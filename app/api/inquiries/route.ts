@@ -1,23 +1,33 @@
 import { getPayload } from "payload";
 import config from "@payload-config";
 import { NextResponse } from "next/server";
-import { routeInquiryNotification } from "@/lib/inquiries/route-notification";
+import { Resend } from "resend";
 
 type InquiryBody = {
   name?: string;
   email?: string;
   company?: string;
+  website?: string;
   phone?: string;
   inquiryType?: string;
   budget?: string;
   timeline?: string;
   message?: string;
+  referral?: string;
   source?: string;
 };
 
 export async function POST(request: Request) {
+  console.log("📬 POST /api/inquiries — handler invoked");
+
   try {
     const body = (await request.json()) as InquiryBody;
+    console.log("📝 Inquiry body received:", {
+      name: body.name,
+      email: body.email,
+      inquiryType: body.inquiryType,
+      company: body.company,
+    });
 
     if (!body.name?.trim() || !body.email?.trim() || !body.message?.trim()) {
       return NextResponse.json(
@@ -26,6 +36,7 @@ export async function POST(request: Request) {
       );
     }
 
+    console.log("💾 Creating inquiry in Payload...");
     const payload = await getPayload({ config });
 
     const inquiry = await payload.create({
@@ -57,26 +68,79 @@ export async function POST(request: Request) {
           | "exploring"
           | undefined,
         message: body.message.trim(),
-        source: body.source || "contact-page",
+        source: body.source || "project-application",
         status: "new",
       },
     });
 
+    console.log("✅ Inquiry saved to Payload. ID:", inquiry.id);
+
+    // ── Send email notification via Resend ──────────────────────────────────
+    // Email failures MUST NOT prevent the inquiry from saving.
     try {
-      await routeInquiryNotification(inquiry, payload);
-    } catch (notificationError) {
-      payload.logger.error({
-        msg: "Inquiry saved but notification email failed",
-        err: notificationError,
-        inquiryId: inquiry.id,
-      });
+      const apiKey = process.env.RESEND_API_KEY;
+
+      if (!apiKey) {
+        console.error("❌ RESEND_API_KEY is not set — skipping email notification");
+      } else {
+        const resend = new Resend(apiKey);
+
+        const recipient =
+          process.env.KXD_INQUIRY_EMAIL || "matt@kreatebydesign.com";
+
+        const name = body.name?.trim() || "Unknown contact";
+        const company = body.company?.trim() || "No company provided";
+        const inquiryType = body.inquiryType || "General inquiry";
+        const message = body.message?.trim() || "No message provided";
+        const subject = `New KXD Inquiry · ${inquiryType} · ${company}`;
+
+        const emailBody = [
+          "New project application received via kreatebydesign.com.",
+          "",
+          `Name:          ${name}`,
+          `Email:         ${body.email?.trim()}`,
+          `Company:       ${company}`,
+          `Website:       ${body.website?.trim() || "Not provided"}`,
+          `Inquiry Type:  ${inquiryType}`,
+          `Investment:    ${body.budget || "Not specified"}`,
+          `Timeline:      ${body.timeline || "Not specified"}`,
+          `Referral:      ${body.referral || "Not specified"}`,
+          "",
+          "Project Goals:",
+          message,
+          "",
+          `Payload ID: ${inquiry.id}`,
+        ].join("\n");
+
+        console.log("🚀 Sending inquiry email via Resend", {
+          recipient,
+          subject,
+          inquiryId: inquiry.id,
+        });
+
+        const result = await resend.emails.send({
+          from: "Kreate by Design <matt@kreatebydesign.com>",
+          to: recipient,
+          replyTo: body.email?.trim() ? [body.email.trim()] : undefined,
+          subject,
+          text: emailBody,
+        });
+
+        console.log("✅ Resend result:", JSON.stringify(result));
+      }
+    } catch (emailError) {
+      console.error("❌ Resend email failed (inquiry still saved):", emailError);
     }
+    // ────────────────────────────────────────────────────────────────────────
 
     return NextResponse.json({ success: true, id: inquiry.id });
   } catch (error) {
-    console.error("Inquiry submission failed:", error);
+    console.error("❌ Inquiry submission failed:", error);
     return NextResponse.json(
-      { error: "Unable to submit inquiry. Please email matt@kreatebydesign.com directly." },
+      {
+        error:
+          "Unable to submit inquiry. Please email matt@kreatebydesign.com directly.",
+      },
       { status: 500 },
     );
   }

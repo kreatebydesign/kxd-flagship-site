@@ -53,7 +53,7 @@ export async function routeInquiryNotification(
     });
 
     const result = await resend.emails.send({
-      from: "Kreate by Design <hello@kreatebydesign.com>",
+      from: "Kreate by Design <matt@kreatebydesign.com>",
       to: recipient,
       replyTo: doc.email ? [doc.email] : undefined,
       subject,

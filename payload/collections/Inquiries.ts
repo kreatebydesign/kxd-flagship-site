@@ -1,7 +1,6 @@
 import type { CollectionConfig } from "payload";
 import { isAuthenticated, publicCreate, publicRead } from "../access/index.ts";
 import { PAYLOAD_GROUPS } from "../admin/groups.ts";
-import { notifyInquiryCreated } from "../hooks/inquiries.ts";
 
 export const Inquiries: CollectionConfig = {
   slug: "inquiries",
@@ -18,9 +17,10 @@ export const Inquiries: CollectionConfig = {
     update: isAuthenticated,
     delete: isAuthenticated,
   },
-  hooks: {
-    afterChange: [notifyInquiryCreated],
-  },
+  // Email notifications are sent directly in app/api/inquiries/route.ts
+  // to ensure console.log visibility in Vercel logs. The notifyInquiryCreated
+  // hook is preserved in payload/hooks/inquiries.ts for admin-created entries
+  // if re-enabled in the future.
   fields: [
     {
       name: "name",
