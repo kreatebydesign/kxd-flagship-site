@@ -5,7 +5,6 @@ import { sqliteAdapter } from "@payloadcms/db-sqlite";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
 import { buildConfig } from "payload";
 import sharp from "sharp";
-import { migrations } from "./migrations/index.ts";
 
 import { CaseStudies } from "./payload/collections/CaseStudies.ts";
 import { Inquiries } from "./payload/collections/Inquiries.ts";
@@ -28,6 +27,21 @@ const dirname = path.dirname(filename);
 // SQLite fallback is only reachable in local dev where both vars are absent.
 const databaseUri =
   process.env.DATABASE_URI?.trim() || process.env.DATABASE_URL?.trim();
+
+// Diagnostic — host only, no credentials.
+let dbHost = "(none — SQLite fallback)";
+if (databaseUri) {
+  try {
+    dbHost = new URL(databaseUri).hostname;
+  } catch {
+    dbHost = "(unparseable)";
+  }
+}
+console.log("[KXD] Payload DB config loaded", {
+  host: dbHost,
+  NODE_ENV: process.env.NODE_ENV,
+  VERCEL: Boolean(process.env.VERCEL),
+});
 
 export default buildConfig({
   admin: {
@@ -66,8 +80,12 @@ export default buildConfig({
         pool: {
           connectionString: databaseUri,
         },
+        // migrationDir kept for CLI use (npm run migrate).
+        // prodMigrations intentionally removed — all migrations have been
+        // applied manually and are confirmed in the payload_migrations table.
+        // Running prodMigrations on every cold start was causing Vercel Lambda
+        // init to hang while Payload acquired a DB lock and traversed migrations.
         migrationDir: path.resolve(dirname, "migrations"),
-        prodMigrations: migrations,
       })
     : sqliteAdapter({
         client: {
