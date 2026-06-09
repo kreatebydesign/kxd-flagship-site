@@ -23,6 +23,10 @@ export async function routeInquiryNotification(
   const apiKey = process.env.RESEND_API_KEY;
 
   if (!apiKey) {
+    console.error("❌ Missing RESEND_API_KEY for inquiry notification", {
+      inquiryId: doc.id,
+    });
+
     payload.logger.error({
       msg: "Missing RESEND_API_KEY for inquiry notification",
       inquiryId: doc.id,
@@ -42,7 +46,13 @@ export async function routeInquiryNotification(
   const subject = `New KXD Inquiry · ${inquiryType} · ${company}`;
 
   try {
-    await resend.emails.send({
+    console.log("🚀 Sending inquiry email via Resend", {
+      recipient,
+      subject,
+      inquiryId: doc.id,
+    });
+
+    const result = await resend.emails.send({
       from: "Kreate by Design <hello@kreatebydesign.com>",
       to: recipient,
       replyTo: doc.email ? [doc.email] : undefined,
@@ -62,6 +72,8 @@ export async function routeInquiryNotification(
       ].join("\n"),
     });
 
+    console.log("✅ Resend result:", result);
+
     payload.logger.info({
       msg: "Inquiry notification sent",
       recipient,
@@ -69,6 +81,8 @@ export async function routeInquiryNotification(
       inquiryId: doc.id,
     });
   } catch (error) {
+    console.error("❌ Resend failed:", error);
+
     payload.logger.error({
       msg: "Failed to send inquiry notification",
       err: error,
