@@ -1,4 +1,5 @@
 import type { Payload } from "payload";
+import { Resend } from "resend";
 import { INQUIRY_EMAIL } from "../site.ts";
 
 type InquiryDoc = {
@@ -19,19 +20,47 @@ export async function routeInquiryNotification(
   doc: InquiryDoc,
   payload: Payload,
 ): Promise<void> {
-  const recipient = INQUIRY_EMAIL;
-  const subjectParts = [
-    doc.inquiryType || doc.platformType || "Inquiry",
-    doc.company || doc.companyName || doc.name || doc.contactName,
-  ].filter(Boolean);
+  const apiKey = process.env.RESEND_API_KEY;
 
-  payload.logger.info({
-    msg: "Inquiry notification queued",
-    recipient,
-    subject: subjectParts.join(" · "),
-    inquiryId: doc.id,
+  if (!apiKey) {
+    payload.logger.error({ msg: "Missing RESEND_API_KEY for inquiry notification" });
+    return;
+  }
+
+  const resend = new Resend(apiKey);
+
+  const recipient = INQUIRY_EMAIL;
+  const name = doc.name || doc.contactName || "Unknown contact";
+  const company = doc.company || doc.companyName || "No company provided";
+  const inquiryType = doc.inquiryType || doc.platformType || "General inquiry";
+  const message = doc.message || doc.objectives || doc.currentState || "No message provided";
+
+  const subject = `New KXD Inquiry · ${inquiryType} · ${company}`;
+
+  await resend.emails.send({
+    from: "Kreate by Design <hello@kreatebydesign.com>",
+    to: recipient,
+    replyTo: doc.email,
+    subject,
+    text: [
+      `New KXD inquiry received.`,
+      ``,
+      `Name: ${name}`,
+      `Email: ${doc.email || "No email provided"}`,
+      `Company: ${company}`,
+      `Inquiry Type: ${inquiryType}`,
+      ``,
+      `Message:`,
+      message,
+      ``,
+      `Payload Inquiry ID: ${doc.id || "Unknown"}`,
+    ].join("\n"),
   });
 
-  // Email transport will connect here when production mail is configured.
-  // All inquiries route to matt@kreatebydesign.com per KXD requirements.
+  payload.logger.info({
+    msg: "Inquiry notification sent",
+    recipient,
+    subject,
+    inquiryId: doc.id,
+  });
 }
