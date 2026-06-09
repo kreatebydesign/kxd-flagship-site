@@ -4,9 +4,9 @@ export function FinalCtaSection() {
   return (
     <FinalCtaBand
       secondaryHref="/work"
-      secondaryLabel="View the Work"
+      secondaryLabel="Explore Our Work"
       headline="Build What Others Can't."
-      subCopy="For brands ready to move with clarity, discipline, and presence."
+      subCopy="KXD partners with ambitious businesses to create exceptional digital experiences, operational systems, and brands built to endure."
     />
   );
 }
