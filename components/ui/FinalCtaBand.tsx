@@ -2,6 +2,8 @@ import Link from "next/link";
 
 type FinalCtaBandProps = {
   showEmail?: boolean;
+  primaryLabel?: string;
+  primaryHref?: string;
   secondaryHref?: string;
   secondaryLabel?: string;
   headline?: string;
@@ -9,6 +11,8 @@ type FinalCtaBandProps = {
 };
 
 export function FinalCtaBand({
+  primaryLabel = "Start a Project",
+  primaryHref = "/contact",
   secondaryHref = "/services",
   secondaryLabel = "View Services",
   headline = "Ready to Build Something Exceptional?",
@@ -81,8 +85,8 @@ export function FinalCtaBand({
 
           {/* CTAs */}
           <div className="mt-12 flex flex-col items-center gap-5 sm:flex-row sm:justify-center">
-            <Link href="/contact" className="kxd-btn-primary">
-              Start a Project
+            <Link href={primaryHref} className="kxd-btn-primary">
+              {primaryLabel}
             </Link>
             <Link
               href={secondaryHref}
