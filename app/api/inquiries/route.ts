@@ -1,6 +1,7 @@
 import { getPayload } from "payload";
 import config from "@payload-config";
 import { NextResponse } from "next/server";
+import { routeInquiryNotification } from "@/lib/inquiries/route-notification";
 
 type InquiryBody = {
   name?: string;
@@ -60,6 +61,16 @@ export async function POST(request: Request) {
         status: "new",
       },
     });
+
+    try {
+      await routeInquiryNotification(inquiry, payload);
+    } catch (notificationError) {
+      payload.logger.error({
+        msg: "Inquiry saved but notification email failed",
+        err: notificationError,
+        inquiryId: inquiry.id,
+      });
+    }
 
     return NextResponse.json({ success: true, id: inquiry.id });
   } catch (error) {
