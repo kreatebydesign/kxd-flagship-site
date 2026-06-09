@@ -23,8 +23,17 @@ import { Users } from "./payload/collections/Users.ts";
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
-const databaseUri = process.env.DATABASE_URI?.trim();
+const databaseUri =
+  process.env.DATABASE_URI?.trim() || process.env.DATABASE_URL?.trim();
 
+const isProductionRuntime =
+  process.env.NODE_ENV === "production" || Boolean(process.env.VERCEL);
+
+if (isProductionRuntime && !databaseUri) {
+  throw new Error(
+    "Payload production database connection missing. Set DATABASE_URI in Vercel.",
+  );
+}
 
 export default buildConfig({
   admin: {
@@ -62,13 +71,8 @@ export default buildConfig({
     ? postgresAdapter({
         pool: {
           connectionString: databaseUri,
-          // Serverless-safe pool settings for Vercel + Neon:
-          // max:1 ensures each Lambda instance holds at most one connection.
-          // idleTimeoutMillis lets the connection close quickly between cold starts.
-          // allowExitOnIdle prevents the Node process from being kept alive by
-          // an idle pg connection (important in Vercel serverless).
           max: 1,
-          connectionTimeoutMillis: 10_000,
+          connectionTimeoutMillis: 30_000,
           idleTimeoutMillis: 30_000,
           allowExitOnIdle: true,
         },
