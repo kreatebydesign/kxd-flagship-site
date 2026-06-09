@@ -1,7 +1,7 @@
 import type { CollectionConfig } from "payload";
-import { isAuthenticated, publicCreate, publicRead } from "../access";
-import { PAYLOAD_GROUPS } from "../admin/groups";
-import { notifyInquiryCreated } from "../hooks/inquiries";
+import { isAuthenticated, publicCreate, publicRead } from "../access/index.ts";
+import { PAYLOAD_GROUPS } from "../admin/groups.ts";
+import { notifyInquiryCreated } from "../hooks/inquiries.ts";
 
 export const Inquiries: CollectionConfig = {
   slug: "inquiries",

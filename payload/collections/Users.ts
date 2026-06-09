@@ -1,5 +1,5 @@
 import type { CollectionConfig } from "payload";
-import { PAYLOAD_GROUPS } from "../admin/groups";
+import { PAYLOAD_GROUPS } from "../admin/groups.ts";
 
 export const Users: CollectionConfig = {
   slug: "users",

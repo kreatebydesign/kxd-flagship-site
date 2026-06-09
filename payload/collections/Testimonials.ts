@@ -1,7 +1,7 @@
 import type { CollectionConfig } from "payload";
-import { isAuthenticatedOrPublished } from "../access";
-import { PAYLOAD_GROUPS } from "../admin/groups";
-import { featuredField, publishedAtField, statusField } from "../fields/shared";
+import { isAuthenticatedOrPublished } from "../access/index.ts";
+import { PAYLOAD_GROUPS } from "../admin/groups.ts";
+import { featuredField, publishedAtField, statusField } from "../fields/shared.ts";
 
 export const Testimonials: CollectionConfig = {
   slug: "testimonials",

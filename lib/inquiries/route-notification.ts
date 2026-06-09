@@ -1,5 +1,5 @@
 import type { Payload } from "payload";
-import { INQUIRY_EMAIL } from "@/lib/site";
+import { INQUIRY_EMAIL } from "../site.ts";
 
 type InquiryDoc = {
   id?: string | number;

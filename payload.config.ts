@@ -5,19 +5,20 @@ import { sqliteAdapter } from "@payloadcms/db-sqlite";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
 import { buildConfig } from "payload";
 import sharp from "sharp";
+import { migrations } from "./migrations/index.ts";
 
-import { CaseStudies } from "./payload/collections/CaseStudies";
-import { Inquiries } from "./payload/collections/Inquiries";
-import { Insights } from "./payload/collections/Insights";
-import { Media } from "./payload/collections/Media";
-import { Partners } from "./payload/collections/Partners";
-import { PlatformApplications } from "./payload/collections/PlatformApplications";
-import { Projects } from "./payload/collections/Projects";
-import { Reviews } from "./payload/collections/Reviews";
-import { Services } from "./payload/collections/Services";
-import { TeamMembers } from "./payload/collections/TeamMembers";
-import { Testimonials } from "./payload/collections/Testimonials";
-import { Users } from "./payload/collections/Users";
+import { CaseStudies } from "./payload/collections/CaseStudies.ts";
+import { Inquiries } from "./payload/collections/Inquiries.ts";
+import { Insights } from "./payload/collections/Insights.ts";
+import { Media } from "./payload/collections/Media.ts";
+import { Partners } from "./payload/collections/Partners.ts";
+import { PlatformApplications } from "./payload/collections/PlatformApplications.ts";
+import { Projects } from "./payload/collections/Projects.ts";
+import { Reviews } from "./payload/collections/Reviews.ts";
+import { Services } from "./payload/collections/Services.ts";
+import { TeamMembers } from "./payload/collections/TeamMembers.ts";
+import { Testimonials } from "./payload/collections/Testimonials.ts";
+import { Users } from "./payload/collections/Users.ts";
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -61,6 +62,8 @@ export default buildConfig({
         pool: {
           connectionString: databaseUri,
         },
+        migrationDir: path.resolve(dirname, "migrations"),
+        prodMigrations: migrations,
       })
     : sqliteAdapter({
         client: {

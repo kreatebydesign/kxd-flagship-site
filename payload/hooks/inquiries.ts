@@ -1,5 +1,4 @@
 import type { CollectionAfterChangeHook } from "payload";
-import { routeInquiryNotification } from "@/lib/inquiries/route-notification";
 
 export const notifyInquiryCreated: CollectionAfterChangeHook = async ({
   doc,
@@ -9,6 +8,10 @@ export const notifyInquiryCreated: CollectionAfterChangeHook = async ({
   if (operation !== "create") return doc;
 
   try {
+    const { routeInquiryNotification } = await import(
+      "../../lib/inquiries/route-notification.ts"
+    );
+
     await routeInquiryNotification(doc, req.payload);
   } catch (error) {
     req.payload.logger.error({

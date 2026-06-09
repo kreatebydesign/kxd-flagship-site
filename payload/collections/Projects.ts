@@ -1,13 +1,13 @@
 import type { CollectionConfig } from "payload";
-import { isAuthenticatedOrPublished } from "../access";
-import { PAYLOAD_GROUPS } from "../admin/groups";
+import { isAuthenticatedOrPublished } from "../access/index.ts";
+import { PAYLOAD_GROUPS } from "../admin/groups.ts";
 import {
   featuredField,
   publishedAtField,
   seoFields,
   slugField,
   statusField,
-} from "../fields/shared";
+} from "../fields/shared.ts";
 
 const projectTypeOptions = [
   { label: "Luxury Website", value: "luxury-website" },

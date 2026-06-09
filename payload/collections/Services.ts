@@ -1,14 +1,14 @@
 import type { CollectionConfig } from "payload";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
-import { isAuthenticatedOrPublished } from "../access";
-import { PAYLOAD_GROUPS } from "../admin/groups";
+import { isAuthenticatedOrPublished } from "../access/index.ts";
+import { PAYLOAD_GROUPS } from "../admin/groups.ts";
 import {
   featuredField,
   publishedAtField,
   seoFields,
   slugField,
   statusField,
-} from "../fields/shared";
+} from "../fields/shared.ts";
 
 export const Services: CollectionConfig = {
   slug: "services",

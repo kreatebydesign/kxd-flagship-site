@@ -1,6 +1,6 @@
 import type { CollectionConfig } from "payload";
-import { publicRead } from "../access";
-import { PAYLOAD_GROUPS } from "../admin/groups";
+import { publicRead } from "../access/index.ts";
+import { PAYLOAD_GROUPS } from "../admin/groups.ts";
 
 export const Media: CollectionConfig = {
   slug: "media",
