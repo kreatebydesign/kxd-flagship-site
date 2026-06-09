@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { FinalCtaBand } from "@/components/ui/FinalCtaBand";
 import { buildMetadata } from "@/lib/seo/metadata";
 
@@ -33,7 +32,6 @@ const LEVELS = [
       "Inquiry and conversion flow design",
       "30-day post-launch support",
     ],
-    cta: "Luxury websites",
     accent: true,
   },
   {
@@ -49,7 +47,6 @@ const LEVELS = [
       "Digital and print-ready asset delivery",
       "Tone of voice and positioning alignment",
     ],
-    cta: "Brand systems",
     accent: false,
   },
   {
@@ -66,7 +63,6 @@ const LEVELS = [
       "Analytics and performance foundation",
       "Scalable architecture for continued growth",
     ],
-    cta: "Growth infrastructure",
     accent: false,
   },
   {
@@ -83,7 +79,6 @@ const LEVELS = [
       "Admin interface and content management",
       "Ongoing support retainer available",
     ],
-    cta: "Enterprise platforms",
     accent: false,
   },
   {
@@ -99,7 +94,6 @@ const LEVELS = [
       "New feature and page development",
       "Priority access and direct communication",
     ],
-    cta: "Ongoing partnership",
     accent: false,
   },
 ] as const;
@@ -107,7 +101,6 @@ const LEVELS = [
 export default function InvestmentPage() {
   return (
     <>
-      {/* ── Hero ── */}
       <section
         style={{
           paddingTop: "calc(var(--nav-height) + var(--section-py))",
@@ -120,7 +113,11 @@ export default function InvestmentPage() {
           <p className="kxd-eyebrow">Investment</p>
           <h1
             className="kxd-serif-title mt-5"
-            style={{ fontSize: "clamp(2.5rem, 5.5vw, 3.75rem)", maxWidth: "38rem", lineHeight: 1.06 }}
+            style={{
+              fontSize: "clamp(2.5rem, 5.5vw, 3.75rem)",
+              maxWidth: "38rem",
+              lineHeight: 1.06,
+            }}
           >
             Built to the Standard You Need.
           </h1>
@@ -129,7 +126,6 @@ export default function InvestmentPage() {
             of the brands we partner with. The ranges below reflect our starting points.
           </p>
 
-          {/* Key qualifier note */}
           <div
             className="mt-8 border-l pl-5"
             style={{ borderColor: "var(--kxd-border-gold)" }}
@@ -138,20 +134,19 @@ export default function InvestmentPage() {
               className="font-serif font-light italic"
               style={{
                 fontSize: "clamp(0.9375rem, 1.4vw, 1.0625rem)",
-                lineHeight: 1.70,
+                lineHeight: 1.7,
                 letterSpacing: "0.01em",
                 color: "var(--kxd-cream-soft)",
                 maxWidth: "34rem",
               }}
             >
-              KXD does not sell packages. We scope each engagement around
-              what the brand actually needs — nothing less, nothing extra.
+              KXD does not sell packages. We scope each engagement around what
+              the brand actually needs — nothing less, nothing extra.
             </p>
           </div>
         </div>
       </section>
 
-      {/* ── Investment Levels ── */}
       <section
         className="kxd-section"
         style={{ background: "var(--kxd-black-base)" }}
@@ -163,17 +158,21 @@ export default function InvestmentPage() {
                 key={level.label}
                 className="grid gap-8 py-12 lg:grid-cols-[8rem_1fr_22rem] lg:gap-12"
                 style={{
-                  borderTop: i === 0 ? "1px solid var(--kxd-border-gold)" : "1px solid var(--kxd-border-white)",
+                  borderTop:
+                    i === 0
+                      ? "1px solid var(--kxd-border-gold)"
+                      : "1px solid var(--kxd-border-white)",
                 }}
               >
-                {/* Number */}
                 <div className="pt-0.5">
                   <p
                     className="font-serif font-light"
                     style={{
                       fontSize: "2.5rem",
                       lineHeight: 1,
-                      color: level.accent ? "var(--kxd-gold)" : "var(--kxd-border-gold-strong)",
+                      color: level.accent
+                        ? "var(--kxd-gold)"
+                        : "var(--kxd-border-gold-strong)",
                       letterSpacing: "0.04em",
                     }}
                   >
@@ -181,7 +180,6 @@ export default function InvestmentPage() {
                   </p>
                 </div>
 
-                {/* Description */}
                 <div>
                   <h2
                     className="font-serif font-light"
@@ -209,7 +207,6 @@ export default function InvestmentPage() {
                   </p>
                 </div>
 
-                {/* Includes list */}
                 <div
                   className="border-l pl-8"
                   style={{ borderColor: "var(--kxd-border-white)" }}
@@ -238,15 +235,26 @@ export default function InvestmentPage() {
               </article>
             ))}
 
-            {/* Bottom border */}
             <div
-              style={{ borderTop: "1px solid var(--kxd-border-white)", paddingTop: "3rem" }}
+              style={{
+                borderTop: "1px solid var(--kxd-border-white)",
+                paddingTop: "3rem",
+              }}
             >
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {[
-                  { label: "All engagements include", value: "Direct access to the founder throughout" },
-                  { label: "Response time", value: "Within 2 business days after application" },
-                  { label: "Minimum engagement", value: "None — we scope to what you need" },
+                  {
+                    label: "All engagements include",
+                    value: "Direct access to the founder throughout",
+                  },
+                  {
+                    label: "Response time",
+                    value: "Within 2 business days after application",
+                  },
+                  {
+                    label: "Engagement model",
+                    value: "Tailored to your goals and growth stage",
+                  },
                 ].map((note) => (
                   <div
                     key={note.label}
@@ -263,7 +271,6 @@ export default function InvestmentPage() {
         </div>
       </section>
 
-      {/* ── FAQ Qualifier ── */}
       <section
         className="kxd-section border-t"
         style={{
@@ -277,7 +284,10 @@ export default function InvestmentPage() {
               <p className="kxd-eyebrow">Common Questions</p>
               <h2
                 className="kxd-serif-title mt-4"
-                style={{ fontSize: "clamp(1.5rem, 2.5vw, 2rem)", maxWidth: "14rem" }}
+                style={{
+                  fontSize: "clamp(1.5rem, 2.5vw, 2rem)",
+                  maxWidth: "14rem",
+                }}
               >
                 Before you apply.
               </h2>
@@ -306,7 +316,9 @@ export default function InvestmentPage() {
                   className="py-7"
                   style={{
                     borderTop: "1px solid var(--kxd-border-white)",
-                    ...(i === arr.length - 1 ? { borderBottom: "1px solid var(--kxd-border-white)" } : {}),
+                    ...(i === arr.length - 1
+                      ? { borderBottom: "1px solid var(--kxd-border-white)" }
+                      : {}),
                   }}
                 >
                   <p
@@ -330,10 +342,10 @@ export default function InvestmentPage() {
       </section>
 
       <FinalCtaBand
-        headline="Ready to Discuss Your Project?"
-        subCopy="Submit an application and we'll respond within 2 business days."
+        headline="Build What Others Can't."
+        subCopy="KXD partners with ambitious businesses to create exceptional digital experiences, operational systems, and brands built to endure."
         secondaryHref="/work"
-        secondaryLabel="View the Work"
+        secondaryLabel="Explore Our Work"
       />
     </>
   );

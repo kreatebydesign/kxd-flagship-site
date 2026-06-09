@@ -12,6 +12,7 @@ import { Insights } from "./payload/collections/Insights.ts";
 import { Media } from "./payload/collections/Media.ts";
 import { Partners } from "./payload/collections/Partners.ts";
 import { PlatformApplications } from "./payload/collections/PlatformApplications.ts";
+import { ProjectInquiries } from "./payload/collections/ProjectInquiries.ts";
 import { Projects } from "./payload/collections/Projects.ts";
 import { Reviews } from "./payload/collections/Reviews.ts";
 import { Services } from "./payload/collections/Services.ts";
@@ -66,6 +67,7 @@ export default buildConfig({
     TeamMembers,
     Insights,
     Inquiries,
+    ProjectInquiries,
     PlatformApplications,
     Media,
     Users,

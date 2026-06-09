@@ -11,10 +11,9 @@ export function FounderStandard() {
     >
       <div className="kxd-container">
         <div className="grid gap-14 lg:grid-cols-[1fr_1.6fr] lg:gap-20 lg:items-center">
-
-          {/* Left */}
           <div>
             <p className="kxd-eyebrow">The Standard</p>
+
             <h2
               className="kxd-serif-title mt-5"
               style={{
@@ -24,13 +23,18 @@ export function FounderStandard() {
             >
               Founder-led.
               <br />
-              <span style={{ color: "var(--kxd-gold)" }}>Built with discipline.</span>
+              <span style={{ color: "var(--kxd-gold)" }}>
+                Built with discipline.
+              </span>
             </h2>
 
             <div
               aria-hidden
               className="mt-9 h-px"
-              style={{ width: "3rem", background: "var(--kxd-border-gold-strong)" }}
+              style={{
+                width: "4rem",
+                background: "var(--kxd-border-gold-strong)",
+              }}
             />
 
             <Link
@@ -42,7 +46,6 @@ export function FounderStandard() {
             </Link>
           </div>
 
-          {/* Right */}
           <div
             className="border-l pl-10 lg:pl-14"
             style={{ borderColor: "var(--kxd-border-white)" }}
@@ -55,8 +58,9 @@ export function FounderStandard() {
                 color: "var(--kxd-cream-soft)",
               }}
             >
-              KXD is selective by design. Every project receives direct strategy,
-              sharper decisions, and execution designed to hold weight long after launch.
+              KXD is built for ambitious businesses that need more than execution.
+              Every engagement receives direct strategic oversight, sharper creative
+              decisions, and systems designed to keep creating value long after launch.
             </p>
 
             <div
@@ -65,13 +69,17 @@ export function FounderStandard() {
             >
               {[
                 { number: "100%", label: "Founder-led" },
-                { number: "5+",   label: "Years active" },
-                { number: "Direct", label: "Partnership" },
+                { number: "Premium", label: "Execution" },
+                { number: "Long-term", label: "Partnership" },
               ].map((stat) => (
                 <div key={stat.label}>
                   <p
                     className="font-serif font-light"
-                    style={{ fontSize: "1.875rem", lineHeight: 1, color: "var(--kxd-gold)" }}
+                    style={{
+                      fontSize: "1.875rem",
+                      lineHeight: 1,
+                      color: "var(--kxd-gold)",
+                    }}
                   >
                     {stat.number}
                   </p>
