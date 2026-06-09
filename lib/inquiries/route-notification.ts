@@ -4,16 +4,16 @@ import { INQUIRY_EMAIL } from "../site";
 
 type InquiryDoc = {
   id?: string | number;
-  name?: string;
-  email?: string;
-  company?: string;
-  companyName?: string;
-  contactName?: string;
-  inquiryType?: string;
-  platformType?: string;
-  message?: string;
-  objectives?: string;
-  currentState?: string;
+  name?: string | null;
+  email?: string | null;
+  company?: string | null;
+  companyName?: string | null;
+  contactName?: string | null;
+  inquiryType?: string | null;
+  platformType?: string | null;
+  message?: string | null;
+  objectives?: string | null;
+  currentState?: string | null;
 };
 
 export async function routeInquiryNotification(
@@ -35,13 +35,9 @@ export async function routeInquiryNotification(
   const recipient = INQUIRY_EMAIL;
   const name = doc.name || doc.contactName || "Unknown contact";
   const company = doc.company || doc.companyName || "No company provided";
-  const inquiryType =
-    doc.inquiryType || doc.platformType || "General inquiry";
+  const inquiryType = doc.inquiryType || doc.platformType || "General inquiry";
   const message =
-    doc.message ||
-    doc.objectives ||
-    doc.currentState ||
-    "No message provided";
+    doc.message || doc.objectives || doc.currentState || "No message provided";
 
   const subject = `New KXD Inquiry · ${inquiryType} · ${company}`;
 
