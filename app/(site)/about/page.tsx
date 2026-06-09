@@ -116,44 +116,113 @@ export default function AboutPage() {
         }}
       >
         <div className="kxd-container">
-          <div className="grid items-start gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
-            {/* Photo */}
-            <div className="kxd-founder-frame mx-auto w-full max-w-sm lg:max-w-none">
-              <div className="relative aspect-[3/4] max-h-[34rem]">
-                <Image
-                  src="/migrated-assets/founder/matt-lunger.jpg"
-                  alt="Matt Lunger, Founder of Kreate by Design"
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 1024px) 90vw, 38vw"
-                />
+          <div
+            className="grid items-center gap-16 lg:grid-cols-[minmax(0,540px)_1fr]"
+            style={{ gap: "clamp(4rem, 8vw, 8rem)" }}
+          >
+            {/* ── Portrait column ── */}
+            <div className="mx-auto w-full" style={{ maxWidth: "540px" }}>
+              {/* Outer editorial frame — offset border */}
+              <div
+                className="relative p-6"
+                style={{ border: "1px solid rgba(197,166,92,0.08)" }}
+              >
+                {/* Atmospheric gallery glow behind portrait */}
                 <div
-                  className="absolute inset-0"
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0"
                   style={{
                     background:
-                      "linear-gradient(to top, var(--kxd-black-deep) 0%, transparent 45%)",
+                      "radial-gradient(circle at 50% 40%, rgba(197,166,92,0.05), transparent 65%)",
                   }}
                 />
+
+                {/* Portrait container — inner frame */}
+                <div
+                  className="relative overflow-hidden"
+                  style={{
+                    aspectRatio: "4 / 5",
+                    background: "#050505",
+                    border: "1px solid rgba(197,166,92,0.22)",
+                  }}
+                >
+                  <Image
+                    src="/migrated-assets/founder/matt-lunger.jpg"
+                    alt="Matt Lunger — Founder, Kreate by Design"
+                    fill
+                    className="object-cover object-top"
+                    style={{
+                      filter: "contrast(1.03) saturate(0.95) brightness(0.98)",
+                    }}
+                    sizes="(max-width: 1024px) 90vw, 540px"
+                    priority
+                  />
+                  {/* Layer 3 — bottom fade */}
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0"
+                    style={{
+                      background:
+                        "linear-gradient(to top, rgba(0,0,0,0.35), transparent 45%)",
+                    }}
+                  />
+                  {/* Founder name on portrait */}
+                  <div className="absolute bottom-5 left-6 right-6">
+                    <p
+                      className="font-serif font-light"
+                      style={{
+                        fontSize: "clamp(1.5rem, 3vw, 2rem)",
+                        lineHeight: 1.1,
+                        letterSpacing: "0.01em",
+                        color: "var(--kxd-cream)",
+                      }}
+                    >
+                      Matt Lunger
+                    </p>
+                    <p
+                      className="mt-1.5 font-sans font-medium uppercase"
+                      style={{
+                        fontSize: "0.72rem",
+                        letterSpacing: "0.28em",
+                        color: "var(--kxd-gold)",
+                        opacity: 0.72,
+                      }}
+                    >
+                      Founder &amp; Creative Director
+                    </p>
+                    <p
+                      className="mt-1 font-sans font-medium uppercase"
+                      style={{
+                        fontSize: "0.60rem",
+                        letterSpacing: "0.18em",
+                        color: "var(--foreground-subtle)",
+                      }}
+                    >
+                      Kreate by Design
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Copy */}
-            <div className="lg:pt-2">
+            {/* ── Copy column ── */}
+            <div style={{ maxWidth: "620px" }}>
               <p className="kxd-eyebrow">A Note From the Founder</p>
-              <h2
-                className="kxd-serif-title mt-5"
-                style={{ fontSize: "clamp(1.875rem, 3vw, 2.625rem)" }}
-              >
-                From the Founder
-              </h2>
 
-              <div className="kxd-body mt-8 space-y-5" style={{ maxWidth: "34rem" }}>
-                <p>
+              <div
+                className="mt-8 font-sans font-light"
+                style={{
+                  fontSize: "clamp(1rem, 1.35vw, 1.125rem)",
+                  lineHeight: 1.95,
+                  color: "var(--kxd-cream-muted)",
+                }}
+              >
+                <p style={{ marginBottom: "1.75rem" }}>
                   I started KXD with a simple truth: the world doesn&rsquo;t need more brands,
                   it needs better ones. Ones that lead with meaning, not noise. Ones that feel
                   human, yet designed with precision.
                 </p>
-                <p>
+                <p style={{ marginBottom: "1.75rem" }}>
                   KXD was never about decoration. It&rsquo;s about direction — helping creators
                   and companies find the version of themselves that belongs to the future.
                 </p>
@@ -167,14 +236,50 @@ export default function AboutPage() {
                 className="mt-10 border-t pt-8"
                 style={{ borderColor: "var(--kxd-border-white)" }}
               >
+                <div
+                  aria-hidden
+                  className="mb-6"
+                  style={{
+                    width: "2.5rem",
+                    height: "1px",
+                    background:
+                      "linear-gradient(to right, var(--kxd-gold), transparent)",
+                    opacity: 0.45,
+                  }}
+                />
                 <p
                   className="font-serif font-light"
-                  style={{ fontSize: "1.5rem", color: "var(--kxd-cream)", letterSpacing: "0.01em" }}
+                  style={{
+                    fontSize: "clamp(2rem, 3vw, 2.6rem)",
+                    lineHeight: 1.0,
+                    letterSpacing: "0.01em",
+                    color: "var(--kxd-cream)",
+                  }}
                 >
                   Matt Lunger
                 </p>
-                <p className="kxd-label mt-2">Founder &amp; Creative Director, KXD</p>
-                <p className="kxd-body-sm mt-3">{SITE.location}</p>
+                <p
+                  className="mt-3 font-sans font-medium uppercase"
+                  style={{
+                    fontSize: "0.72rem",
+                    letterSpacing: "0.28em",
+                    color: "var(--foreground-subtle)",
+                    opacity: 0.72,
+                  }}
+                >
+                  Founder &amp; Creative Director
+                </p>
+                <p
+                  className="mt-1 font-sans font-medium uppercase"
+                  style={{
+                    fontSize: "0.60rem",
+                    letterSpacing: "0.18em",
+                    color: "var(--foreground-subtle)",
+                    opacity: 0.55,
+                  }}
+                >
+                  Kreate by Design
+                </p>
               </div>
             </div>
           </div>

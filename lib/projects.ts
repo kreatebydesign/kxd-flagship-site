@@ -10,6 +10,9 @@ export type ProjectItem = {
   year: string;
   featured?: boolean;
   imageryPending?: boolean;
+  imageryLabel?: string;
+  imagePosition?: string;
+  imageContain?: boolean;
   tier: "primary" | "secondary";
 };
 
@@ -73,10 +76,9 @@ export const PROJECTS: ProjectItem[] = [
     outcome: "Hospitality brought online with the same care as the dining room.",
     description:
       "A refined digital foundation for a regional hospitality brand building its reputation.",
-    image: null,
+    image: "/migrated-assets/case-studies/plate-the-umpqua/hero.webp",
     logo: "/migrated-assets/logos/plate-the-umpqua.svg",
     year: "2025",
-    imageryPending: true,
     tier: "primary",
   },
   {
@@ -87,10 +89,10 @@ export const PROJECTS: ProjectItem[] = [
     outcome: "Boutique automotive identity with a point of view sharp enough to cut.",
     description:
       "Brand-forward web design for an automotive studio that refuses to look like everyone else.",
-    image: null,
+    image: "/migrated-assets/case-studies/autodv8ions/hero.webp",
+    imageContain: true,
     logo: "/migrated-assets/logos/dv8.svg",
     year: "2025",
-    imageryPending: true,
     tier: "primary",
   },
   {
@@ -101,9 +103,9 @@ export const PROJECTS: ProjectItem[] = [
     outcome: "Clear digital presence for a civic organization built on participation.",
     description:
       "Website and engagement architecture for a community-driven organization.",
-    image: null,
+    image: "/migrated-assets/case-studies/democratic-club-greater-tracy/hero.webp",
     logo: "/migrated-assets/logos/the-democratic.svg",
-    year: "2025",
+    year: "2026",
     tier: "secondary",
   },
   {
@@ -114,22 +116,20 @@ export const PROJECTS: ProjectItem[] = [
     outcome: "A restaurant presence as considered as the atmosphere inside.",
     description:
       "Premium web design for a restaurant and bar built on local reputation.",
-    image: null,
-    imageryPending: true,
-    year: "2024",
+    image: "/migrated-assets/case-studies/spur-restaurant/hero.webp",
+    year: "2026",
     tier: "secondary",
   },
   {
-    slug: "dialed-in-electric",
-    title: "Dialed In Electric",
-    industry: "Local Business",
+    slug: "hair-mafia",
+    title: "Hair Mafia",
+    industry: "Beauty / Salon",
     service: "Luxury Website Experiences",
-    outcome: "A trade brand that finally looks as sharp as the work on site.",
+    outcome: "A salon brand with the confidence and craft to own the room.",
     description:
-      "Focused web presence for a service business that needed to match its craft.",
-    image: null,
-    logo: "/migrated-assets/logos/dialed-in-electric.svg",
-    year: "2025",
+      "Brand-forward web experience for a premium salon built on artistry and reputation.",
+    image: "/migrated-assets/case-studies/hair-mafia/hero.webp",
+    year: "2026",
     tier: "secondary",
   },
 ];
@@ -343,10 +343,10 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     industry: "Civic",
     scope: ["Growth Infrastructure"],
     tagline: "Clear digital presence for a civic organization built on participation.",
-    url: "",
+    url: "https://greatertracydems.org",
     status: "Live",
-    year: "2025",
-    image: null,
+    year: "2026",
+    image: "/migrated-assets/case-studies/democratic-club-greater-tracy/hero.webp",
     logo: "/migrated-assets/logos/the-democratic.svg",
     context:
       "The Democratic Club of Greater Tracy has active membership, regular events, and genuine community reach. What it lacked was a digital infrastructure to match its activity — a place where members could connect, events could be found, and prospective participants could understand the organization's purpose and impact.",
@@ -365,7 +365,18 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     ],
     whyItWorked:
       "Civic organizations don't need impressiveness — they need clarity. The site works because it prioritizes the people it's built for, not the organization's need to appear important. The result is a digital presence that feels like the club itself: open, purposeful, and built for participation.",
-    showcaseImages: [],
+    showcaseImages: [
+      {
+        src: "/migrated-assets/case-studies/democratic-club-greater-tracy/hero.webp",
+        alt: "Democratic Club of Greater Tracy — homepage",
+        caption: "Public digital presence",
+      },
+      {
+        src: "/migrated-assets/case-studies/democratic-club-greater-tracy/homepage-02.webp",
+        alt: "Democratic Club of Greater Tracy — content section",
+        caption: "Member & event architecture",
+      },
+    ],
   },
 
   "spur-restaurant": {
@@ -374,10 +385,10 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     industry: "Hospitality",
     scope: ["Luxury Website Experiences"],
     tagline: "A restaurant presence as considered as the atmosphere inside.",
-    url: "",
+    url: "https://spurrestaurantandbar.com",
     status: "Live",
-    year: "2024",
-    image: null,
+    year: "2026",
+    image: "/migrated-assets/case-studies/spur-restaurant/hero.webp",
     context:
       "Spur Restaurant & Bar was built on local reputation and genuine atmosphere — the kind of place that earns loyalty through the quality of the experience, not the size of the marketing budget. The room was right. The website wasn't doing it justice.",
     challenge:
@@ -395,37 +406,61 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     ],
     whyItWorked:
       "Restaurants succeed on atmosphere. The website had to deliver a version of that before the door opens. It works because the design was built around that single goal — not built around what a restaurant website is supposed to look like.",
-    showcaseImages: [],
+    showcaseImages: [
+      {
+        src: "/migrated-assets/case-studies/spur-restaurant/hero.webp",
+        alt: "Spur Restaurant & Bar — homepage hero",
+        caption: "Character-driven entrance",
+      },
+      {
+        src: "/migrated-assets/case-studies/spur-restaurant/homepage-02.webp",
+        alt: "Spur Restaurant & Bar — interior sections",
+        caption: "Reservation pathways",
+      },
+    ],
   },
 
-  "dialed-in-electric": {
-    slug: "dialed-in-electric",
-    title: "Dialed In Electric",
-    industry: "Local Business",
-    scope: ["Luxury Website Experiences"],
-    tagline: "A trade brand that finally looks as sharp as the work on site.",
-    url: "",
+  "hair-mafia": {
+    slug: "hair-mafia",
+    title: "Hair Mafia",
+    industry: "Beauty / Salon",
+    scope: ["Luxury Website Experiences", "Brand Systems & Identity"],
+    tagline: "A salon brand with the confidence and craft to own the room.",
+    url: "https://hairmafiasalon.com",
     status: "Live",
-    year: "2025",
+    year: "2026",
     image: null,
-    logo: "/migrated-assets/logos/dialed-in-electric.svg",
     context:
-      "Dialed In Electric is a skilled electrical contractor with a reputation for precision and reliability. The work was consistently high quality. The digital presence wasn't close — and that gap was limiting the business to clients who already knew them.",
+      "Hair Mafia is a premium salon built on artistry, reputation, and a clear point of view. The clientele is loyal because the standard is consistent. What the brand needed was a digital presence that carried the same energy as the salon itself — sharp, confident, and unmistakably theirs.",
     challenge:
-      "Without a digital presence that matched the quality of the physical work, the business was limited to referrals and couldn't command the project rates its craftsmanship warranted. Every new client conversation started from scratch — there was no foundation that communicated the brand's standard before a call.",
+      "A salon with a strong identity and a committed following was being introduced online by a presence that didn't match either. The website didn't communicate the brand's character or quality — and in an industry where first impressions decide bookings, that gap was costing the salon clients it should have earned.",
     strategy:
-      "Position precision, not price. The design and copy had to communicate the same discipline the crew brings to every job — clean execution, no noise, confidence in the work. Built to attract residential and commercial clients who value quality over the lowest bid.",
+      "Personality first, services second. The digital experience had to feel like the salon — confident, precise, and built for someone who already knows what they want. Content hierarchy was built around the brand's character, not its service menu. The goal: attract clients who are the right fit before they've walked in the door.",
     execution: [
-      "Professional web presence — focused design that positions Dialed In Electric as a premium trade partner.",
-      "Capability and credibility architecture — content structure built to establish trust and qualify the right clients.",
+      "Brand-forward web presence — a digital introduction that communicates the salon's identity and standard before a single service is listed.",
+      "Booking and inquiry pathways — low-friction architecture built to convert qualified interest into direct appointments.",
+      "Visual and copy system — consistent brand language that carries the salon's character across every touchpoint.",
     ],
     qualitativeOutcomes: [
-      "Digital presence that supports premium project positioning and rate conversations",
-      "Design quality that communicates the same precision as the electrical work",
-      "Credibility foundation that grows with the business and its reputation",
+      "Digital presence that reflects the salon's artistry and point of view",
+      "Brand-aligned first impression that attracts the right clientele",
+      "Inquiry experience that converts interest into bookings without disrupting the brand",
+      "Foundation that grows with the salon's reputation",
     ],
     whyItWorked:
-      "Trade businesses earn trust through consistency and care. The website works because it demonstrates both — before a client has made the call. The design doesn't oversell. It shows what the work actually is, and lets the quality speak.",
-    showcaseImages: [],
+      "The best salons earn loyalty through consistency. The website works because it's specific — built for the client who already has taste, and wants to trust the person holding the scissors. That kind of specificity is the strategy.",
+    showcaseImages: [
+      {
+        src: "/migrated-assets/case-studies/hair-mafia/hero.webp",
+        alt: "Hair Mafia — homepage hero",
+        caption: "Brand-forward presence",
+      },
+      {
+        src: "/migrated-assets/case-studies/hair-mafia/homepage-02.webp",
+        alt: "Hair Mafia — salon experience",
+        caption: "Booking pathways",
+      },
+    ],
   },
 };
+

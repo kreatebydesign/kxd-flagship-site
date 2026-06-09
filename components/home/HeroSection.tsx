@@ -1,116 +1,218 @@
+import Image from "next/image";
 import Link from "next/link";
 import { SITE } from "@/lib/site";
 
+/**
+ * KXD Hero — Cinematic Video Framework
+ *
+ * Video-ready architecture. When brand footage is available:
+ *   1. Uncomment the <video> element below
+ *   2. Add src="/assets/kxd-reel.mp4" and poster="/assets/kxd-reel-poster.webp"
+ *   3. The overlay system will handle any footage color/exposure automatically
+ */
+
+const REEL_FRAMES = [
+  { src: "/migrated-assets/case-studies/primal-motorsports/hero.webp",           alt: "Primal Motorsports" },
+  { src: "/migrated-assets/case-studies/primal-motorsports/dashboard-hero.webp", alt: "Primal Motorsports — Driver Portal" },
+  { src: "/migrated-assets/case-studies/primal-motorsports/ops-hero.webp",        alt: "Primal OS" },
+  { src: "/migrated-assets/case-studies/cusick-morgan-motorsports/hero.webp",    alt: "Cusick Morgan Motorsports" },
+  { src: "/migrated-assets/case-studies/plate-the-umpqua/hero.webp",             alt: "Plate the Umpqua" },
+  { src: "/migrated-assets/case-studies/autodv8ions/hero.webp",                  alt: "AutoDV8ions" },
+  { src: "/migrated-assets/case-studies/cusick-morgan-motorsports/homepage-02.webp", alt: "Cusick Morgan Motorsports — Partnership" },
+  { src: "/migrated-assets/case-studies/plate-the-umpqua/homepage-02.webp",      alt: "Plate the Umpqua — Interior" },
+];
+
+const REEL_DOUBLED = [...REEL_FRAMES, ...REEL_FRAMES];
+
 export function HeroSection() {
   return (
-    <section className="relative flex min-h-[100dvh] flex-col overflow-hidden bg-[var(--kxd-black-pure)]">
+    <section
+      className="relative flex min-h-[100dvh] flex-col overflow-hidden"
+      style={{ background: "var(--kxd-black-pure)" }}
+    >
+      {/* ── Video layer — slot for future brand footage ──
+          Uncomment when /assets/kxd-reel.mp4 is available:
 
-      {/* ── Architectural light — three shaft sources from above ── */}
+          <video
+            autoPlay muted loop playsInline
+            poster="/assets/kxd-reel-poster.webp"
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+            aria-hidden
+          >
+            <source src="/assets/kxd-reel.mp4" type="video/mp4" />
+          </video>
+      */}
+
+      {/* ── Atmosphere Layer 1: headline glow (spec) ── */}
       <div
         aria-hidden
-        className="kxd-atmosphere-enter kxd-atmosphere-breathe pointer-events-none absolute inset-0"
+        className="kxd-atmosphere-breathe pointer-events-none absolute inset-0"
+        style={{
+          background: "radial-gradient(circle at center, rgba(197,166,92,0.08), transparent 60%)",
+        }}
+      />
+
+      {/* ── Atmosphere Layer 2: white-light presence (spec) ── */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background: "radial-gradient(circle at 50% 20%, rgba(255,255,255,0.025), transparent 70%)",
+        }}
+      />
+
+      {/* ── Architectural light shafts — narrow descending beams ── */}
+      <div
+        aria-hidden
+        className="kxd-atmosphere-enter pointer-events-none absolute inset-0"
         style={{
           background: [
-            /* Primary shaft — centered, tall */
-            "radial-gradient(ellipse 28% 65% at 50% -2%, rgba(194,160,80,0.065) 0%, transparent 58%)",
-            /* Left secondary shaft */
-            "radial-gradient(ellipse 14% 52% at 36% -5%, rgba(194,160,80,0.028) 0%, transparent 52%)",
-            /* Right secondary shaft */
-            "radial-gradient(ellipse 14% 52% at 64% -5%, rgba(194,160,80,0.024) 0%, transparent 52%)",
-            /* Subtle floor warmth */
-            "radial-gradient(ellipse 60% 30% at 50% 105%, rgba(194,160,80,0.018) 0%, transparent 60%)",
+            "radial-gradient(ellipse 18% 80% at 50%  -10%, rgba(197,166,92,0.060) 0%, transparent 50%)",
+            "radial-gradient(ellipse  9% 58% at 34%   -8%, rgba(197,166,92,0.024) 0%, transparent 48%)",
+            "radial-gradient(ellipse  9% 58% at 66%   -8%, rgba(197,166,92,0.018) 0%, transparent 48%)",
           ].join(", "),
         }}
       />
 
-      {/* ── Corner vignette — cinematic depth ── */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 kxd-vignette" />
+      {/* ── Vignette ── */}
+      <div aria-hidden className="kxd-vignette pointer-events-none absolute inset-0" />
 
-      {/* ── Bottom edge fade ── */}
+      {/* ── Bottom fade (above reel) ── */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-52 kxd-hero-bottom-fade"
+        className="pointer-events-none absolute inset-x-0 z-[2]"
+        style={{
+          bottom: "11.5rem",
+          height: "9rem",
+          background: "linear-gradient(to top, var(--kxd-black-pure) 10%, transparent)",
+        }}
       />
 
-      {/* ═══════════════════════════════
-          MAIN CONTENT
-          ═══════════════════════════════ */}
-      <div className="relative flex flex-1 flex-col items-center justify-center px-6 pb-32 pt-32 text-center">
-
-        {/* ── Brand label ── */}
-        <p
-          className="kxd-reveal mb-10 font-sans font-medium uppercase"
-          style={{
-            fontSize: "0.5625rem",
-            letterSpacing: "0.22em",
-            color: "var(--kxd-gold)",
-            opacity: 0.65,
-          }}
+      {/* ══════════════════════════════════════════
+          MANIFESTO — lower in viewport, editorial weight
+          ══════════════════════════════════════════ */}
+      <div
+        className="relative z-10 flex flex-1 flex-col items-center justify-center px-6 text-center"
+        style={{
+          paddingBottom: "8rem",
+          paddingTop: "clamp(8rem, 12vh, 10rem)",
+        }}
+      >
+        {/* Editorial brand label with flanking gold rules */}
+        <div
+          className="kxd-reveal mb-10 flex items-center gap-4"
+          style={{ opacity: 0.55 }}
         >
-          {SITE.name}
-        </p>
-
-        {/* ── Headline ── */}
-        <h1 className="kxd-display select-none">
-          <span
-            className="kxd-display-hero kxd-reveal kxd-reveal-delay-1 block"
-            style={{ color: "var(--kxd-gold)" }}
-          >
-            Digital
-          </span>
-
-          {/* Hairline separator */}
-          <span
+          <div
             aria-hidden
-            className="kxd-reveal kxd-reveal-delay-1 mx-auto block"
             style={{
-              width: "3rem",
+              width: "40px",
               height: "1px",
-              marginBlock: "0.4em",
-              background: "linear-gradient(90deg, transparent, rgba(194,160,80,0.40), transparent)",
+              background: "var(--kxd-gold)",
             }}
           />
-
-          <span
-            className="kxd-display-hero kxd-reveal kxd-reveal-delay-2 block"
-            style={{ color: "var(--kxd-cream)" }}
+          <p
+            className="font-sans font-medium uppercase"
+            style={{
+              fontSize: "0.68rem",
+              letterSpacing: "0.42em",
+              color: "var(--kxd-gold)",
+            }}
           >
-            Luxury
+            {SITE.name}
+          </p>
+          <div
+            aria-hidden
+            style={{
+              width: "40px",
+              height: "1px",
+              background: "var(--kxd-gold)",
+            }}
+          />
+        </div>
+
+        {/* Main headline — three lines, cinematic weight */}
+        <h1
+          className="kxd-reveal kxd-reveal-delay-1 font-serif font-light select-none"
+          style={{
+            fontSize: "clamp(3.5rem, 10.5vw, 9rem)",
+            lineHeight: 0.94,
+            letterSpacing: "0.015em",
+            color: "var(--kxd-cream)",
+          }}
+        >
+          <span
+            className="block"
+            style={{
+              textShadow: "0 2px 80px rgba(0,0,0,0.60), 0 0 1px rgba(0,0,0,0.40)",
+            }}
+          >
+            We Build
+          </span>
+          <span
+            className="block"
+            style={{
+              color: "var(--kxd-gold)",
+              textShadow:
+                "0 0 120px rgba(197,166,92,0.26), 0 0 48px rgba(197,166,92,0.14), 0 2px 60px rgba(0,0,0,0.55)",
+            }}
+          >
+            What Others
+          </span>
+          <span
+            className="block"
+            style={{
+              textShadow: "0 2px 80px rgba(0,0,0,0.60), 0 0 1px rgba(0,0,0,0.40)",
+            }}
+          >
+            Can&rsquo;t.
           </span>
         </h1>
 
-        {/* ── Subheadline ── */}
-        <p
-          className="kxd-reveal kxd-reveal-delay-3 mt-10 font-serif font-light italic"
+        {/* Hairline */}
+        <div
+          aria-hidden
+          className="kxd-reveal kxd-reveal-delay-2 mx-auto"
           style={{
-            fontSize: "clamp(1.0625rem, 2vw, 1.25rem)",
-            letterSpacing: "0.025em",
-            lineHeight: 1.5,
+            width: "4.5rem",
+            height: "1px",
+            marginBlock: "clamp(1.75rem, 3vw, 2.75rem)",
+            background:
+              "linear-gradient(90deg, transparent, rgba(197,166,92,0.48) 30%, rgba(197,166,92,0.48) 70%, transparent)",
+          }}
+        />
+
+        {/* Subline — single line desktop, natural wrap mobile */}
+        <p
+          className="kxd-reveal kxd-reveal-delay-2 font-serif font-light italic sm:whitespace-nowrap"
+          style={{
+            fontSize: "clamp(0.875rem, 1.55vw, 1.125rem)",
+            letterSpacing: "0.02em",
+            lineHeight: 1.60,
             color: "var(--kxd-cream-soft)",
+            maxWidth: "min(90vw, 800px)",
           }}
         >
-          Precision.&ensp;Clarity.&ensp;Presence.
+          Digital experiences, brand systems, and growth infrastructure built to hold weight.
         </p>
 
-        {/* ── Proof line ── */}
+        {/* Proof line */}
         <p
-          className="kxd-reveal kxd-reveal-delay-3 mt-5 font-sans font-medium uppercase"
+          className="kxd-reveal kxd-reveal-delay-3 mt-6 font-sans font-medium uppercase"
           style={{
             fontSize: "0.5625rem",
-            letterSpacing: "0.17em",
+            letterSpacing: "0.20em",
             color: "var(--foreground-subtle)",
           }}
         >
-          Luxury websites&ensp;&middot;&ensp;Growth systems&ensp;&middot;&ensp;Operational platforms
+          Strategy&ensp;&middot;&ensp;Execution&ensp;&middot;&ensp;Presence
         </p>
 
-        {/* ── CTAs ── */}
-        <div className="kxd-reveal kxd-reveal-delay-4 mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-4">
+        {/* CTAs */}
+        <div className="kxd-reveal kxd-reveal-delay-4 mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-5">
           <Link href="/contact" className="kxd-btn-primary">
             Start a Project
           </Link>
-
-          {/* Text-only secondary */}
           <Link
             href="/work"
             className="group inline-flex items-center gap-2.5 font-sans font-medium uppercase"
@@ -134,48 +236,89 @@ export function HeroSection() {
         </div>
       </div>
 
-      {/* ═══════════════════════════════
-          BOTTOM STATUS BAR
-          ═══════════════════════════════ */}
+      {/* ══════════════════════════════════════════
+          WORK REEL — CSS infinite scroll
+          Communicates range: motorsports, hospitality,
+          automotive, operational platforms, civic
+          ══════════════════════════════════════════ */}
       <div
-        className="kxd-reveal kxd-reveal-delay-5 relative"
-        style={{ borderTop: "1px solid var(--kxd-border-gold)" }}
+        aria-hidden
+        className="kxd-reveal kxd-reveal-delay-5 relative z-[1] overflow-hidden"
+        style={{
+          borderTop: "1px solid var(--kxd-border-gold)",
+          borderBottom: "1px solid var(--kxd-border-white)",
+          height: "5.75rem",
+        }}
       >
-        <div className="kxd-container grid grid-cols-2 py-5 sm:grid-cols-4">
-          {/* Founded */}
+        {/* Edge fades */}
+        <div
+          className="pointer-events-none absolute inset-y-0 left-0 z-[2]"
+          style={{
+            width: "9rem",
+            background: "linear-gradient(to right, var(--kxd-black-pure) 20%, transparent)",
+          }}
+        />
+        <div
+          className="pointer-events-none absolute inset-y-0 right-0 z-[2]"
+          style={{
+            width: "9rem",
+            background: "linear-gradient(to left, var(--kxd-black-pure) 20%, transparent)",
+          }}
+        />
+
+        <div className="kxd-reel-track flex h-full items-center gap-3 pl-3">
+          {REEL_DOUBLED.map((frame, i) => (
+            <div
+              key={i}
+              className="relative h-[4.5rem] shrink-0 overflow-hidden"
+              style={{
+                aspectRatio: "16 / 9",
+                border: "1px solid rgba(255,255,255,0.06)",
+              }}
+            >
+              <Image
+                src={frame.src}
+                alt={frame.alt}
+                fill
+                className="object-cover object-top"
+                sizes="120px"
+                priority={false}
+              />
+              <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.28)" }} />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Status bar ── */}
+      <div
+        className="kxd-reveal kxd-reveal-delay-5 relative z-[1]"
+        style={{ borderTop: "1px solid var(--kxd-border-white)" }}
+      >
+        <div className="kxd-container grid grid-cols-2 py-4 sm:grid-cols-3">
           <div>
             <p className="kxd-label">Est.&ensp;{SITE.foundedYear}</p>
             <p
               className="mt-1.5 font-sans font-medium uppercase"
-              style={{
-                fontSize: "0.5rem",
-                letterSpacing: "0.1em",
-                color: "var(--foreground-subtle)",
-              }}
+              style={{ fontSize: "0.5rem", letterSpacing: "0.10em", color: "var(--foreground-subtle)" }}
             >
               Selective Partnerships
             </p>
           </div>
 
-          {/* Scroll indicator */}
-          <div className="hidden flex-col items-center gap-2 sm:flex">
-            <p className="kxd-label">Scroll</p>
+          <div className="hidden flex-col items-center gap-1.5 sm:flex">
+            <p className="kxd-label" style={{ opacity: 0.45 }}>Scroll</p>
             <div
-              aria-hidden
               className="w-px"
               style={{
                 height: "1.75rem",
                 background: "linear-gradient(to bottom, var(--kxd-gold), transparent)",
-                opacity: 0.40,
+                opacity: 0.28,
               }}
             />
           </div>
 
-          {/* Spacer */}
-          <div className="hidden sm:block" />
-
-          {/* Digital Excellence */}
-          <div className="text-right">
+          <div className="flex flex-col items-end">
             <p className="kxd-label">Digital</p>
             <p className="kxd-label mt-1">Excellence</p>
           </div>

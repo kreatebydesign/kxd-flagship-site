@@ -66,7 +66,7 @@ export default function ServicesPage() {
             <article
               key={service.slug}
               id={service.slug}
-              className="grid gap-8 border-t py-12 first:border-t-0 first:pt-0 lg:grid-cols-[1fr_2fr] lg:gap-16 lg:py-16"
+              className="grid gap-8 border-t py-10 first:border-t-0 first:pt-0 lg:grid-cols-[1fr_2fr] lg:gap-16 lg:py-14"
               style={{ borderColor: "var(--kxd-border-white)" }}
             >
               <div>
@@ -108,7 +108,7 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      <FinalCtaBand />
+      <FinalCtaBand secondaryHref="/work" secondaryLabel="View the Work" headline="Build What Others Can't." subCopy="For brands ready to move with clarity, discipline, and presence." />
     </>
   );
 }

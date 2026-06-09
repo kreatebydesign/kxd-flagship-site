@@ -4,7 +4,7 @@ export const SITE = {
   tagline:
     "Luxury digital experiences, growth infrastructure, and operational systems.",
   description:
-    "Kreate by Design — luxury websites, growth infrastructure, and operational platforms. Los Angeles, California. Founder-led. Built with discipline.",
+    "Kreate by Design — luxury websites, growth infrastructure, and operational platforms. Los Angeles, California. Built with discipline.",
   url: process.env.NEXT_PUBLIC_SITE_URL || "https://kreatebydesign.com",
   locale: "en_US",
   email: "matt@kreatebydesign.com",

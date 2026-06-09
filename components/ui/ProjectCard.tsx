@@ -20,17 +20,28 @@ export function ProjectCard({ project, featured, className, index = 0 }: Project
     <article className={cn("kxd-case-card group", className)} id={project.slug}>
       <Link href={`/work/${project.slug}`} className={cn("kxd-case-card__image-wrap block", aspectClass)}>
         {project.image ? (
-          <Image
-            src={project.image}
-            alt={project.title}
-            fill
-            className="object-cover object-center"
-            sizes={
-              featured
-                ? "(max-width: 1024px) 100vw, 60vw"
-                : "(max-width: 768px) 100vw, 40vw"
-            }
-          />
+          <>
+            {/* Dark bg visible when image uses contain */}
+            {project.imageContain ? (
+              <div className="absolute inset-0" style={{ background: "#050505" }} />
+            ) : null}
+            <Image
+              src={project.image}
+              alt={project.title}
+              fill
+              className={project.imageContain ? "object-contain" : "object-cover"}
+              style={{
+                objectPosition: project.imageContain
+                  ? "center center"
+                  : (project.imagePosition ?? "center top"),
+              }}
+              sizes={
+                featured
+                  ? "(max-width: 1024px) 100vw, 60vw"
+                  : "(max-width: 768px) 100vw, 40vw"
+              }
+            />
+          </>
         ) : (
           /* Archive panel — intentional, not broken */
           <div className="kxd-archive-panel absolute inset-0 flex flex-col items-center justify-center px-10 text-center">
@@ -61,7 +72,7 @@ export function ProjectCard({ project, featured, className, index = 0 }: Project
                 className="kxd-label relative z-[1] mt-5"
                 style={{ fontSize: "0.5rem", color: "var(--kxd-gold-deep)", letterSpacing: "0.18em" }}
               >
-                Visual Archive in Progress
+                {project.imageryLabel ?? "Visual Archive in Progress"}
               </p>
             ) : null}
           </div>
@@ -116,7 +127,7 @@ export function ProjectCard({ project, featured, className, index = 0 }: Project
 
         <Link
           href={`/work/${project.slug}`}
-          className="kxd-ui-label flex h-8 w-8 shrink-0 items-center justify-center border border-[var(--kxd-border-gold)] text-[var(--kxd-gold)] transition hover:bg-[rgba(194,160,80,0.10)]"
+          className="kxd-ui-label flex h-8 w-8 shrink-0 items-center justify-center border border-[var(--kxd-border-gold)] text-[var(--kxd-gold)] transition hover:bg-[rgba(197,166,92,0.10)]"
           aria-label={`View ${project.title} case study`}
         >
           →

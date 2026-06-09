@@ -88,7 +88,7 @@ function ShowcaseFrame({
       {image.caption ? (
         <p
           className="kxd-label absolute bottom-4 right-5"
-          style={{ color: "rgba(194,160,80,0.55)", letterSpacing: "0.16em", fontSize: "0.5rem" }}
+          style={{ color: "rgba(197,166,92,0.55)", letterSpacing: "0.16em", fontSize: "0.5rem" }}
         >
           {image.caption}
         </p>
@@ -120,10 +120,10 @@ export default async function CaseStudyPage({ params }: Props) {
           className="kxd-atmosphere-enter kxd-atmosphere-breathe pointer-events-none absolute inset-0"
           style={{
             background: [
-              "radial-gradient(ellipse 26% 68% at 50% -4%, rgba(194,160,80,0.060) 0%, transparent 60%)",
-              "radial-gradient(ellipse 13% 54% at 34% -6%, rgba(194,160,80,0.026) 0%, transparent 54%)",
-              "radial-gradient(ellipse 13% 54% at 66% -6%, rgba(194,160,80,0.022) 0%, transparent 54%)",
-              "radial-gradient(ellipse 70% 28% at 50% 110%, rgba(194,160,80,0.014) 0%, transparent 60%)",
+              "radial-gradient(ellipse 26% 68% at 50% -4%, rgba(197,166,92,0.060) 0%, transparent 60%)",
+              "radial-gradient(ellipse 13% 54% at 34% -6%, rgba(197,166,92,0.026) 0%, transparent 54%)",
+              "radial-gradient(ellipse 13% 54% at 66% -6%, rgba(197,166,92,0.022) 0%, transparent 54%)",
+              "radial-gradient(ellipse 70% 28% at 50% 110%, rgba(197,166,92,0.014) 0%, transparent 60%)",
             ].join(", "),
           }}
         />
@@ -523,8 +523,8 @@ export default async function CaseStudyPage({ params }: Props) {
                 className="pointer-events-none absolute inset-0"
                 style={{
                   background: [
-                    "radial-gradient(ellipse 50% 40% at 50% 80%, rgba(194,160,80,0.04) 0%, transparent 65%)",
-                    "radial-gradient(ellipse 30% 20% at 50% 0%, rgba(194,160,80,0.02) 0%, transparent 60%)",
+                    "radial-gradient(ellipse 50% 40% at 50% 80%, rgba(197,166,92,0.04) 0%, transparent 65%)",
+                    "radial-gradient(ellipse 30% 20% at 50% 0%, rgba(197,166,92,0.02) 0%, transparent 60%)",
                   ].join(", "),
                 }}
               />
@@ -540,14 +540,14 @@ export default async function CaseStudyPage({ params }: Props) {
               ) : (
                 <p
                   className="kxd-label relative z-[1]"
-                  style={{ color: "rgba(194,160,80,0.20)", letterSpacing: "0.22em" }}
+                  style={{ color: "rgba(197,166,92,0.20)", letterSpacing: "0.22em" }}
                 >
                   {cs.title}
                 </p>
               )}
               <p
                 className="kxd-label absolute bottom-7"
-                style={{ color: "rgba(194,160,80,0.25)", letterSpacing: "0.2em", fontSize: "0.5rem" }}
+                style={{ color: "rgba(197,166,92,0.25)", letterSpacing: "0.2em", fontSize: "0.5rem" }}
               >
                 Visual Documentation in Progress
               </p>

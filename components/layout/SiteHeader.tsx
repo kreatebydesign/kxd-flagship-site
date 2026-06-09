@@ -70,14 +70,14 @@ export function SiteHeader() {
           scrolled || megaOpen || mobileOpen ? "kxd-nav-scrolled" : "kxd-nav-transparent",
         )}
       >
-        <div className="kxd-container flex h-full items-center justify-between">
-          {/* Logo */}
+        <div className="kxd-container grid h-full grid-cols-[auto_1fr_auto] items-center gap-8">
+          {/* Logo — intentionally left-anchored */}
           <div className="shrink-0">
             <KxdLogo />
           </div>
 
-          {/* Desktop center nav */}
-          <nav className="hidden items-center gap-8 lg:flex" aria-label="Primary navigation">
+          {/* Desktop center nav — precisely centered in its grid cell */}
+          <nav className="hidden items-center justify-center gap-8 lg:flex" aria-label="Primary navigation">
             {NAV_LINKS.map((link) =>
               link.label === "Work" ? (
                 <div
@@ -109,19 +109,19 @@ export function SiteHeader() {
             )}
           </nav>
 
-          {/* Desktop CTA */}
-          <div className="hidden items-center lg:flex">
+          {/* Desktop CTA — right-anchored */}
+          <div className="hidden items-center justify-end lg:flex">
             <Link href="/contact" className="kxd-nav-cta">
               Start a Project
             </Link>
           </div>
 
-          {/* Mobile hamburger */}
+          {/* Mobile hamburger — override grid center col to be right-aligned on mobile */}
           <button
             type="button"
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
             aria-expanded={mobileOpen}
-            className="kxd-ui-label flex h-10 w-10 items-center justify-center text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)] lg:hidden"
+            className="kxd-ui-label col-start-3 flex h-10 w-10 items-center justify-center justify-self-end text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)] lg:hidden"
             onClick={() => setMobileOpen((v) => !v)}
           >
             <span className="sr-only">{mobileOpen ? "Close" : "Menu"}</span>
@@ -156,7 +156,7 @@ export function SiteHeader() {
                 {featuredProjects.map((project) => (
                   <li key={project.slug}>
                     <Link
-                      href={`/work#${project.slug}`}
+                      href={`/work/${project.slug}`}
                       className="group flex items-center gap-3 py-2.5 text-[0.875rem] font-light text-[var(--kxd-cream-muted)] transition-colors hover:text-[var(--kxd-cream)]"
                       onClick={() => setMegaOpen(false)}
                     >

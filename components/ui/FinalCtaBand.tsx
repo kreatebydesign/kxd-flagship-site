@@ -1,91 +1,123 @@
 import Link from "next/link";
-import { INQUIRY_EMAIL } from "@/lib/site";
 
 type FinalCtaBandProps = {
   showEmail?: boolean;
   secondaryHref?: string;
   secondaryLabel?: string;
+  headline?: string;
+  subCopy?: string;
 };
 
 export function FinalCtaBand({
-  showEmail = true,
   secondaryHref = "/services",
-  secondaryLabel = "Explore Services",
+  secondaryLabel = "View Services",
+  headline = "Ready to Build Something Exceptional?",
+  subCopy = "KXD partners with brands that value clarity, execution, and experiences designed to last.",
 }: FinalCtaBandProps) {
   return (
     <section
-      className="kxd-section border-t"
+      className="relative overflow-hidden"
       style={{
         background: "var(--kxd-black-pure)",
-        borderColor: "var(--kxd-border-gold)",
+        borderTop: "1px solid var(--kxd-border-gold)",
+        paddingBlock: "clamp(5.5rem, 11vw, 9rem)",
       }}
     >
-      <div className="kxd-container text-center">
-        {/* Ornament */}
-        <div
-          aria-hidden
-          className="kxd-gold-rule mx-auto mb-14"
-          style={{ maxWidth: "6rem" }}
-        />
+      {/* Atmospheric depth */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background: [
+            "radial-gradient(circle at 50% 0%, rgba(197,166,92,0.06), transparent 60%)",
+            "radial-gradient(circle at 50% 100%, rgba(197,166,92,0.03), transparent 55%)",
+          ].join(", "),
+        }}
+      />
 
-        <p className="kxd-eyebrow">Work With KXD</p>
+      <div className="kxd-container relative z-10">
+        <div className="mx-auto text-center" style={{ maxWidth: "52rem" }}>
 
-        <h2
-          className="kxd-serif-title mx-auto mt-5"
-          style={{ fontSize: "clamp(2rem, 4.5vw, 3.25rem)", maxWidth: "38rem" }}
-        >
-          Let&rsquo;s build what others can&rsquo;t.
-        </h2>
-
-        <p className="kxd-body mx-auto mt-5" style={{ maxWidth: "22rem" }}>
-          Built for brands that refuse average.
-        </p>
-
-        {/* Primary CTA + understated text link */}
-        <div className="mt-10 flex flex-col items-center gap-6 sm:flex-row sm:justify-center">
-          <Link href="/contact" className="kxd-btn-primary">
-            Get In Touch
-          </Link>
-
-          <Link
-            href={secondaryHref}
-            className="group inline-flex items-center gap-2 font-sans font-medium uppercase"
+          {/* Gold ornament */}
+          <div
+            aria-hidden
+            className="mx-auto mb-10"
             style={{
-              fontSize: "0.6875rem",
-              letterSpacing: "var(--tracking-button)",
-              color: "var(--kxd-cream-muted)",
+              width: "3rem",
+              height: "1px",
+              background:
+                "linear-gradient(90deg, transparent, var(--kxd-gold) 30%, var(--kxd-gold) 70%, transparent)",
+              opacity: 0.50,
+            }}
+          />
+
+          <p className="kxd-eyebrow">Work With KXD</p>
+
+          <h2
+            className="mx-auto mt-7 font-serif font-light"
+            style={{
+              fontSize: "clamp(2rem, 4.5vw, 3.5rem)",
+              lineHeight: 1.05,
+              letterSpacing: "0.01em",
+              color: "var(--kxd-cream)",
+              maxWidth: "40rem",
             }}
           >
-            <span className="transition-colors duration-200 group-hover:text-[var(--kxd-cream)]">
-              {secondaryLabel}
-            </span>
-            <span
-              aria-hidden
-              className="inline-block transition-transform duration-300 group-hover:translate-x-0.5"
-              style={{ color: "var(--kxd-gold)" }}
-            >
-              →
-            </span>
-          </Link>
-        </div>
+            {headline}
+          </h2>
 
-        {showEmail ? (
-          <div className="mt-14">
-            <div
-              aria-hidden
-              className="kxd-white-rule mx-auto mb-8"
-              style={{ maxWidth: "4rem" }}
-            />
-            <p className="kxd-label">Direct</p>
-            <a
-              href={`mailto:${INQUIRY_EMAIL}`}
-              className="mt-3 inline-block text-[0.875rem] font-light tracking-[0.04em] transition"
-              style={{ color: "var(--kxd-gold)" }}
+          <p
+            className="mx-auto mt-6 font-serif font-light italic"
+            style={{
+              fontSize: "clamp(0.9375rem, 1.4vw, 1.125rem)",
+              letterSpacing: "0.015em",
+              lineHeight: 1.72,
+              color: "var(--kxd-cream-soft)",
+              maxWidth: "38rem",
+            }}
+          >
+            {subCopy}
+          </p>
+
+          {/* CTAs */}
+          <div className="mt-12 flex flex-col items-center gap-5 sm:flex-row sm:justify-center">
+            <Link href="/contact" className="kxd-btn-primary">
+              Start a Project
+            </Link>
+            <Link
+              href={secondaryHref}
+              className="group inline-flex items-center gap-2.5 font-sans font-medium uppercase"
+              style={{
+                fontSize: "0.6875rem",
+                letterSpacing: "var(--tracking-button)",
+                color: "var(--kxd-cream-muted)",
+              }}
             >
-              {INQUIRY_EMAIL}
-            </a>
+              <span className="transition-colors duration-200 group-hover:text-[var(--kxd-cream)]">
+                {secondaryLabel}
+              </span>
+              <span
+                aria-hidden
+                className="inline-block transition-transform duration-300 group-hover:translate-x-1"
+                style={{ color: "var(--kxd-gold)" }}
+              >
+                →
+              </span>
+            </Link>
           </div>
-        ) : null}
+
+          {/* Bottom ornament */}
+          <div
+            aria-hidden
+            className="mx-auto mt-14"
+            style={{
+              width: "3rem",
+              height: "1px",
+              background:
+                "linear-gradient(90deg, transparent, rgba(197,166,92,0.28) 30%, rgba(197,166,92,0.28) 70%, transparent)",
+            }}
+          />
+        </div>
       </div>
     </section>
   );
