@@ -45,7 +45,6 @@ const PROCESS = [
 export default function AboutPage() {
   return (
     <>
-      {/* ── 1. HERO ── */}
       <section
         style={{
           paddingTop: "calc(var(--nav-height) + var(--section-py))",
@@ -58,9 +57,15 @@ export default function AboutPage() {
           <p className="kxd-eyebrow">About KXD</p>
           <h1
             className="kxd-serif-title mt-5"
-            style={{ fontSize: "clamp(2.5rem, 5.5vw, 3.75rem)", maxWidth: "38rem", lineHeight: 1.06 }}
+            style={{
+              fontSize: "clamp(2.5rem, 5.5vw, 3.75rem)",
+              maxWidth: "38rem",
+              lineHeight: 1.06,
+            }}
           >
-            More Than an Agency.
+            Built With Intention.
+            <br />
+            Led With Discipline.
           </h1>
           <p className="kxd-body mt-8" style={{ maxWidth: "34rem" }}>
             KXD was built on one belief: energy is the foundation of design. Every brand
@@ -71,7 +76,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ── 2. PHILOSOPHY ── */}
       <section
         className="kxd-section"
         style={{
@@ -107,7 +111,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ── 3. FOUNDER ── */}
       <section
         className="kxd-section"
         style={{
@@ -120,14 +123,11 @@ export default function AboutPage() {
             className="grid items-center gap-16 lg:grid-cols-[minmax(0,540px)_1fr]"
             style={{ gap: "clamp(4rem, 8vw, 8rem)" }}
           >
-            {/* ── Portrait column ── */}
             <div className="mx-auto w-full" style={{ maxWidth: "540px" }}>
-              {/* Outer editorial frame — offset border */}
               <div
                 className="relative p-6"
                 style={{ border: "1px solid rgba(197,166,92,0.08)" }}
               >
-                {/* Atmospheric gallery glow behind portrait */}
                 <div
                   aria-hidden
                   className="pointer-events-none absolute inset-0"
@@ -137,7 +137,6 @@ export default function AboutPage() {
                   }}
                 />
 
-                {/* Portrait container — inner frame */}
                 <div
                   className="relative overflow-hidden"
                   style={{
@@ -157,7 +156,7 @@ export default function AboutPage() {
                     sizes="(max-width: 1024px) 90vw, 540px"
                     priority
                   />
-                  {/* Layer 3 — bottom fade */}
+
                   <div
                     aria-hidden
                     className="pointer-events-none absolute inset-0"
@@ -166,7 +165,7 @@ export default function AboutPage() {
                         "linear-gradient(to top, rgba(0,0,0,0.35), transparent 45%)",
                     }}
                   />
-                  {/* Founder name on portrait */}
+
                   <div className="absolute bottom-5 left-6 right-6">
                     <p
                       className="font-serif font-light"
@@ -205,7 +204,6 @@ export default function AboutPage() {
               </div>
             </div>
 
-            {/* ── Copy column ── */}
             <div style={{ maxWidth: "620px" }}>
               <p className="kxd-eyebrow">A Note From the Founder</p>
 
@@ -227,8 +225,9 @@ export default function AboutPage() {
                   and companies find the version of themselves that belongs to the future.
                 </p>
                 <p>
-                  That&rsquo;s what drives us: to build brands that live longer, work smarter,
-                  and speak without trying too hard.
+                  That&rsquo;s what drives us: to build brands, systems, and experiences designed
+                  to endure — creating clarity, momentum, and long-term value for the businesses
+                  we partner with.
                 </p>
               </div>
 
@@ -286,7 +285,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ── 4. WHAT WE BELIEVE ── */}
       <section
         className="kxd-section"
         style={{
@@ -309,12 +307,18 @@ export default function AboutPage() {
                   key={belief}
                   className="flex items-start gap-6 py-6"
                   style={{
-                    borderBottom: i < BELIEFS.length - 1 ? "1px solid var(--kxd-border-white)" : "none",
+                    borderBottom:
+                      i < BELIEFS.length - 1
+                        ? "1px solid var(--kxd-border-white)"
+                        : "none",
                   }}
                 >
                   <span
                     className="kxd-label shrink-0 pt-0.5"
-                    style={{ color: "var(--kxd-gold)", fontVariantNumeric: "tabular-nums" }}
+                    style={{
+                      color: "var(--kxd-gold)",
+                      fontVariantNumeric: "tabular-nums",
+                    }}
                   >
                     0{i + 1}
                   </span>
@@ -336,7 +340,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ── 5. HOW WE WORK ── */}
       <section
         className="kxd-section"
         style={{
@@ -349,7 +352,10 @@ export default function AboutPage() {
             <p className="kxd-eyebrow">How We Work</p>
             <h2
               className="kxd-serif-title mt-4"
-              style={{ fontSize: "clamp(1.75rem, 3.5vw, 2.5rem)", maxWidth: "30rem" }}
+              style={{
+                fontSize: "clamp(1.75rem, 3.5vw, 2.5rem)",
+                maxWidth: "30rem",
+              }}
             >
               The way we partner is deliberate.
             </h2>
@@ -367,11 +373,10 @@ export default function AboutPage() {
                     : {}),
                 }}
               >
-                <p className="kxd-label" style={{ color: "var(--kxd-gold)" }}>{step.number}</p>
-                <h3
-                  className="kxd-serif-title mt-4"
-                  style={{ fontSize: "1.25rem" }}
-                >
+                <p className="kxd-label" style={{ color: "var(--kxd-gold)" }}>
+                  {step.number}
+                </p>
+                <h3 className="kxd-serif-title mt-4" style={{ fontSize: "1.25rem" }}>
                   {step.title}
                 </h3>
                 <p className="kxd-body-sm mt-3">{step.body}</p>
@@ -381,7 +386,6 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ── 6. THE STANDARD ── */}
       <section
         className="kxd-section"
         style={{
@@ -405,21 +409,23 @@ export default function AboutPage() {
             long after launch.
           </p>
 
-          <div
-            aria-hidden
-            className="kxd-gold-rule mt-10"
-            style={{ maxWidth: "5rem" }}
-          />
+          <div aria-hidden className="kxd-gold-rule mt-10" style={{ maxWidth: "5rem" }} />
 
           <div className="mt-10">
-            <Link href="/contact" className="kxd-btn-primary">
-              Start a Conversation
+            <Link href="/start-project" className="kxd-btn-primary">
+              Start a Partnership
             </Link>
           </div>
         </div>
       </section>
 
-      <FinalCtaBand showEmail={false} secondaryHref="/work" secondaryLabel="View the Work" />
+      <FinalCtaBand
+        headline="Build What Others Can't."
+        subCopy="KXD partners with ambitious businesses to create exceptional digital experiences, operational systems, and brands built to endure."
+        secondaryHref="/work"
+        secondaryLabel="Explore Our Work"
+        showEmail={false}
+      />
     </>
   );
 }
