@@ -4,11 +4,22 @@ import { buildMetadata } from "@/lib/seo/metadata";
 import { FinalCtaBand } from "@/components/ui/FinalCtaBand";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Platforms",
+  title: "Business Platforms & Operational Systems",
   description:
-    "Membership platforms, client portals, operational dashboards, and enterprise systems — built as brand extensions, not software products.",
+    "KXD designs and develops custom operational systems, client portals, membership platforms, hospitality infrastructure, and motorsports platforms that align operations with experience.",
   path: "/platforms",
-  noIndex: true,
+  keywords: [
+    "Custom Business Platforms",
+    "Operational Systems Development",
+    "Client Portal Development",
+    "Membership Platform Development",
+    "Hospitality Platform Development",
+    "Motorsports Platform Development",
+    "Enterprise Dashboard Development",
+    "Custom CRM Systems",
+    "Business Operations Software",
+    "Digital Operations Platforms",
+  ],
 });
 
 // ── Data ─────────────────────────────────────────────────────────────────────
