@@ -1,14 +1,42 @@
 "use client";
 
 import { useState } from "react";
-import {
-  BUDGET_OPTIONS,
-  SERVICE_OPTIONS,
-  SITE,
-  TIMELINE_OPTIONS,
-} from "@/lib/site";
+import { SITE } from "@/lib/site";
 
 type FormState = "idle" | "submitting" | "success" | "error";
+
+const PROJECT_TYPES = [
+  { value: "luxury-website-experiences", label: "Luxury Website Experience" },
+  { value: "brand-systems-identity",     label: "Brand Systems & Identity" },
+  { value: "growth-infrastructure",      label: "Growth Infrastructure" },
+  { value: "enterprise-platforms",       label: "Enterprise Platforms" },
+  { value: "ongoing-partnership",        label: "Ongoing Partnership" },
+  { value: "general",                    label: "Unsure — Let's discuss" },
+] as const;
+
+const INVESTMENT_RANGES = [
+  { value: "under-5k",  label: "Under $5,000" },
+  { value: "5k-10k",    label: "$5,000 – $10,000" },
+  { value: "10k-25k",   label: "$10,000 – $25,000" },
+  { value: "25k-50k",   label: "$25,000 – $50,000" },
+  { value: "50k-plus",  label: "$50,000+" },
+] as const;
+
+const TIMELINE_OPTIONS = [
+  { value: "immediate",      label: "Immediately" },
+  { value: "within-30-days", label: "Within 30 Days" },
+  { value: "60-90-days",     label: "Within 60–90 Days" },
+  { value: "exploring",      label: "Exploring Options" },
+] as const;
+
+const REFERRAL_OPTIONS = [
+  { value: "referral",     label: "Referral or word of mouth" },
+  { value: "google",       label: "Google Search" },
+  { value: "instagram",    label: "Instagram" },
+  { value: "linkedin",     label: "LinkedIn" },
+  { value: "portfolio",    label: "Saw KXD's portfolio work" },
+  { value: "other",        label: "Other" },
+] as const;
 
 export function ContactForm() {
   const [state, setState] = useState<FormState>("idle");
@@ -27,23 +55,21 @@ export function ContactForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: data.get("name"),
-          email: data.get("email"),
-          company: data.get("company"),
-          phone: data.get("phone"),
-          inquiryType: data.get("inquiryType"),
-          budget: data.get("budget"),
-          timeline: data.get("timeline"),
-          message: data.get("message"),
-          source: "contact-page",
+          name:        data.get("name"),
+          email:       data.get("email"),
+          company:     data.get("company"),
+          website:     data.get("website"),
+          inquiryType: data.get("projectType"),
+          budget:      data.get("investmentRange"),
+          timeline:    data.get("timeline"),
+          message:     data.get("projectGoals"),
+          referral:    data.get("referral"),
+          source:      "project-application",
         }),
       });
 
       const json = await res.json();
-
-      if (!res.ok) {
-        throw new Error(json.error || "Submission failed");
-      }
+      if (!res.ok) throw new Error(json.error || "Submission failed");
 
       setState("success");
       form.reset();
@@ -59,94 +85,144 @@ export function ContactForm() {
 
   if (state === "success") {
     return (
-      <div className="kxd-luxury-form p-10 text-center lg:p-14">
-        <p className="kxd-eyebrow">Received</p>
-        <h3 className="mt-5 font-serif text-[1.875rem] text-white">
-          We&rsquo;ll review and respond.
+      <div
+        className="kxd-luxury-form p-10 text-center lg:p-14"
+        style={{ minHeight: "24rem", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}
+      >
+        <div
+          aria-hidden
+          className="mx-auto mb-8"
+          style={{
+            width: "2.5rem",
+            height: "1px",
+            background: "linear-gradient(to right, transparent, var(--kxd-gold), transparent)",
+          }}
+        />
+        <p className="kxd-eyebrow">Application Received</p>
+        <h3 className="mt-5 font-serif text-[1.875rem] font-light text-white">
+          We&rsquo;ll review and respond directly.
         </h3>
-        <p className="mt-5 text-[0.9375rem] leading-[1.7] text-[var(--foreground-muted)]">
-          Your inquiry is in. If it&rsquo;s the right fit, we&rsquo;ll map the next move.
+        <p
+          className="mx-auto mt-5 font-sans font-light leading-[1.7]"
+          style={{ maxWidth: "26rem", fontSize: "0.9375rem", color: "var(--foreground-muted)" }}
+        >
+          Every application is reviewed personally. If it&rsquo;s the right fit,
+          we&rsquo;ll reach out within 2 business days to map the next step.
         </p>
         <button
           type="button"
           onClick={() => setState("idle")}
-          className="kxd-button-label mt-10 text-[var(--kxd-gold)] transition hover:text-[var(--kxd-gold-light)]"
+          className="mt-10 font-sans text-[0.6875rem] font-medium uppercase tracking-[0.14em] text-[var(--kxd-gold)] transition hover:text-[var(--kxd-gold-light)]"
         >
-          Send another message
+          Submit another application
         </button>
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="kxd-luxury-form p-8 lg:p-10">
-      <p className="kxd-label mb-8">Project Inquiry</p>
+    <form onSubmit={handleSubmit} className="kxd-luxury-form p-8 lg:p-10" noValidate>
+      {/* Section label */}
+      <p className="kxd-label mb-8">Project Application</p>
 
+      {/* ── Row 1: Identity ── */}
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="Name" name="name" required />
-        <Field label="Email" name="email" type="email" required />
-        <Field label="Company" name="company" />
-        <Field label="Phone" name="phone" type="tel" />
+        <Field label="Full Name" name="name" required placeholder="Your name" />
+        <Field label="Company" name="company" placeholder="Brand or studio name" />
       </div>
 
+      {/* ── Row 2: Contact ── */}
       <div className="mt-5 grid gap-5 sm:grid-cols-2">
-        <SelectField label="Service Interest" name="inquiryType" required>
-          {SERVICE_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
+        <Field label="Email" name="email" type="email" required placeholder="your@email.com" />
+        <Field label="Website" name="website" type="url" placeholder="https://yourbrand.com" />
+      </div>
+
+      {/* ── Divider ── */}
+      <div
+        aria-hidden
+        className="my-8"
+        style={{
+          height: "1px",
+          background: "linear-gradient(to right, transparent, var(--kxd-border-white-strong) 20%, var(--kxd-border-white-strong) 80%, transparent)",
+        }}
+      />
+
+      {/* ── Row 3: Project scope ── */}
+      <div className="grid gap-5 sm:grid-cols-2">
+        <SelectField label="Project Type" name="projectType" required>
+          <option value="">Select type</option>
+          {PROJECT_TYPES.map((o) => (
+            <option key={o.value} value={o.value}>{o.label}</option>
           ))}
         </SelectField>
-        <SelectField label="Budget" name="budget">
+        <SelectField label="Estimated Investment Range" name="investmentRange">
           <option value="">Select range</option>
-          {BUDGET_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
+          {INVESTMENT_RANGES.map((o) => (
+            <option key={o.value} value={o.value}>{o.label}</option>
           ))}
         </SelectField>
       </div>
 
       <div className="mt-5">
-        <SelectField label="Timeline" name="timeline">
+        <SelectField label="Estimated Timeline" name="timeline">
           <option value="">Select timeline</option>
-          {TIMELINE_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
+          {TIMELINE_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>{o.label}</option>
           ))}
         </SelectField>
       </div>
 
+      {/* ── Project Goals ── */}
       <div className="mt-5">
-        <label className="kxd-label mb-2 block" htmlFor="message">
-          Message
+        <label className="kxd-label mb-2 block" htmlFor="projectGoals">
+          Project Goals
         </label>
         <textarea
-          id="message"
-          name="message"
+          id="projectGoals"
+          name="projectGoals"
           required
           rows={5}
           className="kxd-field resize-none"
-          placeholder="What are you building?"
+          placeholder="What are you building? What does success look like?"
         />
       </div>
 
+      {/* ── Referral ── */}
+      <div className="mt-5">
+        <SelectField label="How did you hear about KXD?" name="referral">
+          <option value="">Select source</option>
+          {REFERRAL_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>{o.label}</option>
+          ))}
+        </SelectField>
+      </div>
+
+      {/* ── Error ── */}
       {state === "error" && error ? (
-        <p className="mt-5 text-[0.875rem] text-[#d45c5c]" role="alert">
-          {error}
-        </p>
+        <p className="mt-5 text-[0.875rem] text-[#d45c5c]" role="alert">{error}</p>
       ) : null}
 
-      <button
-        type="submit"
-        disabled={state === "submitting"}
-        className="kxd-btn-primary kxd-button-label mt-8 w-full gap-2 px-10 py-4 disabled:opacity-60 sm:w-auto"
-      >
-        {state === "submitting" ? "Sending..." : "Submit Inquiry"}
-      </button>
+      {/* ── Submit ── */}
+      <div className="mt-8 flex flex-col gap-5 sm:flex-row sm:items-center">
+        <button
+          type="submit"
+          disabled={state === "submitting"}
+          className="kxd-btn-primary disabled:opacity-60 sm:w-auto"
+        >
+          {state === "submitting" ? "Submitting…" : "Submit Application"}
+        </button>
+        <p
+          className="font-sans font-light"
+          style={{ fontSize: "0.6875rem", letterSpacing: "0.05em", color: "var(--foreground-subtle)" }}
+        >
+          Reviewed personally within 2 business days.
+        </p>
+      </div>
 
-      <p className="mt-8 text-[0.6875rem] tracking-[0.06em] text-white/30">
+      <p
+        className="mt-8"
+        style={{ fontSize: "0.5625rem", letterSpacing: "0.08em", color: "rgba(255,255,255,0.18)", fontFamily: "var(--font-sans)" }}
+      >
         {SITE.location} · {SITE.email}
       </p>
     </form>
@@ -154,26 +230,18 @@ export function ContactForm() {
 }
 
 function Field({
-  label,
-  name,
-  type = "text",
-  required,
+  label, name, type = "text", required, placeholder,
 }: {
-  label: string;
-  name: string;
-  type?: string;
-  required?: boolean;
+  label: string; name: string; type?: string; required?: boolean; placeholder?: string;
 }) {
   return (
     <div>
       <label className="kxd-label mb-2 block" htmlFor={name}>
-        {label}
+        {label}{required ? <span aria-hidden className="ml-1" style={{ color: "var(--kxd-gold)", opacity: 0.7 }}>*</span> : null}
       </label>
       <input
-        id={name}
-        name={name}
-        type={type}
-        required={required}
+        id={name} name={name} type={type} required={required}
+        placeholder={placeholder}
         className="kxd-field"
       />
     </div>
@@ -181,27 +249,16 @@ function Field({
 }
 
 function SelectField({
-  label,
-  name,
-  required,
-  children,
+  label, name, required, children,
 }: {
-  label: string;
-  name: string;
-  required?: boolean;
-  children: React.ReactNode;
+  label: string; name: string; required?: boolean; children: React.ReactNode;
 }) {
   return (
     <div>
       <label className="kxd-label mb-2 block" htmlFor={name}>
         {label}
       </label>
-      <select
-        id={name}
-        name={name}
-        required={required}
-        className="kxd-field kxd-field-select"
-      >
+      <select id={name} name={name} required={required} className="kxd-field kxd-field-select">
         {children}
       </select>
     </div>

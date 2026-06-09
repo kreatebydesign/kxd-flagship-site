@@ -40,12 +40,14 @@ export async function POST(request: Request) {
             | "brand-systems-identity"
             | "growth-infrastructure"
             | "enterprise-platforms"
-            | "general") || "luxury-website-experiences",
+            | "ongoing-partnership"
+            | "general") || "general",
         budget: body.budget as
           | "under-5k"
           | "5k-10k"
           | "10k-25k"
-          | "25k-plus"
+          | "25k-50k"
+          | "50k-plus"
           | undefined,
         timeline: body.timeline as
           | "immediate"

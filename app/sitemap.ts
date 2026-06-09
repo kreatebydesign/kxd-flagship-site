@@ -7,14 +7,24 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return PUBLIC_SITEMAP_PATHS.map((path) => ({
     url: absolutePublicUrl(path),
     lastModified,
-    changeFrequency: path === "/" ? "weekly" : path.startsWith("/services") ? "monthly" : "monthly",
+    changeFrequency: (
+      path === "/" ? "weekly"
+      : path.startsWith("/work/") ? "monthly"
+      : "monthly"
+    ) as "weekly" | "monthly",
     priority:
       path === "/"
-        ? 1
-        : path === "/services/luxury-websites"
-          ? 0.95
-          : path.startsWith("/services")
-            ? 0.85
-            : 0.8,
+        ? 1.0
+        : path === "/work"
+          ? 0.9
+          : path === "/services/luxury-website-experiences"
+            ? 0.95
+            : path.startsWith("/services")
+              ? 0.85
+              : path === "/investment"
+                ? 0.85
+                : path.startsWith("/work/")
+                  ? 0.8
+                  : 0.75,
   }));
 }

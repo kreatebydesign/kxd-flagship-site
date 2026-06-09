@@ -50,7 +50,8 @@ export const Inquiries: CollectionConfig = {
         { label: "Brand Systems & Identity", value: "brand-systems-identity" },
         { label: "Growth Infrastructure", value: "growth-infrastructure" },
         { label: "Enterprise Platforms", value: "enterprise-platforms" },
-        { label: "General", value: "general" },
+        { label: "Ongoing Partnership", value: "ongoing-partnership" },
+        { label: "General / Unsure", value: "general" },
       ],
     },
     {
@@ -60,7 +61,8 @@ export const Inquiries: CollectionConfig = {
         { label: "Under $5,000", value: "under-5k" },
         { label: "$5,000 – $10,000", value: "5k-10k" },
         { label: "$10,000 – $25,000", value: "10k-25k" },
-        { label: "$25,000+", value: "25k-plus" },
+        { label: "$25,000 – $50,000", value: "25k-50k" },
+        { label: "$50,000+", value: "50k-plus" },
       ],
     },
     {

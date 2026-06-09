@@ -9,9 +9,10 @@ type ProjectCardProps = {
   featured?: boolean;
   className?: string;
   index?: number;
+  priority?: boolean;
 };
 
-export function ProjectCard({ project, featured, className, index = 0 }: ProjectCardProps) {
+export function ProjectCard({ project, featured, className, index = 0, priority = false }: ProjectCardProps) {
   const aspectClass = featured
     ? "aspect-[4/5] lg:aspect-auto lg:min-h-[38rem]"
     : "aspect-[5/4]";
@@ -29,6 +30,7 @@ export function ProjectCard({ project, featured, className, index = 0 }: Project
               src={project.image}
               alt={project.title}
               fill
+              priority={priority}
               className={project.imageContain ? "object-contain" : "object-cover"}
               style={{
                 objectPosition: project.imageContain

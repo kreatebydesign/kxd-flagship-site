@@ -3,6 +3,8 @@ import { ClientLogoWall } from "@/components/home/ClientLogoWall";
 import { FinalCtaSection } from "@/components/home/FinalCtaSection";
 import { FounderStandard } from "@/components/home/FounderStandard";
 import { HeroSection } from "@/components/home/HeroSection";
+import { OutcomesSection } from "@/components/home/OutcomesSection";
+import { ProcessSection } from "@/components/home/ProcessSection";
 import { ReviewsSection } from "@/components/home/ReviewsSection";
 import { ServicesSection } from "@/components/home/ServicesSection";
 import { StructuredData } from "@/components/seo/StructuredData";
@@ -19,7 +21,7 @@ export default function HomePage() {
     authorName: review.author,
     rating: review.rating,
     reviewText: review.text,
-    reviewDate: "2025-01-01",
+    reviewDate: "2026-01-01",
   }));
 
   const schema = [
@@ -38,13 +40,17 @@ export default function HomePage() {
       <ServicesSection />
       {/* 3. Selected Work */}
       <CaseStudiesSection />
-      {/* 4. Founder-Led Standard */}
+      {/* 4. Selected Outcomes — trust + proof */}
+      <OutcomesSection />
+      {/* 5. Process */}
+      <ProcessSection />
+      {/* 6. The Standard */}
       <FounderStandard />
-      {/* 5. Reviews / Proof */}
+      {/* 7. Reviews / Proof */}
       <ReviewsSection />
-      {/* 6. Client Trust */}
+      {/* 8. Client Trust */}
       <ClientLogoWall />
-      {/* 7. Final CTA */}
+      {/* 9. Final CTA */}
       <FinalCtaSection />
     </>
   );

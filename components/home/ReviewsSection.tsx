@@ -7,8 +7,8 @@ function GoldStars({ rating }: { rating: number }) {
         <svg key={i} width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden>
           <path
             d="M5.5 0.917L6.714 3.758L9.9 3.993L7.587 5.906L8.344 8.99L5.5 7.25L2.656 8.99L3.413 5.906L1.1 3.993L4.286 3.758L5.5 0.917Z"
-            fill={i < Math.floor(rating) ? "#c9a962" : "transparent"}
-            stroke="#c9a962"
+            fill={i < Math.floor(rating) ? "#C5A65C" : "transparent"}
+            stroke="#C5A65C"
             strokeWidth="0.7"
             opacity={i < Math.floor(rating) ? 1 : 0.3}
           />
@@ -33,7 +33,7 @@ export function ReviewsSection() {
         {/* Header */}
         <div className="mb-14 grid gap-5 lg:grid-cols-[1fr_auto] lg:items-end">
           <div>
-            <p className="kxd-eyebrow">Proof</p>
+            <p className="kxd-eyebrow">Client Reviews</p>
             <h2
               className="kxd-serif-title mt-4"
               style={{ fontSize: "clamp(1.875rem, 3.5vw, 2.5rem)" }}
@@ -62,8 +62,8 @@ export function ReviewsSection() {
               style={{ background: "var(--kxd-border-white)" }}
             />
             <div>
-              <p className="kxd-label">Client</p>
-              <p className="kxd-label mt-1">Rating</p>
+              <p className="kxd-label">Google</p>
+              <p className="kxd-label mt-1">Reviews</p>
             </div>
           </div>
         </div>

@@ -37,7 +37,7 @@ export function CaseStudiesSection() {
         <div className="grid gap-4 lg:grid-cols-12">
           {flagship ? (
             <div className="lg:col-span-7">
-              <ProjectCard project={flagship} featured index={0} />
+              <ProjectCard project={flagship} featured index={0} priority />
             </div>
           ) : null}
 

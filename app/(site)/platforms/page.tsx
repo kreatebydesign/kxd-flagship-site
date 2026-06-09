@@ -7,7 +7,7 @@ export const metadata: Metadata = buildMetadata({
   description:
     "Membership platforms, client portals, operational dashboards, and enterprise systems — built as brand extensions, not software products.",
   path: "/platforms",
-  keywords: ["Membership Platform Development", "Operational Platform Development"],
+  noIndex: true,
 });
 
 export default function PlatformsPage() {

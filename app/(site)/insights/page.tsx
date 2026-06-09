@@ -7,11 +7,7 @@ export const metadata: Metadata = buildMetadata({
   description:
     "Editorial perspectives on luxury web design, hospitality, motorsports, membership platforms, and operational systems.",
   path: "/insights",
-  keywords: [
-    "Luxury Website Design",
-    "Hospitality Website Design",
-    "Motorsports Website Development",
-  ],
+  noIndex: true,
 });
 
 export default function InsightsPage() {
