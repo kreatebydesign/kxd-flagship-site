@@ -6,6 +6,11 @@ import { RootPage, generatePageMetadata } from "@payloadcms/next/views";
 
 import { importMap } from "../importMap";
 
+// Prevent Next.js from statically prerendering the admin panel.
+// The admin requires a live DB connection and must never be cached.
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+
 type Args = {
   params: Promise<{
     segments: string[];

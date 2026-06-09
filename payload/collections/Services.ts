@@ -15,7 +15,7 @@ export const Services: CollectionConfig = {
   labels: { singular: "Service", plural: "Services" },
   admin: {
     useAsTitle: "title",
-    defaultColumns: ["title", "category", "featured", "status", "order"],
+    defaultColumns: ["title", "category", "status"],
     group: PAYLOAD_GROUPS.content,
     description:
       "Core KXD offerings. Luxury websites remain the primary entry point.",

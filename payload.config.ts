@@ -25,6 +25,7 @@ const dirname = path.dirname(filename);
 
 const databaseUri = process.env.DATABASE_URI?.trim();
 
+
 export default buildConfig({
   admin: {
     user: Users.slug,
@@ -61,6 +62,15 @@ export default buildConfig({
     ? postgresAdapter({
         pool: {
           connectionString: databaseUri,
+          // Serverless-safe pool settings for Vercel + Neon:
+          // max:1 ensures each Lambda instance holds at most one connection.
+          // idleTimeoutMillis lets the connection close quickly between cold starts.
+          // allowExitOnIdle prevents the Node process from being kept alive by
+          // an idle pg connection (important in Vercel serverless).
+          max: 1,
+          connectionTimeoutMillis: 10_000,
+          idleTimeoutMillis: 30_000,
+          allowExitOnIdle: true,
         },
         migrationDir: path.resolve(dirname, "migrations"),
         prodMigrations: migrations,

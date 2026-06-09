@@ -10,6 +10,11 @@ import {
   REST_PUT,
 } from "@payloadcms/next/routes";
 
+// Required for Vercel serverless: prevent static optimisation of Payload API
+// routes and ensure the Node.js runtime is used (Payload requires Node APIs).
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+
 export const GET = REST_GET(config);
 export const POST = REST_POST(config);
 export const DELETE = REST_DELETE(config);

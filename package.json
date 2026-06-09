@@ -10,7 +10,8 @@
     "payload": "cross-env NODE_OPTIONS='--no-deprecation' payload",
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
     "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
-    "migrate": "cross-env NODE_OPTIONS='--no-deprecation' payload migrate"
+    "migrate": "cross-env NODE_OPTIONS='--no-deprecation' payload migrate",
+    "seed:services": "tsx scripts/seed-services.ts"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "^3.84.1",
