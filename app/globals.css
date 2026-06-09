@@ -1,0 +1,800 @@
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════════════
+   KXD DESIGN SYSTEM — FLAGSHIP 2.0
+   ═══════════════════════════════════════════════ */
+
+:root {
+  /* ── Blacks ── */
+  --kxd-black-pure:     #000000;
+  --kxd-black-deep:     #030303;
+  --kxd-black-rich:     #050505;
+  --kxd-black-base:     #080808;
+  --kxd-black-soft:     #0b0b0b;
+  --kxd-black-elevated: #111111;
+
+  /* ── Charcoal ── */
+  --kxd-charcoal:       #161616;
+  --kxd-charcoal-light: #1c1c1c;
+
+  /* ── Cream / White ── */
+  --kxd-white:       #ffffff;
+  --kxd-cream:       #f8f3ea;
+  --kxd-cream-soft:  #e8ded0;
+  --kxd-cream-muted: #bfb7aa;
+
+  /* ── Gold — champagne/antique metallic ── */
+  --kxd-gold:       #c2a050;
+  --kxd-gold-light: #d0ad6a;
+  --kxd-gold-dark:  #a6843c;
+  --kxd-gold-deep:  #8a6a2a;
+
+  /* ── Borders ── */
+  --kxd-border-white:        rgba(255, 255, 255, 0.07);
+  --kxd-border-white-strong: rgba(255, 255, 255, 0.11);
+  --kxd-border-gold:         rgba(194, 160, 80, 0.20);
+  --kxd-border-gold-strong:  rgba(194, 160, 80, 0.36);
+
+  /* ── Semantic aliases (keep for compatibility) ── */
+  --color-background:      var(--kxd-black-soft);
+  --color-background-deep: var(--kxd-black-deep);
+  --color-card:            var(--kxd-black-elevated);
+  --color-foreground:      var(--kxd-white);
+  --color-cream:           var(--kxd-cream);
+  --color-cream-muted:     var(--kxd-cream-muted);
+  --color-gold:            var(--kxd-gold);
+  --color-gold-light:      var(--kxd-gold-light);
+  --color-gold-dark:       var(--kxd-gold-dark);
+  --color-border:          var(--kxd-border-white);
+  --color-border-gold:     var(--kxd-border-gold);
+
+  --foreground-muted:  var(--kxd-cream-muted);
+  --foreground-subtle: rgba(191, 183, 170, 0.55);
+
+  /* ── Gradients ── */
+  --gradient-gold-button: linear-gradient(180deg, #ccab5c 0%, #c2a050 48%, #ae8c3c 100%);
+
+  /* ── Shadows ── */
+  --shadow-gold-sm:  0 1px 0 rgba(255, 255, 255, 0.16) inset, 0 4px 18px rgba(0, 0, 0, 0.60);
+  --shadow-gold-lg:  0 1px 0 rgba(255, 255, 255, 0.20) inset, 0 10px 36px rgba(194, 160, 80, 0.18);
+  --shadow-card:     0 0 0 1px var(--kxd-border-white);
+  --shadow-card-hover: 0 0 0 1px var(--kxd-border-gold), 0 20px 50px rgba(0, 0, 0, 0.50);
+
+  /* ── Typography tracking ── */
+  --tracking-button:  0.12em;
+  --tracking-label:   0.14em;
+  --tracking-display: 0.06em;  /* editorial — used for section titles */
+  --tracking-hero:    0.05em;  /* cinematic — used for hero display */
+
+  /* ── Motion ── */
+  --ease-standard:  cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-enter:     cubic-bezier(0, 0, 0.2, 1);
+  --ease-cinematic: cubic-bezier(0.16, 1, 0.3, 1);  /* expo-out — feels expensive */
+  --dur-fast:   180ms;
+  --dur-base:   260ms;
+  --dur-slow:   500ms;
+  --dur-enter:  900ms;
+
+  /* ── Layout ── */
+  --layout-max: 78rem;
+  --section-py: clamp(5rem, 9vw, 7.5rem);
+  --section-px: clamp(1.5rem, 4vw, 2.75rem);
+  --nav-height: 80px;
+
+  /* ── Nav ── */
+  --nav-bg-scrolled: rgba(3, 3, 3, 0.96);
+}
+
+@theme inline {
+  --color-background: var(--color-background);
+  --color-foreground: var(--color-foreground);
+  --color-gold:       var(--color-gold);
+  --color-border:     var(--color-border);
+  --color-card:       var(--color-card);
+  --font-sans:   var(--font-outfit), system-ui, sans-serif;
+  --font-serif:  var(--font-cormorant), "Playfair Display", Didot, "Bodoni MT", Georgia, serif;
+}
+
+/* ─────────────────── BASE ─────────────────── */
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  display: flex;
+  min-height: 100dvh;
+  flex-direction: column;
+  background-color: var(--kxd-black-deep);
+  color: var(--kxd-white);
+  font-family: var(--font-sans);
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+main {
+  flex: 1 0 auto;
+}
+
+::selection {
+  background: rgba(194, 160, 80, 0.22);
+  color: var(--kxd-white);
+}
+
+/* ─────────────────── TYPOGRAPHY ─────────────────── */
+
+/* Gold eyebrow label */
+.kxd-eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--kxd-gold);
+}
+
+/* Muted uppercase label */
+.kxd-label {
+  font-family: var(--font-sans);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--foreground-subtle);
+}
+
+/* Hero display — cinematic serif */
+.kxd-display {
+  font-family: var(--font-serif);
+  font-weight: 300;
+  letter-spacing: var(--tracking-hero);
+  text-transform: uppercase;
+  line-height: 0.92;
+}
+
+/* Hero scale */
+.kxd-display-hero {
+  font-size: clamp(4.5rem, 12vw, 8.75rem);
+}
+
+/* Editorial section titles */
+.kxd-serif-title {
+  font-family: var(--font-serif);
+  font-weight: 300;
+  line-height: 1.10;
+  letter-spacing: 0.01em;
+  color: var(--kxd-cream);
+}
+
+/* Body — Outfit light */
+.kxd-body {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 300;
+  line-height: 1.82;
+  color: var(--kxd-cream-muted);
+}
+
+.kxd-body-sm {
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  font-weight: 300;
+  line-height: 1.78;
+  color: var(--kxd-cream-muted);
+}
+
+/* Buttons, nav, tags */
+.kxd-ui-label {
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: var(--tracking-button);
+  text-transform: uppercase;
+}
+
+/* Legacy alias */
+.kxd-button-label {
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: var(--tracking-button);
+  text-transform: uppercase;
+}
+
+/* ─────────────────── LAYOUT ─────────────────── */
+
+.kxd-container {
+  width: 100%;
+  max-width: var(--layout-max);
+  margin-inline: auto;
+  padding-inline: var(--section-px);
+}
+
+.kxd-section {
+  padding-block: var(--section-py);
+}
+
+/* ─────────────────── NAVIGATION ─────────────────── */
+
+.kxd-nav {
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+  z-index: 100;
+  height: var(--nav-height);
+  transition:
+    background var(--dur-base) var(--ease-standard),
+    border-color var(--dur-base) var(--ease-standard),
+    backdrop-filter var(--dur-base) var(--ease-standard);
+}
+
+.kxd-nav-transparent {
+  background: transparent;
+  border-bottom: 1px solid transparent;
+}
+
+.kxd-nav-scrolled {
+  background: var(--nav-bg-scrolled);
+  border-bottom: 1px solid var(--kxd-border-white);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+}
+
+.kxd-nav-link {
+  position: relative;
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: var(--tracking-button);
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  transition: color var(--dur-fast) var(--ease-standard);
+}
+
+.kxd-nav-link:hover,
+.kxd-nav-link[data-active="true"] {
+  color: var(--kxd-cream);
+}
+
+.kxd-nav-link::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: -3px;
+  height: 1px;
+  background: var(--kxd-gold);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--dur-base) var(--ease-cinematic);
+}
+
+.kxd-nav-link:hover::after,
+.kxd-nav-link[data-active="true"]::after {
+  transform: scaleX(1);
+}
+
+.kxd-nav-cta {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.625rem 1.375rem;
+  border: 1px solid var(--kxd-border-gold-strong);
+  color: var(--kxd-gold);
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: var(--tracking-button);
+  text-transform: uppercase;
+  transition:
+    background var(--dur-fast) var(--ease-standard),
+    border-color var(--dur-fast) var(--ease-standard),
+    color var(--dur-fast) var(--ease-standard);
+}
+
+.kxd-nav-cta:hover {
+  background: rgba(194, 160, 80, 0.07);
+  border-color: var(--kxd-gold);
+  color: var(--kxd-gold-light);
+}
+
+/* ── Mega menu ── */
+
+.kxd-mega-menu {
+  position: absolute;
+  top: 100%;
+  inset-inline: 0;
+  background: var(--kxd-black-deep);
+  border-bottom: 1px solid var(--kxd-border-gold);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+  transition:
+    opacity var(--dur-slow) var(--ease-cinematic),
+    visibility var(--dur-slow) var(--ease-cinematic),
+    transform var(--dur-slow) var(--ease-cinematic);
+}
+
+.kxd-mega-menu[data-open="true"] {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* ── Mobile nav overlay ── */
+
+.kxd-mobile-nav {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  background: var(--kxd-black-pure);
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--dur-slow) var(--ease-cinematic),
+    visibility var(--dur-slow) var(--ease-cinematic);
+}
+
+.kxd-mobile-nav[data-open="true"] {
+  opacity: 1;
+  visibility: visible;
+}
+
+.kxd-mobile-nav-link {
+  font-family: var(--font-serif);
+  font-size: clamp(2.5rem, 8vw, 4rem);
+  font-weight: 300;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.35);
+  transition: color var(--dur-fast) var(--ease-standard);
+  line-height: 1;
+}
+
+.kxd-mobile-nav-link:hover {
+  color: var(--kxd-cream);
+}
+
+/* ─────────────────── BUTTONS ─────────────────── */
+
+.kxd-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1.0625rem 2.375rem;
+  background: var(--gradient-gold-button);
+  color: #050505;
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: var(--tracking-button);
+  text-transform: uppercase;
+  box-shadow: var(--shadow-gold-sm);
+  transition:
+    box-shadow var(--dur-base) var(--ease-standard),
+    transform var(--dur-base) var(--ease-standard),
+    opacity var(--dur-base) var(--ease-standard);
+}
+
+.kxd-btn-primary:hover {
+  box-shadow: var(--shadow-gold-lg);
+  transform: translateY(-1px);
+}
+
+.kxd-btn-primary:active {
+  transform: translateY(0);
+}
+
+.kxd-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1.0625rem 2.375rem;
+  border: 1px solid var(--kxd-border-white-strong);
+  color: var(--kxd-cream-soft);
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: var(--tracking-button);
+  text-transform: uppercase;
+  transition:
+    border-color var(--dur-base) var(--ease-standard),
+    color var(--dur-base) var(--ease-standard);
+}
+
+.kxd-btn-ghost:hover {
+  border-color: var(--kxd-border-gold-strong);
+  color: var(--kxd-gold-light);
+}
+
+/* ─────────────────── TAGS ─────────────────── */
+
+.kxd-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3125rem 0.6875rem;
+  border: 1px solid var(--kxd-border-gold);
+  background: rgba(0, 0, 0, 0.55);
+  font-family: var(--font-sans);
+  font-size: 0.5625rem;
+  font-weight: 500;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--kxd-gold);
+  backdrop-filter: blur(4px);
+}
+
+/* ─────────────────── DIVIDERS ─────────────────── */
+
+.kxd-gold-rule {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--kxd-border-gold) 25%,
+    var(--kxd-border-gold-strong) 50%,
+    var(--kxd-border-gold) 75%,
+    transparent 100%
+  );
+}
+
+.kxd-white-rule {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--kxd-border-white-strong) 35%,
+    var(--kxd-border-white-strong) 65%,
+    transparent 100%
+  );
+}
+
+/* legacy aliases */
+.kxd-section-divider {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--kxd-border-gold) 25%,
+    var(--kxd-border-gold-strong) 50%,
+    var(--kxd-border-gold) 75%,
+    transparent 100%
+  );
+}
+
+.kxd-section-divider-white {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--kxd-border-white-strong) 35%,
+    var(--kxd-border-white-strong) 65%,
+    transparent 100%
+  );
+}
+
+/* ─────────────────── SURFACE PRIMITIVES ─────────────────── */
+
+.kxd-surface-radial {
+  background: radial-gradient(
+    ellipse 90% 70% at 50% 0%,
+    rgba(22, 22, 22, 0.45) 0%,
+    transparent 68%
+  );
+}
+
+/* Controlled warm gold light — used in hero */
+.kxd-gold-atmosphere {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 55% 40% at 50% 10%,
+    rgba(194, 160, 80, 0.048) 0%,
+    transparent 70%
+  );
+}
+
+/* Slow living warmth — cinematic atmosphere animation */
+.kxd-atmosphere-breathe {
+  animation: kxd-atmosphere-breathe 16s ease-in-out infinite;
+}
+
+@keyframes kxd-atmosphere-breathe {
+  0%, 100% { opacity: 0.65; }
+  50%       { opacity: 1; }
+}
+
+/* Corner vignette — cinematic depth */
+.kxd-vignette {
+  background: radial-gradient(
+    ellipse 90% 85% at 50% 50%,
+    transparent 42%,
+    rgba(0, 0, 0, 0.55) 100%
+  );
+}
+
+/* Bottom fade */
+.kxd-hero-bottom-fade {
+  background: linear-gradient(to top, var(--kxd-black-pure) 0%, transparent 100%);
+}
+
+/* ─────────────────── SERVICES — EDITORIAL INDEX ─────────────────── */
+
+.kxd-service-index-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 3rem 1fr auto;
+  align-items: start;
+  gap: 1.5rem 2rem;
+  padding-block: 2.25rem;
+  border-top: 1px solid var(--kxd-border-white);
+}
+
+.kxd-service-index-row::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--kxd-gold);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur-slow) var(--ease-cinematic);
+}
+
+.kxd-service-index-row:hover::before {
+  transform: scaleX(1);
+}
+
+.kxd-service-index-row:last-child {
+  border-bottom: 1px solid var(--kxd-border-white);
+}
+
+/* ── Legacy service styles ── */
+
+.kxd-service-primary {
+  padding: clamp(2.5rem, 5vw, 3.75rem);
+  border: 1px solid var(--kxd-border-gold);
+  background: linear-gradient(180deg, var(--kxd-charcoal) 0%, var(--kxd-black-base) 100%);
+}
+
+.kxd-service-micro {
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--kxd-border-white);
+}
+
+.kxd-service-row {
+  position: relative;
+  padding: 1.75rem 0;
+  border-bottom: 1px solid var(--kxd-border-white);
+  transition: border-color var(--dur-base) var(--ease-standard);
+}
+
+.kxd-service-row::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 0;
+  height: 1px;
+  background: var(--kxd-gold);
+  transition: width var(--dur-slow) var(--ease-cinematic);
+}
+
+.kxd-service-row:hover::after { width: 100%; }
+.kxd-service-row:last-child    { border-bottom: none; }
+
+/* ─────────────────── CASE CARDS ─────────────────── */
+
+.kxd-case-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--kxd-border-white);
+  background: var(--kxd-black-base);
+  transition:
+    border-color var(--dur-base) var(--ease-standard),
+    box-shadow var(--dur-slow) var(--ease-standard);
+}
+
+.kxd-case-card:hover {
+  border-color: var(--kxd-border-gold);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.kxd-case-card__image-wrap {
+  position: relative;
+  overflow: hidden;
+}
+
+.kxd-case-card__image-wrap img {
+  transition: transform 0.8s var(--ease-cinematic);
+}
+
+.kxd-case-card:hover .kxd-case-card__image-wrap img {
+  transform: scale(1.04);
+}
+
+.kxd-case-card__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.05) 0%,
+    rgba(0, 0, 0, 0.28) 40%,
+    rgba(3, 3, 3, 0.88) 100%
+  );
+}
+
+.kxd-case-card__reveal {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 1.75rem;
+  opacity: 0;
+  background: linear-gradient(to bottom, transparent 20%, rgba(3, 3, 3, 0.82) 100%);
+  transition: opacity var(--dur-base) var(--ease-standard);
+}
+
+.kxd-case-card:hover .kxd-case-card__reveal {
+  opacity: 1;
+}
+
+/* Archive panel — intentional */
+.kxd-archive-panel {
+  position: relative;
+  background: var(--kxd-black-deep);
+  border: 1px solid var(--kxd-border-gold);
+  overflow: hidden;
+}
+
+.kxd-archive-panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 65% 55% at 50% 80%,
+    rgba(194, 160, 80, 0.05) 0%,
+    transparent 68%
+  );
+  pointer-events: none;
+}
+
+/* ─────────────────── REVIEWS ─────────────────── */
+
+.kxd-review-card {
+  padding: 2rem;
+  border: 1px solid var(--kxd-border-white);
+  background: var(--kxd-charcoal);
+  transition: border-color var(--dur-base) var(--ease-standard);
+}
+
+.kxd-review-card:hover {
+  border-color: var(--kxd-border-gold);
+}
+
+.kxd-review-score {
+  padding: 1.75rem 2rem;
+  border: 1px solid var(--kxd-border-gold);
+  background: var(--kxd-black-deep);
+}
+
+/* ─────────────────── LOGO WALL ─────────────────── */
+
+.kxd-logo-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 2rem;
+  opacity: 0.65;
+  filter: grayscale(1) brightness(1.35);
+  transition:
+    opacity var(--dur-base) var(--ease-standard),
+    filter var(--dur-base) var(--ease-standard);
+}
+
+.kxd-logo-item:hover {
+  opacity: 0.90;
+  filter: grayscale(0.5) brightness(1.1);
+}
+
+/* ─────────────────── FORM ─────────────────── */
+
+.kxd-luxury-form {
+  border: 1px solid var(--kxd-border-white-strong);
+  background: linear-gradient(180deg, var(--kxd-charcoal) 0%, var(--kxd-black-deep) 100%);
+}
+
+.kxd-field {
+  width: 100%;
+  border: 1px solid var(--kxd-border-white);
+  background: rgba(0, 0, 0, 0.55);
+  padding: 1rem 1.0625rem;
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  font-weight: 300;
+  color: var(--kxd-cream);
+  outline: none;
+  transition:
+    border-color var(--dur-base) var(--ease-standard),
+    box-shadow var(--dur-base) var(--ease-standard);
+}
+
+.kxd-field::placeholder {
+  color: var(--foreground-subtle);
+}
+
+.kxd-field:focus {
+  border-color: var(--kxd-border-gold-strong);
+  box-shadow: 0 0 0 1px rgba(194, 160, 80, 0.09);
+}
+
+.kxd-field-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23c2a050' stroke-width='1.2'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+}
+
+/* ─────────────────── FOUNDER FRAME ─────────────────── */
+
+.kxd-founder-frame {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--kxd-border-gold);
+  background: var(--kxd-black-deep);
+}
+
+.kxd-founder-frame img {
+  object-position: center 18%;
+}
+
+/* ─────────────────── ENTER ANIMATIONS ─────────────────── */
+
+/* Cinematic fade-up — invisible motion, palpable quality */
+.kxd-reveal {
+  animation: kxd-reveal var(--dur-enter) var(--ease-cinematic) both;
+}
+
+@keyframes kxd-reveal {
+  from { opacity: 0; transform: translateY(0.6rem); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Hero stagger — each step adds 130ms */
+.kxd-reveal-delay-1 { animation-delay: 100ms; }
+.kxd-reveal-delay-2 { animation-delay: 260ms; }
+.kxd-reveal-delay-3 { animation-delay: 440ms; }
+.kxd-reveal-delay-4 { animation-delay: 640ms; }
+.kxd-reveal-delay-5 { animation-delay: 820ms; }
+.kxd-reveal-delay-6 { animation-delay: 1000ms; }
+
+/* Atmosphere fade in once — cinematic preroll */
+.kxd-atmosphere-enter {
+  animation: kxd-fade 2s var(--ease-enter) both;
+}
+
+@keyframes kxd-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ─────────────────── REDUCED MOTION ─────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .kxd-reveal           { animation: none; }
+  .kxd-atmosphere-breathe { animation: none; }
+  .kxd-atmosphere-enter { animation: none; }
+  .kxd-btn-primary:hover { transform: none; }
+  .kxd-case-card:hover .kxd-case-card__image-wrap img { transform: none; }
+  .kxd-mega-menu { transition: none; }
+  .kxd-mobile-nav { transition: none; }
+}
