@@ -13,11 +13,12 @@ import {
 export const Insights: CollectionConfig = {
   slug: "insights",
   labels: { singular: "Insight", plural: "Insights" },
+  defaultSort: "-publishedAt",
   admin: {
     useAsTitle: "title",
-    defaultColumns: ["title", "category", "publishedAt", "status"],
+    defaultColumns: ["title", "category", "publishedAt", "featured", "status"],
     group: PAYLOAD_GROUPS.content,
-    description: "Editorial content for SEO authority and thought leadership.",
+    description: "KXD Journal — editorial content for SEO authority and thought leadership.",
   },
   access: {
     read: isAuthenticatedOrPublished,
@@ -37,18 +38,21 @@ export const Insights: CollectionConfig = {
       type: "select",
       required: true,
       options: [
-        { label: "Luxury Web Design", value: "luxury-web-design" },
-        { label: "Hospitality", value: "hospitality" },
-        { label: "Motorsports", value: "motorsports" },
-        { label: "Membership Platforms", value: "membership-platforms" },
-        { label: "Operational Platforms", value: "operational-platforms" },
-        { label: "Agency", value: "agency" },
+        { label: "Luxury Web Design",     value: "luxury-web-design" },
+        { label: "Operational Systems",   value: "operational-systems" },
+        { label: "Hospitality Growth",    value: "hospitality-growth" },
+        { label: "Motorsports Strategy",  value: "motorsports-strategy" },
+        { label: "Brand Systems",         value: "brand-systems" },
+        { label: "Founder Perspectives",  value: "founder-perspectives" },
       ],
     },
     {
       name: "excerpt",
       type: "textarea",
       required: true,
+      admin: {
+        description: "2–3 sentence summary shown on the overview grid.",
+      },
     },
     {
       name: "heroImage",
@@ -70,8 +74,10 @@ export const Insights: CollectionConfig = {
       name: "readingTimeMinutes",
       type: "number",
       min: 1,
+      label: "Reading Time (min)",
       admin: {
         position: "sidebar",
+        description: "Estimated read time displayed on article pages.",
       },
     },
     featuredField,

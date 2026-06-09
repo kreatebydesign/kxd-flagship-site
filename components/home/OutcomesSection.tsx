@@ -4,22 +4,22 @@ const OUTCOMES = [
   {
     category: "Motorsports",
     result:
-      "Operational systems and digital infrastructure supporting a competitive motorsports organization — driver portals, partner platforms, and public-facing brand presence unified into a single ecosystem.",
+      "Unified digital infrastructure for competitive motorsports — combining public brand presence, driver portals, CRM architecture, and operational systems into one connected ecosystem.",
   },
   {
     category: "Hospitality",
     result:
-      "Premium hospitality experiences designed for inquiry conversion — digital presences that carry the same care as the physical space, setting the right expectation before the guest arrives.",
+      "Premium hospitality experiences built to increase trust before the first inquiry — aligning brand perception, guest expectation, and operational readiness from the first click.",
   },
   {
     category: "Automotive",
     result:
-      "Brand-forward digital experiences that attract qualified clients before the first conversation — turning precision craft into a filter for the right opportunities.",
+      "Brand-forward digital experiences that qualify opportunities before the first conversation — turning craftsmanship, trust, and positioning into a stronger sales filter.",
   },
   {
     category: "Growth Infrastructure",
     result:
-      "End-to-end digital growth systems — combining website, inquiry architecture, CRM integration, and operational tooling into a foundation designed to scale without adding overhead.",
+      "Scalable growth systems that connect website, inquiry architecture, CRM workflows, and operational tooling — giving businesses a cleaner foundation to grow without unnecessary overhead.",
   },
 ] as const;
 
@@ -33,39 +33,50 @@ export function OutcomesSection() {
       }}
     >
       <div className="kxd-container">
-        {/* Header */}
         <div className="mb-14 grid gap-5 lg:grid-cols-[1fr_auto] lg:items-end">
           <div>
             <p className="kxd-eyebrow">Results</p>
+
             <h2
               className="kxd-serif-title mt-4"
-              style={{ fontSize: "clamp(1.875rem, 3.5vw, 2.5rem)" }}
+              style={{
+                fontSize: "clamp(1.875rem, 3.5vw, 2.5rem)",
+              }}
             >
-              Selected Outcomes.
+              Outcomes built beyond launch.
             </h2>
+
+            <p
+              className="kxd-body-sm mt-5"
+              style={{ maxWidth: "36rem" }}
+            >
+              KXD measures success by what the work enables: stronger perception,
+              cleaner operations, better-qualified opportunities, and systems that
+              continue creating value after launch.
+            </p>
           </div>
+
           <Link
             href="/work"
             className="kxd-ui-label self-end inline-flex items-center gap-2 text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)]"
           >
-            View Full Work
+            Explore Case Studies
             <span aria-hidden>→</span>
           </Link>
         </div>
 
         <div className="kxd-gold-rule" />
 
-        {/* Outcomes list */}
         <div>
           {OUTCOMES.map((outcome, i) => (
             <div
               key={outcome.category}
               className="grid gap-6 py-8 lg:grid-cols-[10rem_1fr]"
               style={{
-                borderTop: i === 0 ? "none" : "1px solid var(--kxd-border-white)",
+                borderTop:
+                  i === 0 ? "none" : "1px solid var(--kxd-border-white)",
               }}
             >
-              {/* Category */}
               <div className="lg:pt-0.5">
                 <p
                   className="font-sans font-medium uppercase"
@@ -79,7 +90,6 @@ export function OutcomesSection() {
                 </p>
               </div>
 
-              {/* Result */}
               <div
                 className="border-l pl-8"
                 style={{ borderColor: "var(--kxd-border-gold)" }}
@@ -100,7 +110,6 @@ export function OutcomesSection() {
           ))}
         </div>
 
-        {/* Bottom note */}
         <div
           className="mt-8 border-t pt-8"
           style={{ borderColor: "var(--kxd-border-white)" }}
@@ -114,9 +123,9 @@ export function OutcomesSection() {
               maxWidth: "44rem",
             }}
           >
-            KXD does not fabricate metrics. Every outcome above reflects real
-            engagements, real brands, and real results — measured by the
-            standard each client holds themselves to.
+            KXD does not manufacture vanity metrics. We focus on the outcomes
+            that matter: perception, trust, workflow, conversion quality, and the
+            long-term strength of the system behind the brand.
           </p>
         </div>
       </div>

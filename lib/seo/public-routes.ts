@@ -1,4 +1,5 @@
 import { PROJECTS } from "@/lib/projects";
+import { STATIC_INSIGHTS } from "@/lib/insights";
 
 export const PUBLIC_SITEMAP_PATHS: string[] = [
   "/",
@@ -12,6 +13,8 @@ export const PUBLIC_SITEMAP_PATHS: string[] = [
   "/investment",
   "/about",
   "/contact",
+  "/insights",
+  ...STATIC_INSIGHTS.map((a) => `/insights/${a.slug}`),
 ];
 
 export function absolutePublicUrl(path: string): string {
