@@ -1,7 +1,7 @@
 import type { CollectionConfig } from "payload";
 import { isAuthenticated, publicCreate } from "../access/index.ts";
 import { PAYLOAD_GROUPS } from "../admin/groups.ts";
-// import { notifyInquiryCreated } from "../hooks/inquiries.ts";
+import { notifyInquiryCreated } from "../hooks/inquiries.ts";
 
 export const PlatformApplications: CollectionConfig = {
   slug: "platform-applications",
@@ -18,6 +18,9 @@ export const PlatformApplications: CollectionConfig = {
     create: publicCreate,
     update: isAuthenticated,
     delete: isAuthenticated,
+  },
+  hooks: {
+    afterChange: [notifyInquiryCreated],
   },
   fields: [
     {
