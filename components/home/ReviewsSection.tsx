@@ -4,7 +4,14 @@ function GoldStars({ rating }: { rating: number }) {
   return (
     <div className="flex items-center gap-1" aria-label={`${rating} out of 5`}>
       {Array.from({ length: 5 }, (_, i) => (
-        <svg key={i} width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden>
+        <svg
+          key={i}
+          width="11"
+          height="11"
+          viewBox="0 0 11 11"
+          fill="none"
+          aria-hidden
+        >
           <path
             d="M5.5 0.917L6.714 3.758L9.9 3.993L7.587 5.906L8.344 8.99L5.5 7.25L2.656 8.99L3.413 5.906L1.1 3.993L4.286 3.758L5.5 0.917Z"
             fill={i < Math.floor(rating) ? "#C5A65C" : "transparent"}
@@ -34,15 +41,26 @@ export function ReviewsSection() {
         <div className="mb-14 grid gap-5 lg:grid-cols-[1fr_auto] lg:items-end">
           <div>
             <p className="kxd-eyebrow">Client Reviews</p>
+
             <h2
               className="kxd-serif-title mt-4"
-              style={{ fontSize: "clamp(1.875rem, 3.5vw, 2.5rem)" }}
+              style={{
+                fontSize: "clamp(1.875rem, 3.5vw, 2.5rem)",
+              }}
             >
-              Trusted by brands that expect more.
+              Trusted by businesses building what comes next.
             </h2>
+
+            <p
+              className="kxd-body-sm mt-5"
+              style={{ maxWidth: "34rem" }}
+            >
+              Long-term partnerships are built on trust, clarity, and results.
+              These reflections come from businesses that chose to build with KXD.
+            </p>
           </div>
 
-          {/* Score — restrained */}
+          {/* Score */}
           <div
             className="flex items-center gap-5 self-end border-l pl-8"
             style={{ borderColor: "var(--kxd-border-gold)" }}
@@ -50,25 +68,32 @@ export function ReviewsSection() {
             <div>
               <p
                 className="font-serif font-light"
-                style={{ fontSize: "2.5rem", color: "var(--kxd-gold)", lineHeight: 1 }}
+                style={{
+                  fontSize: "2.5rem",
+                  color: "var(--kxd-gold)",
+                  lineHeight: 1,
+                }}
               >
                 5.0
               </p>
+
               <GoldStars rating={5} />
             </div>
+
             <div
               className="h-10 w-px"
               aria-hidden
               style={{ background: "var(--kxd-border-white)" }}
             />
+
             <div>
-              <p className="kxd-label">Google</p>
-              <p className="kxd-label mt-1">Reviews</p>
+              <p className="kxd-label">Verified</p>
+              <p className="kxd-label mt-1">Client Reviews</p>
             </div>
           </div>
         </div>
 
-        {/* Reviews — editorial, not grid cards */}
+        {/* Reviews */}
         <div>
           {reviews.map((review, i) => (
             <article
@@ -77,16 +102,21 @@ export function ReviewsSection() {
               style={{
                 borderTop: "1px solid var(--kxd-border-white)",
                 ...(i === reviews.length - 1
-                  ? { borderBottom: "1px solid var(--kxd-border-white)" }
+                  ? {
+                      borderBottom:
+                        "1px solid var(--kxd-border-white)",
+                    }
                   : {}),
               }}
             >
               {/* Attribution */}
               <div className="flex flex-col gap-1.5 lg:pt-1">
                 <GoldStars rating={review.rating} />
+
                 <p className="mt-3 text-[0.9375rem] font-medium text-[var(--kxd-cream)]">
                   {review.author}
                 </p>
+
                 <p className="kxd-label">{review.company}</p>
               </div>
 
