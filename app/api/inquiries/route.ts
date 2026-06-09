@@ -17,8 +17,10 @@ type InquiryBody = {
   source?: string;
 };
 
+const DEPLOY_VERSION = "v3-resend-inline-2026-06-09";
+
 export async function POST(request: Request) {
-  console.log("📬 POST /api/inquiries — handler invoked");
+  console.log(`📬 POST /api/inquiries — handler invoked [${DEPLOY_VERSION}]`);
 
   try {
     const body = (await request.json()) as InquiryBody;
