@@ -9,6 +9,7 @@ import React from "react";
 // Ensure Vercel always renders this layout dynamically — never from static cache.
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+export const maxDuration = 60;
 
 import { importMap } from "./admin/importMap.js";
 import "./custom.scss";

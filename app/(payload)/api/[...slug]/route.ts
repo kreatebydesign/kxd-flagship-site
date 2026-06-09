@@ -12,8 +12,10 @@ import {
 
 // Required for Vercel serverless: prevent static optimisation of Payload API
 // routes and ensure the Node.js runtime is used (Payload requires Node APIs).
+// maxDuration=60 allows cold-start + DB connect + migration check to complete.
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+export const maxDuration = 60;
 
 export const GET = REST_GET(config);
 export const POST = REST_POST(config);

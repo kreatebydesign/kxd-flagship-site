@@ -23,17 +23,12 @@ import { Users } from "./payload/collections/Users.ts";
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
+// Prefer DATABASE_URI (direct Neon URL), fall back to DATABASE_URL (Neon/Vercel default).
+// Both env vars should use the DIRECT (non-pooled) Neon connection string in Vercel.
+// Avoid the pooled URL here — @payloadcms/db-postgres uses prepared statements which
+// are not supported by Neon's PgBouncer in transaction mode.
 const databaseUri =
   process.env.DATABASE_URI?.trim() || process.env.DATABASE_URL?.trim();
-
-const isProductionRuntime =
-  process.env.NODE_ENV === "production" || Boolean(process.env.VERCEL);
-
-if (isProductionRuntime && !databaseUri) {
-  throw new Error(
-    "Payload production database connection missing. Set DATABASE_URI in Vercel.",
-  );
-}
 
 export default buildConfig({
   admin: {
@@ -71,9 +66,14 @@ export default buildConfig({
     ? postgresAdapter({
         pool: {
           connectionString: databaseUri,
+          // Serverless-safe settings for Vercel + Neon direct connections:
+          // max:1 — one connection per Lambda invocation, released on idle.
+          // connectionTimeoutMillis:5000 — fail fast (Vercel default timeout is 10s).
+          // idleTimeoutMillis:10000 — release idle connections quickly.
+          // allowExitOnIdle — Node process can exit with idle pg connections.
           max: 1,
-          connectionTimeoutMillis: 30_000,
-          idleTimeoutMillis: 30_000,
+          connectionTimeoutMillis: 5_000,
+          idleTimeoutMillis: 10_000,
           allowExitOnIdle: true,
         },
         migrationDir: path.resolve(dirname, "migrations"),

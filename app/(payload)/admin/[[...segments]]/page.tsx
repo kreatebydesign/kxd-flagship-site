@@ -8,8 +8,10 @@ import { importMap } from "../importMap";
 
 // Prevent Next.js from statically prerendering the admin panel.
 // The admin requires a live DB connection and must never be cached.
+// maxDuration=60 allows cold-start + DB connect to complete within Vercel limits.
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+export const maxDuration = 60;
 
 type Args = {
   params: Promise<{
