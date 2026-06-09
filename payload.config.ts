@@ -72,7 +72,6 @@ export default buildConfig({
           // idleTimeoutMillis:10000 — release idle connections quickly.
           // allowExitOnIdle — Node process can exit with idle pg connections.
           max: 1,
-          connectionTimeoutMillis: 5_000,
           idleTimeoutMillis: 10_000,
           allowExitOnIdle: true,
         },
