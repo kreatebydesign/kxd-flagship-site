@@ -3,10 +3,10 @@ import { FinalCtaBand } from "@/components/ui/FinalCtaBand";
 export function FinalCtaSection() {
   return (
     <FinalCtaBand
-      secondaryHref="/work"
-      secondaryLabel="Explore Our Work"
-      headline="Build What Others Can't."
-      subCopy="KXD partners with ambitious businesses to create exceptional digital experiences, operational systems, and brands built to endure."
+      secondaryHref="/investment"
+      secondaryLabel="View Investment"
+      headline="Ready to Build With Intention?"
+      subCopy="KXD partners with a limited number of ambitious brands each year to create digital experiences, operational systems, and growth infrastructure designed for long-term success."
     />
   );
 }

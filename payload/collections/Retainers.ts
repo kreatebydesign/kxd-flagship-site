@@ -8,9 +8,9 @@ export const Retainers: CollectionConfig = {
   defaultSort: "-createdAt",
   admin: {
     useAsTitle: "retainerName",
-    defaultColumns: ["retainerName", "client", "monthlyAmount", "billingStatus", "renewalDate"],
+    defaultColumns: ["client", "retainerName", "monthlyAmount", "billingDay", "billingStatus", "nextInvoiceDate"],
     group: PAYLOAD_GROUPS.kxdOs,
-    description: "Active and historical retainer agreements per client.",
+    description: "Active and historical retainer agreements. Drives MRR tracking and billing intelligence in the Operations Command Center.",
   },
   access: {
     read: isAuthenticated,
@@ -45,9 +45,9 @@ export const Retainers: CollectionConfig = {
             {
               name: "monthlyAmount",
               type: "number",
-              label: "Monthly Amount ($)",
+              label: "Monthly Value ($)",
               admin: {
-                description: "Recurring monthly invoice amount in USD.",
+                description: "Recurring monthly invoice amount in USD. Used for MRR calculations.",
               },
             },
             {
@@ -63,17 +63,62 @@ export const Retainers: CollectionConfig = {
               ],
             },
             {
-              name: "startDate",
+              name: "billingDay",
+              type: "number",
+              label: "Billing Day of Month",
+              min: 1,
+              max: 31,
+              admin: {
+                description: "Day of the month this retainer invoices (1–31).",
+              },
+            },
+            {
+              name: "autoRenew",
+              type: "checkbox",
+              label: "Auto-Renew",
+              defaultValue: true,
+              admin: {
+                description: "Whether this retainer auto-renews at the end of the contract period.",
+              },
+            },
+          ],
+        },
+
+        // ── Dates ─────────────────────────────────────────────────────────────
+        {
+          label: "Dates",
+          fields: [
+            {
+              name: "contractStartDate",
               type: "date",
-              label: "Start Date",
+              label: "Contract Start Date",
               admin: {
                 date: { pickerAppearance: "dayOnly" },
+                description: "When the contract formally begins.",
+              },
+            },
+            {
+              name: "contractEndDate",
+              type: "date",
+              label: "Contract End Date",
+              admin: {
+                date: { pickerAppearance: "dayOnly" },
+                description: "When the current contract period ends. Leave blank for open-ended.",
+              },
+            },
+            {
+              name: "startDate",
+              type: "date",
+              label: "Service Start Date",
+              admin: {
+                date: { pickerAppearance: "dayOnly" },
+                description: "When active delivery begins (may differ from contract start).",
               },
             },
             {
               name: "renewalDate",
               type: "date",
-              label: "Renewal Date",
+              label: "Next Renewal Date",
               admin: {
                 date: { pickerAppearance: "dayOnly" },
               },
@@ -84,6 +129,7 @@ export const Retainers: CollectionConfig = {
               label: "Next Invoice Date",
               admin: {
                 date: { pickerAppearance: "dayOnly" },
+                description: "Used by the Operations Command Center for upcoming invoice alerts.",
               },
             },
           ],
@@ -113,6 +159,9 @@ export const Retainers: CollectionConfig = {
               name: "notes",
               type: "textarea",
               label: "Internal Notes",
+              admin: {
+                description: "Internal team notes about this retainer arrangement.",
+              },
             },
           ],
         },
@@ -127,14 +176,16 @@ export const Retainers: CollectionConfig = {
       required: true,
       defaultValue: "active",
       options: [
-        { label: "Active",  value: "active" },
-        { label: "Paused",  value: "paused" },
-        { label: "Overdue", value: "overdue" },
-        { label: "Ended",   value: "ended" },
+        { label: "Current",  value: "current" },
+        { label: "Active",   value: "active" },
+        { label: "Upcoming", value: "upcoming" },
+        { label: "Paused",   value: "paused" },
+        { label: "Overdue",  value: "overdue" },
+        { label: "Ended",    value: "ended" },
       ],
       admin: {
         position: "sidebar",
-        description: "Current billing state for this retainer.",
+        description: "Current billing state. 'Current' = invoiced and up to date. 'Upcoming' = invoice due within 14 days.",
       },
     },
   ],

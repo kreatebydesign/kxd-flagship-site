@@ -5,6 +5,7 @@ import * as migration_20260609_project_inquiries from './20260609_project_inquir
 import * as migration_20260609_insights_expand from './20260609_insights_expand';
 import * as migration_20260609_project_inquiries_status_expand from './20260609_project_inquiries_status_expand';
 import * as migration_20260609_kxd_os_phase2a from './20260609_kxd_os_phase2a';
+import * as migration_20260609_retainers_enhance from './20260609_retainers_enhance';
 
 export const migrations = [
   {
@@ -41,5 +42,10 @@ export const migrations = [
     up: migration_20260609_kxd_os_phase2a.up,
     down: migration_20260609_kxd_os_phase2a.down,
     name: '20260609_kxd_os_phase2a',
+  },
+  {
+    up: migration_20260609_retainers_enhance.up,
+    down: migration_20260609_retainers_enhance.down,
+    name: '20260609_retainers_enhance',
   },
 ];
