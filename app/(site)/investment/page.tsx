@@ -119,7 +119,7 @@ export default function InvestmentPage() {
               lineHeight: 1.06,
             }}
           >
-            Built to the Standard You Need.
+            The Right Work Requires the Right Partnership.
           </h1>
           <p className="kxd-body mt-6" style={{ maxWidth: "36rem" }}>
             Every engagement is tailored to the goals, complexity, and long-term vision
