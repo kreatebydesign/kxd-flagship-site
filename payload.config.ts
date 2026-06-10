@@ -7,13 +7,18 @@ import { buildConfig } from "payload";
 import sharp from "sharp";
 
 import { CaseStudies } from "./payload/collections/CaseStudies.ts";
+import { ClientProjects } from "./payload/collections/ClientProjects.ts";
+import { ClientRequests } from "./payload/collections/ClientRequests.ts";
+import { Clients } from "./payload/collections/Clients.ts";
 import { Inquiries } from "./payload/collections/Inquiries.ts";
 import { Insights } from "./payload/collections/Insights.ts";
 import { Media } from "./payload/collections/Media.ts";
+import { MonthlyDeliverables } from "./payload/collections/MonthlyDeliverables.ts";
 import { Partners } from "./payload/collections/Partners.ts";
 import { PlatformApplications } from "./payload/collections/PlatformApplications.ts";
 import { ProjectInquiries } from "./payload/collections/ProjectInquiries.ts";
 import { Projects } from "./payload/collections/Projects.ts";
+import { Retainers } from "./payload/collections/Retainers.ts";
 import { Reviews } from "./payload/collections/Reviews.ts";
 import { Services } from "./payload/collections/Services.ts";
 import { TeamMembers } from "./payload/collections/TeamMembers.ts";
@@ -58,6 +63,7 @@ export default buildConfig({
     },
   },
   collections: [
+    // ── Portfolio & Content ──────────────────────────────────────────────────
     Projects,
     CaseStudies,
     Services,
@@ -66,9 +72,17 @@ export default buildConfig({
     Partners,
     TeamMembers,
     Insights,
+    // ── Leads & Applications ─────────────────────────────────────────────────
     Inquiries,
     ProjectInquiries,
     PlatformApplications,
+    // ── KXD OS ───────────────────────────────────────────────────────────────
+    Clients,
+    Retainers,
+    ClientProjects,
+    MonthlyDeliverables,
+    ClientRequests,
+    // ── System ───────────────────────────────────────────────────────────────
     Media,
     Users,
   ],

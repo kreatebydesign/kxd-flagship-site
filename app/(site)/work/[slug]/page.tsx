@@ -93,7 +93,6 @@ async function fetchCaseStudy(slug: string): Promise<CaseStudy | null> {
     });
     if (docs.length > 0) {
       const mapped = payloadToCaseStudy(docs[0] as unknown as Record<string, unknown>);
-      // Only use Payload data if it has meaningful narrative content
       if (mapped.context || mapped.challenge || mapped.tagline) {
         return mapped;
       }
@@ -235,6 +234,15 @@ export default async function CaseStudyPage({ params }: Props) {
 
   const related = PROJECTS.filter((p) => p.slug !== slug).slice(0, 3);
 
+  const executiveSnapshot = [
+    { label: "Client", value: cs.title },
+    { label: "Industry", value: cs.industry },
+    { label: "Primary Scope", value: cs.scope[0] },
+    { label: "Engagement", value: cs.status === "Live" ? "Launched Experience" : "Active Build" },
+    { label: "Year", value: cs.year },
+    { label: "Outcome Focus", value: cs.qualitativeOutcomes[0] ?? "Digital Growth Foundation" },
+  ];
+
   return (
     <>
       {/* ══════════════════════════════════════════
@@ -244,7 +252,6 @@ export default async function CaseStudyPage({ params }: Props) {
         className="relative flex min-h-[92dvh] flex-col overflow-hidden"
         style={{ background: "var(--kxd-black-pure)" }}
       >
-        {/* Atmospheric light shafts */}
         <div
           aria-hidden
           className="kxd-atmosphere-enter kxd-atmosphere-breathe pointer-events-none absolute inset-0"
@@ -263,7 +270,6 @@ export default async function CaseStudyPage({ params }: Props) {
           className="pointer-events-none absolute inset-x-0 bottom-0 h-44 kxd-hero-bottom-fade"
         />
 
-        {/* Top nav row */}
         <div
           className="relative z-10 kxd-container flex items-center justify-between"
           style={{ paddingTop: "calc(var(--nav-height) + 2.25rem)" }}
@@ -315,12 +321,10 @@ export default async function CaseStudyPage({ params }: Props) {
           ) : null}
         </div>
 
-        {/* Hero content — anchored to bottom */}
         <div
           className="relative z-10 kxd-container mt-auto"
           style={{ paddingBottom: "clamp(4.5rem, 9vw, 7rem)" }}
         >
-          {/* Industry + Year + scope tags */}
           <div className="mb-7 flex flex-wrap items-center gap-3">
             <span className="kxd-tag">{cs.industry}</span>
             {cs.scope.slice(1).map((s) => (
@@ -336,7 +340,6 @@ export default async function CaseStudyPage({ params }: Props) {
             </span>
           </div>
 
-          {/* Title */}
           <h1
             className="kxd-reveal font-serif font-light"
             style={{
@@ -350,7 +353,6 @@ export default async function CaseStudyPage({ params }: Props) {
             {cs.title}
           </h1>
 
-          {/* Tagline */}
           <p
             className="kxd-reveal kxd-reveal-delay-1 mt-6 font-serif font-light italic"
             style={{
@@ -364,7 +366,6 @@ export default async function CaseStudyPage({ params }: Props) {
             {cs.tagline}
           </p>
 
-          {/* Primary scope tag */}
           <div className="kxd-reveal kxd-reveal-delay-2 mt-8">
             <span className="kxd-tag">{cs.scope[0]}</span>
           </div>
@@ -372,9 +373,9 @@ export default async function CaseStudyPage({ params }: Props) {
       </section>
 
       {/* ══════════════════════════════════════════
-          PROJECT SNAPSHOT STRIP
+          EXECUTIVE SNAPSHOT
           ══════════════════════════════════════════ */}
-      <div
+      <section
         style={{
           background: "var(--kxd-black-deep)",
           borderTop: "1px solid var(--kxd-border-gold)",
@@ -382,35 +383,62 @@ export default async function CaseStudyPage({ params }: Props) {
         }}
       >
         <div
-          className="kxd-container grid grid-cols-2 gap-px sm:grid-cols-4"
-          style={{ paddingBlock: "clamp(2rem, 4.5vw, 3.25rem)" }}
+          className="kxd-container"
+          style={{ paddingBlock: "clamp(2.75rem, 5vw, 4.25rem)" }}
         >
-          {[
-            { label: "Client", value: cs.title },
-            { label: "Industry", value: cs.industry },
-            { label: "Scope", value: cs.scope[0] },
-            { label: "Status", value: cs.status },
-          ].map(({ label, value }) => (
-            <div key={label}>
-              <p className="kxd-eyebrow">{label}</p>
-              <p
-                className="mt-2.5 font-serif font-light"
+          <div className="mb-8 flex flex-wrap items-end justify-between gap-6">
+            <div>
+              <p className="kxd-eyebrow">Executive Snapshot</p>
+              <h2
+                className="mt-3 font-serif font-light"
                 style={{
-                  fontSize: "clamp(0.9375rem, 1.4vw, 1.125rem)",
-                  lineHeight: 1.4,
-                  letterSpacing: "0.01em",
+                  fontSize: "clamp(1.375rem, 2.5vw, 1.875rem)",
                   color: "var(--kxd-cream)",
+                  letterSpacing: "0.01em",
                 }}
               >
-                {value}
-              </p>
+                The build at a glance.
+              </h2>
             </div>
-          ))}
+            <p
+              className="kxd-body-sm"
+              style={{ maxWidth: "24rem", color: "rgba(191,183,170,0.58)" }}
+            >
+              A focused view of the brand, scope, and strategic intent behind the
+              engagement.
+            </p>
+          </div>
+
+          <div className="grid gap-px sm:grid-cols-2 lg:grid-cols-3">
+            {executiveSnapshot.map(({ label, value }) => (
+              <div
+                key={label}
+                style={{
+                  padding: "clamp(1.25rem, 2.5vw, 1.75rem)",
+                  borderLeft: "1px solid var(--kxd-border-white)",
+                  borderTop: "1px solid var(--kxd-border-white)",
+                }}
+              >
+                <p className="kxd-eyebrow">{label}</p>
+                <p
+                  className="mt-2.5 font-serif font-light"
+                  style={{
+                    fontSize: "clamp(0.9375rem, 1.4vw, 1.125rem)",
+                    lineHeight: 1.45,
+                    letterSpacing: "0.01em",
+                    color: "var(--kxd-cream)",
+                  }}
+                >
+                  {value}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      </section>
 
       {/* ══════════════════════════════════════════
-          02 — CONTEXT & OPPORTUNITY
+          02 — THE OPPORTUNITY
           ══════════════════════════════════════════ */}
       {cs.context && (
         <section
@@ -420,7 +448,7 @@ export default async function CaseStudyPage({ params }: Props) {
           <div className="kxd-container">
             <div className="grid gap-10 lg:grid-cols-[15rem_1fr] lg:gap-20">
               <div>
-                <SectionLabel number="02" label="Context & Opportunity" />
+                <SectionLabel number="02" label="The Opportunity" />
                 <div className="kxd-white-rule mt-6" />
               </div>
               <div>
@@ -518,7 +546,7 @@ export default async function CaseStudyPage({ params }: Props) {
       )}
 
       {/* ══════════════════════════════════════════
-          05 — EXECUTION
+          05 — WHAT WE BUILT
           ══════════════════════════════════════════ */}
       {cs.execution.length > 0 && (
         <section
@@ -529,8 +557,27 @@ export default async function CaseStudyPage({ params }: Props) {
           }}
         >
           <div className="kxd-container">
-            <div className="mb-12">
-              <SectionLabel number="05" label="Execution" />
+            <div className="mb-12 flex flex-wrap items-end justify-between gap-6">
+              <div>
+                <SectionLabel number="05" label="What We Built" />
+                <h2
+                  className="mt-4 font-serif font-light"
+                  style={{
+                    fontSize: "clamp(1.375rem, 2.75vw, 2rem)",
+                    lineHeight: 1.2,
+                    color: "var(--kxd-cream)",
+                  }}
+                >
+                  Strategy translated into infrastructure.
+                </h2>
+              </div>
+              <p
+                className="kxd-body-sm"
+                style={{ maxWidth: "24rem", color: "rgba(191,183,170,0.58)" }}
+              >
+                Every deliverable was designed to support a stronger brand
+                experience, cleaner operations, and a sharper path to growth.
+              </p>
             </div>
 
             <div className="kxd-gold-rule mb-12" />
@@ -792,7 +839,57 @@ export default async function CaseStudyPage({ params }: Props) {
       )}
 
       {/* ══════════════════════════════════════════
-          08 — WHY IT WORKED
+          08 — PARTNERSHIP IMPACT
+          ══════════════════════════════════════════ */}
+      <section
+        className="kxd-section"
+        style={{
+          background: "var(--kxd-black-soft)",
+          borderTop: "1px solid var(--kxd-border-gold)",
+        }}
+      >
+        <div className="kxd-container">
+          <div className="grid gap-10 lg:grid-cols-[15rem_1fr] lg:gap-20">
+            <div>
+              <SectionLabel number="08" label="Partnership Impact" />
+              <div className="kxd-gold-rule mt-6" />
+              <p
+                className="mt-6 font-serif font-light italic"
+                style={{
+                  fontSize: "0.8125rem",
+                  lineHeight: 1.65,
+                  color: "var(--kxd-gold)",
+                  opacity: 0.65,
+                }}
+              >
+                Beyond launch.
+              </p>
+            </div>
+            <div>
+              <p
+                style={{
+                  fontFamily: "var(--font-serif)",
+                  fontSize: "clamp(1.25rem, 2vw, 1.625rem)",
+                  fontWeight: 300,
+                  lineHeight: 1.58,
+                  letterSpacing: "0.01em",
+                  color: "var(--kxd-cream-soft)",
+                  maxWidth: "42rem",
+                }}
+              >
+                The result was more than a website launch. The engagement established
+                a stronger digital foundation for brand credibility, client acquisition,
+                operational clarity, and future growth. By combining strategy, systems,
+                and execution, {cs.title} gained infrastructure designed to support
+                the next stage of the business.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════
+          09 — WHY IT WORKED
           ══════════════════════════════════════════ */}
       {cs.whyItWorked && (
         <section
@@ -805,7 +902,7 @@ export default async function CaseStudyPage({ params }: Props) {
           <div className="kxd-container">
             <div className="grid gap-10 lg:grid-cols-[15rem_1fr] lg:gap-20">
               <div>
-                <SectionLabel number="08" label="Why It Worked" />
+                <SectionLabel number="09" label="Why It Worked" />
                 <div className="kxd-gold-rule mt-6" />
                 <p
                   className="mt-6 font-serif font-light italic"
@@ -846,7 +943,7 @@ export default async function CaseStudyPage({ params }: Props) {
       )}
 
       {/* ══════════════════════════════════════════
-          09 — RELATED WORK
+          10 — RELATED WORK
           ══════════════════════════════════════════ */}
       {related.length > 0 ? (
         <section
@@ -859,7 +956,7 @@ export default async function CaseStudyPage({ params }: Props) {
           <div className="kxd-container">
             <div className="mb-10 flex items-end justify-between gap-6">
               <div>
-                <SectionLabel number="09" label="Related Work" />
+                <SectionLabel number="10" label="Related Work" />
                 <h2
                   className="kxd-serif-title mt-4"
                   style={{ fontSize: "clamp(1.375rem, 2.5vw, 1.875rem)" }}
@@ -901,7 +998,7 @@ export default async function CaseStudyPage({ params }: Props) {
       ) : null}
 
       {/* ══════════════════════════════════════════
-          10 — FINAL CTA
+          11 — FINAL CTA
           ══════════════════════════════════════════ */}
       <section
         className="kxd-section"
@@ -912,7 +1009,7 @@ export default async function CaseStudyPage({ params }: Props) {
       >
         <div className="kxd-container">
           <div className="mx-auto max-w-[44rem] text-center">
-            <p className="kxd-eyebrow mb-8">10 — Start a Project</p>
+            <p className="kxd-eyebrow mb-8">11 — Start a Partnership</p>
 
             <div className="kxd-gold-rule mb-10" />
 
@@ -943,8 +1040,8 @@ export default async function CaseStudyPage({ params }: Props) {
             </p>
 
             <div className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-4">
-              <Link href="/contact" className="kxd-btn-primary">
-                Start a Project
+              <Link href="/start-project" className="kxd-btn-primary">
+                Start a Partnership
               </Link>
               <Link
                 href="/work"

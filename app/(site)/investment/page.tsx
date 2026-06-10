@@ -98,6 +98,21 @@ const LEVELS = [
   },
 ] as const;
 
+const PARTNERSHIP_FIT = {
+  ideal: [
+    "Established businesses preparing for their next stage of growth",
+    "Organizations seeking long-term strategic partnerships",
+    "Founders who value quality, execution, and collaboration",
+    "Brands ready to invest in exceptional digital experiences",
+  ],
+  notFit: [
+    "Businesses seeking the lowest-cost option",
+    "Projects requiring unrealistic timelines",
+    "Organizations looking for one-size-fits-all solutions",
+    "Engagements without strategic alignment",
+  ],
+} as const;
+
 export default function InvestmentPage() {
   return (
     <>
@@ -121,9 +136,11 @@ export default function InvestmentPage() {
           >
             Built for Brands Ready to Grow.
           </h1>
-          <p className="kxd-body mt-6" style={{ maxWidth: "36rem" }}>
-            Every engagement is tailored to the goals, complexity, and long-term vision
-            of the brands we partner with. The ranges below reflect our starting points.
+          <p className="kxd-body mt-6" style={{ maxWidth: "38rem" }}>
+            Exceptional brands require more than attractive websites. They require
+            intentional systems, thoughtful strategy, and execution capable of
+            supporting long-term growth. Every engagement is built around the unique
+            ambitions of the businesses we partner with.
           </p>
 
           <div
@@ -276,6 +293,88 @@ export default function InvestmentPage() {
       <section
         className="kxd-section border-t"
         style={{
+          background: "var(--kxd-black-base)",
+          borderColor: "var(--kxd-border-white)",
+        }}
+      >
+        <div className="kxd-container">
+          <div className="grid gap-16 lg:grid-cols-2">
+            <div>
+              <p className="kxd-eyebrow">Partnership Fit</p>
+
+              <h2
+                className="kxd-serif-title mt-4"
+                style={{
+                  fontSize: "clamp(2rem, 3vw, 2.75rem)",
+                  maxWidth: "24rem",
+                }}
+              >
+                We work best with brands ready to invest in growth.
+              </h2>
+
+              <p className="kxd-body-sm mt-6" style={{ maxWidth: "30rem" }}>
+                The strongest partnerships happen when ambition, trust, and execution
+                are aligned from day one. KXD is built for brands that want the work
+                done right — not rushed, diluted, or treated like a template.
+              </p>
+            </div>
+
+            <div className="space-y-10">
+              <div>
+                <p className="kxd-label mb-4">Ideal Partners</p>
+
+                <ul className="space-y-3">
+                  {PARTNERSHIP_FIT.ideal.map((item) => (
+                    <li key={item} className="flex items-start gap-3">
+                      <span
+                        aria-hidden
+                        style={{
+                          width: "4px",
+                          height: "4px",
+                          borderRadius: "50%",
+                          background: "var(--kxd-gold)",
+                          opacity: 0.65,
+                          flexShrink: 0,
+                          marginTop: "0.5rem",
+                        }}
+                      />
+                      <p className="kxd-body-sm">{item}</p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div>
+                <p className="kxd-label mb-4">Not the Right Fit</p>
+
+                <ul className="space-y-3">
+                  {PARTNERSHIP_FIT.notFit.map((item) => (
+                    <li key={item} className="flex items-start gap-3">
+                      <span
+                        aria-hidden
+                        style={{
+                          width: "4px",
+                          height: "4px",
+                          borderRadius: "50%",
+                          background: "var(--kxd-cream-muted)",
+                          opacity: 0.38,
+                          flexShrink: 0,
+                          marginTop: "0.5rem",
+                        }}
+                      />
+                      <p className="kxd-body-sm">{item}</p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section
+        className="kxd-section border-t"
+        style={{
           background: "var(--kxd-black-deep)",
           borderColor: "var(--kxd-border-white)",
         }}
@@ -348,8 +447,8 @@ export default function InvestmentPage() {
       </section>
 
       <FinalCtaBand
-        headline="Build What Others Can't."
-        subCopy="KXD partners with ambitious businesses to create exceptional digital experiences, operational systems, and brands built with intention."
+        headline="Let's Build What's Next."
+        subCopy="KXD partners with a limited number of businesses each year to create exceptional digital experiences, operational systems, and growth infrastructure built with intention."
         secondaryHref="/work"
         secondaryLabel="Explore Our Work"
       />
