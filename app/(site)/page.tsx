@@ -34,23 +34,32 @@ export default function HomePage() {
   return (
     <>
       <StructuredData data={schema} />
-      {/* 1. Hero */}
+
+      {/* 1. Hero — positioning + primary conversion */}
       <HeroSection />
-      {/* 2. Services */}
-      <ServicesSection />
-      {/* 3. Selected Work */}
-      <CaseStudiesSection />
-      {/* 4. Selected Outcomes — trust + proof */}
+
+      {/* 2. Selected Outcomes — prove trust before selling services */}
       <OutcomesSection />
-      {/* 5. Process */}
+
+      {/* 3. Services — what KXD builds */}
+      <ServicesSection />
+
+      {/* 4. Selected Work — transformation proof */}
+      <CaseStudiesSection />
+
+      {/* 5. Process — how premium work moves */}
       <ProcessSection />
-      {/* 6. The Standard */}
+
+      {/* 6. Founder Standard — the KXD point of view */}
       <FounderStandard />
-      {/* 7. Reviews / Proof */}
+
+      {/* 7. Reviews — social proof */}
       <ReviewsSection />
-      {/* 8. Client Trust */}
+
+      {/* 8. Client Trust — brand validation */}
       <ClientLogoWall />
-      {/* 9. Final CTA */}
+
+      {/* 9. Final CTA — partnership conversion */}
       <FinalCtaSection />
     </>
   );

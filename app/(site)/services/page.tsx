@@ -22,8 +22,6 @@ export const metadata: Metadata = buildMetadata({
   ],
 });
 
-// ── Unified service shape ─────────────────────────────────────────────────────
-
 interface ServiceItem {
   slug: string;
   title: string;
@@ -41,7 +39,7 @@ const CATEGORY_NAMES: Record<string, string> = {
   "growth-infrastructure": "Growth",
   "operational-platforms": "Platforms",
   "enterprise-systems": "Enterprise",
-  "ecommerce": "Commerce",
+  ecommerce: "Commerce",
   "ongoing-partnership": "Partnership",
 };
 
@@ -59,6 +57,7 @@ async function fetchServices(): Promise<ServiceItem[]> {
       limit: 20,
       depth: 0,
     });
+
     if (docs.length > 0) {
       return (docs as unknown as Array<Record<string, unknown>>).map((doc) => ({
         slug: String(doc.slug),
@@ -66,7 +65,11 @@ async function fetchServices(): Promise<ServiceItem[]> {
         category: String(doc.category),
         headline: String((doc.headline as string) || doc.title),
         summary: String(doc.summary),
-        bestFor: (Array.isArray(doc.bestFor) ? doc.bestFor as Array<{item: string}> : [])
+        bestFor: (
+          Array.isArray(doc.bestFor)
+            ? (doc.bestFor as Array<{ item: string }>)
+            : []
+        )
           .slice(0, 3)
           .map((b) => b.item),
         ctaLabel: String((doc.ctaLabel as string) || "Explore Service"),
@@ -76,6 +79,7 @@ async function fetchServices(): Promise<ServiceItem[]> {
   } catch {
     // fall through to static data
   }
+
   return HOMEPAGE_SERVICES.map((s) => ({
     slug: String(s.slug),
     title: s.title,
@@ -87,8 +91,6 @@ async function fetchServices(): Promise<ServiceItem[]> {
     featured: s.primary,
   }));
 }
-
-// ── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function ServicesPage() {
   const services = await fetchServices();
@@ -105,7 +107,6 @@ export default async function ServicesPage() {
         )}
       />
 
-      {/* ── Hero ── */}
       <section
         className="relative overflow-hidden border-b"
         style={{
@@ -116,8 +117,10 @@ export default async function ServicesPage() {
         }}
       >
         <GoldAtmosphere intensity="hero" />
-        <div className="kxd-container relative z-10" style={{ maxWidth: "56rem" }}>
+
+        <div className="kxd-container relative z-10" style={{ maxWidth: "58rem" }}>
           <p className="kxd-eyebrow">Services</p>
+
           <h1
             className="mt-5 font-serif font-light"
             style={{
@@ -127,28 +130,74 @@ export default async function ServicesPage() {
               color: "var(--kxd-cream)",
             }}
           >
-            Built Beyond
+            Built for Brands
             <br />
             <em style={{ fontStyle: "italic", color: "var(--kxd-cream-soft)" }}>
-              Standards.
+              Ready to Grow.
             </em>
           </h1>
+
           <p
             className="mt-7 font-serif font-light"
             style={{
               fontSize: "clamp(1rem, 1.5vw, 1.1875rem)",
               lineHeight: 1.8,
               color: "var(--kxd-cream-muted)",
-              maxWidth: "34rem",
+              maxWidth: "38rem",
             }}
           >
-            Strategy first. Design with intent. No noise. Every engagement
-            is built to perform from first impression to final conversion.
+            Digital experiences, operational systems, and growth infrastructure
+            designed to support ambitious businesses through every stage of
+            expansion.
           </p>
         </div>
       </section>
 
-      {/* ── Service list ── */}
+      <section
+        style={{
+          background: "var(--kxd-black-deep)",
+          borderTop: "1px solid var(--kxd-border-white)",
+          borderBottom: "1px solid var(--kxd-border-white)",
+        }}
+      >
+        <div
+          className="kxd-container"
+          style={{
+            paddingBlock: "clamp(3rem, 6vw, 4.5rem)",
+            maxWidth: "64rem",
+          }}
+        >
+          <p className="kxd-eyebrow">How We Work</p>
+
+          <h2
+            className="mt-5 font-serif font-light"
+            style={{
+              fontSize: "clamp(1.75rem, 3vw, 2.5rem)",
+              lineHeight: 1.15,
+              color: "var(--kxd-cream)",
+              maxWidth: "28ch",
+            }}
+          >
+            We don&apos;t offer disconnected services. We build systems designed to
+            create momentum.
+          </h2>
+
+          <p
+            className="mt-6 font-serif font-light"
+            style={{
+              fontSize: "clamp(1rem, 1.4vw, 1.125rem)",
+              lineHeight: 1.9,
+              color: "var(--kxd-cream-muted)",
+              maxWidth: "40rem",
+            }}
+          >
+            Every engagement combines strategy, execution, and long-term thinking
+            to strengthen brands, improve operations, and support sustainable
+            growth.
+          </p>
+        </div>
+      </section>
+
       <section style={{ background: "var(--kxd-black-base)" }}>
         <div className="kxd-container">
           {services.map((service, i) => (
@@ -160,12 +209,10 @@ export default async function ServicesPage() {
             >
               <div className="py-14 lg:py-20">
                 <div className="grid gap-10 lg:grid-cols-[1fr_2fr] lg:gap-16 xl:gap-24">
-
-                  {/* ── Left: number / title / CTA ── */}
                   <div className="relative">
                     <span
                       aria-hidden
-                      className="absolute -top-2 right-0 select-none font-serif font-light leading-none lg:right-auto lg:left-0"
+                      className="absolute -top-2 right-0 select-none font-serif font-light leading-none lg:left-0 lg:right-auto"
                       style={{
                         fontSize: "clamp(4rem, 8vw, 7rem)",
                         color: "var(--kxd-gold)",
@@ -236,7 +283,6 @@ export default async function ServicesPage() {
                     </div>
                   </div>
 
-                  {/* ── Right: best for ── */}
                   {service.bestFor.length > 0 && (
                     <div className="self-start lg:pt-2">
                       <p
@@ -250,6 +296,7 @@ export default async function ServicesPage() {
                       >
                         Built For
                       </p>
+
                       <ul className="space-y-4">
                         {service.bestFor.map((item, j) => (
                           <li
@@ -268,6 +315,7 @@ export default async function ServicesPage() {
                             >
                               ◆
                             </span>
+
                             <p
                               className="font-sans font-light"
                               style={{
@@ -291,10 +339,10 @@ export default async function ServicesPage() {
       </section>
 
       <FinalCtaBand
-        secondaryHref="/work"
-        secondaryLabel="View the Work"
-        headline="Build What Others Can't."
-        subCopy="For brands ready to move with clarity, discipline, and presence."
+        headline="Ready to Build With Intention?"
+        subCopy="KXD partners with a limited number of brands each year to create digital experiences and operational systems designed for long-term growth."
+        secondaryHref="/investment"
+        secondaryLabel="View Investment"
       />
     </>
   );

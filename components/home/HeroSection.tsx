@@ -12,14 +12,38 @@ import { SITE } from "@/lib/site";
  */
 
 const REEL_FRAMES = [
-  { src: "/migrated-assets/case-studies/primal-motorsports/hero.webp", alt: "Primal Motorsports" },
-  { src: "/migrated-assets/case-studies/primal-motorsports/dashboard-hero.webp", alt: "Primal Motorsports — Driver Portal" },
-  { src: "/migrated-assets/case-studies/primal-motorsports/ops-hero.webp", alt: "Primal OS" },
-  { src: "/migrated-assets/case-studies/cusick-morgan-motorsports/hero.webp", alt: "Cusick Morgan Motorsports" },
-  { src: "/migrated-assets/case-studies/plate-the-umpqua/hero.webp", alt: "Plate the Umpqua" },
-  { src: "/migrated-assets/case-studies/autodv8ions/hero.webp", alt: "AutoDV8ions" },
-  { src: "/migrated-assets/case-studies/cusick-morgan-motorsports/homepage-02.webp", alt: "Cusick Morgan Motorsports — Partnership" },
-  { src: "/migrated-assets/case-studies/plate-the-umpqua/homepage-02.webp", alt: "Plate the Umpqua — Interior" },
+  {
+    src: "/migrated-assets/case-studies/primal-motorsports/hero.webp",
+    alt: "Primal Motorsports",
+  },
+  {
+    src: "/migrated-assets/case-studies/primal-motorsports/dashboard-hero.webp",
+    alt: "Primal Motorsports — Driver Portal",
+  },
+  {
+    src: "/migrated-assets/case-studies/primal-motorsports/ops-hero.webp",
+    alt: "Primal OS",
+  },
+  {
+    src: "/migrated-assets/case-studies/cusick-morgan-motorsports/hero.webp",
+    alt: "Cusick Morgan Motorsports",
+  },
+  {
+    src: "/migrated-assets/case-studies/plate-the-umpqua/hero.webp",
+    alt: "Plate the Umpqua",
+  },
+  {
+    src: "/migrated-assets/case-studies/autodv8ions/hero.webp",
+    alt: "AutoDV8ions",
+  },
+  {
+    src: "/migrated-assets/case-studies/cusick-morgan-motorsports/homepage-02.webp",
+    alt: "Cusick Morgan Motorsports — Partnership",
+  },
+  {
+    src: "/migrated-assets/case-studies/plate-the-umpqua/homepage-02.webp",
+    alt: "Plate the Umpqua — Interior",
+  },
 ];
 
 const REEL_DOUBLED = [...REEL_FRAMES, ...REEL_FRAMES];
@@ -126,7 +150,7 @@ export function HeroSection() {
         </div>
 
         <h1
-          className="kxd-reveal kxd-reveal-delay-1 font-serif font-light select-none"
+          className="kxd-reveal kxd-reveal-delay-1 select-none font-serif font-light"
           style={{
             fontSize: "clamp(3.5rem, 10.5vw, 9rem)",
             lineHeight: 0.94,
@@ -151,7 +175,7 @@ export function HeroSection() {
                 "0 0 120px rgba(197,166,92,0.26), 0 0 48px rgba(197,166,92,0.14), 0 2px 60px rgba(0,0,0,0.55)",
             }}
           >
-            What Others
+            What Growth
           </span>
           <span
             className="block"
@@ -160,7 +184,7 @@ export function HeroSection() {
                 "0 2px 80px rgba(0,0,0,0.60), 0 0 1px rgba(0,0,0,0.40)",
             }}
           >
-            Can&rsquo;t.
+            Requires.
           </span>
         </h1>
 
@@ -198,6 +222,17 @@ export function HeroSection() {
           }}
         >
           Strategy&ensp;&middot;&ensp;Systems&ensp;&middot;&ensp;Growth
+        </p>
+
+        <p
+          className="kxd-reveal kxd-reveal-delay-3 mt-5 font-sans font-medium uppercase"
+          style={{
+            fontSize: "0.5rem",
+            letterSpacing: "0.14em",
+            color: "rgba(191,183,170,0.42)",
+          }}
+        >
+          Trusted by motorsports brands, hospitality groups, and growth-focused businesses.
         </p>
 
         <div className="kxd-reveal kxd-reveal-delay-4 mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-5">
@@ -315,8 +350,8 @@ export function HeroSection() {
           </div>
 
           <div className="flex flex-col items-end">
-            <p className="kxd-label">Built With</p>
-            <p className="kxd-label mt-1">Intention</p>
+            <p className="kxd-label">Designed For</p>
+            <p className="kxd-label mt-1">Growth</p>
           </div>
         </div>
       </div>
