@@ -75,15 +75,17 @@ function ReviewCard({
       }}
     >
       <div className="flex flex-col gap-1.5 lg:pt-1">
-        <GoldStars rating={review.rating} />
-
-        <p className="mt-3 text-[0.9375rem] font-medium text-[var(--kxd-cream)]">
+        <p className="text-[1.0625rem] font-semibold text-[var(--kxd-cream)]">
           {review.author}
         </p>
 
         {review.company && (
           <p className="kxd-label">{review.company}</p>
         )}
+
+        <div className="mt-2">
+          <GoldStars rating={review.rating} />
+        </div>
 
         {review.source === "google" && <GoogleBadge />}
       </div>
@@ -124,7 +126,7 @@ export async function ReviewsSection() {
       <div className="kxd-container">
         <div className="mb-14 grid gap-5 lg:grid-cols-[1fr_auto] lg:items-end">
           <div>
-            <p className="kxd-eyebrow">Client Trust</p>
+            <p className="kxd-eyebrow">Proof of Execution</p>
 
             <h2
               className="kxd-serif-title mt-4"
@@ -133,7 +135,7 @@ export async function ReviewsSection() {
                 maxWidth: "32rem",
               }}
             >
-              Partnerships built on clarity, trust, and execution.
+              Consistent execution, verified by every brand we operate with.
             </h2>
 
             <p
@@ -143,9 +145,9 @@ export async function ReviewsSection() {
                 lineHeight: 1.85,
               }}
             >
-              KXD partnerships are built for businesses that value sharp strategy,
-              premium execution, and the confidence that comes from having the right
-              creative partner in the room.
+              KXD operates with brands that require system-level execution quality —
+              consistent delivery, production-grade output, and infrastructure built
+              to perform long after the initial build is complete.
             </p>
           </div>
 
@@ -175,8 +177,8 @@ export async function ReviewsSection() {
             />
 
             <div>
-              <p className="kxd-label">{isFromGoogle ? "Google" : "Verified"}</p>
-              <p className="kxd-label mt-1">Client Reviews</p>
+              <p className="kxd-label">{isFromGoogle ? "Google Verified" : "Client Verified"}</p>
+              <p className="kxd-label mt-1">{isFromGoogle ? "Public Record" : "Direct Record"}</p>
             </div>
           </div>
         </div>
@@ -200,16 +202,16 @@ export async function ReviewsSection() {
         >
           {[
             {
-              label: "Strategic Confidence",
-              copy: "Clients know where the work is going and why each decision matters.",
+              label: "System Transparency",
+              copy: "Every production decision surfaces within a documented framework — clients understand the system logic, not just the output.",
             },
             {
               label: "Founder-Led Execution",
-              copy: "Every engagement receives direct oversight and senior-level decision-making.",
+              copy: "Direct founder oversight at every production stage — no handoffs, no gaps, no diluted decisions.",
             },
             {
-              label: "Long-Term Value",
-              copy: "The work is built to support the brand beyond the first launch window.",
+              label: "Compounding Infrastructure",
+              copy: "Systems are built to generate increasing output over time — every layer engineered to compound on the last.",
             },
           ].map((item) => (
             <div key={item.label}>

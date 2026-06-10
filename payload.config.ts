@@ -6,10 +6,15 @@ import { lexicalEditor } from "@payloadcms/richtext-lexical";
 import { buildConfig } from "payload";
 import sharp from "sharp";
 
+import { BrandKitAssets } from "./payload/collections/BrandKitAssets.ts";
+import { BrandKits } from "./payload/collections/BrandKits.ts";
 import { CaseStudies } from "./payload/collections/CaseStudies.ts";
 import { ClientProjects } from "./payload/collections/ClientProjects.ts";
 import { ClientRequests } from "./payload/collections/ClientRequests.ts";
 import { Clients } from "./payload/collections/Clients.ts";
+import { CreativeAssets } from "./payload/collections/CreativeAssets.ts";
+import { CreativeCampaigns } from "./payload/collections/CreativeCampaigns.ts";
+import { FlyerRequests } from "./payload/collections/FlyerRequests.ts";
 import { Inquiries } from "./payload/collections/Inquiries.ts";
 import { Insights } from "./payload/collections/Insights.ts";
 import { Media } from "./payload/collections/Media.ts";
@@ -18,9 +23,11 @@ import { Partners } from "./payload/collections/Partners.ts";
 import { PlatformApplications } from "./payload/collections/PlatformApplications.ts";
 import { ProjectInquiries } from "./payload/collections/ProjectInquiries.ts";
 import { Projects } from "./payload/collections/Projects.ts";
+import { PromoVideoRequests } from "./payload/collections/PromoVideoRequests.ts";
 import { Retainers } from "./payload/collections/Retainers.ts";
 import { Reviews } from "./payload/collections/Reviews.ts";
 import { Services } from "./payload/collections/Services.ts";
+import { SocialPostRequests } from "./payload/collections/SocialPostRequests.ts";
 import { TeamMembers } from "./payload/collections/TeamMembers.ts";
 import { Testimonials } from "./payload/collections/Testimonials.ts";
 import { Users } from "./payload/collections/Users.ts";
@@ -82,6 +89,14 @@ export default buildConfig({
     ClientProjects,
     MonthlyDeliverables,
     ClientRequests,
+    // ── Creative Engine ──────────────────────────────────────────────────────
+    CreativeCampaigns,
+    BrandKits,
+    BrandKitAssets,
+    FlyerRequests,
+    PromoVideoRequests,
+    SocialPostRequests,
+    CreativeAssets,
     // ── System ───────────────────────────────────────────────────────────────
     Media,
     Users,

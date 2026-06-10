@@ -3,23 +3,23 @@ import Link from "next/link";
 const STEPS = [
   {
     number: "01",
-    title: "Diagnose",
-    body: "We uncover what is holding the brand back — positioning gaps, operational friction, weak conversion paths, scattered systems, or unclear digital strategy.",
+    title: "System Diagnosis",
+    body: "We map the full operational picture — positioning gaps, conversion failures, infrastructure debt, and system fragmentation — before a single decision is made.",
   },
   {
     number: "02",
-    title: "Architect",
-    body: "We define the strategy, experience structure, content hierarchy, and operational blueprint before design or development begins.",
+    title: "System Architecture",
+    body: "We define the production blueprint: strategy, information architecture, content systems, and operational structure — engineered before design or development begins.",
   },
   {
     number: "03",
-    title: "Build",
-    body: "We execute with precision across design, development, CMS, automation, and infrastructure — with senior-level oversight from start to launch.",
+    title: "Execution",
+    body: "We build with precision across design, development, CMS, automation, and infrastructure — every layer delivered under direct founder oversight from intake to launch.",
   },
   {
     number: "04",
-    title: "Evolve",
-    body: "We refine, optimize, and expand the foundation over time so the work continues creating momentum beyond launch.",
+    title: "Optimization",
+    body: "We refine, expand, and compound the system over time — so the infrastructure continues generating output and value long after the initial build is complete.",
   },
 ] as const;
 
@@ -35,7 +35,7 @@ export function ProcessSection() {
       <div className="kxd-container">
         <div className="mb-16 grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
           <div>
-            <p className="kxd-eyebrow">Operating Discipline</p>
+            <p className="kxd-eyebrow">Production Framework</p>
             <h2
               className="kxd-serif-title mt-4"
               style={{
@@ -43,7 +43,7 @@ export function ProcessSection() {
                 maxWidth: "30rem",
               }}
             >
-              A process built to create clarity, momentum, and lasting value.
+              A controlled system pipeline — from diagnosis to compounding output.
             </h2>
 
             <p
@@ -53,8 +53,9 @@ export function ProcessSection() {
                 lineHeight: 1.85,
               }}
             >
-              KXD engagements are designed to move with intention — from strategic
-              diagnosis to launch-ready execution and long-term operational growth.
+              Every KXD project flows through a structured production system —
+              from system diagnosis and architecture through precision execution
+              and long-term operational optimization.
             </p>
           </div>
 
@@ -134,8 +135,8 @@ export function ProcessSection() {
               maxWidth: "42rem",
             }}
           >
-            The goal is not simply to launch something beautiful. The goal is to
-            build a foundation your business can actually grow through.
+            The goal is not to ship a project. The goal is to install a system
+            your brand can operate, scale, and grow through indefinitely.
           </p>
         </div>
       </div>

@@ -58,10 +58,10 @@ export function FounderStandard() {
                 color: "var(--kxd-cream-soft)",
               }}
             >
-              KXD is built for ambitious businesses that need more than a polished
-              digital presence. Every engagement receives direct strategic oversight,
-              premium creative execution, and operational thinking designed to help
-              the work keep creating value long after launch.
+              KXD designs and operates creative systems for brands that require
+              more than execution — they require infrastructure. Every engagement
+              receives direct founder oversight, production-grade creative systems,
+              and operational thinking built to compound in value long after launch.
             </p>
 
             <div
@@ -69,9 +69,9 @@ export function FounderStandard() {
               style={{ borderColor: "var(--kxd-border-white)" }}
             >
               {[
-                { number: "100%", label: "Founder-led" },
-                { number: "Systems", label: "Built to scale" },
-                { number: "Long-term", label: "Partnership" },
+                { number: "100%", label: "Founder-led execution" },
+                { number: "Systems", label: "Engineered for scale" },
+                { number: "Long-term", label: "Operational partnership" },
               ].map((stat) => (
                 <div key={stat.label}>
                   <p
@@ -101,8 +101,8 @@ export function FounderStandard() {
                   color: "var(--kxd-cream-muted)",
                 }}
               >
-                The standard is simple: build with intention, protect the brand,
-                and create infrastructure strong enough to support what comes next.
+                The standard is simple: build systems that hold value long after
+                the work is delivered.
               </p>
             </div>
           </div>

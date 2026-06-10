@@ -5,8 +5,8 @@ export function FinalCtaSection() {
     <FinalCtaBand
       secondaryHref="/investment"
       secondaryLabel="View Investment"
-      headline="Ready to Build With Intention?"
-      subCopy="KXD partners with a limited number of ambitious brands each year to create digital experiences, operational systems, and growth infrastructure designed for long-term success."
+      headline="Build the Infrastructure Behind Growth."
+      subCopy="KXD operates with a limited number of brands each year — designing and running the creative systems, production infrastructure, and operational frameworks that compound in value over time."
     />
   );
 }

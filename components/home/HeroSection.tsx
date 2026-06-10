@@ -175,7 +175,7 @@ export function HeroSection() {
                 "0 0 120px rgba(197,166,92,0.26), 0 0 48px rgba(197,166,92,0.14), 0 2px 60px rgba(0,0,0,0.55)",
             }}
           >
-            What Growth
+            Creative Systems
           </span>
           <span
             className="block"
@@ -184,7 +184,7 @@ export function HeroSection() {
                 "0 2px 80px rgba(0,0,0,0.60), 0 0 1px rgba(0,0,0,0.40)",
             }}
           >
-            Requires.
+            That Scale.
           </span>
         </h1>
 
@@ -210,7 +210,7 @@ export function HeroSection() {
             maxWidth: "min(90vw, 800px)",
           }}
         >
-          Digital experiences, operational systems, and growth infrastructure built with intention.
+          Production infrastructure, creative intelligence, and execution systems — built to operate, not just launch.
         </p>
 
         <p
@@ -221,7 +221,7 @@ export function HeroSection() {
             color: "var(--foreground-subtle)",
           }}
         >
-          Strategy&ensp;&middot;&ensp;Systems&ensp;&middot;&ensp;Growth
+          Systems&ensp;&middot;&ensp;Production&ensp;&middot;&ensp;Intelligence
         </p>
 
         <p
@@ -232,12 +232,12 @@ export function HeroSection() {
             color: "rgba(191,183,170,0.42)",
           }}
         >
-          Trusted by motorsports brands, hospitality groups, and growth-focused businesses.
+          Operating for motorsports brands, hospitality groups, and high-growth companies.
         </p>
 
         <div className="kxd-reveal kxd-reveal-delay-4 mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-5">
           <Link href="/start-project" className="kxd-btn-primary">
-            Start a Partnership
+            Start a System
           </Link>
           <Link
             href="/work"
