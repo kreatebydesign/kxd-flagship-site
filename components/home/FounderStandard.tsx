@@ -24,7 +24,7 @@ export function FounderStandard() {
               Founder-led.
               <br />
               <span style={{ color: "var(--kxd-gold)" }}>
-                Built with discipline.
+                System-minded.
               </span>
             </h2>
 
@@ -58,18 +58,19 @@ export function FounderStandard() {
                 color: "var(--kxd-cream-soft)",
               }}
             >
-              KXD is built for ambitious businesses that need more than execution.
-              Every engagement receives direct strategic oversight, sharper creative
-              decisions, and systems designed to keep creating value long after launch.
+              KXD is built for ambitious businesses that need more than a polished
+              digital presence. Every engagement receives direct strategic oversight,
+              premium creative execution, and operational thinking designed to help
+              the work keep creating value long after launch.
             </p>
 
             <div
-              className="mt-10 grid grid-cols-3 gap-6 border-t pt-10"
+              className="mt-10 grid gap-6 border-t pt-10 sm:grid-cols-3"
               style={{ borderColor: "var(--kxd-border-white)" }}
             >
               {[
                 { number: "100%", label: "Founder-led" },
-                { number: "Premium", label: "Execution" },
+                { number: "Systems", label: "Built to scale" },
                 { number: "Long-term", label: "Partnership" },
               ].map((stat) => (
                 <div key={stat.label}>
@@ -86,6 +87,23 @@ export function FounderStandard() {
                   <p className="kxd-label mt-2.5">{stat.label}</p>
                 </div>
               ))}
+            </div>
+
+            <div
+              className="mt-10 border-l pl-5"
+              style={{ borderColor: "var(--kxd-border-gold)" }}
+            >
+              <p
+                className="font-serif font-light italic"
+                style={{
+                  fontSize: "clamp(0.9375rem, 1.3vw, 1.0625rem)",
+                  lineHeight: 1.75,
+                  color: "var(--kxd-cream-muted)",
+                }}
+              >
+                The standard is simple: build with intention, protect the brand,
+                and create infrastructure strong enough to support what comes next.
+              </p>
             </div>
           </div>
         </div>

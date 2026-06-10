@@ -3,23 +3,23 @@ import Link from "next/link";
 const STEPS = [
   {
     number: "01",
-    title: "Discover",
-    body: "Understand goals, opportunities, and positioning. Every engagement begins with the right questions — not assumptions.",
+    title: "Diagnose",
+    body: "We uncover what is holding the brand back — positioning gaps, operational friction, weak conversion paths, scattered systems, or unclear digital strategy.",
   },
   {
     number: "02",
-    title: "Define",
-    body: "Clarify strategy, experience architecture, and priorities. The blueprint before the build.",
+    title: "Architect",
+    body: "We define the strategy, experience structure, content hierarchy, and operational blueprint before design or development begins.",
   },
   {
     number: "03",
     title: "Build",
-    body: "Execute with precision and intention. Direct strategy and senior-level execution throughout — no handoffs.",
+    body: "We execute with precision across design, development, CMS, automation, and infrastructure — with senior-level oversight from start to launch.",
   },
   {
     number: "04",
-    title: "Refine",
-    body: "Launch, optimize, and evolve. The work doesn't end at go-live — it holds weight long after.",
+    title: "Evolve",
+    body: "We refine, optimize, and expand the foundation over time so the work continues creating momentum beyond launch.",
   },
 ] as const;
 
@@ -33,27 +33,45 @@ export function ProcessSection() {
       }}
     >
       <div className="kxd-container">
-        {/* Header */}
         <div className="mb-16 grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
           <div>
-            <p className="kxd-eyebrow">How We Work</p>
+            <p className="kxd-eyebrow">Operating Discipline</p>
             <h2
               className="kxd-serif-title mt-4"
-              style={{ fontSize: "clamp(1.875rem, 3.5vw, 2.5rem)", maxWidth: "28rem" }}
+              style={{
+                fontSize: "clamp(1.875rem, 3.5vw, 2.75rem)",
+                maxWidth: "30rem",
+              }}
             >
-              A process built around clarity.
+              A process built to create clarity, momentum, and lasting value.
             </h2>
+
+            <p
+              className="kxd-body-sm mt-5"
+              style={{
+                maxWidth: "38rem",
+                lineHeight: 1.85,
+              }}
+            >
+              KXD engagements are designed to move with intention — from strategic
+              diagnosis to launch-ready execution and long-term operational growth.
+            </p>
           </div>
+
           <Link
             href="/investment"
-            className="kxd-ui-label self-end inline-flex items-center gap-2 text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)]"
+            className="kxd-ui-label inline-flex items-center gap-2 self-end text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)]"
           >
             View Investment Levels
-            <span aria-hidden>→</span>
+            <span
+              aria-hidden
+              className="transition-transform duration-300 group-hover:translate-x-1"
+            >
+              →
+            </span>
           </Link>
         </div>
 
-        {/* Steps */}
         <div className="grid gap-0 sm:grid-cols-2 lg:grid-cols-4">
           {STEPS.map((step, i) => (
             <div
@@ -66,7 +84,6 @@ export function ProcessSection() {
                   : {}),
               }}
             >
-              {/* Number */}
               <p
                 className="font-serif font-light"
                 style={{
@@ -79,7 +96,6 @@ export function ProcessSection() {
                 {step.number}
               </p>
 
-              {/* Title */}
               <h3
                 className="kxd-serif-title mt-5"
                 style={{ fontSize: "clamp(1.125rem, 1.8vw, 1.375rem)" }}
@@ -87,7 +103,6 @@ export function ProcessSection() {
                 {step.title}
               </h3>
 
-              {/* Hairline */}
               <div
                 aria-hidden
                 className="mt-4"
@@ -98,10 +113,30 @@ export function ProcessSection() {
                 }}
               />
 
-              {/* Body */}
               <p className="kxd-body-sm mt-4 leading-relaxed">{step.body}</p>
             </div>
           ))}
+        </div>
+
+        <div
+          className="mt-14 border-l pl-6"
+          style={{
+            borderColor: "var(--kxd-border-gold)",
+          }}
+        >
+          <p
+            className="font-serif font-light italic"
+            style={{
+              fontSize: "clamp(1rem, 1.5vw, 1.1875rem)",
+              lineHeight: 1.75,
+              letterSpacing: "0.01em",
+              color: "var(--kxd-cream-soft)",
+              maxWidth: "42rem",
+            }}
+          >
+            The goal is not simply to launch something beautiful. The goal is to
+            build a foundation your business can actually grow through.
+          </p>
         </div>
       </div>
     </section>
