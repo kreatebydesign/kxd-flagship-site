@@ -3,6 +3,7 @@ import * as migration_20260609_services_expand from './20260609_services_expand'
 import * as migration_20260609_projects_expand from './20260609_projects_expand';
 import * as migration_20260609_project_inquiries from './20260609_project_inquiries';
 import * as migration_20260609_insights_expand from './20260609_insights_expand';
+import * as migration_20260609_project_inquiries_status_expand from './20260609_project_inquiries_status_expand';
 
 export const migrations = [
   {
@@ -29,5 +30,10 @@ export const migrations = [
     up: migration_20260609_insights_expand.up,
     down: migration_20260609_insights_expand.down,
     name: '20260609_insights_expand',
+  },
+  {
+    up: migration_20260609_project_inquiries_status_expand.up,
+    down: migration_20260609_project_inquiries_status_expand.down,
+    name: '20260609_project_inquiries_status_expand',
   },
 ];
