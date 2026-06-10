@@ -12,7 +12,8 @@
     "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
     "migrate": "cross-env NODE_OPTIONS='--no-deprecation' payload migrate",
     "seed:services": "tsx scripts/seed-services.ts",
-    "seed:projects": "tsx scripts/seed-projects.ts"
+    "seed:projects": "tsx scripts/seed-projects.ts",
+    "seed:clients": "tsx scripts/seed-clients.ts"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "^3.84.1",
