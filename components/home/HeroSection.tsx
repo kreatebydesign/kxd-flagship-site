@@ -12,14 +12,14 @@ import { SITE } from "@/lib/site";
  */
 
 const REEL_FRAMES = [
-  { src: "/migrated-assets/case-studies/primal-motorsports/hero.webp",           alt: "Primal Motorsports" },
+  { src: "/migrated-assets/case-studies/primal-motorsports/hero.webp", alt: "Primal Motorsports" },
   { src: "/migrated-assets/case-studies/primal-motorsports/dashboard-hero.webp", alt: "Primal Motorsports — Driver Portal" },
-  { src: "/migrated-assets/case-studies/primal-motorsports/ops-hero.webp",        alt: "Primal OS" },
-  { src: "/migrated-assets/case-studies/cusick-morgan-motorsports/hero.webp",    alt: "Cusick Morgan Motorsports" },
-  { src: "/migrated-assets/case-studies/plate-the-umpqua/hero.webp",             alt: "Plate the Umpqua" },
-  { src: "/migrated-assets/case-studies/autodv8ions/hero.webp",                  alt: "AutoDV8ions" },
+  { src: "/migrated-assets/case-studies/primal-motorsports/ops-hero.webp", alt: "Primal OS" },
+  { src: "/migrated-assets/case-studies/cusick-morgan-motorsports/hero.webp", alt: "Cusick Morgan Motorsports" },
+  { src: "/migrated-assets/case-studies/plate-the-umpqua/hero.webp", alt: "Plate the Umpqua" },
+  { src: "/migrated-assets/case-studies/autodv8ions/hero.webp", alt: "AutoDV8ions" },
   { src: "/migrated-assets/case-studies/cusick-morgan-motorsports/homepage-02.webp", alt: "Cusick Morgan Motorsports — Partnership" },
-  { src: "/migrated-assets/case-studies/plate-the-umpqua/homepage-02.webp",      alt: "Plate the Umpqua — Interior" },
+  { src: "/migrated-assets/case-studies/plate-the-umpqua/homepage-02.webp", alt: "Plate the Umpqua — Interior" },
 ];
 
 const REEL_DOUBLED = [...REEL_FRAMES, ...REEL_FRAMES];
@@ -43,54 +43,49 @@ export function HeroSection() {
           </video>
       */}
 
-      {/* ── Atmosphere Layer 1: headline glow (spec) ── */}
       <div
         aria-hidden
         className="kxd-atmosphere-breathe pointer-events-none absolute inset-0"
         style={{
-          background: "radial-gradient(circle at center, rgba(197,166,92,0.08), transparent 60%)",
+          background:
+            "radial-gradient(circle at center, rgba(197,166,92,0.08), transparent 60%)",
         }}
       />
 
-      {/* ── Atmosphere Layer 2: white-light presence (spec) ── */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
         style={{
-          background: "radial-gradient(circle at 50% 20%, rgba(255,255,255,0.025), transparent 70%)",
+          background:
+            "radial-gradient(circle at 50% 20%, rgba(255,255,255,0.025), transparent 70%)",
         }}
       />
 
-      {/* ── Architectural light shafts — narrow descending beams ── */}
       <div
         aria-hidden
         className="kxd-atmosphere-enter pointer-events-none absolute inset-0"
         style={{
           background: [
-            "radial-gradient(ellipse 18% 80% at 50%  -10%, rgba(197,166,92,0.060) 0%, transparent 50%)",
-            "radial-gradient(ellipse  9% 58% at 34%   -8%, rgba(197,166,92,0.024) 0%, transparent 48%)",
-            "radial-gradient(ellipse  9% 58% at 66%   -8%, rgba(197,166,92,0.018) 0%, transparent 48%)",
+            "radial-gradient(ellipse 18% 80% at 50% -10%, rgba(197,166,92,0.060) 0%, transparent 50%)",
+            "radial-gradient(ellipse 9% 58% at 34% -8%, rgba(197,166,92,0.024) 0%, transparent 48%)",
+            "radial-gradient(ellipse 9% 58% at 66% -8%, rgba(197,166,92,0.018) 0%, transparent 48%)",
           ].join(", "),
         }}
       />
 
-      {/* ── Vignette ── */}
       <div aria-hidden className="kxd-vignette pointer-events-none absolute inset-0" />
 
-      {/* ── Bottom fade (above reel) ── */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 z-[2]"
         style={{
           bottom: "11.5rem",
           height: "9rem",
-          background: "linear-gradient(to top, var(--kxd-black-pure) 10%, transparent)",
+          background:
+            "linear-gradient(to top, var(--kxd-black-pure) 10%, transparent)",
         }}
       />
 
-      {/* ══════════════════════════════════════════
-          MANIFESTO — lower in viewport, editorial weight
-          ══════════════════════════════════════════ */}
       <div
         className="relative z-10 flex flex-1 flex-col items-center justify-center px-6 text-center"
         style={{
@@ -98,7 +93,6 @@ export function HeroSection() {
           paddingTop: "clamp(8rem, 12vh, 10rem)",
         }}
       >
-        {/* Editorial brand label with flanking gold rules */}
         <div
           className="kxd-reveal mb-10 flex items-center gap-4"
           style={{ opacity: 0.55 }}
@@ -131,7 +125,6 @@ export function HeroSection() {
           />
         </div>
 
-        {/* Main headline — three lines, cinematic weight */}
         <h1
           className="kxd-reveal kxd-reveal-delay-1 font-serif font-light select-none"
           style={{
@@ -144,7 +137,8 @@ export function HeroSection() {
           <span
             className="block"
             style={{
-              textShadow: "0 2px 80px rgba(0,0,0,0.60), 0 0 1px rgba(0,0,0,0.40)",
+              textShadow:
+                "0 2px 80px rgba(0,0,0,0.60), 0 0 1px rgba(0,0,0,0.40)",
             }}
           >
             We Build
@@ -162,14 +156,14 @@ export function HeroSection() {
           <span
             className="block"
             style={{
-              textShadow: "0 2px 80px rgba(0,0,0,0.60), 0 0 1px rgba(0,0,0,0.40)",
+              textShadow:
+                "0 2px 80px rgba(0,0,0,0.60), 0 0 1px rgba(0,0,0,0.40)",
             }}
           >
             Can&rsquo;t.
           </span>
         </h1>
 
-        {/* Hairline */}
         <div
           aria-hidden
           className="kxd-reveal kxd-reveal-delay-2 mx-auto"
@@ -182,21 +176,19 @@ export function HeroSection() {
           }}
         />
 
-        {/* Subline — single line desktop, natural wrap mobile */}
         <p
           className="kxd-reveal kxd-reveal-delay-2 font-serif font-light italic sm:whitespace-nowrap"
           style={{
             fontSize: "clamp(0.875rem, 1.55vw, 1.125rem)",
             letterSpacing: "0.02em",
-            lineHeight: 1.60,
+            lineHeight: 1.6,
             color: "var(--kxd-cream-soft)",
             maxWidth: "min(90vw, 800px)",
           }}
         >
-          Digital experiences, brand systems, and growth infrastructure built to hold weight.
+          Digital experiences, operational systems, and growth infrastructure built with intention.
         </p>
 
-        {/* Proof line */}
         <p
           className="kxd-reveal kxd-reveal-delay-3 mt-6 font-sans font-medium uppercase"
           style={{
@@ -205,13 +197,12 @@ export function HeroSection() {
             color: "var(--foreground-subtle)",
           }}
         >
-          Strategy&ensp;&middot;&ensp;Execution&ensp;&middot;&ensp;Presence
+          Strategy&ensp;&middot;&ensp;Systems&ensp;&middot;&ensp;Growth
         </p>
 
-        {/* CTAs */}
         <div className="kxd-reveal kxd-reveal-delay-4 mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-5">
-          <Link href="/contact" className="kxd-btn-primary">
-            Start a Project
+          <Link href="/start-project" className="kxd-btn-primary">
+            Start a Partnership
           </Link>
           <Link
             href="/work"
@@ -236,11 +227,6 @@ export function HeroSection() {
         </div>
       </div>
 
-      {/* ══════════════════════════════════════════
-          WORK REEL — CSS infinite scroll
-          Communicates range: motorsports, hospitality,
-          automotive, operational platforms, civic
-          ══════════════════════════════════════════ */}
       <div
         aria-hidden
         className="kxd-reveal kxd-reveal-delay-5 relative z-[1] overflow-hidden"
@@ -250,26 +236,27 @@ export function HeroSection() {
           height: "5.75rem",
         }}
       >
-        {/* Edge fades */}
         <div
           className="pointer-events-none absolute inset-y-0 left-0 z-[2]"
           style={{
             width: "9rem",
-            background: "linear-gradient(to right, var(--kxd-black-pure) 20%, transparent)",
+            background:
+              "linear-gradient(to right, var(--kxd-black-pure) 20%, transparent)",
           }}
         />
         <div
           className="pointer-events-none absolute inset-y-0 right-0 z-[2]"
           style={{
             width: "9rem",
-            background: "linear-gradient(to left, var(--kxd-black-pure) 20%, transparent)",
+            background:
+              "linear-gradient(to left, var(--kxd-black-pure) 20%, transparent)",
           }}
         />
 
         <div className="kxd-reel-track flex h-full items-center gap-3 pl-3">
           {REEL_DOUBLED.map((frame, i) => (
             <div
-              key={i}
+              key={`${frame.src}-${i}`}
               className="relative h-[4.5rem] shrink-0 overflow-hidden"
               style={{
                 aspectRatio: "16 / 9",
@@ -284,13 +271,15 @@ export function HeroSection() {
                 sizes="120px"
                 priority={false}
               />
-              <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.28)" }} />
+              <div
+                className="absolute inset-0"
+                style={{ background: "rgba(0,0,0,0.28)" }}
+              />
             </div>
           ))}
         </div>
       </div>
 
-      {/* ── Status bar ── */}
       <div
         className="kxd-reveal kxd-reveal-delay-5 relative z-[1]"
         style={{ borderTop: "1px solid var(--kxd-border-white)" }}
@@ -300,27 +289,34 @@ export function HeroSection() {
             <p className="kxd-label">Est.&ensp;{SITE.foundedYear}</p>
             <p
               className="mt-1.5 font-sans font-medium uppercase"
-              style={{ fontSize: "0.5rem", letterSpacing: "0.10em", color: "var(--foreground-subtle)" }}
+              style={{
+                fontSize: "0.5rem",
+                letterSpacing: "0.10em",
+                color: "var(--foreground-subtle)",
+              }}
             >
               Selective Partnerships
             </p>
           </div>
 
           <div className="hidden flex-col items-center gap-1.5 sm:flex">
-            <p className="kxd-label" style={{ opacity: 0.45 }}>Scroll</p>
+            <p className="kxd-label" style={{ opacity: 0.45 }}>
+              Scroll
+            </p>
             <div
               className="w-px"
               style={{
                 height: "1.75rem",
-                background: "linear-gradient(to bottom, var(--kxd-gold), transparent)",
+                background:
+                  "linear-gradient(to bottom, var(--kxd-gold), transparent)",
                 opacity: 0.28,
               }}
             />
           </div>
 
           <div className="flex flex-col items-end">
-            <p className="kxd-label">Digital</p>
-            <p className="kxd-label mt-1">Excellence</p>
+            <p className="kxd-label">Built With</p>
+            <p className="kxd-label mt-1">Intention</p>
           </div>
         </div>
       </div>
