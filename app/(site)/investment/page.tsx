@@ -21,7 +21,7 @@ const LEVELS = [
   {
     label: "01",
     title: "Luxury Website Experiences",
-    starting: "Starting at $7,500",
+    starting: "Starting at $8,500",
     description:
       "Cinematic brand websites for premium businesses, hospitality, motorsports, and high-end service organizations. Every engagement is built around the brand's positioning, audience, and long-term goals.",
     includes: [
@@ -84,7 +84,7 @@ const LEVELS = [
   {
     label: "05",
     title: "Ongoing Partnerships",
-    starting: "Starting at $2,500/month",
+    starting: "Starting at $3,000/month",
     description:
       "Monthly retainer engagements for brands that need consistent creative direction, technical execution, and strategic support beyond the initial build.",
     includes: [
@@ -119,7 +119,7 @@ export default function InvestmentPage() {
               lineHeight: 1.06,
             }}
           >
-            The Right Work Requires the Right Partnership.
+            Built for Brands Ready to Grow.
           </h1>
           <p className="kxd-body mt-6" style={{ maxWidth: "36rem" }}>
             Every engagement is tailored to the goals, complexity, and long-term vision
@@ -147,10 +147,7 @@ export default function InvestmentPage() {
         </div>
       </section>
 
-      <section
-        className="kxd-section"
-        style={{ background: "var(--kxd-black-base)" }}
-      >
+      <section className="kxd-section" style={{ background: "var(--kxd-black-base)" }}>
         <div className="kxd-container">
           <div className="space-y-0">
             {LEVELS.map((level, i) => (
@@ -241,7 +238,7 @@ export default function InvestmentPage() {
                 paddingTop: "3rem",
               }}
             >
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                 {[
                   {
                     label: "All engagements include",
@@ -254,6 +251,11 @@ export default function InvestmentPage() {
                   {
                     label: "Engagement model",
                     value: "Tailored to your goals and growth stage",
+                  },
+                  {
+                    label: "Current partnerships",
+                    value:
+                      "Motorsports, hospitality, automotive, civic, and growth-focused brands.",
                   },
                 ].map((note) => (
                   <div
@@ -303,6 +305,10 @@ export default function InvestmentPage() {
                   a: "Yes. Many long-term partnerships begin with a focused website or brand engagement. KXD is built for brands that plan to grow.",
                 },
                 {
+                  q: "Do you offer payment plans?",
+                  a: "Yes. Most projects are structured around milestone payments aligned with major delivery phases.",
+                },
+                {
                   q: "What if I'm unsure of my budget?",
                   a: "Submit an application and describe your goals. We'll recommend the scope that makes sense — not the most expensive option.",
                 },
@@ -343,7 +349,7 @@ export default function InvestmentPage() {
 
       <FinalCtaBand
         headline="Build What Others Can't."
-        subCopy="KXD partners with ambitious businesses to create exceptional digital experiences, operational systems, and brands built to endure."
+        subCopy="KXD partners with ambitious businesses to create exceptional digital experiences, operational systems, and brands built with intention."
         secondaryHref="/work"
         secondaryLabel="Explore Our Work"
       />

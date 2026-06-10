@@ -2,8 +2,6 @@
 
 import { useState, type ChangeEvent } from "react";
 
-// ── Constants ─────────────────────────────────────────────────────────────────
-
 const STEPS = [
   { number: "01", title: "Company Information", subtitle: "Tell us about your brand." },
   { number: "02", title: "Primary Contact", subtitle: "Who should we reach out to?" },
@@ -12,7 +10,8 @@ const STEPS = [
   { number: "05", title: "Investment Range", subtitle: "What range are you working within?" },
   { number: "06", title: "Desired Timeline", subtitle: "When are you looking to start?" },
   { number: "07", title: "Existing Assets", subtitle: "What do you already have?" },
-  { number: "08", title: "Additional Notes", subtitle: "Anything else we should know?" },
+  { number: "08", title: "Referral Source", subtitle: "How did you find KXD?" },
+  { number: "09", title: "Additional Notes", subtitle: "Anything else we should know?" },
 ] as const;
 
 const TOTAL = STEPS.length;
@@ -26,8 +25,15 @@ const SERVICE_OPTIONS = [
   "Ongoing Partnership",
 ];
 
+const DECISION_MAKER_OPTIONS = [
+  { value: "yes", label: "Yes, I am the primary decision maker" },
+  { value: "team", label: "I am part of the decision-making team" },
+  { value: "no", label: "No, I am gathering information" },
+];
+
 const INVESTMENT_OPTIONS = [
-  { value: "under-10k", label: "Under $10,000" },
+  { value: "under-5k", label: "Under $5,000" },
+  { value: "5k-10k", label: "$5,000 – $10,000" },
   { value: "10k-25k", label: "$10,000 – $25,000" },
   { value: "25k-50k", label: "$25,000 – $50,000" },
   { value: "50k-100k", label: "$50,000 – $100,000" },
@@ -53,7 +59,15 @@ const ASSET_OPTIONS = [
   "None of the above",
 ];
 
-// ── Types ─────────────────────────────────────────────────────────────────────
+const REFERRAL_OPTIONS = [
+  { value: "google-search", label: "Google Search" },
+  { value: "referral", label: "Referral" },
+  { value: "social-media", label: "Social Media" },
+  { value: "existing-client", label: "Existing Client" },
+  { value: "networking-event", label: "Networking Event" },
+  { value: "portfolio", label: "Previous Work / Portfolio" },
+  { value: "other", label: "Other" },
+];
 
 interface FormData {
   companyName: string;
@@ -61,11 +75,13 @@ interface FormData {
   contactName: string;
   email: string;
   phone: string;
+  decisionMaker: string;
   servicesInterested: string[];
   businessGoals: string;
   investmentRange: string;
   timeline: string;
   assetsAvailable: string[];
+  referralSource: string;
   notes: string;
 }
 
@@ -77,23 +93,18 @@ const EMPTY: FormData = {
   contactName: "",
   email: "",
   phone: "",
+  decisionMaker: "",
   servicesInterested: [],
   businessGoals: "",
   investmentRange: "",
   timeline: "",
   assetsAvailable: [],
+  referralSource: "",
   notes: "",
 };
 
-// ── Shared style helpers ──────────────────────────────────────────────────────
-
-const inputCls =
-  "kxd-field w-full";
-
-const labelCls =
-  "kxd-label mb-2 block";
-
-// ── Sub-components ────────────────────────────────────────────────────────────
+const inputCls = "kxd-field w-full";
+const labelCls = "kxd-label mb-2 block";
 
 function TextField({
   label,
@@ -209,10 +220,7 @@ function RadioOption({
         }}
       >
         {selected && (
-          <div
-            className="h-2 w-2 rounded-full"
-            style={{ background: "var(--kxd-gold)" }}
-          />
+          <div className="h-2 w-2 rounded-full" style={{ background: "var(--kxd-gold)" }} />
         )}
       </div>
       <span
@@ -231,28 +239,25 @@ function RadioOption({
 function ProgressBar({ step }: { step: number }) {
   return (
     <div className="mb-10">
-      {/* Dots */}
       <div className="flex items-center gap-1.5">
         {STEPS.map((_, i) => (
-          <div key={i} className="flex items-center gap-1.5">
-            <div
-              style={{
-                width: i === step ? "20px" : "6px",
-                height: "2px",
-                background:
-                  i < step
-                    ? "rgba(197,166,92,0.45)"
-                    : i === step
-                      ? "var(--kxd-gold)"
-                      : "rgba(255,255,255,0.1)",
-                transition: "all 300ms cubic-bezier(0.16,1,0.3,1)",
-                borderRadius: "1px",
-              }}
-            />
-          </div>
+          <div
+            key={i}
+            style={{
+              width: i === step ? "20px" : "6px",
+              height: "2px",
+              background:
+                i < step
+                  ? "rgba(197,166,92,0.45)"
+                  : i === step
+                    ? "var(--kxd-gold)"
+                    : "rgba(255,255,255,0.1)",
+              transition: "all 300ms cubic-bezier(0.16,1,0.3,1)",
+              borderRadius: "1px",
+            }}
+          />
         ))}
       </div>
-      {/* Step label */}
       <p
         className="mt-4 font-sans uppercase"
         style={{
@@ -268,8 +273,6 @@ function ProgressBar({ step }: { step: number }) {
   );
 }
 
-// ── Main component ────────────────────────────────────────────────────────────
-
 export function StartProjectForm() {
   const [step, setStep] = useState(0);
   const [data, setData] = useState<FormData>(EMPTY);
@@ -282,10 +285,7 @@ export function StartProjectForm() {
     setValidationError("");
   }
 
-  function toggleMulti(
-    key: "servicesInterested" | "assetsAvailable",
-    value: string,
-  ) {
+  function toggleMulti(key: "servicesInterested" | "assetsAvailable", value: string) {
     setData((prev) => {
       const arr = prev[key];
       const next = arr.includes(value) ? arr.filter((v) => v !== value) : [...arr, value];
@@ -298,16 +298,19 @@ export function StartProjectForm() {
       setValidationError("Company name is required.");
       return false;
     }
+
     if (step === 1) {
       if (!data.contactName.trim()) {
         setValidationError("Contact name is required.");
         return false;
       }
+
       if (!data.email.trim() || !data.email.includes("@")) {
         setValidationError("A valid email address is required.");
         return false;
       }
     }
+
     return true;
   }
 
@@ -324,16 +327,23 @@ export function StartProjectForm() {
 
   async function handleSubmit() {
     if (!validate()) return;
+
     setSubmitState("submitting");
     setSubmitError("");
+
     try {
       const res = await fetch("/api/project-inquiries", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
+
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "Submission failed");
+
+      if (!res.ok) {
+        throw new Error(json.error ?? "Submission failed");
+      }
+
       setSubmitState("success");
     } catch (err) {
       setSubmitState("error");
@@ -345,7 +355,6 @@ export function StartProjectForm() {
     }
   }
 
-  // ── Success screen ──────────────────────────────────────────────────────────
   if (submitState === "success") {
     return (
       <div
@@ -367,20 +376,33 @@ export function StartProjectForm() {
         <p className="kxd-eyebrow">Application Received</p>
         <h3
           className="mx-auto mt-5 font-serif font-light"
-          style={{ fontSize: "clamp(1.625rem, 3vw, 2rem)", color: "var(--kxd-cream)", maxWidth: "26rem" }}
+          style={{
+            fontSize: "clamp(1.625rem, 3vw, 2rem)",
+            color: "var(--kxd-cream)",
+            maxWidth: "26rem",
+          }}
         >
           We&rsquo;ll review your application and reach out directly.
         </h3>
         <p
           className="mx-auto mt-5 font-sans font-light"
-          style={{ fontSize: "0.9375rem", lineHeight: 1.75, color: "var(--kxd-cream-muted)", maxWidth: "28rem" }}
+          style={{
+            fontSize: "0.9375rem",
+            lineHeight: 1.75,
+            color: "var(--kxd-cream-muted)",
+            maxWidth: "28rem",
+          }}
         >
           Every application is reviewed personally. If it&rsquo;s the right fit,
           you&rsquo;ll hear from us within 2 business days.
         </p>
         <button
           type="button"
-          onClick={() => { setSubmitState("idle"); setStep(0); setData(EMPTY); }}
+          onClick={() => {
+            setSubmitState("idle");
+            setStep(0);
+            setData(EMPTY);
+          }}
           className="mt-10 font-sans text-[0.6875rem] font-medium uppercase tracking-[0.14em] text-[var(--kxd-gold)] transition hover:text-[var(--kxd-gold-light)]"
         >
           Submit another application
@@ -399,7 +421,6 @@ export function StartProjectForm() {
         border: "1px solid var(--kxd-border-white)",
       }}
     >
-      {/* ── Progress + header ─────────────────────────────────────────────── */}
       <div
         style={{
           padding: "clamp(2rem,4vw,2.75rem) clamp(1.75rem,4vw,2.75rem)",
@@ -407,6 +428,7 @@ export function StartProjectForm() {
         }}
       >
         <ProgressBar step={step} />
+
         <p
           className="font-serif font-light"
           style={{
@@ -419,6 +441,7 @@ export function StartProjectForm() {
         >
           {current.number}
         </p>
+
         <h2
           className="font-serif font-light"
           style={{
@@ -429,6 +452,7 @@ export function StartProjectForm() {
         >
           {current.title}
         </h2>
+
         <p
           className="mt-2 font-serif font-light italic"
           style={{
@@ -440,10 +464,7 @@ export function StartProjectForm() {
         </p>
       </div>
 
-      {/* ── Step content ──────────────────────────────────────────────────── */}
       <div style={{ padding: "clamp(1.75rem,4vw,2.75rem)" }}>
-
-        {/* Step 1 — Company Information */}
         {step === 0 && (
           <div className="space-y-5">
             <TextField
@@ -467,7 +488,6 @@ export function StartProjectForm() {
           </div>
         )}
 
-        {/* Step 2 — Primary Contact */}
         {step === 1 && (
           <div className="space-y-5">
             <TextField
@@ -498,22 +518,38 @@ export function StartProjectForm() {
               placeholder="+1 (555) 000-0000"
               autoComplete="tel"
             />
+
+            <div className="pt-2">
+              <p className={labelCls}>Are you the primary decision maker?</p>
+              <div className="space-y-2">
+                {DECISION_MAKER_OPTIONS.map((opt) => (
+                  <RadioOption
+                    key={opt.value}
+                    label={opt.label}
+                    value={opt.value}
+                    selected={data.decisionMaker === opt.value}
+                    onSelect={(v) => patch({ decisionMaker: v })}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
         )}
 
-        {/* Step 3 — Services Needed */}
         {step === 2 && (
           <div>
             <p
               className="mb-1 font-sans uppercase"
-              style={{ fontSize: "0.5rem", letterSpacing: "var(--tracking-label)", color: "var(--kxd-cream-muted)", opacity: 0.5 }}
+              style={{
+                fontSize: "0.5rem",
+                letterSpacing: "var(--tracking-label)",
+                color: "var(--kxd-cream-muted)",
+                opacity: 0.5,
+              }}
             >
               Select all that apply
             </p>
-            <div
-              className="mt-1 divide-y"
-              style={{ borderColor: "var(--kxd-border-white)" }}
-            >
+            <div className="mt-1 divide-y" style={{ borderColor: "var(--kxd-border-white)" }}>
               {SERVICE_OPTIONS.map((svc) => (
                 <CheckOption
                   key={svc}
@@ -526,7 +562,6 @@ export function StartProjectForm() {
           </div>
         )}
 
-        {/* Step 4 — Business Goals */}
         {step === 3 && (
           <div>
             <label className={labelCls} htmlFor="businessGoals">
@@ -543,7 +578,6 @@ export function StartProjectForm() {
           </div>
         )}
 
-        {/* Step 5 — Investment Range */}
         {step === 4 && (
           <div className="space-y-2">
             {INVESTMENT_OPTIONS.map((opt) => (
@@ -558,7 +592,6 @@ export function StartProjectForm() {
           </div>
         )}
 
-        {/* Step 6 — Desired Timeline */}
         {step === 5 && (
           <div className="space-y-2">
             {TIMELINE_OPTIONS.map((opt) => (
@@ -573,19 +606,20 @@ export function StartProjectForm() {
           </div>
         )}
 
-        {/* Step 7 — Existing Assets */}
         {step === 6 && (
           <div>
             <p
               className="mb-1 font-sans uppercase"
-              style={{ fontSize: "0.5rem", letterSpacing: "var(--tracking-label)", color: "var(--kxd-cream-muted)", opacity: 0.5 }}
+              style={{
+                fontSize: "0.5rem",
+                letterSpacing: "var(--tracking-label)",
+                color: "var(--kxd-cream-muted)",
+                opacity: 0.5,
+              }}
             >
               Select all that apply
             </p>
-            <div
-              className="mt-1 divide-y"
-              style={{ borderColor: "var(--kxd-border-white)" }}
-            >
+            <div className="mt-1 divide-y" style={{ borderColor: "var(--kxd-border-white)" }}>
               {ASSET_OPTIONS.map((asset) => (
                 <CheckOption
                   key={asset}
@@ -598,8 +632,21 @@ export function StartProjectForm() {
           </div>
         )}
 
-        {/* Step 8 — Additional Notes */}
         {step === 7 && (
+          <div className="space-y-2">
+            {REFERRAL_OPTIONS.map((opt) => (
+              <RadioOption
+                key={opt.value}
+                label={opt.label}
+                value={opt.value}
+                selected={data.referralSource === opt.value}
+                onSelect={(v) => patch({ referralSource: v })}
+              />
+            ))}
+          </div>
+        )}
+
+        {step === 8 && (
           <div>
             <label className={labelCls} htmlFor="notes">
               Anything else we should know?
@@ -615,61 +662,43 @@ export function StartProjectForm() {
           </div>
         )}
 
-        {/* ── Validation error ──────────────────────────────────────────────── */}
         {validationError && (
-          <p
-            className="mt-4 font-sans text-sm"
-            role="alert"
-            style={{ color: "#d45c5c" }}
-          >
+          <p className="mt-6 text-sm text-red-300" role="alert">
             {validationError}
           </p>
         )}
+
         {submitState === "error" && submitError && (
-          <p
-            className="mt-4 font-sans text-sm"
-            role="alert"
-            style={{ color: "#d45c5c" }}
-          >
+          <p className="mt-6 text-sm text-red-300" role="alert">
             {submitError}
           </p>
         )}
 
-        {/* ── Navigation ───────────────────────────────────────────────────── */}
-        <div className="mt-8 flex items-center justify-between gap-4">
-          {step > 0 ? (
-            <button
-              type="button"
-              onClick={handleBack}
-              className="font-sans uppercase transition-colors"
-              style={{
-                fontSize: "0.625rem",
-                letterSpacing: "var(--tracking-button)",
-                color: "var(--kxd-cream-muted)",
-              }}
-            >
-              ← Back
-            </button>
-          ) : (
-            <span />
-          )}
+        <div
+          className="mt-10 flex items-center justify-between gap-5 border-t pt-8"
+          style={{ borderColor: "var(--kxd-border-white)" }}
+        >
+          <button
+            type="button"
+            onClick={handleBack}
+            disabled={step === 0 || submitState === "submitting"}
+            className="kxd-ui-label text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)] disabled:pointer-events-none disabled:opacity-30"
+          >
+            Back
+          </button>
 
           {isLastStep ? (
             <button
               type="button"
               onClick={handleSubmit}
               disabled={submitState === "submitting"}
-              className="kxd-btn-primary disabled:opacity-60"
-            >
-              {submitState === "submitting" ? "Submitting…" : "Submit Application"}
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleNext}
               className="kxd-btn-primary"
             >
-              Continue →
+              {submitState === "submitting" ? "Submitting..." : "Submit Application"}
+            </button>
+          ) : (
+            <button type="button" onClick={handleNext} className="kxd-btn-primary">
+              Continue
             </button>
           )}
         </div>
