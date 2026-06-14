@@ -622,9 +622,7 @@ export default async function TodayPage() {
           <div className="flex items-center justify-between gap-4">
 
             <div className="flex items-center gap-4">
-              <Link href="/" aria-label="KXD Home" className="flex items-center" style={{ textDecoration: "none" }}>
-                <KxdLogo />
-              </Link>
+              <KxdLogo />
               <span style={{ color: "rgba(255,255,255,0.1)", fontSize: "0.375rem" }}>◆</span>
               <div>
                 <p style={{
