@@ -486,6 +486,9 @@ export default async function OperationsPage() {
               <p className="hidden sm:block" style={{ fontFamily: C.sans, fontSize: "0.5625rem", letterSpacing: "0.06em", color: "rgba(255,255,255,0.22)" }}>
                 {today}
               </p>
+              <Link href="/admin/operations/today" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.5rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.teal, opacity: 0.8, textDecoration: "none" }}>
+                Today →
+              </Link>
               <Link href="/admin" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.5rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.gold, opacity: 0.55, textDecoration: "none" }}>
                 Payload CMS →
               </Link>
@@ -819,6 +822,7 @@ export default async function OperationsPage() {
           </p>
           <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" as const }}>
             {([
+              ["/admin/operations/today",                  "Today"],
               ["/admin/collections/clients",              "Clients"],
               ["/admin/collections/retainers",            "Retainers"],
               ["/admin/collections/client-projects",      "Projects"],
