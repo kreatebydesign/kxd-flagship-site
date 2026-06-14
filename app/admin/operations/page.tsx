@@ -487,6 +487,9 @@ export default async function OperationsPage() {
               <Link href="/admin/operations/today" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.5rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.teal, opacity: 0.8, textDecoration: "none" }}>
                 Today →
               </Link>
+              <Link href="/admin/operations/growth" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.5rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.gold, opacity: 0.8, textDecoration: "none" }}>
+                Growth →
+              </Link>
               <Link href="/admin" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.5rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.gold, opacity: 0.55, textDecoration: "none" }}>
                 Payload CMS →
               </Link>
@@ -821,11 +824,11 @@ export default async function OperationsPage() {
           <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" as const }}>
             {([
               ["/admin/operations/today",                  "Today"],
-              ["/admin/collections/clients",              "Clients"],
-              ["/admin/collections/retainers",            "Retainers"],
-              ["/admin/collections/client-projects",      "Projects"],
-              ["/admin/collections/monthly-deliverables", "Deliverables"],
-              ["/admin/collections/client-requests",      "Requests"],
+              ["/admin/operations/growth",                 "Growth"],
+              ["/admin/collections/clients",               "Clients"],
+              ["/admin/collections/retainers",             "Retainers"],
+              ["/admin/collections/client-projects",       "Projects"],
+              ["/admin/collections/client-requests",       "Requests"],
             ] as [string, string][]).map(([href, label]) => (
               <Link key={href} href={href} style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: C.gold, opacity: 0.45, textDecoration: "none" }}>
                 {label} →

@@ -664,6 +664,13 @@ export default async function TodayPage() {
               }}>
                 Creative →
               </Link>
+              <Link href="/admin/operations/growth" style={{
+                fontFamily: C.sans, fontWeight: 500, fontSize: "0.5rem",
+                letterSpacing: "0.14em", textTransform: "uppercase",
+                color: C.gold, opacity: 0.8, textDecoration: "none",
+              }}>
+                Growth →
+              </Link>
               <Link href="/admin" style={{
                 fontFamily: C.sans, fontWeight: 500, fontSize: "0.5rem",
                 letterSpacing: "0.14em", textTransform: "uppercase",
@@ -1258,8 +1265,9 @@ export default async function TodayPage() {
           </p>
           <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" as const }}>
             {([
-              ["/admin/operations",         "Operations"],
+              ["/admin/operations",          "Operations"],
               ["/admin/operations/creative", "Creative"],
+              ["/admin/operations/growth",   "Growth"],
               ["/admin",                     "Payload"],
             ] as [string, string][]).map(([href, label]) => (
               <Link key={href} href={href} style={{
