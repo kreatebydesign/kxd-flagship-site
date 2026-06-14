@@ -6,6 +6,7 @@ export const CreativeCampaigns: CollectionConfig = {
   slug: "creative-campaigns",
   labels: { singular: "Campaign", plural: "Campaigns" },
   defaultSort: "-createdAt",
+  lockDocuments: false,
   admin: {
     useAsTitle: "campaignTitle",
     defaultColumns: ["campaignTitle", "client", "campaignType", "status", "priority", "launchDate"],

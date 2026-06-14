@@ -6,6 +6,7 @@ export const ClientRequests: CollectionConfig = {
   slug: "client-requests",
   labels: { singular: "Client Request", plural: "Client Requests" },
   defaultSort: "-createdAt",
+  lockDocuments: false,
   admin: {
     useAsTitle: "requestTitle",
     defaultColumns: ["requestTitle", "client", "requestType", "priority", "status", "dueDate"],

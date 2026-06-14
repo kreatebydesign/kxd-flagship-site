@@ -6,6 +6,7 @@ export const CreativeAssets: CollectionConfig = {
   slug: "creative-assets",
   labels: { singular: "Creative Asset", plural: "Creative Assets" },
   defaultSort: "-createdAt",
+  lockDocuments: false,
   admin: {
     useAsTitle: "assetTitle",
     defaultColumns: ["assetTitle", "client", "assetType", "status", "deadline"],

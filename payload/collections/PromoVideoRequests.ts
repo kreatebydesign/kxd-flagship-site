@@ -6,6 +6,7 @@ export const PromoVideoRequests: CollectionConfig = {
   slug: "promo-video-requests",
   labels: { singular: "Promo Video Request", plural: "Promo Video Requests" },
   defaultSort: "-createdAt",
+  lockDocuments: false,
   admin: {
     useAsTitle: "videoTitle",
     defaultColumns: ["videoTitle", "client", "videoType", "status", "priority", "deadline"],

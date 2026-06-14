@@ -6,6 +6,7 @@ export const ClientProjects: CollectionConfig = {
   slug: "client-projects",
   labels: { singular: "Client Project", plural: "Client Projects" },
   defaultSort: "-createdAt",
+  lockDocuments: false,
   admin: {
     useAsTitle: "projectName",
     defaultColumns: ["projectName", "client", "projectType", "status", "priority", "targetLaunchDate"],

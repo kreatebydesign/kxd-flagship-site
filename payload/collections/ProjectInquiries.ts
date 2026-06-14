@@ -6,6 +6,7 @@ export const ProjectInquiries: CollectionConfig = {
   slug: "project-inquiries",
   labels: { singular: "Project Inquiry", plural: "Project Inquiries" },
   defaultSort: "-createdAt",
+  lockDocuments: false,
   admin: {
     useAsTitle: "companyName",
     defaultColumns: ["companyName", "contactName", "email", "investmentRange", "status", "createdAt"],

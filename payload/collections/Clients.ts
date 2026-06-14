@@ -6,6 +6,7 @@ export const Clients: CollectionConfig = {
   slug: "clients",
   labels: { singular: "Client", plural: "Clients" },
   defaultSort: "name",
+  lockDocuments: false,
   admin: {
     useAsTitle: "name",
     defaultColumns: ["name", "status", "brandTier", "relationshipStatus", "monthlyRetainerAmount"],

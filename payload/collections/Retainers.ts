@@ -6,6 +6,7 @@ export const Retainers: CollectionConfig = {
   slug: "retainers",
   labels: { singular: "Retainer", plural: "Retainers" },
   defaultSort: "-createdAt",
+  lockDocuments: false,
   admin: {
     useAsTitle: "retainerName",
     defaultColumns: ["client", "retainerName", "monthlyAmount", "billingDay", "billingStatus", "nextInvoiceDate"],

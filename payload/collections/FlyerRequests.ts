@@ -6,6 +6,7 @@ export const FlyerRequests: CollectionConfig = {
   slug: "flyer-requests",
   labels: { singular: "Flyer Request", plural: "Flyer Requests" },
   defaultSort: "-createdAt",
+  lockDocuments: false,
   admin: {
     useAsTitle: "flyerTitle",
     defaultColumns: ["flyerTitle", "client", "flyerType", "status", "priority", "deadline"],

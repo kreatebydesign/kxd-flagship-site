@@ -6,6 +6,7 @@ export const BrandKits: CollectionConfig = {
   slug: "brand-kits",
   labels: { singular: "Brand Kit", plural: "Brand Kits" },
   defaultSort: "-createdAt",
+  lockDocuments: false,
   admin: {
     useAsTitle: "brandName",
     defaultColumns: ["brandName", "client", "status", "nextActionDueDate"],

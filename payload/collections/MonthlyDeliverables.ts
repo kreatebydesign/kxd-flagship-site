@@ -6,6 +6,7 @@ export const MonthlyDeliverables: CollectionConfig = {
   slug: "monthly-deliverables",
   labels: { singular: "Monthly Deliverable", plural: "Monthly Deliverables" },
   defaultSort: "-createdAt",
+  lockDocuments: false,
   admin: {
     useAsTitle: "title",
     defaultColumns: ["title", "client", "category", "status", "dueDate", "month", "year"],

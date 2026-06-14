@@ -6,6 +6,7 @@ export const SocialPostRequests: CollectionConfig = {
   slug: "social-post-requests",
   labels: { singular: "Social Post Request", plural: "Social Post Requests" },
   defaultSort: "-createdAt",
+  lockDocuments: false,
   admin: {
     useAsTitle: "postTitle",
     defaultColumns: ["postTitle", "client", "platform", "status", "priority", "scheduledDate"],
