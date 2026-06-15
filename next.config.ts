@@ -16,6 +16,15 @@ const nextConfig: NextConfig = {
     "@payloadcms/db-postgres",
     "@payloadcms/db-sqlite",
     "sharp",
+    // Remotion — contains native Rust compositor binaries; must not be bundled by Next.js
+    "remotion",
+    "@remotion/renderer",
+    "@remotion/bundler",
+    "@remotion/compositor-darwin-arm64",
+    "@remotion/compositor-darwin-x64",
+    "@remotion/compositor-linux-x64-gnu",
+    "@remotion/compositor-linux-x64-musl",
+    "@remotion/compositor-win32-x64-msvc",
   ],
   images: {
     remotePatterns: [

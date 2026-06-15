@@ -98,10 +98,11 @@ export async function POST(req: NextRequest) {
         } as any, // eslint-disable-line @typescript-eslint/no-explicit-any
       });
 
+      const errorDetail = captureResult.errors.join(" | ") || "Unknown capture error";
       return NextResponse.json({
         success: false,
         errors:  captureResult.errors,
-        error:   "Screenshot capture failed. Check that Playwright is installed and the URL is accessible.",
+        error:   `Screenshot capture failed: ${errorDetail}. Check that Playwright is installed (npx playwright install chromium) and the URL is reachable.`,
       }, { status: 500 });
     }
 
@@ -140,16 +141,22 @@ export async function POST(req: NextRequest) {
 
     const combinedIds = [...new Set([...allExisting, ...mediaIds])];
 
+    const screenshotUpdateData: AnyDoc = {
+      capturedScreenshots:   combinedIds,
+      screenshotStatus:      mediaIds.length > 0 ? "complete" : "failed",
+      screenshotsCapturedAt: captureResult.capturedAt,
+      status:                reelDoc.status === "new" ? "storyboarding" : reelDoc.status,
+    };
+    // Only write screenshotError when there is an error message — avoid setting
+    // the column to null explicitly, which can cause issues in some Payload adapters.
+    if (uploadErrors.length > 0) {
+      screenshotUpdateData.screenshotError = uploadErrors.slice(0, 3).join(" | ");
+    }
+
     await payload.update({
       collection: "promo-video-requests" as "clients",
       id: requestId,
-      data: {
-        capturedScreenshots:    combinedIds,
-        screenshotStatus:       mediaIds.length > 0 ? "complete" : "failed",
-        screenshotError:        uploadErrors.length > 0 ? uploadErrors.slice(0, 3).join(" | ") : null,
-        screenshotsCapturedAt:  captureResult.capturedAt,
-        status:                 reelDoc.status === "new" ? "storyboarding" : reelDoc.status,
-      } as any, // eslint-disable-line @typescript-eslint/no-explicit-any
+      data: screenshotUpdateData as any, // eslint-disable-line @typescript-eslint/no-explicit-any
     });
 
     const elapsedMs = Date.now() - startMs;

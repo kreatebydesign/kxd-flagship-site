@@ -13,6 +13,28 @@ export const dynamic = "force-dynamic";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDoc = Record<string, any>;
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+/**
+ * Converts any caught error into a human-readable string.
+ * Surfaces Postgres column/enum/relation errors with a migration hint so the
+ * root cause is immediately visible in the UI — not swallowed as a generic message.
+ */
+function formatError(err: unknown): string {
+  const raw = err instanceof Error ? err.message : String(err);
+
+  if (
+    raw.includes("column") ||
+    raw.includes("enum") ||
+    raw.includes("relation") ||
+    raw.includes("invalid input value")
+  ) {
+    return `Database schema error: ${raw} — ensure migrations are up to date (npm run migrate).`;
+  }
+
+  return raw;
+}
+
 // ── GET ───────────────────────────────────────────────────────────────────────
 
 export async function GET() {
@@ -29,8 +51,9 @@ export async function GET() {
 
     return NextResponse.json({ success: true, docs: result.docs, totalDocs: result.totalDocs });
   } catch (err) {
-    console.error("[KXD Reels] List error:", err);
-    return NextResponse.json({ success: false, error: String(err) }, { status: 500 });
+    const msg = formatError(err);
+    console.error("[KXD Reels] List error:", msg);
+    return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }
 
@@ -81,7 +104,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, id: record.id });
   } catch (err) {
-    console.error("[KXD Reels] Create error:", err);
-    return NextResponse.json({ success: false, error: "Failed to create reel request." }, { status: 500 });
+    const msg = formatError(err);
+    console.error("[KXD Reels] Create error:", msg);
+    return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }

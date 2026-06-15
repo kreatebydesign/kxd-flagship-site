@@ -8,6 +8,9 @@ import * as migration_20260609_kxd_os_phase2a from './20260609_kxd_os_phase2a';
 import * as migration_20260609_retainers_enhance from './20260609_retainers_enhance';
 import * as migration_20260610_kxd_creative_engine from './20260610_kxd_creative_engine';
 import * as migration_20260614_payload_locked_documents_expand from './20260614_payload_locked_documents_expand';
+import * as migration_20260615_phase4a_creative_generation from './20260615_phase4a_creative_generation';
+import * as migration_20260615_phase5a_promo_video_reels from './20260615_phase5a_promo_video_reels';
+import * as migration_20260614_phase5b_reel_renderer from './20260614_phase5b_reel_renderer';
 
 export const migrations = [
   {
@@ -59,5 +62,20 @@ export const migrations = [
     up: migration_20260614_payload_locked_documents_expand.up,
     down: migration_20260614_payload_locked_documents_expand.down,
     name: '20260614_payload_locked_documents_expand',
+  },
+  {
+    up: migration_20260615_phase4a_creative_generation.up,
+    down: migration_20260615_phase4a_creative_generation.down,
+    name: '20260615_phase4a_creative_generation',
+  },
+  {
+    up: migration_20260615_phase5a_promo_video_reels.up,
+    down: migration_20260615_phase5a_promo_video_reels.down,
+    name: '20260615_phase5a_promo_video_reels',
+  },
+  {
+    up: migration_20260614_phase5b_reel_renderer.up,
+    down: migration_20260614_phase5b_reel_renderer.down,
+    name: '20260614_phase5b_reel_renderer',
   },
 ];

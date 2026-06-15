@@ -2,10 +2,12 @@
 
 /**
  * ReelDetailClient.tsx
- * KXD OS — Phase 5A Reel Detail
+ * KXD OS — Phase 5A + 5B Reel Detail
  *
  * Interactive detail view for a single website showcase reel.
- * Allows screenshot capture + storyboard generation + full review.
+ * Step 01: Screenshot capture
+ * Step 02: Storyboard generation
+ * Step 03: MP4 render (Remotion — local dev only; Phase 5C for cloud)
  */
 
 import { useState } from "react";
@@ -185,11 +187,15 @@ export function ReelDetailClient({ doc }: { doc: AnyDoc }) {
   const [screenshotMsg,   setScreenshotMsg]   = useState<string | null>(null);
   const [storyboardState, setStoryboardState] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [storyboardMsg,   setStoryboardMsg]   = useState<string | null>(null);
+  const [renderState,     setRenderState]     = useState<"idle" | "loading" | "done" | "error">("idle");
+  const [renderMsg,       setRenderMsg]       = useState<string | null>(null);
+  const [renderedUrl,     setRenderedUrl]     = useState<string | null>(doc.renderedVideoUrl || null);
 
   const screenshots: AnyDoc[] = Array.isArray(doc.capturedScreenshots) ? doc.capturedScreenshots : [];
   const shotCount   = screenshotCount(doc);
-  const hasStoryboard = doc.storyboardGenerationStatus === "complete" && doc.generatedScript;
+  const hasStoryboard  = doc.storyboardGenerationStatus === "complete" && doc.generatedScript;
   const hasScreenshots = doc.screenshotStatus === "complete" && shotCount > 0;
+  const hasRender      = (doc.renderStatus === "complete" && !!renderedUrl) || !!renderedUrl;
 
   async function captureScreenshots() {
     setScreenshotState("loading");
@@ -238,6 +244,37 @@ export function ReelDetailClient({ doc }: { doc: AnyDoc }) {
     } catch (err) {
       setStoryboardState("error");
       setStoryboardMsg(`Network error: ${String(err)}`);
+    }
+  }
+
+  async function renderReel(manifestOnly = false) {
+    setRenderState("loading");
+    setRenderMsg(null);
+    try {
+      const res  = await fetch("/api/admin/reels/render", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ reelRequestId: doc.id, manifestOnly }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        if (data.manifestOnly) {
+          setRenderState("done");
+          setRenderMsg("Render manifest generated. Check the console or Payload record for the CLI command.");
+          console.log("[KXD Reel Manifest]", JSON.stringify(data.manifest, null, 2));
+        } else {
+          setRenderState("done");
+          const url = data.renderedVideoUrl || data.servedUrl;
+          setRenderedUrl(url);
+          setRenderMsg(`MP4 rendered in ${Math.round(data.durationMs / 1000)}s — ${data.frameCount} frames. Refresh to confirm.`);
+        }
+      } else {
+        setRenderState("error");
+        setRenderMsg(data.error || "Render failed.");
+      }
+    } catch (err) {
+      setRenderState("error");
+      setRenderMsg(`Network error: ${String(err)}`);
     }
   }
 
@@ -305,7 +342,7 @@ export function ReelDetailClient({ doc }: { doc: AnyDoc }) {
         </Panel>
 
         {/* ── Action panel ────────────────────────────────────────────────── */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1rem" }}>
 
           {/* Screenshot action */}
           <Panel accent={!hasScreenshots}>
@@ -414,7 +451,178 @@ export function ReelDetailClient({ doc }: { doc: AnyDoc }) {
               </p>
             )}
           </Panel>
+
+          {/* MP4 render action */}
+          <Panel accent={hasStoryboard && hasScreenshots && !hasRender}>
+            <SectionLabel>Step 03 — Generate MP4</SectionLabel>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1rem" }}>
+              <div>
+                <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: C.cream, marginBottom: "0.375rem" }}>
+                  {hasRender ? "MP4 rendered" : "No render yet"}
+                </p>
+                <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: "rgba(255,255,255,0.3)", lineHeight: 1.5 }}>
+                  Remotion renders screenshots + storyboard into a downloadable MP4 (local dev only — Phase 5C for cloud).
+                </p>
+              </div>
+              <StatusBadge
+                label={
+                  renderState === "loading" ? "rendering"
+                  : doc.renderStatus === "complete" ? "complete"
+                  : doc.renderStatus || "idle"
+                }
+                color={
+                  renderState === "loading" || doc.renderStatus === "rendering" ? C.gold
+                  : (doc.renderStatus === "complete" || renderState === "done") ? C.green
+                  : doc.renderStatus === "failed" || renderState === "error" ? C.red
+                  : C.goldDim
+                }
+              />
+            </div>
+
+            {/* Render button */}
+            <button
+              onClick={() => renderReel(false)}
+              disabled={renderState === "loading" || !hasScreenshots}
+              style={{
+                fontFamily:    C.sans,
+                fontWeight:    500,
+                fontSize:      "0.5rem",
+                letterSpacing: "0.14em",
+                textTransform: "uppercase" as const,
+                color:         C.bgBase,
+                background:    renderState === "loading" || !hasScreenshots
+                  ? "rgba(197,166,92,0.4)"
+                  : "linear-gradient(180deg, #d1b06b 0%, #c5a65c 48%, #b09040 100%)",
+                border:        "none",
+                padding:       "0.75rem 1.5rem",
+                cursor:        renderState === "loading" || !hasScreenshots ? "not-allowed" : "pointer",
+                width:         "100%",
+                marginBottom:  "0.5rem",
+              }}
+            >
+              {renderState === "loading"
+                ? "Rendering… (may take 1–2 min)"
+                : hasRender
+                ? "Re-render MP4"
+                : "Generate MP4"}
+            </button>
+
+            {/* Manifest-only fallback button */}
+            <button
+              onClick={() => renderReel(true)}
+              disabled={renderState === "loading"}
+              style={{
+                fontFamily:    C.sans,
+                fontSize:      "0.4375rem",
+                letterSpacing: "0.12em",
+                textTransform: "uppercase" as const,
+                color:         C.goldDim,
+                background:    "transparent",
+                border:        `1px solid ${C.borderGold}`,
+                padding:       "0.5rem 1rem",
+                cursor:        renderState === "loading" ? "not-allowed" : "pointer",
+                width:         "100%",
+              }}
+            >
+              Export Render Manifest (CLI)
+            </button>
+
+            {!hasScreenshots && (
+              <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: "rgba(255,255,255,0.25)", marginTop: "0.625rem" }}>
+                Capture screenshots first to unlock rendering.
+              </p>
+            )}
+
+            {renderMsg && (
+              <p style={{
+                fontFamily: C.sans,
+                fontSize:   "0.5rem",
+                lineHeight: 1.5,
+                marginTop:  "0.75rem",
+                color:      renderState === "error" ? C.red : C.green,
+              }}>
+                {renderMsg}
+              </p>
+            )}
+
+            {doc.renderDurationMs && (
+              <p style={{ fontFamily: C.sans, fontSize: "0.375rem", color: "rgba(255,255,255,0.18)", marginTop: "0.375rem" }}>
+                Last render: {Math.round(doc.renderDurationMs / 1000)}s · v{doc.renderVersion || 1}
+              </p>
+            )}
+          </Panel>
         </div>
+
+        {/* ── Download / preview rendered video ───────────────────────────── */}
+        {renderedUrl && (
+          <Panel accent>
+            <SectionLabel>Rendered MP4 — Ready to Download</SectionLabel>
+            <div style={{ display: "flex", alignItems: "center", gap: "1.25rem", flexWrap: "wrap" as const }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ fontFamily: "monospace", fontSize: "0.5rem", color: C.goldDim, marginBottom: "0.375rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>
+                  {renderedUrl}
+                </p>
+                <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: "rgba(255,255,255,0.25)" }}>
+                  Served from public/generated-reels/ in local dev. Upload to CDN for production delivery.
+                </p>
+              </div>
+              <div style={{ display: "flex", gap: "0.5rem", flexShrink: 0 }}>
+                <a
+                  href={renderedUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    fontFamily:    C.sans,
+                    fontWeight:    500,
+                    fontSize:      "0.5rem",
+                    letterSpacing: "0.14em",
+                    textTransform: "uppercase" as const,
+                    color:         C.bgBase,
+                    background:    "linear-gradient(180deg, #d1b06b 0%, #c5a65c 48%, #b09040 100%)",
+                    padding:       "0.625rem 1.25rem",
+                    textDecoration:"none",
+                    display:       "inline-block",
+                  }}
+                >
+                  View MP4 ↗
+                </a>
+                <a
+                  href={renderedUrl}
+                  download
+                  style={{
+                    fontFamily:    C.sans,
+                    fontSize:      "0.5rem",
+                    letterSpacing: "0.14em",
+                    textTransform: "uppercase" as const,
+                    color:         C.goldDim,
+                    background:    "transparent",
+                    border:        `1px solid ${C.borderGold}`,
+                    padding:       "0.625rem 1.25rem",
+                    textDecoration:"none",
+                    display:       "inline-block",
+                  }}
+                >
+                  Download
+                </a>
+              </div>
+            </div>
+          </Panel>
+        )}
+
+        {/* ── Render error ─────────────────────────────────────────────────── */}
+        {doc.renderError && doc.renderStatus === "failed" && (
+          <div style={{ padding: "0.875rem 1.25rem", background: "rgba(210,90,90,0.08)", border: "1px solid rgba(210,90,90,0.3)" }}>
+            <p style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.1em", textTransform: "uppercase" as const, color: C.red, marginBottom: "0.375rem" }}>
+              Render Error
+            </p>
+            <p style={{ fontFamily: C.sans, fontSize: "0.75rem", color: C.red }}>
+              {doc.renderError}
+            </p>
+            <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: "rgba(255,255,255,0.25)", marginTop: "0.5rem", lineHeight: 1.5 }}>
+              Common fixes: ensure <code>npx playwright install chromium</code> has been run and the Next.js dev server is accessible at localhost:3000 during rendering.
+            </p>
+          </div>
+        )}
 
         {/* ── Hook ────────────────────────────────────────────────────────── */}
         {doc.reelHook && (

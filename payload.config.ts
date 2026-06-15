@@ -111,6 +111,12 @@ export default buildConfig({
         pool: {
           connectionString: databaseUri,
         },
+        // push: false prevents Drizzle's dev-mode schema-push from running.
+        // Drizzle push generates invalid DDL against Neon Postgres:
+        //   ALTER TABLE "creative_campaigns_platforms" ALTER COLUMN "id" SET DATA TYPE serial
+        // `serial` is a CREATE-time pseudo-type — not valid in ALTER COLUMN SET DATA TYPE.
+        // All schema changes go through explicit migrations (npm run migrate).
+        push: false,
         // migrationDir kept for CLI use (npm run migrate).
         // prodMigrations intentionally removed — all migrations have been
         // applied manually and are confirmed in the payload_migrations table.

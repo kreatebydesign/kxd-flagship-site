@@ -252,6 +252,51 @@ export const PromoVideoRequests: CollectionConfig = {
           ],
         },
 
+        // ── Render ────────────────────────────────────────────────────────────
+        {
+          label: "Render",
+          admin: { description: "Phase 5B — MP4 render output via Remotion. Local render MVP; cloud/production is Phase 5C." },
+          fields: [
+            {
+              name: "renderedVideoUrl",
+              type: "text",
+              label: "Rendered Video URL",
+              admin: { description: "Path to the rendered MP4 file (e.g. /generated-reels/kxd-reel-42-v1.mp4 in local dev, or a CDN URL in production)." },
+            },
+            {
+              name: "renderedVideoAsset",
+              type: "relationship",
+              relationTo: "media",
+              label: "Rendered Video Asset",
+              admin: { description: "Optional Media record created after the MP4 is uploaded to Payload." },
+            },
+            {
+              name: "renderStartedAt",
+              type: "date",
+              label: "Render Started At",
+              admin: { date: { pickerAppearance: "dayAndTime" } },
+            },
+            {
+              name: "renderCompletedAt",
+              type: "date",
+              label: "Render Completed At",
+              admin: { date: { pickerAppearance: "dayAndTime" } },
+            },
+            {
+              name: "renderError",
+              type: "text",
+              label: "Render Error",
+              admin: { description: "Last render error message, if any." },
+            },
+            {
+              name: "renderDurationMs",
+              type: "number",
+              label: "Render Duration (ms)",
+              admin: { description: "Wall-clock time for the last successful render, in milliseconds." },
+            },
+          ],
+        },
+
         // ── Internal ──────────────────────────────────────────────────────────
         {
           label: "Internal",
@@ -304,6 +349,33 @@ export const PromoVideoRequests: CollectionConfig = {
       admin: {
         position: "sidebar",
         description: "Marks this record as a website showcase reel — surfaces it in the Reels Generator dashboard.",
+      },
+    },
+    // ── Phase 5B: Render status ────────────────────────────────────────────
+    {
+      name: "renderStatus",
+      type: "select",
+      label: "Render Status",
+      defaultValue: "idle",
+      options: [
+        { label: "Idle",      value: "idle" },
+        { label: "Rendering", value: "rendering" },
+        { label: "Complete",  value: "complete" },
+        { label: "Failed",    value: "failed" },
+      ],
+      admin: {
+        position: "sidebar",
+        description: "MP4 render status (Phase 5B).",
+      },
+    },
+    {
+      name: "renderVersion",
+      type: "number",
+      label: "Render Version",
+      defaultValue: 0,
+      admin: {
+        position: "sidebar",
+        description: "Increments on each successful render.",
       },
     },
   ],
