@@ -340,9 +340,14 @@ export default async function Page() {
               <p style={{ fontSize: "0.7rem", opacity: 0.5 }}>KXD OS Command Center</p>
             </div>
           </div>
-          <Link href="/admin/operations" style={{ color: C.goldDim, fontSize: "0.6rem" }}>
-            ← Operations
-          </Link>
+          <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+            <Link href="/admin/operations" style={{ color: C.goldDim, fontSize: "0.6rem", textDecoration: "none" }}>
+              ← Operations
+            </Link>
+            <Link href="/admin/operations/accounts" style={{ color: "#b48cdc", fontSize: "0.6rem", textDecoration: "none", opacity: 0.8 }}>
+              Accounts →
+            </Link>
+          </div>
         </div>
       </div>
 

@@ -671,6 +671,13 @@ export default async function TodayPage() {
               }}>
                 Growth →
               </Link>
+              <Link href="/admin/operations/accounts" style={{
+                fontFamily: C.sans, fontWeight: 500, fontSize: "0.5rem",
+                letterSpacing: "0.14em", textTransform: "uppercase",
+                color: C.purple, opacity: 0.8, textDecoration: "none",
+              }}>
+                Accounts →
+              </Link>
               <Link href="/admin" style={{
                 fontFamily: C.sans, fontWeight: 500, fontSize: "0.5rem",
                 letterSpacing: "0.14em", textTransform: "uppercase",
@@ -1214,6 +1221,7 @@ export default async function TodayPage() {
             {([
               { label: "Log Request",     sub: "New client request",   href: "/admin/operations/requests/new" },
               { label: "Operations Hub",  sub: "Command center",       href: "/admin/operations" },
+              { label: "Accounts",        sub: "Strategic intelligence", href: "/admin/operations/accounts" },
               { label: "Creative Engine", sub: "Campaigns & assets",   href: "/admin/operations/creative" },
               { label: "Payload CMS",     sub: "Content & data",       href: "/admin" },
               { label: "All Requests",    sub: "Client requests",      href: "/admin/collections/client-requests" },
@@ -1265,9 +1273,10 @@ export default async function TodayPage() {
           </p>
           <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" as const }}>
             {([
-              ["/admin/operations",          "Operations"],
+              ["/admin/operations",           "Operations"],
               ["/admin/operations/creative", "Creative"],
               ["/admin/operations/growth",   "Growth"],
+              ["/admin/operations/accounts", "Accounts"],
               ["/admin",                     "Payload"],
             ] as [string, string][]).map(([href, label]) => (
               <Link key={href} href={href} style={{
