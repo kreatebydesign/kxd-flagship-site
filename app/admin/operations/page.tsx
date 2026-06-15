@@ -493,6 +493,9 @@ export default async function OperationsPage() {
               <Link href="/admin/operations/accounts" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.5rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.purple, opacity: 0.8, textDecoration: "none" }}>
                 Accounts →
               </Link>
+              <Link href="/admin/operations/founder" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.5rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.gold, opacity: 0.8, textDecoration: "none" }}>
+                Founder →
+              </Link>
               <Link href="/admin" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.5rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.gold, opacity: 0.55, textDecoration: "none" }}>
                 Payload CMS →
               </Link>
@@ -829,6 +832,7 @@ export default async function OperationsPage() {
               ["/admin/operations/today",                  "Today"],
               ["/admin/operations/growth",                 "Growth"],
               ["/admin/operations/accounts",               "Accounts"],
+              ["/admin/operations/founder",                "Founder"],
               ["/admin/collections/clients",               "Clients"],
               ["/admin/collections/retainers",             "Retainers"],
               ["/admin/collections/client-projects",       "Projects"],

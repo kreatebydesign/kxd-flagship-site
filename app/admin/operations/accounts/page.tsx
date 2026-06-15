@@ -551,6 +551,9 @@ export default async function AccountsPage() {
               <Link href="/admin/operations/creative" style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.3)", textDecoration: "none" }}>
                 Creative →
               </Link>
+              <Link href="/admin/operations/founder" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.5rem", letterSpacing: "0.14em", textTransform: "uppercase" as const, color: C.gold, opacity: 0.8, textDecoration: "none" }}>
+                Founder →
+              </Link>
               <Link href="/admin" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.5rem", letterSpacing: "0.14em", textTransform: "uppercase" as const, color: C.gold, opacity: 0.55, textDecoration: "none" }}>
                 Payload →
               </Link>
@@ -1174,10 +1177,11 @@ export default async function AccountsPage() {
           </p>
           <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" as const }}>
             {([
-              ["/admin/operations",          "Operations"],
+              ["/admin/operations",           "Operations"],
               ["/admin/operations/today",    "Today"],
               ["/admin/operations/growth",   "Growth"],
               ["/admin/operations/creative", "Creative"],
+              ["/admin/operations/founder",  "Founder"],
               ["/admin/collections/clients", "Clients"],
               ["/admin/collections/retainers", "Retainers"],
               ["/admin",                     "Payload"],

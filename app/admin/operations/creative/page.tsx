@@ -347,6 +347,9 @@ export default async function Page() {
             <Link href="/admin/operations/accounts" style={{ color: "#b48cdc", fontSize: "0.6rem", textDecoration: "none", opacity: 0.8 }}>
               Accounts →
             </Link>
+            <Link href="/admin/operations/founder" style={{ color: "#C5A65C", fontSize: "0.6rem", textDecoration: "none", opacity: 0.8 }}>
+              Founder →
+            </Link>
           </div>
         </div>
       </div>

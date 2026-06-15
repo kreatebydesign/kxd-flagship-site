@@ -766,6 +766,13 @@ export default async function GrowthPage() {
               }}>
                 Accounts →
               </Link>
+              <Link href="/admin/operations/founder" style={{
+                fontFamily: C.sans, fontWeight: 500, fontSize: "0.5rem",
+                letterSpacing: "0.14em", textTransform: "uppercase",
+                color: C.gold, opacity: 0.8, textDecoration: "none",
+              }}>
+                Founder →
+              </Link>
               <Link href="/admin" style={{
                 fontFamily: C.sans, fontWeight: 500, fontSize: "0.5rem",
                 letterSpacing: "0.14em", textTransform: "uppercase",
@@ -1565,6 +1572,7 @@ export default async function GrowthPage() {
               { label: "Operations Hub",      sub: "Command center",        href: "/admin/operations" },
               { label: "Today",               sub: "Daily command center",  href: "/admin/operations/today" },
               { label: "Accounts",            sub: "Strategic intelligence", href: "/admin/operations/accounts" },
+              { label: "Founder",             sub: "Command center",         href: "/admin/operations/founder" },
               { label: "Creative Engine",     sub: "Campaigns & assets",    href: "/admin/operations/creative" },
               { label: "Payload CMS",         sub: "Content & data",        href: "/admin" },
               { label: "Start Project",       sub: "Public intake form",    href: "/start-project" },
@@ -1615,6 +1623,7 @@ export default async function GrowthPage() {
               ["/admin/operations/today",    "Today"],
               ["/admin/operations/creative", "Creative"],
               ["/admin/operations/accounts", "Accounts"],
+              ["/admin/operations/founder",  "Founder"],
               ["/admin",                     "Payload"],
             ] as [string, string][]).map(([href, label]) => (
               <Link key={href} href={href} style={{
