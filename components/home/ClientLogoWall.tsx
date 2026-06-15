@@ -1,6 +1,18 @@
 import Image from "next/image";
 import { CLIENT_LOGOS } from "@/lib/homepage";
 
+/**
+ * Height classes keyed by size tier.
+ * Baseline (unset): h-7 / sm:h-8 → 28px / 32px
+ */
+const LOGO_SIZE_CLASSES: Record<string, string> = {
+  md:    "h-[2.125rem] w-auto object-contain sm:h-10",
+  lg:    "h-9 w-auto object-contain sm:h-[2.625rem]",
+  xl:    "h-[2.375rem] w-auto object-contain sm:h-11",
+  "2xl": "h-10 w-auto object-contain sm:h-12",
+};
+const LOGO_DEFAULT_CLASS = "h-7 w-auto object-contain sm:h-8";
+
 export function ClientLogoWall() {
   return (
     <section
@@ -34,16 +46,26 @@ export function ClientLogoWall() {
               key={logo.name}
               className="kxd-logo-item"
               style={{
-                borderRight: "1px solid var(--kxd-border-white)",
+                borderRight:  "1px solid var(--kxd-border-white)",
                 borderBottom: "1px solid var(--kxd-border-white)",
+                overflow: "hidden",
               }}
             >
               <Image
                 src={logo.src}
                 alt={logo.name}
-                width={100}
-                height={40}
-                className="h-7 w-auto object-contain sm:h-8"
+                width={140}
+                height={56}
+                className={
+                  logo.size
+                    ? LOGO_SIZE_CLASSES[logo.size]
+                    : LOGO_DEFAULT_CLASS
+                }
+                style={
+                  logo.scale
+                    ? { transform: `scale(${logo.scale})`, transformOrigin: "center" }
+                    : undefined
+                }
               />
             </div>
           ))}

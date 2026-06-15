@@ -1,29 +1,29 @@
 import Link from "next/link";
 
-const OUTCOMES = [
+const CAPABILITIES = [
   {
-    category: "Motorsports",
-    headline: "Operational ecosystems built for performance.",
+    category: "Websites",
+    headline: "Websites designed to be remembered.",
     result:
-      "We unify public-facing experiences, driver operations, CRM architecture, and internal systems into a single ecosystem designed to support growth on and off the track.",
+      "We create digital experiences that build trust, shape perception, and help businesses stand apart.",
   },
   {
-    category: "Hospitality",
-    headline: "Experiences that establish trust before arrival.",
+    category: "Branding",
+    headline: "Brands built with intention.",
     result:
-      "Premium hospitality brands require more than beautiful visuals. We align perception, guest expectations, and operational readiness from the very first interaction.",
+      "Identity systems designed to create clarity, recognition, and lasting impact.",
   },
   {
-    category: "Automotive",
-    headline: "Digital experiences that qualify opportunities.",
+    category: "Systems",
+    headline: "Systems built to scale.",
     result:
-      "We help automotive brands translate craftsmanship and credibility into stronger positioning that attracts better-fit clients and more intentional conversations.",
+      "Operational infrastructure, automations, and internal tools designed to support growth behind the scenes.",
   },
   {
-    category: "Growth Infrastructure",
-    headline: "Systems designed to support expansion.",
+    category: "Partnership",
+    headline: "Partnerships built for what's next.",
     result:
-      "From CRM workflows to inquiry architecture and operational tooling, we create foundations that enable businesses to grow without unnecessary complexity.",
+      "Ongoing creative and strategic support for businesses committed to long-term growth.",
   },
 ] as const;
 
@@ -39,7 +39,7 @@ export function OutcomesSection() {
       <div className="kxd-container">
         <div className="mb-14 grid gap-5 lg:grid-cols-[1fr_auto] lg:items-end">
           <div>
-            <p className="kxd-eyebrow">Outcomes</p>
+            <p className="kxd-eyebrow">Capabilities</p>
 
             <h2
               className="kxd-serif-title mt-4"
@@ -48,7 +48,7 @@ export function OutcomesSection() {
                 maxWidth: "26rem",
               }}
             >
-              Success measured beyond launch.
+              Built for every stage of your growth.
             </h2>
 
             <p
@@ -58,17 +58,17 @@ export function OutcomesSection() {
                 lineHeight: 1.85,
               }}
             >
-              KXD measures success by what the work enables: stronger positioning,
-              cleaner operations, higher-quality opportunities, and systems that
-              continue creating value long after launch.
+              KXD builds the website, the brand, and the systems behind it.
+              Every engagement is structured to create output that compounds
+              in value long after the work is delivered.
             </p>
           </div>
 
           <Link
-            href="/work"
+            href="/services"
             className="kxd-ui-label inline-flex items-center gap-2 self-end text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)]"
           >
-            Explore Case Studies
+            Explore Capabilities
             <span
               aria-hidden
               className="transition-transform duration-300 group-hover:translate-x-1"
@@ -81,9 +81,9 @@ export function OutcomesSection() {
         <div className="kxd-gold-rule" />
 
         <div>
-          {OUTCOMES.map((outcome, i) => (
+          {CAPABILITIES.map((item, i) => (
             <div
-              key={outcome.category}
+              key={item.category}
               className="grid gap-6 py-10 lg:grid-cols-[12rem_1fr]"
               style={{
                 borderTop:
@@ -99,7 +99,7 @@ export function OutcomesSection() {
                     color: "var(--kxd-gold)",
                   }}
                 >
-                  {outcome.category}
+                  {item.category}
                 </p>
               </div>
 
@@ -117,7 +117,7 @@ export function OutcomesSection() {
                     maxWidth: "32rem",
                   }}
                 >
-                  {outcome.headline}
+                  {item.headline}
                 </h3>
 
                 <p
@@ -129,7 +129,7 @@ export function OutcomesSection() {
                     maxWidth: "52rem",
                   }}
                 >
-                  {outcome.result}
+                  {item.result}
                 </p>
               </div>
             </div>
@@ -197,10 +197,10 @@ export function OutcomesSection() {
               maxWidth: "46rem",
             }}
           >
-            KXD doesn't chase vanity metrics. We focus on the outcomes that
-            matter most: trust, perception, operational clarity, conversion
-            quality, and the long-term strength of the systems supporting the
-            brand.
+            KXD doesn&apos;t chase vanity metrics. We focus on the outcomes
+            that matter most: trust, perception, operational clarity,
+            conversion quality, and the long-term strength of the systems
+            supporting the brand.
           </p>
         </div>
       </div>

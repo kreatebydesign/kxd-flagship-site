@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { HeroCursorGlow } from "./HeroCursorGlow";
 
 /**
  * KXD Hero — Cinematic Video Framework
@@ -53,8 +54,12 @@ const PROOF_POINTS = [
   "Built for brands ready to grow intentionally.",
 ];
 
-// SVG feTurbulence grain — industry standard luxury texture, embedded inline
-const GRAIN_SVG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grain)'/%3E%3C/svg%3E")`;
+/*
+ * Grain texture — luxury film grain, embedded inline SVG.
+ * baseFrequency 0.75 / numOctaves 5: finer, more natural film depth.
+ * Rendered at 2.8% opacity — felt not seen.
+ */
+const GRAIN_SVG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grain)'/%3E%3C/svg%3E")`;
 
 export function HeroSection() {
   return (
@@ -75,12 +80,23 @@ export function HeroSection() {
           </video>
       */}
 
-      {/* Grain — restrained film texture, 3.5% opacity. The mark of premium print. */}
+      {/*
+       * Cursor ambient glow — desktop only (hidden via CSS on touch / <1024px).
+       * Soft KXD gold warmth follows the cursor with ~700ms lag.
+       * Placed first so all content layers render above it.
+       */}
+      <HeroCursorGlow />
+
+      {/*
+       * Grain — luxury film texture, 2.8% opacity.
+       * feTurbulence fractalNoise: photographic, not digital.
+       * The mark of premium print applied to screen. Felt, not seen.
+       */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
         style={{
-          opacity: 0.035,
+          opacity: 0.028,
           backgroundImage: GRAIN_SVG,
           backgroundSize: "200px 200px",
           backgroundRepeat: "repeat",
@@ -129,16 +145,19 @@ export function HeroSection() {
         >
 
           {/*
-           * Headline — editorial serif, two lines, intentional measure
+           * Headline — editorial serif, two lines, intentional measure.
            *
            * "Designed to Be Remembered. Built to Perform."
            *
            * Line 1 fills ~84% of container at 1440px (Pentagram asymmetry).
            * Line 2 fills ~53% — the breathing room to the right is the design.
-           * Size is deliberately moderate (5vw) — luxury is restraint, not scale.
+           * Size is deliberately moderate (5.5vw) — luxury is restraint, not scale.
+           *
+           * Animation: kxd-hero-headline-reveal overrides the generic reveal timing
+           * with easeOutCubic (1.05s) — same keyframe, gentler curve. Single unit.
            */}
           <h1
-            className="kxd-reveal kxd-reveal-delay-1 select-none font-serif font-light"
+            className="kxd-reveal kxd-hero-headline-reveal select-none font-serif font-light"
             style={{
               fontSize: "clamp(3.5rem, 5.5vw, 5.5rem)",
               lineHeight: 1.12,
@@ -151,9 +170,8 @@ export function HeroSection() {
           </h1>
 
           {/*
-           * Subheadline — provides explicit product clarity in one sentence.
+           * Subheadline — explicit product clarity in one sentence.
            * Sans-serif at small scale creates contrast against the display serif.
-           * Maximum 2 lines. No explaining, no selling.
            */}
           <p
             className="kxd-reveal kxd-reveal-delay-2 font-sans font-light"
@@ -166,7 +184,7 @@ export function HeroSection() {
               marginTop: "clamp(3.5rem, 5.5vw, 5rem)",
             }}
           >
-            Websites designed to be remembered. Systems built to perform.
+            Thoughtfully crafted digital experiences for businesses building what&rsquo;s next.
           </p>
 
           {/* CTAs — generous gap above. Two options, equal visual weight. */}
@@ -186,7 +204,13 @@ export function HeroSection() {
                 color: "var(--kxd-cream-muted)",
               }}
             >
-              <span className="transition-colors duration-200 group-hover:text-[var(--kxd-cream)]">
+              {/*
+               * kxd-cta-work-text: CSS ::after draws a gold line that extends
+               * width 0→100% on .group:hover. Understated luxury interaction.
+               */}
+              <span
+                className="kxd-cta-work-text transition-colors duration-200 group-hover:text-[var(--kxd-cream)]"
+              >
                 View Selected Work
               </span>
               <span
@@ -204,7 +228,7 @@ export function HeroSection() {
         <div className="flex-1" style={{ minHeight: "clamp(4rem, 6vh, 5rem)" }} />
       </div>
 
-      {/* ── Reel strip — client work thumbnails, silent proof. Opacity reduced so hero remains dominant. ── */}
+      {/* ── Reel strip — client work thumbnails, silent proof. ── */}
       <div
         aria-hidden
         className="kxd-reveal kxd-reveal-delay-5 relative z-[1] overflow-hidden"

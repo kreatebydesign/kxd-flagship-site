@@ -779,6 +779,70 @@ main {
 .kxd-reveal-delay-5 { animation-delay: 820ms; }
 .kxd-reveal-delay-6 { animation-delay: 1000ms; }
 
+/*
+ * Hero headline — dedicated reveal timing.
+ * Overrides animation-timing-function and duration set by kxd-reveal.
+ * easeOutCubic (0.33 1 0.68 1): gentler, more editorial than the default
+ * expo-out. 1.05s duration. No bounce, no stagger — single unit reveal.
+ */
+.kxd-hero-headline-reveal {
+  animation-duration: 1.05s;
+  animation-timing-function: cubic-bezier(0.33, 1, 0.68, 1);
+  animation-delay: 80ms;
+}
+
+/*
+ * Cursor ambient glow — desktop only, KXD gold 4% opacity.
+ * Positioned so transform: translate3d(x, y, 0) centers the glow on cursor.
+ * Shown only on pointer devices at ≥1024px viewport width.
+ */
+.kxd-cursor-glow {
+  position: absolute;
+  top: -22rem;
+  left: -22rem;
+  width: 44rem;
+  height: 44rem;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(197, 166, 92, 0.04) 0%,
+    rgba(197, 166, 92, 0.012) 45%,
+    transparent 70%
+  );
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  pointer-events: none;
+  z-index: 1;
+}
+
+@media (max-width: 1023px), (hover: none) {
+  .kxd-cursor-glow { display: none; }
+}
+
+/*
+ * "View Selected Work" CTA — gold underline extends left→right on hover.
+ * Appears only when the parent group is hovered (class="group" on <Link>).
+ */
+.kxd-cta-work-text {
+  position: relative;
+}
+
+.kxd-cta-work-text::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  height: 1px;
+  width: 0;
+  background: var(--kxd-gold);
+  opacity: 0.75;
+  transition: width 0.45s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.group:hover .kxd-cta-work-text::after {
+  width: 100%;
+}
+
 /* Atmosphere fade in once — cinematic preroll */
 .kxd-atmosphere-enter {
   animation: kxd-fade 2s var(--ease-enter) both;
@@ -853,6 +917,7 @@ main {
   .kxd-atmosphere-breathe  { animation: none; }
   .kxd-atmosphere-enter    { animation: none; }
   .kxd-reel-track          { animation: none; }
+  .kxd-cursor-glow         { display: none; }
   .kxd-btn-primary:hover   { transform: none; }
   .kxd-case-card:hover .kxd-case-card__image-wrap img { transform: none; }
   .kxd-mega-menu  { transition: none; }
