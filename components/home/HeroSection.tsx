@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { SITE } from "@/lib/site";
 
 /**
  * KXD Hero — Cinematic Video Framework
@@ -48,6 +47,15 @@ const REEL_FRAMES = [
 
 const REEL_DOUBLED = [...REEL_FRAMES, ...REEL_FRAMES];
 
+const PROOF_POINTS = [
+  "Websites that convert attention into demand.",
+  "Systems that remove operational friction.",
+  "Built for brands ready to grow intentionally.",
+];
+
+// SVG feTurbulence grain — industry standard luxury texture, embedded inline
+const GRAIN_SVG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grain)'/%3E%3C/svg%3E")`;
+
 export function HeroSection() {
   return (
     <section
@@ -67,38 +75,32 @@ export function HeroSection() {
           </video>
       */}
 
+      {/* Grain — restrained film texture, 3.5% opacity. The mark of premium print. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{
+          opacity: 0.035,
+          backgroundImage: GRAIN_SVG,
+          backgroundSize: "200px 200px",
+          backgroundRepeat: "repeat",
+        }}
+      />
+
+      {/* Ambient warmth — positioned at headline origin, breathes at 16s cycle */}
       <div
         aria-hidden
         className="kxd-atmosphere-breathe pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(circle at center, rgba(197,166,92,0.08), transparent 60%)",
+            "radial-gradient(ellipse 65% 48% at 26% 38%, rgba(197,166,92,0.048), transparent 74%)",
         }}
       />
 
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(circle at 50% 20%, rgba(255,255,255,0.025), transparent 70%)",
-        }}
-      />
-
-      <div
-        aria-hidden
-        className="kxd-atmosphere-enter pointer-events-none absolute inset-0"
-        style={{
-          background: [
-            "radial-gradient(ellipse 18% 80% at 50% -10%, rgba(197,166,92,0.060) 0%, transparent 50%)",
-            "radial-gradient(ellipse 9% 58% at 34% -8%, rgba(197,166,92,0.024) 0%, transparent 48%)",
-            "radial-gradient(ellipse 9% 58% at 66% -8%, rgba(197,166,92,0.018) 0%, transparent 48%)",
-          ].join(", "),
-        }}
-      />
-
+      {/* Vignette — edge darkening only, adds perceived depth */}
       <div aria-hidden className="kxd-vignette pointer-events-none absolute inset-0" />
 
+      {/* Bottom fade into reel strip */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 z-[2]"
@@ -110,158 +112,99 @@ export function HeroSection() {
         }}
       />
 
+      {/*
+       * ── Main content ──
+       *
+       * Layout intent: content anchored from the top, sits at ~38–42% vertical
+       * position (slightly above centre). The void below the CTAs is intentional —
+       * expensive design breathes. The reel strip at the bottom keeps the eye moving.
+       */}
       <div
-        className="relative z-10 flex flex-1 flex-col items-center justify-center px-6 text-center"
-        style={{
-          paddingBottom: "8rem",
-          paddingTop: "clamp(8rem, 12vh, 10rem)",
-        }}
+        className="relative z-10 flex flex-1 flex-col"
+        style={{ paddingTop: "clamp(7rem, 12vh, 10rem)" }}
       >
         <div
-          className="kxd-reveal mb-10 flex items-center gap-4"
-          style={{ opacity: 0.55 }}
+          className="kxd-container"
+          style={{ paddingBottom: "clamp(4rem, 6vw, 5rem)" }}
         >
-          <div
-            aria-hidden
+
+          {/*
+           * Headline — editorial serif, two lines, intentional measure
+           *
+           * "Designed to Be Remembered. Built to Perform."
+           *
+           * Line 1 fills ~84% of container at 1440px (Pentagram asymmetry).
+           * Line 2 fills ~53% — the breathing room to the right is the design.
+           * Size is deliberately moderate (5vw) — luxury is restraint, not scale.
+           */}
+          <h1
+            className="kxd-reveal kxd-reveal-delay-1 select-none font-serif font-light"
             style={{
-              width: "40px",
-              height: "1px",
-              background: "var(--kxd-gold)",
+              fontSize: "clamp(3.5rem, 5.5vw, 5.5rem)",
+              lineHeight: 1.12,
+              letterSpacing: "0.01em",
+              color: "var(--kxd-cream)",
             }}
-          />
+          >
+            <span className="block">Designed to Be Remembered.</span>
+            <span className="block">Built to Perform.</span>
+          </h1>
+
+          {/*
+           * Subheadline — provides explicit product clarity in one sentence.
+           * Sans-serif at small scale creates contrast against the display serif.
+           * Maximum 2 lines. No explaining, no selling.
+           */}
           <p
-            className="font-sans font-medium uppercase"
+            className="kxd-reveal kxd-reveal-delay-2 font-sans font-light"
             style={{
-              fontSize: "0.68rem",
-              letterSpacing: "0.42em",
-              color: "var(--kxd-gold)",
-            }}
-          >
-            {SITE.name}
-          </p>
-          <div
-            aria-hidden
-            style={{
-              width: "40px",
-              height: "1px",
-              background: "var(--kxd-gold)",
-            }}
-          />
-        </div>
-
-        <h1
-          className="kxd-reveal kxd-reveal-delay-1 select-none font-serif font-light"
-          style={{
-            fontSize: "clamp(3.5rem, 10.5vw, 9rem)",
-            lineHeight: 0.94,
-            letterSpacing: "0.015em",
-            color: "var(--kxd-cream)",
-          }}
-        >
-          <span
-            className="block"
-            style={{
-              textShadow:
-                "0 2px 80px rgba(0,0,0,0.60), 0 0 1px rgba(0,0,0,0.40)",
-            }}
-          >
-            We Build
-          </span>
-          <span
-            className="block"
-            style={{
-              color: "var(--kxd-gold)",
-              textShadow:
-                "0 0 120px rgba(197,166,92,0.26), 0 0 48px rgba(197,166,92,0.14), 0 2px 60px rgba(0,0,0,0.55)",
-            }}
-          >
-            Creative Systems
-          </span>
-          <span
-            className="block"
-            style={{
-              textShadow:
-                "0 2px 80px rgba(0,0,0,0.60), 0 0 1px rgba(0,0,0,0.40)",
-            }}
-          >
-            That Scale.
-          </span>
-        </h1>
-
-        <div
-          aria-hidden
-          className="kxd-reveal kxd-reveal-delay-2 mx-auto"
-          style={{
-            width: "4.5rem",
-            height: "1px",
-            marginBlock: "clamp(1.75rem, 3vw, 2.75rem)",
-            background:
-              "linear-gradient(90deg, transparent, rgba(197,166,92,0.48) 30%, rgba(197,166,92,0.48) 70%, transparent)",
-          }}
-        />
-
-        <p
-          className="kxd-reveal kxd-reveal-delay-2 font-serif font-light italic sm:whitespace-nowrap"
-          style={{
-            fontSize: "clamp(0.875rem, 1.55vw, 1.125rem)",
-            letterSpacing: "0.02em",
-            lineHeight: 1.6,
-            color: "var(--kxd-cream-soft)",
-            maxWidth: "min(90vw, 800px)",
-          }}
-        >
-          Production infrastructure, creative intelligence, and execution systems — built to operate, not just launch.
-        </p>
-
-        <p
-          className="kxd-reveal kxd-reveal-delay-3 mt-6 font-sans font-medium uppercase"
-          style={{
-            fontSize: "0.5625rem",
-            letterSpacing: "0.20em",
-            color: "var(--foreground-subtle)",
-          }}
-        >
-          Systems&ensp;&middot;&ensp;Production&ensp;&middot;&ensp;Intelligence
-        </p>
-
-        <p
-          className="kxd-reveal kxd-reveal-delay-3 mt-5 font-sans font-medium uppercase"
-          style={{
-            fontSize: "0.5rem",
-            letterSpacing: "0.14em",
-            color: "rgba(191,183,170,0.42)",
-          }}
-        >
-          Operating for motorsports brands, hospitality groups, and high-growth companies.
-        </p>
-
-        <div className="kxd-reveal kxd-reveal-delay-4 mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-5">
-          <Link href="/start-project" className="kxd-btn-primary">
-            Start a System
-          </Link>
-          <Link
-            href="/work"
-            className="group inline-flex items-center gap-2.5 font-sans font-medium uppercase"
-            style={{
-              fontSize: "0.6875rem",
-              letterSpacing: "var(--tracking-button)",
+              fontSize: "clamp(0.9375rem, 1.15vw, 1.0625rem)",
+              letterSpacing: "0.003em",
+              lineHeight: 1.85,
               color: "var(--kxd-cream-muted)",
+              maxWidth: "min(88vw, 480px)",
+              marginTop: "clamp(3.5rem, 5.5vw, 5rem)",
             }}
           >
-            <span className="transition-colors duration-200 group-hover:text-[var(--kxd-cream)]">
-              View the Work
-            </span>
-            <span
-              aria-hidden
-              className="inline-block transition-transform duration-300 group-hover:translate-x-1"
-              style={{ color: "var(--kxd-gold)" }}
+            Websites designed to be remembered. Systems built to perform.
+          </p>
+
+          {/* CTAs — generous gap above. Two options, equal visual weight. */}
+          <div
+            className="kxd-reveal kxd-reveal-delay-3 flex flex-wrap items-center gap-x-10 gap-y-5"
+            style={{ marginTop: "clamp(3rem, 5vw, 4.5rem)" }}
+          >
+            <Link href="/start-project" className="kxd-btn-primary">
+              Start a Project
+            </Link>
+            <Link
+              href="/work"
+              className="group inline-flex items-center gap-2.5 font-sans font-medium uppercase"
+              style={{
+                fontSize: "0.6875rem",
+                letterSpacing: "var(--tracking-button)",
+                color: "var(--kxd-cream-muted)",
+              }}
             >
-              →
-            </span>
-          </Link>
+              <span className="transition-colors duration-200 group-hover:text-[var(--kxd-cream)]">
+                View Selected Work
+              </span>
+              <span
+                aria-hidden
+                className="inline-block transition-transform duration-300 group-hover:translate-x-1"
+                style={{ color: "var(--kxd-gold)" }}
+              >
+                →
+              </span>
+            </Link>
+          </div>
         </div>
+
+        {/* Vertical space absorber — void between CTAs and reel strip, minimum enforced */}
+        <div className="flex-1" style={{ minHeight: "clamp(4rem, 6vh, 5rem)" }} />
       </div>
 
+      {/* ── Reel strip — client work thumbnails, silent proof. Opacity reduced so hero remains dominant. ── */}
       <div
         aria-hidden
         className="kxd-reveal kxd-reveal-delay-5 relative z-[1] overflow-hidden"
@@ -269,6 +212,7 @@ export function HeroSection() {
           borderTop: "1px solid var(--kxd-border-gold)",
           borderBottom: "1px solid var(--kxd-border-white)",
           height: "5.75rem",
+          opacity: 0.45,
         }}
       >
         <div
@@ -315,43 +259,38 @@ export function HeroSection() {
         </div>
       </div>
 
+      {/* ── Proof bar — three positioning statements, not industry labels ── */}
       <div
         className="kxd-reveal kxd-reveal-delay-5 relative z-[1]"
         style={{ borderTop: "1px solid var(--kxd-border-white)" }}
       >
-        <div className="kxd-container grid grid-cols-2 py-4 sm:grid-cols-3">
-          <div>
-            <p className="kxd-label">Est.&ensp;{SITE.foundedYear}</p>
-            <p
-              className="mt-1.5 font-sans font-medium uppercase"
-              style={{
-                fontSize: "0.5rem",
-                letterSpacing: "0.10em",
-                color: "var(--foreground-subtle)",
-              }}
-            >
-              Selective Partnerships
-            </p>
-          </div>
-
-          <div className="hidden flex-col items-center gap-1.5 sm:flex">
-            <p className="kxd-label" style={{ opacity: 0.45 }}>
-              Scroll
-            </p>
-            <div
-              className="w-px"
-              style={{
-                height: "1.75rem",
-                background:
-                  "linear-gradient(to bottom, var(--kxd-gold), transparent)",
-                opacity: 0.28,
-              }}
-            />
-          </div>
-
-          <div className="flex flex-col items-end">
-            <p className="kxd-label">Designed For</p>
-            <p className="kxd-label mt-1">Growth</p>
+        <div className="kxd-container py-5">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {PROOF_POINTS.map((point, i) => (
+              <div key={i} className="flex items-start gap-2.5">
+                <div
+                  aria-hidden
+                  className="mt-[0.35rem] shrink-0 rounded-full"
+                  style={{
+                    width: "3px",
+                    height: "3px",
+                    background: "var(--kxd-gold)",
+                    opacity: 0.60,
+                  }}
+                />
+                <p
+                  className="font-sans font-light"
+                  style={{
+                    fontSize: "0.625rem",
+                    letterSpacing: "0.035em",
+                    lineHeight: 1.7,
+                    color: "rgba(191,183,170,0.50)",
+                  }}
+                >
+                  {point}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </div>

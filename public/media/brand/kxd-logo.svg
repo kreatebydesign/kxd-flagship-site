@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 200" width="480" height="200" role="img" aria-label="Kreate by Design">
+  <title>Kreate by Design</title>
+  <rect width="480" height="200" fill="#080808"/>
+  <!-- Gold horizontal rule above wordmark -->
+  <line x1="48" y1="58" x2="432" y2="58" stroke="#C5A65C" stroke-width="0.75" opacity="0.4"/>
+  <!-- KXD wordmark  Cormorant-style serif letterforms in brand gold -->
+  <text
+    x="240"
+    y="130"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="72"
+    font-weight="300"
+    letter-spacing="24"
+    text-anchor="middle"
+    fill="#C5A65C"
+  >KXD</text>
+  <!-- Studio descriptor -->
+  <text
+    x="240"
+    y="158"
+    font-family="'Helvetica Neue', Helvetica, Arial, sans-serif"
+    font-size="9.5"
+    font-weight="400"
+    letter-spacing="7"
+    text-anchor="middle"
+    fill="#C5A65C"
+    opacity="0.55"
+  >KREATE BY DESIGN</text>
+  <!-- Gold horizontal rule below -->
+  <line x1="48" y1="172" x2="432" y2="172" stroke="#C5A65C" stroke-width="0.75" opacity="0.4"/>
+</svg>

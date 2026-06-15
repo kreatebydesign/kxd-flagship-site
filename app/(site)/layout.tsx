@@ -7,6 +7,10 @@ import { buildMetadata } from "@/lib/seo/metadata";
 import { SEO_KEYWORDS } from "@/lib/seo/site";
 import "../globals.css";
 
+export const viewport = {
+  themeColor: "#080808",
+};
+
 const cormorant = Cormorant_Garamond({
   variable: "--font-cormorant",
   subsets: ["latin"],
@@ -21,12 +25,23 @@ const outfit = Outfit({
   weight: ["300", "400", "500", "600"],
 });
 
-export const metadata: Metadata = buildMetadata({
-  title: "Luxury Digital Experiences & Infrastructure",
-  description:
-    "Kreate by Design is a luxury web design agency specializing in premium website experiences, brand systems, and growth infrastructure. Direct strategy, senior-level execution — built to hold weight.",
-  keywords: [...SEO_KEYWORDS],
-});
+export const metadata: Metadata = {
+  ...buildMetadata({
+    title: "Luxury Digital Experiences & Infrastructure",
+    description:
+      "Kreate by Design is a luxury web design agency specializing in premium website experiences, brand systems, and growth infrastructure. Direct strategy, senior-level execution — built to hold weight.",
+    keywords: [...SEO_KEYWORDS],
+  }),
+  icons: {
+    icon: [
+      { url: "/migrated-assets/favicons/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/migrated-assets/favicons/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/migrated-assets/favicons/favicon-48x48.png", sizes: "48x48", type: "image/png" },
+      { url: "/migrated-assets/favicons/favicon.ico", rel: "shortcut icon" },
+    ],
+    apple: [{ url: "/migrated-assets/favicons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
+};
 
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (

@@ -134,7 +134,7 @@ export default function ContactPage() {
               <div style={{ borderLeft: "1px solid var(--kxd-border-white)", paddingLeft: "1.25rem" }}>
                 <p className="kxd-label">Investment Starting At</p>
                 <p className="kxd-body-sm mt-2">
-                  Luxury websites from $7,500.<br />
+                  Luxury websites from $8,500.<br />
                   Growth infrastructure from $12,500.
                 </p>
                 <a

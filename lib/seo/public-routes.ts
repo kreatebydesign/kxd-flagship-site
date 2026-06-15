@@ -13,6 +13,7 @@ export const PUBLIC_SITEMAP_PATHS: string[] = [
   "/investment",
   "/about",
   "/contact",
+  "/start-project",
   "/insights",
   ...STATIC_INSIGHTS.map((a) => `/insights/${a.slug}`),
 ];
