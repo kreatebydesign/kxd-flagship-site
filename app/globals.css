@@ -430,6 +430,15 @@ main {
   backdrop-filter: blur(4px);
 }
 
+/* Mobile — compact badge, prevent overlap on narrow cards */
+@media (max-width: 639px) {
+  .kxd-tag {
+    padding: 0.1875rem 0.4375rem;
+    font-size: 0.4375rem;
+    letter-spacing: 0.11em;
+  }
+}
+
 /* ─────────────────── DIVIDERS ─────────────────── */
 
 .kxd-gold-rule {
@@ -889,11 +898,6 @@ main {
   /* Case study hero tagline — allow wrap */
   .kxd-case-tagline {
     white-space: normal !important;
-  }
-
-  /* Work cards equal height enforcement */
-  .kxd-case-card__image-wrap {
-    min-height: 0;
   }
 
   /* Founder portrait max-width on tablet */

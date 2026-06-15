@@ -28,6 +28,14 @@ export const metadata: Metadata = buildMetadata({
 
 // ── Data layer ────────────────────────────────────────────────────────────────
 
+/*
+ * Slug-keyed fallback map from the static PROJECTS array.
+ * Used by payloadToProjectItem so that when a Payload project doc lacks an
+ * uploaded hero image (e.g. fresh Neon DB with no media records), we still
+ * display the correct asset from /public rather than an archive panel.
+ */
+const STATIC_BY_SLUG = Object.fromEntries(PROJECTS.map((p) => [p.slug, p]));
+
 function heroImageUrl(doc: Record<string, unknown>): string | null {
   const img = doc.hero_image ?? doc.heroImage;
   if (!img || typeof img !== "object") return null;
@@ -36,20 +44,24 @@ function heroImageUrl(doc: Record<string, unknown>): string | null {
 }
 
 function payloadToProjectItem(doc: Record<string, unknown>): ProjectItem {
+  const slug = String(doc.slug);
+  const ref = STATIC_BY_SLUG[slug]; // static fallback for image data
+  const payloadImage = heroImageUrl(doc);
   return {
-    slug: String(doc.slug),
+    slug,
     title: String(doc.title),
     industry: String(doc.industry ?? ""),
     service: String(doc.service ?? doc.project_type ?? doc.projectType ?? "Luxury Website Experiences"),
     outcome: String(doc.outcome ?? doc.summary ?? ""),
     description: String(doc.description ?? doc.summary ?? ""),
-    image: heroImageUrl(doc),
-    logo: typeof doc.logo_url === "string" ? doc.logo_url : undefined,
+    // prefer Payload-uploaded image, fall back to static asset path
+    image: payloadImage ?? ref?.image ?? null,
+    logo: typeof doc.logo_url === "string" ? doc.logo_url : ref?.logo,
     year: String(doc.year ?? 2025),
     featured: Boolean(doc.featured),
     tier: (doc.tier as "primary" | "secondary") ?? "secondary",
-    imagePosition: typeof doc.image_position === "string" ? doc.image_position : undefined,
-    imageContain: Boolean(doc.image_contain ?? doc.imageContain),
+    imagePosition: typeof doc.image_position === "string" ? doc.image_position : ref?.imagePosition,
+    imageContain: Boolean(doc.image_contain ?? doc.imageContain ?? ref?.imageContain),
   };
 }
 
@@ -59,6 +71,20 @@ interface WorkLists {
 }
 
 async function fetchProjects(): Promise<WorkLists> {
+  /*
+   * Static data is the authoritative source for the Work page.
+   * Every project defined in lib/projects.ts will always appear.
+   *
+   * Payload is used only to ENRICH individual slugs — when a matching
+   * Payload doc exists (with an uploaded image or overridden copy), that
+   * data wins for that slug; all other slugs fall back to static data.
+   *
+   * This prevents Payload's DB state (which may be a subset of the full
+   * project list) from silently hiding projects that exist only in the
+   * static data file.
+   */
+  const base: ProjectItem[] = PROJECTS as ProjectItem[];
+
   try {
     const payload = await getPayload({ config });
     const { docs } = await payload.find({
@@ -68,19 +94,30 @@ async function fetchProjects(): Promise<WorkLists> {
       limit: 30,
       depth: 1,
     });
+
     if (docs.length > 0) {
-      const items = (docs as unknown as Array<Record<string, unknown>>).map(
-        payloadToProjectItem,
-      );
+      // Build a slug-keyed map of Payload-enriched items
+      const payloadMap: Record<string, ProjectItem> = {};
+      for (const doc of docs as unknown as Array<Record<string, unknown>>) {
+        const item = payloadToProjectItem(doc);
+        payloadMap[item.slug] = item;
+      }
+
+      // Merge: Payload data wins per slug; static data fills the gaps
+      const merged = base.map((s) => payloadMap[s.slug] ?? s);
       return {
-        primary: items.filter((p) => p.tier === "primary"),
-        secondary: items.filter((p) => p.tier === "secondary"),
+        primary: merged.filter((p) => p.tier === "primary"),
+        secondary: merged.filter((p) => p.tier === "secondary"),
       };
     }
   } catch {
-    // fall through to static data
+    // Payload unavailable — fall through to pure static data
   }
-  return { primary: PRIMARY_PROJECTS as ProjectItem[], secondary: SECONDARY_PROJECTS as ProjectItem[] };
+
+  return {
+    primary: PRIMARY_PROJECTS as ProjectItem[],
+    secondary: SECONDARY_PROJECTS as ProjectItem[],
+  };
 }
 
 // ── Page ─────────────────────────────────────────────────────────────────────
@@ -129,9 +166,9 @@ export default async function WorkPage() {
               maxWidth: "34rem",
             }}
           >
-            Selected work across ambitious brands — motorsports, hospitality,
-            civic, automotive, and growth-focused companies. Every project held
-            to the same standard.
+            Selected work across ambitious brands, local leaders, and growing
+            companies — each built with the same level of care, clarity, and
+            intent.
           </p>
 
           {totalCount > 0 && (
@@ -157,38 +194,22 @@ export default async function WorkPage() {
           style={{ background: "var(--kxd-black-base)" }}
         >
           <div className="kxd-container">
-            <div className="grid gap-4 lg:grid-cols-12">
-              {primary[0] ? (
-                <div className="lg:col-span-7">
-                  <ProjectCard
-                    project={primary[0]}
-                    featured
-                    index={0}
-                    priority
-                  />
-                </div>
-              ) : null}
-              <div className="flex flex-col gap-4 lg:col-span-5">
-                {primary[1] ? (
-                  <ProjectCard
-                    project={primary[1]}
-                    index={1}
-                    className="flex-1"
-                  />
-                ) : null}
-                {primary[2] ? (
-                  <ProjectCard
-                    project={primary[2]}
-                    index={2}
-                    className="flex-1"
-                  />
-                ) : null}
-              </div>
-            </div>
+            {/* Full-width featured card */}
+            {primary[0] ? (
+              <ProjectCard
+                project={primary[0]}
+                featured
+                index={0}
+                priority
+              />
+            ) : null}
 
-            {primary[3] ? (
-              <div className="mt-4">
-                <ProjectCard project={primary[3]} index={3} />
+            {/* Remaining primary — clean 2/3-col grid; no height-matching */}
+            {primary.length > 1 ? (
+              <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {primary.slice(1).map((p, i) => (
+                  <ProjectCard key={p.slug} project={p} index={i + 1} />
+                ))}
               </div>
             ) : null}
           </div>
@@ -217,10 +238,11 @@ export default async function WorkPage() {
               </div>
               <p
                 className="kxd-body-sm"
-                style={{ maxWidth: "20rem" }}
+                style={{ maxWidth: "22rem" }}
               >
-                Civic, hospitality, and local business — every brand held to the
-                same standard.
+                From emerging businesses to established brands, every project is
+                approached with the same standard: sharp positioning, refined
+                execution, and a digital presence built to perform.
               </p>
             </div>
 

@@ -3,26 +3,43 @@ import Link from "next/link";
 import type { ProjectItem } from "@/lib/projects";
 import { cn } from "@/lib/utils";
 
-
 type ProjectCardProps = {
   project: ProjectItem;
+  /**
+   * featured — used for the lead project (top of /work).
+   * Renders a portrait/square on mobile then widens to 16/9 at sm+.
+   * All other cards use aspect-[4/3] at every breakpoint.
+   */
   featured?: boolean;
   className?: string;
   index?: number;
   priority?: boolean;
 };
 
-export function ProjectCard({ project, featured, className, index = 0, priority = false }: ProjectCardProps) {
-  const aspectClass = featured
-    ? "aspect-[4/5] lg:aspect-auto lg:min-h-[38rem]"
-    : "aspect-[5/4]";
-
+export function ProjectCard({
+  project,
+  featured,
+  className,
+  index = 0,
+  priority = false,
+}: ProjectCardProps) {
   return (
     <article className={cn("kxd-case-card group", className)} id={project.slug}>
-      <Link href={`/work/${project.slug}`} className={cn("kxd-case-card__image-wrap block", aspectClass)}>
+      {/*
+       * Image area.
+       * - aspect-[4/3] on all viewports for default cards (consistent, no height conflicts)
+       * - featured: aspect-[4/3] on mobile for consistency, sm:aspect-[16/9] desktop
+       * - Classes are inlined (not variables) so Tailwind JIT always includes them.
+       */}
+      <Link
+        href={`/work/${project.slug}`}
+        className={cn(
+          "kxd-case-card__image-wrap block",
+          featured ? "aspect-[4/3] sm:aspect-[16/9]" : "aspect-[4/3]",
+        )}
+      >
         {project.image ? (
           <>
-            {/* Dark bg visible when image uses contain */}
             {project.imageContain ? (
               <div className="absolute inset-0" style={{ background: "#050505" }} />
             ) : null}
@@ -35,17 +52,17 @@ export function ProjectCard({ project, featured, className, index = 0, priority 
               style={{
                 objectPosition: project.imageContain
                   ? "center center"
-                  : (project.imagePosition ?? "center top"),
+                  : (project.imagePosition ?? "center"),
               }}
               sizes={
                 featured
-                  ? "(max-width: 1024px) 100vw, 60vw"
-                  : "(max-width: 768px) 100vw, 40vw"
+                  ? "100vw"
+                  : "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               }
             />
           </>
         ) : (
-          /* Archive panel — intentional, not broken */
+          /* Archive panel — shown when imagery is pending or unavailable */
           <div className="kxd-archive-panel absolute inset-0 flex flex-col items-center justify-center px-10 text-center">
             {project.logo ? (
               <Image
@@ -53,8 +70,8 @@ export function ProjectCard({ project, featured, className, index = 0, priority 
                 alt=""
                 width={160}
                 height={64}
-                className="relative z-[1] mb-6 h-14 w-auto max-w-[52%] object-contain brightness-0 invert"
-                style={{ opacity: 0.50 }}
+                className="relative z-[1] mb-4 h-12 w-auto max-w-[52%] object-contain brightness-0 invert"
+                style={{ opacity: 0.5 }}
               />
             ) : (
               <p
@@ -63,7 +80,7 @@ export function ProjectCard({ project, featured, className, index = 0, priority 
                   fontSize: "clamp(0.875rem, 1.5vw, 1.0625rem)",
                   letterSpacing: "0.1em",
                   color: "var(--kxd-cream-muted)",
-                  opacity: 0.40,
+                  opacity: 0.4,
                 }}
               >
                 {project.title}
@@ -71,7 +88,7 @@ export function ProjectCard({ project, featured, className, index = 0, priority 
             )}
             {project.imageryPending ? (
               <p
-                className="kxd-label relative z-[1] mt-5"
+                className="kxd-label relative z-[1] mt-4"
                 style={{ fontSize: "0.5rem", color: "var(--kxd-gold-deep)", letterSpacing: "0.18em" }}
               >
                 {project.imageryLabel ?? "Visual Archive in Progress"}
@@ -80,11 +97,11 @@ export function ProjectCard({ project, featured, className, index = 0, priority 
           </div>
         )}
 
-        {/* Always-present gradient overlay */}
+        {/* Gradient overlay for text legibility */}
         <div className="kxd-case-card__overlay" />
 
-        {/* Industry tag */}
-        <span className="kxd-tag absolute left-4 top-4 z-[2]">{project.industry}</span>
+        {/* Category badge — small, top-left of image area */}
+        <span className="kxd-tag absolute left-3 top-3 z-[2]">{project.industry}</span>
 
         {/* Hover reveal — outcome copy */}
         <div className="kxd-case-card__reveal">
@@ -108,7 +125,7 @@ export function ProjectCard({ project, featured, className, index = 0, priority 
         </div>
       </Link>
 
-      {/* Card footer */}
+      {/* Card footer — sits directly below image, no flex-1 or h-full */}
       <div
         className="flex items-center justify-between px-5 py-4"
         style={{ borderTop: "1px solid var(--kxd-border-white)" }}

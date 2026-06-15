@@ -90,7 +90,6 @@ export const PROJECTS: ProjectItem[] = [
     description:
       "Brand-forward web design for an automotive studio that refuses to look like everyone else.",
     image: "/migrated-assets/case-studies/autodv8ions/hero.webp",
-    imageContain: true,
     logo: "/migrated-assets/logos/dv8.svg",
     year: "2025",
     tier: "primary",
@@ -128,8 +127,59 @@ export const PROJECTS: ProjectItem[] = [
     outcome: "A salon brand with the confidence and craft to own the room.",
     description:
       "Brand-forward web experience for a premium salon built on artistry and reputation.",
-    image: "/migrated-assets/case-studies/hair-mafia/hero.webp",
+    image: "/migrated-assets/projects/hair-mafia.jpg",
     year: "2026",
+    tier: "secondary",
+  },
+  {
+    slug: "golden-state-warriors",
+    title: "Golden State Warriors",
+    industry: "NBA / Sports",
+    service: "Brand Systems & Identity",
+    outcome: "In-house creative support for one of the most recognized brands in professional sports.",
+    description:
+      "Design team support for the Golden State Warriors in-house creative program.",
+    image: "/images/work/screenshots/golden-state-warriors/desktop-home.png",
+    year: "2024",
+    tier: "secondary",
+  },
+  {
+    slug: "sbe-hyde-lounge",
+    title: "SBE / Hyde Lounge",
+    industry: "Hospitality",
+    service: "Luxury Website Experiences",
+    outcome: "A nightlife experience that translates from the velvet rope to the browser.",
+    description:
+      "Digital presence for Hyde Lounge at Crypto.com Arena — SBE's flagship LA nightlife venue.",
+    image: "/images/work/screenshots/sbe-hyde-lounge/desktop-home.png",
+    year: "2024",
+    tier: "secondary",
+  },
+  {
+    slug: "on-track-performance",
+    title: "On Track Performance",
+    industry: "Motorsports",
+    service: "Luxury Website Experiences",
+    outcome: "Performance-forward digital presence for a motorsports business built on precision.",
+    description:
+      "Website and brand presence for an automotive performance shop with a track-day culture.",
+    image: "/images/work/screenshots/on-track-performance/desktop-home.png",
+    year: "2024",
+    tier: "secondary",
+  },
+  {
+    slug: "dialed-in-electric",
+    title: "Dialed In Electric",
+    industry: "Electrical / Trades",
+    service: "Luxury Website Experiences",
+    outcome: "A trades business that looks as sharp as the work it delivers.",
+    description:
+      "Brand presence and website for an electrical contractor building a premium service reputation.",
+    image: null,
+    logo: "/migrated-assets/logos/dialed-in-electric.svg",
+    imageryPending: true,
+    imageryLabel: "Site Refresh In Progress",
+    year: "2025",
     tier: "secondary",
   },
 ];
@@ -418,6 +468,141 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
         caption: "Reservation pathways",
       },
     ],
+  },
+
+  "golden-state-warriors": {
+    slug: "golden-state-warriors",
+    title: "Golden State Warriors",
+    industry: "NBA / Sports",
+    scope: ["Brand Systems & Identity"],
+    tagline: "Creative support for one of the most recognized brands in professional sports.",
+    url: "https://www.nba.com/warriors",
+    status: "Completed",
+    year: "2024",
+    image: "/images/work/screenshots/golden-state-warriors/desktop-home.png",
+    context:
+      "The Golden State Warriors in-house creative team operates at a pace and scale most studios never encounter. Tight timelines, high-profile deliverables, and a brand standard that leaves no room for anything less than exceptional.",
+    challenge:
+      "Supporting an in-house team means adapting to existing workflows, brand systems, and approval chains — without disrupting the machine. The goal isn't to reinvent anything. It's to deliver work that belongs.",
+    strategy:
+      "Embed, align, and execute. Understand the brand architecture before touching the brief. Every output needed to feel like it was made by the team, not dropped in from outside.",
+    execution: [
+      "Design support aligned to the Warriors' existing brand system and creative standards.",
+      "Execution across digital and print touchpoints under in-house creative leadership.",
+    ],
+    qualitativeOutcomes: [
+      "Creative deliverables that met the Warriors' brand standard",
+      "Seamless integration with the in-house team's workflow",
+    ],
+    whyItWorked:
+      "Knowing when to lead and when to support is a skill. This engagement required the latter — and delivering it well is what made the work worth doing.",
+    showcaseImages: [
+      {
+        src: "/images/work/screenshots/golden-state-warriors/desktop-home.png",
+        alt: "Golden State Warriors — creative support engagement",
+        caption: "In-house creative support",
+      },
+    ],
+  },
+
+  "sbe-hyde-lounge": {
+    slug: "sbe-hyde-lounge",
+    title: "SBE / Hyde Lounge",
+    industry: "Hospitality",
+    scope: ["Luxury Website Experiences"],
+    tagline: "A nightlife experience that translates from the velvet rope to the browser.",
+    url: "https://www.sbe.com/nightlife/hyde/lounge-crypto-arena/",
+    status: "Completed",
+    year: "2024",
+    image: "/images/work/screenshots/sbe-hyde-lounge/desktop-home.png",
+    context:
+      "Hyde Lounge at Crypto.com Arena is one of LA's most recognizable nightlife venues — operating at the intersection of sports, entertainment, and hospitality. SBE demanded a digital presence that carried that weight.",
+    challenge:
+      "Translating the sensory experience of a premium nightlife venue into a digital format is genuinely hard. Too much and it becomes overwhelming. Too little and it loses the room entirely.",
+    strategy:
+      "The web experience had to feel like the approach to the venue — anticipation before arrival. Every visual and copy decision was made to build that feeling, not just describe the space.",
+    execution: [
+      "Digital presence aligned to SBE's luxury hospitality brand standards.",
+      "Content and visual direction built around the atmosphere and clientele of Hyde Lounge.",
+    ],
+    qualitativeOutcomes: [
+      "Premium digital presence aligned with SBE's luxury hospitality portfolio",
+      "Experience that communicates the venue's character before a guest arrives",
+    ],
+    whyItWorked:
+      "Nightlife brands sell a feeling. The digital experience worked because it was built to create that feeling first — not to list features or show floorplans.",
+    showcaseImages: [
+      {
+        src: "/images/work/screenshots/sbe-hyde-lounge/desktop-home.png",
+        alt: "SBE / Hyde Lounge — digital presence",
+        caption: "Premium venue experience",
+      },
+    ],
+  },
+
+  "on-track-performance": {
+    slug: "on-track-performance",
+    title: "On Track Performance",
+    industry: "Motorsports",
+    scope: ["Luxury Website Experiences"],
+    tagline: "Performance-forward digital presence for a motorsports business built on precision.",
+    url: "https://on-track-performance.com",
+    status: "Live",
+    year: "2024",
+    image: "/images/work/screenshots/on-track-performance/desktop-home.png",
+    context:
+      "On Track Performance serves a customer who knows the difference. Whether it's track preparation, alignment, or suspension work — the clients who walk through the door have standards. The website had to meet them.",
+    challenge:
+      "Automotive performance shops tend to look the same — loud, cluttered, aimed at everyone. The goal was a site that looked like a shop that turns away work it doesn't want.",
+    strategy:
+      "Precision over volume. The design language had to reflect the shop's actual standards — sharp, clean, and built for the client who already knows what they need.",
+    execution: [
+      "Performance-aligned website built for a motorsports audience that values precision.",
+      "Content architecture that communicates capability without overselling.",
+    ],
+    qualitativeOutcomes: [
+      "Digital presence that reflects the shop's performance standards",
+      "First impression that attracts the right client profile",
+    ],
+    whyItWorked:
+      "Specificity is a filter. A site that looks like it was built for serious motorsports clients attracts serious motorsports clients. That was the goal — and the outcome.",
+    showcaseImages: [
+      {
+        src: "/images/work/screenshots/on-track-performance/desktop-home.png",
+        alt: "On Track Performance — homepage",
+        caption: "Performance-aligned digital presence",
+      },
+    ],
+  },
+
+  "dialed-in-electric": {
+    slug: "dialed-in-electric",
+    title: "Dialed In Electric",
+    industry: "Electrical / Trades",
+    scope: ["Luxury Website Experiences"],
+    tagline: "A trades business that looks as sharp as the work it delivers.",
+    url: "https://dialedinelectric.com",
+    status: "Live",
+    year: "2025",
+    image: null,
+    logo: "/migrated-assets/logos/dialed-in-electric.svg",
+    context:
+      "Dialed In Electric is a trades business that holds itself to a higher standard — in the quality of the work and the professionalism of every touchpoint. The digital presence had to match.",
+    challenge:
+      "Most trades websites look like they were built in 2009. Dialed In needed something that communicated the same precision and care that the business puts into every job.",
+    strategy:
+      "Brand forward, jargon free. The design had to communicate trust and competence — not through feature lists, but through the quality of the presentation itself.",
+    execution: [
+      "Premium digital presence for a trades business building a reputation on quality.",
+      "Brand-aligned design that elevates the client's positioning in a crowded market.",
+    ],
+    qualitativeOutcomes: [
+      "Digital presence that stands apart from every other trades website",
+      "First impression that communicates precision and reliability",
+    ],
+    whyItWorked:
+      "The best trades businesses win on trust. A website that looks like it was built with the same care as the work itself is a trust signal before anyone reads a word.",
+    showcaseImages: [],
   },
 
   "hair-mafia": {

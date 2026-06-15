@@ -112,7 +112,7 @@ export function SiteHeader() {
           {/* Desktop CTA — right-anchored */}
           <div className="hidden items-center justify-end lg:flex">
             <Link href="/contact" className="kxd-nav-cta">
-              Start a Project
+              Book a Call
             </Link>
           </div>
 
@@ -267,7 +267,7 @@ export function SiteHeader() {
             className="kxd-btn-primary kxd-ui-label mt-8 w-fit"
             onClick={() => setMobileOpen(false)}
           >
-            Start a Project
+            Book a Call
           </Link>
         </nav>
 
