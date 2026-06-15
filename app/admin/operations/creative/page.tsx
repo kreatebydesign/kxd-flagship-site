@@ -395,6 +395,63 @@ export default async function Page() {
           <KpiCard label="Assets"    value={assetCount}    />
         </div>
 
+        {/* ── Phase 4A — Generation Actions ───────────────────────────────── */}
+        <div style={{ marginBottom: "2rem", padding: "1.125rem 1.25rem", background: "rgba(197,166,92,0.04)", border: "1px solid rgba(197,166,92,0.14)" }}>
+          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: "0.75rem" }}>
+            <div>
+              <p style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.18em", textTransform: "uppercase" as const, color: C.goldDim }}>
+                KXD OS · Phase 4A
+              </p>
+              <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "1rem", color: C.cream, marginTop: "0.25rem" }}>
+                Creative Production Engine
+              </p>
+            </div>
+            <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.2)", textTransform: "uppercase" as const }}>
+              Brand-Aware Generation
+            </p>
+          </div>
+          <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: "rgba(255,255,255,0.3)", marginBottom: "1rem", lineHeight: 1.6 }}>
+            Generate brand-aware flyer creative direction and social post copy from any Payload request record.
+            Open a request in Payload Admin, copy its numeric ID, then call the generation endpoint.
+          </p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "1px", background: "rgba(255,255,255,0.07)" }}>
+            {[
+              {
+                label:    "Flyer Generator",
+                endpoint: "POST /api/admin/creative/flyers/generate",
+                body:     '{ "flyerRequestId": <id> }',
+                href:     "/admin/collections/flyer-requests",
+                linkText: "Open Flyer Requests →",
+              },
+              {
+                label:    "Social Post Generator",
+                endpoint: "POST /api/admin/creative/social/generate",
+                body:     '{ "socialPostRequestId": <id> }',
+                href:     "/admin/collections/social-post-requests",
+                linkText: "Open Social Post Requests →",
+              },
+            ].map(action => (
+              <div key={action.label} style={{ background: "#0d0d0d", padding: "1rem 1.125rem" }}>
+                <p style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.5625rem", color: C.cream, marginBottom: "0.375rem" }}>
+                  {action.label}
+                </p>
+                <p style={{ fontFamily: "monospace", fontSize: "0.5rem", color: "rgba(197,166,92,0.6)", marginBottom: "0.25rem" }}>
+                  {action.endpoint}
+                </p>
+                <p style={{ fontFamily: "monospace", fontSize: "0.4375rem", color: "rgba(255,255,255,0.25)", marginBottom: "0.75rem" }}>
+                  {action.body}
+                </p>
+                <Link href={action.href} style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: C.goldDim, textDecoration: "none" }}>
+                  {action.linkText}
+                </Link>
+              </div>
+            ))}
+          </div>
+          <p style={{ fontFamily: C.sans, fontSize: "0.375rem", color: "rgba(255,255,255,0.18)", marginTop: "0.75rem", letterSpacing: "0.06em" }}>
+            Set OPENAI_API_KEY in environment to enable AI generation. Without the key, routes return the assembled prompt only (prompt-only mode for testing).
+          </p>
+        </div>
+
         {/* ── Priority queue ──────────────────────────────────────────────── */}
         <div style={{ marginBottom: "2rem" }}>
           <p style={{ fontSize: "0.6rem", color: C.goldDim, marginBottom: "1rem" }}>Top Priority Queue</p>

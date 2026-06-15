@@ -79,11 +79,60 @@ export const SocialPostRequests: CollectionConfig = {
         // ── Generated Content ─────────────────────────────────────────────────
         {
           label: "Generated Content",
-          admin: { description: "AI copy scaffolding — ready for future generation integration." },
+          admin: { description: "Brand-aware generated copy and creative direction from the KXD Creative Engine." },
           fields: [
             { name: "generatedCaption",      type: "textarea", label: "Generated Caption (Full)" },
             { name: "generatedShortCaption", type: "textarea", label: "Generated Caption (Short)" },
             { name: "generatedHashtags",     type: "textarea", label: "Generated Hashtags" },
+            {
+              name: "generatedAltText",
+              type: "text",
+              label: "Generated Alt Text",
+              admin: { description: "Accessibility-ready alt text for the post graphic." },
+            },
+            {
+              name: "generatedGraphicDirection",
+              type: "textarea",
+              label: "Graphic Direction Output",
+              admin: { description: "Visual direction, layout guidance, and image/asset recommendations for this post." },
+            },
+            {
+              name: "generationPrompt",
+              type: "textarea",
+              label: "Generation Prompt",
+              admin: { description: "The assembled prompt sent to the generation engine. Stored for audit and regeneration.", readOnly: true },
+            },
+            {
+              name: "generationError",
+              type: "textarea",
+              label: "Generation Error",
+              admin: { description: "Error message if generation failed.", readOnly: true },
+            },
+            {
+              name: "generatedAt",
+              type: "date",
+              label: "Generated At",
+              admin: { date: { pickerAppearance: "dayAndTime" }, readOnly: true },
+            },
+            {
+              name: "generationStatus",
+              type: "select",
+              label: "Generation Status",
+              defaultValue: "not-started",
+              options: [
+                { label: "Not Started", value: "not-started" },
+                { label: "Generating",  value: "generating" },
+                { label: "Complete",    value: "complete" },
+                { label: "Failed",      value: "failed" },
+              ],
+              admin: { description: "Tracks the current state of the AI generation run." },
+            },
+            {
+              name: "generatedExportUrl",
+              type: "text",
+              label: "Exported Asset URL",
+              admin: { description: "URL of the exported graphic (Canva, PNG) when available." },
+            },
           ],
         },
 

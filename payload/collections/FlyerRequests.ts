@@ -91,10 +91,53 @@ export const FlyerRequests: CollectionConfig = {
         // ── Generated Content ─────────────────────────────────────────────────
         {
           label: "Generated Content",
-          admin: { description: "AI content scaffolding — ready for future generation integration." },
+          admin: { description: "Brand-aware generated copy and creative direction from the KXD Creative Engine." },
           fields: [
             { name: "generatedHeadlineOptions", type: "textarea", label: "Generated Headline Options" },
             { name: "generatedCopy",            type: "textarea", label: "Generated Body Copy" },
+            {
+              name: "generatedCreativeDirection",
+              type: "textarea",
+              label: "Creative Direction Output",
+              admin: { description: "Full brand-aware creative brief output: layout, hierarchy, visual direction, copy recommendations." },
+            },
+            {
+              name: "generationPrompt",
+              type: "textarea",
+              label: "Generation Prompt",
+              admin: { description: "The assembled prompt sent to the generation engine. Stored for audit and regeneration.", readOnly: true },
+            },
+            {
+              name: "generationError",
+              type: "textarea",
+              label: "Generation Error",
+              admin: { description: "Error message if generation failed.", readOnly: true },
+            },
+            {
+              name: "generatedAt",
+              type: "date",
+              label: "Generated At",
+              admin: { date: { pickerAppearance: "dayAndTime" }, readOnly: true },
+            },
+            {
+              name: "generationStatus",
+              type: "select",
+              label: "Generation Status",
+              defaultValue: "not-started",
+              options: [
+                { label: "Not Started", value: "not-started" },
+                { label: "Generating",  value: "generating" },
+                { label: "Complete",    value: "complete" },
+                { label: "Failed",      value: "failed" },
+              ],
+              admin: { description: "Tracks the current state of the AI generation run." },
+            },
+            {
+              name: "generatedExportUrl",
+              type: "text",
+              label: "Exported Asset URL",
+              admin: { description: "URL of the exported flyer file (PNG, PDF, Canva link) when available." },
+            },
           ],
         },
 
