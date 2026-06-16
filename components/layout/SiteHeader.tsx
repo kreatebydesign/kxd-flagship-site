@@ -205,7 +205,7 @@ export function SiteHeader() {
             <div className="border-l border-[var(--kxd-border-white)] pl-10">
               <p className="kxd-label mb-6">The Standard</p>
               <p className="font-serif text-[1.125rem] font-light leading-[1.6] tracking-[0.01em] text-[var(--kxd-cream-soft)]">
-                &ldquo;KXD creates digital experiences built to be remembered, trusted, and used.&rdquo;
+                &ldquo;KXD creates digital experiences for brands building what&rsquo;s next.&rdquo;
               </p>
               <div className="mt-8 h-px w-12 bg-[var(--kxd-border-gold-strong)]" />
               <p className="kxd-label mt-4">Matt Lunger</p>

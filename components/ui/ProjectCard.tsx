@@ -10,9 +10,16 @@ import { cn } from "@/lib/utils";
  * fill image doesn't size correctly against the aspect-ratio-derived height
  * on mobile viewports. The plain <img> with absolute inset + object-cover is
  * fully reliable at every viewport width.
+ *
+ * Mobile requirements (390px):
+ * - Cards stack vertically, single column.
+ * - Image wrapper: aspect-[16/10] — always produces a visible image box.
+ * - Image: absolute inset-0 h-full w-full object-cover — fills wrapper exactly.
+ * - No h-full, flex-1, min-h-*, or row-span on the card itself.
+ * - All images render at full opacity — no dark placeholder dimming.
  */
 
-/* Fallback used when a project has no image asset yet */
+/* Fallback used when a project has no image asset */
 const KXD_FALLBACK = "/migrated-assets/textures/hero-bg.jpg";
 
 type ProjectCardProps = {
@@ -32,7 +39,6 @@ export function ProjectCard({
   priority = false,
 }: ProjectCardProps) {
   const imageSrc = project.image ?? KXD_FALLBACK;
-  const isPlaceholder = !project.image;
 
   return (
     <article className={cn("kxd-case-card group", className)} id={project.slug}>
@@ -47,13 +53,10 @@ export function ProjectCard({
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={imageSrc}
-          alt={isPlaceholder ? "" : project.title}
+          alt={project.title}
           loading={priority ? "eager" : "lazy"}
           className="absolute inset-0 h-full w-full object-cover"
-          style={{
-            objectPosition: project.imagePosition ?? "center",
-            opacity: isPlaceholder ? 0.3 : 1,
-          }}
+          style={{ objectPosition: project.imagePosition ?? "center" }}
         />
 
         {/* Dark gradient overlay */}
