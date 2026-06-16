@@ -51,7 +51,7 @@ export const PROJECTS: ProjectItem[] = [
     outcome: "Flagship presence for a performance brand that competes at the top.",
     description:
       "Website, membership architecture, and growth infrastructure for one of motorsports' most ambitious brands.",
-    image: "/migrated-assets/projects/primal-motorsports.jpg",
+    image: "/migrated-assets/case-studies/primal-motorsports/hero.webp",
     year: "2025",
     featured: true,
     tier: "primary",
@@ -64,7 +64,7 @@ export const PROJECTS: ProjectItem[] = [
     outcome: "A racing presence with the speed and discipline of the team behind it.",
     description:
       "Cinematic web design built for a professional motorsport program operating at full throttle.",
-    image: "/migrated-assets/projects/cusick-morgan.jpg",
+    image: "/migrated-assets/case-studies/cusick-morgan-motorsports/hero.webp",
     year: "2025",
     tier: "primary",
   },
@@ -163,7 +163,7 @@ export const PROJECTS: ProjectItem[] = [
     outcome: "Performance-forward digital presence for a motorsports business built on precision.",
     description:
       "Website and brand presence for an automotive performance shop with a track-day culture.",
-    image: "/images/work/screenshots/on-track-performance/desktop-home.png",
+    image: "/migrated-assets/projects/otp.jpg",
     year: "2024",
     tier: "secondary",
   },
@@ -549,7 +549,7 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     url: "https://on-track-performance.com",
     status: "Live",
     year: "2024",
-    image: "/images/work/screenshots/on-track-performance/desktop-home.png",
+    image: "/migrated-assets/projects/otp.jpg",
     context:
       "On Track Performance serves a customer who knows the difference. Whether it's track preparation, alignment, or suspension work — the clients who walk through the door have standards. The website had to meet them.",
     challenge:
@@ -568,8 +568,8 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
       "Specificity is a filter. A site that looks like it was built for serious motorsports clients attracts serious motorsports clients. That was the goal — and the outcome.",
     showcaseImages: [
       {
-        src: "/images/work/screenshots/on-track-performance/desktop-home.png",
-        alt: "On Track Performance — homepage",
+        src: "/migrated-assets/projects/otp.jpg",
+          alt: "On Track Performance — homepage",
         caption: "Performance-aligned digital presence",
       },
     ],

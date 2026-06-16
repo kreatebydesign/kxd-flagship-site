@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPayload } from "payload";
@@ -192,13 +191,12 @@ function ShowcaseFrame({
         border: "1px solid var(--kxd-border-gold)",
       }}
     >
-      <Image
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
         src={image.src}
         alt={image.alt}
-        fill
-        className="object-cover object-top transition-transform duration-700 group-hover:scale-[1.015]"
-        sizes="(max-width: 1024px) 100vw, 78rem"
-        priority={priority}
+        loading={priority ? "eager" : "lazy"}
+        className="absolute inset-0 h-full w-full object-cover object-top transition-transform duration-700 group-hover:scale-[1.015]"
       />
       <div
         aria-hidden
@@ -714,11 +712,10 @@ export default async function CaseStudyPage({ params }: Props) {
                 }}
               />
               {cs.logo ? (
-                <Image
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
                   src={cs.logo}
                   alt=""
-                  width={220}
-                  height={88}
                   className="relative z-[1] h-16 w-auto max-w-[38%] object-contain brightness-0 invert"
                   style={{ opacity: 0.22 }}
                 />

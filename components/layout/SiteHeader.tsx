@@ -205,7 +205,7 @@ export function SiteHeader() {
             <div className="border-l border-[var(--kxd-border-white)] pl-10">
               <p className="kxd-label mb-6">The Standard</p>
               <p className="font-serif text-[1.125rem] font-light leading-[1.6] tracking-[0.01em] text-[var(--kxd-cream-soft)]">
-                &ldquo;KXD builds digital experiences designed to hold weight long after launch.&rdquo;
+                &ldquo;KXD creates digital experiences built to be remembered, trusted, and used.&rdquo;
               </p>
               <div className="mt-8 h-px w-12 bg-[var(--kxd-border-gold-strong)]" />
               <p className="kxd-label mt-4">Matt Lunger</p>
@@ -244,6 +244,12 @@ export function SiteHeader() {
           className="flex flex-1 flex-col justify-center px-8"
           aria-label="Mobile navigation"
         >
+          <p
+            className="kxd-eyebrow mb-6"
+            style={{ color: "var(--kxd-gold)", opacity: 0.55 }}
+          >
+            Kreate by Design
+          </p>
           <ul className="space-y-2">
             {NAV_LINKS.map((link, i) => (
               <li key={link.href} style={{ animationDelay: `${i * 60}ms` }}>
@@ -268,6 +274,14 @@ export function SiteHeader() {
             onClick={() => setMobileOpen(false)}
           >
             Book a Call
+          </Link>
+          <Link
+            href="/work"
+            className="kxd-ui-label mt-5 inline-flex items-center gap-1.5 text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)]"
+            onClick={() => setMobileOpen(false)}
+          >
+            View Selected Work
+            <span aria-hidden>→</span>
           </Link>
         </nav>
 
