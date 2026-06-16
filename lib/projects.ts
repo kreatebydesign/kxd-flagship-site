@@ -14,6 +14,8 @@ export type ProjectItem = {
   imagePosition?: string;
   imageContain?: boolean;
   tier: "primary" | "secondary";
+  /** When true, excluded from the public Work page listing (data still kept for detail pages). */
+  hidden?: boolean;
 };
 
 export type ShowcaseImage = {
@@ -44,9 +46,12 @@ export type CaseStudy = {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PROJECTS — authoritative listing order
-// Primary (Selected Work): Primal → Cusick → Plate → AutoDV8ions
-// Secondary (Further Work): Dialed In → OTP → Warriors → SBE → Hair Mafia
-//                           → Democratic Club → Spur
+//
+// Primary (Selected Work):   Primal · Cusick · Plate · Golden State Warriors
+// Secondary (Further Work):  OTP · SBE · Hair Mafia · AutoDV8ions · Spur
+//
+// Hidden (data preserved for /work/[slug] detail pages only):
+//   Dialed In Electric, Democratic Club of Greater Tracy
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const PROJECTS: ProjectItem[] = [
@@ -59,7 +64,8 @@ export const PROJECTS: ProjectItem[] = [
     outcome: "Flagship presence for a performance brand that competes at the top.",
     description:
       "Website, membership architecture, and growth infrastructure for one of motorsports' most ambitious brands.",
-    image: "/migrated-assets/case-studies/primal-motorsports/hero.webp",
+    // homepage-full shows the complete site layout — stronger portfolio impression than the hero crop
+    image: "/migrated-assets/case-studies/primal-motorsports/homepage-full.webp",
     year: "2025",
     featured: true,
     tier: "primary",
@@ -72,7 +78,8 @@ export const PROJECTS: ProjectItem[] = [
     outcome: "A racing presence with the speed and discipline of the team behind it.",
     description:
       "Cinematic web design built for a professional motorsport program operating at full throttle.",
-    image: "/migrated-assets/case-studies/cusick-morgan-motorsports/hero.webp",
+    // New-site hero screenshot captured June 2026 from cusickmotorsports.com
+    image: "/media/cusickmotorsports-com-hero-2026-06-15T06-05-15.png",
     year: "2025",
     tier: "primary",
   },
@@ -90,36 +97,21 @@ export const PROJECTS: ProjectItem[] = [
     tier: "primary",
   },
   {
-    slug: "autodv8ions",
-    title: "AutoDV8ions",
-    industry: "Automotive",
+    slug: "golden-state-warriors",
+    title: "Golden State Warriors",
+    industry: "NBA",
     service: "Brand Systems & Identity",
-    outcome: "Boutique automotive identity with a point of view sharp enough to cut.",
+    outcome: "In-house creative support for one of the most recognized brands in professional sports.",
     description:
-      "Brand-forward web design for an automotive studio that refuses to look like everyone else.",
-    image: "/migrated-assets/case-studies/autodv8ions/hero.webp",
-    logo: "/migrated-assets/logos/dv8.svg",
-    year: "2025",
+      "Design team support for the Golden State Warriors in-house creative program.",
+    // TODO: Replace with official Warriors creative asset if available.
+    // Source: https://sites.teamworkonline.com/golden-state-warriors/
+    image: "/images/work/screenshots/golden-state-warriors/desktop-home.png",
+    year: "2024",
     tier: "primary",
   },
 
   // ── SECONDARY (Further Work) ──────────────────────────────────────────────
-  {
-    slug: "dialed-in-electric",
-    title: "Dialed In Electric",
-    industry: "Electrical / Trades",
-    service: "Luxury Website Experiences",
-    outcome: "A trades business that looks as sharp as the work it delivers.",
-    description:
-      "Brand presence and website for an electrical contractor building a premium service reputation.",
-    // TODO: Replace with Dialed In Electric hero when available. Source: https://dialedinelectric.com
-    image: "/migrated-assets/textures/hero-bg.jpg",
-    logo: "/migrated-assets/logos/dialed-in-electric.svg",
-    imageryPending: true,
-    imageryLabel: "Site Refresh In Progress",
-    year: "2025",
-    tier: "secondary",
-  },
   {
     slug: "on-track-performance",
     title: "On Track Performance",
@@ -133,20 +125,6 @@ export const PROJECTS: ProjectItem[] = [
     tier: "secondary",
   },
   {
-    slug: "golden-state-warriors",
-    title: "Golden State Warriors",
-    industry: "NBA",
-    service: "Brand Systems & Identity",
-    outcome: "In-house creative support for one of the most recognized brands in professional sports.",
-    description:
-      "Design team support for the Golden State Warriors in-house creative program.",
-    // TODO: Replace with official Warriors creative asset if available.
-    // Source: https://sites.teamworkonline.com/golden-state-warriors/
-    image: "/images/work/screenshots/golden-state-warriors/desktop-home.png",
-    year: "2024",
-    tier: "secondary",
-  },
-  {
     slug: "sbe-hyde-lounge",
     title: "SBE / Hyde Lounge",
     industry: "Hospitality",
@@ -154,9 +132,7 @@ export const PROJECTS: ProjectItem[] = [
     outcome: "A nightlife experience that translates from the velvet rope to the browser.",
     description:
       "Digital presence for Hyde Lounge at Crypto.com Arena — SBE's flagship LA nightlife venue.",
-    // TODO: Replace with official SBE/Hyde Lounge asset if available.
-    // Source: https://www.sbe.com/nightlife/hyde/lounge-crypto-arena/
-    image: "/images/work/screenshots/sbe-hyde-lounge/desktop-home.png",
+    image: "/images/work/screenshots/sbe-hyde-lounge/clean-hero.png",
     year: "2024",
     tier: "secondary",
   },
@@ -173,16 +149,16 @@ export const PROJECTS: ProjectItem[] = [
     tier: "secondary",
   },
   {
-    slug: "democratic-club-greater-tracy",
-    title: "Democratic Club of Greater Tracy",
-    industry: "Civic",
-    service: "Growth Infrastructure",
-    outcome: "Clear digital presence for a civic organization built on participation.",
+    slug: "autodv8ions",
+    title: "AutoDV8ions",
+    industry: "Automotive",
+    service: "Brand Systems & Identity",
+    outcome: "Boutique automotive identity with a point of view sharp enough to cut.",
     description:
-      "Website and engagement architecture for a community-driven organization.",
-    image: "/migrated-assets/case-studies/democratic-club-greater-tracy/hero.webp",
-    logo: "/migrated-assets/logos/the-democratic.svg",
-    year: "2026",
+      "Brand-forward web design for an automotive studio that refuses to look like everyone else.",
+    image: "/migrated-assets/case-studies/autodv8ions/hero.webp",
+    logo: "/migrated-assets/logos/dv8.svg",
+    year: "2025",
     tier: "secondary",
   },
   {
@@ -197,10 +173,43 @@ export const PROJECTS: ProjectItem[] = [
     year: "2026",
     tier: "secondary",
   },
+
+  // ── HIDDEN — data preserved for /work/[slug] detail pages only ────────────
+  {
+    slug: "dialed-in-electric",
+    title: "Dialed In Electric",
+    industry: "Electrical / Trades",
+    service: "Luxury Website Experiences",
+    outcome: "A trades business that looks as sharp as the work it delivers.",
+    description:
+      "Brand presence and website for an electrical contractor building a premium service reputation.",
+    // TODO: Replace with Dialed In Electric hero when available. Source: https://dialedinelectric.com
+    image: "/migrated-assets/textures/hero-bg.jpg",
+    logo: "/migrated-assets/logos/dialed-in-electric.svg",
+    imageryPending: true,
+    imageryLabel: "Site Refresh In Progress",
+    year: "2025",
+    tier: "secondary",
+    hidden: true,
+  },
+  {
+    slug: "democratic-club-greater-tracy",
+    title: "Democratic Club of Greater Tracy",
+    industry: "Civic",
+    service: "Growth Infrastructure",
+    outcome: "Clear digital presence for a civic organization built on participation.",
+    description:
+      "Website and engagement architecture for a community-driven organization.",
+    image: "/migrated-assets/case-studies/democratic-club-greater-tracy/hero.webp",
+    logo: "/migrated-assets/logos/the-democratic.svg",
+    year: "2026",
+    tier: "secondary",
+    hidden: true,
+  },
 ];
 
-export const PRIMARY_PROJECTS = PROJECTS.filter((p) => p.tier === "primary");
-export const SECONDARY_PROJECTS = PROJECTS.filter((p) => p.tier === "secondary");
+export const PRIMARY_PROJECTS = PROJECTS.filter((p) => p.tier === "primary" && !p.hidden);
+export const SECONDARY_PROJECTS = PROJECTS.filter((p) => p.tier === "secondary" && !p.hidden);
 
 export const CASE_STUDIES: Record<string, CaseStudy> = {
   "primal-motorsports": {
@@ -511,12 +520,10 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     industry: "Hospitality",
     scope: ["Luxury Website Experiences"],
     tagline: "A nightlife experience that translates from the velvet rope to the browser.",
-    // TODO: Replace with official SBE/Hyde Lounge asset if available.
-    // Source: https://www.sbe.com/nightlife/hyde/lounge-crypto-arena/
     url: "https://www.sbe.com/nightlife/hyde/lounge-crypto-arena/",
     status: "Completed",
     year: "2024",
-    image: "/images/work/screenshots/sbe-hyde-lounge/desktop-home.png",
+    image: "/images/work/screenshots/sbe-hyde-lounge/clean-hero.png",
     context:
       "Hyde Lounge at Crypto.com Arena is one of LA's most recognizable nightlife venues — operating at the intersection of sports, entertainment, and hospitality. SBE demanded a digital presence that carried that weight.",
     challenge:
@@ -535,7 +542,7 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
       "Nightlife brands sell a feeling. The digital experience worked because it was built to create that feeling first — not to list features or show floorplans.",
     showcaseImages: [
       {
-        src: "/images/work/screenshots/sbe-hyde-lounge/desktop-home.png",
+        src: "/images/work/screenshots/sbe-hyde-lounge/clean-hero.png",
         alt: "SBE / Hyde Lounge — digital presence",
         caption: "Premium venue experience",
       },

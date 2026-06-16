@@ -405,7 +405,7 @@ export default function AboutPage() {
               color: "var(--kxd-cream-soft)",
             }}
           >
-            KXD exists to build brands, platforms, and experiences designed to hold weight
+            KXD exists to build brands, platforms, and experiences designed to endure
             long after launch.
           </p>
 

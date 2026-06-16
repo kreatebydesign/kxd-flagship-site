@@ -1032,8 +1032,8 @@ export default async function CaseStudyPage({ params }: Props) {
               }}
             >
               From luxury websites to operational platforms, KXD helps ambitious
-              brands create digital experiences designed to hold weight long
-              after launch.
+              brands create digital experiences that remain clear, useful, and
+              trusted long after launch.
             </p>
 
             <div className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-4">

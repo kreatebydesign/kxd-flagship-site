@@ -1,5 +1,11 @@
 /**
  * Review data layer — structured for future Google Business Profile sync.
+ *
+ * TODO: When Google Reviews sync is configured (GOOGLE_PLACES_API_KEY +
+ * GOOGLE_PLACE_ID), real reviews are fetched via lib/google-reviews.ts and
+ * these placeholder entries are bypassed automatically. Before enabling,
+ * implement an approval/curation flow so only verified client reviews appear.
+ * See lib/google-reviews.ts for the full integration spec.
  */
 
 export type ReviewItem = {
@@ -33,7 +39,7 @@ export const PLACEHOLDER_REVIEWS: ReviewItem[] = [
     id: "review-3",
     author: "Hospitality Director",
     company: "Plate the Umpqua",
-    rating: 4.8,
+    rating: 5,
     text: "Our digital presence finally matches the care we put into the guest experience.",
     source: "placeholder",
   },

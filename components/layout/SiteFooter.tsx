@@ -43,7 +43,7 @@ export function SiteFooter() {
               }}
             >
               Precision. Clarity. Presence.<br />
-              Digital work built to hold weight.
+              Designed with purpose. Built to evolve.
             </p>
 
             <p

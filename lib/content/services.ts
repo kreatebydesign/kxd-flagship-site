@@ -8,7 +8,7 @@ export const HOMEPAGE_SERVICES = [
       "Design systems, conversion paths, content hierarchy, and launch-ready web presence.",
     whyMatters: "Your website is the first proof of standard.",
     summary:
-      "Custom websites built to hold weight from the first impression to the final conversion path.",
+      "Custom websites designed to perform from the first impression to the final conversion path.",
     primary: true,
     icon: "layers" as const,
     cta: "Explore Service" as const,

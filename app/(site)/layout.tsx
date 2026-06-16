@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   ...buildMetadata({
     title: "Luxury Digital Experiences & Infrastructure",
     description:
-      "Kreate by Design is a luxury web design agency specializing in premium website experiences, brand systems, and growth infrastructure. Direct strategy, senior-level execution — built to hold weight.",
+      "Kreate by Design is a luxury web design agency specializing in premium website experiences, brand systems, and growth infrastructure. Direct strategy, senior-level execution — designed to endure.",
     keywords: [...SEO_KEYWORDS],
   }),
   icons: {
