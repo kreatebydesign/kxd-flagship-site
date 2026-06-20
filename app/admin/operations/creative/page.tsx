@@ -341,7 +341,7 @@ export default async function Page() {
             </div>
           </div>
           <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-            <Link href="/admin/operations" style={{ color: C.goldDim, fontSize: "0.6rem", textDecoration: "none" }}>
+            <Link href="/admin/operations/executive" style={{ color: C.goldDim, fontSize: "0.6rem", textDecoration: "none" }}>
               ← Operations
             </Link>
             <Link href="/admin/operations/accounts" style={{ color: "#b48cdc", fontSize: "0.6rem", textDecoration: "none", opacity: 0.8 }}>

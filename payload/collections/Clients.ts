@@ -121,6 +121,81 @@ export const Clients: CollectionConfig = {
             },
           ],
         },
+
+        // ── Onboarding (Phase 4A) ─────────────────────────────────────────────
+        {
+          label: "Onboarding",
+          description:
+            "Synced from the linked Client Onboarding record. " +
+            "Full dashboard: /admin/operations/onboarding",
+          fields: [
+            {
+              name: "osOnboardingRecordId",
+              type: "number",
+              label: "Onboarding Record ID",
+              admin: {
+                readOnly: true,
+                description: "Internal ID for the linked onboarding intake record.",
+              },
+            },
+            {
+              name: "osOnboardingStatus",
+              type: "text",
+              label: "Onboarding Status",
+              admin: {
+                readOnly: true,
+                description: "Current workflow status (Draft, Sent, In Progress, Submitted, Approved).",
+              },
+            },
+            {
+              name: "osOnboardingReadinessScore",
+              type: "number",
+              label: "Readiness Score",
+              admin: {
+                readOnly: true,
+                description: "0–100 readiness score based on populated intake sections.",
+              },
+            },
+            {
+              name: "osOnboardingReadinessLabel",
+              type: "text",
+              label: "Readiness Label",
+              admin: {
+                readOnly: true,
+                description: "Ready · Needs Information · Missing Critical Items",
+              },
+            },
+            {
+              name: "osOnboardingMissingSections",
+              type: "textarea",
+              label: "Missing Sections",
+              admin: {
+                readOnly: true,
+                description: "Sections still incomplete on the onboarding intake.",
+              },
+            },
+            {
+              name: "osOnboardingSubmittedAt",
+              type: "date",
+              label: "Date Submitted",
+              admin: {
+                readOnly: true,
+                date: { pickerAppearance: "dayAndTime" },
+              },
+            },
+            {
+              name: "osOnboardingDashboardLink",
+              type: "text",
+              label: "View Onboarding",
+              admin: {
+                readOnly: true,
+                description:
+                  "Open the KXD OS Onboarding Dashboard at /admin/operations/onboarding " +
+                  "or edit the intake record in Payload → Client Onboarding.",
+              },
+            },
+          ],
+        },
       ],
     },
 

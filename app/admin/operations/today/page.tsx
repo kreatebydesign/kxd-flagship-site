@@ -650,7 +650,7 @@ export default async function TodayPage() {
             </div>
 
             <div className="flex items-center gap-5">
-              <Link href="/admin/operations" style={{
+              <Link href="/admin/operations/executive" style={{
                 fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.12em",
                 textTransform: "uppercase", color: "rgba(255,255,255,0.3)",
                 textDecoration: "none",

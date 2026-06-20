@@ -9,6 +9,7 @@ import sharp from "sharp";
 import { BrandKitAssets } from "./payload/collections/BrandKitAssets.ts";
 import { BrandKits } from "./payload/collections/BrandKits.ts";
 import { CaseStudies } from "./payload/collections/CaseStudies.ts";
+import { ClientOnboarding } from "./payload/collections/ClientOnboarding.ts";
 import { ClientProjects } from "./payload/collections/ClientProjects.ts";
 import { ClientRequests } from "./payload/collections/ClientRequests.ts";
 import { Clients } from "./payload/collections/Clients.ts";
@@ -20,6 +21,7 @@ import { Insights } from "./payload/collections/Insights.ts";
 import { Media } from "./payload/collections/Media.ts";
 import { MonthlyDeliverables } from "./payload/collections/MonthlyDeliverables.ts";
 import { Partners } from "./payload/collections/Partners.ts";
+import { PortalUsers } from "./payload/collections/PortalUsers.ts";
 import { PlatformApplications } from "./payload/collections/PlatformApplications.ts";
 import { ProjectInquiries } from "./payload/collections/ProjectInquiries.ts";
 import { Projects } from "./payload/collections/Projects.ts";
@@ -31,6 +33,7 @@ import { SocialPostRequests } from "./payload/collections/SocialPostRequests.ts"
 import { TeamMembers } from "./payload/collections/TeamMembers.ts";
 import { Testimonials } from "./payload/collections/Testimonials.ts";
 import { Users } from "./payload/collections/Users.ts";
+import { WebsiteAudits } from "./payload/collections/WebsiteAudits.ts";
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -83,12 +86,14 @@ export default buildConfig({
     Inquiries,
     ProjectInquiries,
     PlatformApplications,
+    WebsiteAudits,
     // ── KXD OS ───────────────────────────────────────────────────────────────
     Clients,
     Retainers,
     ClientProjects,
     MonthlyDeliverables,
     ClientRequests,
+    ClientOnboarding,
     // ── Creative Engine ──────────────────────────────────────────────────────
     CreativeCampaigns,
     BrandKits,
@@ -100,6 +105,7 @@ export default buildConfig({
     // ── System ───────────────────────────────────────────────────────────────
     Media,
     Users,
+    PortalUsers,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || "kxd-dev-secret-change-in-production",

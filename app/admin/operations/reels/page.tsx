@@ -388,7 +388,7 @@ export default async function ReelsDashboardPage() {
             <Link href="/admin/operations/creative" style={{ color: C.goldDim, fontSize: "0.5rem", letterSpacing: "0.1em", textDecoration: "none" }}>
               ← Creative Engine
             </Link>
-            <Link href="/admin/operations" style={{ color: "rgba(255,255,255,0.2)", fontSize: "0.5rem", letterSpacing: "0.1em", textDecoration: "none" }}>
+            <Link href="/admin/operations/executive" style={{ color: "rgba(255,255,255,0.2)", fontSize: "0.5rem", letterSpacing: "0.1em", textDecoration: "none" }}>
               Operations
             </Link>
             <Link

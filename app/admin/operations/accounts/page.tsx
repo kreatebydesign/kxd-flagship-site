@@ -539,7 +539,7 @@ export default async function AccountsPage() {
             </div>
 
             <div className="flex items-center gap-5">
-              <Link href="/admin/operations" style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.3)", textDecoration: "none" }}>
+              <Link href="/admin/operations/executive" style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.3)", textDecoration: "none" }}>
                 ← Operations
               </Link>
               <Link href="/admin/operations/today" style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.3)", textDecoration: "none" }}>
