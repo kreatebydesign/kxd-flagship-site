@@ -11,12 +11,9 @@ export function hasPayloadAuthCookie(request: NextRequest): boolean {
     .some((cookie) => cookie.name.startsWith(PAYLOAD_AUTH_COOKIE_PREFIX));
 }
 
-/** Payload login expects redirect paths relative to `/admin` (e.g. `/operations/executive`). */
+/** Preserve the full pathname so post-login navigation hits the real app route. */
 export function payloadAdminLoginUrl(request: NextRequest, pathname: string): URL {
   const loginUrl = new URL(PAYLOAD_ADMIN_LOGIN_PATH, request.url);
-  const redirectPath = pathname.startsWith("/admin")
-    ? pathname.slice("/admin".length) || "/operations"
-    : pathname;
-  loginUrl.searchParams.set("redirect", redirectPath);
+  loginUrl.searchParams.set("redirect", pathname);
   return loginUrl;
 }
