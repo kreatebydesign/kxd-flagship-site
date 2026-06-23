@@ -73,6 +73,12 @@ export default buildConfig({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    components: {
+      graphics: {
+        Logo: "./components/admin/PayloadLogo.tsx#PayloadLogo",
+        Icon: "./components/admin/PayloadIcon.tsx#PayloadIcon",
+      },
+    },
   },
   collections: [
     // ── Portfolio & Content ──────────────────────────────────────────────────

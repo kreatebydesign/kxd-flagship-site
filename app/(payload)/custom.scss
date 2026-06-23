@@ -1,1 +1,156 @@
-/* Payload admin theme overrides */
+/**
+ * KXD OS — Payload admin theme overrides
+ * Scoped to Payload layer; does not affect site or operations pages.
+ */
+@layer payload {
+  :root,
+  html[data-theme="dark"] {
+    --kxd-gold: #c9a962;
+    --kxd-gold-light: #d4ba7a;
+    --kxd-gold-dim: rgba(201, 169, 98, 0.65);
+    --kxd-black: #0a0a0a;
+    --kxd-black-deep: #070707;
+    --kxd-charcoal: #111111;
+    --kxd-border: rgba(255, 255, 255, 0.08);
+    --kxd-border-gold: rgba(201, 169, 98, 0.22);
+
+    --theme-elevation-0: var(--kxd-black-deep);
+    --theme-elevation-50: #080808;
+    --theme-elevation-100: var(--kxd-black);
+    --theme-elevation-150: #0d0d0d;
+    --theme-elevation-200: var(--kxd-charcoal);
+    --theme-elevation-250: #141414;
+    --theme-elevation-300: #181818;
+    --theme-elevation-350: #1c1c1c;
+    --theme-elevation-400: #1f1f1f;
+    --theme-elevation-450: #222222;
+    --theme-elevation-500: #262626;
+    --theme-elevation-550: #2a2a2a;
+    --theme-elevation-600: #2e2e2e;
+    --theme-elevation-700: #333333;
+    --theme-elevation-750: #383838;
+    --theme-elevation-800: #3d3d3d;
+    --theme-elevation-850: #424242;
+    --theme-elevation-900: #4a4a4a;
+    --theme-elevation-950: #555555;
+    --theme-elevation-1000: #f7f2e8;
+
+    --theme-input-bg: rgba(255, 255, 255, 0.04);
+    --theme-border-color: var(--kxd-border);
+    --theme-success-500: var(--kxd-gold);
+  }
+
+  html[data-theme="dark"] body {
+    background:
+      radial-gradient(ellipse 85% 55% at 50% -15%, rgba(201, 169, 98, 0.1), transparent 58%),
+      linear-gradient(180deg, var(--kxd-black) 0%, var(--kxd-black-deep) 100%);
+  }
+
+  /* ── Logo graphics ─────────────────────────────────────────────────────── */
+  .kxd-payload-logo {
+    display: block;
+    width: auto;
+    height: 2.75rem;
+    max-width: 11rem;
+    object-fit: contain;
+  }
+
+  .kxd-payload-icon {
+    display: block;
+    width: auto;
+    height: 1.65rem;
+    max-width: 2.5rem;
+    object-fit: contain;
+  }
+
+  /* ── Login ─────────────────────────────────────────────────────────────── */
+  .login__brand {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.75rem;
+    padding: 0.25rem 0 0.5rem;
+  }
+
+  .login__form {
+    border: 1px solid var(--kxd-border);
+    border-radius: 0.5rem;
+    background: rgba(17, 17, 17, 0.82);
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.03),
+      0 24px 48px rgba(0, 0, 0, 0.45);
+    padding: 1.5rem;
+  }
+
+  .login__form__inputWrap {
+    margin-bottom: 0.75rem;
+  }
+
+  .login__form a {
+    color: var(--kxd-gold-dim);
+    font-size: 0.8125rem;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    transition: color 160ms ease;
+  }
+
+  .login__form a:hover {
+    color: var(--kxd-gold-light);
+  }
+
+  /* ── Primary actions ───────────────────────────────────────────────────── */
+  .btn--style-primary {
+    background: linear-gradient(135deg, var(--kxd-gold) 0%, var(--kxd-gold-light) 100%);
+    border-color: rgba(201, 169, 98, 0.45);
+    color: #0a0a0a;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    transition:
+      box-shadow 180ms ease,
+      transform 180ms ease,
+      filter 180ms ease;
+  }
+
+  .btn--style-primary:hover:not(.btn--disabled) {
+    box-shadow: 0 0 0 1px rgba(201, 169, 98, 0.35), 0 10px 28px rgba(201, 169, 98, 0.18);
+    filter: brightness(1.04);
+  }
+
+  .btn--style-primary:active:not(.btn--disabled) {
+    transform: translateY(1px);
+  }
+
+  /* ── Inputs / focus ────────────────────────────────────────────────────── */
+  input[type="email"],
+  input[type="password"],
+  input[type="text"],
+  textarea,
+  select {
+    border-color: var(--kxd-border);
+    transition:
+      border-color 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+  input[type="email"]:focus,
+  input[type="password"]:focus,
+  input[type="text"]:focus,
+  textarea:focus,
+  select:focus {
+    border-color: rgba(201, 169, 98, 0.55);
+    box-shadow: 0 0 0 1px rgba(201, 169, 98, 0.28);
+    outline: none;
+  }
+
+  /* ── Cards / panels ──────────────────────────────────────────────────────── */
+  .card,
+  .collection-list__wrap,
+  .doc-drawer__content,
+  .table-wrap {
+    border-color: var(--kxd-border);
+  }
+
+  a:hover {
+    color: var(--kxd-gold-light);
+  }
+}
