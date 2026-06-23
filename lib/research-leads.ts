@@ -3,6 +3,21 @@
  * Lead Research Desk — shared labels and options
  */
 
+export const RESEARCH_RESEARCHERS = [
+  { value: "Matt", label: "Matt" },
+  { value: "Sasha", label: "Sasha" },
+  { value: "Harlow", label: "Harlow" },
+] as const;
+
+export type ResearchResearcher = (typeof RESEARCH_RESEARCHERS)[number]["value"];
+
+export const RESEARCH_LEAD_SOURCES = [
+  { value: "Craigslist", label: "Craigslist" },
+  { value: "Manual Research", label: "Manual Research" },
+  { value: "Referral", label: "Referral" },
+  { value: "Other", label: "Other" },
+] as const;
+
 export const RESEARCH_STATUSES = [
   { value: "new", label: "New" },
   { value: "reviewing", label: "Reviewing" },

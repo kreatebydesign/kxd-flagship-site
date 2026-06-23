@@ -6,18 +6,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPayload } from "payload";
 import config from "@payload-config";
-import { RESEARCH_STATUSES } from "@/lib/research-leads";
+import { RESEARCH_RESEARCHERS, RESEARCH_STATUSES } from "@/lib/research-leads";
 
 export const dynamic = "force-dynamic";
 
 const VALID_STATUSES = new Set(RESEARCH_STATUSES.map((s) => s.value));
+const VALID_RESEARCHERS = new Set(RESEARCH_RESEARCHERS.map((r) => r.value));
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    if (!body.researcherName?.trim()) {
-      return NextResponse.json({ success: false, error: "Researcher name is required." }, { status: 400 });
+    if (!body.researcherName?.trim() || !VALID_RESEARCHERS.has(body.researcherName.trim() as typeof RESEARCH_RESEARCHERS[number]["value"])) {
+      return NextResponse.json({ success: false, error: "Select a valid researcher." }, { status: 400 });
     }
 
     const payload = await getPayload({ config });
@@ -31,7 +32,6 @@ export async function POST(req: NextRequest) {
     if (body.state?.trim()) data.state = body.state.trim();
     if (body.city?.trim()) data.city = body.city.trim();
     if (body.leadUrl?.trim()) data.leadUrl = body.leadUrl.trim();
-    if (body.category?.trim()) data.category = body.category.trim();
     if (body.estimatedService) data.estimatedService = body.estimatedService;
     if (body.notes?.trim()) data.notes = body.notes.trim();
 

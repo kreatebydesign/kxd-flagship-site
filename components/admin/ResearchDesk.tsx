@@ -9,6 +9,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { KxdLogo } from "@/components/ui/KxdLogo";
 import {
+  RESEARCH_LEAD_SOURCES,
+  RESEARCH_RESEARCHERS,
   RESEARCH_SERVICES,
   RESEARCH_STATUSES,
   RESEARCH_SERVICE_LABEL,
@@ -51,7 +53,6 @@ export type ResearchLeadRow = {
   state: string | null;
   city: string | null;
   leadUrl: string | null;
-  category: string | null;
   estimatedService: string | null;
   status: string;
   createdAt: string;
@@ -155,10 +156,10 @@ export function ResearchDesk({ leads, metrics, researchers, filterStatus, filter
   const [formSuccess, setFormSuccess] = useState(false);
 
   const [researcherName, setResearcherName] = useState("");
+  const [source, setSource] = useState("Craigslist");
   const [state, setState] = useState("");
   const [city, setCity] = useState("");
   const [leadUrl, setLeadUrl] = useState("");
-  const [category, setCategory] = useState("");
   const [estimatedService, setEstimatedService] = useState("");
   const [notes, setNotes] = useState("");
 
@@ -166,8 +167,8 @@ export function ResearchDesk({ leads, metrics, researchers, filterStatus, filter
     e.preventDefault();
     setFormError("");
     setFormSuccess(false);
-    if (!researcherName.trim()) {
-      setFormError("Researcher name is required.");
+    if (!researcherName) {
+      setFormError("Select a researcher.");
       return;
     }
     setSubmitting(true);
@@ -177,13 +178,12 @@ export function ResearchDesk({ leads, metrics, researchers, filterStatus, filter
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           researcherName,
+          source,
           state,
           city,
           leadUrl,
-          category,
           estimatedService: estimatedService || undefined,
           notes,
-          source: "Craigslist",
         }),
       });
       const data = await res.json();
@@ -192,10 +192,10 @@ export function ResearchDesk({ leads, metrics, researchers, filterStatus, filter
         return;
       }
       setResearcherName("");
+      setSource("Craigslist");
       setState("");
       setCity("");
       setLeadUrl("");
-      setCategory("");
       setEstimatedService("");
       setNotes("");
       setFormSuccess(true);
@@ -227,7 +227,7 @@ export function ResearchDesk({ leads, metrics, researchers, filterStatus, filter
                 </p>
               </div>
               <span style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.12em", textTransform: "uppercase", color: C.goldDim, background: C.goldFaint, border: `1px solid ${C.borderGold}`, padding: "0.2rem 0.6rem" }}>
-                Phase 1
+                Phase 1B
               </span>
             </div>
             <div className="flex flex-wrap items-center gap-4">
@@ -261,7 +261,7 @@ export function ResearchDesk({ leads, metrics, researchers, filterStatus, filter
             Research Desk
           </h1>
           <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: C.creamMuted, marginTop: "0.75rem", maxWidth: "36rem" }}>
-            Internal Craigslist and manual lead intake for Harlow and Sasha — submit, review, qualify, and track opportunities.
+            KXD internal research desk — capture Craigslist and manual opportunities, qualify leads, and track outcomes across the team.
           </p>
         </div>
 
@@ -287,7 +287,7 @@ export function ResearchDesk({ leads, metrics, researchers, filterStatus, filter
 
         {/* Submission form */}
         <section className="mb-10">
-          <FieldLabel style={{ color: C.goldDim, marginBottom: "1rem" }}>Submit Lead</FieldLabel>
+          <FieldLabel style={{ color: C.goldDim, marginBottom: "1rem" }}>Submit Research Lead</FieldLabel>
           <form
             onSubmit={handleSubmit}
             style={{ background: C.bgElevated, border: `1px solid ${C.border}`, padding: "1.5rem 1.625rem" }}
@@ -295,7 +295,20 @@ export function ResearchDesk({ leads, metrics, researchers, filterStatus, filter
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <div>
                 <FieldLabel>Researcher</FieldLabel>
-                <input required value={researcherName} onChange={(e) => setResearcherName(e.target.value)} placeholder="Harlow / Sasha" style={inputStyle} />
+                <select required value={researcherName} onChange={(e) => setResearcherName(e.target.value)} style={inputStyle}>
+                  <option value="">Select researcher…</option>
+                  {RESEARCH_RESEARCHERS.map((r) => (
+                    <option key={r.value} value={r.value}>{r.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <FieldLabel>Lead Source</FieldLabel>
+                <select value={source} onChange={(e) => setSource(e.target.value)} style={inputStyle}>
+                  {RESEARCH_LEAD_SOURCES.map((s) => (
+                    <option key={s.value} value={s.value}>{s.label}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <FieldLabel>State</FieldLabel>
@@ -306,15 +319,11 @@ export function ResearchDesk({ leads, metrics, researchers, filterStatus, filter
                 <input value={city} onChange={(e) => setCity(e.target.value)} placeholder="Portland" style={inputStyle} />
               </div>
               <div className="sm:col-span-2">
-                <FieldLabel>URL</FieldLabel>
+                <FieldLabel>Opportunity URL</FieldLabel>
                 <input value={leadUrl} onChange={(e) => setLeadUrl(e.target.value)} placeholder="https://..." style={inputStyle} />
               </div>
               <div>
-                <FieldLabel>Category</FieldLabel>
-                <input value={category} onChange={(e) => setCategory(e.target.value)} placeholder="Services / Gigs" style={inputStyle} />
-              </div>
-              <div>
-                <FieldLabel>Service</FieldLabel>
+                <FieldLabel>Recommended Service</FieldLabel>
                 <select value={estimatedService} onChange={(e) => setEstimatedService(e.target.value)} style={inputStyle}>
                   <option value="">Select service…</option>
                   {RESEARCH_SERVICES.map((s) => (
@@ -323,8 +332,8 @@ export function ResearchDesk({ leads, metrics, researchers, filterStatus, filter
                 </select>
               </div>
               <div className="sm:col-span-2 lg:col-span-3">
-                <FieldLabel>Notes</FieldLabel>
-                <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} placeholder="Opportunity notes, context, red flags…" style={{ ...inputStyle, resize: "vertical" }} />
+                <FieldLabel>Research Notes</FieldLabel>
+                <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} placeholder="Opportunity context, fit signals, follow-up notes…" style={{ ...inputStyle, resize: "vertical" }} />
               </div>
             </div>
             {formError && (
@@ -344,7 +353,7 @@ export function ResearchDesk({ leads, metrics, researchers, filterStatus, filter
                 opacity: submitting ? 0.7 : 1,
               }}
             >
-              {submitting ? "Submitting…" : "Submit Lead"}
+              {submitting ? "Submitting…" : "Submit Research Lead"}
             </button>
           </form>
         </section>
@@ -375,9 +384,14 @@ export function ResearchDesk({ leads, metrics, researchers, filterStatus, filter
                   style={{ ...inputStyle, width: "auto", minWidth: "8rem" }}
                 >
                   <option value="">All researchers</option>
-                  {researchers.map((r) => (
-                    <option key={r} value={r}>{r}</option>
+                  {RESEARCH_RESEARCHERS.map((r) => (
+                    <option key={r.value} value={r.value}>{r.label}</option>
                   ))}
+                  {researchers
+                    .filter((r) => !RESEARCH_RESEARCHERS.some((x) => x.value === r))
+                    .map((r) => (
+                      <option key={r} value={r}>{r}</option>
+                    ))}
                 </select>
               </div>
               {(filterStatus || filterResearcher) && (
@@ -433,8 +447,7 @@ export function ResearchDesk({ leads, metrics, researchers, filterStatus, filter
                         {lead.researcherName} · {location}
                       </p>
                       <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: "rgba(255,255,255,0.28)", marginTop: "0.25rem" }}>
-                        {fmtDate(lead.createdAt)} · {service}
-                        {lead.category ? ` · ${lead.category}` : ""}
+                        {fmtDate(lead.createdAt)} · {service} · {lead.source}
                       </p>
                     </div>
                     <div className="flex items-center gap-3">

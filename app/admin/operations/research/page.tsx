@@ -59,7 +59,6 @@ export default async function ResearchDeskPage({
     state: l.state ? String(l.state) : null,
     city: l.city ? String(l.city) : null,
     leadUrl: l.leadUrl ? String(l.leadUrl) : null,
-    category: l.category ? String(l.category) : null,
     estimatedService: l.estimatedService ? String(l.estimatedService) : null,
     status: String(l.status ?? "new"),
     createdAt: String(l.createdAt ?? ""),
