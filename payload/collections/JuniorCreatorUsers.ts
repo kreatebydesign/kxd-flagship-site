@@ -4,7 +4,7 @@
  */
 
 import type { CollectionConfig } from "payload";
-import { isAuthenticated } from "../access/index.ts";
+import { isPayloadAdmin, isPayloadAdminUser } from "../access/index.ts";
 import { PAYLOAD_GROUPS } from "../admin/groups.ts";
 
 export const JuniorCreatorUsers: CollectionConfig = {
@@ -26,14 +26,15 @@ export const JuniorCreatorUsers: CollectionConfig = {
     lockTime: 600,
   },
   access: {
+    admin: ({ req: { user } }) => isPayloadAdmin(user),
     read: ({ req: { user } }) => {
-      if (user?.collection === "users") return true;
-      if (user?.collection === "junior-creator-users") return { id: { equals: user.id } };
-      return false;
+      if (!user) return false;
+      if (user.collection === "junior-creator-users") return { id: { equals: user.id } };
+      return isPayloadAdmin(user);
     },
-    create: isAuthenticated,
-    update: isAuthenticated,
-    delete: isAuthenticated,
+    create: isPayloadAdminUser,
+    update: isPayloadAdminUser,
+    delete: isPayloadAdminUser,
   },
   fields: [
     {
