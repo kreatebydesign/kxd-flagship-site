@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 import {
   hasPayloadAuthCookie,
   payloadAdminLoginUrl,
+  requiresPayloadAdminAuth,
 } from "@/lib/admin/middleware";
 import { PORTAL_SESSION_COOKIE } from "@/lib/portal/constants";
 import { JUNIOR_CREATOR_SESSION_COOKIE } from "@/lib/junior-creators/constants";
@@ -20,7 +21,7 @@ const JUNIOR_PUBLIC_PATHS = [
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (pathname === "/admin/operations" || pathname.startsWith("/admin/operations/")) {
+  if (requiresPayloadAdminAuth(pathname)) {
     if (!hasPayloadAuthCookie(request)) {
       return NextResponse.redirect(payloadAdminLoginUrl(request, pathname));
     }
@@ -76,6 +77,7 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    "/os",
     "/admin/operations",
     "/admin/operations/:path*",
     "/portal/:path*",

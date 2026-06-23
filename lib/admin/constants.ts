@@ -5,3 +5,6 @@ export const PAYLOAD_ADMIN_LOGIN_PATH = "/admin/login";
 
 /** Default post-login destination for KXD OS operations */
 export const OPERATIONS_HOME_PATH = "/admin/operations/executive";
+
+/** Unified KXD OS launcher — Payload admin only */
+export const OS_LAUNCHER_PATH = "/os";

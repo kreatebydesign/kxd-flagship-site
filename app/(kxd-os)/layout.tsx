@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Outfit } from "next/font/google";
+import { requirePayloadAdminPage } from "@/lib/admin/auth";
+import { OS_LAUNCHER_PATH } from "@/lib/admin/constants";
 import "../globals.css";
+
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 const cormorant = Cormorant_Garamond({
   variable: "--font-cormorant",
@@ -22,7 +27,9 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function KxdOsLayout({ children }: { children: React.ReactNode }) {
+export default async function KxdOsLayout({ children }: { children: React.ReactNode }) {
+  await requirePayloadAdminPage(OS_LAUNCHER_PATH);
+
   return (
     <html lang="en">
       <body
