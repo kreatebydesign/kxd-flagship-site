@@ -13,13 +13,13 @@ const C = {
   bgPure: "#050505",
   bgBase: "#080808",
   bgElevated: "#111111",
+  bgCard: "#101010",
   gold: "#C9A962",
   goldDim: "rgba(201,169,98,0.55)",
-  goldFaint: "rgba(201,169,98,0.08)",
   cream: "#F5F1E8",
   creamMuted: "rgba(245,241,232,0.72)",
   border: "rgba(255,255,255,0.08)",
-  borderGold: "rgba(201,169,98,0.12)",
+  borderGold: "rgba(201,169,98,0.14)",
   serif: "var(--font-cormorant, Georgia, 'Times New Roman', serif)",
   sans: "var(--font-outfit, 'Helvetica Neue', Arial, sans-serif)",
 } as const;
@@ -125,7 +125,7 @@ export function JuniorDashboard({ displayName, stats, recentLeads }: Props) {
         <JuniorShiftCard activeShift={stats.activeShift} />
 
         {/* Rank progress */}
-        <div style={{ background: C.goldFaint, border: `1px solid ${C.borderGold}`, padding: "1.5rem 1.625rem", marginBottom: "2rem" }}>
+        <div style={{ background: C.bgCard, border: `1px solid ${C.borderGold}`, padding: "1.5rem 1.625rem", marginBottom: "2rem" }}>
           <Label>Rank Progress</Label>
           <p style={{ fontFamily: C.serif, fontWeight: 400, fontSize: "1.75rem", color: C.gold, marginTop: "0.5rem" }}>
             {stats.rankTitle}
@@ -176,7 +176,7 @@ export function JuniorDashboard({ displayName, stats, recentLeads }: Props) {
         {/* Submit form */}
         <section className="mb-10">
           <Label style={{ color: C.goldDim, marginBottom: "1rem" }}>Submit Research Lead</Label>
-          <div style={{ background: C.bgElevated, border: `1px solid ${C.border}`, padding: "1.5rem 1.625rem" }}>
+          <div style={{ background: C.bgCard, border: `1px solid ${C.border}`, padding: "1.5rem 1.625rem" }}>
             <JuniorLeadForm />
           </div>
         </section>

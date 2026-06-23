@@ -5,14 +5,14 @@ import { useRouter } from "next/navigation";
 import { formatEarningsCents, formatHoursFromMinutes, minutesBetween } from "@/lib/junior-creators/week";
 
 const C = {
+  bgCard: "#101010",
   bgElevated: "#111111",
   gold: "#C9A962",
   goldDim: "rgba(201,169,98,0.55)",
-  goldFaint: "rgba(201,169,98,0.08)",
   cream: "#F5F1E8",
   creamMuted: "rgba(245,241,232,0.72)",
   border: "rgba(255,255,255,0.08)",
-  borderGold: "rgba(201,169,98,0.12)",
+  borderGold: "rgba(201,169,98,0.14)",
   sans: "var(--font-outfit, 'Helvetica Neue', Arial, sans-serif)",
   serif: "var(--font-cormorant, Georgia, 'Times New Roman', serif)",
 } as const;
@@ -100,7 +100,7 @@ export function JuniorShiftCard({ activeShift }: Props) {
   return (
     <div
       style={{
-        background: C.goldFaint,
+        background: C.bgCard,
         border: `1px solid ${C.borderGold}`,
         padding: "1.5rem 1.625rem",
         marginBottom: "2rem",

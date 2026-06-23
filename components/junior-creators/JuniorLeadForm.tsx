@@ -12,10 +12,9 @@ const C = {
   cream: "#F5F1E8",
   creamMuted: "rgba(245,241,232,0.72)",
   gold: "#C9A962",
-  green: "#C9A962",
   red: "#d25a5a",
   border: "rgba(255,255,255,0.08)",
-  borderGold: "rgba(201,169,98,0.12)",
+  borderGold: "rgba(201,169,98,0.14)",
   sans: "var(--font-outfit, 'Helvetica Neue', Arial, sans-serif)",
 } as const;
 
@@ -138,7 +137,7 @@ export function JuniorLeadForm() {
         <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: C.red, marginTop: "1rem" }}>{error}</p>
       )}
       {success && (
-        <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: C.green, marginTop: "1rem" }}>
+        <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: C.gold, marginTop: "1rem" }}>
           Research lead submitted — great work.
         </p>
       )}
@@ -153,7 +152,7 @@ export function JuniorLeadForm() {
           letterSpacing: "0.14em",
           textTransform: "uppercase",
           color: "#080808",
-          background: `linear-gradient(180deg, #d1b06b 0%, ${C.gold} 48%, #b09040 100%)`,
+          background: `linear-gradient(180deg, #d4ba7a 0%, ${C.gold} 48%, #b09040 100%)`,
           border: "none",
           padding: "0.75rem 1.5rem",
           cursor: submitting ? "wait" : "pointer",
