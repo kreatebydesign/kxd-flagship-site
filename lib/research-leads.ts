@@ -50,11 +50,11 @@ export const RESEARCH_SERVICE_LABEL: Record<string, string> = Object.fromEntries
 );
 
 export const RESEARCH_STATUS_COLOR: Record<string, string> = {
-  new: "#8a9bd2",
-  reviewing: "#f0be50",
-  qualified: "#96d2c8",
+  new: "#A8B4C8",
+  reviewing: "#E8C468",
+  qualified: "#A8B4C8",
   rejected: "#d25a5a",
-  contacted: "#C5A65C",
-  "closed-won": "#5ec68c",
+  contacted: "#C9A962",
+  "closed-won": "#C9A962",
   "closed-lost": "rgba(255,255,255,0.35)",
 };

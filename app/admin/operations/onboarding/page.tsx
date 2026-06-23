@@ -28,28 +28,28 @@ export const dynamic = "force-dynamic";
 // ── Brand tokens ──────────────────────────────────────────────────────────────
 
 const C = {
-  bgPure:      "#000000",
+  bgPure:      "#050505",
   bgBase:      "#080808",
   bgElevated:  "#111111",
-  bgCard:      "#141414",
-  gold:        "#C5A65C",
-  goldDim:     "rgba(197,166,92,0.55)",
-  goldFaint:   "rgba(197,166,92,0.08)",
-  cream:       "#f8f3ea",
-  creamMuted:  "#bfb7aa",
+  bgCard:      "#101010",
+  gold:        "#C9A962",
+  goldDim:     "rgba(201,169,98,0.55)",
+  goldFaint:   "rgba(201,169,98,0.08)",
+  cream:       "#F5F1E8",
+  creamMuted:  "rgba(245,241,232,0.72)",
   red:         "#d25a5a",
   redFaint:    "rgba(210,90,90,0.08)",
   redBorder:   "rgba(210,90,90,0.25)",
-  yellow:      "#f0be50",
-  yellowFaint: "rgba(240,190,80,0.08)",
-  green:       "#5ec68c",
-  greenFaint:  "rgba(94,198,140,0.07)",
-  greenBorder: "rgba(94,198,140,0.25)",
-  teal:        "#96d2c8",
-  blue:        "#8a9bd2",
-  purple:      "#b48cdc",
-  border:      "rgba(255,255,255,0.07)",
-  borderGold:  "rgba(197,166,92,0.22)",
+  yellow:      "#E8C468",
+  yellowFaint: "rgba(232,196,104,0.08)",
+  green:       "#C9A962",
+  greenFaint:  "rgba(201,169,98,0.07)",
+  greenBorder: "rgba(201,169,98,0.20)",
+  teal:        "#A8B4C8",
+  blue:        "#A8B4C8",
+  purple:      "#C4B0D8",
+  border:      "rgba(255,255,255,0.08)",
+  borderGold:  "rgba(201,169,98,0.12)",
   serif:       "var(--font-cormorant, Georgia, 'Times New Roman', serif)",
   sans:        "var(--font-outfit, 'Helvetica Neue', Arial, sans-serif)",
 } as const;
@@ -322,7 +322,7 @@ export default async function OnboardingDashboardPage() {
             fontSize: "clamp(1.875rem, 5vw, 3rem)",
             lineHeight: 1.02, color: C.cream, letterSpacing: "-0.01em",
           }}>
-            Onboarding Command Center
+            Client Onboarding
           </h1>
           <p style={{
             fontFamily: C.sans, fontSize: "0.5625rem", color: C.creamMuted,

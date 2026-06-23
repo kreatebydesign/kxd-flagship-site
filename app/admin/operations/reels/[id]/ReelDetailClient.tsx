@@ -19,16 +19,16 @@ import { KxdLogo } from "@/components/ui/KxdLogo";
 const C = {
   bgBase:     "#080808",
   bgElevated: "#111",
-  bgInput:    "#0d0d0d",
-  gold:       "#C5A65C",
-  goldDim:    "rgba(197,166,92,0.55)",
-  goldFaint:  "rgba(197,166,92,0.06)",
-  cream:      "#f8f3ea",
-  creamMuted: "#bfb7aa",
-  border:     "rgba(255,255,255,0.07)",
-  borderGold: "rgba(197,166,92,0.22)",
+  bgInput:    "#0B0B0B",
+  gold:       "#C9A962",
+  goldDim:    "rgba(201,169,98,0.55)",
+  goldFaint:  "rgba(201,169,98,0.06)",
+  cream:      "#F5F1E8",
+  creamMuted: "rgba(245,241,232,0.72)",
+  border:     "rgba(255,255,255,0.08)",
+  borderGold: "rgba(201,169,98,0.12)",
   red:        "#d25a5a",
-  green:      "#5ec68c",
+  green:      "#C9A962",
   sans:       "var(--font-outfit, Inter, system-ui)",
   serif:      "var(--font-cormorant, Georgia)",
 } as const;
@@ -373,8 +373,8 @@ export function ReelDetailClient({ doc }: { doc: AnyDoc }) {
                   textTransform: "uppercase" as const,
                   color:         C.bgBase,
                   background:    screenshotState === "loading"
-                    ? "rgba(197,166,92,0.4)"
-                    : "linear-gradient(180deg, #d1b06b 0%, #c5a65c 48%, #b09040 100%)",
+                    ? "rgba(201,169,98,0.4)"
+                    : "linear-gradient(180deg, #d1b06b 0%, #c9a962 48%, #b09040 100%)",
                   border:        "none",
                   padding:       "0.75rem 1.5rem",
                   cursor:        screenshotState === "loading" ? "not-allowed" : "pointer",
@@ -429,8 +429,8 @@ export function ReelDetailClient({ doc }: { doc: AnyDoc }) {
                 textTransform: "uppercase" as const,
                 color:         C.bgBase,
                 background:    storyboardState === "loading"
-                  ? "rgba(197,166,92,0.4)"
-                  : "linear-gradient(180deg, #d1b06b 0%, #c5a65c 48%, #b09040 100%)",
+                  ? "rgba(201,169,98,0.4)"
+                  : "linear-gradient(180deg, #d1b06b 0%, #c9a962 48%, #b09040 100%)",
                 border:        "none",
                 padding:       "0.75rem 1.5rem",
                 cursor:        storyboardState === "loading" ? "not-allowed" : "pointer",
@@ -491,8 +491,8 @@ export function ReelDetailClient({ doc }: { doc: AnyDoc }) {
                 textTransform: "uppercase" as const,
                 color:         C.bgBase,
                 background:    renderState === "loading" || !hasScreenshots
-                  ? "rgba(197,166,92,0.4)"
-                  : "linear-gradient(180deg, #d1b06b 0%, #c5a65c 48%, #b09040 100%)",
+                  ? "rgba(201,169,98,0.4)"
+                  : "linear-gradient(180deg, #d1b06b 0%, #c9a962 48%, #b09040 100%)",
                 border:        "none",
                 padding:       "0.75rem 1.5rem",
                 cursor:        renderState === "loading" || !hasScreenshots ? "not-allowed" : "pointer",
@@ -578,7 +578,7 @@ export function ReelDetailClient({ doc }: { doc: AnyDoc }) {
                     letterSpacing: "0.14em",
                     textTransform: "uppercase" as const,
                     color:         C.bgBase,
-                    background:    "linear-gradient(180deg, #d1b06b 0%, #c5a65c 48%, #b09040 100%)",
+                    background:    "linear-gradient(180deg, #d1b06b 0%, #c9a962 48%, #b09040 100%)",
                     padding:       "0.625rem 1.25rem",
                     textDecoration:"none",
                     display:       "inline-block",

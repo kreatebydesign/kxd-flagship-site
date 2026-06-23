@@ -1,6 +1,6 @@
 /**
  * /admin/operations/founder
- * KXD OS — Founder Command Center
+ * KXD OS — Founder Studio
  * Phase 3B
  *
  * Single morning dashboard for the KXD founder. Executive intelligence across
@@ -24,32 +24,32 @@ export const dynamic = "force-dynamic";
 // ── Brand tokens ──────────────────────────────────────────────────────────────
 
 const C = {
-  bgPure:      "#000000",
+  bgPure:      "#050505",
   bgBase:      "#080808",
   bgElevated:  "#111111",
-  bgCard:      "#141414",
-  gold:        "#C5A65C",
-  goldDim:     "rgba(197,166,92,0.55)",
-  goldFaint:   "rgba(197,166,92,0.08)",
+  bgCard:      "#101010",
+  gold:        "#C9A962",
+  goldDim:     "rgba(201,169,98,0.55)",
+  goldFaint:   "rgba(201,169,98,0.08)",
   goldBright:  "#d4b96a",
-  cream:       "#f8f3ea",
-  creamMuted:  "#bfb7aa",
+  cream:       "#F5F1E8",
+  creamMuted:  "rgba(245,241,232,0.72)",
   red:         "#d25a5a",
   redFaint:    "rgba(210,90,90,0.08)",
   redBorder:   "rgba(210,90,90,0.25)",
-  yellow:      "#f0be50",
-  yellowFaint: "rgba(240,190,80,0.08)",
-  green:       "#5ec68c",
-  greenFaint:  "rgba(94,198,140,0.07)",
-  greenBorder: "rgba(94,198,140,0.25)",
-  teal:        "#96d2c8",
-  tealFaint:   "rgba(150,210,200,0.07)",
-  blue:        "#8a9bd2",
-  blueFaint:   "rgba(138,155,210,0.07)",
-  purple:      "#b48cdc",
-  purpleFaint: "rgba(180,140,220,0.07)",
-  border:      "rgba(255,255,255,0.07)",
-  borderGold:  "rgba(197,166,92,0.22)",
+  yellow:      "#E8C468",
+  yellowFaint: "rgba(232,196,104,0.08)",
+  green:       "#C9A962",
+  greenFaint:  "rgba(201,169,98,0.07)",
+  greenBorder: "rgba(201,169,98,0.20)",
+  teal:        "#A8B4C8",
+  tealFaint:   "rgba(168,180,200,0.07)",
+  blue:        "#A8B4C8",
+  blueFaint:   "rgba(168,180,200,0.07)",
+  purple:      "#C4B0D8",
+  purpleFaint: "rgba(196,176,216,0.07)",
+  border:      "rgba(255,255,255,0.08)",
+  borderGold:  "rgba(201,169,98,0.12)",
   serif:       "var(--font-cormorant, Georgia, 'Times New Roman', serif)",
   sans:        "var(--font-outfit, 'Helvetica Neue', Arial, sans-serif)",
 } as const;
@@ -338,7 +338,7 @@ export default async function FounderPage() {
     goalPct >= 85 ? "on-track" : goalPct >= 55 ? "building" : "behind";
   const REV_CFG: Record<RevStatus, { label: string; color: string; dot: string; bg: string; border: string }> = {
     "on-track": { label: "On Track", color: C.green,  dot: C.green,  bg: C.greenFaint, border: C.greenBorder },
-    "building": { label: "Building Momentum", color: C.teal,   dot: C.teal,   bg: C.tealFaint,  border: "rgba(150,210,200,0.28)" },
+    "building": { label: "Building Momentum", color: C.teal,   dot: C.teal,   bg: C.tealFaint,  border: "rgba(168,180,200,0.28)" },
     "behind":   { label: "Behind Target",     color: C.red,    dot: C.red,    bg: C.redFaint,   border: C.redBorder },
   };
   const rev = REV_CFG[revStatus];
@@ -438,8 +438,8 @@ export default async function FounderPage() {
   const MOMENTUM_CFG: Record<MomentumLevel, { label: string; color: string; bg: string; border: string; description: string }> = {
     "elite":           { label: "Elite",            color: C.gold,    bg: C.goldFaint,   border: C.borderGold,              description: "KXD is firing on all cylinders. Revenue, pipeline, and clients are all strong." },
     "strong":          { label: "Strong",           color: C.green,   bg: C.greenFaint,  border: C.greenBorder,             description: "Strong business performance. Focus on acceleration opportunities." },
-    "building":        { label: "Building",         color: C.teal,    bg: C.tealFaint,   border: "rgba(150,210,200,0.28)",  description: "Momentum is building. Identify the one constraint holding growth back." },
-    "needs-attention": { label: "Needs Attention",  color: C.yellow,  bg: C.yellowFaint, border: "rgba(240,190,80,0.28)",   description: "Business needs active founder attention across revenue and client health." },
+    "building":        { label: "Building",         color: C.teal,    bg: C.tealFaint,   border: "rgba(168,180,200,0.28)",  description: "Momentum is building. Identify the one constraint holding growth back." },
+    "needs-attention": { label: "Needs Attention",  color: C.yellow,  bg: C.yellowFaint, border: "rgba(232,196,104,0.28)",   description: "Business needs active founder attention across revenue and client health." },
   };
   const mom = MOMENTUM_CFG[momentumLevel];
 
@@ -548,7 +548,7 @@ export default async function FounderPage() {
               <KxdLogo />
               <div>
                 <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.2em", textTransform: "uppercase" as const, color: C.goldDim }}>
-                  KXD OS · Founder Command Center
+                  KXD OS · Founder Studio
                 </p>
                 <p style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.18)", marginTop: "0.125rem" }}>
                   Phase 3B · Live Payload data · Refreshes on every request
@@ -557,8 +557,8 @@ export default async function FounderPage() {
               <span style={{
                 fontFamily: C.sans, fontWeight: 600, fontSize: "0.375rem",
                 letterSpacing: "0.16em", textTransform: "uppercase" as const,
-                color: "rgba(197,166,92,0.75)", background: "rgba(197,166,92,0.07)",
-                border: "1px solid rgba(197,166,92,0.2)", padding: "0.2rem 0.6rem",
+                color: "rgba(201,169,98,0.75)", background: "rgba(201,169,98,0.07)",
+                border: "1px solid rgba(201,169,98,0.2)", padding: "0.2rem 0.6rem",
               }}>
                 Phase 3B
               </span>
@@ -593,7 +593,7 @@ export default async function FounderPage() {
         {/* ── Page title + momentum badge ───────────────────────────────── */}
         <div style={{ marginBottom: "2.5rem", paddingBottom: "2rem", borderBottom: `1px solid ${C.border}` }}>
           <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.2em", textTransform: "uppercase" as const, color: C.goldDim, marginBottom: "0.875rem" }}>
-            KXD OS · Founder Command Center
+            KXD OS · Founder Studio
           </p>
           <div className="flex flex-wrap items-end justify-between gap-6">
             <div>
@@ -680,7 +680,7 @@ export default async function FounderPage() {
                   <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: "rgba(255,255,255,0.3)", letterSpacing: "0.08em" }}>Progress to $1M</p>
                   <p style={{ fontFamily: C.sans, fontWeight: 600, fontSize: "0.4375rem", color: rev.color }}>{goalPct}%</p>
                 </div>
-                <div style={{ height: "4px", background: "rgba(255,255,255,0.07)", position: "relative" as const }}>
+                <div style={{ height: "4px", background: "rgba(255,255,255,0.08)", position: "relative" as const }}>
                   <div style={{ position: "absolute" as const, top: 0, left: 0, width: `${goalPct}%`, height: "100%", background: rev.color }} />
                 </div>
                 {mrrNeeded > 0 && (
@@ -707,7 +707,7 @@ export default async function FounderPage() {
               <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: "rgba(255,255,255,0.3)", letterSpacing: "0.06em", marginBottom: "1.25rem" }}>
                 / 100 composite
               </p>
-              <div style={{ height: "4px", background: "rgba(255,255,255,0.07)", position: "relative" as const, marginBottom: "1rem" }}>
+              <div style={{ height: "4px", background: "rgba(255,255,255,0.08)", position: "relative" as const, marginBottom: "1rem" }}>
                 <div style={{ position: "absolute" as const, top: 0, left: 0, width: `${momentumScore}%`, height: "100%", background: mom.color }} />
               </div>
               <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: "rgba(255,255,255,0.35)", lineHeight: 1.6, letterSpacing: "0.02em" }}>
@@ -726,7 +726,7 @@ export default async function FounderPage() {
                     <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: "rgba(255,255,255,0.35)", letterSpacing: "0.06em", flex: 1 }}>
                       {l}
                     </p>
-                    <div style={{ width: "5rem", height: "2px", background: "rgba(255,255,255,0.07)", position: "relative" as const }}>
+                    <div style={{ width: "5rem", height: "2px", background: "rgba(255,255,255,0.08)", position: "relative" as const }}>
                       <div style={{ position: "absolute" as const, top: 0, left: 0, width: `${(pts / max) * 100}%`, height: "100%", background: mom.color, opacity: 0.7 }} />
                     </div>
                     <p style={{ fontFamily: C.sans, fontWeight: 600, fontSize: "0.4375rem", color: mom.color, width: "3rem", textAlign: "right" as const }}>
@@ -747,7 +747,7 @@ export default async function FounderPage() {
           />
 
           {topPriorities.length === 0 ? (
-            <div style={{ background: C.bgElevated, border: `1px solid rgba(94,198,140,0.22)`, padding: "1.5rem 1.75rem", display: "flex", alignItems: "center", gap: "1rem" }}>
+            <div style={{ background: C.bgElevated, border: `1px solid rgba(201,169,98,0.12)`, padding: "1.5rem 1.75rem", display: "flex", alignItems: "center", gap: "1rem" }}>
               <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: C.green }} />
               <div>
                 <p style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.6875rem", color: C.green }}>No priority items this week.</p>
@@ -958,7 +958,7 @@ export default async function FounderPage() {
                             </p>
                           </div>
                         </div>
-                        <div style={{ height: "2px", background: "rgba(255,255,255,0.07)", position: "relative" as const }}>
+                        <div style={{ height: "2px", background: "rgba(255,255,255,0.08)", position: "relative" as const }}>
                           <div style={{ position: "absolute" as const, top: 0, left: 0, width: `${pct}%`, height: "100%", background: TIER_COLOR[a.tier] ?? C.gold }} />
                         </div>
                       </div>
@@ -1025,7 +1025,7 @@ export default async function FounderPage() {
                     {/* Score bar */}
                     <div style={{ marginBottom: "0.75rem" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                        <div style={{ flex: 1, height: "2px", background: "rgba(255,255,255,0.07)", position: "relative" as const }}>
+                        <div style={{ flex: 1, height: "2px", background: "rgba(255,255,255,0.08)", position: "relative" as const }}>
                           <div style={{ position: "absolute" as const, top: 0, left: 0, width: `${a.score}%`, height: "100%", background: a.gradeColor }} />
                         </div>
                         <span style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: a.gradeColor }}>
@@ -1078,7 +1078,7 @@ export default async function FounderPage() {
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-10" style={{ gap: "1px", background: C.border, border: `1px solid ${C.border}` }}>
             {([
-              { label: "Operations",   sub: "Command center",          href: "/admin/operations" },
+              { label: "Operations",   sub: "Studio overview",          href: "/admin/operations" },
               { label: "Today",        sub: "Daily dashboard",         href: "/admin/operations/today" },
               { label: "Growth",       sub: "Pipeline intelligence",   href: "/admin/operations/growth" },
               { label: "Accounts",     sub: "Strategic intelligence",  href: "/admin/operations/accounts" },
@@ -1104,7 +1104,7 @@ export default async function FounderPage() {
         {/* ── Footer ────────────────────────────────────────────────────── */}
         <div style={{ marginTop: "2.5rem", padding: "1rem 1.25rem", background: C.goldFaint, border: `1px solid ${C.borderGold}`, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap" as const, gap: "0.5rem" }}>
           <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", letterSpacing: "0.08em", color: "rgba(255,255,255,0.22)" }}>
-            KXD OS · Founder Command Center · Phase 3B · Live Payload data · Refreshes on each request
+            KXD OS · Founder Studio · Phase 3B · Live Payload data · Refreshes on each request
           </p>
           <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" as const }}>
             {([

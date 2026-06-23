@@ -153,9 +153,9 @@ export const PLAYBOOKS: Playbook[] = [
 ];
 
 export const BADGE_COLORS: Record<PlaybookBadge, { color: string; bg: string; border: string }> = {
-  "Core SOP": { color: "#C5A65C", bg: "rgba(197,166,92,0.08)", border: "rgba(197,166,92,0.25)" },
-  Launch: { color: "#96d2c8", bg: "rgba(150,210,200,0.08)", border: "rgba(150,210,200,0.25)" },
-  SEO: { color: "#8a9bd2", bg: "rgba(138,155,210,0.08)", border: "rgba(138,155,210,0.25)" },
-  "Client Success": { color: "#5ec68c", bg: "rgba(94,198,140,0.08)", border: "rgba(94,198,140,0.25)" },
+  "Core SOP": { color: "#C9A962", bg: "rgba(201,169,98,0.08)", border: "rgba(201,169,98,0.25)" },
+  Launch: { color: "#A8B4C8", bg: "rgba(168,180,200,0.08)", border: "rgba(168,180,200,0.25)" },
+  SEO: { color: "#A8B4C8", bg: "rgba(168,180,200,0.08)", border: "rgba(168,180,200,0.25)" },
+  "Client Success": { color: "#C9A962", bg: "rgba(201,169,98,0.08)", border: "rgba(201,169,98,0.25)" },
   Emergency: { color: "#d25a5a", bg: "rgba(210,90,90,0.08)", border: "rgba(210,90,90,0.25)" },
 };

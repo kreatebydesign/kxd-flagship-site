@@ -22,20 +22,20 @@ interface Props {
 // ── Brand tokens ──────────────────────────────────────────────────────────────
 
 const C = {
-  bgPure:     "#000000",
+  bgPure:     "#050505",
   bgBase:     "#080808",
   bgElevated: "#111111",
-  bgInput:    "#0d0d0d",
-  gold:       "#C5A65C",
-  goldDim:    "rgba(197,166,92,0.55)",
-  goldFaint:  "rgba(197,166,92,0.08)",
-  cream:      "#f8f3ea",
-  creamMuted: "#bfb7aa",
+  bgInput:    "#0B0B0B",
+  gold:       "#C9A962",
+  goldDim:    "rgba(201,169,98,0.55)",
+  goldFaint:  "rgba(201,169,98,0.08)",
+  cream:      "#F5F1E8",
+  creamMuted: "rgba(245,241,232,0.72)",
   red:        "#d25a5a",
-  green:      "#5ec68c",
-  border:     "rgba(255,255,255,0.07)",
-  borderGold: "rgba(197,166,92,0.22)",
-  borderFocus:"rgba(197,166,92,0.55)",
+  green:      "#C9A962",
+  border:     "rgba(255,255,255,0.08)",
+  borderGold: "rgba(201,169,98,0.12)",
+  borderFocus:"rgba(201,169,98,0.55)",
   serif:      "var(--font-cormorant, Georgia, 'Times New Roman', serif)",
   sans:       "var(--font-outfit, 'Helvetica Neue', Arial, sans-serif)",
 } as const;
@@ -216,7 +216,7 @@ export function NewRequestForm({ clients, projects }: Props) {
           {/* Gold circle icon */}
           <div style={{ width: "3.5rem", height: "3.5rem", borderRadius: "50%", background: C.goldFaint, border: `1px solid ${C.borderGold}`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "2rem" }}>
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M4 10.5L8.5 15L16 6" stroke="#C5A65C" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M4 10.5L8.5 15L16 6" stroke="#C9A962" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
 
@@ -227,14 +227,14 @@ export function NewRequestForm({ clients, projects }: Props) {
             Request logged.
           </h1>
           <p style={{ fontFamily: C.sans, fontSize: "0.875rem", color: "rgba(255,255,255,0.4)", maxWidth: "28rem", lineHeight: 1.6, marginBottom: "0.5rem" }}>
-            The client request has been created in Payload and is now visible in the Operations Command Center.
+            The client request has been created in Payload and is now visible in the Operations Suite.
           </p>
           <p style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.2)", marginBottom: "2.5rem" }}>
             Record ID #{submitted.id}
           </p>
 
           <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", justifyContent: "center" }}>
-            <Link href="/admin/operations" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.5625rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.bgBase, background: `linear-gradient(180deg, #d1b06b 0%, #c5a65c 48%, #b09040 100%)`, padding: "0.875rem 2rem", textDecoration: "none", display: "inline-block" }}>
+            <Link href="/admin/operations" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.5625rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.bgBase, background: `linear-gradient(180deg, #d1b06b 0%, #c9a962 48%, #b09040 100%)`, padding: "0.875rem 2rem", textDecoration: "none", display: "inline-block" }}>
               Return to Dashboard
             </Link>
             <button onClick={resetForm} style={{ fontFamily: C.sans, fontWeight: 400, fontSize: "0.5625rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.goldDim, background: "transparent", border: `1px solid ${C.borderGold}`, padding: "0.875rem 2rem", cursor: "pointer" }}>
@@ -409,8 +409,8 @@ export function NewRequestForm({ clients, projects }: Props) {
                   textTransform: "uppercase",
                   color: C.bgBase,
                   background: submitting || !form.client || !form.requestTitle.trim()
-                    ? "rgba(197,166,92,0.3)"
-                    : "linear-gradient(180deg, #d1b06b 0%, #c5a65c 48%, #b09040 100%)",
+                    ? "rgba(201,169,98,0.3)"
+                    : "linear-gradient(180deg, #d1b06b 0%, #c9a962 48%, #b09040 100%)",
                   border: "none",
                   padding: "0.875rem 2.5rem",
                   cursor: submitting || !form.client || !form.requestTitle.trim() ? "not-allowed" : "pointer",

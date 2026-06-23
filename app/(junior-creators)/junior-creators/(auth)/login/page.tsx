@@ -32,8 +32,8 @@ export default function JuniorCreatorsLoginPage() {
         >
           Junior Creators
         </h1>
-        <p className="mb-6 font-sans" style={{ fontSize: "0.5625rem", color: "rgba(255,255,255,0.35)" }}>
-          Research desk login for KXD team members.
+        <p className="mb-6 font-sans" style={{ fontSize: "0.5625rem", color: "rgba(245,241,232,0.48)" }}>
+          Sign in to your KXD Academy research desk.
         </p>
         <Suspense fallback={null}>
           <JuniorLoginForm />

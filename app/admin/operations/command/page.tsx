@@ -1,5 +1,5 @@
 /**
- * KXD OS — Operations Command Center
+ * KXD OS — Operations Suite
  * /admin/operations/command — Phase 2D
  *
  * Live Payload data: Clients, Retainers, ClientProjects,
@@ -22,27 +22,27 @@ export const dynamic = "force-dynamic";
 // ── Brand tokens ──────────────────────────────────────────────────────────────
 
 const C = {
-  bgPure:       "#000000",
+  bgPure:       "#050505",
   bgBase:       "#080808",
   bgElevated:   "#111111",
-  bgCard:       "#141414",
-  gold:         "#C5A65C",
-  goldDim:      "rgba(197,166,92,0.55)",
-  goldFaint:    "rgba(197,166,92,0.08)",
-  cream:        "#f8f3ea",
-  creamMuted:   "#bfb7aa",
+  bgCard:       "#101010",
+  gold:         "#C9A962",
+  goldDim:      "rgba(201,169,98,0.55)",
+  goldFaint:    "rgba(201,169,98,0.08)",
+  cream:        "#F5F1E8",
+  creamMuted:   "rgba(245,241,232,0.72)",
   red:          "#d25a5a",
   redFaint:     "rgba(210,90,90,0.08)",
-  yellow:       "#f0be50",
-  yellowFaint:  "rgba(240,190,80,0.08)",
-  green:        "#5ec68c",
-  greenFaint:   "rgba(94,198,140,0.08)",
-  blue:         "#8a9bd2",
-  teal:         "#96d2c8",
-  purple:       "#b48cdc",
-  border:       "rgba(255,255,255,0.07)",
+  yellow:       "#E8C468",
+  yellowFaint:  "rgba(232,196,104,0.08)",
+  green:        "#C9A962",
+  greenFaint:   "rgba(201,169,98,0.08)",
+  blue:         "#A8B4C8",
+  teal:         "#A8B4C8",
+  purple:       "#C4B0D8",
+  border:       "rgba(255,255,255,0.08)",
   borderStrong: "rgba(255,255,255,0.11)",
-  borderGold:   "rgba(197,166,92,0.22)",
+  borderGold:   "rgba(201,169,98,0.12)",
   borderRed:    "rgba(210,90,90,0.25)",
   serif:        "var(--font-cormorant, Georgia, 'Times New Roman', serif)",
   sans:         "var(--font-outfit, 'Helvetica Neue', Arial, sans-serif)",
@@ -182,30 +182,30 @@ const TIER_LABELS: Record<string, string> = {
 // ── Badge / priority config ───────────────────────────────────────────────────
 
 const STATUS_BADGE: Record<string, { label: string; color: string; bg: string; border: string }> = {
-  healthy:            { label: "Healthy",          color: "#5ec68c", bg: "rgba(94,198,140,0.08)",   border: "rgba(94,198,140,0.3)" },
-  "needs-attention":  { label: "Needs Attention",  color: "#f0be50", bg: "rgba(240,190,80,0.08)",   border: "rgba(240,190,80,0.3)" },
+  healthy:            { label: "Healthy",          color: "#C9A962", bg: "rgba(201,169,98,0.08)",   border: "rgba(201,169,98,0.3)" },
+  "needs-attention":  { label: "Needs Attention",  color: "#E8C468", bg: "rgba(232,196,104,0.08)",   border: "rgba(232,196,104,0.3)" },
   "at-risk":          { label: "At Risk",           color: "#d25a5a", bg: "rgba(210,90,90,0.08)",    border: "rgba(210,90,90,0.3)" },
-  "not-started":      { label: "Not Started",       color: "#8a9bd2", bg: "rgba(138,155,210,0.08)",  border: "rgba(138,155,210,0.3)" },
-  "in-progress":      { label: "In Progress",       color: "#f0be50", bg: "rgba(240,190,80,0.08)",   border: "rgba(240,190,80,0.3)" },
-  "waiting-on-client":{ label: "Waiting",           color: "#b48cdc", bg: "rgba(180,140,220,0.08)",  border: "rgba(180,140,220,0.3)" },
-  complete:           { label: "Complete",          color: "#5ec68c", bg: "rgba(94,198,140,0.08)",   border: "rgba(94,198,140,0.3)" },
+  "not-started":      { label: "Not Started",       color: "#A8B4C8", bg: "rgba(168,180,200,0.08)",  border: "rgba(168,180,200,0.3)" },
+  "in-progress":      { label: "In Progress",       color: "#E8C468", bg: "rgba(232,196,104,0.08)",   border: "rgba(232,196,104,0.3)" },
+  "waiting-on-client":{ label: "Waiting",           color: "#C4B0D8", bg: "rgba(196,176,216,0.08)",  border: "rgba(196,176,216,0.3)" },
+  complete:           { label: "Complete",          color: "#C9A962", bg: "rgba(201,169,98,0.08)",   border: "rgba(201,169,98,0.3)" },
   blocked:            { label: "Blocked",           color: "#d25a5a", bg: "rgba(210,90,90,0.08)",    border: "rgba(210,90,90,0.3)" },
-  current:            { label: "Current",           color: "#5ec68c", bg: "rgba(94,198,140,0.08)",   border: "rgba(94,198,140,0.3)" },
-  active:             { label: "Active",            color: "#5ec68c", bg: "rgba(94,198,140,0.08)",   border: "rgba(94,198,140,0.3)" },
-  upcoming:           { label: "Upcoming",          color: "#96d2c8", bg: "rgba(150,210,200,0.08)",  border: "rgba(150,210,200,0.3)" },
+  current:            { label: "Current",           color: "#C9A962", bg: "rgba(201,169,98,0.08)",   border: "rgba(201,169,98,0.3)" },
+  active:             { label: "Active",            color: "#C9A962", bg: "rgba(201,169,98,0.08)",   border: "rgba(201,169,98,0.3)" },
+  upcoming:           { label: "Upcoming",          color: "#A8B4C8", bg: "rgba(168,180,200,0.08)",  border: "rgba(168,180,200,0.3)" },
   paused:             { label: "Paused",            color: "#888880", bg: "rgba(136,136,128,0.08)",  border: "rgba(136,136,128,0.3)" },
   overdue:            { label: "Overdue",           color: "#d25a5a", bg: "rgba(210,90,90,0.08)",    border: "rgba(210,90,90,0.3)" },
   ended:              { label: "Ended",             color: "rgba(255,255,255,0.3)", bg: "rgba(255,255,255,0.04)", border: "rgba(255,255,255,0.1)" },
-  planning:           { label: "Planning",          color: "#96d2c8", bg: "rgba(150,210,200,0.08)",  border: "rgba(150,210,200,0.3)" },
-  review:             { label: "Review",            color: "#b48cdc", bg: "rgba(180,140,220,0.08)",  border: "rgba(180,140,220,0.3)" },
-  new:                { label: "New",               color: "#C5A65C", bg: "rgba(197,166,92,0.08)",   border: "rgba(197,166,92,0.3)" },
-  triaged:            { label: "Triaged",           color: "#96d2c8", bg: "rgba(150,210,200,0.08)",  border: "rgba(150,210,200,0.3)" },
+  planning:           { label: "Planning",          color: "#A8B4C8", bg: "rgba(168,180,200,0.08)",  border: "rgba(168,180,200,0.3)" },
+  review:             { label: "Review",            color: "#C4B0D8", bg: "rgba(196,176,216,0.08)",  border: "rgba(196,176,216,0.3)" },
+  new:                { label: "New",               color: "#C9A962", bg: "rgba(201,169,98,0.08)",   border: "rgba(201,169,98,0.3)" },
+  triaged:            { label: "Triaged",           color: "#A8B4C8", bg: "rgba(168,180,200,0.08)",  border: "rgba(168,180,200,0.3)" },
   declined:           { label: "Declined",          color: "rgba(255,255,255,0.3)", bg: "rgba(255,255,255,0.04)", border: "rgba(255,255,255,0.1)" },
 };
 
 const PRIORITY_CFG: Record<string, { color: string; label: string }> = {
   urgent: { color: "#d25a5a", label: "Urgent" },
-  high:   { color: "#f0be50", label: "High" },
+  high:   { color: "#E8C468", label: "High" },
   normal: { color: "rgba(255,255,255,0.25)", label: "Normal" },
   low:    { color: "rgba(255,255,255,0.12)", label: "Low" },
 };
@@ -473,10 +473,10 @@ export default async function OperationsPage() {
                   Operations
                 </p>
                 <p className="hidden sm:block" style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "0.35rem" }}>
-                  Executive Command Center
+                  Operations Suite
                 </p>
               </div>
-              <span style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.375rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(94,198,140,0.75)", background: "rgba(94,198,140,0.07)", border: "1px solid rgba(94,198,140,0.2)", padding: "0.2rem 0.6rem" }}>
+              <span style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.375rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(201,169,98,0.75)", background: "rgba(201,169,98,0.07)", border: "1px solid rgba(201,169,98,0.2)", padding: "0.2rem 0.6rem" }}>
                 Phase 2D
               </span>
             </div>
@@ -536,7 +536,7 @@ export default async function OperationsPage() {
           <SectionHeader label="Client Health Signals" href="/admin/collections/clients" linkText="Manage Clients →" />
 
           {flaggedClients.length === 0 ? (
-            <div style={{ background: C.bgElevated, border: `1px solid rgba(94,198,140,0.2)`, padding: "1.25rem 1.5rem", display: "flex", alignItems: "center", gap: "1rem" }}>
+            <div style={{ background: C.bgElevated, border: `1px solid rgba(201,169,98,0.2)`, padding: "1.25rem 1.5rem", display: "flex", alignItems: "center", gap: "1rem" }}>
               <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: C.green, flexShrink: 0 }} />
               <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: C.green, letterSpacing: "0.04em" }}>
                 All client health signals clear — no flags detected.
@@ -828,7 +828,7 @@ export default async function OperationsPage() {
         {/* ── Footer ────────────────────────────────────────────────────── */}
         <div style={{ marginTop: "2.5rem", padding: "1rem 1.25rem", background: C.goldFaint, border: `1px solid ${C.borderGold}`, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap" as const, gap: "0.5rem" }}>
           <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", letterSpacing: "0.08em", color: "rgba(255,255,255,0.22)" }}>
-            KXD OS · Operations Command Center · Phase 2D · Live Payload data
+            KXD OS · Operations Suite · Phase 2D · Live Payload data
           </p>
           <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" as const }}>
             {([

@@ -25,31 +25,31 @@ export const dynamic = "force-dynamic";
 // ── Brand tokens ──────────────────────────────────────────────────────────────
 
 const C = {
-  bgPure:      "#000000",
+  bgPure:      "#050505",
   bgBase:      "#080808",
   bgElevated:  "#111111",
-  bgCard:      "#141414",
-  gold:        "#C5A65C",
-  goldDim:     "rgba(197,166,92,0.55)",
-  goldFaint:   "rgba(197,166,92,0.08)",
-  cream:       "#f8f3ea",
-  creamMuted:  "#bfb7aa",
+  bgCard:      "#101010",
+  gold:        "#C9A962",
+  goldDim:     "rgba(201,169,98,0.55)",
+  goldFaint:   "rgba(201,169,98,0.08)",
+  cream:       "#F5F1E8",
+  creamMuted:  "rgba(245,241,232,0.72)",
   red:         "#d25a5a",
   redFaint:    "rgba(210,90,90,0.08)",
   redBorder:   "rgba(210,90,90,0.25)",
-  yellow:      "#f0be50",
-  yellowFaint: "rgba(240,190,80,0.08)",
-  green:       "#5ec68c",
-  greenFaint:  "rgba(94,198,140,0.07)",
-  greenBorder: "rgba(94,198,140,0.25)",
-  teal:        "#96d2c8",
-  tealFaint:   "rgba(150,210,200,0.07)",
-  blue:        "#8a9bd2",
-  blueFaint:   "rgba(138,155,210,0.07)",
-  purple:      "#b48cdc",
-  purpleFaint: "rgba(180,140,220,0.07)",
-  border:      "rgba(255,255,255,0.07)",
-  borderGold:  "rgba(197,166,92,0.22)",
+  yellow:      "#E8C468",
+  yellowFaint: "rgba(232,196,104,0.08)",
+  green:       "#C9A962",
+  greenFaint:  "rgba(201,169,98,0.07)",
+  greenBorder: "rgba(201,169,98,0.20)",
+  teal:        "#A8B4C8",
+  tealFaint:   "rgba(168,180,200,0.07)",
+  blue:        "#A8B4C8",
+  blueFaint:   "rgba(168,180,200,0.07)",
+  purple:      "#C4B0D8",
+  purpleFaint: "rgba(196,176,216,0.07)",
+  border:      "rgba(255,255,255,0.08)",
+  borderGold:  "rgba(201,169,98,0.12)",
   serif:       "var(--font-cormorant, Georgia, 'Times New Roman', serif)",
   sans:        "var(--font-outfit, 'Helvetica Neue', Arial, sans-serif)",
 } as const;
@@ -531,8 +531,8 @@ export default async function AccountsPage() {
               <span style={{
                 fontFamily: C.sans, fontWeight: 600, fontSize: "0.375rem",
                 letterSpacing: "0.16em", textTransform: "uppercase" as const,
-                color: "rgba(197,166,92,0.75)", background: "rgba(197,166,92,0.07)",
-                border: "1px solid rgba(197,166,92,0.2)", padding: "0.2rem 0.6rem",
+                color: "rgba(201,169,98,0.75)", background: "rgba(201,169,98,0.07)",
+                border: "1px solid rgba(201,169,98,0.2)", padding: "0.2rem 0.6rem",
               }}>
                 Phase 3A
               </span>
@@ -585,7 +585,7 @@ export default async function AccountsPage() {
             <div style={{
               display: "inline-flex", alignItems: "center", gap: "0.875rem",
               background: expansionScore >= 30 ? C.tealFaint : C.goldFaint,
-              border: `1px solid ${expansionScore >= 30 ? "rgba(150,210,200,0.28)" : C.borderGold}`,
+              border: `1px solid ${expansionScore >= 30 ? "rgba(168,180,200,0.28)" : C.borderGold}`,
               padding: "0.875rem 1.375rem",
             }}>
               <div style={{ width: "7px", height: "7px", borderRadius: "50%", background: expansionScore >= 30 ? C.teal : C.gold, flexShrink: 0 }} />
@@ -666,7 +666,7 @@ export default async function AccountsPage() {
                   {/* Score bar */}
                   <div style={{ flex: "2 1 14rem", minWidth: "10rem" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                      <div style={{ flex: 1, height: "3px", background: "rgba(255,255,255,0.07)", position: "relative" as const }}>
+                      <div style={{ flex: 1, height: "3px", background: "rgba(255,255,255,0.08)", position: "relative" as const }}>
                         <div style={{ position: "absolute" as const, top: 0, left: 0, width: `${a.score}%`, height: "100%", background: a.gradeColor }} />
                       </div>
                       <span style={{ fontFamily: C.sans, fontWeight: 600, fontSize: "0.5625rem", color: a.gradeColor, letterSpacing: "0.04em", flexShrink: 0 }}>
@@ -779,7 +779,7 @@ export default async function AccountsPage() {
                             {fmtMoney(a.mrr)}
                           </p>
                         </div>
-                        <div style={{ height: "2px", background: "rgba(255,255,255,0.07)", position: "relative" as const }}>
+                        <div style={{ height: "2px", background: "rgba(255,255,255,0.08)", position: "relative" as const }}>
                           <div style={{ position: "absolute" as const, top: 0, left: 0, width: `${pct}%`, height: "100%", background: TIER_COLOR[a.tier] ?? C.gold }} />
                         </div>
                       </div>
@@ -806,7 +806,7 @@ export default async function AccountsPage() {
           />
 
           {founderAttention.length === 0 ? (
-            <div style={{ background: C.bgElevated, border: `1px solid rgba(94,198,140,0.2)`, padding: "1.25rem 1.5rem", display: "flex", alignItems: "center", gap: "1rem" }}>
+            <div style={{ background: C.bgElevated, border: `1px solid rgba(201,169,98,0.2)`, padding: "1.25rem 1.5rem", display: "flex", alignItems: "center", gap: "1rem" }}>
               <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: C.green, flexShrink: 0 }} />
               <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: C.green, letterSpacing: "0.04em" }}>
                 All accounts clear — no founder attention required right now.
@@ -911,7 +911,7 @@ export default async function AccountsPage() {
                         <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "1rem", color: C.gold, marginTop: "0.125rem" }}>+{fmtMoney(gap)}</p>
                       </div>
                     </div>
-                    <div style={{ height: "2px", background: "rgba(255,255,255,0.07)", position: "relative" as const }}>
+                    <div style={{ height: "2px", background: "rgba(255,255,255,0.08)", position: "relative" as const }}>
                       <div style={{ position: "absolute" as const, top: 0, left: 0, width: `${Math.min((a.mrr / benchmark) * 100, 100)}%`, height: "100%", background: TIER_COLOR[a.tier] ?? C.gold }} />
                     </div>
                     <p style={{ fontFamily: C.sans, fontSize: "0.375rem", color: "rgba(255,255,255,0.2)", marginTop: "0.375rem" }}>
@@ -1126,7 +1126,7 @@ export default async function AccountsPage() {
                   {/* Score bar */}
                   <div style={{ marginBottom: "0.75rem" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                      <div style={{ flex: 1, height: "2px", background: "rgba(255,255,255,0.07)", position: "relative" as const }}>
+                      <div style={{ flex: 1, height: "2px", background: "rgba(255,255,255,0.08)", position: "relative" as const }}>
                         <div style={{ position: "absolute" as const, top: 0, left: 0, width: `${a.score}%`, height: "100%", background: a.gradeColor }} />
                       </div>
                       <span style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: a.gradeColor }}>{a.score}/100</span>
@@ -1158,7 +1158,7 @@ export default async function AccountsPage() {
                   {a.strengths.length > 0 && (
                     <div className="flex flex-wrap gap-1" style={{ marginTop: "0.625rem" }}>
                       {a.strengths.map(s => (
-                        <span key={s} style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.1em", color: "rgba(94,198,140,0.7)", border: "1px solid rgba(94,198,140,0.2)", padding: "0.125rem 0.375rem" }}>
+                        <span key={s} style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.1em", color: "rgba(201,169,98,0.7)", border: "1px solid rgba(201,169,98,0.2)", padding: "0.125rem 0.375rem" }}>
                           {s}
                         </span>
                       ))}

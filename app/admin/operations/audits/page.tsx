@@ -12,20 +12,20 @@ import { AUDIT_STATUS_LABEL } from "@/lib/website-audit/scoring";
 export const dynamic = "force-dynamic";
 
 const C = {
-  bgPure: "#000000",
+  bgPure: "#050505",
   bgBase: "#080808",
   bgElevated: "#111111",
-  gold: "#C5A65C",
-  goldDim: "rgba(197,166,92,0.55)",
-  goldFaint: "rgba(197,166,92,0.08)",
-  cream: "#f8f3ea",
-  creamMuted: "#bfb7aa",
-  green: "#5ec68c",
-  yellow: "#f0be50",
-  teal: "#96d2c8",
-  blue: "#8a9bd2",
-  border: "rgba(255,255,255,0.07)",
-  borderGold: "rgba(197,166,92,0.22)",
+  gold: "#C9A962",
+  goldDim: "rgba(201,169,98,0.55)",
+  goldFaint: "rgba(201,169,98,0.08)",
+  cream: "#F5F1E8",
+  creamMuted: "rgba(245,241,232,0.72)",
+  green: "#C9A962",
+  yellow: "#E8C468",
+  teal: "#A8B4C8",
+  blue: "#A8B4C8",
+  border: "rgba(255,255,255,0.08)",
+  borderGold: "rgba(201,169,98,0.12)",
   serif: "var(--font-cormorant, Georgia, 'Times New Roman', serif)",
   sans: "var(--font-outfit, 'Helvetica Neue', Arial, sans-serif)",
 } as const;
@@ -119,7 +119,7 @@ export default async function AuditsDashboardPage() {
             KXD OS · Website Auditor
           </p>
           <h1 style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "clamp(1.875rem, 5vw, 3rem)", color: C.cream }}>
-            Audit Lead Command Center
+            Audit Lead Desk
           </h1>
           <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: C.creamMuted, marginTop: "0.75rem", maxWidth: "36rem" }}>
             Public website audit submissions — scores, grades, and pipeline status for KXD sales follow-up.
@@ -146,7 +146,7 @@ export default async function AuditsDashboardPage() {
           <div style={{ border: `1px solid ${C.border}` }}>
             <div className="hidden sm:grid" style={{ gridTemplateColumns: "1.5fr 1.5fr 0.6fr 1fr 1fr", gap: "1px", background: C.border }}>
               {["Company", "Website", "Score", "Status", "Date"].map((h) => (
-                <div key={h} style={{ background: "#141414", padding: "0.75rem 1.25rem" }}>
+                <div key={h} style={{ background: "#101010", padding: "0.75rem 1.25rem" }}>
                   <Label>{h}</Label>
                 </div>
               ))}

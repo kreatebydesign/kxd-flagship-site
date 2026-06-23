@@ -8,14 +8,14 @@ import {
 } from "@/lib/research-leads";
 
 const C = {
-  bgInput: "#0d0d0d",
-  cream: "#f8f3ea",
-  creamMuted: "#bfb7aa",
-  gold: "#C5A65C",
-  green: "#5ec68c",
+  bgInput: "#0B0B0B",
+  cream: "#F5F1E8",
+  creamMuted: "rgba(245,241,232,0.72)",
+  gold: "#C9A962",
+  green: "#C9A962",
   red: "#d25a5a",
-  border: "rgba(255,255,255,0.07)",
-  borderGold: "rgba(197,166,92,0.22)",
+  border: "rgba(255,255,255,0.08)",
+  borderGold: "rgba(201,169,98,0.12)",
   sans: "var(--font-outfit, 'Helvetica Neue', Arial, sans-serif)",
 } as const;
 

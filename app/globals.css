@@ -6,34 +6,34 @@
 
 :root {
   /* ── Blacks ── */
-  --kxd-black-pure:     #000000;
-  --kxd-black-deep:     #030303;
+  --kxd-black-pure:     #050505;
+  --kxd-black-deep:     #050505;
   --kxd-black-rich:     #050505;
   --kxd-black-base:     #080808;
   --kxd-black-soft:     #0b0b0b;
   --kxd-black-elevated: #111111;
 
   /* ── Charcoal ── */
-  --kxd-charcoal:       #161616;
-  --kxd-charcoal-light: #1c1c1c;
+  --kxd-charcoal:       #101010;
+  --kxd-charcoal-light: #111111;
 
   /* ── Cream / White ── */
   --kxd-white:       #ffffff;
-  --kxd-cream:       #f8f3ea;
-  --kxd-cream-soft:  #e8ded0;
-  --kxd-cream-muted: #bfb7aa;
+  --kxd-cream:       #F5F1E8;
+  --kxd-cream-soft:  rgba(245, 241, 232, 0.72);
+  --kxd-cream-muted: rgba(245, 241, 232, 0.72);
 
-  /* ── Gold — #C5A65C exact KXD logo match ── */
-  --kxd-gold:       #C5A65C;
-  --kxd-gold-light: #D1B06B;
+  /* ── Gold ── */
+  --kxd-gold:       #C9A962;
+  --kxd-gold-light: #d4ba7a;
   --kxd-gold-dark:  #A88440;
   --kxd-gold-deep:  #7C601C;
 
   /* ── Borders ── */
-  --kxd-border-white:        rgba(255, 255, 255, 0.07);
-  --kxd-border-white-strong: rgba(255, 255, 255, 0.11);
-  --kxd-border-gold:         rgba(197, 166, 92, 0.22);
-  --kxd-border-gold-strong:  rgba(197, 166, 92, 0.40);
+  --kxd-border-white:        rgba(255, 255, 255, 0.08);
+  --kxd-border-white-strong: rgba(255, 255, 255, 0.12);
+  --kxd-border-gold:         rgba(201, 169, 98, 0.12);
+  --kxd-border-gold-strong:  rgba(201, 169, 98, 0.20);
 
   /* ── Semantic aliases (keep for compatibility) ── */
   --color-background:      var(--kxd-black-soft);
@@ -49,10 +49,10 @@
   --color-border-gold:     var(--kxd-border-gold);
 
   --foreground-muted:  var(--kxd-cream-muted);
-  --foreground-subtle: rgba(191, 183, 170, 0.55);
+  --foreground-subtle: rgba(245, 241, 232, 0.48);
 
   /* ── Gradients ── */
-  --gradient-gold-button: linear-gradient(180deg, #d1b06b 0%, #c5a65c 48%, #b09040 100%);
+  --gradient-gold-button: linear-gradient(180deg, #d4ba7a 0%, #c9a962 48%, #b09040 100%);
 
   /* ── Shadows ── */
   --shadow-gold-sm:  0 1px 0 rgba(255, 255, 255, 0.16) inset, 0 4px 18px rgba(0, 0, 0, 0.60);

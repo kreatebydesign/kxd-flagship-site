@@ -19,20 +19,20 @@ import {
 } from "@/lib/research-leads";
 
 const C = {
-  bgPure: "#000000",
+  bgPure: "#050505",
   bgBase: "#080808",
   bgElevated: "#111111",
-  bgInput: "#0d0d0d",
-  gold: "#C5A65C",
-  goldDim: "rgba(197,166,92,0.55)",
-  goldFaint: "rgba(197,166,92,0.08)",
-  cream: "#f8f3ea",
-  creamMuted: "#bfb7aa",
+  bgInput: "#0B0B0B",
+  gold: "#C9A962",
+  goldDim: "rgba(201,169,98,0.55)",
+  goldFaint: "rgba(201,169,98,0.08)",
+  cream: "#F5F1E8",
+  creamMuted: "rgba(245,241,232,0.72)",
   red: "#d25a5a",
-  green: "#5ec68c",
-  border: "rgba(255,255,255,0.07)",
-  borderGold: "rgba(197,166,92,0.22)",
-  borderFocus: "rgba(197,166,92,0.55)",
+  green: "#C9A962",
+  border: "rgba(255,255,255,0.08)",
+  borderGold: "rgba(201,169,98,0.12)",
+  borderFocus: "rgba(201,169,98,0.55)",
   serif: "var(--font-cormorant, Georgia, 'Times New Roman', serif)",
   sans: "var(--font-outfit, 'Helvetica Neue', Arial, sans-serif)",
 } as const;
@@ -209,8 +209,8 @@ export function ResearchDesk({ leads, metrics, researchers, filterStatus, filter
 
   const KPI = [
     { label: "Total Leads", value: metrics.total, accent: C.cream },
-    { label: "New Leads", value: metrics.new, accent: "#8a9bd2" },
-    { label: "Qualified Leads", value: metrics.qualified, accent: "#96d2c8" },
+    { label: "New Leads", value: metrics.new, accent: "#A8B4C8" },
+    { label: "Qualified Leads", value: metrics.qualified, accent: "#A8B4C8" },
     { label: "Closed Won", value: metrics.closedWon, accent: C.green },
   ];
 

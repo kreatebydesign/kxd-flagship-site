@@ -105,7 +105,7 @@ export function JuniorLoginForm() {
           letterSpacing: "0.16em",
           fontWeight: 500,
           color: "#080808",
-          background: "linear-gradient(180deg, #d1b06b 0%, #c5a65c 48%, #b09040 100%)",
+          background: "linear-gradient(180deg, #d4ba7a 0%, #c9a962 48%, #b09040 100%)",
           border: "none",
           padding: "0.875rem 1rem",
           cursor: loading ? "wait" : "pointer",

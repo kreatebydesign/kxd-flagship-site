@@ -6,14 +6,13 @@ import { formatEarningsCents, formatHoursFromMinutes, minutesBetween } from "@/l
 
 const C = {
   bgElevated: "#111111",
-  gold: "#C5A65C",
-  goldDim: "rgba(197,166,92,0.55)",
-  goldFaint: "rgba(197,166,92,0.08)",
-  cream: "#f8f3ea",
-  creamMuted: "#bfb7aa",
-  green: "#5ec68c",
-  border: "rgba(255,255,255,0.07)",
-  borderGold: "rgba(197,166,92,0.22)",
+  gold: "#C9A962",
+  goldDim: "rgba(201,169,98,0.55)",
+  goldFaint: "rgba(201,169,98,0.08)",
+  cream: "#F5F1E8",
+  creamMuted: "rgba(245,241,232,0.72)",
+  border: "rgba(255,255,255,0.08)",
+  borderGold: "rgba(201,169,98,0.12)",
   sans: "var(--font-outfit, 'Helvetica Neue', Arial, sans-serif)",
   serif: "var(--font-cormorant, Georgia, 'Times New Roman', serif)",
 } as const;

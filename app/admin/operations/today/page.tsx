@@ -1,6 +1,6 @@
 /**
  * /admin/operations/today
- * KXD OS — Daily Command Center
+ * KXD OS — Studio Overview
  * Phase 2F
  *
  * A daily-focus surface for the KXD founder. Opens each morning to a live
@@ -26,24 +26,24 @@ export const dynamic = "force-dynamic";
 // ── Brand tokens ──────────────────────────────────────────────────────────────
 
 const C = {
-  bgPure:       "#000000",
+  bgPure:       "#050505",
   bgBase:       "#080808",
   bgElevated:   "#111111",
-  bgCard:       "#141414",
-  gold:         "#C5A65C",
-  goldDim:      "rgba(197,166,92,0.55)",
-  goldFaint:    "rgba(197,166,92,0.08)",
-  cream:        "#f8f3ea",
-  creamMuted:   "#bfb7aa",
+  bgCard:       "#101010",
+  gold:         "#C9A962",
+  goldDim:      "rgba(201,169,98,0.55)",
+  goldFaint:    "rgba(201,169,98,0.08)",
+  cream:        "#F5F1E8",
+  creamMuted:   "rgba(245,241,232,0.72)",
   red:          "#d25a5a",
   redFaint:     "rgba(210,90,90,0.08)",
-  yellow:       "#f0be50",
-  green:        "#5ec68c",
-  teal:         "#96d2c8",
-  blue:         "#8a9bd2",
-  purple:       "#b48cdc",
-  border:       "rgba(255,255,255,0.07)",
-  borderGold:   "rgba(197,166,92,0.22)",
+  yellow:       "#E8C468",
+  green:        "#C9A962",
+  teal:         "#A8B4C8",
+  blue:         "#A8B4C8",
+  purple:       "#C4B0D8",
+  border:       "rgba(255,255,255,0.08)",
+  borderGold:   "rgba(201,169,98,0.12)",
   borderRed:    "rgba(210,90,90,0.25)",
   serif:        "var(--font-cormorant, Georgia, 'Times New Roman', serif)",
   sans:         "var(--font-outfit, 'Helvetica Neue', Arial, sans-serif)",
@@ -102,21 +102,21 @@ function daysUntil(iso: string | null | undefined): number | null {
 // ── Status / priority config ──────────────────────────────────────────────────
 
 const STATUS_BADGE: Record<string, { label: string; color: string; bg: string; border: string }> = {
-  "new":               { label: "New",         color: "#C5A65C", bg: "rgba(197,166,92,0.08)",  border: "rgba(197,166,92,0.3)" },
-  "triaged":           { label: "Triaged",      color: "#96d2c8", bg: "rgba(150,210,200,0.08)", border: "rgba(150,210,200,0.3)" },
-  "drafting":          { label: "Drafting",     color: "#8a9bd2", bg: "rgba(138,155,210,0.08)", border: "rgba(138,155,210,0.3)" },
-  "in-progress":       { label: "In Progress",  color: "#f0be50", bg: "rgba(240,190,80,0.08)",  border: "rgba(240,190,80,0.3)" },
-  "waiting-on-client": { label: "Waiting",      color: "#b48cdc", bg: "rgba(180,140,220,0.08)", border: "rgba(180,140,220,0.3)" },
+  "new":               { label: "New",         color: "#C9A962", bg: "rgba(201,169,98,0.08)",  border: "rgba(201,169,98,0.3)" },
+  "triaged":           { label: "Triaged",      color: "#A8B4C8", bg: "rgba(168,180,200,0.08)", border: "rgba(168,180,200,0.3)" },
+  "drafting":          { label: "Drafting",     color: "#A8B4C8", bg: "rgba(168,180,200,0.08)", border: "rgba(168,180,200,0.3)" },
+  "in-progress":       { label: "In Progress",  color: "#E8C468", bg: "rgba(232,196,104,0.08)",  border: "rgba(232,196,104,0.3)" },
+  "waiting-on-client": { label: "Waiting",      color: "#C4B0D8", bg: "rgba(196,176,216,0.08)", border: "rgba(196,176,216,0.3)" },
   "blocked":           { label: "Blocked",      color: "#d25a5a", bg: "rgba(210,90,90,0.08)",   border: "rgba(210,90,90,0.3)" },
-  "complete":          { label: "Complete",     color: "#5ec68c", bg: "rgba(94,198,140,0.08)",  border: "rgba(94,198,140,0.3)" },
-  "not-started":       { label: "Not Started",  color: "#8a9bd2", bg: "rgba(138,155,210,0.08)", border: "rgba(138,155,210,0.3)" },
-  "active":            { label: "Active",       color: "#5ec68c", bg: "rgba(94,198,140,0.08)",  border: "rgba(94,198,140,0.3)" },
-  "planning":          { label: "Planning",     color: "#96d2c8", bg: "rgba(150,210,200,0.08)", border: "rgba(150,210,200,0.3)" },
-  "review":            { label: "Review",       color: "#b48cdc", bg: "rgba(180,140,220,0.08)", border: "rgba(180,140,220,0.3)" },
+  "complete":          { label: "Complete",     color: "#C9A962", bg: "rgba(201,169,98,0.08)",  border: "rgba(201,169,98,0.3)" },
+  "not-started":       { label: "Not Started",  color: "#A8B4C8", bg: "rgba(168,180,200,0.08)", border: "rgba(168,180,200,0.3)" },
+  "active":            { label: "Active",       color: "#C9A962", bg: "rgba(201,169,98,0.08)",  border: "rgba(201,169,98,0.3)" },
+  "planning":          { label: "Planning",     color: "#A8B4C8", bg: "rgba(168,180,200,0.08)", border: "rgba(168,180,200,0.3)" },
+  "review":            { label: "Review",       color: "#C4B0D8", bg: "rgba(196,176,216,0.08)", border: "rgba(196,176,216,0.3)" },
   "overdue":           { label: "Overdue",      color: "#d25a5a", bg: "rgba(210,90,90,0.08)",   border: "rgba(210,90,90,0.3)" },
   "urgent":            { label: "Urgent",       color: "#d25a5a", bg: "rgba(210,90,90,0.08)",   border: "rgba(210,90,90,0.3)" },
-  "high":              { label: "High",         color: "#f0be50", bg: "rgba(240,190,80,0.08)",  border: "rgba(240,190,80,0.3)" },
-  "current":           { label: "Current",      color: "#5ec68c", bg: "rgba(94,198,140,0.08)",  border: "rgba(94,198,140,0.3)" },
+  "high":              { label: "High",         color: "#E8C468", bg: "rgba(232,196,104,0.08)",  border: "rgba(232,196,104,0.3)" },
+  "current":           { label: "Current",      color: "#C9A962", bg: "rgba(201,169,98,0.08)",  border: "rgba(201,169,98,0.3)" },
   "paused":            { label: "Paused",       color: "rgba(136,136,128,1)", bg: "rgba(136,136,128,0.08)", border: "rgba(136,136,128,0.3)" },
 };
 
@@ -124,9 +124,9 @@ const PRIO_ORDER: Record<string, number> = { urgent: 0, high: 1, normal: 2, low:
 
 const PRIO_COLOR: Record<string, string> = {
   urgent: "#d25a5a",
-  high:   "#f0be50",
+  high:   "#E8C468",
   normal: "rgba(255,255,255,0.15)",
-  low:    "rgba(255,255,255,0.07)",
+  low:    "rgba(255,255,255,0.08)",
 };
 
 // ── Daily Focus Score ─────────────────────────────────────────────────────────
@@ -146,26 +146,26 @@ const FOCUS_CFG: Record<FocusScore, {
   },
   elevated: {
     label:       "Elevated",
-    color:       "#f0be50",
-    bg:          "rgba(240,190,80,0.06)",
-    border:      "rgba(240,190,80,0.28)",
-    dot:         "#f0be50",
+    color:       "#E8C468",
+    bg:          "rgba(232,196,104,0.06)",
+    border:      "rgba(232,196,104,0.28)",
+    dot:         "#E8C468",
     description: "Overdue items. Resolve before end of day.",
   },
   active: {
     label:       "Active",
-    color:       "#C5A65C",
-    bg:          "rgba(197,166,92,0.06)",
-    border:      "rgba(197,166,92,0.28)",
-    dot:         "#C5A65C",
+    color:       "#C9A962",
+    bg:          "rgba(201,169,98,0.06)",
+    border:      "rgba(201,169,98,0.28)",
+    dot:         "#C9A962",
     description: "Work due today. Stay on pace.",
   },
   clear: {
     label:       "Clear",
-    color:       "#5ec68c",
-    bg:          "rgba(94,198,140,0.06)",
-    border:      "rgba(94,198,140,0.28)",
-    dot:         "#5ec68c",
+    color:       "#C9A962",
+    bg:          "rgba(201,169,98,0.06)",
+    border:      "rgba(201,169,98,0.28)",
+    dot:         "#C9A962",
     description: "No critical items. Operate at your own pace.",
   },
 };
@@ -570,7 +570,7 @@ export default async function TodayPage() {
       value: String(delivToday.length),
       sub:   "Deliverables — today",
       alert: delivToday.length > 0,
-      accentColor: "#f0be50",
+      accentColor: "#E8C468",
     },
     {
       label: "Due This Week",
@@ -584,7 +584,7 @@ export default async function TodayPage() {
       value: String(projectsAction.length),
       sub:   "Projects — next action past due",
       alert: projectsAction.length > 0,
-      accentColor: "#f0be50",
+      accentColor: "#E8C468",
     },
     {
       label: "Invoices — 7 Days",
@@ -636,14 +636,14 @@ export default async function TodayPage() {
                   fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.1em",
                   textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "0.35rem",
                 }}>
-                  Daily Command Center
+                  Studio Overview
                 </p>
               </div>
               <span style={{
                 fontFamily: C.sans, fontWeight: 500, fontSize: "0.375rem",
                 letterSpacing: "0.12em", textTransform: "uppercase",
-                color: "rgba(94,198,140,0.75)", background: "rgba(94,198,140,0.07)",
-                border: "1px solid rgba(94,198,140,0.2)", padding: "0.2rem 0.6rem",
+                color: "rgba(201,169,98,0.75)", background: "rgba(201,169,98,0.07)",
+                border: "1px solid rgba(201,169,98,0.2)", padding: "0.2rem 0.6rem",
               }}>
                 Phase 2F
               </span>
@@ -710,7 +710,7 @@ export default async function TodayPage() {
             fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.2em",
             textTransform: "uppercase", color: C.goldDim, marginBottom: "0.875rem",
           }}>
-            KXD OS · Daily Command Center
+            KXD OS · Studio Overview
           </p>
           <div className="flex flex-wrap items-end justify-between gap-6">
             <div>
@@ -1028,7 +1028,7 @@ export default async function TodayPage() {
                 <Card>
                   {retainersWeek.map((r, i) => {
                     const days = daysUntil(r.nextInvoiceDate as string);
-                    const dayColor = days === 0 ? "#d25a5a" : days !== null && days <= 2 ? "#f0be50" : "#96d2c8";
+                    const dayColor = days === 0 ? "#d25a5a" : days !== null && days <= 2 ? "#E8C468" : "#A8B4C8";
                     return (
                       <div
                         key={r.id as number}
@@ -1078,7 +1078,7 @@ export default async function TodayPage() {
           />
           {clientAlerts.length === 0 ? (
             <div style={{
-              background: C.bgElevated, border: `1px solid rgba(94,198,140,0.2)`,
+              background: C.bgElevated, border: `1px solid rgba(201,169,98,0.2)`,
               padding: "1.25rem 1.5rem", display: "flex", alignItems: "center", gap: "1rem",
             }}>
               <div style={{
@@ -1103,7 +1103,7 @@ export default async function TodayPage() {
                     key={client.name}
                     style={{
                       background: C.bgElevated, padding: "1rem 1.25rem",
-                      borderLeft: `3px solid ${hasSevere ? "#d25a5a" : "#f0be50"}`,
+                      borderLeft: `3px solid ${hasSevere ? "#d25a5a" : "#E8C468"}`,
                     }}
                   >
                     <p style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.875rem", color: C.cream, marginBottom: "0.5rem" }}>
@@ -1114,7 +1114,7 @@ export default async function TodayPage() {
                         <p key={issue} style={{
                           fontFamily: C.sans, fontSize: "0.6875rem",
                           color: issue.includes("Retainer") || issue.includes("Urgent") || issue.includes("overdue")
-                            ? "#d25a5a" : "#f0be50",
+                            ? "#d25a5a" : "#E8C468",
                           display: "flex", alignItems: "center", gap: "0.4rem",
                         }}>
                           <span style={{ fontSize: "0.5rem" }}>▸</span>
@@ -1227,9 +1227,9 @@ export default async function TodayPage() {
           >
             {([
               { label: "Log Request",     sub: "New client request",   href: "/admin/operations/requests/new" },
-              { label: "Operations Hub",  sub: "Command center",       href: "/admin/operations" },
+              { label: "Operations Hub",  sub: "Studio overview",       href: "/admin/operations" },
               { label: "Accounts",        sub: "Strategic intelligence", href: "/admin/operations/accounts" },
-              { label: "Founder",         sub: "Command center",        href: "/admin/operations/founder" },
+              { label: "Founder",         sub: "Studio overview",        href: "/admin/operations/founder" },
               { label: "Creative Engine", sub: "Campaigns & assets",   href: "/admin/operations/creative" },
               { label: "Payload CMS",     sub: "Content & data",       href: "/admin" },
               { label: "All Requests",    sub: "Client requests",      href: "/admin/collections/client-requests" },
@@ -1277,7 +1277,7 @@ export default async function TodayPage() {
             fontFamily: C.sans, fontSize: "0.5625rem",
             letterSpacing: "0.08em", color: "rgba(255,255,255,0.22)",
           }}>
-            KXD OS · Daily Command Center · Phase 2F · Live Payload data · Refreshes on each request
+            KXD OS · Studio Overview · Phase 2F · Live Payload data · Refreshes on each request
           </p>
           <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" as const }}>
             {([

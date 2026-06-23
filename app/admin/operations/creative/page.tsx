@@ -1,6 +1,6 @@
 /**
  * /admin/operations/creative
- * KXD Creative Engine — OS Command Center
+ * KXD Creative Engine — Creative Operations
  *
  * Phase 3C: Creative Intelligence Layer integrated.
  * Intelligence section runs in parallel with existing data loads via
@@ -35,13 +35,13 @@ const C = {
   bgBase:     "#080808",
   bgPure:     "#000",
   bgElevated: "#111",
-  gold:       "#C5A65C",
-  goldDim:    "rgba(197,166,92,0.55)",
-  goldFaint:  "rgba(197,166,92,0.08)",
-  cream:      "#f8f3ea",
-  creamMuted: "#bfb7aa",
-  border:     "rgba(255,255,255,0.07)",
-  borderGold: "rgba(197,166,92,0.22)",
+  gold:       "#C9A962",
+  goldDim:    "rgba(201,169,98,0.55)",
+  goldFaint:  "rgba(201,169,98,0.08)",
+  cream:      "#F5F1E8",
+  creamMuted: "rgba(245,241,232,0.72)",
+  border:     "rgba(255,255,255,0.08)",
+  borderGold: "rgba(201,169,98,0.12)",
   red:        "#d25a5a",
   sans:       "var(--font-outfit, Inter, system-ui)",
   serif:      "var(--font-cormorant, Georgia)",
@@ -194,7 +194,7 @@ function CampaignScoresBlock({ scores }: { scores: CampaignHealthScore[] }) {
 
   function scoreBar(s: number) {
     const pct = `${s}%`;
-    const bg  = s >= 80 ? C.gold : s >= 50 ? "rgba(197,166,92,0.35)" : C.red;
+    const bg  = s >= 80 ? C.gold : s >= 50 ? "rgba(201,169,98,0.35)" : C.red;
     return (
       <div style={{ height: "2px", background: C.border, marginTop: "0.25rem", width: "100%" }}>
         <div style={{ height: "100%", width: pct, background: bg, transition: "none" }} />
@@ -337,20 +337,20 @@ export default async function Page() {
             <KxdLogo />
             <div>
               <p style={{ color: C.goldDim, fontSize: "0.6rem" }}>Creative Engine</p>
-              <p style={{ fontSize: "0.7rem", opacity: 0.5 }}>KXD OS Command Center</p>
+              <p style={{ fontSize: "0.7rem", opacity: 0.5 }}>Creative Operations Platform</p>
             </div>
           </div>
           <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
             <Link href="/admin/operations/executive" style={{ color: C.goldDim, fontSize: "0.6rem", textDecoration: "none" }}>
               ← Operations
             </Link>
-            <Link href="/admin/operations/accounts" style={{ color: "#b48cdc", fontSize: "0.6rem", textDecoration: "none", opacity: 0.8 }}>
+            <Link href="/admin/operations/accounts" style={{ color: "#C4B0D8", fontSize: "0.6rem", textDecoration: "none", opacity: 0.8 }}>
               Accounts →
             </Link>
-            <Link href="/admin/operations/founder" style={{ color: "#C5A65C", fontSize: "0.6rem", textDecoration: "none", opacity: 0.8 }}>
+            <Link href="/admin/operations/founder" style={{ color: "#C9A962", fontSize: "0.6rem", textDecoration: "none", opacity: 0.8 }}>
               Founder →
             </Link>
-            <Link href="/admin/operations/reels" style={{ color: "#C5A65C", fontSize: "0.6rem", textDecoration: "none", opacity: 0.8, background: "rgba(197,166,92,0.1)", border: "1px solid rgba(197,166,92,0.25)", padding: "0.25rem 0.625rem" }}>
+            <Link href="/admin/operations/reels" style={{ color: "#C9A962", fontSize: "0.6rem", textDecoration: "none", opacity: 0.8, background: "rgba(201,169,98,0.1)", border: "1px solid rgba(201,169,98,0.20)", padding: "0.25rem 0.625rem" }}>
               Reels →
             </Link>
           </div>
@@ -399,7 +399,7 @@ export default async function Page() {
         </div>
 
         {/* ── Phase 4A — Generation Actions ───────────────────────────────── */}
-        <div style={{ marginBottom: "2rem", padding: "1.125rem 1.25rem", background: "rgba(197,166,92,0.04)", border: "1px solid rgba(197,166,92,0.14)" }}>
+        <div style={{ marginBottom: "2rem", padding: "1.125rem 1.25rem", background: "rgba(201,169,98,0.04)", border: "1px solid rgba(201,169,98,0.14)" }}>
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: "0.75rem" }}>
             <div>
               <p style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.18em", textTransform: "uppercase" as const, color: C.goldDim }}>
@@ -417,7 +417,7 @@ export default async function Page() {
             Generate brand-aware flyer creative direction and social post copy from any Payload request record.
             Open a request in Payload Admin, copy its numeric ID, then call the generation endpoint.
           </p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "1px", background: "rgba(255,255,255,0.07)" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "1px", background: "rgba(255,255,255,0.08)" }}>
             {[
               {
                 label:    "Flyer Generator",
@@ -434,11 +434,11 @@ export default async function Page() {
                 linkText: "Open Social Post Requests →",
               },
             ].map(action => (
-              <div key={action.label} style={{ background: "#0d0d0d", padding: "1rem 1.125rem" }}>
+              <div key={action.label} style={{ background: "#0B0B0B", padding: "1rem 1.125rem" }}>
                 <p style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.5625rem", color: C.cream, marginBottom: "0.375rem" }}>
                   {action.label}
                 </p>
-                <p style={{ fontFamily: "monospace", fontSize: "0.5rem", color: "rgba(197,166,92,0.6)", marginBottom: "0.25rem" }}>
+                <p style={{ fontFamily: "monospace", fontSize: "0.5rem", color: "rgba(201,169,98,0.6)", marginBottom: "0.25rem" }}>
                   {action.endpoint}
                 </p>
                 <p style={{ fontFamily: "monospace", fontSize: "0.4375rem", color: "rgba(255,255,255,0.25)", marginBottom: "0.75rem" }}>
@@ -456,7 +456,7 @@ export default async function Page() {
         </div>
 
         {/* ── Phase 5A — Reel Generator ───────────────────────────────────── */}
-        <div style={{ marginBottom: "2rem", padding: "1.125rem 1.25rem", background: "rgba(197,166,92,0.03)", border: "1px solid rgba(197,166,92,0.18)" }}>
+        <div style={{ marginBottom: "2rem", padding: "1.125rem 1.25rem", background: "rgba(201,169,98,0.03)", border: "1px solid rgba(201,169,98,0.18)" }}>
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: "0.75rem" }}>
             <div>
               <p style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.18em", textTransform: "uppercase" as const, color: C.goldDim }}>
@@ -466,23 +466,23 @@ export default async function Page() {
                 Website Showcase Reel Generator
               </p>
             </div>
-            <Link href="/admin/operations/reels" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.4375rem", letterSpacing: "0.14em", textTransform: "uppercase" as const, color: C.bgBase, background: `linear-gradient(180deg, #d1b06b 0%, #c5a65c 48%, #b09040 100%)`, padding: "0.5rem 1.125rem", textDecoration: "none" }}>
+            <Link href="/admin/operations/reels" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.4375rem", letterSpacing: "0.14em", textTransform: "uppercase" as const, color: C.bgBase, background: `linear-gradient(180deg, #d1b06b 0%, #c9a962 48%, #b09040 100%)`, padding: "0.5rem 1.125rem", textDecoration: "none" }}>
               Open Reel Generator →
             </Link>
           </div>
           <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: "rgba(255,255,255,0.3)", marginBottom: "0.875rem", lineHeight: 1.6 }}>
             Generate premium website highlight reel storyboards from any website URL. Playwright captures hero, services, testimonials, and CTA sections. OpenAI generates a production-ready scene sequence with hook, timing, transitions, captions, and music direction.
           </p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1px", background: "rgba(255,255,255,0.07)" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1px", background: "rgba(255,255,255,0.08)" }}>
             {[
               { label: "Screenshot Capture",    endpoint: "POST /api/admin/reels/screenshot",  body: '{ "promoVideoRequestId": <id> }' },
               { label: "Storyboard Generation", endpoint: "POST /api/admin/reels/storyboard",  body: '{ "promoVideoRequestId": <id> }' },
             ].map(action => (
-              <div key={action.label} style={{ background: "#0d0d0d", padding: "1rem 1.125rem" }}>
+              <div key={action.label} style={{ background: "#0B0B0B", padding: "1rem 1.125rem" }}>
                 <p style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.5625rem", color: C.cream, marginBottom: "0.375rem" }}>
                   {action.label}
                 </p>
-                <p style={{ fontFamily: "monospace", fontSize: "0.5rem", color: "rgba(197,166,92,0.6)", marginBottom: "0.25rem" }}>
+                <p style={{ fontFamily: "monospace", fontSize: "0.5rem", color: "rgba(201,169,98,0.6)", marginBottom: "0.25rem" }}>
                   {action.endpoint}
                 </p>
                 <p style={{ fontFamily: "monospace", fontSize: "0.4375rem", color: "rgba(255,255,255,0.25)" }}>

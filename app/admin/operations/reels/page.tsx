@@ -22,16 +22,16 @@ export const dynamic = "force-dynamic";
 const C = {
   bgBase:     "#080808",
   bgElevated: "#111",
-  bgInput:    "#0d0d0d",
-  gold:       "#C5A65C",
-  goldDim:    "rgba(197,166,92,0.55)",
-  goldFaint:  "rgba(197,166,92,0.06)",
-  cream:      "#f8f3ea",
-  creamMuted: "#bfb7aa",
-  border:     "rgba(255,255,255,0.07)",
-  borderGold: "rgba(197,166,92,0.22)",
+  bgInput:    "#0B0B0B",
+  gold:       "#C9A962",
+  goldDim:    "rgba(201,169,98,0.55)",
+  goldFaint:  "rgba(201,169,98,0.06)",
+  cream:      "#F5F1E8",
+  creamMuted: "rgba(245,241,232,0.72)",
+  border:     "rgba(255,255,255,0.08)",
+  borderGold: "rgba(201,169,98,0.12)",
   red:        "#d25a5a",
-  green:      "#5ec68c",
+  green:      "#C9A962",
   sans:       "var(--font-outfit, Inter, system-ui)",
   serif:      "var(--font-cormorant, Georgia)",
 } as const;
@@ -126,7 +126,7 @@ function Tag({ children, color = C.goldDim }: { children: React.ReactNode; color
       textTransform: "uppercase" as const,
       color,
       background:    "rgba(255,255,255,0.04)",
-      border:        `1px solid rgba(255,255,255,0.07)`,
+      border:        `1px solid rgba(255,255,255,0.08)`,
       padding:       "0.2rem 0.5rem",
       whiteSpace:    "nowrap" as const,
     }}>
@@ -154,7 +154,7 @@ function ActionChip({
         textTransform: "uppercase" as const,
         color:         primary ? C.bgBase : C.goldDim,
         background:    primary
-          ? "linear-gradient(180deg, #d1b06b 0%, #c5a65c 48%, #b09040 100%)"
+          ? "linear-gradient(180deg, #d1b06b 0%, #c9a962 48%, #b09040 100%)"
           : "transparent",
         border:        primary ? "none" : `1px solid ${C.borderGold}`,
         padding:       "0.4375rem 0.875rem",
@@ -170,7 +170,7 @@ function ActionChip({
 
 function EmptyState() {
   return (
-    <div style={{ padding: "4rem 2rem", textAlign: "center", border: `1px dashed rgba(197,166,92,0.2)`, background: C.goldFaint }}>
+    <div style={{ padding: "4rem 2rem", textAlign: "center", border: `1px dashed rgba(201,169,98,0.2)`, background: C.goldFaint }}>
       <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "1.5rem", color: C.cream, marginBottom: "0.75rem" }}>
         No website reels yet.
       </p>
@@ -186,7 +186,7 @@ function EmptyState() {
           letterSpacing: "0.14em",
           textTransform: "uppercase" as const,
           color:         C.bgBase,
-          background:    "linear-gradient(180deg, #d1b06b 0%, #c5a65c 48%, #b09040 100%)",
+          background:    "linear-gradient(180deg, #d1b06b 0%, #c9a962 48%, #b09040 100%)",
           padding:       "0.875rem 2rem",
           textDecoration:"none",
           display:       "inline-block",
@@ -400,7 +400,7 @@ export default async function ReelsDashboardPage() {
                 letterSpacing: "0.14em",
                 textTransform: "uppercase" as const,
                 color:         C.bgBase,
-                background:    "linear-gradient(180deg, #d1b06b 0%, #c5a65c 48%, #b09040 100%)",
+                background:    "linear-gradient(180deg, #d1b06b 0%, #c9a962 48%, #b09040 100%)",
                 padding:       "0.5625rem 1.25rem",
                 textDecoration:"none",
               }}
@@ -465,7 +465,7 @@ export default async function ReelsDashboardPage() {
                   {s.label}
                 </p>
                 {s.endpoint ? (
-                  <p style={{ fontFamily: "monospace", fontSize: "0.4375rem", color: "rgba(197,166,92,0.5)" }}>
+                  <p style={{ fontFamily: "monospace", fontSize: "0.4375rem", color: "rgba(201,169,98,0.5)" }}>
                     {s.endpoint}
                   </p>
                 ) : (

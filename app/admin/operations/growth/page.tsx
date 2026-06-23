@@ -25,24 +25,24 @@ export const dynamic = "force-dynamic";
 // ── Brand tokens ──────────────────────────────────────────────────────────────
 
 const C = {
-  bgPure:     "#000000",
+  bgPure:     "#050505",
   bgBase:     "#080808",
   bgElevated: "#111111",
-  bgCard:     "#141414",
-  gold:       "#C5A65C",
-  goldDim:    "rgba(197,166,92,0.55)",
-  goldFaint:  "rgba(197,166,92,0.08)",
-  cream:      "#f8f3ea",
-  creamMuted: "#bfb7aa",
+  bgCard:     "#101010",
+  gold:       "#C9A962",
+  goldDim:    "rgba(201,169,98,0.55)",
+  goldFaint:  "rgba(201,169,98,0.08)",
+  cream:      "#F5F1E8",
+  creamMuted: "rgba(245,241,232,0.72)",
   red:        "#d25a5a",
   redFaint:   "rgba(210,90,90,0.08)",
-  yellow:     "#f0be50",
-  green:      "#5ec68c",
-  teal:       "#96d2c8",
-  blue:       "#8a9bd2",
-  purple:     "#b48cdc",
-  border:     "rgba(255,255,255,0.07)",
-  borderGold: "rgba(197,166,92,0.22)",
+  yellow:     "#E8C468",
+  green:      "#C9A962",
+  teal:       "#A8B4C8",
+  blue:       "#A8B4C8",
+  purple:     "#C4B0D8",
+  border:     "rgba(255,255,255,0.08)",
+  borderGold: "rgba(201,169,98,0.12)",
   borderRed:  "rgba(210,90,90,0.25)",
   serif:      "var(--font-cormorant, Georgia, 'Times New Roman', serif)",
   sans:       "var(--font-outfit, 'Helvetica Neue', Arial, sans-serif)",
@@ -121,11 +121,11 @@ const SERVICE_LABELS: Record<string, string> = {
 };
 
 const SERVICE_COLORS: Record<string, string> = {
-  "luxury-website-experiences": "#C5A65C",
-  "brand-systems-identity":     "#96d2c8",
-  "growth-infrastructure":      "#5ec68c",
-  "enterprise-platforms":       "#8a9bd2",
-  "ongoing-partnership":        "#b48cdc",
+  "luxury-website-experiences": "#C9A962",
+  "brand-systems-identity":     "#A8B4C8",
+  "growth-infrastructure":      "#C9A962",
+  "enterprise-platforms":       "#A8B4C8",
+  "ongoing-partnership":        "#C4B0D8",
   "general":                    "rgba(255,255,255,0.25)",
 };
 
@@ -258,26 +258,26 @@ const GROWTH_CFG: Record<GrowthScore, {
 }> = {
   strong: {
     label:       "Strong",
-    color:       "#5ec68c",
-    bg:          "rgba(94,198,140,0.06)",
-    border:      "rgba(94,198,140,0.28)",
-    dot:         "#5ec68c",
+    color:       "#C9A962",
+    bg:          "rgba(201,169,98,0.06)",
+    border:      "rgba(201,169,98,0.28)",
+    dot:         "#C9A962",
     description: "High-value pipeline active. Prioritize close and conversion.",
   },
   active: {
     label:       "Active",
-    color:       "#C5A65C",
-    bg:          "rgba(197,166,92,0.06)",
-    border:      "rgba(197,166,92,0.28)",
-    dot:         "#C5A65C",
+    color:       "#C9A962",
+    bg:          "rgba(201,169,98,0.06)",
+    border:      "rgba(201,169,98,0.28)",
+    dot:         "#C9A962",
     description: "Pipeline in motion. Follow up on open proposals.",
   },
   building: {
     label:       "Building",
-    color:       "#96d2c8",
-    bg:          "rgba(150,210,200,0.06)",
-    border:      "rgba(150,210,200,0.28)",
-    dot:         "#96d2c8",
+    color:       "#A8B4C8",
+    bg:          "rgba(168,180,200,0.06)",
+    border:      "rgba(168,180,200,0.28)",
+    dot:         "#A8B4C8",
     description: "Early-stage leads present. Nurture and qualify.",
   },
   quiet: {
@@ -300,21 +300,21 @@ function computeGrowthScore(pipelineValue: number, activeLeads: number): GrowthS
 // ── Status badge config ───────────────────────────────────────────────────────
 
 const STATUS_BADGE: Record<string, { label: string; color: string; bg: string; border: string }> = {
-  "new":           { label: "New",          color: "#C5A65C", bg: "rgba(197,166,92,0.08)",  border: "rgba(197,166,92,0.3)" },
-  "reviewed":      { label: "Reviewed",     color: "#96d2c8", bg: "rgba(150,210,200,0.08)", border: "rgba(150,210,200,0.3)" },
-  "reviewing":     { label: "Reviewing",    color: "#96d2c8", bg: "rgba(150,210,200,0.08)", border: "rgba(150,210,200,0.3)" },
-  "discovery":     { label: "Discovery",    color: "#8a9bd2", bg: "rgba(138,155,210,0.08)", border: "rgba(138,155,210,0.3)" },
-  "in-progress":   { label: "In Progress",  color: "#f0be50", bg: "rgba(240,190,80,0.08)",  border: "rgba(240,190,80,0.3)" },
-  "proposal":      { label: "Proposal",     color: "#b48cdc", bg: "rgba(180,140,220,0.08)", border: "rgba(180,140,220,0.3)" },
-  "proposal-sent": { label: "Proposal Out", color: "#b48cdc", bg: "rgba(180,140,220,0.08)", border: "rgba(180,140,220,0.3)" },
-  "active":        { label: "Active",       color: "#5ec68c", bg: "rgba(94,198,140,0.08)",  border: "rgba(94,198,140,0.3)" },
-  "onboarding":    { label: "Onboarding",   color: "#5ec68c", bg: "rgba(94,198,140,0.08)",  border: "rgba(94,198,140,0.3)" },
-  "retainer":      { label: "Retainer",     color: "#5ec68c", bg: "rgba(94,198,140,0.08)",  border: "rgba(94,198,140,0.3)" },
-  "won":           { label: "Won",          color: "#5ec68c", bg: "rgba(94,198,140,0.08)",  border: "rgba(94,198,140,0.3)" },
+  "new":           { label: "New",          color: "#C9A962", bg: "rgba(201,169,98,0.08)",  border: "rgba(201,169,98,0.3)" },
+  "reviewed":      { label: "Reviewed",     color: "#A8B4C8", bg: "rgba(168,180,200,0.08)", border: "rgba(168,180,200,0.3)" },
+  "reviewing":     { label: "Reviewing",    color: "#A8B4C8", bg: "rgba(168,180,200,0.08)", border: "rgba(168,180,200,0.3)" },
+  "discovery":     { label: "Discovery",    color: "#A8B4C8", bg: "rgba(168,180,200,0.08)", border: "rgba(168,180,200,0.3)" },
+  "in-progress":   { label: "In Progress",  color: "#E8C468", bg: "rgba(232,196,104,0.08)",  border: "rgba(232,196,104,0.3)" },
+  "proposal":      { label: "Proposal",     color: "#C4B0D8", bg: "rgba(196,176,216,0.08)", border: "rgba(196,176,216,0.3)" },
+  "proposal-sent": { label: "Proposal Out", color: "#C4B0D8", bg: "rgba(196,176,216,0.08)", border: "rgba(196,176,216,0.3)" },
+  "active":        { label: "Active",       color: "#C9A962", bg: "rgba(201,169,98,0.08)",  border: "rgba(201,169,98,0.3)" },
+  "onboarding":    { label: "Onboarding",   color: "#C9A962", bg: "rgba(201,169,98,0.08)",  border: "rgba(201,169,98,0.3)" },
+  "retainer":      { label: "Retainer",     color: "#C9A962", bg: "rgba(201,169,98,0.08)",  border: "rgba(201,169,98,0.3)" },
+  "won":           { label: "Won",          color: "#C9A962", bg: "rgba(201,169,98,0.08)",  border: "rgba(201,169,98,0.3)" },
   "lost":          { label: "Lost",         color: "#d25a5a", bg: "rgba(210,90,90,0.08)",   border: "rgba(210,90,90,0.3)" },
   "paused":        { label: "Paused",       color: "#888880", bg: "rgba(136,136,128,0.08)", border: "rgba(136,136,128,0.3)" },
   "closed":        { label: "Closed",       color: "#888880", bg: "rgba(136,136,128,0.08)", border: "rgba(136,136,128,0.3)" },
-  "completed":     { label: "Completed",    color: "#5ec68c", bg: "rgba(94,198,140,0.08)",  border: "rgba(94,198,140,0.3)" },
+  "completed":     { label: "Completed",    color: "#C9A962", bg: "rgba(201,169,98,0.08)",  border: "rgba(201,169,98,0.3)" },
 };
 
 // ── Primitive UI components ───────────────────────────────────────────────────
@@ -358,9 +358,9 @@ function Badge({ status }: { status: string }) {
 }
 
 function ScoreBadge({ score }: { score: number }) {
-  const color  = score >= 8 ? "#5ec68c" : score >= 5 ? "#C5A65C" : "rgba(255,255,255,0.28)";
-  const bg     = score >= 8 ? "rgba(94,198,140,0.08)" : score >= 5 ? "rgba(197,166,92,0.08)" : "rgba(255,255,255,0.04)";
-  const border = score >= 8 ? "rgba(94,198,140,0.3)" : score >= 5 ? "rgba(197,166,92,0.3)" : "rgba(255,255,255,0.1)";
+  const color  = score >= 8 ? "#C9A962" : score >= 5 ? "#C9A962" : "rgba(255,255,255,0.28)";
+  const bg     = score >= 8 ? "rgba(201,169,98,0.08)" : score >= 5 ? "rgba(201,169,98,0.08)" : "rgba(255,255,255,0.04)";
+  const border = score >= 8 ? "rgba(201,169,98,0.3)" : score >= 5 ? "rgba(201,169,98,0.3)" : "rgba(255,255,255,0.1)";
   const label  = score >= 8 ? "High" : score >= 5 ? "Medium" : score > 0 ? "Low" : "—";
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", flexShrink: 0 }}>
@@ -737,8 +737,8 @@ export default async function GrowthPage() {
               <span style={{
                 fontFamily: C.sans, fontWeight: 500, fontSize: "0.375rem",
                 letterSpacing: "0.12em", textTransform: "uppercase",
-                color: "rgba(197,166,92,0.75)", background: "rgba(197,166,92,0.07)",
-                border: "1px solid rgba(197,166,92,0.2)", padding: "0.2rem 0.6rem",
+                color: "rgba(201,169,98,0.75)", background: "rgba(201,169,98,0.07)",
+                border: "1px solid rgba(201,169,98,0.2)", padding: "0.2rem 0.6rem",
               }}>
                 Phase 2G
               </span>
@@ -1204,7 +1204,7 @@ export default async function GrowthPage() {
           />
           {overdueFollowUps.length === 0 ? (
             <div style={{
-              background: C.bgElevated, border: `1px solid rgba(94,198,140,0.2)`,
+              background: C.bgElevated, border: `1px solid rgba(201,169,98,0.2)`,
               padding: "1.25rem 1.5rem",
               display: "flex", alignItems: "center", gap: "1rem",
             }}>
@@ -1569,10 +1569,10 @@ export default async function GrowthPage() {
               { label: "Portfolio",           sub: "Case studies",          href: "/admin/collections/projects" },
               { label: "Retainers",           sub: "Revenue records",       href: "/admin/collections/retainers" },
               { label: "Services",            sub: "Service catalogue",     href: "/admin/collections/services" },
-              { label: "Operations Hub",      sub: "Command center",        href: "/admin/operations" },
-              { label: "Today",               sub: "Daily command center",  href: "/admin/operations/today" },
+              { label: "Operations Hub",      sub: "Studio overview",        href: "/admin/operations" },
+              { label: "Today",               sub: "Studio overview",  href: "/admin/operations/today" },
               { label: "Accounts",            sub: "Strategic intelligence", href: "/admin/operations/accounts" },
-              { label: "Founder",             sub: "Command center",         href: "/admin/operations/founder" },
+              { label: "Founder",             sub: "Studio overview",         href: "/admin/operations/founder" },
               { label: "Creative Engine",     sub: "Campaigns & assets",    href: "/admin/operations/creative" },
               { label: "Payload CMS",         sub: "Content & data",        href: "/admin" },
               { label: "Start Project",       sub: "Public intake form",    href: "/start-project" },

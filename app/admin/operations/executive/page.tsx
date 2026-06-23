@@ -1,6 +1,6 @@
 /**
  * /admin/operations/executive
- * KXD OS Phase 6B — Executive Command Center
+ * KXD OS Phase 6B — Executive Overview
  */
 
 import Link from "next/link";
@@ -11,23 +11,23 @@ import { AUDIT_STATUS_LABEL } from "@/lib/website-audit/scoring";
 export const dynamic = "force-dynamic";
 
 const C = {
-  bgPure: "#000000",
+  bgPure: "#050505",
   bgBase: "#080808",
   bgElevated: "#111111",
-  gold: "#C5A65C",
-  goldDim: "rgba(197,166,92,0.55)",
-  goldFaint: "rgba(197,166,92,0.08)",
-  cream: "#f8f3ea",
-  creamMuted: "#bfb7aa",
+  gold: "#C9A962",
+  goldDim: "rgba(201,169,98,0.55)",
+  goldFaint: "rgba(201,169,98,0.08)",
+  cream: "#F5F1E8",
+  creamMuted: "rgba(245,241,232,0.72)",
   red: "#d25a5a",
   redFaint: "rgba(210,90,90,0.08)",
-  yellow: "#f0be50",
-  green: "#5ec68c",
-  teal: "#96d2c8",
-  blue: "#8a9bd2",
-  purple: "#b48cdc",
-  border: "rgba(255,255,255,0.07)",
-  borderGold: "rgba(197,166,92,0.22)",
+  yellow: "#E8C468",
+  green: "#C9A962",
+  teal: "#A8B4C8",
+  blue: "#A8B4C8",
+  purple: "#C4B0D8",
+  border: "rgba(255,255,255,0.08)",
+  borderGold: "rgba(201,169,98,0.12)",
   serif: "var(--font-cormorant, Georgia, 'Times New Roman', serif)",
   sans: "var(--font-outfit, 'Helvetica Neue', Arial, sans-serif)",
 } as const;
@@ -43,7 +43,7 @@ const PIPELINE_ORDER = [
 
 const TONE: Record<string, { color: string; bg: string; border: string }> = {
   red: { color: C.red, bg: C.redFaint, border: "rgba(210,90,90,0.25)" },
-  yellow: { color: C.yellow, bg: "rgba(240,190,80,0.08)", border: "rgba(240,190,80,0.25)" },
+  yellow: { color: C.yellow, bg: "rgba(232,196,104,0.08)", border: "rgba(232,196,104,0.25)" },
   gold: { color: C.gold, bg: C.goldFaint, border: C.borderGold },
 };
 
@@ -155,7 +155,7 @@ export default async function ExecutiveDashboardPage() {
                   Executive
                 </p>
                 <p style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "0.35rem" }}>
-                  KXD Command Center
+                  KXD OS
                 </p>
               </div>
               <span style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.12em", textTransform: "uppercase", color: C.goldDim, background: C.goldFaint, border: `1px solid ${C.borderGold}`, padding: "0.2rem 0.6rem" }}>
@@ -187,16 +187,16 @@ export default async function ExecutiveDashboardPage() {
             KXD OS · Executive Dashboard
           </p>
           <h1 style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "clamp(1.875rem, 5vw, 3rem)", color: C.cream, lineHeight: 1.05 }}>
-            Business Command Center
+            Executive Overview
           </h1>
           <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: C.creamMuted, marginTop: "0.75rem" }}>
             {today} · Live snapshot across clients, delivery, onboarding, audits, and portal
           </p>
         </div>
 
-        {/* Command center overview */}
+        {/* Executive overview */}
         <section className="mb-10">
-          <Label style={{ color: C.goldDim, marginBottom: "1rem" }}>Command Center Overview</Label>
+          <Label style={{ color: C.goldDim, marginBottom: "1rem" }}>Executive Overview</Label>
           <div className="grid gap-px sm:grid-cols-2 lg:grid-cols-4" style={{ background: C.border, border: `1px solid ${C.border}` }}>
             {data.commandCenter.cards.map((card) => (
               <CommandCard
@@ -403,7 +403,7 @@ export default async function ExecutiveDashboardPage() {
                     <p style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.75rem", color: C.cream }}>{c.clientName}</p>
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       {c.issues.map((issue) => (
-                        <span key={issue} style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.06em", color: C.yellow, background: "rgba(240,190,80,0.08)", border: "1px solid rgba(240,190,80,0.2)", padding: "0.15rem 0.45rem" }}>
+                        <span key={issue} style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.06em", color: C.yellow, background: "rgba(232,196,104,0.08)", border: "1px solid rgba(232,196,104,0.2)", padding: "0.15rem 0.45rem" }}>
                           {issue}
                         </span>
                       ))}

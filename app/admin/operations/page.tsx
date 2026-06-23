@@ -1,5 +1,5 @@
 /**
- * /admin/operations — default KXD OS home → Executive Command Center
+ * /admin/operations — default KXD OS home → Executive Overview
  */
 import { redirect } from "next/navigation";
 

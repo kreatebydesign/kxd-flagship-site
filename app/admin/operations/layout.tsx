@@ -26,8 +26,8 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "Operations · KXD",
-  description: "KXD internal operations dashboard.",
+  title: "KXD OS · Creative Operations",
+  description: "KXD OS — Creative Operations Platform for studio delivery and growth.",
   robots: { index: false, follow: false },
 };
 
