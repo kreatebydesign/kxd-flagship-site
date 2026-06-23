@@ -17,6 +17,7 @@ import { CreativeAssets } from "./payload/collections/CreativeAssets.ts";
 import { CreativeCampaigns } from "./payload/collections/CreativeCampaigns.ts";
 import { FlyerRequests } from "./payload/collections/FlyerRequests.ts";
 import { JuniorCreatorUsers } from "./payload/collections/JuniorCreatorUsers.ts";
+import { JuniorCreatorShifts } from "./payload/collections/JuniorCreatorShifts.ts";
 import { Inquiries } from "./payload/collections/Inquiries.ts";
 import { Insights } from "./payload/collections/Insights.ts";
 import { Media } from "./payload/collections/Media.ts";
@@ -116,8 +117,18 @@ export default buildConfig({
     Users,
     PortalUsers,
     JuniorCreatorUsers,
+    JuniorCreatorShifts,
   ],
   editor: lexicalEditor(),
+  i18n: {
+    translations: {
+      en: {
+        authentication: {
+          login: "Enter KXD OS",
+        },
+      },
+    },
+  },
   secret: process.env.PAYLOAD_SECRET || "kxd-dev-secret-change-in-production",
   typescript: {
     outputFile: path.resolve(dirname, "payload-types.ts"),

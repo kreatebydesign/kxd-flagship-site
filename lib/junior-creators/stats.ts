@@ -2,7 +2,15 @@ import "server-only";
 
 import { getPayload } from "payload";
 import config from "@payload-config";
-import { getRankTitle } from "./ranks";
+import { getRankTitle, getNextRank } from "./ranks";
+import { findActiveShift } from "./shifts";
+import { getLeadWeekKey, getWeekKey, minutesBetween } from "./week";
+
+export type JuniorCreatorPersonalBests = {
+  bestEarningsWeekCents: number;
+  bestHoursWeekMinutes: number;
+  mostLeadsWeek: number;
+};
 
 export type JuniorCreatorStats = {
   submittedThisWeek: number;
@@ -10,24 +18,32 @@ export type JuniorCreatorStats = {
   closedWonThisWeek: number;
   totalLeads: number;
   rankTitle: string;
+  nextRank: { title: string; leadsNeeded: number } | null;
+  hoursWorkedMinutesThisWeek: number;
+  estimatedEarningsCentsThisWeek: number;
+  personalBests: JuniorCreatorPersonalBests;
+  activeShift: {
+    id: number;
+    startedAt: string;
+    hourlyRateCents: number;
+  } | null;
 };
 
-function getWeekStart(): Date {
-  const now = new Date();
-  const day = now.getDay();
-  const diff = day === 0 ? 6 : day - 1;
-  const start = new Date(now);
-  start.setHours(0, 0, 0, 0);
-  start.setDate(start.getDate() - diff);
-  return start;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyDoc = Record<string, any>;
+
+function earningsFromMinutes(minutes: number, hourlyRateCents: number): number {
+  return Math.round((minutes * hourlyRateCents) / 60);
 }
 
 export async function getJuniorCreatorStats(juniorCreatorUserId: number): Promise<JuniorCreatorStats> {
   const payload = await getPayload({ config });
-  const weekStart = getWeekStart();
+  const currentWeekKey = getWeekKey();
+  const weekStart = new Date(currentWeekKey);
+  weekStart.setHours(0, 0, 0, 0);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const result = await payload.find({
+  const leadsResult = await payload.find({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     collection: "research-leads" as any,
     where: { juniorCreatorUser: { equals: juniorCreatorUserId } },
     limit: 500,
@@ -35,23 +51,81 @@ export async function getJuniorCreatorStats(juniorCreatorUserId: number): Promis
     overrideAccess: true,
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const leads = result.docs as any[];
+  const shiftsResult = await payload.find({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    collection: "junior-creator-shifts" as any,
+    where: { juniorCreatorUser: { equals: juniorCreatorUserId } },
+    limit: 500,
+    depth: 0,
+    overrideAccess: true,
+  });
+
+  const leads = leadsResult.docs as AnyDoc[];
+  const shifts = shiftsResult.docs as AnyDoc[];
   const totalLeads = leads.length;
 
   let submittedThisWeek = 0;
   let qualifiedThisWeek = 0;
   let closedWonThisWeek = 0;
+  const leadsPerWeek: Record<string, number> = {};
 
   for (const lead of leads) {
     const created = new Date(lead.createdAt as string);
-    const isThisWeek = created >= weekStart;
-    if (isThisWeek) {
+    const weekKey = getLeadWeekKey(created);
+    leadsPerWeek[weekKey] = (leadsPerWeek[weekKey] ?? 0) + 1;
+
+    if (created >= weekStart) {
       submittedThisWeek += 1;
       if (lead.status === "qualified") qualifiedThisWeek += 1;
       if (lead.status === "closed-won") closedWonThisWeek += 1;
     }
   }
+
+  let hoursWorkedMinutesThisWeek = 0;
+  let estimatedEarningsCentsThisWeek = 0;
+  const minutesPerWeek: Record<string, number> = {};
+  const earningsPerWeek: Record<string, number> = {};
+
+  for (const shift of shifts) {
+    const status = String(shift.status ?? "");
+    if (status === "voided") continue;
+
+    const weekKey = String(shift.weekKey ?? "");
+    const rate = Number(shift.hourlyRateCents ?? 0);
+
+    if (status === "completed") {
+      const mins = Number(shift.totalMinutes ?? 0);
+      if (mins > 0) {
+        minutesPerWeek[weekKey] = (minutesPerWeek[weekKey] ?? 0) + mins;
+        const earned = earningsFromMinutes(mins, rate);
+        earningsPerWeek[weekKey] = (earningsPerWeek[weekKey] ?? 0) + earned;
+
+        if (weekKey === currentWeekKey) {
+          hoursWorkedMinutesThisWeek += mins;
+          estimatedEarningsCentsThisWeek += earned;
+        }
+      }
+    }
+  }
+
+  const activeShift = await findActiveShift(juniorCreatorUserId);
+  if (activeShift) {
+    const elapsed = minutesBetween(new Date(activeShift.startedAt), new Date());
+    hoursWorkedMinutesThisWeek += elapsed;
+    estimatedEarningsCentsThisWeek += earningsFromMinutes(elapsed, activeShift.hourlyRateCents);
+  }
+
+  const personalBests: JuniorCreatorPersonalBests = {
+    bestEarningsWeekCents: Object.values(earningsPerWeek).length
+      ? Math.max(...Object.values(earningsPerWeek))
+      : 0,
+    bestHoursWeekMinutes: Object.values(minutesPerWeek).length
+      ? Math.max(...Object.values(minutesPerWeek))
+      : 0,
+    mostLeadsWeek: Object.values(leadsPerWeek).length
+      ? Math.max(...Object.values(leadsPerWeek))
+      : 0,
+  };
 
   return {
     submittedThisWeek,
@@ -59,5 +133,10 @@ export async function getJuniorCreatorStats(juniorCreatorUserId: number): Promis
     closedWonThisWeek,
     totalLeads,
     rankTitle: getRankTitle(totalLeads),
+    nextRank: getNextRank(totalLeads),
+    hoursWorkedMinutesThisWeek,
+    estimatedEarningsCentsThisWeek,
+    personalBests,
+    activeShift,
   };
 }

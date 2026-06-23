@@ -4,8 +4,9 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { KxdLogo } from "@/components/ui/KxdLogo";
 import { JuniorLeadForm } from "./JuniorLeadForm";
-import { getNextRank } from "@/lib/junior-creators/ranks";
+import { JuniorShiftCard } from "./JuniorShiftCard";
 import type { JuniorCreatorStats } from "@/lib/junior-creators/stats";
+import { formatEarningsCents, formatHoursFromMinutes } from "@/lib/junior-creators/week";
 import { RESEARCH_SERVICE_LABEL, RESEARCH_STATUS_LABEL } from "@/lib/research-leads";
 
 const C = {
@@ -17,7 +18,6 @@ const C = {
   goldFaint: "rgba(197,166,92,0.08)",
   cream: "#f8f3ea",
   creamMuted: "#bfb7aa",
-  green: "#5ec68c",
   border: "rgba(255,255,255,0.07)",
   borderGold: "rgba(197,166,92,0.22)",
   serif: "var(--font-cormorant, Georgia, 'Times New Roman', serif)",
@@ -61,7 +61,6 @@ function fmtDate(iso: string): string {
 
 export function JuniorDashboard({ displayName, stats, recentLeads }: Props) {
   const router = useRouter();
-  const nextRank = getNextRank(stats.totalLeads);
 
   async function handleLogout() {
     await fetch("/api/junior-creators/auth/logout", { method: "POST" });
@@ -69,11 +68,18 @@ export function JuniorDashboard({ displayName, stats, recentLeads }: Props) {
     router.refresh();
   }
 
-  const KPI = [
-    { label: "Submitted This Week", value: stats.submittedThisWeek },
-    { label: "Qualified This Week", value: stats.qualifiedThisWeek },
-    { label: "Closed Won This Week", value: stats.closedWonThisWeek },
-    { label: "Total Leads", value: stats.totalLeads },
+  const thisWeekMetrics = [
+    { label: "Hours This Week", value: formatHoursFromMinutes(stats.hoursWorkedMinutesThisWeek) },
+    { label: "Est. Earnings", value: formatEarningsCents(stats.estimatedEarningsCentsThisWeek) },
+    { label: "Leads Submitted", value: stats.submittedThisWeek },
+    { label: "Qualified", value: stats.qualifiedThisWeek },
+    { label: "Closed Won", value: stats.closedWonThisWeek },
+  ];
+
+  const personalBests = [
+    { label: "Best Earnings Week", value: formatEarningsCents(stats.personalBests.bestEarningsWeekCents) },
+    { label: "Most Hours (Week)", value: formatHoursFromMinutes(stats.personalBests.bestHoursWeekMinutes) },
+    { label: "Most Leads (Week)", value: stats.personalBests.mostLeadsWeek },
   ];
 
   return (
@@ -112,34 +118,60 @@ export function JuniorDashboard({ displayName, stats, recentLeads }: Props) {
             Hey {displayName}
           </h1>
           <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: C.creamMuted, marginTop: "0.75rem", maxWidth: "32rem" }}>
-            Your KXD research command center — submit opportunities, build your rank, and grow with KXD Academy.
+            Your KXD Academy research desk — track your time, grow your pipeline, and build your rank.
           </p>
         </div>
 
-        {/* Rank card */}
+        <JuniorShiftCard activeShift={stats.activeShift} />
+
+        {/* Rank progress */}
         <div style={{ background: C.goldFaint, border: `1px solid ${C.borderGold}`, padding: "1.5rem 1.625rem", marginBottom: "2rem" }}>
-          <Label>Current Rank</Label>
+          <Label>Rank Progress</Label>
           <p style={{ fontFamily: C.serif, fontWeight: 400, fontSize: "1.75rem", color: C.gold, marginTop: "0.5rem" }}>
             {stats.rankTitle}
           </p>
-          {nextRank && (
+          <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: C.creamMuted, marginTop: "0.35rem" }}>
+            {stats.totalLeads} lifetime lead{stats.totalLeads === 1 ? "" : "s"} submitted
+          </p>
+          {stats.nextRank && (
             <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: C.creamMuted, marginTop: "0.5rem" }}>
-              {nextRank.leadsNeeded} more lead{nextRank.leadsNeeded === 1 ? "" : "s"} to reach {nextRank.title}
+              {stats.nextRank.leadsNeeded} more lead{stats.nextRank.leadsNeeded === 1 ? "" : "s"} to reach {stats.nextRank.title}
             </p>
           )}
         </div>
 
-        {/* KPI grid */}
-        <div className="mb-10 grid grid-cols-2 sm:grid-cols-4" style={{ gap: "1px", background: C.border, border: `1px solid ${C.border}` }}>
-          {KPI.map((k) => (
-            <div key={k.label} style={{ background: C.bgElevated, padding: "1.25rem 1.375rem" }}>
-              <Label>{k.label}</Label>
-              <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "1.5rem", color: C.cream, marginTop: "0.5rem", lineHeight: 1 }}>
-                {k.value}
-              </p>
-            </div>
-          ))}
-        </div>
+        {/* This week */}
+        <section className="mb-10">
+          <Label style={{ color: C.goldDim, marginBottom: "1rem" }}>This Week</Label>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5" style={{ gap: "1px", background: C.border, border: `1px solid ${C.border}` }}>
+            {thisWeekMetrics.map((k) => (
+              <div key={k.label} style={{ background: C.bgElevated, padding: "1.25rem 1.375rem" }}>
+                <Label>{k.label}</Label>
+                <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "1.35rem", color: C.cream, marginTop: "0.5rem", lineHeight: 1 }}>
+                  {k.value}
+                </p>
+              </div>
+            ))}
+          </div>
+          <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: "rgba(255,255,255,0.28)", marginTop: "0.625rem" }}>
+            Earnings are estimated from logged shift time — not payroll or payment.
+          </p>
+        </section>
+
+        {/* Personal bests */}
+        <section className="mb-10">
+          <Label style={{ color: C.goldDim, marginBottom: "1rem" }}>Personal Bests</Label>
+          <div className="grid grid-cols-1 sm:grid-cols-3" style={{ gap: "1px", background: C.border, border: `1px solid ${C.border}` }}>
+            {personalBests.map((b) => (
+              <div key={b.label} style={{ background: C.bgElevated, padding: "1.25rem 1.375rem" }}>
+                <Label>{b.label}</Label>
+                <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "1.35rem", color: C.cream, marginTop: "0.5rem", lineHeight: 1 }}>
+                  {b.value}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
 
         {/* Submit form */}
         <section className="mb-10">

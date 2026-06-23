@@ -17,6 +17,7 @@ import * as migration_20260621_phase6a_website_auditor from './20260621_phase6a_
 import * as migration_20260622_phase1_research_leads from './20260622_phase1_research_leads';
 import * as migration_20260623_phase2a_junior_creators from './20260623_phase2a_junior_creators';
 import * as migration_20260623_phase2a_payload_preferences_rels from './20260623_phase2a_payload_preferences_rels';
+import * as migration_20260624_phase2b_junior_creator_shifts from './20260624_phase2b_junior_creator_shifts';
 
 export const migrations = [
   {
@@ -113,5 +114,10 @@ export const migrations = [
     up: migration_20260623_phase2a_payload_preferences_rels.up,
     down: migration_20260623_phase2a_payload_preferences_rels.down,
     name: '20260623_phase2a_payload_preferences_rels',
+  },
+  {
+    up: migration_20260624_phase2b_junior_creator_shifts.up,
+    down: migration_20260624_phase2b_junior_creator_shifts.down,
+    name: '20260624_phase2b_junior_creator_shifts',
   },
 ];

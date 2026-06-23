@@ -47,11 +47,19 @@
   }
 
   /* ── Logo graphics ─────────────────────────────────────────────────────── */
+  .kxd-payload-brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.625rem;
+    text-align: center;
+  }
+
   .kxd-payload-logo {
     display: block;
     width: auto;
-    height: 2.75rem;
-    max-width: 11rem;
+    height: 3.55rem;
+    max-width: 14.25rem;
     object-fit: contain;
   }
 
@@ -69,6 +77,28 @@
     justify-content: center;
     margin-bottom: 1.75rem;
     padding: 0.25rem 0 0.5rem;
+  }
+
+  .kxd-payload-brand__title {
+    margin: 0.125rem 0 0;
+    color: #f7f2e8;
+    font-family: var(--font-body, system-ui, sans-serif);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    line-height: 1.2;
+    text-transform: uppercase;
+  }
+
+  .kxd-payload-brand__subtitle {
+    margin: 0;
+    color: var(--kxd-gold-dim);
+    font-family: var(--font-body, system-ui, sans-serif);
+    font-size: 0.625rem;
+    font-weight: 400;
+    letter-spacing: 0.14em;
+    line-height: 1.35;
+    text-transform: uppercase;
   }
 
   .login__form {
@@ -118,6 +148,11 @@
 
   .btn--style-primary:active:not(.btn--disabled) {
     transform: translateY(1px);
+  }
+
+  .login__form .btn--style-primary {
+    letter-spacing: 0.08em;
+    text-transform: none;
   }
 
   /* ── Inputs / focus ────────────────────────────────────────────────────── */
