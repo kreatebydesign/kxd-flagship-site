@@ -26,6 +26,7 @@ import { PlatformApplications } from "./payload/collections/PlatformApplications
 import { ProjectInquiries } from "./payload/collections/ProjectInquiries.ts";
 import { Projects } from "./payload/collections/Projects.ts";
 import { PromoVideoRequests } from "./payload/collections/PromoVideoRequests.ts";
+import { ResearchLeads } from "./payload/collections/ResearchLeads.ts";
 import { Retainers } from "./payload/collections/Retainers.ts";
 import { Reviews } from "./payload/collections/Reviews.ts";
 import { Services } from "./payload/collections/Services.ts";
@@ -87,6 +88,7 @@ export default buildConfig({
     ProjectInquiries,
     PlatformApplications,
     WebsiteAudits,
+    ResearchLeads,
     // ── KXD OS ───────────────────────────────────────────────────────────────
     Clients,
     Retainers,

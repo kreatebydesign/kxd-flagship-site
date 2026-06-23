@@ -8,7 +8,10 @@ import "server-only";
 
 import { getPayload } from "payload";
 import config from "@payload-config";
-import { calculateOnboardingReadiness } from "@/lib/client-onboarding";
+import {
+  calculateOnboardingReadiness,
+  getOnboardingWorkflowStatus,
+} from "@/lib/client-onboarding";
 import { AUDIT_STATUS_LABEL } from "@/lib/website-audit/scoring";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -39,6 +42,38 @@ export type ClientHealthFlag = {
   href: string;
 };
 
+export type CommandCenterCard = {
+  id: string;
+  title: string;
+  value: string;
+  sub?: string;
+  href: string;
+};
+
+export type ProjectRiskItem = {
+  id: string;
+  projectName: string;
+  clientName: string;
+  reason: string;
+  href: string;
+};
+
+export type RenewalItem = {
+  id: number;
+  clientName: string;
+  label: string;
+  date: string;
+  amount: string;
+  href: string;
+};
+
+export type OnboardingPipeline = {
+  waitingOnClient: number;
+  waitingOnKxd: number;
+  readyForBuild: number;
+  inPipeline: number;
+};
+
 export type ExecutiveDashboardData = {
   kpis: {
     totalClients: number;
@@ -49,6 +84,14 @@ export type ExecutiveDashboardData = {
     newAuditLeads30d: number;
     portalUsers: number;
     onboardingInProgress: number;
+  };
+  commandCenter: {
+    cards: CommandCenterCard[];
+    projectsAtRisk: ProjectRiskItem[];
+    upcomingRenewals: RenewalItem[];
+    onboardingPipeline: OnboardingPipeline;
+    auditNewLeads: number;
+    auditTotal: number;
   };
   actionCenter: ActionItem[];
   salesPipeline: {
@@ -89,6 +132,15 @@ function fmtShort(iso: string): string {
   }
 }
 
+function fmtMoney(n: number | null | undefined): string {
+  if (n == null) return "—";
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(n);
+}
+
 async function findAll(collection: string, limit = 500): Promise<AnyDoc[]> {
   const payload = await getPayload({ config });
   const result = await payload.find({
@@ -105,8 +157,9 @@ export async function getExecutiveDashboardData(): Promise<ExecutiveDashboardDat
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const in14Days = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
+  const in60Days = new Date(now.getTime() + 60 * 24 * 60 * 60 * 1000);
 
-  const [clients, projects, requests, deliverables, audits, portalUsers, onboardings] =
+  const [clients, projects, requests, deliverables, audits, portalUsers, onboardings, retainers] =
     await Promise.all([
       findAll("clients"),
       findAll("client-projects"),
@@ -115,6 +168,7 @@ export async function getExecutiveDashboardData(): Promise<ExecutiveDashboardDat
       findAll("website-audits"),
       findAll("portal-users"),
       findAll("client-onboarding"),
+      findAll("retainers"),
     ]);
 
   const activeClients = clients.filter((c) => c.status !== "archived");
@@ -150,6 +204,146 @@ export async function getExecutiveDashboardData(): Promise<ExecutiveDashboardDat
     portalUsers: portalUsers.length,
     onboardingInProgress: onboardingInProgress.length,
   };
+
+  // ── Command center cards ────────────────────────────────────────────────────
+  const activeRetainers = retainers.filter(
+    (r) => r.billingStatus === "active" || r.billingStatus === "current",
+  );
+  const totalMRR = activeRetainers.reduce((s, r) => s + (Number(r.monthlyAmount) || 0), 0);
+  const auditNewLeads = audits.filter((a) => a.status === "new-lead").length;
+
+  let waitingOnClient = 0;
+  let waitingOnKxd = 0;
+  let readyForBuild = 0;
+  for (const o of onboardings) {
+    const workflow = getOnboardingWorkflowStatus(o);
+    if (workflow === "waiting-on-client") waitingOnClient += 1;
+    if (workflow === "waiting-on-kxd") waitingOnKxd += 1;
+    if (workflow === "ready-for-build") readyForBuild += 1;
+  }
+
+  const commandCenterCards: CommandCenterCard[] = [
+    {
+      id: "active-clients",
+      title: "Active Clients",
+      value: String(activeClients.length),
+      sub: "Non-archived accounts",
+      href: "/admin/collections/clients",
+    },
+    {
+      id: "mrr",
+      title: "Monthly Retainers",
+      value: totalMRR > 0 ? fmtMoney(totalMRR) : "$0",
+      sub: `${activeRetainers.length} active retainers · MRR`,
+      href: "/admin/collections/retainers",
+    },
+    {
+      id: "open-requests",
+      title: "Open Client Requests",
+      value: String(openRequests.length),
+      sub: "Awaiting action",
+      href: "/admin/collections/client-requests",
+    },
+    {
+      id: "active-projects",
+      title: "Active Projects",
+      value: String(activeProjects.length),
+      sub: "Planning through review",
+      href: "/admin/collections/client-projects",
+    },
+    {
+      id: "projects-at-risk",
+      title: "Projects At Risk",
+      value: "—",
+      sub: "See risk panel below",
+      href: "/admin/collections/client-projects",
+    },
+    {
+      id: "upcoming-renewals",
+      title: "Upcoming Renewals",
+      value: "—",
+      sub: "60-day window",
+      href: "/admin/collections/retainers",
+    },
+    {
+      id: "audit-leads",
+      title: "Website Audits / Leads",
+      value: String(audits.length),
+      sub: `${auditNewLeads} new leads`,
+      href: "/admin/operations/audits",
+    },
+    {
+      id: "onboarding-pipeline",
+      title: "Onboarding Pipeline",
+      value: String(onboardingInProgress.length),
+      sub: `${waitingOnClient} waiting on client`,
+      href: "/admin/operations/onboarding",
+    },
+  ];
+
+  const projectsAtRisk: ProjectRiskItem[] = [];
+  const riskProjectIds = new Set<string>();
+
+  const openReqCountByClient: Record<number, number> = {};
+  for (const r of openRequests) {
+    const cid = resolveClientId(r.client);
+    if (cid) openReqCountByClient[cid] = (openReqCountByClient[cid] ?? 0) + 1;
+  }
+
+  for (const p of projects) {
+    if (!["planning", "active", "review", "waiting-on-client"].includes(String(p.status))) continue;
+    const reasons: string[] = [];
+    if (p.status === "waiting-on-client") reasons.push("Waiting on client");
+    if (p.targetLaunchDate && new Date(p.targetLaunchDate as string) < now) {
+      reasons.push("Past launch target");
+    } else if (
+      p.targetLaunchDate &&
+      new Date(p.targetLaunchDate as string) <= in14Days &&
+      new Date(p.targetLaunchDate as string) >= now
+    ) {
+      reasons.push("Launch within 14 days");
+    }
+    const cid = resolveClientId(p.client);
+    const clientOpenReqs = cid ? (openReqCountByClient[cid] ?? 0) : 0;
+    if (clientOpenReqs >= 2) reasons.push(`${clientOpenReqs} open requests`);
+
+    if (reasons.length > 0) {
+      const id = `proj-risk-${p.id}`;
+      if (!riskProjectIds.has(id)) {
+        riskProjectIds.add(id);
+        projectsAtRisk.push({
+          id,
+          projectName: String(p.projectName ?? "Project"),
+          clientName: resolveClientName(p.client),
+          reason: reasons.join(" · "),
+          href: `/admin/collections/client-projects/${p.id}`,
+        });
+      }
+    }
+  }
+
+  projectsAtRisk.sort((a, b) => a.projectName.localeCompare(b.projectName));
+  commandCenterCards[4].value = String(projectsAtRisk.length);
+
+  const upcomingRenewalCandidates: Array<RenewalItem & { sortAt: number }> = [];
+  for (const r of retainers) {
+    const dateRaw = (r.renewalDate ?? r.nextInvoiceDate) as string | null | undefined;
+    if (!dateRaw) continue;
+    const d = new Date(dateRaw);
+    if (d < now || d > in60Days) continue;
+    upcomingRenewalCandidates.push({
+      id: r.id as number,
+      clientName: resolveClientName(r.client),
+      label: String(r.retainerName ?? "Retainer"),
+      date: fmtShort(dateRaw),
+      amount: fmtMoney(r.monthlyAmount as number | null),
+      href: `/admin/collections/retainers/${r.id}`,
+      sortAt: d.getTime(),
+    });
+  }
+  upcomingRenewalCandidates.sort((a, b) => a.sortAt - b.sortAt);
+  const upcomingRenewals: RenewalItem[] = upcomingRenewalCandidates.map(({ sortAt: _, ...item }) => item);
+  commandCenterCards[5].value = String(upcomingRenewals.length);
 
   // ── Action center ───────────────────────────────────────────────────────────
   const actionCenter: ActionItem[] = [];
@@ -426,6 +620,19 @@ export async function getExecutiveDashboardData(): Promise<ExecutiveDashboardDat
 
   return {
     kpis,
+    commandCenter: {
+      cards: commandCenterCards,
+      projectsAtRisk: projectsAtRisk.slice(0, 8),
+      upcomingRenewals: upcomingRenewals.slice(0, 8),
+      onboardingPipeline: {
+        waitingOnClient,
+        waitingOnKxd,
+        readyForBuild,
+        inPipeline: onboardingInProgress.length,
+      },
+      auditNewLeads,
+      auditTotal: audits.length,
+    },
     actionCenter: actionCenter.slice(0, 12),
     salesPipeline: {
       counts,

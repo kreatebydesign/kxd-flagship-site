@@ -833,6 +833,7 @@ export default async function OperationsPage() {
           <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" as const }}>
             {([
               ["/admin/operations/executive",              "Executive"],
+              ["/admin/operations/playbooks",                "Playbooks"],
               ["/admin/operations/today",                  "Today"],
               ["/admin/operations/growth",                 "Growth"],
               ["/admin/operations/accounts",               "Accounts"],

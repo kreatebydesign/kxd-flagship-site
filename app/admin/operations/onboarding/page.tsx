@@ -14,7 +14,12 @@ import { KxdLogo } from "@/components/ui/KxdLogo";
 import {
   calculateOnboardingReadiness,
   getMissingClientRequirements,
+  getOnboardingChecklists,
+  getOnboardingWorkflowStatus,
   onboardingStatusLabel,
+  onboardingWorkflowLabel,
+  type ChecklistItem,
+  type OnboardingWorkflowStatus,
   type ReadinessLabel,
 } from "@/lib/client-onboarding";
 
@@ -92,6 +97,42 @@ const READINESS_COLOR: Record<ReadinessLabel, string> = {
   "Missing Critical Items": C.red,
 };
 
+const WORKFLOW_COLOR: Record<OnboardingWorkflowStatus, string> = {
+  draft: "rgba(255,255,255,0.35)",
+  "waiting-on-client": C.yellow,
+  "waiting-on-kxd": C.teal,
+  "ready-for-build": C.green,
+  approved: C.green,
+};
+
+function ChecklistPanel({ title, items }: { title: string; items: ChecklistItem[] }) {
+  const done = items.filter((i) => i.done).length;
+  return (
+    <div style={{ minWidth: "10rem" }}>
+      <p style={{
+        fontFamily: C.sans, fontSize: "0.4375rem", fontWeight: 600,
+        letterSpacing: "0.14em", textTransform: "uppercase",
+        color: C.goldDim, marginBottom: "0.5rem",
+      }}>
+        {title} · {done}/{items.length}
+      </p>
+      <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
+        {items.map((item) => (
+          <p
+            key={item.label}
+            style={{
+              fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.02em",
+              color: item.done ? C.green : item.critical ? C.red : "rgba(255,255,255,0.35)",
+            }}
+          >
+            {item.done ? "✓" : "○"} {item.label}
+          </p>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function Label({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
   return (
     <p style={{
@@ -166,17 +207,27 @@ export default async function OnboardingDashboardPage() {
   const onboardings =
     onboardingsR[0].status === "fulfilled" ? onboardingsR[0].value.docs as AnyDoc[] : [];
 
-  const total       = onboardings.length;
-  const pending     = onboardings.filter((o) => o.status === "draft" || o.status === "sent").length;
-  const inProgress  = onboardings.filter((o) => o.status === "in-progress").length;
-  const submitted   = onboardings.filter((o) => o.status === "submitted").length;
-  const approved    = onboardings.filter((o) => o.status === "approved").length;
+  const total = onboardings.length;
 
   const enriched = onboardings.map((doc) => {
     const readiness = calculateOnboardingReadiness(doc);
     const missing   = getMissingClientRequirements(doc);
-    return { doc, readiness, missing };
+    const checklists = getOnboardingChecklists(doc);
+    const workflow   = getOnboardingWorkflowStatus(doc);
+    return { doc, readiness, missing, checklists, workflow };
   });
+
+  const workflowCounts = {
+    waitingOnClient: enriched.filter((e) => e.workflow === "waiting-on-client").length,
+    waitingOnKxd: enriched.filter((e) => e.workflow === "waiting-on-kxd").length,
+    readyForBuild: enriched.filter((e) => e.workflow === "ready-for-build").length,
+    approved: enriched.filter((e) => e.workflow === "approved").length,
+  };
+
+  const activeIntakes = enriched
+    .filter((e) => e.workflow !== "approved")
+    .sort((a, b) => b.readiness.score - a.readiness.score)
+    .slice(0, 6);
 
   const withMissing = enriched
     .filter((e) => e.missing.all.length > 0)
@@ -184,10 +235,10 @@ export default async function OnboardingDashboardPage() {
 
   const KPI = [
     { label: "Total Onboardings", value: String(total),      accent: C.cream },
-    { label: "Pending",           value: String(pending),    accent: C.blue },
-    { label: "In Progress",       value: String(inProgress), accent: C.yellow },
-    { label: "Submitted",         value: String(submitted),  accent: C.teal },
-    { label: "Approved",          value: String(approved),   accent: C.green },
+    { label: "Waiting on Client", value: String(workflowCounts.waitingOnClient), accent: C.yellow },
+    { label: "Waiting on KXD",    value: String(workflowCounts.waitingOnKxd),    accent: C.teal },
+    { label: "Ready for Build",   value: String(workflowCounts.readyForBuild),   accent: C.green },
+    { label: "Approved",          value: String(workflowCounts.approved),        accent: C.green },
   ];
 
   return (
@@ -302,6 +353,104 @@ export default async function OnboardingDashboardPage() {
               </p>
             </div>
           ))}
+        </div>
+
+        {/* Active intake detail panels */}
+        <div style={{ marginBottom: "2.5rem" }}>
+          <SectionHeader
+            label="Active Intake Detail"
+            sub="Readiness score, asset checklists, domain/DNS, brand, content, and internal notes"
+            href="/admin/collections/client-onboarding"
+            linkText="All Intakes →"
+          />
+          {activeIntakes.length === 0 ? (
+            <EmptyState message="No active onboarding intakes — all records approved or none created yet." />
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: "1px", background: C.border, border: `1px solid ${C.border}` }}>
+              {activeIntakes.map(({ doc, readiness, checklists, workflow }) => {
+                const name = clientName(doc.client) || doc.businessName || "Unknown";
+                const cid = clientId(doc.client);
+                const workflowColor = WORKFLOW_COLOR[workflow];
+                const notes = doc.notes ? String(doc.notes).trim() : "";
+
+                return (
+                  <div key={doc.id as number} style={{ background: C.bgElevated, padding: "1.5rem 1.625rem" }}>
+                    <div className="flex flex-wrap items-start justify-between gap-4" style={{ marginBottom: "1.25rem" }}>
+                      <div>
+                        {cid ? (
+                          <Link href={`/admin/collections/clients/${cid}`} style={{
+                            fontFamily: C.sans, fontWeight: 500, fontSize: "0.875rem", color: C.cream, textDecoration: "none",
+                          }}>
+                            {name}
+                          </Link>
+                        ) : (
+                          <p style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.875rem", color: C.cream }}>{name}</p>
+                        )}
+                        <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: C.creamMuted, marginTop: "0.35rem" }}>
+                          {onboardingStatusLabel(doc.status as string)} · Updated {fmtDate(doc.updatedAt as string)}
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-3">
+                        <div style={{ textAlign: "right" }}>
+                          <Label>Readiness</Label>
+                          <p style={{
+                            fontFamily: C.serif, fontWeight: 300, fontSize: "1.5rem",
+                            color: readiness.score >= 85 ? C.green : readiness.score >= 50 ? C.yellow : C.red,
+                            marginTop: "0.25rem",
+                          }}>
+                            {readiness.score}%
+                          </p>
+                        </div>
+                        <span style={{
+                          fontFamily: C.sans, fontSize: "0.4375rem", fontWeight: 600,
+                          letterSpacing: "0.12em", textTransform: "uppercase",
+                          color: workflowColor, border: `1px solid ${workflowColor}40`,
+                          background: workflow === "ready-for-build" ? C.greenFaint : workflow === "waiting-on-client" ? C.yellowFaint : "rgba(255,255,255,0.04)",
+                          padding: "0.3rem 0.6rem",
+                        }}>
+                          {onboardingWorkflowLabel(workflow)}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-6" style={{ marginBottom: "1rem" }}>
+                      <ChecklistPanel title="Client Assets" items={checklists.assets} />
+                      <ChecklistPanel title="Domain / DNS" items={checklists.domainDns} />
+                      <ChecklistPanel title="Brand Assets" items={checklists.brand} />
+                      <ChecklistPanel title="Content" items={checklists.content} />
+                    </div>
+
+                    {notes ? (
+                      <div style={{
+                        background: C.bgCard, border: `1px solid ${C.border}`,
+                        padding: "0.875rem 1rem", marginBottom: "0.75rem",
+                      }}>
+                        <Label style={{ marginBottom: "0.375rem" }}>Internal Notes</Label>
+                        <p style={{ fontFamily: C.sans, fontSize: "0.625rem", color: C.creamMuted, lineHeight: 1.55 }}>
+                          {notes.length > 280 ? `${notes.slice(0, 280)}…` : notes}
+                        </p>
+                      </div>
+                    ) : (
+                      <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: "rgba(255,255,255,0.22)", marginBottom: "0.75rem" }}>
+                        No internal notes · add in Payload → Access & Notes
+                      </p>
+                    )}
+
+                    <Link
+                      href={`/admin/collections/client-onboarding/${doc.id as number}`}
+                      style={{
+                        fontFamily: C.sans, fontWeight: 500, fontSize: "0.4375rem",
+                        letterSpacing: "0.14em", textTransform: "uppercase",
+                        color: C.goldDim, textDecoration: "none",
+                      }}
+                    >
+                      Edit in Payload →
+                    </Link>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Missing items engine */}
@@ -491,6 +640,7 @@ export default async function OnboardingDashboardPage() {
           display: "flex", flexWrap: "wrap", gap: "1.5rem",
         }}>
           {[
+            ["/admin/operations/playbooks", "Playbooks"],
             ["/admin/operations/today",    "Today"],
             ["/admin/operations/growth",   "Growth"],
             ["/admin/operations/accounts", "Accounts"],

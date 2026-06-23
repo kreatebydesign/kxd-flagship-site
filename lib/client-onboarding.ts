@@ -249,3 +249,85 @@ export function onboardingStatusLabel(status: string | null | undefined): string
   };
   return map[status ?? ""] ?? status ?? "—";
 }
+
+export type ChecklistItem = {
+  label: string;
+  done: boolean;
+  critical?: boolean;
+};
+
+export type OnboardingChecklists = {
+  assets: ChecklistItem[];
+  domainDns: ChecklistItem[];
+  brand: ChecklistItem[];
+  content: ChecklistItem[];
+};
+
+export type OnboardingWorkflowStatus =
+  | "draft"
+  | "waiting-on-client"
+  | "waiting-on-kxd"
+  | "ready-for-build"
+  | "approved";
+
+export function getOnboardingChecklists(record: OnboardingRecord): OnboardingChecklists {
+  const assets: ChecklistItem[] = [
+    { label: "Logo Files", done: isPopulated(record.logoFiles), critical: true },
+    { label: "Brand Guidelines", done: isPopulated(record.brandGuidelines) },
+    { label: "Marketing Materials", done: isPopulated(record.marketingMaterials) },
+    { label: "Photos", done: isPopulated(record.photos) },
+    { label: "Videos", done: isPopulated(record.videos) },
+  ];
+
+  const domainDns: ChecklistItem[] = [
+    { label: "Current Website URL", done: isPopulated(record.currentWebsite) },
+    { label: "Domain Registrar", done: isPopulated(record.domainRegistrar), critical: true },
+    { label: "Domain Access", done: record.domainAccess === true },
+    { label: "Hosting Provider", done: isPopulated(record.hostingProvider) },
+    { label: "Hosting Access", done: record.hostingAccess === true },
+    { label: "Analytics Connected", done: record.analyticsConnected === true },
+  ];
+
+  const brand: ChecklistItem[] = [
+    { label: "Logo Files", done: isPopulated(record.logoFiles), critical: true },
+    { label: "Brand Guidelines", done: isPopulated(record.brandGuidelines) },
+    { label: "Brand Colors / Fonts Documented", done: isPopulated(record.brandGuidelines) || isPopulated(record.marketingMaterials) },
+  ];
+
+  const content: ChecklistItem[] = [
+    { label: "Business Description", done: isPopulated(record.shortBusinessDescription), critical: true },
+    { label: "Primary Goal", done: isPopulated(record.primaryGoal) },
+    { label: "Success Definition", done: isPopulated(record.successDefinition) },
+    { label: "Pain Point Identified", done: isPopulated(record.biggestPainPoint) },
+    { label: "Competitor Context", done: isPopulated(record.topCompetitors) },
+  ];
+
+  return { assets, domainDns, brand, content };
+}
+
+export function getOnboardingWorkflowStatus(record: OnboardingRecord): OnboardingWorkflowStatus {
+  const status = String(record.status ?? "draft");
+  const readiness = calculateOnboardingReadiness(record);
+  const missing = getMissingClientRequirements(record);
+
+  if (status === "approved") return "approved";
+  if (readiness.label === "Ready" && (status === "submitted" || status === "in-progress")) {
+    return "ready-for-build";
+  }
+  if (status === "submitted") return "waiting-on-kxd";
+  if (missing.all.length > 0 && ["sent", "in-progress", "submitted"].includes(status)) {
+    return "waiting-on-client";
+  }
+  return "draft";
+}
+
+export function onboardingWorkflowLabel(status: OnboardingWorkflowStatus): string {
+  const map: Record<OnboardingWorkflowStatus, string> = {
+    draft: "Draft",
+    "waiting-on-client": "Waiting on Client",
+    "waiting-on-kxd": "Waiting on KXD",
+    "ready-for-build": "Ready for Build",
+    approved: "Approved",
+  };
+  return map[status];
+}

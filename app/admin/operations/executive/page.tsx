@@ -59,6 +59,42 @@ function Label({ children, style }: { children: React.ReactNode; style?: React.C
   );
 }
 
+function EmptyPanel({ message }: { message: string }) {
+  return (
+    <div style={{
+      background: C.bgElevated, border: `1px solid ${C.border}`,
+      padding: "1.375rem 1.5rem",
+    }}>
+      <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: "rgba(255,255,255,0.3)", letterSpacing: "0.04em" }}>
+        {message}
+      </p>
+    </div>
+  );
+}
+
+function CommandCard({ title, value, sub, href }: { title: string; value: string; sub?: string; href: string }) {
+  return (
+    <Link
+      href={href}
+      style={{
+        display: "block", textDecoration: "none",
+        background: C.bgElevated, padding: "1.375rem 1.5rem",
+        border: `1px solid ${C.border}`,
+      }}
+    >
+      <Label>{title}</Label>
+      <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "1.625rem", color: C.cream, marginTop: "0.5rem", lineHeight: 1 }}>
+        {value}
+      </p>
+      {sub && (
+        <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: C.creamMuted, marginTop: "0.5rem", letterSpacing: "0.04em" }}>
+          {sub}
+        </p>
+      )}
+    </Link>
+  );
+}
+
 function fmtTime(iso: string): string {
   try {
     return new Date(iso).toLocaleString("en-US", {
@@ -73,6 +109,7 @@ const NAV_LINKS = [
   ["/admin/operations/today", "Today"],
   ["/admin/operations/audits", "Audits"],
   ["/admin/operations/onboarding", "Onboarding"],
+  ["/admin/operations/playbooks", "Playbooks"],
   ["/admin/operations/growth", "Growth"],
   ["/admin/operations/accounts", "Accounts"],
   ["/admin/operations/founder", "Founder"],
@@ -85,6 +122,7 @@ const QUICK_ACTIONS = [
   { label: "New Request", href: "/admin/operations/requests/new" },
   { label: "New Onboarding", href: "/admin/collections/client-onboarding/create" },
   { label: "Website Audit Review", href: "/admin/operations/audits" },
+  { label: "Playbooks", href: "/admin/operations/playbooks" },
   { label: "Client Portal", href: "/portal" },
 ] as const;
 
@@ -154,6 +192,112 @@ export default async function ExecutiveDashboardPage() {
           <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: C.creamMuted, marginTop: "0.75rem" }}>
             {today} · Live snapshot across clients, delivery, onboarding, audits, and portal
           </p>
+        </div>
+
+        {/* Command center overview */}
+        <section className="mb-10">
+          <Label style={{ color: C.goldDim, marginBottom: "1rem" }}>Command Center Overview</Label>
+          <div className="grid gap-px sm:grid-cols-2 lg:grid-cols-4" style={{ background: C.border, border: `1px solid ${C.border}` }}>
+            {data.commandCenter.cards.map((card) => (
+              <CommandCard
+                key={card.id}
+                title={card.title}
+                value={card.value}
+                sub={card.sub}
+                href={card.href}
+              />
+            ))}
+          </div>
+        </section>
+
+        {/* Risk, renewals, onboarding pipeline */}
+        <div className="mb-10 grid gap-8 lg:grid-cols-3">
+          <section>
+            <Label style={{ color: C.goldDim, marginBottom: "1rem" }}>Projects At Risk</Label>
+            {data.commandCenter.projectsAtRisk.length === 0 ? (
+              <EmptyPanel message="No active risks detected." />
+            ) : (
+              <div style={{ border: `1px solid ${C.border}` }}>
+                {data.commandCenter.projectsAtRisk.map((p) => (
+                  <Link
+                    key={p.id}
+                    href={p.href}
+                    style={{
+                      display: "block", textDecoration: "none",
+                      background: C.bgElevated, padding: "0.875rem 1.25rem",
+                      borderBottom: `1px solid ${C.border}`,
+                    }}
+                  >
+                    <p style={{ fontFamily: C.sans, fontSize: "0.75rem", color: C.cream }}>{p.projectName}</p>
+                    <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: C.creamMuted, marginTop: "0.25rem" }}>{p.clientName}</p>
+                    <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.08em", color: C.yellow, marginTop: "0.375rem" }}>
+                      {p.reason}
+                    </p>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </section>
+
+          <section>
+            <Label style={{ color: C.goldDim, marginBottom: "1rem" }}>Upcoming Renewals</Label>
+            {data.commandCenter.upcomingRenewals.length === 0 ? (
+              <EmptyPanel message="No upcoming renewals inside the current window." />
+            ) : (
+              <div style={{ border: `1px solid ${C.border}` }}>
+                {data.commandCenter.upcomingRenewals.map((r) => (
+                  <Link
+                    key={r.id}
+                    href={r.href}
+                    style={{
+                      display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.75rem",
+                      textDecoration: "none", background: C.bgElevated, padding: "0.875rem 1.25rem",
+                      borderBottom: `1px solid ${C.border}`,
+                    }}
+                  >
+                    <div>
+                      <p style={{ fontFamily: C.sans, fontSize: "0.75rem", color: C.cream }}>{r.clientName}</p>
+                      <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: C.creamMuted, marginTop: "0.2rem" }}>
+                        {r.label} · {r.date}
+                      </p>
+                    </div>
+                    <p style={{ fontFamily: C.sans, fontSize: "0.75rem", color: C.gold }}>{r.amount}</p>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </section>
+
+          <section>
+            <Label style={{ color: C.goldDim, marginBottom: "1rem" }}>Onboarding Pipeline</Label>
+            <div style={{ background: C.bgElevated, border: `1px solid ${C.border}`, padding: "1.25rem 1.5rem" }}>
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { label: "In Pipeline", value: data.commandCenter.onboardingPipeline.inPipeline },
+                  { label: "Waiting on Client", value: data.commandCenter.onboardingPipeline.waitingOnClient },
+                  { label: "Waiting on KXD", value: data.commandCenter.onboardingPipeline.waitingOnKxd },
+                  { label: "Ready for Build", value: data.commandCenter.onboardingPipeline.readyForBuild },
+                ].map((item) => (
+                  <div key={item.label}>
+                    <Label>{item.label}</Label>
+                    <p style={{ fontFamily: C.serif, fontSize: "1.375rem", color: C.cream, marginTop: "0.35rem" }}>{item.value}</p>
+                  </div>
+                ))}
+              </div>
+              {data.commandCenter.onboardingPipeline.waitingOnKxd === 0 ? (
+                <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: "rgba(255,255,255,0.28)", marginTop: "1rem" }}>
+                  No onboarding clients waiting on KXD.
+                </p>
+              ) : null}
+              <Link href="/admin/operations/onboarding" style={{
+                fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.14em",
+                textTransform: "uppercase", color: C.goldDim, textDecoration: "none",
+                marginTop: "1rem", display: "block",
+              }}>
+                Open Onboarding →
+              </Link>
+            </div>
+          </section>
         </div>
 
         {/* KPI bar */}
