@@ -16,6 +16,7 @@ import { Clients } from "./payload/collections/Clients.ts";
 import { CreativeAssets } from "./payload/collections/CreativeAssets.ts";
 import { CreativeCampaigns } from "./payload/collections/CreativeCampaigns.ts";
 import { FlyerRequests } from "./payload/collections/FlyerRequests.ts";
+import { JuniorCreatorUsers } from "./payload/collections/JuniorCreatorUsers.ts";
 import { Inquiries } from "./payload/collections/Inquiries.ts";
 import { Insights } from "./payload/collections/Insights.ts";
 import { Media } from "./payload/collections/Media.ts";
@@ -108,6 +109,7 @@ export default buildConfig({
     Media,
     Users,
     PortalUsers,
+    JuniorCreatorUsers,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || "kxd-dev-secret-change-in-production",

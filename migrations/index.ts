@@ -15,6 +15,7 @@ import * as migration_20260619_phase4a_client_onboarding from './20260619_phase4
 import * as migration_20260620_phase5a_client_portal from './20260620_phase5a_client_portal';
 import * as migration_20260621_phase6a_website_auditor from './20260621_phase6a_website_auditor';
 import * as migration_20260622_phase1_research_leads from './20260622_phase1_research_leads';
+import * as migration_20260623_phase2a_junior_creators from './20260623_phase2a_junior_creators';
 
 export const migrations = [
   {
@@ -101,5 +102,10 @@ export const migrations = [
     up: migration_20260622_phase1_research_leads.up,
     down: migration_20260622_phase1_research_leads.down,
     name: '20260622_phase1_research_leads',
+  },
+  {
+    up: migration_20260623_phase2a_junior_creators.up,
+    down: migration_20260623_phase2a_junior_creators.down,
+    name: '20260623_phase2a_junior_creators',
   },
 ];

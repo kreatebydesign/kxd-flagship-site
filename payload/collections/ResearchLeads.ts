@@ -21,12 +21,32 @@ export const ResearchLeads: CollectionConfig = {
       "Dashboard: /admin/operations/research",
   },
   access: {
-    read: isAuthenticated,
-    create: isAuthenticated,
+    read: ({ req: { user } }) => {
+      if (user?.collection === "users") return true;
+      if (user?.collection === "junior-creator-users") {
+        return { juniorCreatorUser: { equals: user.id } };
+      }
+      return false;
+    },
+    create: ({ req: { user } }) => {
+      if (user?.collection === "users") return true;
+      if (user?.collection === "junior-creator-users") return true;
+      return false;
+    },
     update: isAuthenticated,
     delete: isAuthenticated,
   },
   fields: [
+    {
+      name: "juniorCreatorUser",
+      type: "relationship",
+      relationTo: "junior-creator-users",
+      label: "Junior Creator",
+      admin: {
+        position: "sidebar",
+        description: "Set automatically when a lead is submitted from /junior-creators.",
+      },
+    },
     { name: "researcherName", type: "text", required: true, label: "Researcher" },
     {
       name: "source",
