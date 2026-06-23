@@ -5,7 +5,11 @@
  */
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Outfit } from "next/font/google";
+import { requirePayloadAdminPage } from "@/lib/admin/auth";
 import "../../globals.css";
+
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 const cormorant = Cormorant_Garamond({
   variable: "--font-cormorant",
@@ -27,11 +31,13 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function OperationsLayout({
+export default async function OperationsLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  await requirePayloadAdminPage();
+
   return (
     <html lang="en">
       <body className={`${cormorant.variable} ${outfit.variable} antialiased`}>

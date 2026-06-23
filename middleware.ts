@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import {
+  hasPayloadAuthCookie,
+  payloadAdminLoginUrl,
+} from "@/lib/admin/middleware";
 import { PORTAL_SESSION_COOKIE } from "@/lib/portal/constants";
 import { JUNIOR_CREATOR_SESSION_COOKIE } from "@/lib/junior-creators/constants";
 
@@ -15,6 +19,13 @@ const JUNIOR_PUBLIC_PATHS = [
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  if (pathname === "/admin/operations" || pathname.startsWith("/admin/operations/")) {
+    if (!hasPayloadAuthCookie(request)) {
+      return NextResponse.redirect(payloadAdminLoginUrl(request, pathname));
+    }
+    return NextResponse.next();
+  }
 
   if (pathname.startsWith("/portal")) {
     const isPublic = PORTAL_PUBLIC_PATHS.some(
@@ -64,5 +75,10 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/portal/:path*", "/junior-creators/:path*"],
+  matcher: [
+    "/admin/operations",
+    "/admin/operations/:path*",
+    "/portal/:path*",
+    "/junior-creators/:path*",
+  ],
 };
