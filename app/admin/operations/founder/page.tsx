@@ -26,30 +26,32 @@ export const dynamic = "force-dynamic";
 const C = {
   bgPure:      "#050505",
   bgBase:      "#080808",
-  bgElevated:  "#111111",
+  bgElevated:  "#0B0B0B",
   bgCard:      "#101010",
   gold:        "#C9A962",
   goldDim:     "rgba(201,169,98,0.55)",
-  goldFaint:   "rgba(201,169,98,0.08)",
+  goldFaint:   "rgba(255,255,255,0.035)",
   goldBright:  "#d4b96a",
   cream:       "#F5F1E8",
   creamMuted:  "rgba(245,241,232,0.72)",
   red:         "#d25a5a",
-  redFaint:    "rgba(210,90,90,0.08)",
+  redFaint:    "rgba(255,255,255,0.04)",
   redBorder:   "rgba(210,90,90,0.25)",
   yellow:      "#E8C468",
-  yellowFaint: "rgba(232,196,104,0.08)",
+  yellowFaint: "rgba(255,255,255,0.04)",
   green:       "#C9A962",
-  greenFaint:  "rgba(201,169,98,0.07)",
+  greenFaint:  "rgba(255,255,255,0.035)",
   greenBorder: "rgba(201,169,98,0.20)",
   teal:        "#A8B4C8",
-  tealFaint:   "rgba(168,180,200,0.07)",
+  tealFaint:   "rgba(255,255,255,0.035)",
   blue:        "#A8B4C8",
-  blueFaint:   "rgba(168,180,200,0.07)",
+  blueFaint:   "rgba(255,255,255,0.035)",
   purple:      "#C4B0D8",
-  purpleFaint: "rgba(196,176,216,0.07)",
+  purpleFaint: "rgba(255,255,255,0.035)",
   border:      "rgba(255,255,255,0.08)",
-  borderGold:  "rgba(201,169,98,0.12)",
+  borderGold:  "rgba(201,169,98,0.16)",
+  goldBorder:  "rgba(201,169,98,0.16)",
+  glass:       "rgba(255,255,255,0.035)",
   serif:       "var(--font-cormorant, Georgia, 'Times New Roman', serif)",
   sans:        "var(--font-outfit, 'Helvetica Neue', Arial, sans-serif)",
 } as const;
@@ -68,7 +70,7 @@ const TIER_LABEL: Record<string, string> = {
   flagship: "Flagship", growth: "Growth", maintenance: "Maintenance", internal: "Internal",
 };
 const STATUS_COLOR: Record<string, string> = {
-  healthy: C.green, "needs-attention": C.yellow, "at-risk": C.red, paused: C.creamMuted,
+  healthy: C.gold, "needs-attention": C.yellow, "at-risk": C.red, paused: C.creamMuted,
 };
 const STATUS_LABEL: Record<string, string> = {
   healthy: "Healthy", "needs-attention": "Needs Attention", "at-risk": "At Risk", paused: "Paused",
@@ -202,7 +204,7 @@ function scoreAccount(
 
   const clamped   = Math.min(s, 100);
   const grade     = clamped >= 80 ? "A" : clamped >= 60 ? "B" : clamped >= 40 ? "C" : "D" as "A" | "B" | "C" | "D";
-  const gradeColor = grade === "A" ? C.green : grade === "B" ? C.teal : grade === "C" ? C.yellow : C.red;
+  const gradeColor = grade === "A" ? C.gold : grade === "B" ? C.teal : grade === "C" ? C.yellow : C.red;
 
   return {
     clientId: cid, name, tier, status, mrr, score: clamped, grade, gradeColor,
@@ -222,7 +224,7 @@ function scoreAccount(
 function Label({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
   return (
     <p style={{
-      fontFamily: C.sans, fontSize: "0.4375rem", fontWeight: 600,
+      fontFamily: C.sans, fontSize: "0.6875rem", fontWeight: 600,
       letterSpacing: "0.18em", textTransform: "uppercase" as const,
       color: "rgba(255,255,255,0.3)", ...style,
     }}>
@@ -242,11 +244,11 @@ function SectionHeader({
     }}>
       <div>
         <Label style={{ marginBottom: "0.375rem" }}>{label}</Label>
-        {sub && <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: C.creamMuted, letterSpacing: "0.02em" }}>{sub}</p>}
+        {sub && <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted, letterSpacing: "0.02em" }}>{sub}</p>}
       </div>
       {href && (
         <Link href={href} style={{
-          fontFamily: C.sans, fontWeight: 500, fontSize: "0.4375rem",
+          fontFamily: C.sans, fontWeight: 500, fontSize: "0.6875rem",
           letterSpacing: "0.14em", textTransform: "uppercase" as const,
           color: C.goldDim, textDecoration: "none",
         }}>
@@ -264,7 +266,7 @@ function EmptyState({ message }: { message: string }) {
       padding: "1.375rem 1.5rem", display: "flex", alignItems: "center", gap: "0.875rem",
     }}>
       <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: "rgba(255,255,255,0.2)", flexShrink: 0 }} />
-      <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: "rgba(255,255,255,0.3)", letterSpacing: "0.04em" }}>
+      <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.3)", letterSpacing: "0.04em" }}>
         {message}
       </p>
     </div>
@@ -274,7 +276,7 @@ function EmptyState({ message }: { message: string }) {
 function Badge({ children, color = C.creamMuted }: { children: React.ReactNode; color?: string }) {
   return (
     <span style={{
-      fontFamily: C.sans, fontWeight: 600, fontSize: "0.375rem",
+      fontFamily: C.sans, fontWeight: 600, fontSize: "0.6875rem",
       letterSpacing: "0.16em", textTransform: "uppercase" as const,
       color, border: `1px solid ${color}`, opacity: 0.85,
       padding: "0.125rem 0.5rem", whiteSpace: "nowrap" as const,
@@ -337,7 +339,7 @@ export default async function FounderPage() {
   const revStatus: RevStatus =
     goalPct >= 85 ? "on-track" : goalPct >= 55 ? "building" : "behind";
   const REV_CFG: Record<RevStatus, { label: string; color: string; dot: string; bg: string; border: string }> = {
-    "on-track": { label: "On Track", color: C.green,  dot: C.green,  bg: C.greenFaint, border: C.greenBorder },
+    "on-track": { label: "On Track", color: C.gold,  dot: C.gold,  bg: C.goldFaint, border: C.goldBorder },
     "building": { label: "Building Momentum", color: C.teal,   dot: C.teal,   bg: C.tealFaint,  border: "rgba(168,180,200,0.28)" },
     "behind":   { label: "Behind Target",     color: C.red,    dot: C.red,    bg: C.redFaint,   border: C.redBorder },
   };
@@ -350,7 +352,7 @@ export default async function FounderPage() {
   const top1Pct     = totalMRR > 0 ? Math.round((top1MRR / totalMRR) * 100) : 0;
   const top3Pct     = totalMRR > 0 ? Math.round((top3MRR / totalMRR) * 100) : 0;
   const concRisk    = top1Pct >= 40 ? "high" : top1Pct >= 25 ? "moderate" : "diversified";
-  const concColor   = concRisk === "high" ? C.red : concRisk === "moderate" ? C.yellow : C.green;
+  const concColor   = concRisk === "high" ? C.red : concRisk === "moderate" ? C.yellow : C.gold;
   const concLabel   = concRisk === "high" ? "High Concentration" : concRisk === "moderate" ? "Moderate Risk" : "Diversified";
 
   // Pipeline
@@ -437,7 +439,7 @@ export default async function FounderPage() {
     momentumScore >= 85 ? "elite" : momentumScore >= 65 ? "strong" : momentumScore >= 45 ? "building" : "needs-attention";
   const MOMENTUM_CFG: Record<MomentumLevel, { label: string; color: string; bg: string; border: string; description: string }> = {
     "elite":           { label: "Elite",            color: C.gold,    bg: C.goldFaint,   border: C.borderGold,              description: "KXD is firing on all cylinders. Revenue, pipeline, and clients are all strong." },
-    "strong":          { label: "Strong",           color: C.green,   bg: C.greenFaint,  border: C.greenBorder,             description: "Strong business performance. Focus on acceleration opportunities." },
+    "strong":          { label: "Strong",           color: C.gold,   bg: C.goldFaint,  border: C.goldBorder,             description: "Strong business performance. Focus on acceleration opportunities." },
     "building":        { label: "Building",         color: C.teal,    bg: C.tealFaint,   border: "rgba(168,180,200,0.28)",  description: "Momentum is building. Identify the one constraint holding growth back." },
     "needs-attention": { label: "Needs Attention",  color: C.yellow,  bg: C.yellowFaint, border: "rgba(232,196,104,0.28)",   description: "Business needs active founder attention across revenue and client health." },
   };
@@ -547,17 +549,17 @@ export default async function FounderPage() {
             <div className="flex items-center gap-5">
               <KxdLogo />
               <div>
-                <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.2em", textTransform: "uppercase" as const, color: C.goldDim }}>
+                <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.2em", textTransform: "uppercase" as const, color: C.goldDim }}>
                   KXD OS · Founder Studio
                 </p>
-                <p style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.18)", marginTop: "0.125rem" }}>
+                <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.18)", marginTop: "0.125rem" }}>
                   Phase 3B · Live Payload data · Refreshes on every request
                 </p>
               </div>
               <span style={{
-                fontFamily: C.sans, fontWeight: 600, fontSize: "0.375rem",
+                fontFamily: C.sans, fontWeight: 600, fontSize: "0.6875rem",
                 letterSpacing: "0.16em", textTransform: "uppercase" as const,
-                color: "rgba(201,169,98,0.75)", background: "rgba(201,169,98,0.07)",
+                color: "rgba(201,169,98,0.75)", background: "rgba(255,255,255,0.035)",
                 border: "1px solid rgba(201,169,98,0.2)", padding: "0.2rem 0.6rem",
               }}>
                 Phase 3B
@@ -574,7 +576,7 @@ export default async function FounderPage() {
                 ["/admin",                     "Payload",     C.goldDim],
               ] as [string, string, string][]).map(([href, label, color]) => (
                 <Link key={href} href={href} style={{
-                  fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.12em",
+                  fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.12em",
                   textTransform: "uppercase" as const, color, opacity: href === "/admin" ? 0.55 : 0.85,
                   textDecoration: "none",
                 }}>
@@ -592,7 +594,7 @@ export default async function FounderPage() {
 
         {/* ── Page title + momentum badge ───────────────────────────────── */}
         <div style={{ marginBottom: "2.5rem", paddingBottom: "2rem", borderBottom: `1px solid ${C.border}` }}>
-          <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.2em", textTransform: "uppercase" as const, color: C.goldDim, marginBottom: "0.875rem" }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.2em", textTransform: "uppercase" as const, color: C.goldDim, marginBottom: "0.875rem" }}>
             KXD OS · Founder Studio
           </p>
           <div className="flex flex-wrap items-end justify-between gap-6">
@@ -600,7 +602,7 @@ export default async function FounderPage() {
               <h1 style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "clamp(1.875rem, 5vw, 3.25rem)", lineHeight: 1.02, color: C.cream, letterSpacing: "-0.01em" }}>
                 {dateDisplay}
               </h1>
-              <p style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.06em", color: "rgba(255,255,255,0.2)", marginTop: "0.625rem" }}>
+              <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.06em", color: "rgba(255,255,255,0.2)", marginTop: "0.625rem" }}>
                 Loaded {timeDisplay} · All data live from Payload
               </p>
             </div>
@@ -611,10 +613,10 @@ export default async function FounderPage() {
             }}>
               <div style={{ width: "7px", height: "7px", borderRadius: "50%", background: mom.color, flexShrink: 0 }} />
               <div>
-                <p style={{ fontFamily: C.sans, fontWeight: 600, fontSize: "0.5625rem", letterSpacing: "0.2em", textTransform: "uppercase" as const, color: mom.color, lineHeight: 1 }}>
+                <p style={{ fontFamily: C.sans, fontWeight: 600, fontSize: "0.8125rem", letterSpacing: "0.2em", textTransform: "uppercase" as const, color: mom.color, lineHeight: 1 }}>
                   {mom.label} — {momentumScore}
                 </p>
-                <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.06em", color: "rgba(255,255,255,0.3)", marginTop: "0.375rem" }}>
+                <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.06em", color: "rgba(255,255,255,0.3)", marginTop: "0.375rem" }}>
                   Founder Momentum Score
                 </p>
               </div>
@@ -633,10 +635,10 @@ export default async function FounderPage() {
               <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "clamp(1.375rem, 2.2vw, 1.875rem)", lineHeight: 1, color: kpi.alert ? C.yellow : C.cream, marginTop: "0.625rem", letterSpacing: "-0.01em" }}>
                 {kpi.value}
               </p>
-              <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: "rgba(255,255,255,0.25)", letterSpacing: "0.04em", marginTop: "0.375rem" }}>
+              <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.25)", letterSpacing: "0.04em", marginTop: "0.375rem" }}>
                 {kpi.sub}
               </p>
-              <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: kpi.alert ? C.red : C.goldDim, letterSpacing: "0.06em", marginTop: "0.5rem" }}>
+              <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: kpi.alert ? C.red : C.goldDim, letterSpacing: "0.06em", marginTop: "0.5rem" }}>
                 {kpi.delta}
               </p>
             </div>
@@ -652,7 +654,7 @@ export default async function FounderPage() {
             <div style={{ background: C.bgElevated, border: `1px solid ${rev.border}`, padding: "1.75rem" }}>
               <div className="flex items-center gap-3" style={{ marginBottom: "1.5rem" }}>
                 <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: rev.dot }} />
-                <p style={{ fontFamily: C.sans, fontWeight: 600, fontSize: "0.5625rem", letterSpacing: "0.18em", textTransform: "uppercase" as const, color: rev.color }}>
+                <p style={{ fontFamily: C.sans, fontWeight: 600, fontSize: "0.8125rem", letterSpacing: "0.18em", textTransform: "uppercase" as const, color: rev.color }}>
                   {rev.label}
                 </p>
               </div>
@@ -662,10 +664,10 @@ export default async function FounderPage() {
                   { l: "Current ARR",    v: fmtMoneyCompact(annualProj), c: rev.color },
                   { l: "Annual Goal",    v: fmtMoneyCompact(ANNUAL_GOAL), c: C.creamMuted },
                   { l: "MRR",            v: fmtMoneyCompact(totalMRR),   c: C.cream },
-                  { l: "Remaining Gap",  v: goalGap > 0 ? fmtMoneyCompact(goalGap) : "Goal met", c: goalGap > 0 ? C.red : C.green },
+                  { l: "Remaining Gap",  v: goalGap > 0 ? fmtMoneyCompact(goalGap) : "Goal met", c: goalGap > 0 ? C.red : C.gold },
                 ].map(({ l, v, c }) => (
                   <div key={l}>
-                    <p style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.3)", textTransform: "uppercase" as const }}>
+                    <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.3)", textTransform: "uppercase" as const }}>
                       {l}
                     </p>
                     <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "1.375rem", color: c, marginTop: "0.25rem", letterSpacing: "-0.01em" }}>
@@ -677,14 +679,14 @@ export default async function FounderPage() {
               {/* Progress bar */}
               <div>
                 <div className="flex justify-between" style={{ marginBottom: "0.375rem" }}>
-                  <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: "rgba(255,255,255,0.3)", letterSpacing: "0.08em" }}>Progress to $1M</p>
-                  <p style={{ fontFamily: C.sans, fontWeight: 600, fontSize: "0.4375rem", color: rev.color }}>{goalPct}%</p>
+                  <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(255,255,255,0.3)", letterSpacing: "0.08em" }}>Progress to $1M</p>
+                  <p style={{ fontFamily: C.sans, fontWeight: 600, fontSize: "0.6875rem", color: rev.color }}>{goalPct}%</p>
                 </div>
                 <div style={{ height: "4px", background: "rgba(255,255,255,0.08)", position: "relative" as const }}>
                   <div style={{ position: "absolute" as const, top: 0, left: 0, width: `${goalPct}%`, height: "100%", background: rev.color }} />
                 </div>
                 {mrrNeeded > 0 && (
-                  <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: "rgba(255,255,255,0.25)", marginTop: "0.5rem" }}>
+                  <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(255,255,255,0.25)", marginTop: "0.5rem" }}>
                     {fmtMoney(mrrNeeded)}/mo additional MRR needed to reach goal
                   </p>
                 )}
@@ -696,7 +698,7 @@ export default async function FounderPage() {
               <div className="flex items-center gap-3" style={{ marginBottom: "1.25rem" }}>
                 <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: mom.color }} />
                 <div>
-                  <p style={{ fontFamily: C.sans, fontWeight: 600, fontSize: "0.5625rem", letterSpacing: "0.18em", textTransform: "uppercase" as const, color: mom.color }}>
+                  <p style={{ fontFamily: C.sans, fontWeight: 600, fontSize: "0.8125rem", letterSpacing: "0.18em", textTransform: "uppercase" as const, color: mom.color }}>
                     Momentum — {mom.label}
                   </p>
                 </div>
@@ -704,13 +706,13 @@ export default async function FounderPage() {
               <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "3rem", color: mom.color, letterSpacing: "-0.02em", lineHeight: 1, marginBottom: "0.25rem" }}>
                 {momentumScore}
               </p>
-              <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: "rgba(255,255,255,0.3)", letterSpacing: "0.06em", marginBottom: "1.25rem" }}>
+              <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(255,255,255,0.3)", letterSpacing: "0.06em", marginBottom: "1.25rem" }}>
                 / 100 composite
               </p>
               <div style={{ height: "4px", background: "rgba(255,255,255,0.08)", position: "relative" as const, marginBottom: "1rem" }}>
                 <div style={{ position: "absolute" as const, top: 0, left: 0, width: `${momentumScore}%`, height: "100%", background: mom.color }} />
               </div>
-              <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: "rgba(255,255,255,0.35)", lineHeight: 1.6, letterSpacing: "0.02em" }}>
+              <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.35)", lineHeight: 1.6, letterSpacing: "0.02em" }}>
                 {mom.description}
               </p>
               {/* Component breakdown */}
@@ -723,13 +725,13 @@ export default async function FounderPage() {
                   { l: "Workload Clarity",  pts: overdueReqs.length === 0 ? 10 : overdueReqs.length <= 2 ? 6 : 2, max: 10 },
                 ].map(({ l, pts, max }) => (
                   <div key={l} style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.5rem" }}>
-                    <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: "rgba(255,255,255,0.35)", letterSpacing: "0.06em", flex: 1 }}>
+                    <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(255,255,255,0.35)", letterSpacing: "0.06em", flex: 1 }}>
                       {l}
                     </p>
                     <div style={{ width: "5rem", height: "2px", background: "rgba(255,255,255,0.08)", position: "relative" as const }}>
                       <div style={{ position: "absolute" as const, top: 0, left: 0, width: `${(pts / max) * 100}%`, height: "100%", background: mom.color, opacity: 0.7 }} />
                     </div>
-                    <p style={{ fontFamily: C.sans, fontWeight: 600, fontSize: "0.4375rem", color: mom.color, width: "3rem", textAlign: "right" as const }}>
+                    <p style={{ fontFamily: C.sans, fontWeight: 600, fontSize: "0.6875rem", color: mom.color, width: "3rem", textAlign: "right" as const }}>
                       {pts}/{max}
                     </p>
                   </div>
@@ -747,11 +749,11 @@ export default async function FounderPage() {
           />
 
           {topPriorities.length === 0 ? (
-            <div style={{ background: C.bgElevated, border: `1px solid rgba(201,169,98,0.12)`, padding: "1.5rem 1.75rem", display: "flex", alignItems: "center", gap: "1rem" }}>
-              <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: C.green }} />
+            <div style={{ background: C.bgElevated, border: `1px solid rgba(255,255,255,0.04)`, padding: "1.5rem 1.75rem", display: "flex", alignItems: "center", gap: "1rem" }}>
+              <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: C.gold }} />
               <div>
-                <p style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.6875rem", color: C.green }}>No priority items this week.</p>
-                <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: "rgba(255,255,255,0.3)", marginTop: "0.25rem", letterSpacing: "0.06em" }}>
+                <p style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.6875rem", color: C.gold }}>No priority items this week.</p>
+                <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(255,255,255,0.3)", marginTop: "0.25rem", letterSpacing: "0.06em" }}>
                   Revenue is tracking, clients are healthy, and operations are clear.
                 </p>
               </div>
@@ -764,7 +766,7 @@ export default async function FounderPage() {
                   <div key={i} style={{ background: C.bgElevated, padding: "1.125rem 1.375rem", display: "flex", alignItems: "flex-start", gap: "1rem", borderLeft: `3px solid ${urgencyColor}` }}>
                     {/* Rank */}
                     <div style={{ width: "1.5rem", height: "1.5rem", background: `${urgencyColor}14`, border: `1px solid ${urgencyColor}40`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                      <span style={{ fontFamily: C.sans, fontWeight: 700, fontSize: "0.5rem", color: urgencyColor }}>
+                      <span style={{ fontFamily: C.sans, fontWeight: 700, fontSize: "0.8125rem", color: urgencyColor }}>
                         {i + 1}
                       </span>
                     </div>
@@ -777,7 +779,7 @@ export default async function FounderPage() {
                       ) : (
                         <p style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.6875rem", color: C.cream }}>{item.label}</p>
                       )}
-                      <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: "rgba(255,255,255,0.3)", letterSpacing: "0.06em", marginTop: "0.25rem" }}>
+                      <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(255,255,255,0.3)", letterSpacing: "0.06em", marginTop: "0.25rem" }}>
                         {item.sub}
                       </p>
                     </div>
@@ -813,7 +815,7 @@ export default async function FounderPage() {
                   <span style={{ fontFamily: C.sans, fontWeight: 700, fontSize: "0.75rem", color, opacity: 0.8 }}>{icon}</span>
                   <Label style={{ color: `${color}99` }}>{type}</Label>
                 </div>
-                <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: C.creamMuted, lineHeight: 1.65, letterSpacing: "0.02em" }}>
+                <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted, lineHeight: 1.65, letterSpacing: "0.02em" }}>
                   {text}
                 </p>
               </div>
@@ -846,20 +848,20 @@ export default async function FounderPage() {
                       </Link>
                       <Badge color={TIER_COLOR[a.tier] ?? C.creamMuted}>{TIER_LABEL[a.tier] ?? a.tier}</Badge>
                     </div>
-                    <p style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.25)", textTransform: "uppercase" as const, marginBottom: "0.5rem" }}>
+                    <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.25)", textTransform: "uppercase" as const, marginBottom: "0.5rem" }}>
                       Retainer Growth Opportunity
                     </p>
                     <div style={{ display: "flex", gap: "1.25rem" }}>
                       <div>
-                        <p style={{ fontFamily: C.sans, fontSize: "0.375rem", color: "rgba(255,255,255,0.25)" }}>Current</p>
+                        <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(255,255,255,0.25)" }}>Current</p>
                         <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "1rem", color: C.creamMuted }}>{fmtMoney(a.mrr)}</p>
                       </div>
                       <div>
-                        <p style={{ fontFamily: C.sans, fontSize: "0.375rem", color: "rgba(255,255,255,0.25)" }}>Benchmark</p>
+                        <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(255,255,255,0.25)" }}>Benchmark</p>
                         <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "1rem", color: C.teal }}>{fmtMoney(benchmark)}</p>
                       </div>
                       <div>
-                        <p style={{ fontFamily: C.sans, fontSize: "0.375rem", color: "rgba(255,255,255,0.25)" }}>Upside</p>
+                        <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(255,255,255,0.25)" }}>Upside</p>
                         <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "1rem", color: C.gold }}>+{fmtMoney(gap)}</p>
                       </div>
                     </div>
@@ -877,13 +879,13 @@ export default async function FounderPage() {
                       {TIER_LABEL[c.brandTier as string] ?? String(c.brandTier ?? "—")}
                     </Badge>
                   </div>
-                  <p style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.25)", textTransform: "uppercase" as const, marginBottom: "0.5rem" }}>
+                  <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.25)", textTransform: "uppercase" as const, marginBottom: "0.5rem" }}>
                     White Space — No Active Projects
                   </p>
                   <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "1rem", color: C.teal }}>
                     {fmtMoney(Number(c.monthlyRetainerAmount) || 0)}<span style={{ fontSize: "0.75rem", color: C.creamMuted }}>/mo</span>
                   </p>
-                  <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: "rgba(255,255,255,0.25)", marginTop: "0.25rem" }}>
+                  <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(255,255,255,0.25)", marginTop: "0.25rem" }}>
                     Retainer active — no delivery scope open
                   </p>
                 </div>
@@ -904,21 +906,21 @@ export default async function FounderPage() {
             <div style={{ background: C.bgElevated, border: `1px solid ${concColor}30`, padding: "1.5rem" }}>
               <div className="flex items-center gap-3" style={{ marginBottom: "1rem" }}>
                 <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: concColor }} />
-                <p style={{ fontFamily: C.sans, fontWeight: 600, fontSize: "0.5625rem", letterSpacing: "0.16em", textTransform: "uppercase" as const, color: concColor }}>
+                <p style={{ fontFamily: C.sans, fontWeight: 600, fontSize: "0.8125rem", letterSpacing: "0.16em", textTransform: "uppercase" as const, color: concColor }}>
                   {concLabel}
                 </p>
               </div>
               <div style={{ display: "flex", gap: "2rem", marginBottom: "1rem" }}>
                 <div>
-                  <p style={{ fontFamily: C.sans, fontSize: "0.375rem", color: "rgba(255,255,255,0.3)", letterSpacing: "0.1em", textTransform: "uppercase" as const }}>Top Client</p>
+                  <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(255,255,255,0.3)", letterSpacing: "0.1em", textTransform: "uppercase" as const }}>Top Client</p>
                   <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "1.75rem", color: concColor, lineHeight: 1, marginTop: "0.25rem" }}>{top1Pct}%</p>
                 </div>
                 <div>
-                  <p style={{ fontFamily: C.sans, fontSize: "0.375rem", color: "rgba(255,255,255,0.3)", letterSpacing: "0.1em", textTransform: "uppercase" as const }}>Top 3</p>
+                  <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(255,255,255,0.3)", letterSpacing: "0.1em", textTransform: "uppercase" as const }}>Top 3</p>
                   <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "1.75rem", color: C.creamMuted, lineHeight: 1, marginTop: "0.25rem" }}>{top3Pct}%</p>
                 </div>
               </div>
-              <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: "rgba(255,255,255,0.25)", letterSpacing: "0.06em", lineHeight: 1.6 }}>
+              <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(255,255,255,0.25)", letterSpacing: "0.06em", lineHeight: 1.6 }}>
                 {concRisk === "high"
                   ? "Single client represents over 40% of MRR. Revenue risk if this account churns."
                   : concRisk === "moderate"
@@ -929,11 +931,11 @@ export default async function FounderPage() {
 
             {/* MRR waterfall */}
             <div className="xl:col-span-2" style={{ background: C.bgElevated, border: `1px solid ${C.border}`, padding: "1.5rem" }}>
-              <p style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.14em", textTransform: "uppercase" as const, color: C.goldDim, marginBottom: "1rem" }}>
+              <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.14em", textTransform: "uppercase" as const, color: C.goldDim, marginBottom: "1rem" }}>
                 MRR by Account — {fmtMoney(totalMRR)}/mo total
               </p>
               {withMRR.length === 0 ? (
-                <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: "rgba(255,255,255,0.25)" }}>
+                <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.25)" }}>
                   No retainer revenue recorded.
                 </p>
               ) : (
@@ -943,17 +945,17 @@ export default async function FounderPage() {
                     return (
                       <div key={a.clientId}>
                         <div className="flex justify-between" style={{ marginBottom: "0.25rem" }}>
-                          <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: C.creamMuted }}>
+                          <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted }}>
                             {a.name}
-                            <span style={{ color: TIER_COLOR[a.tier] ?? C.creamMuted, fontSize: "0.4375rem", marginLeft: "0.5rem" }}>
+                            <span style={{ color: TIER_COLOR[a.tier] ?? C.creamMuted, fontSize: "0.6875rem", marginLeft: "0.5rem" }}>
                               {TIER_LABEL[a.tier]}
                             </span>
                           </p>
                           <div className="flex items-center gap-2">
-                            <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: "rgba(255,255,255,0.3)" }}>
+                            <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(255,255,255,0.3)" }}>
                               {Math.round(pct)}%
                             </p>
-                            <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: C.cream }}>
+                            <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.cream }}>
                               {fmtMoney(a.mrr)}
                             </p>
                           </div>
@@ -998,11 +1000,11 @@ export default async function FounderPage() {
                           </p>
                         </Link>
                         <div className="flex items-center gap-2" style={{ marginTop: "0.25rem" }}>
-                          <span style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: TIER_COLOR[a.tier] ?? C.creamMuted }}>
+                          <span style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: TIER_COLOR[a.tier] ?? C.creamMuted }}>
                             {TIER_LABEL[a.tier] ?? a.tier}
                           </span>
                           <span style={{ width: "1px", height: "8px", background: "rgba(255,255,255,0.12)" }} />
-                          <span style={{ fontFamily: C.sans, fontSize: "0.375rem", color: STATUS_COLOR[a.status] ?? C.creamMuted }}>
+                          <span style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: STATUS_COLOR[a.status] ?? C.creamMuted }}>
                             {STATUS_LABEL[a.status] ?? a.status}
                           </span>
                         </div>
@@ -1012,7 +1014,7 @@ export default async function FounderPage() {
                           <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "1rem", color: C.cream }}>
                             {fmtMoney(a.mrr)}
                           </p>
-                          <p style={{ fontFamily: C.sans, fontSize: "0.375rem", color: "rgba(255,255,255,0.25)" }}>/month</p>
+                          <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(255,255,255,0.25)" }}>/month</p>
                         </div>
                         <div style={{ width: "2.25rem", height: "2.25rem", background: `${a.gradeColor}14`, border: `1px solid ${a.gradeColor}40`, display: "flex", alignItems: "center", justifyContent: "center" }}>
                           <span style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "0.875rem", color: a.gradeColor }}>
@@ -1028,7 +1030,7 @@ export default async function FounderPage() {
                         <div style={{ flex: 1, height: "2px", background: "rgba(255,255,255,0.08)", position: "relative" as const }}>
                           <div style={{ position: "absolute" as const, top: 0, left: 0, width: `${a.score}%`, height: "100%", background: a.gradeColor }} />
                         </div>
-                        <span style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: a.gradeColor }}>
+                        <span style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: a.gradeColor }}>
                           {a.score}/100
                         </span>
                       </div>
@@ -1037,18 +1039,18 @@ export default async function FounderPage() {
                     {/* Next action */}
                     {a.nextAction ? (
                       <div style={{ padding: "0.5rem 0.625rem", background: "rgba(255,255,255,0.02)", border: `1px solid ${C.border}`, marginBottom: "0.625rem" }}>
-                        <p style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.25)", textTransform: "uppercase" as const, marginBottom: "0.2rem" }}>
+                        <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.25)", textTransform: "uppercase" as const, marginBottom: "0.2rem" }}>
                           Next Action
                         </p>
-                        <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: C.creamMuted }}>{a.nextAction}</p>
+                        <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted }}>{a.nextAction}</p>
                         {a.nextActionDue && (
-                          <p style={{ fontFamily: C.sans, fontSize: "0.375rem", color: (daysUntil(a.nextActionDue) ?? 999) < 0 ? C.red : C.goldDim, marginTop: "0.2rem" }}>
+                          <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: (daysUntil(a.nextActionDue) ?? 999) < 0 ? C.red : C.goldDim, marginTop: "0.2rem" }}>
                             Due {fmtDate(a.nextActionDue)}
                           </p>
                         )}
                       </div>
                     ) : (
-                      <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: "rgba(210,90,90,0.5)", letterSpacing: "0.06em", marginBottom: "0.625rem" }}>
+                      <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(210,90,90,0.5)", letterSpacing: "0.06em", marginBottom: "0.625rem" }}>
                         No next action defined
                       </p>
                     )}
@@ -1056,10 +1058,10 @@ export default async function FounderPage() {
                     {/* Expansion potential */}
                     {upside > 0 && (
                       <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                        <span style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.25)", textTransform: "uppercase" as const }}>
+                        <span style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.25)", textTransform: "uppercase" as const }}>
                           Expansion potential
                         </span>
-                        <span style={{ fontFamily: C.sans, fontWeight: 600, fontSize: "0.4375rem", color: C.gold }}>
+                        <span style={{ fontFamily: C.sans, fontWeight: 600, fontSize: "0.6875rem", color: C.gold }}>
                           +{fmtMoney(upside)}/mo
                         </span>
                       </div>
@@ -1090,10 +1092,10 @@ export default async function FounderPage() {
               { label: "KXD Website",  sub: "Live site",               href: "/" },
             ] as { label: string; sub: string; href: string }[]).map((action) => (
               <Link key={action.href} href={action.href} style={{ background: C.bgElevated, padding: "1.125rem 1rem", display: "block", textDecoration: "none" }}>
-                <p style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.5625rem", color: C.creamMuted, letterSpacing: "0.02em", lineHeight: 1.3 }}>
+                <p style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem", color: C.creamMuted, letterSpacing: "0.02em", lineHeight: 1.3 }}>
                   {action.label}
                 </p>
-                <p style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.08em", color: "rgba(255,255,255,0.22)", marginTop: "0.25rem", textTransform: "uppercase" as const }}>
+                <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.08em", color: "rgba(255,255,255,0.22)", marginTop: "0.25rem", textTransform: "uppercase" as const }}>
                   {action.sub}
                 </p>
               </Link>
@@ -1103,7 +1105,7 @@ export default async function FounderPage() {
 
         {/* ── Footer ────────────────────────────────────────────────────── */}
         <div style={{ marginTop: "2.5rem", padding: "1rem 1.25rem", background: C.goldFaint, border: `1px solid ${C.borderGold}`, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap" as const, gap: "0.5rem" }}>
-          <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", letterSpacing: "0.08em", color: "rgba(255,255,255,0.22)" }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.08em", color: "rgba(255,255,255,0.22)" }}>
             KXD OS · Founder Studio · Phase 3B · Live Payload data · Refreshes on each request
           </p>
           <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" as const }}>
@@ -1117,7 +1119,7 @@ export default async function FounderPage() {
               ["/admin/collections/retainers","Retainers"],
               ["/admin",                      "Payload"],
             ] as [string, string][]).map(([href, label]) => (
-              <Link key={href} href={href} style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: C.gold, opacity: 0.45, textDecoration: "none" }}>
+              <Link key={href} href={href} style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: C.gold, opacity: 0.45, textDecoration: "none" }}>
                 {label} →
               </Link>
             ))}

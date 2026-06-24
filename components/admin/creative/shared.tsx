@@ -17,17 +17,17 @@ import { KxdLogo } from "@/components/ui/KxdLogo";
 export const C = {
   bgPure:      "#050505",
   bgBase:      "#080808",
-  bgElevated:  "#111111",
+  bgElevated:  "#0B0B0B",
   bgInput:     "#0B0B0B",
   gold:        "#C9A962",
   goldDim:     "rgba(201,169,98,0.55)",
-  goldFaint:   "rgba(201,169,98,0.08)",
+  goldFaint:   "rgba(255,255,255,0.035)",
   cream:       "#F5F1E8",
   creamMuted:  "rgba(245,241,232,0.72)",
   red:         "#d25a5a",
   positive:    "#C9A962",
   border:      "rgba(255,255,255,0.08)",
-  borderGold:  "rgba(201,169,98,0.12)",
+  borderGold:  "rgba(255,255,255,0.04)",
   borderFocus: "rgba(201,169,98,0.55)",
   serif:       "var(--font-cormorant, Georgia, 'Times New Roman', serif)",
   sans:        "var(--font-outfit, 'Helvetica Neue', Arial, sans-serif)",
@@ -46,7 +46,7 @@ export const PRIORITY_OPTIONS = [
 
 export function FieldLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p style={{ fontFamily: C.sans, fontWeight: 400, fontSize: "0.4375rem", letterSpacing: "0.14em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.35)", marginBottom: "0.5rem" }}>
+    <p style={{ fontFamily: C.sans, fontWeight: 400, fontSize: "0.6875rem", letterSpacing: "0.14em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.35)", marginBottom: "0.5rem" }}>
       {children}
     </p>
   );
@@ -54,7 +54,7 @@ export function FieldLabel({ children }: { children: React.ReactNode }) {
 
 export function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.16em", textTransform: "uppercase" as const, color: C.goldDim, marginBottom: "1.25rem" }}>
+    <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.16em", textTransform: "uppercase" as const, color: C.goldDim, marginBottom: "1.25rem" }}>
       {children}
     </p>
   );
@@ -168,7 +168,7 @@ export function SuccessState({
             <path d="M4 10.5L8.5 15L16 6" stroke="#C5A65C" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </div>
-        <p style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.18em", textTransform: "uppercase", color: C.goldDim, marginBottom: "0.875rem" }}>
+        <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.18em", textTransform: "uppercase", color: C.goldDim, marginBottom: "0.875rem" }}>
           {eyebrow}
         </p>
         <h1 style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "clamp(2rem, 4vw, 2.75rem)", color: C.cream, lineHeight: 1.1, marginBottom: "1rem", letterSpacing: "-0.01em" }}>
@@ -177,18 +177,18 @@ export function SuccessState({
         <p style={{ fontFamily: C.sans, fontSize: "0.875rem", color: "rgba(255,255,255,0.4)", maxWidth: "28rem", lineHeight: 1.6, marginBottom: "0.5rem" }}>
           {detail}
         </p>
-        <p style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.2)", marginBottom: "2.5rem" }}>
+        <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.2)", marginBottom: "2.5rem" }}>
           Record ID #{recordId}
         </p>
         <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", justifyContent: "center" }}>
-          <Link href={backHref} style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.5625rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.bgBase, background: `linear-gradient(180deg, #d1b06b 0%, #c5a65c 48%, #b09040 100%)`, padding: "0.875rem 2rem", textDecoration: "none", display: "inline-block" }}>
+          <Link href={backHref} style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.bgBase, background: `linear-gradient(180deg, #d1b06b 0%, #c5a65c 48%, #b09040 100%)`, padding: "0.875rem 2rem", textDecoration: "none", display: "inline-block" }}>
             {backLabel}
           </Link>
-          <button onClick={onReset} style={{ fontFamily: C.sans, fontWeight: 400, fontSize: "0.5625rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.goldDim, background: "transparent", border: `1px solid ${C.borderGold}`, padding: "0.875rem 2rem", cursor: "pointer" }}>
+          <button onClick={onReset} style={{ fontFamily: C.sans, fontWeight: 400, fontSize: "0.8125rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.goldDim, background: "transparent", border: `1px solid ${C.borderGold}`, padding: "0.875rem 2rem", cursor: "pointer" }}>
             {anotherLabel}
           </button>
           {payloadHref && (
-            <Link href={payloadHref} style={{ fontFamily: C.sans, fontWeight: 400, fontSize: "0.5625rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", background: "transparent", border: `1px solid ${C.border}`, padding: "0.875rem 2rem", textDecoration: "none", display: "inline-block" }}>
+            <Link href={payloadHref} style={{ fontFamily: C.sans, fontWeight: 400, fontSize: "0.8125rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", background: "transparent", border: `1px solid ${C.border}`, padding: "0.875rem 2rem", textDecoration: "none", display: "inline-block" }}>
               View in Payload →
             </Link>
           )}
@@ -202,7 +202,7 @@ export function SuccessState({
 
 export function ErrorBar({ message }: { message: string }) {
   return (
-    <div style={{ padding: "0.875rem 1.25rem", background: "rgba(210,90,90,0.08)", border: "1px solid rgba(210,90,90,0.3)" }}>
+    <div style={{ padding: "0.875rem 1.25rem", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(210,90,90,0.3)" }}>
       <p style={{ fontFamily: C.sans, fontSize: "0.75rem", color: C.red }}>{message}</p>
     </div>
   );
@@ -225,7 +225,7 @@ export function SubmitRow({
 }) {
   return (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap" as const, paddingTop: "0.5rem" }}>
-      <Link href={backHref} style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", textDecoration: "none" }}>
+      <Link href={backHref} style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", textDecoration: "none" }}>
         ← Creative Engine
       </Link>
       <button
@@ -234,7 +234,7 @@ export function SubmitRow({
         style={{
           fontFamily: C.sans,
           fontWeight: 500,
-          fontSize: "0.5625rem",
+          fontSize: "0.8125rem",
           letterSpacing: "0.14em",
           textTransform: "uppercase",
           color: C.bgBase,
@@ -263,26 +263,26 @@ export function CreativePageHeader({ subTitle }: { subTitle?: string } = {}) {
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <KxdLogo />
-            <span style={{ color: "rgba(255,255,255,0.1)", fontSize: "0.375rem" }}>◆</span>
+            <span style={{ color: "rgba(255,255,255,0.1)", fontSize: "0.6875rem" }}>◆</span>
             <div>
-              <p style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.5625rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.creamMuted, lineHeight: 1 }}>
+              <p style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.creamMuted, lineHeight: 1 }}>
                 Creative Engine
               </p>
               {subTitle && (
-                <p className="hidden sm:block" style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "0.35rem" }}>
+                <p className="hidden sm:block" style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "0.35rem" }}>
                   {subTitle}
                 </p>
               )}
             </div>
           </div>
           <div className="flex items-center gap-5">
-            <Link href="/admin/operations/creative" style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", textDecoration: "none" }}>
+            <Link href="/admin/operations/creative" style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", textDecoration: "none" }}>
               ← Creative Engine
             </Link>
-            <Link href="/admin/operations" style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", textDecoration: "none" }}>
+            <Link href="/admin/operations" style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", textDecoration: "none" }}>
               Operations
             </Link>
-            <Link href="/admin" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.5rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.gold, opacity: 0.55, textDecoration: "none" }}>
+            <Link href="/admin" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.gold, opacity: 0.55, textDecoration: "none" }}>
               Payload →
             </Link>
           </div>

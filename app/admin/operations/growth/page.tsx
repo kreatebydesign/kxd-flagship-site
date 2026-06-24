@@ -27,22 +27,22 @@ export const dynamic = "force-dynamic";
 const C = {
   bgPure:     "#050505",
   bgBase:     "#080808",
-  bgElevated: "#111111",
+  bgElevated: "#0B0B0B",
   bgCard:     "#101010",
   gold:       "#C9A962",
   goldDim:    "rgba(201,169,98,0.55)",
-  goldFaint:  "rgba(201,169,98,0.08)",
+  goldFaint:  "rgba(255,255,255,0.035)",
   cream:      "#F5F1E8",
   creamMuted: "rgba(245,241,232,0.72)",
   red:        "#d25a5a",
-  redFaint:   "rgba(210,90,90,0.08)",
+  redFaint:   "rgba(255,255,255,0.04)",
   yellow:     "#E8C468",
   green:      "#C9A962",
   teal:       "#A8B4C8",
   blue:       "#A8B4C8",
   purple:     "#C4B0D8",
   border:     "rgba(255,255,255,0.08)",
-  borderGold: "rgba(201,169,98,0.12)",
+  borderGold: "rgba(201,169,98,0.16)",
   borderRed:  "rgba(210,90,90,0.25)",
   serif:      "var(--font-cormorant, Georgia, 'Times New Roman', serif)",
   sans:       "var(--font-outfit, 'Helvetica Neue', Arial, sans-serif)",
@@ -259,7 +259,7 @@ const GROWTH_CFG: Record<GrowthScore, {
   strong: {
     label:       "Strong",
     color:       "#C9A962",
-    bg:          "rgba(201,169,98,0.06)",
+    bg:          "rgba(255,255,255,0.035)",
     border:      "rgba(201,169,98,0.28)",
     dot:         "#C9A962",
     description: "High-value pipeline active. Prioritize close and conversion.",
@@ -267,7 +267,7 @@ const GROWTH_CFG: Record<GrowthScore, {
   active: {
     label:       "Active",
     color:       "#C9A962",
-    bg:          "rgba(201,169,98,0.06)",
+    bg:          "rgba(255,255,255,0.035)",
     border:      "rgba(201,169,98,0.28)",
     dot:         "#C9A962",
     description: "Pipeline in motion. Follow up on open proposals.",
@@ -275,7 +275,7 @@ const GROWTH_CFG: Record<GrowthScore, {
   building: {
     label:       "Building",
     color:       "#A8B4C8",
-    bg:          "rgba(168,180,200,0.06)",
+    bg:          "rgba(255,255,255,0.035)",
     border:      "rgba(168,180,200,0.28)",
     dot:         "#A8B4C8",
     description: "Early-stage leads present. Nurture and qualify.",
@@ -300,21 +300,21 @@ function computeGrowthScore(pipelineValue: number, activeLeads: number): GrowthS
 // ── Status badge config ───────────────────────────────────────────────────────
 
 const STATUS_BADGE: Record<string, { label: string; color: string; bg: string; border: string }> = {
-  "new":           { label: "New",          color: "#C9A962", bg: "rgba(201,169,98,0.08)",  border: "rgba(201,169,98,0.3)" },
-  "reviewed":      { label: "Reviewed",     color: "#A8B4C8", bg: "rgba(168,180,200,0.08)", border: "rgba(168,180,200,0.3)" },
-  "reviewing":     { label: "Reviewing",    color: "#A8B4C8", bg: "rgba(168,180,200,0.08)", border: "rgba(168,180,200,0.3)" },
-  "discovery":     { label: "Discovery",    color: "#A8B4C8", bg: "rgba(168,180,200,0.08)", border: "rgba(168,180,200,0.3)" },
-  "in-progress":   { label: "In Progress",  color: "#E8C468", bg: "rgba(232,196,104,0.08)",  border: "rgba(232,196,104,0.3)" },
-  "proposal":      { label: "Proposal",     color: "#C4B0D8", bg: "rgba(196,176,216,0.08)", border: "rgba(196,176,216,0.3)" },
-  "proposal-sent": { label: "Proposal Out", color: "#C4B0D8", bg: "rgba(196,176,216,0.08)", border: "rgba(196,176,216,0.3)" },
-  "active":        { label: "Active",       color: "#C9A962", bg: "rgba(201,169,98,0.08)",  border: "rgba(201,169,98,0.3)" },
-  "onboarding":    { label: "Onboarding",   color: "#C9A962", bg: "rgba(201,169,98,0.08)",  border: "rgba(201,169,98,0.3)" },
-  "retainer":      { label: "Retainer",     color: "#C9A962", bg: "rgba(201,169,98,0.08)",  border: "rgba(201,169,98,0.3)" },
-  "won":           { label: "Won",          color: "#C9A962", bg: "rgba(201,169,98,0.08)",  border: "rgba(201,169,98,0.3)" },
-  "lost":          { label: "Lost",         color: "#d25a5a", bg: "rgba(210,90,90,0.08)",   border: "rgba(210,90,90,0.3)" },
+  "new":           { label: "New",          color: "#C9A962", bg: "rgba(255,255,255,0.035)",  border: "rgba(201,169,98,0.16)" },
+  "reviewed":      { label: "Reviewed",     color: "#A8B4C8", bg: "rgba(255,255,255,0.035)", border: "rgba(168,180,200,0.3)" },
+  "reviewing":     { label: "Reviewing",    color: "#A8B4C8", bg: "rgba(255,255,255,0.035)", border: "rgba(168,180,200,0.3)" },
+  "discovery":     { label: "Discovery",    color: "#A8B4C8", bg: "rgba(255,255,255,0.035)", border: "rgba(168,180,200,0.3)" },
+  "in-progress":   { label: "In Progress",  color: "#E8C468", bg: "rgba(255,255,255,0.04)",  border: "rgba(232,196,104,0.3)" },
+  "proposal":      { label: "Proposal",     color: "#C4B0D8", bg: "rgba(255,255,255,0.035)", border: "rgba(196,176,216,0.3)" },
+  "proposal-sent": { label: "Proposal Out", color: "#C4B0D8", bg: "rgba(255,255,255,0.035)", border: "rgba(196,176,216,0.3)" },
+  "active":        { label: "Active",       color: "#C9A962", bg: "rgba(255,255,255,0.035)",  border: "rgba(201,169,98,0.16)" },
+  "onboarding":    { label: "Onboarding",   color: "#C9A962", bg: "rgba(255,255,255,0.035)",  border: "rgba(201,169,98,0.16)" },
+  "retainer":      { label: "Retainer",     color: "#C9A962", bg: "rgba(255,255,255,0.035)",  border: "rgba(201,169,98,0.16)" },
+  "won":           { label: "Won",          color: "#C9A962", bg: "rgba(255,255,255,0.035)",  border: "rgba(201,169,98,0.16)" },
+  "lost":          { label: "Lost",         color: "#d25a5a", bg: "rgba(255,255,255,0.04)",   border: "rgba(210,90,90,0.3)" },
   "paused":        { label: "Paused",       color: "#888880", bg: "rgba(136,136,128,0.08)", border: "rgba(136,136,128,0.3)" },
   "closed":        { label: "Closed",       color: "#888880", bg: "rgba(136,136,128,0.08)", border: "rgba(136,136,128,0.3)" },
-  "completed":     { label: "Completed",    color: "#C9A962", bg: "rgba(201,169,98,0.08)",  border: "rgba(201,169,98,0.3)" },
+  "completed":     { label: "Completed",    color: "#C9A962", bg: "rgba(255,255,255,0.035)",  border: "rgba(201,169,98,0.16)" },
 };
 
 // ── Primitive UI components ───────────────────────────────────────────────────
@@ -327,7 +327,7 @@ function Label({
   return (
     <p style={{
       fontFamily: C.sans, fontWeight: 400,
-      fontSize: "0.4375rem", letterSpacing: "0.14em",
+      fontSize: "0.6875rem", letterSpacing: "0.14em",
       textTransform: "uppercase" as const,
       color: "rgba(255,255,255,0.3)", ...style,
     }}>
@@ -346,7 +346,7 @@ function Badge({ status }: { status: string }) {
   return (
     <span style={{
       fontFamily: C.sans, fontWeight: 500,
-      fontSize: "0.375rem", letterSpacing: "0.14em",
+      fontSize: "0.6875rem", letterSpacing: "0.14em",
       textTransform: "uppercase" as const,
       color: b.color, background: b.bg, border: `1px solid ${b.border}`,
       padding: "0.2rem 0.65rem",
@@ -359,7 +359,7 @@ function Badge({ status }: { status: string }) {
 
 function ScoreBadge({ score }: { score: number }) {
   const color  = score >= 8 ? "#C9A962" : score >= 5 ? "#C9A962" : "rgba(255,255,255,0.28)";
-  const bg     = score >= 8 ? "rgba(201,169,98,0.08)" : score >= 5 ? "rgba(201,169,98,0.08)" : "rgba(255,255,255,0.04)";
+  const bg     = score >= 8 ? "rgba(255,255,255,0.035)" : score >= 5 ? "rgba(255,255,255,0.035)" : "rgba(255,255,255,0.04)";
   const border = score >= 8 ? "rgba(201,169,98,0.3)" : score >= 5 ? "rgba(201,169,98,0.3)" : "rgba(255,255,255,0.1)";
   const label  = score >= 8 ? "High" : score >= 5 ? "Medium" : score > 0 ? "Low" : "—";
   return (
@@ -371,7 +371,7 @@ function ScoreBadge({ score }: { score: number }) {
         {score}
       </span>
       <span style={{
-        fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.12em",
+        fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.12em",
         textTransform: "uppercase" as const,
         color, background: bg, border: `1px solid ${border}`,
         padding: "0.18rem 0.5rem", whiteSpace: "nowrap" as const, display: "inline-block",
@@ -393,7 +393,7 @@ function SectionHeader({
         <Label style={{ color: C.goldDim, letterSpacing: "0.16em" }}>{label}</Label>
         {count !== undefined && count > 0 && (
           <span style={{
-            fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.1em",
+            fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.1em",
             color: C.goldDim, background: C.goldFaint,
             border: `1px solid ${C.borderGold}`, padding: "0.15rem 0.5rem",
             display: "inline-block",
@@ -404,7 +404,7 @@ function SectionHeader({
       </div>
       {href && (
         <Link href={href} style={{
-          fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.12em",
+          fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.12em",
           textTransform: "uppercase" as const,
           color: "rgba(255,255,255,0.22)", textDecoration: "none",
         }}>
@@ -434,7 +434,7 @@ function EmptyState({ message }: { message: string }) {
       padding: "2rem 1.5rem", textAlign: "center" as const,
     }}>
       <p style={{
-        fontFamily: C.sans, fontSize: "0.5625rem", letterSpacing: "0.06em",
+        fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.06em",
         color: "rgba(255,255,255,0.2)", fontStyle: "italic",
       }}>
         {message}
@@ -680,7 +680,7 @@ export default async function GrowthPage() {
       value:       String(wonInquiries.length + wonProjInquiries.length),
       sub:         "All-time total",
       alert:       false,
-      accentColor: C.green,
+      accentColor: C.gold,
     },
     {
       label:       "Follow-up Overdue",
@@ -694,7 +694,7 @@ export default async function GrowthPage() {
       value:       mrrBase > 0 ? fmtMoney(mrrBase) : "$0",
       sub:         "Active retainers",
       alert:       false,
-      accentColor: C.green,
+      accentColor: C.gold,
     },
   ];
 
@@ -717,17 +717,17 @@ export default async function GrowthPage() {
 
             <div className="flex items-center gap-4">
               <KxdLogo />
-              <span style={{ color: "rgba(255,255,255,0.1)", fontSize: "0.375rem" }}>◆</span>
+              <span style={{ color: "rgba(255,255,255,0.1)", fontSize: "0.6875rem" }}>◆</span>
               <div>
                 <p style={{
-                  fontFamily: C.sans, fontWeight: 500, fontSize: "0.5625rem",
+                  fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem",
                   letterSpacing: "0.16em", textTransform: "uppercase",
                   color: C.creamMuted, lineHeight: 1,
                 }}>
                   Growth
                 </p>
                 <p className="hidden sm:block" style={{
-                  fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.1em",
+                  fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.1em",
                   textTransform: "uppercase", color: "rgba(255,255,255,0.24)",
                   marginTop: "0.35rem",
                 }}>
@@ -735,9 +735,9 @@ export default async function GrowthPage() {
                 </p>
               </div>
               <span style={{
-                fontFamily: C.sans, fontWeight: 500, fontSize: "0.375rem",
+                fontFamily: C.sans, fontWeight: 500, fontSize: "0.6875rem",
                 letterSpacing: "0.12em", textTransform: "uppercase",
-                color: "rgba(201,169,98,0.75)", background: "rgba(201,169,98,0.07)",
+                color: "rgba(201,169,98,0.75)", background: "rgba(255,255,255,0.035)",
                 border: "1px solid rgba(201,169,98,0.2)", padding: "0.2rem 0.6rem",
               }}>
                 Phase 2G
@@ -746,35 +746,35 @@ export default async function GrowthPage() {
 
             <div className="flex items-center gap-5">
               <Link href="/admin/operations/executive" style={{
-                fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.12em",
+                fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.12em",
                 textTransform: "uppercase", color: "rgba(255,255,255,0.3)",
                 textDecoration: "none",
               }}>
                 ← Operations
               </Link>
               <Link href="/admin/operations/today" style={{
-                fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.12em",
+                fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.12em",
                 textTransform: "uppercase", color: "rgba(255,255,255,0.3)",
                 textDecoration: "none",
               }}>
                 Today →
               </Link>
               <Link href="/admin/operations/accounts" style={{
-                fontFamily: C.sans, fontWeight: 500, fontSize: "0.5rem",
+                fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem",
                 letterSpacing: "0.14em", textTransform: "uppercase",
                 color: C.purple, opacity: 0.8, textDecoration: "none",
               }}>
                 Accounts →
               </Link>
               <Link href="/admin/operations/founder" style={{
-                fontFamily: C.sans, fontWeight: 500, fontSize: "0.5rem",
+                fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem",
                 letterSpacing: "0.14em", textTransform: "uppercase",
                 color: C.gold, opacity: 0.8, textDecoration: "none",
               }}>
                 Founder →
               </Link>
               <Link href="/admin" style={{
-                fontFamily: C.sans, fontWeight: 500, fontSize: "0.5rem",
+                fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem",
                 letterSpacing: "0.14em", textTransform: "uppercase",
                 color: C.gold, opacity: 0.55, textDecoration: "none",
               }}>
@@ -795,7 +795,7 @@ export default async function GrowthPage() {
           borderBottom: `1px solid ${C.border}`,
         }}>
           <p style={{
-            fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.2em",
+            fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.2em",
             textTransform: "uppercase", color: C.goldDim, marginBottom: "0.875rem",
           }}>
             KXD OS · Growth Intelligence
@@ -810,7 +810,7 @@ export default async function GrowthPage() {
                 {dateDisplay}
               </h1>
               <p style={{
-                fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.06em",
+                fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.06em",
                 color: "rgba(255,255,255,0.2)", marginTop: "0.625rem",
               }}>
                 Loaded {timeDisplay} · Refreshes on each page request
@@ -827,14 +827,14 @@ export default async function GrowthPage() {
               }} />
               <div>
                 <p style={{
-                  fontFamily: C.sans, fontWeight: 600, fontSize: "0.5625rem",
+                  fontFamily: C.sans, fontWeight: 600, fontSize: "0.8125rem",
                   letterSpacing: "0.2em", textTransform: "uppercase",
                   color: growth.color, lineHeight: 1,
                 }}>
                   {growth.label}
                 </p>
                 <p style={{
-                  fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.04em",
+                  fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.04em",
                   color: "rgba(255,255,255,0.3)", marginTop: "0.375rem",
                 }}>
                   {growth.description}
@@ -867,7 +867,7 @@ export default async function GrowthPage() {
                 {kpi.value}
               </p>
               <p style={{
-                fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.06em",
+                fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.06em",
                 color: "rgba(255,255,255,0.22)", marginTop: "0.375rem",
               }}>
                 {kpi.sub}
@@ -913,7 +913,7 @@ export default async function GrowthPage() {
                       {stage.count}
                     </p>
                     <p style={{
-                      fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.06em",
+                      fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.06em",
                       color: "rgba(255,255,255,0.22)", marginTop: "0.375rem",
                     }}>
                       {stage.count > 0 ? fmtMoney(stage.value) : "—"}
@@ -929,7 +929,7 @@ export default async function GrowthPage() {
                 alignItems: "center", gap: "1rem", flexWrap: "wrap" as const,
               }}>
                 <p style={{
-                  fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.08em",
+                  fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.08em",
                   color: "rgba(255,255,255,0.28)", textTransform: "uppercase" as const,
                 }}>
                   Total active pipeline · {scoredLeads.length} {scoredLeads.length === 1 ? "lead" : "leads"}
@@ -966,7 +966,7 @@ export default async function GrowthPage() {
                     borderBottom: i < Math.min(scoredLeads.length, 12) - 1
                       ? `1px solid rgba(255,255,255,0.04)` : "none",
                     borderLeft: lead.score >= 8
-                      ? `3px solid ${C.green}`
+                      ? `3px solid ${C.gold}`
                       : lead.score >= 5
                         ? `3px solid ${C.gold}`
                         : `3px solid transparent`,
@@ -978,7 +978,7 @@ export default async function GrowthPage() {
                     flexShrink: 0,
                   }}>
                     <span style={{
-                      fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.08em",
+                      fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.08em",
                       color: "rgba(255,255,255,0.18)",
                     }}>
                       {String(i + 1).padStart(2, "0")}
@@ -995,7 +995,7 @@ export default async function GrowthPage() {
                       {lead.company !== "—" ? lead.company : lead.name}
                     </p>
                     <p style={{
-                      fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.04em",
+                      fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.04em",
                       color: "rgba(255,255,255,0.25)", marginTop: "0.2rem",
                     }}>
                       {lead.name !== "—" && lead.name !== lead.company ? `${lead.name} · ` : ""}
@@ -1011,7 +1011,7 @@ export default async function GrowthPage() {
                     className="sm:block"
                   >
                     <p style={{
-                      fontFamily: C.sans, fontSize: "0.5625rem",
+                      fontFamily: C.sans, fontSize: "0.8125rem",
                       color: "rgba(255,255,255,0.4)",
                       overflow: "hidden", textOverflow: "ellipsis",
                       whiteSpace: "nowrap" as const,
@@ -1054,7 +1054,7 @@ export default async function GrowthPage() {
                   background: "rgba(255,255,255,0.01)",
                 }}>
                   <p style={{
-                    fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.08em",
+                    fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.08em",
                     color: "rgba(255,255,255,0.2)", textTransform: "uppercase" as const,
                   }}>
                     +{scoredLeads.length - 12} more leads — view in Payload
@@ -1079,7 +1079,7 @@ export default async function GrowthPage() {
               padding: "1.375rem 1.5rem",
             }}>
               <p style={{
-                fontFamily: C.sans, fontSize: "0.5625rem", letterSpacing: "0.04em",
+                fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.04em",
                 color: "rgba(255,255,255,0.22)", fontStyle: "italic",
               }}>
                 No current opportunities meeting the threshold — Quality Score ≥ 8 and Est. Value ≥ $20K.
@@ -1097,7 +1097,7 @@ export default async function GrowthPage() {
                   style={{
                     background: C.bgElevated,
                     padding: "1.375rem 1.5rem",
-                    borderLeft: `3px solid ${C.green}`,
+                    borderLeft: `3px solid ${C.gold}`,
                   }}
                 >
                   <div
@@ -1115,7 +1115,7 @@ export default async function GrowthPage() {
                       </p>
                       {lead.name !== "—" && lead.name !== lead.company && (
                         <p style={{
-                          fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.04em",
+                          fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.04em",
                           color: "rgba(255,255,255,0.28)", marginTop: "0.25rem",
                         }}>
                           {lead.name}
@@ -1141,7 +1141,7 @@ export default async function GrowthPage() {
                     <div className="flex items-center justify-between gap-2">
                       <Label>Service</Label>
                       <p style={{
-                        fontFamily: C.sans, fontSize: "0.5625rem", color: C.creamMuted,
+                        fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted,
                         textAlign: "right" as const, maxWidth: "10rem",
                         overflow: "hidden", textOverflow: "ellipsis",
                         whiteSpace: "nowrap" as const,
@@ -1151,7 +1151,7 @@ export default async function GrowthPage() {
                     </div>
                     <div className="flex items-center justify-between gap-2">
                       <Label>Timeline</Label>
-                      <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: C.creamMuted }}>
+                      <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted }}>
                         {lead.timeline === "immediate"      ? "Immediate" :
                          lead.timeline === "within-30-days" ? "Within 30 Days" :
                          lead.timeline === "60-90-days"     ? "60–90 Days" :
@@ -1172,7 +1172,7 @@ export default async function GrowthPage() {
                       background: C.goldFaint, border: `1px solid ${C.borderGold}`,
                     }}>
                       <p style={{
-                        fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.04em",
+                        fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.04em",
                         color: C.goldDim, lineHeight: 1.5,
                       }}>
                         → {lead.nextStep}
@@ -1181,7 +1181,7 @@ export default async function GrowthPage() {
                   )}
 
                   <p style={{
-                    fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.08em",
+                    fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.08em",
                     color: "rgba(255,255,255,0.18)", textTransform: "uppercase" as const,
                   }}>
                     Received {fmtDateShort(lead.createdAt)}
@@ -1210,10 +1210,10 @@ export default async function GrowthPage() {
             }}>
               <div style={{
                 width: "6px", height: "6px", borderRadius: "50%",
-                background: C.green, flexShrink: 0,
+                background: C.gold, flexShrink: 0,
               }} />
               <p style={{
-                fontFamily: C.sans, fontSize: "0.6875rem", color: C.green,
+                fontFamily: C.sans, fontSize: "0.6875rem", color: C.gold,
                 letterSpacing: "0.04em",
               }}>
                 No overdue follow-ups. All lead follow-up dates are current.
@@ -1245,7 +1245,7 @@ export default async function GrowthPage() {
                         {(inq.name as string) &&
                          (inq.name as string) !== (inq.company as string) && (
                           <p style={{
-                            fontFamily: C.sans, fontSize: "0.5rem",
+                            fontFamily: C.sans, fontSize: "0.8125rem",
                             color: "rgba(255,255,255,0.28)", marginTop: "0.2rem",
                           }}>
                             {inq.name as string}
@@ -1263,7 +1263,7 @@ export default async function GrowthPage() {
                       </p>
                     )}
                     <p style={{
-                      fontFamily: C.sans, fontSize: "0.5rem",
+                      fontFamily: C.sans, fontSize: "0.8125rem",
                       color: C.red, marginTop: "0.375rem",
                       letterSpacing: "0.04em",
                     }}>
@@ -1312,7 +1312,7 @@ export default async function GrowthPage() {
                         {row.label}
                       </p>
                       <p style={{
-                        fontFamily: C.sans, fontSize: "0.5rem",
+                        fontFamily: C.sans, fontSize: "0.8125rem",
                         color: C.goldDim, flexShrink: 0,
                         letterSpacing: "0.06em",
                       }}>
@@ -1338,7 +1338,7 @@ export default async function GrowthPage() {
                   background: "rgba(255,255,255,0.01)",
                 }}>
                   <p style={{
-                    fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.08em",
+                    fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.08em",
                     color: "rgba(255,255,255,0.2)", textTransform: "uppercase" as const,
                   }}>
                     Source: contact form inquiries · {inquiries.length} total
@@ -1369,7 +1369,7 @@ export default async function GrowthPage() {
                   background: "rgba(255,255,255,0.02)",
                 }}>
                   {["Tier", "Leads", "Total Value", "Proj. (30%)"].map(h => (
-                    <Label key={h} style={{ fontSize: "0.375rem" }}>{h}</Label>
+                    <Label key={h} style={{ fontSize: "0.6875rem" }}>{h}</Label>
                   ))}
                 </div>
                 {forecastRows.map((row, i) => (
@@ -1397,7 +1397,7 @@ export default async function GrowthPage() {
                     <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: C.gold }}>
                       {fmtMoney(row.totalValue)}
                     </p>
-                    <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: C.green }}>
+                    <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: C.gold }}>
                       {fmtMoney(row.projected)}
                     </p>
                   </div>
@@ -1412,7 +1412,7 @@ export default async function GrowthPage() {
                   background: "rgba(255,255,255,0.02)",
                 }}>
                   <p style={{
-                    fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.1em",
+                    fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.1em",
                     color: "rgba(255,255,255,0.28)", textTransform: "uppercase" as const,
                   }}>
                     Total
@@ -1431,7 +1431,7 @@ export default async function GrowthPage() {
                   </p>
                   <p style={{
                     fontFamily: C.sans, fontWeight: 500, fontSize: "0.6875rem",
-                    color: C.green,
+                    color: C.gold,
                   }}>
                     {fmtMoney(Math.round(pipelineValue * 0.3))}
                   </p>
@@ -1460,12 +1460,12 @@ export default async function GrowthPage() {
               background: "rgba(255,255,255,0.02)",
             }}>
               {["Category", "Count", "Target", "Status"].map(h => (
-                <Label key={h} style={{ fontSize: "0.375rem" }}>{h}</Label>
+                <Label key={h} style={{ fontSize: "0.6875rem" }}>{h}</Label>
               ))}
             </div>
             {seoCoverageRows.map((row, i) => {
               const statusColor =
-                row.status === "strong"   ? C.green  :
+                row.status === "strong"   ? C.gold  :
                 row.status === "building" ? C.gold   :
                 row.status === "minimal"  ? C.yellow :
                 C.red;
@@ -1503,14 +1503,14 @@ export default async function GrowthPage() {
                     {row.count}
                   </p>
                   <p style={{
-                    fontFamily: C.sans, fontSize: "0.5rem",
+                    fontFamily: C.sans, fontSize: "0.8125rem",
                     color: "rgba(255,255,255,0.25)",
                   }}>
                     {row.target} needed
                   </p>
                   <span style={{
                     fontFamily: C.sans, fontWeight: 500,
-                    fontSize: "0.375rem", letterSpacing: "0.14em",
+                    fontSize: "0.6875rem", letterSpacing: "0.14em",
                     textTransform: "uppercase" as const,
                     color: statusColor,
                     background: `${statusColor}18`,
@@ -1533,7 +1533,7 @@ export default async function GrowthPage() {
               alignItems: "center", gap: "1rem", flexWrap: "wrap" as const,
             }}>
               <p style={{
-                fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.08em",
+                fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.08em",
                 color: "rgba(255,255,255,0.22)", textTransform: "uppercase" as const,
               }}>
                 {insights.length} published articles ·{" "}
@@ -1541,7 +1541,7 @@ export default async function GrowthPage() {
                 {seoGapCount} needing content
               </p>
               <Link href="/admin/collections/insights" style={{
-                fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.12em",
+                fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.12em",
                 textTransform: "uppercase" as const, color: C.gold,
                 opacity: 0.6, textDecoration: "none",
               }}>
@@ -1593,7 +1593,7 @@ export default async function GrowthPage() {
                   {action.label}
                 </p>
                 <p style={{
-                  fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.08em",
+                  fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.08em",
                   color: "rgba(255,255,255,0.22)", marginTop: "0.3rem",
                   textTransform: "uppercase" as const,
                 }}>
@@ -1612,7 +1612,7 @@ export default async function GrowthPage() {
           alignItems: "center", flexWrap: "wrap" as const, gap: "0.5rem",
         }}>
           <p style={{
-            fontFamily: C.sans, fontSize: "0.5625rem", letterSpacing: "0.08em",
+            fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.08em",
             color: "rgba(255,255,255,0.22)",
           }}>
             KXD OS · Growth Intelligence · Phase 2G · Live Payload data · Refreshes on each request
@@ -1627,7 +1627,7 @@ export default async function GrowthPage() {
               ["/admin",                     "Payload"],
             ] as [string, string][]).map(([href, label]) => (
               <Link key={href} href={href} style={{
-                fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.12em",
+                fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.12em",
                 textTransform: "uppercase" as const, color: C.gold,
                 opacity: 0.45, textDecoration: "none",
               }}>

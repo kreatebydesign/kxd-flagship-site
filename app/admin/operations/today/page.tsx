@@ -28,22 +28,22 @@ export const dynamic = "force-dynamic";
 const C = {
   bgPure:       "#050505",
   bgBase:       "#080808",
-  bgElevated:   "#111111",
+  bgElevated:   "#0B0B0B",
   bgCard:       "#101010",
   gold:         "#C9A962",
   goldDim:      "rgba(201,169,98,0.55)",
-  goldFaint:    "rgba(201,169,98,0.08)",
+  goldFaint:    "rgba(255,255,255,0.035)",
   cream:        "#F5F1E8",
   creamMuted:   "rgba(245,241,232,0.72)",
   red:          "#d25a5a",
-  redFaint:     "rgba(210,90,90,0.08)",
+  redFaint:     "rgba(255,255,255,0.04)",
   yellow:       "#E8C468",
   green:        "#C9A962",
   teal:         "#A8B4C8",
   blue:         "#A8B4C8",
   purple:       "#C4B0D8",
   border:       "rgba(255,255,255,0.08)",
-  borderGold:   "rgba(201,169,98,0.12)",
+  borderGold:   "rgba(255,255,255,0.04)",
   borderRed:    "rgba(210,90,90,0.25)",
   serif:        "var(--font-cormorant, Georgia, 'Times New Roman', serif)",
   sans:         "var(--font-outfit, 'Helvetica Neue', Arial, sans-serif)",
@@ -102,21 +102,21 @@ function daysUntil(iso: string | null | undefined): number | null {
 // ── Status / priority config ──────────────────────────────────────────────────
 
 const STATUS_BADGE: Record<string, { label: string; color: string; bg: string; border: string }> = {
-  "new":               { label: "New",         color: "#C9A962", bg: "rgba(201,169,98,0.08)",  border: "rgba(201,169,98,0.3)" },
-  "triaged":           { label: "Triaged",      color: "#A8B4C8", bg: "rgba(168,180,200,0.08)", border: "rgba(168,180,200,0.3)" },
-  "drafting":          { label: "Drafting",     color: "#A8B4C8", bg: "rgba(168,180,200,0.08)", border: "rgba(168,180,200,0.3)" },
-  "in-progress":       { label: "In Progress",  color: "#E8C468", bg: "rgba(232,196,104,0.08)",  border: "rgba(232,196,104,0.3)" },
-  "waiting-on-client": { label: "Waiting",      color: "#C4B0D8", bg: "rgba(196,176,216,0.08)", border: "rgba(196,176,216,0.3)" },
-  "blocked":           { label: "Blocked",      color: "#d25a5a", bg: "rgba(210,90,90,0.08)",   border: "rgba(210,90,90,0.3)" },
-  "complete":          { label: "Complete",     color: "#C9A962", bg: "rgba(201,169,98,0.08)",  border: "rgba(201,169,98,0.3)" },
-  "not-started":       { label: "Not Started",  color: "#A8B4C8", bg: "rgba(168,180,200,0.08)", border: "rgba(168,180,200,0.3)" },
-  "active":            { label: "Active",       color: "#C9A962", bg: "rgba(201,169,98,0.08)",  border: "rgba(201,169,98,0.3)" },
-  "planning":          { label: "Planning",     color: "#A8B4C8", bg: "rgba(168,180,200,0.08)", border: "rgba(168,180,200,0.3)" },
-  "review":            { label: "Review",       color: "#C4B0D8", bg: "rgba(196,176,216,0.08)", border: "rgba(196,176,216,0.3)" },
-  "overdue":           { label: "Overdue",      color: "#d25a5a", bg: "rgba(210,90,90,0.08)",   border: "rgba(210,90,90,0.3)" },
-  "urgent":            { label: "Urgent",       color: "#d25a5a", bg: "rgba(210,90,90,0.08)",   border: "rgba(210,90,90,0.3)" },
-  "high":              { label: "High",         color: "#E8C468", bg: "rgba(232,196,104,0.08)",  border: "rgba(232,196,104,0.3)" },
-  "current":           { label: "Current",      color: "#C9A962", bg: "rgba(201,169,98,0.08)",  border: "rgba(201,169,98,0.3)" },
+  "new":               { label: "New",         color: "#C9A962", bg: "rgba(255,255,255,0.035)",  border: "rgba(201,169,98,0.16)" },
+  "triaged":           { label: "Triaged",      color: "#A8B4C8", bg: "rgba(255,255,255,0.035)", border: "rgba(168,180,200,0.3)" },
+  "drafting":          { label: "Drafting",     color: "#A8B4C8", bg: "rgba(255,255,255,0.035)", border: "rgba(168,180,200,0.3)" },
+  "in-progress":       { label: "In Progress",  color: "#E8C468", bg: "rgba(255,255,255,0.04)",  border: "rgba(232,196,104,0.3)" },
+  "waiting-on-client": { label: "Waiting",      color: "#C4B0D8", bg: "rgba(255,255,255,0.035)", border: "rgba(196,176,216,0.3)" },
+  "blocked":           { label: "Blocked",      color: "#d25a5a", bg: "rgba(255,255,255,0.04)",   border: "rgba(210,90,90,0.3)" },
+  "complete":          { label: "Complete",     color: "#C9A962", bg: "rgba(255,255,255,0.035)",  border: "rgba(201,169,98,0.16)" },
+  "not-started":       { label: "Not Started",  color: "#A8B4C8", bg: "rgba(255,255,255,0.035)", border: "rgba(168,180,200,0.3)" },
+  "active":            { label: "Active",       color: "#C9A962", bg: "rgba(255,255,255,0.035)",  border: "rgba(201,169,98,0.16)" },
+  "planning":          { label: "Planning",     color: "#A8B4C8", bg: "rgba(255,255,255,0.035)", border: "rgba(168,180,200,0.3)" },
+  "review":            { label: "Review",       color: "#C4B0D8", bg: "rgba(255,255,255,0.035)", border: "rgba(196,176,216,0.3)" },
+  "overdue":           { label: "Overdue",      color: "#d25a5a", bg: "rgba(255,255,255,0.04)",   border: "rgba(210,90,90,0.3)" },
+  "urgent":            { label: "Urgent",       color: "#d25a5a", bg: "rgba(255,255,255,0.04)",   border: "rgba(210,90,90,0.3)" },
+  "high":              { label: "High",         color: "#E8C468", bg: "rgba(255,255,255,0.04)",  border: "rgba(232,196,104,0.3)" },
+  "current":           { label: "Current",      color: "#C9A962", bg: "rgba(255,255,255,0.035)",  border: "rgba(201,169,98,0.16)" },
   "paused":            { label: "Paused",       color: "rgba(136,136,128,1)", bg: "rgba(136,136,128,0.08)", border: "rgba(136,136,128,0.3)" },
 };
 
@@ -139,7 +139,7 @@ const FOCUS_CFG: Record<FocusScore, {
   critical: {
     label:       "Critical",
     color:       "#d25a5a",
-    bg:          "rgba(210,90,90,0.06)",
+    bg:          "rgba(255,255,255,0.04)",
     border:      "rgba(210,90,90,0.28)",
     dot:         "#d25a5a",
     description: "Urgent items require immediate attention.",
@@ -147,7 +147,7 @@ const FOCUS_CFG: Record<FocusScore, {
   elevated: {
     label:       "Elevated",
     color:       "#E8C468",
-    bg:          "rgba(232,196,104,0.06)",
+    bg:          "rgba(255,255,255,0.04)",
     border:      "rgba(232,196,104,0.28)",
     dot:         "#E8C468",
     description: "Overdue items. Resolve before end of day.",
@@ -155,7 +155,7 @@ const FOCUS_CFG: Record<FocusScore, {
   active: {
     label:       "Active",
     color:       "#C9A962",
-    bg:          "rgba(201,169,98,0.06)",
+    bg:          "rgba(255,255,255,0.035)",
     border:      "rgba(201,169,98,0.28)",
     dot:         "#C9A962",
     description: "Work due today. Stay on pace.",
@@ -163,7 +163,7 @@ const FOCUS_CFG: Record<FocusScore, {
   clear: {
     label:       "Clear",
     color:       "#C9A962",
-    bg:          "rgba(201,169,98,0.06)",
+    bg:          "rgba(255,255,255,0.035)",
     border:      "rgba(201,169,98,0.28)",
     dot:         "#C9A962",
     description: "No critical items. Operate at your own pace.",
@@ -195,7 +195,7 @@ function Label({ children, style }: { children: React.ReactNode; style?: React.C
   return (
     <p style={{
       fontFamily: C.sans, fontWeight: 400,
-      fontSize: "0.4375rem", letterSpacing: "0.14em",
+      fontSize: "0.6875rem", letterSpacing: "0.14em",
       textTransform: "uppercase" as const,
       color: "rgba(255,255,255,0.3)", ...style,
     }}>
@@ -212,7 +212,7 @@ function Badge({ status }: { status: string }) {
   return (
     <span style={{
       fontFamily: C.sans, fontWeight: 500,
-      fontSize: "0.375rem", letterSpacing: "0.14em",
+      fontSize: "0.6875rem", letterSpacing: "0.14em",
       textTransform: "uppercase" as const,
       color: b.color, background: b.bg, border: `1px solid ${b.border}`,
       padding: "0.2rem 0.65rem", whiteSpace: "nowrap" as const, display: "inline-block",
@@ -242,7 +242,7 @@ function SectionHeader({
         <Label style={{ color: C.goldDim, letterSpacing: "0.16em" }}>{label}</Label>
         {count !== undefined && count > 0 && (
           <span style={{
-            fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.1em",
+            fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.1em",
             color: C.goldDim, background: C.goldFaint,
             border: `1px solid ${C.borderGold}`, padding: "0.15rem 0.5rem", display: "inline-block",
           }}>
@@ -252,7 +252,7 @@ function SectionHeader({
       </div>
       {href && (
         <Link href={href} style={{
-          fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.12em",
+          fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.12em",
           textTransform: "uppercase" as const,
           color: "rgba(255,255,255,0.22)", textDecoration: "none",
         }}>
@@ -278,7 +278,7 @@ function EmptyState({ message }: { message: string }) {
       padding: "2rem 1.5rem", textAlign: "center" as const,
     }}>
       <p style={{
-        fontFamily: C.sans, fontSize: "0.5625rem", letterSpacing: "0.06em",
+        fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.06em",
         color: "rgba(255,255,255,0.2)", fontStyle: "italic",
       }}>
         {message}
@@ -623,26 +623,26 @@ export default async function TodayPage() {
 
             <div className="flex items-center gap-4">
               <KxdLogo />
-              <span style={{ color: "rgba(255,255,255,0.1)", fontSize: "0.375rem" }}>◆</span>
+              <span style={{ color: "rgba(255,255,255,0.1)", fontSize: "0.6875rem" }}>◆</span>
               <div>
                 <p style={{
-                  fontFamily: C.sans, fontWeight: 500, fontSize: "0.5625rem",
+                  fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem",
                   letterSpacing: "0.16em", textTransform: "uppercase",
                   color: C.creamMuted, lineHeight: 1,
                 }}>
                   Today
                 </p>
                 <p className="hidden sm:block" style={{
-                  fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.1em",
+                  fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.1em",
                   textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "0.35rem",
                 }}>
                   Studio Overview
                 </p>
               </div>
               <span style={{
-                fontFamily: C.sans, fontWeight: 500, fontSize: "0.375rem",
+                fontFamily: C.sans, fontWeight: 500, fontSize: "0.6875rem",
                 letterSpacing: "0.12em", textTransform: "uppercase",
-                color: "rgba(201,169,98,0.75)", background: "rgba(201,169,98,0.07)",
+                color: "rgba(201,169,98,0.75)", background: "rgba(255,255,255,0.035)",
                 border: "1px solid rgba(201,169,98,0.2)", padding: "0.2rem 0.6rem",
               }}>
                 Phase 2F
@@ -651,42 +651,42 @@ export default async function TodayPage() {
 
             <div className="flex items-center gap-5">
               <Link href="/admin/operations/executive" style={{
-                fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.12em",
+                fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.12em",
                 textTransform: "uppercase", color: "rgba(255,255,255,0.3)",
                 textDecoration: "none",
               }}>
                 ← Operations
               </Link>
               <Link href="/admin/operations/creative" style={{
-                fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.12em",
+                fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.12em",
                 textTransform: "uppercase", color: "rgba(255,255,255,0.3)",
                 textDecoration: "none",
               }}>
                 Creative →
               </Link>
               <Link href="/admin/operations/growth" style={{
-                fontFamily: C.sans, fontWeight: 500, fontSize: "0.5rem",
+                fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem",
                 letterSpacing: "0.14em", textTransform: "uppercase",
                 color: C.gold, opacity: 0.8, textDecoration: "none",
               }}>
                 Growth →
               </Link>
               <Link href="/admin/operations/accounts" style={{
-                fontFamily: C.sans, fontWeight: 500, fontSize: "0.5rem",
+                fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem",
                 letterSpacing: "0.14em", textTransform: "uppercase",
                 color: C.purple, opacity: 0.8, textDecoration: "none",
               }}>
                 Accounts →
               </Link>
               <Link href="/admin/operations/founder" style={{
-                fontFamily: C.sans, fontWeight: 500, fontSize: "0.5rem",
+                fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem",
                 letterSpacing: "0.14em", textTransform: "uppercase",
                 color: C.gold, opacity: 0.8, textDecoration: "none",
               }}>
                 Founder →
               </Link>
               <Link href="/admin" style={{
-                fontFamily: C.sans, fontWeight: 500, fontSize: "0.5rem",
+                fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem",
                 letterSpacing: "0.14em", textTransform: "uppercase",
                 color: C.gold, opacity: 0.55, textDecoration: "none",
               }}>
@@ -707,7 +707,7 @@ export default async function TodayPage() {
           borderBottom: `1px solid ${C.border}`,
         }}>
           <p style={{
-            fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.2em",
+            fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.2em",
             textTransform: "uppercase", color: C.goldDim, marginBottom: "0.875rem",
           }}>
             KXD OS · Studio Overview
@@ -722,7 +722,7 @@ export default async function TodayPage() {
                 {dateDisplay}
               </h1>
               <p style={{
-                fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.06em",
+                fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.06em",
                 color: "rgba(255,255,255,0.2)", marginTop: "0.625rem",
               }}>
                 Loaded {timeDisplay} · Refreshes on each page request
@@ -739,14 +739,14 @@ export default async function TodayPage() {
               }} />
               <div>
                 <p style={{
-                  fontFamily: C.sans, fontWeight: 600, fontSize: "0.5625rem",
+                  fontFamily: C.sans, fontWeight: 600, fontSize: "0.8125rem",
                   letterSpacing: "0.2em", textTransform: "uppercase",
                   color: focus.color, lineHeight: 1,
                 }}>
                   {focus.label}
                 </p>
                 <p style={{
-                  fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.04em",
+                  fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.04em",
                   color: "rgba(255,255,255,0.3)", marginTop: "0.375rem",
                 }}>
                   {focus.description}
@@ -779,7 +779,7 @@ export default async function TodayPage() {
                 {kpi.value}
               </p>
               <p style={{
-                fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.06em",
+                fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.06em",
                 color: "rgba(255,255,255,0.22)", marginTop: "0.375rem",
               }}>
                 {kpi.sub}
@@ -825,7 +825,7 @@ export default async function TodayPage() {
                       </div>
                     </div>
                     <p style={{
-                      fontFamily: C.sans, fontSize: "0.5625rem",
+                      fontFamily: C.sans, fontSize: "0.8125rem",
                       color: "rgba(255,255,255,0.3)", marginTop: "0.3rem", letterSpacing: "0.02em",
                     }}>
                       {resolveName(req.client)}
@@ -871,7 +871,7 @@ export default async function TodayPage() {
                       </p>
                       <Badge status={(d.status as string) ?? "not-started"} />
                     </div>
-                    <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: "rgba(255,255,255,0.28)", marginTop: "0.3rem" }}>
+                    <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.28)", marginTop: "0.3rem" }}>
                       {resolveName(d.client)}
                       {d.category ? ` · ${d.category as string}` : ""}
                       {d.owner ? ` · ${d.owner as string}` : ""}
@@ -905,13 +905,13 @@ export default async function TodayPage() {
                         {(d.title as string) ?? "—"}
                       </p>
                       <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexShrink: 0 }}>
-                        <p style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.06em", color: C.teal }}>
+                        <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.06em", color: C.teal }}>
                           {fmtDateShort(d.dueDate as string)}
                         </p>
                         <Badge status={(d.status as string) ?? "not-started"} />
                       </div>
                     </div>
-                    <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: "rgba(255,255,255,0.28)", marginTop: "0.3rem" }}>
+                    <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.28)", marginTop: "0.3rem" }}>
                       {resolveName(d.client)}
                       {d.category ? ` · ${d.category as string}` : ""}
                       {d.owner ? ` · ${d.owner as string}` : ""}
@@ -958,7 +958,7 @@ export default async function TodayPage() {
                         → {proj.nextAction as string}
                       </p>
                     )}
-                    <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: "rgba(255,255,255,0.28)", marginTop: "0.3rem" }}>
+                    <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.28)", marginTop: "0.3rem" }}>
                       {resolveName(proj.client)}
                       {proj.projectType ? ` · ${proj.projectType as string}` : ""}
                       {proj.nextActionDueDate && (
@@ -1004,14 +1004,14 @@ export default async function TodayPage() {
                         alignItems: "center", gap: "0.75rem",
                         padding: "0.875rem 1.25rem",
                         borderBottom: i < overdueRetainers.length - 1
-                          ? `1px solid rgba(210,90,90,0.07)` : "none",
+                          ? `1px solid rgba(255,255,255,0.04)` : "none",
                       }}
                     >
                       <div style={{ minWidth: 0, flex: 1 }}>
                         <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.cream }}>
                           {resolveName(r.client)}
                         </p>
-                        <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: "rgba(255,255,255,0.28)", marginTop: "0.2rem" }}>
+                        <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.28)", marginTop: "0.2rem" }}>
                           {(r.retainerName as string) ?? "Retainer"}
                           {r.nextInvoiceDate ? ` · Was due ${fmtDateShort(r.nextInvoiceDate as string)}` : ""}
                         </p>
@@ -1044,13 +1044,13 @@ export default async function TodayPage() {
                           <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.cream }}>
                             {resolveName(r.client)}
                           </p>
-                          <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: "rgba(255,255,255,0.28)", marginTop: "0.2rem" }}>
+                          <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.28)", marginTop: "0.2rem" }}>
                             {(r.retainerName as string) ?? "Retainer"} · Due {fmtDateShort(r.nextInvoiceDate as string)}
                           </p>
                         </div>
                         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexShrink: 0 }}>
                           {days !== null && (
-                            <p style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.06em", color: dayColor }}>
+                            <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.06em", color: dayColor }}>
                               {days === 0 ? "Today" : days === 1 ? "Tomorrow" : `${days}d`}
                             </p>
                           )}
@@ -1083,9 +1083,9 @@ export default async function TodayPage() {
             }}>
               <div style={{
                 width: "6px", height: "6px", borderRadius: "50%",
-                background: C.green, flexShrink: 0,
+                background: C.gold, flexShrink: 0,
               }} />
-              <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: C.green, letterSpacing: "0.04em" }}>
+              <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: C.gold, letterSpacing: "0.04em" }}>
                 All client health signals clear — no flags detected today.
               </p>
             </div>
@@ -1117,7 +1117,7 @@ export default async function TodayPage() {
                             ? "#d25a5a" : "#E8C468",
                           display: "flex", alignItems: "center", gap: "0.4rem",
                         }}>
-                          <span style={{ fontSize: "0.5rem" }}>▸</span>
+                          <span style={{ fontSize: "0.8125rem" }}>▸</span>
                           {issue}
                         </p>
                       ))}
@@ -1152,7 +1152,7 @@ export default async function TodayPage() {
                   }}
                 >
                   <span style={{
-                    fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.1em",
+                    fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.1em",
                     textTransform: "uppercase" as const,
                     color: "rgba(255,255,255,0.3)", background: "rgba(255,255,255,0.05)",
                     padding: "0.15rem 0.5rem", border: `1px solid rgba(255,255,255,0.08)`,
@@ -1165,7 +1165,7 @@ export default async function TodayPage() {
                     <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.cream, lineHeight: 1.3 }}>
                       {item.title}
                     </p>
-                    <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: "rgba(255,255,255,0.28)", marginTop: "0.2rem" }}>
+                    <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.28)", marginTop: "0.2rem" }}>
                       {item.client}
                     </p>
                   </div>
@@ -1199,7 +1199,7 @@ export default async function TodayPage() {
                     <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.cream }}>
                       {(req.requestTitle as string) ?? "—"}
                     </p>
-                    <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: "rgba(255,255,255,0.28)", marginTop: "0.2rem" }}>
+                    <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.28)", marginTop: "0.2rem" }}>
                       {resolveName(req.client)}
                       {req.requestType ? ` · ${req.requestType as string}` : ""}
                       {" · Received "}
@@ -1256,7 +1256,7 @@ export default async function TodayPage() {
                   {action.label}
                 </p>
                 <p style={{
-                  fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.08em",
+                  fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.08em",
                   color: "rgba(255,255,255,0.22)", marginTop: "0.3rem", textTransform: "uppercase" as const,
                 }}>
                   {action.sub}
@@ -1274,7 +1274,7 @@ export default async function TodayPage() {
           alignItems: "center", flexWrap: "wrap" as const, gap: "0.5rem",
         }}>
           <p style={{
-            fontFamily: C.sans, fontSize: "0.5625rem",
+            fontFamily: C.sans, fontSize: "0.8125rem",
             letterSpacing: "0.08em", color: "rgba(255,255,255,0.22)",
           }}>
             KXD OS · Studio Overview · Phase 2F · Live Payload data · Refreshes on each request
@@ -1289,7 +1289,7 @@ export default async function TodayPage() {
               ["/admin",                     "Payload"],
             ] as [string, string][]).map(([href, label]) => (
               <Link key={href} href={href} style={{
-                fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.12em",
+                fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.12em",
                 textTransform: "uppercase" as const, color: C.gold,
                 opacity: 0.45, textDecoration: "none",
               }}>

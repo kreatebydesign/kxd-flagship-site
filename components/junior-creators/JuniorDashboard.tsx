@@ -14,14 +14,14 @@ import { RESEARCH_SERVICE_LABEL, RESEARCH_STATUS_LABEL } from "@/lib/research-le
 const C = {
   bgPure: "#050505",
   bgBase: "#080808",
-  bgElevated: "#111111",
+  bgElevated: "#0B0B0B",
   bgCard: "#101010",
   gold: "#C9A962",
   goldDim: "rgba(201,169,98,0.55)",
   cream: "#F5F1E8",
   creamMuted: "rgba(245,241,232,0.72)",
   border: "rgba(255,255,255,0.08)",
-  borderGold: "rgba(201,169,98,0.14)",
+  borderGold: "rgba(201,169,98,0.16)",
   serif: "var(--font-cormorant, Georgia, 'Times New Roman', serif)",
   sans: "var(--font-outfit, 'Helvetica Neue', Arial, sans-serif)",
 } as const;
@@ -46,7 +46,7 @@ type Props = {
 function Label({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
   return (
     <p style={{
-      fontFamily: C.sans, fontSize: "0.4375rem", fontWeight: 600,
+      fontFamily: C.sans, fontSize: "0.6875rem", fontWeight: 600,
       letterSpacing: "0.18em", textTransform: "uppercase",
       color: "rgba(255,255,255,0.3)", ...style,
     }}>
@@ -91,19 +91,19 @@ export function JuniorDashboard({ displayName, stats, recentLeads }: Props) {
           <div className="flex items-center gap-4">
             <KxdLogo />
             <div>
-              <p style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.creamMuted }}>
+              <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.creamMuted }}>
                 KXD Academy · Junior Creators
               </p>
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/junior-creators/leads" style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.12em", textTransform: "uppercase", color: C.goldDim, textDecoration: "none" }}>
+            <Link href="/junior-creators/leads" style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.12em", textTransform: "uppercase", color: C.goldDim, textDecoration: "none" }}>
               My Leads
             </Link>
             <button
               type="button"
               onClick={handleLogout}
-              style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", background: "none", border: "none", cursor: "pointer" }}
+              style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.35)", background: "none", border: "none", cursor: "pointer" }}
             >
               Sign Out
             </button>
@@ -113,13 +113,13 @@ export function JuniorDashboard({ displayName, stats, recentLeads }: Props) {
 
       <main className="mx-auto max-w-screen-lg" style={{ padding: "2.5rem 1.5rem 4rem" }}>
         <div style={{ marginBottom: "2.5rem", paddingBottom: "2rem", borderBottom: `1px solid ${C.border}` }}>
-          <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.2em", textTransform: "uppercase", color: C.goldDim, marginBottom: "0.75rem" }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.2em", textTransform: "uppercase", color: C.goldDim, marginBottom: "0.75rem" }}>
             Welcome back
           </p>
           <h1 style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "clamp(1.75rem, 4vw, 2.75rem)", lineHeight: 1.05 }}>
             Hey {displayName}
           </h1>
-          <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: C.creamMuted, marginTop: "0.75rem", maxWidth: "32rem" }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted, marginTop: "0.75rem", maxWidth: "32rem" }}>
             Your KXD Academy research desk — track your time, grow your pipeline, and build your rank.
           </p>
         </div>
@@ -132,11 +132,11 @@ export function JuniorDashboard({ displayName, stats, recentLeads }: Props) {
           <p style={{ fontFamily: C.serif, fontWeight: 400, fontSize: "1.75rem", color: C.gold, marginTop: "0.5rem" }}>
             {stats.rankTitle}
           </p>
-          <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: C.creamMuted, marginTop: "0.35rem" }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted, marginTop: "0.35rem" }}>
             {stats.totalLeads} lifetime lead{stats.totalLeads === 1 ? "" : "s"} submitted
           </p>
           {stats.nextRank && (
-            <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: C.creamMuted, marginTop: "0.5rem" }}>
+            <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted, marginTop: "0.5rem" }}>
               {stats.nextRank.leadsNeeded} more lead{stats.nextRank.leadsNeeded === 1 ? "" : "s"} to reach {stats.nextRank.title}
             </p>
           )}
@@ -155,7 +155,7 @@ export function JuniorDashboard({ displayName, stats, recentLeads }: Props) {
               </div>
             ))}
           </div>
-          <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: "rgba(255,255,255,0.28)", marginTop: "0.625rem" }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.28)", marginTop: "0.625rem" }}>
             Earnings are estimated from logged shift time — not payroll or payment.
           </p>
         </section>
@@ -199,7 +199,7 @@ export function JuniorDashboard({ displayName, stats, recentLeads }: Props) {
           <Label style={{ color: C.goldDim, marginBottom: "1rem" }}>Recent Submissions</Label>
           {recentLeads.length === 0 ? (
             <div style={{ background: C.bgElevated, border: `1px solid ${C.border}`, padding: "1.25rem 1.5rem" }}>
-              <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: "rgba(255,255,255,0.3)" }}>
+              <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.3)" }}>
                 No leads yet — your first submission starts your streak.
               </p>
             </div>
@@ -225,7 +225,7 @@ export function JuniorDashboard({ displayName, stats, recentLeads }: Props) {
                   >
                     <div>
                       <p style={{ fontFamily: C.sans, fontSize: "0.75rem", color: C.cream }}>{loc} · {service}</p>
-                      <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: "rgba(255,255,255,0.28)", marginTop: "0.25rem" }}>
+                      <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.28)", marginTop: "0.25rem" }}>
                         {fmtDate(lead.createdAt)} · {lead.source} · {RESEARCH_STATUS_LABEL[lead.status] ?? lead.status}
                       </p>
                     </div>
@@ -234,7 +234,7 @@ export function JuniorDashboard({ displayName, stats, recentLeads }: Props) {
                         href={lead.leadUrl.startsWith("http") ? lead.leadUrl : `https://${lead.leadUrl}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.12em", textTransform: "uppercase", color: C.goldDim, textDecoration: "none" }}
+                        style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.12em", textTransform: "uppercase", color: C.goldDim, textDecoration: "none" }}
                       >
                         Open URL
                       </a>

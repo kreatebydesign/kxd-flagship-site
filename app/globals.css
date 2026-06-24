@@ -11,11 +11,11 @@
   --kxd-black-rich:     #050505;
   --kxd-black-base:     #080808;
   --kxd-black-soft:     #0b0b0b;
-  --kxd-black-elevated: #111111;
+  --kxd-black-elevated: #0B0B0B;
 
   /* ── Charcoal ── */
   --kxd-charcoal:       #101010;
-  --kxd-charcoal-light: #111111;
+  --kxd-charcoal-light: #0B0B0B;
 
   /* ── Cream / White ── */
   --kxd-white:       #ffffff;
@@ -32,7 +32,7 @@
   /* ── Borders ── */
   --kxd-border-white:        rgba(255, 255, 255, 0.08);
   --kxd-border-white-strong: rgba(255, 255, 255, 0.12);
-  --kxd-border-gold:         rgba(201, 169, 98, 0.12);
+  --kxd-border-gold:         rgba(201, 169, 98, 0.16);
   --kxd-border-gold-strong:  rgba(201, 169, 98, 0.20);
 
   /* ── Semantic aliases (keep for compatibility) ── */

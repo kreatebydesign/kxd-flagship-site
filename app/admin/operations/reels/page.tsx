@@ -21,15 +21,15 @@ export const dynamic = "force-dynamic";
 
 const C = {
   bgBase:     "#080808",
-  bgElevated: "#111",
+  bgElevated: "#0B0B0B",
   bgInput:    "#0B0B0B",
   gold:       "#C9A962",
   goldDim:    "rgba(201,169,98,0.55)",
-  goldFaint:  "rgba(201,169,98,0.06)",
+  goldFaint:  "rgba(255,255,255,0.035)",
   cream:      "#F5F1E8",
   creamMuted: "rgba(245,241,232,0.72)",
   border:     "rgba(255,255,255,0.08)",
-  borderGold: "rgba(201,169,98,0.12)",
+  borderGold: "rgba(201,169,98,0.16)",
   red:        "#d25a5a",
   green:      "#C9A962",
   sans:       "var(--font-outfit, Inter, system-ui)",
@@ -49,8 +49,8 @@ function statusColor(s: string): string {
     "assets-needed": "#a78bfa",
     editing:       "#60a5fa",
     review:        "#fb923c",
-    approved:      C.green,
-    delivered:     C.green,
+    approved:      C.gold,
+    delivered:     C.gold,
     archived:      "rgba(255,255,255,0.18)",
   };
   return map[s] || "rgba(255,255,255,0.3)";
@@ -60,7 +60,7 @@ function screenshotStatusBadge(s: string): { label: string; color: string } {
   const map: Record<string, { label: string; color: string }> = {
     idle:      { label: "Not Captured",  color: "rgba(255,255,255,0.25)" },
     capturing: { label: "Capturing…",   color: C.gold },
-    complete:  { label: "✓ Captured",   color: C.green },
+    complete:  { label: "✓ Captured",   color: C.gold },
     failed:    { label: "✗ Failed",     color: C.red },
   };
   return map[s] || map.idle;
@@ -70,7 +70,7 @@ function storyboardStatusBadge(s: string): { label: string; color: string } {
   const map: Record<string, { label: string; color: string }> = {
     idle:      { label: "Not Generated", color: "rgba(255,255,255,0.25)" },
     generating:{ label: "Generating…",  color: C.gold },
-    complete:  { label: "✓ Generated",  color: C.green },
+    complete:  { label: "✓ Generated",  color: C.gold },
     failed:    { label: "✗ Failed",     color: C.red },
   };
   return map[s] || map.idle;
@@ -218,7 +218,7 @@ function ReelCard({ doc }: { doc: AnyDoc }) {
       {/* Top row: title + status */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem" }}>
         <div style={{ minWidth: 0 }}>
-          <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.14em", textTransform: "uppercase" as const, color: C.goldDim, marginBottom: "0.375rem" }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.14em", textTransform: "uppercase" as const, color: C.goldDim, marginBottom: "0.375rem" }}>
             {clientName(doc)}
           </p>
           <p style={{
@@ -234,16 +234,16 @@ function ReelCard({ doc }: { doc: AnyDoc }) {
             {doc.videoTitle || "Untitled Reel"}
           </p>
           {doc.websiteUrl && (
-            <p style={{ fontFamily: "monospace", fontSize: "0.5rem", color: "rgba(255,255,255,0.25)", marginTop: "0.25rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>
+            <p style={{ fontFamily: "monospace", fontSize: "0.8125rem", color: "rgba(255,255,255,0.25)", marginTop: "0.25rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>
               {doc.websiteUrl}
             </p>
           )}
         </div>
         <div style={{ display: "flex", flexDirection: "column" as const, alignItems: "flex-end", gap: "0.375rem", flexShrink: 0 }}>
-          <span style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: statusColor(doc.status || "new") }}>
+          <span style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: statusColor(doc.status || "new") }}>
             {(doc.status || "new").replace("-", " ")}
           </span>
-          <span style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.08em", color: "rgba(255,255,255,0.18)" }}>
+          <span style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.08em", color: "rgba(255,255,255,0.18)" }}>
             #{doc.id}
           </span>
         </div>
@@ -264,32 +264,32 @@ function ReelCard({ doc }: { doc: AnyDoc }) {
       {/* Pipeline status */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
         <div style={{ background: C.bgInput, border: `1px solid ${C.border}`, padding: "0.625rem 0.75rem" }}>
-          <p style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.2)", marginBottom: "0.25rem" }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.2)", marginBottom: "0.25rem" }}>
             Screenshots
           </p>
           <p style={{ fontFamily: C.sans, fontSize: "0.625rem", color: ssBadge.color }}>
             {ssBadge.label}
           </p>
           {shotCount > 0 && (
-            <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: "rgba(255,255,255,0.25)", marginTop: "0.125rem" }}>
+            <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(255,255,255,0.25)", marginTop: "0.125rem" }}>
               {shotCount} section{shotCount !== 1 ? "s" : ""} captured
             </p>
           )}
           {doc.screenshotError && (
-            <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: C.red, marginTop: "0.25rem", lineHeight: 1.4 }}>
+            <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: C.red, marginTop: "0.25rem", lineHeight: 1.4 }}>
               {String(doc.screenshotError).slice(0, 80)}
             </p>
           )}
         </div>
         <div style={{ background: C.bgInput, border: `1px solid ${C.border}`, padding: "0.625rem 0.75rem" }}>
-          <p style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.2)", marginBottom: "0.25rem" }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.2)", marginBottom: "0.25rem" }}>
             Storyboard
           </p>
           <p style={{ fontFamily: C.sans, fontSize: "0.625rem", color: sbBadge.color }}>
             {sbBadge.label}
           </p>
           {doc.storyboardGeneratedAt && (
-            <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: "rgba(255,255,255,0.25)", marginTop: "0.125rem" }}>
+            <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(255,255,255,0.25)", marginTop: "0.125rem" }}>
               {new Date(doc.storyboardGeneratedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
             </p>
           )}
@@ -299,7 +299,7 @@ function ReelCard({ doc }: { doc: AnyDoc }) {
       {/* Reel hook preview */}
       {doc.reelHook && (
         <div style={{ background: C.goldFaint, border: `1px solid ${C.borderGold}`, padding: "0.75rem 1rem" }}>
-          <p style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.14em", textTransform: "uppercase" as const, color: C.goldDim, marginBottom: "0.375rem" }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.14em", textTransform: "uppercase" as const, color: C.goldDim, marginBottom: "0.375rem" }}>
             Hook
           </p>
           <p style={{ fontFamily: C.serif, fontWeight: 400, fontSize: "0.9375rem", color: C.cream, lineHeight: 1.3, fontStyle: "italic" }}>
@@ -311,10 +311,10 @@ function ReelCard({ doc }: { doc: AnyDoc }) {
       {/* Scene sequence preview */}
       {hasStoryboard && doc.sceneSequence && (
         <div style={{ background: C.bgInput, border: `1px solid ${C.border}`, padding: "0.75rem 1rem", maxHeight: "6rem", overflow: "hidden" }}>
-          <p style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.14em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.2)", marginBottom: "0.375rem" }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.14em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.2)", marginBottom: "0.375rem" }}>
             Scene Preview
           </p>
-          <pre style={{ fontFamily: "monospace", fontSize: "0.4375rem", color: "rgba(255,255,255,0.35)", lineHeight: 1.6, whiteSpace: "pre-wrap" as const, margin: 0 }}>
+          <pre style={{ fontFamily: "monospace", fontSize: "0.6875rem", color: "rgba(255,255,255,0.35)", lineHeight: 1.6, whiteSpace: "pre-wrap" as const, margin: 0 }}>
             {String(doc.sceneSequence).slice(0, 240)}…
           </pre>
         </div>
@@ -323,7 +323,7 @@ function ReelCard({ doc }: { doc: AnyDoc }) {
       {/* Caption preview */}
       {doc.captionOptions && (
         <div>
-          <p style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.14em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.18)", marginBottom: "0.375rem" }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.14em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.18)", marginBottom: "0.375rem" }}>
             Caption A
           </p>
           <p style={{ fontFamily: C.sans, fontSize: "0.625rem", color: C.creamMuted, lineHeight: 1.5 }}>
@@ -380,15 +380,15 @@ export default async function ReelsDashboardPage() {
           <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
             <KxdLogo />
             <div>
-              <p style={{ color: C.goldDim, fontSize: "0.5rem", letterSpacing: "0.1em" }}>KXD OS · Phase 5A</p>
+              <p style={{ color: C.goldDim, fontSize: "0.8125rem", letterSpacing: "0.1em" }}>KXD OS · Phase 5A</p>
               <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "1rem", color: C.cream }}>Reel Generator</p>
             </div>
           </div>
           <div style={{ display: "flex", gap: "1.25rem", alignItems: "center" }}>
-            <Link href="/admin/operations/creative" style={{ color: C.goldDim, fontSize: "0.5rem", letterSpacing: "0.1em", textDecoration: "none" }}>
+            <Link href="/admin/operations/creative" style={{ color: C.goldDim, fontSize: "0.8125rem", letterSpacing: "0.1em", textDecoration: "none" }}>
               ← Creative Engine
             </Link>
-            <Link href="/admin/operations/executive" style={{ color: "rgba(255,255,255,0.2)", fontSize: "0.5rem", letterSpacing: "0.1em", textDecoration: "none" }}>
+            <Link href="/admin/operations/executive" style={{ color: "rgba(255,255,255,0.2)", fontSize: "0.8125rem", letterSpacing: "0.1em", textDecoration: "none" }}>
               Operations
             </Link>
             <Link
@@ -415,7 +415,7 @@ export default async function ReelsDashboardPage() {
 
         {/* ── Phase label + description ───────────────────────────────────── */}
         <div style={{ marginBottom: "2.5rem", paddingBottom: "1.5rem", borderBottom: `1px solid ${C.border}` }}>
-          <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.18em", textTransform: "uppercase" as const, color: C.goldDim, marginBottom: "0.625rem" }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.18em", textTransform: "uppercase" as const, color: C.goldDim, marginBottom: "0.625rem" }}>
             KXD OS · Phase 5A · Website Showcase Reel Generator
           </p>
           <h1 style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "clamp(1.75rem, 3vw, 2.5rem)", color: C.cream, lineHeight: 1.1, letterSpacing: "-0.01em", marginBottom: "0.75rem" }}>
@@ -435,7 +435,7 @@ export default async function ReelsDashboardPage() {
             { label: "In Progress",      value: counts.generating },
           ].map((kpi, i) => (
             <div key={i} style={{ background: C.bgElevated, padding: "1.125rem 1.25rem" }}>
-              <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: C.goldDim, marginBottom: "0.375rem" }}>
+              <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: C.goldDim, marginBottom: "0.375rem" }}>
                 {kpi.label}
               </p>
               <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "1.75rem", color: C.cream }}>
@@ -447,7 +447,7 @@ export default async function ReelsDashboardPage() {
 
         {/* ── Pipeline guide ──────────────────────────────────────────────── */}
         <div style={{ background: C.goldFaint, border: `1px solid ${C.borderGold}`, padding: "1.25rem", marginBottom: "2rem" }}>
-          <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.16em", textTransform: "uppercase" as const, color: C.goldDim, marginBottom: "0.875rem" }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.16em", textTransform: "uppercase" as const, color: C.goldDim, marginBottom: "0.875rem" }}>
             Reel Generation Pipeline
           </p>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "1px", background: C.border }}>
@@ -458,25 +458,25 @@ export default async function ReelsDashboardPage() {
               { step: "04", label: "Review & Deliver",   detail: "Approve storyboard, export to editor", endpoint: null },
             ].map((s, i) => (
               <div key={i} style={{ background: C.bgBase, padding: "1rem" }}>
-                <p style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.2em", color: C.goldDim, marginBottom: "0.375rem" }}>
+                <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.2em", color: C.goldDim, marginBottom: "0.375rem" }}>
                   {s.step}
                 </p>
-                <p style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.5625rem", color: C.cream, marginBottom: "0.25rem" }}>
+                <p style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem", color: C.cream, marginBottom: "0.25rem" }}>
                   {s.label}
                 </p>
                 {s.endpoint ? (
-                  <p style={{ fontFamily: "monospace", fontSize: "0.4375rem", color: "rgba(201,169,98,0.5)" }}>
+                  <p style={{ fontFamily: "monospace", fontSize: "0.6875rem", color: "rgba(201,169,98,0.5)" }}>
                     {s.endpoint}
                   </p>
                 ) : (
-                  <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: "rgba(255,255,255,0.2)" }}>
+                  <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(255,255,255,0.2)" }}>
                     {s.detail}
                   </p>
                 )}
               </div>
             ))}
           </div>
-          <p style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.06em", color: "rgba(255,255,255,0.18)", marginTop: "0.875rem" }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.06em", color: "rgba(255,255,255,0.18)", marginTop: "0.875rem" }}>
             Set OPENAI_API_KEY to enable storyboard generation. Run <code style={{ fontFamily: "monospace", color: C.goldDim }}>npx playwright install chromium</code> to enable screenshot capture.
           </p>
         </div>

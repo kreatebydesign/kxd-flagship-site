@@ -30,26 +30,26 @@ export const dynamic = "force-dynamic";
 const C = {
   bgPure:      "#050505",
   bgBase:      "#080808",
-  bgElevated:  "#111111",
+  bgElevated:  "#0B0B0B",
   bgCard:      "#101010",
   gold:        "#C9A962",
   goldDim:     "rgba(201,169,98,0.55)",
-  goldFaint:   "rgba(201,169,98,0.08)",
+  goldFaint:   "rgba(255,255,255,0.035)",
   cream:       "#F5F1E8",
   creamMuted:  "rgba(245,241,232,0.72)",
   red:         "#d25a5a",
-  redFaint:    "rgba(210,90,90,0.08)",
+  redFaint:    "rgba(255,255,255,0.04)",
   redBorder:   "rgba(210,90,90,0.25)",
   yellow:      "#E8C468",
-  yellowFaint: "rgba(232,196,104,0.08)",
+  yellowFaint: "rgba(255,255,255,0.04)",
   green:       "#C9A962",
-  greenFaint:  "rgba(201,169,98,0.07)",
+  greenFaint:  "rgba(255,255,255,0.035)",
   greenBorder: "rgba(201,169,98,0.20)",
   teal:        "#A8B4C8",
   blue:        "#A8B4C8",
   purple:      "#C4B0D8",
   border:      "rgba(255,255,255,0.08)",
-  borderGold:  "rgba(201,169,98,0.12)",
+  borderGold:  "rgba(255,255,255,0.04)",
   serif:       "var(--font-cormorant, Georgia, 'Times New Roman', serif)",
   sans:        "var(--font-outfit, 'Helvetica Neue', Arial, sans-serif)",
 } as const;
@@ -88,11 +88,11 @@ const STATUS_COLOR: Record<string, string> = {
   sent:        C.blue,
   "in-progress": C.yellow,
   submitted:   C.teal,
-  approved:    C.green,
+  approved:    C.gold,
 };
 
 const READINESS_COLOR: Record<ReadinessLabel, string> = {
-  Ready:                    C.green,
+  Ready:                    C.gold,
   "Needs Information":      C.yellow,
   "Missing Critical Items": C.red,
 };
@@ -101,8 +101,8 @@ const WORKFLOW_COLOR: Record<OnboardingWorkflowStatus, string> = {
   draft: "rgba(255,255,255,0.35)",
   "waiting-on-client": C.yellow,
   "waiting-on-kxd": C.teal,
-  "ready-for-build": C.green,
-  approved: C.green,
+  "ready-for-build": C.gold,
+  approved: C.gold,
 };
 
 function ChecklistPanel({ title, items }: { title: string; items: ChecklistItem[] }) {
@@ -110,7 +110,7 @@ function ChecklistPanel({ title, items }: { title: string; items: ChecklistItem[
   return (
     <div style={{ minWidth: "10rem" }}>
       <p style={{
-        fontFamily: C.sans, fontSize: "0.4375rem", fontWeight: 600,
+        fontFamily: C.sans, fontSize: "0.6875rem", fontWeight: 600,
         letterSpacing: "0.14em", textTransform: "uppercase",
         color: C.goldDim, marginBottom: "0.5rem",
       }}>
@@ -121,8 +121,8 @@ function ChecklistPanel({ title, items }: { title: string; items: ChecklistItem[
           <p
             key={item.label}
             style={{
-              fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.02em",
-              color: item.done ? C.green : item.critical ? C.red : "rgba(255,255,255,0.35)",
+              fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.02em",
+              color: item.done ? C.gold : item.critical ? C.red : "rgba(255,255,255,0.35)",
             }}
           >
             {item.done ? "✓" : "○"} {item.label}
@@ -136,7 +136,7 @@ function ChecklistPanel({ title, items }: { title: string; items: ChecklistItem[
 function Label({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
   return (
     <p style={{
-      fontFamily: C.sans, fontSize: "0.4375rem", fontWeight: 600,
+      fontFamily: C.sans, fontSize: "0.6875rem", fontWeight: 600,
       letterSpacing: "0.18em", textTransform: "uppercase" as const,
       color: "rgba(255,255,255,0.3)", ...style,
     }}>
@@ -157,14 +157,14 @@ function SectionHeader({
       <div>
         <Label style={{ marginBottom: "0.375rem" }}>{label}</Label>
         {sub && (
-          <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: C.creamMuted, letterSpacing: "0.02em" }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted, letterSpacing: "0.02em" }}>
             {sub}
           </p>
         )}
       </div>
       {href && (
         <Link href={href} style={{
-          fontFamily: C.sans, fontWeight: 500, fontSize: "0.4375rem",
+          fontFamily: C.sans, fontWeight: 500, fontSize: "0.6875rem",
           letterSpacing: "0.14em", textTransform: "uppercase" as const,
           color: C.goldDim, textDecoration: "none",
         }}>
@@ -182,7 +182,7 @@ function EmptyState({ message }: { message: string }) {
       padding: "1.375rem 1.5rem", display: "flex", alignItems: "center", gap: "0.875rem",
     }}>
       <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: "rgba(255,255,255,0.2)", flexShrink: 0 }} />
-      <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: "rgba(255,255,255,0.3)", letterSpacing: "0.04em" }}>
+      <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.3)", letterSpacing: "0.04em" }}>
         {message}
       </p>
     </div>
@@ -237,8 +237,8 @@ export default async function OnboardingDashboardPage() {
     { label: "Total Onboardings", value: String(total),      accent: C.cream },
     { label: "Waiting on Client", value: String(workflowCounts.waitingOnClient), accent: C.yellow },
     { label: "Waiting on KXD",    value: String(workflowCounts.waitingOnKxd),    accent: C.teal },
-    { label: "Ready for Build",   value: String(workflowCounts.readyForBuild),   accent: C.green },
-    { label: "Approved",          value: String(workflowCounts.approved),        accent: C.green },
+    { label: "Ready for Build",   value: String(workflowCounts.readyForBuild),   accent: C.gold },
+    { label: "Approved",          value: String(workflowCounts.approved),        accent: C.gold },
   ];
 
   return (
@@ -256,23 +256,23 @@ export default async function OnboardingDashboardPage() {
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <KxdLogo />
-              <span style={{ color: "rgba(255,255,255,0.1)", fontSize: "0.375rem" }}>◆</span>
+              <span style={{ color: "rgba(255,255,255,0.1)", fontSize: "0.6875rem" }}>◆</span>
               <div>
                 <p style={{
-                  fontFamily: C.sans, fontWeight: 500, fontSize: "0.5625rem",
+                  fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem",
                   letterSpacing: "0.16em", textTransform: "uppercase", color: C.creamMuted,
                 }}>
                   Onboarding
                 </p>
                 <p className="hidden sm:block" style={{
-                  fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.1em",
+                  fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.1em",
                   textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "0.35rem",
                 }}>
                   Client Intake Workflow
                 </p>
               </div>
               <span style={{
-                fontFamily: C.sans, fontWeight: 500, fontSize: "0.375rem",
+                fontFamily: C.sans, fontWeight: 500, fontSize: "0.6875rem",
                 letterSpacing: "0.12em", textTransform: "uppercase",
                 color: C.goldDim, background: C.goldFaint,
                 border: `1px solid ${C.borderGold}`, padding: "0.2rem 0.6rem",
@@ -282,20 +282,20 @@ export default async function OnboardingDashboardPage() {
             </div>
             <div className="flex items-center gap-5">
               <Link href="/admin/operations/executive" style={{
-                fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.12em",
+                fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.12em",
                 textTransform: "uppercase", color: "rgba(255,255,255,0.3)", textDecoration: "none",
               }}>
                 ← Operations
               </Link>
               <Link href="/admin/collections/client-onboarding" style={{
-                fontFamily: C.sans, fontWeight: 500, fontSize: "0.5rem",
+                fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem",
                 letterSpacing: "0.14em", textTransform: "uppercase",
                 color: C.gold, opacity: 0.8, textDecoration: "none",
               }}>
                 New Intake →
               </Link>
               <Link href="/admin" style={{
-                fontFamily: C.sans, fontWeight: 500, fontSize: "0.5rem",
+                fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem",
                 letterSpacing: "0.14em", textTransform: "uppercase",
                 color: C.goldDim, textDecoration: "none",
               }}>
@@ -312,7 +312,7 @@ export default async function OnboardingDashboardPage() {
         {/* Title */}
         <div style={{ marginBottom: "2.5rem", paddingBottom: "2rem", borderBottom: `1px solid ${C.border}` }}>
           <p style={{
-            fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.2em",
+            fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.2em",
             textTransform: "uppercase", color: C.goldDim, marginBottom: "0.875rem",
           }}>
             KXD OS · Client Onboarding
@@ -325,7 +325,7 @@ export default async function OnboardingDashboardPage() {
             Client Onboarding
           </h1>
           <p style={{
-            fontFamily: C.sans, fontSize: "0.5625rem", color: C.creamMuted,
+            fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted,
             letterSpacing: "0.04em", marginTop: "0.75rem", maxWidth: "36rem",
           }}>
             Structured client intake — business information, brand assets, access credentials,
@@ -386,7 +386,7 @@ export default async function OnboardingDashboardPage() {
                         ) : (
                           <p style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.875rem", color: C.cream }}>{name}</p>
                         )}
-                        <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: C.creamMuted, marginTop: "0.35rem" }}>
+                        <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted, marginTop: "0.35rem" }}>
                           {onboardingStatusLabel(doc.status as string)} · Updated {fmtDate(doc.updatedAt as string)}
                         </p>
                       </div>
@@ -395,17 +395,17 @@ export default async function OnboardingDashboardPage() {
                           <Label>Readiness</Label>
                           <p style={{
                             fontFamily: C.serif, fontWeight: 300, fontSize: "1.5rem",
-                            color: readiness.score >= 85 ? C.green : readiness.score >= 50 ? C.yellow : C.red,
+                            color: readiness.score >= 85 ? C.gold : readiness.score >= 50 ? C.yellow : C.red,
                             marginTop: "0.25rem",
                           }}>
                             {readiness.score}%
                           </p>
                         </div>
                         <span style={{
-                          fontFamily: C.sans, fontSize: "0.4375rem", fontWeight: 600,
+                          fontFamily: C.sans, fontSize: "0.6875rem", fontWeight: 600,
                           letterSpacing: "0.12em", textTransform: "uppercase",
                           color: workflowColor, border: `1px solid ${workflowColor}40`,
-                          background: workflow === "ready-for-build" ? C.greenFaint : workflow === "waiting-on-client" ? C.yellowFaint : "rgba(255,255,255,0.04)",
+                          background: workflow === "ready-for-build" ? C.goldFaint : workflow === "waiting-on-client" ? C.yellowFaint : "rgba(255,255,255,0.04)",
                           padding: "0.3rem 0.6rem",
                         }}>
                           {onboardingWorkflowLabel(workflow)}
@@ -431,7 +431,7 @@ export default async function OnboardingDashboardPage() {
                         </p>
                       </div>
                     ) : (
-                      <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: "rgba(255,255,255,0.22)", marginBottom: "0.75rem" }}>
+                      <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.22)", marginBottom: "0.75rem" }}>
                         No internal notes · add in Payload → Access & Notes
                       </p>
                     )}
@@ -439,7 +439,7 @@ export default async function OnboardingDashboardPage() {
                     <Link
                       href={`/admin/collections/client-onboarding/${doc.id as number}`}
                       style={{
-                        fontFamily: C.sans, fontWeight: 500, fontSize: "0.4375rem",
+                        fontFamily: C.sans, fontWeight: 500, fontSize: "0.6875rem",
                         letterSpacing: "0.14em", textTransform: "uppercase",
                         color: C.goldDim, textDecoration: "none",
                       }}
@@ -488,7 +488,7 @@ export default async function OnboardingDashboardPage() {
                         </p>
                       )}
                       <p style={{
-                        fontFamily: C.sans, fontSize: "0.5rem", color: C.creamMuted,
+                        fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted,
                         marginTop: "0.25rem",
                       }}>
                         {onboardingStatusLabel(doc.status as string)} · {readiness.score}% ready
@@ -496,7 +496,7 @@ export default async function OnboardingDashboardPage() {
                     </div>
                     <div style={{ flex: 1, minWidth: "16rem" }}>
                       <p style={{
-                        fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.14em",
+                        fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.14em",
                         textTransform: "uppercase", color: C.red, marginBottom: "0.5rem",
                       }}>
                         Missing
@@ -504,7 +504,7 @@ export default async function OnboardingDashboardPage() {
                       <div style={{ display: "flex", flexWrap: "wrap", gap: "0.375rem" }}>
                         {missing.all.slice(0, 8).map((item) => (
                           <span key={item} style={{
-                            fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.08em",
+                            fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.08em",
                             color: C.creamMuted, background: C.redFaint,
                             border: `1px solid ${C.redBorder}`, padding: "0.2rem 0.5rem",
                           }}>
@@ -512,7 +512,7 @@ export default async function OnboardingDashboardPage() {
                           </span>
                         ))}
                         {missing.all.length > 8 && (
-                          <span style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: C.creamMuted }}>
+                          <span style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: C.creamMuted }}>
                             +{missing.all.length - 8} more
                           </span>
                         )}
@@ -521,7 +521,7 @@ export default async function OnboardingDashboardPage() {
                     <Link
                       href={`/admin/collections/client-onboarding/${doc.id as number}`}
                       style={{
-                        fontFamily: C.sans, fontWeight: 500, fontSize: "0.4375rem",
+                        fontFamily: C.sans, fontWeight: 500, fontSize: "0.6875rem",
                         letterSpacing: "0.14em", textTransform: "uppercase",
                         color: C.goldDim, textDecoration: "none", flexShrink: 0,
                       }}
@@ -585,7 +585,7 @@ export default async function OnboardingDashboardPage() {
                       <Link
                         href={`/admin/collections/client-onboarding/${doc.id as number}`}
                         style={{
-                          fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.1em",
+                          fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.1em",
                           color: C.goldDim, textDecoration: "none", marginTop: "0.25rem", display: "block",
                         }}
                       >
@@ -594,7 +594,7 @@ export default async function OnboardingDashboardPage() {
                     </div>
                     <div style={{ background: C.bgElevated, padding: "1rem 1.25rem" }}>
                       <span style={{
-                        fontFamily: C.sans, fontWeight: 600, fontSize: "0.4375rem",
+                        fontFamily: C.sans, fontWeight: 600, fontSize: "0.6875rem",
                         letterSpacing: "0.14em", textTransform: "uppercase",
                         color: STATUS_COLOR[status] ?? C.creamMuted,
                       }}>
@@ -604,17 +604,17 @@ export default async function OnboardingDashboardPage() {
                     <div style={{ background: C.bgElevated, padding: "1rem 1.25rem" }}>
                       <p style={{
                         fontFamily: C.serif, fontWeight: 300, fontSize: "1.125rem",
-                        color: readiness.score >= 85 ? C.green : readiness.score >= 50 ? C.yellow : C.red,
+                        color: readiness.score >= 85 ? C.gold : readiness.score >= 50 ? C.yellow : C.red,
                       }}>
                         {readiness.completionPercent}%
                       </p>
                     </div>
                     <div style={{ background: C.bgElevated, padding: "1rem 1.25rem" }}>
                       <span style={{
-                        fontFamily: C.sans, fontWeight: 600, fontSize: "0.4375rem",
+                        fontFamily: C.sans, fontWeight: 600, fontSize: "0.6875rem",
                         letterSpacing: "0.12em", textTransform: "uppercase",
                         color: labelColor,
-                        background: labelColor === C.green ? C.greenFaint : labelColor === C.yellow ? C.yellowFaint : C.redFaint,
+                        background: labelColor === C.gold ? C.goldFaint : labelColor === C.yellow ? C.yellowFaint : C.redFaint,
                         border: `1px solid ${labelColor}40`,
                         padding: "0.2rem 0.5rem",
                       }}>
@@ -622,7 +622,7 @@ export default async function OnboardingDashboardPage() {
                       </span>
                     </div>
                     <div style={{ background: C.bgElevated, padding: "1rem 1.25rem" }}>
-                      <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: C.creamMuted }}>
+                      <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted }}>
                         {fmtDate(doc.updatedAt as string)}
                       </p>
                     </div>
@@ -648,7 +648,7 @@ export default async function OnboardingDashboardPage() {
             ["/admin/operations/creative", "Creative"],
           ].map(([href, label]) => (
             <Link key={href} href={href} style={{
-              fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.12em",
+              fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.12em",
               textTransform: "uppercase", color: "rgba(255,255,255,0.3)", textDecoration: "none",
             }}>
               {label} →

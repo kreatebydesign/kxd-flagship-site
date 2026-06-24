@@ -24,25 +24,25 @@ export const dynamic = "force-dynamic";
 const C = {
   bgPure:       "#050505",
   bgBase:       "#080808",
-  bgElevated:   "#111111",
+  bgElevated:   "#0B0B0B",
   bgCard:       "#101010",
   gold:         "#C9A962",
   goldDim:      "rgba(201,169,98,0.55)",
-  goldFaint:    "rgba(201,169,98,0.08)",
+  goldFaint:    "rgba(255,255,255,0.035)",
   cream:        "#F5F1E8",
   creamMuted:   "rgba(245,241,232,0.72)",
   red:          "#d25a5a",
-  redFaint:     "rgba(210,90,90,0.08)",
+  redFaint:     "rgba(255,255,255,0.04)",
   yellow:       "#E8C468",
-  yellowFaint:  "rgba(232,196,104,0.08)",
+  yellowFaint:  "rgba(255,255,255,0.04)",
   green:        "#C9A962",
-  greenFaint:   "rgba(201,169,98,0.08)",
+  greenFaint:   "rgba(255,255,255,0.035)",
   blue:         "#A8B4C8",
   teal:         "#A8B4C8",
   purple:       "#C4B0D8",
   border:       "rgba(255,255,255,0.08)",
   borderStrong: "rgba(255,255,255,0.11)",
-  borderGold:   "rgba(201,169,98,0.12)",
+  borderGold:   "rgba(201,169,98,0.16)",
   borderRed:    "rgba(210,90,90,0.25)",
   serif:        "var(--font-cormorant, Georgia, 'Times New Roman', serif)",
   sans:         "var(--font-outfit, 'Helvetica Neue', Arial, sans-serif)",
@@ -182,24 +182,24 @@ const TIER_LABELS: Record<string, string> = {
 // ── Badge / priority config ───────────────────────────────────────────────────
 
 const STATUS_BADGE: Record<string, { label: string; color: string; bg: string; border: string }> = {
-  healthy:            { label: "Healthy",          color: "#C9A962", bg: "rgba(201,169,98,0.08)",   border: "rgba(201,169,98,0.3)" },
-  "needs-attention":  { label: "Needs Attention",  color: "#E8C468", bg: "rgba(232,196,104,0.08)",   border: "rgba(232,196,104,0.3)" },
-  "at-risk":          { label: "At Risk",           color: "#d25a5a", bg: "rgba(210,90,90,0.08)",    border: "rgba(210,90,90,0.3)" },
-  "not-started":      { label: "Not Started",       color: "#A8B4C8", bg: "rgba(168,180,200,0.08)",  border: "rgba(168,180,200,0.3)" },
-  "in-progress":      { label: "In Progress",       color: "#E8C468", bg: "rgba(232,196,104,0.08)",   border: "rgba(232,196,104,0.3)" },
-  "waiting-on-client":{ label: "Waiting",           color: "#C4B0D8", bg: "rgba(196,176,216,0.08)",  border: "rgba(196,176,216,0.3)" },
-  complete:           { label: "Complete",          color: "#C9A962", bg: "rgba(201,169,98,0.08)",   border: "rgba(201,169,98,0.3)" },
-  blocked:            { label: "Blocked",           color: "#d25a5a", bg: "rgba(210,90,90,0.08)",    border: "rgba(210,90,90,0.3)" },
-  current:            { label: "Current",           color: "#C9A962", bg: "rgba(201,169,98,0.08)",   border: "rgba(201,169,98,0.3)" },
-  active:             { label: "Active",            color: "#C9A962", bg: "rgba(201,169,98,0.08)",   border: "rgba(201,169,98,0.3)" },
-  upcoming:           { label: "Upcoming",          color: "#A8B4C8", bg: "rgba(168,180,200,0.08)",  border: "rgba(168,180,200,0.3)" },
+  healthy:            { label: "Healthy",          color: "#C9A962", bg: "rgba(255,255,255,0.035)",   border: "rgba(201,169,98,0.16)" },
+  "needs-attention":  { label: "Needs Attention",  color: "#E8C468", bg: "rgba(255,255,255,0.04)",   border: "rgba(232,196,104,0.3)" },
+  "at-risk":          { label: "At Risk",           color: "#d25a5a", bg: "rgba(255,255,255,0.04)",    border: "rgba(210,90,90,0.3)" },
+  "not-started":      { label: "Not Started",       color: "#A8B4C8", bg: "rgba(255,255,255,0.035)",  border: "rgba(168,180,200,0.3)" },
+  "in-progress":      { label: "In Progress",       color: "#E8C468", bg: "rgba(255,255,255,0.04)",   border: "rgba(232,196,104,0.3)" },
+  "waiting-on-client":{ label: "Waiting",           color: "#C4B0D8", bg: "rgba(255,255,255,0.035)",  border: "rgba(196,176,216,0.3)" },
+  complete:           { label: "Complete",          color: "#C9A962", bg: "rgba(255,255,255,0.035)",   border: "rgba(201,169,98,0.16)" },
+  blocked:            { label: "Blocked",           color: "#d25a5a", bg: "rgba(255,255,255,0.04)",    border: "rgba(210,90,90,0.3)" },
+  current:            { label: "Current",           color: "#C9A962", bg: "rgba(255,255,255,0.035)",   border: "rgba(201,169,98,0.16)" },
+  active:             { label: "Active",            color: "#C9A962", bg: "rgba(255,255,255,0.035)",   border: "rgba(201,169,98,0.16)" },
+  upcoming:           { label: "Upcoming",          color: "#A8B4C8", bg: "rgba(255,255,255,0.035)",  border: "rgba(168,180,200,0.3)" },
   paused:             { label: "Paused",            color: "#888880", bg: "rgba(136,136,128,0.08)",  border: "rgba(136,136,128,0.3)" },
-  overdue:            { label: "Overdue",           color: "#d25a5a", bg: "rgba(210,90,90,0.08)",    border: "rgba(210,90,90,0.3)" },
+  overdue:            { label: "Overdue",           color: "#d25a5a", bg: "rgba(255,255,255,0.04)",    border: "rgba(210,90,90,0.3)" },
   ended:              { label: "Ended",             color: "rgba(255,255,255,0.3)", bg: "rgba(255,255,255,0.04)", border: "rgba(255,255,255,0.1)" },
-  planning:           { label: "Planning",          color: "#A8B4C8", bg: "rgba(168,180,200,0.08)",  border: "rgba(168,180,200,0.3)" },
-  review:             { label: "Review",            color: "#C4B0D8", bg: "rgba(196,176,216,0.08)",  border: "rgba(196,176,216,0.3)" },
-  new:                { label: "New",               color: "#C9A962", bg: "rgba(201,169,98,0.08)",   border: "rgba(201,169,98,0.3)" },
-  triaged:            { label: "Triaged",           color: "#A8B4C8", bg: "rgba(168,180,200,0.08)",  border: "rgba(168,180,200,0.3)" },
+  planning:           { label: "Planning",          color: "#A8B4C8", bg: "rgba(255,255,255,0.035)",  border: "rgba(168,180,200,0.3)" },
+  review:             { label: "Review",            color: "#C4B0D8", bg: "rgba(255,255,255,0.035)",  border: "rgba(196,176,216,0.3)" },
+  new:                { label: "New",               color: "#C9A962", bg: "rgba(255,255,255,0.035)",   border: "rgba(201,169,98,0.16)" },
+  triaged:            { label: "Triaged",           color: "#A8B4C8", bg: "rgba(255,255,255,0.035)",  border: "rgba(168,180,200,0.3)" },
   declined:           { label: "Declined",          color: "rgba(255,255,255,0.3)", bg: "rgba(255,255,255,0.04)", border: "rgba(255,255,255,0.1)" },
 };
 
@@ -216,7 +216,7 @@ function Label({ children, style }: { children: React.ReactNode; style?: React.C
   return (
     <p style={{
       fontFamily: C.sans, fontWeight: 400,
-      fontSize: "0.4375rem", letterSpacing: "0.14em",
+      fontSize: "0.6875rem", letterSpacing: "0.14em",
       textTransform: "uppercase" as const,
       color: "rgba(255,255,255,0.3)", ...style,
     }}>
@@ -230,7 +230,7 @@ function Badge({ status }: { status: string }) {
   return (
     <span style={{
       fontFamily: C.sans, fontWeight: 500,
-      fontSize: "0.375rem", letterSpacing: "0.14em",
+      fontSize: "0.6875rem", letterSpacing: "0.14em",
       textTransform: "uppercase" as const,
       color: b.color, background: b.bg, border: `1px solid ${b.border}`,
       padding: "0.2rem 0.65rem", whiteSpace: "nowrap" as const, display: "inline-block",
@@ -250,7 +250,7 @@ function SectionHeader({ label, href, linkText }: { label: string; href?: string
     <div className="flex items-center justify-between" style={{ marginBottom: "1rem" }}>
       <Label style={{ color: C.goldDim, letterSpacing: "0.16em" }}>{label}</Label>
       {href && (
-        <Link href={href} style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.22)", textDecoration: "none" }}>
+        <Link href={href} style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.22)", textDecoration: "none" }}>
           {linkText ?? "View in CMS →"}
         </Link>
       )}
@@ -265,7 +265,7 @@ function Card({ children, style }: { children: React.ReactNode; style?: React.CS
 function EmptyState({ message }: { message: string }) {
   return (
     <div style={{ background: C.bgElevated, border: `1px solid ${C.border}`, padding: "2.25rem 1.5rem", textAlign: "center" as const }}>
-      <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", letterSpacing: "0.08em", color: "rgba(255,255,255,0.2)" }}>
+      <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.08em", color: "rgba(255,255,255,0.2)" }}>
         {message}
       </p>
     </div>
@@ -467,39 +467,39 @@ export default async function OperationsPage() {
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <KxdLogo />
-              <span style={{ color: "rgba(255,255,255,0.1)", fontSize: "0.375rem" }}>◆</span>
+              <span style={{ color: "rgba(255,255,255,0.1)", fontSize: "0.6875rem" }}>◆</span>
               <div>
-                <p style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.5625rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.creamMuted, lineHeight: 1 }}>
+                <p style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.creamMuted, lineHeight: 1 }}>
                   Operations
                 </p>
-                <p className="hidden sm:block" style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "0.35rem" }}>
+                <p className="hidden sm:block" style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "0.35rem" }}>
                   Operations Suite
                 </p>
               </div>
-              <span style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.375rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(201,169,98,0.75)", background: "rgba(201,169,98,0.07)", border: "1px solid rgba(201,169,98,0.2)", padding: "0.2rem 0.6rem" }}>
+              <span style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.6875rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(201,169,98,0.75)", background: "rgba(255,255,255,0.035)", border: "1px solid rgba(201,169,98,0.2)", padding: "0.2rem 0.6rem" }}>
                 Phase 2D
               </span>
             </div>
             <div className="flex items-center gap-5">
-              <p className="hidden sm:block" style={{ fontFamily: C.sans, fontSize: "0.5625rem", letterSpacing: "0.06em", color: "rgba(255,255,255,0.22)" }}>
+              <p className="hidden sm:block" style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.06em", color: "rgba(255,255,255,0.22)" }}>
                 {today}
               </p>
-              <Link href="/admin/operations/executive" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.5rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.gold, opacity: 0.8, textDecoration: "none" }}>
+              <Link href="/admin/operations/executive" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.gold, opacity: 0.8, textDecoration: "none" }}>
                 Executive →
               </Link>
-              <Link href="/admin/operations/today" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.5rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.teal, opacity: 0.8, textDecoration: "none" }}>
+              <Link href="/admin/operations/today" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.teal, opacity: 0.8, textDecoration: "none" }}>
                 Today →
               </Link>
-              <Link href="/admin/operations/growth" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.5rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.gold, opacity: 0.8, textDecoration: "none" }}>
+              <Link href="/admin/operations/growth" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.gold, opacity: 0.8, textDecoration: "none" }}>
                 Growth →
               </Link>
-              <Link href="/admin/operations/accounts" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.5rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.purple, opacity: 0.8, textDecoration: "none" }}>
+              <Link href="/admin/operations/accounts" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.purple, opacity: 0.8, textDecoration: "none" }}>
                 Accounts →
               </Link>
-              <Link href="/admin/operations/founder" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.5rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.gold, opacity: 0.8, textDecoration: "none" }}>
+              <Link href="/admin/operations/founder" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.gold, opacity: 0.8, textDecoration: "none" }}>
                 Founder →
               </Link>
-              <Link href="/admin" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.5rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.gold, opacity: 0.55, textDecoration: "none" }}>
+              <Link href="/admin" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.gold, opacity: 0.55, textDecoration: "none" }}>
                 Payload CMS →
               </Link>
             </div>
@@ -521,10 +521,10 @@ export default async function OperationsPage() {
               <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "clamp(1.375rem, 2.2vw, 1.875rem)", lineHeight: 1, color: kpi.alert ? C.yellow : C.cream, marginTop: "0.625rem", letterSpacing: "-0.01em" }}>
                 {kpi.value}
               </p>
-              <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: "rgba(255,255,255,0.25)", letterSpacing: "0.04em", marginTop: "0.375rem" }}>
+              <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.25)", letterSpacing: "0.04em", marginTop: "0.375rem" }}>
                 {kpi.sub}
               </p>
-              <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: kpi.alert ? C.red : C.goldDim, letterSpacing: "0.06em", marginTop: "0.5rem" }}>
+              <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: kpi.alert ? C.red : C.goldDim, letterSpacing: "0.06em", marginTop: "0.5rem" }}>
                 {kpi.delta}
               </p>
             </div>
@@ -537,8 +537,8 @@ export default async function OperationsPage() {
 
           {flaggedClients.length === 0 ? (
             <div style={{ background: C.bgElevated, border: `1px solid rgba(201,169,98,0.2)`, padding: "1.25rem 1.5rem", display: "flex", alignItems: "center", gap: "1rem" }}>
-              <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: C.green, flexShrink: 0 }} />
-              <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: C.green, letterSpacing: "0.04em" }}>
+              <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: C.gold, flexShrink: 0 }} />
+              <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: C.gold, letterSpacing: "0.04em" }}>
                 All client health signals clear — no flags detected.
               </p>
             </div>
@@ -563,7 +563,7 @@ export default async function OperationsPage() {
                     <div style={{ display: "flex", flexDirection: "column", gap: "0.3rem" }}>
                       {client.issues.map((issue) => (
                         <p key={issue} style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: issue.includes("overdue") || issue.includes("Urgent") ? C.red : C.yellow, display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                          <span style={{ fontSize: "0.5rem" }}>▸</span>
+                          <span style={{ fontSize: "0.8125rem" }}>▸</span>
                           {issue}
                         </p>
                       ))}
@@ -595,7 +595,7 @@ export default async function OperationsPage() {
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.4rem" }}>
                   {overdueRetainers.length > 0 && <Badge status="overdue" />}
                   {upcomingInvoices.length > 0 && (
-                    <p style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.08em", color: C.teal }}>
+                    <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.08em", color: C.teal }}>
                       {upcomingInvoices.length} invoice{upcomingInvoices.length !== 1 ? "s" : ""} due within 14d
                     </p>
                   )}
@@ -620,7 +620,7 @@ export default async function OperationsPage() {
                           <p style={{ fontFamily: C.sans, fontWeight: 300, fontSize: "0.75rem", color: C.cream, width: "4.5rem", textAlign: "right" as const, flexShrink: 0 }}>
                             {fmtMoney(amount)}
                           </p>
-                          <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: "rgba(255,255,255,0.25)", width: "2.5rem", textAlign: "right" as const, flexShrink: 0 }}>
+                          <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.25)", width: "2.5rem", textAlign: "right" as const, flexShrink: 0 }}>
                             {pct}%
                           </p>
                         </div>
@@ -646,13 +646,13 @@ export default async function OperationsPage() {
                           <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.cream, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                             {clientName(r.client)}
                           </p>
-                          <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: "rgba(255,255,255,0.28)", marginTop: "0.2rem" }}>
+                          <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.28)", marginTop: "0.2rem" }}>
                             {r.retainerName ?? "Retainer"} · {fmtDateShort(r.nextInvoiceDate)}
                           </p>
                         </div>
                         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexShrink: 0 }}>
                           {days !== null && (
-                            <p style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.06em", color: days <= 3 ? C.red : C.teal }}>
+                            <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.06em", color: days <= 3 ? C.red : C.teal }}>
                               {days === 0 ? "Today" : days === 1 ? "Tomorrow" : `${days}d`}
                             </p>
                           )}
@@ -681,7 +681,7 @@ export default async function OperationsPage() {
                         <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.cream, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                           {clientName(r.client)}
                         </p>
-                        <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: "rgba(255,255,255,0.28)", marginTop: "0.2rem" }}>
+                        <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.28)", marginTop: "0.2rem" }}>
                           {r.retainerName ?? "Retainer"}{r.nextInvoiceDate ? ` · Was due ${fmtDateShort(r.nextInvoiceDate)}` : ""}
                         </p>
                       </div>
@@ -721,7 +721,7 @@ export default async function OperationsPage() {
                         </p>
                       )}
                       {client.nextActionDueDate && (
-                        <p style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.06em", color: isPast(client.nextActionDueDate) ? C.red : "rgba(255,255,255,0.28)", marginTop: "0.35rem", textTransform: "uppercase" }}>
+                        <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.06em", color: isPast(client.nextActionDueDate) ? C.red : "rgba(255,255,255,0.28)", marginTop: "0.35rem", textTransform: "uppercase" }}>
                           Due {fmtDate(client.nextActionDueDate)}
                           {isPast(client.nextActionDueDate) ? " · OVERDUE" : ""}
                         </p>
@@ -782,7 +782,7 @@ export default async function OperationsPage() {
                         </p>
                         <Badge status={req.status ?? "new"} />
                       </div>
-                      <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: "rgba(255,255,255,0.3)", marginTop: "0.25rem" }}>
+                      <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.3)", marginTop: "0.25rem" }}>
                         {clientName(req.client)}{req.requestType ? ` · ${req.requestType}` : ""}{req.dueDate ? ` · Due ${fmtDate(req.dueDate)}` : ""}{req.priority === "urgent" ? " · URGENT" : req.priority === "high" ? " · HIGH" : ""}
                       </p>
                     </div>
@@ -809,11 +809,11 @@ export default async function OperationsPage() {
                         </p>
                         <Badge status={proj.status ?? "planning"} />
                       </div>
-                      <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: "rgba(255,255,255,0.3)", marginTop: "0.25rem" }}>
+                      <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.3)", marginTop: "0.25rem" }}>
                         {clientName(proj.client)}{proj.projectType ? ` · ${proj.projectType}` : ""}{proj.targetLaunchDate ? ` · Launch ${fmtDate(proj.targetLaunchDate)}` : ""}
                       </p>
                       {proj.nextAction && (
-                        <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: C.goldDim, marginTop: "0.3rem", lineHeight: 1.3, fontStyle: "italic" }}>
+                        <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.goldDim, marginTop: "0.3rem", lineHeight: 1.3, fontStyle: "italic" }}>
                           → {proj.nextAction}
                         </p>
                       )}
@@ -827,7 +827,7 @@ export default async function OperationsPage() {
 
         {/* ── Footer ────────────────────────────────────────────────────── */}
         <div style={{ marginTop: "2.5rem", padding: "1rem 1.25rem", background: C.goldFaint, border: `1px solid ${C.borderGold}`, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap" as const, gap: "0.5rem" }}>
-          <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", letterSpacing: "0.08em", color: "rgba(255,255,255,0.22)" }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.08em", color: "rgba(255,255,255,0.22)" }}>
             KXD OS · Operations Suite · Phase 2D · Live Payload data
           </p>
           <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" as const }}>
@@ -843,7 +843,7 @@ export default async function OperationsPage() {
               ["/admin/collections/client-projects",       "Projects"],
               ["/admin/collections/client-requests",       "Requests"],
             ] as [string, string][]).map(([href, label]) => (
-              <Link key={href} href={href} style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: C.gold, opacity: 0.45, textDecoration: "none" }}>
+              <Link key={href} href={href} style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: C.gold, opacity: 0.45, textDecoration: "none" }}>
                 {label} →
               </Link>
             ))}

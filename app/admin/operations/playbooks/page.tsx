@@ -12,14 +12,14 @@ export const dynamic = "force-dynamic";
 const C = {
   bgPure: "#050505",
   bgBase: "#080808",
-  bgElevated: "#111111",
+  bgElevated: "#0B0B0B",
   gold: "#C9A962",
   goldDim: "rgba(201,169,98,0.55)",
-  goldFaint: "rgba(201,169,98,0.08)",
+  goldFaint: "rgba(255,255,255,0.035)",
   cream: "#F5F1E8",
   creamMuted: "rgba(245,241,232,0.72)",
   border: "rgba(255,255,255,0.08)",
-  borderGold: "rgba(201,169,98,0.12)",
+  borderGold: "rgba(201,169,98,0.16)",
   serif: "var(--font-cormorant, Georgia, 'Times New Roman', serif)",
   sans: "var(--font-outfit, 'Helvetica Neue', Arial, sans-serif)",
 } as const;
@@ -40,7 +40,7 @@ const NAV_LINKS = [
 function Label({ children }: { children: React.ReactNode }) {
   return (
     <p style={{
-      fontFamily: C.sans, fontSize: "0.4375rem", fontWeight: 600,
+      fontFamily: C.sans, fontSize: "0.6875rem", fontWeight: 600,
       letterSpacing: "0.18em", textTransform: "uppercase" as const,
       color: "rgba(255,255,255,0.3)",
     }}>
@@ -58,10 +58,10 @@ export default function PlaybooksPage() {
             <div className="flex items-center gap-4">
               <KxdLogo />
               <div>
-                <p style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.5625rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.creamMuted }}>
+                <p style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.creamMuted }}>
                   Playbooks
                 </p>
-                <p style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "0.35rem" }}>
+                <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "0.35rem" }}>
                   Internal SOP Library
                 </p>
               </div>
@@ -72,7 +72,7 @@ export default function PlaybooksPage() {
                   key={href}
                   href={href}
                   style={{
-                    fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.12em",
+                    fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.12em",
                     textTransform: "uppercase",
                     color: href === "/admin/operations/playbooks" ? C.gold : "rgba(255,255,255,0.3)",
                     textDecoration: "none",
@@ -88,13 +88,13 @@ export default function PlaybooksPage() {
 
       <div className="mx-auto max-w-screen-xl" style={{ padding: "2.5rem 1.5rem 5rem" }}>
         <div style={{ marginBottom: "2.5rem", paddingBottom: "2rem", borderBottom: `1px solid ${C.border}` }}>
-          <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.2em", textTransform: "uppercase", color: C.goldDim, marginBottom: "0.875rem" }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.2em", textTransform: "uppercase", color: C.goldDim, marginBottom: "0.875rem" }}>
             KXD OS · Internal Playbooks
           </p>
           <h1 style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "clamp(1.875rem, 5vw, 3rem)", color: C.cream, lineHeight: 1.05 }}>
             SOP & Playbook Library
           </h1>
-          <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: C.creamMuted, marginTop: "0.75rem", maxWidth: "36rem" }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted, marginTop: "0.75rem", maxWidth: "36rem" }}>
             Core KXD operating procedures — launch, DNS, analytics, client success, and emergency response.
             Reference checklists for consistent delivery across the team.
           </p>
@@ -117,7 +117,7 @@ export default function PlaybooksPage() {
                     {playbook.title}
                   </h2>
                   <span style={{
-                    fontFamily: C.sans, fontSize: "0.375rem", fontWeight: 600,
+                    fontFamily: C.sans, fontSize: "0.6875rem", fontWeight: 600,
                     letterSpacing: "0.14em", textTransform: "uppercase",
                     color: badge.color, background: badge.bg,
                     border: `1px solid ${badge.border}`, padding: "0.25rem 0.5rem",
@@ -140,7 +140,7 @@ export default function PlaybooksPage() {
                         display: "flex", alignItems: "baseline", gap: "0.625rem",
                       }}
                     >
-                      <span style={{ color: C.goldDim, fontSize: "0.5rem" }}>◆</span>
+                      <span style={{ color: C.goldDim, fontSize: "0.8125rem" }}>◆</span>
                       {item}
                     </li>
                   ))}
@@ -150,7 +150,7 @@ export default function PlaybooksPage() {
           })}
         </div>
 
-        <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: "rgba(255,255,255,0.22)", marginTop: "2.5rem", letterSpacing: "0.06em" }}>
+        <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.22)", marginTop: "2.5rem", letterSpacing: "0.06em" }}>
           Static reference library · Edit playbooks in <code style={{ color: C.goldDim }}>lib/playbooks.ts</code>
         </p>
       </div>

@@ -27,29 +27,30 @@ export const dynamic = "force-dynamic";
 const C = {
   bgPure:      "#050505",
   bgBase:      "#080808",
-  bgElevated:  "#111111",
+  bgElevated:  "#0B0B0B",
   bgCard:      "#101010",
   gold:        "#C9A962",
   goldDim:     "rgba(201,169,98,0.55)",
-  goldFaint:   "rgba(201,169,98,0.08)",
+  goldFaint:   "rgba(255,255,255,0.035)",
   cream:       "#F5F1E8",
   creamMuted:  "rgba(245,241,232,0.72)",
   red:         "#d25a5a",
-  redFaint:    "rgba(210,90,90,0.08)",
+  redFaint:    "rgba(255,255,255,0.04)",
   redBorder:   "rgba(210,90,90,0.25)",
   yellow:      "#E8C468",
-  yellowFaint: "rgba(232,196,104,0.08)",
+  yellowFaint: "rgba(255,255,255,0.04)",
   green:       "#C9A962",
-  greenFaint:  "rgba(201,169,98,0.07)",
+  greenFaint:  "rgba(255,255,255,0.035)",
   greenBorder: "rgba(201,169,98,0.20)",
   teal:        "#A8B4C8",
-  tealFaint:   "rgba(168,180,200,0.07)",
+  tealFaint:   "rgba(255,255,255,0.035)",
   blue:        "#A8B4C8",
-  blueFaint:   "rgba(168,180,200,0.07)",
+  blueFaint:   "rgba(255,255,255,0.035)",
   purple:      "#C4B0D8",
-  purpleFaint: "rgba(196,176,216,0.07)",
+  purpleFaint: "rgba(255,255,255,0.035)",
   border:      "rgba(255,255,255,0.08)",
-  borderGold:  "rgba(201,169,98,0.12)",
+  borderGold:  "rgba(201,169,98,0.16)",
+  glass:       "rgba(255,255,255,0.035)",
   serif:       "var(--font-cormorant, Georgia, 'Times New Roman', serif)",
   sans:        "var(--font-outfit, 'Helvetica Neue', Arial, sans-serif)",
 } as const;
@@ -115,7 +116,7 @@ const TIER_LABEL: Record<string, string> = {
   flagship: "Flagship", growth: "Growth", maintenance: "Maintenance", internal: "Internal",
 };
 const STATUS_COLOR: Record<string, string> = {
-  healthy:         C.green,
+  healthy:         C.gold,
   "needs-attention": C.yellow,
   "at-risk":       C.red,
   paused:          C.creamMuted,
@@ -132,7 +133,7 @@ const STATUS_LABEL: Record<string, string> = {
 function Label({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
   return (
     <p style={{
-      fontFamily: C.sans, fontSize: "0.4375rem", fontWeight: 600,
+      fontFamily: C.sans, fontSize: "0.6875rem", fontWeight: 600,
       letterSpacing: "0.18em", textTransform: "uppercase" as const,
       color: "rgba(255,255,255,0.3)", ...style,
     }}>
@@ -155,14 +156,14 @@ function SectionHeader({
       <div>
         <Label style={{ marginBottom: "0.375rem" }}>{label}</Label>
         {sub && (
-          <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: C.creamMuted, letterSpacing: "0.02em" }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted, letterSpacing: "0.02em" }}>
             {sub}
           </p>
         )}
       </div>
       {href && (
         <Link href={href} style={{
-          fontFamily: C.sans, fontWeight: 500, fontSize: "0.4375rem",
+          fontFamily: C.sans, fontWeight: 500, fontSize: "0.6875rem",
           letterSpacing: "0.14em", textTransform: "uppercase" as const,
           color: C.goldDim, textDecoration: "none",
         }}>
@@ -180,7 +181,7 @@ function EmptyState({ message }: { message: string }) {
       padding: "1.375rem 1.5rem", display: "flex", alignItems: "center", gap: "0.875rem",
     }}>
       <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: "rgba(255,255,255,0.2)", flexShrink: 0 }} />
-      <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: "rgba(255,255,255,0.3)", letterSpacing: "0.04em" }}>
+      <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.3)", letterSpacing: "0.04em" }}>
         {message}
       </p>
     </div>
@@ -190,7 +191,7 @@ function EmptyState({ message }: { message: string }) {
 function Badge({ children, color = C.creamMuted }: { children: React.ReactNode; color?: string }) {
   return (
     <span style={{
-      fontFamily: C.sans, fontWeight: 600, fontSize: "0.375rem",
+      fontFamily: C.sans, fontWeight: 600, fontSize: "0.6875rem",
       letterSpacing: "0.16em", textTransform: "uppercase" as const,
       color, border: `1px solid ${color}`, opacity: 0.8,
       padding: "0.125rem 0.5rem", whiteSpace: "nowrap" as const,
@@ -294,7 +295,7 @@ function scoreAccount(
   const grade: "A" | "B" | "C" | "D" =
     clamped >= 80 ? "A" : clamped >= 60 ? "B" : clamped >= 40 ? "C" : "D";
   const gradeColor =
-    grade === "A" ? C.green : grade === "B" ? C.teal : grade === "C" ? C.yellow : C.red;
+    grade === "A" ? C.gold : grade === "B" ? C.teal : grade === "C" ? C.yellow : C.red;
 
   return {
     clientId:      cid,
@@ -383,7 +384,7 @@ export default async function AccountsPage() {
   const concRisk: "high" | "medium" | "low" =
     top1Pct >= 40 ? "high" : top1Pct >= 25 ? "medium" : "low";
   const concColor =
-    concRisk === "high" ? C.red : concRisk === "medium" ? C.yellow : C.green;
+    concRisk === "high" ? C.red : concRisk === "medium" ? C.yellow : C.gold;
 
   // ── Expansion opportunities ────────────────────────────────────────────────
   // Clients with no active projects (white space) but active retainer (could expand)
@@ -521,17 +522,17 @@ export default async function AccountsPage() {
             <div className="flex items-center gap-5">
               <KxdLogo />
               <div>
-                <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.2em", textTransform: "uppercase" as const, color: C.goldDim }}>
+                <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.2em", textTransform: "uppercase" as const, color: C.goldDim }}>
                   KXD OS · Strategic Accounts Intelligence
                 </p>
-                <p style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.18)", marginTop: "0.125rem" }}>
+                <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.18)", marginTop: "0.125rem" }}>
                   Phase 3A · Live Payload data · Refreshes on every request
                 </p>
               </div>
               <span style={{
-                fontFamily: C.sans, fontWeight: 600, fontSize: "0.375rem",
+                fontFamily: C.sans, fontWeight: 600, fontSize: "0.6875rem",
                 letterSpacing: "0.16em", textTransform: "uppercase" as const,
-                color: "rgba(201,169,98,0.75)", background: "rgba(201,169,98,0.07)",
+                color: "rgba(201,169,98,0.75)", background: "rgba(255,255,255,0.035)",
                 border: "1px solid rgba(201,169,98,0.2)", padding: "0.2rem 0.6rem",
               }}>
                 Phase 3A
@@ -539,22 +540,22 @@ export default async function AccountsPage() {
             </div>
 
             <div className="flex items-center gap-5">
-              <Link href="/admin/operations/executive" style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.3)", textDecoration: "none" }}>
+              <Link href="/admin/operations/executive" style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.3)", textDecoration: "none" }}>
                 ← Operations
               </Link>
-              <Link href="/admin/operations/today" style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.3)", textDecoration: "none" }}>
+              <Link href="/admin/operations/today" style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.3)", textDecoration: "none" }}>
                 Today →
               </Link>
-              <Link href="/admin/operations/growth" style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.3)", textDecoration: "none" }}>
+              <Link href="/admin/operations/growth" style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.3)", textDecoration: "none" }}>
                 Growth →
               </Link>
-              <Link href="/admin/operations/creative" style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.3)", textDecoration: "none" }}>
+              <Link href="/admin/operations/creative" style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.3)", textDecoration: "none" }}>
                 Creative →
               </Link>
-              <Link href="/admin/operations/founder" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.5rem", letterSpacing: "0.14em", textTransform: "uppercase" as const, color: C.gold, opacity: 0.8, textDecoration: "none" }}>
+              <Link href="/admin/operations/founder" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem", letterSpacing: "0.14em", textTransform: "uppercase" as const, color: C.gold, opacity: 0.8, textDecoration: "none" }}>
                 Founder →
               </Link>
-              <Link href="/admin" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.5rem", letterSpacing: "0.14em", textTransform: "uppercase" as const, color: C.gold, opacity: 0.55, textDecoration: "none" }}>
+              <Link href="/admin" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem", letterSpacing: "0.14em", textTransform: "uppercase" as const, color: C.gold, opacity: 0.55, textDecoration: "none" }}>
                 Payload →
               </Link>
             </div>
@@ -568,7 +569,7 @@ export default async function AccountsPage() {
 
         {/* ── Page title + expansion score ──────────────────────────────── */}
         <div style={{ marginBottom: "2.5rem", paddingBottom: "2rem", borderBottom: `1px solid ${C.border}` }}>
-          <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.2em", textTransform: "uppercase" as const, color: C.goldDim, marginBottom: "0.875rem" }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.2em", textTransform: "uppercase" as const, color: C.goldDim, marginBottom: "0.875rem" }}>
             KXD OS · Strategic Accounts Intelligence
           </p>
           <div className="flex flex-wrap items-end justify-between gap-6">
@@ -576,7 +577,7 @@ export default async function AccountsPage() {
               <h1 style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "clamp(1.875rem, 5vw, 3.25rem)", lineHeight: 1.02, color: C.cream, letterSpacing: "-0.01em" }}>
                 Account Intelligence
               </h1>
-              <p style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.06em", color: "rgba(255,255,255,0.2)", marginTop: "0.625rem" }}>
+              <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.06em", color: "rgba(255,255,255,0.2)", marginTop: "0.625rem" }}>
                 {dateDisplay} · Loaded {timeDisplay}
               </p>
             </div>
@@ -584,16 +585,16 @@ export default async function AccountsPage() {
             {/* Expansion opportunity score badge */}
             <div style={{
               display: "inline-flex", alignItems: "center", gap: "0.875rem",
-              background: expansionScore >= 30 ? C.tealFaint : C.goldFaint,
-              border: `1px solid ${expansionScore >= 30 ? "rgba(168,180,200,0.28)" : C.borderGold}`,
+              background: C.glass,
+              border: `1px solid ${C.borderGold}`,
               padding: "0.875rem 1.375rem",
             }}>
-              <div style={{ width: "7px", height: "7px", borderRadius: "50%", background: expansionScore >= 30 ? C.teal : C.gold, flexShrink: 0 }} />
+              <div style={{ width: "7px", height: "7px", borderRadius: "50%", background: C.gold, flexShrink: 0 }} />
               <div>
-                <p style={{ fontFamily: C.sans, fontWeight: 600, fontSize: "0.5625rem", letterSpacing: "0.2em", textTransform: "uppercase" as const, color: expansionScore >= 30 ? C.teal : C.gold, lineHeight: 1 }}>
+                <p style={{ fontFamily: C.sans, fontWeight: 600, fontSize: "0.8125rem", letterSpacing: "0.2em", textTransform: "uppercase" as const, color: C.gold, lineHeight: 1 }}>
                   Expansion Score — {expansionScore}%
                 </p>
-                <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.06em", color: "rgba(255,255,255,0.3)", marginTop: "0.375rem" }}>
+                <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.06em", color: "rgba(255,255,255,0.3)", marginTop: "0.375rem" }}>
                   {expansionCandidates.length} account{expansionCandidates.length !== 1 ? "s" : ""} with untapped potential · {activeWithMRR.length} on retainer
                 </p>
               </div>
@@ -612,10 +613,10 @@ export default async function AccountsPage() {
               <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "clamp(1.375rem, 2.2vw, 1.875rem)", lineHeight: 1, color: kpi.alert ? C.yellow : C.cream, marginTop: "0.625rem", letterSpacing: "-0.01em" }}>
                 {kpi.value}
               </p>
-              <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: "rgba(255,255,255,0.25)", letterSpacing: "0.04em", marginTop: "0.375rem" }}>
+              <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.25)", letterSpacing: "0.04em", marginTop: "0.375rem" }}>
                 {kpi.sub}
               </p>
-              <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: kpi.alert ? C.red : C.goldDim, letterSpacing: "0.06em", marginTop: "0.5rem" }}>
+              <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: kpi.alert ? C.red : C.goldDim, letterSpacing: "0.06em", marginTop: "0.5rem" }}>
                 {kpi.delta}
               </p>
             </div>
@@ -639,7 +640,7 @@ export default async function AccountsPage() {
                 <div key={a.clientId} style={{ background: C.bgElevated, padding: "1rem 1.375rem", display: "flex", alignItems: "center", gap: "1.25rem", flexWrap: "wrap" as const }}>
 
                   {/* Grade badge */}
-                  <div style={{ width: "2.5rem", height: "2.5rem", background: `${a.gradeColor}14`, border: `1px solid ${a.gradeColor}40`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <div style={{ width: "2.5rem", height: "2.5rem", background: "rgba(255,255,255,0.045)", border: `1px solid ${C.borderGold}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                     <span style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "1.125rem", color: a.gradeColor }}>
                       {a.grade}
                     </span>
@@ -653,11 +654,11 @@ export default async function AccountsPage() {
                       </p>
                     </Link>
                     <div className="flex items-center gap-2" style={{ marginTop: "0.25rem" }}>
-                      <span style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.14em", textTransform: "uppercase" as const, color: TIER_COLOR[a.tier] ?? C.creamMuted }}>
+                      <span style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.14em", textTransform: "uppercase" as const, color: TIER_COLOR[a.tier] ?? C.creamMuted }}>
                         {TIER_LABEL[a.tier] ?? a.tier}
                       </span>
                       <span style={{ width: "1px", height: "8px", background: "rgba(255,255,255,0.12)" }} />
-                      <span style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.1em", textTransform: "uppercase" as const, color: STATUS_COLOR[a.status] ?? C.creamMuted }}>
+                      <span style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.1em", textTransform: "uppercase" as const, color: STATUS_COLOR[a.status] ?? C.creamMuted }}>
                         {STATUS_LABEL[a.status] ?? a.status}
                       </span>
                     </div>
@@ -669,13 +670,13 @@ export default async function AccountsPage() {
                       <div style={{ flex: 1, height: "3px", background: "rgba(255,255,255,0.08)", position: "relative" as const }}>
                         <div style={{ position: "absolute" as const, top: 0, left: 0, width: `${a.score}%`, height: "100%", background: a.gradeColor }} />
                       </div>
-                      <span style={{ fontFamily: C.sans, fontWeight: 600, fontSize: "0.5625rem", color: a.gradeColor, letterSpacing: "0.04em", flexShrink: 0 }}>
+                      <span style={{ fontFamily: C.sans, fontWeight: 600, fontSize: "0.8125rem", color: a.gradeColor, letterSpacing: "0.04em", flexShrink: 0 }}>
                         {a.score}
                       </span>
                     </div>
                     {/* Flags */}
                     {a.flags.length > 0 && (
-                      <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: "rgba(210,90,90,0.7)", letterSpacing: "0.06em", marginTop: "0.375rem" }}>
+                      <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(210,90,90,0.7)", letterSpacing: "0.06em", marginTop: "0.375rem" }}>
                         ⚠ {a.flags.join(" · ")}
                       </p>
                     )}
@@ -686,7 +687,7 @@ export default async function AccountsPage() {
                     <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "1rem", color: a.mrr > 0 ? C.cream : "rgba(255,255,255,0.25)", letterSpacing: "-0.01em" }}>
                       {fmtMoney(a.mrr)}
                     </p>
-                    <p style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.25)", marginTop: "0.2rem" }}>
+                    <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.25)", marginTop: "0.2rem" }}>
                       /month
                     </p>
                   </div>
@@ -700,7 +701,7 @@ export default async function AccountsPage() {
                     ].map(({ v, l }) => (
                       <div key={l} style={{ textAlign: "center" as const }}>
                         <p style={{ fontFamily: C.sans, fontWeight: 600, fontSize: "0.6875rem", color: v > 0 ? C.creamMuted : "rgba(255,255,255,0.2)" }}>{v}</p>
-                        <p style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.2)" }}>{l}</p>
+                        <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.2)" }}>{l}</p>
                       </div>
                     ))}
                   </div>
@@ -724,31 +725,31 @@ export default async function AccountsPage() {
             <div style={{ background: C.bgElevated, border: `1px solid ${concColor}30`, padding: "1.5rem" }}>
               <div className="flex items-center gap-3" style={{ marginBottom: "1.25rem" }}>
                 <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: concColor }} />
-                <p style={{ fontFamily: C.sans, fontWeight: 600, fontSize: "0.5625rem", letterSpacing: "0.16em", textTransform: "uppercase" as const, color: concColor }}>
+                <p style={{ fontFamily: C.sans, fontWeight: 600, fontSize: "0.8125rem", letterSpacing: "0.16em", textTransform: "uppercase" as const, color: concColor }}>
                   Concentration Risk — {concRisk.toUpperCase()}
                 </p>
               </div>
               <div style={{ display: "flex", flexDirection: "column" as const, gap: "0.875rem" }}>
                 <div>
-                  <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.3)", textTransform: "uppercase" as const }}>
+                  <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.3)", textTransform: "uppercase" as const }}>
                     Top Client
                   </p>
                   <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "1.5rem", color: concColor, letterSpacing: "-0.01em", marginTop: "0.25rem" }}>
                     {top1Pct}% <span style={{ fontSize: "0.875rem", color: C.creamMuted }}>of total MRR</span>
                   </p>
-                  <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: "rgba(255,255,255,0.3)", marginTop: "0.25rem" }}>
+                  <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.3)", marginTop: "0.25rem" }}>
                     {activeWithMRR[0]?.name ?? "—"} · {fmtMoney(top1MRR)}/mo
                   </p>
                 </div>
                 <div>
-                  <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.3)", textTransform: "uppercase" as const }}>
+                  <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.3)", textTransform: "uppercase" as const }}>
                     Top 3 Combined
                   </p>
                   <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "1.125rem", color: C.creamMuted, letterSpacing: "-0.01em", marginTop: "0.25rem" }}>
                     {top3Pct}% <span style={{ fontSize: "0.75rem" }}>of total MRR</span>
                   </p>
                 </div>
-                <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: "rgba(255,255,255,0.25)", letterSpacing: "0.06em", borderTop: `1px solid ${C.border}`, paddingTop: "0.75rem" }}>
+                <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(255,255,255,0.25)", letterSpacing: "0.06em", borderTop: `1px solid ${C.border}`, paddingTop: "0.75rem" }}>
                   {concRisk === "high"
                     ? "High concentration — single client loss would significantly impact revenue."
                     : concRisk === "medium"
@@ -760,11 +761,11 @@ export default async function AccountsPage() {
 
             {/* MRR waterfall by client */}
             <div style={{ background: C.bgElevated, border: `1px solid ${C.border}`, padding: "1.5rem" }}>
-              <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.14em", textTransform: "uppercase" as const, color: C.goldDim, marginBottom: "1rem" }}>
+              <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.14em", textTransform: "uppercase" as const, color: C.goldDim, marginBottom: "1rem" }}>
                 MRR by Account
               </p>
               {activeWithMRR.length === 0 ? (
-                <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: "rgba(255,255,255,0.25)" }}>No retainer revenue recorded.</p>
+                <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.25)" }}>No retainer revenue recorded.</p>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column" as const, gap: "0.625rem" }}>
                   {activeWithMRR.slice(0, 8).map((a) => {
@@ -772,10 +773,10 @@ export default async function AccountsPage() {
                     return (
                       <div key={a.clientId}>
                         <div className="flex justify-between" style={{ marginBottom: "0.25rem" }}>
-                          <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: C.creamMuted }}>
+                          <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted }}>
                             {a.name}
                           </p>
-                          <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: C.cream }}>
+                          <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.cream }}>
                             {fmtMoney(a.mrr)}
                           </p>
                         </div>
@@ -786,7 +787,7 @@ export default async function AccountsPage() {
                     );
                   })}
                   {activeWithMRR.length > 8 && (
-                    <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: "rgba(255,255,255,0.25)", marginTop: "0.5rem" }}>
+                    <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(255,255,255,0.25)", marginTop: "0.5rem" }}>
                       +{activeWithMRR.length - 8} more accounts
                     </p>
                   )}
@@ -807,8 +808,8 @@ export default async function AccountsPage() {
 
           {founderAttention.length === 0 ? (
             <div style={{ background: C.bgElevated, border: `1px solid rgba(201,169,98,0.2)`, padding: "1.25rem 1.5rem", display: "flex", alignItems: "center", gap: "1rem" }}>
-              <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: C.green, flexShrink: 0 }} />
-              <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: C.green, letterSpacing: "0.04em" }}>
+              <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: C.gold, flexShrink: 0 }} />
+              <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: C.gold, letterSpacing: "0.04em" }}>
                 All accounts clear — no founder attention required right now.
               </p>
             </div>
@@ -834,26 +835,26 @@ export default async function AccountsPage() {
                           : "Attention"}
                       </Badge>
                     </div>
-                    <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: TIER_COLOR[a.tier] ?? C.creamMuted, letterSpacing: "0.1em", textTransform: "uppercase" as const, marginBottom: "0.5rem" }}>
+                    <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: TIER_COLOR[a.tier] ?? C.creamMuted, letterSpacing: "0.1em", textTransform: "uppercase" as const, marginBottom: "0.5rem" }}>
                       {TIER_LABEL[a.tier] ?? a.tier} · {fmtMoney(a.mrr)}/mo
                     </p>
                     <div style={{ display: "flex", flexDirection: "column" as const, gap: "0.25rem" }}>
                       {a.flags.map(f => (
-                        <p key={f} style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: "rgba(210,90,90,0.75)", letterSpacing: "0.06em" }}>
+                        <p key={f} style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(210,90,90,0.75)", letterSpacing: "0.06em" }}>
                           ⚠ {f}
                         </p>
                       ))}
                     </div>
                     {a.nextAction && (
                       <div style={{ marginTop: "0.625rem", padding: "0.5rem 0.625rem", background: "rgba(255,255,255,0.03)", border: `1px solid ${C.border}` }}>
-                        <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.25)", textTransform: "uppercase" as const, marginBottom: "0.25rem" }}>
+                        <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.25)", textTransform: "uppercase" as const, marginBottom: "0.25rem" }}>
                           Next Action
                         </p>
-                        <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: C.creamMuted }}>
+                        <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted }}>
                           {a.nextAction}
                         </p>
                         {a.nextActionDue && (
-                          <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: (daysUntil(a.nextActionDue) ?? 999) < 0 ? C.red : C.goldDim, marginTop: "0.25rem" }}>
+                          <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: (daysUntil(a.nextActionDue) ?? 999) < 0 ? C.red : C.goldDim, marginTop: "0.25rem" }}>
                             Due {fmtDate(a.nextActionDue)}
                           </p>
                         )}
@@ -899,22 +900,22 @@ export default async function AccountsPage() {
                     </div>
                     <div style={{ display: "flex", gap: "1.5rem", marginBottom: "0.625rem" }}>
                       <div>
-                        <p style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.25)", textTransform: "uppercase" as const }}>Current MRR</p>
+                        <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.25)", textTransform: "uppercase" as const }}>Current MRR</p>
                         <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "1rem", color: C.creamMuted, marginTop: "0.125rem" }}>{fmtMoney(a.mrr)}</p>
                       </div>
                       <div>
-                        <p style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.25)", textTransform: "uppercase" as const }}>Tier Benchmark</p>
+                        <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.25)", textTransform: "uppercase" as const }}>Tier Benchmark</p>
                         <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "1rem", color: C.teal, marginTop: "0.125rem" }}>{fmtMoney(benchmark)}</p>
                       </div>
                       <div>
-                        <p style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.25)", textTransform: "uppercase" as const }}>Upside</p>
+                        <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.12em", color: "rgba(255,255,255,0.25)", textTransform: "uppercase" as const }}>Upside</p>
                         <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "1rem", color: C.gold, marginTop: "0.125rem" }}>+{fmtMoney(gap)}</p>
                       </div>
                     </div>
                     <div style={{ height: "2px", background: "rgba(255,255,255,0.08)", position: "relative" as const }}>
                       <div style={{ position: "absolute" as const, top: 0, left: 0, width: `${Math.min((a.mrr / benchmark) * 100, 100)}%`, height: "100%", background: TIER_COLOR[a.tier] ?? C.gold }} />
                     </div>
-                    <p style={{ fontFamily: C.sans, fontSize: "0.375rem", color: "rgba(255,255,255,0.2)", marginTop: "0.375rem" }}>
+                    <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(255,255,255,0.2)", marginTop: "0.375rem" }}>
                       {Math.round((a.mrr / benchmark) * 100)}% of tier benchmark
                     </p>
                   </div>
@@ -947,7 +948,7 @@ export default async function AccountsPage() {
                         {c.name}
                       </p>
                     </Link>
-                    <p style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.12em", color: TIER_COLOR[c.brandTier as string] ?? C.creamMuted, textTransform: "uppercase" as const, marginBottom: "0.5rem" }}>
+                    <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.12em", color: TIER_COLOR[c.brandTier as string] ?? C.creamMuted, textTransform: "uppercase" as const, marginBottom: "0.5rem" }}>
                       {TIER_LABEL[c.brandTier as string] ?? c.brandTier}
                     </p>
                     <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "1rem", color: C.teal, marginBottom: "0.25rem" }}>
@@ -955,11 +956,11 @@ export default async function AccountsPage() {
                       <span style={{ fontSize: "0.75rem", color: C.creamMuted }}>/mo</span>
                     </p>
                     {score?.nextAction ? (
-                      <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: "rgba(255,255,255,0.3)", letterSpacing: "0.06em", marginTop: "0.5rem" }}>
+                      <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(255,255,255,0.3)", letterSpacing: "0.06em", marginTop: "0.5rem" }}>
                         → {score.nextAction}
                       </p>
                     ) : (
-                      <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: "rgba(210,90,90,0.5)", letterSpacing: "0.06em", marginTop: "0.5rem" }}>
+                      <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(210,90,90,0.5)", letterSpacing: "0.06em", marginTop: "0.5rem" }}>
                         No next action defined
                       </p>
                     )}
@@ -995,7 +996,7 @@ export default async function AccountsPage() {
                       <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "1.5rem", color: acColor, lineHeight: 1 }}>
                         {days}
                       </p>
-                      <p style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.25)", textTransform: "uppercase" as const }}>
+                      <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.25)", textTransform: "uppercase" as const }}>
                         {days === 1 ? "day" : "days"}
                       </p>
                     </div>
@@ -1006,7 +1007,7 @@ export default async function AccountsPage() {
                           {a.name}
                         </p>
                       </Link>
-                      <p style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.1em", color: TIER_COLOR[a.tier] ?? C.creamMuted, textTransform: "uppercase" as const, marginTop: "0.2rem" }}>
+                      <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.1em", color: TIER_COLOR[a.tier] ?? C.creamMuted, textTransform: "uppercase" as const, marginTop: "0.2rem" }}>
                         {TIER_LABEL[a.tier] ?? a.tier}
                       </p>
                     </div>
@@ -1015,7 +1016,7 @@ export default async function AccountsPage() {
                       <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "1rem", color: C.cream }}>
                         {fmtMoney(a.mrr)}<span style={{ fontSize: "0.625rem", color: C.creamMuted }}>/mo</span>
                       </p>
-                      <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: "rgba(255,255,255,0.3)", marginTop: "0.2rem" }}>
+                      <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(255,255,255,0.3)", marginTop: "0.2rem" }}>
                         Renews {fmtDate(a.renewalDate)}
                       </p>
                     </div>
@@ -1051,10 +1052,10 @@ export default async function AccountsPage() {
             <EmptyState message="No flagship clients. Promote accounts to Flagship tier to unlock licensing intelligence." />
           ) : licensingDeliverables.length === 0 ? (
             <div style={{ background: C.bgElevated, border: `1px solid ${C.border}`, padding: "1.375rem 1.5rem" }}>
-              <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: C.creamMuted, letterSpacing: "0.02em", marginBottom: "0.5rem" }}>
+              <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted, letterSpacing: "0.02em", marginBottom: "0.5rem" }}>
                 {flagshipClients.length} flagship client{flagshipClients.length !== 1 ? "s" : ""} on file — no deliverables categorised as brand-system, website, platform, or campaign yet.
               </p>
-              <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.06em", color: "rgba(255,255,255,0.25)" }}>
+              <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.06em", color: "rgba(255,255,255,0.25)" }}>
                 Flagship accounts: {flagshipClients.map(a => a.name).join(", ")}
               </p>
             </div>
@@ -1065,7 +1066,7 @@ export default async function AccountsPage() {
                   <p style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.6875rem", color: C.cream, marginBottom: "0.25rem" }}>
                     {(d.title as string) || "Untitled Deliverable"}
                   </p>
-                  <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: C.gold, letterSpacing: "0.1em", textTransform: "uppercase" as const, marginBottom: "0.375rem" }}>
+                  <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: C.gold, letterSpacing: "0.1em", textTransform: "uppercase" as const, marginBottom: "0.375rem" }}>
                     {clientName(d.client)}
                   </p>
                   <div className="flex items-center gap-2">
@@ -1101,11 +1102,11 @@ export default async function AccountsPage() {
                         </p>
                       </Link>
                       <div className="flex items-center gap-2" style={{ marginTop: "0.25rem" }}>
-                        <span style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: TIER_COLOR[a.tier] ?? C.creamMuted }}>
+                        <span style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: TIER_COLOR[a.tier] ?? C.creamMuted }}>
                           {TIER_LABEL[a.tier] ?? a.tier}
                         </span>
                         <span style={{ width: "1px", height: "8px", background: "rgba(255,255,255,0.12)" }} />
-                        <span style={{ fontFamily: C.sans, fontSize: "0.375rem", color: STATUS_COLOR[a.status] ?? C.creamMuted }}>
+                        <span style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: STATUS_COLOR[a.status] ?? C.creamMuted }}>
                           {STATUS_LABEL[a.status] ?? a.status}
                         </span>
                       </div>
@@ -1113,9 +1114,9 @@ export default async function AccountsPage() {
                     <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
                       <div style={{ textAlign: "right" as const }}>
                         <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "1rem", color: C.cream }}>{fmtMoney(a.mrr)}</p>
-                        <p style={{ fontFamily: C.sans, fontSize: "0.375rem", color: "rgba(255,255,255,0.25)" }}>/month</p>
+                        <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(255,255,255,0.25)" }}>/month</p>
                       </div>
-                      <div style={{ width: "2rem", height: "2rem", background: `${a.gradeColor}14`, border: `1px solid ${a.gradeColor}40`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <div style={{ width: "2rem", height: "2rem", background: "rgba(255,255,255,0.045)", border: `1px solid ${C.borderGold}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
                         <span style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "0.875rem", color: a.gradeColor }}>
                           {a.grade}
                         </span>
@@ -1129,27 +1130,27 @@ export default async function AccountsPage() {
                       <div style={{ flex: 1, height: "2px", background: "rgba(255,255,255,0.08)", position: "relative" as const }}>
                         <div style={{ position: "absolute" as const, top: 0, left: 0, width: `${a.score}%`, height: "100%", background: a.gradeColor }} />
                       </div>
-                      <span style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: a.gradeColor }}>{a.score}/100</span>
+                      <span style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: a.gradeColor }}>{a.score}/100</span>
                     </div>
                   </div>
 
                   {/* Next action */}
                   {a.nextAction ? (
                     <div style={{ padding: "0.5rem 0.625rem", background: "rgba(255,255,255,0.02)", border: `1px solid ${C.border}` }}>
-                      <p style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.25)", textTransform: "uppercase" as const, marginBottom: "0.2rem" }}>
+                      <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.25)", textTransform: "uppercase" as const, marginBottom: "0.2rem" }}>
                         Next Action
                       </p>
-                      <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: C.creamMuted }}>
+                      <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted }}>
                         {a.nextAction}
                       </p>
                       {a.nextActionDue && (
-                        <p style={{ fontFamily: C.sans, fontSize: "0.375rem", color: (daysUntil(a.nextActionDue) ?? 999) < 0 ? C.red : C.goldDim, marginTop: "0.2rem" }}>
+                        <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: (daysUntil(a.nextActionDue) ?? 999) < 0 ? C.red : C.goldDim, marginTop: "0.2rem" }}>
                           Due {fmtDate(a.nextActionDue)}
                         </p>
                       )}
                     </div>
                   ) : (
-                    <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: "rgba(210,90,90,0.45)", letterSpacing: "0.06em" }}>
+                    <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(210,90,90,0.45)", letterSpacing: "0.06em" }}>
                       No next action defined
                     </p>
                   )}
@@ -1158,7 +1159,7 @@ export default async function AccountsPage() {
                   {a.strengths.length > 0 && (
                     <div className="flex flex-wrap gap-1" style={{ marginTop: "0.625rem" }}>
                       {a.strengths.map(s => (
-                        <span key={s} style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.1em", color: "rgba(201,169,98,0.7)", border: "1px solid rgba(201,169,98,0.2)", padding: "0.125rem 0.375rem" }}>
+                        <span key={s} style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.1em", color: "rgba(201,169,98,0.7)", border: "1px solid rgba(201,169,98,0.2)", padding: "0.125rem 0.375rem" }}>
                           {s}
                         </span>
                       ))}
@@ -1171,8 +1172,8 @@ export default async function AccountsPage() {
         </section>
 
         {/* ── Footer ────────────────────────────────────────────────────── */}
-        <div style={{ marginTop: "2.5rem", padding: "1rem 1.25rem", background: C.goldFaint, border: `1px solid ${C.borderGold}`, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap" as const, gap: "0.5rem" }}>
-          <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", letterSpacing: "0.08em", color: "rgba(255,255,255,0.22)" }}>
+        <div style={{ marginTop: "2.5rem", padding: "1rem 1.25rem", background: C.glass, border: `1px solid ${C.border}`, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap" as const, gap: "0.5rem" }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.08em", color: "rgba(255,255,255,0.22)" }}>
             KXD OS · Strategic Accounts Intelligence · Phase 3A · Live Payload data · Refreshes on each request
           </p>
           <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" as const }}>
@@ -1186,7 +1187,7 @@ export default async function AccountsPage() {
               ["/admin/collections/retainers", "Retainers"],
               ["/admin",                     "Payload"],
             ] as [string, string][]).map(([href, label]) => (
-              <Link key={href} href={href} style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: C.gold, opacity: 0.45, textDecoration: "none" }}>
+              <Link key={href} href={href} style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: C.gold, opacity: 0.45, textDecoration: "none" }}>
                 {label} →
               </Link>
             ))}

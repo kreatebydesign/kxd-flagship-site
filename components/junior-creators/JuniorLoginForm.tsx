@@ -44,7 +44,7 @@ export function JuniorLoginForm() {
           style={{
             fontSize: "0.75rem",
             color: "rgba(210,90,90,0.9)",
-            background: "rgba(210,90,90,0.08)",
+            background: "rgba(255,255,255,0.04)",
             border: "1px solid rgba(210,90,90,0.25)",
             padding: "0.75rem 1rem",
           }}
@@ -55,7 +55,7 @@ export function JuniorLoginForm() {
       <div>
         <label
           className="mb-2 block font-sans uppercase"
-          style={{ fontSize: "0.5rem", letterSpacing: "0.14em", color: "rgba(255,255,255,0.35)" }}
+          style={{ fontSize: "0.8125rem", letterSpacing: "0.14em", color: "rgba(255,255,255,0.35)" }}
         >
           Email
         </label>
@@ -77,7 +77,7 @@ export function JuniorLoginForm() {
       <div>
         <label
           className="mb-2 block font-sans uppercase"
-          style={{ fontSize: "0.5rem", letterSpacing: "0.14em", color: "rgba(255,255,255,0.35)" }}
+          style={{ fontSize: "0.8125rem", letterSpacing: "0.14em", color: "rgba(255,255,255,0.35)" }}
         >
           Password
         </label>
@@ -101,7 +101,7 @@ export function JuniorLoginForm() {
         disabled={loading}
         className="w-full font-sans uppercase"
         style={{
-          fontSize: "0.5rem",
+          fontSize: "0.8125rem",
           letterSpacing: "0.16em",
           fontWeight: 500,
           color: "#080808",

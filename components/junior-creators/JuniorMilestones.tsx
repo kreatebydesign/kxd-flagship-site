@@ -1,14 +1,14 @@
 import { evaluateMilestones, type MilestoneStats } from "@/lib/junior-creators/academy";
 
 const C = {
-  bgElevated: "#111111",
+  bgElevated: "#0B0B0B",
   bgCard: "#101010",
   gold: "#C9A962",
   goldDim: "rgba(201,169,98,0.55)",
   cream: "#F5F1E8",
   creamMuted: "rgba(245,241,232,0.72)",
   border: "rgba(255,255,255,0.08)",
-  borderGold: "rgba(201,169,98,0.14)",
+  borderGold: "rgba(201,169,98,0.16)",
   serif: "var(--font-cormorant, Georgia, 'Times New Roman', serif)",
   sans: "var(--font-outfit, 'Helvetica Neue', Arial, sans-serif)",
 } as const;
@@ -22,7 +22,7 @@ function Label({ children, style }: { children: React.ReactNode; style?: React.C
     <p
       style={{
         fontFamily: C.sans,
-        fontSize: "0.4375rem",
+        fontSize: "0.6875rem",
         fontWeight: 600,
         letterSpacing: "0.18em",
         textTransform: "uppercase",
@@ -52,7 +52,7 @@ export function JuniorMilestones({ stats }: Props) {
         }}
       >
         <Label style={{ color: C.goldDim }}>Milestones</Label>
-        <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: C.creamMuted }}>
+        <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted }}>
           {achievedCount} of {milestones.length} reached
         </p>
       </div>
@@ -76,7 +76,7 @@ export function JuniorMilestones({ stats }: Props) {
             <p
               style={{
                 fontFamily: C.sans,
-                fontSize: "0.375rem",
+                fontSize: "0.6875rem",
                 fontWeight: 600,
                 letterSpacing: "0.12em",
                 textTransform: "uppercase",
@@ -101,7 +101,7 @@ export function JuniorMilestones({ stats }: Props) {
             <p
               style={{
                 fontFamily: C.sans,
-                fontSize: "0.5rem",
+                fontSize: "0.8125rem",
                 color: "rgba(245,241,232,0.48)",
                 lineHeight: 1.5,
               }}

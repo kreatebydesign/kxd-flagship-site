@@ -13,21 +13,21 @@ export const dynamic = "force-dynamic";
 const C = {
   bgPure: "#050505",
   bgBase: "#080808",
-  bgElevated: "#111111",
+  bgElevated: "#0B0B0B",
   gold: "#C9A962",
   goldDim: "rgba(201,169,98,0.55)",
-  goldFaint: "rgba(201,169,98,0.08)",
+  goldFaint: "rgba(255,255,255,0.035)",
   cream: "#F5F1E8",
   creamMuted: "rgba(245,241,232,0.72)",
   red: "#d25a5a",
-  redFaint: "rgba(210,90,90,0.08)",
+  redFaint: "rgba(255,255,255,0.04)",
   yellow: "#E8C468",
   green: "#C9A962",
   teal: "#A8B4C8",
   blue: "#A8B4C8",
   purple: "#C4B0D8",
   border: "rgba(255,255,255,0.08)",
-  borderGold: "rgba(201,169,98,0.12)",
+  borderGold: "rgba(201,169,98,0.16)",
   serif: "var(--font-cormorant, Georgia, 'Times New Roman', serif)",
   sans: "var(--font-outfit, 'Helvetica Neue', Arial, sans-serif)",
 } as const;
@@ -43,14 +43,14 @@ const PIPELINE_ORDER = [
 
 const TONE: Record<string, { color: string; bg: string; border: string }> = {
   red: { color: C.red, bg: C.redFaint, border: "rgba(210,90,90,0.25)" },
-  yellow: { color: C.yellow, bg: "rgba(232,196,104,0.08)", border: "rgba(232,196,104,0.25)" },
+  yellow: { color: C.yellow, bg: "rgba(255,255,255,0.04)", border: "rgba(232,196,104,0.25)" },
   gold: { color: C.gold, bg: C.goldFaint, border: C.borderGold },
 };
 
 function Label({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
   return (
     <p style={{
-      fontFamily: C.sans, fontSize: "0.4375rem", fontWeight: 600,
+      fontFamily: C.sans, fontSize: "0.6875rem", fontWeight: 600,
       letterSpacing: "0.18em", textTransform: "uppercase" as const,
       color: "rgba(255,255,255,0.3)", ...style,
     }}>
@@ -65,29 +65,31 @@ function EmptyPanel({ message }: { message: string }) {
       background: C.bgElevated, border: `1px solid ${C.border}`,
       padding: "1.375rem 1.5rem",
     }}>
-      <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: "rgba(255,255,255,0.3)", letterSpacing: "0.04em" }}>
+      <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.3)", letterSpacing: "0.04em" }}>
         {message}
       </p>
     </div>
   );
 }
 
-function CommandCard({ title, value, sub, href }: { title: string; value: string; sub?: string; href: string }) {
+function OverviewCard({ title, value, sub, href }: { title: string; value: string; sub?: string; href: string }) {
   return (
     <Link
       href={href}
       style={{
         display: "block", textDecoration: "none",
-        background: C.bgElevated, padding: "1.375rem 1.5rem",
+        background: "rgba(255,255,255,0.035)", padding: "1.375rem 1.5rem",
         border: `1px solid ${C.border}`,
+        transition: "background 0.2s ease, border-color 0.2s ease",
       }}
+      className="kxd-exec-overview-card"
     >
       <Label>{title}</Label>
       <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "1.625rem", color: C.cream, marginTop: "0.5rem", lineHeight: 1 }}>
         {value}
       </p>
       {sub && (
-        <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: C.creamMuted, marginTop: "0.5rem", letterSpacing: "0.04em" }}>
+        <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted, marginTop: "0.5rem", letterSpacing: "0.04em" }}>
           {sub}
         </p>
       )}
@@ -151,14 +153,14 @@ export default async function ExecutiveDashboardPage() {
             <div className="flex items-center gap-4">
               <KxdLogo />
               <div>
-                <p style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.5625rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.creamMuted }}>
+                <p style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.creamMuted }}>
                   Executive
                 </p>
-                <p style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "0.35rem" }}>
+                <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "0.35rem" }}>
                   KXD OS
                 </p>
               </div>
-              <span style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.12em", textTransform: "uppercase", color: C.goldDim, background: C.goldFaint, border: `1px solid ${C.borderGold}`, padding: "0.2rem 0.6rem" }}>
+              <span style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.12em", textTransform: "uppercase", color: C.goldDim, background: C.goldFaint, border: `1px solid ${C.borderGold}`, padding: "0.2rem 0.6rem" }}>
                 Phase 6B
               </span>
             </div>
@@ -168,7 +170,7 @@ export default async function ExecutiveDashboardPage() {
                   key={href}
                   href={href}
                   style={{
-                    fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.12em",
+                    fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.12em",
                     textTransform: "uppercase", color: href === "/admin/operations/executive" ? C.gold : "rgba(255,255,255,0.3)",
                     textDecoration: "none",
                   }}
@@ -183,13 +185,13 @@ export default async function ExecutiveDashboardPage() {
 
       <div className="mx-auto max-w-screen-xl" style={{ padding: "2.5rem 1.5rem 5rem" }}>
         <div style={{ marginBottom: "2.5rem", paddingBottom: "2rem", borderBottom: `1px solid ${C.border}` }}>
-          <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.2em", textTransform: "uppercase", color: C.goldDim, marginBottom: "0.875rem" }}>
-            KXD OS · Executive Dashboard
+          <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.2em", textTransform: "uppercase", color: C.goldDim, marginBottom: "0.875rem" }}>
+            KXD OS · Executive Overview
           </p>
           <h1 style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "clamp(1.875rem, 5vw, 3rem)", color: C.cream, lineHeight: 1.05 }}>
             Executive Overview
           </h1>
-          <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: C.creamMuted, marginTop: "0.75rem" }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted, marginTop: "0.75rem" }}>
             {today} · Live snapshot across clients, delivery, onboarding, audits, and portal
           </p>
         </div>
@@ -199,7 +201,7 @@ export default async function ExecutiveDashboardPage() {
           <Label style={{ color: C.goldDim, marginBottom: "1rem" }}>Executive Overview</Label>
           <div className="grid gap-px sm:grid-cols-2 lg:grid-cols-4" style={{ background: C.border, border: `1px solid ${C.border}` }}>
             {data.commandCenter.cards.map((card) => (
-              <CommandCard
+              <OverviewCard
                 key={card.id}
                 title={card.title}
                 value={card.value}
@@ -229,8 +231,8 @@ export default async function ExecutiveDashboardPage() {
                     }}
                   >
                     <p style={{ fontFamily: C.sans, fontSize: "0.75rem", color: C.cream }}>{p.projectName}</p>
-                    <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: C.creamMuted, marginTop: "0.25rem" }}>{p.clientName}</p>
-                    <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.08em", color: C.yellow, marginTop: "0.375rem" }}>
+                    <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted, marginTop: "0.25rem" }}>{p.clientName}</p>
+                    <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.08em", color: C.yellow, marginTop: "0.375rem" }}>
                       {p.reason}
                     </p>
                   </Link>
@@ -257,7 +259,7 @@ export default async function ExecutiveDashboardPage() {
                   >
                     <div>
                       <p style={{ fontFamily: C.sans, fontSize: "0.75rem", color: C.cream }}>{r.clientName}</p>
-                      <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: C.creamMuted, marginTop: "0.2rem" }}>
+                      <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted, marginTop: "0.2rem" }}>
                         {r.label} · {r.date}
                       </p>
                     </div>
@@ -285,12 +287,12 @@ export default async function ExecutiveDashboardPage() {
                 ))}
               </div>
               {data.commandCenter.onboardingPipeline.waitingOnKxd === 0 ? (
-                <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: "rgba(255,255,255,0.28)", marginTop: "1rem" }}>
+                <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.28)", marginTop: "1rem" }}>
                   No onboarding clients waiting on KXD.
                 </p>
               ) : null}
               <Link href="/admin/operations/onboarding" style={{
-                fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.14em",
+                fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.14em",
                 textTransform: "uppercase", color: C.goldDim, textDecoration: "none",
                 marginTop: "1rem", display: "block",
               }}>
@@ -332,7 +334,7 @@ export default async function ExecutiveDashboardPage() {
                         borderBottom: `1px solid ${C.border}`,
                       }}
                     >
-                      <p style={{ fontFamily: C.sans, fontWeight: 600, fontSize: "0.4375rem", letterSpacing: "0.14em", textTransform: "uppercase", color: tone.color }}>
+                      <p style={{ fontFamily: C.sans, fontWeight: 600, fontSize: "0.6875rem", letterSpacing: "0.14em", textTransform: "uppercase", color: tone.color }}>
                         {item.label}
                       </p>
                       <p style={{ fontFamily: C.sans, fontSize: "0.75rem", color: C.creamMuted, marginTop: "0.375rem" }}>
@@ -352,7 +354,7 @@ export default async function ExecutiveDashboardPage() {
               <div className="mb-4 flex flex-wrap gap-6">
                 <div>
                   <Label>Win Rate</Label>
-                  <p style={{ fontFamily: C.serif, fontSize: "1.75rem", color: C.green, marginTop: "0.25rem" }}>{data.salesPipeline.conversionToWon}%</p>
+                  <p style={{ fontFamily: C.serif, fontSize: "1.75rem", color: C.gold, marginTop: "0.25rem" }}>{data.salesPipeline.conversionToWon}%</p>
                 </div>
                 <div>
                   <Label>Qualified+</Label>
@@ -369,17 +371,17 @@ export default async function ExecutiveDashboardPage() {
                   const pct = data.salesPipeline.total > 0 ? Math.round((count / data.salesPipeline.total) * 100) : 0;
                   return (
                     <div key={status} className="flex items-center justify-between gap-4" style={{ padding: "0.5rem 0", borderBottom: `1px solid ${C.border}` }}>
-                      <span style={{ fontFamily: C.sans, fontSize: "0.5625rem", letterSpacing: "0.08em", color: C.creamMuted }}>
+                      <span style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.08em", color: C.creamMuted }}>
                         {AUDIT_STATUS_LABEL[status] ?? status}
                       </span>
-                      <span style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: C.cream }}>
+                      <span style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.cream }}>
                         {count} <span style={{ color: "rgba(255,255,255,0.25)" }}>({pct}%)</span>
                       </span>
                     </div>
                   );
                 })}
               </div>
-              <Link href="/admin/operations/audits" style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.goldDim, textDecoration: "none", marginTop: "1rem", display: "block" }}>
+              <Link href="/admin/operations/audits" style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.goldDim, textDecoration: "none", marginTop: "1rem", display: "block" }}>
                 Open Audit Dashboard →
               </Link>
             </div>
@@ -403,7 +405,7 @@ export default async function ExecutiveDashboardPage() {
                     <p style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.75rem", color: C.cream }}>{c.clientName}</p>
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       {c.issues.map((issue) => (
-                        <span key={issue} style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.06em", color: C.yellow, background: "rgba(232,196,104,0.08)", border: "1px solid rgba(232,196,104,0.2)", padding: "0.15rem 0.45rem" }}>
+                        <span key={issue} style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.06em", color: C.yellow, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(232,196,104,0.2)", padding: "0.15rem 0.45rem" }}>
                           {issue}
                         </span>
                       ))}
@@ -448,11 +450,11 @@ export default async function ExecutiveDashboardPage() {
                 }}
               >
                 <div>
-                  <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.12em", textTransform: "uppercase", color: C.goldDim }}>{item.type}</p>
+                  <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.12em", textTransform: "uppercase", color: C.goldDim }}>{item.type}</p>
                   <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.cream, marginTop: "0.25rem" }}>{item.title}</p>
-                  <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: "rgba(255,255,255,0.28)", marginTop: "0.2rem" }}>{item.sub}</p>
+                  <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.28)", marginTop: "0.2rem" }}>{item.sub}</p>
                 </div>
-                <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: "rgba(255,255,255,0.25)" }}>{fmtTime(item.at)}</p>
+                <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.25)" }}>{fmtTime(item.at)}</p>
               </Link>
             ))}
           </div>
@@ -467,7 +469,7 @@ export default async function ExecutiveDashboardPage() {
                 key={a.href}
                 href={a.href}
                 style={{
-                  fontFamily: C.sans, fontWeight: 500, fontSize: "0.4375rem", letterSpacing: "0.14em",
+                  fontFamily: C.sans, fontWeight: 500, fontSize: "0.6875rem", letterSpacing: "0.14em",
                   textTransform: "uppercase", textDecoration: "none", color: C.gold,
                   border: `1px solid ${C.borderGold}`, background: C.goldFaint, padding: "0.625rem 1rem",
                 }}
@@ -478,6 +480,12 @@ export default async function ExecutiveDashboardPage() {
           </div>
         </section>
       </div>
+      <style>{`
+        .kxd-exec-overview-card:hover {
+          background: rgba(255,255,255,0.045);
+          border-color: rgba(255,255,255,0.12);
+        }
+      `}</style>
     </div>
   );
 }

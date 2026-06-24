@@ -162,7 +162,7 @@ export function ReelForm({ clients, projects, campaigns }: Props) {
 
         {/* Header */}
         <div style={{ marginBottom: "2.5rem", paddingBottom: "1.5rem", borderBottom: `1px solid ${C.border}` }}>
-          <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.goldDim, marginBottom: "0.625rem" }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.goldDim, marginBottom: "0.625rem" }}>
             KXD OS · Phase 5A · Reel Generator
           </p>
           <h1 style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "clamp(1.75rem, 3vw, 2.5rem)", color: C.cream, lineHeight: 1.1, letterSpacing: "-0.01em" }}>
@@ -182,13 +182,13 @@ export function ReelForm({ clients, projects, campaigns }: Props) {
             { step: "04", label: "Review",      note: "Approve & deliver",      active: false },
           ].map((s, i) => (
             <div key={i} style={{ flex: 1, padding: "1rem", borderRight: i < 3 ? `1px solid ${C.border}` : undefined, opacity: s.active ? 1 : 0.35 }}>
-              <p style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.2em", color: s.active ? C.gold : C.goldDim, marginBottom: "0.375rem" }}>
+              <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.2em", color: s.active ? C.gold : C.goldDim, marginBottom: "0.375rem" }}>
                 {s.step}
               </p>
               <p style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.625rem", color: C.cream, marginBottom: "0.125rem" }}>
                 {s.label}
               </p>
-              <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: "rgba(255,255,255,0.25)" }}>
+              <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.25)" }}>
                 {s.note}
               </p>
             </div>

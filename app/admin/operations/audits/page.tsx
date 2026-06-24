@@ -14,10 +14,10 @@ export const dynamic = "force-dynamic";
 const C = {
   bgPure: "#050505",
   bgBase: "#080808",
-  bgElevated: "#111111",
+  bgElevated: "#0B0B0B",
   gold: "#C9A962",
   goldDim: "rgba(201,169,98,0.55)",
-  goldFaint: "rgba(201,169,98,0.08)",
+  goldFaint: "rgba(255,255,255,0.035)",
   cream: "#F5F1E8",
   creamMuted: "rgba(245,241,232,0.72)",
   green: "#C9A962",
@@ -25,7 +25,7 @@ const C = {
   teal: "#A8B4C8",
   blue: "#A8B4C8",
   border: "rgba(255,255,255,0.08)",
-  borderGold: "rgba(201,169,98,0.12)",
+  borderGold: "rgba(201,169,98,0.16)",
   serif: "var(--font-cormorant, Georgia, 'Times New Roman', serif)",
   sans: "var(--font-outfit, 'Helvetica Neue', Arial, sans-serif)",
 } as const;
@@ -38,7 +38,7 @@ const STATUS_COLOR: Record<string, string> = {
   contacted: C.yellow,
   qualified: C.teal,
   "proposal-sent": C.gold,
-  "closed-won": C.green,
+  "closed-won": C.gold,
   "closed-lost": "rgba(255,255,255,0.35)",
 };
 
@@ -52,7 +52,7 @@ function fmtDate(iso: string | null | undefined): string {
 function Label({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
   return (
     <p style={{
-      fontFamily: C.sans, fontSize: "0.4375rem", fontWeight: 600,
+      fontFamily: C.sans, fontSize: "0.6875rem", fontWeight: 600,
       letterSpacing: "0.18em", textTransform: "uppercase" as const,
       color: "rgba(255,255,255,0.3)", ...style,
     }}>
@@ -82,7 +82,7 @@ export default async function AuditsDashboardPage() {
     { label: "Total Audits", value: String(total), accent: C.cream },
     { label: "New Leads", value: String(newLeads), accent: C.blue },
     { label: "Qualified Leads", value: String(qualified), accent: C.teal },
-    { label: "Closed Won", value: String(closedWon), accent: C.green },
+    { label: "Closed Won", value: String(closedWon), accent: C.gold },
   ];
 
   return (
@@ -93,19 +93,19 @@ export default async function AuditsDashboardPage() {
             <div className="flex items-center gap-4">
               <KxdLogo />
               <div>
-                <p style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.5625rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.creamMuted }}>
+                <p style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.creamMuted }}>
                   Website Auditor
                 </p>
               </div>
-              <span style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.12em", textTransform: "uppercase", color: C.goldDim, background: C.goldFaint, border: `1px solid ${C.borderGold}`, padding: "0.2rem 0.6rem" }}>
+              <span style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.12em", textTransform: "uppercase", color: C.goldDim, background: C.goldFaint, border: `1px solid ${C.borderGold}`, padding: "0.2rem 0.6rem" }}>
                 Phase 6A
               </span>
             </div>
             <div className="flex items-center gap-5">
-              <Link href="/admin/operations/executive" style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", textDecoration: "none" }}>
+              <Link href="/admin/operations/executive" style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", textDecoration: "none" }}>
                 ← Executive
               </Link>
-              <Link href="/admin/collections/website-audits" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.5rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.gold, opacity: 0.8, textDecoration: "none" }}>
+              <Link href="/admin/collections/website-audits" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.gold, opacity: 0.8, textDecoration: "none" }}>
                 Payload →
               </Link>
             </div>
@@ -115,13 +115,13 @@ export default async function AuditsDashboardPage() {
 
       <div className="mx-auto max-w-screen-xl" style={{ padding: "2.5rem 1.5rem 5rem" }}>
         <div style={{ marginBottom: "2.5rem", paddingBottom: "2rem", borderBottom: `1px solid ${C.border}` }}>
-          <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.2em", textTransform: "uppercase", color: C.goldDim, marginBottom: "0.875rem" }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.2em", textTransform: "uppercase", color: C.goldDim, marginBottom: "0.875rem" }}>
             KXD OS · Website Auditor
           </p>
           <h1 style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "clamp(1.875rem, 5vw, 3rem)", color: C.cream }}>
             Audit Lead Desk
           </h1>
-          <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: C.creamMuted, marginTop: "0.75rem", maxWidth: "36rem" }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted, marginTop: "0.75rem", maxWidth: "36rem" }}>
             Public website audit submissions — scores, grades, and pipeline status for KXD sales follow-up.
           </p>
         </div>
@@ -159,10 +159,10 @@ export default async function AuditsDashboardPage() {
                     <Link href={`/admin/collections/website-audits/${a.id}`} style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.625rem", color: C.cream, textDecoration: "none" }}>
                       {a.company || a.name || "—"}
                     </Link>
-                    <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: "rgba(255,255,255,0.25)", marginTop: "0.25rem" }}>{a.email as string}</p>
+                    <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.25)", marginTop: "0.25rem" }}>{a.email as string}</p>
                   </div>
                   <div style={{ background: C.bgElevated, padding: "1rem 1.25rem" }}>
-                    <a href={a.website as string} target="_blank" rel="noopener noreferrer" style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: C.goldDim, textDecoration: "none" }}>
+                    <a href={a.website as string} target="_blank" rel="noopener noreferrer" style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.goldDim, textDecoration: "none" }}>
                       {a.website as string}
                     </a>
                   </div>
@@ -172,13 +172,13 @@ export default async function AuditsDashboardPage() {
                     </p>
                   </div>
                   <div style={{ background: C.bgElevated, padding: "1rem 1.25rem" }}>
-                    <span style={{ fontFamily: C.sans, fontWeight: 600, fontSize: "0.4375rem", letterSpacing: "0.12em", textTransform: "uppercase", color: STATUS_COLOR[status] ?? C.creamMuted }}>
+                    <span style={{ fontFamily: C.sans, fontWeight: 600, fontSize: "0.6875rem", letterSpacing: "0.12em", textTransform: "uppercase", color: STATUS_COLOR[status] ?? C.creamMuted }}>
                       {AUDIT_STATUS_LABEL[status] ?? status}
                     </span>
                   </div>
                   <div style={{ background: C.bgElevated, padding: "1rem 1.25rem" }}>
-                    <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: C.creamMuted }}>{fmtDate(a.createdAt as string)}</p>
-                    <Link href={`/website-audit/results/${a.id}`} style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: C.goldDim, textDecoration: "none", marginTop: "0.25rem", display: "block" }}>
+                    <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted }}>{fmtDate(a.createdAt as string)}</p>
+                    <Link href={`/website-audit/results/${a.id}`} style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: C.goldDim, textDecoration: "none", marginTop: "0.25rem", display: "block" }}>
                       Public report →
                     </Link>
                   </div>

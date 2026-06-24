@@ -10,7 +10,7 @@ import { formatEarningsCents, formatHoursFromMinutes } from "@/lib/junior-creato
 const C = {
   bgPure: "#050505",
   bgBase: "#080808",
-  bgElevated: "#111111",
+  bgElevated: "#0B0B0B",
   bgCard: "#101010",
   gold: "#C9A962",
   goldDim: "rgba(201,169,98,0.55)",
@@ -18,7 +18,7 @@ const C = {
   creamMuted: "rgba(245,241,232,0.72)",
   red: "#d25a5a",
   border: "rgba(255,255,255,0.08)",
-  borderGold: "rgba(201,169,98,0.14)",
+  borderGold: "rgba(201,169,98,0.16)",
   serif: "var(--font-cormorant, Georgia, 'Times New Roman', serif)",
   sans: "var(--font-outfit, 'Helvetica Neue', Arial, sans-serif)",
 } as const;
@@ -39,7 +39,7 @@ function Label({ children, style }: { children: React.ReactNode; style?: React.C
     <p
       style={{
         fontFamily: C.sans,
-        fontSize: "0.4375rem",
+        fontSize: "0.6875rem",
         fontWeight: 600,
         letterSpacing: "0.18em",
         textTransform: "uppercase",
@@ -99,7 +99,7 @@ function ShiftAdminActions({ shift }: { shift: AdminShiftRow }) {
 
   if (shift.status === "voided") {
     return (
-      <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: "rgba(255,255,255,0.28)" }}>
+      <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.28)" }}>
         Voided — no further actions.
       </p>
     );
@@ -122,7 +122,7 @@ function ShiftAdminActions({ shift }: { shift: AdminShiftRow }) {
           style={{
             marginTop: "0.5rem",
             fontFamily: C.sans,
-            fontSize: "0.4375rem",
+            fontSize: "0.6875rem",
             letterSpacing: "0.12em",
             textTransform: "uppercase",
             color: C.goldDim,
@@ -166,7 +166,7 @@ function ShiftAdminActions({ shift }: { shift: AdminShiftRow }) {
             style={{
               marginTop: "0.5rem",
               fontFamily: C.sans,
-              fontSize: "0.4375rem",
+              fontSize: "0.6875rem",
               letterSpacing: "0.12em",
               textTransform: "uppercase",
               color: C.cream,
@@ -197,7 +197,7 @@ function ShiftAdminActions({ shift }: { shift: AdminShiftRow }) {
           style={{
             marginTop: "0.5rem",
             fontFamily: C.sans,
-            fontSize: "0.4375rem",
+            fontSize: "0.6875rem",
             letterSpacing: "0.12em",
             textTransform: "uppercase",
             color: C.red,
@@ -212,7 +212,7 @@ function ShiftAdminActions({ shift }: { shift: AdminShiftRow }) {
       </div>
 
       {error && (
-        <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: C.red }}>{error}</p>
+        <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.red }}>{error}</p>
       )}
     </div>
   );
@@ -232,7 +232,7 @@ function CreatorSection({ creator }: { creator: AdminCreatorRow }) {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p style={{ fontFamily: C.serif, fontSize: "1.25rem", color: C.cream }}>{creator.displayName}</p>
-            <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: C.creamMuted, marginTop: "0.25rem" }}>
+            <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted, marginTop: "0.25rem" }}>
               {creator.email} · {formatEarningsCents(creator.hourlyRateCents)}/hr
               {!creator.active && " · Inactive"}
             </p>
@@ -242,13 +242,13 @@ function CreatorSection({ creator }: { creator: AdminCreatorRow }) {
             <p style={{ fontFamily: C.serif, fontSize: "1.125rem", color: C.gold, marginTop: "0.35rem" }}>
               {creator.weekHoursLabel}
             </p>
-            <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: C.creamMuted }}>
+            <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted }}>
               Est. {creator.weekEarningsLabel}
             </p>
           </div>
         </div>
         {creator.activeShift && (
-          <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: C.goldDim, marginTop: "0.75rem" }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.goldDim, marginTop: "0.75rem" }}>
             Active shift in progress — {formatHoursFromMinutes(creator.activeShift.totalMinutes)} elapsed
           </p>
         )}
@@ -256,7 +256,7 @@ function CreatorSection({ creator }: { creator: AdminCreatorRow }) {
 
       {creator.shifts.length === 0 ? (
         <div style={{ background: C.bgElevated, border: `1px solid ${C.border}`, padding: "1rem 1.25rem" }}>
-          <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: "rgba(255,255,255,0.3)" }}>No shifts logged.</p>
+          <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.3)" }}>No shifts logged.</p>
         </div>
       ) : (
         <div style={{ border: `1px solid ${C.border}` }}>
@@ -274,7 +274,7 @@ function CreatorSection({ creator }: { creator: AdminCreatorRow }) {
                   <p
                     style={{
                       fontFamily: C.sans,
-                      fontSize: "0.4375rem",
+                      fontSize: "0.6875rem",
                       letterSpacing: "0.12em",
                       textTransform: "uppercase",
                       color:
@@ -291,7 +291,7 @@ function CreatorSection({ creator }: { creator: AdminCreatorRow }) {
                     {fmtDateTime(shift.startedAt)}
                     {shift.endedAt ? ` → ${fmtDateTime(shift.endedAt)}` : ""}
                   </p>
-                  <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: "rgba(255,255,255,0.28)", marginTop: "0.25rem" }}>
+                  <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.28)", marginTop: "0.25rem" }}>
                     Week {shift.weekKey} · {formatHoursFromMinutes(shift.totalMinutes)} · Est.{" "}
                     {formatEarningsCents(shift.estimatedCents)}
                   </p>
@@ -300,7 +300,7 @@ function CreatorSection({ creator }: { creator: AdminCreatorRow }) {
                   href={`/admin/collections/junior-creator-shifts/${shift.id}`}
                   style={{
                     fontFamily: C.sans,
-                    fontSize: "0.4375rem",
+                    fontSize: "0.6875rem",
                     letterSpacing: "0.1em",
                     textTransform: "uppercase",
                     color: C.goldDim,
@@ -314,7 +314,7 @@ function CreatorSection({ creator }: { creator: AdminCreatorRow }) {
                 <p
                   style={{
                     fontFamily: C.sans,
-                    fontSize: "0.5rem",
+                    fontSize: "0.8125rem",
                     color: C.creamMuted,
                     marginTop: "0.75rem",
                     lineHeight: 1.5,
@@ -340,25 +340,25 @@ type Props = {
 export function JuniorCreatorAdminReview({ data }: Props) {
   return (
     <div style={{ background: C.bgBase, minHeight: "100vh", color: C.cream, fontFamily: C.sans }}>
-      <div style={{ position: "sticky", top: 0, zIndex: 50, background: C.bgPure, borderBottom: `1px solid rgba(201,169,98,0.14)` }}>
+      <div style={{ position: "sticky", top: 0, zIndex: 50, background: C.bgPure, borderBottom: `1px solid rgba(255,255,255,0.04)` }}>
         <div className="mx-auto max-w-screen-xl" style={{ padding: "1.125rem 1.5rem" }}>
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <KxdLogo />
               <div>
-                <p style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.5625rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.creamMuted }}>
+                <p style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.creamMuted }}>
                   KXD Academy
                 </p>
-                <p style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "0.35rem" }}>
+                <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "0.35rem" }}>
                   Junior Creator Admin
                 </p>
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-4">
-              <Link href="/os" style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", textDecoration: "none" }}>
+              <Link href="/os" style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", textDecoration: "none" }}>
                 KXD OS
               </Link>
-              <Link href="/admin/collections/junior-creator-shifts" style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.gold, textDecoration: "none" }}>
+              <Link href="/admin/collections/junior-creator-shifts" style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.gold, textDecoration: "none" }}>
                 Payload Shifts →
               </Link>
             </div>
@@ -372,11 +372,11 @@ export function JuniorCreatorAdminReview({ data }: Props) {
           <h1 style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "clamp(1.875rem, 5vw, 3rem)", color: C.cream, lineHeight: 1.05 }}>
             Junior Creator Review
           </h1>
-          <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: C.creamMuted, marginTop: "0.75rem", maxWidth: "40rem", lineHeight: 1.6 }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted, marginTop: "0.75rem", maxWidth: "40rem", lineHeight: 1.6 }}>
             Review shift time, weekly hours, and estimated earnings. Void shifts or adjust completed minutes with a
             required admin note — estimates only, not payroll.
           </p>
-          <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: "rgba(255,255,255,0.28)", marginTop: "0.5rem" }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.28)", marginTop: "0.5rem" }}>
             Week of {data.weekKey} (Monday start)
           </p>
         </div>
@@ -398,7 +398,7 @@ export function JuniorCreatorAdminReview({ data }: Props) {
         </div>
 
         {data.creators.length === 0 ? (
-          <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: "rgba(255,255,255,0.3)" }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.3)" }}>
             No junior creator users yet. Add accounts in Payload.
           </p>
         ) : (

@@ -6,7 +6,7 @@ import {
   getStudioLauncherCards,
   type LauncherCard,
 } from "@/lib/kxd-os/launcher-cards";
-import { KXD_OS as C } from "@/lib/kxd-os/palette";
+import { KXD_OS as C, KXD_OS_CARD, KXD_OS_CARD_HOVER } from "@/lib/kxd-os/palette";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +15,7 @@ function Label({ children, style }: { children: React.ReactNode; style?: React.C
     <p
       style={{
         fontFamily: C.sans,
-        fontSize: "0.4375rem",
+        fontSize: "0.6875rem",
         fontWeight: 600,
         letterSpacing: "0.18em",
         textTransform: "uppercase",
@@ -36,15 +36,16 @@ function LauncherCardLink({ card }: { card: LauncherCard }) {
       style={{
         display: "block",
         textDecoration: "none",
-        background: C.bgCard,
-        border: `1px solid ${C.border}`,
+        background: C.glass,
+        border: KXD_OS_CARD.border,
         padding: "1.375rem 1.5rem",
+        transition: "background 0.2s ease, border-color 0.2s ease",
       }}
     >
       <p
         style={{
           fontFamily: C.sans,
-          fontSize: "0.375rem",
+          fontSize: "0.6875rem",
           fontWeight: 600,
           letterSpacing: "0.14em",
           textTransform: "uppercase",
@@ -69,7 +70,7 @@ function LauncherCardLink({ card }: { card: LauncherCard }) {
       <p
         style={{
           fontFamily: C.sans,
-          fontSize: "0.5625rem",
+          fontSize: "0.8125rem",
           color: C.creamMuted,
           lineHeight: 1.55,
         }}
@@ -79,7 +80,7 @@ function LauncherCardLink({ card }: { card: LauncherCard }) {
       <p
         style={{
           fontFamily: C.sans,
-          fontSize: "0.4375rem",
+          fontSize: "0.6875rem",
           letterSpacing: "0.12em",
           textTransform: "uppercase",
           color: C.goldDim,
@@ -102,7 +103,7 @@ export default function OsLauncherPage() {
       <header
         style={{
           background: C.bgPure,
-          borderBottom: "1px solid rgba(201,169,98,0.14)",
+          borderBottom: "1px solid rgba(255,255,255,0.04)",
         }}
       >
         <div
@@ -115,7 +116,7 @@ export default function OsLauncherPage() {
               <p
                 style={{
                   fontFamily: C.sans,
-                  fontSize: "0.5rem",
+                  fontSize: "0.8125rem",
                   letterSpacing: "0.16em",
                   textTransform: "uppercase",
                   color: C.creamMuted,
@@ -126,7 +127,7 @@ export default function OsLauncherPage() {
               <p
                 style={{
                   fontFamily: C.sans,
-                  fontSize: "0.4375rem",
+                  fontSize: "0.6875rem",
                   letterSpacing: "0.12em",
                   textTransform: "uppercase",
                   color: C.creamSubtle,
@@ -164,7 +165,7 @@ export default function OsLauncherPage() {
           <p
             style={{
               fontFamily: C.sans,
-              fontSize: "0.625rem",
+              fontSize: "0.8125rem",
               color: C.creamMuted,
               marginTop: "1rem",
               maxWidth: "40rem",
@@ -211,7 +212,7 @@ export default function OsLauncherPage() {
         <p
           style={{
             fontFamily: C.sans,
-            fontSize: "0.5rem",
+            fontSize: "0.8125rem",
             color: "rgba(245,241,232,0.36)",
             marginTop: "2.5rem",
             letterSpacing: "0.04em",
@@ -223,7 +224,8 @@ export default function OsLauncherPage() {
 
       <style>{`
         .kxd-os-launcher-card:hover {
-          border-color: rgba(201,169,98,0.14);
+          background: ${KXD_OS_CARD_HOVER.background};
+          border-color: ${KXD_OS_CARD_HOVER.borderColor};
         }
       `}</style>
     </div>

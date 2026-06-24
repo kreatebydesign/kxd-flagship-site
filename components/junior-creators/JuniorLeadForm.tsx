@@ -14,7 +14,7 @@ const C = {
   gold: "#C9A962",
   red: "#d25a5a",
   border: "rgba(255,255,255,0.08)",
-  borderGold: "rgba(201,169,98,0.14)",
+  borderGold: "rgba(201,169,98,0.16)",
   sans: "var(--font-outfit, 'Helvetica Neue', Arial, sans-serif)",
 } as const;
 
@@ -32,7 +32,7 @@ const inputStyle: React.CSSProperties = {
 function FieldLabel({ children }: { children: React.ReactNode }) {
   return (
     <p style={{
-      fontFamily: C.sans, fontSize: "0.4375rem", fontWeight: 600,
+      fontFamily: C.sans, fontSize: "0.6875rem", fontWeight: 600,
       letterSpacing: "0.14em", textTransform: "uppercase",
       color: "rgba(255,255,255,0.35)", marginBottom: "0.5rem",
     }}>
@@ -134,10 +134,10 @@ export function JuniorLeadForm() {
         </div>
       </div>
       {error && (
-        <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: C.red, marginTop: "1rem" }}>{error}</p>
+        <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.red, marginTop: "1rem" }}>{error}</p>
       )}
       {success && (
-        <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: C.gold, marginTop: "1rem" }}>
+        <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.gold, marginTop: "1rem" }}>
           Research lead submitted — great work.
         </p>
       )}
@@ -148,7 +148,7 @@ export function JuniorLeadForm() {
           marginTop: "1.25rem",
           fontFamily: C.sans,
           fontWeight: 500,
-          fontSize: "0.4375rem",
+          fontSize: "0.6875rem",
           letterSpacing: "0.14em",
           textTransform: "uppercase",
           color: "#080808",

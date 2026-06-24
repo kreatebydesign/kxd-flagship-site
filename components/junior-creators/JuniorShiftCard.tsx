@@ -6,13 +6,13 @@ import { formatEarningsCents, formatHoursFromMinutes, minutesBetween } from "@/l
 
 const C = {
   bgCard: "#101010",
-  bgElevated: "#111111",
+  bgElevated: "#0B0B0B",
   gold: "#C9A962",
   goldDim: "rgba(201,169,98,0.55)",
   cream: "#F5F1E8",
   creamMuted: "rgba(245,241,232,0.72)",
   border: "rgba(255,255,255,0.08)",
-  borderGold: "rgba(201,169,98,0.14)",
+  borderGold: "rgba(201,169,98,0.16)",
   sans: "var(--font-outfit, 'Helvetica Neue', Arial, sans-serif)",
   serif: "var(--font-cormorant, Georgia, 'Times New Roman', serif)",
 } as const;
@@ -109,7 +109,7 @@ export function JuniorShiftCard({ activeShift }: Props) {
       <p
         style={{
           fontFamily: C.sans,
-          fontSize: "0.4375rem",
+          fontSize: "0.6875rem",
           fontWeight: 600,
           letterSpacing: "0.18em",
           textTransform: "uppercase",
@@ -125,10 +125,10 @@ export function JuniorShiftCard({ activeShift }: Props) {
           <p style={{ fontFamily: C.serif, fontWeight: 400, fontSize: "1.375rem", color: C.gold }}>
             Session in progress
           </p>
-          <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: C.creamMuted, marginTop: "0.5rem" }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted, marginTop: "0.5rem" }}>
             Started {fmtTime(activeShift.startedAt)} · {formatHoursFromMinutes(elapsedMinutes)} elapsed
           </p>
-          <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: C.goldDim, marginTop: "0.35rem" }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.goldDim, marginTop: "0.35rem" }}>
             Estimated this session · {formatEarningsCents(estimatedLiveCents)} at{" "}
             {formatEarningsCents(activeShift.hourlyRateCents)}/hr
           </p>
@@ -147,7 +147,7 @@ export function JuniorShiftCard({ activeShift }: Props) {
             onClick={handleStart}
             style={{
               fontFamily: C.sans,
-              fontSize: "0.5rem",
+              fontSize: "0.8125rem",
               letterSpacing: "0.14em",
               textTransform: "uppercase",
               padding: "0.75rem 1.25rem",
@@ -168,7 +168,7 @@ export function JuniorShiftCard({ activeShift }: Props) {
             onClick={handleEnd}
             style={{
               fontFamily: C.sans,
-              fontSize: "0.5rem",
+              fontSize: "0.8125rem",
               letterSpacing: "0.14em",
               textTransform: "uppercase",
               padding: "0.75rem 1.25rem",
@@ -184,7 +184,7 @@ export function JuniorShiftCard({ activeShift }: Props) {
       </div>
 
       {error && (
-        <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: "#e88a8a", marginTop: "0.75rem" }}>
+        <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "#e88a8a", marginTop: "0.75rem" }}>
           {error}
         </p>
       )}

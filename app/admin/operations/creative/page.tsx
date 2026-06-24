@@ -34,14 +34,14 @@ export const dynamic = "force-dynamic";
 const C = {
   bgBase:     "#080808",
   bgPure:     "#000",
-  bgElevated: "#111",
+  bgElevated: "#0B0B0B",
   gold:       "#C9A962",
   goldDim:    "rgba(201,169,98,0.55)",
-  goldFaint:  "rgba(201,169,98,0.08)",
+  goldFaint:  "rgba(255,255,255,0.035)",
   cream:      "#F5F1E8",
   creamMuted: "rgba(245,241,232,0.72)",
   border:     "rgba(255,255,255,0.08)",
-  borderGold: "rgba(201,169,98,0.12)",
+  borderGold: "rgba(201,169,98,0.16)",
   red:        "#d25a5a",
   sans:       "var(--font-outfit, Inter, system-ui)",
   serif:      "var(--font-cormorant, Georgia)",
@@ -126,7 +126,7 @@ function IntelLabel({ children }: { children: React.ReactNode }) {
   return (
     <p style={{
       fontFamily: C.sans,
-      fontSize: "0.4375rem",
+      fontSize: "0.6875rem",
       letterSpacing: "0.16em",
       textTransform: "uppercase" as const,
       color: C.goldDim,
@@ -259,7 +259,7 @@ function OrphanedItemsBlock({ orphaned }: { orphaned: OrphanedCreativeItems }) {
                 </p>
               </div>
             ))}
-            <p style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.08em", color: "rgba(255,255,255,0.2)", marginTop: "0.375rem" }}>
+            <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.08em", color: "rgba(255,255,255,0.2)", marginTop: "0.375rem" }}>
               Link these items to a campaign in Payload to resolve.
             </p>
           </div>
@@ -365,14 +365,14 @@ export default async function Page() {
           {/* Section header */}
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: "1.25rem", paddingBottom: "0.75rem", borderBottom: `1px solid ${C.border}` }}>
             <div>
-              <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.18em", textTransform: "uppercase" as const, color: C.goldDim, marginBottom: "0.375rem" }}>
+              <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.18em", textTransform: "uppercase" as const, color: C.goldDim, marginBottom: "0.375rem" }}>
                 KXD OS · Phase 3C
               </p>
               <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "1.375rem", color: C.cream, letterSpacing: "-0.01em" }}>
                 Creative Intelligence
               </p>
             </div>
-            <p style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.18)", textTransform: "uppercase" as const }}>
+            <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.18)", textTransform: "uppercase" as const }}>
               Live · Read-only
             </p>
           </div>
@@ -399,21 +399,21 @@ export default async function Page() {
         </div>
 
         {/* ── Phase 4A — Generation Actions ───────────────────────────────── */}
-        <div style={{ marginBottom: "2rem", padding: "1.125rem 1.25rem", background: "rgba(201,169,98,0.04)", border: "1px solid rgba(201,169,98,0.14)" }}>
+        <div style={{ marginBottom: "2rem", padding: "1.125rem 1.25rem", background: "rgba(201,169,98,0.04)", border: "1px solid rgba(255,255,255,0.04)" }}>
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: "0.75rem" }}>
             <div>
-              <p style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.18em", textTransform: "uppercase" as const, color: C.goldDim }}>
+              <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.18em", textTransform: "uppercase" as const, color: C.goldDim }}>
                 KXD OS · Phase 4A
               </p>
               <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "1rem", color: C.cream, marginTop: "0.25rem" }}>
                 Creative Production Engine
               </p>
             </div>
-            <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.2)", textTransform: "uppercase" as const }}>
+            <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.2)", textTransform: "uppercase" as const }}>
               Brand-Aware Generation
             </p>
           </div>
-          <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: "rgba(255,255,255,0.3)", marginBottom: "1rem", lineHeight: 1.6 }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.3)", marginBottom: "1rem", lineHeight: 1.6 }}>
             Generate brand-aware flyer creative direction and social post copy from any Payload request record.
             Open a request in Payload Admin, copy its numeric ID, then call the generation endpoint.
           </p>
@@ -435,42 +435,42 @@ export default async function Page() {
               },
             ].map(action => (
               <div key={action.label} style={{ background: "#0B0B0B", padding: "1rem 1.125rem" }}>
-                <p style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.5625rem", color: C.cream, marginBottom: "0.375rem" }}>
+                <p style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem", color: C.cream, marginBottom: "0.375rem" }}>
                   {action.label}
                 </p>
-                <p style={{ fontFamily: "monospace", fontSize: "0.5rem", color: "rgba(201,169,98,0.6)", marginBottom: "0.25rem" }}>
+                <p style={{ fontFamily: "monospace", fontSize: "0.8125rem", color: "rgba(201,169,98,0.6)", marginBottom: "0.25rem" }}>
                   {action.endpoint}
                 </p>
-                <p style={{ fontFamily: "monospace", fontSize: "0.4375rem", color: "rgba(255,255,255,0.25)", marginBottom: "0.75rem" }}>
+                <p style={{ fontFamily: "monospace", fontSize: "0.6875rem", color: "rgba(255,255,255,0.25)", marginBottom: "0.75rem" }}>
                   {action.body}
                 </p>
-                <Link href={action.href} style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: C.goldDim, textDecoration: "none" }}>
+                <Link href={action.href} style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: C.goldDim, textDecoration: "none" }}>
                   {action.linkText}
                 </Link>
               </div>
             ))}
           </div>
-          <p style={{ fontFamily: C.sans, fontSize: "0.375rem", color: "rgba(255,255,255,0.18)", marginTop: "0.75rem", letterSpacing: "0.06em" }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(255,255,255,0.18)", marginTop: "0.75rem", letterSpacing: "0.06em" }}>
             Set OPENAI_API_KEY in environment to enable AI generation. Without the key, routes return the assembled prompt only (prompt-only mode for testing).
           </p>
         </div>
 
         {/* ── Phase 5A — Reel Generator ───────────────────────────────────── */}
-        <div style={{ marginBottom: "2rem", padding: "1.125rem 1.25rem", background: "rgba(201,169,98,0.03)", border: "1px solid rgba(201,169,98,0.18)" }}>
+        <div style={{ marginBottom: "2rem", padding: "1.125rem 1.25rem", background: "rgba(201,169,98,0.03)", border: "1px solid rgba(255,255,255,0.04)" }}>
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: "0.75rem" }}>
             <div>
-              <p style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.18em", textTransform: "uppercase" as const, color: C.goldDim }}>
+              <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.18em", textTransform: "uppercase" as const, color: C.goldDim }}>
                 KXD OS · Phase 5A
               </p>
               <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "1rem", color: C.cream, marginTop: "0.25rem" }}>
                 Website Showcase Reel Generator
               </p>
             </div>
-            <Link href="/admin/operations/reels" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.4375rem", letterSpacing: "0.14em", textTransform: "uppercase" as const, color: C.bgBase, background: `linear-gradient(180deg, #d1b06b 0%, #c9a962 48%, #b09040 100%)`, padding: "0.5rem 1.125rem", textDecoration: "none" }}>
+            <Link href="/admin/operations/reels" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.6875rem", letterSpacing: "0.14em", textTransform: "uppercase" as const, color: C.bgBase, background: `linear-gradient(180deg, #d1b06b 0%, #c9a962 48%, #b09040 100%)`, padding: "0.5rem 1.125rem", textDecoration: "none" }}>
               Open Reel Generator →
             </Link>
           </div>
-          <p style={{ fontFamily: C.sans, fontSize: "0.5625rem", color: "rgba(255,255,255,0.3)", marginBottom: "0.875rem", lineHeight: 1.6 }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.3)", marginBottom: "0.875rem", lineHeight: 1.6 }}>
             Generate premium website highlight reel storyboards from any website URL. Playwright captures hero, services, testimonials, and CTA sections. OpenAI generates a production-ready scene sequence with hook, timing, transitions, captions, and music direction.
           </p>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1px", background: "rgba(255,255,255,0.08)" }}>
@@ -479,19 +479,19 @@ export default async function Page() {
               { label: "Storyboard Generation", endpoint: "POST /api/admin/reels/storyboard",  body: '{ "promoVideoRequestId": <id> }' },
             ].map(action => (
               <div key={action.label} style={{ background: "#0B0B0B", padding: "1rem 1.125rem" }}>
-                <p style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.5625rem", color: C.cream, marginBottom: "0.375rem" }}>
+                <p style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem", color: C.cream, marginBottom: "0.375rem" }}>
                   {action.label}
                 </p>
-                <p style={{ fontFamily: "monospace", fontSize: "0.5rem", color: "rgba(201,169,98,0.6)", marginBottom: "0.25rem" }}>
+                <p style={{ fontFamily: "monospace", fontSize: "0.8125rem", color: "rgba(201,169,98,0.6)", marginBottom: "0.25rem" }}>
                   {action.endpoint}
                 </p>
-                <p style={{ fontFamily: "monospace", fontSize: "0.4375rem", color: "rgba(255,255,255,0.25)" }}>
+                <p style={{ fontFamily: "monospace", fontSize: "0.6875rem", color: "rgba(255,255,255,0.25)" }}>
                   {action.body}
                 </p>
               </div>
             ))}
           </div>
-          <p style={{ fontFamily: C.sans, fontSize: "0.375rem", color: "rgba(255,255,255,0.18)", marginTop: "0.75rem", letterSpacing: "0.06em" }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(255,255,255,0.18)", marginTop: "0.75rem", letterSpacing: "0.06em" }}>
             Requires: OPENAI_API_KEY · npx playwright install chromium · No MP4 rendering — storyboard MVP only.
           </p>
         </div>

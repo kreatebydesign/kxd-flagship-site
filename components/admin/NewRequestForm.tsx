@@ -24,17 +24,17 @@ interface Props {
 const C = {
   bgPure:     "#050505",
   bgBase:     "#080808",
-  bgElevated: "#111111",
+  bgElevated: "#0B0B0B",
   bgInput:    "#0B0B0B",
   gold:       "#C9A962",
   goldDim:    "rgba(201,169,98,0.55)",
-  goldFaint:  "rgba(201,169,98,0.08)",
+  goldFaint:  "rgba(255,255,255,0.035)",
   cream:      "#F5F1E8",
   creamMuted: "rgba(245,241,232,0.72)",
   red:        "#d25a5a",
   green:      "#C9A962",
   border:     "rgba(255,255,255,0.08)",
-  borderGold: "rgba(201,169,98,0.12)",
+  borderGold: "rgba(201,169,98,0.16)",
   borderFocus:"rgba(201,169,98,0.55)",
   serif:      "var(--font-cormorant, Georgia, 'Times New Roman', serif)",
   sans:       "var(--font-outfit, 'Helvetica Neue', Arial, sans-serif)",
@@ -66,7 +66,7 @@ const PRIORITIES = [
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p style={{ fontFamily: C.sans, fontWeight: 400, fontSize: "0.4375rem", letterSpacing: "0.14em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.35)", marginBottom: "0.5rem" }}>
+    <p style={{ fontFamily: C.sans, fontWeight: 400, fontSize: "0.6875rem", letterSpacing: "0.14em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.35)", marginBottom: "0.5rem" }}>
       {children}
     </p>
   );
@@ -220,7 +220,7 @@ export function NewRequestForm({ clients, projects }: Props) {
             </svg>
           </div>
 
-          <p style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.18em", textTransform: "uppercase", color: C.goldDim, marginBottom: "0.875rem" }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.18em", textTransform: "uppercase", color: C.goldDim, marginBottom: "0.875rem" }}>
             Request Created
           </p>
           <h1 style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "clamp(2rem, 4vw, 2.75rem)", color: C.cream, lineHeight: 1.1, marginBottom: "1rem", letterSpacing: "-0.01em" }}>
@@ -229,18 +229,18 @@ export function NewRequestForm({ clients, projects }: Props) {
           <p style={{ fontFamily: C.sans, fontSize: "0.875rem", color: "rgba(255,255,255,0.4)", maxWidth: "28rem", lineHeight: 1.6, marginBottom: "0.5rem" }}>
             The client request has been created in Payload and is now visible in the Operations Suite.
           </p>
-          <p style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.2)", marginBottom: "2.5rem" }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.2)", marginBottom: "2.5rem" }}>
             Record ID #{submitted.id}
           </p>
 
           <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", justifyContent: "center" }}>
-            <Link href="/admin/operations" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.5625rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.bgBase, background: `linear-gradient(180deg, #d1b06b 0%, #c9a962 48%, #b09040 100%)`, padding: "0.875rem 2rem", textDecoration: "none", display: "inline-block" }}>
+            <Link href="/admin/operations" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.bgBase, background: `linear-gradient(180deg, #d1b06b 0%, #c9a962 48%, #b09040 100%)`, padding: "0.875rem 2rem", textDecoration: "none", display: "inline-block" }}>
               Return to Dashboard
             </Link>
-            <button onClick={resetForm} style={{ fontFamily: C.sans, fontWeight: 400, fontSize: "0.5625rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.goldDim, background: "transparent", border: `1px solid ${C.borderGold}`, padding: "0.875rem 2rem", cursor: "pointer" }}>
+            <button onClick={resetForm} style={{ fontFamily: C.sans, fontWeight: 400, fontSize: "0.8125rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.goldDim, background: "transparent", border: `1px solid ${C.borderGold}`, padding: "0.875rem 2rem", cursor: "pointer" }}>
               Log Another Request
             </button>
-            <Link href="/admin/collections/client-requests" style={{ fontFamily: C.sans, fontWeight: 400, fontSize: "0.5625rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", background: "transparent", border: `1px solid ${C.border}`, padding: "0.875rem 2rem", textDecoration: "none", display: "inline-block" }}>
+            <Link href="/admin/collections/client-requests" style={{ fontFamily: C.sans, fontWeight: 400, fontSize: "0.8125rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", background: "transparent", border: `1px solid ${C.border}`, padding: "0.875rem 2rem", textDecoration: "none", display: "inline-block" }}>
               View in Payload →
             </Link>
           </div>
@@ -259,7 +259,7 @@ export function NewRequestForm({ clients, projects }: Props) {
 
         {/* Page title */}
         <div style={{ marginBottom: "2.5rem", paddingBottom: "1.5rem", borderBottom: `1px solid ${C.border}` }}>
-          <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.goldDim, marginBottom: "0.625rem" }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.goldDim, marginBottom: "0.625rem" }}>
             KXD OS · New Request
           </p>
           <h1 style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "clamp(1.75rem, 3vw, 2.5rem)", color: C.cream, lineHeight: 1.1, letterSpacing: "-0.01em" }}>
@@ -275,7 +275,7 @@ export function NewRequestForm({ clients, projects }: Props) {
 
             {/* ── Section 1: Client + Project ─────────────────────────── */}
             <div style={{ background: C.bgElevated, border: `1px solid ${C.border}`, padding: "1.75rem" }}>
-              <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.goldDim, marginBottom: "1.25rem" }}>
+              <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.goldDim, marginBottom: "1.25rem" }}>
                 Client & Project
               </p>
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -303,7 +303,7 @@ export function NewRequestForm({ clients, projects }: Props) {
 
             {/* ── Section 2: Request Details ────────────────────────── */}
             <div style={{ background: C.bgElevated, border: `1px solid ${C.border}`, padding: "1.75rem" }}>
-              <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.goldDim, marginBottom: "1.25rem" }}>
+              <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.goldDim, marginBottom: "1.25rem" }}>
                 Request Details
               </p>
               <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
@@ -342,7 +342,7 @@ export function NewRequestForm({ clients, projects }: Props) {
 
             {/* ── Section 3: Requester + Timing ─────────────────────── */}
             <div style={{ background: C.bgElevated, border: `1px solid ${C.border}`, padding: "1.75rem" }}>
-              <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.goldDim, marginBottom: "1.25rem" }}>
+              <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.goldDim, marginBottom: "1.25rem" }}>
                 Requester & Timing
               </p>
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
@@ -371,7 +371,7 @@ export function NewRequestForm({ clients, projects }: Props) {
 
             {/* ── Section 4: Internal Notes ─────────────────────────── */}
             <div style={{ background: C.bgElevated, border: `1px solid ${C.border}`, padding: "1.75rem" }}>
-              <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.goldDim, marginBottom: "1.25rem" }}>
+              <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.goldDim, marginBottom: "1.25rem" }}>
                 Internal Notes
               </p>
               <Textarea
@@ -385,7 +385,7 @@ export function NewRequestForm({ clients, projects }: Props) {
 
             {/* ── Error ─────────────────────────────────────────────── */}
             {error && (
-              <div style={{ padding: "0.875rem 1.25rem", background: "rgba(210,90,90,0.08)", border: "1px solid rgba(210,90,90,0.3)" }}>
+              <div style={{ padding: "0.875rem 1.25rem", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(210,90,90,0.3)" }}>
                 <p style={{ fontFamily: C.sans, fontSize: "0.75rem", color: "#d25a5a" }}>
                   {error}
                 </p>
@@ -394,7 +394,7 @@ export function NewRequestForm({ clients, projects }: Props) {
 
             {/* ── Submit row ─────────────────────────────────────────── */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap" as const, paddingTop: "0.5rem" }}>
-              <Link href="/admin/operations" style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", textDecoration: "none" }}>
+              <Link href="/admin/operations" style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", textDecoration: "none" }}>
                 ← Back to Dashboard
               </Link>
 
@@ -404,7 +404,7 @@ export function NewRequestForm({ clients, projects }: Props) {
                 style={{
                   fontFamily: C.sans,
                   fontWeight: 500,
-                  fontSize: "0.5625rem",
+                  fontSize: "0.8125rem",
                   letterSpacing: "0.14em",
                   textTransform: "uppercase",
                   color: C.bgBase,
@@ -441,23 +441,23 @@ function PageHeader() {
               <KxdLogo />
             </Link>
 
-            <span style={{ color: "rgba(255,255,255,0.1)", fontSize: "0.375rem" }}>◆</span>
+            <span style={{ color: "rgba(255,255,255,0.1)", fontSize: "0.6875rem" }}>◆</span>
 
             <div>
-              <p style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.5625rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.creamMuted, lineHeight: 1 }}>
+              <p style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.creamMuted, lineHeight: 1 }}>
                 Operations
               </p>
-              <p className="hidden sm:block" style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "0.35rem" }}>
+              <p className="hidden sm:block" style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.24)", marginTop: "0.35rem" }}>
                 New Client Request
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-5">
-            <Link href="/admin/operations" style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", textDecoration: "none" }}>
+            <Link href="/admin/operations" style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", textDecoration: "none" }}>
               ← Operations
             </Link>
-            <Link href="/admin" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.5rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.gold, opacity: 0.55, textDecoration: "none" }}>
+            <Link href="/admin" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.gold, opacity: 0.55, textDecoration: "none" }}>
               Payload CMS →
             </Link>
           </div>

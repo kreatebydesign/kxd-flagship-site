@@ -18,15 +18,15 @@ import { KxdLogo } from "@/components/ui/KxdLogo";
 
 const C = {
   bgBase:     "#080808",
-  bgElevated: "#111",
+  bgElevated: "#0B0B0B",
   bgInput:    "#0B0B0B",
   gold:       "#C9A962",
   goldDim:    "rgba(201,169,98,0.55)",
-  goldFaint:  "rgba(201,169,98,0.06)",
+  goldFaint:  "rgba(255,255,255,0.035)",
   cream:      "#F5F1E8",
   creamMuted: "rgba(245,241,232,0.72)",
   border:     "rgba(255,255,255,0.08)",
-  borderGold: "rgba(201,169,98,0.12)",
+  borderGold: "rgba(201,169,98,0.16)",
   red:        "#d25a5a",
   green:      "#C9A962",
   sans:       "var(--font-outfit, Inter, system-ui)",
@@ -121,11 +121,11 @@ function ScreenshotGrid({ screenshots }: { screenshots: AnyDoc[] }) {
               />
             ) : (
               <div style={{ width: "100%", height: "140px", background: "rgba(255,255,255,0.03)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: "rgba(255,255,255,0.18)" }}>No preview</p>
+                <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(255,255,255,0.18)" }}>No preview</p>
               </div>
             )}
             <div style={{ padding: "0.625rem 0.75rem" }}>
-              <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.1em", textTransform: "uppercase" as const, color: C.goldDim }}>
+              <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.1em", textTransform: "uppercase" as const, color: C.goldDim }}>
                 {ss.alt || label}
               </p>
             </div>
@@ -141,7 +141,7 @@ function ScreenshotGrid({ screenshots }: { screenshots: AnyDoc[] }) {
 function SceneSequenceBlock({ text }: { text: string }) {
   const scenes = text.split("---").map(s => s.trim()).filter(Boolean);
   if (scenes.length === 0) return (
-    <pre style={{ fontFamily: "monospace", fontSize: "0.5625rem", color: C.creamMuted, lineHeight: 1.7, whiteSpace: "pre-wrap" as const, margin: 0 }}>
+    <pre style={{ fontFamily: "monospace", fontSize: "0.8125rem", color: C.creamMuted, lineHeight: 1.7, whiteSpace: "pre-wrap" as const, margin: 0 }}>
       {text}
     </pre>
   );
@@ -150,7 +150,7 @@ function SceneSequenceBlock({ text }: { text: string }) {
     <div style={{ display: "flex", flexDirection: "column" as const, gap: "1rem" }}>
       {scenes.map((scene, i) => (
         <div key={i} style={{ background: C.bgInput, border: `1px solid ${C.border}`, padding: "1rem 1.25rem" }}>
-          <pre style={{ fontFamily: "monospace", fontSize: "0.5rem", color: C.creamMuted, lineHeight: 1.8, whiteSpace: "pre-wrap" as const, margin: 0 }}>
+          <pre style={{ fontFamily: "monospace", fontSize: "0.8125rem", color: C.creamMuted, lineHeight: 1.8, whiteSpace: "pre-wrap" as const, margin: 0 }}>
             {scene}
           </pre>
         </div>
@@ -168,7 +168,7 @@ function CaptionOptionsBlock({ text }: { text: string }) {
     <div style={{ display: "flex", flexDirection: "column" as const, gap: "0.75rem" }}>
       {options.map((caption, i) => (
         <div key={i} style={{ background: C.bgInput, border: `1px solid ${C.border}`, padding: "0.875rem 1rem" }}>
-          <p style={{ fontFamily: C.sans, fontSize: "0.375rem", letterSpacing: "0.14em", textTransform: "uppercase" as const, color: C.goldDim, marginBottom: "0.5rem" }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.14em", textTransform: "uppercase" as const, color: C.goldDim, marginBottom: "0.5rem" }}>
             Option {letters[i] || i + 1}
           </p>
           <p style={{ fontFamily: C.sans, fontSize: "0.75rem", color: C.cream, lineHeight: 1.6 }}>
@@ -287,17 +287,17 @@ export function ReelDetailClient({ doc }: { doc: AnyDoc }) {
           <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
             <KxdLogo />
             <div>
-              <p style={{ color: C.goldDim, fontSize: "0.5rem", letterSpacing: "0.1em" }}>Reel Detail</p>
+              <p style={{ color: C.goldDim, fontSize: "0.8125rem", letterSpacing: "0.1em" }}>Reel Detail</p>
               <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "1rem", color: C.cream, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "24rem" }}>
                 {doc.videoTitle || "Untitled Reel"}
               </p>
             </div>
           </div>
           <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-            <Link href="/admin/operations/reels" style={{ color: C.goldDim, fontSize: "0.5rem", letterSpacing: "0.1em", textDecoration: "none" }}>
+            <Link href="/admin/operations/reels" style={{ color: C.goldDim, fontSize: "0.8125rem", letterSpacing: "0.1em", textDecoration: "none" }}>
               ← Reels
             </Link>
-            <Link href={`/admin/collections/promo-video-requests/${doc.id}`} style={{ color: "rgba(255,255,255,0.2)", fontSize: "0.5rem", letterSpacing: "0.1em", textDecoration: "none" }}>
+            <Link href={`/admin/collections/promo-video-requests/${doc.id}`} style={{ color: "rgba(255,255,255,0.2)", fontSize: "0.8125rem", letterSpacing: "0.1em", textDecoration: "none" }}>
               Edit in Payload →
             </Link>
           </div>
@@ -310,7 +310,7 @@ export function ReelDetailClient({ doc }: { doc: AnyDoc }) {
         <Panel>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", flexWrap: "wrap" as const }}>
             <div>
-              <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.14em", textTransform: "uppercase" as const, color: C.goldDim, marginBottom: "0.5rem" }}>
+              <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.14em", textTransform: "uppercase" as const, color: C.goldDim, marginBottom: "0.5rem" }}>
                 {clientName(doc)}
               </p>
               <h1 style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "clamp(1.5rem, 3vw, 2rem)", color: C.cream, lineHeight: 1.1 }}>
@@ -318,7 +318,7 @@ export function ReelDetailClient({ doc }: { doc: AnyDoc }) {
               </h1>
               {doc.websiteUrl && (
                 <a href={doc.websiteUrl} target="_blank" rel="noopener noreferrer"
-                  style={{ fontFamily: "monospace", fontSize: "0.5rem", color: C.goldDim, marginTop: "0.5rem", display: "inline-block" }}>
+                  style={{ fontFamily: "monospace", fontSize: "0.8125rem", color: C.goldDim, marginTop: "0.5rem", display: "inline-block" }}>
                   {doc.websiteUrl} ↗
                 </a>
               )}
@@ -331,7 +331,7 @@ export function ReelDetailClient({ doc }: { doc: AnyDoc }) {
           </div>
           {doc.goal && (
             <div style={{ marginTop: "1.25rem", paddingTop: "1rem", borderTop: `1px solid ${C.border}` }}>
-              <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.2)", marginBottom: "0.375rem" }}>
+              <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.2)", marginBottom: "0.375rem" }}>
                 Goal
               </p>
               <p style={{ fontFamily: C.sans, fontSize: "0.75rem", color: C.creamMuted, lineHeight: 1.6 }}>
@@ -352,13 +352,13 @@ export function ReelDetailClient({ doc }: { doc: AnyDoc }) {
                 <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: C.cream, marginBottom: "0.375rem" }}>
                   {hasScreenshots ? `${shotCount} sections captured` : "No screenshots yet"}
                 </p>
-                <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: "rgba(255,255,255,0.3)", lineHeight: 1.5 }}>
+                <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.3)", lineHeight: 1.5 }}>
                   Playwright captures hero, services, testimonials, CTA, and full-page sections.
                 </p>
               </div>
               <StatusBadge
                 label={doc.screenshotStatus || "idle"}
-                color={doc.screenshotStatus === "complete" ? C.green : doc.screenshotStatus === "failed" ? C.red : C.goldDim}
+                color={doc.screenshotStatus === "complete" ? C.gold : doc.screenshotStatus === "failed" ? C.red : C.goldDim}
               />
             </div>
             {doc.websiteUrl ? (
@@ -384,7 +384,7 @@ export function ReelDetailClient({ doc }: { doc: AnyDoc }) {
                 {screenshotState === "loading" ? "Capturing…" : hasScreenshots ? "Recapture Screenshots" : "Capture Screenshots"}
               </button>
             ) : (
-              <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: C.red }}>
+              <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.red }}>
                 No website URL. Edit this record and add one.
               </p>
             )}
@@ -394,7 +394,7 @@ export function ReelDetailClient({ doc }: { doc: AnyDoc }) {
                 fontSize:   "0.5rem",
                 lineHeight: 1.5,
                 marginTop:  "0.75rem",
-                color:      screenshotState === "error" ? C.red : C.green,
+                color:      screenshotState === "error" ? C.red : C.gold,
               }}>
                 {screenshotMsg}
               </p>
@@ -409,13 +409,13 @@ export function ReelDetailClient({ doc }: { doc: AnyDoc }) {
                 <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: C.cream, marginBottom: "0.375rem" }}>
                   {hasStoryboard ? "Storyboard complete" : "No storyboard yet"}
                 </p>
-                <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: "rgba(255,255,255,0.3)", lineHeight: 1.5 }}>
+                <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.3)", lineHeight: 1.5 }}>
                   Brand-aware AI generation: hook, scene sequence, transitions, captions, CTA, and music direction.
                 </p>
               </div>
               <StatusBadge
                 label={doc.storyboardGenerationStatus || "idle"}
-                color={doc.storyboardGenerationStatus === "complete" ? C.green : doc.storyboardGenerationStatus === "failed" ? C.red : C.goldDim}
+                color={doc.storyboardGenerationStatus === "complete" ? C.gold : doc.storyboardGenerationStatus === "failed" ? C.red : C.goldDim}
               />
             </div>
             <button
@@ -445,7 +445,7 @@ export function ReelDetailClient({ doc }: { doc: AnyDoc }) {
                 fontSize:   "0.5rem",
                 lineHeight: 1.5,
                 marginTop:  "0.75rem",
-                color:      storyboardState === "error" ? C.red : C.green,
+                color:      storyboardState === "error" ? C.red : C.gold,
               }}>
                 {storyboardMsg}
               </p>
@@ -460,7 +460,7 @@ export function ReelDetailClient({ doc }: { doc: AnyDoc }) {
                 <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: C.cream, marginBottom: "0.375rem" }}>
                   {hasRender ? "MP4 rendered" : "No render yet"}
                 </p>
-                <p style={{ fontFamily: C.sans, fontSize: "0.5rem", color: "rgba(255,255,255,0.3)", lineHeight: 1.5 }}>
+                <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.3)", lineHeight: 1.5 }}>
                   Remotion renders screenshots + storyboard into a downloadable MP4 (local dev only — Phase 5C for cloud).
                 </p>
               </div>
@@ -472,7 +472,7 @@ export function ReelDetailClient({ doc }: { doc: AnyDoc }) {
                 }
                 color={
                   renderState === "loading" || doc.renderStatus === "rendering" ? C.gold
-                  : (doc.renderStatus === "complete" || renderState === "done") ? C.green
+                  : (doc.renderStatus === "complete" || renderState === "done") ? C.gold
                   : doc.renderStatus === "failed" || renderState === "error" ? C.red
                   : C.goldDim
                 }
@@ -528,7 +528,7 @@ export function ReelDetailClient({ doc }: { doc: AnyDoc }) {
             </button>
 
             {!hasScreenshots && (
-              <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: "rgba(255,255,255,0.25)", marginTop: "0.625rem" }}>
+              <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(255,255,255,0.25)", marginTop: "0.625rem" }}>
                 Capture screenshots first to unlock rendering.
               </p>
             )}
@@ -539,14 +539,14 @@ export function ReelDetailClient({ doc }: { doc: AnyDoc }) {
                 fontSize:   "0.5rem",
                 lineHeight: 1.5,
                 marginTop:  "0.75rem",
-                color:      renderState === "error" ? C.red : C.green,
+                color:      renderState === "error" ? C.red : C.gold,
               }}>
                 {renderMsg}
               </p>
             )}
 
             {doc.renderDurationMs && (
-              <p style={{ fontFamily: C.sans, fontSize: "0.375rem", color: "rgba(255,255,255,0.18)", marginTop: "0.375rem" }}>
+              <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(255,255,255,0.18)", marginTop: "0.375rem" }}>
                 Last render: {Math.round(doc.renderDurationMs / 1000)}s · v{doc.renderVersion || 1}
               </p>
             )}
@@ -559,10 +559,10 @@ export function ReelDetailClient({ doc }: { doc: AnyDoc }) {
             <SectionLabel>Rendered MP4 — Ready to Download</SectionLabel>
             <div style={{ display: "flex", alignItems: "center", gap: "1.25rem", flexWrap: "wrap" as const }}>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontFamily: "monospace", fontSize: "0.5rem", color: C.goldDim, marginBottom: "0.375rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>
+                <p style={{ fontFamily: "monospace", fontSize: "0.8125rem", color: C.goldDim, marginBottom: "0.375rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>
                   {renderedUrl}
                 </p>
-                <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: "rgba(255,255,255,0.25)" }}>
+                <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(255,255,255,0.25)" }}>
                   Served from public/generated-reels/ in local dev. Upload to CDN for production delivery.
                 </p>
               </div>
@@ -611,14 +611,14 @@ export function ReelDetailClient({ doc }: { doc: AnyDoc }) {
 
         {/* ── Render error ─────────────────────────────────────────────────── */}
         {doc.renderError && doc.renderStatus === "failed" && (
-          <div style={{ padding: "0.875rem 1.25rem", background: "rgba(210,90,90,0.08)", border: "1px solid rgba(210,90,90,0.3)" }}>
-            <p style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.1em", textTransform: "uppercase" as const, color: C.red, marginBottom: "0.375rem" }}>
+          <div style={{ padding: "0.875rem 1.25rem", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(210,90,90,0.3)" }}>
+            <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.1em", textTransform: "uppercase" as const, color: C.red, marginBottom: "0.375rem" }}>
               Render Error
             </p>
             <p style={{ fontFamily: C.sans, fontSize: "0.75rem", color: C.red }}>
               {doc.renderError}
             </p>
-            <p style={{ fontFamily: C.sans, fontSize: "0.4375rem", color: "rgba(255,255,255,0.25)", marginTop: "0.5rem", lineHeight: 1.5 }}>
+            <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(255,255,255,0.25)", marginTop: "0.5rem", lineHeight: 1.5 }}>
               Common fixes: ensure <code>npx playwright install chromium</code> has been run and the Next.js dev server is accessible at localhost:3000 during rendering.
             </p>
           </div>
@@ -632,7 +632,7 @@ export function ReelDetailClient({ doc }: { doc: AnyDoc }) {
               &ldquo;{doc.reelHook}&rdquo;
             </p>
             {doc.reelTitle && (
-              <p style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: C.goldDim, marginTop: "1rem" }}>
+              <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: C.goldDim, marginTop: "1rem" }}>
                 Reel Title: {doc.reelTitle}
               </p>
             )}
@@ -695,7 +695,7 @@ export function ReelDetailClient({ doc }: { doc: AnyDoc }) {
         {doc.generatedPostCopy && (
           <Panel>
             <SectionLabel>Post Copy &amp; Hashtags</SectionLabel>
-            <pre style={{ fontFamily: "monospace", fontSize: "0.5625rem", color: C.creamMuted, lineHeight: 1.8, whiteSpace: "pre-wrap" as const, margin: 0 }}>
+            <pre style={{ fontFamily: "monospace", fontSize: "0.8125rem", color: C.creamMuted, lineHeight: 1.8, whiteSpace: "pre-wrap" as const, margin: 0 }}>
               {doc.generatedPostCopy}
             </pre>
           </Panel>
@@ -732,8 +732,8 @@ export function ReelDetailClient({ doc }: { doc: AnyDoc }) {
 
         {/* ── Generation error ─────────────────────────────────────────────── */}
         {doc.storyboardGenerationError && (
-          <div style={{ padding: "0.875rem 1.25rem", background: "rgba(210,90,90,0.08)", border: "1px solid rgba(210,90,90,0.3)" }}>
-            <p style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.1em", textTransform: "uppercase" as const, color: C.red, marginBottom: "0.375rem" }}>
+          <div style={{ padding: "0.875rem 1.25rem", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(210,90,90,0.3)" }}>
+            <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.1em", textTransform: "uppercase" as const, color: C.red, marginBottom: "0.375rem" }}>
               Generation Error
             </p>
             <p style={{ fontFamily: C.sans, fontSize: "0.75rem", color: C.red }}>
@@ -744,13 +744,13 @@ export function ReelDetailClient({ doc }: { doc: AnyDoc }) {
 
         {/* ── Footer links ─────────────────────────────────────────────────── */}
         <div style={{ display: "flex", gap: "1rem", paddingTop: "1rem", borderTop: `1px solid ${C.border}`, flexWrap: "wrap" as const }}>
-          <Link href="/admin/operations/reels" style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: C.goldDim, textDecoration: "none" }}>
+          <Link href="/admin/operations/reels" style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: C.goldDim, textDecoration: "none" }}>
             ← All Reels
           </Link>
-          <Link href={`/admin/collections/promo-video-requests/${doc.id}`} style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.22)", textDecoration: "none" }}>
+          <Link href={`/admin/collections/promo-video-requests/${doc.id}`} style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.22)", textDecoration: "none" }}>
             Edit Full Record in Payload →
           </Link>
-          <Link href="/admin/operations/reels/new" style={{ fontFamily: C.sans, fontSize: "0.5rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.22)", textDecoration: "none" }}>
+          <Link href="/admin/operations/reels/new" style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.22)", textDecoration: "none" }}>
             Create Another Reel
           </Link>
         </div>

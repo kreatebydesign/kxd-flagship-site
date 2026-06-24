@@ -1,14 +1,14 @@
 import { ACADEMY_MODULES, type AcademyModule } from "@/lib/junior-creators/academy";
 
 const C = {
-  bgElevated: "#111111",
+  bgElevated: "#0B0B0B",
   bgCard: "#101010",
   gold: "#C9A962",
   goldDim: "rgba(201,169,98,0.55)",
   cream: "#F5F1E8",
   creamMuted: "rgba(245,241,232,0.72)",
   border: "rgba(255,255,255,0.08)",
-  borderGold: "rgba(201,169,98,0.14)",
+  borderGold: "rgba(201,169,98,0.16)",
   serif: "var(--font-cormorant, Georgia, 'Times New Roman', serif)",
   sans: "var(--font-outfit, 'Helvetica Neue', Arial, sans-serif)",
 } as const;
@@ -18,7 +18,7 @@ function Label({ children, style }: { children: React.ReactNode; style?: React.C
     <p
       style={{
         fontFamily: C.sans,
-        fontSize: "0.4375rem",
+        fontSize: "0.6875rem",
         fontWeight: 600,
         letterSpacing: "0.18em",
         textTransform: "uppercase",
@@ -46,7 +46,7 @@ function ModuleCard({ module }: { module: AcademyModule }) {
         <span
           style={{
             fontFamily: C.sans,
-            fontSize: "0.375rem",
+            fontSize: "0.6875rem",
             fontWeight: 600,
             letterSpacing: "0.12em",
             textTransform: "uppercase",
@@ -60,7 +60,7 @@ function ModuleCard({ module }: { module: AcademyModule }) {
         <span
           style={{
             fontFamily: C.sans,
-            fontSize: "0.375rem",
+            fontSize: "0.6875rem",
             letterSpacing: "0.1em",
             textTransform: "uppercase",
             color: "rgba(255,255,255,0.28)",
@@ -85,7 +85,7 @@ function ModuleCard({ module }: { module: AcademyModule }) {
       <p
         style={{
           fontFamily: C.sans,
-          fontSize: "0.5625rem",
+          fontSize: "0.8125rem",
           color: C.creamMuted,
           lineHeight: 1.55,
           marginBottom: "1rem",
@@ -101,7 +101,7 @@ function ModuleCard({ module }: { module: AcademyModule }) {
             key={point}
             style={{
               fontFamily: C.sans,
-              fontSize: "0.5rem",
+              fontSize: "0.8125rem",
               color: "rgba(245,241,232,0.55)",
               lineHeight: 1.5,
               paddingLeft: "0.875rem",
@@ -137,7 +137,7 @@ export function JuniorAcademy() {
         <p
           style={{
             fontFamily: C.sans,
-            fontSize: "0.5625rem",
+            fontSize: "0.8125rem",
             color: C.creamMuted,
             marginTop: "0.75rem",
             maxWidth: "40rem",
