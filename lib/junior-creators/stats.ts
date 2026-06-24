@@ -2,7 +2,8 @@ import "server-only";
 
 import { getPayload } from "payload";
 import config from "@payload-config";
-import { getRankTitle, getNextRank } from "./ranks";
+import type { RankProgress } from "./ranks";
+import { getRankTitle, getNextRank, getRankProgress } from "./ranks";
 import { findActiveShift } from "./shifts";
 import { getLeadWeekKey, getWeekKey, minutesBetween } from "./week";
 
@@ -16,11 +17,16 @@ export type JuniorCreatorStats = {
   submittedThisWeek: number;
   qualifiedThisWeek: number;
   closedWonThisWeek: number;
+  submittedToday: number;
   totalLeads: number;
   lifetimeQualified: number;
   lifetimeClosedWon: number;
+  leadsWithNotes: number;
+  websiteOpportunityLeads: number;
+  lifetimeHoursMinutes: number;
   rankTitle: string;
   nextRank: { title: string; leadsNeeded: number } | null;
+  rankProgress: RankProgress;
   hoursWorkedMinutesThisWeek: number;
   estimatedEarningsCentsThisWeek: number;
   personalBests: JuniorCreatorPersonalBests;
@@ -33,6 +39,19 @@ export type JuniorCreatorStats = {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDoc = Record<string, any>;
+
+function isToday(date: Date): boolean {
+  const now = new Date();
+  return (
+    date.getFullYear() === now.getFullYear() &&
+    date.getMonth() === now.getMonth() &&
+    date.getDate() === now.getDate()
+  );
+}
+
+function hasDetailedNotes(notes: unknown): boolean {
+  return typeof notes === "string" && notes.trim().length >= 20;
+}
 
 function earningsFromMinutes(minutes: number, hourlyRateCents: number): number {
   return Math.round((minutes * hourlyRateCents) / 60);
@@ -69,8 +88,11 @@ export async function getJuniorCreatorStats(juniorCreatorUserId: number): Promis
   let submittedThisWeek = 0;
   let qualifiedThisWeek = 0;
   let closedWonThisWeek = 0;
+  let submittedToday = 0;
   let lifetimeQualified = 0;
   let lifetimeClosedWon = 0;
+  let leadsWithNotes = 0;
+  let websiteOpportunityLeads = 0;
   const leadsPerWeek: Record<string, number> = {};
 
   for (const lead of leads) {
@@ -80,6 +102,10 @@ export async function getJuniorCreatorStats(juniorCreatorUserId: number): Promis
 
     if (lead.status === "qualified") lifetimeQualified += 1;
     if (lead.status === "closed-won") lifetimeClosedWon += 1;
+    if (hasDetailedNotes(lead.notes)) leadsWithNotes += 1;
+    if (String(lead.estimatedService ?? "") === "website") websiteOpportunityLeads += 1;
+
+    if (isToday(created)) submittedToday += 1;
 
     if (created >= weekStart) {
       submittedThisWeek += 1;
@@ -90,6 +116,7 @@ export async function getJuniorCreatorStats(juniorCreatorUserId: number): Promis
 
   let hoursWorkedMinutesThisWeek = 0;
   let estimatedEarningsCentsThisWeek = 0;
+  let lifetimeHoursMinutes = 0;
   const minutesPerWeek: Record<string, number> = {};
   const earningsPerWeek: Record<string, number> = {};
 
@@ -103,6 +130,7 @@ export async function getJuniorCreatorStats(juniorCreatorUserId: number): Promis
     if (status === "completed") {
       const mins = Number(shift.totalMinutes ?? 0);
       if (mins > 0) {
+        lifetimeHoursMinutes += mins;
         minutesPerWeek[weekKey] = (minutesPerWeek[weekKey] ?? 0) + mins;
         const earned = earningsFromMinutes(mins, rate);
         earningsPerWeek[weekKey] = (earningsPerWeek[weekKey] ?? 0) + earned;
@@ -119,6 +147,7 @@ export async function getJuniorCreatorStats(juniorCreatorUserId: number): Promis
   if (activeShift) {
     const elapsed = minutesBetween(new Date(activeShift.startedAt), new Date());
     hoursWorkedMinutesThisWeek += elapsed;
+    lifetimeHoursMinutes += elapsed;
     estimatedEarningsCentsThisWeek += earningsFromMinutes(elapsed, activeShift.hourlyRateCents);
   }
 
@@ -138,11 +167,16 @@ export async function getJuniorCreatorStats(juniorCreatorUserId: number): Promis
     submittedThisWeek,
     qualifiedThisWeek,
     closedWonThisWeek,
+    submittedToday,
     totalLeads,
     lifetimeQualified,
     lifetimeClosedWon,
+    leadsWithNotes,
+    websiteOpportunityLeads,
+    lifetimeHoursMinutes,
     rankTitle: getRankTitle(totalLeads),
     nextRank: getNextRank(totalLeads),
+    rankProgress: getRankProgress(totalLeads),
     hoursWorkedMinutesThisWeek,
     estimatedEarningsCentsThisWeek,
     personalBests,

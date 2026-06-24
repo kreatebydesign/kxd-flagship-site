@@ -1,17 +1,9 @@
-import { ACADEMY_MODULES, type AcademyModule } from "@/lib/junior-creators/academy";
+import { buildAcademyModuleViews, type AcademyModuleView } from "@/lib/junior-creators/academy";
+import { KXD_OS as C } from "@/lib/kxd-os/palette";
 
-const C = {
-  bgElevated: "#0B0B0B",
-  bgCard: "#101010",
-  gold: "#C9A962",
-  goldDim: "rgba(201,169,98,0.55)",
-  cream: "#F5F1E8",
-  creamMuted: "rgba(245,241,232,0.72)",
-  border: "rgba(255,255,255,0.08)",
-  borderGold: "rgba(201,169,98,0.16)",
-  serif: "var(--font-cormorant, Georgia, 'Times New Roman', serif)",
-  sans: "var(--font-outfit, 'Helvetica Neue', Arial, sans-serif)",
-} as const;
+type Props = {
+  totalLeads: number;
+};
 
 function Label({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
   return (
@@ -22,7 +14,7 @@ function Label({ children, style }: { children: React.ReactNode; style?: React.C
         fontWeight: 600,
         letterSpacing: "0.18em",
         textTransform: "uppercase",
-        color: "rgba(255,255,255,0.3)",
+        color: C.creamSubtle,
         ...style,
       }}
     >
@@ -31,16 +23,30 @@ function Label({ children, style }: { children: React.ReactNode; style?: React.C
   );
 }
 
-function ModuleCard({ module }: { module: AcademyModule }) {
-  const isAvailable = module.status === "Available";
+const STATUS_STYLE: Record<
+  AcademyModuleView["displayStatus"],
+  { color: string; border: string }
+> = {
+  Unlocked: { color: C.goldDim, border: C.borderGold },
+  "In Progress": { color: C.gold, border: C.borderGoldStrong },
+  Locked: { color: "rgba(245,241,232,0.35)", border: C.border },
+};
+
+function ModuleCard({ module }: { module: AcademyModuleView }) {
+  const isLocked = module.displayStatus === "Locked";
+  const statusStyle = STATUS_STYLE[module.displayStatus];
 
   return (
     <article
       style={{
-        background: C.bgCard,
-        border: `1px solid ${isAvailable ? C.borderGold : C.border}`,
+        background: C.glass,
+        border: `1px solid ${isLocked ? C.border : C.border}`,
+        borderLeft: module.displayStatus === "In Progress" ? `2px solid ${C.gold}` : undefined,
         padding: "1.375rem 1.5rem",
+        opacity: isLocked ? 0.78 : 1,
+        transition: "background 0.2s ease",
       }}
+      className="kxd-academy-module"
     >
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <span
@@ -50,12 +56,12 @@ function ModuleCard({ module }: { module: AcademyModule }) {
             fontWeight: 600,
             letterSpacing: "0.12em",
             textTransform: "uppercase",
-            color: isAvailable ? C.goldDim : "rgba(255,255,255,0.35)",
-            border: `1px solid ${isAvailable ? C.borderGold : C.border}`,
+            color: statusStyle.color,
+            border: `1px solid ${statusStyle.border}`,
             padding: "0.2rem 0.5rem",
           }}
         >
-          {module.status}
+          {module.displayStatus}
         </span>
         <span
           style={{
@@ -63,10 +69,23 @@ function ModuleCard({ module }: { module: AcademyModule }) {
             fontSize: "0.6875rem",
             letterSpacing: "0.1em",
             textTransform: "uppercase",
-            color: "rgba(255,255,255,0.28)",
+            color: C.goldDim,
+            border: `1px solid ${C.borderGold}`,
+            padding: "0.2rem 0.5rem",
           }}
         >
-          {module.level} · {module.estimatedTime}
+          {module.track}
+        </span>
+        <span
+          style={{
+            fontFamily: C.sans,
+            fontSize: "0.6875rem",
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
+            color: "rgba(245,241,232,0.38)",
+          }}
+        >
+          {module.difficulty} · {module.estimatedTime}
         </span>
       </div>
 
@@ -75,7 +94,7 @@ function ModuleCard({ module }: { module: AcademyModule }) {
           fontFamily: C.serif,
           fontWeight: 400,
           fontSize: "1.125rem",
-          color: isAvailable ? C.cream : C.creamMuted,
+          color: isLocked ? C.creamMuted : C.cream,
           lineHeight: 1.25,
           marginBottom: "0.5rem",
         }}
@@ -94,34 +113,40 @@ function ModuleCard({ module }: { module: AcademyModule }) {
         {module.description}
       </p>
 
-      <Label style={{ marginBottom: "0.625rem" }}>What you&apos;ll learn</Label>
-      <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-        {module.learnPoints.map((point) => (
-          <li
-            key={point}
-            style={{
-              fontFamily: C.sans,
-              fontSize: "0.8125rem",
-              color: "rgba(245,241,232,0.55)",
-              lineHeight: 1.5,
-              paddingLeft: "0.875rem",
-              marginBottom: "0.35rem",
-              borderLeft: `1px solid ${C.border}`,
-            }}
-          >
-            {point}
-          </li>
-        ))}
-      </ul>
+      {!isLocked && (
+        <>
+          <Label style={{ marginBottom: "0.625rem" }}>What you&apos;ll learn</Label>
+          <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+            {module.learnPoints.map((point) => (
+              <li
+                key={point}
+                style={{
+                  fontFamily: C.sans,
+                  fontSize: "0.8125rem",
+                  color: C.creamSubtle,
+                  lineHeight: 1.5,
+                  paddingLeft: "0.875rem",
+                  marginBottom: "0.35rem",
+                  borderLeft: `1px solid ${C.border}`,
+                }}
+              >
+                {point}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
     </article>
   );
 }
 
-export function JuniorAcademy() {
+export function JuniorAcademy({ totalLeads }: Props) {
+  const modules = buildAcademyModuleViews(totalLeads);
+
   return (
     <section className="mb-10">
       <div style={{ marginBottom: "1.5rem" }}>
-        <Label style={{ color: C.goldDim, marginBottom: "0.75rem" }}>KXD Academy</Label>
+        <Label style={{ color: C.goldDim, marginBottom: "0.75rem" }}>Academy Modules</Label>
         <h2
           style={{
             fontFamily: C.serif,
@@ -132,7 +157,7 @@ export function JuniorAcademy() {
             maxWidth: "32rem",
           }}
         >
-          Build your creative foundation.
+          Learn KXD services, standards, and workflows.
         </h2>
         <p
           style={{
@@ -144,8 +169,7 @@ export function JuniorAcademy() {
             lineHeight: 1.65,
           }}
         >
-          Learn how KXD finds strong opportunities, train your eye for premium work, and grow into
-          higher-level studio responsibilities — one module at a time.
+          Each module connects to a skill track — research, websites, branding, and studio operations.
         </p>
       </div>
 
@@ -156,10 +180,16 @@ export function JuniorAcademy() {
           border: `1px solid ${C.border}`,
         }}
       >
-        {ACADEMY_MODULES.map((module) => (
+        {modules.map((module) => (
           <ModuleCard key={module.id} module={module} />
         ))}
       </div>
+
+      <style>{`
+        .kxd-academy-module:hover {
+          background: ${C.glassHover};
+        }
+      `}</style>
     </section>
   );
 }

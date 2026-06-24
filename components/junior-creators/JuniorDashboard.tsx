@@ -5,6 +5,9 @@ import Link from "next/link";
 import { KxdLogo } from "@/components/ui/KxdLogo";
 import { JuniorLeadForm } from "./JuniorLeadForm";
 import { JuniorShiftCard } from "./JuniorShiftCard";
+import { JuniorAcademyHero } from "./JuniorAcademyHero";
+import { JuniorDailyQuests } from "./JuniorDailyQuests";
+import { JuniorSkillTrees } from "./JuniorSkillTrees";
 import { JuniorAcademy } from "./JuniorAcademy";
 import { JuniorMilestones } from "./JuniorMilestones";
 import type { JuniorCreatorStats } from "@/lib/junior-creators/stats";
@@ -112,35 +115,30 @@ export function JuniorDashboard({ displayName, stats, recentLeads }: Props) {
       </header>
 
       <main className="mx-auto max-w-screen-lg" style={{ padding: "2.5rem 1.5rem 4rem" }}>
-        <div style={{ marginBottom: "2.5rem", paddingBottom: "2rem", borderBottom: `1px solid ${C.border}` }}>
-          <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.2em", textTransform: "uppercase", color: C.goldDim, marginBottom: "0.75rem" }}>
-            Welcome back
-          </p>
-          <h1 style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "clamp(1.75rem, 4vw, 2.75rem)", lineHeight: 1.05 }}>
-            Hey {displayName}
-          </h1>
-          <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted, marginTop: "0.75rem", maxWidth: "32rem" }}>
-            Your KXD Academy research desk — track your time, grow your pipeline, and build your rank.
-          </p>
-        </div>
+        <JuniorAcademyHero displayName={displayName} stats={stats} />
 
         <JuniorShiftCard activeShift={stats.activeShift} />
 
-        {/* Rank progress */}
-        <div style={{ background: C.bgCard, border: `1px solid ${C.borderGold}`, padding: "1.5rem 1.625rem", marginBottom: "2rem" }}>
-          <Label>Rank Progress</Label>
-          <p style={{ fontFamily: C.serif, fontWeight: 400, fontSize: "1.75rem", color: C.gold, marginTop: "0.5rem" }}>
-            {stats.rankTitle}
-          </p>
-          <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted, marginTop: "0.35rem" }}>
-            {stats.totalLeads} lifetime lead{stats.totalLeads === 1 ? "" : "s"} submitted
-          </p>
-          {stats.nextRank && (
-            <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted, marginTop: "0.5rem" }}>
-              {stats.nextRank.leadsNeeded} more lead{stats.nextRank.leadsNeeded === 1 ? "" : "s"} to reach {stats.nextRank.title}
-            </p>
-          )}
-        </div>
+        <JuniorDailyQuests
+          questContext={{
+            submittedToday: stats.submittedToday,
+            leadsWithNotes: stats.leadsWithNotes,
+            websiteOpportunityLeads: stats.websiteOpportunityLeads,
+          }}
+        />
+
+        <JuniorSkillTrees totalLeads={stats.totalLeads} />
+
+        <JuniorAcademy totalLeads={stats.totalLeads} />
+
+        <JuniorMilestones
+          stats={{
+            totalLeads: stats.totalLeads,
+            lifetimeQualified: stats.lifetimeQualified,
+            lifetimeClosedWon: stats.lifetimeClosedWon,
+            bestHoursWeekMinutes: stats.personalBests.bestHoursWeekMinutes,
+          }}
+        />
 
         {/* This week */}
         <section className="mb-10">
@@ -174,17 +172,6 @@ export function JuniorDashboard({ displayName, stats, recentLeads }: Props) {
             ))}
           </div>
         </section>
-
-        <JuniorAcademy />
-
-        <JuniorMilestones
-          stats={{
-            totalLeads: stats.totalLeads,
-            lifetimeQualified: stats.lifetimeQualified,
-            lifetimeClosedWon: stats.lifetimeClosedWon,
-            bestHoursWeekMinutes: stats.personalBests.bestHoursWeekMinutes,
-          }}
-        />
 
         {/* Submit form */}
         <section className="mb-10">

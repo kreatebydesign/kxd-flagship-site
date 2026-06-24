@@ -1,18 +1,25 @@
 /**
- * KXD Academy — static training modules for Junior Creators (Phase 1)
+ * KXD Academy — training modules, milestones, and progression views.
  */
 
-export type AcademyLevel = "Starter" | "Builder" | "Advanced";
-export type AcademyModuleStatus = "Available" | "Coming Soon";
+import type { SkillTrackId } from "./skill-trees";
+
+export type AcademyTrack = "Research" | "Websites" | "Branding" | "Operations";
+export type AcademyDifficulty = "Beginner" | "Intermediate" | "Advanced";
+export type AcademyModuleAvailability = "Available" | "Coming Soon";
+export type AcademyModuleDisplayStatus = "Unlocked" | "In Progress" | "Locked";
 
 export type AcademyModule = {
   id: string;
   title: string;
   description: string;
-  level: AcademyLevel;
+  track: AcademyTrack;
+  trackId: SkillTrackId;
+  difficulty: AcademyDifficulty;
   estimatedTime: string;
-  status: AcademyModuleStatus;
+  availability: AcademyModuleAvailability;
   learnPoints: string[];
+  unlockAtLeads: number;
 };
 
 export const ACADEMY_MODULES: AcademyModule[] = [
@@ -20,9 +27,12 @@ export const ACADEMY_MODULES: AcademyModule[] = [
     id: "lead-research-fundamentals",
     title: "Lead Research Fundamentals",
     description: "Learn how KXD finds strong opportunities and what makes a lead worth submitting.",
-    level: "Starter",
+    track: "Research",
+    trackId: "research",
+    difficulty: "Beginner",
     estimatedTime: "20 min",
-    status: "Available",
+    availability: "Available",
+    unlockAtLeads: 0,
     learnPoints: [
       "How KXD defines a research lead vs. a random listing",
       "Where to look first — Craigslist, referrals, and manual research",
@@ -35,9 +45,12 @@ export const ACADEMY_MODULES: AcademyModule[] = [
     id: "strong-website-opportunity",
     title: "Spotting a Strong Website Opportunity",
     description: "Train your eye for businesses that need a premium website experience — not just any site refresh.",
-    level: "Starter",
+    track: "Research",
+    trackId: "research",
+    difficulty: "Beginner",
     estimatedTime: "25 min",
-    status: "Available",
+    availability: "Available",
+    unlockAtLeads: 1,
     learnPoints: [
       "Signals of an outdated or underbuilt web presence",
       "Businesses that benefit most from luxury website work",
@@ -50,9 +63,12 @@ export const ACADEMY_MODULES: AcademyModule[] = [
     id: "website-review-basics",
     title: "Website Review Basics",
     description: "Build your creative foundation for evaluating sites with clarity and confidence.",
-    level: "Builder",
+    track: "Websites",
+    trackId: "websites",
+    difficulty: "Intermediate",
     estimatedTime: "30 min",
-    status: "Available",
+    availability: "Available",
+    unlockAtLeads: 10,
     learnPoints: [
       "Layout, hierarchy, and first-impression quality",
       "Mobile experience and basic usability checks",
@@ -65,9 +81,12 @@ export const ACADEMY_MODULES: AcademyModule[] = [
     id: "seo-basics",
     title: "SEO Basics",
     description: "Understand how search visibility connects to growth — and when to flag SEO as the opportunity.",
-    level: "Builder",
+    track: "Websites",
+    trackId: "websites",
+    difficulty: "Intermediate",
     estimatedTime: "25 min",
-    status: "Coming Soon",
+    availability: "Coming Soon",
+    unlockAtLeads: 25,
     learnPoints: [
       "What SEO means in a KXD client context",
       "Quick checks: titles, meta, local presence, content depth",
@@ -80,9 +99,12 @@ export const ACADEMY_MODULES: AcademyModule[] = [
     id: "branding-basics",
     title: "Branding Basics",
     description: "Learn how brand systems show up on a website — and when branding is the real opportunity.",
-    level: "Builder",
+    track: "Branding",
+    trackId: "branding",
+    difficulty: "Intermediate",
     estimatedTime: "25 min",
-    status: "Coming Soon",
+    availability: "Coming Soon",
+    unlockAtLeads: 25,
     learnPoints: [
       "Logo, color, typography, and visual consistency",
       "When a business needs brand systems vs. a site-only fix",
@@ -95,9 +117,12 @@ export const ACADEMY_MODULES: AcademyModule[] = [
     id: "client-communication",
     title: "Client Communication",
     description: "Grow into higher-level studio responsibilities with professional, calm client language.",
-    level: "Advanced",
+    track: "Operations",
+    trackId: "operations",
+    difficulty: "Advanced",
     estimatedTime: "20 min",
-    status: "Coming Soon",
+    availability: "Coming Soon",
+    unlockAtLeads: 50,
     learnPoints: [
       "KXD tone — premium, clear, never pushy",
       "What juniors should never say to a prospect",
@@ -110,9 +135,12 @@ export const ACADEMY_MODULES: AcademyModule[] = [
     id: "kxd-standards",
     title: "KXD Standards",
     description: "Understand the quality bar behind every KXD deliverable — research, delivery, and follow-through.",
-    level: "Advanced",
+    track: "Operations",
+    trackId: "operations",
+    difficulty: "Advanced",
     estimatedTime: "30 min",
-    status: "Coming Soon",
+    availability: "Coming Soon",
+    unlockAtLeads: 100,
     learnPoints: [
       "What “premium” means inside KXD workflows",
       "Accuracy, completeness, and follow-through in research",
@@ -125,9 +153,12 @@ export const ACADEMY_MODULES: AcademyModule[] = [
     id: "creative-confidence",
     title: "Creative Confidence",
     description: "Develop the eye and judgment to contribute meaningfully to a creative studio over time.",
-    level: "Advanced",
+    track: "Operations",
+    trackId: "operations",
+    difficulty: "Advanced",
     estimatedTime: "25 min",
-    status: "Coming Soon",
+    availability: "Coming Soon",
+    unlockAtLeads: 250,
     learnPoints: [
       "Observing good design without needing to design yet",
       "Asking better questions about a prospect’s business",
@@ -137,6 +168,39 @@ export const ACADEMY_MODULES: AcademyModule[] = [
     ],
   },
 ];
+
+export type AcademyModuleView = AcademyModule & {
+  displayStatus: AcademyModuleDisplayStatus;
+};
+
+export function resolveModuleDisplayStatus(
+  module: AcademyModule,
+  totalLeads: number,
+): AcademyModuleDisplayStatus {
+  if (module.availability === "Coming Soon" || totalLeads < module.unlockAtLeads) {
+    return "Locked";
+  }
+
+  const unlockedAvailable = ACADEMY_MODULES.filter(
+    (m) => m.availability === "Available" && totalLeads >= m.unlockAtLeads,
+  ).sort((a, b) => a.unlockAtLeads - b.unlockAtLeads);
+
+  const inProgressId = unlockedAvailable.length
+    ? unlockedAvailable[unlockedAvailable.length - 1].id
+    : null;
+
+  if (module.id === inProgressId) return "In Progress";
+  return "Unlocked";
+}
+
+export function buildAcademyModuleViews(totalLeads: number): AcademyModuleView[] {
+  return ACADEMY_MODULES.map((module) => ({
+    ...module,
+    displayStatus: resolveModuleDisplayStatus(module, totalLeads),
+  }));
+}
+
+// ── Milestones ────────────────────────────────────────────────────────────────
 
 export type MilestoneId =
   | "first-lead"
@@ -198,8 +262,11 @@ export type MilestoneStats = {
   bestHoursWeekMinutes: number;
 };
 
+export type MilestoneVisualState = "completed" | "in-progress" | "locked";
+
 export type MilestoneView = MilestoneDefinition & {
   achieved: boolean;
+  visualState: MilestoneVisualState;
 };
 
 export function evaluateMilestones(stats: MilestoneStats): MilestoneView[] {
@@ -213,8 +280,20 @@ export function evaluateMilestones(stats: MilestoneStats): MilestoneView[] {
     "ten-hour-week": stats.bestHoursWeekMinutes >= 600,
   };
 
-  return MILESTONE_DEFINITIONS.map((m) => ({
+  const base = MILESTONE_DEFINITIONS.map((m) => ({
     ...m,
     achieved: checks[m.id],
   }));
+
+  let foundInProgress = false;
+  return base.map((m) => {
+    if (m.achieved) {
+      return { ...m, visualState: "completed" as const };
+    }
+    if (!foundInProgress) {
+      foundInProgress = true;
+      return { ...m, visualState: "in-progress" as const };
+    }
+    return { ...m, visualState: "locked" as const };
+  });
 }
