@@ -12,7 +12,8 @@ export type LauncherCardPermission =
   | "audits"
   | "playbooks"
   | "payload"
-  | "portal";
+  | "portal"
+  | "juniorAdmin";
 
 export type LauncherCardSection = "studio" | "client";
 
@@ -54,6 +55,15 @@ export const LAUNCHER_CARDS: LauncherCard[] = [
     tag: "KXD Academy",
     section: "studio",
     permission: "academy",
+  },
+  {
+    id: "junior-creators-admin",
+    title: "Junior Creator Admin",
+    description: "Review shifts, weekly hours, estimated earnings, and admin adjustments.",
+    href: "/admin/operations/junior-creators",
+    tag: "KXD Academy",
+    section: "studio",
+    permission: "juniorAdmin",
   },
   {
     id: "onboarding",
