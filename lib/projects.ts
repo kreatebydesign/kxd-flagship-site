@@ -47,30 +47,32 @@ export type CaseStudy = {
 // ─────────────────────────────────────────────────────────────────────────────
 // PROJECTS — authoritative listing order
 //
-// Primary (Selected Work):   Primal · Cusick · Plate · Golden State Warriors
-// Secondary (Further Work):  OTP · SBE · Hair Mafia · AutoDV8ions · Spur
+// Primary (Selected Work — featured first):
+//   1. Cusick Morgan Motorsports (full-width featured card)
+//   2. Primal Motorsports
+//   3. Plate the Umpqua
+//   4. Spur Restaurant & Bar
 //
-// Hidden (data preserved for /work/[slug] detail pages only):
-//   Dialed In Electric, Democratic Club of Greater Tracy
+// Secondary (Further Work):
+//   5. SBE / Hyde Lounge
+//   6. Golden State Warriors
+//   7. On Track Performance
+//   8. AutoDV8ions
+//   9. Martinsen Construction
+//  10. E. Davis Enterprises
+//  11. La Cocina
+//  12. Hair Mafia Salon
+//
+// Hidden (no quality screenshot / not portfolio fit):
+//   — Dialed In Electric (imagery pending)
+//   — Democratic Club of Greater Tracy (not portfolio fit)
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const PROJECTS: ProjectItem[] = [
-  // ── PRIMARY ──────────────────────────────────────────────────────────────
+  // ── PRIMARY — Selected Work ───────────────────────────────────────────────
+
   {
-    slug: "primal-motorsports",
-    title: "Primal Motorsports",
-    industry: "Motorsports",
-    service: "Luxury Website Experiences",
-    outcome: "Flagship presence for a performance brand that competes at the top.",
-    description:
-      "Website, membership architecture, and growth infrastructure for one of motorsports' most ambitious brands.",
-    // homepage-full shows the complete site layout — stronger portfolio impression than the hero crop
-    image: "/migrated-assets/case-studies/primal-motorsports/homepage-full.webp",
-    year: "2025",
-    featured: true,
-    tier: "primary",
-  },
-  {
+    // 1 — Full-width featured card on /work
     slug: "cusick-morgan-motorsports",
     title: "Cusick Morgan Motorsports",
     industry: "Motorsports",
@@ -78,12 +80,28 @@ export const PROJECTS: ProjectItem[] = [
     outcome: "A racing presence with the speed and discipline of the team behind it.",
     description:
       "Cinematic web design built for a professional motorsport program operating at full throttle.",
-    // New-site hero screenshot captured June 2026 from cusickmotorsports.com
     image: "/media/cusickmotorsports-com-hero-2026-06-15T06-05-15.png",
     year: "2025",
+    featured: true,
     tier: "primary",
+    imagePosition: "top center",
   },
   {
+    // 2
+    slug: "primal-motorsports",
+    title: "Primal Motorsports",
+    industry: "Motorsports",
+    service: "Luxury Website Experiences",
+    outcome: "Flagship presence for a performance brand that competes at the top.",
+    description:
+      "Website, membership architecture, and growth infrastructure for one of motorsports' most ambitious brands.",
+    image: "/migrated-assets/case-studies/primal-motorsports/homepage-02.webp",
+    year: "2025",
+    tier: "primary",
+    imagePosition: "top center",
+  },
+  {
+    // 3
     slug: "plate-the-umpqua",
     title: "Plate the Umpqua",
     industry: "Hospitality",
@@ -95,36 +113,27 @@ export const PROJECTS: ProjectItem[] = [
     logo: "/migrated-assets/logos/plate-the-umpqua.svg",
     year: "2025",
     tier: "primary",
+    imagePosition: "top center",
   },
   {
-    slug: "golden-state-warriors",
-    title: "Golden State Warriors",
-    industry: "NBA",
-    service: "Brand Systems & Identity",
-    outcome: "In-house creative support for one of the most recognized brands in professional sports.",
+    // 4
+    slug: "spur-restaurant",
+    title: "Spur Restaurant & Bar",
+    industry: "Hospitality",
+    service: "Luxury Website Experiences",
+    outcome: "A restaurant presence as considered as the atmosphere inside.",
     description:
-      "Design team support for the Golden State Warriors in-house creative program.",
-    // TODO: Replace with official Warriors creative asset if available.
-    // Source: https://sites.teamworkonline.com/golden-state-warriors/
-    image: "/images/work/screenshots/golden-state-warriors/desktop-home.png",
-    year: "2024",
+      "Premium web design for a restaurant and bar built on local reputation.",
+    image: "/migrated-assets/case-studies/spur-restaurant/hero.webp",
+    year: "2026",
     tier: "primary",
+    imagePosition: "top center",
   },
 
-  // ── SECONDARY (Further Work) ──────────────────────────────────────────────
+  // ── SECONDARY — Further Work ──────────────────────────────────────────────
+
   {
-    slug: "on-track-performance",
-    title: "On Track Performance",
-    industry: "Motorsports",
-    service: "Luxury Website Experiences",
-    outcome: "Performance-forward digital presence for a motorsports business built on precision.",
-    description:
-      "Website and brand presence for an automotive performance shop with a track-day culture.",
-    image: "/migrated-assets/projects/otp.jpg",
-    year: "2024",
-    tier: "secondary",
-  },
-  {
+    // 5
     slug: "sbe-hyde-lounge",
     title: "SBE / Hyde Lounge",
     industry: "Hospitality",
@@ -135,20 +144,38 @@ export const PROJECTS: ProjectItem[] = [
     image: "/images/work/screenshots/sbe-hyde-lounge/clean-hero.png",
     year: "2024",
     tier: "secondary",
+    imagePosition: "top center",
   },
   {
-    slug: "hair-mafia",
-    title: "Hair Mafia Salon",
-    industry: "Beauty / Lifestyle",
-    service: "Luxury Website Experiences",
-    outcome: "A salon brand with the confidence and craft to own the room.",
+    // 6
+    slug: "golden-state-warriors",
+    title: "Golden State Warriors",
+    industry: "NBA",
+    service: "Brand Systems & Identity",
+    outcome: "In-house creative support for one of the most recognized brands in professional sports.",
     description:
-      "Brand-forward web experience for a premium salon built on artistry and reputation.",
-    image: "/migrated-assets/case-studies/hair-mafia/hero.webp",
-    year: "2026",
+      "Design team support for the Golden State Warriors in-house creative program.",
+    image: "/images/work/screenshots/golden-state-warriors/desktop-home.png",
+    year: "2024",
     tier: "secondary",
+    imagePosition: "top center",
   },
   {
+    // 7
+    slug: "on-track-performance",
+    title: "On Track Performance",
+    industry: "Motorsports",
+    service: "Luxury Website Experiences",
+    outcome: "Performance-forward digital presence for a motorsports business built on precision.",
+    description:
+      "Website and brand presence for an automotive performance shop with a track-day culture.",
+    image: "/migrated-assets/projects/otp.jpg",
+    year: "2024",
+    tier: "secondary",
+    imagePosition: "center",
+  },
+  {
+    // 8
     slug: "autodv8ions",
     title: "AutoDV8ions",
     industry: "Automotive",
@@ -160,39 +187,70 @@ export const PROJECTS: ProjectItem[] = [
     logo: "/migrated-assets/logos/dv8.svg",
     year: "2025",
     tier: "secondary",
+    imagePosition: "top center",
   },
   {
-    slug: "spur-restaurant",
-    title: "Spur Restaurant & Bar",
-    industry: "Hospitality",
+    // 9
+    slug: "martinsen-construction",
+    title: "Martinsen Construction",
+    industry: "Construction",
     service: "Luxury Website Experiences",
-    outcome: "A restaurant presence as considered as the atmosphere inside.",
+    outcome: "A contractor presence built with the same precision as the work on site.",
     description:
-      "Premium web design for a restaurant and bar built on local reputation.",
-    image: "/migrated-assets/case-studies/spur-restaurant/hero.webp",
+      "Website rebuild for a Central Oregon general contractor — residential construction, remodeling, and site development.",
+    image: "/images/work/screenshots/martinsen-construction/desktop-home.png",
+    logo: "/migrated-assets/logos/martinsen-construction-logo.svg",
     year: "2026",
     tier: "secondary",
+    imagePosition: "top center",
+  },
+  {
+    // 10
+    slug: "e-davis-enterprises",
+    title: "E. Davis Enterprises",
+    industry: "Energy / Trades",
+    service: "Luxury Website Experiences",
+    outcome: "A service business that looks as professional as the work it delivers.",
+    description:
+      "Website rebuild for a family-owned propane, natural gas, and generator services company in Southern Oregon.",
+    image: "/images/work/screenshots/e-davis-enterprises/desktop-home.png",
+    year: "2026",
+    tier: "secondary",
+    imagePosition: "top center",
+  },
+  {
+    // 11
+    slug: "la-cocina",
+    title: "La Cocina",
+    industry: "Hospitality",
+    service: "Luxury Website Experiences",
+    outcome: "A restaurant website as warm and intentional as the kitchen.",
+    description:
+      "Website rebuild for a family-owned Mexican restaurant in Roseburg, Oregon.",
+    image: "/images/work/screenshots/la-cocina/desktop-home.png",
+    year: "2026",
+    tier: "secondary",
+    imagePosition: "top center",
+  },
+  {
+    // 12
+    slug: "hair-mafia",
+    title: "Hair Mafia Salon",
+    industry: "Beauty / Lifestyle",
+    service: "Luxury Website Experiences",
+    outcome: "A salon brand with the confidence and craft to own the room.",
+    description:
+      "Brand-forward web experience for a premium salon built on artistry and reputation.",
+    image: "/migrated-assets/case-studies/hair-mafia/hero.webp",
+    year: "2026",
+    tier: "secondary",
+    imagePosition: "top center",
   },
 
-  // ── HIDDEN — data preserved for /work/[slug] detail pages only ────────────
+  // ── HIDDEN ────────────────────────────────────────────────────────────────
+
   {
-    slug: "dialed-in-electric",
-    title: "Dialed In Electric",
-    industry: "Electrical / Trades",
-    service: "Luxury Website Experiences",
-    outcome: "A trades business that looks as sharp as the work it delivers.",
-    description:
-      "Brand presence and website for an electrical contractor building a premium service reputation.",
-    // TODO: Replace with Dialed In Electric hero when available. Source: https://dialedinelectric.com
-    image: "/migrated-assets/textures/hero-bg.jpg",
-    logo: "/migrated-assets/logos/dialed-in-electric.svg",
-    imageryPending: true,
-    imageryLabel: "Site Refresh In Progress",
-    year: "2025",
-    tier: "secondary",
-    hidden: true,
-  },
-  {
+    // Data kept for detail page; hidden from public Work grid
     slug: "democratic-club-greater-tracy",
     title: "Democratic Club of Greater Tracy",
     industry: "Civic",
@@ -200,9 +258,27 @@ export const PROJECTS: ProjectItem[] = [
     outcome: "Clear digital presence for a civic organization built on participation.",
     description:
       "Website and engagement architecture for a community-driven organization.",
-    image: "/migrated-assets/case-studies/democratic-club-greater-tracy/hero.webp",
+    image: "/migrated-assets/case-studies/democratic-club-greater-tracy/homepage-02.webp",
     logo: "/migrated-assets/logos/the-democratic.svg",
     year: "2026",
+    tier: "secondary",
+    imagePosition: "top center",
+    hidden: true,
+  },
+  {
+    // Hidden until a quality rebuild screenshot exists
+    slug: "dialed-in-electric",
+    title: "Dialed In Electric",
+    industry: "Electrical / Trades",
+    service: "Luxury Website Experiences",
+    outcome: "A trades business that looks as sharp as the work it delivers.",
+    description:
+      "Brand presence and website for an electrical contractor building a premium service reputation.",
+    image: "/migrated-assets/textures/hero-bg.jpg",
+    logo: "/migrated-assets/logos/dialed-in-electric.svg",
+    imageryPending: true,
+    imageryLabel: "Site Refresh In Progress",
+    year: "2025",
     tier: "secondary",
     hidden: true,
   },
@@ -243,8 +319,8 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
       "The result works because it was designed around the organization's actual needs — not what a motorsports website is supposed to look like. Every section earns its place. Every experience serves a defined audience. The outcome wasn't driven by trend or template — it came from asking harder questions upfront and holding the architecture to the same standard the team holds itself on track.",
     showcaseImages: [
       {
-        src: "/migrated-assets/case-studies/primal-motorsports/hero.webp",
-        alt: "Primal Motorsports — flagship website hero",
+        src: "/migrated-assets/case-studies/primal-motorsports/homepage-full.webp",
+        alt: "Primal Motorsports — flagship website rebuild",
         caption: "Public-facing brand presence",
       },
       {
@@ -371,7 +447,7 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     url: "https://autodv8ions.com",
     status: "Live",
     year: "2025",
-    image: "/migrated-assets/case-studies/autodv8ions/hero.webp",
+    image: "/migrated-assets/case-studies/autodv8ions/homepage-full.webp",
     logo: "/migrated-assets/logos/dv8.svg",
     context:
       "AutoDV8ions is a boutique automotive studio that earns its reputation through precision and a point of view. Referral-driven, quality-focused, and deeply committed to doing the work right — the kind of studio where every client is a qualified one. The work was exceptional. The digital introduction wasn't anywhere close.",
@@ -601,7 +677,7 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     url: "https://greatertracydems.org",
     status: "Live",
     year: "2026",
-    image: "/migrated-assets/case-studies/democratic-club-greater-tracy/hero.webp",
+    image: "/migrated-assets/case-studies/democratic-club-greater-tracy/homepage-02.webp",
     logo: "/migrated-assets/logos/the-democratic.svg",
     context:
       "The Democratic Club of Greater Tracy has active membership, regular events, and genuine community reach. What it lacked was a digital infrastructure to match its activity — a place where members could connect, events could be found, and prospective participants could understand the organization's purpose and impact.",
@@ -671,6 +747,112 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
         src: "/migrated-assets/case-studies/spur-restaurant/homepage-02.webp",
         alt: "Spur Restaurant & Bar — interior sections",
         caption: "Reservation pathways",
+      },
+    ],
+  },
+
+  "martinsen-construction": {
+    slug: "martinsen-construction",
+    title: "Martinsen Construction",
+    industry: "Construction",
+    scope: ["Luxury Website Experiences"],
+    tagline: "A contractor website built with the same precision as the work on site.",
+    url: "https://www.martinsenconstruction.com",
+    status: "Live",
+    year: "2026",
+    image: "/images/work/screenshots/martinsen-construction/desktop-home.png",
+    logo: "/migrated-assets/logos/martinsen-construction-logo.svg",
+    context:
+      "Martinsen Construction serves Central Oregon with residential construction, remodeling, ADUs, and site development. The work is precise and professional — the website needed to communicate that before the first call.",
+    challenge:
+      "Most contractor websites look interchangeable. Martinsen needed a digital presence that communicated licensed expertise, local trust, and premium craftsmanship.",
+    strategy:
+      "Lead with credibility and clarity. Service architecture, licensing proof, and a professional first impression that matches the standard of the build.",
+    execution: [
+      "Premium contractor website — clear service pathways and professional presentation.",
+      "Brand-aligned design that elevates perception in a competitive local market.",
+    ],
+    qualitativeOutcomes: [
+      "Digital presence that reflects licensed, professional construction standards",
+      "Clear service architecture for residential and commercial prospects",
+    ],
+    whyItWorked:
+      "Contractors win on trust. A website that looks as intentional as the work itself is a trust signal before anyone reads a word.",
+    showcaseImages: [
+      {
+        src: "/images/work/screenshots/martinsen-construction/desktop-home.png",
+        alt: "Martinsen Construction — website rebuild",
+        caption: "Contractor website rebuild",
+      },
+    ],
+  },
+
+  "e-davis-enterprises": {
+    slug: "e-davis-enterprises",
+    title: "E. Davis Enterprises",
+    industry: "Energy / Trades",
+    scope: ["Luxury Website Experiences"],
+    tagline: "A service business website built for trust and clarity.",
+    url: "https://www.edavisoregon.com",
+    status: "Live",
+    year: "2026",
+    image: "/images/work/screenshots/e-davis-enterprises/desktop-home.png",
+    context:
+      "E. Davis Enterprises is a family-owned propane, natural gas, and generator services company serving Southern Oregon. The business is built on reliability — the website had to communicate that immediately.",
+    challenge:
+      "Service businesses in trades and energy often default to cluttered, outdated websites. E. Davis needed a presence that felt as professional as the work delivered on site.",
+    strategy:
+      "Clarity first. Service pathways, licensing proof, and a calm, confident design language that builds trust before the first call.",
+    execution: [
+      "Service business website rebuild with clear inquiry pathways.",
+      "Brand presentation aligned to a family-owned, licensed operation.",
+    ],
+    qualitativeOutcomes: [
+      "Professional first impression for residential and commercial prospects",
+      "Clear service architecture across propane, gas, and generator work",
+    ],
+    whyItWorked:
+      "When the website matches the professionalism of the field team, every lead starts with confidence instead of skepticism.",
+    showcaseImages: [
+      {
+        src: "/images/work/screenshots/e-davis-enterprises/desktop-home.png",
+        alt: "E. Davis Enterprises — website rebuild",
+        caption: "Service business rebuild",
+      },
+    ],
+  },
+
+  "la-cocina": {
+    slug: "la-cocina",
+    title: "La Cocina",
+    industry: "Hospitality",
+    scope: ["Luxury Website Experiences"],
+    tagline: "A restaurant website as warm and intentional as the kitchen.",
+    url: "https://www.lacocinaroseburg.com",
+    status: "Live",
+    year: "2026",
+    image: "/images/work/screenshots/la-cocina/desktop-home.png",
+    context:
+      "La Cocina is a family-run Mexican restaurant in Roseburg built on real recipes, daily preparation, and local loyalty. The room was right — the website needed to carry that same warmth online.",
+    challenge:
+      "Restaurant websites often feel like menus pasted onto templates. La Cocina needed a digital introduction that felt personal, appetizing, and easy to act on.",
+    strategy:
+      "Lead with atmosphere and clarity. Make ordering and visiting feel as natural as walking through the door.",
+    execution: [
+      "Restaurant website rebuild with clear menu and ordering pathways.",
+      "Warm, editorial presentation aligned to the in-room experience.",
+    ],
+    qualitativeOutcomes: [
+      "Digital presence that reflects the restaurant's character",
+      "Clear pathways for orders, hours, and location",
+    ],
+    whyItWorked:
+      "Hospitality starts with how you are introduced. The site now sets the right expectation before guests arrive.",
+    showcaseImages: [
+      {
+        src: "/images/work/screenshots/la-cocina/desktop-home.png",
+        alt: "La Cocina — website rebuild",
+        caption: "Restaurant website rebuild",
       },
     ],
   },

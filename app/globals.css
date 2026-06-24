@@ -658,6 +658,147 @@ main {
   opacity: 1;
 }
 
+/* ─────────────────── EDITORIAL WORK FRAMES ─────────────────── */
+
+.kxd-editorial-frame {
+  border: 1px solid var(--kxd-border-white);
+  background: var(--kxd-black-base);
+  transition:
+    border-color var(--dur-base) var(--ease-standard),
+    box-shadow var(--dur-slow) var(--ease-standard);
+}
+
+.kxd-editorial-frame:hover {
+  border-color: var(--kxd-border-gold);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.kxd-editorial-frame__shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.04) 0%,
+    rgba(0, 0, 0, 0.18) 55%,
+    rgba(3, 3, 3, 0.55) 100%
+  );
+  pointer-events: none;
+}
+
+.kxd-editorial-frame__label {
+  position: absolute;
+  left: 0.875rem;
+  bottom: 0.875rem;
+  z-index: 1;
+  opacity: 0.72;
+  transition: opacity var(--dur-base) var(--ease-standard);
+}
+
+.kxd-editorial-frame__meta {
+  position: absolute;
+  left: 0.875rem;
+  bottom: 0.875rem;
+  z-index: 1;
+}
+
+.kxd-editorial-frame__role {
+  font-family: var(--font-outfit, sans-serif);
+  font-size: 0.5rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--kxd-gold);
+  opacity: 0.85;
+}
+
+.kxd-editorial-frame:hover .kxd-editorial-frame__label,
+.kxd-editorial-frame:hover .kxd-editorial-frame__role {
+  opacity: 1;
+}
+
+/* Systems momentum cards — equal weight, matched to case cards */
+.kxd-systems-momentum-card {
+  border: 1px solid var(--kxd-border-white);
+  background: var(--kxd-black-base);
+  transition:
+    border-color var(--dur-base) var(--ease-standard),
+    box-shadow var(--dur-slow) var(--ease-standard);
+}
+
+.kxd-systems-momentum-card:hover {
+  border-color: var(--kxd-border-gold);
+  box-shadow: var(--shadow-card-hover);
+}
+
+/* Website auditor signals panel */
+.kxd-audit-signals-panel {
+  border: 1px solid var(--kxd-border-gold);
+  background: linear-gradient(
+    165deg,
+    rgba(197, 166, 92, 0.04) 0%,
+    rgba(255, 255, 255, 0.01) 42%,
+    rgba(255, 255, 255, 0) 100%
+  );
+}
+
+.kxd-audit-signal-cell {
+  padding: 1.125rem 1.25rem;
+  background: var(--kxd-black-elevated);
+  border: 1px solid var(--kxd-border-white);
+}
+
+/* Final CTA — luxury glass finish, no project imagery */
+.kxd-final-cta {
+  border-top: 1px solid var(--kxd-border-gold);
+  padding-block: clamp(5.5rem, 11vw, 9rem);
+  background: var(--kxd-black-pure);
+}
+
+.kxd-final-cta__atmosphere {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 55% at 50% 0%, rgba(197, 166, 92, 0.07) 0%, transparent 68%),
+    radial-gradient(ellipse 70% 50% at 50% 100%, rgba(197, 166, 92, 0.04) 0%, transparent 62%),
+    linear-gradient(180deg, rgba(8, 8, 8, 0.2) 0%, rgba(3, 3, 3, 0.95) 100%);
+}
+
+.kxd-final-cta__glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 42% 38% at 50% 42%,
+    rgba(197, 166, 92, 0.045) 0%,
+    transparent 72%
+  );
+}
+
+.kxd-final-cta__glass {
+  padding: clamp(2.5rem, 5vw, 3.75rem) clamp(1.75rem, 4vw, 2.75rem);
+  border: 1px solid rgba(197, 166, 92, 0.14);
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.035) 0%,
+      rgba(255, 255, 255, 0.008) 42%,
+      rgba(0, 0, 0, 0.12) 100%
+    );
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.03) inset,
+    0 24px 64px rgba(0, 0, 0, 0.35);
+}
+
+/* Asymmetric services strip — middle frame offset for editorial rhythm */
+@media (min-width: 1024px) {
+  .kxd-editorial-strip-offset {
+    transform: translateY(1.75rem);
+  }
+}
+
 /* Archive panel — intentional */
 .kxd-archive-panel {
   position: relative;
@@ -857,9 +998,69 @@ main {
   animation: kxd-fade 2s var(--ease-enter) both;
 }
 
-/* ── Work reel strip — slow horizontal scroll ── */
+/* ── Work reel strip — luxury proof reel, slow drift ── */
+.kxd-hero-reel-fade {
+  bottom: clamp(14rem, 20vh, 18rem);
+  height: clamp(8rem, 11vh, 10rem);
+  background: linear-gradient(to top, var(--kxd-black-pure) 14%, transparent);
+}
+
+/*
+ * Strip: taller than before so each card reads as a miniature case study.
+ * 10.5–11rem at most viewports. GPU-composited opacity — no layout cost.
+ */
+.kxd-work-reel {
+  overflow: hidden;
+  border-top: 1px solid var(--kxd-border-gold);
+  border-bottom: 1px solid var(--kxd-border-white);
+  height: clamp(9rem, 11.5vw, 11rem);
+  opacity: 0.88;
+}
+
+.kxd-work-reel__fade {
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 2;
+  width: clamp(6rem, 14vw, 12rem);
+}
+
+.kxd-work-reel__fade--left {
+  left: 0;
+  background: linear-gradient(to right, var(--kxd-black-pure) 32%, transparent);
+}
+
+.kxd-work-reel__fade--right {
+  right: 0;
+  background: linear-gradient(to left, var(--kxd-black-pure) 32%, transparent);
+}
+
+.kxd-work-reel__track {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  padding-left: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+/*
+ * Each frame: 16:10 viewport crop. Height drives width via aspect-ratio.
+ * Subtle gold border — matches card language throughout the site.
+ */
+.kxd-work-reel__frame {
+  position: relative;
+  flex-shrink: 0;
+  overflow: hidden;
+  height: clamp(7rem, 9.5vw, 9rem);
+  aspect-ratio: 16 / 10;
+  border: 1px solid rgba(197, 166, 92, 0.15);
+  background: var(--kxd-black-elevated);
+}
+
+/* 100s — slow enough to appreciate each project, fast enough to feel alive */
 .kxd-reel-track {
-  animation: kxd-reel-scroll 55s linear infinite;
+  animation: kxd-reel-scroll 100s linear infinite;
   will-change: transform;
 }
 
@@ -924,6 +1125,7 @@ main {
   .kxd-cursor-glow         { display: none; }
   .kxd-btn-primary:hover   { transform: none; }
   .kxd-case-card:hover .kxd-case-card__image-wrap img { transform: none; }
+  .kxd-editorial-frame__image { transform: none !important; }
   .kxd-mega-menu  { transition: none; }
   .kxd-mobile-nav { transition: none; }
 }

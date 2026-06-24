@@ -7,6 +7,7 @@ import { OutcomesSection } from "@/components/home/OutcomesSection";
 import { ProcessSection } from "@/components/home/ProcessSection";
 import { ReviewsSection } from "@/components/home/ReviewsSection";
 import { ServicesSection } from "@/components/home/ServicesSection";
+import { WebsiteAuditorSection } from "@/components/home/WebsiteAuditorSection";
 import { StructuredData } from "@/components/seo/StructuredData";
 import {
   localBusinessSchema,
@@ -47,19 +48,22 @@ export default function HomePage() {
       {/* 4. Selected Work — transformation proof */}
       <CaseStudiesSection />
 
-      {/* 5. Process — how premium work moves */}
+      {/* 5. Website Auditor — premium lead generation */}
+      <WebsiteAuditorSection />
+
+      {/* 6. Process — how premium work moves */}
       <ProcessSection />
 
-      {/* 6. Founder Standard — the KXD point of view */}
+      {/* 7. Founder Standard — the KXD point of view */}
       <FounderStandard />
 
-      {/* 7. Reviews — social proof */}
+      {/* 8. Reviews — social proof */}
       <ReviewsSection />
 
-      {/* 8. Client Trust — brand validation */}
+      {/* 9. Client Trust — brand validation */}
       <ClientLogoWall />
 
-      {/* 9. Final CTA — partnership conversion */}
+      {/* 10. Final CTA — partnership conversion */}
       <FinalCtaSection />
     </>
   );

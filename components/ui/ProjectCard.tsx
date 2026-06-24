@@ -2,29 +2,21 @@ import Link from "next/link";
 import type { ProjectItem } from "@/lib/projects";
 import { cn } from "@/lib/utils";
 
-/*
- * ProjectCard — Work page listing card.
- *
- * Uses a plain <img> (not next/image fill) because Tailwind v4 + next/image
- * fill + aspect-ratio creates an interaction where the absolutely-positioned
- * fill image doesn't size correctly against the aspect-ratio-derived height
- * on mobile viewports. The plain <img> with absolute inset + object-cover is
- * fully reliable at every viewport width.
- *
- * Mobile requirements (390px):
- * - Cards stack vertically, single column.
- * - Image wrapper: aspect-[16/10] — always produces a visible image box.
- * - Image: absolute inset-0 h-full w-full object-cover — fills wrapper exactly.
- * - No h-full, flex-1, min-h-*, or row-span on the card itself.
- * - All images render at full opacity — no dark placeholder dimming.
- */
-
-/* Fallback used when a project has no image asset */
 const KXD_FALLBACK = "/migrated-assets/textures/hero-bg.jpg";
+
+function isWebsiteScreenshot(image: string | null): boolean {
+  if (!image) return false;
+  return (
+    image.includes("homepage-full") ||
+    image.includes("homepage-02") ||
+    image.includes("desktop-home") ||
+    image.includes("/media/cusickmotorsports-com-hero") ||
+    (image.includes("/case-studies/") && image.endsWith("/hero.webp"))
+  );
+}
 
 type ProjectCardProps = {
   project: ProjectItem;
-  /** featured — cinematic wide ratio on desktop (sm+), standard on mobile */
   featured?: boolean;
   className?: string;
   index?: number;
@@ -39,15 +31,24 @@ export function ProjectCard({
   priority = false,
 }: ProjectCardProps) {
   const imageSrc = project.image ?? KXD_FALLBACK;
+  const websiteShot = isWebsiteScreenshot(project.image);
+  const objectPosition =
+    project.imagePosition ?? (websiteShot ? "top center" : "center");
+
+  // Featured cards always use a fixed 16:9 aspect — large, intentional, never collapsing.
+  // Non-featured cards use 16:10 for a slightly taller portrait feel in the grid.
+  const imageAspect = featured ? "aspect-[16/9]" : "aspect-[16/10]";
 
   return (
-    <article className={cn("kxd-case-card group", className)} id={project.slug}>
-      {/* ── Image area ─────────────────────────────────────────────────────── */}
+    <article
+      className={cn("kxd-case-card group", className)}
+      id={project.slug}
+    >
       <Link
         href={`/work/${project.slug}`}
         className={cn(
           "kxd-case-card__image-wrap relative block overflow-hidden",
-          featured ? "aspect-[16/10] sm:aspect-[21/9]" : "aspect-[16/10]",
+          imageAspect,
         )}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -56,18 +57,15 @@ export function ProjectCard({
           alt={project.title}
           loading={priority ? "eager" : "lazy"}
           className="absolute inset-0 h-full w-full object-cover"
-          style={{ objectPosition: project.imagePosition ?? "center" }}
+          style={{ objectPosition }}
         />
 
-        {/* Dark gradient overlay */}
         <div className="kxd-case-card__overlay" />
 
-        {/* Category badge — small, top-left */}
         <span className="kxd-tag absolute left-3 top-3 z-[2]">
           {project.industry}
         </span>
 
-        {/* Hover reveal — outcome copy */}
         <div className="kxd-case-card__reveal">
           <p
             className="kxd-label"
@@ -89,7 +87,6 @@ export function ProjectCard({
         </div>
       </Link>
 
-      {/* ── Footer ─────────────────────────────────────────────────────────── */}
       <div
         className="flex items-center justify-between px-5 py-4"
         style={{ borderTop: "1px solid var(--kxd-border-white)" }}

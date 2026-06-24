@@ -1,52 +1,9 @@
-import Image from "next/image";
 import Link from "next/link";
+import Image from "next/image";
 import { HeroCursorGlow } from "./HeroCursorGlow";
+import { WORK_REEL_FRAMES } from "@/lib/homepage/work-reel";
 
-/**
- * KXD Hero — Cinematic Video Framework
- *
- * Video-ready architecture. When brand footage is available:
- *   1. Uncomment the <video> element below
- *   2. Add src="/assets/kxd-reel.mp4" and poster="/assets/kxd-reel-poster.webp"
- *   3. The overlay system will handle any footage color/exposure automatically
- */
-
-const REEL_FRAMES = [
-  {
-    src: "/migrated-assets/case-studies/primal-motorsports/hero.webp",
-    alt: "Primal Motorsports",
-  },
-  {
-    src: "/migrated-assets/case-studies/primal-motorsports/dashboard-hero.webp",
-    alt: "Primal Motorsports — Driver Portal",
-  },
-  {
-    src: "/migrated-assets/case-studies/primal-motorsports/ops-hero.webp",
-    alt: "Primal OS",
-  },
-  {
-    src: "/migrated-assets/case-studies/cusick-morgan-motorsports/hero.webp",
-    alt: "Cusick Morgan Motorsports",
-  },
-  {
-    src: "/migrated-assets/case-studies/plate-the-umpqua/hero.webp",
-    alt: "Plate the Umpqua",
-  },
-  {
-    src: "/migrated-assets/case-studies/autodv8ions/hero.webp",
-    alt: "AutoDV8ions",
-  },
-  {
-    src: "/migrated-assets/case-studies/cusick-morgan-motorsports/homepage-02.webp",
-    alt: "Cusick Morgan Motorsports — Partnership",
-  },
-  {
-    src: "/migrated-assets/case-studies/plate-the-umpqua/homepage-02.webp",
-    alt: "Plate the Umpqua — Interior",
-  },
-];
-
-const REEL_DOUBLED = [...REEL_FRAMES, ...REEL_FRAMES];
+const REEL_DOUBLED = [...WORK_REEL_FRAMES, ...WORK_REEL_FRAMES];
 
 const PROOF_POINTS = [
   "Websites that convert attention into demand.",
@@ -119,13 +76,7 @@ export function HeroSection() {
       {/* Bottom fade into reel strip */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 z-[2]"
-        style={{
-          bottom: "11.5rem",
-          height: "9rem",
-          background:
-            "linear-gradient(to top, var(--kxd-black-pure) 10%, transparent)",
-        }}
+        className="pointer-events-none absolute inset-x-0 z-[2] kxd-hero-reel-fade"
       />
 
       {/*
@@ -228,55 +179,22 @@ export function HeroSection() {
         <div className="flex-1" style={{ minHeight: "clamp(4rem, 6vh, 5rem)" }} />
       </div>
 
-      {/* ── Reel strip — client work thumbnails, silent proof. ── */}
-      <div
-        aria-hidden
-        className="kxd-reveal kxd-reveal-delay-5 relative z-[1] overflow-hidden"
-        style={{
-          borderTop: "1px solid var(--kxd-border-gold)",
-          borderBottom: "1px solid var(--kxd-border-white)",
-          height: "5.75rem",
-          opacity: 0.45,
-        }}
-      >
-        <div
-          className="pointer-events-none absolute inset-y-0 left-0 z-[2]"
-          style={{
-            width: "9rem",
-            background:
-              "linear-gradient(to right, var(--kxd-black-pure) 20%, transparent)",
-          }}
-        />
-        <div
-          className="pointer-events-none absolute inset-y-0 right-0 z-[2]"
-          style={{
-            width: "9rem",
-            background:
-              "linear-gradient(to left, var(--kxd-black-pure) 20%, transparent)",
-          }}
-        />
+      {/* ── Reel strip — curated proof reel, calm horizontal drift ── */}
+      <div aria-hidden className="kxd-work-reel kxd-reveal kxd-reveal-delay-5 relative z-[1]">
+        <div className="kxd-work-reel__fade kxd-work-reel__fade--left" />
+        <div className="kxd-work-reel__fade kxd-work-reel__fade--right" />
 
-        <div className="kxd-reel-track flex h-full items-center gap-3 pl-3">
+        <div className="kxd-reel-track kxd-work-reel__track">
           {REEL_DOUBLED.map((frame, i) => (
-            <div
-              key={`${frame.src}-${i}`}
-              className="relative h-[4.5rem] shrink-0 overflow-hidden"
-              style={{
-                aspectRatio: "16 / 9",
-                border: "1px solid rgba(255,255,255,0.06)",
-              }}
-            >
+            <div key={`${frame.src}-${i}`} className="kxd-work-reel__frame">
               <Image
                 src={frame.src}
                 alt={frame.alt}
                 fill
-                className="object-cover object-top"
-                sizes="120px"
+                className="object-cover"
+                style={{ objectPosition: frame.objectPosition ?? "top center" }}
+                sizes="(max-width: 640px) 240px, 380px"
                 priority={false}
-              />
-              <div
-                className="absolute inset-0"
-                style={{ background: "rgba(0,0,0,0.28)" }}
               />
             </div>
           ))}

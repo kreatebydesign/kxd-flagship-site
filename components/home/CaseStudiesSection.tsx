@@ -1,9 +1,19 @@
 import Link from "next/link";
-import { PRIMARY_PROJECTS } from "@/lib/projects";
+import { PROJECTS, type ProjectItem } from "@/lib/projects";
+import { HOMEPAGE_CASE_STUDY_SLUGS } from "@/lib/homepage/work-visuals";
 import { ProjectCard } from "@/components/ui/ProjectCard";
 
+function projectBySlug(slug: string): ProjectItem | undefined {
+  return PROJECTS.find((p) => p.slug === slug);
+}
+
 export function CaseStudiesSection() {
-  const [flagship, ...others] = PRIMARY_PROJECTS;
+  const featured = projectBySlug(HOMEPAGE_CASE_STUDY_SLUGS.featured);
+  const secondary = HOMEPAGE_CASE_STUDY_SLUGS.secondary
+    .map((slug) => projectBySlug(slug))
+    .filter((p): p is ProjectItem => p !== undefined);
+
+  const projectCount = secondary.length + (featured ? 1 : 0);
 
   return (
     <section
@@ -14,7 +24,6 @@ export function CaseStudiesSection() {
       }}
     >
       <div className="kxd-container">
-        {/* Header */}
         <div className="mb-12 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="kxd-eyebrow">Selected Work</p>
@@ -29,40 +38,36 @@ export function CaseStudiesSection() {
             className="kxd-body-sm lg:text-right"
             style={{ maxWidth: "24rem" }}
           >
-            Across ambitious brands, motorsports, hospitality, and growth-focused companies.
+            Website rebuilds, brand systems, and operational platforms for
+            ambitious brands across motorsports and hospitality.
           </p>
         </div>
 
-        {/* Featured grid */}
-        <div className="grid gap-4 lg:grid-cols-12">
-          {flagship ? (
-            <div className="lg:col-span-7">
-              <ProjectCard project={flagship} featured index={0} priority />
+        <div className="grid gap-px lg:grid-cols-12">
+          {featured ? (
+            <div className="lg:col-span-8">
+              <ProjectCard project={featured} featured index={0} priority />
             </div>
           ) : null}
 
-          <div className="flex flex-col gap-4 lg:col-span-5">
-            {others[0] ? (
-              <ProjectCard project={others[0]} index={1} className="flex-1" />
-            ) : null}
-            {others[1] ? (
-              <ProjectCard project={others[1]} index={2} className="flex-1" />
-            ) : null}
-          </div>
+          {secondary.length > 0 ? (
+            <div className="flex flex-col gap-px lg:col-span-4">
+              {secondary.map((project, i) => (
+                <ProjectCard
+                  key={project.slug}
+                  project={project}
+                  index={i + 1}
+                />
+              ))}
+            </div>
+          ) : null}
         </div>
 
-        {others[2] ? (
-          <div className="mt-4">
-            <ProjectCard project={others[2]} index={3} />
-          </div>
-        ) : null}
-
-        {/* Footer link */}
         <div
           className="mt-10 flex items-center justify-between border-t pt-7"
           style={{ borderColor: "var(--kxd-border-white)" }}
         >
-          <p className="kxd-label">{PRIMARY_PROJECTS.length} projects</p>
+          <p className="kxd-label">{projectCount} featured projects</p>
           <Link
             href="/work"
             className="kxd-ui-label inline-flex items-center gap-2 text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)]"

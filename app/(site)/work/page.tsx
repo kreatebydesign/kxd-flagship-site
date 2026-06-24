@@ -103,11 +103,17 @@ async function fetchProjects(): Promise<WorkLists> {
         payloadMap[item.slug] = item;
       }
 
-      // Merge: Payload data wins per slug; static data fills the gaps
-      const merged = base.map((s) => payloadMap[s.slug] ?? s);
+      // Merge: Payload data wins per slug; static data fills the gaps.
+      // Always respect hidden: true from static data — Payload enrichment
+      // never overrides a deliberate hide decision.
+      const merged = base.map((s) => {
+        const enriched = payloadMap[s.slug];
+        // Preserve static hidden flag regardless of Payload data
+        return enriched ? { ...enriched, hidden: s.hidden } : s;
+      });
       return {
-        primary: merged.filter((p) => p.tier === "primary"),
-        secondary: merged.filter((p) => p.tier === "secondary"),
+        primary: merged.filter((p) => p.tier === "primary" && !p.hidden),
+        secondary: merged.filter((p) => p.tier === "secondary" && !p.hidden),
       };
     }
   } catch {

@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { HOMEPAGE_SERVICES } from "@/lib/homepage";
+import { SYSTEMS_MOMENTUM_VISUALS } from "@/lib/homepage/work-visuals";
+import { SystemsMomentumCard } from "./SystemsMomentumCard";
 
 export function ServicesSection() {
   return (
@@ -32,7 +34,7 @@ export function ServicesSection() {
                 lineHeight: 1.85,
               }}
             >
-              We don't offer disconnected services. KXD combines strategy,
+              We don&apos;t offer disconnected services. KXD combines strategy,
               execution, and operational thinking to help ambitious businesses
               build stronger brands, improve performance, and support long-term
               growth.
@@ -51,6 +53,12 @@ export function ServicesSection() {
               →
             </span>
           </Link>
+        </div>
+
+        <div className="mb-14 grid gap-4 md:grid-cols-3">
+          {SYSTEMS_MOMENTUM_VISUALS.map((visual) => (
+            <SystemsMomentumCard key={visual.src} visual={visual} />
+          ))}
         </div>
 
         <div className="kxd-gold-rule" />

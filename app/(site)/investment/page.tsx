@@ -84,7 +84,7 @@ const LEVELS = [
   {
     label: "05",
     title: "Ongoing Partnerships",
-    starting: "Starting at $3,000/month",
+    starting: "Starting at $2,500/month",
     description:
       "Monthly retainer engagements for brands that need consistent creative direction, technical execution, and strategic support beyond the initial build.",
     includes: [
@@ -413,7 +413,7 @@ export default function InvestmentPage() {
                 },
                 {
                   q: "How long do projects take?",
-                  a: "Luxury websites: 6–10 weeks. Growth infrastructure: 8–14 weeks. Enterprise platforms: scoped per project. Timelines are defined in the proposal.",
+                  a: "Luxury websites: typically 3–6 weeks. Growth infrastructure: 6–12 weeks. Enterprise platforms: scoped per project. Timelines are defined in the proposal.",
                 },
               ].map((item, i, arr) => (
                 <div

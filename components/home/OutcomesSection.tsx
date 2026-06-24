@@ -1,4 +1,9 @@
 import Link from "next/link";
+import { EditorialWorkFrame } from "./EditorialWorkFrame";
+import {
+  OUTCOME_CAPABILITY_VISUALS,
+  OUTCOMES_HEADER_VISUAL,
+} from "@/lib/homepage/work-visuals";
 
 const CAPABILITIES = [
   {
@@ -37,7 +42,7 @@ export function OutcomesSection() {
       }}
     >
       <div className="kxd-container">
-        <div className="mb-14 grid gap-5 lg:grid-cols-[1fr_auto] lg:items-end">
+        <div className="mb-14 grid gap-10 lg:grid-cols-[1fr_1.05fr] lg:items-end lg:gap-14">
           <div>
             <p className="kxd-eyebrow">Capabilities</p>
 
@@ -62,78 +67,113 @@ export function OutcomesSection() {
               Every engagement is structured to create output that compounds
               in value long after the work is delivered.
             </p>
+
+            <Link
+              href="/services"
+              className="kxd-ui-label mt-8 inline-flex items-center gap-2 text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)] lg:hidden"
+            >
+              Explore Capabilities
+              <span aria-hidden>→</span>
+            </Link>
           </div>
 
+          <EditorialWorkFrame
+            src={OUTCOMES_HEADER_VISUAL.src}
+            alt={OUTCOMES_HEADER_VISUAL.alt}
+            href={OUTCOMES_HEADER_VISUAL.href}
+            label={OUTCOMES_HEADER_VISUAL.label}
+            objectPosition={OUTCOMES_HEADER_VISUAL.objectPosition}
+            aspectClass="aspect-[16/10] lg:aspect-[5/4]"
+            sizes="(max-width: 1024px) 100vw, 42vw"
+            reveal
+            className="kxd-reveal-delay-2"
+          />
+        </div>
+
+        <div className="mb-14 hidden items-center justify-end lg:flex">
           <Link
             href="/services"
-            className="kxd-ui-label inline-flex items-center gap-2 self-end text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)]"
+            className="kxd-ui-label inline-flex items-center gap-2 text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)]"
           >
             Explore Capabilities
-            <span
-              aria-hidden
-              className="transition-transform duration-300 group-hover:translate-x-1"
-            >
-              →
-            </span>
+            <span aria-hidden>→</span>
           </Link>
         </div>
 
         <div className="kxd-gold-rule" />
 
         <div>
-          {CAPABILITIES.map((item, i) => (
-            <div
-              key={item.category}
-              className="grid gap-6 py-10 lg:grid-cols-[12rem_1fr]"
-              style={{
-                borderTop:
-                  i === 0 ? "none" : "1px solid var(--kxd-border-white)",
-              }}
-            >
-              <div className="lg:pt-1">
-                <p
-                  className="font-sans font-medium uppercase"
-                  style={{
-                    fontSize: "0.5625rem",
-                    letterSpacing: "0.16em",
-                    color: "var(--kxd-gold)",
-                  }}
-                >
-                  {item.category}
-                </p>
-              </div>
+          {CAPABILITIES.map((item, i) => {
+            const visual = OUTCOME_CAPABILITY_VISUALS[item.category];
 
+            return (
               <div
-                className="border-l pl-8"
-                style={{ borderColor: "var(--kxd-border-gold)" }}
+                key={item.category}
+                className="grid gap-8 py-10 lg:grid-cols-[12rem_1fr_auto] lg:items-start lg:gap-10"
+                style={{
+                  borderTop:
+                    i === 0 ? "none" : "1px solid var(--kxd-border-white)",
+                }}
               >
-                <h3
-                  className="font-serif font-light"
-                  style={{
-                    fontSize: "clamp(1.125rem, 1.8vw, 1.5rem)",
-                    lineHeight: 1.25,
-                    color: "var(--kxd-cream)",
-                    letterSpacing: "0.01em",
-                    maxWidth: "32rem",
-                  }}
-                >
-                  {item.headline}
-                </h3>
+                <div className="lg:pt-1">
+                  <p
+                    className="font-sans font-medium uppercase"
+                    style={{
+                      fontSize: "0.5625rem",
+                      letterSpacing: "0.16em",
+                      color: "var(--kxd-gold)",
+                    }}
+                  >
+                    {item.category}
+                  </p>
+                </div>
 
-                <p
-                  className="mt-4 font-serif font-light leading-[1.72]"
-                  style={{
-                    fontSize: "clamp(1rem, 1.6vw, 1.125rem)",
-                    letterSpacing: "0.005em",
-                    color: "var(--kxd-cream-soft)",
-                    maxWidth: "52rem",
-                  }}
+                <div
+                  className="border-l pl-8"
+                  style={{ borderColor: "var(--kxd-border-gold)" }}
                 >
-                  {item.result}
-                </p>
+                  <h3
+                    className="font-serif font-light"
+                    style={{
+                      fontSize: "clamp(1.125rem, 1.8vw, 1.5rem)",
+                      lineHeight: 1.25,
+                      color: "var(--kxd-cream)",
+                      letterSpacing: "0.01em",
+                      maxWidth: "32rem",
+                    }}
+                  >
+                    {item.headline}
+                  </h3>
+
+                  <p
+                    className="mt-4 font-serif font-light leading-[1.72]"
+                    style={{
+                      fontSize: "clamp(1rem, 1.6vw, 1.125rem)",
+                      letterSpacing: "0.005em",
+                      color: "var(--kxd-cream-soft)",
+                      maxWidth: "52rem",
+                    }}
+                  >
+                    {item.result}
+                  </p>
+                </div>
+
+                {visual ? (
+                  <div className="hidden w-full max-w-[17.5rem] shrink-0 lg:block">
+                    <EditorialWorkFrame
+                      src={visual.src}
+                      alt={visual.alt}
+                      href={visual.href}
+                      label={visual.label}
+                      objectPosition={visual.objectPosition}
+                      aspectClass="aspect-[4/3]"
+                      sizes="280px"
+                    />
+                  </div>
+                ) : null}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <div

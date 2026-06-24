@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { PROCESS_EXECUTION_VISUAL } from "@/lib/homepage/work-visuals";
+import { EditorialWorkFrame } from "./EditorialWorkFrame";
 
 const STEPS = [
   {
@@ -117,6 +119,19 @@ export function ProcessSection() {
               <p className="kxd-body-sm mt-4 leading-relaxed">{step.body}</p>
             </div>
           ))}
+        </div>
+
+        <div className="mt-14">
+          <EditorialWorkFrame
+            src={PROCESS_EXECUTION_VISUAL.src}
+            alt={PROCESS_EXECUTION_VISUAL.alt}
+            href={PROCESS_EXECUTION_VISUAL.href}
+            label={PROCESS_EXECUTION_VISUAL.label}
+            objectPosition={PROCESS_EXECUTION_VISUAL.objectPosition}
+            aspectClass="aspect-[16/10] sm:aspect-[21/9]"
+            sizes="(max-width: 768px) 100vw, 90vw"
+            reveal
+          />
         </div>
 
         <div

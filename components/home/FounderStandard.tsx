@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { FOUNDER_STANDARD_VISUAL } from "@/lib/homepage/work-visuals";
+import { EditorialWorkFrame } from "./EditorialWorkFrame";
 
 export function FounderStandard() {
   return (
@@ -36,6 +38,19 @@ export function FounderStandard() {
                 background: "var(--kxd-border-gold-strong)",
               }}
             />
+
+            <div className="mt-10">
+              <EditorialWorkFrame
+                src={FOUNDER_STANDARD_VISUAL.src}
+                alt={FOUNDER_STANDARD_VISUAL.alt}
+                href={FOUNDER_STANDARD_VISUAL.href}
+                label={FOUNDER_STANDARD_VISUAL.label}
+                objectPosition={FOUNDER_STANDARD_VISUAL.objectPosition}
+                aspectClass="aspect-[16/10]"
+                sizes="(max-width: 1024px) 100vw, 38vw"
+                reveal
+              />
+            </div>
 
             <Link
               href="/about"
