@@ -23,6 +23,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { requirePayloadAdminApi } from "@/lib/admin/auth";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import { resolveBrandContext } from "@/lib/creative-brand-resolver";
@@ -88,6 +89,9 @@ async function callOpenAI(systemPrompt: string, userPrompt: string): Promise<str
 // ── Route handler ─────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
+  const auth = await requirePayloadAdminApi();
+  if (auth instanceof NextResponse) return auth;
+
   const startMs = Date.now();
 
   try {

@@ -26,11 +26,15 @@
  *   }
  */
 import { NextRequest, NextResponse } from "next/server";
+import { requirePayloadAdminApi } from "@/lib/admin/auth";
 import { rerunCampaignSpawn } from "@/lib/creative-actions";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
+  const auth = await requirePayloadAdminApi();
+  if (auth instanceof NextResponse) return auth;
+
   let body: { campaignId?: unknown };
 
   try {

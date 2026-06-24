@@ -27,11 +27,15 @@
  *   { id, title, status, client, updatedAt, daysSinceUpdate }
  */
 import { NextResponse } from "next/server";
+import { requirePayloadAdminApi } from "@/lib/admin/auth";
 import { fixStalledItems } from "@/lib/creative-actions";
 
 export const dynamic = "force-dynamic";
 
 export async function POST() {
+  const auth = await requirePayloadAdminApi();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     const report = await fixStalledItems();
 

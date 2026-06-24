@@ -1,15 +1,19 @@
 /**
  * POST /api/admin/client-requests
  * Internal intake endpoint — creates a new Client Request record in Payload.
- * Not authenticated (internal tool, same trust level as /admin/operations).
+ * Requires authenticated Payload admin session.
  */
 import { NextRequest, NextResponse } from "next/server";
+import { requirePayloadAdminApi } from "@/lib/admin/auth";
 import { getPayload } from "payload";
 import config from "@payload-config";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
+  const auth = await requirePayloadAdminApi();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     const body = await req.json();
 

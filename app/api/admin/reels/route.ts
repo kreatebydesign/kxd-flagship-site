@@ -5,6 +5,7 @@
  * Records are stored in promo-video-requests with isWebsiteReel: true.
  */
 import { NextRequest, NextResponse } from "next/server";
+import { requirePayloadAdminApi } from "@/lib/admin/auth";
 import { getPayload } from "payload";
 import config from "@payload-config";
 
@@ -38,6 +39,9 @@ function formatError(err: unknown): string {
 // ── GET ───────────────────────────────────────────────────────────────────────
 
 export async function GET() {
+  const auth = await requirePayloadAdminApi();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     const payload = await getPayload({ config });
 
@@ -60,6 +64,9 @@ export async function GET() {
 // ── POST ──────────────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
+  const auth = await requirePayloadAdminApi();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     const body = await req.json() as AnyDoc;
 

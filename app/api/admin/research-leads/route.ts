@@ -4,6 +4,7 @@
  * PATCH — quick status update
  */
 import { NextRequest, NextResponse } from "next/server";
+import { requirePayloadAdminApi } from "@/lib/admin/auth";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import { RESEARCH_RESEARCHERS, RESEARCH_STATUSES } from "@/lib/research-leads";
@@ -14,6 +15,9 @@ const VALID_STATUSES = new Set(RESEARCH_STATUSES.map((s) => s.value));
 const VALID_RESEARCHERS = new Set(RESEARCH_RESEARCHERS.map((r) => r.value));
 
 export async function POST(req: NextRequest) {
+  const auth = await requirePayloadAdminApi();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     const body = await req.json();
 
@@ -49,6 +53,9 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PATCH(req: NextRequest) {
+  const auth = await requirePayloadAdminApi();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     const body = await req.json();
     const id = Number(body.id);

@@ -2,6 +2,7 @@ import "server-only";
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { NextResponse } from "next/server";
 import { executeAuthStrategies, getPayload } from "payload";
 import config from "@payload-config";
 
@@ -20,6 +21,21 @@ export async function getPayloadAdminUser() {
   });
 
   return isPayloadAdmin(user) ? user : null;
+}
+
+/**
+ * Gate internal admin API routes — requires authenticated Payload `users` session.
+ * Returns the admin user, or a 401 JSON response.
+ */
+export async function requirePayloadAdminApi() {
+  const user = await getPayloadAdminUser();
+  if (!user) {
+    return NextResponse.json(
+      { success: false, error: "Unauthorized." },
+      { status: 401 },
+    );
+  }
+  return user;
 }
 
 /**

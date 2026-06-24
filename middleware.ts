@@ -28,6 +28,16 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  if (pathname.startsWith("/api/admin/")) {
+    if (!hasPayloadAuthCookie(request)) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized." },
+        { status: 401 },
+      );
+    }
+    return NextResponse.next();
+  }
+
   if (pathname.startsWith("/portal")) {
     const isPublic = PORTAL_PUBLIC_PATHS.some(
       (p) => pathname === p || pathname.startsWith(`${p}/`),
@@ -80,6 +90,7 @@ export const config = {
     "/os",
     "/admin/operations",
     "/admin/operations/:path*",
+    "/api/admin/:path*",
     "/portal/:path*",
     "/junior-creators/:path*",
   ],

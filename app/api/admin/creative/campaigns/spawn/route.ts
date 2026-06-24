@@ -27,11 +27,15 @@
  *   { success: false, error: string }
  */
 import { NextRequest, NextResponse } from "next/server";
+import { requirePayloadAdminApi } from "@/lib/admin/auth";
 import { spawnCreativeFromCampaign } from "@/lib/creative-spawn-engine";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
+  const auth = await requirePayloadAdminApi();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     const body = await req.json();
 

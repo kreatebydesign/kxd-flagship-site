@@ -24,11 +24,15 @@
  *   }
  */
 import { NextResponse } from "next/server";
+import { requirePayloadAdminApi } from "@/lib/admin/auth";
 import { repairOrphanedItems } from "@/lib/creative-actions";
 
 export const dynamic = "force-dynamic";
 
 export async function POST() {
+  const auth = await requirePayloadAdminApi();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     const result = await repairOrphanedItems();
 
