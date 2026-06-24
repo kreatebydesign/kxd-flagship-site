@@ -17,6 +17,8 @@ export type JuniorCreatorStats = {
   qualifiedThisWeek: number;
   closedWonThisWeek: number;
   totalLeads: number;
+  lifetimeQualified: number;
+  lifetimeClosedWon: number;
   rankTitle: string;
   nextRank: { title: string; leadsNeeded: number } | null;
   hoursWorkedMinutesThisWeek: number;
@@ -67,12 +69,17 @@ export async function getJuniorCreatorStats(juniorCreatorUserId: number): Promis
   let submittedThisWeek = 0;
   let qualifiedThisWeek = 0;
   let closedWonThisWeek = 0;
+  let lifetimeQualified = 0;
+  let lifetimeClosedWon = 0;
   const leadsPerWeek: Record<string, number> = {};
 
   for (const lead of leads) {
     const created = new Date(lead.createdAt as string);
     const weekKey = getLeadWeekKey(created);
     leadsPerWeek[weekKey] = (leadsPerWeek[weekKey] ?? 0) + 1;
+
+    if (lead.status === "qualified") lifetimeQualified += 1;
+    if (lead.status === "closed-won") lifetimeClosedWon += 1;
 
     if (created >= weekStart) {
       submittedThisWeek += 1;
@@ -132,6 +139,8 @@ export async function getJuniorCreatorStats(juniorCreatorUserId: number): Promis
     qualifiedThisWeek,
     closedWonThisWeek,
     totalLeads,
+    lifetimeQualified,
+    lifetimeClosedWon,
     rankTitle: getRankTitle(totalLeads),
     nextRank: getNextRank(totalLeads),
     hoursWorkedMinutesThisWeek,

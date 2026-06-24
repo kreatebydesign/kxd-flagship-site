@@ -5,6 +5,8 @@ import Link from "next/link";
 import { KxdLogo } from "@/components/ui/KxdLogo";
 import { JuniorLeadForm } from "./JuniorLeadForm";
 import { JuniorShiftCard } from "./JuniorShiftCard";
+import { JuniorAcademy } from "./JuniorAcademy";
+import { JuniorMilestones } from "./JuniorMilestones";
 import type { JuniorCreatorStats } from "@/lib/junior-creators/stats";
 import { formatEarningsCents, formatHoursFromMinutes } from "@/lib/junior-creators/week";
 import { RESEARCH_SERVICE_LABEL, RESEARCH_STATUS_LABEL } from "@/lib/research-leads";
@@ -172,6 +174,17 @@ export function JuniorDashboard({ displayName, stats, recentLeads }: Props) {
             ))}
           </div>
         </section>
+
+        <JuniorAcademy />
+
+        <JuniorMilestones
+          stats={{
+            totalLeads: stats.totalLeads,
+            lifetimeQualified: stats.lifetimeQualified,
+            lifetimeClosedWon: stats.lifetimeClosedWon,
+            bestHoursWeekMinutes: stats.personalBests.bestHoursWeekMinutes,
+          }}
+        />
 
         {/* Submit form */}
         <section className="mb-10">
