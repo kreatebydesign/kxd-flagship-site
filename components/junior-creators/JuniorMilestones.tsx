@@ -51,7 +51,7 @@ export function JuniorMilestones({ stats }: Props) {
           gap: "0.75rem",
         }}
       >
-        <Label style={{ color: C.goldDim }}>Milestones</Label>
+        <Label style={{ color: C.goldDim }}>Achievements</Label>
         <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted }}>
           {completedCount} of {milestones.length} completed
         </p>

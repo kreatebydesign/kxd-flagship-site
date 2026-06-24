@@ -146,7 +146,7 @@ export function JuniorAcademy({ totalLeads }: Props) {
   return (
     <section className="mb-10">
       <div style={{ marginBottom: "1.5rem" }}>
-        <Label style={{ color: C.goldDim, marginBottom: "0.75rem" }}>Academy Modules</Label>
+        <Label style={{ color: C.goldDim, marginBottom: "0.75rem" }}>Skill Guides</Label>
         <h2
           style={{
             fontFamily: C.serif,
@@ -157,7 +157,7 @@ export function JuniorAcademy({ totalLeads }: Props) {
             maxWidth: "32rem",
           }}
         >
-          Learn KXD services, standards, and workflows.
+          Deep dives as you level up.
         </h2>
         <p
           style={{
@@ -169,7 +169,7 @@ export function JuniorAcademy({ totalLeads }: Props) {
             lineHeight: 1.65,
           }}
         >
-          Each module connects to a skill track — research, websites, branding, and studio operations.
+          Guides unlock as you submit more discoveries — websites, branding, SEO, and how KXD works inside.
         </p>
       </div>
 

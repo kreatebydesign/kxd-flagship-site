@@ -41,9 +41,9 @@ export function JuniorSkillTrees({ totalLeads }: Props) {
   return (
     <section className="mb-10">
       <div style={{ marginBottom: "1rem" }}>
-        <Label style={{ color: C.goldDim, marginBottom: "0.5rem" }}>Skill Trees</Label>
+        <Label style={{ color: C.goldDim, marginBottom: "0.5rem" }}>Skill Progress</Label>
         <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted, maxWidth: "40rem", lineHeight: 1.6 }}>
-          Build expertise across research, websites, branding, and studio operations — aligned with KXD services and standards.
+          Level up your abilities across opportunity hunting, website detective work, brand spotting, and KXD insider skills.
         </p>
       </div>
 

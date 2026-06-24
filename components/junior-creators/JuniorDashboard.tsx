@@ -6,6 +6,9 @@ import { KxdLogo } from "@/components/ui/KxdLogo";
 import { JuniorLeadForm } from "./JuniorLeadForm";
 import { JuniorShiftCard } from "./JuniorShiftCard";
 import { JuniorAcademyHero } from "./JuniorAcademyHero";
+import { JuniorDailyChallenge } from "./JuniorDailyChallenge";
+import { JuniorAcademyMissions } from "./JuniorAcademyMissions";
+import { JuniorDiscoveryTracks } from "./JuniorDiscoveryTracks";
 import { JuniorDailyQuests } from "./JuniorDailyQuests";
 import { JuniorSkillTrees } from "./JuniorSkillTrees";
 import { JuniorAcademy } from "./JuniorAcademy";
@@ -95,7 +98,7 @@ export function JuniorDashboard({ displayName, stats, recentLeads }: Props) {
             <KxdLogo />
             <div>
               <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.creamMuted }}>
-                KXD Academy · Junior Creators
+                KXD Academy
               </p>
             </div>
           </div>
@@ -117,7 +120,13 @@ export function JuniorDashboard({ displayName, stats, recentLeads }: Props) {
       <main className="mx-auto max-w-screen-lg" style={{ padding: "2.5rem 1.5rem 4rem" }}>
         <JuniorAcademyHero displayName={displayName} stats={stats} />
 
+        <JuniorDailyChallenge rankProgress={stats.rankProgress} />
+
         <JuniorShiftCard activeShift={stats.activeShift} />
+
+        <JuniorAcademyMissions />
+
+        <JuniorDiscoveryTracks />
 
         <JuniorDailyQuests
           questContext={{
@@ -175,7 +184,7 @@ export function JuniorDashboard({ displayName, stats, recentLeads }: Props) {
 
         {/* Submit form */}
         <section className="mb-10">
-          <Label style={{ color: C.goldDim, marginBottom: "1rem" }}>Submit Research Lead</Label>
+          <Label style={{ color: C.goldDim, marginBottom: "1rem" }}>Submit a Discovery</Label>
           <div style={{ background: C.bgCard, border: `1px solid ${C.border}`, padding: "1.5rem 1.625rem" }}>
             <JuniorLeadForm />
           </div>
@@ -183,11 +192,11 @@ export function JuniorDashboard({ displayName, stats, recentLeads }: Props) {
 
         {/* Recent leads */}
         <section>
-          <Label style={{ color: C.goldDim, marginBottom: "1rem" }}>Recent Submissions</Label>
+          <Label style={{ color: C.goldDim, marginBottom: "1rem" }}>Recent Discoveries</Label>
           {recentLeads.length === 0 ? (
             <div style={{ background: C.bgElevated, border: `1px solid ${C.border}`, padding: "1.25rem 1.5rem" }}>
               <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.3)" }}>
-                No leads yet — your first submission starts your streak.
+                No discoveries yet — your first find starts your journey.
               </p>
             </div>
           ) : (

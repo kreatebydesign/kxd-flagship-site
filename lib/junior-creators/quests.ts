@@ -1,6 +1,5 @@
 /**
- * KXD Academy daily quests — static definitions with live progress where available.
- * Phase 3: persistence, completion tracking, and dynamic quest rotation.
+ * KXD Academy daily challenges — static definitions with live progress where available.
  */
 
 export type QuestId =
@@ -19,26 +18,26 @@ export type QuestDefinition = {
 export const DAILY_QUESTS: QuestDefinition[] = [
   {
     id: "submit-leads",
-    title: "Submit 3 leads",
-    description: "Add three strong research opportunities to the KXD pipeline today.",
+    title: "Submit 3 discoveries",
+    description: "Find three real businesses worth sharing with the KXD team today.",
     target: 3,
   },
   {
     id: "complete-lesson",
-    title: "Complete 1 Academy lesson",
-    description: "Work through one training module to sharpen your research eye.",
+    title: "Complete 1 mission",
+    description: "Finish one Academy mission and write down what you noticed.",
     target: 1,
   },
   {
     id: "detailed-notes",
-    title: "Add detailed notes to 1 lead",
-    description: "Include context that helps the team qualify and act on your submission.",
+    title: "Add detailed notes to 1 discovery",
+    description: "Explain what you saw — website problems, brand gaps, or why they need help.",
     target: 1,
   },
   {
     id: "review-website",
-    title: "Review 1 website opportunity",
-    description: "Evaluate a prospect's web presence and flag fit for KXD website work.",
+    title: "Review 1 website like a detective",
+    description: "Pick a business site and list what's working and what's not.",
     target: 1,
   },
 ];

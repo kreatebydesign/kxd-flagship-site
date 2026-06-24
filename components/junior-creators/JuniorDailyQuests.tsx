@@ -38,7 +38,7 @@ export function JuniorDailyQuests({ questContext }: Props) {
         className="mb-4 flex flex-wrap items-baseline justify-between gap-3"
         style={{ marginBottom: "1rem" }}
       >
-        <Label style={{ color: C.goldDim }}>Daily Quests</Label>
+        <Label style={{ color: C.goldDim }}>Daily Challenges</Label>
         <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted }}>
           {getQuestsSummaryLabel(completed, quests.length)}
         </p>

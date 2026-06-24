@@ -1,6 +1,5 @@
 /**
- * KXD Academy rank progression — based on lifetime leads submitted.
- * Phase 2: static thresholds. Phase 3 will add badges and unlock logic.
+ * KXD Academy rank progression — youth edition titles, lead-based thresholds.
  */
 
 export type RankTier = {
@@ -10,12 +9,12 @@ export type RankTier = {
 };
 
 export const RANK_TIERS: RankTier[] = [
-  { id: "kxd-certified", min: 500, title: "KXD Certified" },
+  { id: "kxd-legend", min: 500, title: "KXD Legend" },
   { id: "creative-strategist", min: 250, title: "Creative Strategist" },
-  { id: "growth-specialist", min: 100, title: "Growth Specialist" },
-  { id: "studio-associate", min: 50, title: "Studio Associate" },
-  { id: "brand-observer", min: 25, title: "Brand Observer" },
-  { id: "website-analyst", min: 10, title: "Website Analyst" },
+  { id: "kxd-insider", min: 100, title: "KXD Insider" },
+  { id: "growth-scout", min: 50, title: "Growth Scout" },
+  { id: "brand-spotter", min: 25, title: "Brand Spotter" },
+  { id: "website-detective", min: 10, title: "Website Detective" },
   { id: "opportunity-hunter", min: 1, title: "Opportunity Hunter" },
   { id: "explorer", min: 0, title: "Explorer" },
 ];

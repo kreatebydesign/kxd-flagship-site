@@ -48,8 +48,8 @@ function StatCell({ label, value }: { label: string; value: string | number }) {
 export function JuniorAcademyHero({ displayName, stats }: Props) {
   const { rankProgress } = stats;
   const progressLabel = rankProgress.next
-    ? `Progress to ${rankProgress.next.title}`
-    : "Maximum rank achieved";
+    ? `Level up to ${rankProgress.next.title}`
+    : "You reached KXD Legend";
 
   return (
     <section className="mb-10">
@@ -62,35 +62,61 @@ export function JuniorAcademyHero({ displayName, stats }: Props) {
       >
         <Label style={{ color: C.goldDim, marginBottom: "1rem" }}>KXD Academy</Label>
 
-        <div className="flex flex-wrap items-end justify-between gap-6" style={{ marginBottom: "1.75rem" }}>
-          <div>
-            <h1
-              style={{
-                fontFamily: C.serif,
-                fontWeight: 300,
-                fontSize: "clamp(2rem, 5vw, 3rem)",
-                color: C.cream,
-                lineHeight: 1.05,
-              }}
-            >
-              {displayName}
-            </h1>
-            <p
-              style={{
-                fontFamily: C.serif,
-                fontWeight: 400,
-                fontSize: "1.375rem",
-                color: C.gold,
-                marginTop: "0.5rem",
-                lineHeight: 1.2,
-              }}
-            >
-              {rankProgress.current.title}
-            </p>
-          </div>
+        <div style={{ marginBottom: "1.25rem", maxWidth: "42rem" }}>
+          <h1
+            style={{
+              fontFamily: C.serif,
+              fontWeight: 300,
+              fontSize: "clamp(2rem, 5vw, 3rem)",
+              color: C.cream,
+              lineHeight: 1.05,
+              marginBottom: "0.75rem",
+            }}
+          >
+            Hey, {displayName}
+          </h1>
+          <p
+            style={{
+              fontFamily: C.sans,
+              fontSize: "0.875rem",
+              color: C.creamMuted,
+              lineHeight: 1.65,
+              marginBottom: "0.5rem",
+            }}
+          >
+            Learn how KXD discovers opportunities, spots problems, builds brands, and helps businesses grow.
+          </p>
+          <p
+            style={{
+              fontFamily: C.sans,
+              fontSize: "0.8125rem",
+              color: C.creamSubtle,
+              lineHeight: 1.6,
+            }}
+          >
+            Every challenge you complete unlocks new skills. Explore, notice, submit what you find — and level up.
+          </p>
         </div>
 
-        <div style={{ marginBottom: "1.75rem" }}>
+        <div
+          style={{
+            marginBottom: "1.75rem",
+            padding: "1rem 1.125rem",
+            background: "rgba(255,255,255,0.02)",
+            border: `1px solid ${C.borderGold}`,
+          }}
+        >
+          <p
+            style={{
+              fontFamily: C.serif,
+              fontWeight: 400,
+              fontSize: "1.25rem",
+              color: C.gold,
+              marginBottom: "0.75rem",
+            }}
+          >
+            {rankProgress.current.title}
+          </p>
           <div
             className="flex flex-wrap items-center justify-between gap-2"
             style={{ marginBottom: "0.625rem" }}
@@ -116,7 +142,6 @@ export function JuniorAcademyHero({ displayName, stats }: Props) {
                 height: "100%",
                 background: `linear-gradient(90deg, ${C.goldDim}, ${C.gold})`,
                 borderRadius: "2px",
-                transition: "width 0.4s ease",
               }}
             />
           </div>
@@ -129,7 +154,7 @@ export function JuniorAcademyHero({ displayName, stats }: Props) {
                 marginTop: "0.625rem",
               }}
             >
-              {rankProgress.leadsToNext} more lead{rankProgress.leadsToNext === 1 ? "" : "s"} to reach{" "}
+              {rankProgress.leadsToNext} more discover{rankProgress.leadsToNext === 1 ? "y" : "ies"} to reach{" "}
               {rankProgress.next.title}
             </p>
           )}
@@ -143,10 +168,10 @@ export function JuniorAcademyHero({ displayName, stats }: Props) {
             border: `1px solid ${C.border}`,
           }}
         >
-          <StatCell label="Lifetime Leads" value={stats.totalLeads} />
-          <StatCell label="Qualified Leads" value={stats.lifetimeQualified} />
-          <StatCell label="Closed-Won Leads" value={stats.lifetimeClosedWon} />
-          <StatCell label="Hours Contributed" value={formatHoursFromMinutes(stats.lifetimeHoursMinutes)} />
+          <StatCell label="Discoveries Found" value={stats.totalLeads} />
+          <StatCell label="Qualified" value={stats.lifetimeQualified} />
+          <StatCell label="KXD Wins" value={stats.lifetimeClosedWon} />
+          <StatCell label="Hours Exploring" value={formatHoursFromMinutes(stats.lifetimeHoursMinutes)} />
         </div>
       </div>
     </section>
