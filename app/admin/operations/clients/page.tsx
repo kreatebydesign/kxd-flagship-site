@@ -201,17 +201,30 @@ export default async function ExecutiveClientsPage() {
               Tier, revenue, health, and next actions across the KXD client base.
             </p>
           </div>
-          <Link
-            href="/admin/operations/client-launch"
-            style={{
-              fontFamily: C.sans, fontSize: "0.6875rem", fontWeight: 500,
-              letterSpacing: "0.14em", textTransform: "uppercase" as const,
-              color: C.bgBase, background: C.gold, padding: "0.5rem 1rem",
-              textDecoration: "none",
-            }}
-          >
-            Launch Client
-          </Link>
+          <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+            <Link
+              href="/admin/operations/client-import"
+              style={{
+                fontFamily: C.sans, fontSize: "0.6875rem", fontWeight: 500,
+                letterSpacing: "0.14em", textTransform: "uppercase" as const,
+                color: C.goldDim, border: `1px solid ${C.borderGold}`,
+                padding: "0.5rem 1rem", textDecoration: "none",
+              }}
+            >
+              Import Client
+            </Link>
+            <Link
+              href="/admin/operations/client-launch"
+              style={{
+                fontFamily: C.sans, fontSize: "0.6875rem", fontWeight: 500,
+                letterSpacing: "0.14em", textTransform: "uppercase" as const,
+                color: C.bgBase, background: C.gold, padding: "0.5rem 1rem",
+                textDecoration: "none",
+              }}
+            >
+              Launch Client
+            </Link>
+          </div>
           <Link
             href="/admin/collections/executive-client-profiles"
             style={{
