@@ -3,6 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { buildMetadata } from "@/lib/seo/metadata";
 import { FinalCtaBand } from "@/components/ui/FinalCtaBand";
+import { StructuredData } from "@/components/seo/StructuredData";
+import { blogPostingSchema, breadcrumbSchema } from "@/lib/seo/schema";
 import {
   STATIC_INSIGHTS,
   INSIGHT_CATEGORIES,
@@ -257,35 +259,21 @@ function RelatedCard({ article }: { article: InsightPreview }) {
 // ── JSON-LD ────────────────────────────────────────────────────────────────────
 
 function ArticleJsonLd({ article }: { article: InsightDetail }) {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://kreatebydesign.com";
-  const schema = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    headline: article.title,
-    description: article.excerpt,
-    datePublished: article.publishedAt,
-    dateModified: article.publishedAt,
-    author: {
-      "@type": "Person",
-      name: article.author,
-      url: `${siteUrl}/about`,
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "Kreate by Design",
-      url: siteUrl,
-    },
-    mainEntityOfPage: {
-      "@type": "WebPage",
-      "@id": `${siteUrl}/insights/${article.slug}`,
-    },
-    articleSection: article.categoryLabel,
-  };
-
   return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+    <StructuredData
+      data={[
+        breadcrumbSchema([
+          { name: "Insights", path: "/insights" },
+          { name: article.title, path: `/insights/${article.slug}` },
+        ]),
+        blogPostingSchema({
+          title: article.title,
+          description: article.excerpt,
+          path: `/insights/${article.slug}`,
+          publishedAt: article.publishedAt,
+          authorName: article.author,
+        }),
+      ]}
     />
   );
 }

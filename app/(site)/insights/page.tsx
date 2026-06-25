@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { buildMetadata } from "@/lib/seo/metadata";
 import { INSIGHT_CATEGORIES, STATIC_INSIGHTS, type InsightPreview } from "@/lib/insights";
 import { InsightsGrid } from "@/components/insights/InsightsGrid";
+import { StructuredData } from "@/components/seo/StructuredData";
+import { breadcrumbSchema, itemListSchema } from "@/lib/seo/schema";
 
 export const metadata: Metadata = buildMetadata({
   title: "KXD Journal",
@@ -55,8 +57,20 @@ async function getInsights(): Promise<InsightPreview[]> {
 export default async function InsightsPage() {
   const articles = await getInsights();
 
+  const schema = [
+    breadcrumbSchema([{ name: "Insights", path: "/insights" }]),
+    itemListSchema(
+      articles.map((a) => ({
+        name: a.title,
+        path: `/insights/${a.slug}`,
+      })),
+    ),
+  ];
+
   return (
     <>
+      <StructuredData data={schema} />
+
       {/* ── Hero ──────────────────────────────────────────────────────────────── */}
       <section
         style={{

@@ -5,7 +5,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPayload } from "payload";
 import config from "@payload-config";
+import { getClientIp } from "@/lib/website-audit/client-ip";
+import { findRecentDuplicateAudit } from "@/lib/website-audit/duplicate";
+import {
+  assertAuditRateLimit,
+  AuditRateLimitError,
+} from "@/lib/website-audit/rate-limit";
 import { runWebsiteAudit } from "@/lib/website-audit/analyzer";
+import {
+  UnsafeAuditUrlError,
+  validateSafePublicWebsiteUrl,
+} from "@/lib/website-audit/url-safety";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
@@ -38,10 +48,58 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const payload = await getPayload({ config });
+    const clientIp = getClientIp(req);
+
+    try {
+      await assertAuditRateLimit(payload, clientIp);
+    } catch (err) {
+      if (err instanceof AuditRateLimitError) {
+        return NextResponse.json(
+          { ok: false, message: err.message },
+          { status: 429 },
+        );
+      }
+      throw err;
+    }
+
+    let safeWebsiteUrl: string;
+    try {
+      safeWebsiteUrl = await validateSafePublicWebsiteUrl(website);
+    } catch (err) {
+      if (err instanceof UnsafeAuditUrlError) {
+        return NextResponse.json(
+          { ok: false, message: err.message },
+          { status: 400 },
+        );
+      }
+      throw err;
+    }
+
+    const existing = await findRecentDuplicateAudit(
+      payload,
+      email,
+      safeWebsiteUrl,
+    );
+    if (existing) {
+      return NextResponse.json({
+        ok: true,
+        id: existing.id,
+        overallScore: existing.overallScore,
+        grade: existing.grade,
+      });
+    }
+
     let audit;
     try {
-      audit = await runWebsiteAudit(website);
+      audit = await runWebsiteAudit(safeWebsiteUrl);
     } catch (err) {
+      if (err instanceof UnsafeAuditUrlError) {
+        return NextResponse.json(
+          { ok: false, message: err.message },
+          { status: 400 },
+        );
+      }
       console.error("[KXD Audit] Fetch/analyze failed:", err);
       return NextResponse.json(
         {
@@ -53,7 +111,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const payload = await getPayload({ config });
     const completedAt = new Date().toISOString();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

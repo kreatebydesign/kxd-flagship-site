@@ -21,7 +21,7 @@ const LEVELS = [
   {
     label: "01",
     title: "Luxury Website Experiences",
-    starting: "Starting at $8,500",
+    starting: "Starting at $7,500",
     description:
       "Cinematic brand websites for premium businesses, hospitality, motorsports, and high-end service organizations. Every engagement is built around the brand's positioning, audience, and long-term goals.",
     includes: [

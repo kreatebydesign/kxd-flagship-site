@@ -5,6 +5,7 @@
  */
 
 import { calculateOverallScore, clampScore, type CategoryScores } from "./scoring.ts";
+import { validateSafePublicWebsiteUrl } from "./url-safety.ts";
 
 export type AuditInsight = {
   strengths: string[];
@@ -21,13 +22,6 @@ export type WebsiteAuditResult = CategoryScores & {
   websiteUrl: string;
 };
 
-function normalizeUrl(input: string): string {
-  const trimmed = input.trim();
-  if (!trimmed) throw new Error("Website URL is required.");
-  if (/^https?:\/\//i.test(trimmed)) return trimmed;
-  return `https://${trimmed}`;
-}
-
 function extractBetween(html: string, pattern: RegExp): string | null {
   const m = html.match(pattern);
   return m?.[1]?.trim() ?? null;
@@ -42,7 +36,7 @@ function linesToText(lines: string[]): string {
 }
 
 export async function runWebsiteAudit(websiteInput: string): Promise<WebsiteAuditResult> {
-  const websiteUrl = normalizeUrl(websiteInput);
+  const websiteUrl = await validateSafePublicWebsiteUrl(websiteInput);
   const start = Date.now();
 
   const res = await fetch(websiteUrl, {
@@ -50,7 +44,7 @@ export async function runWebsiteAudit(websiteInput: string): Promise<WebsiteAudi
       "User-Agent": "KXD-Website-Auditor/1.0 (+https://kreatebydesign.com)",
       Accept: "text/html,application/xhtml+xml",
     },
-    signal: AbortSignal.timeout(18_000),
+    signal: AbortSignal.timeout(10_000),
     redirect: "follow",
   });
 

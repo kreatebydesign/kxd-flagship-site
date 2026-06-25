@@ -21,10 +21,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
             ? 0.95
             : path.startsWith("/services")
               ? 0.85
-              : path === "/investment"
+              : path === "/website-audit"
                 ? 0.85
-                : path.startsWith("/work/")
-                  ? 0.8
-                  : 0.75,
+                : path === "/investment"
+                  ? 0.85
+                  : path.startsWith("/work/")
+                    ? 0.8
+                    : 0.75,
   }));
 }

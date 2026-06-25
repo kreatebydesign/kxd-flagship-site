@@ -37,6 +37,7 @@ import { TeamMembers } from "./payload/collections/TeamMembers.ts";
 import { Testimonials } from "./payload/collections/Testimonials.ts";
 import { Users } from "./payload/collections/Users.ts";
 import { WebsiteAudits } from "./payload/collections/WebsiteAudits.ts";
+import { WebsiteAuditAttempts } from "./payload/collections/WebsiteAuditAttempts.ts";
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -96,6 +97,7 @@ export default buildConfig({
     ProjectInquiries,
     PlatformApplications,
     WebsiteAudits,
+    WebsiteAuditAttempts,
     ResearchLeads,
     // ── KXD OS ───────────────────────────────────────────────────────────────
     Clients,

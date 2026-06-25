@@ -1,10 +1,15 @@
 import { PROJECTS } from "@/lib/projects";
 import { STATIC_INSIGHTS } from "@/lib/insights";
 
+/** Public project detail pages — excludes hidden entries (no polished imagery / portfolio fit). */
+const PUBLIC_WORK_PATHS = PROJECTS
+  .filter((p) => !p.hidden)
+  .map((p) => `/work/${p.slug}`);
+
 export const PUBLIC_SITEMAP_PATHS: string[] = [
   "/",
   "/work",
-  ...PROJECTS.map((p) => `/work/${p.slug}`),
+  ...PUBLIC_WORK_PATHS,
   "/services",
   "/services/luxury-website-experiences",
   "/services/brand-systems-identity",
@@ -14,8 +19,10 @@ export const PUBLIC_SITEMAP_PATHS: string[] = [
   "/about",
   "/contact",
   "/start-project",
+  "/website-audit",
   "/insights",
   ...STATIC_INSIGHTS.map((a) => `/insights/${a.slug}`),
+  "/platforms",
 ];
 
 export function absolutePublicUrl(path: string): string {

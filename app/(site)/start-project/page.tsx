@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { buildMetadata } from "@/lib/seo/metadata";
 import { INQUIRY_EMAIL, SITE } from "@/lib/site";
 import { StartProjectForm } from "@/components/start-project/StartProjectForm";
+import { StructuredData } from "@/components/seo/StructuredData";
+import { breadcrumbSchema, webPageSchema } from "@/lib/seo/schema";
 
 export const metadata: Metadata = buildMetadata({
   title: "Start a Partnership",
@@ -20,8 +22,22 @@ export const metadata: Metadata = buildMetadata({
 });
 
 export default function StartProjectPage() {
+  const schema = [
+    breadcrumbSchema([
+      { name: "Start a Project", path: "/start-project" },
+    ]),
+    webPageSchema({
+      title: "Start a Partnership",
+      description:
+        "Apply to begin a KXD project partnership. Share your brand, goals, investment range, and vision.",
+      path: "/start-project",
+    }),
+  ];
+
   return (
     <>
+      <StructuredData data={schema} />
+
       <section
         style={{
           paddingTop: "calc(var(--nav-height) + var(--section-py))",

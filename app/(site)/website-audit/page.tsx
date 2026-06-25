@@ -1,19 +1,22 @@
 import type { Metadata } from "next";
 import { WebsiteAuditForm } from "@/components/website-audit/WebsiteAuditForm";
+import { StructuredData } from "@/components/seo/StructuredData";
 import { buildMetadata } from "@/lib/seo/metadata";
+import { breadcrumbSchema, webPageSchema } from "@/lib/seo/schema";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Free Website Audit",
+  title: "KXD Intelligence — Website Diagnostic",
   description:
-    "Get a premium KXD Website Audit — performance, SEO, mobile, conversion, and brand scores with clear improvement opportunities.",
+    "KXD Intelligence is our AI-powered website diagnostic — a strategic review across performance, SEO, mobile experience, conversion, and brand presentation with clear prioritized improvements.",
   path: "/website-audit",
   keywords: [
-    "Website Audit",
-    "Free Website Score",
-    "SEO Audit",
+    "KXD Intelligence",
+    "Website Diagnostic",
+    "AI Website Audit",
     "Website Performance Review",
+    "SEO Audit",
     "Luxury Web Design Audit",
-    "KXD Website Auditor",
+    "Website Scorecard",
   ],
 });
 
@@ -33,8 +36,22 @@ const SIGNALS = [
 ] as const;
 
 export default function WebsiteAuditPage() {
+  const schema = [
+    breadcrumbSchema([
+      { name: "KXD Intelligence", path: "/website-audit" },
+    ]),
+    webPageSchema({
+      title: "KXD Intelligence — Website Diagnostic",
+      description:
+        "AI-powered website diagnostic across performance, SEO, mobile, conversion, and brand presentation.",
+      path: "/website-audit",
+    }),
+  ];
+
   return (
     <>
+      <StructuredData data={schema} />
+
       <section
         style={{
           paddingTop: "calc(var(--nav-height) + var(--section-py))",
@@ -44,7 +61,7 @@ export default function WebsiteAuditPage() {
         }}
       >
         <div className="kxd-container" style={{ maxWidth: "58rem" }}>
-          <p className="kxd-eyebrow">KXD Website Auditor</p>
+          <p className="kxd-eyebrow">KXD Intelligence</p>
           <h1
             className="kxd-serif-title mt-5"
             style={{ fontSize: "clamp(2.25rem, 4.8vw, 3.5rem)", maxWidth: "36rem", lineHeight: 1.05 }}

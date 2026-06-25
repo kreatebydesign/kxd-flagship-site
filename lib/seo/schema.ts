@@ -1,4 +1,5 @@
 import { SITE } from "@/lib/site";
+import { DEFAULT_OG_IMAGE } from "./site";
 import { absoluteUrl } from "./metadata";
 
 export function organizationSchema() {
@@ -13,7 +14,7 @@ export function organizationSchema() {
     email: SITE.email,
     foundingDate: String(SITE.foundedYear),
     sameAs: Object.values(SITE.social),
-    logo: absoluteUrl("/media/brand/kxd-logo.svg"),
+    logo: absoluteUrl(DEFAULT_OG_IMAGE),
   };
 }
 
@@ -182,5 +183,38 @@ export function serviceSchema(input: {
       "@type": "Country",
       name: "United States",
     },
+  };
+}
+
+export function webPageSchema(input: {
+  title: string;
+  description: string;
+  path: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: input.title,
+    description: input.description,
+    url: absoluteUrl(input.path),
+    isPartOf: {
+      "@id": `${SITE.url}/#website`,
+    },
+    publisher: {
+      "@id": `${SITE.url}/#organization`,
+    },
+  };
+}
+
+export function itemListSchema(items: { name: string; path: string }[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    itemListElement: items.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: item.name,
+      url: absoluteUrl(item.path),
+    })),
   };
 }

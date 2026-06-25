@@ -5,6 +5,7 @@ import config from "@payload-config";
 import { ProjectCard } from "@/components/ui/ProjectCard";
 import { FinalCtaBand } from "@/components/ui/FinalCtaBand";
 import { GoldAtmosphere } from "@/components/ui/surfaces/GoldAtmosphere";
+import { StructuredData } from "@/components/seo/StructuredData";
 import {
   PROJECTS,
   PRIMARY_PROJECTS,
@@ -12,6 +13,7 @@ import {
   type ProjectItem,
 } from "@/lib/projects";
 import { buildMetadata } from "@/lib/seo/metadata";
+import { breadcrumbSchema, itemListSchema } from "@/lib/seo/schema";
 
 export const metadata: Metadata = buildMetadata({
   title: "Work",
@@ -131,9 +133,22 @@ async function fetchProjects(): Promise<WorkLists> {
 export default async function WorkPage() {
   const { primary, secondary } = await fetchProjects();
   const totalCount = primary.length + secondary.length;
+  const visibleProjects = [...primary, ...secondary];
+
+  const schema = [
+    breadcrumbSchema([{ name: "Work", path: "/work" }]),
+    itemListSchema(
+      visibleProjects.map((p) => ({
+        name: p.title,
+        path: `/work/${p.slug}`,
+      })),
+    ),
+  ];
 
   return (
     <>
+      <StructuredData data={schema} />
+
       {/* ── Hero ── */}
       <section
         className="relative overflow-hidden border-b"

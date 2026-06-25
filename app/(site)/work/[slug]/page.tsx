@@ -5,7 +5,9 @@ import { getPayload } from "payload";
 import config from "@payload-config";
 import { CASE_STUDIES, PROJECTS, type CaseStudy, type ShowcaseImage } from "@/lib/projects";
 import { ProjectCard } from "@/components/ui/ProjectCard";
+import { StructuredData } from "@/components/seo/StructuredData";
 import { buildMetadata } from "@/lib/seo/metadata";
+import { breadcrumbSchema, caseStudySchema } from "@/lib/seo/schema";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -133,14 +135,39 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
+  const project = PROJECTS.find((p) => p.slug === slug);
+
+  if (project?.hidden) {
+    return buildMetadata({
+      title: project.title,
+      path: `/work/${slug}`,
+      noIndex: true,
+    });
+  }
+
   const cs = CASE_STUDIES[slug];
-  if (!cs) return {};
-  return buildMetadata({
-    title: cs.title,
-    description: cs.tagline,
-    path: `/work/${cs.slug}`,
-    keywords: [cs.industry, ...cs.scope, "KXD Case Study"],
-  });
+
+  if (cs) {
+    return buildMetadata({
+      title: cs.title,
+      description: cs.tagline,
+      path: `/work/${cs.slug}`,
+      keywords: [cs.industry, ...cs.scope, "KXD Case Study"],
+      ogImage: project?.image ?? cs.image ?? undefined,
+    });
+  }
+
+  if (project) {
+    return buildMetadata({
+      title: project.title,
+      description: project.outcome || project.description,
+      path: `/work/${project.slug}`,
+      keywords: [project.industry, project.service, "KXD Case Study"],
+      ogImage: project.image ?? undefined,
+    });
+  }
+
+  return {};
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
@@ -230,7 +257,24 @@ export default async function CaseStudyPage({ params }: Props) {
 
   if (!cs) notFound();
 
-  const related = PROJECTS.filter((p) => p.slug !== slug).slice(0, 3);
+  const related = PROJECTS.filter((p) => p.slug !== slug && !p.hidden).slice(0, 3);
+  const projectMeta = PROJECTS.find((p) => p.slug === slug);
+  const caseStudyImage = projectMeta?.image ?? cs.image;
+
+  const schema = [
+    breadcrumbSchema([
+      { name: "Work", path: "/work" },
+      { name: cs.title, path: `/work/${cs.slug}` },
+    ]),
+    caseStudySchema({
+      title: cs.title,
+      description: cs.tagline,
+      path: `/work/${cs.slug}`,
+      client: cs.title,
+      industry: cs.industry,
+      image: caseStudyImage ?? undefined,
+    }),
+  ];
 
   const executiveSnapshot = [
     { label: "Client", value: cs.title },
@@ -243,6 +287,8 @@ export default async function CaseStudyPage({ params }: Props) {
 
   return (
     <>
+      <StructuredData data={schema} />
+
       {/* ══════════════════════════════════════════
           01 — CINEMATIC HERO
           ══════════════════════════════════════════ */}
