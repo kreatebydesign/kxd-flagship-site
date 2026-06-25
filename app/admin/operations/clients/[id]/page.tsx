@@ -64,7 +64,7 @@ export default async function ExecutiveClientWorkspacePage({ params, searchParam
                   textDecoration: "none",
                 }}
               >
-                ← Client Command Center
+                ← Client Portfolio
               </Link>
               <h1
                 style={{

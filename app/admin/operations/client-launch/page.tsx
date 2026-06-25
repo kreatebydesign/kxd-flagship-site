@@ -36,7 +36,7 @@ export default function ClientLaunchPage() {
                   textDecoration: "none",
                 }}
               >
-                ← Client Command Center
+                ← Client Portfolio
               </Link>
               <h1
                 style={{

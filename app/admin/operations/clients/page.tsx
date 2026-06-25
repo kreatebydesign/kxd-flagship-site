@@ -1,6 +1,6 @@
 /**
  * /admin/operations/clients
- * KXD OS Phase 1 — Executive Client Command Center
+ * KXD OS — Client Portfolio (executive client dashboard)
  */
 
 import Link from "next/link";
@@ -33,8 +33,8 @@ const C = {
   red: "#d25a5a",
   yellow: "#E8C468",
   teal: "#A8B4C8",
-  border: "rgba(255,255,255,0.08)",
-  borderGold: "rgba(201,169,98,0.16)",
+  border: "rgba(255,255,255,0.06)",
+  borderGold: "rgba(201,169,98,0.14)",
   serif: "var(--font-cormorant, Georgia, 'Times New Roman', serif)",
   sans: "var(--font-outfit, 'Helvetica Neue', Arial, sans-serif)",
 } as const;
@@ -52,13 +52,13 @@ const NAV_LINKS = [
 
 const PRIORITY_COLOR: Record<string, string> = {
   critical: C.red,
-  high: C.gold,
-  medium: C.yellow,
-  low: C.creamMuted,
+  high: C.goldDim,
+  medium: "rgba(245,241,232,0.55)",
+  low: "rgba(245,241,232,0.38)",
 };
 
 const STATUS_COLOR: Record<string, string> = {
-  active: C.gold,
+  active: C.goldDim,
   paused: C.creamMuted,
   "at-risk": C.red,
   archived: "rgba(255,255,255,0.35)",
@@ -66,13 +66,41 @@ const STATUS_COLOR: Record<string, string> = {
 
 function Label({ children }: { children: React.ReactNode }) {
   return (
-    <p style={{
-      fontFamily: C.sans, fontSize: "0.6875rem", fontWeight: 600,
-      letterSpacing: "0.18em", textTransform: "uppercase" as const,
-      color: "rgba(255,255,255,0.3)",
-    }}>
+    <p
+      style={{
+        fontFamily: C.sans,
+        fontSize: "0.6875rem",
+        fontWeight: 500,
+        letterSpacing: "0.08em",
+        textTransform: "uppercase" as const,
+        color: "rgba(255,255,255,0.28)",
+      }}
+    >
       {children}
     </p>
+  );
+}
+
+function PendingBadge() {
+  return (
+    <span
+      style={{
+        display: "inline-block",
+        marginTop: "0.5rem",
+        fontFamily: C.sans,
+        fontSize: "0.6875rem",
+        fontWeight: 500,
+        letterSpacing: "0.02em",
+        color: "rgba(245,241,232,0.42)",
+        background: "rgba(255,255,255,0.03)",
+        border: `1px solid ${C.border}`,
+        borderRadius: "999px",
+        padding: "0.2rem 0.55rem",
+        lineHeight: 1.4,
+      }}
+    >
+      Profile Pending
+    </span>
   );
 }
 
@@ -91,7 +119,10 @@ export default async function ExecutiveClientsPage() {
   const payload = await getPayload({ config });
   const now = new Date();
   const dateDisplay = now.toLocaleDateString("en-US", {
-    weekday: "long", month: "long", day: "numeric", year: "numeric",
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
   });
 
   const [clientsR, profilesR] = await Promise.allSettled([
@@ -99,8 +130,9 @@ export default async function ExecutiveClientsPage() {
     payload.find({ collection: "executive-client-profiles", limit: 200, depth: 1 }),
   ]);
 
-  const clients = clientsR.status === "fulfilled" ? clientsR.value.docs as AnyDoc[] : [];
-  const profiles = profilesR.status === "fulfilled" ? profilesR.value.docs as AnyDoc[] : [];
+  const clients = clientsR.status === "fulfilled" ? (clientsR.value.docs as AnyDoc[]) : [];
+  const profiles =
+    profilesR.status === "fulfilled" ? (profilesR.value.docs as AnyDoc[]) : [];
 
   const profileByClientId = new Map<number, AnyDoc>();
   for (const profile of profiles) {
@@ -109,7 +141,9 @@ export default async function ExecutiveClientsPage() {
   }
 
   const rows = clients
-    .map((client) => mergeClientWithExecutiveProfile(client, profileByClientId.get(client.id as number)))
+    .map((client) =>
+      mergeClientWithExecutiveProfile(client, profileByClientId.get(client.id as number)),
+    )
     .sort((a, b) => {
       const priorityRank = (p: string | null) =>
         p === "critical" ? 0 : p === "high" ? 1 : p === "medium" ? 2 : p === "low" ? 3 : 4;
@@ -137,38 +171,66 @@ export default async function ExecutiveClientsPage() {
 
   return (
     <div style={{ minHeight: "100vh", background: C.bgBase, color: C.cream }}>
-      <header style={{
-        position: "sticky", top: 0, zIndex: 50,
-        background: "rgba(8,8,8,0.92)", backdropFilter: "blur(12px)",
-        borderBottom: `1px solid ${C.border}`,
-      }}>
-        <div className="mx-auto max-w-screen-xl px-6 py-4 flex items-center justify-between gap-6">
+      <header
+        style={{
+          position: "sticky",
+          top: 0,
+          zIndex: 50,
+          background: "rgba(8,8,8,0.92)",
+          backdropFilter: "blur(12px)",
+          borderBottom: `1px solid ${C.border}`,
+        }}
+      >
+        <div className="mx-auto max-w-screen-xl px-6 py-5 flex items-center justify-between gap-6">
           <div className="flex items-center gap-5">
             <KxdLogo height={22} />
             <div>
-              <Label>Executive Layer · Phase 1</Label>
-              <p style={{
-                fontFamily: C.serif, fontWeight: 300, fontSize: "1.25rem",
-                color: C.cream, marginTop: "0.25rem", lineHeight: 1.1,
-              }}>
-                Client Command Center
+              <Label>Client Intelligence</Label>
+              <p
+                style={{
+                  fontFamily: C.serif,
+                  fontWeight: 300,
+                  fontSize: "1.375rem",
+                  color: C.cream,
+                  marginTop: "0.35rem",
+                  lineHeight: 1.15,
+                }}
+              >
+                Client Portfolio
+              </p>
+              <p
+                style={{
+                  fontFamily: C.sans,
+                  fontSize: "0.8125rem",
+                  color: C.creamMuted,
+                  marginTop: "0.5rem",
+                  lineHeight: 1.5,
+                  maxWidth: "36rem",
+                }}
+              >
+                Executive visibility across active relationships, revenue, health, and next
+                actions.
               </p>
             </div>
           </div>
-          <p style={{ fontFamily: C.sans, fontSize: "0.75rem", color: C.creamMuted }}>
+          <p style={{ fontFamily: C.sans, fontSize: "0.75rem", color: "rgba(245,241,232,0.45)" }}>
             {dateDisplay}
           </p>
         </div>
-        <nav className="mx-auto max-w-screen-xl px-6 pb-3 flex flex-wrap gap-x-5 gap-y-2">
+        <nav className="mx-auto max-w-screen-xl px-6 pb-4 flex flex-wrap gap-x-5 gap-y-2">
           {NAV_LINKS.map(([href, label]) => (
             <Link
               key={href}
               href={href}
               style={{
-                fontFamily: C.sans, fontSize: "0.625rem", fontWeight: 500,
-                letterSpacing: "0.14em", textTransform: "uppercase" as const,
+                fontFamily: C.sans,
+                fontSize: "0.6875rem",
+                fontWeight: 500,
+                letterSpacing: "0.06em",
+                textTransform: "uppercase" as const,
                 textDecoration: "none",
-                color: href === "/admin/operations/clients" ? C.gold : "rgba(255,255,255,0.35)",
+                color:
+                  href === "/admin/operations/clients" ? C.goldDim : "rgba(255,255,255,0.32)",
               }}
             >
               {label}
@@ -177,61 +239,118 @@ export default async function ExecutiveClientsPage() {
         </nav>
       </header>
 
-      <main className="mx-auto max-w-screen-xl px-6 py-10">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-10">
+      <main className="mx-auto max-w-screen-xl px-6 py-12">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-12">
           {[
             {
-              label: "Executive Profiles",
+              label: "Portfolio Coverage",
               value: `${withProfiles} / ${activeCount}`,
-              sub: "Portfolio coverage complete",
+              sub: "Executive profiles among active clients",
             },
-            { label: "Active Clients", value: String(activeCount), sub: `${rows.length} total in roster` },
-            { label: "Monthly Revenue", value: fmtExecutiveMoney(totalMRR), sub: "Current tracked MRR" },
-            { label: "Potential MRR", value: fmtExecutiveMoney(totalPotential), sub: "Executive pipeline" },
+            {
+              label: "Active Relationships",
+              value: String(activeCount),
+              sub: `${rows.length} total in roster`,
+            },
+            {
+              label: "Portfolio MRR",
+              value: fmtExecutiveMoney(totalMRR),
+              sub: "Tracked monthly revenue",
+            },
+            {
+              label: "Growth Potential",
+              value: fmtExecutiveMoney(totalPotential),
+              sub: "Estimated pipeline value",
+            },
           ].map((kpi) => (
-            <div key={kpi.label} style={{
-              background: C.bgElevated, border: `1px solid ${C.border}`, padding: "1.25rem 1.375rem",
-            }}>
+            <div
+              key={kpi.label}
+              style={{
+                background: C.bgElevated,
+                border: `1px solid ${C.border}`,
+                borderRadius: "8px",
+                padding: "1.5rem 1.5rem",
+              }}
+            >
               <Label>{kpi.label}</Label>
-              <p style={{
-                fontFamily: C.serif, fontWeight: 300, fontSize: "1.5rem",
-                color: C.cream, marginTop: "0.5rem", lineHeight: 1,
-              }}>
+              <p
+                style={{
+                  fontFamily: C.serif,
+                  fontWeight: 300,
+                  fontSize: "1.625rem",
+                  color: C.cream,
+                  marginTop: "0.625rem",
+                  lineHeight: 1,
+                }}
+              >
                 {kpi.value}
               </p>
-              <p style={{
-                fontFamily: C.sans, fontSize: "0.75rem", color: C.creamMuted, marginTop: "0.375rem",
-              }}>
+              <p
+                style={{
+                  fontFamily: C.sans,
+                  fontSize: "0.75rem",
+                  color: "rgba(245,241,232,0.45)",
+                  marginTop: "0.5rem",
+                  lineHeight: 1.45,
+                }}
+              >
                 {kpi.sub}
               </p>
             </div>
           ))}
         </div>
 
-        <div style={{
-          borderBottom: `1px solid ${C.border}`, marginBottom: "1rem",
-          paddingBottom: "0.75rem", display: "flex", justifyContent: "space-between", alignItems: "baseline",
-        }}>
+        <div
+          style={{
+            borderBottom: `1px solid ${C.border}`,
+            marginBottom: "1.25rem",
+            paddingBottom: "1rem",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "baseline",
+            gap: "1.5rem",
+          }}
+        >
           <div>
-            <Label>Executive Accounts</Label>
-            <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted, marginTop: "0.375rem" }}>
-              Tier, revenue, health, and next actions across the KXD client base.
+            <Label>Portfolio Overview</Label>
+            <p
+              style={{
+                fontFamily: C.sans,
+                fontSize: "0.8125rem",
+                color: "rgba(245,241,232,0.48)",
+                marginTop: "0.5rem",
+                lineHeight: 1.55,
+              }}
+            >
+              Tier, revenue, health, and next actions across your active client base.
               {criticalCount > 0 && (
-                <span style={{ color: C.red }}> · {criticalCount} critical priority</span>
+                <span style={{ color: C.goldDim }}>
+                  {" "}
+                  · {criticalCount} critical priority
+                </span>
               )}
               {duplicateCount > 0 && (
-                <span style={{ color: C.red }}> · {duplicateCount} possible duplicate{duplicateCount === 1 ? "" : "s"} flagged</span>
+                <span style={{ color: "rgba(232,196,104,0.75)" }}>
+                  {" "}
+                  · {duplicateCount} possible duplicate{duplicateCount === 1 ? "" : "s"} flagged
+                </span>
               )}
             </p>
           </div>
-          <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+          <div style={{ display: "flex", gap: "0.75rem", alignItems: "center", flexShrink: 0 }}>
             <Link
               href="/admin/operations/client-import"
               style={{
-                fontFamily: C.sans, fontSize: "0.6875rem", fontWeight: 500,
-                letterSpacing: "0.14em", textTransform: "uppercase" as const,
-                color: C.goldDim, border: `1px solid ${C.borderGold}`,
-                padding: "0.5rem 1rem", textDecoration: "none",
+                fontFamily: C.sans,
+                fontSize: "0.6875rem",
+                fontWeight: 500,
+                letterSpacing: "0.06em",
+                textTransform: "uppercase" as const,
+                color: C.goldDim,
+                border: `1px solid ${C.borderGold}`,
+                borderRadius: "6px",
+                padding: "0.5rem 1rem",
+                textDecoration: "none",
               }}
             >
               Import Client
@@ -239,44 +358,76 @@ export default async function ExecutiveClientsPage() {
             <Link
               href="/admin/operations/client-launch"
               style={{
-                fontFamily: C.sans, fontSize: "0.6875rem", fontWeight: 500,
-                letterSpacing: "0.14em", textTransform: "uppercase" as const,
-                color: C.bgBase, background: C.gold, padding: "0.5rem 1rem",
+                fontFamily: C.sans,
+                fontSize: "0.6875rem",
+                fontWeight: 500,
+                letterSpacing: "0.06em",
+                textTransform: "uppercase" as const,
+                color: C.bgBase,
+                background: C.gold,
+                borderRadius: "6px",
+                padding: "0.5rem 1rem",
                 textDecoration: "none",
               }}
             >
               Launch Client
             </Link>
+            <Link
+              href="/admin/collections/executive-client-profiles"
+              style={{
+                fontFamily: C.sans,
+                fontSize: "0.6875rem",
+                fontWeight: 500,
+                letterSpacing: "0.06em",
+                textTransform: "uppercase" as const,
+                color: C.goldDim,
+                textDecoration: "none",
+              }}
+            >
+              Edit Profiles →
+            </Link>
           </div>
-          <Link
-            href="/admin/collections/executive-client-profiles"
-            style={{
-              fontFamily: C.sans, fontSize: "0.6875rem", fontWeight: 500,
-              letterSpacing: "0.14em", textTransform: "uppercase" as const,
-              color: C.goldDim, textDecoration: "none",
-            }}
-          >
-            Edit Profiles →
-          </Link>
         </div>
 
         {rows.length === 0 ? (
-          <div style={{
-            background: C.bgElevated, border: `1px solid ${C.border}`, padding: "2rem",
-            fontFamily: C.sans, fontSize: "0.875rem", color: "rgba(255,255,255,0.35)",
-          }}>
+          <div
+            style={{
+              background: C.bgElevated,
+              border: `1px solid ${C.border}`,
+              borderRadius: "8px",
+              padding: "2.5rem",
+              fontFamily: C.sans,
+              fontSize: "0.875rem",
+              color: "rgba(255,255,255,0.35)",
+            }}
+          >
             No clients found. Seed clients or add records in Payload.
           </div>
         ) : (
-          <div style={{ border: `1px solid ${C.border}`, background: C.bgElevated }}>
-            <div className="hidden lg:grid" style={{
-              gridTemplateColumns: "minmax(0,1.4fr) minmax(0,0.5fr) minmax(0,0.7fr) minmax(0,0.7fr) minmax(0,0.5fr) minmax(0,0.6fr) minmax(0,1fr) minmax(0,0.6fr)",
-              gap: "0.75rem", padding: "0.875rem 1.25rem",
-              borderBottom: `1px solid ${C.border}`,
-              fontFamily: C.sans, fontSize: "0.625rem", fontWeight: 600,
-              letterSpacing: "0.14em", textTransform: "uppercase" as const,
-              color: "rgba(255,255,255,0.28)",
-            }}>
+          <div
+            style={{
+              border: `1px solid ${C.border}`,
+              background: C.bgElevated,
+              borderRadius: "8px",
+              overflow: "hidden",
+            }}
+          >
+            <div
+              className="hidden lg:grid"
+              style={{
+                gridTemplateColumns:
+                  "minmax(0,1.4fr) minmax(0,0.5fr) minmax(0,0.7fr) minmax(0,0.7fr) minmax(0,0.5fr) minmax(0,0.6fr) minmax(0,1fr) minmax(0,0.6fr)",
+                gap: "0.75rem",
+                padding: "1rem 1.5rem",
+                borderBottom: `1px solid ${C.border}`,
+                fontFamily: C.sans,
+                fontSize: "0.6875rem",
+                fontWeight: 500,
+                letterSpacing: "0.06em",
+                textTransform: "uppercase" as const,
+                color: "rgba(255,255,255,0.26)",
+              }}
+            >
               <span>Client</span>
               <span>Tier</span>
               <span>Monthly</span>
@@ -289,108 +440,132 @@ export default async function ExecutiveClientsPage() {
             {rows.map((row) => {
               const duplicateHint = duplicateWarnings.get(row.clientId);
               return (
-              <Link
-                key={row.clientId}
-                href={`/admin/operations/clients/${row.clientId}`}
-                className="block"
-                style={{
-                  textDecoration: "none",
-                  borderBottom: `1px solid ${C.border}`,
-                  transition: "background 0.15s ease",
-                }}
-              >
-                <div
-                  className="grid gap-3 p-4 lg:grid-cols-8 lg:gap-3 lg:items-start lg:px-5 lg:py-3.5"
-                  style={{ minWidth: 0 }}
+                <Link
+                  key={row.clientId}
+                  href={`/admin/operations/clients/${row.clientId}`}
+                  className="block transition-colors hover:bg-white/[0.025]"
+                  style={{
+                    textDecoration: "none",
+                    borderBottom: `1px solid ${C.border}`,
+                  }}
                 >
-                  <div style={{ minWidth: 0 }}>
-                    <p style={{
-                      fontFamily: C.serif,
-                      fontWeight: 300,
-                      fontSize: "1.0625rem",
-                      color: C.cream,
-                      lineHeight: 1.35,
-                      wordBreak: "break-word",
-                    }}>
-                      {row.name}
-                    </p>
-                    {!row.hasExecutiveProfile && (
+                  <div
+                    className="grid gap-3 p-4 lg:grid-cols-8 lg:gap-3 lg:items-start lg:px-6 lg:py-4"
+                    style={{ minWidth: 0 }}
+                  >
+                    <div style={{ minWidth: 0 }}>
                       <p
                         style={{
-                          fontFamily: C.sans,
-                          fontSize: "0.625rem",
-                          fontWeight: 600,
-                          letterSpacing: "0.1em",
-                          textTransform: "uppercase",
-                          color: C.yellow,
-                          marginTop: "0.375rem",
-                          lineHeight: 1.45,
+                          fontFamily: C.serif,
+                          fontWeight: 300,
+                          fontSize: "1.0625rem",
+                          color: C.cream,
+                          lineHeight: 1.35,
+                          wordBreak: "break-word",
                         }}
                       >
-                        Executive profile pending
+                        {row.name}
                       </p>
-                    )}
-                    {duplicateHint && (
-                      <p style={{
+                      {!row.hasExecutiveProfile && <PendingBadge />}
+                      {duplicateHint && (
+                        <p
+                          style={{
+                            fontFamily: C.sans,
+                            fontSize: "0.6875rem",
+                            color: "rgba(232,196,104,0.75)",
+                            marginTop: "0.5rem",
+                            lineHeight: 1.45,
+                            wordBreak: "break-word",
+                          }}
+                        >
+                          {duplicateHint}
+                        </p>
+                      )}
+                    </div>
+                    <p
+                      style={{
                         fontFamily: C.sans,
-                        fontSize: "0.6875rem",
-                        color: C.red,
-                        marginTop: "0.375rem",
+                        fontSize: "0.8125rem",
+                        color: "rgba(245,241,232,0.55)",
                         lineHeight: 1.45,
                         wordBreak: "break-word",
-                      }}>
-                        {duplicateHint}
-                      </p>
-                    )}
+                      }}
+                    >
+                      {tierLabel(row)}
+                    </p>
+                    <p
+                      style={{
+                        fontFamily: C.sans,
+                        fontSize: "0.8125rem",
+                        color: C.cream,
+                        lineHeight: 1.45,
+                      }}
+                    >
+                      {fmtExecutiveMoney(row.monthlyRevenue)}
+                    </p>
+                    <p
+                      style={{
+                        fontFamily: C.sans,
+                        fontSize: "0.8125rem",
+                        color: C.goldDim,
+                        lineHeight: 1.45,
+                      }}
+                    >
+                      {fmtExecutiveMoney(row.potentialMonthlyRevenue)}
+                    </p>
+                    <p
+                      style={{
+                        fontFamily: C.serif,
+                        fontSize: "1rem",
+                        fontWeight: 300,
+                        color: C.cream,
+                        lineHeight: 1.45,
+                      }}
+                    >
+                      {row.healthScore ?? "—"}
+                    </p>
+                    <p
+                      style={{
+                        fontFamily: C.sans,
+                        fontSize: "0.75rem",
+                        fontWeight: 500,
+                        letterSpacing: "0.04em",
+                        color: STATUS_COLOR[row.relationshipStatus ?? ""] ?? "rgba(245,241,232,0.45)",
+                        lineHeight: 1.45,
+                      }}
+                    >
+                      {statusLabel(row)}
+                    </p>
+                    <p
+                      style={{
+                        fontFamily: C.sans,
+                        fontSize: "0.75rem",
+                        color: "rgba(245,241,232,0.48)",
+                        lineHeight: 1.55,
+                        wordBreak: "break-word",
+                        minWidth: 0,
+                      }}
+                    >
+                      {row.nextAction ?? "—"}
+                    </p>
+                    <p
+                      style={{
+                        fontFamily: C.sans,
+                        fontSize: "0.75rem",
+                        fontWeight: 500,
+                        letterSpacing: "0.04em",
+                        color:
+                          PRIORITY_COLOR[row.internalPriority ?? ""] ?? "rgba(245,241,232,0.45)",
+                        lineHeight: 1.45,
+                      }}
+                    >
+                      {row.internalPriority
+                        ? EXECUTIVE_PRIORITY_LABEL[row.internalPriority]
+                        : "—"}
+                    </p>
                   </div>
-                  <p style={{
-                    fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted,
-                    lineHeight: 1.4, wordBreak: "break-word",
-                  }}>
-                    {tierLabel(row)}
-                  </p>
-                  <p style={{
-                    fontFamily: C.sans, fontSize: "0.8125rem", color: C.cream,
-                    lineHeight: 1.4,
-                  }}>
-                    {fmtExecutiveMoney(row.monthlyRevenue)}
-                  </p>
-                  <p style={{
-                    fontFamily: C.sans, fontSize: "0.8125rem", color: C.goldDim,
-                    lineHeight: 1.4,
-                  }}>
-                    {fmtExecutiveMoney(row.potentialMonthlyRevenue)}
-                  </p>
-                  <p style={{ fontFamily: C.serif, fontSize: "1rem", color: C.cream, lineHeight: 1.4 }}>
-                    {row.healthScore ?? "—"}
-                  </p>
-                  <p style={{
-                    fontFamily: C.sans, fontSize: "0.6875rem", fontWeight: 600,
-                    letterSpacing: "0.1em", textTransform: "uppercase" as const,
-                    color: STATUS_COLOR[row.relationshipStatus ?? ""] ?? C.creamMuted,
-                    lineHeight: 1.4,
-                  }}>
-                    {statusLabel(row)}
-                  </p>
-                  <p style={{
-                    fontFamily: C.sans, fontSize: "0.75rem", color: C.creamMuted,
-                    lineHeight: 1.55, wordBreak: "break-word", minWidth: 0,
-                  }}>
-                    {row.nextAction ?? "—"}
-                  </p>
-                  <p style={{
-                    fontFamily: C.sans, fontSize: "0.6875rem", fontWeight: 600,
-                    letterSpacing: "0.1em", textTransform: "uppercase" as const,
-                    color: PRIORITY_COLOR[row.internalPriority ?? ""] ?? C.creamMuted,
-                    lineHeight: 1.4,
-                  }}>
-                    {row.internalPriority
-                      ? EXECUTIVE_PRIORITY_LABEL[row.internalPriority]
-                      : "—"}
-                  </p>
-                </div>
-              </Link>
-            );
+                </Link>
+              );
             })}
           </div>
         )}
