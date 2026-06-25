@@ -11,6 +11,10 @@ import {
   getAutoDV8ionsImportExampleJson,
   AUTODV8IONS_IMPORT_RAW_NOTES,
 } from "./autodv8ions-import";
+import {
+  getDcogtImportExampleJson,
+  DCOGT_IMPORT_RAW_NOTES,
+} from "./dcogt-import";
 
 export interface ClientImportExampleEntry {
   label: string;
@@ -38,5 +42,10 @@ export const CLIENT_IMPORT_EXAMPLES: ClientImportExampleEntry[] = [
   {
     label: "Load Cusick Example",
     getJson: getCusickImportExampleJson,
+  },
+  {
+    label: "Load DCoGT Example",
+    getJson: getDcogtImportExampleJson,
+    rawNotes: DCOGT_IMPORT_RAW_NOTES,
   },
 ];

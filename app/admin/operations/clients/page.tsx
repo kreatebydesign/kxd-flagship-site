@@ -17,6 +17,7 @@ import {
   type AnyDoc,
   type MergedExecutiveClientRow,
 } from "@/lib/executive-client-profile";
+import { buildClientDuplicateWarnings } from "@/lib/executive-client-profile-dashboard";
 
 export const dynamic = "force-dynamic";
 
@@ -119,8 +120,20 @@ export default async function ExecutiveClientsPage() {
 
   const totalMRR = rows.reduce((s, r) => s + (r.monthlyRevenue ?? 0), 0);
   const totalPotential = rows.reduce((s, r) => s + (r.potentialMonthlyRevenue ?? 0), 0);
-  const withProfiles = rows.filter((r) => r.hasExecutiveProfile).length;
+  const activeRows = rows.filter((r) => r.clientStatus === "active");
+  const activeCount = activeRows.length;
+  const withProfiles = activeRows.filter((r) => r.hasExecutiveProfile).length;
   const criticalCount = rows.filter((r) => r.internalPriority === "critical").length;
+
+  const duplicateWarnings = buildClientDuplicateWarnings(
+    clients.map((client) => ({
+      id: client.id as number,
+      name: (client.name as string) || "Unknown",
+      status: (client.status as string) || null,
+      website: (client.companyWebsite as string) || null,
+    })),
+  );
+  const duplicateCount = duplicateWarnings.size;
 
   return (
     <div style={{ minHeight: "100vh", background: C.bgBase, color: C.cream }}>
@@ -167,10 +180,14 @@ export default async function ExecutiveClientsPage() {
       <main className="mx-auto max-w-screen-xl px-6 py-10">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-10">
           {[
-            { label: "Active Clients", value: String(rows.length), sub: `${withProfiles} executive profiles` },
+            {
+              label: "Executive Profiles",
+              value: `${withProfiles} / ${activeCount}`,
+              sub: "Portfolio coverage complete",
+            },
+            { label: "Active Clients", value: String(activeCount), sub: `${rows.length} total in roster` },
             { label: "Monthly Revenue", value: fmtExecutiveMoney(totalMRR), sub: "Current tracked MRR" },
             { label: "Potential MRR", value: fmtExecutiveMoney(totalPotential), sub: "Executive pipeline" },
-            { label: "Critical Priority", value: String(criticalCount), sub: "Needs founder attention" },
           ].map((kpi) => (
             <div key={kpi.label} style={{
               background: C.bgElevated, border: `1px solid ${C.border}`, padding: "1.25rem 1.375rem",
@@ -199,6 +216,12 @@ export default async function ExecutiveClientsPage() {
             <Label>Executive Accounts</Label>
             <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted, marginTop: "0.375rem" }}>
               Tier, revenue, health, and next actions across the KXD client base.
+              {criticalCount > 0 && (
+                <span style={{ color: C.red }}> · {criticalCount} critical priority</span>
+              )}
+              {duplicateCount > 0 && (
+                <span style={{ color: C.red }}> · {duplicateCount} possible duplicate{duplicateCount === 1 ? "" : "s"} flagged</span>
+              )}
             </p>
           </div>
           <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
@@ -247,7 +270,7 @@ export default async function ExecutiveClientsPage() {
         ) : (
           <div style={{ border: `1px solid ${C.border}`, background: C.bgElevated }}>
             <div className="hidden lg:grid" style={{
-              gridTemplateColumns: "1.4fr 0.5fr 0.7fr 0.7fr 0.5fr 0.6fr 1fr 0.6fr",
+              gridTemplateColumns: "minmax(0,1.4fr) minmax(0,0.5fr) minmax(0,0.7fr) minmax(0,0.7fr) minmax(0,0.5fr) minmax(0,0.6fr) minmax(0,1fr) minmax(0,0.6fr)",
               gap: "0.75rem", padding: "0.875rem 1.25rem",
               borderBottom: `1px solid ${C.border}`,
               fontFamily: C.sans, fontSize: "0.625rem", fontWeight: 600,
@@ -263,7 +286,9 @@ export default async function ExecutiveClientsPage() {
               <span>Next Action</span>
               <span>Priority</span>
             </div>
-            {rows.map((row) => (
+            {rows.map((row) => {
+              const duplicateHint = duplicateWarnings.get(row.clientId);
+              return (
               <Link
                 key={row.clientId}
                 href={`/admin/operations/clients/${row.clientId}`}
@@ -274,44 +299,82 @@ export default async function ExecutiveClientsPage() {
                   transition: "background 0.15s ease",
                 }}
               >
-                <div className="grid gap-3 p-4 lg:grid-cols-8 lg:gap-3 lg:items-center lg:px-5 lg:py-3.5">
-                  <div>
+                <div
+                  className="grid gap-3 p-4 lg:grid-cols-8 lg:gap-3 lg:items-start lg:px-5 lg:py-3.5"
+                  style={{ minWidth: 0 }}
+                >
+                  <div style={{ minWidth: 0 }}>
                     <p style={{
-                      fontFamily: C.serif, fontWeight: 300, fontSize: "1.0625rem", color: C.cream,
+                      fontFamily: C.serif,
+                      fontWeight: 300,
+                      fontSize: "1.0625rem",
+                      color: C.cream,
+                      lineHeight: 1.35,
+                      wordBreak: "break-word",
                     }}>
                       {row.name}
                     </p>
                     {!row.hasExecutiveProfile && (
+                      <p
+                        style={{
+                          fontFamily: C.sans,
+                          fontSize: "0.625rem",
+                          fontWeight: 600,
+                          letterSpacing: "0.1em",
+                          textTransform: "uppercase",
+                          color: C.yellow,
+                          marginTop: "0.375rem",
+                          lineHeight: 1.45,
+                        }}
+                      >
+                        Executive profile pending
+                      </p>
+                    )}
+                    {duplicateHint && (
                       <p style={{
-                        fontFamily: C.sans, fontSize: "0.6875rem", color: C.yellow, marginTop: "0.25rem",
+                        fontFamily: C.sans,
+                        fontSize: "0.6875rem",
+                        color: C.red,
+                        marginTop: "0.375rem",
+                        lineHeight: 1.45,
+                        wordBreak: "break-word",
                       }}>
-                        No executive profile
+                        {duplicateHint}
                       </p>
                     )}
                   </div>
-                  <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted }}>
+                  <p style={{
+                    fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted,
+                    lineHeight: 1.4, wordBreak: "break-word",
+                  }}>
                     {tierLabel(row)}
                   </p>
-                  <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.cream }}>
+                  <p style={{
+                    fontFamily: C.sans, fontSize: "0.8125rem", color: C.cream,
+                    lineHeight: 1.4,
+                  }}>
                     {fmtExecutiveMoney(row.monthlyRevenue)}
                   </p>
-                  <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.goldDim }}>
+                  <p style={{
+                    fontFamily: C.sans, fontSize: "0.8125rem", color: C.goldDim,
+                    lineHeight: 1.4,
+                  }}>
                     {fmtExecutiveMoney(row.potentialMonthlyRevenue)}
                   </p>
-                  <p style={{ fontFamily: C.serif, fontSize: "1rem", color: C.cream }}>
+                  <p style={{ fontFamily: C.serif, fontSize: "1rem", color: C.cream, lineHeight: 1.4 }}>
                     {row.healthScore ?? "—"}
                   </p>
                   <p style={{
                     fontFamily: C.sans, fontSize: "0.6875rem", fontWeight: 600,
                     letterSpacing: "0.1em", textTransform: "uppercase" as const,
                     color: STATUS_COLOR[row.relationshipStatus ?? ""] ?? C.creamMuted,
+                    lineHeight: 1.4,
                   }}>
                     {statusLabel(row)}
                   </p>
                   <p style={{
                     fontFamily: C.sans, fontSize: "0.75rem", color: C.creamMuted,
-                    lineHeight: 1.45, overflow: "hidden", display: "-webkit-box",
-                    WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
+                    lineHeight: 1.55, wordBreak: "break-word", minWidth: 0,
                   }}>
                     {row.nextAction ?? "—"}
                   </p>
@@ -319,6 +382,7 @@ export default async function ExecutiveClientsPage() {
                     fontFamily: C.sans, fontSize: "0.6875rem", fontWeight: 600,
                     letterSpacing: "0.1em", textTransform: "uppercase" as const,
                     color: PRIORITY_COLOR[row.internalPriority ?? ""] ?? C.creamMuted,
+                    lineHeight: 1.4,
                   }}>
                     {row.internalPriority
                       ? EXECUTIVE_PRIORITY_LABEL[row.internalPriority]
@@ -326,7 +390,8 @@ export default async function ExecutiveClientsPage() {
                   </p>
                 </div>
               </Link>
-            ))}
+            );
+            })}
           </div>
         )}
       </main>
