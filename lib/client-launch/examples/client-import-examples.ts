@@ -19,6 +19,14 @@ import {
   getHairMafiaImportExampleJson,
   HAIR_MAFIA_IMPORT_RAW_NOTES,
 } from "./hair-mafia-import";
+import {
+  getOnTrackPerformanceImportExampleJson,
+  ON_TRACK_PERFORMANCE_IMPORT_RAW_NOTES,
+} from "./on-track-performance-import";
+import {
+  getOtpCartsImportExampleJson,
+  OTP_CARTS_IMPORT_RAW_NOTES,
+} from "./otp-carts-import";
 
 export interface ClientImportExampleEntry {
   label: string;
@@ -56,5 +64,15 @@ export const CLIENT_IMPORT_EXAMPLES: ClientImportExampleEntry[] = [
     label: "Load Hair Mafia Example",
     getJson: getHairMafiaImportExampleJson,
     rawNotes: HAIR_MAFIA_IMPORT_RAW_NOTES,
+  },
+  {
+    label: "Load On Track Performance Example",
+    getJson: getOnTrackPerformanceImportExampleJson,
+    rawNotes: ON_TRACK_PERFORMANCE_IMPORT_RAW_NOTES,
+  },
+  {
+    label: "Load OTP Carts Example",
+    getJson: getOtpCartsImportExampleJson,
+    rawNotes: OTP_CARTS_IMPORT_RAW_NOTES,
   },
 ];

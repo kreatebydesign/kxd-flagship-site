@@ -167,22 +167,26 @@ const clients = [
       "Enterprise services client. Digital presence and brand work.",
   },
 
-  // ── 9. OTP ────────────────────────────────────────────────────────────────
+  // ── 9. On Track Performance (OTP) ─────────────────────────────────────────
+  // Canonical slug `otp` is preserved for existing records; display name is full brand.
+  // OTP Carts is a separate client — not this record.
   {
-    name: "OTP",
+    name: "On Track Performance",
     slug: "otp",
     status: "active" as const,
-    primaryContactName: "",
+    primaryContactName: "Don",
     primaryContactEmail: "",
-    companyWebsite: "",
-    brandTier: "growth" as const,
-    monthlyRetainerAmount: null,
+    companyWebsite: "https://on-track-performance.com",
+    brandTier: "flagship" as const,
+    monthlyRetainerAmount: 300,
     billingDay: null,
     nextBillingDate: null,
     relationshipStatus: "healthy" as const,
-    nextAction: "Review project scope and status",
+    nextAction:
+      "Advance KXD platform website rebuild planning and align SEO improvements to lead generation targets.",
     nextActionDueDate: null,
-    notes: "Client — full details to be enriched.",
+    notes:
+      "OTP = On Track Performance. Performance & growth partner since August 2025. Motorsports sales, partnerships, and qualified lead generation. Separate from OTP Carts (golf cart sales brand, same owner).",
   },
 
   // ── 10. 2475 Townsgate ────────────────────────────────────────────────────
