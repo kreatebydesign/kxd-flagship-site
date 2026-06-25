@@ -1,5 +1,17 @@
 import type { CSSProperties, ReactNode } from "react";
 import { WORKSPACE_C } from "@/lib/executive-client-workspace/theme";
+import {
+  parseExecutiveNoteSections,
+  splitExecutiveParagraphs,
+} from "@/lib/executive-client-workspace/format-executive-text";
+
+const proseStyle: CSSProperties = {
+  fontFamily: WORKSPACE_C.sans,
+  fontSize: "0.875rem",
+  fontWeight: 300,
+  lineHeight: 1.75,
+  color: WORKSPACE_C.creamMuted,
+};
 
 export function WorkspaceLabel({ children, style }: { children: ReactNode; style?: CSSProperties }) {
   return (
@@ -55,21 +67,83 @@ export function WorkspacePanel({
 
 export function WorkspaceProse({ children }: { children: ReactNode }) {
   return (
-    <p
-      style={{
-        fontFamily: WORKSPACE_C.sans,
-        fontSize: "0.875rem",
-        fontWeight: 300,
-        lineHeight: 1.75,
-        color: WORKSPACE_C.creamMuted,
-      }}
-    >
+    <p style={proseStyle}>
       {children}
     </p>
   );
 }
 
-export function WorkspaceMetaRow({ label, value }: { label: string; value: string }) {
+/** Preserves paragraph breaks and single line breaks without altering stored text. */
+export function WorkspaceFormattedText({ text }: { text: string }) {
+  const paragraphs = splitExecutiveParagraphs(text);
+  if (paragraphs.length === 0) {
+    return <WorkspaceProse>—</WorkspaceProse>;
+  }
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
+      {paragraphs.map((block, index) => (
+        <p key={index} style={{ ...proseStyle, margin: 0 }}>
+          {block.split("\n").map((line, lineIndex, lines) => (
+            <span key={lineIndex}>
+              {line}
+              {lineIndex < lines.length - 1 && <br />}
+            </span>
+          ))}
+        </p>
+      ))}
+    </div>
+  );
+}
+
+/** Renders strategic notes with visual separation for known section labels. */
+export function WorkspaceExecutiveNotes({ text }: { text: string }) {
+  const { preamble, sections } = parseExecutiveNoteSections(text);
+
+  if (sections.length === 0) {
+    return <WorkspaceFormattedText text={text} />;
+  }
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "1.125rem" }}>
+      {preamble && <WorkspaceFormattedText text={preamble} />}
+      {sections.map((section) => (
+        <div
+          key={section.label}
+          style={{
+            paddingTop: "0.875rem",
+            borderTop: `1px solid ${WORKSPACE_C.border}`,
+          }}
+        >
+          <p
+            style={{
+              fontFamily: WORKSPACE_C.sans,
+              fontSize: "0.625rem",
+              fontWeight: 600,
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+              color: WORKSPACE_C.goldDim,
+              marginBottom: "0.5rem",
+            }}
+          >
+            {section.label}
+          </p>
+          <WorkspaceFormattedText text={section.content} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function WorkspaceMetaRow({
+  label,
+  value,
+  multiline,
+}: {
+  label: string;
+  value: string;
+  multiline?: boolean;
+}) {
   return (
     <div
       style={{
@@ -88,8 +162,11 @@ export function WorkspaceMetaRow({ label, value }: { label: string; value: strin
           fontFamily: WORKSPACE_C.sans,
           fontSize: "0.8125rem",
           color: WORKSPACE_C.cream,
-          textAlign: "right",
-          maxWidth: "65%",
+          textAlign: multiline ? "left" : "right",
+          maxWidth: multiline ? "100%" : "65%",
+          whiteSpace: multiline ? "normal" : undefined,
+          wordBreak: multiline ? "break-word" : undefined,
+          lineHeight: multiline ? 1.65 : undefined,
         }}
       >
         {value}

@@ -15,6 +15,9 @@ import {
   WorkspacePanel,
   WorkspacePlaceholderBadge,
   WorkspaceProse,
+  WorkspaceFormattedText,
+  WorkspaceExecutiveNotes,
+  WorkspaceLabel,
 } from "./WorkspacePrimitives";
 
 function statusLabelFromClient(client: ClientWorkspaceData["client"]): string {
@@ -45,18 +48,20 @@ export function OverviewTab({ data }: { data: ClientWorkspaceData }) {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <WorkspacePanel title="Executive Summary">
-          <WorkspaceProse>
-            {(profile?.executiveSummary as string) ||
+          <WorkspaceFormattedText
+            text={
+              (profile?.executiveSummary as string) ||
               (client.notes as string) ||
-              "No executive summary recorded."}
-          </WorkspaceProse>
+              "No executive summary recorded."
+            }
+          />
         </WorkspacePanel>
 
         <WorkspacePanel title="Revenue Snapshot">
-          <WorkspaceMetaRow label="Current Monthly" value={fmtExecutiveMoney(row.monthlyRevenue)} />
-          <WorkspaceMetaRow label="Estimated Annual" value={fmtExecutiveMoney(annualValue)} />
+          <WorkspaceMetaRow label="Current MRR" value={fmtExecutiveMoney(row.monthlyRevenue)} />
+          <WorkspaceMetaRow label="Est. Annual Value" value={fmtExecutiveMoney(annualValue)} />
           <WorkspaceMetaRow
-            label="Potential Monthly"
+            label="Potential MRR"
             value={fmtExecutiveMoney(row.potentialMonthlyRevenue)}
           />
         </WorkspacePanel>
@@ -88,23 +93,33 @@ export function OverviewTab({ data }: { data: ClientWorkspaceData }) {
         </WorkspacePanel>
 
         <WorkspacePanel title="Next Action">
-          <WorkspaceProse>{row.nextAction ?? "No next action set."}</WorkspaceProse>
-          <WorkspaceMetaRow label="Due Date" value={fmtWorkspaceDate(row.nextActionDueDate)} />
+          <WorkspaceFormattedText text={row.nextAction ?? "No next action set."} />
+          <div style={{ marginTop: "0.75rem" }}>
+            <WorkspaceMetaRow label="Due Date" value={fmtWorkspaceDate(row.nextActionDueDate)} />
+          </div>
         </WorkspacePanel>
       </div>
 
       <WorkspacePanel title="Executive Notes">
-        <WorkspaceProse>
-          {(profile?.strategicNotes as string) ||
+        <WorkspaceExecutiveNotes
+          text={
+            (profile?.strategicNotes as string) ||
             (client.notes as string) ||
-            "No executive notes recorded."}
-        </WorkspaceProse>
+            "No executive notes recorded."
+          }
+        />
         {profile?.riskNotes && (
-          <div style={{ marginTop: "1rem" }}>
-            <WorkspaceProse>
-              <strong style={{ color: "rgba(255,255,255,0.5)" }}>Risk context: </strong>
-              {profile.riskNotes as string}
-            </WorkspaceProse>
+          <div
+            style={{
+              marginTop: "1.125rem",
+              paddingTop: "0.875rem",
+              borderTop: `1px solid rgba(255,255,255,0.08)`,
+            }}
+          >
+            <WorkspaceLabel style={{ marginBottom: "0.5rem", color: "rgba(201,169,98,0.55)" }}>
+              Risk context
+            </WorkspaceLabel>
+            <WorkspaceFormattedText text={profile.riskNotes as string} />
           </div>
         )}
       </WorkspacePanel>
