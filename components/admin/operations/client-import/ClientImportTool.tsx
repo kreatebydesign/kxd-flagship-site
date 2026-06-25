@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { LAUNCH_C } from "@/lib/client-launch/constants";
+import { CLIENT_IMPORT_EXAMPLES } from "@/lib/client-launch/examples/client-import-examples";
 import { getCusickImportExampleJson } from "@/lib/client-launch/examples/cusick-motorsports-import";
 import { LaunchFieldLabel, LaunchPanel } from "@/components/admin/operations/client-launch/LaunchFormPrimitives";
 
@@ -29,9 +30,10 @@ export function ClientImportTool() {
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<ImportSuccess | null>(null);
 
-  function loadExample() {
-    setJsonText(getCusickImportExampleJson());
-    setShowExample(true);
+  function loadExampleEntry(entry: typeof CLIENT_IMPORT_EXAMPLES[number], showCusickPreview = false) {
+    setJsonText(entry.getJson());
+    setRawNotes(entry.rawNotes ?? "");
+    setShowExample(showCusickPreview);
     setErrors([]);
     setMessage("");
     setResult(null);
@@ -172,24 +174,32 @@ export function ClientImportTool() {
             marginBottom: "1rem",
           }}
         >
-          <button
-            type="button"
-            onClick={loadExample}
-            style={{
-              fontFamily: LAUNCH_C.sans,
-              fontSize: "0.6875rem",
-              fontWeight: 500,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              color: LAUNCH_C.gold,
-              background: "transparent",
-              border: `1px solid ${LAUNCH_C.borderGold}`,
-              padding: "0.5rem 0.875rem",
-              cursor: "pointer",
-            }}
-          >
-            Load Cusick Example
-          </button>
+          {CLIENT_IMPORT_EXAMPLES.map((example) => (
+            <button
+              key={example.label}
+              type="button"
+              onClick={() =>
+                loadExampleEntry(
+                  example,
+                  example.label === "Load Cusick Example",
+                )
+              }
+              style={{
+                fontFamily: LAUNCH_C.sans,
+                fontSize: "0.6875rem",
+                fontWeight: 500,
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+                color: LAUNCH_C.gold,
+                background: "transparent",
+                border: `1px solid ${LAUNCH_C.borderGold}`,
+                padding: "0.5rem 0.875rem",
+                cursor: "pointer",
+              }}
+            >
+              {example.label}
+            </button>
+          ))}
           <button
             type="button"
             onClick={() => setShowExample((v) => !v)}

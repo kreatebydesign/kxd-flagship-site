@@ -1,6 +1,10 @@
 import type { Payload } from "payload";
 import type { ClientLaunchDraft, ClientLaunchResult } from "./types";
 import { appendImportedRawNotes } from "./append-imported-raw-notes";
+import {
+  collectWebsiteHostnames,
+  normalizeWebsiteHostname,
+} from "./match-website-host";
 import { launchClientWorkflow } from "./launch-client-workflow";
 import { prepareLaunchRecords } from "./prepare-launch-records";
 import { slugifyBusinessName } from "./slug";
@@ -13,7 +17,11 @@ export type ImportWorkflowOptions = {
   rawNotes?: string;
 };
 
-async function findExistingClient(payload: Payload, businessName: string) {
+async function findExistingClient(
+  payload: Payload,
+  businessName: string,
+  websiteUrls: (string | undefined | null)[],
+) {
   const slug = slugifyBusinessName(businessName);
   const bySlug = await payload.find({
     collection: "clients",
@@ -27,7 +35,43 @@ async function findExistingClient(payload: Payload, businessName: string) {
     where: { name: { equals: businessName.trim() } },
     limit: 1,
   });
-  return byName.docs[0] ?? null;
+  if (byName.docs[0]) return byName.docs[0];
+
+  const hostnames = collectWebsiteHostnames(websiteUrls);
+  for (const host of hostnames) {
+    const byClientWebsite = await payload.find({
+      collection: "clients",
+      where: { companyWebsite: { contains: host } },
+      limit: 20,
+    });
+    const clientMatch = byClientWebsite.docs.find(
+      (doc) => normalizeWebsiteHostname(doc.companyWebsite as string) === host,
+    );
+    if (clientMatch) return clientMatch;
+
+    const byProfileWebsite = await payload.find({
+      collection: "executive-client-profiles",
+      where: { productionUrl: { contains: host } },
+      limit: 20,
+    });
+    for (const profile of byProfileWebsite.docs) {
+      if (normalizeWebsiteHostname(profile.productionUrl as string) !== host) {
+        continue;
+      }
+      const clientId =
+        typeof profile.client === "object" && profile.client !== null
+          ? (profile.client as { id: number }).id
+          : (profile.client as number);
+      if (!clientId) continue;
+      const client = await payload.findByID({
+        collection: "clients",
+        id: clientId,
+      });
+      if (client) return client;
+    }
+  }
+
+  return null;
 }
 
 async function findExecutiveProfile(payload: Payload, clientId: number) {
@@ -98,7 +142,10 @@ export async function importClientWorkflow(
     throw new Error("Business name is required.");
   }
 
-  const existing = await findExistingClient(payload, prepared.businessName);
+  const existing = await findExistingClient(payload, prepared.businessName, [
+    draft.business.website,
+    draft.technical.productionUrl,
+  ]);
 
   if (!existing) {
     const result = await launchClientWorkflow(payload, draft, createdBy, {

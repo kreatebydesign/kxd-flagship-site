@@ -15,7 +15,7 @@ export const CUSICK_MOTORSPORTS_IMPORT_EXAMPLE: ClientLaunchDraft & {
   roadmap: ClientLaunchDraft["roadmap"] & { northStarMetric?: string };
 } = {
   business: {
-    businessName: "Cusick Motorsports",
+    businessName: "Cusick Morgan Motorsports",
     industry: "Motorsports / IndyCar / Sponsorship",
     website: "https://www.cusickmotorsports.com",
     primaryGoal: "Increase sponsorship opportunities and strengthen digital credibility.",
