@@ -35,6 +35,8 @@ const SIGNALS = [
   { label: "Brand", desc: "Typography, identity, and polish" },
 ] as const;
 
+const SIGNAL_SUMMARY = SIGNALS.map((s) => s.label).join(" · ");
+
 export default function WebsiteAuditPage() {
   const schema = [
     breadcrumbSchema([
@@ -86,60 +88,64 @@ export default function WebsiteAuditPage() {
         </div>
       </section>
 
-      <section className="kxd-container py-14 lg:py-16" style={{ maxWidth: "58rem" }}>
-        <div className="grid gap-10 lg:grid-cols-[1fr_22rem] lg:gap-12">
-          <div>
-            <p className="kxd-eyebrow" style={{ opacity: 0.65 }}>Start Your Audit</p>
-            <h2
-              className="mt-3 font-serif font-light"
-              style={{ fontSize: "clamp(1.5rem, 2.5vw, 1.875rem)", color: "var(--kxd-cream)" }}
-            >
-              Submit your website
-            </h2>
-            <p className="mt-4 font-sans font-light" style={{ fontSize: "0.875rem", color: "rgba(255,255,255,0.4)", lineHeight: 1.7 }}>
-              Enter your details and URL. KXD analyzes your homepage signals and generates a
-              scorecard with prioritized improvements.
-            </p>
-            <div
-              className="mt-8"
-              style={{
-                background: "var(--kxd-black-elevated)",
-                border: "1px solid var(--kxd-border-white)",
-                padding: "1.75rem",
-              }}
-            >
-              <WebsiteAuditForm />
+      <section
+        className="kxd-section"
+        style={{ background: "var(--kxd-black-base)" }}
+      >
+        <div className="kxd-container">
+          <div className="grid gap-8 md:gap-10 lg:grid-cols-2 lg:items-start lg:gap-x-12">
+            <div className="kxd-audit-panel">
+              <div className="kxd-audit-panel__header">
+                <p className="kxd-eyebrow" style={{ opacity: 0.65 }}>Start Your Audit</p>
+                <h2 className="kxd-audit-panel__title">Submit your website</h2>
+                <p className="kxd-audit-panel__lede">
+                  Enter your details and URL. KXD analyzes your homepage signals and generates a
+                  scorecard with prioritized improvements.
+                </p>
+              </div>
+              <div className="kxd-audit-panel__body">
+                <WebsiteAuditForm />
+              </div>
             </div>
-          </div>
 
-          <aside>
-            <p className="kxd-eyebrow" style={{ opacity: 0.65 }}>What We Measure</p>
-            <div className="mt-4 space-y-px" style={{ border: "1px solid var(--kxd-border-white)" }}>
-              {SIGNALS.map((s) => (
-                <div
-                  key={s.label}
-                  style={{
-                    background: "var(--kxd-black-elevated)",
-                    padding: "1rem 1.25rem",
-                    borderBottom: "1px solid var(--kxd-border-white)",
-                  }}
-                >
-                  <p className="font-sans uppercase" style={{ fontSize: "0.5rem", letterSpacing: "0.14em", color: "var(--kxd-gold)" }}>
-                    {s.label}
-                  </p>
-                  <p className="mt-1 font-sans font-light" style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.4)" }}>
-                    {s.desc}
-                  </p>
+            <aside className="flex flex-col gap-6">
+              <div className="kxd-audit-panel">
+                <div className="kxd-audit-panel__header">
+                  <p className="kxd-eyebrow" style={{ opacity: 0.65 }}>What We Measure</p>
+                  <p className="kxd-audit-panel__lede">{SIGNAL_SUMMARY}</p>
                 </div>
-              ))}
-            </div>
-            <p
-              className="mt-6 font-serif font-light italic"
-              style={{ fontSize: "0.9375rem", lineHeight: 1.65, color: "var(--kxd-cream-muted)" }}
-            >
-              &ldquo;This isn&rsquo;t a crawler report — it&rsquo;s a strategic snapshot built to start the right conversation.&rdquo;
-            </p>
-          </aside>
+                <div>
+                  {SIGNALS.map((s) => (
+                    <div key={s.label} className="kxd-audit-panel__signal">
+                      <p
+                        className="font-sans uppercase"
+                        style={{ fontSize: "0.5rem", letterSpacing: "0.14em", color: "var(--kxd-gold)" }}
+                      >
+                        {s.label}
+                      </p>
+                      <p
+                        className="mt-1 font-sans font-light"
+                        style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.4)" }}
+                      >
+                        {s.desc}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <p
+                className="font-serif font-light italic"
+                style={{
+                  fontSize: "0.9375rem",
+                  lineHeight: 1.65,
+                  color: "var(--kxd-cream-muted)",
+                  paddingInline: "0.125rem",
+                }}
+              >
+                &ldquo;This isn&rsquo;t a crawler report — it&rsquo;s a strategic snapshot built to start the right conversation.&rdquo;
+              </p>
+            </aside>
+          </div>
         </div>
       </section>
     </>

@@ -747,6 +747,52 @@ main {
   border: 1px solid var(--kxd-border-white);
 }
 
+/* Website audit page — matched form + signals panels */
+.kxd-audit-panel {
+  border: 1px solid var(--kxd-border-white);
+  background: linear-gradient(
+    180deg,
+    var(--kxd-black-elevated) 0%,
+    rgba(12, 12, 12, 0.98) 100%
+  );
+}
+
+.kxd-audit-panel__header {
+  padding: 1.375rem 1.5rem;
+  border-bottom: 1px solid var(--kxd-border-white);
+}
+
+.kxd-audit-panel__body {
+  padding: 1.5rem;
+}
+
+.kxd-audit-panel__signal {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--kxd-border-white);
+}
+
+.kxd-audit-panel__signal:last-child {
+  border-bottom: none;
+}
+
+.kxd-audit-panel__title {
+  margin-top: 0.75rem;
+  font-family: var(--font-serif);
+  font-size: clamp(1.375rem, 2.2vw, 1.75rem);
+  font-weight: 300;
+  line-height: 1.15;
+  color: var(--kxd-cream);
+}
+
+.kxd-audit-panel__lede {
+  margin-top: 0.875rem;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 300;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.4);
+}
+
 /* Final CTA — luxury glass finish, no project imagery */
 .kxd-final-cta {
   border-top: 1px solid var(--kxd-border-gold);
