@@ -4,6 +4,7 @@
  */
 
 export type TimelineEventType =
+  | "client-launch"
   | "website-launch"
   | "portal-launch"
   | "seo-audit"
@@ -34,6 +35,7 @@ export interface PlaceholderRoadmap {
 }
 
 const TIMELINE_TYPE_LABEL: Record<TimelineEventType, string> = {
+  "client-launch": "Client Launch",
   "website-launch": "Website Launch",
   "portal-launch": "Portal Launch",
   "seo-audit": "SEO Audit",

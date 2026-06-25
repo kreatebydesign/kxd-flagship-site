@@ -38,7 +38,7 @@ export async function fetchClientWorkspace(clientId: number): Promise<ClientWork
     return null;
   }
 
-  const [profilesR, projectsR, retainersR] = await Promise.allSettled([
+  const [profilesR, projectsR, retainersR, timelineR] = await Promise.allSettled([
     payload.find({
       collection: "executive-client-profiles",
       where: { client: { equals: clientId } },
@@ -59,6 +59,13 @@ export async function fetchClientWorkspace(clientId: number): Promise<ClientWork
       depth: 0,
       sort: "-updatedAt",
     }),
+    payload.find({
+      collection: "client-timeline-events",
+      where: { client: { equals: clientId } },
+      limit: 100,
+      depth: 0,
+      sort: "-eventDate",
+    }),
   ]);
 
   const profile =
@@ -72,8 +79,23 @@ export async function fetchClientWorkspace(clientId: number): Promise<ClientWork
   const retainers =
     retainersR.status === "fulfilled" ? (retainersR.value.docs as AnyDoc[]) : [];
 
+  const dbTimeline =
+    timelineR.status === "fulfilled" ? (timelineR.value.docs as AnyDoc[]) : [];
+
   const row = mergeClientWithExecutiveProfile(client, profile);
   const slug = row.slug;
+
+  const timelineFromDb: PlaceholderTimelineEvent[] = dbTimeline.map((e) => ({
+    id: String(e.id),
+    type: (e.eventType as PlaceholderTimelineEvent["type"]) ?? "client-milestone",
+    title: (e.title as string) || "Event",
+    summary: (e.summary as string) || "",
+    date: (e.eventDate as string) || new Date().toISOString(),
+    source: (e.source as string) || (e.createdBy as string) || undefined,
+  }));
+
+  const timeline =
+    timelineFromDb.length > 0 ? timelineFromDb : getPlaceholderTimeline(slug);
 
   const annualValue =
     calculateEstimatedAnnualValue(
@@ -92,7 +114,7 @@ export async function fetchClientWorkspace(clientId: number): Promise<ClientWork
     annualValue,
     projects,
     retainers,
-    timeline: getPlaceholderTimeline(slug),
+    timeline,
     roadmap: getPlaceholderRoadmap(slug),
     editProfileHref,
   };

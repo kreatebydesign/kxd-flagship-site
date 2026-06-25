@@ -20,6 +20,7 @@ import * as migration_20260623_phase2a_payload_preferences_rels from './20260623
 import * as migration_20260624_phase2b_junior_creator_shifts from './20260624_phase2b_junior_creator_shifts';
 import * as migration_20260625_website_audit_abuse_protection from './20260625_website_audit_abuse_protection';
 import * as migration_20260626_phase1_executive_client_profiles from './20260626_phase1_executive_client_profiles';
+import * as migration_20260627_client_launch_timeline from './20260627_client_launch_timeline';
 
 export const migrations = [
   {
@@ -131,5 +132,10 @@ export const migrations = [
     up: migration_20260626_phase1_executive_client_profiles.up,
     down: migration_20260626_phase1_executive_client_profiles.down,
     name: '20260626_phase1_executive_client_profiles',
+  },
+  {
+    up: migration_20260627_client_launch_timeline.up,
+    down: migration_20260627_client_launch_timeline.down,
+    name: '20260627_client_launch_timeline',
   },
 ];

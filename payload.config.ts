@@ -11,6 +11,7 @@ import { BrandKitAssets } from "./payload/collections/BrandKitAssets.ts";
 import { BrandKits } from "./payload/collections/BrandKits.ts";
 import { CaseStudies } from "./payload/collections/CaseStudies.ts";
 import { ClientOnboarding } from "./payload/collections/ClientOnboarding.ts";
+import { ClientTimelineEvents } from "./payload/collections/ClientTimelineEvents.ts";
 import { ClientProjects } from "./payload/collections/ClientProjects.ts";
 import { ClientRequests } from "./payload/collections/ClientRequests.ts";
 import { Clients } from "./payload/collections/Clients.ts";
@@ -112,6 +113,7 @@ export default buildConfig({
     MonthlyDeliverables,
     ClientRequests,
     ClientOnboarding,
+    ClientTimelineEvents,
     // ── Creative Engine ──────────────────────────────────────────────────────
     CreativeCampaigns,
     BrandKits,

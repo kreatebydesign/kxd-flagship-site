@@ -202,6 +202,17 @@ export default async function ExecutiveClientsPage() {
             </p>
           </div>
           <Link
+            href="/admin/operations/client-launch"
+            style={{
+              fontFamily: C.sans, fontSize: "0.6875rem", fontWeight: 500,
+              letterSpacing: "0.14em", textTransform: "uppercase" as const,
+              color: C.bgBase, background: C.gold, padding: "0.5rem 1rem",
+              textDecoration: "none",
+            }}
+          >
+            Launch Client
+          </Link>
+          <Link
             href="/admin/collections/executive-client-profiles"
             style={{
               fontFamily: C.sans, fontSize: "0.6875rem", fontWeight: 500,
