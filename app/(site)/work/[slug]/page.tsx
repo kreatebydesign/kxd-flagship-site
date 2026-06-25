@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPayload } from "payload";
 import config from "@payload-config";
-import { CASE_STUDIES, PROJECTS, type CaseStudy, type ShowcaseImage } from "@/lib/projects";
+import { CASE_STUDIES, HIDDEN_PROJECT_SLUGS, PROJECTS, type CaseStudy, type ShowcaseImage } from "@/lib/projects";
 import { ProjectCard } from "@/components/ui/ProjectCard";
 import { StructuredData } from "@/components/seo/StructuredData";
 import { buildMetadata } from "@/lib/seo/metadata";
@@ -105,6 +105,8 @@ async function fetchCaseStudy(slug: string): Promise<CaseStudy | null> {
 }
 
 async function getAllSlugs(): Promise<string[]> {
+  const visibleStaticSlugs = PROJECTS.filter((p) => !p.hidden).map((p) => p.slug);
+
   try {
     const payload = await getPayload({ config });
     const { docs } = await payload.find({
@@ -117,13 +119,14 @@ async function getAllSlugs(): Promise<string[]> {
       const payloadSlugs = (docs as unknown as Array<{ slug: string }>).map(
         (d) => d.slug,
       );
-      const staticSlugs = PROJECTS.map((p) => p.slug);
-      return [...new Set([...payloadSlugs, ...staticSlugs])];
+      return [
+        ...new Set([...payloadSlugs, ...visibleStaticSlugs]),
+      ].filter((slug) => !HIDDEN_PROJECT_SLUGS.has(slug));
     }
   } catch {
     // fall through
   }
-  return PROJECTS.map((p) => p.slug);
+  return visibleStaticSlugs;
 }
 
 // ── Next.js exports ───────────────────────────────────────────────────────────

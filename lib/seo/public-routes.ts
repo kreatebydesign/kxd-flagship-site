@@ -1,10 +1,8 @@
-import { PROJECTS } from "@/lib/projects";
+import { PUBLIC_PROJECTS } from "@/lib/projects";
 import { STATIC_INSIGHTS } from "@/lib/insights";
 
 /** Public project detail pages — excludes hidden entries (no polished imagery / portfolio fit). */
-const PUBLIC_WORK_PATHS = PROJECTS
-  .filter((p) => !p.hidden)
-  .map((p) => `/work/${p.slug}`);
+const PUBLIC_WORK_PATHS = PUBLIC_PROJECTS.map((p) => `/work/${p.slug}`);
 
 export const PUBLIC_SITEMAP_PATHS: string[] = [
   "/",

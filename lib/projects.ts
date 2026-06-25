@@ -284,8 +284,15 @@ export const PROJECTS: ProjectItem[] = [
   },
 ];
 
-export const PRIMARY_PROJECTS = PROJECTS.filter((p) => p.tier === "primary" && !p.hidden);
-export const SECONDARY_PROJECTS = PROJECTS.filter((p) => p.tier === "secondary" && !p.hidden);
+/** Portfolio entries eligible for /work grid, sitemap, and indexable detail pages. */
+export const PUBLIC_PROJECTS = PROJECTS.filter((p) => !p.hidden);
+
+export const HIDDEN_PROJECT_SLUGS = new Set(
+  PROJECTS.filter((p) => p.hidden).map((p) => p.slug),
+);
+
+export const PRIMARY_PROJECTS = PUBLIC_PROJECTS.filter((p) => p.tier === "primary");
+export const SECONDARY_PROJECTS = PUBLIC_PROJECTS.filter((p) => p.tier === "secondary");
 
 export const CASE_STUDIES: Record<string, CaseStudy> = {
   "primal-motorsports": {
