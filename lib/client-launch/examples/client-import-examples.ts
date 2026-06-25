@@ -15,6 +15,10 @@ import {
   getDcogtImportExampleJson,
   DCOGT_IMPORT_RAW_NOTES,
 } from "./dcogt-import";
+import {
+  getHairMafiaImportExampleJson,
+  HAIR_MAFIA_IMPORT_RAW_NOTES,
+} from "./hair-mafia-import";
 
 export interface ClientImportExampleEntry {
   label: string;
@@ -47,5 +51,10 @@ export const CLIENT_IMPORT_EXAMPLES: ClientImportExampleEntry[] = [
     label: "Load DCoGT Example",
     getJson: getDcogtImportExampleJson,
     rawNotes: DCOGT_IMPORT_RAW_NOTES,
+  },
+  {
+    label: "Load Hair Mafia Example",
+    getJson: getHairMafiaImportExampleJson,
+    rawNotes: HAIR_MAFIA_IMPORT_RAW_NOTES,
   },
 ];
