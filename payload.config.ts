@@ -1,5 +1,6 @@
 import path from "path";
 import { fileURLToPath } from "url";
+import { loadEnv } from "payload/node";
 import { postgresAdapter } from "@payloadcms/db-postgres";
 import { sqliteAdapter } from "@payloadcms/db-sqlite";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
@@ -13,6 +14,7 @@ import { ClientOnboarding } from "./payload/collections/ClientOnboarding.ts";
 import { ClientProjects } from "./payload/collections/ClientProjects.ts";
 import { ClientRequests } from "./payload/collections/ClientRequests.ts";
 import { Clients } from "./payload/collections/Clients.ts";
+import { ExecutiveClientProfiles } from "./payload/collections/ExecutiveClientProfiles.ts";
 import { CreativeAssets } from "./payload/collections/CreativeAssets.ts";
 import { CreativeCampaigns } from "./payload/collections/CreativeCampaigns.ts";
 import { FlyerRequests } from "./payload/collections/FlyerRequests.ts";
@@ -41,6 +43,9 @@ import { WebsiteAuditAttempts } from "./payload/collections/WebsiteAuditAttempts
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
+
+// Match Payload CLI / migrate: load .env.local before reading DATABASE_URI.
+loadEnv(dirname);
 
 // Prefer DATABASE_URI, fall back to DATABASE_URL.
 // In Vercel, DATABASE_URI must be the Neon direct (non-pooled) URL.
@@ -101,6 +106,7 @@ export default buildConfig({
     ResearchLeads,
     // ── KXD OS ───────────────────────────────────────────────────────────────
     Clients,
+    ExecutiveClientProfiles,
     Retainers,
     ClientProjects,
     MonthlyDeliverables,

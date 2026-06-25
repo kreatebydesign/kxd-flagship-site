@@ -23,11 +23,12 @@ const clients = [
     primaryContactEmail: "",
     companyWebsite: "https://primalmotorsports.com",
     brandTier: "flagship" as const,
-    monthlyRetainerAmount: null,
+    monthlyRetainerAmount: 1200,
     billingDay: null,
     nextBillingDate: null,
     relationshipStatus: "healthy" as const,
-    nextAction: "Continue platform partnership — Phase 2 scope",
+    nextAction:
+      "Follow up with Adam and Tyler for website revisions and prepare Google Ads performance/continuation recommendation before campaign ends.",
     nextActionDueDate: null,
     notes:
       "KXD's anchor flagship client. Multi-system enterprise platform: public website, driver portal, Primal OS, CRM infrastructure, enrollment systems. Ongoing development partnership.",
