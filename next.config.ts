@@ -9,6 +9,16 @@ const nextConfig: NextConfig = {
         destination: "/investment",
         permanent: true,
       },
+      {
+        source: "/accessibility-statement",
+        destination: "/contact",
+        permanent: true,
+      },
+      {
+        source: "/blank",
+        destination: "/",
+        permanent: true,
+      },
     ];
   },
   serverExternalPackages: [
@@ -31,6 +41,10 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "kreatebydesign.com",
+      },
+      {
+        protocol: "https",
+        hostname: "www.kreatebydesign.com",
       },
     ],
   },
