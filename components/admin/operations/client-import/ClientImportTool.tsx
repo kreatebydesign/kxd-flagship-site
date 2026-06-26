@@ -2,10 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { LAUNCH_C } from "@/lib/client-launch/constants";
 import { CLIENT_IMPORT_EXAMPLES } from "@/lib/client-launch/examples/client-import-examples";
 import { getCusickImportExampleJson } from "@/lib/client-launch/examples/cusick-motorsports-import";
-import { LaunchFieldLabel, LaunchPanel } from "@/components/admin/operations/client-launch/LaunchFormPrimitives";
+import {
+  LaunchFieldLabel,
+  LaunchPanel,
+} from "@/components/admin/operations/client-launch/LaunchFormPrimitives";
+import { KxdButton, KxdTextarea } from "@/components/os";
 
 type ImportSuccess = {
   success: true;
@@ -30,7 +33,10 @@ export function ClientImportTool() {
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<ImportSuccess | null>(null);
 
-  function loadExampleEntry(entry: typeof CLIENT_IMPORT_EXAMPLES[number], showCusickPreview = false) {
+  function loadExampleEntry(
+    entry: (typeof CLIENT_IMPORT_EXAMPLES)[number],
+    showCusickPreview = false,
+  ) {
     setJsonText(entry.getJson());
     setRawNotes(entry.rawNotes ?? "");
     setShowExample(showCusickPreview);
@@ -82,296 +88,114 @@ export function ClientImportTool() {
   if (result) {
     return (
       <LaunchPanel title="Import complete">
-        <p
-          style={{
-            fontFamily: LAUNCH_C.serif,
-            fontSize: "1.5rem",
-            fontWeight: 300,
-            color: LAUNCH_C.cream,
-            marginBottom: "0.75rem",
-          }}
-        >
-          {result.clientName}
-        </p>
-        <p
-          style={{
-            fontFamily: LAUNCH_C.sans,
-            fontSize: "0.875rem",
-            color: LAUNCH_C.creamMuted,
-            marginBottom: "1.5rem",
-            lineHeight: 1.6,
-          }}
-        >
+        <p className="kxd-os-title">{result.clientName}</p>
+        <p className="kxd-os-body" style={{ marginBottom: "1.5rem" }}>
           Client {result.mode === "created" ? "created" : "updated"} via KXD Client Import.
           Executive profile and timeline event recorded.
         </p>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
-          <Link
-            href={result.workspaceUrl}
-            style={{
-              fontFamily: LAUNCH_C.sans,
-              fontSize: "0.6875rem",
-              fontWeight: 500,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              color: LAUNCH_C.bgBase,
-              background: LAUNCH_C.gold,
-              padding: "0.625rem 1.125rem",
-              textDecoration: "none",
-            }}
-          >
+        <div className="kxd-os-ops-workflow-actions">
+          <Link href={result.workspaceUrl} className="kxd-os-btn kxd-os-btn--primary">
             Open Client Workspace
           </Link>
-          <button
-            type="button"
+          <KxdButton
+            variant="ghost"
             onClick={() => {
               setResult(null);
               setJsonText("");
               setRawNotes("");
             }}
-            style={{
-              fontFamily: LAUNCH_C.sans,
-              fontSize: "0.6875rem",
-              fontWeight: 500,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              color: LAUNCH_C.goldDim,
-              background: "transparent",
-              border: `1px solid ${LAUNCH_C.borderGold}`,
-              padding: "0.625rem 1.125rem",
-              cursor: "pointer",
-            }}
           >
             Import Another
-          </button>
+          </KxdButton>
         </div>
       </LaunchPanel>
     );
   }
 
   return (
-    <div style={{ display: "grid", gap: "1.25rem" }}>
+    <div className="kxd-os-ops-workflow-stack">
       <LaunchPanel title="Security">
-        <p
-          style={{
-            fontFamily: LAUNCH_C.sans,
-            fontSize: "0.8125rem",
-            color: LAUNCH_C.creamMuted,
-            lineHeight: 1.6,
-          }}
-        >
+        <p className="kxd-os-body">
           Do not paste passwords, API keys, or private credentials. Store sensitive access in
           secure storage only — reference it in login notes without secrets.
         </p>
       </LaunchPanel>
 
       <LaunchPanel title="Structured JSON">
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: "0.75rem",
-            marginBottom: "1rem",
-          }}
-        >
+        <div className="kxd-os-ops-workflow-actions" style={{ marginBottom: "1rem" }}>
           {CLIENT_IMPORT_EXAMPLES.map((example) => (
-            <button
+            <KxdButton
               key={example.label}
-              type="button"
+              variant="secondary"
+              size="sm"
               onClick={() =>
-                loadExampleEntry(
-                  example,
-                  example.label === "Load Cusick Example",
-                )
+                loadExampleEntry(example, example.label === "Load Cusick Example")
               }
-              style={{
-                fontFamily: LAUNCH_C.sans,
-                fontSize: "0.6875rem",
-                fontWeight: 500,
-                letterSpacing: "0.14em",
-                textTransform: "uppercase",
-                color: LAUNCH_C.gold,
-                background: "transparent",
-                border: `1px solid ${LAUNCH_C.borderGold}`,
-                padding: "0.5rem 0.875rem",
-                cursor: "pointer",
-              }}
             >
               {example.label}
-            </button>
+            </KxdButton>
           ))}
-          <button
-            type="button"
-            onClick={() => setShowExample((v) => !v)}
-            style={{
-              fontFamily: LAUNCH_C.sans,
-              fontSize: "0.6875rem",
-              fontWeight: 500,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              color: LAUNCH_C.goldDim,
-              background: "transparent",
-              border: `1px solid ${LAUNCH_C.border}`,
-              padding: "0.5rem 0.875rem",
-              cursor: "pointer",
-            }}
-          >
+          <KxdButton variant="ghost" size="sm" onClick={() => setShowExample((v) => !v)}>
             {showExample ? "Hide Example" : "Show Example Structure"}
-          </button>
+          </KxdButton>
         </div>
 
-        {showExample && (
-          <pre
-            style={{
-              fontFamily: "ui-monospace, monospace",
-              fontSize: "0.6875rem",
-              color: LAUNCH_C.creamMuted,
-              background: LAUNCH_C.bgBase,
-              border: `1px solid ${LAUNCH_C.border}`,
-              padding: "1rem",
-              marginBottom: "1rem",
-              overflow: "auto",
-              maxHeight: "14rem",
-              lineHeight: 1.5,
-            }}
-          >
-            {getCusickImportExampleJson()}
-          </pre>
-        )}
+        {showExample && <pre className="kxd-os-ops-pre">{getCusickImportExampleJson()}</pre>}
 
         <div style={{ marginBottom: "1.25rem" }}>
           <LaunchFieldLabel>Raw notes (optional)</LaunchFieldLabel>
-          <p
-            style={{
-              fontFamily: LAUNCH_C.sans,
-              fontSize: "0.8125rem",
-              color: LAUNCH_C.creamMuted,
-              lineHeight: 1.6,
-              marginBottom: "0.625rem",
-            }}
-          >
-            Paste messy notes here for reference. Structured JSON below controls the actual
-            client import.
+          <p className="kxd-os-body" style={{ marginBottom: "0.625rem" }}>
+            Paste messy notes here for reference. Structured JSON below controls the actual client
+            import.
           </p>
-          <textarea
+          <KxdTextarea
             value={rawNotes}
             onChange={(e) => setRawNotes(e.target.value)}
             placeholder="Discovery notes, call summaries, conversation context…"
             rows={6}
-            style={{
-              width: "100%",
-              fontFamily: LAUNCH_C.sans,
-              fontSize: "0.8125rem",
-              color: LAUNCH_C.cream,
-              background: LAUNCH_C.bgBase,
-              border: `1px solid ${LAUNCH_C.border}`,
-              padding: "0.875rem 1rem",
-              outline: "none",
-              resize: "vertical",
-              lineHeight: 1.55,
-            }}
           />
         </div>
 
         <LaunchFieldLabel>Client import JSON</LaunchFieldLabel>
-        <textarea
+        <KxdTextarea
+          className="kxd-os-textarea--mono"
           value={jsonText}
           onChange={(e) => setJsonText(e.target.value)}
           placeholder='{ "business": { "businessName": "..." }, "contacts": { ... }, ... }'
           rows={18}
-          style={{
-            width: "100%",
-            fontFamily: "ui-monospace, monospace",
-            fontSize: "0.8125rem",
-            color: LAUNCH_C.cream,
-            background: LAUNCH_C.bgBase,
-            border: `1px solid ${LAUNCH_C.border}`,
-            padding: "1rem",
-            outline: "none",
-            resize: "vertical",
-            lineHeight: 1.55,
-          }}
         />
 
         {(errors.length > 0 || message) && (
-          <div
-            style={{
-              marginTop: "1rem",
-              padding: "0.875rem 1rem",
-              border: `1px solid ${LAUNCH_C.red}`,
-              background: "rgba(210,90,90,0.08)",
-            }}
-          >
-            {message && (
-              <p
-                style={{
-                  fontFamily: LAUNCH_C.sans,
-                  fontSize: "0.8125rem",
-                  color: LAUNCH_C.red,
-                  marginBottom: errors.length ? "0.5rem" : 0,
-                }}
-              >
-                {message}
-              </p>
-            )}
+          <div className="kxd-os-ops-alert kxd-os-ops-alert--error" style={{ marginTop: "1rem" }}>
+            {message && <p>{message}</p>}
             {errors.map((err) => (
-              <p
-                key={err}
-                style={{
-                  fontFamily: LAUNCH_C.sans,
-                  fontSize: "0.8125rem",
-                  color: LAUNCH_C.red,
-                  lineHeight: 1.5,
-                }}
-              >
-                {err}
-              </p>
+              <p key={err}>{err}</p>
             ))}
           </div>
         )}
 
         <div style={{ marginTop: "1.25rem" }}>
-          <button
-            type="button"
+          <KxdButton
             onClick={handleSubmit}
             disabled={submitting || !jsonText.trim()}
-            style={{
-              fontFamily: LAUNCH_C.sans,
-              fontSize: "0.6875rem",
-              fontWeight: 500,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              color: LAUNCH_C.bgBase,
-              background: submitting ? LAUNCH_C.goldDim : LAUNCH_C.gold,
-              border: "none",
-              padding: "0.625rem 1.25rem",
-              cursor: submitting || !jsonText.trim() ? "not-allowed" : "pointer",
-              opacity: submitting || !jsonText.trim() ? 0.65 : 1,
-            }}
+            loading={submitting}
           >
             {submitting ? "Importing…" : "Import Client"}
-          </button>
+          </KxdButton>
         </div>
       </LaunchPanel>
 
       <LaunchPanel title="Sections">
-        <p
-          style={{
-            fontFamily: LAUNCH_C.sans,
-            fontSize: "0.8125rem",
-            color: LAUNCH_C.creamMuted,
-            lineHeight: 1.7,
-          }}
-        >
+        <p className="kxd-os-body" style={{ lineHeight: 1.7 }}>
           JSON should include the same sections as Client Launch:{" "}
-          <code style={{ color: LAUNCH_C.gold }}>business</code>,{" "}
-          <code style={{ color: LAUNCH_C.gold }}>contacts</code>,{" "}
-          <code style={{ color: LAUNCH_C.gold }}>financial</code>,{" "}
-          <code style={{ color: LAUNCH_C.gold }}>services</code>,{" "}
-          <code style={{ color: LAUNCH_C.gold }}>technical</code>,{" "}
-          <code style={{ color: LAUNCH_C.gold }}>executive</code>, and{" "}
-          <code style={{ color: LAUNCH_C.gold }}>roadmap</code>. Existing clients
-          match by slug or business name and are updated safely.
+          <code className="kxd-os-ops-code">business</code>,{" "}
+          <code className="kxd-os-ops-code">contacts</code>,{" "}
+          <code className="kxd-os-ops-code">financial</code>,{" "}
+          <code className="kxd-os-ops-code">services</code>,{" "}
+          <code className="kxd-os-ops-code">technical</code>,{" "}
+          <code className="kxd-os-ops-code">executive</code>, and{" "}
+          <code className="kxd-os-ops-code">roadmap</code>. Existing clients match by slug or
+          business name and are updated safely.
         </p>
       </LaunchPanel>
     </div>

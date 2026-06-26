@@ -2,22 +2,22 @@ import Link from "next/link";
 import {
   EXECUTIVE_PRIORITY_LABEL,
   EXECUTIVE_STATUS_LABEL,
-  EXECUTIVE_TIER_LABEL,
   fmtExecutiveMoney,
 } from "@/lib/executive-client-profile";
 import type { ClientWorkspaceData } from "@/lib/executive-client-workspace/fetch-client-workspace";
 import { MARKETING_MODULE_SECTIONS, timelineTypeLabel } from "@/lib/executive-client-workspace/placeholders";
 import { fmtWorkspaceDate, splitLines } from "@/lib/executive-client-workspace/theme";
 import {
+  WorkspaceChapter,
   WorkspaceKpiGrid,
   WorkspaceList,
-  WorkspaceMetaRow,
-  WorkspacePanel,
+  WorkspaceMetaLine,
   WorkspacePlaceholderBadge,
   WorkspaceProse,
   WorkspaceFormattedText,
   WorkspaceExecutiveNotes,
-  WorkspaceLabel,
+  WorkspaceStat,
+  WorkspaceStatRow,
 } from "./WorkspacePrimitives";
 
 function statusLabelFromClient(client: ClientWorkspaceData["client"]): string {
@@ -33,74 +33,79 @@ export function OverviewTab({ data }: { data: ClientWorkspaceData }) {
   const { client, profile, row, annualValue } = data;
 
   return (
-    <div className="space-y-6">
-      <WorkspaceKpiGrid
-        items={[
-          {
-            label: "Tier",
-            value: row.tier ? EXECUTIVE_TIER_LABEL[row.tier] : row.brandTier ?? "—",
-          },
-          { label: "Monthly Revenue", value: fmtExecutiveMoney(row.monthlyRevenue) },
-          { label: "Est. Annual Value", value: fmtExecutiveMoney(annualValue) },
-          { label: "Potential MRR", value: fmtExecutiveMoney(row.potentialMonthlyRevenue) },
-        ]}
-      />
+    <div className="kxd-os-workspace-dossier">
+      <WorkspaceChapter title="Executive summary">
+        <WorkspaceFormattedText
+          text={
+            (profile?.executiveSummary as string) ||
+            (client.notes as string) ||
+            "No executive summary recorded."
+          }
+        />
+      </WorkspaceChapter>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <WorkspacePanel title="Executive Summary">
-          <WorkspaceFormattedText
-            text={
-              (profile?.executiveSummary as string) ||
-              (client.notes as string) ||
-              "No executive summary recorded."
-            }
-          />
-        </WorkspacePanel>
-
-        <WorkspacePanel title="Revenue Snapshot">
-          <WorkspaceMetaRow label="Current MRR" value={fmtExecutiveMoney(row.monthlyRevenue)} />
-          <WorkspaceMetaRow label="Est. Annual Value" value={fmtExecutiveMoney(annualValue)} />
-          <WorkspaceMetaRow
-            label="Potential MRR"
-            value={fmtExecutiveMoney(row.potentialMonthlyRevenue)}
-          />
-        </WorkspacePanel>
-
-        <WorkspacePanel title="Relationship & Priority">
-          <WorkspaceMetaRow
-            label="Health Score"
-            value={row.healthScore != null ? String(row.healthScore) : "—"}
-          />
-          <WorkspaceMetaRow
-            label="Status"
-            value={
-              row.relationshipStatus
-                ? EXECUTIVE_STATUS_LABEL[row.relationshipStatus]
-                : statusLabelFromClient(client)
-            }
-          />
-          <WorkspaceMetaRow
-            label="Internal Priority"
-            value={
-              row.internalPriority ? EXECUTIVE_PRIORITY_LABEL[row.internalPriority] : "—"
-            }
-          />
-          {profile?.primaryDecisionMaker && (
-            <div style={{ marginTop: "0.75rem" }}>
-              <WorkspaceProse>{profile.primaryDecisionMaker as string}</WorkspaceProse>
-            </div>
-          )}
-        </WorkspacePanel>
-
-        <WorkspacePanel title="Next Action">
-          <WorkspaceFormattedText text={row.nextAction ?? "No next action set."} />
-          <div style={{ marginTop: "0.75rem" }}>
-            <WorkspaceMetaRow label="Due Date" value={fmtWorkspaceDate(row.nextActionDueDate)} />
+      <div className="kxd-os-workspace-dossier-columns">
+        <WorkspaceChapter title="Relationship" variant="compact">
+          <WorkspaceStatRow>
+            <WorkspaceStat
+              label="Health"
+              value={row.healthScore != null ? String(row.healthScore) : "—"}
+              prominence="large"
+            />
+            <WorkspaceStat
+              label="Status"
+              value={
+                row.relationshipStatus
+                  ? EXECUTIVE_STATUS_LABEL[row.relationshipStatus]
+                  : statusLabelFromClient(client)
+              }
+            />
+          </WorkspaceStatRow>
+          <div className="kxd-os-workspace-meta-stack">
+            <WorkspaceMetaLine
+              label="Internal priority"
+              value={
+                row.internalPriority ? EXECUTIVE_PRIORITY_LABEL[row.internalPriority] : "—"
+              }
+            />
+            {profile?.primaryDecisionMaker && (
+              <WorkspaceMetaLine
+                label="Decision maker"
+                value={profile.primaryDecisionMaker as string}
+              />
+            )}
           </div>
-        </WorkspacePanel>
+        </WorkspaceChapter>
+
+        <WorkspaceChapter title="Revenue" variant="compact">
+          <WorkspaceStat
+            label="Monthly revenue"
+            value={fmtExecutiveMoney(row.monthlyRevenue)}
+            prominence="hero"
+          />
+          <div className="kxd-os-workspace-meta-stack">
+            <WorkspaceMetaLine
+              label="Estimated annual"
+              value={fmtExecutiveMoney(annualValue)}
+            />
+            <WorkspaceMetaLine
+              label="Growth potential"
+              value={fmtExecutiveMoney(row.potentialMonthlyRevenue)}
+            />
+          </div>
+        </WorkspaceChapter>
       </div>
 
-      <WorkspacePanel title="Executive Notes">
+      <WorkspaceChapter title="Next action">
+        <WorkspaceFormattedText text={row.nextAction ?? "No next action set."} />
+        {row.nextActionDueDate && (
+          <p className="kxd-os-workspace-chapter__aside">
+            Due {fmtWorkspaceDate(row.nextActionDueDate)}
+          </p>
+        )}
+      </WorkspaceChapter>
+
+      <WorkspaceChapter title="Strategic notes">
         <WorkspaceExecutiveNotes
           text={
             (profile?.strategicNotes as string) ||
@@ -109,20 +114,12 @@ export function OverviewTab({ data }: { data: ClientWorkspaceData }) {
           }
         />
         {profile?.riskNotes && (
-          <div
-            style={{
-              marginTop: "1.125rem",
-              paddingTop: "0.875rem",
-              borderTop: `1px solid rgba(255,255,255,0.08)`,
-            }}
-          >
-            <WorkspaceLabel style={{ marginBottom: "0.5rem", color: "rgba(201,169,98,0.55)" }}>
-              Risk context
-            </WorkspaceLabel>
+          <div className="kxd-os-workspace-risk">
+            <p className="kxd-os-workspace-risk__label">Risk context</p>
             <WorkspaceFormattedText text={profile.riskNotes as string} />
           </div>
         )}
-      </WorkspacePanel>
+      </WorkspaceChapter>
     </div>
   );
 }
@@ -132,89 +129,39 @@ export function TimelineTab({ data }: { data: ClientWorkspaceData }) {
 
   if (events.length === 0) {
     return (
-      <WorkspacePanel
-        title="Activity Timeline"
-        action={<span style={{ fontSize: "0.625rem", color: "rgba(255,255,255,0.3)" }}>Phase 2 — placeholder</span>}
-      >
+      <WorkspaceChapter title="Timeline">
         <WorkspaceProse>
           Chronological client activity will populate here from deployments, invoices, meetings,
           marketing events, and milestones. No timeline events seeded for this client yet.
         </WorkspaceProse>
-      </WorkspacePanel>
+      </WorkspaceChapter>
     );
   }
 
   return (
-    <WorkspacePanel title="Activity Timeline">
-      <div className="space-y-0">
+    <WorkspaceChapter title="Timeline">
+      <ol className="kxd-os-workspace-timeline">
         {events
           .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-          .map((event, index) => (
-            <div
-              key={event.id}
-              style={{
-                display: "grid",
-                gridTemplateColumns: "7rem 1fr",
-                gap: "1rem",
-                padding: "1rem 0",
-                borderBottom:
-                  index < events.length - 1 ? `1px solid rgba(255,255,255,0.08)` : "none",
-              }}
-            >
-              <div>
-                <p
-                  style={{
-                    fontFamily: "var(--font-outfit, sans-serif)",
-                    fontSize: "0.6875rem",
-                    color: "rgba(255,255,255,0.35)",
-                    letterSpacing: "0.06em",
-                  }}
-                >
-                  {fmtWorkspaceDate(event.date)}
-                </p>
-                <p
-                  style={{
-                    fontFamily: "var(--font-outfit, sans-serif)",
-                    fontSize: "0.5625rem",
-                    fontWeight: 600,
-                    letterSpacing: "0.12em",
-                    textTransform: "uppercase",
-                    color: "#C9A962",
-                    marginTop: "0.375rem",
-                  }}
-                >
+          .map((event) => (
+            <li key={event.id} className="kxd-os-workspace-timeline__item">
+              <div className="kxd-os-workspace-timeline__date">
+                <time>{fmtWorkspaceDate(event.date)}</time>
+                <span className="kxd-os-workspace-timeline__type">
                   {timelineTypeLabel(event.type)}
-                </p>
+                </span>
               </div>
-              <div>
-                <p
-                  style={{
-                    fontFamily: "var(--font-cormorant, serif)",
-                    fontWeight: 300,
-                    fontSize: "1.0625rem",
-                    color: "#F5F1E8",
-                  }}
-                >
-                  {event.title}
-                </p>
+              <div className="kxd-os-workspace-timeline__body">
+                <p className="kxd-os-workspace-timeline__title">{event.title}</p>
                 <WorkspaceProse>{event.summary}</WorkspaceProse>
                 {event.source && (
-                  <p
-                    style={{
-                      fontFamily: "var(--font-outfit, sans-serif)",
-                      fontSize: "0.6875rem",
-                      color: "rgba(255,255,255,0.25)",
-                      marginTop: "0.375rem",
-                    }}
-                  >
-                    Source: {event.source}
-                  </p>
+                  <p className="kxd-os-workspace-timeline__source">Source: {event.source}</p>
                 )}
               </div>
-            </div>
+            </li>
           ))}
-      </div>
-    </WorkspacePanel>
+      </ol>
+    </WorkspaceChapter>
   );
 }
 
@@ -233,97 +180,55 @@ export function ProjectsTab({ data }: { data: ClientWorkspaceData }) {
 
   if (projects.length === 0) {
     return (
-      <WorkspacePanel title="Linked Projects">
+      <WorkspaceChapter title="Projects">
         <WorkspaceProse>
           No linked projects yet. Delivery projects from Client Projects will appear here when
           linked to this client.
         </WorkspaceProse>
         <Link
           href="/admin/collections/client-projects"
-          style={{
-            display: "inline-block",
-            marginTop: "1rem",
-            fontFamily: "var(--font-outfit, sans-serif)",
-            fontSize: "0.6875rem",
-            fontWeight: 500,
-            letterSpacing: "0.14em",
-            textTransform: "uppercase",
-            color: "rgba(201,169,98,0.55)",
-            textDecoration: "none",
-          }}
+          className="kxd-os-link-quiet kxd-os-workspace-inline-link"
         >
-          Open Client Projects →
+          Open client projects
         </Link>
-      </WorkspacePanel>
+      </WorkspaceChapter>
     );
   }
 
   return (
-    <WorkspacePanel title="Linked Projects">
-      <div className="space-y-3">
+    <WorkspaceChapter title="Projects">
+      <ul className="kxd-os-workspace-project-list">
         {projects.map((project) => (
-          <div
-            key={project.id as number}
-            style={{
-              border: `1px solid rgba(255,255,255,0.08)`,
-              padding: "1rem 1.125rem",
-              background: "rgba(255,255,255,0.02)",
-            }}
-          >
-            <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <p
-                style={{
-                  fontFamily: "var(--font-cormorant, serif)",
-                  fontWeight: 300,
-                  fontSize: "1.0625rem",
-                  color: "#F5F1E8",
-                }}
-              >
-                {project.projectName as string}
-              </p>
-              <span
-                style={{
-                  fontFamily: "var(--font-outfit, sans-serif)",
-                  fontSize: "0.5625rem",
-                  fontWeight: 600,
-                  letterSpacing: "0.12em",
-                  textTransform: "uppercase",
-                  color: "#C9A962",
-                }}
-              >
+          <li key={project.id as number} className="kxd-os-workspace-project">
+            <div className="kxd-os-workspace-project__head">
+              <p className="kxd-os-workspace-project__name">{project.projectName as string}</p>
+              <span className="kxd-os-workspace-badge">
                 {PROJECT_STATUS_LABEL[project.status as string] ?? project.status}
               </span>
             </div>
-            <WorkspaceMetaRow
-              label="Type"
-              value={(project.projectType as string)?.replace(/-/g, " ") ?? "—"}
-            />
-            <WorkspaceMetaRow
-              label="Target Launch"
-              value={fmtWorkspaceDate(project.targetLaunchDate as string)}
-            />
-            {project.nextAction && (
-              <WorkspaceMetaRow label="Next Action" value={project.nextAction as string} />
-            )}
+            <div className="kxd-os-workspace-meta-stack">
+              <WorkspaceMetaLine
+                label="Type"
+                value={(project.projectType as string)?.replace(/-/g, " ") ?? "—"}
+              />
+              <WorkspaceMetaLine
+                label="Target launch"
+                value={fmtWorkspaceDate(project.targetLaunchDate as string)}
+              />
+              {project.nextAction && (
+                <WorkspaceMetaLine label="Next action" value={project.nextAction as string} />
+              )}
+            </div>
             <Link
               href={`/admin/collections/client-projects/${project.id}`}
-              style={{
-                fontFamily: "var(--font-outfit, sans-serif)",
-                fontSize: "0.625rem",
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                color: "rgba(201,169,98,0.55)",
-                textDecoration: "none",
-                marginTop: "0.5rem",
-                display: "inline-block",
-              }}
+              className="kxd-os-link-quiet kxd-os-workspace-inline-link"
             >
-              Edit in Payload →
+              Edit in Payload
             </Link>
-          </div>
+          </li>
         ))}
-      </div>
-    </WorkspacePanel>
+      </ul>
+    </WorkspaceChapter>
   );
 }
 
@@ -335,23 +240,21 @@ export function ServicesTab({ data }: { data: ClientWorkspaceData }) {
     .filter((line) => /completed|launched|live/i.test(line));
 
   return (
-    <div className="grid gap-6 lg:grid-cols-3">
-      <WorkspacePanel title="Current Recurring">
+    <div className="kxd-os-workspace-dossier-columns kxd-os-workspace-dossier-columns--triple">
+      <WorkspaceChapter title="Current" variant="compact">
         {currentLines.length > 0 ? (
           <WorkspaceList items={currentLines} />
         ) : (
           <WorkspaceProse>No recurring services documented in executive profile.</WorkspaceProse>
         )}
         {retainers.length > 0 && (
-          <div style={{ marginTop: "1rem" }}>
-            <WorkspaceProse>
-              {retainers.length} retainer agreement(s) in Retainers collection.
-            </WorkspaceProse>
-          </div>
+          <p className="kxd-os-workspace-chapter__aside">
+            {retainers.length} retainer agreement{retainers.length === 1 ? "" : "s"} on file
+          </p>
         )}
-      </WorkspacePanel>
+      </WorkspaceChapter>
 
-      <WorkspacePanel title="Future Services">
+      <WorkspaceChapter title="Future" variant="compact">
         {futureLines.length > 0 ? (
           <WorkspaceList items={futureLines} />
         ) : (
@@ -359,9 +262,9 @@ export function ServicesTab({ data }: { data: ClientWorkspaceData }) {
             Future service opportunities will surface from growth and upsell fields.
           </WorkspaceProse>
         )}
-      </WorkspacePanel>
+      </WorkspaceChapter>
 
-      <WorkspacePanel title="Completed">
+      <WorkspaceChapter title="Completed" variant="compact">
         {completedLines.length > 0 ? (
           <WorkspaceList items={completedLines} />
         ) : (
@@ -369,7 +272,7 @@ export function ServicesTab({ data }: { data: ClientWorkspaceData }) {
             Completed deliverables will link from Monthly Deliverables and project launches.
           </WorkspaceProse>
         )}
-      </WorkspacePanel>
+      </WorkspaceChapter>
     </div>
   );
 }
@@ -379,42 +282,43 @@ export function TechnicalTab({ data }: { data: ClientWorkspaceData }) {
   const links = (profile?.importantLinks as Array<{ label?: string; url?: string }>) ?? [];
 
   return (
-    <div className="grid gap-6 lg:grid-cols-2">
-      <WorkspacePanel title="Infrastructure">
-        <WorkspaceMetaRow label="Production URL" value={(profile?.productionUrl as string) || "—"} />
-        <WorkspaceMetaRow label="Staging URL" value={(profile?.stagingUrl as string) || "—"} />
-        <WorkspaceMetaRow label="GitHub Repository" value={(profile?.githubRepo as string) || "—"} />
-        <WorkspaceMetaRow label="Vercel Project" value={(profile?.vercelProject as string) || "—"} />
-        <WorkspaceMetaRow label="Domain Registrar" value={(profile?.domainRegistrar as string) || "—"} />
-        <WorkspaceMetaRow label="DNS Provider" value={(profile?.dnsProvider as string) || "—"} />
-      </WorkspacePanel>
+    <div className="kxd-os-workspace-dossier-columns">
+      <WorkspaceChapter title="Infrastructure" variant="compact">
+        <div className="kxd-os-workspace-meta-stack">
+          <WorkspaceMetaLine label="Production" value={(profile?.productionUrl as string) || "—"} />
+          <WorkspaceMetaLine label="Staging" value={(profile?.stagingUrl as string) || "—"} />
+          <WorkspaceMetaLine label="GitHub" value={(profile?.githubRepo as string) || "—"} />
+          <WorkspaceMetaLine label="Vercel" value={(profile?.vercelProject as string) || "—"} />
+          <WorkspaceMetaLine label="Registrar" value={(profile?.domainRegistrar as string) || "—"} />
+          <WorkspaceMetaLine label="DNS" value={(profile?.dnsProvider as string) || "—"} />
+        </div>
+      </WorkspaceChapter>
 
-      <WorkspacePanel title="Platforms & Integrations">
-        <WorkspaceMetaRow label="Google Workspace" value={(profile?.workspaceStatus as string) || "—"} />
-        <WorkspaceMetaRow label="Analytics" value={(profile?.analyticsStatus as string) || "—"} />
-        <WorkspaceMetaRow
-          label="Search Console"
-          value={(profile?.searchConsoleStatus as string) || "—"}
-        />
+      <WorkspaceChapter title="Platforms" variant="compact">
+        <div className="kxd-os-workspace-meta-stack">
+          <WorkspaceMetaLine label="Google Workspace" value={(profile?.workspaceStatus as string) || "—"} />
+          <WorkspaceMetaLine label="Analytics" value={(profile?.analyticsStatus as string) || "—"} />
+          <WorkspaceMetaLine
+            label="Search Console"
+            value={(profile?.searchConsoleStatus as string) || "—"}
+          />
+        </div>
         {profile?.apiIntegrations && (
-          <div style={{ marginTop: "0.875rem" }}>
+          <div className="kxd-os-workspace-chapter__aside">
             <WorkspaceProse>{profile.apiIntegrations as string}</WorkspaceProse>
           </div>
         )}
         {profile?.loginNotesReference && (
-          <div style={{ marginTop: "1rem" }}>
-            <WorkspaceProse>
-              <strong style={{ color: "rgba(255,255,255,0.45)" }}>Secure references: </strong>
-              {profile.loginNotesReference as string}
-            </WorkspaceProse>
+          <div className="kxd-os-workspace-chapter__aside">
+            <WorkspaceProse>Secure references: {profile.loginNotesReference as string}</WorkspaceProse>
           </div>
         )}
-      </WorkspacePanel>
+      </WorkspaceChapter>
 
       {links.length > 0 && (
-        <WorkspacePanel title="Important Links">
+        <WorkspaceChapter title="Links" variant="compact">
           <WorkspaceList items={links.map((l) => `${l.label ?? "Link"}: ${l.url ?? ""}`)} />
-        </WorkspacePanel>
+        </WorkspaceChapter>
       )}
     </div>
   );
@@ -422,38 +326,21 @@ export function TechnicalTab({ data }: { data: ClientWorkspaceData }) {
 
 export function MarketingTab() {
   return (
-    <WorkspacePanel title="Marketing Intelligence">
+    <WorkspaceChapter title="Marketing">
       <WorkspaceProse>
         Marketing modules will connect to SEO tooling, Google Ads, email campaigns, reviews,
-        and analytics pipelines. Placeholder structure below.
+        and analytics pipelines.
       </WorkspaceProse>
-      <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <ul className="kxd-os-workspace-marketing-grid">
         {MARKETING_MODULE_SECTIONS.map((section) => (
-          <div
-            key={section}
-            style={{
-              border: `1px solid rgba(201,169,98,0.16)`,
-              padding: "1rem 1.125rem",
-              background: "rgba(255,255,255,0.02)",
-            }}
-          >
+          <li key={section} className="kxd-os-workspace-marketing-card">
             <WorkspacePlaceholderBadge label="Coming soon" />
-            <p
-              style={{
-                fontFamily: "var(--font-cormorant, serif)",
-                fontWeight: 300,
-                fontSize: "1rem",
-                color: "#F5F1E8",
-                marginTop: "0.625rem",
-              }}
-            >
-              {section}
-            </p>
+            <p className="kxd-os-workspace-marketing-card__title">{section}</p>
             <WorkspaceProse>Future integration point.</WorkspaceProse>
-          </div>
+          </li>
         ))}
-      </div>
-    </WorkspacePanel>
+      </ul>
+    </WorkspaceChapter>
   );
 }
 
@@ -464,34 +351,32 @@ export function RevenueTab({ data }: { data: ClientWorkspaceData }) {
   const growthDelta = potential > monthly ? potential - monthly : 0;
 
   return (
-    <div className="space-y-6">
+    <div className="kxd-os-workspace-dossier">
       <WorkspaceKpiGrid
         items={[
-          { label: "Current Monthly Revenue", value: fmtExecutiveMoney(row.monthlyRevenue) },
-          { label: "Estimated Annual Revenue", value: fmtExecutiveMoney(annualValue) },
-          { label: "Potential Monthly Revenue", value: fmtExecutiveMoney(row.potentialMonthlyRevenue) },
+          { label: "Monthly revenue", value: fmtExecutiveMoney(row.monthlyRevenue) },
+          { label: "Annual estimate", value: fmtExecutiveMoney(annualValue) },
+          { label: "Potential monthly", value: fmtExecutiveMoney(row.potentialMonthlyRevenue) },
           {
-            label: "Growth Opportunity",
+            label: "Growth opportunity",
             value: growthDelta > 0 ? fmtExecutiveMoney(growthDelta) : "—",
           },
         ]}
       />
 
-      <WorkspacePanel title="Revenue Growth Card">
+      <WorkspaceChapter title="Growth outlook">
         <WorkspaceProse>
           {growthDelta > 0
             ? `Identified monthly expansion opportunity of ${fmtExecutiveMoney(growthDelta)} above current tracked revenue. Detailed charts and MRR history will connect from Retainers and billing intelligence in a future phase.`
             : "Track retainer growth and expansion opportunities as executive profiles and Retainers data are enriched."}
         </WorkspaceProse>
         {data.retainers.length > 0 && (
-          <div style={{ marginTop: "1rem" }}>
-            <WorkspaceMetaRow
-              label="Linked Retainers"
-              value={`${data.retainers.length} agreement(s)`}
-            />
-          </div>
+          <p className="kxd-os-workspace-chapter__aside">
+            {data.retainers.length} linked retainer agreement
+            {data.retainers.length === 1 ? "" : "s"}
+          </p>
         )}
-      </WorkspacePanel>
+      </WorkspaceChapter>
     </div>
   );
 }
@@ -502,59 +387,46 @@ export function OpportunitiesTab({ data }: { data: ClientWorkspaceData }) {
   const upsellLines = splitLines(profile?.upsellOpportunities as string);
 
   return (
-    <div className="grid gap-6 lg:grid-cols-2">
-      <WorkspacePanel title="Upsells">
-        {upsellLines.length > 0 ? (
-          <WorkspaceList items={upsellLines} />
-        ) : (
-          <WorkspaceProse>No upsell opportunities documented.</WorkspaceProse>
-        )}
-      </WorkspacePanel>
+    <div className="kxd-os-workspace-dossier">
+      <div className="kxd-os-workspace-dossier-columns">
+        <WorkspaceChapter title="Upsells" variant="compact">
+          {upsellLines.length > 0 ? (
+            <WorkspaceList items={upsellLines} />
+          ) : (
+            <WorkspaceProse>No upsell opportunities documented.</WorkspaceProse>
+          )}
+        </WorkspaceChapter>
 
-      <WorkspacePanel title="Expansion Ideas">
-        {expansionLines.length > 0 ? (
-          <WorkspaceList items={expansionLines} />
-        ) : (
-          <WorkspaceProse>No growth opportunities documented.</WorkspaceProse>
-        )}
-      </WorkspacePanel>
+        <WorkspaceChapter title="Expansion" variant="compact">
+          {expansionLines.length > 0 ? (
+            <WorkspaceList items={expansionLines} />
+          ) : (
+            <WorkspaceProse>No growth opportunities documented.</WorkspaceProse>
+          )}
+        </WorkspaceChapter>
+      </div>
 
-      <WorkspacePanel title="Productization & Referral">
-        <div className="grid gap-3 sm:grid-cols-3">
+      <WorkspaceChapter title="Potential">
+        <ul className="kxd-os-workspace-potential-grid">
           {[
-            { label: "Case Study", value: profile?.caseStudyPotential },
+            { label: "Case study", value: profile?.caseStudyPotential },
             { label: "Referral", value: profile?.referralPotential },
             { label: "Productization", value: profile?.productizationPotential },
           ].map((item) => (
-            <div
-              key={item.label}
-              style={{
-                border: `1px solid rgba(201,169,98,0.16)`,
-                padding: "0.875rem",
-                background: "rgba(255,255,255,0.02)",
-              }}
-            >
+            <li key={item.label} className="kxd-os-workspace-potential-card">
               <WorkspacePlaceholderBadge label={item.label} />
-              <p
-                style={{
-                  fontFamily: "var(--font-outfit, sans-serif)",
-                  fontSize: "0.8125rem",
-                  color: "#C9A962",
-                  marginTop: "0.5rem",
-                  textTransform: "capitalize",
-                }}
-              >
+              <p className="kxd-os-workspace-potential-card__value">
                 {(item.value as string) || "—"}
               </p>
-            </div>
+            </li>
           ))}
-        </div>
-      </WorkspacePanel>
+        </ul>
+      </WorkspaceChapter>
 
       {profile?.riskNotes && (
-        <WorkspacePanel title="Risk Context">
+        <WorkspaceChapter title="Risk Context">
           <WorkspaceProse>{profile.riskNotes as string}</WorkspaceProse>
-        </WorkspacePanel>
+        </WorkspaceChapter>
       )}
     </div>
   );
@@ -562,20 +434,12 @@ export function OpportunitiesTab({ data }: { data: ClientWorkspaceData }) {
 
 function RoadmapColumn({ title, items }: { title: string; items: string[] }) {
   return (
-    <div
-      style={{
-        border: `1px solid rgba(255,255,255,0.08)`,
-        padding: "1rem 1.125rem",
-        background: "rgba(255,255,255,0.02)",
-      }}
-    >
+    <div className="kxd-os-workspace-roadmap-col">
       <WorkspacePlaceholderBadge label={title} />
       {items.length > 0 ? (
         <WorkspaceList items={items} />
       ) : (
-        <div style={{ marginTop: "0.75rem" }}>
-          <WorkspaceProse>Nothing listed yet.</WorkspaceProse>
-        </div>
+        <WorkspaceProse>Nothing listed yet.</WorkspaceProse>
       )}
     </div>
   );
@@ -586,24 +450,24 @@ export function RoadmapTab({ data }: { data: ClientWorkspaceData }) {
 
   if (!roadmap) {
     return (
-      <WorkspacePanel title="Strategic Roadmap">
+      <WorkspaceChapter title="Roadmap">
         <WorkspaceProse>
           Ordered roadmap items will appear here per client. Seed roadmap data in workspace
           placeholders or a future Roadmap collection.
         </WorkspaceProse>
-      </WorkspacePanel>
+      </WorkspaceChapter>
     );
   }
 
   return (
-    <WorkspacePanel title="Strategic Roadmap">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <WorkspaceChapter title="Roadmap">
+      <div className="kxd-os-workspace-roadmap-grid">
         <RoadmapColumn title="Current" items={roadmap.current} />
         <RoadmapColumn title="Next" items={roadmap.next} />
         <RoadmapColumn title="Future" items={roadmap.future} />
         <RoadmapColumn title="Completed" items={roadmap.completed} />
       </div>
-    </WorkspacePanel>
+    </WorkspaceChapter>
   );
 }
 
@@ -613,25 +477,19 @@ export function NotesTab({ data }: { data: ClientWorkspaceData }) {
   const summary = profile?.executiveSummary as string;
 
   return (
-    <div className="space-y-6">
-      <WorkspacePanel title="CEO Notebook — Strategic Notes">
+    <div className="kxd-os-workspace-dossier">
+      <WorkspaceChapter title="Strategic notes">
         <WorkspaceProse>
-          {strategic || "Long-form strategic notes live in the executive profile. This is the executive memory layer."}
+          {strategic ||
+            "Long-form strategic notes live in the executive profile. This is the executive memory layer."}
         </WorkspaceProse>
-      </WorkspacePanel>
+      </WorkspaceChapter>
 
       {summary && (
-        <WorkspacePanel title="Executive Summary Reference">
+        <WorkspaceChapter title="Executive summary">
           <WorkspaceProse>{summary}</WorkspaceProse>
-        </WorkspacePanel>
+        </WorkspaceChapter>
       )}
-
-      <WorkspacePanel title="Integration">
-        <WorkspaceProse>
-          Future: sync meeting notes, founder voice memos, and decision logs without duplicating
-          operational Client.notes fields.
-        </WorkspaceProse>
-      </WorkspacePanel>
     </div>
   );
 }

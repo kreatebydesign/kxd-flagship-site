@@ -1,79 +1,78 @@
 import type { CSSProperties, ReactNode } from "react";
-import { WORKSPACE_C } from "@/lib/executive-client-workspace/theme";
 import {
   parseExecutiveNoteSections,
   splitExecutiveParagraphs,
 } from "@/lib/executive-client-workspace/format-executive-text";
 
-const proseStyle: CSSProperties = {
-  fontFamily: WORKSPACE_C.sans,
-  fontSize: "0.875rem",
-  fontWeight: 300,
-  lineHeight: 1.75,
-  color: WORKSPACE_C.creamMuted,
-};
-
-export function WorkspaceLabel({ children, style }: { children: ReactNode; style?: CSSProperties }) {
-  return (
-    <p
-      style={{
-        fontFamily: WORKSPACE_C.sans,
-        fontSize: "0.6875rem",
-        fontWeight: 600,
-        letterSpacing: "0.18em",
-        textTransform: "uppercase",
-        color: "rgba(255,255,255,0.3)",
-        ...style,
-      }}
-    >
-      {children}
-    </p>
-  );
-}
-
-export function WorkspacePanel({
+export function WorkspaceChapter({
   title,
+  eyebrow,
   children,
   action,
+  variant = "default",
 }: {
   title: string;
+  eyebrow?: string;
   children: ReactNode;
   action?: ReactNode;
+  variant?: "default" | "compact";
 }) {
   return (
     <section
-      style={{
-        background: WORKSPACE_C.bgElevated,
-        border: `1px solid ${WORKSPACE_C.border}`,
-        padding: "1.375rem 1.5rem",
-      }}
+      className={`kxd-os-workspace-chapter${variant === "compact" ? " kxd-os-workspace-chapter--compact" : ""}`}
     >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "baseline",
-          justifyContent: "space-between",
-          gap: "1rem",
-          marginBottom: "0.875rem",
-        }}
-      >
-        <WorkspaceLabel>{title}</WorkspaceLabel>
+      {eyebrow && <p className="kxd-os-workspace-chapter__eyebrow">{eyebrow}</p>}
+      <div className="kxd-os-workspace-chapter__head">
+        <h2 className="kxd-os-workspace-chapter__title">{title}</h2>
         {action}
       </div>
-      {children}
+      <div className="kxd-os-workspace-chapter__body">{children}</div>
     </section>
   );
 }
 
-export function WorkspaceProse({ children }: { children: ReactNode }) {
+export function WorkspaceStat({
+  label,
+  value,
+  prominence = "default",
+}: {
+  label: string;
+  value: string;
+  prominence?: "default" | "large" | "hero";
+}) {
   return (
-    <p style={proseStyle}>
-      {children}
-    </p>
+    <div
+      className={`kxd-os-workspace-stat kxd-os-workspace-stat--${prominence}`}
+    >
+      <span className="kxd-os-workspace-stat__value">{value}</span>
+      <span className="kxd-os-workspace-stat__label">{label}</span>
+    </div>
   );
 }
 
-/** Preserves paragraph breaks and single line breaks without altering stored text. */
+export function WorkspaceStatRow({ children }: { children: ReactNode }) {
+  return <div className="kxd-os-workspace-stat-row">{children}</div>;
+}
+
+export function WorkspaceMetaLine({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="kxd-os-workspace-meta-line">
+      <span className="kxd-os-workspace-meta-line__value">{value}</span>
+      <span className="kxd-os-workspace-meta-line__label">{label}</span>
+    </div>
+  );
+}
+
+export function WorkspaceProse({ children }: { children: ReactNode }) {
+  return <p className="kxd-os-workspace-prose">{children}</p>;
+}
+
 export function WorkspaceFormattedText({ text }: { text: string }) {
   const paragraphs = splitExecutiveParagraphs(text);
   if (paragraphs.length === 0) {
@@ -81,9 +80,9 @@ export function WorkspaceFormattedText({ text }: { text: string }) {
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
+    <div className="kxd-os-workspace-prose-stack">
       {paragraphs.map((block, index) => (
-        <p key={index} style={{ ...proseStyle, margin: 0 }}>
+        <p key={index} className="kxd-os-workspace-prose">
           {block.split("\n").map((line, lineIndex, lines) => (
             <span key={lineIndex}>
               {line}
@@ -96,7 +95,6 @@ export function WorkspaceFormattedText({ text }: { text: string }) {
   );
 }
 
-/** Renders strategic notes with visual separation for known section labels. */
 export function WorkspaceExecutiveNotes({ text }: { text: string }) {
   const { preamble, sections } = parseExecutiveNoteSections(text);
 
@@ -105,29 +103,11 @@ export function WorkspaceExecutiveNotes({ text }: { text: string }) {
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "1.125rem" }}>
+    <div className="kxd-os-workspace-notes">
       {preamble && <WorkspaceFormattedText text={preamble} />}
       {sections.map((section) => (
-        <div
-          key={section.label}
-          style={{
-            paddingTop: "0.875rem",
-            borderTop: `1px solid ${WORKSPACE_C.border}`,
-          }}
-        >
-          <p
-            style={{
-              fontFamily: WORKSPACE_C.sans,
-              fontSize: "0.625rem",
-              fontWeight: 600,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              color: WORKSPACE_C.goldDim,
-              marginBottom: "0.5rem",
-            }}
-          >
-            {section.label}
-          </p>
+        <div key={section.label} className="kxd-os-workspace-notes__section">
+          <p className="kxd-os-workspace-notes__label">{section.label}</p>
           <WorkspaceFormattedText text={section.content} />
         </div>
       ))}
@@ -135,75 +115,12 @@ export function WorkspaceExecutiveNotes({ text }: { text: string }) {
   );
 }
 
-export function WorkspaceMetaRow({
-  label,
-  value,
-  multiline,
-}: {
-  label: string;
-  value: string;
-  multiline?: boolean;
-}) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        gap: "1rem",
-        padding: "0.625rem 0",
-        borderBottom: `1px solid ${WORKSPACE_C.border}`,
-      }}
-    >
-      <span style={{ fontFamily: WORKSPACE_C.sans, fontSize: "0.75rem", color: "rgba(255,255,255,0.35)" }}>
-        {label}
-      </span>
-      <span
-        style={{
-          fontFamily: WORKSPACE_C.sans,
-          fontSize: "0.8125rem",
-          color: WORKSPACE_C.cream,
-          textAlign: multiline ? "left" : "right",
-          maxWidth: multiline ? "100%" : "65%",
-          whiteSpace: multiline ? "normal" : undefined,
-          wordBreak: multiline ? "break-word" : undefined,
-          lineHeight: multiline ? 1.65 : undefined,
-        }}
-      >
-        {value}
-      </span>
-    </div>
-  );
-}
-
-export function WorkspaceEmpty({ message }: { message: string }) {
-  return (
-    <div
-      style={{
-        background: WORKSPACE_C.bgElevated,
-        border: `1px solid ${WORKSPACE_C.border}`,
-        padding: "1.5rem",
-      }}
-    >
-      <WorkspaceProse>{message}</WorkspaceProse>
-    </div>
-  );
-}
-
 export function WorkspaceList({ items }: { items: string[] }) {
   if (items.length === 0) return null;
   return (
-    <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
+    <ul className="kxd-os-workspace-list">
       {items.map((item) => (
-        <li
-          key={item}
-          style={{
-            display: "flex",
-            gap: "0.625rem",
-            padding: "0.5rem 0",
-            borderBottom: `1px solid ${WORKSPACE_C.border}`,
-          }}
-        >
-          <span style={{ color: WORKSPACE_C.gold, fontSize: "0.5rem", lineHeight: "1.5rem" }}>—</span>
+        <li key={item} className="kxd-os-workspace-list__item">
           <WorkspaceProse>{item}</WorkspaceProse>
         </li>
       ))}
@@ -211,52 +128,72 @@ export function WorkspaceList({ items }: { items: string[] }) {
   );
 }
 
-export function WorkspaceKpiGrid({ items }: { items: { label: string; value: string }[] }) {
+export function WorkspaceKpiGrid({
+  items,
+}: {
+  items: { label: string; value: string }[];
+}) {
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="kxd-os-workspace-kpi-row">
       {items.map((kpi) => (
-        <div
-          key={kpi.label}
-          style={{
-            background: WORKSPACE_C.bgElevated,
-            border: `1px solid ${WORKSPACE_C.border}`,
-            padding: "1.125rem 1.25rem",
-          }}
-        >
-          <WorkspaceLabel>{kpi.label}</WorkspaceLabel>
-          <p
-            style={{
-              fontFamily: WORKSPACE_C.serif,
-              fontWeight: 300,
-              fontSize: "1.375rem",
-              color: WORKSPACE_C.cream,
-              marginTop: "0.375rem",
-              lineHeight: 1.1,
-            }}
-          >
-            {kpi.value}
-          </p>
-        </div>
+        <WorkspaceStat key={kpi.label} label={kpi.label} value={kpi.value} prominence="large" />
       ))}
     </div>
   );
 }
 
 export function WorkspacePlaceholderBadge({ label }: { label: string }) {
+  return <span className="kxd-os-workspace-badge">{label}</span>;
+}
+
+/** @deprecated Use WorkspaceChapter */
+export function WorkspacePanel({
+  title,
+  children,
+  action,
+}: {
+  title: string;
+  children: ReactNode;
+  action?: ReactNode;
+}) {
   return (
-    <span
-      style={{
-        fontFamily: WORKSPACE_C.sans,
-        fontSize: "0.5625rem",
-        fontWeight: 600,
-        letterSpacing: "0.12em",
-        textTransform: "uppercase",
-        color: WORKSPACE_C.goldDim,
-        border: `1px solid ${WORKSPACE_C.borderGold}`,
-        padding: "0.2rem 0.5rem",
-      }}
-    >
-      {label}
-    </span>
+    <WorkspaceChapter title={title} action={action}>
+      {children}
+    </WorkspaceChapter>
+  );
+}
+
+/** @deprecated Use WorkspaceMetaLine */
+export function WorkspaceMetaRow({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+  multiline?: boolean;
+}) {
+  return <WorkspaceMetaLine label={label} value={value} />;
+}
+
+export function WorkspaceEmpty({ message }: { message: string }) {
+  return (
+    <div className="kxd-os-workspace-empty">
+      <WorkspaceProse>{message}</WorkspaceProse>
+    </div>
+  );
+}
+
+/** @deprecated */
+export function WorkspaceLabel({
+  children,
+  style,
+}: {
+  children: ReactNode;
+  style?: CSSProperties;
+}) {
+  return (
+    <p className="kxd-os-workspace-notes__label" style={style}>
+      {children}
+    </p>
   );
 }

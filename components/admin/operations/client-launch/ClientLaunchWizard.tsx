@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  LAUNCH_C,
   LAUNCH_DRAFT_STORAGE_KEY,
   LAUNCH_SERVICE_OPTIONS,
   LAUNCH_STEPS,
@@ -11,11 +10,14 @@ import {
 import type { ClientLaunchDraft, ClientLaunchStepId } from "@/lib/client-launch/types";
 import { EMPTY_LAUNCH_DRAFT } from "@/lib/client-launch/types";
 import {
-  LaunchField,
-  LaunchPanel,
-  launchInputStyle,
-  launchTextareaStyle,
-} from "./LaunchFormPrimitives";
+  KxdButton,
+  KxdDateInput,
+  KxdInput,
+  KxdSelect,
+  KxdTextarea,
+} from "@/components/os";
+import { kxdOsCn } from "@/components/os/utils";
+import { LaunchField, LaunchPanel } from "./LaunchFormPrimitives";
 
 function loadDraft(): ClientLaunchDraft {
   if (typeof window === "undefined") return EMPTY_LAUNCH_DRAFT;
@@ -125,84 +127,37 @@ export function ClientLaunchWizard() {
   }, [draft]);
 
   if (!hydrated) {
-    return (
-      <p style={{ fontFamily: LAUNCH_C.sans, color: LAUNCH_C.creamMuted, fontSize: "0.875rem" }}>
-        Loading launch workflow…
-      </p>
-    );
+    return <p className="kxd-os-body">Loading launch workflow…</p>;
   }
 
   return (
     <div>
-      {/* Progress */}
-      <div style={{ marginBottom: "2rem" }}>
-        <div className="flex flex-wrap items-end justify-between gap-4 mb-4">
+      <div className="kxd-os-ops-progress">
+        <div className="kxd-os-ops-progress__head">
           <div>
-            <p
-              style={{
-                fontFamily: LAUNCH_C.sans,
-                fontSize: "0.625rem",
-                fontWeight: 600,
-                letterSpacing: "0.18em",
-                textTransform: "uppercase",
-                color: "rgba(255,255,255,0.3)",
-              }}
-            >
+            <p className="kxd-os-ops-progress__step">
               Step {stepIndex + 1} of {LAUNCH_STEPS.length}
             </p>
-            <p
-              style={{
-                fontFamily: LAUNCH_C.serif,
-                fontWeight: 300,
-                fontSize: "1.75rem",
-                color: LAUNCH_C.cream,
-                marginTop: "0.25rem",
-              }}
-            >
+            <p className="kxd-os-hero kxd-os-ops-progress__label">
               {LAUNCH_STEPS[stepIndex]?.label}
             </p>
           </div>
-          {autosaveNote && (
-            <p style={{ fontFamily: LAUNCH_C.sans, fontSize: "0.6875rem", color: LAUNCH_C.goldDim }}>
-              {autosaveNote}
-            </p>
-          )}
+          {autosaveNote && <p className="kxd-os-meta">{autosaveNote}</p>}
         </div>
-        <div
-          style={{
-            height: "3px",
-            background: "rgba(255,255,255,0.06)",
-            borderRadius: "2px",
-          }}
-        >
-          <div
-            style={{
-              height: "100%",
-              width: `${progress}%`,
-              background: LAUNCH_C.gold,
-              borderRadius: "2px",
-              transition: "width 0.35s ease",
-            }}
-          />
+        <div className="kxd-os-ops-progress__track">
+          <div className="kxd-os-ops-progress__fill" style={{ width: `${progress}%` }} />
         </div>
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="kxd-os-ops-step-nav">
           {LAUNCH_STEPS.map((s, i) => (
             <button
               key={s.id}
               type="button"
               onClick={() => setStep(s.id)}
-              style={{
-                fontFamily: LAUNCH_C.sans,
-                fontSize: "0.5625rem",
-                fontWeight: 600,
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                padding: "0.35rem 0.625rem",
-                border: `1px solid ${i <= stepIndex ? LAUNCH_C.borderGold : LAUNCH_C.border}`,
-                background: step === s.id ? "rgba(201,169,98,0.12)" : "transparent",
-                color: i <= stepIndex ? LAUNCH_C.gold : "rgba(255,255,255,0.3)",
-                cursor: "pointer",
-              }}
+              className={kxdOsCn(
+                "kxd-os-ops-step-pill",
+                step === s.id && "kxd-os-ops-step-pill--active",
+                i <= stepIndex && step !== s.id && "kxd-os-ops-step-pill--done",
+              )}
             >
               {s.short} {s.label}
             </button>
@@ -210,53 +165,34 @@ export function ClientLaunchWizard() {
         </div>
       </div>
 
-      {error && (
-        <div
-          style={{
-            marginBottom: "1.25rem",
-            padding: "0.875rem 1rem",
-            border: `1px solid rgba(210,90,90,0.35)`,
-            background: "rgba(210,90,90,0.08)",
-            fontFamily: LAUNCH_C.sans,
-            fontSize: "0.8125rem",
-            color: LAUNCH_C.red,
-          }}
-        >
-          {error}
-        </div>
-      )}
+      {error && <div className="kxd-os-ops-alert kxd-os-ops-alert--error">{error}</div>}
 
-      {/* Step content */}
       <div style={{ marginBottom: "2rem" }}>
         {step === "business" && (
           <LaunchPanel title="Business Foundation">
             <div className="grid gap-0 sm:grid-cols-2">
               <LaunchField label="Business Name *">
-                <input
-                  style={launchInputStyle}
+                <KxdInput
                   value={draft.business.businessName}
                   onChange={(e) => update("business", "businessName", e.target.value)}
                   placeholder="Company or brand name"
                 />
               </LaunchField>
               <LaunchField label="Industry">
-                <input
-                  style={launchInputStyle}
+                <KxdInput
                   value={draft.business.industry}
                   onChange={(e) => update("business", "industry", e.target.value)}
                 />
               </LaunchField>
               <LaunchField label="Website">
-                <input
-                  style={launchInputStyle}
+                <KxdInput
                   value={draft.business.website}
                   onChange={(e) => update("business", "website", e.target.value)}
                   placeholder="https://"
                 />
               </LaunchField>
               <LaunchField label="Status">
-                <select
-                  style={launchInputStyle}
+                <KxdSelect
                   value={draft.business.status}
                   onChange={(e) =>
                     update("business", "status", e.target.value as "prospect" | "active")
@@ -264,26 +200,23 @@ export function ClientLaunchWizard() {
                 >
                   <option value="prospect">Prospect</option>
                   <option value="active">Active</option>
-                </select>
+                </KxdSelect>
               </LaunchField>
               <LaunchField label="Primary Goal">
-                <input
-                  style={launchInputStyle}
+                <KxdInput
                   value={draft.business.primaryGoal}
                   onChange={(e) => update("business", "primaryGoal", e.target.value)}
                 />
               </LaunchField>
               <LaunchField label="Lead Source">
-                <input
-                  style={launchInputStyle}
+                <KxdInput
                   value={draft.business.leadSource}
                   onChange={(e) => update("business", "leadSource", e.target.value)}
                 />
               </LaunchField>
             </div>
             <LaunchField label="Business Description">
-              <textarea
-                style={launchTextareaStyle}
+              <KxdTextarea
                 value={draft.business.businessDescription}
                 onChange={(e) => update("business", "businessDescription", e.target.value)}
               />
@@ -295,52 +228,47 @@ export function ClientLaunchWizard() {
           <LaunchPanel title="Contacts & Communication">
             <div className="grid gap-0 sm:grid-cols-2">
               <LaunchField label="Primary Decision Maker">
-                <input
-                  style={launchInputStyle}
+                <KxdInput
                   value={draft.contacts.primaryDecisionMaker}
                   onChange={(e) => update("contacts", "primaryDecisionMaker", e.target.value)}
                 />
               </LaunchField>
               <LaunchField label="Role">
-                <input
-                  style={launchInputStyle}
+                <KxdInput
                   value={draft.contacts.role}
                   onChange={(e) => update("contacts", "role", e.target.value)}
                 />
               </LaunchField>
               <LaunchField label="Email">
-                <input
+                <KxdInput
                   type="email"
-                  style={launchInputStyle}
                   value={draft.contacts.email}
                   onChange={(e) => update("contacts", "email", e.target.value)}
                 />
               </LaunchField>
               <LaunchField label="Phone">
-                <input
-                  style={launchInputStyle}
+                <KxdInput
                   value={draft.contacts.phone}
                   onChange={(e) => update("contacts", "phone", e.target.value)}
                 />
               </LaunchField>
               <LaunchField label="Preferred Communication">
-                <input
-                  style={launchInputStyle}
+                <KxdInput
                   value={draft.contacts.preferredCommunication}
-                  onChange={(e) => update("contacts", "preferredCommunication", e.target.value)}
+                  onChange={(e) =>
+                    update("contacts", "preferredCommunication", e.target.value)
+                  }
                 />
               </LaunchField>
               <LaunchField label="Meeting Cadence">
-                <input
-                  style={launchInputStyle}
+                <KxdInput
                   value={draft.contacts.meetingCadence}
                   onChange={(e) => update("contacts", "meetingCadence", e.target.value)}
                 />
               </LaunchField>
             </div>
             <LaunchField label="Additional Contacts (name, role, email — one per line)">
-              <textarea
-                style={launchTextareaStyle}
+              <KxdTextarea
                 placeholder="Jane Smith, Operations, jane@company.com"
                 value={draft.contacts.additionalContacts
                   .map((c) => [c.name, c.role, c.email].filter(Boolean).join(", "))
@@ -365,48 +293,41 @@ export function ClientLaunchWizard() {
           <LaunchPanel title="Financial Agreement">
             <div className="grid gap-0 sm:grid-cols-2">
               <LaunchField label="Project Value ($)">
-                <input
-                  style={launchInputStyle}
+                <KxdInput
                   value={draft.financial.projectValue}
                   onChange={(e) => update("financial", "projectValue", e.target.value)}
                 />
               </LaunchField>
               <LaunchField label="Monthly Retainer ($)">
-                <input
-                  style={launchInputStyle}
+                <KxdInput
                   value={draft.financial.monthlyRetainer}
                   onChange={(e) => update("financial", "monthlyRetainer", e.target.value)}
                 />
               </LaunchField>
               <LaunchField label="Billing Start Date">
-                <input
-                  type="date"
-                  style={launchInputStyle}
+                <KxdDateInput
                   value={draft.financial.billingStartDate}
                   onChange={(e) => update("financial", "billingStartDate", e.target.value)}
                 />
               </LaunchField>
               <LaunchField label="Contract Status">
-                <select
-                  style={launchInputStyle}
+                <KxdSelect
                   value={draft.financial.contractStatus}
                   onChange={(e) => update("financial", "contractStatus", e.target.value)}
                 >
                   <option value="active">Active</option>
                   <option value="pending">Pending</option>
                   <option value="paused">Paused</option>
-                </select>
+                </KxdSelect>
               </LaunchField>
               <LaunchField label="Expected Annual Value ($)">
-                <input
-                  style={launchInputStyle}
+                <KxdInput
                   value={draft.financial.expectedAnnualValue}
                   onChange={(e) => update("financial", "expectedAnnualValue", e.target.value)}
                 />
               </LaunchField>
               <LaunchField label="Payment Terms">
-                <input
-                  style={launchInputStyle}
+                <KxdInput
                   value={draft.financial.paymentTerms}
                   onChange={(e) => update("financial", "paymentTerms", e.target.value)}
                 />
@@ -417,17 +338,10 @@ export function ClientLaunchWizard() {
 
         {step === "services" && (
           <LaunchPanel title="Services Scope">
-            <p
-              style={{
-                fontFamily: LAUNCH_C.sans,
-                fontSize: "0.8125rem",
-                color: LAUNCH_C.creamMuted,
-                marginBottom: "1rem",
-              }}
-            >
+            <p className="kxd-os-body" style={{ marginBottom: "1rem" }}>
               Select all services included in this partnership launch.
             </p>
-            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="kxd-os-ops-service-grid">
               {LAUNCH_SERVICE_OPTIONS.map((service) => {
                 const active = draft.services.selected.includes(service);
                 return (
@@ -435,16 +349,10 @@ export function ClientLaunchWizard() {
                     key={service}
                     type="button"
                     onClick={() => toggleService(service)}
-                    style={{
-                      fontFamily: LAUNCH_C.sans,
-                      fontSize: "0.75rem",
-                      padding: "0.625rem 0.75rem",
-                      textAlign: "left",
-                      border: `1px solid ${active ? LAUNCH_C.borderGold : LAUNCH_C.border}`,
-                      background: active ? "rgba(201,169,98,0.1)" : "transparent",
-                      color: active ? LAUNCH_C.gold : LAUNCH_C.creamMuted,
-                      cursor: "pointer",
-                    }}
+                    className={kxdOsCn(
+                      "kxd-os-ops-service-pill",
+                      active && "kxd-os-ops-service-pill--active",
+                    )}
                   >
                     {service}
                   </button>
@@ -452,8 +360,7 @@ export function ClientLaunchWizard() {
               })}
             </div>
             <LaunchField label="Custom Services">
-              <textarea
-                style={launchTextareaStyle}
+              <KxdTextarea
                 placeholder="Additional services, one per line"
                 value={draft.services.customServices}
                 onChange={(e) => update("services", "customServices", e.target.value)}
@@ -482,8 +389,7 @@ export function ClientLaunchWizard() {
                 ] as const
               ).map(([key, label]) => (
                 <LaunchField key={key} label={label}>
-                  <input
-                    style={launchInputStyle}
+                  <KxdInput
                     value={draft.technical[key]}
                     onChange={(e) => update("technical", key, e.target.value)}
                   />
@@ -491,22 +397,19 @@ export function ClientLaunchWizard() {
               ))}
             </div>
             <LaunchField label="API Integrations">
-              <textarea
-                style={launchTextareaStyle}
+              <KxdTextarea
                 value={draft.technical.apiIntegrations}
                 onChange={(e) => update("technical", "apiIntegrations", e.target.value)}
               />
             </LaunchField>
             <LaunchField label="Technical Notes">
-              <textarea
-                style={launchTextareaStyle}
+              <KxdTextarea
                 value={draft.technical.technicalNotes}
                 onChange={(e) => update("technical", "technicalNotes", e.target.value)}
               />
             </LaunchField>
             <LaunchField label="Secure References (no passwords)">
-              <textarea
-                style={launchTextareaStyle}
+              <KxdTextarea
                 placeholder="1Password vault, Google Drive folder, etc."
                 value={draft.technical.loginNotesReference}
                 onChange={(e) => update("technical", "loginNotesReference", e.target.value)}
@@ -519,8 +422,7 @@ export function ClientLaunchWizard() {
           <LaunchPanel title="Executive Intelligence">
             <div className="grid gap-0 sm:grid-cols-3">
               <LaunchField label="Tier">
-                <select
-                  style={launchInputStyle}
+                <KxdSelect
                   value={draft.executive.clientTier}
                   onChange={(e) => update("executive", "clientTier", e.target.value)}
                 >
@@ -528,19 +430,17 @@ export function ClientLaunchWizard() {
                   <option value="A">Tier A</option>
                   <option value="B">Tier B</option>
                   <option value="C">Tier C</option>
-                </select>
+                </KxdSelect>
               </LaunchField>
               <LaunchField label="Health Score">
-                <input
-                  style={launchInputStyle}
+                <KxdInput
                   value={draft.executive.healthScore}
                   onChange={(e) => update("executive", "healthScore", e.target.value)}
                   placeholder="0–100"
                 />
               </LaunchField>
               <LaunchField label="Relationship Status">
-                <select
-                  style={launchInputStyle}
+                <KxdSelect
                   value={draft.executive.relationshipStatus}
                   onChange={(e) =>
                     update(
@@ -554,55 +454,48 @@ export function ClientLaunchWizard() {
                   <option value="paused">Paused</option>
                   <option value="at-risk">At Risk</option>
                   <option value="archived">Archived</option>
-                </select>
+                </KxdSelect>
               </LaunchField>
             </div>
             <LaunchField label="Current Priority">
-              <input
-                style={launchInputStyle}
+              <KxdInput
                 value={draft.executive.currentPriority}
                 onChange={(e) => update("executive", "currentPriority", e.target.value)}
               />
             </LaunchField>
             <LaunchField label="Executive Summary">
-              <textarea
-                style={launchTextareaStyle}
+              <KxdTextarea
                 value={draft.executive.executiveSummary}
                 onChange={(e) => update("executive", "executiveSummary", e.target.value)}
               />
             </LaunchField>
             <LaunchField label="Strategic Notes">
-              <textarea
-                style={launchTextareaStyle}
+              <KxdTextarea
                 value={draft.executive.strategicNotes}
                 onChange={(e) => update("executive", "strategicNotes", e.target.value)}
               />
             </LaunchField>
             <LaunchField label="Growth Opportunities">
-              <textarea
-                style={launchTextareaStyle}
+              <KxdTextarea
                 value={draft.executive.growthOpportunities}
                 onChange={(e) => update("executive", "growthOpportunities", e.target.value)}
               />
             </LaunchField>
             <LaunchField label="Upsell Opportunities">
-              <textarea
-                style={launchTextareaStyle}
+              <KxdTextarea
                 value={draft.executive.upsellOpportunities}
                 onChange={(e) => update("executive", "upsellOpportunities", e.target.value)}
               />
             </LaunchField>
             <LaunchField label="Risk Notes">
-              <textarea
-                style={launchTextareaStyle}
+              <KxdTextarea
                 value={draft.executive.riskNotes}
                 onChange={(e) => update("executive", "riskNotes", e.target.value)}
               />
             </LaunchField>
             <div className="grid gap-0 sm:grid-cols-4">
               <LaunchField label="Case Study">
-                <select
-                  style={launchInputStyle}
+                <KxdSelect
                   value={draft.executive.caseStudyPotential}
                   onChange={(e) => update("executive", "caseStudyPotential", e.target.value)}
                 >
@@ -611,11 +504,10 @@ export function ClientLaunchWizard() {
                   <option value="medium">Medium</option>
                   <option value="high">High</option>
                   <option value="flagship">Flagship</option>
-                </select>
+                </KxdSelect>
               </LaunchField>
               <LaunchField label="Referral">
-                <select
-                  style={launchInputStyle}
+                <KxdSelect
                   value={draft.executive.referralPotential}
                   onChange={(e) => update("executive", "referralPotential", e.target.value)}
                 >
@@ -623,23 +515,23 @@ export function ClientLaunchWizard() {
                   <option value="low">Low</option>
                   <option value="medium">Medium</option>
                   <option value="high">High</option>
-                </select>
+                </KxdSelect>
               </LaunchField>
               <LaunchField label="Productization">
-                <select
-                  style={launchInputStyle}
+                <KxdSelect
                   value={draft.executive.productizationPotential}
-                  onChange={(e) => update("executive", "productizationPotential", e.target.value)}
+                  onChange={(e) =>
+                    update("executive", "productizationPotential", e.target.value)
+                  }
                 >
                   <option value="">—</option>
                   <option value="low">Low</option>
                   <option value="medium">Medium</option>
                   <option value="high">High</option>
-                </select>
+                </KxdSelect>
               </LaunchField>
               <LaunchField label="Internal Priority">
-                <select
-                  style={launchInputStyle}
+                <KxdSelect
                   value={draft.executive.internalPriority}
                   onChange={(e) => update("executive", "internalPriority", e.target.value)}
                 >
@@ -647,7 +539,7 @@ export function ClientLaunchWizard() {
                   <option value="medium">Medium</option>
                   <option value="high">High</option>
                   <option value="critical">Critical</option>
-                </select>
+                </KxdSelect>
               </LaunchField>
             </div>
           </LaunchPanel>
@@ -656,45 +548,38 @@ export function ClientLaunchWizard() {
         {step === "roadmap" && (
           <LaunchPanel title="Roadmap & First Action">
             <LaunchField label="Current Focus">
-              <textarea
-                style={launchTextareaStyle}
+              <KxdTextarea
                 value={draft.roadmap.current}
                 onChange={(e) => update("roadmap", "current", e.target.value)}
               />
             </LaunchField>
             <LaunchField label="Next">
-              <textarea
-                style={launchTextareaStyle}
+              <KxdTextarea
                 value={draft.roadmap.next}
                 onChange={(e) => update("roadmap", "next", e.target.value)}
               />
             </LaunchField>
             <LaunchField label="Future">
-              <textarea
-                style={launchTextareaStyle}
+              <KxdTextarea
                 value={draft.roadmap.future}
                 onChange={(e) => update("roadmap", "future", e.target.value)}
               />
             </LaunchField>
             <LaunchField label="Long-term Vision">
-              <textarea
-                style={launchTextareaStyle}
+              <KxdTextarea
                 value={draft.roadmap.longTermVision}
                 onChange={(e) => update("roadmap", "longTermVision", e.target.value)}
               />
             </LaunchField>
             <div className="grid gap-0 sm:grid-cols-2">
               <LaunchField label="First Next Action">
-                <input
-                  style={launchInputStyle}
+                <KxdInput
                   value={draft.roadmap.firstNextAction}
                   onChange={(e) => update("roadmap", "firstNextAction", e.target.value)}
                 />
               </LaunchField>
               <LaunchField label="Next Action Due Date">
-                <input
-                  type="date"
-                  style={launchInputStyle}
+                <KxdDateInput
                   value={draft.roadmap.nextActionDueDate}
                   onChange={(e) => update("roadmap", "nextActionDueDate", e.target.value)}
                 />
@@ -705,57 +590,27 @@ export function ClientLaunchWizard() {
 
         {step === "review" && (
           <LaunchPanel title="Launch Review">
-            <p
-              style={{
-                fontFamily: LAUNCH_C.serif,
-                fontWeight: 300,
-                fontSize: "1.375rem",
-                color: LAUNCH_C.cream,
-                marginBottom: "1rem",
-              }}
-            >
+            <p className="kxd-os-title" style={{ marginBottom: "1rem" }}>
               Ready to launch {draft.business.businessName || "this client"} into KXD OS?
             </p>
-            <div
-              style={{
-                border: `1px solid ${LAUNCH_C.border}`,
-                padding: "1.25rem",
-                background: "rgba(255,255,255,0.02)",
-              }}
-            >
-              {[
-                ["Business", reviewSummary.business],
-                ["Primary Contact", reviewSummary.contact],
-                ["Monthly Retainer", reviewSummary.retainer],
-                ["Services Selected", String(reviewSummary.services)],
-                ["Executive Tier", reviewSummary.tier],
-                ["First Next Action", reviewSummary.nextAction],
-              ].map(([label, value]) => (
-                <div
-                  key={label}
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    padding: "0.5rem 0",
-                    borderBottom: `1px solid ${LAUNCH_C.border}`,
-                    fontFamily: LAUNCH_C.sans,
-                    fontSize: "0.8125rem",
-                  }}
-                >
-                  <span style={{ color: "rgba(255,255,255,0.35)" }}>{label}</span>
-                  <span style={{ color: LAUNCH_C.cream }}>{value}</span>
+            <div className="kxd-os-ops-review-summary">
+              {(
+                [
+                  ["Business", reviewSummary.business],
+                  ["Primary Contact", reviewSummary.contact],
+                  ["Monthly Retainer", reviewSummary.retainer],
+                  ["Services Selected", String(reviewSummary.services)],
+                  ["Executive Tier", reviewSummary.tier],
+                  ["First Next Action", reviewSummary.nextAction],
+                ] as const
+              ).map(([label, value]) => (
+                <div key={label} className="kxd-os-ops-review-row">
+                  <span className="kxd-os-ops-review-row__label">{label}</span>
+                  <span className="kxd-os-ops-review-row__value">{value}</span>
                 </div>
               ))}
             </div>
-            <p
-              style={{
-                fontFamily: LAUNCH_C.sans,
-                fontSize: "0.8125rem",
-                color: LAUNCH_C.creamMuted,
-                marginTop: "1.25rem",
-                lineHeight: 1.7,
-              }}
-            >
+            <p className="kxd-os-body" style={{ marginTop: "1.25rem", lineHeight: 1.7 }}>
               Launching will create the Client record, Executive Client Profile, initial Retainer
               (if applicable), timeline event, and workspace — ready for operations.
             </p>
@@ -763,90 +618,30 @@ export function ClientLaunchWizard() {
         )}
       </div>
 
-      {/* Navigation */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex gap-3">
+      <div className="kxd-os-ops-workflow-nav">
+        <div className="kxd-os-ops-workflow-nav__group">
           {stepIndex > 0 && (
-            <button
-              type="button"
-              onClick={goBack}
-              style={{
-                fontFamily: LAUNCH_C.sans,
-                fontSize: "0.6875rem",
-                fontWeight: 500,
-                letterSpacing: "0.14em",
-                textTransform: "uppercase",
-                color: LAUNCH_C.creamMuted,
-                background: "transparent",
-                border: `1px solid ${LAUNCH_C.border}`,
-                padding: "0.625rem 1.125rem",
-                cursor: "pointer",
-              }}
-            >
+            <KxdButton variant="secondary" onClick={goBack}>
               Back
-            </button>
+            </KxdButton>
           )}
-          <button
-            type="button"
+          <KxdButton
+            variant="ghost"
             onClick={() => {
               localStorage.removeItem(LAUNCH_DRAFT_STORAGE_KEY);
               setDraft(EMPTY_LAUNCH_DRAFT);
               setStep("business");
             }}
-            style={{
-              fontFamily: LAUNCH_C.sans,
-              fontSize: "0.6875rem",
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              color: "rgba(255,255,255,0.35)",
-              background: "transparent",
-              border: "none",
-              cursor: "pointer",
-            }}
           >
             Clear draft
-          </button>
+          </KxdButton>
         </div>
         {step !== "review" ? (
-          <button
-            type="button"
-            onClick={goNext}
-            style={{
-              fontFamily: LAUNCH_C.sans,
-              fontSize: "0.6875rem",
-              fontWeight: 500,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              color: LAUNCH_C.bgBase,
-              background: LAUNCH_C.gold,
-              border: "none",
-              padding: "0.625rem 1.5rem",
-              cursor: "pointer",
-            }}
-          >
-            Continue →
-          </button>
+          <KxdButton onClick={goNext}>Continue →</KxdButton>
         ) : (
-          <button
-            type="button"
-            onClick={launch}
-            disabled={saving}
-            style={{
-              fontFamily: LAUNCH_C.sans,
-              fontSize: "0.6875rem",
-              fontWeight: 600,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              color: LAUNCH_C.bgBase,
-              background: LAUNCH_C.gold,
-              border: "none",
-              padding: "0.75rem 1.75rem",
-              cursor: saving ? "wait" : "pointer",
-              opacity: saving ? 0.6 : 1,
-            }}
-          >
+          <KxdButton onClick={launch} disabled={saving} loading={saving}>
             {saving ? "Launching…" : "Launch Client →"}
-          </button>
+          </KxdButton>
         )}
       </div>
     </div>
