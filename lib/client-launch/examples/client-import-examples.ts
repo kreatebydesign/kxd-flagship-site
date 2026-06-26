@@ -27,6 +27,22 @@ import {
   getOtpCartsImportExampleJson,
   OTP_CARTS_IMPORT_RAW_NOTES,
 } from "./otp-carts-import";
+import {
+  getDialedInElectricImportExampleJson,
+  DIALED_IN_ELECTRIC_IMPORT_RAW_NOTES,
+} from "./dialed-in-electric-import";
+import {
+  getPlateTheUmpquaImportExampleJson,
+  PLATE_THE_UMPQUA_IMPORT_RAW_NOTES,
+} from "./plate-the-umpqua-import";
+import {
+  getLaCocinaImportExampleJson,
+  LA_COCINA_IMPORT_RAW_NOTES,
+} from "./la-cocina-import";
+import {
+  getTownsgate2475ImportExampleJson,
+  TOWNSGATE_2475_IMPORT_RAW_NOTES,
+} from "./2475-townsgate-import";
 
 export interface ClientImportExampleEntry {
   label: string;
@@ -74,5 +90,25 @@ export const CLIENT_IMPORT_EXAMPLES: ClientImportExampleEntry[] = [
     label: "Load OTP Carts Example",
     getJson: getOtpCartsImportExampleJson,
     rawNotes: OTP_CARTS_IMPORT_RAW_NOTES,
+  },
+  {
+    label: "Load Dialed In Electric Example",
+    getJson: getDialedInElectricImportExampleJson,
+    rawNotes: DIALED_IN_ELECTRIC_IMPORT_RAW_NOTES,
+  },
+  {
+    label: "Load Plate The Umpqua Example",
+    getJson: getPlateTheUmpquaImportExampleJson,
+    rawNotes: PLATE_THE_UMPQUA_IMPORT_RAW_NOTES,
+  },
+  {
+    label: "Load La Cocina Example",
+    getJson: getLaCocinaImportExampleJson,
+    rawNotes: LA_COCINA_IMPORT_RAW_NOTES,
+  },
+  {
+    label: "Load 2475 Townsgate Example",
+    getJson: getTownsgate2475ImportExampleJson,
+    rawNotes: TOWNSGATE_2475_IMPORT_RAW_NOTES,
   },
 ];
