@@ -18,6 +18,7 @@ import {
 import type { IntelligenceContext, IntelligenceInsight } from "./types";
 import { buildSalesInsights } from "@/lib/sales/intelligence";
 import { buildReportingInsights } from "./reporting";
+import { buildExecutiveNotesInsights } from "./executive-notes";
 
 export function generateInsights(ctx: IntelligenceContext): IntelligenceInsight[] {
   const insights: IntelligenceInsight[] = [];
@@ -160,6 +161,7 @@ export function generateInsights(ctx: IntelligenceContext): IntelligenceInsight[
 
   insights.push(...buildSalesInsights(ctx));
   insights.push(...buildReportingInsights(ctx));
+  insights.push(...buildExecutiveNotesInsights(ctx));
 
   insights.sort(
     (a, b) =>

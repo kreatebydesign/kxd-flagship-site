@@ -15,6 +15,7 @@ import {
 } from "@/lib/executive-client-profile";
 import { infraStatusLabel } from "@/lib/infrastructure/data";
 import { monthLabel } from "@/lib/reporting/templates";
+import type { ClientStrategySummary } from "@/lib/executive-notes/types";
 import type { IntelligenceRecommendation } from "@/lib/intelligence/types";
 import {
   buildExecutiveBrief,
@@ -35,6 +36,7 @@ import type {
   ReportingSection,
   RevenueSection,
   SalesSection,
+  StrategySection,
   WebsiteSection,
 } from "./types";
 
@@ -446,6 +448,71 @@ function buildAutomationSection(input: CommandWidgetInput): AutomationSection {
   };
 }
 
+function reminderToListItem(r: {
+  id: number;
+  title: string;
+  reminderDate: string;
+  href: string;
+  priority: string;
+}): CommandListItem {
+  return {
+    id: String(r.id),
+    title: r.title,
+    meta: r.reminderDate.slice(0, 10),
+    href: r.href,
+    status: r.priority,
+  };
+}
+
+function noteToListItem(n: {
+  id: number;
+  title: string;
+  summary: string | null;
+  noteType: string;
+  href: string;
+  updatedAt: string;
+}): CommandListItem {
+  return {
+    id: String(n.id),
+    title: n.title,
+    detail: n.summary ?? undefined,
+    meta: n.noteType,
+    href: n.href,
+  };
+}
+
+function buildStrategySection(input: CommandWidgetInput): StrategySection {
+  const s = input.strategy;
+  const cid = input.clientId;
+  if (!s) {
+    return {
+      latestNotes: [],
+      pinnedStrategy: [],
+      upcomingReminders: [],
+      recentDecisions: [],
+      relationshipInsights: {
+        openOpportunities: [],
+        promisesMade: [],
+        pendingFollowUps: [],
+        personalInformation: [],
+        businessGoals: [],
+        growthIdeas: [],
+        risks: [],
+        nextConversationTopics: [],
+      },
+      quickCreateHref: `/admin/collections/executive-notes/create?client=${cid}`,
+    };
+  }
+  return {
+    latestNotes: s.latestNotes.map(noteToListItem),
+    pinnedStrategy: s.pinnedStrategy.map(noteToListItem),
+    upcomingReminders: s.upcomingReminders.map(reminderToListItem),
+    recentDecisions: s.recentDecisions.map(noteToListItem),
+    relationshipInsights: s.relationshipInsights,
+    quickCreateHref: `/admin/collections/executive-notes/create?client=${cid}`,
+  };
+}
+
 export function buildCommandSections(input: CommandWidgetInput): CommandSections {
   return {
     relationship: buildRelationshipSection(input),
@@ -456,6 +523,7 @@ export function buildCommandSections(input: CommandWidgetInput): CommandSections
     reporting: buildReportingSection(input),
     sales: buildSalesSection(input),
     automation: buildAutomationSection(input),
+    strategy: buildStrategySection(input),
   };
 }
 
@@ -481,6 +549,7 @@ export function buildWidgetInputFromContext(
     timeline: import("@/lib/executive-timeline/types").ExecutiveTimelineClientData | null;
     insights: import("@/lib/intelligence/types").ClientInsights | null;
     health: import("@/lib/client-health/health-engine").ClientHealthResult;
+    strategy: ClientStrategySummary | null;
   },
 ): CommandWidgetInput {
   const client = ctx.clientsById.get(cid);
@@ -518,6 +587,7 @@ export function buildWidgetInputFromContext(
     socialPosts: filterForClient(ctx.socialPosts, cid),
     onboardings: filterForClient(ctx.onboardings, cid),
     profile: extras.workspace?.profile ?? null,
+    strategy: extras.strategy,
   };
 }
 

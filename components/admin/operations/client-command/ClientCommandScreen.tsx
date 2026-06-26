@@ -266,6 +266,47 @@ export function ClientCommandScreen({ data }: { data: ClientCommandCenterData })
           </KxdSection>
         </div>
 
+        <KxdSection label="Strategy">
+          <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem", flexWrap: "wrap" }}>
+            <Link href={sections.strategy.quickCreateHref} className="kxd-os-btn kxd-os-btn--ghost">
+              Quick create note
+            </Link>
+            <Link href={`/admin/operations/strategy?client=${hero.clientId}`} className="kxd-os-link-quiet">
+              Open vault →
+            </Link>
+          </div>
+          <div className="kxd-os-operations-split">
+            <div>
+              <OpsSectionHead label="Latest notes" count={sections.strategy.latestNotes.length} />
+              <ListBlock items={sections.strategy.latestNotes} empty="No executive notes yet." />
+            </div>
+            <div>
+              <OpsSectionHead label="Pinned strategy" count={sections.strategy.pinnedStrategy.length} />
+              <ListBlock items={sections.strategy.pinnedStrategy} empty="No pinned strategy notes." />
+            </div>
+          </div>
+          <div className="kxd-os-operations-split" style={{ marginTop: "1rem" }}>
+            <div>
+              <OpsSectionHead label="Upcoming reminders" count={sections.strategy.upcomingReminders.length} />
+              <ListBlock items={sections.strategy.upcomingReminders} empty="No reminders scheduled." />
+            </div>
+            <div>
+              <OpsSectionHead label="Recent decisions" count={sections.strategy.recentDecisions.length} />
+              <ListBlock items={sections.strategy.recentDecisions} empty="No decisions captured." />
+            </div>
+          </div>
+          {sections.strategy.relationshipInsights.nextConversationTopics.length > 0 ? (
+            <div style={{ marginTop: "1rem" }}>
+              <OpsSectionHead label="Relationship insights" />
+              <ul className="kxd-os-body">
+                {sections.strategy.relationshipInsights.nextConversationTopics.slice(0, 4).map((t) => (
+                  <li key={t}>{t}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+        </KxdSection>
+
         <KxdSection label="Recommended Actions">
           {recommendations.length === 0 ? (
             <OpsEmpty message="No recommendations — relationship looks clear." />

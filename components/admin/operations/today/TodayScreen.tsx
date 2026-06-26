@@ -15,6 +15,7 @@ import {
 } from "@/components/admin/operations/shared/OpsBriefing";
 import type { KxdBadgeVariant } from "@/components/os";
 import { KxdPage } from "@/components/os";
+import { getDailyBriefingReminders } from "@/lib/executive-notes/reminders";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDoc = Record<string, any>;
@@ -154,9 +155,10 @@ function computeFocusScore(counts: {
   delivWeek: number;
   retainersWeek: number;
   creativeActive: number;
+  overdueNoteReminders?: number;
 }): FocusScore {
   if (counts.urgentReqs > 0 || counts.overdueRetainers > 0) return "critical";
-  if (counts.overdueReqs > 0 || counts.projectActions > 0) return "elevated";
+  if (counts.overdueReqs > 0 || counts.projectActions > 0 || (counts.overdueNoteReminders ?? 0) > 0) return "elevated";
   if (
     counts.delivToday > 0 ||
     counts.delivWeek > 0 ||
@@ -203,23 +205,14 @@ export async function TodayScreen() {
   let videoActive: AnyDoc[] = [];
   let socialActive: AnyDoc[] = [];
   let newReqsToday: AnyDoc[] = [];
+  let noteReminders = { dueToday: [] as Awaited<ReturnType<typeof getDailyBriefingReminders>>["dueToday"], overdue: [] as Awaited<ReturnType<typeof getDailyBriefingReminders>>["overdue"], upcoming: [] as Awaited<ReturnType<typeof getDailyBriefingReminders>>["upcoming"] };
 
   try {
-    const payload = await getPayload({ config });
+  const payload = await getPayload({ config });
 
-    const [
-      overdueReqsR,
-      urgentReqsR,
-      delivTodayR,
-      delivWeekR,
-      projectsActionR,
-      retainersWeekR,
-      overdueRetainersR,
-      flyerActiveR,
-      videoActiveR,
-      socialActiveR,
-      newReqsTodayR,
-    ] = await Promise.allSettled([
+  const [noteRemindersData, settled] = await Promise.all([
+    getDailyBriefingReminders(),
+    Promise.allSettled([
       payload.find({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         collection: "client-requests" as any,
@@ -337,7 +330,22 @@ export async function TodayScreen() {
         where: { createdAt: { greater_than_equal: yesterdayISO } },
         sort: "-createdAt",
       }),
-    ]);
+    ]),
+  ]);
+
+    const [
+      overdueReqsR,
+      urgentReqsR,
+      delivTodayR,
+      delivWeekR,
+      projectsActionR,
+      retainersWeekR,
+      overdueRetainersR,
+      flyerActiveR,
+      videoActiveR,
+      socialActiveR,
+      newReqsTodayR,
+    ] = settled;
 
     if (overdueReqsR.status === "fulfilled") overdueReqs = overdueReqsR.value.docs as AnyDoc[];
     if (urgentReqsR.status === "fulfilled") urgentReqs = urgentReqsR.value.docs as AnyDoc[];
@@ -352,6 +360,7 @@ export async function TodayScreen() {
     if (videoActiveR.status === "fulfilled") videoActive = videoActiveR.value.docs as AnyDoc[];
     if (socialActiveR.status === "fulfilled") socialActive = socialActiveR.value.docs as AnyDoc[];
     if (newReqsTodayR.status === "fulfilled") newReqsToday = newReqsTodayR.value.docs as AnyDoc[];
+    noteReminders = noteRemindersData;
   } catch {
     // Payload unavailable — all sections degrade to their empty states
   }
@@ -428,6 +437,7 @@ export async function TodayScreen() {
     delivWeek: delivWeek.length,
     retainersWeek: retainersWeek.length,
     creativeActive: creativeQueue.length,
+    overdueNoteReminders: noteReminders.overdue.length,
   });
   const focus = FOCUS_CFG[focusScore];
 
@@ -516,6 +526,28 @@ export async function TodayScreen() {
           <OpsSectionHead label="Daily Focus" />
           <OpsKpiStrip items={kpiItems} />
         </section>
+
+        {(noteReminders.dueToday.length > 0 || noteReminders.overdue.length > 0) ? (
+          <section className="kxd-os-ops-section">
+            <OpsSectionHead
+              label="Strategy Reminders"
+              count={noteReminders.dueToday.length + noteReminders.overdue.length}
+              href="/admin/operations/strategy?view=reminders"
+              linkText="Strategy Vault →"
+            />
+            <div className="kxd-os-list-stack">
+              {[...noteReminders.overdue, ...noteReminders.dueToday].slice(0, 8).map((r) => (
+                <OpsListRow key={r.id} href={r.href}>
+                  <p className="kxd-os-body">{r.title}</p>
+                  <p className="kxd-os-meta">
+                    {r.clientName} · {r.reminderDate.slice(0, 10)}
+                    {r.overdue ? " · Overdue" : ""}
+                  </p>
+                </OpsListRow>
+              ))}
+            </div>
+          </section>
+        ) : null}
 
         <section className="kxd-os-ops-section">
           <OpsSectionHead

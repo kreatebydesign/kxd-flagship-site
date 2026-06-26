@@ -138,6 +138,7 @@ export const ExecutiveTimelineEvents: CollectionConfig = {
         { label: "Growth", value: "Growth" },
         { label: "Portal", value: "Portal" },
         { label: "Website Auditor", value: "Website Auditor" },
+        { label: "Executive Notes", value: "Executive Notes" },
         { label: "Manual", value: "Manual" },
       ],
       admin: { position: "sidebar" },

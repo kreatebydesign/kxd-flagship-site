@@ -23,7 +23,9 @@ export type OperationsNavId =
   | "sales-templates"
   | "sales-activities"
   | "sales-forecast"
-  | "reports";
+  | "reports"
+  | "strategy"
+  | "brain";
 
 export type OperationsNavItem = {
   id: OperationsNavId;
@@ -42,6 +44,7 @@ export const NAV_GROUPS: OperationsNavGroup[] = [
     items: [
       { id: "executive", label: "Executive", href: "/admin/operations/executive" },
       { id: "founder-intelligence", label: "Founder Intelligence", href: "/admin/operations/founder-intelligence" },
+      { id: "brain", label: "KXD Brain", href: "/admin/operations/brain" },
       { id: "today", label: "Today", href: "/admin/operations/today" },
       { id: "command", label: "Operations", href: "/admin/operations/command" },
       { id: "founder", label: "Founder", href: "/admin/operations/founder" },
@@ -51,6 +54,7 @@ export const NAV_GROUPS: OperationsNavGroup[] = [
     label: "Clients",
     items: [
       { id: "clients", label: "Portfolio", href: "/admin/operations/clients" },
+      { id: "strategy", label: "Strategy Vault", href: "/admin/operations/strategy" },
       { id: "accounts", label: "Accounts", href: "/admin/operations/accounts" },
       { id: "onboarding", label: "Onboarding", href: "/admin/operations/onboarding" },
     ],

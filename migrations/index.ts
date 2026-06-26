@@ -27,6 +27,8 @@ import * as migration_20260630_phase5e_automation_engine from './20260630_phase5
 import * as migration_20260701_phase6a_sales_engine from './20260701_phase6a_sales_engine';
 import * as migration_20260702_phase6b_client_acquisition from './20260702_phase6b_client_acquisition';
 import * as migration_20260703_phase6c_executive_reporting from './20260703_phase6c_executive_reporting';
+import * as migration_20260704_phase6e_executive_notes from './20260704_phase6e_executive_notes';
+import * as migration_20260705_phase7a_kxd_brain from './20260705_phase7a_kxd_brain';
 
 export const migrations = [
   {
@@ -173,5 +175,15 @@ export const migrations = [
     up: migration_20260703_phase6c_executive_reporting.up,
     down: migration_20260703_phase6c_executive_reporting.down,
     name: '20260703_phase6c_executive_reporting',
+  },
+  {
+    up: migration_20260704_phase6e_executive_notes.up,
+    down: migration_20260704_phase6e_executive_notes.down,
+    name: '20260704_phase6e_executive_notes',
+  },
+  {
+    up: migration_20260705_phase7a_kxd_brain.up,
+    down: migration_20260705_phase7a_kxd_brain.down,
+    name: '20260705_phase7a_kxd_brain',
   },
 ];

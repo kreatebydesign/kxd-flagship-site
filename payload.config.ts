@@ -19,6 +19,8 @@ import { ClientProjects } from "./payload/collections/ClientProjects.ts";
 import { ClientRequests } from "./payload/collections/ClientRequests.ts";
 import { Clients } from "./payload/collections/Clients.ts";
 import { ExecutiveClientProfiles } from "./payload/collections/ExecutiveClientProfiles.ts";
+import { ExecutiveNotes } from "./payload/collections/ExecutiveNotes.ts";
+import { BrainMemory } from "./payload/collections/BrainMemory.ts";
 import { ExecutiveTimelineEvents } from "./payload/collections/ExecutiveTimelineEvents.ts";
 import { InfrastructureCosts } from "./payload/collections/InfrastructureCosts.ts";
 import { InfrastructureEvents } from "./payload/collections/InfrastructureEvents.ts";
@@ -122,6 +124,8 @@ export default buildConfig({
     // ── KXD OS ───────────────────────────────────────────────────────────────
     Clients,
     ExecutiveClientProfiles,
+    ExecutiveNotes,
+    BrainMemory,
     Retainers,
     ClientProjects,
     MonthlyDeliverables,

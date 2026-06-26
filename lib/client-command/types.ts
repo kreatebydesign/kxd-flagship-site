@@ -2,6 +2,7 @@ import type { ClientHealthResult } from "@/lib/client-health/health-engine";
 import type { ClientInfrastructureDetail } from "@/lib/infrastructure/types";
 import type { ClientInsights, IntelligenceRecommendation } from "@/lib/intelligence/types";
 import type { MergedExecutiveClientRow } from "@/lib/executive-client-profile";
+import type { ClientStrategySummary } from "@/lib/executive-notes/types";
 import type { ExecutiveTimelineClientData } from "@/lib/executive-timeline/types";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -114,6 +115,15 @@ export interface AutomationSection {
   failures: CommandListItem[];
 }
 
+export interface StrategySection {
+  latestNotes: CommandListItem[];
+  pinnedStrategy: CommandListItem[];
+  upcomingReminders: CommandListItem[];
+  recentDecisions: CommandListItem[];
+  relationshipInsights: import("@/lib/executive-notes/types").RelationshipIntelligence;
+  quickCreateHref: string;
+}
+
 export interface CommandSections {
   relationship: RelationshipSection;
   revenue: RevenueSection;
@@ -123,6 +133,7 @@ export interface CommandSections {
   reporting: ReportingSection;
   sales: SalesSection;
   automation: AutomationSection;
+  strategy: StrategySection;
 }
 
 export interface ClientCommandCenterData {
@@ -166,4 +177,5 @@ export interface CommandWidgetInput {
   socialPosts: CommandDoc[];
   onboardings: CommandDoc[];
   profile: CommandDoc | null;
+  strategy: ClientStrategySummary | null;
 }

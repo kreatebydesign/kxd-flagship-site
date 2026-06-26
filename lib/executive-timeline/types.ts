@@ -33,6 +33,7 @@ export type ExecutiveTimelineSourceModule =
   | "Growth"
   | "Portal"
   | "Website Auditor"
+  | "Executive Notes"
   | "Manual";
 
 export interface CreateExecutiveEventInput {

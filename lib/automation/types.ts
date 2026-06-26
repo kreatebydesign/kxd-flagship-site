@@ -13,7 +13,8 @@ export type AutomationModule =
   | "Requests"
   | "Deliverables"
   | "Portal"
-  | "Automation";
+  | "Automation"
+  | "Brain";
 
 export type AutomationEventStatus = "published" | "processed" | "failed";
 
