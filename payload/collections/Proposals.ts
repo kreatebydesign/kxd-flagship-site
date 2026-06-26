@@ -1,0 +1,331 @@
+import type { CollectionConfig } from "payload";
+import { isAuthenticated } from "../access/index.ts";
+import { PAYLOAD_GROUPS } from "../admin/groups.ts";
+import { onProposalCreate } from "../hooks/sales-proposal-public.ts";
+import { onProposalStatusChange } from "../hooks/sales-proposals.ts";
+
+export const Proposals: CollectionConfig = {
+  slug: "proposals",
+  labels: { singular: "Proposal", plural: "Proposals" },
+  defaultSort: "-updatedAt",
+  lockDocuments: false,
+  hooks: {
+    beforeChange: [onProposalCreate],
+    afterChange: [onProposalStatusChange],
+  },
+  admin: {
+    useAsTitle: "title",
+    defaultColumns: [
+      "proposalNumber",
+      "title",
+      "status",
+      "lead",
+      "client",
+      "investment",
+      "paymentStatus",
+      "expiresAt",
+      "updatedAt",
+    ],
+    group: PAYLOAD_GROUPS.kxdOs,
+    description: "KXD Sales Engine — client proposals. Builder: /admin/sales/proposals",
+  },
+  access: {
+    read: isAuthenticated,
+    create: isAuthenticated,
+    update: isAuthenticated,
+    delete: isAuthenticated,
+  },
+  fields: [
+    {
+      name: "proposalNumber",
+      type: "text",
+      required: true,
+      unique: true,
+      label: "Proposal Number",
+      admin: { position: "sidebar" },
+    },
+    {
+      name: "status",
+      type: "select",
+      required: true,
+      defaultValue: "draft",
+      label: "Status",
+      options: [
+        { label: "Draft", value: "draft" },
+        { label: "Sent", value: "sent" },
+        { label: "Viewed", value: "viewed" },
+        { label: "Approved", value: "approved" },
+        { label: "Rejected", value: "rejected" },
+        { label: "Expired", value: "expired" },
+      ],
+      admin: { position: "sidebar" },
+    },
+    {
+      name: "approvalStatus",
+      type: "select",
+      label: "Approval Status",
+      defaultValue: "none",
+      options: [
+        { label: "None", value: "none" },
+        { label: "Changes Requested", value: "changes-requested" },
+        { label: "Declined", value: "declined" },
+        { label: "Pending Payment", value: "pending-payment" },
+        { label: "Ready", value: "ready" },
+      ],
+      admin: { position: "sidebar" },
+    },
+    {
+      name: "lead",
+      type: "relationship",
+      relationTo: "sales-leads",
+      label: "Lead",
+      admin: { position: "sidebar" },
+    },
+    {
+      name: "client",
+      type: "relationship",
+      relationTo: "clients",
+      label: "Client",
+      admin: { position: "sidebar" },
+    },
+    {
+      name: "revoked",
+      type: "checkbox",
+      label: "Revoked",
+      defaultValue: false,
+      admin: { position: "sidebar" },
+    },
+    {
+      type: "tabs",
+      tabs: [
+        {
+          label: "Proposal",
+          fields: [
+            { name: "title", type: "text", required: true, label: "Title" },
+            { name: "executiveSummary", type: "textarea", label: "Executive Summary" },
+            { name: "scope", type: "textarea", label: "Scope" },
+            { name: "deliverables", type: "textarea", label: "Deliverables" },
+            { name: "timeline", type: "textarea", label: "Timeline" },
+            { name: "terms", type: "textarea", label: "Terms" },
+            {
+              name: "faqs",
+              type: "json",
+              label: "FAQs",
+              admin: { description: "Array of { question, answer }." },
+            },
+            {
+              name: "sectionBlocks",
+              type: "json",
+              label: "Section Blocks",
+              admin: { description: "Ordered proposal sections from builder." },
+            },
+            {
+              name: "optionalServices",
+              type: "json",
+              label: "Optional Services",
+            },
+            {
+              name: "signaturePlaceholder",
+              type: "textarea",
+              label: "Signature Placeholder",
+              defaultValue: "Authorized signature · Date",
+            },
+            {
+              name: "approvalPlaceholder",
+              type: "textarea",
+              label: "Approval Placeholder",
+              defaultValue: "Client approval · Date",
+            },
+            {
+              name: "agreementText",
+              type: "textarea",
+              label: "Agreement Text",
+              admin: { description: "Embedded agreement shown in public proposal." },
+            },
+            {
+              name: "agreementVersion",
+              type: "text",
+              label: "Agreement Version",
+              defaultValue: "1.0",
+            },
+          ],
+        },
+        {
+          label: "Investment",
+          fields: [
+            { name: "investment", type: "number", label: "One-Time Investment ($)" },
+            { name: "recurringAmount", type: "number", label: "Recurring Amount ($/mo)" },
+            {
+              name: "investmentSummary",
+              type: "textarea",
+              label: "Investment Summary",
+            },
+            {
+              name: "depositType",
+              type: "select",
+              label: "Deposit Type",
+              defaultValue: "percent-50",
+              options: [
+                { label: "None", value: "none" },
+                { label: "25%", value: "percent-25" },
+                { label: "50%", value: "percent-50" },
+                { label: "Custom %", value: "custom-percent" },
+                { label: "Fixed Amount", value: "fixed" },
+                { label: "Full Payment", value: "full" },
+              ],
+            },
+            { name: "depositPercent", type: "number", label: "Custom Deposit %" },
+            { name: "depositFixedAmount", type: "number", label: "Fixed Deposit ($)" },
+            {
+              name: "depositRequired",
+              type: "checkbox",
+              label: "Deposit Required",
+              defaultValue: true,
+            },
+          ],
+        },
+        {
+          label: "Public Link",
+          fields: [
+            {
+              name: "publicToken",
+              type: "text",
+              unique: true,
+              label: "Public Token",
+              admin: { readOnly: true },
+            },
+            {
+              name: "publicTokenExpiresAt",
+              type: "date",
+              label: "Link Expires At",
+              admin: { date: { pickerAppearance: "dayAndTime" } },
+            },
+            {
+              name: "sentAt",
+              type: "date",
+              label: "Sent At",
+              admin: { date: { pickerAppearance: "dayAndTime" } },
+            },
+          ],
+        },
+        {
+          label: "Payment",
+          fields: [
+            {
+              name: "paymentStatus",
+              type: "select",
+              label: "Payment Status",
+              defaultValue: "none",
+              options: [
+                { label: "None", value: "none" },
+                { label: "Pending", value: "pending" },
+                { label: "Deposit Paid", value: "deposit-paid" },
+                { label: "Paid", value: "paid" },
+                { label: "Failed", value: "failed" },
+              ],
+            },
+            { name: "paymentIntentId", type: "text", label: "Payment Intent ID" },
+            { name: "checkoutSessionId", type: "text", label: "Checkout Session ID" },
+            { name: "paidAmount", type: "number", label: "Paid Amount ($)" },
+            { name: "remainingBalance", type: "number", label: "Remaining Balance ($)" },
+            {
+              name: "paymentDate",
+              type: "date",
+              label: "Payment Date",
+              admin: { date: { pickerAppearance: "dayAndTime" } },
+            },
+            {
+              name: "subscriptionPrepared",
+              type: "json",
+              label: "Subscription Prepared",
+              admin: { description: "Stripe subscription draft for recurring retainer." },
+            },
+          ],
+        },
+        {
+          label: "Analytics",
+          fields: [
+            {
+              name: "firstViewedAt",
+              type: "date",
+              label: "First Viewed At",
+              admin: { readOnly: true, date: { pickerAppearance: "dayAndTime" } },
+            },
+            {
+              name: "lastViewedAt",
+              type: "date",
+              label: "Last Viewed At",
+              admin: { readOnly: true, date: { pickerAppearance: "dayAndTime" } },
+            },
+            { name: "totalViews", type: "number", label: "Total Views", defaultValue: 0 },
+            {
+              name: "totalTimeOnProposalSeconds",
+              type: "number",
+              label: "Total Time on Proposal (seconds)",
+              defaultValue: 0,
+            },
+            {
+              name: "viewedSectionsSummary",
+              type: "json",
+              label: "Viewed Sections Summary",
+              admin: { readOnly: true },
+            },
+          ],
+        },
+        {
+          label: "Lifecycle",
+          fields: [
+            {
+              name: "expiresAt",
+              type: "date",
+              label: "Expires At",
+              admin: { date: { pickerAppearance: "dayAndTime" } },
+            },
+            {
+              name: "viewedAt",
+              type: "date",
+              label: "Viewed At",
+              admin: { date: { pickerAppearance: "dayAndTime" } },
+            },
+            {
+              name: "approvedAt",
+              type: "date",
+              label: "Approved At",
+              admin: { date: { pickerAppearance: "dayAndTime" } },
+            },
+            {
+              name: "conversionPreparedAt",
+              type: "date",
+              label: "Conversion Prepared At",
+              admin: { readOnly: true },
+            },
+            {
+              name: "conversionDraft",
+              type: "json",
+              label: "Conversion Draft",
+              admin: { readOnly: true },
+            },
+            {
+              name: "conversionExecutedAt",
+              type: "date",
+              label: "Conversion Executed At",
+              admin: { readOnly: true },
+            },
+            {
+              name: "conversionClientId",
+              type: "number",
+              label: "Conversion Client ID",
+              admin: { readOnly: true },
+            },
+            {
+              name: "archivedInPortal",
+              type: "checkbox",
+              label: "Archived in Portal Resources",
+              defaultValue: false,
+            },
+          ],
+        },
+      ],
+    },
+  ],
+};

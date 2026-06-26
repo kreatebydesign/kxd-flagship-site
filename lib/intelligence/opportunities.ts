@@ -12,6 +12,7 @@ import {
   retainerClientIds,
 } from "./context";
 import type { GrowthOpportunity, IntelligenceContext } from "./types";
+import { buildSalesOpportunities } from "@/lib/sales/intelligence";
 
 export function buildGrowthOpportunities(ctx: IntelligenceContext): GrowthOpportunity[] {
   const opportunities: GrowthOpportunity[] = [];
@@ -129,6 +130,8 @@ export function buildGrowthOpportunities(ctx: IntelligenceContext): GrowthOpport
       });
     }
   }
+
+  opportunities.push(...buildSalesOpportunities(ctx));
 
   opportunities.sort((a, b) => (b.estimatedBusinessValue ?? 0) - (a.estimatedBusinessValue ?? 0));
   return opportunities;

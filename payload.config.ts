@@ -37,8 +37,14 @@ import { PlatformApplications } from "./payload/collections/PlatformApplications
 import { ProjectInquiries } from "./payload/collections/ProjectInquiries.ts";
 import { Projects } from "./payload/collections/Projects.ts";
 import { PromoVideoRequests } from "./payload/collections/PromoVideoRequests.ts";
+import { ProposalAgreements } from "./payload/collections/ProposalAgreements.ts";
+import { ProposalSections } from "./payload/collections/ProposalSections.ts";
+import { ProposalViewEvents } from "./payload/collections/ProposalViewEvents.ts";
+import { Proposals } from "./payload/collections/Proposals.ts";
 import { ResearchLeads } from "./payload/collections/ResearchLeads.ts";
 import { Retainers } from "./payload/collections/Retainers.ts";
+import { SalesActivities } from "./payload/collections/SalesActivities.ts";
+import { SalesLeads } from "./payload/collections/SalesLeads.ts";
 import { Reviews } from "./payload/collections/Reviews.ts";
 import { Services } from "./payload/collections/Services.ts";
 import { SocialPostRequests } from "./payload/collections/SocialPostRequests.ts";
@@ -123,6 +129,12 @@ export default buildConfig({
     ExecutiveTimelineEvents,
     AutomationEvents,
     AutomationNotifications,
+    SalesLeads,
+    Proposals,
+    ProposalSections,
+    ProposalAgreements,
+    ProposalViewEvents,
+    SalesActivities,
     ClientInfrastructure,
     InfrastructureEvents,
     InfrastructureCosts,

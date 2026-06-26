@@ -72,6 +72,12 @@ export interface RevenueSummary {
   potentialExpansionRevenue: number;
   clientsWithoutRetainers: IntelligenceDoc[];
   missingRetainerCount: number;
+  pipelineValue: number;
+  expectedProposalMrr: number;
+  revenueWonThisMonth: number;
+  revenuePending: number;
+  proposalApprovalRate: number;
+  proposalViewRate: number;
 }
 
 export interface ClientRiskSummary {
@@ -163,6 +169,8 @@ export interface IntelligenceContext {
   executiveTimeline: IntelligenceDoc[];
   portalUsers: IntelligenceDoc[];
   executiveProfiles: IntelligenceDoc[];
+  salesLeads: IntelligenceDoc[];
+  proposals: IntelligenceDoc[];
   campaigns: IntelligenceDoc[];
   flyers: IntelligenceDoc[];
   videos: IntelligenceDoc[];

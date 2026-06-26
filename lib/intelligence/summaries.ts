@@ -31,6 +31,7 @@ import type {
   RevenueSummary,
 } from "./types";
 import { generateInsights } from "./insights";
+import { buildSalesRevenueMetrics } from "@/lib/sales/intelligence";
 
 function section(
   status: string,
@@ -217,6 +218,8 @@ export function buildRevenueSummary(ctx: IntelligenceContext): RevenueSummary {
     if (potential && potential > 0) potentialExpansionRevenue += potential;
   }
 
+  const salesMetrics = buildSalesRevenueMetrics(ctx);
+
   return {
     activeMrr: Math.round(activeMrr),
     upcomingMrr: Math.round(upcomingMrr),
@@ -224,6 +227,12 @@ export function buildRevenueSummary(ctx: IntelligenceContext): RevenueSummary {
     potentialExpansionRevenue: Math.round(potentialExpansionRevenue),
     clientsWithoutRetainers,
     missingRetainerCount: clientsWithoutRetainers.length,
+    pipelineValue: Math.round(salesMetrics.pipelineValue),
+    expectedProposalMrr: Math.round(salesMetrics.expectedProposalMrr),
+    revenueWonThisMonth: Math.round(salesMetrics.revenueWonThisMonth),
+    revenuePending: Math.round(salesMetrics.revenuePending),
+    proposalApprovalRate: salesMetrics.proposalApprovalRate,
+    proposalViewRate: salesMetrics.proposalViewRate,
   };
 }
 

@@ -2893,6 +2893,204 @@
   }
 }
 
+/* ── Sales Engine (Phase 6A) ─────────────────────────────────────────── */
+
+.kxd-os-sales-pipeline {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--kxd-os-space-5);
+  align-items: start;
+}
+
+.kxd-os-sales-pipeline__column {
+  min-width: 0;
+}
+
+.kxd-os-sales-pipeline__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--kxd-os-space-3);
+  margin-bottom: var(--kxd-os-space-2);
+}
+
+.kxd-os-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--kxd-os-space-4);
+}
+
+/* ── Public Proposal (Phase 6B) ─────────────────────────────────────── */
+
+.kxd-proposal-body {
+  background: #080808;
+  color: #f5f0e8;
+  min-height: 100vh;
+}
+
+.kxd-proposal {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 5rem;
+}
+
+.kxd-proposal-hero {
+  margin-bottom: 3rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid rgba(245, 240, 232, 0.08);
+}
+
+.kxd-proposal-eyebrow {
+  font-family: var(--font-outfit), sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(245, 240, 232, 0.5);
+}
+
+.kxd-proposal-title {
+  font-family: var(--font-cormorant), serif;
+  font-size: clamp(2.25rem, 5vw, 3.5rem);
+  font-weight: 400;
+  line-height: 1.1;
+  margin-top: 0.75rem;
+}
+
+.kxd-proposal-meta {
+  font-family: var(--font-outfit), sans-serif;
+  font-size: 0.8125rem;
+  color: rgba(245, 240, 232, 0.45);
+  margin-top: 0.5rem;
+}
+
+.kxd-proposal-lead {
+  font-family: var(--font-outfit), sans-serif;
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  color: rgba(245, 240, 232, 0.75);
+  margin-top: 1.25rem;
+}
+
+.kxd-proposal-section {
+  margin-bottom: 2.5rem;
+}
+
+.kxd-proposal-section h2 {
+  font-family: var(--font-cormorant), serif;
+  font-size: 1.75rem;
+  font-weight: 400;
+  margin-bottom: 0.75rem;
+}
+
+.kxd-proposal-section p {
+  font-family: var(--font-outfit), sans-serif;
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  color: rgba(245, 240, 232, 0.72);
+}
+
+.kxd-proposal-price {
+  font-family: var(--font-cormorant), serif;
+  font-size: 2rem;
+  color: #f5f0e8;
+}
+
+.kxd-proposal-price span {
+  font-size: 1rem;
+  opacity: 0.6;
+}
+
+.kxd-proposal-card {
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(245, 240, 232, 0.06);
+}
+
+.kxd-proposal-form {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.kxd-proposal-input,
+.kxd-proposal-textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(245, 240, 232, 0.1);
+  border-radius: 4px;
+  color: #f5f0e8;
+  font-family: var(--font-outfit), sans-serif;
+  font-size: 0.875rem;
+}
+
+.kxd-proposal-textarea {
+  min-height: 5rem;
+  resize: vertical;
+}
+
+.kxd-proposal-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: rgba(245, 240, 232, 0.7);
+}
+
+.kxd-proposal-signature {
+  width: 100%;
+  max-width: 600px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(245, 240, 232, 0.12);
+  border-radius: 4px;
+  touch-action: none;
+}
+
+.kxd-proposal-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.25rem;
+  background: #f5f0e8;
+  color: #080808;
+  border: none;
+  border-radius: 4px;
+  font-family: var(--font-outfit), sans-serif;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.kxd-proposal-btn--ghost {
+  background: transparent;
+  color: #f5f0e8;
+  border: 1px solid rgba(245, 240, 232, 0.2);
+}
+
+.kxd-proposal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.kxd-proposal-success {
+  color: #8fd4a8;
+  font-size: 0.9375rem;
+}
+
+.kxd-proposal-message {
+  margin-top: 2rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 4px;
+  font-size: 0.875rem;
+}
+
+@media (max-width: 640px) {
+  .kxd-proposal {
+    padding: 2rem 1rem 4rem;
+  }
+}
+
 /* ── Reduced motion ─────────────────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {

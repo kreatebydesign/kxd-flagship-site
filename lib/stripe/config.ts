@@ -1,15 +1,17 @@
 /**
- * Stripe architecture — prepared for future payment flows.
- * Not active until keys are configured.
+ * Stripe configuration — proposal deposits, full payment, recurring prep.
  */
-
 export type StripePaymentPurpose =
   | "discovery-call-deposit"
   | "project-deposit"
-  | "package-purchase";
+  | "package-purchase"
+  | "proposal-deposit"
+  | "proposal-full";
 
 export type StripeCheckoutMetadata = {
   purpose: StripePaymentPurpose;
+  proposalId?: string;
+  proposalNumber?: string;
   inquiryId?: string;
   packageSlug?: string;
   clientEmail?: string;
@@ -28,5 +30,3 @@ export function buildStripeMetadata(
     Object.entries(metadata).filter(([, value]) => value !== undefined),
   ) as Record<string, string>;
 }
-
-// Future: createCheckoutSession, createPaymentIntent, handleWebhook

@@ -24,6 +24,8 @@ import * as migration_20260627_client_launch_timeline from './20260627_client_la
 import * as migration_20260628_phase5b_infrastructure_manager from './20260628_phase5b_infrastructure_manager';
 import * as migration_20260629_phase5d_executive_timeline from './20260629_phase5d_executive_timeline';
 import * as migration_20260630_phase5e_automation_engine from './20260630_phase5e_automation_engine';
+import * as migration_20260701_phase6a_sales_engine from './20260701_phase6a_sales_engine';
+import * as migration_20260702_phase6b_client_acquisition from './20260702_phase6b_client_acquisition';
 
 export const migrations = [
   {
@@ -155,5 +157,15 @@ export const migrations = [
     up: migration_20260630_phase5e_automation_engine.up,
     down: migration_20260630_phase5e_automation_engine.down,
     name: '20260630_phase5e_automation_engine',
+  },
+  {
+    up: migration_20260701_phase6a_sales_engine.up,
+    down: migration_20260701_phase6a_sales_engine.down,
+    name: '20260701_phase6a_sales_engine',
+  },
+  {
+    up: migration_20260702_phase6b_client_acquisition.up,
+    down: migration_20260702_phase6b_client_acquisition.down,
+    name: '20260702_phase6b_client_acquisition',
   },
 ];

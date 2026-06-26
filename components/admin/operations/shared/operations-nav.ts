@@ -16,7 +16,13 @@ export type OperationsNavId =
   | "playbooks"
   | "growth"
   | "client-import"
-  | "client-launch";
+  | "client-launch"
+  | "sales-pipeline"
+  | "sales-leads"
+  | "sales-proposals"
+  | "sales-templates"
+  | "sales-activities"
+  | "sales-forecast";
 
 export type OperationsNavItem = {
   id: OperationsNavId;
@@ -64,6 +70,17 @@ export const NAV_GROUPS: OperationsNavGroup[] = [
       { id: "automation", label: "Automation", href: "/admin/operations/automation" },
       { id: "playbooks", label: "Playbooks", href: "/admin/operations/playbooks" },
       { id: "growth", label: "Growth", href: "/admin/operations/growth" },
+    ],
+  },
+  {
+    label: "Sales",
+    items: [
+      { id: "sales-pipeline", label: "Pipeline", href: "/admin/sales" },
+      { id: "sales-leads", label: "Leads", href: "/admin/sales/leads" },
+      { id: "sales-proposals", label: "Proposals", href: "/admin/sales/proposals" },
+      { id: "sales-templates", label: "Templates", href: "/admin/sales/templates" },
+      { id: "sales-activities", label: "Activities", href: "/admin/sales/activities" },
+      { id: "sales-forecast", label: "Forecast", href: "/admin/sales/forecast" },
     ],
   },
   {
