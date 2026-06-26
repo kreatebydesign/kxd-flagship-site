@@ -6,6 +6,7 @@ export type OperationsNavId =
   | "accounts"
   | "onboarding"
   | "founder"
+  | "founder-intelligence"
   | "creative"
   | "reels"
   | "audits"
@@ -31,6 +32,7 @@ export const NAV_GROUPS: OperationsNavGroup[] = [
     label: "Briefing",
     items: [
       { id: "executive", label: "Executive", href: "/admin/operations/executive" },
+      { id: "founder-intelligence", label: "Founder Intelligence", href: "/admin/operations/founder-intelligence" },
       { id: "today", label: "Today", href: "/admin/operations/today" },
       { id: "command", label: "Operations", href: "/admin/operations/command" },
       { id: "founder", label: "Founder", href: "/admin/operations/founder" },
