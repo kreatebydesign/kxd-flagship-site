@@ -1,9 +1,6 @@
 import Link from "next/link";
-import Image from "next/image";
-import { HeroCursorGlow } from "./HeroCursorGlow";
-import { WORK_REEL_FRAMES } from "@/lib/homepage/work-reel";
-
-const REEL_DOUBLED = [...WORK_REEL_FRAMES, ...WORK_REEL_FRAMES];
+import { HeroWorkReel } from "./HeroWorkReel";
+import { HeroCursorGlowLazy } from "./HeroCursorGlowLazy";
 
 const PROOF_POINTS = [
   "Websites that convert attention into demand.",
@@ -21,7 +18,7 @@ const GRAIN_SVG = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/
 export function HeroSection() {
   return (
     <section
-      className="relative flex min-h-[100dvh] flex-col overflow-hidden"
+      className="kxd-hero-section relative flex min-h-[100dvh] flex-col overflow-hidden"
       style={{ background: "var(--kxd-black-pure)" }}
     >
       {/* ── Video layer — slot for future brand footage ──
@@ -42,7 +39,7 @@ export function HeroSection() {
        * Soft KXD gold warmth follows the cursor with ~700ms lag.
        * Placed first so all content layers render above it.
        */}
-      <HeroCursorGlow />
+      <HeroCursorGlowLazy />
 
       {/*
        * Grain — luxury film texture, 2.8% opacity.
@@ -108,7 +105,7 @@ export function HeroSection() {
            * with easeOutCubic (1.05s) — same keyframe, gentler curve. Single unit.
            */}
           <h1
-            className="kxd-reveal kxd-hero-headline-reveal select-none font-serif font-light"
+            className="kxd-reveal kxd-hero-headline-reveal kxd-hero-lcp select-none font-serif font-light"
             style={{
               fontSize: "clamp(3.5rem, 5.5vw, 5.5rem)",
               lineHeight: 1.12,
@@ -180,26 +177,7 @@ export function HeroSection() {
       </div>
 
       {/* ── Reel strip — curated proof reel, calm horizontal drift ── */}
-      <div aria-hidden className="kxd-work-reel kxd-reveal kxd-reveal-delay-5 relative z-[1]">
-        <div className="kxd-work-reel__fade kxd-work-reel__fade--left" />
-        <div className="kxd-work-reel__fade kxd-work-reel__fade--right" />
-
-        <div className="kxd-reel-track kxd-work-reel__track">
-          {REEL_DOUBLED.map((frame, i) => (
-            <div key={`${frame.src}-${i}`} className="kxd-work-reel__frame">
-              <Image
-                src={frame.src}
-                alt={frame.alt}
-                fill
-                className="object-cover"
-                style={{ objectPosition: frame.objectPosition ?? "top center" }}
-                sizes="(max-width: 640px) 240px, 380px"
-                priority={false}
-              />
-            </div>
-          ))}
-        </div>
-      </div>
+      <HeroWorkReel />
 
       {/* ── Proof bar — three positioning statements, not industry labels ── */}
       <div

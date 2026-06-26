@@ -14,15 +14,20 @@ export const viewport = {
 const cormorant = Cormorant_Garamond({
   variable: "--font-cormorant",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
+  weight: ["300", "400"],
   style: ["normal", "italic"],
   display: "swap",
+  preload: true,
+  adjustFontFallback: true,
 });
 
 const outfit = Outfit({
   variable: "--font-outfit",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600"],
+  display: "swap",
+  preload: true,
+  adjustFontFallback: true,
 });
 
 export const metadata: Metadata = {

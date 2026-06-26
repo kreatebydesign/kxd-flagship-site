@@ -52,6 +52,9 @@ const nextConfig: NextConfig = {
     "@remotion/compositor-win32-x64-msvc",
   ],
   images: {
+    formats: ["image/avif", "image/webp"],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    imageSizes: [16, 32, 48, 64, 96, 128, 240, 384],
     remotePatterns: [
       {
         protocol: "https",

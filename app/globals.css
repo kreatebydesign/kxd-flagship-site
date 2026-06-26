@@ -1120,7 +1120,31 @@ main {
   to   { opacity: 1; }
 }
 
-/* ─────────────────── RESPONSIVE ─────────────────── */
+/* ─────────────────── MOBILE LCP ─────────────────── */
+
+/*
+ * Mobile hero headline is the LCP element. Opacity-0 reveal animations delay
+ * paint until ~1s+ after load. Keep desktop cinematic timing; show headline
+ * immediately on narrow viewports.
+ */
+@media (max-width: 767px) {
+  .kxd-hero-lcp {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .kxd-hero-section .kxd-reveal:not(.kxd-hero-lcp) {
+    animation-duration: 0.42s;
+    animation-delay: 0ms;
+  }
+
+  .kxd-hero-reel-animate {
+    animation: none !important;
+    opacity: 0.88;
+    transform: none;
+  }
+}
 
 /* 320–375px: prevent any single element from overflowing */
 @media (max-width: 400px) {

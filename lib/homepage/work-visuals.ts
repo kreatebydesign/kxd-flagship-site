@@ -48,7 +48,7 @@ export const OUTCOME_CAPABILITY_VISUALS: Record<string, WorkVisual> = {
 /** Systems momentum — Contractor → Service business → Premium motorsports */
 export const SYSTEMS_MOMENTUM_VISUALS: WorkVisual[] = [
   {
-    src: "/images/work/screenshots/martinsen-construction/desktop-home.png",
+    src: "/images/work/screenshots/martinsen-construction/desktop-home.webp",
     alt: "Martinsen Construction — contractor website rebuild",
     href: "/work/martinsen-construction",
     label: "Martinsen Construction",
@@ -56,7 +56,7 @@ export const SYSTEMS_MOMENTUM_VISUALS: WorkVisual[] = [
     objectPosition: "top",
   },
   {
-    src: "/images/work/screenshots/e-davis-enterprises/desktop-home.png",
+    src: "/images/work/screenshots/e-davis-enterprises/desktop-home.webp",
     alt: "E. Davis Enterprises — service business website rebuild",
     href: "/work/e-davis-enterprises",
     label: "E. Davis Enterprises",

@@ -23,7 +23,7 @@ export const WORK_REEL_FRAMES: WorkReelFrame[] = [
   },
   {
     // Martinsen Construction — contractor website
-    src: "/images/work/screenshots/martinsen-construction/desktop-home.png",
+    src: "/images/work/screenshots/martinsen-construction/desktop-home.webp",
     alt: "Martinsen Construction",
     objectPosition: "top center",
   },
@@ -47,7 +47,7 @@ export const WORK_REEL_FRAMES: WorkReelFrame[] = [
   },
   {
     // La Cocina — family restaurant
-    src: "/images/work/screenshots/la-cocina/desktop-home.png",
+    src: "/images/work/screenshots/la-cocina/desktop-home.webp",
     alt: "La Cocina",
     objectPosition: "top center",
   },
@@ -65,13 +65,13 @@ export const WORK_REEL_FRAMES: WorkReelFrame[] = [
   },
   {
     // E. Davis Enterprises — energy/trades
-    src: "/images/work/screenshots/e-davis-enterprises/desktop-home.png",
+    src: "/images/work/screenshots/e-davis-enterprises/desktop-home.webp",
     alt: "E. Davis Enterprises",
     objectPosition: "top center",
   },
   {
     // SBE / Hyde Lounge — premium nightlife
-    src: "/images/work/screenshots/sbe-hyde-lounge/clean-hero.png",
+    src: "/images/work/screenshots/sbe-hyde-lounge/clean-hero.webp",
     alt: "SBE / Hyde Lounge",
     objectPosition: "top center",
   },
