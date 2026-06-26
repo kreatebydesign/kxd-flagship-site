@@ -9,6 +9,7 @@ import {
 } from "@/components/os";
 import { OperationsPageHero } from "@/components/admin/operations/shared/OperationsPageHero";
 import { OperationsShell } from "@/components/admin/operations/shared/OperationsShell";
+import { ClientOpsNav } from "@/components/admin/operations/client-command/ClientOpsNav";
 import { formatTimelineDate } from "@/lib/executive-timeline/format";
 import type { ExecutiveTimelineClientData, ExecutiveTimelineDoc } from "@/lib/executive-timeline/types";
 
@@ -88,6 +89,8 @@ export function ExecutiveTimelineClientScreen({
             ← All clients
           </Link>
         </div>
+
+        <ClientOpsNav clientId={clientId} active="timeline" />
 
         <div className="kxd-os-ops-kpi-grid">
           <KxdMetric label="Total events" value={String(summary.totalEvents)} />

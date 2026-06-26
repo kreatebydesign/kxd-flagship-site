@@ -11,6 +11,7 @@ import {
 import { WorkspaceTabContent } from "./WorkspaceTabContent";
 import { WorkspaceTabNav } from "./WorkspaceTabNav";
 import { WorkspaceStat } from "./WorkspacePrimitives";
+import { ClientOpsNav } from "@/components/admin/operations/client-command/ClientOpsNav";
 
 export interface ClientWorkspaceScreenProps {
   clientId: number;
@@ -95,6 +96,7 @@ export function ClientWorkspaceScreen({
         </header>
 
         <div className="kxd-os-workspace__nav-wrap">
+          <ClientOpsNav clientId={clientId} active="workspace" />
           <WorkspaceTabNav clientId={clientId} activeTab={activeTab} />
         </div>
 

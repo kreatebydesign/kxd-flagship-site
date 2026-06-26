@@ -9,6 +9,7 @@ import {
 } from "@/components/os";
 import { OperationsPageHero } from "@/components/admin/operations/shared/OperationsPageHero";
 import { OperationsShell } from "@/components/admin/operations/shared/OperationsShell";
+import { ClientOpsNav } from "@/components/admin/operations/client-command/ClientOpsNav";
 import {
   formatInfraCurrency,
   formatInfraDate,
@@ -75,6 +76,8 @@ export function InfrastructureClientScreen({
             ← All clients
           </Link>
         </div>
+
+        <ClientOpsNav clientId={clientId} active="infrastructure" />
 
         {!record ? (
           <KxdEmptyState

@@ -140,13 +140,9 @@ export function ClientPortfolioScreen({
               const isCritical = row.internalPriority === "critical";
 
               return (
-                <Link
-                  key={row.clientId}
-                  href={`/admin/operations/clients/${row.clientId}`}
-                  className="kxd-os-portfolio-row--card"
-                >
+                <div key={row.clientId} className="kxd-os-portfolio-row--card">
                   <div className="kxd-os-portfolio-row__grid">
-                    <div>
+                    <Link href={`/admin/operations/clients/${row.clientId}`} className="kxd-os-portfolio-row__link">
                       <p className="kxd-os-portfolio-name">{row.name}</p>
                       <div className="kxd-os-portfolio-cell__meta">
                         <span className="kxd-os-meta">
@@ -162,7 +158,7 @@ export function ClientPortfolioScreen({
                       {duplicateHint && (
                         <p className="kxd-os-portfolio-note">{duplicateHint}</p>
                       )}
-                    </div>
+                    </Link>
 
                     <div className="kxd-os-portfolio-cell__stack">
                       <span className="kxd-os-caption">Monthly</span>
@@ -192,8 +188,17 @@ export function ClientPortfolioScreen({
                         <span className="kxd-os-meta">—</span>
                       ) : null}
                     </div>
+                    <div className="kxd-os-portfolio-cell__stack">
+                      <span className="kxd-os-caption">Command</span>
+                      <Link
+                        href={`/admin/operations/client-command/${row.clientId}`}
+                        className="kxd-os-link-quiet"
+                      >
+                        Open →
+                      </Link>
+                    </div>
                   </div>
-                </Link>
+                </div>
               );
             })}
           </div>
