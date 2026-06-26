@@ -7,6 +7,7 @@ import {
   calculateInfrastructureScore,
   calculateMonthlyStackCost,
 } from "./data";
+import { publishers } from "@/lib/automation/publishers";
 import type { InfraDoc } from "./types";
 
 export interface BackfillResult {
@@ -180,6 +181,19 @@ export async function ensureClientInfrastructureRecords(): Promise<BackfillResul
 
       existingClientIds.add(clientId);
       result.created++;
+
+      try {
+        await publishers.infrastructure.registryInitialized(
+          {
+            clientId,
+            infrastructureId: created.id as number,
+            primaryDomain: draft.primaryDomain ?? undefined,
+          },
+          payload,
+        );
+      } catch (err) {
+        console.error("[KXD Infrastructure] Automation publish failed:", err);
+      }
 
       if (onboarding?.hostingProvider || onboarding?.domainRegistrar) {
         const costs: InfraDoc[] = [];

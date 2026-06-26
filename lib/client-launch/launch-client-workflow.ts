@@ -1,6 +1,7 @@
 import type { Payload } from "payload";
 import type { ClientLaunchDraft, ClientLaunchResult } from "./types";
 import { appendImportedRawNotes } from "./append-imported-raw-notes";
+import { publishers } from "@/lib/automation/publishers";
 import { prepareLaunchRecords } from "./prepare-launch-records";
 import { slugifyBusinessName } from "./slug";
 
@@ -97,6 +98,22 @@ export async function launchClientWorkflow(
       source: timeline.source,
     },
   });
+
+  try {
+    await publishers.launch.clientLaunched(
+      {
+        clientId,
+        title: timeline.title,
+        summary: timeline.summary,
+        eventType: timeline.eventType,
+        createdBy: createdBy || "KXD Client Launch",
+        source: timeline.source,
+      },
+      payload,
+    );
+  } catch (err) {
+    console.error("[KXD Launch] Automation publish failed:", err);
+  }
 
   return {
     success: true,

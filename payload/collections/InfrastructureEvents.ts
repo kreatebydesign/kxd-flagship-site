@@ -1,12 +1,16 @@
 import type { CollectionConfig } from "payload";
 import { isAuthenticated } from "../access/index.ts";
 import { PAYLOAD_GROUPS } from "../admin/groups.ts";
+import { publishInfrastructureEventAutomation } from "../hooks/automation.ts";
 
 export const InfrastructureEvents: CollectionConfig = {
   slug: "infrastructure-events",
   labels: { singular: "Infrastructure Event", plural: "Infrastructure Events" },
   defaultSort: "-occurredAt",
   lockDocuments: false,
+  hooks: {
+    afterChange: [publishInfrastructureEventAutomation],
+  },
   admin: {
     useAsTitle: "title",
     defaultColumns: [

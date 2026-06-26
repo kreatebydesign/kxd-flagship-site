@@ -9,6 +9,7 @@ import {
   formatMissingSections,
   onboardingStatusLabel,
 } from "../../lib/client-onboarding.ts";
+import { publishers } from "../../lib/automation/publishers";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDoc = Record<string, any>;
@@ -25,6 +26,7 @@ function resolveClientId(raw: unknown): number | null {
 export const syncClientOnboardingSummary: CollectionAfterChangeHook = async ({
   doc,
   req,
+  previousDoc,
 }) => {
   const clientId = resolveClientId(doc.client);
   if (!clientId) return doc;
@@ -49,6 +51,36 @@ export const syncClientOnboardingSummary: CollectionAfterChangeHook = async ({
     });
   } catch (err) {
     console.error("[KXD Onboarding] Failed to sync client summary:", err);
+  }
+
+  const prevStatus = previousDoc?.status as string | undefined;
+  const newStatus = doc.status as string;
+
+  try {
+    if (newStatus === "submitted" && prevStatus !== "submitted") {
+      await publishers.onboarding.submitted(
+        {
+          clientId,
+          summary: `Client submitted onboarding intake (${readiness.score}% readiness).`,
+          onboardingId: doc.id as number,
+          readinessScore: readiness.score,
+        },
+        req.payload,
+      );
+    }
+
+    if (newStatus === "approved" && prevStatus !== "approved") {
+      await publishers.onboarding.approved(
+        {
+          clientId,
+          onboardingId: doc.id as number,
+          readinessScore: readiness.score,
+        },
+        req.payload,
+      );
+    }
+  } catch (err) {
+    console.error("[KXD Onboarding] Automation publish failed:", err);
   }
 
   return doc;

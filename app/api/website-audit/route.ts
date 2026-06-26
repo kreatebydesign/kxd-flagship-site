@@ -12,6 +12,7 @@ import {
   AuditRateLimitError,
 } from "@/lib/website-audit/rate-limit";
 import { runWebsiteAudit } from "@/lib/website-audit/analyzer";
+import { publishers } from "@/lib/automation/publishers";
 import {
   UnsafeAuditUrlError,
   validateSafePublicWebsiteUrl,
@@ -136,6 +137,40 @@ export async function POST(req: NextRequest) {
       } as any,
       overrideAccess: true,
     });
+
+    try {
+      const or: Array<{ primaryContactEmail?: { equals: string }; name?: { equals: string } }> = [];
+      if (email) or.push({ primaryContactEmail: { equals: email } });
+      if (company) or.push({ name: { equals: company } });
+
+      if (or.length > 0) {
+        const clientMatch = await payload.find({
+          collection: "clients",
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          where: { or } as any,
+          limit: 1,
+          depth: 0,
+          overrideAccess: true,
+        });
+
+        if (clientMatch.docs.length > 0) {
+          const matchedClient = clientMatch.docs[0];
+          await publishers.websiteAuditor.auditCompleted(
+            {
+              clientId: matchedClient.id as number,
+              websiteAuditId: record.id as number,
+              website: audit.websiteUrl,
+              overallScore: audit.overallScore,
+              grade: audit.grade,
+              email,
+            },
+            payload,
+          );
+        }
+      }
+    } catch (err) {
+      console.error("[KXD Audit] Executive timeline write failed:", err);
+    }
 
     return NextResponse.json({
       ok: true,

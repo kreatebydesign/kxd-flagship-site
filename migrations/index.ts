@@ -22,6 +22,8 @@ import * as migration_20260625_website_audit_abuse_protection from './20260625_w
 import * as migration_20260626_phase1_executive_client_profiles from './20260626_phase1_executive_client_profiles';
 import * as migration_20260627_client_launch_timeline from './20260627_client_launch_timeline';
 import * as migration_20260628_phase5b_infrastructure_manager from './20260628_phase5b_infrastructure_manager';
+import * as migration_20260629_phase5d_executive_timeline from './20260629_phase5d_executive_timeline';
+import * as migration_20260630_phase5e_automation_engine from './20260630_phase5e_automation_engine';
 
 export const migrations = [
   {
@@ -143,5 +145,15 @@ export const migrations = [
     up: migration_20260628_phase5b_infrastructure_manager.up,
     down: migration_20260628_phase5b_infrastructure_manager.down,
     name: '20260628_phase5b_infrastructure_manager',
+  },
+  {
+    up: migration_20260629_phase5d_executive_timeline.up,
+    down: migration_20260629_phase5d_executive_timeline.down,
+    name: '20260629_phase5d_executive_timeline',
+  },
+  {
+    up: migration_20260630_phase5e_automation_engine.up,
+    down: migration_20260630_phase5e_automation_engine.down,
+    name: '20260630_phase5e_automation_engine',
   },
 ];

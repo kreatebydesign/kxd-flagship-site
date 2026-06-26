@@ -7,6 +7,8 @@ import { lexicalEditor } from "@payloadcms/richtext-lexical";
 import { buildConfig } from "payload";
 import sharp from "sharp";
 
+import { AutomationEvents } from "./payload/collections/AutomationEvents.ts";
+import { AutomationNotifications } from "./payload/collections/AutomationNotifications.ts";
 import { BrandKitAssets } from "./payload/collections/BrandKitAssets.ts";
 import { BrandKits } from "./payload/collections/BrandKits.ts";
 import { CaseStudies } from "./payload/collections/CaseStudies.ts";
@@ -17,6 +19,7 @@ import { ClientProjects } from "./payload/collections/ClientProjects.ts";
 import { ClientRequests } from "./payload/collections/ClientRequests.ts";
 import { Clients } from "./payload/collections/Clients.ts";
 import { ExecutiveClientProfiles } from "./payload/collections/ExecutiveClientProfiles.ts";
+import { ExecutiveTimelineEvents } from "./payload/collections/ExecutiveTimelineEvents.ts";
 import { InfrastructureCosts } from "./payload/collections/InfrastructureCosts.ts";
 import { InfrastructureEvents } from "./payload/collections/InfrastructureEvents.ts";
 import { CreativeAssets } from "./payload/collections/CreativeAssets.ts";
@@ -117,6 +120,9 @@ export default buildConfig({
     ClientRequests,
     ClientOnboarding,
     ClientTimelineEvents,
+    ExecutiveTimelineEvents,
+    AutomationEvents,
+    AutomationNotifications,
     ClientInfrastructure,
     InfrastructureEvents,
     InfrastructureCosts,

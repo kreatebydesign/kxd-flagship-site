@@ -1,12 +1,16 @@
 import type { CollectionConfig } from "payload";
 import { isAuthenticated } from "../access/index.ts";
 import { PAYLOAD_GROUPS } from "../admin/groups.ts";
+import { publishProjectAutomation } from "../hooks/automation.ts";
 
 export const ClientProjects: CollectionConfig = {
   slug: "client-projects",
   labels: { singular: "Client Project", plural: "Client Projects" },
   defaultSort: "-createdAt",
   lockDocuments: false,
+  hooks: {
+    afterChange: [publishProjectAutomation],
+  },
   admin: {
     useAsTitle: "projectName",
     defaultColumns: ["projectName", "client", "projectType", "status", "priority", "targetLaunchDate"],

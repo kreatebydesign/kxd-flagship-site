@@ -11,6 +11,8 @@ export type OperationsNavId =
   | "reels"
   | "audits"
   | "infrastructure"
+  | "timeline"
+  | "automation"
   | "playbooks"
   | "growth"
   | "client-import"
@@ -58,6 +60,8 @@ export const NAV_GROUPS: OperationsNavGroup[] = [
     items: [
       { id: "audits", label: "Audits", href: "/admin/operations/audits" },
       { id: "infrastructure", label: "Infrastructure", href: "/admin/operations/infrastructure" },
+      { id: "timeline", label: "Timeline", href: "/admin/operations/timeline" },
+      { id: "automation", label: "Automation", href: "/admin/operations/automation" },
       { id: "playbooks", label: "Playbooks", href: "/admin/operations/playbooks" },
       { id: "growth", label: "Growth", href: "/admin/operations/growth" },
     ],
