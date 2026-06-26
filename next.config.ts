@@ -19,6 +19,21 @@ const nextConfig: NextConfig = {
         destination: "/",
         permanent: true,
       },
+      {
+        source: "/start",
+        destination: "/start-project",
+        permanent: true,
+      },
+      {
+        source: "/book-online",
+        destination: "/contact",
+        permanent: true,
+      },
+      {
+        source: "/service-page/online-strategy-session",
+        destination: "/contact",
+        permanent: true,
+      },
     ];
   },
   serverExternalPackages: [

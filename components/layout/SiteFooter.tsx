@@ -128,7 +128,7 @@ export function SiteFooter() {
 
         {/* Bottom bar — Inter utility type, no "(KXD)" */}
         <div
-          className="mt-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
+          className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
           style={{
             fontFamily: "var(--font-sans, Inter, sans-serif)",
             fontSize: "0.6875rem",
@@ -137,7 +137,23 @@ export function SiteFooter() {
             color: "var(--foreground-subtle)",
           }}
         >
-          <p>&copy; {year} {SITE.name}. All rights reserved.</p>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+            <p>&copy; {year} {SITE.name}. All rights reserved.</p>
+            <div className="flex items-center gap-4">
+              <Link
+                href="/privacy-policy"
+                className="transition hover:text-[var(--kxd-cream-muted)]"
+              >
+                Privacy Policy
+              </Link>
+              <Link
+                href="/terms-and-conditions"
+                className="transition hover:text-[var(--kxd-cream-muted)]"
+              >
+                Terms &amp; Conditions
+              </Link>
+            </div>
+          </div>
           <p>{SITE.location}</p>
         </div>
       </div>

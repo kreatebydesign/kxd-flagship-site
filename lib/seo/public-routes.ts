@@ -21,6 +21,8 @@ export const PUBLIC_SITEMAP_PATHS: string[] = [
   "/insights",
   ...STATIC_INSIGHTS.map((a) => `/insights/${a.slug}`),
   "/platforms",
+  "/privacy-policy",
+  "/terms-and-conditions",
 ];
 
 export function absolutePublicUrl(path: string): string {
