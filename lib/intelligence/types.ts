@@ -171,6 +171,7 @@ export interface IntelligenceContext {
   executiveProfiles: IntelligenceDoc[];
   salesLeads: IntelligenceDoc[];
   proposals: IntelligenceDoc[];
+  monthlyReports: IntelligenceDoc[];
   campaigns: IntelligenceDoc[];
   flyers: IntelligenceDoc[];
   videos: IntelligenceDoc[];

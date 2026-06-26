@@ -30,6 +30,7 @@ import { JuniorCreatorShifts } from "./payload/collections/JuniorCreatorShifts.t
 import { Inquiries } from "./payload/collections/Inquiries.ts";
 import { Insights } from "./payload/collections/Insights.ts";
 import { Media } from "./payload/collections/Media.ts";
+import { MonthlyReports } from "./payload/collections/MonthlyReports.ts";
 import { MonthlyDeliverables } from "./payload/collections/MonthlyDeliverables.ts";
 import { Partners } from "./payload/collections/Partners.ts";
 import { PortalUsers } from "./payload/collections/PortalUsers.ts";
@@ -41,6 +42,7 @@ import { ProposalAgreements } from "./payload/collections/ProposalAgreements.ts"
 import { ProposalSections } from "./payload/collections/ProposalSections.ts";
 import { ProposalViewEvents } from "./payload/collections/ProposalViewEvents.ts";
 import { Proposals } from "./payload/collections/Proposals.ts";
+import { ReportTemplates } from "./payload/collections/ReportTemplates.ts";
 import { ResearchLeads } from "./payload/collections/ResearchLeads.ts";
 import { Retainers } from "./payload/collections/Retainers.ts";
 import { SalesActivities } from "./payload/collections/SalesActivities.ts";
@@ -135,6 +137,8 @@ export default buildConfig({
     ProposalAgreements,
     ProposalViewEvents,
     SalesActivities,
+    MonthlyReports,
+    ReportTemplates,
     ClientInfrastructure,
     InfrastructureEvents,
     InfrastructureCosts,

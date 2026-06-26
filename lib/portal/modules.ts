@@ -13,6 +13,7 @@ export type ClientHqModuleId =
   | "invoices"
   | "meetings"
   | "analytics"
+  | "reports"
   | "website-health"
   | "resources"
   | "team"
@@ -35,6 +36,7 @@ export const CLIENT_HQ_MODULES: Record<ClientHqModuleId, ClientHqModuleConfig> =
   invoices: { id: "invoices", enabled: true, label: "Invoices" },
   meetings: { id: "meetings", enabled: true, label: "Meetings" },
   analytics: { id: "analytics", enabled: true, label: "Analytics" },
+  reports: { id: "reports", enabled: true, label: "Reports" },
   "website-health": { id: "website-health", enabled: true, label: "Website Health" },
   resources: { id: "resources", enabled: true, label: "Resources" },
   team: { id: "team", enabled: true, label: "Team" },

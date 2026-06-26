@@ -23,6 +23,7 @@ const NAV_ITEMS: ClientHqNavItem[] = [
   { id: "invoices", label: "Invoices", href: "/portal/invoices", moduleId: "invoices" },
   { id: "meetings", label: "Meetings", href: "/portal/meetings", moduleId: "meetings" },
   { id: "analytics", label: "Analytics", href: "/portal/analytics", moduleId: "analytics" },
+  { id: "reports", label: "Reports", href: "/portal/reports", moduleId: "reports" },
   { id: "website-health", label: "Website Health", href: "/portal/website-health", moduleId: "website-health" },
   { id: "resources", label: "Resources", href: "/portal/resources", moduleId: "resources" },
   { id: "team", label: "Team", href: "/portal/team", moduleId: "team" },
@@ -48,7 +49,7 @@ export const CLIENT_HQ_NAV_GROUPS: ClientHqNavGroup[] = [
   {
     label: "Intelligence",
     items: NAV_ITEMS.filter((i) =>
-      ["website-health", "analytics", "advisor"].includes(i.id),
+      ["website-health", "analytics", "reports", "advisor"].includes(i.id),
     ),
   },
   {

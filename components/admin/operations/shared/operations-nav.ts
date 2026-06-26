@@ -22,7 +22,8 @@ export type OperationsNavId =
   | "sales-proposals"
   | "sales-templates"
   | "sales-activities"
-  | "sales-forecast";
+  | "sales-forecast"
+  | "reports";
 
 export type OperationsNavItem = {
   id: OperationsNavId;
@@ -70,6 +71,7 @@ export const NAV_GROUPS: OperationsNavGroup[] = [
       { id: "automation", label: "Automation", href: "/admin/operations/automation" },
       { id: "playbooks", label: "Playbooks", href: "/admin/operations/playbooks" },
       { id: "growth", label: "Growth", href: "/admin/operations/growth" },
+      { id: "reports", label: "Reports", href: "/admin/operations/reports" },
     ],
   },
   {

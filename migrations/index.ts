@@ -26,6 +26,7 @@ import * as migration_20260629_phase5d_executive_timeline from './20260629_phase
 import * as migration_20260630_phase5e_automation_engine from './20260630_phase5e_automation_engine';
 import * as migration_20260701_phase6a_sales_engine from './20260701_phase6a_sales_engine';
 import * as migration_20260702_phase6b_client_acquisition from './20260702_phase6b_client_acquisition';
+import * as migration_20260703_phase6c_executive_reporting from './20260703_phase6c_executive_reporting';
 
 export const migrations = [
   {
@@ -167,5 +168,10 @@ export const migrations = [
     up: migration_20260702_phase6b_client_acquisition.up,
     down: migration_20260702_phase6b_client_acquisition.down,
     name: '20260702_phase6b_client_acquisition',
+  },
+  {
+    up: migration_20260703_phase6c_executive_reporting.up,
+    down: migration_20260703_phase6c_executive_reporting.down,
+    name: '20260703_phase6c_executive_reporting',
   },
 ];

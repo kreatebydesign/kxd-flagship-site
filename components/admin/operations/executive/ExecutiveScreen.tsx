@@ -14,6 +14,7 @@ import type {
   ActionItem,
   ExecutiveDashboardData,
 } from "@/lib/executive-dashboard";
+import type { ReportingDashboardData } from "@/lib/reporting/types";
 import { AUDIT_STATUS_LABEL } from "@/lib/website-audit/scoring";
 
 const PIPELINE_ORDER = [
@@ -56,10 +57,11 @@ function fmtTime(iso: string): string {
 
 export interface ExecutiveScreenProps {
   data: ExecutiveDashboardData;
+  reporting?: ReportingDashboardData;
   today: string;
 }
 
-export function ExecutiveScreen({ data, today }: ExecutiveScreenProps) {
+export function ExecutiveScreen({ data, reporting, today }: ExecutiveScreenProps) {
   const kpiItems = [
     { label: "Total Clients", value: String(data.kpis.totalClients) },
     { label: "Active Projects", value: String(data.kpis.activeProjects) },
@@ -194,6 +196,20 @@ export function ExecutiveScreen({ data, today }: ExecutiveScreenProps) {
             <KxdMetric key={kpi.label} label={kpi.label} value={kpi.value} />
           ))}
         </div>
+
+        {reporting ? (
+          <KxdSection label="Reporting">
+            <div className="kxd-os-operations-kpi-bar" style={{ marginBottom: "0.75rem" }}>
+              <KxdMetric label="Reports due" value={String(reporting.reportsDue)} />
+              <KxdMetric label="Generated" value={String(reporting.reportsGenerated)} />
+              <KxdMetric label="Published" value={String(reporting.reportsPublished)} />
+              <KxdMetric label="Viewed" value={String(reporting.reportsViewed)} />
+            </div>
+            <Link href="/admin/operations/reports" className="kxd-os-link-quiet">
+              Open Reporting Engine →
+            </Link>
+          </KxdSection>
+        ) : null}
 
         <div className="kxd-os-operations-split">
           <KxdSection label="Action Center">
