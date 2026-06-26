@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/accessibility-statement",
-        destination: "/contact",
+        destination: "/privacy-policy",
         permanent: true,
       },
       {

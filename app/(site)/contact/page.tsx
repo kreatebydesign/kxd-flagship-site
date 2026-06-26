@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import { ContactForm } from "@/components/contact/ContactForm";
 import { INQUIRY_EMAIL, SITE } from "@/lib/site";
-import { buildMetadata } from "@/lib/seo/metadata";
+import { absoluteUrl, buildMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = buildMetadata({
+const CONTACT_CANONICAL_PATH = "/contact";
+
+const contactMetadata = buildMetadata({
   title: "Start a Project",
   description:
     "Apply to work with Kreate by Design. KXD takes on a limited number of engagements — each reviewed personally to ensure the right fit.",
-  path: "/contact",
+  path: CONTACT_CANONICAL_PATH,
   keywords: [
     "Hire Luxury Web Designer",
     "Premium Web Design Agency Contact",
@@ -15,6 +17,18 @@ export const metadata: Metadata = buildMetadata({
     "KXD Project Inquiry",
   ],
 });
+
+export const metadata: Metadata = {
+  ...contactMetadata,
+  alternates: {
+    ...contactMetadata.alternates,
+    canonical: CONTACT_CANONICAL_PATH,
+  },
+  openGraph: {
+    ...contactMetadata.openGraph,
+    url: absoluteUrl(CONTACT_CANONICAL_PATH),
+  },
+};
 
 export default function ContactPage() {
   return (

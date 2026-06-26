@@ -25,7 +25,9 @@ export function buildMetadata(input: SeoInput = {}): Metadata {
     : `${SITE.shortName} · Luxury Digital Experiences & Infrastructure`;
 
   const description = input.description || SITE.description;
-  const canonical = absoluteUrl(input.path || "/");
+  const path = input.path || "/";
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  const canonicalUrl = absoluteUrl(normalizedPath);
   const ogImage = absoluteUrl(input.ogImage || DEFAULT_OG_IMAGE);
 
   return {
@@ -34,7 +36,8 @@ export function buildMetadata(input: SeoInput = {}): Metadata {
     description,
     keywords: input.keywords,
     alternates: {
-      canonical,
+      // Path-only canonical — never includes request query strings (e.g. /contact?service=…).
+      canonical: normalizedPath,
     },
     robots: input.noIndex
       ? { index: false, follow: false }
@@ -42,7 +45,7 @@ export function buildMetadata(input: SeoInput = {}): Metadata {
     openGraph: {
       type: input.type || "website",
       locale: SITE.locale,
-      url: canonical,
+      url: canonicalUrl,
       siteName: SITE.name,
       title,
       description,
