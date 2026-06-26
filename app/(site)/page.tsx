@@ -12,7 +12,6 @@ import { StructuredData } from "@/components/seo/StructuredData";
 import {
   localBusinessSchema,
   organizationSchema,
-  reviewSchema,
   websiteSchema,
 } from "@/lib/seo/schema";
 import { HOMEPAGE_REVIEWS } from "@/lib/homepage";
@@ -26,10 +25,9 @@ export default function HomePage() {
   }));
 
   const schema = [
-    organizationSchema(),
+    organizationSchema(reviews),
     localBusinessSchema(),
     websiteSchema(),
-    reviewSchema(reviews),
   ].filter(Boolean) as Record<string, unknown>[];
 
   return (

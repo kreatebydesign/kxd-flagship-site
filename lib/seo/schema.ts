@@ -2,8 +2,13 @@ import { SITE } from "@/lib/site";
 import { DEFAULT_OG_IMAGE } from "./site";
 import { absoluteUrl } from "./metadata";
 
-export function organizationSchema() {
-  return {
+export function organizationSchema(reviews?: {
+  authorName: string;
+  rating: number;
+  reviewText: string;
+  reviewDate: string;
+}[]) {
+  const schema: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Organization",
     "@id": `${SITE.url}/#organization`,
@@ -16,6 +21,38 @@ export function organizationSchema() {
     sameAs: Object.values(SITE.social),
     logo: absoluteUrl(DEFAULT_OG_IMAGE),
   };
+
+  if (reviews?.length) {
+    const ratings = reviews.map((review) => review.rating);
+
+    schema.aggregateRating = {
+      "@type": "AggregateRating",
+      ratingValue: (
+        ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length
+      ).toFixed(1),
+      reviewCount: reviews.length,
+      bestRating: 5,
+      worstRating: 1,
+    };
+
+    schema.review = reviews.map((review) => ({
+      "@type": "Review",
+      author: {
+        "@type": "Person",
+        name: review.authorName,
+      },
+      reviewRating: {
+        "@type": "Rating",
+        ratingValue: review.rating,
+        bestRating: 5,
+        worstRating: 1,
+      },
+      reviewBody: review.reviewText,
+      datePublished: review.reviewDate,
+    }));
+  }
+
+  return schema;
 }
 
 export function localBusinessSchema() {
@@ -71,6 +108,11 @@ export function breadcrumbSchema(items: { name: string; path: string }[]) {
   };
 }
 
+/**
+ * Deprecated compatibility helper.
+ * Reviews should be passed into organizationSchema(reviews) so the homepage
+ * only outputs one Organization object with one stable @id.
+ */
 export function reviewSchema(reviews: {
   authorName: string;
   rating: number;
@@ -79,38 +121,7 @@ export function reviewSchema(reviews: {
 }[]) {
   if (!reviews.length) return null;
 
-  const ratings = reviews.map((r) => r.rating);
-  const aggregateRating = {
-    "@type": "AggregateRating",
-    ratingValue: (
-      ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length
-    ).toFixed(1),
-    reviewCount: reviews.length,
-    bestRating: 5,
-    worstRating: 1,
-  };
-
-  return {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "@id": `${SITE.url}/#organization`,
-    aggregateRating,
-    review: reviews.map((review) => ({
-      "@type": "Review",
-      author: {
-        "@type": "Person",
-        name: review.authorName,
-      },
-      reviewRating: {
-        "@type": "Rating",
-        ratingValue: review.rating,
-        bestRating: 5,
-        worstRating: 1,
-      },
-      reviewBody: review.reviewText,
-      datePublished: review.reviewDate,
-    })),
-  };
+  return organizationSchema(reviews);
 }
 
 export function blogPostingSchema(input: {
