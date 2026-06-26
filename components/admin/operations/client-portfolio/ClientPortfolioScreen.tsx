@@ -1,15 +1,12 @@
 import Link from "next/link";
-import { KxdLogo } from "@/components/ui/KxdLogo";
 import {
   KxdBadge,
   KxdEmptyState,
-  KxdHeader,
   KxdPage,
   KxdSection,
-  KxdShell,
   KxdSurface,
-  KxdTabs,
 } from "@/components/os";
+import { OperationsShell } from "@/components/admin/operations/shared/OperationsShell";
 import {
   EXECUTIVE_PRIORITY_LABEL,
   EXECUTIVE_STATUS_LABEL,
@@ -17,17 +14,6 @@ import {
   fmtExecutiveMoney,
   type MergedExecutiveClientRow,
 } from "@/lib/executive-client-profile";
-
-const NAV_ITEMS = [
-  { id: "executive", label: "Executive", href: "/admin/operations/executive" },
-  { id: "command", label: "Operations", href: "/admin/operations/command" },
-  { id: "today", label: "Today", href: "/admin/operations/today" },
-  { id: "clients", label: "Clients", href: "/admin/operations/clients" },
-  { id: "accounts", label: "Accounts", href: "/admin/operations/accounts" },
-  { id: "onboarding", label: "Onboarding", href: "/admin/operations/onboarding" },
-  { id: "founder", label: "Founder", href: "/admin/operations/founder" },
-  { id: "creative", label: "Creative", href: "/admin/operations/creative" },
-] as const;
 
 function tierLabel(row: MergedExecutiveClientRow): string {
   if (row.tier) return EXECUTIVE_TIER_LABEL[row.tier];
@@ -77,19 +63,13 @@ export function ClientPortfolioScreen({
     : `${rows.length} relationships — revenue, health, and what matters next.`;
 
   return (
-    <KxdShell>
-      <KxdHeader className="kxd-os-header--portfolio">
-        <div className="kxd-os-header__bar">
-          <KxdLogo height={22} />
-          <time className="kxd-os-meta">{dateDisplay}</time>
-        </div>
-        <KxdTabs items={[...NAV_ITEMS]} activeId="clients" />
-      </KxdHeader>
-
+    <OperationsShell activeId="clients" dateDisplay={dateDisplay}>
       <KxdPage className="kxd-os-page--portfolio">
         <header className="kxd-os-portfolio-hero">
           <p className="kxd-os-eyebrow">Client intelligence</p>
-          <h1 className="kxd-os-display kxd-os-portfolio-hero__title">Client Portfolio</h1>
+          <h1 className="kxd-os-headline kxd-os-headline--presence kxd-os-portfolio-hero__title">
+            Client Portfolio
+          </h1>
           <p className="kxd-os-portfolio-hero__lead">
             Executive visibility across active relationships, revenue, health, and next
             actions.
@@ -219,6 +199,6 @@ export function ClientPortfolioScreen({
           </div>
         )}
       </KxdPage>
-    </KxdShell>
+    </OperationsShell>
   );
 }

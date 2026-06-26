@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 
 export default function ClientImportPage() {
   return (
-    <OperationsShell activeId="clients">
+    <OperationsShell activeId="client-import">
       <KxdPage className="kxd-os-page--ops">
         <header className="kxd-os-ops-hero">
           <div className="kxd-os-ops-hero__top">
@@ -24,7 +24,7 @@ export default function ClientImportPage() {
             </Link>
           </div>
           <p className="kxd-os-eyebrow">KXD OS · Client Import</p>
-          <h1 className="kxd-os-display kxd-os-ops-hero__title">Client Import</h1>
+          <h1 className="kxd-os-headline kxd-os-ops-hero__title">Client Import</h1>
           <p className="kxd-os-ops-hero__lead">
             Paste structured JSON for an existing client. Import runs through the canonical launch
             workflow — creating or updating Client, Executive Profile, Retainer, and timeline

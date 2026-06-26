@@ -12,26 +12,16 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { KxdLogo } from "@/components/ui/KxdLogo";
-
-// ── Brand tokens ──────────────────────────────────────────────────────────────
-
-const C = {
-  bgBase:     "#080808",
-  bgElevated: "#0B0B0B",
-  bgInput:    "#0B0B0B",
-  gold:       "#C9A962",
-  goldDim:    "rgba(201,169,98,0.55)",
-  goldFaint:  "rgba(255,255,255,0.035)",
-  cream:      "#F5F1E8",
-  creamMuted: "rgba(245,241,232,0.72)",
-  border:     "rgba(255,255,255,0.08)",
-  borderGold: "rgba(201,169,98,0.16)",
-  red:        "#d25a5a",
-  green:      "#C9A962",
-  sans:       "var(--font-outfit, Inter, system-ui)",
-  serif:      "var(--font-cormorant, Georgia)",
-} as const;
+import { OperationsPageHero } from "@/components/admin/operations/shared/OperationsPageHero";
+import { OperationsShell } from "@/components/admin/operations/shared/OperationsShell";
+import { OpsCard, OpsSectionHead, OpsStatusBadge } from "@/components/admin/operations/shared/OpsBriefing";
+import {
+  KxdButton,
+  KxdPage,
+  KxdSection,
+  KxdSurface,
+  type KxdBadgeVariant,
+} from "@/components/os";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDoc = Record<string, any>;
@@ -49,87 +39,94 @@ function screenshotCount(doc: AnyDoc): number {
   return doc.capturedScreenshots.length;
 }
 
-// ── Sub-components ────────────────────────────────────────────────────────────
+function statusVariant(status: string): KxdBadgeVariant {
+  switch (status) {
+    case "new":
+      return "tier";
+    case "storyboarding":
+    case "scripting":
+    case "editing":
+    case "review":
+      return "warning";
+    case "approved":
+    case "delivered":
+      return "success";
+    case "archived":
+      return "default";
+    default:
+      return "critical";
+  }
+}
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
+function pipelineStatusVariant(status: string, state?: string): KxdBadgeVariant {
+  if (state === "loading" || status === "rendering" || status === "capturing" || status === "generating") {
+    return "warning";
+  }
+  if (status === "complete" || state === "done") return "success";
+  if (status === "failed" || state === "error") return "critical";
+  return "default";
+}
+
+function StepPanel({
+  label,
+  accent = false,
+  children,
+}: {
+  label: string;
+  accent?: boolean;
+  children: React.ReactNode;
+}) {
   return (
-    <p style={{
-      fontFamily:    C.sans,
-      fontSize:      "0.4375rem",
-      letterSpacing: "0.16em",
-      textTransform: "uppercase" as const,
-      color:         C.goldDim,
-      marginBottom:  "1rem",
-    }}>
-      {children}
-    </p>
+    <KxdSurface variant={accent ? "raised" : "panel"} className="kxd-os-ops-workflow-panel">
+      <KxdSection label={label}>{children}</KxdSection>
+    </KxdSurface>
   );
 }
 
-function Panel({ children, accent = false }: { children: React.ReactNode; accent?: boolean }) {
-  return (
-    <div style={{
-      background: accent ? C.goldFaint : C.bgElevated,
-      border:     `1px solid ${accent ? C.borderGold : C.border}`,
-      padding:    "1.5rem",
-    }}>
-      {children}
-    </div>
-  );
-}
-
-function StatusBadge({ label, color }: { label: string; color: string }) {
-  return (
-    <span style={{
-      fontFamily:    C.sans,
-      fontSize:      "0.4375rem",
-      letterSpacing: "0.12em",
-      textTransform: "uppercase" as const,
-      color,
-      border:        `1px solid currentColor`,
-      padding:       "0.25rem 0.625rem",
-      opacity:       0.9,
-    }}>
-      {label}
-    </span>
-  );
+function ActionFeedback({ message, isError }: { message: string; isError: boolean }) {
+  if (isError) {
+    return (
+      <div className="kxd-os-ops-alert kxd-os-ops-alert--error mt-3">
+        <p>{message}</p>
+      </div>
+    );
+  }
+  return <p className="kxd-os-meta mt-3">{message}</p>;
 }
 
 // ── Screenshot grid ───────────────────────────────────────────────────────────
 
 function ScreenshotGrid({ screenshots }: { screenshots: AnyDoc[] }) {
   const LABELS: Record<string, string> = {
-    hero:         "Hero",
-    services:     "Services",
+    hero: "Hero",
+    services: "Services",
     testimonials: "Testimonials",
     "cta-footer": "CTA / Footer",
     "full-brand": "Full Page",
   };
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "0.75rem" }}>
+    <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-3">
       {screenshots.map((ss: AnyDoc, i: number) => {
-        const url   = ss.url || ss.filename || null;
+        const url = ss.url || ss.filename || null;
         const label = LABELS[ss.alt?.toLowerCase().split("—")[1]?.trim() || ""] || `Screenshot ${i + 1}`;
         return (
-          <div key={ss.id || i} style={{ background: C.bgInput, border: `1px solid ${C.border}`, overflow: "hidden" }}>
+          <KxdSurface key={ss.id || i} variant="panel" className="overflow-hidden">
             {url ? (
               <img
                 src={url}
                 alt={ss.alt || label}
-                style={{ width: "100%", height: "140px", objectFit: "cover", display: "block" }}
+                className="block h-[140px] w-full object-cover"
               />
             ) : (
-              <div style={{ width: "100%", height: "140px", background: "rgba(255,255,255,0.03)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(255,255,255,0.18)" }}>No preview</p>
+              <div className="flex h-[140px] items-center justify-center bg-white/[0.03]">
+                <p className="kxd-os-caption">No preview</p>
               </div>
             )}
-            <div style={{ padding: "0.625rem 0.75rem" }}>
-              <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.1em", textTransform: "uppercase" as const, color: C.goldDim }}>
-                {ss.alt || label}
-              </p>
+            <div className="p-3">
+              <p className="kxd-os-section__label">{ss.alt || label}</p>
             </div>
-          </div>
+          </KxdSurface>
         );
       })}
     </div>
@@ -139,21 +136,17 @@ function ScreenshotGrid({ screenshots }: { screenshots: AnyDoc[] }) {
 // ── Scene sequence display ────────────────────────────────────────────────────
 
 function SceneSequenceBlock({ text }: { text: string }) {
-  const scenes = text.split("---").map(s => s.trim()).filter(Boolean);
-  if (scenes.length === 0) return (
-    <pre style={{ fontFamily: "monospace", fontSize: "0.8125rem", color: C.creamMuted, lineHeight: 1.7, whiteSpace: "pre-wrap" as const, margin: 0 }}>
-      {text}
-    </pre>
-  );
+  const scenes = text.split("---").map((s) => s.trim()).filter(Boolean);
+  if (scenes.length === 0) {
+    return <pre className="kxd-os-ops-pre m-0 max-h-none">{text}</pre>;
+  }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column" as const, gap: "1rem" }}>
+    <div className="flex flex-col gap-4">
       {scenes.map((scene, i) => (
-        <div key={i} style={{ background: C.bgInput, border: `1px solid ${C.border}`, padding: "1rem 1.25rem" }}>
-          <pre style={{ fontFamily: "monospace", fontSize: "0.8125rem", color: C.creamMuted, lineHeight: 1.8, whiteSpace: "pre-wrap" as const, margin: 0 }}>
-            {scene}
-          </pre>
-        </div>
+        <KxdSurface key={i} variant="panel" className="p-4">
+          <pre className="kxd-os-ops-pre m-0 max-h-none">{scene}</pre>
+        </KxdSurface>
       ))}
     </div>
   );
@@ -162,19 +155,15 @@ function SceneSequenceBlock({ text }: { text: string }) {
 // ── Caption options block ─────────────────────────────────────────────────────
 
 function CaptionOptionsBlock({ text }: { text: string }) {
-  const options = text.split("---").map(s => s.trim()).filter(Boolean);
+  const options = text.split("---").map((s) => s.trim()).filter(Boolean);
   const letters = ["A", "B", "C"];
   return (
-    <div style={{ display: "flex", flexDirection: "column" as const, gap: "0.75rem" }}>
+    <div className="flex flex-col gap-3">
       {options.map((caption, i) => (
-        <div key={i} style={{ background: C.bgInput, border: `1px solid ${C.border}`, padding: "0.875rem 1rem" }}>
-          <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.14em", textTransform: "uppercase" as const, color: C.goldDim, marginBottom: "0.5rem" }}>
-            Option {letters[i] || i + 1}
-          </p>
-          <p style={{ fontFamily: C.sans, fontSize: "0.75rem", color: C.cream, lineHeight: 1.6 }}>
-            {caption}
-          </p>
-        </div>
+        <KxdSurface key={i} variant="panel" className="p-4">
+          <p className="kxd-os-section__label mb-2">Option {letters[i] || i + 1}</p>
+          <p className="kxd-os-body">{caption}</p>
+        </KxdSurface>
       ))}
     </div>
   );
@@ -184,24 +173,24 @@ function CaptionOptionsBlock({ text }: { text: string }) {
 
 export function ReelDetailClient({ doc }: { doc: AnyDoc }) {
   const [screenshotState, setScreenshotState] = useState<"idle" | "loading" | "done" | "error">("idle");
-  const [screenshotMsg,   setScreenshotMsg]   = useState<string | null>(null);
+  const [screenshotMsg, setScreenshotMsg] = useState<string | null>(null);
   const [storyboardState, setStoryboardState] = useState<"idle" | "loading" | "done" | "error">("idle");
-  const [storyboardMsg,   setStoryboardMsg]   = useState<string | null>(null);
-  const [renderState,     setRenderState]     = useState<"idle" | "loading" | "done" | "error">("idle");
-  const [renderMsg,       setRenderMsg]       = useState<string | null>(null);
-  const [renderedUrl,     setRenderedUrl]     = useState<string | null>(doc.renderedVideoUrl || null);
+  const [storyboardMsg, setStoryboardMsg] = useState<string | null>(null);
+  const [renderState, setRenderState] = useState<"idle" | "loading" | "done" | "error">("idle");
+  const [renderMsg, setRenderMsg] = useState<string | null>(null);
+  const [renderedUrl, setRenderedUrl] = useState<string | null>(doc.renderedVideoUrl || null);
 
   const screenshots: AnyDoc[] = Array.isArray(doc.capturedScreenshots) ? doc.capturedScreenshots : [];
-  const shotCount   = screenshotCount(doc);
-  const hasStoryboard  = doc.storyboardGenerationStatus === "complete" && doc.generatedScript;
+  const shotCount = screenshotCount(doc);
+  const hasStoryboard = doc.storyboardGenerationStatus === "complete" && doc.generatedScript;
   const hasScreenshots = doc.screenshotStatus === "complete" && shotCount > 0;
-  const hasRender      = (doc.renderStatus === "complete" && !!renderedUrl) || !!renderedUrl;
+  const hasRender = (doc.renderStatus === "complete" && !!renderedUrl) || !!renderedUrl;
 
   async function captureScreenshots() {
     setScreenshotState("loading");
     setScreenshotMsg(null);
     try {
-      const res  = await fetch("/api/admin/reels/screenshot", {
+      const res = await fetch("/api/admin/reels/screenshot", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ promoVideoRequestId: doc.id }),
@@ -224,7 +213,7 @@ export function ReelDetailClient({ doc }: { doc: AnyDoc }) {
     setStoryboardState("loading");
     setStoryboardMsg(null);
     try {
-      const res  = await fetch("/api/admin/reels/storyboard", {
+      const res = await fetch("/api/admin/reels/storyboard", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ promoVideoRequestId: doc.id }),
@@ -251,10 +240,10 @@ export function ReelDetailClient({ doc }: { doc: AnyDoc }) {
     setRenderState("loading");
     setRenderMsg(null);
     try {
-      const res  = await fetch("/api/admin/reels/render", {
-        method:  "POST",
+      const res = await fetch("/api/admin/reels/render", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ reelRequestId: doc.id, manifestOnly }),
+        body: JSON.stringify({ reelRequestId: doc.id, manifestOnly }),
       });
       const data = await res.json();
       if (data.success) {
@@ -279,483 +268,344 @@ export function ReelDetailClient({ doc }: { doc: AnyDoc }) {
   }
 
   return (
-    <div style={{ background: C.bgBase, minHeight: "100vh", color: C.cream, fontFamily: C.sans, WebkitFontSmoothing: "antialiased" }}>
-
-      {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <div style={{ padding: "1.25rem", borderBottom: `1px solid ${C.borderGold}`, position: "sticky", top: 0, zIndex: 50, background: C.bgBase }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-            <KxdLogo />
-            <div>
-              <p style={{ color: C.goldDim, fontSize: "0.8125rem", letterSpacing: "0.1em" }}>Reel Detail</p>
-              <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "1rem", color: C.cream, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "24rem" }}>
-                {doc.videoTitle || "Untitled Reel"}
-              </p>
-            </div>
-          </div>
-          <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-            <Link href="/admin/operations/reels" style={{ color: C.goldDim, fontSize: "0.8125rem", letterSpacing: "0.1em", textDecoration: "none" }}>
+    <OperationsShell activeId="reels">
+      <KxdPage className="kxd-os-page--ops">
+        <header className="kxd-os-ops-hero">
+          <div className="kxd-os-ops-hero__top">
+            <Link href="/admin/operations/reels" className="kxd-os-ops-hero__back">
               ← Reels
             </Link>
-            <Link href={`/admin/collections/promo-video-requests/${doc.id}`} style={{ color: "rgba(255,255,255,0.2)", fontSize: "0.8125rem", letterSpacing: "0.1em", textDecoration: "none" }}>
+            <Link
+              href={`/admin/collections/promo-video-requests/${doc.id}`}
+              className="kxd-os-link-quiet"
+            >
               Edit in Payload →
             </Link>
           </div>
-        </div>
-      </div>
-
-      <div style={{ padding: "2rem", display: "flex", flexDirection: "column" as const, gap: "2rem" }}>
+          <OperationsPageHero
+            eyebrow="KXD OS · Reel Detail"
+            title={doc.videoTitle || "Untitled Reel"}
+            lead="Screenshot capture, storyboard generation, and MP4 render for this website reel."
+            presence
+          />
+        </header>
 
         {/* ── Brief summary ───────────────────────────────────────────────── */}
-        <Panel>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", flexWrap: "wrap" as const }}>
-            <div>
-              <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.14em", textTransform: "uppercase" as const, color: C.goldDim, marginBottom: "0.5rem" }}>
-                {clientName(doc)}
-              </p>
-              <h1 style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "clamp(1.5rem, 3vw, 2rem)", color: C.cream, lineHeight: 1.1 }}>
+        <OpsCard className="mb-10">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="min-w-0 flex-1">
+              <p className="kxd-os-section__label">{clientName(doc)}</p>
+              <h2 className="kxd-os-headline kxd-os-headline--presence mt-2">
                 {doc.videoTitle || "Untitled Reel"}
-              </h1>
+              </h2>
               {doc.websiteUrl && (
-                <a href={doc.websiteUrl} target="_blank" rel="noopener noreferrer"
-                  style={{ fontFamily: "monospace", fontSize: "0.8125rem", color: C.goldDim, marginTop: "0.5rem", display: "inline-block" }}>
+                <a
+                  href={doc.websiteUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="kxd-os-ops-link-row--external kxd-os-ops-link-row--inline"
+                >
                   {doc.websiteUrl} ↗
                 </a>
               )}
             </div>
-            <div style={{ display: "flex", flexDirection: "column" as const, gap: "0.5rem", alignItems: "flex-end" }}>
-              <StatusBadge label={(doc.status || "new").replace("-", " ")} color={C.gold} />
-              {doc.platform    && <StatusBadge label={doc.platform}    color={C.creamMuted} />}
-              {doc.visualStyle && <StatusBadge label={doc.visualStyle} color={C.creamMuted} />}
+            <div className="flex flex-col items-end gap-2">
+              <OpsStatusBadge
+                label={(doc.status || "new").replace("-", " ")}
+                variant={statusVariant(String(doc.status ?? "new"))}
+              />
+              {doc.platform && <OpsStatusBadge label={doc.platform} variant="default" />}
+              {doc.visualStyle && <OpsStatusBadge label={doc.visualStyle} variant="default" />}
             </div>
           </div>
           {doc.goal && (
-            <div style={{ marginTop: "1.25rem", paddingTop: "1rem", borderTop: `1px solid ${C.border}` }}>
-              <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.2)", marginBottom: "0.375rem" }}>
-                Goal
-              </p>
-              <p style={{ fontFamily: C.sans, fontSize: "0.75rem", color: C.creamMuted, lineHeight: 1.6 }}>
-                {doc.goal}
-              </p>
+            <div className="mt-5 border-t border-white/[0.08] pt-4">
+              <p className="kxd-os-section__label">Goal</p>
+              <p className="kxd-os-body mt-2">{doc.goal}</p>
             </div>
           )}
-        </Panel>
+        </OpsCard>
 
         {/* ── Action panel ────────────────────────────────────────────────── */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1rem" }}>
-
+        <div className="kxd-os-operations-columns">
           {/* Screenshot action */}
-          <Panel accent={!hasScreenshots}>
-            <SectionLabel>Step 01 — Screenshot Capture</SectionLabel>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1rem" }}>
+          <StepPanel label="Step 01 — Screenshot Capture" accent={!hasScreenshots}>
+            <div className="mb-4 flex items-start justify-between gap-3">
               <div>
-                <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: C.cream, marginBottom: "0.375rem" }}>
+                <p className="kxd-os-body mb-1">
                   {hasScreenshots ? `${shotCount} sections captured` : "No screenshots yet"}
                 </p>
-                <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.3)", lineHeight: 1.5 }}>
+                <p className="kxd-os-meta">
                   Playwright captures hero, services, testimonials, CTA, and full-page sections.
                 </p>
               </div>
-              <StatusBadge
+              <OpsStatusBadge
                 label={doc.screenshotStatus || "idle"}
-                color={doc.screenshotStatus === "complete" ? C.gold : doc.screenshotStatus === "failed" ? C.red : C.goldDim}
+                variant={pipelineStatusVariant(String(doc.screenshotStatus ?? "idle"))}
               />
             </div>
             {doc.websiteUrl ? (
-              <button
+              <KxdButton
                 onClick={captureScreenshots}
-                disabled={screenshotState === "loading"}
-                style={{
-                  fontFamily:    C.sans,
-                  fontWeight:    500,
-                  fontSize:      "0.5rem",
-                  letterSpacing: "0.14em",
-                  textTransform: "uppercase" as const,
-                  color:         C.bgBase,
-                  background:    screenshotState === "loading"
-                    ? "rgba(201,169,98,0.4)"
-                    : "linear-gradient(180deg, #d1b06b 0%, #c9a962 48%, #b09040 100%)",
-                  border:        "none",
-                  padding:       "0.75rem 1.5rem",
-                  cursor:        screenshotState === "loading" ? "not-allowed" : "pointer",
-                  width:         "100%",
-                }}
+                loading={screenshotState === "loading"}
+                className="w-full"
               >
-                {screenshotState === "loading" ? "Capturing…" : hasScreenshots ? "Recapture Screenshots" : "Capture Screenshots"}
-              </button>
+                {screenshotState === "loading"
+                  ? "Capturing…"
+                  : hasScreenshots
+                    ? "Recapture Screenshots"
+                    : "Capture Screenshots"}
+              </KxdButton>
             ) : (
-              <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.red }}>
-                No website URL. Edit this record and add one.
-              </p>
+              <p className="kxd-os-ops-alert kxd-os-ops-alert--error">No website URL. Edit this record and add one.</p>
             )}
             {screenshotMsg && (
-              <p style={{
-                fontFamily: C.sans,
-                fontSize:   "0.5rem",
-                lineHeight: 1.5,
-                marginTop:  "0.75rem",
-                color:      screenshotState === "error" ? C.red : C.gold,
-              }}>
-                {screenshotMsg}
-              </p>
+              <ActionFeedback message={screenshotMsg} isError={screenshotState === "error"} />
             )}
-          </Panel>
+          </StepPanel>
 
           {/* Storyboard action */}
-          <Panel accent={hasScreenshots && !hasStoryboard}>
-            <SectionLabel>Step 02 — Storyboard Generation</SectionLabel>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1rem" }}>
+          <StepPanel label="Step 02 — Storyboard Generation" accent={hasScreenshots && !hasStoryboard}>
+            <div className="mb-4 flex items-start justify-between gap-3">
               <div>
-                <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: C.cream, marginBottom: "0.375rem" }}>
+                <p className="kxd-os-body mb-1">
                   {hasStoryboard ? "Storyboard complete" : "No storyboard yet"}
                 </p>
-                <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.3)", lineHeight: 1.5 }}>
+                <p className="kxd-os-meta">
                   Brand-aware AI generation: hook, scene sequence, transitions, captions, CTA, and music direction.
                 </p>
               </div>
-              <StatusBadge
+              <OpsStatusBadge
                 label={doc.storyboardGenerationStatus || "idle"}
-                color={doc.storyboardGenerationStatus === "complete" ? C.gold : doc.storyboardGenerationStatus === "failed" ? C.red : C.goldDim}
+                variant={pipelineStatusVariant(String(doc.storyboardGenerationStatus ?? "idle"))}
               />
             </div>
-            <button
+            <KxdButton
               onClick={generateStoryboard}
-              disabled={storyboardState === "loading"}
-              style={{
-                fontFamily:    C.sans,
-                fontWeight:    500,
-                fontSize:      "0.5rem",
-                letterSpacing: "0.14em",
-                textTransform: "uppercase" as const,
-                color:         C.bgBase,
-                background:    storyboardState === "loading"
-                  ? "rgba(201,169,98,0.4)"
-                  : "linear-gradient(180deg, #d1b06b 0%, #c9a962 48%, #b09040 100%)",
-                border:        "none",
-                padding:       "0.75rem 1.5rem",
-                cursor:        storyboardState === "loading" ? "not-allowed" : "pointer",
-                width:         "100%",
-              }}
+              loading={storyboardState === "loading"}
+              className="w-full"
             >
-              {storyboardState === "loading" ? "Generating…" : hasStoryboard ? "Regenerate Storyboard" : "Generate Storyboard"}
-            </button>
+              {storyboardState === "loading"
+                ? "Generating…"
+                : hasStoryboard
+                  ? "Regenerate Storyboard"
+                  : "Generate Storyboard"}
+            </KxdButton>
             {storyboardMsg && (
-              <p style={{
-                fontFamily: C.sans,
-                fontSize:   "0.5rem",
-                lineHeight: 1.5,
-                marginTop:  "0.75rem",
-                color:      storyboardState === "error" ? C.red : C.gold,
-              }}>
-                {storyboardMsg}
-              </p>
+              <ActionFeedback message={storyboardMsg} isError={storyboardState === "error"} />
             )}
-          </Panel>
+          </StepPanel>
 
           {/* MP4 render action */}
-          <Panel accent={hasStoryboard && hasScreenshots && !hasRender}>
-            <SectionLabel>Step 03 — Generate MP4</SectionLabel>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1rem" }}>
+          <StepPanel label="Step 03 — Generate MP4" accent={hasStoryboard && hasScreenshots && !hasRender}>
+            <div className="mb-4 flex items-start justify-between gap-3">
               <div>
-                <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: C.cream, marginBottom: "0.375rem" }}>
-                  {hasRender ? "MP4 rendered" : "No render yet"}
-                </p>
-                <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.3)", lineHeight: 1.5 }}>
+                <p className="kxd-os-body mb-1">{hasRender ? "MP4 rendered" : "No render yet"}</p>
+                <p className="kxd-os-meta">
                   Remotion renders screenshots + storyboard into a downloadable MP4 (local dev only — Phase 5C for cloud).
                 </p>
               </div>
-              <StatusBadge
+              <OpsStatusBadge
                 label={
-                  renderState === "loading" ? "rendering"
-                  : doc.renderStatus === "complete" ? "complete"
-                  : doc.renderStatus || "idle"
+                  renderState === "loading"
+                    ? "rendering"
+                    : doc.renderStatus === "complete"
+                      ? "complete"
+                      : doc.renderStatus || "idle"
                 }
-                color={
-                  renderState === "loading" || doc.renderStatus === "rendering" ? C.gold
-                  : (doc.renderStatus === "complete" || renderState === "done") ? C.gold
-                  : doc.renderStatus === "failed" || renderState === "error" ? C.red
-                  : C.goldDim
-                }
+                variant={pipelineStatusVariant(
+                  String(doc.renderStatus ?? "idle"),
+                  renderState === "loading" ? "loading" : renderState,
+                )}
               />
             </div>
 
-            {/* Render button */}
-            <button
+            <KxdButton
               onClick={() => renderReel(false)}
-              disabled={renderState === "loading" || !hasScreenshots}
-              style={{
-                fontFamily:    C.sans,
-                fontWeight:    500,
-                fontSize:      "0.5rem",
-                letterSpacing: "0.14em",
-                textTransform: "uppercase" as const,
-                color:         C.bgBase,
-                background:    renderState === "loading" || !hasScreenshots
-                  ? "rgba(201,169,98,0.4)"
-                  : "linear-gradient(180deg, #d1b06b 0%, #c9a962 48%, #b09040 100%)",
-                border:        "none",
-                padding:       "0.75rem 1.5rem",
-                cursor:        renderState === "loading" || !hasScreenshots ? "not-allowed" : "pointer",
-                width:         "100%",
-                marginBottom:  "0.5rem",
-              }}
+              loading={renderState === "loading"}
+              disabled={!hasScreenshots}
+              className="mb-2 w-full"
             >
               {renderState === "loading"
                 ? "Rendering… (may take 1–2 min)"
                 : hasRender
-                ? "Re-render MP4"
-                : "Generate MP4"}
-            </button>
+                  ? "Re-render MP4"
+                  : "Generate MP4"}
+            </KxdButton>
 
-            {/* Manifest-only fallback button */}
-            <button
+            <KxdButton
+              variant="secondary"
               onClick={() => renderReel(true)}
-              disabled={renderState === "loading"}
-              style={{
-                fontFamily:    C.sans,
-                fontSize:      "0.4375rem",
-                letterSpacing: "0.12em",
-                textTransform: "uppercase" as const,
-                color:         C.goldDim,
-                background:    "transparent",
-                border:        `1px solid ${C.borderGold}`,
-                padding:       "0.5rem 1rem",
-                cursor:        renderState === "loading" ? "not-allowed" : "pointer",
-                width:         "100%",
-              }}
+              loading={renderState === "loading"}
+              className="w-full"
             >
               Export Render Manifest (CLI)
-            </button>
+            </KxdButton>
 
             {!hasScreenshots && (
-              <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(255,255,255,0.25)", marginTop: "0.625rem" }}>
-                Capture screenshots first to unlock rendering.
-              </p>
+              <p className="kxd-os-caption mt-2">Capture screenshots first to unlock rendering.</p>
             )}
 
-            {renderMsg && (
-              <p style={{
-                fontFamily: C.sans,
-                fontSize:   "0.5rem",
-                lineHeight: 1.5,
-                marginTop:  "0.75rem",
-                color:      renderState === "error" ? C.red : C.gold,
-              }}>
-                {renderMsg}
-              </p>
-            )}
+            {renderMsg && <ActionFeedback message={renderMsg} isError={renderState === "error"} />}
 
             {doc.renderDurationMs && (
-              <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(255,255,255,0.18)", marginTop: "0.375rem" }}>
+              <p className="kxd-os-caption mt-2">
                 Last render: {Math.round(doc.renderDurationMs / 1000)}s · v{doc.renderVersion || 1}
               </p>
             )}
-          </Panel>
+          </StepPanel>
         </div>
 
         {/* ── Download / preview rendered video ───────────────────────────── */}
         {renderedUrl && (
-          <Panel accent>
-            <SectionLabel>Rendered MP4 — Ready to Download</SectionLabel>
-            <div style={{ display: "flex", alignItems: "center", gap: "1.25rem", flexWrap: "wrap" as const }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontFamily: "monospace", fontSize: "0.8125rem", color: C.goldDim, marginBottom: "0.375rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const }}>
-                  {renderedUrl}
-                </p>
-                <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(255,255,255,0.25)" }}>
+          <OpsCard className="mb-10">
+            <OpsSectionHead label="Rendered MP4 — Ready to Download" />
+            <div className="flex flex-wrap items-center gap-5">
+              <div className="min-w-0 flex-1">
+                <p className="kxd-os-ops-code truncate">{renderedUrl}</p>
+                <p className="kxd-os-meta mt-1">
                   Served from public/generated-reels/ in local dev. Upload to CDN for production delivery.
                 </p>
               </div>
-              <div style={{ display: "flex", gap: "0.5rem", flexShrink: 0 }}>
-                <a
-                  href={renderedUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    fontFamily:    C.sans,
-                    fontWeight:    500,
-                    fontSize:      "0.5rem",
-                    letterSpacing: "0.14em",
-                    textTransform: "uppercase" as const,
-                    color:         C.bgBase,
-                    background:    "linear-gradient(180deg, #d1b06b 0%, #c9a962 48%, #b09040 100%)",
-                    padding:       "0.625rem 1.25rem",
-                    textDecoration:"none",
-                    display:       "inline-block",
-                  }}
-                >
-                  View MP4 ↗
-                </a>
-                <a
-                  href={renderedUrl}
-                  download
-                  style={{
-                    fontFamily:    C.sans,
-                    fontSize:      "0.5rem",
-                    letterSpacing: "0.14em",
-                    textTransform: "uppercase" as const,
-                    color:         C.goldDim,
-                    background:    "transparent",
-                    border:        `1px solid ${C.borderGold}`,
-                    padding:       "0.625rem 1.25rem",
-                    textDecoration:"none",
-                    display:       "inline-block",
-                  }}
-                >
-                  Download
+              <div className="kxd-os-ops-workflow-actions shrink-0">
+                <Link href={renderedUrl} target="_blank" rel="noopener noreferrer">
+                  <KxdButton>View MP4 ↗</KxdButton>
+                </Link>
+                <a href={renderedUrl} download>
+                  <KxdButton variant="secondary">Download</KxdButton>
                 </a>
               </div>
             </div>
-          </Panel>
+          </OpsCard>
         )}
 
         {/* ── Render error ─────────────────────────────────────────────────── */}
         {doc.renderError && doc.renderStatus === "failed" && (
-          <div style={{ padding: "0.875rem 1.25rem", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(210,90,90,0.3)" }}>
-            <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.1em", textTransform: "uppercase" as const, color: C.red, marginBottom: "0.375rem" }}>
-              Render Error
-            </p>
-            <p style={{ fontFamily: C.sans, fontSize: "0.75rem", color: C.red }}>
-              {doc.renderError}
-            </p>
-            <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(255,255,255,0.25)", marginTop: "0.5rem", lineHeight: 1.5 }}>
-              Common fixes: ensure <code>npx playwright install chromium</code> has been run and the Next.js dev server is accessible at localhost:3000 during rendering.
+          <div className="kxd-os-ops-alert kxd-os-ops-alert--error mb-10">
+            <p className="kxd-os-section__label">Render Error</p>
+            <p>{doc.renderError}</p>
+            <p className="kxd-os-meta">
+              Common fixes: ensure <code className="kxd-os-ops-footnote__code">npx playwright install chromium</code> has
+              been run and the Next.js dev server is accessible at localhost:3000 during rendering.
             </p>
           </div>
         )}
 
         {/* ── Hook ────────────────────────────────────────────────────────── */}
         {doc.reelHook && (
-          <Panel accent>
-            <SectionLabel>Reel Hook (0:00–0:03)</SectionLabel>
-            <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "clamp(1.25rem, 3vw, 2rem)", color: C.cream, lineHeight: 1.2, fontStyle: "italic", letterSpacing: "-0.01em" }}>
+          <OpsCard className="mb-10">
+            <OpsSectionHead label="Reel Hook (0:00–0:03)" />
+            <p className="kxd-os-headline kxd-os-headline--presence italic">
               &ldquo;{doc.reelHook}&rdquo;
             </p>
             {doc.reelTitle && (
-              <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: C.goldDim, marginTop: "1rem" }}>
-                Reel Title: {doc.reelTitle}
-              </p>
+              <p className="kxd-os-section__label mt-4">Reel Title: {doc.reelTitle}</p>
             )}
-          </Panel>
+          </OpsCard>
         )}
 
         {/* ── Scene sequence ───────────────────────────────────────────────── */}
         {doc.sceneSequence && (
-          <div>
-            <Panel>
-              <SectionLabel>Scene Sequence</SectionLabel>
+          <KxdSection className="kxd-os-ops-section">
+            <OpsSectionHead label="Scene Sequence" />
+            <OpsCard>
               <SceneSequenceBlock text={doc.sceneSequence} />
-            </Panel>
-          </div>
+            </OpsCard>
+          </KxdSection>
         )}
 
         {/* ── Two-col: transition style + CTA ─────────────────────────────── */}
         {(doc.transitionStyle || doc.ctaText) && (
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+          <div className="kxd-os-operations-split">
             {doc.transitionStyle && (
-              <Panel>
-                <SectionLabel>Transition Style</SectionLabel>
-                <p style={{ fontFamily: C.sans, fontSize: "0.75rem", color: C.cream, lineHeight: 1.6 }}>
-                  {doc.transitionStyle}
-                </p>
-              </Panel>
+              <OpsCard>
+                <OpsSectionHead label="Transition Style" />
+                <p className="kxd-os-body">{doc.transitionStyle}</p>
+              </OpsCard>
             )}
             {doc.ctaText && (
-              <Panel accent>
-                <SectionLabel>CTA</SectionLabel>
-                <p style={{ fontFamily: C.serif, fontWeight: 400, fontSize: "1.25rem", color: C.cream }}>
-                  {doc.ctaText}
-                </p>
-              </Panel>
+              <OpsCard>
+                <OpsSectionHead label="CTA" />
+                <p className="kxd-os-title">{doc.ctaText}</p>
+              </OpsCard>
             )}
           </div>
         )}
 
         {/* ── Music direction ──────────────────────────────────────────────── */}
         {doc.musicDirection && (
-          <Panel>
-            <SectionLabel>Music Direction</SectionLabel>
-            <p style={{ fontFamily: C.sans, fontSize: "0.75rem", color: C.cream, lineHeight: 1.6 }}>
-              {doc.musicDirection}
-            </p>
-          </Panel>
+          <KxdSection className="kxd-os-ops-section">
+            <OpsSectionHead label="Music Direction" />
+            <OpsCard>
+              <p className="kxd-os-body">{doc.musicDirection}</p>
+            </OpsCard>
+          </KxdSection>
         )}
 
         {/* ── Caption options ──────────────────────────────────────────────── */}
         {doc.captionOptions && (
-          <div>
-            <Panel>
-              <SectionLabel>Caption Options (A/B/C)</SectionLabel>
+          <KxdSection className="kxd-os-ops-section">
+            <OpsSectionHead label="Caption Options (A/B/C)" />
+            <OpsCard>
               <CaptionOptionsBlock text={doc.captionOptions} />
-            </Panel>
-          </div>
+            </OpsCard>
+          </KxdSection>
         )}
 
         {/* ── Post copy (hook + hashtags) ──────────────────────────────────── */}
         {doc.generatedPostCopy && (
-          <Panel>
-            <SectionLabel>Post Copy &amp; Hashtags</SectionLabel>
-            <pre style={{ fontFamily: "monospace", fontSize: "0.8125rem", color: C.creamMuted, lineHeight: 1.8, whiteSpace: "pre-wrap" as const, margin: 0 }}>
-              {doc.generatedPostCopy}
-            </pre>
-          </Panel>
+          <KxdSection className="kxd-os-ops-section">
+            <OpsSectionHead label="Post Copy & Hashtags" />
+            <OpsCard>
+              <pre className="kxd-os-ops-pre m-0 max-h-none">{doc.generatedPostCopy}</pre>
+            </OpsCard>
+          </KxdSection>
         )}
 
         {/* ── Screenshots ──────────────────────────────────────────────────── */}
         {screenshots.length > 0 && (
-          <div>
-            <Panel>
-              <SectionLabel>Captured Screenshots ({screenshots.length})</SectionLabel>
+          <KxdSection className="kxd-os-ops-section">
+            <OpsSectionHead label="Captured Screenshots" count={screenshots.length} />
+            <OpsCard>
               <ScreenshotGrid screenshots={screenshots} />
-            </Panel>
-          </div>
+            </OpsCard>
+          </KxdSection>
         )}
 
         {/* ── Full storyboard text ──────────────────────────────────────────── */}
         {doc.generatedScript && (
-          <Panel>
-            <SectionLabel>Full Storyboard Output</SectionLabel>
-            <pre style={{
-              fontFamily: "monospace",
-              fontSize:   "0.5rem",
-              color:      C.creamMuted,
-              lineHeight: 1.8,
-              whiteSpace: "pre-wrap" as const,
-              margin:     0,
-              maxHeight:  "28rem",
-              overflow:   "auto",
-            }}>
-              {doc.generatedScript}
-            </pre>
-          </Panel>
+          <KxdSection className="kxd-os-ops-section">
+            <OpsSectionHead label="Full Storyboard Output" />
+            <OpsCard>
+              <pre className="kxd-os-ops-pre m-0 max-h-[28rem]">{doc.generatedScript}</pre>
+            </OpsCard>
+          </KxdSection>
         )}
 
         {/* ── Generation error ─────────────────────────────────────────────── */}
         {doc.storyboardGenerationError && (
-          <div style={{ padding: "0.875rem 1.25rem", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(210,90,90,0.3)" }}>
-            <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.1em", textTransform: "uppercase" as const, color: C.red, marginBottom: "0.375rem" }}>
-              Generation Error
-            </p>
-            <p style={{ fontFamily: C.sans, fontSize: "0.75rem", color: C.red }}>
-              {doc.storyboardGenerationError}
-            </p>
+          <div className="kxd-os-ops-alert kxd-os-ops-alert--error mb-10">
+            <p className="kxd-os-section__label">Generation Error</p>
+            <p>{doc.storyboardGenerationError}</p>
           </div>
         )}
 
         {/* ── Footer links ─────────────────────────────────────────────────── */}
-        <div style={{ display: "flex", gap: "1rem", paddingTop: "1rem", borderTop: `1px solid ${C.border}`, flexWrap: "wrap" as const }}>
-          <Link href="/admin/operations/reels" style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: C.goldDim, textDecoration: "none" }}>
+        <div className="flex flex-wrap gap-4 border-t border-white/[0.08] pt-6">
+          <Link href="/admin/operations/reels" className="kxd-os-link-quiet">
             ← All Reels
           </Link>
-          <Link href={`/admin/collections/promo-video-requests/${doc.id}`} style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.22)", textDecoration: "none" }}>
+          <Link
+            href={`/admin/collections/promo-video-requests/${doc.id}`}
+            className="kxd-os-link-quiet"
+          >
             Edit Full Record in Payload →
           </Link>
-          <Link href="/admin/operations/reels/new" style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.12em", textTransform: "uppercase" as const, color: "rgba(255,255,255,0.22)", textDecoration: "none" }}>
+          <Link href="/admin/operations/reels/new" className="kxd-os-link-quiet">
             Create Another Reel
           </Link>
         </div>
-
-      </div>
-    </div>
+      </KxdPage>
+    </OperationsShell>
   );
 }

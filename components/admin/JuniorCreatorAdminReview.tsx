@@ -8,19 +8,19 @@ import type { JuniorCreatorAdminReviewData, AdminCreatorRow, AdminShiftRow } fro
 import { formatEarningsCents, formatHoursFromMinutes } from "@/lib/junior-creators/week";
 
 const C = {
-  bgPure: "#050505",
-  bgBase: "#080808",
-  bgElevated: "#0B0B0B",
-  bgCard: "#101010",
-  gold: "#C9A962",
-  goldDim: "rgba(201,169,98,0.55)",
-  cream: "#F5F1E8",
-  creamMuted: "rgba(245,241,232,0.72)",
-  red: "#d25a5a",
-  border: "rgba(255,255,255,0.08)",
-  borderGold: "rgba(201,169,98,0.16)",
+  bgPure: "#1a1b1d",
+  bgBase: "#1f2022",
+  bgElevated: "#27282a",
+  bgCard: "#2b2c2e",
+  gold: "#c2aa72",
+  goldDim: "rgba(194,170,114,0.55)",
+  cream: "#f5f6f8",
+  creamMuted: "rgba(245,246,248,0.74)",
+  red: "#e07070",
+  border: "rgba(255,255,255,0.06)",
+  borderGold: "rgba(194,170,114,0.16)",
   serif: "var(--font-cormorant, Georgia, 'Times New Roman', serif)",
-  sans: "var(--font-outfit, 'Helvetica Neue', Arial, sans-serif)",
+  sans: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', var(--font-outfit, 'Helvetica Neue'), Arial, sans-serif",
 } as const;
 
 const inputStyle: React.CSSProperties = {
@@ -28,7 +28,7 @@ const inputStyle: React.CSSProperties = {
   fontFamily: C.sans,
   fontSize: "0.75rem",
   color: C.cream,
-  background: "#0B0B0B",
+  background: "#27282a",
   border: `1px solid ${C.border}`,
   padding: "0.5rem 0.625rem",
   outline: "none",

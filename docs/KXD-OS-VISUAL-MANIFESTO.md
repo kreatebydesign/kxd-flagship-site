@@ -304,8 +304,87 @@ When building or refining KXD OS UI, include:
 7. **Typography silence** — sentence-case buttons/labels; quieter captions and metric labels
 8. **Gold restraint** — machined primary button with highlight inset; gold only on metal CTA + toggle thumb
 
-### Remaining watch (not this pass)
+### Remaining watch
 
-- Legacy operations pages (`today`, `command`, etc.) still inline `const C` — assembled, not machined
-- Client Workspace on `WORKSPACE_C` patterns
+- Reel detail (`reels/[id]`) still inline `const C` — next presentation pass
+- Founder dashboard interior still uses legacy inline patterns — shell integrated; full component migration optional
 - Portfolio column captions still present in markup — quieter via CSS, could be reduced in a future presentation pass
+
+---
+
+## Appendix D — Product Design Master Pass (v1.1)
+
+**Goal:** KXD OS should feel manufactured — premium software someone lives inside eight hours a day — not a luxury website or admin dashboard.
+
+### Structural shift
+
+1. **Sidebar navigation** — grouped software rail (Briefing · Clients · Studio · Intelligence · Tools) replaces horizontal website tabs
+2. **Wide workspace** — 88rem content field; typography-led hierarchy; asymmetrical hero widths
+3. **Sans-first type** — Outfit carries scan hierarchy; Cormorant reserved for `presence` moments only (portfolio title, daily date)
+4. **Gold = importance** — primary actions, critical revenue, founder insights — never navigation, links, or metadata
+
+### Material shift (v1.1 tokens)
+
+- Canvas `#0e0d0c` → warmer graphite ladder through `#282624` floating
+- Cream text `#f3efe6` with softer muted steps
+- Skylight increased — natural light from above, not gold ambient wash
+- Borders further reduced; depth from rim light + warm shadow + spacing
+
+### Screens touched
+
+All operations routes inherit sidebar + tokens. Command migrated off `const C`. Founder embedded in shell. Portfolio unified on `OperationsShell`.
+
+---
+
+## Appendix E — Art Direction Pass v3.0 — Designed with light
+
+**Principle:** Apple designs with light, not color. The interface must *reflect* an overhead source, not absorb it — noticeably **brighter**, not lighter.
+
+### Material (v3.0 tokens)
+
+- Titanium ladder lifted: canvas `#201f1d` → floating `#454240` (Space-black graphite toward natural silver)
+- Text → warm paper white `#faf8f2`
+- Skylight strengthened (`0.11`) + rim light (`0.09`) — every surface catches light at its top edge ("light across machined titanium")
+- Shadows softened toward near-black low alpha — brighter surfaces need gentle weight, never darkness
+- Borders effectively gone; depth = surface gradient + rim + diffusion
+
+### Typography
+
+- Numbers moved off serif → **Outfit, tabular figures** (portfolio revenue/health, workspace stats, ops score)
+- Workspace structural titles (chapter, timeline, project, marketing) → sans
+- Serif (Cormorant) confined to earned emotional moments: workspace cover title, client names, founder briefing date + notes
+
+### Gold as reward (< 5%)
+
+Solid gold appears only in: primary action buttons, active toggle, pipeline accent, renewal/revenue figures, active step/service, founder MRR. Everything else is neutral titanium.
+
+### Enterprise tells removed
+
+Tiny uppercase tracked labels on step/service/progress pills and operations brand label → sentence-case, depth-filled chips. No hard borders, no cybersecurity micro-caps.
+
+---
+
+## Appendix F — v4.0 — Native macOS / Space Black Titanium
+
+**Mission:** Stop building a premium dashboard. Recreate the macOS design language so KXD OS feels like a first-party Apple professional desktop app — Finder / Xcode / System Settings, not an admin panel.
+
+### The decisive change: warm → cool
+
+The v3.0 warm graphite (brown/taupe) read as "army / Xbox / government." Replaced wholesale with a **cool, neutral Space Black titanium** ladder — machined, clean, expensive, no muddy warmth.
+
+- Canvas `#1a1b1d` → page `#1f2022` → surface `#27282a` → elevated `#2f3032` → floating `#393a3c`, panel `#2b2c2e`
+- Text → cool white `#F5F6F8` (no cream)
+- Skylight/rim → pure cool white diffusion
+- Shadows → cool near-black, slightly more present so panels read as titanium *floating on* Space Black
+
+### Typography → SF Pro native
+
+Font stack now resolves to **SF Pro** on macOS (`-apple-system, BlinkMacSystemFont, "SF Pro Text/Display"`), Outfit as fallback. Numbers tabular. Serif (Cormorant) stays confined to the few earned editorial moments. The OS now literally renders in the system typeface beside Apple's own apps.
+
+### Gold < 3%
+
+Champagne `#C2AA72` only: primary CTA, revenue, launch, success milestones. Everything else neutral titanium. Primary accent is white.
+
+### Reach beyond Operations
+
+Legacy creative modules (creative engine `shared`, NewRequestForm, ResearchDesk, JuniorCreatorAdminReview) repointed from pure-black `#050505` + warm gold onto the same titanium tokens, so Creative belongs to the same product family as Operations.

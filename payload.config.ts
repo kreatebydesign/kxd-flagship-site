@@ -10,12 +10,15 @@ import sharp from "sharp";
 import { BrandKitAssets } from "./payload/collections/BrandKitAssets.ts";
 import { BrandKits } from "./payload/collections/BrandKits.ts";
 import { CaseStudies } from "./payload/collections/CaseStudies.ts";
+import { ClientInfrastructure } from "./payload/collections/ClientInfrastructure.ts";
 import { ClientOnboarding } from "./payload/collections/ClientOnboarding.ts";
 import { ClientTimelineEvents } from "./payload/collections/ClientTimelineEvents.ts";
 import { ClientProjects } from "./payload/collections/ClientProjects.ts";
 import { ClientRequests } from "./payload/collections/ClientRequests.ts";
 import { Clients } from "./payload/collections/Clients.ts";
 import { ExecutiveClientProfiles } from "./payload/collections/ExecutiveClientProfiles.ts";
+import { InfrastructureCosts } from "./payload/collections/InfrastructureCosts.ts";
+import { InfrastructureEvents } from "./payload/collections/InfrastructureEvents.ts";
 import { CreativeAssets } from "./payload/collections/CreativeAssets.ts";
 import { CreativeCampaigns } from "./payload/collections/CreativeCampaigns.ts";
 import { FlyerRequests } from "./payload/collections/FlyerRequests.ts";
@@ -114,6 +117,9 @@ export default buildConfig({
     ClientRequests,
     ClientOnboarding,
     ClientTimelineEvents,
+    ClientInfrastructure,
+    InfrastructureEvents,
+    InfrastructureCosts,
     // ── Creative Engine ──────────────────────────────────────────────────────
     CreativeCampaigns,
     BrandKits,

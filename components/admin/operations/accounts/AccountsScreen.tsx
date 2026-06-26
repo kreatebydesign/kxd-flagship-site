@@ -155,7 +155,7 @@ export function AccountsScreen({
         <div className="kxd-os-ops-hero-row">
           <KxdSurface variant="glass" className="p-6">
             <p className="kxd-os-section__label">Expansion Opportunity Score</p>
-            <p className="kxd-os-display mt-3 text-3xl">{expansionScore}%</p>
+            <p className="kxd-os-headline mt-3">{expansionScore}%</p>
             <p className="kxd-os-metric__sub mt-3">
               {expansionCandidatesCount} account
               {expansionCandidatesCount === 1 ? "" : "s"} with untapped potential

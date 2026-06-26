@@ -506,7 +506,7 @@ export async function TodayScreen() {
 
         <div className="kxd-os-ops-hero-row">
           <div>
-            <h2 className="kxd-os-display">{dateDisplay}</h2>
+            <h2 className="kxd-os-headline kxd-os-headline--presence">{dateDisplay}</h2>
             <p className="kxd-os-meta">Loaded {timeDisplay} · Refreshes on each page request</p>
           </div>
           <OpsFocusPill label={focus.label} description={focus.description} tone={focus.tone} />

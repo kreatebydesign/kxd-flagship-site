@@ -15,22 +15,22 @@ import { KxdLogo } from "@/components/ui/KxdLogo";
 // ── Brand tokens ──────────────────────────────────────────────────────────────
 
 export const C = {
-  bgPure:      "#050505",
-  bgBase:      "#080808",
-  bgElevated:  "#0B0B0B",
-  bgInput:     "#0B0B0B",
-  gold:        "#C9A962",
-  goldDim:     "rgba(201,169,98,0.55)",
-  goldFaint:   "rgba(255,255,255,0.035)",
-  cream:       "#F5F1E8",
-  creamMuted:  "rgba(245,241,232,0.72)",
-  red:         "#d25a5a",
-  positive:    "#C9A962",
-  border:      "rgba(255,255,255,0.08)",
-  borderGold:  "rgba(255,255,255,0.04)",
-  borderFocus: "rgba(201,169,98,0.55)",
+  bgPure:      "#1a1b1d",
+  bgBase:      "#1f2022",
+  bgElevated:  "#27282a",
+  bgInput:     "#27282a",
+  gold:        "#c2aa72",
+  goldDim:     "rgba(194,170,114,0.55)",
+  goldFaint:   "rgba(255,255,255,0.05)",
+  cream:       "#f5f6f8",
+  creamMuted:  "rgba(245,246,248,0.74)",
+  red:         "#e07070",
+  positive:    "#6fbf8f",
+  border:      "rgba(255,255,255,0.06)",
+  borderGold:  "rgba(255,255,255,0.05)",
+  borderFocus: "rgba(245,246,248,0.18)",
   serif:       "var(--font-cormorant, Georgia, 'Times New Roman', serif)",
-  sans:        "var(--font-outfit, 'Helvetica Neue', Arial, sans-serif)",
+  sans:        "-apple-system, BlinkMacSystemFont, 'SF Pro Text', var(--font-outfit, 'Helvetica Neue'), Arial, sans-serif",
 } as const;
 
 // ── Shared option lists ───────────────────────────────────────────────────────
@@ -165,7 +165,7 @@ export function SuccessState({
       <div className="mx-auto max-w-screen-xl" style={{ padding: "5rem 1.5rem", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
         <div style={{ width: "3.5rem", height: "3.5rem", borderRadius: "50%", background: C.goldFaint, border: `1px solid ${C.borderGold}`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "2rem" }}>
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M4 10.5L8.5 15L16 6" stroke="#C5A65C" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M4 10.5L8.5 15L16 6" stroke="#c2aa72" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </div>
         <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.18em", textTransform: "uppercase", color: C.goldDim, marginBottom: "0.875rem" }}>
@@ -181,7 +181,7 @@ export function SuccessState({
           Record ID #{recordId}
         </p>
         <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", justifyContent: "center" }}>
-          <Link href={backHref} style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.bgBase, background: `linear-gradient(180deg, #d1b06b 0%, #c5a65c 48%, #b09040 100%)`, padding: "0.875rem 2rem", textDecoration: "none", display: "inline-block" }}>
+          <Link href={backHref} style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.bgBase, background: `linear-gradient(180deg, #d4bf86 0%, #c2aa72 50%, #9c8856 100%)`, padding: "0.875rem 2rem", textDecoration: "none", display: "inline-block" }}>
             {backLabel}
           </Link>
           <button onClick={onReset} style={{ fontFamily: C.sans, fontWeight: 400, fontSize: "0.8125rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.goldDim, background: "transparent", border: `1px solid ${C.borderGold}`, padding: "0.875rem 2rem", cursor: "pointer" }}>
@@ -239,8 +239,8 @@ export function SubmitRow({
           textTransform: "uppercase",
           color: C.bgBase,
           background: disabled
-            ? "rgba(197,166,92,0.3)"
-            : "linear-gradient(180deg, #d1b06b 0%, #c5a65c 48%, #b09040 100%)",
+            ? "rgba(194,170,114,0.3)"
+            : "linear-gradient(180deg, #d4bf86 0%, #c2aa72 50%, #9c8856 100%)",
           border: "none",
           padding: "0.875rem 2.5rem",
           cursor: disabled ? "not-allowed" : "pointer",

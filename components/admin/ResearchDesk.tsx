@@ -19,22 +19,22 @@ import {
 } from "@/lib/research-leads";
 
 const C = {
-  bgPure: "#050505",
-  bgBase: "#080808",
-  bgElevated: "#0B0B0B",
-  bgInput: "#0B0B0B",
-  gold: "#C9A962",
-  goldDim: "rgba(201,169,98,0.55)",
-  goldFaint: "rgba(255,255,255,0.035)",
-  cream: "#F5F1E8",
-  creamMuted: "rgba(245,241,232,0.72)",
-  red: "#d25a5a",
-  green: "#C9A962",
-  border: "rgba(255,255,255,0.08)",
-  borderGold: "rgba(201,169,98,0.16)",
-  borderFocus: "rgba(201,169,98,0.55)",
+  bgPure: "#1a1b1d",
+  bgBase: "#1f2022",
+  bgElevated: "#27282a",
+  bgInput: "#27282a",
+  gold: "#c2aa72",
+  goldDim: "rgba(194,170,114,0.55)",
+  goldFaint: "rgba(255,255,255,0.05)",
+  cream: "#f5f6f8",
+  creamMuted: "rgba(245,246,248,0.74)",
+  red: "#e07070",
+  green: "#6fbf8f",
+  border: "rgba(255,255,255,0.06)",
+  borderGold: "rgba(194,170,114,0.16)",
+  borderFocus: "rgba(245,246,248,0.18)",
   serif: "var(--font-cormorant, Georgia, 'Times New Roman', serif)",
-  sans: "var(--font-outfit, 'Helvetica Neue', Arial, sans-serif)",
+  sans: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', var(--font-outfit, 'Helvetica Neue'), Arial, sans-serif",
 } as const;
 
 const NAV_LINKS = [

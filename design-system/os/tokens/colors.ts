@@ -1,78 +1,81 @@
 /**
- * KXD OS 1.0 — Color tokens
- * Warm charcoal ladder. Cream light. Gold as machined accent — rare.
+ * KXD OS 4.0 — Color tokens
+ * Space Black Titanium. Cool, neutral, machined — Finder / Xcode dark mode.
+ * No warmth in the chrome. Champagne appears only as a reward (< 3%).
+ * Design with light, not color.
  */
 
 export const osColors = {
-  /** Canvas — warm near-black, never flat #000 */
+  /** Canvas — cool neutral titanium, lifted off pure black */
   bg: {
-    canvas: "#080808",
-    page: "#0a0a09",
-    surface: "#111010",
-    elevated: "#161514",
-    floating: "#1c1a18",
-    panel: "#131211",
-    muted: "rgba(255, 255, 255, 0.028)",
-    overlay: "rgba(8, 8, 7, 0.94)",
+    canvas: "#1a1b1d",
+    page: "#1f2022",
+    surface: "#27282a",
+    elevated: "#2f3032",
+    floating: "#393a3c",
+    panel: "#2b2c2e",
+    muted: "rgba(255, 255, 255, 0.05)",
+    overlay: "rgba(26, 27, 29, 0.86)",
   },
   text: {
-    primary: "#F5F1E8",
-    secondary: "rgba(245, 241, 232, 0.74)",
-    muted: "rgba(245, 241, 232, 0.5)",
-    faint: "rgba(245, 241, 232, 0.32)",
-    inverse: "#0a0908",
+    /** Cool white — clean, never clinical */
+    primary: "#F5F6F8",
+    secondary: "rgba(245, 246, 248, 0.74)",
+    muted: "rgba(245, 246, 248, 0.5)",
+    faint: "rgba(245, 246, 248, 0.32)",
+    inverse: "#1a1b1d",
   },
   gold: {
-    accent: "#C9A962",
-    soft: "rgba(201, 169, 98, 0.38)",
-    whisper: "rgba(201, 169, 98, 0.1)",
-    border: "rgba(201, 169, 98, 0.06)",
-    glow: "rgba(201, 169, 98, 0.04)",
+    /** Champagne metal — reward only, < 3% */
+    accent: "#C2AA72",
+    soft: "rgba(194, 170, 114, 0.3)",
+    whisper: "rgba(194, 170, 114, 0.07)",
+    border: "rgba(194, 170, 114, 0.05)",
+    glow: "rgba(194, 170, 114, 0.04)",
   },
   border: {
-    /** Structural last resort — prefer depth and light */
-    default: "rgba(255, 255, 255, 0.03)",
-    strong: "rgba(255, 255, 255, 0.05)",
-    divider: "rgba(255, 255, 255, 0.02)",
-    focus: "rgba(245, 241, 232, 0.18)",
+    default: "rgba(255, 255, 255, 0.05)",
+    strong: "rgba(255, 255, 255, 0.08)",
+    divider: "rgba(255, 255, 255, 0.035)",
+    focus: "rgba(245, 246, 248, 0.18)",
   },
   light: {
-    /** Skylight — cream wash from above */
-    skylight: "rgba(245, 241, 232, 0.035)",
-    skylightSoft: "rgba(245, 241, 232, 0.015)",
-    /** Rim — machined top edge catch */
-    rim: "rgba(255, 255, 255, 0.055)",
-    rimSoft: "rgba(255, 255, 255, 0.028)",
-    /** Ambient fill in recessed areas */
-    recess: "rgba(0, 0, 0, 0.22)",
+    /** Skylight — cool overhead diffusion */
+    skylight: "rgba(255, 255, 255, 0.06)",
+    skylightSoft: "rgba(255, 255, 255, 0.028)",
+    /** Rim — top edge catch */
+    rim: "rgba(255, 255, 255, 0.09)",
+    rimSoft: "rgba(255, 255, 255, 0.045)",
+    /** Recess — soft ambient occlusion */
+    recess: "rgba(0, 0, 0, 0.12)",
   },
   shadow: {
-    /** Warm undertone — weight, not decoration */
-    rest: "rgba(10, 8, 6, 0.28)",
-    mid: "rgba(10, 8, 6, 0.38)",
-    deep: "rgba(10, 8, 6, 0.48)",
+    /** Cool near-black, soft */
+    rest: "rgba(0, 0, 0, 0.18)",
+    mid: "rgba(0, 0, 0, 0.24)",
+    deep: "rgba(0, 0, 0, 0.32)",
   },
   semantic: {
-    critical: "#c45c5c",
-    criticalMuted: "rgba(196, 92, 92, 0.12)",
-    warning: "#c9a45a",
-    warningMuted: "rgba(201, 164, 90, 0.1)",
-    success: "#6b9e7a",
-    successMuted: "rgba(107, 158, 122, 0.1)",
-    info: "rgba(168, 180, 200, 0.68)",
-    infoMuted: "rgba(168, 180, 200, 0.08)",
+    critical: "#e07070",
+    criticalMuted: "rgba(224, 112, 112, 0.1)",
+    warning: "#d4af6a",
+    warningMuted: "rgba(212, 175, 106, 0.08)",
+    success: "#6fbf8f",
+    successMuted: "rgba(111, 191, 143, 0.1)",
+    info: "rgba(150, 178, 214, 0.66)",
+    infoMuted: "rgba(150, 178, 214, 0.08)",
   },
 } as const;
 
 export const osGradients = {
   goldButton:
-    "linear-gradient(180deg, rgba(228, 206, 148, 0.96) 0%, #c9a962 46%, #9a7d42 100%)",
+    "linear-gradient(180deg, rgba(255, 255, 255, 0.18) 0%, transparent 44%), linear-gradient(180deg, #d4bf86 0%, #c2aa72 50%, #9c8856 100%)",
   surfaceMilled:
-    "linear-gradient(180deg, rgba(255, 255, 255, 0.042) 0%, rgba(255, 255, 255, 0.008) 14%, transparent 42%)",
+    "linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.01) 9%, transparent 32%)",
   surfaceGlass:
-    "linear-gradient(165deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.012) 38%, transparent 72%)",
+    "linear-gradient(165deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.012) 26%, transparent 58%)",
   canvasSkylight:
-    "radial-gradient(ellipse 120% 75% at 50% -38%, rgba(245, 241, 232, 0.038), transparent 56%)",
+    "radial-gradient(ellipse 150% 95% at 50% -28%, rgba(255, 255, 255, 0.05), transparent 64%)",
   canvasAmbient:
-    "radial-gradient(ellipse 65% 45% at 88% 8%, rgba(245, 241, 232, 0.014), transparent 48%)",
+    "radial-gradient(ellipse 85% 60% at 100% 0%, rgba(255, 255, 255, 0.025), transparent 58%)",
 } as const;

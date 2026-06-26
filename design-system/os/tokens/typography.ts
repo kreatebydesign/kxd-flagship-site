@@ -1,32 +1,38 @@
 /**
- * KXD OS 1.0 — Typography scale
- * Architectural rhythm. Serif for presence. Sans for precision.
+ * KXD OS 1.1 — Typography scale
+ * Sans-first hierarchy. Serif reserved for presence moments.
  */
 
 export const osFonts = {
   display: "var(--font-cormorant, 'Cormorant Garamond', Georgia, serif)",
-  sans: "var(--font-outfit, 'Outfit', system-ui, sans-serif)",
+  sans: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', var(--font-outfit, 'Outfit'), system-ui, sans-serif",
   mono: "ui-monospace, SFMono-Regular, Menlo, monospace",
 } as const;
 
 export const osTypography = {
   display: {
-    fontSize: "2.5rem",
-    lineHeight: 1.08,
+    fontSize: "2.25rem",
+    lineHeight: 1.06,
+    fontWeight: 500,
+    letterSpacing: "-0.03em",
+  },
+  displayPresence: {
+    fontSize: "2.75rem",
+    lineHeight: 1.02,
     fontWeight: 300,
-    letterSpacing: "-0.02em",
+    letterSpacing: "-0.03em",
   },
   hero: {
-    fontSize: "1.75rem",
-    lineHeight: 1.15,
-    fontWeight: 300,
-    letterSpacing: "-0.01em",
+    fontSize: "1.5rem",
+    lineHeight: 1.18,
+    fontWeight: 500,
+    letterSpacing: "-0.02em",
   },
   title: {
-    fontSize: "1.375rem",
-    lineHeight: 1.2,
-    fontWeight: 300,
-    letterSpacing: "0",
+    fontSize: "1.25rem",
+    lineHeight: 1.22,
+    fontWeight: 500,
+    letterSpacing: "-0.01em",
   },
   section: {
     fontSize: "0.8125rem",
@@ -36,10 +42,10 @@ export const osTypography = {
     textTransform: "none" as const,
   },
   cardTitle: {
-    fontSize: "1.0625rem",
+    fontSize: "1rem",
     lineHeight: 1.35,
-    fontWeight: 300,
-    letterSpacing: "0",
+    fontWeight: 500,
+    letterSpacing: "-0.01em",
   },
   body: {
     fontSize: "0.8125rem",
@@ -57,12 +63,12 @@ export const osTypography = {
     fontSize: "0.75rem",
     lineHeight: 1.45,
     fontWeight: 400,
-    letterSpacing: "0.02em",
+    letterSpacing: "0.01em",
   },
   caption: {
     fontSize: "0.6875rem",
     lineHeight: 1.45,
     fontWeight: 400,
-    letterSpacing: "0.02em",
+    letterSpacing: "0.01em",
   },
 } as const;

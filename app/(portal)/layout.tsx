@@ -17,7 +17,7 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "KXD Client Portal",
+  title: "KXD Client HQ",
   robots: { index: false, follow: false },
 };
 

@@ -3,26 +3,26 @@
 import { useState, type ChangeEvent } from "react";
 
 const STEPS = [
-  { number: "01", title: "Company Information", subtitle: "Tell us about your brand." },
-  { number: "02", title: "Primary Contact", subtitle: "Who should we reach out to?" },
-  { number: "03", title: "Services Needed", subtitle: "What are you looking to build?" },
-  { number: "04", title: "Business Goals", subtitle: "What does success look like?" },
-  { number: "05", title: "Investment Range", subtitle: "What range are you working within?" },
-  { number: "06", title: "Desired Timeline", subtitle: "When are you looking to start?" },
-  { number: "07", title: "Existing Assets", subtitle: "What do you already have?" },
-  { number: "08", title: "Referral Source", subtitle: "How did you find KXD?" },
-  { number: "09", title: "Additional Notes", subtitle: "Anything else we should know?" },
+  { number: "01", title: "Tell us about your business", subtitle: "The brand, company, or idea we may be building around." },
+  { number: "02", title: "Who is leading the project?", subtitle: "The person we should work with directly." },
+  { number: "03", title: "What are you hoping to build?", subtitle: "Select the areas where KXD can create the most value." },
+  { number: "04", title: "Where do you want to be?", subtitle: "Help us understand the bigger business outcome." },
+  { number: "05", title: "What level of investment are you considering?", subtitle: "This helps us recommend the right path forward." },
+  { number: "06", title: "When would you like to begin?", subtitle: "Timing helps us understand urgency and fit." },
+  { number: "07", title: "What do you already have?", subtitle: "Existing assets help us understand the starting point." },
+  { number: "08", title: "How did you find KXD?", subtitle: "A little context helps us understand the connection." },
+  { number: "09", title: "Anything else we should know?", subtitle: "Final context, references, or details that matter." },
 ] as const;
 
 const TOTAL = STEPS.length;
 
 const SERVICE_OPTIONS = [
-  "Luxury Website Experience",
+  "Premium Website Experience",
   "Brand Systems & Identity",
   "Growth Infrastructure",
-  "Enterprise Platform / Operations System",
+  "Operating System / Client Portal",
   "CRM & Email Infrastructure",
-  "Ongoing Partnership",
+  "Ongoing Strategic Partnership",
 ];
 
 const DECISION_MAKER_OPTIONS = [
@@ -43,10 +43,10 @@ const INVESTMENT_OPTIONS = [
 
 const TIMELINE_OPTIONS = [
   { value: "immediate", label: "Immediately" },
-  { value: "within-30-days", label: "Within 30 Days" },
-  { value: "60-90-days", label: "Within 60–90 Days" },
-  { value: "3-6-months", label: "3–6 Months" },
-  { value: "exploring", label: "Exploring Options" },
+  { value: "within-30-days", label: "Within 30 days" },
+  { value: "60-90-days", label: "Within 60–90 days" },
+  { value: "3-6-months", label: "3–6 months" },
+  { value: "exploring", label: "Exploring options" },
 ];
 
 const ASSET_OPTIONS = [
@@ -130,7 +130,7 @@ function TextField({
       <label className={labelCls} htmlFor={name}>
         {label}
         {required && (
-          <span aria-hidden className="ml-1" style={{ color: "var(--kxd-gold)", opacity: 0.7 }}>
+          <span aria-hidden className="ml-1 text-[var(--kxd-gold)]">
             *
           </span>
         )}
@@ -160,35 +160,41 @@ function CheckOption({
   onChange: (checked: boolean) => void;
 }) {
   return (
-    <label className="group flex cursor-pointer items-center gap-4 py-3">
-      <button
-        type="button"
-        role="checkbox"
-        aria-checked={checked}
-        onClick={() => onChange(!checked)}
-        className="flex h-5 w-5 shrink-0 items-center justify-center border transition-colors"
+    <button
+      type="button"
+      role="checkbox"
+      aria-checked={checked}
+      onClick={() => onChange(!checked)}
+      className="group flex w-full items-center gap-4 rounded-[10px] px-4 py-3 text-left transition"
+      style={{
+        background: checked
+          ? "rgba(255,255,255,0.065)"
+          : "rgba(255,255,255,0.025)",
+        boxShadow: checked
+          ? "inset 0 0 0 1px rgba(255,255,255,0.11)"
+          : "inset 0 0 0 1px rgba(255,255,255,0.055)",
+      }}
+    >
+      <span
+        aria-hidden
+        className="flex h-5 w-5 shrink-0 items-center justify-center rounded-[6px]"
         style={{
-          borderColor: checked ? "var(--kxd-gold)" : "rgba(255,255,255,0.12)",
-          background: checked ? "rgba(197,166,92,0.08)" : "rgba(255,255,255,0.02)",
+          background: checked ? "var(--kxd-gold)" : "rgba(255,255,255,0.055)",
+          color: checked ? "#111" : "transparent",
         }}
       >
-        {checked && (
-          <span aria-hidden style={{ fontSize: "0.375rem", color: "var(--kxd-gold)" }}>
-            ◆
-          </span>
-        )}
-      </button>
+        ✓
+      </span>
       <span
-        className="font-sans font-light transition-colors"
+        className="font-sans font-normal"
         style={{
-          fontSize: "clamp(0.9375rem, 1.2vw, 1rem)",
+          fontSize: "0.95rem",
           color: checked ? "var(--kxd-cream)" : "var(--kxd-cream-muted)",
-          letterSpacing: "0.005em",
         }}
       >
         {label}
       </span>
-    </label>
+    </button>
   );
 }
 
@@ -207,26 +213,29 @@ function RadioOption({
     <button
       type="button"
       onClick={() => onSelect(value)}
-      className="group flex w-full items-center gap-4 border px-5 py-4 text-left transition-colors"
+      className="group flex w-full items-center gap-4 rounded-[12px] px-5 py-4 text-left transition"
       style={{
-        borderColor: selected ? "var(--kxd-border-gold-strong)" : "var(--kxd-border-white)",
-        background: selected ? "rgba(197,166,92,0.05)" : "rgba(255,255,255,0.015)",
+        background: selected
+          ? "rgba(255,255,255,0.07)"
+          : "rgba(255,255,255,0.025)",
+        boxShadow: selected
+          ? "inset 0 0 0 1px rgba(255,255,255,0.13)"
+          : "inset 0 0 0 1px rgba(255,255,255,0.055)",
       }}
     >
-      <div
-        className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border transition-colors"
-        style={{
-          borderColor: selected ? "var(--kxd-gold)" : "rgba(255,255,255,0.18)",
-        }}
-      >
-        {selected && (
-          <div className="h-2 w-2 rounded-full" style={{ background: "var(--kxd-gold)" }} />
-        )}
-      </div>
       <span
-        className="font-sans font-light"
+        aria-hidden
+        className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full"
         style={{
-          fontSize: "clamp(0.875rem, 1.15vw, 1rem)",
+          boxShadow: selected
+            ? "inset 0 0 0 5px var(--kxd-gold)"
+            : "inset 0 0 0 1px rgba(255,255,255,0.22)",
+        }}
+      />
+      <span
+        className="font-sans font-normal"
+        style={{
+          fontSize: "0.95rem",
           color: selected ? "var(--kxd-cream)" : "var(--kxd-cream-muted)",
         }}
       >
@@ -237,38 +246,32 @@ function RadioOption({
 }
 
 function ProgressBar({ step }: { step: number }) {
+  const progress = ((step + 1) / TOTAL) * 100;
+
   return (
     <div className="mb-10">
-      <div className="flex items-center gap-1.5">
-        {STEPS.map((_, i) => (
-          <div
-            key={i}
-            style={{
-              width: i === step ? "20px" : "6px",
-              height: "2px",
-              background:
-                i < step
-                  ? "rgba(197,166,92,0.45)"
-                  : i === step
-                    ? "var(--kxd-gold)"
-                    : "rgba(255,255,255,0.1)",
-              transition: "all 300ms cubic-bezier(0.16,1,0.3,1)",
-              borderRadius: "1px",
-            }}
-          />
-        ))}
+      <div className="mb-4 flex items-center justify-between gap-6">
+        <p className="font-sans text-sm font-medium text-[var(--kxd-cream)]">
+          Partnership Application
+        </p>
+        <p className="font-sans text-sm text-[var(--kxd-cream-muted)]">
+          Step {step + 1} of {TOTAL}
+        </p>
       </div>
-      <p
-        className="mt-4 font-sans uppercase"
-        style={{
-          fontSize: "0.5rem",
-          letterSpacing: "var(--tracking-label)",
-          color: "var(--kxd-cream-muted)",
-          opacity: 0.55,
-        }}
+
+      <div
+        className="h-[3px] overflow-hidden rounded-full"
+        style={{ background: "rgba(255,255,255,0.08)" }}
       >
-        Step {step + 1} of {TOTAL}
-      </p>
+        <div
+          className="h-full rounded-full transition-all duration-500"
+          style={{
+            width: `${progress}%`,
+            background:
+              "linear-gradient(90deg, rgba(255,255,255,0.78), var(--kxd-gold))",
+          }}
+        />
+      </div>
     </div>
   );
 }
@@ -288,9 +291,13 @@ export function StartProjectForm() {
   function toggleMulti(key: "servicesInterested" | "assetsAvailable", value: string) {
     setData((prev) => {
       const arr = prev[key];
-      const next = arr.includes(value) ? arr.filter((v) => v !== value) : [...arr, value];
+      const next = arr.includes(value)
+        ? arr.filter((v) => v !== value)
+        : [...arr, value];
+
       return { ...prev, [key]: next };
     });
+    setValidationError("");
   }
 
   function validate(): boolean {
@@ -358,36 +365,30 @@ export function StartProjectForm() {
   if (submitState === "success") {
     return (
       <div
-        className="flex min-h-[32rem] flex-col items-center justify-center p-10 text-center lg:p-16"
+        className="flex min-h-[32rem] flex-col items-center justify-center rounded-[18px] p-10 text-center lg:p-16"
         style={{
-          background: "var(--kxd-black-elevated)",
-          border: "1px solid var(--kxd-border-white)",
+          background:
+            "linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.035))",
+          boxShadow:
+            "inset 0 1px 0 rgba(255,255,255,0.10), 0 24px 70px rgba(0,0,0,0.28)",
         }}
       >
-        <div
-          aria-hidden
-          style={{
-            width: "2.5rem",
-            height: "1px",
-            background: "linear-gradient(to right, transparent, var(--kxd-gold), transparent)",
-            marginBottom: "2rem",
-          }}
-        />
-        <p className="kxd-eyebrow">Application Received</p>
+        <p className="kxd-eyebrow">Application received</p>
         <h3
-          className="mx-auto mt-5 font-serif font-light"
+          className="mx-auto mt-5 font-sans font-medium"
           style={{
-            fontSize: "clamp(1.625rem, 3vw, 2rem)",
+            fontSize: "clamp(1.75rem, 3vw, 2.15rem)",
             color: "var(--kxd-cream)",
-            maxWidth: "26rem",
+            maxWidth: "28rem",
+            letterSpacing: "-0.03em",
           }}
         >
           We&rsquo;ll review your application and reach out directly.
         </h3>
         <p
-          className="mx-auto mt-5 font-sans font-light"
+          className="mx-auto mt-5 font-sans font-normal"
           style={{
-            fontSize: "0.9375rem",
+            fontSize: "0.95rem",
             lineHeight: 1.75,
             color: "var(--kxd-cream-muted)",
             maxWidth: "28rem",
@@ -403,7 +404,7 @@ export function StartProjectForm() {
             setStep(0);
             setData(EMPTY);
           }}
-          className="mt-10 font-sans text-[0.6875rem] font-medium uppercase tracking-[0.14em] text-[var(--kxd-gold)] transition hover:text-[var(--kxd-gold-light)]"
+          className="mt-10 font-sans text-sm font-medium text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)]"
         >
           Submit another application
         </button>
@@ -416,63 +417,63 @@ export function StartProjectForm() {
 
   return (
     <div
+      className="overflow-hidden rounded-[20px]"
       style={{
-        background: "var(--kxd-black-elevated)",
-        border: "1px solid var(--kxd-border-white)",
+        background:
+          "linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.032))",
+        boxShadow:
+          "inset 0 1px 0 rgba(255,255,255,0.10), 0 26px 80px rgba(0,0,0,0.30)",
       }}
     >
       <div
         style={{
-          padding: "clamp(2rem,4vw,2.75rem) clamp(1.75rem,4vw,2.75rem)",
-          borderBottom: "1px solid var(--kxd-border-white)",
+          padding: "clamp(2rem,4vw,3rem) clamp(1.75rem,4vw,3rem)",
         }}
       >
         <ProgressBar step={step} />
 
-        <p
-          className="font-serif font-light"
-          style={{
-            fontSize: "clamp(0.6875rem, 1vw, 0.75rem)",
-            letterSpacing: "0.06em",
-            color: "var(--kxd-gold)",
-            opacity: 0.65,
-            marginBottom: "0.75rem",
-          }}
-        >
+        <p className="mb-3 font-sans text-sm font-medium text-[var(--kxd-cream-muted)]">
           {current.number}
         </p>
 
         <h2
-          className="font-serif font-light"
+          className="font-sans font-medium"
           style={{
-            fontSize: "clamp(1.5rem, 2.75vw, 2rem)",
-            lineHeight: 1.15,
+            fontSize: "clamp(1.55rem, 2.75vw, 2.15rem)",
+            lineHeight: 1.12,
             color: "var(--kxd-cream)",
+            letterSpacing: "-0.035em",
           }}
         >
           {current.title}
         </h2>
 
         <p
-          className="mt-2 font-serif font-light italic"
+          className="mt-3 font-sans font-normal"
           style={{
-            fontSize: "clamp(0.875rem, 1.2vw, 1rem)",
+            fontSize: "0.98rem",
             color: "var(--kxd-cream-muted)",
+            lineHeight: 1.65,
+            maxWidth: "34rem",
           }}
         >
           {current.subtitle}
         </p>
       </div>
 
-      <div style={{ padding: "clamp(1.75rem,4vw,2.75rem)" }}>
+      <div
+        style={{
+          padding: "0 clamp(1.75rem,4vw,3rem) clamp(2rem,4vw,3rem)",
+        }}
+      >
         {step === 0 && (
           <div className="space-y-5">
             <TextField
-              label="Company Name"
+              label="Company name"
               name="companyName"
               value={data.companyName}
               onChange={(v) => patch({ companyName: v })}
-              placeholder="Your brand or studio name"
+              placeholder="Your brand or company name"
               required
               autoComplete="organization"
             />
@@ -491,7 +492,7 @@ export function StartProjectForm() {
         {step === 1 && (
           <div className="space-y-5">
             <TextField
-              label="Full Name"
+              label="Full name"
               name="contactName"
               value={data.contactName}
               onChange={(v) => patch({ contactName: v })}
@@ -500,7 +501,7 @@ export function StartProjectForm() {
               autoComplete="name"
             />
             <TextField
-              label="Email Address"
+              label="Email address"
               name="email"
               type="email"
               value={data.email}
@@ -538,18 +539,10 @@ export function StartProjectForm() {
 
         {step === 2 && (
           <div>
-            <p
-              className="mb-1 font-sans uppercase"
-              style={{
-                fontSize: "0.5rem",
-                letterSpacing: "var(--tracking-label)",
-                color: "var(--kxd-cream-muted)",
-                opacity: 0.5,
-              }}
-            >
-              Select all that apply
+            <p className="mb-4 font-sans text-sm text-[var(--kxd-cream-muted)]">
+              Select all that apply.
             </p>
-            <div className="mt-1 divide-y" style={{ borderColor: "var(--kxd-border-white)" }}>
+            <div className="space-y-2">
               {SERVICE_OPTIONS.map((svc) => (
                 <CheckOption
                   key={svc}
@@ -565,7 +558,7 @@ export function StartProjectForm() {
         {step === 3 && (
           <div>
             <label className={labelCls} htmlFor="businessGoals">
-              Business Goals
+              Business goals
             </label>
             <textarea
               id="businessGoals"
@@ -573,7 +566,7 @@ export function StartProjectForm() {
               onChange={(e) => patch({ businessGoals: e.target.value })}
               rows={7}
               className="kxd-field w-full resize-none"
-              placeholder="What are you building? What does success look like 12 months from now?"
+              placeholder="What are you building? What should success look like 12 months from now?"
             />
           </div>
         )}
@@ -608,18 +601,10 @@ export function StartProjectForm() {
 
         {step === 6 && (
           <div>
-            <p
-              className="mb-1 font-sans uppercase"
-              style={{
-                fontSize: "0.5rem",
-                letterSpacing: "var(--tracking-label)",
-                color: "var(--kxd-cream-muted)",
-                opacity: 0.5,
-              }}
-            >
-              Select all that apply
+            <p className="mb-4 font-sans text-sm text-[var(--kxd-cream-muted)]">
+              Select all that apply.
             </p>
-            <div className="mt-1 divide-y" style={{ borderColor: "var(--kxd-border-white)" }}>
+            <div className="space-y-2">
               {ASSET_OPTIONS.map((asset) => (
                 <CheckOption
                   key={asset}
@@ -657,7 +642,7 @@ export function StartProjectForm() {
               onChange={(e) => patch({ notes: e.target.value })}
               rows={7}
               className="kxd-field w-full resize-none"
-              placeholder="References you admire, constraints we should know about, context that didn't fit elsewhere..."
+              placeholder="References you admire, constraints we should know about, context that did not fit elsewhere..."
             />
           </div>
         )}
@@ -675,14 +660,14 @@ export function StartProjectForm() {
         )}
 
         <div
-          className="mt-10 flex items-center justify-between gap-5 border-t pt-8"
-          style={{ borderColor: "var(--kxd-border-white)" }}
+          className="mt-10 flex items-center justify-between gap-5 pt-8"
+          style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.07)" }}
         >
           <button
             type="button"
             onClick={handleBack}
             disabled={step === 0 || submitState === "submitting"}
-            className="kxd-ui-label text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)] disabled:pointer-events-none disabled:opacity-30"
+            className="font-sans text-sm font-medium text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)] disabled:pointer-events-none disabled:opacity-30"
           >
             Back
           </button>
@@ -694,7 +679,7 @@ export function StartProjectForm() {
               disabled={submitState === "submitting"}
               className="kxd-btn-primary"
             >
-              {submitState === "submitting" ? "Submitting..." : "Submit Application"}
+              {submitState === "submitting" ? "Submitting..." : "Request Partnership"}
             </button>
           ) : (
             <button type="button" onClick={handleNext} className="kxd-btn-primary">

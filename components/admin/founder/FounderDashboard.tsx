@@ -1,13 +1,8 @@
 import Link from "next/link";
-import { KxdLogo } from "@/components/ui/KxdLogo";
+import { OpsSectionHead } from "@/components/admin/operations/shared/OpsBriefing";
+import { OperationsPageHero } from "@/components/admin/operations/shared/OperationsPageHero";
+import { KxdBadge } from "@/components/os";
 import type { FounderDashboardData, FounderFocusItem, FounderSnapshotMetric } from "@/lib/founder-dashboard";
-import { KXD_OS as C } from "@/lib/kxd-os/palette";
-
-const URGENCY_COLOR = {
-  critical: C.red,
-  high: C.amber,
-  medium: C.slate,
-} as const;
 
 const STATUS_LABEL: Record<string, string> = {
   healthy: "Healthy",
@@ -15,24 +10,6 @@ const STATUS_LABEL: Record<string, string> = {
   "at-risk": "At Risk",
   paused: "Paused",
 };
-
-function Label({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
-  return (
-    <p
-      style={{
-        fontFamily: C.sans,
-        fontSize: "0.6875rem",
-        fontWeight: 600,
-        letterSpacing: "0.18em",
-        textTransform: "uppercase",
-        color: C.creamSubtle,
-        ...style,
-      }}
-    >
-      {children}
-    </p>
-  );
-}
 
 function SectionHeader({
   label,
@@ -46,92 +23,36 @@ function SectionHeader({
   linkText?: string;
 }) {
   return (
-    <div
-      className="mb-5 flex flex-wrap items-baseline justify-between gap-3"
-      style={{ paddingBottom: "0.875rem", borderBottom: `1px solid ${C.border}` }}
-    >
-      <div>
-        <Label style={{ color: C.goldDim, marginBottom: sub ? "0.5rem" : 0 }}>{label}</Label>
-        {sub && (
-          <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted, lineHeight: 1.55 }}>
-            {sub}
-          </p>
-        )}
-      </div>
-      {href && (
-        <Link
-          href={href}
-          style={{
-            fontFamily: C.sans,
-            fontWeight: 500,
-            fontSize: "0.6875rem",
-            letterSpacing: "0.14em",
-            textTransform: "uppercase",
-            color: C.goldDim,
-            textDecoration: "none",
-          }}
-        >
-          {linkText ?? "View →"}
-        </Link>
-      )}
+    <div className="mb-6">
+      <OpsSectionHead label={label} href={href} linkText={linkText} />
+      {sub && <p className="kxd-os-section__description mt-2">{sub}</p>}
     </div>
   );
 }
 
 function SnapshotGrid({ metrics }: { metrics: FounderSnapshotMetric[] }) {
   return (
-    <div
-      className="grid grid-cols-2 lg:grid-cols-4"
-      style={{ gap: "1px", background: C.border, border: `1px solid ${C.border}` }}
-    >
+    <div className="kxd-os-founder-snapshot-grid">
       {metrics.map((m) => {
         const inner = (
-          <div
-            style={{
-              background: C.glass,
-              padding: "1.375rem 1.5rem",
-              height: "100%",
-              transition: "background 0.2s ease",
-            }}
-            className="founder-snapshot-cell"
-          >
-            <Label>{m.label}</Label>
+          <div className="kxd-os-founder-snapshot-cell">
+            <p className="kxd-os-metric__label">{m.label}</p>
             <p
-              style={{
-                fontFamily: C.serif,
-                fontWeight: 300,
-                fontSize: "clamp(1.375rem, 2.5vw, 1.75rem)",
-                color: m.alert ? C.amber : C.cream,
-                marginTop: "0.625rem",
-                lineHeight: 1,
-              }}
+              className={`kxd-os-metric__value${m.alert ? " kxd-os-ops-kpi-cell__value--alert" : ""}`}
             >
               {m.value}
             </p>
-            <p
-              style={{
-                fontFamily: C.sans,
-                fontSize: "0.8125rem",
-                color: C.creamSubtle,
-                marginTop: "0.5rem",
-                lineHeight: 1.45,
-              }}
-            >
-              {m.sub}
-            </p>
+            <p className="kxd-os-metric__sub">{m.sub}</p>
           </div>
         );
         return m.href ? (
-          <Link key={m.id} href={m.href} style={{ textDecoration: "none", display: "block" }}>
+          <Link key={m.id} href={m.href}>
             {inner}
           </Link>
         ) : (
           <div key={m.id}>{inner}</div>
         );
       })}
-      <style>{`
-        .founder-snapshot-cell:hover { background: ${C.glassHover}; }
-      `}</style>
     </div>
   );
 }
@@ -139,87 +60,37 @@ function SnapshotGrid({ metrics }: { metrics: FounderSnapshotMetric[] }) {
 function FocusStack({ items }: { items: FounderFocusItem[] }) {
   if (items.length === 0) {
     return (
-      <div
-        style={{
-          background: C.glass,
-          border: `1px solid ${C.border}`,
-          padding: "1.5rem 1.75rem",
-          display: "flex",
-          alignItems: "center",
-          gap: "1rem",
-        }}
-      >
-        <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: C.gold }} />
-        <div>
-          <p style={{ fontFamily: C.sans, fontSize: "0.875rem", color: C.cream }}>All clear for today.</p>
-          <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamSubtle, marginTop: "0.25rem" }}>
-            No critical items in the priority stack.
-          </p>
-        </div>
+      <div className="kxd-os-founder-panel">
+        <p className="kxd-os-body">All clear for today.</p>
+        <p className="kxd-os-meta mt-2">No critical items in the priority stack.</p>
       </div>
     );
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "1px", background: C.border }}>
+    <div className="kxd-os-founder-focus-stack">
       {items.map((item, i) => {
-        const color = URGENCY_COLOR[item.urgency];
+        const rowClass = `kxd-os-founder-focus-row${
+          item.urgency === "critical"
+            ? " kxd-os-founder-focus-row--critical"
+            : item.urgency === "high"
+              ? " kxd-os-founder-focus-row--high"
+              : ""
+        }`;
         const row = (
-          <div
-            style={{
-              background: C.glass,
-              padding: "1.125rem 1.375rem",
-              display: "flex",
-              alignItems: "flex-start",
-              gap: "1rem",
-              borderLeft: `2px solid ${color}`,
-            }}
-          >
-            <span
-              style={{
-                fontFamily: C.sans,
-                fontWeight: 700,
-                fontSize: "0.8125rem",
-                color: C.creamSubtle,
-                width: "1.25rem",
-                flexShrink: 0,
-              }}
-            >
-              {i + 1}
-            </span>
-            <div style={{ flex: 1 }}>
-              <p style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.875rem", color: C.cream }}>
-                {item.label}
-              </p>
-              <p
-                style={{
-                  fontFamily: C.sans,
-                  fontSize: "0.8125rem",
-                  color: C.creamSubtle,
-                  marginTop: "0.25rem",
-                  lineHeight: 1.5,
-                }}
-              >
-                {item.detail}
-              </p>
+          <div className={rowClass}>
+            <span className="kxd-os-meta">{i + 1}</span>
+            <div className="flex-1 min-w-0">
+              <p className="kxd-os-title text-base">{item.label}</p>
+              <p className="kxd-os-meta mt-1">{item.detail}</p>
             </div>
-            <span
-              style={{
-                fontFamily: C.sans,
-                fontSize: "0.6875rem",
-                fontWeight: 600,
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                color,
-                flexShrink: 0,
-              }}
-            >
+            <KxdBadge variant={item.urgency === "critical" ? "critical" : item.urgency === "high" ? "warning" : "default"}>
               {item.urgency}
-            </span>
+            </KxdBadge>
           </div>
         );
         return item.href ? (
-          <Link key={item.id} href={item.href} style={{ textDecoration: "none" }}>
+          <Link key={item.id} href={item.href} className="no-underline text-inherit">
             {row}
           </Link>
         ) : (
@@ -242,119 +113,44 @@ function fmtMoneyCompact(n: number): string {
 
 type Props = {
   data: FounderDashboardData;
+  embedded?: boolean;
 };
 
-export function FounderDashboard({ data }: Props) {
-  const navLinks = [
-    ["/admin/operations/founder", "Founder"],
-    ["/admin/operations/executive", "Executive"],
-    ["/admin/operations/today", "Today"],
-    ["/admin/operations/accounts", "Accounts"],
-    ["/admin/operations/growth", "Growth"],
-    ["/admin/operations/creative", "Creative"],
-    ["/admin/operations/onboarding", "Onboarding"],
-    ["/admin/operations", "Operations"],
-  ] as const;
+export function FounderDashboard({ data, embedded = true }: Props) {
+  const growthItems = [
+    {
+      label: "Website Audits",
+      value: data.growthPipeline.auditsSubmitted,
+      sub: `${data.growthPipeline.auditsNew30d} new in 30 days`,
+    },
+    {
+      label: "Research Leads",
+      value: data.growthPipeline.researchLeadsSubmitted,
+      sub: `${data.growthPipeline.researchLeadsNew30d} new in 30 days`,
+    },
+    {
+      label: "Qualified Opportunities",
+      value: data.growthPipeline.qualifiedOpportunities,
+      sub: "Qualified or further in pipeline",
+    },
+    {
+      label: "Closed Opportunities",
+      value: data.growthPipeline.closedOpportunities,
+      sub: "Closed-won research leads",
+    },
+  ];
 
   return (
-    <div
-      style={{
-        background: C.bgBase,
-        minHeight: "100vh",
-        color: C.cream,
-        fontFamily: C.sans,
-        WebkitFontSmoothing: "antialiased",
-      }}
-    >
-      <header style={{ background: C.bgPure, borderBottom: `1px solid ${C.border}` }}>
-        <div
-          className="mx-auto flex max-w-screen-xl flex-wrap items-center justify-between gap-4"
-          style={{ padding: "1.125rem 1.5rem" }}
-        >
-          <div className="flex items-center gap-4">
-            <KxdLogo />
-            <div>
-              <p
-                style={{
-                  fontFamily: C.sans,
-                  fontSize: "0.8125rem",
-                  letterSpacing: "0.16em",
-                  textTransform: "uppercase",
-                  color: C.creamMuted,
-                }}
-              >
-                KXD OS · Founder Studio
-              </p>
-              <p
-                style={{
-                  fontFamily: C.sans,
-                  fontSize: "0.6875rem",
-                  letterSpacing: "0.1em",
-                  color: C.creamSubtle,
-                  marginTop: "0.25rem",
-                }}
-              >
-                Morning intelligence briefing
-              </p>
-            </div>
-          </div>
-          <nav className="flex flex-wrap items-center gap-4">
-            {navLinks.map(([href, label]) => (
-              <Link
-                key={href}
-                href={href}
-                style={{
-                  fontFamily: C.sans,
-                  fontSize: "0.6875rem",
-                  letterSpacing: "0.12em",
-                  textTransform: "uppercase",
-                  color: href === "/admin/operations/founder" ? C.gold : C.creamSubtle,
-                  textDecoration: "none",
-                }}
-              >
-                {label}
-              </Link>
-            ))}
-          </nav>
-        </div>
-      </header>
+    <div className={embedded ? "kxd-os-page kxd-os-page--ops" : "kxd-os-shell"}>
+      <main>
+        <OperationsPageHero
+          eyebrow="Founder Studio"
+          title={data.dateDisplay}
+          lead={`Loaded ${data.timeDisplay} · Live snapshot across clients, delivery, growth, and studio operations`}
+          presence
+        />
 
-      <main className="mx-auto max-w-screen-xl" style={{ padding: "2.5rem 1.5rem 5rem" }}>
-        {/* Hero */}
-        <div
-          style={{
-            marginBottom: "2.75rem",
-            paddingBottom: "2.25rem",
-            borderBottom: `1px solid ${C.border}`,
-          }}
-        >
-          <Label style={{ color: C.goldDim, marginBottom: "0.875rem" }}>Founder Studio</Label>
-          <h1
-            style={{
-              fontFamily: C.serif,
-              fontWeight: 300,
-              fontSize: "clamp(2rem, 5vw, 3.25rem)",
-              lineHeight: 1.05,
-              color: C.cream,
-              maxWidth: "36rem",
-            }}
-          >
-            {data.dateDisplay}
-          </h1>
-          <p
-            style={{
-              fontFamily: C.sans,
-              fontSize: "0.8125rem",
-              color: C.creamSubtle,
-              marginTop: "0.75rem",
-            }}
-          >
-            Loaded {data.timeDisplay} · Live snapshot across clients, delivery, growth, and studio operations
-          </p>
-        </div>
-
-        {/* 1. Founder Snapshot */}
-        <section style={{ marginBottom: "3rem" }}>
+        <section className="kxd-os-section">
           <SectionHeader
             label="Founder Snapshot"
             sub="Real-time pulse of the business — one glance, full context"
@@ -362,83 +158,50 @@ export function FounderDashboard({ data }: Props) {
           <SnapshotGrid metrics={data.snapshot} />
         </section>
 
-        <div className="grid gap-10 xl:grid-cols-5" style={{ marginBottom: "3rem" }}>
-          {/* 2. Today's Focus */}
-          <section className="xl:col-span-3">
+        <div className="kxd-os-operations-split">
+          <section className="kxd-os-section">
             <SectionHeader
               label="Today's Focus"
               sub="Priority stack — overdue work, onboarding, requests, and creative blockers"
               href="/admin/operations/today"
-              linkText="Studio Today →"
+              linkText="Studio Today"
             />
             <FocusStack items={data.todaysFocus} />
           </section>
 
-          {/* 6. Revenue View (sidebar) */}
-          <section className="xl:col-span-2">
+          <section className="kxd-os-section">
             <SectionHeader
               label="Revenue View"
               sub="Retainer-based recurring revenue"
               href="/admin/collections/retainers"
-              linkText="Retainers →"
+              linkText="Retainers"
             />
-            <div
-              style={{
-                background: C.glass,
-                border: `1px solid ${C.borderGold}`,
-                padding: "1.5rem 1.625rem",
-              }}
-            >
-              <p
-                style={{
-                  fontFamily: C.serif,
-                  fontWeight: 300,
-                  fontSize: "2.25rem",
-                  color: C.gold,
-                  lineHeight: 1,
-                }}
-              >
-                {fmtMoneyCompact(data.revenue.mrr)}
-              </p>
-              <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted, marginTop: "0.35rem" }}>
-                Monthly recurring revenue
-              </p>
-              <div
-                className="grid grid-cols-2"
-                style={{ gap: "1rem", marginTop: "1.5rem", paddingTop: "1.25rem", borderTop: `1px solid ${C.border}` }}
-              >
+            <div className="kxd-os-founder-panel">
+              <p className="kxd-os-founder-revenue-value">{fmtMoneyCompact(data.revenue.mrr)}</p>
+              <p className="kxd-os-meta mt-2">Monthly recurring revenue</p>
+              <div className="mt-6 pt-6 kxd-os-operations-mini-grid kxd-os-founder-revenue-stats">
                 <div>
-                  <Label>Est. ARR</Label>
-                  <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "1.25rem", color: C.cream, marginTop: "0.35rem" }}>
-                    {fmtMoneyCompact(data.revenue.arr)}
-                  </p>
+                  <p className="kxd-os-metric__label">Est. ARR</p>
+                  <p className="kxd-os-metric__value text-xl mt-2">{fmtMoneyCompact(data.revenue.arr)}</p>
                 </div>
                 <div>
-                  <Label>Active Retainers</Label>
-                  <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "1.25rem", color: C.cream, marginTop: "0.35rem" }}>
-                    {data.revenue.activeRetainers}
-                  </p>
+                  <p className="kxd-os-metric__label">Active Retainers</p>
+                  <p className="kxd-os-metric__value text-xl mt-2">{data.revenue.activeRetainers}</p>
                 </div>
                 <div>
-                  <Label>Retainer Clients</Label>
-                  <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "1.25rem", color: C.cream, marginTop: "0.35rem" }}>
-                    {data.revenue.retainerClients}
-                  </p>
+                  <p className="kxd-os-metric__label">Retainer Clients</p>
+                  <p className="kxd-os-metric__value text-xl mt-2">{data.revenue.retainerClients}</p>
                 </div>
               </div>
               {data.revenue.topAccounts.length > 0 && (
-                <div style={{ marginTop: "1.25rem", paddingTop: "1rem", borderTop: `1px solid ${C.border}` }}>
-                  <Label style={{ marginBottom: "0.75rem" }}>Top Accounts</Label>
+                <div className="mt-6 pt-5 kxd-os-founder-revenue-stats">
+                  <p className="kxd-os-metric__label mb-4">Top Accounts</p>
                   {data.revenue.topAccounts.map((a) => (
-                    <div
-                      key={a.name}
-                      className="flex justify-between gap-2"
-                      style={{ marginBottom: "0.5rem" }}
-                    >
-                      <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted }}>{a.name}</p>
-                      <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.cream }}>
+                    <div key={a.name} className="flex justify-between gap-2 mb-2">
+                      <p className="kxd-os-body">{a.name}</p>
+                      <p className="kxd-os-body">
                         {fmtMoneyCompact(a.mrr)}
-                        <span style={{ color: C.creamSubtle, marginLeft: "0.35rem" }}>{a.pct}%</span>
+                        <span className="kxd-os-meta ml-2">{a.pct}%</span>
                       </p>
                     </div>
                   ))}
@@ -448,231 +211,118 @@ export function FounderDashboard({ data }: Props) {
           </section>
         </div>
 
-        {/* 3. Growth Pipeline */}
-        <section style={{ marginBottom: "3rem" }}>
+        <section className="kxd-os-section">
           <SectionHeader
             label="Growth Pipeline"
             sub="Audits and research leads — early signal before revenue"
             href="/admin/operations/growth"
-            linkText="Growth Systems →"
+            linkText="Growth Systems"
           />
-          <div
-            className="grid grid-cols-2 lg:grid-cols-3"
-            style={{ gap: "1px", background: C.border, border: `1px solid ${C.border}` }}
-          >
-            {[
-              {
-                label: "Website Audits",
-                value: data.growthPipeline.auditsSubmitted,
-                sub: `${data.growthPipeline.auditsNew30d} new in 30 days`,
-              },
-              {
-                label: "Research Leads",
-                value: data.growthPipeline.researchLeadsSubmitted,
-                sub: `${data.growthPipeline.researchLeadsNew30d} new in 30 days`,
-              },
-              {
-                label: "Qualified Opportunities",
-                value: data.growthPipeline.qualifiedOpportunities,
-                sub: "Qualified or further in pipeline",
-              },
-              {
-                label: "Closed Opportunities",
-                value: data.growthPipeline.closedOpportunities,
-                sub: "Closed-won research leads",
-              },
-            ].map((item) => (
-              <div key={item.label} style={{ background: C.glass, padding: "1.375rem 1.5rem" }}>
-                <Label>{item.label}</Label>
-                <p
-                  style={{
-                    fontFamily: C.serif,
-                    fontWeight: 300,
-                    fontSize: "1.75rem",
-                    color: C.cream,
-                    marginTop: "0.5rem",
-                    lineHeight: 1,
-                  }}
-                >
-                  {item.value}
-                </p>
-                <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamSubtle, marginTop: "0.4rem" }}>
-                  {item.sub}
-                </p>
+          <div className="kxd-os-founder-snapshot-grid kxd-os-founder-snapshot-grid--half">
+            {growthItems.map((item) => (
+              <div key={item.label} className="kxd-os-founder-snapshot-cell">
+                <p className="kxd-os-metric__label">{item.label}</p>
+                <p className="kxd-os-metric__value">{item.value}</p>
+                <p className="kxd-os-metric__sub">{item.sub}</p>
               </div>
             ))}
           </div>
         </section>
 
-        <div className="grid gap-10 lg:grid-cols-2" style={{ marginBottom: "3rem" }}>
-          {/* 4. Team Activity */}
-          <section>
+        <div className="kxd-os-operations-split">
+          <section className="kxd-os-section">
             <SectionHeader
               label="Team Activity"
               sub="Junior Creators — research output and studio contribution"
               href="/admin/operations/junior-creators"
-              linkText="Junior Creator Admin →"
+              linkText="Junior Creator Admin"
             />
             {data.teamActivity.length === 0 ? (
-              <div style={{ background: C.glass, border: `1px solid ${C.border}`, padding: "1.5rem" }}>
-                <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamSubtle }}>
-                  No junior creator accounts active.
-                </p>
+              <div className="kxd-os-founder-panel">
+                <p className="kxd-os-meta">No junior creator accounts active.</p>
               </div>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: "1px", background: C.border }}>
+              <div className="kxd-os-founder-focus-stack">
                 {data.teamActivity.map((member) => (
-                  <div
-                    key={member.id}
-                    style={{
-                      background: C.glass,
-                      padding: "1.25rem 1.375rem",
-                      borderLeft: member.activeNow ? `2px solid ${C.gold}` : undefined,
-                    }}
-                  >
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div>
-                        <p style={{ fontFamily: C.serif, fontWeight: 400, fontSize: "1.125rem", color: C.cream }}>
-                          {member.displayName}
-                          {member.activeNow && (
-                            <span
-                              style={{
-                                fontFamily: C.sans,
-                                fontSize: "0.6875rem",
-                                letterSpacing: "0.1em",
-                                textTransform: "uppercase",
-                                color: C.goldDim,
-                                marginLeft: "0.75rem",
-                              }}
-                            >
-                              Active now
-                            </span>
-                          )}
-                        </p>
-                        <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.gold, marginTop: "0.25rem" }}>
-                          {member.rankTitle}
-                        </p>
+                  <div key={member.id} className="kxd-os-founder-focus-row">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-3">
+                        <p className="kxd-os-title text-base">{member.displayName}</p>
+                        {member.activeNow && <KxdBadge variant="success">Active now</KxdBadge>}
                       </div>
-                      <div style={{ textAlign: "right" }}>
-                        <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.cream }}>
-                          {member.leadsSubmitted} leads
-                        </p>
-                        <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamSubtle, marginTop: "0.2rem" }}>
-                          {member.hoursLabel} contributed
-                        </p>
-                      </div>
+                      <p className="kxd-os-meta mt-1">{member.rankTitle}</p>
+                      <p className="kxd-os-meta mt-2">
+                        {member.leadsThisWeek} lead{member.leadsThisWeek === 1 ? "" : "s"} this week
+                      </p>
                     </div>
-                    <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamSubtle, marginTop: "0.5rem" }}>
-                      {member.leadsThisWeek} lead{member.leadsThisWeek === 1 ? "" : "s"} this week
-                    </p>
+                    <div className="text-right">
+                      <p className="kxd-os-body">{member.leadsSubmitted} leads</p>
+                      <p className="kxd-os-meta mt-1">{member.hoursLabel} contributed</p>
+                    </div>
                   </div>
                 ))}
               </div>
             )}
           </section>
 
-          {/* 5. Client Health */}
-          <section>
+          <section className="kxd-os-section">
             <SectionHeader
               label="Client Health"
               sub="Relationship status across the active client base"
               href="/admin/operations/accounts"
-              linkText="Account Intelligence →"
+              linkText="Account Intelligence"
             />
-            <div
-              className="mb-4 grid grid-cols-3"
-              style={{ gap: "1px", background: C.border, border: `1px solid ${C.border}` }}
-            >
+            <div className="kxd-os-founder-snapshot-grid kxd-os-founder-snapshot-grid--third mb-4">
               {[
-                { label: "Healthy", value: data.clientHealth.healthy, color: C.goldDim },
-                { label: "Needs Attention", value: data.clientHealth.needsAttention, color: C.amber },
-                { label: "At Risk", value: data.clientHealth.atRisk, color: C.red },
+                { label: "Healthy", value: data.clientHealth.healthy },
+                { label: "Needs Attention", value: data.clientHealth.needsAttention },
+                { label: "At Risk", value: data.clientHealth.atRisk },
               ].map((s) => (
-                <div key={s.label} style={{ background: C.glass, padding: "1rem 1.125rem", textAlign: "center" }}>
-                  <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "1.5rem", color: s.color }}>{s.value}</p>
-                  <p style={{ fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.1em", textTransform: "uppercase", color: C.creamSubtle, marginTop: "0.35rem" }}>
-                    {s.label}
-                  </p>
+                <div key={s.label} className="kxd-os-founder-snapshot-cell text-center">
+                  <p className="kxd-os-metric__value">{s.value}</p>
+                  <p className="kxd-os-metric__label mt-2">{s.label}</p>
                 </div>
               ))}
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "1px", background: C.border }}>
+            <div className="kxd-os-founder-focus-stack">
               {data.clientHealth.topClients.map((client) => (
                 <Link
                   key={client.clientId}
                   href={client.href}
-                  style={{
-                    background: C.glass,
-                    padding: "0.875rem 1.125rem",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    gap: "0.75rem",
-                    textDecoration: "none",
-                  }}
+                  className="kxd-os-founder-focus-row no-underline text-inherit"
                 >
-                  <div>
-                    <p style={{ fontFamily: C.sans, fontSize: "0.875rem", color: C.cream }}>{client.name}</p>
-                    <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamSubtle, marginTop: "0.15rem" }}>
+                  <div className="flex-1 min-w-0">
+                    <p className="kxd-os-presence-name">{client.name}</p>
+                    <p className="kxd-os-meta mt-1">
                       {STATUS_LABEL[client.status] ?? client.status} · Grade {client.grade}
                     </p>
                   </div>
-                  <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.goldDim }}>
-                    {fmtMoneyCompact(client.mrr)}/mo
-                  </p>
+                  <p className="kxd-os-body">{fmtMoneyCompact(client.mrr)}/mo</p>
                 </Link>
               ))}
             </div>
           </section>
         </div>
 
-        {/* 7. Founder Notes */}
-        <section style={{ marginBottom: "3rem" }}>
+        <section className="kxd-os-section">
           <SectionHeader
             label="Founder Notes"
             sub="Priorities, reminders, and vision — your private studio notebook"
           />
-          <div
-            className="grid gap-px lg:grid-cols-3"
-            style={{ background: C.border, border: `1px solid ${C.border}` }}
-          >
+          <div className="kxd-os-founder-note-grid">
             {data.founderNotes.map((note) => (
-              <div
-                key={note.id}
-                style={{
-                  background: C.glass,
-                  padding: "1.5rem 1.625rem",
-                  borderTop: `1px solid ${C.borderGold}`,
-                }}
-              >
-                <Label style={{ color: C.goldDim, marginBottom: "0.625rem" }}>{note.category}</Label>
-                <p
-                  style={{
-                    fontFamily: C.serif,
-                    fontWeight: 400,
-                    fontSize: "1.125rem",
-                    color: C.cream,
-                    marginBottom: "0.625rem",
-                    lineHeight: 1.25,
-                  }}
-                >
-                  {note.title}
-                </p>
-                <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted, lineHeight: 1.65 }}>
-                  {note.body}
-                </p>
+              <div key={note.id} className="kxd-os-founder-note-card">
+                <p className="kxd-os-metric__label mb-3">{note.category}</p>
+                <p className="kxd-os-founder-note-title">{note.title}</p>
+                <p className="kxd-os-body">{note.body}</p>
               </div>
             ))}
           </div>
         </section>
 
-        {/* Quick links */}
-        <section>
-          <Label style={{ color: C.goldDim, marginBottom: "1rem" }}>Studio Systems</Label>
-          <div
-            className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6"
-            style={{ gap: "1px", background: C.border, border: `1px solid ${C.border}` }}
-          >
+        <section className="kxd-os-section">
+          <p className="kxd-os-metric__label mb-4">Studio Systems</p>
+          <div className="kxd-os-founder-quick-grid">
             {[
               { label: "Executive", href: "/admin/operations/executive" },
               { label: "Today", href: "/admin/operations/today" },
@@ -681,35 +331,14 @@ export function FounderDashboard({ data }: Props) {
               { label: "Research", href: "/admin/operations/research" },
               { label: "KXD OS", href: "/os" },
             ].map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                style={{
-                  background: C.glass,
-                  padding: "1rem 1.125rem",
-                  textDecoration: "none",
-                  transition: "background 0.2s ease",
-                }}
-                className="founder-quick-link"
-              >
-                <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted }}>{link.label}</p>
+              <Link key={link.href} href={link.href} className="kxd-os-founder-quick-link">
+                {link.label}
               </Link>
             ))}
           </div>
-          <style>{`
-            .founder-quick-link:hover { background: ${C.glassHover}; }
-          `}</style>
         </section>
 
-        <p
-          style={{
-            fontFamily: C.sans,
-            fontSize: "0.8125rem",
-            color: C.creamSubtle,
-            marginTop: "2.5rem",
-            letterSpacing: "0.04em",
-          }}
-        >
+        <p className="kxd-os-caption mt-10">
           KXD OS · Founder Studio · Live Payload data · Refreshes on each request
         </p>
       </main>
