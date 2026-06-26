@@ -17,8 +17,7 @@ export function KxdLogo({ className, width = 56, height = 40, disableLink = fals
       width={width}
       height={height}
       className="h-auto w-[3.5rem] object-contain"
-      priority
-      fetchPriority="high"
+      loading="eager"
     />
   );
 

@@ -92,7 +92,7 @@
   --color-border:     var(--color-border);
   --color-card:       var(--color-card);
   --font-sans:   var(--font-outfit), system-ui, sans-serif;
-  --font-serif:  var(--font-cormorant), "Playfair Display", Didot, "Bodoni MT", Georgia, serif;
+  --font-serif:  var(--font-cormorant), var(--font-cormorant-ext), "Playfair Display", Didot, "Bodoni MT", Georgia, serif;
 }
 
 /* ─────────────────── BASE ─────────────────── */
@@ -1044,11 +1044,11 @@ main {
   animation: kxd-fade 2s var(--ease-enter) both;
 }
 
-/* ── Work reel strip — luxury proof reel, slow drift ── */
+/* Bottom fade — soft edge at viewport base before reel strip (below on mobile). */
 .kxd-hero-reel-fade {
-  bottom: clamp(14rem, 20vh, 18rem);
-  height: clamp(8rem, 11vh, 10rem);
-  background: linear-gradient(to top, var(--kxd-black-pure) 14%, transparent);
+  bottom: 0;
+  height: clamp(6rem, 10vh, 8rem);
+  background: linear-gradient(to top, var(--kxd-black-pure) 18%, transparent);
 }
 
 /*

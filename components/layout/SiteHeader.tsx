@@ -3,9 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { HOMEPAGE_SERVICES } from "@/lib/homepage";
+import { HEADER_MEGA_SERVICES, HEADER_MEGA_WORK } from "@/lib/header-nav";
 import { SITE } from "@/lib/site";
-import { PRIMARY_PROJECTS } from "@/lib/projects";
 import { cn } from "@/lib/utils";
 import { KxdLogo } from "@/components/ui/KxdLogo";
 
@@ -60,7 +59,7 @@ export function SiteHeader() {
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
-  const featuredProjects = PRIMARY_PROJECTS.slice(0, 4);
+  const featuredProjects = HEADER_MEGA_WORK;
 
   return (
     <>
@@ -183,7 +182,7 @@ export function SiteHeader() {
             <div>
               <p className="kxd-eyebrow mb-6">Capabilities</p>
               <ul className="space-y-1">
-                {HOMEPAGE_SERVICES.map((service) => (
+                {HEADER_MEGA_SERVICES.map((service) => (
                   <li key={service.slug}>
                     <Link
                       href={`/services/${service.slug}`}
