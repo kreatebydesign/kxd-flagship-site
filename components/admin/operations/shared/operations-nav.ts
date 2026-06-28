@@ -25,7 +25,8 @@ export type OperationsNavId =
   | "sales-forecast"
   | "reports"
   | "strategy"
-  | "brain";
+  | "brain"
+  | "integrations";
 
 export type OperationsNavItem = {
   id: OperationsNavId;
@@ -47,6 +48,7 @@ export const NAV_GROUPS: OperationsNavGroup[] = [
       { id: "brain", label: "KXD Brain", href: "/admin/operations/brain" },
       { id: "today", label: "Today", href: "/admin/operations/today" },
       { id: "command", label: "Operations", href: "/admin/operations/command" },
+      { id: "integrations", label: "Integrations", href: "/admin/operations/integrations" },
       { id: "founder", label: "Founder", href: "/admin/operations/founder" },
     ],
   },
