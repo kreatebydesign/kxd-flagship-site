@@ -31,3 +31,9 @@ export type {
   CommandHubClientRow,
   WorkspaceTimelineEvent,
 } from "./workspace-types";
+
+export {
+  publishClientActivity,
+  backfillClientActivity,
+  loadClientActivityTimeline,
+} from "./activity";

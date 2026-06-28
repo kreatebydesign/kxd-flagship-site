@@ -30,6 +30,10 @@ export function ClientCommandHub({
           <Link href="/admin/operations/clients" className="kxd-os-link-quiet">
             Open portfolio view →
           </Link>
+          {" · "}
+          <Link href="/admin/operations/client-command/backfill" className="kxd-os-link-quiet">
+            Activity backfill →
+          </Link>
         </p>
       </div>
     </OperationsShell>

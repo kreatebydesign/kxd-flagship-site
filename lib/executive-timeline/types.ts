@@ -24,6 +24,7 @@ export type ExecutiveTimelineImportance = "low" | "normal" | "high" | "critical"
 export type ExecutiveTimelineSourceModule =
   | "Launch"
   | "Client HQ"
+  | "Client Command"
   | "Infrastructure"
   | "Founder Intelligence"
   | "Audits"
@@ -34,6 +35,12 @@ export type ExecutiveTimelineSourceModule =
   | "Portal"
   | "Website Auditor"
   | "Executive Notes"
+  | "Projects"
+  | "Requests"
+  | "Sales"
+  | "Retainers"
+  | "Client Success"
+  | "Emails"
   | "Manual";
 
 export interface CreateExecutiveEventInput {

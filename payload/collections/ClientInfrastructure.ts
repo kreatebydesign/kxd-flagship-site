@@ -1,6 +1,7 @@
 import type { CollectionConfig } from "payload";
 import { isAuthenticated } from "../access/index.ts";
 import { PAYLOAD_GROUPS } from "../admin/groups.ts";
+import { publishInfrastructureActivityHook } from "../hooks/client-activity.ts";
 
 export const ClientInfrastructure: CollectionConfig = {
   slug: "client-infrastructure",
@@ -28,6 +29,9 @@ export const ClientInfrastructure: CollectionConfig = {
     create: isAuthenticated,
     update: isAuthenticated,
     delete: isAuthenticated,
+  },
+  hooks: {
+    afterChange: [publishInfrastructureActivityHook],
   },
   fields: [
     {

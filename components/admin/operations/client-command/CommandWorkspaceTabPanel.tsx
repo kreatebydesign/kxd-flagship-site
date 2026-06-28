@@ -12,6 +12,7 @@ import {
   WorkspaceStat,
   WorkspaceStatRow,
 } from "@/components/admin/operations/client-workspace/WorkspacePrimitives";
+import { ClientTimelinePanel } from "./ClientTimelinePanel";
 
 function statusLabel(status: string): string {
   return status.replace(/-/g, " ");
@@ -28,7 +29,7 @@ export function CommandWorkspaceTabPanel({
     case "overview":
       return <OverviewPanel data={data} />;
     case "timeline":
-      return <TimelinePanel data={data} />;
+      return <ClientTimelinePanel data={data} />;
     case "projects":
       return <ProjectsPanel data={data} />;
     case "requests":
@@ -173,64 +174,6 @@ function OverviewPanel({ data }: { data: ClientWorkspaceBundle }) {
         </div>
       </WorkspaceChapter>
     </div>
-  );
-}
-
-function TimelinePanel({ data }: { data: ClientWorkspaceBundle }) {
-  const events = data.timelineEvents;
-
-  if (events.length === 0) {
-    return (
-      <WorkspaceChapter title="Timeline">
-        <WorkspaceEmpty
-          message="The client timeline is empty. Events from projects, launches, invoices, meetings, and infrastructure will accumulate here automatically."
-        />
-        <Link
-          href={`/admin/collections/executive-timeline-events/create?client=${data.clientId}`}
-          className="kxd-os-link-quiet kxd-os-workspace-inline-link"
-        >
-          Log timeline event →
-        </Link>
-      </WorkspaceChapter>
-    );
-  }
-
-  return (
-    <WorkspaceChapter title="Timeline">
-      <ol className="kxd-os-command-timeline">
-        {events.map((event) => (
-          <li key={event.id} className="kxd-os-command-timeline__item">
-            <div className="kxd-os-command-timeline__marker" aria-hidden="true">
-              {event.icon}
-            </div>
-            <div className="kxd-os-command-timeline__content">
-              <div className="kxd-os-command-timeline__head">
-                <time className="kxd-os-command-timeline__date">
-                  {fmtWorkspaceDate(event.occurredAt)}
-                </time>
-                {event.pinned ? (
-                  <span className="kxd-os-workspace-badge">Pinned</span>
-                ) : null}
-                <span className="kxd-os-workspace-badge">{event.category}</span>
-              </div>
-              <h3 className="kxd-os-command-timeline__title">
-                {event.href ? (
-                  <Link href={event.href}>{event.title}</Link>
-                ) : (
-                  event.title
-                )}
-              </h3>
-              {event.details ? (
-                <p className="kxd-os-workspace-prose">{event.details}</p>
-              ) : null}
-              {event.author ? (
-                <p className="kxd-os-command-timeline__author">{event.author}</p>
-              ) : null}
-            </div>
-          </li>
-        ))}
-      </ol>
-    </WorkspaceChapter>
   );
 }
 

@@ -2,6 +2,7 @@ import type { CollectionConfig } from "payload";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
 import { isAuthenticated } from "../access/index.ts";
 import { PAYLOAD_GROUPS } from "../admin/groups.ts";
+import { publishNoteActivityHook } from "../hooks/client-activity.ts";
 
 const NOTE_TYPES = [
   { label: "Strategy", value: "strategy" },
@@ -62,6 +63,7 @@ export const ExecutiveNotes: CollectionConfig = {
         return data;
       },
     ],
+    afterChange: [publishNoteActivityHook],
   },
   fields: [
     {

@@ -2,7 +2,7 @@ import "server-only";
 
 import { getPayload } from "payload";
 import config from "@payload-config";
-import { getExecutiveTimeline } from "@/lib/executive-timeline/data";
+import { loadClientActivityTimeline } from "./activity/load";
 import { getClientInfrastructure } from "@/lib/infrastructure/data";
 import { fetchClientWorkspace } from "@/lib/executive-client-workspace/fetch-client-workspace";
 import { daysSince } from "@/lib/intelligence/context";
@@ -13,59 +13,8 @@ import type {
   WorkspaceAnalyticsSnapshot,
   WorkspaceFileRow,
   WorkspaceInvoiceRow,
-  WorkspaceTimelineEvent,
 } from "./workspace-types";
 import type { CommandDoc } from "./types";
-
-const TIMELINE_ICONS: Record<string, string> = {
-  relationship: "◎",
-  project: "▣",
-  creative: "◆",
-  infrastructure: "⚙",
-  website: "◇",
-  sales: "◈",
-  meeting: "◉",
-  finance: "◐",
-  launch: "▲",
-  general: "·",
-};
-
-function timelineIcon(category: string, eventType?: string): string {
-  if (eventType?.includes("meeting")) return "◉";
-  if (eventType?.includes("invoice") || eventType?.includes("payment")) return "◐";
-  if (eventType?.includes("launch") || eventType?.includes("deploy")) return "▲";
-  return TIMELINE_ICONS[category] ?? "·";
-}
-
-function mapExecutiveTimeline(events: Awaited<ReturnType<typeof getExecutiveTimeline>>): WorkspaceTimelineEvent[] {
-  return events.map((e) => ({
-    id: `exec-${e.id}`,
-    occurredAt: String(e.occurredAt ?? e.createdAt ?? ""),
-    icon: timelineIcon(String(e.category ?? "general"), String(e.eventType ?? "")),
-    title: String(e.title ?? "Event"),
-    details: String(e.summary ?? e.description ?? ""),
-    author: e.createdBy ? String(e.createdBy) : e.sourceModule ? String(e.sourceModule) : null,
-    category: String(e.category ?? "general"),
-    sourceModule: e.sourceModule ? String(e.sourceModule) : null,
-    href: e.id ? `/admin/collections/executive-timeline-events/${e.id}` : null,
-    pinned: Boolean(e.pinned),
-  }));
-}
-
-function mapClientTimelineEvents(docs: CommandDoc[]): WorkspaceTimelineEvent[] {
-  return docs.map((e) => ({
-    id: `client-${e.id}`,
-    occurredAt: String(e.eventDate ?? e.createdAt ?? ""),
-    icon: timelineIcon(String(e.eventType ?? "general")),
-    title: String(e.title ?? "Event"),
-    details: String(e.summary ?? ""),
-    author: e.source ? String(e.source) : e.createdBy ? String(e.createdBy) : null,
-    category: String(e.eventType ?? "general"),
-    sourceModule: "client-timeline",
-    href: e.id ? `/admin/collections/client-timeline-events/${e.id}` : null,
-    pinned: false,
-  }));
-}
 
 function buildInvoices(proposals: CommandDoc[], retainers: CommandDoc[]): WorkspaceInvoiceRow[] {
   const rows: WorkspaceInvoiceRow[] = [];
@@ -174,8 +123,7 @@ export async function loadClientWorkspaceBundle(
   if (!workspace) return null;
 
   const [
-    executiveTimeline,
-    clientTimelineR,
+    timelineEvents,
     requests,
     projects,
     retainers,
@@ -186,8 +134,7 @@ export async function loadClientWorkspaceBundle(
     tasks,
     infrastructure,
   ] = await Promise.all([
-    getExecutiveTimeline(clientId),
-    fetchDocs("client-timeline-events", clientId, "-eventDate", 100),
+    loadClientActivityTimeline(clientId),
     fetchDocs("client-requests", clientId, "-createdAt", 80),
     fetchDocs("client-projects", clientId, "-updatedAt", 50),
     fetchDocs("retainers", clientId, "-updatedAt", 20),
@@ -198,13 +145,6 @@ export async function loadClientWorkspaceBundle(
     fetchDocs("client-tasks", clientId, "-updatedAt", 40),
     getClientInfrastructure(clientId),
   ]);
-
-  const timelineEvents = [
-    ...mapExecutiveTimeline(executiveTimeline),
-    ...mapClientTimelineEvents(clientTimelineR),
-  ].sort(
-    (a, b) => new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime(),
-  );
 
   const invoices = buildInvoices(proposals, retainers);
   const creativeAssets = await fetchDocs("creative-assets", clientId);

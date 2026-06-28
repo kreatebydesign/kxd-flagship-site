@@ -2,6 +2,7 @@ import type { CollectionConfig } from "payload";
 import { isAuthenticated } from "../access/index.ts";
 import { PAYLOAD_GROUPS } from "../admin/groups.ts";
 import { publishRetainerAutomation } from "../hooks/automation.ts";
+import { publishRetainerActivityHook } from "../hooks/client-activity.ts";
 
 export const Retainers: CollectionConfig = {
   slug: "retainers",
@@ -9,7 +10,7 @@ export const Retainers: CollectionConfig = {
   defaultSort: "-createdAt",
   lockDocuments: false,
   hooks: {
-    afterChange: [publishRetainerAutomation],
+    afterChange: [publishRetainerAutomation, publishRetainerActivityHook],
   },
   admin: {
     useAsTitle: "retainerName",

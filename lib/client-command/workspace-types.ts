@@ -20,10 +20,14 @@ export interface WorkspaceTimelineEvent {
   occurredAt: string;
   icon: string;
   title: string;
+  summary: string;
   details: string;
   author: string | null;
   category: string;
+  eventType: string;
   sourceModule: string | null;
+  status: string | null;
+  priority: string | null;
   href: string | null;
   pinned: boolean;
 }

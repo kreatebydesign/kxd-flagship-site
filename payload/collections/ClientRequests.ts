@@ -1,12 +1,16 @@
 import type { CollectionConfig } from "payload";
 import { isAuthenticated } from "../access/index.ts";
 import { PAYLOAD_GROUPS } from "../admin/groups.ts";
+import { publishRequestActivityHook } from "../hooks/client-activity.ts";
 
 export const ClientRequests: CollectionConfig = {
   slug: "client-requests",
   labels: { singular: "Client Request", plural: "Client Requests" },
   defaultSort: "-createdAt",
   lockDocuments: false,
+  hooks: {
+    afterChange: [publishRequestActivityHook],
+  },
   admin: {
     useAsTitle: "requestTitle",
     defaultColumns: ["requestTitle", "client", "requestType", "priority", "status", "dueDate"],

@@ -4032,6 +4032,98 @@
   margin: 0.35rem 0 0;
 }
 
+.kxd-os-command-timeline-groups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--kxd-os-space-12);
+}
+
+.kxd-os-command-timeline-group__label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-muted);
+  margin: 0 0 var(--kxd-os-space-6);
+}
+
+.kxd-os-command-timeline__details {
+  color: var(--kxd-os-text-muted);
+  font-size: 0.875rem;
+}
+
+.kxd-os-command-timeline-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: var(--kxd-os-space-8);
+}
+
+.kxd-os-command-timeline-actions__btn {
+  font-size: 0.8125rem;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--kxd-os-border-subtle);
+  background: transparent;
+  color: var(--kxd-os-text-secondary);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.kxd-os-command-timeline-actions__btn:hover {
+  color: var(--kxd-os-text-primary);
+  border-color: var(--kxd-os-border-strong);
+}
+
+.kxd-os-command-timeline-actions__btn--primary {
+  background: var(--kxd-os-surface-elevated);
+  color: var(--kxd-os-text-primary);
+}
+
+.kxd-os-command-timeline-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: var(--kxd-os-space-10);
+  padding: var(--kxd-os-space-8);
+  border: 1px solid var(--kxd-os-border-subtle);
+  border-radius: 6px;
+  background: var(--kxd-os-surface-subtle);
+}
+
+.kxd-os-command-timeline-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.8125rem;
+  color: var(--kxd-os-text-muted);
+}
+
+.kxd-os-command-timeline-form__input {
+  font: inherit;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--kxd-os-border-subtle);
+  border-radius: 4px;
+  background: var(--kxd-os-surface-base);
+  color: var(--kxd-os-text-primary);
+}
+
+.kxd-os-command-timeline-form__actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.kxd-os-command-timeline-form__error {
+  color: var(--kxd-os-status-warning);
+  font-size: 0.8125rem;
+  margin: 0;
+}
+
+.kxd-os-command-timeline-form__success {
+  color: var(--kxd-os-status-positive);
+  font-size: 0.8125rem;
+  margin: 0;
+}
+
 .kxd-os-command-quick-links {
   display: flex;
   flex-wrap: wrap;

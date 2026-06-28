@@ -19,6 +19,11 @@ export function buildWorkspaceQuickActions(
       href: successCheckInHref(clientId),
     },
     {
+      id: "add-timeline-event",
+      label: "Add Timeline Event",
+      href: `/admin/operations/client-command/${clientId}?tab=timeline`,
+    },
+    {
       id: "create-invoice",
       label: "Create Invoice",
       href: proposalHref(clientId),

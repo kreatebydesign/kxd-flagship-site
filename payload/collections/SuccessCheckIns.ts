@@ -1,6 +1,7 @@
 import type { CollectionConfig } from "payload";
 import { isAuthenticated } from "../access/index.ts";
 import { PAYLOAD_GROUPS } from "../admin/groups.ts";
+import { publishMeetingActivityHook } from "../hooks/client-activity.ts";
 
 const SATISFACTION_LEVELS = [
   { label: "Poor", value: "poor" },
@@ -26,6 +27,9 @@ export const SuccessCheckIns: CollectionConfig = {
     create: isAuthenticated,
     update: isAuthenticated,
     delete: isAuthenticated,
+  },
+  hooks: {
+    afterChange: [publishMeetingActivityHook],
   },
   fields: [
     {

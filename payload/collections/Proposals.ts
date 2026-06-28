@@ -3,6 +3,7 @@ import { isAuthenticated } from "../access/index.ts";
 import { PAYLOAD_GROUPS } from "../admin/groups.ts";
 import { onProposalCreate } from "../hooks/sales-proposal-public.ts";
 import { onProposalStatusChange } from "../hooks/sales-proposals.ts";
+import { publishProposalActivityHook } from "../hooks/client-activity.ts";
 
 export const Proposals: CollectionConfig = {
   slug: "proposals",
@@ -11,7 +12,7 @@ export const Proposals: CollectionConfig = {
   lockDocuments: false,
   hooks: {
     beforeChange: [onProposalCreate],
-    afterChange: [onProposalStatusChange],
+    afterChange: [onProposalStatusChange, publishProposalActivityHook],
   },
   admin: {
     useAsTitle: "title",
