@@ -4,6 +4,7 @@ import { KxdLogo } from "@/components/ui/KxdLogo";
 import { KxdShell } from "@/components/os";
 import { CommandPalette } from "@/components/admin/operations/command-search";
 import { CommandPaletteTrigger } from "@/components/admin/operations/command-search/CommandPaletteTrigger";
+import { NotificationCenter } from "@/components/admin/operations/notifications";
 import { QuickCaptureNote } from "@/components/admin/operations/strategy/QuickCaptureNote";
 import { NAV_GROUPS, type OperationsNavId } from "./operations-nav";
 
@@ -54,6 +55,7 @@ export function OperationsShell({ activeId, dateDisplay, children }: OperationsS
             ) : null}
             <div style={{ marginBottom: "0.5rem", display: "flex", flexDirection: "column", gap: "0.375rem" }}>
               <CommandPaletteTrigger />
+              <NotificationCenter />
               <QuickCaptureNote />
             </div>
             <Link href="/admin" className="kxd-os-sidebar__cms">

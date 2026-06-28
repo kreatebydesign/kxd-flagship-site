@@ -16,6 +16,7 @@ import {
 import type { KxdBadgeVariant } from "@/components/os";
 import { KxdPage } from "@/components/os";
 import { getDailyBriefingReminders } from "@/lib/executive-notes/reminders";
+import { getNotificationCenterSummary } from "@/lib/notifications";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDoc = Record<string, any>;
@@ -206,12 +207,14 @@ export async function TodayScreen() {
   let socialActive: AnyDoc[] = [];
   let newReqsToday: AnyDoc[] = [];
   let noteReminders = { dueToday: [] as Awaited<ReturnType<typeof getDailyBriefingReminders>>["dueToday"], overdue: [] as Awaited<ReturnType<typeof getDailyBriefingReminders>>["overdue"], upcoming: [] as Awaited<ReturnType<typeof getDailyBriefingReminders>>["upcoming"] };
+  let notifSummary = { unread: 0, critical: 0, dueToday: 0, recentlyResolved: 0 };
 
   try {
   const payload = await getPayload({ config });
 
-  const [noteRemindersData, settled] = await Promise.all([
+  const [noteRemindersData, notifSummaryData, settled] = await Promise.all([
     getDailyBriefingReminders(),
+    getNotificationCenterSummary(),
     Promise.allSettled([
       payload.find({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -361,6 +364,7 @@ export async function TodayScreen() {
     if (socialActiveR.status === "fulfilled") socialActive = socialActiveR.value.docs as AnyDoc[];
     if (newReqsTodayR.status === "fulfilled") newReqsToday = newReqsTodayR.value.docs as AnyDoc[];
     noteReminders = noteRemindersData;
+    notifSummary = notifSummaryData;
   } catch {
     // Payload unavailable — all sections degrade to their empty states
   }
@@ -525,6 +529,38 @@ export async function TodayScreen() {
         <section className="kxd-os-ops-section">
           <OpsSectionHead label="Daily Focus" />
           <OpsKpiStrip items={kpiItems} />
+        </section>
+
+        <section className="kxd-os-ops-section">
+          <OpsSectionHead label="Operating Inbox" />
+          <OpsKpiStrip
+            items={[
+              {
+                label: "Critical",
+                value: String(notifSummary.critical),
+                sub: "Requires immediate attention",
+                alert: notifSummary.critical > 0,
+              },
+              {
+                label: "Unread",
+                value: String(notifSummary.unread),
+                sub: "Open inbox from sidebar",
+                alert: notifSummary.unread > 0,
+              },
+              {
+                label: "Due Today",
+                value: String(notifSummary.dueToday),
+                sub: "Strategy & operational signals",
+                alert: notifSummary.dueToday > 0,
+              },
+              {
+                label: "Recently Resolved",
+                value: String(notifSummary.recentlyResolved),
+                sub: "Last 7 days",
+                alert: false,
+              },
+            ]}
+          />
         </section>
 
         {(noteReminders.dueToday.length > 0 || noteReminders.overdue.length > 0) ? (

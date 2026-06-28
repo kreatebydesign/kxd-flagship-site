@@ -66,6 +66,15 @@ export const QUICK_COMMANDS: CommandDefinition[] = [
     actionLabel: "Open",
   },
   {
+    id: "cmd-notifications",
+    title: "Open Notifications",
+    keywords: ["open notifications", "notifications", "inbox", "notification center", "alerts"],
+    href: "#notifications",
+    group: "commands",
+    icon: "◆",
+    actionLabel: "Open",
+  },
+  {
     id: "cmd-brain",
     title: "Open KXD Brain",
     keywords: ["brain", "kxd brain", "intelligence"],

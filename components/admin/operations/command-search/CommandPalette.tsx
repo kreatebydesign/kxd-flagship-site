@@ -188,6 +188,10 @@ export function CommandPalette() {
       saveRecentItem(result);
       recordFrequentOpen(result.id);
       closePalette();
+      if (result.id === "cmd-notifications") {
+        window.dispatchEvent(new CustomEvent("kxd:notifications-open"));
+        return;
+      }
       router.push(result.href);
     },
     [query, closePalette, router],
