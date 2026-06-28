@@ -12,7 +12,9 @@ export type BrainSignalKind =
   | "retainer-opportunity"
   | "automation-failure"
   | "delivery-risk"
-  | "strategy-reminder";
+  | "strategy-reminder"
+  | "integration-failure"
+  | "sync-failure";
 
 export interface BrainSignal {
   id: string;

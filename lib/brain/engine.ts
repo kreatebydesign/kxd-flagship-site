@@ -13,6 +13,7 @@ import { buildBrainSignals } from "./signals";
 import { buildWorkTaskSignals } from "@/lib/client-tasks/brain";
 import { detectBrainPatternsWithWork } from "./patterns";
 import { buildBrainPredictions } from "./predictions";
+import { buildIntegrationBrainSignals } from "@/lib/live-integrations/engine";
 import { buildDailyPulse } from "./daily";
 import { buildWeeklyPulse } from "./weekly";
 import { buildMonthlyPulse } from "./monthly";
@@ -63,8 +64,9 @@ export async function buildBrain(): Promise<BrainSnapshot> {
   });
 
   const workSignals = await buildWorkTaskSignals(ctx);
+  const integrationSignals = buildIntegrationBrainSignals();
   const growthSignals = mergeGrowthOpportunities(growthOpportunities);
-  const allSignals = [...signals, ...workSignals, ...growthSignals].sort(
+  const allSignals = [...signals, ...workSignals, ...integrationSignals, ...growthSignals].sort(
     (a, b) =>
       ({ critical: 0, high: 1, medium: 2, low: 3 }[a.urgency] ?? 9) -
       ({ critical: 0, high: 1, medium: 2, low: 3 }[b.urgency] ?? 9),
@@ -115,6 +117,7 @@ export async function buildBrain(): Promise<BrainSnapshot> {
         "Client HQ",
         "Client Work Manager",
         "Executive Profiles",
+        "Integrations",
       ],
       memoryEvents: memory.length,
       futureLlmReady: true,

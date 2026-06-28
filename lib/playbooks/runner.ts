@@ -205,6 +205,29 @@ export async function completePlaybookStep(
   });
   if (autoStepId) automationIds.push(autoStepId);
 
+  const playbookSlug =
+    typeof run.playbook === "object" && run.playbook !== null && "slug" in run.playbook
+      ? String((run.playbook as PlaybookDoc).slug)
+      : "";
+  if (playbookSlug === "website-launch") {
+    const { isWebsiteLaunchQaStep, launchQaHrefForClient } = await import("@/lib/launch-qa/playbooks");
+    if (isWebsiteLaunchQaStep(String(step.title))) {
+      await createExecutiveEvent(
+        {
+          client: clientId as number,
+          eventType: "launch-qa.playbook-step",
+          title: "Website Launch QA checkpoint",
+          summary: `Complete Launch QA before go-live — ${launchQaHrefForClient(clientId as number)}`,
+          category: "launch",
+          importance: "high",
+          sourceModule: "Manual",
+          metadata: { runId, stepId, href: launchQaHrefForClient(clientId as number) },
+        },
+        payload,
+      );
+    }
+  }
+
   await payload.update({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     collection: RUNS as any,

@@ -11,6 +11,8 @@ import { searchPlaybooks, searchPlaybookRuns } from "@/lib/playbooks/search";
 import { searchClientSuccessPlans, searchSuccessCheckIns } from "@/lib/client-success/search";
 import { searchClientTasks } from "@/lib/client-tasks/search";
 import { searchGenesisSessions } from "@/lib/genesis/search";
+import { searchLaunchQaSessions } from "@/lib/launch-qa/search";
+import { searchLiveIntegrations } from "@/lib/live-integrations/search";
 import { getEditionOperationsNavItems, isSearchProviderEnabled } from "@/lib/editions/navigation";
 import type { CommandSearchResult, SearchEntityType } from "./types";
 import { groupForType } from "./types";
@@ -669,6 +671,36 @@ export const genesisProvider: SearchProvider = {
   },
 };
 
+export const launchQaProvider: SearchProvider = {
+  id: "launch-qa",
+  order: 59,
+  lazy: true,
+  search: async (query) => {
+    const sessions = await searchLaunchQaSessions(query);
+    return sessions.map((s) =>
+      makeResult({
+        id: `launch-qa-${s.id}`,
+        type: "launch-qa-check",
+        title: `Launch QA — ${s.clientName}`,
+        subtitle: `${s.readinessScore}% · ${s.status}${s.websiteUrl ? ` · ${s.websiteUrl}` : ""}`,
+        clientId: s.clientId,
+        clientName: s.clientName,
+        href: s.href,
+        updatedAt: s.updatedAt,
+        icon: "✓",
+        actionLabel: "Open",
+      }),
+    );
+  },
+};
+
+export const integrationsProvider: SearchProvider = {
+  id: "integrations",
+  order: 57,
+  lazy: true,
+  search: async (query) => searchLiveIntegrations(query),
+};
+
 /** All registered providers — extend by adding to this array */
 export const SEARCH_PROVIDERS: SearchProvider[] = [
   navigationProvider,
@@ -684,6 +716,8 @@ export const SEARCH_PROVIDERS: SearchProvider[] = [
   playbooksProvider,
   clientSuccessProvider,
   genesisProvider,
+  launchQaProvider,
+  integrationsProvider,
   clientTasksProvider,
   portalUsersProvider,
   automationProvider,

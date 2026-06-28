@@ -14,6 +14,7 @@ import {
   mergeClientWithExecutiveProfile,
 } from "@/lib/executive-client-profile";
 import { infraStatusLabel } from "@/lib/infrastructure/data";
+import { getLaunchQaIntegrationHints } from "@/lib/live-integrations/engine";
 import { monthLabel } from "@/lib/reporting/templates";
 import type { ClientStrategySummary } from "@/lib/executive-notes/types";
 import type { IntelligenceRecommendation } from "@/lib/intelligence/types";
@@ -272,6 +273,8 @@ function buildWebsiteSection(input: CommandWidgetInput): WebsiteSection {
     }),
   );
 
+  const liveHints = getLaunchQaIntegrationHints();
+
   const deployments: CommandListItem[] = [];
   if (record?.lastDeploymentAt) {
     deployments.push({
@@ -288,15 +291,23 @@ function buildWebsiteSection(input: CommandWidgetInput): WebsiteSection {
     infrastructureStatus: record ? infraStatusLabel(String(record.status ?? "unknown")) : "No record",
     primaryDomain: record?.primaryDomain ? String(record.primaryDomain) : null,
     hosting: record?.hostingProvider ? String(record.hostingProvider) : null,
-    sslStatus: record?.sslStatus ? String(record.sslStatus) : null,
-    analytics: record?.analyticsProvider
-      ? String(record.analyticsProvider)
-      : record?.ga4PropertyId
-        ? "GA4 configured"
+    sslStatus: liveHints.ssl.configured
+      ? liveHints.ssl.message
+      : record?.sslStatus
+        ? String(record.sslStatus)
+        : null,
+    analytics: liveHints.ga4.configured
+      ? liveHints.ga4.message
+      : record?.analyticsProvider
+        ? String(record.analyticsProvider)
+        : record?.ga4PropertyId
+          ? "GA4 configured"
+          : "Not configured",
+    searchConsole: liveHints.searchConsole.configured
+      ? liveHints.searchConsole.message
+      : record?.searchConsoleStatus
+        ? String(record.searchConsoleStatus)
         : "Not configured",
-    searchConsole: record?.searchConsoleStatus
-      ? String(record.searchConsoleStatus)
-      : "Not configured",
     recentDeployments: deployments,
     audits: auditItems,
     signals,

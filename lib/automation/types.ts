@@ -14,7 +14,8 @@ export type AutomationModule =
   | "Deliverables"
   | "Portal"
   | "Automation"
-  | "Brain";
+  | "Brain"
+  | "Integrations";
 
 export type AutomationEventStatus = "published" | "processed" | "failed";
 

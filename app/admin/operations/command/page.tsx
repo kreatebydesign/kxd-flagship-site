@@ -17,6 +17,7 @@ import {
   type RequestDoc,
   type RetainerDoc,
 } from "@/components/admin/operations/command/CommandScreen";
+import { getCommandCenterLiveSummary, prepareLiveIntegrations } from "@/lib/live-integrations";
 
 export const dynamic = "force-dynamic";
 
@@ -65,6 +66,9 @@ const MONTH_NAMES = [
 ];
 
 export default async function OperationsPage() {
+  await prepareLiveIntegrations();
+  const liveOps = getCommandCenterLiveSummary();
+
   const now = new Date();
   const currentMonth = now.getMonth() + 1;
   const currentYear = now.getFullYear();
@@ -258,6 +262,18 @@ export default async function OperationsPage() {
             ? "None logged yet"
             : "No blockers",
       alert: monthDeliverables.some((d) => d.status === "blocked"),
+    },
+    {
+      label: "Live Integrations",
+      value: `${liveOps.healthy}/${liveOps.total}`,
+      sub: "Healthy providers",
+      delta:
+        liveOps.alerts.length > 0
+          ? liveOps.alerts[0]
+          : liveOps.deploymentStatus
+            ? `Deploy: ${liveOps.deploymentStatus}`
+            : "All sync channels ready",
+      alert: liveOps.error > 0 || liveOps.alerts.length > 0,
     },
   ];
 

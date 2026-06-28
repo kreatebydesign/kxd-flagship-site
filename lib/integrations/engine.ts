@@ -1,5 +1,6 @@
 import "server-only";
 
+import { enrichProviderViewFromLive, getIntegrationDetailSyncHistory } from "@/lib/live-integrations/engine";
 import { resolveConnectionSnapshot, isProviderId } from "./connections";
 import { getAllIntegrationProviders, getIntegrationProvider } from "./registry";
 import { ensureIntegrationProvidersRegistered } from "./providers";
@@ -17,7 +18,7 @@ let hubCache: IntegrationHubData | null = null;
 function toProviderView(definition: ReturnType<typeof getIntegrationProvider>): IntegrationProviderView | null {
   if (!definition) return null;
   const snapshot = resolveConnectionSnapshot(definition);
-  return {
+  const base: IntegrationProviderView = {
     ...definition,
     status: snapshot.status,
     health: snapshot.health,
@@ -26,6 +27,7 @@ function toProviderView(definition: ReturnType<typeof getIntegrationProvider>): 
     configuredEnvVars: snapshot.configuredEnvVars,
     missingRequiredEnvVars: snapshot.missingRequiredEnvVars,
   };
+  return enrichProviderViewFromLive(base);
 }
 
 function buildReadiness(providers: IntegrationProviderView[]): IntegrationReadinessScore {
@@ -77,22 +79,25 @@ export function getIntegrationDetail(providerId: string): IntegrationDetailData 
   const provider = toProviderView(definition);
   if (!provider) return null;
 
+  const liveHistory = getIntegrationDetailSyncHistory(providerId);
   const syncHistoryPlaceholder =
-    provider.status === "connected"
-      ? [
-          {
-            at: provider.lastSync ?? new Date().toISOString(),
-            status: "success",
-            message: "Architecture placeholder — no live sync executed",
-          },
-        ]
-      : [];
+    liveHistory.length > 0
+      ? liveHistory
+      : provider.status === "connected"
+        ? [
+            {
+              at: provider.lastSync ?? new Date().toISOString(),
+              status: "pending",
+              message: "Credentials detected — awaiting first live sync",
+            },
+          ]
+        : [];
 
   return {
     provider,
     syncHistoryPlaceholder,
     futureSyncNote:
-      "Scheduled syncs, webhook ingestion, and retry queues are defined in the integration architecture but not yet active.",
+      "Webhook ingestion, OAuth, and background worker queues are architecture-ready. Live env sync runs on Integration Hub load.",
   };
 }
 

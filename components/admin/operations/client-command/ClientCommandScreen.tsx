@@ -56,7 +56,7 @@ function ListBlock({
 }
 
 export function ClientCommandScreen({ data }: { data: ClientCommandCenterData }) {
-  const { hero, executiveBrief, sections, recommendations, currentWork, playbooks, clientSuccess, genesis } = data;
+  const { hero, executiveBrief, sections, recommendations, currentWork, playbooks, clientSuccess, genesis, launchQa } = data;
 
   return (
     <OperationsShell activeId="clients" clientId={hero.clientId}>
@@ -118,6 +118,37 @@ export function ClientCommandScreen({ data }: { data: ClientCommandCenterData })
             ) : (
               <Link href="/admin/operations/genesis" className="kxd-os-btn kxd-os-btn--ghost kxd-os-btn--sm">
                 Launch Genesis
+              </Link>
+            )}
+          </div>
+        </KxdSection>
+
+        <KxdSection label="Launch QA" className="kxd-os-operations-section">
+          <OpsKpiStrip
+            items={[
+              { label: "Readiness", value: `${launchQa.readinessScore}%`, alert: launchQa.readinessScore < 80 },
+              { label: "Status", value: launchQa.status.replace(/-/g, " ") },
+              { label: "Blockers", value: String(launchQa.criticalBlockers), alert: launchQa.criticalBlockers > 0 },
+              { label: "Open Items", value: String(launchQa.openItems), alert: launchQa.openItems > 5 },
+            ]}
+          />
+          <p className="kxd-os-body" style={{ marginTop: "0.75rem" }}>
+            <span className="kxd-os-meta">Recommendation · </span>
+            {launchQa.recommendation === "none" ? "No QA session" : launchQa.recommendation.replace(/-/g, " ")}
+          </p>
+          {launchQa.launchDate ? (
+            <p className="kxd-os-meta" style={{ marginTop: "0.35rem" }}>
+              Launch date: {launchQa.launchDate}
+            </p>
+          ) : null}
+          <div style={{ marginTop: "0.75rem" }}>
+            {launchQa.href ? (
+              <Link href={launchQa.href} className="kxd-os-btn kxd-os-btn--ghost kxd-os-btn--sm">
+                Open Launch QA
+              </Link>
+            ) : (
+              <Link href={`/admin/operations/launch-qa/${hero.clientId}`} className="kxd-os-btn kxd-os-btn--ghost kxd-os-btn--sm">
+                Start Launch QA
               </Link>
             )}
           </div>

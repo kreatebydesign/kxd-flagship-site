@@ -1,7 +1,12 @@
 import type { IntelligenceContext } from "@/lib/intelligence/types";
 import { fmtMoney } from "@/lib/intelligence/context";
-import { CONNECTOR_PLACEHOLDERS, gatherClientMonthlyMetrics } from "./metrics";
-import { buildReportRecommendations } from "./recommendations";
+import {
+  getConnectorStatusesFromLive,
+  getReportingLiveConversions,
+  getReportingLiveSeo,
+  getReportingLiveTraffic,
+} from "@/lib/live-integrations/engine";
+import { gatherClientMonthlyMetrics } from "./metrics";
 import {
   buildExecutiveSummaryText,
   buildNextMonthPriorities,
@@ -9,6 +14,7 @@ import {
 } from "./summary";
 import { getBuiltinTemplate } from "./templates";
 import type { GeneratedReportPayload, ReportKpi } from "./types";
+import { buildReportRecommendations } from "./recommendations";
 
 export function generateReportPayload(
   clientId: number,
@@ -63,12 +69,10 @@ export function generateReportPayload(
     },
   ];
 
-  const connectorStatus = CONNECTOR_PLACEHOLDERS.map((c) => ({
-    id: c.id,
-    label: c.label,
-    status: "not-configured" as const,
-    note: c.note,
-  }));
+  const connectorStatus = getConnectorStatusesFromLive();
+  const liveTraffic = getReportingLiveTraffic();
+  const liveConversions = getReportingLiveConversions();
+  const liveSeo = getReportingLiveSeo();
 
   return {
     executiveSummary,
@@ -96,22 +100,28 @@ export function generateReportPayload(
     },
     recommendations,
     kpis,
-    traffic: {
-      id: "ga4",
-      label: "Google Analytics 4",
-      status: "not-configured",
-      note: "Traffic data will appear when GA4 connector is configured.",
-    },
-    conversions: {
-      id: "ga4",
-      label: "Conversions",
-      status: "not-configured",
-      note: "Conversion tracking requires GA4 or Stripe connector.",
-    },
-    seo: {
-      score: metrics.websiteAuditScore ?? undefined,
-      source: metrics.websiteAuditScore != null ? "website-audit" : "not-available",
-    },
+    traffic: liveTraffic
+      ? liveTraffic
+      : {
+          id: "ga4",
+          label: "Google Analytics 4",
+          status: "not-configured",
+          note: "Traffic data will appear when GA4 connector is configured.",
+        },
+    conversions: liveConversions
+      ? liveConversions
+      : {
+          id: "ga4",
+          label: "Conversions",
+          status: "not-configured",
+          note: "Conversion tracking requires GA4 or Stripe connector.",
+        },
+    seo: liveSeo
+      ? liveSeo
+      : {
+          score: metrics.websiteAuditScore ?? undefined,
+          source: metrics.websiteAuditScore != null ? "website-audit" : "not-available",
+        },
     timeline: metrics.timeline,
     notes: "",
     nextMonthPriorities,

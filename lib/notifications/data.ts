@@ -186,6 +186,28 @@ async function collectNotificationItems(): Promise<NotificationItem[]> {
     virtual.push(normalizeBrainRecommendationToNotification(rec));
   }
 
+  try {
+    const { getLiveIntegrationAlerts } = await import("@/lib/live-integrations/engine");
+    for (const alert of getLiveIntegrationAlerts().slice(0, 6)) {
+      if (isVirtualIgnored(alert.id, memory)) continue;
+      virtual.push({
+        id: alert.id,
+        virtual: true,
+        source: "integrations",
+        title: alert.title,
+        message: alert.message,
+        severity: alert.severity,
+        module: "Integrations",
+        status: "unread",
+        href: alert.href,
+        createdAt: new Date().toISOString(),
+        actionLabel: "Review",
+      });
+    }
+  } catch {
+    /* live integrations optional during build */
+  }
+
   for (const rec of founder.recommendations
     .filter((r) => r.urgency === "critical" || r.urgency === "high")
     .slice(0, 5)) {

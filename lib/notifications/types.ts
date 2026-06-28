@@ -13,7 +13,8 @@ export type NotificationSource =
   | "sales"
   | "infrastructure"
   | "playbooks"
-  | "client-success";
+  | "client-success"
+  | "integrations";
 
 export interface NotificationItem {
   id: string;

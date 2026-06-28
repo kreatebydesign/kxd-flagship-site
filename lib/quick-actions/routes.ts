@@ -40,7 +40,7 @@ export function websiteAuditHref(clientId?: number): string {
 export function clientCommandCenterHref(clientId?: number): string {
   return clientId
     ? `/admin/operations/client-command/${clientId}`
-    : "/admin/operations/clients";
+    : "/admin/operations/client-command";
 }
 
 export function clientHqHref(clientId: number): string {

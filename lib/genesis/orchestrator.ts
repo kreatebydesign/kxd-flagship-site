@@ -133,6 +133,26 @@ export async function completeGenesisSession(
     if (result.success && result.taskId) taskIds.push(result.taskId);
   }
 
+  let launchQaId: number | null = null;
+  const hasWebsiteWork =
+    template.playbookSlugs.includes("website-launch") ||
+    session.discovery.websiteStrategy.requiredPages.trim() ||
+    session.discovery.businessFoundation.currentWebsite.trim() ||
+    blueprints.website.sections.some((s) => s.items.length > 0);
+
+  if (hasWebsiteWork) {
+    const { createLaunchQaFromGenesis } = await import("@/lib/launch-qa/runner");
+    launchQaId = await createLaunchQaFromGenesis({
+      clientId,
+      projectId,
+      websiteUrl:
+        session.discovery.businessFoundation.currentWebsite.trim() ||
+        launchDraft.business.website ||
+        undefined,
+      genesisSessionId: sessionId,
+    });
+  }
+
   const existingPlan = await payload.find({
     collection: "client-success-plans",
     where: { client: { equals: clientId } },
@@ -213,5 +233,6 @@ export async function completeGenesisSession(
     genesisHref: `/admin/operations/genesis/${sessionId}`,
     playbookRunIds,
     taskIds,
+    launchQaId,
   };
 }

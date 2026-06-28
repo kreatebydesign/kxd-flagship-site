@@ -27,7 +27,7 @@ export const BUILTIN_PLAYBOOK_TEMPLATES: PlaybookTemplate[] = [
     tags: ["launch", "website"],
     steps: steps([
       { title: "Staging sign-off", desc: "Confirm client approval on staging", module: "Projects" },
-      { title: "Final QA pass", desc: "Mobile, forms, tracking, performance", module: "Projects", trigger: "run_website_audit" },
+      { title: "Final QA pass", desc: "Mobile, forms, tracking, performance — complete Launch QA checklist", module: "Projects", trigger: "run_website_audit" },
       { title: "DNS & SSL prep", desc: "Records documented and validated", module: "Infrastructure" },
       { title: "Launch window scheduled", desc: "Align with client on go-live", module: "Timeline", trigger: "schedule_meeting" },
       { title: "Production smoke test", module: "Projects" },

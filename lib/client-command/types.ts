@@ -137,6 +137,17 @@ export interface GenesisSection {
   status: string;
 }
 
+export interface LaunchQaSection {
+  qaId: number | null;
+  href: string | null;
+  status: string;
+  readinessScore: number;
+  recommendation: string;
+  criticalBlockers: number;
+  openItems: number;
+  launchDate: string | null;
+}
+
 export interface CommandSections {
   relationship: RelationshipSection;
   revenue: RevenueSection;
@@ -160,6 +171,7 @@ export interface ClientCommandCenterData {
   currentWork: ClientWorkSummary;
   clientSuccess: ClientSuccessSummary;
   genesis: GenesisSection;
+  launchQa: LaunchQaSection;
   insights: ClientInsights | null;
   health: ClientHealthResult;
   row: MergedExecutiveClientRow | null;

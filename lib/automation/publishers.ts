@@ -194,4 +194,99 @@ export const publishers = {
       );
     },
   },
+
+  launchQa: {
+    async created(
+      input: { clientId: number; qaId: number; projectId?: number },
+      payloadInstance?: Payload,
+    ) {
+      return publish(
+        "Projects",
+        "launch-qa.created",
+        input.clientId,
+        { qaId: input.qaId, projectId: input.projectId },
+        payloadInstance,
+      );
+    },
+
+    async blockers(
+      input: { clientId: number; qaId: number; blockerCount: number },
+      payloadInstance?: Payload,
+    ) {
+      return publish(
+        "Projects",
+        "launch-qa.blockers",
+        input.clientId,
+        input,
+        payloadInstance,
+      );
+    },
+
+    async ready(
+      input: { clientId: number; qaId: number; readinessScore: number },
+      payloadInstance?: Payload,
+    ) {
+      return publish(
+        "Projects",
+        "launch-qa.ready",
+        input.clientId,
+        input,
+        payloadInstance,
+      );
+    },
+
+    async approved(
+      input: { clientId: number; qaId: number; approvedBy: string },
+      payloadInstance?: Payload,
+    ) {
+      return publish(
+        "Projects",
+        "launch-qa.approved",
+        input.clientId,
+        input,
+        payloadInstance,
+      );
+    },
+  },
+
+  integrations: {
+    async syncCompleted(
+      input: { providerId: string; recordsProcessed: number; completedAt: string },
+      payloadInstance?: Payload,
+    ) {
+      return publish(
+        "Integrations",
+        "integration.sync.completed",
+        undefined,
+        input,
+        payloadInstance,
+      );
+    },
+
+    async syncFailed(
+      input: { providerId: string; errorMessage: string; completedAt: string },
+      payloadInstance?: Payload,
+    ) {
+      return publish(
+        "Integrations",
+        "integration.sync.failed",
+        undefined,
+        input,
+        payloadInstance,
+      );
+    },
+
+    async deploymentFailed(
+      input: { providerId: string; message: string },
+      payloadInstance?: Payload,
+    ) {
+      return publish(
+        "Integrations",
+        "integration.deployment.failed",
+        undefined,
+        input,
+        payloadInstance,
+      );
+    },
+  },
 };

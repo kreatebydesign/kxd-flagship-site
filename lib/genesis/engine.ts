@@ -2,6 +2,7 @@ import "server-only";
 
 import { getPayload } from "payload";
 import config from "@payload-config";
+import { getGenesisIntegrationMissingHints } from "@/lib/live-integrations/engine";
 import type {
   GenesisCommandSummary,
   GenesisDiscoveryData,
@@ -260,13 +261,19 @@ export async function getGenesisSummaryForClient(clientId: number): Promise<Gene
   }
 
   const detail = toDetail(doc);
+  const integrationHints = getGenesisIntegrationMissingHints();
+  const missingInformation = [
+    ...detail.missingFields.slice(0, 6),
+    ...integrationHints.slice(0, 2),
+  ].slice(0, 6);
+
   return {
     sessionId: detail.id,
     href: `/admin/operations/genesis/${detail.id}`,
     discoveryProgress: detail.progressPercent,
     blueprintStatus: detail.blueprintStatus,
     launchReadiness: detail.launchReadiness,
-    missingInformation: detail.missingFields.slice(0, 6),
+    missingInformation,
     recommendedNextStep: detail.recommendedNextStep,
     status: detail.status,
   };

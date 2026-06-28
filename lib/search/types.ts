@@ -45,7 +45,11 @@ export type SearchEntityType =
   | "success-plan"
   | "success-check-in"
   | "client-task"
-  | "genesis-session";
+  | "genesis-session"
+  | "launch-qa-check"
+  | "integration"
+  | "deployment"
+  | "domain";
 
 export interface CommandSearchResult {
   id: string;
@@ -152,6 +156,9 @@ export function groupForType(type: SearchEntityType): SearchGroupId {
       return "reports";
     case "infrastructure":
     case "audit":
+    case "integration":
+    case "deployment":
+    case "domain":
       return "infrastructure";
     case "campaign":
     case "brand-kit":
@@ -170,6 +177,8 @@ export function groupForType(type: SearchEntityType): SearchGroupId {
       return "work";
     case "genesis-session":
       return "strategy";
+    case "launch-qa-check":
+      return "projects";
     case "automation-event":
       return "automation";
     case "brain-signal":

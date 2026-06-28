@@ -14,6 +14,7 @@ import { getClientPlaybookSummary } from "@/lib/playbooks";
 import { getClientWorkSummary } from "@/lib/client-tasks";
 import { getClientSuccessSummary } from "@/lib/client-success";
 import { getGenesisSummaryForClient } from "@/lib/genesis";
+import { getLaunchQaSummaryForClient } from "@/lib/launch-qa";
 import { getClientStrategySummary } from "@/lib/executive-notes/vault";
 import {
   buildCommandHero,
@@ -141,6 +142,7 @@ export async function loadClientCommandCenter(
     currentWork,
     clientSuccessSummary,
     genesisSummary,
+    launchQaSummary,
   ] = await Promise.all([
     fetchClientWorkspace(clientId),
     getClientInfrastructure(clientId),
@@ -153,6 +155,7 @@ export async function loadClientCommandCenter(
     getClientWorkSummary(clientId),
     getClientSuccessSummary(clientId),
     getGenesisSummaryForClient(clientId),
+    getLaunchQaSummaryForClient(clientId),
   ]);
 
   const insights = await buildClientInsightSections(clientId, ctx);
@@ -200,6 +203,16 @@ export async function loadClientCommandCenter(
       recommendedNextStep: genesisSummary.recommendedNextStep,
       href: genesisSummary.href,
       status: genesisSummary.status,
+    },
+    launchQa: {
+      qaId: launchQaSummary.qaId,
+      href: launchQaSummary.href,
+      status: launchQaSummary.status,
+      readinessScore: launchQaSummary.readinessScore,
+      recommendation: launchQaSummary.recommendation,
+      criticalBlockers: launchQaSummary.criticalBlockers,
+      openItems: launchQaSummary.openItems,
+      launchDate: launchQaSummary.launchDate,
     },
     insights,
     health,

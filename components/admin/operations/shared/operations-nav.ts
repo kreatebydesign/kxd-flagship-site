@@ -20,6 +20,7 @@ export type OperationsNavId =
   | "client-import"
   | "client-launch"
   | "genesis"
+  | "launch-qa"
   | "sales-pipeline"
   | "sales-leads"
   | "sales-proposals"
@@ -80,6 +81,7 @@ export const NAV_GROUPS: OperationsNavGroup[] = [
       { id: "infrastructure", label: "Infrastructure", href: "/admin/operations/infrastructure" },
       { id: "timeline", label: "Timeline", href: "/admin/operations/timeline" },
       { id: "automation", label: "Automation", href: "/admin/operations/automation" },
+      { id: "launch-qa", label: "Launch QA", href: "/admin/operations/launch-qa" },
       { id: "work", label: "Work", href: "/admin/operations/work" },
       { id: "playbooks", label: "Playbooks", href: "/admin/operations/playbooks" },
       { id: "growth", label: "Growth", href: "/admin/operations/growth" },

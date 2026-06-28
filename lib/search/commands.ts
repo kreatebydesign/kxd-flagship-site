@@ -110,6 +110,37 @@ export const GENESIS_NAV_COMMANDS: CommandDefinition[] = [
   },
 ];
 
+/** Launch QA navigation commands */
+export const LAUNCH_QA_NAV_COMMANDS: CommandDefinition[] = [
+  {
+    id: "cmd-open-launch-qa",
+    title: "Open Launch QA",
+    keywords: ["launch qa", "website qa", "qa checklist", "launch readiness"],
+    href: "/admin/operations/launch-qa",
+    group: "commands",
+    icon: "✓",
+    actionLabel: "Open",
+  },
+  {
+    id: "cmd-website-qa",
+    title: "Website QA",
+    keywords: ["website qa", "pre-launch", "go live"],
+    href: "/admin/operations/launch-qa",
+    group: "commands",
+    icon: "✓",
+    actionLabel: "Open",
+  },
+  {
+    id: "cmd-client-launch-readiness",
+    title: "Client Launch Readiness",
+    keywords: ["client launch readiness", "readiness score", "launch blockers"],
+    href: "/admin/operations/launch-qa",
+    group: "commands",
+    icon: "✓",
+    actionLabel: "Review",
+  },
+];
+
 function buildQuickCommands(): CommandDefinition[] {
   const actions = filterEditionQuickActions(getGlobalQuickActions());
   const fromActions = actions.map((action) => ({
@@ -123,7 +154,8 @@ function buildQuickCommands(): CommandDefinition[] {
   }));
   const workCommands = isModuleEnabled("work") ? WORK_NAV_COMMANDS : [];
   const genesisCommands = isModuleEnabled("onboarding") ? GENESIS_NAV_COMMANDS : [];
-  return [...fromActions, ...workCommands, ...genesisCommands];
+  const launchQaCommands = isModuleEnabled("work") ? LAUNCH_QA_NAV_COMMANDS : [];
+  return [...fromActions, ...workCommands, ...genesisCommands, ...launchQaCommands];
 }
 
 export function getQuickCommands(): CommandDefinition[] {

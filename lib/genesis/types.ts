@@ -241,6 +241,7 @@ export interface GenesisCompletionResult {
   genesisHref?: string;
   playbookRunIds?: number[];
   taskIds?: number[];
+  launchQaId?: number | null;
   error?: string;
 }
 

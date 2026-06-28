@@ -256,6 +256,33 @@ export async function generateMonthlyReport(
     }
   }
 
+  const { getLaunchQaActivityForMonth } = await import("@/lib/launch-qa/reporting");
+  const qaActivity = await getLaunchQaActivityForMonth(
+    input.clientId,
+    input.month,
+    input.year,
+  );
+  if (qaActivity.lines.length > 0) {
+    payload_data.workCompleted = `${payload_data.workCompleted}\n${qaActivity.lines.join("\n")}`;
+    if (qaActivity.sessionsCompleted > 0) {
+      payload_data.kpis.push({
+        label: "Launch QA completed",
+        value: String(qaActivity.sessionsCompleted),
+        status: "positive",
+      });
+    }
+    if (qaActivity.blockersResolved > 0) {
+      payload_data.kpis.push({
+        label: "Launch blockers resolved",
+        value: String(qaActivity.blockersResolved),
+        status: "positive",
+      });
+    }
+    if (qaActivity.readinessImprovement > 0) {
+      payload_data.executiveSummary = `${payload_data.executiveSummary} Website launch readiness improved across ${qaActivity.readinessImprovement} QA review(s).`;
+    }
+  }
+
   const htmlExport = buildHtmlReport(clientName, input.month, input.year, payload_data);
   const portalHtml = buildPortalReportHtml(clientName, input.month, input.year, payload_data);
 

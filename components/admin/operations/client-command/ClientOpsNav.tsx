@@ -3,7 +3,7 @@ import Link from "next/link";
 const CLIENT_OPS_LINKS = [
   { id: "command", label: "Command Center", path: "client-command" },
   { id: "work", label: "Work", path: "work" },
-  { id: "workspace", label: "Workspace", path: "clients" },
+  { id: "workspace", label: "Workspace", path: "client-command" },
   { id: "timeline", label: "Timeline", path: "timeline" },
   { id: "infrastructure", label: "Infrastructure", path: "infrastructure" },
 ] as const;
@@ -22,8 +22,8 @@ export function ClientOpsNav({
       {CLIENT_OPS_LINKS.map((link) => {
         const isActive = link.id === active;
         const href =
-          link.path === "clients"
-            ? `/admin/operations/clients/${clientId}`
+          link.path === "client-command"
+            ? `/admin/operations/client-command/${clientId}`
             : `/admin/operations/${link.path}/${clientId}`;
         return (
           <Link

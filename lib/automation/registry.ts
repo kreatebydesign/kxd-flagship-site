@@ -19,4 +19,5 @@ export const MODULE_REGISTRY: ModuleRegistryEntry[] = [
   { id: "Requests", label: "Requests", connected: false, description: "Client requests — ready to connect" },
   { id: "Deliverables", label: "Deliverables", connected: false, description: "Monthly deliverables — ready to connect" },
   { id: "Portal", label: "Portal", connected: false, description: "Client HQ — ready to connect" },
+  { id: "Integrations", label: "Integrations", connected: true, description: "Live integration sync events" },
 ];
