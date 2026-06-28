@@ -2,6 +2,8 @@ import "server-only";
 
 import { loadIntelligenceContext } from "@/lib/intelligence/context";
 import { matchQuickActionCommand } from "@/lib/quick-actions";
+import { filterEditionSearchResults } from "@/lib/editions/navigation";
+import { getCurrentEdition } from "@/lib/editions/engine";
 import { commandsToResults, matchCommands } from "./commands";
 import { dedupeResults, rankSearchResults } from "./ranking";
 import { runSearchProviders } from "./providers";
@@ -54,20 +56,31 @@ export async function universalCommandSearch(
   const q = query.trim();
 
   const commandMatches = commandsToResults(matchCommands(q, 10));
-  let commandsRanked = rankSearchResults(commandMatches, { query: q });
+  let commandsRanked = filterEditionSearchResults(
+    rankSearchResults(commandMatches, { query: q }),
+    getCurrentEdition(),
+  );
 
   if (q) {
     const ctx = await getCachedContext();
     const contextual = matchQuickActionCommand(q, ctx);
     if (contextual) {
-      commandsRanked = [contextual, ...commandsRanked.filter((r) => r.id !== contextual.id)];
+      const edition = getCurrentEdition();
+      const allowed = filterEditionSearchResults([contextual], edition);
+      if (allowed.length > 0) {
+        commandsRanked = [contextual, ...commandsRanked.filter((r) => r.id !== contextual.id)];
+      }
     }
   }
 
   if (!q) {
     const ctx = await getCachedContext();
     const navResults = await runSearchProviders("", ctx);
-    const navOnly = navResults.filter((r) => r.type === "nav").slice(0, 12);
+    const edition = getCurrentEdition();
+    const navOnly = filterEditionSearchResults(
+      navResults.filter((r) => r.type === "nav").slice(0, 12),
+      edition,
+    );
     const groups = groupResults([...commandsRanked, ...navOnly]);
     return {
       success: true,
@@ -86,8 +99,11 @@ export async function universalCommandSearch(
     ...rankSearchResults(entityResults, { query: q }),
   ]).slice(0, limit);
 
-  const commands = merged.filter((r) => r.type === "command");
-  const rest = merged.filter((r) => r.type !== "command");
+  const edition = getCurrentEdition();
+  const editionFiltered = filterEditionSearchResults(merged, edition);
+
+  const commands = editionFiltered.filter((r) => r.type === "command");
+  const rest = editionFiltered.filter((r) => r.type !== "command");
   const groups = groupResults([...commands, ...rest]);
 
   return {

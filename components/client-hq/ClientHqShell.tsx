@@ -2,6 +2,8 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { KxdLogo } from "@/components/ui/KxdLogo";
 import { KxdShell } from "@/components/os";
+import type { EditionBranding } from "@/lib/editions";
+import { editionBrandingCssVars } from "@/lib/editions";
 import { ClientHqLogoutButton } from "./ClientHqLogoutButton";
 import {
   clientHqNavIsActive,
@@ -12,15 +14,25 @@ import {
 export interface ClientHqShellProps {
   activeId: ClientHqNavId;
   companyName?: string;
+  editionBranding?: EditionBranding;
   children: ReactNode;
 }
 
-export function ClientHqShell({ activeId, companyName, children }: ClientHqShellProps) {
+export function ClientHqShell({
+  activeId,
+  companyName,
+  editionBranding,
+  children,
+}: ClientHqShellProps) {
   const navGroups = getEnabledClientHqNavGroups();
+  const branding = editionBranding;
+  const cssVars = branding ? editionBrandingCssVars(branding) : undefined;
+  const sidebarLabel = branding?.portal.sidebarLabel ?? "Client HQ";
+  const footerText = branding?.footerText ?? sidebarLabel;
 
   return (
     <KxdShell className="kxd-os-shell--app">
-      <div className="kxd-os-app">
+      <div className="kxd-os-app" style={cssVars as React.CSSProperties}>
         <aside className="kxd-os-sidebar" aria-label="Client HQ">
           <div className="kxd-os-sidebar__brand">
             <KxdLogo height={18} />
@@ -58,7 +70,7 @@ export function ClientHqShell({ activeId, companyName, children }: ClientHqShell
           </div>
 
           <div className="kxd-os-sidebar__foot">
-            <p className="kxd-os-meta kxd-os-sidebar__date">Client HQ</p>
+            <p className="kxd-os-meta kxd-os-sidebar__date">{footerText}</p>
             <ClientHqLogoutButton />
           </div>
         </aside>

@@ -17,7 +17,7 @@ export {
   SEMANTIC_ADAPTER_PLACEHOLDERS,
 } from "./types";
 
-export { QUICK_COMMANDS, matchCommands, commandsToResults } from "./commands";
+export { QUICK_COMMANDS, getQuickCommands, matchCommands, commandsToResults } from "./commands";
 export { DEFAULT_PINNED, PINNED_STORAGE_KEY } from "./shortcuts";
 export { rankSearchResults, dedupeResults } from "./ranking";
 export {

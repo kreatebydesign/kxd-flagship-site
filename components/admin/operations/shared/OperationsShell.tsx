@@ -7,7 +7,8 @@ import { CommandPaletteTrigger } from "@/components/admin/operations/command-sea
 import { NotificationCenter } from "@/components/admin/operations/notifications";
 import { QuickActionBar } from "@/components/admin/operations/quick-actions";
 import { QuickCaptureNote } from "@/components/admin/operations/strategy/QuickCaptureNote";
-import { NAV_GROUPS, type OperationsNavId } from "./operations-nav";
+import { type OperationsNavId } from "./operations-nav";
+import { getEditionOperationsNavGroups } from "@/lib/editions/navigation";
 
 export interface OperationsShellProps {
   activeId: OperationsNavId;
@@ -17,6 +18,8 @@ export interface OperationsShellProps {
 }
 
 export function OperationsShell({ activeId, dateDisplay, clientId, children }: OperationsShellProps) {
+  const navGroups = getEditionOperationsNavGroups();
+
   return (
     <KxdShell className="kxd-os-shell--app">
       <div className="kxd-os-app">
@@ -26,7 +29,7 @@ export function OperationsShell({ activeId, dateDisplay, clientId, children }: O
           </div>
 
           <div className="kxd-os-sidebar__nav">
-            {NAV_GROUPS.map((group, groupIndex) => (
+            {navGroups.map((group, groupIndex) => (
               <div
                 key={group.label}
                 className={`kxd-os-sidebar__group${groupIndex > 0 ? " kxd-os-sidebar__group--sep" : ""}`}

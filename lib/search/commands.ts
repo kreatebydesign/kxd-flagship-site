@@ -1,4 +1,6 @@
 import type { CommandDefinition } from "./types";
+import { isModuleEnabled } from "@/lib/editions";
+import { filterEditionQuickActions } from "@/lib/editions/navigation";
 import { getGlobalQuickActions } from "@/lib/quick-actions";
 
 /** Work board navigation commands */
@@ -59,9 +61,9 @@ export const WORK_NAV_COMMANDS: CommandDefinition[] = [
   },
 ];
 
-/** Quick commands — matched before entity search results */
-export const QUICK_COMMANDS: CommandDefinition[] = [
-  ...getGlobalQuickActions().map((action) => ({
+function buildQuickCommands(): CommandDefinition[] {
+  const actions = filterEditionQuickActions(getGlobalQuickActions());
+  const fromActions = actions.map((action) => ({
     id: `cmd-${action.id}`,
     title: action.label,
     keywords: action.keywords ?? [action.label.toLowerCase(), action.sub.toLowerCase()],
@@ -69,15 +71,24 @@ export const QUICK_COMMANDS: CommandDefinition[] = [
     group: "commands" as const,
     icon: "◆",
     actionLabel: action.sub,
-  })),
-  ...WORK_NAV_COMMANDS,
-];
+  }));
+  const workCommands = isModuleEnabled("work") ? WORK_NAV_COMMANDS : [];
+  return [...fromActions, ...workCommands];
+}
+
+export function getQuickCommands(): CommandDefinition[] {
+  return buildQuickCommands();
+}
+
+/** Edition-filtered quick commands at module load (default edition) */
+export const QUICK_COMMANDS = buildQuickCommands();
 
 export function matchCommands(query: string, limit = 8): CommandDefinition[] {
   const q = query.trim().toLowerCase();
-  if (!q) return QUICK_COMMANDS.slice(0, 6);
+  const commands = buildQuickCommands();
+  if (!q) return commands.slice(0, 6);
 
-  return QUICK_COMMANDS.filter((cmd) => {
+  return commands.filter((cmd) => {
     if (cmd.title.toLowerCase().includes(q)) return true;
     return cmd.keywords.some((kw) => kw.includes(q) || q.includes(kw));
   }).slice(0, limit);

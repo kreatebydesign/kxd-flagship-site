@@ -10,7 +10,7 @@ import type { IntelligenceContext } from "@/lib/intelligence/types";
 import { searchPlaybooks, searchPlaybookRuns } from "@/lib/playbooks/search";
 import { searchClientSuccessPlans, searchSuccessCheckIns } from "@/lib/client-success/search";
 import { searchClientTasks } from "@/lib/client-tasks/search";
-import { NAV_ITEMS } from "@/components/admin/operations/shared/operations-nav";
+import { getEditionOperationsNavItems, isSearchProviderEnabled } from "@/lib/editions/navigation";
 import type { CommandSearchResult, SearchEntityType } from "./types";
 import { groupForType } from "./types";
 
@@ -49,7 +49,7 @@ export const navigationProvider: SearchProvider = {
   search: async (query) => {
     const q = query.trim().toLowerCase();
     if (!q) {
-      return NAV_ITEMS.slice(0, 12).map((item) =>
+      return getEditionOperationsNavItems().slice(0, 12).map((item) =>
         makeResult({
           id: `nav-${item.id}`,
           type: "nav",
@@ -60,7 +60,7 @@ export const navigationProvider: SearchProvider = {
         }),
       );
     }
-    return NAV_ITEMS.filter(
+    return getEditionOperationsNavItems().filter(
       (item) =>
         item.label.toLowerCase().includes(q) || item.href.toLowerCase().includes(q),
     ).map((item) =>
@@ -671,7 +671,9 @@ export async function runSearchProviders(
   ctx: IntelligenceContext,
 ): Promise<CommandSearchResult[]> {
   const q = query.trim();
-  const active = SEARCH_PROVIDERS.filter((p) => !p.lazy || q.length >= 2);
+  const active = SEARCH_PROVIDERS.filter(
+    (p) => (!p.lazy || q.length >= 2) && isSearchProviderEnabled(p.id),
+  );
 
   const batches = await Promise.all(active.map((p) => p.search(q, ctx)));
   return batches.flat();

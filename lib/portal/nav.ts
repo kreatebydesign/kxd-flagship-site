@@ -1,4 +1,6 @@
-import { CLIENT_HQ_MODULES, type ClientHqModuleId } from "./modules";
+import { CLIENT_HQ_MODULES, isClientHqModuleEnabled, type ClientHqModuleId } from "./modules";
+import { getEditionBranding, getEditionNavigation } from "@/lib/editions";
+import { isPortalNavEnabled } from "@/lib/editions/navigation";
 
 export type ClientHqNavId = ClientHqModuleId;
 
@@ -61,10 +63,22 @@ export const CLIENT_HQ_NAV_GROUPS: ClientHqNavGroup[] = [
 ];
 
 export function getEnabledClientHqNavGroups(): ClientHqNavGroup[] {
+  const editionNav = getEditionNavigation();
+
   return CLIENT_HQ_NAV_GROUPS.map((group) => ({
     ...group,
-    items: group.items.filter((item) => CLIENT_HQ_MODULES[item.moduleId]?.enabled),
+    items: group.items
+      .filter((item) => isClientHqModuleEnabled(item.moduleId))
+      .filter((item) => isPortalNavEnabled(item.id))
+      .map((item) => ({
+        ...item,
+        label: editionNav.portalNavLabels[item.id] ?? item.label,
+      })),
   })).filter((group) => group.items.length > 0);
+}
+
+export function getPortalEditionBranding() {
+  return getEditionBranding();
 }
 
 export function clientHqNavIsActive(pathname: string, href: string): boolean {

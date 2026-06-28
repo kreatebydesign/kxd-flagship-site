@@ -1,8 +1,10 @@
 /**
  * KXD Core — Client HQ module registry.
- * Future OS editions (Contractor, Hospitality, Motorsports, etc.)
- * enable or disable modules without rewriting the experience.
+ * Edition framework controls visibility per edition (Phase 8A).
  */
+
+import { isModuleEnabled } from "@/lib/editions";
+import { PORTAL_NAV_MODULE_MAP } from "@/lib/editions/navigation";
 
 export type ClientHqModuleId =
   | "overview"
@@ -26,7 +28,24 @@ export interface ClientHqModuleConfig {
   label: string;
 }
 
-/** Default Client HQ module set — all enabled for Creative OS */
+const CLIENT_HQ_MODULE_LABELS: Record<ClientHqModuleId, string> = {
+  overview: "Overview",
+  projects: "Projects",
+  deliverables: "Deliverables",
+  requests: "Requests",
+  assets: "Assets",
+  invoices: "Invoices",
+  meetings: "Meetings",
+  analytics: "Analytics",
+  reports: "Reports",
+  "website-health": "Website Health",
+  resources: "Resources",
+  team: "Team",
+  settings: "Settings",
+  advisor: "AI Advisor",
+};
+
+/** Default Client HQ module set — edition-aware */
 export const CLIENT_HQ_MODULES: Record<ClientHqModuleId, ClientHqModuleConfig> = {
   overview: { id: "overview", enabled: true, label: "Overview" },
   projects: { id: "projects", enabled: true, label: "Projects" },
@@ -45,5 +64,10 @@ export const CLIENT_HQ_MODULES: Record<ClientHqModuleId, ClientHqModuleConfig> =
 };
 
 export function isClientHqModuleEnabled(moduleId: ClientHqModuleId): boolean {
-  return CLIENT_HQ_MODULES[moduleId]?.enabled ?? false;
+  const editionModule = PORTAL_NAV_MODULE_MAP[moduleId];
+  return isModuleEnabled(editionModule);
+}
+
+export function getClientHqModuleLabel(moduleId: ClientHqModuleId): string {
+  return CLIENT_HQ_MODULE_LABELS[moduleId] ?? moduleId;
 }

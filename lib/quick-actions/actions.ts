@@ -1,5 +1,6 @@
 import type { CommandSearchResult } from "@/lib/search/types";
 import type { IntelligenceContext } from "@/lib/intelligence/types";
+import { filterEditionQuickActions } from "@/lib/editions/navigation";
 import { matchClientFromQuery } from "./client-context";
 import type { QuickAction, QuickActionCommandMatch, QuickActionId } from "./types";
 import {
@@ -19,7 +20,7 @@ import {
 } from "./routes";
 
 export function getGlobalQuickActions(): QuickAction[] {
-  return [
+  return filterEditionQuickActions([
     {
       id: "create-proposal",
       label: "Create Proposal",
@@ -111,11 +112,11 @@ export function getGlobalQuickActions(): QuickAction[] {
       href: createTaskHref(),
       keywords: ["new task", "create task", "add task"],
     },
-  ];
+  ]);
 }
 
 export function getClientQuickActions(clientId: number): QuickAction[] {
-  return [
+  return filterEditionQuickActions([
     {
       id: "open-command-center",
       label: "Open Command Center",
@@ -218,7 +219,7 @@ export function getClientQuickActions(clientId: number): QuickAction[] {
       sub: "Audits",
       href: websiteAuditHref(clientId),
     },
-  ];
+  ]);
 }
 
 const COMMAND_VERBS: Array<{
