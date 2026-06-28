@@ -2,6 +2,8 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { KxdLogo } from "@/components/ui/KxdLogo";
 import { KxdShell } from "@/components/os";
+import { CommandPalette } from "@/components/admin/operations/command-search";
+import { CommandPaletteTrigger } from "@/components/admin/operations/command-search/CommandPaletteTrigger";
 import { QuickCaptureNote } from "@/components/admin/operations/strategy/QuickCaptureNote";
 import { NAV_GROUPS, type OperationsNavId } from "./operations-nav";
 
@@ -50,7 +52,8 @@ export function OperationsShell({ activeId, dateDisplay, children }: OperationsS
             {dateDisplay ? (
               <time className="kxd-os-meta kxd-os-sidebar__date">{dateDisplay}</time>
             ) : null}
-            <div style={{ marginBottom: "0.5rem" }}>
+            <div style={{ marginBottom: "0.5rem", display: "flex", flexDirection: "column", gap: "0.375rem" }}>
+              <CommandPaletteTrigger />
               <QuickCaptureNote />
             </div>
             <Link href="/admin" className="kxd-os-sidebar__cms">
@@ -61,6 +64,7 @@ export function OperationsShell({ activeId, dateDisplay, children }: OperationsS
 
         <div className="kxd-os-app__main">{children}</div>
       </div>
+      <CommandPalette />
     </KxdShell>
   );
 }
