@@ -39,6 +39,7 @@ export const OPERATIONS_NAV_MODULE_MAP: Record<OperationsNavId, KxdModuleId> = {
   "sales-forecast": "sales",
   "client-import": "portfolio",
   "client-launch": "portfolio",
+  genesis: "onboarding",
 };
 
 export const PORTAL_NAV_MODULE_MAP: Record<ClientHqNavId, KxdModuleId> = {
@@ -98,6 +99,7 @@ export const SEARCH_PROVIDER_MODULE_MAP: Record<string, KxdModuleId> = {
   playbooks: "playbooks",
   "client-success": "client-success",
   "client-tasks": "work",
+  genesis: "onboarding",
   automation: "automation",
   brain: "brain",
   "portal-users": "client-hq",

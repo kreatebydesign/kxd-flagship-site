@@ -10,6 +10,7 @@ import type { IntelligenceContext } from "@/lib/intelligence/types";
 import { searchPlaybooks, searchPlaybookRuns } from "@/lib/playbooks/search";
 import { searchClientSuccessPlans, searchSuccessCheckIns } from "@/lib/client-success/search";
 import { searchClientTasks } from "@/lib/client-tasks/search";
+import { searchGenesisSessions } from "@/lib/genesis/search";
 import { getEditionOperationsNavItems, isSearchProviderEnabled } from "@/lib/editions/navigation";
 import type { CommandSearchResult, SearchEntityType } from "./types";
 import { groupForType } from "./types";
@@ -646,6 +647,28 @@ export const clientTasksProvider: SearchProvider = {
   search: async (query) => searchClientTasks(query),
 };
 
+export const genesisProvider: SearchProvider = {
+  id: "genesis",
+  order: 61,
+  lazy: true,
+  search: async (query) => {
+    const sessions = await searchGenesisSessions(query);
+    return sessions.map((s) =>
+      makeResult({
+        id: `genesis-${s.id}`,
+        type: "genesis-session",
+        title: s.sessionLabel,
+        subtitle: `${s.templateId.replace(/-/g, " ")} · ${s.progressPercent}% · ${s.status}`,
+        clientName: s.clientName,
+        href: s.href,
+        updatedAt: s.updatedAt,
+        icon: "◇",
+        actionLabel: "Open",
+      }),
+    );
+  },
+};
+
 /** All registered providers — extend by adding to this array */
 export const SEARCH_PROVIDERS: SearchProvider[] = [
   navigationProvider,
@@ -660,6 +683,7 @@ export const SEARCH_PROVIDERS: SearchProvider[] = [
   strategyProvider,
   playbooksProvider,
   clientSuccessProvider,
+  genesisProvider,
   clientTasksProvider,
   portalUsersProvider,
   automationProvider,

@@ -18,6 +18,7 @@ import { ClientTimelineEvents } from "./payload/collections/ClientTimelineEvents
 import { ClientProjects } from "./payload/collections/ClientProjects.ts";
 import { ClientRequests } from "./payload/collections/ClientRequests.ts";
 import { ClientTasks } from "./payload/collections/ClientTasks.ts";
+import { GenesisSessions } from "./payload/collections/GenesisSessions.ts";
 import { Clients } from "./payload/collections/Clients.ts";
 import { ExecutiveClientProfiles } from "./payload/collections/ExecutiveClientProfiles.ts";
 import { ExecutiveNotes } from "./payload/collections/ExecutiveNotes.ts";
@@ -137,6 +138,7 @@ export default buildConfig({
     MonthlyDeliverables,
     ClientRequests,
     ClientTasks,
+    GenesisSessions,
     ClientOnboarding,
     ClientTimelineEvents,
     ExecutiveTimelineEvents,

@@ -127,6 +127,16 @@ export interface StrategySection {
   quickCreateHref: string;
 }
 
+export interface GenesisSection {
+  discoveryProgress: number;
+  blueprintStatus: string;
+  launchReadiness: number;
+  missingInformation: string[];
+  recommendedNextStep: string;
+  href: string | null;
+  status: string;
+}
+
 export interface CommandSections {
   relationship: RelationshipSection;
   revenue: RevenueSection;
@@ -149,6 +159,7 @@ export interface ClientCommandCenterData {
   playbooks: ClientPlaybookSummary;
   currentWork: ClientWorkSummary;
   clientSuccess: ClientSuccessSummary;
+  genesis: GenesisSection;
   insights: ClientInsights | null;
   health: ClientHealthResult;
   row: MergedExecutiveClientRow | null;

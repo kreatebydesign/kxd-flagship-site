@@ -44,7 +44,8 @@ export type SearchEntityType =
   | "playbook-run"
   | "success-plan"
   | "success-check-in"
-  | "client-task";
+  | "client-task"
+  | "genesis-session";
 
 export interface CommandSearchResult {
   id: string;
@@ -167,6 +168,8 @@ export function groupForType(type: SearchEntityType): SearchGroupId {
       return "client-success";
     case "client-task":
       return "work";
+    case "genesis-session":
+      return "strategy";
     case "automation-event":
       return "automation";
     case "brain-signal":

@@ -13,6 +13,7 @@ import { buildQuickActions } from "./actions";
 import { getClientPlaybookSummary } from "@/lib/playbooks";
 import { getClientWorkSummary } from "@/lib/client-tasks";
 import { getClientSuccessSummary } from "@/lib/client-success";
+import { getGenesisSummaryForClient } from "@/lib/genesis";
 import { getClientStrategySummary } from "@/lib/executive-notes/vault";
 import {
   buildCommandHero,
@@ -139,6 +140,7 @@ export async function loadClientCommandCenter(
     playbookSummary,
     currentWork,
     clientSuccessSummary,
+    genesisSummary,
   ] = await Promise.all([
     fetchClientWorkspace(clientId),
     getClientInfrastructure(clientId),
@@ -150,6 +152,7 @@ export async function loadClientCommandCenter(
     getClientPlaybookSummary(clientId),
     getClientWorkSummary(clientId),
     getClientSuccessSummary(clientId),
+    getGenesisSummaryForClient(clientId),
   ]);
 
   const insights = await buildClientInsightSections(clientId, ctx);
@@ -189,6 +192,15 @@ export async function loadClientCommandCenter(
     playbooks: playbookSummary,
     currentWork,
     clientSuccess: clientSuccessSummary,
+    genesis: {
+      discoveryProgress: genesisSummary.discoveryProgress,
+      blueprintStatus: genesisSummary.blueprintStatus,
+      launchReadiness: genesisSummary.launchReadiness,
+      missingInformation: genesisSummary.missingInformation,
+      recommendedNextStep: genesisSummary.recommendedNextStep,
+      href: genesisSummary.href,
+      status: genesisSummary.status,
+    },
     insights,
     health,
     row: widgetInput.row,

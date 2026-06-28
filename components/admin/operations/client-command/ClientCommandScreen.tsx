@@ -56,7 +56,7 @@ function ListBlock({
 }
 
 export function ClientCommandScreen({ data }: { data: ClientCommandCenterData }) {
-  const { hero, executiveBrief, sections, recommendations, currentWork, playbooks, clientSuccess } = data;
+  const { hero, executiveBrief, sections, recommendations, currentWork, playbooks, clientSuccess, genesis } = data;
 
   return (
     <OperationsShell activeId="clients" clientId={hero.clientId}>
@@ -90,6 +90,38 @@ export function ClientCommandScreen({ data }: { data: ClientCommandCenterData })
           {hero.tier ? `${hero.tier} · ` : ""}
           Account: {hero.accountManager}
         </div>
+
+        <KxdSection label="Genesis" className="kxd-os-operations-section">
+          <OpsKpiStrip
+            items={[
+              { label: "Discovery", value: `${genesis.discoveryProgress}%` },
+              { label: "Blueprints", value: genesis.blueprintStatus },
+              { label: "Launch Readiness", value: `${genesis.launchReadiness}%`, alert: genesis.launchReadiness < 70 },
+            ]}
+          />
+          <p className="kxd-os-body" style={{ marginTop: "0.75rem" }}>
+            <span className="kxd-os-meta">Recommended · </span>
+            {genesis.recommendedNextStep}
+          </p>
+          {genesis.missingInformation.length > 0 ? (
+            <div className="kxd-os-list-stack" style={{ marginTop: "0.75rem" }}>
+              {genesis.missingInformation.map((item) => (
+                <p key={item} className="kxd-os-meta">{item}</p>
+              ))}
+            </div>
+          ) : null}
+          <div style={{ marginTop: "0.75rem", display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+            {genesis.href ? (
+              <Link href={genesis.href} className="kxd-os-btn kxd-os-btn--ghost kxd-os-btn--sm">
+                Open Genesis
+              </Link>
+            ) : (
+              <Link href="/admin/operations/genesis" className="kxd-os-btn kxd-os-btn--ghost kxd-os-btn--sm">
+                Launch Genesis
+              </Link>
+            )}
+          </div>
+        </KxdSection>
 
         <KxdSection label="Current Work" className="kxd-os-operations-section">
           <OpsKpiStrip

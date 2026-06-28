@@ -61,6 +61,55 @@ export const WORK_NAV_COMMANDS: CommandDefinition[] = [
   },
 ];
 
+/** Genesis navigation commands */
+export const GENESIS_NAV_COMMANDS: CommandDefinition[] = [
+  {
+    id: "cmd-open-genesis",
+    title: "Open KXD Genesis",
+    keywords: ["genesis", "launch genesis", "engagement", "blueprint"],
+    href: "/admin/operations/genesis",
+    group: "commands",
+    icon: "◇",
+    actionLabel: "Open",
+  },
+  {
+    id: "cmd-genesis-hub",
+    title: "Genesis Hub",
+    keywords: ["genesis hub", "new engagement", "discovery"],
+    href: "/admin/operations/genesis",
+    group: "commands",
+    icon: "◇",
+    actionLabel: "Open",
+  },
+  {
+    id: "cmd-website-blueprint",
+    title: "Website Blueprint",
+    keywords: ["website blueprint", "sitemap", "site architecture"],
+    href: "/admin/operations/genesis",
+    group: "commands",
+    icon: "◇",
+    actionLabel: "Genesis",
+  },
+  {
+    id: "cmd-seo-blueprint",
+    title: "SEO Blueprint",
+    keywords: ["seo blueprint", "seo strategy", "keywords"],
+    href: "/admin/operations/genesis",
+    group: "commands",
+    icon: "◇",
+    actionLabel: "Genesis",
+  },
+  {
+    id: "cmd-brand-blueprint",
+    title: "Brand Blueprint",
+    keywords: ["brand blueprint", "brand strategy", "discovery"],
+    href: "/admin/operations/genesis",
+    group: "commands",
+    icon: "◇",
+    actionLabel: "Genesis",
+  },
+];
+
 function buildQuickCommands(): CommandDefinition[] {
   const actions = filterEditionQuickActions(getGlobalQuickActions());
   const fromActions = actions.map((action) => ({
@@ -73,7 +122,8 @@ function buildQuickCommands(): CommandDefinition[] {
     actionLabel: action.sub,
   }));
   const workCommands = isModuleEnabled("work") ? WORK_NAV_COMMANDS : [];
-  return [...fromActions, ...workCommands];
+  const genesisCommands = isModuleEnabled("onboarding") ? GENESIS_NAV_COMMANDS : [];
+  return [...fromActions, ...workCommands, ...genesisCommands];
 }
 
 export function getQuickCommands(): CommandDefinition[] {

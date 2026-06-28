@@ -2762,6 +2762,96 @@
   gap: var(--kxd-os-space-3);
 }
 
+/* ── KXD Genesis workflow ───────────────────────────────────────────── */
+
+.kxd-os-ops-genesis__layout {
+  display: grid;
+  grid-template-columns: minmax(200px, 240px) minmax(0, 1fr);
+  gap: var(--kxd-os-space-8);
+  align-items: start;
+}
+
+.kxd-os-ops-genesis__sidebar {
+  position: sticky;
+  top: var(--kxd-os-space-6);
+}
+
+.kxd-os-ops-genesis__phase-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--kxd-os-space-2);
+  margin-top: var(--kxd-os-space-3);
+}
+
+.kxd-os-ops-genesis__phase {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: var(--kxd-os-space-2) var(--kxd-os-space-3);
+  align-items: center;
+  width: 100%;
+  padding: var(--kxd-os-space-3) var(--kxd-os-space-4);
+  border: none;
+  border-radius: var(--kxd-os-radius-md);
+  background: transparent;
+  color: var(--kxd-os-text-secondary);
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--kxd-os-duration-base) var(--kxd-os-ease-settle);
+}
+
+.kxd-os-ops-genesis__phase:hover {
+  background: var(--kxd-os-bg-elevated);
+}
+
+.kxd-os-ops-genesis__phase--active {
+  background: var(--kxd-os-bg-elevated);
+  color: var(--kxd-os-text-primary);
+  box-shadow: var(--kxd-os-shadow-rest);
+}
+
+.kxd-os-ops-genesis__phase--done .kxd-os-ops-genesis__phase-label {
+  color: var(--kxd-os-text-primary);
+}
+
+.kxd-os-ops-genesis__phase-num {
+  font-size: var(--kxd-os-text-xs);
+  letter-spacing: 0.08em;
+  opacity: 0.7;
+}
+
+.kxd-os-ops-genesis__phase-label {
+  font-size: var(--kxd-os-text-sm);
+}
+
+.kxd-os-ops-genesis-start {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--kxd-os-space-6);
+  padding: var(--kxd-os-space-6);
+  background: var(--kxd-os-surface-milled), var(--kxd-os-bg-elevated);
+  border-radius: var(--kxd-os-radius-lg);
+  box-shadow: var(--kxd-os-shadow-rest);
+}
+
+.kxd-os-ops-genesis-start__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--kxd-os-space-3);
+  align-items: center;
+}
+
+@media (max-width: 900px) {
+  .kxd-os-ops-genesis__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .kxd-os-ops-genesis__sidebar {
+    position: static;
+  }
+}
+
 /* ── Founder studio (embedded) ──────────────────────────────────────── */
 
 .kxd-os-founder-hero {
