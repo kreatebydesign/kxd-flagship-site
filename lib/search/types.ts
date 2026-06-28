@@ -13,7 +13,8 @@ export type SearchGroupId =
   | "brain"
   | "navigation"
   | "playbook"
-  | "playbook-run";
+  | "playbook-run"
+  | "client-success";
 
 export type SearchEntityType =
   | "command"
@@ -39,7 +40,9 @@ export type SearchEntityType =
   | "brain-recommendation"
   | "nav"
   | "playbook"
-  | "playbook-run";
+  | "playbook-run"
+  | "success-plan"
+  | "success-check-in";
 
 export interface CommandSearchResult {
   id: string;
@@ -124,6 +127,7 @@ export const GROUP_LABELS: Record<SearchGroupId, string> = {
   navigation: "Navigate",
   playbook: "Playbooks",
   "playbook-run": "Playbook runs",
+  "client-success": "Client Success",
 };
 
 export function groupForType(type: SearchEntityType): SearchGroupId {
@@ -155,6 +159,9 @@ export function groupForType(type: SearchEntityType): SearchGroupId {
     case "playbook":
     case "playbook-run":
       return "strategy";
+    case "success-plan":
+    case "success-check-in":
+      return "client-success";
     case "automation-event":
       return "automation";
     case "brain-signal":
@@ -179,6 +186,7 @@ export const GROUP_ORDER: SearchGroupId[] = [
   "creative",
   "strategy",
   "playbook",
+  "client-success",
   "automation",
   "brain",
   "navigation",

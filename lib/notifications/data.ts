@@ -276,6 +276,74 @@ async function collectNotificationItems(): Promise<NotificationItem[]> {
     /* playbooks collection may not exist yet */
   }
 
+  try {
+    const payload = await getPayload({ config });
+    const dash = await import("@/lib/client-success").then((m) => m.getClientSuccessDashboard());
+
+    for (const client of dash.upcomingReviews.slice(0, 6)) {
+      const id = `success-review-${client.clientId}`;
+      if (isVirtualIgnored(id, memory)) continue;
+      virtual.push({
+        id,
+        virtual: true,
+        source: "client-success",
+        title: `Quarterly review due — ${client.clientName}`,
+        message: `Review in ${client.daysUntilReview ?? "?"} day(s)`,
+        clientId: client.clientId,
+        clientName: client.clientName,
+        severity: (client.daysUntilReview ?? 99) <= 7 ? "warning" : "info",
+        module: "Client Success",
+        status: "unread",
+        href: client.href,
+        createdAt: new Date().toISOString(),
+        actionLabel: "Review",
+      });
+    }
+
+    for (const client of dash.staleMeetings.slice(0, 6)) {
+      const id = `success-stale-${client.clientId}`;
+      if (isVirtualIgnored(id, memory)) continue;
+      virtual.push({
+        id,
+        virtual: true,
+        source: "client-success",
+        title: `No success meeting — ${client.clientName}`,
+        message: `No check-in in ${client.daysSinceMeeting ?? 30}+ days`,
+        clientId: client.clientId,
+        clientName: client.clientName,
+        severity: "warning",
+        module: "Client Success",
+        status: "unread",
+        href: client.href,
+        createdAt: new Date().toISOString(),
+        actionLabel: "Schedule",
+      });
+    }
+
+    for (const client of dash.needingAttention.slice(0, 4)) {
+      if (client.healthScore >= 55) continue;
+      const id = `success-health-${client.clientId}`;
+      if (isVirtualIgnored(id, memory)) continue;
+      virtual.push({
+        id,
+        virtual: true,
+        source: "client-success",
+        title: `Health drop — ${client.clientName}`,
+        message: `Client health at ${client.healthScore}/100 — success task recommended`,
+        clientId: client.clientId,
+        clientName: client.clientName,
+        severity: client.healthScore < 45 ? "critical" : "warning",
+        module: "Client Success",
+        status: "unread",
+        href: client.href,
+        createdAt: new Date().toISOString(),
+        actionLabel: "Address",
+      });
+    }
+  } catch {
+    /* client success may not exist yet */
+  }
+
   const merged = applyVirtualMemoryState(
     dedupeNotifications([...persisted, ...virtual]),
     memory,

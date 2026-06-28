@@ -166,6 +166,40 @@ export async function generateMonthlyReport(
     payload_data.executiveSummary = `${payload_data.executiveSummary} ${completedPlaybooks.length} operational playbook${completedPlaybooks.length === 1 ? "" : "s"} completed this period.`;
   }
 
+  const { getClientSuccessActivityForMonth } = await import("@/lib/client-success");
+  const successActivity = await getClientSuccessActivityForMonth(
+    input.clientId,
+    input.month,
+    input.year,
+  );
+  if (
+    successActivity.checkInsCompleted > 0 ||
+    successActivity.wins.length > 0 ||
+    successActivity.goalsAchieved.length > 0
+  ) {
+    const successLines: string[] = [];
+    if (successActivity.checkInsCompleted > 0) {
+      successLines.push(`· ${successActivity.checkInsCompleted} success meeting(s) completed`);
+    }
+    for (const win of successActivity.wins.slice(0, 5)) {
+      successLines.push(`· Win — ${win.slice(0, 120)}`);
+    }
+    for (const goal of successActivity.goalsAchieved) {
+      successLines.push(`· ${goal}`);
+    }
+    if (successActivity.renewalReadiness !== "Not assessed") {
+      successLines.push(`· Renewal readiness: ${successActivity.renewalReadiness}`);
+    }
+    for (const note of successActivity.expansionNotes) {
+      successLines.push(`· Expansion: ${note}`);
+    }
+    payload_data.workCompleted = `${payload_data.workCompleted}\n${successLines.join("\n")}`;
+    payload_data.executiveSummary = `${payload_data.executiveSummary} Relationship health trend tracked via ${successActivity.checkInsCompleted} success check-in${successActivity.checkInsCompleted === 1 ? "" : "s"}.`;
+    if (successActivity.renewalReadiness !== "Not assessed") {
+      payload_data.executiveSummary = `${payload_data.executiveSummary} ${successActivity.renewalReadiness}.`;
+    }
+  }
+
   const htmlExport = buildHtmlReport(clientName, input.month, input.year, payload_data);
   const portalHtml = buildPortalReportHtml(clientName, input.month, input.year, payload_data);
 

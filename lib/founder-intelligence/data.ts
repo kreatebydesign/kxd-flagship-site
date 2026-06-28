@@ -6,6 +6,7 @@ import "server-only";
 
 import { getFounderInsights, getInfrastructureInsights, getGrowthOpportunities, loadIntelligenceContext } from "@/lib/intelligence/engine";
 import { getPlaybookDashboard } from "@/lib/playbooks";
+import { getClientSuccessFounderSignals } from "@/lib/client-success";
 import { buildPortfolioRecommendations } from "@/lib/intelligence/recommendations";
 import {
   mapClientRisks,
@@ -76,9 +77,10 @@ export async function getRecommendedFocus(
 
 export async function getFounderBriefing(): Promise<FounderBriefingData> {
   const now = new Date();
-  const [bundle, playbookDash] = await Promise.all([
+  const [bundle, playbookDash, successSignals] = await Promise.all([
     getFounderInsights(),
     getPlaybookDashboard(),
+    getClientSuccessFounderSignals(),
   ]);
 
   const dateDisplay = now.toLocaleDateString("en-US", {
@@ -111,6 +113,70 @@ export async function getFounderBriefing(): Promise<FounderBriefingData> {
 
   if (playbookDash.stats.activeRunCount > 0) {
     briefing.morningBrief.summary = `${briefing.morningBrief.summary} ${playbookDash.stats.activeRunCount} active playbook run(s).`;
+  }
+
+  for (const client of successSignals.renewalRisk.slice(0, 4)) {
+    briefing.priorities.push({
+      id: `success-renewal-${client.clientId}`,
+      type: "client-health",
+      title: `Renewal risk — ${client.clientName}`,
+      client: client.clientName,
+      clientId: client.clientId,
+      whyItMatters: "Contract renewal within 30 days — relationship strategy required",
+      recommendedAction: "Review renewal strategy and success plan",
+      urgency: "high",
+      sourceModule: "Client Success",
+      href: client.href,
+    });
+  }
+
+  for (const client of successSignals.reviewsDue.slice(0, 4)) {
+    briefing.priorities.push({
+      id: `success-review-${client.clientId}`,
+      type: "meeting-prep",
+      title: `Success review due — ${client.clientName}`,
+      client: client.clientName,
+      clientId: client.clientId,
+      whyItMatters: "Quarterly success review approaching",
+      recommendedAction: "Schedule quarterly review",
+      urgency: client.daysUntilReview != null && client.daysUntilReview <= 7 ? "high" : "medium",
+      sourceModule: "Client Success",
+      href: client.href,
+    });
+  }
+
+  for (const client of successSignals.staleMeetings.slice(0, 4)) {
+    briefing.priorities.push({
+      id: `success-stale-${client.clientId}`,
+      type: "client-health",
+      title: `No success meeting — ${client.clientName}`,
+      client: client.clientName,
+      clientId: client.clientId,
+      whyItMatters: "No check-in in 30+ days — relationship may be cooling",
+      recommendedAction: "Schedule success check-in",
+      urgency: "medium",
+      sourceModule: "Client Success",
+      href: client.href,
+    });
+  }
+
+  for (const client of successSignals.upsellReady.slice(0, 3)) {
+    briefing.priorities.push({
+      id: `success-upsell-${client.clientId}`,
+      type: "growth-opportunity",
+      title: `Upsell ready — ${client.clientName}`,
+      client: client.clientName,
+      clientId: client.clientId,
+      whyItMatters: "Expansion opportunity documented in success plan",
+      recommendedAction: "Explore upsell or referral conversation",
+      urgency: "medium",
+      sourceModule: "Client Success",
+      href: client.href,
+    });
+  }
+
+  if (successSignals.momentumPositive.length > 0) {
+    briefing.morningBrief.summary = `${briefing.morningBrief.summary} ${successSignals.momentumPositive.length} client(s) with positive success momentum.`;
   }
 
   return {

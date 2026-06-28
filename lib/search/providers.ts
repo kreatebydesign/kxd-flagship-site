@@ -8,6 +8,7 @@ import { searchExecutiveNotes } from "@/lib/executive-notes/search";
 import { clientId, clientName } from "@/lib/intelligence/context";
 import type { IntelligenceContext } from "@/lib/intelligence/types";
 import { searchPlaybooks, searchPlaybookRuns } from "@/lib/playbooks/search";
+import { searchClientSuccessPlans, searchSuccessCheckIns } from "@/lib/client-success/search";
 import { NAV_ITEMS } from "@/components/admin/operations/shared/operations-nav";
 import type { CommandSearchResult, SearchEntityType } from "./types";
 import { groupForType } from "./types";
@@ -624,6 +625,19 @@ export const playbooksProvider: SearchProvider = {
   },
 };
 
+export const clientSuccessProvider: SearchProvider = {
+  id: "client-success",
+  order: 62,
+  lazy: true,
+  search: async (query) => {
+    const [plans, checkIns] = await Promise.all([
+      searchClientSuccessPlans(query),
+      searchSuccessCheckIns(query),
+    ]);
+    return [...plans, ...checkIns];
+  },
+};
+
 /** All registered providers — extend by adding to this array */
 export const SEARCH_PROVIDERS: SearchProvider[] = [
   navigationProvider,
@@ -637,6 +651,7 @@ export const SEARCH_PROVIDERS: SearchProvider[] = [
   creativeAssetsProvider,
   strategyProvider,
   playbooksProvider,
+  clientSuccessProvider,
   portalUsersProvider,
   automationProvider,
   brainProvider,

@@ -37,6 +37,8 @@ import { MonthlyDeliverables } from "./payload/collections/MonthlyDeliverables.t
 import { Playbooks } from "./payload/collections/Playbooks.ts";
 import { PlaybookSteps } from "./payload/collections/PlaybookSteps.ts";
 import { PlaybookRuns } from "./payload/collections/PlaybookRuns.ts";
+import { ClientSuccessPlans } from "./payload/collections/ClientSuccessPlans.ts";
+import { SuccessCheckIns } from "./payload/collections/SuccessCheckIns.ts";
 import { Partners } from "./payload/collections/Partners.ts";
 import { PortalUsers } from "./payload/collections/PortalUsers.ts";
 import { PlatformApplications } from "./payload/collections/PlatformApplications.ts";
@@ -141,6 +143,8 @@ export default buildConfig({
     Playbooks,
     PlaybookSteps,
     PlaybookRuns,
+    ClientSuccessPlans,
+    SuccessCheckIns,
     SalesLeads,
     Proposals,
     ProposalSections,

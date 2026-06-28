@@ -57,7 +57,7 @@ function ListBlock({
 }
 
 export function ClientCommandScreen({ data }: { data: ClientCommandCenterData }) {
-  const { hero, executiveBrief, sections, recommendations, quickActions, playbooks } = data;
+  const { hero, executiveBrief, sections, recommendations, quickActions, playbooks, clientSuccess } = data;
 
   return (
     <OperationsShell activeId="clients">
@@ -127,6 +127,45 @@ export function ClientCommandScreen({ data }: { data: ClientCommandCenterData })
               ))}
             </div>
           ) : null}
+        </KxdSection>
+
+        <KxdSection label="Client Success" className="kxd-os-operations-section">
+          <OpsKpiStrip
+            items={[
+              { label: "Snapshot", value: clientSuccess.snapshot },
+              {
+                label: "Next Review",
+                value:
+                  clientSuccess.daysUntilReview != null
+                    ? `${clientSuccess.daysUntilReview}d`
+                    : clientSuccess.nextReview ?? "—",
+                alert:
+                  clientSuccess.daysUntilReview != null && clientSuccess.daysUntilReview <= 14,
+              },
+              {
+                label: "Health",
+                value: String(clientSuccess.healthScore),
+                alert: clientSuccess.healthScore < 55,
+              },
+            ]}
+          />
+          {clientSuccess.currentFocus ? (
+            <p className="kxd-os-body" style={{ marginTop: "0.75rem" }}>
+              {clientSuccess.currentFocus}
+            </p>
+          ) : null}
+          {clientSuccess.recentWins.length > 0 ? (
+            <div className="kxd-os-list-stack" style={{ marginTop: "0.75rem" }}>
+              {clientSuccess.recentWins.map((win) => (
+                <p key={win} className="kxd-os-meta">· {win}</p>
+              ))}
+            </div>
+          ) : null}
+          <div style={{ marginTop: "0.75rem" }}>
+            <Link href={clientSuccess.href} className="kxd-os-btn kxd-os-btn--ghost kxd-os-btn--sm">
+              Open success plan
+            </Link>
+          </div>
         </KxdSection>
 
         <KxdSection label="Executive Brief" className="kxd-os-operations-section">
