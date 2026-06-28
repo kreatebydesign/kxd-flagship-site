@@ -57,7 +57,7 @@ function ListBlock({
 }
 
 export function ClientCommandScreen({ data }: { data: ClientCommandCenterData }) {
-  const { hero, executiveBrief, sections, recommendations, quickActions } = data;
+  const { hero, executiveBrief, sections, recommendations, quickActions, playbooks } = data;
 
   return (
     <OperationsShell activeId="clients">
@@ -93,6 +93,41 @@ export function ClientCommandScreen({ data }: { data: ClientCommandCenterData })
         </div>
 
         <OpsQuickGrid items={quickActions} />
+
+        <KxdSection label="Playbooks" className="kxd-os-operations-section">
+          <OpsKpiStrip
+            items={[
+              { label: "Active", value: String(playbooks.active.length), alert: playbooks.active.length > 0 },
+              { label: "Completed", value: String(playbooks.completed.length) },
+              {
+                label: "Next Step",
+                value: playbooks.nextStep?.stepTitle ?? "—",
+                sub: playbooks.nextStep ? "Current playbook step" : "No active step",
+                alert: Boolean(playbooks.nextStep),
+              },
+            ]}
+          />
+          <div style={{ marginTop: "0.75rem", display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+            <Link href={`/admin/operations/playbooks?client=${hero.clientId}`} className="kxd-os-btn kxd-os-btn--ghost kxd-os-btn--sm">
+              Quick launch playbook
+            </Link>
+            {playbooks.nextStep ? (
+              <Link href={playbooks.nextStep.href} className="kxd-os-link-quiet">
+                Open current run →
+              </Link>
+            ) : null}
+          </div>
+          {playbooks.active.length > 0 ? (
+            <div className="kxd-os-list-stack" style={{ marginTop: "0.75rem" }}>
+              {playbooks.active.slice(0, 5).map((run) => (
+                <OpsListRow key={run.id} href={run.href}>
+                  <p className="kxd-os-body">{run.playbookName}</p>
+                  <p className="kxd-os-meta">{run.percentComplete}% · {run.status}</p>
+                </OpsListRow>
+              ))}
+            </div>
+          ) : null}
+        </KxdSection>
 
         <KxdSection label="Executive Brief" className="kxd-os-operations-section">
           <div className="kxd-os-list-stack">

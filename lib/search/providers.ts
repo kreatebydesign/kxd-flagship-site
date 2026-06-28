@@ -7,6 +7,7 @@ import { getAutomationDashboard } from "@/lib/automation/engine";
 import { searchExecutiveNotes } from "@/lib/executive-notes/search";
 import { clientId, clientName } from "@/lib/intelligence/context";
 import type { IntelligenceContext } from "@/lib/intelligence/types";
+import { searchPlaybooks, searchPlaybookRuns } from "@/lib/playbooks/search";
 import { NAV_ITEMS } from "@/components/admin/operations/shared/operations-nav";
 import type { CommandSearchResult, SearchEntityType } from "./types";
 import { groupForType } from "./types";
@@ -610,6 +611,19 @@ export const creativeAssetsProvider: SearchProvider = {
   },
 };
 
+export const playbooksProvider: SearchProvider = {
+  id: "playbooks",
+  order: 64,
+  lazy: true,
+  search: async (query) => {
+    const [playbooks, runs] = await Promise.all([
+      searchPlaybooks(query),
+      searchPlaybookRuns(query),
+    ]);
+    return [...playbooks, ...runs];
+  },
+};
+
 /** All registered providers — extend by adding to this array */
 export const SEARCH_PROVIDERS: SearchProvider[] = [
   navigationProvider,
@@ -622,6 +636,7 @@ export const SEARCH_PROVIDERS: SearchProvider[] = [
   brandKitsProvider,
   creativeAssetsProvider,
   strategyProvider,
+  playbooksProvider,
   portalUsersProvider,
   automationProvider,
   brainProvider,

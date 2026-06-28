@@ -34,6 +34,9 @@ import { Insights } from "./payload/collections/Insights.ts";
 import { Media } from "./payload/collections/Media.ts";
 import { MonthlyReports } from "./payload/collections/MonthlyReports.ts";
 import { MonthlyDeliverables } from "./payload/collections/MonthlyDeliverables.ts";
+import { Playbooks } from "./payload/collections/Playbooks.ts";
+import { PlaybookSteps } from "./payload/collections/PlaybookSteps.ts";
+import { PlaybookRuns } from "./payload/collections/PlaybookRuns.ts";
 import { Partners } from "./payload/collections/Partners.ts";
 import { PortalUsers } from "./payload/collections/PortalUsers.ts";
 import { PlatformApplications } from "./payload/collections/PlatformApplications.ts";
@@ -135,6 +138,9 @@ export default buildConfig({
     ExecutiveTimelineEvents,
     AutomationEvents,
     AutomationNotifications,
+    Playbooks,
+    PlaybookSteps,
+    PlaybookRuns,
     SalesLeads,
     Proposals,
     ProposalSections,

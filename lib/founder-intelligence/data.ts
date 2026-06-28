@@ -5,6 +5,7 @@
 import "server-only";
 
 import { getFounderInsights, getInfrastructureInsights, getGrowthOpportunities, loadIntelligenceContext } from "@/lib/intelligence/engine";
+import { getPlaybookDashboard } from "@/lib/playbooks";
 import { buildPortfolioRecommendations } from "@/lib/intelligence/recommendations";
 import {
   mapClientRisks,
@@ -75,7 +76,10 @@ export async function getRecommendedFocus(
 
 export async function getFounderBriefing(): Promise<FounderBriefingData> {
   const now = new Date();
-  const bundle = await getFounderInsights();
+  const [bundle, playbookDash] = await Promise.all([
+    getFounderInsights(),
+    getPlaybookDashboard(),
+  ]);
 
   const dateDisplay = now.toLocaleDateString("en-US", {
     weekday: "long",
@@ -88,9 +92,30 @@ export async function getFounderBriefing(): Promise<FounderBriefingData> {
     minute: "2-digit",
   });
 
+  const briefing = mapFounderBriefing(bundle);
+
+  for (const run of playbookDash.blockedRuns.slice(0, 5)) {
+    briefing.priorities.push({
+      id: `playbook-blocked-${run.id}`,
+      type: "project-at-risk",
+      title: `Blocked playbook — ${run.playbookName}`,
+      client: run.clientName,
+      clientId: run.clientId,
+      whyItMatters: "Operational SOP execution stalled — delivery risk",
+      recommendedAction: "Open run and resolve blocker",
+      urgency: "high",
+      sourceModule: "Playbooks",
+      href: run.href,
+    });
+  }
+
+  if (playbookDash.stats.activeRunCount > 0) {
+    briefing.morningBrief.summary = `${briefing.morningBrief.summary} ${playbookDash.stats.activeRunCount} active playbook run(s).`;
+  }
+
   return {
     dateDisplay,
     timeDisplay,
-    ...mapFounderBriefing(bundle),
+    ...briefing,
   };
 }

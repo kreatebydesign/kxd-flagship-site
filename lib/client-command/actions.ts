@@ -22,9 +22,39 @@ export function buildQuickActions(clientId: number): CommandQuickAction[] {
       href: `/admin/operations/reports?client=${clientId}&month=${month}&year=${year}`,
     },
     {
+      label: "Run Website Launch",
+      sub: "Playbook",
+      href: `/admin/operations/playbooks?playbook=website-launch&client=${clientId}`,
+    },
+    {
+      label: "Run Monthly Report",
+      sub: "Playbook",
+      href: `/admin/operations/playbooks?playbook=monthly-reporting&client=${clientId}`,
+    },
+    {
+      label: "Run Onboarding",
+      sub: "Playbook",
+      href: `/admin/operations/playbooks?playbook=client-onboarding&client=${clientId}`,
+    },
+    {
+      label: "Quarterly Review",
+      sub: "Playbook",
+      href: `/admin/operations/playbooks?playbook=quarterly-business-review&client=${clientId}`,
+    },
+    {
+      label: "SEO Checklist",
+      sub: "Playbook",
+      href: `/admin/operations/playbooks?playbook=seo-launch&client=${clientId}`,
+    },
+    {
       label: "Run Website Audit",
-      sub: "Intelligence",
-      href: `/admin/operations/audits?client=${clientId}`,
+      sub: "Playbook",
+      href: `/admin/operations/playbooks?playbook=website-audit&client=${clientId}`,
+    },
+    {
+      label: "Launch Playbook",
+      sub: "All templates",
+      href: `/admin/operations/playbooks?client=${clientId}`,
     },
     {
       label: "Create Deliverable",

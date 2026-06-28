@@ -154,6 +154,18 @@ export async function generateMonthlyReport(
     input.templateSlug,
   );
 
+  const { getCompletedPlaybooksForClientInMonth } = await import("@/lib/playbooks");
+  const completedPlaybooks = await getCompletedPlaybooksForClientInMonth(
+    input.clientId,
+    input.month,
+    input.year,
+  );
+  if (completedPlaybooks.length > 0) {
+    const lines = completedPlaybooks.map((r) => `· Playbook completed — ${r.playbookName}`);
+    payload_data.workCompleted = `${payload_data.workCompleted}\n${lines.join("\n")}`;
+    payload_data.executiveSummary = `${payload_data.executiveSummary} ${completedPlaybooks.length} operational playbook${completedPlaybooks.length === 1 ? "" : "s"} completed this period.`;
+  }
+
   const htmlExport = buildHtmlReport(clientName, input.month, input.year, payload_data);
   const portalHtml = buildPortalReportHtml(clientName, input.month, input.year, payload_data);
 

@@ -3,6 +3,7 @@ import type { ClientInfrastructureDetail } from "@/lib/infrastructure/types";
 import type { ClientInsights, IntelligenceRecommendation } from "@/lib/intelligence/types";
 import type { MergedExecutiveClientRow } from "@/lib/executive-client-profile";
 import type { ClientStrategySummary } from "@/lib/executive-notes/types";
+import type { ClientPlaybookSummary } from "@/lib/playbooks";
 import type { ExecutiveTimelineClientData } from "@/lib/executive-timeline/types";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -143,6 +144,7 @@ export interface ClientCommandCenterData {
   sections: CommandSections;
   recommendations: CommandRecommendation[];
   quickActions: CommandQuickAction[];
+  playbooks: ClientPlaybookSummary;
   insights: ClientInsights | null;
   health: ClientHealthResult;
   row: MergedExecutiveClientRow | null;

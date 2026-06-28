@@ -240,6 +240,42 @@ async function collectNotificationItems(): Promise<NotificationItem[]> {
     }
   }
 
+  try {
+    const payload = await getPayload({ config });
+    const blockedR = await payload.find({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      collection: "playbook-runs" as any,
+      where: { status: { equals: "blocked" } },
+      limit: 10,
+      sort: "-updatedAt",
+      depth: 1,
+      overrideAccess: true,
+    });
+    for (const run of blockedR.docs as AutomationDoc[]) {
+      const id = `playbook-blocked-${run.id}`;
+      if (isVirtualIgnored(id, memory)) continue;
+      const pb = run.playbook as AutomationDoc | number;
+      const cl = run.client as AutomationDoc | number;
+      virtual.push({
+        id,
+        virtual: true,
+        source: "playbooks",
+        title: `Playbook blocked — ${typeof pb === "object" ? String(pb.name) : "Run"}`,
+        message: "Operational workflow requires attention",
+        clientId: typeof cl === "object" ? (cl.id as number) : Number(cl),
+        clientName: typeof cl === "object" ? String(cl.name) : null,
+        severity: "warning",
+        module: "Playbooks",
+        status: "unread",
+        href: `/admin/operations/playbooks/runs/${run.id}`,
+        createdAt: String(run.updatedAt ?? run.createdAt ?? new Date().toISOString()),
+        actionLabel: "Resolve",
+      });
+    }
+  } catch {
+    /* playbooks collection may not exist yet */
+  }
+
   const merged = applyVirtualMemoryState(
     dedupeNotifications([...persisted, ...virtual]),
     memory,
