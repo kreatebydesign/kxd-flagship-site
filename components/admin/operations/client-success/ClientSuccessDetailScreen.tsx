@@ -31,7 +31,7 @@ function TextBlock({ label, value }: { label: string; value: string | null }) {
 
 export function ClientSuccessDetailScreen({ data }: { data: ClientSuccessDetailData }) {
   return (
-    <OperationsShell activeId="client-success">
+    <OperationsShell activeId="client-success" clientId={data.clientId}>
       <KxdPage className="kxd-os-page--ops">
         <OperationsPageHero
           eyebrow="KXD OS · Client Success"

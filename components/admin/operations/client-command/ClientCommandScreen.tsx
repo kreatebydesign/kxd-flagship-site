@@ -11,7 +11,6 @@ import {
   OpsEmpty,
   OpsKpiStrip,
   OpsListRow,
-  OpsQuickGrid,
   OpsSectionHead,
 } from "@/components/admin/operations/shared/OpsBriefing";
 import type { ClientCommandCenterData, CommandListItem } from "@/lib/client-command";
@@ -57,10 +56,10 @@ function ListBlock({
 }
 
 export function ClientCommandScreen({ data }: { data: ClientCommandCenterData }) {
-  const { hero, executiveBrief, sections, recommendations, quickActions, playbooks, clientSuccess } = data;
+  const { hero, executiveBrief, sections, recommendations, playbooks, clientSuccess } = data;
 
   return (
-    <OperationsShell activeId="clients">
+    <OperationsShell activeId="clients" clientId={hero.clientId}>
       <KxdPage className="kxd-os-page--ops">
         <div className="kxd-os-ops-section-head">
           <OperationsPageHero
@@ -91,8 +90,6 @@ export function ClientCommandScreen({ data }: { data: ClientCommandCenterData })
           {hero.tier ? `${hero.tier} · ` : ""}
           Account: {hero.accountManager}
         </div>
-
-        <OpsQuickGrid items={quickActions} />
 
         <KxdSection label="Playbooks" className="kxd-os-operations-section">
           <OpsKpiStrip

@@ -12,6 +12,7 @@ import { WorkspaceTabContent } from "./WorkspaceTabContent";
 import { WorkspaceTabNav } from "./WorkspaceTabNav";
 import { WorkspaceStat } from "./WorkspacePrimitives";
 import { ClientOpsNav } from "@/components/admin/operations/client-command/ClientOpsNav";
+import { ClientQuickActions } from "@/components/admin/operations/quick-actions";
 
 export interface ClientWorkspaceScreenProps {
   clientId: number;
@@ -99,6 +100,8 @@ export function ClientWorkspaceScreen({
           <ClientOpsNav clientId={clientId} active="workspace" />
           <WorkspaceTabNav clientId={clientId} activeTab={activeTab} />
         </div>
+
+        <ClientQuickActions clientId={clientId} />
 
         <main className="kxd-os-workspace__main">
           <WorkspaceTabContent tab={activeTab} data={data} />

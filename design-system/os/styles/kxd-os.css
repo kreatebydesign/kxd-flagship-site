@@ -2122,6 +2122,32 @@
   margin-top: var(--kxd-os-space-2);
 }
 
+.kxd-os-quick-action-bar {
+  padding: var(--kxd-os-space-4) var(--kxd-os-space-8) var(--kxd-os-space-6);
+  box-shadow: inset 0 -1px 0 var(--kxd-os-border-divider);
+}
+
+.kxd-os-quick-action-bar--compact {
+  padding: var(--kxd-os-space-3) var(--kxd-os-space-8) var(--kxd-os-space-4);
+}
+
+.kxd-os-quick-action-bar__label {
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-faint);
+  margin-bottom: var(--kxd-os-space-3);
+}
+
+.kxd-os-quick-action-bar__grid {
+  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+}
+
+.kxd-os-ops-quick-cell--compact {
+  padding: var(--kxd-os-space-3) var(--kxd-os-space-4);
+}
+
 .kxd-os-ops-priority-bar {
   width: 2px;
   height: 2.25rem;

@@ -63,7 +63,7 @@ export function InfrastructureClientScreen({
   const clientName = String(client.name ?? "Client");
 
   return (
-    <OperationsShell activeId="infrastructure">
+    <OperationsShell activeId="infrastructure" clientId={clientId}>
       <KxdPage className="kxd-os-page--ops">
         <div className="kxd-os-ops-section-head">
           <OperationsPageHero

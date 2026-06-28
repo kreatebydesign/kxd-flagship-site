@@ -5,16 +5,18 @@ import { KxdShell } from "@/components/os";
 import { CommandPalette } from "@/components/admin/operations/command-search";
 import { CommandPaletteTrigger } from "@/components/admin/operations/command-search/CommandPaletteTrigger";
 import { NotificationCenter } from "@/components/admin/operations/notifications";
+import { QuickActionBar } from "@/components/admin/operations/quick-actions";
 import { QuickCaptureNote } from "@/components/admin/operations/strategy/QuickCaptureNote";
 import { NAV_GROUPS, type OperationsNavId } from "./operations-nav";
 
 export interface OperationsShellProps {
   activeId: OperationsNavId;
   dateDisplay?: string;
+  clientId?: number;
   children: ReactNode;
 }
 
-export function OperationsShell({ activeId, dateDisplay, children }: OperationsShellProps) {
+export function OperationsShell({ activeId, dateDisplay, clientId, children }: OperationsShellProps) {
   return (
     <KxdShell className="kxd-os-shell--app">
       <div className="kxd-os-app">
@@ -64,7 +66,10 @@ export function OperationsShell({ activeId, dateDisplay, children }: OperationsS
           </div>
         </aside>
 
-        <div className="kxd-os-app__main">{children}</div>
+        <div className="kxd-os-app__main">
+          <QuickActionBar clientId={clientId} />
+          {children}
+        </div>
       </div>
       <CommandPalette />
     </KxdShell>

@@ -76,7 +76,7 @@ export function ExecutiveTimelineClientScreen({
   const clientName = String(client.name ?? "Client");
 
   return (
-    <OperationsShell activeId="timeline">
+    <OperationsShell activeId="timeline" clientId={clientId}>
       <KxdPage className="kxd-os-page--ops">
         <div className="kxd-os-ops-section-head">
           <OperationsPageHero
