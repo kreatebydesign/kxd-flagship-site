@@ -11,6 +11,7 @@ import {
   latestActivityDate,
   retainerClientIds,
 } from "@/lib/intelligence/context";
+import { detectWorkTaskPatterns } from "@/lib/client-tasks/brain";
 import type { IntelligenceContext } from "@/lib/intelligence/types";
 import type { BrainPattern } from "./types";
 
@@ -192,6 +193,14 @@ export function detectBrainPatterns(ctx: IntelligenceContext): BrainPattern[] {
   );
 
   return patterns;
+}
+
+export async function detectBrainPatternsWithWork(
+  ctx: IntelligenceContext,
+): Promise<BrainPattern[]> {
+  const base = detectBrainPatterns(ctx);
+  const work = await detectWorkTaskPatterns(ctx);
+  return [...base, ...work];
 }
 
 function openCreativeCountProxy(ctx: IntelligenceContext, cid: number): number {

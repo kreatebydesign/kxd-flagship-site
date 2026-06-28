@@ -3,6 +3,7 @@ import "server-only";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import { calculateOnboardingReadiness } from "@/lib/client-onboarding";
+import { getPortalClientTasks } from "@/lib/client-tasks";
 import { requirePortalSession, type PortalSession } from "./session";
 import type {
   PortalDoc,
@@ -582,7 +583,7 @@ export function getPortalResourceCategories(): PortalResourceCategory[] {
 
 export async function getPortalOverview(session: PortalSession): Promise<PortalOverviewData> {
   const dashboard = await getPortalDashboard(session);
-  const [client, onboarding, executive, retainers, timeline, projects, deliverables] =
+  const [client, onboarding, executive, retainers, timeline, projects, deliverables, clientTasks] =
     await Promise.all([
       getPortalClient(session),
       getPortalOnboarding(session),
@@ -591,6 +592,7 @@ export async function getPortalOverview(session: PortalSession): Promise<PortalO
       getPortalTimeline(session),
       getPortalProjects(session),
       getPortalDeliverables(session),
+      getPortalClientTasks(session.clientId),
     ]);
 
   const activeRetainer = retainers.find((r) =>
@@ -646,6 +648,9 @@ export async function getPortalOverview(session: PortalSession): Promise<PortalO
     .slice(0, 5);
 
   const timelineActivity = timeline.slice(0, 8);
+
+  const openTasks = clientTasks.filter((t) => !t.completed).length;
+  const waitingOnClientTasks = clientTasks.filter((t) => t.waitingOnClient).length;
 
   const quickActions = [
     {
@@ -703,5 +708,8 @@ export async function getPortalOverview(session: PortalSession): Promise<PortalO
     recentCompleted,
     timelineActivity,
     quickActions,
+    openTasks,
+    waitingOnClientTasks,
+    clientTasks: clientTasks.slice(0, 12),
   };
 }

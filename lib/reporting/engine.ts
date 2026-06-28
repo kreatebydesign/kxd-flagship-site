@@ -166,6 +166,62 @@ export async function generateMonthlyReport(
     payload_data.executiveSummary = `${payload_data.executiveSummary} ${completedPlaybooks.length} operational playbook${completedPlaybooks.length === 1 ? "" : "s"} completed this period.`;
   }
 
+  const { getClientTasksForMonth } = await import("@/lib/client-tasks");
+  const taskActivity = await getClientTasksForMonth(input.clientId, input.month, input.year);
+  if (
+    taskActivity.completed > 0 ||
+    taskActivity.created > 0 ||
+    taskActivity.outstanding > 0
+  ) {
+    const taskLines: string[] = [];
+    if (taskActivity.completed > 0) {
+      taskLines.push(`· ${taskActivity.completed} client task(s) completed`);
+    }
+    if (taskActivity.hoursCompleted > 0) {
+      taskLines.push(`· ${taskActivity.hoursCompleted}h logged on completed work`);
+    }
+    if (taskActivity.blocked > 0) {
+      taskLines.push(`· ${taskActivity.blocked} blocked task(s) need attention`);
+    }
+    if (taskActivity.outstanding > 0) {
+      taskLines.push(`· ${taskActivity.outstanding} outstanding (${taskActivity.hoursEstimated}h estimated)`);
+    }
+    payload_data.workCompleted = `${payload_data.workCompleted}\n${taskLines.join("\n")}`;
+    payload_data.executiveSummary = `${payload_data.executiveSummary} ${taskActivity.velocityLabel} — ${taskActivity.completed} task${taskActivity.completed === 1 ? "" : "s"} completed.`;
+    payload_data.kpis.push(
+      {
+        label: "Tasks completed",
+        value: String(taskActivity.completed),
+        status: taskActivity.completed > 0 ? "positive" : "neutral",
+      },
+      {
+        label: "Tasks created",
+        value: String(taskActivity.created),
+        status: "neutral",
+      },
+      {
+        label: "Hours completed",
+        value: `${taskActivity.hoursCompleted}h`,
+        status: "neutral",
+      },
+      {
+        label: "Outstanding work",
+        value: String(taskActivity.outstanding),
+        status: taskActivity.outstanding > 5 ? "attention" : "neutral",
+      },
+      {
+        label: "Blocked work",
+        value: String(taskActivity.blocked),
+        status: taskActivity.blocked > 0 ? "attention" : "neutral",
+      },
+      {
+        label: "Project velocity",
+        value: taskActivity.velocityLabel,
+        status: taskActivity.completed >= 3 ? "positive" : "neutral",
+      },
+    );
+  }
+
   const { getClientSuccessActivityForMonth } = await import("@/lib/client-success");
   const successActivity = await getClientSuccessActivityForMonth(
     input.clientId,

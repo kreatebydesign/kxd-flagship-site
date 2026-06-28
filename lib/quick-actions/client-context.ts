@@ -2,6 +2,7 @@ import type { IntelligenceContext } from "@/lib/intelligence/types";
 
 const CLIENT_SCOPED_PATHS = [
   /^\/admin\/operations\/client-command\/(\d+)/,
+  /^\/admin\/operations\/work\/(\d+)/,
   /^\/admin\/operations\/clients\/(\d+)/,
   /^\/admin\/operations\/timeline\/(\d+)/,
   /^\/admin\/operations\/infrastructure\/(\d+)/,

@@ -1,3 +1,4 @@
+import type { ClientWorkSummary } from "@/lib/client-tasks/types";
 import type { ClientHealthResult } from "@/lib/client-health/health-engine";
 import type { ClientInfrastructureDetail } from "@/lib/infrastructure/types";
 import type { ClientInsights, IntelligenceRecommendation } from "@/lib/intelligence/types";
@@ -146,6 +147,7 @@ export interface ClientCommandCenterData {
   recommendations: CommandRecommendation[];
   quickActions: CommandQuickAction[];
   playbooks: ClientPlaybookSummary;
+  currentWork: ClientWorkSummary;
   clientSuccess: ClientSuccessSummary;
   insights: ClientInsights | null;
   health: ClientHealthResult;

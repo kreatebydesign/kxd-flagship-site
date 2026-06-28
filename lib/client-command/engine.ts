@@ -11,6 +11,7 @@ import { buildClientRecommendations } from "@/lib/intelligence/recommendations";
 import { loadIntelligenceContext } from "@/lib/intelligence/context";
 import { buildQuickActions } from "./actions";
 import { getClientPlaybookSummary } from "@/lib/playbooks";
+import { getClientWorkSummary } from "@/lib/client-tasks";
 import { getClientSuccessSummary } from "@/lib/client-success";
 import { getClientStrategySummary } from "@/lib/executive-notes/vault";
 import {
@@ -136,6 +137,7 @@ export async function loadClientCommandCenter(
     automation,
     strategy,
     playbookSummary,
+    currentWork,
     clientSuccessSummary,
   ] = await Promise.all([
     fetchClientWorkspace(clientId),
@@ -146,6 +148,7 @@ export async function loadClientCommandCenter(
     fetchClientAutomation(clientId),
     getClientStrategySummary(clientId),
     getClientPlaybookSummary(clientId),
+    getClientWorkSummary(clientId),
     getClientSuccessSummary(clientId),
   ]);
 
@@ -184,6 +187,7 @@ export async function loadClientCommandCenter(
     recommendations: buildCommandRecommendations(recommendations),
     quickActions: buildQuickActions(clientId),
     playbooks: playbookSummary,
+    currentWork,
     clientSuccess: clientSuccessSummary,
     insights,
     health,

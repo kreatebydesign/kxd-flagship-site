@@ -10,7 +10,8 @@ import {
 } from "@/lib/intelligence/engine";
 import { getReportingDashboard } from "@/lib/reporting/engine";
 import { buildBrainSignals } from "./signals";
-import { detectBrainPatterns } from "./patterns";
+import { buildWorkTaskSignals } from "@/lib/client-tasks/brain";
+import { detectBrainPatternsWithWork } from "./patterns";
 import { buildBrainPredictions } from "./predictions";
 import { buildDailyPulse } from "./daily";
 import { buildWeeklyPulse } from "./weekly";
@@ -61,14 +62,15 @@ export async function buildBrain(): Promise<BrainSnapshot> {
     overdueReminders,
   });
 
+  const workSignals = await buildWorkTaskSignals(ctx);
   const growthSignals = mergeGrowthOpportunities(growthOpportunities);
-  const allSignals = [...signals, ...growthSignals].sort(
+  const allSignals = [...signals, ...workSignals, ...growthSignals].sort(
     (a, b) =>
       ({ critical: 0, high: 1, medium: 2, low: 3 }[a.urgency] ?? 9) -
       ({ critical: 0, high: 1, medium: 2, low: 3 }[b.urgency] ?? 9),
   );
 
-  const patterns = detectBrainPatterns(ctx);
+  const patterns = await detectBrainPatternsWithWork(ctx);
   const predictions = buildBrainPredictions({ ctx, founder, reporting });
   const suppressed = getSuppressedRecommendationIds(memory);
   const brainRecommendations = buildBrainRecommendations(
@@ -111,6 +113,7 @@ export async function buildBrain(): Promise<BrainSnapshot> {
         "Audits",
         "Founder Intelligence",
         "Client HQ",
+        "Client Work Manager",
         "Executive Profiles",
       ],
       memoryEvents: memory.length,

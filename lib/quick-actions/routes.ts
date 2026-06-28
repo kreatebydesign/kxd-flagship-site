@@ -61,6 +61,18 @@ export function clientSuccessHref(clientId?: number): string {
     : "/admin/operations/client-success";
 }
 
+export function workBoardHref(clientId?: number): string {
+  return clientId
+    ? `/admin/operations/work/${clientId}`
+    : "/admin/operations/work";
+}
+
+export function createTaskHref(clientId?: number): string {
+  return clientId
+    ? `/admin/collections/client-tasks/create?client=${clientId}`
+    : "/admin/collections/client-tasks/create";
+}
+
 export function successCheckInHref(clientId: number): string {
   return `/admin/collections/success-check-ins/create?client=${clientId}`;
 }
@@ -104,6 +116,15 @@ export function resolveQuickActionHref(
       return clientSuccessHref(clientId);
     case "open-integrations":
       return "/admin/operations/integrations";
+    case "open-work-board":
+      return workBoardHref(clientId);
+    case "create-task":
+      return createTaskHref(clientId);
+    case "complete-task":
+    case "move-task-review":
+    case "mark-waiting-client":
+    case "mark-task-blocked":
+      return workBoardHref(clientId);
     case "create-success-check-in":
       return clientId ? successCheckInHref(clientId) : "/admin/operations/client-success";
     default:

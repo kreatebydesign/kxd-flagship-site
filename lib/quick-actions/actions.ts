@@ -6,6 +6,7 @@ import {
   clientCommandCenterHref,
   clientHqHref,
   clientSuccessHref,
+  createTaskHref,
   executiveNoteHref,
   infrastructureHref,
   playbookHref,
@@ -14,6 +15,7 @@ import {
   successCheckInHref,
   timelineHref,
   websiteAuditHref,
+  workBoardHref,
 } from "./routes";
 
 export function getGlobalQuickActions(): QuickAction[] {
@@ -95,6 +97,20 @@ export function getGlobalQuickActions(): QuickAction[] {
       href: "/admin/operations/integrations",
       keywords: ["integrations", "integration hub"],
     },
+    {
+      id: "open-work-board",
+      label: "Open Work Board",
+      sub: "Execution",
+      href: workBoardHref(),
+      keywords: ["work", "tasks", "open work", "work board"],
+    },
+    {
+      id: "create-task",
+      label: "Create Task",
+      sub: "Work",
+      href: createTaskHref(),
+      keywords: ["new task", "create task", "add task"],
+    },
   ];
 }
 
@@ -105,6 +121,42 @@ export function getClientQuickActions(clientId: number): QuickAction[] {
       label: "Open Command Center",
       sub: "Client ops",
       href: clientCommandCenterHref(clientId),
+    },
+    {
+      id: "open-work-board",
+      label: "Open Work Board",
+      sub: "Execution",
+      href: workBoardHref(clientId),
+    },
+    {
+      id: "create-task",
+      label: "Create Task",
+      sub: "Work",
+      href: createTaskHref(clientId),
+    },
+    {
+      id: "complete-task",
+      label: "Complete Task",
+      sub: "Work",
+      href: workBoardHref(clientId),
+    },
+    {
+      id: "move-task-review",
+      label: "Move to Review",
+      sub: "Work",
+      href: `${workBoardHref(clientId)}?view=kanban`,
+    },
+    {
+      id: "mark-waiting-client",
+      label: "Mark Waiting On Client",
+      sub: "Work",
+      href: `${workBoardHref(clientId)}?view=kanban`,
+    },
+    {
+      id: "mark-task-blocked",
+      label: "Mark Blocked",
+      sub: "Work",
+      href: `${workBoardHref(clientId)}?view=blocked`,
     },
     {
       id: "open-client-hq",

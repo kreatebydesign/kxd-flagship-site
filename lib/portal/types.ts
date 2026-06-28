@@ -58,6 +58,8 @@ export interface PortalResourceCategory {
   items: Array<{ title: string; description?: string; href?: string }>;
 }
 
+import type { PortalClientTaskItem } from "@/lib/client-tasks/types";
+
 export interface PortalQuickAction {
   label: string;
   href: string;
@@ -90,4 +92,7 @@ export interface PortalOverviewData {
   recentCompleted: PortalDoc[];
   timelineActivity: PortalDoc[];
   quickActions: PortalQuickAction[];
+  openTasks: number;
+  waitingOnClientTasks: number;
+  clientTasks: PortalClientTaskItem[];
 }

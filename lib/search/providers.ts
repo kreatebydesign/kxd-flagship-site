@@ -9,6 +9,7 @@ import { clientId, clientName } from "@/lib/intelligence/context";
 import type { IntelligenceContext } from "@/lib/intelligence/types";
 import { searchPlaybooks, searchPlaybookRuns } from "@/lib/playbooks/search";
 import { searchClientSuccessPlans, searchSuccessCheckIns } from "@/lib/client-success/search";
+import { searchClientTasks } from "@/lib/client-tasks/search";
 import { NAV_ITEMS } from "@/components/admin/operations/shared/operations-nav";
 import type { CommandSearchResult, SearchEntityType } from "./types";
 import { groupForType } from "./types";
@@ -638,6 +639,13 @@ export const clientSuccessProvider: SearchProvider = {
   },
 };
 
+export const clientTasksProvider: SearchProvider = {
+  id: "client-tasks",
+  order: 63,
+  lazy: true,
+  search: async (query) => searchClientTasks(query),
+};
+
 /** All registered providers — extend by adding to this array */
 export const SEARCH_PROVIDERS: SearchProvider[] = [
   navigationProvider,
@@ -652,6 +660,7 @@ export const SEARCH_PROVIDERS: SearchProvider[] = [
   strategyProvider,
   playbooksProvider,
   clientSuccessProvider,
+  clientTasksProvider,
   portalUsersProvider,
   automationProvider,
   brainProvider,

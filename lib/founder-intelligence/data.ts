@@ -6,6 +6,7 @@ import "server-only";
 
 import { getFounderInsights, getInfrastructureInsights, getGrowthOpportunities, loadIntelligenceContext } from "@/lib/intelligence/engine";
 import { getPlaybookDashboard } from "@/lib/playbooks";
+import { getWorkFounderSignals } from "@/lib/client-tasks";
 import { getClientSuccessFounderSignals } from "@/lib/client-success";
 import { buildPortfolioRecommendations } from "@/lib/intelligence/recommendations";
 import {
@@ -77,10 +78,11 @@ export async function getRecommendedFocus(
 
 export async function getFounderBriefing(): Promise<FounderBriefingData> {
   const now = new Date();
-  const [bundle, playbookDash, successSignals] = await Promise.all([
+  const [bundle, playbookDash, successSignals, workSignals] = await Promise.all([
     getFounderInsights(),
     getPlaybookDashboard(),
     getClientSuccessFounderSignals(),
+    getWorkFounderSignals(),
   ]);
 
   const dateDisplay = now.toLocaleDateString("en-US", {
@@ -113,6 +115,74 @@ export async function getFounderBriefing(): Promise<FounderBriefingData> {
 
   if (playbookDash.stats.activeRunCount > 0) {
     briefing.morningBrief.summary = `${briefing.morningBrief.summary} ${playbookDash.stats.activeRunCount} active playbook run(s).`;
+  }
+
+  for (const client of workSignals.blockedByClient.slice(0, 5)) {
+    briefing.priorities.push({
+      id: `work-blocked-${client.clientId}`,
+      type: "project-at-risk",
+      title: `Blocked work — ${client.clientName}`,
+      client: client.clientName,
+      clientId: client.clientId,
+      whyItMatters: `${client.count} blocked task(s) slowing delivery`,
+      recommendedAction: "Review blockers on work board",
+      urgency: "high",
+      sourceModule: "Client Work",
+      href: client.href,
+    });
+  }
+
+  for (const task of workSignals.overdueTasks.slice(0, 5)) {
+    briefing.priorities.push({
+      id: `work-overdue-${task.id}`,
+      type: "overdue-request",
+      title: `Overdue task — ${task.title}`,
+      client: task.clientName,
+      clientId: task.clientId,
+      whyItMatters: "Execution item past due date",
+      recommendedAction: "Complete or reschedule",
+      urgency: task.priority === "critical" ? "critical" : "high",
+      sourceModule: "Client Work",
+      href: task.href,
+    });
+  }
+
+  for (const task of workSignals.highPriority.slice(0, 4)) {
+    briefing.priorities.push({
+      id: `work-priority-${task.id}`,
+      type: "project-at-risk",
+      title: `High priority — ${task.title}`,
+      client: task.clientName,
+      clientId: task.clientId,
+      whyItMatters: `${task.priority} priority execution item`,
+      recommendedAction: "Assign and complete today",
+      urgency: "high",
+      sourceModule: "Client Work",
+      href: task.href,
+    });
+  }
+
+  for (const w of workSignals.workloadByClient.filter((c) => c.open >= 8).slice(0, 3)) {
+    briefing.priorities.push({
+      id: `work-load-${w.clientId}`,
+      type: "project-at-risk",
+      title: `Heavy workload — ${w.clientName}`,
+      client: w.clientName,
+      clientId: w.clientId,
+      whyItMatters: `${w.open} open tasks · ${w.hours}h estimated`,
+      recommendedAction: "Balance workload or assign resources",
+      urgency: "medium",
+      sourceModule: "Client Work",
+      href: w.href,
+    });
+  }
+
+  if (workSignals.waitingOnClient.length > 0) {
+    briefing.morningBrief.summary = `${briefing.morningBrief.summary} ${workSignals.waitingOnClient.length} task(s) waiting on client.`;
+  }
+
+  if (workSignals.waitingOnKxd.length > 0) {
+    briefing.morningBrief.summary = `${briefing.morningBrief.summary} ${workSignals.waitingOnKxd.length} task(s) waiting on KXD.`;
   }
 
   for (const client of successSignals.renewalRisk.slice(0, 4)) {

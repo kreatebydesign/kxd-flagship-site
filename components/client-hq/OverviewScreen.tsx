@@ -79,12 +79,12 @@ export function OverviewScreen({ displayName, data }: OverviewScreenProps) {
             value: String(data.openRequests),
           },
           {
-            label: "Deliverables due",
-            value: String(data.deliverablesDue),
+            label: "Open tasks",
+            value: String(data.openTasks),
           },
           {
-            label: "Active projects",
-            value: String(data.activeProjects),
+            label: "Waiting on you",
+            value: String(data.waitingOnClientTasks),
           },
         ]}
       />
@@ -132,6 +132,26 @@ export function OverviewScreen({ displayName, data }: OverviewScreenProps) {
       </div>
 
       <div className="kxd-os-operations-split" style={{ marginBottom: "2rem" }}>
+        <KxdSection label="Your work">
+          <div className="kxd-os-card">
+            {data.clientTasks.length === 0 ? (
+              <p className="kxd-os-meta">No active work items visible in Client HQ.</p>
+            ) : (
+              <div className="kxd-os-list-stack">
+                {data.clientTasks.map((task) => (
+                  <div key={task.id}>
+                    <p className="kxd-os-body">{task.title}</p>
+                    <p className="kxd-os-meta">
+                      {task.status.replace(/-/g, " ")}
+                      {task.dueDate ? ` · Due ${fmtPortalDate(task.dueDate)}` : ""}
+                      {task.waitingOnClient ? " · Action needed" : ""}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </KxdSection>
         <ClientHqActivityList
           title="Open requests"
           items={data.recentRequests}
@@ -139,6 +159,9 @@ export function OverviewScreen({ displayName, data }: OverviewScreenProps) {
           href="/portal/requests"
           emptyMessage="No open requests."
         />
+      </div>
+
+      <div className="kxd-os-operations-split" style={{ marginBottom: "2rem" }}>
         <ClientHqActivityList
           title="Deliverables due"
           items={data.recentDeliverables.filter((d) => d.status !== "complete")}
@@ -146,9 +169,6 @@ export function OverviewScreen({ displayName, data }: OverviewScreenProps) {
           href="/portal/deliverables"
           emptyMessage="No deliverables due right now."
         />
-      </div>
-
-      <div className="kxd-os-operations-split" style={{ marginBottom: "2rem" }}>
         <ClientHqActivityList
           title="Recent completed work"
           items={data.recentCompleted}

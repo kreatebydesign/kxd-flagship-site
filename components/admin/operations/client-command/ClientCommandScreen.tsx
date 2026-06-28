@@ -56,7 +56,7 @@ function ListBlock({
 }
 
 export function ClientCommandScreen({ data }: { data: ClientCommandCenterData }) {
-  const { hero, executiveBrief, sections, recommendations, playbooks, clientSuccess } = data;
+  const { hero, executiveBrief, sections, recommendations, currentWork, playbooks, clientSuccess } = data;
 
   return (
     <OperationsShell activeId="clients" clientId={hero.clientId}>
@@ -90,6 +90,49 @@ export function ClientCommandScreen({ data }: { data: ClientCommandCenterData })
           {hero.tier ? `${hero.tier} · ` : ""}
           Account: {hero.accountManager}
         </div>
+
+        <KxdSection label="Current Work" className="kxd-os-operations-section">
+          <OpsKpiStrip
+            items={[
+              { label: "Open", value: String(currentWork.openCount), alert: currentWork.openCount > 0 },
+              { label: "Blocked", value: String(currentWork.blockedCount), alert: currentWork.blockedCount > 0 },
+              { label: "Due This Week", value: String(currentWork.dueThisWeek), alert: currentWork.dueThisWeek > 0 },
+              { label: "Completed (Month)", value: String(currentWork.completedThisMonth) },
+              {
+                label: "Est. Hours",
+                value: `${currentWork.estimatedHoursOpen}h`,
+                sub: "Open workload",
+              },
+            ]}
+          />
+          {currentWork.currentFocus ? (
+            <p className="kxd-os-body" style={{ marginTop: "0.75rem" }}>
+              <span className="kxd-os-meta">Current focus · </span>
+              {currentWork.currentFocus}
+            </p>
+          ) : null}
+          {currentWork.nextTask ? (
+            <div className="kxd-os-list-stack" style={{ marginTop: "0.75rem" }}>
+              <OpsListRow href={currentWork.href}>
+                <p className="kxd-os-body">Next recommended — {currentWork.nextTask.title}</p>
+                <p className="kxd-os-meta">
+                  {currentWork.nextTask.priority} · {currentWork.nextTask.status.replace(/-/g, " ")}
+                </p>
+              </OpsListRow>
+            </div>
+          ) : null}
+          <div style={{ marginTop: "0.75rem", display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+            <Link href={currentWork.href} className="kxd-os-btn kxd-os-btn--ghost kxd-os-btn--sm">
+              Open work board
+            </Link>
+            <Link
+              href={`/admin/collections/client-tasks/create?client=${hero.clientId}`}
+              className="kxd-os-link-quiet"
+            >
+              New task →
+            </Link>
+          </div>
+        </KxdSection>
 
         <KxdSection label="Playbooks" className="kxd-os-operations-section">
           <OpsKpiStrip
