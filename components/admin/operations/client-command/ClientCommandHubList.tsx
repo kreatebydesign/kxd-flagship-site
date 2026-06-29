@@ -55,10 +55,17 @@ export function ClientCommandHubList({
             <li key={row.clientId}>
               <Link href={row.href} className="kxd-os-command-hub__row">
                 <div className="kxd-os-command-hub__row-main">
-                  <span className="kxd-os-command-hub__name">{row.name}</span>
-                  {row.primaryContact ? (
-                    <span className="kxd-os-command-hub__meta">{row.primaryContact}</span>
-                  ) : null}
+                  <div className="kxd-os-command-hub__identity">
+                    <span className="kxd-os-command-hub__name">{row.name}</span>
+                    {row.primaryContact ? (
+                      <span className="kxd-os-command-hub__meta">
+                        <span className="kxd-os-command-hub__meta-sep" aria-hidden="true">
+                          •
+                        </span>
+                        <span className="kxd-os-command-hub__meta-text">{row.primaryContact}</span>
+                      </span>
+                    ) : null}
+                  </div>
                 </div>
                 <div className="kxd-os-command-hub__row-stats">
                   {row.healthScore != null ? (
