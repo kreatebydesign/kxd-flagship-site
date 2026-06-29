@@ -100,6 +100,37 @@ export function ExecutiveScreen({ data, reporting, today }: ExecutiveScreenProps
           </div>
         </KxdSection>
 
+        <KxdSection label="Today's Client Priorities">
+          <div className="kxd-os-operations-priorities">
+            {[
+              { key: "critical", label: "Critical", items: data.clientPriorities.critical, total: data.clientPriorities.totals.critical },
+              { key: "high", label: "High", items: data.clientPriorities.high, total: data.clientPriorities.totals.high },
+              { key: "dueToday", label: "Due today", items: data.clientPriorities.dueToday, total: data.clientPriorities.totals.dueToday },
+              { key: "overdue", label: "Overdue", items: data.clientPriorities.overdue, total: data.clientPriorities.totals.overdue },
+              { key: "needsReply", label: "Needs reply", items: data.clientPriorities.needsReply, total: data.clientPriorities.totals.needsReply },
+            ].map((bucket) => (
+              <div key={bucket.key} className="kxd-os-operations-priorities__col">
+                <p className="kxd-os-metric__label">
+                  {bucket.label}
+                  {bucket.total > bucket.items.length ? ` · ${bucket.total}` : ""}
+                </p>
+                {bucket.items.length === 0 ? (
+                  <p className="kxd-os-meta">Clear</p>
+                ) : (
+                  <div className="kxd-os-list-stack">
+                    {bucket.items.map((item) => (
+                      <Link key={`${bucket.key}-${item.id}`} href={item.href} className="kxd-os-list-row">
+                        <p className="kxd-os-body">{item.title}</p>
+                        <p className="kxd-os-meta kxd-os-list-row__sub">{item.clientName}</p>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </KxdSection>
+
         <div className="kxd-os-operations-columns">
           <KxdSection label="Projects At Risk">
             {data.commandCenter.projectsAtRisk.length === 0 ? (

@@ -12,6 +12,8 @@ import { AutomationNotifications } from "./payload/collections/AutomationNotific
 import { BrandKitAssets } from "./payload/collections/BrandKitAssets.ts";
 import { BrandKits } from "./payload/collections/BrandKits.ts";
 import { CaseStudies } from "./payload/collections/CaseStudies.ts";
+import { ClientCommunications } from "./payload/collections/ClientCommunications.ts";
+import { ClientActions } from "./payload/collections/ClientActions.ts";
 import { ClientInfrastructure } from "./payload/collections/ClientInfrastructure.ts";
 import { ClientOnboarding } from "./payload/collections/ClientOnboarding.ts";
 import { ClientTimelineEvents } from "./payload/collections/ClientTimelineEvents.ts";
@@ -138,6 +140,8 @@ export default buildConfig({
     ClientProjects,
     MonthlyDeliverables,
     ClientRequests,
+    ClientCommunications,
+    ClientActions,
     ClientTasks,
     GenesisSessions,
     WebsiteQAChecks,

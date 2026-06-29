@@ -86,6 +86,12 @@ export function ClientCommandWorkspace({
           </div>
         </div>
 
+        {data.communications.hasStaleUnresolved ? (
+          <p className="kxd-os-comm-stale-banner kxd-os-comm-stale-banner--header">
+            Unresolved communications older than 7 days — open Communications to follow up.
+          </p>
+        ) : null}
+
         <div className="kxd-os-command-workspace__actions">
           <p className="kxd-os-command-workspace__actions-label">Quick actions</p>
           <div className="kxd-os-command-workspace__actions-grid">
@@ -106,17 +112,28 @@ export function ClientCommandWorkspace({
 
       <div className="kxd-os-command-workspace__body">
         <nav className="kxd-os-command-workspace__nav" aria-label="Client workspace">
-          {COMMAND_WORKSPACE_TABS.map((tab) => (
-            <Link
-              key={tab.id}
-              href={commandWorkspaceHref(data.clientId, tab.id)}
-              className={`kxd-os-command-workspace__nav-item${
-                activeTab === tab.id ? " kxd-os-command-workspace__nav-item--active" : ""
-              }`}
-            >
-              {tab.label}
-            </Link>
-          ))}
+          {COMMAND_WORKSPACE_TABS.map((tab) => {
+            const badge =
+              tab.id === "emails" && data.communications.needsReplyCount > 0
+                ? data.communications.needsReplyCount
+                : tab.id === "actions" && data.actions.openCount > 0
+                  ? data.actions.openCount
+                  : null;
+            return (
+              <Link
+                key={tab.id}
+                href={commandWorkspaceHref(data.clientId, tab.id)}
+                className={`kxd-os-command-workspace__nav-item${
+                  activeTab === tab.id ? " kxd-os-command-workspace__nav-item--active" : ""
+                }`}
+              >
+                {tab.label}
+                {badge != null ? (
+                  <span className="kxd-os-command-workspace__nav-badge">{badge}</span>
+                ) : null}
+              </Link>
+            );
+          })}
         </nav>
 
         <main className="kxd-os-command-workspace__content">

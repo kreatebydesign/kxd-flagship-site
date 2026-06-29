@@ -19,6 +19,16 @@ export function buildWorkspaceQuickActions(
       href: successCheckInHref(clientId),
     },
     {
+      id: "log-communication",
+      label: "Log Communication",
+      href: `/admin/operations/client-command/${clientId}?tab=emails`,
+    },
+    {
+      id: "follow-up",
+      label: "Follow Up",
+      href: `/admin/operations/client-command/${clientId}?tab=emails`,
+    },
+    {
       id: "add-timeline-event",
       label: "Add Timeline Event",
       href: `/admin/operations/client-command/${clientId}?tab=timeline`,

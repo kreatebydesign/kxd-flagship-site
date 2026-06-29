@@ -13,6 +13,9 @@ import {
   WorkspaceStatRow,
 } from "@/components/admin/operations/client-workspace/WorkspacePrimitives";
 import { ClientTimelinePanel } from "./ClientTimelinePanel";
+import { ClientCommunicationsPanel } from "./ClientCommunicationsPanel";
+import { ClientIntelligencePanel } from "./ClientIntelligencePanel";
+import { ClientActionsPanel } from "./ClientActionsPanel";
 
 function statusLabel(status: string): string {
   return status.replace(/-/g, " ");
@@ -43,7 +46,11 @@ export function CommandWorkspaceTabPanel({
     case "domains":
       return <DomainsPanel data={data} />;
     case "emails":
-      return <EmailsPanel />;
+      return <ClientCommunicationsPanel data={data} />;
+    case "intelligence":
+      return <ClientIntelligencePanel data={data} />;
+    case "actions":
+      return <ClientActionsPanel data={data} />;
     case "meetings":
       return <MeetingsPanel data={data} />;
     case "notes":
@@ -72,10 +79,26 @@ function OverviewPanel({ data }: { data: ClientWorkspaceBundle }) {
         items={[
           { label: "Active projects", value: String(sections.projects.active.length) },
           { label: "Open requests", value: String(sections.projects.requests.length) },
+          { label: "Needs reply", value: String(data.communications.needsReplyCount) },
           { label: "Monthly revenue", value: fmtExecutiveMoney(header.monthlyRevenue) },
-          { label: "Lifetime revenue", value: fmtExecutiveMoney(header.lifetimeRevenue) },
         ]}
       />
+
+      {data.communications.hasStaleUnresolved ? (
+        <p className="kxd-os-comm-stale-banner">
+          {data.communications.staleUnresolvedCount} open communication
+          {data.communications.staleUnresolvedCount === 1 ? "" : "s"} older than 7 days — review in Communications.
+        </p>
+      ) : null}
+
+      {data.memory.scores.urgencyScore >= 65 ? (
+        <p className="kxd-os-comm-stale-banner">
+          Intelligence urgency {data.memory.scores.urgencyScore}/100 —{" "}
+          <Link href={`/admin/operations/client-command/${data.clientId}?tab=intelligence`} className="kxd-os-link-quiet">
+            open Intelligence →
+          </Link>
+        </p>
+      ) : null}
 
       <div className="kxd-os-workspace-dossier-columns kxd-os-workspace-dossier-columns--triple">
         <WorkspaceChapter title="Relationship" variant="compact">
@@ -111,6 +134,77 @@ function OverviewPanel({ data }: { data: ClientWorkspaceBundle }) {
             label="Open work"
             value={`${currentWork.openCount} tasks · ${currentWork.blockedCount} blocked`}
           />
+        </WorkspaceChapter>
+      </div>
+
+      <div className="kxd-os-workspace-dossier-columns">
+        <WorkspaceChapter title="Communications" variant="compact">
+          <WorkspaceMetaLine
+            label="Open"
+            value={String(data.communications.openCount)}
+          />
+          <WorkspaceMetaLine
+            label="Needs reply"
+            value={String(data.communications.needsReplyCount)}
+          />
+          <WorkspaceMetaLine
+            label="Overdue follow-ups"
+            value={String(data.communications.overdueFollowUps.length)}
+          />
+          {data.communications.upcomingFollowUps.length > 0 ? (
+            <ul className="kxd-os-workspace-list">
+              {data.communications.upcomingFollowUps.slice(0, 4).map((c) => (
+                <li key={c.id} className="kxd-os-workspace-list__item">
+                  <Link href={`/admin/operations/client-command/${data.clientId}?tab=emails`} className="kxd-os-link-quiet">
+                    {c.subject ?? c.summary ?? c.type} · {fmtWorkspaceDate(c.followUpDate!)}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <WorkspaceProse>No upcoming follow-ups scheduled.</WorkspaceProse>
+          )}
+        </WorkspaceChapter>
+
+        <WorkspaceChapter title="Intelligence" variant="compact">
+          <WorkspaceMetaLine label="Status" value={data.memory.currentStatus} />
+          <WorkspaceMetaLine
+            label="Health score"
+            value={`${data.memory.scores.relationshipHealthScore}/100`}
+          />
+          <WorkspaceMetaLine
+            label="Top action"
+            value={data.memory.nextBestActions[0]?.label ?? "No actions flagged"}
+          />
+          <Link
+            href={`/admin/operations/client-command/${data.clientId}?tab=intelligence`}
+            className="kxd-os-link-quiet kxd-os-workspace-inline-link"
+          >
+            Full intelligence →
+          </Link>
+        </WorkspaceChapter>
+
+        <WorkspaceChapter title="Actions" variant="compact">
+          <WorkspaceMetaLine label="Open actions" value={String(data.actions.openCount)} />
+          <WorkspaceMetaLine label="Critical" value={String(data.actions.criticalCount)} />
+          <WorkspaceMetaLine
+            label="Next due"
+            value={
+              data.actions.nextDue
+                ? `${data.actions.nextDue.title} · ${fmtWorkspaceDate(data.actions.nextDue.dueDate!)}`
+                : "—"
+            }
+          />
+          <WorkspaceMetaLine
+            label="Assigned to"
+            value={data.actions.nextDue?.assignedTo ?? "Unassigned"}
+          />
+          <Link
+            href={`/admin/operations/client-command/${data.clientId}?tab=actions`}
+            className="kxd-os-link-quiet kxd-os-workspace-inline-link"
+          >
+            Open actions →
+          </Link>
         </WorkspaceChapter>
       </div>
 
@@ -416,16 +510,6 @@ function DomainsPanel({ data }: { data: ClientWorkspaceBundle }) {
       <Link href={d.href} className="kxd-os-link-quiet kxd-os-workspace-inline-link">
         Full infrastructure registry →
       </Link>
-    </WorkspaceChapter>
-  );
-}
-
-function EmailsPanel() {
-  return (
-    <WorkspaceChapter title="Emails">
-      <WorkspaceEmpty
-        message="Email sync is not connected yet. When Workspace or transactional email integration is configured, client correspondence will appear here."
-      />
     </WorkspaceChapter>
   );
 }

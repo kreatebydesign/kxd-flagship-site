@@ -1,6 +1,10 @@
 import type { MergedExecutiveClientRow } from "@/lib/executive-client-profile";
 import type { ClientCommandCenterData, CommandDoc } from "./types";
 
+import type { WorkspaceCommunicationsSnapshot } from "./communications/types";
+import type { WorkspaceActionsSnapshot } from "./actions/types";
+import type { ClientMemorySnapshot } from "./memory/types";
+
 export interface CommandHubClientRow {
   clientId: number;
   name: string;
@@ -74,6 +78,8 @@ export interface WorkspaceAnalyticsSnapshot {
   averageTurnaroundDays: number | null;
   meetingCount: number;
   daysSinceLastContact: number | null;
+  communicationsNeedsReply: number;
+  communicationsOverdueFollowUps: number;
 }
 
 export interface CommandWorkspaceQuickAction {
@@ -97,6 +103,9 @@ export interface ClientWorkspaceBundle extends ClientCommandCenterData {
   noteDocs: CommandDoc[];
   portalUsers: CommandDoc[];
   taskDocs: CommandDoc[];
+  communications: WorkspaceCommunicationsSnapshot;
+  actions: WorkspaceActionsSnapshot;
+  memory: ClientMemorySnapshot;
   workspaceQuickActions: CommandWorkspaceQuickAction[];
   analytics: WorkspaceAnalyticsSnapshot;
   header: {

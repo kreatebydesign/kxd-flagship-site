@@ -25,6 +25,7 @@ export type ExecutiveTimelineSourceModule =
   | "Launch"
   | "Client HQ"
   | "Client Command"
+  | "Client Intelligence"
   | "Infrastructure"
   | "Founder Intelligence"
   | "Audits"
@@ -41,6 +42,7 @@ export type ExecutiveTimelineSourceModule =
   | "Retainers"
   | "Client Success"
   | "Emails"
+  | "Communications"
   | "Manual";
 
 export interface CreateExecutiveEventInput {

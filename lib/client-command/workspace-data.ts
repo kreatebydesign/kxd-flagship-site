@@ -3,6 +3,14 @@ import "server-only";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import { loadClientActivityTimeline } from "./activity/load";
+import { loadClientCommunications } from "./communications/data";
+import {
+  countCompletedActionsWithinHours,
+  loadClientActions,
+  loadDismissedMemoryReferenceCounts,
+  syncIntelligenceActions,
+} from "./actions/data";
+import { loadClientMemoryFromBundle } from "./memory/load";
 import { getClientInfrastructure } from "@/lib/infrastructure/data";
 import { fetchClientWorkspace } from "@/lib/executive-client-workspace/fetch-client-workspace";
 import { daysSince } from "@/lib/intelligence/context";
@@ -133,6 +141,7 @@ export async function loadClientWorkspaceBundle(
     portalUsers,
     tasks,
     infrastructure,
+    communications,
   ] = await Promise.all([
     loadClientActivityTimeline(clientId),
     fetchDocs("client-requests", clientId, "-createdAt", 80),
@@ -144,6 +153,7 @@ export async function loadClientWorkspaceBundle(
     fetchDocs("portal-users", clientId, "-updatedAt", 20),
     fetchDocs("client-tasks", clientId, "-updatedAt", 40),
     getClientInfrastructure(clientId),
+    loadClientCommunications(clientId),
   ]);
 
   const invoices = buildInvoices(proposals, retainers);
@@ -198,13 +208,15 @@ export async function loadClientWorkspaceBundle(
     averageTurnaroundDays: null,
     meetingCount: meetings.length,
     daysSinceLastContact: lastContact ? daysSince(lastContact) : null,
+    communicationsNeedsReply: communications.needsReplyCount,
+    communicationsOverdueFollowUps: communications.overdueFollowUps.length,
   };
 
   const primaryEmail = client.primaryContactEmail
     ? String(client.primaryContactEmail)
     : null;
 
-  return {
+  const partialBundle = {
     ...commandCenter,
     client,
     profile,
@@ -219,6 +231,7 @@ export async function loadClientWorkspaceBundle(
     noteDocs: notes,
     portalUsers,
     taskDocs: tasks,
+    communications,
     workspaceQuickActions: buildWorkspaceQuickActions(clientId, primaryEmail),
     analytics,
     header: {
@@ -245,5 +258,25 @@ export async function loadClientWorkspaceBundle(
       ),
       row,
     },
+  };
+
+  const [dismissedCounts, fastCompletions48h] = await Promise.all([
+    loadDismissedMemoryReferenceCounts(clientId),
+    countCompletedActionsWithinHours(clientId, 48),
+  ]);
+
+  const memory = loadClientMemoryFromBundle(partialBundle, {
+    dismissedCounts,
+    fastCompletions48h,
+  });
+
+  await syncIntelligenceActions(clientId, memory);
+
+  const actions = await loadClientActions(clientId);
+
+  return {
+    ...partialBundle,
+    memory,
+    actions,
   };
 }

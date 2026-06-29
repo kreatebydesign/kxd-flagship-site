@@ -8,10 +8,11 @@ import "server-only";
 
 import { getPayload } from "payload";
 import config from "@payload-config";
-import {
-  calculateOnboardingReadiness,
+import { calculateOnboardingReadiness,
   getOnboardingWorkflowStatus,
 } from "@/lib/client-onboarding";
+import { loadClientPrioritiesWidget } from "@/lib/client-command/actions/dashboard";
+import type { ClientPrioritiesWidget } from "@/lib/client-command/actions/types";
 import { AUDIT_STATUS_LABEL } from "@/lib/website-audit/scoring";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -109,6 +110,7 @@ export type ExecutiveDashboardData = {
     auditConversionRate: number;
     onboardingCompletionRate: number;
   };
+  clientPriorities: ClientPrioritiesWidget;
 };
 
 function resolveClientId(raw: unknown): number | null {
@@ -159,7 +161,7 @@ export async function getExecutiveDashboardData(): Promise<ExecutiveDashboardDat
   const in14Days = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
   const in60Days = new Date(now.getTime() + 60 * 24 * 60 * 60 * 1000);
 
-  const [clients, projects, requests, deliverables, audits, portalUsers, onboardings, retainers] =
+  const [clients, projects, requests, deliverables, audits, portalUsers, onboardings, retainers, clientPriorities] =
     await Promise.all([
       findAll("clients"),
       findAll("client-projects"),
@@ -169,6 +171,7 @@ export async function getExecutiveDashboardData(): Promise<ExecutiveDashboardDat
       findAll("portal-users"),
       findAll("client-onboarding"),
       findAll("retainers"),
+      loadClientPrioritiesWidget(),
     ]);
 
   const activeClients = clients.filter((c) => c.status !== "archived");
@@ -649,5 +652,6 @@ export async function getExecutiveDashboardData(): Promise<ExecutiveDashboardDat
       auditConversionRate,
       onboardingCompletionRate,
     },
+    clientPriorities,
   };
 }

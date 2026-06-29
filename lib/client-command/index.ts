@@ -37,3 +37,20 @@ export {
   backfillClientActivity,
   loadClientActivityTimeline,
 } from "./activity";
+
+export {
+  loadClientCommunications,
+  createClientCommunication,
+  publishCommunicationActivity,
+} from "./communications";
+
+export { buildClientMemory, loadClientMemoryFromBundle } from "./memory";
+export type { ClientMemorySnapshot } from "./memory";
+
+export {
+  loadClientActions,
+  createClientAction,
+  syncIntelligenceActions,
+} from "./actions/data";
+export { loadClientPrioritiesWidget } from "./actions/dashboard";
+export type { WorkspaceActionsSnapshot, ClientPrioritiesWidget } from "./actions/types";
