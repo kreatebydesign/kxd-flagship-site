@@ -36,6 +36,7 @@ import * as migration_20260709_phase8a_kxd_genesis from './20260709_phase8a_kxd_
 import * as migration_20260710_phase8b_launch_qa from './20260710_phase8b_launch_qa';
 import * as migration_20260711_phase8c_client_communications from './20260711_phase8c_client_communications';
 import * as migration_20260712_phase8e_client_actions from './20260712_phase8e_client_actions';
+import * as migration_20260713_phase9a_executive_proposals from './20260713_phase9a_executive_proposals';
 
 export const migrations = [
   {
@@ -227,5 +228,10 @@ export const migrations = [
     up: migration_20260712_phase8e_client_actions.up,
     down: migration_20260712_phase8e_client_actions.down,
     name: '20260712_phase8e_client_actions',
+  },
+  {
+    up: migration_20260713_phase9a_executive_proposals.up,
+    down: migration_20260713_phase9a_executive_proposals.down,
+    name: '20260713_phase9a_executive_proposals',
   },
 ];

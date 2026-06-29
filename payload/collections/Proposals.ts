@@ -4,6 +4,7 @@ import { PAYLOAD_GROUPS } from "../admin/groups.ts";
 import { onProposalCreate } from "../hooks/sales-proposal-public.ts";
 import { onProposalStatusChange } from "../hooks/sales-proposals.ts";
 import { publishProposalActivityHook } from "../hooks/client-activity.ts";
+import { publishExecutiveProposalLifecycleHook } from "../hooks/executive-proposals.ts";
 
 export const Proposals: CollectionConfig = {
   slug: "proposals",
@@ -12,7 +13,11 @@ export const Proposals: CollectionConfig = {
   lockDocuments: false,
   hooks: {
     beforeChange: [onProposalCreate],
-    afterChange: [onProposalStatusChange, publishProposalActivityHook],
+    afterChange: [
+      onProposalStatusChange,
+      publishProposalActivityHook,
+      publishExecutiveProposalLifecycleHook,
+    ],
   },
   admin: {
     useAsTitle: "title",
@@ -53,11 +58,16 @@ export const Proposals: CollectionConfig = {
       label: "Status",
       options: [
         { label: "Draft", value: "draft" },
+        { label: "Internal Review", value: "internal-review" },
         { label: "Sent", value: "sent" },
         { label: "Viewed", value: "viewed" },
+        { label: "Questions", value: "questions" },
+        { label: "Revision Requested", value: "revision-requested" },
         { label: "Approved", value: "approved" },
+        { label: "Declined", value: "declined" },
         { label: "Rejected", value: "rejected" },
         { label: "Expired", value: "expired" },
+        { label: "Archived", value: "archived" },
       ],
       admin: { position: "sidebar" },
     },
@@ -90,6 +100,51 @@ export const Proposals: CollectionConfig = {
       admin: { position: "sidebar" },
     },
     {
+      name: "proposalType",
+      type: "select",
+      label: "Proposal Type",
+      defaultValue: "website",
+      options: [
+        { label: "Website", value: "website" },
+        { label: "Branding", value: "branding" },
+        { label: "Marketing Retainer", value: "marketing-retainer" },
+        { label: "CRM / Automation", value: "crm-automation" },
+        { label: "Consulting", value: "consulting" },
+        { label: "One-Time Project", value: "one-time-project" },
+        { label: "Monthly Retainer", value: "monthly-retainer" },
+        { label: "Custom", value: "custom" },
+      ],
+      admin: { position: "sidebar" },
+    },
+    {
+      name: "template",
+      type: "relationship",
+      relationTo: "proposal-templates" as any,
+      label: "Template",
+      admin: { position: "sidebar" },
+    },
+    {
+      name: "relatedProject",
+      type: "relationship",
+      relationTo: "client-projects",
+      label: "Related Project",
+      admin: { position: "sidebar" },
+    },
+    {
+      name: "relatedRetainer",
+      type: "relationship",
+      relationTo: "retainers",
+      label: "Related Retainer",
+      admin: { position: "sidebar" },
+    },
+    {
+      name: "revisionNumber",
+      type: "number",
+      label: "Revision",
+      defaultValue: 1,
+      admin: { position: "sidebar" },
+    },
+    {
       name: "revoked",
       type: "checkbox",
       label: "Revoked",
@@ -103,11 +158,14 @@ export const Proposals: CollectionConfig = {
           label: "Proposal",
           fields: [
             { name: "title", type: "text", required: true, label: "Title" },
+            { name: "heroTitle", type: "text", label: "Hero Title" },
+            { name: "heroSubtitle", type: "textarea", label: "Hero Subtitle" },
             { name: "executiveSummary", type: "textarea", label: "Executive Summary" },
             { name: "scope", type: "textarea", label: "Scope" },
             { name: "deliverables", type: "textarea", label: "Deliverables" },
             { name: "timeline", type: "textarea", label: "Timeline" },
             { name: "terms", type: "textarea", label: "Terms" },
+            { name: "internalNotes", type: "textarea", label: "Internal Notes" },
             {
               name: "faqs",
               type: "json",
@@ -156,6 +214,30 @@ export const Proposals: CollectionConfig = {
           fields: [
             { name: "investment", type: "number", label: "One-Time Investment ($)" },
             { name: "recurringAmount", type: "number", label: "Recurring Amount ($/mo)" },
+            {
+              name: "discountType",
+              type: "select",
+              label: "Discount Type",
+              defaultValue: "none",
+              options: [
+                { label: "None", value: "none" },
+                { label: "Percent", value: "percent" },
+                { label: "Fixed", value: "fixed" },
+              ],
+            },
+            { name: "discountValue", type: "number", label: "Discount Value" },
+            {
+              name: "taxRate",
+              type: "number",
+              label: "Tax Rate (%)",
+              admin: { description: "Future-ready — applied to one-time total." },
+            },
+            {
+              name: "pricingSnapshot",
+              type: "json",
+              label: "Pricing Snapshot",
+              admin: { readOnly: true, description: "Computed by estimate engine." },
+            },
             {
               name: "investmentSummary",
               type: "textarea",

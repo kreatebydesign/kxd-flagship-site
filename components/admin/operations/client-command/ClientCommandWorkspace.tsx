@@ -118,7 +118,9 @@ export function ClientCommandWorkspace({
                 ? data.communications.needsReplyCount
                 : tab.id === "actions" && data.actions.openCount > 0
                   ? data.actions.openCount
-                  : null;
+                  : tab.id === "proposals" && data.proposals.pendingFollowUpCount > 0
+                    ? data.proposals.pendingFollowUpCount
+                    : null;
             return (
               <Link
                 key={tab.id}

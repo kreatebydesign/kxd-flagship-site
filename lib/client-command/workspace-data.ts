@@ -10,6 +10,8 @@ import {
   loadDismissedMemoryReferenceCounts,
   syncIntelligenceActions,
 } from "./actions/data";
+import { loadClientProposalsSnapshot } from "@/lib/executive-proposals/data";
+import { buildProposalIntelligence } from "@/lib/executive-proposals/intelligence";
 import { loadClientMemoryFromBundle } from "./memory/load";
 import { getClientInfrastructure } from "@/lib/infrastructure/data";
 import { fetchClientWorkspace } from "@/lib/executive-client-workspace/fetch-client-workspace";
@@ -135,7 +137,7 @@ export async function loadClientWorkspaceBundle(
     requests,
     projects,
     retainers,
-    proposals,
+    proposalDocs,
     notes,
     meetings,
     portalUsers,
@@ -156,7 +158,7 @@ export async function loadClientWorkspaceBundle(
     loadClientCommunications(clientId),
   ]);
 
-  const invoices = buildInvoices(proposals, retainers);
+  const invoices = buildInvoices(proposalDocs, retainers);
   const creativeAssets = await fetchDocs("creative-assets", clientId);
   const brandKits = await fetchDocs("brand-kits", clientId);
   const filesMerged = buildFiles(creativeAssets, brandKits);
@@ -273,10 +275,14 @@ export async function loadClientWorkspaceBundle(
   await syncIntelligenceActions(clientId, memory);
 
   const actions = await loadClientActions(clientId);
+  const proposalsSnapshot = await loadClientProposalsSnapshot(clientId);
+  const proposalIntelligence = buildProposalIntelligence(clientId, proposalsSnapshot);
 
   return {
     ...partialBundle,
     memory,
     actions,
+    proposals: proposalsSnapshot,
+    proposalIntelligence,
   };
 }

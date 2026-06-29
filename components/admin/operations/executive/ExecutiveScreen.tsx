@@ -131,6 +131,55 @@ export function ExecutiveScreen({ data, reporting, today }: ExecutiveScreenProps
           </div>
         </KxdSection>
 
+        <KxdSection label="Proposal Pipeline">
+          <div className="kxd-os-operations-proposals-head">
+            <KxdMetric
+              label="Pipeline value"
+              value={new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(data.proposals.pipelineValue)}
+              className="kxd-os-operations-mini-metric"
+            />
+            <KxdMetric
+              label="Forecast revenue"
+              value={new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(data.proposals.forecastRevenue)}
+              className="kxd-os-operations-mini-metric"
+            />
+            <Link href="/admin/sales/proposals" className="kxd-os-link-quiet">
+              Open Sales Engine →
+            </Link>
+          </div>
+          <div className="kxd-os-operations-priorities">
+            {[
+              { key: "pending", label: "Pending", items: data.proposals.pending, total: data.proposals.totals.pending },
+              { key: "viewed", label: "Viewed", items: data.proposals.viewed, total: data.proposals.totals.viewed },
+              { key: "follow-up", label: "Needs follow-up", items: data.proposals.needsFollowUp, total: data.proposals.totals.needsFollowUp },
+              { key: "approved", label: "Approved (month)", items: data.proposals.approvedThisMonth, total: data.proposals.totals.approvedThisMonth },
+              { key: "expiring", label: "Expiring", items: data.proposals.expiring, total: data.proposals.totals.expiring },
+            ].map((bucket) => (
+              <div key={bucket.key} className="kxd-os-operations-priorities__col">
+                <p className="kxd-os-metric__label">
+                  {bucket.label}
+                  {bucket.total > bucket.items.length ? ` · ${bucket.total}` : ""}
+                </p>
+                {bucket.items.length === 0 ? (
+                  <p className="kxd-os-meta">Clear</p>
+                ) : (
+                  <div className="kxd-os-list-stack">
+                    {bucket.items.map((item) => (
+                      <Link key={`${bucket.key}-${item.id}`} href={item.href} className="kxd-os-list-row">
+                        <p className="kxd-os-body">{item.title}</p>
+                        <p className="kxd-os-meta kxd-os-list-row__sub">
+                          {item.clientName}
+                          {item.amount != null ? ` · ${new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(item.amount)}` : ""}
+                        </p>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </KxdSection>
+
         <div className="kxd-os-operations-columns">
           <KxdSection label="Projects At Risk">
             {data.commandCenter.projectsAtRisk.length === 0 ? (

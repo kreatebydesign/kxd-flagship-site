@@ -19,7 +19,7 @@ function actionFromSignal(
 }
 
 export function buildMemoryRecommendations(
-  bundle: Omit<ClientWorkspaceBundle, "memory" | "actions">,
+  bundle: Omit<ClientWorkspaceBundle, "memory" | "actions" | "proposals" | "proposalIntelligence">,
   signals: MemorySignal[],
 ): ClientMemoryAction[] {
   const actions: ClientMemoryAction[] = [];

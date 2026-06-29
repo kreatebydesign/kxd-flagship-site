@@ -9,7 +9,7 @@ import { buildMemoryRecommendations } from "./recommendations";
 import type { ClientMemoryAiPayload, ClientMemorySnapshot } from "./types";
 
 function buildExecutiveSummaryLines(
-  bundle: Omit<ClientWorkspaceBundle, "memory" | "actions">,
+  bundle: Omit<ClientWorkspaceBundle, "memory" | "actions" | "proposals" | "proposalIntelligence">,
   scores: ClientMemorySnapshot["scores"],
   signalCount: number,
 ): string[] {
@@ -57,7 +57,7 @@ function buildExecutiveSummaryLines(
 }
 
 function deriveCurrentStatus(
-  bundle: Omit<ClientWorkspaceBundle, "memory" | "actions">,
+  bundle: Omit<ClientWorkspaceBundle, "memory" | "actions" | "proposals" | "proposalIntelligence">,
   scores: ClientMemorySnapshot["scores"],
 ): string {
   if (scores.urgencyScore >= 70) return "Needs immediate attention";
@@ -86,7 +86,7 @@ function filterActionsByDismissals(
 }
 
 export function buildClientMemory(
-  bundle: Omit<ClientWorkspaceBundle, "memory" | "actions">,
+  bundle: Omit<ClientWorkspaceBundle, "memory" | "actions" | "proposals" | "proposalIntelligence">,
   options?: ClientMemoryBuildOptions,
 ): ClientMemorySnapshot {
   const signals = extractClientMemorySignals(bundle);
@@ -123,7 +123,7 @@ export function buildClientMemory(
 
 /** Structured payload for future KXD Brain / LLM adapters. */
 export function buildClientMemoryAiPayload(
-  bundle: Omit<ClientWorkspaceBundle, "memory" | "actions">,
+  bundle: Omit<ClientWorkspaceBundle, "memory" | "actions" | "proposals" | "proposalIntelligence">,
   options?: ClientMemoryBuildOptions,
 ): ClientMemoryAiPayload {
   const memory = buildClientMemory(bundle, options);

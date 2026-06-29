@@ -13,6 +13,8 @@ import { calculateOnboardingReadiness,
 } from "@/lib/client-onboarding";
 import { loadClientPrioritiesWidget } from "@/lib/client-command/actions/dashboard";
 import type { ClientPrioritiesWidget } from "@/lib/client-command/actions/types";
+import { loadExecutiveProposalsWidget } from "@/lib/executive-proposals/dashboard";
+import type { ExecutiveProposalsWidget } from "@/lib/executive-proposals/client";
 import { AUDIT_STATUS_LABEL } from "@/lib/website-audit/scoring";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -111,6 +113,7 @@ export type ExecutiveDashboardData = {
     onboardingCompletionRate: number;
   };
   clientPriorities: ClientPrioritiesWidget;
+  proposals: ExecutiveProposalsWidget;
 };
 
 function resolveClientId(raw: unknown): number | null {
@@ -161,7 +164,7 @@ export async function getExecutiveDashboardData(): Promise<ExecutiveDashboardDat
   const in14Days = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
   const in60Days = new Date(now.getTime() + 60 * 24 * 60 * 60 * 1000);
 
-  const [clients, projects, requests, deliverables, audits, portalUsers, onboardings, retainers, clientPriorities] =
+  const [clients, projects, requests, deliverables, audits, portalUsers, onboardings, retainers, clientPriorities, proposalsWidget] =
     await Promise.all([
       findAll("clients"),
       findAll("client-projects"),
@@ -172,6 +175,7 @@ export async function getExecutiveDashboardData(): Promise<ExecutiveDashboardDat
       findAll("client-onboarding"),
       findAll("retainers"),
       loadClientPrioritiesWidget(),
+      loadExecutiveProposalsWidget(),
     ]);
 
   const activeClients = clients.filter((c) => c.status !== "archived");
@@ -653,5 +657,6 @@ export async function getExecutiveDashboardData(): Promise<ExecutiveDashboardDat
       onboardingCompletionRate,
     },
     clientPriorities,
+    proposals: proposalsWidget,
   };
 }

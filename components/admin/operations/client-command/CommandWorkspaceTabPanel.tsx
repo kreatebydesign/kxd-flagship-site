@@ -16,6 +16,7 @@ import { ClientTimelinePanel } from "./ClientTimelinePanel";
 import { ClientCommunicationsPanel } from "./ClientCommunicationsPanel";
 import { ClientIntelligencePanel } from "./ClientIntelligencePanel";
 import { ClientActionsPanel } from "./ClientActionsPanel";
+import { ClientProposalsPanel } from "./ClientProposalsPanel";
 
 function statusLabel(status: string): string {
   return status.replace(/-/g, " ");
@@ -51,6 +52,8 @@ export function CommandWorkspaceTabPanel({
       return <ClientIntelligencePanel data={data} />;
     case "actions":
       return <ClientActionsPanel data={data} />;
+    case "proposals":
+      return <ClientProposalsPanel data={data} />;
     case "meetings":
       return <MeetingsPanel data={data} />;
     case "notes":
@@ -204,6 +207,21 @@ function OverviewPanel({ data }: { data: ClientWorkspaceBundle }) {
             className="kxd-os-link-quiet kxd-os-workspace-inline-link"
           >
             Open actions →
+          </Link>
+        </WorkspaceChapter>
+
+        <WorkspaceChapter title="Proposals" variant="compact">
+          <WorkspaceMetaLine label="Open" value={String(data.proposals.openCount)} />
+          <WorkspaceMetaLine label="Needs follow-up" value={String(data.proposals.pendingFollowUpCount)} />
+          <WorkspaceMetaLine
+            label="Current"
+            value={data.proposals.current?.title ?? "—"}
+          />
+          <Link
+            href={`/admin/operations/client-command/${data.clientId}?tab=proposals`}
+            className="kxd-os-link-quiet kxd-os-workspace-inline-link"
+          >
+            Proposal workspace →
           </Link>
         </WorkspaceChapter>
       </div>

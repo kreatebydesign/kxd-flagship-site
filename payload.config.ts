@@ -20,6 +20,10 @@ import { ClientTimelineEvents } from "./payload/collections/ClientTimelineEvents
 import { ClientProjects } from "./payload/collections/ClientProjects.ts";
 import { ClientRequests } from "./payload/collections/ClientRequests.ts";
 import { ClientTasks } from "./payload/collections/ClientTasks.ts";
+import { ProposalActivity } from "./payload/collections/ProposalActivity.ts";
+import { ProposalApprovals } from "./payload/collections/ProposalApprovals.ts";
+import { EstimateItems } from "./payload/collections/EstimateItems.ts";
+import { ProposalTemplates } from "./payload/collections/ProposalTemplates.ts";
 import { GenesisSessions } from "./payload/collections/GenesisSessions.ts";
 import { WebsiteQAChecks } from "./payload/collections/WebsiteQAChecks.ts";
 import { Clients } from "./payload/collections/Clients.ts";
@@ -157,7 +161,11 @@ export default buildConfig({
     SuccessCheckIns,
     SalesLeads,
     Proposals,
+    ProposalTemplates,
     ProposalSections,
+    EstimateItems,
+    ProposalApprovals,
+    ProposalActivity,
     ProposalAgreements,
     ProposalViewEvents,
     SalesActivities,

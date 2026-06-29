@@ -10,6 +10,7 @@ export const COMMAND_WORKSPACE_TABS = [
   { id: "emails", label: "Communications" },
   { id: "intelligence", label: "Intelligence" },
   { id: "actions", label: "Actions" },
+  { id: "proposals", label: "Proposals" },
   { id: "meetings", label: "Meetings" },
   { id: "notes", label: "Notes" },
   { id: "analytics", label: "Analytics" },
