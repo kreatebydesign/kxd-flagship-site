@@ -82,6 +82,14 @@ export function ClientProposalsPanel({ data }: { data: ClientWorkspaceBundle }) 
             <Link href={current.builderHref} className="kxd-os-link-quiet kxd-os-workspace-inline-link">
               Open builder →
             </Link>
+            {current.status === "approved" ? (
+              <Link
+                href={`/admin/sales/conversion/${current.id}`}
+                className="kxd-os-command-timeline-actions__btn kxd-os-command-timeline-actions__btn--primary kxd-os-proposals__convert-btn"
+              >
+                Convert to client
+              </Link>
+            ) : null}
           </div>
         </WorkspaceChapter>
       ) : (

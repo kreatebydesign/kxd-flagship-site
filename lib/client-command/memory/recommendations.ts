@@ -1,4 +1,4 @@
-import type { ClientWorkspaceBundle } from "../workspace-types";
+import type { ClientWorkspaceMemoryInput } from "../workspace-types";
 import type { ClientMemoryAction, MemorySignal } from "./types";
 
 const SEVERITY_RANK = { critical: 0, high: 1, medium: 2, low: 3 };
@@ -19,7 +19,7 @@ function actionFromSignal(
 }
 
 export function buildMemoryRecommendations(
-  bundle: Omit<ClientWorkspaceBundle, "memory" | "actions" | "proposals" | "proposalIntelligence">,
+  bundle: ClientWorkspaceMemoryInput,
   signals: MemorySignal[],
 ): ClientMemoryAction[] {
   const actions: ClientMemoryAction[] = [];

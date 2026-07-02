@@ -4555,6 +4555,106 @@
   margin: 0.25rem 0 0;
 }
 
+.kxd-os-proposals__convert-btn {
+  margin-top: 0.75rem;
+  display: inline-flex;
+}
+
+.kxd-os-operations-conversion-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+  margin-bottom: 1rem;
+}
+
+.kxd-os-contracts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--kxd-os-space-12);
+}
+
+.kxd-os-contracts__hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.kxd-os-contracts__title {
+  font-size: 1.25rem;
+  font-weight: 500;
+  margin: 0.25rem 0;
+}
+
+.kxd-os-contracts__lead {
+  font-size: 0.875rem;
+  color: var(--kxd-os-text-muted);
+  margin: 0;
+}
+
+.kxd-os-contracts__current-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.35rem;
+}
+
+.kxd-os-contracts__current-title {
+  font-weight: 600;
+  color: var(--kxd-os-text-primary);
+}
+
+.kxd-os-contracts__current-amounts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  font-size: 0.8125rem;
+  color: var(--kxd-os-text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.kxd-os-contracts-list,
+.kxd-os-contracts-conversions,
+.kxd-os-contracts-intel {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.kxd-os-contracts-list__item,
+.kxd-os-contracts-conversions__item,
+.kxd-os-contracts-intel__item {
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--kxd-os-border-divider);
+}
+
+.kxd-os-contracts-intel__item {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.kxd-os-contracts-intel__reason {
+  font-size: 0.8125rem;
+  color: var(--kxd-os-text-muted);
+  margin: 0.25rem 0 0;
+}
+
+.kxd-os-contracts-list__meta,
+.kxd-os-contracts-conversions__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--kxd-os-text-faint);
+  margin-top: 0.25rem;
+}
+
 .kxd-os-command-workspace__content {
   padding: var(--kxd-os-space-12) var(--kxd-os-space-16);
   min-width: 0;

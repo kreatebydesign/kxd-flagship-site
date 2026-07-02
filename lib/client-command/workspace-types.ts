@@ -4,6 +4,10 @@ import type { ClientCommandCenterData, CommandDoc } from "./types";
 import type { WorkspaceCommunicationsSnapshot } from "./communications/types";
 import type { WorkspaceActionsSnapshot } from "./actions/types";
 import type { WorkspaceProposalsSnapshot, ProposalIntelligenceSnapshot } from "@/lib/executive-proposals/client";
+import type {
+  ConversionIntelligenceSnapshot,
+  WorkspaceContractsSnapshot,
+} from "@/lib/proposal-conversion/client";
 import type { ClientMemorySnapshot } from "./memory/types";
 
 export interface CommandHubClientRow {
@@ -108,6 +112,8 @@ export interface ClientWorkspaceBundle extends ClientCommandCenterData {
   actions: WorkspaceActionsSnapshot;
   proposals: WorkspaceProposalsSnapshot;
   proposalIntelligence: ProposalIntelligenceSnapshot;
+  contracts: WorkspaceContractsSnapshot;
+  conversionIntelligence: ConversionIntelligenceSnapshot;
   memory: ClientMemorySnapshot;
   workspaceQuickActions: CommandWorkspaceQuickAction[];
   analytics: WorkspaceAnalyticsSnapshot;
@@ -127,3 +133,8 @@ export interface ClientWorkspaceBundle extends ClientCommandCenterData {
     row: MergedExecutiveClientRow | null;
   };
 }
+
+export type ClientWorkspaceMemoryInput = Omit<
+  ClientWorkspaceBundle,
+  "memory" | "actions" | "proposals" | "proposalIntelligence" | "contracts" | "conversionIntelligence"
+>;

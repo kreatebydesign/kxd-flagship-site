@@ -180,6 +180,60 @@ export function ExecutiveScreen({ data, reporting, today }: ExecutiveScreenProps
           </div>
         </KxdSection>
 
+        <KxdSection label="Proposal Conversion">
+          <div className="kxd-os-operations-conversion-head">
+            <KxdMetric
+              label="Ready to convert"
+              value={String(data.conversion.totals.ready)}
+              className="kxd-os-operations-mini-metric"
+            />
+            <KxdMetric
+              label="Conversion value"
+              value={new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(data.conversion.conversionValue)}
+              className="kxd-os-operations-mini-metric"
+            />
+            <KxdMetric
+              label="Awaiting signature"
+              value={String(data.conversion.totals.contracts)}
+              className="kxd-os-operations-mini-metric"
+            />
+            <Link href="/admin/sales/conversion" className="kxd-os-link-quiet">
+              Open conversion queue →
+            </Link>
+          </div>
+          <div className="kxd-os-operations-priorities">
+            {[
+              { key: "ready", label: "Ready to Convert", items: data.conversion.readyToConvert, total: data.conversion.totals.ready },
+              { key: "converted", label: "Recently Converted", items: data.conversion.recentlyConverted, total: data.conversion.totals.converted },
+              { key: "contracts", label: "Contracts Awaiting Signature", items: data.conversion.contractsAwaitingSignature, total: data.conversion.totals.contracts },
+              { key: "signed", label: "Signed Today", items: data.conversion.signedToday, total: data.conversion.totals.signed },
+              { key: "launch", label: "Launch Queue", items: data.conversion.launchQueue, total: data.conversion.totals.launch },
+            ].map((bucket) => (
+              <div key={bucket.key} className="kxd-os-operations-priorities__col">
+                <p className="kxd-os-metric__label">
+                  {bucket.label}
+                  {bucket.total > bucket.items.length ? ` · ${bucket.total}` : ""}
+                </p>
+                {bucket.items.length === 0 ? (
+                  <p className="kxd-os-meta">Clear</p>
+                ) : (
+                  <div className="kxd-os-list-stack">
+                    {bucket.items.map((item) => (
+                      <Link key={`${bucket.key}-${item.id}`} href={item.href} className="kxd-os-list-row">
+                        <p className="kxd-os-body">{item.title}</p>
+                        <p className="kxd-os-meta kxd-os-list-row__sub">
+                          {item.clientName}
+                          {item.amount != null ? ` · ${new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(item.amount)}` : ""}
+                        </p>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </KxdSection>
+
         <div className="kxd-os-operations-columns">
           <KxdSection label="Projects At Risk">
             {data.commandCenter.projectsAtRisk.length === 0 ? (

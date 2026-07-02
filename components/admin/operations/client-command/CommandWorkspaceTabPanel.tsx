@@ -17,6 +17,7 @@ import { ClientCommunicationsPanel } from "./ClientCommunicationsPanel";
 import { ClientIntelligencePanel } from "./ClientIntelligencePanel";
 import { ClientActionsPanel } from "./ClientActionsPanel";
 import { ClientProposalsPanel } from "./ClientProposalsPanel";
+import { ClientContractsPanel } from "./ClientContractsPanel";
 
 function statusLabel(status: string): string {
   return status.replace(/-/g, " ");
@@ -54,6 +55,8 @@ export function CommandWorkspaceTabPanel({
       return <ClientActionsPanel data={data} />;
     case "proposals":
       return <ClientProposalsPanel data={data} />;
+    case "contracts":
+      return <ClientContractsPanel data={data} />;
     case "meetings":
       return <MeetingsPanel data={data} />;
     case "notes":

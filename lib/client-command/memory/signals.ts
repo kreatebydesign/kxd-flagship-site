@@ -1,10 +1,10 @@
-import type { ClientWorkspaceBundle } from "../workspace-types";
+import type { ClientWorkspaceMemoryInput } from "../workspace-types";
 import type { MemorySignal } from "./types";
 
 const OPEN_REQUEST = new Set(["new", "triaged", "in-progress", "waiting-on-client"]);
 const ACTIVE_PROJECT = new Set(["planning", "active", "review", "waiting-on-client"]);
 
-function recentTimelineWins(bundle: Omit<ClientWorkspaceBundle, "memory" | "actions" | "proposals" | "proposalIntelligence">): MemorySignal[] {
+function recentTimelineWins(bundle: ClientWorkspaceMemoryInput): MemorySignal[] {
   const signals: MemorySignal[] = [];
   const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
 
@@ -38,7 +38,7 @@ function recentTimelineWins(bundle: Omit<ClientWorkspaceBundle, "memory" | "acti
 }
 
 export function extractClientMemorySignals(
-  bundle: Omit<ClientWorkspaceBundle, "memory" | "actions" | "proposals" | "proposalIntelligence">,
+  bundle: ClientWorkspaceMemoryInput,
 ): MemorySignal[] {
   const signals: MemorySignal[] = [];
   const { clientId, header, sections, communications, launchQa, currentWork } = bundle;

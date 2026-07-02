@@ -13,6 +13,7 @@ const EVENT_TYPES = [
   { label: "Declined", value: "proposal.declined" },
   { label: "Expired", value: "proposal.expired" },
   { label: "Archived", value: "proposal.archived" },
+  { label: "Converted", value: "proposal.converted" },
 ] as const;
 
 export const ProposalActivity: CollectionConfig = {

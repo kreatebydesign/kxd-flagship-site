@@ -21,6 +21,10 @@ import { ClientProjects } from "./payload/collections/ClientProjects.ts";
 import { ClientRequests } from "./payload/collections/ClientRequests.ts";
 import { ClientTasks } from "./payload/collections/ClientTasks.ts";
 import { ProposalActivity } from "./payload/collections/ProposalActivity.ts";
+import { ProposalConversions } from "./payload/collections/ProposalConversions.ts";
+import { ContractTemplates } from "./payload/collections/ContractTemplates.ts";
+import { Contracts } from "./payload/collections/Contracts.ts";
+import { ContractActivity } from "./payload/collections/ContractActivity.ts";
 import { ProposalApprovals } from "./payload/collections/ProposalApprovals.ts";
 import { EstimateItems } from "./payload/collections/EstimateItems.ts";
 import { ProposalTemplates } from "./payload/collections/ProposalTemplates.ts";
@@ -166,6 +170,10 @@ export default buildConfig({
     EstimateItems,
     ProposalApprovals,
     ProposalActivity,
+    ProposalConversions,
+    ContractTemplates,
+    Contracts,
+    ContractActivity,
     ProposalAgreements,
     ProposalViewEvents,
     SalesActivities,

@@ -12,6 +12,8 @@ import {
 } from "./actions/data";
 import { loadClientProposalsSnapshot } from "@/lib/executive-proposals/data";
 import { buildProposalIntelligence } from "@/lib/executive-proposals/intelligence";
+import { loadClientContractsSnapshot } from "@/lib/proposal-conversion/data";
+import { buildConversionIntelligence } from "@/lib/proposal-conversion/intelligence";
 import { loadClientMemoryFromBundle } from "./memory/load";
 import { getClientInfrastructure } from "@/lib/infrastructure/data";
 import { fetchClientWorkspace } from "@/lib/executive-client-workspace/fetch-client-workspace";
@@ -277,6 +279,12 @@ export async function loadClientWorkspaceBundle(
   const actions = await loadClientActions(clientId);
   const proposalsSnapshot = await loadClientProposalsSnapshot(clientId);
   const proposalIntelligence = buildProposalIntelligence(clientId, proposalsSnapshot);
+  const contracts = await loadClientContractsSnapshot(clientId);
+  const conversionIntelligence = buildConversionIntelligence(
+    clientId,
+    contracts,
+    proposalsSnapshot,
+  );
 
   return {
     ...partialBundle,
@@ -284,5 +292,7 @@ export async function loadClientWorkspaceBundle(
     actions,
     proposals: proposalsSnapshot,
     proposalIntelligence,
+    contracts,
+    conversionIntelligence,
   };
 }
