@@ -234,6 +234,71 @@ export function ExecutiveScreen({ data, reporting, today }: ExecutiveScreenProps
           </div>
         </KxdSection>
 
+        <KxdSection label="Financial Command">
+          <div className="kxd-os-operations-financial-head">
+            <KxdMetric
+              label="MRR"
+              value={new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(data.financial.mrr)}
+              className="kxd-os-operations-mini-metric"
+            />
+            <KxdMetric
+              label="Pipeline"
+              value={new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(data.financial.pipelineValue)}
+              className="kxd-os-operations-mini-metric"
+            />
+            <KxdMetric
+              label="Contracted"
+              value={new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(data.financial.contractedRevenue)}
+              className="kxd-os-operations-mini-metric"
+            />
+            <KxdMetric
+              label="Projected annual"
+              value={new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(data.financial.projectedAnnualValue)}
+              className="kxd-os-operations-mini-metric"
+            />
+            <KxdMetric
+              label="At risk"
+              value={new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(data.financial.atRiskRevenue)}
+              className="kxd-os-operations-mini-metric"
+            />
+          </div>
+          <div className="kxd-os-operations-financial-alerts">
+            {data.financial.alerts.length === 0 ? (
+              <p className="kxd-os-meta">No revenue alerts — portfolio healthy.</p>
+            ) : (
+              <div className="kxd-os-list-stack">
+                {data.financial.alerts.map((alert) => (
+                  <Link key={alert.id} href={alert.href} className="kxd-os-list-row">
+                    <p className="kxd-os-body">{alert.label}</p>
+                    <p className="kxd-os-meta kxd-os-list-row__sub">
+                      {alert.detail}
+                      {alert.amount != null
+                        ? ` · ${new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(alert.amount)}`
+                        : ""}
+                    </p>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+          {data.financial.topClientsByRevenue.length > 0 ? (
+            <div className="kxd-os-operations-financial-clients">
+              <p className="kxd-os-metric__label">Revenue by client</p>
+              <div className="kxd-os-list-stack">
+                {data.financial.topClientsByRevenue.map((row) => (
+                  <Link key={row.clientId} href={row.href} className="kxd-os-list-row">
+                    <p className="kxd-os-body">{row.clientName}</p>
+                    <p className="kxd-os-meta kxd-os-list-row__sub">
+                      MRR {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(row.mrr)}
+                      {" · "}LTV {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(row.lifetimeValue)}
+                    </p>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </KxdSection>
+
         <div className="kxd-os-operations-columns">
           <KxdSection label="Projects At Risk">
             {data.commandCenter.projectsAtRisk.length === 0 ? (

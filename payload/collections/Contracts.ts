@@ -2,6 +2,7 @@ import type { CollectionConfig } from "payload";
 import { isAuthenticated } from "../access/index.ts";
 import { PAYLOAD_GROUPS } from "../admin/groups.ts";
 import { publishContractLifecycleHook } from "../hooks/contracts.ts";
+import { publishContractRevenueHook } from "../hooks/revenue-events.ts";
 
 const STATUSES = [
   { label: "Draft", value: "draft" },
@@ -29,7 +30,7 @@ export const Contracts: CollectionConfig = {
   defaultSort: "-updatedAt",
   lockDocuments: false,
   hooks: {
-    afterChange: [publishContractLifecycleHook],
+    afterChange: [publishContractLifecycleHook, publishContractRevenueHook],
   },
   admin: {
     useAsTitle: "title",

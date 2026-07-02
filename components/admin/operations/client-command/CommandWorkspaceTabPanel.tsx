@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { fmtExecutiveMoney } from "@/lib/executive-client-profile";
+import { fmtFinancialMoney } from "@/lib/financial-command/client";
 import { fmtWorkspaceDate } from "@/lib/executive-client-workspace/theme";
 import type { ClientWorkspaceBundle } from "@/lib/client-command/workspace-types";
 import type { CommandWorkspaceTabId } from "@/lib/client-command/tabs";
@@ -18,6 +19,7 @@ import { ClientIntelligencePanel } from "./ClientIntelligencePanel";
 import { ClientActionsPanel } from "./ClientActionsPanel";
 import { ClientProposalsPanel } from "./ClientProposalsPanel";
 import { ClientContractsPanel } from "./ClientContractsPanel";
+import { ClientFinancialPanel } from "./ClientFinancialPanel";
 
 function statusLabel(status: string): string {
   return status.replace(/-/g, " ");
@@ -57,6 +59,8 @@ export function CommandWorkspaceTabPanel({
       return <ClientProposalsPanel data={data} />;
     case "contracts":
       return <ClientContractsPanel data={data} />;
+    case "financial":
+      return <ClientFinancialPanel data={data} />;
     case "meetings":
       return <MeetingsPanel data={data} />;
     case "notes":
@@ -142,6 +146,42 @@ function OverviewPanel({ data }: { data: ClientWorkspaceBundle }) {
           />
         </WorkspaceChapter>
       </div>
+
+      <WorkspaceChapter title="Financial snapshot" variant="compact">
+        <div className="kxd-os-workspace-dossier-columns kxd-os-workspace-dossier-columns--triple">
+          <WorkspaceMetaLine label="MRR" value={fmtFinancialMoney(data.financial.mrr)} />
+          <WorkspaceMetaLine
+            label="Contracted"
+            value={fmtFinancialMoney(data.financial.contractedValue)}
+          />
+          <WorkspaceMetaLine
+            label="Pipeline"
+            value={fmtFinancialMoney(data.financial.pipelineValue)}
+          />
+          <WorkspaceMetaLine
+            label="Lifetime value"
+            value={fmtFinancialMoney(data.financial.lifetimeValue)}
+          />
+          <WorkspaceMetaLine
+            label="Billing"
+            value={
+              data.financial.billingProfile.setupComplete
+                ? "Configured"
+                : "Setup incomplete"
+            }
+          />
+          <WorkspaceMetaLine
+            label="Risk"
+            value={data.financial.atRiskAmount > 0 ? fmtFinancialMoney(data.financial.atRiskAmount) : "Clear"}
+          />
+        </div>
+        <Link
+          href={`/admin/operations/client-command/${data.clientId}?tab=financial`}
+          className="kxd-os-link-quiet kxd-os-workspace-inline-link"
+        >
+          Full financial command →
+        </Link>
+      </WorkspaceChapter>
 
       <div className="kxd-os-workspace-dossier-columns">
         <WorkspaceChapter title="Communications" variant="compact">

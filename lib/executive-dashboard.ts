@@ -17,6 +17,8 @@ import { loadExecutiveProposalsWidget } from "@/lib/executive-proposals/dashboar
 import type { ExecutiveProposalsWidget } from "@/lib/executive-proposals/client";
 import { loadExecutiveConversionWidget } from "@/lib/proposal-conversion/dashboard";
 import type { ExecutiveConversionWidget } from "@/lib/proposal-conversion/client";
+import { loadExecutiveFinancialWidget } from "@/lib/financial-command/dashboard";
+import type { ExecutiveFinancialWidget } from "@/lib/financial-command/client";
 import { AUDIT_STATUS_LABEL } from "@/lib/website-audit/scoring";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -117,6 +119,7 @@ export type ExecutiveDashboardData = {
   clientPriorities: ClientPrioritiesWidget;
   proposals: ExecutiveProposalsWidget;
   conversion: ExecutiveConversionWidget;
+  financial: ExecutiveFinancialWidget;
 };
 
 function resolveClientId(raw: unknown): number | null {
@@ -167,7 +170,7 @@ export async function getExecutiveDashboardData(): Promise<ExecutiveDashboardDat
   const in14Days = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
   const in60Days = new Date(now.getTime() + 60 * 24 * 60 * 60 * 1000);
 
-  const [clients, projects, requests, deliverables, audits, portalUsers, onboardings, retainers, clientPriorities, proposalsWidget, conversionWidget] =
+  const [clients, projects, requests, deliverables, audits, portalUsers, onboardings, retainers, clientPriorities, proposalsWidget, conversionWidget, financialWidget] =
     await Promise.all([
       findAll("clients"),
       findAll("client-projects"),
@@ -180,6 +183,7 @@ export async function getExecutiveDashboardData(): Promise<ExecutiveDashboardDat
       loadClientPrioritiesWidget(),
       loadExecutiveProposalsWidget(),
       loadExecutiveConversionWidget(),
+      loadExecutiveFinancialWidget(),
     ]);
 
   const activeClients = clients.filter((c) => c.status !== "archived");
@@ -663,5 +667,6 @@ export async function getExecutiveDashboardData(): Promise<ExecutiveDashboardDat
     clientPriorities,
     proposals: proposalsWidget,
     conversion: conversionWidget,
+    financial: financialWidget,
   };
 }

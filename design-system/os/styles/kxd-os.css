@@ -4655,6 +4655,111 @@
   margin-top: 0.25rem;
 }
 
+.kxd-os-operations-financial-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+  margin-bottom: 1rem;
+}
+
+.kxd-os-operations-financial-alerts {
+  margin-bottom: 1rem;
+}
+
+.kxd-os-operations-financial-clients {
+  margin-top: 0.5rem;
+}
+
+.kxd-os-financial {
+  display: flex;
+  flex-direction: column;
+  gap: var(--kxd-os-space-12);
+}
+
+.kxd-os-financial__hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.kxd-os-financial__title {
+  font-size: 1.25rem;
+  font-weight: 500;
+  margin: 0.25rem 0;
+}
+
+.kxd-os-financial__lead {
+  font-size: 0.875rem;
+  color: var(--kxd-os-text-muted);
+  margin: 0;
+}
+
+.kxd-os-financial__flags {
+  font-size: 0.8125rem;
+  color: var(--kxd-os-text-muted);
+  margin: 0.5rem 0 0;
+}
+
+.kxd-os-financial-intel,
+.kxd-os-financial-services,
+.kxd-os-financial-events {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.kxd-os-financial-intel__item,
+.kxd-os-financial-services__item,
+.kxd-os-financial-events__item {
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--kxd-os-border-divider);
+}
+
+.kxd-os-financial-intel__item {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.kxd-os-financial-intel__reason {
+  font-size: 0.8125rem;
+  color: var(--kxd-os-text-muted);
+  margin: 0.25rem 0 0;
+}
+
+.kxd-os-financial-services__item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+}
+
+.kxd-os-financial-events__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+
+.kxd-os-financial-events__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--kxd-os-text-faint);
+}
+
+.kxd-os-financial__links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
 .kxd-os-command-workspace__content {
   padding: var(--kxd-os-space-12) var(--kxd-os-space-16);
   min-width: 0;

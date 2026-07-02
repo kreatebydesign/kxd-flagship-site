@@ -3,6 +3,7 @@ import { isAuthenticated } from "../access/index.ts";
 import { PAYLOAD_GROUPS } from "../admin/groups.ts";
 import { publishProjectAutomation } from "../hooks/automation.ts";
 import { publishProjectActivityHook } from "../hooks/client-activity.ts";
+import { publishProjectRevenueHook } from "../hooks/revenue-events.ts";
 
 export const ClientProjects: CollectionConfig = {
   slug: "client-projects",
@@ -10,7 +11,7 @@ export const ClientProjects: CollectionConfig = {
   defaultSort: "-createdAt",
   lockDocuments: false,
   hooks: {
-    afterChange: [publishProjectAutomation, publishProjectActivityHook],
+    afterChange: [publishProjectAutomation, publishProjectActivityHook, publishProjectRevenueHook],
   },
   admin: {
     useAsTitle: "projectName",

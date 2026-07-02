@@ -5,6 +5,7 @@ import { onProposalCreate } from "../hooks/sales-proposal-public.ts";
 import { onProposalStatusChange } from "../hooks/sales-proposals.ts";
 import { publishProposalActivityHook } from "../hooks/client-activity.ts";
 import { publishExecutiveProposalLifecycleHook } from "../hooks/executive-proposals.ts";
+import { publishProposalRevenueHook } from "../hooks/revenue-events.ts";
 
 export const Proposals: CollectionConfig = {
   slug: "proposals",
@@ -17,6 +18,7 @@ export const Proposals: CollectionConfig = {
       onProposalStatusChange,
       publishProposalActivityHook,
       publishExecutiveProposalLifecycleHook,
+      publishProposalRevenueHook,
     ],
   },
   admin: {

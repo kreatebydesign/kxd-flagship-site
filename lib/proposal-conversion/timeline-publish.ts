@@ -4,6 +4,7 @@
 import type { Payload } from "payload";
 import { publishClientActivity } from "@/lib/client-command/activity/publish";
 import { publishSalesTimelineEvent } from "@/lib/sales/timeline-events";
+import { publishRevenueEvent } from "@/lib/financial-command/timeline-publish";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDoc = Record<string, any>;
@@ -53,6 +54,19 @@ export async function publishProposalConvertedEvent(
         proposalId: input.proposalId,
         ...input.metadata,
       },
+    },
+    payload,
+  );
+
+  await publishRevenueEvent(
+    {
+      eventType: "revenue.proposal-converted",
+      title: input.title,
+      summary: input.summary ?? "Proposal converted to client revenue.",
+      clientId: input.clientId,
+      proposalId: input.proposalId,
+      dedupeKey: `proposal-converted:${input.proposalId}`,
+      metadata: input.metadata,
     },
     payload,
   );

@@ -8,6 +8,10 @@ import type {
   ConversionIntelligenceSnapshot,
   WorkspaceContractsSnapshot,
 } from "@/lib/proposal-conversion/client";
+import type {
+  FinancialIntelligenceSnapshot,
+  WorkspaceFinancialSnapshot,
+} from "@/lib/financial-command/client";
 import type { ClientMemorySnapshot } from "./memory/types";
 
 export interface CommandHubClientRow {
@@ -114,6 +118,8 @@ export interface ClientWorkspaceBundle extends ClientCommandCenterData {
   proposalIntelligence: ProposalIntelligenceSnapshot;
   contracts: WorkspaceContractsSnapshot;
   conversionIntelligence: ConversionIntelligenceSnapshot;
+  financial: WorkspaceFinancialSnapshot;
+  financialIntelligence: FinancialIntelligenceSnapshot;
   memory: ClientMemorySnapshot;
   workspaceQuickActions: CommandWorkspaceQuickAction[];
   analytics: WorkspaceAnalyticsSnapshot;
@@ -136,5 +142,12 @@ export interface ClientWorkspaceBundle extends ClientCommandCenterData {
 
 export type ClientWorkspaceMemoryInput = Omit<
   ClientWorkspaceBundle,
-  "memory" | "actions" | "proposals" | "proposalIntelligence" | "contracts" | "conversionIntelligence"
+  | "memory"
+  | "actions"
+  | "proposals"
+  | "proposalIntelligence"
+  | "contracts"
+  | "conversionIntelligence"
+  | "financial"
+  | "financialIntelligence"
 >;
