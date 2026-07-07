@@ -485,6 +485,7 @@ export async function TodayScreen() {
   ];
 
   const quickActions = [
+    { label: "Reports", sub: "Client performance", href: "/admin/operations/reports" },
     { label: "Log Request", sub: "New client request", href: "/admin/operations/requests/new" },
     { label: "Operations Hub", sub: "Studio overview", href: "/admin/operations" },
     { label: "Accounts", sub: "Strategic intelligence", href: "/admin/operations/accounts" },

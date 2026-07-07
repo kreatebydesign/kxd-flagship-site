@@ -11,6 +11,7 @@ import type { EditionDefinition, EditionResolvedNavigation, KxdModuleId } from "
 export const OPERATIONS_NAV_MODULE_MAP: Record<OperationsNavId, KxdModuleId> = {
   executive: "reporting",
   command: "operations",
+  platform: "operations",
   today: "operations",
   founder: "founder",
   "founder-intelligence": "brain",

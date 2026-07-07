@@ -1,7 +1,13 @@
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ReportDoc = Record<string, any>;
 
-export type ReportStatus = "draft" | "generating" | "ready" | "published";
+export type ReportStatus =
+  | "draft"
+  | "generating"
+  | "ready"
+  | "sent"
+  | "published"
+  | "archived";
 
 export type ReportSectionKey =
   | "executiveSummary"

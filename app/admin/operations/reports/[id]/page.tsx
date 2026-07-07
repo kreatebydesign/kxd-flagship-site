@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
-import { ReportDetailScreen } from "@/components/admin/operations/reports/ReportDetailScreen";
+import { PerformanceReportShell } from "@/components/admin/operations/reports/PerformanceReportShell";
 import { getReportById } from "@/lib/reporting/engine";
+import { buildPerformanceReportView } from "@/lib/reporting/performance-view";
 
 export const dynamic = "force-dynamic";
 
@@ -12,5 +13,8 @@ export default async function ReportDetailPage({
   const { id } = await params;
   const report = await getReportById(Number(id));
   if (!report) notFound();
-  return <ReportDetailScreen report={report} />;
+
+  const view = buildPerformanceReportView(report);
+
+  return <PerformanceReportShell report={view} reportId={Number(report.id)} />;
 }

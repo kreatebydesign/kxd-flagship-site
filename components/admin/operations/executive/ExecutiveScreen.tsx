@@ -405,7 +405,7 @@ export function ExecutiveScreen({ data, reporting, today }: ExecutiveScreenProps
               <KxdMetric label="Viewed" value={String(reporting.reportsViewed)} />
             </div>
             <Link href="/admin/operations/reports" className="kxd-os-link-quiet">
-              Open Reporting Engine →
+              Client Performance Reports →
             </Link>
           </KxdSection>
         ) : null}
