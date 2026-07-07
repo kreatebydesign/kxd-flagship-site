@@ -20,6 +20,7 @@ import { loadClientMemoryFromBundle } from "./memory/load";
 import { getClientInfrastructure } from "@/lib/infrastructure/data";
 import { fetchClientWorkspace } from "@/lib/executive-client-workspace/fetch-client-workspace";
 import { daysSince } from "@/lib/intelligence/context";
+import { getClientWorkBoard } from "@/lib/client-tasks/engine";
 import { loadClientCommandCenter } from "./engine";
 import { buildWorkspaceQuickActions } from "./workspace-actions";
 import type {
@@ -295,6 +296,8 @@ export async function loadClientWorkspaceBundle(
     proposalsSnapshot,
   );
 
+  const workBoard = await getClientWorkBoard(clientId);
+
   return {
     ...partialBundle,
     memory,
@@ -305,5 +308,6 @@ export async function loadClientWorkspaceBundle(
     conversionIntelligence,
     financial,
     financialIntelligence,
+    workBoard,
   };
 }

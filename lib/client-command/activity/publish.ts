@@ -451,3 +451,47 @@ export async function publishEmailActivity(
     payloadInstance,
   );
 }
+
+export async function publishWorkItemActivity(
+  params: {
+    clientId: number;
+    taskId: number;
+    eventType: "work.created" | "work.completed" | "work.blocked" | "work.status-changed" | string;
+    title: string;
+    summary?: string;
+    status?: string;
+    sourceType?: string;
+    projectId?: number;
+    requestId?: number;
+    timestamp?: string;
+  },
+  payloadInstance?: Payload,
+): Promise<PublishActivityResult> {
+  return publishClientActivity(
+    {
+      clientId: params.clientId,
+      sourceModule: "Work",
+      sourceType: "client-task",
+      sourceId: params.taskId,
+      eventType: params.eventType,
+      title: params.title,
+      summary: params.summary,
+      projectId: params.projectId,
+      requestId: params.requestId,
+      timestamp: params.timestamp,
+      status: params.status,
+      relatedLinks: [
+        {
+          label: "Open work item",
+          href: `/admin/collections/client-tasks/${params.taskId}`,
+        },
+        {
+          label: "Client work board",
+          href: `/admin/operations/work/${params.clientId}`,
+        },
+      ],
+      metadata: params.sourceType ? { workSourceType: params.sourceType } : undefined,
+    },
+    payloadInstance,
+  );
+}

@@ -1,6 +1,26 @@
 import type { CollectionConfig } from "payload";
 import { isAuthenticated } from "../access/index.ts";
 import { PAYLOAD_GROUPS } from "../admin/groups.ts";
+import { publishClientTaskActivityHook } from "../hooks/client-tasks.ts";
+
+const SOURCE_TYPES = [
+  { label: "Client Request", value: "client-request" },
+  { label: "Monthly Deliverable", value: "monthly-deliverable" },
+  { label: "Project Task", value: "project-task" },
+  { label: "Follow-up", value: "follow-up" },
+  { label: "Admin Task", value: "admin-task" },
+  { label: "Upgrade Offer", value: "upgrade-offer" },
+  { label: "Growth Opportunity", value: "growth-opportunity" },
+  { label: "Playbook Step", value: "playbook-step" },
+  { label: "Portal Request", value: "portal-request" },
+  { label: "Retainer Task", value: "retainer-task" },
+  { label: "Content", value: "content" },
+  { label: "Website", value: "website" },
+  { label: "SEO", value: "seo" },
+  { label: "Ads", value: "ads" },
+  { label: "Internal", value: "internal" },
+  { label: "Manual", value: "manual" },
+] as const;
 
 const CATEGORIES = [
   { label: "Website", value: "website" },
@@ -38,20 +58,23 @@ const STATUSES = [
 
 export const ClientTasks: CollectionConfig = {
   slug: "client-tasks",
-  labels: { singular: "Client Task", plural: "Client Tasks" },
+  labels: { singular: "Work Item", plural: "Work Items" },
   defaultSort: "-updatedAt",
   lockDocuments: false,
   admin: {
     useAsTitle: "title",
-    defaultColumns: ["title", "client", "status", "priority", "dueDate", "assignedTo", "updatedAt"],
+    defaultColumns: ["title", "client", "sourceType", "status", "priority", "dueDate", "assignedTo", "updatedAt"],
     group: PAYLOAD_GROUPS.kxdOs,
-    description: "Day-to-day client work execution — OS: /admin/operations/work",
+    description: "KXD Work Items — day-to-day execution. OS: /admin/operations/work",
   },
   access: {
     read: isAuthenticated,
     create: isAuthenticated,
     update: isAuthenticated,
     delete: isAuthenticated,
+  },
+  hooks: {
+    afterChange: [publishClientTaskActivityHook],
   },
   fields: [
     {
@@ -85,6 +108,14 @@ export const ClientTasks: CollectionConfig = {
       defaultValue: "medium",
       label: "Priority",
       options: [...PRIORITIES],
+      admin: { position: "sidebar" },
+    },
+    {
+      name: "sourceType",
+      type: "select",
+      label: "Source Type",
+      defaultValue: "manual",
+      options: [...SOURCE_TYPES],
       admin: { position: "sidebar" },
     },
     {
@@ -152,6 +183,12 @@ export const ClientTasks: CollectionConfig = {
             { name: "createdFrom", type: "text", label: "Created From" },
             { name: "notes", type: "textarea", label: "Notes" },
             {
+              name: "internalNotes",
+              type: "textarea",
+              label: "Internal Notes",
+              admin: { description: "Admin-only — not shown in Client HQ." },
+            },
+            {
               name: "dependencies",
               type: "json",
               label: "Dependencies",
@@ -206,6 +243,20 @@ export const ClientTasks: CollectionConfig = {
               type: "relationship",
               relationTo: "proposals",
               label: "Related Proposal",
+            },
+            {
+              name: "relatedRetainer",
+              type: "relationship",
+              relationTo: "retainers",
+              label: "Related Retainer",
+            },
+            {
+              name: "relatedUpgradeOfferId",
+              type: "number",
+              label: "Related Upgrade Offer ID",
+              admin: {
+                description: "Phase 12A.4 will link upgrade-offers collection.",
+              },
             },
           ],
         },

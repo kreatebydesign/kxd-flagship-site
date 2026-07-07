@@ -9,20 +9,33 @@ import {
 import { OperationsPageHero } from "@/components/admin/operations/shared/OperationsPageHero";
 import { OperationsShell } from "@/components/admin/operations/shared/OperationsShell";
 import {
+  OpsCard,
+  OpsFocusPill,
   OpsKpiStrip,
   OpsListRow,
+  OpsQuickGrid,
   OpsSectionHead,
 } from "@/components/admin/operations/shared/OpsBriefing";
 import {
   KANBAN_STATUSES,
   TASK_CATEGORY_LABELS,
+  TASK_PRIORITY_LABELS,
   type TaskListItem,
   type WorkPortfolioData,
 } from "@/lib/client-tasks/types";
+import {
+  sortWorkItemsByPriority,
+} from "@/lib/work-items/views";
+import {
+  WORK_ITEM_STATUS_LABELS,
+} from "@/lib/work-items/types";
 import { WorkKanban } from "./WorkKanban";
 
 type PortfolioView =
   | "kanban"
+  | "today"
+  | "this-week"
+  | "by-priority"
   | "my-tasks"
   | "due-today"
   | "overdue"
@@ -35,8 +48,10 @@ type PortfolioView =
 
 const VIEW_OPTIONS: Array<{ id: PortfolioView; label: string }> = [
   { id: "kanban", label: "Kanban" },
-  { id: "my-tasks", label: "My Tasks" },
-  { id: "due-today", label: "Due Today" },
+  { id: "today", label: "Today" },
+  { id: "this-week", label: "This Week" },
+  { id: "by-priority", label: "By Priority" },
+  { id: "my-tasks", label: "Assigned to Me" },
   { id: "overdue", label: "Overdue" },
   { id: "blocked", label: "Blocked" },
   { id: "waiting-on-client", label: "Waiting On Client" },
@@ -46,14 +61,42 @@ const VIEW_OPTIONS: Array<{ id: PortfolioView; label: string }> = [
   { id: "by-category", label: "By Category" },
 ];
 
+const QUICK_ACTIONS = [
+  {
+    label: "Create Work Item",
+    sub: "New execution task",
+    href: "/admin/collections/client-tasks/create",
+  },
+  {
+    label: "Open Client Command",
+    sub: "Client workspace hub",
+    href: "/admin/operations/client-command",
+  },
+  {
+    label: "Launch Playbook",
+    sub: "Run automation",
+    href: "/admin/operations/playbooks",
+  },
+  {
+    label: "Run Website Audit",
+    sub: "Lead intelligence",
+    href: "/admin/operations/audits",
+  },
+] as const;
+
 function filterForView(
   view: PortfolioView,
   data: WorkPortfolioData,
   adminEmail?: string | null,
 ): TaskListItem[] {
   switch (view) {
+    case "today":
     case "due-today":
       return data.dueToday;
+    case "this-week":
+      return data.dueThisWeek;
+    case "by-priority":
+      return sortWorkItemsByPriority(data.tasks);
     case "overdue":
       return data.overdue;
     case "blocked":
@@ -65,10 +108,130 @@ function filterForView(
     case "completed":
       return data.completedRecent;
     case "my-tasks":
-      if (!adminEmail) return data.tasks.filter((t) => t.priority === "critical" || t.priority === "high");
+      if (!adminEmail) {
+        return data.tasks.filter((t) => t.priority === "critical" || t.priority === "high");
+      }
       return data.tasks.filter((t) => t.assignedTo?.toLowerCase() === adminEmail.toLowerCase());
     default:
       return data.tasks;
+  }
+}
+
+function statusLabel(status: TaskListItem["status"]): string {
+  return WORK_ITEM_STATUS_LABELS[status] ?? status.replace(/-/g, " ");
+}
+
+function timeGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 17) return "Good afternoon";
+  return "Good evening";
+}
+
+function greetingName(displayName?: string | null): string {
+  if (!displayName?.trim()) return "there";
+  return displayName.trim().split(/\s+/)[0] ?? displayName.trim();
+}
+
+function executionBrief(stats: WorkPortfolioData["stats"]): {
+  healthLine: string;
+  focusLabel: string;
+  focusDescription: string;
+  tone: "default" | "warning" | "critical" | "clear";
+  statements: string[];
+} {
+  let healthLine: string;
+  let focusLabel: string;
+  let focusDescription: string;
+  let tone: "default" | "warning" | "critical" | "clear";
+
+  if (stats.overdueCount > 0) {
+    healthLine = "There are overdue work items that need attention.";
+    focusLabel = "Attention Needed";
+    focusDescription = `${stats.overdueCount} overdue item${stats.overdueCount === 1 ? "" : "s"}.`;
+    tone = stats.overdueCount >= 3 ? "critical" : "warning";
+  } else if (stats.blockedCount > 0) {
+    healthLine = "Some work is blocked and needs review.";
+    focusLabel = "Blocked";
+    focusDescription = `${stats.blockedCount} item${stats.blockedCount === 1 ? "" : "s"} need review.`;
+    tone = "warning";
+  } else {
+    healthLine = "Agency execution is healthy.";
+    focusLabel = "Healthy";
+    focusDescription = "Execution pipeline is clear.";
+    tone = "clear";
+  }
+
+  const statements = [
+    stats.overdueCount === 0
+      ? "Nothing is overdue."
+      : `${stats.overdueCount} item${stats.overdueCount === 1 ? "" : "s"} overdue.`,
+    stats.blockedCount === 0
+      ? "No work is blocked."
+      : `${stats.blockedCount} item${stats.blockedCount === 1 ? "" : "s"} blocked.`,
+    stats.waitingOnKxdCount === 0
+      ? "No clients are waiting on KXD."
+      : `${stats.waitingOnKxdCount} item${stats.waitingOnKxdCount === 1 ? "" : "s"} waiting on KXD.`,
+  ];
+
+  return { healthLine, focusLabel, focusDescription, tone, statements };
+}
+
+function pickTodaysFocus(data: WorkPortfolioData): TaskListItem[] {
+  const seen = new Set<number>();
+  const result: TaskListItem[] = [];
+
+  function add(tasks: TaskListItem[]) {
+    for (const task of tasks) {
+      if (seen.has(task.id)) continue;
+      seen.add(task.id);
+      result.push(task);
+      if (result.length >= 3) return;
+    }
+  }
+
+  add(sortWorkItemsByPriority(data.dueToday));
+  if (result.length < 3) add(sortWorkItemsByPriority(data.overdue));
+  if (result.length < 3) {
+    add(
+      sortWorkItemsByPriority(
+        data.tasks.filter((t) => t.priority === "critical" || t.priority === "high"),
+      ),
+    );
+  }
+  if (result.length < 3) {
+    add(data.tasks.filter((t) => t.status === "in-progress"));
+  }
+
+  return result.slice(0, 3);
+}
+
+function focusContext(task: TaskListItem): string {
+  if (task.daysUntilDue === 0) return "Due today";
+  if (task.daysUntilDue != null && task.daysUntilDue < 0) {
+    const days = Math.abs(task.daysUntilDue);
+    return `${days} day${days === 1 ? "" : "s"} overdue`;
+  }
+  if (task.status === "in-progress") return "In progress";
+  if (task.priority === "critical" || task.priority === "high") {
+    return `${TASK_PRIORITY_LABELS[task.priority]} priority`;
+  }
+  return statusLabel(task.status);
+}
+
+function countCompletedThisWeek(completed: TaskListItem[]): number {
+  const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  return completed.filter((task) => {
+    const at = new Date(task.updatedAt).getTime();
+    return !Number.isNaN(at) && at >= weekAgo;
+  }).length;
+}
+
+function fmtCompletedDate(iso: string): string {
+  try {
+    return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  } catch {
+    return "";
   }
 }
 
@@ -76,15 +239,28 @@ export function WorkScreen({
   data,
   initialView,
   adminEmail,
+  adminDisplayName,
 }: {
   data: WorkPortfolioData;
   initialView?: string;
   adminEmail?: string | null;
+  adminDisplayName?: string | null;
 }) {
   const [view, setView] = useState<PortfolioView>(
     (VIEW_OPTIONS.find((v) => v.id === initialView)?.id ?? "kanban") as PortfolioView,
   );
   const [search, setSearch] = useState("");
+
+  const brief = useMemo(() => executionBrief(data.stats), [data.stats]);
+  const todaysFocus = useMemo(() => pickTodaysFocus(data), [data]);
+  const completedThisWeek = useMemo(
+    () => countCompletedThisWeek(data.completedRecent),
+    [data.completedRecent],
+  );
+  const recentlyCompleted = useMemo(
+    () => data.completedRecent.slice(0, 5),
+    [data.completedRecent],
+  );
 
   const q = search.trim().toLowerCase();
   const baseTasks = filterForView(view, data, adminEmail);
@@ -94,6 +270,7 @@ export function WorkScreen({
           t.title.toLowerCase().includes(q) ||
           t.clientName.toLowerCase().includes(q) ||
           t.category.includes(q) ||
+          (t.sourceType?.toLowerCase().includes(q) ?? false) ||
           t.labels.some((l) => l.toLowerCase().includes(q)),
       )
     : baseTasks;
@@ -119,26 +296,104 @@ export function WorkScreen({
     return [...map.entries()];
   }, [filteredTasks]);
 
+  const kpiItems = [
+    {
+      label: "Today's Work",
+      value: String(data.stats.dueTodayCount),
+      sub: "Due today",
+      alert: data.stats.dueTodayCount > 0,
+    },
+    {
+      label: "This Week",
+      value: String(data.stats.dueThisWeekCount),
+      sub: "Due in 7 days",
+    },
+    {
+      label: "Overdue",
+      value: String(data.stats.overdueCount),
+      sub: "Past due date",
+      alert: data.stats.overdueCount > 0,
+    },
+    {
+      label: "Waiting on Client",
+      value: String(data.stats.waitingOnClientCount),
+      sub: "Client action needed",
+      alert: data.stats.waitingOnClientCount > 0,
+    },
+    {
+      label: "Blocked",
+      value: String(data.stats.blockedCount),
+      sub: "Needs review",
+      alert: data.stats.blockedCount > 0,
+    },
+    ...(completedThisWeek > 0
+      ? [
+          {
+            label: "Completed This Week",
+            value: String(completedThisWeek),
+            sub: "Last 7 days",
+          },
+        ]
+      : []),
+    {
+      label: "Estimated Hours",
+      value: `${data.stats.estimatedHoursOpen}h`,
+      sub: "Open work load",
+    },
+  ];
+
   return (
     <OperationsShell activeId="work">
       <KxdPage className="kxd-os-page--ops">
         <OperationsPageHero
-          eyebrow="KXD OS · Client Work"
-          title="Work Manager"
-          lead="Day-to-day execution board — every edit, task, follow-up, and delivery item across the portfolio."
+          eyebrow="KXD OS · Work Items"
+          title={`${timeGreeting()}, ${greetingName(adminDisplayName)}.`}
+          lead={brief.healthLine}
           presence
         />
 
-        <OpsKpiStrip
-          items={[
-            { label: "Open", value: String(data.stats.openCount), alert: data.stats.openCount > 0 },
-            { label: "Blocked", value: String(data.stats.blockedCount), alert: data.stats.blockedCount > 0 },
-            { label: "Due Today", value: String(data.stats.dueTodayCount), alert: data.stats.dueTodayCount > 0 },
-            { label: "Overdue", value: String(data.stats.overdueCount), alert: data.stats.overdueCount > 0 },
-            { label: "Waiting Client", value: String(data.stats.waitingOnClientCount) },
-            { label: "Est. Hours", value: `${data.stats.estimatedHoursOpen}h` },
-          ]}
-        />
+        <div className="kxd-os-ops-hero-row">
+          <ul className="kxd-os-ops-brief-status">
+            {brief.statements.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
+          <OpsFocusPill
+            label={brief.focusLabel}
+            description={brief.focusDescription}
+            tone={brief.tone}
+          />
+        </div>
+
+        <section className="kxd-os-ops-section">
+          <OpsSectionHead label="Today's Focus" count={todaysFocus.length || undefined} />
+          {todaysFocus.length === 0 ? (
+            <OpsCard className="kxd-os-ops-briefing-card">
+              <p className="kxd-os-ops-briefing-card__body">No work scheduled today.</p>
+            </OpsCard>
+          ) : (
+            <OpsCard>
+              <div className="kxd-os-list-stack">
+                {todaysFocus.map((task) => (
+                  <OpsListRow key={task.id} href={`/admin/collections/client-tasks/${task.id}`}>
+                    <div className="kxd-os-ops-list-row__main">
+                      <p className="kxd-os-ops-list-row__title">{task.title}</p>
+                      <p className="kxd-os-ops-list-row__meta">
+                        {task.clientName ? `${task.clientName} · ` : ""}
+                        {focusContext(task)}
+                      </p>
+                    </div>
+                  </OpsListRow>
+                ))}
+              </div>
+            </OpsCard>
+          )}
+        </section>
+
+        <section className="kxd-os-ops-section">
+          <OpsSectionHead label="Execution Snapshot" />
+          <OpsKpiStrip items={kpiItems} />
+        </section>
 
         <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", margin: "1rem 0" }}>
           {VIEW_OPTIONS.map((opt) => (
@@ -152,19 +407,34 @@ export function WorkScreen({
             </button>
           ))}
           <Link href="/admin/collections/client-tasks/create" className="kxd-os-btn kxd-os-btn--ghost kxd-os-btn--sm">
-            New task
+            New work item
           </Link>
         </div>
 
         <input
           className="kxd-notif-select"
           type="search"
-          placeholder="Search tasks, clients, categories, labels…"
+          placeholder="Search clients, work items, requests, projects..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          aria-label="Search work"
+          aria-label="Search work items"
           style={{ width: "100%", maxWidth: "28rem", marginBottom: "1rem" }}
         />
+
+        {data.stats.openCount === 0 ? (
+          <section className="kxd-os-ops-section">
+            <OpsCard className="kxd-os-ops-briefing-card">
+              <h2 className="kxd-os-headline kxd-os-headline--presence">You&apos;re caught up.</h2>
+              <p className="kxd-os-ops-briefing-card__body">
+                No active work items are currently waiting on KXD.
+              </p>
+              <div style={{ marginTop: "var(--kxd-os-space-8)" }}>
+                <OpsSectionHead label="Quick actions" />
+                <OpsQuickGrid items={[...QUICK_ACTIONS]} />
+              </div>
+            </OpsCard>
+          </section>
+        ) : null}
 
         {view === "kanban" ? (
           <WorkKanban byStatus={byStatus} columns={KANBAN_STATUSES} showClient />
@@ -193,7 +463,7 @@ export function WorkScreen({
                   {tasks.slice(0, 8).map((task) => (
                     <OpsListRow key={task.id} href={task.href}>
                       <p className="kxd-os-body">{task.title}</p>
-                      <p className="kxd-os-meta">{task.clientName} · {task.status}</p>
+                      <p className="kxd-os-meta">{task.clientName} · {statusLabel(task.status)}</p>
                     </OpsListRow>
                   ))}
                 </div>
@@ -203,23 +473,50 @@ export function WorkScreen({
         ) : null}
 
         {view !== "kanban" && view !== "by-client" && view !== "by-category" ? (
-          <KxdSection label={VIEW_OPTIONS.find((v) => v.id === view)?.label ?? "Tasks"}>
+          <KxdSection label={VIEW_OPTIONS.find((v) => v.id === view)?.label ?? "Work items"}>
             <div className="kxd-os-list-stack">
               {filteredTasks.length === 0 ? (
-                <p className="kxd-os-meta">No tasks in this view.</p>
+                <p className="kxd-os-meta">No work items in this view.</p>
               ) : (
                 filteredTasks.map((task) => (
-                  <OpsListRow key={task.id} href={task.href}>
+                  <OpsListRow key={task.id} href={`/admin/collections/client-tasks/${task.id}`}>
                     <p className="kxd-os-body">{task.title}</p>
                     <p className="kxd-os-meta">
-                      {task.clientName} · {task.status.replace(/-/g, " ")}
+                      {task.clientName} · {statusLabel(task.status)}
                       {task.dueDate ? ` · ${task.dueDate}` : ""}
+                      {task.sourceType ? ` · ${task.sourceType.replace(/-/g, " ")}` : ""}
                     </p>
                   </OpsListRow>
                 ))
               )}
             </div>
           </KxdSection>
+        ) : null}
+
+        {recentlyCompleted.length > 0 ? (
+          <section className="kxd-os-ops-section">
+            <OpsSectionHead
+              label="Recently Completed"
+              count={recentlyCompleted.length}
+              href="/admin/operations/work?view=completed"
+              linkText="View all"
+            />
+            <OpsCard>
+              <div className="kxd-os-list-stack">
+                {recentlyCompleted.map((task) => (
+                  <OpsListRow key={task.id} href={`/admin/collections/client-tasks/${task.id}`}>
+                    <div className="kxd-os-ops-list-row__main">
+                      <p className="kxd-os-ops-list-row__title">{task.title}</p>
+                      <p className="kxd-os-ops-list-row__meta">
+                        {task.clientName}
+                        {task.updatedAt ? ` · Completed ${fmtCompletedDate(task.updatedAt)}` : ""}
+                      </p>
+                    </div>
+                  </OpsListRow>
+                ))}
+              </div>
+            </OpsCard>
+          </section>
         ) : null}
 
         <div style={{ marginTop: "1.5rem" }}>
@@ -229,7 +526,7 @@ export function WorkScreen({
               {data.byClient.slice(0, 12).map((row) => (
                 <OpsListRow key={row.clientId} href={row.href}>
                   <p className="kxd-os-body">{row.clientName}</p>
-                  <p className="kxd-os-meta">{row.count} open tasks</p>
+                  <p className="kxd-os-meta">{row.count} open work items</p>
                 </OpsListRow>
               ))}
             </div>

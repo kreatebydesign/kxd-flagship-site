@@ -96,6 +96,11 @@ export async function createTask(input: {
   estimatedHours?: number;
   assignedTo?: number;
   createdFrom?: string;
+  sourceType?: string;
+  relatedRetainerId?: number;
+  relatedUpgradeOfferId?: number;
+  internalNotes?: string;
+  clientVisible?: boolean;
 }): Promise<{ success: boolean; taskId?: number; href?: string; error?: string }> {
   const payload = await getPayload({ config });
 
@@ -110,12 +115,16 @@ export async function createTask(input: {
         category: input.category ?? "general",
         status: input.status ?? "to-do",
         priority: input.priority ?? "medium",
-        createdFrom: input.createdFrom ?? "manual",
+        createdFrom: input.createdFrom ?? input.sourceType ?? "manual",
+        sourceType: input.sourceType ?? input.createdFrom ?? "manual",
         project: input.projectId,
         dueDate: input.dueDate,
         estimatedHours: input.estimatedHours,
         assignedTo: input.assignedTo,
-        clientVisible: true,
+        relatedRetainer: input.relatedRetainerId,
+        relatedUpgradeOfferId: input.relatedUpgradeOfferId,
+        internalNotes: input.internalNotes,
+        clientVisible: input.clientVisible ?? true,
       },
       overrideAccess: true,
     });
@@ -169,10 +178,14 @@ export async function createTaskFromSource(input: {
   description?: string;
   category?: string;
   createdFrom: string;
+  sourceType?: string;
   relatedRequestId?: number;
   relatedDeliverableId?: number;
   relatedPlaybookId?: number;
+  relatedRetainerId?: number;
+  relatedUpgradeOfferId?: number;
   projectId?: number;
+  clientVisible?: boolean;
 }): Promise<{ success: boolean; taskId?: number; href?: string; error?: string }> {
   const payload = await getPayload({ config });
 
@@ -188,11 +201,14 @@ export async function createTaskFromSource(input: {
         status: "to-do",
         priority: "medium",
         createdFrom: input.createdFrom,
+        sourceType: input.sourceType ?? input.createdFrom,
         project: input.projectId,
         relatedRequest: input.relatedRequestId,
         relatedDeliverable: input.relatedDeliverableId,
         relatedPlaybook: input.relatedPlaybookId,
-        clientVisible: true,
+        relatedRetainer: input.relatedRetainerId,
+        relatedUpgradeOfferId: input.relatedUpgradeOfferId,
+        clientVisible: input.clientVisible ?? true,
       },
       overrideAccess: true,
     });

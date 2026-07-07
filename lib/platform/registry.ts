@@ -7,8 +7,8 @@ import type {
 
 /** Single source of truth — update per platform phase completion. */
 export const PLATFORM_META: Omit<PlatformMeta, "buildDate"> = {
-  currentPhase: "11D",
-  currentPhaseTitle: "Platform Progress Dashboard",
+  currentPhase: "12A.2",
+  currentPhaseTitle: "KXD Work Items Foundation",
   version: "0.1.0",
   editionLabel: "KXD Core (Edition 1)",
 };
@@ -81,6 +81,14 @@ export const PLATFORM_PHASES: PlatformPhaseDefinition[] = [
     completedAt: "2026-07-06",
   },
   {
+    id: "phase-12a2",
+    number: "12A.2",
+    title: "KXD Work Items Foundation",
+    status: "completed",
+    description: "Work Items facade, schema extensions, Activity Engine hooks, Client Command Work tab, portal request spawning.",
+    completedAt: "2026-07-06",
+  },
+  {
     id: "phase-12",
     number: "12",
     title: "Timeline Unification",
@@ -145,10 +153,10 @@ export const PLATFORM_SUBSYSTEMS: PlatformSubsystemDefinition[] = [
     category: "Operations",
     owner: "shared-core",
     maturity: "beta",
-    completionPercent: 72,
-    status: "consolidation",
+    completionPercent: 82,
+    status: "active",
     dependencies: ["Timeline", "Intelligence"],
-    lastCompletedPhase: "11C",
+    lastCompletedPhase: "12A.2",
     currentPhase: "12",
     href: "/admin/operations/client-command/backfill",
     description: "Canonical client activity publishing with dedupe.",

@@ -56,6 +56,7 @@ export interface TaskListItem {
   title: string;
   description?: string | null;
   category: TaskCategory;
+  sourceType?: string | null;
   priority: TaskPriority;
   status: TaskStatus;
   assignedTo?: string | null;
@@ -75,6 +76,7 @@ export interface WorkPortfolioData {
   byStatus: Record<TaskStatus, TaskListItem[]>;
   byClient: Array<{ clientId: number; clientName: string; count: number; blocked: number; href: string }>;
   dueToday: TaskListItem[];
+  dueThisWeek: TaskListItem[];
   overdue: TaskListItem[];
   waitingOnClient: TaskListItem[];
   waitingOnKxd: TaskListItem[];
@@ -83,6 +85,7 @@ export interface WorkPortfolioData {
     openCount: number;
     blockedCount: number;
     dueTodayCount: number;
+    dueThisWeekCount: number;
     overdueCount: number;
     waitingOnClientCount: number;
     waitingOnKxdCount: number;

@@ -116,6 +116,8 @@ export function ClientCommandWorkspace({
             const badge =
               tab.id === "emails" && data.communications.needsReplyCount > 0
                 ? data.communications.needsReplyCount
+                : tab.id === "work" && data.workBoard && data.workBoard.stats.openCount > 0
+                  ? data.workBoard.stats.openCount
                 : tab.id === "actions" && data.actions.openCount > 0
                   ? data.actions.openCount
                   : tab.id === "proposals" && data.proposals.pendingFollowUpCount > 0

@@ -1,6 +1,7 @@
 export const COMMAND_WORKSPACE_TABS = [
   { id: "overview", label: "Overview" },
   { id: "timeline", label: "Timeline" },
+  { id: "work", label: "Work" },
   { id: "projects", label: "Projects" },
   { id: "requests", label: "Requests" },
   { id: "invoices", label: "Invoices" },

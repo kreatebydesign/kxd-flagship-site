@@ -20,6 +20,7 @@ import { ClientActionsPanel } from "./ClientActionsPanel";
 import { ClientProposalsPanel } from "./ClientProposalsPanel";
 import { ClientContractsPanel } from "./ClientContractsPanel";
 import { ClientFinancialPanel } from "./ClientFinancialPanel";
+import { ClientWorkPanel } from "./ClientWorkPanel";
 
 function statusLabel(status: string): string {
   return status.replace(/-/g, " ");
@@ -37,6 +38,8 @@ export function CommandWorkspaceTabPanel({
       return <OverviewPanel data={data} />;
     case "timeline":
       return <ClientTimelinePanel data={data} />;
+    case "work":
+      return <ClientWorkPanel board={data.workBoard} />;
     case "projects":
       return <ProjectsPanel data={data} />;
     case "requests":

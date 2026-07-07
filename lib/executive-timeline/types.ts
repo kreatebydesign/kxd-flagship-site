@@ -43,6 +43,7 @@ export type ExecutiveTimelineSourceModule =
   | "Client Success"
   | "Emails"
   | "Communications"
+  | "Work"
   | "Manual";
 
 export interface CreateExecutiveEventInput {

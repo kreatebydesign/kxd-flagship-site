@@ -23,6 +23,11 @@ export default async function WorkPortfolioPage({
       data={data}
       initialView={params.view}
       adminEmail={typeof user.email === "string" ? user.email : null}
+      adminDisplayName={
+        typeof user.displayName === "string" && user.displayName.trim()
+          ? user.displayName.trim()
+          : null
+      }
     />
   );
 }

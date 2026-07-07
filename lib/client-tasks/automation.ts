@@ -3,7 +3,6 @@ import "server-only";
 import type { Payload } from "payload";
 import { clearBrainCache } from "@/lib/brain/engine";
 import { recordBrainMemory } from "@/lib/brain/memory";
-import { createExecutiveEvent } from "@/lib/executive-timeline/create-event";
 import { persistAutomationEvent, publishNotification } from "@/lib/automation/actions";
 import type { TaskStatus } from "./types";
 
@@ -44,26 +43,13 @@ export async function onTaskCompleted(
     category: string;
   },
 ): Promise<void> {
-  await createExecutiveEvent(
-    {
-      client: input.clientId,
-      eventType: "client-milestone",
-      title: `Task completed — ${input.taskTitle}`,
-      summary: `${input.category} work completed`,
-      category: "project",
-      sourceModule: "Manual",
-      metadata: { taskId: input.taskId },
-    },
-    payload,
-  );
-
   await publishNotification(
     {
       title: `Task completed — ${input.taskTitle}`,
       summary: "Client work item marked complete",
       clientId: input.clientId,
       severity: "success",
-      module: "Client Work",
+      module: "Work Items",
       metadata: {
         href: `/admin/operations/work/${input.clientId}`,
         taskId: input.taskId,
@@ -105,7 +91,7 @@ export async function onTaskBlocked(
       summary: input.reason ?? "Work item requires attention",
       clientId: input.clientId,
       severity: "warning",
-      module: "Client Work",
+      module: "Work Items",
       metadata: {
         href: `/admin/operations/work/${input.clientId}`,
         taskId: input.taskId,

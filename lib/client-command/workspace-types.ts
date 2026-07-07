@@ -1,3 +1,4 @@
+import type { ClientWorkBoardData } from "@/lib/client-tasks/types";
 import type { MergedExecutiveClientRow } from "@/lib/executive-client-profile";
 import type { ClientCommandCenterData, CommandDoc } from "./types";
 
@@ -121,6 +122,7 @@ export interface ClientWorkspaceBundle extends ClientCommandCenterData {
   financial: WorkspaceFinancialSnapshot;
   financialIntelligence: FinancialIntelligenceSnapshot;
   memory: ClientMemorySnapshot;
+  workBoard: ClientWorkBoardData | null;
   workspaceQuickActions: CommandWorkspaceQuickAction[];
   analytics: WorkspaceAnalyticsSnapshot;
   header: {
@@ -150,4 +152,5 @@ export type ClientWorkspaceMemoryInput = Omit<
   | "conversionIntelligence"
   | "financial"
   | "financialIntelligence"
+  | "workBoard"
 >;
