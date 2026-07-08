@@ -1,8 +1,14 @@
+import type { CesModuleId } from "@/lib/ces";
+import { CES_MODULE_REGISTRY } from "@/lib/ces/modules/registry";
+import { getCesNavItems, resolveCesNavId } from "@/lib/ces/modules/nav";
+import type { CesNavGroupId } from "@/lib/ces/modules/types";
+import type { ResolvedExperienceProfile } from "@/lib/ces";
 import { CLIENT_HQ_MODULES, isClientHqModuleEnabled, type ClientHqModuleId } from "./modules";
 import { getEditionBranding, getEditionNavigation } from "@/lib/editions";
 import { isPortalNavEnabled } from "@/lib/editions/navigation";
 
 export type ClientHqNavId = ClientHqModuleId;
+export type PortalNavId = ClientHqNavId | CesModuleId;
 
 export interface ClientHqNavItem {
   id: ClientHqNavId;
@@ -15,6 +21,25 @@ export interface ClientHqNavGroup {
   label: string;
   items: ClientHqNavItem[];
 }
+
+export interface PortalNavItem {
+  id: PortalNavId;
+  label: string;
+  href: string;
+}
+
+export interface PortalNavGroup {
+  label: string;
+  items: PortalNavItem[];
+}
+
+const PORTAL_GROUP_TO_CES: Record<string, CesNavGroupId> = {
+  Headquarters: "headquarters",
+  Work: "work",
+  Library: "library",
+  Intelligence: "intelligence",
+  Account: "account",
+};
 
 const NAV_ITEMS: ClientHqNavItem[] = [
   { id: "overview", label: "Overview", href: "/portal", moduleId: "overview" },
@@ -75,6 +100,53 @@ export function getEnabledClientHqNavGroups(): ClientHqNavGroup[] {
         label: editionNav.portalNavLabels[item.id] ?? item.label,
       })),
   })).filter((group) => group.items.length > 0);
+}
+
+/** Client HQ nav + CES module items when profile enables them */
+export function getEnabledPortalNavGroups(
+  profile?: ResolvedExperienceProfile | null,
+): PortalNavGroup[] {
+  const base = getEnabledClientHqNavGroups();
+  if (!profile) {
+    return base.map((group) => ({
+      label: group.label,
+      items: group.items.map(({ id, label, href }) => ({ id, label, href })),
+    }));
+  }
+
+  const cesItems = getCesNavItems(profile);
+
+  return base.map((group) => {
+    const cesGroupId = PORTAL_GROUP_TO_CES[group.label];
+    const cesForGroup = cesItems
+      .filter((item) => {
+        const def = CES_MODULE_REGISTRY.find((d) => d.moduleId === item.moduleId);
+        return def?.navGroup === cesGroupId;
+      })
+      .map((item) => ({
+        id: item.id as PortalNavId,
+        label: item.label,
+        href: item.href,
+      }));
+
+    return {
+      label: group.label,
+      items: [
+        ...group.items.map(({ id, label, href }) => ({ id, label, href })),
+        ...cesForGroup,
+      ],
+    };
+  });
+}
+
+export function resolvePortalNavId(pathname: string): PortalNavId {
+  const cesId = resolveCesNavId(pathname);
+  if (cesId) return cesId as PortalNavId;
+
+  const allItems = CLIENT_HQ_NAV_GROUPS.flatMap((g) => g.items);
+  const sorted = [...allItems].sort((a, b) => b.href.length - a.href.length);
+  const match = sorted.find((item) => clientHqNavIsActive(pathname, item.href));
+  return match?.id ?? "overview";
 }
 
 export function getPortalEditionBranding() {

@@ -206,6 +206,7 @@ export async function TodayScreen() {
   let videoActive: AnyDoc[] = [];
   let socialActive: AnyDoc[] = [];
   let newReqsToday: AnyDoc[] = [];
+  let websiteReviewNew: AnyDoc[] = [];
   let noteReminders = { dueToday: [] as Awaited<ReturnType<typeof getDailyBriefingReminders>>["dueToday"], overdue: [] as Awaited<ReturnType<typeof getDailyBriefingReminders>>["overdue"], upcoming: [] as Awaited<ReturnType<typeof getDailyBriefingReminders>>["upcoming"] };
   let notifSummary = { unread: 0, critical: 0, dueToday: 0, recentlyResolved: 0 };
 
@@ -333,6 +334,19 @@ export async function TodayScreen() {
         where: { createdAt: { greater_than_equal: yesterdayISO } },
         sort: "-createdAt",
       }),
+      payload.find({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        collection: "client-requests" as any,
+        depth: 1,
+        limit: 8,
+        where: {
+          and: [
+            { experienceModule: { equals: "website-review" } },
+            { status: { equals: "new" } },
+          ],
+        },
+        sort: "-createdAt",
+      }),
     ]),
   ]);
 
@@ -348,6 +362,7 @@ export async function TodayScreen() {
       videoActiveR,
       socialActiveR,
       newReqsTodayR,
+      websiteReviewNewR,
     ] = settled;
 
     if (overdueReqsR.status === "fulfilled") overdueReqs = overdueReqsR.value.docs as AnyDoc[];
@@ -363,6 +378,9 @@ export async function TodayScreen() {
     if (videoActiveR.status === "fulfilled") videoActive = videoActiveR.value.docs as AnyDoc[];
     if (socialActiveR.status === "fulfilled") socialActive = socialActiveR.value.docs as AnyDoc[];
     if (newReqsTodayR.status === "fulfilled") newReqsToday = newReqsTodayR.value.docs as AnyDoc[];
+    if (websiteReviewNewR.status === "fulfilled") {
+      websiteReviewNew = websiteReviewNewR.value.docs as AnyDoc[];
+    }
     noteReminders = noteRemindersData;
     notifSummary = notifSummaryData;
   } catch {
@@ -560,9 +578,45 @@ export async function TodayScreen() {
                 sub: "Last 7 days",
                 alert: false,
               },
+              {
+                label: "Website Review",
+                value: String(websiteReviewNew.length),
+                sub: "New client revisions",
+                alert: websiteReviewNew.length > 0,
+              },
             ]}
           />
         </section>
+
+        {websiteReviewNew.length > 0 ? (
+          <section className="kxd-os-ops-section">
+            <OpsSectionHead
+              label="Website Review — New"
+              count={websiteReviewNew.length}
+              href="/admin/operations/review-inbox"
+              linkText="Review Inbox →"
+            />
+            <OpsCard>
+              {websiteReviewNew.map((req) => (
+                <OpsListRow
+                  key={req.id as number}
+                  href={`/admin/operations/review-inbox/${req.id as number}`}
+                >
+                  <div className="kxd-os-ops-list-row__main">
+                    <p className="kxd-os-ops-list-row__title">{(req.requestTitle as string) ?? "—"}</p>
+                    <p className="kxd-os-ops-list-row__meta">
+                      {resolveName(req.client)}
+                      {req.pageContext ? ` · ${req.pageContext as string}` : ""}
+                      {" · "}
+                      {req.requestedBy ? `${req.requestedBy as string}` : "Client"}
+                    </p>
+                  </div>
+                  <OpsStatusBadge label="New" variant="status" />
+                </OpsListRow>
+              ))}
+            </OpsCard>
+          </section>
+        ) : null}
 
         {(noteReminders.dueToday.length > 0 || noteReminders.overdue.length > 0) ? (
           <section className="kxd-os-ops-section">

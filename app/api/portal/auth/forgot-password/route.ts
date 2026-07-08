@@ -50,6 +50,8 @@ export async function POST(req: NextRequest) {
           <p>This link expires in 1 hour. If you did not request this, you can ignore this email.</p>
         `,
       });
+    } else if (process.env.NODE_ENV !== "production") {
+      console.info("[KXD Portal] Local dev password reset link:", resetUrl);
     } else {
       console.warn("[KXD Portal] RESEND_API_KEY not set — password reset email not sent.");
     }

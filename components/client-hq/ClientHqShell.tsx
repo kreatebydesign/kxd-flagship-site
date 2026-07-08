@@ -2,19 +2,21 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { KxdLogo } from "@/components/ui/KxdLogo";
 import { KxdShell } from "@/components/os";
+import type { ResolvedExperienceProfile } from "@/lib/ces";
 import type { EditionBranding } from "@/lib/editions";
 import { editionBrandingCssVars } from "@/lib/editions";
 import { ClientHqLogoutButton } from "./ClientHqLogoutButton";
 import {
   clientHqNavIsActive,
-  getEnabledClientHqNavGroups,
-  type ClientHqNavId,
+  getEnabledPortalNavGroups,
+  type PortalNavId,
 } from "@/lib/portal/nav";
 
 export interface ClientHqShellProps {
-  activeId: ClientHqNavId;
+  activeId: PortalNavId;
   companyName?: string;
   editionBranding?: EditionBranding;
+  experienceProfile?: ResolvedExperienceProfile;
   children: ReactNode;
 }
 
@@ -22,25 +24,44 @@ export function ClientHqShell({
   activeId,
   companyName,
   editionBranding,
+  experienceProfile,
   children,
 }: ClientHqShellProps) {
-  const navGroups = getEnabledClientHqNavGroups();
+  const navGroups = getEnabledPortalNavGroups(experienceProfile);
   const branding = editionBranding;
-  const cssVars = branding ? editionBrandingCssVars(branding) : undefined;
-  const sidebarLabel = branding?.portal.sidebarLabel ?? "Client HQ";
-  const footerText = branding?.footerText ?? sidebarLabel;
+  const cssVars = experienceProfile
+    ? experienceProfile.cssVars
+    : branding
+      ? editionBrandingCssVars(branding)
+      : undefined;
+
+  const displayName =
+    experienceProfile?.identity.clientName ?? companyName ?? "Your workspace";
+  const sidebarLabel =
+    experienceProfile?.hospitality.portalSidebarLabel ??
+    branding?.portal.sidebarLabel ??
+    "Client HQ";
+  const reassuranceLine = experienceProfile?.hospitality.reassuranceLine;
+  const partnerLine = experienceProfile?.hospitality.partnerFooterLine;
+  const showPartnerMark = experienceProfile?.hospitality.showPartnerMark ?? true;
+  const clientLogo = experienceProfile?.identity.logoUrl;
 
   return (
     <KxdShell className="kxd-os-shell--app">
       <div className="kxd-os-app" style={cssVars as React.CSSProperties}>
-        <aside className="kxd-os-sidebar" aria-label="Client HQ">
-          <div className="kxd-os-sidebar__brand">
-            <KxdLogo height={18} />
-            {companyName ? (
-              <p className="kxd-os-meta kxd-os-sidebar__date" style={{ marginTop: "0.5rem" }}>
-                {companyName}
-              </p>
-            ) : null}
+        <aside className="kxd-os-sidebar" aria-label={sidebarLabel}>
+          <div className="kxd-ces-identity">
+            {clientLogo ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={clientLogo}
+                alt={experienceProfile?.identity.logoAlt ?? displayName}
+                className="kxd-ces-identity__logo"
+              />
+            ) : (
+              <p className="kxd-ces-identity__name">{displayName}</p>
+            )}
+            <p className="kxd-ces-identity__workspace">{sidebarLabel}</p>
           </div>
 
           <div className="kxd-os-sidebar__nav">
@@ -70,7 +91,20 @@ export function ClientHqShell({
           </div>
 
           <div className="kxd-os-sidebar__foot">
-            <p className="kxd-os-meta kxd-os-sidebar__date">{footerText}</p>
+            {reassuranceLine ? (
+              <p className="kxd-ces-trust-line">{reassuranceLine}</p>
+            ) : null}
+            {showPartnerMark ? (
+              <p className="kxd-ces-partner-mark">
+                {experienceProfile ? (
+                  partnerLine
+                ) : (
+                  <>
+                    <KxdLogo height={12} /> · {partnerLine ?? sidebarLabel}
+                  </>
+                )}
+              </p>
+            ) : null}
             <ClientHqLogoutButton />
           </div>
         </aside>

@@ -6,6 +6,7 @@ import { getPayload } from "payload";
 import config from "@payload-config";
 
 import { PORTAL_SESSION_COOKIE } from "./constants";
+
 const SESSION_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
 
 export type PortalSession = {
@@ -14,30 +15,31 @@ export type PortalSession = {
   email: string;
   displayName: string;
   clientName: string;
+  welcomeCompletedAt: string | null;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDoc = Record<string, any>;
 
-function getSecret(): string {
-  const secret = process.env.PAYLOAD_SECRET?.trim();
-  if (!secret) throw new Error("PAYLOAD_SECRET is not configured.");
-  return secret;
+/** Must match payload.config.ts secret resolution (incl. dev fallback). */
+async function getPayloadSecret(): Promise<string> {
+  const payload = await getPayload({ config });
+  return payload.secret;
 }
 
-function signPortalUserId(portalUserId: number): string {
-  const sig = createHmac("sha256", getSecret())
+function signPortalUserId(portalUserId: number, secret: string): string {
+  const sig = createHmac("sha256", secret)
     .update(`portal:${portalUserId}`)
     .digest("hex");
   return `${portalUserId}.${sig}`;
 }
 
-function parseSignedSession(value: string): number | null {
+function parseSignedSession(value: string, secret: string): number | null {
   const [idPart, sig] = value.split(".");
   if (!idPart || !sig) return null;
   const portalUserId = Number(idPart);
   if (!Number.isFinite(portalUserId)) return null;
-  const expected = createHmac("sha256", getSecret())
+  const expected = createHmac("sha256", secret)
     .update(`portal:${portalUserId}`)
     .digest("hex");
   if (sig.length !== expected.length) return null;
@@ -52,8 +54,9 @@ function parseSignedSession(value: string): number | null {
 }
 
 export async function createPortalSession(portalUserId: number): Promise<void> {
+  const secret = await getPayloadSecret();
   const cookieStore = await cookies();
-  cookieStore.set(PORTAL_SESSION_COOKIE, signPortalUserId(portalUserId), {
+  cookieStore.set(PORTAL_SESSION_COOKIE, signPortalUserId(portalUserId, secret), {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
@@ -72,13 +75,14 @@ export async function getPortalSession(): Promise<PortalSession | null> {
   const raw = cookieStore.get(PORTAL_SESSION_COOKIE)?.value;
   if (!raw) return null;
 
-  const portalUserId = parseSignedSession(raw);
+  const secret = await getPayloadSecret();
+  const portalUserId = parseSignedSession(raw, secret);
   if (!portalUserId) return null;
 
   const payload = await getPayload({ config });
 
   try {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const user = await payload.findByID({
       collection: "portal-users" as any,
       id: portalUserId,
@@ -107,6 +111,9 @@ export async function getPortalSession(): Promise<PortalSession | null> {
       email: String(user.email ?? ""),
       displayName: String(user.displayName ?? clientName),
       clientName,
+      welcomeCompletedAt: user.welcomeCompletedAt
+        ? String(user.welcomeCompletedAt)
+        : null,
     };
   } catch {
     return null;

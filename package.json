@@ -14,7 +14,9 @@
     "seed:services": "tsx scripts/seed-services.ts",
     "seed:projects": "tsx scripts/seed-projects.ts",
     "seed:clients": "tsx scripts/seed-clients.ts",
-    "seed:executive-profiles": "tsx scripts/seed-executive-client-profiles.ts"
+    "seed:executive-profiles": "tsx scripts/seed-executive-client-profiles.ts",
+    "seed:primal-experience": "tsx scripts/seed-primal-experience-profile.ts",
+    "seed:portal-user": "tsx scripts/seed-portal-user.ts"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "^3.84.1",

@@ -87,6 +87,34 @@ export const ClientRequests: CollectionConfig = {
                 description: "Full description of what the client is requesting.",
               },
             },
+            {
+              name: "experienceModule",
+              type: "select",
+              label: "Experience Module",
+              options: [{ label: "Website Review", value: "website-review" }],
+              admin: {
+                description:
+                  "CES module that created this request. Portal Website Review requests are tagged here.",
+              },
+            },
+            {
+              name: "pageContext",
+              type: "text",
+              label: "Page Context",
+              admin: {
+                description:
+                  "Human-readable page location — derived from review context when available.",
+              },
+            },
+            {
+              name: "reviewContext",
+              type: "json",
+              label: "Review Context",
+              admin: {
+                description:
+                  "Structured page/section context from Website Review (supports future review URL integration).",
+              },
+            },
           ],
         },
 

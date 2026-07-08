@@ -654,24 +654,24 @@ export async function getPortalOverview(session: PortalSession): Promise<PortalO
 
   const quickActions = [
     {
-      label: "New request",
+      label: "Request an update",
       href: "/portal/requests",
-      description: "Ask your KXD team for support or a change.",
+      description: "Share a change or question with your KXD team.",
     },
     {
       label: "View deliverables",
       href: "/portal/deliverables",
-      description: "See what is in progress and what is due.",
+      description: "See what's in progress and what's due.",
     },
     {
       label: "Website health",
       href: "/portal/website-health",
-      description: "Review performance, SEO, and site status.",
+      description: "Performance, SEO, and site status at a glance.",
     },
     {
       label: "Your assets",
       href: "/portal/assets",
-      description: "Download logos, files, and brand materials.",
+      description: "Logos, files, and brand materials.",
     },
   ];
 

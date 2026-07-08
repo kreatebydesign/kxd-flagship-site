@@ -2,33 +2,30 @@
 
 import { usePathname } from "next/navigation";
 import type { EditionBranding } from "@/lib/editions";
+import type { ResolvedExperienceProfile } from "@/lib/ces";
 import { ClientHqShell } from "./ClientHqShell";
-import { CLIENT_HQ_NAV_GROUPS, clientHqNavIsActive, type ClientHqNavId } from "@/lib/portal/nav";
-
-function resolveActiveNavId(pathname: string): ClientHqNavId {
-  const allItems = CLIENT_HQ_NAV_GROUPS.flatMap((g) => g.items);
-  const sorted = [...allItems].sort((a, b) => b.href.length - a.href.length);
-  const match = sorted.find((item) => clientHqNavIsActive(pathname, item.href));
-  return match?.id ?? "overview";
-}
+import { resolvePortalNavId } from "@/lib/portal/nav";
 
 export function ClientHqAppShell({
   children,
   companyName,
   editionBranding,
+  experienceProfile,
 }: {
   children: React.ReactNode;
   companyName?: string;
   editionBranding?: EditionBranding;
+  experienceProfile?: ResolvedExperienceProfile;
 }) {
   const pathname = usePathname();
-  const activeId = resolveActiveNavId(pathname);
+  const activeId = resolvePortalNavId(pathname);
 
   return (
     <ClientHqShell
       activeId={activeId}
       companyName={companyName}
       editionBranding={editionBranding}
+      experienceProfile={experienceProfile}
     >
       {children}
     </ClientHqShell>

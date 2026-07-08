@@ -41,6 +41,12 @@ import * as migration_20260714_phase9c_proposal_conversion_contracts from './202
 import * as migration_20260715_phase9d_financial_command_center from './20260715_phase9d_financial_command_center';
 import * as migration_20260716_phase10a_performance_reports from './20260716_phase10a_performance_reports';
 import * as migration_20260717_phase12a2_work_items from './20260717_phase12a2_work_items';
+import * as migration_20260718_phase12a_ces_experience_profiles from './20260718_phase12a_ces_experience_profiles';
+import * as migration_20260719_phase12a_ces_enabled_modules_json from './20260719_phase12a_ces_enabled_modules_json';
+import * as migration_20260720_phase12a5_website_review_requests from './20260720_phase12a5_website_review_requests';
+import * as migration_20260721_phase12c_website_review_v2 from './20260721_phase12c_website_review_v2';
+import * as migration_20260722_phase12d_website_review_schema_ensure from './20260722_phase12d_website_review_schema_ensure';
+import * as migration_20260723_phase12h_portal_welcome from './20260723_phase12h_portal_welcome';
 
 export const migrations = [
   {
@@ -257,5 +263,35 @@ export const migrations = [
     up: migration_20260717_phase12a2_work_items.up,
     down: migration_20260717_phase12a2_work_items.down,
     name: '20260717_phase12a2_work_items',
+  },
+  {
+    up: migration_20260718_phase12a_ces_experience_profiles.up,
+    down: migration_20260718_phase12a_ces_experience_profiles.down,
+    name: '20260718_phase12a_ces_experience_profiles',
+  },
+  {
+    up: migration_20260719_phase12a_ces_enabled_modules_json.up,
+    down: migration_20260719_phase12a_ces_enabled_modules_json.down,
+    name: '20260719_phase12a_ces_enabled_modules_json',
+  },
+  {
+    up: migration_20260720_phase12a5_website_review_requests.up,
+    down: migration_20260720_phase12a5_website_review_requests.down,
+    name: '20260720_phase12a5_website_review_requests',
+  },
+  {
+    up: migration_20260721_phase12c_website_review_v2.up,
+    down: migration_20260721_phase12c_website_review_v2.down,
+    name: '20260721_phase12c_website_review_v2',
+  },
+  {
+    up: migration_20260722_phase12d_website_review_schema_ensure.up,
+    down: migration_20260722_phase12d_website_review_schema_ensure.down,
+    name: '20260722_phase12d_website_review_schema_ensure',
+  },
+  {
+    up: migration_20260723_phase12h_portal_welcome.up,
+    down: migration_20260723_phase12h_portal_welcome.down,
+    name: '20260723_phase12h_portal_welcome',
   },
 ];

@@ -15,10 +15,12 @@ import { CaseStudies } from "./payload/collections/CaseStudies.ts";
 import { ClientCommunications } from "./payload/collections/ClientCommunications.ts";
 import { ClientActions } from "./payload/collections/ClientActions.ts";
 import { ClientInfrastructure } from "./payload/collections/ClientInfrastructure.ts";
+import { ClientExperienceProfiles } from "./payload/collections/ClientExperienceProfiles.ts";
 import { ClientOnboarding } from "./payload/collections/ClientOnboarding.ts";
 import { ClientTimelineEvents } from "./payload/collections/ClientTimelineEvents.ts";
 import { ClientProjects } from "./payload/collections/ClientProjects.ts";
 import { ClientRequests } from "./payload/collections/ClientRequests.ts";
+import { ClientReviewMedia } from "./payload/collections/ClientReviewMedia.ts";
 import { ClientTasks } from "./payload/collections/ClientTasks.ts";
 import { ProposalActivity } from "./payload/collections/ProposalActivity.ts";
 import { ProposalConversions } from "./payload/collections/ProposalConversions.ts";
@@ -152,12 +154,14 @@ export default buildConfig({
     ClientProjects,
     MonthlyDeliverables,
     ClientRequests,
+    ClientReviewMedia,
     ClientCommunications,
     ClientActions,
     ClientTasks,
     GenesisSessions,
     WebsiteQAChecks,
     ClientOnboarding,
+    ClientExperienceProfiles,
     ClientTimelineEvents,
     ExecutiveTimelineEvents,
     AutomationEvents,

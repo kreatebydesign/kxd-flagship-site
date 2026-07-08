@@ -15,6 +15,7 @@ export type OperationsNavId =
   | "automation"
   | "playbooks"
   | "work"
+  | "review-inbox"
   | "client-success"
   | "growth"
   | "client-import"
@@ -85,6 +86,7 @@ export const NAV_GROUPS: OperationsNavGroup[] = [
       { id: "automation", label: "Automation", href: "/admin/operations/automation" },
       { id: "launch-qa", label: "Launch QA", href: "/admin/operations/launch-qa" },
       { id: "work", label: "Work Items", href: "/admin/operations/work" },
+      { id: "review-inbox", label: "Review Inbox", href: "/admin/operations/review-inbox" },
       { id: "playbooks", label: "Playbooks", href: "/admin/operations/playbooks" },
       { id: "growth", label: "Growth", href: "/admin/operations/growth" },
       { id: "reports", label: "Reports", href: "/admin/operations/reports" },

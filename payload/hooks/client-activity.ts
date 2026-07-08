@@ -8,6 +8,11 @@ import {
   publishRequestActivity,
   publishRetainerActivity,
 } from "@/lib/client-command/activity/publish";
+import { publishWebsiteReviewActivity } from "@/lib/client-command/activity/website-review";
+import {
+  mapRequestStatusToReview,
+  type WebsiteReviewClientStatus,
+} from "@/lib/ces/vocabulary/website-review";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDoc = Record<string, any>;
@@ -18,6 +23,28 @@ function relId(value: unknown): number | null {
     return Number((value as AnyDoc).id);
   }
   return null;
+}
+
+async function publishWebsiteReviewStatusActivity(
+  doc: AnyDoc,
+  clientStatus: WebsiteReviewClientStatus,
+  payload: Parameters<typeof publishWebsiteReviewActivity>[1],
+  timestamp?: string,
+  author?: string,
+): Promise<void> {
+  const clientId = relId(doc.client);
+  if (!clientId) return;
+
+  await publishWebsiteReviewActivity(
+    {
+      clientId,
+      requestId: doc.id as number,
+      clientStatus,
+      author,
+      timestamp,
+    },
+    payload,
+  );
 }
 
 export const publishProjectActivityHook: CollectionAfterChangeHook = async ({
@@ -82,6 +109,7 @@ export const publishRequestActivityHook: CollectionAfterChangeHook = async ({
 
   const requestId = doc.id as number;
   const title = String(doc.requestTitle ?? "Request");
+  const isWebsiteReview = doc.experienceModule === "website-review";
 
   try {
     if (operation === "create") {
@@ -98,10 +126,36 @@ export const publishRequestActivityHook: CollectionAfterChangeHook = async ({
         },
         req.payload,
       );
+
+      if (isWebsiteReview) {
+        await publishWebsiteReviewStatusActivity(
+          doc,
+          "review-received",
+          req.payload,
+          doc.createdAt ? String(doc.createdAt) : undefined,
+          doc.requestedBy ? String(doc.requestedBy) : undefined,
+        );
+      }
     }
 
     const status = String(doc.status ?? "");
     const previousStatus = String((previousDoc as AnyDoc | undefined)?.status ?? "");
+
+    if (
+      isWebsiteReview &&
+      operation === "update" &&
+      status &&
+      status !== previousStatus
+    ) {
+      const clientStatus = mapRequestStatusToReview(status);
+      await publishWebsiteReviewStatusActivity(
+        doc,
+        clientStatus,
+        req.payload,
+        (doc.updatedAt as string) || undefined,
+      );
+    }
+
     if (status === "complete" && previousStatus !== "complete") {
       await publishRequestActivity(
         {

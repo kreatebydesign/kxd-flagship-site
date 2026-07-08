@@ -1,0 +1,140 @@
+/**
+ * POST /api/portal/website-review/upload
+ * Multipart upload for Website Review attachments.
+ */
+import { NextRequest, NextResponse } from "next/server";
+import { getPayload } from "payload";
+import config from "@payload-config";
+import {
+  isWebsiteReviewMimeAllowed,
+  WEBSITE_REVIEW_MAX_FILE_BYTES,
+} from "@/lib/ces/modules/website-review/attachments";
+import { mapReviewMediaDocToAttachment } from "@/lib/ces/modules/website-review/attachments-server";
+import { getPortalSession } from "@/lib/portal/session";
+
+export const dynamic = "force-dynamic";
+
+export async function POST(req: NextRequest) {
+  const session = await getPortalSession();
+  if (!session) {
+    return NextResponse.json({ ok: false, message: "Unauthorized." }, { status: 401 });
+  }
+
+  try {
+    const formData = await req.formData();
+    const file = formData.get("file");
+
+    if (!file || !(file instanceof File)) {
+      return NextResponse.json(
+        { ok: false, message: "Please choose a file to upload." },
+        { status: 400 },
+      );
+    }
+
+    if (file.size > WEBSITE_REVIEW_MAX_FILE_BYTES) {
+      return NextResponse.json(
+        { ok: false, message: "Files must be 10 MB or smaller." },
+        { status: 400 },
+      );
+    }
+
+    const mimeType = file.type || "application/octet-stream";
+    if (!isWebsiteReviewMimeAllowed(mimeType)) {
+      return NextResponse.json(
+        { ok: false, message: "That file type isn’t supported. Try an image, PDF, or document." },
+        { status: 400 },
+      );
+    }
+
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const payload = await getPayload({ config });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const record = await payload.create({
+      collection: "client-review-media" as any,
+      data: {
+        client: session.clientId,
+        originalFilename: file.name,
+        uploadedByEmail: session.email,
+      } as any,
+      file: {
+        data: buffer,
+        mimetype: mimeType,
+        name: file.name,
+        size: file.size,
+      },
+      overrideAccess: true,
+    });
+
+    const attachment = mapReviewMediaDocToAttachment(record as Record<string, unknown>);
+
+    return NextResponse.json({ ok: true, attachment });
+  } catch (err) {
+    console.error("[KXD Portal] Website review upload failed:", err);
+    return NextResponse.json(
+      { ok: false, message: "We couldn't upload that file. Please try again." },
+      { status: 500 },
+    );
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  const session = await getPortalSession();
+  if (!session) {
+    return NextResponse.json({ ok: false, message: "Unauthorized." }, { status: 401 });
+  }
+
+  const idParam = req.nextUrl.searchParams.get("id");
+  const mediaId = Number.parseInt(idParam ?? "", 10);
+  if (!Number.isFinite(mediaId)) {
+    return NextResponse.json({ ok: false, message: "Invalid attachment." }, { status: 400 });
+  }
+
+  try {
+    const payload = await getPayload({ config });
+    const doc = await payload.findByID({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      collection: "client-review-media" as any,
+      id: mediaId,
+      depth: 0,
+      overrideAccess: true,
+    });
+
+    const row = doc as Record<string, unknown>;
+    const rowClientId =
+      typeof row.client === "number"
+        ? row.client
+        : (row.client as { id?: number } | undefined)?.id;
+
+    if (rowClientId !== session.clientId) {
+      return NextResponse.json({ ok: false, message: "Not found." }, { status: 404 });
+    }
+
+    const existingRequest =
+      typeof row.relatedRequest === "number"
+        ? row.relatedRequest
+        : (row.relatedRequest as { id?: number } | undefined)?.id;
+
+    if (existingRequest != null) {
+      return NextResponse.json(
+        { ok: false, message: "This attachment is already part of a revision." },
+        { status: 400 },
+      );
+    }
+
+    await payload.delete({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      collection: "client-review-media" as any,
+      id: mediaId,
+      overrideAccess: true,
+    });
+
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("[KXD Portal] Website review attachment delete failed:", err);
+    return NextResponse.json(
+      { ok: false, message: "We couldn't remove that file." },
+      { status: 500 },
+    );
+  }
+}
