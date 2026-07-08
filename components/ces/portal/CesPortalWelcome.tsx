@@ -20,6 +20,7 @@ async function markWelcomeComplete(): Promise<boolean> {
 export function CesPortalWelcome({ profile, clientName, websiteUrl }: CesPortalWelcomeProps) {
   const router = useRouter();
   const [busy, setBusy] = useState<"review" | "continue" | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const logoUrl = profile.identity.logoUrl;
   const logoAlt = profile.identity.logoAlt ?? clientName;
@@ -34,9 +35,13 @@ export function CesPortalWelcome({ profile, clientName, websiteUrl }: CesPortalW
 
   async function goTo(path: string, action: "review" | "continue") {
     setBusy(action);
+    setError(null);
     try {
       const ok = await markWelcomeComplete();
-      if (!ok) return;
+      if (!ok) {
+        setError(PORTAL_CLIENT_LANGUAGE.welcomeError);
+        return;
+      }
       router.push(path);
       router.refresh();
     } finally {
@@ -67,6 +72,11 @@ export function CesPortalWelcome({ profile, clientName, websiteUrl }: CesPortalW
         </div>
 
         <div className="kxd-ces-welcome__actions">
+          {error ? (
+            <p className="kxd-ces-welcome__error" role="alert">
+              {error}
+            </p>
+          ) : null}
           {websiteUrl ? (
             <button
               type="button"

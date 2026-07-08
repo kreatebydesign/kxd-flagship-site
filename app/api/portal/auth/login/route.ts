@@ -54,6 +54,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const portalUser = result.user as { id: number; active?: boolean };
+    if (portalUser.active === false) {
+      return NextResponse.json(
+        {
+          ok: false,
+          message: "This portal account is not active. Please contact Kreate by Design.",
+        },
+        { status: 403 },
+      );
+    }
+
     await createPortalSession(result.user.id as number);
 
     return NextResponse.json({ ok: true });

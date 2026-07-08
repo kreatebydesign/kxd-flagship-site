@@ -59,7 +59,7 @@ export function WorkspaceMetaLine({
   value,
 }: {
   label: string;
-  value: string;
+  value: ReactNode;
 }) {
   return (
     <div className="kxd-os-workspace-meta-line">

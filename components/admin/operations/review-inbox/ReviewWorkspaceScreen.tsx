@@ -12,11 +12,9 @@ import {
   REVIEW_INBOX_STATUS_OPTIONS,
   reviewInboxStatusOption,
 } from "@/lib/website-review-inbox/status";
-import type {
-  ReviewInboxRequestStatus,
-  ReviewWorkspaceAttachment,
-  ReviewWorkspaceDetail,
-} from "@/lib/website-review-inbox/types";
+import type { ReviewInboxRequestStatus } from "@/lib/website-review-inbox/types";
+import type { ReviewWorkspaceAttachment, ReviewWorkspaceDetail } from "@/lib/website-review-inbox/types";
+import { ReviewDeleteControl } from "./ReviewDeleteControl";
 
 function fmtDateLong(iso: string): string {
   return new Date(iso).toLocaleDateString("en-US", {
@@ -105,6 +103,8 @@ export function ReviewWorkspaceScreen({ review: initialReview }: ReviewWorkspace
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [notesSaved, setNotesSaved] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [statusError, setStatusError] = useState<string | null>(null);
+  const [notesError, setNotesError] = useState<string | null>(null);
 
   const statusOption = reviewInboxStatusOption(status);
   const prioVariant = PRIO_VARIANT[review.priority] ?? "default";
@@ -112,19 +112,22 @@ export function ReviewWorkspaceScreen({ review: initialReview }: ReviewWorkspace
   async function handleStatusChange(next: ReviewInboxRequestStatus) {
     if (next === status) return;
     setUpdatingStatus(true);
+    setStatusError(null);
     try {
       const res = await fetch(`/api/admin/client-requests/${review.id}/status`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: next }),
       });
-      const body = (await res.json()) as { ok?: boolean; status?: ReviewInboxRequestStatus };
-      if (!res.ok || !body.ok || !body.status) throw new Error("Status update failed");
+      const body = (await res.json()) as { ok?: boolean; status?: ReviewInboxRequestStatus; error?: string };
+      if (!res.ok || !body.ok || !body.status) {
+        throw new Error(body.error ?? "Could not update status.");
+      }
       setStatus(body.status);
       setReview((prev) => ({ ...prev, status: body.status! }));
       router.refresh();
     } catch (err) {
-      console.error("[Review Workspace] status update failed:", err);
+      setStatusError(err instanceof Error ? err.message : "Could not update status.");
     } finally {
       setUpdatingStatus(false);
     }
@@ -133,17 +136,18 @@ export function ReviewWorkspaceScreen({ review: initialReview }: ReviewWorkspace
   async function saveNotes() {
     setSavingNotes(true);
     setNotesSaved(false);
+    setNotesError(null);
     try {
       const res = await fetch(`/api/admin/client-requests/${review.id}/notes`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ internalNotes }),
       });
-      const body = (await res.json()) as { ok?: boolean };
-      if (!res.ok || !body.ok) throw new Error("Notes save failed");
+      const body = (await res.json()) as { ok?: boolean; error?: string };
+      if (!res.ok || !body.ok) throw new Error(body.error ?? "Could not save notes.");
       setNotesSaved(true);
     } catch (err) {
-      console.error("[Review Workspace] notes save failed:", err);
+      setNotesError(err instanceof Error ? err.message : "Could not save notes.");
     } finally {
       setSavingNotes(false);
     }
@@ -290,6 +294,7 @@ export function ReviewWorkspaceScreen({ review: initialReview }: ReviewWorkspace
                 onChange={(e) => {
                   setInternalNotes(e.target.value);
                   setNotesSaved(false);
+                  setNotesError(null);
                 }}
                 placeholder="Context for the team — triage notes, blockers, handoff…"
               />
@@ -308,6 +313,11 @@ export function ReviewWorkspaceScreen({ review: initialReview }: ReviewWorkspace
                   </span>
                 ) : null}
               </div>
+              {notesError ? (
+                <p className="kxd-os-review-workspace__notice kxd-os-review-workspace__notice--error" role="alert">
+                  {notesError}
+                </p>
+              ) : null}
             </section>
 
             <div
@@ -340,6 +350,11 @@ export function ReviewWorkspaceScreen({ review: initialReview }: ReviewWorkspace
                   ))}
                 </select>
               </label>
+              {statusError ? (
+                <p className="kxd-os-review-workspace__notice kxd-os-review-workspace__notice--error" role="alert">
+                  {statusError}
+                </p>
+              ) : null}
 
               <div className="kxd-os-review-workspace__action-stack">
                 <Link
@@ -410,6 +425,13 @@ export function ReviewWorkspaceScreen({ review: initialReview }: ReviewWorkspace
                 ))}
               </ol>
             </section>
+
+            <ReviewDeleteControl
+              requestId={review.id}
+              title={review.title}
+              redirectTo="/admin/operations/review-inbox?deleted=1"
+              className="kxd-os-review-delete--workspace"
+            />
           </aside>
         </div>
       </KxdPage>

@@ -385,6 +385,18 @@
   max-width: 36ch;
 }
 
+.kxd-ces-empty__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.625rem;
+  margin-top: 1.25rem;
+}
+
+.kxd-ces-empty--gone {
+  margin-top: 1rem;
+}
+
 /* ── Guided flow ─────────────────────────────────────────────── */
 
 .kxd-ces-flow {
@@ -2382,6 +2394,14 @@
   flex-wrap: wrap;
   gap: 0.625rem;
   padding-top: 0.25rem;
+}
+
+.kxd-ces-welcome__error {
+  width: 100%;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--kxd-os-critical, #d97070);
+  margin: 0 0 0.25rem;
 }
 
 .kxd-ces-review-reassurance {

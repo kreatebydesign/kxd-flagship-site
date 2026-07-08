@@ -16,7 +16,8 @@
     "seed:clients": "tsx scripts/seed-clients.ts",
     "seed:executive-profiles": "tsx scripts/seed-executive-client-profiles.ts",
     "seed:primal-experience": "tsx scripts/seed-primal-experience-profile.ts",
-    "seed:portal-user": "tsx scripts/seed-portal-user.ts"
+    "seed:portal-user": "tsx scripts/seed-portal-user.ts",
+    "verify:primal-portal": "tsx scripts/verify-primal-portal-readiness.ts"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "^3.84.1",

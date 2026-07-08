@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { ReviewWorkspaceGone } from "@/components/admin/operations/review-inbox/ReviewWorkspaceGone";
 import { ReviewWorkspaceScreen } from "@/components/admin/operations/review-inbox/ReviewWorkspaceScreen";
 import { requirePayloadAdminPage } from "@/lib/admin/auth";
 import { getReviewWorkspace } from "@/lib/website-review-inbox/detail";
@@ -17,7 +18,7 @@ export default async function ReviewWorkspacePage({
   if (!Number.isFinite(requestId)) notFound();
 
   const review = await getReviewWorkspace(requestId);
-  if (!review) notFound();
+  if (!review) return <ReviewWorkspaceGone />;
 
   return <ReviewWorkspaceScreen review={review} />;
 }

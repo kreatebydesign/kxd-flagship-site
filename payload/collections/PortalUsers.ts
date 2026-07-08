@@ -17,12 +17,13 @@ export const PortalUsers: CollectionConfig = {
   },
   admin: {
     useAsTitle: "email",
-    defaultColumns: ["email", "displayName", "client", "updatedAt"],
+    defaultColumns: ["email", "displayName", "client", "active", "updatedAt"],
     group: PAYLOAD_GROUPS.kxdOs,
     description:
-      "Client portal login accounts. Each portal user is linked to exactly one Client record. " +
-      "Created by KXD admin — clients do not self-register in MVP. " +
-      "Password is required on create (8+ chars). Local dev: npm run seed:portal-user.",
+      "Client portal login accounts. Each portal user is linked to exactly one Client record and only sees that client's data. " +
+      "Preferred workflow: KXD OS → Portal Access (/admin/operations/portal-access). " +
+      "Password is required on create (8+ chars). Clients can reset via /portal/forgot-password. " +
+      "Local dev seed: npm run seed:portal-user -- --email user@example.com --password 'TempPass123!' --client primal-motorsports --display-name Adam",
   },
   auth: {
     tokenExpiration: 60 * 60 * 24 * 7, // 7 days
@@ -47,15 +48,8 @@ export const PortalUsers: CollectionConfig = {
       name: "displayName",
       type: "text",
       label: "Display Name",
-      admin: { description: "Shown in the portal welcome message." },
-    },
-    {
-      name: "welcomeCompletedAt",
-      type: "date",
       admin: {
-        position: "sidebar",
-        description: "When the client completed the first-login welcome experience.",
-        readOnly: true,
+        description: "Shown in greetings and the portal welcome experience.",
       },
     },
     {
@@ -65,7 +59,27 @@ export const PortalUsers: CollectionConfig = {
       required: true,
       label: "Client",
       admin: {
-        description: "The KXD client this portal account can access. Data is scoped to this client only.",
+        description:
+          "The client this account belongs to. Portal data, CES branding, and Website Review are scoped to this client only.",
+      },
+    },
+    {
+      name: "active",
+      type: "checkbox",
+      label: "Active",
+      defaultValue: true,
+      admin: {
+        position: "sidebar",
+        description: "Inactive users cannot sign in. Use to revoke access without deleting history.",
+      },
+    },
+    {
+      name: "welcomeCompletedAt",
+      type: "date",
+      admin: {
+        position: "sidebar",
+        description: "When the client completed the first-login welcome experience. Clear to show welcome again.",
+        date: { pickerAppearance: "dayAndTime" },
       },
     },
   ],

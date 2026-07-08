@@ -100,6 +100,8 @@ export async function getPortalSession(): Promise<PortalSession | null> {
 
     if (!clientId) return null;
 
+    if (user.active === false) return null;
+
     const clientName =
       typeof clientRaw === "object" && clientRaw !== null && "name" in clientRaw
         ? String((clientRaw as AnyDoc).name ?? "")

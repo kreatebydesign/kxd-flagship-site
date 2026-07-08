@@ -16,6 +16,7 @@ export type OperationsNavId =
   | "playbooks"
   | "work"
   | "review-inbox"
+  | "portal-access"
   | "client-success"
   | "growth"
   | "client-import"
@@ -67,6 +68,7 @@ export const NAV_GROUPS: OperationsNavGroup[] = [
       { id: "strategy", label: "Strategy Vault", href: "/admin/operations/strategy" },
       { id: "accounts", label: "Accounts", href: "/admin/operations/accounts" },
       { id: "onboarding", label: "Onboarding", href: "/admin/operations/onboarding" },
+      { id: "portal-access", label: "Portal Access", href: "/admin/operations/portal-access" },
       { id: "client-success", label: "Client Success", href: "/admin/operations/client-success" },
     ],
   },

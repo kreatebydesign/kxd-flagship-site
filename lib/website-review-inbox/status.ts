@@ -4,7 +4,7 @@ import type { ReviewInboxRequestStatus, ReviewInboxStatusOption } from "./types"
 export const REVIEW_INBOX_STATUS_OPTIONS: ReviewInboxStatusOption[] = [
   { value: "new", label: "New", variant: "status" },
   { value: "triaged", label: "In review", variant: "status" },
-  { value: "waiting-on-client", label: "Scheduled", variant: "pending" },
+  { value: "waiting-on-client", label: "Waiting on client", variant: "pending" },
   { value: "in-progress", label: "In progress", variant: "warning" },
   { value: "complete", label: "Completed", variant: "success" },
   { value: "declined", label: "Declined", variant: "default" },

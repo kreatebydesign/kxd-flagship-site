@@ -119,7 +119,23 @@ function OverviewPanel({ data }: { data: ClientWorkspaceBundle }) {
           <WorkspaceMetaLine label="Next follow-up" value={sections.relationship.nextFollowUp} />
           <WorkspaceMetaLine
             label="Portal"
-            value={data.portalUsers.length > 0 ? `${data.portalUsers.length} user(s)` : "No portal users"}
+            value={
+              data.portalUsers.length > 0 ? (
+                <Link
+                  href={`/admin/operations/portal-access?client=${data.clientId}`}
+                  className="kxd-os-link-quiet"
+                >
+                  {data.portalUsers.length} user{data.portalUsers.length === 1 ? "" : "s"}
+                </Link>
+              ) : (
+                <Link
+                  href={`/admin/operations/portal-access?client=${data.clientId}`}
+                  className="kxd-os-link-quiet"
+                >
+                  Add portal access
+                </Link>
+              )
+            }
           />
         </WorkspaceChapter>
 

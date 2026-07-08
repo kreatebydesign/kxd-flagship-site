@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import { OperationsPageHero } from "@/components/admin/operations/shared/OperationsPageHero";
 import { OperationsShell } from "@/components/admin/operations/shared/OperationsShell";
 import {
@@ -19,6 +19,7 @@ import {
   reviewInboxStatusOption,
 } from "@/lib/website-review-inbox/status";
 import type { ReviewInboxData, ReviewInboxItem, ReviewInboxRequestStatus } from "@/lib/website-review-inbox/types";
+import { ReviewDeleteControl } from "./ReviewDeleteControl";
 
 function fmtDate(iso: string): string {
   return new Date(iso).toLocaleDateString("en-US", {
@@ -43,9 +44,19 @@ export interface ReviewInboxScreenProps {
 
 export function ReviewInboxScreen({ data: initialData }: ReviewInboxScreenProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [items, setItems] = useState(initialData.items);
   const [filter, setFilter] = useState<"new" | "active" | "all">("active");
   const [updatingId, setUpdatingId] = useState<number | null>(null);
+  const [statusError, setStatusError] = useState<{ id: number; message: string } | null>(null);
+  const [showDeletedNotice, setShowDeletedNotice] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get("deleted") === "1") {
+      setShowDeletedNotice(true);
+      router.replace("/admin/operations/review-inbox");
+    }
+  }, [router, searchParams]);
 
   const newCount = items.filter((item) => item.status === "new").length;
   const activeCount = items.filter((item) =>
@@ -66,6 +77,7 @@ export function ReviewInboxScreen({ data: initialData }: ReviewInboxScreenProps)
     if (item.status === status) return;
 
     setUpdatingId(item.id);
+    setStatusError(null);
     try {
       const res = await fetch(`/api/admin/client-requests/${item.id}/status`, {
         method: "POST",
@@ -83,7 +95,10 @@ export function ReviewInboxScreen({ data: initialData }: ReviewInboxScreenProps)
       );
       router.refresh();
     } catch (err) {
-      console.error("[Review Inbox] status update failed:", err);
+      setStatusError({
+        id: item.id,
+        message: err instanceof Error ? err.message : "Could not update status.",
+      });
     } finally {
       setUpdatingId(null);
     }
@@ -105,6 +120,12 @@ export function ReviewInboxScreen({ data: initialData }: ReviewInboxScreenProps)
             { label: "Total", value: String(items.length) },
           ]}
         />
+
+        {showDeletedNotice ? (
+          <p className="kxd-os-review-inbox__notice" role="status">
+            Revision deleted. It no longer appears in the client workspace or Review Inbox.
+          </p>
+        ) : null}
 
         <section className="kxd-os-ops-section">
           <div className="kxd-os-review-inbox__filters" role="tablist" aria-label="Inbox filter">
@@ -214,6 +235,19 @@ export function ReviewInboxScreen({ data: initialData }: ReviewInboxScreenProps)
                           ))}
                         </select>
                       </label>
+                      <ReviewDeleteControl
+                        requestId={item.id}
+                        title={item.title}
+                        className="kxd-os-review-delete--inbox"
+                        onDeleted={() => {
+                          setItems((prev) => prev.filter((row) => row.id !== item.id));
+                        }}
+                      />
+                      {statusError?.id === item.id ? (
+                        <p className="kxd-os-review-inbox__notice kxd-os-review-inbox__notice--error" role="alert">
+                          {statusError.message}
+                        </p>
+                      ) : null}
                     </div>
                   </div>
                 );

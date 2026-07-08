@@ -1,5 +1,5 @@
-import { notFound, redirect } from "next/navigation";
-import { WebsiteReviewDetail } from "@/components/ces/modules/website-review";
+import { redirect } from "next/navigation";
+import { WebsiteReviewDetail, WebsiteReviewGone } from "@/components/ces/modules/website-review";
 import { requireCesModule, resolveExperienceProfile } from "@/lib/ces/server";
 import { getWebsiteReviewById } from "@/lib/ces/modules/website-review/data";
 import { getPortalSession } from "@/lib/portal/session";
@@ -19,7 +19,7 @@ export default async function WebsiteReviewDetailPage({
 
   const { requestId } = await params;
   const review = await getWebsiteReviewById(session, requestId);
-  if (!review) notFound();
+  if (!review) return <WebsiteReviewGone />;
 
   return <WebsiteReviewDetail profile={profile} review={review} />;
 }

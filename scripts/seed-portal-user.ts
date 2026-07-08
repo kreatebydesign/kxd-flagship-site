@@ -5,9 +5,8 @@
  * Run: npm run seed:portal-user
  *
  * Examples:
- *   npm run seed:portal-user
- *   npm run seed:portal-user -- --email matt.primal@kxd.local --password 'Primal123!' --client primal-motorsports
- *   npm run seed:portal-user -- --email matt.primal@kxd.local --password 'Primal123!' --client-id 1
+ *   npm run seed:portal-user -- --email adam@primalmotorsports.com --password 'TempPass123!' --client primal-motorsports --display-name Adam
+ *   npm run seed:portal-user -- --email tyler@primalmotorsports.com --password 'TempPass123!' --client primal-motorsports --display-name Tyler
  */
 
 import { getPayload } from "payload";

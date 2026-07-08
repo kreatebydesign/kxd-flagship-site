@@ -21,6 +21,12 @@ export const PORTAL_CLIENT_LANGUAGE = {
   welcomeEnterWorkspace: "Enter workspace",
   welcomeOpening: "Starting review…",
   welcomeEntering: "Entering workspace…",
+  welcomeError: "We couldn't open your workspace just now. Please try again.",
+
+  revisionGoneTitle: "This revision is no longer available",
+  revisionGoneLead:
+    "It may have been removed or the link is no longer active. Your other revisions are still organized in Website Review.",
+  revisionGoneCta: "Back to Website Review",
 
   attentionHeading: "Waiting on you",
   attentionEmpty: "Nothing waiting on you right now. Your site is in good hands.",
@@ -127,7 +133,7 @@ export const PORTAL_CLIENT_LANGUAGE = {
   reviewSessionSaveError: "We couldn't save your feedback just now. Please try again.",
   reviewSessionUnavailableTitle: "Visual review isn't available yet",
   reviewSessionUnavailableLead:
-    "We couldn't open a review session for this link. Your site URL may not be configured yet, or this revision may no longer exist.",
+    "We couldn't open a review session for this link. Your site URL may not be configured yet, or this revision may no longer be available.",
   reviewSessionBack: "Back to Website Review",
 
   identityWorkspace: "Private workspace",

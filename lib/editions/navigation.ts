@@ -21,6 +21,7 @@ export const OPERATIONS_NAV_MODULE_MAP: Record<OperationsNavId, KxdModuleId> = {
   strategy: "strategy",
   accounts: "portfolio",
   onboarding: "onboarding",
+  "portal-access": "client-hq",
   "client-success": "client-success",
   creative: "creative",
   reels: "creative",
