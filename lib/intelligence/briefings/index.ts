@@ -11,6 +11,20 @@ export {
   computeBriefingConfidence,
 } from "./sections";
 export {
+  buildExecutiveNarrative,
+  buildExecutiveHealthSnapshot,
+  selectPrimaryRecommendation,
+  estimateEffortForAction,
+  detectStaleRequest,
+} from "./narrative";
+export {
+  enrichRecommendation,
+  enrichRecommendations,
+  effortForActionType,
+} from "./recommendation-intelligence";
+export { buildExecutiveInsights } from "./insights";
+export { confidenceDisplayLabel, categoryDisplayLabel, insightToneLabel } from "./display";
+export {
   BRIEFING_SIGNAL_SOURCES,
   getBriefingSignalSource,
   listActiveBriefingSources,
@@ -32,8 +46,18 @@ export type {
   RelationshipHealthSection,
   OperationalHealthSection,
   BriefingRecommendation,
+  IntelligentRecommendation,
+  RecommendationCategory,
+  RecommendationEffortLabel,
+  RecommendationEvidence,
+  RecommendationHistoryNote,
   PlatformStatusItem,
   PlatformStatusSection,
+  ExecutiveNarrative,
+  ExecutiveHealthSnapshot,
+  ExecutiveInsight,
+  ExecutiveInsightContext,
+  ExecutiveInsightTone,
   ExecutiveBriefing,
 } from "./types";
 

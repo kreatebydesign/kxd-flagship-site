@@ -5,7 +5,7 @@ import { KxdPage } from "@/components/os";
 export function ReviewWorkspaceGone() {
   return (
     <OperationsShell activeId="review-inbox">
-      <KxdPage className="kxd-os-ops-page kxd-os-review-workspace-gone">
+      <KxdPage className="kxd-os-page--ops kxd-os-review-workspace-gone">
         <div className="kxd-os-review-workspace-gone__panel">
           <h1 className="kxd-os-review-workspace-gone__title">Revision not found</h1>
           <p className="kxd-os-review-workspace-gone__lead">

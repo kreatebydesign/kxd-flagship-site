@@ -42,4 +42,4 @@ export type {
   RevenueSummary,
 } from "./types";
 
-export type { ExecutiveBriefing } from "./briefings";
+export type { ExecutiveBriefing, ExecutiveNarrative, ExecutiveHealthSnapshot, ExecutiveInsight, IntelligentRecommendation } from "./briefings";

@@ -260,7 +260,7 @@ export function CommandScreen({
         <OperationsPageHero
           eyebrow="KXD OS · Operations"
           title="Operations Suite"
-          lead={`${today} · Live Payload data across clients, retainers, deliverables, and requests`}
+          lead={`${today} · A calm view across clients, retainers, deliverables, and requests.`}
         />
 
         <KxdSection label="Executive Summary" className="kxd-os-ops-section">
@@ -288,7 +288,7 @@ export function CommandScreen({
               description="All client health signals clear — no flags detected."
             />
           ) : (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="kxd-os-ops-flagged-grid">
               {flaggedClients.map((client) => {
                 const hasCritical = client.issues.some(
                   (issue) => issue.includes("overdue") || issue.includes("Urgent"),
@@ -297,9 +297,9 @@ export function CommandScreen({
                   <KxdSurface
                     key={client.id}
                     variant="glass"
-                    className={`kxd-os-ops-briefing-surface p-5${hasCritical ? " kxd-os-ops-alert kxd-os-ops-alert--error" : ""}`}
+                    className={`kxd-os-ops-briefing-surface kxd-os-ops-flagged-card${hasCritical ? " kxd-os-ops-alert kxd-os-ops-alert--error" : ""}`}
                   >
-                    <div className="flex items-start justify-between gap-3">
+                    <div className="kxd-os-ops-row-between">
                       <p className="kxd-os-ops-list-row__title">{client.name}</p>
                       {client.brandTier ? (
                         <KxdBadge variant="tier">
@@ -307,11 +307,11 @@ export function CommandScreen({
                         </KxdBadge>
                       ) : null}
                     </div>
-                    <div className="mt-3 flex flex-col gap-1.5">
+                    <div className="kxd-os-ops-stack kxd-os-mt-3">
                       {client.issues.map((issue) => (
                         <p
                           key={issue}
-                          className={`kxd-os-meta${issueTone(issue) === "critical" ? " [color:var(--kxd-os-critical)]" : " [color:var(--kxd-os-warning)]"}`}
+                          className={`kxd-os-meta${issueTone(issue) === "critical" ? " kxd-os-text-critical" : " kxd-os-text-warning"}`}
                         >
                           {issue}
                         </p>
@@ -324,8 +324,8 @@ export function CommandScreen({
           )}
         </KxdSection>
 
-        <div className="mb-10 grid gap-8 lg:grid-cols-[1fr_22rem] xl:gap-10">
-          <KxdSection label="Revenue Intelligence" className="mb-0">
+        <div className="kxd-os-ops-layout-split kxd-os-ops-layout-split--aside">
+          <KxdSection label="Revenue Intelligence" className="kxd-os-section--flush">
             <OpsSectionHead
               label="Retainer Revenue"
               href="/admin/collections/retainers"
@@ -333,17 +333,17 @@ export function CommandScreen({
             />
 
             <OpsCard>
-              <div className="border-b border-[var(--kxd-os-border-divider)] p-6">
-                <div className="flex flex-wrap items-end justify-between gap-4">
+              <div className="kxd-os-ops-card-header">
+                <div className="kxd-os-ops-row-end">
                   <div>
                     <p className="kxd-os-section__label">Monthly Recurring Revenue</p>
                     <p
-                      className={`kxd-os-display mt-3 text-3xl${totalMRR > 0 ? " [color:var(--kxd-os-gold)]" : ""}`}
+                      className={`kxd-os-display kxd-os-ops-mrr${totalMRR > 0 ? " kxd-os-ops-mrr--accent" : ""}`}
                     >
                       {totalMRR > 0 ? fmtMoney(totalMRR) : "—"}
                     </p>
                   </div>
-                  <div className="flex flex-col items-end gap-2">
+                  <div className="kxd-os-ops-stack kxd-os-ops-inline--end">
                     {overdueRetainers.length > 0 ? <StatusBadge status="overdue" /> : null}
                     {upcomingInvoices.length > 0 ? (
                       <p className="kxd-os-meta">
@@ -356,30 +356,24 @@ export function CommandScreen({
               </div>
 
               {tierRevenueEntries.length > 0 ? (
-                <div className="p-6">
-                  <p className="kxd-os-section__label mb-4">Revenue by Client Tier</p>
-                  <div className="flex flex-col gap-4">
+                <div className="kxd-os-ops-card-body">
+                  <p className="kxd-os-section__label kxd-os-mb-section">Revenue by Client Tier</p>
+                  <div className="kxd-os-gap-stack">
                     {tierRevenueEntries.map(([tier, amount]) => {
                       const pct = totalMRR > 0 ? Math.round((amount / totalMRR) * 100) : 0;
                       return (
-                        <div key={tier} className="flex items-center gap-3">
-                          <p className="kxd-os-meta w-24 shrink-0">
+                        <div key={tier} className="kxd-os-ops-progress-row">
+                          <p className="kxd-os-meta kxd-os-ops-progress-row__label">
                             {TIER_LABELS[tier] ?? tier}
                           </p>
-                          <div className="kxd-os-ops-progress__track min-w-0 flex-1">
+                          <div className="kxd-os-ops-progress__track kxd-os-ops-progress-row__track">
                             <div
-                              className="kxd-os-ops-progress__fill"
-                              style={{
-                                width: `${pct}%`,
-                                background:
-                                  tier === "flagship"
-                                    ? "var(--kxd-os-gold)"
-                                    : "rgba(168, 180, 200, 0.55)",
-                              }}
+                              className={`kxd-os-ops-progress__fill${tier === "flagship" ? "" : " kxd-os-ops-progress__fill--neutral"}`}
+                              style={{ width: `${pct}%` }}
                             />
                           </div>
-                          <p className="kxd-os-body w-20 shrink-0 text-right">{fmtMoney(amount)}</p>
-                          <p className="kxd-os-meta w-10 shrink-0 text-right">{pct}%</p>
+                          <p className="kxd-os-body kxd-os-ops-progress-row__amount">{fmtMoney(amount)}</p>
+                          <p className="kxd-os-meta kxd-os-ops-progress-row__pct">{pct}%</p>
                         </div>
                       );
                     })}
@@ -389,15 +383,15 @@ export function CommandScreen({
             </OpsCard>
 
             {upcomingInvoices.length > 0 ? (
-              <div className="mt-6">
+              <div className="kxd-os-mt-section">
                 <OpsSectionHead label="Upcoming Invoices — Next 14 Days" />
                 <OpsCard>
                   {upcomingInvoices.map((retainer) => {
                     const days = daysUntil(retainer.nextInvoiceDate);
                     return (
                       <OpsListRow key={retainer.id}>
-                        <div className="kxd-os-ops-list-row__main min-w-0">
-                          <p className="kxd-os-ops-list-row__title truncate">
+                        <div className="kxd-os-ops-list-row__main kxd-os-ops-flex-main">
+                          <p className="kxd-os-ops-list-row__title kxd-os-truncate">
                             {clientName(retainer.client)}
                           </p>
                           <p className="kxd-os-ops-list-row__meta">
@@ -405,10 +399,10 @@ export function CommandScreen({
                             {fmtDateShort(retainer.nextInvoiceDate)}
                           </p>
                         </div>
-                        <div className="flex shrink-0 items-center gap-3">
+                        <div className="kxd-os-ops-inline kxd-os-shrink-0">
                           {days !== null ? (
                             <p
-                              className={`kxd-os-meta${days <= 3 ? " [color:var(--kxd-os-critical)]" : ""}`}
+                              className={`kxd-os-meta${days <= 3 ? " kxd-os-text-critical" : ""}`}
                             >
                               {days === 0 ? "Today" : days === 1 ? "Tomorrow" : `${days}d`}
                             </p>
@@ -424,13 +418,13 @@ export function CommandScreen({
             ) : null}
 
             {overdueRetainers.length > 0 ? (
-              <div className="mt-6">
+              <div className="kxd-os-mt-section">
                 <OpsSectionHead label="Overdue Retainers" />
                 <OpsCard className="kxd-os-ops-alert kxd-os-ops-alert--error">
                   {overdueRetainers.map((retainer) => (
                     <OpsListRow key={retainer.id}>
-                      <div className="kxd-os-ops-list-row__main min-w-0">
-                        <p className="kxd-os-ops-list-row__title truncate">
+                      <div className="kxd-os-ops-list-row__main kxd-os-ops-flex-main">
+                        <p className="kxd-os-ops-list-row__title kxd-os-truncate">
                           {clientName(retainer.client)}
                         </p>
                         <p className="kxd-os-ops-list-row__meta">
@@ -440,8 +434,8 @@ export function CommandScreen({
                             : ""}
                         </p>
                       </div>
-                      <div className="flex shrink-0 items-center gap-3">
-                        <p className="kxd-os-body [color:var(--kxd-os-critical)]">
+                      <div className="kxd-os-ops-inline kxd-os-shrink-0">
+                        <p className="kxd-os-body kxd-os-text-critical">
                           {fmtMoney(retainer.monthlyAmount)}
                         </p>
                         <StatusBadge status="overdue" />
@@ -457,7 +451,7 @@ export function CommandScreen({
             ) : null}
           </KxdSection>
 
-          <KxdSection label="Clients Requiring Action" className="mb-0">
+          <KxdSection label="Clients Requiring Action" className="kxd-os-section--flush">
             <OpsSectionHead
               label="Relationship Follow-Up"
               count={clientsNeedingAction.length}
@@ -474,17 +468,17 @@ export function CommandScreen({
                       className={`kxd-os-ops-priority-bar ${relationshipBarClass(client.relationshipStatus)}`}
                       aria-hidden="true"
                     />
-                    <div className="kxd-os-ops-list-row__main min-w-0">
-                      <div className="flex items-start justify-between gap-3">
+                    <div className="kxd-os-ops-list-row__main kxd-os-ops-flex-main">
+                      <div className="kxd-os-ops-row-between">
                         <p className="kxd-os-ops-list-row__title">{client.name}</p>
                         <StatusBadge status={client.relationshipStatus ?? "healthy"} />
                       </div>
                       {client.nextAction ? (
-                        <p className="kxd-os-meta mt-1">{client.nextAction}</p>
+                        <p className="kxd-os-meta kxd-os-mt-2">{client.nextAction}</p>
                       ) : null}
                       {client.nextActionDueDate ? (
                         <p
-                          className={`kxd-os-meta mt-1 uppercase tracking-wide${isPast(client.nextActionDueDate) ? " [color:var(--kxd-os-critical)]" : ""}`}
+                          className={`kxd-os-meta kxd-os-mt-2${isPast(client.nextActionDueDate) ? " kxd-os-text-critical" : ""}`}
                         >
                           Due {fmtDate(client.nextActionDueDate)}
                           {isPast(client.nextActionDueDate) ? " · Overdue" : ""}
@@ -530,11 +524,11 @@ export function CommandScreen({
                     <KxdTableRow key={deliverable.id}>
                       <KxdTableCell primary>{deliverable.title ?? "—"}</KxdTableCell>
                       <KxdTableCell>{clientName(deliverable.client)}</KxdTableCell>
-                      <KxdTableCell className="capitalize">{deliverable.category ?? "—"}</KxdTableCell>
+                      <KxdTableCell className="kxd-os-text-capitalize">{deliverable.category ?? "—"}</KxdTableCell>
                       <KxdTableCell>
                         <OpsStatusBadge label={status.label} variant={status.variant} />
                       </KxdTableCell>
-                      <KxdTableCell className={duePast ? "[color:var(--kxd-os-critical)]" : undefined}>
+                      <KxdTableCell className={duePast ? "kxd-os-text-critical" : undefined}>
                         {fmtDate(deliverable.dueDate)}
                       </KxdTableCell>
                       <KxdTableCell>{deliverable.owner ?? "—"}</KxdTableCell>
@@ -546,8 +540,8 @@ export function CommandScreen({
           )}
         </KxdSection>
 
-        <div className="grid gap-8 lg:grid-cols-2 xl:gap-10">
-          <KxdSection label="Open Client Requests" className="mb-0">
+        <div className="kxd-os-ops-layout-grid kxd-os-ops-layout-grid--2">
+          <KxdSection label="Open Client Requests" className="kxd-os-section--flush">
             <OpsSectionHead
               label="Active Requests"
               count={sortedRequests.length}
@@ -566,8 +560,8 @@ export function CommandScreen({
                         className={`kxd-os-ops-priority-bar ${PRIO_CLASS[request.priority ?? "normal"]}`}
                         aria-hidden="true"
                       />
-                      <div className="kxd-os-ops-list-row__main min-w-0">
-                        <div className="flex items-start justify-between gap-3">
+                      <div className="kxd-os-ops-list-row__main kxd-os-ops-flex-main">
+                        <div className="kxd-os-ops-row-between">
                           <p className="kxd-os-ops-list-row__title">{request.requestTitle ?? "—"}</p>
                           <OpsStatusBadge label={status.label} variant={status.variant} />
                         </div>
@@ -589,7 +583,7 @@ export function CommandScreen({
             )}
           </KxdSection>
 
-          <KxdSection label="Active Projects" className="mb-0">
+          <KxdSection label="Active Projects" className="kxd-os-section--flush">
             <OpsSectionHead
               label="In Delivery"
               count={activeProjects.length}
@@ -608,8 +602,8 @@ export function CommandScreen({
                         className={`kxd-os-ops-priority-bar ${PRIO_CLASS[project.priority ?? "normal"]}`}
                         aria-hidden="true"
                       />
-                      <div className="kxd-os-ops-list-row__main min-w-0">
-                        <div className="flex items-start justify-between gap-3">
+                      <div className="kxd-os-ops-list-row__main kxd-os-ops-flex-main">
+                        <div className="kxd-os-ops-row-between">
                           <p className="kxd-os-ops-list-row__title">{project.projectName ?? "—"}</p>
                           <OpsStatusBadge label={status.label} variant={status.variant} />
                         </div>
@@ -621,7 +615,7 @@ export function CommandScreen({
                             : ""}
                         </p>
                         {project.nextAction ? (
-                          <p className="kxd-os-meta mt-1 italic">→ {project.nextAction}</p>
+                          <p className="kxd-os-meta kxd-os-mt-2">→ {project.nextAction}</p>
                         ) : null}
                       </div>
                     </OpsListRow>

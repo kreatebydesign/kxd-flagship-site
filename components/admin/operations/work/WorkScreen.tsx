@@ -395,7 +395,7 @@ export function WorkScreen({
           <OpsKpiStrip items={kpiItems} />
         </section>
 
-        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", margin: "1rem 0" }}>
+        <div className="kxd-os-ops-view-tabs">
           {VIEW_OPTIONS.map((opt) => (
             <button
               key={opt.id}
@@ -412,13 +412,12 @@ export function WorkScreen({
         </div>
 
         <input
-          className="kxd-notif-select"
+          className="kxd-os-input kxd-os-ops-search"
           type="search"
           placeholder="Search clients, work items, requests, projects..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           aria-label="Search work items"
-          style={{ width: "100%", maxWidth: "28rem", marginBottom: "1rem" }}
         />
 
         {data.stats.openCount === 0 ? (
@@ -428,7 +427,7 @@ export function WorkScreen({
               <p className="kxd-os-ops-briefing-card__body">
                 No active work items are currently waiting on KXD.
               </p>
-              <div style={{ marginTop: "var(--kxd-os-space-8)" }}>
+              <div className="kxd-os-mt-page">
                 <OpsSectionHead label="Quick actions" />
                 <OpsQuickGrid items={[...QUICK_ACTIONS]} />
               </div>
@@ -519,7 +518,7 @@ export function WorkScreen({
           </section>
         ) : null}
 
-        <div style={{ marginTop: "1.5rem" }}>
+        <div className="kxd-os-mt-section">
           <KxdSection label="Portfolio clients" className="kxd-os-operations-section">
             <OpsSectionHead label="Open work by client" href="/admin/operations/clients" />
             <div className="kxd-os-list-stack">

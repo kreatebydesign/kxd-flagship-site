@@ -174,7 +174,7 @@ export function ReviewWorkspaceScreen({ review: initialReview }: ReviewWorkspace
 
   return (
     <OperationsShell activeId="review-inbox">
-      <KxdPage className="kxd-os-ops-page kxd-os-review-workspace">
+      <KxdPage className="kxd-os-page--ops kxd-os-review-workspace">
         <nav className="kxd-os-review-workspace__back">
           <Link href="/admin/operations/review-inbox">← Back to Review Inbox</Link>
         </nav>

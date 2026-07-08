@@ -1,0 +1,93 @@
+---
+description: KXD OS Edition 1 permanent architecture, intelligence pipeline, and development principles
+alwaysApply: true
+---
+
+# KXD OS Edition 1 — Architecture
+
+You are working on **KXD OS Edition 1** — the business operating system for Kreate by Design.
+
+KXD OS is not a CRM, dashboard, or AI chatbot. It is studio software that continuously understands the business. Product value is **accumulated business context**.
+
+## Mission
+
+Help the founder understand the business, reclaim time, and operate with calm authority. Complex underneath. Simple on top.
+
+## Platform Layers (preserve order)
+
+```
+Business Systems (Shared Core — Payload, loaders)
+      ↓
+Observer                    — facts only
+      ↓
+Observation Registry + History
+      ↓
+Business Brain              — business meaning
+      ↓
+Pulse                       — movement and awareness
+      ↓
+Executive Narrative         — founder-readable explanation
+      ↓
+Executive Rituals           — Brief, Focus, Review
+      ↓
+Automation                  — future; explicit approval required
+```
+
+**Business Context** (`lib/business-context/`) provides interpretation lenses. It does not override facts.
+
+**Executive Intelligence** (`lib/intelligence/`) is the existing deterministic briefing system. Do not replace it with the Phase 17 pipeline unless explicitly requested.
+
+## Major Systems (do not duplicate)
+
+| System | Location | Role |
+|--------|----------|------|
+| Shared Core | `payload/`, `lib/client-command/`, loaders | System of record |
+| CES | `lib/ces/` | Client-facing experience layer |
+| Connected Workspace | Portal + CES modules (`/portal/*`) | Client HQ experience |
+| Timeline | `lib/executive-timeline/` | Relationship memory |
+| Work Engine | `lib/work/`, `lib/work-items/` | Execution layer |
+| Executive Intelligence | `lib/intelligence/` | Briefings, recommendations |
+| Executive Rituals | `lib/rituals/`, `/admin/operations/brief\|focus\|review` | Daily ritual modes |
+| Observer | `lib/observer/` | Facts — no UI, no automation |
+| Business Brain | `lib/business-brain/` | Meaning — no actions |
+| Pulse | `lib/pulse/` | Awareness — no recommendations |
+| Executive Narrative | `lib/executive-narrative/` | Explanation — no decisions |
+
+## Layer Boundaries
+
+| Layer | Answers | Must NOT |
+|-------|---------|----------|
+| Observer | What happened? | Recommend, automate, render UI |
+| Business Brain | What does it mean? | Execute, mutate systems |
+| Pulse | What changed? | Recommend actions |
+| Executive Narrative | How should a founder understand this? | Decide, automate |
+| Rituals | How does the founder start the day? | Replace full workspaces without request |
+| Automation | What runs automatically? | Run without explicit approval |
+
+Maintain separation: **facts → interpretation → awareness → narrative → action**.
+
+## Development Principles
+
+1. **Protect existing architecture** — Shared Core, CES, Timeline, Work Engine, Intelligence
+2. **Prefer additive changes** — extend; do not rewrite completed phases
+3. **Avoid duplicate systems** — reuse loaders (`loadBriefingContext`, `loadObserverContext`, etc.)
+4. **No UI changes** unless explicitly requested
+5. **No automation** without explicit approval
+6. **No AI generation** in Edition 1 intelligence foundations unless requested
+7. **KHIG standards** — `design-system/os/`, calm executive UI
+8. **Run `npm run build`** after major implementation
+
+## Before Building
+
+1. Does this strengthen the whole platform?
+2. Does it improve business understanding?
+3. Is it additive to an existing layer — not a parallel one?
+4. Does it respect facts / interpretation / awareness / narrative / action separation?
+
+## Source of Truth
+
+- Architecture: `docs/KXD-OS-ARCHITECTURE.md`
+- Philosophy: `docs/KXD-OS-PHILOSOPHY.md`
+- Roadmap: `docs/KXD-OS-ROADMAP.md`
+- Experience: `docs/KXD-OS-CONSTITUTION.md`
+- Platform registry: `lib/platform/registry.ts`

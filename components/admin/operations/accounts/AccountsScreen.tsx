@@ -149,14 +149,14 @@ export function AccountsScreen({
         <OperationsPageHero
           eyebrow="KXD OS · Strategic Account Intelligence"
           title="Account Intelligence"
-          lead={`${dateDisplay} · Loaded ${timeDisplay} · Live strategic signal mapping across client health, revenue concentration, renewal pressure, and expansion opportunity.`}
+          lead={`${dateDisplay} · Strategic signal across client health, revenue concentration, renewal pressure, and expansion opportunity.`}
         />
 
         <div className="kxd-os-ops-hero-row">
-          <KxdSurface variant="glass" className="p-6">
+          <KxdSurface variant="glass" className="kxd-os-ops-surface-padding">
             <p className="kxd-os-section__label">Expansion Opportunity Score</p>
-            <p className="kxd-os-headline mt-3">{expansionScore}%</p>
-            <p className="kxd-os-metric__sub mt-3">
+            <p className="kxd-os-headline kxd-os-mt-3">{expansionScore}%</p>
+            <p className="kxd-os-metric__sub kxd-os-mt-3">
               {expansionCandidatesCount} account
               {expansionCandidatesCount === 1 ? "" : "s"} with untapped potential
               across {activeWithMRRCount} retainer relationships.
@@ -200,7 +200,7 @@ export function AccountsScreen({
                       </p>
                     </KxdTableCell>
                     <KxdTableCell>
-                      <div className="flex flex-wrap items-center gap-2">
+                      <div className="kxd-os-ops-inline">
                         <KxdBadge variant="tier">
                           {TIER_LABEL[account.tier] ?? account.tier}
                         </KxdBadge>
@@ -210,7 +210,7 @@ export function AccountsScreen({
                       </div>
                     </KxdTableCell>
                     <KxdTableCell>
-                      <div className="flex items-center gap-3">
+                      <div className="kxd-os-ops-inline">
                         <KxdBadge variant={badgeForGrade(account.grade)}>{account.grade}</KxdBadge>
                         <span className="kxd-os-body">{account.score}/100</span>
                       </div>
@@ -232,18 +232,18 @@ export function AccountsScreen({
           )}
         </KxdSection>
 
-        <div className="mb-10 grid gap-6 lg:grid-cols-2">
-          <KxdSection label="Revenue Concentration Analysis" className="mb-0">
+        <div className="kxd-os-ops-layout-grid kxd-os-ops-layout-grid--2">
+          <KxdSection label="Revenue Concentration Analysis" className="kxd-os-section--flush">
             <OpsCard>
-              <div className="p-6">
-                <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="kxd-os-ops-card-padding">
+                <div className="kxd-os-ops-row-between">
                   <p className="kxd-os-section__label">Portfolio Risk</p>
                   <OpsStatusBadge
                     variant={badgeForConcentration(concentration.risk)}
                     label={`${concentration.risk.toUpperCase()} RISK`}
                   />
                 </div>
-                <div className="mt-6 grid gap-4 sm:grid-cols-3">
+                <div className="kxd-os-ops-metric-row">
                   <KxdMetric
                     label="Top Client Share"
                     value={`${concentration.top1Pct}%`}
@@ -264,7 +264,7 @@ export function AccountsScreen({
             </OpsCard>
           </KxdSection>
 
-          <KxdSection label="MRR By Account" className="mb-0">
+          <KxdSection label="MRR By Account" className="kxd-os-section--flush">
             <OpsCard>
               {topAccountsByMRR.length === 0 ? (
                 <KxdEmptyState title="No retainer revenue recorded." />
@@ -294,8 +294,8 @@ export function AccountsScreen({
           </KxdSection>
         </div>
 
-        <div className="mb-10 grid gap-6 lg:grid-cols-2">
-          <KxdSection label="Founder Attention Required" className="mb-0">
+        <div className="kxd-os-ops-layout-grid kxd-os-ops-layout-grid--2">
+          <KxdSection label="Founder Attention Required" className="kxd-os-section--flush">
             <OpsCard>
               {founderAttention.length === 0 ? (
                 <KxdEmptyState title="All accounts clear. No founder intervention required." />
@@ -320,7 +320,7 @@ export function AccountsScreen({
             </OpsCard>
           </KxdSection>
 
-          <KxdSection label="Retainer Growth Opportunities" className="mb-0">
+          <KxdSection label="Retainer Growth Opportunities" className="kxd-os-section--flush">
             <OpsCard>
               {retainerGrowth.length === 0 ? (
                 <KxdEmptyState title="No retainer growth gaps against current tier benchmarks." />
@@ -394,8 +394,8 @@ export function AccountsScreen({
           )}
         </KxdSection>
 
-        <div className="grid gap-6 lg:grid-cols-2">
-          <KxdSection label="White Space Opportunities" className="mb-0">
+        <div className="kxd-os-ops-layout-grid kxd-os-ops-layout-grid--2">
+          <KxdSection label="White Space Opportunities" className="kxd-os-section--flush">
             <OpsCard>
               {whiteSpace.length === 0 ? (
                 <KxdEmptyState title="No white space detected. Every retainer has active scope." />
@@ -424,7 +424,7 @@ export function AccountsScreen({
             </OpsCard>
           </KxdSection>
 
-          <KxdSection label="Licensing Opportunities" className="mb-0">
+          <KxdSection label="Licensing Opportunities" className="kxd-os-section--flush">
             <OpsCard>
               {flagshipClientNames.length === 0 ? (
                 <KxdEmptyState title="No flagship clients are available for licensing analysis." />
@@ -440,7 +440,7 @@ export function AccountsScreen({
                       <p className="kxd-os-ops-list-row__title">{deliverable.title}</p>
                       <p className="kxd-os-ops-list-row__meta">{deliverable.clientName}</p>
                     </div>
-                    <div className="flex flex-wrap items-center gap-2">
+                    <div className="kxd-os-ops-inline">
                       <KxdBadge variant="tier">{deliverable.category}</KxdBadge>
                       {deliverable.status ? (
                         <KxdBadge variant="status">{deliverable.status}</KxdBadge>
@@ -457,10 +457,10 @@ export function AccountsScreen({
           {keyRelationships.length === 0 ? (
             <KxdEmptyState title="No active clients found." />
           ) : (
-            <div className="grid gap-6 lg:grid-cols-2">
+            <div className="kxd-os-ops-layout-grid kxd-os-ops-layout-grid--2">
               {keyRelationships.map((account) => (
-                <KxdSurface key={account.clientId} variant="glass" className="p-6">
-                  <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+                <KxdSurface key={account.clientId} variant="glass" className="kxd-os-ops-surface-padding">
+                  <div className="kxd-os-ops-row-between kxd-os-mb-section">
                     <div>
                       <Link
                         href={`/admin/collections/clients/${account.clientId}`}
@@ -468,7 +468,7 @@ export function AccountsScreen({
                       >
                         {account.name}
                       </Link>
-                      <p className="kxd-os-meta mt-2">
+                      <p className="kxd-os-meta kxd-os-mt-2">
                         {TIER_LABEL[account.tier] ?? account.tier} ·{" "}
                         {STATUS_LABEL[account.status] ?? account.status}
                       </p>
@@ -483,7 +483,7 @@ export function AccountsScreen({
                     <p className="kxd-os-meta">No next action defined</p>
                   )}
                   {account.nextActionDue ? (
-                    <p className="kxd-os-meta mt-2">Due {account.nextActionDue}</p>
+                    <p className="kxd-os-meta kxd-os-mt-2">Due {account.nextActionDue}</p>
                   ) : null}
                 </KxdSurface>
               ))}

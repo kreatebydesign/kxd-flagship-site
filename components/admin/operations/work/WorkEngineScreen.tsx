@@ -247,13 +247,16 @@ export function WorkEngineScreen({
 
         <div className="kxd-os-ops-toolbar">
           <input
-            className="kxd-notif-select"
+            className="kxd-os-input kxd-os-ops-search"
             type="search"
             placeholder="Search work, clients, summaries…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             aria-label="Search work"
           />
+          <Link href="/admin/operations/focus" className="kxd-os-btn kxd-os-btn--ghost kxd-os-btn--sm">
+            Focus
+          </Link>
           <Link href="/admin/collections/work/create" className="kxd-os-btn kxd-os-btn--ghost kxd-os-btn--sm">
             New work
           </Link>

@@ -31,29 +31,31 @@ function TimelineEventRow({ event, showDate = true }: { event: ExecutiveTimeline
   const category = String(event.category ?? "relationship");
 
   return (
-    <article className="kxd-os-card" style={{ marginBottom: "0.65rem" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap" }}>
-        <div style={{ flex: 1, minWidth: "14rem" }}>
+    <article className="kxd-os-card kxd-os-timeline-event">
+      <div className="kxd-os-timeline-event__row">
+        <div className="kxd-os-timeline-event__body kxd-os-ops-flex-main--timeline">
           {showDate ? (
             <p className="kxd-os-meta">
               {formatTimelineDate(event.occurredAt as string)} · {String(event.sourceModule ?? "Manual")}
             </p>
           ) : null}
-          <p className="kxd-os-card__title" style={{ marginTop: showDate ? "0.35rem" : 0 }}>
+          <p
+            className={`kxd-os-card__title kxd-os-timeline-event__title${showDate ? "" : " kxd-os-timeline-event__title--flush"}`}
+          >
             {event.pinned ? "Pinned · " : ""}
             {String(event.title)}
           </p>
           {event.summary ? (
-            <p className="kxd-os-body" style={{ marginTop: "0.45rem" }}>
+            <p className="kxd-os-body kxd-os-timeline-event__summary">
               {String(event.summary)}
             </p>
           ) : null}
           {event.description ? (
-            <p className="kxd-os-meta" style={{ marginTop: "0.35rem" }}>
+            <p className="kxd-os-meta kxd-os-timeline-event__meta">
               {String(event.description)}
             </p>
           ) : null}
-          <p className="kxd-os-meta" style={{ marginTop: "0.45rem" }}>
+          <p className="kxd-os-meta kxd-os-timeline-event__meta">
             {category}
             {event.eventType ? ` · ${String(event.eventType)}` : ""}
             {event.createdBy ? ` · ${String(event.createdBy)}` : ""}
@@ -82,7 +84,7 @@ export function ExecutiveTimelineClientScreen({
           <OperationsPageHero
             eyebrow="Executive Timeline"
             title={clientName}
-            lead="Permanent relationship history — single source of truth for this partnership."
+            lead="The complete relationship record for this partnership — every milestone, decision, and turning point."
             presence
           />
           <Link href="/admin/operations/timeline" className="kxd-os-link-quiet">
@@ -104,15 +106,15 @@ export function ExecutiveTimelineClientScreen({
         </div>
 
         <div className="kxd-os-operations-split">
-          <section className="kxd-os-card">
+          <section className="kxd-os-card kxd-os-ops-card-padding">
             <p className="kxd-os-section__label">Relationship summary</p>
-            <p className="kxd-os-body" style={{ marginTop: "0.75rem" }}>
+            <p className="kxd-os-body kxd-os-mt-3">
               {summary.totalEvents === 0
-                ? "No executive timeline events recorded yet. Events from Launch, Infrastructure, Onboarding, and audits will accumulate here."
+                ? "No executive timeline events recorded yet. Events from launches, infrastructure, and onboarding will accumulate here."
                 : `${summary.totalEvents} events across the partnership. Most active in ${summary.topCategories[0]?.category ?? "relationship"}.`}
             </p>
             {summary.topCategories.length > 0 ? (
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem", marginTop: "1rem" }}>
+              <div className="kxd-os-timeline-categories">
                 {summary.topCategories.map((row) => (
                   <KxdBadge key={row.category} variant="default">
                     {row.category} ({row.count})
@@ -120,7 +122,7 @@ export function ExecutiveTimelineClientScreen({
                 ))}
               </div>
             ) : null}
-            <p className="kxd-os-meta" style={{ marginTop: "1rem" }}>
+            <p className="kxd-os-meta kxd-os-mt-4">
               <Link href={`/admin/operations/clients/${clientId}`} className="kxd-os-link-quiet">
                 Client workspace →
               </Link>
@@ -129,7 +131,7 @@ export function ExecutiveTimelineClientScreen({
                 href={`/admin/collections/executive-timeline-events/create?client=${clientId}`}
                 className="kxd-os-link-quiet"
               >
-                Add event in Payload →
+                Add event →
               </Link>
             </p>
           </section>
@@ -148,19 +150,19 @@ export function ExecutiveTimelineClientScreen({
 
         <KxdSection label="Major milestones" />
         {milestones.length === 0 ? (
-          <p className="kxd-os-meta" style={{ marginBottom: "2rem" }}>
+          <p className="kxd-os-meta kxd-os-mb-8">
             High-importance and pinned events will surface here.
           </p>
         ) : (
-          <div style={{ marginBottom: "2rem" }}>
+          <div className="kxd-os-mb-8">
             {milestones.map((event) => (
               <TimelineEventRow key={`milestone-${event.id as number}`} event={event} />
             ))}
           </div>
         )}
 
-        <div className="kxd-os-operations-split">
-          <section style={{ flex: 2 }}>
+        <div className="kxd-os-operations-split kxd-os-operations-split--weighted">
+          <section>
             <KxdSection label="Timeline by month" />
             {monthGroups.length === 0 ? (
               <KxdEmptyState
@@ -169,8 +171,8 @@ export function ExecutiveTimelineClientScreen({
               />
             ) : (
               monthGroups.map((group) => (
-                <div key={group.monthKey} style={{ marginBottom: "2rem" }}>
-                  <p className="kxd-os-section__label" style={{ marginBottom: "0.75rem" }}>
+                <div key={group.monthKey} className="kxd-os-timeline-month">
+                  <p className="kxd-os-section__label kxd-os-timeline-month__label">
                     {group.monthLabel}
                   </p>
                   {group.events.map((event) => (
@@ -181,7 +183,7 @@ export function ExecutiveTimelineClientScreen({
             )}
           </section>
 
-          <section style={{ flex: 1 }}>
+          <section>
             <KxdSection label="Upcoming related" />
             {upcomingRelated.length === 0 ? (
               <p className="kxd-os-meta">No future-dated events on record.</p>

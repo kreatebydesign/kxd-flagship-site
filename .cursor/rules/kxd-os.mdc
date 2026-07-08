@@ -1,0 +1,110 @@
+---
+description: KXD OS Edition 1 Architecture Rules
+alwaysApply: true
+---
+
+# KXD OS Edition 1 Rules
+
+You are working on KXD OS Edition 1.
+
+This is a long-term business operating system platform.
+
+Protect architecture over speed.
+
+## Core Philosophy
+
+KXD OS is not a CRM.
+KXD OS is not a dashboard.
+KXD OS is not an AI chatbot.
+
+KXD OS is a business operating system that continuously understands a company.
+
+The product value is accumulated business context.
+
+## Architecture
+
+Always preserve:
+
+Business Systems
+↓
+Observer
+↓
+Observation Registry
+↓
+Business Brain
+↓
+Pulse
+↓
+Executive Narrative
+↓
+Executive Rituals
+↓
+Automation (future)
+
+## Boundaries
+
+Observer:
+- Facts only.
+- No recommendations.
+- No UI.
+- No automation.
+
+Business Brain:
+- Interprets observations.
+- Detects meaning and patterns.
+- Does not execute actions.
+
+Pulse:
+- Detects movement and awareness.
+- Does not recommend actions.
+
+Executive Narrative:
+- Explains business state.
+- Does not decide.
+
+## Development Rules
+
+- Prefer additive changes.
+- Avoid rewriting completed systems.
+- Avoid duplicate intelligence layers.
+- Reuse existing loaders and patterns.
+- Preserve Shared Core.
+- Preserve CES.
+- Preserve Connected Workspace.
+- Preserve Timeline.
+- Preserve KHIG design standards.
+
+## Before Building
+
+Always evaluate:
+
+1. Does this strengthen the whole platform?
+2. Does this improve business understanding?
+3. Does this create long-term leverage?
+4. Does this reduce future complexity?
+
+If not, reconsider.
+
+## Quality Standard
+
+Build with premium software craftsmanship.
+
+Prioritize:
+
+- reliability
+- clarity
+- scalability
+- maintainability
+- trust
+
+Complex underneath.
+Simple on top.
+
+## Testing
+
+After major implementation:
+
+- run TypeScript checks
+- run npm build
+- report files changed
+- report architecture impact

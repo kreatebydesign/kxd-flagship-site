@@ -37,7 +37,18 @@ export function OperationsShell({ activeId, dateDisplay, clientId, children }: O
             {dateDisplay ? (
               <time className="kxd-os-meta kxd-os-sidebar__date">{dateDisplay}</time>
             ) : null}
-            <div style={{ marginBottom: "0.5rem", display: "flex", flexDirection: "column", gap: "0.375rem" }}>
+            <nav className="kxd-os-sidebar__rituals" aria-label="Daily rituals">
+              <Link href="/admin/operations/brief" className="kxd-os-sidebar__ritual-link">
+                Brief
+              </Link>
+              <Link href="/admin/operations/focus" className="kxd-os-sidebar__ritual-link">
+                Focus
+              </Link>
+              <Link href="/admin/operations/review" className="kxd-os-sidebar__ritual-link">
+                Review
+              </Link>
+            </nav>
+            <div className="kxd-os-sidebar__actions">
               <CommandPaletteTrigger />
               <NotificationCenter />
               <QuickCaptureNote />

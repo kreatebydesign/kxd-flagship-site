@@ -22,6 +22,14 @@ import {
   buildRecommendedActions,
   computeBriefingConfidence,
 } from "./sections";
+import {
+  buildExecutiveHealthSnapshot,
+  buildExecutiveNarrative,
+  detectStaleRequest,
+} from "./narrative";
+import { enrichRecommendations } from "./recommendation-intelligence";
+import { buildExecutiveInsights } from "./insights";
+import type { BrainMemoryRecord } from "@/lib/brain/types";
 import type { BriefingInputContext, ExecutiveBriefing } from "./types";
 
 async function loadPortfolioCommunications(): Promise<BriefingInputContext["communications"]> {
@@ -69,7 +77,10 @@ export async function loadBriefingContext(): Promise<BriefingInputContext> {
   };
 }
 
-export function buildExecutiveBriefing(input: BriefingInputContext): ExecutiveBriefing {
+export function buildExecutiveBriefing(
+  input: BriefingInputContext,
+  memory: BrainMemoryRecord[] = [],
+): ExecutiveBriefing {
   const { greeting, dateDisplay, timeDisplay } = buildBriefingGreeting(
     new Date(input.generatedAt),
   );
@@ -81,14 +92,53 @@ export function buildExecutiveBriefing(input: BriefingInputContext): ExecutiveBr
   const topPriorities = buildTopPriorities(input);
   const businessRisks = buildBusinessRisks(input);
   const businessOpportunities = buildBusinessOpportunities(input);
-  const recommendedActions = buildRecommendedActions({ priorities: topPriorities, risks: businessRisks });
+  const baseRecommendations = buildRecommendedActions({ priorities: topPriorities, risks: businessRisks });
+  const recommendedActions = enrichRecommendations(
+    baseRecommendations,
+    input,
+    memory,
+    input.generatedAt,
+  );
   const platformStatus = buildPlatformStatus(input);
   const confidence = computeBriefingConfidence(input);
+  const primaryRecommendation = recommendedActions[0] ?? null;
+  const healthSnapshot = buildExecutiveHealthSnapshot({
+    businessHealth,
+    relationshipHealth,
+    operationalHealth,
+  });
+  const narrative = buildExecutiveNarrative({
+    businessHealth,
+    relationshipHealth,
+    operationalHealth,
+    whatChanged,
+    topPriorities,
+    businessRisks,
+    businessOpportunities,
+    recommendedActions,
+    reviewInbox: input.reviewInbox,
+    completedToday: input.work.stats.completedTodayCount,
+    staleRequest: detectStaleRequest(input),
+  });
+  const executiveInsights = buildExecutiveInsights({
+    context: input,
+    businessHealth,
+    relationshipHealth,
+    operationalHealth,
+    healthSnapshot,
+    whatChanged,
+    businessRisks,
+    memory,
+  });
 
   return {
     greeting,
     dateDisplay,
     timeDisplay,
+    narrative,
+    healthSnapshot,
+    primaryRecommendation,
+    executiveInsights,
     businessHealth,
     whatChanged,
     topPriorities,
@@ -104,6 +154,10 @@ export function buildExecutiveBriefing(input: BriefingInputContext): ExecutiveBr
 }
 
 export async function getExecutiveBriefing(): Promise<ExecutiveBriefing> {
-  const context = await loadBriefingContext();
-  return buildExecutiveBriefing(context);
+  const { loadBrainMemory } = await import("@/lib/brain/memory");
+  const [context, memory] = await Promise.all([
+    loadBriefingContext(),
+    loadBrainMemory(200),
+  ]);
+  return buildExecutiveBriefing(context, memory);
 }

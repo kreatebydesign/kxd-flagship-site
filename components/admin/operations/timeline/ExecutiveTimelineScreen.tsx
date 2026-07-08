@@ -69,22 +69,22 @@ function TimelineEventCard({ event }: { event: ExecutiveTimelineDoc }) {
   const category = String(event.category ?? "relationship");
 
   return (
-    <article className="kxd-os-card" style={{ marginBottom: "0.75rem" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap" }}>
-        <div style={{ flex: 1, minWidth: "12rem" }}>
+    <article className="kxd-os-card kxd-os-timeline-event">
+      <div className="kxd-os-timeline-event__row">
+        <div className="kxd-os-timeline-event__body">
           <p className="kxd-os-meta">
             {formatTimelineDate(event.occurredAt as string)} · {String(event.sourceModule ?? "Manual")}
             {event.pinned ? " · Pinned" : ""}
           </p>
-          <p className="kxd-os-card__title" style={{ marginTop: "0.35rem" }}>
+          <p className="kxd-os-card__title kxd-os-timeline-event__title">
             {String(event.title)}
           </p>
           {event.summary ? (
-            <p className="kxd-os-body" style={{ marginTop: "0.5rem" }}>
+            <p className="kxd-os-body kxd-os-timeline-event__summary">
               {String(event.summary)}
             </p>
           ) : null}
-          <p className="kxd-os-meta" style={{ marginTop: "0.5rem" }}>
+          <p className="kxd-os-meta kxd-os-timeline-event__meta">
             {clientId ? (
               <Link href={`/admin/operations/timeline/${clientId}`} className="kxd-os-link-quiet">
                 {clientName}
@@ -97,7 +97,7 @@ function TimelineEventCard({ event }: { event: ExecutiveTimelineDoc }) {
             {event.eventType ? ` · ${String(event.eventType)}` : ""}
           </p>
         </div>
-        <div style={{ display: "flex", gap: "0.35rem", alignItems: "flex-start", flexWrap: "wrap" }}>
+        <div className="kxd-os-timeline-event__badges">
           <KxdBadge variant={importanceVariant(importance)}>{importance}</KxdBadge>
           <KxdBadge variant="default">{category}</KxdBadge>
         </div>
@@ -143,7 +143,7 @@ export function ExecutiveTimelineScreen({
         <OperationsPageHero
           eyebrow="KXD OS · Executive Timeline"
           title="Relationship History"
-          lead="Permanent client relationship record — CRM timeline meets Git history. Every important KXD Core event writes here."
+          lead="Permanent record of every meaningful moment in the partnership — launches, milestones, and decisions that shaped the relationship."
         />
 
         <div className="kxd-os-ops-kpi-grid">
@@ -153,16 +153,11 @@ export function ExecutiveTimelineScreen({
         </div>
 
         <KxdSection label="Filters" />
-        <form
-          method="get"
-          action="/admin/operations/timeline"
-          style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", marginBottom: "1.5rem" }}
-        >
+        <form method="get" action="/admin/operations/timeline" className="kxd-os-filter-bar">
           <select
             name="client"
             defaultValue={clientFilter ? String(clientFilter) : ""}
-            className="kxd-os-input"
-            style={{ minWidth: "10rem" }}
+            className="kxd-os-input kxd-os-filter-bar__input kxd-os-filter-bar__input--client"
           >
             <option value="">All clients</option>
             {data.clients.map((c) => (
@@ -174,8 +169,7 @@ export function ExecutiveTimelineScreen({
           <select
             name="category"
             defaultValue={categoryFilter}
-            className="kxd-os-input"
-            style={{ minWidth: "9rem" }}
+            className="kxd-os-input kxd-os-filter-bar__input"
           >
             {CATEGORIES.map((opt) => (
               <option key={opt.id} value={opt.id}>
@@ -186,8 +180,7 @@ export function ExecutiveTimelineScreen({
           <select
             name="importance"
             defaultValue={importanceFilter}
-            className="kxd-os-input"
-            style={{ minWidth: "9rem" }}
+            className="kxd-os-input kxd-os-filter-bar__input"
           >
             {IMPORTANCE.map((opt) => (
               <option key={opt.id} value={opt.id}>
@@ -200,17 +193,16 @@ export function ExecutiveTimelineScreen({
             name="q"
             defaultValue={searchQuery}
             placeholder="Search events…"
-            className="kxd-os-input"
-            style={{ minWidth: "12rem", flex: 1 }}
+            className="kxd-os-input kxd-os-filter-bar__input kxd-os-filter-bar__input--search"
           />
-          <label className="kxd-os-meta" style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
+          <label className="kxd-os-meta kxd-os-filter-bar__check">
             <input type="checkbox" name="pinned" value="1" defaultChecked={pinnedOnly} />
             Pinned only
           </label>
-          <button type="submit" className="kxd-os-sidebar__link" style={{ padding: "0.35rem 0.75rem" }}>
+          <button type="submit" className="kxd-os-btn kxd-os-btn--ghost kxd-os-btn--sm">
             Apply
           </button>
-          <Link href="/admin/operations/timeline" className="kxd-os-link-quiet" style={{ alignSelf: "center" }}>
+          <Link href="/admin/operations/timeline" className="kxd-os-link-quiet">
             Clear
           </Link>
         </form>
@@ -229,13 +221,12 @@ export function ExecutiveTimelineScreen({
 
           <section>
             <KxdSection label="Quick filters" />
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem" }}>
+            <div className="kxd-os-filter-pills">
               {CATEGORIES.slice(1, 8).map((opt) => (
                 <Link
                   key={opt.id}
                   href={buildFilterHref({ ...filterBase, category: opt.id })}
-                  className={`kxd-os-sidebar__link${categoryFilter === opt.id ? " kxd-os-sidebar__link--active" : ""}`}
-                  style={{ padding: "0.35rem 0.65rem", fontSize: "0.75rem" }}
+                  className={`kxd-os-filter-pill${categoryFilter === opt.id ? " kxd-os-filter-pill--active" : ""}`}
                 >
                   {opt.label}
                 </Link>
@@ -247,14 +238,14 @@ export function ExecutiveTimelineScreen({
           </section>
         </div>
 
-        <div className="kxd-os-ops-section-head" style={{ marginTop: "2rem" }}>
+        <div className="kxd-os-ops-section-head kxd-os-mt-page">
           <KxdSection label="Recent executive activity" />
         </div>
 
         {data.recentEvents.length === 0 ? (
           <KxdEmptyState
             title="No timeline events yet"
-            description="Events from Launch, Infrastructure, Onboarding, and Website Auditor will appear here as modules write to the executive timeline."
+            description="Events from launches, infrastructure work, onboarding, and audits will appear here as they occur."
           />
         ) : (
           <div className="kxd-os-timeline-stream">

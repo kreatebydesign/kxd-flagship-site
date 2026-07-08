@@ -130,6 +130,48 @@ export interface BriefingRecommendation {
   clientName?: string;
 }
 
+export type RecommendationCategory =
+  | "operations"
+  | "client-success"
+  | "website"
+  | "marketing"
+  | "projects"
+  | "deliverables"
+  | "reviews"
+  | "relationship";
+
+export type RecommendationEffortLabel =
+  | "5 minutes"
+  | "15 minutes"
+  | "30 minutes"
+  | "1 hour"
+  | "Half day"
+  | "Full day";
+
+export interface RecommendationEvidence {
+  id: string;
+  source: BriefingSignalSource;
+  label: string;
+  detail?: string;
+  href?: string;
+}
+
+export interface RecommendationHistoryNote {
+  type: "previously-shown" | "previously-completed" | "previously-dismissed" | "previously-ignored" | "similar-completed";
+  message: string;
+}
+
+export interface IntelligentRecommendation extends BriefingRecommendation {
+  signalConfidence: IntelligenceConfidence;
+  whyAppeared: string;
+  expectedImpact: string;
+  effort: RecommendationEffortLabel;
+  category: RecommendationCategory;
+  evidence: RecommendationEvidence[];
+  historyNotes: RecommendationHistoryNote[];
+  generatedAt: string;
+}
+
 export interface PlatformStatusItem {
   label: string;
   status: "ok" | "attention" | "warning";
@@ -141,10 +183,50 @@ export interface PlatformStatusSection {
   items: PlatformStatusItem[];
 }
 
+export interface ExecutiveNarrative {
+  text: string;
+  sentences: string[];
+}
+
+export interface ExecutiveHealthSnapshot {
+  business: { level: string; score: number; label: string };
+  relationship: { level: string; score: number; label: string };
+  operational: { level: string; score: number; label: string };
+  overall: { level: BusinessHealthLevel; score: number; label: string };
+}
+
+export type ExecutiveInsightTone = "positive" | "neutral" | "observational" | "quiet";
+
+export interface ExecutiveInsightContext {
+  id: string;
+  source: BriefingSignalSource;
+  label: string;
+  detail?: string;
+  href?: string;
+}
+
+export interface ExecutiveInsight {
+  id: string;
+  observation: string;
+  whatChanged: string;
+  whyItMatters: string;
+  tone: ExecutiveInsightTone;
+  timeframe: string;
+  confidence?: IntelligenceConfidence;
+  clientName?: string;
+  relatedRecommendationId?: string;
+  relatedHealthArea?: "business" | "relationship" | "operational";
+  context: ExecutiveInsightContext[];
+}
+
 export interface ExecutiveBriefing {
   greeting: string;
   dateDisplay: string;
   timeDisplay: string;
+  narrative: ExecutiveNarrative;
+  healthSnapshot: ExecutiveHealthSnapshot;
+  primaryRecommendation: IntelligentRecommendation | null;
+  executiveInsights: ExecutiveInsight[];
   businessHealth: BusinessHealthSection;
   whatChanged: BriefingChangeItem[];
   topPriorities: BriefingPriority[];
@@ -152,7 +234,7 @@ export interface ExecutiveBriefing {
   businessOpportunities: BriefingOpportunity[];
   relationshipHealth: RelationshipHealthSection;
   operationalHealth: OperationalHealthSection;
-  recommendedActions: BriefingRecommendation[];
+  recommendedActions: IntelligentRecommendation[];
   platformStatus: PlatformStatusSection;
   generatedAt: string;
   confidence: IntelligenceConfidence;

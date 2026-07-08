@@ -398,7 +398,7 @@ export function ExecutiveScreen({ data, reporting, today }: ExecutiveScreenProps
 
         {reporting ? (
           <KxdSection label="Reporting">
-            <div className="kxd-os-operations-kpi-bar" style={{ marginBottom: "0.75rem" }}>
+            <div className="kxd-os-operations-kpi-bar kxd-os-mb-section">
               <KxdMetric label="Reports due" value={String(reporting.reportsDue)} />
               <KxdMetric label="Generated" value={String(reporting.reportsGenerated)} />
               <KxdMetric label="Published" value={String(reporting.reportsPublished)} />
