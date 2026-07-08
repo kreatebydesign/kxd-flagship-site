@@ -105,7 +105,10 @@ export async function getPortalAccessData(): Promise<PortalAccessData> {
     if (clientId != null) profileByClient.set(clientId, doc);
   }
 
-  const userCounts = new Map<number, { total: number; active: number }>();
+  const userCounts = new Map<
+    number,
+    { total: number; active: number; welcomePending: number }
+  >();
   const users: PortalAccessUserRow[] = (usersResult.docs as AnyDoc[]).map((doc) => {
     const id = doc.id as number;
     const clientId = resolveId(doc.client) ?? 0;
@@ -116,10 +119,14 @@ export async function getPortalAccessData(): Promise<PortalAccessData> {
         ? String((clientRaw as AnyDoc).slug ?? "") || null
         : null;
     const active = doc.active !== false;
+    const welcomeCompleted = Boolean(doc.welcomeCompletedAt);
 
-    const counts = userCounts.get(clientId) ?? { total: 0, active: 0 };
+    const counts = userCounts.get(clientId) ?? { total: 0, active: 0, welcomePending: 0 };
     counts.total += 1;
-    if (active) counts.active += 1;
+    if (active) {
+      counts.active += 1;
+      if (!welcomeCompleted) counts.welcomePending += 1;
+    }
     userCounts.set(clientId, counts);
 
     return {
@@ -141,7 +148,7 @@ export async function getPortalAccessData(): Promise<PortalAccessData> {
   const clients: PortalAccessClientReadiness[] = (clientsResult.docs as AnyDoc[]).map((doc) => {
     const clientId = doc.id as number;
     const profile = profileByClient.get(clientId);
-    const counts = userCounts.get(clientId) ?? { total: 0, active: 0 };
+    const counts = userCounts.get(clientId) ?? { total: 0, active: 0, welcomePending: 0 };
     const cesProfileStatus = profile ? normalizeCesProfileStatus(profile.status) : "none";
     const modules = Array.isArray(profile?.enabledModules)
       ? (profile.enabledModules as string[])
@@ -158,6 +165,7 @@ export async function getPortalAccessData(): Promise<PortalAccessData> {
       cesProfileName: profile ? String(profile.profileName ?? "") : null,
       cesModules: modules,
       accentColor: profile?.accentColor ? String(profile.accentColor) : null,
+      welcomePendingUserCount: counts.welcomePending,
     };
 
     const evaluation = evaluatePortalClientReadiness(input, readinessEnv);
