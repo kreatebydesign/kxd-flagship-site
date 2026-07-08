@@ -1,0 +1,216 @@
+/**
+ * Source adapter registry — definitions only. Subsystems are NOT wired in Phase 14C.
+ */
+
+import type { WorkAdapterKey, WorkSourceAdapterDefinition } from "./types";
+
+export const WORK_SOURCE_ADAPTERS: Record<WorkAdapterKey, WorkSourceAdapterDefinition> = {
+  "website-review": {
+    key: "website-review",
+    displayName: "Website Review",
+    collectionSource: "website-review",
+    defaultCategory: "website",
+    defaultPriority: "normal",
+    supportsSpawning: true,
+    supportsCompletion: true,
+    supportsRelationshipLinking: true,
+    defaultRelationshipType: "website-review",
+  },
+  "client-request": {
+    key: "client-request",
+    displayName: "Client Requests",
+    collectionSource: "client-request",
+    defaultCategory: "communication",
+    defaultPriority: "normal",
+    supportsSpawning: true,
+    supportsCompletion: true,
+    supportsRelationshipLinking: true,
+    defaultRelationshipType: "client-request",
+  },
+  communication: {
+    key: "communication",
+    displayName: "Communications",
+    collectionSource: "communication",
+    defaultCategory: "communication",
+    defaultPriority: "normal",
+    supportsSpawning: true,
+    supportsCompletion: true,
+    supportsRelationshipLinking: true,
+    defaultRelationshipType: "communication",
+  },
+  manual: {
+    key: "manual",
+    displayName: "Manual",
+    collectionSource: "manual",
+    defaultCategory: "general",
+    defaultPriority: "normal",
+    supportsSpawning: true,
+    supportsCompletion: true,
+    supportsRelationshipLinking: true,
+  },
+  "future-ai": {
+    key: "future-ai",
+    displayName: "AI Concierge",
+    collectionSource: "future-ai",
+    defaultCategory: "strategy",
+    defaultPriority: "normal",
+    supportsSpawning: true,
+    supportsCompletion: true,
+    supportsRelationshipLinking: true,
+  },
+  "future-automation": {
+    key: "future-automation",
+    displayName: "Automation",
+    collectionSource: "future-automation",
+    defaultCategory: "operations",
+    defaultPriority: "normal",
+    supportsSpawning: true,
+    supportsCompletion: true,
+    supportsRelationshipLinking: true,
+  },
+  "future-onboarding": {
+    key: "future-onboarding",
+    displayName: "Onboarding",
+    collectionSource: "future-onboarding",
+    defaultCategory: "onboarding",
+    defaultPriority: "normal",
+    supportsSpawning: true,
+    supportsCompletion: true,
+    supportsRelationshipLinking: true,
+  },
+  "future-brand-center": {
+    key: "future-brand-center",
+    displayName: "Brand Center",
+    collectionSource: "future-brand-center",
+    defaultCategory: "creative",
+    defaultPriority: "normal",
+    supportsSpawning: true,
+    supportsCompletion: true,
+    supportsRelationshipLinking: true,
+    defaultRelationshipType: "brand-asset",
+  },
+  "future-marketing": {
+    key: "future-marketing",
+    displayName: "Marketing",
+    collectionSource: "future-marketing",
+    defaultCategory: "creative",
+    defaultPriority: "normal",
+    supportsSpawning: true,
+    supportsCompletion: true,
+    supportsRelationshipLinking: true,
+    defaultRelationshipType: "campaign",
+  },
+  deliverable: {
+    key: "deliverable",
+    displayName: "Deliverables",
+    collectionSource: "manual",
+    defaultCategory: "reporting",
+    defaultPriority: "normal",
+    supportsSpawning: true,
+    supportsCompletion: true,
+    supportsRelationshipLinking: true,
+    defaultRelationshipType: "deliverable",
+  },
+  "executive-recommendation": {
+    key: "executive-recommendation",
+    displayName: "Executive Recommendations",
+    collectionSource: "manual",
+    defaultCategory: "strategy",
+    defaultPriority: "high",
+    supportsSpawning: true,
+    supportsCompletion: true,
+    supportsRelationshipLinking: true,
+  },
+  meeting: {
+    key: "meeting",
+    displayName: "Meetings",
+    collectionSource: "communication",
+    defaultCategory: "communication",
+    defaultPriority: "normal",
+    supportsSpawning: true,
+    supportsCompletion: true,
+    supportsRelationshipLinking: true,
+    defaultRelationshipType: "meeting",
+  },
+  "ai-concierge": {
+    key: "ai-concierge",
+    displayName: "AI Concierge",
+    collectionSource: "future-ai",
+    defaultCategory: "strategy",
+    defaultPriority: "normal",
+    supportsSpawning: true,
+    supportsCompletion: true,
+    supportsRelationshipLinking: true,
+  },
+  proposal: {
+    key: "proposal",
+    displayName: "Proposals",
+    collectionSource: "manual",
+    defaultCategory: "strategy",
+    defaultPriority: "high",
+    supportsSpawning: false,
+    supportsCompletion: false,
+    supportsRelationshipLinking: true,
+    defaultRelationshipType: "proposal",
+  },
+  invoice: {
+    key: "invoice",
+    displayName: "Invoices",
+    collectionSource: "manual",
+    defaultCategory: "operations",
+    defaultPriority: "normal",
+    supportsSpawning: false,
+    supportsCompletion: false,
+    supportsRelationshipLinking: true,
+    defaultRelationshipType: "invoice",
+  },
+  "brand-asset": {
+    key: "brand-asset",
+    displayName: "Brand Assets",
+    collectionSource: "future-brand-center",
+    defaultCategory: "creative",
+    defaultPriority: "normal",
+    supportsSpawning: true,
+    supportsCompletion: true,
+    supportsRelationshipLinking: true,
+    defaultRelationshipType: "brand-asset",
+  },
+  campaign: {
+    key: "campaign",
+    displayName: "Campaigns",
+    collectionSource: "future-marketing",
+    defaultCategory: "creative",
+    defaultPriority: "normal",
+    supportsSpawning: true,
+    supportsCompletion: true,
+    supportsRelationshipLinking: true,
+    defaultRelationshipType: "campaign",
+  },
+  "timeline-event": {
+    key: "timeline-event",
+    displayName: "Timeline Events",
+    collectionSource: "manual",
+    defaultCategory: "operations",
+    defaultPriority: "low",
+    supportsSpawning: false,
+    supportsCompletion: false,
+    supportsRelationshipLinking: true,
+    defaultRelationshipType: "timeline-event",
+  },
+};
+
+export function getWorkSourceAdapter(key: WorkAdapterKey): WorkSourceAdapterDefinition {
+  const adapter = WORK_SOURCE_ADAPTERS[key];
+  if (!adapter) {
+    throw new Error(`Unknown Work adapter: ${String(key)}`);
+  }
+  return adapter;
+}
+
+export function listWorkSourceAdapters(): WorkSourceAdapterDefinition[] {
+  return Object.values(WORK_SOURCE_ADAPTERS);
+}
+
+export function adapterSupportsSpawning(key: WorkAdapterKey): boolean {
+  return getWorkSourceAdapter(key).supportsSpawning;
+}

@@ -6671,6 +6671,47 @@ a.kxd-os-platform-subsystem-card__title:hover {
   color: var(--kxd-os-text-muted);
 }
 
+.kxd-os-review-workspace__work-engine {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid color-mix(in srgb, var(--kxd-os-text-faint) 12%, transparent);
+}
+
+.kxd-os-review-workspace__work-engine-label {
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-faint);
+  margin: 0 0 0.35rem;
+}
+
+.kxd-os-review-workspace__work-engine-link {
+  display: inline-block;
+  font-family: var(--kxd-os-font-mono);
+  font-size: 0.875rem;
+  color: var(--kxd-os-text-primary);
+  text-decoration: none;
+  padding: 0.35rem 0;
+}
+
+.kxd-os-review-workspace__work-engine-link:hover {
+  color: var(--kxd-os-gold, #c9a962);
+}
+
+.kxd-os-review-workspace__work-engine-hint {
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--kxd-os-text-faint);
+  margin: 0.5rem 0 0;
+}
+
+.kxd-os-review-workspace__work-engine--linked {
+  padding: 0.875rem 1rem;
+  border-radius: var(--kxd-os-radius-sm);
+  border: 1px solid color-mix(in srgb, var(--kxd-os-gold, #c9a962) 22%, transparent);
+  background: color-mix(in srgb, var(--kxd-os-gold, #c9a962) 5%, var(--kxd-os-bg-elevated));
+}
+
 .kxd-os-review-workspace__timeline {
   list-style: none;
   padding: 0;
@@ -7180,6 +7221,43 @@ a.kxd-os-platform-subsystem-card__title:hover {
     font-size: 0.6875rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
+  }
+}
+
+/* ── Work Engine (Phase 14B) ─────────────────────────────────────────── */
+
+.kxd-os-page--work-engine .kxd-os-ops-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: var(--kxd-os-space-8);
+}
+
+.kxd-os-page--work-engine .kxd-os-ops-toolbar .kxd-notif-select {
+  flex: 1;
+  min-width: 12rem;
+  max-width: 28rem;
+}
+
+.kxd-os-work-engine-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--kxd-os-space-8);
+  margin-bottom: var(--kxd-os-space-10);
+}
+
+.kxd-os-ops-list-row__aside {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+@media (max-width: 900px) {
+  .kxd-os-work-engine-grid {
+    grid-template-columns: 1fr;
   }
 }
 

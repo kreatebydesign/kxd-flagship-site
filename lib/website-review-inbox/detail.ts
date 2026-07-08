@@ -7,6 +7,7 @@ import { formatPageContextDisplay } from "@/lib/ces/modules/website-review/conte
 import { WEBSITE_REVIEW_EXPERIENCE_MODULE } from "@/lib/ces/modules/website-review/constants";
 import { isWebsiteReviewImageMime } from "@/lib/ces/modules/website-review/attachments";
 import type { WebsiteReviewPageContext } from "@/lib/ces/modules/website-review/types";
+import { findWorkBySource } from "@/lib/work/integration/lookup";
 import type {
   ReviewWorkspaceAttachment,
   ReviewWorkspaceDetail,
@@ -125,9 +126,10 @@ export async function getReviewWorkspace(
   const clientId = resolveId(doc.client);
   if (clientId == null) return null;
 
-  const [attachments, timeline] = await Promise.all([
+  const [attachments, timeline, workLink] = await Promise.all([
     loadAttachments(requestId),
     loadWebsiteReviewTimeline(clientId, requestId, doc),
+    findWorkBySource(clientId, "website-review", String(requestId)),
   ]);
 
   const id = doc.id as number;
@@ -153,6 +155,13 @@ export async function getReviewWorkspace(
     clientPortalUrl: `/portal/website-review/${id}`,
     clientCommandUrl: `/admin/operations/client-command/${clientId}`,
     workspaceUrl: `/admin/operations/review-inbox/${id}`,
+    workEngine: workLink
+      ? {
+          workId: workLink.workId,
+          workNumber: workLink.workNumber ?? `WK-${String(workLink.workId).padStart(6, "0")}`,
+          adminUrl: `/admin/collections/work/${workLink.workId}`,
+        }
+      : null,
   };
 }
 

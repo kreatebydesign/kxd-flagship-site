@@ -15,6 +15,7 @@ import {
 import type { ReviewInboxRequestStatus } from "@/lib/website-review-inbox/types";
 import type { ReviewWorkspaceAttachment, ReviewWorkspaceDetail } from "@/lib/website-review-inbox/types";
 import { ReviewDeleteControl } from "./ReviewDeleteControl";
+import { ReviewSendToWorkControl } from "./ReviewSendToWorkControl";
 
 function fmtDateLong(iso: string): string {
   return new Date(iso).toLocaleDateString("en-US", {
@@ -389,6 +390,12 @@ export function ReviewWorkspaceScreen({ review: initialReview }: ReviewWorkspace
                   Open Payload record
                 </a>
               </div>
+
+              <ReviewSendToWorkControl
+                reviewId={review.id}
+                clientId={review.clientId}
+                initialLink={review.workEngine}
+              />
 
               <div
                 className="kxd-os-extension-slot"

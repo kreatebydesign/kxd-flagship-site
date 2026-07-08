@@ -51,6 +51,12 @@ export interface ReviewWorkspaceLocation {
   display: string | null;
 }
 
+export interface ReviewWorkEngineLink {
+  workId: number;
+  workNumber: string;
+  adminUrl: string;
+}
+
 export interface ReviewWorkspaceDetail {
   id: number;
   title: string;
@@ -72,6 +78,7 @@ export interface ReviewWorkspaceDetail {
   clientPortalUrl: string;
   clientCommandUrl: string;
   workspaceUrl: string;
+  workEngine: ReviewWorkEngineLink | null;
 }
 
 export interface ReviewInboxData {

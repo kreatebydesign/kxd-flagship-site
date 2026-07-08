@@ -48,6 +48,7 @@ import * as migration_20260721_phase12c_website_review_v2 from './20260721_phase
 import * as migration_20260722_phase12d_website_review_schema_ensure from './20260722_phase12d_website_review_schema_ensure';
 import * as migration_20260723_phase12h_portal_welcome from './20260723_phase12h_portal_welcome';
 import * as migration_20260724_phase13a_portal_users_active from './20260724_phase13a_portal_users_active';
+import * as migration_20260725_phase14b_work_engine from './20260725_phase14b_work_engine';
 
 export const migrations = [
   {
@@ -299,5 +300,10 @@ export const migrations = [
     up: migration_20260724_phase13a_portal_users_active.up,
     down: migration_20260724_phase13a_portal_users_active.down,
     name: '20260724_phase13a_portal_users_active',
+  },
+  {
+    up: migration_20260725_phase14b_work_engine.up,
+    down: migration_20260725_phase14b_work_engine.down,
+    name: '20260725_phase14b_work_engine',
   },
 ];
