@@ -38,12 +38,6 @@ const QUICK_ACTION_LABELS: Record<ConnectedQuickAction["id"], string> = {
   "message-kxd": PORTAL_CLIENT_LANGUAGE.connectedQuickActionMessageKxd,
 };
 
-function quickActionHint(hint: ConnectedQuickAction["hint"]): string | undefined {
-  if (hint === "coming-soon") return PORTAL_CLIENT_LANGUAGE.connectedQuickActionComingSoon;
-  if (hint === "url-missing") return PORTAL_CLIENT_LANGUAGE.connectedWebsiteUrlMissing;
-  return undefined;
-}
-
 export interface CesConnectedWorkspaceProps {
   profile: ResolvedExperienceProfile;
   connected: ConnectedWorkspaceData;
@@ -51,6 +45,9 @@ export interface CesConnectedWorkspaceProps {
 
 export function CesConnectedWorkspace({ profile, connected }: CesConnectedWorkspaceProps) {
   const t = profile.terminology;
+  const quickActions = connected.quickActions.filter((action) => action.enabled);
+  const showDeliverablesPanel =
+    connected.showDeliverablesLink || connected.deliverables.length > 0;
   const workByGroup = WORK_GROUP_ORDER.map((group) => ({
     group,
     label: WORK_GROUP_LABELS[group],
@@ -64,27 +61,14 @@ export function CesConnectedWorkspace({ profile, connected }: CesConnectedWorksp
           {portalCopy(t, "portal.home.quickActions", PORTAL_CLIENT_LANGUAGE.connectedQuickActions)}
         </h2>
         <div className="kxd-ces-connected__quick-grid">
-          {connected.quickActions.map((action) =>
-            action.enabled && action.href ? (
+          {quickActions.map((action) =>
+            action.href ? (
               <Link key={action.id} href={action.href} className="kxd-ces-connected__quick-action">
                 <span className="kxd-ces-connected__quick-label">
                   {portalCopy(t, `portal.home.quick.${action.id}`, QUICK_ACTION_LABELS[action.id])}
                 </span>
               </Link>
-            ) : (
-              <div
-                key={action.id}
-                className="kxd-ces-connected__quick-action kxd-ces-connected__quick-action--disabled"
-                aria-disabled="true"
-              >
-                <span className="kxd-ces-connected__quick-label">
-                  {portalCopy(t, `portal.home.quick.${action.id}`, QUICK_ACTION_LABELS[action.id])}
-                </span>
-                {action.hint ? (
-                  <span className="kxd-ces-connected__quick-hint">{quickActionHint(action.hint)}</span>
-                ) : null}
-              </div>
-            ),
+            ) : null,
           )}
         </div>
       </section>
@@ -244,6 +228,7 @@ export function CesConnectedWorkspace({ profile, connected }: CesConnectedWorksp
           )}
         </section>
 
+        {showDeliverablesPanel ? (
         <section className="kxd-ces-connected__panel" aria-labelledby="connected-deliverables-heading">
           <div className="kxd-ces-connected__panel-head">
             <h2 id="connected-deliverables-heading" className="kxd-ces-connected__section-title">
@@ -274,6 +259,7 @@ export function CesConnectedWorkspace({ profile, connected }: CesConnectedWorksp
             </p>
           )}
         </section>
+        ) : null}
       </div>
     </div>
   );

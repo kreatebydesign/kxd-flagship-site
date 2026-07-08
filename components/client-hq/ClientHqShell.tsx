@@ -40,7 +40,7 @@ export function ClientHqShell({
   const sidebarLabel =
     experienceProfile?.hospitality.portalSidebarLabel ??
     branding?.portal.sidebarLabel ??
-    "Client HQ";
+    "Your workspace";
   const reassuranceLine = experienceProfile?.hospitality.reassuranceLine;
   const partnerLine = experienceProfile?.hospitality.partnerFooterLine;
   const showPartnerMark = experienceProfile?.hospitality.showPartnerMark ?? true;

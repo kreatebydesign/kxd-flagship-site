@@ -36,7 +36,7 @@ export const PRIMAL_EXPERIENCE_PROFILE = {
     "portal.home.launch.step1": "Review the current site.",
     "portal.home.launch.step2": "Submit notes through Website Review.",
     "portal.home.launch.step3": "Attach screenshots if helpful.",
-    "portal.home.launch.step4": "KXD will review and respond from the inbox.",
+    "portal.home.launch.step4": "We'll review your feedback and keep you updated here.",
     "portal.home.stat.active": "Active revisions",
     "portal.home.stat.awaiting": "Waiting on you",
     "portal.home.stat.current": "Current review",

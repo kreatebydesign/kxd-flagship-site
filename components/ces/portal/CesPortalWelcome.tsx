@@ -68,6 +68,18 @@ export function CesPortalWelcome({ profile, clientName, websiteUrl }: CesPortalW
           <p className="kxd-ces-welcome__workspace">{PORTAL_CLIENT_LANGUAGE.welcomeWorkspaceLabel}</p>
           <p className="kxd-ces-welcome__intro">{intro}</p>
           <p className="kxd-ces-welcome__lead">{PORTAL_CLIENT_LANGUAGE.welcomeBody}</p>
+
+          <div className="kxd-ces-welcome__purpose">
+            <p className="kxd-ces-welcome__purpose-heading">
+              {PORTAL_CLIENT_LANGUAGE.welcomePurposeHeading}
+            </p>
+            <ol className="kxd-ces-welcome__purpose-steps">
+              {PORTAL_CLIENT_LANGUAGE.welcomePurposeSteps.map((step) => (
+                <li key={step}>{step}</li>
+              ))}
+            </ol>
+          </div>
+
           <p className="kxd-ces-welcome__closing">{closing}</p>
         </div>
 

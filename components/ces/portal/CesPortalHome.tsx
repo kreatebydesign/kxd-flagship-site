@@ -1,9 +1,10 @@
+import Link from "next/link";
 import type { ResolvedExperienceProfile } from "@/lib/ces";
 import { isCesModuleEnabled } from "@/lib/ces";
 import { portalCopy, PORTAL_CLIENT_LANGUAGE } from "@/lib/ces/copy/portal-language";
 import type { WebsiteReviewLandingData } from "@/lib/ces/modules/website-review/types";
 import type { ConnectedWorkspaceData } from "@/lib/portal/connected-workspace";
-import { PRIMAL_CLIENT_SLUG } from "@/lib/ces/profile/primal";
+import { isCesFlagshipPortal } from "@/lib/portal/ces-launch-safety";
 import { portalFirstName, portalTimeGreeting } from "@/lib/portal/greeting";
 import { CesHero, CesPage } from "@/components/ces/primitives";
 import { WebsiteReviewEmptyGuide } from "@/components/ces/modules/website-review/WebsiteReviewReassurance";
@@ -21,18 +22,14 @@ function workspaceEyebrow(
   profile: ResolvedExperienceProfile,
   terminology: Record<string, string>,
 ): string {
-  if (profile.identity.clientSlug === PRIMAL_CLIENT_SLUG) {
-    return portalCopy(
-      terminology,
-      "portal.home.workspaceLabel",
-      PORTAL_CLIENT_LANGUAGE.primalWorkspaceLabel,
-    );
-  }
-
   return portalCopy(
     terminology,
-    "portal.home.eyebrow",
-    profile.hospitality.welcomeEyebrow ?? PORTAL_CLIENT_LANGUAGE.homeEyebrow,
+    "portal.home.workspaceLabel",
+    portalCopy(
+      terminology,
+      "portal.home.eyebrow",
+      profile.hospitality.welcomeEyebrow ?? PORTAL_CLIENT_LANGUAGE.homeEyebrow,
+    ),
   );
 }
 
@@ -49,11 +46,12 @@ export function CesPortalHome({
   const eyebrow = workspaceEyebrow(profile, t);
   const title = portalTimeGreeting(firstName);
   const lead = portalCopy(t, "portal.home.lead", PORTAL_CLIENT_LANGUAGE.homeLead);
+  const flagship = isCesFlagshipPortal(profile);
 
   return (
     <CesPage
       className={`kxd-ces-portal-home kxd-ces-page--enter${
-        profile.identity.clientSlug === PRIMAL_CLIENT_SLUG ? " kxd-ces-portal-home--primal" : ""
+        flagship ? " kxd-ces-portal-home--flagship" : ""
       }`}
     >
       <CesHero eyebrow={eyebrow} title={title} lead={lead} presence />

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ResolvedExperienceProfile } from "@/lib/ces";
 import { portalCopy, PORTAL_CLIENT_LANGUAGE } from "@/lib/ces/copy/portal-language";
-import { PRIMAL_CLIENT_SLUG } from "@/lib/ces/profile/primal";
+import { isCesFlagshipPortal } from "@/lib/portal/ces-launch-safety";
 
 export interface CesPortalLaunchGuideProps {
   profile: ResolvedExperienceProfile;
@@ -18,8 +18,9 @@ const LAUNCH_STEP_KEYS = [
 
 const LAUNCH_STEP_FALLBACKS = PORTAL_CLIENT_LANGUAGE.launchSteps;
 
+/** Show getting-started guidance for CES flagship clients (Website Review launch mode). */
 export function shouldShowPortalLaunchGuide(profile: ResolvedExperienceProfile): boolean {
-  return profile.identity.clientSlug === PRIMAL_CLIENT_SLUG;
+  return isCesFlagshipPortal(profile);
 }
 
 export function CesPortalLaunchGuide({

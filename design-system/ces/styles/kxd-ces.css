@@ -836,6 +836,7 @@
   --kxd-ces-content-max: 44rem;
 }
 
+.kxd-ces-portal-home--flagship .kxd-ces-hero__eyebrow,
 .kxd-ces-portal-home--primal .kxd-ces-hero__eyebrow {
   color: var(--kxd-ces-accent, var(--kxd-os-accent));
   letter-spacing: 0.12em;
@@ -1538,6 +1539,8 @@
   margin: 0;
 }
 
+.kxd-ces-portal-home--flagship .kxd-ces-connected__website-badge,
+.kxd-ces-portal-home--flagship .kxd-ces-connected__work-group-label,
 .kxd-ces-portal-home--primal .kxd-ces-connected__website-badge,
 .kxd-ces-portal-home--primal .kxd-ces-connected__work-group-label {
   color: var(--kxd-ces-accent);
@@ -2910,6 +2913,32 @@
   color: var(--kxd-os-text-muted);
   margin: 0;
   max-width: 40ch;
+}
+
+.kxd-ces-welcome__purpose {
+  margin-top: 0.25rem;
+}
+
+.kxd-ces-welcome__purpose-heading {
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-faint);
+  margin: 0 0 0.625rem;
+}
+
+.kxd-ces-welcome__purpose-steps {
+  margin: 0;
+  padding-left: 1.125rem;
+  display: grid;
+  gap: 0.375rem;
+  max-width: 42ch;
+}
+
+.kxd-ces-welcome__purpose-steps li {
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--kxd-os-text-muted);
 }
 
 .kxd-ces-welcome__closing {

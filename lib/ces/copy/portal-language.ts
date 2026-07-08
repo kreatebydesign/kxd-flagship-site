@@ -6,7 +6,8 @@ export const PORTAL_CLIENT_LANGUAGE = {
   homeEyebrow: "Your workspace",
   primalWorkspaceLabel: "Primal Workspace",
   homeWelcome: (name: string) => `Welcome back, ${name}`,
-  homeLead: "Everything related to your website and creative work is organized here.",
+  homeLead:
+    "Your dedicated space to review website progress, submit feedback, and track every update — in one calm place.",
 
   launchEyebrow: "Getting started",
   launchTitle: "What to do first",
@@ -15,10 +16,10 @@ export const PORTAL_CLIENT_LANGUAGE = {
   launchLeadActive:
     "Keep momentum going — review your site, submit notes, and track every revision here.",
   launchSteps: [
-    "Review the current site.",
-    "Submit notes through Website Review.",
-    "Attach screenshots if helpful.",
-    "KXD will review and respond from the inbox.",
+    "Open your website and review the pages that matter most.",
+    "Submit feedback through Website Review — notes, screenshots, or both.",
+    "Attach references if they help explain what you'd like changed.",
+    "We'll review your feedback and keep you updated here.",
   ] as const,
 
   statActiveRevisions: "Active revisions",
@@ -32,19 +33,26 @@ export const PORTAL_CLIENT_LANGUAGE = {
   moduleActiveCount: (count: number) =>
     count === 1 ? "1 revision in progress" : `${count} revisions in progress`,
 
-  welcomeTitle: "Welcome",
-  welcomeWorkspaceLabel: "Your workspace",
-  welcomeIntroWithBrand: (clientName: string) => `Welcome to your ${clientName} workspace.`,
-  welcomeIntroNoBrand: "Welcome to your workspace.",
+  welcomeTitle: "Welcome to your workspace",
+  welcomeWorkspaceLabel: "Your collaboration space",
+  welcomeIntroWithBrand: (clientName: string) =>
+    `This is where ${clientName} reviews website progress with our team.`,
+  welcomeIntroNoBrand: "This is where you review website progress with our team.",
+  welcomePurposeHeading: "What you can do here",
+  welcomePurposeSteps: [
+    "Review your live website and leave feedback where it matters.",
+    "Submit revision requests with clear notes and screenshots.",
+    "Track progress as updates move forward — nothing gets lost.",
+  ] as const,
   welcomeBody:
-    "Everything related to your website, creative projects, revisions, and future initiatives now lives here.",
+    "This is your professional collaboration workspace — not a generic dashboard. Every website update is organized here.",
   welcomeClosingWithBrand: (clientName: string) =>
-    `Focus on growing ${clientName}. We'll handle the rest.`,
+    `Focus on ${clientName}. We'll handle the rest.`,
   welcomeClosingNoBrand: "Focus on what matters most. We'll handle the rest.",
-  welcomeStartReviewing: "Start reviewing",
-  welcomeEnterWorkspace: "Enter workspace",
-  welcomeOpening: "Starting review…",
-  welcomeEntering: "Entering workspace…",
+  welcomeStartReviewing: "Review your website",
+  welcomeEnterWorkspace: "Go to workspace",
+  welcomeOpening: "Opening review…",
+  welcomeEntering: "Opening workspace…",
   welcomeError: "We couldn't open your workspace just now. Please try again.",
 
   revisionGoneTitle: "This revision is no longer available",
@@ -68,9 +76,9 @@ export const PORTAL_CLIENT_LANGUAGE = {
   reviewCtaSecondary: "View live site",
   reviewActiveSection: "Active revisions",
   reviewCompletedSection: "Recently complete",
-  reviewEmptyTitle: "You're all caught up",
+  reviewEmptyTitle: "No updates yet",
   reviewEmptyLead:
-    "When you're ready to share feedback, everything will be organized here.",
+    "Submit your first website review request and we'll organize every update here.",
   reviewEmptyCta: "Start a revision",
 
   reviewReassuranceLine1: "Every revision is tracked. Nothing gets lost.",
@@ -84,19 +92,24 @@ export const PORTAL_CLIENT_LANGUAGE = {
   reviewEmptyGuideClosing: "We'll take care of the rest.",
 
   requestEyebrow: "New revision",
-  requestTitle: "Start a revision",
-  requestLead: "Tell us what to change. Attach references if helpful — we handle the rest.",
-  requestFocusIntro: "What would you like updated?",
+  requestTitle: "Submit website feedback",
+  requestLead:
+    "Tell us what you'd like changed on your site. Be specific — we'll handle the rest and keep you updated here.",
+  requestFocusIntro: "What would you like us to update?",
   requestDetailsHint:
     "Be specific — current copy, what should change, or what you're seeing. The more context, the fewer back-and-forths.",
   requestLocationHint:
     "Pick a page and section so we go straight to the right place. Leave blank if it applies site-wide.",
   requestConfirmIntro: "Does this look right?",
   contextFromReviewUrl: "We pre-filled the page from your review link. Adjust anything before sending.",
+  requestFlowStepFocus: "What to change",
+  requestFlowStepDetails: "Your notes",
+  requestFlowStepConfirm: "Review & send",
+
   confirmTitle: "Thank you — we've received it.",
   confirmMessage:
-    "Your revision is with us. We'll keep you updated as work moves forward.",
-  confirmReferenceLabel: "Revision no.",
+    "Your feedback is with our team. We'll keep you updated here as work moves forward.",
+  confirmReferenceLabel: "Reference",
   submitError:
     "We couldn't send your revision just now. Please try again in a moment.",
   sendRevision: "Send revision",
@@ -203,9 +216,10 @@ export const PORTAL_CLIENT_LANGUAGE = {
 
   confirmErrorTitle: "Something didn't go through",
 
-  connectedCurrentWork: "Current Work",
-  connectedCurrentWorkEmpty: "You're all caught up. Start a Website Review when you're ready to share feedback.",
-  connectedWebsite: "Website",
+  connectedCurrentWork: "Current updates",
+  connectedCurrentWorkEmpty:
+    "No active updates yet. Submit your first website review request and we'll track everything here.",
+  connectedWebsite: "Your website",
   connectedWebsiteReview: "Website Review",
   connectedWebsiteAvailable: "Available",
   connectedWebsiteActiveRevisions: (count: number) =>
@@ -214,13 +228,13 @@ export const PORTAL_CLIENT_LANGUAGE = {
   connectedWebsiteNoActivity: "No recent activity yet",
   connectedRecentActivity: "Recent Activity",
   connectedRecentActivityEmpty:
-    "Your workspace is ready. Revisions and updates will appear here as work moves forward.",
-  connectedDeliverables: "Latest Deliverables",
+    "Updates will appear here as revisions move forward. Start with a website review when you're ready.",
+  connectedDeliverables: "Latest deliverables",
   connectedDeliverablesEmpty:
-    "You're all caught up. New deliverables will appear here as we publish them.",
-  connectedQuickActions: "Quick Actions",
-  connectedQuickActionReviewWebsite: "Review Website",
-  connectedQuickActionStartReview: "Start Website Review",
+    "New deliverables will appear here when they're ready to share.",
+  connectedQuickActions: "Quick actions",
+  connectedQuickActionReviewWebsite: "Review website",
+  connectedQuickActionStartReview: "Submit feedback",
   connectedQuickActionUploadAssets: "Upload Assets",
   connectedQuickActionMessageKxd: "Message KXD",
   connectedQuickActionComingSoon: "Coming soon",

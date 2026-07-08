@@ -26,9 +26,9 @@ import type {
 import { WebsiteReviewAttachmentZone } from "./WebsiteReviewAttachmentZone";
 
 const FLOW_STEPS: CesFlowStep[] = [
-  { id: "focus", label: "Focus" },
-  { id: "details", label: "Details" },
-  { id: "review", label: "Confirm" },
+  { id: "focus", label: PORTAL_CLIENT_LANGUAGE.requestFlowStepFocus },
+  { id: "details", label: PORTAL_CLIENT_LANGUAGE.requestFlowStepDetails },
+  { id: "review", label: PORTAL_CLIENT_LANGUAGE.requestFlowStepConfirm },
 ];
 
 const UPDATE_TYPES = [

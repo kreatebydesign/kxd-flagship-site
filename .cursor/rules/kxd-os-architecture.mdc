@@ -11,7 +11,7 @@ KXD OS is not a CRM, dashboard, or AI chatbot. It is studio software that contin
 
 ## Mission
 
-Help the founder understand the business, reclaim time, and operate with calm authority. Complex underneath. Simple on top.
+Help the founder understand the business, reclaim time, and operate with calm authority. Complex underneath. Simple on top. **Premium software craftsmanship** (KHIG) — calm executive UI, editorial typography, evidence-bound language.
 
 ## Platform Layers (preserve order)
 
@@ -22,20 +22,42 @@ Observer                    — facts only
       ↓
 Observation Registry + History
       ↓
-Business Brain              — business meaning
+Business Brain              — meaning and patterns
       ↓
 Pulse                       — movement and awareness
       ↓
-Executive Narrative         — founder-readable explanation
+Executive Narrative         — founder-level explanation
       ↓
-Executive Rituals           — Brief, Focus, Review
+Business Context            — business-specific interpretation lens
+      ↓
+Business Memory             — historical evolution
+      ↓
+Executive Rituals           — presentation layer (Brief, Focus, Review)
+      ↓
+Client Workspace / Portal   — CES, Connected Workspace
       ↓
 Automation                  — future; explicit approval required
 ```
 
 **Business Context** (`lib/business-context/`) provides interpretation lenses. It does not override facts.
 
+**Business Memory** (`lib/business-memory/`) tracks evolution over time. It does not invent history.
+
 **Executive Intelligence** (`lib/intelligence/`) is the existing deterministic briefing system. Do not replace it with the Phase 17 pipeline unless explicitly requested.
+
+## Completed Intelligence Layers
+
+| Phase | Layer | Location | Status |
+|-------|-------|----------|--------|
+| 17A | Observer | `lib/observer/` | ✅ Complete |
+| 17B | Business Brain | `lib/business-brain/` | ✅ Complete |
+| 17C | Pulse | `lib/pulse/` | ✅ Complete |
+| 17D | Executive Narrative | `lib/executive-narrative/` | ✅ Complete |
+| 17E | Business Context | `lib/business-context/` | ✅ Complete |
+| 18A | Ritual Intelligence Integration | `lib/rituals/intelligence/` | ✅ Wired to rituals |
+| 18B | Business Memory | `lib/business-memory/` | ✅ Foundation (no UI) |
+| 18C | Primal Workspace Validation | — | ✅ First external client |
+| 18D | Client Launch Readiness | `lib/client-launch/` | ✅ Repeatable launch pattern |
 
 ## Major Systems (do not duplicate)
 
@@ -44,6 +66,7 @@ Automation                  — future; explicit approval required
 | Shared Core | `payload/`, `lib/client-command/`, loaders | System of record |
 | CES | `lib/ces/` | Client-facing experience layer |
 | Connected Workspace | Portal + CES modules (`/portal/*`) | Client HQ experience |
+| Client Launch Readiness | `lib/client-launch/` | Launch checklist and evaluation |
 | Timeline | `lib/executive-timeline/` | Relationship memory |
 | Work Engine | `lib/work/`, `lib/work-items/` | Execution layer |
 | Executive Intelligence | `lib/intelligence/` | Briefings, recommendations |
@@ -52,6 +75,7 @@ Automation                  — future; explicit approval required
 | Business Brain | `lib/business-brain/` | Meaning — no actions |
 | Pulse | `lib/pulse/` | Awareness — no recommendations |
 | Executive Narrative | `lib/executive-narrative/` | Explanation — no decisions |
+| Business Memory | `lib/business-memory/` | Evolution — no invented history |
 
 ## Layer Boundaries
 
@@ -61,31 +85,38 @@ Automation                  — future; explicit approval required
 | Business Brain | What does it mean? | Execute, mutate systems |
 | Pulse | What changed? | Recommend actions |
 | Executive Narrative | How should a founder understand this? | Decide, automate |
+| Business Context | How does this business interpret events? | Override facts |
+| Business Memory | How has the business evolved? | Invent history |
 | Rituals | How does the founder start the day? | Replace full workspaces without request |
 | Automation | What runs automatically? | Run without explicit approval |
 
-Maintain separation: **facts → interpretation → awareness → narrative → action**.
+Maintain separation: **facts → interpretation → awareness → narrative → memory → presentation → action**.
 
 ## Development Principles
 
-1. **Protect existing architecture** — Shared Core, CES, Timeline, Work Engine, Intelligence
+1. **Protect Edition 1 architecture** — no architecture drift, no Edition 2 concepts
 2. **Prefer additive changes** — extend; do not rewrite completed phases
-3. **Avoid duplicate systems** — reuse loaders (`loadBriefingContext`, `loadObserverContext`, etc.)
-4. **No UI changes** unless explicitly requested
-5. **No automation** without explicit approval
-6. **No AI generation** in Edition 1 intelligence foundations unless requested
-7. **KHIG standards** — `design-system/os/`, calm executive UI
-8. **Run `npm run build`** after major implementation
+3. **Avoid duplicate systems** — reuse loaders; no parallel intelligence paths
+4. **No duplicate intelligence systems** — one pipeline, adapter layers for presentation
+5. **Facts before interpretation, interpretation before action**
+6. **No UI changes** unless explicitly requested
+7. **No automation** without explicit approval
+8. **No AI generation** in Edition 1 intelligence foundations unless requested
+9. **KHIG standards** — `design-system/os/`, calm executive UI, premium craftsmanship
+10. **Run `npm run build`** after major implementation
 
 ## Before Building
 
 1. Does this strengthen the whole platform?
 2. Does it improve business understanding?
 3. Is it additive to an existing layer — not a parallel one?
-4. Does it respect facts / interpretation / awareness / narrative / action separation?
+4. Does it respect layer separation (facts / interpretation / awareness / narrative / memory / action)?
+5. Is there an existing loader or adapter to reuse?
 
 ## Source of Truth
 
+- Current state: `docs/KXD-OS-CURRENT-STATE.md`
+- Engineering brief: `docs/KXD-OS-ENGINEERING-BRIEF.md`
 - Architecture: `docs/KXD-OS-ARCHITECTURE.md`
 - Philosophy: `docs/KXD-OS-PHILOSOPHY.md`
 - Roadmap: `docs/KXD-OS-ROADMAP.md`
