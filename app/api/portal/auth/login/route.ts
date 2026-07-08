@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
             "Invalid email or password. This account exists but credentials may not be set. " +
             "Run: npm run seed:portal-user -- --email " +
             email +
-            " --password 'YourPassword' --client primal-motorsports",
+            " --password 'YourPassword' --client <client-slug> --display-name Name",
         },
         { status: 401 },
       );

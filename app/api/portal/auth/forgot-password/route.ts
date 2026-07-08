@@ -49,6 +49,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true });
     }
 
+    if (process.env.NODE_ENV === "production" && !process.env.RESEND_API_KEY?.trim()) {
+      console.warn(
+        "[KXD Portal] RESEND_API_KEY not set in production — password reset email not sent.",
+      );
+      return NextResponse.json({ ok: true });
+    }
+
     const sendResult = await sendPortalEmail({
       to: email,
       subject: PORTAL_CLIENT_LANGUAGE.authEmailSubject,
