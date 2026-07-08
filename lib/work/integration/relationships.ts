@@ -1,4 +1,4 @@
-import "server-only";
+/** Payload-safe — used by CLI hooks and migrate scripts (no server-only). */
 
 import { getPayload } from "payload";
 import config from "@payload-config";

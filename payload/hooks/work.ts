@@ -1,9 +1,9 @@
 import type { CollectionAfterChangeHook } from "payload";
+import { assignWorkNumber } from "@/lib/work/integration/relationships";
 import {
-  assignWorkNumber,
   publishWorkEventFromDoc,
   resolveLifecycleEvent,
-} from "@/lib/work/integration";
+} from "@/lib/work/integration/events";
 import type { WorkStatus } from "@/lib/work/types";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

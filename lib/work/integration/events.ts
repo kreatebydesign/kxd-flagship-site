@@ -1,4 +1,4 @@
-import "server-only";
+/** Payload-safe — used by CLI hooks and migrate scripts (no server-only). */
 
 import type { Payload } from "payload";
 import { createExecutiveEvent } from "@/lib/executive-timeline/create-event";
