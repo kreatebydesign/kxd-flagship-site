@@ -5,6 +5,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPayload } from "payload";
 import config from "@payload-config";
+import { deleteClientReviewMediaObject } from "@/lib/client-review-media/delete-object";
+import { getDefaultClientReviewStorageAdapter } from "@/lib/client-review-media/storage";
 import {
   isWebsiteReviewMimeAllowed,
   WEBSITE_REVIEW_MAX_FILE_BYTES,
@@ -47,28 +49,45 @@ export async function POST(req: NextRequest) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    const payload = await getPayload({ config });
+    const adapter = getDefaultClientReviewStorageAdapter();
+    let stored: { key: string } | null = null;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const record = await payload.create({
-      collection: "client-review-media" as any,
-      data: {
-        client: session.clientId,
+    try {
+      stored = await adapter.upload({
+        clientId: session.clientId,
+        buffer,
+        mimeType,
         originalFilename: file.name,
-        uploadedByEmail: session.email,
-      } as any,
-      file: {
-        data: buffer,
-        mimetype: mimeType,
-        name: file.name,
-        size: file.size,
-      },
-      overrideAccess: true,
-    });
+      });
 
-    const attachment = mapReviewMediaDocToAttachment(record as Record<string, unknown>);
+      const payload = await getPayload({ config });
 
-    return NextResponse.json({ ok: true, attachment });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const record = await payload.create({
+        collection: "client-review-media" as any,
+        data: {
+          client: session.clientId,
+          originalFilename: file.name,
+          uploadedByEmail: session.email,
+          mimeType,
+          filesize: file.size,
+          storageProvider: adapter.provider,
+          storageKey: stored.key,
+        } as any,
+        overrideAccess: true,
+      });
+
+      const attachment = mapReviewMediaDocToAttachment(record as Record<string, unknown>);
+
+      return NextResponse.json({ ok: true, attachment });
+    } catch (innerErr) {
+      if (stored) {
+        await adapter.delete(stored.key).catch((cleanupErr) => {
+          console.error("[KXD Portal] Upload rollback failed:", cleanupErr);
+        });
+      }
+      throw innerErr;
+    }
   } catch (err) {
     console.error("[KXD Portal] Website review upload failed:", err);
     return NextResponse.json(
@@ -121,6 +140,8 @@ export async function DELETE(req: NextRequest) {
         { status: 400 },
       );
     }
+
+    await deleteClientReviewMediaObject(row);
 
     await payload.delete({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

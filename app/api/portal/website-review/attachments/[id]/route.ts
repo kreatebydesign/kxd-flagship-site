@@ -2,17 +2,13 @@
  * GET /api/portal/website-review/attachments/[id]
  * Session-scoped file delivery for review attachments.
  */
-import path from "path";
-import { createReadStream } from "fs";
-import { stat } from "fs/promises";
 import { NextRequest, NextResponse } from "next/server";
 import { getPayload } from "payload";
 import config from "@payload-config";
+import { openClientReviewMedia } from "@/lib/client-review-media/serve";
 import { getPortalSession } from "@/lib/portal/session";
 
 export const dynamic = "force-dynamic";
-
-const STATIC_ROOT = path.join(process.cwd(), "private/client-review-media");
 
 export async function GET(
   _req: NextRequest,
@@ -49,24 +45,12 @@ export async function GET(
       return NextResponse.json({ ok: false, message: "Not found." }, { status: 404 });
     }
 
-    const filename = String(row.filename ?? "");
-    if (!filename) {
-      return NextResponse.json({ ok: false, message: "File unavailable." }, { status: 404 });
-    }
+    const opened = await openClientReviewMedia(row);
 
-    const safeName = path.basename(filename);
-    const filePath = path.join(STATIC_ROOT, safeName);
-
-    await stat(filePath);
-
-    const mimeType = String(row.mimeType ?? "application/octet-stream");
-    const originalFilename = String(row.originalFilename ?? safeName);
-    const stream = createReadStream(filePath);
-
-    return new NextResponse(stream as unknown as BodyInit, {
+    return new NextResponse(opened.body as unknown as BodyInit, {
       headers: {
-        "Content-Type": mimeType,
-        "Content-Disposition": `inline; filename="${originalFilename.replace(/"/g, "")}"`,
+        "Content-Type": opened.mimeType,
+        "Content-Disposition": `inline; filename="${opened.filename.replace(/"/g, "")}"`,
         "Cache-Control": "private, max-age=3600",
       },
     });

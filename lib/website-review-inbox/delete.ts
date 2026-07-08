@@ -2,6 +2,7 @@ import "server-only";
 
 import { getPayload } from "payload";
 import config from "@payload-config";
+import { deleteClientReviewMediaObject } from "@/lib/client-review-media/delete-object";
 import { WEBSITE_REVIEW_EXPERIENCE_MODULE } from "@/lib/ces/modules/website-review/constants";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -50,6 +51,7 @@ export async function deleteWebsiteReviewRevision(
   });
 
   for (const doc of attachments.docs) {
+    await deleteClientReviewMediaObject(doc as AnyDoc);
     await payload.delete({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       collection: "client-review-media" as any,

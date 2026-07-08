@@ -1,15 +1,10 @@
-import path from "path";
-import { fileURLToPath } from "url";
 import type { CollectionConfig } from "payload";
 import { isAuthenticated } from "../access/index.ts";
 import { PAYLOAD_GROUPS } from "../admin/groups.ts";
 
-const filename = fileURLToPath(import.meta.url);
-const dirname = path.dirname(filename);
-
 /**
  * Client-scoped review attachments — separate from public Marketing `media`.
- * Files live outside `public/` and are served through the portal API.
+ * Binary content is stored through `lib/client-review-media/storage` adapters.
  */
 export const ClientReviewMedia: CollectionConfig = {
   slug: "client-review-media",
@@ -18,30 +13,16 @@ export const ClientReviewMedia: CollectionConfig = {
   admin: {
     group: PAYLOAD_GROUPS.kxdOs,
     useAsTitle: "originalFilename",
-    defaultColumns: ["originalFilename", "client", "relatedRequest", "mimeType", "createdAt"],
+    defaultColumns: [
+      "originalFilename",
+      "client",
+      "relatedRequest",
+      "storageProvider",
+      "mimeType",
+      "createdAt",
+    ],
     description:
       "Website Review attachments uploaded by portal clients. Not part of the public media library.",
-  },
-  upload: {
-    staticDir: path.resolve(dirname, "../../private/client-review-media"),
-    mimeTypes: [
-      "image/*",
-      "application/pdf",
-      "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-      "text/plain",
-    ],
-    imageSizes: [
-      {
-        name: "preview",
-        width: 320,
-        height: 320,
-        position: "centre",
-      },
-    ],
-    adminThumbnail: "preview",
   },
   access: {
     read: isAuthenticated,
@@ -75,6 +56,45 @@ export const ClientReviewMedia: CollectionConfig = {
       name: "uploadedByEmail",
       type: "text",
       label: "Uploaded by",
+    },
+    {
+      name: "mimeType",
+      type: "text",
+      label: "MIME type",
+    },
+    {
+      name: "filesize",
+      type: "number",
+      label: "File size (bytes)",
+    },
+    {
+      name: "storageProvider",
+      type: "select",
+      label: "Storage provider",
+      defaultValue: "local",
+      options: [
+        { label: "Local filesystem", value: "local" },
+        { label: "Vercel Blob", value: "vercel-blob" },
+      ],
+      required: true,
+    },
+    {
+      name: "storageKey",
+      type: "text",
+      label: "Storage key",
+      required: true,
+      admin: {
+        description: "Provider-specific object key. Legacy rows may use `filename` only.",
+      },
+    },
+    {
+      name: "filename",
+      type: "text",
+      label: "Legacy filename",
+      admin: {
+        readOnly: true,
+        description: "Payload upload filename from pre-18G records.",
+      },
     },
   ],
 };
