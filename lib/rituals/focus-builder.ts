@@ -3,6 +3,7 @@ import "server-only";
 import type { ExecutiveBriefing } from "@/lib/intelligence/briefings/types";
 import type { WorkListItem, WorkWorkspaceData } from "@/lib/work/types";
 import { getDelightAffirmation, morningGreeting } from "./delight";
+import type { FocusIntelligence } from "./intelligence/types";
 import type { FocusContext, FocusDecision, FocusPriority, FocusWorkItem } from "./types";
 
 function toFocusWorkItem(item: WorkListItem): FocusWorkItem {
@@ -29,6 +30,7 @@ function isDueToday(item: WorkListItem): boolean {
 export function buildFocusContext(
   briefing: ExecutiveBriefing,
   work: WorkWorkspaceData,
+  intelligence?: FocusIntelligence,
 ): FocusContext {
   const priorities: FocusPriority[] = briefing.topPriorities.slice(0, 5).map((item) => ({
     id: item.id,
@@ -72,8 +74,9 @@ export function buildFocusContext(
 
   const hasBlockers = blocked.length > 0;
   const hasWork = todaysWork.length > 0;
+  const hasAttention = (intelligence?.attentionAreas.length ?? 0) > 0;
   const affirmation = getDelightAffirmation(
-    !hasBlockers && !hasWork ? "focus-clear" : "morning-busy",
+    !hasBlockers && !hasWork && !hasAttention ? "focus-clear" : "morning-busy",
   );
 
   return {
@@ -84,5 +87,6 @@ export function buildFocusContext(
     urgentDecisions: urgentDecisions.slice(0, 4),
     blockers: blocked,
     affirmation,
+    intelligence,
   };
 }

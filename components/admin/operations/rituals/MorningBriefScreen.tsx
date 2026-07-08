@@ -1,31 +1,27 @@
 import type { ExecutiveBriefing } from "@/lib/intelligence/briefings";
+import type { MorningBriefIntelligence } from "@/lib/rituals/intelligence";
 import {
   estimateReadingMinutes,
   formatReadingTime,
   getDelightAffirmation,
 } from "@/lib/rituals";
 import { ExecutiveHealthSummary } from "../intelligence/ExecutiveHealthSummary";
-import { ExecutiveInsights } from "../intelligence/ExecutiveInsights";
-import { ExecutiveNarrativeBlock } from "../intelligence/ExecutiveNarrative";
-import { PrimaryRecommendation } from "../intelligence/PrimaryRecommendation";
 import { DelightMoment } from "./DelightMoment";
+import { RitualIntelligenceSection } from "./RitualIntelligenceProse";
 import { RitualReadingTime } from "./RitualReadingTime";
 import { RitualShell } from "./RitualShell";
 
-export function MorningBriefScreen({ briefing }: { briefing: ExecutiveBriefing }) {
-  const readingTexts = [
-    briefing.narrative.text,
-    briefing.primaryRecommendation?.title ?? "",
-    briefing.primaryRecommendation?.reason ?? "",
-    ...briefing.executiveInsights.map((i) => i.observation),
-  ];
-  const minutes = estimateReadingMinutes(readingTexts);
+export function MorningBriefScreen({
+  briefing,
+  intelligence,
+}: {
+  briefing: ExecutiveBriefing;
+  intelligence: MorningBriefIntelligence;
+}) {
+  const minutes = estimateReadingMinutes(intelligence.readingTexts);
   const readingLabel = formatReadingTime(minutes);
 
-  const isClear =
-    briefing.topPriorities.length === 0 &&
-    briefing.businessRisks.length === 0 &&
-    !briefing.primaryRecommendation;
+  const isClear = intelligence.tone === "calm";
 
   const affirmation = getDelightAffirmation(isClear ? "morning-clear" : "morning-busy");
 
@@ -34,20 +30,25 @@ export function MorningBriefScreen({ briefing }: { briefing: ExecutiveBriefing }
       <article className="kxd-os-ritual-morning">
         <RitualReadingTime label={readingLabel} />
 
-        <ExecutiveNarrativeBlock
-          narrative={briefing.narrative}
-          greeting={briefing.greeting}
-          dateDisplay={briefing.dateDisplay}
-          timeDisplay={briefing.timeDisplay}
-          confidence={briefing.confidence}
-          variant="ritual"
-        />
+        <header className="kxd-os-ritual-intelligence__hero">
+          <p className="kxd-os-ritual-intelligence__greeting">{briefing.greeting}</p>
+          <p className="kxd-os-ritual-intelligence__meta">
+            {briefing.dateDisplay} · {briefing.timeDisplay}
+          </p>
+          <h1 className="kxd-os-ritual-intelligence__headline">
+            {intelligence.sections[0]?.paragraphs[0] ?? intelligence.postureLabel}
+          </h1>
+          <p className="kxd-os-ritual-intelligence__context">{intelligence.contextSummary}</p>
+          <p className="kxd-os-ritual-intelligence__posture">
+            Business posture: {intelligence.postureLabel}
+          </p>
+        </header>
+
+        {intelligence.sections.map((section) => (
+          <RitualIntelligenceSection key={section.id} block={section} />
+        ))}
 
         <ExecutiveHealthSummary snapshot={briefing.healthSnapshot} variant="ritual" />
-
-        <PrimaryRecommendation recommendation={briefing.primaryRecommendation} />
-
-        <ExecutiveInsights insights={briefing.executiveInsights} variant="ritual" />
 
         <DelightMoment message={affirmation} context={isClear ? "morning-clear" : "morning-busy"} />
       </article>

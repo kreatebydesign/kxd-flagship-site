@@ -5,6 +5,7 @@ import type { ExecutiveTimelineDoc } from "@/lib/executive-timeline/types";
 import type { WorkListItem, WorkWorkspaceData } from "@/lib/work/types";
 import { getDelightAffirmation, morningGreeting } from "./delight";
 import { estimateReadingMinutes, formatReadingTime } from "./reading-time";
+import type { WeeklyReviewIntelligence } from "./intelligence/types";
 import type { FocusPriority, WeeklyReview, WeeklyReviewLesson, WeeklyReviewWin } from "./types";
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
@@ -111,12 +112,15 @@ export function buildWeeklyReview(
   briefing: ExecutiveBriefing,
   work: WorkWorkspaceData,
   timelineEvents: ExecutiveTimelineDoc[],
+  intelligence?: WeeklyReviewIntelligence,
 ): WeeklyReview {
   const completedWork = completedThisWeek(work);
   const wins = buildWins(briefing, completedWork);
   const lessons = buildLessons(briefing);
 
-  const businessProgress = briefing.narrative.sentences.slice(0, 3);
+  const businessProgress = intelligence?.movementNarrative.length
+    ? intelligence.movementNarrative
+    : briefing.narrative.sentences.slice(0, 3);
   const relationshipProgress = relationshipEvents(timelineEvents);
 
   const nextWeekPriorities: FocusPriority[] = briefing.topPriorities.slice(0, 5).map((item) => ({
@@ -134,7 +138,8 @@ export function buildWeeklyReview(
   }));
 
   const readingTexts = [
-    briefing.narrative.text,
+    ...businessProgress,
+    ...(intelligence?.meaningfulChanges ?? []),
     ...wins.map((w) => w.label),
     ...lessons.map((l) => l.observation),
   ];
@@ -160,5 +165,6 @@ export function buildWeeklyReview(
       minutes,
       label: formatReadingTime(minutes),
     },
+    intelligence,
   };
 }

@@ -59,6 +59,7 @@ export interface FocusContext {
   urgentDecisions: FocusDecision[];
   blockers: FocusWorkItem[];
   affirmation: string;
+  intelligence?: import("./intelligence/types").FocusIntelligence;
 }
 
 export interface WeeklyReviewWin {
@@ -85,4 +86,5 @@ export interface WeeklyReview {
   nextWeekPriorities: FocusPriority[];
   affirmation: string;
   readingEstimate: RitualReadingEstimate;
+  intelligence?: import("./intelligence/types").WeeklyReviewIntelligence;
 }

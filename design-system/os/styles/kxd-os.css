@@ -8731,6 +8731,104 @@ a.kxd-os-ritual-focus__title:hover {
   color: var(--kxd-os-text-secondary);
 }
 
+/* Phase 18A — Ritual intelligence presentation */
+.kxd-os-ritual-intelligence__hero {
+  margin-bottom: var(--kxd-os-space-10);
+}
+
+.kxd-os-ritual-intelligence__greeting {
+  font-size: 0.8125rem;
+  color: var(--kxd-os-text-faint);
+  margin-bottom: var(--kxd-os-space-2);
+}
+
+.kxd-os-ritual-intelligence__meta {
+  font-size: 0.75rem;
+  color: var(--kxd-os-text-faint);
+  margin-bottom: var(--kxd-os-space-6);
+}
+
+.kxd-os-ritual-intelligence__headline {
+  font-family: var(--kxd-os-font-display);
+  font-size: clamp(1.5rem, 4vw, 2.25rem);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--kxd-os-text-primary);
+  margin-bottom: var(--kxd-os-space-4);
+}
+
+.kxd-os-ritual-intelligence__context {
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: var(--kxd-os-text-muted);
+  margin-bottom: var(--kxd-os-space-3);
+}
+
+.kxd-os-ritual-intelligence__posture {
+  font-size: 0.75rem;
+  color: var(--kxd-os-text-faint);
+  letter-spacing: 0.02em;
+}
+
+.kxd-os-ritual-intelligence__section {
+  margin-bottom: var(--kxd-os-space-10);
+  padding-bottom: var(--kxd-os-space-8);
+  box-shadow: inset 0 -1px 0 var(--kxd-os-border-divider);
+}
+
+.kxd-os-ritual-intelligence__section--subdued {
+  opacity: 0.92;
+}
+
+.kxd-os-ritual-intelligence__label {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-faint);
+  margin-bottom: var(--kxd-os-space-4);
+}
+
+.kxd-os-ritual-intelligence__prose p {
+  font-size: 1.0625rem;
+  line-height: 1.75;
+  color: var(--kxd-os-text-secondary);
+  margin-bottom: var(--kxd-os-space-4);
+  max-width: var(--khig-reading-width);
+}
+
+.kxd-os-ritual-intelligence__prose p:last-child {
+  margin-bottom: 0;
+}
+
+.kxd-os-ritual-intelligence__empty {
+  font-size: 0.875rem;
+  color: var(--kxd-os-text-muted);
+  line-height: 1.6;
+}
+
+.kxd-os-ritual-intelligence__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--kxd-os-space-5);
+}
+
+.kxd-os-ritual-intelligence__item-title {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--kxd-os-text-primary);
+  margin-bottom: var(--kxd-os-space-1);
+}
+
+.kxd-os-ritual-intelligence__item-context {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--kxd-os-text-muted);
+}
+
 /* ── Reduced motion ─────────────────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {

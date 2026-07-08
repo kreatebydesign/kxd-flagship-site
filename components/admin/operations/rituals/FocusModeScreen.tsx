@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { FocusContext } from "@/lib/rituals";
+import { RitualIntelligenceList } from "./RitualIntelligenceProse";
 import { DelightMoment } from "./DelightMoment";
 import { RitualShell } from "./RitualShell";
 
@@ -24,10 +25,17 @@ function FocusSection({
 }
 
 export function FocusModeScreen({ focus }: { focus: FocusContext }) {
+  const intelligence = focus.intelligence;
   const allClear =
-    focus.priorities.length === 0 &&
+    !intelligence?.attentionAreas.length &&
     focus.todaysWork.length === 0 &&
     focus.blockers.length === 0;
+
+  const lead = intelligence
+    ? `${intelligence.postureLabel} — ${intelligence.postureDescription}`
+    : allClear
+      ? "Nothing needs your attention right now. Execute when ready."
+      : "What matters today — nothing else.";
 
   return (
     <RitualShell mode="focus">
@@ -35,36 +43,29 @@ export function FocusModeScreen({ focus }: { focus: FocusContext }) {
         <header className="kxd-os-ritual-focus__hero">
           <p className="kxd-os-ritual-focus__greeting">{focus.greeting}</p>
           <p className="kxd-os-ritual-focus__date">{focus.dateDisplay}</p>
-          <p className="kxd-os-ritual-focus__lead">
-            {allClear
-              ? "Nothing needs your attention right now. Execute when ready."
-              : "What matters today — nothing else."}
-          </p>
+          <p className="kxd-os-ritual-focus__lead">{lead}</p>
         </header>
 
-        <FocusSection
-          label="Today's priorities"
-          isEmpty={focus.priorities.length === 0}
-          empty="No urgent priorities. The studio is clear."
-        >
-          <ul className="kxd-os-ritual-focus__list">
-            {focus.priorities.map((item, index) => (
-              <li key={item.id} className="kxd-os-ritual-focus__item">
-                <span className="kxd-os-ritual-focus__index">{index + 1}</span>
-                <div className="kxd-os-ritual-focus__item-body">
-                  {item.href ? (
-                    <Link href={item.href} className="kxd-os-ritual-focus__title">
-                      {item.title}
-                    </Link>
-                  ) : (
-                    <p className="kxd-os-ritual-focus__title">{item.title}</p>
-                  )}
-                  <p className="kxd-os-ritual-focus__reason">{item.reason}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </FocusSection>
+        {intelligence ? (
+          <>
+            <RitualIntelligenceList
+              label="Important domains"
+              items={intelligence.domains}
+              empty="No dominant domains in the current executive state."
+            />
+            <RitualIntelligenceList
+              label="Areas of attention"
+              items={intelligence.attentionAreas}
+              empty="No areas currently rise to executive attention."
+            />
+            <section className="kxd-os-ritual-intelligence__section">
+              <h2 className="kxd-os-ritual-intelligence__label">Execution landscape</h2>
+              <div className="kxd-os-ritual-intelligence__prose">
+                <p>{intelligence.executionLandscape}</p>
+              </div>
+            </section>
+          </>
+        ) : null}
 
         <FocusSection
           label="Today's work"
@@ -85,29 +86,8 @@ export function FocusModeScreen({ focus }: { focus: FocusContext }) {
           </ul>
         </FocusSection>
 
-        {focus.urgentDecisions.length > 0 ? (
-          <FocusSection label="Decisions waiting">
-            <ul className="kxd-os-ritual-focus__list">
-              {focus.urgentDecisions.map((item) => (
-                <li key={item.id} className="kxd-os-ritual-focus__item">
-                  <div className="kxd-os-ritual-focus__item-body">
-                    {item.href ? (
-                      <Link href={item.href} className="kxd-os-ritual-focus__title">
-                        {item.title}
-                      </Link>
-                    ) : (
-                      <p className="kxd-os-ritual-focus__title">{item.title}</p>
-                    )}
-                    <p className="kxd-os-ritual-focus__reason">{item.reason}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </FocusSection>
-        ) : null}
-
         {focus.blockers.length > 0 ? (
-          <FocusSection label="Blockers">
+          <FocusSection label="Blocked work">
             <ul className="kxd-os-ritual-focus__list kxd-os-ritual-focus__list--blockers">
               {focus.blockers.map((item) => (
                 <li key={item.id}>

@@ -25,6 +25,8 @@ function ReviewSection({
 }
 
 export function ReviewModeScreen({ review }: { review: WeeklyReview }) {
+  const intelligence = review.intelligence;
+
   return (
     <RitualShell mode="review">
       <article className="kxd-os-ritual-review">
@@ -34,12 +36,58 @@ export function ReviewModeScreen({ review }: { review: WeeklyReview }) {
           <h1 className="kxd-os-ritual-review__title">Weekly Review</h1>
           <p className="kxd-os-ritual-review__week">{review.weekLabel}</p>
           <p className="kxd-os-ritual-review__lead">
-            A moment to reflect on the week — what moved, what mattered, what comes next.
+            What happened this week — and what it tells us about the business.
           </p>
+          {intelligence ? (
+            <p className="kxd-os-ritual-intelligence__context">{intelligence.contextSummary}</p>
+          ) : null}
         </header>
 
+        {intelligence ? (
+          <>
+            <ReviewSection
+              label="Meaningful changes"
+              isEmpty={intelligence.meaningfulChanges.length === 0}
+              empty="No significant movement detected this week."
+            >
+              <div className="kxd-os-ritual-review__prose">
+                {intelligence.meaningfulChanges.map((line, index) => (
+                  <p key={index}>{line}</p>
+                ))}
+              </div>
+            </ReviewSection>
+
+            <ReviewSection
+              label="Recurring patterns"
+              isEmpty={intelligence.patterns.length === 0}
+              empty="No recurring patterns surfaced in observation history."
+            >
+              <ul className="kxd-os-ritual-review__list">
+                {intelligence.patterns.map((pattern) => (
+                  <li key={pattern.id} className="kxd-os-ritual-review__item">
+                    <span className="kxd-os-ritual-review__item-title">{pattern.label}</span>
+                    <span className="kxd-os-ritual-review__item-meta">{pattern.description}</span>
+                  </li>
+                ))}
+              </ul>
+            </ReviewSection>
+
+            <ReviewSection
+              label="Stable areas"
+              isEmpty={intelligence.stableAreas.length === 0}
+              empty="No persistent stable signals this week."
+            >
+              <ul className="kxd-os-ritual-review__lessons">
+                {intelligence.stableAreas.map((area, index) => (
+                  <li key={index}>{area}</li>
+                ))}
+              </ul>
+            </ReviewSection>
+          </>
+        ) : null}
+
         {review.businessProgress.length > 0 ? (
-          <ReviewSection label="Business progress">
+          <ReviewSection label="Business movement">
             <div className="kxd-os-ritual-review__prose">
               {review.businessProgress.map((line, index) => (
                 <p key={index}>{line}</p>
