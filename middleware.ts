@@ -5,7 +5,7 @@ import {
   payloadAdminLoginUrl,
   requiresPayloadAdminAuth,
 } from "@/lib/admin/middleware";
-import { PORTAL_SESSION_COOKIE } from "@/lib/portal/constants";
+import { PORTAL_SESSION_COOKIE, PORTAL_HOST } from "@/lib/portal/constants";
 import { JUNIOR_CREATOR_SESSION_COOKIE } from "@/lib/junior-creators/constants";
 
 const PORTAL_PUBLIC_PATHS = [
@@ -18,8 +18,17 @@ const JUNIOR_PUBLIC_PATHS = [
   "/junior-creators/login",
 ];
 
+function isPortalHost(request: NextRequest): boolean {
+  const host = request.headers.get("host")?.split(":")[0]?.toLowerCase();
+  return host === PORTAL_HOST;
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  if (pathname === "/" && isPortalHost(request)) {
+    return NextResponse.redirect(new URL("/portal/login", request.url));
+  }
 
   if (requiresPayloadAdminAuth(pathname)) {
     if (!hasPayloadAuthCookie(request)) {
@@ -87,6 +96,7 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    "/",
     "/os",
     "/admin/operations",
     "/admin/operations/:path*",

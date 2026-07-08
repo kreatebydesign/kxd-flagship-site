@@ -4,8 +4,33 @@
 
 export const PORTAL_CLIENT_LANGUAGE = {
   homeEyebrow: "Your workspace",
+  primalWorkspaceLabel: "Primal Workspace",
   homeWelcome: (name: string) => `Welcome back, ${name}`,
   homeLead: "Everything related to your website and creative work is organized here.",
+
+  launchEyebrow: "Getting started",
+  launchTitle: "What to do first",
+  launchLead:
+    "Your workspace is ready. Here is the clearest path to share website feedback with us.",
+  launchLeadActive:
+    "Keep momentum going — review your site, submit notes, and track every revision here.",
+  launchSteps: [
+    "Review the current site.",
+    "Submit notes through Website Review.",
+    "Attach screenshots if helpful.",
+    "KXD will review and respond from the inbox.",
+  ] as const,
+
+  statActiveRevisions: "Active revisions",
+  statAwaitingYou: "Waiting on you",
+  statCurrentReview: "Current review",
+  statAllClear: "All clear — nothing in progress.",
+  currentStatusHeading: "Current review status",
+  openRevision: "Open this revision",
+  openLatestRevision: "Open latest revision",
+  recentRevisionsHeading: "Recent revisions",
+  moduleActiveCount: (count: number) =>
+    count === 1 ? "1 revision in progress" : `${count} revisions in progress`,
 
   welcomeTitle: "Welcome.",
   welcomeWorkspaceLabel: "Private workspace",
