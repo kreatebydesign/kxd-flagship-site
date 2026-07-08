@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
 
     if (!result.user?.id) {
       return NextResponse.json(
-        { ok: false, message: "Invalid email or password." },
+        { ok: false, message: "We couldn't sign you in. Please check your email and password." },
         { status: 401 },
       );
     }
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           ok: false,
-          message: "This portal account is not active. Please contact Kreate by Design.",
+          message: "This workspace account isn't active. Please reach out to us for help.",
         },
         { status: 403 },
       );
@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
           ok: false,
           message:
             process.env.NODE_ENV === "production"
-              ? "Sign-in is temporarily unavailable. Please try again later."
+              ? "Sign-in is temporarily unavailable. Please try again shortly."
               : "PAYLOAD_SECRET is missing from .env.local. Copy it from .env.production.local or .env.example.",
         },
         { status: 500 },
@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { ok: false, message: "Invalid email or password." },
+      { ok: false, message: "We couldn't sign you in. Please check your email and password." },
       { status: 401 },
     );
   }

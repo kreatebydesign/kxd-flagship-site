@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { PORTAL_CLIENT_LANGUAGE } from "@/lib/ces/copy/portal-language";
 
 export function PortalLoginForm() {
   const router = useRouter();
@@ -24,91 +25,59 @@ export function PortalLoginForm() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.message || "Login failed.");
+        setError(data.message || PORTAL_CLIENT_LANGUAGE.authLoginErrorGeneric);
         return;
       }
       const redirect = searchParams.get("redirect") || "/portal";
       router.push(redirect);
       router.refresh();
     } catch {
-      setError("Unable to sign in. Please try again.");
+      setError(PORTAL_CLIENT_LANGUAGE.authLoginErrorGeneric);
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      {error && (
-        <p
-          className="font-sans"
-          style={{
-            fontSize: "0.75rem",
-            color: "rgba(210,90,90,0.9)",
-            background: "rgba(210,90,90,0.08)",
-            border: "1px solid rgba(210,90,90,0.25)",
-            padding: "0.75rem 1rem",
-          }}
-        >
+    <form onSubmit={handleSubmit} className="kxd-portal-auth__form">
+      {error ? (
+        <p className="kxd-portal-auth__notice kxd-portal-auth__notice--error" role="alert">
           {error}
         </p>
-      )}
-      <div>
-        <label
-          className="mb-2 block font-sans uppercase"
-          style={{ fontSize: "0.5rem", letterSpacing: "0.14em", color: "rgba(255,255,255,0.35)" }}
-        >
-          Email
+      ) : null}
+      <div className="kxd-portal-auth__field">
+        <label className="kxd-portal-auth__label" htmlFor="portal-login-email">
+          {PORTAL_CLIENT_LANGUAGE.authLoginEmail}
         </label>
         <input
+          id="portal-login-email"
           type="email"
           required
+          autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full font-sans"
-          style={{
-            background: "var(--kxd-black-elevated)",
-            border: "1px solid var(--kxd-border-white)",
-            color: "var(--kxd-cream)",
-            padding: "0.75rem 1rem",
-            fontSize: "0.875rem",
-          }}
+          className="kxd-portal-auth__input"
         />
       </div>
-      <div>
-        <label
-          className="mb-2 block font-sans uppercase"
-          style={{ fontSize: "0.5rem", letterSpacing: "0.14em", color: "rgba(255,255,255,0.35)" }}
-        >
-          Password
+      <div className="kxd-portal-auth__field">
+        <label className="kxd-portal-auth__label" htmlFor="portal-login-password">
+          {PORTAL_CLIENT_LANGUAGE.authLoginPassword}
         </label>
         <input
+          id="portal-login-password"
           type="password"
           required
+          autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full font-sans"
-          style={{
-            background: "var(--kxd-black-elevated)",
-            border: "1px solid var(--kxd-border-white)",
-            color: "var(--kxd-cream)",
-            padding: "0.75rem 1rem",
-            fontSize: "0.875rem",
-          }}
+          className="kxd-portal-auth__input"
         />
       </div>
-      <button
-        type="submit"
-        disabled={loading}
-        className="kxd-btn-primary w-full font-sans uppercase disabled:opacity-50"
-        style={{ fontSize: "0.625rem", letterSpacing: "0.14em" }}
-      >
-        {loading ? "Signing in…" : "Sign In"}
+      <button type="submit" disabled={loading} className="kxd-portal-auth__submit">
+        {loading ? PORTAL_CLIENT_LANGUAGE.authLoginSubmitting : PORTAL_CLIENT_LANGUAGE.authLoginSubmit}
       </button>
-      <p className="text-center font-sans" style={{ fontSize: "0.6875rem", color: "rgba(255,255,255,0.35)" }}>
-        <Link href="/portal/forgot-password" style={{ color: "var(--kxd-gold)", opacity: 0.75 }}>
-          Forgot password?
-        </Link>
+      <p className="kxd-portal-auth__footer-link">
+        <Link href="/portal/forgot-password">{PORTAL_CLIENT_LANGUAGE.authLoginForgot}</Link>
       </p>
     </form>
   );

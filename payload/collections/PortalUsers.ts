@@ -30,7 +30,7 @@ export const PortalUsers: CollectionConfig = {
     maxLoginAttempts: 8,
     lockTime: 600,
     forgotPassword: {
-      generateEmailSubject: () => "Reset your KXD Client Portal password",
+      generateEmailSubject: () => "Reset your workspace password",
     },
   },
   access: {

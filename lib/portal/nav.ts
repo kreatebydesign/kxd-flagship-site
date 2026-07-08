@@ -6,6 +6,7 @@ import type { ResolvedExperienceProfile } from "@/lib/ces";
 import { CLIENT_HQ_MODULES, isClientHqModuleEnabled, type ClientHqModuleId } from "./modules";
 import { getEditionBranding, getEditionNavigation } from "@/lib/editions";
 import { isPortalNavEnabled } from "@/lib/editions/navigation";
+import { isPortalNavVisibleForCesLaunch } from "@/lib/portal/ces-launch-safety";
 
 export type ClientHqNavId = ClientHqModuleId;
 export type PortalNavId = ClientHqNavId | CesModuleId;
@@ -116,27 +117,33 @@ export function getEnabledPortalNavGroups(
 
   const cesItems = getCesNavItems(profile);
 
-  return base.map((group) => {
-    const cesGroupId = PORTAL_GROUP_TO_CES[group.label];
-    const cesForGroup = cesItems
-      .filter((item) => {
-        const def = CES_MODULE_REGISTRY.find((d) => d.moduleId === item.moduleId);
-        return def?.navGroup === cesGroupId;
-      })
-      .map((item) => ({
-        id: item.id as PortalNavId,
-        label: item.label,
-        href: item.href,
-      }));
+  return base
+    .map((group) => {
+      const cesGroupId = PORTAL_GROUP_TO_CES[group.label];
+      const cesForGroup = cesItems
+        .filter((item) => {
+          const def = CES_MODULE_REGISTRY.find((d) => d.moduleId === item.moduleId);
+          return def?.navGroup === cesGroupId;
+        })
+        .map((item) => ({
+          id: item.id as PortalNavId,
+          label: item.label,
+          href: item.href,
+        }));
 
-    return {
-      label: group.label,
-      items: [
-        ...group.items.map(({ id, label, href }) => ({ id, label, href })),
-        ...cesForGroup,
-      ],
-    };
-  });
+      return {
+        label: group.label,
+        items: [
+          ...group.items.map(({ id, label, href }) => ({ id, label, href })),
+          ...cesForGroup,
+        ],
+      };
+    })
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => isPortalNavVisibleForCesLaunch(item.id, profile)),
+    }))
+    .filter((group) => group.items.length > 0);
 }
 
 export function resolvePortalNavId(pathname: string): PortalNavId {

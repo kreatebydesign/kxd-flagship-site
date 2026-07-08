@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
 
     if (!token || !password || password.length < 8) {
       return NextResponse.json(
-        { ok: false, message: "A valid token and password (8+ characters) are required." },
+        { ok: false, message: "Please enter a valid link and a password with at least 8 characters." },
         { status: 400 },
       );
     }
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
 
     if (!result) {
       return NextResponse.json(
-        { ok: false, message: "This reset link is invalid or has expired." },
+        { ok: false, message: "This link isn't valid anymore. Please request a new one." },
         { status: 400 },
       );
     }

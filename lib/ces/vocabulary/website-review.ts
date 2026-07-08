@@ -9,11 +9,11 @@ export type WebsiteReviewClientStatus =
   | "closed";
 
 export const WEBSITE_REVIEW_STATUS_LABELS: Record<WebsiteReviewClientStatus, string> = {
-  "review-received": "Review received",
+  "review-received": "We've received it",
   "in-review": "In review",
   "revision-in-progress": "Revision in progress",
   "awaiting-your-input": "Awaiting your input",
-  completed: "Revision complete",
+  completed: "Complete",
   closed: "Closed",
 };
 
@@ -35,10 +35,10 @@ export function reviewStatusLabel(status: WebsiteReviewClientStatus): string {
 export const WEBSITE_REVIEW_ACTIVITY_DETAILS: Partial<
   Record<WebsiteReviewClientStatus, string>
 > = {
-  "review-received": "We're reviewing this now.",
-  "in-review": "We're reviewing this now.",
+  "review-received": "We've received your revision and are reviewing it now.",
+  "in-review": "We're reviewing your notes now.",
   "revision-in-progress": "We're preparing your updates.",
-  "awaiting-your-input": "A quick confirmation from you will help us continue.",
+  "awaiting-your-input": "A quick note from you will help us continue.",
   completed: "This revision is complete.",
   closed: "This revision has been closed.",
 };

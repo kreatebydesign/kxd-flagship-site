@@ -259,7 +259,7 @@ export function WebsiteReviewRequestFlow({ initialContext }: WebsiteReviewReques
     return (
       <CesPage narrow>
         <CesConfirm
-          title="Something didn’t go through"
+          title={PORTAL_CLIENT_LANGUAGE.confirmErrorTitle}
           message={submitError}
           actions={
             <div className="kxd-ces-confirm__action-row">

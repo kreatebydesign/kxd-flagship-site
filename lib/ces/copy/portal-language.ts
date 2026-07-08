@@ -24,7 +24,7 @@ export const PORTAL_CLIENT_LANGUAGE = {
   statActiveRevisions: "Active revisions",
   statAwaitingYou: "Waiting on you",
   statCurrentReview: "Current review",
-  statAllClear: "All clear — nothing in progress.",
+  statAllClear: "You're all caught up.",
   currentStatusHeading: "Current review status",
   openRevision: "Open this revision",
   openLatestRevision: "Open latest revision",
@@ -32,11 +32,10 @@ export const PORTAL_CLIENT_LANGUAGE = {
   moduleActiveCount: (count: number) =>
     count === 1 ? "1 revision in progress" : `${count} revisions in progress`,
 
-  welcomeTitle: "Welcome.",
-  welcomeWorkspaceLabel: "Private workspace",
-  welcomeIntroWithBrand: (clientName: string) =>
-    `Welcome to your private ${clientName} workspace.`,
-  welcomeIntroNoBrand: "Welcome to your private workspace.",
+  welcomeTitle: "Welcome",
+  welcomeWorkspaceLabel: "Your workspace",
+  welcomeIntroWithBrand: (clientName: string) => `Welcome to your ${clientName} workspace.`,
+  welcomeIntroNoBrand: "Welcome to your workspace.",
   welcomeBody:
     "Everything related to your website, creative projects, revisions, and future initiatives now lives here.",
   welcomeClosingWithBrand: (clientName: string) =>
@@ -54,7 +53,7 @@ export const PORTAL_CLIENT_LANGUAGE = {
   revisionGoneCta: "Back to Website Review",
 
   attentionHeading: "Waiting on you",
-  attentionEmpty: "Nothing waiting on you right now. Your site is in good hands.",
+  attentionEmpty: "You're all caught up. Your site is in good hands.",
   happeningHeading: "In progress",
   nextHeading: "Website Review",
   focusEyebrow: "Website Review",
@@ -69,14 +68,14 @@ export const PORTAL_CLIENT_LANGUAGE = {
   reviewCtaSecondary: "View live site",
   reviewActiveSection: "Active revisions",
   reviewCompletedSection: "Recently complete",
-  reviewEmptyTitle: "Ready whenever inspiration strikes",
+  reviewEmptyTitle: "You're all caught up",
   reviewEmptyLead:
-    "Every update you share will appear here — tracked, organized, and clear.",
+    "When you're ready to share feedback, everything will be organized here.",
   reviewEmptyCta: "Start a revision",
 
   reviewReassuranceLine1: "Every revision is tracked. Nothing gets lost.",
   reviewReassuranceLine2: "You'll always know what we're working on.",
-  reviewEmptyGuideTitle: "Let's review your website together.",
+  reviewEmptyGuideTitle: "Ready when you are.",
   reviewEmptyGuideSteps: [
     "Open your site.",
     "Click anywhere.",
@@ -94,9 +93,9 @@ export const PORTAL_CLIENT_LANGUAGE = {
     "Pick a page and section so we go straight to the right place. Leave blank if it applies site-wide.",
   requestConfirmIntro: "Does this look right?",
   contextFromReviewUrl: "We pre-filled the page from your review link. Adjust anything before sending.",
-  confirmTitle: "Thanks — we've got it.",
+  confirmTitle: "Thank you — we've received it.",
   confirmMessage:
-    "Your revision is with us now. You'll see progress here as work moves forward.",
+    "Your revision is with us. We'll keep you updated as work moves forward.",
   confirmReferenceLabel: "Revision no.",
   submitError:
     "We couldn't send your revision just now. Please try again in a moment.",
@@ -161,7 +160,78 @@ export const PORTAL_CLIENT_LANGUAGE = {
     "We couldn't open a review session for this link. Your site URL may not be configured yet, or this revision may no longer be available.",
   reviewSessionBack: "Back to Website Review",
 
-  identityWorkspace: "Private workspace",
+  identityWorkspace: "Your workspace",
+
+  authLoginEyebrow: "Your workspace",
+  authLoginTitle: "Sign in",
+  authLoginLead:
+    "Review your site, share feedback, and follow every revision — all in one place.",
+  authLoginEmail: "Email",
+  authLoginPassword: "Password",
+  authLoginSubmit: "Sign in",
+  authLoginSubmitting: "Signing in…",
+  authLoginForgot: "Forgot your password?",
+  authLoginErrorGeneric: "We couldn't sign you in. Please check your email and password.",
+  authLoginErrorUnavailable: "Sign-in is temporarily unavailable. Please try again shortly.",
+  authLoginErrorInactive:
+    "This workspace account isn't active. Please reach out to us for help.",
+
+  authForgotTitle: "Reset your workspace password",
+  authForgotLead: "We'll send a secure link to the email on your account.",
+  authForgotSubmit: "Send reset link",
+  authForgotSubmitting: "Sending…",
+  authForgotSuccessTitle: "Check your email",
+  authForgotSuccessMessage:
+    "If we found your account, a reset link is on its way. It expires in one hour.",
+  authForgotError: "We couldn't send the reset link just now. Please try again.",
+  authForgotBack: "Back to sign in",
+
+  authResetTitle: "Choose a new password",
+  authResetLead: "Use at least 8 characters. You'll sign in with this password going forward.",
+  authResetPassword: "New password",
+  authResetSubmit: "Update password",
+  authResetSubmitting: "Updating…",
+  authResetSuccessTitle: "You're all set",
+  authResetSuccessMessage: "Your password has been updated.",
+  authResetSuccessCta: "Enter your workspace",
+  authResetInvalidLink: "This link isn't valid anymore.",
+  authResetInvalidCta: "Request a new link",
+  authResetError: "We couldn't update your password. Please try again or request a new link.",
+
+  authEmailSubject: "Reset your workspace password",
+  authEmailFooter: "Powered by Kreate by Design",
+
+  confirmErrorTitle: "Something didn't go through",
+
+  connectedCurrentWork: "Current Work",
+  connectedCurrentWorkEmpty: "You're all caught up. Start a Website Review when you're ready to share feedback.",
+  connectedWebsite: "Website",
+  connectedWebsiteReview: "Website Review",
+  connectedWebsiteAvailable: "Available",
+  connectedWebsiteActiveRevisions: (count: number) =>
+    count === 1 ? "1 active revision" : `${count} active revisions`,
+  connectedWebsiteLastActivity: "Last activity",
+  connectedWebsiteNoActivity: "No recent activity yet",
+  connectedRecentActivity: "Recent Activity",
+  connectedRecentActivityEmpty:
+    "Your workspace is ready. Revisions and updates will appear here as work moves forward.",
+  connectedDeliverables: "Latest Deliverables",
+  connectedDeliverablesEmpty:
+    "You're all caught up. New deliverables will appear here as we publish them.",
+  connectedQuickActions: "Quick Actions",
+  connectedQuickActionReviewWebsite: "Review Website",
+  connectedQuickActionStartReview: "Start Website Review",
+  connectedQuickActionUploadAssets: "Upload Assets",
+  connectedQuickActionMessageKxd: "Message KXD",
+  connectedQuickActionComingSoon: "Coming soon",
+  connectedWebsiteUnavailable: "Unavailable",
+  connectedWebsiteUrlMissing: "Website URL not configured",
+  connectedWebsiteLatestStatus: "Latest status",
+  connectedViewDeliverables: "View deliverables",
+  connectedOpenRevision: "Open revision",
+  connectedWorkAwaiting: "Waiting on you",
+  connectedWorkInProgress: "In progress",
+  connectedWorkRecentlyComplete: "Recently complete",
 } as const;
 
 export function portalCopy(

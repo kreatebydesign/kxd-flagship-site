@@ -2,22 +2,31 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { PORTAL_CLIENT_LANGUAGE } from "@/lib/ces/copy/portal-language";
 
 export function PortalForgotPasswordForm() {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError("");
     setLoading(true);
     try {
-      await fetch("/api/portal/auth/forgot-password", {
+      const res = await fetch("/api/portal/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
+      if (!res.ok) {
+        setError(PORTAL_CLIENT_LANGUAGE.authForgotError);
+        return;
+      }
       setSent(true);
+    } catch {
+      setError(PORTAL_CLIENT_LANGUAGE.authForgotError);
     } finally {
       setLoading(false);
     }
@@ -25,57 +34,44 @@ export function PortalForgotPasswordForm() {
 
   if (sent) {
     return (
-      <div>
-        <p className="font-sans font-light" style={{ fontSize: "0.875rem", color: "var(--kxd-cream-muted)" }}>
-          If an account exists for that email, a reset link has been sent.
+      <div className="kxd-portal-auth__state" role="status">
+        <p className="kxd-portal-auth__state-title">{PORTAL_CLIENT_LANGUAGE.authForgotSuccessTitle}</p>
+        <p className="kxd-portal-auth__state-message">
+          {PORTAL_CLIENT_LANGUAGE.authForgotSuccessMessage}
         </p>
-        <Link
-          href="/portal/login"
-          className="mt-6 inline-block font-sans uppercase"
-          style={{ fontSize: "0.5625rem", letterSpacing: "0.14em", color: "var(--kxd-gold)" }}
-        >
-          Back to sign in →
+        <Link href="/portal/login" className="kxd-portal-auth__state-link">
+          {PORTAL_CLIENT_LANGUAGE.authForgotBack} →
         </Link>
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      <div>
-        <label
-          className="mb-2 block font-sans uppercase"
-          style={{ fontSize: "0.5rem", letterSpacing: "0.14em", color: "rgba(255,255,255,0.35)" }}
-        >
-          Email
+    <form onSubmit={handleSubmit} className="kxd-portal-auth__form">
+      {error ? (
+        <p className="kxd-portal-auth__notice kxd-portal-auth__notice--error" role="alert">
+          {error}
+        </p>
+      ) : null}
+      <div className="kxd-portal-auth__field">
+        <label className="kxd-portal-auth__label" htmlFor="portal-forgot-email">
+          {PORTAL_CLIENT_LANGUAGE.authLoginEmail}
         </label>
         <input
+          id="portal-forgot-email"
           type="email"
           required
+          autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full font-sans"
-          style={{
-            background: "var(--kxd-black-elevated)",
-            border: "1px solid var(--kxd-border-white)",
-            color: "var(--kxd-cream)",
-            padding: "0.75rem 1rem",
-            fontSize: "0.875rem",
-          }}
+          className="kxd-portal-auth__input"
         />
       </div>
-      <button
-        type="submit"
-        disabled={loading}
-        className="kxd-btn-primary w-full font-sans uppercase disabled:opacity-50"
-        style={{ fontSize: "0.625rem", letterSpacing: "0.14em" }}
-      >
-        {loading ? "Sending…" : "Send Reset Link"}
+      <button type="submit" disabled={loading} className="kxd-portal-auth__submit">
+        {loading ? PORTAL_CLIENT_LANGUAGE.authForgotSubmitting : PORTAL_CLIENT_LANGUAGE.authForgotSubmit}
       </button>
-      <p className="text-center font-sans" style={{ fontSize: "0.6875rem", color: "rgba(255,255,255,0.35)" }}>
-        <Link href="/portal/login" style={{ color: "var(--kxd-gold)", opacity: 0.75 }}>
-          Back to sign in
-        </Link>
+      <p className="kxd-portal-auth__footer-link">
+        <Link href="/portal/login">{PORTAL_CLIENT_LANGUAGE.authForgotBack}</Link>
       </p>
     </form>
   );

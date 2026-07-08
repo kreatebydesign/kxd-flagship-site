@@ -9,6 +9,7 @@ import {
   resolvePortalResetOrigin,
   sendPortalEmail,
 } from "@/lib/portal/email";
+import { PORTAL_CLIENT_LANGUAGE } from "@/lib/ces/copy/portal-language";
 
 export const dynamic = "force-dynamic";
 
@@ -50,7 +51,7 @@ export async function POST(req: NextRequest) {
 
     const sendResult = await sendPortalEmail({
       to: email,
-      subject: "Reset your KXD Client Portal password",
+      subject: PORTAL_CLIENT_LANGUAGE.authEmailSubject,
       html: buildPasswordResetEmailHtml(resetUrl),
     });
 
