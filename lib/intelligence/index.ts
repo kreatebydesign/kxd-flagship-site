@@ -16,6 +16,12 @@ export { buildGrowthOpportunities } from "./opportunities";
 export { generateInsights } from "./insights";
 export { buildExecutiveSummary, buildRevenueSummary, buildClientInsightSections } from "./summaries";
 
+export {
+  buildExecutiveBriefing,
+  getExecutiveBriefing,
+  loadBriefingContext,
+} from "./briefings";
+
 export type {
   ClientInsights,
   ClientRiskSummary,
@@ -35,3 +41,5 @@ export type {
   RelationshipInsights,
   RevenueSummary,
 } from "./types";
+
+export type { ExecutiveBriefing } from "./briefings";

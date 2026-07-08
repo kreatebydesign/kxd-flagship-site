@@ -7261,6 +7261,170 @@ a.kxd-os-platform-subsystem-card__title:hover {
   }
 }
 
+/* ── Executive Intelligence (Phase 15B) ─────────────────────────────── */
+
+.kxd-os-intelligence {
+  max-width: 72rem;
+}
+
+.kxd-os-intelligence-brief {
+  margin-bottom: 2rem;
+  padding: 1.5rem 1.75rem;
+}
+
+.kxd-os-intelligence-brief__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.kxd-os-intelligence-brief__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.kxd-os-intelligence-brief__summary {
+  font-family: var(--kxd-os-font-serif, "Cormorant Garamond", serif);
+  font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+  line-height: 1.55;
+  color: var(--kxd-os-text-primary);
+  margin: 0;
+}
+
+.kxd-os-intelligence-grid--health {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+@media (min-width: 900px) {
+  .kxd-os-intelligence-grid--health {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.kxd-os-intelligence-score {
+  padding: 1.25rem 1.5rem;
+}
+
+.kxd-os-intelligence-score__label {
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-faint);
+  margin: 0 0 0.5rem;
+}
+
+.kxd-os-intelligence-score__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.kxd-os-intelligence-score__level {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: var(--kxd-os-text-primary);
+  margin: 0;
+}
+
+.kxd-os-intelligence-score__summary {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--kxd-os-text-muted);
+  margin: 0 0 0.75rem;
+}
+
+.kxd-os-intelligence-signals {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--kxd-os-text-faint);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.kxd-os-intelligence-layout {
+  display: grid;
+  gap: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .kxd-os-intelligence-layout {
+    grid-template-columns: minmax(0, 1fr) 20rem;
+    align-items: start;
+  }
+}
+
+.kxd-os-intelligence-main,
+.kxd-os-intelligence-aside {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.kxd-os-intelligence-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.kxd-os-intelligence-row__title {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--kxd-os-text-primary);
+  margin: 0 0 0.25rem;
+}
+
+.kxd-os-intelligence-row__action {
+  margin-top: 0.35rem;
+}
+
+.kxd-os-intelligence-priority {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.kxd-os-intelligence-platform {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.kxd-os-intelligence-platform li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.25rem 0.75rem;
+  align-items: center;
+}
+
+.kxd-os-intelligence-platform li span:first-child {
+  font-size: 0.875rem;
+  color: var(--kxd-os-text-primary);
+}
+
+.kxd-os-intelligence-platform li .kxd-os-meta {
+  grid-column: 1 / -1;
+}
+
+.kxd-os-intelligence-generated {
+  text-align: center;
+  padding-top: 0.5rem;
+}
+
 /* ── Reduced motion ─────────────────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,5 +1,6 @@
 export type OperationsNavId =
   | "executive"
+  | "intelligence"
   | "command"
   | "today"
   | "clients"
@@ -50,6 +51,7 @@ export const NAV_GROUPS: OperationsNavGroup[] = [
   {
     label: "Briefing",
     items: [
+      { id: "intelligence", label: "Intelligence", href: "/admin/operations/intelligence" },
       { id: "executive", label: "Executive", href: "/admin/operations/executive" },
       { id: "founder-intelligence", label: "Founder Intelligence", href: "/admin/operations/founder-intelligence" },
       { id: "brain", label: "KXD Brain", href: "/admin/operations/brain" },
