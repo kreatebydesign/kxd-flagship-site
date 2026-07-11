@@ -8424,8 +8424,74 @@ a.kxd-os-platform-subsystem-card__title:hover {
 
 /* Morning Brief */
 .kxd-os-ritual-morning {
-  max-width: var(--khig-reading-width);
+  max-width: 36rem;
   margin-inline: auto;
+}
+
+.kxd-os-ritual-morning--v2 .kxd-os-ritual-morning__hero {
+  margin-bottom: var(--kxd-os-space-12);
+  padding-bottom: var(--kxd-os-space-8);
+  box-shadow: inset 0 -1px 0 var(--kxd-os-border-divider);
+}
+
+.kxd-os-ritual-morning--v2 .kxd-os-ritual-intelligence__headline {
+  font-size: clamp(1.625rem, 4vw, 2.5rem);
+  max-width: 28rem;
+  margin-bottom: var(--kxd-os-space-5);
+}
+
+.kxd-os-ritual-morning__welcome {
+  font-size: 1.125rem;
+  line-height: 1.55;
+  color: var(--kxd-os-text-secondary);
+  max-width: 28rem;
+  margin-bottom: var(--kxd-os-space-5);
+}
+
+.kxd-os-ritual-morning--v2 .kxd-os-ritual-intelligence__greeting {
+  font-size: 0.9375rem;
+  color: var(--kxd-os-text-primary);
+  font-weight: 500;
+  margin-bottom: var(--kxd-os-space-3);
+}
+
+.kxd-os-ritual-morning--v2 .kxd-os-ritual-intelligence__context {
+  display: none;
+}
+
+.kxd-os-ritual-morning--v2 .kxd-os-ritual-intelligence__posture {
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+}
+
+.kxd-os-ritual-morning__narrative {
+  margin-top: var(--kxd-os-space-4);
+  margin-bottom: var(--kxd-os-space-12);
+}
+
+.kxd-os-ritual-morning__narrative-label {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-faint);
+  margin-bottom: var(--kxd-os-space-8);
+}
+
+.kxd-os-ritual-morning--v2 .kxd-os-ritual-intelligence__section--subdued {
+  opacity: 0.88;
+}
+
+.kxd-os-ritual-morning--v2 .kxd-os-ritual-intelligence__section--subdued .kxd-os-ritual-intelligence__prose p {
+  font-size: 1rem;
+  line-height: 1.7;
+  max-width: 32rem;
+  color: var(--kxd-os-text-muted);
+}
+
+.kxd-os-ritual-morning--v2 .kxd-os-intelligence-health--ritual {
+  margin-top: var(--kxd-os-space-4);
+  margin-bottom: var(--kxd-os-space-12);
 }
 
 .kxd-os-intelligence-hero--ritual {
@@ -8827,6 +8893,225 @@ a.kxd-os-ritual-focus__title:hover {
   font-size: 0.875rem;
   line-height: 1.6;
   color: var(--kxd-os-text-muted);
+}
+
+/* Morning Brief — live client activity (primary operational focus) */
+.kxd-os-ritual-activity {
+  margin-bottom: var(--kxd-os-space-12);
+  padding-bottom: var(--kxd-os-space-10);
+  box-shadow: inset 0 -1px 0 var(--kxd-os-border-divider);
+}
+
+.kxd-os-ritual-activity__heading {
+  font-family: var(--kxd-os-font-display);
+  font-size: 1.25rem;
+  letter-spacing: -0.01em;
+  color: var(--kxd-os-text-primary);
+  margin-bottom: var(--kxd-os-space-6);
+}
+
+.kxd-os-ritual-activity__empty {
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--kxd-os-text-secondary);
+  max-width: 28rem;
+}
+
+.kxd-os-ritual-activity__groups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--kxd-os-space-8);
+}
+
+.kxd-os-ritual-activity__group {
+  max-width: 28rem;
+}
+
+.kxd-os-ritual-activity__client {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-faint);
+  margin-bottom: var(--kxd-os-space-4);
+}
+
+.kxd-os-ritual-activity__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--kxd-os-space-5);
+}
+
+.kxd-os-ritual-activity__link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.kxd-os-ritual-activity__link:hover .kxd-os-ritual-activity__primary {
+  color: var(--kxd-os-gold);
+}
+
+.kxd-os-ritual-activity__kind {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--kxd-os-text-secondary);
+}
+
+.kxd-os-ritual-activity__bullet {
+  font-size: 0.5rem;
+  line-height: 1;
+  color: var(--kxd-os-gold);
+}
+
+.kxd-os-ritual-activity__primary {
+  font-size: 1.0625rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--kxd-os-text-primary);
+  transition: color 0.15s ease;
+}
+
+.kxd-os-ritual-activity__aside {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--kxd-os-text-muted);
+}
+
+.kxd-os-ritual-activity__facts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin-top: 0.25rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--kxd-os-text-muted);
+}
+
+/* Morning Brief — executive snapshot */
+.kxd-os-ritual-snapshot {
+  margin-bottom: var(--kxd-os-space-12);
+  padding-bottom: var(--kxd-os-space-10);
+  box-shadow: inset 0 -1px 0 var(--kxd-os-border-divider);
+  max-width: 24rem;
+}
+
+.kxd-os-ritual-snapshot__heading {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-faint);
+  margin-bottom: var(--kxd-os-space-4);
+}
+
+.kxd-os-ritual-snapshot__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.kxd-os-ritual-snapshot__item {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--kxd-os-text-secondary);
+}
+
+.kxd-os-ritual-snapshot__mark {
+  color: var(--kxd-os-text-faint);
+  flex-shrink: 0;
+}
+
+.kxd-os-ritual-snapshot__label {
+  color: var(--kxd-os-text-muted);
+}
+
+.kxd-os-ritual-snapshot__value {
+  font-variant-numeric: tabular-nums;
+  color: var(--kxd-os-text-primary);
+  font-weight: 500;
+}
+
+/* Morning Brief — recommended first action */
+.kxd-os-ritual-first-action {
+  margin-bottom: var(--kxd-os-space-12);
+  padding-bottom: var(--kxd-os-space-10);
+  box-shadow: inset 0 -1px 0 var(--kxd-os-border-divider);
+  max-width: 28rem;
+}
+
+.kxd-os-ritual-first-action__heading {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-faint);
+  margin-bottom: var(--kxd-os-space-4);
+}
+
+.kxd-os-ritual-first-action__calm {
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--kxd-os-text-secondary);
+}
+
+.kxd-os-ritual-first-action__label {
+  font-size: 0.8125rem;
+  color: var(--kxd-os-text-muted);
+  margin-bottom: var(--kxd-os-space-3);
+}
+
+.kxd-os-ritual-first-action__client {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-faint);
+  margin-bottom: var(--kxd-os-space-2);
+}
+
+.kxd-os-ritual-first-action__item {
+  font-size: 1.0625rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--kxd-os-text-primary);
+  margin-bottom: var(--kxd-os-space-2);
+}
+
+.kxd-os-ritual-first-action__detail {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--kxd-os-text-muted);
+  margin-bottom: var(--kxd-os-space-4);
+}
+
+.kxd-os-ritual-first-action__link {
+  font-size: 0.875rem;
+  color: var(--kxd-os-text-secondary);
+  text-decoration: none;
+  border-bottom: 1px solid var(--kxd-os-border-divider);
+  padding-bottom: 0.1rem;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.kxd-os-ritual-first-action__link:hover {
+  color: var(--kxd-os-gold);
+  border-color: var(--kxd-os-gold);
 }
 
 /* ── Reduced motion ─────────────────────────────────────────────────── */

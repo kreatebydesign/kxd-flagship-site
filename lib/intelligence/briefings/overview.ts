@@ -1,25 +1,27 @@
-export function buildBriefingGreeting(now = new Date()): {
+import {
+  formatDisplayDate,
+  formatDisplayTime,
+  getZonedHour,
+  KXD_BUSINESS_TIMEZONE,
+} from "@/lib/platform/timezone";
+
+export function buildBriefingGreeting(
+  now = new Date(),
+  timeZone: string = KXD_BUSINESS_TIMEZONE,
+): {
   greeting: string;
   dateDisplay: string;
   timeDisplay: string;
 } {
-  const hour = now.getHours();
+  const hour = getZonedHour(now, timeZone);
   const greeting =
     hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
 
-  const dateDisplay = now.toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
-
-  const timeDisplay = now.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-  });
-
-  return { greeting, dateDisplay, timeDisplay };
+  return {
+    greeting,
+    dateDisplay: formatDisplayDate(now, timeZone),
+    timeDisplay: formatDisplayTime(now, timeZone),
+  };
 }
 
 export function buildBriefingOverview(input: {

@@ -2,6 +2,11 @@
  * Quiet delight moments — never gamified, never noisy.
  */
 
+import {
+  getZonedHour,
+  KXD_BUSINESS_TIMEZONE,
+} from "@/lib/platform/timezone";
+
 export type DelightContext =
   | "morning-clear"
   | "morning-busy"
@@ -65,8 +70,11 @@ export function getDelightAffirmation(context: DelightContext, seed = Date.now()
   return pickStable(options, daySeed);
 }
 
-export function morningGreeting(hour?: number): string {
-  const h = hour ?? new Date().getHours();
+export function morningGreeting(
+  hour?: number,
+  timeZone: string = KXD_BUSINESS_TIMEZONE,
+): string {
+  const h = hour ?? getZonedHour(new Date(), timeZone);
   if (h < 12) return "Good morning";
   if (h < 17) return "Good afternoon";
   return "Good evening";

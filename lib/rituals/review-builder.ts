@@ -3,7 +3,11 @@ import "server-only";
 import type { ExecutiveBriefing } from "@/lib/intelligence/briefings/types";
 import type { ExecutiveTimelineDoc } from "@/lib/executive-timeline/types";
 import type { WorkListItem, WorkWorkspaceData } from "@/lib/work/types";
-import { getDelightAffirmation, morningGreeting } from "./delight";
+import {
+  formatDisplayDateShort,
+  KXD_BUSINESS_TIMEZONE,
+} from "@/lib/platform/timezone";
+import { getDelightAffirmation } from "./delight";
 import { estimateReadingMinutes, formatReadingTime } from "./reading-time";
 import type { WeeklyReviewIntelligence } from "./intelligence/types";
 import type { FocusPriority, WeeklyReview, WeeklyReviewLesson, WeeklyReviewWin } from "./types";
@@ -16,13 +20,10 @@ function isWithinWeek(iso: string): boolean {
   return Date.now() - ts <= WEEK_MS;
 }
 
-function weekLabel(): string {
+function weekLabel(timeZone: string = KXD_BUSINESS_TIMEZONE): string {
   const now = new Date();
-  const start = new Date(now);
-  start.setDate(now.getDate() - 6);
-  const fmt = (d: Date) =>
-    d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-  return `${fmt(start)} – ${fmt(now)}`;
+  const start = new Date(now.getTime() - 6 * 24 * 60 * 60 * 1000);
+  return `${formatDisplayDateShort(start, timeZone)} – ${formatDisplayDateShort(now, timeZone)}`;
 }
 
 function completedThisWeek(work: WorkWorkspaceData): Array<{
@@ -150,7 +151,7 @@ export function buildWeeklyReview(
   );
 
   return {
-    greeting: morningGreeting(),
+    greeting: briefing.greeting,
     weekLabel: weekLabel(),
     dateDisplay: briefing.dateDisplay,
     completedWork,

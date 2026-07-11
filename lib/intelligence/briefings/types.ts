@@ -1,6 +1,7 @@
 import type { IntelligenceConfidence, IntelligenceUrgency } from "../types";
 import type { WorkWorkspaceData } from "@/lib/work/types";
 import type { IntelligenceContext } from "../types";
+import type { ReviewInboxItem } from "@/lib/website-review-inbox/types";
 
 export type BriefingSignalSource =
   | "work"
@@ -41,15 +42,30 @@ export interface BriefingSignal {
   href?: string;
 }
 
+export interface BriefingCommunicationItem {
+  id: number;
+  clientId: number | null;
+  clientName: string;
+  subject: string;
+  date: string;
+  status: string;
+  href: string;
+}
+
 export interface BriefingInputContext {
   intelligence: IntelligenceContext;
   work: WorkWorkspaceData;
-  reviewInbox: { newCount: number; activeCount: number };
+  reviewInbox: {
+    newCount: number;
+    activeCount: number;
+    items: ReviewInboxItem[];
+  };
   communications: {
     needsReplyCount: number;
     staleUnresolvedCount: number;
     overdueFollowUpCount: number;
     openCount: number;
+    needsReply: BriefingCommunicationItem[];
   };
   generatedAt: string;
 }

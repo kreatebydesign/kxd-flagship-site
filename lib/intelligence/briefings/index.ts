@@ -37,6 +37,7 @@ export type {
   OperationalHealthLevel,
   BriefingActionType,
   BriefingSignal,
+  BriefingCommunicationItem,
   BriefingInputContext,
   BusinessHealthSection,
   BriefingChangeItem,

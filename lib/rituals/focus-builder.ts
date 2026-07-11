@@ -2,7 +2,7 @@ import "server-only";
 
 import type { ExecutiveBriefing } from "@/lib/intelligence/briefings/types";
 import type { WorkListItem, WorkWorkspaceData } from "@/lib/work/types";
-import { getDelightAffirmation, morningGreeting } from "./delight";
+import { getDelightAffirmation } from "./delight";
 import type { FocusIntelligence } from "./intelligence/types";
 import type { FocusContext, FocusDecision, FocusPriority, FocusWorkItem } from "./types";
 
@@ -80,7 +80,7 @@ export function buildFocusContext(
   );
 
   return {
-    greeting: morningGreeting(),
+    greeting: briefing.greeting,
     dateDisplay: briefing.dateDisplay,
     priorities,
     todaysWork,

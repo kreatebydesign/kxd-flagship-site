@@ -8,7 +8,6 @@ import { loadBriefingContext } from "@/lib/intelligence/briefings/builder";
 import { loadBrainMemory } from "@/lib/brain/memory";
 import { getPayload } from "payload";
 import config from "@payload-config";
-import { getReviewInbox } from "@/lib/website-review-inbox/data";
 
 /**
  * Shared context loaded once per observation run.
@@ -39,18 +38,18 @@ async function loadCommunicationDocs(): Promise<ClientCommunicationDoc[]> {
 }
 
 export async function loadObserverContext(): Promise<ObserverContext> {
-  const [briefing, brainMemory, communicationDocs, reviewInbox] = await Promise.all([
+  const [briefing, brainMemory, communicationDocs] = await Promise.all([
     loadBriefingContext(),
     loadBrainMemory(200),
     loadCommunicationDocs(),
-    getReviewInbox(),
   ]);
 
   return {
     ...briefing,
     brainMemory,
     communicationDocs,
-    reviewInboxItems: reviewInbox.items,
+    // Reuse Review Inbox items already loaded for briefing — no second query
+    reviewInboxItems: briefing.reviewInbox.items,
     observedAt: new Date().toISOString(),
   };
 }
