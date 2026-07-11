@@ -89,7 +89,7 @@ export const NAV_GROUPS: OperationsNavGroup[] = [
       { id: "timeline", label: "Timeline", href: "/admin/operations/timeline" },
       { id: "automation", label: "Automation", href: "/admin/operations/automation" },
       { id: "launch-qa", label: "Launch QA", href: "/admin/operations/launch-qa" },
-      { id: "work", label: "Work", href: "/admin/operations/work" },
+      { id: "work", label: "Work", href: "/admin/work" },
       { id: "review-inbox", label: "Review Inbox", href: "/admin/operations/review-inbox" },
       { id: "playbooks", label: "Playbooks", href: "/admin/operations/playbooks" },
       { id: "growth", label: "Growth", href: "/admin/operations/growth" },

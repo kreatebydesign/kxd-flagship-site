@@ -5,6 +5,7 @@ export const WORK_STATUSES: WorkStatus[] = [
   "planned",
   "in-progress",
   "waiting-on-client",
+  "waiting-on-kxd",
   "blocked",
   "review",
   "completed",
@@ -16,28 +17,31 @@ export const OPEN_WORK_STATUSES: WorkStatus[] = [
   "planned",
   "in-progress",
   "waiting-on-client",
+  "waiting-on-kxd",
   "blocked",
   "review",
 ];
 
+/** `new` is the Inbox status value — preserved for existing records. */
 export const WORK_STATUS_LABELS: Record<WorkStatus, string> = {
-  new: "New",
+  new: "Inbox",
   planned: "Planned",
   "in-progress": "In Progress",
   "waiting-on-client": "Waiting on Client",
+  "waiting-on-kxd": "Waiting on KXD",
   blocked: "Blocked",
   review: "Review",
   completed: "Completed",
   archived: "Archived",
 };
 
-export const WORK_PRIORITIES: WorkPriority[] = ["low", "normal", "high", "critical"];
+export const WORK_PRIORITIES: WorkPriority[] = ["critical", "high", "normal", "low"];
 
 export const WORK_PRIORITY_LABELS: Record<WorkPriority, string> = {
-  low: "Low",
-  normal: "Normal",
-  high: "High",
   critical: "Critical",
+  high: "High",
+  normal: "Normal",
+  low: "Low",
 };
 
 export const WORK_SOURCES: WorkSource[] = [
@@ -89,6 +93,14 @@ export const WORK_CATEGORY_LABELS: Record<WorkCategory, string> = {
 };
 
 export const WORK_COLLECTION = "work" as const;
+
+export const WORK_ENGINE_HOME = "/admin/work" as const;
+
+export const CLIENT_SUCCESS_HOME = "/admin/operations/client-success" as const;
+
+export function clientSuccessHref(clientId: number): string {
+  return `${CLIENT_SUCCESS_HOME}/${clientId}`;
+}
 
 export const PRIORITY_RANK: Record<WorkPriority, number> = {
   critical: 0,

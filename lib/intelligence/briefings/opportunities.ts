@@ -20,7 +20,7 @@ export function buildBusinessOpportunities(input: BriefingInputContext): Briefin
       title: "Delivery momentum",
       reason: `${work.stats.completedTodayCount} work item${work.stats.completedTodayCount === 1 ? "" : "s"} completed today — strong execution signal.`,
       confidence: "high",
-      href: "/admin/operations/work",
+      href: "/admin/work",
       supportingSignals: work.completedToday.map((item) => `work:completed:${item.id}`),
     });
   }
@@ -47,7 +47,7 @@ export function buildBusinessOpportunities(input: BriefingInputContext): Briefin
       title: "Low operational backlog",
       reason: `Only ${work.stats.openCount} open work items with no blockers — capacity available for growth work.`,
       confidence: "high",
-      href: "/admin/operations/work",
+      href: "/admin/work",
       supportingSignals: [`work:open:${work.stats.openCount}`],
     });
   }
@@ -61,7 +61,7 @@ export function buildBusinessOpportunities(input: BriefingInputContext): Briefin
       title: "Positive delivery momentum",
       reason: "Completions are outpacing blockers — studio throughput is healthy.",
       confidence: "medium",
-      href: "/admin/operations/work",
+      href: "/admin/work",
       supportingSignals: [
         `work:completed_today:${work.stats.completedTodayCount}`,
         `work:blocked:${work.stats.blockedCount}`,

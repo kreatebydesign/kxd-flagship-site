@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requirePayloadAdminApi } from "@/lib/admin/auth";
-import { updateWork } from "@/lib/work/integration";
+import { transitionWorkItem } from "@/lib/work/services";
 import type { WorkStatus } from "@/lib/work/types";
 
 export const dynamic = "force-dynamic";
@@ -25,12 +25,12 @@ export async function POST(
   }
 
   try {
-    const result = await updateWork({
+    const work = await transitionWorkItem(
       workId,
       status,
-      actorEmail: typeof auth.email === "string" ? auth.email : undefined,
-    });
-    return NextResponse.json(result);
+      typeof auth.email === "string" ? auth.email : undefined,
+    );
+    return NextResponse.json({ ok: true, work, status: work.status });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Could not update work status.";
     return NextResponse.json({ ok: false, error: message }, { status: 400 });

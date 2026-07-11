@@ -9,6 +9,10 @@ type KxdLogoProps = {
   disableLink?: boolean;
 };
 
+/**
+ * Public/marketing brand mark — links to `/`.
+ * Authenticated KXD OS surfaces must use `KxdOsLogo` (Executive Home), not this component.
+ */
 export function KxdLogo({ className, width = 56, height = 40, disableLink = false }: KxdLogoProps) {
   const img = (
     <Image

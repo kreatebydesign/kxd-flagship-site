@@ -2,7 +2,7 @@ import "server-only";
 
 import { getPayload } from "payload";
 import config from "@payload-config";
-import { WORK_COLLECTION } from "./constants";
+import { WORK_COLLECTION, WORK_ENGINE_HOME, clientSuccessHref } from "./constants";
 import type {
   CreateWorkInput,
   SpawnWorkFromSourceInput,
@@ -10,6 +10,8 @@ import type {
   WorkListItem,
   WorkStatus,
 } from "./types";
+import { resolveAssigneeLabel } from "./display";
+import { readActivityHistory } from "./activity";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDoc = Record<string, any>;
@@ -22,13 +24,34 @@ function relId(value: unknown): number | null {
   return null;
 }
 
-function toWorkListItem(doc: AnyDoc, clientName = "Client"): WorkListItem {
-  const clientId = relId(doc.client) ?? 0;
+function readTags(doc: AnyDoc): string[] {
+  if (!Array.isArray(doc.tags)) return [];
+  return doc.tags
+    .map((row: unknown) => {
+      if (typeof row === "string") return row;
+      if (row && typeof row === "object" && "tag" in row) {
+        return String((row as AnyDoc).tag ?? "");
+      }
+      return "";
+    })
+    .filter(Boolean);
+}
+
+function toWorkListItem(doc: AnyDoc, fallbackClientName = "Internal"): WorkListItem {
+  const clientId = relId(doc.client);
   const assignedToId = relId(doc.assignedTo);
   const assignedTo =
     doc.assignedTo && typeof doc.assignedTo === "object"
-      ? String((doc.assignedTo as AnyDoc).email ?? (doc.assignedTo as AnyDoc).name ?? "")
+      ? resolveAssigneeLabel(doc.assignedTo as AnyDoc) || null
       : null;
+  const clientName =
+    doc.client && typeof doc.client === "object"
+      ? String((doc.client as AnyDoc).name ?? fallbackClientName)
+      : clientId != null
+        ? fallbackClientName
+        : doc.internalProject
+          ? String(doc.internalProject)
+          : "Internal";
 
   return {
     id: doc.id as number,
@@ -36,6 +59,8 @@ function toWorkListItem(doc: AnyDoc, clientName = "Client"): WorkListItem {
     clientName,
     title: String(doc.title ?? "Work"),
     summary: doc.summary ? String(doc.summary) : null,
+    description: doc.description ? String(doc.description) : null,
+    notes: doc.notes ? String(doc.notes) : null,
     source: doc.source as WorkListItem["source"],
     sourceId: doc.sourceId ? String(doc.sourceId) : null,
     category: doc.category as WorkListItem["category"],
@@ -46,13 +71,23 @@ function toWorkListItem(doc: AnyDoc, clientName = "Client"): WorkListItem {
     createdBy: doc.createdBy ? String(doc.createdBy) : null,
     assignedTo,
     assignedToId,
+    internalProject: doc.internalProject ? String(doc.internalProject) : null,
+    tags: readTags(doc),
+    estimatedEffort:
+      typeof doc.estimatedEffort === "number" && Number.isFinite(doc.estimatedEffort)
+        ? doc.estimatedEffort
+        : null,
     dueDate: doc.dueDate ? String(doc.dueDate) : null,
+    startDate: doc.startDate ? String(doc.startDate) : null,
     startedAt: doc.startedAt ? String(doc.startedAt) : null,
     completedAt: doc.completedAt ? String(doc.completedAt) : null,
+    parentWorkId: relId(doc.parentWork),
     createdAt: String(doc.createdAt ?? new Date().toISOString()),
     updatedAt: String(doc.updatedAt ?? doc.createdAt ?? new Date().toISOString()),
-    href: `/admin/operations/work/${clientId}`,
-    adminHref: `/admin/collections/work/${doc.id}`,
+    href: clientId != null ? `${WORK_ENGINE_HOME}?client=${clientId}` : WORK_ENGINE_HOME,
+    adminHref: `${WORK_ENGINE_HOME}/${doc.id}`,
+    clientSuccessHref: clientId != null ? clientSuccessHref(clientId) : null,
+    activityHistory: readActivityHistory(doc),
   };
 }
 
@@ -88,9 +123,11 @@ export async function createWork(input: CreateWorkInput): Promise<{ ok: true; wo
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     collection: WORK_COLLECTION as any,
     data: {
-      client: input.clientId,
+      client: input.clientId ?? undefined,
       title: input.title.trim(),
       summary: input.summary?.trim() || undefined,
+      description: input.description?.trim() || undefined,
+      notes: input.notes?.trim() || undefined,
       source: input.source ?? "manual",
       sourceId: input.sourceId?.trim() || undefined,
       category: input.category ?? "general",
@@ -100,10 +137,24 @@ export async function createWork(input: CreateWorkInput): Promise<{ ok: true; wo
       timelineEnabled: input.timelineEnabled ?? true,
       createdBy: input.createdBy,
       assignedTo: input.assignedToId ?? undefined,
+      internalProject: input.internalProject?.trim() || undefined,
+      tags: input.tags?.map((tag) => ({ tag })) ?? undefined,
+      estimatedEffort: input.estimatedEffort,
       dueDate: input.dueDate,
+      startDate: input.startDate,
       startedAt: status === "in-progress" ? input.startedAt ?? now : input.startedAt,
       completedAt: status === "completed" ? now : undefined,
+      parentWork: input.parentWorkId ?? undefined,
+      activityHistory: [
+        {
+          at: now,
+          actor: input.createdBy ?? null,
+          action: "created",
+          detail: "Work opened",
+        },
+      ],
     },
+    depth: 1,
     overrideAccess: true,
   });
 
@@ -175,9 +226,7 @@ export async function updateWorkStatus(
     overrideAccess: true,
   });
 
-  const work = toWorkListItem(updated as AnyDoc);
-
-  return { ok: true, work };
+  return { ok: true, work: toWorkListItem(updated as AnyDoc) };
 }
 
 export async function getWorkById(workId: number): Promise<WorkListItem | null> {
@@ -191,11 +240,7 @@ export async function getWorkById(workId: number): Promise<WorkListItem | null> 
       overrideAccess: true,
     });
     if (!doc) return null;
-    const clientName =
-      doc.client && typeof doc.client === "object"
-        ? String((doc.client as AnyDoc).name ?? "Client")
-        : "Client";
-    return toWorkListItem(doc as AnyDoc, clientName);
+    return toWorkListItem(doc as AnyDoc);
   } catch {
     return null;
   }

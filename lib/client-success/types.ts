@@ -1,5 +1,7 @@
 /** Phase 7F — Client Success Engine types */
 
+import type { ClientWorkData } from "@/lib/work/types";
+
 export type SatisfactionLevel = "poor" | "fair" | "good" | "high" | "excellent";
 
 export interface ClientSuccessListItem {
@@ -75,6 +77,8 @@ export interface ClientSuccessDetailData {
   recentWins: CheckInListItem[];
   checkInHistory: CheckInListItem[];
   timelineHighlights: Array<{ title: string; summary: string; date: string }>;
+  /** Phase 20C — client-scoped Work Engine groups */
+  work: ClientWorkData;
   recommendedAction: string;
   planHref: string;
   generatedAt: string;

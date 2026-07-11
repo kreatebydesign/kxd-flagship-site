@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { KxdLogo } from "@/components/ui/KxdLogo";
+import { KxdOsLogo } from "@/components/os";
 import type { JuniorCreatorAdminReviewData, AdminCreatorRow, AdminShiftRow } from "@/lib/junior-creators/admin-review-types";
 import { formatEarningsCents, formatHoursFromMinutes } from "@/lib/junior-creators/week";
 
@@ -344,7 +344,7 @@ export function JuniorCreatorAdminReview({ data }: Props) {
         <div className="mx-auto max-w-screen-xl" style={{ padding: "1.125rem 1.5rem" }}>
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <KxdLogo />
+              <KxdOsLogo />
               <div>
                 <p style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.creamMuted }}>
                   KXD Academy

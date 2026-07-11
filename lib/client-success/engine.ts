@@ -12,6 +12,7 @@ import {
 } from "@/lib/intelligence/context";
 import type { IntelligenceDoc } from "@/lib/intelligence/types";
 import { getExecutiveTimelineClient } from "@/lib/executive-timeline/data";
+import { getClientWork } from "@/lib/work/services";
 import type {
   CheckInListItem,
   ClientSuccessDashboardData,
@@ -266,7 +267,7 @@ export async function getClientSuccessDetail(clientId: number): Promise<ClientSu
   if (!ctx.clientsById.has(clientId)) return null;
 
   const payload = await getPayload({ config });
-  const [timeline, plansR, checkInsR] = await Promise.all([
+  const [timeline, plansR, checkInsR, work] = await Promise.all([
     getExecutiveTimelineClient(clientId),
     payload.find({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -285,6 +286,7 @@ export async function getClientSuccessDetail(clientId: number): Promise<ClientSu
       depth: 0,
       overrideAccess: true,
     }),
+    getClientWork(clientId),
   ]);
 
   const plan = (plansR.docs[0] as SuccessDoc | undefined) ?? undefined;
@@ -326,6 +328,9 @@ export async function getClientSuccessDetail(clientId: number): Promise<ClientSu
     lastCheckIn
       ? `Last check-in ${daysSince(String(lastCheckIn.meetingDate)) ?? 0} day(s) ago.`
       : "No success check-ins on record.",
+    work.openCount > 0
+      ? `${work.openCount} open work item${work.openCount === 1 ? "" : "s"} on file.`
+      : "No open work on file.",
   ];
 
   return {
@@ -351,6 +356,7 @@ export async function getClientSuccessDetail(clientId: number): Promise<ClientSu
     recentWins,
     checkInHistory,
     timelineHighlights,
+    work,
     recommendedAction: recommendAction(listItem),
     planHref: `/admin/collections/client-success-plans`,
     generatedAt: new Date().toISOString(),

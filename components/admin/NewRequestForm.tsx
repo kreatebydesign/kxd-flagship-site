@@ -7,7 +7,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { KxdLogo } from "@/components/ui/KxdLogo";
+import { KxdOsLogo } from "@/components/os";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -437,9 +437,7 @@ function PageHeader() {
       <div className="mx-auto max-w-screen-xl" style={{ padding: "1.125rem 1.5rem" }}>
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <Link href="/" aria-label="Kreate by Design Home" className="flex items-center" style={{ textDecoration: "none" }}>
-              <KxdLogo />
-            </Link>
+            <KxdOsLogo className="flex items-center" />
 
             <span style={{ color: "rgba(255,255,255,0.1)", fontSize: "0.6875rem" }}>◆</span>
 

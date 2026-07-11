@@ -28,10 +28,11 @@ const CATEGORIES = [
 ] as const;
 
 const STATUSES = [
-  { label: "New", value: "new" },
+  { label: "Inbox", value: "new" },
   { label: "Planned", value: "planned" },
   { label: "In Progress", value: "in-progress" },
   { label: "Waiting on Client", value: "waiting-on-client" },
+  { label: "Waiting on KXD", value: "waiting-on-kxd" },
   { label: "Blocked", value: "blocked" },
   { label: "Review", value: "review" },
   { label: "Completed", value: "completed" },
@@ -39,12 +40,16 @@ const STATUSES = [
 ] as const;
 
 const PRIORITIES = [
-  { label: "Low", value: "low" },
-  { label: "Normal", value: "normal" },
-  { label: "High", value: "high" },
   { label: "Critical", value: "critical" },
+  { label: "High", value: "high" },
+  { label: "Normal", value: "normal" },
+  { label: "Low", value: "low" },
 ] as const;
 
+/**
+ * Phase 14B + 20A — Work Engine collection.
+ * Execution layer for running the agency. OS: /admin/work
+ */
 export const Work: CollectionConfig = {
   slug: "work",
   labels: { singular: "Work", plural: "Work" },
@@ -55,16 +60,15 @@ export const Work: CollectionConfig = {
     defaultColumns: [
       "title",
       "client",
-      "source",
       "status",
       "priority",
-      "category",
-      "clientVisible",
+      "dueDate",
+      "assignedTo",
       "updatedAt",
     ],
     group: PAYLOAD_GROUPS.kxdOs,
     description:
-      "KXD Work Engine — operational heartbeat of every client relationship. OS: /admin/operations/work",
+      "KXD Work Engine — execution heartbeat of the agency. Workspace: /admin/work",
   },
   access: {
     read: isAuthenticated,
@@ -80,9 +84,21 @@ export const Work: CollectionConfig = {
       name: "client",
       type: "relationship",
       relationTo: "clients",
-      required: true,
+      required: false,
       label: "Client",
-      admin: { position: "sidebar" },
+      admin: {
+        position: "sidebar",
+        description: "Optional — leave empty for internal studio work.",
+      },
+    },
+    {
+      name: "internalProject",
+      type: "text",
+      label: "Internal project",
+      admin: {
+        position: "sidebar",
+        description: "Studio initiative or internal workstream label.",
+      },
     },
     {
       name: "status",
@@ -125,7 +141,16 @@ export const Work: CollectionConfig = {
       type: "relationship",
       relationTo: "users",
       label: "Assigned To",
-      admin: { position: "sidebar", description: "Assignment-ready — future operator routing." },
+      admin: {
+        position: "sidebar",
+        description: "Team-ready assignment for future operator routing.",
+      },
+    },
+    {
+      name: "estimatedEffort",
+      type: "number",
+      label: "Estimated effort (hours)",
+      admin: { position: "sidebar", step: 0.25 },
     },
     {
       name: "clientVisible",
@@ -148,6 +173,16 @@ export const Work: CollectionConfig = {
       },
     },
     {
+      name: "startDate",
+      type: "date",
+      label: "Start Date",
+      admin: {
+        date: { pickerAppearance: "dayOnly" },
+        position: "sidebar",
+        description: "Planned start — distinct from actual started timestamp.",
+      },
+    },
+    {
       name: "dueDate",
       type: "date",
       label: "Due Date",
@@ -166,6 +201,16 @@ export const Work: CollectionConfig = {
       admin: { date: { pickerAppearance: "dayAndTime" }, position: "sidebar" },
     },
     {
+      name: "parentWork",
+      type: "relationship",
+      relationTo: "work",
+      label: "Parent work",
+      admin: {
+        position: "sidebar",
+        description: "Future subtask relationship — optional parent work item.",
+      },
+    },
+    {
       type: "tabs",
       tabs: [
         {
@@ -176,14 +221,48 @@ export const Work: CollectionConfig = {
               name: "summary",
               type: "textarea",
               label: "Summary",
-              admin: { description: "Concise context — what this work represents for the relationship." },
+              admin: {
+                description: "Concise context — what this work represents.",
+              },
+            },
+            {
+              name: "description",
+              type: "textarea",
+              label: "Description",
+              admin: {
+                description: "Fuller brief for execution. Rich text may follow later.",
+              },
+            },
+            {
+              name: "notes",
+              type: "textarea",
+              label: "Notes",
+              admin: { description: "Operator notes — internal only." },
+            },
+            {
+              name: "tags",
+              type: "array",
+              label: "Tags",
+              labels: { singular: "Tag", plural: "Tags" },
+              fields: [
+                {
+                  name: "tag",
+                  type: "text",
+                  required: true,
+                  label: "Tag",
+                },
+              ],
+              admin: {
+                description: "Lightweight labels for future filters and views.",
+              },
             },
             {
               name: "sourceId",
               type: "text",
               label: "Source ID",
               admin: {
-                description: "External record identifier (request id, review id, etc.). Used for idempotent spawning.",
+                description:
+                  "External record identifier (request id, review id, etc.). Used for idempotent spawning.",
               },
             },
             {
@@ -193,10 +272,51 @@ export const Work: CollectionConfig = {
               admin: { description: "Operator email or system identifier." },
             },
             {
+              name: "activityHistory",
+              type: "array",
+              label: "Activity history",
+              labels: { singular: "Entry", plural: "Entries" },
+              admin: {
+                description: "Append-only execution history. Timeline remains the relationship record.",
+                readOnly: true,
+              },
+              fields: [
+                { name: "at", type: "date", required: true, label: "At" },
+                { name: "actor", type: "text", label: "Actor" },
+                { name: "action", type: "text", required: true, label: "Action" },
+                { name: "detail", type: "textarea", label: "Detail" },
+              ],
+            },
+            {
+              name: "attachments",
+              type: "array",
+              label: "Attachments",
+              labels: { singular: "Attachment", plural: "Attachments" },
+              admin: {
+                description: "Future-ready attachment slots — upload plumbing comes later.",
+              },
+              fields: [
+                {
+                  name: "label",
+                  type: "text",
+                  label: "Label",
+                },
+                {
+                  name: "media",
+                  type: "upload",
+                  relationTo: "media",
+                  label: "File",
+                },
+              ],
+            },
+            {
               name: "metadata",
               type: "json",
               label: "Metadata",
-              admin: { description: "Structured context for AI, reporting, and future automation." },
+              admin: {
+                description:
+                  "Structured context for AI, reporting, notifications, and future automation.",
+              },
             },
           ],
         },

@@ -93,7 +93,7 @@ function buildCompletionInsight(context: BriefingInputContext): InsightCandidate
       tone: "positive",
       timeframe: "This week",
       confidence: "high",
-      context: [{ id: "work-week", source: "work", label: "Work Engine", detail: `${week} completions`, href: "/admin/operations/work" }],
+      context: [{ id: "work-week", source: "work", label: "Work Engine", detail: `${week} completions`, href: "/admin/work" }],
       score: 58 + week * 2,
     };
   }

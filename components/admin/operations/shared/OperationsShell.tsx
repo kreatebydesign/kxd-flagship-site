@@ -1,12 +1,12 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { KxdLogo } from "@/components/ui/KxdLogo";
-import { KxdShell } from "@/components/os";
+import { KxdOsLogo, KxdShell } from "@/components/os";
 import { CommandPalette } from "@/components/admin/operations/command-search";
 import { CommandPaletteTrigger } from "@/components/admin/operations/command-search/CommandPaletteTrigger";
 import { NotificationCenter } from "@/components/admin/operations/notifications";
 import { QuickActionBar } from "@/components/admin/operations/quick-actions";
 import { QuickCaptureNote } from "@/components/admin/operations/strategy/QuickCaptureNote";
+import { WorkComposerHost } from "@/components/admin/work/composer";
 import { OperationsSidebarNav } from "./OperationsSidebarNav";
 import { type OperationsNavId } from "./operations-nav";
 import { getEditionOperationsNavGroups } from "@/lib/editions/navigation";
@@ -26,7 +26,7 @@ export function OperationsShell({ activeId, dateDisplay, clientId, children }: O
       <div className="kxd-os-app">
         <aside className="kxd-os-sidebar" aria-label="KXD OS">
           <div className="kxd-os-sidebar__brand">
-            <KxdLogo height={18} />
+            <KxdOsLogo height={18} />
           </div>
 
           <div className="kxd-os-sidebar__nav">
@@ -65,6 +65,7 @@ export function OperationsShell({ activeId, dateDisplay, clientId, children }: O
         </div>
       </div>
       <CommandPalette />
+      <WorkComposerHost />
     </KxdShell>
   );
 }

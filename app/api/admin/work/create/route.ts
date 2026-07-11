@@ -5,33 +5,63 @@ import type { WorkCategory, WorkPriority, WorkSource, WorkStatus } from "@/lib/w
 
 export const dynamic = "force-dynamic";
 
+function optionalNumber(value: unknown): number | undefined {
+  if (value === null || value === undefined || value === "") return undefined;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : undefined;
+}
+
+function optionalString(value: unknown): string | undefined {
+  if (value === null || value === undefined) return undefined;
+  const s = String(value).trim();
+  return s || undefined;
+}
+
+function parseTags(value: unknown): string[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const tags = value.map((t) => String(t).trim()).filter(Boolean);
+  return tags.length ? tags : undefined;
+}
+
+/**
+ * POST /api/admin/work/create
+ * Executive Work Composer + programmatic create entry.
+ * clientId is optional (internal studio work).
+ */
 export async function POST(req: Request) {
   const auth = await requirePayloadAdminApi();
   if (auth instanceof NextResponse) return auth;
 
   const body = await req.json();
-  const clientId = Number(body.clientId);
   const title = String(body.title ?? "").trim();
 
-  if (!clientId || !title) {
-    return NextResponse.json({ ok: false, error: "clientId and title are required." }, { status: 400 });
+  if (!title) {
+    return NextResponse.json({ ok: false, error: "Title is required." }, { status: 400 });
   }
+
+  const clientId = optionalNumber(body.clientId) ?? null;
 
   try {
     const result = await createWork({
       clientId,
       title,
-      summary: body.summary ? String(body.summary) : undefined,
+      summary: optionalString(body.summary),
+      description: optionalString(body.description),
+      notes: optionalString(body.notes),
       source: body.source ? (String(body.source) as WorkSource) : "manual",
-      sourceId: body.sourceId ? String(body.sourceId) : undefined,
+      sourceId: optionalString(body.sourceId),
       category: body.category ? (String(body.category) as WorkCategory) : undefined,
-      status: body.status ? (String(body.status) as WorkStatus) : undefined,
-      priority: body.priority ? (String(body.priority) as WorkPriority) : undefined,
+      status: body.status ? (String(body.status) as WorkStatus) : "new",
+      priority: body.priority ? (String(body.priority) as WorkPriority) : "normal",
       clientVisible: body.clientVisible === true,
       timelineEnabled: body.timelineEnabled !== false,
       createdBy: typeof auth.email === "string" ? auth.email : undefined,
-      assignedToId: body.assignedToId ? Number(body.assignedToId) : undefined,
-      dueDate: body.dueDate ? String(body.dueDate) : undefined,
+      assignedToId: optionalNumber(body.assignedToId),
+      internalProject: optionalString(body.project ?? body.internalProject),
+      tags: parseTags(body.tags),
+      estimatedEffort: optionalNumber(body.estimatedEffort),
+      dueDate: optionalString(body.dueDate),
+      startDate: optionalString(body.startDate),
     });
 
     const workNumber = await assignWorkNumber(result.work.id);

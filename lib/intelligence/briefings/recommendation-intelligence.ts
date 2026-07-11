@@ -114,7 +114,7 @@ function resolveEvidence(
         source: "work",
         label: "Work backlog",
         detail: `${idOrCount} open work items in the Work Engine.`,
-        href: "/admin/operations/work",
+        href: "/admin/work",
       };
     }
 
@@ -126,7 +126,7 @@ function resolveEvidence(
         source: "work",
         label: item ? `Blocked · ${item.title}` : "Blocked work item",
         detail: item ? `${item.clientName} · ${item.status}` : undefined,
-        href: item?.adminHref ?? "/admin/operations/work",
+        href: item?.adminHref ?? "/admin/work",
       };
     }
 
@@ -138,7 +138,7 @@ function resolveEvidence(
         source: "work",
         label: item ? `Overdue · ${item.title}` : "Overdue work item",
         detail: item?.dueDate ? `Due date passed for ${item.clientName}.` : undefined,
-        href: item?.adminHref ?? "/admin/operations/work",
+        href: item?.adminHref ?? "/admin/work",
       };
     }
 

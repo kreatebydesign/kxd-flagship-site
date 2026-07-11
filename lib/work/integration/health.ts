@@ -31,6 +31,7 @@ function isOverdue(dueDate: string | null | undefined): boolean {
 export function computeWorkHealth(input: WorkHealthInput): WorkHealth {
   if (input.status === "blocked") return "blocked";
   if (input.status === "waiting-on-client") return "waiting-on-client";
+  if (input.status === "waiting-on-kxd") return "needs-attention";
   if (isOverdue(input.dueDate) && input.status !== "completed" && input.status !== "archived") {
     return "overdue";
   }

@@ -4,6 +4,7 @@
  */
 
 export { KxdShell } from "./KxdShell";
+export { KxdOsLogo } from "./KxdOsLogo";
 export { KxdPage } from "./KxdPage";
 export { KxdHeader } from "./KxdHeader";
 export { KxdSection } from "./KxdSection";

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { KxdLogo } from "@/components/ui/KxdLogo";
+import { KxdOsLogo } from "@/components/os";
 import {
   getClientLauncherCards,
   getLauncherCardsForUser,
@@ -111,7 +111,7 @@ export default function OsLauncherPage() {
           style={{ padding: "1.25rem 1.5rem" }}
         >
           <div className="flex items-center gap-4">
-            <KxdLogo />
+            <KxdOsLogo />
             <div>
               <p
                 style={{

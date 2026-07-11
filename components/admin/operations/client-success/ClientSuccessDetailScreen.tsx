@@ -11,6 +11,7 @@ import {
 } from "@/components/admin/operations/shared/OpsBriefing";
 import { SATISFACTION_LABELS } from "@/lib/client-success/types";
 import type { ClientSuccessDetailData } from "@/lib/client-success/types";
+import { ClientWorkSection } from "./ClientWorkSection";
 
 function TextBlock({ label, value }: { label: string; value: string | null }) {
   if (!value?.trim()) {
@@ -135,6 +136,8 @@ export function ClientSuccessDetailScreen({ data }: { data: ClientSuccessDetailD
             </div>
           )}
         </KxdSection>
+
+        <ClientWorkSection clientId={data.clientId} initialWork={data.work} />
 
         <KxdSection label="Check-In History" className="kxd-os-operations-section">
           <OpsSectionHead

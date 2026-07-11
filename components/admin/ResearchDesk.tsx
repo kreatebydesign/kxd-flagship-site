@@ -7,7 +7,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { KxdLogo } from "@/components/ui/KxdLogo";
+import { KxdOsLogo } from "@/components/os";
 import {
   RESEARCH_LEAD_SOURCES,
   RESEARCH_RESEARCHERS,
@@ -220,7 +220,7 @@ export function ResearchDesk({ leads, metrics, researchers, filterStatus, filter
         <div className="mx-auto max-w-screen-xl" style={{ padding: "1.125rem 1.5rem" }}>
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <KxdLogo />
+              <KxdOsLogo />
               <div>
                 <p style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem", letterSpacing: "0.16em", textTransform: "uppercase", color: C.creamMuted }}>
                   Lead Research Desk

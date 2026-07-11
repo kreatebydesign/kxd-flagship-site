@@ -120,7 +120,17 @@ export interface UpdateWorkInput {
   status?: WorkStatus;
   priority?: WorkPriority;
   title?: string;
-  summary?: string;
+  summary?: string | null;
+  description?: string | null;
+  notes?: string | null;
+  category?: WorkCategory;
+  clientId?: number | null;
+  assignedToId?: number | null;
+  internalProject?: string | null;
+  tags?: string[];
+  estimatedEffort?: number | null;
+  dueDate?: string | null;
+  startDate?: string | null;
   actorEmail?: string;
 }
 

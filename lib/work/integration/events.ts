@@ -26,7 +26,9 @@ function defaultEventTitle(input: PublishWorkEventInput): string {
     case "work.started":
       return `Work started · ${input.title}`;
     case "work.waiting":
-      return `Waiting on client · ${input.title}`;
+      return input.status === "waiting-on-kxd"
+        ? `Waiting on KXD · ${input.title}`
+        : `Waiting on client · ${input.title}`;
     case "work.review":
       return `In review · ${input.title}`;
     case "work.archived":
@@ -98,6 +100,7 @@ export function resolveLifecycleEvent(
     case "in-progress":
       return "work.started";
     case "waiting-on-client":
+    case "waiting-on-kxd":
       return "work.waiting";
     case "blocked":
       return "work.blocked";

@@ -1,26 +1,15 @@
 /**
  * /admin/operations/work
- * KXD OS Phase 14B — Work Engine workspace
+ * Phase 14B — retained route; redirects to Phase 20A Work Engine home.
  */
 
-import { WorkEngineScreen } from "@/components/admin/operations/work/WorkEngineScreen";
+import { redirect } from "next/navigation";
 import { requirePayloadAdminPage } from "@/lib/admin/auth";
-import { getWorkWorkspace } from "@/lib/work/server";
+import { WORK_ENGINE_HOME } from "@/lib/work/constants";
 
 export const dynamic = "force-dynamic";
 
-export default async function WorkEnginePage() {
-  const user = await requirePayloadAdminPage("/admin/operations/work");
-  const data = await getWorkWorkspace();
-
-  return (
-    <WorkEngineScreen
-      data={data}
-      adminDisplayName={
-        typeof user.displayName === "string" && user.displayName.trim()
-          ? user.displayName.trim()
-          : null
-      }
-    />
-  );
+export default async function OperationsWorkRedirectPage() {
+  await requirePayloadAdminPage(WORK_ENGINE_HOME);
+  redirect(WORK_ENGINE_HOME);
 }

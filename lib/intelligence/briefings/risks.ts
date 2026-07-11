@@ -18,7 +18,7 @@ export function buildBusinessRisks(input: BriefingInputContext): BriefingRisk[] 
       reason: `${work.stats.openCount} open work items may delay client delivery and erode confidence.`,
       urgency: work.stats.openCount > 40 ? "high" : "medium",
       confidence: "high",
-      href: "/admin/operations/work",
+      href: "/admin/work",
       supportingSignals: [`work:open:${work.stats.openCount}`],
     });
   }
@@ -30,7 +30,7 @@ export function buildBusinessRisks(input: BriefingInputContext): BriefingRisk[] 
       reason: `${work.stats.blockedCount} items are blocked — execution is stalling across clients.`,
       urgency: "high",
       confidence: "high",
-      href: "/admin/operations/work",
+      href: "/admin/work",
       supportingSignals: work.currentWork
         .filter((item) => item.status === "blocked")
         .map((item) => `work:blocked:${item.id}`),
@@ -93,7 +93,7 @@ export function buildBusinessRisks(input: BriefingInputContext): BriefingRisk[] 
       reason: `${overdueWork.length} work items are past due — commitments may be at risk.`,
       urgency: "high",
       confidence: "high",
-      href: "/admin/operations/work",
+      href: "/admin/work",
       supportingSignals: overdueWork.map((item) => `work:overdue:${item.id}`),
     });
   }
