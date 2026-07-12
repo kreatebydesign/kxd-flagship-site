@@ -51,6 +51,7 @@ export interface WorkIntegrationMetadata {
 
 export type WorkLifecycleEvent =
   | "work.created"
+  | "work.updated"
   | "work.started"
   | "work.blocked"
   | "work.waiting"

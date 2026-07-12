@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState, type KeyboardEvent } from "react";
-import { KxdOsLogo, KxdShell } from "@/components/os";
+import { KxdShell } from "@/components/os";
+import { ExecutiveWorkspaceShell } from "@/components/admin/executive-workspace";
 import { WorkComposerHost, WorkComposerTrigger } from "@/components/admin/work/composer";
 import {
   WORK_ENGINE_HOME,
@@ -161,72 +162,73 @@ export function WorkEngineClient({
 
   return (
     <KxdShell className="kxd-os-shell--ritual">
-      <div className="kxd-os-work-engine">
-        <header className="kxd-os-work-engine__header">
-          <KxdOsLogo height={16} className="kxd-os-work-engine__brand" />
-          <nav className="kxd-os-work-engine__nav" aria-label="Work Engine">
-            <span className="kxd-os-work-engine__nav-active">Work</span>
-            <Link href="/admin/operations/brief">Morning Brief</Link>
-            <Link href="/admin/operations/review-inbox">Review Inbox</Link>
-          </nav>
-          <Link href="/admin/operations/intelligence" className="kxd-os-work-engine__exit">
-            Full workspace
-          </Link>
-        </header>
-
-        <main className="kxd-os-work-engine__main">
-          <header className="kxd-os-work-engine__hero">
-            <p className="kxd-os-work-engine__eyebrow">Work Engine</p>
-            <h1 className="kxd-os-work-engine__headline">{greeting}</h1>
-            <p className="kxd-os-work-engine__lede">
-              {dateDisplay}. Execution for the studio — calm, ordered, ready to move.
-            </p>
-            <p className="kxd-os-work-engine__stats">{statsLine}</p>
+      <ExecutiveWorkspaceShell workspaceId="work" includeWorkComposer={false}>
+        <div className="kxd-os-work-engine">
+          <header className="kxd-os-work-engine__header kxd-os-work-engine__header--secondary">
+            <nav className="kxd-os-work-engine__nav" aria-label="Work Engine">
+              <span className="kxd-os-work-engine__nav-active">Work</span>
+              <Link href="/admin/operations/today">Today</Link>
+              <Link href="/admin/operations/review-inbox">Review Inbox</Link>
+            </nav>
+            <Link href="/admin/operations/intelligence" className="kxd-os-work-engine__exit">
+              Full workspace
+            </Link>
           </header>
 
-          <WorkSection
-            title="Today's Work"
-            items={todayWork}
-            empty="Nothing due or in motion today."
-          />
+          <main className="kxd-os-work-engine__main">
+            <header className="kxd-os-work-engine__hero">
+              <p className="kxd-os-work-engine__eyebrow">Work Engine</p>
+              <h1 className="kxd-os-work-engine__headline">{greeting}</h1>
+              <p className="kxd-os-work-engine__lede">
+                {dateDisplay}. Execution for the studio — calm, ordered, ready to move.
+              </p>
+              <p className="kxd-os-work-engine__stats">{statsLine}</p>
+            </header>
 
-          <WorkSection
-            title="Waiting on Client"
-            items={waitingOnClient}
-            empty="No work is waiting on a client."
-          />
+            <WorkSection
+              title="Today's Work"
+              items={todayWork}
+              empty="Nothing due or in motion today."
+            />
 
-          <WorkSection
-            title="Waiting on KXD"
-            items={waitingOnKxd}
-            empty="Nothing is waiting on the studio."
-          />
+            <WorkSection
+              title="Waiting on Client"
+              items={waitingOnClient}
+              empty="No work is waiting on a client."
+            />
 
-          <WorkSection
-            title="Upcoming"
-            items={upcoming}
-            empty="No upcoming due dates in the next two weeks."
-          />
+            <WorkSection
+              title="Waiting on KXD"
+              items={waitingOnKxd}
+              empty="Nothing is waiting on the studio."
+            />
 
-          <WorkSection
-            title="Completed Today"
-            items={data.completedToday}
-            empty="No completions recorded today yet."
-          />
+            <WorkSection
+              title="Upcoming"
+              items={upcoming}
+              empty="No upcoming due dates in the next two weeks."
+            />
 
-          <p className="kxd-os-work-engine__footnote">
-            <WorkComposerTrigger />
-            {" · "}
-            <Link href={WORK_ENGINE_HOME}>Refresh</Link>
-          </p>
-        </main>
-      </div>
+            <WorkSection
+              title="Completed Today"
+              items={data.completedToday}
+              empty="No completions recorded today yet."
+            />
 
-      <WorkComposerHost
-        currentUser={currentUser}
-        onCreated={onCreated}
-        onUpdated={onUpdated}
-      />
+            <p className="kxd-os-work-engine__footnote">
+              <WorkComposerTrigger />
+              {" · "}
+              <Link href={WORK_ENGINE_HOME}>Refresh</Link>
+            </p>
+          </main>
+        </div>
+
+        <WorkComposerHost
+          currentUser={currentUser}
+          onCreated={onCreated}
+          onUpdated={onUpdated}
+        />
+      </ExecutiveWorkspaceShell>
     </KxdShell>
   );
 }

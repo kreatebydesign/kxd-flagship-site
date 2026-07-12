@@ -6,6 +6,7 @@ import { appendWorkActivityEntry, readActivityHistory } from "../activity";
 import { WORK_COLLECTION, WORK_STATUS_LABELS } from "../constants";
 import { updateWorkStatus } from "../runner";
 import type { WorkStatus } from "../types";
+import { publishWorkEventFromDoc } from "./events";
 import { assignWorkNumber } from "./relationships";
 import type { UpdateWorkInput, UpdateWorkResult } from "./types";
 
@@ -115,6 +116,15 @@ export async function updateWork(input: UpdateWorkInput): Promise<UpdateWorkResu
     depth: 0,
     overrideAccess: true,
   });
+
+  if (hasFieldPatch && !statusChanging && refreshed) {
+    await publishWorkEventFromDoc(
+      refreshed as AnyDoc,
+      "work.updated",
+      previousStatus,
+      payload,
+    );
+  }
 
   return {
     ok: true,

@@ -51,6 +51,9 @@ import * as migration_20260724_phase13a_portal_users_active from './20260724_pha
 import * as migration_20260725_phase14b_work_engine from './20260725_phase14b_work_engine';
 import * as migration_20260726_phase18g_client_review_media_storage from './20260726_phase18g_client_review_media_storage';
 import * as migration_20260727_phase20a_work_engine_foundation from './20260727_phase20a_work_engine_foundation';
+import * as migration_20260728_phase20e_activity_engine from './20260728_phase20e_activity_engine';
+import * as migration_20260729_phase20f_training_enablement from './20260729_phase20f_training_enablement';
+import * as migration_20260730_phase20g_operations_experience from './20260730_phase20g_operations_experience';
 
 export const migrations = [
   {
@@ -317,5 +320,20 @@ export const migrations = [
     up: migration_20260727_phase20a_work_engine_foundation.up,
     down: migration_20260727_phase20a_work_engine_foundation.down,
     name: '20260727_phase20a_work_engine_foundation',
+  },
+  {
+    up: migration_20260728_phase20e_activity_engine.up,
+    down: migration_20260728_phase20e_activity_engine.down,
+    name: '20260728_phase20e_activity_engine',
+  },
+  {
+    up: migration_20260729_phase20f_training_enablement.up,
+    down: migration_20260729_phase20f_training_enablement.down,
+    name: '20260729_phase20f_training_enablement',
+  },
+  {
+    up: migration_20260730_phase20g_operations_experience.up,
+    down: migration_20260730_phase20g_operations_experience.down,
+    name: '20260730_phase20g_operations_experience',
   },
 ];

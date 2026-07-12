@@ -2,12 +2,19 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { QUICK_NOTE_OPEN_EVENT } from "@/lib/executive-workspace/quick-create";
 
 /**
  * Global quick capture — available across KXD OS.
- * Keyboard: ⌘ + Shift + N (architecture only — listener registered here).
+ * Keyboard: ⌘ + Shift + N. Also opens via Quick Create.
  */
-export function QuickCaptureNote({ defaultClientId }: { defaultClientId?: number }) {
+export function QuickCaptureNote({
+  defaultClientId,
+  hideTrigger = false,
+}: {
+  defaultClientId?: number;
+  hideTrigger?: boolean;
+}) {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [summary, setSummary] = useState("");
@@ -15,6 +22,7 @@ export function QuickCaptureNote({ defaultClientId }: { defaultClientId?: number
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
 
+  const openCapture = useCallback(() => setOpen(true), []);
   const toggle = useCallback(() => setOpen((v) => !v), []);
 
   useEffect(() => {
@@ -24,9 +32,16 @@ export function QuickCaptureNote({ defaultClientId }: { defaultClientId?: number
         toggle();
       }
     }
+    function onOpen() {
+      openCapture();
+    }
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [toggle]);
+    window.addEventListener(QUICK_NOTE_OPEN_EVENT, onOpen);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener(QUICK_NOTE_OPEN_EVENT, onOpen);
+    };
+  }, [toggle, openCapture]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -59,14 +74,16 @@ export function QuickCaptureNote({ defaultClientId }: { defaultClientId?: number
 
   return (
     <>
-      <button
-        type="button"
-        className="kxd-os-btn kxd-os-btn--ghost kxd-os-btn--sm"
-        onClick={toggle}
-        data-kxd-quick-capture
-      >
-        New Note
-      </button>
+      {!hideTrigger ? (
+        <button
+          type="button"
+          className="kxd-os-btn kxd-os-btn--ghost kxd-os-btn--sm"
+          onClick={toggle}
+          data-kxd-quick-capture
+        >
+          New Note
+        </button>
+      ) : null}
 
       {open ? (
         <div

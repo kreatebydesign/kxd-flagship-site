@@ -1,123 +1,49 @@
 import type { Payload } from "payload";
-import { getPayload } from "payload";
-import config from "@payload-config";
-import { createExecutiveEvent } from "@/lib/executive-timeline/create-event";
-import type { ExecutiveTimelineSourceModule } from "@/lib/executive-timeline/types";
-import {
-  buildActivityDedupeKey,
-  categoryForEventType,
-  defaultImportanceForEventType,
-  timelineStatusForActivity,
-} from "./rules";
+import { publishActivity } from "@/lib/activity-engine/publish";
+import type { PublishActivityResult as EnginePublishResult } from "@/lib/activity-engine/types";
 import type { ClientActivityInput, PublishActivityResult } from "./types";
 
-const COLLECTION = "executive-timeline-events";
-
-function asSourceModule(module: string): ExecutiveTimelineSourceModule {
-  return module as ExecutiveTimelineSourceModule;
-}
-
-async function findExistingActivity(
-  clientId: number,
-  eventType: string,
-  sourceId: string | number,
-  payload: Payload,
-): Promise<number | null> {
-  const dedupeKey = buildActivityDedupeKey(sourceId, eventType);
-
-  const result = await payload.find({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    collection: COLLECTION as any,
-    where: {
-      and: [{ client: { equals: clientId } }, { eventType: { equals: eventType } }],
-    },
-    limit: 100,
-    depth: 0,
-    overrideAccess: true,
-  });
-
-  for (const doc of result.docs) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const row = doc as Record<string, any>;
-    const meta = row.metadata as Record<string, unknown> | undefined;
-    if (meta?.dedupeKey === dedupeKey) return row.id as number;
-    if (meta?.sourceId != null && String(meta.sourceId) === String(sourceId)) {
-      return row.id as number;
-    }
-  }
-
-  return null;
-}
-
-function buildActivityMetadata(input: ClientActivityInput, dedupeKey: string): Record<string, unknown> {
-  return {
-    activityEngine: true,
-    sourceModule: input.sourceModule,
-    sourceType: input.sourceType,
-    sourceId: input.sourceId,
-    dedupeKey,
-    author: input.author,
-    priority: input.priority,
-    relatedLinks: input.relatedLinks,
-    attachments: input.attachments,
-    ...input.metadata,
-  };
-}
-
 /**
- * Canonical publish path — writes to executive-timeline-events with dedupe by sourceId + eventType.
+ * Canonical client activity publish — delegates to the Executive Activity Engine.
+ * Kept for module-specific helpers and existing call sites.
  */
 export async function publishClientActivity(
   input: ClientActivityInput,
   payloadInstance?: Payload,
 ): Promise<PublishActivityResult> {
-  const payload = payloadInstance ?? (await getPayload({ config }));
-  const dedupeKey = buildActivityDedupeKey(input.sourceId, input.eventType);
-
-  const existingId = await findExistingActivity(
-    input.clientId,
-    input.eventType,
-    input.sourceId,
-    payload,
-  );
-
-  if (existingId) {
-    return { created: false, skipped: true, id: existingId, dedupeKey };
-  }
-
-  const category = categoryForEventType(input.eventType);
-  const importance = defaultImportanceForEventType(input.eventType, input.priority);
-  const status = timelineStatusForActivity(input.eventType, input.status);
-
-  const event = await createExecutiveEvent(
+  const result: EnginePublishResult = await publishActivity(
     {
-      client: input.clientId,
-      project: input.projectId,
-      infrastructure: input.infrastructureId,
-      request: input.requestId,
-      deliverable: input.deliverableId,
+      clientId: input.clientId,
       eventType: input.eventType,
       title: input.title,
       summary: input.summary,
       description: input.details ?? input.summary,
-      category,
-      status,
-      importance,
-      sourceModule: asSourceModule(input.sourceModule),
-      createdBy: input.author,
-      occurredAt: input.timestamp ?? new Date().toISOString(),
-      metadata: buildActivityMetadata(input, dedupeKey),
-      internalOnly: input.internalOnly ?? true,
-      pinned: input.pinned ?? false,
+      sourceModule: input.sourceModule,
+      sourceType: input.sourceType,
+      sourceId: input.sourceId,
+      author: input.author,
+      occurredAt: input.timestamp,
+      status: input.status,
+      importance: input.priority,
+      metadata: input.metadata,
+      relatedLinks: input.relatedLinks,
+      attachments: input.attachments,
+      projectId: input.projectId,
+      requestId: input.requestId,
+      infrastructureId: input.infrastructureId,
+      deliverableId: input.deliverableId,
+      internalOnly: input.internalOnly,
+      pinned: input.pinned,
+      dedupe: true,
     },
-    payload,
+    payloadInstance,
   );
 
   return {
-    created: true,
-    skipped: false,
-    id: event.id as number,
-    dedupeKey,
+    created: result.created,
+    skipped: result.skipped,
+    id: result.id,
+    dedupeKey: result.dedupeKey ?? `${String(input.sourceId)}:${input.eventType}`,
   };
 }
 

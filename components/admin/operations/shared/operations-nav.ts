@@ -34,7 +34,8 @@ export type OperationsNavId =
   | "strategy"
   | "brain"
   | "integrations"
-  | "platform";
+  | "platform"
+  | "training";
 
 export type OperationsNavItem = {
   id: OperationsNavId;
@@ -51,11 +52,11 @@ export const NAV_GROUPS: OperationsNavGroup[] = [
   {
     label: "Briefing",
     items: [
+      { id: "today", label: "Today", href: "/admin/operations/today" },
       { id: "intelligence", label: "Intelligence", href: "/admin/operations/intelligence" },
       { id: "executive", label: "Executive", href: "/admin/operations/executive" },
       { id: "founder-intelligence", label: "Founder Intelligence", href: "/admin/operations/founder-intelligence" },
       { id: "brain", label: "KXD Brain", href: "/admin/operations/brain" },
-      { id: "today", label: "Today", href: "/admin/operations/today" },
       { id: "command", label: "Operations", href: "/admin/operations/command" },
       { id: "platform", label: "Platform", href: "/admin/operations/platform" },
       { id: "integrations", label: "Integrations", href: "/admin/operations/integrations" },
@@ -110,6 +111,7 @@ export const NAV_GROUPS: OperationsNavGroup[] = [
   {
     label: "Tools",
     items: [
+      { id: "training", label: "Operations", href: "/admin/training" },
       { id: "client-import", label: "Import", href: "/admin/operations/client-import" },
       { id: "client-launch", label: "Launch", href: "/admin/operations/client-launch" },
     ],

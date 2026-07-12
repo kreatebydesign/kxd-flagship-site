@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useCallback, useMemo, useState } from "react";
-import { KxdOsLogo, KxdShell } from "@/components/os";
+import { KxdShell } from "@/components/os";
+import { ExecutiveWorkspaceShell } from "@/components/admin/executive-workspace";
 import { WorkComposerHost } from "@/components/admin/work/composer";
 import {
   formatTimeBudgetHours,
@@ -121,110 +122,111 @@ export function WorkDetailClient({
 
   return (
     <KxdShell className="kxd-os-shell--ritual">
-      <div className="kxd-os-work-detail">
-        <header className="kxd-os-work-engine__header">
-          <KxdOsLogo height={16} className="kxd-os-work-engine__brand" />
-          <nav className="kxd-os-work-engine__nav" aria-label="Work Engine">
-            <Link href={WORK_ENGINE_HOME}>Work</Link>
-            <span className="kxd-os-work-engine__nav-active">Detail</span>
-          </nav>
-          <Link href={WORK_ENGINE_HOME} className="kxd-os-work-engine__exit">
-            Back to Work Engine
-          </Link>
-        </header>
+      <ExecutiveWorkspaceShell workspaceId="work" includeWorkComposer={false}>
+        <div className="kxd-os-work-detail">
+          <header className="kxd-os-work-engine__header kxd-os-work-engine__header--secondary">
+            <nav className="kxd-os-work-engine__nav" aria-label="Work Engine">
+              <Link href={WORK_ENGINE_HOME}>Work</Link>
+              <span className="kxd-os-work-engine__nav-active">Detail</span>
+            </nav>
+            <Link href={WORK_ENGINE_HOME} className="kxd-os-work-engine__exit">
+              Back to Work Engine
+            </Link>
+          </header>
 
-        <main className="kxd-os-work-detail__main">
-          <p className="kxd-os-work-engine__eyebrow">Work</p>
-          <h1 className="kxd-os-work-detail__title">{work.title}</h1>
+          <main className="kxd-os-work-detail__main">
+            <p className="kxd-os-work-engine__eyebrow">Work</p>
+            <h1 className="kxd-os-work-detail__title">{work.title}</h1>
 
-          {work.description ? (
-            <p className="kxd-os-work-detail__description">{work.description}</p>
-          ) : (
-            <p className="kxd-os-work-detail__description kxd-os-work-detail__description--empty">
-              No description.
-            </p>
-          )}
-
-          <div className="kxd-os-work-detail__actions">
-            <button
-              type="button"
-              className="kxd-os-work-detail__edit"
-              onClick={() => openWorkComposerForEdit(work)}
-            >
-              Edit
-            </button>
-            {actions.map((action) => (
-              <button
-                key={action.id}
-                type="button"
-                className="kxd-os-work-detail__action"
-                disabled={busyAction != null}
-                onClick={() => void runTransition(action.status, action.id)}
-              >
-                {busyAction === action.id ? "…" : action.label}
-              </button>
-            ))}
-          </div>
-
-          {error ? <p className="kxd-os-work-composer__error">{error}</p> : null}
-
-          <section className="kxd-os-work-detail__meta" aria-label="Work details">
-            <MetaRow
-              label="Client"
-              value={
-                work.clientId != null && work.clientSuccessHref ? (
-                  <Link href={work.clientSuccessHref} className="kxd-os-link-quiet">
-                    {work.clientName}
-                  </Link>
-                ) : (
-                  work.clientName
-                )
-              }
-            />
-            <MetaRow label="Project" value={work.internalProject} />
-            <MetaRow label="Status" value={WORK_STATUS_LABELS[work.status]} />
-            <MetaRow label="Priority" value={WORK_PRIORITY_LABELS[work.priority]} />
-            <MetaRow label="Due date" value={due} />
-            <MetaRow label="Start date" value={start} />
-            <MetaRow label="Assigned" value={assignee} />
-            <MetaRow label="Created by" value={work.createdBy} />
-            <MetaRow label="Time budget" value={budget} />
-            <MetaRow
-              label="Tags"
-              value={work.tags.length ? work.tags.join(", ") : null}
-            />
-            <MetaRow label="Created" value={formatDateTime(work.createdAt)} />
-            <MetaRow label="Updated" value={formatDateTime(work.updatedAt)} />
-            <MetaRow label="Completed" value={formatDateTime(work.completedAt)} />
-            <MetaRow label="State age" value={age} />
-          </section>
-
-          <section className="kxd-os-work-detail__history" aria-label="Activity history">
-            <h2 className="kxd-os-work-engine__section-title">Activity</h2>
-            {history.length === 0 ? (
-              <p className="kxd-os-meta">No internal activity recorded yet.</p>
+            {work.description ? (
+              <p className="kxd-os-work-detail__description">{work.description}</p>
             ) : (
-              <ul className="kxd-os-work-detail__history-list">
-                {history.map((entry, i) => (
-                  <li key={`${entry.at}-${entry.action}-${i}`}>
-                    <p className="kxd-os-body">{entry.action}</p>
-                    <p className="kxd-os-meta">
-                      {formatDateTime(entry.at)}
-                      {entry.actor ? ` · ${entry.actor}` : ""}
-                      {entry.detail ? ` · ${entry.detail}` : ""}
-                    </p>
-                  </li>
-                ))}
-              </ul>
+              <p className="kxd-os-work-detail__description kxd-os-work-detail__description--empty">
+                No description.
+              </p>
             )}
-          </section>
-        </main>
-      </div>
 
-      <WorkComposerHost
-        currentUser={currentUser}
-        onUpdated={(next) => setWork(next)}
-      />
+            <div className="kxd-os-work-detail__actions">
+              <button
+                type="button"
+                className="kxd-os-work-detail__edit"
+                onClick={() => openWorkComposerForEdit(work)}
+              >
+                Edit
+              </button>
+              {actions.map((action) => (
+                <button
+                  key={action.id}
+                  type="button"
+                  className="kxd-os-work-detail__action"
+                  disabled={busyAction != null}
+                  onClick={() => void runTransition(action.status, action.id)}
+                >
+                  {busyAction === action.id ? "…" : action.label}
+                </button>
+              ))}
+            </div>
+
+            {error ? <p className="kxd-os-work-composer__error">{error}</p> : null}
+
+            <section className="kxd-os-work-detail__meta" aria-label="Work details">
+              <MetaRow
+                label="Client"
+                value={
+                  work.clientId != null && work.clientSuccessHref ? (
+                    <Link href={work.clientSuccessHref} className="kxd-os-link-quiet">
+                      {work.clientName}
+                    </Link>
+                  ) : (
+                    work.clientName
+                  )
+                }
+              />
+              <MetaRow label="Project" value={work.internalProject} />
+              <MetaRow label="Status" value={WORK_STATUS_LABELS[work.status]} />
+              <MetaRow label="Priority" value={WORK_PRIORITY_LABELS[work.priority]} />
+              <MetaRow label="Due date" value={due} />
+              <MetaRow label="Start date" value={start} />
+              <MetaRow label="Assigned" value={assignee} />
+              <MetaRow label="Created by" value={work.createdBy} />
+              <MetaRow label="Time budget" value={budget} />
+              <MetaRow
+                label="Tags"
+                value={work.tags.length ? work.tags.join(", ") : null}
+              />
+              <MetaRow label="Created" value={formatDateTime(work.createdAt)} />
+              <MetaRow label="Updated" value={formatDateTime(work.updatedAt)} />
+              <MetaRow label="Completed" value={formatDateTime(work.completedAt)} />
+              <MetaRow label="State age" value={age} />
+            </section>
+
+            <section className="kxd-os-work-detail__history" aria-label="Activity history">
+              <h2 className="kxd-os-work-engine__section-title">Activity</h2>
+              {history.length === 0 ? (
+                <p className="kxd-os-meta">No internal activity recorded yet.</p>
+              ) : (
+                <ul className="kxd-os-work-detail__history-list">
+                  {history.map((entry, i) => (
+                    <li key={`${entry.at}-${entry.action}-${i}`}>
+                      <p className="kxd-os-body">{entry.action}</p>
+                      <p className="kxd-os-meta">
+                        {formatDateTime(entry.at)}
+                        {entry.actor ? ` · ${entry.actor}` : ""}
+                        {entry.detail ? ` · ${entry.detail}` : ""}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          </main>
+        </div>
+
+        <WorkComposerHost
+          currentUser={currentUser}
+          onUpdated={(next) => setWork(next)}
+        />
+      </ExecutiveWorkspaceShell>
     </KxdShell>
   );
 }

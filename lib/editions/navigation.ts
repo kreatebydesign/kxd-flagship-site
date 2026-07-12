@@ -43,6 +43,7 @@ export const OPERATIONS_NAV_MODULE_MAP: Record<OperationsNavId, KxdModuleId> = {
   "sales-forecast": "sales",
   "client-import": "portfolio",
   "client-launch": "portfolio",
+  training: "operations",
   genesis: "onboarding",
   "launch-qa": "work",
 };

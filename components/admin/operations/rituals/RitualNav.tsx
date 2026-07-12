@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { RitualMode } from "@/lib/rituals";
 
 const RITUALS: Array<{ mode: RitualMode; label: string; href: string }> = [
-  { mode: "morning", label: "Brief", href: "/admin/operations/brief" },
+  { mode: "morning", label: "Today", href: "/admin/operations/today" },
   { mode: "focus", label: "Focus", href: "/admin/operations/focus" },
   { mode: "review", label: "Review", href: "/admin/operations/review" },
 ];

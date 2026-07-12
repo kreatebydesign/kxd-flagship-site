@@ -1,7 +1,10 @@
-/** Payload-safe — used by CLI hooks and migrate scripts (no server-only). */
+/**
+ * Canonical Work lifecycle publisher — routes through the Executive Activity Engine.
+ * Payload-safe — used by CLI hooks and migrate scripts (no server-only).
+ */
 
 import type { Payload } from "payload";
-import { createExecutiveEvent } from "@/lib/executive-timeline/create-event";
+import { publishActivity } from "@/lib/activity-engine/publish";
 import type { WorkSource, WorkStatus } from "../types";
 import { WORK_SOURCE_LABELS, WORK_STATUS_LABELS } from "../constants";
 import type { PublishWorkEventInput, WorkLifecycleEvent } from "./types";
@@ -33,6 +36,8 @@ function defaultEventTitle(input: PublishWorkEventInput): string {
       return `In review · ${input.title}`;
     case "work.archived":
       return `Work archived · ${input.title}`;
+    case "work.updated":
+      return `Work updated · ${input.title}`;
     default:
       return `Work · ${input.title}`;
   }
@@ -52,7 +57,7 @@ function defaultEventSummary(input: PublishWorkEventInput): string {
 }
 
 /**
- * Canonical lifecycle publisher — all Work timeline writes flow through here.
+ * Canonical lifecycle publisher — all Work activity writes flow through the Activity Engine.
  */
 export async function publishWorkEvent(
   input: PublishWorkEventInput,
@@ -60,18 +65,33 @@ export async function publishWorkEvent(
 ): Promise<void> {
   if (!input.timelineEnabled) return;
 
-  await createExecutiveEvent(
+  await publishActivity(
     {
-      client: input.clientId,
+      clientId: input.clientId,
+      workId: input.workId,
       eventType: input.event,
       title: defaultEventTitle(input),
       summary: defaultEventSummary(input),
       category: timelineCategoryForSource(input.source),
-      importance: input.event === "work.blocked" ? "high" : "normal",
+      importance:
+        input.event === "work.blocked"
+          ? "high"
+          : input.event === "work.updated"
+            ? "low"
+            : "normal",
       sourceModule: "Work",
-      createdBy: input.createdBy ?? undefined,
+      sourceType: "work",
+      sourceId: `${input.workId}:${input.event}:${input.status}`,
+      author: input.createdBy ?? undefined,
       occurredAt: new Date().toISOString(),
       internalOnly: !input.clientVisible,
+      dedupe: false,
+      relatedLinks: [
+        {
+          label: "Open work",
+          href: `/admin/work/${input.workId}`,
+        },
+      ],
       metadata: {
         workId: input.workId,
         workNumber: input.workNumber ?? null,

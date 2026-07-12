@@ -42,6 +42,10 @@ import { ExecutiveClientProfiles } from "./payload/collections/ExecutiveClientPr
 import { ExecutiveNotes } from "./payload/collections/ExecutiveNotes.ts";
 import { BrainMemory } from "./payload/collections/BrainMemory.ts";
 import { ExecutiveTimelineEvents } from "./payload/collections/ExecutiveTimelineEvents.ts";
+import { ExecutiveActivityReads } from "./payload/collections/ExecutiveActivityReads.ts";
+import { TrainingLearningPaths } from "./payload/collections/TrainingLearningPaths.ts";
+import { TrainingLessons } from "./payload/collections/TrainingLessons.ts";
+import { TrainingLearnerProgress } from "./payload/collections/TrainingLearnerProgress.ts";
 import { InfrastructureCosts } from "./payload/collections/InfrastructureCosts.ts";
 import { InfrastructureEvents } from "./payload/collections/InfrastructureEvents.ts";
 import { CreativeAssets } from "./payload/collections/CreativeAssets.ts";
@@ -166,6 +170,10 @@ export default buildConfig({
     ClientExperienceProfiles,
     ClientTimelineEvents,
     ExecutiveTimelineEvents,
+    ExecutiveActivityReads,
+    TrainingLearningPaths,
+    TrainingLessons,
+    TrainingLearnerProgress,
     AutomationEvents,
     AutomationNotifications,
     Playbooks,
