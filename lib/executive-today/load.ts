@@ -1,8 +1,9 @@
 import "server-only";
 
 /**
- * Phase 22A/23A/23B — Executive Today presentation loader.
- * Renders entirely from Executive Context — no independent composition.
+ * Phase 22A/23A/23B/27B — Executive Today presentation loader.
+ * Composes Executive Context + calendar-aware brief.
+ * Does not publish Activity. Does not mutate calendar.
  */
 
 import { getExecutiveContext } from "@/lib/executive-context";
@@ -10,12 +11,26 @@ import {
   EXECUTIVE_SIGNALS_EMPTY_MESSAGE,
   mapSignalToListItem,
 } from "@/lib/executive-signals";
+import { buildExecutiveTodayBrief } from "./brief/load-brief";
 import {
   mapWorkToFocusItem,
   type ExecutiveTodayData,
   type ExecutiveTodayPrimary,
   type ExecutiveTodayUpcomingItem,
 } from "./types";
+
+function mapPrimaryFromBrief(
+  brief: Awaited<ReturnType<typeof buildExecutiveTodayBrief>>,
+): ExecutiveTodayPrimary {
+  return {
+    title: brief.recommendation.action,
+    detail: brief.recommendation.reason,
+    href: brief.recommendation.href,
+    hrefLabel: brief.recommendation.hrefLabel,
+    reason: brief.recommendation.timeSensitivity,
+    from: "calendar-brief",
+  };
+}
 
 function mapPrimary(ctx: Awaited<ReturnType<typeof getExecutiveContext>>): ExecutiveTodayPrimary {
   const { morning, recommendedPriority, quietHoursReady } = ctx;
@@ -68,11 +83,26 @@ function mapPrimary(ctx: Awaited<ReturnType<typeof getExecutiveContext>>): Execu
   };
 }
 
-function mapUpcoming(ctx: Awaited<ReturnType<typeof getExecutiveContext>>): ExecutiveTodayUpcomingItem[] {
+function mapUpcoming(
+  ctx: Awaited<ReturnType<typeof getExecutiveContext>>,
+  brief: Awaited<ReturnType<typeof buildExecutiveTodayBrief>> | null,
+): ExecutiveTodayUpcomingItem[] {
   const items: ExecutiveTodayUpcomingItem[] = [];
-  const reviewCount = ctx.reviewsWaiting.length;
 
-  if (reviewCount > 0) {
+  if (brief) {
+    for (const item of brief.dayFlow.filter((i) => i.state === "next" || i.state === "upcoming").slice(0, 2)) {
+      items.push({
+        id: item.id,
+        label: item.title,
+        detail: item.detail ?? item.kind.replace("_", " "),
+        href: item.workHref ?? item.calendarHtmlLink,
+        source: item.kind === "linked_work" || item.kind === "recovery" ? "work" : "calendar",
+      });
+    }
+  }
+
+  const reviewCount = ctx.reviewsWaiting.length;
+  if (reviewCount > 0 && items.length < 3) {
     items.push({
       id: "review-inbox",
       label: "Website Review",
@@ -82,29 +112,11 @@ function mapUpcoming(ctx: Awaited<ReturnType<typeof getExecutiveContext>>): Exec
     });
   }
 
-  if (ctx.waiting.blockedItems.length > 0) {
-    items.push({
-      id: "work-blocked",
-      label: "Work Engine",
-      detail: `${ctx.waiting.blockedItems.length} blocked`,
-      href: "/admin/work",
-      source: "work",
-    });
-  } else if (ctx.waiting.waitingOnKxd.length > 0) {
-    items.push({
-      id: "work-waiting-kxd",
-      label: "Work Engine",
-      detail: `${ctx.waiting.waitingOnKxd.length} waiting on KXD`,
-      href: "/admin/work",
-      source: "work",
-    });
-  }
-
   if (items.length === 0) {
     items.push({
-      id: "calendar-reserved",
-      label: "Calendar",
-      detail: "Schedule awareness arrives when Calendar connects.",
+      id: "calendar-quiet",
+      label: "Day flow",
+      detail: brief?.freshness.label ?? "No timed commitments on the board.",
       href: null,
       source: "calendar",
     });
@@ -114,20 +126,61 @@ function mapUpcoming(ctx: Awaited<ReturnType<typeof getExecutiveContext>>): Exec
 }
 
 /**
- * Executive Today — presentation adapter over getExecutiveContext().
+ * Executive Today — presentation adapter over Context + calendar brief.
  */
 export async function loadExecutiveToday(input?: {
   displayName?: string | null;
   email?: string | null;
 }): Promise<ExecutiveTodayData> {
-  const ctx = await getExecutiveContext(input);
+  const [ctx, brief] = await Promise.all([
+    getExecutiveContext(input),
+    buildExecutiveTodayBrief({
+      reviewWaitingCount: undefined,
+    }).catch(() => null),
+  ]);
+
+  // Prefer calendar-aware recommendation when brief has material schedule evidence
+  // or elevated orientation; otherwise keep Morning Brief priority.
+  const preferBrief =
+    brief != null &&
+    (brief.evidence.observedEventCount > 0 ||
+      brief.evidence.linkedCount > 0 ||
+      brief.evidence.recoveryCount > 0 ||
+      brief.orientation === "compressed" ||
+      brief.orientation === "overloaded" ||
+      brief.orientation === "commitment_at_risk" ||
+      brief.orientation === "recovery_required" ||
+      brief.orientation === "fragmented");
+
+  const primary = preferBrief && brief
+    ? mapPrimaryFromBrief(brief)
+    : mapPrimary(ctx);
+
+  // Re-run brief with review count from context when available
+  const briefWithReviews =
+    brief && ctx.reviewsWaiting.length > 0
+      ? {
+          ...brief,
+          attention: [
+            ...brief.attention.filter((a) => a.id !== "reviews"),
+            {
+              id: "reviews",
+              title: "Website reviews waiting",
+              evidence: `${ctx.reviewsWaiting.length} review${ctx.reviewsWaiting.length === 1 ? "" : "s"} need judgment.`,
+              href: "/admin/operations/review-inbox",
+              hrefLabel: "Open Review Inbox",
+              severity: "watch" as const,
+            },
+          ].slice(0, 6),
+        }
+      : brief;
 
   return {
     greeting: ctx.summary.greeting,
     welcome: ctx.summary.welcome,
     dateDisplay: ctx.summary.dateDisplay,
     timeDisplay: ctx.summary.timeDisplay,
-    primary: mapPrimary(ctx),
+    primary,
     focus: ctx.todayWork.map(mapWorkToFocusItem),
     activity: ctx.executiveSignals.map((signal) => {
       const mapped = mapSignalToListItem(signal);
@@ -142,12 +195,15 @@ export async function loadExecutiveToday(input?: {
     }),
     activityEmptyMessage: ctx.signalsEmptyMessage || EXECUTIVE_SIGNALS_EMPTY_MESSAGE,
     intelligence: {
-      postureLabel: ctx.momentum.postureLabel,
-      headline: ctx.summary.headline,
-      summary: ctx.summary.contextSummary,
+      postureLabel: briefWithReviews
+        ? briefWithReviews.orientation.replace(/_/g, " ")
+        : ctx.momentum.postureLabel,
+      headline: briefWithReviews?.orientationSummary ?? ctx.summary.headline,
+      summary: briefWithReviews?.current.summary ?? ctx.summary.contextSummary,
       tone: ctx.momentum.tone,
     },
-    upcoming: mapUpcoming(ctx),
+    upcoming: mapUpcoming(ctx, briefWithReviews),
+    brief: briefWithReviews,
     morning: ctx.morning,
     generatedAt: ctx.generatedAt,
   };

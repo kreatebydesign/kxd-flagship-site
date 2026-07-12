@@ -93,7 +93,7 @@ export interface ExecutiveTrainingStatus {
 
 export interface ExecutiveExtensionSlot {
   id: "calendar" | "finance" | "business-development" | "crm" | "notifications" | "scheduling";
-  status: "reserved";
+  status: "reserved" | "active";
   note: string;
 }
 

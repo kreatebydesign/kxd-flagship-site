@@ -85,6 +85,7 @@ export type {
 
 export type {
   CalendarAvailabilityProvider,
+  CalendarDayObserver,
   CalendarEventReader,
   CalendarEventWriter,
   CalendarMetadataProvider,
@@ -92,6 +93,7 @@ export type {
 
 export {
   getCalendarAvailabilityProvider,
+  getCalendarDayObserver,
   getCalendarEventReader,
   getCalendarEventWriter,
   getCalendarMetadataProvider,

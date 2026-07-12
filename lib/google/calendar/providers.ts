@@ -12,7 +12,7 @@ import {
   resolveTargetCalendarId,
   validateCalendarOwnership,
 } from "./calendars";
-import { createCalendarEvent, getCalendarEvent } from "./events";
+import { createCalendarEvent, getCalendarEvent, listCalendarEventsInRange } from "./events";
 import { isGoogleCalendarError } from "./errors";
 import { resolveGoogleCalendarTimezone } from "./timezone";
 import type { CalendarAvailabilitySnapshot } from "./types";
@@ -23,6 +23,7 @@ import {
 } from "./working-hours";
 import type {
   CalendarAvailabilityProvider,
+  CalendarDayObserver,
   CalendarEventReader,
   CalendarEventWriter,
   CalendarMetadataProvider,
@@ -131,6 +132,17 @@ export const googleCalendarEventReader: CalendarEventReader = {
     return getCalendarEvent({
       calendarId,
       eventId: input.eventId,
+    });
+  },
+};
+
+/** Phase 27B — day observation. Never creates, updates, deletes, or syncs links. */
+export const googleCalendarDayObserver: CalendarDayObserver = {
+  async listEventsInRange(input) {
+    const calendarId = await resolveTargetCalendarId(input.calendarId);
+    return listCalendarEventsInRange({
+      ...input,
+      calendarId,
     });
   },
 };

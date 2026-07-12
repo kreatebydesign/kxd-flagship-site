@@ -203,6 +203,36 @@ export interface GetCalendarEventInput {
 }
 
 /**
+ * Phase 27B — Read-only day/range observation (no create/update/delete).
+ */
+export interface ListCalendarEventsInput {
+  calendarId?: string | null;
+  timeMin: string;
+  timeMax: string;
+  /** Max events to return (Google page size). */
+  maxResults?: number;
+}
+
+/**
+ * Observed event for day composition — privacy-aware, never a raw Google payload.
+ */
+export interface ObservedCalendarEvent extends CalendarEventSnapshot {
+  allDay: boolean;
+  /** True when Google marks the event private/confidential or summary is withheld. */
+  isPrivate: boolean;
+  visibility: string | null;
+  transparency: string | null;
+}
+
+export interface ListCalendarEventsResult {
+  outcome: "ok" | "failure";
+  calendarId: string | null;
+  events: ObservedCalendarEvent[];
+  observedAt: string;
+  failure: CalendarEventReadFailure | null;
+}
+
+/**
  * Deterministic availability snapshot for Scheduling Domain consumption.
  */
 export interface CalendarAvailabilitySnapshot {

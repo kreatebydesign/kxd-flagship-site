@@ -1,13 +1,13 @@
 /**
- * Phase 22A — Executive Today
+ * Phase 22A / 27B — Executive Today
  * Permanent home screen composition types.
- * No business logic — shapes for composed existing services.
  */
 
 import type { ExecutiveActivityItem } from "@/lib/activity-engine";
 import type { IntelligentRecommendation } from "@/lib/intelligence/briefings/types";
 import type { MorningBriefPageData } from "@/lib/rituals/morning-brief";
 import type { WorkListItem } from "@/lib/work/types";
+import type { ExecutiveTodayBrief } from "./brief/types";
 
 export interface ExecutiveTodayFocusItem {
   id: string;
@@ -31,7 +31,6 @@ export interface ExecutiveTodayUpcomingItem {
   label: string;
   detail: string;
   href: string | null;
-  /** Reserved for calendar when wired. */
   source: "review" | "work" | "calendar";
 }
 
@@ -41,7 +40,7 @@ export interface ExecutiveTodayPrimary {
   href: string | null;
   hrefLabel: string | null;
   reason: string;
-  from: "first-action" | "recommendation" | "calm";
+  from: "first-action" | "recommendation" | "calm" | "calendar-brief";
 }
 
 export interface ExecutiveTodayIntelligenceBlock {
@@ -63,6 +62,8 @@ export interface ExecutiveTodayData {
   activityEmptyMessage: string;
   intelligence: ExecutiveTodayIntelligenceBlock;
   upcoming: ExecutiveTodayUpcomingItem[];
+  /** Phase 27B — calendar-aware operating brief. */
+  brief: ExecutiveTodayBrief | null;
   /** Morning Brief payload retained for deep sections / future expansion. */
   morning: MorningBriefPageData;
   generatedAt: string;

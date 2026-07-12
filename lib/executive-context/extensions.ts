@@ -7,8 +7,8 @@ import type { ExecutiveExtensionSlot } from "./types";
 export const EXECUTIVE_CONTEXT_EXTENSIONS: ExecutiveExtensionSlot[] = [
   {
     id: "calendar",
-    status: "reserved",
-    note: "Phase 25C–25D Google Calendar read + availability engine exist. Context composition remains inactive until a later phase.",
+    status: "active",
+    note: "Phase 27B — day observation feeds Executive Today brief locally. Not promoted into global Signal scoring yet.",
   },
   {
     id: "finance",
@@ -32,7 +32,7 @@ export const EXECUTIVE_CONTEXT_EXTENSIONS: ExecutiveExtensionSlot[] = [
   },
   {
     id: "scheduling",
-    status: "reserved",
-    note: "Phase 25D availability engine exists (lib/scheduling/availability). Context composition remains inactive until a later phase.",
+    status: "active",
+    note: "Phase 27B — WorkScheduleLinks correlate into Executive Today day flow and recovery attention.",
   },
 ];

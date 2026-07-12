@@ -14,6 +14,9 @@ import type {
   FreeBusyQueryInput,
   FreeBusyResult,
   GetCalendarEventInput,
+  ListCalendarEventsInput,
+  ListCalendarEventsResult,
+  ObservedCalendarEvent,
   WorkingHoursWindow,
 } from "@/lib/google/calendar/types";
 
@@ -64,6 +67,16 @@ export interface CalendarEventReader {
   getEvent(input: GetCalendarEventInput): Promise<CalendarEventReadResult>;
 }
 
+/**
+ * Phase 27B — Current-day / range observation (read-only).
+ * Observing the day is distinct from syncing a linked schedule record.
+ */
+export interface CalendarDayObserver {
+  listEventsInRange(
+    input: ListCalendarEventsInput,
+  ): Promise<ListCalendarEventsResult>;
+}
+
 export type {
   BusyBlock,
   CalendarAvailabilitySnapshot,
@@ -71,5 +84,8 @@ export type {
   CreateCalendarEventInput,
   CreatedCalendarEvent,
   GetCalendarEventInput,
+  ListCalendarEventsInput,
+  ListCalendarEventsResult,
+  ObservedCalendarEvent,
   WorkingHoursWindow,
 };

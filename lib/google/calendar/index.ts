@@ -61,7 +61,7 @@ export {
   validateCalendarOwnership,
 } from "./calendars";
 
-export { createCalendarEvent } from "./events";
+export { createCalendarEvent, getCalendarEvent, listCalendarEventsInRange } from "./events";
 
 export { queryGoogleCalendarFreeBusy } from "./availability";
 export { resolveGoogleCalendarTimezone } from "./timezone";
@@ -72,6 +72,8 @@ export {
 
 export {
   googleCalendarAvailabilityProvider,
+  googleCalendarDayObserver,
+  googleCalendarEventReader,
   googleCalendarEventWriter,
   googleCalendarMetadataProvider,
 } from "./providers";

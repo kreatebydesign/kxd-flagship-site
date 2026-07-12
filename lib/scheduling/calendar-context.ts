@@ -9,6 +9,7 @@ import "server-only";
 
 import {
   googleCalendarAvailabilityProvider,
+  googleCalendarDayObserver,
   googleCalendarEventReader,
   googleCalendarEventWriter,
   googleCalendarMetadataProvider,
@@ -17,6 +18,7 @@ import { getGoogleCalendarConnectionStatus } from "@/lib/google/calendar/validat
 import type { CalendarAvailabilitySnapshot } from "@/lib/google/calendar/types";
 import type {
   CalendarAvailabilityProvider,
+  CalendarDayObserver,
   CalendarEventReader,
   CalendarEventWriter,
   CalendarMetadataProvider,
@@ -24,6 +26,7 @@ import type {
 
 export type {
   CalendarAvailabilityProvider,
+  CalendarDayObserver,
   CalendarEventReader,
   CalendarEventWriter,
   CalendarMetadataProvider,
@@ -44,6 +47,10 @@ export function getCalendarEventWriter(): CalendarEventWriter {
 
 export function getCalendarEventReader(): CalendarEventReader {
   return googleCalendarEventReader;
+}
+
+export function getCalendarDayObserver(): CalendarDayObserver {
+  return googleCalendarDayObserver;
 }
 
 export interface SchedulingCalendarContext {

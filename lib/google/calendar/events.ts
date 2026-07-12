@@ -18,6 +18,9 @@ import type {
   CreateCalendarEventInput,
   CreatedCalendarEvent,
   GetCalendarEventInput,
+  ListCalendarEventsInput,
+  ListCalendarEventsResult,
+  ObservedCalendarEvent,
 } from "./types";
 import { assertCalendarId, assertIsoRange } from "./validation";
 
@@ -31,9 +34,16 @@ interface GoogleEventResource {
   summary?: string;
   description?: string;
   location?: string;
+  visibility?: string;
+  transparency?: string;
   start?: { dateTime?: string; date?: string; timeZone?: string };
   end?: { dateTime?: string; date?: string; timeZone?: string };
   organizer?: { email?: string; displayName?: string };
+}
+
+interface GoogleEventsListResponse {
+  items?: GoogleEventResource[];
+  nextPageToken?: string;
 }
 
 function encodeCalendarPathId(calendarId: string): string {
@@ -255,6 +265,96 @@ export async function getCalendarEvent(
     return { outcome: "found", event, failure: null };
   } catch (err) {
     return failureFromError(err);
+  }
+}
+
+function toObservedEvent(
+  calendarId: string,
+  raw: GoogleEventResource,
+): ObservedCalendarEvent | null {
+  const base = normalizeGoogleEventResource(calendarId, raw);
+  if (!base.eventId) return null;
+
+  const visibility =
+    typeof raw.visibility === "string" && raw.visibility.trim()
+      ? raw.visibility.trim().toLowerCase()
+      : null;
+  const transparency =
+    typeof raw.transparency === "string" && raw.transparency.trim()
+      ? raw.transparency.trim().toLowerCase()
+      : null;
+  const allDay = Boolean(raw.start?.date && !raw.start?.dateTime);
+  const isPrivate =
+    visibility === "private" ||
+    visibility === "confidential" ||
+    (!base.title && visibility !== "public");
+
+  return {
+    ...base,
+    title: isPrivate ? null : base.title,
+    description: null,
+    location: isPrivate ? null : base.location,
+    allDay,
+    isPrivate,
+    visibility,
+    transparency,
+  };
+}
+
+/**
+ * Phase 27B — List events in a time window. Read-only observation.
+ * Does not create, update, delete, or sync linked schedule records.
+ */
+export async function listCalendarEventsInRange(
+  input: ListCalendarEventsInput,
+): Promise<ListCalendarEventsResult> {
+  const observedAt = new Date().toISOString();
+  try {
+    const calendarId = assertCalendarId(
+      typeof input.calendarId === "string" && input.calendarId.trim()
+        ? input.calendarId
+        : "primary",
+    );
+    assertIsoRange(input.timeMin, input.timeMax);
+    const maxResults = Math.min(
+      Math.max(Number(input.maxResults) || 50, 1),
+      100,
+    );
+
+    const params = new URLSearchParams({
+      timeMin: input.timeMin,
+      timeMax: input.timeMax,
+      singleEvents: "true",
+      orderBy: "startTime",
+      maxResults: String(maxResults),
+    });
+
+    const raw = await calendarApiRequest<GoogleEventsListResponse>(
+      `/calendars/${encodeCalendarPathId(calendarId)}/events?${params.toString()}`,
+      { method: "GET", timeoutMs: 18_000 },
+    );
+
+    const events = (raw.items ?? [])
+      .map((item) => toObservedEvent(calendarId, item))
+      .filter((e): e is ObservedCalendarEvent => e != null)
+      .filter((e) => !e.cancelled);
+
+    return {
+      outcome: "ok",
+      calendarId,
+      events,
+      observedAt,
+      failure: null,
+    };
+  } catch (err) {
+    const failed = failureFromError(err);
+    return {
+      outcome: "failure",
+      calendarId: null,
+      events: [],
+      observedAt,
+      failure: failed.failure,
+    };
   }
 }
 
