@@ -104,6 +104,62 @@ export function humanScheduleLinkStatus(status: ScheduleLinkStatus): string {
   }
 }
 
+/** Phase 27A — calm sync health labels (not lifecycle status). */
+export function humanSyncHealth(input: {
+  syncStatus: string;
+  recoveryState?: string | null;
+  externalChangeClass?: string | null;
+}): string {
+  if (input.recoveryState === "cancelled_remote") {
+    return "Cancelled in Google Calendar";
+  }
+  if (input.recoveryState === "missing_remote") {
+    return "Missing in Google Calendar";
+  }
+  if (input.recoveryState === "review_required") {
+    if (input.externalChangeClass === "schedule_impacting") {
+      return "External schedule change";
+    }
+    if (input.externalChangeClass === "descriptive") {
+      return "External descriptive change";
+    }
+    return "Review recommended";
+  }
+  if (input.recoveryState === "restored") {
+    return "Restored";
+  }
+  switch (input.syncStatus) {
+    case "synced":
+      return "Synchronized";
+    case "stale":
+      return "External change detected";
+    case "deleted_remotely":
+      return "Not confirmed in Google Calendar";
+    case "error":
+      return "Synchronization failed";
+    case "pending_write":
+      return "Pending calendar write";
+    default:
+      return "Not synchronized";
+  }
+}
+
+export function calendarRecoveryGuidance(input: {
+  recoveryState?: string | null;
+  syncStatus?: string | null;
+}): string | null {
+  if (input.recoveryState === "cancelled_remote") {
+    return "The Work item still exists. The Google Calendar event was cancelled externally. KXD OS did not recreate it. You may retry synchronization; later phases will support explicit rescheduling.";
+  }
+  if (input.recoveryState === "missing_remote") {
+    return "The Work item still exists. The Google Calendar event could not be confirmed. KXD OS did not recreate it. You may retry synchronization; later phases will support explicit replacement.";
+  }
+  if (input.syncStatus === "error") {
+    return "Synchronization could not reach Google Calendar. Stored event linkage was preserved. Retry when the connection is available.";
+  }
+  return null;
+}
+
 /** Occupancy-safe proposal card for the workspace list. */
 export interface SchedulingProposalCard {
   link: WorkScheduleLinkRecord;

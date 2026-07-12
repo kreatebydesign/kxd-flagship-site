@@ -1,9 +1,9 @@
 /**
- * Phase 25B / 26C — Scheduling audit adapter.
+ * Phase 25B / 26C / 27A — Scheduling audit adapter.
  * Uses Work activityHistory always; Activity Engine when client-linked.
  *
- * Secondary activity failures must never roll back calendar writes or
- * primary scheduling mutations.
+ * Secondary activity failures must never roll back calendar writes,
+ * synchronization, or primary scheduling mutations.
  */
 
 import "server-only";
@@ -24,6 +24,12 @@ const ACTION_LABELS: Record<SchedulingAuditAction, string> = {
   calendar_created: "schedule.calendar-created",
   calendar_create_failed: "schedule.calendar-create-failed",
   calendar_linked: "schedule.calendar-linked",
+  calendar_sync_completed: "schedule.calendar-sync-completed",
+  calendar_external_change: "schedule.calendar-external-change",
+  calendar_event_cancelled: "schedule.calendar-event-cancelled",
+  calendar_event_missing: "schedule.calendar-event-missing",
+  calendar_sync_failed: "schedule.calendar-sync-failed",
+  calendar_recovery_restored: "schedule.calendar-recovery-restored",
   rejected: "schedule.rejected",
   canceled: "schedule.canceled",
   completed: "schedule.completed",
@@ -44,6 +50,12 @@ const ACTIVITY_EVENT_TYPES: Partial<Record<SchedulingAuditAction, string>> = {
   calendar_created: "work.schedule-calendar-created",
   calendar_create_failed: "work.schedule-calendar-create-failed",
   calendar_linked: "work.schedule-calendar-linked",
+  calendar_sync_completed: "work.schedule-calendar-sync-completed",
+  calendar_external_change: "work.schedule-calendar-external-change",
+  calendar_event_cancelled: "work.schedule-calendar-event-cancelled",
+  calendar_event_missing: "work.schedule-calendar-event-missing",
+  calendar_sync_failed: "work.schedule-calendar-sync-failed",
+  calendar_recovery_restored: "work.schedule-calendar-recovery-restored",
   rejected: "work.schedule-rejected",
   canceled: "work.schedule-canceled",
   completed: "work.schedule-completed",
@@ -148,6 +160,18 @@ function detailTitle(action: SchedulingAuditAction, detail: string): string {
       return "Calendar write failed";
     case "calendar_linked":
       return "Schedule linked to Google Calendar";
+    case "calendar_sync_completed":
+      return "Calendar synchronization completed";
+    case "calendar_external_change":
+      return "External calendar change detected";
+    case "calendar_event_cancelled":
+      return "Calendar event cancelled";
+    case "calendar_event_missing":
+      return "Calendar event missing";
+    case "calendar_sync_failed":
+      return "Calendar synchronization failed";
+    case "calendar_recovery_restored":
+      return "Calendar recovery restored";
     case "rejected":
       return "Schedule proposal rejected";
     case "canceled":
@@ -171,13 +195,20 @@ function importanceFor(
     case "policy_blocked":
     case "integrity_repair":
     case "calendar_create_failed":
+    case "calendar_event_cancelled":
+    case "calendar_event_missing":
+    case "calendar_sync_failed":
       return "high";
     case "approved":
     case "pending_calendar_write":
     case "calendar_created":
     case "calendar_linked":
+    case "calendar_external_change":
+    case "calendar_recovery_restored":
     case "canceled":
       return "normal";
+    case "calendar_sync_completed":
+      return "low";
     default:
       return "normal";
   }

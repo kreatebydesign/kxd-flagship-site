@@ -60,6 +60,7 @@ import * as migration_20260802_phase26b1_active_proposal_integrity from './20260
 import * as migration_20260803_phase26b1_active_unique_index from './20260803_phase26b1_active_unique_index';
 import * as migration_20260804_phase26c_calendar_write_fields from './20260804_phase26c_calendar_write_fields';
 import * as migration_20260805_phase26c1_timeline_source_module_work from './20260805_phase26c1_timeline_source_module_work';
+import * as migration_20260806_phase27a_calendar_sync_fields from './20260806_phase27a_calendar_sync_fields';
 
 export const migrations = [
   {
@@ -371,5 +372,10 @@ export const migrations = [
     up: migration_20260805_phase26c1_timeline_source_module_work.up,
     down: migration_20260805_phase26c1_timeline_source_module_work.down,
     name: '20260805_phase26c1_timeline_source_module_work',
+  },
+  {
+    up: migration_20260806_phase27a_calendar_sync_fields.up,
+    down: migration_20260806_phase27a_calendar_sync_fields.down,
+    name: '20260806_phase27a_calendar_sync_fields',
   },
 ];

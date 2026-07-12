@@ -12,7 +12,7 @@ import {
   resolveTargetCalendarId,
   validateCalendarOwnership,
 } from "./calendars";
-import { createCalendarEvent } from "./events";
+import { createCalendarEvent, getCalendarEvent } from "./events";
 import { isGoogleCalendarError } from "./errors";
 import { resolveGoogleCalendarTimezone } from "./timezone";
 import type { CalendarAvailabilitySnapshot } from "./types";
@@ -23,6 +23,7 @@ import {
 } from "./working-hours";
 import type {
   CalendarAvailabilityProvider,
+  CalendarEventReader,
   CalendarEventWriter,
   CalendarMetadataProvider,
 } from "@/lib/scheduling/calendar-providers";
@@ -119,6 +120,17 @@ export const googleCalendarEventWriter: CalendarEventWriter = {
     return createCalendarEvent({
       ...input,
       calendarId,
+    });
+  },
+};
+
+/** Phase 27A — read-only linked event fetch. Never creates or mutates. */
+export const googleCalendarEventReader: CalendarEventReader = {
+  async getEvent(input) {
+    const calendarId = await resolveTargetCalendarId(input.calendarId);
+    return getCalendarEvent({
+      calendarId,
+      eventId: input.eventId,
     });
   },
 };

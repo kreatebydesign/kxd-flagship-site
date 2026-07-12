@@ -36,6 +36,13 @@ export default async function WorkDetailPage({
         scheduleLink?.link.googleEventHtmlLink ?? null
       }
       calendarWriteAt={scheduleLink?.link.calendarWriteAt ?? null}
+      scheduleLinkId={scheduleLink?.link.id ?? work.activeScheduleLinkId}
+      calendarSyncStatus={scheduleLink?.link.syncStatus ?? null}
+      calendarRecoveryState={scheduleLink?.link.recoveryState ?? null}
+      calendarExternalChangeClass={
+        scheduleLink?.link.externalChangeClass ?? null
+      }
+      calendarLastSyncAt={scheduleLink?.link.lastSyncAt ?? null}
       currentUser={{
         id: Number(user.id),
         email: typeof user.email === "string" ? user.email : "",

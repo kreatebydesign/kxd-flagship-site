@@ -34,6 +34,31 @@ export type ScheduleSyncStatus =
   | "deleted_remotely"
   | "error";
 
+/**
+ * Phase 27A — Synchronization health / recovery (separate from lifecycle status).
+ */
+export type ScheduleRecoveryState =
+  | "none"
+  | "review_required"
+  | "cancelled_remote"
+  | "missing_remote"
+  | "restored";
+
+/**
+ * Phase 27A — Deterministic external change classification.
+ */
+export type ScheduleExternalChangeClass =
+  | "none"
+  | "metadata_only"
+  | "schedule_impacting"
+  | "descriptive"
+  | "cancelled"
+  | "missing"
+  | "authorization_failure"
+  | "provider_unavailable"
+  | "transient_error"
+  | "manual_review";
+
 export type SchedulingMode = "suggest" | "direct" | "restricted";
 
 export type SchedulingPermissionLevel = 1 | 2 | 3;
@@ -155,6 +180,18 @@ export interface WorkScheduleLinkRecord {
   calendarWriteAt: string | null;
   /** Last successful calendar sync/write timestamp. */
   lastSyncAt: string | null;
+  /** Phase 27A — last sync attempt (success or failure). */
+  lastSyncAttemptAt: string | null;
+  syncFailureCode: string | null;
+  syncFailureMessage: string | null;
+  externalChangeClass: ScheduleExternalChangeClass;
+  externalChangeAt: string | null;
+  recoveryState: ScheduleRecoveryState;
+  providerEventStatus: string | null;
+  observedTitle: string | null;
+  observedLocation: string | null;
+  cancelledRemoteAt: string | null;
+  missingRemoteAt: string | null;
   policySnapshot: SchedulingPolicyEvidence | Record<string, unknown> | null;
   conflictSnapshot: Record<string, unknown> | null;
   displacedItemSnapshot: Record<string, unknown> | null;
@@ -200,6 +237,12 @@ export type SchedulingAuditAction =
   | "calendar_created"
   | "calendar_create_failed"
   | "calendar_linked"
+  | "calendar_sync_completed"
+  | "calendar_external_change"
+  | "calendar_event_cancelled"
+  | "calendar_event_missing"
+  | "calendar_sync_failed"
+  | "calendar_recovery_restored"
   | "rejected"
   | "canceled"
   | "completed"

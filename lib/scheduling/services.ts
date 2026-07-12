@@ -115,6 +115,30 @@ function mapLink(doc: AnyDoc): WorkScheduleLinkRecord {
       : null,
     calendarWriteAt: doc.calendarWriteAt ? String(doc.calendarWriteAt) : null,
     lastSyncAt: doc.lastSyncAt ? String(doc.lastSyncAt) : null,
+    lastSyncAttemptAt: doc.lastSyncAttemptAt
+      ? String(doc.lastSyncAttemptAt)
+      : null,
+    syncFailureCode: doc.syncFailureCode ? String(doc.syncFailureCode) : null,
+    syncFailureMessage: doc.syncFailureMessage
+      ? String(doc.syncFailureMessage)
+      : null,
+    externalChangeClass: (doc.externalChangeClass ?? "none") as WorkScheduleLinkRecord["externalChangeClass"],
+    externalChangeAt: doc.externalChangeAt
+      ? String(doc.externalChangeAt)
+      : null,
+    recoveryState: (doc.recoveryState ??
+      "none") as WorkScheduleLinkRecord["recoveryState"],
+    providerEventStatus: doc.providerEventStatus
+      ? String(doc.providerEventStatus)
+      : null,
+    observedTitle: doc.observedTitle ? String(doc.observedTitle) : null,
+    observedLocation: doc.observedLocation
+      ? String(doc.observedLocation)
+      : null,
+    cancelledRemoteAt: doc.cancelledRemoteAt
+      ? String(doc.cancelledRemoteAt)
+      : null,
+    missingRemoteAt: doc.missingRemoteAt ? String(doc.missingRemoteAt) : null,
     policySnapshot: (doc.policySnapshot as SchedulingPolicyEvidence) ?? null,
     conflictSnapshot: (doc.conflictSnapshot as Record<string, unknown>) ?? null,
     displacedItemSnapshot:

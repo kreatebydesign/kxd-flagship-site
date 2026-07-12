@@ -6,12 +6,14 @@
 import type {
   BusyBlock,
   CalendarAvailabilitySnapshot,
+  CalendarEventReadResult,
   CalendarListItem,
   CalendarMetadata,
   CreateCalendarEventInput,
   CreatedCalendarEvent,
   FreeBusyQueryInput,
   FreeBusyResult,
+  GetCalendarEventInput,
   WorkingHoursWindow,
 } from "@/lib/google/calendar/types";
 
@@ -47,17 +49,27 @@ export interface CalendarAvailabilityProvider {
 }
 
 /**
- * Phase 26C — Event creation only (no update / delete / sync).
+ * Phase 26C — Event creation only (no update / delete).
  * Scheduling calls this — never Google modules directly.
  */
 export interface CalendarEventWriter {
   createEvent(input: CreateCalendarEventInput): Promise<CreatedCalendarEvent>;
 }
 
+/**
+ * Phase 27A — Linked event read only (no create / update / delete).
+ * Returns normalized scheduling-domain shapes — never raw Google payloads.
+ */
+export interface CalendarEventReader {
+  getEvent(input: GetCalendarEventInput): Promise<CalendarEventReadResult>;
+}
+
 export type {
   BusyBlock,
   CalendarAvailabilitySnapshot,
+  CalendarEventReadResult,
   CreateCalendarEventInput,
   CreatedCalendarEvent,
+  GetCalendarEventInput,
   WorkingHoursWindow,
 };

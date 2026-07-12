@@ -185,7 +185,12 @@ const PROVIDER_DEFINITIONS: IntegrationProviderDefinition[] = [
         { key: "GOOGLE_CALENDAR_REFRESH_TOKEN", label: "Calendar OAuth Refresh Token", required: false },
         { key: "GOOGLE_CALENDAR_ID", label: "Preferred Calendar ID", required: false },
       ],
-      permissions: ["Read calendar", "Read free/busy", "Create events"],
+      permissions: [
+        "Read calendar",
+        "Read free/busy",
+        "Create events",
+        "Read linked events",
+      ],
       scopes: ["calendar.readonly", "calendar.events"],
     }),
   },

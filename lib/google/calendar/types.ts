@@ -138,6 +138,71 @@ export interface CreatedCalendarEvent {
 }
 
 /**
+ * Phase 27A — Normalized calendar event state for Scheduling (read-only).
+ * Never a raw Google API payload.
+ */
+export interface CalendarEventSnapshot {
+  eventId: string;
+  calendarId: string;
+  title: string | null;
+  description: string | null;
+  location: string | null;
+  start: string | null;
+  end: string | null;
+  timezone: string | null;
+  status: string | null;
+  htmlLink: string | null;
+  etag: string | null;
+  updatedAt: string | null;
+  createdAt: string | null;
+  organizerEmail: string | null;
+  cancelled: boolean;
+  exists: boolean;
+}
+
+export type CalendarEventReadFailureClassification =
+  | "authorization_failure"
+  | "authentication_failure"
+  | "provider_unavailable"
+  | "transient_error"
+  | "not_found"
+  | "invalid_request"
+  | "unknown";
+
+export interface CalendarEventReadFailure {
+  classification: CalendarEventReadFailureClassification;
+  message: string;
+  retryable: boolean;
+  providerCode?: string;
+}
+
+/**
+ * Reader outcome — found, missing (404), or provider failure.
+ * Does not create, update, or delete events.
+ */
+export type CalendarEventReadResult =
+  | {
+      outcome: "found";
+      event: CalendarEventSnapshot;
+      failure: null;
+    }
+  | {
+      outcome: "missing";
+      event: null;
+      failure: CalendarEventReadFailure;
+    }
+  | {
+      outcome: "failure";
+      event: null;
+      failure: CalendarEventReadFailure;
+    };
+
+export interface GetCalendarEventInput {
+  calendarId: string;
+  eventId: string;
+}
+
+/**
  * Deterministic availability snapshot for Scheduling Domain consumption.
  */
 export interface CalendarAvailabilitySnapshot {

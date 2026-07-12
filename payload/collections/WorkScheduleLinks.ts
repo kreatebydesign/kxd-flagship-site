@@ -39,6 +39,27 @@ const SYNC_STATUSES = [
   { label: "Error", value: "error" },
 ] as const;
 
+const RECOVERY_STATES = [
+  { label: "None", value: "none" },
+  { label: "Review required", value: "review_required" },
+  { label: "Cancelled remotely", value: "cancelled_remote" },
+  { label: "Missing remotely", value: "missing_remote" },
+  { label: "Restored", value: "restored" },
+] as const;
+
+const EXTERNAL_CHANGE_CLASSES = [
+  { label: "None", value: "none" },
+  { label: "Metadata only", value: "metadata_only" },
+  { label: "Schedule impacting", value: "schedule_impacting" },
+  { label: "Descriptive", value: "descriptive" },
+  { label: "Cancelled", value: "cancelled" },
+  { label: "Missing", value: "missing" },
+  { label: "Authorization failure", value: "authorization_failure" },
+  { label: "Provider unavailable", value: "provider_unavailable" },
+  { label: "Transient error", value: "transient_error" },
+  { label: "Manual review", value: "manual_review" },
+] as const;
+
 const SCHEDULING_MODES = [
   { label: "Suggest", value: "suggest" },
   { label: "Direct", value: "direct" },
@@ -295,6 +316,98 @@ export const WorkScheduleLinks: CollectionConfig = {
       name: "lastSyncAt",
       type: "date",
       label: "Last sync at",
+      admin: {
+        date: { pickerAppearance: "dayAndTime" },
+        position: "sidebar",
+      },
+    },
+    {
+      name: "lastSyncAttemptAt",
+      type: "date",
+      label: "Last sync attempt at",
+      admin: {
+        date: { pickerAppearance: "dayAndTime" },
+        position: "sidebar",
+        description: "Phase 27A — last synchronization attempt (success or failure).",
+      },
+    },
+    {
+      name: "syncFailureCode",
+      type: "text",
+      label: "Sync failure code",
+      admin: { position: "sidebar" },
+    },
+    {
+      name: "syncFailureMessage",
+      type: "textarea",
+      label: "Sync failure message",
+      admin: { position: "sidebar" },
+    },
+    {
+      name: "externalChangeClass",
+      type: "select",
+      label: "External change class",
+      defaultValue: "none",
+      options: [...EXTERNAL_CHANGE_CLASSES],
+      admin: {
+        position: "sidebar",
+        description: "Phase 27A — deterministic drift classification.",
+      },
+    },
+    {
+      name: "externalChangeAt",
+      type: "date",
+      label: "External change at",
+      admin: {
+        date: { pickerAppearance: "dayAndTime" },
+        position: "sidebar",
+      },
+    },
+    {
+      name: "recoveryState",
+      type: "select",
+      label: "Recovery state",
+      defaultValue: "none",
+      options: [...RECOVERY_STATES],
+      admin: {
+        position: "sidebar",
+        description: "Phase 27A — sync recovery health (separate from lifecycle).",
+      },
+    },
+    {
+      name: "providerEventStatus",
+      type: "text",
+      label: "Provider event status",
+      admin: { position: "sidebar" },
+    },
+    {
+      name: "observedTitle",
+      type: "text",
+      label: "Observed calendar title",
+      admin: {
+        position: "sidebar",
+        description: "Last observed Google title — never overwrites Work title.",
+      },
+    },
+    {
+      name: "observedLocation",
+      type: "text",
+      label: "Observed calendar location",
+      admin: { position: "sidebar" },
+    },
+    {
+      name: "cancelledRemoteAt",
+      type: "date",
+      label: "Cancelled remotely at",
+      admin: {
+        date: { pickerAppearance: "dayAndTime" },
+        position: "sidebar",
+      },
+    },
+    {
+      name: "missingRemoteAt",
+      type: "date",
+      label: "Missing remotely at",
       admin: {
         date: { pickerAppearance: "dayAndTime" },
         position: "sidebar",

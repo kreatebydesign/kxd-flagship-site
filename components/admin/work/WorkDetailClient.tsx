@@ -28,6 +28,10 @@ import {
   openScheduleWork,
   SCHEDULING_STATUS_LABELS,
 } from "@/lib/work/scheduling";
+import {
+  calendarRecoveryGuidance,
+  humanSyncHealth,
+} from "@/lib/scheduling/workspace";
 import { getWorkStatusActions } from "@/lib/work/transitions";
 import type { WorkListItem, WorkStatus } from "@/lib/work/types";
 
@@ -61,15 +65,32 @@ export function WorkDetailClient({
   currentUser,
   calendarEventHtmlLink = null,
   calendarWriteAt = null,
+  scheduleLinkId = null,
+  calendarSyncStatus = null,
+  calendarRecoveryState = null,
+  calendarExternalChangeClass = null,
+  calendarLastSyncAt = null,
 }: {
   initialWork: WorkListItem;
   currentUser?: WorkComposerUserOption | null;
   calendarEventHtmlLink?: string | null;
   calendarWriteAt?: string | null;
+  scheduleLinkId?: number | null;
+  calendarSyncStatus?: string | null;
+  calendarRecoveryState?: string | null;
+  calendarExternalChangeClass?: string | null;
+  calendarLastSyncAt?: string | null;
 }) {
   const [work, setWork] = useState(initialWork);
   const [busyAction, setBusyAction] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [syncStatus, setSyncStatus] = useState(calendarSyncStatus);
+  const [recoveryState, setRecoveryState] = useState(calendarRecoveryState);
+  const [externalChangeClass, setExternalChangeClass] = useState(
+    calendarExternalChangeClass,
+  );
+  const [lastSyncAt, setLastSyncAt] = useState(calendarLastSyncAt);
+  const [syncMessage, setSyncMessage] = useState<string | null>(null);
 
   const actions = useMemo(() => getWorkStatusActions(work.status), [work.status]);
   const showSchedule = canShowScheduleWorkAction(work);
@@ -128,6 +149,71 @@ export function WorkDetailClient({
   const age = formatWorkStateAge(work);
   const budget = formatTimeBudgetHours(work.estimatedEffort);
   const history = [...(work.activityHistory ?? [])].reverse();
+  const showCalendarSync =
+    scheduleLinkId != null &&
+    (work.schedulingStatus === "scheduled" ||
+      work.schedulingStatus === "sync_error" ||
+      Boolean(calendarWriteAt) ||
+      Boolean(calendarEventHtmlLink));
+  const recoveryNote = calendarRecoveryGuidance({
+    recoveryState,
+    syncStatus,
+  });
+
+  async function checkCalendar() {
+    if (scheduleLinkId == null) return;
+    setBusyAction("sync");
+    setError(null);
+    setSyncMessage(null);
+    try {
+      const res = await fetch(
+        `/api/admin/scheduling/proposals/${scheduleLinkId}/sync`,
+        { method: "POST" },
+      );
+      const data = (await res.json()) as {
+        ok?: boolean;
+        error?: string;
+        result?: {
+          message?: string;
+          syncStatus?: string;
+          recoveryState?: string;
+          externalChangeClass?: string;
+          link?: {
+            lastSyncAt?: string | null;
+            syncStatus?: string;
+            recoveryState?: string;
+            externalChangeClass?: string;
+          };
+        };
+      };
+      if (!res.ok || data.ok === false) {
+        setError(data.error ?? "Could not check calendar.");
+        return;
+      }
+      const link = data.result?.link;
+      setSyncStatus(link?.syncStatus ?? data.result?.syncStatus ?? syncStatus);
+      setRecoveryState(
+        link?.recoveryState ?? data.result?.recoveryState ?? recoveryState,
+      );
+      setExternalChangeClass(
+        link?.externalChangeClass ??
+          data.result?.externalChangeClass ??
+          externalChangeClass,
+      );
+      setLastSyncAt(link?.lastSyncAt ?? lastSyncAt);
+      setSyncMessage(data.result?.message ?? "Calendar checked.");
+      const refresh = await fetch(`/api/admin/work/${work.id}`);
+      const refreshed = (await refresh.json()) as {
+        ok?: boolean;
+        work?: WorkListItem;
+      };
+      if (refreshed.ok && refreshed.work) setWork(refreshed.work);
+    } catch {
+      setError("Could not check calendar.");
+    } finally {
+      setBusyAction(null);
+    }
+  }
 
   return (
     <KxdShell className="kxd-os-shell--ritual">
@@ -220,10 +306,29 @@ export function WorkDetailClient({
                     : null
                 }
               />
-              {work.schedulingStatus === "scheduled" ? (
+              {work.schedulingStatus === "scheduled" ||
+              work.schedulingStatus === "sync_error" ||
+              showCalendarSync ? (
                 <>
                   <MetaRow label="Calendar" value="Matt" />
-                  <MetaRow label="Google Calendar" value="Created" />
+                  {syncStatus ? (
+                    <MetaRow
+                      label="Calendar sync"
+                      value={humanSyncHealth({
+                        syncStatus,
+                        recoveryState,
+                        externalChangeClass,
+                      })}
+                    />
+                  ) : (
+                    <MetaRow label="Google Calendar" value="Linked" />
+                  )}
+                  {lastSyncAt ? (
+                    <MetaRow
+                      label="Last checked"
+                      value={formatDateTime(lastSyncAt)}
+                    />
+                  ) : null}
                   {calendarWriteAt ? (
                     <MetaRow
                       label="Calendar created"
@@ -244,6 +349,41 @@ export function WorkDetailClient({
                         </a>
                       }
                     />
+                  ) : null}
+                  {showCalendarSync ? (
+                    <MetaRow
+                      label="Synchronize"
+                      value={
+                        <button
+                          type="button"
+                          className="kxd-os-link-quiet"
+                          disabled={busyAction != null}
+                          onClick={() => void checkCalendar()}
+                          style={{
+                            background: "none",
+                            border: "none",
+                            padding: 0,
+                            cursor: busyAction != null ? "default" : "pointer",
+                            font: "inherit",
+                            color: "inherit",
+                          }}
+                        >
+                          {busyAction === "sync"
+                            ? "Checking…"
+                            : syncStatus === "error" ||
+                                recoveryState === "missing_remote" ||
+                                recoveryState === "cancelled_remote"
+                              ? "Retry Sync"
+                              : "Check Calendar"}
+                        </button>
+                      }
+                    />
+                  ) : null}
+                  {syncMessage ? (
+                    <MetaRow label="Sync result" value={syncMessage} />
+                  ) : null}
+                  {recoveryNote ? (
+                    <MetaRow label="Recovery" value={recoveryNote} />
                   ) : null}
                 </>
               ) : null}

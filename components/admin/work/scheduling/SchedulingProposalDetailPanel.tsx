@@ -22,7 +22,9 @@ import {
 import {
   canActorAdjustProposal,
   canActorCancelProposal,
+  calendarRecoveryGuidance,
   humanScheduleLinkStatus,
+  humanSyncHealth,
   type SchedulingProposalCard,
   type SchedulingProposalDetail,
   type SchedulingWorkspaceCapabilities,
@@ -120,6 +122,15 @@ export function SchedulingProposalDetailPanel({
   const canRetryWrite =
     capabilities.canApprove &&
     link.status === "pending_calendar_write";
+  const canSyncCalendar =
+    Boolean(link.calendarWriteAt || link.lastSyncAt || link.googleEventHtmlLink) &&
+    (link.status === "scheduled" ||
+      link.status === "reschedule_required" ||
+      link.status === "sync_error" ||
+      link.syncStatus === "deleted_remotely" ||
+      link.syncStatus === "stale" ||
+      link.syncStatus === "error" ||
+      link.syncStatus === "synced");
   const canReject =
     capabilities.canApprove &&
     (link.status === "approval_required" || link.status === "proposed");
@@ -175,6 +186,23 @@ export function SchedulingProposalDetailPanel({
       const data = (await res.json()) as { ok?: boolean; error?: string };
       if (!res.ok || data.ok === false) {
         throw new Error(data.error ?? "Could not retry calendar write.");
+      }
+    });
+  }
+
+  async function syncCalendar() {
+    await runAction("sync", async () => {
+      const res = await fetch(
+        `/api/admin/scheduling/proposals/${link.id}/sync`,
+        { method: "POST" },
+      );
+      const data = (await res.json()) as {
+        ok?: boolean;
+        error?: string;
+        result?: { message?: string };
+      };
+      if (!res.ok || data.ok === false) {
+        throw new Error(data.error ?? "Could not check calendar.");
       }
     });
   }
@@ -364,9 +392,24 @@ export function SchedulingProposalDetailPanel({
                   value={link.approvalStatus}
                 />
                 {link.status === "scheduled" ||
-                link.status === "pending_calendar_write" ? (
+                link.status === "pending_calendar_write" ||
+                link.status === "reschedule_required" ||
+                link.status === "sync_error" ? (
                   <>
-                    <Row label="Sync" value={link.syncStatus} />
+                    <Row
+                      label="Calendar sync"
+                      value={humanSyncHealth({
+                        syncStatus: link.syncStatus,
+                        recoveryState: link.recoveryState,
+                        externalChangeClass: link.externalChangeClass,
+                      })}
+                    />
+                    {link.lastSyncAt ? (
+                      <Row
+                        label="Last checked"
+                        value={formatCreated(link.lastSyncAt)}
+                      />
+                    ) : null}
                     {link.calendarWriteAt ? (
                       <Row
                         label="Calendar created"
@@ -405,6 +448,21 @@ export function SchedulingProposalDetailPanel({
                   <p className="kxd-os-sched-ws-block__label">Work summary</p>
                   <p className="kxd-os-sched-ws-block__body">
                     {detail.workSummary || detail.workDescription}
+                  </p>
+                </section>
+              ) : null}
+
+              {calendarRecoveryGuidance({
+                recoveryState: link.recoveryState,
+                syncStatus: link.syncStatus,
+              }) ? (
+                <section className="kxd-os-sched-ws-block">
+                  <p className="kxd-os-sched-ws-block__label">Calendar recovery</p>
+                  <p className="kxd-os-sched-ws-block__body">
+                    {calendarRecoveryGuidance({
+                      recoveryState: link.recoveryState,
+                      syncStatus: link.syncStatus,
+                    })}
                   </p>
                 </section>
               ) : null}
@@ -619,6 +677,22 @@ export function SchedulingProposalDetailPanel({
                     onClick={() => void startAdjust()}
                   >
                     Adjust
+                  </button>
+                ) : null}
+                {canSyncCalendar ? (
+                  <button
+                    type="button"
+                    className="kxd-os-schedule-panel__ghost"
+                    disabled={busy != null}
+                    onClick={() => void syncCalendar()}
+                  >
+                    {busy === "sync"
+                      ? "Checking…"
+                      : link.syncStatus === "error" ||
+                          link.recoveryState === "missing_remote" ||
+                          link.recoveryState === "cancelled_remote"
+                        ? "Retry Sync"
+                        : "Check Calendar"}
                   </button>
                 ) : null}
                 {canCancel ? (

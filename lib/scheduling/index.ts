@@ -10,7 +10,9 @@ export { schedulingActorFromUser } from "./actor";
 export type {
   CreateScheduleProposalInput,
   ScheduleApprovalStatus,
+  ScheduleExternalChangeClass,
   ScheduleLinkStatus,
+  ScheduleRecoveryState,
   ScheduleSyncStatus,
   SchedulingActor,
   SchedulingAuditAction,
@@ -83,17 +85,32 @@ export type {
 
 export type {
   CalendarAvailabilityProvider,
+  CalendarEventReader,
   CalendarEventWriter,
   CalendarMetadataProvider,
 } from "./calendar-providers";
 
 export {
   getCalendarAvailabilityProvider,
+  getCalendarEventReader,
   getCalendarEventWriter,
   getCalendarMetadataProvider,
   getSchedulingCalendarContext,
 } from "./calendar-context";
 export type { SchedulingCalendarContext } from "./calendar-context";
+
+export {
+  syncLinkedScheduleFromCalendar,
+} from "./sync";
+export type { CalendarSyncResult, SyncLinkedScheduleOptions } from "./sync";
+
+export {
+  compareLinkedEventToSchedule,
+  missingEventDriftReport,
+  sameInstant,
+  sameOptionalText,
+} from "./sync-compare";
+export type { SyncDriftKind, SyncDriftReport } from "./sync-compare";
 
 export {
   findSchedulingCandidates,
@@ -147,6 +164,8 @@ export {
   dedupeActiveProposalsPerWork,
   groupProposals,
   humanScheduleLinkStatus,
+  humanSyncHealth,
+  calendarRecoveryGuidance,
   workspaceGroupForStatus,
 } from "./workspace";
 export type {
