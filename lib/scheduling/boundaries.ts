@@ -19,8 +19,8 @@ export interface ExecutiveContextSchedulingSummary {
   activeScheduleLinkId: number | null;
   approvalRequired: boolean;
   permissionLevel: SchedulingPermissionLevel | null;
-  /** Always false in 25B — calendar not connected. */
-  calendarConnected: false;
+  /** Phase 25C — true when Google Calendar OAuth refresh token is connected. */
+  calendarConnected: boolean;
 }
 
 /** Executive Signals — evidence shape for future schedule signals. */
@@ -32,7 +32,8 @@ export interface SchedulingSignalEvidence {
   policyDecision: SchedulingPolicyDecision | null;
   confidence: SchedulingConfidence;
   reasons: string[];
-  calendarAvailabilityAssessed: false;
+  /** Phase 25C — set true only when free/busy was successfully assessed. */
+  calendarAvailabilityAssessed: boolean;
 }
 
 /** Operational Flow — scheduling transition kinds (registered in flow types). */
@@ -54,7 +55,6 @@ export interface SchedulingIntelligenceEvidence {
   reasons: string[];
   warnings: string[];
   confidence: SchedulingConfidence;
-  /** Must remain false until Google free/busy exists. */
-  calendarAvailabilityAssessed: false;
-  source: "scheduling-policy";
+  calendarAvailabilityAssessed: boolean;
+  source: "scheduling-policy" | "calendar-availability";
 }

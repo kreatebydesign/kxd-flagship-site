@@ -224,6 +224,15 @@ export const PLATFORM_PHASES: PlatformPhaseDefinition[] = [
     completedAt: "2026-07-11",
   },
   {
+    id: "phase-25c",
+    number: "25C",
+    title: "Google Calendar Read Foundation",
+    status: "completed",
+    description:
+      "OAuth 2.0 calendar.readonly foundation — list calendars, timezone, free/busy, provider interfaces for Scheduling. No event writes.",
+    completedAt: "2026-07-11",
+  },
+  {
     id: "phase-12",
     number: "12",
     title: "Timeline Unification",
@@ -326,10 +335,10 @@ export const PLATFORM_SUBSYSTEMS: PlatformSubsystemDefinition[] = [
     completionPercent: 28,
     status: "active",
     dependencies: ["Work Engine", "Operational Flow", "Activity Engine"],
-    lastCompletedPhase: "25B",
-    currentPhase: "25B",
+    lastCompletedPhase: "25C",
+    currentPhase: "25C",
     description:
-      "Work↔calendar scheduling domain — proposals, approvals, policy levels. Google Calendar connection deferred to 25C+.",
+      "Work↔calendar scheduling — domain foundation (25B) + Google Calendar read/OAuth (25C). Writes deferred to 25E.",
   },
   {
     id: "executive-signals",

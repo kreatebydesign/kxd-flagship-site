@@ -8,7 +8,7 @@ export const EXECUTIVE_CONTEXT_EXTENSIONS: ExecutiveExtensionSlot[] = [
   {
     id: "calendar",
     status: "reserved",
-    note: "Calendar events will feed waiting and upcoming when connected.",
+    note: "Phase 25C Google Calendar read foundation exists (lib/google/calendar). Context composition remains inactive until a later phase.",
   },
   {
     id: "finance",

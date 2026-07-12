@@ -1,9 +1,8 @@
 /**
- * Phase 25B — Executive Scheduling domain
+ * Phase 25B–25C — Executive Scheduling domain
  *
- * Work determines what. Calendar (later) determines when.
- * This package is the durable proposal / approval / policy foundation.
- * No Google Calendar integration in this phase.
+ * Work determines what. Calendar (via provider interfaces) determines when.
+ * Google Calendar reads live in lib/google/calendar — Scheduling never calls Google directly.
  */
 
 export { schedulingActorFromUser } from "./actor";
@@ -64,6 +63,18 @@ export type {
   SchedulingOperationalKind,
   SchedulingSignalEvidence,
 } from "./boundaries";
+
+export type {
+  CalendarAvailabilityProvider,
+  CalendarMetadataProvider,
+} from "./calendar-providers";
+
+export {
+  getCalendarAvailabilityProvider,
+  getCalendarMetadataProvider,
+  getSchedulingCalendarContext,
+} from "./calendar-context";
+export type { SchedulingCalendarContext } from "./calendar-context";
 
 export {
   applyWorkScheduleProjection,

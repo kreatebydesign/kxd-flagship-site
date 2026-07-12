@@ -169,10 +169,21 @@ const PROVIDER_DEFINITIONS: IntegrationProviderDefinition[] = [
     connectPriority: 9,
     settingsSchema: buildSettingsSchema({
       documentationUrl: "https://developers.google.com/workspace",
-      oauth: { label: "Google Workspace OAuth", scopes: ["https://www.googleapis.com/auth/calendar.readonly"], placeholder: "Domain-wide delegation — future" },
-      envVars: [{ key: "GOOGLE_WORKSPACE_DOMAIN", label: "Workspace Domain", required: false }],
-      permissions: ["Read calendar", "Read directory"],
-      scopes: ["calendar.readonly", "directory.readonly"],
+      oauth: {
+        label: "Google Calendar OAuth (founder calendar)",
+        scopes: ["https://www.googleapis.com/auth/calendar.readonly"],
+        placeholder: "Phase 25C — user OAuth refresh token (not domain-wide delegation)",
+      },
+      envVars: [
+        { key: "GOOGLE_WORKSPACE_DOMAIN", label: "Workspace Domain", required: false },
+        { key: "GOOGLE_CALENDAR_CLIENT_ID", label: "Calendar OAuth Client ID", required: false },
+        { key: "GOOGLE_CALENDAR_CLIENT_SECRET", label: "Calendar OAuth Client Secret", required: false },
+        { key: "GOOGLE_CALENDAR_REDIRECT_URI", label: "Calendar OAuth Redirect URI", required: false },
+        { key: "GOOGLE_CALENDAR_REFRESH_TOKEN", label: "Calendar OAuth Refresh Token", required: false },
+        { key: "GOOGLE_CALENDAR_ID", label: "Preferred Calendar ID", required: false },
+      ],
+      permissions: ["Read calendar", "Read free/busy"],
+      scopes: ["calendar.readonly"],
     }),
   },
   {
