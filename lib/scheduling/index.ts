@@ -35,12 +35,29 @@ export {
   SCHEDULE_STATUS_TRANSITIONS,
   SchedulingTransitionError,
   assertScheduleStatusTransition,
+  canConfirmScheduledFromPendingWrite,
   canTransitionScheduleStatus,
   isActiveScheduleStatus,
   isTerminalScheduleStatus,
   nextApprovalStatusForLifecycle,
+  syncStatusAfterApproval,
   syncStatusAfterLocalSchedule,
 } from "./lifecycle";
+
+export {
+  ACTIVE_SCHEDULE_PROPOSAL_STATUSES,
+  INACTIVE_SCHEDULE_PROPOSAL_STATUSES,
+  INTEGRITY_SUPERSEDE_REASON,
+  ActiveProposalConflictError,
+  ConcurrentProposalMutationError,
+  activeProposalConflictMessage,
+  activeProposalPrecedence,
+  assertSingleActiveProposal,
+  isActiveScheduleProposal,
+  sameProposedWindow,
+  selectAuthoritativeActiveProposal,
+  workProjectionStatusForLink,
+} from "./active-proposal";
 
 export {
   ALL_SCHEDULING_CAPABILITIES,
@@ -77,14 +94,62 @@ export {
 export type { SchedulingCalendarContext } from "./calendar-context";
 
 export {
+  findSchedulingCandidates,
+  generateCandidateSlots,
+  getAvailabilitySummary,
+  getNextAvailableWorkWindow,
+  normalizeBusyBlocks,
+  validateProposedSlot,
+  validateProposedSlotAvailability,
+} from "./availability";
+
+export type {
+  AvailabilitySummary,
+  CandidateSlot,
+  FindCandidatesResult,
+  SlotValidationResult,
+} from "./availability";
+
+export {
   applyWorkScheduleProjection,
   clearWorkScheduleProjection,
   approveScheduleProposal,
+  assertSingleActiveProposalForWork,
   cancelScheduleProposal,
+  confirmScheduleAfterGoogleEvent,
   createScheduleProposal,
   evaluateSchedulingPolicyForInput,
+  findActiveProposalForWork,
+  findActiveProposalsForWork,
   markScheduleCompleted,
   rejectScheduleProposal,
+  repairActiveProposalsForWork,
   requestScheduleApproval,
+  supersedeScheduleProposal,
   updateScheduleProposal,
 } from "./services";
+
+export {
+  getSchedulingProposalDetail,
+  listSchedulingProposals,
+} from "./proposals-list";
+
+export {
+  SCHEDULING_WORKSPACE_GROUPS,
+  SCHEDULING_WORKSPACE_GROUP_LABELS,
+  buildWorkspaceCapabilities,
+  canActorAdjustProposal,
+  canActorCancelProposal,
+  confidenceLabel,
+  dedupeActiveProposalsPerWork,
+  groupProposals,
+  humanScheduleLinkStatus,
+  workspaceGroupForStatus,
+} from "./workspace";
+export type {
+  SchedulingProposalAuditEntry,
+  SchedulingProposalCard,
+  SchedulingProposalDetail,
+  SchedulingWorkspaceCapabilities,
+  SchedulingWorkspaceGroupId,
+} from "./workspace";

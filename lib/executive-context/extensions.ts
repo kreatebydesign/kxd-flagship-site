@@ -8,7 +8,7 @@ export const EXECUTIVE_CONTEXT_EXTENSIONS: ExecutiveExtensionSlot[] = [
   {
     id: "calendar",
     status: "reserved",
-    note: "Phase 25C Google Calendar read foundation exists (lib/google/calendar). Context composition remains inactive until a later phase.",
+    note: "Phase 25C–25D Google Calendar read + availability engine exist. Context composition remains inactive until a later phase.",
   },
   {
     id: "finance",
@@ -33,6 +33,6 @@ export const EXECUTIVE_CONTEXT_EXTENSIONS: ExecutiveExtensionSlot[] = [
   {
     id: "scheduling",
     status: "reserved",
-    note: "Phase 25B domain foundation exists (lib/scheduling). Context summary remains inactive until calendar connection.",
+    note: "Phase 25D availability engine exists (lib/scheduling/availability). Context composition remains inactive until a later phase.",
   },
 ];

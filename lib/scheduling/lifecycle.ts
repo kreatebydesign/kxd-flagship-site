@@ -1,6 +1,12 @@
 /**
- * Phase 25B — Explicit lifecycle transitions for schedule links.
+ * Phase 25B / 26B.1 — Explicit lifecycle transitions for schedule links.
  * Invalid transitions throw — no arbitrary status mutation.
+ *
+ * Lifecycle (pre–Google write):
+ * draft → proposed → approval_required → approved → pending_calendar_write → scheduled
+ *
+ * `scheduled` requires a confirmed Google Calendar event (Phase 26C+).
+ * Approval alone must never imply scheduled.
  */
 
 import type {
@@ -28,21 +34,39 @@ export const SCHEDULE_STATUS_TRANSITIONS: Record<
   ScheduleLinkStatus,
   readonly ScheduleLinkStatus[]
 > = {
-  draft: ["proposed", "canceled"],
-  proposed: ["approval_required", "approved", "canceled"],
-  approval_required: ["approved", "rejected", "canceled"],
-  approved: ["scheduled", "canceled"],
-  rejected: ["proposed", "canceled"],
+  draft: ["proposed", "canceled", "superseded"],
+  proposed: ["approval_required", "approved", "canceled", "superseded"],
+  approval_required: ["approved", "rejected", "canceled", "superseded"],
+  approved: ["pending_calendar_write", "canceled", "superseded"],
+  pending_calendar_write: [
+    "scheduled",
+    "canceled",
+    "superseded",
+    "sync_error",
+  ],
+  rejected: ["proposed", "canceled", "superseded"],
   scheduled: [
     "reschedule_required",
     "canceled",
     "completed",
     "sync_error",
   ],
-  reschedule_required: ["proposed", "approval_required", "canceled"],
+  reschedule_required: [
+    "proposed",
+    "approval_required",
+    "canceled",
+    "superseded",
+  ],
   canceled: [],
   completed: [],
-  sync_error: ["scheduled", "reschedule_required", "canceled"],
+  superseded: [],
+  sync_error: [
+    "pending_calendar_write",
+    "scheduled",
+    "reschedule_required",
+    "canceled",
+    "superseded",
+  ],
 };
 
 export function canTransitionScheduleStatus(
@@ -71,10 +95,12 @@ export function nextApprovalStatusForLifecycle(
     case "proposed":
     case "canceled":
     case "completed":
+    case "superseded":
       return "none";
     case "approval_required":
       return "pending";
     case "approved":
+    case "pending_calendar_write":
     case "scheduled":
     case "reschedule_required":
     case "sync_error":
@@ -87,24 +113,54 @@ export function nextApprovalStatusForLifecycle(
 }
 
 /**
- * Phase 25B: after approval we enter `scheduled` with pending_write.
- * Google write happens in a later phase — sync stays pending.
+ * After approval: sync awaits a future Google Calendar write.
+ * Does not mean the event exists.
  */
-export function syncStatusAfterLocalSchedule(): ScheduleSyncStatus {
+export function syncStatusAfterApproval(): ScheduleSyncStatus {
   return "pending_write";
 }
 
-export function isTerminalScheduleStatus(status: ScheduleLinkStatus): boolean {
-  return status === "canceled" || status === "completed";
+/** @deprecated Use syncStatusAfterApproval — approval ≠ scheduled. */
+export function syncStatusAfterLocalSchedule(): ScheduleSyncStatus {
+  return syncStatusAfterApproval();
 }
 
+export function isTerminalScheduleStatus(status: ScheduleLinkStatus): boolean {
+  return (
+    status === "canceled" ||
+    status === "completed" ||
+    status === "superseded"
+  );
+}
+
+/**
+ * Active / blocking statuses for the one-proposal-per-Work invariant.
+ * Includes draft and pending_calendar_write; excludes superseded.
+ */
 export function isActiveScheduleStatus(status: ScheduleLinkStatus): boolean {
   return (
+    status === "draft" ||
     status === "proposed" ||
     status === "approval_required" ||
     status === "approved" ||
-    status === "scheduled" ||
+    status === "pending_calendar_write" ||
     status === "reschedule_required" ||
+    status === "scheduled" ||
     status === "sync_error"
+  );
+}
+
+/**
+ * Reserved for Phase 26C+: confirm local schedule only after Google event linkage.
+ * Callers must supply a confirmed external event id — this does not call Google.
+ */
+export function canConfirmScheduledFromPendingWrite(input: {
+  status: ScheduleLinkStatus;
+  googleEventId: string | null | undefined;
+}): boolean {
+  return (
+    input.status === "pending_calendar_write" &&
+    typeof input.googleEventId === "string" &&
+    input.googleEventId.trim().length > 0
   );
 }

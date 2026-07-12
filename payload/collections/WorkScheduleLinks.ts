@@ -12,11 +12,13 @@ const STATUSES = [
   { label: "Proposed", value: "proposed" },
   { label: "Approval required", value: "approval_required" },
   { label: "Approved", value: "approved" },
+  { label: "Pending calendar write", value: "pending_calendar_write" },
   { label: "Rejected", value: "rejected" },
   { label: "Scheduled", value: "scheduled" },
   { label: "Reschedule required", value: "reschedule_required" },
   { label: "Canceled", value: "canceled" },
   { label: "Completed", value: "completed" },
+  { label: "Superseded", value: "superseded" },
   { label: "Sync error", value: "sync_error" },
 ] as const;
 
@@ -228,6 +230,20 @@ export const WorkScheduleLinks: CollectionConfig = {
       name: "canceledReason",
       type: "textarea",
       label: "Canceled reason",
+    },
+    {
+      name: "supersededReason",
+      type: "textarea",
+      label: "Superseded reason",
+    },
+    {
+      name: "replacedBy",
+      type: "relationship",
+      relationTo: "work-schedule-links",
+      label: "Replaced by",
+      admin: {
+        description: "Successor proposal when this record was superseded.",
+      },
     },
     {
       name: "googleCalendarId",

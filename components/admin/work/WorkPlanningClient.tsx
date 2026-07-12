@@ -187,6 +187,7 @@ export function WorkPlanningClient({
               <span className="kxd-os-work-engine__nav-active">Work</span>
               <Link href="/admin/operations/today">Today</Link>
               <Link href="/admin/operations/review-inbox">Review Inbox</Link>
+              <Link href="/admin/work/scheduling">Scheduling</Link>
             </nav>
             <Link href="/admin/operations/intelligence" className="kxd-os-work-engine__exit">
               Full workspace

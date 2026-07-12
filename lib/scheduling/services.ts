@@ -1,7 +1,9 @@
 /**
- * Phase 25B — Scheduling domain services.
+ * Phase 25B / 26B.1 — Scheduling domain services.
  * Canonical mutation surface for proposals, approvals, and Work projections.
  * No Google Calendar reads or writes.
+ *
+ * Invariant: one Work item → one active scheduling proposal.
  */
 
 import "server-only";
@@ -12,19 +14,32 @@ import { KXD_BUSINESS_TIMEZONE } from "@/lib/platform/timezone";
 import { processOperationalFlow } from "@/lib/operational-flow";
 import type { OperationalTransitionKind } from "@/lib/operational-flow/types";
 import { WORK_COLLECTION } from "@/lib/work/constants";
+import {
+  ACTIVE_SCHEDULE_PROPOSAL_STATUSES,
+  ActiveProposalConflictError,
+  ConcurrentProposalMutationError,
+  activeProposalConflictMessage,
+  isActiveScheduleProposal,
+  sameProposedWindow,
+  selectAuthoritativeActiveProposal,
+  workProjectionStatusForLink,
+} from "./active-proposal";
 import { recordSchedulingAudit } from "./audit";
 import {
   assertScheduleStatusTransition,
+  canConfirmScheduledFromPendingWrite,
   nextApprovalStatusForLifecycle,
-  syncStatusAfterLocalSchedule,
+  syncStatusAfterApproval,
 } from "./lifecycle";
 import { assertCapability, actorHasCapability } from "./permissions";
 import { evaluateSchedulingPolicy } from "./policy";
 import {
   applyWorkScheduleProjection,
   clearWorkScheduleProjection,
+  projectionForPendingCalendarWrite,
   projectionForProposed,
   projectionForScheduled,
+  projectionForLinkStatus,
 } from "./projections";
 import type {
   CreateScheduleProposalInput,
@@ -83,6 +98,10 @@ function mapLink(doc: AnyDoc): WorkScheduleLinkRecord {
       : null,
     rejectionReason: doc.rejectionReason ? String(doc.rejectionReason) : null,
     canceledReason: doc.canceledReason ? String(doc.canceledReason) : null,
+    supersededReason: doc.supersededReason
+      ? String(doc.supersededReason)
+      : null,
+    replacedById: relId(doc.replacedBy),
     googleCalendarId: doc.googleCalendarId ? String(doc.googleCalendarId) : null,
     googleEventId: doc.googleEventId ? String(doc.googleEventId) : null,
     googleEventEtag: doc.googleEventEtag ? String(doc.googleEventEtag) : null,
@@ -188,6 +207,15 @@ function durationFromRange(start: string, end: string): number {
   return Math.max(1, Math.round((Date.parse(end) - Date.parse(start)) / 60000));
 }
 
+function isUniqueViolation(err: unknown): boolean {
+  const msg = err instanceof Error ? err.message : String(err);
+  return (
+    /unique/i.test(msg) ||
+    /duplicate key/i.test(msg) ||
+    /work_schedule_links_one_active/i.test(msg)
+  );
+}
+
 async function emitFlow(
   kind: OperationalTransitionKind,
   workId: number,
@@ -196,16 +224,139 @@ async function emitFlow(
   previousStatus?: string | null,
   nextStatus?: string | null,
 ): Promise<void> {
-  await processOperationalFlow({
-    kind,
-    source: "calendar",
-    entityId: workId,
-    workId,
-    clientId,
-    actorEmail: actor.email,
-    previousStatus: previousStatus ?? null,
-    nextStatus: nextStatus ?? null,
+  try {
+    await processOperationalFlow({
+      kind,
+      source: "calendar",
+      entityId: workId,
+      workId,
+      clientId,
+      actorEmail: actor.email,
+      previousStatus: previousStatus ?? null,
+      nextStatus: nextStatus ?? null,
+    });
+  } catch (err) {
+    console.warn(
+      "[KXD Scheduling] Operational Flow emit skipped:",
+      err instanceof Error ? err.message : String(err),
+    );
+  }
+}
+
+/**
+ * Load all active proposals for a Work item (may be >1 before repair).
+ */
+export async function findActiveProposalsForWork(
+  workId: number,
+): Promise<WorkScheduleLinkRecord[]> {
+  const payload = await getPayload({ config });
+  const result = await payload.find({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    collection: SCHEDULE_LINK_COLLECTION as any,
+    where: {
+      and: [
+        { work: { equals: workId } },
+        { status: { in: [...ACTIVE_SCHEDULE_PROPOSAL_STATUSES] } },
+      ],
+    },
+    limit: 50,
+    depth: 0,
+    overrideAccess: true,
+    sort: "-updatedAt",
   });
+  return (result.docs as AnyDoc[])
+    .map(mapLink)
+    .filter((link) => isActiveScheduleProposal(link));
+}
+
+export async function findActiveProposalForWork(
+  workId: number,
+): Promise<WorkScheduleLinkRecord | null> {
+  const actives = await findActiveProposalsForWork(workId);
+  return selectAuthoritativeActiveProposal(actives);
+}
+
+export async function assertSingleActiveProposalForWork(
+  workId: number,
+): Promise<WorkScheduleLinkRecord | null> {
+  const actives = await findActiveProposalsForWork(workId);
+  if (actives.length > 1) {
+    const ids = actives.map((p) => p.id).join(", ");
+    throw new ActiveProposalConflictError(
+      `Work ${workId} has ${actives.length} active scheduling proposals (${ids}). Review or adjust in Scheduling, or run integrity repair.`,
+      actives[0].id,
+      workId,
+    );
+  }
+  return actives[0] ?? null;
+}
+
+async function healWorkProjection(
+  workId: number,
+  link: WorkScheduleLinkRecord,
+  actor: SchedulingActor,
+  clientId: number | null,
+  detail: string,
+): Promise<void> {
+  const projStatus = workProjectionStatusForLink(link.status);
+  await applyWorkScheduleProjection(
+    workId,
+    projectionForLinkStatus(
+      projStatus,
+      link.id,
+      link.proposedStart,
+      link.proposedEnd,
+    ),
+  );
+  await recordSchedulingAudit({
+    workId,
+    linkId: link.id,
+    clientId,
+    action: "projection_healed",
+    detail,
+    actor,
+  });
+}
+
+/**
+ * Mark a proposal superseded. Preserves history. Soft-fails secondary audit.
+ */
+export async function supersedeScheduleProposal(
+  linkId: number,
+  actor: SchedulingActor,
+  reason: string,
+  replacedById?: number | null,
+): Promise<WorkScheduleLinkRecord> {
+  const existing = await loadLink(linkId);
+  if (!isActiveScheduleProposal(existing) && existing.status !== "draft") {
+    return existing;
+  }
+  if (existing.status === "superseded") return existing;
+
+  assertScheduleStatusTransition(existing.status, "superseded");
+  const link = await updateLinkStatus(linkId, {
+    status: "superseded",
+    supersededReason: reason,
+    replacedBy: replacedById ?? undefined,
+  });
+
+  const { clientId, raw } = await loadWorkContext(existing.workId);
+  const activeId = relId(raw.activeScheduleLink);
+  if (activeId === linkId) {
+    // Projection will be repaired by caller to the survivor when available.
+  }
+
+  await recordSchedulingAudit({
+    workId: existing.workId,
+    linkId,
+    clientId,
+    action: "proposal_superseded",
+    detail: reason,
+    actor,
+    metadata: { replacedById: replacedById ?? null },
+  });
+
+  return link;
 }
 
 /**
@@ -222,10 +373,11 @@ export async function createScheduleProposal(
 ): Promise<{
   link: WorkScheduleLinkRecord;
   policy: SchedulingPolicyEvidence;
+  reused?: boolean;
 }> {
   assertCapability(input.actor, "scheduling.suggest");
 
-  const { work, clientId } = await loadWorkContext(input.workId);
+  const { work, clientId, raw } = await loadWorkContext(input.workId);
   const timezone = input.timezone?.trim() || KXD_BUSINESS_TIMEZONE;
   const proposedStart = input.proposedStart;
   const proposedEnd = input.proposedEnd;
@@ -233,6 +385,92 @@ export async function createScheduleProposal(
     input.durationMinutes && input.durationMinutes > 0
       ? input.durationMinutes
       : durationFromRange(proposedStart, proposedEnd);
+
+  const payload = await getPayload({ config });
+
+  // Cancel abandoned drafts left by prior failed attempts (never reached approval).
+  const abandonedDrafts = await payload.find({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    collection: SCHEDULE_LINK_COLLECTION as any,
+    where: {
+      and: [
+        { work: { equals: input.workId } },
+        { status: { equals: "draft" } },
+      ],
+    },
+    limit: 20,
+    depth: 0,
+    overrideAccess: true,
+  });
+  for (const doc of abandonedDrafts.docs as AnyDoc[]) {
+    try {
+      assertScheduleStatusTransition("draft", "canceled");
+      await updateLinkStatus(doc.id as number, {
+        status: "canceled",
+        canceledReason: "Superseded — abandoned draft from incomplete proposal.",
+      });
+    } catch {
+      // ignore cleanup failures
+    }
+  }
+
+  // One-active enforcement — load ALL actives, not limit 1.
+  const actives = await findActiveProposalsForWork(input.workId);
+  if (actives.length > 0) {
+    const authoritative = selectAuthoritativeActiveProposal(actives)!;
+    const sameWindow = sameProposedWindow(authoritative, {
+      proposedStart,
+      proposedEnd,
+    });
+
+    if (sameWindow) {
+      await healWorkProjection(
+        input.workId,
+        authoritative,
+        input.actor,
+        clientId,
+        "Healed Work projection to existing same-window proposal.",
+      );
+      await recordSchedulingAudit({
+        workId: input.workId,
+        linkId: authoritative.id,
+        clientId,
+        action: "proposal_reused",
+        detail: "Returned existing active proposal (same window; idempotent).",
+        actor: input.actor,
+      });
+      return {
+        link: authoritative,
+        policy:
+          (authoritative.policySnapshot as SchedulingPolicyEvidence) ??
+          evaluateSchedulingPolicy({
+            actor: input.actor,
+            work,
+            slot: {
+              proposedStart: authoritative.proposedStart,
+              proposedEnd: authoritative.proposedEnd,
+              timezone: authoritative.timezone,
+              durationMinutes: authoritative.durationMinutes,
+            },
+            intent: input.intent ?? "suggest",
+          }),
+        reused: true,
+      };
+    }
+
+    // Different window — never create a second active record.
+    throw new ActiveProposalConflictError(
+      activeProposalConflictMessage(authoritative.id),
+      authoritative.id,
+      input.workId,
+    );
+  }
+
+  // Heal stale projection pointing at nothing / inactive
+  const existingStatus = String(raw.schedulingStatus ?? "none");
+  if (existingStatus !== "none" && actives.length === 0) {
+    await clearWorkScheduleProjection(input.workId);
+  }
 
   const policy = evaluateSchedulingPolicy({
     actor: input.actor,
@@ -258,44 +496,107 @@ export async function createScheduleProposal(
     );
   }
 
-  const payload = await getPayload({ config });
-
-  // Create as draft, then transition per policy.
-  const created = (await payload.create({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    collection: SCHEDULE_LINK_COLLECTION as any,
-    data: {
-      work: input.workId,
-      calendarOwner: input.calendarOwnerId ?? undefined,
-      requestedBy: input.actor.userId ?? undefined,
-      status: "draft",
-      approvalStatus: "none",
-      syncStatus: "none",
-      schedulingMode: policy.schedulingMode,
-      permissionLevel: String(policy.permissionLevel),
-      proposedStart,
-      proposedEnd,
-      timezone,
-      durationMinutes,
-      schedulingReason: input.schedulingReason ?? undefined,
-      evidenceSummary: evidenceSummaryText(policy),
-      confidence: policy.confidence,
-      source: "operator",
-      restrictionReason:
-        policy.permissionLevel === 3
-          ? policy.reasons.join("; ")
-          : undefined,
-      policySnapshot: policy,
-      metadata: {
-        phase: "25B",
-        calendarAvailabilityAssessed: false,
+  let created: AnyDoc;
+  try {
+    created = (await payload.create({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      collection: SCHEDULE_LINK_COLLECTION as any,
+      data: {
+        work: input.workId,
+        calendarOwner: input.calendarOwnerId ?? undefined,
+        requestedBy: input.actor.userId ?? undefined,
+        status: "draft",
+        approvalStatus: "none",
+        syncStatus: "none",
+        schedulingMode: policy.schedulingMode,
+        permissionLevel: String(policy.permissionLevel),
+        proposedStart,
+        proposedEnd,
+        timezone,
+        durationMinutes,
+        schedulingReason: input.schedulingReason ?? undefined,
+        evidenceSummary: evidenceSummaryText(policy),
+        confidence: policy.confidence,
+        source: "operator",
+        restrictionReason:
+          policy.permissionLevel === 3
+            ? policy.reasons.join("; ")
+            : undefined,
+        policySnapshot: policy,
+        metadata: {
+          phase: "26B.1",
+          calendarAvailabilityAssessed: false,
+          writeEnabled: false,
+        },
       },
-    },
-    depth: 0,
-    overrideAccess: true,
-  })) as AnyDoc;
+      depth: 0,
+      overrideAccess: true,
+    })) as AnyDoc;
+  } catch (err) {
+    if (isUniqueViolation(err)) {
+      const winner = await findActiveProposalForWork(input.workId);
+      if (winner && sameProposedWindow(winner, { proposedStart, proposedEnd })) {
+        await healWorkProjection(
+          input.workId,
+          winner,
+          input.actor,
+          clientId,
+          "Healed after concurrent create race (unique active constraint).",
+        );
+        await recordSchedulingAudit({
+          workId: input.workId,
+          linkId: winner.id,
+          clientId,
+          action: "proposal_reused",
+          detail: "Concurrent create resolved to existing proposal.",
+          actor: input.actor,
+        });
+        return {
+          link: winner,
+          policy:
+            (winner.policySnapshot as SchedulingPolicyEvidence) ?? policy,
+          reused: true,
+        };
+      }
+      throw new ConcurrentProposalMutationError(
+        "A concurrent scheduling proposal was created. Review or adjust the existing proposal in Scheduling.",
+      );
+    }
+    throw err;
+  }
 
   let link = mapLink(created);
+
+  // Race heal: if another active appeared, supersede this draft and resolve.
+  const afterCreate = await findActiveProposalsForWork(input.workId);
+  const others = afterCreate.filter((p) => p.id !== link.id);
+  if (others.length > 0) {
+    const winner = selectAuthoritativeActiveProposal(others)!;
+    await supersedeScheduleProposal(
+      link.id,
+      input.actor,
+      "Superseded — lost concurrent create race.",
+      winner.id,
+    );
+    if (sameProposedWindow(winner, { proposedStart, proposedEnd })) {
+      await healWorkProjection(
+        input.workId,
+        winner,
+        input.actor,
+        clientId,
+        "Healed after concurrent create; returned winning proposal.",
+      );
+      return {
+        link: winner,
+        policy:
+          (winner.policySnapshot as SchedulingPolicyEvidence) ?? policy,
+        reused: true,
+      };
+    }
+    throw new ConcurrentProposalMutationError(
+      activeProposalConflictMessage(winner.id),
+    );
+  }
 
   // draft → proposed
   assertScheduleStatusTransition(link.status, "proposed");
@@ -311,32 +612,41 @@ export async function createScheduleProposal(
       approvalStatus: "pending",
     });
   } else if (policy.decision === "allow-direct") {
-    // Level 2: proposed → approved (auto) → scheduled (local; pending Google write)
+    // Level 2: proposed → approved (auto) → pending_calendar_write (NOT scheduled)
     assertScheduleStatusTransition(link.status, "approved");
     link = await updateLinkStatus(link.id, {
       status: "approved",
       approvalStatus: "auto_approved",
       approvedBy: input.actor.userId ?? undefined,
     });
-    assertScheduleStatusTransition(link.status, "scheduled");
+    assertScheduleStatusTransition(link.status, "pending_calendar_write");
     link = await updateLinkStatus(link.id, {
-      status: "scheduled",
+      status: "pending_calendar_write",
       approvalStatus: "auto_approved",
-      syncStatus: syncStatusAfterLocalSchedule(),
+      syncStatus: syncStatusAfterApproval(),
     });
   }
 
-  if (link.status === "scheduled") {
+  if (link.status === "pending_calendar_write") {
     await applyWorkScheduleProjection(
       input.workId,
-      projectionForScheduled(link.id, proposedStart, proposedEnd),
+      projectionForPendingCalendarWrite(link.id, proposedStart, proposedEnd),
     );
     await recordSchedulingAudit({
       workId: input.workId,
       linkId: link.id,
       clientId,
+      action: "pending_calendar_write",
+      detail:
+        "Auto-approved; awaiting Google Calendar write (not scheduled yet).",
+      actor: input.actor,
+    });
+    await recordSchedulingAudit({
+      workId: input.workId,
+      linkId: link.id,
+      clientId,
       action: "projection_applied",
-      detail: "Work schedule projection set to scheduled (sync pending).",
+      detail: "Work projection set to pending_calendar_write.",
       actor: input.actor,
     });
   } else {
@@ -399,8 +709,17 @@ export async function updateScheduleProposal(
     existing.status !== "rejected"
   ) {
     throw new Error(
-      `Cannot update proposal in status ${existing.status}.`,
+      `Cannot update proposal in status ${existing.status}. Review or adjust the existing proposal in Scheduling.`,
     );
+  }
+
+  if (
+    !actorHasCapability(input.actor, "scheduling.approve") &&
+    existing.requestedById != null &&
+    input.actor.userId != null &&
+    existing.requestedById !== input.actor.userId
+  ) {
+    throw new Error("You can only adjust your own proposals.");
   }
 
   const proposedStart = input.proposedStart ?? existing.proposedStart;
@@ -424,6 +743,18 @@ export async function updateScheduleProposal(
     );
   }
 
+  // Ensure no other active sibling remains (adjust updates in place).
+  const actives = await findActiveProposalsForWork(existing.workId);
+  for (const sibling of actives) {
+    if (sibling.id === existing.id) continue;
+    await supersedeScheduleProposal(
+      sibling.id,
+      input.actor,
+      "Superseded — replaced by adjustment of active proposal.",
+      existing.id,
+    );
+  }
+
   let link = await updateLinkStatus(input.linkId, {
     proposedStart,
     proposedEnd,
@@ -439,7 +770,6 @@ export async function updateScheduleProposal(
       policy.permissionLevel === 3 ? policy.reasons.join("; ") : null,
   });
 
-  // Re-enter approval_required when still in proposal lane
   if (
     link.status === "proposed" ||
     link.status === "rejected" ||
@@ -470,7 +800,7 @@ export async function updateScheduleProposal(
     linkId: link.id,
     clientId,
     action: "proposal_updated",
-    detail: "Schedule proposal updated.",
+    detail: "Schedule proposal adjusted to a new candidate window.",
     actor: input.actor,
     metadata: { policy },
   });
@@ -513,6 +843,10 @@ export async function requestScheduleApproval(
   return link;
 }
 
+/**
+ * Approve → pending_calendar_write.
+ * Does NOT mark Work or link as scheduled (requires future Google event).
+ */
 export async function approveScheduleProposal(
   linkId: number,
   actor: SchedulingActor,
@@ -527,15 +861,15 @@ export async function approveScheduleProposal(
     approvedBy: actor.userId ?? undefined,
   });
 
-  assertScheduleStatusTransition(link.status, "scheduled");
+  assertScheduleStatusTransition(link.status, "pending_calendar_write");
   link = await updateLinkStatus(linkId, {
-    status: "scheduled",
-    syncStatus: syncStatusAfterLocalSchedule(),
+    status: "pending_calendar_write",
+    syncStatus: syncStatusAfterApproval(),
   });
 
   await applyWorkScheduleProjection(
     existing.workId,
-    projectionForScheduled(
+    projectionForPendingCalendarWrite(
       link.id,
       link.proposedStart,
       link.proposedEnd,
@@ -549,7 +883,15 @@ export async function approveScheduleProposal(
     clientId,
     action: "approved",
     detail:
-      "Proposal approved. Marked scheduled locally; Google Calendar write deferred.",
+      "Proposal approved. Awaiting Google Calendar write — not scheduled yet.",
+    actor,
+  });
+  await recordSchedulingAudit({
+    workId: existing.workId,
+    linkId,
+    clientId,
+    action: "pending_calendar_write",
+    detail: "Status set to pending_calendar_write; syncStatus=pending_write.",
     actor,
   });
   await recordSchedulingAudit({
@@ -557,7 +899,7 @@ export async function approveScheduleProposal(
     linkId,
     clientId,
     action: "projection_applied",
-    detail: "Work projection set to scheduled.",
+    detail: "Work projection set to pending_calendar_write (not scheduled).",
     actor,
   });
 
@@ -567,8 +909,57 @@ export async function approveScheduleProposal(
     clientId,
     actor,
     existing.status,
-    "scheduled",
+    "pending_calendar_write",
   );
+
+  return link;
+}
+
+/**
+ * Reserved for Phase 26C+: transition pending_calendar_write → scheduled
+ * only when a confirmed Google event id is already linked.
+ * Does not call Google Calendar APIs.
+ */
+export async function confirmScheduleAfterGoogleEvent(
+  linkId: number,
+  actor: SchedulingActor,
+  googleEventId: string,
+): Promise<WorkScheduleLinkRecord> {
+  assertCapability(actor, "scheduling.approve");
+  const existing = await loadLink(linkId);
+
+  if (
+    !canConfirmScheduledFromPendingWrite({
+      status: existing.status,
+      googleEventId: googleEventId || existing.googleEventId,
+    })
+  ) {
+    throw new Error(
+      "Cannot mark scheduled without pending_calendar_write status and a confirmed Google event id.",
+    );
+  }
+
+  assertScheduleStatusTransition(existing.status, "scheduled");
+  const link = await updateLinkStatus(linkId, {
+    status: "scheduled",
+    googleEventId: googleEventId.trim(),
+    syncStatus: "synced",
+  });
+
+  await applyWorkScheduleProjection(
+    existing.workId,
+    projectionForScheduled(link.id, link.proposedStart, link.proposedEnd),
+  );
+
+  const { clientId } = await loadWorkContext(existing.workId);
+  await recordSchedulingAudit({
+    workId: existing.workId,
+    linkId,
+    clientId,
+    action: "projection_applied",
+    detail: "Work projection set to scheduled after confirmed Google event.",
+    actor,
+  });
 
   return link;
 }
@@ -637,6 +1028,16 @@ export async function cancelScheduleProposal(
   }
 
   const existing = await loadLink(linkId);
+
+  if (
+    !actorHasCapability(actor, "scheduling.approve") &&
+    existing.requestedById != null &&
+    actor.userId != null &&
+    existing.requestedById !== actor.userId
+  ) {
+    throw new Error("You can only cancel your own proposals.");
+  }
+
   assertScheduleStatusTransition(existing.status, "canceled");
 
   const link = await updateLinkStatus(linkId, {
@@ -724,6 +1125,82 @@ export async function markScheduleCompleted(
   );
 
   return link;
+}
+
+/**
+ * Repair duplicate active proposals for one Work item.
+ * Keeps the authoritative survivor; supersedes the rest.
+ */
+export async function repairActiveProposalsForWork(
+  workId: number,
+  actor: SchedulingActor,
+  opts?: { dryRun?: boolean; reason?: string },
+): Promise<{
+  workId: number;
+  retainedId: number | null;
+  supersededIds: number[];
+  projectionRepaired: boolean;
+  dryRun: boolean;
+}> {
+  const dryRun = opts?.dryRun === true;
+  const reason = opts?.reason ?? "Replaced during active proposal integrity cleanup";
+  const actives = await findActiveProposalsForWork(workId);
+  if (actives.length <= 1) {
+    const sole = actives[0] ?? null;
+    if (sole && !dryRun) {
+      await healWorkProjection(
+        workId,
+        sole,
+        actor,
+        null,
+        "Projection aligned to sole active proposal.",
+      );
+    }
+    return {
+      workId,
+      retainedId: sole?.id ?? null,
+      supersededIds: [],
+      projectionRepaired: Boolean(sole),
+      dryRun,
+    };
+  }
+
+  const survivor = selectAuthoritativeActiveProposal(actives)!;
+  const losers = actives.filter((p) => p.id !== survivor.id);
+
+  if (!dryRun) {
+    for (const loser of losers) {
+      await supersedeScheduleProposal(loser.id, actor, reason, survivor.id);
+    }
+    const { clientId } = await loadWorkContext(workId);
+    await healWorkProjection(
+      workId,
+      survivor,
+      actor,
+      clientId,
+      "Projection repaired to surviving active proposal after integrity cleanup.",
+    );
+    await recordSchedulingAudit({
+      workId,
+      linkId: survivor.id,
+      clientId,
+      action: "integrity_repair",
+      detail: `Retained #${survivor.id}; superseded ${losers.map((l) => l.id).join(", ")}.`,
+      actor,
+      metadata: {
+        retainedId: survivor.id,
+        supersededIds: losers.map((l) => l.id),
+      },
+    });
+  }
+
+  return {
+    workId,
+    retainedId: survivor.id,
+    supersededIds: losers.map((l) => l.id),
+    projectionRepaired: !dryRun,
+    dryRun,
+  };
 }
 
 export { evaluateSchedulingPolicy };

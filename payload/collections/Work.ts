@@ -207,6 +207,8 @@ export const Work: CollectionConfig = {
       options: [
         { label: "None", value: "none" },
         { label: "Proposed", value: "proposed" },
+        { label: "Approved", value: "approved" },
+        { label: "Pending calendar write", value: "pending_calendar_write" },
         { label: "Scheduled", value: "scheduled" },
         { label: "Conflict", value: "conflict" },
         { label: "Sync error", value: "sync_error" },
@@ -215,7 +217,7 @@ export const Work: CollectionConfig = {
         position: "sidebar",
         readOnly: true,
         description:
-          "Projection only — updated exclusively by scheduling services (Phase 25B).",
+          "Projection only — updated exclusively by scheduling services. Scheduled requires a confirmed Google event.",
       },
     },
     {

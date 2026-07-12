@@ -233,6 +233,42 @@ export const PLATFORM_PHASES: PlatformPhaseDefinition[] = [
     completedAt: "2026-07-11",
   },
   {
+    id: "phase-25d",
+    number: "25D",
+    title: "Executive Availability Engine",
+    status: "completed",
+    description:
+      "Deterministic candidate work slots from free/busy, working hours, buffers, and duration — evidence-ranked, read-only, no Schedule Work UI.",
+    completedAt: "2026-07-11",
+  },
+  {
+    id: "phase-25e",
+    number: "25E",
+    title: "Executive Availability Validation",
+    status: "completed",
+    description:
+      "Permanent occupancy-only regression suite + live free/busy validation against connected calendar — no writes, no Schedule Work UI.",
+    completedAt: "2026-07-11",
+  },
+  {
+    id: "phase-26a",
+    number: "26A",
+    title: "Schedule Work Experience",
+    status: "completed",
+    description:
+      "Work Detail Schedule Work panel — availability candidates, evidence, propose via Scheduling Domain. No Google writes, no approval UI.",
+    completedAt: "2026-07-12",
+  },
+  {
+    id: "phase-26b",
+    number: "26B",
+    title: "Scheduling Proposal Workspace",
+    status: "completed",
+    description:
+      "Proposal inbox under Work — grouped review, approve/reject/cancel/adjust from Availability Engine. Domain-only; no Google writes.",
+    completedAt: "2026-07-12",
+  },
+  {
     id: "phase-12",
     number: "12",
     title: "Timeline Unification",
@@ -331,14 +367,15 @@ export const PLATFORM_SUBSYSTEMS: PlatformSubsystemDefinition[] = [
     name: "Executive Scheduling",
     category: "Platform",
     owner: "shared-core",
-    maturity: "alpha",
-    completionPercent: 28,
+    maturity: "beta",
+    completionPercent: 55,
     status: "active",
     dependencies: ["Work Engine", "Operational Flow", "Activity Engine"],
-    lastCompletedPhase: "25C",
-    currentPhase: "25C",
+    lastCompletedPhase: "26B",
+    currentPhase: "26B",
+    href: "/admin/work/scheduling",
     description:
-      "Work↔calendar scheduling — domain foundation (25B) + Google Calendar read/OAuth (25C). Writes deferred to 25E.",
+      "Work↔calendar scheduling — propose from Work Detail, review in Scheduling workspace. Calendar writes deferred.",
   },
   {
     id: "executive-signals",

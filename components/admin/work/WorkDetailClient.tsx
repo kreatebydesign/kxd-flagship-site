@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { KxdShell } from "@/components/os";
 import { ExecutiveWorkspaceShell } from "@/components/admin/executive-workspace";
 import { WorkComposerHost } from "@/components/admin/work/composer";
+import { ScheduleWorkHost } from "@/components/admin/work/scheduling";
 import {
   formatTimeBudgetHours,
   openWorkComposerForEdit,
@@ -22,9 +23,13 @@ import {
   formatWorkDue,
   formatWorkStateAge,
 } from "@/lib/work/display";
+import {
+  canShowScheduleWorkAction,
+  openScheduleWork,
+  SCHEDULING_STATUS_LABELS,
+} from "@/lib/work/scheduling";
 import { getWorkStatusActions } from "@/lib/work/transitions";
 import type { WorkListItem, WorkStatus } from "@/lib/work/types";
-import { useEffect } from "react";
 
 function formatDateTime(iso: string | null): string | null {
   if (!iso) return null;
@@ -63,6 +68,7 @@ export function WorkDetailClient({
   const [error, setError] = useState<string | null>(null);
 
   const actions = useMemo(() => getWorkStatusActions(work.status), [work.status]);
+  const showSchedule = canShowScheduleWorkAction(work);
 
   useEffect(() => {
     function onUpdated(e: Event) {
@@ -93,7 +99,6 @@ export function WorkDetailClient({
           setError(data.error ?? "Could not update status.");
           return;
         }
-        // Status route returns UpdateWorkResult — refetch for full item
         const refresh = await fetch(`/api/admin/work/${work.id}`);
         const refreshed = (await refresh.json()) as {
           ok?: boolean;
@@ -128,6 +133,7 @@ export function WorkDetailClient({
             <nav className="kxd-os-work-engine__nav" aria-label="Work Engine">
               <Link href={WORK_ENGINE_HOME}>Work</Link>
               <span className="kxd-os-work-engine__nav-active">Detail</span>
+              <Link href="/admin/work/scheduling">Scheduling</Link>
             </nav>
             <Link href={WORK_ENGINE_HOME} className="kxd-os-work-engine__exit">
               Back to Work Engine
@@ -154,6 +160,16 @@ export function WorkDetailClient({
               >
                 Edit
               </button>
+              {showSchedule ? (
+                <button
+                  type="button"
+                  className="kxd-os-work-detail__action kxd-os-work-detail__action--schedule"
+                  disabled={busyAction != null}
+                  onClick={() => openScheduleWork(work.id)}
+                >
+                  Schedule Work
+                </button>
+              ) : null}
               {actions.map((action) => (
                 <button
                   key={action.id}
@@ -188,6 +204,18 @@ export function WorkDetailClient({
               <MetaRow label="Due date" value={due} />
               <MetaRow label="Start date" value={start} />
               <MetaRow label="Planned for" value={formatWorkDue(work.plannedForDate)} />
+              <MetaRow
+                label="Scheduling"
+                value={SCHEDULING_STATUS_LABELS[work.schedulingStatus]}
+              />
+              <MetaRow
+                label="Proposed window"
+                value={
+                  work.scheduledStart && work.scheduledEnd
+                    ? `${formatDateTime(work.scheduledStart)} – ${formatDateTime(work.scheduledEnd)}`
+                    : null
+                }
+              />
               <MetaRow label="Assigned" value={assignee} />
               <MetaRow label="Created by" value={work.createdBy} />
               <MetaRow label="Time budget" value={budget} />
@@ -227,6 +255,7 @@ export function WorkDetailClient({
           currentUser={currentUser}
           onUpdated={(next) => setWork(next)}
         />
+        <ScheduleWorkHost work={work} onWorkRefresh={(next) => setWork(next)} />
       </ExecutiveWorkspaceShell>
     </KxdShell>
   );

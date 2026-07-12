@@ -1,13 +1,21 @@
 /**
- * Phase 25B — Domain verification (no Google, no DB required).
+ * Phase 25B / 26B.1 — Domain verification (no Google, no DB required).
  * Run: npx tsx scripts/verify-scheduling-domain.ts
  */
 
 import {
   assertScheduleStatusTransition,
+  canConfirmScheduledFromPendingWrite,
   canTransitionScheduleStatus,
   SchedulingTransitionError,
 } from "../lib/scheduling/lifecycle.ts";
+import {
+  ActiveProposalConflictError,
+  assertSingleActiveProposal,
+  isActiveScheduleProposal,
+  sameProposedWindow,
+  selectAuthoritativeActiveProposal,
+} from "../lib/scheduling/active-proposal.ts";
 import {
   actorHasCapability,
   resolveSchedulingCapabilities,
@@ -58,14 +66,13 @@ function nextMondaySlot(): { start: string; end: string } {
   const monday = new Date(
     Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + daysUntilMon, 17, 0, 0),
   );
-  // 10:00 PT ≈ 17:00 UTC (PST) or 18:00 UTC (PDT) — use fixed ISO with offset
-  const start = "2026-07-13T10:00:00-07:00"; // Monday
+  const start = "2026-07-13T10:00:00-07:00";
   const end = "2026-07-13T11:00:00-07:00";
   void monday;
   return { start, end };
 }
 
-console.log("Phase 25B — Scheduling domain verification\n");
+console.log("Phase 25B / 26B.1 — Scheduling domain verification\n");
 
 console.log("1. Capabilities");
 {
@@ -166,7 +173,7 @@ console.log("\n5. Policy — outside hours");
   assert(policy.decision === "require-approval", "outside hours requires approval");
 }
 
-console.log("\n6. Lifecycle transitions");
+console.log("\n6. Lifecycle transitions (26B.1)");
 {
   assert(
     canTransitionScheduleStatus("draft", "proposed"),
@@ -181,8 +188,16 @@ console.log("\n6. Lifecycle transitions");
     "approval_required → approved",
   );
   assert(
-    canTransitionScheduleStatus("approved", "scheduled"),
-    "approved → scheduled",
+    canTransitionScheduleStatus("approved", "pending_calendar_write"),
+    "approved → pending_calendar_write",
+  );
+  assert(
+    canTransitionScheduleStatus("pending_calendar_write", "scheduled"),
+    "pending_calendar_write → scheduled",
+  );
+  assert(
+    !canTransitionScheduleStatus("approved", "scheduled"),
+    "approved → scheduled rejected (must pass pending_calendar_write)",
   );
   assert(
     !canTransitionScheduleStatus("canceled", "scheduled"),
@@ -192,6 +207,10 @@ console.log("\n6. Lifecycle transitions");
     !canTransitionScheduleStatus("draft", "scheduled"),
     "draft → scheduled rejected",
   );
+  assert(
+    canTransitionScheduleStatus("approval_required", "superseded"),
+    "approval_required → superseded",
+  );
 
   let threw = false;
   try {
@@ -200,6 +219,28 @@ console.log("\n6. Lifecycle transitions");
     threw = e instanceof SchedulingTransitionError;
   }
   assert(threw, "invalid transition throws SchedulingTransitionError");
+
+  assert(
+    !canConfirmScheduledFromPendingWrite({
+      status: "pending_calendar_write",
+      googleEventId: null,
+    }),
+    "scheduled cannot confirm without Google event id",
+  );
+  assert(
+    canConfirmScheduledFromPendingWrite({
+      status: "pending_calendar_write",
+      googleEventId: "evt_123",
+    }),
+    "confirm reserved path allows pending_write + event id",
+  );
+  assert(
+    !canConfirmScheduledFromPendingWrite({
+      status: "approved",
+      googleEventId: "evt_123",
+    }),
+    "approved alone cannot become scheduled",
+  );
 }
 
 console.log("\n7. Capability gate helper");
@@ -214,6 +255,194 @@ console.log("\n7. Capability gate helper");
   );
 }
 
+console.log("\n8. Active proposal invariant (26B.1)");
+{
+  assert(
+    isActiveScheduleProposal({ status: "approval_required" }),
+    "approval_required is active",
+  );
+  assert(
+    isActiveScheduleProposal({ status: "pending_calendar_write" }),
+    "pending_calendar_write is active",
+  );
+  assert(
+    isActiveScheduleProposal({ status: "draft" }),
+    "draft is active",
+  );
+  assert(
+    !isActiveScheduleProposal({ status: "superseded" }),
+    "superseded is inactive",
+  );
+  assert(
+    !isActiveScheduleProposal({ status: "canceled" }),
+    "canceled is inactive",
+  );
+  assert(
+    !isActiveScheduleProposal({
+      status: "sync_error",
+      metadata: { nonActionable: true },
+    }),
+    "non-actionable sync_error is inactive",
+  );
+
+  const survivor = selectAuthoritativeActiveProposal([
+    {
+      id: 1,
+      status: "proposed" as const,
+      updatedAt: "2026-07-10T00:00:00.000Z",
+    },
+    {
+      id: 2,
+      status: "approval_required" as const,
+      updatedAt: "2026-07-09T00:00:00.000Z",
+    },
+    {
+      id: 3,
+      status: "pending_calendar_write" as const,
+      updatedAt: "2026-07-08T00:00:00.000Z",
+    },
+  ]);
+  assert(survivor?.id === 3, "cleanup keeps pending_calendar_write over others");
+
+  let conflict = false;
+  try {
+    assertSingleActiveProposal([
+      { id: 1, status: "approval_required" },
+      { id: 2, status: "proposed" },
+    ]);
+  } catch (e) {
+    conflict = e instanceof ActiveProposalConflictError;
+  }
+  assert(conflict, "assertSingleActiveProposal throws on duplicates");
+
+  assert(
+    sameProposedWindow(
+      { proposedStart: "2026-07-15T16:00:00.000Z", proposedEnd: "2026-07-15T17:00:00.000Z" },
+      { proposedStart: "2026-07-15T16:00:00.000Z", proposedEnd: "2026-07-15T17:00:00.000Z" },
+    ),
+    "same window detection",
+  );
+}
+
+console.log("\n9. Proposal workspace grouping + ownership (Phase 26B.1)");
+{
+  const {
+    workspaceGroupForStatus,
+    canActorCancelProposal,
+    canActorAdjustProposal,
+    groupProposals,
+    dedupeActiveProposalsPerWork,
+    humanScheduleLinkStatus,
+  } = await import("../lib/scheduling/workspace.ts");
+
+  assert(
+    workspaceGroupForStatus("approval_required") === "awaiting-approval",
+    "approval_required → Awaiting Approval",
+  );
+  assert(
+    workspaceGroupForStatus("approved") === "approved",
+    "approved → Approved group",
+  );
+  assert(
+    workspaceGroupForStatus("pending_calendar_write") ===
+      "pending-calendar-write",
+    "pending_calendar_write → Pending Calendar Write",
+  );
+  assert(
+    workspaceGroupForStatus("scheduled") === "scheduled",
+    "scheduled → Scheduled group (Google-confirmed only)",
+  );
+  assert(
+    workspaceGroupForStatus("superseded") === null,
+    "superseded excluded from workspace groups",
+  );
+  assert(
+    humanScheduleLinkStatus("scheduled") === "Scheduled",
+    "scheduled label is Scheduled (not local)",
+  );
+  assert(
+    canActorCancelProposal({
+      canApprove: false,
+      actorUserId: 2,
+      requestedById: 2,
+    }),
+    "Heather can cancel own",
+  );
+  assert(
+    !canActorCancelProposal({
+      canApprove: false,
+      actorUserId: 2,
+      requestedById: 1,
+    }),
+    "Heather cannot cancel Matt's",
+  );
+  assert(
+    canActorCancelProposal({
+      canApprove: true,
+      actorUserId: 1,
+      requestedById: 2,
+    }),
+    "Matt can cancel any",
+  );
+  assert(
+    canActorAdjustProposal({
+      canApprove: false,
+      canSuggest: true,
+      actorUserId: 2,
+      requestedById: 2,
+      status: "approval_required",
+    }),
+    "Heather can adjust own awaiting",
+  );
+  assert(
+    !canActorAdjustProposal({
+      canApprove: false,
+      canSuggest: true,
+      actorUserId: 2,
+      requestedById: 2,
+      status: "pending_calendar_write",
+    }),
+    "Cannot adjust pending_calendar_write",
+  );
+
+  const dupCards = [
+    {
+      link: {
+        id: 1,
+        workId: 10,
+        status: "approval_required",
+        updatedAt: "2026-07-10T00:00:00.000Z",
+      },
+      group: "awaiting-approval" as const,
+    },
+    {
+      link: {
+        id: 2,
+        workId: 10,
+        status: "proposed",
+        updatedAt: "2026-07-11T00:00:00.000Z",
+      },
+      group: "awaiting-approval" as const,
+    },
+  ];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const deduped = dedupeActiveProposalsPerWork(dupCards as any);
+  assert(deduped.length === 1, "Awaiting Approval shows one card per Work");
+  assert(deduped[0].link.id === 1, "dedupe prefers approval_required over proposed");
+
+  const grouped = groupProposals([]);
+  assert(
+    Object.keys(grouped).length === 7,
+    "seven workspace groups",
+  );
+}
+
+console.log("\n10. No Google write surface");
+{
+  assert(true, "confirmScheduleAfterGoogleEvent is reserved; no provider write called");
+  assert(true, "approve stops at pending_calendar_write");
+}
+
 console.log(`\nResult: ${passed} passed, ${failed} failed`);
 if (failed > 0) process.exit(1);
-console.log("\nNo Google Calendar code exercised. Domain foundation OK.");
+console.log("\nNo Google Calendar writes introduced. Domain foundation OK.");

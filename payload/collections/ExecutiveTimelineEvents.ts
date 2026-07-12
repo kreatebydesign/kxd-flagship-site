@@ -148,6 +148,7 @@ export const ExecutiveTimelineEvents: CollectionConfig = {
         { label: "Client Success", value: "Client Success" },
         { label: "Emails", value: "Emails" },
         { label: "Communications", value: "Communications" },
+        { label: "Work", value: "Work" },
         { label: "Manual", value: "Manual" },
       ],
       admin: { position: "sidebar" },

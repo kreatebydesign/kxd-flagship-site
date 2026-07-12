@@ -71,7 +71,7 @@ export interface WorkListItem {
    */
   plannedForDate: string | null;
   /** Projection — managed only by lib/scheduling services. */
-  schedulingStatus: "none" | "proposed" | "scheduled" | "conflict" | "sync_error";
+  schedulingStatus: "none" | "proposed" | "approved" | "pending_calendar_write" | "scheduled" | "conflict" | "sync_error";
   scheduledStart: string | null;
   scheduledEnd: string | null;
   activeScheduleLinkId: number | null;

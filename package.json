@@ -20,7 +20,13 @@
     "verify:primal-portal": "tsx scripts/verify-primal-portal-readiness.ts",
     "verify:client-launch": "tsx scripts/verify-client-launch-readiness.ts",
     "verify:scheduling": "tsx scripts/verify-scheduling-domain.ts",
-    "verify:calendar": "tsx scripts/verify-google-calendar-read.ts"
+    "verify:calendar": "tsx scripts/verify-google-calendar-read.ts",
+    "verify:availability": "tsx scripts/verify-availability.ts",
+    "verify:availability:live": "KXD_SERVER_ONLY_SHIM=1 VERIFY_AVAILABILITY_LIVE=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/verify-availability.ts",
+    "verify:schedule-work": "tsx scripts/verify-schedule-work.ts",
+    "verify:schedule-work:live": "KXD_SERVER_ONLY_SHIM=1 VERIFY_SCHEDULE_WORK_LIVE=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/verify-schedule-work.ts",
+    "repair:scheduling-proposals": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/repair-active-scheduling-proposals.ts",
+    "repair:scheduling-proposals:apply": "KXD_SERVER_ONLY_SHIM=1 APPLY=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/repair-active-scheduling-proposals.ts"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "^3.84.1",

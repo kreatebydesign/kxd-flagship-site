@@ -1,5 +1,5 @@
 /**
- * Phase 25B — Executive Scheduling domain types.
+ * Phase 25B / 26B.1 — Executive Scheduling domain types.
  * Durable proposals / links — not a calendar event mirror.
  */
 
@@ -10,11 +10,13 @@ export type ScheduleLinkStatus =
   | "proposed"
   | "approval_required"
   | "approved"
+  | "pending_calendar_write"
   | "rejected"
   | "scheduled"
   | "reschedule_required"
   | "canceled"
   | "completed"
+  | "superseded"
   | "sync_error";
 
 export type ScheduleApprovalStatus =
@@ -44,6 +46,8 @@ export type SchedulingSource = "operator" | "policy" | "system";
 export type WorkSchedulingStatus =
   | "none"
   | "proposed"
+  | "approved"
+  | "pending_calendar_write"
   | "scheduled"
   | "conflict"
   | "sync_error";
@@ -140,6 +144,8 @@ export interface WorkScheduleLinkRecord {
   restrictionReason: string | null;
   rejectionReason: string | null;
   canceledReason: string | null;
+  supersededReason: string | null;
+  replacedById: number | null;
   googleCalendarId: string | null;
   googleEventId: string | null;
   googleEventEtag: string | null;
@@ -181,12 +187,17 @@ export interface UpdateScheduleProposalInput {
 export type SchedulingAuditAction =
   | "proposal_created"
   | "proposal_updated"
+  | "proposal_superseded"
+  | "proposal_reused"
   | "approval_requested"
   | "approved"
+  | "pending_calendar_write"
   | "rejected"
   | "canceled"
   | "completed"
   | "projection_applied"
   | "projection_cleared"
+  | "projection_healed"
+  | "integrity_repair"
   | "policy_blocked"
   | "override_used";

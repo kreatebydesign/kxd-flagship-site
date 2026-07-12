@@ -1,6 +1,9 @@
 /**
- * Phase 25B — Work scheduling summary projections.
+ * Phase 25B / 26B.1 — Work scheduling summary projections.
  * Sole mutators for Work.schedulingStatus / scheduledStart / scheduledEnd / activeScheduleLink.
+ *
+ * Approval and pending_calendar_write must never project as `scheduled`.
+ * `scheduled` is reserved for confirmed Google Calendar event linkage.
  */
 
 import "server-only";
@@ -66,6 +69,35 @@ export function projectionForProposed(
   };
 }
 
+export function projectionForApproved(
+  linkId: number,
+  start: string,
+  end: string,
+): WorkScheduleProjection {
+  return {
+    schedulingStatus: "approved",
+    scheduledStart: start,
+    scheduledEnd: end,
+    activeScheduleLinkId: linkId,
+  };
+}
+
+export function projectionForPendingCalendarWrite(
+  linkId: number,
+  start: string,
+  end: string,
+): WorkScheduleProjection {
+  return {
+    schedulingStatus: "pending_calendar_write",
+    scheduledStart: start,
+    scheduledEnd: end,
+    activeScheduleLinkId: linkId,
+  };
+}
+
+/**
+ * Only after a confirmed Google Calendar event exists (future Phase 26C+).
+ */
 export function projectionForScheduled(
   linkId: number,
   start: string,
@@ -90,4 +122,25 @@ export function projectionForSyncError(
     scheduledEnd: end,
     activeScheduleLinkId: linkId,
   };
+}
+
+export function projectionForLinkStatus(
+  status: WorkSchedulingStatus | string,
+  linkId: number,
+  start: string,
+  end: string,
+): WorkScheduleProjection {
+  switch (status) {
+    case "scheduled":
+      return projectionForScheduled(linkId, start, end);
+    case "pending_calendar_write":
+      return projectionForPendingCalendarWrite(linkId, start, end);
+    case "approved":
+      return projectionForApproved(linkId, start, end);
+    case "sync_error":
+      return projectionForSyncError(linkId, start, end);
+    case "proposed":
+    default:
+      return projectionForProposed(linkId, start, end);
+  }
 }
