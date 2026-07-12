@@ -179,6 +179,33 @@ export const PLATFORM_PHASES: PlatformPhaseDefinition[] = [
     completedAt: "2026-07-11",
   },
   {
+    id: "phase-24a",
+    number: "24A",
+    title: "Work Planning & Daily Execution",
+    status: "completed",
+    description:
+      "URL-driven Work views, plannedForDate daily planning, quick actions, filters, and Recommended sort — ClickUp-class execution without Kanban.",
+    completedAt: "2026-07-11",
+  },
+  {
+    id: "phase-24b",
+    number: "24B",
+    title: "Operational Flow",
+    status: "completed",
+    description:
+      "Quiet OS rebalancing after meaningful transitions — continuation, focus, signals, and path refresh without duplicate events or AI.",
+    completedAt: "2026-07-11",
+  },
+  {
+    id: "phase-24c",
+    number: "24C",
+    title: "Executive Work Composer v2",
+    status: "completed",
+    description:
+      "Premium capture experience — Title, Description, Client, Due Date first; More details disclosure; reserved intelligence slot; keyboard-first.",
+    completedAt: "2026-07-11",
+  },
+  {
     id: "phase-12",
     number: "12",
     title: "Timeline Unification",
@@ -251,6 +278,26 @@ export const PLATFORM_SUBSYSTEMS: PlatformSubsystemDefinition[] = [
     href: "/admin/operations/timeline",
     description:
       "Executive Activity Engine — unified event backbone for Work, reviews, and client systems.",
+  },
+  {
+    id: "operational-flow",
+    name: "Operational Flow",
+    category: "Platform",
+    owner: "shared-core",
+    maturity: "beta",
+    completionPercent: 82,
+    status: "active",
+    dependencies: [
+      "Work Engine",
+      "Activity Engine",
+      "Executive Context Engine",
+      "Executive Signal Engine",
+    ],
+    lastCompletedPhase: "24B",
+    currentPhase: "24B",
+    href: "/admin/operations/today",
+    description:
+      "Observes meaningful state transitions and quietly rebalances Context, Signals, Focus, and related surfaces — no automation, no AI, no UI.",
   },
   {
     id: "executive-signals",

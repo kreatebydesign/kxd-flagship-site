@@ -1,26 +1,28 @@
 /**
- * /admin/work — Work Engine editorial workspace (server entry).
- * Interactive lists + Executive Work Composer live in WorkEngineClient.
+ * /admin/work — Work Engine planning workspace (server entry).
  */
 
-import { WorkEngineClient } from "@/components/admin/work/WorkEngineClient";
+import { WorkPlanningClient } from "@/components/admin/work/WorkPlanningClient";
 import type { WorkComposerUserOption } from "@/lib/work/composer";
-import type { WorkWorkspaceData } from "@/lib/work/types";
+import type { WorkPlanningPageData } from "@/lib/work/planning";
 
 export function WorkEngineWorkspace({
-  data,
+  planning,
   greeting,
   dateDisplay,
   currentUser,
 }: {
-  data: WorkWorkspaceData;
+  planning: WorkPlanningPageData;
   greeting: string;
   dateDisplay: string;
   currentUser?: WorkComposerUserOption | null;
 }) {
   return (
-    <WorkEngineClient
-      data={data}
+    <WorkPlanningClient
+      initialView={planning.view}
+      initialPool={planning.pool}
+      contextHints={planning.contextHints}
+      options={planning.options}
       greeting={greeting}
       dateDisplay={dateDisplay}
       currentUser={currentUser}

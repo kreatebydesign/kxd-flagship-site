@@ -66,12 +66,34 @@ export {
   filterWorkByStatus,
   groupWorkByStatus,
   isDueToday,
+  isPlannedForDate,
+  isPlannedForToday,
   isStartToday,
   isWorkOverdue,
   sortWorkByDueDateAsc,
   sortWorkByPriority,
   sortWorkByUpdatedDesc,
 } from "./views";
+
+export type {
+  GetWorkViewInput,
+  WorkDueRange,
+  WorkFilterOptions,
+  WorkSortId,
+  WorkViewFilters,
+  WorkViewId,
+  WorkViewResult,
+} from "./planning/client";
+
+export {
+  WORK_VIEW_IDS,
+  WORK_VIEW_LABELS,
+  composeWorkView,
+  parseWorkSortId,
+  parseWorkViewId,
+  workViewHref,
+} from "./planning/client";
+
 
 export type { WorkAdapterKey, WorkLifecycleEvent, WorkRelationshipType } from "./integration/types";
 export { formatWorkNumber, parseWorkNumber } from "./integration/types";

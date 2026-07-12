@@ -25,6 +25,8 @@ export interface WorkComposerOpenOptions {
   dueDate?: string;
   /** Prefill start date (YYYY-MM-DD) */
   startDate?: string;
+  /** Prefill planned-for date (YYYY-MM-DD) — daily plan, not due date */
+  plannedForDate?: string;
   /** Prefill priority */
   priority?: WorkPriority;
   /** Prefill status */
@@ -91,6 +93,8 @@ export interface WorkComposerDraft {
   estimatedEffort: number | null;
   tags: string;
   startDate: string;
+  /** Daily plan date (YYYY-MM-DD) — independent of dueDate. */
+  plannedForDate: string;
 }
 
 export type WorkComposerCreatedHandler = (work: import("../types").WorkListItem) => void;

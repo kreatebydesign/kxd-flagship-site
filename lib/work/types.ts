@@ -65,6 +65,11 @@ export interface WorkListItem {
   estimatedEffort: number | null;
   dueDate: string | null;
   startDate: string | null;
+  /**
+   * Daily execution plan date (YYYY-MM-DD).
+   * Independent of dueDate — intentional placement for Today / planning.
+   */
+  plannedForDate: string | null;
   startedAt: string | null;
   completedAt: string | null;
   parentWorkId: number | null;
@@ -137,6 +142,7 @@ export interface CreateWorkInput {
   estimatedEffort?: number;
   dueDate?: string;
   startDate?: string;
+  plannedForDate?: string;
   startedAt?: string;
   parentWorkId?: number;
 }
@@ -157,6 +163,7 @@ export interface UpdateWorkItemInput {
   estimatedEffort?: number | null;
   dueDate?: string | null;
   startDate?: string | null;
+  plannedForDate?: string | null;
   actorEmail?: string;
 }
 

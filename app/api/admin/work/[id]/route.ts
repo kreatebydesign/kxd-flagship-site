@@ -82,6 +82,7 @@ export async function PATCH(
       estimatedEffort: optionalNumber(body.estimatedEffort),
       dueDate: optionalString(body.dueDate),
       startDate: optionalString(body.startDate),
+      plannedForDate: optionalString(body.plannedForDate),
       actorEmail: typeof auth.email === "string" ? auth.email : undefined,
     });
 

@@ -19,6 +19,7 @@ export function openWorkComposerForEdit(work: WorkListItem): void {
     project: work.internalProject ?? "",
     dueDate: dateInputValue(work.dueDate),
     startDate: dateInputValue(work.startDate),
+    plannedForDate: dateInputValue(work.plannedForDate),
     priority: work.priority,
     status: work.status,
     assignedToId: work.assignedToId,

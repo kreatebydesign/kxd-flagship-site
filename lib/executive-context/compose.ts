@@ -12,8 +12,10 @@ import {
 } from "@/lib/executive-signals";
 import { loadBriefingContext } from "@/lib/intelligence/briefings/builder";
 import type { IntelligenceConfidence } from "@/lib/intelligence/types";
+import { resolveContinuation } from "@/lib/operational-flow/resolve-continuation";
 import { loadMorningBriefPageData } from "@/lib/rituals/morning-brief";
 import { filterWorkByStatus } from "@/lib/work";
+import { getWorkPool } from "@/lib/work/engine";
 import { EXECUTIVE_CONTEXT_EXTENSIONS } from "./extensions";
 import {
   refFromReview,
@@ -89,6 +91,27 @@ function continuationFromWork(
   return inProgress[0] ?? todayWork[0] ?? priority;
 }
 
+function continuationFromOperationalFlow(
+  pool: Awaited<ReturnType<typeof getWorkPool>>,
+  fallback: ExecutiveContextRef | null,
+): ExecutiveContextRef | null {
+  const resolved = resolveContinuation({
+    pool,
+    kind: "work.status-changed",
+  });
+  if (!resolved?.workId || !resolved.title) return fallback;
+  return {
+    id: `work-${resolved.workId}`,
+    kind: "work",
+    title: resolved.title,
+    detail: resolved.reason,
+    href: resolved.href,
+    clientId: resolved.clientId,
+    clientName: resolved.clientName,
+    workId: resolved.workId,
+  };
+}
+
 /**
  * Load once — Morning Brief warms briefing context; activity is the only companion fetch.
  */
@@ -134,10 +157,15 @@ export async function composeExecutiveContext(
     .filter((a): a is NonNullable<typeof a> => a != null);
 
   const recommendedPriority = priorityFromMorning(morning, todayRefs);
-  const recommendedContinuation = continuationFromWork(
+  const legacyContinuation = continuationFromWork(
     inProgress,
     todayRefs,
     recommendedPriority,
+  );
+  const pool = await getWorkPool();
+  const recommendedContinuation = continuationFromOperationalFlow(
+    pool,
+    legacyContinuation,
   );
 
   const intel = morning.intelligence;

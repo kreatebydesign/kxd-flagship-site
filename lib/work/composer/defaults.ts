@@ -35,6 +35,7 @@ export function createEmptyComposerDraft(
     estimatedEffort: null,
     tags: "",
     startDate: today,
+    plannedForDate: "",
   };
 }
 
@@ -76,6 +77,7 @@ export function applyComposerPrefill(
     project: options.project?.trim() ? options.project : draft.project,
     dueDate: options.dueDate ?? draft.dueDate,
     startDate: options.startDate ?? draft.startDate,
+    plannedForDate: options.plannedForDate ?? draft.plannedForDate,
     priority: options.priority ?? draft.priority,
     status: options.status ?? draft.status,
     assignedToId:
@@ -96,4 +98,22 @@ export function parseComposerTags(raw: string): string[] {
     .split(/[,#]/)
     .map((t) => t.trim())
     .filter(Boolean);
+}
+
+/**
+ * Edit mode: expand More details when any secondary field already has a value.
+ * Create mode stays collapsed so capture stays fast.
+ */
+export function shouldExpandComposerMoreDetails(draft: WorkComposerDraft): boolean {
+  if (draft.mode !== "edit") return false;
+  return (
+    Boolean(draft.project.trim()) ||
+    Boolean(draft.tags.trim()) ||
+    Boolean(draft.timeBudgetPresetId) ||
+    Boolean(draft.plannedForDate) ||
+    Boolean(draft.startDate) ||
+    draft.assignedToId != null ||
+    draft.priority !== "normal" ||
+    draft.status !== "new"
+  );
 }

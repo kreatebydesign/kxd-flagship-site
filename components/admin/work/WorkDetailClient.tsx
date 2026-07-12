@@ -187,6 +187,7 @@ export function WorkDetailClient({
               <MetaRow label="Priority" value={WORK_PRIORITY_LABELS[work.priority]} />
               <MetaRow label="Due date" value={due} />
               <MetaRow label="Start date" value={start} />
+              <MetaRow label="Planned for" value={formatWorkDue(work.plannedForDate)} />
               <MetaRow label="Assigned" value={assignee} />
               <MetaRow label="Created by" value={work.createdBy} />
               <MetaRow label="Time budget" value={budget} />

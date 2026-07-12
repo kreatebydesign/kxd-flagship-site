@@ -5,6 +5,7 @@ import config from "@payload-config";
 import { formatPageContextDisplay } from "@/lib/ces/modules/website-review/context";
 import { WEBSITE_REVIEW_EXPERIENCE_MODULE } from "@/lib/ces/modules/website-review/constants";
 import type { WebsiteReviewPageContext } from "@/lib/ces/modules/website-review/types";
+import { processOperationalFlow } from "@/lib/operational-flow";
 import { REVIEW_INBOX_OPEN_STATUSES } from "./status";
 import type { ReviewInboxData, ReviewInboxItem, ReviewInboxRequestStatus } from "./types";
 
@@ -174,6 +175,7 @@ export async function updateReviewRequestStatus(
     throw new Error("Not a website review request.");
   }
 
+  const previousStatus = String(row.status ?? "new");
   const data: AnyDoc = { status };
   if (status === "complete") {
     data.completedDate = new Date().toISOString().slice(0, 10);
@@ -185,6 +187,21 @@ export async function updateReviewRequestStatus(
     id: requestId,
     data,
     overrideAccess: true,
+  });
+
+  const clientId =
+    typeof row.client === "number"
+      ? row.client
+      : row.client && typeof row.client === "object" && "id" in row.client
+        ? Number((row.client as AnyDoc).id) || null
+        : null;
+
+  await processOperationalFlow({
+    source: "review",
+    entityId: requestId,
+    clientId,
+    previousStatus,
+    nextStatus: status,
   });
 
   return { ok: true, status };

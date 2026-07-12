@@ -11,7 +11,7 @@ import {
   updateWork as updateWorkIntegration,
 } from "./integration/updates";
 import { getClientWork as loadClientWork, getWorkWorkspace } from "./engine";
-import { createWork, getWorkById, updateWorkStatus } from "./runner";
+import { createWork, getWorkById } from "./runner";
 import type {
   ClientWorkData,
   CreateWorkInput,
@@ -51,6 +51,7 @@ export async function updateWorkItem(input: UpdateWorkItemInput): Promise<WorkLi
     estimatedEffort: patch.estimatedEffort,
     dueDate: patch.dueDate,
     startDate: patch.startDate,
+    plannedForDate: patch.plannedForDate,
     actorEmail,
   });
   const work = await getWorkById(workId);
@@ -143,6 +144,5 @@ export async function setWorkStatus(
   status: WorkListItem["status"],
   actorEmail?: string,
 ): Promise<WorkListItem> {
-  const result = await updateWorkStatus({ workId, status, actorEmail });
-  return result.work;
+  return transitionWorkItem(workId, status, actorEmail);
 }

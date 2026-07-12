@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * Phase 24C — Executive Work Composer v2
+ * Premium capture: four primary fields, calm More details, reserved intelligence slot.
+ */
+
 import {
   useCallback,
   useEffect,
@@ -9,6 +14,7 @@ import {
   type FormEvent,
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
+import { createPortal } from "react-dom";
 import {
   WORK_PRIORITIES,
   WORK_PRIORITY_LABELS,
@@ -28,6 +34,7 @@ import {
   localDateString,
   parseComposerTags,
   resolveTimeBudgetHours,
+  shouldExpandComposerMoreDetails,
 } from "@/lib/work/composer";
 import type {
   WorkComposerDraft,
@@ -43,13 +50,20 @@ type WorkComposerPanelProps = {
   onUpdated?: (work: WorkListItem) => void;
 };
 
+/** Reserved — hide completely until KXD Intelligence has real suggestions. */
+type ComposerSuggestion = {
+  id: string;
+  label: string;
+};
+
 export function WorkComposerPanel({
   currentUser: seedUser,
   onCreated,
   onUpdated,
 }: WorkComposerPanelProps) {
   const titleId = useId();
-  const titleRef = useRef<HTMLTextAreaElement>(null);
+  const moreId = useId();
+  const titleRef = useRef<HTMLInputElement>(null);
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
 
   const [open, setOpen] = useState(false);
@@ -60,13 +74,17 @@ export function WorkComposerPanel({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [optionsLoaded, setOptionsLoaded] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const [suggestions] = useState<ComposerSuggestion[]>([]);
 
   const resetDraft = useCallback(
     (prefill?: WorkComposerOpenOptions | null, user?: WorkComposerUserOption | null) => {
       const assignee = user?.id ?? seedUser?.id ?? null;
       const today = options?.today ?? localDateString();
       const base = createEmptyComposerDraft(today, assignee);
-      setDraft(applyComposerPrefill(base, prefill));
+      const next = applyComposerPrefill(base, prefill);
+      setDraft(next);
+      setMoreOpen(shouldExpandComposerMoreDetails(next));
       setError(null);
     },
     [options?.today, seedUser?.id],
@@ -76,6 +94,7 @@ export function WorkComposerPanel({
     setOpen(false);
     setBusy(false);
     setError(null);
+    setMoreOpen(false);
   }, []);
 
   function setTimeBudgetPreset(presetId: string) {
@@ -194,6 +213,7 @@ export function WorkComposerPanel({
       project: draft.project.trim() || null,
       dueDate: draft.dueDate || null,
       startDate: draft.startDate || null,
+      plannedForDate: draft.plannedForDate || null,
       priority: draft.priority,
       status: draft.status,
       assignedToId: draft.assignedToId,
@@ -249,7 +269,7 @@ export function WorkComposerPanel({
     void submit();
   }
 
-  function onTitleKeyDown(e: ReactKeyboardEvent<HTMLTextAreaElement>) {
+  function onTitleKeyDown(e: ReactKeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter" && !e.metaKey && !e.ctrlKey && !e.shiftKey) {
       e.preventDefault();
       descriptionRef.current?.focus();
@@ -273,8 +293,10 @@ export function WorkComposerPanel({
   const users = options?.users ?? (seedUser ? [seedUser] : []);
   const clients = options?.clients ?? [];
   const isEdit = draft.mode === "edit";
+  const titleReady = Boolean(draft.title.trim());
+  const hasSuggestions = suggestions.length > 0;
 
-  return (
+  const modal = (
     <div
       className="kxd-os-work-composer-overlay"
       role="presentation"
@@ -283,47 +305,59 @@ export function WorkComposerPanel({
       }}
     >
       <div
-        className="kxd-os-work-composer"
+        className="kxd-os-work-composer kxd-os-work-composer--v2"
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
       >
         <form className="kxd-os-work-composer__form" onSubmit={onFormSubmit}>
+          <header className="kxd-os-work-composer__header">
+            <div className="kxd-os-work-composer__header-copy">
+              <h2 id={titleId} className="kxd-os-work-composer__headline">
+                What needs to get done?
+              </h2>
+              <p className="kxd-os-work-composer__lede">
+                Capture it once.
+                <br />
+                KXD OS will organize the rest.
+              </p>
+            </div>
+            {isEdit ? (
+              <p className="kxd-os-work-composer__mode">Edit</p>
+            ) : null}
+          </header>
+
           <div className="kxd-os-work-composer__scroll">
-            <header className="kxd-os-work-composer__header">
-              <p className="kxd-os-work-composer__eyebrow">
-                {isEdit ? "Edit work" : "New work"}
-              </p>
-              <p className="kxd-os-work-composer__hint">
-                ⌘ Enter to {isEdit ? "save" : "create"} · Esc to close
-              </p>
-            </header>
+            <label className="kxd-os-work-composer__primary-field">
+              <span className="kxd-os-work-composer__primary-label">Title</span>
+              <input
+                ref={titleRef}
+                className="kxd-os-work-composer__title"
+                placeholder="Name this work"
+                value={draft.title}
+                onChange={(e) => patch("title", e.target.value)}
+                onKeyDown={onTitleKeyDown}
+                required
+                autoComplete="off"
+                aria-label="Work title"
+              />
+            </label>
 
-            <textarea
-              id={titleId}
-              ref={titleRef}
-              className="kxd-os-work-composer__title"
-              placeholder="What needs to get done?"
-              value={draft.title}
-              onChange={(e) => patch("title", e.target.value)}
-              onKeyDown={onTitleKeyDown}
-              rows={2}
-              required
-              aria-label="Work title"
-            />
+            <label className="kxd-os-work-composer__primary-field">
+              <span className="kxd-os-work-composer__primary-label">Description</span>
+              <textarea
+                ref={descriptionRef}
+                className="kxd-os-work-composer__description"
+                placeholder="Add context if it helps"
+                value={draft.description}
+                onChange={(e) => patch("description", e.target.value)}
+                onKeyDown={onDescriptionKeyDown}
+                rows={3}
+                aria-label="Description"
+              />
+            </label>
 
-            <textarea
-              ref={descriptionRef}
-              className="kxd-os-work-composer__description"
-              placeholder="Description"
-              value={draft.description}
-              onChange={(e) => patch("description", e.target.value)}
-              onKeyDown={onDescriptionKeyDown}
-              rows={3}
-              aria-label="Description"
-            />
-
-            <div className="kxd-os-work-composer__meta">
+            <div className="kxd-os-work-composer__essentials">
               <label className="kxd-os-work-composer__field">
                 <span>Client</span>
                 <select
@@ -342,16 +376,6 @@ export function WorkComposerPanel({
               </label>
 
               <label className="kxd-os-work-composer__field">
-                <span>Project</span>
-                <input
-                  type="text"
-                  value={draft.project}
-                  onChange={(e) => patch("project", e.target.value)}
-                  placeholder="Optional"
-                />
-              </label>
-
-              <label className="kxd-os-work-composer__field">
                 <span>Due date</span>
                 <input
                   type="date"
@@ -359,144 +383,230 @@ export function WorkComposerPanel({
                   onChange={(e) => patch("dueDate", e.target.value)}
                 />
               </label>
+            </div>
 
-              <label className="kxd-os-work-composer__field">
-                <span>Start date</span>
-                <input
-                  type="date"
-                  value={draft.startDate}
-                  onChange={(e) => patch("startDate", e.target.value)}
-                />
-              </label>
-
-              <label className="kxd-os-work-composer__field">
-                <span>Priority</span>
-                <select
-                  value={draft.priority}
-                  onChange={(e) => patch("priority", e.target.value as WorkPriority)}
-                >
-                  {WORK_PRIORITIES.map((p) => (
-                    <option key={p} value={p}>
-                      {WORK_PRIORITY_LABELS[p]}
-                    </option>
+            {hasSuggestions ? (
+              <div
+                className="kxd-os-work-composer__intelligence"
+                aria-label="Suggestions"
+              >
+                <p className="kxd-os-work-composer__intelligence-label">Suggestions</p>
+                <ul className="kxd-os-work-composer__intelligence-list">
+                  {suggestions.map((item) => (
+                    <li key={item.id}>{item.label}</li>
                   ))}
-                </select>
-              </label>
+                </ul>
+              </div>
+            ) : null}
 
-              <label className="kxd-os-work-composer__field">
-                <span>Status</span>
-                <select
-                  value={draft.status}
-                  onChange={(e) => patch("status", e.target.value as WorkStatus)}
+            <div className="kxd-os-work-composer__more">
+              <button
+                type="button"
+                className="kxd-os-work-composer__more-toggle"
+                aria-expanded={moreOpen}
+                aria-controls={moreId}
+                onClick={() => setMoreOpen((v) => !v)}
+              >
+                More details
+                <span className="kxd-os-work-composer__more-chevron" aria-hidden>
+                  {moreOpen ? "–" : "+"}
+                </span>
+              </button>
+
+              {moreOpen ? (
+                <div
+                  id={moreId}
+                  className="kxd-os-work-composer__more-panel kxd-os-work-composer__more-panel--open"
                 >
-                  {WORK_STATUSES.filter((s) => s !== "archived").map((s) => (
-                    <option key={s} value={s}>
-                      {WORK_STATUS_LABELS[s]}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="kxd-os-work-composer__field">
-                <span>Assigned to</span>
-                <select
-                  value={draft.assignedToId ?? ""}
-                  onChange={(e) =>
-                    patch("assignedToId", e.target.value ? Number(e.target.value) : null)
-                  }
-                >
-                  <option value="">Unassigned</option>
-                  {users.map((u) => (
-                    <option key={u.id} value={u.id}>
-                      {u.displayName || u.email}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className="kxd-os-work-composer__field">
-                <span>Time budget</span>
-                <select
-                  value={draft.timeBudgetPresetId}
-                  onChange={(e) => setTimeBudgetPreset(e.target.value)}
-                  aria-label="Time budget"
-                >
-                  {TIME_BUDGET_PRESETS.map((opt) => (
-                    <option key={opt.id || "none"} value={opt.id}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              {isTimeBudgetCustom(draft.timeBudgetPresetId) ? (
-                <div className="kxd-os-work-composer__field kxd-os-work-composer__field--wide kxd-os-work-composer__custom-budget">
-                  <span>Custom duration</span>
-                  <div className="kxd-os-work-composer__custom-budget-inputs">
-                    <label>
-                      <span className="kxd-os-work-composer__custom-budget-label">Hours</span>
+                  <div className="kxd-os-work-composer__meta">
+                    <label className="kxd-os-work-composer__field">
+                      <span>Project</span>
                       <input
-                        type="number"
-                        min={0}
-                        step={1}
-                        inputMode="numeric"
-                        value={draft.customHours}
-                        onChange={(e) => patch("customHours", e.target.value)}
-                        placeholder="0"
-                        aria-label="Custom hours"
+                        type="text"
+                        value={draft.project}
+                        onChange={(e) => patch("project", e.target.value)}
+                        placeholder="Optional"
                       />
                     </label>
-                    <label>
-                      <span className="kxd-os-work-composer__custom-budget-label">Minutes</span>
+
+                    <label className="kxd-os-work-composer__field">
+                      <span>Start date</span>
                       <input
-                        type="number"
-                        min={0}
-                        max={59}
-                        step={1}
-                        inputMode="numeric"
-                        value={draft.customMinutes}
-                        onChange={(e) => patch("customMinutes", e.target.value)}
-                        placeholder="0"
-                        aria-label="Custom minutes"
+                        type="date"
+                        value={draft.startDate}
+                        onChange={(e) => patch("startDate", e.target.value)}
+                      />
+                    </label>
+
+                    <label className="kxd-os-work-composer__field">
+                      <span>Planned date</span>
+                      <input
+                        type="date"
+                        value={draft.plannedForDate}
+                        onChange={(e) => patch("plannedForDate", e.target.value)}
+                      />
+                    </label>
+
+                    <label className="kxd-os-work-composer__field">
+                      <span>Priority</span>
+                      <select
+                        value={draft.priority}
+                        onChange={(e) =>
+                          patch("priority", e.target.value as WorkPriority)
+                        }
+                      >
+                        {WORK_PRIORITIES.map((p) => (
+                          <option key={p} value={p}>
+                            {WORK_PRIORITY_LABELS[p]}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    <label className="kxd-os-work-composer__field">
+                      <span>Status</span>
+                      <select
+                        value={draft.status}
+                        onChange={(e) =>
+                          patch("status", e.target.value as WorkStatus)
+                        }
+                      >
+                        {WORK_STATUSES.filter((s) => s !== "archived").map((s) => (
+                          <option key={s} value={s}>
+                            {WORK_STATUS_LABELS[s]}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    <label className="kxd-os-work-composer__field">
+                      <span>Assigned to</span>
+                      <select
+                        value={draft.assignedToId ?? ""}
+                        onChange={(e) =>
+                          patch(
+                            "assignedToId",
+                            e.target.value ? Number(e.target.value) : null,
+                          )
+                        }
+                      >
+                        <option value="">Unassigned</option>
+                        {users.map((u) => (
+                          <option key={u.id} value={u.id}>
+                            {u.displayName || u.email}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    <label className="kxd-os-work-composer__field">
+                      <span>Time budget</span>
+                      <select
+                        value={draft.timeBudgetPresetId}
+                        onChange={(e) => setTimeBudgetPreset(e.target.value)}
+                        aria-label="Time budget"
+                      >
+                        {TIME_BUDGET_PRESETS.map((opt) => (
+                          <option key={opt.id || "none"} value={opt.id}>
+                            {opt.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    {isTimeBudgetCustom(draft.timeBudgetPresetId) ? (
+                      <div className="kxd-os-work-composer__field kxd-os-work-composer__field--wide kxd-os-work-composer__custom-budget">
+                        <span>Custom duration</span>
+                        <div className="kxd-os-work-composer__custom-budget-inputs">
+                          <label>
+                            <span className="kxd-os-work-composer__custom-budget-label">
+                              Hours
+                            </span>
+                            <input
+                              type="number"
+                              min={0}
+                              step={1}
+                              inputMode="numeric"
+                              value={draft.customHours}
+                              onChange={(e) => patch("customHours", e.target.value)}
+                              placeholder="0"
+                              aria-label="Custom hours"
+                            />
+                          </label>
+                          <label>
+                            <span className="kxd-os-work-composer__custom-budget-label">
+                              Minutes
+                            </span>
+                            <input
+                              type="number"
+                              min={0}
+                              max={59}
+                              step={1}
+                              inputMode="numeric"
+                              value={draft.customMinutes}
+                              onChange={(e) => patch("customMinutes", e.target.value)}
+                              placeholder="0"
+                              aria-label="Custom minutes"
+                            />
+                          </label>
+                        </div>
+                      </div>
+                    ) : null}
+
+                    <label className="kxd-os-work-composer__field kxd-os-work-composer__field--wide">
+                      <span>Tags</span>
+                      <input
+                        type="text"
+                        value={draft.tags}
+                        onChange={(e) => patch("tags", e.target.value)}
+                        placeholder="Optional — comma separated"
                       />
                     </label>
                   </div>
                 </div>
               ) : null}
-
-              <label className="kxd-os-work-composer__field kxd-os-work-composer__field--wide">
-                <span>Tags</span>
-                <input
-                  type="text"
-                  value={draft.tags}
-                  onChange={(e) => patch("tags", e.target.value)}
-                  placeholder="Optional — comma separated"
-                />
-              </label>
             </div>
 
             {error ? <p className="kxd-os-work-composer__error">{error}</p> : null}
           </div>
 
           <footer className="kxd-os-work-composer__footer">
-            <button
-              type="button"
-              className="kxd-os-work-composer__cancel"
-              onClick={close}
-              disabled={busy}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="kxd-os-work-composer__submit"
-              disabled={busy || !draft.title.trim()}
-            >
-              {busy ? (isEdit ? "Saving…" : "Creating…") : isEdit ? "Save changes" : "Create work"}
-            </button>
+            <div className="kxd-os-work-composer__footer-hint" aria-live="polite">
+              {titleReady ? (
+                <span>
+                  ⌘ Enter to {isEdit ? "save" : "create"} · Esc to close
+                </span>
+              ) : null}
+            </div>
+            <div className="kxd-os-work-composer__footer-actions">
+              <button
+                type="button"
+                className="kxd-os-work-composer__cancel"
+                onClick={close}
+                disabled={busy}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="kxd-os-work-composer__submit"
+                disabled={busy || !titleReady}
+              >
+                {busy
+                  ? isEdit
+                    ? "Saving…"
+                    : "Creating…"
+                  : isEdit
+                    ? "Save changes"
+                    : "Create Work"}
+              </button>
+            </div>
           </footer>
         </form>
       </div>
     </div>
   );
+
+  if (typeof document === "undefined") return null;
+  return createPortal(modal, document.body);
 }

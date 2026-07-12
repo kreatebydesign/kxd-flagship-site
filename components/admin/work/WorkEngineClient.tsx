@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * @deprecated Phase 24A — replaced by WorkPlanningClient.
+ * Kept for reference; not mounted by /admin/work.
+ */
+
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState, type KeyboardEvent } from "react";

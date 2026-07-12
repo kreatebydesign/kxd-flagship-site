@@ -62,6 +62,7 @@ export async function POST(req: Request) {
       estimatedEffort: optionalNumber(body.estimatedEffort),
       dueDate: optionalString(body.dueDate),
       startDate: optionalString(body.startDate),
+      plannedForDate: optionalString(body.plannedForDate),
     });
 
     const workNumber = await assignWorkNumber(result.work.id);

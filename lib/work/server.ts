@@ -1,4 +1,4 @@
-export { getWorkWorkspace, getClientWorkWorkspace, getClientWork, countOpenWorkForClient } from "./engine";
+export { getWorkWorkspace, getWorkPool, loadWorkPoolFresh, getClientWorkWorkspace, getClientWork, countOpenWorkForClient } from "./engine";
 export { createWork, spawnWorkFromSource, updateWorkStatus, getWorkById } from "./runner";
 export { publishWorkTimelineEvent } from "./timeline";
 export { seedManualWorkForClient } from "./seed";
@@ -18,6 +18,19 @@ export {
   getOverdueWork,
   setWorkStatus,
 } from "./services";
+
+export {
+  getWorkView,
+  loadWorkPlanningPage,
+  getWorkFilterOptions,
+  getTodayPlan,
+  getUpcomingPlan,
+  planWorkForDate,
+  planWorkForToday,
+  planWorkForTomorrow,
+  removeWorkFromPlan,
+} from "./planning";
+
 
 /** Phase 14C — canonical integration contract for all subsystems */
 export {

@@ -91,6 +91,7 @@ export function toWorkListItem(
         : null,
     dueDate: doc.dueDate ? String(doc.dueDate) : null,
     startDate: doc.startDate ? String(doc.startDate) : null,
+    plannedForDate: doc.plannedForDate ? String(doc.plannedForDate).slice(0, 10) : null,
     startedAt: doc.startedAt ? String(doc.startedAt) : null,
     completedAt: doc.completedAt ? String(doc.completedAt) : null,
     parentWorkId,
@@ -120,9 +121,23 @@ async function loadWorkDocs(limit = 500): Promise<AnyDoc[]> {
   }
 }
 
-async function loadWorkWorkspaceUncached(): Promise<WorkWorkspaceData> {
+async function loadWorkPoolUncached(): Promise<WorkListItem[]> {
   const [ctx, docs] = await Promise.all([loadIntelligenceContext(), loadWorkDocs()]);
-  const all = docs.map((doc) => toWorkListItem(doc, ctx));
+  return docs.map((doc) => toWorkListItem(doc, ctx));
+}
+
+/**
+ * Fresh pool bypassing React request cache — for post-mutation Operational Flow.
+ */
+export async function loadWorkPoolFresh(): Promise<WorkListItem[]> {
+  return loadWorkPoolUncached();
+}
+
+/** Full work pool for planning views — one cached load per request. */
+export const getWorkPool = cache(loadWorkPoolUncached);
+
+async function loadWorkWorkspaceUncached(): Promise<WorkWorkspaceData> {
+  const all = await getWorkPool();
   const open = filterOpenWork(all);
   const currentWork = sortWorkByPriority(open).slice(0, 12);
   const todayWork = filterTodayWork(open).slice(0, 16);

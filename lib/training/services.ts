@@ -2,6 +2,7 @@ import "server-only";
 
 import { getPayload } from "payload";
 import config from "@payload-config";
+import { processOperationalFlow } from "@/lib/operational-flow";
 import { TRAINING_CATALOG, getCatalogLesson, getCatalogPath } from "./catalog";
 import { EXECUTIVE_OPS_COORDINATOR_TRACK } from "./growth-track";
 import {
@@ -164,6 +165,14 @@ export async function completeTrainingLesson(input: {
     markCompleted: true,
     checklistCompletedIds: input.checklistCompletedIds,
     percentComplete: 100,
+  });
+
+  await processOperationalFlow({
+    source: "training",
+    kind: "training.milestone-completed",
+    entityId: `${input.pathSlug}/${input.lessonSlug}`,
+    actorEmail:
+      input.user && typeof input.user.email === "string" ? input.user.email : null,
   });
 
   return getTrainingLesson(input.pathSlug, input.lessonSlug, input.user);

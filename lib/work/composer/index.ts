@@ -17,6 +17,7 @@ export {
   createEmptyComposerDraft,
   localDateString,
   parseComposerTags,
+  shouldExpandComposerMoreDetails,
 } from "./defaults";
 
 export {

@@ -83,7 +83,18 @@ export function filterQueue(items: WorkListItem[]): WorkListItem[] {
   );
 }
 
-/** Due today, starting today, or actively in progress / review / blocked. */
+export function isPlannedForDate(item: WorkListItem, day: Date = new Date()): boolean {
+  if (!item.plannedForDate) return false;
+  const planned = new Date(item.plannedForDate);
+  if (Number.isNaN(planned.getTime())) return false;
+  return planned >= startOfLocalDay(day) && planned <= endOfLocalDay(day);
+}
+
+export function isPlannedForToday(item: WorkListItem, now = new Date()): boolean {
+  return isPlannedForDate(item, now);
+}
+
+/** Due today, starting today, planned for today, or actively in progress / review / blocked. */
 export function filterTodayWork(items: WorkListItem[]): WorkListItem[] {
   const open = filterOpenWork(items);
   return sortWorkByPriority(
@@ -91,6 +102,7 @@ export function filterTodayWork(items: WorkListItem[]): WorkListItem[] {
       (item) =>
         isDueToday(item) ||
         isStartToday(item) ||
+        isPlannedForToday(item) ||
         item.status === "in-progress" ||
         item.status === "review" ||
         item.status === "blocked",

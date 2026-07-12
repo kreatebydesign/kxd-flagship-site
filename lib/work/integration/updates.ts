@@ -2,6 +2,7 @@ import "server-only";
 
 import { getPayload } from "payload";
 import config from "@payload-config";
+import { processOperationalFlow } from "@/lib/operational-flow";
 import { appendWorkActivityEntry, readActivityHistory } from "../activity";
 import { WORK_COLLECTION, WORK_STATUS_LABELS } from "../constants";
 import { updateWorkStatus } from "../runner";
@@ -39,6 +40,9 @@ function buildFieldPatch(input: UpdateWorkInput): AnyDoc {
   }
   if (input.dueDate !== undefined) patch.dueDate = input.dueDate || null;
   if (input.startDate !== undefined) patch.startDate = input.startDate || null;
+  if (input.plannedForDate !== undefined) {
+    patch.plannedForDate = input.plannedForDate || null;
+  }
   return patch;
 }
 
@@ -126,11 +130,53 @@ export async function updateWork(input: UpdateWorkInput): Promise<UpdateWorkResu
     );
   }
 
+  const nextStatus = String(
+    (refreshed as AnyDoc)?.status ?? input.status ?? previousStatus,
+  ) as WorkStatus;
+  const clientId =
+    typeof (refreshed as AnyDoc)?.client === "number"
+      ? ((refreshed as AnyDoc).client as number)
+      : (refreshed as AnyDoc)?.client &&
+          typeof (refreshed as AnyDoc).client === "object" &&
+          "id" in (refreshed as AnyDoc).client
+        ? Number(((refreshed as AnyDoc).client as AnyDoc).id) || null
+        : typeof (existing as AnyDoc).client === "number"
+          ? ((existing as AnyDoc).client as number)
+          : null;
+
+  if (statusChanging && input.status) {
+    await processOperationalFlow({
+      source: "work",
+      entityId: input.workId,
+      workId: input.workId,
+      clientId,
+      previousStatus,
+      nextStatus: input.status,
+      actorEmail: input.actorEmail ?? null,
+    });
+  } else if (
+    input.plannedForDate !== undefined &&
+    String((existing as AnyDoc).plannedForDate ?? "").slice(0, 10) !==
+      String(input.plannedForDate ?? "").slice(0, 10)
+  ) {
+    await processOperationalFlow({
+      source: "work",
+      entityId: input.workId,
+      workId: input.workId,
+      clientId,
+      previousPlannedForDate: (existing as AnyDoc).plannedForDate
+        ? String((existing as AnyDoc).plannedForDate).slice(0, 10)
+        : null,
+      plannedForDate: input.plannedForDate,
+      actorEmail: input.actorEmail ?? null,
+    });
+  }
+
   return {
     ok: true,
     workId: input.workId,
     workNumber,
-    status: String((refreshed as AnyDoc)?.status ?? input.status ?? previousStatus) as WorkStatus,
+    status: nextStatus,
   };
 }
 

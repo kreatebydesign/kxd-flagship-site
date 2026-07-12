@@ -132,6 +132,7 @@ export interface UpdateWorkInput {
   estimatedEffort?: number | null;
   dueDate?: string | null;
   startDate?: string | null;
+  plannedForDate?: string | null;
   actorEmail?: string;
 }
 

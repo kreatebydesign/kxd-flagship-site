@@ -1,6 +1,6 @@
 /**
  * /admin/work
- * Phase 20A — Work Engine editorial workspace
+ * Phase 24A — Work Planning & Daily Execution
  */
 
 import { redirect } from "next/navigation";
@@ -12,14 +12,35 @@ import {
   resolveRequestTimezone,
 } from "@/lib/platform/timezone";
 import { resolveExecutiveFirstName } from "@/lib/rituals/morning-welcome";
-import { getWorkEngineWorkspace } from "@/lib/work/services";
+import {
+  loadWorkPlanningPage,
+  parseWorkSortId,
+  parseWorkViewId,
+  type WorkDueRange,
+  type WorkViewFilters,
+} from "@/lib/work/planning";
+import type { WorkPriority, WorkStatus } from "@/lib/work/types";
 
 export const dynamic = "force-dynamic";
+
+function parseFilters(params: Record<string, string | undefined>): WorkViewFilters {
+  const clientIdRaw = params.clientId;
+  const assignedRaw = params.assignedTo;
+  return {
+    clientId: clientIdRaw && /^\d+$/.test(clientIdRaw) ? Number(clientIdRaw) : null,
+    status: params.status ? (params.status as WorkStatus) : null,
+    priority: params.priority ? (params.priority as WorkPriority) : null,
+    assignedToId:
+      assignedRaw && /^\d+$/.test(assignedRaw) ? Number(assignedRaw) : null,
+    dueRange: (params.due as WorkDueRange | undefined) ?? "any",
+    tag: params.tag?.trim() || null,
+  };
+}
 
 export default async function WorkEnginePage({
   searchParams,
 }: {
-  searchParams?: Promise<{ client?: string }>;
+  searchParams?: Promise<Record<string, string | undefined>>;
 }) {
   const user = await requirePayloadAdminPage("/admin/work");
   const params = searchParams ? await searchParams : {};
@@ -29,8 +50,12 @@ export default async function WorkEnginePage({
     redirect(`/admin/operations/work/${params.client}`);
   }
 
-  const [data, timeZone] = await Promise.all([
-    getWorkEngineWorkspace(),
+  const [planning, timeZone] = await Promise.all([
+    loadWorkPlanningPage({
+      view: parseWorkViewId(params.view),
+      sort: parseWorkSortId(params.sort),
+      filters: parseFilters(params),
+    }),
     resolveRequestTimezone(),
   ]);
 
@@ -48,7 +73,7 @@ export default async function WorkEnginePage({
 
   return (
     <WorkEngineWorkspace
-      data={data}
+      planning={planning}
       greeting={greeting}
       dateDisplay={formatDisplayDate(new Date(), timeZone)}
       currentUser={{

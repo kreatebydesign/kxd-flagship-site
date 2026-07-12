@@ -189,6 +189,17 @@ export const Work: CollectionConfig = {
       admin: { date: { pickerAppearance: "dayOnly" }, position: "sidebar" },
     },
     {
+      name: "plannedForDate",
+      type: "date",
+      label: "Planned for",
+      admin: {
+        date: { pickerAppearance: "dayOnly" },
+        position: "sidebar",
+        description:
+          "Daily execution plan — place work on a day without changing the due date.",
+      },
+    },
+    {
       name: "startedAt",
       type: "date",
       label: "Started At",
