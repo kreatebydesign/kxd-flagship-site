@@ -1,8 +1,8 @@
 /**
- * Phase 25C — Google Calendar read foundation.
+ * Phase 25C / 26C — Google Calendar foundation.
  *
  * Auth: OAuth 2.0 (refresh token) for Matt’s founder calendar.
- * Scope: calendar.readonly only — no event writes in this phase.
+ * Scopes: calendar.readonly + calendar.events (Phase 26C create).
  */
 
 export type {
@@ -11,6 +11,8 @@ export type {
   CalendarConnectionStatus,
   CalendarListItem,
   CalendarMetadata,
+  CreateCalendarEventInput,
+  CreatedCalendarEvent,
   FreeBusyQueryInput,
   FreeBusyResult,
   GoogleCalendarOAuthConfig,
@@ -20,7 +22,9 @@ export type {
 
 export {
   GOOGLE_CALENDAR_API_BASE,
+  GOOGLE_CALENDAR_EVENTS_SCOPE,
   GOOGLE_CALENDAR_READONLY_SCOPE,
+  GOOGLE_CALENDAR_WRITE_SCOPES,
   GOOGLE_OAUTH_AUTH_URL,
   GOOGLE_OAUTH_TOKEN_URL,
 } from "./types";
@@ -57,11 +61,17 @@ export {
   validateCalendarOwnership,
 } from "./calendars";
 
+export { createCalendarEvent } from "./events";
+
 export { queryGoogleCalendarFreeBusy } from "./availability";
 export { resolveGoogleCalendarTimezone } from "./timezone";
-export { getDefaultWorkingHours, getGoogleCalendarWorkingHours } from "./working-hours";
+export {
+  getDefaultWorkingHours,
+  getGoogleCalendarWorkingHours,
+} from "./working-hours";
 
 export {
   googleCalendarAvailabilityProvider,
+  googleCalendarEventWriter,
   googleCalendarMetadataProvider,
 } from "./providers";

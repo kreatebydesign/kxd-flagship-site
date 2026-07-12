@@ -151,6 +151,10 @@ export interface WorkScheduleLinkRecord {
   googleEventEtag: string | null;
   googleEventUpdatedAt: string | null;
   googleEventHtmlLink: string | null;
+  /** When the Google event was successfully written (Phase 26C). */
+  calendarWriteAt: string | null;
+  /** Last successful calendar sync/write timestamp. */
+  lastSyncAt: string | null;
   policySnapshot: SchedulingPolicyEvidence | Record<string, unknown> | null;
   conflictSnapshot: Record<string, unknown> | null;
   displacedItemSnapshot: Record<string, unknown> | null;
@@ -192,6 +196,10 @@ export type SchedulingAuditAction =
   | "approval_requested"
   | "approved"
   | "pending_calendar_write"
+  | "calendar_write_started"
+  | "calendar_created"
+  | "calendar_create_failed"
+  | "calendar_linked"
   | "rejected"
   | "canceled"
   | "completed"

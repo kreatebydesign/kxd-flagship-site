@@ -282,6 +282,25 @@ export const WorkScheduleLinks: CollectionConfig = {
       admin: { position: "sidebar" },
     },
     {
+      name: "calendarWriteAt",
+      type: "date",
+      label: "Calendar write at",
+      admin: {
+        date: { pickerAppearance: "dayAndTime" },
+        position: "sidebar",
+        description: "When the Google Calendar event was created (Phase 26C).",
+      },
+    },
+    {
+      name: "lastSyncAt",
+      type: "date",
+      label: "Last sync at",
+      admin: {
+        date: { pickerAppearance: "dayAndTime" },
+        position: "sidebar",
+      },
+    },
+    {
       name: "policySnapshot",
       type: "json",
       label: "Policy snapshot",

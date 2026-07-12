@@ -58,6 +58,8 @@ import * as migration_20260731_phase24a_work_planned_for_date from './20260731_p
 import * as migration_20260801_phase25b_scheduling_domain from './20260801_phase25b_scheduling_domain';
 import * as migration_20260802_phase26b1_active_proposal_integrity from './20260802_phase26b1_active_proposal_integrity';
 import * as migration_20260803_phase26b1_active_unique_index from './20260803_phase26b1_active_unique_index';
+import * as migration_20260804_phase26c_calendar_write_fields from './20260804_phase26c_calendar_write_fields';
+import * as migration_20260805_phase26c1_timeline_source_module_work from './20260805_phase26c1_timeline_source_module_work';
 
 export const migrations = [
   {
@@ -359,5 +361,15 @@ export const migrations = [
     up: migration_20260803_phase26b1_active_unique_index.up,
     down: migration_20260803_phase26b1_active_unique_index.down,
     name: '20260803_phase26b1_active_unique_index',
+  },
+  {
+    up: migration_20260804_phase26c_calendar_write_fields.up,
+    down: migration_20260804_phase26c_calendar_write_fields.down,
+    name: '20260804_phase26c_calendar_write_fields',
+  },
+  {
+    up: migration_20260805_phase26c1_timeline_source_module_work.up,
+    down: migration_20260805_phase26c1_timeline_source_module_work.down,
+    name: '20260805_phase26c1_timeline_source_module_work',
   },
 ];

@@ -8,6 +8,8 @@ import type {
   CalendarAvailabilitySnapshot,
   CalendarListItem,
   CalendarMetadata,
+  CreateCalendarEventInput,
+  CreatedCalendarEvent,
   FreeBusyQueryInput,
   FreeBusyResult,
   WorkingHoursWindow,
@@ -44,4 +46,18 @@ export interface CalendarAvailabilityProvider {
   }): Promise<CalendarAvailabilitySnapshot>;
 }
 
-export type { BusyBlock, CalendarAvailabilitySnapshot, WorkingHoursWindow };
+/**
+ * Phase 26C — Event creation only (no update / delete / sync).
+ * Scheduling calls this — never Google modules directly.
+ */
+export interface CalendarEventWriter {
+  createEvent(input: CreateCalendarEventInput): Promise<CreatedCalendarEvent>;
+}
+
+export type {
+  BusyBlock,
+  CalendarAvailabilitySnapshot,
+  CreateCalendarEventInput,
+  CreatedCalendarEvent,
+  WorkingHoursWindow,
+};

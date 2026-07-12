@@ -4,7 +4,7 @@
 
 import { GoogleCalendarError } from "./errors";
 import {
-  GOOGLE_CALENDAR_READONLY_SCOPE,
+  GOOGLE_CALENDAR_WRITE_SCOPES,
   type GoogleCalendarOAuthConfig,
   type CalendarConnectionStatus,
 } from "./types";
@@ -59,7 +59,7 @@ export function loadGoogleCalendarOAuthConfig(opts?: {
     redirectUri,
     refreshToken,
     preferredCalendarId,
-    scopes: [GOOGLE_CALENDAR_READONLY_SCOPE],
+    scopes: [...GOOGLE_CALENDAR_WRITE_SCOPES],
   };
 }
 
@@ -82,8 +82,9 @@ export function getGoogleCalendarConnectionStatus(): CalendarConnectionStatus {
     connected,
     hasRefreshToken: Boolean(refreshToken),
     preferredCalendarId,
-    scope: GOOGLE_CALENDAR_READONLY_SCOPE,
-    writeEnabled: false,
+    scope: GOOGLE_CALENDAR_WRITE_SCOPES.join(" "),
+    /** Phase 26C — writes enabled when OAuth refresh token is connected. */
+    writeEnabled: connected,
     missingEnv,
   };
 }

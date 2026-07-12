@@ -1,5 +1,5 @@
 /**
- * Phase 25C — Google implementations of Scheduling calendar provider interfaces.
+ * Phase 25C / 26C — Google implementations of Scheduling calendar provider interfaces.
  */
 
 import "server-only";
@@ -12,13 +12,18 @@ import {
   resolveTargetCalendarId,
   validateCalendarOwnership,
 } from "./calendars";
+import { createCalendarEvent } from "./events";
 import { isGoogleCalendarError } from "./errors";
 import { resolveGoogleCalendarTimezone } from "./timezone";
 import type { CalendarAvailabilitySnapshot } from "./types";
 import { getGoogleCalendarConnectionStatus } from "./validation";
-import { getGoogleCalendarWorkingHours, getDefaultWorkingHours } from "./working-hours";
+import {
+  getDefaultWorkingHours,
+  getGoogleCalendarWorkingHours,
+} from "./working-hours";
 import type {
   CalendarAvailabilityProvider,
+  CalendarEventWriter,
   CalendarMetadataProvider,
 } from "@/lib/scheduling/calendar-providers";
 
@@ -104,5 +109,16 @@ export const googleCalendarAvailabilityProvider: CalendarAvailabilityProvider = 
         errors: [message],
       };
     }
+  },
+};
+
+/** Phase 26C — create-only writer. */
+export const googleCalendarEventWriter: CalendarEventWriter = {
+  async createEvent(input) {
+    const calendarId = await resolveTargetCalendarId(input.calendarId);
+    return createCalendarEvent({
+      ...input,
+      calendarId,
+    });
   },
 };

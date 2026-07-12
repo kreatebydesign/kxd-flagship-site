@@ -59,9 +59,13 @@ function MetaRow({ label, value }: { label: string; value: React.ReactNode }) {
 export function WorkDetailClient({
   initialWork,
   currentUser,
+  calendarEventHtmlLink = null,
+  calendarWriteAt = null,
 }: {
   initialWork: WorkListItem;
   currentUser?: WorkComposerUserOption | null;
+  calendarEventHtmlLink?: string | null;
+  calendarWriteAt?: string | null;
 }) {
   const [work, setWork] = useState(initialWork);
   const [busyAction, setBusyAction] = useState<string | null>(null);
@@ -216,6 +220,33 @@ export function WorkDetailClient({
                     : null
                 }
               />
+              {work.schedulingStatus === "scheduled" ? (
+                <>
+                  <MetaRow label="Calendar" value="Matt" />
+                  <MetaRow label="Google Calendar" value="Created" />
+                  {calendarWriteAt ? (
+                    <MetaRow
+                      label="Calendar created"
+                      value={formatDateTime(calendarWriteAt)}
+                    />
+                  ) : null}
+                  {calendarEventHtmlLink ? (
+                    <MetaRow
+                      label="Open event"
+                      value={
+                        <a
+                          href={calendarEventHtmlLink}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="kxd-os-link-quiet"
+                        >
+                          Open in Google Calendar
+                        </a>
+                      }
+                    />
+                  ) : null}
+                </>
+              ) : null}
               <MetaRow label="Assigned" value={assignee} />
               <MetaRow label="Created by" value={work.createdBy} />
               <MetaRow label="Time budget" value={budget} />

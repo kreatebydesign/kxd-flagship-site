@@ -117,6 +117,9 @@ export function SchedulingProposalDetailPanel({
   const canApprove =
     capabilities.canApprove &&
     (link.status === "approval_required" || link.status === "proposed");
+  const canRetryWrite =
+    capabilities.canApprove &&
+    link.status === "pending_calendar_write";
   const canReject =
     capabilities.canApprove &&
     (link.status === "approval_required" || link.status === "proposed");
@@ -159,6 +162,19 @@ export function SchedulingProposalDetailPanel({
       const data = (await res.json()) as { ok?: boolean; error?: string };
       if (!res.ok || data.ok === false) {
         throw new Error(data.error ?? "Could not approve.");
+      }
+    });
+  }
+
+  async function retryCalendarWrite() {
+    await runAction("retry-write", async () => {
+      const res = await fetch(
+        `/api/admin/scheduling/proposals/${link.id}/approve`,
+        { method: "POST" },
+      );
+      const data = (await res.json()) as { ok?: boolean; error?: string };
+      if (!res.ok || data.ok === false) {
+        throw new Error(data.error ?? "Could not retry calendar write.");
       }
     });
   }
@@ -347,6 +363,33 @@ export function SchedulingProposalDetailPanel({
                   label="Approval"
                   value={link.approvalStatus}
                 />
+                {link.status === "scheduled" ||
+                link.status === "pending_calendar_write" ? (
+                  <>
+                    <Row label="Sync" value={link.syncStatus} />
+                    {link.calendarWriteAt ? (
+                      <Row
+                        label="Calendar created"
+                        value={formatCreated(link.calendarWriteAt)}
+                      />
+                    ) : null}
+                    {link.googleEventHtmlLink ? (
+                      <Row
+                        label="Google Calendar"
+                        value={
+                          <a
+                            href={link.googleEventHtmlLink}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="kxd-os-link-quiet"
+                          >
+                            Open Calendar
+                          </a>
+                        }
+                      />
+                    ) : null}
+                  </>
+                ) : null}
                 <Row
                   label="Work"
                   value={
@@ -607,6 +650,19 @@ export function SchedulingProposalDetailPanel({
                   onClick={() => void approve()}
                 >
                   {busy === "approve" ? "Approving…" : "Approve"}
+                </button>
+              ) : canRetryWrite ? (
+                <button
+                  type="button"
+                  className="kxd-os-schedule-panel__primary"
+                  disabled={busy != null}
+                  onClick={() => void retryCalendarWrite()}
+                >
+                  {busy === "retry-write"
+                    ? "Writing…"
+                    : link.syncStatus === "error"
+                      ? "Retry calendar write"
+                      : "Write to Google Calendar"}
                 </button>
               ) : (
                 <button

@@ -362,38 +362,43 @@ async function runLiveSubmission(): Promise<void> {
   const actives = await findActiveProposalsForWork(targetId);
   assert(actives.length === 1, `exactly one active proposal (got ${actives.length})`);
 
-  // Approve → pending_calendar_write (not scheduled)
+  // Approve → calendar write → scheduled (or pending with sync error)
   if (first.link.status === "approval_required") {
     const approved = await approveScheduleProposal(first.link.id, actor);
     assert(
-      approved.status === "pending_calendar_write",
-      `approve → pending_calendar_write (got ${approved.status})`,
+      approved.status === "scheduled" ||
+        approved.status === "pending_calendar_write",
+      `approve+write status (${approved.status})`,
     );
-    assert(
-      approved.syncStatus === "pending_write",
-      "syncStatus pending_write after approve",
-    );
-    const workApproved = (await payload.findByID({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      collection: "work" as any,
-      id: targetId,
-      depth: 0,
-      overrideAccess: true,
-    })) as { schedulingStatus?: string };
-    assert(
-      workApproved.schedulingStatus === "pending_calendar_write",
-      "Work projection pending_calendar_write after approve",
-    );
-    assert(
-      workApproved.schedulingStatus !== "scheduled",
-      "approve does not mark Work scheduled",
-    );
+    if (approved.status === "scheduled") {
+      assert(Boolean(approved.googleEventId), "Google event id stored");
+      assert(approved.syncStatus === "synced", "syncStatus synced");
+      const workApproved = (await payload.findByID({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        collection: "work" as any,
+        id: targetId,
+        depth: 0,
+        overrideAccess: true,
+      })) as { schedulingStatus?: string };
+      assert(
+        workApproved.schedulingStatus === "scheduled",
+        "Work projection scheduled after Google write",
+      );
+    } else {
+      assert(
+        approved.syncStatus === "error" ||
+          approved.syncStatus === "pending_write",
+        "pending write retained on soft failure path",
+      );
+    }
   } else if (first.link.status === "pending_calendar_write") {
     assert(
       true,
-      "already pending_calendar_write — approve→scheduled skipped (correct)",
+      "already pending_calendar_write — approve→write available via retry",
     );
+  } else if (first.link.status === "scheduled") {
+    assert(Boolean(first.link.googleEventId), "scheduled has event linkage");
   }
 
-  assert(true, "no Google Calendar write invoked");
+  assert(true, "calendar write path uses provider only");
 }

@@ -40,8 +40,9 @@ export async function GET(req: Request) {
     return NextResponse.json({
       ok: true,
       authorizationUrl,
-      scope: "https://www.googleapis.com/auth/calendar.readonly",
-      note: "Complete consent, then set GOOGLE_CALENDAR_REFRESH_TOKEN from the callback response.",
+      scope:
+        "https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events",
+      note: "Phase 26C requires calendar.events. Re-consent if your refresh token was readonly-only, then set GOOGLE_CALENDAR_REFRESH_TOKEN.",
     });
   } catch (err) {
     if (isGoogleCalendarError(err)) {

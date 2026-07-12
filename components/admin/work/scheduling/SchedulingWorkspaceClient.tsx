@@ -243,6 +243,31 @@ function ProposalCardButton({
         {" · "}
         {formatShort(card.link.createdAt)}
       </p>
+      {card.link.status === "scheduled" ? (
+        <div className="kxd-os-sched-ws-card__calendar">
+          <p className="kxd-os-sched-ws-card__calendar-label">
+            Google Calendar · Created
+            {card.link.calendarWriteAt
+              ? ` · ${formatShort(card.link.calendarWriteAt)}`
+              : ""}
+          </p>
+          {card.link.googleEventHtmlLink ? (
+            <a
+              href={card.link.googleEventHtmlLink}
+              target="_blank"
+              rel="noreferrer"
+              className="kxd-os-link-quiet"
+              onClick={(e) => e.stopPropagation()}
+            >
+              Open Calendar
+            </a>
+          ) : null}
+        </div>
+      ) : null}
+      {card.link.status === "pending_calendar_write" &&
+      card.link.syncStatus === "error" ? (
+        <p className="kxd-os-sched-ws-card__status">Calendar write failed — retry from detail</p>
+      ) : null}
     </button>
   );
 }

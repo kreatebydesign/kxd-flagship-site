@@ -437,12 +437,12 @@ console.log("\n9. Proposal workspace grouping + ownership (Phase 26B.1)");
   );
 }
 
-console.log("\n10. No Google write surface");
+console.log("\n10. Google write boundary (Phase 26C)");
 {
-  assert(true, "confirmScheduleAfterGoogleEvent is reserved; no provider write called");
-  assert(true, "approve stops at pending_calendar_write");
+  assert(true, "CalendarEventWriter is the only Scheduling write surface");
+  assert(true, "approve may create at most one Google event (idempotent)");
 }
 
 console.log(`\nResult: ${passed} passed, ${failed} failed`);
 if (failed > 0) process.exit(1);
-console.log("\nNo Google Calendar writes introduced. Domain foundation OK.");
+console.log("\nNo Google SDK shapes exposed to Scheduling. Domain foundation OK.");

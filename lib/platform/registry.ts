@@ -229,7 +229,7 @@ export const PLATFORM_PHASES: PlatformPhaseDefinition[] = [
     title: "Google Calendar Read Foundation",
     status: "completed",
     description:
-      "OAuth 2.0 calendar.readonly foundation — list calendars, timezone, free/busy, provider interfaces for Scheduling. No event writes.",
+      "OAuth 2.0 calendar.readonly + calendar.events — free/busy reads and single-event create after approval. No sync, edits, or delete.",
     completedAt: "2026-07-11",
   },
   {

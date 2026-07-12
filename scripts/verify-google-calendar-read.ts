@@ -9,7 +9,6 @@ import {
   GoogleCalendarError,
   googleCalendarErrorFromHttp,
 } from "../lib/google/calendar/errors.ts";
-import { GOOGLE_CALENDAR_READONLY_SCOPE } from "../lib/google/calendar/types.ts";
 import {
   GOOGLE_CALENDAR_ENV,
   assertIsoRange,
@@ -35,10 +34,11 @@ console.log("Phase 25C — Google Calendar read foundation\n");
 console.log("1. Config / connection status");
 {
   const status = getGoogleCalendarConnectionStatus();
-  assert(status.writeEnabled === false, "writeEnabled is false");
+  assert(typeof status.writeEnabled === "boolean", "writeEnabled is boolean");
   assert(
-    status.scope === GOOGLE_CALENDAR_READONLY_SCOPE,
-    "readonly scope declared",
+    status.scope.includes("calendar.readonly") ||
+      status.scope.includes("calendar.events"),
+    "calendar scopes declared",
   );
   assert(Array.isArray(status.missingEnv), "missingEnv is an array");
   console.log(

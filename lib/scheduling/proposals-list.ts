@@ -69,7 +69,11 @@ function mapLink(doc: AnyDoc): WorkScheduleLinkRecord {
     googleEventId: null,
     googleEventEtag: null,
     googleEventUpdatedAt: null,
-    googleEventHtmlLink: null,
+    googleEventHtmlLink: doc.googleEventHtmlLink
+      ? String(doc.googleEventHtmlLink)
+      : null,
+    calendarWriteAt: doc.calendarWriteAt ? String(doc.calendarWriteAt) : null,
+    lastSyncAt: doc.lastSyncAt ? String(doc.lastSyncAt) : null,
     policySnapshot: (doc.policySnapshot as SchedulingPolicyEvidence) ?? null,
     conflictSnapshot: null,
     displacedItemSnapshot: null,

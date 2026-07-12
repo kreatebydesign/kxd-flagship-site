@@ -1,11 +1,9 @@
 /**
- * Phase 25B / 26B.1 — Scheduling audit adapter.
+ * Phase 25B / 26C — Scheduling audit adapter.
  * Uses Work activityHistory always; Activity Engine when client-linked.
- * Does not invent a parallel activity system.
  *
- * Activity Engine / timeline publish must never abort proposal creation.
- * Work activityHistory append is soft-failed so secondary audit cannot
- * duplicate primary mutations on retry.
+ * Secondary activity failures must never roll back calendar writes or
+ * primary scheduling mutations.
  */
 
 import "server-only";
@@ -22,6 +20,10 @@ const ACTION_LABELS: Record<SchedulingAuditAction, string> = {
   approval_requested: "schedule.approval-requested",
   approved: "schedule.approved",
   pending_calendar_write: "schedule.pending-calendar-write",
+  calendar_write_started: "schedule.calendar-write-started",
+  calendar_created: "schedule.calendar-created",
+  calendar_create_failed: "schedule.calendar-create-failed",
+  calendar_linked: "schedule.calendar-linked",
   rejected: "schedule.rejected",
   canceled: "schedule.canceled",
   completed: "schedule.completed",
@@ -38,6 +40,10 @@ const ACTIVITY_EVENT_TYPES: Partial<Record<SchedulingAuditAction, string>> = {
   approval_requested: "work.schedule-approval-requested",
   approved: "work.schedule-approved",
   pending_calendar_write: "work.schedule-pending-calendar-write",
+  calendar_write_started: "work.schedule-calendar-write-started",
+  calendar_created: "work.schedule-calendar-created",
+  calendar_create_failed: "work.schedule-calendar-create-failed",
+  calendar_linked: "work.schedule-calendar-linked",
   rejected: "work.schedule-rejected",
   canceled: "work.schedule-canceled",
   completed: "work.schedule-completed",
@@ -68,9 +74,10 @@ export async function recordSchedulingAudit(
     await appendWorkActivityEntry(input.workId, {
       actor: actorLabel,
       action,
-      detail: input.linkId != null
-        ? `[link:${input.linkId}] ${input.detail}`
-        : input.detail,
+      detail:
+        input.linkId != null
+          ? `[link:${input.linkId}] ${input.detail}`
+          : input.detail,
     });
   } catch (err) {
     console.warn(
@@ -88,7 +95,6 @@ export async function recordSchedulingAudit(
         summary: input.detail,
         clientId: input.clientId,
         workId: input.workId,
-        // Must match ExecutiveTimelineEvents.sourceModule options
         sourceModule: "Work",
         sourceType: "scheduling",
         sourceId: input.linkId ?? `work-${input.workId}-${input.action}`,
@@ -98,6 +104,8 @@ export async function recordSchedulingAudit(
           schedulingAudit: true,
           action: input.action,
           linkId: input.linkId ?? null,
+          proposalId: input.linkId ?? null,
+          workId: input.workId,
           ...input.metadata,
         },
         relatedLinks: [
@@ -132,6 +140,14 @@ function detailTitle(action: SchedulingAuditAction, detail: string): string {
       return "Schedule proposal approved";
     case "pending_calendar_write":
       return "Pending calendar write";
+    case "calendar_write_started":
+      return "Calendar write started";
+    case "calendar_created":
+      return "Google Calendar event created";
+    case "calendar_create_failed":
+      return "Calendar write failed";
+    case "calendar_linked":
+      return "Schedule linked to Google Calendar";
     case "rejected":
       return "Schedule proposal rejected";
     case "canceled":
@@ -154,9 +170,12 @@ function importanceFor(
     case "rejected":
     case "policy_blocked":
     case "integrity_repair":
+    case "calendar_create_failed":
       return "high";
     case "approved":
     case "pending_calendar_write":
+    case "calendar_created":
+    case "calendar_linked":
     case "canceled":
       return "normal";
     default:

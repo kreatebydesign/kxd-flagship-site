@@ -83,11 +83,13 @@ export type {
 
 export type {
   CalendarAvailabilityProvider,
+  CalendarEventWriter,
   CalendarMetadataProvider,
 } from "./calendar-providers";
 
 export {
   getCalendarAvailabilityProvider,
+  getCalendarEventWriter,
   getCalendarMetadataProvider,
   getSchedulingCalendarContext,
 } from "./calendar-context";
@@ -127,6 +129,7 @@ export {
   requestScheduleApproval,
   supersedeScheduleProposal,
   updateScheduleProposal,
+  writeApprovedScheduleToCalendar,
 } from "./services";
 
 export {

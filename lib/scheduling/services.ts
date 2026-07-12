@@ -14,6 +14,9 @@ import { KXD_BUSINESS_TIMEZONE } from "@/lib/platform/timezone";
 import { processOperationalFlow } from "@/lib/operational-flow";
 import type { OperationalTransitionKind } from "@/lib/operational-flow/types";
 import { WORK_COLLECTION } from "@/lib/work/constants";
+import { getCalendarEventWriter } from "./calendar-context";
+import { isGoogleCalendarError } from "@/lib/google/calendar/errors";
+import { getGoogleCalendarConnectionStatus } from "@/lib/google/calendar/validation";
 import {
   ACTIVE_SCHEDULE_PROPOSAL_STATUSES,
   ActiveProposalConflictError,
@@ -27,7 +30,6 @@ import {
 import { recordSchedulingAudit } from "./audit";
 import {
   assertScheduleStatusTransition,
-  canConfirmScheduledFromPendingWrite,
   nextApprovalStatusForLifecycle,
   syncStatusAfterApproval,
 } from "./lifecycle";
@@ -111,6 +113,8 @@ function mapLink(doc: AnyDoc): WorkScheduleLinkRecord {
     googleEventHtmlLink: doc.googleEventHtmlLink
       ? String(doc.googleEventHtmlLink)
       : null,
+    calendarWriteAt: doc.calendarWriteAt ? String(doc.calendarWriteAt) : null,
+    lastSyncAt: doc.lastSyncAt ? String(doc.lastSyncAt) : null,
     policySnapshot: (doc.policySnapshot as SchedulingPolicyEvidence) ?? null,
     conflictSnapshot: (doc.conflictSnapshot as Record<string, unknown>) ?? null,
     displacedItemSnapshot:
@@ -526,7 +530,7 @@ export async function createScheduleProposal(
         metadata: {
           phase: "26B.1",
           calendarAvailabilityAssessed: false,
-          writeEnabled: false,
+          writeEnabled: true,
         },
       },
       depth: 0,
@@ -637,8 +641,7 @@ export async function createScheduleProposal(
       linkId: link.id,
       clientId,
       action: "pending_calendar_write",
-      detail:
-        "Auto-approved; awaiting Google Calendar write (not scheduled yet).",
+      detail: "Auto-approved; writing Google Calendar event.",
       actor: input.actor,
     });
     await recordSchedulingAudit({
@@ -693,6 +696,11 @@ export async function createScheduleProposal(
     "none",
     link.status,
   );
+
+  // Level 2 auto-approve → attempt Google write (same path as founder approve).
+  if (link.status === "pending_calendar_write") {
+    link = await writeApprovedScheduleToCalendar(link.id, input.actor);
+  }
 
   return { link, policy };
 }
@@ -844,8 +852,8 @@ export async function requestScheduleApproval(
 }
 
 /**
- * Approve → pending_calendar_write.
- * Does NOT mark Work or link as scheduled (requires future Google event).
+ * Approve → pending_calendar_write → attempt Google Calendar create → scheduled.
+ * On write failure: remains pending_calendar_write with syncStatus=error (approval kept).
  */
 export async function approveScheduleProposal(
   linkId: number,
@@ -853,9 +861,17 @@ export async function approveScheduleProposal(
 ): Promise<WorkScheduleLinkRecord> {
   assertCapability(actor, "scheduling.approve");
   const existing = await loadLink(linkId);
+
+  let link = existing;
+
+  if (existing.status === "pending_calendar_write") {
+    // Retry path after a failed write — approval already held.
+    return writeApprovedScheduleToCalendar(linkId, actor);
+  }
+
   assertScheduleStatusTransition(existing.status, "approved");
 
-  let link = await updateLinkStatus(linkId, {
+  link = await updateLinkStatus(linkId, {
     status: "approved",
     approvalStatus: nextApprovalStatusForLifecycle("approved"),
     approvedBy: actor.userId ?? undefined,
@@ -882,8 +898,7 @@ export async function approveScheduleProposal(
     linkId,
     clientId,
     action: "approved",
-    detail:
-      "Proposal approved. Awaiting Google Calendar write — not scheduled yet.",
+    detail: "Proposal approved. Creating Google Calendar event.",
     actor,
   });
   await recordSchedulingAudit({
@@ -899,7 +914,7 @@ export async function approveScheduleProposal(
     linkId,
     clientId,
     action: "projection_applied",
-    detail: "Work projection set to pending_calendar_write (not scheduled).",
+    detail: "Work projection set to pending_calendar_write.",
     actor,
   });
 
@@ -912,38 +927,208 @@ export async function approveScheduleProposal(
     "pending_calendar_write",
   );
 
-  return link;
+  return writeApprovedScheduleToCalendar(linkId, actor);
 }
 
 /**
- * Reserved for Phase 26C+: transition pending_calendar_write → scheduled
- * only when a confirmed Google event id is already linked.
- * Does not call Google Calendar APIs.
+ * Phase 26C — Create exactly one Google Calendar event for an approved proposal.
+ * Idempotent when googleEventId already exists.
+ * Scheduling calls the CalendarEventWriter only — never Google modules directly.
+ */
+export async function writeApprovedScheduleToCalendar(
+  linkId: number,
+  actor: SchedulingActor,
+): Promise<WorkScheduleLinkRecord> {
+  assertCapability(actor, "scheduling.approve");
+  let link = await loadLink(linkId);
+  const { work, clientId } = await loadWorkContext(link.workId);
+
+  // Already scheduled with linkage — return as-is (idempotent).
+  if (
+    link.status === "scheduled" &&
+    link.googleEventId &&
+    link.syncStatus === "synced"
+  ) {
+    return link;
+  }
+
+  // Duplicate protection: event already created — finish local transition only.
+  if (link.googleEventId && link.syncStatus === "synced") {
+    return confirmScheduleAfterGoogleEvent(linkId, actor, {
+      googleEventId: link.googleEventId,
+      googleCalendarId: link.googleCalendarId,
+      htmlLink: link.googleEventHtmlLink,
+      etag: link.googleEventEtag,
+      createdAt: link.calendarWriteAt ?? new Date().toISOString(),
+    });
+  }
+
+  if (link.googleEventId) {
+    return confirmScheduleAfterGoogleEvent(linkId, actor, {
+      googleEventId: link.googleEventId,
+      googleCalendarId: link.googleCalendarId,
+      htmlLink: link.googleEventHtmlLink,
+      etag: link.googleEventEtag,
+      createdAt: link.calendarWriteAt ?? new Date().toISOString(),
+    });
+  }
+
+  if (link.status !== "pending_calendar_write") {
+    throw new Error(
+      `Cannot write calendar event from status ${link.status}. Proposal must be pending_calendar_write.`,
+    );
+  }
+
+  const connection = getGoogleCalendarConnectionStatus();
+  await recordSchedulingAudit({
+    workId: link.workId,
+    linkId,
+    clientId,
+    action: "calendar_write_started",
+    detail: connection.connected
+      ? "Creating Google Calendar event."
+      : "Calendar write started — connection may be incomplete.",
+    actor,
+  });
+
+  try {
+    const writer = getCalendarEventWriter();
+    const created = await writer.createEvent({
+      calendarId: connection.preferredCalendarId,
+      title: work.title,
+      description: [
+        link.schedulingReason?.trim() || null,
+        `KXD Work: ${work.title}`,
+        `Open in KXD OS: /admin/work/${link.workId}`,
+      ]
+        .filter(Boolean)
+        .join("\n\n"),
+      start: link.proposedStart,
+      end: link.proposedEnd,
+      timezone: link.timezone,
+    });
+
+    await recordSchedulingAudit({
+      workId: link.workId,
+      linkId,
+      clientId,
+      action: "calendar_created",
+      detail: "Google Calendar event created.",
+      actor,
+      metadata: {
+        calendarId: created.calendarId,
+        // Do not put raw event id in activity title; keep in metadata only.
+        hasEventId: true,
+      },
+    });
+
+    link = await confirmScheduleAfterGoogleEvent(linkId, actor, {
+      googleEventId: created.googleEventId,
+      googleCalendarId: created.calendarId,
+      htmlLink: created.htmlLink,
+      etag: created.etag,
+      createdAt: created.createdAt,
+    });
+
+    await recordSchedulingAudit({
+      workId: link.workId,
+      linkId,
+      clientId,
+      action: "calendar_linked",
+      detail: "Schedule link bound to Google Calendar event.",
+      actor,
+    });
+
+    return link;
+  } catch (err) {
+    const message = isGoogleCalendarError(err)
+      ? `${err.code}: ${err.message}`
+      : err instanceof Error
+        ? err.message
+        : "Calendar write failed.";
+
+    // Keep approval — stay pending_calendar_write with sync error.
+    link = await updateLinkStatus(linkId, {
+      status: "pending_calendar_write",
+      syncStatus: "error",
+      metadata: {
+        ...(link.metadata && typeof link.metadata === "object"
+          ? link.metadata
+          : {}),
+        lastCalendarWriteError: message,
+        lastCalendarWriteErrorAt: new Date().toISOString(),
+        googleErrorCode: isGoogleCalendarError(err) ? err.code : "unknown",
+      },
+    });
+
+    await recordSchedulingAudit({
+      workId: link.workId,
+      linkId,
+      clientId,
+      action: "calendar_create_failed",
+      detail: message,
+      actor,
+      metadata: {
+        googleErrorCode: isGoogleCalendarError(err) ? err.code : "unknown",
+        retryable: isGoogleCalendarError(err) ? err.retryable : true,
+      },
+    });
+
+    return link;
+  }
+}
+
+/**
+ * Transition pending_calendar_write → scheduled after a confirmed Google event id.
+ * Stores linkage metadata on the schedule link (not on Work).
  */
 export async function confirmScheduleAfterGoogleEvent(
   linkId: number,
   actor: SchedulingActor,
-  googleEventId: string,
+  event: {
+    googleEventId: string;
+    googleCalendarId?: string | null;
+    htmlLink?: string | null;
+    etag?: string | null;
+    createdAt?: string | null;
+  },
 ): Promise<WorkScheduleLinkRecord> {
   assertCapability(actor, "scheduling.approve");
   const existing = await loadLink(linkId);
+  const googleEventId = (event.googleEventId || existing.googleEventId || "").trim();
 
-  if (
-    !canConfirmScheduledFromPendingWrite({
-      status: existing.status,
-      googleEventId: googleEventId || existing.googleEventId,
-    })
-  ) {
+  if (!googleEventId) {
+    throw new Error(
+      "Cannot mark scheduled without a confirmed Google event id.",
+    );
+  }
+
+  if (existing.status === "scheduled" && existing.googleEventId === googleEventId) {
+    return existing;
+  }
+
+  if (existing.status !== "pending_calendar_write" && existing.status !== "scheduled") {
     throw new Error(
       "Cannot mark scheduled without pending_calendar_write status and a confirmed Google event id.",
     );
   }
 
-  assertScheduleStatusTransition(existing.status, "scheduled");
+  if (existing.status === "pending_calendar_write") {
+    assertScheduleStatusTransition(existing.status, "scheduled");
+  }
+
+  const writeAt = event.createdAt?.trim() || new Date().toISOString();
+
   const link = await updateLinkStatus(linkId, {
     status: "scheduled",
-    googleEventId: googleEventId.trim(),
     syncStatus: "synced",
+    googleEventId,
+    googleCalendarId: event.googleCalendarId ?? existing.googleCalendarId ?? undefined,
+    googleEventHtmlLink: event.htmlLink ?? existing.googleEventHtmlLink ?? undefined,
+    googleEventEtag: event.etag ?? existing.googleEventEtag ?? undefined,
+    googleEventUpdatedAt: writeAt,
+    calendarWriteAt: existing.calendarWriteAt ?? writeAt,
+    lastSyncAt: writeAt,
   });
 
   await applyWorkScheduleProjection(

@@ -9,27 +9,34 @@ import "server-only";
 
 import {
   googleCalendarAvailabilityProvider,
+  googleCalendarEventWriter,
   googleCalendarMetadataProvider,
 } from "@/lib/google/calendar/providers";
 import { getGoogleCalendarConnectionStatus } from "@/lib/google/calendar/validation";
 import type { CalendarAvailabilitySnapshot } from "@/lib/google/calendar/types";
 import type {
   CalendarAvailabilityProvider,
+  CalendarEventWriter,
   CalendarMetadataProvider,
 } from "./calendar-providers";
 
 export type {
   CalendarAvailabilityProvider,
+  CalendarEventWriter,
   CalendarMetadataProvider,
 } from "./calendar-providers";
 
-/** Default providers — Google Calendar read foundation. */
+/** Default providers — Google Calendar. */
 export function getCalendarMetadataProvider(): CalendarMetadataProvider {
   return googleCalendarMetadataProvider;
 }
 
 export function getCalendarAvailabilityProvider(): CalendarAvailabilityProvider {
   return googleCalendarAvailabilityProvider;
+}
+
+export function getCalendarEventWriter(): CalendarEventWriter {
+  return googleCalendarEventWriter;
 }
 
 export interface SchedulingCalendarContext {

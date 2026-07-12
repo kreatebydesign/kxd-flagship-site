@@ -6,6 +6,7 @@
 import { notFound } from "next/navigation";
 import { WorkDetailClient } from "@/components/admin/work/WorkDetailClient";
 import { requirePayloadAdminPage } from "@/lib/admin/auth";
+import { getSchedulingProposalDetail } from "@/lib/scheduling/proposals-list";
 import { getWorkItem } from "@/lib/work/services";
 
 export const dynamic = "force-dynamic";
@@ -23,9 +24,18 @@ export default async function WorkDetailPage({
   const work = await getWorkItem(workId);
   if (!work) notFound();
 
+  const scheduleLink =
+    work.activeScheduleLinkId != null
+      ? await getSchedulingProposalDetail(work.activeScheduleLinkId)
+      : null;
+
   return (
     <WorkDetailClient
       initialWork={work}
+      calendarEventHtmlLink={
+        scheduleLink?.link.googleEventHtmlLink ?? null
+      }
+      calendarWriteAt={scheduleLink?.link.calendarWriteAt ?? null}
       currentUser={{
         id: Number(user.id),
         email: typeof user.email === "string" ? user.email : "",

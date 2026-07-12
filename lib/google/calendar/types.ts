@@ -6,6 +6,15 @@
 export const GOOGLE_CALENDAR_READONLY_SCOPE =
   "https://www.googleapis.com/auth/calendar.readonly" as const;
 
+/** Event create/update/delete — Phase 26C write scope (least privilege for events). */
+export const GOOGLE_CALENDAR_EVENTS_SCOPE =
+  "https://www.googleapis.com/auth/calendar.events" as const;
+
+export const GOOGLE_CALENDAR_WRITE_SCOPES = [
+  GOOGLE_CALENDAR_READONLY_SCOPE,
+  GOOGLE_CALENDAR_EVENTS_SCOPE,
+] as const;
+
 export const GOOGLE_OAUTH_AUTH_URL =
   "https://accounts.google.com/o/oauth2/v2/auth" as const;
 
@@ -98,9 +107,34 @@ export interface CalendarConnectionStatus {
   hasRefreshToken: boolean;
   preferredCalendarId: string | null;
   scope: string;
-  /** Read-only foundation — writes are never enabled in 25C. */
-  writeEnabled: false;
+  /** Phase 26C — true when connected; event creation is available. */
+  writeEnabled: boolean;
   missingEnv: string[];
+}
+
+/**
+ * Input for creating a single calendar event (domain shape — not Google SDK).
+ */
+export interface CreateCalendarEventInput {
+  /** When omitted, the writer resolves preferred / primary calendar. */
+  calendarId?: string | null;
+  title: string;
+  description?: string | null;
+  start: string;
+  end: string;
+  timezone: string;
+  attendees?: Array<{ email: string }>;
+}
+
+/**
+ * Confirmed Google event metadata returned to Scheduling (plain objects only).
+ */
+export interface CreatedCalendarEvent {
+  googleEventId: string;
+  htmlLink: string | null;
+  etag: string | null;
+  calendarId: string;
+  createdAt: string;
 }
 
 /**

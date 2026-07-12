@@ -63,11 +63,11 @@ export async function GET(req: Request) {
         envVar: "GOOGLE_CALENDAR_REFRESH_TOKEN",
         refreshToken: tokens.refreshToken,
         note: tokens.refreshToken
-          ? "Copy refreshToken into GOOGLE_CALENDAR_REFRESH_TOKEN (Vercel / .env.local). It is not stored by KXD OS in Phase 25C."
+          ? "Copy refreshToken into GOOGLE_CALENDAR_REFRESH_TOKEN (Vercel / .env.local). Re-consent if upgrading from readonly-only."
           : "No refresh_token returned — revoke prior Google grant and retry with prompt=consent.",
       },
-      writeEnabled: false,
-      phase: "25C",
+      writeEnabled: true,
+      phase: "26C",
     });
   } catch (err) {
     if (isGoogleCalendarError(err)) {

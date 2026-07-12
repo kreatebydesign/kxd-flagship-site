@@ -171,8 +171,11 @@ const PROVIDER_DEFINITIONS: IntegrationProviderDefinition[] = [
       documentationUrl: "https://developers.google.com/workspace",
       oauth: {
         label: "Google Calendar OAuth (founder calendar)",
-        scopes: ["https://www.googleapis.com/auth/calendar.readonly"],
-        placeholder: "Phase 25C — user OAuth refresh token (not domain-wide delegation)",
+        scopes: [
+          "https://www.googleapis.com/auth/calendar.readonly",
+          "https://www.googleapis.com/auth/calendar.events",
+        ],
+        placeholder: "Phase 26C — user OAuth refresh token (readonly + events)",
       },
       envVars: [
         { key: "GOOGLE_WORKSPACE_DOMAIN", label: "Workspace Domain", required: false },
@@ -182,8 +185,8 @@ const PROVIDER_DEFINITIONS: IntegrationProviderDefinition[] = [
         { key: "GOOGLE_CALENDAR_REFRESH_TOKEN", label: "Calendar OAuth Refresh Token", required: false },
         { key: "GOOGLE_CALENDAR_ID", label: "Preferred Calendar ID", required: false },
       ],
-      permissions: ["Read calendar", "Read free/busy"],
-      scopes: ["calendar.readonly"],
+      permissions: ["Read calendar", "Read free/busy", "Create events"],
+      scopes: ["calendar.readonly", "calendar.events"],
     }),
   },
   {
