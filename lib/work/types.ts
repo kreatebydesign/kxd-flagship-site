@@ -70,6 +70,11 @@ export interface WorkListItem {
    * Independent of dueDate — intentional placement for Today / planning.
    */
   plannedForDate: string | null;
+  /** Projection — managed only by lib/scheduling services. */
+  schedulingStatus: "none" | "proposed" | "scheduled" | "conflict" | "sync_error";
+  scheduledStart: string | null;
+  scheduledEnd: string | null;
+  activeScheduleLinkId: number | null;
   startedAt: string | null;
   completedAt: string | null;
   parentWorkId: number | null;

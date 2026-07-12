@@ -8,7 +8,7 @@ export const OPERATIONAL_FLOW_EXTENSIONS: OperationalExtensionSlot[] = [
   {
     id: "calendar",
     status: "reserved",
-    note: "Schedule awareness will consume flow transitions without changing Today composition.",
+    note: "Phase 25B registers schedule.* flow kinds. Calendar adapter remains inactive until Google connection.",
   },
   {
     id: "finance",

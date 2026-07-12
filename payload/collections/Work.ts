@@ -200,6 +200,58 @@ export const Work: CollectionConfig = {
       },
     },
     {
+      name: "schedulingStatus",
+      type: "select",
+      label: "Scheduling status",
+      defaultValue: "none",
+      options: [
+        { label: "None", value: "none" },
+        { label: "Proposed", value: "proposed" },
+        { label: "Scheduled", value: "scheduled" },
+        { label: "Conflict", value: "conflict" },
+        { label: "Sync error", value: "sync_error" },
+      ],
+      admin: {
+        position: "sidebar",
+        readOnly: true,
+        description:
+          "Projection only — updated exclusively by scheduling services (Phase 25B).",
+      },
+    },
+    {
+      name: "scheduledStart",
+      type: "date",
+      label: "Scheduled start",
+      admin: {
+        date: { pickerAppearance: "dayAndTime" },
+        position: "sidebar",
+        readOnly: true,
+        description: "Projection of active schedule link — not independently mutable.",
+      },
+    },
+    {
+      name: "scheduledEnd",
+      type: "date",
+      label: "Scheduled end",
+      admin: {
+        date: { pickerAppearance: "dayAndTime" },
+        position: "sidebar",
+        readOnly: true,
+        description: "Projection of active schedule link — not independently mutable.",
+      },
+    },
+    {
+      name: "activeScheduleLink",
+      type: "relationship",
+      relationTo: "work-schedule-links",
+      label: "Active schedule link",
+      admin: {
+        position: "sidebar",
+        readOnly: true,
+        description: "Canonical scheduling record — managed by lib/scheduling services.",
+      },
+    },
+    {
       name: "startedAt",
       type: "date",
       label: "Started At",

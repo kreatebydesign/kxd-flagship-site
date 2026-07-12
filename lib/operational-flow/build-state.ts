@@ -62,6 +62,20 @@ function describeChange(
       return "Proposal accepted.";
     case "client.onboarded":
       return "New client onboarded.";
+    case "schedule.proposed":
+      return "A schedule proposal was created.";
+    case "schedule.approval-requested":
+      return "Schedule approval was requested.";
+    case "schedule.approved":
+      return "A schedule proposal was approved.";
+    case "schedule.rejected":
+      return "A schedule proposal was rejected.";
+    case "schedule.canceled":
+      return "A schedule was canceled.";
+    case "schedule.completed":
+      return "A scheduled block was completed.";
+    case "schedule.conflict":
+      return "A scheduling conflict was recorded.";
     default:
       return input.nextStatus
         ? `Status moved to ${input.nextStatus}.`

@@ -92,6 +92,15 @@ export function toWorkListItem(
     dueDate: doc.dueDate ? String(doc.dueDate) : null,
     startDate: doc.startDate ? String(doc.startDate) : null,
     plannedForDate: doc.plannedForDate ? String(doc.plannedForDate).slice(0, 10) : null,
+    schedulingStatus: (doc.schedulingStatus as WorkListItem["schedulingStatus"]) || "none",
+    scheduledStart: doc.scheduledStart ? String(doc.scheduledStart) : null,
+    scheduledEnd: doc.scheduledEnd ? String(doc.scheduledEnd) : null,
+    activeScheduleLinkId:
+      typeof doc.activeScheduleLink === "object" && doc.activeScheduleLink != null
+        ? Number((doc.activeScheduleLink as { id: number }).id)
+        : doc.activeScheduleLink != null
+          ? Number(doc.activeScheduleLink)
+          : null,
     startedAt: doc.startedAt ? String(doc.startedAt) : null,
     completedAt: doc.completedAt ? String(doc.completedAt) : null,
     parentWorkId,

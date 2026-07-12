@@ -33,6 +33,6 @@ export const EXECUTIVE_CONTEXT_EXTENSIONS: ExecutiveExtensionSlot[] = [
   {
     id: "scheduling",
     status: "reserved",
-    note: "Scheduling will inform quietHoursReady and continuation.",
+    note: "Phase 25B domain foundation exists (lib/scheduling). Context summary remains inactive until calendar connection.",
   },
 ];

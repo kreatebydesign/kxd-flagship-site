@@ -39,7 +39,14 @@ export type OperationalTransitionKind =
   | "invoice.paid"
   | "proposal.accepted"
   | "client.onboarded"
-  | "operational.milestone";
+  | "operational.milestone"
+  | "schedule.proposed"
+  | "schedule.approval-requested"
+  | "schedule.approved"
+  | "schedule.rejected"
+  | "schedule.canceled"
+  | "schedule.completed"
+  | "schedule.conflict";
 
 export type OperationalAffectedSystem =
   | "executive-today"

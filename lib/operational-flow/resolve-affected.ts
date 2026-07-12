@@ -51,6 +51,10 @@ export function resolveAffectedSystems(
     systems.add("notifications");
   }
 
+  if (kind.startsWith("schedule.")) {
+    systems.add("calendar");
+  }
+
   return [...systems];
 }
 

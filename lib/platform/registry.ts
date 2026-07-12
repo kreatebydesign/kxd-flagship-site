@@ -206,6 +206,24 @@ export const PLATFORM_PHASES: PlatformPhaseDefinition[] = [
     completedAt: "2026-07-11",
   },
   {
+    id: "phase-25a",
+    number: "25A",
+    title: "Executive Scheduling Architecture",
+    status: "completed",
+    description:
+      "Architecture audit for Work↔Google Calendar scheduling — source of truth, hybrid domain model, Heather permission levels, sync/approval boundaries.",
+    completedAt: "2026-07-11",
+  },
+  {
+    id: "phase-25b",
+    number: "25B",
+    title: "Scheduling Domain Foundation",
+    status: "completed",
+    description:
+      "Durable work-schedule-links, Work projections, policy/lifecycle/permissions, proposal APIs — no Google Calendar reads or writes.",
+    completedAt: "2026-07-11",
+  },
+  {
     id: "phase-12",
     number: "12",
     title: "Timeline Unification",
@@ -293,11 +311,25 @@ export const PLATFORM_SUBSYSTEMS: PlatformSubsystemDefinition[] = [
       "Executive Context Engine",
       "Executive Signal Engine",
     ],
-    lastCompletedPhase: "24B",
-    currentPhase: "24B",
+    lastCompletedPhase: "25B",
+    currentPhase: "25B",
     href: "/admin/operations/today",
     description:
       "Observes meaningful state transitions and quietly rebalances Context, Signals, Focus, and related surfaces — no automation, no AI, no UI.",
+  },
+  {
+    id: "executive-scheduling",
+    name: "Executive Scheduling",
+    category: "Platform",
+    owner: "shared-core",
+    maturity: "alpha",
+    completionPercent: 28,
+    status: "active",
+    dependencies: ["Work Engine", "Operational Flow", "Activity Engine"],
+    lastCompletedPhase: "25B",
+    currentPhase: "25B",
+    description:
+      "Work↔calendar scheduling domain — proposals, approvals, policy levels. Google Calendar connection deferred to 25C+.",
   },
   {
     id: "executive-signals",

@@ -40,6 +40,12 @@ export type ExecutiveActivityEventType =
   | "communication.needs-reply"
   | "client.created"
   | "proposal.accepted"
+  | "work.schedule-proposed"
+  | "work.schedule-approval-requested"
+  | "work.schedule-approved"
+  | "work.schedule-rejected"
+  | "work.schedule-canceled"
+  | "work.schedule-completed"
   | string;
 
 export interface ActivityLink {

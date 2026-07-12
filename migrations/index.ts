@@ -55,6 +55,7 @@ import * as migration_20260728_phase20e_activity_engine from './20260728_phase20
 import * as migration_20260729_phase20f_training_enablement from './20260729_phase20f_training_enablement';
 import * as migration_20260730_phase20g_operations_experience from './20260730_phase20g_operations_experience';
 import * as migration_20260731_phase24a_work_planned_for_date from './20260731_phase24a_work_planned_for_date';
+import * as migration_20260801_phase25b_scheduling_domain from './20260801_phase25b_scheduling_domain';
 
 export const migrations = [
   {
@@ -341,5 +342,10 @@ export const migrations = [
     up: migration_20260731_phase24a_work_planned_for_date.up,
     down: migration_20260731_phase24a_work_planned_for_date.down,
     name: '20260731_phase24a_work_planned_for_date',
+  },
+  {
+    up: migration_20260801_phase25b_scheduling_domain.up,
+    down: migration_20260801_phase25b_scheduling_domain.down,
+    name: '20260801_phase25b_scheduling_domain',
   },
 ];
