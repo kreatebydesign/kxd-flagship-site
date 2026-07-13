@@ -4,6 +4,7 @@ export type {
   ExperienceHospitality,
   ExperienceIdentity,
   ExperienceMotionPreset,
+  ExperiencePresentation,
   ExperienceProfileSource,
   ExperienceSupportTone,
   ExperienceVisual,
@@ -11,6 +12,11 @@ export type {
 } from "./types";
 
 export { isCesModuleEnabled } from "./types";
+
+export {
+  getExecutivePresentation,
+  isExecutivePerformanceAvailable,
+} from "./executive-performance";
 
 export {
   CES_DEFAULT_PARTNER_FOOTER,

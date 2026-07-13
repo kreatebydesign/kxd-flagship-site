@@ -85,6 +85,8 @@ export function mergeProfileWithFallback(
     visual: { ...fallbackVisual, ...partial.visual },
     hospitality: { ...fallbackHospitality, ...partial.hospitality },
     enabledModules: partial.enabledModules ?? [],
+    reportingCapabilities: partial.reportingCapabilities ?? [],
+    presentation: partial.presentation ?? null,
     terminology: partial.terminology ?? {},
     cssVars: partial.cssVars ?? {},
   };

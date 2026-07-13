@@ -4,6 +4,11 @@ import { getPayload } from "payload";
 import config from "@payload-config";
 import { getEditionBranding } from "@/lib/editions";
 import type { PortalSession } from "@/lib/portal/session";
+import {
+  ALL_REPORTING_CAPABILITIES,
+  type ReportingCapabilityId,
+} from "@/lib/reporting/domain/capabilities";
+import { getExecutivePresentation } from "../executive-performance/presentation";
 import type { CesModuleId, ResolvedExperienceProfile } from "../types";
 import {
   buildFallbackHospitality,
@@ -21,6 +26,13 @@ type AnyDoc = Record<string, unknown>;
 
 const COLLECTION = "client-experience-profiles";
 
+const CES_MODULE_IDS = new Set<CesModuleId>([
+  "website-review",
+  "executive-performance",
+]);
+
+const REPORTING_CAPABILITY_SET = new Set<string>(ALL_REPORTING_CAPABILITIES);
+
 function mediaUrl(value: unknown): string | null {
   if (!value || typeof value !== "object") return null;
   const doc = value as AnyDoc;
@@ -29,7 +41,17 @@ function mediaUrl(value: unknown): string | null {
 
 function normalizeEnabledModules(value: unknown): CesModuleId[] {
   if (!Array.isArray(value)) return [];
-  return value.filter((item): item is CesModuleId => item === "website-review");
+  return value.filter((item): item is CesModuleId =>
+    typeof item === "string" && CES_MODULE_IDS.has(item as CesModuleId),
+  );
+}
+
+function normalizeReportingCapabilities(value: unknown): ReportingCapabilityId[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter(
+    (item): item is ReportingCapabilityId =>
+      typeof item === "string" && REPORTING_CAPABILITY_SET.has(item),
+  );
 }
 
 async function loadOnboardingLogo(clientId: number): Promise<string | null> {
@@ -47,6 +69,20 @@ async function loadOnboardingLogo(clientId: number): Promise<string | null> {
   const logoFiles = onboarding.logoFiles;
   if (!Array.isArray(logoFiles) || logoFiles.length === 0) return null;
   return mediaUrl(logoFiles[0]);
+}
+
+function finalizeProfile(profile: ResolvedExperienceProfile): ResolvedExperienceProfile {
+  const presentation = getExecutivePresentation(profile.identity.clientSlug);
+  profile.presentation = presentation;
+  profile.cssVars = {
+    ...experienceProfileToCssVars(profile.visual),
+    ...(presentation
+      ? {
+          "--kxd-ces-hero-image": `url(${presentation.heroImageSrc})`,
+        }
+      : {}),
+  };
+  return profile;
 }
 
 export async function resolveExperienceProfile(
@@ -81,17 +117,21 @@ export async function resolveExperienceProfile(
   };
 
   const fallbackVisual = buildFallbackVisual(editionBranding);
-  const fallback = mergeProfileWithFallback(
-    {
-      source: "fallback",
-      identity: identityBase,
-      visual: fallbackVisual,
-      hospitality: buildFallbackHospitality(clientName, editionBranding),
-      enabledModules: [],
-      terminology: {},
-      cssVars: experienceProfileToCssVars(fallbackVisual),
-    },
-    editionBranding,
+  const fallback = finalizeProfile(
+    mergeProfileWithFallback(
+      {
+        source: "fallback",
+        identity: identityBase,
+        visual: fallbackVisual,
+        hospitality: buildFallbackHospitality(clientName, editionBranding),
+        enabledModules: [],
+        reportingCapabilities: [],
+        presentation: null,
+        terminology: {},
+        cssVars: experienceProfileToCssVars(fallbackVisual),
+      },
+      editionBranding,
+    ),
   );
 
   let profileDoc: AnyDoc | null = null;
@@ -119,7 +159,7 @@ export async function resolveExperienceProfile(
     if (onboardingLogo) {
       fallback.identity.logoUrl = onboardingLogo;
     }
-    return fallback;
+    return finalizeProfile(fallback);
   }
 
   const brandKit =
@@ -159,6 +199,7 @@ export async function resolveExperienceProfile(
     showPartnerMark: profileDoc.showKxdPartnerMark !== false,
   };
 
+  const enabledRaw = profileDoc.enabledModules;
   const resolved = mergeProfileWithFallback(
     {
       profileId: profileDoc.id as number,
@@ -170,13 +211,14 @@ export async function resolveExperienceProfile(
       },
       visual,
       hospitality,
-      enabledModules: normalizeEnabledModules(profileDoc.enabledModules),
+      enabledModules: normalizeEnabledModules(enabledRaw),
+      reportingCapabilities: normalizeReportingCapabilities(enabledRaw),
+      presentation: null,
       terminology: parseTerminology(profileDoc.terminology),
       cssVars: {},
     },
     editionBranding,
   );
 
-  resolved.cssVars = experienceProfileToCssVars(resolved.visual);
-  return resolved;
+  return finalizeProfile(resolved);
 }

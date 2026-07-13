@@ -1,11 +1,13 @@
 import { redirect } from "next/navigation";
 import { CesPortalHome, shouldUseCesPortalHome } from "@/components/ces/portal";
 import { OverviewScreen } from "@/components/client-hq";
+import { composeExecutivePerformance } from "@/lib/ces/executive-performance/compose";
 import { composePartnershipBriefing } from "@/lib/ces/partnership/compose";
 import { resolveExperienceProfile } from "@/lib/ces/server";
 import { getWebsiteReviewLanding } from "@/lib/ces/modules/website-review/data";
 import { getConnectedWorkspaceData } from "@/lib/portal/connected-workspace";
 import { getPortalOverview } from "@/lib/portal/data";
+import { portalFirstName, portalTimeGreeting } from "@/lib/portal/greeting";
 import { getPortalSession } from "@/lib/portal/session";
 
 export const dynamic = "force-dynamic";
@@ -28,6 +30,13 @@ export default async function PortalOverviewPage() {
       websiteReview,
       connected,
     });
+    const greeting = portalTimeGreeting(portalFirstName(session.displayName));
+    const performance = await composeExecutivePerformance({
+      profile,
+      briefing,
+      websiteReview,
+      greeting,
+    });
     return (
       <CesPortalHome
         displayName={session.displayName}
@@ -35,6 +44,7 @@ export default async function PortalOverviewPage() {
         websiteReview={websiteReview}
         connected={connected}
         briefing={briefing}
+        performance={performance}
       />
     );
   }

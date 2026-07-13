@@ -18,7 +18,7 @@ export const PRIMAL_EXPERIENCE_PROFILE = {
   reassuranceLine: "Every revision is tracked. Nothing gets lost.",
   supportTone: "direct" as const,
   portalSidebarLabel: "Primal Motorsports",
-  enabledModules: ["website-review"] as const,
+  enabledModules: ["website-review", "executive-performance"] as const,
   showKxdPartnerMark: true,
   partnerFooterLine: "Powered by KXD OS",
   terminology: {

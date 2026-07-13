@@ -1,6 +1,9 @@
-/** Phase 12A — Client Experience System types (client-safe) */
+/** Phase 12A / 31A — Client Experience System types (client-safe) */
 
-export type CesModuleId = "website-review";
+import type { ReportingCapabilityId } from "@/lib/reporting/domain/capabilities";
+import type { ExperiencePresentation } from "./executive-performance/types";
+
+export type CesModuleId = "website-review" | "executive-performance";
 
 export type ExperienceProfileSource = "profile" | "fallback";
 
@@ -38,6 +41,8 @@ export interface ExperienceVisual {
   motionPreset: ExperienceMotionPreset;
 }
 
+export type { ExperiencePresentation };
+
 /** Resolved profile consumed by CES components and portal shell */
 export interface ResolvedExperienceProfile {
   profileId: number | null;
@@ -46,6 +51,13 @@ export interface ResolvedExperienceProfile {
   visual: ExperienceVisual;
   hospitality: ExperienceHospitality;
   enabledModules: CesModuleId[];
+  /**
+   * Reporting capabilities enabled for this client experience.
+   * Sourced from experience profile JSON — gates Executive Performance panels.
+   */
+  reportingCapabilities: ReportingCapabilityId[];
+  /** Presentation theme for Executive Performance (null → classic partnership briefing). */
+  presentation: ExperiencePresentation | null;
   terminology: Record<string, string>;
   cssVars: Record<string, string>;
 }
