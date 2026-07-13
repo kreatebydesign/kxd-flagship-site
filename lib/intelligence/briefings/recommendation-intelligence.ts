@@ -1,3 +1,10 @@
+/**
+ * Phase 28B — Briefing recommendation enrichment (supporting context only).
+ * Enriches portfolio priorities for Morning Brief / Intelligence Screen.
+ * Does NOT choose the founder’s primary action — that belongs to
+ * lib/executive-intelligence via composeExecutiveIntelligence().
+ */
+
 import type { IntelligenceConfidence } from "../types";
 import type { BrainMemoryRecord } from "@/lib/brain/types";
 import { daysSince } from "../context";

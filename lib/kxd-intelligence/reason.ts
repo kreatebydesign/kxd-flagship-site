@@ -1,6 +1,9 @@
 /**
  * Reasoning pipeline — turn sources into calm, structured intelligence.
  * Deterministic. No AI generation. Caps noise.
+ *
+ * Phase 28B boundary: this layer must not re-rank founder-level priorities.
+ * Founder primary action ownership lives in lib/executive-intelligence.
  */
 
 import type { BusinessSignalSeverity } from "@/lib/business-brain";

@@ -1,6 +1,17 @@
+/**
+ * Phase 28B — Focus Mode presentation over Executive Intelligence.
+ * Does not create a separate focus priority algorithm.
+ */
+
 import "server-only";
 
+import {
+  composeExecutiveIntelligence,
+  mapRecommendationToFocusDecision,
+} from "@/lib/executive-intelligence";
+import type { UserFacingExplainability } from "@/lib/executive-intelligence";
 import type { ExecutiveBriefing } from "@/lib/intelligence/briefings/types";
+import type { BriefingInputContext } from "@/lib/intelligence/briefings/types";
 import type { WorkListItem, WorkWorkspaceData } from "@/lib/work/types";
 import { getDelightAffirmation } from "./delight";
 import type { FocusIntelligence } from "./intelligence/types";
@@ -31,7 +42,18 @@ export function buildFocusContext(
   briefing: ExecutiveBriefing,
   work: WorkWorkspaceData,
   intelligence?: FocusIntelligence,
-): FocusContext {
+  briefingContext?: BriefingInputContext | null,
+): FocusContext & {
+  primaryDecision: FocusDecision & {
+    whatToDo?: string;
+    whatToIgnore?: string;
+    whatCanWait?: string;
+    whyThisBlock?: string;
+    whenToStop?: string;
+  };
+  explainability: UserFacingExplainability | null;
+} {
+  // Supporting context only — not a competing primary
   const priorities: FocusPriority[] = briefing.topPriorities.slice(0, 5).map((item) => ({
     id: item.id,
     title: item.title,
@@ -52,18 +74,32 @@ export function buildFocusContext(
     .filter((item, index, arr) => arr.findIndex((x) => x.id === item.id) === index)
     .slice(0, 8);
 
-  const urgentDecisions: FocusDecision[] = [];
+  const surface = composeExecutiveIntelligence({
+    observedAt: briefing.generatedAt,
+    briefing: briefingContext ?? null,
+  });
 
-  if (briefing.primaryRecommendation) {
-    urgentDecisions.push({
-      id: briefing.primaryRecommendation.id,
-      title: briefing.primaryRecommendation.title,
-      reason: briefing.primaryRecommendation.reason,
-      href: briefing.primaryRecommendation.href,
-    });
-  }
+  const mapped = mapRecommendationToFocusDecision(
+    surface.recommendation,
+    surface.userExplainability,
+  );
+
+  const primaryDecision = {
+    id: mapped.id,
+    title: mapped.title,
+    reason: mapped.reason,
+    href: mapped.href,
+    whatToDo: mapped.whatToDo,
+    whatToIgnore: mapped.whatToIgnore,
+    whatCanWait: mapped.whatCanWait,
+    whyThisBlock: mapped.whyThisBlock,
+    whenToStop: mapped.whenToStop,
+  };
+
+  const urgentDecisions: FocusDecision[] = [primaryDecision];
 
   for (const risk of briefing.businessRisks.slice(0, 2)) {
+    if (risk.id === primaryDecision.id) continue;
     urgentDecisions.push({
       id: risk.id,
       title: risk.title,
@@ -88,5 +124,7 @@ export function buildFocusContext(
     blockers: blocked,
     affirmation,
     intelligence,
+    primaryDecision,
+    explainability: surface.userExplainability,
   };
 }

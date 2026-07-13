@@ -1,5 +1,9 @@
 import "server-only";
 
+import {
+  composeExecutiveIntelligence,
+  mapRecommendationToMorningFirstAction,
+} from "@/lib/executive-intelligence";
 import { buildExecutiveBriefing, loadBriefingContext } from "@/lib/intelligence/briefings/builder";
 import type { ExecutiveBriefing } from "@/lib/intelligence/briefings/types";
 import { resolveRequestTimezone } from "@/lib/platform/timezone";
@@ -12,10 +16,7 @@ import {
   buildMorningClientActivity,
   type MorningClientActivity,
 } from "@/lib/rituals/morning-activity";
-import {
-  buildMorningFirstAction,
-  type MorningFirstAction,
-} from "@/lib/rituals/morning-first-action";
+import type { MorningFirstAction } from "@/lib/rituals/morning-first-action";
 import {
   buildMorningExecutiveSnapshot,
   type MorningExecutiveSnapshot,
@@ -33,6 +34,8 @@ export interface MorningBriefPageData {
   snapshot: MorningExecutiveSnapshot;
   firstAction: MorningFirstAction;
   voice: MorningBriefVoice;
+  /** Phase 28B — user-facing explainability for the engine primary. */
+  explainability: import("@/lib/executive-intelligence").UserFacingExplainability | null;
 }
 
 /**
@@ -54,7 +57,11 @@ export async function loadMorningBriefPageData(input?: {
 
   const briefing = buildExecutiveBriefing(context, memory, timeZone);
   const activity = buildMorningClientActivity(context, timeZone);
-  const firstAction = buildMorningFirstAction(context);
+  const intelligenceSurface = composeExecutiveIntelligence({
+    observedAt: context.generatedAt,
+    briefing: context,
+  });
+  const firstAction = mapRecommendationToMorningFirstAction(intelligenceSurface.recommendation);
   const firstName = resolveExecutiveFirstName(input?.displayName, input?.email);
 
   return {
@@ -71,5 +78,6 @@ export async function loadMorningBriefPageData(input?: {
       firstAction,
       timeZone,
     }),
+    explainability: intelligenceSurface.userExplainability,
   };
 }

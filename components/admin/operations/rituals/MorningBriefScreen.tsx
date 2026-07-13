@@ -25,6 +25,7 @@ export function MorningBriefScreen({
   snapshot,
   firstAction,
   voice,
+  explainability,
 }: {
   briefing: ExecutiveBriefing;
   intelligence: MorningBriefIntelligence;
@@ -32,6 +33,7 @@ export function MorningBriefScreen({
   snapshot: MorningExecutiveSnapshot;
   firstAction: MorningFirstAction;
   voice: MorningBriefVoice;
+  explainability?: import("@/lib/executive-intelligence").UserFacingExplainability | null;
 }) {
   const minutes = estimateReadingMinutes([
     voice.greeting,
@@ -75,7 +77,7 @@ export function MorningBriefScreen({
 
         <MorningExecutiveSnapshotSection snapshot={snapshot} />
 
-        <MorningFirstActionSection action={firstAction} />
+        <MorningFirstActionSection action={firstAction} explainability={explainability} />
 
         <div className="kxd-os-ritual-morning__narrative">
           <p className="kxd-os-ritual-morning__narrative-label">Executive Narrative</p>

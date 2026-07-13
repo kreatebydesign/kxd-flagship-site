@@ -61,6 +61,7 @@ import * as migration_20260803_phase26b1_active_unique_index from './20260803_ph
 import * as migration_20260804_phase26c_calendar_write_fields from './20260804_phase26c_calendar_write_fields';
 import * as migration_20260805_phase26c1_timeline_source_module_work from './20260805_phase26c1_timeline_source_module_work';
 import * as migration_20260806_phase27a_calendar_sync_fields from './20260806_phase27a_calendar_sync_fields';
+import * as migration_20260807_phase28b_sales_leads_estimated_mrr_column from './20260807_phase28b_sales_leads_estimated_mrr_column';
 
 export const migrations = [
   {
@@ -377,5 +378,10 @@ export const migrations = [
     up: migration_20260806_phase27a_calendar_sync_fields.up,
     down: migration_20260806_phase27a_calendar_sync_fields.down,
     name: '20260806_phase27a_calendar_sync_fields',
+  },
+  {
+    up: migration_20260807_phase28b_sales_leads_estimated_mrr_column.up,
+    down: migration_20260807_phase28b_sales_leads_estimated_mrr_column.down,
+    name: '20260807_phase28b_sales_leads_estimated_mrr_column',
   },
 ];

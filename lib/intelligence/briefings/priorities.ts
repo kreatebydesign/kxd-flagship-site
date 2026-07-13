@@ -1,28 +1,16 @@
 import type { IntelligenceConfidence, IntelligenceUrgency } from "../types";
 import { clientId, clientName, daysSince } from "../context";
 import type { BriefingInputContext, BriefingPriority } from "./types";
+import { executiveRankScore } from "@/lib/executive-intelligence/constants";
 
 const MAX_PRIORITIES = 5;
-
-const URGENCY_WEIGHT: Record<IntelligenceUrgency, number> = {
-  critical: 4,
-  high: 3,
-  medium: 2,
-  low: 1,
-};
-
-const CONFIDENCE_WEIGHT: Record<IntelligenceConfidence, number> = {
-  high: 1,
-  medium: 0.85,
-  low: 0.65,
-};
 
 function rankScore(
   businessImpact: number,
   urgency: IntelligenceUrgency,
   confidence: IntelligenceConfidence,
 ): number {
-  return businessImpact * URGENCY_WEIGHT[urgency] * CONFIDENCE_WEIGHT[confidence];
+  return executiveRankScore(businessImpact, urgency, confidence);
 }
 
 function pushPriority(list: BriefingPriority[], item: Omit<BriefingPriority, "id"> & { id?: string }): void {

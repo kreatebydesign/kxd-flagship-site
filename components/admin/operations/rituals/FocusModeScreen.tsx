@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { FocusContext } from "@/lib/rituals";
+import { WhyThisDisclosure } from "@/components/admin/executive-intelligence/WhyThisDisclosure";
 import { RitualIntelligenceList } from "./RitualIntelligenceProse";
 import { DelightMoment } from "./DelightMoment";
 import { RitualShell } from "./RitualShell";
@@ -26,16 +27,20 @@ function FocusSection({
 
 export function FocusModeScreen({ focus }: { focus: FocusContext }) {
   const intelligence = focus.intelligence;
+  const primary = focus.primaryDecision ?? focus.urgentDecisions[0] ?? null;
   const allClear =
     !intelligence?.attentionAreas.length &&
     focus.todaysWork.length === 0 &&
-    focus.blockers.length === 0;
+    focus.blockers.length === 0 &&
+    !primary;
 
-  const lead = intelligence
-    ? `${intelligence.postureLabel} — ${intelligence.postureDescription}`
-    : allClear
-      ? "Nothing needs your attention right now. Execute when ready."
-      : "What matters today — nothing else.";
+  const lead = primary
+    ? primary.whyThisBlock ?? primary.reason
+    : intelligence
+      ? `${intelligence.postureLabel} — ${intelligence.postureDescription}`
+      : allClear
+        ? "Nothing needs your attention right now. Execute when ready."
+        : "What matters today — nothing else.";
 
   return (
     <RitualShell mode="focus">
@@ -45,6 +50,32 @@ export function FocusModeScreen({ focus }: { focus: FocusContext }) {
           <p className="kxd-os-ritual-focus__date">{focus.dateDisplay}</p>
           <p className="kxd-os-ritual-focus__lead">{lead}</p>
         </header>
+
+        {primary ? (
+          <section className="kxd-os-ritual-focus__section kxd-os-ritual-focus__section--primary">
+            <h2 className="kxd-os-ritual-focus__label">Focus on this</h2>
+            <p className="kxd-os-ritual-focus__primary-title">{primary.title}</p>
+            <p className="kxd-os-ritual-focus__primary-reason">{primary.reason}</p>
+            {primary.whatToIgnore ? (
+              <p className="kxd-os-ritual-focus__guidance">
+                <span className="kxd-os-ritual-focus__guidance-label">Ignore for now</span>
+                {primary.whatToIgnore}
+              </p>
+            ) : null}
+            {primary.whenToStop ? (
+              <p className="kxd-os-ritual-focus__guidance">
+                <span className="kxd-os-ritual-focus__guidance-label">Stop when</span>
+                {primary.whenToStop}
+              </p>
+            ) : null}
+            {primary.href ? (
+              <p className="kxd-os-ritual-focus__link">
+                <Link href={primary.href}>Open</Link>
+              </p>
+            ) : null}
+            <WhyThisDisclosure explainability={focus.explainability} />
+          </section>
+        ) : null}
 
         {intelligence ? (
           <>

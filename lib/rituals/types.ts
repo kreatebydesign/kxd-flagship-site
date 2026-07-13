@@ -49,6 +49,11 @@ export interface FocusDecision {
   title: string;
   reason: string;
   href?: string;
+  whatToDo?: string;
+  whatToIgnore?: string;
+  whatCanWait?: string;
+  whyThisBlock?: string;
+  whenToStop?: string;
 }
 
 export interface FocusContext {
@@ -60,6 +65,9 @@ export interface FocusContext {
   blockers: FocusWorkItem[];
   affirmation: string;
   intelligence?: import("./intelligence/types").FocusIntelligence;
+  /** Phase 28B — canonical engine decision for focus. */
+  primaryDecision?: FocusDecision;
+  explainability?: import("@/lib/executive-intelligence").UserFacingExplainability | null;
 }
 
 export interface WeeklyReviewWin {

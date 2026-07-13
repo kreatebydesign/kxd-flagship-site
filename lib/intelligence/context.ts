@@ -25,6 +25,8 @@ export const STALE_AUDIT_DAYS = 180;
 export const HEALTH_SCORE_THRESHOLD = 60;
 
 export const URGENCY_RANK: Record<string, number> = {
+  // Phase 28B — legacy inverted ranking (lower = more urgent) for existing sort callers.
+  // New executive code must use EXECUTIVE_URGENCY_RANK from lib/executive-intelligence.
   critical: 0,
   high: 1,
   medium: 2,

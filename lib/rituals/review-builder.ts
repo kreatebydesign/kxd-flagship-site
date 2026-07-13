@@ -1,5 +1,12 @@
 import "server-only";
 
+/**
+ * Phase 16C / 28B — Weekly Review presentation.
+ * Consumes briefing topPriorities / businessRisks as period context.
+ * Does not independently compute founder-level primary recommendations.
+ * Full period-aware engine migration is deferred to Phase 28C.
+ */
+
 import type { ExecutiveBriefing } from "@/lib/intelligence/briefings/types";
 import type { ExecutiveTimelineDoc } from "@/lib/executive-timeline/types";
 import type { WorkListItem, WorkWorkspaceData } from "@/lib/work/types";

@@ -66,6 +66,8 @@ export interface ExecutiveTodayData {
   brief: ExecutiveTodayBrief | null;
   /** Morning Brief payload retained for deep sections / future expansion. */
   morning: MorningBriefPageData;
+  /** Phase 28B — user-facing explainability for the primary recommendation. */
+  explainability?: import("@/lib/executive-intelligence").UserFacingExplainability | null;
   generatedAt: string;
 }
 

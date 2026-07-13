@@ -1,10 +1,10 @@
 /**
- * Phase 28A — Adapters for Executive Today surfaces.
+ * Phase 28B — Adapters for Executive Today surfaces.
  */
 
 import type { ExecutiveTodayRecommendation } from "@/lib/executive-today/brief/types";
 import type { ExecutiveTodayPrimary } from "@/lib/executive-today/types";
-import type { PrimaryRecommendation } from "../types";
+import type { PrimaryRecommendation, UserFacingExplainability } from "../types";
 
 export function mapRecommendationToTodayBrief(
   rec: PrimaryRecommendation,
@@ -16,7 +16,7 @@ export function mapRecommendationToTodayBrief(
     timeSensitivity: rec.timeSensitivity,
     href: rec.href,
     hrefLabel: rec.hrefLabel,
-    evidence: evidenceSummaries.length > 0 ? evidenceSummaries : rec.evidenceIds,
+    evidence: evidenceSummaries.length > 0 ? evidenceSummaries : [rec.reasoning],
   };
 }
 
@@ -37,7 +37,9 @@ export function mapRecommendationToTodayPrimary(
     detail: rec.reasoning,
     href: rec.href,
     hrefLabel: rec.hrefLabel,
-    reason: rec.timeSensitivity,
+    reason: rec.timeSensitivity || rec.subject || rec.reasoning,
     from,
   };
 }
+
+export type { UserFacingExplainability };

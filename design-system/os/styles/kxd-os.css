@@ -12212,3 +12212,126 @@ a.kxd-exec-today__row:hover {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ── Phase 28B — Why this? explainability ───────────────────────────── */
+/* Uses OS text tokens so contrast works on dark ritual shells. */
+
+.kxd-os-why-this {
+  margin-top: var(--kxd-os-space-4, 1rem);
+}
+
+.kxd-os-why-this__trigger {
+  font-family: inherit;
+  font-size: 0.8125rem;
+  letter-spacing: 0.02em;
+  color: var(--kxd-os-text-muted);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.kxd-os-why-this__trigger:hover {
+  color: var(--kxd-os-text-primary);
+}
+
+.kxd-os-why-this__panel {
+  margin-top: 0.75rem;
+  max-width: 28rem;
+}
+
+.kxd-os-why-this__decision {
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  margin: 0 0 0.5rem;
+  color: var(--kxd-os-text-primary);
+}
+
+.kxd-os-why-this__evidence {
+  margin: 0 0 0.75rem;
+  padding-left: 1.1rem;
+  color: var(--kxd-os-text-muted);
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.kxd-os-why-this__impact,
+.kxd-os-why-this__tradeoff,
+.kxd-os-why-this__confidence,
+.kxd-os-why-this__freshness,
+.kxd-os-why-this__missing {
+  margin: 0 0 0.4rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--kxd-os-text-muted);
+}
+
+.kxd-os-why-this__label {
+  display: block;
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 0.15rem;
+  color: var(--kxd-os-text-faint);
+}
+
+/* Focus Mode — primary recommendation hierarchy (dark editorial) */
+.kxd-os-ritual-focus__section--primary {
+  margin-bottom: var(--kxd-os-space-12);
+}
+
+.kxd-os-ritual-focus__primary-title {
+  font-family: var(--kxd-os-font-display);
+  font-size: clamp(1.25rem, 3.2vw, 1.6rem);
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  margin: 0 0 var(--kxd-os-space-3);
+  color: var(--kxd-os-text-primary);
+  font-weight: 500;
+}
+
+.kxd-os-ritual-focus__primary-reason {
+  margin: 0 0 var(--kxd-os-space-5);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--kxd-os-text-secondary, var(--kxd-os-text-muted));
+}
+
+.kxd-os-ritual-focus__guidance {
+  margin: 0 0 var(--kxd-os-space-4);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--kxd-os-text-muted);
+}
+
+.kxd-os-ritual-focus__guidance-label {
+  display: block;
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 0.2rem;
+  color: var(--kxd-os-text-faint);
+}
+
+.kxd-os-ritual-focus__link {
+  margin: var(--kxd-os-space-5) 0 var(--kxd-os-space-3);
+}
+
+.kxd-os-ritual-focus__link a {
+  font-size: 0.875rem;
+  color: var(--kxd-os-text-primary);
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.kxd-os-ritual-focus__link a:hover {
+  color: var(--kxd-os-text-secondary, var(--kxd-os-text-muted));
+}
+
+@media (max-width: 640px) {
+  .kxd-os-ritual-focus__primary-title {
+    font-size: 1.2rem;
+  }
+}

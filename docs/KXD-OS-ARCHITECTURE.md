@@ -113,9 +113,48 @@ The **execution layer** for studio work.
 
 Work Items connect to Client Command, portal requests, and Activity Engine hooks.
 
-### Executive Intelligence
+### Executive Intelligence Engine (Phase 28)
 
-The **existing deterministic intelligence system** — briefings, health, recommendations.
+The **canonical founder-level reasoning service**. Deterministic. No AI generation.
+
+| Area | Location |
+|------|----------|
+| Engine domain | `lib/executive-intelligence/` |
+| Evidence | `lib/executive-intelligence/evidence/` |
+| Interpretation / Decision / Recommendation | `interpret/`, `decide/`, `recommend/` |
+| Narrative input | `lib/executive-intelligence/narrative/` |
+| Surface adapters | `lib/executive-intelligence/adapters/` |
+
+Pipeline:
+
+```
+Evidence → Interpretation → Decision → Recommendation → Narrative Input
+```
+
+**Permanent rule:** No new founder-level recommendation logic may be introduced outside `lib/executive-intelligence/`.
+
+Boundaries:
+
+| System | Role after Phase 28B |
+|--------|----------------------|
+| `lib/executive-intelligence/` | Cross-domain arbitration; one primary recommendation; confidence; explainability |
+| `lib/intelligence/` | Portfolio analysis evidence supplier — must not choose the founder’s primary action |
+| `lib/executive-signals/` | Signal detection evidence supplier — must not outrank the engine |
+| `lib/executive-context/` | Transport/composition — carries engine result; does not silently arbitrate |
+| `lib/kxd-intelligence/` | Operational coaching consumer — must not re-rank executive priorities |
+| Observer → Brain → Pulse → Narrative | Intact platform pipeline — facts/meaning/awareness/prose; does not replace the engine |
+
+Cross-domain arbitration uses DecisionClass 0–5 (integrity → calm). Schedule and portfolio candidates compete in one pool.
+
+Why deterministic before AI: executive trust requires explainable, reproducible judgment. AI may enrich narrative later; it must never own the decision.
+
+Why one primary recommendation: competing primaries recreate the old multi-engine problem. Surfaces adapt presentation; they do not re-rank.
+
+How future systems integrate: add typed evidence adapters; consume `composeExecutiveIntelligence()`; never invent surface-local priority chains.
+
+### Portfolio Intelligence (`lib/intelligence/`)
+
+The **portfolio analysis system** — briefings, health, growth, infrastructure.
 
 | Area | Location |
 |------|----------|
@@ -124,7 +163,7 @@ The **existing deterministic intelligence system** — briefings, health, recomm
 | Briefing narrative | `lib/intelligence/briefings/narrative.ts` |
 | Operations UI | `app/admin/operations/intelligence/` |
 
-This is distinct from the Phase 17 pipeline (`lib/observer/` through `lib/executive-narrative/`). Intelligence remains the live briefing surface until explicitly wired to the new pipeline.
+Briefing priorities and enriched recommendations are **supporting context** after Phase 28B. Primary founder action comes from the Executive Intelligence Engine.
 
 ### Executive Rituals
 
@@ -132,11 +171,12 @@ This is distinct from the Phase 17 pipeline (`lib/observer/` through `lib/execut
 
 | Ritual | Route | Framework |
 |--------|-------|-----------|
-| Morning Brief | `/admin/operations/brief` | `lib/rituals/` |
-| Focus Mode | `/admin/operations/focus` | `lib/rituals/focus-builder.ts` |
-| Weekly Review | `/admin/operations/review` | `lib/rituals/review-builder.ts` |
+| Morning Brief | `/admin/operations/brief` → Today | `lib/rituals/` (first action from engine) |
+| Focus Mode | `/admin/operations/focus` | `lib/rituals/focus-builder.ts` (engine primary) |
+| Weekly Review | `/admin/operations/review` | `lib/rituals/review-builder.ts` (period context; full engine migration deferred) |
+| Executive Today | `/admin/operations/today` | `lib/executive-today/` (engine + calendar evidence) |
 
-Rituals consume existing Intelligence, Work, and Timeline loaders. Phase 17 narrative is not wired to rituals yet.
+Rituals present engine decisions. They must not independently decide what matters.
 
 ---
 

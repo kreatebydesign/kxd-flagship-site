@@ -1,5 +1,6 @@
 /**
- * Phase 28A — Structured narrative input (no prose generation).
+ * Phase 28B — Structured narrative input (no prose generation).
+ * Narrative must never override the decision.
  */
 
 import type {
@@ -14,6 +15,7 @@ export function buildNarrativeInput(input: {
   decision: OperatingPicture;
   recommendation: PrimaryRecommendation;
   capacitySummary?: string | null;
+  freshness?: string;
 }): NarrativeInput {
   const riskSignals = input.evidence
     .filter((e) =>
@@ -34,7 +36,6 @@ export function buildNarrativeInput(input: {
       [
         "focus_block_available",
         "open_focus_gap",
-        "momentum_opportunity",
         "website_review_new",
         "high_priority_work",
       ].includes(e.kind),
@@ -54,5 +55,8 @@ export function buildNarrativeInput(input: {
       id: e.id,
       summary: e.summary,
     })),
+    confidence: input.decision.confidence,
+    tradeoff: input.recommendation.tradeoff ?? null,
+    freshness: input.freshness ?? "Evidence is current",
   };
 }

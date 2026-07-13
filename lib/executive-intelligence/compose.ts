@@ -1,20 +1,31 @@
 /**
- * Phase 28A — Executive Intelligence Engine entry point.
+ * Phase 28B — Executive Intelligence Engine entry point.
  * Evidence → Interpretation → Decision → Recommendation → Narrative Input
  */
 
 import type { BriefingInputContext } from "@/lib/intelligence/briefings/types";
 import { buildOperatingPicture } from "./decide";
-import { collectEvidence, type ScheduleEvidenceInput } from "./evidence";
+import {
+  collectEvidence,
+  type ScheduleEvidenceInput,
+  type SignalEvidenceSource,
+} from "./evidence";
 import { interpretEvidence } from "./interpret";
 import { buildNarrativeInput } from "./narrative";
-import { buildExplainabilityPath, selectPrimaryRecommendation } from "./recommend";
+import {
+  buildExplainabilityPath,
+  buildUserFacingExplainability,
+  selectPrimaryRecommendation,
+} from "./recommend";
 import type { ExecutiveIntelligenceSurface } from "./types";
+import { DECISION_CLASS_LABEL } from "./types";
 
 export interface ComposeExecutiveIntelligenceInput {
   observedAt?: string;
   briefing?: BriefingInputContext | null;
   schedule?: ScheduleEvidenceInput | null;
+  signals?: SignalEvidenceSource[] | null;
+  calendarAvailable?: boolean | null;
 }
 
 /**
@@ -30,6 +41,8 @@ export function composeExecutiveIntelligence(
     observedAt,
     briefing: input.briefing,
     schedule: input.schedule,
+    signals: input.signals,
+    calendarAvailable: input.calendarAvailable,
   });
 
   const interpretations = interpretEvidence(evidence);
@@ -37,27 +50,37 @@ export function composeExecutiveIntelligence(
     evidence,
     interpretations,
     schedule: input.schedule,
+    hasBriefing: Boolean(input.briefing),
   });
 
-  const recommendation = selectPrimaryRecommendation({
+  const { recommendation, outranked } = selectPrimaryRecommendation({
     evidence,
     interpretations,
     decision,
     schedule: input.schedule,
   });
 
-  const { decisionPath, confidenceRationale } = buildExplainabilityPath(
-    evidence,
-    interpretations,
-    decision,
+  // Align recommendation confidence with operating-picture assessment
+  recommendation.confidence = decision.confidence;
+
+  const { decisionPath, confidenceRationale, missingEvidence, freshness } =
+    buildExplainabilityPath(evidence, interpretations, decision, recommendation);
+
+  const userExplainability = buildUserFacingExplainability({
     recommendation,
-  );
+    confidence: decision.confidence,
+    confidenceReasons: decision.confidenceReasons,
+    evidence,
+    freshness,
+    missingEvidence,
+  });
 
   const narrativeInput = buildNarrativeInput({
     evidence,
     decision,
     recommendation,
     capacitySummary: input.schedule?.capacity?.summary ?? null,
+    freshness,
   });
 
   return {
@@ -71,7 +94,16 @@ export function composeExecutiveIntelligence(
       interpretations,
       decisionPath,
       confidenceRationale,
+      confidenceReasons: decision.confidenceReasons,
+      decisionClass: recommendation.decisionClass,
+      decisionClassLabel: DECISION_CLASS_LABEL[recommendation.decisionClass],
+      outranked,
+      missingEvidence,
+      tradeoff: recommendation.tradeoff ?? null,
+      expectedImpact: recommendation.expectedImpact ?? null,
+      freshness,
     },
+    userExplainability,
     generatedAt: observedAt,
   };
 }

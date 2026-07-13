@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { KxdShell } from "@/components/os";
 import { ExecutiveWorkspaceShell } from "@/components/admin/executive-workspace";
+import { WhyThisDisclosure } from "@/components/admin/executive-intelligence/WhyThisDisclosure";
 import type { ExecutiveTodayData } from "@/lib/executive-today";
 import { formatClock } from "@/lib/executive-today/brief/time-model";
 import { ExecutiveTodayCapture } from "./ExecutiveTodayCapture";
@@ -84,6 +85,7 @@ export function ExecutiveTodayScreen({ data }: { data: ExecutiveTodayData }) {
                 </Link>
               </p>
             ) : null}
+            <WhyThisDisclosure explainability={data.explainability} />
           </section>
 
           {brief && brief.dayFlow.length > 0 ? (

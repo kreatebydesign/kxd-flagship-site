@@ -44,15 +44,17 @@ function momentumFromTone(tone: string): ExecutiveMomentumSlice["businessMomentu
   return "steady";
 }
 
-function priorityFromMorning(
+function priorityFromEngine(
   morning: Awaited<ReturnType<typeof loadMorningBriefPageData>>,
   todayWork: ReturnType<typeof refFromWork>[],
 ): ExecutiveContextRef | null {
-  const { firstAction, briefing } = morning;
+  // Phase 28B — carry canonical engine result via firstAction adapter.
+  // Do not silently fall back to briefing.primaryRecommendation (legacy ranking).
+  const { firstAction } = morning;
 
   if (firstAction.hasAction) {
     return {
-      id: `priority-first-action`,
+      id: `priority-engine-first-action`,
       kind:
         firstAction.kind.includes("website-review")
           ? "review"
@@ -66,17 +68,6 @@ function priorityFromMorning(
           .join(" · ") || null,
       href: firstAction.href,
       clientName: firstAction.clientName,
-    };
-  }
-
-  const rec = briefing.primaryRecommendation;
-  if (rec) {
-    return {
-      id: `priority-recommendation`,
-      kind: "activity",
-      title: rec.title,
-      detail: rec.reason,
-      href: rec.href ?? null,
     };
   }
 
@@ -156,7 +147,7 @@ export async function composeExecutiveContext(
     .map((s) => activityById.get(s.sourceActivityIds[0]))
     .filter((a): a is NonNullable<typeof a> => a != null);
 
-  const recommendedPriority = priorityFromMorning(morning, todayRefs);
+  const recommendedPriority = priorityFromEngine(morning, todayRefs);
   const legacyContinuation = continuationFromWork(
     inProgress,
     todayRefs,

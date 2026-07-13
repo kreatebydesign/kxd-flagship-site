@@ -155,6 +155,34 @@ const KIND_TO_INTERPRETATION: Record<
     opportunity: 35,
     confidence: "high",
   },
+  calendar_unavailable: {
+    kind: "schedule_pressure",
+    leverage: 50,
+    risk: 40,
+    opportunity: 20,
+    confidence: "medium",
+  },
+  executive_signal: {
+    kind: "signal_attention",
+    leverage: 45,
+    risk: 35,
+    opportunity: 40,
+    confidence: "medium",
+  },
+  activity_elevated: {
+    kind: "signal_attention",
+    leverage: 48,
+    risk: 40,
+    opportunity: 35,
+    confidence: "medium",
+  },
+  memory_pattern: {
+    kind: "steady_operations",
+    leverage: 35,
+    risk: 20,
+    opportunity: 30,
+    confidence: "low",
+  },
 };
 
 export function interpretEvidence(evidence: EvidenceItem[]): Interpretation[] {

@@ -1,7 +1,7 @@
 import "server-only";
 
 /**
- * Phase 22A/23A/23B/27B/28A — Executive Today presentation loader.
+ * Phase 22A/23A/23B/27B/28B — Executive Today presentation loader.
  * Composes Executive Context + calendar-aware brief + Executive Intelligence Engine.
  * Does not publish Activity. Does not mutate calendar.
  */
@@ -72,6 +72,7 @@ export async function loadExecutiveToday(input?: {
   displayName?: string | null;
   email?: string | null;
 }): Promise<ExecutiveTodayData> {
+  // Single shared briefing load — React cache shares with getExecutiveContext → morning brief.
   const briefingContext = await loadBriefingContext();
 
   const [ctx, brief] = await Promise.all([
@@ -82,10 +83,23 @@ export async function loadExecutiveToday(input?: {
     }).catch(() => null),
   ]);
 
+  const signals = ctx.executiveSignals.map((s) => ({
+    id: s.id,
+    title: s.title,
+    summary: s.summary ?? s.title,
+    domain: s.domain,
+    href: s.href,
+    occurredAt: s.occurredAt,
+    businessImpact: s.score.businessImpact,
+    urgency: s.score.urgency,
+  }));
+
   const intelligence = composeExecutiveIntelligence({
     observedAt: brief?.bounds.nowIso ?? ctx.generatedAt,
     briefing: briefingContext,
     schedule: brief?.engineSchedule ?? null,
+    signals,
+    calendarAvailable: brief?.freshness.calendarAvailable ?? null,
   });
 
   const primary = mapRecommendationToTodayPrimary(intelligence.recommendation);
@@ -138,6 +152,7 @@ export async function loadExecutiveToday(input?: {
     upcoming: mapUpcoming(ctx, briefWithReviews),
     brief: briefWithReviews,
     morning: ctx.morning,
+    explainability: intelligence.userExplainability,
     generatedAt: ctx.generatedAt,
   };
 }
