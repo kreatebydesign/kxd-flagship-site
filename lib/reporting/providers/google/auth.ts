@@ -1,23 +1,27 @@
 /**
- * Phase 29C — Google Reporting API scopes and auth.
+ * Phase 29C / 31B — Google Reporting API scopes and auth.
  *
  * Separate from Calendar OAuth (calendar.readonly / calendar.events)
  * and any Drive credentials. Reporting never reads GOOGLE_CALENDAR_* or Drive env.
  *
- * Credential precedence (intentional — no silent SA→OAuth fallthrough on bad SA JSON):
- * 1. GOOGLE_REPORTING_SERVICE_ACCOUNT_JSON (inline JSON)
- * 2. GA4_SERVICE_ACCOUNT_JSON / GSC_SERVICE_ACCOUNT_JSON (aliases)
- * 3. GOOGLE_APPLICATION_CREDENTIALS (filesystem path to JSON)
- * 4. GOOGLE_REPORTING_CLIENT_ID + CLIENT_SECRET + REFRESH_TOKEN (all three)
+ * Credential precedence (strict — no silent fallthrough on invalid higher sources):
+ * 1. Vercel OIDC + Google Workload Identity Federation
+ *    (on Vercel + complete GCP_* federation env)
+ * 2. GOOGLE_REPORTING_SERVICE_ACCOUNT_JSON (inline JSON)
+ * 3. GA4_SERVICE_ACCOUNT_JSON / GSC_SERVICE_ACCOUNT_JSON (aliases)
+ * 4. GOOGLE_APPLICATION_CREDENTIALS (filesystem path to JSON)
+ * 5. GOOGLE_REPORTING_CLIENT_ID + CLIENT_SECRET + REFRESH_TOKEN (all three)
  * Else: not-configured
  *
  * If a higher-precedence source is present but invalid → invalid-configuration
- * (does not fall through to OAuth).
+ * (does not fall through).
  */
 
 import "server-only";
 
 import { createSign } from "node:crypto";
+import { ExternalAccountClient } from "google-auth-library";
+import { getVercelOidcToken } from "@vercel/oidc";
 import { envPresent, envValue } from "@/lib/live-integrations/status";
 import { mapHttpStatusToProviderStatus, providerError, sanitizeProviderMessage } from "../errors";
 import type { ReportingProviderError } from "../types";
@@ -33,8 +37,20 @@ export const GOOGLE_REPORTING_SCOPES = [
   GOOGLE_REPORTING_WEBMASTERS_SCOPE,
 ] as const;
 
+/** GCP Workload Identity Federation env keys (all required for OIDC mode). */
+export const GCP_OIDC_ENV_KEYS = [
+  "GCP_PROJECT_ID",
+  "GCP_PROJECT_NUMBER",
+  "GCP_SERVICE_ACCOUNT_EMAIL",
+  "GCP_WORKLOAD_IDENTITY_POOL_ID",
+  "GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID",
+] as const;
+
+export type GcpOidcEnvKey = (typeof GCP_OIDC_ENV_KEYS)[number];
+
 /** Documented precedence for operators and tests. */
 export const GOOGLE_REPORTING_CREDENTIAL_PRECEDENCE = [
+  "VERCEL_OIDC_WORKLOAD_IDENTITY",
   "GOOGLE_REPORTING_SERVICE_ACCOUNT_JSON",
   "GA4_SERVICE_ACCOUNT_JSON",
   "GSC_SERVICE_ACCOUNT_JSON",
@@ -43,8 +59,10 @@ export const GOOGLE_REPORTING_CREDENTIAL_PRECEDENCE = [
 ] as const;
 
 const GOOGLE_OAUTH_TOKEN_URL = "https://oauth2.googleapis.com/token";
+const GOOGLE_STS_TOKEN_URL = "https://sts.googleapis.com/v1/token";
 
 export type GoogleReportingAuthMode =
+  | "vercel-oidc"
   | "service-account"
   | "oauth-refresh"
   | "not-configured"
@@ -57,12 +75,22 @@ export interface GoogleReportingAuthConfig {
   scopes: readonly string[];
   /** Sanitized reason when mode is invalid-configuration */
   invalidReason?: string;
+  /** True when mode is vercel-oidc */
+  workloadIdentityConfigured?: boolean;
 }
 
 export interface ServiceAccountJson {
   client_email: string;
   private_key: string;
   token_uri?: string;
+}
+
+export interface GcpOidcFederationConfig {
+  projectId: string;
+  projectNumber: string;
+  serviceAccountEmail: string;
+  poolId: string;
+  providerId: string;
 }
 
 interface CachedToken {
@@ -75,6 +103,66 @@ let cachedToken: CachedToken | null = null;
 
 export function clearGoogleReportingAccessTokenCache(): void {
   cachedToken = null;
+}
+
+export function isVercelRuntime(env: {
+  get: (key: string) => string | undefined;
+}): boolean {
+  const vercel = env.get("VERCEL")?.trim();
+  if (vercel === "1" || vercel?.toLowerCase() === "true") return true;
+  const vercelEnv = env.get("VERCEL_ENV")?.trim();
+  return Boolean(vercelEnv);
+}
+
+export function buildWorkloadIdentityAudience(
+  projectNumber: string,
+  poolId: string,
+  providerId: string,
+): string {
+  return `//iam.googleapis.com/projects/${projectNumber}/locations/global/workloadIdentityPools/${poolId}/providers/${providerId}`;
+}
+
+export function buildServiceAccountImpersonationUrl(serviceAccountEmail: string): string {
+  return `https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/${serviceAccountEmail}:generateAccessToken`;
+}
+
+/**
+ * Classify GCP OIDC env completeness for precedence decisions.
+ * Partial configuration is always invalid (never ignored).
+ */
+export function evaluateGcpOidcEnv(env: {
+  get: (key: string) => string | undefined;
+}):
+  | { status: "absent" }
+  | { status: "partial"; present: GcpOidcEnvKey[]; missing: GcpOidcEnvKey[] }
+  | { status: "complete"; config: GcpOidcFederationConfig } {
+  const present: GcpOidcEnvKey[] = [];
+  const missing: GcpOidcEnvKey[] = [];
+  const values: Partial<Record<GcpOidcEnvKey, string>> = {};
+
+  for (const key of GCP_OIDC_ENV_KEYS) {
+    const value = env.get(key)?.trim() ?? "";
+    if (value) {
+      present.push(key);
+      values[key] = value;
+    } else {
+      missing.push(key);
+    }
+  }
+
+  if (present.length === 0) return { status: "absent" };
+  if (missing.length > 0) return { status: "partial", present, missing };
+
+  return {
+    status: "complete",
+    config: {
+      projectId: values.GCP_PROJECT_ID!,
+      projectNumber: values.GCP_PROJECT_NUMBER!,
+      serviceAccountEmail: values.GCP_SERVICE_ACCOUNT_EMAIL!,
+      poolId: values.GCP_WORKLOAD_IDENTITY_POOL_ID!,
+      providerId: values.GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID!,
+    },
+  };
 }
 
 /**
@@ -123,7 +211,6 @@ export function parseServiceAccountJson(
     };
   }
 
-  // Env-stored keys often contain literal \n sequences.
   privateKey = privateKey.replace(/\\n/g, "\n");
   if (!privateKey.includes("BEGIN") || !privateKey.includes("PRIVATE KEY")) {
     return {
@@ -151,6 +238,7 @@ export function parseServiceAccountJson(
 }
 
 type CredentialResolution =
+  | { kind: "vercel-oidc"; config: GcpOidcFederationConfig }
   | { kind: "service-account"; value: ServiceAccountJson; source: string }
   | { kind: "oauth" }
   | { kind: "not-configured" }
@@ -163,6 +251,24 @@ export function resolveGoogleReportingCredentials(env: {
   get: (key: string) => string | undefined;
   present: (key: string) => boolean;
 }): CredentialResolution {
+  const oidc = evaluateGcpOidcEnv(env);
+
+  // Partial OIDC always invalid — never ignore half-configured federation.
+  if (oidc.status === "partial") {
+    return {
+      kind: "invalid",
+      error: providerError(
+        "invalid-configuration",
+        `GCP Workload Identity Federation is partially configured (missing ${oidc.missing.join(", ")}).`,
+      ),
+    };
+  }
+
+  // On Vercel with complete federation env → OIDC wins over JSON/OAuth.
+  if (oidc.status === "complete" && isVercelRuntime(env)) {
+    return { kind: "vercel-oidc", config: oidc.config };
+  }
+
   const inlineKeys = [
     "GOOGLE_REPORTING_SERVICE_ACCOUNT_JSON",
     "GA4_SERVICE_ACCOUNT_JSON",
@@ -213,7 +319,6 @@ export function resolveGoogleReportingCredentials(env: {
     env.present("GOOGLE_CALENDAR_REFRESH_TOKEN") ||
     env.present("GOOGLE_CALENDAR_CLIENT_ID")
   ) {
-    // Still not-configured for reporting — Calendar env is intentionally ignored.
     return { kind: "not-configured" };
   }
 
@@ -231,6 +336,14 @@ export function getGoogleReportingAuthConfig(
   env = defaultEnv(),
 ): GoogleReportingAuthConfig {
   const resolved = resolveGoogleReportingCredentials(env);
+  if (resolved.kind === "vercel-oidc") {
+    return {
+      mode: "vercel-oidc",
+      serviceAccountEmail: resolved.config.serviceAccountEmail,
+      scopes: GOOGLE_REPORTING_SCOPES,
+      workloadIdentityConfigured: true,
+    };
+  }
   if (resolved.kind === "service-account") {
     return {
       mode: "service-account",
@@ -255,6 +368,32 @@ export function getGoogleReportingAuthConfig(
   return { mode: "not-configured", scopes: GOOGLE_REPORTING_SCOPES };
 }
 
+/**
+ * Build External Account Client JSON shape (no secrets / no OIDC token).
+ * Exported for offline verification.
+ */
+export function buildExternalAccountClientConfig(config: GcpOidcFederationConfig): {
+  type: "external_account";
+  audience: string;
+  subject_token_type: string;
+  token_url: string;
+  service_account_impersonation_url: string;
+} {
+  return {
+    type: "external_account",
+    audience: buildWorkloadIdentityAudience(
+      config.projectNumber,
+      config.poolId,
+      config.providerId,
+    ),
+    subject_token_type: "urn:ietf:params:oauth:token-type:jwt",
+    token_url: GOOGLE_STS_TOKEN_URL,
+    service_account_impersonation_url: buildServiceAccountImpersonationUrl(
+      config.serviceAccountEmail,
+    ),
+  };
+}
+
 function base64url(input: Buffer | string): string {
   const buf = typeof input === "string" ? Buffer.from(input) : input;
   return buf
@@ -262,6 +401,47 @@ function base64url(input: Buffer | string): string {
     .replace(/=/g, "")
     .replace(/\+/g, "-")
     .replace(/\//g, "_");
+}
+
+async function fetchVercelOidcAccessToken(
+  config: GcpOidcFederationConfig,
+): Promise<{ accessToken: string; expiresAt: number }> {
+  const external = buildExternalAccountClientConfig(config);
+
+  // Allowed-audience provider (https://vercel.com/kxd): use default Vercel OIDC token.
+  // Never log the OIDC assertion or access token.
+  const authClient = ExternalAccountClient.fromJSON({
+    ...external,
+    subject_token_supplier: {
+      getSubjectToken: async () => getVercelOidcToken(),
+    },
+  });
+
+  if (!authClient) {
+    throw Object.assign(new Error("Failed to construct Workload Identity client."), {
+      status: 0,
+      code: "invalid-configuration",
+    });
+  }
+
+  authClient.scopes = [...GOOGLE_REPORTING_SCOPES];
+  const tokenResponse = await authClient.getAccessToken();
+  const accessToken =
+    typeof tokenResponse === "string"
+      ? tokenResponse
+      : tokenResponse?.token ?? null;
+
+  if (!accessToken) {
+    throw Object.assign(new Error("OIDC federation did not return an access token."), {
+      status: 401,
+    });
+  }
+
+  // External account tokens are short-lived; refresh conservatively without reading raw expiry claims into logs.
+  return {
+    accessToken,
+    expiresAt: Date.now() + 50 * 60 * 1000,
+  };
 }
 
 async function fetchServiceAccountAccessToken(
@@ -357,7 +537,11 @@ async function fetchOAuthRefreshAccessToken(): Promise<{ accessToken: string; ex
 }
 
 export type GoogleReportingAccessResult =
-  | { ok: true; accessToken: string; mode: "service-account" | "oauth-refresh" }
+  | {
+      ok: true;
+      accessToken: string;
+      mode: "vercel-oidc" | "service-account" | "oauth-refresh";
+    }
   | { ok: false; error: ReportingProviderError };
 
 export async function getGoogleReportingAccessToken(): Promise<GoogleReportingAccessResult> {
@@ -368,7 +552,7 @@ export async function getGoogleReportingAccessToken(): Promise<GoogleReportingAc
       ok: false,
       error: providerError(
         "not-configured",
-        "Google Reporting credentials are not configured. Set GOOGLE_REPORTING_SERVICE_ACCOUNT_JSON or GOOGLE_REPORTING_* OAuth trio.",
+        "Google Reporting credentials are not configured. On Vercel set GCP Workload Identity vars; locally use GOOGLE_REPORTING_SERVICE_ACCOUNT_JSON or GOOGLE_REPORTING_* OAuth trio.",
       ),
     };
   }
@@ -377,7 +561,12 @@ export async function getGoogleReportingAccessToken(): Promise<GoogleReportingAc
     return { ok: false, error: resolved.error };
   }
 
-  const mode = resolved.kind === "service-account" ? "service-account" : "oauth-refresh";
+  const mode =
+    resolved.kind === "vercel-oidc"
+      ? "vercel-oidc"
+      : resolved.kind === "service-account"
+        ? "service-account"
+        : "oauth-refresh";
 
   if (cachedToken && cachedToken.mode === mode && Date.now() < cachedToken.expiresAt) {
     return { ok: true, accessToken: cachedToken.accessToken, mode };
@@ -385,16 +574,18 @@ export async function getGoogleReportingAccessToken(): Promise<GoogleReportingAc
 
   try {
     const token =
-      resolved.kind === "service-account"
-        ? await fetchServiceAccountAccessToken(resolved.value)
-        : await fetchOAuthRefreshAccessToken();
+      resolved.kind === "vercel-oidc"
+        ? await fetchVercelOidcAccessToken(resolved.config)
+        : resolved.kind === "service-account"
+          ? await fetchServiceAccountAccessToken(resolved.value)
+          : await fetchOAuthRefreshAccessToken();
 
     cachedToken = {
       accessToken: token.accessToken,
       expiresAt: token.expiresAt,
       mode,
     };
-    return { ok: true, accessToken: token.accessToken, mode };
+    return { ok: true, accessToken: cachedToken.accessToken, mode };
   } catch (err) {
     const status =
       typeof err === "object" && err && "status" in err
@@ -404,9 +595,18 @@ export async function getGoogleReportingAccessToken(): Promise<GoogleReportingAc
       typeof err === "object" && err && "code" in err
         ? String((err as { code: string }).code)
         : undefined;
-    const message = err instanceof Error ? err.message : "Authentication failed";
+    const message = sanitizeProviderMessage(
+      err instanceof Error ? err.message : "Authentication failed",
+    );
+    // Configured OIDC/SA must never silently fall through to another mode.
     if (codeHint === "not-configured" || status === 0) {
-      return { ok: false, error: providerError("not-configured", message) };
+      return {
+        ok: false,
+        error: providerError(
+          resolved.kind === "vercel-oidc" ? "invalid-configuration" : "not-configured",
+          message,
+        ),
+      };
     }
     const code = status ? mapHttpStatusToProviderStatus(status) : "unauthorized";
     return {

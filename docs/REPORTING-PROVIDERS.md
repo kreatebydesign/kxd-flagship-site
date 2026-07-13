@@ -22,7 +22,7 @@ Downstream modules must not import GA4/GSC clients or Google auth.
 1. Enable APIs on the Google Cloud project:
    - Google Analytics Data API
    - Google Search Console API
-2. Prefer a **service account** with read access to each client’s GA4 property and Search Console site.
+2. Prefer **Vercel OIDC + Google Workload Identity Federation** in production (no JSON key). Locally, a **service account** JSON / `GOOGLE_APPLICATION_CREDENTIALS` / reporting OAuth trio remain supported.
 3. Alternatively use a **reporting-specific OAuth refresh token** with the scopes below.
    - Do **not** reuse `GOOGLE_CALENDAR_REFRESH_TOKEN` — Calendar scopes are different.
    - Existing Calendar tokens do **not** inherit analytics/webmasters scopes; re-consent is required for a new reporting token.
@@ -38,13 +38,14 @@ https://www.googleapis.com/auth/webmasters.readonly
 
 Exact order (higher wins; invalid higher source does **not** fall through):
 
-1. `GOOGLE_REPORTING_SERVICE_ACCOUNT_JSON` (inline JSON)
-2. `GA4_SERVICE_ACCOUNT_JSON` (alias)
-3. `GSC_SERVICE_ACCOUNT_JSON` (alias)
-4. `GOOGLE_APPLICATION_CREDENTIALS` (filesystem path to JSON)
-5. `GOOGLE_REPORTING_CLIENT_ID` + `GOOGLE_REPORTING_CLIENT_SECRET` + `GOOGLE_REPORTING_REFRESH_TOKEN` (all three required)
+1. Vercel OIDC + Workload Identity Federation (`GCP_PROJECT_ID`, `GCP_PROJECT_NUMBER`, `GCP_SERVICE_ACCOUNT_EMAIL`, `GCP_WORKLOAD_IDENTITY_POOL_ID`, `GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID` — on Vercel only)
+2. `GOOGLE_REPORTING_SERVICE_ACCOUNT_JSON` (inline JSON)
+3. `GA4_SERVICE_ACCOUNT_JSON` (alias)
+4. `GSC_SERVICE_ACCOUNT_JSON` (alias)
+5. `GOOGLE_APPLICATION_CREDENTIALS` (filesystem path to JSON)
+6. `GOOGLE_REPORTING_CLIENT_ID` + `GOOGLE_REPORTING_CLIENT_SECRET` + `GOOGLE_REPORTING_REFRESH_TOKEN` (all three required)
 
-Malformed or partial service-account configuration → `invalid-configuration` (not OAuth fallback).
+Malformed or partial service-account / OIDC configuration → `invalid-configuration` (not silent fallback).
 
 Never commit live credentials. Never expose refresh tokens to the browser. Access tokens are never stored on reporting facts.
 
@@ -152,11 +153,13 @@ Diagnostic only — **does not persist facts**, mutate clients, or create report
 
 ### Select credential mode
 
-Prefer service account:
+**Production (Vercel):** set the five `GCP_*` Workload Identity Federation variables. Tokens come from Vercel OIDC + STS impersonation of `kxd-os-reporting@…`. No JSON key.
 
-1. Create a Google Cloud service account.
+**Local development:** service account JSON / `GOOGLE_APPLICATION_CREDENTIALS` / reporting OAuth trio:
+
+1. Create a Google Cloud service account (or reuse `kxd-os-reporting@…` with a local key **only** if required for offline work).
 2. Enable **Google Analytics Data API** and **Google Search Console API**.
-3. Download the JSON key.
+3. Prefer Viewer grants on each client property — not project Owner alone.
 4. Set `GOOGLE_REPORTING_SERVICE_ACCOUNT_JSON` to the full JSON string (or `GOOGLE_APPLICATION_CREDENTIALS` to the file path).
 5. Note the service-account **email** (`client_email`) from the JSON — do not log the private key.
 

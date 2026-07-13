@@ -43,8 +43,14 @@ import {
   GOOGLE_REPORTING_ANALYTICS_SCOPE,
   GOOGLE_REPORTING_WEBMASTERS_SCOPE,
   GOOGLE_REPORTING_CREDENTIAL_PRECEDENCE,
+  GCP_OIDC_ENV_KEYS,
   parseServiceAccountJson,
   resolveGoogleReportingCredentials,
+  evaluateGcpOidcEnv,
+  isVercelRuntime,
+  buildWorkloadIdentityAudience,
+  buildServiceAccountImpersonationUrl,
+  buildExternalAccountClientConfig,
 } from "../lib/reporting/providers/google/auth.ts";
 import { GA4_CORE_METRICS } from "../lib/reporting/providers/google/ga4/client.ts";
 import { normalizeGa4Metrics } from "../lib/reporting/providers/google/ga4/normalize.ts";
@@ -140,7 +146,15 @@ console.log("\n2. Period / freshness semantics");
 console.log("\n3. Authentication");
 assert(GOOGLE_REPORTING_SCOPES.includes(GOOGLE_REPORTING_ANALYTICS_SCOPE), "analytics scope");
 assert(GOOGLE_REPORTING_SCOPES.includes(GOOGLE_REPORTING_WEBMASTERS_SCOPE), "webmasters scope");
-assert(GOOGLE_REPORTING_CREDENTIAL_PRECEDENCE[0] === "GOOGLE_REPORTING_SERVICE_ACCOUNT_JSON", "SA JSON precedes path/OAuth");
+assert(
+  GOOGLE_REPORTING_CREDENTIAL_PRECEDENCE[0] === "VERCEL_OIDC_WORKLOAD_IDENTITY",
+  "Vercel OIDC precedes SA JSON / OAuth",
+);
+assert(
+  GOOGLE_REPORTING_CREDENTIAL_PRECEDENCE[1] === "GOOGLE_REPORTING_SERVICE_ACCOUNT_JSON",
+  "SA JSON remains second precedence",
+);
+assert(GCP_OIDC_ENV_KEYS.length === 5, "five GCP federation env keys required");
 {
   const bad = parseServiceAccountJson("{not-json");
   assert(!bad.ok && bad.error.code === "invalid-configuration", "malformed SA JSON → invalid-configuration");
@@ -161,6 +175,80 @@ assert(GOOGLE_REPORTING_CREDENTIAL_PRECEDENCE[0] === "GOOGLE_REPORTING_SERVICE_A
   if (escaped.ok) {
     assert(escaped.value.private_key.includes("\nABC\n"), "literal \\n normalized to newlines");
   }
+}
+{
+  const envMap: Record<string, string> = {
+    GCP_PROJECT_ID: "kxd-os",
+    GCP_PROJECT_NUMBER: "571979415347",
+  };
+  const oidc = evaluateGcpOidcEnv({ get: (k) => envMap[k] });
+  assert(oidc.status === "partial", "partial GCP federation → partial status");
+  const resolved = resolveGoogleReportingCredentials({
+    get: (k) => envMap[k],
+    present: (k) => Boolean(envMap[k]),
+  });
+  assert(resolved.kind === "invalid", "partial OIDC never falls through");
+  if (resolved.kind === "invalid") {
+    assert(resolved.error.code === "invalid-configuration", "partial OIDC → invalid-configuration");
+  }
+}
+{
+  const envMap: Record<string, string> = {
+    VERCEL: "1",
+    GCP_PROJECT_ID: "kxd-os",
+    GCP_PROJECT_NUMBER: "571979415347",
+    GCP_SERVICE_ACCOUNT_EMAIL: "kxd-os-reporting@kxd-os.iam.gserviceaccount.com",
+    GCP_WORKLOAD_IDENTITY_POOL_ID: "vercel",
+    GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID: "vercel",
+    GOOGLE_REPORTING_SERVICE_ACCOUNT_JSON: JSON.stringify({
+      client_email: "ignored@example.iam.gserviceaccount.com",
+      private_key: "-----BEGIN PRIVATE KEY-----\nABC\n-----END PRIVATE KEY-----\n",
+    }),
+  };
+  assert(isVercelRuntime({ get: (k) => envMap[k] }), "VERCEL=1 detected");
+  const resolved = resolveGoogleReportingCredentials({
+    get: (k) => envMap[k],
+    present: (k) => Boolean(envMap[k]),
+  });
+  assert(resolved.kind === "vercel-oidc", "complete OIDC on Vercel wins over SA JSON");
+  if (resolved.kind === "vercel-oidc") {
+    const external = buildExternalAccountClientConfig(resolved.config);
+    assert(external.type === "external_account", "external_account type");
+    assert(
+      external.audience ===
+        buildWorkloadIdentityAudience("571979415347", "vercel", "vercel"),
+      "WIF audience shape",
+    );
+    assert(
+      external.service_account_impersonation_url ===
+        buildServiceAccountImpersonationUrl("kxd-os-reporting@kxd-os.iam.gserviceaccount.com"),
+      "impersonation URL shape",
+    );
+    assert(external.token_url.includes("sts.googleapis.com"), "STS token URL");
+    assert(
+      !JSON.stringify(external).includes("BEGIN PRIVATE KEY"),
+      "external config never embeds private keys",
+    );
+  }
+}
+{
+  // Local: complete GCP env without Vercel → fall through to SA (OIDC token unavailable locally).
+  const envMap: Record<string, string> = {
+    GCP_PROJECT_ID: "kxd-os",
+    GCP_PROJECT_NUMBER: "571979415347",
+    GCP_SERVICE_ACCOUNT_EMAIL: "kxd-os-reporting@kxd-os.iam.gserviceaccount.com",
+    GCP_WORKLOAD_IDENTITY_POOL_ID: "vercel",
+    GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID: "vercel",
+    GOOGLE_REPORTING_SERVICE_ACCOUNT_JSON: JSON.stringify({
+      client_email: "sa@example.iam.gserviceaccount.com",
+      private_key: "-----BEGIN PRIVATE KEY-----\nABC\n-----END PRIVATE KEY-----\n",
+    }),
+  };
+  const resolved = resolveGoogleReportingCredentials({
+    get: (k) => envMap[k],
+    present: (k) => Boolean(envMap[k]),
+  });
+  assert(resolved.kind === "service-account", "local complete GCP env falls through to SA JSON");
 }
 {
   const envMap: Record<string, string> = {
@@ -190,6 +278,9 @@ assert(GOOGLE_REPORTING_CREDENTIAL_PRECEDENCE[0] === "GOOGLE_REPORTING_SERVICE_A
   const err = providerError("unauthorized", "Bearer ya29.secret-token-value revoked");
   assert(!JSON.stringify(err).toLowerCase().includes("ya29"), "secrets absent from serialized errors");
   assert(mapHttpStatusToProviderStatus(401) === "unauthorized", "revoked/401 → unauthorized");
+  const authSrc = readFileSync(resolve("lib/reporting/providers/google/auth.ts"), "utf8");
+  assert(!authSrc.includes("console.log(assertion"), "auth never logs OIDC assertion");
+  assert(!authSrc.includes("console.log(accessToken"), "auth never logs access tokens");
 }
 
 console.log("\n4. Scoping and property resolution");
