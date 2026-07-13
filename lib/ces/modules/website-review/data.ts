@@ -10,6 +10,7 @@ import { loadWebsiteReviewTimeline } from "./activity";
 import { loadAttachmentsForRequest } from "./attachments-server";
 import { formatPageContextDisplay } from "./context";
 import { getWebsiteReviewRequestsForClient } from "./queries";
+import { resolveWebsiteReviewTargetUrl } from "./target-url";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDoc = Record<string, any>;
@@ -78,7 +79,7 @@ export async function mapRequestDocToWebsiteReviewItem(
 
 export async function getWebsiteReviewLanding(
   session: PortalSession,
-  profile: ResolvedExperienceProfile,
+  _profile: ResolvedExperienceProfile,
 ): Promise<WebsiteReviewLandingData> {
   const docs = await getWebsiteReviewRequestsForClient(session.clientId);
   const items = await Promise.all(
@@ -93,7 +94,7 @@ export async function getWebsiteReviewLanding(
   );
 
   return {
-    websiteUrl: profile.identity.websiteUrl,
+    websiteUrl: await resolveWebsiteReviewTargetUrl(session.clientId),
     activeReviews,
     completedReviews,
   };

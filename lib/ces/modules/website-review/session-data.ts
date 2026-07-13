@@ -4,6 +4,7 @@ import type { PortalSession } from "@/lib/portal/session";
 import type { ResolvedExperienceProfile } from "@/lib/ces/types";
 import type { ReviewSession } from "@/lib/ces/review";
 import { getWebsiteReviewById } from "./data";
+import { resolveWebsiteReviewTargetUrl } from "./target-url";
 
 export interface ReviewSessionBootstrap extends ReviewSession {
   parentRequestTitle?: string | null;
@@ -11,10 +12,10 @@ export interface ReviewSessionBootstrap extends ReviewSession {
 
 export async function getReviewSessionBootstrap(
   session: PortalSession,
-  profile: ResolvedExperienceProfile,
+  _profile: ResolvedExperienceProfile,
   revisionId: string,
 ): Promise<ReviewSessionBootstrap | null> {
-  const websiteUrl = profile.identity.websiteUrl?.trim();
+  const websiteUrl = await resolveWebsiteReviewTargetUrl(session.clientId);
   if (!websiteUrl) return null;
 
   const isNew = revisionId === "new";
