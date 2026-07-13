@@ -3,6 +3,7 @@
  * Deterministic composition shapes — no Google SDK, no LLM dependency.
  */
 
+import type { ScheduleEvidenceInput } from "@/lib/executive-intelligence/evidence/schedule";
 import type { ObservedCalendarEvent } from "@/lib/google/calendar/types";
 import type {
   ScheduleExternalChangeClass,
@@ -161,6 +162,8 @@ export interface ExecutiveTodayBrief {
     conflictCount: number;
     workTitleAuthoritative: true;
   };
+  /** Engine schedule context — downstream arbitration. Not for UI. */
+  engineSchedule: ScheduleEvidenceInput;
 }
 
 /** Inputs for pure composition (testable without network). */
@@ -176,6 +179,7 @@ export interface ExecutiveTodayComposeInput {
   linkedSchedules: ExecutiveTodayLinkedSchedule[];
   workItems: ExecutiveTodayWorkRef[];
   reviewWaitingCount: number;
+  briefing?: import("@/lib/intelligence/briefings/types").BriefingInputContext | null;
 }
 
 export interface ExecutiveTodayLinkedSchedule {

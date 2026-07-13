@@ -7,7 +7,6 @@ import type { ObservedCalendarEvent } from "@/lib/google/calendar/types";
 import { correlateDayCommitments, type CorrelatedCommitment } from "./correlate";
 import {
   buildExecutiveDayBounds,
-  formatClock,
   gapMinutes,
   largestGap,
   minutesBetween,
@@ -18,6 +17,10 @@ import {
   totalMinutes,
   type TimeInterval,
 } from "./time-model";
+import {
+  composeExecutiveIntelligence,
+  mapRecommendationToTodayBrief,
+} from "@/lib/executive-intelligence";
 import type {
   CommitmentRiskLevel,
   DayFlowItemKind,
@@ -29,7 +32,6 @@ import type {
   ExecutiveTodayComposeInput,
   ExecutiveTodayCurrentPosition,
   ExecutiveTodayDayFlowItem,
-  ExecutiveTodayRecommendation,
 } from "./types";
 
 const TRANSITION_BUFFER_MINUTES = 10;
@@ -285,184 +287,6 @@ function buildCapacity(input: {
   };
 }
 
-function buildRecommendation(input: {
-  orientation: ExecutiveDayOrientation;
-  dayFlow: ExecutiveTodayDayFlowItem[];
-  attention: ExecutiveTodayAttentionItem[];
-  capacity: ExecutiveTodayCapacity;
-  current: ExecutiveTodayCurrentPosition;
-  overdueWork: ExecutiveTodayComposeInput["workItems"];
-  plannedUnscheduled: ExecutiveTodayComposeInput["workItems"];
-  timeZone: string;
-}): ExecutiveTodayRecommendation {
-  const recovery = input.dayFlow.find((i) => i.kind === "recovery");
-  if (recovery) {
-    return {
-      action: "Resolve calendar recovery before treating the day as confirmed",
-      reason: recovery.detail || "A linked calendar commitment is missing or cancelled.",
-      timeSensitivity: "Before relying on today’s schedule",
-      href: recovery.workHref ?? recovery.scheduleLinkId
-        ? `/admin/work/scheduling`
-        : "/admin/work/scheduling",
-      hrefLabel: recovery.workHref ? "Open Work" : "Open Scheduling",
-      evidence: [
-        recovery.title,
-        recovery.detail ?? "Recovery required",
-        "KXD OS did not recreate the event",
-      ],
-    };
-  }
-
-  const conflict = input.attention.find((a) => a.id.startsWith("conflict"));
-  if (conflict) {
-    return {
-      action: "Decide which overlapping commitment to protect",
-      reason: conflict.evidence,
-      timeSensitivity: "Now — the day plan is inconsistent",
-      href: conflict.href,
-      hrefLabel: conflict.hrefLabel,
-      evidence: [conflict.title, conflict.evidence],
-    };
-  }
-
-  const currentItem = input.dayFlow.find((i) => i.state === "current" && i.kind !== "focus_gap");
-  if (currentItem && currentItem.kind === "linked_work" && currentItem.workHref) {
-    return {
-      action: `Continue ${currentItem.title}`,
-      reason: "This Work block is active now.",
-      timeSensitivity:
-        input.current.minutesRemaining != null
-          ? `${input.current.minutesRemaining} minutes remaining`
-          : "In progress",
-      href: currentItem.workHref,
-      hrefLabel: "Open Work",
-      evidence: [
-        "Current linked schedule block",
-        currentItem.clientName ?? "Internal",
-      ],
-    };
-  }
-
-  if (
-    currentItem &&
-    (currentItem.kind === "external" || currentItem.kind === "all_day")
-  ) {
-    return {
-      action: "Stay with the current commitment",
-      reason: "An external calendar block is active. Protect the transition after it ends.",
-      timeSensitivity:
-        input.current.minutesRemaining != null
-          ? `${input.current.minutesRemaining} minutes remaining`
-          : "In progress",
-      href: currentItem.calendarHtmlLink,
-      hrefLabel: currentItem.calendarHtmlLink ? "Open Calendar" : null,
-      evidence: [currentItem.title, "External occupancy"],
-    };
-  }
-
-  if (
-    input.current.nextStartsInMinutes != null &&
-    input.current.nextStartsInMinutes <= 20 &&
-    input.current.nextCommitment
-  ) {
-    return {
-      action: `Prepare for ${input.current.nextCommitment}`,
-      reason: "The next commitment begins soon — avoid starting deep work that cannot finish.",
-      timeSensitivity: `Starts in ${input.current.nextStartsInMinutes} minutes`,
-      href: null,
-      hrefLabel: null,
-      evidence: [
-        input.current.nextCommitment,
-        `${input.current.nextStartsInMinutes} minutes until start`,
-      ],
-    };
-  }
-
-  if (
-    input.capacity.requestedWorkMinutes != null &&
-    input.capacity.largestFocusBlockMinutes > 0 &&
-    input.capacity.requestedWorkMinutes > input.capacity.openFocusMinutes
-  ) {
-    const move = input.plannedUnscheduled[0];
-    return {
-      action: move
-        ? `Move “${move.title}” out of today`
-        : "Reduce today’s planned load",
-      reason: `${input.capacity.requestedWorkMinutes} minutes of planned work exceed ${input.capacity.openFocusMinutes} minutes of open focus.`,
-      timeSensitivity: "Before the day compresses further",
-      href: move?.href ?? "/admin/work",
-      hrefLabel: move ? "Open Work" : "Open Work Engine",
-      evidence: [
-        input.capacity.summary,
-        "Planned work exceeds remaining capacity",
-      ],
-    };
-  }
-
-  if (input.overdueWork[0]) {
-    const item = input.overdueWork[0];
-    if (
-      input.capacity.largestFocusBlockMinutes >= 45 ||
-      item.estimatedEffortHours == null
-    ) {
-      return {
-        action: `Begin ${item.title}`,
-        reason: "Overdue Work is competing with today and a usable focus block remains.",
-        timeSensitivity: "Use the next open focus block",
-        href: item.href,
-        hrefLabel: "Open Work",
-        evidence: [
-          "Overdue",
-          item.clientName ?? "Internal",
-          input.capacity.largestFocusBlockMinutes > 0
-            ? `Largest focus block: ${input.capacity.largestFocusBlockMinutes} minutes`
-            : "Duration unknown — no false precision",
-        ],
-      };
-    }
-  }
-
-  if (
-    input.capacity.largestFocusBlockMinutes >= 45 &&
-    input.plannedUnscheduled[0]
-  ) {
-    const item = input.plannedUnscheduled[0];
-    return {
-      action: `Protect the next focus block for ${item.title}`,
-      reason: `A ${input.capacity.largestFocusBlockMinutes}-minute open block is the best available window.`,
-      timeSensitivity: input.capacity.largestFocusBlockStart
-        ? `From ${formatClock(input.capacity.largestFocusBlockStart, input.timeZone)}`
-        : "Next open block",
-      href: item.href,
-      hrefLabel: "Open Work",
-      evidence: [
-        input.capacity.summary,
-        item.clientName ?? "Internal priority",
-      ],
-    };
-  }
-
-  if (input.current.inOpenGap && input.capacity.largestFocusBlockMinutes >= 30) {
-    return {
-      action: "Leave this gap intentionally open — or begin one clear Work item",
-      reason: "You are in an open focus window with no active commitment.",
-      timeSensitivity: `${input.capacity.largestFocusBlockMinutes} minutes available`,
-      href: input.plannedUnscheduled[0]?.href ?? "/admin/work",
-      hrefLabel: input.plannedUnscheduled[0] ? "Open Work" : "Open Work Engine",
-      evidence: [input.capacity.summary],
-    };
-  }
-
-  return {
-    action: "Continue planned work without forcing the calendar",
-    reason: "No elevated schedule conflict or recovery issue requires a decision right now.",
-    timeSensitivity: "Steady pace",
-    href: "/admin/work",
-    hrefLabel: "Open Work Engine",
-    evidence: [input.orientation, input.capacity.summary],
-  };
-}
-
 export function composeExecutiveTodayBrief(
   input: ExecutiveTodayComposeInput,
 ): ExecutiveTodayBrief {
@@ -707,7 +531,7 @@ export function composeExecutiveTodayBrief(
         : "No active timed commitment",
   };
 
-  const recommendation = buildRecommendation({
+  const engineSchedule = {
     orientation,
     dayFlow,
     attention,
@@ -715,11 +539,26 @@ export function composeExecutiveTodayBrief(
     current,
     overdueWork,
     plannedUnscheduled,
+    observedEventCount: input.observedEvents.length,
+    linkedCount: correlations.filter((c) => c.link != null).length,
+    recoveryCount,
+    conflictCount: conflictPairs.length,
+    observedAt: bounds.nowIso,
     timeZone: bounds.timeZone,
+  };
+
+  const intelligence = composeExecutiveIntelligence({
+    observedAt: bounds.nowIso,
+    briefing: input.briefing,
+    schedule: engineSchedule,
   });
 
-  // Fix accidental minutesLabel reference - already avoided in final buildRecommendation for current linked work
-  // Clean recommendation timeSensitivity if it somehow got a function - already fixed
+  const recommendation = mapRecommendationToTodayBrief(
+    intelligence.recommendation,
+    intelligence.evidence
+      .filter((e) => intelligence.recommendation.evidenceIds.includes(e.id))
+      .map((e) => e.summary),
+  );
 
   const orientationSummary = (() => {
     switch (orientation) {
@@ -785,5 +624,6 @@ export function composeExecutiveTodayBrief(
       conflictCount: conflictPairs.length,
       workTitleAuthoritative: true,
     },
+    engineSchedule,
   };
 }

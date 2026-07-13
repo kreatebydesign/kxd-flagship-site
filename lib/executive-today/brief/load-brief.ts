@@ -50,6 +50,7 @@ export interface BuildExecutiveTodayBriefOptions {
   observedEvents?: ExecutiveTodayBrief extends never ? never : import("@/lib/google/calendar/types").ObservedCalendarEvent[];
   skipCalendar?: boolean;
   reviewWaitingCount?: number;
+  briefingContext?: import("@/lib/intelligence/briefings/types").BriefingInputContext;
 }
 
 /**
@@ -286,6 +287,7 @@ export async function buildExecutiveTodayBrief(
     linkedSchedules,
     workItems,
     reviewWaitingCount: opts.reviewWaitingCount ?? 0,
+    briefing: opts.briefingContext ?? null,
   });
 }
 

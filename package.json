@@ -25,6 +25,7 @@
     "verify:calendar-write:live": "KXD_SERVER_ONLY_SHIM=1 VERIFY_CALENDAR_WRITE_LIVE=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/verify-calendar-write.ts",
     "verify:calendar-sync": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/verify-calendar-sync.ts",
     "verify:executive-today-calendar": "tsx scripts/verify-executive-today-calendar.ts",
+    "verify:executive-intelligence": "tsx scripts/verify-executive-intelligence.ts",
     "verify:availability": "tsx scripts/verify-availability.ts",
     "verify:availability:live": "KXD_SERVER_ONLY_SHIM=1 VERIFY_AVAILABILITY_LIVE=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/verify-availability.ts",
     "verify:schedule-work": "tsx scripts/verify-schedule-work.ts",

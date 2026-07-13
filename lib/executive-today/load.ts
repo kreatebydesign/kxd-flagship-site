@@ -1,87 +1,27 @@
 import "server-only";
 
 /**
- * Phase 22A/23A/23B/27B — Executive Today presentation loader.
- * Composes Executive Context + calendar-aware brief.
+ * Phase 22A/23A/23B/27B/28A — Executive Today presentation loader.
+ * Composes Executive Context + calendar-aware brief + Executive Intelligence Engine.
  * Does not publish Activity. Does not mutate calendar.
  */
 
 import { getExecutiveContext } from "@/lib/executive-context";
 import {
+  composeExecutiveIntelligence,
+  mapRecommendationToTodayPrimary,
+} from "@/lib/executive-intelligence";
+import {
   EXECUTIVE_SIGNALS_EMPTY_MESSAGE,
   mapSignalToListItem,
 } from "@/lib/executive-signals";
+import { loadBriefingContext } from "@/lib/intelligence/briefings/builder";
 import { buildExecutiveTodayBrief } from "./brief/load-brief";
 import {
   mapWorkToFocusItem,
   type ExecutiveTodayData,
-  type ExecutiveTodayPrimary,
   type ExecutiveTodayUpcomingItem,
 } from "./types";
-
-function mapPrimaryFromBrief(
-  brief: Awaited<ReturnType<typeof buildExecutiveTodayBrief>>,
-): ExecutiveTodayPrimary {
-  return {
-    title: brief.recommendation.action,
-    detail: brief.recommendation.reason,
-    href: brief.recommendation.href,
-    hrefLabel: brief.recommendation.hrefLabel,
-    reason: brief.recommendation.timeSensitivity,
-    from: "calendar-brief",
-  };
-}
-
-function mapPrimary(ctx: Awaited<ReturnType<typeof getExecutiveContext>>): ExecutiveTodayPrimary {
-  const { morning, recommendedPriority, quietHoursReady } = ctx;
-  const { firstAction, briefing } = morning;
-
-  if (firstAction.hasAction) {
-    return {
-      title: firstAction.label,
-      detail:
-        [firstAction.clientName, firstAction.itemTitle, firstAction.detail]
-          .filter(Boolean)
-          .join(" · ") || firstAction.label,
-      href: firstAction.href,
-      hrefLabel: firstAction.hrefLabel,
-      reason: "Morning Brief first action — your calmest next move.",
-      from: "first-action",
-    };
-  }
-
-  if (briefing.primaryRecommendation) {
-    const rec = briefing.primaryRecommendation;
-    return {
-      title: rec.title,
-      detail: rec.reason,
-      href: rec.href ?? null,
-      hrefLabel: rec.href ? "Open" : "Continue",
-      reason: rec.expectedImpact || rec.whyAppeared || rec.reason,
-      from: "recommendation",
-    };
-  }
-
-  if (recommendedPriority && !quietHoursReady) {
-    return {
-      title: recommendedPriority.title,
-      detail: recommendedPriority.detail || "Continue from where the system left off.",
-      href: recommendedPriority.href,
-      hrefLabel: "Continue",
-      reason: "Executive Context continuation.",
-      from: "recommendation",
-    };
-  }
-
-  return {
-    title: "Nothing urgent",
-    detail: "Continue planned work. The system is quiet.",
-    href: "/admin/work",
-    hrefLabel: "Open Work Engine",
-    reason: "No elevated first action from Brief.",
-    from: "calm",
-  };
-}
 
 function mapUpcoming(
   ctx: Awaited<ReturnType<typeof getExecutiveContext>>,
@@ -126,37 +66,30 @@ function mapUpcoming(
 }
 
 /**
- * Executive Today — presentation adapter over Context + calendar brief.
+ * Executive Today — presentation adapter over Context + calendar brief + intelligence engine.
  */
 export async function loadExecutiveToday(input?: {
   displayName?: string | null;
   email?: string | null;
 }): Promise<ExecutiveTodayData> {
+  const briefingContext = await loadBriefingContext();
+
   const [ctx, brief] = await Promise.all([
     getExecutiveContext(input),
     buildExecutiveTodayBrief({
       reviewWaitingCount: undefined,
+      briefingContext,
     }).catch(() => null),
   ]);
 
-  // Prefer calendar-aware recommendation when brief has material schedule evidence
-  // or elevated orientation; otherwise keep Morning Brief priority.
-  const preferBrief =
-    brief != null &&
-    (brief.evidence.observedEventCount > 0 ||
-      brief.evidence.linkedCount > 0 ||
-      brief.evidence.recoveryCount > 0 ||
-      brief.orientation === "compressed" ||
-      brief.orientation === "overloaded" ||
-      brief.orientation === "commitment_at_risk" ||
-      brief.orientation === "recovery_required" ||
-      brief.orientation === "fragmented");
+  const intelligence = composeExecutiveIntelligence({
+    observedAt: brief?.bounds.nowIso ?? ctx.generatedAt,
+    briefing: briefingContext,
+    schedule: brief?.engineSchedule ?? null,
+  });
 
-  const primary = preferBrief && brief
-    ? mapPrimaryFromBrief(brief)
-    : mapPrimary(ctx);
+  const primary = mapRecommendationToTodayPrimary(intelligence.recommendation);
 
-  // Re-run brief with review count from context when available
   const briefWithReviews =
     brief && ctx.reviewsWaiting.length > 0
       ? {
