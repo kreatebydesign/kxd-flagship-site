@@ -1,29 +1,24 @@
 /**
- * Phase 31A — Shared Core Executive Performance presentation tokens.
- * Configured per client — never hardcoded inside UI components.
+ * Phase 31A / 31A.2 — Shared Core Executive Performance presentation tokens.
  * Presentation only — never grants reporting entitlements.
  */
 
 export type ExecutiveHeroOverlay = "graphite" | "soft" | "deep" | "none";
 
-export type ExecutivePerformanceSectionId =
-  | "hero"
-  | "recommendation"
+/** Workspace zones — Shared Core layout; presentation may reorder. */
+export type ExecutiveWorkspaceZoneId =
+  | "summary"
   | "performance"
-  | "partnership"
-  | "impact"
   | "progress"
-  | "website-review"
-  | "evolution"
-  | "billing";
+  | "collaboration"
+  | "growth"
+  | "account";
 
 /**
  * Presentation theme for the Executive Performance Workspace.
- * Future clients = configuration entry. No engineering rewrite.
- * Brand/imagery/copy only — capabilities come from Client Experience Profiles.
+ * Future clients = configuration entry. No component fork.
  */
 export type ExperiencePresentation = {
-  /** Enable the Executive Performance Workspace on portal home. */
   enabled: boolean;
   heroImageSrc: string;
   heroImageAlt: string;
@@ -33,7 +28,8 @@ export type ExperiencePresentation = {
   workspaceEyebrow: string;
   workspaceTitle: string;
   introduction: string;
-  sectionOrder?: ExecutivePerformanceSectionId[];
+  /** Optional zone order — defaults to Shared Core sequence. */
+  zoneOrder?: ExecutiveWorkspaceZoneId[];
 };
 
 export type PerformanceConnectionState = "connected" | "awaiting-signal" | "not-connected";
@@ -43,6 +39,7 @@ export type ExecutivePerformancePanel = {
   title: string;
   domainLabel: string;
   state: PerformanceConnectionState;
+  /** Concise line — empty string when state alone is enough. */
   summary: string;
   detail: string | null;
   evidenceLabels: string[];
@@ -53,6 +50,8 @@ export type ExecutivePartnershipItem = {
   label: string;
   detail: string;
   complete: boolean;
+  /** Highlighted in primary progress strip; others may fold into disclosure. */
+  priority?: boolean;
 };
 
 export type ExecutiveImpactItem = {
@@ -62,10 +61,40 @@ export type ExecutiveImpactItem = {
   hasEvidence: boolean;
 };
 
+export type ExecutiveEvolutionMaturity = "available-now" | "next" | "future";
+
 export type ExecutiveEvolutionItem = {
   id: string;
   label: string;
   detail: string;
+  maturity: ExecutiveEvolutionMaturity;
+};
+
+export type ExecutiveSummaryFacts = {
+  currentPhase: string;
+  currentFocus: string;
+  nextMilestone: string;
+  lastMajorMilestone: string;
+};
+
+export type ExecutiveCollaboration = {
+  statusLabel: string;
+  explanation: string;
+  primaryAction: { label: string; href: string } | null;
+  secondaryAction: { label: string; href: string } | null;
+  recentActivity: Array<{ id: string; label: string; at: string | null }>;
+};
+
+export type ExecutiveAccount = {
+  engagementStatus: string;
+  billingAvailability: string;
+  note: string;
+};
+
+export type ExecutiveProgressBeat = {
+  id: string;
+  label: string;
+  complete: boolean;
 };
 
 export type ExecutivePerformanceBriefing = {
@@ -74,6 +103,7 @@ export type ExecutivePerformanceBriefing = {
   clientSlug: string | null;
   presentation: ExperiencePresentation;
   greeting: string;
+  summary: ExecutiveSummaryFacts;
   recommendation: {
     headline: string;
     rationale: string;
@@ -84,17 +114,26 @@ export type ExecutivePerformanceBriefing = {
     href: string;
   } | null;
   performancePanels: ExecutivePerformancePanel[];
-  partnership: ExecutivePartnershipItem[];
-  impact: ExecutiveImpactItem[];
-  evolution: ExecutiveEvolutionItem[];
-  currentFocus: string;
-  /** Recent improvements from partnership activity — empty when none. */
+  /** Primary progress items (5–7). */
+  partnershipPrimary: ExecutivePartnershipItem[];
+  /** Secondary history — progressive disclosure. */
+  partnershipSecondary: ExecutivePartnershipItem[];
+  /** Compact journey beats. */
+  progressBeats: ExecutiveProgressBeat[];
+  /** Evidence-backed working signals (optional, compact). */
+  workingSignals: ExecutiveImpactItem[];
   recentImprovements: Array<{
     id: string;
     label: string;
     detail: string | null;
     at: string | null;
   }>;
+  collaboration: ExecutiveCollaboration;
+  evolution: ExecutiveEvolutionItem[];
+  account: ExecutiveAccount;
   momentumLabel: string | null;
   composedAt: string;
 };
+
+/** @deprecated Prefer zoneOrder — kept for type export stability during 31A.2. */
+export type ExecutivePerformanceSectionId = ExecutiveWorkspaceZoneId;

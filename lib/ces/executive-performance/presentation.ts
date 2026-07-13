@@ -1,24 +1,19 @@
 /**
  * Phase 31A — Client presentation themes for Executive Performance.
- * Shared Core registry — brand assets and copy, not business logic.
+ * Shared Core registry — brand assets and copy, not entitlements.
  */
 
 import type { ExperiencePresentation } from "./types";
 
-const DEFAULT_SECTION_ORDER = [
-  "hero",
-  "recommendation",
+const DEFAULT_ZONE_ORDER = [
+  "summary",
   "performance",
-  "partnership",
-  "impact",
-  "website-review",
-  "evolution",
-] as const satisfies NonNullable<ExperiencePresentation["sectionOrder"]>;
+  "progress",
+  "collaboration",
+  "growth",
+  "account",
+] as const satisfies NonNullable<ExperiencePresentation["zoneOrder"]>;
 
-/**
- * Primal Motorsports — first branded implementation.
- * Other clients add an entry here (or via future profile fields) — no component fork.
- */
 const PRIMAL_PRESENTATION: ExperiencePresentation = {
   enabled: true,
   heroImageSrc: "/migrated-assets/case-studies/primal-motorsports/hero.webp",
@@ -29,8 +24,8 @@ const PRIMAL_PRESENTATION: ExperiencePresentation = {
   workspaceEyebrow: "Private Partnership Workspace",
   workspaceTitle: "Executive Performance",
   introduction:
-    "A calm view of the partnership — where the work stands, what it is delivering, and what deserves your attention next.",
-  sectionOrder: [...DEFAULT_SECTION_ORDER],
+    "A calm view of the partnership — where the work stands, and what deserves attention next.",
+  zoneOrder: [...DEFAULT_ZONE_ORDER],
 };
 
 const BY_SLUG: Record<string, ExperiencePresentation> = {
@@ -47,6 +42,13 @@ export function getExecutivePresentation(
 export function isExecutivePerformanceAvailable(
   clientSlug: string | null | undefined,
 ): boolean {
-  const presentation = getExecutivePresentation(clientSlug);
-  return Boolean(presentation?.enabled);
+  return Boolean(getExecutivePresentation(clientSlug)?.enabled);
+}
+
+export function getExecutiveZoneOrder(
+  presentation: ExperiencePresentation,
+): NonNullable<ExperiencePresentation["zoneOrder"]> {
+  return presentation.zoneOrder?.length
+    ? presentation.zoneOrder
+    : [...DEFAULT_ZONE_ORDER];
 }

@@ -4,22 +4,34 @@
 
 export type {
   ExperiencePresentation,
+  ExecutiveAccount,
+  ExecutiveCollaboration,
   ExecutiveEvolutionItem,
+  ExecutiveEvolutionMaturity,
   ExecutiveHeroOverlay,
   ExecutiveImpactItem,
   ExecutivePartnershipItem,
   ExecutivePerformanceBriefing,
   ExecutivePerformancePanel,
   ExecutivePerformanceSectionId,
+  ExecutiveProgressBeat,
+  ExecutiveSummaryFacts,
+  ExecutiveWorkspaceZoneId,
   PerformanceConnectionState,
 } from "./types";
 
 export {
   getExecutivePresentation,
+  getExecutiveZoneOrder,
   isExecutivePerformanceAvailable,
 } from "./presentation";
 
-export { getExecutivePartnershipValue } from "./partnership-value";
-export { getExecutiveEvolution } from "./evolution";
+export {
+  getExecutivePartnershipValue,
+  splitPartnershipPriority,
+} from "./partnership-value";
 
-/** Server compose — import from compose.ts in RSC / loaders only. */
+export {
+  evolutionMaturityLabel,
+  getExecutiveEvolution,
+} from "./evolution";

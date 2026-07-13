@@ -41,7 +41,6 @@ export function CesPortalHome({
       {useExecutive && performance ? (
         <CesExecutivePerformanceWorkspace
           performance={performance}
-          briefing={briefing}
           websiteReview={websiteReview}
         />
       ) : (
