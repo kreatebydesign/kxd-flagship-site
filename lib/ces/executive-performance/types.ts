@@ -97,6 +97,20 @@ export type ExecutiveProgressBeat = {
   complete: boolean;
 };
 
+/**
+ * Provenance for the Performance zone — period + source only.
+ * Never invents metrics; empty providers when no ReportingFacts exist.
+ */
+export type ExecutiveReportingProvenance = {
+  /** Requested reporting window label (e.g. "July 2026"). */
+  periodLabel: string;
+  /** Human provider names present in loaded facts (e.g. "Search Console"). */
+  providerLabels: string[];
+  factCount: number;
+  /** Honest status when entitled but empty, or when no capabilities. */
+  statusNote: string | null;
+};
+
 export type ExecutivePerformanceBriefing = {
   clientId: number;
   clientName: string;
@@ -114,6 +128,8 @@ export type ExecutivePerformanceBriefing = {
     href: string;
   } | null;
   performancePanels: ExecutivePerformancePanel[];
+  /** Reporting window + provider source (facts-backed). */
+  reportingProvenance: ExecutiveReportingProvenance;
   /** Primary progress items (5–7). */
   partnershipPrimary: ExecutivePartnershipItem[];
   /** Secondary history — progressive disclosure. */

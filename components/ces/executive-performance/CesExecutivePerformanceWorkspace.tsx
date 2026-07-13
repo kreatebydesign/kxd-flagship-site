@@ -114,6 +114,19 @@ export function CesExecutivePerformanceWorkspace({
         aria-labelledby="exec-performance-heading"
       >
         <ZoneHeader eyebrow="Signal" title="Performance" id="exec-performance-heading" />
+        <p className="kxd-ces-exec__reporting-provenance">
+          <span>
+            Reporting period: {performance.reportingProvenance.periodLabel}
+          </span>
+          {performance.reportingProvenance.providerLabels.length > 0 ? (
+            <span>
+              Source: {performance.reportingProvenance.providerLabels.join(", ")}
+            </span>
+          ) : null}
+          {performance.reportingProvenance.statusNote ? (
+            <span>{performance.reportingProvenance.statusNote}</span>
+          ) : null}
+        </p>
         <ul className="kxd-ces-exec__status-row">
           {performance.performancePanels.map((panel) => (
             <li

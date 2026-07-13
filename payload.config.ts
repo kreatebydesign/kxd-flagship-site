@@ -59,6 +59,7 @@ import { Insights } from "./payload/collections/Insights.ts";
 import { Media } from "./payload/collections/Media.ts";
 import { MonthlyReports } from "./payload/collections/MonthlyReports.ts";
 import { MonthlyDeliverables } from "./payload/collections/MonthlyDeliverables.ts";
+import { ReportingFacts } from "./payload/collections/ReportingFacts.ts";
 import { Playbooks } from "./payload/collections/Playbooks.ts";
 import { PlaybookSteps } from "./payload/collections/PlaybookSteps.ts";
 import { PlaybookRuns } from "./payload/collections/PlaybookRuns.ts";
@@ -202,6 +203,7 @@ export default buildConfig({
     ProposalViewEvents,
     SalesActivities,
     MonthlyReports,
+    ReportingFacts,
     ReportTemplates,
     ClientInfrastructure,
     InfrastructureEvents,

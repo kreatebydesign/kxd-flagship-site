@@ -15,6 +15,23 @@ Provider APIs
 
 Downstream modules must not import GA4/GSC clients or Google auth.
 
+Phase 31C Shared Core persistence path:
+
+```text
+Protected POST /api/admin/reporting/ingest  (admin session or CRON_SECRET)
+  or POST /api/cron/reporting-ingest        (CRON_SECRET only; cron-ready)
+→ syncReportingFacts (Shared Core)
+→ ingestClientReportingProvider (entitled provider only)
+→ ReportingFact[]
+→ persistReportingFacts (idempotent by factKey)
+→ loadReportingFacts
+→ composeReportingIntelligence
+→ composeExecutivePerformance (portal; no Google calls)
+```
+
+Default executive + ingest period: **previous completed UTC calendar month**
+(not the in-progress current month).
+
 `lib/live-integrations/ga4.ts` and `search-console.ts` are **thin platform-hub status probes only**. They do not call Google APIs and must not be used for client reporting.
 
 ## Required Google Cloud setup

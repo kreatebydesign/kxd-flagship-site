@@ -23,6 +23,7 @@ export default async function ReportsOperationsPage() {
   const clients = clientsResult.docs.map((c) => ({
     id: c.id as number,
     name: String((c as { name?: string }).name ?? "Client"),
+    slug: (c as { slug?: string | null }).slug ?? null,
   }));
 
   return (

@@ -4046,6 +4046,16 @@
   color: var(--kxd-os-text-secondary);
 }
 
+.kxd-ces-exec__reporting-provenance {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0 0 0.85rem;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--kxd-os-text-faint);
+}
+
 .kxd-ces-exec__status-row {
   list-style: none;
   margin: 0;

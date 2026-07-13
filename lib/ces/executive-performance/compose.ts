@@ -1,6 +1,7 @@
 /**
- * Phase 31A.2 — Compose Executive Performance workspace (6 zones).
- * No Google provider calls. No invented metrics.
+ * Phase 31A.2 / 31C — Compose Executive Performance workspace (6 zones).
+ * No Google provider calls from portal compose. No invented metrics.
+ * Reporting: load persisted ReportingFacts only → Reporting Engine compose.
  * Entitlements: Client Experience Profile.enabledModules → getReportingCapabilityIds only.
  */
 
@@ -11,9 +12,13 @@ import type { PartnershipBriefing } from "@/lib/ces/partnership/types";
 import { getPartnershipStoryTimeline } from "@/lib/ces/partnership/milestones";
 import type { WebsiteReviewLandingData } from "@/lib/ces/modules/website-review/types";
 import { getReportingCapabilityIds } from "@/lib/ces/partnership/capabilities";
-import { createMonthPeriod } from "@/lib/reporting/domain/period";
 import type { ReportingCapabilityId } from "@/lib/reporting/domain/capabilities";
 import { composeReportingIntelligence } from "@/lib/reporting/compose/intelligence";
+import { defaultExecutiveReportingPeriod } from "@/lib/reporting/ingest/period";
+import {
+  loadReportingFacts,
+  summarizeReportingFactProvenance,
+} from "@/lib/reporting/persistence";
 import { getExecutiveEvolution } from "./evolution";
 import {
   getExecutivePartnershipValue,
@@ -24,8 +29,58 @@ import type {
   ExecutiveImpactItem,
   ExecutivePerformanceBriefing,
   ExecutivePerformancePanel,
+  ExecutiveReportingProvenance,
   PerformanceConnectionState,
 } from "./types";
+
+function providerDisplayLabel(providerId: string): string {
+  if (providerId === "google-search-console") return "Search Console";
+  if (providerId === "google-analytics-4") return "Google Analytics 4";
+  return providerId;
+}
+
+function buildReportingProvenance(input: {
+  periodLabel: string;
+  factsLength: number;
+  providerIds: string[];
+  hasAnyReportingCapability: boolean;
+  seoEnabled: boolean;
+  websiteAnalyticsEnabled: boolean;
+  /** True when persisted facts exist but all numeric values are zero. */
+  zeroActivity: boolean;
+}): ExecutiveReportingProvenance {
+  const providerLabels = input.providerIds.map(providerDisplayLabel);
+  if (!input.hasAnyReportingCapability) {
+    return {
+      periodLabel: input.periodLabel,
+      providerLabels: [],
+      factCount: 0,
+      statusNote: "No reporting capabilities are enabled for this account yet.",
+    };
+  }
+  if (input.factsLength === 0) {
+    const awaiting: string[] = [];
+    if (input.seoEnabled) awaiting.push("Search Console");
+    if (input.websiteAnalyticsEnabled) awaiting.push("Google Analytics 4");
+    return {
+      periodLabel: input.periodLabel,
+      providerLabels: [],
+      factCount: 0,
+      statusNote:
+        awaiting.length > 0
+          ? `Entitled sources (${awaiting.join(", ")}) — not synced for this period yet.`
+          : "Awaiting first trustworthy reporting signal.",
+    };
+  }
+  return {
+    periodLabel: input.periodLabel,
+    providerLabels,
+    factCount: input.factsLength,
+    statusNote: input.zeroActivity
+      ? "Synced — no measurable activity recorded for this period."
+      : null,
+  };
+}
 
 const PANEL_CAPABILITIES: Array<{
   id: string;
@@ -111,17 +166,22 @@ export async function composeExecutivePerformance(input: {
   if (!presentation?.enabled) return null;
 
   const clientId = input.profile.identity.clientId;
-  const now = new Date();
-  const period = createMonthPeriod(now.getUTCFullYear(), now.getUTCMonth() + 1);
+  const period = defaultExecutiveReportingPeriod(new Date());
 
   const enabledCapabilities =
     input.reportingCapabilities ??
     getReportingCapabilityIds(input.profile.reportingCapabilities);
 
+  // Portal compose never calls Google — Shared Core ReportingFacts only.
+  const facts = await loadReportingFacts({ clientId, period });
+  const factProvenance = summarizeReportingFactProvenance(facts);
+  const zeroActivity =
+    facts.length > 0 && facts.every((f) => Number(f.value) === 0);
+
   const bundle = composeReportingIntelligence({
     clientId,
     period,
-    facts: [],
+    facts,
     enabledCapabilities,
     composedAt: new Date().toISOString(),
   });
@@ -130,6 +190,16 @@ export async function composeExecutivePerformance(input: {
   const domainHealth = new Map(bundle.health.domains.map((d) => [d.domain, d.state]));
   const hasAnyFact = bundle.snapshot.facts.length > 0;
   const hasAnyReportingCapability = enabledCapabilities.length > 0;
+  const reportingProvenance = buildReportingProvenance({
+    periodLabel: period.label ?? `${period.start} – ${period.end}`,
+    factsLength: factProvenance.factCount,
+    providerIds: factProvenance.providerIds,
+    hasAnyReportingCapability,
+    seoEnabled: enabledSet.has("seo"),
+    websiteAnalyticsEnabled: enabledSet.has("website-analytics"),
+    zeroActivity,
+  });
+
 
   const performancePanels: ExecutivePerformancePanel[] = PANEL_CAPABILITIES.map((panel) => {
     const capabilityEnabled = enabledSet.has(panel.capability);
@@ -259,6 +329,7 @@ export async function composeExecutivePerformance(input: {
     recommendation: input.briefing.recommendation,
     primaryAction,
     performancePanels,
+    reportingProvenance,
     partnershipPrimary,
     partnershipSecondary,
     progressBeats,

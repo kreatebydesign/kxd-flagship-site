@@ -15,6 +15,7 @@ export type {
   ExecutivePerformancePanel,
   ExecutivePerformanceSectionId,
   ExecutiveProgressBeat,
+  ExecutiveReportingProvenance,
   ExecutiveSummaryFacts,
   ExecutiveWorkspaceZoneId,
   PerformanceConnectionState,

@@ -22,6 +22,7 @@ import {
 } from "@/lib/reporting/performance-format";
 import type { ReportingDashboardData } from "@/lib/reporting/types";
 import { GenerateReportForm } from "./GenerateReportForm";
+import { SyncReportingFactsForm } from "./SyncReportingFactsForm";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ReportDoc = Record<string, any>;
@@ -57,7 +58,7 @@ export function ReportsScreen({
   defaultYear,
 }: {
   dashboard: ReportingDashboardData;
-  clients: { id: number; name: string }[];
+  clients: { id: number; name: string; slug: string | null }[];
   defaultMonth: number;
   defaultYear: number;
 }) {
@@ -139,8 +140,15 @@ export function ReportsScreen({
           )}
         </KxdSection>
 
-        <KxdSection label="Auto-generate (legacy)">
-          <GenerateReportForm clients={clients} defaultMonth={defaultMonth} defaultYear={defaultYear} />
+        <KxdSection label="Operations">
+          <div className="kxd-os-form-grid" style={{ alignItems: "start" }}>
+            <GenerateReportForm
+              clients={clients}
+              defaultMonth={defaultMonth}
+              defaultYear={defaultYear}
+            />
+            <SyncReportingFactsForm clients={clients} />
+          </div>
         </KxdSection>
       </KxdPage>
     </OperationsShell>

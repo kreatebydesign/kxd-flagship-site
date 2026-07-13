@@ -7,6 +7,10 @@ import {
 } from "@/lib/admin/middleware";
 import { PORTAL_SESSION_COOKIE, PORTAL_HOST } from "@/lib/portal/constants";
 import { JUNIOR_CREATOR_SESSION_COOKIE } from "@/lib/junior-creators/constants";
+import {
+  isAuthorizedCronBearer,
+  isReportingAdminIngestPath,
+} from "@/lib/reporting/ingest/cron-auth";
 
 const PORTAL_PUBLIC_PATHS = [
   "/portal/login",
@@ -37,8 +41,23 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Cron surfaces — fail closed. Require valid CRON_SECRET bearer. No cookie bypass.
+  if (pathname.startsWith("/api/cron/")) {
+    if (!isAuthorizedCronBearer(request.headers.get("authorization"))) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized." },
+        { status: 401 },
+      );
+    }
+    return NextResponse.next();
+  }
+
   if (pathname.startsWith("/api/admin/")) {
-    if (!hasPayloadAuthCookie(request)) {
+    const authHeader = request.headers.get("authorization");
+    // Cron bearer is scoped ONLY to reporting ingest — never the whole admin API.
+    const hasScopedCronBearer =
+      isReportingAdminIngestPath(pathname) && isAuthorizedCronBearer(authHeader);
+    if (!hasScopedCronBearer && !hasPayloadAuthCookie(request)) {
       return NextResponse.json(
         { success: false, error: "Unauthorized." },
         { status: 401 },
@@ -101,6 +120,7 @@ export const config = {
     "/admin/operations",
     "/admin/operations/:path*",
     "/api/admin/:path*",
+    "/api/cron/:path*",
     "/portal/:path*",
     "/junior-creators/:path*",
   ],

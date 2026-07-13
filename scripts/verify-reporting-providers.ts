@@ -530,6 +530,7 @@ console.log("\n8. Mixed compose + architecture boundaries");
     ["compose", "lib/reporting/compose/intelligence.ts"],
     ["health engine", "lib/reporting/health/engine.ts"],
     ["partnership compose", "lib/ces/partnership/compose.ts"],
+    ["executive performance compose", "lib/ces/executive-performance/compose.ts"],
   ];
   for (const [name, rel] of files) {
     const src = readFileSync(resolve(root, rel), "utf8");
@@ -538,6 +539,21 @@ console.log("\n8. Mixed compose + architecture boundaries");
     assert(!src.includes("webmasters/v3"), `${name}: no GSC API`);
     assert(!src.includes("providers/google"), `${name}: no Google provider modules`);
   }
+  const epCompose = readFileSync(
+    resolve(root, "lib/ces/executive-performance/compose.ts"),
+    "utf8",
+  );
+  assert(epCompose.includes("loadReportingFacts"), "EP compose loads ReportingFacts");
+  assert(
+    !epCompose.includes("ingestClientReporting"),
+    "EP compose does not ingest providers",
+  );
+  const persistence = readFileSync(
+    resolve(root, "lib/reporting/persistence/facts.ts"),
+    "utf8",
+  );
+  assert(persistence.includes("factKey"), "persistence upserts by factKey");
+  assert(!persistence.includes("googleapis"), "persistence: no googleapis");
   const liveGa4 = readFileSync(resolve(root, "lib/live-integrations/ga4.ts"), "utf8");
   const liveGsc = readFileSync(resolve(root, "lib/live-integrations/search-console.ts"), "utf8");
   assert(liveGa4.includes("Thin compatibility") || liveGa4.includes("NOT the canonical"), "live GA4 marked as thin probe");

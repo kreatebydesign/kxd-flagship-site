@@ -32,6 +32,8 @@
     "verify:reporting-live": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/verify-live-reporting-provider.ts",
     "configure:primal-reporting": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/configure-primal-reporting-connection.ts",
     "configure:primal-reporting:apply": "KXD_SERVER_ONLY_SHIM=1 APPLY=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/configure-primal-reporting-connection.ts",
+    "ingest:reporting-facts": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/ingest-reporting-facts.ts",
+    "verify:reporting-ingest": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/verify-reporting-ingest.ts",
     "verify:runtime-contract": "tsx scripts/verify-runtime-contract.ts",
     "verify:sales-pipeline": "tsx scripts/verify-sales-pipeline.ts",
     "verify:availability": "tsx scripts/verify-availability.ts",

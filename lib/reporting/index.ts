@@ -53,6 +53,26 @@ export {
   type IngestClientReportingResult,
 } from "./providers";
 
+/** Phase 31C — Persist / query ReportingFacts (Shared Core) */
+export {
+  loadReportingFacts,
+  persistReportingFacts,
+  summarizeReportingFactProvenance,
+  type PersistReportingFactsResult,
+  type ReportingFactProvenance,
+} from "./persistence";
+
+/** Phase 31C — Production reporting facts sync (admin / cron) */
+export {
+  syncReportingFacts,
+  parseReportingIngestBody,
+  defaultExecutiveReportingPeriod,
+  resolveReportingMonthPeriod,
+  REPORTING_INGEST_MAX_RANGE_DAYS,
+  type ReportingFactsSyncRequest,
+  type ReportingFactsSyncResult,
+} from "./ingest";
+
 /** Performance report view helpers (existing) */
 export {
   buildPerformanceReportView,
