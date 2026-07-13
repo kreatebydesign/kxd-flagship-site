@@ -147,6 +147,15 @@ export const ClientInfrastructure: CollectionConfig = {
             { name: "analyticsProvider", type: "text", label: "Analytics Provider" },
             { name: "ga4PropertyId", type: "text", label: "GA4 Property ID" },
             {
+              name: "searchConsoleSiteUrl",
+              type: "text",
+              label: "Search Console Site URL",
+              admin: {
+                description:
+                  "Exact Search Console property identifier — URL-prefix (https://example.com/) or domain (sc-domain:example.com).",
+              },
+            },
+            {
               name: "searchConsoleStatus",
               type: "select",
               label: "Search Console",

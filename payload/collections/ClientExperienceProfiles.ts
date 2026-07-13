@@ -197,7 +197,8 @@ export const ClientExperienceProfiles: CollectionConfig = {
               type: "json",
               label: "Enabled CES Modules",
               admin: {
-                description: 'String array, e.g. ["website-review"]',
+                description:
+                  'Canonical per-client capability entitlements (string array). Portal CES modules (e.g. "website-review") and reporting capabilities (e.g. "website-analytics", "seo") share this field. Reporting ingestion reads reporting IDs via getReportingCapabilityIds.',
               },
             },
             {

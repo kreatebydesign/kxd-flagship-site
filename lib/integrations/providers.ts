@@ -60,10 +60,18 @@ const PROVIDER_DEFINITIONS: IntegrationProviderDefinition[] = [
     connectPriority: 5,
     settingsSchema: buildSettingsSchema({
       documentationUrl: "https://developers.google.com/analytics/devguides/collection/ga4",
-      oauth: { label: "Google OAuth", scopes: ["https://www.googleapis.com/auth/analytics.readonly"], placeholder: "Service account or OAuth — future" },
+      oauth: {
+        label: "Google Reporting OAuth / Service Account",
+        scopes: ["https://www.googleapis.com/auth/analytics.readonly"],
+        placeholder: "Phase 29C — service account preferred; OAuth refresh separate from Calendar",
+      },
       envVars: [
-        { key: "NEXT_PUBLIC_GA4_MEASUREMENT_ID", label: "GA4 Measurement ID", required: false },
-        { key: "GA4_PROPERTY_ID", label: "GA4 Property ID", required: false },
+        { key: "NEXT_PUBLIC_GA4_MEASUREMENT_ID", label: "GA4 Measurement ID (browser tag)", required: false },
+        { key: "GOOGLE_REPORTING_SERVICE_ACCOUNT_JSON", label: "Reporting Service Account JSON", required: false },
+        { key: "GA4_SERVICE_ACCOUNT_JSON", label: "GA4 Service Account JSON (alias)", required: false },
+        { key: "GOOGLE_REPORTING_CLIENT_ID", label: "Reporting OAuth Client ID", required: false },
+        { key: "GOOGLE_REPORTING_CLIENT_SECRET", label: "Reporting OAuth Client Secret", required: false },
+        { key: "GOOGLE_REPORTING_REFRESH_TOKEN", label: "Reporting OAuth Refresh Token", required: false },
       ],
       permissions: ["Read analytics data", "Read property configuration"],
       scopes: ["analytics.readonly"],
@@ -81,10 +89,18 @@ const PROVIDER_DEFINITIONS: IntegrationProviderDefinition[] = [
     connectPriority: 6,
     settingsSchema: buildSettingsSchema({
       documentationUrl: "https://developers.google.com/webmaster-tools/v1/api_reference_index",
-      oauth: { label: "Google OAuth", scopes: ["https://www.googleapis.com/auth/webmasters.readonly"], placeholder: "OAuth credentials — future" },
+      oauth: {
+        label: "Google Reporting OAuth / Service Account",
+        scopes: ["https://www.googleapis.com/auth/webmasters.readonly"],
+        placeholder: "Phase 29C — same reporting credentials as GA4; site URL per client",
+      },
       envVars: [
         { key: "GOOGLE_SITE_VERIFICATION", label: "Site Verification Meta", required: false },
-        { key: "GSC_SITE_URL", label: "Search Console Site URL", required: false },
+        { key: "GOOGLE_REPORTING_SERVICE_ACCOUNT_JSON", label: "Reporting Service Account JSON", required: false },
+        { key: "GSC_SERVICE_ACCOUNT_JSON", label: "GSC Service Account JSON (alias)", required: false },
+        { key: "GOOGLE_REPORTING_CLIENT_ID", label: "Reporting OAuth Client ID", required: false },
+        { key: "GOOGLE_REPORTING_CLIENT_SECRET", label: "Reporting OAuth Client Secret", required: false },
+        { key: "GOOGLE_REPORTING_REFRESH_TOKEN", label: "Reporting OAuth Refresh Token", required: false },
       ],
       permissions: ["Read search analytics", "Read index status"],
       scopes: ["webmasters.readonly"],

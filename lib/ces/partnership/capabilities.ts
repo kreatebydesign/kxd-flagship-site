@@ -1,6 +1,7 @@
 /**
- * Future client modules — presentation registry only.
- * Not an entitlement system. Labels are honest maturity states.
+ * Future client modules — presentation registry (labels / maturity).
+ * Durable per-client entitlements live on Client Experience Profiles.enabledModules.
+ * Reporting resolves IDs via getReportingCapabilityIds().
  *
  * Phase 29B — reporting capabilities added for modular domain gating.
  */

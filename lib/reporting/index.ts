@@ -39,6 +39,20 @@ export {
   EXECUTIVE_REPORTING_EVIDENCE_CONTRACT,
 } from "./adapters/executive-intelligence";
 
+/** Phase 29C — Live reporting provider bridges (GA4 + Search Console) */
+export {
+  ingestClientReporting,
+  ingestClientReportingProvider,
+  composeReportingFromProviderResults,
+  REPORTING_PROVIDER_CAPABILITY,
+  REPORTING_PROVIDER_METRIC_SET_VERSION,
+  GOOGLE_REPORTING_SCOPES,
+  type ReportingProviderId,
+  type ReportingProviderResult,
+  type ReportingProviderStatus,
+  type IngestClientReportingResult,
+} from "./providers";
+
 /** Performance report view helpers (existing) */
 export {
   buildPerformanceReportView,
