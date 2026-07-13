@@ -30,6 +30,7 @@
     "verify:reporting-domain": "tsx scripts/verify-reporting-domain.ts",
     "verify:reporting-providers": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/verify-reporting-providers.ts",
     "verify:reporting-live": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/verify-live-reporting-provider.ts",
+    "verify:runtime-contract": "tsx scripts/verify-runtime-contract.ts",
     "verify:sales-pipeline": "tsx scripts/verify-sales-pipeline.ts",
     "verify:availability": "tsx scripts/verify-availability.ts",
     "verify:availability:live": "KXD_SERVER_ONLY_SHIM=1 VERIFY_AVAILABILITY_LIVE=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/verify-availability.ts",
