@@ -12,7 +12,7 @@ import config from "../payload.config";
 
 export const PRIMAL_CLIENT_SLUG = "primal-motorsports";
 export const PRIMAL_REVIEW_STAGING_URL =
-  "https://primal-motorsports-rebuild-ggv0lkpv2-kxd.vercel.app";
+  "https://primal-motorsports-rebuild.vercel.app";
 
 async function main() {
   const payload = await getPayload({ config });
