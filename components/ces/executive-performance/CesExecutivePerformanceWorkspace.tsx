@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { WebsiteReviewLandingData } from "@/lib/ces/modules/website-review/types";
 import {
   evolutionMaturityLabel,
+  executivePresentationToCssVars,
   getExecutiveZoneOrder,
   type ExecutivePerformanceBriefing,
   type ExecutiveWorkspaceZoneId,
@@ -16,7 +17,7 @@ export interface CesExecutivePerformanceWorkspaceProps {
 function connectionLabel(state: string): string {
   if (state === "connected") return "Connected";
   if (state === "awaiting-signal") return "Awaiting";
-  return "Not connected";
+  return "Unavailable";
 }
 
 function ZoneHeader({
@@ -55,9 +56,8 @@ export function CesExecutivePerformanceWorkspace({
     year: "numeric",
   });
 
-  const heroStyle = {
-    "--kxd-ces-exec-hero-image": `url(${presentation.heroImageSrc})`,
-  } as CSSProperties;
+  const hasHeroImage = Boolean(presentation.heroImageSrc?.trim());
+  const themeStyle = executivePresentationToCssVars(presentation) as CSSProperties;
 
   const zoneMap: Record<ExecutiveWorkspaceZoneId, ReactNode> = {
     summary: (
@@ -114,19 +114,27 @@ export function CesExecutivePerformanceWorkspace({
         aria-labelledby="exec-performance-heading"
       >
         <ZoneHeader eyebrow="Signal" title="Performance" id="exec-performance-heading" />
-        <p className="kxd-ces-exec__reporting-provenance">
-          <span>
-            Reporting period: {performance.reportingProvenance.periodLabel}
-          </span>
-          {performance.reportingProvenance.providerLabels.length > 0 ? (
-            <span>
-              Source: {performance.reportingProvenance.providerLabels.join(", ")}
+        <div className="kxd-ces-exec__reporting-provenance">
+          <p className="kxd-ces-exec__provenance-row">
+            <span className="kxd-ces-exec__provenance-key">Period</span>
+            <span className="kxd-ces-exec__provenance-value">
+              {performance.reportingProvenance.periodLabel}
             </span>
+          </p>
+          {performance.reportingProvenance.providerLabels.length > 0 ? (
+            <p className="kxd-ces-exec__provenance-row">
+              <span className="kxd-ces-exec__provenance-key">Source</span>
+              <span className="kxd-ces-exec__provenance-value kxd-ces-exec__provenance-value--intel">
+                {performance.reportingProvenance.providerLabels.join(", ")}
+              </span>
+            </p>
           ) : null}
           {performance.reportingProvenance.statusNote ? (
-            <span>{performance.reportingProvenance.statusNote}</span>
+            <p className="kxd-ces-exec__provenance-note">
+              {performance.reportingProvenance.statusNote}
+            </p>
           ) : null}
-        </p>
+        </div>
         <ul className="kxd-ces-exec__status-row">
           {performance.performancePanels.map((panel) => (
             <li
@@ -135,7 +143,9 @@ export function CesExecutivePerformanceWorkspace({
             >
               <div className="kxd-ces-exec__status-top">
                 <span className="kxd-ces-exec__status-title">{panel.title}</span>
-                <span className="kxd-ces-exec__status-state">
+                <span
+                  className={`kxd-ces-exec__status-state kxd-ces-exec__status-state--${panel.state}`}
+                >
                   {connectionLabel(panel.state)}
                 </span>
               </div>
@@ -181,7 +191,7 @@ export function CesExecutivePerformanceWorkspace({
         ) : null}
 
         <div className="kxd-ces-exec__progress-columns">
-          <div>
+          <div className="kxd-ces-exec__progress-col">
             <p className="kxd-ces-exec__subhead">Accomplished</p>
             <ul className="kxd-ces-exec__compact-list">
               {performance.partnershipPrimary.map((item) => (
@@ -206,7 +216,7 @@ export function CesExecutivePerformanceWorkspace({
             ) : null}
           </div>
 
-          <div>
+          <div className="kxd-ces-exec__progress-col">
             {performance.recentImprovements.length > 0 ? (
               <>
                 <p className="kxd-ces-exec__subhead">Recent</p>
@@ -225,9 +235,15 @@ export function CesExecutivePerformanceWorkspace({
             {performance.workingSignals.length > 0 ? (
               <>
                 <p className="kxd-ces-exec__subhead">What&apos;s working</p>
-                <ul className="kxd-ces-exec__signal-chips">
+                <ul className="kxd-ces-exec__signal-list">
                   {performance.workingSignals.map((item) => (
-                    <li key={item.id}>{item.label}</li>
+                    <li key={item.id}>
+                      <span className="kxd-ces-exec__signal-mark" aria-hidden="true" />
+                      <span className="kxd-ces-exec__signal-label">{item.label}</span>
+                      {item.detail ? (
+                        <span className="kxd-ces-exec__signal-detail">{item.detail}</span>
+                      ) : null}
+                    </li>
                   ))}
                 </ul>
               </>
@@ -313,7 +329,10 @@ export function CesExecutivePerformanceWorkspace({
         <ZoneHeader eyebrow="When you&apos;re ready" title="Growth" id="exec-growth-heading" />
         <ul className="kxd-ces-exec__growth">
           {performance.evolution.map((item) => (
-            <li key={item.id} className="kxd-ces-exec__growth-item">
+            <li
+              key={item.id}
+              className={`kxd-ces-exec__growth-item kxd-ces-exec__growth-item--${item.maturity}`}
+            >
               <div className="kxd-ces-exec__growth-top">
                 <p className="kxd-ces-exec__growth-label">{item.label}</p>
                 <span className="kxd-ces-exec__growth-maturity">
@@ -350,13 +369,18 @@ export function CesExecutivePerformanceWorkspace({
   };
 
   return (
-    <div className="kxd-ces-exec kxd-ces-exec--workspace">
+    <div className="kxd-ces-exec kxd-ces-exec--workspace" style={themeStyle}>
       <header
-        className={`kxd-ces-exec__hero kxd-ces-exec__hero--compact kxd-ces-exec__hero--${presentation.heroOverlay}`}
-        style={heroStyle}
+        className={[
+          "kxd-ces-exec__hero",
+          "kxd-ces-exec__hero--compact",
+          `kxd-ces-exec__hero--${presentation.heroOverlay}`,
+          hasHeroImage ? "kxd-ces-exec__hero--imaged" : "kxd-ces-exec__hero--fallback",
+        ].join(" ")}
         aria-label={presentation.heroImageAlt}
       >
         <div className="kxd-ces-exec__hero-veil" aria-hidden="true" />
+        <div className="kxd-ces-exec__hero-vignette" aria-hidden="true" />
         <div className="kxd-ces-exec__hero-inner">
           {presentation.logoSrc ? (
             // eslint-disable-next-line @next/next/no-img-element

@@ -1,6 +1,6 @@
 /**
- * Phase 31A / 31A.2 — Shared Core Executive Performance presentation tokens.
- * Presentation only — never grants reporting entitlements.
+ * Phase 31A / 31A.2 / visual refinement — Shared Core Executive Performance
+ * presentation tokens. Presentation only — never grants reporting entitlements.
  */
 
 export type ExecutiveHeroOverlay = "graphite" | "soft" | "deep" | "none";
@@ -20,14 +20,30 @@ export type ExecutiveWorkspaceZoneId =
  */
 export type ExperiencePresentation = {
   enabled: boolean;
+  /**
+   * Editorial hero photograph (not a webpage screenshot).
+   * Empty string → graphite editorial fallback (no fabricated image).
+   */
   heroImageSrc: string;
   heroImageAlt: string;
   heroOverlay: ExecutiveHeroOverlay;
+  /** CSS background-position for intentional crop (e.g. "center 42%"). */
+  heroFocus?: string;
   logoSrc: string | null;
   logoAlt: string;
   workspaceEyebrow: string;
   workspaceTitle: string;
   introduction: string;
+  /**
+   * Action accent — CTAs, completed beats, partnership emphasis.
+   * Applied as --kxd-ces-exec-action.
+   */
+  actionAccent?: string;
+  /**
+   * Intelligence accent — reporting, provenance, strategic emphasis.
+   * Applied as --kxd-ces-exec-intelligence. Quiet; never paints the whole UI.
+   */
+  intelligenceAccent?: string;
   /** Optional zone order — defaults to Shared Core sequence. */
   zoneOrder?: ExecutiveWorkspaceZoneId[];
 };
