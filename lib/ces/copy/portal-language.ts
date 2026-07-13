@@ -40,7 +40,7 @@ export const PORTAL_CLIENT_LANGUAGE = {
   welcomeIntroNoBrand: "This is where you review website progress with our team.",
   welcomePurposeHeading: "What you can do here",
   welcomePurposeSteps: [
-    "Review your live website and leave feedback where it matters.",
+    "Review your website and leave feedback where it matters.",
     "Submit revision requests with clear notes and screenshots.",
     "Track progress as updates move forward — nothing gets lost.",
   ] as const,
@@ -72,8 +72,8 @@ export const PORTAL_CLIENT_LANGUAGE = {
   reviewHeroLead:
     "Review the site, leave precise feedback, and follow every revision with clarity.",
   reviewCtaPrimary: "Start a revision",
-  reviewCtaVisual: "Review visually",
-  reviewCtaSecondary: "View live site",
+  reviewCtaVisual: "Review Website",
+  reviewCtaSecondary: "Open Review Site",
   reviewActiveSection: "Active revisions",
   reviewCompletedSection: "Recently complete",
   reviewEmptyTitle: "No updates yet",

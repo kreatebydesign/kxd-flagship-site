@@ -53,7 +53,7 @@ export const PRIMAL_EXPERIENCE_PROFILE = {
     "website-review.request.eyebrow": "New revision",
     "website-review.detail.eyebrow": "Revision details",
     "website-review.cta.request": "Start a revision",
-    "website-review.cta.visual": "Review visually",
+    "website-review.cta.visual": "Review Website",
     "portal.home.currentWork": "Current Work",
     "portal.home.website": "Website",
     "portal.home.recentActivity": "Recent Activity",

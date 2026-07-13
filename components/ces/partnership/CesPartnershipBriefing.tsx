@@ -199,7 +199,7 @@ export function CesPartnershipBriefing({ briefing, greeting }: CesPartnershipBri
             <p className="kxd-ces-partnership__attention-action">{needsAttention.action}</p>
             {needsAttention.href ? (
               <Link href={needsAttention.href} className="kxd-ces-btn kxd-ces-btn--primary">
-                Begin
+                Review Website
               </Link>
             ) : null}
           </div>
@@ -275,7 +275,7 @@ export function CesPartnershipBriefing({ briefing, greeting }: CesPartnershipBri
                     href="/portal/website-review/session/new"
                     className="kxd-ces-btn kxd-ces-btn--primary"
                   >
-                    Review the site
+                    Review Website
                   </Link>
                   <a
                     href={websiteReview.websiteUrl}
@@ -283,7 +283,7 @@ export function CesPartnershipBriefing({ briefing, greeting }: CesPartnershipBri
                     rel="noopener noreferrer"
                     className="kxd-ces-btn kxd-ces-btn--ghost"
                   >
-                    Open live site
+                    Open Review Site
                   </a>
                 </>
               ) : (
@@ -307,7 +307,7 @@ export function CesPartnershipBriefing({ briefing, greeting }: CesPartnershipBri
                     href="/portal/website-review/session/new"
                     className="kxd-ces-btn kxd-ces-btn--primary"
                   >
-                    Review the site
+                    Review Website
                   </Link>
                   <Link href="/portal/website-review/request" className="kxd-ces-btn kxd-ces-btn--ghost">
                     Share written notes

@@ -52,7 +52,7 @@ function buildWebsiteReviewSnapshot(
   } else if (websiteReview.activeReviews.length > 0) {
     nextStep = "Kreate by Design is advancing the open revisions.";
   } else if (websiteReview.websiteUrl) {
-    nextStep = "Review the live site and share anything that still needs attention.";
+    nextStep = "Review the website and share anything that still needs attention.";
   }
 
   return {
@@ -335,7 +335,7 @@ export async function composePartnershipBriefing(input: {
     currentState: {
       initiative: "Bringing the website to launch",
       websiteStage: websiteReview.websiteUrl
-        ? "Live site in refinement"
+        ? "Review Website in refinement"
         : "Website address still being confirmed",
       reviewState: websiteSnapshot.statusLabel,
       outstandingClientAction: attentionAction,
