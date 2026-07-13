@@ -90,13 +90,6 @@ export interface PartnershipRecommendation {
   evidenceLabels: string[];
 }
 
-export interface PartnershipStrategicRoadmap {
-  title: string;
-  lead: string;
-  ctaLabel: string;
-  href: string;
-}
-
 export interface PartnershipFutureModule {
   id: string;
   label: string;
@@ -124,7 +117,6 @@ export interface PartnershipBriefing {
   recentProgress: PartnershipProgressItem[];
   results: PartnershipResults | null;
   recommendation: PartnershipRecommendation;
-  strategicRoadmap: PartnershipStrategicRoadmap | null;
   futureModules: PartnershipFutureModule[];
   billingPreview: PartnershipBillingPreview;
 }

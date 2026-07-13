@@ -16,7 +16,6 @@ import { getBoardFutureModules } from "./capabilities";
 import { getPartnershipMilestones } from "./milestones";
 import { loadPartnershipResults } from "./outcomes";
 import { decideClientRecommendation } from "./recommend";
-import { getStrategicRoadmap } from "./roadmap";
 import type {
   PartnershipBriefing,
   PartnershipDeliveredItem,
@@ -354,7 +353,6 @@ export async function composePartnershipBriefing(input: {
     recentProgress: buildProgress(safeConnected, websiteReview, results?.periodLabel ?? null),
     results,
     recommendation,
-    strategicRoadmap: getStrategicRoadmap(slug),
     futureModules: getBoardFutureModules(),
     billingPreview: {
       title: "Account & Billing",

@@ -17,7 +17,7 @@ export interface CesPartnershipBriefingProps {
 }
 
 export function CesPartnershipBriefing({ briefing, greeting }: CesPartnershipBriefingProps) {
-  const { overview, needsAttention, websiteReview, results, recommendation, strategicRoadmap } =
+  const { overview, needsAttention, websiteReview, results, recommendation } =
     briefing;
   const story = getPartnershipStoryTimeline(briefing.clientSlug);
   const updatedLabel = new Date().toLocaleDateString(undefined, {
@@ -129,28 +129,6 @@ export function CesPartnershipBriefing({ briefing, greeting }: CesPartnershipBri
           ))}
         </ul>
       </section>
-
-      {/* Roadmap — strategic, early */}
-      {strategicRoadmap ? (
-        <section
-          className="kxd-ces-partnership__section kxd-ces-partnership__roadmap"
-          aria-labelledby="roadmap-heading"
-        >
-          <p className="kxd-ces-partnership__section-eyebrow">Vision</p>
-          <h2 id="roadmap-heading" className="kxd-ces-partnership__heading">
-            {strategicRoadmap.title}
-          </h2>
-          <p className="kxd-ces-partnership__roadmap-lead">{strategicRoadmap.lead}</p>
-          <a
-            href={strategicRoadmap.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="kxd-ces-btn kxd-ces-btn--primary"
-          >
-            {strategicRoadmap.ctaLabel}
-          </a>
-        </section>
-      ) : null}
 
       {/* What we've built / delivered */}
       <section className="kxd-ces-partnership__section" aria-labelledby="delivered-heading">

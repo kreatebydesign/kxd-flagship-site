@@ -3306,8 +3306,7 @@
 }
 
 .kxd-ces-partnership__lead,
-.kxd-ces-partnership__section-lead,
-.kxd-ces-partnership__roadmap-lead {
+.kxd-ces-partnership__section-lead {
   margin: 0;
   max-width: 34rem;
   font-size: 1.125rem;
@@ -3711,20 +3710,6 @@
 .kxd-ces-partnership__evidence li {
   font-size: 0.8125rem;
   color: var(--kxd-os-text-faint);
-}
-
-.kxd-ces-partnership__roadmap {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 1.25rem;
-  padding: 1.75rem 0;
-  border-top: 1px solid color-mix(in srgb, var(--kxd-ces-accent) 22%, transparent);
-  border-bottom: 1px solid color-mix(in srgb, var(--kxd-ces-accent) 22%, transparent);
-}
-
-.kxd-ces-partnership__roadmap .kxd-ces-partnership__heading {
-  margin-bottom: 0;
 }
 
 .kxd-ces-partnership__modules {
