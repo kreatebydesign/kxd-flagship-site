@@ -18,6 +18,7 @@
     "seed:primal-experience": "tsx scripts/seed-primal-experience-profile.ts",
     "seed:portal-user": "tsx scripts/seed-portal-user.ts",
     "verify:primal-portal": "tsx scripts/verify-primal-portal-readiness.ts",
+    "verify:partnership-briefing": "tsx scripts/verify-partnership-briefing.ts",
     "verify:client-launch": "tsx scripts/verify-client-launch-readiness.ts",
     "verify:scheduling": "tsx scripts/verify-scheduling-domain.ts",
     "verify:calendar": "tsx scripts/verify-google-calendar-read.ts",

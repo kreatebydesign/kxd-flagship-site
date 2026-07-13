@@ -7,7 +7,7 @@ export const PORTAL_CLIENT_LANGUAGE = {
   primalWorkspaceLabel: "Primal Workspace",
   homeWelcome: (name: string) => `Welcome back, ${name}`,
   homeLead:
-    "Your dedicated space to review website progress, submit feedback, and track every update — in one calm place.",
+    "Everything Kreate by Design is actively delivering, planning, and recommending for your partnership.",
 
   launchEyebrow: "Getting started",
   launchTitle: "What to do first",
@@ -70,7 +70,7 @@ export const PORTAL_CLIENT_LANGUAGE = {
 
   reviewHeroTitle: "Website Review",
   reviewHeroLead:
-    "Review your site, leave feedback, and follow every revision with clarity.",
+    "Review the site, leave precise feedback, and follow every revision with clarity.",
   reviewCtaPrimary: "Start a revision",
   reviewCtaVisual: "Review visually",
   reviewCtaSecondary: "View live site",

@@ -14,7 +14,7 @@ export const PRIMAL_EXPERIENCE_PROFILE = {
   surfaceTint: "rgba(168, 52, 36, 0.032)",
   borderRadiusPreset: "default" as const,
   motionPreset: "calm" as const,
-  welcomeEyebrow: "Your workspace",
+  welcomeEyebrow: "Partnership",
   reassuranceLine: "Every revision is tracked. Nothing gets lost.",
   supportTone: "direct" as const,
   portalSidebarLabel: "Primal Motorsports",
@@ -26,7 +26,7 @@ export const PRIMAL_EXPERIENCE_PROFILE = {
     "portal.home.workspaceLabel": "Primal Workspace",
     "portal.home.eyebrow": "Primal Workspace",
     "portal.home.lead":
-      "Your website, revisions, and creative updates — organized in one calm workspace.",
+      "Everything Kreate by Design is actively delivering, planning, and recommending for Primal Motorsports.",
     "portal.home.launch.eyebrow": "Getting started",
     "portal.home.launch.title": "What to do first",
     "portal.home.launch.lead":
@@ -48,8 +48,8 @@ export const PRIMAL_EXPERIENCE_PROFILE = {
     "portal.home.module.activeCount": "Revisions in progress",
     "website-review.landing.title": "Website Review",
     "website-review.landing.lead":
-      "Review your site, leave feedback, and follow every revision with clarity.",
-    "website-review.landing.eyebrow": "First active module",
+      "Review the site, leave precise feedback, and follow every revision with clarity.",
+    "website-review.landing.eyebrow": "Collaboration",
     "website-review.request.eyebrow": "New revision",
     "website-review.detail.eyebrow": "Revision details",
     "website-review.cta.request": "Start a revision",
