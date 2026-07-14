@@ -1,6 +1,7 @@
 /**
- * Phase 31A — Client presentation themes for Executive Performance.
+ * Phase 31A / 32A — Client presentation themes for Executive Performance.
  * Shared Core registry — brand assets, color tokens, and copy. Not entitlements.
+ * Enable a client by setting `enabled: true` and completing brand assets — no component forks.
  */
 
 import type { ExperiencePresentation } from "./types";
@@ -21,6 +22,7 @@ const DEFAULT_ZONE_ORDER = [
  */
 const PRIMAL_PRESENTATION: ExperiencePresentation = {
   enabled: true,
+  briefingEnabled: true,
   heroImageSrc: "/migrated-assets/projects/primal-motorsports-hero.jpg",
   heroImageAlt: "Radical race cars on track — Primal Motorsports",
   heroOverlay: "deep",
@@ -37,9 +39,54 @@ const PRIMAL_PRESENTATION: ExperiencePresentation = {
   zoneOrder: [...DEFAULT_ZONE_ORDER],
 };
 
+/** Disabled stubs — ready for brand assets + memory. EP appears when enabled. */
+function stubPresentation(input: {
+  logoAlt: string;
+  heroImageAlt: string;
+}): ExperiencePresentation {
+  return {
+    enabled: false,
+    briefingEnabled: false,
+    heroImageSrc: "",
+    heroImageAlt: input.heroImageAlt,
+    heroOverlay: "graphite",
+    logoSrc: null,
+    logoAlt: input.logoAlt,
+    workspaceEyebrow: "Private Partnership Workspace",
+    workspaceTitle: "Executive Performance",
+    introduction:
+      "A quiet view of where things stand — and what deserves attention next.",
+    zoneOrder: [...DEFAULT_ZONE_ORDER],
+  };
+}
+
 const BY_SLUG: Record<string, ExperiencePresentation> = {
   "primal-motorsports": PRIMAL_PRESENTATION,
+  "cusick-morgan-motorsports": stubPresentation({
+    logoAlt: "Cusick Morgan Motorsports",
+    heroImageAlt: "Cusick Morgan Motorsports",
+  }),
+  otp: stubPresentation({
+    logoAlt: "On Track Performance",
+    heroImageAlt: "On Track Performance",
+  }),
+  "plate-the-umpqua": stubPresentation({
+    logoAlt: "Plate The Umpqua",
+    heroImageAlt: "Plate The Umpqua",
+  }),
+  "e-davis-enterprises": stubPresentation({
+    logoAlt: "E. Davis Enterprises",
+    heroImageAlt: "E. Davis Enterprises",
+  }),
+  autodv8ions: stubPresentation({
+    logoAlt: "AutoDV8ions",
+    heroImageAlt: "AutoDV8ions",
+  }),
 };
+
+export function listExecutivePresentationSlugs(): string[] {
+  return Object.keys(BY_SLUG);
+}
 
 export function getExecutivePresentation(
   clientSlug: string | null | undefined,

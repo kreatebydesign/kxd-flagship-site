@@ -21,6 +21,11 @@ export type ExecutiveWorkspaceZoneId =
 export type ExperiencePresentation = {
   enabled: boolean;
   /**
+   * Executive Client Briefing (/portal/partnership).
+   * Requires authored Executive Memory. Defaults false when omitted.
+   */
+  briefingEnabled?: boolean;
+  /**
    * Editorial hero photograph (not a webpage screenshot).
    * Empty string → graphite editorial fallback (no fabricated image).
    */

@@ -1,65 +1,11 @@
 /**
- * Phase 31A.2 — Partnership progress (Shared Core, slug-configured).
+ * Phase 31A.2 / 32A — Partnership progress (Shared Core, slug-configured).
+ * Prefers Executive Memory when authored; falls back to local defaults.
  * Relationship language — not project management.
  */
 
+import { memoryToPartnershipItems } from "@/lib/executive-memory";
 import type { ExecutivePartnershipItem } from "./types";
-
-const PRIMAL_PARTNERSHIP: ExecutivePartnershipItem[] = [
-  {
-    id: "website-rebuild",
-    label: "Your website, rebuilt",
-    detail: "We've rebuilt the flagship site and refined it toward launch readiness.",
-    complete: true,
-    priority: true,
-  },
-  {
-    id: "landing-pages",
-    label: "Landing experiences shaped with care",
-    detail: "Pages designed to meet people arriving from advertising — clear, composed, and on-brand.",
-    complete: true,
-    priority: true,
-  },
-  {
-    id: "google-ads",
-    label: "Advertising refined with care",
-    detail: "Google Ads work that protects investment and attracts qualified interest.",
-    complete: true,
-    priority: true,
-  },
-  {
-    id: "seo",
-    label: "Search presence established",
-    detail: "Foundational search work is in place so people can find you more clearly over time.",
-    complete: true,
-    priority: true,
-  },
-  {
-    id: "website-review",
-    label: "A private place to refine the site together",
-    detail: "Website Review keeps revision notes organized in one private place.",
-    complete: true,
-    priority: true,
-  },
-  {
-    id: "reporting",
-    label: "Executive clarity, prepared",
-    detail: "This workspace is structured so leadership can see what matters when signals are ready.",
-    complete: true,
-    priority: true,
-  },
-  {
-    id: "portal",
-    label: "Your private partnership workspace",
-    detail: "A quiet operating environment built for leadership — not a generic client portal.",
-    complete: true,
-    priority: false,
-  },
-];
-
-const BY_SLUG: Record<string, ExecutivePartnershipItem[]> = {
-  "primal-motorsports": PRIMAL_PARTNERSHIP,
-};
 
 const DEFAULT_PARTNERSHIP: ExecutivePartnershipItem[] = [
   {
@@ -81,7 +27,8 @@ const DEFAULT_PARTNERSHIP: ExecutivePartnershipItem[] = [
 export function getExecutivePartnershipValue(
   clientSlug: string | null,
 ): ExecutivePartnershipItem[] {
-  if (clientSlug && BY_SLUG[clientSlug]) return BY_SLUG[clientSlug];
+  const fromMemory = memoryToPartnershipItems(clientSlug);
+  if (fromMemory && fromMemory.length > 0) return fromMemory;
   return DEFAULT_PARTNERSHIP;
 }
 

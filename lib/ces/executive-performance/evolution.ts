@@ -1,44 +1,10 @@
 /**
- * Phase 31A.2 — Growth opportunities (Shared Core).
- * Possibility — not a catalog, not an upsell.
+ * Phase 31A.2 / 32A — Growth opportunities (Shared Core).
+ * Prefers Executive Memory when authored. Possibility — not a catalog, not an upsell.
  */
 
+import { memoryToEvolutionItems } from "@/lib/executive-memory";
 import type { ExecutiveEvolutionItem } from "./types";
-
-const PRIMAL_EVOLUTION: ExecutiveEvolutionItem[] = [
-  {
-    id: "lead-management",
-    label: "Lead Management",
-    detail:
-      "A clearer path from inquiry to conversation — so promising interest is never left waiting.",
-    maturity: "next",
-  },
-  {
-    id: "executive-reporting",
-    label: "Executive Reporting",
-    detail:
-      "A calm, recurring view of what is moving the business — prepared for leadership, not buried in tools.",
-    maturity: "next",
-  },
-  {
-    id: "customer-journey",
-    label: "Customer Journey",
-    detail:
-      "One continuous picture from first interest to long-term relationship — marketing, site, and follow-through together.",
-    maturity: "future",
-  },
-  {
-    id: "expansion",
-    label: "Expansion",
-    detail:
-      "Room to grow into new programs when the partnership has the capacity — paced thoughtfully, never rushed.",
-    maturity: "future",
-  },
-];
-
-const BY_SLUG: Record<string, ExecutiveEvolutionItem[]> = {
-  "primal-motorsports": PRIMAL_EVOLUTION,
-};
 
 const DEFAULT_EVOLUTION: ExecutiveEvolutionItem[] = [
   {
@@ -64,8 +30,8 @@ const DEFAULT_EVOLUTION: ExecutiveEvolutionItem[] = [
 export function getExecutiveEvolution(
   clientSlug: string | null,
 ): ExecutiveEvolutionItem[] {
-  const items =
-    clientSlug && BY_SLUG[clientSlug] ? BY_SLUG[clientSlug] : DEFAULT_EVOLUTION;
+  const fromMemory = memoryToEvolutionItems(clientSlug);
+  const items = fromMemory && fromMemory.length > 0 ? fromMemory : DEFAULT_EVOLUTION;
   return items.slice(0, 4);
 }
 

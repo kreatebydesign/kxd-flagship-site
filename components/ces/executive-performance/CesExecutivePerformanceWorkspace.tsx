@@ -317,6 +317,11 @@ export function CesExecutivePerformanceWorkspace({
           title="Partnership Progress"
           id="exec-progress-heading"
         />
+        {performance.presentation.briefingEnabled ? (
+          <Link href="/portal/partnership" className="kxd-ces-exec__section-link">
+            Open executive briefing
+          </Link>
+        ) : null}
         <div className="kxd-ces-exec__progress-stage">
           {performance.progressBeats.length > 0 ? (
             <div className="kxd-ces-exec__progress-journey">

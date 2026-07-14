@@ -51,7 +51,8 @@
     "verify:schedule-work": "tsx scripts/verify-schedule-work.ts",
     "verify:schedule-work:live": "KXD_SERVER_ONLY_SHIM=1 VERIFY_SCHEDULE_WORK_LIVE=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/verify-schedule-work.ts",
     "repair:scheduling-proposals": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/repair-active-scheduling-proposals.ts",
-    "repair:scheduling-proposals:apply": "KXD_SERVER_ONLY_SHIM=1 APPLY=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/repair-active-scheduling-proposals.ts"
+    "repair:scheduling-proposals:apply": "KXD_SERVER_ONLY_SHIM=1 APPLY=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/repair-active-scheduling-proposals.ts",
+    "verify:executive-memory": "tsx scripts/verify-executive-memory.ts"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "^3.84.1",

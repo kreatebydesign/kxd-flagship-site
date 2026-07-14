@@ -27,6 +27,7 @@ export {
   getExecutiveZoneOrder,
   isExecutivePerformanceAvailable,
   executivePresentationToCssVars,
+  listExecutivePresentationSlugs,
 } from "./presentation";
 
 export {

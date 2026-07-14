@@ -3,13 +3,16 @@ import { CES_MODULE_REGISTRY } from "@/lib/ces/modules/registry";
 import { getCesNavItems, resolveCesNavId } from "@/lib/ces/modules/nav";
 import type { CesNavGroupId } from "@/lib/ces/modules/types";
 import type { ResolvedExperienceProfile } from "@/lib/ces";
+import { isExecutiveClientBriefingAvailable } from "@/lib/executive-client-summary/availability";
 import { CLIENT_HQ_MODULES, isClientHqModuleEnabled, type ClientHqModuleId } from "./modules";
 import { getEditionBranding, getEditionNavigation } from "@/lib/editions";
 import { isPortalNavEnabled } from "@/lib/editions/navigation";
 import { isPortalNavVisibleForCesLaunch } from "@/lib/portal/ces-launch-safety";
 
 export type ClientHqNavId = ClientHqModuleId;
-export type PortalNavId = ClientHqNavId | CesModuleId;
+/** Shared Core partnership briefing — not a CES module entitlement. */
+export type PortalBriefingNavId = "partnership";
+export type PortalNavId = ClientHqNavId | CesModuleId | PortalBriefingNavId;
 
 export interface ClientHqNavItem {
   id: ClientHqNavId;
@@ -116,6 +119,7 @@ export function getEnabledPortalNavGroups(
   }
 
   const cesItems = getCesNavItems(profile);
+  const briefingAvailable = isExecutiveClientBriefingAvailable(profile.identity.clientSlug);
 
   return base
     .map((group) => {
@@ -131,10 +135,16 @@ export function getEnabledPortalNavGroups(
           href: item.href,
         }));
 
+      const briefingItem: PortalNavItem[] =
+        briefingAvailable && group.label === "Headquarters"
+          ? [{ id: "partnership", label: "Partnership", href: "/portal/partnership" }]
+          : [];
+
       return {
         label: group.label,
         items: [
           ...group.items.map(({ id, label, href }) => ({ id, label, href })),
+          ...briefingItem,
           ...cesForGroup,
         ],
       };
@@ -147,6 +157,10 @@ export function getEnabledPortalNavGroups(
 }
 
 export function resolvePortalNavId(pathname: string): PortalNavId {
+  if (pathname === "/portal/partnership" || pathname.startsWith("/portal/partnership/")) {
+    return "partnership";
+  }
+
   const cesId = resolveCesNavId(pathname);
   if (cesId) return cesId as PortalNavId;
 

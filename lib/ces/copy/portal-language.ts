@@ -4,7 +4,10 @@
 
 export const PORTAL_CLIENT_LANGUAGE = {
   homeEyebrow: "Your workspace",
-  primalWorkspaceLabel: "Primal Workspace",
+  /** Generic workspace label — brand-specific names come from presentation / profile. */
+  workspaceLabel: "Your workspace",
+  /** @deprecated Prefer presentation / profile brand name; kept for legacy reads. */
+  primalWorkspaceLabel: "Your workspace",
   homeWelcome: (name: string) => `Welcome back, ${name}`,
   homeLead:
     "Everything Kreate by Design is actively delivering, planning, and recommending for your partnership.",
