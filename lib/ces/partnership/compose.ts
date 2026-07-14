@@ -46,24 +46,27 @@ function buildWebsiteReviewSnapshot(
   const hasRevisions =
     websiteReview.activeReviews.length + websiteReview.completedReviews.length > 0;
 
-  let nextStep = "When you are ready, share the next round of website feedback.";
+  let nextStep =
+    "Whenever you're ready, leave anything you'd like us to refine — we'll keep every note organized.";
   if (awaiting.length > 0) {
-    nextStep = "A short response will keep the current revision moving.";
+    nextStep =
+      "One open revision is waiting for your eye. A short response is all we need to continue.";
   } else if (websiteReview.activeReviews.length > 0) {
-    nextStep = "Kreate by Design is advancing the open revisions.";
+    nextStep = "Our team is advancing the open revisions.";
   } else if (websiteReview.websiteUrl) {
-    nextStep = "Review the website and share anything that still needs attention.";
+    nextStep =
+      "Whenever you're ready, review the latest version and leave anything you'd like us to refine.";
   }
 
   return {
     statusLabel: latest
       ? reviewStatusLabel(latest.status)
       : hasRevisions
-        ? "Organized"
-        : "Ready for your eye",
+        ? "Organized and in good hands"
+        : "Ready whenever you are",
     timelineLabel: hasRevisions
       ? `${websiteReview.activeReviews.length} active · ${websiteReview.completedReviews.length} complete`
-      : "Awaiting the first round of feedback",
+      : "Waiting for your first round of notes",
     latestRevisionTitle: latest?.title ?? null,
     latestRevisionHref: latest ? `/portal/website-review/${latest.id}` : null,
     latestKxdResponse: latestTimelineLabel(latest),
@@ -207,20 +210,20 @@ function buildProgress(
     items.push(
       {
         id: "portal-live",
-        label: "Private partnership workspace opened",
-        detail: "Leadership now has a calm place to follow the work",
+        label: "Your partnership workspace opened",
+        detail: "Leadership now has a quiet place to follow everything with us",
         at: null,
       },
       {
         id: "review-ready",
-        label: "Website review process introduced",
-        detail: "Feedback and revisions stay organized in one place",
+        label: "A private review rhythm introduced",
+        detail: "Every note stays organized so refinement stays confident",
         at: null,
       },
       {
         id: "ads-active",
-        label: "Growth advertising continues",
-        detail: "Visibility and qualified traffic remain under continuous care",
+        label: "Advertising continues",
+        detail: "Visibility and qualified interest remain part of the active relationship",
         at: null,
       },
     );
@@ -299,21 +302,21 @@ export async function composePartnershipBriefing(input: {
   if (hasAwaitingClient) {
     const awaiting = websiteReview.activeReviews.find((r) => r.status === "awaiting-your-input");
     attentionAction = awaiting
-      ? `Respond to “${awaiting.title}”`
-      : "Respond to the open revision";
+      ? `Leave a note on “${awaiting.title}”`
+      : "Leave a short note on the open revision";
     attentionHref = awaiting
       ? `/portal/website-review/${awaiting.id}`
       : "/portal/website-review";
   } else if (!hasActiveReviews && websiteReview.websiteUrl) {
-    attentionAction = "Review the website and share any remaining notes";
+    attentionAction = "Review the website and leave any remaining notes";
     attentionHref = "/portal/website-review/session/new";
   }
 
   const overview = {
     relationshipStatus: "Active partnership",
-    currentPhase: "Website refinement toward launch",
-    currentFocus: "Complete remaining website revisions while keeping growth steady",
-    lastMajorMilestone: "Private partnership workspace opened",
+    currentPhase: "Refining the website toward launch",
+    currentFocus: "Completing remaining revisions while growth stays steady",
+    lastMajorMilestone: "Your partnership workspace opened",
     nextMilestone: "Website launch",
     recommendationLine: recommendation.headline,
   };
@@ -340,9 +343,9 @@ export async function composePartnershipBriefing(input: {
       reviewState: websiteSnapshot.statusLabel,
       outstandingClientAction: attentionAction,
       outstandingKxdAction: hasActiveReviews
-        ? "Advancing the open website revisions"
-        : "Refining the website and sustaining growth",
-      partnershipHealth: "Strong, organized, and moving forward",
+        ? "Advancing the open website revisions with care"
+        : "Refining the website and sustaining growth thoughtfully",
+      partnershipHealth: "Strong, organized, and moving forward together",
     },
     needsAttention: {
       action: attentionAction,
@@ -365,7 +368,7 @@ export async function composePartnershipBriefing(input: {
         "Secure checkout",
         "Saved payment methods",
       ],
-      previewNote: "Coming next — payments are not processed in this workspace yet.",
+      previewNote: "Coming soon — billing stays outside this workspace for now, handled with care.",
       retainerOnFile: counts.retainerOnFile,
     },
   };

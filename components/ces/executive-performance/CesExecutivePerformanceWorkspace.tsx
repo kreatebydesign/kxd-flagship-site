@@ -3,6 +3,8 @@ import Link from "next/link";
 import type { WebsiteReviewLandingData } from "@/lib/ces/modules/website-review/types";
 import {
   evolutionMaturityLabel,
+  executivePanelNarrative,
+  executivePanelTitle,
   executivePresentationToCssVars,
   getExecutiveZoneOrder,
   type ExecutivePerformanceBriefing,
@@ -17,18 +19,16 @@ export interface CesExecutivePerformanceWorkspaceProps {
 
 function connectionLabel(state: string): string {
   if (state === "connected") return "Connected";
-  if (state === "awaiting-signal") return "Awaiting";
-  return "Unavailable";
+  if (state === "awaiting-signal") return "Waiting";
+  return "Not yet";
 }
 
-function ZoneHeader({
-  eyebrow,
+function ZoneTitle({
   title,
   id,
   action,
   lead,
 }: {
-  eyebrow: string;
   title: string;
   id: string;
   action?: ReactNode;
@@ -37,7 +37,6 @@ function ZoneHeader({
   return (
     <div className="kxd-ces-exec__zone-head">
       <div>
-        <p className="kxd-ces-exec__section-eyebrow">{eyebrow}</p>
         <h2 id={id} className="kxd-ces-exec__heading">
           {title}
         </h2>
@@ -62,6 +61,7 @@ export function CesExecutivePerformanceWorkspace({
 
   const hasHeroImage = Boolean(presentation.heroImageSrc?.trim());
   const themeStyle = executivePresentationToCssVars(presentation) as CSSProperties;
+  const periodLabel = performance.reportingProvenance.periodLabel;
 
   const zoneMap: Record<ExecutiveWorkspaceZoneId, ReactNode> = {
     summary: (
@@ -70,15 +70,9 @@ export function CesExecutivePerformanceWorkspace({
         className="kxd-ces-exec__zone kxd-ces-exec__zone--summary"
         aria-labelledby="exec-summary-heading"
       >
-        <ZoneHeader
-          eyebrow="Briefing"
-          title="Executive Summary"
-          id="exec-summary-heading"
-          lead="Where the partnership stands — and what deserves attention next."
-        />
+        <ZoneTitle title="Executive Summary" id="exec-summary-heading" />
         <div className="kxd-ces-exec__summary-letter">
           <article className="kxd-ces-exec__letter-body">
-            <p className="kxd-ces-exec__letter-salutation">From your KXD partner</p>
             <h3 className="kxd-ces-exec__letter-headline">
               {performance.recommendation.headline}
             </h3>
@@ -97,31 +91,19 @@ export function CesExecutivePerformanceWorkspace({
           <aside className="kxd-ces-exec__letter-meta" aria-label="Partnership context">
             <dl className="kxd-ces-exec__meta-list">
               <div className="kxd-ces-exec__meta-row">
-                <dt>
-                  <span className="kxd-ces-exec__meta-mark" aria-hidden="true" />
-                  Phase
-                </dt>
+                <dt>Phase</dt>
                 <dd>{performance.summary.currentPhase}</dd>
               </div>
               <div className="kxd-ces-exec__meta-row">
-                <dt>
-                  <span className="kxd-ces-exec__meta-mark" aria-hidden="true" />
-                  Focus
-                </dt>
+                <dt>Focus</dt>
                 <dd>{performance.summary.currentFocus}</dd>
               </div>
               <div className="kxd-ces-exec__meta-row">
-                <dt>
-                  <span className="kxd-ces-exec__meta-mark" aria-hidden="true" />
-                  Next
-                </dt>
+                <dt>Next</dt>
                 <dd>{performance.summary.nextMilestone}</dd>
               </div>
               <div className="kxd-ces-exec__meta-row kxd-ces-exec__meta-row--quiet">
-                <dt>
-                  <span className="kxd-ces-exec__meta-mark" aria-hidden="true" />
-                  Recent
-                </dt>
+                <dt>Recent</dt>
                 <dd>{performance.summary.lastMajorMilestone}</dd>
               </div>
             </dl>
@@ -136,22 +118,19 @@ export function CesExecutivePerformanceWorkspace({
         className="kxd-ces-exec__zone kxd-ces-exec__zone--performance"
         aria-labelledby="exec-performance-heading"
       >
-        <ZoneHeader
-          eyebrow="Signal"
+        <ZoneTitle
           title="Performance"
           id="exec-performance-heading"
-          lead="Trustworthy signals only — never estimated or invented."
+          lead="A calm view of what we can show you — never estimated, never invented."
         />
         <div className="kxd-ces-exec__reporting-provenance">
           <p className="kxd-ces-exec__provenance-row">
             <span className="kxd-ces-exec__provenance-key">Period</span>
-            <span className="kxd-ces-exec__provenance-value">
-              {performance.reportingProvenance.periodLabel}
-            </span>
+            <span className="kxd-ces-exec__provenance-value">{periodLabel}</span>
           </p>
           {performance.reportingProvenance.providerLabels.length > 0 ? (
             <p className="kxd-ces-exec__provenance-row">
-              <span className="kxd-ces-exec__provenance-key">Source</span>
+              <span className="kxd-ces-exec__provenance-key">From</span>
               <span className="kxd-ces-exec__provenance-value kxd-ces-exec__provenance-value--intel">
                 {performance.reportingProvenance.providerLabels.join(", ")}
               </span>
@@ -164,34 +143,30 @@ export function CesExecutivePerformanceWorkspace({
           ) : null}
         </div>
         <ul className="kxd-ces-exec__status-row">
-          {performance.performancePanels.map((panel) => (
-            <li
-              key={panel.id}
-              className={`kxd-ces-exec__status kxd-ces-exec__status--${panel.state}`}
-            >
-              <div className="kxd-ces-exec__status-top">
-                <div className="kxd-ces-exec__status-titles">
-                  <span className="kxd-ces-exec__status-title">{panel.title}</span>
-                  <span className="kxd-ces-exec__status-domain">{panel.domainLabel}</span>
+          {performance.performancePanels.map((panel) => {
+            const narrative = executivePanelNarrative(panel, periodLabel);
+            return (
+              <li
+                key={panel.id}
+                className={`kxd-ces-exec__status kxd-ces-exec__status--${panel.state}`}
+              >
+                <div className="kxd-ces-exec__status-top">
+                  <span className="kxd-ces-exec__status-title">
+                    {executivePanelTitle(panel)}
+                  </span>
+                  <span
+                    className={`kxd-ces-exec__status-state kxd-ces-exec__status-state--${panel.state}`}
+                  >
+                    {connectionLabel(panel.state)}
+                  </span>
                 </div>
-                <span
-                  className={`kxd-ces-exec__status-state kxd-ces-exec__status-state--${panel.state}`}
-                >
-                  {connectionLabel(panel.state)}
-                </span>
-              </div>
-              {panel.summary ? (
-                <p className="kxd-ces-exec__status-summary">{panel.summary}</p>
-              ) : panel.state === "not-connected" ? (
-                <p className="kxd-ces-exec__status-summary">
-                  Not entitled for this workspace yet.
-                </p>
-              ) : null}
-              {panel.detail ? (
-                <p className="kxd-ces-exec__status-detail">{panel.detail}</p>
-              ) : null}
-            </li>
-          ))}
+                <p className="kxd-ces-exec__status-summary">{narrative.lead}</p>
+                {narrative.support ? (
+                  <p className="kxd-ces-exec__status-detail">{narrative.support}</p>
+                ) : null}
+              </li>
+            );
+          })}
         </ul>
       </section>
     ),
@@ -202,12 +177,14 @@ export function CesExecutivePerformanceWorkspace({
         className="kxd-ces-exec__zone kxd-ces-exec__zone--progress"
         aria-labelledby="exec-progress-heading"
       >
-        <ZoneHeader
-          eyebrow="Partnership"
+        <ZoneTitle
           title="Partnership Progress"
           id="exec-progress-heading"
-          lead="The story of the work — what has been accomplished, and what is taking shape."
+          lead="The story of the work we've done together — and what comes next."
         />
+        <p className="kxd-ces-exec__story-lead">
+          Since partnering with Kreate by Design…
+        </p>
         <div className="kxd-ces-exec__progress-stage">
           {performance.progressBeats.length > 0 ? (
             <ol className="kxd-ces-exec__beats" aria-label="Journey">
@@ -232,7 +209,7 @@ export function CesExecutivePerformanceWorkspace({
 
           <div className="kxd-ces-exec__progress-columns">
             <div className="kxd-ces-exec__progress-col">
-              <p className="kxd-ces-exec__subhead">Accomplished</p>
+              <p className="kxd-ces-exec__subhead">What we&apos;ve built together</p>
               <ul className="kxd-ces-exec__compact-list">
                 {performance.partnershipPrimary.map((item) => (
                   <li key={item.id}>
@@ -243,7 +220,7 @@ export function CesExecutivePerformanceWorkspace({
               </ul>
               {performance.partnershipSecondary.length > 0 ? (
                 <details className="kxd-ces-exec__disclosure">
-                  <summary>More partnership history</summary>
+                  <summary>Earlier partnership history</summary>
                   <ul className="kxd-ces-exec__compact-list">
                     {performance.partnershipSecondary.map((item) => (
                       <li key={item.id}>
@@ -259,7 +236,7 @@ export function CesExecutivePerformanceWorkspace({
             <div className="kxd-ces-exec__progress-col kxd-ces-exec__progress-col--side">
               {performance.recentImprovements.length > 0 ? (
                 <div className="kxd-ces-exec__progress-block">
-                  <p className="kxd-ces-exec__subhead">Recent</p>
+                  <p className="kxd-ces-exec__subhead">Lately</p>
                   <ul className="kxd-ces-exec__compact-list">
                     {performance.recentImprovements.map((item) => (
                       <li key={item.id}>
@@ -300,21 +277,27 @@ export function CesExecutivePerformanceWorkspace({
         className="kxd-ces-exec__zone kxd-ces-exec__zone--collaboration"
         aria-labelledby="exec-collab-heading"
       >
-        <ZoneHeader
-          eyebrow="Collaboration"
+        <ZoneTitle
           title="Website Review"
           id="exec-collab-heading"
           action={
             <Link href="/portal/website-review" className="kxd-ces-exec__section-link">
-              View all
+              See everything
             </Link>
           }
         />
         <div className="kxd-ces-exec__action-band">
           <div className="kxd-ces-exec__action-band-copy">
             <p className="kxd-ces-exec__collab-status">{performance.collaboration.statusLabel}</p>
+            <p className="kxd-ces-exec__collab-invite">
+              Whenever you&apos;re ready, review the latest version and leave anything
+              you&apos;d like us to refine.
+            </p>
             <p className="kxd-ces-exec__collab-lead">
-              {performance.collaboration.explanation}
+              We&apos;ll keep every note organized in Website Review.
+              {performance.collaboration.explanation
+                ? ` ${performance.collaboration.explanation}`
+                : ""}
             </p>
           </div>
           <div className="kxd-ces-exec__actions">
@@ -341,14 +324,14 @@ export function CesExecutivePerformanceWorkspace({
                 rel="noopener noreferrer"
                 className="kxd-ces-btn kxd-ces-btn--ghost"
               >
-                Open Review Site
+                Open the review site
               </a>
             ) : null}
           </div>
         </div>
         {performance.collaboration.recentActivity.length > 0 ? (
           <div className="kxd-ces-exec__collab-side">
-            <p className="kxd-ces-exec__subhead">Recent revisions</p>
+            <p className="kxd-ces-exec__subhead">Recent refinements</p>
             <ul className="kxd-ces-exec__compact-list">
               {performance.collaboration.recentActivity.map((item) => (
                 <li key={item.id}>
@@ -367,11 +350,10 @@ export function CesExecutivePerformanceWorkspace({
         className="kxd-ces-exec__zone kxd-ces-exec__zone--growth"
         aria-labelledby="exec-growth-heading"
       >
-        <ZoneHeader
-          eyebrow="When you&apos;re ready"
+        <ZoneTitle
           title="Growth"
           id="exec-growth-heading"
-          lead="Strategic opportunities — presented when they strengthen the partnership."
+          lead="Possibilities we can open when the partnership is ready — never pressed."
         />
         <ul className="kxd-ces-exec__growth">
           {performance.evolution.map((item) => (
@@ -380,12 +362,11 @@ export function CesExecutivePerformanceWorkspace({
               className={`kxd-ces-exec__growth-item kxd-ces-exec__growth-item--${item.maturity}`}
             >
               <div className="kxd-ces-exec__growth-top">
-                <p className="kxd-ces-exec__growth-label">{item.label}</p>
-                <span className="kxd-ces-exec__growth-cue" aria-hidden="true" />
+                <span className="kxd-ces-exec__growth-maturity">
+                  {evolutionMaturityLabel(item.maturity)}
+                </span>
               </div>
-              <span className="kxd-ces-exec__growth-maturity">
-                {evolutionMaturityLabel(item.maturity)}
-              </span>
+              <p className="kxd-ces-exec__growth-label">{item.label}</p>
               <p className="kxd-ces-exec__growth-detail">{item.detail}</p>
             </li>
           ))}
@@ -404,32 +385,28 @@ export function CesExecutivePerformanceWorkspace({
         className="kxd-ces-exec__zone kxd-ces-exec__zone--account"
         aria-labelledby="exec-account-heading"
       >
-        <ZoneHeader
-          eyebrow="Relationship"
+        <ZoneTitle
           title="Your Partnership"
           id="exec-account-heading"
-          lead="Quiet workspace details — status, support, and how we work together."
+          lead="Your relationship with Kreate by Design — quiet details, close support."
         />
         <div className="kxd-ces-exec__partnership-card">
           <div className="kxd-ces-exec__partnership-groups">
             <div className="kxd-ces-exec__partnership-group">
-              <p className="kxd-ces-exec__subhead">Status</p>
+              <p className="kxd-ces-exec__subhead">Relationship</p>
               <dl className="kxd-ces-exec__account">
                 <div>
-                  <dt>Engagement</dt>
-                  <dd>
-                    <span className="kxd-ces-exec__live-dot" aria-hidden="true" />
-                    {performance.account.engagementStatus}
-                  </dd>
+                  <dt>Partnership</dt>
+                  <dd>{performance.account.engagementStatus}</dd>
                 </div>
                 <div>
-                  <dt>Workspace</dt>
+                  <dt>Engagement</dt>
                   <dd>{performance.account.billingAvailability}</dd>
                 </div>
               </dl>
             </div>
             <div className="kxd-ces-exec__partnership-group">
-              <p className="kxd-ces-exec__subhead">Support</p>
+              <p className="kxd-ces-exec__subhead">How we take care of you</p>
               <p className="kxd-ces-exec__account-note">{performance.account.note}</p>
             </div>
           </div>

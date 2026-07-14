@@ -55,7 +55,7 @@ function buildReportingProvenance(input: {
       periodLabel: input.periodLabel,
       providerLabels: [],
       factCount: 0,
-      statusNote: "No reporting capabilities are enabled for this account yet.",
+      statusNote: "Reporting will appear here once the related capabilities are enabled.",
     };
   }
   if (input.factsLength === 0) {
@@ -68,8 +68,8 @@ function buildReportingProvenance(input: {
       factCount: 0,
       statusNote:
         awaiting.length > 0
-          ? `Entitled sources (${awaiting.join(", ")}) — not synced for this period yet.`
-          : "Awaiting first trustworthy reporting signal.",
+          ? `${awaiting.join(" and ")} ${awaiting.length === 1 ? "is" : "are"} entitled — no facts synced for this period yet.`
+          : "Waiting on the first trustworthy reporting signal.",
     };
   }
   return {
@@ -77,7 +77,7 @@ function buildReportingProvenance(input: {
     providerLabels,
     factCount: input.factsLength,
     statusNote: input.zeroActivity
-      ? "Synced — no measurable activity recorded for this period."
+      ? "Facts synced for this period — no measurable activity recorded yet."
       : null,
   };
 }
@@ -96,15 +96,15 @@ const PANEL_CAPABILITIES: Array<{
 function momentumLabel(state: string): string | null {
   switch (state) {
     case "accelerating":
-      return "Accelerating";
+      return "Building";
     case "improving":
       return "Improving";
     case "stable":
       return "Steady";
     case "slowing":
-      return "Slowing";
+      return "Worth a closer look";
     case "declining":
-      return "Needs attention";
+      return "Needs closer attention";
     default:
       return null;
   }
@@ -124,10 +124,10 @@ function panelSummary(
   domainState: string | undefined,
 ): string {
   if (state === "not-connected") return "";
-  if (state === "awaiting-signal") return "Awaiting first trustworthy signal";
-  if (domainState === "improving" || domainState === "healthy") return "Healthy signal";
-  if (domainState === "attention" || domainState === "critical") return "Needs attention";
-  return "Under review";
+  if (state === "awaiting-signal") return "Waiting on the first trustworthy signal";
+  if (domainState === "improving" || domainState === "healthy") return "Looking healthy";
+  if (domainState === "attention" || domainState === "critical") return "Worth a closer look";
+  return "Still coming into focus";
 }
 
 function buildWorkingSignals(input: {
@@ -139,15 +139,15 @@ function buildWorkingSignals(input: {
     items.push({
       id: `outcome-${items.length}`,
       label: outcome,
-      detail: "From prepared partnership reports — not live portal metrics.",
+      detail: "From prepared partnership reports — factual summary language only.",
       hasEvidence: true,
     });
   }
   if (input.hasReview && items.length < 3) {
     items.push({
       id: "collaboration",
-      label: "Centralized collaboration",
-      detail: "Website Review keeps revision notes in one private channel.",
+      label: "Clear collaboration",
+      detail: "Website Review keeps revision notes organized in one private place.",
       hasEvidence: true,
     });
   }
@@ -256,9 +256,9 @@ export async function composeExecutivePerformance(input: {
   });
 
   const primaryAction = input.briefing.needsAttention.href
-    ? { label: "Review Website", href: input.briefing.needsAttention.href }
+    ? { label: "Review the website", href: input.briefing.needsAttention.href }
     : input.websiteReview.websiteUrl
-      ? { label: "Review Website", href: "/portal/website-review/session/new" }
+      ? { label: "Review the website", href: "/portal/website-review/session/new" }
       : { label: "Open Website Review", href: "/portal/website-review" };
 
   const reviewCount =
@@ -296,18 +296,18 @@ export async function composeExecutivePerformance(input: {
 
   const wr = input.briefing.websiteReview;
   const secondaryAction = input.websiteReview.websiteUrl
-    ? { label: "Share written notes", href: "/portal/website-review/request" }
-    : { label: "Share written notes", href: "/portal/website-review/request" };
+    ? { label: "Leave written notes", href: "/portal/website-review/request" }
+    : { label: "Leave written notes", href: "/portal/website-review/request" };
 
   const billing = input.briefing.billingPreview;
   const account = {
     engagementStatus: input.briefing.overview.relationshipStatus,
     billingAvailability: billing.retainerOnFile
       ? "Retainer on file"
-      : "Billing not active in this workspace",
+      : "Handled personally with your KXD partner",
     note: billing.retainerOnFile
       ? billing.previewNote
-      : "Account details stay quiet here — discuss engagement with your KXD partner when needed.",
+      : "You're not alone in this — whenever something needs attention, your KXD partner is close.",
   };
 
   return {

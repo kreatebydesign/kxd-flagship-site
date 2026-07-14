@@ -37,3 +37,8 @@ export {
   evolutionMaturityLabel,
   getExecutiveEvolution,
 } from "./evolution";
+
+export {
+  executivePanelNarrative,
+  executivePanelTitle,
+} from "./panel-presentation";

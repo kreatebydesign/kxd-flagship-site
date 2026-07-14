@@ -24,15 +24,15 @@ const PRIMAL_PRESENTATION: ExperiencePresentation = {
   heroImageSrc: "/migrated-assets/projects/primal-motorsports-hero.jpg",
   heroImageAlt: "Radical race cars on track — Primal Motorsports",
   heroOverlay: "deep",
-  heroFocus: "62% 42%",
+  heroFocus: "56% 38%",
   logoSrc: "/migrated-assets/logos/primal.svg",
   logoAlt: "Primal Motorsports",
   workspaceEyebrow: "Private Partnership Workspace",
   workspaceTitle: "Executive Performance",
   introduction:
-    "A calm view of the partnership — where the work stands, and what deserves attention next.",
+    "A quiet view of where things stand — and what deserves attention next.",
   actionAccent: "#A83424",
-  intelligenceAccent: "#2B6CB0",
+  intelligenceAccent: "#3A6EA5",
   zoneOrder: [...DEFAULT_ZONE_ORDER],
 };
 

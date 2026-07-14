@@ -1,6 +1,7 @@
 /**
  * Exactly ONE client-safe recommendation — evidence-backed presentation adapter.
  * Not Executive Intelligence. Deterministic rules only.
+ * Hospitality voice — honest about what the system knows.
  */
 
 import type { WebsiteReviewLandingData } from "@/lib/ces/modules/website-review/types";
@@ -20,49 +21,49 @@ export function decideClientRecommendation(input: RecommendInput): PartnershipRe
       (r) => r.status === "awaiting-your-input",
     );
     return {
-      headline: "Respond to the open revision",
+      headline: "A short note from you will keep things moving",
       rationale:
-        "A revision is waiting on your input. A short response keeps momentum and clears the path to launch.",
+        "One open revision is waiting for your eye. A brief response is all we need — then we can continue refining with care.",
       evidenceLabels: [
-        awaiting ? `Open revision: ${awaiting.title}` : "Revision awaiting your input",
+        awaiting ? `Waiting on: ${awaiting.title}` : "A revision is waiting for your input",
       ],
     };
   }
 
   if (input.hasActiveReviews) {
     return {
-      headline: "Review the latest website updates",
+      headline: "Website revisions are underway",
       rationale:
-        "Active revisions are in motion. Confirming direction now keeps the site moving toward launch with clarity.",
+        "Active website revisions are in progress. When you're ready, a quick look from you keeps direction clear.",
       evidenceLabels: ["Website revisions in progress"],
     };
   }
 
   if (input.results?.optimizations.some((o) => /landing page/i.test(o))) {
     return {
-      headline: "Review the landing page experience",
+      headline: "We recommend a closer look at the landing experience",
       rationale:
-        "Campaign work is healthy. The next leverage point is aligning the landing experience with qualified traffic.",
-      evidenceLabels: ["Campaign optimization priorities", "Landing page review recommended"],
+        "Recent advertising priorities point to the landing experience. Aligning that page with arriving interest is the clearest next step — we can guide that together.",
+      evidenceLabels: ["Campaign priorities from prepared reports", "Landing experience worth reviewing"],
     };
   }
 
   if (input.websiteUrl) {
     return {
-      headline: "Finalize website revisions ahead of launch",
+      headline: "Let's finish refining the site ahead of launch",
       rationale:
-        "The clearest next step is completing remaining website revisions so the site meets the standard the brand deserves.",
+        "Here's the clearest picture of where things stand today. Completing the remaining website revisions is the surest path to a launch that feels worthy of the brand.",
       evidenceLabels: [
-        "Website rebuild in the current phase",
-        "Private workspace ready for review collaboration",
+        "Website work in the current phase",
+        "Your private workspace is ready for review",
       ],
     };
   }
 
   return {
-    headline: "Continue optimization",
+    headline: "Keep refining what is already working",
     rationale:
-      "Core systems are in place. Stay focused on refining what is already working before expanding scope.",
-    evidenceLabels: ["Partnership systems established"],
+      "The foundation is in place. The calm next step is polishing what already serves you well before expanding into anything new.",
+    evidenceLabels: ["Partnership foundations established"],
   };
 }
