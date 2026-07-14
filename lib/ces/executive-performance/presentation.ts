@@ -32,8 +32,7 @@ const PRIMAL_PRESENTATION: ExperiencePresentation = {
   logoAlt: "Primal Motorsports",
   workspaceEyebrow: "Private Partnership Workspace",
   workspaceTitle: "Executive Performance",
-  introduction:
-    "A quiet view of where things stand — and what deserves attention next.",
+  introduction: "Where things stand — and what deserves attention next.",
   actionAccent: "#A83424",
   intelligenceAccent: "#3A6EA5",
   zoneOrder: [...DEFAULT_ZONE_ORDER],
@@ -54,8 +53,7 @@ function stubPresentation(input: {
     logoAlt: input.logoAlt,
     workspaceEyebrow: "Private Partnership Workspace",
     workspaceTitle: "Executive Performance",
-    introduction:
-      "A quiet view of where things stand — and what deserves attention next.",
+    introduction: "Where things stand — and what deserves attention next.",
     zoneOrder: [...DEFAULT_ZONE_ORDER],
   };
 }

@@ -441,7 +441,7 @@ export function CesExecutivePerformanceWorkspace({
           <div className="kxd-ces-exec__action-band-copy">
             <p className="kxd-ces-exec__collab-status">{performance.collaboration.statusLabel}</p>
             <p className="kxd-ces-exec__collab-invite">
-              Whenever you&apos;re ready, leave anything you&apos;d like us to refine.
+              Leave anything you&apos;d like us to refine.
             </p>
             <p className="kxd-ces-exec__collab-lead">
               {performance.collaboration.explanation ||

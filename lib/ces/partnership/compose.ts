@@ -46,16 +46,14 @@ function buildWebsiteReviewSnapshot(
   const hasRevisions =
     websiteReview.activeReviews.length + websiteReview.completedReviews.length > 0;
 
-  let nextStep =
-    "Whenever you're ready, leave anything you'd like us to refine — we'll keep every note organized.";
+  let nextStep = "We'll keep every note organized here.";
   if (awaiting.length > 0) {
     nextStep =
       "One open revision is waiting for your eye. A short response is all we need to continue.";
   } else if (websiteReview.activeReviews.length > 0) {
     nextStep = "Our team is advancing the open revisions.";
   } else if (websiteReview.websiteUrl) {
-    nextStep =
-      "Whenever you're ready, review the latest version and leave anything you'd like us to refine.";
+    nextStep = "Review the latest version and leave anything you'd like us to refine.";
   }
 
   return {

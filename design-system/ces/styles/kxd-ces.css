@@ -3936,8 +3936,17 @@
 
 .kxd-ces-exec__band--split > .kxd-ces-exec__zone {
   border-top: none;
-  padding-top: 0;
   height: 100%;
+}
+
+/*
+ * Split bands zero the generic zone hairline padding — but collaboration is a
+ * bordered card with its own padding stack. Zeroing it here (and again via the
+ * first-band rule below) outranked .kxd-ces-exec__zone--collaboration, so prior
+ * padding bumps never rendered. Keep the card's padding intact.
+ */
+.kxd-ces-exec__band--split > .kxd-ces-exec__zone:not(.kxd-ces-exec__zone--collaboration) {
+  padding-top: 0;
 }
 
 .kxd-ces-exec__band--split > .kxd-ces-exec__zone--performance {
@@ -4078,9 +4087,18 @@
   border-top: 1px solid color-mix(in srgb, var(--kxd-os-text-faint) 10%, transparent);
 }
 
-.kxd-ces-exec__zone:first-child,
+.kxd-ces-exec__zone:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
 .kxd-ces-exec__zones > .kxd-ces-exec__band:first-child .kxd-ces-exec__zone {
   border-top: none;
+}
+
+.kxd-ces-exec__zones
+  > .kxd-ces-exec__band:first-child
+  .kxd-ces-exec__zone:not(.kxd-ces-exec__zone--collaboration) {
   padding-top: 0;
 }
 
