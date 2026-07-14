@@ -73,6 +73,16 @@ export {
   type ReportingFactsSyncResult,
 } from "./ingest";
 
+/** Phase 32A — Honest live reporting readiness (no fabricated providers) */
+export {
+  getExecutiveReportingReadiness,
+  getGoogleAdsRemainingWork,
+  summarizeGoogleAdsReadiness,
+  type ExecutiveReportingReadiness,
+  type ProviderReadiness,
+  type ProviderReadinessStatus,
+} from "./readiness";
+
 /** Performance report view helpers (existing) */
 export {
   buildPerformanceReportView,

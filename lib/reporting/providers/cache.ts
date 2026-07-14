@@ -35,6 +35,8 @@ const TTL = {
   ga4Current: 15 * 60,
   ga4Historical: 6 * 60 * 60,
   gsc: 6 * 60 * 60,
+  adsCurrent: 15 * 60,
+  adsHistorical: 6 * 60 * 60,
   negative: 5 * 60,
 } as const;
 
@@ -84,6 +86,9 @@ export function ttlForProviderResult(
 ): number {
   if (status !== "connected" && status !== "no-rows") return TTL.negative;
   if (provider === "search-console") return TTL.gsc;
+  if (provider === "ads") {
+    return includesToday(period) ? TTL.adsCurrent : TTL.adsHistorical;
+  }
   return includesToday(period) ? TTL.ga4Current : TTL.ga4Historical;
 }
 

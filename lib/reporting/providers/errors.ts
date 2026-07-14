@@ -5,7 +5,7 @@
 import type { ReportingProviderError, ReportingProviderStatus } from "./types";
 
 const SECRET_PATTERN =
-  /(bearer\s+[a-z0-9\-._~+/]+=*|refresh_token|client_secret|private_key|BEGIN PRIVATE KEY)/i;
+  /(bearer\s+[a-z0-9\-._~+/]+=*|refresh_token|client_secret|private_key|BEGIN PRIVATE KEY|developer-token|developer_token)/i;
 
 export function sanitizeProviderMessage(message: string): string {
   const trimmed = message.trim().slice(0, 280);

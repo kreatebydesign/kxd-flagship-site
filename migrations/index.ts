@@ -64,6 +64,7 @@ import * as migration_20260806_phase27a_calendar_sync_fields from './20260806_ph
 import * as migration_20260807_phase28b_sales_leads_estimated_mrr_column from './20260807_phase28b_sales_leads_estimated_mrr_column';
 import * as migration_20260712_phase29c_reporting_provider_connections from './20260712_phase29c_reporting_provider_connections';
 import * as migration_20260713_phase31c_reporting_facts from './20260713_phase31c_reporting_facts';
+import * as migration_20260713_phase32b_google_ads_customer_fields from './20260713_phase32b_google_ads_customer_fields';
 
 export const migrations = [
   {
@@ -395,5 +396,10 @@ export const migrations = [
     up: migration_20260713_phase31c_reporting_facts.up,
     down: migration_20260713_phase31c_reporting_facts.down,
     name: '20260713_phase31c_reporting_facts',
+  },
+  {
+    up: migration_20260713_phase32b_google_ads_customer_fields.up,
+    down: migration_20260713_phase32b_google_ads_customer_fields.down,
+    name: '20260713_phase32b_google_ads_customer_fields',
   },
 ];

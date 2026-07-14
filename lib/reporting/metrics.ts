@@ -153,5 +153,5 @@ export const CONNECTOR_PLACEHOLDERS = [
   { id: "gbp", label: "Google Business Profile", note: "Local presence metrics planned." },
   { id: "callrail", label: "CallRail", note: "Call tracking connector planned." },
   { id: "meta-ads", label: "Meta Ads", note: "Paid social connector planned." },
-  { id: "google-ads", label: "Google Ads", note: "Paid search connector planned." },
+  { id: "google-ads", label: "Google Ads", note: "Shared Core pipeline ready — configure developer token + customer ID; entitlement off until facts exist." },
 ] as const;

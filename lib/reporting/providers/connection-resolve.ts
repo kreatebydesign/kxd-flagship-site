@@ -40,6 +40,18 @@ export function normalizeSearchConsoleSiteUrl(
   return trimmed.length > 0 ? trimmed : null;
 }
 
+/**
+ * Google Ads customer / login-customer IDs — digits only (dashes stripped).
+ * Empty / non-digit → null (not configured).
+ */
+export function normalizeGoogleAdsCustomerId(
+  raw: string | null | undefined,
+): string | null {
+  if (raw == null) return null;
+  const digits = raw.trim().replace(/\D/g, "");
+  return digits.length > 0 ? digits : null;
+}
+
 export function isClientEligibleForReportingIngest(
   status: ClientStatusForReporting,
 ): boolean {

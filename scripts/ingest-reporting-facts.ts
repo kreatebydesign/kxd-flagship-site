@@ -1,10 +1,11 @@
 /**
- * Phase 31C — Persist ReportingFacts from entitled providers (CLI helper).
+ * Phase 31C / 32B — Persist ReportingFacts from entitled providers (CLI helper).
  * Production preferred path: POST /api/admin/reporting/ingest (Vercel OIDC).
  *
  * Usage:
  *   npm run ingest:reporting-facts -- --client-slug=primal-motorsports --provider=search-console
- *   npm run ingest:reporting-facts -- --client-id=1 --provider=search-console --year=2026 --month=6
+ *   npm run ingest:reporting-facts -- --client-id=1 --provider=ga4 --year=2026 --month=6
+ *   npm run ingest:reporting-facts -- --client-slug=primal-motorsports --provider=ads
  *
  * Default period: previous completed UTC calendar month.
  */
@@ -17,7 +18,7 @@ import {
 interface CliArgs {
   clientId: number | null;
   clientSlug: string | null;
-  provider: "search-console" | "ga4";
+  provider: "search-console" | "ga4" | "ads";
   year: number | null;
   month: number | null;
   refresh: boolean;
@@ -25,11 +26,11 @@ interface CliArgs {
 
 function printUsage(): void {
   console.log(`
-Phase 31C — Persist ReportingFacts from entitled providers
+Phase 31C / 32B — Persist ReportingFacts from entitled providers
 
 Required:
   --client-id=<id>  OR  --client-slug=<slug>
-  --provider=search-console|ga4
+  --provider=search-console|ga4|ads
 
 Optional:
   --year=YYYY --month=M   calendar month (default: previous completed UTC month)
@@ -70,7 +71,7 @@ function parseArgs(argv: string[]): CliArgs {
     }
     if (raw.startsWith("--provider=")) {
       const v = raw.slice("--provider=".length);
-      if (v === "ga4" || v === "search-console") args.provider = v;
+      if (v === "ga4" || v === "search-console" || v === "ads") args.provider = v;
       else {
         console.error(`Unknown provider: ${v}`);
         process.exit(1);

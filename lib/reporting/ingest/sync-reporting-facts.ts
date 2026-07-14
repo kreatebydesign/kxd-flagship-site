@@ -21,7 +21,7 @@ import {
 import { normalizeSearchConsoleAggregate } from "@/lib/reporting/providers/google/search-console/normalize";
 import { resolveIngestPeriod } from "./period";
 
-export const REPORTING_INGEST_PROVIDERS = ["search-console", "ga4"] as const;
+export const REPORTING_INGEST_PROVIDERS = ["search-console", "ga4", "ads"] as const;
 export type ReportingIngestProvider = (typeof REPORTING_INGEST_PROVIDERS)[number];
 
 export type ReportingIngestOutcome =
@@ -89,7 +89,7 @@ function emptyResult(
 }
 
 function isProvider(value: unknown): value is ReportingProviderId {
-  return value === "search-console" || value === "ga4";
+  return value === "search-console" || value === "ga4" || value === "ads";
 }
 
 async function resolveClient(input: {
@@ -228,7 +228,7 @@ export async function syncReportingFacts(
     return emptyResult({
       outcome: "invalid",
       provider: "search-console",
-      message: "provider must be search-console or ga4.",
+      message: "provider must be search-console, ga4, or ads.",
     });
   }
 
@@ -316,6 +316,19 @@ export async function syncReportingFacts(
     });
   }
 
+  if (input.provider === "ads" && !connection.googleAdsCustomerId) {
+    return emptyResult({
+      outcome: "unavailable",
+      provider: input.provider,
+      clientId: client.clientId,
+      clientSlug: client.clientSlug,
+      clientName: client.clientName,
+      requestedPeriod: period,
+      providerStatus: "not-configured",
+      message: "Google Ads customer ID is not configured on client infrastructure.",
+    });
+  }
+
   const providerResult = await ingestClientReportingProvider({
     clientId: client.clientId,
     provider: input.provider,
@@ -385,7 +398,7 @@ export function parseReportingIngestBody(
   }
   const raw = body as Record<string, unknown>;
   if (!isProvider(raw.provider)) {
-    return { error: "provider must be search-console or ga4." };
+    return { error: "provider must be search-console, ga4, or ads." };
   }
 
   const clientId =

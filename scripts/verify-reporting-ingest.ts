@@ -110,6 +110,20 @@ console.log("\n2. Request validation");
     ),
     "valid slug + provider accepted",
   );
+  assert(
+    !(
+      "error" in
+      parseReportingIngestBody({
+        provider: "ads",
+        clientSlug: "primal-motorsports",
+      })
+    ),
+    "ads provider allowlisted",
+  );
+  assert(
+    "error" in parseReportingIngestBody({ provider: "google-ads", clientSlug: "x" }),
+    "long-form google-ads provider id rejected (use ads)",
+  );
 }
 
 console.log("\n3. Persistence boundary (mocked facts)");

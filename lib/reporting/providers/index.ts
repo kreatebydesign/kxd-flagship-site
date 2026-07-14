@@ -34,6 +34,7 @@ export { isCapabilityEnabled } from "./capability-gate";
 export {
   connectionHasCapability,
   normalizeGa4PropertyId,
+  normalizeGoogleAdsCustomerId,
   normalizeSearchConsoleSiteUrl,
   resolveInfrastructureForClient,
   isClientEligibleForReportingIngest,
@@ -43,16 +44,27 @@ export {
   getGoogleReportingAuthConfig,
   getGoogleReportingAccessToken,
   clearGoogleReportingAccessTokenCache,
+  getGoogleAdsAuthConfig,
+  getGoogleAdsAccessToken,
+  getGoogleAdsDeveloperToken,
+  clearGoogleAdsAccessTokenCache,
   parseServiceAccountJson,
   resolveGoogleReportingCredentials,
   GOOGLE_REPORTING_SCOPES,
   GOOGLE_REPORTING_ANALYTICS_SCOPE,
   GOOGLE_REPORTING_WEBMASTERS_SCOPE,
+  GOOGLE_ADS_ADWORDS_SCOPE,
+  GOOGLE_ADS_SCOPES,
   GOOGLE_REPORTING_CREDENTIAL_PRECEDENCE,
 } from "./google/auth";
 export { normalizeGa4Metrics, ga4FactsToSnapshot } from "./google/ga4/normalize";
 export { GA4_CORE_METRICS } from "./google/ga4/client";
 export { normalizeSearchConsoleAggregate, searchConsoleFactsToSnapshot } from "./google/search-console/normalize";
+export {
+  normalizeGoogleAdsAggregate,
+  googleAdsFactsToSnapshot,
+} from "./google/ads/normalize";
+export { GOOGLE_ADS_API_VERSION } from "./google/ads/client";
 export {
   clearReportingProviderCache,
   reportingProviderCacheKey,

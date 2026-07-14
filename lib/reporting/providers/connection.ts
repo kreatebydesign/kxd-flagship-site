@@ -17,6 +17,7 @@ import type { ReportingCapabilityId } from "@/lib/reporting/domain";
 import { getGoogleReportingAuthConfig } from "./google/auth";
 import {
   normalizeGa4PropertyId,
+  normalizeGoogleAdsCustomerId,
   normalizeSearchConsoleSiteUrl,
   resolveInfrastructureForClient,
   type ClientStatusForReporting,
@@ -27,6 +28,10 @@ export interface ClientReportingConnection {
   clientStatus: ClientStatusForReporting;
   ga4PropertyId: string | null;
   searchConsoleSiteUrl: string | null;
+  /** Digits-only Google Ads customer ID (no dashes). */
+  googleAdsCustomerId: string | null;
+  /** Optional MCC login-customer-id (digits only). */
+  googleAdsLoginCustomerId: string | null;
   /** Canonical entitlements from experience-profile enabledModules. */
   enabledCapabilities: ReportingCapabilityId[];
   authMode: ReturnType<typeof getGoogleReportingAuthConfig>["mode"];
@@ -39,6 +44,7 @@ export { isCapabilityEnabled } from "./capability-gate";
 export {
   connectionHasCapability,
   normalizeGa4PropertyId,
+  normalizeGoogleAdsCustomerId,
   normalizeSearchConsoleSiteUrl,
   resolveInfrastructureForClient,
   type ClientStatusForReporting,
@@ -137,12 +143,22 @@ export async function loadClientReportingConnection(
     picked && typeof picked.searchConsoleSiteUrl === "string"
       ? picked.searchConsoleSiteUrl
       : null;
+  const adsCustomerRaw =
+    picked && typeof picked.googleAdsCustomerId === "string"
+      ? picked.googleAdsCustomerId
+      : null;
+  const adsLoginRaw =
+    picked && typeof picked.googleAdsLoginCustomerId === "string"
+      ? picked.googleAdsLoginCustomerId
+      : null;
 
   return {
     clientId,
     clientStatus,
     ga4PropertyId: normalizeGa4PropertyId(ga4Raw),
     searchConsoleSiteUrl: normalizeSearchConsoleSiteUrl(gscRaw),
+    googleAdsCustomerId: normalizeGoogleAdsCustomerId(adsCustomerRaw),
+    googleAdsLoginCustomerId: normalizeGoogleAdsCustomerId(adsLoginRaw),
     enabledCapabilities,
     authMode: getGoogleReportingAuthConfig().mode,
     lastLoadedAt: new Date().toISOString(),

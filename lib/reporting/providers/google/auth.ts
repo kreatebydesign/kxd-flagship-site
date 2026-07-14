@@ -1,5 +1,5 @@
 /**
- * Phase 29C / 31B — Google Reporting API scopes and auth.
+ * Phase 29C / 31B / 32B — Google Reporting + Ads API scopes and auth.
  *
  * Separate from Calendar OAuth (calendar.readonly / calendar.events)
  * and any Drive credentials. Reporting never reads GOOGLE_CALENDAR_* or Drive env.
@@ -15,6 +15,13 @@
  *
  * If a higher-precedence source is present but invalid → invalid-configuration
  * (does not fall through).
+ *
+ * Google Ads (Phase 32B):
+ * - Requires GOOGLE_ADS_DEVELOPER_TOKEN in addition to the credential path above.
+ * - Uses a separate access-token cache with the adwords scope only
+ *   (does not mutate GOOGLE_REPORTING_SCOPES used by GA4 / Search Console).
+ * - OAuth refresh tokens must have been granted adwords; otherwise Ads API
+ *   returns unauthorized — GA4/GSC continue to use analytics + webmasters scopes.
  */
 
 import "server-only";
@@ -32,10 +39,18 @@ export const GOOGLE_REPORTING_ANALYTICS_SCOPE =
 export const GOOGLE_REPORTING_WEBMASTERS_SCOPE =
   "https://www.googleapis.com/auth/webmasters.readonly";
 
+/** GA4 + Search Console only — do not add Ads here (keeps Reporting scopes stable). */
 export const GOOGLE_REPORTING_SCOPES = [
   GOOGLE_REPORTING_ANALYTICS_SCOPE,
   GOOGLE_REPORTING_WEBMASTERS_SCOPE,
 ] as const;
+
+/** Google Ads API OAuth scope (Phase 32B). */
+export const GOOGLE_ADS_ADWORDS_SCOPE =
+  "https://www.googleapis.com/auth/adwords";
+
+/** Ads token requests use adwords only — does not break GA4/GSC token minting. */
+export const GOOGLE_ADS_SCOPES = [GOOGLE_ADS_ADWORDS_SCOPE] as const;
 
 /** GCP Workload Identity Federation env keys (all required for OIDC mode). */
 export const GCP_OIDC_ENV_KEYS = [
@@ -100,9 +115,83 @@ interface CachedToken {
 }
 
 let cachedToken: CachedToken | null = null;
+let cachedAdsToken: CachedToken | null = null;
 
 export function clearGoogleReportingAccessTokenCache(): void {
   cachedToken = null;
+}
+
+export function clearGoogleAdsAccessTokenCache(): void {
+  cachedAdsToken = null;
+}
+
+/** Digits / opaque developer token string — never log the value. */
+export function getGoogleAdsDeveloperToken(
+  env: { get: (key: string) => string | undefined } = defaultEnv(),
+): string | null {
+  const value = env.get("GOOGLE_ADS_DEVELOPER_TOKEN")?.trim() ?? "";
+  return value.length > 0 ? value : null;
+}
+
+export interface GoogleAdsAuthConfig {
+  mode: GoogleReportingAuthMode;
+  serviceAccountEmail?: string;
+  oauthClientConfigured?: boolean;
+  scopes: readonly string[];
+  invalidReason?: string;
+  workloadIdentityConfigured?: boolean;
+  developerTokenConfigured: boolean;
+}
+
+/**
+ * Ads auth requires developer token + the shared Google Reporting credential path.
+ * Missing developer token → not-configured (honest; no silent Ads calls).
+ */
+export function getGoogleAdsAuthConfig(
+  env: {
+    get: (key: string) => string | undefined;
+    present: (key: string) => boolean;
+  } = defaultEnv(),
+): GoogleAdsAuthConfig {
+  const developerTokenConfigured = Boolean(getGoogleAdsDeveloperToken(env));
+  const reporting = getGoogleReportingAuthConfig(env);
+
+  if (!developerTokenConfigured) {
+    return {
+      mode: "not-configured",
+      scopes: GOOGLE_ADS_SCOPES,
+      developerTokenConfigured: false,
+      invalidReason: "GOOGLE_ADS_DEVELOPER_TOKEN is not configured.",
+    };
+  }
+
+  if (reporting.mode === "not-configured") {
+    return {
+      mode: "not-configured",
+      scopes: GOOGLE_ADS_SCOPES,
+      developerTokenConfigured: true,
+      invalidReason:
+        "Google Reporting credentials are not configured (required for Ads OAuth / service account access).",
+    };
+  }
+
+  if (reporting.mode === "invalid-configuration") {
+    return {
+      mode: "invalid-configuration",
+      scopes: GOOGLE_ADS_SCOPES,
+      developerTokenConfigured: true,
+      invalidReason: reporting.invalidReason,
+    };
+  }
+
+  return {
+    mode: reporting.mode,
+    serviceAccountEmail: reporting.serviceAccountEmail,
+    oauthClientConfigured: reporting.oauthClientConfigured,
+    scopes: GOOGLE_ADS_SCOPES,
+    workloadIdentityConfigured: reporting.workloadIdentityConfigured,
+    developerTokenConfigured: true,
+  };
 }
 
 export function isVercelRuntime(env: {
@@ -405,6 +494,7 @@ function base64url(input: Buffer | string): string {
 
 async function fetchVercelOidcAccessToken(
   config: GcpOidcFederationConfig,
+  scopes: readonly string[],
 ): Promise<{ accessToken: string; expiresAt: number }> {
   const external = buildExternalAccountClientConfig(config);
 
@@ -424,7 +514,7 @@ async function fetchVercelOidcAccessToken(
     });
   }
 
-  authClient.scopes = [...GOOGLE_REPORTING_SCOPES];
+  authClient.scopes = [...scopes];
   const tokenResponse = await authClient.getAccessToken();
   const accessToken =
     typeof tokenResponse === "string"
@@ -446,13 +536,14 @@ async function fetchVercelOidcAccessToken(
 
 async function fetchServiceAccountAccessToken(
   sa: ServiceAccountJson,
+  scopes: readonly string[],
 ): Promise<{ accessToken: string; expiresAt: number }> {
   const now = Math.floor(Date.now() / 1000);
   const header = base64url(JSON.stringify({ alg: "RS256", typ: "JWT" }));
   const claim = base64url(
     JSON.stringify({
       iss: sa.client_email,
-      scope: GOOGLE_REPORTING_SCOPES.join(" "),
+      scope: scopes.join(" "),
       aud: sa.token_uri || GOOGLE_OAUTH_TOKEN_URL,
       iat: now,
       exp: now + 3600,
@@ -544,7 +635,10 @@ export type GoogleReportingAccessResult =
     }
   | { ok: false; error: ReportingProviderError };
 
-export async function getGoogleReportingAccessToken(): Promise<GoogleReportingAccessResult> {
+async function mintGoogleAccessToken(input: {
+  scopes: readonly string[];
+  cache: "reporting" | "ads";
+}): Promise<GoogleReportingAccessResult> {
   const resolved = resolveGoogleReportingCredentials(defaultEnv());
 
   if (resolved.kind === "not-configured") {
@@ -552,7 +646,9 @@ export async function getGoogleReportingAccessToken(): Promise<GoogleReportingAc
       ok: false,
       error: providerError(
         "not-configured",
-        "Google Reporting credentials are not configured. On Vercel set GCP Workload Identity vars; locally use GOOGLE_REPORTING_SERVICE_ACCOUNT_JSON or GOOGLE_REPORTING_* OAuth trio.",
+        input.cache === "ads"
+          ? "Google Reporting credentials are not configured (required for Google Ads API access)."
+          : "Google Reporting credentials are not configured. On Vercel set GCP Workload Identity vars; locally use GOOGLE_REPORTING_SERVICE_ACCOUNT_JSON or GOOGLE_REPORTING_* OAuth trio.",
       ),
     };
   }
@@ -568,24 +664,27 @@ export async function getGoogleReportingAccessToken(): Promise<GoogleReportingAc
         ? "service-account"
         : "oauth-refresh";
 
-  if (cachedToken && cachedToken.mode === mode && Date.now() < cachedToken.expiresAt) {
-    return { ok: true, accessToken: cachedToken.accessToken, mode };
+  const existing = input.cache === "ads" ? cachedAdsToken : cachedToken;
+  if (existing && existing.mode === mode && Date.now() < existing.expiresAt) {
+    return { ok: true, accessToken: existing.accessToken, mode };
   }
 
   try {
     const token =
       resolved.kind === "vercel-oidc"
-        ? await fetchVercelOidcAccessToken(resolved.config)
+        ? await fetchVercelOidcAccessToken(resolved.config, input.scopes)
         : resolved.kind === "service-account"
-          ? await fetchServiceAccountAccessToken(resolved.value)
+          ? await fetchServiceAccountAccessToken(resolved.value, input.scopes)
           : await fetchOAuthRefreshAccessToken();
 
-    cachedToken = {
+    const entry: CachedToken = {
       accessToken: token.accessToken,
       expiresAt: token.expiresAt,
       mode,
     };
-    return { ok: true, accessToken: cachedToken.accessToken, mode };
+    if (input.cache === "ads") cachedAdsToken = entry;
+    else cachedToken = entry;
+    return { ok: true, accessToken: entry.accessToken, mode };
   } catch (err) {
     const status =
       typeof err === "object" && err && "status" in err
@@ -617,4 +716,31 @@ export async function getGoogleReportingAccessToken(): Promise<GoogleReportingAc
       }),
     };
   }
+}
+
+export async function getGoogleReportingAccessToken(): Promise<GoogleReportingAccessResult> {
+  return mintGoogleAccessToken({
+    scopes: GOOGLE_REPORTING_SCOPES,
+    cache: "reporting",
+  });
+}
+
+/**
+ * Ads access token (adwords scope). Requires GOOGLE_ADS_DEVELOPER_TOKEN for API calls;
+ * missing developer token is reported as not-configured before minting.
+ */
+export async function getGoogleAdsAccessToken(): Promise<GoogleReportingAccessResult> {
+  if (!getGoogleAdsDeveloperToken()) {
+    return {
+      ok: false,
+      error: providerError(
+        "not-configured",
+        "GOOGLE_ADS_DEVELOPER_TOKEN is not configured.",
+      ),
+    };
+  }
+  return mintGoogleAccessToken({
+    scopes: GOOGLE_ADS_SCOPES,
+    cache: "ads",
+  });
 }

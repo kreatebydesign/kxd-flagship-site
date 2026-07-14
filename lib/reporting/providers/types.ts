@@ -11,7 +11,7 @@ import type {
   ReportingSource,
 } from "@/lib/reporting/domain";
 
-export type ReportingProviderId = "ga4" | "search-console";
+export type ReportingProviderId = "ga4" | "search-console" | "ads";
 
 export type ReportingProviderStatus =
   | "connected"
@@ -112,12 +112,14 @@ export const REPORTING_PROVIDER_CAPABILITY: Record<
 > = {
   ga4: "website-analytics",
   "search-console": "seo",
+  ads: "google-ads",
 };
 
 export const REPORTING_PROVIDER_SOURCE_ID: Record<ReportingProviderId, string> = {
   ga4: "google-analytics-4",
   "search-console": "google-search-console",
+  ads: "google-ads",
 };
 
 /** Metric set version — bump when normalized metric selection changes. */
-export const REPORTING_PROVIDER_METRIC_SET_VERSION = "29c.1.1";
+export const REPORTING_PROVIDER_METRIC_SET_VERSION = "32b.1.0";

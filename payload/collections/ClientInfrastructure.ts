@@ -167,6 +167,24 @@ export const ClientInfrastructure: CollectionConfig = {
                 { label: "Pending", value: "pending" },
               ],
             },
+            {
+              name: "googleAdsCustomerId",
+              type: "text",
+              label: "Google Ads Customer ID",
+              admin: {
+                description:
+                  "Digits-only or dashed Google Ads customer ID (e.g. 123-456-7890). Stored connection only — no credentials.",
+              },
+            },
+            {
+              name: "googleAdsLoginCustomerId",
+              type: "text",
+              label: "Google Ads Login Customer ID (MCC)",
+              admin: {
+                description:
+                  "Optional manager (MCC) login-customer-id when the Ads account is under a manager hierarchy.",
+              },
+            },
             { name: "emailProvider", type: "text", label: "Email Provider" },
             { name: "workspaceProvider", type: "text", label: "Workspace Provider" },
             { name: "emailDomain", type: "text", label: "Email Domain" },

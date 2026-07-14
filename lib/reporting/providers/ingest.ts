@@ -19,10 +19,12 @@ import { loadClientReportingConnection } from "./connection";
 import { isClientEligibleForReportingIngest } from "./connection-resolve";
 import { composeReportingFromProviderResults } from "./compose-from-providers";
 import { providerError } from "./errors";
+import { fetchGoogleAdsReportingBridge } from "./google/ads/bridge";
 import { fetchGa4ReportingBridge } from "./google/ga4/bridge";
 import { fetchSearchConsoleReportingBridge } from "./google/search-console/bridge";
 import {
   REPORTING_PROVIDER_CAPABILITY,
+  REPORTING_PROVIDER_SOURCE_ID,
   type IngestClientReportingInput,
   type IngestClientReportingProviderInput,
   type IngestClientReportingResult,
@@ -41,8 +43,7 @@ function emptyResult(
 ): ReportingProviderResult {
   return {
     providerId: provider,
-    sourceProviderId:
-      provider === "ga4" ? "google-analytics-4" : "google-search-console",
+    sourceProviderId: REPORTING_PROVIDER_SOURCE_ID[provider],
     clientId,
     capabilityId: REPORTING_PROVIDER_CAPABILITY[provider],
     requestedPeriod: period,
@@ -101,6 +102,9 @@ async function fetchProviderFresh(
   if (provider === "ga4") {
     return fetchGa4ReportingBridge({ connection, period });
   }
+  if (provider === "ads") {
+    return fetchGoogleAdsReportingBridge({ connection, period });
+  }
   return fetchSearchConsoleReportingBridge({ connection, period });
 }
 
@@ -121,7 +125,9 @@ export async function ingestClientReportingProvider(
   const connectionIdentity =
     input.provider === "ga4"
       ? connection?.ga4PropertyId ?? "none"
-      : connection?.searchConsoleSiteUrl ?? "none";
+      : input.provider === "ads"
+        ? connection?.googleAdsCustomerId ?? "none"
+        : connection?.searchConsoleSiteUrl ?? "none";
 
   const cacheKey = reportingProviderCacheKey({
     clientId: input.clientId,
@@ -180,7 +186,11 @@ export async function ingestClientReportingProvider(
 export async function ingestClientReporting(
   input: IngestClientReportingInput,
 ): Promise<IngestClientReportingResult> {
-  const providers: ReportingProviderId[] = input.providers ?? ["ga4", "search-console"];
+  const providers: ReportingProviderId[] = input.providers ?? [
+    "ga4",
+    "search-console",
+    "ads",
+  ];
   const results: ReportingProviderResult[] = [];
 
   for (const provider of providers) {

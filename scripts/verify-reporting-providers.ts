@@ -33,6 +33,7 @@ import {
 import { isCapabilityEnabled } from "../lib/reporting/providers/capability-gate.ts";
 import {
   normalizeGa4PropertyId,
+  normalizeGoogleAdsCustomerId,
   normalizeSearchConsoleSiteUrl,
   resolveInfrastructureForClient,
   isClientEligibleForReportingIngest,
@@ -42,6 +43,8 @@ import {
   GOOGLE_REPORTING_SCOPES,
   GOOGLE_REPORTING_ANALYTICS_SCOPE,
   GOOGLE_REPORTING_WEBMASTERS_SCOPE,
+  GOOGLE_ADS_ADWORDS_SCOPE,
+  GOOGLE_ADS_SCOPES,
   GOOGLE_REPORTING_CREDENTIAL_PRECEDENCE,
   GCP_OIDC_ENV_KEYS,
   parseServiceAccountJson,
@@ -54,10 +57,14 @@ import {
 } from "../lib/reporting/providers/google/auth.ts";
 import { GA4_CORE_METRICS } from "../lib/reporting/providers/google/ga4/client.ts";
 import { normalizeGa4Metrics } from "../lib/reporting/providers/google/ga4/normalize.ts";
+import { normalizeGoogleAdsAggregate } from "../lib/reporting/providers/google/ads/normalize.ts";
 import { normalizeSearchConsoleAggregate } from "../lib/reporting/providers/google/search-console/normalize.ts";
 import { composeReportingFromProviderResults } from "../lib/reporting/providers/compose-from-providers.ts";
 import type { ReportingProviderResult } from "../lib/reporting/providers/types.ts";
-import { REPORTING_PROVIDER_CAPABILITY } from "../lib/reporting/providers/types.ts";
+import {
+  REPORTING_PROVIDER_CAPABILITY,
+  REPORTING_PROVIDER_SOURCE_ID,
+} from "../lib/reporting/providers/types.ts";
 import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 
@@ -87,18 +94,23 @@ console.log("\nPhase 29C.1 — Reporting Providers\n");
 console.log("1. Capability architecture (canonical entitlement source)");
 assert(REPORTING_PROVIDER_CAPABILITY.ga4 === "website-analytics", "GA4 → website-analytics");
 assert(REPORTING_PROVIDER_CAPABILITY["search-console"] === "seo", "GSC → seo");
+assert(REPORTING_PROVIDER_CAPABILITY.ads === "google-ads", "ads → google-ads capability");
+assert(REPORTING_PROVIDER_SOURCE_ID.ads === "google-ads", "ads sourceProviderId is google-ads");
 {
   const caps = getReportingCapabilityIds(["website-review", "website-analytics", "seo", "billing"]);
   assert(caps.includes("website-analytics") && caps.includes("seo"), "getReportingCapabilityIds filters reporting IDs");
   assert(!caps.includes("billing" as never), "non-reporting modules excluded from reporting capabilities");
   assert(!isCapabilityEnabled([], "website-analytics"), "empty entitlements disable GA4");
   assert(!isCapabilityEnabled(["seo"], "website-analytics"), "seo alone does not enable GA4");
+  assert(!isCapabilityEnabled(["seo"], "google-ads"), "seo alone does not enable Ads");
 }
 {
   const infraPath = resolve("payload/collections/ClientInfrastructure.ts");
   const src = readFileSync(infraPath, "utf8");
   assert(!src.includes("reportingCapabilities"), "ClientInfrastructure has no reportingCapabilities field");
   assert(src.includes("searchConsoleSiteUrl"), "ClientInfrastructure retains searchConsoleSiteUrl connection field");
+  assert(src.includes("googleAdsCustomerId"), "ClientInfrastructure has googleAdsCustomerId field");
+  assert(src.includes("googleAdsLoginCustomerId"), "ClientInfrastructure has optional login customer field");
 }
 assert(
   !existsSync(resolve("migrations/20260808_phase29c_reporting_provider_connections.ts")),
@@ -146,6 +158,11 @@ console.log("\n2. Period / freshness semantics");
 console.log("\n3. Authentication");
 assert(GOOGLE_REPORTING_SCOPES.includes(GOOGLE_REPORTING_ANALYTICS_SCOPE), "analytics scope");
 assert(GOOGLE_REPORTING_SCOPES.includes(GOOGLE_REPORTING_WEBMASTERS_SCOPE), "webmasters scope");
+assert(
+  !GOOGLE_REPORTING_SCOPES.includes(GOOGLE_ADS_ADWORDS_SCOPE as never),
+  "GA4/GSC scopes unchanged (no adwords on reporting scopes)",
+);
+assert(GOOGLE_ADS_SCOPES.includes(GOOGLE_ADS_ADWORDS_SCOPE), "Ads uses adwords scope");
 assert(
   GOOGLE_REPORTING_CREDENTIAL_PRECEDENCE[0] === "VERCEL_OIDC_WORKLOAD_IDENTITY",
   "Vercel OIDC precedes SA JSON / OAuth",
@@ -297,6 +314,9 @@ assert(
   normalizeSearchConsoleSiteUrl("sc-domain:example.com") === "sc-domain:example.com",
   "domain GSC preserved",
 );
+assert(normalizeGoogleAdsCustomerId("") === null, "empty Ads customer → not configured");
+assert(normalizeGoogleAdsCustomerId("123-456-7890") === "1234567890", "Ads dashes stripped");
+assert(normalizeGoogleAdsCustomerId("abc") === null, "non-digit Ads customer rejected");
 {
   const cross = resolveInfrastructureForClient(1, [{ id: 9, client: 2, ga4PropertyId: "1" }]);
   assert(cross === "cross-client", "cross-client infrastructure rejected");
@@ -388,6 +408,62 @@ console.log("\n6. Search Console metrics");
   });
   assert(facts.find((f) => f.metricKey === "ctr")?.value === 1, "CTR ratio converted to percent once");
   assert(facts.every((f) => f.evidenceRefs[0] === "gsc:site:https://example.com/"), "URL-prefix unchanged");
+}
+
+console.log("\n6b. Google Ads metrics");
+{
+  const facts = normalizeGoogleAdsAggregate({
+    clientId: 9,
+    period: closedPeriod,
+    current: {
+      impressions: 1000,
+      clicks: 40,
+      costMicros: 12_500_000,
+      conversions: 2,
+      costPerConversion: 6.25,
+    },
+    previous: {
+      impressions: 800,
+      clicks: 30,
+      costMicros: 10_000_000,
+      conversions: 1,
+      costPerConversion: 10,
+    },
+    fetchedAt: "2026-07-01T00:00:00.000Z",
+    freshness: "fresh",
+    confidence: "high",
+    customerId: "1234567890",
+  });
+  const byKey = Object.fromEntries(facts.map((f) => [f.metricKey, f]));
+  assert(byKey.ad_spend?.value === 12.5, "cost_micros → ad_spend (/1e6)");
+  assert(byKey.clicks?.value === 40, "clicks mapped");
+  assert(byKey.conversions?.value === 2, "conversions mapped");
+  assert(byKey.cost_per_lead?.value === 6.25, "cost_per_conversion → cost_per_lead (API only)");
+  assert(byKey.impressions?.value === 1000, "impressions stored when canonical exists");
+  assert(facts.every((f) => f.domain === "marketing"), "Ads facts use marketing domain");
+  assert(facts.every((f) => f.source.providerId === "google-ads"), "Ads provenance is google-ads");
+}
+{
+  const facts = normalizeGoogleAdsAggregate({
+    clientId: 9,
+    period: closedPeriod,
+    current: {
+      impressions: 100,
+      clicks: 5,
+      costMicros: 5_000_000,
+      conversions: 0,
+      costPerConversion: null,
+    },
+    previous: null,
+    fetchedAt: "2026-07-01T00:00:00.000Z",
+    freshness: "fresh",
+    confidence: "high",
+    customerId: "1",
+  });
+  assert(
+    !facts.some((f) => f.metricKey === "cost_per_lead"),
+    "cost_per_lead never invented when API omits cost_per_conversion",
+  );
 }
 
 console.log("\n7. Cache");
