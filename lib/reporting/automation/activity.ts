@@ -1,10 +1,14 @@
 /**
- * Phase 33A / 33A.1 — Best-effort activity logging for reporting automation.
+ * Phase 33A / 33B.1 — Best-effort activity logging for reporting automation.
  * Never throws into the sweep; timeline write failures are warnings only.
+ *
+ * Client sync events → Activity Engine / executive-timeline (requires client).
+ * Platform sweep summaries → Automation Events (client optional; no fake ownership).
  */
 
 import "server-only";
 
+import { createAutomationEvent } from "@/lib/automation/engine";
 import { publishActivity } from "@/lib/activity-engine/publish";
 import type { ReportingProviderId } from "@/lib/reporting/providers/types";
 import { outcomeIncrementsFailures } from "./classify";
@@ -14,6 +18,73 @@ function providerLabel(provider: ReportingProviderId): string {
   if (provider === "search-console") return "Search Console";
   if (provider === "ga4") return "GA4";
   return "Google Ads";
+}
+
+/**
+ * Platform-scoped sweep summary.
+ * Persists via automation-events with no client relationship — never anchors to a client.
+ */
+export async function publishReportingSweepActivity(input: {
+  dryRun: boolean;
+  force: boolean;
+  truncated: boolean;
+  clientsConsidered: number;
+  clientsRun: number;
+  clientsSkippedCapacity: number;
+  providerAttempts: number;
+  providerSynced: number;
+  providerFailed: number;
+  providerDeferred: number;
+  startedAt: string;
+  finishedAt: string;
+}): Promise<{ published: boolean; warning?: string }> {
+  if (input.dryRun) {
+    return { published: false };
+  }
+
+  const durationMs = Math.max(
+    0,
+    Date.parse(input.finishedAt) - Date.parse(input.startedAt),
+  );
+
+  try {
+    await createAutomationEvent({
+      module: "Infrastructure",
+      eventName: "reporting.sweep.completed",
+      // Intentionally omit clientId — platform scope.
+      skipRules: true,
+      status: "processed",
+      payload: {
+        scope: "platform",
+        triggerType: input.force ? "operator" : "automation-sweep",
+        truncated: input.truncated,
+        clientsConsidered: input.clientsConsidered,
+        clientsRun: input.clientsRun,
+        clientsSkippedCapacity: input.clientsSkippedCapacity,
+        providerAttempts: input.providerAttempts,
+        providerSynced: input.providerSynced,
+        providerFailed: input.providerFailed,
+        providerDeferred: input.providerDeferred,
+        runDurationMs: Number.isFinite(durationMs) ? durationMs : null,
+        startedAt: input.startedAt,
+        finishedAt: input.finishedAt,
+        ok: input.providerFailed === 0,
+        title: input.truncated
+          ? "Reporting sweep completed (truncated)"
+          : "Reporting sweep completed",
+        summary: `Synced ${input.providerSynced}, failed ${input.providerFailed}, deferred ${input.providerDeferred}.`,
+      },
+    });
+    return { published: true };
+  } catch (error) {
+    return {
+      published: false,
+      warning:
+        error instanceof Error
+          ? `Sweep activity log failed: ${error.message}`
+          : "Sweep activity log failed.",
+    };
+  }
 }
 
 export async function publishReportingSyncActivity(input: {
@@ -57,6 +128,7 @@ export async function publishReportingSyncActivity(input: {
         outcome: input.outcome,
         factsWritten: input.factsWritten,
         ok: input.ok,
+        triggerType: "automation-sweep",
       },
       internalOnly: true,
     });

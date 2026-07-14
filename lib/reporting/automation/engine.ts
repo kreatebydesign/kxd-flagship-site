@@ -13,7 +13,10 @@ import "server-only";
 import { syncReportingFacts } from "@/lib/reporting/ingest/sync-reporting-facts";
 import { loadClientReportingConnection } from "@/lib/reporting/providers/connection";
 import type { ReportingProviderId } from "@/lib/reporting/providers";
-import { publishReportingSyncActivity } from "./activity";
+import {
+  publishReportingSweepActivity,
+  publishReportingSyncActivity,
+} from "./activity";
 import { reportingBackoffUntil } from "./backoff";
 import {
   classifyPreflight,
@@ -605,6 +608,26 @@ export async function runReportingAutomationSweep(
     providerDeferred,
     truncated,
   });
+
+  if (!dryRun) {
+    const sweepActivity = await publishReportingSweepActivity({
+      dryRun,
+      force,
+      truncated,
+      clientsConsidered: summary.clientsConsidered,
+      clientsRun: summary.clientsRun,
+      clientsSkippedCapacity: summary.clientsSkippedCapacity,
+      providerAttempts: summary.providerAttempts,
+      providerSynced: summary.providerSynced,
+      providerFailed: summary.providerFailed,
+      providerDeferred: summary.providerDeferred,
+      startedAt: summary.startedAt,
+      finishedAt: summary.finishedAt,
+    });
+    if (sweepActivity.warning) {
+      summary.warnings.push(sweepActivity.warning);
+    }
+  }
 
   return summary;
 }

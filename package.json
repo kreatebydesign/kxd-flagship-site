@@ -32,6 +32,7 @@
     "verify:reporting-live": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/verify-live-reporting-provider.ts",
     "verify:reporting": "tsx scripts/verify-reporting.ts",
     "verify:reporting-automation": "tsx scripts/verify-reporting-automation.ts",
+    "verify:reporting-operations": "tsx scripts/verify-reporting-operations.ts",
     "reporting:sweep": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/run-reporting-sweep.ts",
     "reporting:sweep:dry": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/run-reporting-sweep.ts -- --dry-run",
     "verify:ga4": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/verify-ga4.ts",

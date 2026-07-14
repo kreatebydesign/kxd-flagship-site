@@ -8,5 +8,6 @@ export { runReportingAutomationSweep } from "./engine";
 export {
   loadReportingProviderSyncStates,
   upsertReportingProviderSyncState,
+  clearExpiredReportingExecutionLease,
 } from "./sync-state";
 export { loadClientsForReportingAutomation } from "./clients";

@@ -114,6 +114,28 @@ export {
   type ExecutiveReportingNarrative,
 } from "./executive-narratives";
 
+/** Phase 33B — Reporting Operations (pure read-model helpers; loaders via ./operations/server) */
+export {
+  deriveReportingOperationalStatus,
+  operationalStatusLabel,
+  providerLabel,
+  freshnessFromLastSuccess,
+  filterReportingOpsRows,
+  parseReportingOpsFilter,
+  buildReportingOpsCapacityView,
+  resolveReportingSweepCapacityLimits,
+  buildReportingOpsPlatformSummary,
+  buildReportingOpsRow,
+  isValidReportingOpsProvider,
+  type ReportingOperationalStatus,
+  type ReportingOpsFilter,
+  type ReportingOpsRow,
+  type ReportingOpsPlatformSummary,
+  type ReportingOpsPlatformModel,
+  type ReportingOpsClientDetail,
+  type ReportingOpsHistoryEntry,
+} from "./operations";
+
 /** Performance report view helpers (existing) */
 export {
   buildPerformanceReportView,

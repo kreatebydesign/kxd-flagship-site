@@ -412,3 +412,117 @@ export async function releaseReportingExecutionLease(input: {
     );
   });
 }
+
+export type ClearExpiredReportingLeaseResult =
+  | {
+      ok: true;
+      previousLeaseExpiresAt: string | null;
+      executionStatus: "idle";
+    }
+  | {
+      ok: false;
+      reason: "lease-active" | "not-applicable";
+      leaseExpiresAt: string | null;
+      executionStatus: ReportingExecutionStatus;
+    };
+
+/**
+ * Atomically clear only an expired/stale running lease.
+ * Refuses active leases even if a concurrent sweep acquires between UI and request.
+ */
+export async function clearExpiredReportingExecutionLease(input: {
+  clientId: number;
+  provider: ReportingProviderId;
+  now?: Date;
+}): Promise<ClearExpiredReportingLeaseResult> {
+  await ensureReportingProviderSyncState(input);
+  const now = input.now ?? new Date();
+
+  const atomic = await withReportingAutomationDb(async (client) => {
+    const result = await client.query<{
+      previous_lease_expires_at: Date | null;
+      cleared: boolean;
+      execution_status: string;
+      lease_expires_at: Date | null;
+    }>(
+      `
+      WITH target AS (
+        SELECT id, lease_expires_at, execution_status
+        FROM reporting_sync_states
+        WHERE client_id = $1 AND provider = $2
+        FOR UPDATE
+      ),
+      cleared AS (
+        UPDATE reporting_sync_states AS s
+        SET
+          execution_status = 'idle',
+          execution_run_id = NULL,
+          execution_started_at = NULL,
+          lease_expires_at = NULL,
+          integration_status = CASE
+            WHEN s.integration_status = 'running' THEN 'idle'
+            ELSE s.integration_status
+          END,
+          updated_at = NOW()
+        FROM target
+        WHERE s.id = target.id
+          AND target.execution_status = 'running'
+          AND (
+            target.lease_expires_at IS NULL
+            OR target.lease_expires_at < $3::timestamptz
+          )
+        RETURNING target.lease_expires_at AS previous_lease_expires_at
+      )
+      SELECT
+        (SELECT previous_lease_expires_at FROM cleared) AS previous_lease_expires_at,
+        EXISTS(SELECT 1 FROM cleared) AS cleared,
+        target.execution_status,
+        target.lease_expires_at
+      FROM target
+      `,
+      [input.clientId, input.provider, now.toISOString()],
+    );
+    return result.rows[0] ?? null;
+  });
+
+  if (!atomic) {
+    return {
+      ok: false,
+      reason: "not-applicable",
+      leaseExpiresAt: null,
+      executionStatus: "idle",
+    };
+  }
+
+  if (atomic.cleared) {
+    return {
+      ok: true,
+      previousLeaseExpiresAt: atomic.previous_lease_expires_at
+        ? new Date(atomic.previous_lease_expires_at).toISOString()
+        : null,
+      executionStatus: "idle",
+    };
+  }
+
+  if (
+    atomic.execution_status === "running" &&
+    atomic.lease_expires_at &&
+    new Date(atomic.lease_expires_at).getTime() > now.getTime()
+  ) {
+    return {
+      ok: false,
+      reason: "lease-active",
+      leaseExpiresAt: new Date(atomic.lease_expires_at).toISOString(),
+      executionStatus: "running",
+    };
+  }
+
+  return {
+    ok: false,
+    reason: "not-applicable",
+    leaseExpiresAt: atomic.lease_expires_at
+      ? new Date(atomic.lease_expires_at).toISOString()
+      : null,
+    executionStatus: atomic.execution_status === "running" ? "running" : "idle",
+  };
+}

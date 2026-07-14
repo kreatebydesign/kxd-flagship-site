@@ -31,6 +31,7 @@ export type OperationsNavId =
   | "sales-activities"
   | "sales-forecast"
   | "reports"
+  | "reporting-ops"
   | "strategy"
   | "brain"
   | "integrations"
@@ -95,6 +96,11 @@ export const NAV_GROUPS: OperationsNavGroup[] = [
       { id: "playbooks", label: "Playbooks", href: "/admin/operations/playbooks" },
       { id: "growth", label: "Growth", href: "/admin/operations/growth" },
       { id: "reports", label: "Reports", href: "/admin/operations/reports" },
+      {
+        id: "reporting-ops",
+        label: "Reporting Ops",
+        href: "/admin/operations/reporting",
+      },
     ],
   },
   {

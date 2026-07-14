@@ -12,6 +12,7 @@ const suites = [
   ["npm", ["run", "verify:reporting-providers"]],
   ["npm", ["run", "verify:reporting-ingest"]],
   ["npm", ["run", "verify:reporting-automation"]],
+  ["npm", ["run", "verify:reporting-operations"]],
   ["npm", ["run", "verify:executive-panel-metrics"]],
 ] as const;
 
