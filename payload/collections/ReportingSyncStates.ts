@@ -57,7 +57,11 @@ export const ReportingSyncStates: CollectionConfig = {
       required: true,
       index: true,
       label: "Client",
-      admin: { position: "sidebar" },
+      admin: {
+        position: "sidebar",
+        description:
+          "Required client relationship. DB enforces client_id → clients.id ON DELETE CASCADE (Phase 33A.2).",
+      },
     },
     {
       name: "provider",

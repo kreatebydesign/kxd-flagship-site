@@ -103,9 +103,30 @@ async function main() {
     `CREATE INDEX IF NOT EXISTS reporting_sync_states_lease_idx ON reporting_sync_states (execution_status, lease_expires_at)`,
   );
 
+  await client.query(`
+    DO $$
+    BEGIN
+      IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+        WHERE conname IN (
+          'reporting_sync_states_client_id_fkey',
+          'reporting_sync_states_client_id_fk'
+        )
+      ) THEN
+        ALTER TABLE reporting_sync_states
+          ADD CONSTRAINT reporting_sync_states_client_id_fkey
+          FOREIGN KEY (client_id)
+          REFERENCES clients(id)
+          ON DELETE CASCADE
+          ON UPDATE NO ACTION;
+      END IF;
+    END $$;
+  `);
+
   for (const name of [
     "20260714_phase33a_reporting_automation",
     "20260714_phase33a1_reporting_scheduler_reliability",
+    "20260714_phase33a2_reporting_sync_state_foreign_key",
   ]) {
     try {
       await client.query(

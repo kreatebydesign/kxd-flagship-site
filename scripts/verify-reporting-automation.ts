@@ -226,6 +226,34 @@ async function main() {
   check("lease fields in migration", mig.includes("lease_expires_at") && mig.includes("execution_run_id"));
   check("window field in migration", mig.includes("last_completed_window_id"));
 
+  const mig2 = readFileSync(
+    path.join(
+      process.cwd(),
+      "migrations/20260714_phase33a2_reporting_sync_state_foreign_key.ts",
+    ),
+    "utf8",
+  );
+  const migIndex = readFileSync(path.join(process.cwd(), "migrations/index.ts"), "utf8");
+  check(
+    "33A.2 FK migration references clients.id ON DELETE CASCADE",
+    mig2.includes('REFERENCES "clients"("id")') &&
+      mig2.includes("ON DELETE CASCADE") &&
+      mig2.includes("reporting_sync_states_client_id_fkey"),
+  );
+  check(
+    "33A.2 FK migration registered after 33A.1",
+    migIndex.indexOf("phase33a1_reporting_scheduler_reliability") <
+      migIndex.indexOf("phase33a2_reporting_sync_state_foreign_key"),
+  );
+  check(
+    "fresh-chain migrations declare unique indexes + FK",
+    mig.includes("reporting_sync_states_state_key_idx") &&
+      mig.includes("reporting_sync_states_client_provider_uidx") &&
+      mig.includes("reporting_sync_states_lease_idx") &&
+      mig.includes("reporting_sync_states_window_idx") &&
+      mig2.includes('FOREIGN KEY ("client_id")'),
+  );
+
   // 13–15 classification
   const disabled = classifyPreflight({
     providerAutomationEnabled: false,
