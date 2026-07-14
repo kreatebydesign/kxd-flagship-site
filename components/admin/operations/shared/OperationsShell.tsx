@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { KxdOsLogo, KxdShell } from "@/components/os";
+import { KxdShell } from "@/components/os";
 import { ExecutiveWorkspaceShell } from "@/components/admin/executive-workspace";
 import { NotificationCenter } from "@/components/admin/operations/notifications";
 import { QuickActionBar } from "@/components/admin/operations/quick-actions";
@@ -15,6 +15,11 @@ export interface OperationsShellProps {
   children: ReactNode;
 }
 
+/**
+ * Operations chrome. Brand mark lives once in ExecutiveHeader (top-left).
+ * Do not render a second KxdOsLogo in the sidebar — that caused visible
+ * duplication at desktop and mobile widths (Phase 34A.3).
+ */
 export function OperationsShell({ activeId, dateDisplay, clientId, children }: OperationsShellProps) {
   const navGroups = getEditionOperationsNavGroups();
 
@@ -23,10 +28,6 @@ export function OperationsShell({ activeId, dateDisplay, clientId, children }: O
       <ExecutiveWorkspaceShell clientId={clientId}>
         <div className="kxd-os-app">
           <aside className="kxd-os-sidebar" aria-label="KXD OS">
-            <div className="kxd-os-sidebar__brand">
-              <KxdOsLogo height={18} />
-            </div>
-
             <div className="kxd-os-sidebar__nav">
               <OperationsSidebarNav navGroups={navGroups} activeId={activeId} />
             </div>

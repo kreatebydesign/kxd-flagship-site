@@ -22,6 +22,7 @@ export type OperationsNavId =
   | "growth"
   | "client-import"
   | "client-launch"
+  | "client-launch-wizard"
   | "genesis"
   | "launch-qa"
   | "sales-pipeline"
@@ -69,6 +70,11 @@ export const NAV_GROUPS: OperationsNavGroup[] = [
     items: [
       { id: "genesis", label: "Genesis", href: "/admin/operations/genesis" },
       { id: "clients", label: "Portfolio", href: "/admin/operations/clients" },
+      {
+        id: "client-launch-wizard",
+        label: "Launch Wizard",
+        href: "/admin/operations/clients/launch",
+      },
       { id: "strategy", label: "Strategy Vault", href: "/admin/operations/strategy" },
       { id: "accounts", label: "Accounts", href: "/admin/operations/accounts" },
       { id: "onboarding", label: "Onboarding", href: "/admin/operations/onboarding" },
@@ -119,7 +125,6 @@ export const NAV_GROUPS: OperationsNavGroup[] = [
     items: [
       { id: "training", label: "Operations", href: "/admin/training" },
       { id: "client-import", label: "Import", href: "/admin/operations/client-import" },
-      { id: "client-launch", label: "Launch", href: "/admin/operations/client-launch" },
     ],
   },
 ];

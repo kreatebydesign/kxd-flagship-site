@@ -68,6 +68,7 @@ import * as migration_20260713_phase32b_google_ads_customer_fields from './20260
 import * as migration_20260714_phase33a_reporting_automation from './20260714_phase33a_reporting_automation';
 import * as migration_20260714_phase33a1_reporting_scheduler_reliability from './20260714_phase33a1_reporting_scheduler_reliability';
 import * as migration_20260714_phase33a2_reporting_sync_state_foreign_key from './20260714_phase33a2_reporting_sync_state_foreign_key';
+import * as migration_20260714_phase34a_client_launch_drafts from './20260714_phase34a_client_launch_drafts';
 
 export const migrations = [
   {
@@ -419,5 +420,10 @@ export const migrations = [
     up: migration_20260714_phase33a2_reporting_sync_state_foreign_key.up,
     down: migration_20260714_phase33a2_reporting_sync_state_foreign_key.down,
     name: '20260714_phase33a2_reporting_sync_state_foreign_key',
+  },
+  {
+    up: migration_20260714_phase34a_client_launch_drafts.up,
+    down: migration_20260714_phase34a_client_launch_drafts.down,
+    name: '20260714_phase34a_client_launch_drafts',
   },
 ];

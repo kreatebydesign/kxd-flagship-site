@@ -16,6 +16,7 @@ import { ClientCommunications } from "./payload/collections/ClientCommunications
 import { ClientActions } from "./payload/collections/ClientActions.ts";
 import { ClientInfrastructure } from "./payload/collections/ClientInfrastructure.ts";
 import { ClientExperienceProfiles } from "./payload/collections/ClientExperienceProfiles.ts";
+import { ClientLaunchDrafts } from "./payload/collections/ClientLaunchDrafts.ts";
 import { ClientOnboarding } from "./payload/collections/ClientOnboarding.ts";
 import { ClientTimelineEvents } from "./payload/collections/ClientTimelineEvents.ts";
 import { ClientProjects } from "./payload/collections/ClientProjects.ts";
@@ -172,6 +173,7 @@ export default buildConfig({
     WebsiteQAChecks,
     ClientOnboarding,
     ClientExperienceProfiles,
+    ClientLaunchDrafts,
     ClientTimelineEvents,
     ExecutiveTimelineEvents,
     ExecutiveActivityReads,

@@ -1,6 +1,7 @@
 /**
- * /admin/operations/client-launch
- * KXD OS — Guided Client Launch workflow
+ * Legacy localStorage Client Launch route.
+ * Phase 34A.1 — kept for parity review; not equally prominent in nav.
+ * Primary pipeline: /admin/operations/clients/launch
  */
 
 import Link from "next/link";
@@ -10,21 +11,31 @@ import { KxdPage } from "@/components/os";
 
 export const dynamic = "force-dynamic";
 
-export default function ClientLaunchPage() {
+export default function LegacyClientLaunchPage() {
   return (
-    <OperationsShell activeId="client-launch">
+    <OperationsShell activeId="client-launch-wizard">
       <KxdPage className="kxd-os-page--ops">
+        <div className="kxd-launch-wizard__legacy-banner" role="status">
+          <p>
+            <strong>Legacy wizard.</strong> New launches use the Client Launch Pipeline with
+            durable drafts, package presets, and readiness review.
+          </p>
+          <Link href="/admin/operations/clients/launch" className="kxd-launch-wizard__primary">
+            Open Client Launch Pipeline
+          </Link>
+        </div>
+
         <header className="kxd-os-ops-hero">
           <div className="kxd-os-ops-hero__top">
             <Link href="/admin/operations/clients" className="kxd-os-ops-hero__back">
               ← Client Portfolio
             </Link>
           </div>
-          <p className="kxd-os-eyebrow">KXD OS · Client Launch</p>
-          <h1 className="kxd-os-headline kxd-os-ops-hero__title">Client Launch</h1>
+          <p className="kxd-os-eyebrow">Legacy · Local draft only</p>
+          <h1 className="kxd-os-headline kxd-os-ops-hero__title">Client Launch (legacy)</h1>
           <p className="kxd-os-ops-hero__lead">
-            Launch a new KXD partnership — not just a database record. Guided onboarding into
-            Client, Executive Profile, Retainer, and Workspace.
+            Browser-local draft path retained temporarily. Prefer the Client Launch Pipeline for
+            production onboarding.
           </p>
         </header>
 
