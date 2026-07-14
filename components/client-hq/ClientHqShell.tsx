@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { KxdLogo } from "@/components/ui/KxdLogo";
 import { KxdShell } from "@/components/os";
 import type { ResolvedExperienceProfile } from "@/lib/ces";
@@ -14,14 +14,27 @@ import {
 
 export interface ClientHqShellProps {
   activeId: PortalNavId;
+  /** Current pathname — used to hide sidebar partner credit only when EP signature is on-screen. */
+  pathname?: string;
   companyName?: string;
   editionBranding?: EditionBranding;
   experienceProfile?: ResolvedExperienceProfile;
   children: ReactNode;
 }
 
+function labelsMatch(a: string, b: string): boolean {
+  return a.trim().toLowerCase() === b.trim().toLowerCase();
+}
+
+function isPortalOverviewPath(pathname: string | undefined): boolean {
+  if (!pathname) return false;
+  const normalized = pathname.replace(/\/+$/, "") || "/";
+  return normalized === "/portal";
+}
+
 export function ClientHqShell({
   activeId,
+  pathname,
   companyName,
   editionBranding,
   experienceProfile,
@@ -41,27 +54,40 @@ export function ClientHqShell({
     experienceProfile?.hospitality.portalSidebarLabel ??
     branding?.portal.sidebarLabel ??
     "Your workspace";
+  const quietWorkspaceLabel =
+    sidebarLabel && !labelsMatch(sidebarLabel, displayName) ? sidebarLabel : null;
   const reassuranceLine = experienceProfile?.hospitality.reassuranceLine;
   const partnerLine = experienceProfile?.hospitality.partnerFooterLine;
-  const showPartnerMark = experienceProfile?.hospitality.showPartnerMark ?? true;
+  /**
+   * Suppress sidebar partner credit only when the Executive Performance
+   * maker’s signature is actually rendered (overview + EP presentation).
+   * Other portal routes retain hospitality partner mark so attribution is never blank.
+   */
+  const workspaceSignaturePresent =
+    isPortalOverviewPath(pathname) &&
+    Boolean(experienceProfile?.presentation?.enabled);
+  const showPartnerMark =
+    (experienceProfile?.hospitality.showPartnerMark ?? true) &&
+    !workspaceSignaturePresent;
   const clientLogo = experienceProfile?.identity.logoUrl;
 
   return (
     <KxdShell className="kxd-os-shell--app">
-      <div className="kxd-os-app" style={cssVars as React.CSSProperties}>
-        <aside className="kxd-os-sidebar" aria-label={sidebarLabel}>
+      <div className="kxd-os-app" style={cssVars as CSSProperties}>
+        <aside className="kxd-os-sidebar" aria-label={displayName}>
           <div className="kxd-ces-identity">
             {clientLogo ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={clientLogo}
-                alt={experienceProfile?.identity.logoAlt ?? displayName}
+                alt=""
                 className="kxd-ces-identity__logo"
               />
-            ) : (
-              <p className="kxd-ces-identity__name">{displayName}</p>
-            )}
-            <p className="kxd-ces-identity__workspace">{sidebarLabel}</p>
+            ) : null}
+            <p className="kxd-ces-identity__name">{displayName}</p>
+            {quietWorkspaceLabel ? (
+              <p className="kxd-ces-identity__workspace">{quietWorkspaceLabel}</p>
+            ) : null}
           </div>
 
           <div className="kxd-os-sidebar__nav">
@@ -92,7 +118,10 @@ export function ClientHqShell({
 
           <div className="kxd-os-sidebar__foot">
             {reassuranceLine ? (
-              <p className="kxd-ces-trust-line">{reassuranceLine}</p>
+              <p className="kxd-ces-trust-line">
+                <span className="kxd-ces-trust-line__dot" aria-hidden="true" />
+                <span className="kxd-ces-trust-line__text">{reassuranceLine}</span>
+              </p>
             ) : null}
             {showPartnerMark ? (
               <p className="kxd-ces-partner-mark">

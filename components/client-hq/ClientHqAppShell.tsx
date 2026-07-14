@@ -23,6 +23,7 @@ export function ClientHqAppShell({
   return (
     <ClientHqShell
       activeId={activeId}
+      pathname={pathname}
       companyName={companyName}
       editionBranding={editionBranding}
       experienceProfile={experienceProfile}

@@ -1,6 +1,7 @@
 /**
  * Shared Core signature footer for Executive Performance workplaces.
  * Presentational only — no client forks, no marketing CTAs.
+ * Single intentional maker’s mark for the client operating system.
  */
 
 export function CesWorkspaceSignature() {
@@ -13,8 +14,8 @@ export function CesWorkspaceSignature() {
           className="kxd-ces-exec__signature-mark"
           src="/migrated-assets/brand/kxd-logo-transparent.png"
           alt=""
-          width={40}
-          height={28}
+          width={36}
+          height={26}
         />
         <div className="kxd-ces-exec__signature-copy">
           <p className="kxd-ces-exec__signature-line">Powered by KXD OS</p>

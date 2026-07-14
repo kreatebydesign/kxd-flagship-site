@@ -10,8 +10,7 @@ export function ClientHqLogoutButton() {
     <button
       type="button"
       onClick={handleLogout}
-      className="kxd-os-sidebar__cms"
-      style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+      className="kxd-ces-logout"
     >
       Sign out
     </button>

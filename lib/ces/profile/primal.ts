@@ -17,7 +17,7 @@ export const PRIMAL_EXPERIENCE_PROFILE = {
   welcomeEyebrow: "Partnership",
   reassuranceLine: "Every revision is tracked. Nothing gets lost.",
   supportTone: "direct" as const,
-  portalSidebarLabel: "Primal Motorsports",
+  portalSidebarLabel: "Partnership workspace",
   enabledModules: ["website-review", "executive-performance"] as const,
   showKxdPartnerMark: true,
   partnerFooterLine: "Powered by KXD OS",

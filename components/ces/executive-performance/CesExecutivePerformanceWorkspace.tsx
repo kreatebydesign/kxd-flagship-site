@@ -97,19 +97,31 @@ export function CesExecutivePerformanceWorkspace({
           <aside className="kxd-ces-exec__letter-meta" aria-label="Partnership context">
             <dl className="kxd-ces-exec__meta-list">
               <div className="kxd-ces-exec__meta-row">
-                <dt>Phase</dt>
+                <dt>
+                  <span className="kxd-ces-exec__meta-mark" aria-hidden="true" />
+                  Phase
+                </dt>
                 <dd>{performance.summary.currentPhase}</dd>
               </div>
               <div className="kxd-ces-exec__meta-row">
-                <dt>Focus</dt>
+                <dt>
+                  <span className="kxd-ces-exec__meta-mark" aria-hidden="true" />
+                  Focus
+                </dt>
                 <dd>{performance.summary.currentFocus}</dd>
               </div>
               <div className="kxd-ces-exec__meta-row">
-                <dt>Next</dt>
+                <dt>
+                  <span className="kxd-ces-exec__meta-mark" aria-hidden="true" />
+                  Next
+                </dt>
                 <dd>{performance.summary.nextMilestone}</dd>
               </div>
               <div className="kxd-ces-exec__meta-row kxd-ces-exec__meta-row--quiet">
-                <dt>Recent</dt>
+                <dt>
+                  <span className="kxd-ces-exec__meta-mark" aria-hidden="true" />
+                  Recent
+                </dt>
                 <dd>{performance.summary.lastMajorMilestone}</dd>
               </div>
             </dl>
@@ -196,85 +208,87 @@ export function CesExecutivePerformanceWorkspace({
           id="exec-progress-heading"
           lead="The story of the work — what has been accomplished, and what is taking shape."
         />
-        {performance.progressBeats.length > 0 ? (
-          <ol className="kxd-ces-exec__beats" aria-label="Journey">
-            {performance.progressBeats.map((beat, index) => (
-              <li
-                key={beat.id}
-                className={
-                  beat.complete
-                    ? "kxd-ces-exec__beat kxd-ces-exec__beat--done"
-                    : "kxd-ces-exec__beat kxd-ces-exec__beat--ahead"
-                }
-              >
-                <span className="kxd-ces-exec__beat-index" aria-hidden="true">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-                <span className="kxd-ces-exec__beat-dot" aria-hidden="true" />
-                <span className="kxd-ces-exec__beat-label">{beat.label}</span>
-              </li>
-            ))}
-          </ol>
-        ) : null}
-
-        <div className="kxd-ces-exec__progress-columns">
-          <div className="kxd-ces-exec__progress-col">
-            <p className="kxd-ces-exec__subhead">Accomplished</p>
-            <ul className="kxd-ces-exec__compact-list">
-              {performance.partnershipPrimary.map((item) => (
-                <li key={item.id}>
-                  <span className="kxd-ces-exec__compact-label">{item.label}</span>
-                  <span className="kxd-ces-exec__compact-detail">{item.detail}</span>
+        <div className="kxd-ces-exec__progress-stage">
+          {performance.progressBeats.length > 0 ? (
+            <ol className="kxd-ces-exec__beats" aria-label="Journey">
+              {performance.progressBeats.map((beat, index) => (
+                <li
+                  key={beat.id}
+                  className={
+                    beat.complete
+                      ? "kxd-ces-exec__beat kxd-ces-exec__beat--done"
+                      : "kxd-ces-exec__beat kxd-ces-exec__beat--ahead"
+                  }
+                >
+                  <span className="kxd-ces-exec__beat-index" aria-hidden="true">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <span className="kxd-ces-exec__beat-node" aria-hidden="true" />
+                  <span className="kxd-ces-exec__beat-label">{beat.label}</span>
                 </li>
               ))}
-            </ul>
-            {performance.partnershipSecondary.length > 0 ? (
-              <details className="kxd-ces-exec__disclosure">
-                <summary>More partnership history</summary>
-                <ul className="kxd-ces-exec__compact-list">
-                  {performance.partnershipSecondary.map((item) => (
-                    <li key={item.id}>
-                      <span className="kxd-ces-exec__compact-label">{item.label}</span>
-                      <span className="kxd-ces-exec__compact-detail">{item.detail}</span>
-                    </li>
-                  ))}
-                </ul>
-              </details>
-            ) : null}
-          </div>
+            </ol>
+          ) : null}
 
-          <div className="kxd-ces-exec__progress-col kxd-ces-exec__progress-col--side">
-            {performance.recentImprovements.length > 0 ? (
-              <div className="kxd-ces-exec__progress-block">
-                <p className="kxd-ces-exec__subhead">Recent</p>
-                <ul className="kxd-ces-exec__compact-list">
-                  {performance.recentImprovements.map((item) => (
-                    <li key={item.id}>
-                      <span className="kxd-ces-exec__compact-label">{item.label}</span>
-                      {item.detail ? (
+          <div className="kxd-ces-exec__progress-columns">
+            <div className="kxd-ces-exec__progress-col">
+              <p className="kxd-ces-exec__subhead">Accomplished</p>
+              <ul className="kxd-ces-exec__compact-list">
+                {performance.partnershipPrimary.map((item) => (
+                  <li key={item.id}>
+                    <span className="kxd-ces-exec__compact-label">{item.label}</span>
+                    <span className="kxd-ces-exec__compact-detail">{item.detail}</span>
+                  </li>
+                ))}
+              </ul>
+              {performance.partnershipSecondary.length > 0 ? (
+                <details className="kxd-ces-exec__disclosure">
+                  <summary>More partnership history</summary>
+                  <ul className="kxd-ces-exec__compact-list">
+                    {performance.partnershipSecondary.map((item) => (
+                      <li key={item.id}>
+                        <span className="kxd-ces-exec__compact-label">{item.label}</span>
                         <span className="kxd-ces-exec__compact-detail">{item.detail}</span>
-                      ) : null}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : null}
-            {performance.workingSignals.length > 0 ? (
-              <div className="kxd-ces-exec__progress-block">
-                <p className="kxd-ces-exec__subhead">What&apos;s working</p>
-                <ul className="kxd-ces-exec__signal-list">
-                  {performance.workingSignals.map((item) => (
-                    <li key={item.id}>
-                      <span className="kxd-ces-exec__signal-mark" aria-hidden="true" />
-                      <span className="kxd-ces-exec__signal-label">{item.label}</span>
-                      {item.detail ? (
-                        <span className="kxd-ces-exec__signal-detail">{item.detail}</span>
-                      ) : null}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              ) : null}
+            </div>
+
+            <div className="kxd-ces-exec__progress-col kxd-ces-exec__progress-col--side">
+              {performance.recentImprovements.length > 0 ? (
+                <div className="kxd-ces-exec__progress-block">
+                  <p className="kxd-ces-exec__subhead">Recent</p>
+                  <ul className="kxd-ces-exec__compact-list">
+                    {performance.recentImprovements.map((item) => (
+                      <li key={item.id}>
+                        <span className="kxd-ces-exec__compact-label">{item.label}</span>
+                        {item.detail ? (
+                          <span className="kxd-ces-exec__compact-detail">{item.detail}</span>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+              {performance.workingSignals.length > 0 ? (
+                <div className="kxd-ces-exec__progress-block kxd-ces-exec__progress-block--signals">
+                  <p className="kxd-ces-exec__subhead">What&apos;s working</p>
+                  <ul className="kxd-ces-exec__signal-list">
+                    {performance.workingSignals.map((item) => (
+                      <li key={item.id}>
+                        <span className="kxd-ces-exec__signal-mark" aria-hidden="true" />
+                        <span className="kxd-ces-exec__signal-label">{item.label}</span>
+                        {item.detail ? (
+                          <span className="kxd-ces-exec__signal-detail">{item.detail}</span>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+            </div>
           </div>
         </div>
       </section>
@@ -296,54 +310,54 @@ export function CesExecutivePerformanceWorkspace({
             </Link>
           }
         />
-        <div className="kxd-ces-exec__collab">
-          <div className="kxd-ces-exec__collab-main">
+        <div className="kxd-ces-exec__action-band">
+          <div className="kxd-ces-exec__action-band-copy">
             <p className="kxd-ces-exec__collab-status">{performance.collaboration.statusLabel}</p>
             <p className="kxd-ces-exec__collab-lead">
               {performance.collaboration.explanation}
             </p>
-            <div className="kxd-ces-exec__actions">
-              {performance.collaboration.primaryAction ? (
-                <Link
-                  href={performance.collaboration.primaryAction.href}
-                  className="kxd-ces-btn kxd-ces-btn--primary"
-                >
-                  {performance.collaboration.primaryAction.label}
-                </Link>
-              ) : null}
-              {performance.collaboration.secondaryAction ? (
-                <Link
-                  href={performance.collaboration.secondaryAction.href}
-                  className="kxd-ces-btn kxd-ces-btn--ghost"
-                >
-                  {performance.collaboration.secondaryAction.label}
-                </Link>
-              ) : null}
-              {websiteReview.websiteUrl ? (
-                <a
-                  href={websiteReview.websiteUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="kxd-ces-btn kxd-ces-btn--ghost"
-                >
-                  Open Review Site
-                </a>
-              ) : null}
-            </div>
           </div>
-          {performance.collaboration.recentActivity.length > 0 ? (
-            <div className="kxd-ces-exec__collab-side">
-              <p className="kxd-ces-exec__subhead">Recent revisions</p>
-              <ul className="kxd-ces-exec__compact-list">
-                {performance.collaboration.recentActivity.map((item) => (
-                  <li key={item.id}>
-                    <span className="kxd-ces-exec__compact-label">{item.label}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
+          <div className="kxd-ces-exec__actions">
+            {performance.collaboration.primaryAction ? (
+              <Link
+                href={performance.collaboration.primaryAction.href}
+                className="kxd-ces-btn kxd-ces-btn--primary"
+              >
+                {performance.collaboration.primaryAction.label}
+              </Link>
+            ) : null}
+            {performance.collaboration.secondaryAction ? (
+              <Link
+                href={performance.collaboration.secondaryAction.href}
+                className="kxd-ces-btn kxd-ces-btn--ghost"
+              >
+                {performance.collaboration.secondaryAction.label}
+              </Link>
+            ) : null}
+            {websiteReview.websiteUrl ? (
+              <a
+                href={websiteReview.websiteUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="kxd-ces-btn kxd-ces-btn--ghost"
+              >
+                Open Review Site
+              </a>
+            ) : null}
+          </div>
         </div>
+        {performance.collaboration.recentActivity.length > 0 ? (
+          <div className="kxd-ces-exec__collab-side">
+            <p className="kxd-ces-exec__subhead">Recent revisions</p>
+            <ul className="kxd-ces-exec__compact-list">
+              {performance.collaboration.recentActivity.map((item) => (
+                <li key={item.id}>
+                  <span className="kxd-ces-exec__compact-label">{item.label}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
       </section>
     ),
 
@@ -367,10 +381,11 @@ export function CesExecutivePerformanceWorkspace({
             >
               <div className="kxd-ces-exec__growth-top">
                 <p className="kxd-ces-exec__growth-label">{item.label}</p>
-                <span className="kxd-ces-exec__growth-maturity">
-                  {evolutionMaturityLabel(item.maturity)}
-                </span>
+                <span className="kxd-ces-exec__growth-cue" aria-hidden="true" />
               </div>
+              <span className="kxd-ces-exec__growth-maturity">
+                {evolutionMaturityLabel(item.maturity)}
+              </span>
               <p className="kxd-ces-exec__growth-detail">{item.detail}</p>
             </li>
           ))}
@@ -402,7 +417,10 @@ export function CesExecutivePerformanceWorkspace({
               <dl className="kxd-ces-exec__account">
                 <div>
                   <dt>Engagement</dt>
-                  <dd>{performance.account.engagementStatus}</dd>
+                  <dd>
+                    <span className="kxd-ces-exec__live-dot" aria-hidden="true" />
+                    {performance.account.engagementStatus}
+                  </dd>
                 </div>
                 <div>
                   <dt>Workspace</dt>
@@ -434,14 +452,6 @@ export function CesExecutivePerformanceWorkspace({
         <div className="kxd-ces-exec__hero-veil" aria-hidden="true" />
         <div className="kxd-ces-exec__hero-vignette" aria-hidden="true" />
         <div className="kxd-ces-exec__hero-inner">
-          {presentation.logoSrc ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              className="kxd-ces-exec__logo"
-              src={presentation.logoSrc}
-              alt={presentation.logoAlt}
-            />
-          ) : null}
           <p className="kxd-ces-exec__eyebrow">{presentation.workspaceEyebrow}</p>
           <h1 className="kxd-ces-exec__brand">{performance.clientName}</h1>
           <p className="kxd-ces-exec__workspace-title">{presentation.workspaceTitle}</p>

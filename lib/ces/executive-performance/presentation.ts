@@ -24,7 +24,7 @@ const PRIMAL_PRESENTATION: ExperiencePresentation = {
   heroImageSrc: "/migrated-assets/projects/primal-motorsports-hero.jpg",
   heroImageAlt: "Radical race cars on track — Primal Motorsports",
   heroOverlay: "deep",
-  heroFocus: "center 38%",
+  heroFocus: "62% 42%",
   logoSrc: "/migrated-assets/logos/primal.svg",
   logoAlt: "Primal Motorsports",
   workspaceEyebrow: "Private Partnership Workspace",
@@ -32,7 +32,7 @@ const PRIMAL_PRESENTATION: ExperiencePresentation = {
   introduction:
     "A calm view of the partnership — where the work stands, and what deserves attention next.",
   actionAccent: "#A83424",
-  intelligenceAccent: "#1E5BB8",
+  intelligenceAccent: "#2B6CB0",
   zoneOrder: [...DEFAULT_ZONE_ORDER],
 };
 
