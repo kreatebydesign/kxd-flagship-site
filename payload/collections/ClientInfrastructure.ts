@@ -185,6 +185,28 @@ export const ClientInfrastructure: CollectionConfig = {
                   "Optional manager (MCC) login-customer-id when the Ads account is under a manager hierarchy.",
               },
             },
+            {
+              name: "reportingAutomationEnabled",
+              type: "checkbox",
+              label: "Reporting Automation Enabled",
+              defaultValue: true,
+              admin: {
+                description:
+                  "When enabled, the Shared Core reporting sweep may refresh entitled providers for this client.",
+              },
+            },
+            {
+              name: "reportingSyncHourPacific",
+              type: "number",
+              label: "Reporting Sync Hour (Pacific)",
+              defaultValue: 5,
+              min: 0,
+              max: 23,
+              admin: {
+                description:
+                  "Daily automated sync hour in America/Los_Angeles (default 5 = 5:00 AM Pacific).",
+              },
+            },
             { name: "emailProvider", type: "text", label: "Email Provider" },
             { name: "workspaceProvider", type: "text", label: "Workspace Provider" },
             { name: "emailDomain", type: "text", label: "Email Domain" },

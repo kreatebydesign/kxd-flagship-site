@@ -65,6 +65,8 @@ import * as migration_20260807_phase28b_sales_leads_estimated_mrr_column from '.
 import * as migration_20260712_phase29c_reporting_provider_connections from './20260712_phase29c_reporting_provider_connections';
 import * as migration_20260713_phase31c_reporting_facts from './20260713_phase31c_reporting_facts';
 import * as migration_20260713_phase32b_google_ads_customer_fields from './20260713_phase32b_google_ads_customer_fields';
+import * as migration_20260714_phase33a_reporting_automation from './20260714_phase33a_reporting_automation';
+import * as migration_20260714_phase33a1_reporting_scheduler_reliability from './20260714_phase33a1_reporting_scheduler_reliability';
 
 export const migrations = [
   {
@@ -401,5 +403,15 @@ export const migrations = [
     up: migration_20260713_phase32b_google_ads_customer_fields.up,
     down: migration_20260713_phase32b_google_ads_customer_fields.down,
     name: '20260713_phase32b_google_ads_customer_fields',
+  },
+  {
+    up: migration_20260714_phase33a_reporting_automation.up,
+    down: migration_20260714_phase33a_reporting_automation.down,
+    name: '20260714_phase33a_reporting_automation',
+  },
+  {
+    up: migration_20260714_phase33a1_reporting_scheduler_reliability.up,
+    down: migration_20260714_phase33a1_reporting_scheduler_reliability.down,
+    name: '20260714_phase33a1_reporting_scheduler_reliability',
   },
 ];

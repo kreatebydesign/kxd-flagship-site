@@ -83,6 +83,37 @@ export {
   type ProviderReadinessStatus,
 } from "./readiness";
 
+/** Phase 33A / 33A.1 — Automated Reporting Engine (pure helpers; orchestrator via ./automation/server) */
+export {
+  REPORTING_AUTOMATION_PROVIDERS,
+  REPORTING_SWEEP_CRON_UTC,
+  REPORTING_SCHEDULE_TIMEZONE,
+  DEFAULT_REPORTING_SYNC_HOUR_PACIFIC,
+  reportingBackoffMinutes,
+  nextDailyPacificSyncAt,
+  lastPacificSyncSlotAt,
+  isReportingSyncDue,
+  isScheduledWindowComplete,
+  resolveScheduledWindow,
+  isReportingLeaseActive,
+  sanitizeReportingFailureMessage,
+  type ReportingSweepSummary,
+  type ReportingProviderSyncState,
+  type ReportingIntegrationStatus,
+  type RunReportingSweepInput,
+} from "./automation";
+
+/** Phase 33A — Executive health + fact-bound narratives (no UI coupling) */
+export {
+  composeExecutiveReportingHealth,
+  type ExecutiveReportingHealth,
+  type ComposeExecutiveReportingHealthInput,
+} from "./executive-health";
+export {
+  composeExecutiveReportingNarratives,
+  type ExecutiveReportingNarrative,
+} from "./executive-narratives";
+
 /** Performance report view helpers (existing) */
 export {
   buildPerformanceReportView,

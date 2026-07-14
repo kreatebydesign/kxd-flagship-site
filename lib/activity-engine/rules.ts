@@ -28,7 +28,7 @@ export function categoryForEventType(eventType: string): ExecutiveTimelineCatego
   if (t.includes("sales")) return "finance";
   if (t.includes("creative")) return "creative";
   if (t.includes("seo")) return "seo";
-  if (t.includes("analytics")) return "analytics";
+  if (t.includes("analytics") || t.includes("reporting")) return "analytics";
   if (t.includes("onboarding")) return "onboarding";
   if (t.includes("work.") || t.includes("task")) return "project";
   if (t.includes("client.")) return "relationship";
