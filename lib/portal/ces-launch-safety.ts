@@ -44,6 +44,14 @@ export function isPortalNavVisibleForCesLaunch(
 ): boolean {
   if (!isCesFlagshipPortal(profile)) return true;
   if (navId === "overview" || navId === "website-review") return true;
+  /* Inventory — CES module entitlement (Primal first). */
+  if (
+    navId === "inventory" &&
+    profile &&
+    isCesModuleEnabled(profile, "inventory")
+  ) {
+    return true;
+  }
   /* Partnership briefing — only when presentation + memory make it available. */
   if (navId === "partnership") return true;
   if (CES_LAUNCH_HIDDEN_NAV_IDS.includes(navId as ClientHqNavId)) return false;

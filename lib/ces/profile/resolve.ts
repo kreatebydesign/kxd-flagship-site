@@ -29,6 +29,7 @@ const COLLECTION = "client-experience-profiles";
 const CES_MODULE_IDS = new Set<CesModuleId>([
   "website-review",
   "executive-performance",
+  "inventory",
 ]);
 
 const REPORTING_CAPABILITY_SET = new Set<string>(ALL_REPORTING_CAPABILITIES);

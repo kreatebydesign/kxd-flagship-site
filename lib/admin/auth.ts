@@ -3,7 +3,7 @@ import "server-only";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
-import { executeAuthStrategies, getPayload } from "payload";
+import { getPayload } from "payload";
 import config from "@payload-config";
 
 import { isPayloadAdmin } from "../../payload/access/index.ts";
@@ -12,15 +12,22 @@ import {
   PAYLOAD_ADMIN_LOGIN_PATH,
 } from "./constants";
 
+/**
+ * Resolve the authenticated Payload **admin** (`users`) session.
+ *
+ * Portal users share Payload's auth cookie namespace when `payload.login` is used
+ * for `portal-users`. Only `users` collection sessions are accepted here —
+ * portal sessions never grant operator APIs.
+ */
 export async function getPayloadAdminUser() {
   const headersList = await headers();
   const payload = await getPayload({ config });
-  const { user } = await executeAuthStrategies({
-    headers: headersList,
-    payload,
-  });
+  const { user } = await payload.auth({ headers: headersList });
 
-  return isPayloadAdmin(user) ? user : null;
+  if (!user) return null;
+  if (!isPayloadAdmin(user)) return null;
+  if (user.collection && user.collection !== "users") return null;
+  return user;
 }
 
 /**
@@ -31,7 +38,7 @@ export async function requirePayloadAdminApi() {
   const user = await getPayloadAdminUser();
   if (!user) {
     return NextResponse.json(
-      { success: false, error: "Unauthorized." },
+      { success: false, ok: false, error: "Unauthorized." },
       { status: 401 },
     );
   }

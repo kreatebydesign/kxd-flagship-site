@@ -1,5 +1,9 @@
 /**
  * POST /api/portal/auth/login
+ *
+ * Uses Payload LocalAPI `payload.login` so lockout / loginAttempts are enforced.
+ * Session cookie is custom `kxd-portal-session` only — LocalAPI login does NOT call
+ * setPayloadAuthCookie, so this path does not overwrite admin `payload-token`.
  */
 import { NextRequest, NextResponse } from "next/server";
 import { AuthenticationError } from "payload";
@@ -41,6 +45,8 @@ export async function POST(req: NextRequest) {
 
     const payload = await getPayload({ config });
 
+    // LocalAPI login: verifies hash via authenticateLocalStrategy, enforces
+    // maxLoginAttempts/lockUntil, resets attempts on success. Does not set cookies.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const result = await payload.login({
       collection: PORTAL_USERS_COLLECTION as any,
@@ -59,7 +65,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           ok: false,
-          message: "This workspace account isn't active. Please reach out to us for help.",
+          message:
+            "This workspace account isn't active. Please reach out to us for help.",
         },
         { status: 403 },
       );

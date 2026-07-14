@@ -6459,6 +6459,14 @@ a.kxd-os-platform-subsystem-card__title:hover {
   color: var(--kxd-os-text-secondary);
 }
 
+.kxd-os-review-inbox__status-saving {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  color: var(--kxd-os-text-faint);
+}
+
 @media (max-width: 960px) {
   .kxd-os-review-inbox__head {
     display: none;

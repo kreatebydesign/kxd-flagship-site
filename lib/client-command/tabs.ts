@@ -7,6 +7,7 @@ export const COMMAND_WORKSPACE_TABS = [
   { id: "invoices", label: "Invoices" },
   { id: "retainers", label: "Retainers" },
   { id: "files", label: "Files" },
+  { id: "inventory", label: "Inventory" },
   { id: "domains", label: "Domains" },
   { id: "emails", label: "Communications" },
   { id: "intelligence", label: "Intelligence" },

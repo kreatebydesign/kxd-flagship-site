@@ -18,11 +18,16 @@ export const PRIMAL_EXPERIENCE_PROFILE = {
   reassuranceLine: "Every revision is tracked. Nothing gets lost.",
   supportTone: "direct" as const,
   portalSidebarLabel: "Partnership workspace",
-  enabledModules: ["website-review", "executive-performance"] as const,
+  enabledModules: ["website-review", "executive-performance", "inventory"] as const,
   showKxdPartnerMark: true,
   partnerFooterLine: "Powered by KXD OS",
   terminology: {
     "nav.website-review": "Website Review",
+    "nav.inventory": "Inventory",
+    "inventory.landing.eyebrow": "Listings",
+    "inventory.landing.title": "Inventory",
+    "inventory.landing.lead":
+      "Add, update, and publish vehicles for your public website — without waiting on a developer.",
     "portal.home.workspaceLabel": "Primal Workspace",
     "portal.home.eyebrow": "Primal Workspace",
     "portal.home.lead":

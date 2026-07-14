@@ -75,18 +75,43 @@ export function ReviewInboxScreen({ data: initialData }: ReviewInboxScreenProps)
 
   async function updateStatus(item: ReviewInboxItem, status: ReviewInboxRequestStatus) {
     if (item.status === status) return;
+    const previous = item.status;
 
+    // Optimistic: keep the controlled select from snapping back during save.
+    setItems((prev) =>
+      prev.map((row) => (row.id === item.id ? { ...row, status } : row)),
+    );
     setUpdatingId(item.id);
     setStatusError(null);
     try {
       const res = await fetch(`/api/admin/client-requests/${item.id}/status`, {
         method: "POST",
+        credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),
       });
 
-      const body = (await res.json()) as { ok?: boolean; status?: ReviewInboxRequestStatus; error?: string };
-      if (!res.ok || !body.ok || !body.status) {
+      if (res.status === 401) {
+        setItems((prev) =>
+          prev.map((row) => (row.id === item.id ? { ...row, status: previous } : row)),
+        );
+        const returnPath = window.location.pathname;
+        window.location.href = `/admin/login?redirect=${encodeURIComponent(returnPath)}`;
+        return;
+      }
+
+      let body: {
+        ok?: boolean;
+        success?: boolean;
+        status?: ReviewInboxRequestStatus;
+        error?: string;
+      } = {};
+      try {
+        body = (await res.json()) as typeof body;
+      } catch {
+        throw new Error("Could not update status (invalid response).");
+      }
+      if (!res.ok || !(body.ok || body.success) || !body.status) {
         throw new Error(body.error ?? "Could not update status.");
       }
 
@@ -95,6 +120,9 @@ export function ReviewInboxScreen({ data: initialData }: ReviewInboxScreenProps)
       );
       router.refresh();
     } catch (err) {
+      setItems((prev) =>
+        prev.map((row) => (row.id === item.id ? { ...row, status: previous } : row)),
+      );
       setStatusError({
         id: item.id,
         message: err instanceof Error ? err.message : "Could not update status.",
@@ -223,6 +251,7 @@ export function ReviewInboxScreen({ data: initialData }: ReviewInboxScreenProps)
                         <select
                           value={item.status}
                           disabled={updatingId === item.id}
+                          aria-busy={updatingId === item.id}
                           aria-label={`Update status for ${item.title}`}
                           onChange={(e) =>
                             void updateStatus(item, e.target.value as ReviewInboxRequestStatus)
@@ -234,6 +263,11 @@ export function ReviewInboxScreen({ data: initialData }: ReviewInboxScreenProps)
                             </option>
                           ))}
                         </select>
+                        {updatingId === item.id ? (
+                          <span className="kxd-os-review-inbox__status-saving" role="status">
+                            Saving…
+                          </span>
+                        ) : null}
                       </label>
                       <ReviewDeleteControl
                         requestId={item.id}

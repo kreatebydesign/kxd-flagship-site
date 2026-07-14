@@ -6,10 +6,20 @@ import {
   OS_LAUNCHER_PATH,
 } from "./constants";
 
+/** True when the Payload admin JWT cookie is present (`payload-token`). */
 export function hasPayloadAuthCookie(request: NextRequest): boolean {
+  const tokenName = `${PAYLOAD_AUTH_COOKIE_PREFIX}-token`;
+  if (request.cookies.get(tokenName)?.value) return true;
+  // Fallback: any payload-* token-shaped cookie (older Payload naming)
   return request.cookies
     .getAll()
-    .some((cookie) => cookie.name.startsWith(PAYLOAD_AUTH_COOKIE_PREFIX));
+    .some(
+      (cookie) =>
+        cookie.name === tokenName ||
+        (cookie.name.startsWith(`${PAYLOAD_AUTH_COOKIE_PREFIX}-`) &&
+          cookie.name.endsWith("-token") &&
+          Boolean(cookie.value)),
+    );
 }
 
 /** Preserve the full pathname so post-login navigation hits the real app route. */

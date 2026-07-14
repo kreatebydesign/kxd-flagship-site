@@ -106,28 +106,58 @@ export function ReviewWorkspaceScreen({ review: initialReview }: ReviewWorkspace
   const [copied, setCopied] = useState(false);
   const [statusError, setStatusError] = useState<string | null>(null);
   const [notesError, setNotesError] = useState<string | null>(null);
+  const [completionNote, setCompletionNote] = useState("");
 
   const statusOption = reviewInboxStatusOption(status);
   const prioVariant = PRIO_VARIANT[review.priority] ?? "default";
 
   async function handleStatusChange(next: ReviewInboxRequestStatus) {
     if (next === status) return;
+    const previous = status;
+    // Optimistic: controlled <select> otherwise snaps back while the request runs.
+    setStatus(next);
+    setReview((prev) => ({ ...prev, status: next }));
     setUpdatingStatus(true);
     setStatusError(null);
     try {
       const res = await fetch(`/api/admin/client-requests/${review.id}/status`, {
         method: "POST",
+        credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: next }),
+        body: JSON.stringify({
+          status: next,
+          // Optional — omit when empty; never block Complete on a note.
+          clientCompletionNote:
+            next === "complete" ? completionNote.trim() || undefined : undefined,
+        }),
       });
-      const body = (await res.json()) as { ok?: boolean; status?: ReviewInboxRequestStatus; error?: string };
-      if (!res.ok || !body.ok || !body.status) {
+      if (res.status === 401) {
+        setStatus(previous);
+        setReview((prev) => ({ ...prev, status: previous }));
+        const returnPath = window.location.pathname;
+        window.location.href = `/admin/login?redirect=${encodeURIComponent(returnPath)}`;
+        return;
+      }
+      let body: {
+        ok?: boolean;
+        success?: boolean;
+        status?: ReviewInboxRequestStatus;
+        error?: string;
+      } = {};
+      try {
+        body = (await res.json()) as typeof body;
+      } catch {
+        throw new Error("Could not update status (invalid response).");
+      }
+      if (!res.ok || !(body.ok || body.success) || !body.status) {
         throw new Error(body.error ?? "Could not update status.");
       }
       setStatus(body.status);
       setReview((prev) => ({ ...prev, status: body.status! }));
       router.refresh();
     } catch (err) {
+      setStatus(previous);
+      setReview((prev) => ({ ...prev, status: previous }));
       setStatusError(err instanceof Error ? err.message : "Could not update status.");
     } finally {
       setUpdatingStatus(false);
@@ -335,11 +365,25 @@ export function ReviewWorkspaceScreen({ review: initialReview }: ReviewWorkspace
               </h2>
 
               <label className="kxd-os-review-workspace__action-field">
+                <span className="kxd-os-review-workspace__action-label">
+                  Client completion note
+                </span>
+                <textarea
+                  className="kxd-os-review-workspace__notes"
+                  rows={3}
+                  value={completionNote}
+                  onChange={(e) => setCompletionNote(e.target.value)}
+                  placeholder="Optional note shown in Completed History when marked complete."
+                />
+              </label>
+
+              <label className="kxd-os-review-workspace__action-field">
                 <span className="kxd-os-review-workspace__action-label">Status</span>
                 <select
                   className="kxd-os-review-workspace__select"
                   value={status}
                   disabled={updatingStatus}
+                  aria-busy={updatingStatus}
                   onChange={(e) =>
                     void handleStatusChange(e.target.value as ReviewInboxRequestStatus)
                   }
@@ -350,6 +394,11 @@ export function ReviewWorkspaceScreen({ review: initialReview }: ReviewWorkspace
                     </option>
                   ))}
                 </select>
+                {updatingStatus ? (
+                  <span className="kxd-os-review-workspace__saved" role="status">
+                    Saving status…
+                  </span>
+                ) : null}
               </label>
               {statusError ? (
                 <p className="kxd-os-review-workspace__notice kxd-os-review-workspace__notice--error" role="alert">

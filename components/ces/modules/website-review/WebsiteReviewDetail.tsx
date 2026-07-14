@@ -73,25 +73,73 @@ export function WebsiteReviewDetail({ profile, review }: WebsiteReviewDetailProp
             </p>
           )}
 
-          {location ? (
+          {location ||
+          review.pageLabel ||
+          review.pageUrl ||
+          review.section ||
+          review.markerNumber != null ||
+          review.completedAt ||
+          review.completionNote ? (
             <dl className="kxd-ces-detail-facts">
-              <div className="kxd-ces-detail-facts__row">
-                <dt>On your site</dt>
-                <dd>{location}</dd>
-              </div>
-              {review.reviewContext?.pageUrl ? (
+              {review.pageLabel || review.pagePath ? (
                 <div className="kxd-ces-detail-facts__row">
-                  <dt>Page</dt>
+                  <dt>Website page</dt>
+                  <dd>{review.pageLabel || review.pagePath}</dd>
+                </div>
+              ) : null}
+              {review.section ? (
+                <div className="kxd-ces-detail-facts__row">
+                  <dt>Section</dt>
+                  <dd>{review.section}</dd>
+                </div>
+              ) : null}
+              {review.markerNumber != null ? (
+                <div className="kxd-ces-detail-facts__row">
+                  <dt>Marker</dt>
+                  <dd>#{review.markerNumber}</dd>
+                </div>
+              ) : null}
+              {location ? (
+                <div className="kxd-ces-detail-facts__row">
+                  <dt>On your site</dt>
+                  <dd>{location}</dd>
+                </div>
+              ) : null}
+              <div className="kxd-ces-detail-facts__row">
+                <dt>Submitted</dt>
+                <dd>{formatDate(review.submittedAt)}</dd>
+              </div>
+              <div className="kxd-ces-detail-facts__row">
+                <dt>Status</dt>
+                <dd>
+                  <WebsiteReviewStatus status={review.status} />
+                </dd>
+              </div>
+              {review.completedAt ? (
+                <div className="kxd-ces-detail-facts__row">
+                  <dt>Completed</dt>
+                  <dd>{formatDate(review.completedAt)}</dd>
+                </div>
+              ) : null}
+              {review.pageUrl ? (
+                <div className="kxd-ces-detail-facts__row">
+                  <dt>Page URL</dt>
                   <dd>
                     <a
-                      href={review.reviewContext.pageUrl}
+                      href={review.pageUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="kxd-ces-detail-link"
                     >
-                      {review.reviewContext.pageUrl}
+                      {review.pageUrl}
                     </a>
                   </dd>
+                </div>
+              ) : null}
+              {review.completionNote ? (
+                <div className="kxd-ces-detail-facts__row">
+                  <dt>Completion note</dt>
+                  <dd>{review.completionNote}</dd>
                 </div>
               ) : null}
             </dl>

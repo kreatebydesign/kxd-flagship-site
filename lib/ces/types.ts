@@ -3,7 +3,10 @@
 import type { ReportingCapabilityId } from "@/lib/reporting/domain/capabilities";
 import type { ExperiencePresentation } from "./executive-performance/types";
 
-export type CesModuleId = "website-review" | "executive-performance";
+export type CesModuleId =
+  | "website-review"
+  | "executive-performance"
+  | "inventory";
 
 export type ExperienceProfileSource = "profile" | "fallback";
 

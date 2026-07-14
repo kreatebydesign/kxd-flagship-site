@@ -110,6 +110,10 @@ export const publishRequestActivityHook: CollectionAfterChangeHook = async ({
   const requestId = doc.id as number;
   const title = String(doc.requestTitle ?? "Request");
   const isWebsiteReview = doc.experienceModule === "website-review";
+  const context = (req.context ?? {}) as {
+    clientCompletionNote?: string;
+    actorEmail?: string;
+  };
 
   try {
     if (operation === "create") {
@@ -148,11 +152,19 @@ export const publishRequestActivityHook: CollectionAfterChangeHook = async ({
       status !== previousStatus
     ) {
       const clientStatus = mapRequestStatusToReview(status);
-      await publishWebsiteReviewStatusActivity(
-        doc,
-        clientStatus,
+      await publishWebsiteReviewActivity(
+        {
+          clientId,
+          requestId,
+          clientStatus,
+          summary:
+            clientStatus === "completed" && context.clientCompletionNote
+              ? context.clientCompletionNote
+              : undefined,
+          author: context.actorEmail,
+          timestamp: (doc.updatedAt as string) || undefined,
+        },
         req.payload,
-        (doc.updatedAt as string) || undefined,
       );
     }
 
@@ -163,7 +175,8 @@ export const publishRequestActivityHook: CollectionAfterChangeHook = async ({
           requestId,
           eventType: "request.completed",
           title: `Request completed · ${title}`,
-          summary: "Client request marked complete.",
+          summary:
+            context.clientCompletionNote || "Client request marked complete.",
           timestamp:
             (doc.completedDate as string) || (doc.updatedAt as string) || undefined,
           status: "completed",

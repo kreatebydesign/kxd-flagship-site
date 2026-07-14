@@ -1,13 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ReviewSessionBootstrap } from "@/lib/ces/modules/website-review/session-data";
 import type { ReviewSessionMode, ReviewSessionPin, ReviewViewport } from "@/lib/ces/review";
 import {
   loadSessionPins,
-  nextPinNumber,
+  nextPinNumberForPage,
+  pinsForPageUrl,
   REVIEW_OVERLAY_EXTENSION_OPERATOR,
+  reviewPageKey,
   saveSessionPins,
+  summarizeReviewPages,
 } from "@/lib/ces/review";
 import { PORTAL_CLIENT_LANGUAGE } from "@/lib/ces/copy/portal-language";
 import { ReviewFeedbackPopover } from "./ReviewFeedbackPopover";
@@ -26,6 +29,7 @@ export interface ReviewSessionScreenProps {
 
 export function ReviewSessionScreen({ bootstrap }: ReviewSessionScreenProps) {
   const sessionStorageId = useMemo(() => createSessionStorageId(bootstrap), [bootstrap]);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const [mode, setMode] = useState<ReviewSessionMode>("browse");
   const [iframeUrl, setIframeUrl] = useState(bootstrap.iframeUrl);
@@ -47,9 +51,24 @@ export function ReviewSessionScreen({ bootstrap }: ReviewSessionScreenProps) {
     saveSessionPins(sessionStorageId, pins);
   }, [hydrated, pins, sessionStorageId]);
 
-  const activePin = pins.find((pin) => pin.id === activePinId) ?? null;
+  const pagePins = useMemo(
+    () => pinsForPageUrl(pins, activeUrl),
+    [pins, activeUrl],
+  );
+  const pageSummaries = useMemo(() => summarizeReviewPages(pins), [pins]);
+  const activePin = pagePins.find((pin) => pin.id === activePinId) ?? null;
   const popoverOpen = popoverMode != null;
   const isCommentMode = mode === "comment";
+
+  useEffect(() => {
+    // When the page changes, close any pin UI that belongs to a previous page.
+    if (activePinId && !pagePins.some((pin) => pin.id === activePinId)) {
+      setActivePinId(null);
+      setPopoverMode(null);
+      setPendingViewport(null);
+      setAnchorPoint(null);
+    }
+  }, [activePinId, pagePins]);
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -64,11 +83,27 @@ export function ReviewSessionScreen({ bootstrap }: ReviewSessionScreenProps) {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [mode, popoverOpen]);
 
-  const handleNavigate = useCallback(() => {
-    const trimmed = iframeUrl.trim();
+  const syncActiveUrl = useCallback((nextUrl: string) => {
+    const trimmed = nextUrl.trim();
     if (!trimmed) return;
     setActiveUrl(trimmed);
-  }, [iframeUrl]);
+    setIframeUrl(trimmed);
+  }, []);
+
+  const handleNavigate = useCallback(() => {
+    syncActiveUrl(iframeUrl);
+  }, [iframeUrl, syncActiveUrl]);
+
+  const handleIframeLoad = useCallback(() => {
+    try {
+      const href = iframeRef.current?.contentWindow?.location?.href;
+      if (href && href !== "about:blank" && reviewPageKey(href) !== reviewPageKey(activeUrl)) {
+        syncActiveUrl(href);
+      }
+    } catch {
+      // Cross-origin staging (expected) — toolbar URL remains the source of truth.
+    }
+  }, [activeUrl, syncActiveUrl]);
 
   const exitCommentMode = useCallback(() => {
     setMode("browse");
@@ -104,7 +139,9 @@ export function ReviewSessionScreen({ bootstrap }: ReviewSessionScreenProps) {
   const handleSaved = useCallback(
     (draftPin: ReviewSessionPin, requestId: number) => {
       setPins((prev) => {
-        const pinNumber = draftPin.number || nextPinNumber(prev);
+        const pinNumber =
+          draftPin.number ||
+          nextPinNumberForPage(prev, draftPin.anchor.viewport.pageUrl || activeUrl);
         const pin: ReviewSessionPin = {
           ...draftPin,
           number: pinNumber,
@@ -115,7 +152,14 @@ export function ReviewSessionScreen({ bootstrap }: ReviewSessionScreenProps) {
       });
       handleClosePopover();
     },
-    [handleClosePopover],
+    [activeUrl, handleClosePopover],
+  );
+
+  const handleSelectPage = useCallback(
+    (pageUrl: string) => {
+      syncActiveUrl(pageUrl);
+    },
+    [syncActiveUrl],
   );
 
   return (
@@ -123,8 +167,13 @@ export function ReviewSessionScreen({ bootstrap }: ReviewSessionScreenProps) {
       <ReviewSessionToolbar
         iframeUrl={iframeUrl}
         mode={mode}
+        pageSummaries={pageSummaries}
+        activePageKey={reviewPageKey(activeUrl)}
+        pagePinCount={pagePins.length}
+        totalPinCount={pins.length}
         onUrlChange={setIframeUrl}
         onNavigate={handleNavigate}
+        onSelectPage={handleSelectPage}
       />
 
       {isCommentMode && !popoverOpen ? (
@@ -141,15 +190,17 @@ export function ReviewSessionScreen({ bootstrap }: ReviewSessionScreenProps) {
 
       <div className="kxd-review-session__stage">
         <iframe
+          ref={iframeRef}
           title={PORTAL_CLIENT_LANGUAGE.reviewSessionIframeTitle}
           className="kxd-review-session__iframe"
           src={activeUrl}
+          onLoad={handleIframeLoad}
           sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
         />
         <ReviewOverlayLayer
           pageUrl={activeUrl}
           mode={mode}
-          pins={pins}
+          pins={pagePins}
           activePinId={activePinId}
           popoverOpen={popoverOpen}
           onCapture={handleCapture}
@@ -161,6 +212,7 @@ export function ReviewSessionScreen({ bootstrap }: ReviewSessionScreenProps) {
             viewport={pendingViewport}
             existingPin={popoverMode === "view" ? activePin : null}
             anchorPoint={anchorPoint ?? undefined}
+            nextPinNumber={nextPinNumberForPage(pins, activeUrl)}
             onClose={handleClosePopover}
             onSaved={handleSaved}
           />

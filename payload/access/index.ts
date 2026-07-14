@@ -2,11 +2,16 @@ import type { Access, PayloadRequest } from "payload";
 
 export const isAuthenticated: Access = ({ req: { user } }) => Boolean(user);
 
-/** Payload admin (`users` collection). Legacy sessions may omit `collection`. */
+/**
+ * Payload admin (`users` collection only).
+ * Portal users and other auth collections must never pass this check.
+ * Legacy admin JWTs may omit `collection` — still accepted when no collection is tagged.
+ */
 export function isPayloadAdmin(
   user: PayloadRequest["user"],
 ): boolean {
   if (!user) return false;
+  if (user.collection === "portal-users") return false;
   return user.collection === "users" || user.collection === undefined;
 }
 

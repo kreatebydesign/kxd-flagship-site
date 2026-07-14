@@ -63,13 +63,21 @@ export function buildReviewContextFromDraft(input: {
   pageUrl?: string;
   source?: WebsiteReviewPageContext["source"];
   reviewAnchor?: WebsiteReviewPageContext["reviewAnchor"];
+  markerNumber?: number;
 }): WebsiteReviewPageContext | undefined {
   const pageLabel = input.pageLabel?.trim();
   const section = input.section?.trim();
   const pagePath = input.pagePath?.trim();
   const pageUrl = input.pageUrl?.trim();
 
-  if (!pageLabel && !section && !pagePath && !pageUrl && !input.reviewAnchor) {
+  if (
+    !pageLabel &&
+    !section &&
+    !pagePath &&
+    !pageUrl &&
+    !input.reviewAnchor &&
+    input.markerNumber == null
+  ) {
     return undefined;
   }
 
@@ -80,5 +88,9 @@ export function buildReviewContextFromDraft(input: {
     pageUrl: pageUrl || undefined,
     source: input.source ?? "manual",
     reviewAnchor: input.reviewAnchor,
+    markerNumber:
+      typeof input.markerNumber === "number" && Number.isFinite(input.markerNumber)
+        ? input.markerNumber
+        : undefined,
   };
 }

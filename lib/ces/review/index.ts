@@ -26,3 +26,11 @@ export {
   reviewSessionStorageKey,
   saveSessionPins,
 } from "./session-storage";
+
+export {
+  nextPinNumberForPage,
+  pinsForPageUrl,
+  reviewPageKey,
+  summarizeReviewPages,
+  type ReviewPageSummary,
+} from "./page-scope";

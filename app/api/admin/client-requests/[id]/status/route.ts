@@ -18,16 +18,27 @@ export async function POST(
     return NextResponse.json({ ok: false, error: "Invalid request id." }, { status: 400 });
   }
 
-  const body = (await req.json()) as { status?: string };
+  const body = (await req.json()) as {
+    status?: string;
+    clientCompletionNote?: string;
+  };
   const status = body.status?.trim() ?? "";
+  const clientCompletionNote = body.clientCompletionNote?.trim() || undefined;
 
   if (!isReviewInboxStatus(status)) {
     return NextResponse.json({ ok: false, error: "Invalid status." }, { status: 400 });
   }
 
   try {
-    const result = await updateReviewRequestStatus(requestId, status);
-    return NextResponse.json(result);
+    const result = await updateReviewRequestStatus(requestId, status, {
+      actorEmail:
+        typeof auth === "object" && auth && "email" in auth
+          ? String((auth as { email?: string }).email ?? "")
+          : undefined,
+      clientCompletionNote:
+        status === "complete" ? clientCompletionNote : undefined,
+    });
+    return NextResponse.json({ success: true, ...result });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Status update failed.";
     return NextResponse.json({ ok: false, error: message }, { status: 400 });

@@ -59,6 +59,21 @@ export async function mapRequestDocToWebsiteReviewItem(
   const reviewContext = parseReviewContext(doc);
   const attachments = await loadAttachmentsForRequest(requestId);
   const pageContext = formatPageContextDisplay(reviewContext, doc.pageContext as string | null);
+  const completedAt =
+    doc.completedDate != null
+      ? String(doc.completedDate)
+      : status === "completed" || status === "closed"
+        ? String(doc.updatedAt ?? doc.createdAt ?? "")
+        : null;
+
+  const completionEvent = [...timeline]
+    .reverse()
+    .find(
+      (event) =>
+        /complete|closed/i.test(event.label) ||
+        event.id.includes("completed") ||
+        event.id.includes("closed"),
+    );
 
   return {
     id: String(requestId),
@@ -70,8 +85,18 @@ export async function mapRequestDocToWebsiteReviewItem(
     status,
     submittedAt: String(doc.createdAt ?? new Date().toISOString()),
     updatedAt: String(doc.updatedAt ?? doc.createdAt ?? new Date().toISOString()),
+    completedAt,
+    completionNote: completionEvent?.detail ?? null,
     pageContext,
     reviewContext,
+    pageLabel: reviewContext?.pageLabel ?? null,
+    pagePath: reviewContext?.pagePath ?? null,
+    pageUrl: reviewContext?.pageUrl ?? null,
+    section: reviewContext?.section ?? null,
+    markerNumber:
+      typeof reviewContext?.markerNumber === "number"
+        ? reviewContext.markerNumber
+        : null,
     attachments,
     timeline,
   };

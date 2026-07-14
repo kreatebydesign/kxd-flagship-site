@@ -78,7 +78,7 @@ export const PORTAL_CLIENT_LANGUAGE = {
   reviewCtaVisual: "Review Website",
   reviewCtaSecondary: "Open Review Site",
   reviewActiveSection: "Active revisions",
-  reviewCompletedSection: "Recently complete",
+  reviewCompletedSection: "Completed History",
   reviewEmptyTitle: "No updates yet",
   reviewEmptyLead:
     "Submit your first website review request and we'll organize every update here.",

@@ -159,6 +159,10 @@ export async function getReviewInboxSummary(): Promise<{ newCount: number; activ
 export async function updateReviewRequestStatus(
   requestId: number,
   status: ReviewInboxRequestStatus,
+  options?: {
+    actorEmail?: string;
+    clientCompletionNote?: string;
+  },
 ): Promise<{ ok: true; status: ReviewInboxRequestStatus }> {
   const payload = await getPayload({ config });
 
@@ -187,6 +191,10 @@ export async function updateReviewRequestStatus(
     id: requestId,
     data,
     overrideAccess: true,
+    context: {
+      actorEmail: options?.actorEmail,
+      clientCompletionNote: options?.clientCompletionNote,
+    },
   });
 
   const clientId =
@@ -196,12 +204,18 @@ export async function updateReviewRequestStatus(
         ? Number((row.client as AnyDoc).id) || null
         : null;
 
-  await processOperationalFlow({
+  // Persist first, respond fast. Operational flow loads the full work pool and
+  // must not block Complete (or any status) — that previously hung 15–70s and
+  // made the controlled dropdown look like a silent no-op.
+  void processOperationalFlow({
     source: "review",
     entityId: requestId,
     clientId,
     previousStatus,
     nextStatus: status,
+    actorEmail: options?.actorEmail,
+  }).catch((err) => {
+    console.error("[KXD Review Inbox] processOperationalFlow failed:", err);
   });
 
   return { ok: true, status };

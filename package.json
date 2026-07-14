@@ -22,6 +22,7 @@
     "verify:client-launch": "tsx scripts/verify-client-launch-readiness.ts",
     "verify:client-launch-wizard": "tsx scripts/verify-client-launch-wizard.ts",
     "verify:client-launch-pipeline": "npm run verify:client-launch-wizard",
+    "verify:client-inventory": "tsx scripts/verify-client-inventory.ts",
     "verify:scheduling": "tsx scripts/verify-scheduling-domain.ts",
     "verify:calendar": "tsx scripts/verify-google-calendar-read.ts",
     "verify:calendar-write": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/verify-calendar-write.ts",

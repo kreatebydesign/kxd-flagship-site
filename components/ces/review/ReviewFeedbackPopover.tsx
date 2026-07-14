@@ -24,6 +24,7 @@ export interface ReviewFeedbackPopoverProps {
   viewport: ReviewViewport | null;
   existingPin?: ReviewSessionPin | null;
   anchorPoint?: { x: number; y: number };
+  nextPinNumber?: number;
   onClose: () => void;
   onSaved: (pin: ReviewSessionPin, requestId: number) => void;
 }
@@ -33,6 +34,7 @@ export function ReviewFeedbackPopover({
   viewport,
   existingPin,
   anchorPoint,
+  nextPinNumber = 1,
   onClose,
   onSaved,
 }: ReviewFeedbackPopoverProps) {
@@ -87,12 +89,14 @@ export function ReviewFeedbackPopover({
     setError(null);
 
     const reviewAnchor = createReviewAnchor(viewport, existingPin?.anchor.id);
+    const pinNumber = existingPin?.number || nextPinNumber;
     const reviewContext = buildReviewContextFromDraft({
       pageLabel: viewport.pageLabel,
       pagePath: viewport.pagePath,
       pageUrl: viewport.pageUrl,
       source: "visual-review",
       reviewAnchor,
+      markerNumber: pinNumber,
     });
 
     try {
@@ -120,7 +124,7 @@ export function ReviewFeedbackPopover({
       onSaved(
         {
           id: reviewAnchor.id,
-          number: existingPin?.number ?? 0,
+          number: pinNumber,
           anchor: { ...reviewAnchor, requestId: data.id },
           title: trimmedTitle,
           summary: trimmedDetails,

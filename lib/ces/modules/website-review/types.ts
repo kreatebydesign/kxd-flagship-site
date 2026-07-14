@@ -12,6 +12,8 @@ export interface WebsiteReviewPageContext {
   section?: string;
   source?: WebsiteReviewContextSource;
   reviewAnchor?: ReviewAnchor;
+  /** Visual pin number for the page (page-scoped, 1-based) */
+  markerNumber?: number;
 }
 
 export interface WebsiteReviewTimelineEvent {
@@ -30,8 +32,15 @@ export interface WebsiteReviewItem {
   status: WebsiteReviewClientStatus;
   submittedAt: string;
   updatedAt: string;
+  completedAt?: string | null;
+  completionNote?: string | null;
   pageContext?: string | null;
   reviewContext?: WebsiteReviewPageContext | null;
+  pageLabel?: string | null;
+  pagePath?: string | null;
+  pageUrl?: string | null;
+  section?: string | null;
+  markerNumber?: number | null;
   attachments: WebsiteReviewAttachmentMeta[];
   timeline: WebsiteReviewTimelineEvent[];
 }

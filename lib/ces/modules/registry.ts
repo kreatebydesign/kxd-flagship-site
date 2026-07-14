@@ -13,6 +13,18 @@ export const CES_MODULE_REGISTRY: CesModuleDefinition[] = [
     },
     vocabularyNamespace: "website-review",
   },
+  {
+    moduleId: "inventory",
+    label: "Inventory",
+    navGroup: "work",
+    navOrder: 8,
+    routes: {
+      landing: "/portal/inventory",
+      request: "/portal/inventory/new",
+      detail: (id) => `/portal/inventory/${id}`,
+    },
+    vocabularyNamespace: "inventory",
+  },
 ];
 
 export function getCesModuleDefinition(moduleId: string): CesModuleDefinition | undefined {
