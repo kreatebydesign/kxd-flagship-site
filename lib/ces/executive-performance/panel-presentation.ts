@@ -6,27 +6,24 @@
 import type { ExecutivePerformancePanel } from "./types";
 
 const PANEL_TITLES: Record<string, string> = {
-  website: "Website Intelligence",
-  search: "Search Intelligence",
-  ads: "Advertising Intelligence",
-  momentum: "Partnership Momentum",
+  website: "Website",
+  search: "Search",
+  ads: "Google Ads",
+  momentum: "Momentum",
 };
 
 const ENABLEMENT_SUPPORT: Record<string, string> = {
-  website:
-    "Once Website Analytics is connected, meaningful updates can appear here.",
-  search:
-    "Once Search Console is connected, meaningful updates can appear here.",
-  ads: "Once Google Ads reporting is enabled, meaningful updates can appear here.",
-  momentum:
-    "A fuller momentum view appears once trustworthy reporting is active.",
+  website: "Once website analytics is connected, activity will appear here.",
+  search: "Once Search Console is connected, activity will appear here.",
+  ads: "Once advertising reporting is ready, activity will appear here.",
+  momentum: "A fuller view appears once trustworthy signals are active.",
 };
 
 const CONNECTED_CARE: Record<string, string> = {
-  website: "Shown from connected reporting for this period — never estimated.",
-  search: "Shown from connected Search Console for this period — never estimated.",
-  ads: "Shown from entitled advertising reporting when available — never estimated.",
-  momentum: "Drawn from the overall picture of entitled reporting signals.",
+  website: "From your connected reporting — never estimated.",
+  search: "From Search Console for this period — never estimated.",
+  ads: "From entitled advertising reporting — never estimated.",
+  momentum: "Drawn from the entitled reporting picture overall.",
 };
 
 export function executivePanelTitle(panel: ExecutivePerformancePanel): string {
@@ -39,7 +36,7 @@ export function executivePanelNarrative(
 ): { lead: string; support: string | null } {
   if (panel.state === "not-connected") {
     return {
-      lead: "This capability becomes available as your partnership expands.",
+      lead: "Available when this part of the partnership is in place.",
       support: ENABLEMENT_SUPPORT[panel.id] ?? null,
     };
   }
@@ -47,14 +44,21 @@ export function executivePanelNarrative(
   if (panel.state === "awaiting-signal") {
     return {
       lead: panel.summary?.trim() || "Waiting on the first trustworthy signal.",
-      support:
-        "Nothing is estimated here. Observed activity will appear when it is available.",
+      support: "Nothing is estimated here — observed activity appears when it is ready.",
     };
   }
 
+  const hasMetrics = Boolean(panel.metrics && panel.metrics.length > 0);
   const observation = panel.detail?.trim() || null;
   const status = panel.summary?.trim() || null;
-  const care = CONNECTED_CARE[panel.id] ?? "Shown from connected reporting — never estimated.";
+  const care = CONNECTED_CARE[panel.id] ?? "From connected reporting — never estimated.";
+
+  if (hasMetrics) {
+    return {
+      lead: observation || status || "What we can see for this period.",
+      support: care,
+    };
+  }
 
   return {
     lead: observation || status || "A trustworthy signal is available for this period.",

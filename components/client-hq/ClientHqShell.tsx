@@ -69,18 +69,25 @@ export function ClientHqShell({
   const showPartnerMark =
     (experienceProfile?.hospitality.showPartnerMark ?? true) &&
     !workspaceSignaturePresent;
-  const clientLogo = experienceProfile?.identity.logoUrl;
+  const clientLogo =
+    experienceProfile?.identity.logoUrl ??
+    experienceProfile?.presentation?.logoSrc ??
+    null;
+  const clientLogoAlt =
+    experienceProfile?.identity.logoAlt ??
+    experienceProfile?.presentation?.logoAlt ??
+    displayName;
 
   return (
     <KxdShell className="kxd-os-shell--app">
       <div className="kxd-os-app" style={cssVars as CSSProperties}>
-        <aside className="kxd-os-sidebar" aria-label={displayName}>
+        <aside className="kxd-os-sidebar kxd-ces-sidebar" aria-label={displayName}>
           <div className="kxd-ces-identity">
             {clientLogo ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={clientLogo}
-                alt=""
+                alt={clientLogoAlt}
                 className="kxd-ces-identity__logo"
               />
             ) : null}
@@ -88,6 +95,7 @@ export function ClientHqShell({
             {quietWorkspaceLabel ? (
               <p className="kxd-ces-identity__workspace">{quietWorkspaceLabel}</p>
             ) : null}
+            <div className="kxd-ces-identity__rule" aria-hidden="true" />
           </div>
 
           <div className="kxd-os-sidebar__nav">

@@ -74,11 +74,27 @@ async function loadOnboardingLogo(clientId: number): Promise<string | null> {
 function finalizeProfile(profile: ResolvedExperienceProfile): ResolvedExperienceProfile {
   const presentation = getExecutivePresentation(profile.identity.clientSlug);
   profile.presentation = presentation;
+  /* Presentation Registry supplies brand mark when no CMS/onboarding logo exists. */
+  if (presentation?.logoSrc && !profile.identity.logoUrl) {
+    profile.identity.logoUrl = presentation.logoSrc;
+    if (presentation.logoAlt) {
+      profile.identity.logoAlt = presentation.logoAlt;
+    }
+  }
   profile.cssVars = {
     ...experienceProfileToCssVars(profile.visual),
     ...(presentation
       ? {
           "--kxd-ces-hero-image": `url(${presentation.heroImageSrc})`,
+          ...(presentation.actionAccent
+            ? { "--kxd-ces-accent": presentation.actionAccent }
+            : {}),
+          ...(presentation.intelligenceAccent
+            ? {
+                "--kxd-ces-intelligence": presentation.intelligenceAccent,
+                "--kxd-ces-identity-name": presentation.intelligenceAccent,
+              }
+            : {}),
         }
       : {}),
   };

@@ -24,7 +24,8 @@ const PRIMAL_PRESENTATION: ExperiencePresentation = {
   heroImageSrc: "/migrated-assets/projects/primal-motorsports-hero.jpg",
   heroImageAlt: "Radical race cars on track — Primal Motorsports",
   heroOverlay: "deep",
-  heroFocus: "56% 38%",
+  /* 6000×4000 asset — lead #91 sits lower-center; prefer car body over sky. */
+  heroFocus: "54% 58%",
   logoSrc: "/migrated-assets/logos/primal.svg",
   logoAlt: "Primal Motorsports",
   workspaceEyebrow: "Private Partnership Workspace",

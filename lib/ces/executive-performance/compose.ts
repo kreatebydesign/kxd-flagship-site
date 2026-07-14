@@ -14,12 +14,15 @@ import type { WebsiteReviewLandingData } from "@/lib/ces/modules/website-review/
 import { getReportingCapabilityIds } from "@/lib/ces/partnership/capabilities";
 import type { ReportingCapabilityId } from "@/lib/reporting/domain/capabilities";
 import { composeReportingIntelligence } from "@/lib/reporting/compose/intelligence";
+import { factsForDomain } from "@/lib/reporting/domain/snapshot";
+import type { BusinessDomain } from "@/lib/reporting/domain/types";
 import { defaultExecutiveReportingPeriod } from "@/lib/reporting/ingest/period";
 import {
   loadReportingFacts,
   summarizeReportingFactProvenance,
 } from "@/lib/reporting/persistence";
 import { getExecutiveEvolution } from "./evolution";
+import { buildExecutivePanelMetrics } from "./panel-metrics";
 import {
   getExecutivePartnershipValue,
   splitPartnershipPriority,
@@ -139,7 +142,7 @@ function buildWorkingSignals(input: {
     items.push({
       id: `outcome-${items.length}`,
       label: outcome,
-      detail: "From prepared partnership reports — factual summary language only.",
+      detail: "From prepared partnership reports.",
       hasEvidence: true,
     });
   }
@@ -203,15 +206,18 @@ export async function composeExecutivePerformance(input: {
 
   const performancePanels: ExecutivePerformancePanel[] = PANEL_CAPABILITIES.map((panel) => {
     const capabilityEnabled = enabledSet.has(panel.capability);
-    const domainKey =
+    const domainKey = (
       panel.capability === "website-analytics"
         ? "website"
         : panel.capability === "seo"
           ? "search"
-          : "marketing";
+          : "marketing"
+    ) as BusinessDomain;
+    /* Connected only when THIS domain has persisted facts — never from sibling providers. */
+    const domainFacts = factsForDomain(bundle.snapshot, domainKey);
     const hasDomainSignal =
       capabilityEnabled &&
-      hasAnyFact &&
+      domainFacts.length > 0 &&
       domainHealth.get(domainKey) !== undefined &&
       domainHealth.get(domainKey) !== "unknown";
     const state = panelState(capabilityEnabled, Boolean(hasDomainSignal));
@@ -222,6 +228,10 @@ export async function composeExecutivePerformance(input: {
             .slice(0, 1)
             .map((o) => o.statement)
         : [];
+    const metrics =
+      state === "connected"
+        ? buildExecutivePanelMetrics(panel.id, bundle.snapshot)
+        : [];
 
     return {
       id: panel.id,
@@ -231,6 +241,7 @@ export async function composeExecutivePerformance(input: {
       summary: panelSummary(state, domainHealth.get(domainKey)),
       detail: state === "connected" && observations[0] ? observations[0] : null,
       evidenceLabels: observations,
+      metrics,
     };
   });
 
@@ -249,10 +260,11 @@ export async function composeExecutivePerformance(input: {
     state: momentumConnection,
     summary:
       momentumConnection === "connected"
-        ? (momentumLabel(momentumState) ?? "Under review")
+        ? (momentumLabel(momentumState) ?? "Coming into focus")
         : "",
     detail: null,
     evidenceLabels: [],
+    metrics: [],
   });
 
   const primaryAction = input.briefing.needsAttention.href
@@ -325,6 +337,12 @@ export async function composeExecutivePerformance(input: {
       currentFocus: input.briefing.overview.currentFocus,
       nextMilestone: input.briefing.overview.nextMilestone,
       lastMajorMilestone: input.briefing.overview.lastMajorMilestone,
+      labels: {
+        phase: "Current priority",
+        focus: "Biggest opportunity",
+        next: "Watching",
+        recent: "Recent win",
+      },
     },
     recommendation: input.briefing.recommendation,
     primaryAction,

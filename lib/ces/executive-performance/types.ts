@@ -50,6 +50,14 @@ export type ExperiencePresentation = {
 
 export type PerformanceConnectionState = "connected" | "awaiting-signal" | "not-connected";
 
+/** Pre-formatted ReportingFact values for connected panels — never invented. */
+export type ExecutivePanelMetric = {
+  key: string;
+  label: string;
+  value: string;
+  trend?: "up" | "down" | "flat" | "unknown" | null;
+};
+
 export type ExecutivePerformancePanel = {
   id: string;
   title: string;
@@ -59,6 +67,8 @@ export type ExecutivePerformancePanel = {
   summary: string;
   detail: string | null;
   evidenceLabels: string[];
+  /** Present only when ReportingFacts exist for this panel. */
+  metrics?: ExecutivePanelMetric[];
 };
 
 export type ExecutivePartnershipItem = {
@@ -91,6 +101,16 @@ export type ExecutiveSummaryFacts = {
   currentFocus: string;
   nextMilestone: string;
   lastMajorMilestone: string;
+  /**
+   * Presentation vocabulary for meta cells.
+   * Defaults evolve toward live intelligence labels without layout changes.
+   */
+  labels: {
+    phase: string;
+    focus: string;
+    next: string;
+    recent: string;
+  };
 };
 
 export type ExecutiveCollaboration = {

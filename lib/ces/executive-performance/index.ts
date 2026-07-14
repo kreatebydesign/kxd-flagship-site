@@ -10,6 +10,7 @@ export type {
   ExecutiveEvolutionMaturity,
   ExecutiveHeroOverlay,
   ExecutiveImpactItem,
+  ExecutivePanelMetric,
   ExecutivePartnershipItem,
   ExecutivePerformanceBriefing,
   ExecutivePerformancePanel,
@@ -42,3 +43,8 @@ export {
   executivePanelNarrative,
   executivePanelTitle,
 } from "./panel-presentation";
+
+export {
+  buildExecutivePanelMetrics,
+  formatExecutiveMetricValue,
+} from "./panel-metrics";
