@@ -16,7 +16,6 @@ export default async function WebsiteWorkspacePage() {
   const data = await getWebsiteWorkspaceLanding(
     session.clientId,
     profile.identity.clientSlug,
-    profile.identity.websiteUrl,
   );
 
   return <WebsiteWorkspaceLanding profile={profile} data={data} />;

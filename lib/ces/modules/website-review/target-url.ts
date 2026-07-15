@@ -1,11 +1,22 @@
 /**
- * Canonical Website Review target URL for a client.
+ * Canonical Website Review / Website Workspace / Visual Review target URL.
  *
  * Precedence (Shared Core, client-scoped):
  *   1. client-infrastructure.stagingUrl  — active review / staging deployment
  *   2. clients.companyWebsite            — fallback when no staging URL is set
  *
- * Do not hardcode per-client URLs in CES components.
+ * Consumers (must not hardcode per-client deployment URLs):
+ *   - Client Website Review landing / open-site links
+ *   - Operator Review Inbox “Open website”
+ *   - Website Workspace open-site links
+ *   - Visual Review iframe bootstraps
+ *   - Partnership Workspace website actions (via Website Review data)
+ *
+ * Changing stagingUrl once (via Infrastructure admin or
+ * scripts/set-primal-review-staging-url.ts) updates every consumer above.
+ * Future permanent Primal preview: https://primal.kxdpreview.com
+ * (written into stagingUrl when ready — field name migration is separate).
+ * Do not poll Vercel or hardcode unique preview deployments in CES modules.
  */
 
 import "server-only";

@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { WebsiteWorkspacePageView } from "@/components/ces/modules/website-workspace";
-import { getWebsiteWorkspaceSite } from "@/lib/ces/modules/website-workspace/catalog";
+import { resolveWebsiteReviewTargetUrl } from "@/lib/ces/modules/website-review/target-url";
 import { getWebsiteWorkspacePageView } from "@/lib/ces/modules/website-workspace/data";
 import { requireCesModule, resolveExperienceProfile } from "@/lib/ces/server";
 import { getPortalSession } from "@/lib/portal/session";
@@ -26,13 +26,13 @@ export default async function WebsiteWorkspacePageDetail({
   const page = getWebsiteWorkspacePageView(profile.identity.clientSlug, pageSlug);
   if (!page) notFound();
 
-  const site = getWebsiteWorkspaceSite(profile.identity.clientSlug);
+  const websiteUrl = await resolveWebsiteReviewTargetUrl(session.clientId);
 
   return (
     <WebsiteWorkspacePageView
       profile={profile}
       page={page}
-      websiteUrl={site?.websiteUrl ?? profile.identity.websiteUrl}
+      websiteUrl={websiteUrl}
     />
   );
 }

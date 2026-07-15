@@ -5,6 +5,7 @@ import config from "@payload-config";
 import { loadWebsiteReviewTimeline } from "@/lib/ces/modules/website-review/activity";
 import { formatPageContextDisplay } from "@/lib/ces/modules/website-review/context";
 import { WEBSITE_REVIEW_EXPERIENCE_MODULE } from "@/lib/ces/modules/website-review/constants";
+import { resolveWebsiteReviewTargetUrl } from "@/lib/ces/modules/website-review/target-url";
 import { WEBSITE_WORKSPACE_EXPERIENCE_MODULE } from "@/lib/ces/modules/website-workspace/constants";
 import { isWebsiteReviewImageMime } from "@/lib/ces/modules/website-review/attachments";
 import type { WebsiteReviewPageContext } from "@/lib/ces/modules/website-review/types";
@@ -129,10 +130,11 @@ export async function getReviewWorkspace(
   const clientId = resolveId(doc.client);
   if (clientId == null) return null;
 
-  const [attachments, timeline, workLink] = await Promise.all([
+  const [attachments, timeline, workLink, clientWebsiteUrl] = await Promise.all([
     loadAttachments(requestId),
     loadWebsiteReviewTimeline(clientId, requestId, doc),
     findWorkBySource(clientId, "website-review", String(requestId)),
+    resolveWebsiteReviewTargetUrl(clientId),
   ]);
 
   const id = doc.id as number;
@@ -144,7 +146,7 @@ export async function getReviewWorkspace(
     ),
     clientName: resolveName(doc.client),
     clientId,
-    clientWebsiteUrl: resolveClientWebsite(doc),
+    clientWebsiteUrl: clientWebsiteUrl ?? resolveClientWebsite(doc),
     submittedBy: doc.requestedBy ? String(doc.requestedBy) : null,
     submittedByEmail: doc.requestedByEmail ? String(doc.requestedByEmail) : null,
     submittedAt: String(doc.createdAt ?? new Date().toISOString()),

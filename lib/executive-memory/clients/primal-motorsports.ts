@@ -46,9 +46,8 @@ export const PRIMAL_MOTORSPORTS_MEMORY: ExecutiveMemoryItem[] = [
       "The flagship website has been rebuilt and refined on staging. Production launch follows final revisions from leadership.",
     occurredAt: null,
     evidenceLabels: [
-      "staging:primal-motorsports-rebuild.vercel.app",
-      "seed:executive-profiles:awaiting-revisions",
       "infra:stagingUrl",
+      "seed:executive-profiles:awaiting-revisions",
     ],
     evidenceStrength: "verified",
     priority: true,
@@ -163,7 +162,7 @@ export const PRIMAL_MOTORSPORTS_MEMORY: ExecutiveMemoryItem[] = [
     briefingStatement:
       "The rebuilt website exists on staging and continues to be refined for launch.",
     occurredAt: null,
-    evidenceLabels: ["staging:primal-motorsports-rebuild.vercel.app"],
+    evidenceLabels: ["infra:stagingUrl"],
     evidenceStrength: "verified",
     briefingSection: "hidden",
     presentation: {

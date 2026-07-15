@@ -1,6 +1,7 @@
 import "server-only";
 
 import { loadAttachmentsForRequest } from "@/lib/ces/modules/website-review/attachments-server";
+import { resolveWebsiteReviewTargetUrl } from "@/lib/ces/modules/website-review/target-url";
 import {
   mapRequestStatusToWorkspace,
 } from "@/lib/ces/vocabulary/website-workspace";
@@ -34,10 +35,12 @@ function emptyContent(): WebsiteWorkspaceSectionContent {
 export async function getWebsiteWorkspaceLanding(
   clientId: number,
   clientSlug: string | null,
-  websiteUrlFallback: string | null,
 ): Promise<WebsiteWorkspaceLandingData> {
   const site = getWebsiteWorkspaceSite(clientSlug);
-  const docs = await getWebsiteWorkspaceRequestsForClient(clientId);
+  const [docs, websiteUrl] = await Promise.all([
+    getWebsiteWorkspaceRequestsForClient(clientId),
+    resolveWebsiteReviewTargetUrl(clientId),
+  ]);
 
   const openByPage = new Map<string, number>();
   for (const doc of docs) {
@@ -82,7 +85,7 @@ export async function getWebsiteWorkspaceLanding(
   });
 
   return {
-    websiteUrl: site?.websiteUrl ?? websiteUrlFallback,
+    websiteUrl,
     pages,
     recentRequests,
     openRequestCount: docs.filter((doc) =>

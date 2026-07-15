@@ -289,7 +289,6 @@ const PRIMAL_PAGES: WebsiteWorkspacePageDefinition[] = [
 const SITE_CATALOGS: Record<string, WebsiteWorkspaceSiteDefinition> = {
   [PRIMAL_CLIENT_SLUG]: {
     clientSlug: PRIMAL_CLIENT_SLUG,
-    websiteUrl: "https://primalmotorsports.com",
     pages: PRIMAL_PAGES,
   },
 };

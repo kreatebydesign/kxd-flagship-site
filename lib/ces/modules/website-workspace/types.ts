@@ -33,7 +33,6 @@ export interface WebsiteWorkspacePageDefinition {
 
 export interface WebsiteWorkspaceSiteDefinition {
   clientSlug: string;
-  websiteUrl: string;
   pages: WebsiteWorkspacePageDefinition[];
 }
 
