@@ -4,10 +4,22 @@ import { getPayload } from "payload";
 import config from "@payload-config";
 import { formatPageContextDisplay } from "@/lib/ces/modules/website-review/context";
 import { WEBSITE_REVIEW_EXPERIENCE_MODULE } from "@/lib/ces/modules/website-review/constants";
+import { WEBSITE_WORKSPACE_EXPERIENCE_MODULE } from "@/lib/ces/modules/website-workspace/constants";
 import type { WebsiteReviewPageContext } from "@/lib/ces/modules/website-review/types";
+import { notesPreviewFromDetails } from "@/lib/ces/modules/website-workspace/submit";
 import { processOperationalFlow } from "@/lib/operational-flow";
 import { REVIEW_INBOX_OPEN_STATUSES } from "./status";
-import type { ReviewInboxData, ReviewInboxItem, ReviewInboxRequestStatus } from "./types";
+import type {
+  ReviewInboxData,
+  ReviewInboxExperienceModule,
+  ReviewInboxItem,
+  ReviewInboxRequestStatus,
+} from "./types";
+
+const REVIEW_INBOX_MODULES = [
+  WEBSITE_REVIEW_EXPERIENCE_MODULE,
+  WEBSITE_WORKSPACE_EXPERIENCE_MODULE,
+] as const;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDoc = Record<string, any>;
@@ -46,8 +58,18 @@ function extractNotesPreview(doc: AnyDoc): string {
 }
 
 function mapPageLocation(doc: AnyDoc): string | null {
-  const reviewContext = doc.reviewContext as WebsiteReviewPageContext | null | undefined;
-  return formatPageContextDisplay(reviewContext, doc.pageContext as string | null);
+  const reviewContext = doc.reviewContext as AnyDoc | null | undefined;
+  if (reviewContext?.source === "website-workspace") {
+    const parts = [reviewContext.pageTitle, reviewContext.sectionTitle]
+      .map((value) => (typeof value === "string" ? value.trim() : ""))
+      .filter(Boolean);
+    if (parts.length > 0) return parts.join(" · ");
+  }
+
+  return formatPageContextDisplay(
+    reviewContext as WebsiteReviewPageContext | null | undefined,
+    doc.pageContext as string | null,
+  );
 }
 
 async function loadAttachmentCounts(requestIds: number[]): Promise<Map<number, number>> {
@@ -73,13 +95,25 @@ async function loadAttachmentCounts(requestIds: number[]): Promise<Map<number, n
   return counts;
 }
 
+function mapExperienceModule(value: unknown): ReviewInboxExperienceModule {
+  return value === WEBSITE_WORKSPACE_EXPERIENCE_MODULE
+    ? WEBSITE_WORKSPACE_EXPERIENCE_MODULE
+    : WEBSITE_REVIEW_EXPERIENCE_MODULE;
+}
+
 function mapDocToItem(doc: AnyDoc, attachmentCount: number): ReviewInboxItem {
   const id = doc.id as number;
   const status = String(doc.status ?? "new") as ReviewInboxRequestStatus;
+  const experienceModule = mapExperienceModule(doc.experienceModule);
 
   return {
     id,
-    title: String(doc.requestTitle ?? "Website revision"),
+    title: String(
+      doc.requestTitle ??
+        (experienceModule === WEBSITE_WORKSPACE_EXPERIENCE_MODULE
+          ? "Website update"
+          : "Website revision"),
+    ),
     clientName: resolveName(doc.client),
     clientId: resolveId(doc.client),
     submittedBy: doc.requestedBy ? String(doc.requestedBy) : null,
@@ -89,7 +123,11 @@ function mapDocToItem(doc: AnyDoc, attachmentCount: number): ReviewInboxItem {
     attachmentCount,
     submittedAt: String(doc.createdAt ?? new Date().toISOString()),
     status,
-    notesPreview: extractNotesPreview(doc),
+    experienceModule,
+    notesPreview:
+      experienceModule === WEBSITE_WORKSPACE_EXPERIENCE_MODULE
+        ? notesPreviewFromDetails(String(doc.requestDetails ?? ""))
+        : extractNotesPreview(doc),
     workspaceUrl: `/admin/operations/review-inbox/${id}`,
     payloadAdminUrl: `/admin/collections/client-requests/${id}`,
   };
@@ -101,7 +139,7 @@ export async function getReviewInbox(): Promise<ReviewInboxData> {
   const result = await payload.find({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     collection: "client-requests" as any,
-    where: { experienceModule: { equals: WEBSITE_REVIEW_EXPERIENCE_MODULE } },
+    where: { experienceModule: { in: [...REVIEW_INBOX_MODULES] } },
     sort: "-createdAt",
     limit: 100,
     depth: 1,
@@ -131,7 +169,7 @@ export async function getReviewInboxSummary(): Promise<{ newCount: number; activ
       collection: "client-requests" as any,
       where: {
         and: [
-          { experienceModule: { equals: WEBSITE_REVIEW_EXPERIENCE_MODULE } },
+          { experienceModule: { in: [...REVIEW_INBOX_MODULES] } },
           { status: { equals: "new" } },
         ],
       },
@@ -142,7 +180,7 @@ export async function getReviewInboxSummary(): Promise<{ newCount: number; activ
       collection: "client-requests" as any,
       where: {
         and: [
-          { experienceModule: { equals: WEBSITE_REVIEW_EXPERIENCE_MODULE } },
+          { experienceModule: { in: [...REVIEW_INBOX_MODULES] } },
           { status: { in: REVIEW_INBOX_OPEN_STATUSES } },
         ],
       },
@@ -175,8 +213,12 @@ export async function updateReviewRequestStatus(
   });
 
   const row = existing as AnyDoc;
-  if (row.experienceModule !== WEBSITE_REVIEW_EXPERIENCE_MODULE) {
-    throw new Error("Not a website review request.");
+  if (
+    !REVIEW_INBOX_MODULES.includes(
+      row.experienceModule as (typeof REVIEW_INBOX_MODULES)[number],
+    )
+  ) {
+    throw new Error("Not a website collaboration request.");
   }
 
   const previousStatus = String(row.status ?? "new");

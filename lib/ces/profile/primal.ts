@@ -18,12 +18,25 @@ export const PRIMAL_EXPERIENCE_PROFILE = {
   reassuranceLine: "Every revision is tracked. Nothing gets lost.",
   supportTone: "direct" as const,
   portalSidebarLabel: "Partnership workspace",
-  enabledModules: ["website-review", "executive-performance", "inventory"] as const,
+  enabledModules: [
+    "website-review",
+    "website-workspace",
+    "executive-performance",
+    "inventory",
+  ] as const,
   showKxdPartnerMark: true,
   partnerFooterLine: "Powered by KXD OS",
   terminology: {
     "nav.website-review": "Website Review",
+    "nav.website-workspace": "Website Workspace",
     "nav.inventory": "Inventory",
+    "website-workspace.landing.eyebrow": "Website",
+    "website-workspace.landing.title": "Website Workspace",
+    "website-workspace.landing.lead":
+      "Request precise website updates by page and section — KXD reviews every change before anything goes live.",
+    "website-workspace.cta.open": "Open page",
+    "website-workspace.cta.edit": "Edit request",
+    "website-workspace.requests.title": "Update requests",
     "inventory.landing.eyebrow": "Listings",
     "inventory.landing.title": "Inventory",
     "inventory.landing.lead":

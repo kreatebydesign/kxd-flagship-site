@@ -37,8 +37,11 @@ export async function deleteWebsiteReviewRevision(
     throw new Error("Revision not found.");
   }
 
-  if (existing.experienceModule !== WEBSITE_REVIEW_EXPERIENCE_MODULE) {
-    throw new Error("Only website review revisions can be deleted from Review Inbox.");
+  if (
+    existing.experienceModule !== WEBSITE_REVIEW_EXPERIENCE_MODULE &&
+    existing.experienceModule !== "website-workspace"
+  ) {
+    throw new Error("Only website collaboration requests can be deleted from Review Inbox.");
   }
 
   const attachments = await payload.find({

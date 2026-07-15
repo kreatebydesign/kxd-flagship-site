@@ -14,6 +14,18 @@ export const CES_MODULE_REGISTRY: CesModuleDefinition[] = [
     vocabularyNamespace: "website-review",
   },
   {
+    moduleId: "website-workspace",
+    label: "Website Workspace",
+    navGroup: "work",
+    navOrder: 6,
+    routes: {
+      landing: "/portal/website-workspace",
+      request: "/portal/website-workspace",
+      detail: (id) => `/portal/website-workspace/requests/${id}`,
+    },
+    vocabularyNamespace: "website-workspace",
+  },
+  {
     moduleId: "inventory",
     label: "Inventory",
     navGroup: "work",

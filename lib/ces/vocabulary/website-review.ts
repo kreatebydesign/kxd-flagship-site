@@ -21,6 +21,7 @@ export const WEBSITE_REVIEW_STATUS_LABELS: Record<WebsiteReviewClientStatus, str
 export const REQUEST_STATUS_TO_REVIEW: Record<string, WebsiteReviewClientStatus> = {
   new: "review-received",
   triaged: "in-review",
+  approved: "in-review",
   "in-progress": "revision-in-progress",
   "waiting-on-client": "awaiting-your-input",
   complete: "completed",

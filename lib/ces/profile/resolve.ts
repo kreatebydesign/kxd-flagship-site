@@ -21,6 +21,7 @@ import {
   parseTerminology,
 } from "./defaults";
 import { experienceProfileToCssVars } from "./tokens";
+import { PRIMAL_CLIENT_SLUG, PRIMAL_EXPERIENCE_PROFILE } from "./primal";
 
 type AnyDoc = Record<string, unknown>;
 
@@ -28,6 +29,7 @@ const COLLECTION = "client-experience-profiles";
 
 const CES_MODULE_IDS = new Set<CesModuleId>([
   "website-review",
+  "website-workspace",
   "executive-performance",
   "inventory",
 ]);
@@ -72,7 +74,21 @@ async function loadOnboardingLogo(clientId: number): Promise<string | null> {
   return mediaUrl(logoFiles[0]);
 }
 
+function ensurePrimalWebsiteWorkspace(profile: ResolvedExperienceProfile): void {
+  if (profile.identity.clientSlug !== PRIMAL_CLIENT_SLUG) return;
+  if (!profile.enabledModules.includes("website-review")) return;
+  if (!profile.enabledModules.includes("website-workspace")) {
+    profile.enabledModules = [...profile.enabledModules, "website-workspace"];
+  }
+  for (const [key, value] of Object.entries(PRIMAL_EXPERIENCE_PROFILE.terminology)) {
+    if (key.startsWith("nav.website-workspace") || key.startsWith("website-workspace.")) {
+      if (!profile.terminology[key]) profile.terminology[key] = value;
+    }
+  }
+}
+
 function finalizeProfile(profile: ResolvedExperienceProfile): ResolvedExperienceProfile {
+  ensurePrimalWebsiteWorkspace(profile);
   const presentation = getExecutivePresentation(profile.identity.clientSlug);
   profile.presentation = presentation;
   /* Presentation Registry supplies brand mark when no CMS/onboarding logo exists. */

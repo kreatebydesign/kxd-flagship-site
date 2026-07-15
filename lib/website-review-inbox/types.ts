@@ -3,10 +3,13 @@ import type { KxdBadgeVariant } from "@/components/os";
 export type ReviewInboxRequestStatus =
   | "new"
   | "triaged"
+  | "approved"
   | "waiting-on-client"
   | "in-progress"
   | "complete"
   | "declined";
+
+export type ReviewInboxExperienceModule = "website-review" | "website-workspace";
 
 export interface ReviewInboxItem {
   id: number;
@@ -20,6 +23,7 @@ export interface ReviewInboxItem {
   attachmentCount: number;
   submittedAt: string;
   status: ReviewInboxRequestStatus;
+  experienceModule: ReviewInboxExperienceModule;
   notesPreview: string;
   /** Primary operator destination */
   workspaceUrl: string;

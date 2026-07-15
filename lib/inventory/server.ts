@@ -12,8 +12,11 @@ import type {
   InventoryListingStatus,
   InventoryVehicleInput,
   InventoryVehicleRecord,
+  PublicInventoryClient,
   PublicInventoryVehicle,
 } from "./types";
+
+export type { PublicInventoryClient };
 
 type AnyDoc = Record<string, unknown>;
 
@@ -370,11 +373,10 @@ export async function duplicateInventoryVehicle(
   });
 }
 
-export async function listPublicInventory(
+export async function resolvePublicInventoryClient(
   payload: Payload,
   clientSlug: string,
-  options?: { group?: "new" | "used" | "coming_soon"; featured?: boolean },
-): Promise<PublicInventoryVehicle[]> {
+): Promise<PublicInventoryClient | null> {
   const clients = await payload.find({
     collection: "clients",
     where: { slug: { equals: clientSlug } },
@@ -383,10 +385,27 @@ export async function listPublicInventory(
     overrideAccess: true,
   });
   const client = clients.docs[0] as unknown as AnyDoc | undefined;
-  const clientId = client ? Number(client.id) : null;
-  if (!clientId) return [];
+  if (!client?.id) return null;
+  return {
+    id: Number(client.id),
+    slug: String(client.slug ?? clientSlug),
+    name: String(client.name ?? clientSlug),
+    website: client.companyWebsite ? String(client.companyWebsite) : null,
+    contactEmail: client.primaryContactEmail
+      ? String(client.primaryContactEmail)
+      : null,
+  };
+}
 
-  const rows = await listInventoryForClient(payload, clientId, { limit: 500 });
+export async function listPublicInventory(
+  payload: Payload,
+  clientSlug: string,
+  options?: { group?: "new" | "used" | "coming_soon"; featured?: boolean },
+): Promise<PublicInventoryVehicle[]> {
+  const client = await resolvePublicInventoryClient(payload, clientSlug);
+  if (!client) return [];
+
+  const rows = await listInventoryForClient(payload, client.id, { limit: 500 });
   let publicRows = rows
     .map((row) => toPublicInventoryVehicle(row))
     .filter((row): row is PublicInventoryVehicle => Boolean(row));

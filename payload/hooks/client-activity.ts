@@ -9,10 +9,15 @@ import {
   publishRetainerActivity,
 } from "@/lib/client-command/activity/publish";
 import { publishWebsiteReviewActivity } from "@/lib/client-command/activity/website-review";
+import { publishWebsiteWorkspaceActivity } from "@/lib/client-command/activity/website-workspace";
 import {
   mapRequestStatusToReview,
   type WebsiteReviewClientStatus,
 } from "@/lib/ces/vocabulary/website-review";
+import {
+  mapRequestStatusToWorkspace,
+  type WebsiteWorkspaceClientStatus,
+} from "@/lib/ces/vocabulary/website-workspace";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDoc = Record<string, any>;
@@ -36,6 +41,28 @@ async function publishWebsiteReviewStatusActivity(
   if (!clientId) return;
 
   await publishWebsiteReviewActivity(
+    {
+      clientId,
+      requestId: doc.id as number,
+      clientStatus,
+      author,
+      timestamp,
+    },
+    payload,
+  );
+}
+
+async function publishWebsiteWorkspaceStatusActivity(
+  doc: AnyDoc,
+  clientStatus: WebsiteWorkspaceClientStatus,
+  payload: Parameters<typeof publishWebsiteWorkspaceActivity>[1],
+  timestamp?: string,
+  author?: string,
+): Promise<void> {
+  const clientId = relId(doc.client);
+  if (!clientId) return;
+
+  await publishWebsiteWorkspaceActivity(
     {
       clientId,
       requestId: doc.id as number,
@@ -110,6 +137,7 @@ export const publishRequestActivityHook: CollectionAfterChangeHook = async ({
   const requestId = doc.id as number;
   const title = String(doc.requestTitle ?? "Request");
   const isWebsiteReview = doc.experienceModule === "website-review";
+  const isWebsiteWorkspace = doc.experienceModule === "website-workspace";
   const context = (req.context ?? {}) as {
     clientCompletionNote?: string;
     actorEmail?: string;
@@ -140,6 +168,16 @@ export const publishRequestActivityHook: CollectionAfterChangeHook = async ({
           doc.requestedBy ? String(doc.requestedBy) : undefined,
         );
       }
+
+      if (isWebsiteWorkspace) {
+        await publishWebsiteWorkspaceStatusActivity(
+          doc,
+          "submitted",
+          req.payload,
+          doc.createdAt ? String(doc.createdAt) : undefined,
+          doc.requestedBy ? String(doc.requestedBy) : undefined,
+        );
+      }
     }
 
     const status = String(doc.status ?? "");
@@ -153,6 +191,29 @@ export const publishRequestActivityHook: CollectionAfterChangeHook = async ({
     ) {
       const clientStatus = mapRequestStatusToReview(status);
       await publishWebsiteReviewActivity(
+        {
+          clientId,
+          requestId,
+          clientStatus,
+          summary:
+            clientStatus === "completed" && context.clientCompletionNote
+              ? context.clientCompletionNote
+              : undefined,
+          author: context.actorEmail,
+          timestamp: (doc.updatedAt as string) || undefined,
+        },
+        req.payload,
+      );
+    }
+
+    if (
+      isWebsiteWorkspace &&
+      operation === "update" &&
+      status &&
+      status !== previousStatus
+    ) {
+      const clientStatus = mapRequestStatusToWorkspace(status);
+      await publishWebsiteWorkspaceActivity(
         {
           clientId,
           requestId,

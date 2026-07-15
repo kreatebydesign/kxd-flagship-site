@@ -5,6 +5,7 @@ import type { ExperiencePresentation } from "./executive-performance/types";
 
 export type CesModuleId =
   | "website-review"
+  | "website-workspace"
   | "executive-performance"
   | "inventory";
 

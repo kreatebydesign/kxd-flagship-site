@@ -15,6 +15,7 @@ import {
 import type { KxdBadgeVariant } from "@/components/os";
 import { KxdPage } from "@/components/os";
 import {
+  REVIEW_INBOX_OPEN_STATUSES,
   REVIEW_INBOX_STATUS_OPTIONS,
   reviewInboxStatusOption,
 } from "@/lib/website-review-inbox/status";
@@ -50,6 +51,7 @@ export function ReviewInboxScreen({ data: initialData }: ReviewInboxScreenProps)
   const [updatingId, setUpdatingId] = useState<number | null>(null);
   const [statusError, setStatusError] = useState<{ id: number; message: string } | null>(null);
   const [showDeletedNotice, setShowDeletedNotice] = useState(false);
+  const [statusNotice, setStatusNotice] = useState<string | null>(null);
 
   useEffect(() => {
     if (searchParams.get("deleted") === "1") {
@@ -60,15 +62,13 @@ export function ReviewInboxScreen({ data: initialData }: ReviewInboxScreenProps)
 
   const newCount = items.filter((item) => item.status === "new").length;
   const activeCount = items.filter((item) =>
-    ["new", "triaged", "waiting-on-client", "in-progress"].includes(item.status),
+    REVIEW_INBOX_OPEN_STATUSES.includes(item.status),
   ).length;
 
   const visibleItems = useMemo(() => {
     if (filter === "new") return items.filter((item) => item.status === "new");
     if (filter === "active") {
-      return items.filter((item) =>
-        ["new", "triaged", "waiting-on-client", "in-progress"].includes(item.status),
-      );
+      return items.filter((item) => REVIEW_INBOX_OPEN_STATUSES.includes(item.status));
     }
     return items;
   }, [filter, items]);
@@ -115,9 +115,26 @@ export function ReviewInboxScreen({ data: initialData }: ReviewInboxScreenProps)
         throw new Error(body.error ?? "Could not update status.");
       }
 
+      const nextStatus = body.status!;
       setItems((prev) =>
-        prev.map((row) => (row.id === item.id ? { ...row, status: body.status! } : row)),
+        prev.map((row) => (row.id === item.id ? { ...row, status: nextStatus } : row)),
       );
+
+      if (nextStatus === "complete") {
+        setStatusNotice(
+          filter === "all"
+            ? `Marked complete: ${item.title}.`
+            : `Marked complete: ${item.title}. It moved out of Active — open All to find it again.`,
+        );
+      } else if (
+        !REVIEW_INBOX_OPEN_STATUSES.includes(nextStatus) &&
+        filter === "active"
+      ) {
+        setStatusNotice(`Status updated: ${item.title}.`);
+      } else {
+        setStatusNotice(null);
+      }
+
       router.refresh();
     } catch (err) {
       setItems((prev) =>
@@ -152,6 +169,12 @@ export function ReviewInboxScreen({ data: initialData }: ReviewInboxScreenProps)
         {showDeletedNotice ? (
           <p className="kxd-os-review-inbox__notice" role="status">
             Revision deleted. It no longer appears in the client workspace or Review Inbox.
+          </p>
+        ) : null}
+
+        {statusNotice ? (
+          <p className="kxd-os-review-inbox__notice" role="status">
+            {statusNotice}
           </p>
         ) : null}
 
@@ -208,6 +231,10 @@ export function ReviewInboxScreen({ data: initialData }: ReviewInboxScreenProps)
                       </Link>
                       <p className="kxd-os-review-inbox__notes">{item.notesPreview || "—"}</p>
                       <p className="kxd-os-review-inbox__meta">
+                        {item.experienceModule === "website-workspace"
+                          ? "Website Workspace"
+                          : "Website Review"}
+                        {" · "}
                         {item.submittedBy ?? "Client"}
                         {item.submittedByEmail ? ` · ${item.submittedByEmail}` : ""}
                       </p>

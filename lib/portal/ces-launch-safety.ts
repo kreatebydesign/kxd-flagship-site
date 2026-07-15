@@ -52,6 +52,14 @@ export function isPortalNavVisibleForCesLaunch(
   ) {
     return true;
   }
+  /* Website Workspace — managed website collaboration (Primal first). */
+  if (
+    navId === "website-workspace" &&
+    profile &&
+    isCesModuleEnabled(profile, "website-workspace")
+  ) {
+    return true;
+  }
   /* Partnership briefing — only when presentation + memory make it available. */
   if (navId === "partnership") return true;
   if (CES_LAUNCH_HIDDEN_NAV_IDS.includes(navId as ClientHqNavId)) return false;
@@ -67,6 +75,7 @@ export function isCesLaunchDeliverablesPageReady(
 export function isClientSafeTimelineDoc(doc: AnyDoc): boolean {
   const eventType = String(doc.eventType ?? "");
   if (eventType.startsWith("website-review.")) return true;
+  if (eventType.startsWith("website-workspace.")) return true;
 
   const sourceModule = String(doc.sourceModule ?? "");
   if (sourceModule === "Portal") return !containsInternalLanguage(doc);

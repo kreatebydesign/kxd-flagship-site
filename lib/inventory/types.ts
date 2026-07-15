@@ -90,6 +90,15 @@ export type InventoryVehicleRecord = {
   updatedAt: string | null;
 };
 
+/** Public showroom client context (no private fields). */
+export type PublicInventoryClient = {
+  id: number;
+  slug: string;
+  name: string;
+  website: string | null;
+  contactEmail: string | null;
+};
+
 /** Stable public contract for external website consumption. */
 export type PublicInventoryVehicle = {
   id: string;

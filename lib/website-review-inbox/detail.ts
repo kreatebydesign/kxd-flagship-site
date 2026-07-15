@@ -5,6 +5,7 @@ import config from "@payload-config";
 import { loadWebsiteReviewTimeline } from "@/lib/ces/modules/website-review/activity";
 import { formatPageContextDisplay } from "@/lib/ces/modules/website-review/context";
 import { WEBSITE_REVIEW_EXPERIENCE_MODULE } from "@/lib/ces/modules/website-review/constants";
+import { WEBSITE_WORKSPACE_EXPERIENCE_MODULE } from "@/lib/ces/modules/website-workspace/constants";
 import { isWebsiteReviewImageMime } from "@/lib/ces/modules/website-review/attachments";
 import type { WebsiteReviewPageContext } from "@/lib/ces/modules/website-review/types";
 import { findWorkBySource } from "@/lib/work/integration/lookup";
@@ -121,7 +122,9 @@ export async function getReviewWorkspace(
     return null;
   }
 
-  if (doc.experienceModule !== WEBSITE_REVIEW_EXPERIENCE_MODULE) return null;
+  const isWebsiteReview = doc.experienceModule === WEBSITE_REVIEW_EXPERIENCE_MODULE;
+  const isWebsiteWorkspace = doc.experienceModule === WEBSITE_WORKSPACE_EXPERIENCE_MODULE;
+  if (!isWebsiteReview && !isWebsiteWorkspace) return null;
 
   const clientId = resolveId(doc.client);
   if (clientId == null) return null;
@@ -136,7 +139,9 @@ export async function getReviewWorkspace(
 
   return {
     id,
-    title: String(doc.requestTitle ?? "Website revision"),
+    title: String(
+      doc.requestTitle ?? (isWebsiteWorkspace ? "Website update" : "Website revision"),
+    ),
     clientName: resolveName(doc.client),
     clientId,
     clientWebsiteUrl: resolveClientWebsite(doc),
@@ -146,13 +151,17 @@ export async function getReviewWorkspace(
     priority: String(doc.priority ?? "normal"),
     status: String(doc.status ?? "new") as ReviewWorkspaceDetail["status"],
     requestBody: extractRequestBody(doc),
-    updateTypeLabel: extractUpdateTypeLabel(doc),
+    updateTypeLabel: isWebsiteWorkspace
+      ? "Website Workspace"
+      : extractUpdateTypeLabel(doc),
     location: buildLocation(doc),
     attachments,
     timeline,
     internalNotes: doc.internalNotes ? String(doc.internalNotes) : null,
     payloadAdminUrl: `/admin/collections/client-requests/${id}`,
-    clientPortalUrl: `/portal/website-review/${id}`,
+    clientPortalUrl: isWebsiteWorkspace
+      ? `/portal/website-workspace/requests/${id}`
+      : `/portal/website-review/${id}`,
     clientCommandUrl: `/admin/operations/client-command/${clientId}`,
     workspaceUrl: `/admin/operations/review-inbox/${id}`,
     workEngine: workLink
@@ -179,8 +188,12 @@ export async function updateReviewInternalNotes(
     overrideAccess: true,
   });
 
-  if ((existing as AnyDoc).experienceModule !== WEBSITE_REVIEW_EXPERIENCE_MODULE) {
-    throw new Error("Not a website review request.");
+  const moduleId = (existing as AnyDoc).experienceModule;
+  if (
+    moduleId !== WEBSITE_REVIEW_EXPERIENCE_MODULE &&
+    moduleId !== WEBSITE_WORKSPACE_EXPERIENCE_MODULE
+  ) {
+    throw new Error("Not a website collaboration request.");
   }
 
   await payload.update({

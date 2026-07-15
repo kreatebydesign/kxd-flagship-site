@@ -27,6 +27,7 @@ export function mapReviewMediaDocToAttachment(doc: AnyDoc): WebsiteReviewAttachm
 
 export async function loadAttachmentsForRequest(
   requestId: number,
+  maxAttachments: number = WEBSITE_REVIEW_MAX_ATTACHMENTS,
 ): Promise<WebsiteReviewAttachmentMeta[]> {
   const { getPayload } = await import("payload");
   const config = (await import("@payload-config")).default;
@@ -37,7 +38,7 @@ export async function loadAttachmentsForRequest(
     collection: "client-review-media" as any,
     where: { relatedRequest: { equals: requestId } },
     sort: "createdAt",
-    limit: WEBSITE_REVIEW_MAX_ATTACHMENTS,
+    limit: maxAttachments,
     depth: 0,
     overrideAccess: true,
   });
@@ -97,9 +98,10 @@ export async function linkAttachmentsToRequest(
 export async function validateAttachmentIdsForClient(
   attachmentIds: number[],
   clientId: number,
+  maxAttachments: number = WEBSITE_REVIEW_MAX_ATTACHMENTS,
 ): Promise<void> {
-  if (attachmentIds.length > WEBSITE_REVIEW_MAX_ATTACHMENTS) {
-    throw new Error(`Maximum ${WEBSITE_REVIEW_MAX_ATTACHMENTS} attachments allowed.`);
+  if (attachmentIds.length > maxAttachments) {
+    throw new Error(`Maximum ${maxAttachments} attachments allowed.`);
   }
 
   const { getPayload } = await import("payload");

@@ -91,10 +91,13 @@ export const ClientRequests: CollectionConfig = {
               name: "experienceModule",
               type: "select",
               label: "Experience Module",
-              options: [{ label: "Website Review", value: "website-review" }],
+              options: [
+                { label: "Website Review", value: "website-review" },
+                { label: "Website Workspace", value: "website-workspace" },
+              ],
               admin: {
                 description:
-                  "CES module that created this request. Portal Website Review requests are tagged here.",
+                  "CES module that created this request. Portal Website Review and Website Workspace requests are tagged here.",
               },
             },
             {
@@ -103,7 +106,7 @@ export const ClientRequests: CollectionConfig = {
               label: "Page Context",
               admin: {
                 description:
-                  "Human-readable page location — derived from review context when available.",
+                  "Human-readable page location — derived from review or workspace context when available.",
               },
             },
             {
@@ -112,7 +115,7 @@ export const ClientRequests: CollectionConfig = {
               label: "Review Context",
               admin: {
                 description:
-                  "Structured page/section context from Website Review (supports future review URL integration).",
+                  "Structured page/section context from Website Review or Website Workspace update requests.",
               },
             },
           ],
@@ -160,6 +163,7 @@ export const ClientRequests: CollectionConfig = {
       options: [
         { label: "New",               value: "new" },
         { label: "Triaged",           value: "triaged" },
+        { label: "Approved",          value: "approved" },
         { label: "In Progress",       value: "in-progress" },
         { label: "Waiting on Client", value: "waiting-on-client" },
         { label: "Complete",          value: "complete" },

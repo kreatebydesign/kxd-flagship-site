@@ -4,7 +4,15 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { ClientWorkspaceBundle } from "@/lib/client-command/workspace-types";
 import type { InventoryVehicleRecord } from "@/lib/inventory/types";
-import { LISTING_STATUS_LABELS } from "@/lib/inventory/constants";
+import { PUBLIC_LISTABLE_STATUSES } from "@/lib/inventory/types";
+import {
+  formatInventoryIdentity,
+  formatInventoryPrice,
+  inventoryStatusLabel,
+  inventoryStatusTone,
+} from "@/lib/inventory/presentation";
+
+const PUBLIC_LISTABLE = new Set<string>(PUBLIC_LISTABLE_STATUSES);
 
 export function ClientInventoryPanel({ data }: { data: ClientWorkspaceBundle }) {
   const clientId = data.clientId;
@@ -36,6 +44,16 @@ export function ClientInventoryPanel({ data }: { data: ClientWorkspaceBundle }) 
     };
   }, [clientId]);
 
+  const availableCount = vehicles.filter((v) => v.listingStatus === "available").length;
+  const draftCount = vehicles.filter((v) => v.listingStatus === "draft").length;
+  const publicCount = vehicles.filter((v) =>
+    PUBLIC_LISTABLE.has(v.listingStatus),
+  ).length;
+  const clientSlug =
+    typeof (data.client as { slug?: unknown } | null)?.slug === "string"
+      ? String((data.client as { slug: string }).slug)
+      : null;
+
   return (
     <section className="kxd-os-workspace-chapter">
       <header className="kxd-os-workspace-chapter__header">
@@ -46,58 +64,103 @@ export function ClientInventoryPanel({ data }: { data: ClientWorkspaceBundle }) 
         </p>
       </header>
 
-      {loading ? <p className="kxd-os-meta">Loading inventory…</p> : null}
-      {error ? <p className="kxd-os-meta">{error}</p> : null}
+      {!loading && !error ? (
+        <div className="kxd-os-inv-kpis" aria-label="Inventory summary">
+          <p>
+            <span>{vehicles.length}</span> total
+          </p>
+          <p>
+            <span>{availableCount}</span> available
+          </p>
+          <p>
+            <span>{publicCount}</span> public
+          </p>
+          <p>
+            <span>{draftCount}</span> draft
+          </p>
+        </div>
+      ) : null}
 
-      {!loading && !error && vehicles.length === 0 ? (
-        <p className="kxd-os-meta">
-          No inventory vehicles yet. When entitled, the client can add listings
-          from Connected Workspace → Inventory.
+      {loading ? (
+        <div className="kxd-os-inv-skeleton" aria-busy="true" aria-live="polite">
+          <span className="kxd-os-meta">Loading inventory…</span>
+          <div className="kxd-os-inv-skeleton__bars" aria-hidden>
+            <div />
+            <div />
+            <div />
+          </div>
+        </div>
+      ) : null}
+
+      {error ? (
+        <p className="kxd-os-meta kxd-os-meta--error" role="alert">
+          {error}
         </p>
       ) : null}
 
+      {!loading && !error && vehicles.length === 0 ? (
+        <div className="kxd-os-inv-empty">
+          <p className="kxd-os-meta">No inventory vehicles yet.</p>
+          <p className="kxd-os-meta">
+            When entitled, the client can add listings from Connected Workspace →
+            Inventory.
+          </p>
+        </div>
+      ) : null}
+
       {vehicles.length > 0 ? (
-        <div className="kxd-os-table-wrap">
-          <table className="kxd-os-table">
-            <thead>
-              <tr>
-                <th>Title</th>
-                <th>Status</th>
-                <th>Condition</th>
-                <th>Price</th>
-                <th>Updated</th>
-              </tr>
-            </thead>
-            <tbody>
-              {vehicles.map((vehicle) => (
-                <tr key={vehicle.id}>
-                  <td>
+        <ul className="kxd-os-inv-rows">
+          {vehicles.map((vehicle) => (
+            <li key={vehicle.id} className="kxd-os-inv-row">
+              <div className="kxd-os-inv-row__media">
+                {vehicle.primaryImage ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={vehicle.primaryImage.url} alt="" />
+                ) : (
+                  <div className="kxd-os-inv-row__placeholder">No photo</div>
+                )}
+              </div>
+              <div className="kxd-os-inv-row__body">
+                <div className="kxd-os-inv-row__top">
+                  <div>
                     <Link
+                      className="kxd-os-inv-row__title"
                       href={`/admin/collections/client-inventory-vehicles/${vehicle.id}`}
                     >
                       {vehicle.title}
                     </Link>
-                  </td>
-                  <td>
-                    {LISTING_STATUS_LABELS[vehicle.listingStatus] ??
-                      vehicle.listingStatus}
-                  </td>
-                  <td>{vehicle.condition}</td>
-                  <td>
-                    {vehicle.price != null
-                      ? `$${vehicle.price.toLocaleString()}`
-                      : "—"}
-                  </td>
-                  <td>
+                    <p className="kxd-os-meta">{formatInventoryIdentity(vehicle)}</p>
+                  </div>
+                  <span
+                    className={`kxd-ces-status kxd-ces-status--${inventoryStatusTone(vehicle.listingStatus)}`}
+                  >
+                    {inventoryStatusLabel(vehicle.listingStatus)}
+                  </span>
+                </div>
+                <div className="kxd-os-inv-row__meta">
+                  <span>{formatInventoryPrice(vehicle)}</span>
+                  {vehicle.featured ? <span className="kxd-os-inv-featured">Featured</span> : null}
+                  <span>
+                    {PUBLIC_LISTABLE.has(vehicle.listingStatus) ? "Public" : "Private"}
+                  </span>
+                  <span>
                     {vehicle.updatedAt
-                      ? new Date(vehicle.updatedAt).toLocaleDateString()
+                      ? `Updated ${new Date(vehicle.updatedAt).toLocaleDateString()}`
                       : "—"}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                  </span>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+
+      {vehicles.length > 0 && clientSlug ? (
+        <p className="kxd-os-inv-showroom">
+          <a href={`/showroom/${clientSlug}`} target="_blank" rel="noopener noreferrer">
+            Open public showroom →
+          </a>
+        </p>
       ) : null}
     </section>
   );

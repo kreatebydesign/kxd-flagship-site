@@ -70,6 +70,7 @@ import * as migration_20260714_phase33a1_reporting_scheduler_reliability from '.
 import * as migration_20260714_phase33a2_reporting_sync_state_foreign_key from './20260714_phase33a2_reporting_sync_state_foreign_key';
 import * as migration_20260714_phase34a_client_launch_drafts from './20260714_phase34a_client_launch_drafts';
 import * as migration_20260714_phase34b_client_inventory_vehicles from './20260714_phase34b_client_inventory_vehicles';
+import * as migration_20260714_phase34d_website_workspace_client_requests from './20260714_phase34d_website_workspace_client_requests';
 
 export const migrations = [
   {
@@ -431,5 +432,10 @@ export const migrations = [
     up: migration_20260714_phase34b_client_inventory_vehicles.up,
     down: migration_20260714_phase34b_client_inventory_vehicles.down,
     name: '20260714_phase34b_client_inventory_vehicles',
+  },
+  {
+    up: migration_20260714_phase34d_website_workspace_client_requests.up,
+    down: migration_20260714_phase34d_website_workspace_client_requests.down,
+    name: '20260714_phase34d_website_workspace_client_requests',
   },
 ];
