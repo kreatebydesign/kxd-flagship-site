@@ -69,9 +69,10 @@ async function main() {
     companyWebsite,
     expectedStaging: expected,
     resolvedTargetUrl: resolved,
-    futureStablePreview: PRIMAL_STABLE_PREVIEW_URL,
+    stablePreview: PRIMAL_STABLE_PREVIEW_URL,
     companyWebsitePreserved: companyWebsite === "https://primalmotorsports.com",
     stagingMatchesExpected: resolved === expected,
+    activeEqualsStable: expected === normalizeUrl(PRIMAL_STABLE_PREVIEW_URL),
   });
 
   if (companyWebsite !== "https://primalmotorsports.com") {

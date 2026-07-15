@@ -1,5 +1,5 @@
 /**
- * Urgent / one-shot: set Primal Motorsports Website Review staging URL.
+ * One-shot: set Primal Motorsports Website Review preview URL.
  *
  * Updates client-infrastructure.stagingUrl only for slug=primal-motorsports.
  * Does not change companyWebsite (production) or other clients.
@@ -7,14 +7,11 @@
  * Canonical runtime resolution remains:
  *   lib/ces/modules/website-review/target-url.ts → resolveWebsiteReviewTargetUrl
  *
- * Active URL (temporary unique Vercel deployment until the permanent
- * KXD-owned preview domain is configured):
- *   https://primal-motorsports-rebuild-ckdqqopvq-kxd.vercel.app
+ * Permanent KXD-owned Primal preview domain (active):
+ *   https://primal.preview.kreatebydesign.com
  *
- * When https://primal.kxdpreview.com is ready, change PRIMAL_REVIEW_STAGING_URL
- * to PRIMAL_STABLE_PREVIEW_URL and re-run this script once. Every Review /
- * Workspace / Visual Review consumer will pick up the new value via
- * client-infrastructure.stagingUrl (field name unchanged; previewUrl migration later).
+ * Written into client-infrastructure.stagingUrl (field name unchanged;
+ * previewUrl schema migration can happen separately later).
  *
  * Run: npx tsx scripts/set-primal-review-staging-url.ts
  */
@@ -25,17 +22,17 @@ import config from "../payload.config";
 export const PRIMAL_CLIENT_SLUG = "primal-motorsports";
 
 /**
- * Permanent KXD-owned Primal preview domain — switch PRIMAL_REVIEW_STAGING_URL
- * to this when DNS/Vercel alias is ready. Do not use client-owned staging hosts.
+ * Permanent KXD-owned Primal preview domain.
+ * Do not use client-owned staging hosts or ephemeral Vercel deployment URLs.
  */
-export const PRIMAL_STABLE_PREVIEW_URL = "https://primal.kxdpreview.com";
+export const PRIMAL_STABLE_PREVIEW_URL =
+  "https://primal.preview.kreatebydesign.com";
 
 /**
  * Active canonical review/preview URL written to client-infrastructure.stagingUrl.
  * Keep trailing slashes off — resolver normalizes the same way.
  */
-export const PRIMAL_REVIEW_STAGING_URL =
-  "https://primal-motorsports-rebuild-ckdqqopvq-kxd.vercel.app";
+export const PRIMAL_REVIEW_STAGING_URL = PRIMAL_STABLE_PREVIEW_URL;
 
 function normalizeUrl(raw: string | null | undefined): string | null {
   const value = raw?.trim();
@@ -74,7 +71,7 @@ async function main() {
   console.log(`Client: ${client.name} (id=${client.id})`);
   console.log(`companyWebsite (unchanged): ${companyWebsite ?? "(none)"}`);
   console.log(`Target stagingUrl: ${target}`);
-  console.log(`Stable KXD preview (future): ${PRIMAL_STABLE_PREVIEW_URL}`);
+  console.log(`Stable KXD preview: ${PRIMAL_STABLE_PREVIEW_URL}`);
 
   if (companyWebsite === target) {
     console.error(

@@ -14,8 +14,8 @@
  *
  * Changing stagingUrl once (via Infrastructure admin or
  * scripts/set-primal-review-staging-url.ts) updates every consumer above.
- * Future permanent Primal preview: https://primal.kxdpreview.com
- * (written into stagingUrl when ready — field name migration is separate).
+ * Permanent Primal preview: https://primal.preview.kreatebydesign.com
+ * (stored in stagingUrl — field name migration is separate).
  * Do not poll Vercel or hardcode unique preview deployments in CES modules.
  */
 
