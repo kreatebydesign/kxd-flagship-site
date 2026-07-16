@@ -23,6 +23,7 @@ export type OperationsNavId =
   | "client-import"
   | "client-launch"
   | "client-launch-wizard"
+  | "client-provisioning"
   | "genesis"
   | "launch-qa"
   | "sales-pipeline"
@@ -74,6 +75,11 @@ export const NAV_GROUPS: OperationsNavGroup[] = [
         id: "client-launch-wizard",
         label: "Launch Wizard",
         href: "/admin/operations/clients/launch",
+      },
+      {
+        id: "client-provisioning",
+        label: "Provisioning",
+        href: "/admin/operations/client-provisioning",
       },
       { id: "strategy", label: "Strategy Vault", href: "/admin/operations/strategy" },
       { id: "accounts", label: "Accounts", href: "/admin/operations/accounts" },
