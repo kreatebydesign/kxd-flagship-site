@@ -1,7 +1,56 @@
-import type { CollectionConfig } from "payload";
+import type { CollectionBeforeChangeHook, CollectionConfig, FieldHook } from "payload";
 import { isAuthenticated } from "../access/index.ts";
 import { PAYLOAD_GROUPS } from "../admin/groups.ts";
 import { publishInfrastructureActivityHook } from "../hooks/client-activity.ts";
+import {
+  findDuplicatePreviewWebsite,
+  trimPreviewWebsiteInput,
+  validatePreviewWebsiteUrl,
+} from "@/lib/infrastructure/preview-domain";
+
+const trimStagingUrlHook: FieldHook = ({ value }) => {
+  if (value == null || value === "") return value;
+  return trimPreviewWebsiteInput(value) ?? "";
+};
+
+const validatePreviewWebsiteUniqueness: CollectionBeforeChangeHook = async ({
+  data,
+  originalDoc,
+  operation,
+  req,
+}) => {
+  if (!data) return data;
+
+  const raw =
+    data.stagingUrl !== undefined
+      ? data.stagingUrl
+      : operation === "update"
+        ? originalDoc?.stagingUrl
+        : data.stagingUrl;
+
+  if (raw == null || raw === "") return data;
+
+  const checked = validatePreviewWebsiteUrl(String(raw));
+  if (!checked.ok) {
+    throw new Error(checked.message);
+  }
+  if (!checked.url) return data;
+
+  data.stagingUrl = checked.url;
+
+  const excludeId =
+    operation === "update" && originalDoc?.id != null ? originalDoc.id : null;
+  const duplicate = await findDuplicatePreviewWebsite(
+    req.payload,
+    checked.url,
+    excludeId,
+  );
+  if (duplicate) {
+    throw new Error("Preview Website is already assigned to another client.");
+  }
+
+  return data;
+};
 
 export const ClientInfrastructure: CollectionConfig = {
   slug: "client-infrastructure",
@@ -31,6 +80,7 @@ export const ClientInfrastructure: CollectionConfig = {
     delete: isAuthenticated,
   },
   hooks: {
+    beforeChange: [validatePreviewWebsiteUniqueness],
     afterChange: [publishInfrastructureActivityHook],
   },
   fields: [
@@ -116,7 +166,24 @@ export const ClientInfrastructure: CollectionConfig = {
           fields: [
             { name: "hostingProvider", type: "text", label: "Hosting Provider" },
             { name: "productionUrl", type: "text", label: "Production URL" },
-            { name: "stagingUrl", type: "text", label: "Staging URL" },
+            {
+              name: "stagingUrl",
+              type: "text",
+              label: "Preview Website",
+              admin: {
+                description:
+                  "Permanent https preview domain (e.g. https://client.preview.kreatebydesign.com). " +
+                  "Field key remains stagingUrl for compatibility. Used by Website Review and Workspace.",
+              },
+              hooks: {
+                beforeValidate: [trimStagingUrlHook],
+              },
+              validate: (value: unknown) => {
+                if (value == null || value === "") return true;
+                const checked = validatePreviewWebsiteUrl(String(value));
+                return checked.ok ? true : checked.message;
+              },
+            },
             { name: "githubRepo", type: "text", label: "GitHub Repository" },
             { name: "vercelProject", type: "text", label: "Vercel Project" },
             { name: "vercelTeam", type: "text", label: "Vercel Team" },

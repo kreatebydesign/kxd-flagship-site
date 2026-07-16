@@ -286,7 +286,7 @@ export function TechnicalTab({ data }: { data: ClientWorkspaceData }) {
       <WorkspaceChapter title="Infrastructure" variant="compact">
         <div className="kxd-os-workspace-meta-stack">
           <WorkspaceMetaLine label="Production" value={(profile?.productionUrl as string) || "—"} />
-          <WorkspaceMetaLine label="Staging" value={(profile?.stagingUrl as string) || "—"} />
+          <WorkspaceMetaLine label="Preview Website" value={(profile?.stagingUrl as string) || "—"} />
           <WorkspaceMetaLine label="GitHub" value={(profile?.githubRepo as string) || "—"} />
           <WorkspaceMetaLine label="Vercel" value={(profile?.vercelProject as string) || "—"} />
           <WorkspaceMetaLine label="Registrar" value={(profile?.domainRegistrar as string) || "—"} />

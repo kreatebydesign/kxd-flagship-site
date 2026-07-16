@@ -10,6 +10,7 @@ import {
 import { OperationsPageHero } from "@/components/admin/operations/shared/OperationsPageHero";
 import { OperationsShell } from "@/components/admin/operations/shared/OperationsShell";
 import { ClientOpsNav } from "@/components/admin/operations/client-command/ClientOpsNav";
+import { PreviewDomainManager } from "@/components/admin/operations/infrastructure/PreviewDomainManager";
 import {
   formatInfraCurrency,
   formatInfraDate,
@@ -49,6 +50,19 @@ function field(record: InfraDoc | null, key: string): string {
   if (!record || record[key] == null || record[key] === "") return "—";
   if (typeof record[key] === "boolean") return record[key] ? "Yes" : "No";
   return String(record[key]);
+}
+
+function resolveProductionWebsite(record: InfraDoc, client: InfraDoc): string | null {
+  const fromInfra = String(record.productionUrl ?? "").trim();
+  if (fromInfra) return fromInfra.replace(/\/$/, "");
+  const fromClient = String(client.companyWebsite ?? "").trim();
+  if (fromClient) return fromClient.replace(/\/$/, "");
+  return null;
+}
+
+function resolvePreviewWebsite(record: InfraDoc): string | null {
+  const value = String(record.stagingUrl ?? "").trim();
+  return value ? value.replace(/\/$/, "") : null;
 }
 
 export function InfrastructureClientScreen({
@@ -114,6 +128,13 @@ export function InfrastructureClientScreen({
               />
             </div>
 
+            <PreviewDomainManager
+              clientId={clientId}
+              productionUrl={resolveProductionWebsite(record, client)}
+              previewUrl={resolvePreviewWebsite(record)}
+              editHref={`/admin/collections/client-infrastructure/${record.id}`}
+            />
+
             <KxdSection label="Health signals" />
             <div
               style={{
@@ -163,7 +184,7 @@ export function InfrastructureClientScreen({
                   rows={[
                     { label: "Hosting", value: field(record, "hostingProvider") },
                     { label: "Production URL", value: field(record, "productionUrl") },
-                    { label: "Staging URL", value: field(record, "stagingUrl") },
+                    { label: "Preview Website", value: field(record, "stagingUrl") },
                     {
                       label: "Last deployment",
                       value: formatInfraDate(record.lastDeploymentDate as string),

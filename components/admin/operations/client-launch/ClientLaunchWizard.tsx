@@ -375,7 +375,7 @@ export function ClientLaunchWizard() {
               {(
                 [
                   ["productionUrl", "Production URL"],
-                  ["stagingUrl", "Staging URL"],
+                  ["stagingUrl", "Preview Website"],
                   ["domainRegistrar", "Domain Registrar"],
                   ["dnsProvider", "DNS Provider"],
                   ["hosting", "Hosting"],

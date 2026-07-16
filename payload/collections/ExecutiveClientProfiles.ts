@@ -244,7 +244,15 @@ export const ExecutiveClientProfiles: CollectionConfig = {
               type: "row",
               fields: [
                 { name: "productionUrl", type: "text", label: "Production URL" },
-                { name: "stagingUrl", type: "text", label: "Staging URL" },
+                {
+                  name: "stagingUrl",
+                  type: "text",
+                  label: "Preview Website",
+                  admin: {
+                    description:
+                      "Permanent https preview domain. Field key remains stagingUrl for compatibility.",
+                  },
+                },
               ],
             },
             {

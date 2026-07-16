@@ -2,8 +2,8 @@
  * Canonical Website Review / Website Workspace / Visual Review target URL.
  *
  * Precedence (Shared Core, client-scoped):
- *   1. client-infrastructure.stagingUrl  — active review / staging deployment
- *   2. clients.companyWebsite            — fallback when no staging URL is set
+ *   1. client-infrastructure.stagingUrl  — Preview Website (UI label)
+ *   2. clients.companyWebsite            — Production fallback
  *
  * Consumers (must not hardcode per-client deployment URLs):
  *   - Client Website Review landing / open-site links
@@ -12,19 +12,18 @@
  *   - Visual Review iframe bootstraps
  *   - Partnership Workspace website actions (via Website Review data)
  *
- * Changing stagingUrl once (via Infrastructure admin or
- * scripts/set-primal-review-staging-url.ts) updates every consumer above.
- * Permanent Primal preview: https://primal.preview.kreatebydesign.com
- * (stored in stagingUrl — field name migration is separate).
- * Do not poll Vercel or hardcode unique preview deployments in CES modules.
+ * Setting Preview Website once in Client Infrastructure updates every consumer.
+ * Field key remains `stagingUrl` for backward compatibility.
+ * Pattern: https://{client}.preview.kreatebydesign.com — data-driven, no per-client code.
  */
 
 import "server-only";
 
 import { getPayload } from "payload";
 import config from "@payload-config";
+import { validatePreviewWebsiteUrl } from "@/lib/infrastructure/preview-domain";
 
-function normalizeUrl(raw: string | null | undefined): string | null {
+function normalizeFallbackUrl(raw: string | null | undefined): string | null {
   const value = raw?.trim();
   if (!value) return null;
   return value.replace(/\/$/, "");
@@ -35,7 +34,6 @@ export async function resolveWebsiteReviewTargetUrl(
 ): Promise<string | null> {
   const payload = await getPayload({ config });
 
-  let stagingUrl: string | null = null;
   try {
     const infra = await payload.find({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -46,12 +44,11 @@ export async function resolveWebsiteReviewTargetUrl(
       overrideAccess: true,
     });
     const doc = infra.docs[0] as { stagingUrl?: string | null } | undefined;
-    stagingUrl = normalizeUrl(doc?.stagingUrl ?? null);
+    const preview = validatePreviewWebsiteUrl(doc?.stagingUrl ?? null);
+    if (preview.ok && preview.url) return preview.url;
   } catch {
-    stagingUrl = null;
+    /* fall through to production website */
   }
-
-  if (stagingUrl) return stagingUrl;
 
   try {
     const client = await payload.findByID({
@@ -60,7 +57,7 @@ export async function resolveWebsiteReviewTargetUrl(
       depth: 0,
       overrideAccess: true,
     });
-    return normalizeUrl(
+    return normalizeFallbackUrl(
       (client as { companyWebsite?: string | null }).companyWebsite ?? null,
     );
   } catch {

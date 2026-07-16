@@ -1379,7 +1379,7 @@ export function ClientLaunchWizardShell({ initialDraft, openDrafts }: Props) {
                 />
               </label>
               <label className="kxd-launch-wizard__field">
-                Staging / review URL
+                Preview Website
                 <span className="kxd-launch-wizard__opt">Optional</span>
                 <input
                   value={payload.infrastructure.stagingUrl}
