@@ -54,6 +54,11 @@ export function CesExecutiveClientBriefing({ briefing }: CesExecutiveClientBrief
   const platform = briefing.platformOpportunity;
   const hasLiveMetrics = briefing.results.live.metrics.length > 0;
   const prepared = briefing.results.prepared;
+  const preparedMetrics =
+    prepared && prepared.periodLabel
+      ? prepared.metrics.filter((m) => Boolean(m.periodLabel || prepared.periodLabel))
+      : [];
+  const showPreparedMetrics = Boolean(prepared?.periodLabel && preparedMetrics.length > 0);
   const showExecutiveReview = Boolean(
     getExecutivePresentation(briefing.clientSlug)?.executiveReviewEnabled,
   );
@@ -94,54 +99,51 @@ export function CesExecutiveClientBriefing({ briefing }: CesExecutiveClientBrief
         </Chapter>
       ))}
 
-      {(hasLiveMetrics || prepared) && (
-        <Chapter title="Results in view">
-          {hasLiveMetrics ? (
-            <div className="kxd-ces-briefing__result-block">
-              <p className="kxd-ces-briefing__subhead">Live reporting</p>
-              {briefing.results.live.periodLabel ? (
-                <p className="kxd-ces-briefing__meta">
-                  {briefing.results.live.periodLabel}
-                  {briefing.results.live.providerLabels.length > 0
-                    ? ` · ${briefing.results.live.providerLabels.join(", ")}`
-                    : ""}
-                </p>
-              ) : null}
-              <ul className="kxd-ces-briefing__metrics">
-                {briefing.results.live.metrics.map((m) => (
-                  <li key={`${m.sourceLabel}-${m.label}`}>
-                    <span>{m.label}</span>
-                    <strong>{m.value}</strong>
-                    <em>{m.sourceLabel}</em>
-                  </li>
-                ))}
-              </ul>
-            </div>
+      {hasLiveMetrics ? (
+        <Chapter title="Live reporting">
+          {briefing.results.live.periodLabel ? (
+            <p className="kxd-ces-briefing__meta">
+              {briefing.results.live.periodLabel}
+              {briefing.results.live.providerLabels.length > 0
+                ? ` · ${briefing.results.live.providerLabels.join(", ")}`
+                : ""}
+            </p>
           ) : null}
-
-          {prepared ? (
-            <div className="kxd-ces-briefing__result-block kxd-ces-briefing__result-block--prepared">
-              <p className="kxd-ces-briefing__subhead">Prepared partnership reporting</p>
-              <p className="kxd-ces-briefing__meta">
-                {prepared.title}
-                {prepared.periodLabel ? ` · ${prepared.periodLabel}` : ""}
-              </p>
-              <p className="kxd-ces-briefing__note">{prepared.note}</p>
-              {prepared.metrics.length > 0 ? (
-                <ul className="kxd-ces-briefing__metrics">
-                  {prepared.metrics.map((m) => (
-                    <li key={`prepared-${m.label}`}>
-                      <span>{m.label}</span>
-                      <strong>{m.value}</strong>
-                      <em>Prepared report</em>
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
-            </div>
-          ) : null}
+          <ul className="kxd-ces-briefing__metrics">
+            {briefing.results.live.metrics
+              .filter((m) => Boolean(m.periodLabel))
+              .map((m) => (
+                <li key={`${m.sourceLabel}-${m.label}`}>
+                  <span>{m.label}</span>
+                  <strong>{m.value}</strong>
+                  <em>
+                    {m.sourceLabel}
+                    {m.periodLabel ? ` · ${m.periodLabel}` : ""}
+                  </em>
+                </li>
+              ))}
+          </ul>
         </Chapter>
-      )}
+      ) : null}
+
+      {showPreparedMetrics && prepared ? (
+        <Chapter title="Historical prepared report">
+          <p className="kxd-ces-briefing__meta">
+            {prepared.title}
+            {prepared.periodLabel ? ` · ${prepared.periodLabel}` : ""}
+          </p>
+          <p className="kxd-ces-briefing__note">{prepared.note}</p>
+          <ul className="kxd-ces-briefing__metrics">
+            {preparedMetrics.map((m) => (
+              <li key={`prepared-${m.label}`}>
+                <span>{m.label}</span>
+                <strong>{m.value}</strong>
+                <em>Historical · {prepared.periodLabel}</em>
+              </li>
+            ))}
+          </ul>
+        </Chapter>
+      ) : null}
 
       {platform ? (
         <Chapter title={platform.title}>

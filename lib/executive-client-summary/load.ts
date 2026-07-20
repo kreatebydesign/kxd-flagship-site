@@ -1,18 +1,15 @@
 /**
  * Phase 32A.1 — Load Executive Client Briefing for portal.
- * Live ReportingFacts + prepared monthly reports kept visibly separate.
+ * Live ReportingFacts only when entitled + present. No prepared Ads figures as “current.”
  */
 
 import "server-only";
 
 import { buildExecutivePanelMetrics } from "@/lib/ces/executive-performance/panel-metrics";
-import { loadPartnershipResults } from "@/lib/ces/partnership/outcomes";
 import type { WebsiteReviewLandingData } from "@/lib/ces/modules/website-review/types";
 import type { ResolvedExperienceProfile } from "@/lib/ces/types";
-import {
-  composeReportingIntelligence,
-} from "@/lib/reporting/compose/intelligence";
-import { getReportingCapabilityIds } from "@/lib/ces/partnership/capabilities";
+import { composeReportingIntelligence } from "@/lib/reporting/compose/intelligence";
+import type { ReportingCapabilityId } from "@/lib/reporting/domain/capabilities";
 import { defaultExecutiveReportingPeriod } from "@/lib/reporting/ingest/period";
 import {
   loadReportingFacts,
@@ -32,6 +29,18 @@ const PROVIDER_LABELS: Record<string, string> = {
   "google-search-console": "Google Search Console",
   "google-analytics-4": "Google Analytics 4",
   "google-ads": "Google Ads",
+};
+
+const PANEL_CAPABILITY: Record<"search" | "website" | "ads", ReportingCapabilityId> = {
+  search: "seo",
+  website: "website-analytics",
+  ads: "google-ads",
+};
+
+const PANEL_SOURCE_LABEL: Record<"search" | "website" | "ads", string> = {
+  search: "Google Search Console",
+  website: "Google Analytics 4",
+  ads: "Google Ads",
 };
 
 function providerLabel(id: string): string {
@@ -55,69 +64,67 @@ function awaitingFromWebsiteReview(
   }));
 }
 
-async function loadBriefingResults(clientId: number): Promise<ExecutiveBriefingResults> {
+/**
+ * Live metrics only from ReportingFacts for capabilities this client is entitled to.
+ * Prepared monthly-report Ads figures are intentionally not attached here — they are
+ * historical authored reports and must not appear as current Partnership performance.
+ */
+async function loadBriefingResults(
+  profile: ResolvedExperienceProfile,
+): Promise<ExecutiveBriefingResults> {
+  const clientId = profile.identity.clientId;
   const period = defaultExecutiveReportingPeriod(new Date());
+  const entitled = profile.reportingCapabilities;
   const facts = await loadReportingFacts({ clientId, period });
   const provenance = summarizeReportingFactProvenance(facts);
-  const providerLabels = provenance.providerIds.map(providerLabel);
+
+  const entitledProviderLabels = provenance.providerIds
+    .map(providerLabel)
+    .filter((label) => {
+      if (label === "Google Search Console") return entitled.includes("seo");
+      if (label === "Google Analytics 4") return entitled.includes("website-analytics");
+      if (label === "Google Ads") return entitled.includes("google-ads");
+      return false;
+    });
 
   const bundle = composeReportingIntelligence({
     clientId,
     period,
     facts,
-    enabledCapabilities: getReportingCapabilityIds(["seo", "website-analytics", "google-ads"]),
+    enabledCapabilities: entitled,
     composedAt: new Date().toISOString(),
   });
 
   const liveMetrics: ExecutiveBriefingMetric[] = [];
   for (const panelId of ["search", "website", "ads"] as const) {
+    if (!entitled.includes(PANEL_CAPABILITY[panelId])) continue;
     const panelMetrics = buildExecutivePanelMetrics(panelId, bundle.snapshot);
     for (const metric of panelMetrics) {
-      const sourceProvider =
-        panelId === "search"
-          ? "Google Search Console"
-          : panelId === "website"
-            ? "Google Analytics 4"
-            : "Google Ads";
+      /* Never display a live figure without an exact period. */
+      if (!period.label) continue;
       liveMetrics.push({
         label: metric.label,
         value: metric.value,
         source: "live-reporting-facts",
-        sourceLabel: sourceProvider,
-        periodLabel: period.label ?? null,
+        sourceLabel: PANEL_SOURCE_LABEL[panelId],
+        periodLabel: period.label,
       });
     }
   }
 
-  const preparedDoc = await loadPartnershipResults(clientId);
-  const prepared = preparedDoc
-    ? {
-        title: "Prepared Google Ads partnership report",
-        periodLabel: preparedDoc.periodLabel,
-        sourceLabel: "Prepared monthly report (not live ReportingFacts)",
-        outcomes: preparedDoc.outcomes,
-        metrics: preparedDoc.metrics.map((m) => ({
-          label: m.label,
-          value: m.value,
-          source: "prepared-report" as const,
-          sourceLabel: "Prepared Google Ads report",
-          periodLabel: preparedDoc.periodLabel,
-        })),
-        note: "These figures come from a prepared partnership report. They are not live Google Ads ReportingFacts.",
-      }
-    : null;
+  const hasLive = liveMetrics.length > 0;
 
   return {
     live: {
-      periodLabel: period.label ?? null,
-      providerLabels,
+      periodLabel: hasLive ? (period.label ?? null) : null,
+      providerLabels: entitledProviderLabels,
       metrics: liveMetrics,
-      note:
-        liveMetrics.length > 0
-          ? null
-          : "No live ReportingFacts for this period yet. Search, website, and ads metrics appear here automatically when providers are connected and facts are ingested.",
+      note: hasLive
+        ? null
+        : "Live performance numbers will appear here when Search, website analytics, or advertising reporting is connected for this period. Detailed partnership evidence is available in Executive Review.",
     },
-    prepared,
+    /* Do not surface prepared Ads monthly-report metrics on Partnership. */
+    prepared: null,
   };
 }
 
@@ -127,7 +134,6 @@ export async function loadExecutiveClientBriefing(input: {
 }): Promise<ExecutiveClientBriefing | ExecutiveClientBriefingUnavailable> {
   const slug = input.profile.identity.clientSlug;
   const name = input.profile.identity.clientName;
-  const clientId = input.profile.identity.clientId;
 
   if (!slug) {
     return {
@@ -147,9 +153,9 @@ export async function loadExecutiveClientBriefing(input: {
     };
   }
 
-  const results = await loadBriefingResults(clientId);
+  const results = await loadBriefingResults(input.profile);
   const briefing = composeExecutiveClientBriefing({
-    clientId,
+    clientId: input.profile.identity.clientId,
     clientSlug: slug,
     clientName: name,
     results,

@@ -265,15 +265,15 @@ export function composeExecutiveClientBriefing(
 
   const liveSentence =
     results.live.metrics.length > 0
-      ? `Live reporting now shows ${results.live.providerLabels.join(" and ") || "connected sources"}${
-          results.live.periodLabel ? ` for ${results.live.periodLabel}` : ""
+      ? `Live reporting for ${results.live.periodLabel ?? "the current period"} now shows ${
+          results.live.providerLabels.join(" and ") || "connected sources"
         }.`
       : results.live.note;
 
   const preparedSentence = results.prepared
-    ? `We also have a prepared Google Ads report${
-        results.prepared.periodLabel ? ` covering ${results.prepared.periodLabel}` : ""
-      } for historical context — kept separate from live numbers.`
+    ? results.prepared.periodLabel
+      ? `A historical prepared Google Ads report covering ${results.prepared.periodLabel} is on file. Those figures are not live Ads metrics.`
+      : null
     : null;
 
   const chapters: ExecutiveBriefingChapter[] = [
@@ -327,7 +327,7 @@ export function composeExecutiveClientBriefing(
         liveSentence,
         preparedSentence,
         results.live.metrics.length === 0 && !results.prepared
-          ? "Measurable results will appear here as Search, Website, and Advertising reporting connect — never estimated."
+          ? "Google Ads remains actively managed. Detailed performance evidence for leadership is available in Executive Review."
           : null,
       ].filter((p): p is string => Boolean(p)),
     },

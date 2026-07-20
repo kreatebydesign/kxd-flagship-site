@@ -76,12 +76,13 @@ export const PRIMAL_MOTORSPORTS_MEMORY: ExecutiveMemoryItem[] = [
     label: "Advertising refined with care",
     statement: "Google Ads work that protects investment and attracts qualified interest.",
     briefingStatement:
-      "Google Ads has been actively managed in the partnership. Prepared performance reports summarize results; live Ads ReportingFacts are not yet connected in KXD OS.",
+      "Google Ads continues to be actively managed. Live Ads metrics are not yet connected inside this workspace.",
     occurredAt: null,
     evidenceLabels: [
       "seed:executive-profiles:google-ads",
       "monthly-reports:google_ads",
-      "provider:ads:not-implemented",
+      "provider:google-ads:pipeline-ready",
+      "entitlement:google-ads:held",
     ],
     evidenceStrength: "supported",
     priority: true,
@@ -96,7 +97,7 @@ export const PRIMAL_MOTORSPORTS_MEMORY: ExecutiveMemoryItem[] = [
     statement:
       "Foundational search work is in place so people can find you more clearly over time.",
     briefingStatement:
-      "Search Console is connected. Live search metrics appear when ReportingFacts exist for the selected period.",
+      "Search Console is connected for the partnership. Live search numbers appear here only when ReportingFacts exist for the selected period.",
     occurredAt: null,
     evidenceLabels: [
       "capability:seo",
@@ -364,7 +365,7 @@ export const PRIMAL_MOTORSPORTS_MEMORY: ExecutiveMemoryItem[] = [
     status: "completed",
     label: "Search Console connected",
     statement:
-      "We connected Search Console and surface live clicks, impressions, CTR, and position when ReportingFacts exist for the period.",
+      "Search Console is connected. Live clicks, impressions, CTR, and position appear when ReportingFacts exist for the selected period.",
     occurredAt: null,
     evidenceLabels: ["provider:google-search-console", "facts:search"],
     evidenceStrength: "verified",
