@@ -22,11 +22,13 @@ export const PRIMAL_EXPERIENCE_PROFILE = {
     "website-review",
     "website-workspace",
     "executive-performance",
+    "executive-review",
     "inventory",
   ] as const,
   showKxdPartnerMark: true,
   partnerFooterLine: "Powered by KXD OS",
   terminology: {
+    "nav.executive-review": "Executive Review",
     "nav.website-review": "Website Review",
     "nav.website-workspace": "Website Workspace",
     "nav.inventory": "Inventory",

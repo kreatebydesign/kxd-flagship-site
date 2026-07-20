@@ -5,6 +5,7 @@ import { KxdShell } from "@/components/os";
 import type { ResolvedExperienceProfile } from "@/lib/ces";
 import type { EditionBranding } from "@/lib/editions";
 import { editionBrandingCssVars } from "@/lib/editions";
+import { ClientNotificationsCenter } from "@/components/ces/notifications";
 import { ClientHqLogoutButton } from "./ClientHqLogoutButton";
 import {
   clientHqNavIsActive,
@@ -125,6 +126,7 @@ export function ClientHqShell({
           </div>
 
           <div className="kxd-os-sidebar__foot">
+            <ClientNotificationsCenter />
             {reassuranceLine ? (
               <p className="kxd-ces-trust-line">
                 <span className="kxd-ces-trust-line__dot" aria-hidden="true" />

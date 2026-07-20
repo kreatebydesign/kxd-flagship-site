@@ -41,3 +41,6 @@ export {
 
 export { backfillClientActivity } from "./backfill";
 export { loadClientActivityTimeline } from "./load";
+export { publishInventoryActivity } from "./inventory";
+export { publishWebsiteReviewActivity } from "./website-review";
+export { publishWebsiteWorkspaceActivity } from "./website-workspace";

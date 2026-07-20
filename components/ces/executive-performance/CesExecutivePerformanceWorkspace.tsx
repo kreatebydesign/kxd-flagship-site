@@ -322,6 +322,11 @@ export function CesExecutivePerformanceWorkspace({
             Open executive briefing
           </Link>
         ) : null}
+        {performance.presentation.executiveReviewEnabled ? (
+          <Link href="/portal/executive-review" className="kxd-ces-exec__section-link">
+            Open Executive Review
+          </Link>
+        ) : null}
         <div className="kxd-ces-exec__progress-stage">
           {performance.progressBeats.length > 0 ? (
             <div className="kxd-ces-exec__progress-journey">
@@ -504,6 +509,11 @@ export function CesExecutivePerformanceWorkspace({
           title="Growth"
           id="exec-growth-heading"
         />
+        {performance.presentation.executiveReviewEnabled ? (
+          <Link href="/portal/executive-review" className="kxd-ces-exec__section-link">
+            Open Executive Review
+          </Link>
+        ) : null}
         <ul className="kxd-ces-exec__growth">
           {performance.evolution.map((item) => (
             <li

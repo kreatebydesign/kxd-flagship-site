@@ -398,14 +398,14 @@ export const PRIMAL_MOTORSPORTS_MEMORY: ExecutiveMemoryItem[] = [
     briefingSection: "next",
   },
 
-  /* ── Primal OS — separate opportunity (not included / not purchased) */
+  /* ── Primal OS — future opportunity only (not included / not purchased) */
   {
     id: "platform-primal-os",
     kind: "platform",
     status: "planned",
     label: "Primal OS",
     statement:
-      "Primal OS is prepared as an expansion opportunity — a separate premium operating system engagement, not included in the current website and reporting work.",
+      "As Primal continues to grow, there are opportunities to expand beyond today's website and workspace. Those conversations stay separate from the current engagement.",
     occurredAt: null,
     evidenceLabels: [
       "case-study:primal-os-scoped",
@@ -416,15 +416,14 @@ export const PRIMAL_MOTORSPORTS_MEMORY: ExecutiveMemoryItem[] = [
     evidenceStrength: "supported",
     briefingSection: "platform",
     platformOpportunity: {
-      title: "Primal OS",
-      positioning: "Available as a separate Primal OS engagement",
+      title: "Future Opportunities",
+      positioning:
+        "As Primal continues to grow, there are opportunities to expand beyond today's website and workspace.",
       capabilities: [
-        "Driver operations and private driver portal experiences",
-        "Operational visibility for leadership across team workflows",
-        "Internal team workflows and accountability surfaces",
-        "Automation-ready patterns for recurring operations",
-        "Centralized business reporting for motorsports operations",
-        "Room for integrations such as shop systems when scoped",
+        "Driver management",
+        "Team operations",
+        "Internal reporting",
+        "Driver portal experiences",
       ],
       pricing: {
         mode: "prepared-separately",

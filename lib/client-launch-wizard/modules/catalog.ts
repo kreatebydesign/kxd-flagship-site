@@ -24,6 +24,7 @@ export const LAUNCH_MODULE_CATEGORY_LABELS: Record<LaunchModuleCategoryId, strin
 export const LAUNCH_MODULE_LABELS: Record<string, string> = {
   "website-review": "Website Review",
   "executive-performance": "Executive Performance",
+  "executive-review": "Executive Review",
   "website-analytics": "Website Analytics",
   "google-ads": "Google Ads",
   seo: "Search / SEO",
@@ -41,7 +42,9 @@ export function launchModuleLabel(moduleId: string): string {
 }
 
 export function launchModuleCategory(moduleId: LaunchWizardModuleId): LaunchModuleCategoryId {
-  if (moduleId === "website-review") return "client-experience";
+  if (moduleId === "website-review" || moduleId === "executive-review") {
+    return "client-experience";
+  }
   if (moduleId === "executive-performance" || moduleId === "executive-reporting") {
     return "executive-intelligence";
   }

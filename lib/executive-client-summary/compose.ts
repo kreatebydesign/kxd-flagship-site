@@ -135,7 +135,7 @@ export function composeExecutiveClientSummary(
         briefing.platformOpportunity.title,
         [
           briefing.platformOpportunity.positioning,
-          briefing.platformOpportunity.pricing.note,
+          "These are future conversations and are not part of the current engagement.",
         ],
         briefing.platformOpportunity.capabilities,
       ),
@@ -219,33 +219,38 @@ export function composeExecutiveClientBriefing(
       periodLabel: null,
       providerLabels: [],
       metrics: [] as ExecutiveBriefingMetric[],
-      note: "Live metrics appear when ReportingFacts exist for the selected period.",
+      note: "Live metrics appear when reporting is connected for the selected period.",
     },
     prepared: null,
   };
 
+  /* Board-ready next steps — short and conversational. */
   const recommendedNextSteps: string[] = [];
-  if (awaitingClient[0]) {
-    recommendedNextSteps.push(awaitingClient[0].statement);
+  if (awaitingClient.some((item) => item.id === "awaiting-website-revisions") || awaitingClient[0]) {
+    recommendedNextSteps.push("Finish remaining website revisions.");
   }
-  if (input.recommendationHeadline) {
-    recommendedNextSteps.push(input.recommendationHeadline);
+  if (lens.items.some((item) => item.id === "story-launch" || item.kind === "launch")) {
+    recommendedNextSteps.push("Launch the new website.");
   }
-  if (input.recommendationRationale) {
-    recommendedNextSteps.push(input.recommendationRationale);
+  if (lens.items.some((item) => item.id === "google-ads")) {
+    recommendedNextSteps.push("Continue Google Ads management.");
   }
-  const launch = lens.items.find((i) => i.id === "story-launch" || i.kind === "launch");
-  if (launch && recommendedNextSteps.length < 3) {
-    recommendedNextSteps.push(lineFor(launch));
-  }
-  if (platformItem?.platformOpportunity && recommendedNextSteps.length < 4) {
-    recommendedNextSteps.push(platformItem.platformOpportunity.positioning);
+  if (
+    lens.items.some(
+      (item) =>
+        item.id === "reporting" ||
+        item.id === "ga4-prepared" ||
+        item.id === "search-console-connected" ||
+        item.id === "opportunity-exec-reporting",
+    )
+  ) {
+    recommendedNextSteps.push("Continue improving reporting.");
   }
   if (recommendedNextSteps.length === 0) {
-    recommendedNextSteps.push(
-      "Continue refining what already serves the brand before expanding scope.",
-    );
+    recommendedNextSteps.push("Keep refining what already serves the brand.");
   }
+
+  const launch = lens.items.find((i) => i.id === "story-launch" || i.kind === "launch");
 
   const phase =
     launch?.status === "planned"
@@ -260,15 +265,15 @@ export function composeExecutiveClientBriefing(
 
   const liveSentence =
     results.live.metrics.length > 0
-      ? `Live reporting now reflects ${results.live.providerLabels.join(" and ") || "connected sources"}${
+      ? `Live reporting now shows ${results.live.providerLabels.join(" and ") || "connected sources"}${
           results.live.periodLabel ? ` for ${results.live.periodLabel}` : ""
-        } — signals leadership can trust without leaving this workspace.`
+        }.`
       : results.live.note;
 
   const preparedSentence = results.prepared
-    ? `Alongside live facts, a prepared partnership report${
+    ? `We also have a prepared Google Ads report${
         results.prepared.periodLabel ? ` covering ${results.prepared.periodLabel}` : ""
-      } remains available as historical advertising context — clearly separated from live ReportingFacts.`
+      } for historical context — kept separate from live numbers.`
     : null;
 
   const chapters: ExecutiveBriefingChapter[] = [
@@ -277,14 +282,14 @@ export function composeExecutiveClientBriefing(
       title: "How the partnership began",
       paragraphs: [
         identity?.statement ??
-          `${clientName} partners with Kreate by Design to elevate digital presence and operating clarity.`,
+          `${clientName} partners with Kreate by Design on the website, marketing, and a private place to work together.`,
         relationship?.statement ??
-          "The relationship is active, oriented toward measured progress and calm leadership visibility.",
+          "The partnership is active and focused on measured progress.",
         journeyComplete.length > 0
-          ? `From the outset, the work moved through a clear sequence: ${journeyComplete
+          ? `From the start, the work moved through a clear sequence: ${journeyComplete
               .map((i) => i.label.toLowerCase())
               .join("; ")}.`
-          : "Early partnership direction was set together and continues to guide the work.",
+          : "Early direction was set together and still guides the work.",
       ].filter(Boolean) as string[],
     },
     {
@@ -292,14 +297,10 @@ export function composeExecutiveClientBriefing(
       title: "What stands today",
       paragraphs: [
         built.length > 0
-          ? `What Kreate by Design has put in place: ${built.join(" ")}`
-          : "Verified deliveries will appear here as the relationship memory grows.",
-        systems.length > 0
-          ? `Those foundations now operate as living systems: ${systems.join(" ")}`
-          : null,
-        marketing.length > 0
-          ? `On visibility and demand: ${marketing.join(" ")}`
-          : null,
+          ? `What we've put in place: ${built.join(" ")}`
+          : "Verified deliveries will appear here as the partnership history grows.",
+        systems.length > 0 ? `Systems already in use: ${systems.join(" ")}` : null,
+        marketing.length > 0 ? `On search and advertising: ${marketing.join(" ")}` : null,
       ].filter((p): p is string => Boolean(p)),
     },
     {
@@ -307,47 +308,36 @@ export function composeExecutiveClientBriefing(
       title: "Where we are now",
       paragraphs: [
         currentWork.length > 0
-          ? `Kreate by Design is presently focused on ${currentWork
+          ? `Right now, Kreate by Design is focused on ${currentWork
               .map((i) => i.statement)
               .join(" ")}`
           : "Day-to-day focus remains calm and deliberate.",
         awaitingClient.length > 0
-          ? `The clearest items awaiting ${clientName}: ${awaitingClient
-              .map((i) => i.statement)
-              .join(" ")}`
-          : `Nothing material is waiting on ${clientName} in this briefing.`,
+          ? `Waiting on ${clientName}: ${awaitingClient.map((i) => i.statement).join(" ")}`
+          : `Nothing material is waiting on ${clientName} right now.`,
         journeyAhead.length > 0
-          ? `Immediately ahead: ${journeyAhead.map((i) => lineFor(i)).join(" ")}`
+          ? `Just ahead: ${journeyAhead.map((i) => lineFor(i)).join(" ")}`
           : null,
       ].filter((p): p is string => Boolean(p)),
     },
     {
       id: "evidence",
-      title: "Evidence of progress",
+      title: "How things are performing",
       paragraphs: [
         liveSentence,
         preparedSentence,
         results.live.metrics.length === 0 && !results.prepared
-          ? "Measurable results will surface here automatically as Search, Website, and Advertising facts are connected and ingested — never estimated."
+          ? "Measurable results will appear here as Search, Website, and Advertising reporting connect — never estimated."
           : null,
       ].filter((p): p is string => Boolean(p)),
     },
     {
       id: "ahead",
-      title: "The road ahead",
+      title: "What's ahead",
       paragraphs: [
         whatComesNext.length > 0
           ? whatComesNext.join(" ")
-          : "Next steps remain open and unhurried — paced to real capacity.",
-        platformItem?.platformOpportunity
-          ? `${platformItem.platformOpportunity.title} is ${platformItem.platformOpportunity.positioning.toLowerCase()}. It can extend into ${platformItem.platformOpportunity.capabilities
-              .slice(0, 3)
-              .map((c) => c.charAt(0).toLowerCase() + c.slice(1))
-              .join("; ")} — when leadership chooses that expansion.`
-          : null,
-        platformItem?.platformOpportunity
-          ? platformItem.platformOpportunity.pricing.note
-          : null,
+          : "Next steps stay open and unhurried — paced to real capacity.",
       ].filter((p): p is string => Boolean(p)),
     },
   ];
@@ -363,7 +353,7 @@ export function composeExecutiveClientBriefing(
       perspective:
         relationship?.statement ??
         identity?.statement ??
-        `A calm executive view of the ${clientName} relationship with Kreate by Design.`,
+        `A calm view of the ${clientName} partnership with Kreate by Design.`,
     },
     relationshipAtAGlance: {
       phase,

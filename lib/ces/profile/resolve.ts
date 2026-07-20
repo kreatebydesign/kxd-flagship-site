@@ -31,6 +31,7 @@ const CES_MODULE_IDS = new Set<CesModuleId>([
   "website-review",
   "website-workspace",
   "executive-performance",
+  "executive-review",
   "inventory",
 ]);
 
@@ -87,8 +88,22 @@ function ensurePrimalWebsiteWorkspace(profile: ResolvedExperienceProfile): void 
   }
 }
 
+/** V1 — ensure Executive Review entitlement for Primal without requiring a reseed. */
+function ensurePrimalExecutiveReview(profile: ResolvedExperienceProfile): void {
+  if (profile.identity.clientSlug !== PRIMAL_CLIENT_SLUG) return;
+  if (!profile.enabledModules.includes("website-review")) return;
+  if (!profile.enabledModules.includes("executive-review")) {
+    profile.enabledModules = [...profile.enabledModules, "executive-review"];
+  }
+  if (!profile.terminology["nav.executive-review"]) {
+    profile.terminology["nav.executive-review"] =
+      PRIMAL_EXPERIENCE_PROFILE.terminology["nav.executive-review"];
+  }
+}
+
 function finalizeProfile(profile: ResolvedExperienceProfile): ResolvedExperienceProfile {
   ensurePrimalWebsiteWorkspace(profile);
+  ensurePrimalExecutiveReview(profile);
   const presentation = getExecutivePresentation(profile.identity.clientSlug);
   profile.presentation = presentation;
   /* Presentation Registry supplies brand mark when no CMS/onboarding logo exists. */

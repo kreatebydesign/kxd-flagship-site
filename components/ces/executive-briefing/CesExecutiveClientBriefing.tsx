@@ -4,6 +4,7 @@ import type {
   ExecutiveClientBriefing,
   ExecutiveClientBriefingUnavailable,
 } from "@/lib/executive-client-summary";
+import { getExecutivePresentation } from "@/lib/ces/executive-performance/presentation";
 
 export type CesExecutiveClientBriefingProps = {
   briefing: ExecutiveClientBriefing | ExecutiveClientBriefingUnavailable;
@@ -53,6 +54,9 @@ export function CesExecutiveClientBriefing({ briefing }: CesExecutiveClientBrief
   const platform = briefing.platformOpportunity;
   const hasLiveMetrics = briefing.results.live.metrics.length > 0;
   const prepared = briefing.results.prepared;
+  const showExecutiveReview = Boolean(
+    getExecutivePresentation(briefing.clientSlug)?.executiveReviewEnabled,
+  );
 
   return (
     <article className="kxd-ces-briefing">
@@ -147,22 +151,13 @@ export function CesExecutiveClientBriefing({ briefing }: CesExecutiveClientBrief
               <li key={cap}>{cap}</li>
             ))}
           </ul>
-          <div className="kxd-ces-briefing__pricing">
-            <p className="kxd-ces-briefing__subhead">Engagement models</p>
-            <ul className="kxd-ces-briefing__pricing-models">
-              {platform.pricing.models.map((model) => (
-                <li key={model.id}>
-                  <span>{model.label}</span>
-                  <span>{model.amountLabel ?? "Prepared separately"}</span>
-                </li>
-              ))}
-            </ul>
-            <p className="kxd-ces-briefing__note">{platform.pricing.note}</p>
-          </div>
+          <p className="kxd-ces-briefing__note">
+            These are future conversations and are not part of the current engagement.
+          </p>
         </Chapter>
       ) : null}
 
-      <Chapter title="Recommended next steps">
+      <Chapter title="What's Next">
         <ol className="kxd-ces-briefing__steps">
           {briefing.recommendedNextSteps.map((step) => (
             <li key={step}>{step}</li>
@@ -172,6 +167,11 @@ export function CesExecutiveClientBriefing({ briefing }: CesExecutiveClientBrief
           <Link href="/portal/website-review" className="kxd-ces-btn kxd-ces-btn--primary">
             Continue Website Review
           </Link>
+          {showExecutiveReview ? (
+            <Link href="/portal/executive-review" className="kxd-ces-btn kxd-ces-btn--ghost">
+              Open Executive Review
+            </Link>
+          ) : null}
           <Link href="/portal" className="kxd-ces-btn kxd-ces-btn--ghost">
             Executive Performance
           </Link>

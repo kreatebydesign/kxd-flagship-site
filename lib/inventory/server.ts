@@ -15,8 +15,13 @@ import type {
   PublicInventoryClient,
   PublicInventoryVehicle,
 } from "./types";
+import { PUBLIC_LISTABLE_STATUSES } from "./types";
 
 export type { PublicInventoryClient };
+
+function isPublicListable(status: InventoryListingStatus): boolean {
+  return (PUBLIC_LISTABLE_STATUSES as readonly string[]).includes(status);
+}
 
 type AnyDoc = Record<string, unknown>;
 
@@ -315,6 +320,45 @@ export async function updateInventoryVehicle(
 
   const vehicle = parseInventoryVehicleDoc(updated);
   if (!vehicle) return { ok: false, message: "Could not parse updated vehicle." };
+
+  if (listingStatus !== existing.listingStatus) {
+    try {
+      const { publishInventoryActivity } = await import(
+        "@/lib/client-command/activity/inventory"
+      );
+      if (listingStatus === "hidden" && isPublicListable(existing.listingStatus)) {
+        await publishInventoryActivity({
+          clientId: input.clientId,
+          vehicleId: vehicle.id,
+          vehicleTitle: vehicle.title,
+          kind: "hidden",
+          author: input.actor,
+        });
+      } else if (
+        isPublicListable(listingStatus) &&
+        !isPublicListable(existing.listingStatus)
+      ) {
+        await publishInventoryActivity({
+          clientId: input.clientId,
+          vehicleId: vehicle.id,
+          vehicleTitle: vehicle.title,
+          kind: "published",
+          author: input.actor,
+        });
+      } else {
+        await publishInventoryActivity({
+          clientId: input.clientId,
+          vehicleId: vehicle.id,
+          vehicleTitle: vehicle.title,
+          kind: "updated",
+          author: input.actor,
+        });
+      }
+    } catch (err) {
+      console.error("[KXD Inventory] Client notification publish failed:", err);
+    }
+  }
+
   return { ok: true, vehicle };
 }
 

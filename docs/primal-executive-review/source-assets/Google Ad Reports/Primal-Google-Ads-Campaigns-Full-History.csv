@@ -1,0 +1,9 @@
+Campaign report
+"March 31, 2026 - July 20, 2026"
+Campaign status,Campaign,Budget,Budget name,Budget type,Currency code,Status,Status reasons,Optimization score,Campaign type,Avg. CPM,Impr.,Interactions,Interaction rate,Avg. cost,Cost,Clicks,CTR,Avg. CPC,Conv. value,Value / conv.,Search impr. share,Bid strategy type,Conv. rate,Conversions,Cost / conv.
+Enabled,Upper Funnel & Remarketing I Racing School I KXD I Jun26,20.00, --,Daily,USD,Eligible,,96.67,Demand Gen,22.85,"50,919","2,709",5.32%,0.43,1163.47,"1,368",2.69%,0.85,13.00,1.00, --,Maximize Conversions,0.48%,13.00,89.50
+Enabled,Bottom Funnel I Racing School I KXD I Apr26,80.00, --,Daily,USD,Eligible,,87.82,Search,464.74,"20,438","1,179",5.77%,8.06,9498.45,"1,179",5.77%,8.06,16.00,1.00,37.43%,Maximize Conversions,1.36%,16.00,593.65
+Total: Filtered campaigns, --, --, --, --,USD, --,, --, --,149.42,"71,357","3,888",5.45%,2.74,10661.91,"2,547",3.57%,4.19,29.00,1.00,37.43%, --,0.75%,29.00,367.65
+Total: Account,,,,,USD,,,,,149.42,"71,357","3,888",5.45%,2.74,10661.91,"2,547",3.57%,4.19,29.00,1.00,37.43%,,0.75%,29.00,367.65
+Total: Search,,,,,USD,,,,Search,464.74,"20,438","1,179",5.77%,8.06,9498.45,"1,179",5.77%,8.06,16.00,1.00,37.43%,,1.36%,16.00,593.65
+Total: Demand Gen,,,,,USD,,,,Demand Gen,22.85,"50,919","2,709",5.32%,0.43,1163.47,"1,368",2.69%,0.85,13.00,1.00, --,,0.48%,13.00,89.50

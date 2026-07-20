@@ -1,0 +1,45 @@
+Campaign report
+"March 31, 2026 - July 20, 2026"
+Month,Campaign status,Campaign,Budget,Budget name,Budget type,Currency code,Status,Status reasons,Optimization score,Campaign type,Avg. CPM,Impr.,Interactions,Interaction rate,Avg. cost,Cost,Clicks,CTR,Avg. CPC,Conv. value,Value / conv.,Search impr. share,Bid strategy type,Conv. rate,Conversions,Cost / conv.
+March 2026,Enabled,Upper Funnel & Remarketing I Racing School I KXD I Jun26,20.00, --,Daily,USD,Eligible,,96.67,Demand Gen,0,0,0, --,0,0.00,0, --,0,0.00,0.00, --,Maximize Conversions,0.00%,0.00,0.00
+April 2026,Enabled,Upper Funnel & Remarketing I Racing School I KXD I Jun26,20.00, --,Daily,USD,Eligible,,96.67,Demand Gen,0,0,0, --,0,0.00,0, --,0,0.00,0.00, --,Maximize Conversions,0.00%,0.00,0.00
+May 2026,Enabled,Upper Funnel & Remarketing I Racing School I KXD I Jun26,20.00, --,Daily,USD,Eligible,,96.67,Demand Gen,21.13,"6,643",454,6.83%,0.31,140.38,162,2.44%,0.87,4.00,1.00, --,Maximize Conversions,0.88%,4.00,35.10
+June 2026,Enabled,Upper Funnel & Remarketing I Racing School I KXD I Jun26,20.00, --,Daily,USD,Eligible,,96.67,Demand Gen,23.10,"26,572","1,233",4.64%,0.50,613.92,749,2.82%,0.82,9.00,1.00, --,Maximize Conversions,0.73%,9.00,68.21
+July 2026,Enabled,Upper Funnel & Remarketing I Racing School I KXD I Jun26,20.00, --,Daily,USD,Eligible,,96.67,Demand Gen,23.11,"17,706","1,022",5.77%,0.40,409.18,458,2.59%,0.89,0.00,0.00, --,Maximize Conversions,0.00%,0.00,0.00
+March 2026,Enabled,Bottom Funnel I Racing School I KXD I Apr26,80.00, --,Daily,USD,Eligible,,87.82,Search,0,0,0, --,0,0.00,0, --,0,0.00,0.00, --,Maximize Conversions,0.00%,0.00,0.00
+April 2026,Enabled,Bottom Funnel I Racing School I KXD I Apr26,80.00, --,Daily,USD,Eligible,,87.82,Search,311.65,"8,212",498,6.06%,5.14,2559.26,498,6.06%,5.14,9.00,1.00,31.46%,Maximize Conversions,1.81%,9.00,284.36
+May 2026,Enabled,Bottom Funnel I Racing School I KXD I Apr26,80.00, --,Daily,USD,Eligible,,87.82,Search,665.42,"4,393",307,6.99%,9.52,2923.17,307,6.99%,9.52,3.00,1.00,69.64%,Maximize Conversions,0.98%,3.00,974.39
+June 2026,Enabled,Bottom Funnel I Racing School I KXD I Apr26,80.00, --,Daily,USD,Eligible,,87.82,Search,857.87,"2,844",205,7.21%,11.90,2439.78,205,7.21%,11.90,3.00,1.00,54.27%,Maximize Conversions,1.46%,3.00,813.26
+July 2026,Enabled,Bottom Funnel I Racing School I KXD I Apr26,80.00, --,Daily,USD,Eligible,,87.82,Search,315.12,"5,002",169,3.38%,9.33,1576.23,169,3.38%,9.33,1.00,1.00,30.26%,Maximize Conversions,0.59%,1.00,1576.23
+ --,Total: Filtered campaigns, --, --, --, --,USD, --,, --, --,149.39,"71,372","3,888",5.45%,2.74,10661.93,"2,548",3.57%,4.18,29.00,1.00,37.43%, --,0.75%,29.00,367.65
+ --,Total: Filtered campaigns, --, --, --, --,USD, --,, --, --,0,0,0, --,0,0,0, --,0,0,0, --, --, --,0,0
+ --,Total: Filtered campaigns, --, --, --, --, --, --,, --, --,0,0,0, --,0,0,0, --,0,0,0, --, --, --,0,0
+March 2026,Total: Filtered campaigns, --, --, --, --, --, --,, --, --,0,0,0, --,0,0,0, --,0,0,0, --, --, --,0,0
+April 2026,Total: Filtered campaigns, --, --, --, --, --, --,, --, --,0,0,0, --,0,0,0, --,0,0,0, --, --, --,0,0
+May 2026,Total: Filtered campaigns, --, --, --, --, --, --,, --, --,0,0,0, --,0,0,0, --,0,0,0, --, --, --,0,0
+June 2026,Total: Filtered campaigns, --, --, --, --, --, --,, --, --,0,0,0, --,0,0,0, --,0,0,0, --, --, --,0,0
+July 2026,Total: Filtered campaigns, --, --, --, --, --, --,, --, --,0,0,0, --,0,0,0, --,0,0,0, --, --, --,0,0
+ --,Total: Filtered campaigns, --, --, --, --, --, --,, --, --,0,0,0, --,0,0,0, --,0,0,0, --, --, --,0,0
+March 2026,Total: Filtered campaigns, --, --, --, --,USD, --,, --, --,0,0,0, --,0,0.00,0, --,0,0.00,0.00, --, --,0.00%,0.00,0.00
+April 2026,Total: Filtered campaigns, --, --, --, --,USD, --,, --, --,311.65,"8,212",498,6.06%,5.14,2559.26,498,6.06%,5.14,9.00,1.00,31.46%, --,1.81%,9.00,284.36
+May 2026,Total: Filtered campaigns, --, --, --, --,USD, --,, --, --,277.60,"11,036",761,6.90%,4.03,3063.56,469,4.25%,6.53,7.00,1.00,69.64%, --,0.92%,7.00,437.65
+June 2026,Total: Filtered campaigns, --, --, --, --,USD, --,, --, --,103.81,"29,416","1,438",4.89%,2.12,3053.70,954,3.24%,3.20,12.00,1.00,54.27%, --,0.83%,12.00,254.47
+July 2026,Total: Filtered campaigns, --, --, --, --,USD, --,, --, --,87.43,"22,708","1,191",5.24%,1.67,1985.42,627,2.76%,3.17,1.00,1.00,30.26%, --,0.08%,1.00,1985.42
+,Total: Account,,,,,USD,,,,,149.39,"71,372","3,888",5.45%,2.74,10661.93,"2,548",3.57%,4.18,29.00,1.00,37.43%,,0.75%,29.00,367.65
+June 2026,Total: Account,,,,,USD,,,,,103.81,"29,416","1,438",4.89%,2.12,3053.70,954,3.24%,3.20,12.00,1.00,54.27%,,0.83%,12.00,254.47
+March 2026,Total: Account,,,,,USD,,,,,0,0,0, --,0,0.00,0, --,0,0.00,0.00, --,,0.00%,0.00,0.00
+May 2026,Total: Account,,,,,USD,,,,,277.60,"11,036",761,6.90%,4.03,3063.56,469,4.25%,6.53,7.00,1.00,69.64%,,0.92%,7.00,437.65
+April 2026,Total: Account,,,,,USD,,,,,311.65,"8,212",498,6.06%,5.14,2559.26,498,6.06%,5.14,9.00,1.00,31.46%,,1.81%,9.00,284.36
+July 2026,Total: Account,,,,,USD,,,,,87.43,"22,708","1,191",5.24%,1.67,1985.42,627,2.76%,3.17,1.00,1.00,30.26%,,0.08%,1.00,1985.42
+,Total: Search,,,,,USD,,,,Search,464.45,"20,451","1,179",5.76%,8.06,9498.45,"1,179",5.76%,8.06,16.00,1.00,37.43%,,1.36%,16.00,593.65
+,Total: Demand Gen,,,,,USD,,,,Demand Gen,22.85,"50,921","2,709",5.32%,0.43,1163.48,"1,369",2.69%,0.85,13.00,1.00, --,,0.48%,13.00,89.50
+March 2026,Total: Search,,,,,USD,,,,Search,0,0,0, --,0,0.00,0, --,0,0.00,0.00, --,,0.00%,0.00,0.00
+July 2026,Total: Search,,,,,USD,,,,Search,315.12,"5,002",169,3.38%,9.33,1576.23,169,3.38%,9.33,1.00,1.00,30.26%,,0.59%,1.00,1576.23
+March 2026,Total: Demand Gen,,,,,USD,,,,Demand Gen,0,0,0, --,0,0.00,0, --,0,0.00,0.00, --,,0.00%,0.00,0.00
+April 2026,Total: Demand Gen,,,,,USD,,,,Demand Gen,0,0,0, --,0,0.00,0, --,0,0.00,0.00, --,,0.00%,0.00,0.00
+May 2026,Total: Search,,,,,USD,,,,Search,665.42,"4,393",307,6.99%,9.52,2923.17,307,6.99%,9.52,3.00,1.00,69.64%,,0.98%,3.00,974.39
+July 2026,Total: Demand Gen,,,,,USD,,,,Demand Gen,23.11,"17,706","1,022",5.77%,0.40,409.18,458,2.59%,0.89,0.00,0.00, --,,0.00%,0.00,0.00
+May 2026,Total: Demand Gen,,,,,USD,,,,Demand Gen,21.13,"6,643",454,6.83%,0.31,140.38,162,2.44%,0.87,4.00,1.00, --,,0.88%,4.00,35.10
+April 2026,Total: Search,,,,,USD,,,,Search,311.65,"8,212",498,6.06%,5.14,2559.26,498,6.06%,5.14,9.00,1.00,31.46%,,1.81%,9.00,284.36
+June 2026,Total: Demand Gen,,,,,USD,,,,Demand Gen,23.10,"26,572","1,233",4.64%,0.50,613.92,749,2.82%,0.82,9.00,1.00, --,,0.73%,9.00,68.21
+June 2026,Total: Search,,,,,USD,,,,Search,857.87,"2,844",205,7.21%,11.90,2439.78,205,7.21%,11.90,3.00,1.00,54.27%,,1.46%,3.00,813.26

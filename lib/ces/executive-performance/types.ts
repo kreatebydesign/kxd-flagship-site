@@ -26,6 +26,11 @@ export type ExperiencePresentation = {
    */
   briefingEnabled?: boolean;
   /**
+   * Executive Review (/portal/executive-review).
+   * Requires CES module entitlement + authored review pack. Defaults false when omitted.
+   */
+  executiveReviewEnabled?: boolean;
+  /**
    * Editorial hero photograph (not a webpage screenshot).
    * Empty string → graphite editorial fallback (no fabricated image).
    */

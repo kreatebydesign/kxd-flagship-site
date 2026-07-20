@@ -31,6 +31,7 @@ export async function getRecentExecutiveActivity(
   const events = await getRecentExecutiveEvents(limit, {
     clientId: filters.clientId,
     importance: filters.importance === "all" ? undefined : filters.importance,
+    clientVisibleOnly: filters.clientVisibleOnly,
   });
 
   const eventIds = events

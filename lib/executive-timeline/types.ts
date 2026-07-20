@@ -73,6 +73,8 @@ export interface ExecutiveTimelineFilters {
   importance?: ExecutiveTimelineImportance | "all";
   search?: string;
   pinnedOnly?: boolean;
+  /** When true, only events with internalOnly === false (client-visible). */
+  clientVisibleOnly?: boolean;
 }
 
 export interface ExecutiveTimelineMonthGroup {

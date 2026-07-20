@@ -121,6 +121,8 @@ export interface ExecutiveActivityFilters {
   unreadOnly?: boolean;
   importance?: ExecutiveActivityImportance | "all";
   sourceModule?: string | "all";
+  /** When true, only client-visible timeline events (internalOnly === false). */
+  clientVisibleOnly?: boolean;
 }
 
 export interface ExecutiveActivityCenterData {

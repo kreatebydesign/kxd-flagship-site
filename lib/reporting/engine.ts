@@ -378,14 +378,29 @@ export async function publishMonthlyReport(
 
   if (clientId) {
     try {
-      await createExecutiveEvent({
-        client: clientId as number,
+      const { publishActivity } = await import("@/lib/activity-engine/publish");
+      const label = monthLabel(
+        Number(report.reportingMonth),
+        Number(report.reportingYear),
+      );
+      await publishActivity({
+        clientId: clientId as number,
         eventType: "reporting.published",
-        title: `Monthly report published · ${monthLabel(Number(report.reportingMonth), Number(report.reportingYear))}`,
-        category: "relationship",
+        title: "New Monthly Report Available",
+        summary: `Your ${label} performance report is ready to review.`,
+        category: "analytics",
         importance: "high",
         sourceModule: "Growth",
+        sourceType: "monthly-report",
+        sourceId: reportId,
+        internalOnly: false,
         metadata: { reportId },
+        relatedLinks: [
+          {
+            label: "Monthly Report",
+            href: `/portal/reports/${reportId}`,
+          },
+        ],
       });
     } catch (err) {
       console.error("[KXD Reporting] Publish timeline failed:", err);

@@ -55,6 +55,9 @@ function buildWhere(filters: ExecutiveTimelineFilters): ExecutiveTimelineDoc {
     and.push({ importance: { equals: filters.importance } });
   }
   if (filters.pinnedOnly) and.push({ pinned: { equals: true } });
+  if (filters.clientVisibleOnly) {
+    and.push({ internalOnly: { equals: false } });
+  }
 
   if (filters.search?.trim()) {
     const q = filters.search.trim();

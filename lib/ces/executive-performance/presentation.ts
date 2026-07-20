@@ -23,6 +23,7 @@ const DEFAULT_ZONE_ORDER = [
 const PRIMAL_PRESENTATION: ExperiencePresentation = {
   enabled: true,
   briefingEnabled: true,
+  executiveReviewEnabled: true,
   heroImageSrc: "/migrated-assets/projects/primal-motorsports-hero.jpg",
   heroImageAlt: "Radical race cars on track — Primal Motorsports",
   heroOverlay: "deep",
@@ -46,6 +47,7 @@ function stubPresentation(input: {
   return {
     enabled: false,
     briefingEnabled: false,
+    executiveReviewEnabled: false,
     heroImageSrc: "",
     heroImageAlt: input.heroImageAlt,
     heroOverlay: "graphite",

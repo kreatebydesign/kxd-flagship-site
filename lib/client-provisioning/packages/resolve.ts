@@ -136,16 +136,24 @@ export function resolvePersistableEntitlements(
 
 export function resolveCesModules(
   entitlements: readonly string[],
-): Array<"website-review" | "website-workspace" | "executive-performance" | "inventory"> {
+): Array<
+  | "website-review"
+  | "website-workspace"
+  | "executive-performance"
+  | "executive-review"
+  | "inventory"
+> {
   const allowed = new Set([
     "website-review",
     "website-workspace",
     "executive-performance",
+    "executive-review",
     "inventory",
   ]);
   return entitlements.filter((id): id is
     | "website-review"
     | "website-workspace"
     | "executive-performance"
+    | "executive-review"
     | "inventory" => allowed.has(id));
 }

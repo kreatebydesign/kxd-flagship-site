@@ -2,6 +2,18 @@ import type { CesModuleDefinition } from "./types";
 
 export const CES_MODULE_REGISTRY: CesModuleDefinition[] = [
   {
+    moduleId: "executive-review",
+    label: "Executive Review",
+    navGroup: "headquarters",
+    navOrder: 2,
+    routes: {
+      landing: "/portal/executive-review",
+      request: "/portal/executive-review",
+      detail: () => "/portal/executive-review",
+    },
+    vocabularyNamespace: "executive-review",
+  },
+  {
     moduleId: "website-review",
     label: "Website Review",
     navGroup: "work",

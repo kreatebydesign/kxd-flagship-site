@@ -7,6 +7,7 @@ export type CesModuleId =
   | "website-review"
   | "website-workspace"
   | "executive-performance"
+  | "executive-review"
   | "inventory";
 
 export type ExperienceProfileSource = "profile" | "fallback";

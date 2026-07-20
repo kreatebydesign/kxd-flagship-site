@@ -62,6 +62,14 @@ export function isPortalNavVisibleForCesLaunch(
   }
   /* Partnership briefing — only when presentation + memory make it available. */
   if (navId === "partnership") return true;
+  /* Executive Review — leadership narrative (Primal V1 entitlement). */
+  if (
+    navId === "executive-review" &&
+    profile &&
+    isCesModuleEnabled(profile, "executive-review")
+  ) {
+    return true;
+  }
   if (CES_LAUNCH_HIDDEN_NAV_IDS.includes(navId as ClientHqNavId)) return false;
   return false;
 }
