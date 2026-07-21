@@ -4,11 +4,12 @@ import { INQUIRY_EMAIL, SITE } from "@/lib/site";
 import { KxdLogo } from "@/components/ui/KxdLogo";
 
 const NAV_LINKS = [
-  { label: "Work",       href: "/work" },
-  { label: "Services",   href: "/services" },
-  { label: "Investment", href: "/investment" },
-  { label: "About",      href: "/about" },
-  { label: "Contact",    href: "/contact" },
+  { label: "Work",         href: "/work" },
+  { label: "Services",     href: "/services" },
+  { label: "Investment",   href: "/investment" },
+  { label: "Partnerships", href: "/pricing" },
+  { label: "About",        href: "/about" },
+  { label: "Contact",      href: "/contact" },
 ];
 
 const utilityLinkClass =

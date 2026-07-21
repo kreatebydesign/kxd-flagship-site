@@ -30,7 +30,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
               ? 0.85
               : path === "/website-audit"
                 ? 0.85
-                : path === "/investment"
+                : path === "/investment" || path === "/pricing"
                   ? 0.85
                   : path.startsWith("/work/")
                     ? 0.8

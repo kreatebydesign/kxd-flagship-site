@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { ContactForm } from "@/components/contact/ContactForm";
 import { INQUIRY_EMAIL, SITE } from "@/lib/site";
 import { absoluteUrl, buildMetadata } from "@/lib/seo/metadata";
@@ -33,7 +34,6 @@ export const metadata: Metadata = {
 export default function ContactPage() {
   return (
     <>
-      {/* ── Hero ── */}
       <section
         className="border-b"
         style={{
@@ -57,7 +57,6 @@ export default function ContactPage() {
             we&rsquo;ll reach out directly.
           </p>
 
-          {/* Trust indicators */}
           <div className="mt-10 flex flex-wrap gap-x-8 gap-y-3">
             {[
               "Reviewed personally",
@@ -67,25 +66,39 @@ export default function ContactPage() {
               <div key={point} className="flex items-center gap-2.5">
                 <div
                   aria-hidden
-                  style={{ width: "4px", height: "4px", borderRadius: "50%", background: "var(--kxd-gold)", flexShrink: 0 }}
+                  style={{
+                    width: "4px",
+                    height: "4px",
+                    borderRadius: "50%",
+                    background: "var(--kxd-gold)",
+                    flexShrink: 0,
+                  }}
                 />
-                <p className="kxd-label" style={{ letterSpacing: "0.10em" }}>{point}</p>
+                <p className="kxd-label" style={{ letterSpacing: "0.10em" }}>
+                  {point}
+                </p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── Application form + sidebar ── */}
       <section
         className="kxd-section"
         style={{ background: "var(--kxd-black-base)" }}
       >
         <div className="kxd-container">
           <div className="grid gap-12 lg:grid-cols-[1fr_20rem] lg:gap-16 lg:items-start">
-            <ContactForm />
+            <Suspense
+              fallback={
+                <div className="kxd-luxury-form p-8 lg:p-10">
+                  <p className="kxd-label">Loading application…</p>
+                </div>
+              }
+            >
+              <ContactForm />
+            </Suspense>
 
-            {/* Sidebar */}
             <aside className="space-y-8 lg:pt-2">
               <div
                 style={{
@@ -103,7 +116,12 @@ export default function ContactPage() {
                 </a>
               </div>
 
-              <div style={{ borderLeft: "1px solid var(--kxd-border-white)", paddingLeft: "1.25rem" }}>
+              <div
+                style={{
+                  borderLeft: "1px solid var(--kxd-border-white)",
+                  paddingLeft: "1.25rem",
+                }}
+              >
                 <p className="kxd-label">What to Expect</p>
                 <ul className="mt-3 space-y-2.5">
                   {[
@@ -115,7 +133,12 @@ export default function ContactPage() {
                     <li key={step} className="flex items-start gap-2.5">
                       <span
                         aria-hidden
-                        style={{ color: "var(--kxd-gold)", opacity: 0.65, fontSize: "0.5rem", lineHeight: "1.6rem" }}
+                        style={{
+                          color: "var(--kxd-gold)",
+                          opacity: 0.65,
+                          fontSize: "0.5rem",
+                          lineHeight: "1.6rem",
+                        }}
                       >
                         —
                       </span>
@@ -125,12 +148,17 @@ export default function ContactPage() {
                 </ul>
               </div>
 
-              <div style={{ borderLeft: "1px solid var(--kxd-border-white)", paddingLeft: "1.25rem" }}>
+              <div
+                style={{
+                  borderLeft: "1px solid var(--kxd-border-white)",
+                  paddingLeft: "1.25rem",
+                }}
+              >
                 <p className="kxd-label">Connect</p>
                 <div className="mt-3 space-y-2">
                   {[
                     { label: "Instagram", href: SITE.social.instagram },
-                    { label: "LinkedIn",  href: SITE.social.linkedin },
+                    { label: "LinkedIn", href: SITE.social.linkedin },
                   ].map((s) => (
                     <a
                       key={s.label}
@@ -145,10 +173,34 @@ export default function ContactPage() {
                 </div>
               </div>
 
-              <div style={{ borderLeft: "1px solid var(--kxd-border-white)", paddingLeft: "1.25rem" }}>
-                <p className="kxd-label">Investment Starting At</p>
+              <div
+                style={{
+                  borderLeft: "1px solid var(--kxd-border-white)",
+                  paddingLeft: "1.25rem",
+                }}
+              >
+                <p className="kxd-label">Partnerships</p>
                 <p className="kxd-body-sm mt-2">
-                  Luxury websites from $8,500.<br />
+                  Ongoing partnerships start at $1,250/month.
+                </p>
+                <a
+                  href="/pricing"
+                  className="mt-3 block font-sans text-[0.6875rem] font-medium uppercase tracking-[0.12em] text-[var(--kxd-gold)] transition hover:text-[var(--kxd-gold-light)]"
+                >
+                  View partnership packages →
+                </a>
+              </div>
+
+              <div
+                style={{
+                  borderLeft: "1px solid var(--kxd-border-white)",
+                  paddingLeft: "1.25rem",
+                }}
+              >
+                <p className="kxd-label">Project Investment</p>
+                <p className="kxd-body-sm mt-2">
+                  Luxury websites from $8,500.
+                  <br />
                   Growth infrastructure from $12,500.
                 </p>
                 <a

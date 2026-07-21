@@ -84,15 +84,15 @@ const LEVELS = [
   {
     label: "05",
     title: "Ongoing Partnerships",
-    starting: "Starting at $2,500/month",
+    starting: "Starting at $1,250/month",
     description:
-      "Monthly retainer engagements for brands that need consistent creative direction, technical execution, and strategic support beyond the initial build.",
+      "Monthly creative and operating partnerships for brands that need consistent website care, structured requests, and a private client experience — supported by KXD OS.",
     includes: [
-      "Dedicated monthly creative and strategy hours",
-      "Ongoing website updates and improvements",
-      "Performance monitoring and optimization",
-      "New feature and page development",
-      "Priority access and direct communication",
+      "KXD Partnership, Operating, or Executive packages",
+      "Defined monthly service credits",
+      "Premium client portal and revision workflow",
+      "Website Workspace on Operating and above",
+      "Optional Inventory, reporting, and priority support",
     ],
     accent: false,
   },
@@ -157,8 +157,8 @@ export default function InvestmentPage() {
                 maxWidth: "34rem",
               }}
             >
-              KXD does not sell packages. We scope each engagement around what
-              the brand actually needs — nothing less, nothing extra.
+              KXD scopes project work carefully — and offers clear monthly
+              partnership packages for ongoing creative and operating support.
             </p>
           </div>
         </div>
@@ -267,7 +267,7 @@ export default function InvestmentPage() {
                   },
                   {
                     label: "Engagement model",
-                    value: "Tailored to your goals and growth stage",
+                    value: "Scoped to your goals and growth stage",
                   },
                   {
                     label: "Current partnerships",
@@ -285,6 +285,16 @@ export default function InvestmentPage() {
                   </div>
                 ))}
               </div>
+              <p className="kxd-body-sm mt-10">
+                Looking for ongoing website care?{" "}
+                <a
+                  href="/pricing"
+                  className="text-[var(--kxd-gold)] transition hover:text-[var(--kxd-gold-light)]"
+                >
+                  Review partnership packages
+                </a>
+                .
+              </p>
             </div>
           </div>
         </div>

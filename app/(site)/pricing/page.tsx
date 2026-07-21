@@ -1,23 +1,40 @@
 import type { Metadata } from "next";
-import { PageHero, PagePlaceholder } from "@/components/ui/PageHero";
+import { PartnershipPackagesExperience } from "@/components/partnerships/PartnershipPackagesExperience";
+import { StructuredData } from "@/components/seo/StructuredData";
 import { buildMetadata } from "@/lib/seo/metadata";
+import { breadcrumbSchema, webPageSchema } from "@/lib/seo/schema";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Pricing",
+  title: "Partnerships",
   description:
-    "Investment ranges for luxury website design and extended digital infrastructure work.",
+    "KXD Partnership, KXD Operating Partnership, and KXD Executive Partnership — premium creative and operating relationships with clear monthly capacity and starting investment.",
   path: "/pricing",
+  keywords: [
+    "Website Partnership",
+    "Ongoing Website Support",
+    "Premium Creative Retainer",
+    "KXD Partnership",
+    "Website Operating Partnership",
+  ],
 });
 
 export default function PricingPage() {
+  const schema = [
+    breadcrumbSchema([
+      { name: "Partnerships", path: "/pricing" },
+    ]),
+    webPageSchema({
+      title: "Partnerships",
+      description:
+        "Premium creative and operating partnerships with Kreate by Design — clear capacity, organized execution, and a private client experience.",
+      path: "/pricing",
+    }),
+  ];
+
   return (
     <>
-      <PageHero
-        label="Pricing"
-        title="Clear ranges. No ambiguity."
-        description="Luxury website projects typically begin at defined investment tiers. Platform and enterprise work is scoped after discovery."
-      />
-      <PagePlaceholder message="Pricing architecture will support package tiers, discovery call deposits, and Stripe checkout — prepared but not yet active." />
+      <StructuredData data={schema} />
+      <PartnershipPackagesExperience />
     </>
   );
 }

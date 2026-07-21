@@ -9,10 +9,11 @@ import { cn } from "@/lib/utils";
 import { KxdLogo } from "@/components/ui/KxdLogo";
 
 const NAV_LINKS = [
-  { label: "Work",       href: "/work" },
-  { label: "Services",   href: "/services" },
-  { label: "Investment", href: "/investment" },
-  { label: "About",      href: "/about" },
+  { label: "Work",         href: "/work" },
+  { label: "Services",     href: "/services" },
+  { label: "Investment",   href: "/investment" },
+  { label: "Partnerships", href: "/pricing" },
+  { label: "About",        href: "/about" },
 ];
 
 export function SiteHeader() {
@@ -20,8 +21,16 @@ export function SiteHeader() {
   const [scrolled, setScrolled] = useState(false);
   const [megaOpen, setMegaOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [navPath, setNavPath] = useState(pathname);
   const megaRef = useRef<HTMLDivElement>(null);
   const workRef = useRef<HTMLDivElement>(null);
+
+  /* Close overlays when the route changes (render-time sync — not an effect). */
+  if (navPath !== pathname) {
+    setNavPath(pathname);
+    setMobileOpen(false);
+    setMegaOpen(false);
+  }
 
   /* scroll detection */
   useEffect(() => {
@@ -30,9 +39,6 @@ export function SiteHeader() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-  /* close mobile nav on route change */
-  useEffect(() => { setMobileOpen(false); setMegaOpen(false); }, [pathname]);
 
   /* lock body scroll while mobile nav is open */
   useEffect(() => {

@@ -14,6 +14,7 @@ export const PUBLIC_SITEMAP_PATHS: string[] = [
   "/services/growth-infrastructure",
   "/services/enterprise-platforms",
   "/investment",
+  "/pricing",
   "/about",
   "/contact",
   "/start-project",
