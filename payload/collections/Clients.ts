@@ -247,5 +247,75 @@ export const Clients: CollectionConfig = {
         description: "Internal health rating for this client relationship.",
       },
     },
+
+    // ── Phase 35A — Plans & Entitlements ─────────────────────────────────────
+    {
+      name: "planKey",
+      type: "select",
+      label: "Service Plan",
+      options: [
+        { label: "Starter", value: "starter" },
+        { label: "Growth", value: "growth" },
+        { label: "Premium", value: "premium" },
+        { label: "Enterprise", value: "enterprise" },
+        { label: "Custom", value: "custom" },
+      ],
+      admin: {
+        position: "sidebar",
+        description:
+          "Commercial plan assignment. Empty = legacy (keep existing CES enabledModules). Managed in Client Command → Plans & Access.",
+      },
+    },
+    {
+      name: "planStatus",
+      type: "select",
+      label: "Plan Status",
+      defaultValue: "legacy",
+      options: [
+        { label: "Active", value: "active" },
+        { label: "Trial", value: "trial" },
+        { label: "Paused", value: "paused" },
+        { label: "Legacy", value: "legacy" },
+      ],
+      admin: {
+        position: "sidebar",
+        description:
+          "Legacy preserves pre-entitlement CES access. Paused clears effective modules.",
+      },
+    },
+    {
+      name: "planEffectiveAt",
+      type: "date",
+      label: "Plan Effective At",
+      admin: {
+        position: "sidebar",
+        date: { pickerAppearance: "dayAndTime" },
+      },
+    },
+    {
+      name: "planNote",
+      type: "textarea",
+      label: "Plan Note (Internal)",
+      admin: {
+        description: "Internal-only. Never shown in the client portal.",
+      },
+    },
+    {
+      name: "planAddOnModules",
+      type: "json",
+      label: "Plan Add-On Modules",
+      admin: {
+        description: 'JSON string array of entitlement keys, e.g. ["inventory","seo"].',
+      },
+    },
+    {
+      name: "planRemovedModules",
+      type: "json",
+      label: "Plan Removed Modules",
+      admin: {
+        description:
+          "JSON string array of entitlement keys explicitly removed from the plan.",
+      },
+    },
   ],
 };

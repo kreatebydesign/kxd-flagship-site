@@ -15193,3 +15193,192 @@ a.kxd-exec-today__row:hover {
     grid-template-columns: 1fr;
   }
 }
+
+/* ── Phase 35A — Plans & Access (Client Command) ─────────────────────────── */
+
+.kxd-plans-access {
+  margin-bottom: var(--kxd-os-space-6);
+  padding: 1.25rem 1.35rem 1.4rem;
+}
+
+.kxd-plans-access__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.1rem;
+}
+
+.kxd-plans-access__badge {
+  display: inline-block;
+  padding: 0.35rem 0.65rem;
+  border: 1px solid var(--kxd-os-border);
+  border-radius: 2px;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-muted);
+  background: transparent;
+}
+
+.kxd-plans-access__badge--active {
+  border-color: color-mix(in srgb, var(--kxd-os-gold, #b8974a) 55%, var(--kxd-os-border));
+  color: var(--kxd-os-gold, #b8974a);
+}
+
+.kxd-plans-access__badge--warn {
+  border-color: color-mix(in srgb, var(--kxd-os-warning) 50%, var(--kxd-os-border));
+  color: var(--kxd-os-warning);
+}
+
+.kxd-plans-access__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem 1rem;
+}
+
+.kxd-plans-access__field {
+  display: grid;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-faint);
+}
+
+.kxd-plans-access__field select,
+.kxd-plans-access__field textarea {
+  width: 100%;
+  border: 1px solid var(--kxd-os-border);
+  border-radius: 2px;
+  background: var(--kxd-os-surface, #fff);
+  color: var(--kxd-os-text-primary);
+  font: inherit;
+  font-size: 0.92rem;
+  letter-spacing: normal;
+  text-transform: none;
+  padding: 0.55rem 0.7rem;
+}
+
+.kxd-plans-access__field select:focus,
+.kxd-plans-access__field textarea:focus,
+.kxd-plans-access__check input:focus-visible,
+.kxd-plans-access__save:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--kxd-os-gold, #b8974a) 70%, transparent);
+  outline-offset: 2px;
+}
+
+.kxd-plans-access__columns {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.1rem;
+  margin-top: 1.25rem;
+}
+
+.kxd-plans-access__list {
+  list-style: none;
+  margin: 0.55rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+  color: var(--kxd-os-text-primary);
+}
+
+.kxd-plans-access__list--effective li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid var(--kxd-os-border);
+}
+
+.kxd-plans-access__list--effective li span {
+  font-size: 0.78rem;
+  color: var(--kxd-os-text-muted);
+}
+
+.kxd-plans-access__checks {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.55rem;
+  max-height: 14rem;
+  overflow: auto;
+  padding-right: 0.25rem;
+}
+
+.kxd-plans-access__check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  font-size: 0.86rem;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--kxd-os-text-primary);
+  cursor: pointer;
+}
+
+.kxd-plans-access__check input {
+  margin-top: 0.2rem;
+  accent-color: var(--kxd-os-gold, #b8974a);
+}
+
+.kxd-plans-access__effective {
+  margin-top: 1.35rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--kxd-os-border);
+}
+
+.kxd-plans-access__actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 1.15rem;
+}
+
+.kxd-plans-access__save {
+  border: 1px solid var(--kxd-os-text-primary);
+  border-radius: 2px;
+  background: var(--kxd-os-text-primary);
+  color: var(--kxd-os-surface, #fff);
+  font: inherit;
+  font-size: 0.88rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.65rem 1.05rem;
+  cursor: pointer;
+}
+
+.kxd-plans-access__save:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.kxd-plans-access__error {
+  margin-top: 0.85rem;
+  color: var(--kxd-os-critical);
+  font-size: 0.9rem;
+}
+
+.kxd-plans-access__success {
+  margin-top: 0.85rem;
+  color: var(--kxd-os-success);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 960px) {
+  .kxd-plans-access__grid,
+  .kxd-plans-access__columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+.kxd-plans-access__state-note {
+  margin: 0 0 1rem;
+  padding: 0.55rem 0.7rem;
+  border-left: 2px solid var(--kxd-os-border);
+  color: var(--kxd-os-text-muted);
+}

@@ -15,6 +15,7 @@ import {
 } from "@/components/admin/operations/shared/OpsBriefing";
 import type { ClientCommandCenterData, CommandListItem } from "@/lib/client-command";
 import { ClientOpsNav } from "./ClientOpsNav";
+import { ClientPlansAccessPanel } from "./ClientPlansAccessPanel";
 
 function urgencyVariant(urgency: string): "default" | "status" | "success" | "critical" | "warning" {
   switch (urgency) {
@@ -74,6 +75,8 @@ export function ClientCommandScreen({ data }: { data: ClientCommandCenterData })
         </div>
 
         <ClientOpsNav clientId={hero.clientId} active="command" />
+
+        <ClientPlansAccessPanel clientId={hero.clientId} />
 
         <OpsKpiStrip
           items={[

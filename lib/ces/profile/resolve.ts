@@ -133,6 +133,34 @@ function finalizeProfile(profile: ResolvedExperienceProfile): ResolvedExperience
   return profile;
 }
 
+/**
+ * Phase 35A — intersect CES modules with Client Plans entitlements when a plan
+ * is explicitly assigned. Legacy / unassigned clients keep existing CES access.
+ */
+async function applyClientPlanEntitlements(
+  profile: ResolvedExperienceProfile,
+): Promise<ResolvedExperienceProfile> {
+  try {
+    const { resolveClientEntitlements } = await import("@/lib/client-plans");
+    const entitlements = await resolveClientEntitlements(profile.identity.clientId);
+    if (entitlements.isLegacy) return profile;
+
+    const allowed = new Set(entitlements.effectiveModules);
+    profile.enabledModules = profile.enabledModules.filter((moduleId) =>
+      allowed.has(moduleId),
+    );
+    profile.reportingCapabilities = profile.reportingCapabilities.filter(
+      (capability) => allowed.has(capability),
+    );
+  } catch (err) {
+    console.error(
+      "[KXD CES] Client plan entitlement gate failed; keeping CES modules:",
+      err,
+    );
+  }
+  return profile;
+}
+
 export async function resolveExperienceProfile(
   session: PortalSession,
 ): Promise<ResolvedExperienceProfile> {
@@ -165,20 +193,22 @@ export async function resolveExperienceProfile(
   };
 
   const fallbackVisual = buildFallbackVisual(editionBranding);
-  const fallback = finalizeProfile(
-    mergeProfileWithFallback(
-      {
-        source: "fallback",
-        identity: identityBase,
-        visual: fallbackVisual,
-        hospitality: buildFallbackHospitality(clientName, editionBranding),
-        enabledModules: [],
-        reportingCapabilities: [],
-        presentation: null,
-        terminology: {},
-        cssVars: experienceProfileToCssVars(fallbackVisual),
-      },
-      editionBranding,
+  const fallback = await applyClientPlanEntitlements(
+    finalizeProfile(
+      mergeProfileWithFallback(
+        {
+          source: "fallback",
+          identity: identityBase,
+          visual: fallbackVisual,
+          hospitality: buildFallbackHospitality(clientName, editionBranding),
+          enabledModules: [],
+          reportingCapabilities: [],
+          presentation: null,
+          terminology: {},
+          cssVars: experienceProfileToCssVars(fallbackVisual),
+        },
+        editionBranding,
+      ),
     ),
   );
 
@@ -268,5 +298,5 @@ export async function resolveExperienceProfile(
     editionBranding,
   );
 
-  return finalizeProfile(resolved);
+  return applyClientPlanEntitlements(finalizeProfile(resolved));
 }

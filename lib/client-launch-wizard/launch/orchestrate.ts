@@ -3,6 +3,10 @@ import "server-only";
 import { randomBytes, randomUUID } from "node:crypto";
 import type { Payload } from "payload";
 import { buildDefaultCesProfileData } from "@/lib/client-launch/defaults";
+import {
+  assignPlanOnClientCreate,
+  derivePlanOverridesFromSelection,
+} from "@/lib/client-plans";
 import { publishers } from "@/lib/automation/publishers";
 import { normalizeClientSlug } from "../validation/identity";
 import { persistableEntitlementIds } from "../packages/resolve";
@@ -145,6 +149,20 @@ export async function orchestrateClientLaunch(
       },
     });
     created.cesProfileId = cesProfile.id as number;
+
+    // Phase 35A — assign durable plan + sync CES from canonical entitlements.
+    const planOverrides = derivePlanOverridesFromSelection(
+      input.draftPayload.package.packageId,
+      enabledModules,
+    );
+    if (planOverrides) {
+      await assignPlanOnClientCreate(clientId, {
+        planKey: planOverrides.planKey,
+        addOnModules: planOverrides.addOnModules,
+        removedModules: planOverrides.removedModules,
+        actor: input.createdBy,
+      });
+    }
 
     const infra = input.draftPayload.infrastructure;
     const automation = input.draftPayload.automation;

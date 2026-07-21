@@ -71,6 +71,7 @@ import * as migration_20260714_phase33a2_reporting_sync_state_foreign_key from '
 import * as migration_20260714_phase34a_client_launch_drafts from './20260714_phase34a_client_launch_drafts';
 import * as migration_20260714_phase34b_client_inventory_vehicles from './20260714_phase34b_client_inventory_vehicles';
 import * as migration_20260714_phase34d_website_workspace_client_requests from './20260714_phase34d_website_workspace_client_requests';
+import * as migration_20260808_phase35a_client_plans_entitlements from './20260808_phase35a_client_plans_entitlements';
 
 export const migrations = [
   {
@@ -437,5 +438,10 @@ export const migrations = [
     up: migration_20260714_phase34d_website_workspace_client_requests.up,
     down: migration_20260714_phase34d_website_workspace_client_requests.down,
     name: '20260714_phase34d_website_workspace_client_requests',
+  },
+  {
+    up: migration_20260808_phase35a_client_plans_entitlements.up,
+    down: migration_20260808_phase35a_client_plans_entitlements.down,
+    name: '20260808_phase35a_client_plans_entitlements',
   },
 ];

@@ -5,6 +5,10 @@ import type { Payload } from "payload";
 import { publishers } from "@/lib/automation/publishers";
 import { buildDefaultCesProfileData } from "@/lib/client-launch/defaults";
 import {
+  assignPlanOnClientCreate,
+  derivePlanOverridesFromSelection,
+} from "@/lib/client-plans";
+import {
   buildAdminClientWorkspaceUrl,
   buildPortalHomeUrl,
 } from "@/lib/client-launch-wizard/urls";
@@ -224,6 +228,21 @@ export async function orchestrateClientProvision(
       "success",
       `Entitlements: ${enabledModules.join(", ") || "none"}.`,
     );
+
+    const planOverrides = derivePlanOverridesFromSelection(
+      input.draft.packageId,
+      enabledModules,
+    );
+    if (planOverrides) {
+      pushLog(log, "info", `Assigning plan “${planOverrides.planKey}”…`);
+      await assignPlanOnClientCreate(clientId, {
+        planKey: planOverrides.planKey,
+        addOnModules: planOverrides.addOnModules,
+        removedModules: planOverrides.removedModules,
+        actor: input.createdBy || "KXD Client Provisioning",
+      });
+      pushLog(log, "success", `Plan assigned: ${planOverrides.planKey}.`);
+    }
 
     pushLog(log, "info", "Creating infrastructure record…");
     const infraDoc = await input.payload.create({
