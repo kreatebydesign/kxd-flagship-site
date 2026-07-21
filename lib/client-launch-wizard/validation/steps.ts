@@ -1,4 +1,8 @@
 import { getLaunchPackagePreset } from "../packages/presets";
+import {
+  assertCommercialBaselineMatches,
+  isCommercialAgreementId,
+} from "@/lib/commercial-agreements";
 import type {
   LaunchWizardDraftPayload,
   LaunchWizardStepId,
@@ -12,18 +16,61 @@ import { validateTeamStep } from "./team";
 export function validatePackageStep(
   payload: LaunchWizardDraftPayload,
 ): LaunchWizardValidationIssue[] {
+  const issues: LaunchWizardValidationIssue[] = [];
   if (!getLaunchPackagePreset(payload.package.packageId)) {
-    return [
-      {
-        stepId: "package",
-        field: "packageId",
-        code: "package.unknown",
-        message: "Select a valid package preset.",
-        level: "error",
-      },
-    ];
+    issues.push({
+      stepId: "package",
+      field: "packageId",
+      code: "package.unknown",
+      message: "Select a valid package preset.",
+      level: "error",
+    });
   }
-  return [];
+
+  if (!isCommercialAgreementId(payload.package.commercialAgreementId)) {
+    issues.push({
+      stepId: "package",
+      field: "commercialAgreementId",
+      code: "commercial.unknown",
+      message: "Select a commercial agreement.",
+      level: "error",
+    });
+    return issues;
+  }
+
+  const baseline = assertCommercialBaselineMatches(
+    payload.package.commercialAgreementId,
+    {
+      monthlyStarting: payload.package.monthlyStarting,
+      setupFee: payload.package.setupFee,
+      monthlyServiceCredits: payload.package.monthlyServiceCredits,
+    },
+  );
+  if (!baseline.ok) {
+    issues.push({
+      stepId: "package",
+      field: "commercialAgreementId",
+      code: "commercial.tampered",
+      message: baseline.message,
+      level: "error",
+    });
+  }
+
+  if (
+    payload.package.commercialAgreementId === "custom-legacy" &&
+    payload.package.monthlyServiceCredits != null &&
+    payload.package.monthlyServiceCredits < 0
+  ) {
+    issues.push({
+      stepId: "package",
+      field: "monthlyServiceCredits",
+      code: "commercial.credits.invalid",
+      message: "Monthly service credits cannot be negative.",
+      level: "error",
+    });
+  }
+
+  return issues;
 }
 
 export function validateExperienceStep(

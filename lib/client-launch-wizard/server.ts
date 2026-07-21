@@ -1,5 +1,8 @@
 import "server-only";
 
+/* Payload draft collection slug typing until generated types cover client-launch-drafts. */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { randomUUID } from "node:crypto";
 import type { Payload } from "payload";
 import { emptyLaunchWizardPayload } from "./draft/empty";
@@ -68,7 +71,9 @@ export async function createLaunchDraft(
   createdBy: string,
 ): Promise<LaunchWizardDraftRecord> {
   const payloadData = emptyLaunchWizardPayload();
-  payloadData.modules = resolvePackageModuleSelections("starter");
+  payloadData.modules = resolvePackageModuleSelections(
+    payloadData.package.packageId,
+  );
   const doc = await payload.create({
     collection: DRAFTS as any,
     data: {
@@ -138,7 +143,7 @@ export async function findSlugCollisions(
   return {
     slugTakenByClient: clients.docs.length > 0,
     slugTakenByDraft: drafts.docs.length > 0,
-    nameTakenByClient: false,
+    nameTakenByClient: names.docs.length > 0,
   };
 }
 
@@ -264,7 +269,39 @@ export async function saveLaunchDraftStep(input: {
     team: input.patch.team ?? existing.payload.team,
   };
 
-  if (input.patch.package?.packageId && input.patch.package.packageId !== existing.payload.package.packageId) {
+  if (
+    input.patch.package?.commercialAgreementId &&
+    input.patch.package.commercialAgreementId !==
+      existing.payload.package.commercialAgreementId
+  ) {
+    const { getCommercialAgreement } = await import("@/lib/commercial-agreements");
+    const agreement = getCommercialAgreement(
+      input.patch.package.commercialAgreementId,
+    );
+    if (agreement && agreement.id !== "custom-legacy") {
+      merged.package.packageId = agreement.entitlementPresetId;
+      merged.package.displayName = agreement.name;
+      merged.package.monthlyStarting = agreement.monthlyStarting;
+      merged.package.setupFee = agreement.setupFee;
+      merged.package.monthlyServiceCredits = agreement.monthlyServiceCredits;
+      merged.modules = resolvePackageModuleSelections(
+        agreement.entitlementPresetId,
+        existing.payload.modules,
+      );
+      const presetAutomation = (
+        await import("./packages/presets")
+      ).getLaunchPackagePreset(agreement.entitlementPresetId)?.automationDefaults;
+      if (presetAutomation) {
+        merged.automation = {
+          ...merged.automation,
+          ...presetAutomation,
+        };
+      }
+    }
+  } else if (
+    input.patch.package?.packageId &&
+    input.patch.package.packageId !== existing.payload.package.packageId
+  ) {
     merged.modules = resolvePackageModuleSelections(
       input.patch.package.packageId,
       existing.payload.modules,

@@ -317,5 +317,61 @@ export const Clients: CollectionConfig = {
           "JSON string array of entitlement keys explicitly removed from the plan.",
       },
     },
+
+    // ── Commercial agreement (public packages → internal launch) ─────────────
+    {
+      name: "commercialAgreementId",
+      type: "select",
+      label: "Commercial Agreement",
+      options: [
+        { label: "KXD Partnership", value: "kxd-partnership" },
+        { label: "KXD Operating Partnership", value: "kxd-operating" },
+        { label: "KXD Executive Partnership", value: "kxd-executive" },
+        { label: "Custom / Legacy Agreement", value: "custom-legacy" },
+      ],
+      admin: {
+        position: "sidebar",
+        description:
+          "Approved commercial relationship for this account. Empty on historical clients. Does not change entitlements by itself.",
+      },
+    },
+    {
+      name: "setupFee",
+      type: "number",
+      label: "Setup Fee ($)",
+      admin: {
+        position: "sidebar",
+        description: "Agreed setup fee in USD. Internal only.",
+      },
+    },
+    {
+      name: "monthlyServiceCredits",
+      type: "number",
+      label: "Monthly Service Credits",
+      min: 0,
+      admin: {
+        position: "sidebar",
+        description:
+          "Agreed monthly production capacity. Credits do not roll over. Not a client-facing balance.",
+      },
+    },
+    {
+      name: "commercialAddOns",
+      type: "json",
+      label: "Approved Commercial Add-Ons",
+      admin: {
+        description:
+          'JSON string array of approved add-on ids (e.g. ["inventory-showroom"]). Never auto-enables entitlements.',
+      },
+    },
+    {
+      name: "commercialNotes",
+      type: "textarea",
+      label: "Commercial Notes (Internal)",
+      admin: {
+        description:
+          "Negotiated or legacy commercial terms. Internal only — never shown in the client portal.",
+      },
+    },
   ],
 };

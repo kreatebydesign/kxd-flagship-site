@@ -22,6 +22,7 @@
     "verify:client-launch": "tsx scripts/verify-client-launch-readiness.ts",
     "verify:client-launch-wizard": "tsx scripts/verify-client-launch-wizard.ts",
     "verify:client-launch-pipeline": "npm run verify:client-launch-wizard",
+    "verify:commercial-agreements": "tsx scripts/verify-commercial-agreements.ts",
     "verify:client-plans": "tsx scripts/verify-client-plans-entitlements.ts",
     "verify:client-upgrade-requests": "tsx scripts/verify-client-upgrade-requests.ts",
     "verify:client-inventory": "tsx scripts/verify-client-inventory.ts",

@@ -1,6 +1,7 @@
 /**
  * Phase 34A — Package presets resolve to entitlements and defaults.
- * Commercial pricing and public package names stay outside Shared Core.
+ * Commercial partnership names and pricing live in lib/commercial-agreements
+ * (sourced from lib/partnerships). Preset ids remain stable for entitlement mapping.
  */
 
 import type { LaunchPackagePreset } from "../types";

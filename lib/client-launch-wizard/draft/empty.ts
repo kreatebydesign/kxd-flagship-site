@@ -14,8 +14,15 @@ export function emptyLaunchWizardPayload(): LaunchWizardDraftPayload {
       internalNotes: "",
     },
     package: {
-      packageId: "starter",
-      displayName: "",
+      // Recommended commercial default for new launches — Operating → Growth baseline.
+      packageId: "growth",
+      displayName: "KXD Operating Partnership",
+      commercialAgreementId: "kxd-operating",
+      monthlyStarting: 2000,
+      setupFee: 1750,
+      monthlyServiceCredits: 7,
+      approvedAddOnIds: [],
+      commercialNotes: "",
     },
     experience: {
       choiceId: "default",

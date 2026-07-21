@@ -65,6 +65,26 @@ function fixtureClient(name: string, packageId: "starter" | "growth" | "custom")
     internalNotes: "",
   };
   payload.package.packageId = packageId;
+  if (packageId === "starter") {
+    payload.package.commercialAgreementId = "kxd-partnership";
+    payload.package.displayName = "KXD Partnership";
+    payload.package.monthlyStarting = 1250;
+    payload.package.setupFee = 1000;
+    payload.package.monthlyServiceCredits = 4;
+  } else if (packageId === "growth") {
+    payload.package.commercialAgreementId = "kxd-operating";
+    payload.package.displayName = "KXD Operating Partnership";
+    payload.package.monthlyStarting = 2000;
+    payload.package.setupFee = 1750;
+    payload.package.monthlyServiceCredits = 7;
+  } else {
+    payload.package.commercialAgreementId = "custom-legacy";
+    payload.package.displayName = "Custom / Legacy Agreement";
+    payload.package.monthlyStarting = null;
+    payload.package.setupFee = null;
+    payload.package.monthlyServiceCredits = null;
+  }
+  payload.package.approvedAddOnIds = [];
   payload.modules = resolvePackageModuleSelections(packageId);
   if (packageId === "custom") {
     payload.modules = payload.modules.map((row) =>
@@ -282,7 +302,9 @@ function main() {
   check(
     "explicit launch confirmation summary includes business + package + users",
     confirmation.businessName.includes("Ready") &&
-      confirmation.packageLabel === "Growth" &&
+      confirmation.packageLabel === "KXD Operating Partnership" &&
+      confirmation.commercialAgreementLabel === "KXD Operating Partnership" &&
+      confirmation.monthlyCreditsLabel.includes("7") &&
       confirmation.portalUsersToCreate === 1,
   );
 

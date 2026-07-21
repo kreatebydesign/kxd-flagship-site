@@ -1,5 +1,10 @@
 import { emptyLaunchWizardPayload } from "./empty";
 import { resolvePackageModuleSelections } from "../packages/resolve";
+import {
+  getCommercialAgreement,
+  isCommercialAgreementId,
+  sanitizeApprovedAddOnIds,
+} from "@/lib/commercial-agreements";
 import type {
   LaunchDraftStatus,
   LaunchWizardDraftPayload,
@@ -27,6 +32,71 @@ function asBool(value: unknown, fallback = false): boolean {
 
 function asNumber(value: unknown, fallback: number): number {
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;
+}
+
+function asNullableNumber(value: unknown): number | null {
+  if (value === null) return null;
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function normalizeCommercialPackage(
+  pkg: Record<string, unknown>,
+  packageId: LaunchWizardDraftPayload["package"]["packageId"],
+  base: LaunchWizardDraftPayload["package"],
+): LaunchWizardDraftPayload["package"] {
+  const agreementIdRaw =
+    typeof pkg.commercialAgreementId === "string"
+      ? pkg.commercialAgreementId
+      : null;
+  const agreementId = isCommercialAgreementId(agreementIdRaw)
+    ? agreementIdRaw
+    : "custom-legacy";
+  const agreement = getCommercialAgreement(agreementId);
+  const approvedAddOnIds = sanitizeApprovedAddOnIds(
+    agreementId,
+    Array.isArray(pkg.approvedAddOnIds)
+      ? pkg.approvedAddOnIds.filter((id): id is string => typeof id === "string")
+      : [],
+  );
+
+  // Legacy drafts without commercialAgreementId: preserve entitlement preset,
+  // do not invent prices or credit capacity.
+  if (!isCommercialAgreementId(agreementIdRaw)) {
+    return {
+      packageId,
+      displayName: asString(pkg.displayName),
+      commercialAgreementId: "custom-legacy",
+      monthlyStarting: asNullableNumber(pkg.monthlyStarting),
+      setupFee: asNullableNumber(pkg.setupFee),
+      monthlyServiceCredits: asNullableNumber(pkg.monthlyServiceCredits),
+      approvedAddOnIds,
+      commercialNotes: asString(pkg.commercialNotes),
+    };
+  }
+
+  if (agreementId === "custom-legacy") {
+    return {
+      packageId,
+      displayName: asString(pkg.displayName, "Custom / Legacy Agreement"),
+      commercialAgreementId: agreementId,
+      monthlyStarting: asNullableNumber(pkg.monthlyStarting),
+      setupFee: asNullableNumber(pkg.setupFee),
+      monthlyServiceCredits: asNullableNumber(pkg.monthlyServiceCredits),
+      approvedAddOnIds,
+      commercialNotes: asString(pkg.commercialNotes),
+    };
+  }
+
+  return {
+    packageId: (agreement?.entitlementPresetId ?? packageId) as LaunchWizardDraftPayload["package"]["packageId"],
+    displayName: asString(pkg.displayName, agreement?.name ?? base.displayName),
+    commercialAgreementId: agreementId,
+    monthlyStarting: agreement?.monthlyStarting ?? null,
+    setupFee: agreement?.setupFee ?? null,
+    monthlyServiceCredits: agreement?.monthlyServiceCredits ?? null,
+    approvedAddOnIds,
+    commercialNotes: asString(pkg.commercialNotes),
+  };
 }
 
 export function isLaunchWizardStepId(value: unknown): value is LaunchWizardStepId {
@@ -113,10 +183,11 @@ export function normalizeLaunchWizardPayload(raw: unknown): LaunchWizardDraftPay
       serviceRegion: asString(identity.serviceRegion),
       internalNotes: asString(identity.internalNotes),
     },
-    package: {
-      packageId: packageId as LaunchWizardDraftPayload["package"]["packageId"],
-      displayName: asString(pkg.displayName),
-    },
+    package: normalizeCommercialPackage(
+      pkg,
+      packageId as LaunchWizardDraftPayload["package"]["packageId"],
+      base.package,
+    ),
     experience: {
       choiceId: asString(experience.choiceId, "default"),
       presentationSlug:

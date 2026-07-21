@@ -12,6 +12,7 @@ export const Inquiries: CollectionConfig = {
       "email",
       "company",
       "inquiryType",
+      "partnershipPackage",
       "status",
       "priority",
       "createdAt",
@@ -98,6 +99,27 @@ export const Inquiries: CollectionConfig = {
               type: "text",
               admin: {
                 description: "Page, campaign, or referral source.",
+              },
+            },
+            {
+              name: "website",
+              type: "text",
+              admin: {
+                description: "Prospect website provided on the inquiry form.",
+              },
+            },
+            {
+              name: "partnershipPackage",
+              type: "select",
+              label: "Partnership of Interest",
+              options: [
+                { label: "KXD Partnership", value: "partnership" },
+                { label: "KXD Operating Partnership", value: "operating" },
+                { label: "KXD Executive Partnership", value: "executive" },
+              ],
+              admin: {
+                description:
+                  "Selected on /pricing when present. Independent of entitlement presets.",
               },
             },
           ],

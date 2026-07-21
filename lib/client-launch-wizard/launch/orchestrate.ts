@@ -104,6 +104,13 @@ export async function orchestrateClientLaunch(
   } = { portalUserEmails: [] };
 
   try {
+    const commercialAgreementId =
+      input.draftPayload.package.commercialAgreementId ?? "custom-legacy";
+    const commercialLabel =
+      input.draftPayload.package.displayName.trim() ||
+      preset?.catalogLabel ||
+      "package";
+
     const client = await input.payload.create({
       collection: "clients",
       data: {
@@ -117,7 +124,16 @@ export async function orchestrateClientLaunch(
         primaryContactEmail: identity.primaryContactEmail.trim() || undefined,
         status: "active",
         notes: identity.internalNotes.trim() || undefined,
-      },
+        monthlyRetainerAmount:
+          input.draftPayload.package.monthlyStarting ?? undefined,
+        commercialAgreementId,
+        setupFee: input.draftPayload.package.setupFee ?? undefined,
+        monthlyServiceCredits:
+          input.draftPayload.package.monthlyServiceCredits ?? undefined,
+        commercialAddOns: input.draftPayload.package.approvedAddOnIds,
+        commercialNotes:
+          input.draftPayload.package.commercialNotes.trim() || undefined,
+      } as never,
     });
     clientId = client.id as number;
 
@@ -126,7 +142,7 @@ export async function orchestrateClientLaunch(
       data: {
         client: clientId,
         relationshipStatus: "active",
-        executiveSummary: `Launched via Client Launch Wizard (${preset?.catalogLabel ?? "package"}).`,
+        executiveSummary: `Launched via Client Launch Wizard (${commercialLabel}).`,
         strategicNotes: identity.internalNotes.trim() || undefined,
       },
     });
@@ -219,7 +235,7 @@ export async function orchestrateClientLaunch(
         client: clientId,
         eventType: "client-launch",
         title: "Client launched into KXD OS",
-        summary: `Partnership launched via Client Launch Wizard (${preset?.catalogLabel ?? "package"}).`,
+        summary: `Partnership launched via Client Launch Wizard (${commercialLabel}).`,
         eventDate: new Date().toISOString(),
         createdBy: input.createdBy || "KXD Client Launch Wizard",
         source: "client-launch-wizard",
@@ -267,7 +283,7 @@ export async function orchestrateClientLaunch(
         clientName: identity.businessName.trim(),
         clientSlug: slug,
         packageId: input.draftPayload.package.packageId,
-        packageLabel: preset?.catalogLabel ?? input.draftPayload.package.packageId,
+        packageLabel: commercialLabel,
         experienceChoiceId: input.draftPayload.experience.choiceId,
         modulesEnabled: enabledModules,
         portalUsersCreated,

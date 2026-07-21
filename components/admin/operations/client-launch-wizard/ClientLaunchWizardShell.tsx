@@ -25,7 +25,6 @@ import {
   moduleAvailabilityForPackage,
   nextOptimisticLaunchStage,
   normalizeClientSlug,
-  packageCapabilitySummaryLines,
   resolvePackageModuleSelections,
   validateIdentityStep,
   type LaunchStageId,
@@ -35,6 +34,13 @@ import {
   type LaunchWizardStepId,
   type LaunchWizardTeamMember,
 } from "@/lib/client-launch-wizard";
+import {
+  commercialAddOnLabel,
+  getCommercialAgreement,
+  listCommercialAgreements,
+  type CommercialAgreementId,
+} from "@/lib/commercial-agreements";
+import { PARTNERSHIP_ADD_ONS } from "@/lib/partnerships/packages";
 import { formatReportingSyncHourPacificLabel as formatHour } from "@/lib/reporting/operations/sync-hour";
 
 type Props = {
@@ -127,8 +133,8 @@ const STEP_HEADING: Record<
     lead: "Name, contact, and workspace slug. Nothing is activated yet.",
   },
   package: {
-    title: "What capabilities do they receive?",
-    lead: "Choose the operating surface. Higher packages expand what KXD OS can run for them.",
+    title: "What did they purchase?",
+    lead: "Select the commercial agreement first. Capability baselines map underneath — Inventory and other add-ons stay off until you approve them.",
   },
   experience: {
     title: "What experience will they see?",
@@ -284,6 +290,11 @@ export function ClientLaunchWizardShell({ initialDraft, openDrafts }: Props) {
   const pollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const packages = useMemo(() => listLaunchPackagePresets(), []);
+  const commercialAgreements = useMemo(() => listCommercialAgreements(), []);
+  const selectedCommercial = useMemo(
+    () => getCommercialAgreement(payload.package.commercialAgreementId),
+    [payload.package.commercialAgreementId],
+  );
   const experiences = useMemo(() => listLaunchExperienceOptions(), []);
 
   const uniqueness: Uniqueness = useMemo(
@@ -393,6 +404,8 @@ export function ClientLaunchWizardShell({ initialDraft, openDrafts }: Props) {
   useEffect(() => {
     const slug = payload.identity.clientSlug.trim();
     if (!slug) {
+      // Reset availability when slug is cleared — intentional draft UI sync.
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- empty-slug UI reset
       setSlugAvailability({
         available: true,
         takenByClient: false,
@@ -496,6 +509,8 @@ export function ClientLaunchWizardShell({ initialDraft, openDrafts }: Props) {
 
   useEffect(() => {
     if (initialDraft.status !== "launching") return;
+    // Resume in-flight launch UI after refresh — poll is the external sync.
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- recover launching draft UI
     setLaunchPhase("running");
     startStageTicker();
     void pollLaunchDraft();
@@ -713,17 +728,74 @@ export function ClientLaunchWizardShell({ initialDraft, openDrafts }: Props) {
     }));
   }
 
-  function selectPackage(packageId: LaunchWizardDraftPayload["package"]["packageId"]) {
+  function selectCommercialAgreement(agreementId: CommercialAgreementId) {
+    const agreement = commercialAgreements.find((item) => item.id === agreementId);
+    if (!agreement) return;
+    const packageId = agreement.entitlementPresetId;
     const preset = packages.find((item) => item.id === packageId);
     updatePayload((prev) => ({
       ...prev,
-      package: { packageId, displayName: "" },
+      package: {
+        packageId,
+        displayName: agreement.name,
+        commercialAgreementId: agreementId,
+        monthlyStarting: agreement.monthlyStarting,
+        setupFee: agreement.setupFee,
+        monthlyServiceCredits: agreement.monthlyServiceCredits,
+        approvedAddOnIds: [],
+        commercialNotes: prev.package.commercialNotes,
+      },
       modules: resolvePackageModuleSelections(packageId, prev.modules),
       automation: {
         ...prev.automation,
         ...(preset?.automationDefaults ?? {}),
       },
     }));
+  }
+
+  function selectLegacyCapabilityPreset(
+    packageId: LaunchWizardDraftPayload["package"]["packageId"],
+  ) {
+    const preset = packages.find((item) => item.id === packageId);
+    updatePayload((prev) => ({
+      ...prev,
+      package: {
+        ...prev.package,
+        commercialAgreementId: "custom-legacy",
+        packageId,
+        displayName:
+          prev.package.displayName.trim() ||
+          preset?.catalogLabel ||
+          "Custom / Legacy Agreement",
+        monthlyStarting: null,
+        setupFee: null,
+        monthlyServiceCredits: null,
+      },
+      modules: resolvePackageModuleSelections(packageId, prev.modules),
+      automation: {
+        ...prev.automation,
+        ...(preset?.automationDefaults ?? {}),
+      },
+    }));
+  }
+
+  function toggleApprovedAddOn(addOnId: string) {
+    updatePayload((prev) => {
+      const selected = new Set(prev.package.approvedAddOnIds);
+      if (selected.has(addOnId)) selected.delete(addOnId);
+      else selected.add(addOnId);
+      return {
+        ...prev,
+        package: {
+          ...prev.package,
+          approvedAddOnIds: [...selected],
+        },
+      };
+    });
+  }
+
+  function selectPackage(packageId: LaunchWizardDraftPayload["package"]["packageId"]) {
+    selectLegacyCapabilityPreset(packageId);
   }
 
   function addTeamMember() {
@@ -1159,41 +1231,224 @@ export function ClientLaunchWizardShell({ initialDraft, openDrafts }: Props) {
               <p className="kxd-launch-wizard__hint">{stepCopy.lead}</p>
             </header>
             <div className="kxd-launch-wizard__package-grid">
-              {packages.map((preset) => {
-                const selected = payload.package.packageId === preset.id;
-                const lines = packageCapabilitySummaryLines(preset.id);
+              {commercialAgreements.map((agreement) => {
+                const selected =
+                  payload.package.commercialAgreementId === agreement.id;
                 return (
                   <button
-                    key={preset.id}
+                    key={agreement.id}
                     type="button"
-                    data-tier={preset.id}
+                    data-tier={agreement.entitlementPresetId}
                     className={
                       selected
                         ? "kxd-launch-wizard__package is-selected"
                         : "kxd-launch-wizard__package"
                     }
-                    onClick={() => selectPackage(preset.id)}
+                    onClick={() => selectCommercialAgreement(agreement.id)}
                   >
                     <div className="kxd-launch-wizard__package-top">
-                      <strong>{preset.catalogLabel}</strong>
-                      {selected ? (
+                      <strong>{agreement.name}</strong>
+                      {agreement.recommended ? (
+                        <span className="kxd-launch-wizard__selected-mark">
+                          Recommended
+                        </span>
+                      ) : selected ? (
                         <span className="kxd-launch-wizard__selected-mark">
                           Selected
                         </span>
                       ) : null}
                     </div>
                     <span className="kxd-launch-wizard__package-fit">
-                      {preset.intendedFit}
+                      {agreement.summary}
                     </span>
                     <ul className="kxd-launch-wizard__capability-lines">
-                      {lines.map((line) => (
-                        <li key={line}>{line}</li>
-                      ))}
+                      <li>
+                        {agreement.monthlyLabel ?? "Monthly price entered deliberately"}
+                      </li>
+                      <li>
+                        {agreement.setupLabel ?? "Setup fee entered deliberately"}
+                      </li>
+                      <li>
+                        {agreement.monthlyServiceCredits != null
+                          ? `${agreement.monthlyServiceCredits} service credits / month`
+                          : "No automatic credit capacity"}
+                      </li>
+                      <li>Capability baseline: {agreement.entitlementPresetId}</li>
                     </ul>
                   </button>
                 );
               })}
             </div>
+
+            {selectedCommercial ? (
+              <p className="kxd-launch-wizard__hint" style={{ marginTop: "1.25rem" }}>
+                {selectedCommercial.capabilityNote}
+              </p>
+            ) : null}
+
+            {payload.package.commercialAgreementId === "custom-legacy" ? (
+              <div className="kxd-launch-wizard__capability" style={{ marginTop: "1.75rem" }}>
+                <header className="kxd-launch-wizard__step-head">
+                  <h3>Legacy capability baseline</h3>
+                  <p className="kxd-launch-wizard__hint">
+                    Historical entitlement presets remain available for custom or
+                    legacy agreements. Prices and credits stay blank unless you enter them.
+                  </p>
+                </header>
+                <div className="kxd-launch-wizard__package-grid">
+                  {packages.map((preset) => {
+                    const selected = payload.package.packageId === preset.id;
+                    return (
+                      <button
+                        key={preset.id}
+                        type="button"
+                        data-tier={preset.id}
+                        className={
+                          selected
+                            ? "kxd-launch-wizard__package is-selected"
+                            : "kxd-launch-wizard__package"
+                        }
+                        onClick={() => selectPackage(preset.id)}
+                      >
+                        <div className="kxd-launch-wizard__package-top">
+                          <strong>{preset.catalogLabel}</strong>
+                          {selected ? (
+                            <span className="kxd-launch-wizard__selected-mark">
+                              Selected
+                            </span>
+                          ) : null}
+                        </div>
+                        <span className="kxd-launch-wizard__package-fit">
+                          {preset.intendedFit}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="kxd-launch-wizard__fields" style={{ marginTop: "1.25rem" }}>
+                  <label className="kxd-launch-wizard__field">
+                    Monthly starting ($)
+                    <input
+                      type="number"
+                      min={0}
+                      value={payload.package.monthlyStarting ?? ""}
+                      onChange={(e) =>
+                        updatePayload((prev) => ({
+                          ...prev,
+                          package: {
+                            ...prev.package,
+                            monthlyStarting:
+                              e.target.value === ""
+                                ? null
+                                : Number(e.target.value),
+                          },
+                        }))
+                      }
+                    />
+                  </label>
+                  <label className="kxd-launch-wizard__field">
+                    Setup fee ($)
+                    <input
+                      type="number"
+                      min={0}
+                      value={payload.package.setupFee ?? ""}
+                      onChange={(e) =>
+                        updatePayload((prev) => ({
+                          ...prev,
+                          package: {
+                            ...prev.package,
+                            setupFee:
+                              e.target.value === ""
+                                ? null
+                                : Number(e.target.value),
+                          },
+                        }))
+                      }
+                    />
+                  </label>
+                  <label className="kxd-launch-wizard__field">
+                    Monthly service credits
+                    <input
+                      type="number"
+                      min={0}
+                      value={payload.package.monthlyServiceCredits ?? ""}
+                      onChange={(e) =>
+                        updatePayload((prev) => ({
+                          ...prev,
+                          package: {
+                            ...prev.package,
+                            monthlyServiceCredits:
+                              e.target.value === ""
+                                ? null
+                                : Number(e.target.value),
+                          },
+                        }))
+                      }
+                    />
+                  </label>
+                </div>
+              </div>
+            ) : null}
+
+            <div className="kxd-launch-wizard__capability" style={{ marginTop: "1.75rem" }}>
+              <header className="kxd-launch-wizard__step-head">
+                <h3>Approved add-ons</h3>
+                <p className="kxd-launch-wizard__hint">
+                  Commercial approval only. Inventory + Public Showroom and other
+                  add-ons never enable automatically from the base partnership.
+                </p>
+              </header>
+              <ul className="kxd-launch-wizard__plain-list">
+                {PARTNERSHIP_ADD_ONS.map((addon) => {
+                  const checked = payload.package.approvedAddOnIds.includes(
+                    addon.id,
+                  );
+                  return (
+                    <li key={addon.id}>
+                      <label
+                        style={{
+                          display: "flex",
+                          gap: "0.75rem",
+                          alignItems: "flex-start",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => toggleApprovedAddOn(addon.id)}
+                        />
+                        <span>
+                          <strong>{addon.name}</strong>
+                          <span style={{ display: "block" }}>{addon.summary}</span>
+                        </span>
+                      </label>
+                    </li>
+                  );
+                })}
+              </ul>
+              <label
+                className="kxd-launch-wizard__field kxd-launch-wizard__field--wide"
+                style={{ marginTop: "1rem" }}
+              >
+                Commercial notes
+                <span className="kxd-launch-wizard__opt">Internal</span>
+                <textarea
+                  value={payload.package.commercialNotes}
+                  onChange={(e) =>
+                    updatePayload((prev) => ({
+                      ...prev,
+                      package: {
+                        ...prev.package,
+                        commercialNotes: e.target.value,
+                      },
+                    }))
+                  }
+                  placeholder="Negotiated terms, legacy exceptions, or confirmation still required."
+                />
+              </label>
+            </div>
+
             <div className="kxd-launch-wizard__capability">
               <header className="kxd-launch-wizard__step-head">
                 <h3>
@@ -1202,7 +1457,7 @@ export function ClientLaunchWizardShell({ initialDraft, openDrafts }: Props) {
                     : "Capabilities"}
                 </h3>
                 <p className="kxd-launch-wizard__hint">
-                  From the selected package. Not marketing copy.
+                  Entitlement baseline from the selected agreement. Not marketing copy.
                 </p>
               </header>
               <div className="kxd-launch-wizard__capability-grid">
@@ -1787,8 +2042,50 @@ export function ClientLaunchWizardShell({ initialDraft, openDrafts }: Props) {
                   <dd>{payload.identity.businessName.trim() || "Untitled"}</dd>
                 </div>
                 <div>
-                  <dt>Package</dt>
+                  <dt>Commercial agreement</dt>
+                  <dd>
+                    {selectedCommercial?.name ||
+                      payload.package.displayName ||
+                      "—"}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Capability baseline</dt>
                   <dd>{selectedPackage?.catalogLabel ?? "—"}</dd>
+                </div>
+                <div>
+                  <dt>Monthly starting</dt>
+                  <dd>
+                    {payload.package.monthlyStarting == null
+                      ? "Custom / not set"
+                      : `$${payload.package.monthlyStarting.toLocaleString("en-US")}`}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Setup fee</dt>
+                  <dd>
+                    {payload.package.setupFee == null
+                      ? "Custom / not set"
+                      : `$${payload.package.setupFee.toLocaleString("en-US")}`}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Monthly service credits</dt>
+                  <dd>
+                    {payload.package.monthlyServiceCredits == null
+                      ? "Custom / not set"
+                      : `${payload.package.monthlyServiceCredits} (capacity — no rollover)`}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Approved add-ons</dt>
+                  <dd>
+                    {payload.package.approvedAddOnIds.length > 0
+                      ? payload.package.approvedAddOnIds
+                          .map((id) => commercialAddOnLabel(id))
+                          .join(", ")
+                      : "None"}
+                  </dd>
                 </div>
                 <div>
                   <dt>Experience</dt>
@@ -1943,10 +2240,20 @@ export function ClientLaunchWizardShell({ initialDraft, openDrafts }: Props) {
               Launch {confirmation.businessName}
             </h2>
             <p className="kxd-launch-wizard__hint">
-              Package {confirmation.packageLabel}. This creates Shared Core
+              {confirmation.commercialAgreementLabel}. Monthly{" "}
+              {confirmation.monthlyStartingLabel}.{" "}
+              {confirmation.monthlyCreditsLabel}. This creates Shared Core
               records for the client.
             </p>
             <dl className="kxd-launch-wizard__confirm-grid">
+              <div>
+                <dt>Setup fee</dt>
+                <dd>{confirmation.setupFeeLabel}</dd>
+              </div>
+              <div>
+                <dt>Approved add-ons</dt>
+                <dd>{confirmation.approvedAddOnsLabel}</dd>
+              </div>
               <div>
                 <dt>Portal users</dt>
                 <dd>{confirmation.portalUsersToCreate}</dd>

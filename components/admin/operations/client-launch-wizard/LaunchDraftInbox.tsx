@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { getLaunchPackagePreset, type LaunchWizardDraftRecord } from "@/lib/client-launch-wizard";
+import { getCommercialAgreement } from "@/lib/commercial-agreements";
 
 type InboxRow = {
   draft: LaunchWizardDraftRecord;
@@ -89,7 +90,11 @@ export function LaunchDraftInbox({ rows }: { rows: InboxRow[] }) {
             <tbody>
               {rows.map(({ draft, readinessLabel, blockerCount }) => {
                 const packageLabel =
-                  getLaunchPackagePreset(draft.payload.package.packageId)?.catalogLabel ??
+                  getCommercialAgreement(draft.payload.package.commercialAgreementId)
+                    ?.name ||
+                  draft.payload.package.displayName ||
+                  getLaunchPackagePreset(draft.payload.package.packageId)
+                    ?.catalogLabel ||
                   draft.payload.package.packageId;
                 const name =
                   draft.payload.identity.businessName.trim() || `Draft ${draft.id}`;

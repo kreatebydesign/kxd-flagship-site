@@ -76,6 +76,31 @@ export interface LaunchWizardPackageSelection {
   packageId: LaunchPackageId;
   /** Custom display name override — commercial naming stays out of Shared Core. */
   displayName: string;
+  /**
+   * Commercial agreement for new-client operations.
+   * Independent from entitlement presets so legacy drafts keep working.
+   */
+  commercialAgreementId:
+    | "kxd-partnership"
+    | "kxd-operating"
+    | "kxd-executive"
+    | "custom-legacy";
+  /** Starting monthly amount from the approved commercial offer (null = custom/legacy). */
+  monthlyStarting: number | null;
+  /** Setup fee from the approved commercial offer (null = custom/legacy). */
+  setupFee: number | null;
+  /**
+   * Agreed monthly service-credit capacity.
+   * Credits reserve production capacity — not hours, currency, or rollover.
+   */
+  monthlyServiceCredits: number | null;
+  /**
+   * Commercially approved add-ons.
+   * Never auto-enables Inventory or other entitlements at selection time.
+   */
+  approvedAddOnIds: string[];
+  /** Operator notes about negotiated or legacy commercial terms. */
+  commercialNotes: string;
 }
 
 export interface LaunchWizardExperienceSelection {

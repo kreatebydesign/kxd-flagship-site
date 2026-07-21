@@ -100,6 +100,7 @@ export function ContactForm() {
           source: selectedPartnership
             ? "partnership-pricing"
             : "project-application",
+          partnershipPackage: selectedPartnership?.id || undefined,
         }),
       });
 

@@ -2,6 +2,7 @@ import { getPayload } from "payload";
 import config from "@payload-config";
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
+import { getPartnershipPackage } from "@/lib/partnerships/packages";
 
 type InquiryBody = {
   name?: string;
@@ -15,9 +16,16 @@ type InquiryBody = {
   message?: string;
   referral?: string;
   source?: string;
+  partnershipPackage?: string;
 };
 
-const DEPLOY_VERSION = "v3-resend-inline-2026-06-09";
+const DEPLOY_VERSION = "v4-partnership-package-2026-07-21";
+
+const PARTNERSHIP_PACKAGE_VALUES = new Set([
+  "partnership",
+  "operating",
+  "executive",
+]);
 
 export async function POST(request: Request) {
   console.log(`📬 POST /api/inquiries — handler invoked [${DEPLOY_VERSION}]`);
@@ -29,6 +37,8 @@ export async function POST(request: Request) {
       email: body.email,
       inquiryType: body.inquiryType,
       company: body.company,
+      partnershipPackage: body.partnershipPackage,
+      source: body.source,
     });
 
     if (!body.name?.trim() || !body.email?.trim() || !body.message?.trim()) {
@@ -37,6 +47,15 @@ export async function POST(request: Request) {
         { status: 400 },
       );
     }
+
+    const partnershipPackage = PARTNERSHIP_PACKAGE_VALUES.has(
+      String(body.partnershipPackage || ""),
+    )
+      ? (body.partnershipPackage as "partnership" | "operating" | "executive")
+      : undefined;
+    const partnershipLabel = partnershipPackage
+      ? getPartnershipPackage(partnershipPackage)?.name
+      : null;
 
     console.log("💾 Creating inquiry in Payload...");
     const payload = await getPayload({ config });
@@ -48,6 +67,7 @@ export async function POST(request: Request) {
         email: body.email.trim(),
         company: body.company?.trim() || undefined,
         phone: body.phone?.trim() || undefined,
+        website: body.website?.trim() || undefined,
         inquiryType:
           (body.inquiryType as
             | "luxury-website-experiences"
@@ -71,8 +91,9 @@ export async function POST(request: Request) {
           | undefined,
         message: body.message.trim(),
         source: body.source || "project-application",
+        partnershipPackage,
         status: "new",
-      },
+      } as never,
     });
 
     console.log("✅ Inquiry saved to Payload. ID:", inquiry.id);
@@ -104,6 +125,8 @@ export async function POST(request: Request) {
           `Company:       ${company}`,
           `Website:       ${body.website?.trim() || "Not provided"}`,
           `Inquiry Type:  ${inquiryType}`,
+          `Partnership:   ${partnershipLabel || "Not specified"}`,
+          `Source:        ${body.source || "project-application"}`,
           `Investment:    ${body.budget || "Not specified"}`,
           `Timeline:      ${body.timeline || "Not specified"}`,
           `Referral:      ${body.referral || "Not specified"}`,
