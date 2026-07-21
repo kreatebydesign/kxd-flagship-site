@@ -140,6 +140,59 @@ async function findActiveForModule(
   return doc ? mapDoc(doc) : null;
 }
 
+/** Latest approved request for client+module — used while access is still ineffective. */
+async function findLatestApprovedForModule(
+  clientId: number,
+  moduleKey: string,
+): Promise<ClientUpgradeRequestRecord | null> {
+  const payload = await getPayload({ config });
+  const result = await payload.find({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    collection: COLLECTION as any,
+    where: {
+      and: [
+        { client: { equals: clientId } },
+        { moduleKey: { equals: moduleKey } },
+        { status: { equals: "approved" } },
+      ],
+    },
+    sort: "-createdAt",
+    limit: 1,
+    depth: 0,
+    overrideAccess: true,
+  });
+  const doc = result.docs[0] as Record<string, unknown> | undefined;
+  return doc ? mapDoc(doc) : null;
+}
+
+/**
+ * Request that should surface on the portal card and block a new create.
+ * Open (submitted/reviewing) wins; otherwise approved-without-access.
+ */
+async function findSurfaceRequestForModule(
+  clientId: number,
+  moduleKey: string,
+  accessGranted: boolean,
+): Promise<{
+  active: ClientUpgradeRequestRecord | null;
+  approvedAwaiting: ClientUpgradeRequestRecord | null;
+  surface: ClientUpgradeRequestRecord | null;
+}> {
+  const active = await findActiveForModule(clientId, moduleKey);
+  if (active) {
+    return { active, approvedAwaiting: null, surface: active };
+  }
+  if (accessGranted) {
+    return { active: null, approvedAwaiting: null, surface: null };
+  }
+  const approvedAwaiting = await findLatestApprovedForModule(clientId, moduleKey);
+  return {
+    active: null,
+    approvedAwaiting,
+    surface: approvedAwaiting,
+  };
+}
+
 export async function findActiveUpgradeRequest(
   clientId: number,
   moduleKey: string,
@@ -164,6 +217,7 @@ export async function canRequestClientUpgrade(
     moduleKeyRaw,
     entitlements,
     hasActiveDuplicate: false,
+    hasApprovedAwaitingAccess: false,
   });
   if (!provisional.moduleKey) {
     return {
@@ -175,11 +229,17 @@ export async function canRequestClientUpgrade(
     };
   }
 
-  const active = await findActiveForModule(clientId, provisional.moduleKey);
+  const accessGranted = clientHasModule(entitlements, provisional.moduleKey);
+  const { active, approvedAwaiting, surface } = await findSurfaceRequestForModule(
+    clientId,
+    provisional.moduleKey,
+    accessGranted,
+  );
   const evaluated = evaluateUpgradeEligibility({
     moduleKeyRaw: provisional.moduleKey,
     entitlements,
     hasActiveDuplicate: Boolean(active),
+    hasApprovedAwaitingAccess: Boolean(approvedAwaiting),
   });
 
   return {
@@ -187,8 +247,8 @@ export async function canRequestClientUpgrade(
     reason: evaluated.reason,
     moduleKey: evaluated.moduleKey,
     accessGranted: evaluated.accessGranted,
-    activeRequest: active
-      ? toPortalUpgradeRequestView(active, evaluated.accessGranted)
+    activeRequest: surface
+      ? toPortalUpgradeRequestView(surface, evaluated.accessGranted)
       : null,
   };
 }
@@ -200,27 +260,33 @@ export async function listUpgradeCapabilityCards(
   const cards: UpgradeCapabilityCard[] = [];
 
   for (const capability of listUpgradeEligibleCapabilities()) {
-    const active = await findActiveForModule(clientId, capability.key);
+    const accessGranted = clientHasModule(entitlements, capability.key);
+    const { active, approvedAwaiting, surface } = await findSurfaceRequestForModule(
+      clientId,
+      capability.key,
+      accessGranted,
+    );
     const evaluated = evaluateUpgradeEligibility({
       moduleKeyRaw: capability.key,
       entitlements,
       hasActiveDuplicate: Boolean(active),
+      hasApprovedAwaitingAccess: Boolean(approvedAwaiting),
     });
 
     // Hide modules the client already has — keep the surface curated.
-    if (evaluated.accessGranted && !active) continue;
+    if (evaluated.accessGranted && !surface) continue;
 
     // Paused plans: do not present a module upsell catalog. Only surface
-    // capabilities that already have an open request so status remains visible.
-    if (entitlements.isPaused && !active) continue;
+    // capabilities that already have an open/awaiting request so status remains visible.
+    if (entitlements.isPaused && !surface) continue;
 
     cards.push({
       moduleKey: capability.key,
       label: capability.label,
       summary: capability.summary,
       valueLine: capability.valueLine,
-      activeRequest: active
-        ? toPortalUpgradeRequestView(active, evaluated.accessGranted)
+      activeRequest: surface
+        ? toPortalUpgradeRequestView(surface, evaluated.accessGranted)
         : null,
       canRequest: evaluated.canRequest,
       reason: evaluated.reason,
@@ -242,6 +308,7 @@ export async function createClientUpgradeRequest(
       moduleKeyRaw: input.moduleKey,
       entitlements,
       hasActiveDuplicate: false,
+      hasApprovedAwaitingAccess: false,
     });
     if (evaluated.reason === "internal_only") {
       throw new UpgradeRequestError("This capability is not available.", 403, "internal_only");
@@ -256,11 +323,17 @@ export async function createClientUpgradeRequest(
     );
   }
 
-  const active = await findActiveForModule(input.clientId, capability.key);
+  const accessGranted = clientHasModule(entitlements, capability.key);
+  const { active, approvedAwaiting } = await findSurfaceRequestForModule(
+    input.clientId,
+    capability.key,
+    accessGranted,
+  );
   const evaluated = evaluateUpgradeEligibility({
     moduleKeyRaw: capability.key,
     entitlements,
     hasActiveDuplicate: Boolean(active),
+    hasApprovedAwaitingAccess: Boolean(approvedAwaiting),
   });
 
   if (evaluated.accessGranted) {
@@ -282,6 +355,13 @@ export async function createClientUpgradeRequest(
       "You already have an open request for this capability.",
       409,
       "active_duplicate",
+    );
+  }
+  if (approvedAwaiting || evaluated.reason === "approved_awaiting_access") {
+    throw new UpgradeRequestError(
+      "This capability was already approved and is awaiting enablement by KXD.",
+      409,
+      "approved_awaiting_access",
     );
   }
 

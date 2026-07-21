@@ -65,10 +65,27 @@ export function canClientCancelUpgradeStatus(
   return (CLIENT_CANCELABLE as readonly string[]).includes(status);
 }
 
+/**
+ * Whether prior request history blocks a new create for the same module.
+ * Active open requests always block. Approved blocks only while access is still
+ * ineffective — declined/canceled never block. Does not change DB uniqueness.
+ */
+export function blocksNewUpgradeRequest(input: {
+  status: UpgradeRequestStatus | null | undefined;
+  accessGranted: boolean;
+}): boolean {
+  if (!input.status) return false;
+  if (isActiveUpgradeStatus(input.status)) return true;
+  if (input.status === "approved" && !input.accessGranted) return true;
+  return false;
+}
+
 export function evaluateUpgradeEligibility(input: {
   moduleKeyRaw: string;
   entitlements: ResolvedClientEntitlements;
   hasActiveDuplicate: boolean;
+  /** Latest approved request exists and entitlement is still ineffective. */
+  hasApprovedAwaitingAccess?: boolean;
 }): {
   reason: UpgradeEligibilityReason;
   moduleKey: string | null;
@@ -123,6 +140,15 @@ export function evaluateUpgradeEligibility(input: {
   if (input.hasActiveDuplicate) {
     return {
       reason: "active_duplicate",
+      moduleKey: canonical,
+      canRequest: false,
+      accessGranted: false,
+    };
+  }
+
+  if (input.hasApprovedAwaitingAccess) {
+    return {
+      reason: "approved_awaiting_access",
       moduleKey: canonical,
       canRequest: false,
       accessGranted: false,

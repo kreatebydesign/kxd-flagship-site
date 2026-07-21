@@ -22,6 +22,8 @@ import { ClientContractsPanel } from "./ClientContractsPanel";
 import { ClientFinancialPanel } from "./ClientFinancialPanel";
 import { ClientWorkPanel } from "./ClientWorkPanel";
 import { ClientInventoryPanel } from "./ClientInventoryPanel";
+import { ClientPlansAccessPanel } from "./ClientPlansAccessPanel";
+import { ClientUpgradeRequestsPanel } from "./ClientUpgradeRequestsPanel";
 
 function statusLabel(status: string): string {
   return status.replace(/-/g, " ");
@@ -91,6 +93,9 @@ function OverviewPanel({ data }: { data: ClientWorkspaceBundle }) {
 
   return (
     <div className="kxd-os-workspace-dossier">
+      <ClientPlansAccessPanel clientId={data.clientId} />
+      <ClientUpgradeRequestsPanel clientId={data.clientId} />
+
       <WorkspaceKpiGrid
         items={[
           { label: "Active projects", value: String(sections.projects.active.length) },

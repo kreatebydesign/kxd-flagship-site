@@ -15,8 +15,6 @@ import {
 } from "@/components/admin/operations/shared/OpsBriefing";
 import type { ClientCommandCenterData, CommandListItem } from "@/lib/client-command";
 import { ClientOpsNav } from "./ClientOpsNav";
-import { ClientPlansAccessPanel } from "./ClientPlansAccessPanel";
-import { ClientUpgradeRequestsPanel } from "./ClientUpgradeRequestsPanel";
 
 function urgencyVariant(urgency: string): "default" | "status" | "success" | "critical" | "warning" {
   switch (urgency) {
@@ -57,6 +55,13 @@ function ListBlock({
   );
 }
 
+/**
+ * Legacy Client Command center screen.
+ * Live route `/admin/operations/client-command/[clientId]` renders
+ * `ClientCommandWorkspace` (overview mounts Plans & Access + Upgrade Requests).
+ * Keep this screen for reference / alternate composition — do not mount panels
+ * here as a second live path.
+ */
 export function ClientCommandScreen({ data }: { data: ClientCommandCenterData }) {
   const { hero, executiveBrief, sections, recommendations, currentWork, playbooks, clientSuccess, genesis, launchQa } = data;
 
@@ -76,9 +81,6 @@ export function ClientCommandScreen({ data }: { data: ClientCommandCenterData })
         </div>
 
         <ClientOpsNav clientId={hero.clientId} active="command" />
-
-        <ClientPlansAccessPanel clientId={hero.clientId} />
-        <ClientUpgradeRequestsPanel clientId={hero.clientId} />
 
         <OpsKpiStrip
           items={[

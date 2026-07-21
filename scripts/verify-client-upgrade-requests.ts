@@ -17,6 +17,7 @@ import {
 import { isUniqueConstraintError } from "../lib/client-upgrade-requests/errors.ts";
 import {
   allowedNextUpgradeStatuses,
+  blocksNewUpgradeRequest,
   canClientCancelUpgradeStatus,
   canTransitionUpgradeStatus,
   evaluateUpgradeEligibility,
@@ -248,6 +249,19 @@ console.log("\nEligibility");
   });
   assert(!dup.canRequest && dup.reason === "active_duplicate", "active duplicate blocked");
 
+  const approvedAwaiting = evaluateUpgradeEligibility({
+    moduleKeyRaw: "website-workspace",
+    entitlements: starter,
+    hasActiveDuplicate: false,
+    hasApprovedAwaitingAccess: true,
+  });
+  assert(
+    !approvedAwaiting.canRequest &&
+      approvedAwaiting.reason === "approved_awaiting_access" &&
+      !approvedAwaiting.accessGranted,
+    "approved without access suppresses CTA",
+  );
+
   const aliasDup = evaluateUpgradeEligibility({
     moduleKeyRaw: "visual-review",
     entitlements: entitlementsFor({
@@ -262,6 +276,23 @@ console.log("\nEligibility");
       !aliasDup.canRequest &&
       aliasDup.reason === "active_duplicate",
     "alias + canonical share active duplicate key",
+  );
+
+  const aliasApprovedAwaiting = evaluateUpgradeEligibility({
+    moduleKeyRaw: "public-showroom",
+    entitlements: entitlementsFor({
+      clientId: 1,
+      planKey: "custom",
+      planStatus: "active",
+    }),
+    hasActiveDuplicate: false,
+    hasApprovedAwaitingAccess: true,
+  });
+  assert(
+    aliasApprovedAwaiting.moduleKey === "inventory" &&
+      !aliasApprovedAwaiting.canRequest &&
+      aliasApprovedAwaiting.reason === "approved_awaiting_access",
+    "alias + canonical share approved-awaiting block",
   );
 
   const paused = entitlementsFor({
@@ -441,7 +472,84 @@ assert(
   !isActiveUpgradeStatus("declined") && !isActiveUpgradeStatus("canceled"),
   "declined/canceled are not active — new request allowed by duplicate rule",
 );
-assert(!isActiveUpgradeStatus("approved"), "approved is closed for duplicate purposes");
+assert(!isActiveUpgradeStatus("approved"), "approved is not DB-active duplicate status");
+assert(
+  blocksNewUpgradeRequest({ status: "submitted", accessGranted: false }),
+  "submitted blocks new request",
+);
+assert(
+  blocksNewUpgradeRequest({ status: "reviewing", accessGranted: false }),
+  "reviewing blocks new request",
+);
+assert(
+  blocksNewUpgradeRequest({ status: "approved", accessGranted: false }),
+  "approved without access blocks new request (server + CTA)",
+);
+assert(
+  !blocksNewUpgradeRequest({ status: "approved", accessGranted: true }),
+  "approved with effective access does not block via awaiting rule",
+);
+assert(
+  !blocksNewUpgradeRequest({ status: "declined", accessGranted: false }),
+  "declined permits a legitimate new request",
+);
+assert(
+  !blocksNewUpgradeRequest({ status: "canceled", accessGranted: false }),
+  "canceled permits a legitimate new request",
+);
+assert(
+  !blocksNewUpgradeRequest({ status: null, accessGranted: false }),
+  "no prior request permits CTA when otherwise eligible",
+);
+
+{
+  const starter = entitlementsFor({
+    clientId: 21,
+    planKey: "starter",
+    planStatus: "active",
+  });
+  const declinedAllows = evaluateUpgradeEligibility({
+    moduleKeyRaw: "website-workspace",
+    entitlements: starter,
+    hasActiveDuplicate: false,
+    hasApprovedAwaitingAccess: false,
+  });
+  assert(
+    declinedAllows.canRequest && declinedAllows.reason === "eligible",
+    "after declined/canceled history, eligibility remains open when no blocking row",
+  );
+
+  const approvedBlocksCreate = evaluateUpgradeEligibility({
+    moduleKeyRaw: "website-workspace",
+    entitlements: starter,
+    hasActiveDuplicate: false,
+    hasApprovedAwaitingAccess: true,
+  });
+  assert(
+    !approvedBlocksCreate.canRequest &&
+      approvedBlocksCreate.reason === "approved_awaiting_access",
+    "approved without access rejects second create (eligibility reason)",
+  );
+
+  const afterGrant = entitlementsFor({
+    clientId: 21,
+    planKey: "starter",
+    planStatus: "active",
+    addOnModules: ["website-workspace"],
+  });
+  const granted = evaluateUpgradeEligibility({
+    moduleKeyRaw: "website-workspace",
+    entitlements: afterGrant,
+    hasActiveDuplicate: false,
+    hasApprovedAwaitingAccess: true,
+  });
+  assert(
+    !granted.canRequest &&
+      granted.reason === "already_entitled" &&
+      granted.accessGranted,
+    "later effective entitlement resolves approved request as access granted",
+  );
+}
 
 console.log("\nInternal-only never portal-eligible");
 assert(isInternalOnlyEntitlement("focus-mode"), "focus-mode internal");
@@ -598,6 +706,124 @@ console.log("\nNotification non-destructive contract (static)");
   assert(
     notifySrc.includes("does not change entitlements"),
     "email states approval does not change entitlements",
+  );
+  assert(notifySrc.includes("Resend"), "Phase 35B channel is operator email via Resend");
+  assert(
+    notifySrc.includes("KXD_REVIEW_NOTIFICATION_EMAIL") ||
+      notifySrc.includes("matt@kreatebydesign.com"),
+    "email uses established operator destination",
+  );
+  const createFn = serviceSrc.slice(
+    serviceSrc.indexOf("export async function createClientUpgradeRequest"),
+    serviceSrc.indexOf("export async function listClientUpgradeRequests"),
+  );
+  assert(
+    createFn.includes("payload.create") &&
+      createFn.includes("notifyUpgradeRequestSubmitted") &&
+      createFn.indexOf("payload.create") <
+        createFn.indexOf("notifyUpgradeRequestSubmitted"),
+    "email attempted only after durable create",
+  );
+  assert(
+    !notifySrc.includes("notifications") ||
+      notifySrc.includes("does not change entitlements"),
+    "upgrade notify stays on email path (no required in-app center write)",
+  );
+}
+
+console.log("\nLive Client Command mounts Plans & Access panels");
+{
+  const workspacePath = resolve(
+    process.cwd(),
+    "components/admin/operations/client-command/CommandWorkspaceTabPanel.tsx",
+  );
+  const pagePath = resolve(
+    process.cwd(),
+    "app/admin/operations/client-command/[clientId]/page.tsx",
+  );
+  const screenPath = resolve(
+    process.cwd(),
+    "components/admin/operations/client-command/ClientCommandScreen.tsx",
+  );
+  const workspaceSrc = readFileSync(workspacePath, "utf8");
+  const pageSrc = readFileSync(pagePath, "utf8");
+  const screenSrc = readFileSync(screenPath, "utf8");
+  assert(
+    pageSrc.includes("ClientCommandWorkspace"),
+    "live route renders ClientCommandWorkspace",
+  );
+  assert(
+    workspaceSrc.includes("ClientPlansAccessPanel") &&
+      workspaceSrc.includes("ClientUpgradeRequestsPanel"),
+    "overview mounts both existing panels",
+  );
+  assert(
+    workspaceSrc.includes("clientId={data.clientId}") &&
+      /ClientPlansAccessPanel\s+clientId=\{data\.clientId\}/.test(workspaceSrc) &&
+      /ClientUpgradeRequestsPanel\s+clientId=\{data\.clientId\}/.test(workspaceSrc),
+    "panels receive route-selected client id",
+  );
+  assert(
+    !screenSrc.includes("ClientPlansAccessPanel") &&
+      !screenSrc.includes("ClientUpgradeRequestsPanel"),
+    "unused ClientCommandScreen does not duplicate live panel mounts",
+  );
+}
+
+console.log("\nWebsite Workspace CES gate (static)");
+{
+  const pagePath = resolve(
+    process.cwd(),
+    "app/(portal)/portal/(app)/website-workspace/page.tsx",
+  );
+  const accessPath = resolve(process.cwd(), "lib/ces/server/access.ts");
+  const pageSrc = readFileSync(pagePath, "utf8");
+  const accessSrc = readFileSync(accessPath, "utf8");
+  assert(pageSrc.includes("requireCesModule"), "website-workspace uses requireCesModule");
+  assert(
+    pageSrc.includes('"website-workspace"') || pageSrc.includes("'website-workspace'"),
+    "website-workspace gate targets website-workspace module",
+  );
+  assert(
+    accessSrc.includes("redirect(fallback)") &&
+      accessSrc.includes('fallback = "/portal"'),
+    "CES convention redirects unentitled modules to portal home (HTTP 200 after follow)",
+  );
+}
+
+console.log("\nService create rejects approved-awaiting (static)");
+{
+  const servicePath = resolve(
+    process.cwd(),
+    "lib/client-upgrade-requests/service.ts",
+  );
+  const src = readFileSync(servicePath, "utf8");
+  assert(
+    src.includes("approved_awaiting_access") &&
+      src.includes("awaiting enablement by KXD"),
+    "create path rejects approved-without-access server-side",
+  );
+  assert(
+    src.includes("findLatestApprovedForModule") ||
+      src.includes("hasApprovedAwaitingAccess"),
+    "service resolves approved-awaiting history for CTA/create",
+  );
+  assert(
+    !src.includes("planAddOnModules") && !src.includes("enabledModules"),
+    "upgrade service never writes plan add-ons or CES enabledModules",
+  );
+  const statusFn = src.slice(
+    src.indexOf("export async function updateClientUpgradeRequestStatus"),
+  );
+  assert(
+    statusFn.includes('collection: COLLECTION as any') ||
+      statusFn.includes("collection: COLLECTION"),
+    "approval updates the upgrade-request collection",
+  );
+  assert(
+    !statusFn.includes('collection: "clients"') &&
+      !statusFn.includes("collection: 'clients'"),
+    "approval does not mutate clients / entitlements collection",
   );
 }
 

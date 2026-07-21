@@ -32,6 +32,8 @@ export type UpgradeEligibilityReason =
   | "not_upgrade_eligible"
   | "plan_paused"
   | "active_duplicate"
+  /** Approved while entitlement is still ineffective — suppress new CTA/create. */
+  | "approved_awaiting_access"
   | "invalid_session";
 
 export type EntitlementSnapshot = {

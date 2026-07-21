@@ -102,10 +102,16 @@ export function PortalUpgradeOpportunities() {
         }),
       });
       const json = (await res.json()) as ApiResponse;
-      if (json.code === "active_duplicate" || res.status === 409) {
+      if (
+        json.code === "active_duplicate" ||
+        json.code === "approved_awaiting_access" ||
+        res.status === 409
+      ) {
         setFormError(
           json.message ||
-            "You already have an open request for this capability.",
+            (json.code === "approved_awaiting_access"
+              ? "This capability was already approved and is awaiting enablement by KXD."
+              : "You already have an open request for this capability."),
         );
         setActiveKey(null);
         setMessage("");

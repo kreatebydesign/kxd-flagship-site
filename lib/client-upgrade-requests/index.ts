@@ -26,6 +26,7 @@ export {
   isActiveUpgradeStatus,
   canTransitionUpgradeStatus,
   canClientCancelUpgradeStatus,
+  blocksNewUpgradeRequest,
   evaluateUpgradeEligibility,
   upgradeStatusLabel,
   allowedNextUpgradeStatuses,
