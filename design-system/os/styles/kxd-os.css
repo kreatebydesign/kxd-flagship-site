@@ -15382,3 +15382,355 @@ a.kxd-exec-today__row:hover {
   border-left: 2px solid var(--kxd-os-border);
   color: var(--kxd-os-text-muted);
 }
+
+/* ── Phase 35B — Client Upgrade Requests ─────────────────────────────────── */
+
+.kxd-upgrade {
+  margin-top: 2.5rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--kxd-ces-border, rgba(0, 0, 0, 0.08));
+}
+
+.kxd-upgrade__eyebrow {
+  margin: 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--kxd-ces-text-muted, #6b645c);
+}
+
+.kxd-upgrade__title {
+  margin: 0.45rem 0 0;
+  font-size: clamp(1.35rem, 2vw, 1.75rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--kxd-ces-text, #16140f);
+}
+
+.kxd-upgrade__lead,
+.kxd-upgrade__meta,
+.kxd-upgrade__card-summary,
+.kxd-upgrade__card-value {
+  margin: 0.55rem 0 0;
+  color: var(--kxd-ces-text-muted, #6b645c);
+  line-height: 1.55;
+  font-size: 0.95rem;
+}
+
+.kxd-upgrade__paused {
+  margin: 0.85rem 0 0;
+  padding: 0.55rem 0.7rem;
+  border-left: 2px solid var(--kxd-os-warning, #b0893d);
+  color: var(--kxd-ces-text-muted, #6b645c);
+  font-size: 0.9rem;
+}
+
+.kxd-upgrade__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15.5rem, 1fr));
+  gap: 1rem;
+  margin-top: 1.35rem;
+}
+
+.kxd-upgrade__card {
+  border: 1px solid var(--kxd-ces-border, rgba(0, 0, 0, 0.1));
+  border-radius: 2px;
+  padding: 1rem 1.05rem 1.1rem;
+  background: transparent;
+}
+
+.kxd-upgrade__card-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--kxd-ces-text, #16140f);
+}
+
+.kxd-upgrade__card-value {
+  font-size: 0.88rem;
+}
+
+.kxd-upgrade__btn,
+.kxd-upgrade-admin__save {
+  margin-top: 0.95rem;
+  border: 1px solid var(--kxd-ces-text, #16140f);
+  border-radius: 2px;
+  background: var(--kxd-ces-text, #16140f);
+  color: #fff;
+  font: inherit;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.6rem 0.9rem;
+  cursor: pointer;
+}
+
+.kxd-upgrade__btn:disabled,
+.kxd-upgrade-admin__save:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.kxd-upgrade__text-btn {
+  margin-top: 0.55rem;
+  border: 0;
+  background: transparent;
+  color: var(--kxd-ces-text-muted, #6b645c);
+  font: inherit;
+  font-size: 0.85rem;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+}
+
+.kxd-upgrade__label {
+  display: grid;
+  gap: 0.4rem;
+  margin-top: 0.85rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--kxd-ces-text-muted, #6b645c);
+}
+
+.kxd-upgrade__label textarea,
+.kxd-upgrade-admin__field select,
+.kxd-upgrade-admin__field textarea {
+  width: 100%;
+  border: 1px solid var(--kxd-os-border, rgba(0, 0, 0, 0.12));
+  border-radius: 2px;
+  background: #fff;
+  color: inherit;
+  font: inherit;
+  font-size: 0.92rem;
+  letter-spacing: normal;
+  text-transform: none;
+  padding: 0.55rem 0.7rem;
+}
+
+.kxd-upgrade__form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  align-items: center;
+}
+
+.kxd-upgrade__status {
+  display: inline-block;
+  margin-top: 0.75rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--kxd-ces-text-muted, #6b645c);
+}
+
+.kxd-upgrade__status--approved {
+  color: var(--kxd-os-success, #2f6b4f);
+}
+
+.kxd-upgrade__status--declined,
+.kxd-upgrade__status--canceled {
+  color: var(--kxd-os-text-faint, #8a8378);
+}
+
+.kxd-upgrade__error {
+  margin-top: 0.85rem;
+  color: var(--kxd-os-critical, #8b2e2e);
+  font-size: 0.9rem;
+}
+
+.kxd-upgrade__success {
+  margin-top: 0.85rem;
+  color: var(--kxd-os-success, #2f6b4f);
+  font-size: 0.9rem;
+}
+
+.kxd-upgrade__history {
+  margin-top: 1.75rem;
+}
+
+.kxd-upgrade__history-title {
+  margin: 0;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--kxd-ces-text-muted, #6b645c);
+}
+
+.kxd-upgrade__history-list {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.kxd-upgrade__history-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid var(--kxd-ces-border, rgba(0, 0, 0, 0.08));
+  font-size: 0.92rem;
+}
+
+.kxd-upgrade__history-list span {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--kxd-ces-text-muted, #6b645c);
+}
+
+.kxd-upgrade__history-message {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--kxd-ces-text-muted, #6b645c);
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.kxd-upgrade-admin__filters {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0.75rem 0 1.25rem;
+}
+
+.kxd-upgrade-admin__filters button {
+  border: 1px solid var(--kxd-os-border);
+  border-radius: 2px;
+  background: transparent;
+  color: var(--kxd-os-text-muted);
+  font: inherit;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.45rem 0.75rem;
+  cursor: pointer;
+}
+
+.kxd-upgrade-admin__filters button.is-active {
+  border-color: var(--kxd-os-text-primary);
+  color: var(--kxd-os-text-primary);
+}
+
+.kxd-upgrade-admin__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: 1.5rem;
+}
+
+.kxd-upgrade-admin__list {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.kxd-upgrade-admin__list button {
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--kxd-os-border);
+  border-radius: 2px;
+  background: transparent;
+  padding: 0.75rem 0.85rem;
+  cursor: pointer;
+  display: grid;
+  gap: 0.2rem;
+  font: inherit;
+  color: inherit;
+}
+
+.kxd-upgrade-admin__list button.is-active {
+  border-color: color-mix(in srgb, var(--kxd-os-gold, #b8974a) 55%, var(--kxd-os-border));
+}
+
+.kxd-upgrade-admin__list em {
+  font-style: normal;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-muted);
+}
+
+.kxd-upgrade-admin__list time {
+  font-size: 0.78rem;
+  color: var(--kxd-os-text-faint);
+}
+
+.kxd-upgrade-admin__meta {
+  display: grid;
+  gap: 0.65rem;
+  margin: 1rem 0;
+}
+
+.kxd-upgrade-admin__meta dt {
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-faint);
+}
+
+.kxd-upgrade-admin__meta dd {
+  margin: 0.2rem 0 0;
+}
+
+.kxd-upgrade-admin__field {
+  display: grid;
+  gap: 0.4rem;
+  margin-top: 0.85rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-faint);
+}
+
+.kxd-upgrade-admin__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.kxd-upgrade-admin__callout {
+  margin: 0.85rem 0;
+  padding: 0.65rem 0.75rem;
+  border-left: 2px solid var(--kxd-os-gold, #b8974a);
+  color: var(--kxd-os-text-muted);
+  font-size: 0.9rem;
+}
+
+.kxd-upgrade-admin__callout--ok {
+  border-left-color: var(--kxd-os-success);
+}
+
+.kxd-upgrade-admin__error {
+  margin-top: 0.75rem;
+  color: var(--kxd-os-critical);
+}
+
+.kxd-upgrade-admin__success {
+  margin-top: 0.75rem;
+  color: var(--kxd-os-success);
+}
+
+@media (max-width: 960px) {
+  .kxd-upgrade-admin__layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kxd-upgrade__btn,
+  .kxd-upgrade-admin__save,
+  .kxd-upgrade-admin__list button {
+    transition: none;
+  }
+}

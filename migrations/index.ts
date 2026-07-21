@@ -72,6 +72,7 @@ import * as migration_20260714_phase34a_client_launch_drafts from './20260714_ph
 import * as migration_20260714_phase34b_client_inventory_vehicles from './20260714_phase34b_client_inventory_vehicles';
 import * as migration_20260714_phase34d_website_workspace_client_requests from './20260714_phase34d_website_workspace_client_requests';
 import * as migration_20260808_phase35a_client_plans_entitlements from './20260808_phase35a_client_plans_entitlements';
+import * as migration_20260809_phase35b_client_upgrade_requests from './20260809_phase35b_client_upgrade_requests';
 
 export const migrations = [
   {
@@ -443,5 +444,10 @@ export const migrations = [
     up: migration_20260808_phase35a_client_plans_entitlements.up,
     down: migration_20260808_phase35a_client_plans_entitlements.down,
     name: '20260808_phase35a_client_plans_entitlements',
+  },
+  {
+    up: migration_20260809_phase35b_client_upgrade_requests.up,
+    down: migration_20260809_phase35b_client_upgrade_requests.down,
+    name: '20260809_phase35b_client_upgrade_requests',
   },
 ];

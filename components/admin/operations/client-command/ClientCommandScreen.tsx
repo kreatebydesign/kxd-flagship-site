@@ -16,6 +16,7 @@ import {
 import type { ClientCommandCenterData, CommandListItem } from "@/lib/client-command";
 import { ClientOpsNav } from "./ClientOpsNav";
 import { ClientPlansAccessPanel } from "./ClientPlansAccessPanel";
+import { ClientUpgradeRequestsPanel } from "./ClientUpgradeRequestsPanel";
 
 function urgencyVariant(urgency: string): "default" | "status" | "success" | "critical" | "warning" {
   switch (urgency) {
@@ -77,6 +78,7 @@ export function ClientCommandScreen({ data }: { data: ClientCommandCenterData })
         <ClientOpsNav clientId={hero.clientId} active="command" />
 
         <ClientPlansAccessPanel clientId={hero.clientId} />
+        <ClientUpgradeRequestsPanel clientId={hero.clientId} />
 
         <OpsKpiStrip
           items={[

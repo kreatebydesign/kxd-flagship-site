@@ -17,6 +17,7 @@ export type OperationsNavId =
   | "playbooks"
   | "work"
   | "review-inbox"
+  | "upgrade-requests"
   | "portal-access"
   | "client-success"
   | "growth"
@@ -105,6 +106,11 @@ export const NAV_GROUPS: OperationsNavGroup[] = [
       { id: "launch-qa", label: "Launch QA", href: "/admin/operations/launch-qa" },
       { id: "work", label: "Work", href: "/admin/work" },
       { id: "review-inbox", label: "Review Inbox", href: "/admin/operations/review-inbox" },
+      {
+        id: "upgrade-requests",
+        label: "Upgrade Requests",
+        href: "/admin/operations/upgrade-requests",
+      },
       { id: "playbooks", label: "Playbooks", href: "/admin/operations/playbooks" },
       { id: "growth", label: "Growth", href: "/admin/operations/growth" },
       { id: "reports", label: "Reports", href: "/admin/operations/reports" },

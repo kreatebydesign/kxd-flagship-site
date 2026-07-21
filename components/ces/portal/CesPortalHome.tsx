@@ -9,6 +9,7 @@ import { portalFirstName, portalTimeGreeting } from "@/lib/portal/greeting";
 import { CesPage } from "@/components/ces/primitives";
 import { CesPartnershipBriefing } from "@/components/ces/partnership";
 import { CesExecutivePerformanceWorkspace } from "@/components/ces/executive-performance";
+import { PortalUpgradeOpportunities } from "./PortalUpgradeOpportunities";
 
 export interface CesPortalHomeProps {
   displayName: string;
@@ -46,6 +47,7 @@ export function CesPortalHome({
       ) : (
         <CesPartnershipBriefing briefing={briefing} greeting={greeting} />
       )}
+      <PortalUpgradeOpportunities />
     </CesPage>
   );
 }

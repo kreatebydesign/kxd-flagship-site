@@ -22,6 +22,7 @@ import { ClientOnboarding } from "./payload/collections/ClientOnboarding.ts";
 import { ClientTimelineEvents } from "./payload/collections/ClientTimelineEvents.ts";
 import { ClientProjects } from "./payload/collections/ClientProjects.ts";
 import { ClientRequests } from "./payload/collections/ClientRequests.ts";
+import { ClientUpgradeRequests } from "./payload/collections/ClientUpgradeRequests.ts";
 import { ClientReviewMedia } from "./payload/collections/ClientReviewMedia.ts";
 import { ClientTasks } from "./payload/collections/ClientTasks.ts";
 import { Work } from "./payload/collections/Work.ts";
@@ -164,6 +165,7 @@ export default buildConfig({
     ClientProjects,
     MonthlyDeliverables,
     ClientRequests,
+    ClientUpgradeRequests,
     ClientReviewMedia,
     ClientCommunications,
     ClientActions,
