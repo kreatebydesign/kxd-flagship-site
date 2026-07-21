@@ -7,9 +7,11 @@
  *
  * Pattern: {slug}.preview.kreatebydesign.com
  * Resolution is data-driven — no per-client code.
+ *
+ * Payload-safe — imported by `payload/collections/ClientInfrastructure.ts`
+ * hooks and CLI migrate (no `server-only`). Next.js route handlers and
+ * provisioning orchestration remain server-bound at their call sites.
  */
-
-import "server-only";
 
 import type { Payload } from "payload";
 import type { PreviewHealthStatus } from "./preview-domain-types";

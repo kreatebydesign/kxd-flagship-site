@@ -182,7 +182,7 @@ If logic exists in Observer, Brain, Pulse, or Narrative — extend it there. Rit
 
 ### Payload-safe modules for hooks and CLI
 
-Modules imported by `payload.config.ts` hooks and `tsx` scripts must not use `import "server-only"`. Follow the pattern in `lib/financial-command/timeline-publish.ts` and `lib/work/integration/events.ts`.
+Modules imported by `payload.config.ts` hooks and `tsx` scripts must not use `import "server-only"`. Follow the pattern in `lib/financial-command/timeline-publish.ts`, `lib/work/integration/events.ts`, and `lib/infrastructure/preview-domain.ts`. See `docs/PAYLOAD-MIGRATIONS.md` for the official migrate workflow.
 
 ### Prioritize reliability and maintainability
 
