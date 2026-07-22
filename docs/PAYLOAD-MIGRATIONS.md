@@ -100,8 +100,9 @@ Supported path for a brand-new Postgres database:
    ```
 
 5. Expected result:
-   - Every migration in `migrations/index.ts` recorded once
-   - `migrate:status` shows no pending (`Ran: Yes` for all)
+   - Every migration in `migrations/index.ts` recorded once (canonical count: **76**)
+   - `migrate:status` shows no pending (`Ran: Yes` for all indexed names)
+   - Fresh databases normally have **76** `payload_migrations` rows — one per indexed migration
    - Critical tables exist (`clients`, `reporting_sync_states`, launch/inventory/scheduling surfaces, etc.)
 
 6. Destroy disposable bootstrap databases when finished. Do not keep dumps with secrets.
@@ -112,6 +113,39 @@ Supported path for a brand-new Postgres database:
 - Empty-database rebuild must use guarded `migrate:local` / `verify:migration-bootstrap` (index order).
 - Never rewrite `payload_migrations` history on production to “fix” bootstrap.
 - Emergency SQL remains last resort when the CLI cannot run.
+
+## Production `dev` push sentinel
+
+Production can report **77** rows in `payload_migrations` while `migrations/index.ts` exports **76** canonical migrations. That difference is **expected**.
+
+| Signal | Expected value |
+|--------|----------------|
+| Canonical indexed migrations | 76 |
+| Production `payload_migrations` rows | 77 |
+| Extra row | name `dev`, batch `-1` |
+| Canonical pending (`migrate:status`) | 0 |
+
+The extra row is Payload’s **development push-mode sentinel**. Payload inserts (and later refreshes) a row named `dev` with `batch = -1` when Drizzle **schema push** runs in development. It is bookkeeping evidence of an early schema push — **not** a versioned migration, and it contains no migration SQL.
+
+**Do not:**
+
+- Delete, rename, or “reconcile” the production `dev` / batch `-1` row
+- Add `dev` to `migrations/index.ts`
+- Create a fake migration file named `dev`
+- Treat the sentinel as a pending canonical migration
+- Demand that raw `payload_migrations` row count equal the index export count
+
+**Do:**
+
+- Compare **canonical migration names** and **pending status** from `npm run migrate:status`
+- Expect fresh / recovered databases to apply the **76** indexed migrations and normally contain **76** history rows
+- Treat production and a fresh 76-row bootstrap as operationally equivalent when every indexed name shows `Ran: Yes` and pending is empty — even if production still has the sentinel (77 rows)
+
+Payload may show an interactive warning that a development push (`batch = -1`) occurred before further migrates. That warning is about the sentinel, not a missing indexed migration. Answer deliberately for the confirmed database only.
+
+**Current decision:** leave the production `dev` / batch `-1` sentinel **permanently unchanged**.
+
+Any future alteration of production migration history requires explicit approval, a verified backup, and a separate maintenance plan. Before considering a change after a Payload upgrade, test that release against this sentinel behavior first.
 
 ## Production workflow (deliberate)
 
@@ -126,6 +160,7 @@ Supported path for a brand-new Postgres database:
    - Resolved host is the expected production database
    - Pending migrations match the release (expected names only)
    - No unexpected extra pending migrations
+   - Do **not** require raw row-count equality with `migrations/index.ts` (see Production `dev` push sentinel)
 4. Apply only with explicit confirmation:
 
    ```bash
