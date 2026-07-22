@@ -80,6 +80,9 @@ function emptyProfile(
     stripeSubscriptionId: null,
     quickbooksCustomerId: null,
     waveCustomerId: null,
+    currencyCode: null,
+    collectionMethod: null,
+    taxPosture: null,
     duplicateProfiles: false,
     ...overrides,
   };
@@ -208,6 +211,22 @@ function main() {
   check(
     "currency is never inferred as authoritative",
     standard.currency.code === null && standard.currency.authoritative === false,
+  );
+  check(
+    "configured currency becomes authoritative",
+    buildBillingReadinessSnapshot(
+      baseState(),
+      emptyProfile({
+        profilePresent: true,
+        currencyCode: "usd",
+        billingEmail: "billing@example.com",
+        billingContact: "Billing Desk",
+        collectionMethod: "send_invoice",
+        paymentTerms: "net-30",
+        taxPosture: "taxable",
+      }),
+      "2026-07-21T18:00:00.000Z",
+    ).currency.authoritative === true,
   );
   check(
     "cadence for retainer is monthly from field definition",
@@ -387,83 +406,52 @@ function main() {
   );
 
   // Fingerprint determinism
-  const fp1 = buildBillingReadinessFingerprint({
+  const fpBase = {
     clientId: 42,
-    agreementId: "kxd-operating",
-    planKey: "growth",
-    planStatus: "active",
-    setupFeeCents: 175000,
-    monthlyRetainerCents: 200000,
-    monthlyServiceCredits: 7,
-    commercialAddOns: [],
-    readiness: "ready_for_review",
+    agreementId: "kxd-operating" as string | null,
+    planKey: "growth" as string | null,
+    planStatus: "active" as string | null,
+    setupFeeCents: 175000 as number | null,
+    monthlyRetainerCents: 200000 as number | null,
+    monthlyServiceCredits: 7 as number | null,
+    commercialAddOns: [] as string[],
+    readiness: "ready_for_review" as const,
     alignmentStatus: "aligned_standard",
-    billingEmail: null,
-    externalKeys: [],
-  });
-  const fp2 = buildBillingReadinessFingerprint({
-    clientId: 42,
-    agreementId: "kxd-operating",
-    planKey: "growth",
-    planStatus: "active",
-    setupFeeCents: 175000,
-    monthlyRetainerCents: 200000,
-    monthlyServiceCredits: 7,
-    commercialAddOns: [],
-    readiness: "ready_for_review",
-    alignmentStatus: "aligned_standard",
-    billingEmail: null,
-    externalKeys: [],
-  });
+    billingEmail: null as string | null,
+    currencyCode: null as string | null,
+    collectionMethod: null as string | null,
+    taxPosture: null as string | null,
+    paymentTerms: null as string | null,
+    externalKeys: [] as string[],
+  };
+  const fp1 = buildBillingReadinessFingerprint(fpBase);
+  const fp2 = buildBillingReadinessFingerprint({ ...fpBase });
   check("fingerprint is deterministic", fp1 === fp2 && fp1.length === 40);
 
   const fpAgreement = buildBillingReadinessFingerprint({
-    clientId: 42,
+    ...fpBase,
     agreementId: "kxd-partnership",
-    planKey: "growth",
-    planStatus: "active",
-    setupFeeCents: 175000,
-    monthlyRetainerCents: 200000,
-    monthlyServiceCredits: 7,
-    commercialAddOns: [],
-    readiness: "ready_for_review",
-    alignmentStatus: "aligned_standard",
-    billingEmail: null,
-    externalKeys: [],
   });
   check("agreement changes alter the fingerprint", fpAgreement !== fp1);
 
   const fpPlan = buildBillingReadinessFingerprint({
-    clientId: 42,
-    agreementId: "kxd-operating",
+    ...fpBase,
     planKey: "starter",
-    planStatus: "active",
-    setupFeeCents: 175000,
-    monthlyRetainerCents: 200000,
-    monthlyServiceCredits: 7,
-    commercialAddOns: [],
-    readiness: "ready_for_review",
     alignmentStatus: "mismatch",
-    billingEmail: null,
-    externalKeys: [],
   });
   check("plan changes alter the fingerprint", fpPlan !== fp1);
 
   const fpMoney = buildBillingReadinessFingerprint({
-    clientId: 42,
-    agreementId: "kxd-operating",
-    planKey: "growth",
-    planStatus: "active",
+    ...fpBase,
     setupFeeCents: 100000,
-    monthlyRetainerCents: 200000,
-    monthlyServiceCredits: 7,
-    commercialAddOns: [],
-    readiness: "ready_for_review",
-    alignmentStatus: "aligned_standard",
-    billingEmail: null,
-    externalKeys: [],
   });
   check("commercial-value changes alter the fingerprint", fpMoney !== fp1);
+
+  const fpCurrency = buildBillingReadinessFingerprint({
+    ...fpBase,
+    currencyCode: "usd",
+  });
+  check("currency changes alter the fingerprint", fpCurrency !== fp1);
 
   check(
     "UI helper requires recorded agreement",
@@ -629,9 +617,11 @@ function main() {
   check(
     "UI has no create-customer or sync-to-stripe controls",
     !ui.includes("Create customer") &&
+      !ui.includes("Create Stripe customer") &&
       !ui.includes("Sync to Stripe") &&
       !ui.includes("Start subscription") &&
-      !ui.includes("Send invoice") &&
+      !ui.includes("Send invoice now") &&
+      !ui.includes("Charge automatically now") &&
       ui.includes("Review billing readiness"),
   );
   check(

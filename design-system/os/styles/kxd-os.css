@@ -16019,9 +16019,40 @@ a.kxd-exec-today__row:hover {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.kxd-commercial-admin__billing-config .kxd-commercial-admin__meta {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.kxd-commercial-admin__form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem 1rem;
+  margin: 1rem 0;
+}
+
+.kxd-commercial-admin__form-grid .kxd-commercial-admin__field {
+  min-width: 0;
+}
+
+.kxd-commercial-admin__form-grid .kxd-commercial-admin__field input,
+.kxd-commercial-admin__form-grid .kxd-commercial-admin__field select {
+  width: 100%;
+  min-height: 44px;
+  word-break: break-word;
+}
+
 @media (max-width: 720px) {
-  .kxd-commercial-admin__billing .kxd-commercial-admin__meta {
+  .kxd-commercial-admin__billing .kxd-commercial-admin__meta,
+  .kxd-commercial-admin__billing-config .kxd-commercial-admin__meta,
+  .kxd-commercial-admin__form-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kxd-commercial-admin__billing-config,
+  .kxd-commercial-admin__billing {
+    scroll-behavior: auto;
   }
 }
 

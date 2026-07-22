@@ -47,6 +47,9 @@ export async function loadBillingProfile(
     paymentPreference: doc?.paymentPreference ? String(doc.paymentPreference) : null,
     invoiceCadence: doc?.invoiceCadence ? String(doc.invoiceCadence) : null,
     paymentTerms: doc?.paymentTerms ? String(doc.paymentTerms) : null,
+    currencyCode: doc?.currencyCode ? String(doc.currencyCode) : null,
+    collectionMethod: doc?.collectionMethod ? String(doc.collectionMethod) : null,
+    taxPosture: doc?.taxPosture ? String(doc.taxPosture) : null,
     billingStatus,
     missingSetupFlags,
     setupComplete:
@@ -60,6 +63,9 @@ export interface UpdateBillingProfileInput {
   paymentPreference?: string;
   invoiceCadence?: string;
   paymentTerms?: string;
+  currencyCode?: string;
+  collectionMethod?: string;
+  taxPosture?: string;
   billingStatus?: BillingStatus;
   executiveNotes?: string;
 }
@@ -93,6 +99,9 @@ export async function upsertBillingProfile(
     paymentPreference: input.paymentPreference,
     invoiceCadence: input.invoiceCadence,
     paymentTerms: input.paymentTerms,
+    currencyCode: input.currencyCode,
+    collectionMethod: input.collectionMethod,
+    taxPosture: input.taxPosture,
     billingStatus: input.billingStatus ?? (flags.length === 0 ? "active" : "partial"),
     missingSetupFlags: flags,
     executiveNotes: input.executiveNotes,

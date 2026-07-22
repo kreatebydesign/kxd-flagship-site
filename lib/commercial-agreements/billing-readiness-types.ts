@@ -103,6 +103,25 @@ export type BillingContactAssessment = {
   explanation: string;
 };
 
+export type CollectionMethodAssessment = {
+  method: "send_invoice" | "charge_automatically" | null;
+  present: boolean;
+  /** Intent only — never means payment capability is enabled. */
+  automaticCollectionAllowed: boolean;
+  explanation: string;
+};
+
+export type TaxPostureAssessment = {
+  posture:
+    | "not_configured"
+    | "tax_exempt"
+    | "taxable"
+    | "requires_review"
+    | null;
+  present: boolean;
+  explanation: string;
+};
+
 export type ExternalBillingIdentity = {
   provider: "stripe" | "quickbooks" | "wave";
   field: string;
@@ -150,6 +169,9 @@ export type BillingReadinessSnapshot = {
   currency: CurrencyAssessment;
   cadence: CadenceAssessment;
   billingContact: BillingContactAssessment;
+  collectionMethod: CollectionMethodAssessment;
+  taxPosture: TaxPostureAssessment;
+  paymentTermsConfigured: string | null;
   externalIdentities: ExternalBillingIdentity[];
   proposedCustomerIdentityInputs: {
     clientId: number;
@@ -194,7 +216,7 @@ export const BILLING_OWNERSHIP: BillingOwnershipMap = {
   planAssignment:
     "clients.planKey / planStatus / plan modules (Phases 35A, 37B–37E)",
   billingConfiguration:
-    "billing-profiles collection (contact, cadence preference, payment terms, external id slots)",
+    "billing-profiles collection (currency, contact, collection method, payment terms, tax posture, cadence preference, external id slots)",
   externalStripeState:
     "billing-profiles.stripeCustomerId / stripeSubscriptionId — external execution identifiers only",
   financialTransactions:

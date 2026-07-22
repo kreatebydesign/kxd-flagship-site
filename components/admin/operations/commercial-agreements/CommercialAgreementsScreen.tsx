@@ -12,6 +12,8 @@ import { KxdPage } from "@/components/os";
 import {
   activationEligibilityLabel,
   applyCatalogDefaults,
+  billingConfigurationOperationLabel,
+  billingReadinessStatusLabel,
   commercialAddOnLabel,
   commercialProvisioningLabel,
   commercialRecordStatusLabel,
@@ -20,11 +22,20 @@ import {
   customPlanEligibilityLabel,
   getCommercialAgreement,
   hasAgreementPlanMismatch,
+  isBillingReviewAvailable,
   isCustomPlanCandidate,
   isLegacyConversionCandidate,
   listCommercialAgreements,
+  BILLING_COLLECTION_METHODS,
+  BILLING_CURRENCY_CODES,
+  BILLING_INVOICE_CADENCES,
+  BILLING_PAYMENT_TERMS,
+  BILLING_TAX_POSTURES,
   type ActivationPreview,
   type ActivationResult,
+  type BillingConfigurationEditableInput,
+  type BillingConfigurationPreview,
+  type BillingConfigurationResult,
   type BillingReadinessSnapshot,
   type ClientCommercialAgreementRecord,
   type CommercialAgreementFieldErrors,
@@ -35,8 +46,6 @@ import {
   type LegacyConversionResult,
   type PlanChangePreview,
   type PlanChangeResult,
-  billingReadinessStatusLabel,
-  isBillingReviewAvailable,
 } from "@/lib/commercial-agreements";
 import { PARTNERSHIP_ADD_ONS } from "@/lib/partnerships/packages";
 
@@ -119,12 +128,105 @@ type BillingReadinessResponse = {
   notice?: string;
 };
 
+type BillingConfigurationPreviewResponse = {
+  ok?: boolean;
+  message?: string;
+  code?: string;
+  preview?: BillingConfigurationPreview;
+  notice?: string;
+};
+
+type BillingConfigurationMutationResponse = {
+  ok?: boolean;
+  message?: string;
+  code?: string;
+  result?: BillingConfigurationResult;
+};
+
 type EditorMode = "idle" | "edit" | "create";
 type ActivationPhase = "closed" | "preview" | "result";
 type PlanChangePhase = "closed" | "preview" | "result";
 type LegacyConversionPhase = "closed" | "preview" | "result";
 type CustomPlanPhase = "closed" | "preview" | "result";
 type BillingReadinessPhase = "closed" | "review";
+type BillingConfigPhase = "closed" | "form" | "preview" | "result";
+
+type BillingConfigDraft = {
+  currencyCode: string;
+  billingContact: string;
+  billingEmail: string;
+  collectionMethod: string;
+  paymentTerms: string;
+  taxPosture: string;
+  invoiceCadence: string;
+};
+
+function emptyBillingConfigDraft(): BillingConfigDraft {
+  return {
+    currencyCode: "",
+    billingContact: "",
+    billingEmail: "",
+    collectionMethod: "",
+    paymentTerms: "",
+    taxPosture: "",
+    invoiceCadence: "",
+  };
+}
+
+function draftFromBillingSnapshot(
+  snapshot: BillingReadinessSnapshot | null,
+): BillingConfigDraft {
+  if (!snapshot) return emptyBillingConfigDraft();
+  return {
+    currencyCode: snapshot.currency.code ?? "",
+    billingContact: snapshot.billingContact.contactName ?? "",
+    billingEmail: snapshot.billingContact.email ?? "",
+    collectionMethod: snapshot.collectionMethod.method ?? "",
+    paymentTerms: snapshot.paymentTermsConfigured ?? "",
+    taxPosture: snapshot.taxPosture.posture ?? "",
+    invoiceCadence: snapshot.cadence.profileInvoiceCadence ?? "",
+  };
+}
+
+function draftToBillingConfigurationInput(
+  draft: BillingConfigDraft,
+): BillingConfigurationEditableInput {
+  const collectionMethod =
+    draft.collectionMethod === "send_invoice" ||
+    draft.collectionMethod === "charge_automatically"
+      ? draft.collectionMethod
+      : null;
+  return {
+    currencyCode: draft.currencyCode === "usd" ? "usd" : null,
+    billingContact: draft.billingContact.trim() || null,
+    billingEmail: draft.billingEmail.trim() || null,
+    collectionMethod,
+    paymentTerms:
+      collectionMethod === "charge_automatically"
+        ? null
+        : draft.paymentTerms === "due-on-receipt" ||
+            draft.paymentTerms === "net-15" ||
+            draft.paymentTerms === "net-30" ||
+            draft.paymentTerms === "net-45"
+          ? draft.paymentTerms
+          : null,
+    taxPosture:
+      draft.taxPosture === "not_configured" ||
+      draft.taxPosture === "tax_exempt" ||
+      draft.taxPosture === "taxable" ||
+      draft.taxPosture === "requires_review"
+        ? draft.taxPosture
+        : null,
+    invoiceCadence:
+      draft.invoiceCadence === "monthly" ||
+      draft.invoiceCadence === "quarterly" ||
+      draft.invoiceCadence === "milestone" ||
+      draft.invoiceCadence === "on-completion"
+        ? draft.invoiceCadence
+        : null,
+  };
+}
+
 type Draft = {
   commercialAgreementId: CommercialAgreementId | "";
   monthlyRetainerAmount: string;
@@ -289,6 +391,23 @@ export function CommercialAgreementsScreen() {
   const [billingLoading, setBillingLoading] = useState(false);
   const [billingError, setBillingError] = useState<string | null>(null);
 
+  const [billingConfigPhase, setBillingConfigPhase] =
+    useState<BillingConfigPhase>("closed");
+  const [billingConfigDraft, setBillingConfigDraft] =
+    useState<BillingConfigDraft>(emptyBillingConfigDraft);
+  const [billingConfigPreview, setBillingConfigPreview] =
+    useState<BillingConfigurationPreview | null>(null);
+  const [billingConfigResult, setBillingConfigResult] =
+    useState<BillingConfigurationResult | null>(null);
+  const [billingConfigLoading, setBillingConfigLoading] = useState(false);
+  const [billingConfigError, setBillingConfigError] = useState<string | null>(
+    null,
+  );
+  const [billingConfigAcknowledged, setBillingConfigAcknowledged] =
+    useState(false);
+  const [billingConfigNoActivateAck, setBillingConfigNoActivateAck] =
+    useState(false);
+
   const dirty = mode !== "idle" && !draftsEqual(draft, baseline);
 
   function resetActivation() {
@@ -337,12 +456,24 @@ export function CommercialAgreementsScreen() {
     setBillingError(null);
   }
 
+  function resetBillingConfiguration() {
+    setBillingConfigPhase("closed");
+    setBillingConfigDraft(emptyBillingConfigDraft());
+    setBillingConfigPreview(null);
+    setBillingConfigResult(null);
+    setBillingConfigLoading(false);
+    setBillingConfigError(null);
+    setBillingConfigAcknowledged(false);
+    setBillingConfigNoActivateAck(false);
+  }
+
   function resetReviews() {
     resetActivation();
     resetPlanChange();
     resetLegacyConversion();
     resetCustomPlan();
     resetBillingReadiness();
+    resetBillingConfiguration();
   }
 
   const anyReviewLoading =
@@ -350,7 +481,8 @@ export function CommercialAgreementsScreen() {
     planChangeLoading ||
     legacyLoading ||
     customLoading ||
-    billingLoading;
+    billingLoading ||
+    billingConfigLoading;
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -432,6 +564,7 @@ export function CommercialAgreementsScreen() {
     resetLegacyConversion();
     resetCustomPlan();
     resetBillingReadiness();
+    resetBillingConfiguration();
     setActivationLoading(true);
     setActivationError(null);
     setActivationResult(null);
@@ -530,6 +663,7 @@ export function CommercialAgreementsScreen() {
     resetLegacyConversion();
     resetCustomPlan();
     resetBillingReadiness();
+    resetBillingConfiguration();
     setPlanChangeLoading(true);
     setPlanChangeError(null);
     setPlanChangeResult(null);
@@ -639,6 +773,7 @@ export function CommercialAgreementsScreen() {
     resetPlanChange();
     resetCustomPlan();
     resetBillingReadiness();
+    resetBillingConfiguration();
     setLegacyLoading(true);
     setLegacyError(null);
     setLegacyResult(null);
@@ -742,6 +877,7 @@ export function CommercialAgreementsScreen() {
     resetPlanChange();
     resetLegacyConversion();
     resetBillingReadiness();
+    resetBillingConfiguration();
     setCustomLoading(true);
     setCustomError(null);
     setCustomResult(null);
@@ -788,6 +924,7 @@ export function CommercialAgreementsScreen() {
     resetPlanChange();
     resetLegacyConversion();
     resetCustomPlan();
+    resetBillingConfiguration();
     setBillingLoading(true);
     setBillingError(null);
     setBillingSnapshot(null);
@@ -814,6 +951,125 @@ export function CommercialAgreementsScreen() {
       setBillingPhase("review");
     } finally {
       setBillingLoading(false);
+    }
+  }
+
+  function openBillingConfiguration(fromSnapshot: BillingReadinessSnapshot | null) {
+    if (!selectedId || anyReviewLoading) return;
+    resetActivation();
+    resetPlanChange();
+    resetLegacyConversion();
+    resetCustomPlan();
+    setBillingConfigDraft(draftFromBillingSnapshot(fromSnapshot));
+    setBillingConfigPreview(null);
+    setBillingConfigResult(null);
+    setBillingConfigError(null);
+    setBillingConfigAcknowledged(false);
+    setBillingConfigNoActivateAck(false);
+    setBillingConfigPhase("form");
+  }
+
+  async function previewBillingConfiguration() {
+    if (!selectedId || billingConfigLoading) return;
+    setBillingConfigLoading(true);
+    setBillingConfigError(null);
+    setBillingConfigPreview(null);
+    setBillingConfigAcknowledged(false);
+    setBillingConfigNoActivateAck(false);
+    try {
+      const res = await fetch(
+        `/api/admin/commercial-agreements/${selectedId}/billing-configuration-preview`,
+        {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(draftToBillingConfigurationInput(billingConfigDraft)),
+        },
+      );
+      const json = (await res.json()) as BillingConfigurationPreviewResponse;
+      if (!res.ok || !json.ok || !json.preview) {
+        throw new Error(
+          json.message || "Unable to generate billing-configuration preview.",
+        );
+      }
+      setBillingConfigPreview(json.preview);
+      setBillingConfigPhase("preview");
+    } catch (err) {
+      setBillingConfigError(
+        err instanceof Error
+          ? err.message
+          : "Unable to generate billing-configuration preview.",
+      );
+      setBillingConfigPhase("preview");
+    } finally {
+      setBillingConfigLoading(false);
+    }
+  }
+
+  async function confirmBillingConfiguration() {
+    if (
+      !selectedId ||
+      !billingConfigPreview ||
+      !billingConfigAcknowledged ||
+      !billingConfigNoActivateAck ||
+      billingConfigLoading
+    ) {
+      return;
+    }
+    setBillingConfigLoading(true);
+    setBillingConfigError(null);
+    try {
+      const res = await fetch(
+        `/api/admin/commercial-agreements/${selectedId}/apply-billing-configuration`,
+        {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...draftToBillingConfigurationInput(billingConfigDraft),
+            previewFingerprint: billingConfigPreview.previewFingerprint,
+            confirmed: true,
+            configurationDoesNotActivateBilling: true,
+          }),
+        },
+      );
+      const json = (await res.json()) as BillingConfigurationMutationResponse;
+      if (!res.ok || !json.ok || !json.result) {
+        if (res.status === 409 || json.code === "stale_preview") {
+          throw new Error(
+            json.message ||
+              "This preview is out of date. Review a fresh preview and try again.",
+          );
+        }
+        throw new Error(
+          json.message || "Unable to save billing configuration.",
+        );
+      }
+      setBillingConfigResult(json.result);
+      setBillingConfigPhase("result");
+      if (json.result.readiness) {
+        setBillingSnapshot(json.result.readiness);
+        setBillingPhase("review");
+      }
+      await load();
+      if (selectedId) {
+        const detailRes = await fetch(
+          `/api/admin/commercial-agreements/${selectedId}`,
+          { credentials: "same-origin" },
+        );
+        const detailJson = (await detailRes.json()) as DetailResponse;
+        if (detailRes.ok && detailJson.ok && detailJson.agreement) {
+          setDetail(detailJson.agreement);
+        }
+      }
+    } catch (err) {
+      setBillingConfigError(
+        err instanceof Error
+          ? err.message
+          : "Unable to save billing configuration.",
+      );
+    } finally {
+      setBillingConfigLoading(false);
     }
   }
 
@@ -1102,6 +1358,7 @@ export function CommercialAgreementsScreen() {
     isBillingReviewAvailable({
       commercialAgreementId: detail!.commercialAgreementId,
     });
+  const showBillingConfig = Boolean(detail) && mode === "idle";
 
   return (
     <OperationsShell activeId="commercial-agreements">
@@ -1603,10 +1860,27 @@ export function CommercialAgreementsScreen() {
                         : "Review billing readiness"}
                     </button>
                   ) : null}
-                  {showBillingReview ? (
+                  {showBillingConfig ? (
+                    <button
+                      type="button"
+                      className="kxd-commercial-admin__secondary"
+                      onClick={() =>
+                        openBillingConfiguration(
+                          billingPhase === "review" ? billingSnapshot : null,
+                        )
+                      }
+                      disabled={anyReviewLoading}
+                      aria-label="Configure billing details"
+                    >
+                      {billingConfigLoading && billingConfigPhase === "closed"
+                        ? "Preparing…"
+                        : "Configure billing details"}
+                    </button>
+                  ) : null}
+                  {showBillingReview || showBillingConfig ? (
                     <p className="kxd-commercial-admin__muted">
-                      Billing review available · No billing action performed from
-                      this workspace
+                      Billing review and configuration are internal only · No
+                      billing action performed from this workspace
                     </p>
                   ) : null}
                   {showLegacyNeedsAgreement ? (
@@ -2913,6 +3187,30 @@ export function CommercialAgreementsScreen() {
                             </dd>
                           </div>
                           <div>
+                            <dt>Collection method</dt>
+                            <dd>
+                              {billingSnapshot.collectionMethod.method ??
+                                "Not configured"}
+                              {billingSnapshot.collectionMethod
+                                .automaticCollectionAllowed
+                                ? " · automatic collection intended (not enabled)"
+                                : ""}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt>Payment terms</dt>
+                            <dd>
+                              {billingSnapshot.paymentTermsConfigured ?? "—"}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt>Tax posture</dt>
+                            <dd>
+                              {billingSnapshot.taxPosture.posture ??
+                                "Not recorded"}
+                            </dd>
+                          </div>
+                          <div>
                             <dt>Billing cadence</dt>
                             <dd>
                               Retainer:{" "}
@@ -3034,6 +3332,16 @@ export function CommercialAgreementsScreen() {
                         <div className="kxd-commercial-admin__actions">
                           <button
                             type="button"
+                            className="kxd-commercial-admin__save"
+                            onClick={() =>
+                              openBillingConfiguration(billingSnapshot)
+                            }
+                            disabled={billingLoading || billingConfigLoading}
+                          >
+                            Configure billing details
+                          </button>
+                          <button
+                            type="button"
                             className="kxd-commercial-admin__text-btn"
                             onClick={resetBillingReadiness}
                             disabled={billingLoading}
@@ -3045,6 +3353,495 @@ export function CommercialAgreementsScreen() {
                     ) : billingLoading ? (
                       <p className="kxd-commercial-admin__muted" role="status">
                         Assessing billing readiness…
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
+
+                {billingConfigPhase !== "closed" ? (
+                  <div
+                    className="kxd-commercial-admin__activation kxd-commercial-admin__billing-config"
+                    role="region"
+                    aria-label="Billing configuration"
+                    aria-busy={billingConfigLoading}
+                  >
+                    <OpsSectionHead label="Billing configuration" />
+                    <p className="kxd-commercial-admin__callout" role="note">
+                      Internal billing details only. Saving does not activate
+                      billing, create Stripe objects, change access, send email,
+                      or create invoices.
+                    </p>
+
+                    {billingConfigError ? (
+                      <p className="kxd-commercial-admin__error" role="alert">
+                        {billingConfigError}
+                      </p>
+                    ) : null}
+
+                    {billingConfigPhase === "form" ? (
+                      <>
+                        <div className="kxd-commercial-admin__form-grid">
+                          <label className="kxd-commercial-admin__field">
+                            <span>Currency</span>
+                            <select
+                              value={billingConfigDraft.currencyCode}
+                              onChange={(e) =>
+                                setBillingConfigDraft((prev) => ({
+                                  ...prev,
+                                  currencyCode: e.target.value,
+                                }))
+                              }
+                              disabled={billingConfigLoading}
+                            >
+                              <option value="">Not configured</option>
+                              {BILLING_CURRENCY_CODES.map((code) => (
+                                <option key={code} value={code}>
+                                  {code.toUpperCase()}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                          <label className="kxd-commercial-admin__field">
+                            <span>Billing contact</span>
+                            <input
+                              type="text"
+                              autoComplete="off"
+                              value={billingConfigDraft.billingContact}
+                              onChange={(e) =>
+                                setBillingConfigDraft((prev) => ({
+                                  ...prev,
+                                  billingContact: e.target.value,
+                                }))
+                              }
+                              disabled={billingConfigLoading}
+                            />
+                          </label>
+                          <label className="kxd-commercial-admin__field">
+                            <span>Billing email</span>
+                            <input
+                              type="email"
+                              autoComplete="off"
+                              value={billingConfigDraft.billingEmail}
+                              onChange={(e) =>
+                                setBillingConfigDraft((prev) => ({
+                                  ...prev,
+                                  billingEmail: e.target.value,
+                                }))
+                              }
+                              disabled={billingConfigLoading}
+                            />
+                          </label>
+                          <label className="kxd-commercial-admin__field">
+                            <span>Collection method</span>
+                            <select
+                              value={billingConfigDraft.collectionMethod}
+                              onChange={(e) => {
+                                const next = e.target.value;
+                                setBillingConfigDraft((prev) => ({
+                                  ...prev,
+                                  collectionMethod: next,
+                                  paymentTerms:
+                                    next === "charge_automatically"
+                                      ? ""
+                                      : prev.paymentTerms,
+                                }));
+                              }}
+                              disabled={billingConfigLoading}
+                            >
+                              <option value="">Not configured</option>
+                              {BILLING_COLLECTION_METHODS.map((method) => (
+                                <option key={method} value={method}>
+                                  {method === "send_invoice"
+                                    ? "Send invoice"
+                                    : "Charge automatically"}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                          <label className="kxd-commercial-admin__field">
+                            <span>Payment terms</span>
+                            <select
+                              value={billingConfigDraft.paymentTerms}
+                              onChange={(e) =>
+                                setBillingConfigDraft((prev) => ({
+                                  ...prev,
+                                  paymentTerms: e.target.value,
+                                }))
+                              }
+                              disabled={
+                                billingConfigLoading ||
+                                billingConfigDraft.collectionMethod ===
+                                  "charge_automatically"
+                              }
+                            >
+                              <option value="">
+                                {billingConfigDraft.collectionMethod ===
+                                "charge_automatically"
+                                  ? "Not applicable"
+                                  : "Not configured"}
+                              </option>
+                              {BILLING_PAYMENT_TERMS.map((term) => (
+                                <option key={term} value={term}>
+                                  {term}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                          <label className="kxd-commercial-admin__field">
+                            <span>Tax posture</span>
+                            <select
+                              value={billingConfigDraft.taxPosture}
+                              onChange={(e) =>
+                                setBillingConfigDraft((prev) => ({
+                                  ...prev,
+                                  taxPosture: e.target.value,
+                                }))
+                              }
+                              disabled={billingConfigLoading}
+                            >
+                              <option value="">Not configured</option>
+                              {BILLING_TAX_POSTURES.map((posture) => (
+                                <option key={posture} value={posture}>
+                                  {posture.replace(/_/g, " ")}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                          <label className="kxd-commercial-admin__field">
+                            <span>Invoice cadence preference</span>
+                            <select
+                              value={billingConfigDraft.invoiceCadence}
+                              onChange={(e) =>
+                                setBillingConfigDraft((prev) => ({
+                                  ...prev,
+                                  invoiceCadence: e.target.value,
+                                }))
+                              }
+                              disabled={billingConfigLoading}
+                            >
+                              <option value="">Not configured</option>
+                              {BILLING_INVOICE_CADENCES.map((cadence) => (
+                                <option key={cadence} value={cadence}>
+                                  {cadence}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                        </div>
+                        <p className="kxd-commercial-admin__muted">
+                          Commercial amounts, plan access, and Stripe identifiers
+                          cannot be edited here.
+                        </p>
+                        <div className="kxd-commercial-admin__actions">
+                          <button
+                            type="button"
+                            className="kxd-commercial-admin__save"
+                            onClick={() => void previewBillingConfiguration()}
+                            disabled={billingConfigLoading}
+                          >
+                            {billingConfigLoading
+                              ? "Preparing…"
+                              : "Review billing configuration"}
+                          </button>
+                          <button
+                            type="button"
+                            className="kxd-commercial-admin__text-btn"
+                            onClick={resetBillingConfiguration}
+                            disabled={billingConfigLoading}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </>
+                    ) : null}
+
+                    {billingConfigPhase === "preview" && billingConfigPreview ? (
+                      <>
+                        <p
+                          className="kxd-commercial-admin__status"
+                          role="status"
+                        >
+                          {billingConfigurationOperationLabel(
+                            billingConfigPreview.operation,
+                          )}
+                          {" · "}
+                          {billingConfigPreview.canApply
+                            ? "Ready to confirm"
+                            : "Blocked"}
+                        </p>
+                        <dl className="kxd-commercial-admin__meta">
+                          <div>
+                            <dt>Commercial terms</dt>
+                            <dd>Unchanged</dd>
+                          </div>
+                          <div>
+                            <dt>Access</dt>
+                            <dd>Unchanged</dd>
+                          </div>
+                          <div>
+                            <dt>Stripe</dt>
+                            <dd>Unchanged</dd>
+                          </div>
+                          <div>
+                            <dt>Resulting readiness</dt>
+                            <dd>
+                              {billingReadinessStatusLabel(
+                                billingConfigPreview.resultingReadiness
+                                  .readiness,
+                              )}
+                            </dd>
+                          </div>
+                        </dl>
+
+                        {billingConfigPreview.changedFields.length > 0 ? (
+                          <div className="kxd-commercial-admin__change-list">
+                            <h3>Changed fields</h3>
+                            <ul>
+                              {billingConfigPreview.changedFields.map((row) => (
+                                <li key={row.field}>
+                                  {row.label}: {row.from ?? "—"} →{" "}
+                                  {row.to ?? "—"}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ) : (
+                          <p className="kxd-commercial-admin__muted">
+                            No material configuration changes.
+                          </p>
+                        )}
+
+                        <div className="kxd-commercial-admin__change-list">
+                          <h3>Proposed configuration</h3>
+                          <ul>
+                            <li>
+                              Currency:{" "}
+                              {billingConfigPreview.proposed.currencyCode ??
+                                "—"}
+                            </li>
+                            <li>
+                              Billing contact:{" "}
+                              {[
+                                billingConfigPreview.proposed.billingContact,
+                                billingConfigPreview.proposed.billingEmail,
+                              ]
+                                .filter(Boolean)
+                                .join(" · ") || "—"}
+                            </li>
+                            <li>
+                              Collection method:{" "}
+                              {billingConfigPreview.proposed.collectionMethod ??
+                                "—"}
+                            </li>
+                            <li>
+                              Payment terms:{" "}
+                              {billingConfigPreview.proposed.paymentTerms ??
+                                "—"}
+                            </li>
+                            <li>
+                              Tax posture:{" "}
+                              {billingConfigPreview.proposed.taxPosture ?? "—"}
+                            </li>
+                            <li>
+                              Invoice cadence preference:{" "}
+                              {billingConfigPreview.proposed.invoiceCadence ??
+                                "—"}
+                            </li>
+                          </ul>
+                        </div>
+
+                        {billingConfigPreview.current
+                          .sanitizedStripeCustomerId ||
+                        billingConfigPreview.current
+                          .sanitizedStripeSubscriptionId ? (
+                          <div className="kxd-commercial-admin__change-list">
+                            <h3>External identifiers (read-only)</h3>
+                            <ul>
+                              {billingConfigPreview.current
+                                .sanitizedStripeCustomerId ? (
+                                <li>
+                                  Stripe customer ·{" "}
+                                  {
+                                    billingConfigPreview.current
+                                      .sanitizedStripeCustomerId
+                                  }
+                                </li>
+                              ) : null}
+                              {billingConfigPreview.current
+                                .sanitizedStripeSubscriptionId ? (
+                                <li>
+                                  Stripe subscription ·{" "}
+                                  {
+                                    billingConfigPreview.current
+                                      .sanitizedStripeSubscriptionId
+                                  }
+                                </li>
+                              ) : null}
+                            </ul>
+                          </div>
+                        ) : (
+                          <p className="kxd-commercial-admin__muted">
+                            No external Stripe identifiers stored.
+                          </p>
+                        )}
+
+                        {billingConfigPreview.blockers.length > 0 ? (
+                          <ul className="kxd-commercial-admin__blockers">
+                            {billingConfigPreview.blockers.map((row) => (
+                              <li key={row.code}>{row.message}</li>
+                            ))}
+                          </ul>
+                        ) : null}
+
+                        {billingConfigPreview.warnings.length > 0 ? (
+                          <ul className="kxd-commercial-admin__warnings">
+                            {billingConfigPreview.warnings.map((warning) => (
+                              <li key={warning}>{warning}</li>
+                            ))}
+                          </ul>
+                        ) : null}
+
+                        <p className="kxd-commercial-admin__muted">
+                          Fingerprint {billingConfigPreview.previewFingerprint}
+                        </p>
+
+                        {billingConfigPreview.canApply ? (
+                          <>
+                            <label className="kxd-commercial-admin__ack">
+                              <input
+                                type="checkbox"
+                                checked={billingConfigAcknowledged}
+                                onChange={(e) =>
+                                  setBillingConfigAcknowledged(e.target.checked)
+                                }
+                                disabled={billingConfigLoading}
+                              />
+                              <span>
+                                I confirm this saves internal billing
+                                configuration only.
+                              </span>
+                            </label>
+                            <label className="kxd-commercial-admin__ack">
+                              <input
+                                type="checkbox"
+                                checked={billingConfigNoActivateAck}
+                                onChange={(e) =>
+                                  setBillingConfigNoActivateAck(
+                                    e.target.checked,
+                                  )
+                                }
+                                disabled={billingConfigLoading}
+                              />
+                              <span>
+                                Configuration does not activate billing, create
+                                Stripe objects, invoices, subscriptions, or
+                                charges, and does not send email.
+                              </span>
+                            </label>
+                            <div className="kxd-commercial-admin__actions">
+                              <button
+                                type="button"
+                                className="kxd-commercial-admin__save"
+                                onClick={() =>
+                                  void confirmBillingConfiguration()
+                                }
+                                disabled={
+                                  billingConfigLoading ||
+                                  !billingConfigAcknowledged ||
+                                  !billingConfigNoActivateAck
+                                }
+                              >
+                                {billingConfigLoading
+                                  ? "Saving…"
+                                  : "Confirm configuration"}
+                              </button>
+                              <button
+                                type="button"
+                                className="kxd-commercial-admin__secondary"
+                                onClick={() => setBillingConfigPhase("form")}
+                                disabled={billingConfigLoading}
+                              >
+                                Edit details
+                              </button>
+                              <button
+                                type="button"
+                                className="kxd-commercial-admin__text-btn"
+                                onClick={resetBillingConfiguration}
+                                disabled={billingConfigLoading}
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="kxd-commercial-admin__actions">
+                            <button
+                              type="button"
+                              className="kxd-commercial-admin__secondary"
+                              onClick={() => setBillingConfigPhase("form")}
+                              disabled={billingConfigLoading}
+                            >
+                              Edit details
+                            </button>
+                            <button
+                              type="button"
+                              className="kxd-commercial-admin__text-btn"
+                              onClick={resetBillingConfiguration}
+                              disabled={billingConfigLoading}
+                            >
+                              Close
+                            </button>
+                          </div>
+                        )}
+                      </>
+                    ) : null}
+
+                    {billingConfigPhase === "result" && billingConfigResult ? (
+                      <>
+                        <p
+                          className="kxd-commercial-admin__status kxd-commercial-admin__status--active"
+                          role="status"
+                        >
+                          {billingConfigResult.message}
+                        </p>
+                        <dl className="kxd-commercial-admin__meta">
+                          <div>
+                            <dt>Result</dt>
+                            <dd>{billingConfigResult.status}</dd>
+                          </div>
+                          <div>
+                            <dt>Readiness</dt>
+                            <dd>
+                              {billingReadinessStatusLabel(
+                                billingConfigResult.readiness.readiness,
+                              )}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt>Notices</dt>
+                            <dd>
+                              No billing action performed · Stripe unchanged ·
+                              Access unchanged
+                            </dd>
+                          </div>
+                        </dl>
+                        <div className="kxd-commercial-admin__actions">
+                          <button
+                            type="button"
+                            className="kxd-commercial-admin__text-btn"
+                            onClick={resetBillingConfiguration}
+                          >
+                            Close
+                          </button>
+                        </div>
+                      </>
+                    ) : null}
+
+                    {billingConfigLoading &&
+                    billingConfigPhase === "preview" &&
+                    !billingConfigPreview ? (
+                      <p className="kxd-commercial-admin__muted" role="status">
+                        Generating billing-configuration preview…
                       </p>
                     ) : null}
                   </div>

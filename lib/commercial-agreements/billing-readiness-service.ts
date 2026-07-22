@@ -63,6 +63,9 @@ async function loadBillingProfileState(
       stripeSubscriptionId: null,
       quickbooksCustomerId: null,
       waveCustomerId: null,
+      currencyCode: null,
+      collectionMethod: null,
+      taxPosture: null,
       duplicateProfiles: false,
     };
   }
@@ -79,6 +82,9 @@ async function loadBillingProfileState(
     stripeSubscriptionId: asString(doc.stripeSubscriptionId),
     quickbooksCustomerId: asString(doc.quickbooksCustomerId),
     waveCustomerId: asString(doc.waveCustomerId),
+    currencyCode: asString(doc.currencyCode),
+    collectionMethod: asString(doc.collectionMethod),
+    taxPosture: asString(doc.taxPosture),
     duplicateProfiles: docs.length > 1,
   };
 }

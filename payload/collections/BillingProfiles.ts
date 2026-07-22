@@ -32,6 +32,23 @@ const BILLING_STATUSES = [
   { label: "Archived", value: "archived" },
 ] as const;
 
+/** Phase 37G — explicit ISO 4217 codes currently supported by KXD billing config. */
+const CURRENCY_CODES = [{ label: "USD", value: "usd" }] as const;
+
+/** Phase 37G — intended collection behavior (internal; not Stripe execution). */
+const COLLECTION_METHODS = [
+  { label: "Send invoice", value: "send_invoice" },
+  { label: "Charge automatically", value: "charge_automatically" },
+] as const;
+
+/** Phase 37G — conservative tax posture only; never calculates tax. */
+const TAX_POSTURES = [
+  { label: "Not configured", value: "not_configured" },
+  { label: "Tax exempt", value: "tax_exempt" },
+  { label: "Taxable", value: "taxable" },
+  { label: "Requires review", value: "requires_review" },
+] as const;
+
 export const BillingProfiles: CollectionConfig = {
   slug: "billing-profiles",
   labels: { singular: "Billing Profile", plural: "Billing Profiles" },
@@ -69,25 +86,67 @@ export const BillingProfiles: CollectionConfig = {
     { name: "billingContact", type: "text", label: "Billing Contact" },
     { name: "billingEmail", type: "email", label: "Billing Email" },
     {
+      name: "currencyCode",
+      type: "select",
+      label: "Currency",
+      options: [...CURRENCY_CODES],
+      admin: {
+        description:
+          "Authoritative billing currency. Null until an operator explicitly configures it — never inferred.",
+      },
+    },
+    {
+      name: "collectionMethod",
+      type: "select",
+      label: "Collection Method",
+      options: [...COLLECTION_METHODS],
+      admin: {
+        description:
+          "Intended collection behavior for future invoicing. Does not enable Stripe collection.",
+      },
+    },
+    {
+      name: "taxPosture",
+      type: "select",
+      label: "Tax Posture",
+      options: [...TAX_POSTURES],
+      admin: {
+        description:
+          "Recorded tax posture only. Does not calculate tax or configure Stripe Tax.",
+      },
+    },
+    {
       name: "paymentPreference",
       type: "select",
       defaultValue: "invoice",
       options: [...PAYMENT_PREFERENCES],
-      admin: { position: "sidebar" },
+      admin: {
+        position: "sidebar",
+        description:
+          "Payment instrument preference (invoice/ACH/card/wire). Distinct from collection method.",
+      },
     },
     {
       name: "invoiceCadence",
       type: "select",
       defaultValue: "monthly",
       options: [...INVOICE_CADENCES],
-      admin: { position: "sidebar" },
+      admin: {
+        position: "sidebar",
+        description:
+          "Billing-profile cadence preference only. Commercial retainer cadence remains on the agreement.",
+      },
     },
     {
       name: "paymentTerms",
       type: "select",
       defaultValue: "net-30",
       options: [...PAYMENT_TERMS],
-      admin: { position: "sidebar" },
+      admin: {
+        position: "sidebar",
+        description:
+          "Due terms for send-invoice collection. Not applicable to automatic collection.",
+      },
     },
     {
       name: "missingSetupFlags",

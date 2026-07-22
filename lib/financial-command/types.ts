@@ -79,6 +79,9 @@ export interface WorkspaceBillingProfile {
   paymentPreference: string | null;
   invoiceCadence: string | null;
   paymentTerms: string | null;
+  currencyCode: string | null;
+  collectionMethod: string | null;
+  taxPosture: string | null;
   billingStatus: BillingStatus;
   missingSetupFlags: string[];
   setupComplete: boolean;

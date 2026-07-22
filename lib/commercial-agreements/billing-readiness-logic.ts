@@ -56,6 +56,12 @@ export type BillingProfileReadState = {
   stripeSubscriptionId: string | null;
   quickbooksCustomerId: string | null;
   waveCustomerId: string | null;
+  /** Phase 37G — authoritative ISO currency when operator-configured. */
+  currencyCode?: string | null;
+  /** Phase 37G — intended collection method (not Stripe execution). */
+  collectionMethod?: string | null;
+  /** Phase 37G — recorded tax posture only. */
+  taxPosture?: string | null;
   /** True when more than one billing-profiles doc exists for the client. */
   duplicateProfiles: boolean;
 };
@@ -252,7 +258,25 @@ function buildMoneyTerm(input: {
   };
 }
 
-export function assessCurrency() {
+export function assessCurrency(profile: BillingProfileReadState | null = null) {
+  const raw = profile?.currencyCode?.trim().toLowerCase() || null;
+  if (raw === "usd") {
+    return {
+      code: "usd" as string | null,
+      authoritative: true,
+      documentedFieldUnit: "USD" as string | null,
+      explanation:
+        "Authoritative currency code usd is stored on billing-profiles. Currency was not inferred from locale, address, or agreement labels.",
+    };
+  }
+  if (raw) {
+    return {
+      code: null as string | null,
+      authoritative: false,
+      documentedFieldUnit: "USD" as string | null,
+      explanation: `Stored currency “${raw}” is not a supported authoritative billing currency. Operator clarification required.`,
+    };
+  }
   return {
     code: null as string | null,
     authoritative: false,
@@ -302,6 +326,64 @@ export function assessBillingContact(profile: BillingProfileReadState | null) {
     explanation: present
       ? "Billing contact loaded from the authoritative billing-profiles collection."
       : "Billing profile exists but billing contact and email are unset.",
+  };
+}
+
+export function assessCollectionMethod(profile: BillingProfileReadState | null) {
+  const raw = profile?.collectionMethod?.trim() || null;
+  if (raw === "send_invoice" || raw === "charge_automatically") {
+    return {
+      method: raw as "send_invoice" | "charge_automatically",
+      present: true,
+      automaticCollectionAllowed: raw === "charge_automatically",
+      explanation:
+        raw === "charge_automatically"
+          ? "Automatic collection is recorded as intended configuration only. It does not enable payment capability or create Stripe payment methods."
+          : "Send-invoice collection is recorded. Invoices must be sent manually when billing is later activated.",
+    };
+  }
+  return {
+    method: null as "send_invoice" | "charge_automatically" | null,
+    present: false,
+    automaticCollectionAllowed: false,
+    explanation:
+      "No collection method is configured on the billing profile. Collection method is never inferred from payment preference or email.",
+  };
+}
+
+export function assessTaxPosture(profile: BillingProfileReadState | null) {
+  const raw = profile?.taxPosture?.trim() || null;
+  if (
+    raw === "not_configured" ||
+    raw === "tax_exempt" ||
+    raw === "taxable" ||
+    raw === "requires_review"
+  ) {
+    return {
+      posture: raw as
+        | "not_configured"
+        | "tax_exempt"
+        | "taxable"
+        | "requires_review",
+      present: raw !== "not_configured",
+      explanation:
+        raw === "not_configured"
+          ? "Tax posture is explicitly not configured. Tax is never calculated or inferred."
+          : raw === "requires_review"
+            ? "Tax posture requires operator review. Exemption and jurisdiction are never inferred."
+            : `Tax posture “${raw}” is recorded. Tax is never calculated in this phase.`,
+    };
+  }
+  return {
+    posture: null as
+      | "not_configured"
+      | "tax_exempt"
+      | "taxable"
+      | "requires_review"
+      | null,
+    present: false,
+    explanation:
+      "No tax posture is recorded on the billing profile. Tax exemption is never inferred.",
   };
 }
 
@@ -552,10 +634,14 @@ export function buildBillingReadinessFingerprint(input: {
   readiness: BillingReadinessStatus;
   alignmentStatus: string;
   billingEmail: string | null;
+  currencyCode: string | null;
+  collectionMethod: string | null;
+  taxPosture: string | null;
+  paymentTerms: string | null;
   externalKeys: readonly string[];
 }): string {
   const payload = JSON.stringify({
-    v: 1,
+    v: 2,
     clientId: input.clientId,
     agreementId: input.agreementId,
     planKey: input.planKey,
@@ -567,6 +653,10 @@ export function buildBillingReadinessFingerprint(input: {
     readiness: input.readiness,
     alignmentStatus: input.alignmentStatus,
     billingEmail: input.billingEmail,
+    currencyCode: input.currencyCode,
+    collectionMethod: input.collectionMethod,
+    taxPosture: input.taxPosture,
+    paymentTerms: input.paymentTerms,
     externalKeys: [...input.externalKeys].slice().sort(),
   });
   return createHash("sha256").update(payload).digest("hex").slice(0, 40);
@@ -860,7 +950,7 @@ export function buildBillingReadinessSnapshot(
     });
   }
 
-  const currency = assessCurrency();
+  const currency = assessCurrency(profile);
   warnings.push(currency.explanation);
 
   const hasRetainer =
@@ -877,8 +967,32 @@ export function buildBillingReadinessSnapshot(
     warnings.push(billingContact.explanation);
   }
 
+  const collectionMethod = assessCollectionMethod(profile);
+  if (!collectionMethod.present) {
+    missingRequired.push("Collection method (billing-profiles)");
+    warnings.push(collectionMethod.explanation);
+  } else if (collectionMethod.automaticCollectionAllowed) {
+    warnings.push(collectionMethod.explanation);
+  }
+
+  const taxPosture = assessTaxPosture(profile);
+  if (!taxPosture.present) {
+    missingRequired.push("Tax posture (billing-profiles)");
+    warnings.push(taxPosture.explanation);
+  } else if (taxPosture.posture === "requires_review") {
+    warnings.push(taxPosture.explanation);
+  }
+
+  const paymentTermsConfigured = profile?.paymentTerms?.trim() || null;
+  if (
+    collectionMethod.method === "send_invoice" &&
+    !paymentTermsConfigured
+  ) {
+    missingRequired.push("Payment terms for send-invoice collection");
+  }
+
   warnings.push(
-    "Tax treatment is not modeled — never invent tax-inclusive/exclusive behavior.",
+    "Tax treatment is never calculated — posture is recorded only.",
   );
   warnings.push(
     "Discounts are not modeled — never invent discount, coupon, or promotional pricing.",
@@ -963,6 +1077,10 @@ export function buildBillingReadinessSnapshot(
     !hardBlocked &&
     currency.authoritative &&
     billingContact.email &&
+    collectionMethod.present &&
+    taxPosture.present &&
+    taxPosture.posture !== "requires_review" &&
+    (collectionMethod.method !== "send_invoice" || paymentTermsConfigured) &&
     (setupFee.classification === "billable" ||
       monthlyRetainer.classification === "billable") &&
     commercialAddOns.every(
@@ -973,11 +1091,11 @@ export function buildBillingReadinessSnapshot(
   ) {
     readiness = "ready_for_future_sync";
     readinessExplanation =
-      "Commercial terms appear complete for a future controlled Stripe setup. No sync has been performed.";
+      "Commercial terms and billing configuration appear complete for a future controlled Stripe setup. No sync has been performed.";
   } else if (agreementId && !hardBlocked) {
     readiness = "ready_for_review";
     readinessExplanation =
-      "Commercial terms are recorded and ready for operator billing review. Currency, contact, or add-on clarification may still be required before a future controlled setup.";
+      "Commercial terms are recorded and ready for operator billing review. Currency, contact, collection, tax posture, or add-on clarification may still be required before a future controlled setup.";
   }
 
   if (
@@ -1014,6 +1132,10 @@ export function buildBillingReadinessSnapshot(
     readiness,
     alignmentStatus: alignment.status,
     billingEmail: billingContact.email,
+    currencyCode: currency.code,
+    collectionMethod: collectionMethod.method,
+    taxPosture: taxPosture.posture,
+    paymentTerms: paymentTermsConfigured,
     externalKeys: externalIdentities.map((e) => `${e.provider}:${e.field}`),
   });
 
@@ -1038,6 +1160,9 @@ export function buildBillingReadinessSnapshot(
     currency,
     cadence,
     billingContact,
+    collectionMethod,
+    taxPosture,
+    paymentTermsConfigured,
     externalIdentities,
     proposedCustomerIdentityInputs: {
       clientId: state.clientId,
