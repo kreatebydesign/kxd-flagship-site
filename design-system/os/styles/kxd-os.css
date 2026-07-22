@@ -16130,6 +16130,23 @@ a.kxd-exec-today__row:hover {
   flex-shrink: 0;
 }
 
+.kxd-commercial-admin__module-picker {
+  margin-top: 1.25rem;
+}
+
+.kxd-commercial-admin__module-picker .kxd-commercial-admin__addon-list label {
+  min-height: 44px;
+  padding: 0.35rem 0;
+}
+
+.kxd-commercial-admin__module-picker em {
+  font-style: normal;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-faint);
+}
+
 @media (max-width: 960px) {
   .kxd-commercial-admin__layout,
   .kxd-commercial-admin__grid,

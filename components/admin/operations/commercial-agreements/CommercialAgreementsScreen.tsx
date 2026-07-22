@@ -15,9 +15,12 @@ import {
   commercialAddOnLabel,
   commercialProvisioningLabel,
   commercialRecordStatusLabel,
+  confirmCustomPlanActionLabel,
   confirmPlanChangeActionLabel,
+  customPlanEligibilityLabel,
   getCommercialAgreement,
   hasAgreementPlanMismatch,
+  isCustomPlanCandidate,
   isLegacyConversionCandidate,
   listCommercialAgreements,
   type ActivationPreview,
@@ -25,6 +28,8 @@ import {
   type ClientCommercialAgreementRecord,
   type CommercialAgreementFieldErrors,
   type CommercialAgreementId,
+  type CustomPlanPreview,
+  type CustomPlanResult,
   type LegacyConversionPreview,
   type LegacyConversionResult,
   type PlanChangePreview,
@@ -91,10 +96,24 @@ type LegacyConversionMutationResponse = {
   result?: LegacyConversionResult;
 };
 
+type CustomPlanPreviewResponse = {
+  ok?: boolean;
+  message?: string;
+  preview?: CustomPlanPreview;
+};
+
+type CustomPlanMutationResponse = {
+  ok?: boolean;
+  message?: string;
+  code?: string;
+  result?: CustomPlanResult;
+};
+
 type EditorMode = "idle" | "edit" | "create";
 type ActivationPhase = "closed" | "preview" | "result";
 type PlanChangePhase = "closed" | "preview" | "result";
 type LegacyConversionPhase = "closed" | "preview" | "result";
+type CustomPlanPhase = "closed" | "preview" | "result";
 type Draft = {
   commercialAgreementId: CommercialAgreementId | "";
   monthlyRetainerAmount: string;
@@ -225,6 +244,22 @@ export function CommercialAgreementsScreen() {
   const [legacyError, setLegacyError] = useState<string | null>(null);
   const [legacyAcknowledged, setLegacyAcknowledged] = useState(false);
 
+  const [customPhase, setCustomPhase] = useState<CustomPlanPhase>("closed");
+  const [customPreview, setCustomPreview] = useState<CustomPlanPreview | null>(
+    null,
+  );
+  const [customResult, setCustomResult] = useState<CustomPlanResult | null>(
+    null,
+  );
+  const [customLoading, setCustomLoading] = useState(false);
+  const [customError, setCustomError] = useState<string | null>(null);
+  const [customAcknowledged, setCustomAcknowledged] = useState(false);
+  const [customRemovalsAcknowledged, setCustomRemovalsAcknowledged] =
+    useState(false);
+  const [customSelectedModules, setCustomSelectedModules] = useState<string[]>(
+    [],
+  );
+
   const dirty = mode !== "idle" && !draftsEqual(draft, baseline);
 
   function resetActivation() {
@@ -255,11 +290,26 @@ export function CommercialAgreementsScreen() {
     setLegacyAcknowledged(false);
   }
 
+  function resetCustomPlan() {
+    setCustomPhase("closed");
+    setCustomPreview(null);
+    setCustomResult(null);
+    setCustomLoading(false);
+    setCustomError(null);
+    setCustomAcknowledged(false);
+    setCustomRemovalsAcknowledged(false);
+    setCustomSelectedModules([]);
+  }
+
   function resetReviews() {
     resetActivation();
     resetPlanChange();
     resetLegacyConversion();
+    resetCustomPlan();
   }
+
+  const anyReviewLoading =
+    activationLoading || planChangeLoading || legacyLoading || customLoading;
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -334,11 +384,12 @@ export function CommercialAgreementsScreen() {
   }
 
   async function reviewActivation() {
-    if (!selectedId || activationLoading || planChangeLoading || legacyLoading) {
+    if (!selectedId || anyReviewLoading) {
       return;
     }
     resetPlanChange();
     resetLegacyConversion();
+    resetCustomPlan();
     setActivationLoading(true);
     setActivationError(null);
     setActivationResult(null);
@@ -430,11 +481,12 @@ export function CommercialAgreementsScreen() {
   }
 
   async function reviewPlanChange() {
-    if (!selectedId || planChangeLoading || activationLoading || legacyLoading) {
+    if (!selectedId || anyReviewLoading) {
       return;
     }
     resetActivation();
     resetLegacyConversion();
+    resetCustomPlan();
     setPlanChangeLoading(true);
     setPlanChangeError(null);
     setPlanChangeResult(null);
@@ -537,11 +589,12 @@ export function CommercialAgreementsScreen() {
   }
 
   async function reviewLegacyConversion() {
-    if (!selectedId || legacyLoading || activationLoading || planChangeLoading) {
+    if (!selectedId || anyReviewLoading) {
       return;
     }
     resetActivation();
     resetPlanChange();
+    resetCustomPlan();
     setLegacyLoading(true);
     setLegacyError(null);
     setLegacyResult(null);
@@ -634,6 +687,137 @@ export function CommercialAgreementsScreen() {
       );
     } finally {
       setLegacyLoading(false);
+    }
+  }
+
+  async function reviewCustomPlan(modules?: string[] | null) {
+    if (!selectedId || anyReviewLoading) {
+      return;
+    }
+    resetActivation();
+    resetPlanChange();
+    resetLegacyConversion();
+    setCustomLoading(true);
+    setCustomError(null);
+    setCustomResult(null);
+    setCustomAcknowledged(false);
+    setCustomRemovalsAcknowledged(false);
+    try {
+      const res = await fetch(
+        `/api/admin/commercial-agreements/${selectedId}/custom-plan-preview`,
+        {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(
+            modules == null ? {} : { requestedModules: modules },
+          ),
+        },
+      );
+      const json = (await res.json()) as CustomPlanPreviewResponse;
+      if (!res.ok || !json.ok || !json.preview) {
+        throw new Error(
+          json.message || "Unable to generate custom-plan preview.",
+        );
+      }
+      setCustomPreview(json.preview);
+      setCustomSelectedModules(
+        json.preview.proposedEffectiveModules.map((row) => row.key),
+      );
+      setCustomPhase("preview");
+    } catch (err) {
+      setCustomError(
+        err instanceof Error ? err.message : "Unable to generate preview.",
+      );
+      setCustomPhase("preview");
+    } finally {
+      setCustomLoading(false);
+    }
+  }
+
+  function toggleCustomModule(key: string) {
+    setCustomSelectedModules((prev) => {
+      if (prev.includes(key)) return prev.filter((row) => row !== key);
+      return [...prev, key].sort();
+    });
+    setCustomAcknowledged(false);
+    setCustomRemovalsAcknowledged(false);
+  }
+
+  async function confirmCustomPlan() {
+    if (
+      !selectedId ||
+      !customPreview ||
+      !customAcknowledged ||
+      customLoading
+    ) {
+      return;
+    }
+    if (customPreview.hasRemovals && !customRemovalsAcknowledged) {
+      return;
+    }
+    setCustomLoading(true);
+    setCustomError(null);
+    try {
+      const res = await fetch(
+        `/api/admin/commercial-agreements/${selectedId}/apply-custom-plan`,
+        {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            previewFingerprint: customPreview.previewFingerprint,
+            confirmed: true,
+            removalsAcknowledged: customPreview.hasRemovals
+              ? customRemovalsAcknowledged
+              : false,
+            requestedModules: customSelectedModules,
+          }),
+        },
+      );
+      const json = (await res.json()) as CustomPlanMutationResponse;
+      if (!res.ok || !json.ok || !json.result) {
+        if (json.code === "stale_preview") {
+          setCustomError(
+            json.message ||
+              "This preview is out of date. Refresh the review and try again.",
+          );
+          setCustomPhase("preview");
+          setCustomAcknowledged(false);
+          setCustomRemovalsAcknowledged(false);
+          return;
+        }
+        throw new Error(json.message || "Unable to apply custom plan.");
+      }
+      setCustomResult(json.result);
+      setCustomPhase("result");
+      if (json.result.preview) {
+        setCustomPreview(json.result.preview);
+        setCustomSelectedModules(
+          json.result.preview.proposedEffectiveModules.map((row) => row.key),
+        );
+      }
+      if (
+        json.result.status === "activated" ||
+        json.result.status === "changed" ||
+        json.result.status === "aligned"
+      ) {
+        const detailRes = await fetch(
+          `/api/admin/commercial-agreements/${selectedId}`,
+          { credentials: "same-origin" },
+        );
+        const detailJson = (await detailRes.json()) as DetailResponse;
+        if (detailRes.ok && detailJson.ok && detailJson.agreement) {
+          setDetail(detailJson.agreement);
+        }
+        await load();
+      }
+    } catch (err) {
+      setCustomError(
+        err instanceof Error ? err.message : "Unable to apply custom plan.",
+      );
+    } finally {
+      setCustomLoading(false);
     }
   }
 
@@ -813,6 +997,24 @@ export function CommercialAgreementsScreen() {
     Boolean(detail) &&
     detail!.recordStatus === "recorded" &&
     planMismatch;
+  const showCustomPlanAction =
+    Boolean(detail) &&
+    detail!.recordStatus === "recorded" &&
+    isCustomPlanCandidate({
+      commercialAgreementId: detail!.commercialAgreementId,
+      planStatus: detail!.planStatus,
+    });
+  const customSelectionNeedsRefresh =
+    Boolean(customPreview) &&
+    customSelectedModules.slice().sort().join(",") !==
+      customPreview!.proposedEffectiveModules
+        .map((row) => row.key)
+        .slice()
+        .sort()
+        .join(",");
+  const isExistingCustomAssignment =
+    detail?.planKey === "custom" &&
+    (detail.planStatus === "active" || detail.planStatus === "trial");
 
   return (
     <OperationsShell activeId="commercial-agreements">
@@ -1217,7 +1419,11 @@ export function CommercialAgreementsScreen() {
                               ? " · Plan change available"
                               : showLegacyConversion
                                 ? " · Legacy conversion available"
-                                : ""
+                                : showCustomPlanAction
+                                  ? isExistingCustomAssignment
+                                    ? " · Custom plan review available"
+                                    : " · Custom plan setup available"
+                                  : ""
                           }`
                         : detail.commercialAgreementId
                           ? "Manual review required"
@@ -1252,9 +1458,7 @@ export function CommercialAgreementsScreen() {
                       type="button"
                       className="kxd-commercial-admin__secondary"
                       onClick={() => void reviewLegacyConversion()}
-                      disabled={
-                        legacyLoading || activationLoading || planChangeLoading
-                      }
+                      disabled={anyReviewLoading}
                     >
                       {legacyLoading && legacyPhase === "closed"
                         ? "Preparing…"
@@ -1266,9 +1470,7 @@ export function CommercialAgreementsScreen() {
                       type="button"
                       className="kxd-commercial-admin__secondary"
                       onClick={() => void reviewActivation()}
-                      disabled={
-                        activationLoading || planChangeLoading || legacyLoading
-                      }
+                      disabled={anyReviewLoading}
                     >
                       {activationLoading && activationPhase === "closed"
                         ? "Preparing…"
@@ -1280,13 +1482,25 @@ export function CommercialAgreementsScreen() {
                       type="button"
                       className="kxd-commercial-admin__secondary"
                       onClick={() => void reviewPlanChange()}
-                      disabled={
-                        planChangeLoading || activationLoading || legacyLoading
-                      }
+                      disabled={anyReviewLoading}
                     >
                       {planChangeLoading && planChangePhase === "closed"
                         ? "Preparing…"
                         : "Review plan change"}
+                    </button>
+                  ) : null}
+                  {showCustomPlanAction ? (
+                    <button
+                      type="button"
+                      className="kxd-commercial-admin__secondary"
+                      onClick={() => void reviewCustomPlan(null)}
+                      disabled={anyReviewLoading}
+                    >
+                      {customLoading && customPhase === "closed"
+                        ? "Preparing…"
+                        : isExistingCustomAssignment
+                          ? "Review custom plan"
+                          : "Build custom plan"}
                     </button>
                   ) : null}
                   {showLegacyNeedsAgreement ? (
@@ -1302,6 +1516,7 @@ export function CommercialAgreementsScreen() {
                   ) : null}
                   {detail.recordStatus === "recorded" &&
                   detail.planKey &&
+                  detail.planKey !== "custom" &&
                   !planMismatch &&
                   (detail.planStatus === "active" ||
                     detail.planStatus === "trial") ? (
@@ -2139,6 +2354,341 @@ export function CommercialAgreementsScreen() {
                     ) : legacyLoading ? (
                       <p className="kxd-commercial-admin__muted">
                         Generating legacy-conversion preview…
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
+
+                {customPhase !== "closed" ? (
+                  <div
+                    className="kxd-commercial-admin__activation"
+                    role="region"
+                    aria-label="Custom plan review"
+                  >
+                    <OpsSectionHead label="Custom plan review" />
+
+                    {customError ? (
+                      <p className="kxd-commercial-admin__error" role="alert">
+                        {customError}
+                      </p>
+                    ) : null}
+
+                    {customPreview ? (
+                      <>
+                        <p
+                          className={
+                            customPreview.eligibility === "blocked" ||
+                            customPreview.eligibility === "use_standard_flow"
+                              ? "kxd-commercial-admin__status kxd-commercial-admin__status--blocked"
+                              : customPreview.alreadyAligned
+                                ? "kxd-commercial-admin__status kxd-commercial-admin__status--active"
+                                : "kxd-commercial-admin__status"
+                          }
+                          role="status"
+                        >
+                          {customPlanEligibilityLabel(customPreview.eligibility)}
+                          {customPreview.operation === "revise"
+                            ? " · Revision"
+                            : customPreview.operation === "activate"
+                              ? " · First custom activation"
+                              : ""}
+                        </p>
+
+                        {customPreview.blockers.length > 0 ? (
+                          <ul className="kxd-commercial-admin__blockers">
+                            {customPreview.blockers.map((row) => (
+                              <li key={row.code}>{row.message}</li>
+                            ))}
+                          </ul>
+                        ) : null}
+
+                        {customPreview.warnings.length > 0 ? (
+                          <ul className="kxd-commercial-admin__warnings">
+                            {customPreview.warnings.map((warning) => (
+                              <li key={warning}>{warning}</li>
+                            ))}
+                          </ul>
+                        ) : null}
+
+                        <div className="kxd-commercial-admin__compare">
+                          <div>
+                            <h3>Current access</h3>
+                            <p>
+                              Plan: {customPreview.currentPlanKey ?? "none"} ·{" "}
+                              {customPreview.currentPlanStatus ?? "—"}
+                            </p>
+                            <ul>
+                              {customPreview.currentEffectiveModules.length ? (
+                                customPreview.currentEffectiveModules.map(
+                                  (row) => (
+                                    <li key={`cp-cur-${row.key}`}>
+                                      {row.label}
+                                    </li>
+                                  ),
+                                )
+                              ) : (
+                                <li>No current modules</li>
+                              )}
+                            </ul>
+                          </div>
+                          <div>
+                            <h3>Proposed access</h3>
+                            <p>
+                              custom · {customPreview.proposedPlanStatus ?? "—"}
+                            </p>
+                            <ul>
+                              {customPreview.proposedEffectiveModules.length ? (
+                                customPreview.proposedEffectiveModules.map(
+                                  (row) => (
+                                    <li key={`cp-prop-${row.key}`}>
+                                      {row.label}
+                                    </li>
+                                  ),
+                                )
+                              ) : (
+                                <li>No modules proposed</li>
+                              )}
+                            </ul>
+                          </div>
+                        </div>
+
+                        <fieldset className="kxd-commercial-admin__addons kxd-commercial-admin__module-picker">
+                          <legend>Selectable modules</legend>
+                          <p className="kxd-commercial-admin__muted">
+                            {customPreview.accessNote}
+                          </p>
+                          <div className="kxd-commercial-admin__addon-list">
+                            {customPreview.selectableModules.map((row) => {
+                              const checked = customSelectedModules.includes(
+                                row.key,
+                              );
+                              const stateLabel = row.currentlyIncluded
+                                ? checked
+                                  ? "Currently included"
+                                  : "No longer included"
+                                : checked
+                                  ? "Newly included"
+                                  : "Not included";
+                              return (
+                                <label key={row.key}>
+                                  <input
+                                    type="checkbox"
+                                    checked={checked}
+                                    onChange={() => toggleCustomModule(row.key)}
+                                    disabled={
+                                      customLoading || customPhase === "result"
+                                    }
+                                  />
+                                  <span>
+                                    <strong>{row.label}</strong>
+                                    <em data-kind={stateLabel}>
+                                      {" "}
+                                      · {stateLabel}
+                                    </em>
+                                    <br />
+                                    <span className="kxd-commercial-admin__muted">
+                                      {row.description}
+                                    </span>
+                                  </span>
+                                </label>
+                              );
+                            })}
+                          </div>
+                          {customSelectionNeedsRefresh ? (
+                            <div className="kxd-commercial-admin__actions">
+                              <button
+                                type="button"
+                                className="kxd-commercial-admin__secondary"
+                                onClick={() =>
+                                  void reviewCustomPlan(customSelectedModules)
+                                }
+                                disabled={customLoading}
+                              >
+                                {customLoading
+                                  ? "Updating preview…"
+                                  : "Update preview"}
+                              </button>
+                            </div>
+                          ) : null}
+                        </fieldset>
+
+                        <div className="kxd-commercial-admin__change-list">
+                          <h3>Newly included</h3>
+                          <ul>
+                            {customPreview.addedModules.length ? (
+                              customPreview.addedModules.map((row) => (
+                                <li key={`cp-add-${row.key}`} data-kind="added">
+                                  Newly included · {row.label}
+                                </li>
+                              ))
+                            ) : (
+                              <li>None</li>
+                            )}
+                          </ul>
+                          <h3>No longer included</h3>
+                          <ul>
+                            {customPreview.removedModules.length ? (
+                              customPreview.removedModules.map((row) => (
+                                <li
+                                  key={`cp-rem-${row.key}`}
+                                  data-kind="removed"
+                                >
+                                  No longer included · {row.label}
+                                </li>
+                              ))
+                            ) : (
+                              <li>None</li>
+                            )}
+                          </ul>
+                          <h3>Unchanged</h3>
+                          <ul>
+                            {customPreview.unchangedModules.length ? (
+                              customPreview.unchangedModules.map((row) => (
+                                <li
+                                  key={`cp-same-${row.key}`}
+                                  data-kind="unchanged"
+                                >
+                                  Unchanged · {row.label}
+                                </li>
+                              ))
+                            ) : (
+                              <li>None</li>
+                            )}
+                          </ul>
+                          <h3>Systems unchanged</h3>
+                          <ul>
+                            {customPreview.unchangedSystems.map((row) => (
+                              <li key={row.id} data-kind="excluded">
+                                Excluded · {row.label}
+                              </li>
+                            ))}
+                          </ul>
+                          <p className="kxd-commercial-admin__muted">
+                            {customPreview.moduleDataNote}
+                          </p>
+                          <p className="kxd-commercial-admin__muted">
+                            Commercial agreement and commercial values remain
+                            unchanged. Billing is not configured or changed.
+                          </p>
+                        </div>
+
+                        {customPhase === "result" && customResult ? (
+                          <p
+                            className={
+                              customResult.status === "activated" ||
+                              customResult.status === "changed" ||
+                              customResult.status === "aligned"
+                                ? "kxd-commercial-admin__success"
+                                : "kxd-commercial-admin__error"
+                            }
+                            role="status"
+                          >
+                            {customResult.message}
+                          </p>
+                        ) : null}
+
+                        {customPreview.canApply &&
+                        customPhase !== "result" &&
+                        !customSelectionNeedsRefresh ? (
+                          <div className="kxd-commercial-admin__confirm">
+                            <p>
+                              Confirm custom access for{" "}
+                              <strong>{customPreview.clientName}</strong>. Access
+                              changes only. Commercial terms, billing, providers,
+                              and infrastructure are not changed.
+                            </p>
+                            <label className="kxd-commercial-admin__ack">
+                              <input
+                                type="checkbox"
+                                checked={customAcknowledged}
+                                onChange={(e) =>
+                                  setCustomAcknowledged(e.target.checked)
+                                }
+                                disabled={customLoading}
+                              />
+                              <span>
+                                I reviewed the proposed custom access, commercial
+                                agreement, and systems that will remain unchanged.
+                              </span>
+                            </label>
+                            {customPreview.hasRemovals ? (
+                              <label className="kxd-commercial-admin__ack">
+                                <input
+                                  type="checkbox"
+                                  checked={customRemovalsAcknowledged}
+                                  onChange={(e) =>
+                                    setCustomRemovalsAcknowledged(
+                                      e.target.checked,
+                                    )
+                                  }
+                                  disabled={customLoading}
+                                />
+                                <span>
+                                  I understand that the listed modules will no
+                                  longer be included in this client’s access.
+                                  Existing module data will not be deleted by this
+                                  change.
+                                </span>
+                              </label>
+                            ) : null}
+                            <div className="kxd-commercial-admin__actions">
+                              <button
+                                type="button"
+                                className="kxd-commercial-admin__save"
+                                onClick={() => void confirmCustomPlan()}
+                                disabled={
+                                  !customAcknowledged ||
+                                  customLoading ||
+                                  (customPreview.hasRemovals &&
+                                    !customRemovalsAcknowledged)
+                                }
+                              >
+                                {customLoading
+                                  ? "Applying…"
+                                  : confirmCustomPlanActionLabel(
+                                      customPreview.operation,
+                                    )}
+                              </button>
+                              <button
+                                type="button"
+                                className="kxd-commercial-admin__text-btn"
+                                onClick={resetCustomPlan}
+                                disabled={customLoading}
+                              >
+                                Cancel review
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="kxd-commercial-admin__actions">
+                            <button
+                              type="button"
+                              className="kxd-commercial-admin__text-btn"
+                              onClick={resetCustomPlan}
+                              disabled={customLoading}
+                            >
+                              Close review
+                            </button>
+                            {customError?.includes("out of date") ||
+                            customError?.includes("Refresh") ||
+                            customSelectionNeedsRefresh ? (
+                              <button
+                                type="button"
+                                className="kxd-commercial-admin__secondary"
+                                onClick={() =>
+                                  void reviewCustomPlan(customSelectedModules)
+                                }
+                                disabled={customLoading}
+                              >
+                                Refresh preview
+                              </button>
+                            ) : null}
+                          </div>
+                        )}
+                      </>
+                    ) : customLoading ? (
+                      <p className="kxd-commercial-admin__muted">
+                        Generating custom-plan preview…
                       </p>
                     ) : null}
                   </div>

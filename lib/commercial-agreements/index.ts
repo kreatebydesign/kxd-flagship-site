@@ -98,3 +98,32 @@ export {
   parseLegacyConversionRequestBody,
 } from "./legacy-conversion-logic";
 export type { LegacyConversionClientState } from "./legacy-conversion-logic";
+export type {
+  CustomPlanBlockCode,
+  CustomPlanEligibilityStatus,
+  CustomPlanPreview,
+  CustomPlanResult,
+  CustomPlanResultStatus,
+  CustomSelectableModule,
+} from "./custom-plan-types";
+export {
+  CUSTOM_PLAN_ACCESS_NOTE,
+  CUSTOM_PLAN_EXCLUDED_ACTIONS,
+  CUSTOM_PLAN_MODULE_DATA_NOTE,
+} from "./custom-plan-types";
+export {
+  CUSTOM_PLAN_AGREEMENT_ID,
+  buildCustomPlanFingerprint,
+  buildCustomPlanPreview,
+  calculateCustomModuleDiff,
+  confirmCustomPlanActionLabel,
+  customPlanEligibilityLabel,
+  evaluateCustomPlanEligibility,
+  isCommerciallySelectableModule,
+  isCustomPlanCandidate,
+  listCommercialSelectableModules,
+  normalizeRequestedModules,
+  parseCustomPlanPreviewBody,
+  parseCustomPlanRequestBody,
+} from "./custom-plan-logic";
+export type { CustomPlanClientState } from "./custom-plan-logic";
