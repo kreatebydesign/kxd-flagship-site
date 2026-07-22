@@ -33,6 +33,7 @@ export const OPERATIONS_NAV_MODULE_MAP: Record<OperationsNavId, KxdModuleId> = {
   work: "work",
   "review-inbox": "work",
   "upgrade-requests": "work",
+  "commercial-agreements": "portfolio",
   playbooks: "playbooks",
   growth: "growth",
   reports: "reporting",

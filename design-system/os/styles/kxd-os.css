@@ -15734,3 +15734,302 @@ a.kxd-exec-today__row:hover {
     transition: none;
   }
 }
+
+/* ── Commercial Agreements ops workspace (Phase 37A) ─────────────────────── */
+
+.kxd-commercial-admin__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  align-items: end;
+  margin: 0.75rem 0 1.25rem;
+}
+
+.kxd-commercial-admin__toolbar label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-faint);
+}
+
+.kxd-commercial-admin__toolbar input,
+.kxd-commercial-admin__toolbar select,
+.kxd-commercial-admin__field input,
+.kxd-commercial-admin__field select,
+.kxd-commercial-admin__field textarea {
+  width: 100%;
+  min-width: 10rem;
+  border: 1px solid var(--kxd-os-border, rgba(0, 0, 0, 0.12));
+  border-radius: 2px;
+  background: #fff;
+  color: inherit;
+  font: inherit;
+  font-size: 0.92rem;
+  letter-spacing: normal;
+  text-transform: none;
+  padding: 0.55rem 0.7rem;
+}
+
+.kxd-commercial-admin__search input {
+  min-width: 14rem;
+}
+
+.kxd-commercial-admin__filters {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.kxd-commercial-admin__filters button,
+.kxd-commercial-admin__new,
+.kxd-commercial-admin__save {
+  border: 1px solid var(--kxd-os-border);
+  border-radius: 2px;
+  background: transparent;
+  color: var(--kxd-os-text-muted);
+  font: inherit;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.45rem 0.75rem;
+  cursor: pointer;
+}
+
+.kxd-commercial-admin__filters button.is-active,
+.kxd-commercial-admin__new,
+.kxd-commercial-admin__save {
+  border-color: var(--kxd-os-text-primary, #16140f);
+  background: var(--kxd-os-text-primary, #16140f);
+  color: #fff;
+}
+
+.kxd-commercial-admin__save:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.kxd-commercial-admin__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  gap: 1.5rem;
+}
+
+.kxd-commercial-admin__list {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.kxd-commercial-admin__list button {
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--kxd-os-border);
+  border-radius: 2px;
+  background: transparent;
+  padding: 0.75rem 0.85rem;
+  cursor: pointer;
+  display: grid;
+  gap: 0.2rem;
+  font: inherit;
+  color: inherit;
+}
+
+.kxd-commercial-admin__list button:focus-visible,
+.kxd-commercial-admin__filters button:focus-visible,
+.kxd-commercial-admin__new:focus-visible,
+.kxd-commercial-admin__save:focus-visible,
+.kxd-commercial-admin__toolbar input:focus-visible,
+.kxd-commercial-admin__toolbar select:focus-visible,
+.kxd-commercial-admin__field input:focus-visible,
+.kxd-commercial-admin__field select:focus-visible,
+.kxd-commercial-admin__field textarea:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--kxd-os-gold, #b8974a) 70%, transparent);
+  outline-offset: 2px;
+}
+
+.kxd-commercial-admin__list button.is-active {
+  border-color: color-mix(in srgb, var(--kxd-os-gold, #b8974a) 55%, var(--kxd-os-border));
+}
+
+.kxd-commercial-admin__list em,
+.kxd-commercial-admin__list span,
+.kxd-commercial-admin__list time {
+  font-style: normal;
+  font-size: 0.78rem;
+  color: var(--kxd-os-text-muted);
+}
+
+.kxd-commercial-admin__list em {
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.kxd-commercial-admin__muted {
+  margin: 0.65rem 0;
+  color: var(--kxd-os-text-muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.kxd-commercial-admin__callout {
+  margin: 0.85rem 0;
+  padding: 0.65rem 0.75rem;
+  border-left: 2px solid var(--kxd-os-gold, #b8974a);
+  color: var(--kxd-os-text-muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.kxd-commercial-admin__meta {
+  display: grid;
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.kxd-commercial-admin__meta dt {
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-faint);
+}
+
+.kxd-commercial-admin__meta dd {
+  margin: 0.2rem 0 0;
+  overflow-wrap: anywhere;
+}
+
+.kxd-commercial-admin__field {
+  display: grid;
+  gap: 0.4rem;
+  margin-top: 0.85rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-faint);
+}
+
+.kxd-commercial-admin__field-error {
+  color: var(--kxd-os-critical, #8b2e2e);
+  font-size: 0.78rem;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.kxd-commercial-admin__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.kxd-commercial-admin__addons {
+  margin: 1rem 0 0;
+  padding: 0;
+  border: 0;
+}
+
+.kxd-commercial-admin__addons legend {
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-faint);
+}
+
+.kxd-commercial-admin__addon-list {
+  display: grid;
+  gap: 0.45rem;
+  margin-top: 0.55rem;
+}
+
+.kxd-commercial-admin__addon-list label {
+  display: flex;
+  gap: 0.55rem;
+  align-items: flex-start;
+  font-size: 0.9rem;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--kxd-os-text-primary, #16140f);
+}
+
+.kxd-commercial-admin__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.kxd-commercial-admin__text-btn {
+  border: 0;
+  background: transparent;
+  color: var(--kxd-os-text-muted);
+  font: inherit;
+  font-size: 0.85rem;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+}
+
+.kxd-commercial-admin__error {
+  margin-top: 0.75rem;
+  color: var(--kxd-os-critical, #8b2e2e);
+  font-size: 0.9rem;
+}
+
+.kxd-commercial-admin__error button {
+  margin-left: 0.75rem;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.35rem 0.55rem;
+  cursor: pointer;
+}
+
+.kxd-commercial-admin__success {
+  margin-top: 0.75rem;
+  color: var(--kxd-os-success, #2f6b4f);
+  font-size: 0.9rem;
+}
+
+.kxd-commercial-admin__field input[readonly] {
+  background: color-mix(in srgb, var(--kxd-os-border, #ddd) 18%, #fff);
+  color: var(--kxd-os-text-muted);
+}
+
+@media (max-width: 960px) {
+  .kxd-commercial-admin__layout,
+  .kxd-commercial-admin__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .kxd-commercial-admin__toolbar {
+    align-items: stretch;
+  }
+
+  .kxd-commercial-admin__toolbar input,
+  .kxd-commercial-admin__toolbar select {
+    min-width: 0;
+  }
+
+  .kxd-commercial-admin__new,
+  .kxd-commercial-admin__save,
+  .kxd-commercial-admin__list button {
+    min-height: 2.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kxd-commercial-admin__save,
+  .kxd-commercial-admin__list button,
+  .kxd-commercial-admin__filters button {
+    transition: none;
+  }
+}

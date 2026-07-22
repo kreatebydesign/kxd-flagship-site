@@ -18,6 +18,7 @@ export type OperationsNavId =
   | "work"
   | "review-inbox"
   | "upgrade-requests"
+  | "commercial-agreements"
   | "portal-access"
   | "client-success"
   | "growth"
@@ -86,6 +87,11 @@ export const NAV_GROUPS: OperationsNavGroup[] = [
       { id: "accounts", label: "Accounts", href: "/admin/operations/accounts" },
       { id: "onboarding", label: "Onboarding", href: "/admin/operations/onboarding" },
       { id: "portal-access", label: "Portal Access", href: "/admin/operations/portal-access" },
+      {
+        id: "commercial-agreements",
+        label: "Commercial Agreements",
+        href: "/admin/operations/commercial-agreements",
+      },
       { id: "client-success", label: "Client Success", href: "/admin/operations/client-success" },
     ],
   },

@@ -4,6 +4,14 @@ export type {
   CommercialAgreementId,
   CommercialEntitlementPresetId,
 } from "./types";
+export type {
+  ClientCommercialAgreementRecord,
+  CommercialAgreementFieldErrors,
+  CommercialAgreementListFilters,
+  CommercialAgreementSaveInput,
+  CommercialProvisioningState,
+  CommercialRecordStatus,
+} from "./ops-types";
 export {
   COMMERCIAL_AGREEMENTS,
   COMMERCIAL_AGREEMENT_IDS,
@@ -16,3 +24,12 @@ export {
   publicPackageFromCommercialAgreement,
   sanitizeApprovedAddOnIds,
 } from "./definitions";
+export {
+  applyCatalogDefaults,
+  commercialProvisioningLabel,
+  commercialRecordStatusLabel,
+  normalizeCredits,
+  normalizeCurrencyAmount,
+  parseCommercialSaveBody,
+  parseOptionalNumber,
+} from "./ops-validate";
