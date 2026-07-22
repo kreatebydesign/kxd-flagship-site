@@ -47,6 +47,10 @@ import {
   type PlanChangePreview,
   type PlanChangeResult,
 } from "@/lib/commercial-agreements";
+import {
+  stripeIntegrationStatusLabel,
+  type StripeIntegrationReadiness,
+} from "@/lib/stripe";
 import { PARTNERSHIP_ADD_ONS } from "@/lib/partnerships/packages";
 
 type ListResponse = {
@@ -143,6 +147,13 @@ type BillingConfigurationMutationResponse = {
   result?: BillingConfigurationResult;
 };
 
+type StripeIntegrationReadinessResponse = {
+  ok?: boolean;
+  message?: string;
+  readiness?: StripeIntegrationReadiness;
+  notice?: string;
+};
+
 type EditorMode = "idle" | "edit" | "create";
 type ActivationPhase = "closed" | "preview" | "result";
 type PlanChangePhase = "closed" | "preview" | "result";
@@ -150,6 +161,7 @@ type LegacyConversionPhase = "closed" | "preview" | "result";
 type CustomPlanPhase = "closed" | "preview" | "result";
 type BillingReadinessPhase = "closed" | "review";
 type BillingConfigPhase = "closed" | "form" | "preview" | "result";
+type StripeReadinessPhase = "closed" | "review";
 
 type BillingConfigDraft = {
   currencyCode: string;
@@ -408,6 +420,15 @@ export function CommercialAgreementsScreen() {
   const [billingConfigNoActivateAck, setBillingConfigNoActivateAck] =
     useState(false);
 
+  const [stripeReadinessPhase, setStripeReadinessPhase] =
+    useState<StripeReadinessPhase>("closed");
+  const [stripeReadiness, setStripeReadiness] =
+    useState<StripeIntegrationReadiness | null>(null);
+  const [stripeReadinessLoading, setStripeReadinessLoading] = useState(false);
+  const [stripeReadinessError, setStripeReadinessError] = useState<
+    string | null
+  >(null);
+
   const dirty = mode !== "idle" && !draftsEqual(draft, baseline);
 
   function resetActivation() {
@@ -467,6 +488,13 @@ export function CommercialAgreementsScreen() {
     setBillingConfigNoActivateAck(false);
   }
 
+  function resetStripeReadiness() {
+    setStripeReadinessPhase("closed");
+    setStripeReadiness(null);
+    setStripeReadinessLoading(false);
+    setStripeReadinessError(null);
+  }
+
   function resetReviews() {
     resetActivation();
     resetPlanChange();
@@ -474,6 +502,7 @@ export function CommercialAgreementsScreen() {
     resetCustomPlan();
     resetBillingReadiness();
     resetBillingConfiguration();
+    resetStripeReadiness();
   }
 
   const anyReviewLoading =
@@ -482,7 +511,8 @@ export function CommercialAgreementsScreen() {
     legacyLoading ||
     customLoading ||
     billingLoading ||
-    billingConfigLoading;
+    billingConfigLoading ||
+    stripeReadinessLoading;
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -1073,6 +1103,46 @@ export function CommercialAgreementsScreen() {
     }
   }
 
+  async function reviewStripeIntegrationReadiness() {
+    if (anyReviewLoading) return;
+    resetActivation();
+    resetPlanChange();
+    resetLegacyConversion();
+    resetCustomPlan();
+    resetBillingReadiness();
+    resetBillingConfiguration();
+    setStripeReadinessLoading(true);
+    setStripeReadinessError(null);
+    setStripeReadiness(null);
+    try {
+      const res = await fetch(
+        `/api/admin/commercial-agreements/stripe-integration-readiness`,
+        {
+          method: "GET",
+          credentials: "same-origin",
+          cache: "no-store",
+        },
+      );
+      const json = (await res.json()) as StripeIntegrationReadinessResponse;
+      if (!res.ok || !json.ok || !json.readiness) {
+        throw new Error(
+          json.message || "Unable to assess Stripe integration readiness.",
+        );
+      }
+      setStripeReadiness(json.readiness);
+      setStripeReadinessPhase("review");
+    } catch (err) {
+      setStripeReadinessError(
+        err instanceof Error
+          ? err.message
+          : "Unable to assess Stripe integration readiness.",
+      );
+      setStripeReadinessPhase("review");
+    } finally {
+      setStripeReadinessLoading(false);
+    }
+  }
+
   function toggleCustomModule(key: string) {
     setCustomSelectedModules((prev) => {
       if (prev.includes(key)) return prev.filter((row) => row !== key);
@@ -1434,7 +1504,176 @@ export function CommercialAgreementsScreen() {
           >
             New agreement
           </button>
+          <button
+            type="button"
+            className="kxd-commercial-admin__secondary"
+            onClick={() => void reviewStripeIntegrationReadiness()}
+            disabled={anyReviewLoading}
+            aria-label="Review Stripe integration readiness"
+          >
+            {stripeReadinessLoading && stripeReadinessPhase === "closed"
+              ? "Preparing…"
+              : "Stripe integration readiness"}
+          </button>
         </div>
+
+        {stripeReadinessPhase !== "closed" ? (
+          <div
+            className="kxd-commercial-admin__activation kxd-commercial-admin__stripe-readiness"
+            role="region"
+            aria-label="Stripe integration readiness"
+            aria-busy={stripeReadinessLoading}
+          >
+            <OpsSectionHead label="Stripe integration readiness" />
+            <p className="kxd-commercial-admin__callout" role="note">
+              Platform-level structural assessment only. Connectivity not tested.
+              Execution disabled. No Stripe request performed. No financial objects
+              created.
+            </p>
+
+            {stripeReadinessError ? (
+              <p className="kxd-commercial-admin__error" role="alert">
+                {stripeReadinessError}
+              </p>
+            ) : null}
+
+            {stripeReadiness ? (
+              <>
+                <p
+                  className={
+                    stripeReadiness.status === "configured_test" ||
+                    stripeReadiness.status === "configured_live"
+                      ? "kxd-commercial-admin__status kxd-commercial-admin__status--active"
+                      : stripeReadiness.status === "mode_mismatch" ||
+                          stripeReadiness.status === "invalid_format"
+                        ? "kxd-commercial-admin__status kxd-commercial-admin__status--blocked"
+                        : "kxd-commercial-admin__status"
+                  }
+                  role="status"
+                >
+                  {stripeIntegrationStatusLabel(stripeReadiness.status)}
+                  {" · "}
+                  Execution disabled · Connectivity not tested
+                </p>
+
+                <dl className="kxd-commercial-admin__meta">
+                  <div>
+                    <dt>Secret key</dt>
+                    <dd>
+                      {stripeReadiness.secretKeyPresent ? "Present" : "Absent"}
+                      {" · "}
+                      Mode: {stripeReadiness.detectedSecretMode}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Publishable key</dt>
+                    <dd>
+                      {stripeReadiness.publishableKeyPresent
+                        ? "Present"
+                        : "Absent"}
+                      {" · "}
+                      Mode: {stripeReadiness.detectedPublishableMode}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Webhook secret</dt>
+                    <dd>
+                      {stripeReadiness.webhookSecretPresent
+                        ? "Present"
+                        : "Absent"}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Mode alignment</dt>
+                    <dd>
+                      {stripeReadiness.modeAligned
+                        ? "Aligned"
+                        : "Mismatch"}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Execution gate</dt>
+                    <dd>Closed · Requires separately approved phase</dd>
+                  </div>
+                  <div>
+                    <dt>Stripe objects created</dt>
+                    <dd>None</dd>
+                  </div>
+                  <div>
+                    <dt>Customer mapping strategy</dt>
+                    <dd>Defined</dd>
+                  </div>
+                  <div>
+                    <dt>Catalog strategy</dt>
+                    <dd>Defined</dd>
+                  </div>
+                  <div>
+                    <dt>Idempotency foundation</dt>
+                    <dd>{stripeReadiness.idempotency.status}</dd>
+                  </div>
+                  <div>
+                    <dt>Webhook foundation</dt>
+                    <dd>{stripeReadiness.webhookArchitecture.status.replace(/_/g, " ")}</dd>
+                  </div>
+                  <div>
+                    <dt>Reconciliation foundation</dt>
+                    <dd>{stripeReadiness.reconciliation.status.replace(/_/g, " ")}</dd>
+                  </div>
+                </dl>
+
+                {stripeReadiness.blockers.length > 0 ? (
+                  <div className="kxd-commercial-admin__change-list">
+                    <h3>Current blockers</h3>
+                    <ul className="kxd-commercial-admin__blockers">
+                      {stripeReadiness.blockers.map((row) => (
+                        <li key={row.code}>{row.message}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+
+                {stripeReadiness.prerequisites.length > 0 ? (
+                  <div className="kxd-commercial-admin__change-list">
+                    <h3>Review prerequisites</h3>
+                    <ul>
+                      {stripeReadiness.prerequisites.map((row) => (
+                        <li key={row}>{row}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+
+                <div className="kxd-commercial-admin__change-list">
+                  <h3>Systems unchanged</h3>
+                  <ul>
+                    {stripeReadiness.systemsUnchanged.map((row) => (
+                      <li key={row}>{row}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                <p className="kxd-commercial-admin__muted">
+                  Fingerprint {stripeReadiness.fingerprint}
+                </p>
+
+                <div className="kxd-commercial-admin__actions">
+                  <button
+                    type="button"
+                    className="kxd-commercial-admin__text-btn"
+                    onClick={resetStripeReadiness}
+                    disabled={stripeReadinessLoading}
+                  >
+                    Close review
+                  </button>
+                </div>
+              </>
+            ) : stripeReadinessLoading ? (
+              <p className="kxd-commercial-admin__muted" role="status">
+                Assessing Stripe integration readiness…
+              </p>
+            ) : null}
+          </div>
+        ) : null}
 
         {error ? (
           <div className="kxd-commercial-admin__error" role="alert">

@@ -16023,6 +16023,10 @@ a.kxd-exec-today__row:hover {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.kxd-commercial-admin__stripe-readiness .kxd-commercial-admin__meta {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .kxd-commercial-admin__form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -16044,6 +16048,7 @@ a.kxd-exec-today__row:hover {
 @media (max-width: 720px) {
   .kxd-commercial-admin__billing .kxd-commercial-admin__meta,
   .kxd-commercial-admin__billing-config .kxd-commercial-admin__meta,
+  .kxd-commercial-admin__stripe-readiness .kxd-commercial-admin__meta,
   .kxd-commercial-admin__form-grid {
     grid-template-columns: 1fr;
   }
