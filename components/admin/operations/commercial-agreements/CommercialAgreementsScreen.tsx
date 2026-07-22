@@ -18,12 +18,15 @@ import {
   confirmPlanChangeActionLabel,
   getCommercialAgreement,
   hasAgreementPlanMismatch,
+  isLegacyConversionCandidate,
   listCommercialAgreements,
   type ActivationPreview,
   type ActivationResult,
   type ClientCommercialAgreementRecord,
   type CommercialAgreementFieldErrors,
   type CommercialAgreementId,
+  type LegacyConversionPreview,
+  type LegacyConversionResult,
   type PlanChangePreview,
   type PlanChangeResult,
 } from "@/lib/commercial-agreements";
@@ -75,9 +78,23 @@ type PlanChangeMutationResponse = {
   result?: PlanChangeResult;
 };
 
+type LegacyConversionPreviewResponse = {
+  ok?: boolean;
+  message?: string;
+  preview?: LegacyConversionPreview;
+};
+
+type LegacyConversionMutationResponse = {
+  ok?: boolean;
+  message?: string;
+  code?: string;
+  result?: LegacyConversionResult;
+};
+
 type EditorMode = "idle" | "edit" | "create";
 type ActivationPhase = "closed" | "preview" | "result";
 type PlanChangePhase = "closed" | "preview" | "result";
+type LegacyConversionPhase = "closed" | "preview" | "result";
 type Draft = {
   commercialAgreementId: CommercialAgreementId | "";
   monthlyRetainerAmount: string;
@@ -198,6 +215,16 @@ export function CommercialAgreementsScreen() {
   const [planChangeAcknowledged, setPlanChangeAcknowledged] = useState(false);
   const [removalsAcknowledged, setRemovalsAcknowledged] = useState(false);
 
+  const [legacyPhase, setLegacyPhase] =
+    useState<LegacyConversionPhase>("closed");
+  const [legacyPreview, setLegacyPreview] =
+    useState<LegacyConversionPreview | null>(null);
+  const [legacyResult, setLegacyResult] =
+    useState<LegacyConversionResult | null>(null);
+  const [legacyLoading, setLegacyLoading] = useState(false);
+  const [legacyError, setLegacyError] = useState<string | null>(null);
+  const [legacyAcknowledged, setLegacyAcknowledged] = useState(false);
+
   const dirty = mode !== "idle" && !draftsEqual(draft, baseline);
 
   function resetActivation() {
@@ -219,9 +246,19 @@ export function CommercialAgreementsScreen() {
     setRemovalsAcknowledged(false);
   }
 
+  function resetLegacyConversion() {
+    setLegacyPhase("closed");
+    setLegacyPreview(null);
+    setLegacyResult(null);
+    setLegacyLoading(false);
+    setLegacyError(null);
+    setLegacyAcknowledged(false);
+  }
+
   function resetReviews() {
     resetActivation();
     resetPlanChange();
+    resetLegacyConversion();
   }
 
   const load = useCallback(async () => {
@@ -297,8 +334,11 @@ export function CommercialAgreementsScreen() {
   }
 
   async function reviewActivation() {
-    if (!selectedId || activationLoading || planChangeLoading) return;
+    if (!selectedId || activationLoading || planChangeLoading || legacyLoading) {
+      return;
+    }
     resetPlanChange();
+    resetLegacyConversion();
     setActivationLoading(true);
     setActivationError(null);
     setActivationResult(null);
@@ -390,8 +430,11 @@ export function CommercialAgreementsScreen() {
   }
 
   async function reviewPlanChange() {
-    if (!selectedId || planChangeLoading || activationLoading) return;
+    if (!selectedId || planChangeLoading || activationLoading || legacyLoading) {
+      return;
+    }
     resetActivation();
+    resetLegacyConversion();
     setPlanChangeLoading(true);
     setPlanChangeError(null);
     setPlanChangeResult(null);
@@ -490,6 +533,107 @@ export function CommercialAgreementsScreen() {
       );
     } finally {
       setPlanChangeLoading(false);
+    }
+  }
+
+  async function reviewLegacyConversion() {
+    if (!selectedId || legacyLoading || activationLoading || planChangeLoading) {
+      return;
+    }
+    resetActivation();
+    resetPlanChange();
+    setLegacyLoading(true);
+    setLegacyError(null);
+    setLegacyResult(null);
+    setLegacyAcknowledged(false);
+    try {
+      const res = await fetch(
+        `/api/admin/commercial-agreements/${selectedId}/legacy-conversion-preview`,
+        {
+          method: "POST",
+          credentials: "same-origin",
+        },
+      );
+      const json = (await res.json()) as LegacyConversionPreviewResponse;
+      if (!res.ok || !json.ok || !json.preview) {
+        throw new Error(
+          json.message || "Unable to generate legacy-conversion preview.",
+        );
+      }
+      setLegacyPreview(json.preview);
+      setLegacyPhase("preview");
+    } catch (err) {
+      setLegacyError(
+        err instanceof Error ? err.message : "Unable to generate preview.",
+      );
+      setLegacyPhase("preview");
+    } finally {
+      setLegacyLoading(false);
+    }
+  }
+
+  async function confirmLegacyConversion() {
+    if (
+      !selectedId ||
+      !legacyPreview ||
+      !legacyAcknowledged ||
+      legacyLoading
+    ) {
+      return;
+    }
+    setLegacyLoading(true);
+    setLegacyError(null);
+    try {
+      const res = await fetch(
+        `/api/admin/commercial-agreements/${selectedId}/convert-legacy`,
+        {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            previewFingerprint: legacyPreview.previewFingerprint,
+            confirmed: true,
+          }),
+        },
+      );
+      const json = (await res.json()) as LegacyConversionMutationResponse;
+      if (!res.ok || !json.ok || !json.result) {
+        if (json.code === "stale_preview") {
+          setLegacyError(
+            json.message ||
+              "This preview is out of date. Generate a fresh review and try again.",
+          );
+          setLegacyPhase("preview");
+          setLegacyAcknowledged(false);
+          return;
+        }
+        throw new Error(json.message || "Unable to convert legacy client.");
+      }
+      setLegacyResult(json.result);
+      setLegacyPhase("result");
+      if (json.result.preview) {
+        setLegacyPreview(json.result.preview);
+      }
+      if (
+        json.result.status === "converted" ||
+        json.result.status === "already_converted"
+      ) {
+        const detailRes = await fetch(
+          `/api/admin/commercial-agreements/${selectedId}`,
+          { credentials: "same-origin" },
+        );
+        const detailJson = (await detailRes.json()) as DetailResponse;
+        if (detailRes.ok && detailJson.ok && detailJson.agreement) {
+          setDetail(detailJson.agreement);
+        }
+        await load();
+      }
+    } catch (err) {
+      setLegacyError(
+        err instanceof Error ? err.message : "Unable to convert.",
+      );
+    } finally {
+      setLegacyLoading(false);
     }
   }
 
@@ -652,10 +796,19 @@ export function CommercialAgreementsScreen() {
         planStatus: detail.planStatus,
       })
     : false;
-  const showFirstTimeActivation =
+  const showLegacyConversion =
     Boolean(detail) &&
-    detail!.recordStatus === "recorded" &&
-    !detail!.planKey;
+    isLegacyConversionCandidate({
+      commercialAgreementId: detail!.commercialAgreementId,
+      planKey: detail!.planKey,
+      planStatus: detail!.planStatus,
+    });
+  const showLegacyNeedsAgreement =
+    Boolean(detail) &&
+    !detail!.planKey &&
+    detail!.planStatus === "legacy" &&
+    !detail!.commercialAgreementId;
+  const showFirstTimeActivation = false;
   const showPlanChangeAction =
     Boolean(detail) &&
     detail!.recordStatus === "recorded" &&
@@ -1060,7 +1213,11 @@ export function CommercialAgreementsScreen() {
                     <dd>
                       {detailAgreementPlan?.entitlementPresetId
                         ? `${detailAgreementPlan.entitlementPresetId}${
-                            planMismatch ? " · Plan change available" : ""
+                            planMismatch
+                              ? " · Plan change available"
+                              : showLegacyConversion
+                                ? " · Legacy conversion available"
+                                : ""
                           }`
                         : detail.commercialAgreementId
                           ? "Manual review required"
@@ -1090,12 +1247,28 @@ export function CommercialAgreementsScreen() {
                   >
                     Edit
                   </button>
+                  {showLegacyConversion ? (
+                    <button
+                      type="button"
+                      className="kxd-commercial-admin__secondary"
+                      onClick={() => void reviewLegacyConversion()}
+                      disabled={
+                        legacyLoading || activationLoading || planChangeLoading
+                      }
+                    >
+                      {legacyLoading && legacyPhase === "closed"
+                        ? "Preparing…"
+                        : "Review legacy conversion"}
+                    </button>
+                  ) : null}
                   {showFirstTimeActivation ? (
                     <button
                       type="button"
                       className="kxd-commercial-admin__secondary"
                       onClick={() => void reviewActivation()}
-                      disabled={activationLoading || planChangeLoading}
+                      disabled={
+                        activationLoading || planChangeLoading || legacyLoading
+                      }
                     >
                       {activationLoading && activationPhase === "closed"
                         ? "Preparing…"
@@ -1107,14 +1280,22 @@ export function CommercialAgreementsScreen() {
                       type="button"
                       className="kxd-commercial-admin__secondary"
                       onClick={() => void reviewPlanChange()}
-                      disabled={planChangeLoading || activationLoading}
+                      disabled={
+                        planChangeLoading || activationLoading || legacyLoading
+                      }
                     >
                       {planChangeLoading && planChangePhase === "closed"
                         ? "Preparing…"
                         : "Review plan change"}
                     </button>
                   ) : null}
-                  {detail.recordStatus !== "recorded" ? (
+                  {showLegacyNeedsAgreement ? (
+                    <p className="kxd-commercial-admin__muted">
+                      Record a standard agreement before legacy conversion.
+                    </p>
+                  ) : null}
+                  {detail.recordStatus !== "recorded" &&
+                  !showLegacyNeedsAgreement ? (
                     <p className="kxd-commercial-admin__muted">
                       No recorded agreement available for activation.
                     </p>
@@ -1702,6 +1883,262 @@ export function CommercialAgreementsScreen() {
                     ) : planChangeLoading ? (
                       <p className="kxd-commercial-admin__muted">
                         Generating plan-change preview…
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
+
+                {legacyPhase !== "closed" ? (
+                  <div
+                    className="kxd-commercial-admin__activation"
+                    role="region"
+                    aria-label="Legacy conversion review"
+                  >
+                    <OpsSectionHead label="Legacy conversion review" />
+
+                    {legacyError ? (
+                      <p className="kxd-commercial-admin__error" role="alert">
+                        {legacyError}
+                      </p>
+                    ) : null}
+
+                    {legacyPreview ? (
+                      <>
+                        <p
+                          className={
+                            legacyPreview.canConvert
+                              ? "kxd-commercial-admin__status kxd-commercial-admin__status--active"
+                              : legacyPreview.alreadyConverted
+                                ? "kxd-commercial-admin__status kxd-commercial-admin__status--active"
+                                : "kxd-commercial-admin__status kxd-commercial-admin__status--blocked"
+                          }
+                          role="status"
+                        >
+                          {legacyPreview.canConvert
+                            ? "Legacy conversion available"
+                            : legacyPreview.alreadyConverted
+                              ? "Already converted"
+                              : "Manual review required"}
+                          {legacyPreview.proposedPlanLabel
+                            ? ` · ${legacyPreview.proposedPlanLabel}`
+                            : ""}
+                          {legacyPreview.noAccessLoss && legacyPreview.canConvert
+                            ? " · No access removed"
+                            : ""}
+                        </p>
+
+                        {legacyPreview.blockers.length > 0 ? (
+                          <ul className="kxd-commercial-admin__blockers">
+                            {legacyPreview.blockers.map((row) => (
+                              <li key={row.code}>{row.message}</li>
+                            ))}
+                          </ul>
+                        ) : null}
+
+                        {legacyPreview.warnings.length > 0 ? (
+                          <ul className="kxd-commercial-admin__warnings">
+                            {legacyPreview.warnings.map((warning) => (
+                              <li key={warning}>{warning}</li>
+                            ))}
+                          </ul>
+                        ) : null}
+
+                        <div className="kxd-commercial-admin__compare">
+                          <div>
+                            <h3>Current legacy access</h3>
+                            <p>
+                              Plan:{" "}
+                              {legacyPreview.currentPlanKey ?? "none"} ·{" "}
+                              {legacyPreview.currentPlanStatus ?? "—"}
+                            </p>
+                            <ul>
+                              {legacyPreview.currentLegacyModules.length ? (
+                                legacyPreview.currentLegacyModules.map((row) => (
+                                  <li key={`lg-cur-${row.key}`}>{row.label}</li>
+                                ))
+                              ) : (
+                                <li>No current portal modules</li>
+                              )}
+                            </ul>
+                          </div>
+                          <div>
+                            <h3>Proposed modern plan</h3>
+                            <p>
+                              {legacyPreview.proposedPlanLabel ??
+                                legacyPreview.proposedPlanKey ??
+                                "none"}{" "}
+                              · {legacyPreview.proposedPlanStatus ?? "—"}
+                            </p>
+                            <ul>
+                              {legacyPreview.proposedEffectiveModules.length ? (
+                                legacyPreview.proposedEffectiveModules.map(
+                                  (row) => (
+                                    <li key={`lg-prop-${row.key}`}>
+                                      {row.label}
+                                    </li>
+                                  ),
+                                )
+                              ) : (
+                                <li>No modules proposed</li>
+                              )}
+                            </ul>
+                          </div>
+                        </div>
+
+                        <div className="kxd-commercial-admin__change-list">
+                          <h3>Included with the plan</h3>
+                          <ul>
+                            {legacyPreview.targetBaselineModules.length ? (
+                              legacyPreview.targetBaselineModules.map((row) => (
+                                <li
+                                  key={`lg-base-${row.key}`}
+                                  data-kind="unchanged"
+                                >
+                                  Plan · {row.label}
+                                </li>
+                              ))
+                            ) : (
+                              <li>None</li>
+                            )}
+                          </ul>
+                          <h3>Preserved from the current setup</h3>
+                          <ul>
+                            {legacyPreview.preservedAsAddOns.length ? (
+                              legacyPreview.preservedAsAddOns.map((row) => (
+                                <li
+                                  key={`lg-keep-${row.key}`}
+                                  data-kind="unchanged"
+                                >
+                                  Preserved · {row.label}
+                                </li>
+                              ))
+                            ) : (
+                              <li>None required — current access fits the plan</li>
+                            )}
+                          </ul>
+                          <h3>Newly included</h3>
+                          <ul>
+                            {legacyPreview.newlyIncluded.length ? (
+                              legacyPreview.newlyIncluded.map((row) => (
+                                <li
+                                  key={`lg-new-${row.key}`}
+                                  data-kind="added"
+                                >
+                                  Newly included · {row.label}
+                                </li>
+                              ))
+                            ) : (
+                              <li>No new modules</li>
+                            )}
+                          </ul>
+                          <h3>Not changed</h3>
+                          <ul>
+                            {legacyPreview.unchangedSystems.map((row) => (
+                              <li key={row.id} data-kind="excluded">
+                                Excluded · {row.label}
+                              </li>
+                            ))}
+                          </ul>
+                          <p className="kxd-commercial-admin__muted">
+                            {legacyPreview.moduleDataNote}
+                          </p>
+                          <p className="kxd-commercial-admin__muted">
+                            {legacyPreview.overrideHandling}
+                          </p>
+                        </div>
+
+                        {legacyPhase === "result" && legacyResult ? (
+                          <p
+                            className={
+                              legacyResult.status === "converted" ||
+                              legacyResult.status === "already_converted"
+                                ? "kxd-commercial-admin__success"
+                                : "kxd-commercial-admin__error"
+                            }
+                            role="status"
+                          >
+                            {legacyResult.message}
+                          </p>
+                        ) : null}
+
+                        {legacyPreview.canConvert &&
+                        legacyPhase !== "result" ? (
+                          <div className="kxd-commercial-admin__confirm">
+                            <p>
+                              Conversion assigns{" "}
+                              <strong>
+                                {legacyPreview.proposedPlanLabel}
+                              </strong>{" "}
+                              for <strong>{legacyPreview.clientName}</strong>{" "}
+                              while preserving current legacy access. No current
+                              access will be removed. Billing, providers, and
+                              infrastructure are not changed.
+                            </p>
+                            <label className="kxd-commercial-admin__ack">
+                              <input
+                                type="checkbox"
+                                checked={legacyAcknowledged}
+                                onChange={(e) =>
+                                  setLegacyAcknowledged(e.target.checked)
+                                }
+                                disabled={legacyLoading}
+                              />
+                              <span>
+                                I reviewed the proposed modern plan and the
+                                legacy access that will be preserved for this
+                                client.
+                              </span>
+                            </label>
+                            <div className="kxd-commercial-admin__actions">
+                              <button
+                                type="button"
+                                className="kxd-commercial-admin__save"
+                                onClick={() => void confirmLegacyConversion()}
+                                disabled={
+                                  !legacyAcknowledged || legacyLoading
+                                }
+                              >
+                                {legacyLoading
+                                  ? "Converting…"
+                                  : "Confirm conversion"}
+                              </button>
+                              <button
+                                type="button"
+                                className="kxd-commercial-admin__text-btn"
+                                onClick={resetLegacyConversion}
+                                disabled={legacyLoading}
+                              >
+                                Cancel review
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="kxd-commercial-admin__actions">
+                            <button
+                              type="button"
+                              className="kxd-commercial-admin__text-btn"
+                              onClick={resetLegacyConversion}
+                              disabled={legacyLoading}
+                            >
+                              Close review
+                            </button>
+                            {legacyError?.includes("out of date") ||
+                            legacyError?.includes("fresh") ? (
+                              <button
+                                type="button"
+                                className="kxd-commercial-admin__secondary"
+                                onClick={() => void reviewLegacyConversion()}
+                                disabled={legacyLoading}
+                              >
+                                Refresh preview
+                              </button>
+                            ) : null}
+                          </div>
+                        )}
+                      </>
+                    ) : legacyLoading ? (
+                      <p className="kxd-commercial-admin__muted">
+                        Generating legacy-conversion preview…
                       </p>
                     ) : null}
                   </div>

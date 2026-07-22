@@ -76,3 +76,25 @@ export {
   parsePlanChangeRequestBody,
   planChangeClassificationLabel,
 } from "./plan-change-logic";
+export type {
+  LegacyConversionBlockCode,
+  LegacyConversionEligibilityStatus,
+  LegacyConversionPreview,
+  LegacyConversionResult,
+  LegacyConversionResultStatus,
+} from "./legacy-conversion-types";
+export {
+  LEGACY_CONVERSION_EXCLUDED_ACTIONS,
+  LEGACY_CONVERSION_MODULE_DATA_NOTE,
+  LEGACY_CONVERSION_OVERRIDE_HANDLING,
+} from "./legacy-conversion-types";
+export {
+  buildLegacyConversionFingerprint,
+  buildLegacyConversionPreview,
+  calculateLegacyModuleMapping,
+  evaluateLegacyConversionEligibility,
+  isLegacyConversionCandidate,
+  isPreservableLegacyAddOn,
+  parseLegacyConversionRequestBody,
+} from "./legacy-conversion-logic";
+export type { LegacyConversionClientState } from "./legacy-conversion-logic";
