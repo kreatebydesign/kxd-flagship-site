@@ -12,6 +12,7 @@ import {
   STRIPE_INTEGRATION_SYSTEMS_UNCHANGED,
   STRIPE_OPTIONAL_ENV_VARS,
   STRIPE_REQUIRED_ENV_VARS,
+  stripeIntegrationStatusLabel,
   type StripeCatalogStrategy,
   type StripeCustomerIdentityStrategy,
   type StripeExecutionGateSnapshot,
@@ -83,8 +84,9 @@ export function isPublishableKeyFormatValid(mode: StripeKeyMode): boolean {
 /**
  * Commercial billing execution gate — CLOSED in Phase 37H.
  * Flip only in a separately approved code phase. Not env-, UI-, or CMS-controlled.
+ * Typed as boolean (not `false as const`) so production `tsc` accepts a future flip.
  */
-export const STRIPE_COMMERCIAL_EXECUTION_AUTHORIZED = false as const;
+export const STRIPE_COMMERCIAL_EXECUTION_AUTHORIZED: boolean = false;
 
 export function getStripeExecutionGate(): StripeExecutionGateSnapshot {
   return {
@@ -104,30 +106,7 @@ export function isCommercialStripeOperationAllowed(
     // Existing proposal webhook path is separate; commercial webhook expansion is not authorized.
     return false;
   }
-  return STRIPE_COMMERCIAL_EXECUTION_AUTHORIZED === true;
-}
-
-export function stripeIntegrationStatusLabel(
-  status: StripeIntegrationStatus,
-): string {
-  switch (status) {
-    case "disabled":
-      return "Disabled";
-    case "incomplete":
-      return "Configuration incomplete";
-    case "configured_test":
-      return "Structurally configured · Test mode";
-    case "configured_live":
-      return "Structurally configured · Live mode";
-    case "mode_mismatch":
-      return "Mode mismatch";
-    case "invalid_format":
-      return "Invalid key format";
-    case "webhook_incomplete":
-      return "Webhook configuration incomplete";
-    default:
-      return status;
-  }
+  return STRIPE_COMMERCIAL_EXECUTION_AUTHORIZED;
 }
 
 export function buildCustomerIdentityStrategy(): StripeCustomerIdentityStrategy {

@@ -161,3 +161,27 @@ export const STRIPE_REQUIRED_ENV_VARS = [
 export const STRIPE_OPTIONAL_ENV_VARS = [
   "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
 ] as const;
+
+/** Browser-safe status labels — keep free of Node builtins. */
+export function stripeIntegrationStatusLabel(
+  status: StripeIntegrationStatus,
+): string {
+  switch (status) {
+    case "disabled":
+      return "Disabled";
+    case "incomplete":
+      return "Configuration incomplete";
+    case "configured_test":
+      return "Structurally configured · Test mode";
+    case "configured_live":
+      return "Structurally configured · Live mode";
+    case "mode_mismatch":
+      return "Mode mismatch";
+    case "invalid_format":
+      return "Invalid key format";
+    case "webhook_incomplete":
+      return "Webhook configuration incomplete";
+    default:
+      return status;
+  }
+}

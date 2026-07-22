@@ -50,7 +50,7 @@ import {
 import {
   stripeIntegrationStatusLabel,
   type StripeIntegrationReadiness,
-} from "@/lib/stripe";
+} from "@/lib/stripe/integration-readiness-types";
 import { PARTNERSHIP_ADD_ONS } from "@/lib/partnerships/packages";
 
 type ListResponse = {

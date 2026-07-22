@@ -24,6 +24,7 @@ export {
   STRIPE_INTEGRATION_SYSTEMS_UNCHANGED,
   STRIPE_OPTIONAL_ENV_VARS,
   STRIPE_REQUIRED_ENV_VARS,
+  stripeIntegrationStatusLabel,
 } from "./integration-readiness-types";
 
 export {
@@ -46,7 +47,6 @@ export {
   isWebhookSecretFormatValid,
   listExistingStripePaths,
   rejectBrowserStripeAuthority,
-  stripeIntegrationStatusLabel,
 } from "./integration-readiness-logic";
 
 export {
