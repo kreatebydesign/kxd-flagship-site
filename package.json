@@ -30,6 +30,7 @@
     "verify:commercial-agreements": "tsx scripts/verify-commercial-agreements.ts",
     "verify:commercial-agreements-ops": "tsx scripts/verify-commercial-agreements-ops.ts",
     "verify:commercial-activation": "tsx scripts/verify-commercial-activation.ts",
+    "verify:commercial-plan-change": "tsx scripts/verify-commercial-plan-change.ts",
     "verify:client-plans": "tsx scripts/verify-client-plans-entitlements.ts",
     "verify:client-upgrade-requests": "tsx scripts/verify-client-upgrade-requests.ts",
     "verify:client-inventory": "tsx scripts/verify-client-inventory.ts",

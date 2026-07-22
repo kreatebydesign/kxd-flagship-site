@@ -41,6 +41,9 @@ export {
   listClientPlans,
   isClientPlanKey,
   baseModulesForPlan,
+  getPlanOrder,
+  classifyPlanChange,
+  type PlanChangeClassification,
 } from "./catalog";
 
 export {

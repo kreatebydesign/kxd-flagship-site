@@ -30,6 +30,33 @@ const PLAN_ORDER: Record<ClientPlanKey, number> = {
   custom: 90,
 };
 
+/** Canonical tier rank for upgrade/downgrade classification. */
+export function getPlanOrder(planKey: ClientPlanKey): number {
+  return PLAN_ORDER[planKey];
+}
+
+export type PlanChangeClassification =
+  | "upgrade"
+  | "downgrade"
+  | "lateral"
+  | "aligned";
+
+/**
+ * Classify a plan move using catalog order only — not display names.
+ * Same key → aligned; higher order → upgrade; lower → downgrade; equal order → lateral.
+ */
+export function classifyPlanChange(
+  fromKey: ClientPlanKey,
+  toKey: ClientPlanKey,
+): PlanChangeClassification {
+  if (fromKey === toKey) return "aligned";
+  const fromOrder = getPlanOrder(fromKey);
+  const toOrder = getPlanOrder(toKey);
+  if (toOrder > fromOrder) return "upgrade";
+  if (toOrder < fromOrder) return "downgrade";
+  return "lateral";
+}
+
 function buildPlanDefinition(key: ClientPlanKey): ClientPlanDefinition {
   const preset = getLaunchPackagePreset(key);
   const included = normalizeModuleList([

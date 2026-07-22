@@ -15,12 +15,17 @@ import {
   commercialAddOnLabel,
   commercialProvisioningLabel,
   commercialRecordStatusLabel,
+  confirmPlanChangeActionLabel,
+  getCommercialAgreement,
+  hasAgreementPlanMismatch,
   listCommercialAgreements,
   type ActivationPreview,
   type ActivationResult,
   type ClientCommercialAgreementRecord,
   type CommercialAgreementFieldErrors,
   type CommercialAgreementId,
+  type PlanChangePreview,
+  type PlanChangeResult,
 } from "@/lib/commercial-agreements";
 import { PARTNERSHIP_ADD_ONS } from "@/lib/partnerships/packages";
 
@@ -57,8 +62,22 @@ type ActivateResponse = {
   result?: ActivationResult;
 };
 
+type PlanChangePreviewResponse = {
+  ok?: boolean;
+  message?: string;
+  preview?: PlanChangePreview;
+};
+
+type PlanChangeMutationResponse = {
+  ok?: boolean;
+  message?: string;
+  code?: string;
+  result?: PlanChangeResult;
+};
+
 type EditorMode = "idle" | "edit" | "create";
 type ActivationPhase = "closed" | "preview" | "result";
+type PlanChangePhase = "closed" | "preview" | "result";
 type Draft = {
   commercialAgreementId: CommercialAgreementId | "";
   monthlyRetainerAmount: string;
@@ -168,6 +187,17 @@ export function CommercialAgreementsScreen() {
   const [activationError, setActivationError] = useState<string | null>(null);
   const [activationAcknowledged, setActivationAcknowledged] = useState(false);
 
+  const [planChangePhase, setPlanChangePhase] =
+    useState<PlanChangePhase>("closed");
+  const [planChangePreview, setPlanChangePreview] =
+    useState<PlanChangePreview | null>(null);
+  const [planChangeResult, setPlanChangeResult] =
+    useState<PlanChangeResult | null>(null);
+  const [planChangeLoading, setPlanChangeLoading] = useState(false);
+  const [planChangeError, setPlanChangeError] = useState<string | null>(null);
+  const [planChangeAcknowledged, setPlanChangeAcknowledged] = useState(false);
+  const [removalsAcknowledged, setRemovalsAcknowledged] = useState(false);
+
   const dirty = mode !== "idle" && !draftsEqual(draft, baseline);
 
   function resetActivation() {
@@ -177,6 +207,21 @@ export function CommercialAgreementsScreen() {
     setActivationLoading(false);
     setActivationError(null);
     setActivationAcknowledged(false);
+  }
+
+  function resetPlanChange() {
+    setPlanChangePhase("closed");
+    setPlanChangePreview(null);
+    setPlanChangeResult(null);
+    setPlanChangeLoading(false);
+    setPlanChangeError(null);
+    setPlanChangeAcknowledged(false);
+    setRemovalsAcknowledged(false);
+  }
+
+  function resetReviews() {
+    resetActivation();
+    resetPlanChange();
   }
 
   const load = useCallback(async () => {
@@ -236,7 +281,7 @@ export function CommercialAgreementsScreen() {
     setSaveMessage(null);
     setSaveError(null);
     setFieldErrors({});
-    resetActivation();
+    resetReviews();
     try {
       const res = await fetch(`/api/admin/commercial-agreements/${clientId}`, {
         credentials: "same-origin",
@@ -252,7 +297,8 @@ export function CommercialAgreementsScreen() {
   }
 
   async function reviewActivation() {
-    if (!selectedId || activationLoading) return;
+    if (!selectedId || activationLoading || planChangeLoading) return;
+    resetPlanChange();
     setActivationLoading(true);
     setActivationError(null);
     setActivationResult(null);
@@ -343,9 +389,113 @@ export function CommercialAgreementsScreen() {
     }
   }
 
+  async function reviewPlanChange() {
+    if (!selectedId || planChangeLoading || activationLoading) return;
+    resetActivation();
+    setPlanChangeLoading(true);
+    setPlanChangeError(null);
+    setPlanChangeResult(null);
+    setPlanChangeAcknowledged(false);
+    setRemovalsAcknowledged(false);
+    try {
+      const res = await fetch(
+        `/api/admin/commercial-agreements/${selectedId}/plan-change-preview`,
+        {
+          method: "POST",
+          credentials: "same-origin",
+        },
+      );
+      const json = (await res.json()) as PlanChangePreviewResponse;
+      if (!res.ok || !json.ok || !json.preview) {
+        throw new Error(json.message || "Unable to generate plan-change preview.");
+      }
+      setPlanChangePreview(json.preview);
+      setPlanChangePhase("preview");
+    } catch (err) {
+      setPlanChangeError(
+        err instanceof Error ? err.message : "Unable to generate preview.",
+      );
+      setPlanChangePhase("preview");
+    } finally {
+      setPlanChangeLoading(false);
+    }
+  }
+
+  async function confirmPlanChange() {
+    if (
+      !selectedId ||
+      !planChangePreview ||
+      !planChangeAcknowledged ||
+      planChangeLoading
+    ) {
+      return;
+    }
+    if (planChangePreview.hasRemovals && !removalsAcknowledged) {
+      setPlanChangeError(
+        "Acknowledge module removals before confirming this plan change.",
+      );
+      return;
+    }
+    setPlanChangeLoading(true);
+    setPlanChangeError(null);
+    try {
+      const res = await fetch(
+        `/api/admin/commercial-agreements/${selectedId}/change-plan`,
+        {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            previewFingerprint: planChangePreview.previewFingerprint,
+            confirmed: true,
+            removalsAcknowledged: planChangePreview.hasRemovals
+              ? removalsAcknowledged
+              : false,
+          }),
+        },
+      );
+      const json = (await res.json()) as PlanChangeMutationResponse;
+      if (!res.ok || !json.ok || !json.result) {
+        if (json.code === "stale_preview") {
+          setPlanChangeError(
+            json.message ||
+              "This preview is out of date. Generate a fresh review and try again.",
+          );
+          setPlanChangePhase("preview");
+          setPlanChangeAcknowledged(false);
+          setRemovalsAcknowledged(false);
+          return;
+        }
+        throw new Error(json.message || "Unable to change plan.");
+      }
+      setPlanChangeResult(json.result);
+      setPlanChangePhase("result");
+      if (json.result.preview) {
+        setPlanChangePreview(json.result.preview);
+      }
+      if (json.result.status === "changed" || json.result.status === "aligned") {
+        const detailRes = await fetch(
+          `/api/admin/commercial-agreements/${selectedId}`,
+          { credentials: "same-origin" },
+        );
+        const detailJson = (await detailRes.json()) as DetailResponse;
+        if (detailRes.ok && detailJson.ok && detailJson.agreement) {
+          setDetail(detailJson.agreement);
+        }
+        await load();
+      }
+    } catch (err) {
+      setPlanChangeError(
+        err instanceof Error ? err.message : "Unable to change plan.",
+      );
+    } finally {
+      setPlanChangeLoading(false);
+    }
+  }
+
   function beginEdit() {
     if (!detail) return;
-    resetActivation();
+    resetReviews();
     const next = draftFromRecord(detail);
     setDraft(next);
     setBaseline(next);
@@ -359,7 +509,7 @@ export function CommercialAgreementsScreen() {
     if (dirty && !window.confirm("Discard unsaved commercial changes?")) {
       return;
     }
-    resetActivation();
+    resetReviews();
     setSelectedId(null);
     setDetail(null);
     setCreateClientId("");
@@ -491,6 +641,25 @@ export function CommercialAgreementsScreen() {
     (row) => row.id === draft.commercialAgreementId,
   );
   const isCustom = draft.commercialAgreementId === "custom-legacy";
+
+  const detailAgreementPlan = detail?.commercialAgreementId
+    ? getCommercialAgreement(detail.commercialAgreementId)
+    : null;
+  const planMismatch = detail
+    ? hasAgreementPlanMismatch({
+        commercialAgreementId: detail.commercialAgreementId,
+        planKey: detail.planKey,
+        planStatus: detail.planStatus,
+      })
+    : false;
+  const showFirstTimeActivation =
+    Boolean(detail) &&
+    detail!.recordStatus === "recorded" &&
+    !detail!.planKey;
+  const showPlanChangeAction =
+    Boolean(detail) &&
+    detail!.recordStatus === "recorded" &&
+    planMismatch;
 
   return (
     <OperationsShell activeId="commercial-agreements">
@@ -887,6 +1056,18 @@ export function CommercialAgreementsScreen() {
                     </dd>
                   </div>
                   <div>
+                    <dt>Agreement plan</dt>
+                    <dd>
+                      {detailAgreementPlan?.entitlementPresetId
+                        ? `${detailAgreementPlan.entitlementPresetId}${
+                            planMismatch ? " · Plan change available" : ""
+                          }`
+                        : detail.commercialAgreementId
+                          ? "Manual review required"
+                          : "—"}
+                    </dd>
+                  </div>
+                  <div>
                     <dt>Provisioning</dt>
                     <dd>
                       {commercialProvisioningLabel(detail.provisioningState)}
@@ -909,22 +1090,44 @@ export function CommercialAgreementsScreen() {
                   >
                     Edit
                   </button>
-                  {detail.recordStatus === "recorded" ? (
+                  {showFirstTimeActivation ? (
                     <button
                       type="button"
                       className="kxd-commercial-admin__secondary"
                       onClick={() => void reviewActivation()}
-                      disabled={activationLoading}
+                      disabled={activationLoading || planChangeLoading}
                     >
                       {activationLoading && activationPhase === "closed"
                         ? "Preparing…"
                         : "Review activation"}
                     </button>
-                  ) : (
+                  ) : null}
+                  {showPlanChangeAction ? (
+                    <button
+                      type="button"
+                      className="kxd-commercial-admin__secondary"
+                      onClick={() => void reviewPlanChange()}
+                      disabled={planChangeLoading || activationLoading}
+                    >
+                      {planChangeLoading && planChangePhase === "closed"
+                        ? "Preparing…"
+                        : "Review plan change"}
+                    </button>
+                  ) : null}
+                  {detail.recordStatus !== "recorded" ? (
                     <p className="kxd-commercial-admin__muted">
                       No recorded agreement available for activation.
                     </p>
-                  )}
+                  ) : null}
+                  {detail.recordStatus === "recorded" &&
+                  detail.planKey &&
+                  !planMismatch &&
+                  (detail.planStatus === "active" ||
+                    detail.planStatus === "trial") ? (
+                    <p className="kxd-commercial-admin__muted">
+                      Plan already aligned with the recorded agreement.
+                    </p>
+                  ) : null}
                 </div>
                 {saveMessage ? (
                   <p className="kxd-commercial-admin__success" role="status">
@@ -1195,6 +1398,310 @@ export function CommercialAgreementsScreen() {
                     ) : activationLoading ? (
                       <p className="kxd-commercial-admin__muted">
                         Generating activation preview…
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
+
+                {planChangePhase !== "closed" ? (
+                  <div
+                    className="kxd-commercial-admin__activation"
+                    role="region"
+                    aria-label="Plan change review"
+                  >
+                    <OpsSectionHead label="Plan change review" />
+
+                    {planChangeError ? (
+                      <p className="kxd-commercial-admin__error" role="alert">
+                        {planChangeError}
+                      </p>
+                    ) : null}
+
+                    {planChangePreview ? (
+                      <>
+                        <p
+                          className={
+                            planChangePreview.eligibility === "blocked" ||
+                            planChangePreview.eligibility === "use_activation"
+                              ? "kxd-commercial-admin__status kxd-commercial-admin__status--blocked"
+                              : planChangePreview.alreadyAligned
+                                ? "kxd-commercial-admin__status kxd-commercial-admin__status--active"
+                                : planChangePreview.classification ===
+                                    "downgrade"
+                                  ? "kxd-commercial-admin__status kxd-commercial-admin__status--blocked"
+                                  : "kxd-commercial-admin__status"
+                          }
+                          role="status"
+                        >
+                          {planChangePreview.classificationLabel ??
+                            "Plan change"}
+                          {planChangePreview.proposedPlanLabel
+                            ? ` · ${planChangePreview.currentPlanLabel ?? "none"} → ${planChangePreview.proposedPlanLabel}`
+                            : ""}
+                        </p>
+
+                        {planChangePreview.blockers.length > 0 ? (
+                          <ul className="kxd-commercial-admin__blockers">
+                            {planChangePreview.blockers.map((row) => (
+                              <li key={row.code}>{row.message}</li>
+                            ))}
+                          </ul>
+                        ) : null}
+
+                        {planChangePreview.warnings.length > 0 ? (
+                          <ul className="kxd-commercial-admin__warnings">
+                            {planChangePreview.warnings.map((warning) => (
+                              <li key={warning}>{warning}</li>
+                            ))}
+                          </ul>
+                        ) : null}
+
+                        <div className="kxd-commercial-admin__compare">
+                          <div>
+                            <h3>Current plan</h3>
+                            <p>
+                              {planChangePreview.currentPlanLabel ??
+                                planChangePreview.current.planKey ??
+                                "none"}{" "}
+                              · {planChangePreview.currentPlanStatus ?? "—"}
+                            </p>
+                            <ul>
+                              {planChangePreview.current.effectiveModules
+                                .length ? (
+                                planChangePreview.current.effectiveModules.map(
+                                  (key) => (
+                                    <li key={`pc-current-${key}`}>
+                                      {planChangePreview.capabilityChanges.find(
+                                        (row) => row.key === key,
+                                      )?.label ?? key}
+                                    </li>
+                                  ),
+                                )
+                              ) : (
+                                <li>No plan-derived modules</li>
+                              )}
+                            </ul>
+                          </div>
+                          <div>
+                            <h3>After plan change</h3>
+                            <p>
+                              {planChangePreview.proposedPlanLabel ??
+                                planChangePreview.proposed.planKey ??
+                                "none"}{" "}
+                              · {planChangePreview.proposedPlanStatus ?? "—"}
+                            </p>
+                            <ul>
+                              {planChangePreview.proposed.effectiveModules
+                                .length ? (
+                                planChangePreview.proposed.effectiveModules.map(
+                                  (key) => (
+                                    <li key={`pc-proposed-${key}`}>
+                                      {planChangePreview.capabilityChanges.find(
+                                        (row) => row.key === key,
+                                      )?.label ?? key}
+                                    </li>
+                                  ),
+                                )
+                              ) : (
+                                <li>No modules proposed</li>
+                              )}
+                            </ul>
+                          </div>
+                        </div>
+
+                        <div className="kxd-commercial-admin__change-list">
+                          <h3>Added with this plan</h3>
+                          <ul>
+                            {planChangePreview.capabilityChanges.filter(
+                              (row) => row.kind === "added",
+                            ).length === 0 ? (
+                              <li>No new modules</li>
+                            ) : (
+                              planChangePreview.capabilityChanges
+                                .filter((row) => row.kind === "added")
+                                .map((row) => (
+                                  <li
+                                    key={`pc-add-${row.key}`}
+                                    data-kind="added"
+                                  >
+                                    Added · {row.label}
+                                  </li>
+                                ))
+                            )}
+                          </ul>
+                          <h3>Still included</h3>
+                          <ul>
+                            {planChangePreview.capabilityChanges.filter(
+                              (row) => row.kind === "unchanged",
+                            ).length === 0 ? (
+                              <li>None</li>
+                            ) : (
+                              planChangePreview.capabilityChanges
+                                .filter((row) => row.kind === "unchanged")
+                                .map((row) => (
+                                  <li
+                                    key={`pc-same-${row.key}`}
+                                    data-kind="unchanged"
+                                  >
+                                    Still included · {row.label}
+                                  </li>
+                                ))
+                            )}
+                          </ul>
+                          {planChangePreview.hasRemovals ? (
+                            <>
+                              <h3>No longer included</h3>
+                              <ul>
+                                {planChangePreview.capabilityChanges
+                                  .filter((row) => row.kind === "removed")
+                                  .map((row) => (
+                                    <li
+                                      key={`pc-rm-${row.key}`}
+                                      data-kind="removed"
+                                    >
+                                      Removed · {row.label}
+                                    </li>
+                                  ))}
+                              </ul>
+                            </>
+                          ) : null}
+                          <h3>Not changed</h3>
+                          <ul>
+                            {planChangePreview.unchangedSystems.map((row) => (
+                              <li key={row.id} data-kind="excluded">
+                                Excluded · {row.label}
+                              </li>
+                            ))}
+                          </ul>
+                          <p className="kxd-commercial-admin__muted">
+                            {planChangePreview.moduleDataNote}
+                          </p>
+                          <p className="kxd-commercial-admin__muted">
+                            {planChangePreview.overrideHandling}
+                          </p>
+                        </div>
+
+                        {planChangePhase === "result" && planChangeResult ? (
+                          <p
+                            className={
+                              planChangeResult.status === "changed" ||
+                              planChangeResult.status === "aligned"
+                                ? "kxd-commercial-admin__success"
+                                : "kxd-commercial-admin__error"
+                            }
+                            role="status"
+                          >
+                            {planChangeResult.message}
+                          </p>
+                        ) : null}
+
+                        {planChangePreview.canChange &&
+                        planChangePhase !== "result" ? (
+                          <div className="kxd-commercial-admin__confirm">
+                            <p>
+                              This {planChangePreview.classificationLabel?.toLowerCase() ?? "plan change"}{" "}
+                              moves <strong>{planChangePreview.clientName}</strong>{" "}
+                              from{" "}
+                              <strong>
+                                {planChangePreview.currentPlanLabel}
+                              </strong>{" "}
+                              to{" "}
+                              <strong>
+                                {planChangePreview.proposedPlanLabel}
+                              </strong>
+                              . Client access will change. Billing, providers,
+                              and infrastructure are not changed.
+                            </p>
+                            <label className="kxd-commercial-admin__ack">
+                              <input
+                                type="checkbox"
+                                checked={planChangeAcknowledged}
+                                onChange={(e) =>
+                                  setPlanChangeAcknowledged(e.target.checked)
+                                }
+                                disabled={planChangeLoading}
+                              />
+                              <span>
+                                I understand this will change client access for
+                                this plan assignment.
+                              </span>
+                            </label>
+                            {planChangePreview.hasRemovals ? (
+                              <label className="kxd-commercial-admin__ack">
+                                <input
+                                  type="checkbox"
+                                  checked={removalsAcknowledged}
+                                  onChange={(e) =>
+                                    setRemovalsAcknowledged(e.target.checked)
+                                  }
+                                  disabled={planChangeLoading}
+                                />
+                                <span>
+                                  I understand that the listed modules will no
+                                  longer be included in this client’s plan.
+                                </span>
+                              </label>
+                            ) : null}
+                            <div className="kxd-commercial-admin__actions">
+                              <button
+                                type="button"
+                                className="kxd-commercial-admin__save"
+                                onClick={() => void confirmPlanChange()}
+                                disabled={
+                                  !planChangeAcknowledged ||
+                                  (planChangePreview.hasRemovals &&
+                                    !removalsAcknowledged) ||
+                                  planChangeLoading
+                                }
+                              >
+                                {planChangeLoading
+                                  ? "Updating…"
+                                  : confirmPlanChangeActionLabel(
+                                      planChangePreview.classification,
+                                    )}
+                              </button>
+                              <button
+                                type="button"
+                                className="kxd-commercial-admin__text-btn"
+                                onClick={resetPlanChange}
+                                disabled={planChangeLoading}
+                              >
+                                Cancel review
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="kxd-commercial-admin__actions">
+                            {planChangePreview.alreadyAligned ? (
+                              <p className="kxd-commercial-admin__muted">
+                                Plan already aligned — no change needed.
+                              </p>
+                            ) : null}
+                            <button
+                              type="button"
+                              className="kxd-commercial-admin__text-btn"
+                              onClick={resetPlanChange}
+                              disabled={planChangeLoading}
+                            >
+                              Close review
+                            </button>
+                            {planChangeError?.includes("out of date") ||
+                            planChangeError?.includes("fresh") ? (
+                              <button
+                                type="button"
+                                className="kxd-commercial-admin__secondary"
+                                onClick={() => void reviewPlanChange()}
+                                disabled={planChangeLoading}
+                              >
+                                Refresh preview
+                              </button>
+                            ) : null}
+                          </div>
+                        )}
+                      </>
+                    ) : planChangeLoading ? (
+                      <p className="kxd-commercial-admin__muted">
+                        Generating plan-change preview…
                       </p>
                     ) : null}
                   </div>

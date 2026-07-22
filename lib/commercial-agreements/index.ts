@@ -54,3 +54,25 @@ export {
 } from "./activation-logic";
 export type { ActivationClientState } from "./activation-logic";
 export { ACTIVATION_EXCLUDED_ACTIONS } from "./activation-types";
+export type {
+  PlanChangeBlockCode,
+  PlanChangeEligibilityStatus,
+  PlanChangePreview,
+  PlanChangeResult,
+  PlanChangeResultStatus,
+} from "./plan-change-types";
+export {
+  PLAN_CHANGE_EXCLUDED_ACTIONS,
+  PLAN_CHANGE_MODULE_DATA_NOTE,
+} from "./plan-change-types";
+export {
+  PLAN_CHANGE_SOURCE_KEYS,
+  buildPlanChangeFingerprint,
+  buildPlanChangePreview,
+  confirmPlanChangeActionLabel,
+  evaluatePlanChangeEligibility,
+  hasAgreementPlanMismatch,
+  isPlanChangeSourceKey,
+  parsePlanChangeRequestBody,
+  planChangeClassificationLabel,
+} from "./plan-change-logic";
