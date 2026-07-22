@@ -16015,6 +16015,16 @@ a.kxd-exec-today__row:hover {
   font-size: 0.9rem;
 }
 
+.kxd-commercial-admin__billing .kxd-commercial-admin__meta {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (max-width: 720px) {
+  .kxd-commercial-admin__billing .kxd-commercial-admin__meta {
+    grid-template-columns: 1fr;
+  }
+}
+
 .kxd-commercial-admin__field input[readonly] {
   background: color-mix(in srgb, var(--kxd-os-border, #ddd) 18%, #fff);
   color: var(--kxd-os-text-muted);

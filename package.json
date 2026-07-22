@@ -33,6 +33,7 @@
     "verify:commercial-plan-change": "tsx scripts/verify-commercial-plan-change.ts",
     "verify:commercial-legacy-conversion": "tsx scripts/verify-commercial-legacy-conversion.ts",
     "verify:commercial-custom-plan": "tsx scripts/verify-commercial-custom-plan.ts",
+    "verify:commercial-billing-readiness": "tsx scripts/verify-commercial-billing-readiness.ts",
     "verify:client-plans": "tsx scripts/verify-client-plans-entitlements.ts",
     "verify:client-upgrade-requests": "tsx scripts/verify-client-upgrade-requests.ts",
     "verify:client-inventory": "tsx scripts/verify-client-inventory.ts",

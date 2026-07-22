@@ -25,6 +25,7 @@ import {
   listCommercialAgreements,
   type ActivationPreview,
   type ActivationResult,
+  type BillingReadinessSnapshot,
   type ClientCommercialAgreementRecord,
   type CommercialAgreementFieldErrors,
   type CommercialAgreementId,
@@ -34,6 +35,8 @@ import {
   type LegacyConversionResult,
   type PlanChangePreview,
   type PlanChangeResult,
+  billingReadinessStatusLabel,
+  isBillingReviewAvailable,
 } from "@/lib/commercial-agreements";
 import { PARTNERSHIP_ADD_ONS } from "@/lib/partnerships/packages";
 
@@ -109,11 +112,19 @@ type CustomPlanMutationResponse = {
   result?: CustomPlanResult;
 };
 
+type BillingReadinessResponse = {
+  ok?: boolean;
+  message?: string;
+  snapshot?: BillingReadinessSnapshot;
+  notice?: string;
+};
+
 type EditorMode = "idle" | "edit" | "create";
 type ActivationPhase = "closed" | "preview" | "result";
 type PlanChangePhase = "closed" | "preview" | "result";
 type LegacyConversionPhase = "closed" | "preview" | "result";
 type CustomPlanPhase = "closed" | "preview" | "result";
+type BillingReadinessPhase = "closed" | "review";
 type Draft = {
   commercialAgreementId: CommercialAgreementId | "";
   monthlyRetainerAmount: string;
@@ -155,6 +166,17 @@ function fmtMoney(value: number | null): string {
     style: "currency",
     currency: "USD",
     maximumFractionDigits: 0,
+  }).format(value);
+}
+
+function fmtMoneyExact(value: number | null, presence?: string): string {
+  if (presence === "null" || value == null) return "Unset (null)";
+  if (presence === "zero") return "$0.00 (explicit zero)";
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(value);
 }
 
@@ -260,6 +282,13 @@ export function CommercialAgreementsScreen() {
     [],
   );
 
+  const [billingPhase, setBillingPhase] =
+    useState<BillingReadinessPhase>("closed");
+  const [billingSnapshot, setBillingSnapshot] =
+    useState<BillingReadinessSnapshot | null>(null);
+  const [billingLoading, setBillingLoading] = useState(false);
+  const [billingError, setBillingError] = useState<string | null>(null);
+
   const dirty = mode !== "idle" && !draftsEqual(draft, baseline);
 
   function resetActivation() {
@@ -301,15 +330,27 @@ export function CommercialAgreementsScreen() {
     setCustomSelectedModules([]);
   }
 
+  function resetBillingReadiness() {
+    setBillingPhase("closed");
+    setBillingSnapshot(null);
+    setBillingLoading(false);
+    setBillingError(null);
+  }
+
   function resetReviews() {
     resetActivation();
     resetPlanChange();
     resetLegacyConversion();
     resetCustomPlan();
+    resetBillingReadiness();
   }
 
   const anyReviewLoading =
-    activationLoading || planChangeLoading || legacyLoading || customLoading;
+    activationLoading ||
+    planChangeLoading ||
+    legacyLoading ||
+    customLoading ||
+    billingLoading;
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -390,6 +431,7 @@ export function CommercialAgreementsScreen() {
     resetPlanChange();
     resetLegacyConversion();
     resetCustomPlan();
+    resetBillingReadiness();
     setActivationLoading(true);
     setActivationError(null);
     setActivationResult(null);
@@ -487,6 +529,7 @@ export function CommercialAgreementsScreen() {
     resetActivation();
     resetLegacyConversion();
     resetCustomPlan();
+    resetBillingReadiness();
     setPlanChangeLoading(true);
     setPlanChangeError(null);
     setPlanChangeResult(null);
@@ -595,6 +638,7 @@ export function CommercialAgreementsScreen() {
     resetActivation();
     resetPlanChange();
     resetCustomPlan();
+    resetBillingReadiness();
     setLegacyLoading(true);
     setLegacyError(null);
     setLegacyResult(null);
@@ -697,6 +741,7 @@ export function CommercialAgreementsScreen() {
     resetActivation();
     resetPlanChange();
     resetLegacyConversion();
+    resetBillingReadiness();
     setCustomLoading(true);
     setCustomError(null);
     setCustomResult(null);
@@ -732,6 +777,43 @@ export function CommercialAgreementsScreen() {
       setCustomPhase("preview");
     } finally {
       setCustomLoading(false);
+    }
+  }
+
+  async function reviewBillingReadiness() {
+    if (!selectedId || anyReviewLoading) {
+      return;
+    }
+    resetActivation();
+    resetPlanChange();
+    resetLegacyConversion();
+    resetCustomPlan();
+    setBillingLoading(true);
+    setBillingError(null);
+    setBillingSnapshot(null);
+    try {
+      const res = await fetch(
+        `/api/admin/commercial-agreements/${selectedId}/billing-readiness`,
+        {
+          method: "GET",
+          credentials: "same-origin",
+        },
+      );
+      const json = (await res.json()) as BillingReadinessResponse;
+      if (!res.ok || !json.ok || !json.snapshot) {
+        throw new Error(
+          json.message || "Unable to assess billing readiness.",
+        );
+      }
+      setBillingSnapshot(json.snapshot);
+      setBillingPhase("review");
+    } catch (err) {
+      setBillingError(
+        err instanceof Error ? err.message : "Unable to assess billing readiness.",
+      );
+      setBillingPhase("review");
+    } finally {
+      setBillingLoading(false);
     }
   }
 
@@ -1015,6 +1097,11 @@ export function CommercialAgreementsScreen() {
   const isExistingCustomAssignment =
     detail?.planKey === "custom" &&
     (detail.planStatus === "active" || detail.planStatus === "trial");
+  const showBillingReview =
+    Boolean(detail) &&
+    isBillingReviewAvailable({
+      commercialAgreementId: detail!.commercialAgreementId,
+    });
 
   return (
     <OperationsShell activeId="commercial-agreements">
@@ -1502,6 +1589,25 @@ export function CommercialAgreementsScreen() {
                           ? "Review custom plan"
                           : "Build custom plan"}
                     </button>
+                  ) : null}
+                  {showBillingReview ? (
+                    <button
+                      type="button"
+                      className="kxd-commercial-admin__secondary"
+                      onClick={() => void reviewBillingReadiness()}
+                      disabled={anyReviewLoading}
+                      aria-label="Review billing readiness"
+                    >
+                      {billingLoading && billingPhase === "closed"
+                        ? "Preparing…"
+                        : "Review billing readiness"}
+                    </button>
+                  ) : null}
+                  {showBillingReview ? (
+                    <p className="kxd-commercial-admin__muted">
+                      Billing review available · No billing action performed from
+                      this workspace
+                    </p>
                   ) : null}
                   {showLegacyNeedsAgreement ? (
                     <p className="kxd-commercial-admin__muted">
@@ -2689,6 +2795,256 @@ export function CommercialAgreementsScreen() {
                     ) : customLoading ? (
                       <p className="kxd-commercial-admin__muted">
                         Generating custom-plan preview…
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
+
+                {billingPhase !== "closed" ? (
+                  <div
+                    className="kxd-commercial-admin__activation kxd-commercial-admin__billing"
+                    role="region"
+                    aria-label="Billing readiness review"
+                    aria-busy={billingLoading}
+                  >
+                    <OpsSectionHead label="Billing readiness" />
+                    <p className="kxd-commercial-admin__callout" role="note">
+                      Internal readiness assessment only. No charge, Stripe object,
+                      subscription, invoice, or payment is created from this review.
+                    </p>
+
+                    {billingError ? (
+                      <p className="kxd-commercial-admin__error" role="alert">
+                        {billingError}
+                      </p>
+                    ) : null}
+
+                    {billingSnapshot ? (
+                      <>
+                        <p
+                          className={
+                            billingSnapshot.readiness === "blocked" ||
+                            billingSnapshot.readiness === "state_mismatch"
+                              ? "kxd-commercial-admin__status kxd-commercial-admin__status--blocked"
+                              : billingSnapshot.readiness ===
+                                    "ready_for_review" ||
+                                  billingSnapshot.readiness ===
+                                    "ready_for_future_sync"
+                                ? "kxd-commercial-admin__status kxd-commercial-admin__status--active"
+                                : "kxd-commercial-admin__status"
+                          }
+                          role="status"
+                        >
+                          {billingReadinessStatusLabel(billingSnapshot.readiness)}
+                          {" · "}
+                          {billingSnapshot.readinessExplanation}
+                        </p>
+
+                        <dl className="kxd-commercial-admin__meta">
+                          <div>
+                            <dt>Client</dt>
+                            <dd>
+                              {billingSnapshot.clientName} (#{billingSnapshot.clientId})
+                            </dd>
+                          </div>
+                          <div>
+                            <dt>Agreement</dt>
+                            <dd>
+                              {billingSnapshot.agreementName ?? "—"}
+                              {billingSnapshot.agreementId
+                                ? ` · ${billingSnapshot.agreementId}`
+                                : ""}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt>Plan and access</dt>
+                            <dd>
+                              {billingSnapshot.planKey ?? "null"} ·{" "}
+                              {billingSnapshot.planStatus ?? "null"} ·{" "}
+                              {billingSnapshot.assignmentClassification}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt>Commercial-to-plan alignment</dt>
+                            <dd>{billingSnapshot.alignment.explanation}</dd>
+                          </div>
+                          <div>
+                            <dt>One-time amount (setup fee)</dt>
+                            <dd>
+                              {fmtMoneyExact(
+                                billingSnapshot.setupFee.amount,
+                                billingSnapshot.setupFee.presence,
+                              )}{" "}
+                              · {billingSnapshot.setupFee.classification} ·{" "}
+                              {billingSnapshot.setupFee.kind}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt>Monthly amount (retainer)</dt>
+                            <dd>
+                              {fmtMoneyExact(
+                                billingSnapshot.monthlyRetainer.amount,
+                                billingSnapshot.monthlyRetainer.presence,
+                              )}{" "}
+                              · {billingSnapshot.monthlyRetainer.classification} ·{" "}
+                              {billingSnapshot.monthlyRetainer.kind}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt>Monthly service credits</dt>
+                            <dd>
+                              {billingSnapshot.monthlyServiceCredits.presence ===
+                              "null"
+                                ? "Unset (null)"
+                                : String(
+                                    billingSnapshot.monthlyServiceCredits.amount,
+                                  )}{" "}
+                              · capacity only (not cash)
+                            </dd>
+                          </div>
+                          <div>
+                            <dt>Currency</dt>
+                            <dd>
+                              {billingSnapshot.currency.authoritative
+                                ? billingSnapshot.currency.code
+                                : "Not authoritative"}{" "}
+                              · documented unit:{" "}
+                              {billingSnapshot.currency.documentedFieldUnit ?? "—"}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt>Billing cadence</dt>
+                            <dd>
+                              Retainer:{" "}
+                              {billingSnapshot.cadence.retainerCadence ?? "—"}
+                              {" · "}
+                              Profile preference:{" "}
+                              {billingSnapshot.cadence.profileInvoiceCadence ??
+                                "—"}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt>Billing contact</dt>
+                            <dd>
+                              {billingSnapshot.billingContact.present
+                                ? [
+                                    billingSnapshot.billingContact.contactName,
+                                    billingSnapshot.billingContact.email,
+                                  ]
+                                    .filter(Boolean)
+                                    .join(" · ")
+                                : "Missing"}
+                            </dd>
+                          </div>
+                        </dl>
+
+                        {billingSnapshot.commercialAddOns.length > 0 ? (
+                          <div className="kxd-commercial-admin__change-list">
+                            <h3>Commercial add-ons</h3>
+                            <ul>
+                              {billingSnapshot.commercialAddOns.map((row) => (
+                                <li key={row.id}>
+                                  {row.label} · {row.classification}
+                                  {row.pricingNote ? ` · ${row.pricingNote}` : ""}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ) : (
+                          <p className="kxd-commercial-admin__muted">
+                            No commercial add-ons recorded.
+                          </p>
+                        )}
+
+                        {billingSnapshot.missingRequired.length > 0 ? (
+                          <div className="kxd-commercial-admin__change-list">
+                            <h3>Missing billing information</h3>
+                            <ul>
+                              {billingSnapshot.missingRequired.map((row) => (
+                                <li key={row}>{row}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        ) : null}
+
+                        {billingSnapshot.blockers.length > 0 ? (
+                          <ul className="kxd-commercial-admin__blockers">
+                            {billingSnapshot.blockers.map((row) => (
+                              <li key={row.code}>{row.message}</li>
+                            ))}
+                          </ul>
+                        ) : null}
+
+                        {billingSnapshot.warnings.length > 0 ? (
+                          <ul className="kxd-commercial-admin__warnings">
+                            {billingSnapshot.warnings.map((warning) => (
+                              <li key={warning}>{warning}</li>
+                            ))}
+                          </ul>
+                        ) : null}
+
+                        {billingSnapshot.externalIdentities.length > 0 ? (
+                          <div className="kxd-commercial-admin__change-list">
+                            <h3>External identities (sanitized)</h3>
+                            <ul>
+                              {billingSnapshot.externalIdentities.map((row) => (
+                                <li key={`${row.provider}-${row.field}`}>
+                                  {row.provider} · {row.field} ·{" "}
+                                  {row.sanitizedId ?? "present"}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ) : (
+                          <p className="kxd-commercial-admin__muted">
+                            No external billing identity stored.
+                          </p>
+                        )}
+
+                        <div className="kxd-commercial-admin__change-list">
+                          <h3>Future Stripe mapping summary</h3>
+                          <ul>
+                            <li>{billingSnapshot.futureStripeMapping.clientToCustomer}</li>
+                            <li>{billingSnapshot.futureStripeMapping.setupFee}</li>
+                            <li>
+                              {billingSnapshot.futureStripeMapping.monthlyRetainer}
+                            </li>
+                            <li>
+                              {billingSnapshot.futureStripeMapping.catalogStrategy}
+                            </li>
+                            <li>
+                              {billingSnapshot.futureStripeMapping.explicitNotice}
+                            </li>
+                          </ul>
+                        </div>
+
+                        <div className="kxd-commercial-admin__change-list">
+                          <h3>Systems unchanged</h3>
+                          <ul>
+                            {billingSnapshot.systemsUnchanged.map((row) => (
+                              <li key={row}>{row}</li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        <p className="kxd-commercial-admin__muted">
+                          Fingerprint {billingSnapshot.fingerprint}
+                        </p>
+
+                        <div className="kxd-commercial-admin__actions">
+                          <button
+                            type="button"
+                            className="kxd-commercial-admin__text-btn"
+                            onClick={resetBillingReadiness}
+                            disabled={billingLoading}
+                          >
+                            Close review
+                          </button>
+                        </div>
+                      </>
+                    ) : billingLoading ? (
+                      <p className="kxd-commercial-admin__muted" role="status">
+                        Assessing billing readiness…
                       </p>
                     ) : null}
                   </div>
