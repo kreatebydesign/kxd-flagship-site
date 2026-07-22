@@ -99,16 +99,20 @@ export function getStripeExecutionGate(): StripeExecutionGateSnapshot {
 }
 
 /**
- * Phase 37I narrows commercial Stripe network ops to test-mode
- * `customer_lookup` and `reconciliation_read` only. All mutation classes
+ * Phase 37I/37J: test-mode customer_lookup, reconciliation_read, and
+ * customer_create are narrowly authorized. All other mutation classes
  * remain closed via STRIPE_COMMERCIAL_EXECUTION_AUTHORIZED.
  */
 export function isCommercialStripeOperationAllowed(
   operation: StripeOperationClass,
 ): boolean {
   if (operation === "configuration_readiness") return true;
-  if (operation === "customer_lookup" || operation === "reconciliation_read") {
-    // Phase 37I test-mode reads — still require structural test-mode gate at call site.
+  if (
+    operation === "customer_lookup" ||
+    operation === "reconciliation_read" ||
+    operation === "customer_create"
+  ) {
+    // Narrow Phase 37I/37J ops — still require structural test-mode gate at call site.
     return true;
   }
   if (operation === "webhook_receive") {

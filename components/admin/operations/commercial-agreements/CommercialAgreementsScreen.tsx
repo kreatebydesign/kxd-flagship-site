@@ -59,6 +59,11 @@ import {
   type StripeCustomerReconciliationSnapshot,
   type StripeCustomerSearchResult,
 } from "@/lib/stripe/customer-linking-types";
+import {
+  STRIPE_CUSTOMER_CREATE_NOTICES,
+  type StripeCustomerCreatePreview,
+  type StripeCustomerCreateResult,
+} from "@/lib/stripe/customer-creation-types";
 import { PARTNERSHIP_ADD_ONS } from "@/lib/partnerships/packages";
 
 type ListResponse = {
@@ -236,6 +241,20 @@ type StripeCustomerReconcileResponse = {
   ok?: boolean;
   message?: string;
   reconciliation?: StripeCustomerReconciliationSnapshot;
+  notice?: string;
+};
+
+type StripeCustomerCreatePreviewResponse = {
+  ok?: boolean;
+  message?: string;
+  preview?: StripeCustomerCreatePreview;
+  notice?: string;
+};
+
+type StripeCustomerCreateMutationResponse = {
+  ok?: boolean;
+  message?: string;
+  result?: StripeCustomerCreateResult;
   notice?: string;
 };
 
@@ -570,6 +589,16 @@ export function CommercialAgreementsScreen() {
     string | null
   >(null);
   const [unlinkConfirmed, setUnlinkConfirmed] = useState(false);
+  const [createPreview, setCreatePreview] =
+    useState<StripeCustomerCreatePreview | null>(null);
+  const [createResult, setCreateResult] =
+    useState<StripeCustomerCreateResult | null>(null);
+  const [busyCreatingPreview, setBusyCreatingPreview] = useState(false);
+  const [busyCreating, setBusyCreating] = useState(false);
+  const [ackInformationalDuplicates, setAckInformationalDuplicates] =
+    useState(false);
+  const [ackCreateNoActivate, setAckCreateNoActivate] = useState(false);
+  const [createConfirmed, setCreateConfirmed] = useState(false);
   const [busyConnecting, setBusyConnecting] = useState(false);
   const [busySearching, setBusySearching] = useState(false);
   const [busyLinking, setBusyLinking] = useState(false);
@@ -661,6 +690,13 @@ export function CommercialAgreementsScreen() {
     setLinkConfirmed(false);
     setUnlinkPreviewFingerprint(null);
     setUnlinkConfirmed(false);
+    setCreatePreview(null);
+    setCreateResult(null);
+    setBusyCreatingPreview(false);
+    setBusyCreating(false);
+    setAckInformationalDuplicates(false);
+    setAckCreateNoActivate(false);
+    setCreateConfirmed(false);
     setBusyConnecting(false);
     setBusySearching(false);
     setBusyLinking(false);
@@ -687,7 +723,9 @@ export function CommercialAgreementsScreen() {
     billingLoading ||
     billingConfigLoading ||
     stripeReadinessLoading ||
-    stripeLinkingLoading;
+    stripeLinkingLoading ||
+    busyCreatingPreview ||
+    busyCreating;
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -1435,6 +1473,11 @@ export function CommercialAgreementsScreen() {
     setLinkConfirmed(false);
     setUnlinkPreviewFingerprint(null);
     setUnlinkConfirmed(false);
+    setCreatePreview(null);
+    setCreateResult(null);
+    setAckInformationalDuplicates(false);
+    setAckCreateNoActivate(false);
+    setCreateConfirmed(false);
     if (typeof nextId === "number" && Number.isInteger(nextId) && nextId > 0) {
       const row = eligibleClients.find((c) => c.clientId === nextId);
       if (row?.stripeCustomerId) {
@@ -1704,6 +1747,145 @@ export function CommercialAgreementsScreen() {
       );
     } finally {
       setBusyReconciling(false);
+    }
+  }
+
+  async function previewStripeCustomerCreate() {
+    if (
+      busyCreatingPreview ||
+      busyCreating ||
+      linkClientId === ""
+    ) {
+      return;
+    }
+    const selected = eligibleClients.find((c) => c.clientId === linkClientId);
+    if (!selected?.eligible || !selected.billingProfileId) {
+      return;
+    }
+    setBusyCreatingPreview(true);
+    setStripeLinkingError(null);
+    setCreatePreview(null);
+    setCreateResult(null);
+    setCreateConfirmed(false);
+    try {
+      const res = await fetch(
+        `/api/admin/commercial-agreements/stripe-customers/create-preview`,
+        {
+          method: "POST",
+          credentials: "same-origin",
+          cache: "no-store",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            clientId: linkClientId,
+            acknowledgeInformationalDuplicates: ackInformationalDuplicates,
+          }),
+        },
+      );
+      const json = (await res.json()) as StripeCustomerCreatePreviewResponse;
+      if (!res.ok || !json.ok || !json.preview) {
+        throw new Error(
+          json.message || "Unable to preview Stripe customer creation.",
+        );
+      }
+      setCreatePreview(json.preview);
+    } catch (err) {
+      setStripeLinkingError(
+        err instanceof Error
+          ? err.message
+          : "Unable to preview Stripe customer creation.",
+      );
+    } finally {
+      setBusyCreatingPreview(false);
+    }
+  }
+
+  async function confirmStripeCustomerCreate() {
+    if (
+      busyCreating ||
+      busyCreatingPreview ||
+      !createPreview ||
+      linkClientId === "" ||
+      !createConfirmed ||
+      !ackCreateNoActivate
+    ) {
+      return;
+    }
+    if (
+      createPreview.requiresInformationalDuplicateAck &&
+      !ackInformationalDuplicates
+    ) {
+      return;
+    }
+    if (!createPreview.canCreate) {
+      return;
+    }
+    const selected = eligibleClients.find((c) => c.clientId === linkClientId);
+    if (!selected?.eligible || !selected.billingProfileId) {
+      setStripeLinkingError(
+        "Selected client has no eligible billing profile for test customer creation.",
+      );
+      return;
+    }
+    setBusyCreating(true);
+    setStripeLinkingError(null);
+    try {
+      const res = await fetch(
+        `/api/admin/commercial-agreements/stripe-customers/create`,
+        {
+          method: "POST",
+          credentials: "same-origin",
+          cache: "no-store",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            clientId: linkClientId,
+            billingProfileId: selected.billingProfileId,
+            previewFingerprint: createPreview.previewFingerprint,
+            confirmed: true,
+            creatingTestCustomerDoesNotActivateBilling: true,
+            acknowledgeInformationalDuplicates: ackInformationalDuplicates,
+          }),
+        },
+      );
+      const json = (await res.json()) as StripeCustomerCreateMutationResponse;
+      if (!json.result) {
+        throw new Error(
+          json.message || "Unable to create Stripe test customer.",
+        );
+      }
+      setCreateResult(json.result);
+      if (
+        json.result.outcome === "created" ||
+        json.result.outcome === "recovered" ||
+        json.result.outcome === "unchanged"
+      ) {
+        setEligibleClients((prev) =>
+          prev.map((row) =>
+            row.clientId === linkClientId
+              ? {
+                  ...row,
+                  mappingStatus:
+                    json.result!.mappingStatus ?? row.mappingStatus,
+                  stripeCustomerId:
+                    json.result!.stripeCustomerId ?? row.stripeCustomerId,
+                  reason: json.result!.stripeCustomerId
+                    ? "Eligible · mapping present"
+                    : row.reason,
+                }
+              : row,
+          ),
+        );
+        if (json.result.stripeCustomerId) {
+          await loadUnlinkPreviewForClient(linkClientId);
+        }
+      }
+    } catch (err) {
+      setStripeLinkingError(
+        err instanceof Error
+          ? err.message
+          : "Unable to create Stripe test customer.",
+      );
+    } finally {
+      setBusyCreating(false);
     }
   }
 
@@ -2266,7 +2448,9 @@ export function CommercialAgreementsScreen() {
               busySearching ||
               busyLinking ||
               busyReconciling ||
-              busyUnlinking
+              busyUnlinking ||
+              busyCreatingPreview ||
+              busyCreating
             }
           >
             <OpsSectionHead label="Stripe customer linking" />
@@ -2361,7 +2545,9 @@ export function CommercialAgreementsScreen() {
                         busySearching ||
                         busyLinking ||
                         busyUnlinking ||
-                        busyReconciling
+                        busyReconciling ||
+                        busyCreatingPreview ||
+                        busyCreating
                       }
                       aria-label="Select client for Stripe customer linking"
                     >
@@ -2772,6 +2958,289 @@ export function CommercialAgreementsScreen() {
             </div>
 
             <div className="kxd-commercial-admin__change-list">
+              <h3>Create test customer</h3>
+              <p className="kxd-commercial-admin__callout" role="note">
+                Creates one Stripe test customer and links it internally. No
+                subscription, invoice, payment, or access change. Live mode is
+                disabled. Customer deletion is not available in this phase.
+              </p>
+              {STRIPE_CUSTOMER_CREATE_NOTICES.length > 0 ? (
+                <ul>
+                  {STRIPE_CUSTOMER_CREATE_NOTICES.map((row) => (
+                    <li key={row}>{row}</li>
+                  ))}
+                </ul>
+              ) : null}
+              {eligibleClients.length === 0 || linkClientId === "" ? (
+                <p className="kxd-commercial-admin__muted" role="status">
+                  Test customer creation is unavailable until a billing profile
+                  exists and a client is selected. Profiles are not
+                  auto-created.
+                </p>
+              ) : !selectedLinkClient?.eligible ||
+                !selectedLinkClient.billingProfileId ? (
+                <p className="kxd-commercial-admin__muted" role="status">
+                  Creation is unavailable for this selection. An eligible
+                  billing profile is required.
+                </p>
+              ) : (
+                <>
+                  <div className="kxd-commercial-admin__actions">
+                    <button
+                      type="button"
+                      className="kxd-commercial-admin__secondary"
+                      onClick={() => void previewStripeCustomerCreate()}
+                      disabled={busyCreatingPreview || busyCreating}
+                      aria-label="Review Stripe test customer creation preview"
+                    >
+                      {busyCreatingPreview
+                        ? "Preparing preview…"
+                        : "Review creation preview"}
+                    </button>
+                  </div>
+
+                  {createPreview ? (
+                    <>
+                      <p
+                        className="kxd-commercial-admin__status"
+                        role="status"
+                      >
+                        {createPreview.canCreate
+                          ? "Creation preview ready"
+                          : "Creation preview blocked"}
+                        {" · "}
+                        {createPreview.clientName}
+                        {" · Account "}
+                        {createPreview.accountId}
+                        {" · Mode "}
+                        {createPreview.mode}
+                      </p>
+                      <dl className="kxd-commercial-admin__meta">
+                        <div>
+                          <dt>Name</dt>
+                          <dd>{createPreview.payload.name}</dd>
+                        </div>
+                        <div>
+                          <dt>Email</dt>
+                          <dd>{createPreview.payload.emailMasked}</dd>
+                        </div>
+                        <div>
+                          <dt>Metadata keys</dt>
+                          <dd>
+                            {createPreview.payload.metadataKeys.join(", ") ||
+                              "None"}
+                          </dd>
+                        </div>
+                      </dl>
+                      <p className="kxd-commercial-admin__muted">
+                        Fingerprint {createPreview.previewFingerprint}
+                      </p>
+                      {createPreview.blockers.length > 0 ? (
+                        <ul className="kxd-commercial-admin__blockers">
+                          {createPreview.blockers.map((row) => (
+                            <li key={`${row.code}-${row.message}`}>
+                              {row.message}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
+                      {createPreview.warnings.length > 0 ? (
+                        <ul>
+                          {createPreview.warnings.map((row) => (
+                            <li key={row}>{row}</li>
+                          ))}
+                        </ul>
+                      ) : null}
+                      {createPreview.informationalEmailNameMatches.length >
+                      0 ? (
+                        <div>
+                          <p className="kxd-commercial-admin__muted">
+                            Informational email/name matches (not blockers by
+                            themselves):
+                          </p>
+                          <ul>
+                            {createPreview.informationalEmailNameMatches.map(
+                              (row) => (
+                                <li key={row.stripeCustomerId}>
+                                  {row.displayName || row.stripeCustomerId}
+                                  {" · "}
+                                  {row.billingEmailMasked || "email hidden"}
+                                  {" · "}
+                                  {row.note}
+                                </li>
+                              ),
+                            )}
+                          </ul>
+                        </div>
+                      ) : null}
+                      {createPreview.existingMetadataMatches.length > 0 ? (
+                        <ul className="kxd-commercial-admin__blockers">
+                          {createPreview.existingMetadataMatches.map((row) => (
+                            <li key={row.stripeCustomerId}>
+                              {row.stripeCustomerId}
+                              {" · "}
+                              {row.note}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
+                      {createPreview.notices.length > 0 ? (
+                        <ul>
+                          {createPreview.notices.map((row) => (
+                            <li key={row}>{row}</li>
+                          ))}
+                        </ul>
+                      ) : null}
+
+                      {createPreview.requiresInformationalDuplicateAck ? (
+                        <label className="kxd-commercial-admin__ack">
+                          <input
+                            type="checkbox"
+                            checked={ackInformationalDuplicates}
+                            onChange={(e) => {
+                              const next = e.target.checked;
+                              setAckInformationalDuplicates(next);
+                              setCreateConfirmed(false);
+                              const clientId = linkClientId;
+                              if (typeof clientId !== "number") {
+                                return;
+                              }
+                              void (async () => {
+                                  if (busyCreatingPreview || busyCreating) {
+                                    return;
+                                  }
+                                  setBusyCreatingPreview(true);
+                                  setStripeLinkingError(null);
+                                  try {
+                                    const res = await fetch(
+                                      `/api/admin/commercial-agreements/stripe-customers/create-preview`,
+                                      {
+                                        method: "POST",
+                                        credentials: "same-origin",
+                                        cache: "no-store",
+                                        headers: {
+                                          "Content-Type": "application/json",
+                                        },
+                                        body: JSON.stringify({
+                                          clientId,
+                                          acknowledgeInformationalDuplicates:
+                                            next,
+                                        }),
+                                      },
+                                    );
+                                    const json =
+                                      (await res.json()) as StripeCustomerCreatePreviewResponse;
+                                    if (
+                                      !res.ok ||
+                                      !json.ok ||
+                                      !json.preview
+                                    ) {
+                                      throw new Error(
+                                        json.message ||
+                                          "Unable to preview Stripe customer creation.",
+                                      );
+                                    }
+                                    setCreatePreview(json.preview);
+                                  } catch (err) {
+                                    setStripeLinkingError(
+                                      err instanceof Error
+                                        ? err.message
+                                        : "Unable to preview Stripe customer creation.",
+                                    );
+                                  } finally {
+                                    setBusyCreatingPreview(false);
+                                  }
+                                })();
+                            }}
+                            disabled={busyCreatingPreview || busyCreating}
+                          />
+                          <span>
+                            I acknowledge informational email/name matches and
+                            still want to create a distinct test customer.
+                          </span>
+                        </label>
+                      ) : null}
+
+                      <label className="kxd-commercial-admin__ack">
+                        <input
+                          type="checkbox"
+                          checked={ackCreateNoActivate}
+                          onChange={(e) =>
+                            setAckCreateNoActivate(e.target.checked)
+                          }
+                          disabled={busyCreatingPreview || busyCreating}
+                        />
+                        <span>
+                          Creating a test customer does not activate billing,
+                          subscriptions, invoices, or access.
+                        </span>
+                      </label>
+                      <label className="kxd-commercial-admin__ack">
+                        <input
+                          type="checkbox"
+                          checked={createConfirmed}
+                          onChange={(e) =>
+                            setCreateConfirmed(e.target.checked)
+                          }
+                          disabled={busyCreatingPreview || busyCreating}
+                        />
+                        <span>
+                          I confirm creating one Stripe test customer and
+                          linking it internally after reviewing the preview.
+                        </span>
+                      </label>
+
+                      <div className="kxd-commercial-admin__actions">
+                        <button
+                          type="button"
+                          className="kxd-commercial-admin__secondary"
+                          onClick={() => void confirmStripeCustomerCreate()}
+                          disabled={
+                            busyCreating ||
+                            busyCreatingPreview ||
+                            !createPreview.canCreate ||
+                            !ackCreateNoActivate ||
+                            !createConfirmed ||
+                            (createPreview.requiresInformationalDuplicateAck &&
+                              !ackInformationalDuplicates)
+                          }
+                          aria-label="Confirm create Stripe test customer"
+                        >
+                          {busyCreating
+                            ? "Creating…"
+                            : "Confirm create test customer"}
+                        </button>
+                      </div>
+                    </>
+                  ) : null}
+
+                  {createResult ? (
+                    <p
+                      className="kxd-commercial-admin__status"
+                      role="status"
+                    >
+                      {createResult.outcome.replace(/_/g, " ")}
+                      {" · "}
+                      {createResult.message}
+                      {createResult.stripeCustomerId
+                        ? ` · ${createResult.stripeCustomerId}`
+                        : ""}
+                      {createResult.reconciliationStatus
+                        ? ` · ${stripeReconciliationStatusLabel(createResult.reconciliationStatus)}`
+                        : ""}
+                      {createResult.stripeCustomerCreated
+                        ? " · customer created"
+                        : ""}
+                      {createResult.activityEmitted
+                        ? " · activity emitted"
+                        : " · activity not emitted"}
+                    </p>
+                  ) : null}
+                </>
+              )}
+            </div>
+
+            <div className="kxd-commercial-admin__change-list">
               <h3>Reconciliation</h3>
               <p className="kxd-commercial-admin__muted">
                 Read-only comparison of internal mapping with external customer
@@ -2856,7 +3325,9 @@ export function CommercialAgreementsScreen() {
                   busySearching ||
                   busyLinking ||
                   busyReconciling ||
-                  busyUnlinking
+                  busyUnlinking ||
+                  busyCreatingPreview ||
+                  busyCreating
                 }
               >
                 Close review

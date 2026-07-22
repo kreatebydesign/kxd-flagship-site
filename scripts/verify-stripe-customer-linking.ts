@@ -86,16 +86,16 @@ async function main() {
   check(
     "mutation classes remain closed",
     STRIPE_COMMERCIAL_EXECUTION_AUTHORIZED === false &&
-      !isCommercialStripeOperationAllowed("customer_create") &&
       !isCommercialStripeOperationAllowed("subscription_create") &&
       !isCommercialStripeOperationAllowed("invoice_create") &&
       !isCommercialStripeOperationAllowed("checkout_create") &&
       !isCommercialStripeOperationAllowed("catalog_create"),
   );
   check(
-    "Phase 37I reads allowed by operation policy",
+    "Phase 37I reads and Phase 37J create allowed by operation policy",
     isCommercialStripeOperationAllowed("customer_lookup") &&
-      isCommercialStripeOperationAllowed("reconciliation_read"),
+      isCommercialStripeOperationAllowed("reconciliation_read") &&
+      isCommercialStripeOperationAllowed("customer_create"),
   );
 
   // Structural gate
@@ -517,8 +517,9 @@ async function main() {
   // Source guards
   const service = read("lib/stripe/customer-linking-service.ts");
   check(
-    "service never creates customers",
-    !service.includes("customers.create"),
+    "linking service never creates customers",
+    !service.includes("customers.create") &&
+      !service.includes("createCustomer"),
   );
   check(
     "service has no customers.update",
@@ -531,13 +532,10 @@ async function main() {
       !service.includes("checkout.sessions"),
   );
   check(
-    "adapter only reads account/customers",
+    "adapter retains account/customer reads",
     read("lib/stripe/commercial-stripe-adapter.ts").includes("accounts.retrieve") &&
       read("lib/stripe/commercial-stripe-adapter.ts").includes(
         "customers.retrieve",
-      ) &&
-      !read("lib/stripe/commercial-stripe-adapter.ts").includes(
-        "customers.create",
       ),
   );
 

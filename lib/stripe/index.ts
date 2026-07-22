@@ -89,6 +89,38 @@ export {
 
 export { createFakeCommercialStripeAdapter } from "./commercial-stripe-adapter";
 
+export type {
+  StripeCustomerCreateOutcome,
+  StripeCustomerCreatePreview,
+  StripeCustomerCreateResult,
+} from "./customer-creation-types";
+
+export {
+  KXD_STRIPE_BILLING_PROFILE_METADATA_KEY,
+  KXD_STRIPE_CREATION_INTENT_METADATA_KEY,
+  KXD_STRIPE_ENVIRONMENT_METADATA_KEY,
+  STRIPE_CUSTOMER_CREATE_METADATA_ALLOWLIST,
+  STRIPE_CUSTOMER_CREATE_NOTICES,
+  STRIPE_CUSTOMER_CREATE_SYSTEMS_UNCHANGED,
+} from "./customer-creation-types";
+
+export {
+  STRIPE_PHASE_37J_TEST_CREATE_AUTHORIZED,
+  assessCreateEligibility,
+  assessPhase37JCreateGate,
+  buildAllowlistedCreateMetadata,
+  buildCreatePreviewFingerprint,
+  buildCreationIntentVersion,
+  deriveStripeCustomerCreateIdempotencyKey,
+  normalizeCreateBillingEmail,
+  normalizeCreateCustomerName,
+  parseCreateApplyBody,
+  parseCreatePreviewBody,
+  rejectBrowserStripeCreateAuthority,
+  resolveAuthoritativeCustomerIdentity,
+  verifyCreatedCustomerOwnership,
+} from "./customer-creation-logic";
+
 export {
   STRIPE_CONFIG,
   buildStripeMetadata,

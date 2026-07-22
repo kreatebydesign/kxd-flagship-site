@@ -1,10 +1,11 @@
 /**
- * Phase 37I — Injectable Stripe commercial adapter.
- * Real adapter performs only authorized test-mode reads.
+ * Phase 37I/37J — Injectable Stripe commercial adapter.
+ * Reads: account + customers. Write: customers.create only (Phase 37J test mode).
  * Fake adapter used by deterministic verification (no network).
  */
 
 import type Stripe from "stripe";
+import { KXD_STRIPE_CLIENT_METADATA_KEY } from "./customer-linking-types";
 
 export type CommercialStripeAccountSnapshot = {
   accountId: string;
@@ -21,6 +22,14 @@ export type CommercialStripeCustomerSnapshot = {
   metadata: Record<string, string>;
 };
 
+export type CommercialStripeCreateCustomerParams = {
+  name: string;
+  email: string;
+  metadata: Record<string, string>;
+  /** Opaque server-derived key — never log or return to browser. */
+  idempotencyKey: string;
+};
+
 export type CommercialStripeAdapter = {
   verifyAccount(): Promise<CommercialStripeAccountSnapshot>;
   retrieveCustomer(
@@ -34,6 +43,13 @@ export type CommercialStripeAdapter = {
     name: string,
     limit: number,
   ): Promise<CommercialStripeCustomerSnapshot[]>;
+  searchCustomersByClientMetadata(
+    clientId: number,
+    limit: number,
+  ): Promise<CommercialStripeCustomerSnapshot[]>;
+  createCustomer(
+    params: CommercialStripeCreateCustomerParams,
+  ): Promise<CommercialStripeCustomerSnapshot>;
 };
 
 function asMetadata(meta: Stripe.Metadata | null | undefined): Record<string, string> {
@@ -66,15 +82,17 @@ function mapCustomer(
     name: live.name ?? null,
     email: live.email ?? null,
     deleted: false,
-    livemode: Boolean((live as { livemode?: boolean }).livemode ?? livemodeFallback),
+    livemode: Boolean(
+      (live as { livemode?: boolean }).livemode ?? livemodeFallback,
+    ),
     created: typeof live.created === "number" ? live.created : null,
     metadata: asMetadata(live.metadata),
   };
 }
 
 /**
- * Real Stripe adapter — only account + customer read methods.
- * Must never call create/update/delete or subscription/invoice/checkout APIs.
+ * Real Stripe adapter — account/customer reads + customers.create only.
+ * Must never call customer update/delete or subscription/invoice/checkout APIs.
  */
 export function createLiveCommercialStripeAdapter(
   stripe: Stripe,
@@ -82,13 +100,8 @@ export function createLiveCommercialStripeAdapter(
   return {
     async verifyAccount() {
       const account = await stripe.accounts.retrieve();
-      const livemode = Boolean(
-        (account as { livemode?: boolean }).livemode,
-      );
-      return {
-        accountId: account.id,
-        livemode,
-      };
+      const livemode = Boolean((account as { livemode?: boolean }).livemode);
+      return { accountId: account.id, livemode };
     },
     async retrieveCustomer(customerId: string) {
       try {
@@ -112,7 +125,6 @@ export function createLiveCommercialStripeAdapter(
       return list.data.map((row) => mapCustomer(row, livemode));
     },
     async listCustomersByName(name: string, limit: number) {
-      // Prefer Search API when available; fall back to empty rather than unbounded list.
       try {
         const escaped = name.replace(/'/g, "\\'");
         const result = await stripe.customers.search({
@@ -125,6 +137,29 @@ export function createLiveCommercialStripeAdapter(
         return [];
       }
     },
+    async searchCustomersByClientMetadata(clientId: number, limit: number) {
+      try {
+        const result = await stripe.customers.search({
+          query: `metadata['${KXD_STRIPE_CLIENT_METADATA_KEY}']:'${clientId}'`,
+          limit: Math.min(Math.max(limit, 1), 10),
+        });
+        const livemode = Boolean((result as { livemode?: boolean }).livemode);
+        return result.data.map((row) => mapCustomer(row, livemode));
+      } catch {
+        return [];
+      }
+    },
+    async createCustomer(params) {
+      const customer = await stripe.customers.create(
+        {
+          name: params.name,
+          email: params.email,
+          metadata: params.metadata,
+        },
+        { idempotencyKey: params.idempotencyKey },
+      );
+      return mapCustomer(customer, false);
+    },
   };
 }
 
@@ -134,16 +169,19 @@ export function createFakeCommercialStripeAdapter(options?: {
   livemode?: boolean;
   customers?: CommercialStripeCustomerSnapshot[];
   failVerify?: boolean;
+  createBehavior?: "succeed" | "fail_network";
+  /** When set, createCustomer returns this existing customer (idempotent replay). */
+  idempotentCreateMap?: Map<string, string>;
 }): CommercialStripeAdapter {
   const accountId = options?.accountId ?? "acct_phase37i_test_fixture";
   const livemode = options?.livemode ?? false;
   const customers = options?.customers ?? [];
+  const idempotentCreateMap = options?.idempotentCreateMap ?? new Map();
+  let createSeq = 0;
 
   return {
     async verifyAccount() {
-      if (options?.failVerify) {
-        throw new Error("fake_auth_failed");
-      }
+      if (options?.failVerify) throw new Error("fake_auth_failed");
       return { accountId, livemode };
     },
     async retrieveCustomer(customerId: string) {
@@ -163,12 +201,41 @@ export function createFakeCommercialStripeAdapter(options?: {
       const needle = name.trim().toLowerCase();
       return customers
         .filter(
-          (c) =>
-            !c.deleted &&
-            c.name &&
-            c.name.toLowerCase().includes(needle),
+          (c) => !c.deleted && c.name && c.name.toLowerCase().includes(needle),
         )
         .slice(0, limit);
+    },
+    async searchCustomersByClientMetadata(clientId: number, limit: number) {
+      return customers
+        .filter(
+          (c) =>
+            !c.deleted &&
+            c.metadata[KXD_STRIPE_CLIENT_METADATA_KEY] === String(clientId),
+        )
+        .slice(0, limit);
+    },
+    async createCustomer(params) {
+      if (options?.createBehavior === "fail_network") {
+        throw new Error("fake_network_error");
+      }
+      const priorId = idempotentCreateMap.get(params.idempotencyKey);
+      if (priorId) {
+        const prior = customers.find((c) => c.id === priorId);
+        if (prior) return prior;
+      }
+      createSeq += 1;
+      const created: CommercialStripeCustomerSnapshot = {
+        id: `cus_phase37j_fake_${createSeq}`,
+        name: params.name,
+        email: params.email,
+        deleted: false,
+        livemode: false,
+        created: 1_700_000_000 + createSeq,
+        metadata: { ...params.metadata },
+      };
+      customers.push(created);
+      idempotentCreateMap.set(params.idempotencyKey, created.id);
+      return created;
     },
   };
 }

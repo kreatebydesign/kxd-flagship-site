@@ -147,11 +147,11 @@ function main() {
     rejectBrowserStripeAuthority({ enableExecution: true }).ok === false,
   );
   check(
-    "configuration_readiness and Phase 37I reads allowed; mutations blocked",
+    "configuration_readiness and Phase 37I/37J ops allowed; financial mutations blocked",
     isCommercialStripeOperationAllowed("configuration_readiness") &&
       isCommercialStripeOperationAllowed("customer_lookup") &&
       isCommercialStripeOperationAllowed("reconciliation_read") &&
-      !isCommercialStripeOperationAllowed("customer_create") &&
+      isCommercialStripeOperationAllowed("customer_create") &&
       !isCommercialStripeOperationAllowed("subscription_create") &&
       !isCommercialStripeOperationAllowed("invoice_create") &&
       !isCommercialStripeOperationAllowed("checkout_create") &&
