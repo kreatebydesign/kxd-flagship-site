@@ -7,12 +7,20 @@ import type {
 } from "./types";
 import { buildClientReviewStorageKey } from "./sanitize";
 
-function getBlobToken(): string {
+/**
+ * Optional explicit read-write token. When omitted, `@vercel/blob` resolves
+ * credentials from `BLOB_READ_WRITE_TOKEN` or Vercel OIDC + `BLOB_STORE_ID`.
+ */
+function getOptionalBlobToken(): string | undefined {
   const token = process.env.BLOB_READ_WRITE_TOKEN?.trim();
-  if (!token) {
-    throw new Error("BLOB_READ_WRITE_TOKEN is not configured.");
-  }
-  return token;
+  return token || undefined;
+}
+
+function withOptionalToken<T extends Record<string, unknown>>(
+  options: T,
+): T & { token?: string } {
+  const token = getOptionalBlobToken();
+  return token ? { ...options, token } : options;
 }
 
 export const vercelBlobClientReviewStorageAdapter: ClientReviewStorageAdapter = {
@@ -20,21 +28,27 @@ export const vercelBlobClientReviewStorageAdapter: ClientReviewStorageAdapter = 
 
   async upload(input: ClientReviewUploadInput): Promise<ClientReviewUploadResult> {
     const key = buildClientReviewStorageKey(input.clientId, input.originalFilename);
-    const token = getBlobToken();
 
-    await put(key, input.buffer, {
-      access: "private",
-      token,
-      contentType: input.mimeType,
-      addRandomSuffix: false,
-    });
+    await put(
+      key,
+      input.buffer,
+      withOptionalToken({
+        access: "private" as const,
+        contentType: input.mimeType,
+        addRandomSuffix: false,
+      }),
+    );
 
     return { key };
   },
 
   async open(key: string): Promise<ClientReviewOpenResult> {
-    const token = getBlobToken();
-    const result = await get(key, { access: "private", token });
+    const result = await get(
+      key,
+      withOptionalToken({
+        access: "private" as const,
+      }),
+    );
 
     if (!result || result.statusCode !== 200 || !result.stream) {
       throw new Error("Blob unavailable.");
@@ -48,7 +62,7 @@ export const vercelBlobClientReviewStorageAdapter: ClientReviewStorageAdapter = 
   },
 
   async delete(key: string): Promise<void> {
-    const token = getBlobToken();
-    await del(key, { token });
+    const token = getOptionalBlobToken();
+    await del(key, token ? { token } : undefined);
   },
 };

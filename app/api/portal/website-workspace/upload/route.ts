@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import { getDefaultClientReviewStorageAdapter } from "@/lib/client-review-media/storage";
+import { resolveWebsiteReviewMimeType } from "@/lib/ces/modules/website-review/attachments";
 import { mapReviewMediaDocToAttachment } from "@/lib/ces/modules/website-review/attachments-server";
 import { WEBSITE_WORKSPACE_MAX_FILE_BYTES } from "@/lib/ces/modules/website-workspace/constants";
 import { getPortalSession } from "@/lib/portal/session";
@@ -36,7 +37,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const mimeType = file.type || "application/octet-stream";
+    const mimeType = resolveWebsiteReviewMimeType(file.type, file.name);
     if (!mimeType.startsWith("image/")) {
       return NextResponse.json(
         { ok: false, message: "Please upload an image file." },
@@ -45,7 +46,25 @@ export async function POST(req: NextRequest) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    const adapter = getDefaultClientReviewStorageAdapter();
+    let adapter;
+    try {
+      adapter = getDefaultClientReviewStorageAdapter();
+    } catch (err) {
+      console.error("[KXD Portal] Website Workspace upload failed:", {
+        category: "storage_not_configured",
+        route: "/api/portal/website-workspace/upload",
+        clientId: session.clientId,
+        mimeType,
+        filesize: file.size,
+        errorName: err instanceof Error ? err.name : null,
+        errorMessage: err instanceof Error ? err.message : null,
+      });
+      return NextResponse.json(
+        { ok: false, message: "We couldn't upload that image. Please try again." },
+        { status: 500 },
+      );
+    }
+
     let stored: { key: string } | null = null;
 
     try {
@@ -91,7 +110,13 @@ export async function POST(req: NextRequest) {
       throw innerErr;
     }
   } catch (err) {
-    console.error("[KXD Portal] Website Workspace upload failed:", err);
+    console.error("[KXD Portal] Website Workspace upload failed:", {
+      category: "unexpected",
+      route: "/api/portal/website-workspace/upload",
+      clientId: session.clientId,
+      errorName: err instanceof Error ? err.name : null,
+      errorMessage: err instanceof Error ? err.message : null,
+    });
     return NextResponse.json(
       { ok: false, message: "We couldn't upload that image. Please try again." },
       { status: 500 },

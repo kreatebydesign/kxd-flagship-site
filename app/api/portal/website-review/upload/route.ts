@@ -9,6 +9,7 @@ import { deleteClientReviewMediaObject } from "@/lib/client-review-media/delete-
 import { getDefaultClientReviewStorageAdapter } from "@/lib/client-review-media/storage";
 import {
   isWebsiteReviewMimeAllowed,
+  resolveWebsiteReviewMimeType,
   WEBSITE_REVIEW_MAX_FILE_BYTES,
 } from "@/lib/ces/modules/website-review/attachments";
 import { mapReviewMediaDocToAttachment } from "@/lib/ces/modules/website-review/attachments-server";
@@ -16,11 +17,62 @@ import { getPortalSession } from "@/lib/portal/session";
 
 export const dynamic = "force-dynamic";
 
+type UploadErrorCategory =
+  | "storage_not_configured"
+  | "storage_upload_failed"
+  | "record_create_failed"
+  | "unexpected";
+
+function categorizeUploadError(err: unknown, hadStoredObject: boolean): UploadErrorCategory {
+  if (hadStoredObject) return "record_create_failed";
+
+  const message = err instanceof Error ? err.message : String(err);
+  if (
+    message.includes("storage is not configured") ||
+    message.includes("BLOB_") ||
+    message.includes("blob credentials") ||
+    message.includes("ENOENT") ||
+    message.includes("/var/task/private")
+  ) {
+    return "storage_not_configured";
+  }
+
+  return "storage_upload_failed";
+}
+
+function logUploadFailure(context: {
+  category: UploadErrorCategory | "unexpected";
+  clientId?: number;
+  mimeType?: string;
+  filesize?: number;
+  err?: unknown;
+}) {
+  console.error("[KXD Portal] Website review upload failed:", {
+    category: context.category,
+    route: "/api/portal/website-review/upload",
+    clientId: context.clientId ?? null,
+    mimeType: context.mimeType ?? null,
+    filesize: context.filesize ?? null,
+    errorName: context.err instanceof Error ? context.err.name : null,
+    errorMessage: context.err instanceof Error ? context.err.message : null,
+  });
+}
+
+function uploadFailureResponse() {
+  return NextResponse.json(
+    { ok: false, message: "We couldn't upload that file. Please try again." },
+    { status: 500 },
+  );
+}
+
 export async function POST(req: NextRequest) {
   const session = await getPortalSession();
   if (!session) {
     return NextResponse.json({ ok: false, message: "Unauthorized." }, { status: 401 });
   }
+
+  let mimeType: string | undefined;
+  let filesize: number | undefined;
 
   try {
     const formData = await req.formData();
@@ -33,6 +85,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    filesize = file.size;
+
     if (file.size > WEBSITE_REVIEW_MAX_FILE_BYTES) {
       return NextResponse.json(
         { ok: false, message: "Files must be 10 MB or smaller." },
@@ -40,7 +94,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const mimeType = file.type || "application/octet-stream";
+    mimeType = resolveWebsiteReviewMimeType(file.type, file.name);
     if (!isWebsiteReviewMimeAllowed(mimeType)) {
       return NextResponse.json(
         { ok: false, message: "That file type isn’t supported. Try an image, PDF, or document." },
@@ -49,7 +103,20 @@ export async function POST(req: NextRequest) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    const adapter = getDefaultClientReviewStorageAdapter();
+    let adapter;
+    try {
+      adapter = getDefaultClientReviewStorageAdapter();
+    } catch (err) {
+      logUploadFailure({
+        category: "storage_not_configured",
+        clientId: session.clientId,
+        mimeType,
+        filesize,
+        err,
+      });
+      return uploadFailureResponse();
+    }
+
     let stored: { key: string } | null = null;
 
     try {
@@ -83,17 +150,35 @@ export async function POST(req: NextRequest) {
     } catch (innerErr) {
       if (stored) {
         await adapter.delete(stored.key).catch((cleanupErr) => {
-          console.error("[KXD Portal] Upload rollback failed:", cleanupErr);
+          console.error("[KXD Portal] Upload rollback failed:", {
+            category: "rollback_failed",
+            route: "/api/portal/website-review/upload",
+            clientId: session.clientId,
+            errorName: cleanupErr instanceof Error ? cleanupErr.name : null,
+            errorMessage: cleanupErr instanceof Error ? cleanupErr.message : null,
+          });
         });
       }
-      throw innerErr;
+
+      logUploadFailure({
+        category: categorizeUploadError(innerErr, stored != null),
+        clientId: session.clientId,
+        mimeType,
+        filesize,
+        err: innerErr,
+      });
+
+      return uploadFailureResponse();
     }
   } catch (err) {
-    console.error("[KXD Portal] Website review upload failed:", err);
-    return NextResponse.json(
-      { ok: false, message: "We couldn't upload that file. Please try again." },
-      { status: 500 },
-    );
+    logUploadFailure({
+      category: "unexpected",
+      clientId: session.clientId,
+      mimeType,
+      filesize,
+      err,
+    });
+    return uploadFailureResponse();
   }
 }
 
@@ -152,7 +237,14 @@ export async function DELETE(req: NextRequest) {
 
     return NextResponse.json({ ok: true });
   } catch (err) {
-    console.error("[KXD Portal] Website review attachment delete failed:", err);
+    console.error("[KXD Portal] Website review attachment delete failed:", {
+      category: "delete_failed",
+      route: "/api/portal/website-review/upload",
+      clientId: session.clientId,
+      mediaId,
+      errorName: err instanceof Error ? err.name : null,
+      errorMessage: err instanceof Error ? err.message : null,
+    });
     return NextResponse.json(
       { ok: false, message: "We couldn't remove that file." },
       { status: 500 },

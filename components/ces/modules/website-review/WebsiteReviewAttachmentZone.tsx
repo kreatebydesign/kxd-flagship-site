@@ -7,6 +7,7 @@ import {
   formatAttachmentSize,
   isWebsiteReviewImageMime,
   isWebsiteReviewMimeAllowed,
+  resolveWebsiteReviewMimeType,
   WEBSITE_REVIEW_MAX_ATTACHMENTS,
   WEBSITE_REVIEW_MAX_FILE_BYTES,
 } from "@/lib/ces/modules/website-review/attachments";
@@ -44,7 +45,9 @@ export function WebsiteReviewAttachmentZone({
 
   const uploadFile = useCallback(
     async (file: File) => {
-      if (!isWebsiteReviewMimeAllowed(file.type || "")) {
+      const mimeType = resolveWebsiteReviewMimeType(file.type, file.name);
+
+      if (!isWebsiteReviewMimeAllowed(mimeType)) {
         setZoneError(PORTAL_CLIENT_LANGUAGE.attachmentTypeError);
         return;
       }
@@ -62,13 +65,13 @@ export function WebsiteReviewAttachmentZone({
       setZoneError(null);
 
       const localId = createLocalId();
-      const isImage = isWebsiteReviewImageMime(file.type || "");
+      const isImage = isWebsiteReviewImageMime(mimeType);
       const previewUrl = isImage ? URL.createObjectURL(file) : undefined;
 
       const pending: WebsiteReviewPendingAttachment = {
         localId,
         filename: file.name,
-        mimeType: file.type || "application/octet-stream",
+        mimeType,
         filesize: file.size,
         isImage,
         previewUrl,
