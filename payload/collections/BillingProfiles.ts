@@ -160,12 +160,109 @@ export const BillingProfiles: CollectionConfig = {
       name: "stripeCustomerId",
       type: "text",
       label: "Stripe Customer ID",
-      admin: { description: "Future-ready — Stripe integration." },
+      access: {
+        // Phase 37I — generic CMS edits cannot inject Stripe IDs; server overrideAccess only.
+        update: () => false,
+      },
+      admin: {
+        readOnly: true,
+        description:
+          "External Stripe customer mapping. Set only via controlled commercial linking — not CMS edit.",
+      },
+    },
+    {
+      name: "stripeMode",
+      type: "select",
+      label: "Stripe Mode",
+      options: [
+        { label: "Test", value: "test" },
+        { label: "Live", value: "live" },
+      ],
+      access: { update: () => false },
+      admin: {
+        readOnly: true,
+        description: "Mode in which the Stripe customer mapping was verified.",
+      },
+    },
+    {
+      name: "stripeAccountId",
+      type: "text",
+      label: "Stripe Account ID",
+      access: { update: () => false },
+      admin: {
+        readOnly: true,
+        description: "Authenticated Stripe account context for this mapping.",
+      },
+    },
+    {
+      name: "stripeCustomerMappingStatus",
+      type: "select",
+      label: "Stripe Customer Mapping Status",
+      options: [
+        { label: "Unlinked", value: "unlinked" },
+        { label: "Linked", value: "linked" },
+        { label: "Requires review", value: "requires_review" },
+      ],
+      access: { update: () => false },
+      admin: {
+        readOnly: true,
+        description: "Internal mapping state — not Stripe billing activation.",
+      },
+    },
+    {
+      name: "stripeCustomerVerifiedAt",
+      type: "date",
+      label: "Stripe Customer Verified At",
+      access: { update: () => false },
+      admin: {
+        readOnly: true,
+        date: { pickerAppearance: "dayAndTime" },
+      },
+    },
+    {
+      name: "stripeCustomerLastReconciledAt",
+      type: "date",
+      label: "Stripe Customer Last Reconciled At",
+      access: { update: () => false },
+      admin: {
+        readOnly: true,
+        date: { pickerAppearance: "dayAndTime" },
+      },
+    },
+    {
+      name: "stripeCustomerReconciliationStatus",
+      type: "select",
+      label: "Stripe Customer Reconciliation Status",
+      options: [
+        { label: "Unlinked", value: "unlinked" },
+        { label: "Linked healthy", value: "linked_healthy" },
+        { label: "Customer missing", value: "customer_missing" },
+        { label: "Customer deleted", value: "customer_deleted" },
+        { label: "Account mismatch", value: "account_mismatch" },
+        { label: "Mode mismatch", value: "mode_mismatch" },
+        { label: "Client metadata missing", value: "client_metadata_missing" },
+        { label: "Client metadata mismatch", value: "client_metadata_mismatch" },
+        { label: "Duplicate internal mapping", value: "duplicate_internal_mapping" },
+        { label: "Conflicting billing profiles", value: "conflicting_billing_profiles" },
+        { label: "Configuration blocked", value: "configuration_blocked" },
+        { label: "Connectivity failed", value: "connectivity_failed" },
+        { label: "Requires operator review", value: "requires_operator_review" },
+      ],
+      access: { update: () => false },
+      admin: {
+        readOnly: true,
+        description: "Last computed reconciliation status (sanitized).",
+      },
     },
     {
       name: "stripeSubscriptionId",
       type: "text",
       label: "Stripe Subscription ID",
+      access: { update: () => false },
+      admin: {
+        readOnly: true,
+        description: "Reserved external slot — not written by Phase 37I.",
+      },
     },
     {
       name: "quickbooksCustomerId",

@@ -51,6 +51,14 @@ import {
   stripeIntegrationStatusLabel,
   type StripeIntegrationReadiness,
 } from "@/lib/stripe/integration-readiness-types";
+import {
+  stripeReconciliationStatusLabel,
+  type StripeConnectivityResult,
+  type StripeCustomerLinkPreview,
+  type StripeCustomerLinkResult,
+  type StripeCustomerReconciliationSnapshot,
+  type StripeCustomerSearchResult,
+} from "@/lib/stripe/customer-linking-types";
 import { PARTNERSHIP_ADD_ONS } from "@/lib/partnerships/packages";
 
 type ListResponse = {
@@ -154,6 +162,83 @@ type StripeIntegrationReadinessResponse = {
   notice?: string;
 };
 
+type StripeEligibleClientRow = {
+  clientId: number;
+  clientName: string;
+  billingProfileId: number | null;
+  eligible: boolean;
+  reason: string;
+  mappingStatus: string | null;
+  stripeCustomerId: string | null;
+};
+
+type StripeEligibleClientsResponse = {
+  ok?: boolean;
+  message?: string;
+  clients?: StripeEligibleClientRow[];
+  notice?: string;
+};
+
+type StripeConnectivityVerifyResponse = {
+  ok?: boolean;
+  message?: string;
+  connectivity?: StripeConnectivityResult;
+  notice?: string;
+};
+
+type StripeCustomerSearchResponse = {
+  ok?: boolean;
+  message?: string;
+  search?: StripeCustomerSearchResult;
+  notice?: string;
+};
+
+type StripeCustomerLinkPreviewResponse = {
+  ok?: boolean;
+  message?: string;
+  preview?: StripeCustomerLinkPreview;
+  notice?: string;
+};
+
+type StripeCustomerLinkMutationResponse = {
+  ok?: boolean;
+  message?: string;
+  result?: StripeCustomerLinkResult;
+  notice?: string;
+};
+
+type StripeCustomerUnlinkPreviewResponse = {
+  ok?: boolean;
+  message?: string;
+  preview?: {
+    clientId: number;
+    billingProfileId: number;
+    stripeCustomerId: string | null;
+    previewFingerprint: string;
+    canUnlink: boolean;
+    message: string;
+  };
+};
+
+type StripeCustomerUnlinkMutationResponse = {
+  ok?: boolean;
+  message?: string;
+  result?: {
+    outcome: string;
+    clientId: number;
+    billingProfileId: number;
+    message: string;
+    activityEmitted: boolean;
+  };
+};
+
+type StripeCustomerReconcileResponse = {
+  ok?: boolean;
+  message?: string;
+  reconciliation?: StripeCustomerReconciliationSnapshot;
+  notice?: string;
+};
+
 type EditorMode = "idle" | "edit" | "create";
 type ActivationPhase = "closed" | "preview" | "result";
 type PlanChangePhase = "closed" | "preview" | "result";
@@ -162,6 +247,30 @@ type CustomPlanPhase = "closed" | "preview" | "result";
 type BillingReadinessPhase = "closed" | "review";
 type BillingConfigPhase = "closed" | "form" | "preview" | "result";
 type StripeReadinessPhase = "closed" | "review";
+type StripeLinkingPhase = "closed" | "review";
+
+function stripeConnectivityOutcomeLabel(
+  outcome: StripeConnectivityResult["outcome"],
+): string {
+  switch (outcome) {
+    case "authenticated_test_account":
+      return "Connectivity verified";
+    case "structurally_blocked":
+      return "Structurally blocked";
+    case "authentication_failed":
+      return "Authentication failed";
+    case "account_mismatch":
+      return "Account mismatch";
+    case "unavailable":
+      return "Unavailable";
+    case "live_mode_rejected":
+      return "Live mode rejected";
+    case "not_attempted":
+      return "Not attempted";
+    default:
+      return outcome;
+  }
+}
 
 type BillingConfigDraft = {
   currencyCode: string;
@@ -429,6 +538,44 @@ export function CommercialAgreementsScreen() {
     string | null
   >(null);
 
+  const [stripeLinkingPhase, setStripeLinkingPhase] =
+    useState<StripeLinkingPhase>("closed");
+  const [stripeLinkingLoading, setStripeLinkingLoading] = useState(false);
+  const [stripeLinkingError, setStripeLinkingError] = useState<string | null>(
+    null,
+  );
+  const [connectivity, setConnectivity] =
+    useState<StripeConnectivityResult | null>(null);
+  const [eligibleClients, setEligibleClients] = useState<
+    StripeEligibleClientRow[]
+  >([]);
+  const [linkClientId, setLinkClientId] = useState<number | "">("");
+  const [exactCustomerId, setExactCustomerId] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchResult, setSearchResult] =
+    useState<StripeCustomerSearchResult | null>(null);
+  const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(
+    null,
+  );
+  const [linkPreview, setLinkPreview] =
+    useState<StripeCustomerLinkPreview | null>(null);
+  const [linkResult, setLinkResult] =
+    useState<StripeCustomerLinkResult | null>(null);
+  const [reconciliation, setReconciliation] =
+    useState<StripeCustomerReconciliationSnapshot | null>(null);
+  const [ackMissingMetadata, setAckMissingMetadata] = useState(false);
+  const [ackNoBillingActivate, setAckNoBillingActivate] = useState(false);
+  const [linkConfirmed, setLinkConfirmed] = useState(false);
+  const [unlinkPreviewFingerprint, setUnlinkPreviewFingerprint] = useState<
+    string | null
+  >(null);
+  const [unlinkConfirmed, setUnlinkConfirmed] = useState(false);
+  const [busyConnecting, setBusyConnecting] = useState(false);
+  const [busySearching, setBusySearching] = useState(false);
+  const [busyLinking, setBusyLinking] = useState(false);
+  const [busyReconciling, setBusyReconciling] = useState(false);
+  const [busyUnlinking, setBusyUnlinking] = useState(false);
+
   const dirty = mode !== "idle" && !draftsEqual(draft, baseline);
 
   function resetActivation() {
@@ -495,6 +642,32 @@ export function CommercialAgreementsScreen() {
     setStripeReadinessError(null);
   }
 
+  function resetStripeLinking() {
+    setStripeLinkingPhase("closed");
+    setStripeLinkingLoading(false);
+    setStripeLinkingError(null);
+    setConnectivity(null);
+    setEligibleClients([]);
+    setLinkClientId("");
+    setExactCustomerId("");
+    setSearchTerm("");
+    setSearchResult(null);
+    setSelectedCandidateId(null);
+    setLinkPreview(null);
+    setLinkResult(null);
+    setReconciliation(null);
+    setAckMissingMetadata(false);
+    setAckNoBillingActivate(false);
+    setLinkConfirmed(false);
+    setUnlinkPreviewFingerprint(null);
+    setUnlinkConfirmed(false);
+    setBusyConnecting(false);
+    setBusySearching(false);
+    setBusyLinking(false);
+    setBusyReconciling(false);
+    setBusyUnlinking(false);
+  }
+
   function resetReviews() {
     resetActivation();
     resetPlanChange();
@@ -503,6 +676,7 @@ export function CommercialAgreementsScreen() {
     resetBillingReadiness();
     resetBillingConfiguration();
     resetStripeReadiness();
+    resetStripeLinking();
   }
 
   const anyReviewLoading =
@@ -512,7 +686,8 @@ export function CommercialAgreementsScreen() {
     customLoading ||
     billingLoading ||
     billingConfigLoading ||
-    stripeReadinessLoading;
+    stripeReadinessLoading ||
+    stripeLinkingLoading;
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -1111,6 +1286,7 @@ export function CommercialAgreementsScreen() {
     resetCustomPlan();
     resetBillingReadiness();
     resetBillingConfiguration();
+    resetStripeLinking();
     setStripeReadinessLoading(true);
     setStripeReadinessError(null);
     setStripeReadiness(null);
@@ -1140,6 +1316,394 @@ export function CommercialAgreementsScreen() {
       setStripeReadinessPhase("review");
     } finally {
       setStripeReadinessLoading(false);
+    }
+  }
+
+  async function openStripeCustomerLinking() {
+    if (anyReviewLoading) return;
+    resetActivation();
+    resetPlanChange();
+    resetLegacyConversion();
+    resetCustomPlan();
+    resetBillingReadiness();
+    resetBillingConfiguration();
+    resetStripeReadiness();
+    resetStripeLinking();
+    setStripeLinkingPhase("review");
+    setStripeLinkingLoading(true);
+    setStripeLinkingError(null);
+    try {
+      const res = await fetch(
+        `/api/admin/commercial-agreements/stripe-customers/eligible`,
+        {
+          method: "GET",
+          credentials: "same-origin",
+          cache: "no-store",
+        },
+      );
+      const json = (await res.json()) as StripeEligibleClientsResponse;
+      if (!res.ok || !json.ok) {
+        throw new Error(
+          json.message || "Unable to load eligible billing clients.",
+        );
+      }
+      setEligibleClients(json.clients ?? []);
+    } catch (err) {
+      setStripeLinkingError(
+        err instanceof Error
+          ? err.message
+          : "Unable to load eligible billing clients.",
+      );
+    } finally {
+      setStripeLinkingLoading(false);
+    }
+  }
+
+  async function verifyStripeConnectivity() {
+    if (busyConnecting || stripeLinkingLoading) return;
+    setBusyConnecting(true);
+    setStripeLinkingError(null);
+    try {
+      const res = await fetch(
+        `/api/admin/commercial-agreements/stripe-connectivity/verify`,
+        {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ confirmedReadOnly: true }),
+        },
+      );
+      const json = (await res.json()) as StripeConnectivityVerifyResponse;
+      if (!json.connectivity) {
+        throw new Error(
+          json.message || "Unable to verify Stripe test-mode connectivity.",
+        );
+      }
+      setConnectivity(json.connectivity);
+    } catch (err) {
+      setStripeLinkingError(
+        err instanceof Error
+          ? err.message
+          : "Unable to verify Stripe test-mode connectivity.",
+      );
+    } finally {
+      setBusyConnecting(false);
+    }
+  }
+
+  async function loadUnlinkPreviewForClient(clientId: number) {
+    setUnlinkPreviewFingerprint(null);
+    setUnlinkConfirmed(false);
+    try {
+      const res = await fetch(
+        `/api/admin/commercial-agreements/stripe-customers/unlink`,
+        {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ clientId, previewOnly: true }),
+        },
+      );
+      const json = (await res.json()) as StripeCustomerUnlinkPreviewResponse;
+      if (!res.ok || !json.ok || !json.preview) {
+        throw new Error(json.message || "Unable to load unlink preview.");
+      }
+      setUnlinkPreviewFingerprint(
+        json.preview.previewFingerprint || null,
+      );
+    } catch (err) {
+      setStripeLinkingError(
+        err instanceof Error ? err.message : "Unable to load unlink preview.",
+      );
+    }
+  }
+
+  async function onStripeLinkClientChange(nextValue: string) {
+    const nextId = nextValue === "" ? "" : Number(nextValue);
+    setLinkClientId(
+      nextId === "" || !Number.isInteger(nextId) || nextId <= 0 ? "" : nextId,
+    );
+    setExactCustomerId("");
+    setSearchTerm("");
+    setSearchResult(null);
+    setSelectedCandidateId(null);
+    setLinkPreview(null);
+    setLinkResult(null);
+    setReconciliation(null);
+    setAckMissingMetadata(false);
+    setAckNoBillingActivate(false);
+    setLinkConfirmed(false);
+    setUnlinkPreviewFingerprint(null);
+    setUnlinkConfirmed(false);
+    if (typeof nextId === "number" && Number.isInteger(nextId) && nextId > 0) {
+      const row = eligibleClients.find((c) => c.clientId === nextId);
+      if (row?.stripeCustomerId) {
+        await loadUnlinkPreviewForClient(nextId);
+      }
+    }
+  }
+
+  async function searchStripeCustomersForLink() {
+    if (
+      busySearching ||
+      linkClientId === "" ||
+      (!exactCustomerId.trim() && !searchTerm.trim())
+    ) {
+      return;
+    }
+    setBusySearching(true);
+    setStripeLinkingError(null);
+    setSearchResult(null);
+    setSelectedCandidateId(null);
+    setLinkPreview(null);
+    setLinkResult(null);
+    setAckMissingMetadata(false);
+    setAckNoBillingActivate(false);
+    setLinkConfirmed(false);
+    try {
+      const res = await fetch(
+        `/api/admin/commercial-agreements/stripe-customers/search`,
+        {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            clientId: linkClientId,
+            exactCustomerId: exactCustomerId.trim() || undefined,
+            searchTerm: searchTerm.trim() || undefined,
+          }),
+        },
+      );
+      const json = (await res.json()) as StripeCustomerSearchResponse;
+      if (!res.ok || !json.ok || !json.search) {
+        throw new Error(json.message || "Unable to search Stripe customers.");
+      }
+      setSearchResult(json.search);
+    } catch (err) {
+      setStripeLinkingError(
+        err instanceof Error
+          ? err.message
+          : "Unable to search Stripe customers.",
+      );
+    } finally {
+      setBusySearching(false);
+    }
+  }
+
+  async function previewStripeCustomerLink() {
+    if (
+      busyLinking ||
+      linkClientId === "" ||
+      !selectedCandidateId
+    ) {
+      return;
+    }
+    setBusyLinking(true);
+    setStripeLinkingError(null);
+    setLinkPreview(null);
+    setLinkResult(null);
+    setLinkConfirmed(false);
+    try {
+      const res = await fetch(
+        `/api/admin/commercial-agreements/stripe-customers/link-preview`,
+        {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            clientId: linkClientId,
+            stripeCustomerId: selectedCandidateId,
+            acknowledgeMissingMetadata: ackMissingMetadata,
+          }),
+        },
+      );
+      const json = (await res.json()) as StripeCustomerLinkPreviewResponse;
+      if (!res.ok || !json.ok || !json.preview) {
+        throw new Error(json.message || "Unable to preview customer link.");
+      }
+      setLinkPreview(json.preview);
+    } catch (err) {
+      setStripeLinkingError(
+        err instanceof Error
+          ? err.message
+          : "Unable to preview customer link.",
+      );
+    } finally {
+      setBusyLinking(false);
+    }
+  }
+
+  async function confirmStripeCustomerLink() {
+    if (
+      busyLinking ||
+      !linkPreview ||
+      linkClientId === "" ||
+      !linkConfirmed ||
+      !ackNoBillingActivate
+    ) {
+      return;
+    }
+    if (linkPreview.requiresMissingMetadataAck && !ackMissingMetadata) {
+      return;
+    }
+    const selected = eligibleClients.find((c) => c.clientId === linkClientId);
+    if (!selected?.billingProfileId) {
+      setStripeLinkingError(
+        "Selected client has no billing profile available for linking.",
+      );
+      return;
+    }
+    setBusyLinking(true);
+    setStripeLinkingError(null);
+    try {
+      const res = await fetch(
+        `/api/admin/commercial-agreements/stripe-customers/link`,
+        {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            clientId: linkClientId,
+            billingProfileId: selected.billingProfileId,
+            stripeCustomerId: linkPreview.stripeCustomerId,
+            previewFingerprint: linkPreview.previewFingerprint,
+            confirmed: true,
+            linkingDoesNotActivateBilling: true,
+            acknowledgeMissingMetadata: ackMissingMetadata,
+          }),
+        },
+      );
+      const json = (await res.json()) as StripeCustomerLinkMutationResponse;
+      if (!json.result) {
+        throw new Error(json.message || "Unable to link Stripe customer.");
+      }
+      setLinkResult(json.result);
+      if (json.result.outcome === "changed" || json.result.outcome === "unchanged") {
+        setEligibleClients((prev) =>
+          prev.map((row) =>
+            row.clientId === linkClientId
+              ? {
+                  ...row,
+                  mappingStatus: json.result!.mappingStatus,
+                  stripeCustomerId: json.result!.stripeCustomerId,
+                  reason: json.result!.stripeCustomerId
+                    ? "Eligible · mapping present"
+                    : row.reason,
+                }
+              : row,
+          ),
+        );
+        if (json.result.stripeCustomerId) {
+          await loadUnlinkPreviewForClient(linkClientId);
+        }
+      }
+    } catch (err) {
+      setStripeLinkingError(
+        err instanceof Error
+          ? err.message
+          : "Unable to link Stripe customer.",
+      );
+    } finally {
+      setBusyLinking(false);
+    }
+  }
+
+  async function confirmStripeCustomerUnlink() {
+    if (
+      busyUnlinking ||
+      linkClientId === "" ||
+      !unlinkPreviewFingerprint ||
+      !unlinkConfirmed
+    ) {
+      return;
+    }
+    const selected = eligibleClients.find((c) => c.clientId === linkClientId);
+    if (!selected?.billingProfileId) {
+      setStripeLinkingError(
+        "Selected client has no billing profile available for unlinking.",
+      );
+      return;
+    }
+    setBusyUnlinking(true);
+    setStripeLinkingError(null);
+    try {
+      const res = await fetch(
+        `/api/admin/commercial-agreements/stripe-customers/unlink`,
+        {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            clientId: linkClientId,
+            billingProfileId: selected.billingProfileId,
+            previewFingerprint: unlinkPreviewFingerprint,
+            confirmed: true,
+            unlinkDoesNotAffectAccess: true,
+          }),
+        },
+      );
+      const json = (await res.json()) as StripeCustomerUnlinkMutationResponse;
+      if (!res.ok || !json.ok) {
+        throw new Error(json.message || "Unable to unlink Stripe customer.");
+      }
+      setEligibleClients((prev) =>
+        prev.map((row) =>
+          row.clientId === linkClientId
+            ? {
+                ...row,
+                mappingStatus: "unlinked",
+                stripeCustomerId: null,
+                reason: "Eligible · unlinked",
+              }
+            : row,
+        ),
+      );
+      setUnlinkPreviewFingerprint(null);
+      setUnlinkConfirmed(false);
+      setLinkResult(null);
+      setLinkPreview(null);
+      setReconciliation(null);
+    } catch (err) {
+      setStripeLinkingError(
+        err instanceof Error
+          ? err.message
+          : "Unable to unlink Stripe customer.",
+      );
+    } finally {
+      setBusyUnlinking(false);
+    }
+  }
+
+  async function reconcileStripeCustomerMapping() {
+    if (busyReconciling || linkClientId === "") return;
+    setBusyReconciling(true);
+    setStripeLinkingError(null);
+    setReconciliation(null);
+    try {
+      const res = await fetch(
+        `/api/admin/commercial-agreements/stripe-customers/reconcile`,
+        {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ clientId: linkClientId }),
+        },
+      );
+      const json = (await res.json()) as StripeCustomerReconcileResponse;
+      if (!res.ok || !json.ok || !json.reconciliation) {
+        throw new Error(
+          json.message || "Unable to reconcile Stripe customer mapping.",
+        );
+      }
+      setReconciliation(json.reconciliation);
+    } catch (err) {
+      setStripeLinkingError(
+        err instanceof Error
+          ? err.message
+          : "Unable to reconcile Stripe customer mapping.",
+      );
+    } finally {
+      setBusyReconciling(false);
     }
   }
 
@@ -1429,6 +1993,11 @@ export function CommercialAgreementsScreen() {
       commercialAgreementId: detail!.commercialAgreementId,
     });
   const showBillingConfig = Boolean(detail) && mode === "idle";
+  const selectedLinkClient =
+    linkClientId === ""
+      ? null
+      : (eligibleClients.find((row) => row.clientId === linkClientId) ?? null);
+  const selectedLinkIsMapped = Boolean(selectedLinkClient?.stripeCustomerId);
 
   return (
     <OperationsShell activeId="commercial-agreements">
@@ -1514,6 +2083,17 @@ export function CommercialAgreementsScreen() {
             {stripeReadinessLoading && stripeReadinessPhase === "closed"
               ? "Preparing…"
               : "Stripe integration readiness"}
+          </button>
+          <button
+            type="button"
+            className="kxd-commercial-admin__secondary"
+            onClick={() => void openStripeCustomerLinking()}
+            disabled={anyReviewLoading}
+            aria-label="Open Stripe customer linking"
+          >
+            {stripeLinkingLoading && stripeLinkingPhase === "closed"
+              ? "Preparing…"
+              : "Stripe customer linking"}
           </button>
         </div>
 
@@ -1672,6 +2252,616 @@ export function CommercialAgreementsScreen() {
                 Assessing Stripe integration readiness…
               </p>
             ) : null}
+          </div>
+        ) : null}
+
+        {stripeLinkingPhase !== "closed" ? (
+          <div
+            className="kxd-commercial-admin__activation kxd-commercial-admin__stripe-linking"
+            role="region"
+            aria-label="Stripe customer linking"
+            aria-busy={
+              stripeLinkingLoading ||
+              busyConnecting ||
+              busySearching ||
+              busyLinking ||
+              busyReconciling ||
+              busyUnlinking
+            }
+          >
+            <OpsSectionHead label="Stripe customer linking" />
+            <p className="kxd-commercial-admin__callout" role="note">
+              Test mode · Execution remains restricted · No customer created · No
+              billing activated · Subscriptions and invoices remain unavailable
+            </p>
+
+            {stripeLinkingError ? (
+              <p className="kxd-commercial-admin__error" role="alert">
+                {stripeLinkingError}
+              </p>
+            ) : null}
+
+            <div className="kxd-commercial-admin__change-list">
+              <h3>Test-mode connectivity</h3>
+              <p className="kxd-commercial-admin__muted">
+                Deliberate operator action only. Performs one read-only Stripe
+                request when structurally allowed. Never automatic.
+              </p>
+              <div className="kxd-commercial-admin__actions">
+                <button
+                  type="button"
+                  className="kxd-commercial-admin__secondary"
+                  onClick={() => void verifyStripeConnectivity()}
+                  disabled={busyConnecting || stripeLinkingLoading}
+                  aria-label="Verify test-mode connectivity"
+                >
+                  {busyConnecting
+                    ? "Verifying…"
+                    : "Verify test-mode connectivity"}
+                </button>
+              </div>
+              {connectivity ? (
+                <>
+                  <p className="kxd-commercial-admin__status" role="status">
+                    {stripeConnectivityOutcomeLabel(connectivity.outcome)}
+                    {connectivity.accountId
+                      ? ` · Account ${connectivity.accountId}`
+                      : ""}
+                    {connectivity.mode ? ` · Mode ${connectivity.mode}` : ""}
+                    {" · "}
+                    Stripe request{" "}
+                    {connectivity.stripeRequestPerformed
+                      ? "performed"
+                      : "not performed"}
+                    {" · Objects created none"}
+                  </p>
+                  <p className="kxd-commercial-admin__muted">
+                    {connectivity.message}
+                  </p>
+                  {connectivity.blockers.length > 0 ? (
+                    <ul className="kxd-commercial-admin__blockers">
+                      {connectivity.blockers.map((row) => (
+                        <li key={row.code}>{row.message}</li>
+                      ))}
+                    </ul>
+                  ) : null}
+                  {connectivity.notices.length > 0 ? (
+                    <ul>
+                      {connectivity.notices.map((row) => (
+                        <li key={row}>{row}</li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </>
+              ) : null}
+            </div>
+
+            <div className="kxd-commercial-admin__change-list">
+              <h3>Customer linking</h3>
+              {stripeLinkingLoading ? (
+                <p className="kxd-commercial-admin__muted" role="status">
+                  Loading eligible billing clients…
+                </p>
+              ) : eligibleClients.length === 0 ? (
+                <p className="kxd-commercial-admin__muted" role="status">
+                  No billing profiles exist. Customer linking requires an
+                  existing billing profile — profiles are not auto-created.
+                  Linking is unavailable.
+                </p>
+              ) : (
+                <>
+                  <label className="kxd-commercial-admin__field">
+                    <span>Client</span>
+                    <select
+                      value={linkClientId === "" ? "" : String(linkClientId)}
+                      onChange={(e) =>
+                        void onStripeLinkClientChange(e.target.value)
+                      }
+                      disabled={
+                        busySearching ||
+                        busyLinking ||
+                        busyUnlinking ||
+                        busyReconciling
+                      }
+                      aria-label="Select client for Stripe customer linking"
+                    >
+                      <option value="">Select a client…</option>
+                      {eligibleClients.map((row) => (
+                        <option key={row.clientId} value={row.clientId}>
+                          {row.clientName}
+                          {row.eligible ? "" : " (blocked)"}
+                          {row.stripeCustomerId ? " · mapped" : ""}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  {selectedLinkClient ? (
+                    <p className="kxd-commercial-admin__muted">
+                      {selectedLinkClient.reason}
+                      {" · "}
+                      Mapping{" "}
+                      {selectedLinkClient.mappingStatus || "unknown"}
+                      {selectedLinkClient.stripeCustomerId
+                        ? ` · ${selectedLinkClient.stripeCustomerId}`
+                        : ""}
+                      {!selectedLinkClient.eligible
+                        ? " · Linking blocked for this client"
+                        : ""}
+                    </p>
+                  ) : null}
+
+                  {selectedLinkClient?.eligible ? (
+                    <>
+                      <label className="kxd-commercial-admin__field">
+                        <span>Exact Stripe customer ID</span>
+                        <input
+                          type="text"
+                          autoComplete="off"
+                          value={exactCustomerId}
+                          onChange={(e) => {
+                            setExactCustomerId(e.target.value);
+                            setLinkPreview(null);
+                            setLinkResult(null);
+                          }}
+                          disabled={busySearching || busyLinking}
+                          placeholder="cus_…"
+                          aria-label="Exact Stripe customer ID"
+                        />
+                      </label>
+                      <label className="kxd-commercial-admin__field">
+                        <span>Search term (email or name)</span>
+                        <input
+                          type="text"
+                          autoComplete="off"
+                          value={searchTerm}
+                          onChange={(e) => {
+                            setSearchTerm(e.target.value);
+                            setLinkPreview(null);
+                            setLinkResult(null);
+                          }}
+                          disabled={busySearching || busyLinking}
+                          aria-label="Stripe customer search term"
+                        />
+                      </label>
+                      <div className="kxd-commercial-admin__actions">
+                        <button
+                          type="button"
+                          className="kxd-commercial-admin__secondary"
+                          onClick={() => void searchStripeCustomersForLink()}
+                          disabled={
+                            busySearching ||
+                            busyLinking ||
+                            (!exactCustomerId.trim() && !searchTerm.trim())
+                          }
+                          aria-label="Search Stripe customers"
+                        >
+                          {busySearching ? "Searching…" : "Search customers"}
+                        </button>
+                      </div>
+
+                      {searchResult ? (
+                        <div>
+                          <p className="kxd-commercial-admin__muted">
+                            Query {searchResult.queryKind}
+                            {searchResult.stripeRequestPerformed
+                              ? " · Stripe request performed"
+                              : " · No Stripe request"}
+                          </p>
+                          {searchResult.notices.length > 0 ? (
+                            <ul>
+                              {searchResult.notices.map((row) => (
+                                <li key={row}>{row}</li>
+                              ))}
+                            </ul>
+                          ) : null}
+                          {searchResult.blockers.length > 0 ? (
+                            <ul className="kxd-commercial-admin__blockers">
+                              {searchResult.blockers.map((row) => (
+                                <li key={`${row.code}-${row.message}`}>
+                                  {row.message}
+                                </li>
+                              ))}
+                            </ul>
+                          ) : null}
+                          {searchResult.candidates.length === 0 ? (
+                            <p className="kxd-commercial-admin__muted">
+                              No candidates returned.
+                            </p>
+                          ) : (
+                            <ul
+                              className="kxd-commercial-admin__list"
+                              role="radiogroup"
+                              aria-label="Stripe customer candidates"
+                            >
+                              {searchResult.candidates.map((candidate) => (
+                                <li key={candidate.stripeCustomerId}>
+                                  <label className="kxd-commercial-admin__ack">
+                                    <input
+                                      type="radio"
+                                      name="stripe-customer-candidate"
+                                      checked={
+                                        selectedCandidateId ===
+                                        candidate.stripeCustomerId
+                                      }
+                                      onChange={() => {
+                                        setSelectedCandidateId(
+                                          candidate.stripeCustomerId,
+                                        );
+                                        setLinkPreview(null);
+                                        setLinkResult(null);
+                                        setAckMissingMetadata(false);
+                                        setAckNoBillingActivate(false);
+                                        setLinkConfirmed(false);
+                                      }}
+                                      disabled={busyLinking}
+                                    />
+                                    <span>
+                                      {candidate.displayName ||
+                                        candidate.stripeCustomerId}
+                                      {" · "}
+                                      {candidate.billingEmailMasked ||
+                                        "email hidden"}
+                                      {" · "}
+                                      {candidate.eligibleToLink
+                                        ? "eligible"
+                                        : "blocked"}
+                                      {candidate.deleted ? " · deleted" : ""}
+                                      {candidate.alreadyLinkedInternally
+                                        ? " · already linked internally"
+                                        : ""}
+                                    </span>
+                                  </label>
+                                  {candidate.blockers.length > 0 ? (
+                                    <ul className="kxd-commercial-admin__blockers">
+                                      {candidate.blockers.map((row) => (
+                                        <li
+                                          key={`${candidate.stripeCustomerId}-${row.code}`}
+                                        >
+                                          {row.message}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  ) : null}
+                                  {candidate.emailNameNotes.length > 0 ? (
+                                    <p className="kxd-commercial-admin__muted">
+                                      {candidate.emailNameNotes.join(" · ")}
+                                    </p>
+                                  ) : null}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                      ) : null}
+
+                      {selectedCandidateId ? (
+                        <div className="kxd-commercial-admin__actions">
+                          <button
+                            type="button"
+                            className="kxd-commercial-admin__secondary"
+                            onClick={() => void previewStripeCustomerLink()}
+                            disabled={busyLinking}
+                            aria-label="Preview Stripe customer link"
+                          >
+                            {busyLinking && !linkPreview
+                              ? "Preparing preview…"
+                              : "Preview link"}
+                          </button>
+                        </div>
+                      ) : null}
+
+                      {linkPreview ? (
+                        <>
+                          <p className="kxd-commercial-admin__status" role="status">
+                            {linkPreview.canLink
+                              ? "Link preview ready"
+                              : "Link preview blocked"}
+                            {" · "}
+                            Customer {linkPreview.stripeCustomerId}
+                            {" · Account "}
+                            {linkPreview.accountId}
+                            {" · Mode "}
+                            {linkPreview.mode}
+                          </p>
+                          {linkPreview.warnings.length > 0 ? (
+                            <ul>
+                              {linkPreview.warnings.map((row) => (
+                                <li key={row}>{row}</li>
+                              ))}
+                            </ul>
+                          ) : null}
+                          {linkPreview.blockers.length > 0 ? (
+                            <ul className="kxd-commercial-admin__blockers">
+                              {linkPreview.blockers.map((row) => (
+                                <li key={`${row.code}-${row.message}`}>
+                                  {row.message}
+                                </li>
+                              ))}
+                            </ul>
+                          ) : null}
+                          {linkPreview.notices.length > 0 ? (
+                            <ul>
+                              {linkPreview.notices.map((row) => (
+                                <li key={row}>{row}</li>
+                              ))}
+                            </ul>
+                          ) : null}
+                          <p className="kxd-commercial-admin__muted">
+                            Fingerprint {linkPreview.previewFingerprint}
+                          </p>
+
+                          {linkPreview.requiresMissingMetadataAck ? (
+                            <label className="kxd-commercial-admin__ack">
+                              <input
+                                type="checkbox"
+                                checked={ackMissingMetadata}
+                                onChange={(e) => {
+                                  const next = e.target.checked;
+                                  setAckMissingMetadata(next);
+                                  setLinkConfirmed(false);
+                                  // Re-preview with acknowledgment so canLink can clear.
+                                  if (selectedCandidateId && linkClientId !== "") {
+                                    void (async () => {
+                                      setBusyLinking(true);
+                                      setStripeLinkingError(null);
+                                      try {
+                                        const res = await fetch(
+                                          `/api/admin/commercial-agreements/stripe-customers/link-preview`,
+                                          {
+                                            method: "POST",
+                                            credentials: "same-origin",
+                                            headers: {
+                                              "Content-Type": "application/json",
+                                            },
+                                            body: JSON.stringify({
+                                              clientId: linkClientId,
+                                              stripeCustomerId:
+                                                selectedCandidateId,
+                                              acknowledgeMissingMetadata: next,
+                                            }),
+                                          },
+                                        );
+                                        const json =
+                                          (await res.json()) as StripeCustomerLinkPreviewResponse;
+                                        if (
+                                          !res.ok ||
+                                          !json.ok ||
+                                          !json.preview
+                                        ) {
+                                          throw new Error(
+                                            json.message ||
+                                              "Unable to preview customer link.",
+                                          );
+                                        }
+                                        setLinkPreview(json.preview);
+                                      } catch (err) {
+                                        setStripeLinkingError(
+                                          err instanceof Error
+                                            ? err.message
+                                            : "Unable to preview customer link.",
+                                        );
+                                      } finally {
+                                        setBusyLinking(false);
+                                      }
+                                    })();
+                                  }
+                                }}
+                                disabled={busyLinking}
+                              />
+                              <span>
+                                I acknowledge Stripe customer metadata is
+                                missing or incomplete for this link.
+                              </span>
+                            </label>
+                          ) : null}
+
+                          <label className="kxd-commercial-admin__ack">
+                            <input
+                              type="checkbox"
+                              checked={ackNoBillingActivate}
+                              onChange={(e) =>
+                                setAckNoBillingActivate(e.target.checked)
+                              }
+                              disabled={busyLinking}
+                            />
+                            <span>
+                              Linking does not activate billing,
+                              subscriptions, or invoices.
+                            </span>
+                          </label>
+                          <label className="kxd-commercial-admin__ack">
+                            <input
+                              type="checkbox"
+                              checked={linkConfirmed}
+                              onChange={(e) =>
+                                setLinkConfirmed(e.target.checked)
+                              }
+                              disabled={busyLinking}
+                            />
+                            <span>
+                              I confirm this internal mapping after reviewing
+                              the preview.
+                            </span>
+                          </label>
+
+                          <div className="kxd-commercial-admin__actions">
+                            <button
+                              type="button"
+                              className="kxd-commercial-admin__secondary"
+                              onClick={() => void confirmStripeCustomerLink()}
+                              disabled={
+                                busyLinking ||
+                                !linkPreview.canLink ||
+                                !ackNoBillingActivate ||
+                                !linkConfirmed ||
+                                (linkPreview.requiresMissingMetadataAck &&
+                                  !ackMissingMetadata)
+                              }
+                              aria-label="Confirm Stripe customer link"
+                            >
+                              {busyLinking ? "Linking…" : "Confirm link"}
+                            </button>
+                          </div>
+                        </>
+                      ) : null}
+
+                      {linkResult ? (
+                        <p className="kxd-commercial-admin__status" role="status">
+                          {linkResult.outcome.replace(/_/g, " ")}
+                          {" · "}
+                          {linkResult.message}
+                          {" · "}
+                          {stripeReconciliationStatusLabel(
+                            linkResult.reconciliationStatus,
+                          )}
+                        </p>
+                      ) : null}
+                    </>
+                  ) : null}
+
+                  {selectedLinkIsMapped ? (
+                    <div className="kxd-commercial-admin__change-list">
+                      <h3>Unlink mapping</h3>
+                      <p className="kxd-commercial-admin__muted">
+                        Removes the internal mapping only. Stripe customer is
+                        not deleted or modified. Access is unchanged.
+                      </p>
+                      {unlinkPreviewFingerprint ? (
+                        <p className="kxd-commercial-admin__muted">
+                          Unlink fingerprint {unlinkPreviewFingerprint}
+                        </p>
+                      ) : (
+                        <p className="kxd-commercial-admin__muted">
+                          Unlink preview not loaded.
+                        </p>
+                      )}
+                      <label className="kxd-commercial-admin__ack">
+                        <input
+                          type="checkbox"
+                          checked={unlinkConfirmed}
+                          onChange={(e) =>
+                            setUnlinkConfirmed(e.target.checked)
+                          }
+                          disabled={busyUnlinking || !unlinkPreviewFingerprint}
+                        />
+                        <span>
+                          I confirm unlink. Access and Stripe customer remain
+                          unchanged.
+                        </span>
+                      </label>
+                      <div className="kxd-commercial-admin__actions">
+                        <button
+                          type="button"
+                          className="kxd-commercial-admin__secondary"
+                          onClick={() => void confirmStripeCustomerUnlink()}
+                          disabled={
+                            busyUnlinking ||
+                            !unlinkConfirmed ||
+                            !unlinkPreviewFingerprint
+                          }
+                          aria-label="Confirm Stripe customer unlink"
+                        >
+                          {busyUnlinking ? "Unlinking…" : "Confirm unlink"}
+                        </button>
+                      </div>
+                    </div>
+                  ) : null}
+                </>
+              )}
+            </div>
+
+            <div className="kxd-commercial-admin__change-list">
+              <h3>Reconciliation</h3>
+              <p className="kxd-commercial-admin__muted">
+                Read-only comparison of internal mapping with external customer
+                facts. No repair or Stripe mutation.
+              </p>
+              <div className="kxd-commercial-admin__actions">
+                <button
+                  type="button"
+                  className="kxd-commercial-admin__secondary"
+                  onClick={() => void reconcileStripeCustomerMapping()}
+                  disabled={
+                    busyReconciling ||
+                    linkClientId === "" ||
+                    stripeLinkingLoading
+                  }
+                  aria-label="Reconcile Stripe customer mapping"
+                >
+                  {busyReconciling
+                    ? "Reconciling…"
+                    : "Reconcile selected client"}
+                </button>
+              </div>
+              {reconciliation ? (
+                <>
+                  <p className="kxd-commercial-admin__status" role="status">
+                    {reconciliation.statusLabel ||
+                      stripeReconciliationStatusLabel(reconciliation.status)}
+                  </p>
+                  <p className="kxd-commercial-admin__muted">
+                    Recommended action: {reconciliation.recommendedAction}
+                  </p>
+                  {reconciliation.notices.length > 0 ? (
+                    <ul>
+                      {reconciliation.notices.map((row) => (
+                        <li key={row}>{row}</li>
+                      ))}
+                    </ul>
+                  ) : null}
+                  {reconciliation.blockers.length > 0 ? (
+                    <ul className="kxd-commercial-admin__blockers">
+                      {reconciliation.blockers.map((row) => (
+                        <li key={`${row.code}-${row.message}`}>
+                          {row.message}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                  <dl className="kxd-commercial-admin__meta">
+                    <div>
+                      <dt>Customer</dt>
+                      <dd>
+                        {reconciliation.stripeCustomerId || "None"}
+                        {reconciliation.accountId
+                          ? ` · Account ${reconciliation.accountId}`
+                          : ""}
+                        {reconciliation.mode
+                          ? ` · Mode ${reconciliation.mode}`
+                          : ""}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Stripe request</dt>
+                      <dd>
+                        {reconciliation.stripeRequestPerformed
+                          ? "Performed"
+                          : "Not performed"}
+                      </dd>
+                    </div>
+                  </dl>
+                </>
+              ) : null}
+            </div>
+
+            <div className="kxd-commercial-admin__actions">
+              <button
+                type="button"
+                className="kxd-commercial-admin__text-btn"
+                onClick={resetStripeLinking}
+                disabled={
+                  stripeLinkingLoading ||
+                  busyConnecting ||
+                  busySearching ||
+                  busyLinking ||
+                  busyReconciling ||
+                  busyUnlinking
+                }
+              >
+                Close review
+              </button>
+            </div>
           </div>
         ) : null}
 

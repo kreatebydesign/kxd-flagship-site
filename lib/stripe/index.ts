@@ -49,6 +49,46 @@ export {
   rejectBrowserStripeAuthority,
 } from "./integration-readiness-logic";
 
+export type {
+  StripeConnectivityOutcome,
+  StripeCustomerCandidate,
+  StripeCustomerLinkPreview,
+  StripeCustomerLinkResult,
+  StripeCustomerMappingStatus,
+  StripeCustomerReconciliationSnapshot,
+  StripeCustomerSearchResult,
+  StripeReconciliationStatus,
+} from "./customer-linking-types";
+
+export {
+  KXD_STRIPE_CLIENT_METADATA_KEY,
+  STRIPE_CUSTOMER_LINK_NOTICES,
+  STRIPE_CUSTOMER_LINK_SYSTEMS_UNCHANGED,
+  stripeReconciliationStatusLabel,
+} from "./customer-linking-types";
+
+export {
+  STRIPE_PHASE_37I_AUTHORIZED_OPERATIONS,
+  STRIPE_PHASE_37I_TEST_READS_AUTHORIZED,
+  assessLinkEligibility,
+  assessPhase37IStructuralGate,
+  buildCustomerCandidate,
+  buildLinkPreviewFingerprint,
+  computeReconciliationStatus,
+  isStripeCustomerIdFormat,
+  maskBillingEmail,
+  parseConnectivityVerifyBody,
+  parseCustomerSearchBody,
+  parseLinkApplyBody,
+  parseLinkPreviewBody,
+  parseReconcileBody,
+  parseUnlinkBody,
+  refineReconciliationForClientMetadata,
+  rejectBrowserStripeLinkAuthority,
+} from "./customer-linking-logic";
+
+export { createFakeCommercialStripeAdapter } from "./commercial-stripe-adapter";
+
 export {
   STRIPE_CONFIG,
   buildStripeMetadata,

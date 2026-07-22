@@ -147,12 +147,15 @@ function main() {
     rejectBrowserStripeAuthority({ enableExecution: true }).ok === false,
   );
   check(
-    "configuration_readiness allowed; mutations blocked",
+    "configuration_readiness and Phase 37I reads allowed; mutations blocked",
     isCommercialStripeOperationAllowed("configuration_readiness") &&
+      isCommercialStripeOperationAllowed("customer_lookup") &&
+      isCommercialStripeOperationAllowed("reconciliation_read") &&
       !isCommercialStripeOperationAllowed("customer_create") &&
       !isCommercialStripeOperationAllowed("subscription_create") &&
       !isCommercialStripeOperationAllowed("invoice_create") &&
-      !isCommercialStripeOperationAllowed("checkout_create"),
+      !isCommercialStripeOperationAllowed("checkout_create") &&
+      !isCommercialStripeOperationAllowed("catalog_create"),
   );
 
   // Strategies
@@ -268,8 +271,8 @@ function main() {
       configuredTest.webhookArchitecture.knownGaps.length > 0,
   );
   check(
-    "reconciliation requires work",
-    configuredTest.reconciliation.status === "requires_work",
+    "reconciliation foundation ready for test-mode customer mapping",
+    configuredTest.reconciliation.status === "ready",
   );
 
   // Fingerprint

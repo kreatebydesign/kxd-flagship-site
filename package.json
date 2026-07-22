@@ -36,6 +36,7 @@
     "verify:commercial-billing-readiness": "tsx scripts/verify-commercial-billing-readiness.ts",
     "verify:commercial-billing-configuration": "tsx scripts/verify-commercial-billing-configuration.ts",
     "verify:stripe-integration-readiness": "tsx scripts/verify-stripe-integration-readiness.ts",
+    "verify:stripe-customer-linking": "tsx scripts/verify-stripe-customer-linking.ts",
     "verify:client-plans": "tsx scripts/verify-client-plans-entitlements.ts",
     "verify:client-upgrade-requests": "tsx scripts/verify-client-upgrade-requests.ts",
     "verify:client-inventory": "tsx scripts/verify-client-inventory.ts",

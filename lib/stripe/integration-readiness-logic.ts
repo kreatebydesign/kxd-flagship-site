@@ -98,10 +98,19 @@ export function getStripeExecutionGate(): StripeExecutionGateSnapshot {
   };
 }
 
+/**
+ * Phase 37I narrows commercial Stripe network ops to test-mode
+ * `customer_lookup` and `reconciliation_read` only. All mutation classes
+ * remain closed via STRIPE_COMMERCIAL_EXECUTION_AUTHORIZED.
+ */
 export function isCommercialStripeOperationAllowed(
   operation: StripeOperationClass,
 ): boolean {
   if (operation === "configuration_readiness") return true;
+  if (operation === "customer_lookup" || operation === "reconciliation_read") {
+    // Phase 37I test-mode reads — still require structural test-mode gate at call site.
+    return true;
+  }
   if (operation === "webhook_receive") {
     // Existing proposal webhook path is separate; commercial webhook expansion is not authorized.
     return false;
@@ -197,11 +206,12 @@ export function buildWebhookArchitecture(): StripeWebhookArchitecture {
 
 export function buildReconciliationArchitecture(): StripeReconciliationArchitecture {
   return {
-    status: "requires_work",
+    status: "ready",
     requirements: [
-      "Compare internal billing intent (agreement + billing profile) to external Stripe state without treating either as access state",
+      "Phase 37I provides test-mode customer reconciliation for linked mappings",
+      "Compare internal billing intent (agreement + billing profile) to external Stripe customer state without treating either as access state",
       "Verify ownership and mode before linking external IDs",
-      "Detect missed webhook events and out-of-order updates",
+      "Detect missed webhook events and out-of-order updates (still requires future commercial webhook work)",
       "Never mutate plan/access from Stripe events alone",
       "Keep agreement terms and payment state distinct",
     ],
@@ -381,17 +391,17 @@ export function buildStripeIntegrationReadiness(
   blockers.push({
     code: "execution_disabled",
     message:
-      "Commercial Stripe execution gate is closed. Structural configuration does not authorize mutations.",
+      "Commercial Stripe mutation gate remains closed. Customer creation, catalog, subscription, invoice, checkout, and payment operations are not authorized.",
   });
   blockers.push({
     code: "connectivity_not_tested",
     message:
-      "Stripe connectivity is not tested. Key presence is structural only — not verified authentication.",
+      "Stripe connectivity is not tested by this structural assessment. Use the deliberate test-mode connectivity action when authorized.",
   });
   blockers.push({
     code: "commercial_sync_not_authorized",
     message:
-      "Commercial customer, catalog, subscription, and invoice synchronization is not authorized in this phase.",
+      "Catalog, subscription, invoice, and customer-creation synchronization remain unauthorized. Phase 37I permits only test-mode lookup, linking of existing customers, and reconciliation.",
   });
 
   if (publishableKeyPresent && !secretKeyPresent) {

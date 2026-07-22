@@ -75,6 +75,7 @@ import * as migration_20260808_phase35a_client_plans_entitlements from './202608
 import * as migration_20260809_phase35b_client_upgrade_requests from './20260809_phase35b_client_upgrade_requests';
 import * as migration_20260721_phase36a_commercial_agreements from './20260721_phase36a_commercial_agreements';
 import * as migration_20260721_phase37g_billing_configuration from './20260721_phase37g_billing_configuration';
+import * as migration_20260721_phase37i_stripe_customer_mapping from './20260721_phase37i_stripe_customer_mapping';
 
 export const migrations = [
   {
@@ -461,5 +462,10 @@ export const migrations = [
     up: migration_20260721_phase37g_billing_configuration.up,
     down: migration_20260721_phase37g_billing_configuration.down,
     name: '20260721_phase37g_billing_configuration',
+  },
+  {
+    up: migration_20260721_phase37i_stripe_customer_mapping.up,
+    down: migration_20260721_phase37i_stripe_customer_mapping.down,
+    name: '20260721_phase37i_stripe_customer_mapping',
   },
 ];
