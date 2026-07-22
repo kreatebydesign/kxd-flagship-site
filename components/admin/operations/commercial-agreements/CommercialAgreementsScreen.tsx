@@ -10,11 +10,14 @@ import {
 } from "@/components/admin/operations/shared/OpsBriefing";
 import { KxdPage } from "@/components/os";
 import {
+  activationEligibilityLabel,
   applyCatalogDefaults,
   commercialAddOnLabel,
   commercialProvisioningLabel,
   commercialRecordStatusLabel,
   listCommercialAgreements,
+  type ActivationPreview,
+  type ActivationResult,
   type ClientCommercialAgreementRecord,
   type CommercialAgreementFieldErrors,
   type CommercialAgreementId,
@@ -41,8 +44,21 @@ type DetailResponse = {
   fieldErrors?: CommercialAgreementFieldErrors;
 };
 
-type EditorMode = "idle" | "edit" | "create";
+type PreviewResponse = {
+  ok?: boolean;
+  message?: string;
+  preview?: ActivationPreview;
+};
 
+type ActivateResponse = {
+  ok?: boolean;
+  message?: string;
+  code?: string;
+  result?: ActivationResult;
+};
+
+type EditorMode = "idle" | "edit" | "create";
+type ActivationPhase = "closed" | "preview" | "result";
 type Draft = {
   commercialAgreementId: CommercialAgreementId | "";
   monthlyRetainerAmount: string;
@@ -142,7 +158,26 @@ export function CommercialAgreementsScreen() {
   const [fieldErrors, setFieldErrors] =
     useState<CommercialAgreementFieldErrors>({});
 
+  const [activationPhase, setActivationPhase] =
+    useState<ActivationPhase>("closed");
+  const [activationPreview, setActivationPreview] =
+    useState<ActivationPreview | null>(null);
+  const [activationResult, setActivationResult] =
+    useState<ActivationResult | null>(null);
+  const [activationLoading, setActivationLoading] = useState(false);
+  const [activationError, setActivationError] = useState<string | null>(null);
+  const [activationAcknowledged, setActivationAcknowledged] = useState(false);
+
   const dirty = mode !== "idle" && !draftsEqual(draft, baseline);
+
+  function resetActivation() {
+    setActivationPhase("closed");
+    setActivationPreview(null);
+    setActivationResult(null);
+    setActivationLoading(false);
+    setActivationError(null);
+    setActivationAcknowledged(false);
+  }
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -201,6 +236,7 @@ export function CommercialAgreementsScreen() {
     setSaveMessage(null);
     setSaveError(null);
     setFieldErrors({});
+    resetActivation();
     try {
       const res = await fetch(`/api/admin/commercial-agreements/${clientId}`, {
         credentials: "same-origin",
@@ -215,8 +251,101 @@ export function CommercialAgreementsScreen() {
     }
   }
 
+  async function reviewActivation() {
+    if (!selectedId || activationLoading) return;
+    setActivationLoading(true);
+    setActivationError(null);
+    setActivationResult(null);
+    setActivationAcknowledged(false);
+    try {
+      const res = await fetch(
+        `/api/admin/commercial-agreements/${selectedId}/activation-preview`,
+        {
+          method: "POST",
+          credentials: "same-origin",
+        },
+      );
+      const json = (await res.json()) as PreviewResponse;
+      if (!res.ok || !json.ok || !json.preview) {
+        throw new Error(json.message || "Unable to generate activation preview.");
+      }
+      setActivationPreview(json.preview);
+      setActivationPhase("preview");
+    } catch (err) {
+      setActivationError(
+        err instanceof Error ? err.message : "Unable to generate preview.",
+      );
+      setActivationPhase("preview");
+    } finally {
+      setActivationLoading(false);
+    }
+  }
+
+  async function confirmActivation() {
+    if (
+      !selectedId ||
+      !activationPreview ||
+      !activationAcknowledged ||
+      activationLoading
+    ) {
+      return;
+    }
+    setActivationLoading(true);
+    setActivationError(null);
+    try {
+      const res = await fetch(
+        `/api/admin/commercial-agreements/${selectedId}/activate`,
+        {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            previewFingerprint: activationPreview.previewFingerprint,
+            confirmed: true,
+          }),
+        },
+      );
+      const json = (await res.json()) as ActivateResponse;
+      if (!res.ok || !json.ok || !json.result) {
+        if (json.code === "stale_preview") {
+          setActivationError(
+            json.message ||
+              "This preview is out of date. Generate a fresh review and try again.",
+          );
+          setActivationPhase("preview");
+          setActivationAcknowledged(false);
+          return;
+        }
+        throw new Error(json.message || "Unable to activate.");
+      }
+      setActivationResult(json.result);
+      setActivationPhase("result");
+      if (json.result.preview) {
+        setActivationPreview(json.result.preview);
+      }
+      if (json.result.status === "activated" || json.result.status === "already_active") {
+        const detailRes = await fetch(
+          `/api/admin/commercial-agreements/${selectedId}`,
+          { credentials: "same-origin" },
+        );
+        const detailJson = (await detailRes.json()) as DetailResponse;
+        if (detailRes.ok && detailJson.ok && detailJson.agreement) {
+          setDetail(detailJson.agreement);
+        }
+        await load();
+      }
+    } catch (err) {
+      setActivationError(
+        err instanceof Error ? err.message : "Unable to activate.",
+      );
+    } finally {
+      setActivationLoading(false);
+    }
+  }
+
   function beginEdit() {
     if (!detail) return;
+    resetActivation();
     const next = draftFromRecord(detail);
     setDraft(next);
     setBaseline(next);
@@ -230,6 +359,7 @@ export function CommercialAgreementsScreen() {
     if (dirty && !window.confirm("Discard unsaved commercial changes?")) {
       return;
     }
+    resetActivation();
     setSelectedId(null);
     setDetail(null);
     setCreateClientId("");
@@ -751,7 +881,7 @@ export function CommercialAgreementsScreen() {
                     </dd>
                   </div>
                   <div>
-                    <dt>Client plan (unchanged by this workspace)</dt>
+                    <dt>Client plan (unchanged by recording)</dt>
                     <dd>
                       {detail.planKey ?? "null"} · {detail.planStatus ?? "null"}
                     </dd>
@@ -779,6 +909,22 @@ export function CommercialAgreementsScreen() {
                   >
                     Edit
                   </button>
+                  {detail.recordStatus === "recorded" ? (
+                    <button
+                      type="button"
+                      className="kxd-commercial-admin__secondary"
+                      onClick={() => void reviewActivation()}
+                      disabled={activationLoading}
+                    >
+                      {activationLoading && activationPhase === "closed"
+                        ? "Preparing…"
+                        : "Review activation"}
+                    </button>
+                  ) : (
+                    <p className="kxd-commercial-admin__muted">
+                      No recorded agreement available for activation.
+                    </p>
+                  )}
                 </div>
                 {saveMessage ? (
                   <p className="kxd-commercial-admin__success" role="status">
@@ -789,6 +935,269 @@ export function CommercialAgreementsScreen() {
                   <p className="kxd-commercial-admin__error" role="alert">
                     {saveError}
                   </p>
+                ) : null}
+
+                {activationPhase !== "closed" ? (
+                  <div
+                    className="kxd-commercial-admin__activation"
+                    role="region"
+                    aria-label="Activation review"
+                  >
+                    <OpsSectionHead label="Activation review" />
+
+                    {activationError ? (
+                      <p className="kxd-commercial-admin__error" role="alert">
+                        {activationError}
+                      </p>
+                    ) : null}
+
+                    {activationPreview ? (
+                      <>
+                        <p
+                          className={
+                            activationPreview.eligibility === "blocked"
+                              ? "kxd-commercial-admin__status kxd-commercial-admin__status--blocked"
+                              : activationPreview.alreadyActive
+                                ? "kxd-commercial-admin__status kxd-commercial-admin__status--active"
+                                : "kxd-commercial-admin__status"
+                          }
+                          role="status"
+                        >
+                          {activationEligibilityLabel(
+                            activationPreview.eligibility,
+                          )}
+                          {activationPreview.proposedPlanLabel
+                            ? ` · ${activationPreview.proposedPlanLabel}`
+                            : ""}
+                        </p>
+
+                        {activationPreview.blockers.length > 0 ? (
+                          <ul className="kxd-commercial-admin__blockers">
+                            {activationPreview.blockers.map((row) => (
+                              <li key={row.code}>{row.message}</li>
+                            ))}
+                          </ul>
+                        ) : null}
+
+                        {activationPreview.warnings.length > 0 ? (
+                          <ul className="kxd-commercial-admin__warnings">
+                            {activationPreview.warnings.map((warning) => (
+                              <li key={warning}>{warning}</li>
+                            ))}
+                          </ul>
+                        ) : null}
+
+                        <div className="kxd-commercial-admin__compare">
+                          <div>
+                            <h3>Current access</h3>
+                            <p>
+                              Plan: {activationPreview.current.planKey ?? "none"}{" "}
+                              · {activationPreview.current.planStatus ?? "—"}
+                            </p>
+                            <ul>
+                              {activationPreview.current.effectiveModules.length ? (
+                                activationPreview.current.effectiveModules.map(
+                                  (key) => (
+                                    <li key={`current-${key}`}>
+                                      {activationPreview.capabilityChanges.find(
+                                        (row) => row.key === key,
+                                      )?.label ?? key}
+                                    </li>
+                                  ),
+                                )
+                              ) : (
+                                <li>No plan-derived modules</li>
+                              )}
+                            </ul>
+                          </div>
+                          <div>
+                            <h3>After activation</h3>
+                            <p>
+                              Plan:{" "}
+                              {activationPreview.proposed.planKey ?? "none"} ·{" "}
+                              {activationPreview.proposed.planStatus ?? "—"}
+                            </p>
+                            <ul>
+                              {activationPreview.proposed.effectiveModules
+                                .length ? (
+                                activationPreview.proposed.effectiveModules.map(
+                                  (key) => (
+                                    <li key={`proposed-${key}`}>
+                                      {activationPreview.capabilityChanges.find(
+                                        (row) => row.key === key,
+                                      )?.label ?? key}
+                                    </li>
+                                  ),
+                                )
+                              ) : (
+                                <li>No modules proposed</li>
+                              )}
+                            </ul>
+                          </div>
+                        </div>
+
+                        <div className="kxd-commercial-admin__change-list">
+                          <h3>Included with this plan</h3>
+                          <ul>
+                            {activationPreview.capabilityChanges.filter(
+                              (row) => row.kind === "added",
+                            ).length === 0 ? (
+                              <li>No new modules</li>
+                            ) : (
+                              activationPreview.capabilityChanges
+                                .filter((row) => row.kind === "added")
+                                .map((row) => (
+                                  <li
+                                    key={`add-${row.key}`}
+                                    data-kind="added"
+                                  >
+                                    Added · {row.label}
+                                  </li>
+                                ))
+                            )}
+                          </ul>
+                          <h3>Not changed by activation</h3>
+                          <ul>
+                            {activationPreview.capabilityChanges
+                              .filter((row) => row.kind === "unchanged")
+                              .map((row) => (
+                                <li
+                                  key={`same-${row.key}`}
+                                  data-kind="unchanged"
+                                >
+                                  Unchanged · {row.label}
+                                </li>
+                              ))}
+                            {activationPreview.unchangedSystems.map((row) => (
+                              <li key={row.id} data-kind="excluded">
+                                Excluded · {row.label}
+                              </li>
+                            ))}
+                          </ul>
+                          {activationPreview.capabilityChanges.some(
+                            (row) => row.kind === "removed",
+                          ) ? (
+                            <>
+                              <h3>Would no longer be available</h3>
+                              <ul>
+                                {activationPreview.capabilityChanges
+                                  .filter((row) => row.kind === "removed")
+                                  .map((row) => (
+                                    <li
+                                      key={`rm-${row.key}`}
+                                      data-kind="removed"
+                                    >
+                                      Removed · {row.label}
+                                    </li>
+                                  ))}
+                              </ul>
+                            </>
+                          ) : null}
+                        </div>
+
+                        {activationPhase === "result" && activationResult ? (
+                          <p
+                            className={
+                              activationResult.status === "activated" ||
+                              activationResult.status === "already_active"
+                                ? "kxd-commercial-admin__success"
+                                : "kxd-commercial-admin__error"
+                            }
+                            role="status"
+                          >
+                            {activationResult.message}
+                          </p>
+                        ) : null}
+
+                        {activationPreview.canActivate &&
+                        activationPhase !== "result" ? (
+                          <div className="kxd-commercial-admin__confirm">
+                            <p>
+                              Activation assigns{" "}
+                              <strong>
+                                {activationPreview.proposedPlanLabel}
+                              </strong>{" "}
+                              for <strong>{activationPreview.clientName}</strong>{" "}
+                              from{" "}
+                              <strong>
+                                {activationPreview.agreementName}
+                              </strong>
+                              . This changes client access. It does not bill,
+                              email, connect providers, create portal users, or
+                              publish inventory.
+                            </p>
+                            <label className="kxd-commercial-admin__ack">
+                              <input
+                                type="checkbox"
+                                checked={activationAcknowledged}
+                                onChange={(e) =>
+                                  setActivationAcknowledged(e.target.checked)
+                                }
+                                disabled={activationLoading}
+                              />
+                              <span>
+                                I understand this will change client access for
+                                this plan assignment.
+                              </span>
+                            </label>
+                            <div className="kxd-commercial-admin__actions">
+                              <button
+                                type="button"
+                                className="kxd-commercial-admin__save"
+                                onClick={() => void confirmActivation()}
+                                disabled={
+                                  !activationAcknowledged || activationLoading
+                                }
+                              >
+                                {activationLoading
+                                  ? "Activating…"
+                                  : "Activate plan"}
+                              </button>
+                              <button
+                                type="button"
+                                className="kxd-commercial-admin__text-btn"
+                                onClick={resetActivation}
+                                disabled={activationLoading}
+                              >
+                                Cancel review
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="kxd-commercial-admin__actions">
+                            {activationPreview.alreadyActive ? (
+                              <p className="kxd-commercial-admin__muted">
+                                Already active — no activation needed.
+                              </p>
+                            ) : null}
+                            <button
+                              type="button"
+                              className="kxd-commercial-admin__text-btn"
+                              onClick={resetActivation}
+                              disabled={activationLoading}
+                            >
+                              Close review
+                            </button>
+                            {activationError?.includes("out of date") ||
+                            activationError?.includes("fresh") ? (
+                              <button
+                                type="button"
+                                className="kxd-commercial-admin__secondary"
+                                onClick={() => void reviewActivation()}
+                                disabled={activationLoading}
+                              >
+                                Refresh preview
+                              </button>
+                            ) : null}
+                          </div>
+                        )}
+                      </>
+                    ) : activationLoading ? (
+                      <p className="kxd-commercial-admin__muted">
+                        Generating activation preview…
+                      </p>
+                    ) : null}
+                  </div>
                 ) : null}
               </div>
             ) : null}

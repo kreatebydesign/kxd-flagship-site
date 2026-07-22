@@ -15805,6 +15805,20 @@ a.kxd-exec-today__row:hover {
   color: #fff;
 }
 
+.kxd-commercial-admin__secondary {
+  border: 1px solid var(--kxd-os-border);
+  border-radius: 2px;
+  background: transparent;
+  color: var(--kxd-os-text-primary, #16140f);
+  font: inherit;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.45rem 0.75rem;
+  cursor: pointer;
+}
+
+.kxd-commercial-admin__secondary:disabled,
 .kxd-commercial-admin__save:disabled {
   opacity: 0.55;
   cursor: wait;
@@ -15842,11 +15856,13 @@ a.kxd-exec-today__row:hover {
 .kxd-commercial-admin__filters button:focus-visible,
 .kxd-commercial-admin__new:focus-visible,
 .kxd-commercial-admin__save:focus-visible,
+.kxd-commercial-admin__secondary:focus-visible,
 .kxd-commercial-admin__toolbar input:focus-visible,
 .kxd-commercial-admin__toolbar select:focus-visible,
 .kxd-commercial-admin__field input:focus-visible,
 .kxd-commercial-admin__field select:focus-visible,
-.kxd-commercial-admin__field textarea:focus-visible {
+.kxd-commercial-admin__field textarea:focus-visible,
+.kxd-commercial-admin__ack input:focus-visible {
   outline: 2px solid color-mix(in srgb, var(--kxd-os-gold, #b8974a) 70%, transparent);
   outline-offset: 2px;
 }
@@ -16004,9 +16020,120 @@ a.kxd-exec-today__row:hover {
   color: var(--kxd-os-text-muted);
 }
 
+.kxd-commercial-admin__activation {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--kxd-os-border);
+}
+
+.kxd-commercial-admin__status {
+  margin: 0.75rem 0;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--kxd-os-border);
+  border-radius: 2px;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-muted);
+}
+
+.kxd-commercial-admin__status--blocked {
+  border-color: color-mix(in srgb, var(--kxd-os-critical, #8b2e2e) 45%, var(--kxd-os-border));
+  color: var(--kxd-os-critical, #8b2e2e);
+}
+
+.kxd-commercial-admin__status--active {
+  border-color: color-mix(in srgb, var(--kxd-os-success, #2f6b4f) 45%, var(--kxd-os-border));
+  color: var(--kxd-os-success, #2f6b4f);
+}
+
+.kxd-commercial-admin__blockers,
+.kxd-commercial-admin__warnings,
+.kxd-commercial-admin__compare ul,
+.kxd-commercial-admin__change-list ul {
+  margin: 0.45rem 0 0.85rem;
+  padding-left: 1.1rem;
+  color: var(--kxd-os-text-muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.kxd-commercial-admin__blockers {
+  color: var(--kxd-os-critical, #8b2e2e);
+}
+
+.kxd-commercial-admin__compare {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.kxd-commercial-admin__compare h3,
+.kxd-commercial-admin__change-list h3 {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--kxd-os-text-faint);
+}
+
+.kxd-commercial-admin__compare p {
+  margin: 0.35rem 0 0.55rem;
+  font-size: 0.9rem;
+}
+
+.kxd-commercial-admin__change-list li[data-kind="added"]::marker {
+  content: "+ ";
+}
+
+.kxd-commercial-admin__change-list li[data-kind="removed"]::marker {
+  content: "− ";
+}
+
+.kxd-commercial-admin__change-list li[data-kind="unchanged"]::marker,
+.kxd-commercial-admin__change-list li[data-kind="excluded"]::marker {
+  content: "· ";
+}
+
+.kxd-commercial-admin__confirm {
+  margin-top: 1rem;
+  padding: 0.85rem 0.9rem;
+  border: 1px solid var(--kxd-os-border);
+  border-radius: 2px;
+}
+
+.kxd-commercial-admin__confirm p {
+  margin: 0 0 0.85rem;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--kxd-os-text-muted);
+}
+
+.kxd-commercial-admin__ack {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+  margin-bottom: 0.85rem;
+  font-size: 0.9rem;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--kxd-os-text-primary, #16140f);
+  cursor: pointer;
+}
+
+.kxd-commercial-admin__ack input {
+  margin-top: 0.2rem;
+  width: 1.1rem;
+  height: 1.1rem;
+  flex-shrink: 0;
+}
+
 @media (max-width: 960px) {
   .kxd-commercial-admin__layout,
-  .kxd-commercial-admin__grid {
+  .kxd-commercial-admin__grid,
+  .kxd-commercial-admin__compare {
     grid-template-columns: 1fr;
   }
 
@@ -16021,6 +16148,7 @@ a.kxd-exec-today__row:hover {
 
   .kxd-commercial-admin__new,
   .kxd-commercial-admin__save,
+  .kxd-commercial-admin__secondary,
   .kxd-commercial-admin__list button {
     min-height: 2.75rem;
   }
@@ -16028,6 +16156,7 @@ a.kxd-exec-today__row:hover {
 
 @media (prefers-reduced-motion: reduce) {
   .kxd-commercial-admin__save,
+  .kxd-commercial-admin__secondary,
   .kxd-commercial-admin__list button,
   .kxd-commercial-admin__filters button {
     transition: none;
