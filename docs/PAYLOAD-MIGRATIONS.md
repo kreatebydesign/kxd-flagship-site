@@ -16,11 +16,25 @@ hook carried a Next.js `server-only` boundary. Direct SQL plus manual
 | Command | Effect | Safety |
 |---------|--------|--------|
 | `npm run migrate:status` | Lists applied vs pending migrations | Read-only |
-| `npm run migrate` / `npm run migrate:local` | Applies pending migrations | Local Postgres or SQLite only |
-| `npm run migrate:production` | Applies pending migrations to remote Postgres | Requires `KXD_CONFIRM_PRODUCTION_MIGRATE=1` |
-| `npm run migrate:unsafe` | Raw `payload migrate` with no target guard | Emergency / advanced only |
+| `npm run migrate` / `npm run migrate:local` | Applies pending migrations in **`migrations/index.ts` order** | Local Postgres or SQLite only |
+| `npm run migrate:production` | Applies pending migrations in **`migrations/index.ts` order** | Requires `KXD_CONFIRM_PRODUCTION_MIGRATE=1` |
+| `npm run migrate:unsafe` | Raw `payload migrate` (filesystem lexicographic order, no target guard) | Emergency / advanced only |
+| `npm run verify:migration-bootstrap` | Full empty-DB bootstrap + schema checks | Local Postgres only; requires `KXD_BOOTSTRAP_VERIFY=1` |
 
 All guarded commands print the resolved **host + database name** (never credentials).
+
+## Migration discovery vs apply order
+
+Payload’s built-in file reader uses `fs.readdirSync(migrationDir).sort()` (lexicographic).
+That is **not** dependency order. Example:
+
+- Lexicographic: `…phase33a1…` → `…phase33a2…` → `…phase33a_…`
+- Required: `…phase33a_…` (creates `reporting_sync_states`) → `…phase33a1…` → `…phase33a2…`
+
+`migrations/index.ts` is the **authoritative apply order** for guarded migrate commands.
+Do not re-enable `prodMigrations` in `payload.config.ts` (removed to avoid Vercel cold-start hangs).
+
+`migrate:unsafe` still uses lexicographic file order and can fail on empty databases.
 
 ## Identify the resolved database target
 
@@ -42,17 +56,62 @@ Confirm the printed line:
 - **Local apply** requires `kind=local-postgres` or `kind=sqlite`.
 - **Production apply** requires `kind=remote-postgres` and an explicit confirm env var.
 - If `.env.local` points at Neon/production, `migrate` / `migrate:local` will refuse.
+- Prefer **local Postgres** for full historical bootstrap (migrations are Postgres DDL).
 
-## Safe local workflow
+## Safe local workflow (forward migrate)
 
 1. Point env at an isolated database:
    - Local Postgres: `DATABASE_URI=postgres://…@127.0.0.1:5432/kxd_dev`
-   - Or unset `DATABASE_URI` / `DATABASE_URL` and use SQLite for disposable tests
 2. Inspect: `npm run migrate:status`
 3. Apply: `npm run migrate:local` (or `npm run migrate`)
 4. Re-check status; pending list should be empty
 
 Do not use production credentials for write-capable local verification.
+
+## Fresh empty-database bootstrap (recovery / local setup)
+
+Supported path for a brand-new Postgres database:
+
+1. Create an empty local database (no user tables).
+2. Export a local URL only, for example:
+
+   ```bash
+   export DATABASE_URI=postgres://postgres@127.0.0.1:5432/kxd_bootstrap
+   unset DATABASE_URL POSTGRES_URL
+   ```
+
+3. Confirm the guard resolves local:
+
+   ```bash
+   npm run migrate:status
+   # expect: kind=local-postgres host=127.0.0.1 …
+   ```
+
+4. Either:
+
+   ```bash
+   npm run migrate:local
+   ```
+
+   or the full verification harness:
+
+   ```bash
+   KXD_BOOTSTRAP_VERIFY=1 npm run verify:migration-bootstrap
+   ```
+
+5. Expected result:
+   - Every migration in `migrations/index.ts` recorded once
+   - `migrate:status` shows no pending (`Ran: Yes` for all)
+   - Critical tables exist (`clients`, `reporting_sync_states`, launch/inventory/scheduling surfaces, etc.)
+
+6. Destroy disposable bootstrap databases when finished. Do not keep dumps with secrets.
+
+### Disaster-recovery implications
+
+- Forward production migrate remains name-based and safe for already-applied rows.
+- Empty-database rebuild must use guarded `migrate:local` / `verify:migration-bootstrap` (index order).
+- Never rewrite `payload_migrations` history on production to “fix” bootstrap.
+- Emergency SQL remains last resort when the CLI cannot run.
 
 ## Production workflow (deliberate)
 
@@ -113,3 +172,11 @@ and `lib/infrastructure/preview-domain.ts`.
 
 Next.js-only behavior (`server-only`, request APIs, React client modules) belongs in
 route handlers / server adapters — not on the Payload config import graph.
+
+When adding migrations:
+
+1. Prefer timestamp prefixes that sort after existing files.
+2. Always register the migration in `migrations/index.ts` in dependency order.
+3. Treat `index.ts` order as authoritative for guarded applies.
+4. Avoid names that sort before their prerequisites under lexicographic order
+   (especially `phaseNNa1` before `phaseNNa_`).

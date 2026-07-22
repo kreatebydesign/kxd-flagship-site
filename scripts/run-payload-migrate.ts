@@ -6,6 +6,8 @@
  *   npx tsx scripts/run-payload-migrate.ts local
  *   npx tsx scripts/run-payload-migrate.ts production
  *
+ * Apply paths use migrations/index.ts order (dependency-safe).
+ * Status remains read-only via Payload migrate:status.
  * Never prints connection secrets — host/db only.
  */
 
@@ -30,7 +32,7 @@ function usage(): never {
   npx tsx scripts/run-payload-migrate.ts production
 
 status      — read-only migrate:status (safe against any configured target)
-local      — apply migrations only to local Postgres or SQLite
+local      — apply migrations only to local Postgres or SQLite (index.ts order)
 production — apply migrations to remote Postgres; requires KXD_CONFIRM_PRODUCTION_MIGRATE=1
 `);
   process.exit(1);
@@ -74,8 +76,16 @@ async function main(): Promise<void> {
   }
 
   assertSafeWriteTarget(target, mode);
-  const code = await runPayload(["migrate"]);
-  process.exit(code);
+  if (target.kind === "sqlite") {
+    console.warn(
+      "[KXD] Warning: historical migrations target Postgres DDL. Prefer local Postgres for full bootstrap.",
+    );
+  }
+
+  // Lazy-load so refuse/status paths do not import the full Payload graph.
+  const { applyOrderedMigrations } = await import("./lib/payload-migrate-ordered");
+  await applyOrderedMigrations();
+  process.exit(0);
 }
 
 main().catch((err) => {

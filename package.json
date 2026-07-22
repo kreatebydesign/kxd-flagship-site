@@ -15,6 +15,7 @@
     "migrate:local": "tsx scripts/run-payload-migrate.ts local",
     "migrate:production": "tsx scripts/run-payload-migrate.ts production",
     "migrate:unsafe": "cross-env NODE_OPTIONS='--no-deprecation' payload migrate",
+    "verify:migration-bootstrap": "tsx scripts/verify-migration-bootstrap.ts",
     "seed:services": "tsx scripts/seed-services.ts",
     "seed:projects": "tsx scripts/seed-projects.ts",
     "seed:clients": "tsx scripts/seed-clients.ts",
