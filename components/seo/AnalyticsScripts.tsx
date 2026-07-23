@@ -1,48 +1,50 @@
+import { headers } from "next/headers";
 import Script from "next/script";
-import { ANALYTICS_CONFIG } from "@/lib/analytics/config";
+import {
+  getPublicGoogleTagId,
+  isPublicProductionAnalyticsHost,
+  resolveRequestHostname,
+} from "@/lib/analytics/config";
 
-export function AnalyticsScripts() {
-  const { ga4Id, gtmId } = ANALYTICS_CONFIG;
+/**
+ * Public marketing site analytics only (`app/(site)/layout.tsx`).
+ *
+ * - Canonical Google tag: GT-TQTSJHVJ (connected GA4: G-1L1BXNJB4T)
+ * - Loads only on kreatebydesign.com / www.kreatebydesign.com
+ * - Not mounted on portal, admin, KXD OS, API, or auth layouts
+ * - Does not install GTM (avoids duplicate Google tags)
+ * - Initial page_view comes from gtag('config') — do not emit manual page_view events
+ * - SPA navigations: rely on GA4 Enhanced Measurement
+ *   (“Page changes based on browser history events”) — confirm in GA4 after deploy
+ */
+export async function AnalyticsScripts() {
+  const headerStore = await headers();
+  const hostname = resolveRequestHostname(headerStore);
 
-  if (!ga4Id && !gtmId) return null;
+  if (!isPublicProductionAnalyticsHost(hostname)) {
+    return null;
+  }
+
+  const tagId = getPublicGoogleTagId();
+  if (!tagId) return null;
 
   return (
     <>
-      {gtmId ? (
-        <>
-          <Script id="gtm-init" strategy="lazyOnload">
-            {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-            })(window,document,'script','dataLayer','${gtmId}');`}
-          </Script>
-          <noscript>
-            <iframe
-              src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
-              height="0"
-              width="0"
-              style={{ display: "none", visibility: "hidden" }}
-              title="Google Tag Manager"
-            />
-          </noscript>
-        </>
-      ) : null}
-
-      {ga4Id && !gtmId ? (
-        <>
-          <Script
-            src={`https://www.googletagmanager.com/gtag/js?id=${ga4Id}`}
-            strategy="lazyOnload"
-          />
-          <Script id="ga4-init" strategy="lazyOnload">
-            {`window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', '${ga4Id}');`}
-          </Script>
-        </>
-      ) : null}
+      <Script
+        src={`https://www.googletagmanager.com/gtag/js?id=${tagId}`}
+        strategy="afterInteractive"
+      />
+      <Script id="google-tag-init" strategy="afterInteractive">
+        {`(function(){
+  var host = window.location.hostname;
+  if (host !== 'kreatebydesign.com' && host !== 'www.kreatebydesign.com') return;
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  window.gtag = gtag;
+  gtag('js', new Date());
+  gtag('config', '${tagId}');
+})();`}
+      </Script>
     </>
   );
 }
