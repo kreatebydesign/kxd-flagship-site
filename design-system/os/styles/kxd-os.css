@@ -15626,18 +15626,44 @@ a.kxd-exec-today__row:hover {
 
 /* ── Phase 35B — Client Upgrade Requests ─────────────────────────────────── */
 
+/* ── Phase 35B — Portal upgrade opportunities (dark CES theme contract) ─── */
+/*
+ * Opaque color-mix against page/surface — not alpha text — so glyphs stay
+ * bright on dark CES. Tokens only; no light-theme fallbacks.
+ */
 .kxd-upgrade {
+  --kxd-upgrade-page: var(--kxd-os-bg-page);
+  --kxd-upgrade-surface: var(--kxd-os-bg-elevated);
+  --kxd-upgrade-text: var(--kxd-os-text-primary);
+  --kxd-upgrade-body: color-mix(in srgb, var(--kxd-os-text-primary) 88%, var(--kxd-os-bg-page));
+  --kxd-upgrade-body-on-surface: color-mix(
+    in srgb,
+    var(--kxd-os-text-primary) 88%,
+    var(--kxd-os-bg-elevated)
+  );
+  --kxd-upgrade-meta: color-mix(in srgb, var(--kxd-os-text-primary) 68%, var(--kxd-os-bg-page));
+  --kxd-upgrade-meta-on-surface: color-mix(
+    in srgb,
+    var(--kxd-os-text-primary) 68%,
+    var(--kxd-os-bg-elevated)
+  );
+  --kxd-upgrade-border: color-mix(in srgb, var(--kxd-os-text-primary) 16%, transparent);
+  --kxd-upgrade-status-ok: color-mix(in srgb, var(--kxd-os-success) 72%, white);
+
   margin-top: 2.5rem;
   padding-top: 1.75rem;
-  border-top: 1px solid var(--kxd-ces-border, rgba(0, 0, 0, 0.08));
+  padding-bottom: clamp(2.25rem, 5vw, 3.25rem);
+  border-top: 1px solid var(--kxd-upgrade-border);
+  color: var(--kxd-upgrade-text);
 }
 
 .kxd-upgrade__eyebrow {
   margin: 0;
   font-size: 0.68rem;
+  font-weight: 500;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--kxd-ces-text-muted, #6b645c);
+  color: var(--kxd-os-accent);
 }
 
 .kxd-upgrade__title {
@@ -15645,7 +15671,7 @@ a.kxd-exec-today__row:hover {
   font-size: clamp(1.35rem, 2vw, 1.75rem);
   font-weight: 500;
   letter-spacing: -0.02em;
-  color: var(--kxd-ces-text, #16140f);
+  color: var(--kxd-upgrade-text);
 }
 
 .kxd-upgrade__lead,
@@ -15653,16 +15679,21 @@ a.kxd-exec-today__row:hover {
 .kxd-upgrade__card-summary,
 .kxd-upgrade__card-value {
   margin: 0.55rem 0 0;
-  color: var(--kxd-ces-text-muted, #6b645c);
+  color: var(--kxd-upgrade-body);
   line-height: 1.55;
   font-size: 0.95rem;
+}
+
+.kxd-upgrade__card-summary,
+.kxd-upgrade__card-value {
+  color: var(--kxd-upgrade-body-on-surface);
 }
 
 .kxd-upgrade__paused {
   margin: 0.85rem 0 0;
   padding: 0.55rem 0.7rem;
-  border-left: 2px solid var(--kxd-os-warning, #b0893d);
-  color: var(--kxd-ces-text-muted, #6b645c);
+  border-left: 2px solid var(--kxd-os-warning);
+  color: var(--kxd-upgrade-body);
   font-size: 0.9rem;
 }
 
@@ -15674,17 +15705,17 @@ a.kxd-exec-today__row:hover {
 }
 
 .kxd-upgrade__card {
-  border: 1px solid var(--kxd-ces-border, rgba(0, 0, 0, 0.1));
+  border: 1px solid var(--kxd-upgrade-border);
   border-radius: 2px;
   padding: 1rem 1.05rem 1.1rem;
-  background: transparent;
+  background: var(--kxd-upgrade-surface);
 }
 
 .kxd-upgrade__card-title {
   margin: 0;
   font-size: 1.05rem;
   font-weight: 500;
-  color: var(--kxd-ces-text, #16140f);
+  color: var(--kxd-upgrade-text);
 }
 
 .kxd-upgrade__card-value {
@@ -15694,16 +15725,30 @@ a.kxd-exec-today__row:hover {
 .kxd-upgrade__btn,
 .kxd-upgrade-admin__save {
   margin-top: 0.95rem;
-  border: 1px solid var(--kxd-ces-text, #16140f);
+  border: 1px solid var(--kxd-os-text-primary);
   border-radius: 2px;
-  background: var(--kxd-ces-text, #16140f);
-  color: #fff;
+  background: var(--kxd-os-text-primary);
+  color: var(--kxd-os-text-inverse);
   font: inherit;
   font-size: 0.82rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   padding: 0.6rem 0.9rem;
   cursor: pointer;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.kxd-upgrade__btn:hover:not(:disabled),
+.kxd-upgrade-admin__save:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--kxd-os-text-primary) 92%, white);
+  border-color: color-mix(in srgb, var(--kxd-os-text-primary) 92%, white);
+}
+
+.kxd-upgrade__btn:focus-visible,
+.kxd-upgrade-admin__save:focus-visible,
+.kxd-upgrade__text-btn:focus-visible {
+  outline: 2px solid var(--kxd-os-focus-ring);
+  outline-offset: 2px;
 }
 
 .kxd-upgrade__btn:disabled,
@@ -15716,12 +15761,17 @@ a.kxd-exec-today__row:hover {
   margin-top: 0.55rem;
   border: 0;
   background: transparent;
-  color: var(--kxd-ces-text-muted, #6b645c);
+  color: var(--kxd-upgrade-body-on-surface);
   font: inherit;
   font-size: 0.85rem;
   text-decoration: underline;
+  text-underline-offset: 0.18em;
   cursor: pointer;
   padding: 0;
+}
+
+.kxd-upgrade__text-btn:hover {
+  color: var(--kxd-upgrade-text);
 }
 
 .kxd-upgrade__label {
@@ -15731,22 +15781,26 @@ a.kxd-exec-today__row:hover {
   font-size: 0.72rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--kxd-ces-text-muted, #6b645c);
+  color: var(--kxd-upgrade-meta-on-surface);
 }
 
 .kxd-upgrade__label textarea,
 .kxd-upgrade-admin__field select,
 .kxd-upgrade-admin__field textarea {
   width: 100%;
-  border: 1px solid var(--kxd-os-border, rgba(0, 0, 0, 0.12));
+  border: 1px solid var(--kxd-upgrade-border);
   border-radius: 2px;
-  background: #fff;
-  color: inherit;
+  background: var(--kxd-os-bg-surface);
+  color: var(--kxd-upgrade-text);
   font: inherit;
   font-size: 0.92rem;
   letter-spacing: normal;
   text-transform: none;
   padding: 0.55rem 0.7rem;
+}
+
+.kxd-upgrade__label textarea::placeholder {
+  color: var(--kxd-upgrade-meta-on-surface);
 }
 
 .kxd-upgrade__form-actions {
@@ -15760,80 +15814,135 @@ a.kxd-exec-today__row:hover {
   display: inline-block;
   margin-top: 0.75rem;
   font-size: 0.78rem;
+  font-weight: 500;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--kxd-ces-text-muted, #6b645c);
+  color: var(--kxd-upgrade-body-on-surface);
 }
 
 .kxd-upgrade__status--approved {
-  color: var(--kxd-os-success, #2f6b4f);
+  color: var(--kxd-upgrade-status-ok);
 }
 
 .kxd-upgrade__status--declined,
 .kxd-upgrade__status--canceled {
-  color: var(--kxd-os-text-faint, #8a8378);
+  color: var(--kxd-upgrade-meta-on-surface);
 }
 
 .kxd-upgrade__error {
   margin-top: 0.85rem;
-  color: var(--kxd-os-critical, #8b2e2e);
+  color: var(--kxd-os-critical);
   font-size: 0.9rem;
 }
 
 .kxd-upgrade__success {
   margin-top: 0.85rem;
-  color: var(--kxd-os-success, #2f6b4f);
+  color: var(--kxd-upgrade-status-ok);
   font-size: 0.9rem;
 }
 
 .kxd-upgrade__history {
-  margin-top: 1.75rem;
+  margin-top: 1.85rem;
 }
 
 .kxd-upgrade__history-title {
   margin: 0;
   font-size: 0.78rem;
+  font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--kxd-ces-text-muted, #6b645c);
+  color: var(--kxd-os-accent);
 }
 
 .kxd-upgrade__history-list {
   list-style: none;
-  margin: 0.75rem 0 0;
+  margin: 0.85rem 0 0;
   padding: 0;
   display: grid;
-  gap: 0.55rem;
+  gap: 0.75rem;
 }
 
-.kxd-upgrade__history-list li {
+.kxd-upgrade__history-item {
+  display: grid;
+  gap: 0.55rem;
+  min-width: 0;
+  padding: 0.95rem 1.05rem 1.05rem;
+  border: 1px solid var(--kxd-upgrade-border);
+  border-radius: 2px;
+  background: var(--kxd-upgrade-surface);
+}
+
+.kxd-upgrade__history-item-head {
   display: flex;
   justify-content: space-between;
-  gap: 0.75rem;
+  align-items: flex-start;
+  gap: 0.75rem 1.25rem;
   flex-wrap: wrap;
-  padding: 0.45rem 0;
-  border-bottom: 1px solid var(--kxd-ces-border, rgba(0, 0, 0, 0.08));
-  font-size: 0.92rem;
+  min-width: 0;
 }
 
-.kxd-upgrade__history-list span {
-  display: block;
-  margin-top: 0.2rem;
+.kxd-upgrade__history-item-identity {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+  flex: 1 1 12rem;
+}
+
+.kxd-upgrade__history-item-title {
+  margin: 0;
+  font-size: 1.02rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--kxd-upgrade-text);
+  overflow-wrap: anywhere;
+}
+
+.kxd-upgrade__history-item .kxd-upgrade__status {
+  margin-top: 0;
+}
+
+.kxd-upgrade__history-item-date {
+  flex: 0 1 auto;
+  margin: 0.15rem 0 0;
   font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--kxd-ces-text-muted, #6b645c);
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  color: var(--kxd-upgrade-meta-on-surface);
+  white-space: nowrap;
 }
 
 .kxd-upgrade__history-message {
-  margin: 0.35rem 0 0;
-  font-size: 0.85rem;
-  line-height: 1.45;
-  color: var(--kxd-ces-text-muted, #6b645c);
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--kxd-upgrade-body-on-surface);
   overflow-wrap: anywhere;
   white-space: pre-wrap;
-  text-transform: none;
-  letter-spacing: normal;
+}
+
+.kxd-upgrade__history-note {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--kxd-upgrade-body-on-surface);
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 480px) {
+  .kxd-upgrade__history-item {
+    padding: 0.9rem 0.95rem 1rem;
+  }
+
+  .kxd-upgrade__history-item-head {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.45rem;
+  }
+
+  .kxd-upgrade__history-item-date {
+    margin: 0;
+    white-space: normal;
+  }
 }
 
 .kxd-upgrade-admin__filters {

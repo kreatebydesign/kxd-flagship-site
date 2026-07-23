@@ -46,6 +46,24 @@ function statusDetail(
   return upgradeStatusLabel(status);
 }
 
+/** Secondary access note for history rows — keeps status from repeating. */
+function historyAccessNote(
+  status: UpgradeRequestStatus,
+  accessGranted: boolean,
+): string | null {
+  if (accessGranted) return "Access is now available in your workspace.";
+  if (status === "approved") return "Access not yet enabled by KXD.";
+  return null;
+}
+
+function formatRequestDate(iso: string): string {
+  return new Date(iso).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
 export function PortalUpgradeOpportunities() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -326,26 +344,39 @@ export function PortalUpgradeOpportunities() {
         <div className="kxd-upgrade__history">
           <h3 className="kxd-upgrade__history-title">Your requests</h3>
           <ul className="kxd-upgrade__history-list">
-            {requests.map((row) => (
-              <li key={row.id}>
-                <div>
-                  <strong>{row.moduleLabel}</strong>
-                  <span className={`kxd-upgrade__status ${statusClass(row.status)}`}>
-                    {statusDetail(row.status, row.accessGranted)}
-                  </span>
+            {requests.map((row) => {
+              const accessNote = historyAccessNote(row.status, row.accessGranted);
+              return (
+                <li key={row.id} className="kxd-upgrade__history-item">
+                  <div className="kxd-upgrade__history-item-head">
+                    <div className="kxd-upgrade__history-item-identity">
+                      <p className="kxd-upgrade__history-item-title">
+                        {row.moduleLabel}
+                      </p>
+                      <p
+                        className={`kxd-upgrade__status ${statusClass(row.status)}`}
+                      >
+                        {upgradeStatusLabel(row.status)}
+                      </p>
+                    </div>
+                    <time
+                      className="kxd-upgrade__history-item-date"
+                      dateTime={row.createdAt}
+                    >
+                      Submitted {formatRequestDate(row.createdAt)}
+                    </time>
+                  </div>
                   {row.clientMessage ? (
-                    <p className="kxd-upgrade__history-message">{row.clientMessage}</p>
+                    <p className="kxd-upgrade__history-message">
+                      {row.clientMessage}
+                    </p>
                   ) : null}
-                </div>
-                <time dateTime={row.createdAt}>
-                  {new Date(row.createdAt).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                  })}
-                </time>
-              </li>
-            ))}
+                  {accessNote ? (
+                    <p className="kxd-upgrade__history-note">{accessNote}</p>
+                  ) : null}
+                </li>
+              );
+            })}
           </ul>
         </div>
       ) : null}
