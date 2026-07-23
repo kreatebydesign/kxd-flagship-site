@@ -25,6 +25,7 @@
     "verify:primal-portal": "tsx scripts/verify-primal-portal-readiness.ts",
     "verify:website-review-upload": "tsx scripts/verify-website-review-upload.ts",
     "verify:website-review-page-location": "tsx scripts/verify-website-review-page-location.ts",
+    "verify:review-inbox-bulk-complete": "tsx scripts/verify-review-inbox-bulk-complete.ts",
     "verify:partnership-briefing": "tsx scripts/verify-partnership-briefing.ts",
     "verify:client-launch": "tsx scripts/verify-client-launch-readiness.ts",
     "verify:client-launch-wizard": "tsx scripts/verify-client-launch-wizard.ts",

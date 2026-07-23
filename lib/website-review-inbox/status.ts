@@ -31,3 +31,21 @@ export const REVIEW_INBOX_OPEN_STATUSES: ReviewInboxRequestStatus[] = [
   "waiting-on-client",
   "in-progress",
 ];
+
+/**
+ * Statuses eligible for operator bulk completion.
+ *
+ * Stored `"in-progress"` is the only match for operator “In progress” and
+ * client “Revision in progress”. There is no distinct “In Revision” enum value.
+ */
+export const REVIEW_INBOX_BULK_COMPLETE_ELIGIBLE_STATUSES: ReviewInboxRequestStatus[] = [
+  "in-progress",
+];
+
+export function isReviewInboxBulkCompleteEligible(
+  status: string | null | undefined,
+): boolean {
+  return REVIEW_INBOX_BULK_COMPLETE_ELIGIBLE_STATUSES.includes(
+    status as ReviewInboxRequestStatus,
+  );
+}
