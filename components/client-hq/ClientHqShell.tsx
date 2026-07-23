@@ -1,5 +1,7 @@
+"use client";
+
 import Link from "next/link";
-import type { CSSProperties, ReactNode } from "react";
+import { useEffect, useId, useState, type CSSProperties, type ReactNode } from "react";
 import { KxdLogo } from "@/components/ui/KxdLogo";
 import { KxdShell } from "@/components/os";
 import type { ResolvedExperienceProfile } from "@/lib/ces";
@@ -7,6 +9,7 @@ import type { EditionBranding } from "@/lib/editions";
 import { editionBrandingCssVars } from "@/lib/editions";
 import { ClientNotificationsCenter } from "@/components/ces/notifications";
 import { ClientHqLogoutButton } from "./ClientHqLogoutButton";
+import { PortalFeedbackControl } from "./PortalFeedbackControl";
 import {
   clientHqNavIsActive,
   getEnabledPortalNavGroups,
@@ -48,6 +51,30 @@ export function ClientHqShell({
     : branding
       ? editionBrandingCssVars(branding)
       : undefined;
+  const navId = useId();
+  const [navOpen, setNavOpen] = useState(false);
+  const [mobileNavMode, setMobileNavMode] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 960px)");
+    const sync = () => {
+      const matches = media.matches;
+      setMobileNavMode(matches);
+      if (!matches) setNavOpen(false);
+    };
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
+
+  useEffect(() => {
+    if (!navOpen) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setNavOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [navOpen]);
 
   const displayName =
     experienceProfile?.identity.clientName ?? companyName ?? "Your workspace";
@@ -81,8 +108,43 @@ export function ClientHqShell({
 
   return (
     <KxdShell className="kxd-os-shell--app">
-      <div className="kxd-os-app" style={cssVars as CSSProperties}>
-        <aside className="kxd-os-sidebar kxd-ces-sidebar" aria-label={displayName}>
+      <div
+        className={`kxd-os-app${navOpen ? " kxd-ces-nav-open" : ""}`}
+        style={cssVars as CSSProperties}
+      >
+        <div className="kxd-ces-mobile-bar">
+          <div className="kxd-ces-mobile-bar__identity">
+            <p className="kxd-ces-mobile-bar__name">{displayName}</p>
+            {quietWorkspaceLabel ? (
+              <p className="kxd-ces-mobile-bar__workspace">{quietWorkspaceLabel}</p>
+            ) : null}
+          </div>
+          <button
+            type="button"
+            className="kxd-ces-mobile-bar__toggle"
+            aria-expanded={navOpen}
+            aria-controls={navId}
+            onClick={() => setNavOpen((open) => !open)}
+          >
+            {navOpen ? "Close menu" : "Menu"}
+          </button>
+        </div>
+
+        {navOpen ? (
+          <button
+            type="button"
+            className="kxd-ces-nav-scrim"
+            aria-label="Close navigation"
+            onClick={() => setNavOpen(false)}
+          />
+        ) : null}
+
+        <aside
+          id={navId}
+          className="kxd-os-sidebar kxd-ces-sidebar"
+          aria-label={displayName}
+          aria-hidden={mobileNavMode ? !navOpen : undefined}
+        >
           <div className="kxd-ces-identity">
             {clientLogo ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -114,6 +176,7 @@ export function ClientHqShell({
                           href={item.href}
                           className={`kxd-os-sidebar__link${isActive ? " kxd-os-sidebar__link--active" : ""}`}
                           aria-current={isActive ? "page" : undefined}
+                          onClick={() => setNavOpen(false)}
                         >
                           {item.label}
                         </Link>
@@ -127,6 +190,7 @@ export function ClientHqShell({
 
           <div className="kxd-os-sidebar__foot">
             <ClientNotificationsCenter />
+            <PortalFeedbackControl />
             {reassuranceLine ? (
               <p className="kxd-ces-trust-line">
                 <span className="kxd-ces-trust-line__dot" aria-hidden="true" />

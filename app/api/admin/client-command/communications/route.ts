@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requirePayloadAdminApi } from "@/lib/admin/auth";
 import { createClientCommunication } from "@/lib/client-command/communications/data";
 import type {
   ClientCommunicationDirection,
@@ -11,6 +12,9 @@ import type {
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
+  const auth = await requirePayloadAdminApi();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     const body = (await req.json()) as CreateClientCommunicationInput;
 

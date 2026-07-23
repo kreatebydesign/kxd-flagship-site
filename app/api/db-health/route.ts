@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
 import { Client } from "pg";
+import { requirePayloadAdminApi } from "@/lib/admin/auth";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
 export async function GET() {
+  const auth = await requirePayloadAdminApi();
+  if (auth instanceof NextResponse) return auth;
+
   const rawUri =
     process.env.DATABASE_URI?.trim() || process.env.DATABASE_URL?.trim();
 

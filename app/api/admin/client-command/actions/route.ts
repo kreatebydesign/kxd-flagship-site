@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requirePayloadAdminApi } from "@/lib/admin/auth";
 import {
   createClientAction,
   loadClientActions,
@@ -14,6 +15,9 @@ import type {
 export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
+  const auth = await requirePayloadAdminApi();
+  if (auth instanceof NextResponse) return auth;
+
   const { searchParams } = new URL(req.url);
   const clientId = Number(searchParams.get("clientId"));
   if (!clientId) {
@@ -28,6 +32,9 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  const auth = await requirePayloadAdminApi();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     const body = (await req.json()) as CreateClientActionInput;
 

@@ -32,13 +32,11 @@ export async function POST(request: Request) {
 
   try {
     const body = (await request.json()) as InquiryBody;
-    console.log("📝 Inquiry body received:", {
-      name: body.name,
-      email: body.email,
+    console.log("📝 Inquiry received:", {
       inquiryType: body.inquiryType,
-      company: body.company,
-      partnershipPackage: body.partnershipPackage,
       source: body.source,
+      hasCompany: Boolean(body.company?.trim()),
+      hasPartnershipPackage: Boolean(body.partnershipPackage),
     });
 
     if (!body.name?.trim() || !body.email?.trim() || !body.message?.trim()) {

@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
+import { requirePayloadAdminApi } from "@/lib/admin/auth";
 import { syncProposalPricing } from "@/lib/executive-proposals/sync-pricing";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
+  const auth = await requirePayloadAdminApi();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     const body = (await req.json()) as { proposalId?: number };
     if (!body.proposalId) {

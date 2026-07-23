@@ -1,5 +1,5 @@
 import type { CollectionConfig } from "payload";
-import { isAuthenticated } from "../access/index.ts";
+import { isPayloadAdmin, isPayloadAdminUser } from "../access/index.ts";
 import { PAYLOAD_GROUPS } from "../admin/groups.ts";
 import {
   normalizePortalUserEmailHook,
@@ -23,6 +23,7 @@ export const PortalUsers: CollectionConfig = {
       "Client portal login accounts. Each portal user is linked to exactly one Client record and only sees that client's data. " +
       "Preferred workflow: KXD OS → Portal Access (/admin/operations/portal-access). " +
       "Password is required on create (8+ chars). Clients can reset via /portal/forgot-password. " +
+      "LocalAPI / custom portal auth is the sign-in path — portal-users must never mutate their own client link via REST. " +
       "Local dev seed: npm run seed:portal-user -- --email user@example.com --password 'TempPass123!' --client primal-motorsports --display-name Adam",
   },
   auth: {
@@ -34,14 +35,18 @@ export const PortalUsers: CollectionConfig = {
     },
   },
   access: {
+    admin: ({ req: { user } }) => isPayloadAdmin(user),
     read: ({ req: { user } }) => {
-      if (user?.collection === "users") return true;
-      if (user?.collection === "portal-users") return { id: { equals: user.id } };
-      return false;
+      if (!user) return false;
+      // Self-read only — never expose other portal users or allow client pivots.
+      if (user.collection === "portal-users") return { id: { equals: user.id } };
+      return isPayloadAdmin(user);
     },
-    create: isAuthenticated,
-    update: isAuthenticated,
-    delete: isAuthenticated,
+    // Mutations are operator-only. Portal sessions use HMAC cookies + LocalAPI,
+    // not Payload REST updates on this collection.
+    create: isPayloadAdminUser,
+    update: isPayloadAdminUser,
+    delete: isPayloadAdminUser,
   },
   fields: [
     {

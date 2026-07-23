@@ -23,6 +23,8 @@
     "seed:primal-experience": "tsx scripts/seed-primal-experience-profile.ts",
     "seed:portal-user": "tsx scripts/seed-portal-user.ts",
     "verify:primal-portal": "tsx scripts/verify-primal-portal-readiness.ts",
+    "verify:portal-auth-boundaries": "tsx scripts/verify-portal-admin-auth-boundaries.ts",
+    "verify:experience-feedback": "tsx scripts/verify-experience-feedback.ts",
     "verify:website-review-upload": "tsx scripts/verify-website-review-upload.ts",
     "verify:website-review-page-location": "tsx scripts/verify-website-review-page-location.ts",
     "verify:review-inbox-bulk-complete": "tsx scripts/verify-review-inbox-bulk-complete.ts",

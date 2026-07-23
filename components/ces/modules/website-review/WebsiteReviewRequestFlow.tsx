@@ -299,11 +299,20 @@ export function WebsiteReviewRequestFlow({
         }),
       });
 
-      const data = (await res.json()) as { ok?: boolean; id?: number; message?: string };
+      const data = (await res.json()) as {
+        ok?: boolean;
+        id?: number;
+        message?: string;
+        code?: string;
+      };
 
       if (!res.ok || !data.ok || !data.id) {
         setSubmitPhase("error");
-        setSubmitError(data.message ?? PORTAL_CLIENT_LANGUAGE.submitError);
+        if (res.status === 401 || data.code === "session_expired") {
+          setSubmitError(data.message ?? PORTAL_CLIENT_LANGUAGE.sessionExpired);
+        } else {
+          setSubmitError(data.message ?? PORTAL_CLIENT_LANGUAGE.submitError);
+        }
         return;
       }
 
@@ -339,6 +348,7 @@ export function WebsiteReviewRequestFlow({
   }
 
   if (submitPhase === "error" && submitError) {
+    const sessionExpired = /session expired/i.test(submitError);
     return (
       <CesPage narrow>
         <CesConfirm
@@ -346,16 +356,25 @@ export function WebsiteReviewRequestFlow({
           message={submitError}
           actions={
             <div className="kxd-ces-confirm__action-row">
-              <button
-                type="button"
-                className="kxd-ces-btn kxd-ces-btn--primary"
-                onClick={() => {
-                  setSubmitPhase("idle");
-                  setSubmitError(null);
-                }}
-              >
-                Try again
-              </button>
+              {sessionExpired ? (
+                <Link
+                  href={`/portal/login?redirect=${encodeURIComponent("/portal/website-review/request")}`}
+                  className="kxd-ces-btn kxd-ces-btn--primary"
+                >
+                  {PORTAL_CLIENT_LANGUAGE.sessionExpiredAction}
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  className="kxd-ces-btn kxd-ces-btn--primary"
+                  onClick={() => {
+                    setSubmitPhase("idle");
+                    setSubmitError(null);
+                  }}
+                >
+                  Try again
+                </button>
+              )}
               <Link href="/portal/website-review" className="kxd-ces-btn kxd-ces-btn--ghost">
                 Back to Website Review
               </Link>

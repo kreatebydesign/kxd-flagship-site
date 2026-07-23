@@ -1,24 +1,31 @@
 import type { Access, PayloadRequest } from "payload";
 
-export const isAuthenticated: Access = ({ req: { user } }) => Boolean(user);
-
 /**
  * Payload admin (`users` collection only).
- * Portal users and other auth collections must never pass this check.
- * Legacy admin JWTs may omit `collection` — still accepted when no collection is tagged.
+ * Portal users, junior creators, and other auth collections must never pass.
+ * Do not accept missing `collection` — forged or legacy tokens without a
+ * collection claim are denied.
  */
 export function isPayloadAdmin(
   user: PayloadRequest["user"],
 ): boolean {
   if (!user) return false;
-  if (user.collection === "portal-users") return false;
-  return user.collection === "users" || user.collection === undefined;
+  return user.collection === "users";
 }
 
-export const isPayloadAdminUser: Access = ({ req: { user } }) => isPayloadAdmin(user);
+/**
+ * Historical name used across KXD OS collections for REST/LocalAPI access.
+ * Intentionally admin-only — a portal-users JWT must never satisfy this.
+ * Prefer `isPayloadAdminUser` in new collections.
+ */
+export const isAuthenticated: Access = ({ req: { user } }) =>
+  isPayloadAdmin(user);
+
+export const isPayloadAdminUser: Access = ({ req: { user } }) =>
+  isPayloadAdmin(user);
 
 export const isAuthenticatedOrPublished: Access = ({ req: { user } }) => {
-  if (user) return true;
+  if (isPayloadAdmin(user)) return true;
   return {
     status: {
       equals: "published",

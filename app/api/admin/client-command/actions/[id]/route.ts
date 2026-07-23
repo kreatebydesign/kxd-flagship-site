@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requirePayloadAdminApi } from "@/lib/admin/auth";
 import { updateClientAction } from "@/lib/client-command/actions/data";
 import type {
   ClientActionPriority,
@@ -12,6 +13,9 @@ export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const auth = await requirePayloadAdminApi();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     const { id } = await params;
     const actionId = Number(id);

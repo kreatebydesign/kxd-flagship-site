@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requirePayloadAdminApi } from "@/lib/admin/auth";
 import { bulkUpdateClientActions } from "@/lib/client-command/actions/data";
 import type {
   BulkClientActionInput,
@@ -9,6 +10,9 @@ import type {
 export const dynamic = "force-dynamic";
 
 export async function PATCH(req: Request) {
+  const auth = await requirePayloadAdminApi();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     const body = (await req.json()) as BulkClientActionInput;
 

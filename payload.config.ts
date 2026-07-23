@@ -120,6 +120,27 @@ console.log("[KXD] Payload DB config loaded", {
   VERCEL: Boolean(process.env.VERCEL),
 });
 
+/** Dev-only fallback — never allowed on deployed production runtime. */
+const PAYLOAD_DEV_SECRET_FALLBACK = "kxd-dev-secret-change-in-production";
+const payloadSecret = process.env.PAYLOAD_SECRET?.trim() || "";
+const isNextBuildPhase =
+  process.env.NEXT_PHASE === "phase-production-build" ||
+  process.env.NEXT_PHASE === "phase-export";
+const isDeployedProductionRuntime =
+  !isNextBuildPhase &&
+  (process.env.VERCEL_ENV === "production" ||
+    (process.env.NODE_ENV === "production" && Boolean(process.env.VERCEL)));
+
+if (
+  isDeployedProductionRuntime &&
+  (!payloadSecret || payloadSecret === PAYLOAD_DEV_SECRET_FALLBACK)
+) {
+  throw new Error(
+    "PAYLOAD_SECRET must be set to a strong random value in production. " +
+      "The development fallback secret is not permitted.",
+  );
+}
+
 export default buildConfig({
   admin: {
     user: Users.slug,
@@ -241,7 +262,7 @@ export default buildConfig({
       },
     },
   },
-  secret: process.env.PAYLOAD_SECRET || "kxd-dev-secret-change-in-production",
+  secret: payloadSecret || PAYLOAD_DEV_SECRET_FALLBACK,
   typescript: {
     outputFile: path.resolve(dirname, "payload-types.ts"),
   },

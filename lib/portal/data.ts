@@ -34,8 +34,8 @@ async function scopedFind(
   extra?: Record<string, unknown>,
 ) {
   const payload = await getPayload({ config });
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return payload.find({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     collection: collection as any,
     where: {
       client: { equals: clientId },
@@ -334,24 +334,21 @@ export async function getPortalMeetings(session: PortalSession): Promise<PortalM
 async function getPortalWebsiteAudit(
   client: PortalDoc | null,
   onboarding: PortalDoc | null,
-  session: PortalSession,
 ): Promise<PortalWebsiteAuditSummary | null> {
   const payload = await getPayload({ config });
   const website = String(onboarding?.currentWebsite ?? client?.companyWebsite ?? "").trim();
-  const email = String(client?.primaryContactEmail ?? session.email).trim();
-  const company = String(client?.name ?? session.clientName).trim();
 
-  const orFilters: PortalDoc[] = [];
-  if (website) orFilters.push({ website: { contains: website.replace(/^https?:\/\//, "") } });
-  if (email) orFilters.push({ email: { equals: email } });
-  if (company) orFilters.push({ company: { equals: company } });
+  // Require a client website match — never resolve audits by email/company alone
+  // (shared contacts or company names could otherwise cross client boundaries).
+  if (!website) return null;
 
-  if (orFilters.length === 0) return null;
+  const websiteHost = website.replace(/^https?:\/\//i, "").replace(/\/.*$/, "").trim();
+  if (!websiteHost) return null;
 
   const result = await payload.find({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     collection: "website-audits" as any,
-    where: { or: orFilters },
+    where: { website: { contains: websiteHost } },
     sort: "-createdAt",
     limit: 1,
     depth: 0,
@@ -383,7 +380,7 @@ export async function getPortalWebsiteHealth(session: PortalSession): Promise<Po
     getPortalOnboarding(session),
     getPortalTimeline(session),
   ]);
-  const latestAudit = await getPortalWebsiteAudit(client, onboarding, session);
+  const latestAudit = await getPortalWebsiteAudit(client, onboarding);
 
   const domain = String(onboarding?.currentWebsite ?? client?.companyWebsite ?? "").trim() || null;
   const hosting = onboarding?.hostingProvider ? String(onboarding.hostingProvider) : null;

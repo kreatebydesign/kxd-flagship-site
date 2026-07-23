@@ -27,6 +27,12 @@ function isPortalHost(request: NextRequest): boolean {
   return host === PORTAL_HOST;
 }
 
+/** Signed portal session shape: `{portalUserId}.{sha256Hex}` (64 hex chars). */
+function isWellFormedPortalSessionCookie(value: string | undefined): boolean {
+  if (!value) return false;
+  return /^\d+\.[a-f0-9]{64}$/i.test(value);
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -70,12 +76,35 @@ export function middleware(request: NextRequest) {
     const isPublic = PORTAL_PUBLIC_PATHS.some(
       (p) => pathname === p || pathname.startsWith(`${p}/`),
     );
-    const hasSession = Boolean(request.cookies.get(PORTAL_SESSION_COOKIE)?.value);
+    const rawSession = request.cookies.get(PORTAL_SESSION_COOKIE)?.value;
+    // Presence alone is not enough — forged/malformed cookies must not count as
+    // authenticated, or login↔workspace redirects can loop forever.
+    const hasSession = isWellFormedPortalSessionCookie(rawSession);
+
+    if (rawSession && !hasSession) {
+      const response = isPublic
+        ? NextResponse.next()
+        : NextResponse.redirect(
+            (() => {
+              const loginUrl = new URL("/portal/login", request.url);
+              loginUrl.searchParams.set("redirect", pathname);
+              return loginUrl;
+            })(),
+          );
+      response.cookies.set(PORTAL_SESSION_COOKIE, "", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 0,
+      });
+      return response;
+    }
 
     if (isPublic) {
-      if (hasSession && pathname.startsWith("/portal/login")) {
-        return NextResponse.redirect(new URL("/portal", request.url));
-      }
+      // Do not bounce /portal/login → /portal from cookie presence alone.
+      // Valid sessions are redirected by the login page after getPortalSession().
+      // Cookie-only bounce caused ERR_TOO_MANY_REDIRECTS for invalid sessions.
       return NextResponse.next();
     }
 
@@ -119,6 +148,12 @@ export const config = {
     "/os",
     "/admin/operations",
     "/admin/operations/:path*",
+    "/admin/work",
+    "/admin/work/:path*",
+    "/admin/sales",
+    "/admin/sales/:path*",
+    "/admin/training",
+    "/admin/training/:path*",
     "/api/admin/:path*",
     "/api/cron/:path*",
     "/portal/:path*",

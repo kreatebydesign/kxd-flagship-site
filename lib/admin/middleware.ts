@@ -35,5 +35,11 @@ export function requiresPayloadAdminAuth(pathname: string): boolean {
     pathname === OS_LAUNCHER_PATH
     || pathname === "/admin/operations"
     || pathname.startsWith("/admin/operations/")
+    || pathname === "/admin/work"
+    || pathname.startsWith("/admin/work/")
+    || pathname === "/admin/sales"
+    || pathname.startsWith("/admin/sales/")
+    || pathname === "/admin/training"
+    || pathname.startsWith("/admin/training/")
   );
 }

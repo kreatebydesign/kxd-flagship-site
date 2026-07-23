@@ -55,15 +55,9 @@ export async function POST(req: NextRequest) {
       moduleKey?: string;
       clientMessage?: string;
       sourceSurface?: string;
-      clientId?: unknown;
     };
 
-    if (body.clientId != null && Number(body.clientId) !== session.clientId) {
-      return NextResponse.json(
-        { ok: false, message: "Client identity mismatch." },
-        { status: 403 },
-      );
-    }
+    // Client identity comes from the portal session only — ignore any browser-supplied id.
 
     const moduleKey =
       typeof body.moduleKey === "string" ? body.moduleKey.trim() : "";

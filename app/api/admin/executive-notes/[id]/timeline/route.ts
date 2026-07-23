@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requirePayloadAdminApi } from "@/lib/admin/auth";
 import { convertNoteToTimeline } from "@/lib/executive-notes/engine";
 import type { TimelinePromotionType } from "@/lib/executive-notes/types";
 
@@ -16,6 +17,9 @@ export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const auth = await requirePayloadAdminApi();
+  if (auth instanceof NextResponse) return auth;
+
   const { id } = await params;
   const body = (await req.json()) as { promotionType?: TimelinePromotionType };
   const promotionType = body.promotionType ?? "decision";

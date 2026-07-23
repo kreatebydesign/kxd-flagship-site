@@ -2,7 +2,7 @@
  * Focused auth regression checks for portal/admin cookie separation.
  * Run: npx tsx scripts/verify-portal-admin-auth-boundaries.ts
  */
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 
 const root = process.cwd();
@@ -86,8 +86,31 @@ function main() {
   check(
     "admin auth requires users collection",
     adminAuth.includes('user.collection !== "users"') &&
-      access.includes('user.collection === "portal-users"') &&
-      access.includes("return false"),
+      access.includes('return user.collection === "users"') &&
+      !access.includes("user.collection === undefined"),
+  );
+
+  check(
+    "isAuthenticated is admin-only (portal JWT cannot pass REST access)",
+    access.includes("export const isAuthenticated") &&
+      access.includes("isPayloadAdmin(user)") &&
+      !/\(\{\s*req:\s*\{\s*user\s*\}\s*\}\)\s*=>\s*Boolean\(user\)/.test(access),
+  );
+
+  check(
+    "PortalUsers mutations are admin-only (no client pivot via REST)",
+    portalUsers.includes("create: isPayloadAdminUser") &&
+      portalUsers.includes("update: isPayloadAdminUser") &&
+      portalUsers.includes("delete: isPayloadAdminUser") &&
+      !portalUsers.includes("create: isAuthenticated") &&
+      !portalUsers.includes("update: isAuthenticated"),
+  );
+
+  check(
+    "production rejects PAYLOAD_SECRET development fallback",
+    payloadConfig.includes("PAYLOAD_DEV_SECRET_FALLBACK") &&
+      payloadConfig.includes("isDeployedProductionRuntime") &&
+      payloadConfig.includes("The development fallback secret is not permitted"),
   );
 
   check(
@@ -138,13 +161,81 @@ function main() {
       middleware.includes("`-token`"),
   );
 
+  const edgeMiddleware = read("middleware.ts");
+  check(
+    "portal middleware requires well-formed session cookie (not presence alone)",
+    edgeMiddleware.includes("isWellFormedPortalSessionCookie") &&
+      edgeMiddleware.includes(String.raw`/^\d+\.[a-f0-9]{64}$/i`) &&
+      !edgeMiddleware.includes(
+        'hasSession && pathname.startsWith("/portal/login")',
+      ),
+  );
+
+  const portalLoginPage = read("app/(portal)/portal/(auth)/login/page.tsx");
+  check(
+    "portal login page redirects only after getPortalSession() succeeds",
+    portalLoginPage.includes("getPortalSession") &&
+      portalLoginPage.includes("if (session)") &&
+      portalLoginPage.includes("redirect("),
+  );
+
+  const unguardedAdminRoutes: string[] = [];
+  const adminRouteRoot = path.join(root, "app/api/admin");
+  function walkAdminRoutes(dir: string) {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        walkAdminRoutes(full);
+        continue;
+      }
+      if (entry.name !== "route.ts") continue;
+      const src = readFileSync(full, "utf8");
+      const rel = path.relative(root, full);
+      if (
+        !src.includes("requirePayloadAdminApi") &&
+        !src.includes("authorizeReportingIngest")
+      ) {
+        unguardedAdminRoutes.push(rel);
+      }
+    }
+  }
+  walkAdminRoutes(adminRouteRoot);
+  check(
+    "every /api/admin route validates Payload admin (or scoped reporting ingest auth)",
+    unguardedAdminRoutes.length === 0,
+    unguardedAdminRoutes.slice(0, 8).join(", "),
+  );
+
+  const sensitiveAdminRoutes = [
+    "app/api/admin/brain/route.ts",
+    "app/api/admin/brain/search/route.ts",
+    "app/api/admin/executive-notes/route.ts",
+    "app/api/admin/executive-notes/[id]/timeline/route.ts",
+    "app/api/admin/client-command/actions/route.ts",
+    "app/api/admin/client-command/communications/route.ts",
+  ];
+  for (const rel of sensitiveAdminRoutes) {
+    const src = read(rel);
+    check(
+      `${rel} calls requirePayloadAdminApi`,
+      src.includes("requirePayloadAdminApi") &&
+        src.includes("if (auth instanceof NextResponse) return auth"),
+    );
+  }
+
   console.log("\nAuth boundary verification passed.\n");
   console.log("Notes:");
   console.log(
     "- LocalAPI payload.login restores lockout without writing payload-token.",
   );
   console.log(
-    "- Residual risk: Payload REST /api/portal-users/login still sets payload-token.",
+    "- Residual risk: Payload REST /api/portal-users/login can still set payload-token,",
+  );
+  console.log(
+    "  but portal-users JWTs fail isAuthenticated / isPayloadAdmin and cannot mutate",
+  );
+  console.log(
+    "  portal-users.client or read KXD OS collections via REST.",
   );
   console.log(
     "- Admin hardening rejects portal-users JWTs even if that cookie is present.",

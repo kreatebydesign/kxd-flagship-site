@@ -115,6 +115,9 @@ export const PORTAL_CLIENT_LANGUAGE = {
   confirmReferenceLabel: "Reference",
   submitError:
     "We couldn't send your revision just now. Please try again in a moment.",
+  sessionExpired:
+    "Your session expired. Sign in again to continue — your notes on this screen are still here.",
+  sessionExpiredAction: "Sign in again",
   sendRevision: "Send revision",
 
   attachmentLabel: "Reference files",

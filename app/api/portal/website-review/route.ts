@@ -19,6 +19,7 @@ import {
 import type { ReviewAnchor } from "@/lib/ces/review";
 import type { WebsiteReviewPageContext } from "@/lib/ces/modules/website-review/types";
 import { getPortalSession } from "@/lib/portal/session";
+import { PORTAL_CLIENT_LANGUAGE } from "@/lib/ces/copy/portal-language";
 import { spawnWorkItemFromPortalRequest } from "@/lib/work-items/spawn";
 import { notifyWebsiteReviewSubmitted } from "@/lib/website-review-inbox/notify";
 
@@ -78,7 +79,14 @@ function parseAttachmentIds(body: Record<string, unknown>): number[] {
 export async function POST(req: NextRequest) {
   const session = await getPortalSession();
   if (!session) {
-    return NextResponse.json({ ok: false, message: "Unauthorized." }, { status: 401 });
+    return NextResponse.json(
+      {
+        ok: false,
+        code: "session_expired",
+        message: PORTAL_CLIENT_LANGUAGE.sessionExpired,
+      },
+      { status: 401 },
+    );
   }
 
   try {
@@ -124,9 +132,9 @@ export async function POST(req: NextRequest) {
     );
     const requestType = WEBSITE_REVIEW_UPDATE_TYPE_MAP[updateType] ?? "other";
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const record = await payload.create({
-      collection: "client-requests" as any,
+      // Payload collection typing lags CES fields on client-requests.
+      collection: "client-requests" as any, // eslint-disable-line @typescript-eslint/no-explicit-any
       data: {
         requestTitle,
         requestDetails,
@@ -139,7 +147,7 @@ export async function POST(req: NextRequest) {
         experienceModule: WEBSITE_REVIEW_EXPERIENCE_MODULE,
         pageContext: pageContext || undefined,
         reviewContext: reviewContext ?? undefined,
-      } as any,
+      } as any, // eslint-disable-line @typescript-eslint/no-explicit-any
       overrideAccess: true,
     });
 

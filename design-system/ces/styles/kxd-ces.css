@@ -9557,3 +9557,215 @@
     padding-right: max(0.9rem, env(safe-area-inset-right, 0px));
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Founding-client EA — mobile nav drawer + feedback control
+   Desktop layout unchanged (≥961px).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.kxd-ces-mobile-bar,
+.kxd-ces-nav-scrim {
+  display: none;
+}
+
+.kxd-ces-feedback-trigger {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  opacity: 0.72;
+  padding: 0.35rem 0;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.kxd-ces-feedback-trigger:hover,
+.kxd-ces-feedback-trigger:focus-visible {
+  opacity: 1;
+  outline: none;
+}
+
+.kxd-ces-feedback-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: end center;
+  padding: max(1rem, env(safe-area-inset-top, 0px)) 1rem max(1rem, env(safe-area-inset-bottom, 0px));
+  background: rgba(8, 8, 10, 0.55);
+}
+
+.kxd-ces-feedback-dialog {
+  width: min(100%, 26rem);
+  max-height: min(88dvh, 40rem);
+  overflow: auto;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.55rem;
+  background: #121214;
+  color: #f4f1ea;
+  padding: 1.15rem 1.15rem 1.25rem;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.35);
+}
+
+.kxd-ces-feedback-dialog__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.kxd-ces-feedback-dialog__head h2 {
+  font-size: 1.05rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+.kxd-ces-feedback-dialog__close,
+.kxd-ces-feedback-dialog__label span {
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+}
+
+.kxd-ces-feedback-dialog__close {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0.7;
+  padding: 0.2rem 0;
+}
+
+.kxd-ces-feedback-dialog__form {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.kxd-ces-feedback-dialog__label {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.kxd-ces-feedback-dialog__label select,
+.kxd-ces-feedback-dialog__label textarea {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 0.4rem;
+  background: rgba(255, 255, 255, 0.03);
+  color: inherit;
+  font: inherit;
+  padding: 0.7rem 0.8rem;
+}
+
+.kxd-ces-feedback-dialog__hint {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  opacity: 0.65;
+}
+
+.kxd-ces-feedback-dialog__error {
+  margin: 0;
+  color: #f0b4a8;
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.kxd-ces-feedback-dialog__actions,
+.kxd-ces-feedback-dialog__success {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.kxd-ces-feedback-dialog__success {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+@media (min-width: 640px) {
+  .kxd-ces-feedback-backdrop {
+    place-items: center;
+  }
+}
+
+@media (max-width: 960px) {
+  .kxd-ces-mobile-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.85rem;
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    width: 100%;
+    padding: max(0.85rem, env(safe-area-inset-top, 0px))
+      max(1rem, env(safe-area-inset-right, 0px))
+      0.85rem
+      max(1rem, env(safe-area-inset-left, 0px));
+    background: color-mix(in srgb, var(--kxd-ces-surface, #0f0f11) 92%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .kxd-ces-mobile-bar__name {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 500;
+  }
+
+  .kxd-ces-mobile-bar__workspace {
+    margin: 0.15rem 0 0;
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.62;
+  }
+
+  .kxd-ces-mobile-bar__toggle {
+    appearance: none;
+    min-height: 2.5rem;
+    padding: 0.55rem 0.9rem;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 0.4rem;
+    background: rgba(255, 255, 255, 0.03);
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.82rem;
+  }
+
+  .kxd-ces-nav-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 35;
+    border: 0;
+    background: rgba(8, 8, 10, 0.48);
+    cursor: pointer;
+  }
+
+  .kxd-ces-app .kxd-ces-sidebar.kxd-os-sidebar {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 40;
+    width: min(20.5rem, calc(100vw - 2.5rem));
+    overflow: auto;
+    background: var(--kxd-ces-surface, #0f0f11);
+    box-shadow: 12px 0 40px rgba(0, 0, 0, 0.35);
+  }
+
+  .kxd-ces-app .kxd-os-app.kxd-ces-nav-open .kxd-ces-sidebar.kxd-os-sidebar {
+    display: flex;
+  }
+}
+

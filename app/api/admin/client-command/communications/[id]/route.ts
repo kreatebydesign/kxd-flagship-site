@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requirePayloadAdminApi } from "@/lib/admin/auth";
 import { updateClientCommunication } from "@/lib/client-command/communications/data";
 import type {
   ClientCommunicationPriority,
@@ -17,6 +18,9 @@ export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const auth = await requirePayloadAdminApi();
+  if (auth instanceof NextResponse) return auth;
+
   const { id } = await params;
   const communicationId = Number(id);
 

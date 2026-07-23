@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requirePayloadAdminApi } from "@/lib/admin/auth";
 import { performQuickClientAction } from "@/lib/client-command/actions/quick";
 import type { QuickActionOperation } from "@/lib/client-command/actions/quick";
 import type {
@@ -10,6 +11,9 @@ import type {
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
+  const auth = await requirePayloadAdminApi();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     const body = (await req.json()) as {
       clientId: number;

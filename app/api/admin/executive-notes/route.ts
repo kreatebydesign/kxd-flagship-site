@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requirePayloadAdminApi } from "@/lib/admin/auth";
 import { createExecutiveNote } from "@/lib/executive-notes/engine";
 import { searchExecutiveNotes } from "@/lib/executive-notes/search";
 import type { CreateExecutiveNoteInput } from "@/lib/executive-notes/types";
@@ -6,6 +7,9 @@ import type { CreateExecutiveNoteInput } from "@/lib/executive-notes/types";
 export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
+  const auth = await requirePayloadAdminApi();
+  if (auth instanceof NextResponse) return auth;
+
   const { searchParams } = new URL(req.url);
   const q = searchParams.get("q") ?? undefined;
   const clientId = searchParams.get("clientId");
@@ -18,6 +22,9 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  const auth = await requirePayloadAdminApi();
+  if (auth instanceof NextResponse) return auth;
+
   try {
     const body = (await req.json()) as CreateExecutiveNoteInput;
     if (!body.clientId || !body.title?.trim()) {
