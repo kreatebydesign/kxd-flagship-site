@@ -18,7 +18,7 @@ export interface ReviewInboxItem {
   clientId: number | null;
   submittedBy: string | null;
   submittedByEmail: string | null;
-  pageLocation: string | null;
+  pageLocation: string;
   priority: string;
   attachmentCount: number;
   submittedAt: string;

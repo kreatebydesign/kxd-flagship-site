@@ -102,7 +102,7 @@ export const PORTAL_CLIENT_LANGUAGE = {
   requestDetailsHint:
     "Be specific — current copy, what should change, or what you're seeing. The more context, the fewer back-and-forths.",
   requestLocationHint:
-    "Pick a page and section so we go straight to the right place. Leave blank if it applies site-wide.",
+    "Select the page this request applies to. You can also choose Different page and enter a path.",
   requestConfirmIntro: "Does this look right?",
   contextFromReviewUrl: "We pre-filled the page from your review link. Adjust anything before sending.",
   requestFlowStepFocus: "What to change",
@@ -146,7 +146,8 @@ export const PORTAL_CLIENT_LANGUAGE = {
   reviewSessionTitle: "Website Review",
   reviewSessionHintBrowse: "Browse freely — leave feedback when you're ready.",
   reviewSessionHintComment: "Click anywhere to place feedback.",
-  reviewSessionCommentBanner: "Focused feedback — click anywhere on the page.",
+  reviewSessionCommentBanner:
+    "Focused feedback — confirm the Page above matches what you're viewing, then click to place a marker.",
   reviewSessionFabLabel: "Leave feedback",
   reviewSessionFabActiveLabel: "Commenting",
   reviewSessionExit: "Exit review",

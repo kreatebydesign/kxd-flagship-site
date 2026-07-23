@@ -3,8 +3,8 @@ import type { WebsiteReviewItem } from "@/lib/ces/modules/website-review/types";
 import type { ResolvedExperienceProfile } from "@/lib/ces";
 import { PORTAL_CLIENT_LANGUAGE } from "@/lib/ces/copy/portal-language";
 import { formatAttachmentSize } from "@/lib/ces/modules/website-review/attachments";
-import { formatPageContextDisplay } from "@/lib/ces/modules/website-review/context";
-import { CesHero, CesPage, CesTimeline } from "@/components/ces/primitives";
+import { resolveReviewPageLocation } from "@/lib/ces/modules/website-review/page-location";
+import { CesPage, CesTimeline } from "@/components/ces/primitives";
 import { WebsiteReviewStatus } from "./WebsiteReviewStatus";
 
 function formatDate(iso: string): string {
@@ -26,7 +26,7 @@ export function WebsiteReviewDetail({ profile, review }: WebsiteReviewDetailProp
     profile.terminology["website-review.detail.eyebrow"] ??
     profile.hospitality.welcomeEyebrow;
 
-  const location = formatPageContextDisplay(review.reviewContext, review.pageContext);
+  const location = resolveReviewPageLocation(review.reviewContext, review.pageContext);
 
   const timelineEvents = review.timeline.map((event, index) => ({
     ...event,
@@ -73,20 +73,21 @@ export function WebsiteReviewDetail({ profile, review }: WebsiteReviewDetailProp
             </p>
           )}
 
-          {location ||
-          review.pageLabel ||
-          review.pageUrl ||
-          review.section ||
-          review.markerNumber != null ||
-          review.completedAt ||
-          review.completionNote ? (
-            <dl className="kxd-ces-detail-facts">
-              {review.pageLabel || review.pagePath ? (
-                <div className="kxd-ces-detail-facts__row">
-                  <dt>Website page</dt>
-                  <dd>{review.pageLabel || review.pagePath}</dd>
-                </div>
-              ) : null}
+          <dl className="kxd-ces-detail-facts">
+              <div className="kxd-ces-detail-facts__row">
+                <dt>Page</dt>
+                <dd>
+                  <span className="kxd-ces-page-field__label">
+                    {location.pageLabel ?? location.display}
+                  </span>
+                  {location.pagePath ? (
+                    <>
+                      <br />
+                      <span className="kxd-ces-page-field__path-value">{location.pagePath}</span>
+                    </>
+                  ) : null}
+                </dd>
+              </div>
               {review.section ? (
                 <div className="kxd-ces-detail-facts__row">
                   <dt>Section</dt>
@@ -97,12 +98,6 @@ export function WebsiteReviewDetail({ profile, review }: WebsiteReviewDetailProp
                 <div className="kxd-ces-detail-facts__row">
                   <dt>Marker</dt>
                   <dd>#{review.markerNumber}</dd>
-                </div>
-              ) : null}
-              {location ? (
-                <div className="kxd-ces-detail-facts__row">
-                  <dt>On your site</dt>
-                  <dd>{location}</dd>
                 </div>
               ) : null}
               <div className="kxd-ces-detail-facts__row">
@@ -121,17 +116,17 @@ export function WebsiteReviewDetail({ profile, review }: WebsiteReviewDetailProp
                   <dd>{formatDate(review.completedAt)}</dd>
                 </div>
               ) : null}
-              {review.pageUrl ? (
+              {location.pageUrl ? (
                 <div className="kxd-ces-detail-facts__row">
                   <dt>Page URL</dt>
                   <dd>
                     <a
-                      href={review.pageUrl}
+                      href={location.pageUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="kxd-ces-detail-link"
                     >
-                      {review.pageUrl}
+                      {location.pageUrl}
                     </a>
                   </dd>
                 </div>
@@ -143,7 +138,6 @@ export function WebsiteReviewDetail({ profile, review }: WebsiteReviewDetailProp
                 </div>
               ) : null}
             </dl>
-          ) : null}
 
           {review.attachments.length > 0 ? (
             <div className="kxd-ces-detail-attachments">

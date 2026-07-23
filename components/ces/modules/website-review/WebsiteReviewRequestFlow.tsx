@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   CesConfirm,
   CesField,
@@ -15,15 +14,23 @@ import { useCesProfile } from "@/components/ces/providers/CesProfileProvider";
 import { PORTAL_CLIENT_LANGUAGE } from "@/lib/ces/copy/portal-language";
 import {
   buildReviewContextFromDraft,
-  formatPageContextDisplay,
-  WEBSITE_REVIEW_PAGE_SUGGESTIONS,
 } from "@/lib/ces/modules/website-review/context";
+import {
+  buildReviewPageChoices,
+  derivePageLabel,
+  normalizeReviewPageInput,
+  resolveReviewPageLocation,
+} from "@/lib/ces/modules/website-review/page-location";
 import type {
   WebsiteReviewPageContext,
   WebsiteReviewPendingAttachment,
   WebsiteReviewRequestDraft,
 } from "@/lib/ces/modules/website-review/types";
 import { WebsiteReviewAttachmentZone } from "./WebsiteReviewAttachmentZone";
+import {
+  WebsiteReviewPageField,
+  type WebsiteReviewPageFieldValue,
+} from "./WebsiteReviewPageField";
 
 const FLOW_STEPS: CesFlowStep[] = [
   { id: "focus", label: PORTAL_CLIENT_LANGUAGE.requestFlowStepFocus },
@@ -56,6 +63,44 @@ const UPDATE_TYPES = [
 
 type SubmitPhase = "idle" | "submitting" | "done" | "error";
 
+function pageValueFromContext(
+  initial: WebsiteReviewPageContext | undefined,
+  websiteBaseUrl: string | null,
+): WebsiteReviewPageFieldValue {
+  if (initial?.pagePath || initial?.pageUrl) {
+    const raw = initial.pagePath || initial.pageUrl || "";
+    const normalized = normalizeReviewPageInput(raw, {
+      websiteBaseUrl,
+      preferredLabel: initial.pageLabel,
+    });
+    if (normalized.ok) {
+      return {
+        pageLabel: normalized.page.pageLabel,
+        pagePath: normalized.page.pagePath,
+        pageUrl: normalized.page.pageUrl,
+      };
+    }
+  }
+
+  if (initial?.pageLabel === "Homepage") {
+    const normalized = normalizeReviewPageInput("/", { websiteBaseUrl, preferredLabel: "Homepage" });
+    if (normalized.ok) {
+      return {
+        pageLabel: normalized.page.pageLabel,
+        pagePath: normalized.page.pagePath,
+        pageUrl: normalized.page.pageUrl,
+      };
+    }
+  }
+
+  if (initial?.pageLabel) {
+    // Label-only legacy — keep label until client picks a path
+    return { pageLabel: initial.pageLabel, pagePath: "", pageUrl: "" };
+  }
+
+  return { pageLabel: "", pagePath: "", pageUrl: "" };
+}
+
 function draftFromContext(initial?: WebsiteReviewPageContext): WebsiteReviewRequestDraft {
   return {
     updateType: "",
@@ -68,23 +113,25 @@ function draftFromContext(initial?: WebsiteReviewPageContext): WebsiteReviewRequ
 
 export interface WebsiteReviewRequestFlowProps {
   initialContext?: WebsiteReviewPageContext;
+  websiteBaseUrl?: string | null;
+  workspacePages?: Array<{ title: string; path: string }>;
 }
 
-export function WebsiteReviewRequestFlow({ initialContext }: WebsiteReviewRequestFlowProps) {
+export function WebsiteReviewRequestFlow({
+  initialContext,
+  websiteBaseUrl = null,
+  workspacePages = [],
+}: WebsiteReviewRequestFlowProps) {
   const profile = useCesProfile();
-  const router = useRouter();
   const panelRef = useRef<HTMLDivElement>(null);
   const [stepId, setStepId] = useState("focus");
   const [draft, setDraft] = useState<WebsiteReviewRequestDraft>(() =>
     draftFromContext(initialContext),
   );
+  const [pageValue, setPageValue] = useState<WebsiteReviewPageFieldValue>(() =>
+    pageValueFromContext(initialContext, websiteBaseUrl),
+  );
   const [attachments, setAttachments] = useState<WebsiteReviewPendingAttachment[]>([]);
-  const [customPage, setCustomPage] = useState(() => {
-    if (!initialContext?.pageLabel) return false;
-    return !WEBSITE_REVIEW_PAGE_SUGGESTIONS.includes(
-      initialContext.pageLabel as (typeof WEBSITE_REVIEW_PAGE_SUGGESTIONS)[number],
-    );
-  });
   const [submitPhase, setSubmitPhase] = useState<SubmitPhase>("idle");
   const [createdId, setCreatedId] = useState<number | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -101,19 +148,35 @@ export function WebsiteReviewRequestFlow({ initialContext }: WebsiteReviewReques
     .filter((a) => a.status === "ready" && a.id != null)
     .map((a) => a.id as number);
 
-  const pageContextLabel = formatPageContextDisplay(
-    buildReviewContextFromDraft({
-      pageLabel: draft.pageLabel,
-      section: draft.section,
-      pagePath: draft.reviewContext?.pagePath,
-      pageUrl: draft.reviewContext?.pageUrl,
-      source: draft.reviewContext?.source,
-    }),
+  const pageChoices = useMemo(
+    () =>
+      buildReviewPageChoices({
+        websiteBaseUrl,
+        workspacePages,
+        current: pageValue.pagePath
+          ? {
+              label: pageValue.pageLabel || derivePageLabel(pageValue.pagePath),
+              pagePath: pageValue.pagePath,
+              pageUrl: pageValue.pageUrl,
+            }
+          : null,
+      }),
+    [websiteBaseUrl, workspacePages, pageValue],
   );
+
+  const reviewContextPreview = buildReviewContextFromDraft({
+    pageLabel: pageValue.pageLabel,
+    section: draft.section,
+    pagePath: pageValue.pagePath,
+    pageUrl: pageValue.pageUrl,
+    source: initialContext?.source ?? "manual",
+  });
+
+  const pageLocation = resolveReviewPageLocation(reviewContextPreview);
 
   useEffect(() => {
     const focusable = panelRef.current?.querySelector<HTMLElement>(
-      "button, textarea, input, [tabindex='0']",
+      "button, textarea, input, select, [tabindex='0']",
     );
     focusable?.focus();
   }, [stepId]);
@@ -134,6 +197,14 @@ export function WebsiteReviewRequestFlow({ initialContext }: WebsiteReviewReques
       nextErrors.details = "Add a few details so we know exactly what to change.";
     } else if (draft.details.trim().length < 12) {
       nextErrors.details = "A little more detail helps us move faster — even one sentence more.";
+    }
+
+    const pageCheck = normalizeReviewPageInput(pageValue.pagePath || pageValue.pageUrl, {
+      websiteBaseUrl,
+      preferredLabel: pageValue.pageLabel,
+    });
+    if (!pageCheck.ok) {
+      nextErrors.page = pageCheck.error;
     }
 
     if (attachments.some((a) => a.status === "error")) {
@@ -192,16 +263,28 @@ export function WebsiteReviewRequestFlow({ initialContext }: WebsiteReviewReques
       return;
     }
 
+    const pageCheck = normalizeReviewPageInput(pageValue.pagePath || pageValue.pageUrl, {
+      websiteBaseUrl,
+      preferredLabel: pageValue.pageLabel,
+    });
+    if (!pageCheck.ok) {
+      setErrors({ page: pageCheck.error });
+      setStepId("details");
+      return;
+    }
+
     setSubmitPhase("submitting");
     setSubmitError(null);
 
     const reviewContext = buildReviewContextFromDraft({
-      pageLabel: draft.pageLabel,
+      pageLabel: pageCheck.page.pageLabel,
       section: draft.section,
-      pagePath: draft.reviewContext?.pagePath,
-      pageUrl: draft.reviewContext?.pageUrl,
+      pagePath: pageCheck.page.pagePath,
+      pageUrl: pageCheck.page.pageUrl,
       source: draft.reviewContext?.source ?? (initialContext ? "review-url" : "manual"),
     });
+
+    const locationDisplay = resolveReviewPageLocation(reviewContext).display;
 
     try {
       const res = await fetch("/api/portal/website-review", {
@@ -210,7 +293,7 @@ export function WebsiteReviewRequestFlow({ initialContext }: WebsiteReviewReques
         body: JSON.stringify({
           updateType: draft.updateType,
           details: draft.details.trim(),
-          pageContext: pageContextLabel ?? undefined,
+          pageContext: locationDisplay,
           reviewContext,
           attachmentIds: readyAttachmentIds,
         }),
@@ -361,66 +444,37 @@ export function WebsiteReviewRequestFlow({ initialContext }: WebsiteReviewReques
               />
             </CesField>
 
-            <CesField
-              label="Where on the site?"
-              hint={PORTAL_CLIENT_LANGUAGE.requestLocationHint}
-              optional
-            >
-              <div className="kxd-ces-page-picks" role="group" aria-label="Page location">
-                {WEBSITE_REVIEW_PAGE_SUGGESTIONS.map((page) => {
-                  const selected = !customPage && draft.pageLabel === page;
-                  return (
-                    <button
-                      key={page}
-                      type="button"
-                      aria-pressed={selected}
-                      disabled={isSubmitting}
-                      className={`kxd-ces-page-pick${selected ? " kxd-ces-page-pick--selected" : ""}`}
-                      onClick={() => {
-                        setCustomPage(false);
-                        setDraft((d) => ({ ...d, pageLabel: page }));
-                      }}
-                    >
-                      {page}
-                    </button>
-                  );
-                })}
-                <button
-                  type="button"
-                  aria-pressed={customPage}
-                  disabled={isSubmitting}
-                  className={`kxd-ces-page-pick${customPage ? " kxd-ces-page-pick--selected" : ""}`}
-                  onClick={() => {
-                    setCustomPage(true);
-                    setDraft((d) => ({ ...d, pageLabel: "" }));
-                  }}
-                >
-                  Other
-                </button>
-              </div>
+            <WebsiteReviewPageField
+              websiteBaseUrl={websiteBaseUrl}
+              choices={pageChoices}
+              value={pageValue}
+              disabled={isSubmitting}
+              error={errors.page}
+              onChange={(next) => {
+                setPageValue(next);
+                setDraft((d) => ({
+                  ...d,
+                  pageLabel: next.pageLabel,
+                  reviewContext: {
+                    ...d.reviewContext,
+                    pageLabel: next.pageLabel,
+                    pagePath: next.pagePath,
+                    pageUrl: next.pageUrl,
+                  },
+                }));
+                setErrors((err) => ({ ...err, page: "" }));
+              }}
+            />
 
-              {customPage ? (
-                <input
-                  id="review-page-custom"
-                  type="text"
-                  className="kxd-ces-input kxd-ces-input--spaced"
-                  disabled={isSubmitting}
-                  value={draft.pageLabel ?? ""}
-                  onChange={(e) => setDraft((d) => ({ ...d, pageLabel: e.target.value }))}
-                  placeholder="Page name or path"
-                  aria-label="Custom page name or path"
-                />
-              ) : null}
-
+            <CesField label="Section" optional htmlFor="review-section">
               <input
                 id="review-section"
                 type="text"
-                className="kxd-ces-input kxd-ces-input--spaced"
+                className="kxd-ces-input"
                 disabled={isSubmitting}
                 value={draft.section ?? ""}
                 onChange={(e) => setDraft((d) => ({ ...d, section: e.target.value }))}
-                placeholder="Section (optional) — e.g. Hero, Footer, Programs list"
-                aria-label="Section on page"
+                placeholder="Optional — e.g. Hero, Footer, Programs list"
               />
             </CesField>
 
@@ -456,10 +510,22 @@ export function WebsiteReviewRequestFlow({ initialContext }: WebsiteReviewReques
                 <dt>Details</dt>
                 <dd>{draft.details}</dd>
               </div>
-              {pageContextLabel ? (
+              <div className="kxd-ces-summary__row">
+                <dt>Page</dt>
+                <dd>
+                  <span className="kxd-ces-page-field__label">{pageLocation.pageLabel}</span>
+                  {pageLocation.pagePath ? (
+                    <>
+                      <br />
+                      <span className="kxd-ces-page-field__path-value">{pageLocation.pagePath}</span>
+                    </>
+                  ) : null}
+                </dd>
+              </div>
+              {draft.section?.trim() ? (
                 <div className="kxd-ces-summary__row">
-                  <dt>Location</dt>
-                  <dd>{pageContextLabel}</dd>
+                  <dt>Section</dt>
+                  <dd>{draft.section}</dd>
                 </div>
               ) : null}
               {readyAttachmentIds.length > 0 ? (

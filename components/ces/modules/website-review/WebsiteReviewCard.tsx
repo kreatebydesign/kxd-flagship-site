@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { WebsiteReviewItem } from "@/lib/ces/modules/website-review/types";
 import { PORTAL_CLIENT_LANGUAGE } from "@/lib/ces/copy/portal-language";
+import { resolveReviewPageLocation } from "@/lib/ces/modules/website-review/page-location";
 import { WebsiteReviewStatus } from "./WebsiteReviewStatus";
 
 function formatRelativeDate(iso: string): string {
@@ -11,13 +12,18 @@ function formatRelativeDate(iso: string): string {
   });
 }
 
-function pageMeta(review: WebsiteReviewItem): string | null {
-  const parts = [
-    review.pageLabel || review.pagePath || null,
-    review.section || null,
-    review.markerNumber != null ? `Marker ${review.markerNumber}` : null,
-  ].filter(Boolean);
-  return parts.length ? parts.join(" · ") : review.pageContext || null;
+function pageMeta(review: WebsiteReviewItem): { compact: string; path: string | null } {
+  const location = resolveReviewPageLocation(review.reviewContext, review.pageContext);
+  const marker =
+    review.markerNumber != null ? ` · Marker ${review.markerNumber}` : "";
+  const section = review.section?.trim() ? ` · ${review.section.trim()}` : "";
+  if (location.unspecified) {
+    return { compact: location.compact + marker, path: null };
+  }
+  return {
+    compact: `${location.compact}${section}${marker}`,
+    path: location.pagePath,
+  };
 }
 
 export function WebsiteReviewCard({
@@ -43,10 +49,7 @@ export function WebsiteReviewCard({
     >
       <div className="kxd-ces-review-card__head">
         <h3 className="kxd-ces-review-card__title">{review.title}</h3>
-        {location ? <p className="kxd-ces-review-card__context">{location}</p> : null}
-        {review.pageUrl ? (
-          <p className="kxd-ces-review-card__url">{review.pageUrl}</p>
-        ) : null}
+        <p className="kxd-ces-review-card__context">{location.compact}</p>
       </div>
       {preview ? <p className="kxd-ces-review-card__summary">{preview}</p> : null}
       {emphasizeCompleted && review.completionNote ? (

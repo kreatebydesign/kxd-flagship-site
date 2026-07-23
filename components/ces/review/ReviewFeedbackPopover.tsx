@@ -1,13 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { CesField } from "@/components/ces/primitives";
 import { WebsiteReviewAttachmentZone } from "@/components/ces/modules/website-review/WebsiteReviewAttachmentZone";
+import {
+  WebsiteReviewPageField,
+  type WebsiteReviewPageFieldValue,
+} from "@/components/ces/modules/website-review/WebsiteReviewPageField";
 import { PORTAL_CLIENT_LANGUAGE } from "@/lib/ces/copy/portal-language";
 import type { ReviewSessionPin, ReviewViewport } from "@/lib/ces/review";
-import { createReviewAnchor } from "@/lib/ces/review";
+import { createReviewAnchor, pageLabelFromPath, parsePagePathFromUrl } from "@/lib/ces/review";
 import { buildReviewContextFromDraft } from "@/lib/ces/modules/website-review/context";
+import {
+  buildReviewPageChoices,
+  normalizeReviewPageInput,
+} from "@/lib/ces/modules/website-review/page-location";
 import type { WebsiteReviewPendingAttachment } from "@/lib/ces/modules/website-review/types";
 
 const PRIORITY_OPTIONS = [
@@ -25,8 +33,35 @@ export interface ReviewFeedbackPopoverProps {
   existingPin?: ReviewSessionPin | null;
   anchorPoint?: { x: number; y: number };
   nextPinNumber?: number;
+  websiteBaseUrl?: string | null;
+  workspacePages?: Array<{ title: string; path: string }>;
+  sessionPages?: Array<{ label: string; pagePath: string; pageUrl?: string }>;
   onClose: () => void;
   onSaved: (pin: ReviewSessionPin, requestId: number) => void;
+}
+
+function pageValueFromViewport(
+  viewport: ReviewViewport | null,
+  websiteBaseUrl?: string | null,
+): WebsiteReviewPageFieldValue {
+  if (!viewport) return { pageLabel: "", pagePath: "", pageUrl: "" };
+  const path = viewport.pagePath || parsePagePathFromUrl(viewport.pageUrl);
+  const normalized = normalizeReviewPageInput(path || viewport.pageUrl, {
+    websiteBaseUrl,
+    preferredLabel: viewport.pageLabel,
+  });
+  if (normalized.ok) {
+    return {
+      pageLabel: normalized.page.pageLabel,
+      pagePath: normalized.page.pagePath,
+      pageUrl: normalized.page.pageUrl,
+    };
+  }
+  return {
+    pageLabel: viewport.pageLabel || pageLabelFromPath(path),
+    pagePath: path,
+    pageUrl: viewport.pageUrl,
+  };
 }
 
 export function ReviewFeedbackPopover({
@@ -35,6 +70,9 @@ export function ReviewFeedbackPopover({
   existingPin,
   anchorPoint,
   nextPinNumber = 1,
+  websiteBaseUrl = null,
+  workspacePages = [],
+  sessionPages = [],
   onClose,
   onSaved,
 }: ReviewFeedbackPopoverProps) {
@@ -43,17 +81,38 @@ export function ReviewFeedbackPopover({
   const [title, setTitle] = useState(existingPin?.title ?? "");
   const [details, setDetails] = useState(existingPin?.summary ?? "");
   const [priority, setPriority] = useState(existingPin?.priority ?? "normal");
+  const [pageValue, setPageValue] = useState<WebsiteReviewPageFieldValue>(() =>
+    pageValueFromViewport(viewport, websiteBaseUrl),
+  );
   const [attachments, setAttachments] = useState<WebsiteReviewPendingAttachment[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pageError, setPageError] = useState<string | null>(null);
 
   const readyAttachmentIds = attachments
     .filter((a) => a.status === "ready" && a.id != null)
     .map((a) => a.id as number);
   const hasUploading = attachments.some((a) => a.status === "uploading");
 
+  const pageChoices = useMemo(
+    () =>
+      buildReviewPageChoices({
+        websiteBaseUrl,
+        workspacePages,
+        sessionPages,
+        current: pageValue.pagePath
+          ? {
+              label: pageValue.pageLabel,
+              pagePath: pageValue.pagePath,
+              pageUrl: pageValue.pageUrl,
+            }
+          : null,
+      }),
+    [websiteBaseUrl, workspacePages, sessionPages, pageValue],
+  );
+
   useEffect(() => {
-    panelRef.current?.querySelector<HTMLElement>("input, textarea, button")?.focus();
+    panelRef.current?.querySelector<HTMLElement>("input, textarea, select, button")?.focus();
   }, [mode]);
 
   useEffect(() => {
@@ -80,6 +139,16 @@ export function ReviewFeedbackPopover({
       return;
     }
 
+    const pageCheck = normalizeReviewPageInput(pageValue.pagePath || pageValue.pageUrl, {
+      websiteBaseUrl,
+      preferredLabel: pageValue.pageLabel,
+    });
+    if (!pageCheck.ok) {
+      setPageError(pageCheck.error);
+      setError(null);
+      return;
+    }
+
     if (hasUploading) {
       setError(PORTAL_CLIENT_LANGUAGE.attachmentUploadError);
       return;
@@ -87,13 +156,21 @@ export function ReviewFeedbackPopover({
 
     setSubmitting(true);
     setError(null);
+    setPageError(null);
 
-    const reviewAnchor = createReviewAnchor(viewport, existingPin?.anchor.id);
+    const resolvedViewport: ReviewViewport = {
+      ...viewport,
+      pageUrl: pageCheck.page.pageUrl,
+      pagePath: pageCheck.page.pagePath,
+      pageLabel: pageCheck.page.pageLabel,
+    };
+
+    const reviewAnchor = createReviewAnchor(resolvedViewport, existingPin?.anchor.id);
     const pinNumber = existingPin?.number || nextPinNumber;
     const reviewContext = buildReviewContextFromDraft({
-      pageLabel: viewport.pageLabel,
-      pagePath: viewport.pagePath,
-      pageUrl: viewport.pageUrl,
+      pageLabel: pageCheck.page.pageLabel,
+      pagePath: pageCheck.page.pagePath,
+      pageUrl: pageCheck.page.pageUrl,
       source: "visual-review",
       reviewAnchor,
       markerNumber: pinNumber,
@@ -148,6 +225,11 @@ export function ReviewFeedbackPopover({
       : undefined;
 
   if (mode === "view" && existingPin) {
+    const pinPath =
+      existingPin.anchor.viewport.pagePath ||
+      parsePagePathFromUrl(existingPin.anchor.viewport.pageUrl);
+    const pinLabel =
+      existingPin.anchor.viewport.pageLabel || pageLabelFromPath(pinPath);
     return (
       <div
         ref={panelRef}
@@ -163,6 +245,11 @@ export function ReviewFeedbackPopover({
           <h2 id={`${dialogId}-title`} className="kxd-review-popover__title">
             {existingPin.title}
           </h2>
+          <p className="kxd-review-popover__page">
+            <span>{pinLabel}</span>
+            <span aria-hidden> · </span>
+            <span>{pinPath}</span>
+          </p>
         </div>
         <p className="kxd-review-popover__body">{existingPin.summary}</p>
         <div className="kxd-review-popover__actions">
@@ -199,6 +286,19 @@ export function ReviewFeedbackPopover({
       </div>
 
       <div className="kxd-review-popover__form">
+        <WebsiteReviewPageField
+          compact
+          websiteBaseUrl={websiteBaseUrl}
+          choices={pageChoices}
+          value={pageValue}
+          error={pageError ?? undefined}
+          disabled={submitting}
+          onChange={(next) => {
+            setPageValue(next);
+            setPageError(null);
+          }}
+        />
+
         <CesField label={PORTAL_CLIENT_LANGUAGE.reviewSessionFieldTitle} htmlFor={`${dialogId}-title-input`}>
           <input
             id={`${dialogId}-title-input`}

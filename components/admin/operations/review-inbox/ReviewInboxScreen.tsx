@@ -254,7 +254,7 @@ export function ReviewInboxScreen({ data: initialData }: ReviewInboxScreenProps)
                     </div>
 
                     <div className="kxd-os-review-inbox__cell" data-label="Location">
-                      {item.pageLocation ?? "—"}
+                      {item.pageLocation}
                     </div>
 
                     <div className="kxd-os-review-inbox__cell" data-label="Priority">

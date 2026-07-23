@@ -3,6 +3,7 @@ import "server-only";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import { formatPageContextDisplay } from "@/lib/ces/modules/website-review/context";
+import { REVIEW_PAGE_UNSPECIFIED_LABEL } from "@/lib/ces/modules/website-review/page-location";
 import { WEBSITE_REVIEW_EXPERIENCE_MODULE } from "@/lib/ces/modules/website-review/constants";
 import { WEBSITE_WORKSPACE_EXPERIENCE_MODULE } from "@/lib/ces/modules/website-workspace/constants";
 import type { WebsiteReviewPageContext } from "@/lib/ces/modules/website-review/types";
@@ -57,7 +58,7 @@ function extractNotesPreview(doc: AnyDoc): string {
   return text.length > 160 ? `${text.slice(0, 160).trim()}…` : text;
 }
 
-function mapPageLocation(doc: AnyDoc): string | null {
+function mapPageLocation(doc: AnyDoc): string {
   const reviewContext = doc.reviewContext as AnyDoc | null | undefined;
   if (reviewContext?.source === "website-workspace") {
     const parts = [reviewContext.pageTitle, reviewContext.sectionTitle]
@@ -66,9 +67,11 @@ function mapPageLocation(doc: AnyDoc): string | null {
     if (parts.length > 0) return parts.join(" · ");
   }
 
-  return formatPageContextDisplay(
-    reviewContext as WebsiteReviewPageContext | null | undefined,
-    doc.pageContext as string | null,
+  return (
+    formatPageContextDisplay(
+      reviewContext as WebsiteReviewPageContext | null | undefined,
+      doc.pageContext as string | null,
+    ) || REVIEW_PAGE_UNSPECIFIED_LABEL
   );
 }
 

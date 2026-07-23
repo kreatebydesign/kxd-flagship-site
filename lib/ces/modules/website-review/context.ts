@@ -1,6 +1,13 @@
 import type { WebsiteReviewPageContext } from "./types";
+import {
+  resolveReviewPageLocation,
+  type ResolvedReviewPageLocation,
+} from "./page-location";
 
-/** Common site pages — reduces typing for manual requests */
+/**
+ * @deprecated Prefer path-based choices from buildReviewPageChoices / Website Workspace.
+ * Kept only for reading older drafts that stored label-only chips.
+ */
 export const WEBSITE_REVIEW_PAGE_SUGGESTIONS = [
   "Homepage",
   "About",
@@ -42,18 +49,19 @@ export function parseReviewContextFromSearchParams(
   };
 }
 
+/** Shared display string for cards, inbox, detail, and notifications. */
 export function formatPageContextDisplay(
   context?: WebsiteReviewPageContext | null,
   legacyPageContext?: string | null,
-): string | null {
-  if (context) {
-    const page = context.pageLabel ?? context.pagePath ?? context.pageUrl;
-    const parts = [page, context.section].filter(Boolean);
-    if (parts.length > 0) return parts.join(" · ");
-  }
+): string {
+  return resolveReviewPageLocation(context, legacyPageContext).display;
+}
 
-  const legacy = legacyPageContext?.trim();
-  return legacy || null;
+export function resolvePageLocationForDisplay(
+  context?: WebsiteReviewPageContext | null,
+  legacyPageContext?: string | null,
+): ResolvedReviewPageLocation {
+  return resolveReviewPageLocation(context, legacyPageContext);
 }
 
 export function buildReviewContextFromDraft(input: {

@@ -3,7 +3,7 @@ import "server-only";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import { loadWebsiteReviewTimeline } from "@/lib/ces/modules/website-review/activity";
-import { formatPageContextDisplay } from "@/lib/ces/modules/website-review/context";
+import { resolveReviewPageLocation } from "@/lib/ces/modules/website-review/page-location";
 import { WEBSITE_REVIEW_EXPERIENCE_MODULE } from "@/lib/ces/modules/website-review/constants";
 import { resolveWebsiteReviewTargetUrl } from "@/lib/ces/modules/website-review/target-url";
 import { WEBSITE_WORKSPACE_EXPERIENCE_MODULE } from "@/lib/ces/modules/website-workspace/constants";
@@ -60,13 +60,14 @@ function extractRequestBody(doc: AnyDoc): string {
 function buildLocation(doc: AnyDoc): ReviewWorkspaceLocation {
   const reviewContext = (doc.reviewContext as WebsiteReviewPageContext | null | undefined) ?? {};
   const pageContext = doc.pageContext as string | null | undefined;
+  const resolved = resolveReviewPageLocation(reviewContext, pageContext);
 
   return {
-    pageLabel: reviewContext.pageLabel ?? null,
+    pageLabel: resolved.pageLabel,
     section: reviewContext.section ?? null,
-    pagePath: reviewContext.pagePath ?? null,
-    pageUrl: reviewContext.pageUrl ?? null,
-    display: formatPageContextDisplay(reviewContext, pageContext),
+    pagePath: resolved.pagePath,
+    pageUrl: resolved.pageUrl ?? reviewContext.pageUrl ?? null,
+    display: resolved.display,
   };
 }
 

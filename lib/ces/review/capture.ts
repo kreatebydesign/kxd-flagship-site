@@ -4,20 +4,49 @@ export const REVIEW_SESSION_STORAGE_PREFIX = "kxd-review-session:";
 
 export const REVIEW_OVERLAY_EXTENSION_OPERATOR = "review-overlay-operator";
 
+/**
+ * Pathname (+ search when present) for page identity.
+ * Does not include the preview/production domain.
+ */
 export function parsePagePathFromUrl(url: string): string {
+  const trimmed = String(url ?? "").trim();
+  if (!trimmed) return "/";
   try {
-    const parsed = new URL(url);
-    return parsed.pathname || "/";
+    const parsed = new URL(trimmed);
+    const path = parsed.pathname.replace(/\/+$/, "") || "/";
+    return `${path}${parsed.search}`;
   } catch {
-    return "/";
+    const withSlash = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+    try {
+      const parsed = new URL(withSlash, "https://example.invalid");
+      const path = parsed.pathname.replace(/\/+$/, "") || "/";
+      return `${path}${parsed.search}`;
+    } catch {
+      return "/";
+    }
   }
 }
 
+/**
+ * Human-readable label from a path. Never returns "Homepage" for non-root paths.
+ * `/` → Homepage · `/racing-schools` → Racing Schools · `/models/x` → Models · X
+ */
 export function pageLabelFromPath(path: string): string {
-  if (path === "/" || path === "") return "Homepage";
-  const segment = path.split("/").filter(Boolean)[0];
-  if (!segment) return "Page";
-  return segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, " ");
+  const pathOnly = (path.split("?")[0] ?? path).replace(/\/+$/, "") || "/";
+  if (pathOnly === "/" || pathOnly === "") return "Homepage";
+  const segments = pathOnly.split("/").filter(Boolean);
+  if (segments.length === 0) return "Page";
+  return segments
+    .map((segment) => {
+      const cleaned = segment.replace(/[-_]+/g, " ").trim();
+      if (!cleaned) return "";
+      return cleaned
+        .split(/\s+/)
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+    })
+    .filter(Boolean)
+    .join(" · ");
 }
 
 export function captureReviewViewport(input: {

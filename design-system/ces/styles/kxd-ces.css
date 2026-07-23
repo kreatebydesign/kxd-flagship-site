@@ -2012,6 +2012,53 @@
 
 /* ── Phase 12C: Page location picks ─────────────────────────── */
 
+.kxd-ces-page-field__path {
+  margin: 0.45rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: var(--kxd-ces-muted, #8a8278);
+}
+
+.kxd-ces-page-field__label {
+  color: var(--kxd-ces-ink, #1a1814);
+  font-weight: 500;
+}
+
+.kxd-ces-page-field__path-value {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.01em;
+}
+
+.kxd-review-toolbar__current {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.55rem;
+  margin-top: 0.2rem;
+  font-size: 0.8125rem;
+  color: var(--kxd-ces-ink, #1a1814);
+}
+
+.kxd-review-toolbar__current-path {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.75rem;
+  color: var(--kxd-ces-muted, #8a8278);
+}
+
+.kxd-review-popover__page {
+  margin: 0.35rem 0 0;
+  font-size: 0.8125rem;
+  color: var(--kxd-ces-muted, #8a8278);
+}
+
+.kxd-os-review-workspace__path {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.8125rem;
+  color: var(--kxd-os-muted, #8a8278);
+}
+
+
 .kxd-ces-page-picks {
   display: flex;
   flex-wrap: wrap;

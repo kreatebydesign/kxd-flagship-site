@@ -213,8 +213,13 @@ export function ReviewWorkspaceScreen({ review: initialReview }: ReviewWorkspace
           <div className="kxd-os-review-workspace__hero-main">
             <p className="kxd-os-review-workspace__client">{review.clientName}</p>
             <h1 className="kxd-os-review-workspace__title">
-              {review.location.pageLabel ?? review.location.display ?? review.title}
+              {review.location.pageLabel && review.location.pageLabel !== "Page not specified"
+                ? review.location.pageLabel
+                : review.title}
             </h1>
+            {review.location.pagePath ? (
+              <p className="kxd-os-review-workspace__section">{review.location.pagePath}</p>
+            ) : null}
             {review.location.section ? (
               <p className="kxd-os-review-workspace__section">{review.location.section}</p>
             ) : null}
@@ -288,12 +293,18 @@ export function ReviewWorkspaceScreen({ review: initialReview }: ReviewWorkspace
                   <dt>Website</dt>
                   <dd>{review.clientName}</dd>
                 </div>
-                {review.location.pageLabel || review.location.pagePath ? (
-                  <div>
-                    <dt>Page</dt>
-                    <dd>{review.location.pageLabel ?? review.location.pagePath}</dd>
-                  </div>
-                ) : null}
+                <div>
+                  <dt>Page</dt>
+                  <dd>
+                    {review.location.pageLabel ?? review.location.display}
+                    {review.location.pagePath ? (
+                      <>
+                        <br />
+                        <span className="kxd-os-review-workspace__path">{review.location.pagePath}</span>
+                      </>
+                    ) : null}
+                  </dd>
+                </div>
                 {review.location.section ? (
                   <div>
                     <dt>Section</dt>

@@ -8,7 +8,7 @@ import {
 import type { ResolvedExperienceProfile } from "@/lib/ces/types";
 import { loadWebsiteReviewTimeline } from "./activity";
 import { loadAttachmentsForRequest } from "./attachments-server";
-import { formatPageContextDisplay } from "./context";
+import { resolveReviewPageLocation } from "./page-location";
 import { getWebsiteReviewRequestsForClient } from "./queries";
 import { resolveWebsiteReviewTargetUrl } from "./target-url";
 
@@ -58,7 +58,8 @@ export async function mapRequestDocToWebsiteReviewItem(
   const timeline = await loadWebsiteReviewTimeline(session.clientId, requestId, doc);
   const reviewContext = parseReviewContext(doc);
   const attachments = await loadAttachmentsForRequest(requestId);
-  const pageContext = formatPageContextDisplay(reviewContext, doc.pageContext as string | null);
+  const location = resolveReviewPageLocation(reviewContext, doc.pageContext as string | null);
+  const pageContext = location.display;
   const completedAt =
     doc.completedDate != null
       ? String(doc.completedDate)
@@ -89,9 +90,9 @@ export async function mapRequestDocToWebsiteReviewItem(
     completionNote: completionEvent?.detail ?? null,
     pageContext,
     reviewContext,
-    pageLabel: reviewContext?.pageLabel ?? null,
-    pagePath: reviewContext?.pagePath ?? null,
-    pageUrl: reviewContext?.pageUrl ?? null,
+    pageLabel: location.pageLabel,
+    pagePath: location.pagePath,
+    pageUrl: location.pageUrl ?? reviewContext?.pageUrl ?? null,
     section: reviewContext?.section ?? null,
     markerNumber:
       typeof reviewContext?.markerNumber === "number"
@@ -104,8 +105,9 @@ export async function mapRequestDocToWebsiteReviewItem(
 
 export async function getWebsiteReviewLanding(
   session: PortalSession,
-  _profile: ResolvedExperienceProfile,
+  profile: ResolvedExperienceProfile,
 ): Promise<WebsiteReviewLandingData> {
+  void profile;
   const docs = await getWebsiteReviewRequestsForClient(session.clientId);
   const items = await Promise.all(
     docs.map((doc) => mapRequestDocToWebsiteReviewItem(doc, session)),

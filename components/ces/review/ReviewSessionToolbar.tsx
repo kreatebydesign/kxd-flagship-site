@@ -10,6 +10,8 @@ export interface ReviewSessionToolbarProps {
   mode: ReviewSessionMode;
   pageSummaries: ReviewPageSummary[];
   activePageKey: string;
+  activePageLabel?: string;
+  activePagePath?: string;
   pagePinCount: number;
   totalPinCount: number;
   onUrlChange: (url: string) => void;
@@ -22,6 +24,8 @@ export function ReviewSessionToolbar({
   mode,
   pageSummaries,
   activePageKey,
+  activePageLabel,
+  activePagePath,
   pagePinCount,
   totalPinCount,
   onUrlChange,
@@ -46,6 +50,12 @@ export function ReviewSessionToolbar({
           {pagePinCount} on this page
           {totalPinCount > pagePinCount ? ` · ${totalPinCount} total` : ""}
         </span>
+        {activePageLabel ? (
+          <span className="kxd-review-toolbar__current" aria-live="polite">
+            <strong>{activePageLabel}</strong>
+            {activePagePath ? <span className="kxd-review-toolbar__current-path">{activePagePath}</span> : null}
+          </span>
+        ) : null}
       </div>
 
       <div className="kxd-review-toolbar__url">
@@ -55,7 +65,8 @@ export function ReviewSessionToolbar({
         <input
           id="kxd-review-page-url"
           className="kxd-review-toolbar__url-input"
-          type="url"
+          type="text"
+          inputMode="url"
           value={iframeUrl}
           onChange={(event) => onUrlChange(event.target.value)}
           onKeyDown={(event) => {
