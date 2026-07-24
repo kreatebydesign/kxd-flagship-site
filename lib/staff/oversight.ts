@@ -5,7 +5,8 @@ import config from "@payload-config";
 import { getTrainingDashboard } from "@/lib/training/services";
 import { getAssignedWorkForStaff } from "./load";
 import { buildStaffPlan } from "./plan";
-import { normalizeStaffRole, staffRoleTitle } from "./permissions";
+import { staffActorFromUser } from "./actor";
+import { staffRoleTitle } from "./permissions";
 import { listStaffResponsibilities } from "./responsibilities";
 import { listRecentWrapUps } from "./wrap-up";
 import {
@@ -13,7 +14,7 @@ import {
   listOpenHelpRequestsForOversight,
 } from "./help-requests";
 import { isWaitingOnMatt } from "./prioritize";
-import type { StaffOversightData, StaffRoleId } from "./types";
+import type { StaffOversightData } from "./types";
 
 /**
  * Administrator-only staff oversight composition.
@@ -32,20 +33,15 @@ export async function loadStaffOversight(): Promise<StaffOversightData> {
   const draftsAwaitingApproval: StaffOversightData["draftsAwaitingApproval"] = [];
 
   for (const doc of result.docs) {
-    const staffRole = normalizeStaffRole(
-      (doc as { staffRole?: unknown }).staffRole,
-    ) as StaffRoleId;
-    if (staffRole === "none") continue;
-    if ((doc as { role?: string }).role === "admin") continue;
+    const memberActor = staffActorFromUser(doc);
+    if (!memberActor) continue;
+    if (memberActor.staffRole === "none") continue;
+    if (memberActor.role === "admin") continue;
 
-    const userId = Number(doc.id);
-    const email =
-      typeof doc.email === "string" ? doc.email.trim().toLowerCase() : "";
-    const displayName =
-      typeof (doc as { displayName?: string }).displayName === "string" &&
-      (doc as { displayName?: string }).displayName!.trim()
-        ? (doc as { displayName: string }).displayName.trim()
-        : email || `User ${userId}`;
+    const userId = memberActor.userId;
+    const email = memberActor.email;
+    const displayName = memberActor.displayName;
+    const staffRole = memberActor.staffRole;
 
     const assigned = await getAssignedWorkForStaff(userId);
     const open = assigned.filter(
@@ -70,32 +66,18 @@ export async function loadStaffOversight(): Promise<StaffOversightData> {
     try {
       const dash = await getTrainingDashboard(doc);
       trainingPercent = dash.overallPercent;
-      const rawOnboarding = (doc as { staffOnboardingCompletedAt?: unknown })
-        .staffOnboardingCompletedAt;
-      const onboardingCompletedAt =
-        typeof rawOnboarding === "string"
-          ? rawOnboarding
-          : rawOnboarding instanceof Date
-            ? rawOnboarding.toISOString()
-            : null;
-      const actor = {
-        userId,
-        email,
-        displayName,
-        role: "editor" as const,
-        staffRole,
-        onboardingCompletedAt,
-      };
-      const plan = buildStaffPlan({ actor, assigned, training: dash });
+      const plan = buildStaffPlan({
+        actor: memberActor,
+        assigned,
+        training: dash,
+      });
       startHereLabel = plan.primaryAction.title ?? plan.primaryAction.label;
       planActionableCount = plan.morning.actionableCount;
     } catch {
       trainingPercent = 0;
     }
 
-    const onboardingCompleted = Boolean(
-      (doc as { staffOnboardingCompletedAt?: unknown }).staffOnboardingCompletedAt,
-    );
+    const onboardingCompleted = Boolean(memberActor.onboardingCompletedAt);
 
     let helpRequestedCount = 0;
     try {

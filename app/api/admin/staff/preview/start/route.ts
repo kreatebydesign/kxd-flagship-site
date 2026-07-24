@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getPayload } from "payload";
 import config from "@payload-config";
+import { staffActorFromUser } from "@/lib/staff/actor";
 import { requireStaffCapabilityApi } from "@/lib/staff/guard";
 import {
   buildStaffPreviewSession,
@@ -48,20 +49,22 @@ export async function POST(request: Request) {
     );
   }
 
-  const staffRole = (staff as { staffRole?: string }).staffRole;
-  if (!staffRole || staffRole === "none") {
+  const previewActor = staffActorFromUser(staff);
+  if (!previewActor) {
+    return NextResponse.json(
+      { success: false, error: "Staff user not found." },
+      { status: 404 },
+    );
+  }
+
+  if (previewActor.staffRole === "none") {
     return NextResponse.json(
       { success: false, error: "User is not configured with a staff role." },
       { status: 400 },
     );
   }
 
-  const email = typeof staff.email === "string" ? staff.email : "";
-  const displayName =
-    typeof (staff as { displayName?: string }).displayName === "string" &&
-    (staff as { displayName?: string }).displayName!.trim()
-      ? (staff as { displayName: string }).displayName.trim()
-      : email || `User ${staffUserId}`;
+  const displayName = previewActor.displayName;
 
   const session = buildStaffPreviewSession({
     staffUserId,

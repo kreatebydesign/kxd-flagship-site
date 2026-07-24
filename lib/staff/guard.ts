@@ -136,7 +136,8 @@ export async function getStaffActorOrNull() {
 }
 
 export function staffCanUseFullNav(user: unknown): boolean {
-  const actor = staffActorFromUser(user as Record<string, unknown>);
+  if (!user || typeof user !== "object") return false;
+  const actor = staffActorFromUser(user);
   if (!actor) return false;
   return actorHasStaffCapability(actor, "admin.full-operations");
 }
