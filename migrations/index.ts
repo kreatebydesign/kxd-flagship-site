@@ -76,6 +76,10 @@ import * as migration_20260809_phase35b_client_upgrade_requests from './20260809
 import * as migration_20260721_phase36a_commercial_agreements from './20260721_phase36a_commercial_agreements';
 import * as migration_20260721_phase37g_billing_configuration from './20260721_phase37g_billing_configuration';
 import * as migration_20260721_phase37i_stripe_customer_mapping from './20260721_phase37i_stripe_customer_mapping';
+import * as migration_20260724_phase38a_staff_experience from './20260724_phase38a_staff_experience';
+import * as migration_20260724_phase38b_daily_staff_plan from './20260724_phase38b_daily_staff_plan';
+import * as migration_20260724_phase38c_staff_help_requests from './20260724_phase38c_staff_help_requests';
+import * as migration_20260724_phase38d_staff_help_intelligence from './20260724_phase38d_staff_help_intelligence';
 
 export const migrations = [
   {
@@ -467,5 +471,25 @@ export const migrations = [
     up: migration_20260721_phase37i_stripe_customer_mapping.up,
     down: migration_20260721_phase37i_stripe_customer_mapping.down,
     name: '20260721_phase37i_stripe_customer_mapping',
+  },
+  {
+    up: migration_20260724_phase38a_staff_experience.up,
+    down: migration_20260724_phase38a_staff_experience.down,
+    name: '20260724_phase38a_staff_experience',
+  },
+  {
+    up: migration_20260724_phase38b_daily_staff_plan.up,
+    down: migration_20260724_phase38b_daily_staff_plan.down,
+    name: '20260724_phase38b_daily_staff_plan',
+  },
+  {
+    up: migration_20260724_phase38c_staff_help_requests.up,
+    down: migration_20260724_phase38c_staff_help_requests.down,
+    name: '20260724_phase38c_staff_help_requests',
+  },
+  {
+    up: migration_20260724_phase38d_staff_help_intelligence.up,
+    down: migration_20260724_phase38d_staff_help_intelligence.down,
+    name: '20260724_phase38d_staff_help_intelligence',
   },
 ];

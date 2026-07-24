@@ -8513,6 +8513,18 @@ a.kxd-os-platform-subsystem-card__title:hover {
   }
 }
 
+.kxd-os-sidebar__sign-out {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+}
+
+.kxd-os-sidebar__sign-out-btn:focus-visible {
+  outline: 2px solid var(--kxd-os-focus, var(--kxd-os-accent, #c4a574));
+  outline-offset: 2px;
+}
+
 .kxd-os-sidebar__actions {
   margin-bottom: var(--kxd-os-space-2);
   display: flex;
@@ -11355,6 +11367,14 @@ a.kxd-os-ritual-focus__title:hover {
   font-size: 0.75rem;
   color: var(--kxd-os-text-muted);
   text-decoration: none;
+}
+
+.kxd-os-training__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .kxd-os-training__main {

@@ -27,6 +27,9 @@ import { ClientReviewMedia } from "./payload/collections/ClientReviewMedia.ts";
 import { ClientTasks } from "./payload/collections/ClientTasks.ts";
 import { Work } from "./payload/collections/Work.ts";
 import { WorkScheduleLinks } from "./payload/collections/WorkScheduleLinks.ts";
+import { StaffResponsibilities } from "./payload/collections/StaffResponsibilities.ts";
+import { StaffDayWrapups } from "./payload/collections/StaffDayWrapups.ts";
+import { StaffHelpRequests } from "./payload/collections/StaffHelpRequests.ts";
 import { ProposalActivity } from "./payload/collections/ProposalActivity.ts";
 import { ProposalConversions } from "./payload/collections/ProposalConversions.ts";
 import { ContractTemplates } from "./payload/collections/ContractTemplates.ts";
@@ -193,6 +196,9 @@ export default buildConfig({
     ClientTasks,
     Work,
     WorkScheduleLinks,
+    StaffResponsibilities,
+    StaffDayWrapups,
+    StaffHelpRequests,
     GenesisSessions,
     WebsiteQAChecks,
     ClientOnboarding,

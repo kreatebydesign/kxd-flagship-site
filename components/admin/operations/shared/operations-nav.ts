@@ -41,7 +41,8 @@ export type OperationsNavId =
   | "integrations"
   | "platform"
   | "settings"
-  | "training";
+  | "training"
+  | "staff";
 
 export type OperationsNavItem = {
   id: OperationsNavId;
@@ -143,6 +144,7 @@ export const NAV_GROUPS: OperationsNavGroup[] = [
   {
     label: "Tools",
     items: [
+      { id: "staff", label: "Staff Home", href: "/admin/operations/staff" },
       { id: "training", label: "Operations", href: "/admin/training" },
       { id: "client-import", label: "Import", href: "/admin/operations/client-import" },
     ],
@@ -151,3 +153,10 @@ export const NAV_GROUPS: OperationsNavGroup[] = [
 
 /** Flat list — backwards compatible */
 export const NAV_ITEMS = NAV_GROUPS.flatMap((group) => group.items);
+
+/** Administrator oversight entry — linked from staff oversight page and Tools. */
+export const STAFF_OVERSIGHT_NAV_ITEM = {
+  id: "staff" as const,
+  label: "Staff Oversight",
+  href: "/admin/operations/staff/oversight",
+};

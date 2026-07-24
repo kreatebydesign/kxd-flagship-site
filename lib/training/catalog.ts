@@ -3,6 +3,7 @@ import type {
   TrainingLessonDefinition,
   TrainingPathDefinition,
 } from "./types";
+import { STAFF_FOUNDATION_PATH } from "./staff-foundation";
 
 function frame(
   partial: Partial<TrainingLessonContent["operations"]> &
@@ -51,6 +52,7 @@ function lesson(partial: TrainingLessonDefinition): TrainingLessonDefinition {
  * Paths teach how to operate Kreate by Design *through* KXD OS.
  */
 export const TRAINING_CATALOG: TrainingPathDefinition[] = [
+  STAFF_FOUNDATION_PATH,
   {
     slug: "welcome-to-kxd",
     title: "Welcome to KXD",

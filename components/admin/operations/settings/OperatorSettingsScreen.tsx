@@ -9,9 +9,13 @@ import { OperationsShell } from "@/components/admin/operations/shared/Operations
  * Operator Settings — device preferences (Batch E theme system).
  * Visual/preference only; no auth, billing, or workflow changes.
  */
-export function OperatorSettingsScreen() {
+export function OperatorSettingsScreen({
+  variant = "full",
+}: {
+  variant?: "full" | "staff";
+}) {
   return (
-    <OperationsShell activeId="settings">
+    <OperationsShell activeId="settings" variant={variant}>
       <KxdPage className="kxd-os-page--ops">
         <OperationsPageHero
           eyebrow="Preferences"

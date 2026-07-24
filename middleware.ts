@@ -36,26 +36,46 @@ function isWellFormedPortalSessionCookie(value: string | undefined): boolean {
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  const nextWithPath = () => {
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set("x-kxd-pathname", pathname);
+    return NextResponse.next({
+      request: { headers: requestHeaders },
+    });
+  };
+
+  const jsonWithPath = (body: unknown, init?: ResponseInit) => {
+    const response = NextResponse.json(body, init);
+    response.headers.set("x-kxd-pathname", pathname);
+    return response;
+  };
+
+  const redirectWithPath = (url: URL) => {
+    const response = NextResponse.redirect(url);
+    response.headers.set("x-kxd-pathname", pathname);
+    return response;
+  };
+
   if (pathname === "/" && isPortalHost(request)) {
-    return NextResponse.redirect(new URL("/portal/login", request.url));
+    return redirectWithPath(new URL("/portal/login", request.url));
   }
 
   if (requiresPayloadAdminAuth(pathname)) {
     if (!hasPayloadAuthCookie(request)) {
-      return NextResponse.redirect(payloadAdminLoginUrl(request, pathname));
+      return redirectWithPath(payloadAdminLoginUrl(request, pathname));
     }
-    return NextResponse.next();
+    return nextWithPath();
   }
 
   // Cron surfaces — fail closed. Require valid CRON_SECRET bearer. No cookie bypass.
   if (pathname.startsWith("/api/cron/")) {
     if (!isAuthorizedCronBearer(request.headers.get("authorization"))) {
-      return NextResponse.json(
+      return jsonWithPath(
         { success: false, error: "Unauthorized." },
         { status: 401 },
       );
     }
-    return NextResponse.next();
+    return nextWithPath();
   }
 
   if (pathname.startsWith("/api/admin/")) {
@@ -64,12 +84,12 @@ export function middleware(request: NextRequest) {
     const hasScopedCronBearer =
       isReportingAdminIngestPath(pathname) && isAuthorizedCronBearer(authHeader);
     if (!hasScopedCronBearer && !hasPayloadAuthCookie(request)) {
-      return NextResponse.json(
+      return jsonWithPath(
         { success: false, error: "Unauthorized." },
         { status: 401 },
       );
     }
-    return NextResponse.next();
+    return nextWithPath();
   }
 
   if (pathname.startsWith("/portal")) {

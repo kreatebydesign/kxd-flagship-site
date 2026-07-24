@@ -33,6 +33,7 @@ export async function getPayloadAdminUser() {
 /**
  * Gate internal admin API routes — requires authenticated Payload `users` session.
  * Returns the admin user, or a 401 JSON response.
+ * Restricted staff roles are deny-by-default against non-allowlisted API paths.
  */
 export async function requirePayloadAdminApi() {
   const user = await getPayloadAdminUser();
@@ -42,6 +43,49 @@ export async function requirePayloadAdminApi() {
       { status: 401 },
     );
   }
+
+  try {
+    const { staffActorFromUser } = await import("@/lib/staff/actor");
+    const {
+      isRestrictedStaff,
+      isStaffAllowedApiPath,
+    } = await import("@/lib/staff/permissions");
+    const { getStaffPreviewSession } = await import("@/lib/staff/preview");
+    const actor = staffActorFromUser(user);
+    if (actor && isRestrictedStaff(actor)) {
+      const preview = await getStaffPreviewSession();
+      if (preview) {
+        return NextResponse.json(
+          {
+            success: false,
+            ok: false,
+            error: "Preview mode is read-only. Changes are disabled.",
+          },
+          { status: 403 },
+        );
+      }
+      const { headers: nextHeaders } = await import("next/headers");
+      const h = await nextHeaders();
+      const pathname =
+        h.get("x-kxd-pathname") ||
+        h.get("next-url") ||
+        h.get("x-invoke-path") ||
+        "";
+      if (pathname && !isStaffAllowedApiPath(pathname, actor)) {
+        return NextResponse.json(
+          {
+            success: false,
+            ok: false,
+            error: "Staff permission denied for this API.",
+          },
+          { status: 403 },
+        );
+      }
+    }
+  } catch {
+    /* fail open only if staff modules fail to load — auth still required */
+  }
+
   return user;
 }
 

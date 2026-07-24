@@ -7,6 +7,7 @@ import { TRAINING_HOME, trainingPathHref } from "@/lib/training/constants";
 import type { TrainingLessonView } from "@/lib/training/types";
 import { TrainingIntelligencePanel } from "./TrainingIntelligencePanel";
 import { TrainingShell } from "./TrainingShell";
+import { StaffAskHelpControl } from "@/components/admin/operations/staff/StaffAskHelpControl";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -28,7 +29,13 @@ function FrameList({ items }: { items: string[] }) {
   );
 }
 
-export function TrainingLessonScreen({ lesson }: { lesson: TrainingLessonView }) {
+export function TrainingLessonScreen({
+  lesson,
+  shellVariant = "full",
+}: {
+  lesson: TrainingLessonView;
+  shellVariant?: "full" | "staff";
+}) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [checked, setChecked] = useState<string[]>(
@@ -98,7 +105,7 @@ export function TrainingLessonScreen({ lesson }: { lesson: TrainingLessonView })
   }
 
   return (
-    <TrainingShell active="lesson">
+    <TrainingShell active="lesson" variant={shellVariant}>
       <p className="kxd-os-training__crumb">
         <Link href={TRAINING_HOME}>Operations</Link>
         <span aria-hidden> / </span>
@@ -282,6 +289,16 @@ export function TrainingLessonScreen({ lesson }: { lesson: TrainingLessonView })
           </Link>
         </footer>
       </article>
+
+      {shellVariant === "staff" ? (
+        <div style={{ marginTop: "2rem" }}>
+          <StaffAskHelpControl
+            pagePath={`/admin/training/${lesson.pathSlug}/${lesson.slug}`}
+            canAct
+            isPreview={false}
+          />
+        </div>
+      ) : null}
     </TrainingShell>
   );
 }

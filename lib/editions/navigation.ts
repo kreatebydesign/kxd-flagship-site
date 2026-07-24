@@ -50,6 +50,7 @@ export const OPERATIONS_NAV_MODULE_MAP: Record<OperationsNavId, KxdModuleId> = {
   "client-launch-wizard": "portfolio",
   "client-provisioning": "portfolio",
   training: "operations",
+  staff: "operations",
   genesis: "onboarding",
   "launch-qa": "work",
 };

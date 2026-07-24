@@ -43,11 +43,17 @@ function PathCard({ path }: { path: TrainingPathView }) {
   );
 }
 
-export function TrainingDashboard({ data }: { data: TrainingDashboardData }) {
+export function TrainingDashboard({
+  data,
+  shellVariant = "full",
+}: {
+  data: TrainingDashboardData;
+  shellVariant?: "full" | "staff";
+}) {
   const track = data.growthTrack;
 
   return (
-    <TrainingShell active="home">
+    <TrainingShell active="home" variant={shellVariant}>
       <header className="kxd-os-training__hero">
         <p className="kxd-os-training__eyebrow">Operations Experience</p>
         <h1 className="kxd-os-training__headline">{data.experienceTitle}</h1>

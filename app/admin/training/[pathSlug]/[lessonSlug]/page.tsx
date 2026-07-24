@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { TrainingLessonScreen } from "@/components/admin/training";
 import { getPayloadAdminUser } from "@/lib/admin/auth";
 import { getTrainingLesson } from "@/lib/training";
+import { isRestrictedStaff, staffActorFromUser } from "@/lib/staff";
 
 export const dynamic = "force-dynamic";
 
@@ -18,5 +19,8 @@ export default async function TrainingLessonPage({
     user,
   );
   if (!lesson) notFound();
-  return <TrainingLessonScreen lesson={lesson} />;
+  const actor = staffActorFromUser(user);
+  const shellVariant =
+    actor && isRestrictedStaff(actor) ? ("staff" as const) : ("full" as const);
+  return <TrainingLessonScreen lesson={lesson} shellVariant={shellVariant} />;
 }

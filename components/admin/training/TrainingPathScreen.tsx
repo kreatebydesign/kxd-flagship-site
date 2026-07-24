@@ -3,9 +3,15 @@ import { TRAINING_HOME } from "@/lib/training/constants";
 import type { TrainingPathView } from "@/lib/training/types";
 import { TrainingShell } from "./TrainingShell";
 
-export function TrainingPathScreen({ path }: { path: TrainingPathView }) {
+export function TrainingPathScreen({
+  path,
+  shellVariant = "full",
+}: {
+  path: TrainingPathView;
+  shellVariant?: "full" | "staff";
+}) {
   return (
-    <TrainingShell active="path">
+    <TrainingShell active="path" variant={shellVariant}>
       <p className="kxd-os-training__crumb">
         <Link href={TRAINING_HOME}>Operations</Link>
         <span aria-hidden> / </span>
