@@ -28,7 +28,10 @@ export default function PortalRootLayout({ children }: { children: React.ReactNo
     <html lang="en">
       <body
         className={`${cormorant.variable} ${outfit.variable} antialiased`}
-        style={{ background: "var(--kxd-black-base)", color: "var(--kxd-cream)" }}
+        style={{
+          background: "var(--kxd-os-bg-canvas)",
+          color: "var(--kxd-os-text-primary)",
+        }}
       >
         {children}
       </body>

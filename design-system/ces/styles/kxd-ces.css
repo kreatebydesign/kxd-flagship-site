@@ -3318,7 +3318,7 @@
   gap: 0.625rem;
 }
 
-/* ── Portal auth (sign-in, reset) ─────────────────────────────── */
+/* ── Portal auth (sign-in, reset) — Phase 2 Batch A light foundation ─ */
 
 .kxd-portal-auth {
   display: flex;
@@ -3327,15 +3327,18 @@
   justify-content: center;
   padding: clamp(2rem, 6vw, 3.5rem) 1rem;
   background: var(--kxd-os-bg-canvas);
+  color: var(--kxd-os-text-primary);
+  font-family: var(--kxd-os-font-sans);
 }
 
 .kxd-portal-auth__card {
   width: 100%;
   max-width: 26rem;
   padding: clamp(2rem, 5vw, 2.75rem);
-  border: 1px solid color-mix(in srgb, var(--kxd-cream, #f5f0e8) 10%, transparent);
-  background: var(--kxd-black-elevated, #111);
-  box-shadow: 0 28px 80px color-mix(in srgb, var(--kxd-os-bg-canvas) 55%, transparent);
+  border: 1px solid var(--kxd-os-border-divider);
+  border-radius: var(--kxd-os-radius-lg);
+  background: var(--kxd-os-bg-surface);
+  box-shadow: var(--kxd-os-shadow-floating);
 }
 
 .kxd-portal-auth__head {
@@ -3348,31 +3351,31 @@
 
 .kxd-portal-auth__eyebrow {
   margin: 0;
-  font-family: var(--font-outfit, sans-serif);
-  font-size: 0.5625rem;
-  font-weight: 500;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--kxd-gold, #c5a65c) 72%, transparent);
+  font-family: var(--kxd-os-font-sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-transform: none;
+  color: var(--kxd-os-accent);
 }
 
 .kxd-portal-auth__title {
   margin: 0 0 0.625rem;
-  font-family: var(--font-cormorant, "Cormorant Garamond", serif);
-  font-size: clamp(1.75rem, 4vw, 2rem);
-  font-weight: 400;
-  line-height: 1.12;
-  letter-spacing: -0.02em;
-  color: var(--kxd-cream, #f5f0e8);
+  font-family: var(--kxd-os-font-sans);
+  font-size: clamp(1.5rem, 3vw, 1.75rem);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.022em;
+  color: var(--kxd-os-text-primary);
 }
 
 .kxd-portal-auth__lead {
   margin: 0 0 1.75rem;
-  font-family: var(--font-outfit, sans-serif);
+  font-family: var(--kxd-os-font-sans);
   font-size: 0.9375rem;
-  font-weight: 300;
-  line-height: 1.65;
-  color: color-mix(in srgb, var(--kxd-cream, #f5f0e8) 52%, transparent);
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--kxd-os-text-secondary);
   max-width: 34ch;
 }
 
@@ -3393,59 +3396,70 @@
 }
 
 .kxd-portal-auth__label {
-  font-family: var(--font-outfit, sans-serif);
-  font-size: 0.5625rem;
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--kxd-cream, #f5f0e8) 38%, transparent);
+  font-family: var(--kxd-os-font-sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-transform: none;
+  color: var(--kxd-os-text-secondary);
 }
 
 .kxd-portal-auth__input {
   width: 100%;
-  padding: 0.8125rem 1rem;
-  border: 1px solid color-mix(in srgb, var(--kxd-cream, #f5f0e8) 12%, transparent);
-  background: color-mix(in srgb, var(--kxd-os-bg-canvas) 40%, transparent);
-  color: var(--kxd-cream, #f5f0e8);
-  font-family: var(--font-outfit, sans-serif);
-  font-size: 0.9375rem;
+  min-height: 2.5rem;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid var(--kxd-os-border-default);
+  border-radius: var(--kxd-os-radius-sm);
+  background: var(--kxd-os-bg-elevated);
+  color: var(--kxd-os-text-primary);
+  font-family: var(--kxd-os-font-sans);
+  font-size: 0.875rem;
   line-height: 1.4;
-  transition: border-color 180ms ease;
+  transition:
+    border-color var(--kxd-os-duration-fast) var(--kxd-os-ease-glide),
+    box-shadow var(--kxd-os-duration-base) var(--kxd-os-ease-settle);
 }
 
 .kxd-portal-auth__input:focus {
   outline: none;
-  border-color: color-mix(in srgb, var(--kxd-gold, #c5a65c) 42%, transparent);
+  border-color: var(--kxd-os-accent);
+  box-shadow: var(--kxd-os-shadow-focus);
 }
 
 .kxd-portal-auth__submit {
   width: 100%;
   margin-top: 0.25rem;
-  padding: 0.875rem 1rem;
-  border: 1px solid color-mix(in srgb, var(--kxd-gold, #c5a65c) 55%, transparent);
-  background: color-mix(in srgb, var(--kxd-gold, #c5a65c) 10%, transparent);
-  color: var(--kxd-cream, #f5f0e8);
-  font-family: var(--font-outfit, sans-serif);
-  font-size: 0.625rem;
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  min-height: 2.5rem;
+  padding: 0.625rem 1rem;
+  border: none;
+  border-radius: var(--kxd-os-radius-sm);
+  background: var(--kxd-os-accent);
+  color: var(--kxd-os-text-inverse);
+  font-family: var(--kxd-os-font-sans);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-transform: none;
   text-align: center;
   text-decoration: none;
   cursor: pointer;
   transition:
-    background 180ms ease,
-    border-color 180ms ease,
-    opacity 180ms ease;
+    background var(--kxd-os-duration-fast) var(--kxd-os-ease-glide),
+    box-shadow var(--kxd-os-duration-base) var(--kxd-os-ease-settle),
+    opacity var(--kxd-os-duration-fast) var(--kxd-os-ease-glide);
 }
 
 .kxd-portal-auth__submit:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--kxd-gold, #c5a65c) 16%, transparent);
-  border-color: color-mix(in srgb, var(--kxd-gold, #c5a65c) 72%, transparent);
+  background: var(--kxd-os-accent-hover);
+}
+
+.kxd-portal-auth__submit:focus-visible {
+  outline: none;
+  box-shadow: var(--kxd-os-shadow-focus);
 }
 
 .kxd-portal-auth__submit:disabled {
-  opacity: 0.5;
+  opacity: 0.45;
   cursor: not-allowed;
 }
 
@@ -3458,33 +3472,34 @@
 .kxd-portal-auth__footer-link {
   margin: 0;
   text-align: center;
-  font-family: var(--font-outfit, sans-serif);
-  font-size: 0.75rem;
-  font-weight: 300;
+  font-family: var(--kxd-os-font-sans);
+  font-size: 0.8125rem;
+  font-weight: 400;
 }
 
 .kxd-portal-auth__footer-link a {
-  color: color-mix(in srgb, var(--kxd-gold, #c5a65c) 78%, transparent);
+  color: var(--kxd-os-accent);
   text-decoration: none;
-  transition: color 180ms ease;
+  transition: color var(--kxd-os-duration-fast) var(--kxd-os-ease-glide);
 }
 
 .kxd-portal-auth__footer-link a:hover {
-  color: var(--kxd-gold, #c5a65c);
+  color: var(--kxd-os-accent-hover);
 }
 
 .kxd-portal-auth__notice {
   margin: 0;
   padding: 0.8125rem 1rem;
-  font-family: var(--font-outfit, sans-serif);
+  font-family: var(--kxd-os-font-sans);
   font-size: 0.8125rem;
   line-height: 1.5;
+  border-radius: var(--kxd-os-radius-sm);
 }
 
 .kxd-portal-auth__notice--error {
-  color: rgba(210, 90, 90, 0.95);
-  background: rgba(210, 90, 90, 0.08);
-  border: 1px solid rgba(210, 90, 90, 0.22);
+  color: var(--kxd-os-critical);
+  background: var(--kxd-os-critical-muted);
+  border: 1px solid color-mix(in srgb, var(--kxd-os-critical) 22%, transparent);
 }
 
 .kxd-portal-auth__state {
@@ -3495,35 +3510,36 @@
 
 .kxd-portal-auth__state-title {
   margin: 0;
-  font-family: var(--font-cormorant, "Cormorant Garamond", serif);
-  font-size: 1.375rem;
-  font-weight: 500;
+  font-family: var(--kxd-os-font-sans);
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
   line-height: 1.2;
-  color: var(--kxd-cream, #f5f0e8);
+  color: var(--kxd-os-text-primary);
 }
 
 .kxd-portal-auth__state-message {
   margin: 0;
-  font-family: var(--font-outfit, sans-serif);
+  font-family: var(--kxd-os-font-sans);
   font-size: 0.9375rem;
-  font-weight: 300;
-  line-height: 1.65;
-  color: color-mix(in srgb, var(--kxd-cream, #f5f0e8) 62%, transparent);
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--kxd-os-text-secondary);
 }
 
 .kxd-portal-auth__state-link {
   margin-top: 0.5rem;
-  font-family: var(--font-outfit, sans-serif);
-  font-size: 0.625rem;
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--kxd-gold, #c5a65c) 82%, transparent);
+  font-family: var(--kxd-os-font-sans);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-transform: none;
+  color: var(--kxd-os-accent);
   text-decoration: none;
 }
 
 .kxd-portal-auth__state-link:hover {
-  color: var(--kxd-gold, #c5a65c);
+  color: var(--kxd-os-accent-hover);
 }
 
 /* ── Partnership briefing (board presentation) ───────────────── */
@@ -5848,19 +5864,35 @@
 .kxd-inv-toolbar input,
 .kxd-inv-toolbar select {
   width: 100%;
-  min-height: 2.85rem;
-  padding: 0.7rem 0.95rem;
-  font: inherit;
-  font-size: 0.92rem;
+  min-height: var(--kxd-os-control-height, 2.5rem);
+  padding: 0.5rem 0.75rem;
+  font-family: var(--kxd-os-font-sans);
+  font-size: 0.875rem;
+  font-weight: 400;
+  letter-spacing: -0.01em;
   color: var(--kxd-os-text-primary);
-  background: color-mix(in srgb, #0d0d0d 88%, #1a1a1a);
-  border: 1px solid color-mix(in srgb, var(--kxd-os-text-faint) 16%, transparent);
-  border-radius: 0.5rem;
+  background: var(--kxd-os-bg-surface);
+  border: 1px solid var(--kxd-os-border-default);
+  border-radius: var(--kxd-os-radius-sm);
   outline: none;
   appearance: none;
+  color-scheme: light;
   transition:
-    border-color 180ms ease,
-    box-shadow 180ms ease;
+    border-color var(--kxd-os-duration-fast, 120ms) var(--kxd-os-ease-glide, ease),
+    box-shadow var(--kxd-os-duration-base, 200ms) var(--kxd-os-ease-settle, ease),
+    background-color var(--kxd-os-duration-fast, 120ms) var(--kxd-os-ease-glide, ease);
+}
+
+.kxd-inv-input::placeholder,
+.kxd-inv-toolbar input::placeholder {
+  color: var(--kxd-os-text-faint);
+  opacity: 1;
+}
+
+.kxd-inv-input option,
+.kxd-inv-toolbar select option {
+  background: var(--kxd-os-bg-surface);
+  color: var(--kxd-os-text-primary);
 }
 
 .kxd-inv-input--textarea {
@@ -5879,17 +5911,29 @@
   min-height: 11rem;
 }
 
-.kxd-inv-input:hover,
-.kxd-inv-toolbar input:hover,
-.kxd-inv-toolbar select:hover {
-  border-color: color-mix(in srgb, var(--kxd-os-gold) 28%, transparent);
+.kxd-inv-input:hover:not(:disabled),
+.kxd-inv-toolbar input:hover:not(:disabled),
+.kxd-inv-toolbar select:hover:not(:disabled) {
+  border-color: var(--kxd-os-border-strong);
 }
 
 .kxd-inv-input:focus,
+.kxd-inv-input:focus-visible,
 .kxd-inv-toolbar input:focus,
-.kxd-inv-toolbar select:focus {
-  border-color: color-mix(in srgb, var(--kxd-os-gold) 55%, transparent);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--kxd-os-gold) 18%, transparent);
+.kxd-inv-toolbar input:focus-visible,
+.kxd-inv-toolbar select:focus,
+.kxd-inv-toolbar select:focus-visible {
+  border-color: var(--kxd-os-accent);
+  box-shadow: var(--kxd-os-shadow-focus);
+}
+
+.kxd-inv-input:disabled,
+.kxd-inv-toolbar input:disabled,
+.kxd-inv-toolbar select:disabled {
+  opacity: 0.55;
+  color: var(--kxd-os-disabled);
+  background: var(--kxd-os-bg-elevated);
+  cursor: not-allowed;
 }
 
 .kxd-inv-input-affix {
@@ -5903,11 +5947,11 @@
   display: grid;
   place-items: center;
   padding: 0 0.85rem;
-  border: 1px solid color-mix(in srgb, var(--kxd-os-text-faint) 16%, transparent);
+  border: 1px solid var(--kxd-os-border-default);
   border-right: 0;
-  border-radius: 0.5rem 0 0 0.5rem;
+  border-radius: var(--kxd-os-radius-sm) 0 0 var(--kxd-os-radius-sm);
   color: var(--kxd-os-text-faint);
-  background: color-mix(in srgb, #0d0d0d 70%, #1a1a1a);
+  background: var(--kxd-os-bg-elevated);
 }
 
 .kxd-inv-input-affix .kxd-inv-input {
@@ -6485,9 +6529,14 @@
 .kxd-inv-card__actions .kxd-inv-input--compact {
   width: auto;
   min-width: 8.5rem;
-  min-height: 2rem;
+  min-height: var(--kxd-os-control-height, 2rem);
   padding: 0.3rem 0.6rem;
-  font-size: 0.78rem;
+  font-size: 0.8125rem;
+  background: var(--kxd-os-bg-surface);
+  color: var(--kxd-os-text-primary);
+  border: 1px solid var(--kxd-os-border-default);
+  border-radius: var(--kxd-os-radius-sm);
+  color-scheme: light;
 }
 
 .kxd-inv-card__status-control {

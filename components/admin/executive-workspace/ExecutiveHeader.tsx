@@ -13,6 +13,9 @@ import {
   workspaceLabel,
 } from "@/lib/executive-workspace";
 
+/** Shared operator chrome identity — visual only; not a security claim. */
+const OPERATOR_IDENTITY_LABEL = "KXD OS // ENCRYPTED ACCESS · 1220";
+
 export function ExecutiveHeader({
   userLabel = "Studio",
 }: {
@@ -81,14 +84,13 @@ export function ExecutiveHeader({
         </button>
         <div
           className={`kxd-exec-header__status kxd-exec-header__status--${status.tone}`}
-          title={status.detail ?? status.label}
+          title={status.detail ?? OPERATOR_IDENTITY_LABEL}
         >
           <span className="kxd-exec-header__status-dot" aria-hidden />
-          <span>{status.label}</span>
+          <span className="kxd-exec-header__identity">{OPERATOR_IDENTITY_LABEL}</span>
         </div>
-        <span className="kxd-exec-header__user" title={userLabel}>
-          {userLabel}
-        </span>
+        {/* userLabel retained for shell API compatibility; identity chrome supersedes Studio label */}
+        <span className="kxd-exec-header__user">{userLabel}</span>
       </div>
     </header>
   );
