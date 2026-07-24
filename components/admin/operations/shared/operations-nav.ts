@@ -40,6 +40,7 @@ export type OperationsNavId =
   | "brain"
   | "integrations"
   | "platform"
+  | "settings"
   | "training";
 
 export type OperationsNavItem = {
@@ -64,6 +65,7 @@ export const NAV_GROUPS: OperationsNavGroup[] = [
       { id: "brain", label: "KXD Brain", href: "/admin/operations/brain" },
       { id: "command", label: "Operations", href: "/admin/operations/command" },
       { id: "platform", label: "Platform", href: "/admin/operations/platform" },
+      { id: "settings", label: "Settings", href: "/admin/operations/settings" },
       { id: "integrations", label: "Integrations", href: "/admin/operations/integrations" },
       { id: "founder", label: "Founder", href: "/admin/operations/founder" },
     ],

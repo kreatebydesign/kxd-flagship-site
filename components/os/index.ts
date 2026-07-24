@@ -4,6 +4,8 @@
  */
 
 export { KxdShell } from "./KxdShell";
+export { ThemeBootScript } from "./ThemeBootScript";
+export { ThemePreferenceControl } from "./ThemePreferenceControl";
 export { KxdOsLogo } from "./KxdOsLogo";
 export { KxdPage } from "./KxdPage";
 export { KxdHeader } from "./KxdHeader";

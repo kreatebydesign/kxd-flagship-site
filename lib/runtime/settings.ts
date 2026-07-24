@@ -43,6 +43,7 @@ export const SETTINGS_OWNERSHIP: readonly SettingsOwnership[] = [
       "workspace memory pins",
       "command palette recents",
       "saved display timezone preference",
+      "Light / Dark / System appearance preference",
       "notification opt-in toggles (non-secret)",
     ],
   },

@@ -13,6 +13,7 @@ export const OPERATIONS_NAV_MODULE_MAP: Record<OperationsNavId, KxdModuleId> = {
   intelligence: "brain",
   command: "operations",
   platform: "operations",
+  settings: "operations",
   today: "operations",
   founder: "founder",
   "founder-intelligence": "brain",

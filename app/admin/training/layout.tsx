@@ -4,6 +4,7 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Outfit } from "next/font/google";
 import { requirePayloadAdminPage } from "@/lib/admin/auth";
+import { ThemeBootScript } from "@/components/os/ThemeBootScript";
 import "../../globals.css";
 import "../../../design-system/os/styles/kxd-os.css";
 
@@ -38,7 +39,10 @@ export default async function TrainingLayout({
   await requirePayloadAdminPage("/admin/training");
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <ThemeBootScript />
+      </head>
       <body className={`${cormorant.variable} ${outfit.variable} antialiased`}>
         {children}
       </body>

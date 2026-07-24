@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Outfit } from "next/font/google";
+import { ThemeBootScript } from "@/components/os/ThemeBootScript";
 import "../globals.css";
 import "../../design-system/os/styles/kxd-os.css";
 import "../../design-system/ces/styles/kxd-ces.css";
@@ -25,7 +26,10 @@ export const metadata: Metadata = {
 
 export default function PortalRootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <ThemeBootScript />
+      </head>
       <body
         className={`${cormorant.variable} ${outfit.variable} antialiased`}
         style={{

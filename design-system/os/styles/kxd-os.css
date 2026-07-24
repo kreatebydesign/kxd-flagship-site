@@ -7,7 +7,7 @@
  * Phase 1: foundation + representative screens (Today, Review Inbox).
  * Phase 2 Batch A: shared authenticated-shell primitives — shells, nav chrome,
  * headers, actions, forms, records, statuses, dialogs, empty states.
- * Theme preference UI (Light / Dark / System) is intentionally deferred.
+ * Phase 2 Batch E: Light / Dark / System preference via semantic token retargeting.
  */
 
 :root {
@@ -10532,11 +10532,11 @@ a.kxd-os-ritual-focus__title:hover {
 }
 
 .kxd-os-work-composer__submit {
-  color: var(--kxd-os-bg-base);
-  background: linear-gradient(180deg, #d1b06b 0%, #c9a962 48%, #b09040 100%);
+  color: #ffffff;
+  background: var(--kxd-os-accent);
   padding: 0.75rem 1.5rem;
   border-radius: var(--kxd-os-radius-sm);
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .kxd-os-work-composer__submit:disabled {
@@ -10545,7 +10545,8 @@ a.kxd-os-ritual-focus__title:hover {
 }
 
 .kxd-os-work-composer__submit:not(:disabled):hover {
-  filter: brightness(1.05);
+  background: var(--kxd-os-accent-hover);
+  filter: none;
 }
 
 @media (max-width: 640px) {
@@ -17703,4 +17704,215 @@ a.kxd-exec-today__row:hover .kxd-exec-today__row-title {
 
 .kxd-os-schedule-panel__primary:hover:not(:disabled) {
   background: var(--kxd-os-accent-hover);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Phase 2 Batch E — Theme system + remaining surface unification
+   Light / Dark / System via html[data-theme]. Public marketing,
+   Payload Admin, showroom, and proposal docs are out of scope.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Appearance preference control */
+.kxd-os-theme-pref {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.kxd-os-theme-pref__legend {
+  padding: 0;
+  font-family: var(--kxd-os-font-sans);
+  font-size: var(--kxd-os-type-section-size);
+  font-weight: var(--kxd-os-type-section-weight);
+  letter-spacing: var(--kxd-os-type-section-tracking);
+  text-transform: none;
+  color: var(--kxd-os-text-secondary);
+}
+
+.kxd-os-theme-pref__help {
+  margin: 0.55rem 0 0.85rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--kxd-os-text-secondary);
+}
+
+.kxd-os-theme-pref__segment {
+  display: inline-grid;
+  grid-auto-flow: column;
+  gap: 0.2rem;
+  padding: 0.2rem;
+  border: 1px solid var(--kxd-os-border-divider);
+  border-radius: 6px;
+  background: var(--kxd-os-bg-panel);
+  width: fit-content;
+  max-width: 100%;
+}
+
+.kxd-os-theme-pref__option {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--kxd-os-text-secondary);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  min-height: 2rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.kxd-os-theme-pref__option.is-active {
+  background: var(--kxd-os-bg-surface);
+  color: var(--kxd-os-accent);
+  font-weight: 600;
+  box-shadow: var(--kxd-os-shadow-rest, 0 1px 2px rgba(29, 29, 31, 0.06));
+}
+
+.kxd-os-theme-pref__option:focus-visible {
+  outline: 2px solid var(--kxd-os-accent);
+  outline-offset: 2px;
+}
+
+.kxd-os-theme-pref:disabled {
+  opacity: 0.72;
+}
+
+/* Remaining shared chrome — gold → system accent / semantic */
+.kxd-os-app .kxd-os-operations-pipeline-metric--accent .kxd-os-metric__value,
+.kxd-os-app .kxd-os-operations-renewal-amount,
+.kxd-os-app .kxd-os-preview-domain__url,
+.kxd-os-app .kxd-os-ops-progress__fill,
+.kxd-os-app .kxd-cmd-result__icon,
+.kxd-os-app .kxd-cmd-result--active .kxd-cmd-result__action,
+.kxd-os-app .kxd-provision__progress-fill {
+  color: var(--kxd-os-accent);
+}
+
+.kxd-os-app .kxd-os-ops-progress__fill,
+.kxd-os-app .kxd-provision__progress-fill {
+  background: var(--kxd-os-accent) !important;
+  color: transparent;
+}
+
+.kxd-os-app .kxd-os-ops-step-pill--active,
+.kxd-os-app .kxd-os-ops-service-pill--active {
+  color: var(--kxd-os-accent) !important;
+  background: var(--kxd-os-accent-subtle) !important;
+  border-color: transparent !important;
+}
+
+.kxd-os-app .kxd-os-ops-mrr--accent,
+.kxd-os-app .kxd-os-preview-domain__status-mark {
+  color: var(--kxd-os-positive) !important;
+}
+
+.kxd-os-app .kxd-provision__eyebrow {
+  color: var(--kxd-os-text-secondary) !important;
+}
+
+.kxd-os-app .kxd-provision__steps .is-active {
+  color: var(--kxd-os-accent) !important;
+  border-color: color-mix(in srgb, var(--kxd-os-accent) 40%, transparent) !important;
+}
+
+/* Remaining sentence-case operational labels */
+.kxd-os-app .kxd-os-quick-action-bar__label,
+.kxd-os-app .kxd-os-command-workspace__metric-label,
+.kxd-os-app .kxd-os-command-workspace__actions-label,
+.kxd-os-app .kxd-os-command-timeline-group__label,
+.kxd-os-app .kxd-os-review-inbox__head,
+.kxd-os-app .kxd-os-review-workspace__client,
+.kxd-os-app .kxd-os-review-workspace__meta-label,
+.kxd-os-app .kxd-os-review-workspace__block-title,
+.kxd-os-app .kxd-os-portal-access__head,
+.kxd-os-app .kxd-os-portal-access__launch-eyebrow,
+.kxd-os-app .kxd-os-intelligence-hero__eyebrow,
+.kxd-os-app .kxd-os-intelligence-health-cell__label,
+.kxd-os-app .kxd-os-intelligence-primary__label,
+.kxd-os-app .kxd-os-recommendation__category,
+.kxd-os-app .kxd-os-work-composer__mode,
+.kxd-os-app .kxd-os-work-composer__primary-label,
+.kxd-os-app .kxd-provision__eyebrow {
+  letter-spacing: var(--kxd-os-type-section-tracking) !important;
+  text-transform: none !important;
+  font-weight: 600 !important;
+}
+
+/* Dark theme — authenticated shells only (layouts own <html>) */
+html[data-theme="dark"] {
+  color-scheme: dark;
+
+  --kxd-os-bg-canvas: #1c1c1e;
+  --kxd-os-bg-page: #1c1c1e;
+  --kxd-os-bg-surface: #2c2c2e;
+  --kxd-os-bg-elevated: #3a3a3c;
+  --kxd-os-bg-floating: #2c2c2e;
+  --kxd-os-bg-panel: #3a3a3c;
+  --kxd-os-bg-muted: rgba(255, 255, 255, 0.06);
+  --kxd-os-bg-overlay: rgba(0, 0, 0, 0.55);
+  --kxd-os-bg-selected: rgba(10, 132, 255, 0.18);
+
+  --kxd-os-text-primary: #f5f5f7;
+  --kxd-os-text-secondary: #a1a1a6;
+  --kxd-os-text-muted: #a1a1a6;
+  --kxd-os-text-faint: #8e8e93;
+  --kxd-os-text-inverse: #1d1d1f;
+
+  --kxd-os-border-default: #48484a;
+  --kxd-os-border-strong: #636366;
+  --kxd-os-border-divider: #38383a;
+  --kxd-os-border-focus: rgba(10, 132, 255, 0.6);
+  --kxd-os-border: var(--kxd-os-border-default);
+
+  --kxd-os-critical: #ff453a;
+  --kxd-os-critical-muted: rgba(255, 69, 58, 0.16);
+  --kxd-os-warning: #ff9f0a;
+  --kxd-os-warning-muted: rgba(255, 159, 10, 0.16);
+  --kxd-os-success: #30d158;
+  --kxd-os-success-muted: rgba(48, 209, 88, 0.16);
+  --kxd-os-info: #0a84ff;
+  --kxd-os-info-muted: rgba(10, 132, 255, 0.18);
+  --kxd-os-disabled: rgba(235, 235, 245, 0.3);
+
+  --kxd-os-canvas: var(--kxd-os-bg-canvas);
+  --kxd-os-canvas-elevated: var(--kxd-os-bg-page);
+  --kxd-os-surface: var(--kxd-os-bg-surface);
+  --kxd-os-surface-subtle: var(--kxd-os-bg-muted);
+  --kxd-os-surface-selected: var(--kxd-os-bg-selected);
+  --kxd-os-surface-interactive: var(--kxd-os-bg-elevated);
+  --kxd-os-border-subtle: var(--kxd-os-border-default);
+  --kxd-os-accent: #0a84ff;
+  --kxd-os-accent-hover: #409cff;
+  --kxd-os-accent-subtle: rgba(10, 132, 255, 0.18);
+  --kxd-os-positive: var(--kxd-os-success);
+  --kxd-os-positive-subtle: var(--kxd-os-success-muted);
+  --kxd-os-destructive: var(--kxd-os-critical);
+  --kxd-os-destructive-subtle: var(--kxd-os-critical-muted);
+  --kxd-os-focus-ring: var(--kxd-os-border-focus);
+
+  --kxd-os-shadow-rest: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --kxd-os-shadow-mid: 0 4px 14px rgba(0, 0, 0, 0.4);
+  --kxd-os-shadow-deep: 0 12px 32px rgba(0, 0, 0, 0.5);
+  --kxd-os-shadow-floating: 0 16px 40px rgba(0, 0, 0, 0.55);
+}
+
+html[data-theme="dark"] body,
+html[data-theme="dark"] body:has(.kxd-os-shell),
+html[data-theme="dark"] body:has(.kxd-ces-app),
+html[data-theme="dark"] body:has(.kxd-exec-workspace) {
+  background: var(--kxd-os-bg-canvas);
+  color: var(--kxd-os-text-primary);
+}
+
+html[data-theme="dark"] .kxd-os-theme-pref__option.is-active {
+  box-shadow: inset 0 0 0 1px var(--kxd-os-border-divider);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kxd-os-theme-pref__option {
+    transition: none !important;
+  }
 }

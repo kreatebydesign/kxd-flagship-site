@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { KxdPage } from "@/components/os";
+import { ThemePreferenceControl } from "@/components/os/ThemePreferenceControl";
 import { ClientHqPageHero } from "./ClientHqPageHero";
 import type { PortalSession } from "@/lib/portal/session";
 
@@ -9,7 +10,7 @@ export function SettingsScreen({ session }: { session: PortalSession }) {
       <ClientHqPageHero
         eyebrow="Account"
         title="Settings"
-        lead="Your account details and security preferences."
+        lead="Your account details, appearance, and security preferences."
       />
 
       <div className="kxd-os-card" style={{ maxWidth: "32rem" }}>
@@ -28,6 +29,10 @@ export function SettingsScreen({ session }: { session: PortalSession }) {
             <dd className="kxd-os-body">{session.clientName}</dd>
           </div>
         </dl>
+      </div>
+
+      <div className="kxd-os-card" style={{ maxWidth: "32rem", marginTop: "1.5rem" }}>
+        <ThemePreferenceControl />
       </div>
 
       <div className="kxd-os-card" style={{ maxWidth: "32rem", marginTop: "1.5rem" }}>

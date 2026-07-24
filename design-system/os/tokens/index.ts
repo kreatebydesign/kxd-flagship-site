@@ -1,4 +1,4 @@
-export { osColors, osGradients } from "./colors";
+export { osColors, osDarkColors, osGradients } from "./colors";
 export { osTypography, osFonts } from "./typography";
 export { osSpace, osLayout } from "./spacing";
 export { osRadius } from "./radius";
