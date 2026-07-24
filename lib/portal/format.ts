@@ -1,3 +1,9 @@
+import { KXD_BUSINESS_TIMEZONE } from "@/lib/platform/timezone";
+
+/**
+ * Portal display dates must be hydration-stable: explicit locale + business
+ * timezone so SSR (UTC host) and the browser (local TZ) render identical text.
+ */
 export function fmtPortalDate(iso: string | null | undefined): string {
   if (!iso) return "—";
   try {
@@ -5,6 +11,7 @@ export function fmtPortalDate(iso: string | null | undefined): string {
       month: "short",
       day: "numeric",
       year: "numeric",
+      timeZone: KXD_BUSINESS_TIMEZONE,
     });
   } catch {
     return "—";

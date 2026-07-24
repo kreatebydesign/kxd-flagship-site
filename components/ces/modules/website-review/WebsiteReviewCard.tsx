@@ -2,15 +2,8 @@ import Link from "next/link";
 import type { WebsiteReviewItem } from "@/lib/ces/modules/website-review/types";
 import { PORTAL_CLIENT_LANGUAGE } from "@/lib/ces/copy/portal-language";
 import { resolveReviewPageLocation } from "@/lib/ces/modules/website-review/page-location";
+import { fmtPortalDate } from "@/lib/portal/format";
 import { WebsiteReviewStatus } from "./WebsiteReviewStatus";
-
-function formatRelativeDate(iso: string): string {
-  return new Date(iso).toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-}
 
 function pageMeta(review: WebsiteReviewItem): { compact: string; path: string | null } {
   const location = resolveReviewPageLocation(review.reviewContext, review.pageContext);
@@ -38,8 +31,8 @@ export function WebsiteReviewCard({
     ? review.completedAt || review.updatedAt
     : review.submittedAt;
   const updatedLabel = emphasizeCompleted
-    ? `Completed ${formatRelativeDate(dateIso)}`
-    : PORTAL_CLIENT_LANGUAGE.cardUpdated(formatRelativeDate(dateIso));
+    ? `Completed ${fmtPortalDate(dateIso)}`
+    : PORTAL_CLIENT_LANGUAGE.cardUpdated(fmtPortalDate(dateIso));
   const location = pageMeta(review);
 
   return (
