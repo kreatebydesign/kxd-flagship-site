@@ -1,26 +1,23 @@
 /**
- * KXD OS 1.0 — Elevation & shadow
- * Weight through warm shadow. Rim through inset light. No outline rings.
+ * KXD OS v1 — Elevation & shadow
+ * Light-first, Apple-inspired: quiet depth, no decorative glow.
+ * Prefer luminance + space; shadows only when objects need lift.
  */
 
 export const osElevation = {
   flat: "none",
-  /** Resting machined plate — subtle rim + grounded shadow */
-  rest:
-    "inset 0 1px 0 rgba(255, 255, 255, 0.028), 0 1px 2px rgba(10, 8, 6, 0.16), 0 8px 28px rgba(10, 8, 6, 0.2)",
-  raised:
-    "inset 0 1px 0 rgba(255, 255, 255, 0.042), 0 2px 6px rgba(10, 8, 6, 0.2), 0 16px 40px rgba(10, 8, 6, 0.28)",
-  floating:
-    "inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 4px 12px rgba(10, 8, 6, 0.24), 0 28px 64px rgba(10, 8, 6, 0.36)",
-  /** Magnetic focus — cream pull, not gold flash */
-  focus:
-    "0 0 0 1px rgba(245, 241, 232, 0.1), 0 0 0 3px rgba(245, 241, 232, 0.06), 0 6px 24px rgba(245, 241, 232, 0.04)",
-  /** Hover lift — object rises, shadow deepens */
-  hover:
-    "inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 4px 10px rgba(10, 8, 6, 0.22), 0 20px 48px rgba(10, 8, 6, 0.32)",
-  /** Pressed — weight settles */
-  pressed:
-    "inset 0 2px 6px rgba(10, 8, 6, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.02), 0 1px 2px rgba(10, 8, 6, 0.12)",
+  /** Resting surface on soft canvas */
+  rest: "0 1px 2px rgba(29, 29, 31, 0.04), 0 1px 3px rgba(29, 29, 31, 0.03)",
+  /** Slightly raised interactive panel */
+  raised: "0 2px 8px rgba(29, 29, 31, 0.06), 0 1px 2px rgba(29, 29, 31, 0.04)",
+  /** Modals / floating chrome */
+  floating: "0 8px 28px rgba(29, 29, 31, 0.12), 0 2px 8px rgba(29, 29, 31, 0.06)",
+  /** Focus ring — system blue, restrained */
+  focus: "0 0 0 3px rgba(0, 113, 227, 0.28)",
+  /** Hover — barely lifts */
+  hover: "0 2px 8px rgba(29, 29, 31, 0.08), 0 1px 2px rgba(29, 29, 31, 0.04)",
+  /** Pressed — settles */
+  pressed: "inset 0 1px 2px rgba(29, 29, 31, 0.08)",
 } as const;
 
 export const osElevationLevels = {

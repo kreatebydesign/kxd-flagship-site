@@ -1,80 +1,115 @@
 /**
- * KXD OS Design System 1.0 — CSS custom properties & primitives
- * Scoped to /admin/operations via layout import. Does not affect public site.
+ * KXD OS Design System v1 — CSS custom properties & primitives
+ * Clean light-first product foundation (Apple-inspired clarity; original KXD).
+ * Shared by Operator OS + Client Portal. Public marketing site is unaffected
+ * unless it imports this file.
+ *
+ * Phase 1: foundation + representative screens only. Matt visual approval required
+ * before platform-wide rollout.
  */
 
 :root {
-  /* Background — Space Black titanium, cool neutral */
-  --kxd-os-bg-canvas: #151617;
-  --kxd-os-bg-page: #1b1c1e;
-  --kxd-os-bg-surface: #242528;
-  --kxd-os-bg-elevated: #2c2d30;
-  --kxd-os-bg-floating: #35363a;
-  --kxd-os-bg-panel: #28292c;
-  --kxd-os-bg-muted: rgba(255, 255, 255, 0.045);
-  --kxd-os-bg-overlay: rgba(21, 22, 23, 0.88);
-  --kxd-os-bg-selected: rgba(194, 170, 114, 0.1);
+  /* Background — soft neutral canvas, white surfaces */
+  --kxd-os-bg-canvas: #f5f5f7;
+  --kxd-os-bg-page: #f5f5f7;
+  --kxd-os-bg-surface: #ffffff;
+  --kxd-os-bg-elevated: #fafafc;
+  --kxd-os-bg-floating: #ffffff;
+  --kxd-os-bg-panel: #f0f0f2;
+  --kxd-os-bg-muted: rgba(29, 29, 31, 0.04);
+  --kxd-os-bg-overlay: rgba(29, 29, 31, 0.36);
+  --kxd-os-bg-selected: rgba(0, 113, 227, 0.08);
 
-  /* Text — cool white, long-session hierarchy */
-  --kxd-os-text-primary: #f3f4f6;
-  --kxd-os-text-secondary: rgba(243, 244, 246, 0.78);
-  --kxd-os-text-muted: rgba(243, 244, 246, 0.54);
-  --kxd-os-text-faint: rgba(243, 244, 246, 0.34);
-  --kxd-os-text-inverse: #151617;
+  /* Text — graphite hierarchy (solid colors, not weak alpha) */
+  --kxd-os-text-primary: #1d1d1f;
+  --kxd-os-text-secondary: #6e6e73;
+  --kxd-os-text-muted: #6e6e73;
+  --kxd-os-text-faint: #86868b;
+  --kxd-os-text-inverse: #ffffff;
 
-  /* Champagne metal — signal, not decoration */
+  /* Optional brand gold — identity moments only, never default chrome */
   --kxd-os-gold: #c2aa72;
-  --kxd-os-gold-soft: rgba(194, 170, 114, 0.28);
+  --kxd-os-gold-soft: rgba(194, 170, 114, 0.22);
   --kxd-os-gold-whisper: rgba(194, 170, 114, 0.08);
-  --kxd-os-gold-border: rgba(194, 170, 114, 0.22);
-  --kxd-os-gold-glow: rgba(194, 170, 114, 0.05);
+  --kxd-os-gold-border: rgba(194, 170, 114, 0.28);
+  --kxd-os-gold-glow: transparent;
   --kxd-os-gold-hover: #d0b984;
 
-  /* Light — cool overhead diffusion across machined titanium */
-  --kxd-os-light-skylight: rgba(255, 255, 255, 0.045);
-  --kxd-os-light-skylight-soft: rgba(255, 255, 255, 0.02);
-  --kxd-os-light-rim: rgba(255, 255, 255, 0.08);
-  --kxd-os-light-rim-soft: rgba(255, 255, 255, 0.04);
-  --kxd-os-light-recess: rgba(0, 0, 0, 0.16);
+  /* Light / rim — unused theatrical diffusion removed */
+  --kxd-os-light-skylight: transparent;
+  --kxd-os-light-skylight-soft: transparent;
+  --kxd-os-light-rim: rgba(255, 255, 255, 0.9);
+  --kxd-os-light-rim-soft: rgba(255, 255, 255, 0.65);
+  --kxd-os-light-recess: rgba(29, 29, 31, 0.04);
 
-  /* Borders — restrained, readable */
-  --kxd-os-border-default: rgba(255, 255, 255, 0.07);
-  --kxd-os-border-strong: rgba(255, 255, 255, 0.12);
-  --kxd-os-border-divider: rgba(255, 255, 255, 0.055);
-  --kxd-os-border-focus: rgba(194, 170, 114, 0.55);
+  /* Borders — subtle neutral gray */
+  --kxd-os-border-default: #d2d2d7;
+  --kxd-os-border-strong: #c7c7cc;
+  --kxd-os-border-divider: #e5e5ea;
+  --kxd-os-border-focus: rgba(0, 113, 227, 0.55);
+  --kxd-os-border: var(--kxd-os-border-default);
 
-  /* Semantic */
-  --kxd-os-critical: #d98484;
-  --kxd-os-critical-muted: rgba(217, 132, 132, 0.12);
-  --kxd-os-warning: #cbb07a;
-  --kxd-os-warning-muted: rgba(203, 176, 122, 0.1);
-  --kxd-os-success: #7aaf90;
-  --kxd-os-success-muted: rgba(122, 175, 144, 0.12);
-  --kxd-os-info: rgba(150, 178, 214, 0.7);
-  --kxd-os-info-muted: rgba(150, 178, 214, 0.08);
-  --kxd-os-disabled: rgba(243, 244, 246, 0.28);
+  /* Semantic — clean, accessible, restrained */
+  --kxd-os-critical: #e30000;
+  --kxd-os-critical-muted: rgba(227, 0, 0, 0.08);
+  --kxd-os-warning: #b25000;
+  --kxd-os-warning-muted: rgba(178, 80, 0, 0.1);
+  --kxd-os-success: #248a3d;
+  --kxd-os-success-muted: rgba(36, 138, 61, 0.1);
+  --kxd-os-info: #0071e3;
+  --kxd-os-info-muted: rgba(0, 113, 227, 0.08);
+  --kxd-os-disabled: rgba(29, 29, 31, 0.28);
 
-  /* Phase 34A.3 — semantic role aliases (prefer these in new surfaces) */
+  /* Semantic role aliases — accent is system blue, not gold */
   --kxd-os-canvas: var(--kxd-os-bg-canvas);
   --kxd-os-canvas-elevated: var(--kxd-os-bg-page);
   --kxd-os-surface: var(--kxd-os-bg-surface);
   --kxd-os-surface-subtle: var(--kxd-os-bg-muted);
   --kxd-os-surface-selected: var(--kxd-os-bg-selected);
+  --kxd-os-surface-interactive: var(--kxd-os-bg-elevated);
   --kxd-os-border-subtle: var(--kxd-os-border-default);
-  --kxd-os-accent: var(--kxd-os-gold);
-  --kxd-os-accent-hover: var(--kxd-os-gold-hover);
-  --kxd-os-accent-subtle: var(--kxd-os-gold-whisper);
+  --kxd-os-accent: #0071e3;
+  --kxd-os-accent-hover: #0077ed;
+  --kxd-os-accent-subtle: rgba(0, 113, 227, 0.08);
   --kxd-os-positive: var(--kxd-os-success);
   --kxd-os-positive-subtle: var(--kxd-os-success-muted);
   --kxd-os-destructive: var(--kxd-os-critical);
   --kxd-os-destructive-subtle: var(--kxd-os-critical-muted);
   --kxd-os-focus-ring: var(--kxd-os-border-focus);
 
-  /* Typography — SF Pro native on macOS, Outfit fallback */
-  --kxd-os-font-display: var(--font-cormorant, "Cormorant Garamond", Georgia, serif);
+  /* Typography — native Apple-style system stack only (no product serif) */
   --kxd-os-font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
-    var(--font-outfit, "Outfit"), system-ui, sans-serif;
+    "Segoe UI", sans-serif;
+  --kxd-os-font-display: var(--kxd-os-font-sans);
+  --kxd-os-font-serif: var(--kxd-os-font-sans);
   --kxd-os-font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Semantic type roles — light/dark safe via color tokens; refine weight/size here */
+  --kxd-os-type-section-size: 0.6875rem;
+  --kxd-os-type-section-weight: 500;
+  --kxd-os-type-section-lh: 1.4;
+  --kxd-os-type-section-tracking: -0.01em;
+
+  --kxd-os-type-item-size: 0.9375rem;
+  --kxd-os-type-item-weight: 400;
+  --kxd-os-type-item-lh: 1.35;
+  --kxd-os-type-item-tracking: -0.016em;
+
+  --kxd-os-type-support-size: 0.8125rem;
+  --kxd-os-type-support-weight: 400;
+  --kxd-os-type-support-lh: 1.5;
+  --kxd-os-type-support-tracking: -0.01em;
+  --kxd-os-type-support-measure: 36em;
+
+  --kxd-os-type-body-size: 0.875rem;
+  --kxd-os-type-body-weight: 400;
+  --kxd-os-type-body-lh: 1.5;
+  --kxd-os-type-body-tracking: -0.01em;
+
+  --kxd-os-type-meta-size: 0.75rem;
+  --kxd-os-type-meta-weight: 400;
+  --kxd-os-type-meta-lh: 1.4;
+  --kxd-os-type-meta-tracking: -0.006em;
 
   /* Spacing */
   --kxd-os-space-1: 0.25rem;
@@ -88,45 +123,23 @@
   --kxd-os-space-12: 3rem;
   --kxd-os-space-16: 4rem;
 
-  /* Radius — macOS-soft */
+  /* Radius — restrained rectangles */
   --kxd-os-radius-sm: 6px;
-  --kxd-os-radius-md: 10px;
-  --kxd-os-radius-lg: 12px;
-  --kxd-os-radius-xl: 16px;
+  --kxd-os-radius-md: 8px;
+  --kxd-os-radius-lg: 10px;
+  --kxd-os-radius-xl: 12px;
   --kxd-os-radius-full: 9999px;
 
-  /* Elevation — edge-lit titanium floating on Space Black */
+  /* Elevation — quiet, precise; no decorative glow */
   --kxd-os-shadow-flat: none;
-  --kxd-os-shadow-rest:
-    inset 0 1px 0 var(--kxd-os-light-rim),
-    0 1px 1px rgba(0, 0, 0, 0.1),
-    0 4px 14px rgba(0, 0, 0, 0.12);
-  --kxd-os-shadow-raised:
-    inset 0 1px 0 var(--kxd-os-light-rim),
-    0 1px 2px rgba(0, 0, 0, 0.12),
-    0 8px 24px rgba(0, 0, 0, 0.16);
-  --kxd-os-shadow-floating:
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-    0 4px 12px rgba(0, 0, 0, 0.16),
-    0 20px 52px rgba(0, 0, 0, 0.24);
-  --kxd-os-shadow-hover:
-    inset 0 1px 0 rgba(255, 255, 255, 0.11),
-    0 3px 10px rgba(0, 0, 0, 0.14),
-    0 14px 38px rgba(0, 0, 0, 0.2);
-  --kxd-os-shadow-pressed:
-    inset 0 2px 4px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04),
-    0 1px 1px rgba(0, 0, 0, 0.06);
+  --kxd-os-shadow-rest: 0 1px 2px rgba(29, 29, 31, 0.04);
+  --kxd-os-shadow-raised: 0 2px 8px rgba(29, 29, 31, 0.06);
+  --kxd-os-shadow-floating: 0 8px 24px rgba(29, 29, 31, 0.1);
+  --kxd-os-shadow-hover: 0 2px 8px rgba(29, 29, 31, 0.08);
+  --kxd-os-shadow-pressed: inset 0 1px 2px rgba(29, 29, 31, 0.08);
   --kxd-os-shadow-focus:
-    0 0 0 2px color-mix(in srgb, var(--kxd-os-accent) 35%, transparent),
-    0 0 0 4px color-mix(in srgb, var(--kxd-os-accent) 12%, transparent);
-  --kxd-os-surface-milled:
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.06) 0%,
-      rgba(255, 255, 255, 0.01) 9%,
-      transparent 32%
-    );
+    0 0 0 3px rgba(0, 113, 227, 0.28);
+  --kxd-os-surface-milled: none;
 
   /* Motion — confident, inevitable */
   --kxd-os-duration-fast: 120ms;
@@ -152,22 +165,19 @@
   --khig-page-width: 80rem;
 }
 
+/* Kill marketing-site dark body when OS / portal shells are present */
+body:has(.kxd-os-shell),
+body:has(.kxd-ces-app),
+body:has(.kxd-exec-workspace) {
+  background-color: var(--kxd-os-bg-canvas) !important;
+  color: var(--kxd-os-text-primary) !important;
+}
+
 /* ── Shell & layout ─────────────────────────────────────────────────────── */
 
 .kxd-os-shell {
   min-height: 100vh;
-  background:
-    radial-gradient(
-      ellipse 120% 75% at 50% -38%,
-      var(--kxd-os-light-skylight),
-      transparent 56%
-    ),
-    radial-gradient(
-      ellipse 65% 45% at 88% 8%,
-      var(--kxd-os-light-skylight-soft),
-      transparent 48%
-    ),
-    var(--kxd-os-bg-canvas);
+  background: var(--kxd-os-bg-canvas);
   color: var(--kxd-os-text-primary);
   font-family: var(--kxd-os-font-sans);
   -webkit-font-smoothing: antialiased;
@@ -201,7 +211,7 @@
   flex-direction: column;
   height: 100vh;
   padding: var(--kxd-os-space-5) var(--kxd-os-space-3);
-  background: transparent;
+  background: var(--kxd-os-bg-surface);
   box-shadow: inset -1px 0 0 var(--kxd-os-border-divider);
   overflow-y: auto;
 }
@@ -258,8 +268,8 @@
 
 .kxd-os-sidebar__link--active {
   color: var(--kxd-os-text-primary);
-  font-weight: 500;
-  background: var(--kxd-os-bg-muted);
+  font-weight: 600;
+  background: var(--kxd-os-bg-selected);
 }
 
 .kxd-os-sidebar__foot {
@@ -289,13 +299,7 @@
 
 .kxd-os-app__main {
   min-width: 0;
-  background:
-    radial-gradient(
-      ellipse 120% 70% at 30% -20%,
-      var(--kxd-os-light-skylight-soft),
-      transparent 55%
-    ),
-    var(--kxd-os-bg-page);
+  background: var(--kxd-os-bg-page);
 }
 
 @media (max-width: 960px) {
@@ -662,19 +666,14 @@
 }
 
 .kxd-os-btn--primary {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.18) 0%, transparent 44%),
-    linear-gradient(180deg, #d4bf86 0%, #c2aa72 50%, #9c8856 100%);
+  background: var(--kxd-os-accent);
   color: var(--kxd-os-text-inverse);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    0 1px 2px rgba(0, 0, 0, 0.16);
+  box-shadow: none;
 }
 
 .kxd-os-btn--primary:hover:not(:disabled) {
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.26),
-    0 2px 6px rgba(0, 0, 0, 0.2);
+  background: var(--kxd-os-accent-hover);
+  box-shadow: none;
 }
 
 .kxd-os-btn--primary:active:not(:disabled) {
@@ -1001,28 +1000,29 @@
 /* ── Empty state ──────────────────────────────────────────────────────── */
 
 .kxd-os-empty {
-  padding: var(--kxd-os-space-10);
+  padding: var(--kxd-os-space-10) var(--kxd-os-space-8);
   text-align: center;
-  border: none;
-  border-radius: var(--kxd-os-radius-lg);
-  background: var(--kxd-os-surface-milled), var(--kxd-os-bg-elevated);
-  box-shadow: var(--kxd-os-shadow-rest);
+  border: 1px solid var(--kxd-os-border-divider);
+  border-radius: var(--kxd-os-radius-md);
+  background: var(--kxd-os-bg-surface);
+  box-shadow: none;
 }
 
 .kxd-os-empty__title {
   font-family: var(--kxd-os-font-sans);
   font-size: 1.125rem;
-  font-weight: 500;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   color: var(--kxd-os-text-primary);
   margin-bottom: var(--kxd-os-space-2);
 }
 
 .kxd-os-empty__body {
-  font-size: 0.8125rem;
-  color: var(--kxd-os-text-muted);
-  max-width: 24rem;
+  font-size: 0.875rem;
+  color: var(--kxd-os-text-secondary);
+  max-width: 28rem;
   margin-inline: auto;
-  line-height: 1.55;
+  line-height: 1.5;
 }
 
 /* ── Icon ─────────────────────────────────────────────────────────────── */
@@ -2139,40 +2139,43 @@
 .kxd-os-ops-quick-grid {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: var(--kxd-os-space-4);
+  gap: var(--kxd-os-space-2);
 }
 
 .kxd-os-ops-quick-cell {
   display: block;
-  padding: var(--kxd-os-space-5) var(--kxd-os-space-6);
+  padding: var(--kxd-os-space-3) var(--kxd-os-space-4);
   text-decoration: none;
-  border-radius: var(--kxd-os-radius-md);
-  background: var(--kxd-os-surface-milled), var(--kxd-os-bg-elevated);
-  box-shadow: var(--kxd-os-shadow-rest);
+  border-radius: var(--kxd-os-radius-sm);
+  border: 1px solid var(--kxd-os-border-divider);
+  background: var(--kxd-os-bg-surface);
+  box-shadow: none;
   transition:
-    transform var(--kxd-os-duration-base) var(--kxd-os-ease-settle),
-    box-shadow var(--kxd-os-duration-base) var(--kxd-os-ease-settle);
+    border-color var(--kxd-os-duration-fast) var(--kxd-os-ease-glide),
+    background-color var(--kxd-os-duration-fast) var(--kxd-os-ease-glide);
 }
 
 .kxd-os-ops-quick-cell:hover {
-  box-shadow: var(--kxd-os-shadow-hover);
+  border-color: var(--kxd-os-border-strong);
+  background: var(--kxd-os-bg-elevated);
+  box-shadow: none;
 }
 
 .kxd-os-ops-quick-cell__label {
   font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--kxd-os-text-secondary);
+  font-weight: 600;
+  color: var(--kxd-os-text-primary);
   line-height: 1.3;
 }
 
 .kxd-os-ops-quick-cell__sub {
   font-size: 0.6875rem;
-  color: var(--kxd-os-text-faint);
-  margin-top: var(--kxd-os-space-2);
+  color: var(--kxd-os-text-secondary);
+  margin-top: var(--kxd-os-space-1);
 }
 
 .kxd-os-quick-action-bar {
-  padding: var(--kxd-os-space-4) var(--kxd-os-space-8) var(--kxd-os-space-6);
+  padding: var(--kxd-os-space-3) var(--kxd-os-space-8) var(--kxd-os-space-4);
   box-shadow: inset 0 -1px 0 var(--kxd-os-border-divider);
 }
 
@@ -6471,18 +6474,22 @@ a.kxd-os-platform-subsystem-card__title:hover {
 
 .kxd-os-review-inbox__filter {
   font-size: 0.8125rem;
-  padding: 0.4rem 0.85rem;
-  border-radius: 999px;
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--kxd-os-radius-sm);
   border: 1px solid var(--kxd-os-border-default);
   background: transparent;
   color: var(--kxd-os-text-muted);
   cursor: pointer;
+  transition:
+    color var(--kxd-os-duration-fast) var(--kxd-os-ease-glide),
+    border-color var(--kxd-os-duration-fast) var(--kxd-os-ease-glide),
+    background-color var(--kxd-os-duration-fast) var(--kxd-os-ease-glide);
 }
 
 .kxd-os-review-inbox__filter--active {
   color: var(--kxd-os-text-primary);
-  border-color: color-mix(in srgb, var(--kxd-os-gold, #c9a962) 40%, transparent);
-  background: color-mix(in srgb, var(--kxd-os-gold, #c9a962) 8%, transparent);
+  border-color: color-mix(in srgb, var(--kxd-os-accent) 40%, var(--kxd-os-border-default));
+  background: var(--kxd-os-accent-subtle);
 }
 
 .kxd-os-review-inbox__table {
@@ -8776,21 +8783,24 @@ a.kxd-os-platform-subsystem-card__title:hover {
   font-size: 0.75rem;
   color: var(--kxd-os-text-muted);
   text-decoration: none;
-  border-radius: var(--kxd-os-radius-full);
-  background: var(--kxd-os-bg-muted);
+  border-radius: var(--kxd-os-radius-sm);
+  border: 1px solid transparent;
+  background: transparent;
   transition:
     background-color var(--kxd-os-duration-fast) var(--kxd-os-ease-glide),
+    border-color var(--kxd-os-duration-fast) var(--kxd-os-ease-glide),
     color var(--kxd-os-duration-fast) var(--kxd-os-ease-glide);
 }
 
 .kxd-os-filter-pill:hover {
   color: var(--kxd-os-text-secondary);
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--kxd-os-bg-muted);
 }
 
 .kxd-os-filter-pill--active {
   color: var(--kxd-os-text-primary);
-  background: rgba(255, 255, 255, 0.1);
+  border-color: color-mix(in srgb, var(--kxd-os-accent) 40%, var(--kxd-os-border-default));
+  background: var(--kxd-os-accent-subtle);
 }
 
 .kxd-os-filter-pills {
@@ -11764,18 +11774,11 @@ a.kxd-os-ritual-focus__title:hover {
   align-items: center;
   gap: 1rem;
   padding: 0.65rem 1.35rem;
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--kxd-os-bg-floating) 42%, transparent) 0%,
-      color-mix(in srgb, var(--kxd-os-bg-canvas) 72%, transparent) 100%
-    );
-  backdrop-filter: saturate(1.15) blur(22px);
-  -webkit-backdrop-filter: saturate(1.15) blur(22px);
-  border-bottom: 1px solid color-mix(in srgb, var(--kxd-os-border-default) 80%, transparent);
-  box-shadow:
-    inset 0 1px 0 color-mix(in srgb, var(--kxd-os-light-rim) 55%, transparent),
-    0 1px 0 color-mix(in srgb, var(--kxd-os-bg-canvas) 40%, transparent);
+  background: color-mix(in srgb, var(--kxd-os-bg-surface) 92%, transparent);
+  backdrop-filter: saturate(1.2) blur(16px);
+  -webkit-backdrop-filter: saturate(1.2) blur(16px);
+  border-bottom: 1px solid var(--kxd-os-border-divider);
+  box-shadow: none;
   transition:
     background var(--kxd-exec-duration-base) var(--kxd-exec-ease-glide),
     border-color var(--kxd-exec-duration-base) var(--kxd-exec-ease-glide);
@@ -11838,8 +11841,9 @@ a.kxd-os-ritual-focus__title:hover {
 
 .kxd-exec-header__workspace.is-active {
   color: var(--kxd-os-text-primary);
-  background: color-mix(in srgb, var(--kxd-os-bg-floating) 55%, transparent);
-  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--kxd-os-light-rim) 40%, transparent);
+  background: var(--kxd-os-bg-selected);
+  box-shadow: none;
+  font-weight: 600;
 }
 
 .kxd-exec-header__current {
@@ -11878,7 +11882,8 @@ a.kxd-os-ritual-focus__title:hover {
 }
 
 .kxd-exec-header__action--create {
-  color: var(--kxd-os-gold);
+  color: var(--kxd-os-accent);
+  font-weight: 600;
 }
 
 .kxd-exec-header__status {
@@ -16574,4 +16579,396 @@ a.kxd-exec-today__row:hover {
   .kxd-commercial-admin__filters button {
     transition: none;
   }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * KXD OS v1 Phase 1 — Light-first representative refinements
+ * Screens: Today, Review Inbox, Portal home, Website Workspace.
+ * Rejected: dark/brown/serif editorial direction. Apple-inspired clarity.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+.kxd-os-sidebar__link--active {
+  color: var(--kxd-os-accent);
+  font-weight: 600;
+  background: var(--kxd-os-accent-subtle);
+  box-shadow: none;
+}
+
+.kxd-exec-header__workspace.is-active {
+  color: var(--kxd-os-text-primary);
+  background: var(--kxd-os-accent-subtle);
+  box-shadow: none;
+  font-weight: 600;
+}
+
+/* Today — crisp product title, not oversized editorial serif */
+.kxd-exec-today__headline,
+.kxd-exec-today__primary-title {
+  font-family: var(--kxd-os-font-sans) !important;
+  font-weight: 600;
+  letter-spacing: -0.022em;
+  color: var(--kxd-os-text-primary);
+}
+
+.kxd-exec-today__headline {
+  font-size: clamp(1.75rem, 2.5vw, 2.125rem);
+  line-height: 1.15;
+}
+
+.kxd-exec-today__label {
+  letter-spacing: -0.01em;
+  text-transform: none;
+  font-weight: 600;
+  color: var(--kxd-os-text-secondary);
+}
+
+.kxd-exec-today__section-link,
+.kxd-exec-today a {
+  color: var(--kxd-os-accent);
+}
+
+.kxd-exec-today a:hover {
+  color: var(--kxd-os-accent-hover);
+}
+
+/* Review Inbox — light empty state + blue selection */
+.kxd-os-review-inbox .kxd-os-empty,
+.kxd-os-review-inbox [class*="empty"] {
+  border-radius: var(--kxd-os-radius-md);
+  background: var(--kxd-os-bg-surface);
+  border: 1px solid var(--kxd-os-border-divider);
+}
+
+/* Plans & Access / upgrade panels stay readable on light canvas */
+.kxd-upgrade {
+  --kxd-upgrade-page: var(--kxd-os-bg-page);
+  --kxd-upgrade-surface: var(--kxd-os-bg-surface);
+  --kxd-upgrade-text: var(--kxd-os-text-primary);
+  --kxd-upgrade-body: var(--kxd-os-text-secondary);
+  --kxd-upgrade-body-on-surface: var(--kxd-os-text-secondary);
+  --kxd-upgrade-meta: var(--kxd-os-text-faint);
+  --kxd-upgrade-meta-on-surface: var(--kxd-os-text-faint);
+  --kxd-upgrade-border: var(--kxd-os-border-divider);
+}
+
+.kxd-upgrade__eyebrow {
+  color: var(--kxd-os-text-secondary);
+  letter-spacing: -0.01em;
+  text-transform: none;
+  font-weight: 600;
+}
+
+.kxd-upgrade__btn,
+.kxd-upgrade-admin__save {
+  background: var(--kxd-os-accent);
+  border-color: var(--kxd-os-accent);
+  color: var(--kxd-os-text-inverse);
+}
+
+.kxd-upgrade__btn:hover:not(:disabled),
+.kxd-upgrade-admin__save:hover:not(:disabled) {
+  background: var(--kxd-os-accent-hover);
+  border-color: var(--kxd-os-accent-hover);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kxd-os-ops-quick-cell,
+  .kxd-ws-page-card,
+  .kxd-ces-btn,
+  .kxd-os-btn {
+    transition: none !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Phase 1 light foundation — representative operator screens
+   (today + review-inbox). Do not expand until Matt approves.
+   ═══════════════════════════════════════════════════════════════ */
+
+.kxd-os-shell .kxd-os-headline,
+.kxd-os-shell .kxd-os-headline--presence,
+.kxd-os-shell .kxd-os-display,
+.kxd-os-shell .kxd-os-display--presence,
+.kxd-os-shell h1,
+.kxd-os-shell h2,
+.kxd-os-shell h3 {
+  font-family: var(--kxd-os-font-sans) !important;
+}
+
+.kxd-os-shell .kxd-os-headline--presence,
+.kxd-os-shell .kxd-os-display--presence {
+  font-size: clamp(1.5rem, 2.4vw, 1.875rem) !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.022em !important;
+  line-height: 1.18 !important;
+}
+
+.kxd-os-shell .kxd-os-eyebrow {
+  letter-spacing: -0.01em !important;
+  text-transform: none !important;
+  color: var(--kxd-os-accent) !important;
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+.kxd-os-shell .kxd-os-sidebar {
+  background: var(--kxd-os-bg-surface) !important;
+}
+
+.kxd-os-shell .kxd-os-card,
+.kxd-os-shell .kxd-os-panel,
+.kxd-os-shell .kxd-os-surface {
+  background: var(--kxd-os-bg-surface);
+  border-color: var(--kxd-os-border-divider);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Phase 1 premium elevation — operator representative screens
+   Finish pass: proportion, hierarchy, control quality, quiet labels.
+   Scope: Today + Review Inbox only. Do not expand platform-wide.
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  --kxd-os-shadow-rest: 0 1px 2px rgba(29, 29, 31, 0.04), 0 1px 3px rgba(29, 29, 31, 0.03);
+  --kxd-os-shadow-raised: 0 2px 8px rgba(29, 29, 31, 0.06), 0 1px 2px rgba(29, 29, 31, 0.04);
+  --kxd-os-shadow-hover: 0 2px 8px rgba(29, 29, 31, 0.08), 0 1px 2px rgba(29, 29, 31, 0.04);
+  --kxd-os-shadow-floating: 0 8px 28px rgba(29, 29, 31, 0.12), 0 2px 8px rgba(29, 29, 31, 0.06);
+  --kxd-os-control-height: 2rem;
+}
+
+/* —— Today —— */
+.kxd-exec-today {
+  --kxd-exec-today-rhythm: 1.75rem;
+}
+
+.kxd-exec-today__greeting {
+  font-size: 0.8125rem;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: var(--kxd-os-text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.kxd-exec-today__headline {
+  font-size: 2rem !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.025em !important;
+  line-height: 1.12 !important;
+  margin-bottom: 0.55rem !important;
+}
+
+.kxd-exec-today__welcome {
+  font-size: 0.9375rem;
+  line-height: 1.47;
+  color: var(--kxd-os-text-secondary);
+  margin-bottom: 0.85rem;
+}
+
+.kxd-exec-today__meta,
+.kxd-exec-today__orientation {
+  font-family: var(--kxd-os-font-sans) !important;
+  font-size: 0.75rem !important;
+  font-weight: 400 !important;
+  letter-spacing: -0.006em !important;
+  text-transform: none !important;
+  color: var(--kxd-os-text-faint) !important;
+}
+
+.kxd-exec-today__label {
+  font-family: var(--kxd-os-font-sans) !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+  text-transform: none !important;
+  color: var(--kxd-os-text-secondary) !important;
+  margin-bottom: 0.65rem !important;
+}
+
+.kxd-exec-today__primary-title {
+  font-size: clamp(1.25rem, 2vw, 1.5rem) !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.02em !important;
+  line-height: 1.25 !important;
+  margin-bottom: 0.45rem !important;
+}
+
+.kxd-exec-today__primary-detail,
+.kxd-exec-today__intel-headline,
+.kxd-exec-today__intel-summary {
+  font-size: 0.875rem;
+  line-height: 1.47;
+  color: var(--kxd-os-text-secondary);
+}
+
+.kxd-exec-today__section {
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+.kxd-exec-today__section-link {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--kxd-os-accent);
+}
+
+.kxd-exec-today__section-link:hover {
+  color: var(--kxd-os-accent-hover);
+}
+
+/* —— Review Inbox —— */
+.kxd-os-review-inbox .kxd-os-headline,
+.kxd-os-review-inbox h1 {
+  font-size: 1.75rem !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.022em !important;
+  line-height: 1.15 !important;
+}
+
+.kxd-os-ops-quick-grid {
+  gap: 0.5rem;
+}
+
+.kxd-os-ops-quick-cell {
+  padding: 0.7rem 0.85rem;
+  border-radius: var(--kxd-os-radius-md);
+  border: 1px solid var(--kxd-os-border-divider);
+  background: var(--kxd-os-bg-surface);
+  box-shadow: none;
+}
+
+.kxd-os-ops-quick-cell:hover {
+  border-color: var(--kxd-os-border-strong);
+  background: var(--kxd-os-bg-elevated);
+  box-shadow: var(--kxd-os-shadow-rest);
+}
+
+.kxd-os-ops-quick-cell__label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.kxd-os-ops-quick-cell__sub {
+  font-size: 0.6875rem;
+  letter-spacing: -0.006em;
+  color: var(--kxd-os-text-faint);
+}
+
+.kxd-os-review-inbox__filters {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0;
+  padding: 0.2rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--kxd-os-border-divider);
+  border-radius: var(--kxd-os-radius-md);
+  background: var(--kxd-os-bg-panel);
+}
+
+.kxd-os-review-inbox__filter {
+  min-height: var(--kxd-os-control-height);
+  padding: 0.35rem 0.85rem;
+  border: 0;
+  border-radius: calc(var(--kxd-os-radius-md) - 2px);
+  background: transparent;
+  color: var(--kxd-os-text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.kxd-os-review-inbox__filter--active {
+  background: var(--kxd-os-bg-surface);
+  color: var(--kxd-os-text-primary);
+  font-weight: 600;
+  box-shadow: var(--kxd-os-shadow-rest);
+  border: 0;
+}
+
+.kxd-os-review-inbox .kxd-os-empty {
+  padding: 2.5rem 1.5rem;
+  box-shadow: none;
+}
+
+.kxd-exec-header__create,
+.kxd-os-shell a.kxd-exec-header__create {
+  color: var(--kxd-os-accent) !important;
+  font-weight: 600;
+}
+
+/* Phase 1 elevation — Review Inbox title + Quick actions label */
+.kxd-os-review-inbox .kxd-os-ops-hero__title,
+.kxd-os-review-inbox .kxd-os-headline {
+  font-size: 1.75rem !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.022em !important;
+  line-height: 1.15 !important;
+}
+
+.kxd-os-review-inbox .kxd-os-ops-hero__lead {
+  font-size: 0.9375rem;
+  line-height: 1.47;
+  color: var(--kxd-os-text-secondary);
+  margin-top: 0.55rem;
+}
+
+.kxd-os-review-inbox .kxd-os-ops-hero {
+  margin-bottom: 1.75rem;
+}
+
+.kxd-os-page--ops .kxd-os-section__label {
+  font-family: var(--kxd-os-font-sans) !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+  text-transform: none !important;
+  color: var(--kxd-os-text-secondary) !important;
+}
+
+/* Phase 1 elevation — Quick Action bar label */
+.kxd-os-shell--app .kxd-os-quick-action-bar__label {
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+  text-transform: none !important;
+  color: var(--kxd-os-text-secondary) !important;
+}
+
+/* Phase 1 typography refinement — operator list/support roles stay aligned */
+.kxd-os-shell .kxd-os-ops-quick-cell__label {
+  font-size: var(--kxd-os-type-item-size) !important;
+  font-weight: var(--kxd-os-type-item-weight) !important;
+  line-height: var(--kxd-os-type-item-lh) !important;
+  letter-spacing: var(--kxd-os-type-item-tracking) !important;
+}
+
+.kxd-os-shell .kxd-os-ops-quick-cell__sub {
+  font-size: var(--kxd-os-type-meta-size) !important;
+  font-weight: var(--kxd-os-type-meta-weight) !important;
+  line-height: var(--kxd-os-type-meta-lh) !important;
+  letter-spacing: var(--kxd-os-type-meta-tracking) !important;
+  color: var(--kxd-os-text-faint) !important;
+}
+
+.kxd-exec-today__primary-detail,
+.kxd-exec-today__intel-summary,
+.kxd-exec-today__welcome {
+  font-size: var(--kxd-os-type-support-size) !important;
+  font-weight: var(--kxd-os-type-support-weight) !important;
+  line-height: var(--kxd-os-type-support-lh) !important;
+  letter-spacing: var(--kxd-os-type-support-tracking) !important;
+  color: var(--kxd-os-text-secondary) !important;
+}
+
+.kxd-exec-today__primary-title {
+  font-weight: 500 !important;
+  letter-spacing: -0.016em !important;
+  line-height: 1.3 !important;
+}
+
+.kxd-os-review-inbox .kxd-os-ops-hero__lead {
+  font-size: var(--kxd-os-type-body-size) !important;
+  font-weight: var(--kxd-os-type-body-weight) !important;
+  line-height: var(--kxd-os-type-body-lh) !important;
+  letter-spacing: var(--kxd-os-type-body-tracking) !important;
 }

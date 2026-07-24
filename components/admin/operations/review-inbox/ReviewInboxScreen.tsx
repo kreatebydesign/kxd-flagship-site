@@ -389,7 +389,7 @@ export function ReviewInboxScreen({ data: initialData }: ReviewInboxScreenProps)
 
   return (
     <OperationsShell activeId="review-inbox">
-      <KxdPage className="kxd-os-page--ops">
+      <KxdPage className="kxd-os-page--ops kxd-os-review-inbox">
         <OperationsPageHero
           eyebrow="Website Review"
           title="Review Inbox"
