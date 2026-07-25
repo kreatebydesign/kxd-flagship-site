@@ -3,6 +3,7 @@ export {
   requireStaffAwarePage,
   requireStaffCapabilityApi,
   requireAdminOversightApi,
+  denyUnlessStaffAssignedWork,
   getStaffActorOrNull,
   staffCanUseFullNav,
 } from "./guard";
@@ -12,6 +13,7 @@ export {
   loadStaffWrapUp,
   getAssignedWorkForStaff,
   staffHomePathForUser,
+  staffLandingPathForUser,
 } from "./load";
 export { loadStaffOversight } from "./oversight";
 export {
@@ -23,6 +25,7 @@ export {
   assertStaffCapability,
   isRestrictedStaff,
   normalizeStaffRole,
+  staffLandingPathForActor,
   staffRoleTitle,
 } from "./permissions";
 export {

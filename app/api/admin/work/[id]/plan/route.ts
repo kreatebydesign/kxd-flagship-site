@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requirePayloadAdminApi } from "@/lib/admin/auth";
+import { denyUnlessStaffAssignedWork } from "@/lib/staff/guard";
 import {
   planWorkForDate,
   planWorkForToday,
@@ -26,6 +27,9 @@ export async function POST(
   if (!Number.isFinite(workId)) {
     return NextResponse.json({ ok: false, error: "Invalid work id." }, { status: 400 });
   }
+
+  const denied = await denyUnlessStaffAssignedWork(auth, workId);
+  if (denied) return denied;
 
   const body = (await req.json().catch(() => ({}))) as {
     action?: string;

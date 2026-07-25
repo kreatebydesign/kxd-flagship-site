@@ -1,12 +1,19 @@
 /**
  * /admin/work/[workId]
  * Phase 20D — Work detail
+ *
+ * Restricted staff may only open work assigned to them; others redirect home.
  */
 
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { WorkDetailClient } from "@/components/admin/work/WorkDetailClient";
-import { requirePayloadAdminPage } from "@/lib/admin/auth";
 import { getSchedulingProposalDetail } from "@/lib/scheduling/proposals-list";
+import {
+  STAFF_HOME_PATH,
+  isRestrictedStaff,
+  requireStaffAwarePage,
+  staffActorFromUser,
+} from "@/lib/staff";
 import { getWorkItem } from "@/lib/work/services";
 
 export const dynamic = "force-dynamic";
@@ -16,13 +23,23 @@ export default async function WorkDetailPage({
 }: {
   params: Promise<{ workId: string }>;
 }) {
-  const user = await requirePayloadAdminPage("/admin/work");
   const { workId: raw } = await params;
   const workId = Number.parseInt(raw, 10);
   if (!Number.isFinite(workId)) notFound();
 
+  const user = await requireStaffAwarePage(`/admin/work/${workId}`);
+  const actor = staffActorFromUser(user);
+
   const work = await getWorkItem(workId);
   if (!work) notFound();
+
+  if (
+    actor &&
+    isRestrictedStaff(actor) &&
+    work.assignedToId !== actor.userId
+  ) {
+    redirect(STAFF_HOME_PATH);
+  }
 
   const scheduleLink =
     work.activeScheduleLinkId != null

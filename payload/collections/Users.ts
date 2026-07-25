@@ -1,4 +1,8 @@
 import type { CollectionConfig } from "payload";
+import {
+  isRestrictedStaffPayloadUser,
+  isStudioPayloadOperator,
+} from "../access/index.ts";
 import { PAYLOAD_GROUPS } from "../admin/groups.ts";
 
 export const Users: CollectionConfig = {
@@ -10,6 +14,20 @@ export const Users: CollectionConfig = {
     description: "KXD team access for Payload admin and future KXD OS integrations.",
   },
   auth: true,
+  access: {
+    admin: ({ req: { user } }) => isStudioPayloadOperator(user),
+    read: ({ req: { user } }) => {
+      if (!user) return false;
+      // Restricted staff may only read their own user record (session / me).
+      if (isRestrictedStaffPayloadUser(user)) {
+        return { id: { equals: user.id } };
+      }
+      return isStudioPayloadOperator(user);
+    },
+    create: ({ req: { user } }) => isStudioPayloadOperator(user),
+    update: ({ req: { user } }) => isStudioPayloadOperator(user),
+    delete: ({ req: { user } }) => isStudioPayloadOperator(user),
+  },
   fields: [
     {
       name: "displayName",

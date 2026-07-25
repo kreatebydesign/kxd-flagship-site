@@ -10,6 +10,7 @@ import {
   isStaffAllowedPagePath,
   isStaffWorkListAllowed,
   resolveStaffCapabilities,
+  staffLandingPathForActor,
   staffRoleTitle,
 } from "../lib/staff/permissions";
 import { staffActorFromUser } from "../lib/staff/actor";
@@ -32,6 +33,11 @@ import {
   answerStaffHelpDeterministic,
   detectStaffEscalationTopic,
 } from "../lib/staff/help-intelligence-core";
+import {
+  isPayloadAdmin,
+  isRestrictedStaffPayloadUser,
+  isStudioPayloadOperator,
+} from "../payload/access/index.ts";
 import type { WorkListItem } from "../lib/work/types";
 import type { StaffResponsibilityTemplate } from "../lib/staff/types";
 
@@ -72,6 +78,49 @@ assert.equal(isStaffAllowedApiPath("/api/admin/staff/assign", heather), true);
 assert.equal(isStaffAllowedApiPath("/api/admin/auth/logout", heather), true);
 assert.equal(actorHasStaffCapability(heather, "staff.help.request"), true);
 assert.equal(isStaffAllowedApiPath("/api/admin/financial-command", heather), false);
+assert.equal(isStaffAllowedApiPath("/api/admin/work/create", heather), false);
+assert.equal(isStaffAllowedApiPath("/api/admin/work/seed", heather), false);
+assert.equal(isStaffAllowedApiPath("/api/admin/work/composer-options", heather), false);
+assert.equal(isStaffAllowedApiPath("/api/admin/work/12", heather), true);
+assert.equal(isStaffAllowedApiPath("/api/admin/work/12/status", heather), true);
+
+assert.equal(isStaffAllowedPagePath("/admin", heather), false);
+assert.equal(isStaffAllowedPagePath("/admin/collections/users", heather), false);
+assert.equal(isStaffAllowedPagePath("/admin/globals/site-settings", heather), false);
+assert.equal(isStaffAllowedPagePath("/admin/sales", heather), false);
+
+const heatherPayloadUser = {
+  id: 42,
+  collection: "users" as const,
+  role: "editor",
+  staffRole: "operations_coordinator",
+};
+const mattPayloadUser = {
+  id: 1,
+  collection: "users" as const,
+  role: "admin",
+  staffRole: "none",
+};
+assert.equal(isPayloadAdmin(heatherPayloadUser as never), true);
+assert.equal(isRestrictedStaffPayloadUser(heatherPayloadUser as never), true);
+assert.equal(isStudioPayloadOperator(heatherPayloadUser as never), false);
+assert.equal(isStudioPayloadOperator(mattPayloadUser as never), true);
+assert.equal(isPayloadAdmin({ collection: "portal-users" } as never), false);
+
+assert.equal(staffLandingPathForActor(heather!), "/admin/operations/staff/welcome");
+const heatherOnboarded = staffActorFromUser({
+  id: 42,
+  email: "heather@kreatebydesign.com",
+  displayName: "Heather",
+  role: "editor",
+  staffRole: "operations_coordinator",
+  staffOnboardingCompletedAt: "2026-07-01T00:00:00.000Z",
+});
+assert.ok(heatherOnboarded);
+assert.equal(
+  staffLandingPathForActor(heatherOnboarded!),
+  "/admin/operations/staff",
+);
 
 const matt = staffActorFromUser({
   id: 1,
@@ -324,6 +373,9 @@ assert.equal(injectQ.requiresMatt, true);
 assert.ok(detectStaffEscalationTopic(injectQuestion));
 
 console.log("✓ Restricted staff deny-by-default pages/APIs");
+console.log("✓ Payload isolation — restricted staff denied studio operator access");
+console.log("✓ Work create/seed APIs denied; numeric work item APIs allowlisted");
+console.log("✓ Staff landing — welcome vs home by onboarding");
 console.log("✓ Admin retains oversight + full operations");
 console.log("✓ Deterministic daily plan prioritization");
 console.log("✓ Waiting-on-Matt excluded from actionable Start Here");

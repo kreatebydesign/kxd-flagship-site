@@ -91,9 +91,10 @@ function main() {
   );
 
   check(
-    "isAuthenticated is admin-only (portal JWT cannot pass REST access)",
+    "isAuthenticated is studio-operator-only (portal JWT + restricted staff cannot pass REST access)",
     access.includes("export const isAuthenticated") &&
-      access.includes("isPayloadAdmin(user)") &&
+      access.includes("isStudioPayloadOperator(user)") &&
+      access.includes("isRestrictedStaffPayloadUser") &&
       !/\(\{\s*req:\s*\{\s*user\s*\}\s*\}\)\s*=>\s*Boolean\(user\)/.test(access),
   );
 
@@ -191,8 +192,13 @@ function main() {
       if (entry.name !== "route.ts") continue;
       const src = readFileSync(full, "utf8");
       const rel = path.relative(root, full);
+      // Logout destroys the session cookie — must remain callable without
+      // requirePayloadAdminApi so restricted staff can always sign out.
+      if (rel === "app/api/admin/auth/logout/route.ts") continue;
       if (
         !src.includes("requirePayloadAdminApi") &&
+        !src.includes("requireStaffCapabilityApi") &&
+        !src.includes("requireAdminOversightApi") &&
         !src.includes("authorizeReportingIngest")
       ) {
         unguardedAdminRoutes.push(rel);

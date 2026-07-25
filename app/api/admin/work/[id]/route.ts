@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requirePayloadAdminApi } from "@/lib/admin/auth";
+import { denyUnlessStaffAssignedWork } from "@/lib/staff/guard";
 import { getWorkItem, updateWorkItem } from "@/lib/work/services";
 import type { WorkCategory, WorkPriority, WorkStatus } from "@/lib/work/types";
 
@@ -38,6 +39,9 @@ export async function GET(
     return NextResponse.json({ ok: false, error: "Invalid work id." }, { status: 400 });
   }
 
+  const denied = await denyUnlessStaffAssignedWork(auth, workId);
+  if (denied) return denied;
+
   const work = await getWorkItem(workId);
   if (!work) {
     return NextResponse.json({ ok: false, error: "Work not found." }, { status: 404 });
@@ -58,6 +62,9 @@ export async function PATCH(
   if (!Number.isFinite(workId)) {
     return NextResponse.json({ ok: false, error: "Invalid work id." }, { status: 400 });
   }
+
+  const denied = await denyUnlessStaffAssignedWork(auth, workId);
+  if (denied) return denied;
 
   const body = await req.json();
   const title = optionalString(body.title);

@@ -9,6 +9,7 @@ import {
   STAFF_HOME_PATH,
   actorHasStaffCapability,
   isRestrictedStaff,
+  staffLandingPathForActor,
   staffRoleTitle,
 } from "./permissions";
 import { materializeResponsibilitiesForUser } from "./responsibilities";
@@ -302,6 +303,13 @@ export function staffHomePathForUser(user: AnyUser): string {
   const actor = staffActorFromUser(user);
   if (actor && isRestrictedStaff(actor)) return STAFF_HOME_PATH;
   return "/admin/operations/today";
+}
+
+/** Login / Payload isolation destination — welcome when onboarding incomplete. */
+export function staffLandingPathForUser(user: AnyUser): string {
+  const actor = staffActorFromUser(user);
+  if (!actor || !isRestrictedStaff(actor)) return "/admin/operations/today";
+  return staffLandingPathForActor(actor);
 }
 
 export { staffRoleTitle, todayDateLabel };

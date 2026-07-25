@@ -29,17 +29,29 @@ export function payloadAdminLoginUrl(request: NextRequest, pathname: string): UR
   return loginUrl;
 }
 
+/** Payload login / bootstrap routes — must not require an existing session. */
+export function isPayloadAdminPublicPath(pathname: string): boolean {
+  return (
+    pathname === PAYLOAD_ADMIN_LOGIN_PATH
+    || pathname.startsWith(`${PAYLOAD_ADMIN_LOGIN_PATH}/`)
+    || pathname === "/admin/create-first-user"
+    || pathname.startsWith("/admin/create-first-user/")
+    || pathname === "/admin/forgot"
+    || pathname.startsWith("/admin/forgot/")
+    || pathname === "/admin/reset"
+    || pathname.startsWith("/admin/reset/")
+    || pathname === "/admin/logout"
+    || pathname.startsWith("/admin/logout/")
+  );
+}
+
 /** Paths gated by Payload `users` admin session (KXD OS internal surfaces). */
 export function requiresPayloadAdminAuth(pathname: string): boolean {
+  if (isPayloadAdminPublicPath(pathname)) return false;
+
   return (
     pathname === OS_LAUNCHER_PATH
-    || pathname === "/admin/operations"
-    || pathname.startsWith("/admin/operations/")
-    || pathname === "/admin/work"
-    || pathname.startsWith("/admin/work/")
-    || pathname === "/admin/sales"
-    || pathname.startsWith("/admin/sales/")
-    || pathname === "/admin/training"
-    || pathname.startsWith("/admin/training/")
+    || pathname === "/admin"
+    || pathname.startsWith("/admin/")
   );
 }

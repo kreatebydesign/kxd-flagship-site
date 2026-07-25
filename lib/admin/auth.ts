@@ -71,7 +71,8 @@ export async function requirePayloadAdminApi() {
         h.get("next-url") ||
         h.get("x-invoke-path") ||
         "";
-      if (pathname && !isStaffAllowedApiPath(pathname, actor)) {
+      // Fail closed when pathname cannot be resolved for restricted staff.
+      if (!pathname || !isStaffAllowedApiPath(pathname, actor)) {
         return NextResponse.json(
           {
             success: false,

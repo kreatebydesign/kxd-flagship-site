@@ -18,6 +18,7 @@ import {
   isStaffAllowedApiPath,
   isStaffAllowedPagePath,
   isStaffWorkListAllowed,
+  staffLandingPathForActor,
 } from "./permissions";
 import type { StaffCapability } from "./types";
 import { getStaffPreviewSession } from "./preview";
@@ -45,11 +46,12 @@ export async function requireStaffAwarePage(returnPath?: string) {
 
   const rawPath = await resolveRequestPathname("");
   const pathname = rawPath || "";
+  const landing = staffLandingPathForActor(actor);
 
   if (isRestrictedStaff(actor)) {
     // Fail closed when pathname cannot be resolved.
     if (!pathname) {
-      redirect(STAFF_HOME_PATH);
+      redirect(landing);
     }
 
     if (
@@ -61,20 +63,24 @@ export async function requireStaffAwarePage(returnPath?: string) {
     }
 
     if (
+      pathname === "/admin" ||
+      pathname === "/admin/" ||
+      pathname.startsWith("/admin/collections") ||
+      pathname.startsWith("/admin/globals") ||
       pathname === "/admin/operations" ||
       pathname === "/admin/operations/" ||
       pathname === "/admin/operations/today" ||
       pathname.startsWith("/admin/operations/today/")
     ) {
-      redirect(STAFF_HOME_PATH);
+      redirect(landing);
     }
 
     if (!isStaffWorkListAllowed(pathname, actor)) {
-      redirect(STAFF_HOME_PATH);
+      redirect(landing);
     }
 
     if (!isStaffAllowedPagePath(pathname, actor)) {
-      redirect(STAFF_HOME_PATH);
+      redirect(landing);
     }
   }
 
@@ -128,6 +134,38 @@ export async function requireStaffCapabilityApi(capability: StaffCapability) {
 
 export async function requireAdminOversightApi() {
   return requireStaffCapabilityApi("admin.oversight");
+}
+
+/**
+ * Restricted staff may only read/mutate work assigned to them.
+ * Admins pass. Returns a 403/404 NextResponse on denial, or null when allowed.
+ */
+export async function denyUnlessStaffAssignedWork(
+  user: object,
+  workId: number,
+): Promise<NextResponse | null> {
+  const actor = staffActorFromUser(user);
+  if (!actor || !isRestrictedStaff(actor)) return null;
+
+  const { getWorkItem } = await import("@/lib/work/services");
+  const work = await getWorkItem(workId);
+  if (!work) {
+    return NextResponse.json(
+      { success: false, ok: false, error: "Work not found." },
+      { status: 404 },
+    );
+  }
+  if (work.assignedToId !== actor.userId) {
+    return NextResponse.json(
+      {
+        success: false,
+        ok: false,
+        error: "Staff permission denied for this work item.",
+      },
+      { status: 403 },
+    );
+  }
+  return null;
 }
 
 export async function getStaffActorOrNull() {

@@ -4,7 +4,10 @@
  */
 
 import type { CollectionConfig } from "payload";
-import { isPayloadAdmin, isPayloadAdminUser } from "../access/index.ts";
+import {
+  isPayloadAdminUser,
+  isStudioPayloadOperator,
+} from "../access/index.ts";
 import { PAYLOAD_GROUPS } from "../admin/groups.ts";
 
 export const JuniorCreatorUsers: CollectionConfig = {
@@ -26,11 +29,11 @@ export const JuniorCreatorUsers: CollectionConfig = {
     lockTime: 600,
   },
   access: {
-    admin: ({ req: { user } }) => isPayloadAdmin(user),
+    admin: ({ req: { user } }) => isStudioPayloadOperator(user),
     read: ({ req: { user } }) => {
       if (!user) return false;
       if (user.collection === "junior-creator-users") return { id: { equals: user.id } };
-      return isPayloadAdmin(user);
+      return isStudioPayloadOperator(user);
     },
     create: isPayloadAdminUser,
     update: isPayloadAdminUser,

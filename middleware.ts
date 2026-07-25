@@ -166,6 +166,8 @@ export const config = {
   matcher: [
     "/",
     "/os",
+    "/admin",
+    "/admin/:path*",
     "/admin/operations",
     "/admin/operations/:path*",
     "/admin/work",

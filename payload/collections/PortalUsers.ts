@@ -1,5 +1,8 @@
 import type { CollectionConfig } from "payload";
-import { isPayloadAdmin, isPayloadAdminUser } from "../access/index.ts";
+import {
+  isPayloadAdminUser,
+  isStudioPayloadOperator,
+} from "../access/index.ts";
 import { PAYLOAD_GROUPS } from "../admin/groups.ts";
 import {
   normalizePortalUserEmailHook,
@@ -35,12 +38,12 @@ export const PortalUsers: CollectionConfig = {
     },
   },
   access: {
-    admin: ({ req: { user } }) => isPayloadAdmin(user),
+    admin: ({ req: { user } }) => isStudioPayloadOperator(user),
     read: ({ req: { user } }) => {
       if (!user) return false;
       // Self-read only — never expose other portal users or allow client pivots.
       if (user.collection === "portal-users") return { id: { equals: user.id } };
-      return isPayloadAdmin(user);
+      return isStudioPayloadOperator(user);
     },
     // Mutations are operator-only. Portal sessions use HMAC cookies + LocalAPI,
     // not Payload REST updates on this collection.

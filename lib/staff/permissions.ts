@@ -69,9 +69,16 @@ export const STAFF_ALLOWED_API_PREFIXES: readonly string[] = [
   "/api/admin/auth/logout",
   "/api/admin/training/progress",
   "/api/admin/training/intelligence",
-  "/api/admin/work/", // status updates further gated to assigned items
   "/api/admin/scheduling/proposals", // suggest only; approve blocked in service
 ] as const;
+
+/**
+ * Work Engine API — restricted staff may only touch numeric work item routes
+ * (status/update). Create/seed/composer and list endpoints are denied.
+ */
+export function isStaffAllowedWorkApiPath(pathname: string): boolean {
+  return /^\/api\/admin\/work\/\d+(\/|$)/.test(pathname);
+}
 
 export function normalizeStaffRole(value: unknown): StaffRoleId {
   if (value === "operations_coordinator") return "operations_coordinator";
@@ -157,6 +164,19 @@ export function isStaffAllowedPagePath(
   actor: StaffActor,
 ): boolean {
   if (!isRestrictedStaff(actor)) return true;
+
+  // Raw Payload Admin surfaces — never allowlisted for restricted staff.
+  if (
+    pathname === "/admin" ||
+    pathname === "/admin/" ||
+    pathname.startsWith("/admin/collections") ||
+    pathname.startsWith("/admin/globals") ||
+    pathname.startsWith("/admin/account") ||
+    pathname.startsWith("/admin/create-first-user")
+  ) {
+    return false;
+  }
+
   if (pathname === "/admin/operations" || pathname === "/admin/operations/") {
     return false; // redirected to staff home
   }
@@ -165,11 +185,24 @@ export function isStaffAllowedPagePath(
   );
 }
 
+/**
+ * Post-login / Payload-isolation landing for restricted staff.
+ * Welcome when onboarding incomplete; otherwise Staff Home.
+ */
+export function staffLandingPathForActor(actor: StaffActor): string {
+  if (!isRestrictedStaff(actor)) return STAFF_HOME_PATH;
+  if (!actor.onboardingCompletedAt) return STAFF_WELCOME_PATH;
+  return STAFF_HOME_PATH;
+}
+
 export function isStaffAllowedApiPath(
   pathname: string,
   actor: StaffActor,
 ): boolean {
   if (!isRestrictedStaff(actor)) return true;
+  if (pathname.startsWith("/api/admin/work")) {
+    return isStaffAllowedWorkApiPath(pathname);
+  }
   return STAFF_ALLOWED_API_PREFIXES.some(
     (prefix) => pathname === prefix || pathname.startsWith(prefix),
   );
