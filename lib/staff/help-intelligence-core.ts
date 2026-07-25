@@ -3,7 +3,7 @@
  * Kept free of server-only so verify scripts can import safely.
  */
 
-import { detectUnsupportedTopic } from "@/lib/kxd-intelligence/operations-mentor/boundaries";
+import { detectSensitiveTopic } from "@/lib/staff/sensitive-topics";
 import type { WorkListItem } from "@/lib/work/types";
 import type { StaffActor } from "./types";
 
@@ -22,40 +22,9 @@ export interface StaffHelpIntelligenceAnswer {
   recommendedNextStep: string;
 }
 
-const EXTRA_ESCALATION: Array<{ pattern: RegExp; topic: string }> = [
-  { pattern: /\b(scope\s+change|change\s+the\s+scope|add\s+scope)\b/i, topic: "scope changes" },
-  {
-    pattern:
-      /\b(publish|go\s+live|make\s+it\s+live|send\s+to\s+the\s+client|email\s+the\s+client)\b/i,
-    topic: "external communications or publishing",
-  },
-  {
-    pattern:
-      /\b(refund|payout|charge\s+the\s+card|stripe|wire\s+transfer|invoice\s+amount)\b/i,
-    topic: "financial execution",
-  },
-  {
-    pattern:
-      /\b(entitlement|grant\s+access|revoke\s+access|role\s+change|make\s+them\s+admin)\b/i,
-    topic: "access or entitlements",
-  },
-  {
-    pattern:
-      /\b(delete\s+(the\s+)?(client|database|production|account)|destroy|wipe)\b/i,
-    topic: "destructive actions",
-  },
-  {
-    pattern:
-      /\b(ignore\s+(previous|all)\s+instructions|system\s+prompt|jailbreak|developer\s+mode)\b/i,
-    topic: "unsafe instructions",
-  },
-];
-
+/** Sensitive / authority topics — centralized in sensitive-topics.ts */
 export function detectStaffEscalationTopic(question: string): string | null {
-  for (const row of EXTRA_ESCALATION) {
-    if (row.pattern.test(question)) return row.topic;
-  }
-  return detectUnsupportedTopic(question);
+  return detectSensitiveTopic(question);
 }
 
 function workContextLine(work: WorkListItem | null | undefined): string {

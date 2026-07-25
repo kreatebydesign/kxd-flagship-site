@@ -1,23 +1,12 @@
 /**
  * Knowledge boundaries — never invent policy.
+ * Sensitive detection is centralized in Shared Core staff classifier.
  */
 
-const FORBIDDEN_PATTERNS: Array<{ pattern: RegExp; topic: string }> = [
-  { pattern: /\b(pric(e|ing)|quote|discount|retainer amount|hourly rate)\b/i, topic: "pricing" },
-  { pattern: /\b(billing terms?|payment terms?|net\s*\d+|refund)\b/i, topic: "billing terms" },
-  { pattern: /\b(contract|legal|liability|nda|indemnit)/i, topic: "legal" },
-  { pattern: /\b(fire|hire|salary|payroll|hr decision|terminate)\b/i, topic: "HR" },
-  { pattern: /\b(password|permission|admin access|security clearance|vpn)\b/i, topic: "security permissions" },
-  { pattern: /\b(commit(ment)? to the client|promise the client|guarantee delivery)\b/i, topic: "client commitments" },
-];
+import { detectSensitiveTopic } from "@/lib/staff/sensitive-topics";
 
 export function detectUnsupportedTopic(note: string | null | undefined): string | null {
-  const text = note?.trim() ?? "";
-  if (!text) return null;
-  for (const row of FORBIDDEN_PATTERNS) {
-    if (row.pattern.test(text)) return row.topic;
-  }
-  return null;
+  return detectSensitiveTopic(note);
 }
 
 export function unsupportedTopicResponse(topic: string): {

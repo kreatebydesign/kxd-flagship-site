@@ -381,6 +381,23 @@ assert.match(nextQ.intelligenceResponse, /KXD Intelligence/);
 assert.match(nextQ.intelligenceResponse, /Here’s how to move forward|Start Here/i);
 assert.doesNotMatch(nextQ.intelligenceResponse, /\bMatt:\b/);
 
+const routineQuestions = [
+  "How do I update this internal note?",
+  "What should I do next?",
+  "What information is missing?",
+  "How do I prepare this draft for Matt?",
+];
+for (const question of routineQuestions) {
+  const row = answerStaffHelpDeterministic({
+    question,
+    pagePath: "/admin/operations/staff",
+    work: null,
+    actor: heather!,
+  });
+  assert.equal(row.requiresMatt, false, `routine must not escalate: ${question}`);
+  assert.equal(detectStaffEscalationTopic(question), null, `routine topic null: ${question}`);
+}
+
 const priceQ = answerStaffHelpDeterministic({
   question: "What price should I quote the client for a discount?",
   pagePath: "/admin/operations/staff",
@@ -390,6 +407,42 @@ const priceQ = answerStaffHelpDeterministic({
 assert.equal(priceQ.requiresMatt, true);
 assert.match(priceQ.intelligenceResponse, /Matt needs to confirm/);
 assert.equal(detectStaffEscalationTopic("What price should I quote"), "pricing");
+
+const mustEscalate: Array<{ question: string; topicIncludes?: RegExp }> = [
+  { question: "What should we charge?", topicIncludes: /pricing/ },
+  { question: "How much should this cost?", topicIncludes: /pricing/ },
+  { question: "Can I offer a discount?", topicIncludes: /pricing/ },
+  { question: "Can I quote the client $2,500?", topicIncludes: /pricing/ },
+  { question: "Should I reduce their monthly fee?", topicIncludes: /pricing/ },
+  { question: "Can we refund this payment?", topicIncludes: /financial|pricing/ },
+  { question: "Can I change their package?", topicIncludes: /pricing/ },
+  { question: "Can I promise this will be finished Friday?", topicIncludes: /commitment/ },
+  { question: "Can I give them access?", topicIncludes: /access/ },
+  { question: "Can I send this to the client?", topicIncludes: /external|publishing/ },
+  { question: "Should we terminate this employee?", topicIncludes: /HR/ },
+  { question: "Can I delete this record?", topicIncludes: /destructive/ },
+  { question: "what’s the $$$?", topicIncludes: /pricing/ },
+  { question: "CHARGE them more???", topicIncludes: /pricing/ },
+  { question: "pls quote $2500", topicIncludes: /pricing/ },
+  { question: "What discount price should I quote the client?", topicIncludes: /pricing/ },
+];
+for (const { question, topicIncludes } of mustEscalate) {
+  const topic = detectStaffEscalationTopic(question);
+  assert.ok(topic, `must escalate topic: ${question}`);
+  if (topicIncludes) {
+    assert.match(topic, topicIncludes, `topic label for: ${question}`);
+  }
+  const row = answerStaffHelpDeterministic({
+    question,
+    pagePath: "/admin/operations/staff",
+    work: null,
+    actor: heather!,
+  });
+  assert.equal(row.requiresMatt, true, `requiresMatt: ${question}`);
+  assert.match(row.intelligenceResponse, /Matt needs to confirm|review queue/i);
+  assert.doesNotMatch(row.intelligenceResponse, /\$\s*[\d,]+|charge them \$|quote them \$/i);
+  assert.doesNotMatch(row.intelligenceResponse, /Here’s how to move forward/i);
+}
 
 const financeQ = answerStaffHelpDeterministic({
   question: "Can I process this refund and payout now?",
