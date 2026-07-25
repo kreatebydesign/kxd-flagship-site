@@ -1,49 +1,75 @@
 /**
  * KXD OS — Payload admin theme overrides
- * Scoped to Payload layer; does not affect site or operations pages.
+ * Scoped to Payload Admin only (imported from app/(payload)/layout.tsx).
+ * Does not affect site, portal, or /admin/operations KXD OS pages.
+ *
+ * Payload dark mode expects an inverted elevation scale:
+ *   low  = surfaces (near-black)
+ *   high = text/chrome (near-white)
+ * Labels use elevation-800; descriptions use elevation-400;
+ * select values use elevation-800; --theme-text uses elevation-1000.
  */
 @layer payload {
-  :root,
-  html[data-theme="dark"] {
+  :root {
     --kxd-gold: #c9a962;
     --kxd-gold-light: #d4ba7a;
-    --kxd-gold-dim: rgba(201, 169, 98, 0.65);
+    --kxd-gold-dim: rgba(201, 169, 98, 0.72);
     --kxd-black: #0a0a0a;
     --kxd-black-deep: #070707;
     --kxd-charcoal: #111111;
-    --kxd-border: rgba(255, 255, 255, 0.08);
-    --kxd-border-gold: rgba(201, 169, 98, 0.22);
+    --kxd-text: #f7f2e8;
+    --kxd-text-muted: rgba(247, 242, 232, 0.72);
+    --kxd-border: rgba(255, 255, 255, 0.14);
+    --kxd-border-gold: rgba(201, 169, 98, 0.28);
+  }
 
-    --theme-elevation-0: var(--kxd-black-deep);
-    --theme-elevation-50: #080808;
-    --theme-elevation-100: var(--kxd-black);
-    --theme-elevation-150: #0d0d0d;
-    --theme-elevation-200: var(--kxd-charcoal);
-    --theme-elevation-250: #141414;
-    --theme-elevation-300: #181818;
-    --theme-elevation-350: #1c1c1c;
-    --theme-elevation-400: #1f1f1f;
-    --theme-elevation-450: #222222;
-    --theme-elevation-500: #262626;
-    --theme-elevation-550: #2a2a2a;
-    --theme-elevation-600: #2e2e2e;
-    --theme-elevation-700: #333333;
-    --theme-elevation-750: #383838;
-    --theme-elevation-800: #3d3d3d;
-    --theme-elevation-850: #424242;
-    --theme-elevation-900: #4a4a4a;
-    --theme-elevation-950: #555555;
-    --theme-elevation-1000: #f7f2e8;
+  html[data-theme="dark"] {
+    --kxd-gold: #c9a962;
+    --kxd-gold-light: #d4ba7a;
+    --kxd-gold-dim: rgba(201, 169, 98, 0.85);
+    --kxd-black: #0a0a0a;
+    --kxd-black-deep: #070707;
+    --kxd-charcoal: #111111;
+    --kxd-text: #f7f2e8;
+    --kxd-text-muted: rgba(247, 242, 232, 0.78);
+    --kxd-border: rgba(255, 255, 255, 0.18);
+    --kxd-border-gold: rgba(201, 169, 98, 0.32);
 
-    --theme-input-bg: rgba(255, 255, 255, 0.04);
+    /* Inverted elevation — graphite surfaces → cream text */
+    --theme-elevation-0: #070707;
+    --theme-elevation-50: #0a0a0a;
+    --theme-elevation-100: #111111;
+    --theme-elevation-150: #1a1a1a;
+    --theme-elevation-200: #222222;
+    --theme-elevation-250: #2a2a2a;
+    --theme-elevation-300: #363636;
+    --theme-elevation-350: #454545;
+    --theme-elevation-400: #a39c91; /* muted helper — ≥6:1 on graphite */
+    --theme-elevation-450: #b2ab9f;
+    --theme-elevation-500: #9a948a;
+    --theme-elevation-550: #aea79c;
+    --theme-elevation-600: #c2bbb0;
+    --theme-elevation-650: #d0c9bd;
+    --theme-elevation-700: #ddd6ca;
+    --theme-elevation-750: #e8e1d5;
+    --theme-elevation-800: #efe8db; /* labels, select values */
+    --theme-elevation-850: #f3ede2;
+    --theme-elevation-900: #f7f2e8;
+    --theme-elevation-950: #faf6ef;
+    --theme-elevation-1000: #f7f2e8; /* primary text */
+
+    --theme-bg: var(--theme-elevation-0);
+    --theme-text: var(--theme-elevation-1000);
+    --theme-input-bg: rgba(255, 255, 255, 0.06);
     --theme-border-color: var(--kxd-border);
     --theme-success-500: var(--kxd-gold);
   }
 
   html[data-theme="dark"] body {
     background:
-      radial-gradient(ellipse 85% 55% at 50% -15%, rgba(201, 169, 98, 0.1), transparent 58%),
+      radial-gradient(ellipse 85% 55% at 50% -15%, rgba(201, 169, 98, 0.08), transparent 58%),
       linear-gradient(180deg, var(--kxd-black) 0%, var(--kxd-black-deep) 100%);
+    color: var(--theme-text);
   }
 
   /* ── Logo graphics ─────────────────────────────────────────────────────── */
@@ -81,7 +107,7 @@
 
   .kxd-payload-brand__title {
     margin: 0.125rem 0 0;
-    color: #f7f2e8;
+    color: var(--kxd-text);
     font-family: var(--font-body, system-ui, sans-serif);
     font-size: 0.6875rem;
     font-weight: 500;
@@ -104,7 +130,7 @@
   .login__form {
     border: 1px solid var(--kxd-border);
     border-radius: 0.5rem;
-    background: rgba(17, 17, 17, 0.82);
+    background: rgba(17, 17, 17, 0.88);
     box-shadow:
       0 0 0 1px rgba(255, 255, 255, 0.03),
       0 24px 48px rgba(0, 0, 0, 0.45);
@@ -155,26 +181,114 @@
     text-transform: none;
   }
 
-  /* ── Inputs / focus ────────────────────────────────────────────────────── */
-  input[type="email"],
-  input[type="password"],
-  input[type="text"],
-  textarea,
-  select {
-    border-color: var(--kxd-border);
-    transition:
-      border-color 160ms ease,
-      box-shadow 160ms ease;
-  }
+  /* ── Form fields: readable values, clear boundaries, gold focus ───────── */
+  html[data-theme="dark"] {
+    input[type="email"],
+    input[type="password"],
+    input[type="text"],
+    input[type="number"],
+    input[type="search"],
+    input[type="date"],
+    input[type="datetime-local"],
+    textarea,
+    select {
+      color: var(--theme-text);
+      border-color: var(--kxd-border);
+      background-color: var(--theme-input-bg);
+      transition:
+        border-color 160ms ease,
+        box-shadow 160ms ease;
+    }
 
-  input[type="email"]:focus,
-  input[type="password"]:focus,
-  input[type="text"]:focus,
-  textarea:focus,
-  select:focus {
-    border-color: rgba(201, 169, 98, 0.55);
-    box-shadow: 0 0 0 1px rgba(201, 169, 98, 0.28);
-    outline: none;
+    input::placeholder,
+    textarea::placeholder {
+      color: var(--theme-elevation-450);
+      opacity: 1;
+    }
+
+    input:disabled,
+    textarea:disabled,
+    select:disabled,
+    input[readonly],
+    textarea[readonly] {
+      color: var(--theme-elevation-650);
+      border-color: rgba(255, 255, 255, 0.1);
+      background-color: rgba(255, 255, 255, 0.03);
+      opacity: 1;
+    }
+
+    input[type="email"]:focus,
+    input[type="password"]:focus,
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    input[type="search"]:focus,
+    input[type="date"]:focus,
+    input[type="datetime-local"]:focus,
+    textarea:focus,
+    select:focus {
+      border-color: rgba(201, 169, 98, 0.65);
+      box-shadow: 0 0 0 1px rgba(201, 169, 98, 0.35);
+      outline: none;
+    }
+
+    label.field-label:not(.unstyled) {
+      color: var(--theme-elevation-800);
+    }
+
+    .field-description {
+      color: var(--theme-elevation-400);
+    }
+
+    .react-select .rs__control {
+      color: var(--theme-elevation-800);
+      border-color: var(--kxd-border);
+      background: var(--theme-input-bg);
+    }
+
+    .react-select .rs__single-value,
+    .react-select .rs__input-container,
+    .react-select .rs__input {
+      color: var(--theme-text);
+    }
+
+    .react-select .rs__placeholder {
+      color: var(--theme-elevation-450);
+    }
+
+    .react-select .rs__menu {
+      background: var(--theme-elevation-100);
+      border: 1px solid var(--kxd-border);
+      color: var(--theme-text);
+    }
+
+    .react-select .rs__option {
+      color: var(--theme-elevation-800);
+    }
+
+    .react-select .rs__option--is-focused {
+      background: var(--theme-elevation-200);
+      color: var(--theme-text);
+    }
+
+    .react-select .rs__option--is-selected {
+      background: rgba(201, 169, 98, 0.18);
+      color: var(--theme-text);
+    }
+
+    .react-select .rs__control--is-focused {
+      border-color: rgba(201, 169, 98, 0.65);
+      box-shadow: 0 0 0 1px rgba(201, 169, 98, 0.35);
+    }
+
+    .react-select .rs__control--is-disabled {
+      color: var(--theme-elevation-650);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .field-error,
+    .tooltip.field-error {
+      color: var(--theme-error-500, #e07070);
+    }
   }
 
   /* ── Cards / panels ──────────────────────────────────────────────────────── */
