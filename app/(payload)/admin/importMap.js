@@ -23,6 +23,7 @@ import { BoldFeatureClient as BoldFeatureClient_e70f5e05f09f93e00b997edb1ef0c864
 import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { PayloadIcon as PayloadIcon_3f5c98e36b66bbb0ef120aef9039d1d0 } from '../../../components/admin/PayloadIcon.tsx'
 import { PayloadLogo as PayloadLogo_ef94d35532e015c5b8cf8b7c75faf006 } from '../../../components/admin/PayloadLogo.tsx'
+import { KxdAdminLoginView as KxdAdminLoginView_08072bff3d698e7bd717a4e8c7928ca9 } from '../../../components/admin/KxdAdminLoginView.tsx'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 /** @type import('payload').ImportMap */
@@ -52,5 +53,6 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#ItalicFeatureClient": ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "./components/admin/PayloadIcon.tsx#PayloadIcon": PayloadIcon_3f5c98e36b66bbb0ef120aef9039d1d0,
   "./components/admin/PayloadLogo.tsx#PayloadLogo": PayloadLogo_ef94d35532e015c5b8cf8b7c75faf006,
+  "./components/admin/KxdAdminLoginView.tsx#KxdAdminLoginView": KxdAdminLoginView_08072bff3d698e7bd717a4e8c7928ca9,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

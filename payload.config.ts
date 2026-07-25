@@ -161,6 +161,11 @@ export default buildConfig({
         Logo: "./components/admin/PayloadLogo.tsx#PayloadLogo",
         Icon: "./components/admin/PayloadIcon.tsx#PayloadIcon",
       },
+      views: {
+        login: {
+          Component: "./components/admin/KxdAdminLoginView.tsx#KxdAdminLoginView",
+        },
+      },
     },
   },
   collections: [
