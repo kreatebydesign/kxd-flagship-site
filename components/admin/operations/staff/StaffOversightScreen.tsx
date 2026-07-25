@@ -310,7 +310,7 @@ export function StaffOversightScreen({ data }: StaffOversightScreenProps) {
 
   return (
     <OperationsShell activeId="staff">
-      <KxdPage className="kxd-os-page--ops">
+      <KxdPage className="kxd-os-page--ops kxd-os-page--staff">
         <OperationsPageHero
           eyebrow="Staff oversight"
           title="Team readiness"

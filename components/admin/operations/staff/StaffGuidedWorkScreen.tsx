@@ -123,7 +123,7 @@ export function StaffGuidedWorkScreen({
 
   return (
     <OperationsShell activeId="staff" variant="staff">
-      <KxdPage className="kxd-os-page--ops">
+      <KxdPage className="kxd-os-page--ops kxd-os-page--staff">
         <OperationsPageHero
           eyebrow="Guided work"
           title={data.title}

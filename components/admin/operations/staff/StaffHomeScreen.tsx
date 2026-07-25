@@ -158,9 +158,12 @@ export function StaffHomeScreen({
 
   return (
     <OperationsShell activeId="staff" variant="staff">
-      <KxdPage className="kxd-os-page--ops">
+      <KxdPage className="kxd-os-page--ops kxd-os-page--staff">
         {data.permissions.previewBanner ? (
-          <div className="kxd-os-card kxd-os-reporting-ops__banner" role="status">
+          <div
+            className="kxd-os-card kxd-os-ops-card-padding kxd-os-reporting-ops__banner"
+            role="status"
+          >
             <p className="kxd-os-card__title">{data.permissions.previewBanner}</p>
             <button
               type="button"

@@ -50,7 +50,7 @@ export function StaffGuidancePanel({
       </div>
 
       {lastResponse ? (
-        <div className="kxd-os-card" style={{ marginTop: "1.25rem", padding: "1rem" }}>
+        <div className="kxd-os-card kxd-os-ops-card-inset" style={{ marginTop: "1.25rem" }}>
           <p className="kxd-os-section__label">Latest guidance</p>
           <p className="kxd-os-card__title" style={{ marginTop: "0.5rem" }}>
             {lastResponse.conciseAnswer}

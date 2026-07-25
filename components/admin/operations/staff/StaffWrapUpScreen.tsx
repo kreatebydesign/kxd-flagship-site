@@ -80,7 +80,7 @@ export function StaffWrapUpScreen({
 
   return (
     <OperationsShell activeId="staff" variant="staff">
-      <KxdPage className="kxd-os-page--ops">
+      <KxdPage className="kxd-os-page--ops kxd-os-page--staff">
         <OperationsPageHero
           eyebrow="End of day"
           title="Wrap up today"

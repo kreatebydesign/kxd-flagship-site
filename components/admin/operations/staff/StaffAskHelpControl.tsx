@@ -175,8 +175,8 @@ export function StaffAskHelpControl({
 
       {latest?.intelligenceResponse ? (
         <div
-          className="kxd-os-card"
-          style={{ marginTop: "1rem", padding: "0.85rem 1rem" }}
+          className="kxd-os-card kxd-os-ops-card-inset"
+          style={{ marginTop: "1rem" }}
           role="status"
         >
           <p className="kxd-os-section__label">KXD Intelligence</p>

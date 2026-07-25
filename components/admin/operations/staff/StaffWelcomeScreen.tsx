@@ -62,7 +62,7 @@ export function StaffWelcomeScreen({ displayName, roleTitle }: StaffWelcomeScree
 
   return (
     <OperationsShell activeId="staff" variant="staff">
-      <KxdPage className="kxd-os-page--ops">
+      <KxdPage className="kxd-os-page--ops kxd-os-page--staff">
         <OperationsPageHero
           eyebrow="Welcome"
           title={`Welcome, ${firstName}.`}

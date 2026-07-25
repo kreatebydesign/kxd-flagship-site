@@ -125,6 +125,10 @@
   --kxd-os-space-12: 3rem;
   --kxd-os-space-16: 4rem;
 
+  /* Ops / staff card content inset — ~24–32px desktop */
+  --kxd-os-ops-card-pad-block: 1.5rem;
+  --kxd-os-ops-card-pad-inline: 1.75rem;
+
   /* Radius — restrained rectangles */
   --kxd-os-radius-sm: 6px;
   --kxd-os-radius-md: 8px;
@@ -8556,17 +8560,56 @@ a.kxd-os-platform-subsystem-card__title:hover {
   grid-template-columns: minmax(0, 1fr) 22rem;
 }
 
+/*
+ * Shared card-content spacing — ~24–32px desktop, ~18–20px mobile.
+ * Use .kxd-os-ops-card-padding on content cards; staff pages also apply
+ * this to Ops briefing surfaces via .kxd-os-page--staff.
+ */
+@media (max-width: 640px) {
+  :root {
+    --kxd-os-ops-card-pad-block: 1.125rem; /* 18px */
+    --kxd-os-ops-card-pad-inline: 1.25rem; /* 20px */
+  }
+}
+
 .kxd-os-ops-card-padding,
-.kxd-os-ops-surface-padding {
-  padding: var(--kxd-os-space-6);
+.kxd-os-ops-surface-padding,
+.kxd-os-ops-card-inset {
+  padding: var(--kxd-os-ops-card-pad-block) var(--kxd-os-ops-card-pad-inline);
 }
 
 .kxd-os-ops-card-header {
-  padding: var(--kxd-os-space-6);
+  padding: var(--kxd-os-ops-card-pad-block) var(--kxd-os-ops-card-pad-inline);
 }
 
 .kxd-os-ops-card-body {
-  padding: var(--kxd-os-space-6);
+  padding: var(--kxd-os-ops-card-pad-block) var(--kxd-os-ops-card-pad-inline);
+}
+
+/* Staff experience: every OpsCard surface gets the shared content pad. */
+.kxd-os-page--staff .kxd-os-ops-briefing-surface {
+  padding: var(--kxd-os-ops-card-pad-block) var(--kxd-os-ops-card-pad-inline);
+}
+
+/* List rows already carry their own rhythm — drop horizontal pad to avoid doubling. */
+.kxd-os-page--staff .kxd-os-ops-briefing-surface .kxd-os-ops-list-row {
+  padding-inline: 0;
+}
+
+.kxd-os-page--staff .kxd-os-ops-briefing-surface > .kxd-os-ops-list-row:first-child {
+  padding-top: 0;
+}
+
+.kxd-os-page--staff .kxd-os-ops-briefing-surface > .kxd-os-ops-list-row:last-child {
+  padding-bottom: 0;
+}
+
+/* Metrics strip inside a staff card is content, not a page-level chrome band. */
+.kxd-os-page--staff .kxd-os-ops-briefing-surface .kxd-os-ops-kpi-strip {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  box-shadow: none;
+  gap: var(--kxd-os-space-5);
 }
 
 .kxd-os-ops-flagged-grid {
