@@ -7,6 +7,7 @@ export {
   getStaffActorOrNull,
   staffCanUseFullNav,
 } from "./guard";
+export { redirectRestrictedStaffFromPayloadAdmin } from "./payload-admin-redirect";
 export {
   loadStaffToday,
   loadStaffGuidedWork,

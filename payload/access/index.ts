@@ -43,13 +43,29 @@ export function isRestrictedStaffPayloadUser(
 }
 
 /**
- * Studio operators who may use Payload Admin + collection/global APIs.
+ * Studio operators who may use Payload Admin collection/global data APIs.
  * Portal JWTs and restricted staff are denied.
  */
 export function isStudioPayloadOperator(
   user: PayloadRequest["user"],
 ): boolean {
   return isPayloadAdmin(user) && !isRestrictedStaffPayloadUser(user);
+}
+
+/**
+ * Panel entry for the auth `users` collection `access.admin` check.
+ *
+ * Restricted staff MUST pass this so login can complete and our server
+ * redirect can send them to Staff Home/Welcome. Denying here strands them
+ * on Payload's "You do not have access to this page" after a valid login.
+ *
+ * Collection/global REST and LocalAPI data remain deny-by-default via
+ * `isStudioPayloadOperator` / `isAuthenticated`.
+ */
+export function canEnterPayloadAdminPanel(
+  user: PayloadRequest["user"],
+): boolean {
+  return isPayloadAdmin(user);
 }
 
 /**

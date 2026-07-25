@@ -1,5 +1,6 @@
 import type { CollectionConfig } from "payload";
 import {
+  canEnterPayloadAdminPanel,
   isRestrictedStaffPayloadUser,
   isStudioPayloadOperator,
 } from "../access/index.ts";
@@ -15,7 +16,14 @@ export const Users: CollectionConfig = {
   },
   auth: true,
   access: {
-    admin: ({ req: { user } }) => isStudioPayloadOperator(user),
+    /**
+     * Panel entry for the auth collection — any authenticated `users` session.
+     * Restricted staff must pass this check after login so the Payload route
+     * tree can run and immediately redirect them to Staff Welcome/Home.
+     * Deny-by-default collection/global data access remains via
+     * `isStudioPayloadOperator` (not this gate).
+     */
+    admin: ({ req: { user } }) => canEnterPayloadAdminPanel(user),
     read: ({ req: { user } }) => {
       if (!user) return false;
       // Restricted staff may only read their own user record (session / me).

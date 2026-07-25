@@ -13,6 +13,7 @@ export const maxDuration = 60;
 
 import { importMap } from "./admin/importMap.js";
 import "./custom.scss";
+import { redirectRestrictedStaffFromPayloadAdmin } from "@/lib/staff/payload-admin-redirect";
 
 type Args = {
   children: React.ReactNode;
@@ -27,10 +28,18 @@ const serverFunction: ServerFunctionClient = async function (args) {
   });
 };
 
-const Layout = ({ children }: Args) => (
-  <RootLayout config={config} importMap={importMap} serverFunction={serverFunction}>
-    {children}
-  </RootLayout>
-);
+/**
+ * Redirect restricted staff before Payload RootLayout evaluates admin access UI.
+ * Panel entry is allowed for authenticated users; data plane stays deny-by-default.
+ */
+const Layout = async ({ children }: Args) => {
+  await redirectRestrictedStaffFromPayloadAdmin();
+
+  return (
+    <RootLayout config={config} importMap={importMap} serverFunction={serverFunction}>
+      {children}
+    </RootLayout>
+  );
+};
 
 export default Layout;

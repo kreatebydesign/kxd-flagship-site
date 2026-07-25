@@ -130,6 +130,24 @@ function main() {
   );
 
   check(
+    "Users.access.admin allows authenticated users panel entry (login redirect, not operator denial)",
+    /admin:\s*\(\{\s*req:\s*\{\s*user\s*\}\s*\}\)\s*=>\s*canEnterPayloadAdminPanel\(user\)/.test(
+      users,
+    ) &&
+      !/admin:\s*\(\{\s*req:\s*\{\s*user\s*\}\s*\}\)\s*=>\s*isStudioPayloadOperator\(user\)/.test(
+        users,
+      ) &&
+      users.includes("isStudioPayloadOperator(user)") &&
+      access.includes("canEnterPayloadAdminPanel"),
+  );
+
+  const payloadLayout = read("app/(payload)/layout.tsx");
+  check(
+    "Payload layout redirects restricted staff before RootLayout",
+    payloadLayout.includes("redirectRestrictedStaffFromPayloadAdmin"),
+  );
+
+  check(
     "payload.config does not define per-collection cookie names / cookiePrefix override",
     !payloadConfig.includes("cookiePrefix") &&
       !/cookies\s*:\s*\{/.test(portalUsers) &&

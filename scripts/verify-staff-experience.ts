@@ -3,13 +3,15 @@
  * Pure assertions — no database mutations.
  */
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   actorHasStaffCapability,
   isRestrictedStaff,
   isStaffAllowedApiPath,
   isStaffAllowedPagePath,
   isStaffWorkListAllowed,
-  resolveStaffCapabilities,
   staffLandingPathForActor,
   staffRoleTitle,
 } from "../lib/staff/permissions";
@@ -37,9 +39,12 @@ import {
   isPayloadAdmin,
   isRestrictedStaffPayloadUser,
   isStudioPayloadOperator,
+  canEnterPayloadAdminPanel,
 } from "../payload/access/index.ts";
 import type { WorkListItem } from "../lib/work/types";
 import type { StaffResponsibilityTemplate } from "../lib/staff/types";
+
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 console.log("\nPhase 38A/38B — verify:staff-experience\n");
 
@@ -102,10 +107,43 @@ const mattPayloadUser = {
   staffRole: "none",
 };
 assert.equal(isPayloadAdmin(heatherPayloadUser as never), true);
+assert.equal(canEnterPayloadAdminPanel(heatherPayloadUser as never), true);
 assert.equal(isRestrictedStaffPayloadUser(heatherPayloadUser as never), true);
 assert.equal(isStudioPayloadOperator(heatherPayloadUser as never), false);
 assert.equal(isStudioPayloadOperator(mattPayloadUser as never), true);
+assert.equal(canEnterPayloadAdminPanel(mattPayloadUser as never), true);
 assert.equal(isPayloadAdmin({ collection: "portal-users" } as never), false);
+assert.equal(canEnterPayloadAdminPanel({ collection: "portal-users" } as never), false);
+
+/**
+ * Login transition regression:
+ * Restricted staff must pass Users.access.admin (isPayloadAdmin) so authentication
+ * can complete and the Payload layout redirect can send them to Staff Welcome/Home.
+ * They must still fail isStudioPayloadOperator so collection/global APIs stay denied.
+ * Using isStudioPayloadOperator for access.admin strands them on
+ * "You do not have access to this page" after a successful login.
+ */
+const usersSrc = readFileSync(path.join(repoRoot, "payload/collections/Users.ts"), "utf8");
+const payloadLayoutSrc = readFileSync(
+  path.join(repoRoot, "app/(payload)/layout.tsx"),
+  "utf8",
+);
+const redirectHelperSrc = readFileSync(
+  path.join(repoRoot, "lib/staff/payload-admin-redirect.ts"),
+  "utf8",
+);
+assert.match(
+  usersSrc,
+  /admin:\s*\(\{\s*req:\s*\{\s*user\s*\}\s*\}\)\s*=>\s*canEnterPayloadAdminPanel\(user\)/,
+);
+assert.doesNotMatch(
+  usersSrc,
+  /admin:\s*\(\{\s*req:\s*\{\s*user\s*\}\s*\}\)\s*=>\s*isStudioPayloadOperator\(user\)/,
+);
+assert.match(usersSrc, /create:\s*\(\{\s*req:\s*\{\s*user\s*\}\s*\}\)\s*=>\s*isStudioPayloadOperator\(user\)/);
+assert.match(payloadLayoutSrc, /redirectRestrictedStaffFromPayloadAdmin/);
+assert.match(redirectHelperSrc, /staffLandingPathForUser/);
+assert.match(redirectHelperSrc, /isRestrictedStaff/);
 
 assert.equal(staffLandingPathForActor(heather!), "/admin/operations/staff/welcome");
 const heatherOnboarded = staffActorFromUser({
@@ -374,6 +412,7 @@ assert.ok(detectStaffEscalationTopic(injectQuestion));
 
 console.log("✓ Restricted staff deny-by-default pages/APIs");
 console.log("✓ Payload isolation — restricted staff denied studio operator access");
+console.log("✓ Login transition — Users.access.admin allows panel entry for redirect");
 console.log("✓ Work create/seed APIs denied; numeric work item APIs allowlisted");
 console.log("✓ Staff landing — welcome vs home by onboarding");
 console.log("✓ Admin retains oversight + full operations");
