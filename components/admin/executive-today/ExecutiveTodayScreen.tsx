@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { KxdShell } from "@/components/os";
+import { KxdIntelligenceMark, KxdShell } from "@/components/os";
 import { ExecutiveWorkspaceShell } from "@/components/admin/executive-workspace";
 import { WhyThisDisclosure } from "@/components/admin/executive-intelligence/WhyThisDisclosure";
 import type { ExecutiveTodayData } from "@/lib/executive-today";
@@ -65,6 +65,7 @@ export function ExecutiveTodayScreen({ data }: { data: ExecutiveTodayData }) {
             className={`kxd-exec-today__section kxd-exec-today__section--primary kxd-exec-today__enter kxd-exec-today__enter--1 ${primaryClass}`}
             aria-labelledby="today-primary"
           >
+            <KxdIntelligenceMark className="kxd-exec-today__intel-mark" />
             <h2 id="today-primary" className="kxd-exec-today__label">
               Do this next
             </h2>

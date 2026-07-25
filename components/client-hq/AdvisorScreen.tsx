@@ -1,4 +1,4 @@
-import { KxdEmptyState, KxdPage } from "@/components/os";
+import { KxdIntelligenceCallout, KxdPage } from "@/components/os";
 import { ClientHqPageHero } from "./ClientHqPageHero";
 
 export function AdvisorScreen() {
@@ -6,14 +6,15 @@ export function AdvisorScreen() {
     <KxdPage className="kxd-os-page--ops">
       <ClientHqPageHero
         eyebrow="Intelligence"
-        title="AI Advisor"
+        title="Advisor"
         lead="Proactive recommendations for your business, website, and growth."
         presence
       />
 
-      <KxdEmptyState
+      <KxdIntelligenceCallout
         title="KXD Intelligence is coming"
-        description="KXD Intelligence will soon provide proactive recommendations, growth opportunities, website monitoring, and operational insights — tailored to your business."
+        description="Proactive recommendations, growth opportunities, website monitoring, and operational insights — tailored to your business. Available soon."
+        aria-label="KXD Intelligence unavailable"
       />
     </KxdPage>
   );

@@ -9,6 +9,7 @@ import {
   formatReadingTime,
   getDelightAffirmation,
 } from "@/lib/rituals";
+import { KxdIntelligenceMark } from "@/components/os";
 import { ExecutiveHealthSummary } from "../intelligence/ExecutiveHealthSummary";
 import { DelightMoment } from "./DelightMoment";
 import { MorningClientActivitySection } from "./MorningClientActivitySection";
@@ -80,6 +81,7 @@ export function MorningBriefScreen({
         <MorningFirstActionSection action={firstAction} explainability={explainability} />
 
         <div className="kxd-os-ritual-morning__narrative">
+          <KxdIntelligenceMark />
           <p className="kxd-os-ritual-morning__narrative-label">Executive Narrative</p>
           {intelligence.sections.map((section) => (
             <RitualIntelligenceSection key={section.id} block={section} subdued />

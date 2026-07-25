@@ -69,6 +69,25 @@ export const osColors = {
     infoMuted: "rgba(0, 113, 227, 0.08)",
     disabled: "rgba(29, 29, 31, 0.28)",
   },
+  /**
+   * KXD Intelligence product identity — deep navy surface + system-blue signal.
+   * Use only on Intelligence feature surfaces; never as default OS chrome.
+   */
+  intelligence: {
+    surface: "#0E1C33",
+    surfaceElevated: "#13233C",
+    surfaceStrong: "#1A2F4F",
+    border: "rgba(0, 113, 227, 0.34)",
+    signal: "#0071E3",
+    textPrimary: "#F5F5F7",
+    /** Muted blue-gray — WCAG AA on navy surfaces (~7:1). */
+    textSecondary: "#C2CBD9",
+    focus: "rgba(0, 113, 227, 0.55)",
+    success: "#30D158",
+    successMuted: "rgba(48, 209, 88, 0.14)",
+    escalation: "#FF9F0A",
+    escalationMuted: "rgba(255, 159, 10, 0.14)",
+  },
   roles: {
     canvas: "bg.canvas",
     canvasElevated: "bg.page",
@@ -134,6 +153,21 @@ export const osDarkColors = {
     info: "#0A84FF",
     infoMuted: "rgba(10, 132, 255, 0.18)",
     disabled: "rgba(235, 235, 245, 0.3)",
+  },
+  intelligence: {
+    surface: "#0A1424",
+    surfaceElevated: "#101C32",
+    surfaceStrong: "#162840",
+    border: "rgba(10, 132, 255, 0.38)",
+    signal: "#0A84FF",
+    textPrimary: "#F5F5F7",
+    /** Muted blue-gray — WCAG AA on navy surfaces (~7:1). */
+    textSecondary: "#C2CBD9",
+    focus: "rgba(10, 132, 255, 0.6)",
+    success: "#30D158",
+    successMuted: "rgba(48, 209, 88, 0.16)",
+    escalation: "#FF9F0A",
+    escalationMuted: "rgba(255, 159, 10, 0.16)",
   },
 } as const;
 

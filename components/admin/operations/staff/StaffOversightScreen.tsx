@@ -12,7 +12,7 @@ import {
   OpsSectionHead,
   OpsStatusBadge,
 } from "@/components/admin/operations/shared/OpsBriefing";
-import { KxdButton, KxdPage } from "@/components/os";
+import { KxdButton, KxdIntelligenceBadge, KxdIntelligenceMark, KxdPage } from "@/components/os";
 import type { StaffOversightData } from "@/lib/staff/types";
 
 type HelpRequestRowData = StaffOversightData["helpRequests"][number];
@@ -80,10 +80,22 @@ function HelpRequestRow({
           {new Date(request.createdAt).toLocaleString()}
         </p>
         {request.intelligenceResponse ? (
-          <div style={{ marginTop: "0.65rem" }}>
-            <p className="kxd-os-section__label">KXD Intelligence</p>
-            <p style={{ marginTop: "0.35rem" }}>{request.intelligenceResponse}</p>
-            <p className="kxd-os-meta" style={{ marginTop: "0.35rem" }}>
+          <div className="kxd-os-intel-response" style={{ marginTop: "0.65rem" }}>
+            <div className="kxd-os-intel-response__meta">
+              <KxdIntelligenceMark />
+              <KxdIntelligenceBadge
+                source={
+                  request.responseSource === "ai-assisted"
+                    ? "ai-assisted"
+                    : request.responseSource === "matt"
+                      ? "matt"
+                      : "deterministic"
+                }
+                requiresMatt={request.requiresMatt && !request.mattResponse}
+              />
+            </div>
+            <p className="kxd-os-intel-response__body">{request.intelligenceResponse}</p>
+            <p className="kxd-os-intel-response__note">
               Source: {request.responseSource || "none"}
               {request.confidence ? ` · Confidence: ${request.confidence}` : ""}
               {request.requiresMatt ? " · Matt required" : ""}

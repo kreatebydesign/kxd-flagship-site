@@ -1,4 +1,5 @@
 import { OpsCard } from "@/components/admin/operations/shared/OpsBriefing";
+import { KxdIntelligenceMark } from "@/components/os";
 import type { IntelligentRecommendation } from "@/lib/intelligence/briefings";
 import { RecommendationCard } from "./RecommendationCard";
 
@@ -14,6 +15,7 @@ export function PrimaryRecommendation({
         aria-label="Primary recommendation"
       >
         <OpsCard>
+          <KxdIntelligenceMark />
           <p className="kxd-os-intelligence-primary__label">Primary Recommendation</p>
           <p className="kxd-os-intelligence-primary__title">No action required right now.</p>
           <p className="kxd-os-intelligence-primary__reason">
@@ -26,7 +28,6 @@ export function PrimaryRecommendation({
 
   return (
     <section className="kxd-os-intelligence-primary" aria-label="Primary recommendation">
-      <p className="kxd-os-intelligence-primary__label">Primary Recommendation</p>
       <RecommendationCard recommendation={recommendation} variant="primary" />
     </section>
   );

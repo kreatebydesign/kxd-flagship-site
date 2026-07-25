@@ -5,6 +5,10 @@ import { CommandPalette } from "@/components/admin/operations/command-search";
 import { ActivityCenter } from "@/components/admin/operations/activity";
 import { QuickCaptureNote } from "@/components/admin/operations/strategy/QuickCaptureNote";
 import { WorkComposerHost } from "@/components/admin/work/composer";
+import {
+  KxdIntelligenceProvider,
+  KxdIntelligenceWorkspace,
+} from "@/components/os";
 import type { ExecutiveWorkspaceId } from "@/lib/executive-workspace";
 import { ExecutiveHeader } from "./ExecutiveHeader";
 import { QuickCreateHost } from "./QuickCreateHost";
@@ -17,6 +21,8 @@ export interface ExecutiveWorkspaceShellProps {
   clientId?: number;
   /** When false, omit WorkComposerHost (caller mounts with callbacks). */
   includeWorkComposer?: boolean;
+  /** Mount global KXD Intelligence workspace (internal authenticated shell only). */
+  includeIntelligence?: boolean;
 }
 
 /**
@@ -29,18 +35,28 @@ export function ExecutiveWorkspaceShell({
   userLabel,
   clientId,
   includeWorkComposer = true,
+  includeIntelligence = true,
 }: ExecutiveWorkspaceShellProps) {
+  const shell = (
+    <div className="kxd-exec-workspace">
+      <ExecutiveHeader userLabel={userLabel} />
+      <div className="kxd-exec-workspace__body">{children}</div>
+      <CommandPalette />
+      <ActivityCenter hideTrigger />
+      <QuickCreateHost />
+      <QuickCaptureNote defaultClientId={clientId} hideTrigger />
+      {includeWorkComposer ? <WorkComposerHost /> : null}
+      {includeIntelligence ? <KxdIntelligenceWorkspace /> : null}
+    </div>
+  );
+
   return (
     <WorkspaceMemoryProvider workspaceId={workspaceId}>
-      <div className="kxd-exec-workspace">
-        <ExecutiveHeader userLabel={userLabel} />
-        <div className="kxd-exec-workspace__body">{children}</div>
-        <CommandPalette />
-        <ActivityCenter hideTrigger />
-        <QuickCreateHost />
-        <QuickCaptureNote defaultClientId={clientId} hideTrigger />
-        {includeWorkComposer ? <WorkComposerHost /> : null}
-      </div>
+      {includeIntelligence ? (
+        <KxdIntelligenceProvider>{shell}</KxdIntelligenceProvider>
+      ) : (
+        shell
+      )}
     </WorkspaceMemoryProvider>
   );
 }

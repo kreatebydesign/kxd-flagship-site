@@ -4,7 +4,7 @@ import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { forwardRef } from "react";
 import { kxdOsCn } from "./utils";
 
-export type KxdButtonVariant = "primary" | "secondary" | "ghost" | "danger";
+export type KxdButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "intelligence";
 export type KxdButtonSize = "md" | "sm" | "icon";
 
 export type KxdButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -35,7 +35,9 @@ export const KxdButton = forwardRef<HTMLButtonElement, KxdButtonProps>(
           ? "kxd-os-btn--ghost"
           : variant === "danger"
             ? "kxd-os-btn--danger"
-            : "kxd-os-btn--primary";
+            : variant === "intelligence"
+              ? "kxd-os-btn--intelligence"
+              : "kxd-os-btn--primary";
 
     const sizeClass =
       size === "sm" ? "kxd-os-btn--sm" : size === "icon" ? "kxd-os-btn--icon" : "";

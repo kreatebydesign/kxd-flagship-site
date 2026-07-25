@@ -296,6 +296,8 @@ export function TrainingLessonScreen({
             pagePath={`/admin/training/${lesson.pathSlug}/${lesson.slug}`}
             canAct
             isPreview={false}
+            contextKind="training"
+            contextLabel={lesson.title}
           />
         </div>
       ) : null}

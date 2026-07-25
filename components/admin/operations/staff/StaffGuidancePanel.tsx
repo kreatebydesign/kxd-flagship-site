@@ -1,93 +1,89 @@
 "use client";
 
-import type { ReactNode } from "react";
-import type { StaffGuidancePrompt } from "@/lib/staff/types";
+/**
+ * Compatibility adapter — Staff Home no longer mounts a permanent Intelligence rail.
+ * Prefer KxdIntelligenceBriefing + global KxdIntelligenceWorkspace.
+ */
+import {
+  KxdIntelligenceBriefing,
+  useKxdIntelligenceOptional,
+} from "@/components/os";
 import type { StaffGuidanceResponse } from "@/lib/staff/guidance";
-import { KxdButton } from "@/components/os";
+import type {
+  StaffGuidancePrompt,
+  StaffHelpRequestView,
+  StaffPlanState,
+  StaffPrimaryAction,
+} from "@/lib/staff/types";
 
 export interface StaffGuidancePanelProps {
   prompts: StaffGuidancePrompt[];
   lastResponse: StaffGuidanceResponse | null;
   onSelectPrompt: (promptId: string) => void;
   loading?: boolean;
-  /** Optional calm control under guidance (Ask Matt for help). */
-  askHelp?: ReactNode;
+  primaryAction?: StaffPrimaryAction | null;
+  planState?: StaffPlanState | null;
+  pagePath?: string;
+  workId?: number | null;
+  canAct?: boolean;
+  isPreview?: boolean;
+  helpRequests?: StaffHelpRequestView[];
+  askHelpDefaultOpen?: boolean;
+}
+
+function observationFrom(primaryAction?: StaffPrimaryAction | null): string {
+  if (!primaryAction) {
+    return "Open Intelligence for guidance on today’s sequence, what’s missing, or Matt preparation.";
+  }
+  if (primaryAction.label === "You are caught up") {
+    return "You’re caught up. Open Intelligence to wrap the day or review anything still open.";
+  }
+  const title = primaryAction.title?.trim() || primaryAction.label;
+  const client = primaryAction.clientOrCategory?.trim();
+  if (client) return `Your next priority is ${title} (${client}).`;
+  return `Your next priority is ${title}.`;
 }
 
 export function StaffGuidancePanel({
   prompts,
   lastResponse,
-  onSelectPrompt,
-  loading = false,
-  askHelp = null,
+  primaryAction = null,
+  planState = null,
+  pagePath = "/admin/operations/staff",
+  workId = null,
+  canAct = true,
+  isPreview = false,
+  helpRequests = [],
 }: StaffGuidancePanelProps) {
+  const intel = useKxdIntelligenceOptional();
+  const requiresMattCount = helpRequests.filter(
+    (row) => row.requiresMatt && !row.mattResponse && row.status !== "resolved",
+  ).length;
+
   return (
-    <aside className="kxd-os-card kxd-os-ops-card-padding" aria-label="KXD Intelligence guidance">
-      <p className="kxd-os-section__label">KXD Intelligence</p>
-      <p className="kxd-os-meta" style={{ marginTop: "0.35rem" }}>
-        Ask for explanation, sequencing, or when Matt must approve. Guidance stays inside your
-        permission boundary.
-      </p>
-
-      <div
-        className="kxd-os-ops-quick-grid"
-        style={{ marginTop: "1rem", gridTemplateColumns: "1fr" }}
-      >
-        {prompts.map((prompt) => (
-          <KxdButton
-            key={prompt.id}
-            type="button"
-            variant="ghost"
-            size="sm"
-            disabled={loading}
-            onClick={() => onSelectPrompt(prompt.id)}
-            className="kxd-os-ops-quick-cell"
-            style={{ textAlign: "left", width: "100%" }}
-          >
-            {prompt.label}
-          </KxdButton>
-        ))}
-      </div>
-
-      {lastResponse ? (
-        <div className="kxd-os-card kxd-os-ops-card-inset" style={{ marginTop: "1.25rem" }}>
-          <p className="kxd-os-section__label">Latest guidance</p>
-          <p className="kxd-os-card__title" style={{ marginTop: "0.5rem" }}>
-            {lastResponse.conciseAnswer}
-          </p>
-          <p className="kxd-os-meta" style={{ marginTop: "0.75rem" }}>
-            Recommended next step
-          </p>
-          <p style={{ marginTop: "0.25rem" }}>{lastResponse.recommendedNextStep}</p>
-          <p className="kxd-os-meta" style={{ marginTop: "0.75rem" }}>
-            {lastResponse.reason}
-          </p>
-          {lastResponse.involveMatt ? (
-            <p className="kxd-os-meta" style={{ marginTop: "0.75rem" }}>
-              Matt involvement: {lastResponse.mattReason ?? "Approval or judgment required."}
-              {" "}If you are blocked, ask Matt for help below.
-            </p>
-          ) : null}
-          {lastResponse.warning ? (
-            <p className="kxd-os-meta" style={{ marginTop: "0.75rem", color: "var(--kxd-os-warning)" }}>
-              {lastResponse.warning}
-            </p>
-          ) : null}
-          {lastResponse.evidence.length > 0 ? (
-            <ul className="kxd-os-meta" style={{ marginTop: "0.75rem", paddingLeft: "1.1rem" }}>
-              {lastResponse.evidence.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          ) : null}
-        </div>
-      ) : (
-        <p className="kxd-os-meta" style={{ marginTop: "1.25rem" }}>
-          Select a prompt when something feels unclear. Responses are deterministic and evidence-bound.
-        </p>
-      )}
-
-      {askHelp ? <div style={{ marginTop: "1.25rem" }}>{askHelp}</div> : null}
-    </aside>
+    <KxdIntelligenceBriefing
+      observation={observationFrom(primaryAction)}
+      recommendedAction={
+        primaryAction?.title?.trim() ||
+        primaryAction?.label ||
+        "Open Intelligence for recommended next steps"
+      }
+      requiresMattCount={requiresMattCount}
+      onOpen={() => {
+        intel?.openWith({
+          pagePath,
+          contextLabel: "Daily staff plan",
+          contextKind: "staff-home",
+          workId,
+          helpRequests,
+          guidancePrompts: prompts,
+          primaryAction,
+          planState,
+          canAct,
+          isPreview,
+        });
+        if (lastResponse) intel?.setLastGuidance(lastResponse);
+      }}
+    />
   );
 }

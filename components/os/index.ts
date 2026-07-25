@@ -36,6 +36,38 @@ export { KxdTabs } from "./KxdTabs";
 export type { KxdTabItem } from "./KxdTabs";
 export { KxdEmptyState } from "./KxdEmptyState";
 export { KxdIcon } from "./KxdIcon";
+export {
+  KxdIntelligenceMark,
+  KxdIntelligenceBadge,
+  KxdIntelligencePanel,
+  KxdIntelligenceCallout,
+  KxdIntelligenceResponse,
+  KxdIntelligenceAttribution,
+} from "./KxdIntelligence";
+export type { KxdIntelligenceSource, KxdIntelligenceVariant } from "./KxdIntelligence";
+export {
+  KxdIntelligenceProvider,
+  useKxdIntelligence,
+  useKxdIntelligenceOptional,
+  KxdIntelligenceTrigger,
+  KxdIntelligenceWorkspace,
+  KxdIntelligenceHeader,
+  KxdIntelligenceContext,
+  KxdIntelligenceTimeline,
+  KxdIntelligenceMessage,
+  KxdIntelligenceComposer,
+  KxdIntelligenceBriefing,
+} from "./intelligence";
+export type {
+  KxdIntelligenceComposerMode,
+  KxdIntelligenceContextKind,
+  KxdIntelligenceContextValue,
+  KxdIntelligenceSessionConfig,
+  KxdIntelligenceSessionState,
+  KxdIntelligenceTimelineItem,
+  KxdIntelligenceTimelineKind,
+} from "./intelligence";
+
 export type { KxdBadgeVariant } from "./KxdBadge";
 export type { KxdButtonVariant, KxdButtonSize } from "./KxdButton";
 export type { KxdSurfaceVariant } from "./KxdSurface";

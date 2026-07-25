@@ -2,6 +2,7 @@ import Link from "next/link";
 import {
   KxdBadge,
   KxdEmptyState,
+  KxdIntelligenceCallout,
   KxdMetric,
   KxdPage,
   KxdSection,
@@ -303,13 +304,12 @@ export function InfrastructureClientScreen({
               </KxdSection>
 
               <div>
-                <KxdSection label="AI recommendations" />
-                <div className="kxd-os-card">
-                  <KxdEmptyState
-                    title="KXD Intelligence coming soon"
-                    description="Proactive infrastructure recommendations, renewal alerts, and optimization insights will appear here."
-                  />
-                </div>
+                <KxdSection label="Recommendations" />
+                <KxdIntelligenceCallout
+                  title="KXD Intelligence is coming"
+                  description="Proactive infrastructure recommendations, renewal alerts, and optimization insights will appear here."
+                  aria-label="KXD Intelligence unavailable"
+                />
 
                 <KxdSection label="Internal notes" />
                 <div className="kxd-os-card">

@@ -38,6 +38,9 @@ export function RecommendationCard({
       <OpsCard>
         <div className="kxd-os-recommendation__head">
           <div className="kxd-os-recommendation__labels">
+            {isPrimary ? (
+              <span className="kxd-os-intel-mark">KXD Intelligence</span>
+            ) : null}
             <span className="kxd-os-recommendation__category">
               {categoryDisplayLabel(recommendation.category)}
             </span>

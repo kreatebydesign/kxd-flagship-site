@@ -388,9 +388,9 @@ export function WorkComposerPanel({
             {hasSuggestions ? (
               <div
                 className="kxd-os-work-composer__intelligence"
-                aria-label="Suggestions"
+                aria-label="KXD Intelligence suggestions"
               >
-                <p className="kxd-os-work-composer__intelligence-label">Suggestions</p>
+                <p className="kxd-os-work-composer__intelligence-label">KXD Intelligence</p>
                 <ul className="kxd-os-work-composer__intelligence-list">
                   {suggestions.map((item) => (
                     <li key={item.id}>{item.label}</li>

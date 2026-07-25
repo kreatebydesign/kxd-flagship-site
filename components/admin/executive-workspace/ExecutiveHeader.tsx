@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { KxdOsLogo } from "@/components/os";
+import { KxdIntelligenceTrigger, KxdOsLogo } from "@/components/os";
 import { openActivityCenter } from "@/lib/activity-engine/events";
 import {
   EXECUTIVE_WORKSPACES,
@@ -58,6 +58,7 @@ export function ExecutiveHeader({
       </div>
 
       <div className="kxd-exec-header__right">
+        <KxdIntelligenceTrigger className="kxd-exec-header__intel" compact />
         <button
           type="button"
           className="kxd-exec-header__action"

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect } from "react";
 import { OperationsPageHero } from "@/components/admin/operations/shared/OperationsPageHero";
 import { OperationsShell } from "@/components/admin/operations/shared/OperationsShell";
 import {
@@ -13,15 +13,17 @@ import {
   OpsSectionHead,
   OpsStatusBadge,
 } from "@/components/admin/operations/shared/OpsBriefing";
-import { KxdPage } from "@/components/os";
+import {
+  KxdIntelligenceBriefing,
+  KxdPage,
+  useKxdIntelligenceOptional,
+} from "@/components/os";
 import type { StaffGuidanceResponse } from "@/lib/staff/guidance";
 import type {
   StaffPlanItem,
   StaffPlanState,
   StaffTodayData,
 } from "@/lib/staff/types";
-import { StaffGuidancePanel } from "./StaffGuidancePanel";
-import { StaffAskHelpControl } from "./StaffAskHelpControl";
 
 function planStateBadge(state: StaffPlanState): {
   label: string;
@@ -81,6 +83,25 @@ function PlanRow({ item, showOrder }: { item: StaffPlanItem; showOrder?: boolean
   );
 }
 
+function briefingObservation(data: StaffTodayData): string {
+  if (data.morning.caughtUp || data.primaryAction.label === "You are caught up") {
+    return "You’re caught up for now. Wrap the day when ready, or open Intelligence for a calm review.";
+  }
+  const title = data.primaryAction.title?.trim() || data.primaryAction.label;
+  const client = data.primaryAction.clientOrCategory?.trim();
+  if (client) {
+    return `Today’s clearest move is ${title} for ${client}.`;
+  }
+  return `Today’s clearest move is ${title}.`;
+}
+
+function briefingRecommended(data: StaffTodayData): string {
+  if (data.primaryAction.label === "You are caught up") {
+    return "Wrap up today when you’re ready.";
+  }
+  return data.primaryAction.title?.trim() || data.primaryAction.label;
+}
+
 export interface StaffHomeScreenProps {
   data: StaffTodayData;
   onGuidance?: (promptId: string) => void | Promise<void>;
@@ -88,17 +109,19 @@ export interface StaffHomeScreenProps {
   guidanceLoading?: boolean;
 }
 
-export function StaffHomeScreen({
+export function StaffHomeScreen(props: StaffHomeScreenProps) {
+  return (
+    <OperationsShell activeId="staff" variant="staff">
+      <StaffHomeBody {...props} />
+    </OperationsShell>
+  );
+}
+
+function StaffHomeBody({
   data,
-  onGuidance,
   guidanceResponse = null,
-  guidanceLoading = false,
 }: StaffHomeScreenProps) {
-  const [localGuidanceLoading, setLocalGuidanceLoading] = useState(false);
-  const [localGuidanceResponse, setLocalGuidanceResponse] =
-    useState<StaffGuidanceResponse | null>(guidanceResponse);
-  const loading = guidanceLoading || localGuidanceLoading;
-  const activeGuidanceResponse = guidanceResponse ?? localGuidanceResponse;
+  const intel = useKxdIntelligenceOptional();
 
   const sequence = data.plan.filter(
     (item) =>
@@ -107,57 +130,48 @@ export function StaffHomeScreen({
       item.bucket === "training",
   );
   const thenItems = sequence.filter((item) => item.bucket !== "start-here");
+  const startItem = data.plan.find((item) => item.bucket === "start-here");
+  const requiresMattCount =
+    data.helpRequests.filter(
+      (row) => row.requiresMatt && !row.mattResponse && row.status !== "resolved",
+    ).length || data.morning.waitingOnMattCount;
 
-  async function handleGuidance(promptId: string) {
-    if (onGuidance) {
-      setLocalGuidanceLoading(true);
-      try {
-        await onGuidance(promptId);
-      } finally {
-        setLocalGuidanceLoading(false);
-      }
-      return;
-    }
+  const configure = intel?.configure;
+  const setLastGuidance = intel?.setLastGuidance;
+  const openWith = intel?.openWith;
 
-    setLocalGuidanceLoading(true);
-    try {
-      const res = await fetch("/api/admin/staff/guidance", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          promptId,
-          pagePath: "/admin/operations/staff",
-        }),
-      });
-      const payload = (await res.json()) as {
-        success?: boolean;
-        guidance?: StaffGuidanceResponse;
-        error?: string;
-      };
-      if (!res.ok || payload.success === false || !payload.guidance) {
-        throw new Error(payload.error ?? "Could not load guidance.");
-      }
-      setLocalGuidanceResponse(payload.guidance);
-    } catch {
-      setLocalGuidanceResponse({
-        conciseAnswer:
-          "Guidance is temporarily unavailable. Use your Start here action from the plan.",
-        recommendedNextStep: data.primaryAction.label,
-        reason: "Deterministic fallback while guidance API is unavailable.",
-        involveMatt: false,
-        mattReason: null,
-        mode: "deterministic",
-        aiGenerated: false,
-        evidence: [],
-        warning: null,
-      });
-    } finally {
-      setLocalGuidanceLoading(false);
+  useEffect(() => {
+    if (!configure) return;
+    configure({
+      pagePath: "/admin/operations/staff",
+      contextLabel: "Daily staff plan",
+      contextKind: "staff-home",
+      workId: startItem?.workId ?? data.primaryAction.workId ?? null,
+      workTitle: data.primaryAction.title ?? data.primaryAction.label,
+      clientLabel: data.primaryAction.clientOrCategory ?? null,
+      helpRequests: data.helpRequests,
+      guidancePrompts: data.guidancePrompts,
+      primaryAction: data.primaryAction,
+      planState: startItem?.planState ?? data.primaryAction.planState ?? null,
+      canAct: data.permissions.canAct,
+      isPreview: data.permissions.isPreview,
+      observation: briefingObservation(data),
+      recommendedActionLabel: briefingRecommended(data),
+      recommendedActionHref: data.primaryAction.href,
+    });
+    if (guidanceResponse) {
+      setLastGuidance?.(guidanceResponse);
     }
-  }
+  }, [
+    configure,
+    setLastGuidance,
+    data,
+    guidanceResponse,
+    startItem?.workId,
+    startItem?.planState,
+  ]);
 
   return (
-    <OperationsShell activeId="staff" variant="staff">
       <KxdPage className="kxd-os-page--ops kxd-os-page--staff">
         {data.permissions.previewBanner ? (
           <div
@@ -185,14 +199,7 @@ export function StaffHomeScreen({
           lead={`${data.morning.dateLabel}. ${data.morning.summary}`}
         />
 
-        <div
-          className="kxd-os-ops-briefing-grid"
-          style={{
-            display: "grid",
-            gap: "1.5rem",
-            gridTemplateColumns: "minmax(0, 1fr) minmax(18rem, 22rem)",
-          }}
-        >
+        <div className="kxd-os-staff-plan-grid">
           <div>
             <OpsCard>
               <OpsKpiStrip
@@ -226,6 +233,31 @@ export function StaffHomeScreen({
                 ]}
               />
             </OpsCard>
+
+            <section
+              className="kxd-os-staff-intel-briefing"
+              aria-label="KXD Intelligence"
+            >
+              <KxdIntelligenceBriefing
+                observation={briefingObservation(data)}
+                recommendedAction={briefingRecommended(data)}
+                requiresMattCount={requiresMattCount}
+                onOpen={() =>
+                  openWith?.({
+                    pagePath: "/admin/operations/staff",
+                    contextLabel: "Daily staff plan",
+                    contextKind: "staff-home",
+                    workId: startItem?.workId ?? data.primaryAction.workId ?? null,
+                    helpRequests: data.helpRequests,
+                    guidancePrompts: data.guidancePrompts,
+                    primaryAction: data.primaryAction,
+                    planState: startItem?.planState ?? data.primaryAction.planState ?? null,
+                    canAct: data.permissions.canAct,
+                    isPreview: data.permissions.isPreview,
+                  })
+                }
+              />
+            </section>
 
             <section style={{ marginTop: "1.5rem" }} aria-label="Start here">
               <OpsSectionHead label="Start here" />
@@ -350,34 +382,7 @@ export function StaffHomeScreen({
               </OpsCard>
             </section>
           </div>
-
-          <StaffGuidancePanel
-            prompts={data.guidancePrompts}
-            lastResponse={activeGuidanceResponse}
-            onSelectPrompt={handleGuidance}
-            loading={loading}
-            askHelp={
-              <StaffAskHelpControl
-                pagePath="/admin/operations/staff"
-                workId={
-                  data.plan.find((item) => item.bucket === "start-here")?.workId ?? null
-                }
-                canAct={data.permissions.canAct}
-                isPreview={data.permissions.isPreview}
-                existing={data.helpRequests}
-                defaultOpen={
-                  Boolean(activeGuidanceResponse?.involveMatt) ||
-                  data.plan.some(
-                    (item) =>
-                      item.planState === "needs-information" ||
-                      item.currentStatus === "blocked",
-                  )
-                }
-              />
-            }
-          />
         </div>
       </KxdPage>
-    </OperationsShell>
   );
 }

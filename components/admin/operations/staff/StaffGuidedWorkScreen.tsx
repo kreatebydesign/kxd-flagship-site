@@ -285,10 +285,14 @@ export function StaffGuidedWorkScreen({
             <StaffAskHelpControl
               pagePath={`/admin/operations/staff/work/${data.workId}`}
               workId={data.workId}
+              workTitle={data.title}
+              clientLabel={data.clientLabel}
               canAct={canAct}
               isPreview={readOnly}
               existing={data.helpRequests}
               defaultOpen={data.status === "blocked"}
+              contextKind="guided-work"
+              contextLabel={data.title}
             />
           </div>
         </div>

@@ -3,6 +3,11 @@
 import Link from "next/link";
 import { useRef, useState } from "react";
 import {
+  KxdIntelligenceBadge,
+  KxdIntelligencePanel,
+  KxdIntelligenceResponse,
+} from "@/components/os";
+import {
   KXD_INTELLIGENCE_CAPABILITIES,
   defaultIntelligencePromptsForLesson,
 } from "@/lib/training/intelligence";
@@ -67,15 +72,16 @@ export function TrainingIntelligencePanel({
   }
 
   return (
-    <section className="kxd-os-training__intelligence" aria-label="KXD Intelligence">
-      <h2 className="kxd-os-training__section-title">KXD Intelligence</h2>
-      <p className="kxd-os-training__prose">
-        Quiet operational guidance for this lesson. Ask only when you need help — nothing runs
-        until you choose an action.
-      </p>
-
+    <KxdIntelligencePanel
+      as="section"
+      className="kxd-os-training__intelligence"
+      title="Guidance for this lesson"
+      description="Quiet operational guidance. Ask only when you need help — nothing runs until you choose an action."
+      footer="Sensitive decisions go to Matt."
+      aria-label="KXD Intelligence"
+    >
       {ops.askIntelligenceWhen.length > 0 ? (
-        <ul className="kxd-os-training__bullets">
+        <ul className="kxd-os-training__bullets kxd-os-training__bullets--intel">
           {ops.askIntelligenceWhen.map((item) => (
             <li key={item}>{item}</li>
           ))}
@@ -108,18 +114,32 @@ export function TrainingIntelligencePanel({
       </div>
 
       {busy ? (
-        <p className="kxd-os-training__row-meta">Preparing guidance…</p>
+        <p className="kxd-os-intel-callout__desc" role="status">
+          Preparing guidance…
+        </p>
       ) : null}
 
-      {error ? <p className="kxd-os-training__intel-error">{error}</p> : null}
+      {error ? (
+        <p className="kxd-os-training__intel-error" role="alert">
+          {error}
+        </p>
+      ) : null}
 
       {guidance ? (
-        <div className="kxd-os-training__intel-panel" aria-live="polite">
+        <KxdIntelligenceResponse
+          source="deterministic"
+          requiresMatt={guidance.involveMatt}
+          note={
+            guidance.involveMatt
+              ? `Involve Matt${guidance.mattReason ? ` — ${guidance.mattReason}` : "."}`
+              : undefined
+          }
+        >
           <p className="kxd-os-training__intel-answer">{guidance.conciseAnswer}</p>
           <p className="kxd-os-training__intel-step">
             <span className="kxd-os-meta">Next</span> {guidance.recommendedNextStep}
           </p>
-          <p className="kxd-os-training__row-meta">
+          <p className="kxd-os-intel-callout__desc">
             {guidance.reason}
             {" · "}
             Confidence {guidance.confidence}
@@ -130,19 +150,12 @@ export function TrainingIntelligencePanel({
             <p className="kxd-os-training__intel-warning">{guidance.warning}</p>
           ) : null}
 
-          {guidance.involveMatt ? (
-            <p className="kxd-os-training__intel-escalate">
-              Involve Matt
-              {guidance.mattReason ? ` — ${guidance.mattReason}` : "."}
-            </p>
-          ) : null}
-
           {guidance.needsClarification && guidance.clarificationPrompt ? (
             <p className="kxd-os-training__intel-clarify">{guidance.clarificationPrompt}</p>
           ) : null}
 
           {guidance.checklistCorrection ? (
-            <p className="kxd-os-training__row-meta">
+            <p className="kxd-os-intel-callout__desc">
               Checklist {guidance.checklistCorrection.completedCount}/
               {guidance.checklistCorrection.requiredCount}
               {guidance.checklistCorrection.readyToComplete
@@ -158,14 +171,17 @@ export function TrainingIntelligencePanel({
               </Link>
             </p>
           ) : null}
-        </div>
+        </KxdIntelligenceResponse>
       ) : selected && !busy && !error ? (
-        <div className="kxd-os-training__intel-panel">
-          <p className="kxd-os-training__row-meta">
+        <div className="kxd-os-intel-response" style={{ marginTop: "0.75rem" }}>
+          <div className="kxd-os-intel-response__meta">
+            <KxdIntelligenceBadge>Available</KxdIntelligenceBadge>
+          </div>
+          <p className="kxd-os-intel-callout__desc" style={{ marginTop: 0 }}>
             {KXD_INTELLIGENCE_CAPABILITIES.find((c) => c.id === selected)?.description}
           </p>
         </div>
       ) : null}
-    </section>
+    </KxdIntelligencePanel>
   );
 }

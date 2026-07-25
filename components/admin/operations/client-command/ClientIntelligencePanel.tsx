@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { KxdIntelligenceMark } from "@/components/os";
 import { intelQuickButtonsForAction } from "@/lib/client-command/actions/quick-buttons";
 import type { ClientMemoryAction } from "@/lib/client-command/memory/types";
 import type { ClientWorkspaceBundle } from "@/lib/client-command/workspace-types";
@@ -179,8 +180,8 @@ export function ClientIntelligencePanel({ data }: { data: ClientWorkspaceBundle 
     <div className="kxd-os-intel">
       <header className="kxd-os-intel__hero">
         <div>
-          <p className="kxd-os-eyebrow">Client AI Memory</p>
-          <h2 className="kxd-os-intel__title">Executive intelligence</h2>
+          <KxdIntelligenceMark />
+          <h2 className="kxd-os-intel__title">Client Intelligence</h2>
           <p className="kxd-os-intel__status">{memory.currentStatus}</p>
         </div>
         <div className="kxd-os-intel__hero-actions">
