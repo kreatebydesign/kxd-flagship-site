@@ -39,14 +39,14 @@ export const STAFF_RESPONSIBILITY_LIBRARY = [
     key: "website-review-inbox",
     title: "Check Website Review Inbox",
     purpose: "Review Website Review items that require staff triage.",
-    expectedOutcome: "Inbox triaged; sensitive outcomes prepared for Matt.",
+    expectedOutcome: "Inbox triaged; sensitive outcomes prepared for review.",
     estimatedMinutes: 20,
   },
   {
     key: "prepare-follow-ups",
     title: "Prepare approved follow-ups",
     purpose: "Draft follow-ups Matt has already approved in principle.",
-    expectedOutcome: "Drafts ready for Matt's final review — not sent.",
+    expectedOutcome: "Drafts ready for final review — not sent.",
     estimatedMinutes: 30,
   },
   {

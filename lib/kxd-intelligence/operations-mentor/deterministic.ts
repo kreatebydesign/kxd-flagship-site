@@ -102,7 +102,7 @@ export function showExample(context: OperationsMentorContext): Draft {
         "This lesson doesn’t list a separate example yet. Use the walkthrough as the concrete pattern.",
       recommendedNextStep: context.walkthrough[0]
         ? `Follow “${context.walkthrough[0].title}” once.`
-        : "Ask Matt if you need a live example from a real client.",
+        : "Request a Decision if you need a live example from a real client.",
       reason: "Examples are limited to approved lesson content.",
       confidence: "medium",
       involveMatt: !context.walkthrough.length,

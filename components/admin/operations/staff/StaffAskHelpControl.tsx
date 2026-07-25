@@ -63,11 +63,11 @@ function toView(request: StaffHelpRequestView): StaffHelpRequestView {
 
 function statusLabel(row: StaffHelpRequestView): string {
   if (row.mattResponse) {
-    return row.status === "resolved" ? "Matt resolved" : "Matt responded";
+    return row.status === "resolved" ? "Resolved" : "Approver responded";
   }
-  if (row.requiresMatt) return "Waiting on Matt";
+  if (row.requiresMatt) return "Awaiting Approval";
   if (row.intelligenceResponse) return "KXD Intelligence answered";
-  if (row.status === "open") return "Waiting on Matt";
+  if (row.status === "open") return "Awaiting Approval";
   if (row.status === "answered") return "Answered";
   return "Resolved";
 }
@@ -226,7 +226,7 @@ export function StaffAskHelpControl({
     return (
       <KxdIntelligenceCallout
         title="Ask for help"
-        description="Open KXD Intelligence for evidence-bound guidance. Sensitive decisions go to Matt."
+        description="Open KXD Intelligence for evidence-bound guidance. Sensitive decisions require approval."
         inset={inset}
         showMark={!inset}
         action={
@@ -249,7 +249,7 @@ export function StaffAskHelpControl({
                     <KxdIntelligenceBadge source="matt">Matt</KxdIntelligenceBadge>
                   ) : row.requiresMatt ? (
                     <KxdIntelligenceBadge source="escalation" requiresMatt>
-                      Requires Matt
+                      Approval Required
                     </KxdIntelligenceBadge>
                   ) : (
                     <KxdIntelligenceBadge source="deterministic">
@@ -269,7 +269,7 @@ export function StaffAskHelpControl({
   const askForm = (
     <div id={`${formId}-form`} className="kxd-os-intel-ask-form">
       <label className="kxd-os-intel-rail__eyebrow" htmlFor={questionId}>
-        {mode === "matt" ? "What does Matt need to decide?" : "Ask about this work…"}
+        {mode === "matt" ? "What decision is needed?" : "Ask about this work…"}
       </label>
       <textarea
         id={questionId}
@@ -293,7 +293,7 @@ export function StaffAskHelpControl({
           disabled={disabled || question.trim().length < 8}
           onClick={submit}
         >
-          {mode === "matt" ? "Send to Matt" : "Ask KXD Intelligence"}
+          {mode === "matt" ? "Submit for Approval" : "Ask KXD Intelligence"}
         </KxdButton>
         {open ? (
           <KxdButton
@@ -326,7 +326,7 @@ export function StaffAskHelpControl({
           requiresMatt={latest.requiresMatt}
           note={
             latest.requiresMatt
-              ? "I need Matt to confirm this. It is in his review queue."
+              ? "Approval Required — this is in the Approval Queue."
               : undefined
           }
         >
@@ -351,7 +351,7 @@ export function StaffAskHelpControl({
                 <KxdIntelligenceBadge source="matt">Matt</KxdIntelligenceBadge>
               ) : row.requiresMatt ? (
                 <KxdIntelligenceBadge source="escalation" requiresMatt>
-                  Requires Matt
+                  Approval Required
                 </KxdIntelligenceBadge>
               ) : row.responseSource === "ai-assisted" ? (
                 <KxdIntelligenceBadge source="ai-assisted" />
@@ -380,7 +380,7 @@ export function StaffAskHelpControl({
   return (
     <KxdIntelligenceCallout
       title="Ask for help"
-      description="Short question or blocker. Safe answers come from KXD Intelligence. Sensitive decisions go to Matt."
+      description="Short question or blocker. Safe answers come from KXD Intelligence. Sensitive decisions require approval."
       inset={inset}
       showMark={!inset}
       action={

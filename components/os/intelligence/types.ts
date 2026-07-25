@@ -33,6 +33,10 @@ export type KxdIntelligenceTimelineItem = {
   meta?: string | null;
   createdAt?: string | null;
   helpId?: number | null;
+  /** Context-specific approval state (presentation only). */
+  stateLabel?: string | null;
+  /** Resolved assignee display name when truthfully known. */
+  assignedApprover?: string | null;
 };
 
 export type KxdIntelligenceSessionConfig = {

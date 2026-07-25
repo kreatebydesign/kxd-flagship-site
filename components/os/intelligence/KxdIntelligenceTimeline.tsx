@@ -1,7 +1,12 @@
 "use client";
 
 import { useMemo } from "react";
+import {
+  approvalStateLabelForTopic,
+  resolveAssignedApproverName,
+} from "@/lib/staff/approval-presentation";
 import type { StaffGuidanceResponse } from "@/lib/staff/guidance";
+import { detectSensitiveTopic } from "@/lib/staff/sensitive-topics";
 import type { StaffHelpRequestView } from "@/lib/staff/types";
 import { kxdOsCn } from "../utils";
 import { KxdIntelligenceMessage } from "./KxdIntelligenceMessage";
@@ -28,34 +33,63 @@ function helpToTimeline(rows: StaffHelpRequestView[]): KxdIntelligenceTimelineIt
           : null,
     });
 
+    const openEscalation = Boolean(row.requiresMatt && !row.mattResponse);
+    const topic = openEscalation ? detectSensitiveTopic(row.question) : null;
+    const stateLabel = openEscalation ? approvalStateLabelForTopic(topic) : null;
+    const assignedApprover = openEscalation
+      ? resolveAssignedApproverName({
+          requiresApproval: true,
+          hasApproverResponse: Boolean(row.mattResponse),
+        })
+      : null;
+
     if (row.intelligenceResponse) {
+      // One cohesive Intelligence response — escalation state is folded in.
+      // Do not emit a second conversational bubble for the same help record.
       items.push({
         id: `help-a-${row.id}`,
         kind: row.responseSource === "ai-assisted" ? "ai-assisted" : "deterministic",
         body: row.intelligenceResponse,
         createdAt: row.answeredAt ?? row.createdAt,
         helpId: row.id,
+        stateLabel,
+        assignedApprover,
+        meta: openEscalation
+          ? "Request routed · Prepare context · Continue safe work while you wait"
+          : null,
       });
-    }
-
-    if (row.requiresMatt && !row.mattResponse) {
+    } else if (openEscalation) {
+      // Fallback only when no stored intelligence response exists (legacy / edge).
       items.push({
         id: `help-esc-${row.id}`,
         kind: "requires-matt",
-        body: "This needs Matt’s judgment. It is in his review queue — keep working on safe next steps while you wait.",
+        body: "This decision requires an authorized approver. It is in the Approval Queue — keep working on safe next steps while you wait.",
         createdAt: row.answeredAt ?? row.createdAt,
         helpId: row.id,
+        stateLabel,
+        assignedApprover,
       });
     }
 
     if (row.mattResponse) {
+      const approverName = resolveAssignedApproverName({
+        requiresApproval: true,
+        hasApproverResponse: true,
+      });
       items.push({
         id: `help-matt-${row.id}`,
         kind: "matt",
         body: row.mattResponse,
         createdAt: row.answeredAt ?? row.createdAt,
         helpId: row.id,
-        meta: row.status === "resolved" ? "Resolved by Matt" : "Matt responded",
+        meta:
+          row.status === "resolved"
+            ? approverName
+              ? `Resolved by ${approverName}`
+              : "Resolved"
+            : approverName
+              ? `${approverName} responded`
+              : "Approver responded",
       });
     }
   }
@@ -68,17 +102,16 @@ function guidanceToTimeline(
 ): KxdIntelligenceTimelineItem[] {
   if (!guidance) return [];
 
+  const openEscalation = Boolean(guidance.involveMatt);
   const metaParts = [
-    guidance.involveMatt
-      ? `Matt involvement: ${guidance.mattReason ?? "Approval or judgment required."}`
-      : guidance.warning,
+    openEscalation ? null : guidance.warning,
     guidance.evidence.length > 0 ? `Evidence: ${guidance.evidence.join(" · ")}` : null,
   ].filter(Boolean);
 
   return [
     {
       id: `guidance-${guidance.conciseAnswer.slice(0, 24)}`,
-      kind: guidance.involveMatt ? "requires-matt" : "guidance",
+      kind: openEscalation ? "requires-matt" : "guidance",
       body: [
         guidance.conciseAnswer,
         "",
@@ -88,6 +121,10 @@ function guidanceToTimeline(
         .filter(Boolean)
         .join("\n")
         .trim(),
+      stateLabel: openEscalation ? "Approval Required" : null,
+      assignedApprover: openEscalation
+        ? resolveAssignedApproverName({ requiresApproval: true })
+        : null,
       meta: metaParts.length > 0 ? metaParts.join(" · ") : null,
     },
   ];

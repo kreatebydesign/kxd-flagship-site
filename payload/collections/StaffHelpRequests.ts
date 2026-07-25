@@ -19,7 +19,7 @@ export const StaffHelpRequests: CollectionConfig = {
     defaultColumns: ["staffUser", "status", "work", "createdAt", "updatedAt"],
     group: PAYLOAD_GROUPS.kxdOs,
     description:
-      "Internal Ask Matt for help. Workspace: /admin/operations/staff/oversight",
+      "Internal staff help / approval requests. Workspace: /admin/operations/staff/oversight",
   },
   access: {
     read: isAuthenticated,
@@ -77,14 +77,17 @@ export const StaffHelpRequests: CollectionConfig = {
       name: "mattResponse",
       type: "textarea",
       required: false,
-      admin: { description: "Matt's response — visible to the requesting staff member." },
+      admin: {
+        description:
+          "Approver response (currently Matt Lunger) — visible to the requesting staff member.",
+      },
     },
     {
       name: "intelligenceResponse",
       type: "textarea",
       required: false,
       admin: {
-        description: "KXD Intelligence response — never labeled as Matt.",
+        description: "KXD Intelligence response — never attributed as the approver.",
       },
     },
     {
@@ -95,7 +98,7 @@ export const StaffHelpRequests: CollectionConfig = {
         { label: "None", value: "none" },
         { label: "Deterministic", value: "deterministic" },
         { label: "AI-assisted", value: "ai-assisted" },
-        { label: "Matt", value: "matt" },
+        { label: "Approver", value: "matt" },
       ],
       admin: { position: "sidebar" },
     },
@@ -116,7 +119,8 @@ export const StaffHelpRequests: CollectionConfig = {
       defaultValue: false,
       admin: {
         position: "sidebar",
-        description: "When true, remains in Matt's help queue even if Intelligence replied.",
+        description:
+          "When true, remains in the Approval Queue even if Intelligence replied.",
       },
     },
     {

@@ -77,7 +77,7 @@ export function TrainingIntelligencePanel({
       className="kxd-os-training__intelligence"
       title="Guidance for this lesson"
       description="Quiet operational guidance. Ask only when you need help — nothing runs until you choose an action."
-      footer="Sensitive decisions go to Matt."
+      footer="Sensitive decisions require approval."
       aria-label="KXD Intelligence"
     >
       {ops.askIntelligenceWhen.length > 0 ? (
@@ -131,7 +131,7 @@ export function TrainingIntelligencePanel({
           requiresMatt={guidance.involveMatt}
           note={
             guidance.involveMatt
-              ? `Involve Matt${guidance.mattReason ? ` — ${guidance.mattReason}` : "."}`
+              ? `Approval Required${guidance.mattReason ? ` — ${guidance.mattReason}` : "."}`
               : undefined
           }
         >

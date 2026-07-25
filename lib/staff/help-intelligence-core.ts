@@ -3,6 +3,10 @@
  * Kept free of server-only so verify scripts can import safely.
  */
 
+import {
+  buildEscalationIntelligenceResponse,
+  escalationRecommendedNextStep,
+} from "@/lib/staff/approval-presentation";
 import { detectSensitiveTopic } from "@/lib/staff/sensitive-topics";
 import type { WorkListItem } from "@/lib/work/types";
 import type { StaffActor } from "./types";
@@ -54,11 +58,11 @@ export function answerStaffHelpDeterministic(input: {
   const escalation = detectStaffEscalationTopic(q);
   if (escalation) {
     return {
-      intelligenceResponse: `KXD Intelligence: I can help you prepare context, but Matt needs to confirm ${escalation} before this moves forward. I’ve placed the question in his review queue.`,
+      intelligenceResponse: buildEscalationIntelligenceResponse(escalation),
       responseSource: "deterministic",
       confidence: "high",
       requiresMatt: true,
-      recommendedNextStep: "Wait for Matt — do not invent an answer or act alone.",
+      recommendedNextStep: escalationRecommendedNextStep(),
     };
   }
 
@@ -88,7 +92,7 @@ export function answerStaffHelpDeterministic(input: {
   if (/status mean|what does .* status|waiting on|blocked|review mean/i.test(lower)) {
     return {
       intelligenceResponse:
-        "KXD Intelligence: Review means Matt must approve before it finishes. Waiting on KXD means the studio side is blocked on Matt or another internal step. Blocked means something must clear before you continue — document it, then move to ready work.",
+        "KXD Intelligence: Review means an authorized approver must decide before it finishes. Awaiting Approval means the studio side is blocked on that decision or another internal step. Blocked means something must clear before you continue — document it, then move to ready work.",
       responseSource: "deterministic",
       confidence: "high",
       requiresMatt: false,
@@ -99,22 +103,22 @@ export function answerStaffHelpDeterministic(input: {
   if (/prepare .* matt|for matt|approval|submit for review/i.test(lower)) {
     return {
       intelligenceResponse:
-        "KXD Intelligence: Prepare a short facts-only packet: what was requested, what you verified, what is still missing, and the draft. Submit for Matt’s review. Do not send, publish, charge, or promise anything to the client.",
+        "KXD Intelligence: Prepare a short facts-only packet: what was requested, what you verified, what is still missing, and the draft. Submit for Approval. Do not send, publish, charge, or promise anything to the client.",
       responseSource: "deterministic",
       confidence: "high",
       requiresMatt: false,
-      recommendedNextStep: "Use Prepare for Matt on the guided work screen.",
+      recommendedNextStep: "Use Prepare for Review on the guided work screen.",
     };
   }
 
   if (/why .* approv|require approval|must matt/i.test(lower)) {
     return {
       intelligenceResponse:
-        "KXD Intelligence: Anything that changes money, access, public content, pricing, or client promises returns to Matt. You may prepare; you may not finalize alone.",
+        "KXD Intelligence: Anything that changes money, access, public content, pricing, or client promises requires approval. You may prepare; you may not finalize alone.",
       responseSource: "deterministic",
       confidence: "high",
       requiresMatt: false,
-      recommendedNextStep: "Prepare the packet, then submit for review.",
+      recommendedNextStep: "Prepare the packet, then submit for approval.",
     };
   }
 
@@ -122,7 +126,7 @@ export function answerStaffHelpDeterministic(input: {
     return {
       intelligenceResponse: input.work
         ? `KXD Intelligence: Start on this assignment’s guided work screen and the summary already on file. ${workLine} Use training if the procedure is unfamiliar.`
-        : "KXD Intelligence: Use your Daily Staff Plan for assigned work, Training for procedures, and Ask Matt only when you are blocked on judgment or authority.",
+        : "KXD Intelligence: Use your Daily Staff Plan for assigned work, Training for procedures, and Request a Decision only when you are blocked on judgment or authority.",
       responseSource: "deterministic",
       confidence: "medium",
       requiresMatt: false,
@@ -133,7 +137,7 @@ export function answerStaffHelpDeterministic(input: {
   if (/can i proceed|am i allowed|may i /i.test(lower)) {
     return {
       intelligenceResponse:
-        "KXD Intelligence: You may proceed inside your checklist and permission boundary. If the action sends externally, changes money, access, or public content — stop and prepare it for Matt instead.",
+        "KXD Intelligence: You may proceed inside your checklist and permission boundary. If the action sends externally, changes money, access, or public content — stop and prepare it for review instead.",
       responseSource: "deterministic",
       confidence: "high",
       requiresMatt: false,
@@ -144,7 +148,7 @@ export function answerStaffHelpDeterministic(input: {
   if (/draft|structure|internal note|how should i write/i.test(lower)) {
     return {
       intelligenceResponse:
-        "KXD Intelligence: Structure the internal draft as: (1) request, (2) verified facts, (3) open questions, (4) proposed next step. Label anything AI-assisted. Keep it internal until Matt approves external send.",
+        "KXD Intelligence: Structure the internal draft as: (1) request, (2) verified facts, (3) open questions, (4) proposed next step. Label anything AI-assisted. Keep it internal until an authorized approver approves external send.",
       responseSource: "deterministic",
       confidence: "high",
       requiresMatt: false,
@@ -155,7 +159,7 @@ export function answerStaffHelpDeterministic(input: {
   if (/procedure|training|how do i complete|how do i do this step/i.test(lower)) {
     return {
       intelligenceResponse:
-        "KXD Intelligence: Open the related Training lesson when you need the procedure, then return to guided work. Complete the checklist in order. If the lesson and the assignment conflict, ask Matt.",
+        "KXD Intelligence: Open the related Training lesson when you need the procedure, then return to guided work. Complete the checklist in order. If the lesson and the assignment conflict, request a decision.",
       responseSource: "deterministic",
       confidence: "medium",
       requiresMatt: false,
@@ -165,11 +169,11 @@ export function answerStaffHelpDeterministic(input: {
 
   return {
     intelligenceResponse: workLine
-      ? `KXD Intelligence: Here’s how to move forward. ${workLine} Read the request, verify facts already in KXD, prepare the next draft or update inside your authority, and ask Matt only when approval or judgment is required.`
-      : "KXD Intelligence: Here’s how to move forward. Use your Daily Staff Plan Start Here action. Work from verified records only. Escalate to Matt when the next step needs approval or judgment.",
+      ? `KXD Intelligence: Here’s how to move forward. ${workLine} Read the request, verify facts already in KXD, prepare the next draft or update inside your authority, and request a decision only when approval or judgment is required.`
+      : "KXD Intelligence: Here’s how to move forward. Use your Daily Staff Plan Start Here action. Work from verified records only. Request a Decision when the next step needs approval or judgment.",
     responseSource: "deterministic",
     confidence: "medium",
     requiresMatt: false,
-    recommendedNextStep: "Take the next checklist step, or ask Matt if still blocked.",
+    recommendedNextStep: "Take the next checklist step, or request a decision if still blocked.",
   };
 }

@@ -85,9 +85,9 @@ export function StaffGuidedWorkScreen({
       });
       const payload = (await res.json()) as { success?: boolean; error?: string };
       if (!res.ok || payload.success === false) {
-        throw new Error(payload.error ?? "Could not submit for Matt's review.");
+        throw new Error(payload.error ?? "Could not submit for approval.");
       }
-      setMessage("Submitted for Matt's review. Do not send or finalize externally.");
+      setMessage("Submitted for approval. Do not send or finalize externally.");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not submit for review.");
@@ -257,7 +257,7 @@ export function StaffGuidedWorkScreen({
                   disabled={mutationsDisabled || !requiredComplete}
                   onClick={handleSubmitReview}
                 >
-                  Prepare for Matt
+                  Prepare for Review
                 </KxdButton>
               ) : null}
 

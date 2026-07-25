@@ -37,9 +37,9 @@ function planStateBadge(state: StaffPlanState): {
     case "needs-information":
       return { label: "Needs information", variant: "critical" };
     case "prepare-for-matt":
-      return { label: "Prepare for Matt", variant: "pending" };
+      return { label: "Prepare for Review", variant: "pending" };
     case "waiting-on-matt":
-      return { label: "Waiting on Matt", variant: "pending" };
+      return { label: "Awaiting Approval", variant: "pending" };
     case "training-required":
       return { label: "Training required", variant: "status" };
     case "scheduled-later":
@@ -76,7 +76,7 @@ function PlanRow({ item, showOrder }: { item: StaffPlanItem; showOrder?: boolean
         </p>
         <p className="kxd-os-meta" style={{ marginTop: "0.35rem" }}>
           Next: {item.safestNextAction}
-          {item.requiresMattApproval ? " · Matt must approve sensitive outcomes." : ""}
+          {item.requiresMattApproval ? " · Sensitive outcomes require approval." : ""}
         </p>
       </div>
     </OpsListRow>
@@ -210,7 +210,7 @@ function StaffHomeBody({
                     sub: "Ready for you today",
                   },
                   {
-                    label: "Waiting on Matt",
+                    label: "Awaiting Approval",
                     value: String(data.morning.waitingOnMattCount),
                     sub: "Do not reopen repeatedly",
                   },
@@ -322,14 +322,14 @@ function StaffHomeBody({
               </section>
             ) : null}
 
-            <section style={{ marginTop: "1.5rem" }} aria-label="Waiting on Matt">
+            <section style={{ marginTop: "1.5rem" }} aria-label="Awaiting Approval">
               <OpsSectionHead
-                label="Waiting on Matt"
+                label="Awaiting Approval"
                 count={data.waitingOnMatt.length}
               />
               <OpsCard>
                 {data.waitingOnMatt.length === 0 ? (
-                  <p className="kxd-os-meta">Nothing is waiting on Matt right now.</p>
+                  <p className="kxd-os-meta">Nothing is awaiting approval right now.</p>
                 ) : (
                   data.waitingOnMatt.map((item) => (
                     <div key={item.id} className="kxd-os-ops-list-row">

@@ -70,23 +70,30 @@ export const osColors = {
     disabled: "rgba(29, 29, 31, 0.28)",
   },
   /**
-   * KXD Intelligence product identity — deep navy surface + system-blue signal.
+   * KXD Intelligence product identity — light theme (default).
+   * Refined cool surface + navy/graphite text. Dark mirror in osDarkColors.
    * Use only on Intelligence feature surfaces; never as default OS chrome.
    */
   intelligence: {
-    surface: "#0E1C33",
-    surfaceElevated: "#13233C",
-    surfaceStrong: "#1A2F4F",
-    border: "rgba(0, 113, 227, 0.34)",
-    signal: "#0071E3",
-    textPrimary: "#F5F5F7",
-    /** Muted blue-gray — WCAG AA on navy surfaces (~7:1). */
-    textSecondary: "#C2CBD9",
-    focus: "rgba(0, 113, 227, 0.55)",
-    success: "#30D158",
-    successMuted: "rgba(48, 209, 88, 0.14)",
-    escalation: "#FF9F0A",
-    escalationMuted: "rgba(255, 159, 10, 0.14)",
+    surface: "#F2F5FA",
+    surfaceElevated: "#FFFFFF",
+    surfaceStrong: "#E7ECF4",
+    border: "rgba(0, 96, 198, 0.28)",
+    /** Darker than system blue so small identity type clears WCAG AA on light. */
+    signal: "#0060C6",
+    signalHover: "#0050A8",
+    cta: "#0060C6",
+    ctaHover: "#0050A8",
+    textPrimary: "#0E1C33",
+    /** Graphite — strong secondary contrast on light intel surfaces (~8.7:1). */
+    textSecondary: "#3A4658",
+    focus: "rgba(0, 96, 198, 0.45)",
+    success: "#1F7A35",
+    successMuted: "rgba(31, 122, 53, 0.12)",
+    escalation: "#9A5B00",
+    escalationMuted: "rgba(154, 91, 0, 0.12)",
+    onSignal: "#FFFFFF",
+    inputBg: "#FFFFFF",
   },
   roles: {
     canvas: "bg.canvas",
@@ -159,15 +166,22 @@ export const osDarkColors = {
     surfaceElevated: "#101C32",
     surfaceStrong: "#162840",
     border: "rgba(10, 132, 255, 0.38)",
+    /** Bright signal for identity/links on navy (~5.1:1). */
     signal: "#0A84FF",
+    signalHover: "#409CFF",
+    /** Deeper CTA fill so white labels clear WCAG AA body (~5.2:1). */
+    cta: "#006AD6",
+    ctaHover: "#0050A8",
     textPrimary: "#F5F5F7",
-    /** Muted blue-gray — WCAG AA on navy surfaces (~7:1). */
+    /** Cool blue-gray — WCAG AA on navy surfaces (~11:1). */
     textSecondary: "#C2CBD9",
     focus: "rgba(10, 132, 255, 0.6)",
     success: "#30D158",
     successMuted: "rgba(48, 209, 88, 0.16)",
     escalation: "#FF9F0A",
     escalationMuted: "rgba(255, 159, 10, 0.16)",
+    onSignal: "#FFFFFF",
+    inputBg: "#0C182B",
   },
 } as const;
 

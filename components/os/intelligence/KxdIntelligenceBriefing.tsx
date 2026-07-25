@@ -1,5 +1,6 @@
 "use client";
 
+import { approvalRequiredCountLabel } from "@/lib/staff/approval-presentation";
 import { KxdButton } from "../KxdButton";
 import { KxdIntelligenceBadge } from "../KxdIntelligence";
 import { kxdOsCn } from "../utils";
@@ -18,6 +19,8 @@ export function KxdIntelligenceBriefing({
   onOpen: () => void;
   className?: string;
 }) {
+  const approvalLabel = approvalRequiredCountLabel(requiresMattCount);
+
   return (
     <section
       className={kxdOsCn("kxd-os-intel-briefing", className)}
@@ -27,11 +30,9 @@ export function KxdIntelligenceBriefing({
         <div className="kxd-os-intel-briefing__identity">
           <KxdIntelligenceSymbol />
           <p className="kxd-os-intel-mark">KXD Intelligence</p>
-          {requiresMattCount > 0 ? (
+          {approvalLabel ? (
             <KxdIntelligenceBadge source="escalation" requiresMatt>
-              {requiresMattCount === 1
-                ? "1 requires Matt"
-                : `${requiresMattCount} require Matt`}
+              {approvalLabel}
             </KxdIntelligenceBadge>
           ) : null}
         </div>

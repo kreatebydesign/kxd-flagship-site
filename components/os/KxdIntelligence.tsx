@@ -24,7 +24,7 @@ const SOURCE_LABEL: Record<KxdIntelligenceSource, string> = {
   "ai-assisted": "AI-assisted",
   matt: "Matt",
   answered: "KXD Intelligence",
-  escalation: "Requires Matt",
+  escalation: "Approval Required",
   unable: "Unable to answer safely",
   unavailable: "Intelligence unavailable",
 };

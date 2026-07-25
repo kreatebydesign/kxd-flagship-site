@@ -61,7 +61,7 @@ export async function POST(request: Request) {
       "You already asked about this recently. Showing your existing request.";
   } else if (req.requiresMatt) {
     message =
-      "KXD Intelligence replied. Matt still needs to confirm — it is in his review queue.";
+      "KXD Intelligence replied. Approval Required — it is in the Approval Queue.";
   } else if (req.intelligenceResponse) {
     message = "KXD Intelligence replied.";
   } else {

@@ -40,7 +40,7 @@ export async function POST(request: Request, context: RouteContext) {
     );
   }
 
-  // Sensitive categories still require Matt — force review instead of complete.
+  // Sensitive categories still require approval — force review instead of complete.
   const needsMatt =
     work.priority === "critical" ||
     /invoice|billing|payment|agreement|entitlement/i.test(
@@ -52,7 +52,7 @@ export async function POST(request: Request, context: RouteContext) {
       {
         success: false,
         error:
-          "This item requires Matt's approval. Use Prepare for Matt instead of Complete.",
+          "This item requires approval. Use Prepare for Review instead of Complete.",
       },
       { status: 403 },
     );

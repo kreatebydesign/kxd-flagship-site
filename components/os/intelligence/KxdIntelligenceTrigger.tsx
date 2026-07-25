@@ -1,5 +1,6 @@
 "use client";
 
+import { approvalRequiredCountLabel } from "@/lib/staff/approval-presentation";
 import { kxdOsCn } from "../utils";
 import { useKxdIntelligenceOptional } from "./KxdIntelligenceProvider";
 import { KxdIntelligenceSymbol } from "./KxdIntelligenceSymbol";
@@ -35,7 +36,7 @@ export function KxdIntelligenceTrigger({
       aria-controls="kxd-intelligence-workspace"
       aria-label={
         intel.hasAttention
-          ? `${label} — ${intel.requiresMattCount} require Matt`
+          ? `${label} — ${approvalRequiredCountLabel(intel.requiresMattCount)}`
           : label
       }
       title="KXD Intelligence (⌘⇧I)"

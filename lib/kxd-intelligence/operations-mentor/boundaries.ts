@@ -20,8 +20,8 @@ export function unsupportedTopicResponse(topic: string): {
 } {
   return {
     conciseAnswer: `I can’t confirm ${topic} from approved Operations Experience knowledge.`,
-    recommendedNextStep: "Ask Matt before acting on this.",
-    reason: "This topic requires founder confirmation — guessing would be unsafe.",
+    recommendedNextStep: "Request a Decision before acting on this.",
+    reason: "This topic requires authorized approval — guessing would be unsafe.",
     involveMatt: true,
     mattReason: `${topic} is outside automatic Operations guidance.`,
     warning: "Do not invent pricing, terms, commitments, legal answers, HR decisions, or permissions.",

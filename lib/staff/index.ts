@@ -63,6 +63,14 @@ export {
   requiresMattApproval,
 } from "./prioritize";
 export {
+  CURRENT_STUDIO_APPROVER_NAME,
+  approvalStateLabelForTopic,
+  approvalRequiredCountLabel,
+  buildEscalationIntelligenceResponse,
+  resolveAssignedApproverName,
+  assignedApproverLine,
+} from "./approval-presentation";
+export {
   buildStaffPreviewSession,
   encodeStaffPreviewSession,
   decodeStaffPreviewSession,

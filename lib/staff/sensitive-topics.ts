@@ -3,7 +3,7 @@
  * Facts-only permission gate — not AI. Used by staff help (and operations mentor).
  *
  * Ambiguous questions that may create financial, legal, access, HR, publishing,
- * or client commitments escalate to Matt.
+ * or client commitments escalate for authorized approval.
  */
 
 type SensitiveRule = {
@@ -107,7 +107,7 @@ const SENSITIVE_RULES: SensitiveRule[] = [
 ];
 
 /**
- * Detect whether a staff/ops question requires Matt before acting.
+ * Detect whether a staff/ops question requires authorized approval before acting.
  * Returns a stable topic label, or null when routine guidance is allowed.
  */
 export function detectSensitiveTopic(question: string | null | undefined): string | null {

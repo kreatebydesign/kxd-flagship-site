@@ -18,7 +18,6 @@ import type {
   StaffPrimaryAction,
   StaffWaitingOnMattItem,
 } from "./types";
-import { STAFF_FOUNDATION_PATH_SLUG } from "./permissions";
 import {
   bandLabel,
   classifyActionableBand,
@@ -115,9 +114,9 @@ function planStateLabel(state: StaffPlanState): string {
     case "needs-information":
       return "Needs information";
     case "prepare-for-matt":
-      return "Prepare for Matt";
+      return "Prepare for Review";
     case "waiting-on-matt":
-      return "Waiting on Matt";
+      return "Awaiting Approval";
     case "training-required":
       return "Training required";
     case "scheduled-later":
@@ -150,9 +149,9 @@ function toWorkPlanItem(
     kind: work.tags.includes("staff-responsibility") ? "responsibility" : "work",
     title: work.title,
     clientOrCategory: clientOrCategory(work),
-    whyItMatters: band != null ? whyForBand(band, work) : "Matt must act before you can finish this.",
+    whyItMatters: band != null ? whyForBand(band, work) : "An authorized approver must act before you can finish this.",
     expectedOutcome: approval
-      ? "A prepared packet ready for Matt's review — not a final external action."
+      ? "A prepared packet ready for review — not a final external action."
       : "A clear update or completion within your authority.",
     estimatedMinutes: estimateMinutes(work),
     dueState: dueState(work, now),
@@ -168,13 +167,13 @@ function toWorkPlanItem(
         : planState === "needs-information"
           ? "Gather facts from KXD records — do not invent them."
           : planState === "prepare-for-matt"
-            ? "Prepare carefully, then submit for Matt's review."
+            ? "Prepare carefully, then submit for approval."
             : "Open guided work mode and follow the checklist.",
     href: workHref(work.id),
     workId: work.id,
     priorityBand: band,
     evidence: [
-      band != null ? `Priority: ${bandLabel(band)}` : "Waiting on Matt",
+      band != null ? `Priority: ${bandLabel(band)}` : "Awaiting Approval",
       `Status: ${work.status}`,
       dueState(work, now),
       `Plan state: ${planStateLabel(planState)}`,
@@ -329,7 +328,7 @@ export function buildStaffPlan(input: {
       title: work.title,
       preparedSummary:
         work.summary?.trim() ||
-        "You prepared this item and submitted it for Matt's decision.",
+        "You prepared this item and submitted it for a decision.",
       decisionNeeded:
         work.status === "review"
           ? "Matt needs to approve, return, or clarify."
@@ -401,7 +400,7 @@ export function buildStaffPlan(input: {
       estimatedMinutes: startItem.estimatedMinutes,
       permissionStatus: startItem.canAct
         ? startItem.requiresMattApproval
-          ? "Prepare only — Matt must approve sensitive outcomes"
+          ? "Prepare only — sensitive outcomes require approval"
           : "You may advance this within your authority"
         : "Waiting — do not force progress",
       planState: startItem.planState,

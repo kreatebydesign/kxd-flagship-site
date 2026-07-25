@@ -1,5 +1,5 @@
 /**
- * Staff help requests — Ask Matt for help.
+ * Staff help requests — Ask KXD Intelligence / request a decision.
  * Reuses Shared Core + oversight surface. Not a messaging platform.
  */
 
@@ -179,7 +179,7 @@ export async function createStaffHelpRequest(input: {
     return { ok: false, error: "Question is too long.", status: 400 };
   }
 
-  let workId = input.workId ?? null;
+  const workId = input.workId ?? null;
   let clientId: number | null = null;
   let work = null as Awaited<ReturnType<typeof getWorkItem>>;
 
@@ -253,7 +253,7 @@ export async function listOpenHelpRequestsForOversight(): Promise<
   StaffHelpRequestRecord[]
 > {
   const payload = await getPayload({ config });
-  // Awaiting Matt: open, or requires Matt without Matt's response yet.
+  // Awaiting approval: open, or requiresMatt without approver response yet.
   const result = await payload.find({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     collection: STAFF_HELP_COLLECTION as any,

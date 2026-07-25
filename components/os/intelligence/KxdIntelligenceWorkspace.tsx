@@ -273,8 +273,8 @@ export function KxdIntelligenceWorkspace() {
                     <p className="kxd-os-intel-workspace__history-q">{row.question}</p>
                     <p className="kxd-os-intel-workspace__history-meta">
                       {new Date(row.createdAt).toLocaleString()}
-                      {row.requiresMatt && !row.mattResponse ? " · Requires Matt" : ""}
-                      {row.mattResponse ? " · Matt responded" : ""}
+                      {row.requiresMatt && !row.mattResponse ? " · Approval Required" : ""}
+                      {row.mattResponse ? " · Approver responded" : ""}
                     </p>
                   </div>
                 ))

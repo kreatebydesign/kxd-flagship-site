@@ -35,6 +35,7 @@ import {
   answerStaffHelpDeterministic,
   detectStaffEscalationTopic,
 } from "../lib/staff/help-intelligence-core";
+import { approvalRequiredCountLabel } from "../lib/staff/approval-presentation";
 import {
   isPayloadAdmin,
   isRestrictedStaffPayloadUser,
@@ -405,8 +406,13 @@ const priceQ = answerStaffHelpDeterministic({
   actor: heather!,
 });
 assert.equal(priceQ.requiresMatt, true);
-assert.match(priceQ.intelligenceResponse, /Matt needs to confirm/);
+assert.match(priceQ.intelligenceResponse, /authorized approver|routed this for approval/i);
+assert.doesNotMatch(priceQ.intelligenceResponse, /Matt needs to confirm/i);
+assert.doesNotMatch(priceQ.intelligenceResponse, /\brequires Matt\b/i);
 assert.equal(detectStaffEscalationTopic("What price should I quote"), "pricing");
+assert.equal(approvalRequiredCountLabel(1), "1 approval required");
+assert.equal(approvalRequiredCountLabel(3), "3 approvals required");
+assert.equal(approvalRequiredCountLabel(0), "");
 
 const mustEscalate: Array<{ question: string; topicIncludes?: RegExp }> = [
   { question: "What should we charge?", topicIncludes: /pricing/ },
@@ -439,7 +445,10 @@ for (const { question, topicIncludes } of mustEscalate) {
     actor: heather!,
   });
   assert.equal(row.requiresMatt, true, `requiresMatt: ${question}`);
-  assert.match(row.intelligenceResponse, /Matt needs to confirm|review queue/i);
+  assert.match(
+    row.intelligenceResponse,
+    /authorized approver|routed this for approval|Approval Queue/i,
+  );
   assert.doesNotMatch(row.intelligenceResponse, /\$\s*[\d,]+|charge them \$|quote them \$/i);
   assert.doesNotMatch(row.intelligenceResponse, /Here’s how to move forward/i);
 }

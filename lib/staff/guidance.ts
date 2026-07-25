@@ -15,13 +15,17 @@ export const STAFF_GUIDANCE_PROMPTS: StaffGuidancePrompt[] = [
   { id: "check", label: "Review my work", prompt: "Check my work" },
   {
     id: "prepare-matt",
-    label: "Help me prepare this for Matt",
-    prompt: "Help me prepare this for Matt",
+    label: "Help me prepare this for review",
+    prompt: "Help me prepare this for review",
   },
   { id: "why-wait", label: "Explain why I must wait", prompt: "Why must I wait?" },
   { id: "next", label: "What should I do after this?", prompt: "What should I do next?" },
   { id: "wrap-up", label: "Help me wrap up today", prompt: "Help me wrap up today" },
-  { id: "matt", label: "Should I ask Matt?", prompt: "Should I continue or ask Matt?" },
+  {
+    id: "matt",
+    label: "Should I request a decision?",
+    prompt: "Should I continue or request a decision?",
+  },
   { id: "explain", label: "Explain this page", prompt: "Explain this page" },
 ];
 
@@ -49,13 +53,13 @@ const SAFE_ASSISTED = [
   "Organize the daily sequence",
   "Explain workflow status",
   "Draft internal notes for review",
-  "Draft client communications for Matt's approval",
+  "Draft client communications for approval",
   "Identify missing client information",
   "Prepare invoice verification summaries",
   "Prepare onboarding checklists",
   "Suggest scheduling options",
   "Check a draft against KXD standards",
-  "Prepare an approval packet for Matt",
+  "Prepare an approval packet",
   "Recommend continue, wait, or escalate",
   "Help wrap up the day from real activity",
 ] as const;
@@ -143,7 +147,7 @@ export function buildDeterministicStaffGuidance(input: {
       aiGenerated: false,
       evidence: [
         `Actionable today: ${today?.morning.actionableCount ?? "—"}`,
-        `Waiting on Matt: ${today?.morning.waitingOnMattCount ?? "—"}`,
+        `Awaiting Approval: ${today?.morning.waitingOnMattCount ?? "—"}`,
       ],
       warning: null,
     };
@@ -152,8 +156,8 @@ export function buildDeterministicStaffGuidance(input: {
   if (id === "approval" || id === "matt" || id === "prepare-matt") {
     return {
       conciseAnswer:
-        "Anything that changes money, access, public content, pricing, or client promises returns to Matt. You may prepare drafts and checklists; you may not finalize alone.",
-      recommendedNextStep: "Prepare the packet, then submit for Matt's review.",
+        "Anything that changes money, access, public content, pricing, or client promises requires approval. You may prepare drafts and checklists; you may not finalize alone.",
+      recommendedNextStep: "Prepare the packet, then submit for approval.",
       reason: "Permission boundary for operations_coordinator authority.",
       involveMatt: true,
       mattReason: "Approval or judgment required before external or sensitive action.",
@@ -167,7 +171,7 @@ export function buildDeterministicStaffGuidance(input: {
   if (id === "check" || id === "missing") {
     return {
       conciseAnswer:
-        "Check that every fact came from KXD records or Matt — not invention. Confirm the checklist items you can honestly mark complete.",
+        "Check that every fact came from KXD records or an authorized note — not invention. Confirm the checklist items you can honestly mark complete.",
       recommendedNextStep: "Use Check my work on the guided assignment screen.",
       reason: "Output quality depends on evidence, not speed.",
       involveMatt: false,
@@ -184,7 +188,7 @@ export function buildDeterministicStaffGuidance(input: {
       conciseAnswer:
         id === "context"
           ? "Use only client facts already on this assignment and in authorized records. If a fact is missing, say so — do not invent it."
-          : "Drafts and walkthroughs are assistance only. Label AI-assisted drafts when used, review every line, and never send without Matt when the action is external or sensitive.",
+          : "Drafts and walkthroughs are assistance only. Label AI-assisted drafts when used, review every line, and never send without approval when the action is external or sensitive.",
       recommendedNextStep:
         id === "walkthrough"
           ? "Open guided work mode and follow each step in order."
@@ -201,7 +205,7 @@ export function buildDeterministicStaffGuidance(input: {
 
   return {
     conciseAnswer:
-      "I can explain your daily plan, walk you through work, help you draft for review, and tell you when Matt must approve. I will not invent tasks or take restricted actions.",
+      "I can explain your daily plan, walk you through work, help you draft for review, and tell you when approval is required. I will not invent tasks or take restricted actions.",
     recommendedNextStep: start?.label ?? "Return to your Start here action",
     reason: "Deterministic fallback — available even when AI is offline.",
     involveMatt: false,

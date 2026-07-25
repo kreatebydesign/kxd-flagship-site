@@ -7,7 +7,7 @@ import type { OperationsGuidanceResponse, OperationsMentorContext } from "./type
 type Draft = Omit<OperationsGuidanceResponse, "usage">;
 
 /**
- * Assess whether Matt must be involved before the learner acts.
+ * Assess whether authorized approval is required before the learner acts.
  */
 export function assessEscalationNeed(context: OperationsMentorContext): {
   involveMatt: boolean;

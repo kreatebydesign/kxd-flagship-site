@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useState, type KeyboardEvent } from "react";
+import { approvalRequiredCountLabel } from "@/lib/staff/approval-presentation";
 import type { StaffHelpRequestView } from "@/lib/staff/types";
 import { KxdButton } from "../KxdButton";
 import { kxdOsCn } from "../utils";
@@ -43,7 +44,7 @@ export function KxdIntelligenceComposer({
   isPreview?: boolean;
   mode?: KxdIntelligenceComposerMode;
   onModeChange?: (mode: KxdIntelligenceComposerMode) => void;
-  /** Open items waiting on Matt — shown as contextual secondary, not a dual CTA. */
+  /** Open items awaiting approval — shown as contextual secondary, not a dual CTA. */
   requiresMattCount?: number;
   onSubmitted?: (request: StaffHelpRequestView) => void;
   className?: string;
@@ -56,7 +57,7 @@ export function KxdIntelligenceComposer({
   const [error, setError] = useState<string | null>(null);
 
   const disabled = !canAct || isPreview;
-  const mattMode = mode === "matt";
+  const decisionMode = mode === "matt";
 
   async function submit() {
     if (disabled || busy || question.trim().length < 8) return;
@@ -82,7 +83,7 @@ export function KxdIntelligenceComposer({
       setMessage(
         payload.message ??
           (payload.request?.requiresMatt
-            ? "Requires Matt — queued for review."
+            ? "Approval Required — queued for review."
             : "KXD Intelligence replied."),
       );
       setQuestion("");
@@ -110,12 +111,12 @@ export function KxdIntelligenceComposer({
     <div
       className={kxdOsCn(
         "kxd-os-intel-composer",
-        mattMode && "kxd-os-intel-composer--matt",
+        decisionMode && "kxd-os-intel-composer--matt",
         className,
       )}
     >
       <label className="kxd-os-intel-composer__label" htmlFor={questionId}>
-        {mattMode ? "What does Matt need to decide?" : "Ask about this work"}
+        {decisionMode ? "What decision is needed?" : "Ask about this work"}
       </label>
       <textarea
         id={questionId}
@@ -125,11 +126,11 @@ export function KxdIntelligenceComposer({
         onChange={(event) => setQuestion(event.target.value)}
         onKeyDown={onKeyDown}
         placeholder={
-          mattMode
+          decisionMode
             ? "Describe the decision and what you’ve prepared…"
             : "Ask one short question about this work…"
         }
-        rows={mattMode ? 3 : 2}
+        rows={decisionMode ? 3 : 2}
       />
       <div className="kxd-os-intel-composer__actions">
         <KxdButton
@@ -139,16 +140,17 @@ export function KxdIntelligenceComposer({
           disabled={disabled || question.trim().length < 8}
           onClick={() => void submit()}
         >
-          {mattMode ? "Send to Matt" : "Ask KXD Intelligence"}
+          {decisionMode ? "Submit for Approval" : "Ask KXD Intelligence"}
         </KxdButton>
       </div>
 
-      {mattMode ? (
+      {decisionMode ? (
         <div className="kxd-os-intel-composer__matt-context">
           <p className="kxd-os-intel-composer__hint">
-            Pricing, access, external messages, and other sensitive calls stay with Matt.
+            Pricing, access, external messages, and other sensitive calls require
+            approval.
             {requiresMattCount > 0
-              ? ` ${requiresMattCount} open item${requiresMattCount === 1 ? "" : "s"} waiting.`
+              ? ` ${approvalRequiredCountLabel(requiresMattCount)}.`
               : ""}
           </p>
           <button
@@ -171,8 +173,8 @@ export function KxdIntelligenceComposer({
               onClick={() => onModeChange?.("matt")}
             >
               {requiresMattCount > 0
-                ? `Prepare for Matt (${requiresMattCount})`
-                : "Needs Matt’s judgment?"}
+                ? `Prepare for Review (${requiresMattCount})`
+                : "Request a Decision?"}
             </button>
           ) : null}
         </div>

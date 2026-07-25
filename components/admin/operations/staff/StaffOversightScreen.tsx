@@ -98,7 +98,7 @@ function HelpRequestRow({
             <p className="kxd-os-intel-response__note">
               Source: {request.responseSource || "none"}
               {request.confidence ? ` · Confidence: ${request.confidence}` : ""}
-              {request.requiresMatt ? " · Matt required" : ""}
+              {request.requiresMatt ? " · Approval required" : ""}
             </p>
           </div>
         ) : null}
@@ -478,7 +478,7 @@ export function StaffOversightScreen({ data }: StaffOversightScreenProps) {
                   checked={requiresApproval}
                   onChange={(e) => setRequiresApproval(e.target.checked)}
                 />
-                Requires Matt approval
+                Requires approval
               </label>
               <KxdButton
                 type="button"

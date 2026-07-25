@@ -175,22 +175,30 @@
   --khig-content-width: 72rem;
   --khig-page-width: 80rem;
 
-  /* KXD Intelligence product identity — selective surfaces only */
-  --kxd-os-intel-surface: #0e1c33;
-  --kxd-os-intel-surface-elevated: #13233c;
-  --kxd-os-intel-surface-strong: #1a2f4f;
-  --kxd-os-intel-border: rgba(0, 113, 227, 0.34);
-  --kxd-os-intel-signal: #0071e3;
-  --kxd-os-intel-text-primary: #f5f5f7;
-  /* Muted blue-gray — WCAG AA on navy (~7:1), not pale gray */
-  --kxd-os-intel-text-secondary: #c2cbd9;
-  --kxd-os-intel-focus: rgba(0, 113, 227, 0.55);
-  --kxd-os-intel-success: #30d158;
-  --kxd-os-intel-success-muted: rgba(48, 209, 88, 0.14);
-  --kxd-os-intel-escalation: #ff9f0a;
-  --kxd-os-intel-escalation-muted: rgba(255, 159, 10, 0.14);
+  /* KXD Intelligence — light (default). Dark overrides under html[data-theme="dark"].
+     System preference resolves to light|dark via ThemeBootScript → data-theme. */
+  --kxd-os-intel-surface: #f2f5fa;
+  --kxd-os-intel-surface-elevated: #ffffff;
+  --kxd-os-intel-surface-strong: #e7ecf4;
+  --kxd-os-intel-border: rgba(0, 96, 198, 0.28);
+  --kxd-os-intel-signal: #0060c6;
+  --kxd-os-intel-signal-hover: #0050a8;
+  /* CTA fill aliases — white label ≥4.5:1 on resting + hover */
+  --kxd-os-intel-cta: var(--kxd-os-intel-signal);
+  --kxd-os-intel-cta-hover: var(--kxd-os-intel-signal-hover);
+  --kxd-os-intel-text-primary: #0e1c33;
+  /* Graphite — strong secondary contrast on light intel (~8.7:1) */
+  --kxd-os-intel-text-secondary: #3a4658;
+  --kxd-os-intel-focus: rgba(0, 96, 198, 0.45);
+  --kxd-os-intel-success: #1f7a35;
+  --kxd-os-intel-success-muted: rgba(31, 122, 53, 0.12);
+  --kxd-os-intel-escalation: #9a5b00;
+  --kxd-os-intel-escalation-muted: rgba(154, 91, 0, 0.12);
+  --kxd-os-intel-on-signal: #ffffff;
+  --kxd-os-intel-input-bg: #ffffff;
   --kxd-os-intel-radius: 2px;
-  --kxd-os-intel-depth: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  --kxd-os-intel-depth: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  --kxd-os-intel-workspace-shadow: -12px 0 40px rgba(14, 28, 51, 0.12);
 }
 
 /* Kill marketing-site dark body when OS / portal shells are present */
@@ -747,8 +755,8 @@ body:has(.kxd-exec-workspace) {
 }
 
 .kxd-os-btn--intelligence {
-  background: var(--kxd-os-intel-signal);
-  color: var(--kxd-os-text-inverse);
+  background: var(--kxd-os-intel-cta, var(--kxd-os-intel-signal));
+  color: var(--kxd-os-intel-on-signal);
   min-height: 2.75rem;
   padding: 0.625rem 1.125rem;
   font-size: 0.875rem;
@@ -756,12 +764,16 @@ body:has(.kxd-exec-workspace) {
   box-shadow: none;
 }
 
-.kxd-os-btn--intelligence:hover:not(:disabled) {
-  background: var(--kxd-os-accent-hover);
+.kxd-os-btn--intelligence:hover:not(:disabled),
+.kxd-os-btn--intelligence:focus-visible:not(:disabled) {
+  background: var(--kxd-os-intel-cta-hover, var(--kxd-os-intel-signal-hover));
+  color: var(--kxd-os-intel-on-signal);
   box-shadow: none;
 }
 
 .kxd-os-btn--intelligence:active:not(:disabled) {
+  background: var(--kxd-os-intel-cta-hover, var(--kxd-os-intel-signal-hover));
+  color: var(--kxd-os-intel-on-signal);
   box-shadow: var(--kxd-os-shadow-pressed);
 }
 
@@ -8680,8 +8692,8 @@ a.kxd-os-platform-subsystem-card__title:hover {
 }
 
 .kxd-os-intel-badge--user {
-  border-color: color-mix(in srgb, #fff 22%, transparent);
-  background: color-mix(in srgb, #fff 6%, transparent);
+  border-color: color-mix(in srgb, var(--kxd-os-intel-text-secondary) 35%, transparent);
+  background: color-mix(in srgb, var(--kxd-os-intel-text-secondary) 8%, transparent);
   color: var(--kxd-os-intel-text-secondary);
 }
 
@@ -8712,7 +8724,7 @@ a.kxd-os-platform-subsystem-card__title:hover {
 .kxd-os-intel-badge--unable,
 .kxd-os-intel-badge--unavailable {
   border-color: color-mix(in srgb, var(--kxd-os-intel-text-secondary) 40%, transparent);
-  background: color-mix(in srgb, #000 18%, var(--kxd-os-intel-surface-strong));
+  background: var(--kxd-os-intel-surface-strong);
   color: var(--kxd-os-intel-text-secondary);
 }
 
@@ -8908,7 +8920,7 @@ a.kxd-os-platform-subsystem-card__title:hover {
 .kxd-os-intel-panel .kxd-os-btn--ghost,
 .kxd-os-intel-callout .kxd-os-btn--ghost {
   color: var(--kxd-os-intel-text-secondary);
-  background: color-mix(in srgb, #fff 3%, var(--kxd-os-intel-surface-elevated));
+  background: var(--kxd-os-intel-surface-elevated);
   border: 1px solid color-mix(in srgb, var(--kxd-os-intel-border) 55%, transparent);
 }
 
@@ -8921,7 +8933,7 @@ a.kxd-os-platform-subsystem-card__title:hover {
 
 .kxd-os-intel-panel .kxd-os-btn--secondary,
 .kxd-os-intel-callout .kxd-os-btn--secondary {
-  background: color-mix(in srgb, #fff 4%, var(--kxd-os-intel-surface-strong));
+  background: var(--kxd-os-intel-surface-strong);
   color: var(--kxd-os-intel-text-primary);
   border: 1px solid color-mix(in srgb, var(--kxd-os-intel-border) 70%, transparent);
   box-shadow: none;
@@ -8940,7 +8952,7 @@ a.kxd-os-platform-subsystem-card__title:hover {
 .kxd-os-intel-panel textarea,
 .kxd-os-intel-callout textarea,
 .kxd-os-intel-ask-form__input {
-  background: color-mix(in srgb, #000 28%, var(--kxd-os-intel-surface-strong));
+  background: var(--kxd-os-intel-input-bg);
   border-color: color-mix(in srgb, var(--kxd-os-intel-border) 75%, transparent);
   color: var(--kxd-os-intel-text-primary);
   border-radius: var(--kxd-os-intel-radius);
@@ -9323,21 +9335,21 @@ a.kxd-os-platform-subsystem-card__title:hover {
   }
 }
 
-/* Compact system briefing — proprietary navy/blue signal, not a navy hero band */
+/* Compact system briefing — theme-aware intel surface (light graphite / dark navy) */
 .kxd-os-intel-briefing {
   padding: 0.55rem 0.8rem 0.6rem;
   border-radius: var(--kxd-os-intel-radius);
-  border: 1px solid color-mix(in srgb, var(--kxd-os-intel-border) 55%, transparent);
+  border: 1px solid color-mix(in srgb, var(--kxd-os-intel-border) 70%, transparent);
   border-left: 2px solid var(--kxd-os-intel-signal);
   background:
     linear-gradient(
       90deg,
-      color-mix(in srgb, var(--kxd-os-intel-signal) 7%, transparent),
-      transparent 32%
+      color-mix(in srgb, var(--kxd-os-intel-signal) 8%, transparent),
+      transparent 36%
     ),
-    color-mix(in srgb, var(--kxd-os-intel-surface) 42%, var(--kxd-os-bg-surface));
-  color: var(--kxd-os-text-primary);
-  box-shadow: none;
+    var(--kxd-os-intel-surface);
+  color: var(--kxd-os-intel-text-primary);
+  box-shadow: var(--kxd-os-intel-depth);
 }
 
 .kxd-os-intel-briefing__row {
@@ -9366,7 +9378,7 @@ a.kxd-os-platform-subsystem-card__title:hover {
   font-weight: 450;
   letter-spacing: -0.01em;
   line-height: 1.4;
-  color: var(--kxd-os-text-secondary);
+  color: var(--kxd-os-intel-text-secondary);
   max-width: 40rem;
 }
 
@@ -9390,7 +9402,7 @@ a.kxd-os-platform-subsystem-card__title:hover {
   font-size: 0.8125rem;
   font-weight: 600;
   line-height: 1.35;
-  color: var(--kxd-os-text-primary);
+  color: var(--kxd-os-intel-text-primary);
 }
 
 .kxd-os-intel-briefing__action .kxd-os-intel-briefing__eyebrow {
@@ -9460,7 +9472,7 @@ a.kxd-os-platform-subsystem-card__title:hover {
     ),
     var(--kxd-os-intel-surface);
   color: var(--kxd-os-intel-text-primary);
-  box-shadow: -12px 0 40px rgba(8, 14, 24, 0.28);
+  box-shadow: var(--kxd-os-intel-workspace-shadow);
   transform: translateX(104%);
   transition: transform var(--kxd-exec-duration-drawer) var(--kxd-exec-ease-settle);
   overflow: hidden;
@@ -9516,7 +9528,7 @@ a.kxd-os-platform-subsystem-card__title:hover {
 .kxd-os-intel-workspace__header-actions .kxd-os-btn {
   min-height: 2.5rem;
   color: var(--kxd-os-intel-text-secondary);
-  background: color-mix(in srgb, #fff 3%, var(--kxd-os-intel-surface-elevated));
+  background: var(--kxd-os-intel-surface-elevated);
   border: 1px solid color-mix(in srgb, var(--kxd-os-intel-border) 55%, transparent);
 }
 
@@ -9640,12 +9652,12 @@ a.kxd-os-platform-subsystem-card__title:hover {
   border-radius: var(--kxd-os-intel-radius);
   border: 1px solid color-mix(in srgb, var(--kxd-os-intel-border) 40%, transparent);
   border-left-width: 2px;
-  background: color-mix(in srgb, #fff 2%, var(--kxd-os-intel-surface-elevated));
+  background: var(--kxd-os-intel-surface-elevated);
 }
 
 .kxd-os-intel-message--role-user {
-  border-left-color: color-mix(in srgb, #fff 35%, var(--kxd-os-intel-border));
-  background: color-mix(in srgb, #fff 4%, var(--kxd-os-intel-surface));
+  border-left-color: color-mix(in srgb, var(--kxd-os-intel-text-secondary) 45%, var(--kxd-os-intel-border));
+  background: var(--kxd-os-intel-surface-strong);
 }
 
 .kxd-os-intel-message--role-intelligence {
@@ -9773,7 +9785,7 @@ a.kxd-os-platform-subsystem-card__title:hover {
   font-size: 0.8125rem;
   font-weight: 500;
   color: var(--kxd-os-intel-text-primary) !important;
-  background: color-mix(in srgb, #fff 2%, var(--kxd-os-intel-surface)) !important;
+  background: var(--kxd-os-intel-surface-elevated) !important;
   border: 1px solid color-mix(in srgb, var(--kxd-os-intel-border) 42%, transparent) !important;
 }
 
@@ -9817,7 +9829,7 @@ a.kxd-os-platform-subsystem-card__title:hover {
   width: 100%;
   min-height: 3.25rem;
   resize: vertical;
-  background: color-mix(in srgb, #000 28%, var(--kxd-os-intel-surface-strong));
+  background: var(--kxd-os-intel-input-bg);
   border-color: color-mix(in srgb, var(--kxd-os-intel-border) 75%, transparent);
   color: var(--kxd-os-intel-text-primary);
   border-radius: var(--kxd-os-intel-radius);
@@ -9857,7 +9869,7 @@ a.kxd-os-platform-subsystem-card__title:hover {
   padding: 0;
   border: 0;
   background: transparent;
-  color: color-mix(in srgb, var(--kxd-os-intel-escalation) 88%, #fff);
+  color: var(--kxd-os-intel-escalation);
   font-family: var(--kxd-os-font-sans);
   font-size: 0.6875rem;
   font-weight: 600;
@@ -19285,7 +19297,11 @@ html[data-theme="dark"] {
   --kxd-os-intel-surface-elevated: #101c32;
   --kxd-os-intel-surface-strong: #162840;
   --kxd-os-intel-border: rgba(10, 132, 255, 0.38);
+  /* Signal stays bright for identity/links on navy; CTA fill is deeper for white labels */
   --kxd-os-intel-signal: #0a84ff;
+  --kxd-os-intel-signal-hover: #409cff;
+  --kxd-os-intel-cta: #006ad6;
+  --kxd-os-intel-cta-hover: #0050a8;
   --kxd-os-intel-text-primary: #f5f5f7;
   --kxd-os-intel-text-secondary: #c2cbd9;
   --kxd-os-intel-focus: rgba(10, 132, 255, 0.6);
@@ -19293,7 +19309,10 @@ html[data-theme="dark"] {
   --kxd-os-intel-success-muted: rgba(48, 209, 88, 0.16);
   --kxd-os-intel-escalation: #ff9f0a;
   --kxd-os-intel-escalation-muted: rgba(255, 159, 10, 0.16);
+  --kxd-os-intel-on-signal: #ffffff;
+  --kxd-os-intel-input-bg: #0c182b;
   --kxd-os-intel-depth: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --kxd-os-intel-workspace-shadow: -12px 0 40px rgba(8, 14, 24, 0.45);
 }
 
 html[data-theme="dark"] body,

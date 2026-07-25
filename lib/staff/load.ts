@@ -14,7 +14,6 @@ import {
 } from "./permissions";
 import { materializeResponsibilitiesForUser } from "./responsibilities";
 import {
-  countOpenHelpForStaff,
   listHelpRequestsForStaff,
   type StaffHelpRequestRecord,
 } from "./help-requests";
@@ -246,7 +245,7 @@ export async function loadStaffGuidedWork(
       "A clear internal update or draft",
       "Any missing facts gathered without inventing them",
       mattApproval
-        ? "A packet ready for Matt's approval"
+        ? "A packet ready for approval"
         : "Completion confirmation when the checklist is honest",
     ],
     steps: [
@@ -267,18 +266,18 @@ export async function loadStaffGuidedWork(
         detail: "Use the checklist. Ask KXD Intelligence if something feels unclear.",
       },
       {
-        title: mattApproval ? "Prepare for Matt" : "Complete intentionally",
+        title: mattApproval ? "Prepare for Review" : "Complete intentionally",
         detail: mattApproval
-          ? "Submit for review — do not send, publish, or finalize alone."
+          ? "Submit for approval — do not send, publish, or finalize alone."
           : "Mark complete only when the checklist is truly done.",
       },
     ],
     examples: [
       "Internal note: facts only, no promises to the client.",
-      "Draft email: mark as draft and send to Matt for approval.",
+      "Draft email: mark as draft and submit for approval.",
     ],
     permissionBoundary: mattApproval
-      ? "You may prepare. Matt must approve before anything leaves the studio or changes access, money, or public content."
+      ? "You may prepare. An authorized approver must decide before anything leaves the studio or changes access, money, or public content."
       : "You may complete this assigned item. Do not change plans, entitlements, permissions, or send external messages.",
     checklist: [
       { id: "understood", label: "I understand what was requested", required: true },
@@ -287,7 +286,7 @@ export async function loadStaffGuidedWork(
       {
         id: "matt",
         label: mattApproval
-          ? "Ready for Matt's review"
+          ? "Ready for review"
           : "I confirmed completion intentionally",
         required: true,
       },
