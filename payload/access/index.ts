@@ -1,4 +1,4 @@
-import type { Access, PayloadRequest } from "payload";
+import type { Access, FieldAccess, PayloadRequest } from "payload";
 
 /**
  * Payload admin (`users` collection only).
@@ -77,6 +77,13 @@ export const isAuthenticated: Access = ({ req: { user } }) =>
   isStudioPayloadOperator(user);
 
 export const isPayloadAdminUser: Access = ({ req: { user } }) =>
+  isStudioPayloadOperator(user);
+
+/**
+ * Field-level gate for private relationship intelligence fields.
+ * Studio operators only — portal JWTs and restricted staff are denied.
+ */
+export const studioOperatorFieldAccess: FieldAccess = ({ req: { user } }) =>
   isStudioPayloadOperator(user);
 
 export const isAuthenticatedOrPublished: Access = ({ req: { user } }) => {

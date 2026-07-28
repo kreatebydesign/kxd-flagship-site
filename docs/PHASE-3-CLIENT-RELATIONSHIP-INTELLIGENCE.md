@@ -1,10 +1,10 @@
 # Phase 3 — Client & Relationship Intelligence
 
-**Status:** Approved and planned (documentation only — not yet implemented)  
-**Baseline:** `0cc1704ed071f61ed5b4062334abea0bfef16659` (`main` / `origin/main`)  
+**Status:** Batch A implemented (data & privacy foundation) — Batches B–E not started  
+**Baseline (planning):** `e97a571515efabec3f47347d3a38133007b7aef0`  
 **Companion:** `docs/KXD-OS-ROADMAP.md`, `docs/KXD-OS-CURRENT-STATE.md`
 
-> Planning record only. Do not treat this document as shipped capability.
+> Batch A landed collections, migration, and privacy verification only. Operator Clients/Events UI is **not** shipped.
 
 ---
 
@@ -147,12 +147,19 @@ Optional non-blocking implementation choice (implementer may proceed with defaul
 
 | Item | Definition |
 |------|------------|
+| **Status** | ✅ Implemented (awaiting review/publication) |
+| **Collections** | `client-contacts` (`payload/collections/ClientContacts.ts`), `client-relationship-events` (`payload/collections/ClientRelationshipEvents.ts`) |
+| **Access** | Collection CRUD via `isAuthenticated` → `isStudioPayloadOperator`; sensitive fields via `studioOperatorFieldAccess` |
+| **Migration** | `migrations/20260727_phase3_client_relationship_intelligence.ts` (registered in `migrations/index.ts`) |
+| **Verification** | `npm run verify:phase3-relationship-foundation`; also `npm run verify:portal-auth-boundaries` |
+| **Privacy** | Operator-only; `internalOnly` default true; no portal/public imports of these collections |
+| **Not started** | Batch B Client Intelligence UI, Batch C Events routes, Batch D navigation, Batch E hardening completion |
 | **Outcome** | Operator-only Payload collections and migration for contacts, relationship events, and private context fields; no public/portal serialization paths |
-| **Areas** | `payload/collections/ClientContacts.ts` (new), `payload/collections/ClientRelationshipEvents.ts` (new), `payload.config.ts`, `migrations/*_phase3_client_relationship_intelligence.ts`, `migrations/index.ts`, focused verify script |
+| **Areas** | `payload/collections/ClientContacts.ts`, `payload/collections/ClientRelationshipEvents.ts`, `payload.config.ts`, `migrations/20260727_phase3_client_relationship_intelligence.ts`, `migrations/index.ts`, `scripts/verify-phase3-relationship-foundation.ts` |
 | **Dependencies** | Approved baseline; existing `isAuthenticated` / `isStudioPayloadOperator` |
 | **Schema / migration** | Create tables/columns for contacts + relationship events; register migration; access = studio operators only; `internalOnly` (or equivalent) defaults true; sensitive fields never marked public-read |
 | **Auth / privacy gates** | Collection access denies portal users and restricted staff; no public endpoints; confirm fields absent from portal loaders and public page props |
-| **Verification** | New focused verify (access + field privacy inventory); `npm run verify:portal-auth-boundaries`; `npm run migrate` on local DB only |
+| **Verification (contract)** | Focused verify (access + field privacy inventory); `npm run verify:portal-auth-boundaries`; `npm run migrate` on local DB only when isolated |
 | **Completion criteria** | Collections registered; migration up/down registered; privacy inventory documents zero public/portal exposure paths for new fields |
 | **Commit boundary** | One commit: schema + migration + registration + privacy verify foundation |
 | **Stop conditions** | Any need to mutate production data; any proposal to put sensitive fields on public/portal collections; collision that would rewrite Google Calendar or Timeline schemas |

@@ -205,16 +205,18 @@ Edition 1 is in the **operate and extend** phase — not redesign.
 
 ### Approved next product phase
 
-**Phase 3 — Client & Relationship Intelligence** is **approved and planned** (not yet implemented).
+**Phase 3 — Client & Relationship Intelligence** — **Batch A implemented** (data & privacy foundation); Batches B–E not started.
 
 - Plan: `docs/PHASE-3-CLIENT-RELATIONSHIP-INTELLIGENCE.md`
-- Planning baseline: `0cc1704ed071f61ed5b4062334abea0bfef16659`
-- Extends authenticated operator Clients experience; adds operator Events; introduces first-class contacts and private relationship context
+- Batch A collections: `client-contacts`, `client-relationship-events` (studio-operator-only)
+- Batch A migration: `migrations/20260727_phase3_client_relationship_intelligence.ts`
+- Batch A verify: `npm run verify:phase3-relationship-foundation`
+- Extends authenticated operator Clients experience in later batches; adds operator Events UI in Batch C
 - Explicitly excludes portal/public exposure, rituals/Business Memory wiring, Google Calendar rewrite, commercial/Stripe, deploy, and production-data mutation
 
 ### Immediate priorities
 
-1. **Phase 3 — Client & Relationship Intelligence** — Execute approved batches A→E per the Phase 3 plan (data/privacy foundation first).
+1. **Phase 3 — Client & Relationship Intelligence** — Batch A complete; next is Batch B (Client Intelligence workspace UI) per the Phase 3 plan.
 2. **Client operations at scale** — Repeat the Primal launch pattern using `lib/client-launch/` for every new client workspace.
 3. **Business Memory integration** — Wire `runBusinessMemory()` into rituals or intelligence when explicitly requested; foundation exists, UI does not. Phase 3 prepares durable relationship context but does not integrate Business Memory yet.
 4. **Executive experience polish** — Premium ritual presentation (KHIG) without new intelligence layers.

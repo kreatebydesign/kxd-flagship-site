@@ -45,6 +45,8 @@ import { ProposalTemplates } from "./payload/collections/ProposalTemplates.ts";
 import { GenesisSessions } from "./payload/collections/GenesisSessions.ts";
 import { WebsiteQAChecks } from "./payload/collections/WebsiteQAChecks.ts";
 import { Clients } from "./payload/collections/Clients.ts";
+import { ClientContacts } from "./payload/collections/ClientContacts.ts";
+import { ClientRelationshipEvents } from "./payload/collections/ClientRelationshipEvents.ts";
 import { ExecutiveClientProfiles } from "./payload/collections/ExecutiveClientProfiles.ts";
 import { ExecutiveNotes } from "./payload/collections/ExecutiveNotes.ts";
 import { BrainMemory } from "./payload/collections/BrainMemory.ts";
@@ -187,6 +189,8 @@ export default buildConfig({
     ResearchLeads,
     // ── KXD OS ───────────────────────────────────────────────────────────────
     Clients,
+    ClientContacts,
+    ClientRelationshipEvents,
     ExecutiveClientProfiles,
     ExecutiveNotes,
     BrainMemory,

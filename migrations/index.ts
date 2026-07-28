@@ -80,6 +80,7 @@ import * as migration_20260724_phase38a_staff_experience from './20260724_phase3
 import * as migration_20260724_phase38b_daily_staff_plan from './20260724_phase38b_daily_staff_plan';
 import * as migration_20260724_phase38c_staff_help_requests from './20260724_phase38c_staff_help_requests';
 import * as migration_20260724_phase38d_staff_help_intelligence from './20260724_phase38d_staff_help_intelligence';
+import * as migration_20260727_phase3_client_relationship_intelligence from './20260727_phase3_client_relationship_intelligence';
 
 export const migrations = [
   {
@@ -491,5 +492,10 @@ export const migrations = [
     up: migration_20260724_phase38d_staff_help_intelligence.up,
     down: migration_20260724_phase38d_staff_help_intelligence.down,
     name: '20260724_phase38d_staff_help_intelligence',
+  },
+  {
+    up: migration_20260727_phase3_client_relationship_intelligence.up,
+    down: migration_20260727_phase3_client_relationship_intelligence.down,
+    name: '20260727_phase3_client_relationship_intelligence',
   },
 ];
