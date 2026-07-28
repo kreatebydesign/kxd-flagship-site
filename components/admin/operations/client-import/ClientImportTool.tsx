@@ -8,6 +8,7 @@ import {
   LaunchFieldLabel,
   LaunchPanel,
 } from "@/components/admin/operations/client-launch/LaunchFormPrimitives";
+import { OtpCartsReadinessGatePanel } from "@/components/admin/operations/client-import/OtpCartsReadinessGatePanel";
 import { KxdButton, KxdTextarea } from "@/components/os";
 
 type ImportSuccess = {
@@ -120,6 +121,8 @@ export function ClientImportTool() {
           secure storage only — reference it in login notes without secrets.
         </p>
       </LaunchPanel>
+
+      <OtpCartsReadinessGatePanel />
 
       <LaunchPanel title="Structured JSON">
         <div className="kxd-os-ops-workflow-actions" style={{ marginBottom: "1rem" }}>

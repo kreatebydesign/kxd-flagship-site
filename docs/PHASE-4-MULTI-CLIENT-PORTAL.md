@@ -223,8 +223,13 @@ Preserve four **separate** Clients. Do not merge. Do not add parent-org FKs for 
 Repository evidence today:
 
 - Import/launch example: `lib/client-launch/examples/otp-carts-import.ts`
-- **Not** present in `scripts/seed-clients.ts`
-- Production existence **not** confirmed in this phase definition (Neon not inspected)
+- Gate helpers: `lib/client-launch/otp-carts-readiness.ts`
+- Operator UI: Client Import + Client Launch landing (`OtpCartsReadinessGatePanel`)
+- Verifier: `npm run verify:otp-carts-readiness`
+- **Not** present in `scripts/seed-clients.ts` (On Track Performance remains slug `otp`; OTP Carts expected slug `otp-carts`)
+- Production existence **not** confirmed by the import example alone
+
+**OTP Carts Launch Readiness — Batch A (Gate Hardening)** is **migration-independent**. It does not require Phase 3 or Phase 4 database migrations, does not add memberships, and does not start Phase 4 Batch B. It hardens the prerequisite gate so Cusick membership linking stays correctly blocked until a later approved production launch ops task.
 
 **Before adding OTP Carts membership in any environment:**
 

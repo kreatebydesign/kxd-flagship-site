@@ -223,10 +223,14 @@ Edition 1 is in the **operate and extend** phase — not redesign.
 - Portal Access manages memberships; no switcher UI; no Cusick production linking
 - First production configuration remains Cusick account group (four independent clients) after later batches + ops readiness
 
+### Parallel ops track (migration-independent)
+
+**OTP Carts Launch Readiness — Batch A (Gate Hardening)** — code/docs gate only. Verifier: `npm run verify:otp-carts-readiness`. Does **not** claim Phase 3 or Phase 4 database migrations are complete, does **not** start Phase 4 Batch B, and does **not** invent or link production client IDs.
+
 ### Immediate priorities
 
-1. **Phase 4 — Multi-Client Portal Access & Account Context** — Publish/deploy Batch A (migration + verification), then implement Batch B per `docs/PHASE-4-MULTI-CLIENT-PORTAL.md`.
-2. **Client operations at scale** — Repeat the Primal launch pattern using `lib/client-launch/` for every new client workspace (including OTP Carts readiness before Cusick membership linking).
+1. **Phase 4 — Multi-Client Portal Access & Account Context** — Production migration verification remains blocked until DB identity + PITR gates clear; then Batch B per `docs/PHASE-4-MULTI-CLIENT-PORTAL.md`.
+2. **Client operations at scale** — Repeat the Primal launch pattern using `lib/client-launch/` for every new client workspace (including OTP Carts readiness before Cusick membership linking). Gate Batch A: `verify:otp-carts-readiness`.
 3. **Business Memory integration** — Wire `runBusinessMemory()` into rituals or intelligence when explicitly requested; foundation exists, UI does not. Phase 3 prepared durable relationship context but does not integrate Business Memory yet.
 4. **Executive experience polish** — Premium ritual presentation (KHIG) without new intelligence layers.
 5. **Human-approved automation** — Connect Observer automation metadata and Pulse posture to rules; no autonomous execution without approval.

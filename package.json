@@ -40,6 +40,7 @@
     "verify:client-launch": "tsx scripts/verify-client-launch-readiness.ts",
     "verify:client-launch-wizard": "tsx scripts/verify-client-launch-wizard.ts",
     "verify:client-launch-pipeline": "npm run verify:client-launch-wizard",
+    "verify:otp-carts-readiness": "tsx scripts/verify-otp-carts-readiness.ts",
     "verify:commercial-agreements": "tsx scripts/verify-commercial-agreements.ts",
     "verify:commercial-agreements-ops": "tsx scripts/verify-commercial-agreements-ops.ts",
     "verify:commercial-activation": "tsx scripts/verify-commercial-activation.ts",

@@ -4,6 +4,7 @@ import config from "@payload-config";
 import { requirePayloadAdminPage } from "@/lib/admin/auth";
 import { OperationsShell } from "@/components/admin/operations/shared/OperationsShell";
 import { LaunchDraftInbox } from "@/components/admin/operations/client-launch-wizard/LaunchDraftInbox";
+import { OtpCartsReadinessGatePanel } from "@/components/admin/operations/client-import/OtpCartsReadinessGatePanel";
 import { listOpenLaunchDrafts } from "@/lib/client-launch-wizard/server";
 import { computeLaunchReadiness } from "@/lib/client-launch-wizard";
 
@@ -46,6 +47,9 @@ export default async function ClientLaunchPipelineLandingPage() {
             </Link>
           </div>
         </header>
+        <div style={{ marginBottom: "2rem" }}>
+          <OtpCartsReadinessGatePanel compact />
+        </div>
         <LaunchDraftInbox rows={rows} />
       </div>
     </OperationsShell>

@@ -71,3 +71,16 @@ export { prepareLaunchRecords } from "./prepare-launch-records";
 export { validateImportDraft } from "./validate-import-draft";
 export { slugifyBusinessName } from "./slug";
 export { normalizeWebsiteHostname } from "./match-website-host";
+export {
+  OTP_CARTS_EXPECTED_SLUG,
+  ON_TRACK_PERFORMANCE_SEED_SLUG,
+  OTP_CARTS_BUSINESS_NAME,
+  buildOtpCartsGateChecklist,
+  evaluateOtpCartsImportGate,
+  seedClientsDefinesOtpCarts,
+} from "./otp-carts-readiness";
+export type {
+  OtpCartsGateChecklistItem,
+  OtpCartsGateItemStatus,
+  OtpCartsImportGateResult,
+} from "./otp-carts-readiness";
