@@ -29,6 +29,7 @@
     "verify:phase3-relationship-events": "tsx scripts/verify-phase3-relationship-events.ts",
     "verify:phase3-relationship-connections": "tsx scripts/verify-phase3-relationship-connections.ts",
     "verify:phase3-relationship-completion": "tsx scripts/verify-phase3-relationship-completion.ts",
+    "verify:phase3-operator-containment": "tsx scripts/verify-phase3-operator-containment.ts",
     "verify:phase4-multi-client-membership": "tsx scripts/verify-phase4-multi-client-membership.ts",
     "verify:experience-feedback": "tsx scripts/verify-experience-feedback.ts",
     "verify:website-review-upload": "tsx scripts/verify-website-review-upload.ts",

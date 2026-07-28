@@ -87,13 +87,13 @@ function main() {
   );
 
   check(
-    "admin work/sales/training in middleware matcher + auth helper",
+    "admin work/sales/training matcher + /admin/ prefix auth helper",
     middleware.includes("/admin/work/:path*") &&
       middleware.includes("/admin/sales/:path*") &&
       middleware.includes("/admin/training/:path*") &&
-      adminMiddleware.includes('pathname.startsWith("/admin/work/")') &&
-      adminMiddleware.includes('pathname.startsWith("/admin/sales/")') &&
-      adminMiddleware.includes('pathname.startsWith("/admin/training/")'),
+      adminMiddleware.includes('pathname.startsWith("/admin/")') &&
+      adminMiddleware.includes("function requiresPayloadAdminAuth") &&
+      !adminMiddleware.includes('pathname.startsWith("/admin/work/")'),
   );
 
   check(

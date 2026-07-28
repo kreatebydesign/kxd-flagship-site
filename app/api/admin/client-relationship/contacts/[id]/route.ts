@@ -4,9 +4,11 @@ import {
   ContactNotFoundError,
   ContactOwnershipError,
   ContactValidationError,
+  Phase3SchemaUnavailableError,
   updateClientContactForClient,
   type ClientContactWriteInput,
 } from "@/lib/executive-client-workspace/contacts-data";
+import { phase3UnavailableHttpResponse } from "@/lib/executive-client-workspace/phase3-http";
 
 export const dynamic = "force-dynamic";
 
@@ -78,6 +80,9 @@ export async function PATCH(req: Request, context: RouteContext) {
       href: `/admin/collections/client-contacts/${doc.id}`,
     });
   } catch (err) {
+    if (err instanceof Phase3SchemaUnavailableError) {
+      return phase3UnavailableHttpResponse();
+    }
     if (err instanceof ContactValidationError) {
       return NextResponse.json({ success: false, error: err.message }, { status: 400 });
     }

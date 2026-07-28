@@ -14,6 +14,7 @@ import {
   EVENT_CATEGORY_LABEL,
   EVENT_STATUS_LABEL,
 } from "@/lib/executive-client-workspace/relationship-types";
+import { PHASE3_OPERATOR_UNAVAILABLE_MESSAGE } from "@/lib/executive-client-workspace/phase3-schema";
 
 export type EventFormState = {
   clientId: string;
@@ -376,8 +377,12 @@ export function useClientContactOptions(clientId: string) {
         const json = (await res.json()) as {
           success?: boolean;
           error?: string;
+          unavailable?: boolean;
           contacts?: OperatorContactOption[];
         };
+        if (res.status === 503 || json.unavailable) {
+          throw new Error(json.error ?? PHASE3_OPERATOR_UNAVAILABLE_MESSAGE);
+        }
         if (!res.ok || !json.success) {
           throw new Error(json.error ?? "Unable to load contacts.");
         }

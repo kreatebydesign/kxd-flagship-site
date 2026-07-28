@@ -132,6 +132,7 @@ export function RelationshipTab({ data }: { data: ClientWorkspaceData }) {
       contacts={data.contacts}
       events={data.relationshipEvents}
       summary={data.relationshipSummary}
+      schemaUnavailable={data.phase3RelationshipUnavailable}
     />
   );
 }

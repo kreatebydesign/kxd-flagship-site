@@ -2,9 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { requirePayloadAdminApi } from "@/lib/admin/auth";
 import {
   EventValidationError,
+  Phase3SchemaUnavailableError,
   listOperatorClientOptions,
   listOperatorContactOptionsForClient,
 } from "@/lib/executive-client-workspace/events-data";
+import { phase3UnavailableHttpResponse } from "@/lib/executive-client-workspace/phase3-http";
 
 export const dynamic = "force-dynamic";
 
@@ -32,16 +34,27 @@ export async function GET(req: NextRequest) {
           { status: 400 },
         );
       }
-      contacts = await listOperatorContactOptionsForClient(clientId);
+      try {
+        contacts = await listOperatorContactOptionsForClient(clientId);
+      } catch (err) {
+        if (err instanceof Phase3SchemaUnavailableError) {
+          return phase3UnavailableHttpResponse({ clients, contacts: [] });
+        }
+        throw err;
+      }
     }
 
     return NextResponse.json({ success: true, clients, contacts });
   } catch (err) {
+    if (err instanceof Phase3SchemaUnavailableError) {
+      return phase3UnavailableHttpResponse({ clients: [], contacts: [] });
+    }
     if (err instanceof EventValidationError) {
       return NextResponse.json({ success: false, error: err.message }, { status: 400 });
     }
-    const message =
-      err instanceof Error ? err.message : "Failed to load form options.";
-    return NextResponse.json({ success: false, error: message }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: "Failed to load form options." },
+      { status: 500 },
+    );
   }
 }

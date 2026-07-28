@@ -19,6 +19,7 @@ import {
   EVENT_STATUS_LABEL,
 } from "@/lib/executive-client-workspace/relationship-types";
 import { fmtWorkspaceDateTime } from "@/lib/executive-client-workspace/theme";
+import { PHASE3_OPERATOR_UNAVAILABLE_MESSAGE } from "@/lib/executive-client-workspace/phase3-schema";
 
 type Timeframe = "all" | "upcoming" | "recent";
 
@@ -26,6 +27,7 @@ export function EventsListScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [denied, setDenied] = useState(false);
+  const [unavailable, setUnavailable] = useState(false);
   const [events, setEvents] = useState<OperatorRelationshipEventRow[]>([]);
   const [clients, setClients] = useState<OperatorClientOption[]>([]);
   const [q, setQ] = useState("");
@@ -39,6 +41,7 @@ export function EventsListScreen() {
     setLoading(true);
     setError(null);
     setDenied(false);
+    setUnavailable(false);
     try {
       const params = new URLSearchParams();
       params.set("timeframe", timeframe);
@@ -54,6 +57,7 @@ export function EventsListScreen() {
       const json = (await res.json()) as {
         success?: boolean;
         error?: string;
+        unavailable?: boolean;
         events?: OperatorRelationshipEventRow[];
         clients?: OperatorClientOption[];
       };
@@ -62,6 +66,13 @@ export function EventsListScreen() {
         throw new Error(
           json.error ?? "You do not have permission to view relationship events.",
         );
+      }
+      if (res.status === 503 || json.unavailable) {
+        setUnavailable(true);
+        setEvents([]);
+        setClients(json.clients ?? []);
+        setError(json.error ?? PHASE3_OPERATOR_UNAVAILABLE_MESSAGE);
+        return;
       }
       if (!res.ok || !json.success) {
         throw new Error(json.error ?? "Unable to load relationship events.");
@@ -108,9 +119,15 @@ export function EventsListScreen() {
         />
 
         <div className="kxd-rel-events__toolbar">
-          <Link href="/admin/operations/events/new" className="kxd-os-btn kxd-os-btn--sm">
-            New event
-          </Link>
+          {unavailable ? (
+            <span className="kxd-os-btn kxd-os-btn--sm" aria-disabled="true" style={{ opacity: 0.5, pointerEvents: "none" }}>
+              New event
+            </span>
+          ) : (
+            <Link href="/admin/operations/events/new" className="kxd-os-btn kxd-os-btn--sm">
+              New event
+            </Link>
+          )}
           <Link href="/admin/operations/clients" className="kxd-os-link-quiet">
             Client portfolio →
           </Link>
@@ -119,7 +136,9 @@ export function EventsListScreen() {
               ? "Loading…"
               : denied
                 ? "Access restricted"
-                : `${events.length} shown${upcomingCount > 0 ? ` · ${upcomingCount} upcoming planned` : ""}`}
+                : unavailable
+                  ? "Temporarily unavailable"
+                  : `${events.length} shown${upcomingCount > 0 ? ` · ${upcomingCount} upcoming planned` : ""}`}
           </p>
         </div>
 
@@ -138,7 +157,7 @@ export function EventsListScreen() {
               onChange={(e) => setQDraft(e.target.value)}
               className="kxd-os-command-timeline-form__input"
               placeholder="Search…"
-              disabled={denied}
+              disabled={denied || unavailable}
             />
           </label>
           <label className="kxd-os-command-timeline-form__field">
@@ -147,7 +166,7 @@ export function EventsListScreen() {
               value={clientId}
               onChange={(e) => setClientId(e.target.value)}
               className="kxd-os-command-timeline-form__input"
-              disabled={denied}
+              disabled={denied || unavailable}
             >
               <option value="all">All clients</option>
               {clients.map((c) => (
@@ -165,7 +184,7 @@ export function EventsListScreen() {
                 setStatus(e.target.value as RelationshipEventStatus | "all")
               }
               className="kxd-os-command-timeline-form__input"
-              disabled={denied}
+              disabled={denied || unavailable}
             >
               <option value="all">All statuses</option>
               {(Object.keys(EVENT_STATUS_LABEL) as RelationshipEventStatus[]).map(
@@ -185,7 +204,7 @@ export function EventsListScreen() {
                 setCategory(e.target.value as RelationshipEventCategory | "all")
               }
               className="kxd-os-command-timeline-form__input"
-              disabled={denied}
+              disabled={denied || unavailable}
             >
               <option value="all">All categories</option>
               {(Object.keys(EVENT_CATEGORY_LABEL) as RelationshipEventCategory[]).map(
@@ -203,7 +222,7 @@ export function EventsListScreen() {
               value={timeframe}
               onChange={(e) => setTimeframe(e.target.value as Timeframe)}
               className="kxd-os-command-timeline-form__input"
-              disabled={denied}
+              disabled={denied || unavailable}
             >
               <option value="all">Upcoming then recent</option>
               <option value="upcoming">Upcoming planned</option>
@@ -214,7 +233,7 @@ export function EventsListScreen() {
             <button
               type="submit"
               className="kxd-os-btn kxd-os-btn--ghost kxd-os-btn--sm"
-              disabled={denied}
+              disabled={denied || unavailable}
             >
               Apply search
             </button>
@@ -227,7 +246,10 @@ export function EventsListScreen() {
           </p>
         ) : null}
 
-        <OpsSectionHead label="Events" count={loading || denied ? undefined : events.length} />
+        <OpsSectionHead
+          label="Events"
+          count={loading || denied || unavailable ? undefined : events.length}
+        />
 
         {loading ? (
           <p className="kxd-os-meta" aria-live="polite">
@@ -235,6 +257,8 @@ export function EventsListScreen() {
           </p>
         ) : denied ? (
           <OpsEmpty message="Access denied. Relationship Events are available to studio operators only." />
+        ) : unavailable ? (
+          <OpsEmpty message={PHASE3_OPERATOR_UNAVAILABLE_MESSAGE} />
         ) : events.length === 0 ? (
           <div className="kxd-rel-events__empty">
             <OpsEmpty

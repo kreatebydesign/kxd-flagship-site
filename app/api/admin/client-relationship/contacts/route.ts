@@ -3,9 +3,11 @@ import { requirePayloadAdminApi } from "@/lib/admin/auth";
 import {
   ContactOwnershipError,
   ContactValidationError,
+  Phase3SchemaUnavailableError,
   createClientContactForClient,
   type ClientContactWriteInput,
 } from "@/lib/executive-client-workspace/contacts-data";
+import { phase3UnavailableHttpResponse } from "@/lib/executive-client-workspace/phase3-http";
 
 export const dynamic = "force-dynamic";
 
@@ -51,13 +53,18 @@ export async function POST(req: Request) {
       href: `/admin/collections/client-contacts/${doc.id}`,
     });
   } catch (err) {
+    if (err instanceof Phase3SchemaUnavailableError) {
+      return phase3UnavailableHttpResponse();
+    }
     if (err instanceof ContactValidationError) {
       return NextResponse.json({ success: false, error: err.message }, { status: 400 });
     }
     if (err instanceof ContactOwnershipError) {
       return NextResponse.json({ success: false, error: err.message }, { status: 403 });
     }
-    const message = err instanceof Error ? err.message : "Failed to create contact.";
-    return NextResponse.json({ success: false, error: message }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: "Failed to create contact." },
+      { status: 500 },
+    );
   }
 }

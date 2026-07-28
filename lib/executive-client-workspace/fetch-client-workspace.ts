@@ -21,6 +21,7 @@ import {
   type WorkspaceContact,
   type WorkspaceRelationshipEvent,
 } from "./relationship-types";
+import { isPhase3SchemaUnavailableError } from "./phase3-schema";
 
 export interface ClientWorkspaceData {
   client: AnyDoc;
@@ -38,6 +39,11 @@ export interface ClientWorkspaceData {
   relationshipEvents: WorkspaceRelationshipEvent[];
   /** Phase 3 Batch B — concise facts-only summary (no scores / AI). */
   relationshipSummary: RelationshipIntelligenceSummary;
+  /**
+   * True when Phase 3 contacts/events tables are absent.
+   * Empty arrays alone are not enough — schema may be unavailable.
+   */
+  phase3RelationshipUnavailable: boolean;
 }
 
 export async function fetchClientWorkspace(clientId: number): Promise<ClientWorkspaceData | null> {
@@ -161,6 +167,12 @@ export async function fetchClientWorkspace(clientId: number): Promise<ClientWork
     relationshipEvents,
   );
 
+  const phase3RelationshipUnavailable =
+    (contactsR.status === "rejected" &&
+      isPhase3SchemaUnavailableError(contactsR.reason)) ||
+    (eventsR.status === "rejected" &&
+      isPhase3SchemaUnavailableError(eventsR.reason));
+
   return {
     client,
     profile,
@@ -171,8 +183,11 @@ export async function fetchClientWorkspace(clientId: number): Promise<ClientWork
     timeline,
     roadmap: getPlaceholderRoadmap(slug),
     editProfileHref,
-    contacts,
-    relationshipEvents,
-    relationshipSummary,
+    contacts: phase3RelationshipUnavailable ? [] : contacts,
+    relationshipEvents: phase3RelationshipUnavailable ? [] : relationshipEvents,
+    relationshipSummary: phase3RelationshipUnavailable
+      ? buildRelationshipIntelligenceSummary([], [])
+      : relationshipSummary,
+    phase3RelationshipUnavailable,
   };
 }

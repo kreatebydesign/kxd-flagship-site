@@ -4,11 +4,13 @@ import {
   EventNotFoundError,
   EventOwnershipError,
   EventValidationError,
+  Phase3SchemaUnavailableError,
   getRelationshipEventById,
   listOperatorContactOptionsForClient,
   updateRelationshipEvent,
   type RelationshipEventWriteInput,
 } from "@/lib/executive-client-workspace/events-data";
+import { phase3UnavailableHttpResponse } from "@/lib/executive-client-workspace/phase3-http";
 import type {
   RelationshipEventCategory,
   RelationshipEventStatus,
@@ -43,6 +45,9 @@ export async function GET(_req: Request, context: RouteContext) {
 
     return NextResponse.json({ success: true, event, contacts });
   } catch (err) {
+    if (err instanceof Phase3SchemaUnavailableError) {
+      return phase3UnavailableHttpResponse();
+    }
     if (err instanceof EventValidationError) {
       return NextResponse.json({ success: false, error: err.message }, { status: 400 });
     }
@@ -131,6 +136,9 @@ export async function PATCH(req: Request, context: RouteContext) {
       href: `/admin/operations/events/${doc.id}`,
     });
   } catch (err) {
+    if (err instanceof Phase3SchemaUnavailableError) {
+      return phase3UnavailableHttpResponse();
+    }
     if (err instanceof EventValidationError) {
       return NextResponse.json({ success: false, error: err.message }, { status: 400 });
     }

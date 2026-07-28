@@ -15,6 +15,7 @@ import {
   EVENT_STATUS_LABEL,
 } from "@/lib/executive-client-workspace/relationship-types";
 import { fmtWorkspaceDateTime } from "@/lib/executive-client-workspace/theme";
+import { PHASE3_OPERATOR_UNAVAILABLE_MESSAGE } from "@/lib/executive-client-workspace/phase3-schema";
 import {
   WorkspaceChapter,
   WorkspaceEmpty,
@@ -72,11 +73,13 @@ export function RelationshipIntelligencePanel({
   contacts,
   events,
   summary,
+  schemaUnavailable = false,
 }: {
   clientId: number;
   contacts: WorkspaceContact[];
   events: WorkspaceRelationshipEvent[];
   summary: RelationshipIntelligenceSummary;
+  schemaUnavailable?: boolean;
 }) {
   const router = useRouter();
   const formTitleId = useId();
@@ -101,6 +104,7 @@ export function RelationshipIntelligencePanel({
   }, [formMode]);
 
   function openCreate() {
+    if (schemaUnavailable) return;
     setFormMode("create");
     setEditingId(null);
     setForm(EMPTY_FORM);
@@ -109,6 +113,7 @@ export function RelationshipIntelligencePanel({
   }
 
   function openEdit(contact: WorkspaceContact) {
+    if (schemaUnavailable) return;
     setFormMode("edit");
     setEditingId(contact.id);
     setForm(formFromContact(contact));
@@ -162,7 +167,14 @@ export function RelationshipIntelligencePanel({
               body: JSON.stringify(payload),
             });
 
-      const json = (await res.json()) as { success?: boolean; error?: string };
+      const json = (await res.json()) as {
+        success?: boolean;
+        error?: string;
+        unavailable?: boolean;
+      };
+      if (res.status === 503 || json.unavailable) {
+        throw new Error(json.error ?? PHASE3_OPERATOR_UNAVAILABLE_MESSAGE);
+      }
       if (!res.ok || !json.success) {
         throw new Error(json.error ?? "Unable to save contact.");
       }
@@ -177,6 +189,7 @@ export function RelationshipIntelligencePanel({
   }
 
   async function setContactStatus(contact: WorkspaceContact, status: ContactStatus) {
+    if (schemaUnavailable) return;
     setError(null);
     setSaveState("saving");
     try {
@@ -188,7 +201,14 @@ export function RelationshipIntelligencePanel({
           status,
         }),
       });
-      const json = (await res.json()) as { success?: boolean; error?: string };
+      const json = (await res.json()) as {
+        success?: boolean;
+        error?: string;
+        unavailable?: boolean;
+      };
+      if (res.status === 503 || json.unavailable) {
+        throw new Error(json.error ?? PHASE3_OPERATOR_UNAVAILABLE_MESSAGE);
+      }
       if (!res.ok || !json.success) {
         throw new Error(json.error ?? "Unable to update status.");
       }
@@ -198,6 +218,20 @@ export function RelationshipIntelligencePanel({
       setSaveState("error");
       setError(err instanceof Error ? err.message : "Unable to update status.");
     }
+  }
+
+  if (schemaUnavailable) {
+    return (
+      <div className="kxd-os-workspace-dossier kxd-os-workspace-relationship">
+        <WorkspaceChapter
+          title="Relationship intelligence"
+          eyebrow="Operator only · temporarily unavailable"
+        >
+          <WorkspaceProse>{PHASE3_OPERATOR_UNAVAILABLE_MESSAGE}</WorkspaceProse>
+          <WorkspaceEmpty message="Contacts and relationship events cannot be loaded or edited until the Phase 3 database schema is activated." />
+        </WorkspaceChapter>
+      </div>
+    );
   }
 
   return (

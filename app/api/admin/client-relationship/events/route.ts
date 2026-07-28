@@ -3,11 +3,13 @@ import { requirePayloadAdminApi } from "@/lib/admin/auth";
 import {
   EventOwnershipError,
   EventValidationError,
+  Phase3SchemaUnavailableError,
   createRelationshipEvent,
   listOperatorClientOptions,
   listRelationshipEvents,
   type RelationshipEventWriteInput,
 } from "@/lib/executive-client-workspace/events-data";
+import { phase3UnavailableHttpResponse } from "@/lib/executive-client-workspace/phase3-http";
 import type {
   RelationshipEventCategory,
   RelationshipEventStatus,
@@ -79,9 +81,19 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ success: true, events, clients });
   } catch (err) {
-    const message =
-      err instanceof Error ? err.message : "Failed to load relationship events.";
-    return NextResponse.json({ success: false, error: message }, { status: 500 });
+    if (err instanceof Phase3SchemaUnavailableError) {
+      let clients: Awaited<ReturnType<typeof listOperatorClientOptions>> = [];
+      try {
+        clients = await listOperatorClientOptions();
+      } catch {
+        clients = [];
+      }
+      return phase3UnavailableHttpResponse({ events: [], clients });
+    }
+    return NextResponse.json(
+      { success: false, error: "Failed to load relationship events." },
+      { status: 500 },
+    );
   }
 }
 
@@ -130,14 +142,18 @@ export async function POST(req: Request) {
       href: `/admin/operations/events/${doc.id}`,
     });
   } catch (err) {
+    if (err instanceof Phase3SchemaUnavailableError) {
+      return phase3UnavailableHttpResponse();
+    }
     if (err instanceof EventValidationError) {
       return NextResponse.json({ success: false, error: err.message }, { status: 400 });
     }
     if (err instanceof EventOwnershipError) {
       return NextResponse.json({ success: false, error: err.message }, { status: 403 });
     }
-    const message =
-      err instanceof Error ? err.message : "Failed to create relationship event.";
-    return NextResponse.json({ success: false, error: message }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: "Failed to create relationship event." },
+      { status: 500 },
+    );
   }
 }

@@ -14,6 +14,7 @@ import type {
 import type { RelationshipEventStatus } from "@/lib/executive-client-workspace/relationship-types";
 import { EVENT_STATUS_LABEL } from "@/lib/executive-client-workspace/relationship-types";
 import { fmtWorkspaceDateTime } from "@/lib/executive-client-workspace/theme";
+import { PHASE3_OPERATOR_UNAVAILABLE_MESSAGE } from "@/lib/executive-client-workspace/phase3-schema";
 import {
   EMPTY_EVENT_FORM,
   RelationshipEventForm,
@@ -53,12 +54,16 @@ export function EventCreateScreen({
         const json = (await res.json()) as {
           success?: boolean;
           error?: string;
+          unavailable?: boolean;
           clients?: OperatorClientOption[];
         };
         if (res.status === 401 || res.status === 403) {
           throw new Error(
             json.error ?? "You do not have permission to create relationship events.",
           );
+        }
+        if (res.status === 503 || json.unavailable) {
+          throw new Error(json.error ?? PHASE3_OPERATOR_UNAVAILABLE_MESSAGE);
         }
         if (!res.ok || !json.success) {
           throw new Error(json.error ?? "Unable to load clients.");
@@ -96,6 +101,7 @@ export function EventCreateScreen({
       const json = (await res.json()) as {
         success?: boolean;
         error?: string;
+        unavailable?: boolean;
         href?: string;
         id?: number;
       };
@@ -103,6 +109,9 @@ export function EventCreateScreen({
         throw new Error(
           json.error ?? "You do not have permission to create relationship events.",
         );
+      }
+      if (res.status === 503 || json.unavailable) {
+        throw new Error(json.error ?? PHASE3_OPERATOR_UNAVAILABLE_MESSAGE);
       }
       if (!res.ok || !json.success) {
         throw new Error(json.error ?? "Unable to create event.");
@@ -198,6 +207,7 @@ export function EventDetailScreen({ eventId }: { eventId: number }) {
       const detailJson = (await detailRes.json()) as {
         success?: boolean;
         error?: string;
+        unavailable?: boolean;
         event?: OperatorRelationshipEventRow;
         contacts?: OperatorContactOption[];
       };
@@ -210,6 +220,9 @@ export function EventDetailScreen({ eventId }: { eventId: number }) {
           detailJson.error ??
             "You do not have permission to view this relationship event.",
         );
+      }
+      if (detailRes.status === 503 || detailJson.unavailable) {
+        throw new Error(detailJson.error ?? PHASE3_OPERATOR_UNAVAILABLE_MESSAGE);
       }
       if (!detailRes.ok || !detailJson.success || !detailJson.event) {
         throw new Error(detailJson.error ?? "Event not found.");
@@ -259,8 +272,12 @@ export function EventDetailScreen({ eventId }: { eventId: number }) {
       const json = (await res.json()) as {
         success?: boolean;
         error?: string;
+        unavailable?: boolean;
         event?: OperatorRelationshipEventRow;
       };
+      if (res.status === 503 || json.unavailable) {
+        throw new Error(json.error ?? PHASE3_OPERATOR_UNAVAILABLE_MESSAGE);
+      }
       if (!res.ok || !json.success || !json.event) {
         throw new Error(json.error ?? "Unable to save.");
       }
@@ -292,8 +309,12 @@ export function EventDetailScreen({ eventId }: { eventId: number }) {
       const json = (await res.json()) as {
         success?: boolean;
         error?: string;
+        unavailable?: boolean;
         event?: OperatorRelationshipEventRow;
       };
+      if (res.status === 503 || json.unavailable) {
+        throw new Error(json.error ?? PHASE3_OPERATOR_UNAVAILABLE_MESSAGE);
+      }
       if (!res.ok || !json.success || !json.event) {
         throw new Error(json.error ?? "Unable to update status.");
       }

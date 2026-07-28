@@ -8,8 +8,15 @@ import "server-only";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import type { ContactStatus } from "./relationship-types";
+import {
+  PHASE3_CONTACTS_COLLECTION,
+  Phase3SchemaUnavailableError,
+  withPhase3Schema,
+} from "./phase3-schema";
 
-const COLLECTION = "client-contacts";
+const COLLECTION = PHASE3_CONTACTS_COLLECTION;
+
+export { Phase3SchemaUnavailableError } from "./phase3-schema";
 
 export class ContactOwnershipError extends Error {
   constructor(message: string) {
@@ -133,17 +140,19 @@ export async function createClientContactForClient(
   await assertClientExists(trustedClientId);
 
   const payload = await getPayload({ config });
-  const doc = await payload.create({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    collection: COLLECTION as any,
-    data: {
-      ...buildWriteData(input),
-      client: trustedClientId,
-      status: validateStatus(input.status) ?? "active",
-      internalOnly: true,
-    },
-    overrideAccess: true,
-  });
+  const doc = await withPhase3Schema(() =>
+    payload.create({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      collection: COLLECTION as any,
+      data: {
+        ...buildWriteData(input),
+        client: trustedClientId,
+        status: validateStatus(input.status) ?? "active",
+        internalOnly: true,
+      },
+      overrideAccess: true,
+    }),
+  );
 
   return { id: Number(doc.id) };
 }
@@ -167,14 +176,17 @@ export async function updateClientContactForClient(
   const payload = await getPayload({ config });
   let existing: Record<string, unknown>;
   try {
-    existing = (await payload.findByID({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      collection: COLLECTION as any,
-      id: contactId,
-      depth: 0,
-      overrideAccess: true,
-    })) as Record<string, unknown>;
-  } catch {
+    existing = (await withPhase3Schema(() =>
+      payload.findByID({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        collection: COLLECTION as any,
+        id: contactId,
+        depth: 0,
+        overrideAccess: true,
+      }),
+    )) as Record<string, unknown>;
+  } catch (err) {
+    if (err instanceof Phase3SchemaUnavailableError) throw err;
     throw new ContactNotFoundError();
   }
 
@@ -213,13 +225,15 @@ export async function updateClientContactForClient(
   // Explicitly never accept a client reassignment from the request body.
   delete data.client;
 
-  const doc = await payload.update({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    collection: COLLECTION as any,
-    id: contactId,
-    data,
-    overrideAccess: true,
-  });
+  const doc = await withPhase3Schema(() =>
+    payload.update({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      collection: COLLECTION as any,
+      id: contactId,
+      data,
+      overrideAccess: true,
+    }),
+  );
 
   return { id: Number(doc.id) };
 }

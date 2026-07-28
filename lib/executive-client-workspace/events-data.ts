@@ -14,9 +14,17 @@ import {
   type RelationshipEventCategory,
   type RelationshipEventStatus,
 } from "./relationship-types";
+import {
+  PHASE3_CONTACTS_COLLECTION,
+  PHASE3_EVENTS_COLLECTION,
+  Phase3SchemaUnavailableError,
+  withPhase3Schema,
+} from "./phase3-schema";
 
-const COLLECTION = "client-relationship-events";
-const CONTACTS_COLLECTION = "client-contacts";
+const COLLECTION = PHASE3_EVENTS_COLLECTION;
+const CONTACTS_COLLECTION = PHASE3_CONTACTS_COLLECTION;
+
+export { Phase3SchemaUnavailableError } from "./phase3-schema";
 
 export class EventOwnershipError extends Error {
   constructor(message: string) {
@@ -213,19 +221,21 @@ async function assertContactsBelongToClient(
   }
 
   const payload = await getPayload({ config });
-  const result = await payload.find({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    collection: CONTACTS_COLLECTION as any,
-    where: {
-      and: [
-        { id: { in: unique } },
-        { client: { equals: trustedClientId } },
-      ],
-    },
-    limit: unique.length,
-    depth: 0,
-    overrideAccess: true,
-  });
+  const result = await withPhase3Schema(() =>
+    payload.find({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      collection: CONTACTS_COLLECTION as any,
+      where: {
+        and: [
+          { id: { in: unique } },
+          { client: { equals: trustedClientId } },
+        ],
+      },
+      limit: unique.length,
+      depth: 0,
+      overrideAccess: true,
+    }),
+  );
 
   if (result.docs.length !== unique.length) {
     throw new EventOwnershipError(
@@ -242,19 +252,30 @@ async function loadContactNamesForClient(
 ): Promise<{ names: string[]; ids: number[] }> {
   if (contactIds.length === 0) return { names: [], ids: [] };
   const payload = await getPayload({ config });
-  const result = await payload.find({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    collection: CONTACTS_COLLECTION as any,
-    where: {
-      and: [
-        { id: { in: contactIds } },
-        { client: { equals: clientId } },
-      ],
-    },
-    limit: contactIds.length,
-    depth: 0,
-    overrideAccess: true,
-  });
+  let result: { docs: unknown[] };
+  try {
+    result = await withPhase3Schema(() =>
+      payload.find({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        collection: CONTACTS_COLLECTION as any,
+        where: {
+          and: [
+            { id: { in: contactIds } },
+            { client: { equals: clientId } },
+          ],
+        },
+        limit: contactIds.length,
+        depth: 0,
+        overrideAccess: true,
+      }),
+    );
+  } catch (err) {
+    if (err instanceof Phase3SchemaUnavailableError) {
+      // List rows can still render without contact name enrichment.
+      return { names: [], ids: contactIds };
+    }
+    throw err;
+  }
 
   const byId = new Map<number, string>();
   for (const doc of result.docs as unknown as Record<string, unknown>[]) {
@@ -396,15 +417,17 @@ export async function listOperatorContactOptionsForClient(
   await assertClientExists(clientId);
 
   const payload = await getPayload({ config });
-  const result = await payload.find({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    collection: CONTACTS_COLLECTION as any,
-    where: { client: { equals: clientId } },
-    limit: 200,
-    depth: 0,
-    sort: "name",
-    overrideAccess: true,
-  });
+  const result = await withPhase3Schema(() =>
+    payload.find({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      collection: CONTACTS_COLLECTION as any,
+      where: { client: { equals: clientId } },
+      limit: 200,
+      depth: 0,
+      sort: "name",
+      overrideAccess: true,
+    }),
+  );
 
   return (result.docs as unknown as Record<string, unknown>[]).map((doc) => {
     const id = relationId(doc.id) ?? 0;
@@ -438,15 +461,17 @@ export async function listRelationshipEvents(
     and.push({ title: { contains: query.q.trim() } });
   }
 
-  const result = await payload.find({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    collection: COLLECTION as any,
-    where: and.length > 0 ? { and } : undefined,
-    limit,
-    depth: 0,
-    sort: "-eventAt",
-    overrideAccess: true,
-  });
+  const result = await withPhase3Schema(() =>
+    payload.find({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      collection: COLLECTION as any,
+      where: and.length > 0 ? { and } : undefined,
+      limit,
+      depth: 0,
+      sort: "-eventAt",
+      overrideAccess: true,
+    }),
+  );
 
   const docs = result.docs as unknown as Record<string, unknown>[];
   const clientIds = [
@@ -522,14 +547,17 @@ export async function getRelationshipEventById(
   const payload = await getPayload({ config });
   let doc: Record<string, unknown>;
   try {
-    doc = (await payload.findByID({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      collection: COLLECTION as any,
-      id: eventId,
-      depth: 0,
-      overrideAccess: true,
-    })) as unknown as Record<string, unknown>;
-  } catch {
+    doc = (await withPhase3Schema(() =>
+      payload.findByID({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        collection: COLLECTION as any,
+        id: eventId,
+        depth: 0,
+        overrideAccess: true,
+      }),
+    )) as unknown as Record<string, unknown>;
+  } catch (err) {
+    if (err instanceof Phase3SchemaUnavailableError) throw err;
     throw new EventNotFoundError();
   }
 
@@ -556,25 +584,27 @@ export async function createRelationshipEvent(
   );
 
   const payload = await getPayload({ config });
-  const doc = await payload.create({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    collection: COLLECTION as any,
-    data: {
-      client: trustedClientId,
-      title: validateTitle(input.title),
-      eventAt: validateEventAt(input.eventAt),
-      eventCategory: parseOptionalCategory(input.eventCategory) ?? "meeting",
-      status: parseOptionalStatus(input.status) ?? "planned",
-      location: normalizeOptional(input.location) ?? null,
-      contextNotes: normalizeOptional(input.contextNotes) ?? null,
-      followUpNotes: normalizeOptional(input.followUpNotes) ?? null,
-      dietaryNotes: normalizeOptional(input.dietaryNotes) ?? null,
-      accessibilityNotes: normalizeOptional(input.accessibilityNotes) ?? null,
-      contacts: contactIds,
-      internalOnly: true,
-    },
-    overrideAccess: true,
-  });
+  const doc = await withPhase3Schema(() =>
+    payload.create({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      collection: COLLECTION as any,
+      data: {
+        client: trustedClientId,
+        title: validateTitle(input.title),
+        eventAt: validateEventAt(input.eventAt),
+        eventCategory: parseOptionalCategory(input.eventCategory) ?? "meeting",
+        status: parseOptionalStatus(input.status) ?? "planned",
+        location: normalizeOptional(input.location) ?? null,
+        contextNotes: normalizeOptional(input.contextNotes) ?? null,
+        followUpNotes: normalizeOptional(input.followUpNotes) ?? null,
+        dietaryNotes: normalizeOptional(input.dietaryNotes) ?? null,
+        accessibilityNotes: normalizeOptional(input.accessibilityNotes) ?? null,
+        contacts: contactIds,
+        internalOnly: true,
+      },
+      overrideAccess: true,
+    }),
+  );
 
   return { id: Number(doc.id) };
 }
@@ -596,14 +626,17 @@ export async function updateRelationshipEvent(
   const payload = await getPayload({ config });
   let existing: Record<string, unknown>;
   try {
-    existing = (await payload.findByID({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      collection: COLLECTION as any,
-      id: eventId,
-      depth: 0,
-      overrideAccess: true,
-    })) as unknown as Record<string, unknown>;
-  } catch {
+    existing = (await withPhase3Schema(() =>
+      payload.findByID({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        collection: COLLECTION as any,
+        id: eventId,
+        depth: 0,
+        overrideAccess: true,
+      }),
+    )) as unknown as Record<string, unknown>;
+  } catch (err) {
+    if (err instanceof Phase3SchemaUnavailableError) throw err;
     throw new EventNotFoundError();
   }
 
@@ -656,13 +689,15 @@ export async function updateRelationshipEvent(
   // Never reassign client from browser input.
   delete data.client;
 
-  const doc = await payload.update({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    collection: COLLECTION as any,
-    id: eventId,
-    data,
-    overrideAccess: true,
-  });
+  const doc = await withPhase3Schema(() =>
+    payload.update({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      collection: COLLECTION as any,
+      id: eventId,
+      data,
+      overrideAccess: true,
+    }),
+  );
 
   return { id: Number(doc.id) };
 }
