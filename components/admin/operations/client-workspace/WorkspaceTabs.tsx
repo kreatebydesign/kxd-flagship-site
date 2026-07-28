@@ -19,6 +19,7 @@ import {
   WorkspaceStat,
   WorkspaceStatRow,
 } from "./WorkspacePrimitives";
+import { RelationshipIntelligencePanel } from "./RelationshipIntelligencePanel";
 
 function statusLabelFromClient(client: ClientWorkspaceData["client"]): string {
   const s = client.relationshipStatus as string;
@@ -121,6 +122,17 @@ export function OverviewTab({ data }: { data: ClientWorkspaceData }) {
         )}
       </WorkspaceChapter>
     </div>
+  );
+}
+
+export function RelationshipTab({ data }: { data: ClientWorkspaceData }) {
+  return (
+    <RelationshipIntelligencePanel
+      clientId={Number(data.client.id)}
+      contacts={data.contacts}
+      events={data.relationshipEvents}
+      summary={data.relationshipSummary}
+    />
   );
 }
 

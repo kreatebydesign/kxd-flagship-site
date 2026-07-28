@@ -6,6 +6,7 @@ import {
   OpportunitiesTab,
   OverviewTab,
   ProjectsTab,
+  RelationshipTab,
   RevenueTab,
   RoadmapTab,
   ServicesTab,
@@ -23,6 +24,8 @@ export function WorkspaceTabContent({
   switch (tab) {
     case "overview":
       return <OverviewTab data={data} />;
+    case "relationship":
+      return <RelationshipTab data={data} />;
     case "timeline":
       return <TimelineTab data={data} />;
     case "projects":

@@ -11,6 +11,14 @@ import {
   type PlaceholderRoadmap,
   type PlaceholderTimelineEvent,
 } from "./placeholders";
+import {
+  buildRelationshipIntelligenceSummary,
+  mapWorkspaceContact,
+  mapWorkspaceRelationshipEvent,
+  type RelationshipIntelligenceSummary,
+  type WorkspaceContact,
+  type WorkspaceRelationshipEvent,
+} from "./relationship-types";
 
 export interface ClientWorkspaceData {
   client: AnyDoc;
@@ -22,6 +30,12 @@ export interface ClientWorkspaceData {
   timeline: PlaceholderTimelineEvent[];
   roadmap: PlaceholderRoadmap | null;
   editProfileHref: string;
+  /** Phase 3 Batch B — client-scoped contacts (operator-only). */
+  contacts: WorkspaceContact[];
+  /** Phase 3 Batch B — client-scoped relationship events (read-only in Batch B). */
+  relationshipEvents: WorkspaceRelationshipEvent[];
+  /** Phase 3 Batch B — concise facts-only summary (no scores / AI). */
+  relationshipSummary: RelationshipIntelligenceSummary;
 }
 
 export async function fetchClientWorkspace(clientId: number): Promise<ClientWorkspaceData | null> {
@@ -38,35 +52,54 @@ export async function fetchClientWorkspace(clientId: number): Promise<ClientWork
     return null;
   }
 
-  const [profilesR, projectsR, retainersR, timelineR] = await Promise.allSettled([
-    payload.find({
-      collection: "executive-client-profiles",
-      where: { client: { equals: clientId } },
-      limit: 1,
-      depth: 0,
-    }),
-    payload.find({
-      collection: "client-projects",
-      where: { client: { equals: clientId } },
-      limit: 50,
-      depth: 0,
-      sort: "-updatedAt",
-    }),
-    payload.find({
-      collection: "retainers",
-      where: { client: { equals: clientId } },
-      limit: 20,
-      depth: 0,
-      sort: "-updatedAt",
-    }),
-    payload.find({
-      collection: "client-timeline-events",
-      where: { client: { equals: clientId } },
-      limit: 100,
-      depth: 0,
-      sort: "-eventDate",
-    }),
-  ]);
+  const [profilesR, projectsR, retainersR, timelineR, contactsR, eventsR] =
+    await Promise.allSettled([
+      payload.find({
+        collection: "executive-client-profiles",
+        where: { client: { equals: clientId } },
+        limit: 1,
+        depth: 0,
+      }),
+      payload.find({
+        collection: "client-projects",
+        where: { client: { equals: clientId } },
+        limit: 50,
+        depth: 0,
+        sort: "-updatedAt",
+      }),
+      payload.find({
+        collection: "retainers",
+        where: { client: { equals: clientId } },
+        limit: 20,
+        depth: 0,
+        sort: "-updatedAt",
+      }),
+      payload.find({
+        collection: "client-timeline-events",
+        where: { client: { equals: clientId } },
+        limit: 100,
+        depth: 0,
+        sort: "-eventDate",
+      }),
+      payload.find({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        collection: "client-contacts" as any,
+        where: { client: { equals: clientId } },
+        limit: 100,
+        depth: 0,
+        sort: "name",
+        overrideAccess: true,
+      }),
+      payload.find({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        collection: "client-relationship-events" as any,
+        where: { client: { equals: clientId } },
+        limit: 50,
+        depth: 0,
+        sort: "-eventAt",
+        overrideAccess: true,
+      }),
+    ]);
 
   const profile =
     profilesR.status === "fulfilled"
@@ -107,6 +140,25 @@ export async function fetchClientWorkspace(clientId: number): Promise<ClientWork
     ? `/admin/collections/executive-client-profiles/${profile.id}`
     : `/admin/collections/executive-client-profiles/create?client=${clientId}`;
 
+  const contactDocs =
+    contactsR.status === "fulfilled"
+      ? (contactsR.value.docs as Record<string, unknown>[])
+      : [];
+  const contacts = contactDocs.map(mapWorkspaceContact);
+  const contactsById = new Map(contacts.map((c) => [c.id, c]));
+
+  const eventDocs =
+    eventsR.status === "fulfilled"
+      ? (eventsR.value.docs as Record<string, unknown>[])
+      : [];
+  const relationshipEvents = eventDocs.map((doc) =>
+    mapWorkspaceRelationshipEvent(doc, contactsById),
+  );
+  const relationshipSummary = buildRelationshipIntelligenceSummary(
+    contacts,
+    relationshipEvents,
+  );
+
   return {
     client,
     profile,
@@ -117,5 +169,8 @@ export async function fetchClientWorkspace(clientId: number): Promise<ClientWork
     timeline,
     roadmap: getPlaceholderRoadmap(slug),
     editProfileHref,
+    contacts,
+    relationshipEvents,
+    relationshipSummary,
   };
 }

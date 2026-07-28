@@ -18,6 +18,7 @@ export const WORKSPACE_C = {
 
 export const WORKSPACE_TABS = [
   { id: "overview", label: "Overview" },
+  { id: "relationship", label: "Relationship" },
   { id: "timeline", label: "Timeline" },
   { id: "projects", label: "Projects" },
   { id: "services", label: "Services" },
@@ -42,6 +43,21 @@ export function fmtWorkspaceDate(iso: string | null | undefined): string {
       month: "short",
       day: "numeric",
       year: "numeric",
+    });
+  } catch {
+    return "—";
+  }
+}
+
+export function fmtWorkspaceDateTime(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  try {
+    return new Date(iso).toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
     });
   } catch {
     return "—";

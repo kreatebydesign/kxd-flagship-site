@@ -1,10 +1,10 @@
 # Phase 3 — Client & Relationship Intelligence
 
-**Status:** Batch A implemented (data & privacy foundation) — Batches B–E not started  
+**Status:** Batch A published · Batch B implemented (Client Intelligence workspace) — Batches C–E not started  
 **Baseline (planning):** `e97a571515efabec3f47347d3a38133007b7aef0`  
 **Companion:** `docs/KXD-OS-ROADMAP.md`, `docs/KXD-OS-CURRENT-STATE.md`
 
-> Batch A landed collections, migration, and privacy verification only. Operator Clients/Events UI is **not** shipped.
+> Batch A landed collections, migration, and privacy verification. Batch B extends the existing Clients workspace (`/admin/operations/clients/[id]?tab=relationship`) with contacts CRUD and read-only relationship-event context. Standalone Events UI is **not** shipped.
 
 ---
 
@@ -147,13 +147,13 @@ Optional non-blocking implementation choice (implementer may proceed with defaul
 
 | Item | Definition |
 |------|------------|
-| **Status** | ✅ Implemented (awaiting review/publication) |
+| **Status** | ✅ Published |
 | **Collections** | `client-contacts` (`payload/collections/ClientContacts.ts`), `client-relationship-events` (`payload/collections/ClientRelationshipEvents.ts`) |
 | **Access** | Collection CRUD via `isAuthenticated` → `isStudioPayloadOperator`; sensitive fields via `studioOperatorFieldAccess` |
 | **Migration** | `migrations/20260727_phase3_client_relationship_intelligence.ts` (registered in `migrations/index.ts`) |
 | **Verification** | `npm run verify:phase3-relationship-foundation`; also `npm run verify:portal-auth-boundaries` |
 | **Privacy** | Operator-only; `internalOnly` default true; no portal/public imports of these collections |
-| **Not started** | Batch B Client Intelligence UI, Batch C Events routes, Batch D navigation, Batch E hardening completion |
+| **Not started at Batch A** | Batch B Client Intelligence UI, Batch C Events routes, Batch D navigation, Batch E hardening completion |
 | **Outcome** | Operator-only Payload collections and migration for contacts, relationship events, and private context fields; no public/portal serialization paths |
 | **Areas** | `payload/collections/ClientContacts.ts`, `payload/collections/ClientRelationshipEvents.ts`, `payload.config.ts`, `migrations/20260727_phase3_client_relationship_intelligence.ts`, `migrations/index.ts`, `scripts/verify-phase3-relationship-foundation.ts` |
 | **Dependencies** | Approved baseline; existing `isAuthenticated` / `isStudioPayloadOperator` |
@@ -168,15 +168,20 @@ Optional non-blocking implementation choice (implementer may proceed with defaul
 
 | Item | Definition |
 |------|------------|
-| **Outcome** | Existing Clients list/detail surfaces show relationship context, preferences, and linked contacts with Payload deep links |
-| **Areas** | `app/admin/operations/clients/**`, `components/admin/operations/client-portfolio/**`, `components/admin/operations/client-workspace/**`, `lib/executive-client-workspace/**`, Payload deep-link helpers |
+| **Status** | ✅ Implemented (awaiting review/publication) |
+| **Location** | `/admin/operations/clients/[id]?tab=relationship` inside existing `ClientWorkspaceScreen` |
+| **Outcome** | Operator Clients detail shows relationship intelligence summary, contacts CRUD, and read-only client-scoped relationship events with Payload deep links |
+| **Contacts workflow** | Add / edit / mark active|inactive via `/api/admin/client-relationship/contacts` (+ `[id]` PATCH); client ownership forced from trusted workspace `clientId`; no hard delete; `internalOnly` kept true |
+| **Events in Batch B** | Client-scoped read-only list only — no create/edit/delete, no `/admin/operations/events`, no Events nav |
+| **Privacy / ownership** | Studio-operator shell + `requirePayloadAdminApi`; portal/restricted staff denied; reads/writes scoped to selected client; forged client reassignment rejected |
+| **Activity** | No activity/audit emission for contact changes (avoids private-field leakage into broad feeds) |
+| **Schema / migration** | None — Batch A schema unchanged |
+| **Verification** | `npm run verify:phase3-client-intelligence`; `npm run verify:phase3-relationship-foundation`; `npm run verify:portal-auth-boundaries`; build/typecheck |
+| **Areas** | `lib/executive-client-workspace/*`, `components/admin/operations/client-workspace/RelationshipIntelligencePanel.tsx`, `WorkspaceTabs.tsx`, `WorkspaceTabContent.tsx`, `app/api/admin/client-relationship/contacts/**`, `scripts/verify-phase3-client-intelligence.ts` |
 | **Dependencies** | Batch A |
-| **Schema / migration** | None expected beyond Batch A |
-| **Auth / privacy gates** | Pages remain behind `requireStaffAwarePage`; loaders use Payload with operator session; no client-portal imports of private fields |
-| **Verification** | Typecheck via `npm run build`; targeted loader/unit checks if added; spot-check Light/Dark/System via existing theme tokens (no theme-system changes) |
-| **Completion criteria** | Operator can view/edit private relationship context and contacts from client detail; deep links to Payload records work; empty/loading/error states present |
-| **Commit boundary** | One commit: Clients workspace intelligence UI + loaders |
+| **Commit boundary** | One commit: Clients workspace intelligence UI + loaders + contact APIs + verify |
 | **Stop conditions** | Theme-system rewrite; portal surface changes; commercial/billing coupling |
+| **Not started** | Batch C standalone Events workspace, Batch D nav/cross-links, Batch E hardening completion |
 
 ### Batch C — Events workspace
 
