@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requirePayloadAdminApi } from "@/lib/admin/auth";
 import {
+  EventNotFoundError,
   EventOwnershipError,
   EventValidationError,
   getRelationshipEventById,
@@ -45,12 +46,16 @@ export async function GET(_req: Request, context: RouteContext) {
     if (err instanceof EventValidationError) {
       return NextResponse.json({ success: false, error: err.message }, { status: 400 });
     }
-    if (err instanceof EventOwnershipError) {
-      return NextResponse.json({ success: false, error: err.message }, { status: 404 });
+    if (err instanceof EventNotFoundError || err instanceof EventOwnershipError) {
+      return NextResponse.json(
+        { success: false, error: "Relationship event not found." },
+        { status: 404 },
+      );
     }
-    const message =
-      err instanceof Error ? err.message : "Failed to load relationship event.";
-    return NextResponse.json({ success: false, error: message }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: "Failed to load relationship event." },
+      { status: 500 },
+    );
   }
 }
 
@@ -129,11 +134,15 @@ export async function PATCH(req: Request, context: RouteContext) {
     if (err instanceof EventValidationError) {
       return NextResponse.json({ success: false, error: err.message }, { status: 400 });
     }
-    if (err instanceof EventOwnershipError) {
-      return NextResponse.json({ success: false, error: err.message }, { status: 403 });
+    if (err instanceof EventNotFoundError || err instanceof EventOwnershipError) {
+      return NextResponse.json(
+        { success: false, error: "Relationship event not found." },
+        { status: 404 },
+      );
     }
-    const message =
-      err instanceof Error ? err.message : "Failed to update relationship event.";
-    return NextResponse.json({ success: false, error: message }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: "Failed to update relationship event." },
+      { status: 500 },
+    );
   }
 }

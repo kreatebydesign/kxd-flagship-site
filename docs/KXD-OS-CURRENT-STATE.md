@@ -205,7 +205,7 @@ Edition 1 is in the **operate and extend** phase — not redesign.
 
 ### Approved next product phase
 
-**Phase 3 — Client & Relationship Intelligence** — **Batches A–D implemented**; Batch E not started.
+**Phase 3 — Client & Relationship Intelligence** — **Batches A–E implemented**; Batch E awaiting review/publication and production verification.
 
 - Plan: `docs/PHASE-3-CLIENT-RELATIONSHIP-INTELLIGENCE.md`
 - Batch A collections: `client-contacts`, `client-relationship-events` (studio-operator-only)
@@ -216,12 +216,12 @@ Edition 1 is in the **operate and extend** phase — not redesign.
 - Batch C: Relationship Events at `/admin/operations/events` (+ `/new`, `/[id]`) — list/filter/create/edit/status; Clients nav **Events**
 - Batch C verify: `npm run verify:phase3-relationship-events`
 - Batch D: Portfolio ↔ Relationship ↔ Events bidirectional links; staff allowlists keep relationship surfaces denied; `verify:phase3-relationship-connections`
-- Batch E remains privacy hardening / Phase 3 completion verification
+- Batch E: privacy hardening (list note stripping, uniform 404, server-only workspace loader) + `verify:phase3-relationship-completion`
 - Explicitly excludes portal/public exposure, rituals/Business Memory wiring, Google Calendar rewrite, commercial/Stripe, deploy, and production-data mutation
 
 ### Immediate priorities
 
-1. **Phase 3 — Client & Relationship Intelligence** — Batches A–D complete; next is Batch E (privacy hardening / stabilization) per the Phase 3 plan.
+1. **Phase 3 — Client & Relationship Intelligence** — Batches A–E implemented; next is Batch E review/publication then production deployment verification.
 2. **Client operations at scale** — Repeat the Primal launch pattern using `lib/client-launch/` for every new client workspace.
 3. **Business Memory integration** — Wire `runBusinessMemory()` into rituals or intelligence when explicitly requested; foundation exists, UI does not. Phase 3 prepares durable relationship context but does not integrate Business Memory yet.
 4. **Executive experience polish** — Premium ritual presentation (KHIG) without new intelligence layers.

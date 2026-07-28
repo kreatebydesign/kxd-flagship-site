@@ -179,12 +179,12 @@ function main() {
   assert.equal(leaks.length, 0, leaks.join("; "));
   console.log("  ✔ portal/public surfaces do not import Batch C event modules/fields");
 
-  // Broader Phase 3 batches after C may exist; Batch E completion is separate.
+  // Broader Phase 3 batches after C may exist; this verifier stays Batch-C-scoped.
   assert.doesNotMatch(
     read("docs/PHASE-3-CLIENT-RELATIONSHIP-INTELLIGENCE.md"),
-    /Batch E[^\n]*✅ Implemented/,
+    /Batch F[^\n]*✅ Implemented/,
   );
-  console.log("  ✔ Batch E not marked implemented");
+  console.log("  ✔ no later-phase Batch F marked implemented");
 
   console.log("\nPhase 3 Batch C Relationship Events verification passed.\n");
 }

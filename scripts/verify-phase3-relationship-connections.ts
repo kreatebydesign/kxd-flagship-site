@@ -149,9 +149,9 @@ function main() {
   console.log("  ✔ Batch B/C intact; Calendar/Timeline/activity stay separate");
 
   // No schema/migration drift in Batch D working tree expectations (source contract)
-  assert.doesNotMatch(phaseDoc, /Batch E[^\n]*✅ Implemented/);
   assert.match(phaseDoc, /Batch D[^\n]*Implemented|Batch D — Relationship connections/);
-  console.log("  ✔ Batch E not marked implemented");
+  assert.doesNotMatch(phaseDoc, /Batch F[^\n]*✅ Implemented/);
+  console.log("  ✔ Batch D documented; no later-phase Batch F");
 
   console.log("\nPhase 3 Batch D Relationship connections verification passed.\n");
 }

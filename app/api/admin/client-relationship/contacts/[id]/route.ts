@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requirePayloadAdminApi } from "@/lib/admin/auth";
 import {
+  ContactNotFoundError,
   ContactOwnershipError,
   ContactValidationError,
   updateClientContactForClient,
@@ -80,10 +81,15 @@ export async function PATCH(req: Request, context: RouteContext) {
     if (err instanceof ContactValidationError) {
       return NextResponse.json({ success: false, error: err.message }, { status: 400 });
     }
-    if (err instanceof ContactOwnershipError) {
-      return NextResponse.json({ success: false, error: err.message }, { status: 403 });
+    if (err instanceof ContactNotFoundError || err instanceof ContactOwnershipError) {
+      return NextResponse.json(
+        { success: false, error: "Contact not found." },
+        { status: 404 },
+      );
     }
-    const message = err instanceof Error ? err.message : "Failed to update contact.";
-    return NextResponse.json({ success: false, error: message }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: "Failed to update contact." },
+      { status: 500 },
+    );
   }
 }

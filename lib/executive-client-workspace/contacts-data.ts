@@ -18,6 +18,14 @@ export class ContactOwnershipError extends Error {
   }
 }
 
+/** Missing or cross-client contact — map to HTTP 404 with a generic client message. */
+export class ContactNotFoundError extends Error {
+  constructor(message = "Contact not found.") {
+    super(message);
+    this.name = "ContactNotFoundError";
+  }
+}
+
 export class ContactValidationError extends Error {
   constructor(message: string) {
     super(message);
@@ -167,12 +175,13 @@ export async function updateClientContactForClient(
       overrideAccess: true,
     })) as Record<string, unknown>;
   } catch {
-    throw new ContactOwnershipError("Contact not found for this client.");
+    throw new ContactNotFoundError();
   }
 
   const ownerId = relationId(existing.client);
   if (ownerId !== trustedClientId) {
-    throw new ContactOwnershipError("Contact does not belong to this client.");
+    // Uniform not-found — do not disclose cross-client ownership mismatch.
+    throw new ContactNotFoundError();
   }
 
   const data: Record<string, unknown> = {

@@ -25,6 +25,14 @@ export class EventOwnershipError extends Error {
   }
 }
 
+/** Missing or unresolvable event — map to HTTP 404 with a generic client message. */
+export class EventNotFoundError extends Error {
+  constructor(message = "Relationship event not found.") {
+    super(message);
+    this.name = "EventNotFoundError";
+  }
+}
+
 export class EventValidationError extends Error {
   constructor(message: string) {
     super(message);
@@ -282,6 +290,7 @@ function extractContactIds(doc: Record<string, unknown>): number[] {
 async function mapEventRow(
   doc: Record<string, unknown>,
   clientNameById: Map<number, string>,
+  options: { includePrivateNotes: boolean } = { includePrivateNotes: true },
 ): Promise<OperatorRelationshipEventRow> {
   const id = relationId(doc.id) ?? 0;
   const clientId = relationId(doc.client) ?? 0;
@@ -305,6 +314,9 @@ async function mapEventRow(
 
   const contextNotes = asString(doc.contextNotes);
   const followUpNotes = asString(doc.followUpNotes);
+  const dietaryNotes = asString(doc.dietaryNotes);
+  const accessibilityNotes = asString(doc.accessibilityNotes);
+  const includePrivateNotes = options.includePrivateNotes;
 
   return {
     id,
@@ -321,10 +333,11 @@ async function mapEventRow(
     contactNames: names,
     hasPrivateContext: Boolean(contextNotes),
     hasFollowUpNotes: Boolean(followUpNotes),
-    contextNotes,
-    followUpNotes,
-    dietaryNotes: asString(doc.dietaryNotes),
-    accessibilityNotes: asString(doc.accessibilityNotes),
+    // List payloads keep presence flags only — full note text is detail-only (Batch E).
+    contextNotes: includePrivateNotes ? contextNotes : null,
+    followUpNotes: includePrivateNotes ? followUpNotes : null,
+    dietaryNotes: includePrivateNotes ? dietaryNotes : null,
+    accessibilityNotes: includePrivateNotes ? accessibilityNotes : null,
     createdAt: asString(doc.createdAt),
     updatedAt: asString(doc.updatedAt),
     href: `/admin/operations/events/${id}`,
@@ -444,7 +457,11 @@ export async function listRelationshipEvents(
     ),
   ];
   const clientNames = await loadClientNameMap(clientIds);
-  const rows = await Promise.all(docs.map((doc) => mapEventRow(doc, clientNames)));
+  const rows = await Promise.all(
+    docs.map((doc) =>
+      mapEventRow(doc, clientNames, { includePrivateNotes: false }),
+    ),
+  );
 
   const now = Date.now();
   const timeframe = query.timeframe ?? "all";
@@ -513,15 +530,15 @@ export async function getRelationshipEventById(
       overrideAccess: true,
     })) as unknown as Record<string, unknown>;
   } catch {
-    throw new EventOwnershipError("Relationship event not found.");
+    throw new EventNotFoundError();
   }
 
   const clientId = relationId(doc.client);
   if (clientId == null) {
-    throw new EventOwnershipError("Relationship event is missing a client.");
+    throw new EventNotFoundError();
   }
   const clientNames = await loadClientNameMap([clientId]);
-  return mapEventRow(doc, clientNames);
+  return mapEventRow(doc, clientNames, { includePrivateNotes: true });
 }
 
 export async function createRelationshipEvent(
@@ -587,12 +604,12 @@ export async function updateRelationshipEvent(
       overrideAccess: true,
     })) as unknown as Record<string, unknown>;
   } catch {
-    throw new EventOwnershipError("Relationship event not found.");
+    throw new EventNotFoundError();
   }
 
   const ownerClientId = relationId(existing.client);
   if (ownerClientId == null) {
-    throw new EventOwnershipError("Relationship event is missing a client.");
+    throw new EventNotFoundError();
   }
 
   if (
@@ -600,7 +617,8 @@ export async function updateRelationshipEvent(
     Number.isFinite(input.expectedClientId) &&
     input.expectedClientId !== ownerClientId
   ) {
-    throw new EventOwnershipError("Event does not belong to the selected client.");
+    // Uniform not-found response — do not disclose ownership mismatch details.
+    throw new EventNotFoundError();
   }
 
   const data: Record<string, unknown> = {

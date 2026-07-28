@@ -119,7 +119,7 @@ This track is distinct from registry phase numbers and from Intelligence Pipelin
 | Phase | Title | Status | Notes |
 |-------|-------|--------|-------|
 | Phase 2 | Authenticated theming + portal date stabilization | ✅ Complete (historical) | Theme: `lib/shell/theme.ts`, Light / Dark / System. Portal dates: `a94ca60`. Later staff/Intelligence commits remain legitimate current architecture. |
-| **Phase 3** | **Client & Relationship Intelligence** | **Batches A–D implemented — Batch E planned** | Private operator workspace connecting clients, contacts, relationships, preferences, and events. Plan: `docs/PHASE-3-CLIENT-RELATIONSHIP-INTELLIGENCE.md`. Batch A: collections + migration. Batch B: client Relationship tab. Batch C: `/admin/operations/events` Relationship Events workspace. Batch D: Portfolio ↔ Relationship ↔ Events connections + staff permission wiring. |
+| **Phase 3** | **Client & Relationship Intelligence** | **Batches A–E implemented — awaiting Batch E publication / production verification** | Private operator workspace connecting clients, contacts, relationships, preferences, and events. Plan: `docs/PHASE-3-CLIENT-RELATIONSHIP-INTELLIGENCE.md`. Batches A–D published. Batch E: privacy hardening + completion verifier. |
 
 **Phase 3 product outcome:** durable private business context for future Business Memory — not portal, not public, not calendar rewrite, not ritual/Business Memory integration in this phase.
 

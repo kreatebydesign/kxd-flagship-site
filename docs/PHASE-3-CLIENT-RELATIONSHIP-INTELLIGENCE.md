@@ -1,10 +1,10 @@
 # Phase 3 — Client & Relationship Intelligence
 
-**Status:** Batches A–D implemented — Batch E not started  
+**Status:** Batches A–E implemented — Phase 3 complete pending Batch E review/publication and production verification  
 **Baseline (planning):** `e97a571515efabec3f47347d3a38133007b7aef0`  
 **Companion:** `docs/KXD-OS-ROADMAP.md`, `docs/KXD-OS-CURRENT-STATE.md`
 
-> Batch A: collections + migration. Batch B: client Relationship tab (contacts CRUD + read-only events). Batch C: standalone `/admin/operations/events`. Batch D: Portfolio ↔ Relationship ↔ Events connections, permission wiring. Batch E hardening remains.
+> Batch A: collections + migration. Batch B: client Relationship tab. Batch C: `/admin/operations/events`. Batch D: Portfolio ↔ Relationship ↔ Events connections. Batch E: privacy hardening, authorization stabilization, completion verification.
 
 ---
 
@@ -202,13 +202,13 @@ Optional non-blocking implementation choice (implementer may proceed with defaul
 | **Dependencies** | Batches A–B |
 | **Commit boundary** | One commit: Events workspace routes + UI + loaders + APIs + verify |
 | **Stop conditions** | Using Calendar/scheduling as store; renaming Timeline to Events; portal exposure |
-| **Not started** | Batch E hardening |
+| **Not started** | — |
 
 ### Batch D — Relationship connections and navigation
 
 | Item | Definition |
 |------|------------|
-| **Status** | ✅ Implemented (awaiting review/publication) |
+| **Status** | ✅ Published |
 | **Outcome** | Bidirectional Portfolio ↔ Relationship tab ↔ Events workspace links; Events remains in Clients nav; restricted staff denied on pages/APIs |
 | **Connections** | Portfolio → Events + per-client Relationship tab; Events list/detail → Portfolio / client workspace / Relationship; Relationship tab → Events + `new?clientId=` (preselect only); event contacts → Relationship tab |
 | **Navigation** | Clients → **Events** retained (distinct from Intelligence → Timeline); staff shell omits Events/Portfolio/Timeline; edition map `events: "portfolio"` unchanged |
@@ -220,21 +220,24 @@ Optional non-blocking implementation choice (implementer may proceed with defaul
 | **Dependencies** | Batches B and C |
 | **Commit boundary** | One commit: navigation + cross-links + permission wiring |
 | **Stop conditions** | Broad nav redesign; training/staff product expansion beyond permission gates |
-| **Not started** | Batch E hardening |
+| **Not started** | — |
 
 ### Batch E — Verification, privacy hardening, and stabilization
 
 | Item | Definition |
 |------|------------|
-| **Outcome** | Phase 3 privacy, auth, isolation, migration, build, and theme-compatibility verification complete; docs marked implemented only when true |
-| **Areas** | `scripts/verify-*-relationship*` (or equivalent), docs updates to roadmap/current-state status, privacy leak checklist |
+| **Status** | ✅ Implemented (awaiting review/publication) |
+| **Outcome** | Phase 3 privacy/auth/isolation completion verification; objective privacy hardening; A–D regression green; ready for publication then production verification |
+| **Hardening** | Events list omits private note text (presence flags only); uniform 404 for missing/cross-client event & contact mutations; `fetch-client-workspace` guarded with `server-only` |
+| **Guarantees** | Operator-only pages/APIs; restricted-staff deny-by-default; portal/public isolation; immutable event client; same-client contacts; forced `internalOnly`; no private values in URLs/metadata/activity |
+| **Schema / migration** | None — Batch A schema unchanged |
+| **Verification** | `npm run verify:phase3-relationship-completion`; A–D verifiers; portal auth; staff-experience; build on loopback |
+| **Browser QA** | Deferred consolidated manual browser testing remains deferred per plan — focused static/build checks only |
+| **Areas** | events/contacts data + API error mapping, workspace loader guard, completion verifier, Phase 3 docs |
 | **Dependencies** | Batches A–D |
-| **Schema / migration** | None expected |
-| **Auth / privacy gates** | Explicit checks: public HTML/metadata/JSON-LD/API/portal responses contain none of the private field names/values |
-| **Verification** | `npm run build`; `npm run verify:portal-auth-boundaries`; Phase 3 verify script; migration bootstrap verify if applicable; Light/Dark/System smoke on Clients + Events (deferred consolidated manual browser testing remains deferred — focused checks only) |
-| **Completion criteria** | All Phase 3 completion criteria green; exclusions still respected; no deploy; no production-data mutation |
-| **Commit boundary** | One commit: verification + documentation completion notes |
+| **Commit boundary** | One commit: privacy hardening + completion verifier + documentation |
 | **Stop conditions** | Any public leak; any portal serialization of private fields; deploy request |
+| **Production note** | Implementation complete for review/publication; final production deployment verification is a separate publication pass |
 
 ---
 
