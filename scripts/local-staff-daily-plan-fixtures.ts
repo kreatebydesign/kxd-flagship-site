@@ -61,7 +61,7 @@ async function main() {
     collection: "work" as any,
     data: {
       title: "[LOCAL FIXTURE] Draft awaiting Matt",
-      summary: "Local test item already in review — must appear under Waiting on Matt.",
+      summary: "Local test item already in review — must appear under Awaiting Approval.",
       assignedTo: staffUserId,
       priority: "normal",
       status: "review",
