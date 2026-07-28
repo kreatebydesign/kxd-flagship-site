@@ -4,11 +4,13 @@ import type { PartnershipBriefing } from "@/lib/ces/partnership";
 import type { ExecutivePerformanceBriefing } from "@/lib/ces/executive-performance";
 import type { WebsiteReviewLandingData } from "@/lib/ces/modules/website-review/types";
 import type { ConnectedWorkspaceData } from "@/lib/portal/connected-workspace";
+import type { WorkspacePersonalizationModel } from "@/lib/portal/workspace-personalization";
 import { isCesFlagshipPortal } from "@/lib/portal/ces-launch-safety";
 import { portalFirstName, portalTimeGreeting } from "@/lib/portal/greeting";
 import { CesPage } from "@/components/ces/primitives";
 import { CesPartnershipBriefing } from "@/components/ces/partnership";
 import { CesExecutivePerformanceWorkspace } from "@/components/ces/executive-performance";
+import { WorkspaceFocusStrip } from "@/components/portal/WorkspaceFocusStrip";
 import { PortalUpgradeOpportunities } from "./PortalUpgradeOpportunities";
 
 export interface CesPortalHomeProps {
@@ -19,6 +21,8 @@ export interface CesPortalHomeProps {
   briefing: PartnershipBriefing;
   /** Phase 31A — when present, replaces classic partnership briefing. */
   performance?: ExecutivePerformanceBriefing | null;
+  /** Batch C — server-resolved workspace personalization for the active client. */
+  personalization?: WorkspacePersonalizationModel | null;
 }
 
 export function CesPortalHome({
@@ -27,6 +31,7 @@ export function CesPortalHome({
   briefing,
   websiteReview,
   performance,
+  personalization = null,
 }: CesPortalHomeProps) {
   const firstName = portalFirstName(displayName);
   const greeting = portalTimeGreeting(firstName);
@@ -39,15 +44,23 @@ export function CesPortalHome({
         flagship ? " kxd-ces-portal-home--flagship" : ""
       }${useExecutive ? " kxd-ces-portal-home--executive" : ""}`}
     >
-      {useExecutive && performance ? (
-        <CesExecutivePerformanceWorkspace
-          performance={performance}
-          websiteReview={websiteReview}
-        />
-      ) : (
-        <CesPartnershipBriefing briefing={briefing} greeting={greeting} />
-      )}
-      <PortalUpgradeOpportunities />
+      <div
+        data-workspace-client={personalization?.clientId ?? profile.identity.clientId}
+        data-workspace-profile={personalization?.profileKey ?? "default"}
+      >
+        {useExecutive && performance ? (
+          <CesExecutivePerformanceWorkspace
+            performance={performance}
+            websiteReview={websiteReview}
+          />
+        ) : (
+          <CesPartnershipBriefing briefing={briefing} greeting={greeting} />
+        )}
+        {personalization && !useExecutive ? (
+          <WorkspaceFocusStrip personalization={personalization} />
+        ) : null}
+        <PortalUpgradeOpportunities />
+      </div>
     </CesPage>
   );
 }

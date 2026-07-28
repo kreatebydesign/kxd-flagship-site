@@ -32,6 +32,7 @@
     "verify:phase3-operator-containment": "tsx scripts/verify-phase3-operator-containment.ts",
     "verify:phase4-multi-client-membership": "tsx scripts/verify-phase4-multi-client-membership.ts",
     "verify:phase4-account-switcher": "tsx scripts/verify-phase4-account-switcher.ts",
+    "verify:phase4-workspace-personalization": "tsx scripts/verify-phase4-workspace-personalization.ts",
     "verify:experience-feedback": "tsx scripts/verify-experience-feedback.ts",
     "verify:website-review-upload": "tsx scripts/verify-website-review-upload.ts",
     "verify:website-review-page-location": "tsx scripts/verify-website-review-page-location.ts",

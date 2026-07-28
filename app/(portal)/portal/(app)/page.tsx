@@ -9,6 +9,7 @@ import { getConnectedWorkspaceData } from "@/lib/portal/connected-workspace";
 import { getPortalOverview } from "@/lib/portal/data";
 import { portalFirstName, portalTimeGreeting } from "@/lib/portal/greeting";
 import { getPortalSession } from "@/lib/portal/session";
+import { resolvePortalWorkspacePersonalization } from "@/lib/portal/workspace-personalization/server";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +21,12 @@ export default async function PortalOverviewPage() {
     getPortalOverview(session),
     resolveExperienceProfile(session),
   ]);
+
+  // Personalization resolves only after session authorization — session.clientId only.
+  const personalization = resolvePortalWorkspacePersonalization({
+    session,
+    experienceProfile: profile,
+  });
 
   if (shouldUseCesPortalHome(profile)) {
     const websiteReview = await getWebsiteReviewLanding(session, profile);
@@ -45,9 +52,16 @@ export default async function PortalOverviewPage() {
         connected={connected}
         briefing={briefing}
         performance={performance}
+        personalization={personalization}
       />
     );
   }
 
-  return <OverviewScreen displayName={session.displayName} data={data} />;
+  return (
+    <OverviewScreen
+      displayName={session.displayName}
+      data={data}
+      personalization={personalization}
+    />
+  );
 }

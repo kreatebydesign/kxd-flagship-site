@@ -14,6 +14,7 @@ import {
   type PortalMembershipRecord,
 } from "./memberships";
 import { probeMembershipSchemaAvailable } from "./multi-client-readiness";
+import { diagnoseWorkspacePersonalization } from "./workspace-personalization";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDoc = Record<string, any>;
@@ -77,6 +78,16 @@ export interface PortalAccessClientReadiness {
   issues: PortalReadinessIssue[];
   payloadClientUrl: string;
   payloadCesProfileUrl: string | null;
+  /** Batch C — read-only personalization diagnostic (not DB-backed config). */
+  personalizationPreview: {
+    profileKey: string;
+    source: string;
+    fallbackApplied: boolean;
+    enabledModuleKeys: string[];
+    primaryActionLabels: string[];
+    notice: string;
+    warnings: string[];
+  } | null;
 }
 
 export interface PortalAccessData {
@@ -213,6 +224,14 @@ export async function getPortalAccessData(): Promise<PortalAccessData> {
 
     const evaluation = evaluatePortalClientReadiness(input, readinessEnv);
 
+    const personalizationDiag = diagnoseWorkspacePersonalization({
+      clientId,
+      clientName: input.clientName,
+      clientSlug: input.clientSlug,
+      cesModules: modules,
+      accentColor: input.accentColor,
+    });
+
     return {
       ...input,
       hasActiveCesProfile: cesProfileStatus === "active",
@@ -223,6 +242,15 @@ export async function getPortalAccessData(): Promise<PortalAccessData> {
       payloadCesProfileUrl: profile
         ? `/admin/collections/client-experience-profiles/${profile.id}`
         : null,
+      personalizationPreview: {
+        profileKey: personalizationDiag.profileKey,
+        source: personalizationDiag.source,
+        fallbackApplied: personalizationDiag.fallbackApplied,
+        enabledModuleKeys: personalizationDiag.enabledModuleKeys,
+        primaryActionLabels: personalizationDiag.primaryActionLabels,
+        notice: personalizationDiag.notice,
+        warnings: personalizationDiag.warnings,
+      },
     };
   });
 

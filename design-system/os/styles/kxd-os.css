@@ -19602,3 +19602,75 @@ html[data-theme="dark"] .kxd-os-theme-pref__option.is-active {
     transition: none !important;
   }
 }
+
+/* ── Batch C: Workspace personalization (portal overview) ─────────────── */
+
+.kxd-ws-identity__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.kxd-ws-identity__logo {
+  width: 3rem;
+  height: 3rem;
+  object-fit: contain;
+  flex-shrink: 0;
+  border-radius: 0.35rem;
+}
+
+.kxd-ws-identity__mark {
+  width: 3rem;
+  height: 3rem;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.35rem;
+  background: color-mix(in srgb, var(--kxd-ws-accent, var(--kxd-os-text-primary)) 12%, transparent);
+  color: var(--kxd-ws-accent, var(--kxd-os-text-primary));
+  font-family: var(--kxd-os-font-display, inherit);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.kxd-ws-identity__copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.kxd-ws-identity__copy .kxd-os-ops-hero__title,
+.kxd-ws-identity__copy .kxd-os-headline {
+  overflow-wrap: anywhere;
+}
+
+.kxd-ws-focus__modules {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.kxd-ws-focus__modules li {
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .kxd-ws-identity__row {
+    gap: 0.75rem;
+  }
+
+  .kxd-ws-identity__logo,
+  .kxd-ws-identity__mark {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kxd-ws-personalization * {
+    transition: none !important;
+  }
+}

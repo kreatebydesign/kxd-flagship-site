@@ -398,6 +398,35 @@ function PortalAccessScreenInner({ data: initialData }: PortalAccessScreenProps)
                     {client.activePortalUserCount === 1 ? "" : "s"}
                     {client.websiteUrl ? ` · ${client.websiteUrl}` : " · No website URL"}
                   </p>
+                  {client.personalizationPreview ? (
+                    <p className="kxd-os-portal-access__readiness-meta">
+                      Personalization preview: {client.personalizationPreview.profileKey} ·{" "}
+                      {client.personalizationPreview.source}
+                      {client.personalizationPreview.fallbackApplied ? " · fallback" : ""}
+                      {client.personalizationPreview.enabledModuleKeys.length > 0
+                        ? ` · modules ${client.personalizationPreview.enabledModuleKeys
+                            .slice(0, 5)
+                            .join(", ")}`
+                        : ""}
+                      {client.personalizationPreview.primaryActionLabels.length > 0
+                        ? ` · actions ${client.personalizationPreview.primaryActionLabels
+                            .slice(0, 3)
+                            .join(", ")}`
+                        : ""}
+                    </p>
+                  ) : null}
+                  {client.personalizationPreview?.warnings.length ? (
+                    <ul className="kxd-os-portal-access__issues kxd-os-portal-access__issues--compact">
+                      {client.personalizationPreview.warnings.map((warning) => (
+                        <li
+                          key={warning}
+                          className="kxd-os-portal-access__issue kxd-os-portal-access__issue--info"
+                        >
+                          {warning}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
                   {client.issues.some((issue) => issue.level !== "info") ? (
                     <ul className="kxd-os-portal-access__issues kxd-os-portal-access__issues--compact">
                       {client.issues
