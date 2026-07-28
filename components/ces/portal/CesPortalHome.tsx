@@ -5,12 +5,14 @@ import type { ExecutivePerformanceBriefing } from "@/lib/ces/executive-performan
 import type { WebsiteReviewLandingData } from "@/lib/ces/modules/website-review/types";
 import type { ConnectedWorkspaceData } from "@/lib/portal/connected-workspace";
 import type { WorkspacePersonalizationModel } from "@/lib/portal/workspace-personalization";
+import type { WorkPerformanceModel } from "@/lib/portal/work-performance";
 import { isCesFlagshipPortal } from "@/lib/portal/ces-launch-safety";
 import { portalFirstName, portalTimeGreeting } from "@/lib/portal/greeting";
 import { CesPage } from "@/components/ces/primitives";
 import { CesPartnershipBriefing } from "@/components/ces/partnership";
 import { CesExecutivePerformanceWorkspace } from "@/components/ces/executive-performance";
 import { WorkspaceFocusStrip } from "@/components/portal/WorkspaceFocusStrip";
+import { WorkPerformanceWorkspace } from "@/components/portal/WorkPerformanceWorkspace";
 import { PortalUpgradeOpportunities } from "./PortalUpgradeOpportunities";
 
 export interface CesPortalHomeProps {
@@ -23,6 +25,8 @@ export interface CesPortalHomeProps {
   performance?: ExecutivePerformanceBriefing | null;
   /** Batch C — server-resolved workspace personalization for the active client. */
   personalization?: WorkspacePersonalizationModel | null;
+  /** Batch D — monthly work & performance workspace for the active client. */
+  workPerformance?: WorkPerformanceModel | null;
 }
 
 export function CesPortalHome({
@@ -32,6 +36,7 @@ export function CesPortalHome({
   websiteReview,
   performance,
   personalization = null,
+  workPerformance = null,
 }: CesPortalHomeProps) {
   const firstName = portalFirstName(displayName);
   const greeting = portalTimeGreeting(firstName);
@@ -45,7 +50,11 @@ export function CesPortalHome({
       }${useExecutive ? " kxd-ces-portal-home--executive" : ""}`}
     >
       <div
-        data-workspace-client={personalization?.clientId ?? profile.identity.clientId}
+        data-workspace-client={
+          workPerformance?.clientId ??
+          personalization?.clientId ??
+          profile.identity.clientId
+        }
         data-workspace-profile={personalization?.profileKey ?? "default"}
       >
         {useExecutive && performance ? (
@@ -56,7 +65,11 @@ export function CesPortalHome({
         ) : (
           <CesPartnershipBriefing briefing={briefing} greeting={greeting} />
         )}
-        {personalization && !useExecutive ? (
+        {workPerformance ? (
+          <div className="kxd-ws-perf-wrap">
+            <WorkPerformanceWorkspace model={workPerformance} />
+          </div>
+        ) : personalization && !useExecutive ? (
           <WorkspaceFocusStrip personalization={personalization} />
         ) : null}
         <PortalUpgradeOpportunities />
