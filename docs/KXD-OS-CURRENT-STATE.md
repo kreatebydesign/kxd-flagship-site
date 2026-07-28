@@ -203,12 +203,22 @@ Facts → Interpretation → Awareness → Narrative → Memory → Presentation
 
 Edition 1 is in the **operate and extend** phase — not redesign.
 
+### Approved next product phase
+
+**Phase 3 — Client & Relationship Intelligence** is **approved and planned** (not yet implemented).
+
+- Plan: `docs/PHASE-3-CLIENT-RELATIONSHIP-INTELLIGENCE.md`
+- Planning baseline: `0cc1704ed071f61ed5b4062334abea0bfef16659`
+- Extends authenticated operator Clients experience; adds operator Events; introduces first-class contacts and private relationship context
+- Explicitly excludes portal/public exposure, rituals/Business Memory wiring, Google Calendar rewrite, commercial/Stripe, deploy, and production-data mutation
+
 ### Immediate priorities
 
-1. **Client operations at scale** — Repeat the Primal launch pattern using `lib/client-launch/` for every new client workspace.
-2. **Business Memory integration** — Wire `runBusinessMemory()` into rituals or intelligence when explicitly requested; foundation exists, UI does not.
-3. **Executive experience polish** — Premium ritual presentation (KHIG) without new intelligence layers.
-4. **Human-approved automation** — Connect Observer automation metadata and Pulse posture to rules; no autonomous execution without approval.
+1. **Phase 3 — Client & Relationship Intelligence** — Execute approved batches A→E per the Phase 3 plan (data/privacy foundation first).
+2. **Client operations at scale** — Repeat the Primal launch pattern using `lib/client-launch/` for every new client workspace.
+3. **Business Memory integration** — Wire `runBusinessMemory()` into rituals or intelligence when explicitly requested; foundation exists, UI does not. Phase 3 prepares durable relationship context but does not integrate Business Memory yet.
+4. **Executive experience polish** — Premium ritual presentation (KHIG) without new intelligence layers.
+5. **Human-approved automation** — Connect Observer automation metadata and Pulse posture to rules; no autonomous execution without approval.
 
 ### Explicitly not in scope without request
 
@@ -250,6 +260,7 @@ From `lib/platform/registry.ts` and `docs/KXD-OS-ROADMAP.md`:
 | `KXD-OS-ARCHITECTURE.md` | Full architecture reference |
 | `KXD-OS-PHILOSOPHY.md` | Product vision |
 | `KXD-OS-ROADMAP.md` | Edition 1 progress and next phases |
+| `PHASE-3-CLIENT-RELATIONSHIP-INTELLIGENCE.md` | Phase 3 approved plan (Client & Relationship Intelligence) |
 | `KXD-OS-CONSTITUTION.md` | Experience standard |
 | `CLIENT-EXPERIENCE-SYSTEM-ARCHITECTURE.md` | CES architecture |
 | `.cursor/rules/kxd-os-architecture.mdc` | Cursor permanent context |

@@ -112,6 +112,21 @@ From `lib/platform/registry.ts` — not yet implemented:
 
 ---
 
+## Authenticated Operator Experience (product track)
+
+This track is distinct from registry phase numbers and from Intelligence Pipeline Phase 17. It records recent authenticated-operator product work without renumbering historical engineering phases.
+
+| Phase | Title | Status | Notes |
+|-------|-------|--------|-------|
+| Phase 2 | Authenticated theming + portal date stabilization | ✅ Complete (historical) | Theme: `lib/shell/theme.ts`, Light / Dark / System. Portal dates: `a94ca60`. Later staff/Intelligence commits remain legitimate current architecture. |
+| **Phase 3** | **Client & Relationship Intelligence** | **Approved — planned** | Private operator workspace connecting clients, contacts, relationships, preferences, and events. Plan: `docs/PHASE-3-CLIENT-RELATIONSHIP-INTELLIGENCE.md`. Baseline: `0cc1704`. |
+
+**Phase 3 product outcome:** durable private business context for future Business Memory — not portal, not public, not calendar rewrite, not ritual/Business Memory integration in this phase.
+
+**Phase 3 privacy boundary:** relationship context, preferences, dietary notes, accessibility notes, and internal event intelligence stay authenticated and operator-only. Never enter public HTML, metadata, JSON-LD, public APIs, public serialized props, client portals, or client-facing API responses.
+
+---
+
 ## Future Direction (Edition 1 Priorities)
 
 Ordered by architectural dependency:
@@ -189,6 +204,7 @@ From `lib/platform/registry.ts`:
 | `KXD-OS-ROADMAP.md` | This document — build progress |
 | `KXD-OS-PRODUCT-ROADMAP.md` | 5–10 year product eras |
 | `KXD-OS-CONSTITUTION.md` | Experience standard |
+| `PHASE-3-CLIENT-RELATIONSHIP-INTELLIGENCE.md` | Phase 3 approved definition + implementation batches |
 | `.cursor/rules/kxd-os-architecture.mdc` | Cursor agent rule |
 
 ---
