@@ -229,6 +229,8 @@ Edition 1 is in the **operate and extend** phase — not redesign.
 
 **Hosting Renewal Readiness — Batch A (Operator Visibility)** — provider-neutral renewal posture on Infrastructure Command from existing `client-infrastructure` fields (`hostingProvider`, `nextRenewalDate`, `domainExpirationDate`, SSL). Verifier: `npm run verify:hosting-renewal-readiness`. Wix is a classification/filter only — **not** a separate system. Hosting-transition **automation** remains deferred (founding-client post-v1). No migration, cron, email, or production data mutation.
 
+**Client Resource Directory — Batch A (Operator Visibility)** — allowlisted safe links and system metadata on Infrastructure client detail from existing `client-infrastructure` (+ `clients.companyWebsite`, soft onboarding access booleans). Verifier: `npm run verify:client-resource-directory`. Not a credential vault; no secrets, migrations, portal exposure, or automated access tests. Secure Credential Vault and broader Internal Resource Center remain deferred.
+
 ### Immediate priorities
 
 1. **Phase 4 — Multi-Client Portal Access & Account Context** — Production migration verification remains blocked until DB identity + PITR gates clear; then Batch B per `docs/PHASE-4-MULTI-CLIENT-PORTAL.md`.

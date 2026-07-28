@@ -1,3 +1,4 @@
+import type { ClientResourceDirectory } from "./client-resource-directory";
 import type { HostingRenewalReadiness } from "./hosting-renewal-readiness";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -38,6 +39,8 @@ export interface ClientInfrastructureDetail {
   events: InfraDoc[];
   healthSignals: InfrastructureHealthSignal[];
   hostingRenewalReadiness: HostingRenewalReadiness;
+  /** Allowlisted operator resource directory — no secrets or free-form notes. */
+  clientResourceDirectory: ClientResourceDirectory;
   score: number | null;
   monthlyCost: number;
   annualCost: number;

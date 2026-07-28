@@ -21,6 +21,7 @@ import {
   type HostingRenewalReadiness,
   type HostingRenewalUrgency,
 } from "./hosting-renewal-readiness";
+import { buildClientResourceDirectoryFromRecords } from "./client-resource-directory";
 
 function asNumber(value: unknown): number | null {
   if (typeof value === "number" && Number.isFinite(value)) return value;
@@ -330,6 +331,19 @@ export async function getClientInfrastructure(
   const infraId = record?.id as number | undefined;
 
   let hostingAccess: boolean | null = null;
+  const onboardingAccess: {
+    websiteAccess: boolean | null;
+    domainAccess: boolean | null;
+    hostingAccess: boolean | null;
+    analyticsAccess: boolean | null;
+    emailAccess: boolean | null;
+  } = {
+    websiteAccess: null,
+    domainAccess: null,
+    hostingAccess: null,
+    analyticsAccess: null,
+    emailAccess: null,
+  };
   try {
     const onboardingResult = await payload.find({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -340,8 +354,23 @@ export async function getClientInfrastructure(
       overrideAccess: true,
     });
     const onboarding = onboardingResult.docs[0] as InfraDoc | undefined;
-    if (onboarding && typeof onboarding.hostingAccess === "boolean") {
-      hostingAccess = onboarding.hostingAccess;
+    if (onboarding) {
+      if (typeof onboarding.hostingAccess === "boolean") {
+        hostingAccess = onboarding.hostingAccess;
+        onboardingAccess.hostingAccess = onboarding.hostingAccess;
+      }
+      if (typeof onboarding.websiteAccess === "boolean") {
+        onboardingAccess.websiteAccess = onboarding.websiteAccess;
+      }
+      if (typeof onboarding.domainAccess === "boolean") {
+        onboardingAccess.domainAccess = onboarding.domainAccess;
+      }
+      if (typeof onboarding.analyticsAccess === "boolean") {
+        onboardingAccess.analyticsAccess = onboarding.analyticsAccess;
+      }
+      if (typeof onboarding.emailAccess === "boolean") {
+        onboardingAccess.emailAccess = onboarding.emailAccess;
+      }
     }
   } catch {
     hostingAccess = null;
@@ -359,6 +388,11 @@ export async function getClientInfrastructure(
     record,
     hostingAccess,
   );
+  const clientResourceDirectory = buildClientResourceDirectoryFromRecords({
+    record,
+    client,
+    onboardingAccess,
+  });
 
   return {
     record,
@@ -367,6 +401,7 @@ export async function getClientInfrastructure(
     events,
     healthSignals: getInfrastructureHealthSignals(record),
     hostingRenewalReadiness,
+    clientResourceDirectory,
     score,
     monthlyCost,
     annualCost,

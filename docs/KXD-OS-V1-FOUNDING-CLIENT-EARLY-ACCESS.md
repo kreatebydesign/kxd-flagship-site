@@ -191,6 +191,8 @@ npm run verify:client-launch -- --client primal-motorsports
 
 > **Note:** Operator **Hosting Renewal Readiness** visibility on Infrastructure Command (Batch A) reuses existing infrastructure dates and is **not** hosting-transition automation. Wix remains a provider classification only.
 
+> **Note:** Operator **Client Resource Directory** (Batch A) is allowlisted visibility on Infrastructure client detail from existing infrastructure/client metadata. It is **not** a Secure Credential Vault and does **not** replace the deferred Internal Resource Center.
+
 ---
 
 ## Architecture pointers

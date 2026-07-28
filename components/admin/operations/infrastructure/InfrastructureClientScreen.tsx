@@ -24,6 +24,12 @@ import {
   urgencyBadgeLabel,
   type HostingRenewalUrgency,
 } from "@/lib/infrastructure/hosting-renewal-readiness";
+import {
+  resourceEntryStateLabel,
+  softAccessStateLabel,
+  type ResourceEntry,
+  type SoftAccessSignal,
+} from "@/lib/infrastructure/client-resource-directory";
 
 function DetailGrid({ rows }: { rows: Array<{ label: string; value: string }> }) {
   return (
@@ -67,6 +73,45 @@ function renewalUrgencyVariant(urgency: HostingRenewalUrgency): KxdBadgeVariant 
   }
 }
 
+function resourceStateVariant(state: ResourceEntry["state"]): KxdBadgeVariant {
+  switch (state) {
+    case "recorded":
+      return "success";
+    case "invalid":
+    case "withheld":
+      return "warning";
+    case "missing":
+    case "unknown":
+    default:
+      return "default";
+  }
+}
+
+function softAccessVariant(state: SoftAccessSignal["state"]): KxdBadgeVariant {
+  switch (state) {
+    case "reported_yes":
+      return "success";
+    case "reported_no":
+      return "warning";
+    default:
+      return "default";
+  }
+}
+
+function ResourceEntryValue({ entry }: { entry: ResourceEntry }) {
+  if (entry.href && entry.state === "recorded") {
+    return (
+      <a href={entry.href} target="_blank" rel="noopener noreferrer" className="kxd-os-link-quiet">
+        {entry.displayValue ?? entry.href}
+      </a>
+    );
+  }
+  if (entry.displayValue) {
+    return <span className="kxd-os-body">{entry.displayValue}</span>;
+  }
+  return <span className="kxd-os-meta">{entry.note ?? "—"}</span>;
+}
+
 function field(record: InfraDoc | null, key: string): string {
   if (!record || record[key] == null || record[key] === "") return "—";
   if (typeof record[key] === "boolean") return record[key] ? "Yes" : "No";
@@ -93,10 +138,11 @@ export function InfrastructureClientScreen({
   clientId: number;
   detail: ClientInfrastructureDetail;
 }) {
-  const { record, client, costs, events, healthSignals, hostingRenewalReadiness, score, monthlyCost, annualCost } =
+  const { record, client, costs, events, healthSignals, hostingRenewalReadiness, clientResourceDirectory, score, monthlyCost, annualCost } =
     detail;
   const clientName = String(client.name ?? "Client");
   const readiness = hostingRenewalReadiness;
+  const directory = clientResourceDirectory;
 
   return (
     <OperationsShell activeId="infrastructure" clientId={clientId}>
@@ -272,6 +318,100 @@ export function InfrastructureClientScreen({
                   ]}
                 />
               </section>
+            </div>
+
+            <KxdSection label="Client resource directory" />
+            <div className="kxd-os-card" style={{ marginBottom: "1rem" }}>
+              <p className="kxd-os-body">{directory.disclosure}</p>
+              <p className="kxd-os-meta" style={{ marginTop: "0.75rem" }}>
+                Soft onboarding access signals do not confirm ownership, working login, or KXD
+                control.
+              </p>
+              {!directory.hasAnyRecordedValue ? (
+                <p className="kxd-os-meta" style={{ marginTop: "0.75rem" }}>
+                  No allowlisted system values are recorded yet for this client.
+                </p>
+              ) : null}
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(16rem, 1fr))",
+                gap: "1rem",
+                marginBottom: "1.5rem",
+              }}
+            >
+              {directory.categories.map((category) => (
+                <section key={category.id} className="kxd-os-card">
+                  <p className="kxd-os-section__label">{category.label}</p>
+                  <div className="kxd-os-ops-list" style={{ marginTop: "0.75rem" }}>
+                    {category.entries.map((entry) => (
+                      <div key={entry.id} style={{ marginBottom: "0.85rem" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            gap: "0.5rem",
+                            alignItems: "flex-start",
+                          }}
+                        >
+                          <p className="kxd-os-metric__label">{entry.label}</p>
+                          <KxdBadge variant={resourceStateVariant(entry.state)}>
+                            {resourceEntryStateLabel(entry.state)}
+                          </KxdBadge>
+                        </div>
+                        <div style={{ marginTop: "0.25rem" }}>
+                          <ResourceEntryValue entry={entry} />
+                        </div>
+                        {entry.note && entry.displayValue ? (
+                          <p className="kxd-os-meta" style={{ marginTop: "0.25rem" }}>
+                            {entry.note}
+                          </p>
+                        ) : null}
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              ))}
+            </div>
+
+            <div className="kxd-os-card" style={{ marginBottom: "2rem" }}>
+              <p className="kxd-os-section__label">Onboarding access signals</p>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(12rem, 1fr))",
+                  gap: "0.75rem",
+                  marginTop: "0.75rem",
+                }}
+              >
+                {directory.softAccessSignals.map((signal) => (
+                  <div key={signal.id}>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        gap: "0.5rem",
+                        alignItems: "flex-start",
+                      }}
+                    >
+                      <p className="kxd-os-metric__label">{signal.label}</p>
+                      <KxdBadge variant={softAccessVariant(signal.state)}>
+                        {softAccessStateLabel(signal.state)}
+                      </KxdBadge>
+                    </div>
+                    <p className="kxd-os-meta" style={{ marginTop: "0.25rem" }}>
+                      {signal.detail}
+                    </p>
+                  </div>
+                ))}
+              </div>
+              <p className="kxd-os-meta" style={{ marginTop: "1rem" }}>
+                Directory last reviewed context:{" "}
+                {formatInfraDate(directory.lastReviewedAt)}
+                {directory.reviewedBy ? ` · ${directory.reviewedBy}` : ""}
+              </p>
             </div>
 
             <KxdSection label="Costs + Renewals" />
