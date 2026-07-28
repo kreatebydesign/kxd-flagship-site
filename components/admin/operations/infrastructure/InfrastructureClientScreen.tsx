@@ -2,7 +2,6 @@ import Link from "next/link";
 import {
   KxdBadge,
   KxdEmptyState,
-  KxdIntelligenceCallout,
   KxdMetric,
   KxdPage,
   KxdSection,
@@ -18,6 +17,13 @@ import {
   infraStatusLabel,
 } from "@/lib/infrastructure/data";
 import type { ClientInfrastructureDetail, InfraDoc } from "@/lib/infrastructure/types";
+import {
+  formatDaysRemainingLabel,
+  providerClassLabel,
+  responsibilityHintLabel,
+  urgencyBadgeLabel,
+  type HostingRenewalUrgency,
+} from "@/lib/infrastructure/hosting-renewal-readiness";
 
 function DetailGrid({ rows }: { rows: Array<{ label: string; value: string }> }) {
   return (
@@ -47,6 +53,20 @@ function signalVariant(status: string): KxdBadgeVariant {
   return "default";
 }
 
+function renewalUrgencyVariant(urgency: HostingRenewalUrgency): KxdBadgeVariant {
+  switch (urgency) {
+    case "critical":
+      return "critical";
+    case "attention":
+    case "watch":
+      return "warning";
+    case "ok":
+      return "success";
+    default:
+      return "default";
+  }
+}
+
 function field(record: InfraDoc | null, key: string): string {
   if (!record || record[key] == null || record[key] === "") return "—";
   if (typeof record[key] === "boolean") return record[key] ? "Yes" : "No";
@@ -73,9 +93,10 @@ export function InfrastructureClientScreen({
   clientId: number;
   detail: ClientInfrastructureDetail;
 }) {
-  const { record, client, costs, events, healthSignals, score, monthlyCost, annualCost } =
+  const { record, client, costs, events, healthSignals, hostingRenewalReadiness, score, monthlyCost, annualCost } =
     detail;
   const clientName = String(client.name ?? "Client");
+  const readiness = hostingRenewalReadiness;
 
   return (
     <OperationsShell activeId="infrastructure" clientId={clientId}>
@@ -304,12 +325,65 @@ export function InfrastructureClientScreen({
               </KxdSection>
 
               <div>
-                <KxdSection label="Recommendations" />
-                <KxdIntelligenceCallout
-                  title="KXD Intelligence is coming"
-                  description="Proactive infrastructure recommendations, renewal alerts, and optimization insights will appear here."
-                  aria-label="KXD Intelligence unavailable"
-                />
+                <KxdSection label="Hosting renewal readiness" />
+                <div className="kxd-os-card" style={{ marginBottom: "1rem" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      gap: "0.75rem",
+                      alignItems: "flex-start",
+                      marginBottom: "0.75rem",
+                    }}
+                  >
+                    <div>
+                      <p className="kxd-os-card__title">
+                        {providerClassLabel(readiness.providerClass)}
+                        {readiness.providerRaw ? ` · ${readiness.providerRaw}` : ""}
+                      </p>
+                      <p className="kxd-os-meta">
+                        {responsibilityHintLabel(readiness.responsibilityHint)}
+                      </p>
+                    </div>
+                    <KxdBadge variant={renewalUrgencyVariant(readiness.overallUrgency)}>
+                      {urgencyBadgeLabel(readiness.overallUrgency)}
+                    </KxdBadge>
+                  </div>
+                  <p className="kxd-os-body">{readiness.overallRecommendedAction}</p>
+                  <p className="kxd-os-meta" style={{ marginTop: "0.75rem" }}>
+                    Operator guidance only — no automated reminders or emails are sent from this
+                    view.
+                  </p>
+                </div>
+
+                <div className="kxd-os-ops-list" style={{ marginBottom: "1.5rem" }}>
+                  {[readiness.hosting, readiness.domain, readiness.ssl].map((signal) => (
+                    <div key={signal.kind} className="kxd-os-ops-list__row">
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          gap: "0.75rem",
+                          alignItems: "flex-start",
+                        }}
+                      >
+                        <div>
+                          <p className="kxd-os-card__title">{signal.label}</p>
+                          <p className="kxd-os-meta">
+                            {formatInfraDate(signal.iso)} ·{" "}
+                            {formatDaysRemainingLabel(signal.daysRemaining)}
+                          </p>
+                          <p className="kxd-os-body" style={{ marginTop: "0.5rem" }}>
+                            {signal.recommendedAction}
+                          </p>
+                        </div>
+                        <KxdBadge variant={renewalUrgencyVariant(signal.urgency)}>
+                          {urgencyBadgeLabel(signal.urgency)}
+                        </KxdBadge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
 
                 <KxdSection label="Internal notes" />
                 <div className="kxd-os-card">

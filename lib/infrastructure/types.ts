@@ -1,3 +1,5 @@
+import type { HostingRenewalReadiness } from "./hosting-renewal-readiness";
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type InfraDoc = Record<string, any>;
 
@@ -15,7 +17,10 @@ export interface InfrastructureDashboardData {
   overallHealthLabel: string;
   totalClientsTracked: number;
   criticalIssues: number;
+  /** @deprecated Prefer hostingRenewalWatchlist — retained for compatibility. */
   upcomingRenewals: InfraDoc[];
+  /** Hosting/domain renewal readiness rows (past-due, soon, and missing included). */
+  hostingRenewalWatchlist: Array<InfraDoc & { readiness: HostingRenewalReadiness }>;
   monthlyStackCost: number;
   annualStackCost: number;
   marginOpportunity: number | null;
@@ -32,6 +37,7 @@ export interface ClientInfrastructureDetail {
   costs: InfraDoc[];
   events: InfraDoc[];
   healthSignals: InfrastructureHealthSignal[];
+  hostingRenewalReadiness: HostingRenewalReadiness;
   score: number | null;
   monthlyCost: number;
   annualCost: number;

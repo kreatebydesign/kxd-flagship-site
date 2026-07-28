@@ -14,20 +14,17 @@ import type {
   InfrastructureHealthSignal,
   InfrastructureStatus,
 } from "./types";
-
-const MS_PER_DAY = 86_400_000;
-const RENEWAL_WINDOW_DAYS = 60;
+import {
+  compareHostingRenewalReadiness,
+  evaluateFromInfrastructureRecord,
+  formatDaysRemainingLabel,
+  type HostingRenewalReadiness,
+  type HostingRenewalUrgency,
+} from "./hosting-renewal-readiness";
 
 function asNumber(value: unknown): number | null {
   if (typeof value === "number" && Number.isFinite(value)) return value;
   return null;
-}
-
-function daysUntil(iso: string | null | undefined): number | null {
-  if (!iso) return null;
-  const target = new Date(iso).getTime();
-  if (Number.isNaN(target)) return null;
-  return Math.ceil((target - Date.now()) / MS_PER_DAY);
 }
 
 function clientIdFromRel(client: unknown): number | null {
@@ -53,6 +50,15 @@ export {
   calculateMonthlyStackCost,
 } from "./scoring";
 
+function urgencyToHealthStatus(
+  urgency: HostingRenewalUrgency,
+): InfrastructureHealthSignal["status"] {
+  if (urgency === "critical") return "critical";
+  if (urgency === "attention" || urgency === "watch") return "warning";
+  if (urgency === "ok") return "ok";
+  return "unknown";
+}
+
 export function getInfrastructureHealthSignals(record: InfraDoc | null): InfrastructureHealthSignal[] {
   if (!record) {
     return [
@@ -60,8 +66,9 @@ export function getInfrastructureHealthSignals(record: InfraDoc | null): Infrast
     ];
   }
 
-  const domainDays = daysUntil(record.domainExpirationDate as string);
-  const sslDays = daysUntil(record.sslExpirationDate as string);
+  const readiness = evaluateFromInfrastructureRecord(record);
+  const domainDays = readiness.domain.daysRemaining;
+  const sslDays = readiness.ssl.daysRemaining;
 
   return [
     {
@@ -110,6 +117,12 @@ export function getInfrastructureHealthSignals(record: InfraDoc | null): Infrast
               : "unknown",
     },
     {
+      id: "hosting-renewal",
+      label: "Hosting renewal",
+      value: formatDaysRemainingLabel(readiness.hosting.daysRemaining),
+      status: urgencyToHealthStatus(readiness.hosting.urgency),
+    },
+    {
       id: "domain-expiry",
       label: "Domain expiration",
       value:
@@ -118,14 +131,7 @@ export function getInfrastructureHealthSignals(record: InfraDoc | null): Infrast
             ? "Expired"
             : `${domainDays} days`
           : "Not on file",
-      status:
-        domainDays == null
-          ? "unknown"
-          : domainDays < 0
-            ? "critical"
-            : domainDays <= 30
-              ? "warning"
-              : "ok",
+      status: urgencyToHealthStatus(readiness.domain.urgency),
     },
     {
       id: "ssl-expiry",
@@ -136,14 +142,7 @@ export function getInfrastructureHealthSignals(record: InfraDoc | null): Infrast
             ? "Expired"
             : `${sslDays} days`
           : "Not on file",
-      status:
-        sslDays == null
-          ? "unknown"
-          : sslDays < 0
-            ? "critical"
-            : sslDays <= 14
-              ? "warning"
-              : "ok",
+      status: urgencyToHealthStatus(readiness.ssl.urgency),
     },
     {
       id: "analytics",
@@ -268,21 +267,37 @@ export async function getInfrastructureEvents(
   return result.docs as InfraDoc[];
 }
 
+/**
+ * Hosting/domain renewal watchlist for operators.
+ * Includes past-due, soon, and missing-date rows — not limited to a 60-day window.
+ */
+export function buildHostingRenewalWatchlist(
+  records: InfraDoc[],
+  limit = 12,
+): Array<InfraDoc & { readiness: HostingRenewalReadiness }> {
+  const rows = records.map((record) => {
+    const readiness = evaluateFromInfrastructureRecord(record);
+    return { ...record, readiness };
+  });
+
+  rows.sort((a, b) => compareHostingRenewalReadiness(a.readiness, b.readiness));
+
+  // Prefer actionable rows (not fully healthy OK with both dates present and ok).
+  const actionable = rows.filter(
+    (row) =>
+      row.readiness.overallUrgency !== "ok" ||
+      row.readiness.hosting.urgency === "unknown" ||
+      row.readiness.domain.urgency === "unknown",
+  );
+
+  const source = actionable.length > 0 ? actionable : rows;
+  return source.slice(0, limit);
+}
+
+/** @deprecated Use buildHostingRenewalWatchlist — kept for older call sites. */
 export async function getUpcomingRenewals(limit = 12): Promise<InfraDoc[]> {
   const { records } = await fetchAllInfrastructure();
-  const horizon = Date.now() + RENEWAL_WINDOW_DAYS * MS_PER_DAY;
-
-  return records
-    .filter((record) => {
-      const next = record.nextRenewalDate as string | undefined;
-      if (!next) return false;
-      const ts = new Date(next).getTime();
-      return !Number.isNaN(ts) && ts <= horizon;
-    })
-    .sort((a, b) =>
-      String(a.nextRenewalDate).localeCompare(String(b.nextRenewalDate)),
-    )
-    .slice(0, limit);
+  return buildHostingRenewalWatchlist(records, limit);
 }
 
 export async function getClientInfrastructure(
@@ -314,6 +329,24 @@ export async function getClientInfrastructure(
   const record = infraResult.docs.length > 0 ? (infraResult.docs[0] as InfraDoc) : null;
   const infraId = record?.id as number | undefined;
 
+  let hostingAccess: boolean | null = null;
+  try {
+    const onboardingResult = await payload.find({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      collection: "client-onboarding" as any,
+      where: { client: { equals: clientId } },
+      limit: 1,
+      depth: 0,
+      overrideAccess: true,
+    });
+    const onboarding = onboardingResult.docs[0] as InfraDoc | undefined;
+    if (onboarding && typeof onboarding.hostingAccess === "boolean") {
+      hostingAccess = onboarding.hostingAccess;
+    }
+  } catch {
+    hostingAccess = null;
+  }
+
   const [costs, events] = await Promise.all([
     getInfrastructureCosts(clientId, infraId),
     getInfrastructureEvents(clientId, infraId),
@@ -322,6 +355,10 @@ export async function getClientInfrastructure(
   const score = calculateInfrastructureScore(record);
   const monthlyCost = calculateMonthlyStackCost(costs);
   const annualCost = calculateAnnualStackCost(costs, record);
+  const hostingRenewalReadiness = evaluateFromInfrastructureRecord(
+    record,
+    hostingAccess,
+  );
 
   return {
     record,
@@ -329,6 +366,7 @@ export async function getClientInfrastructure(
     costs,
     events,
     healthSignals: getInfrastructureHealthSignals(record),
+    hostingRenewalReadiness,
     score,
     monthlyCost,
     annualCost,
@@ -377,7 +415,22 @@ export async function getInfrastructureDashboard(): Promise<InfrastructureDashbo
     statusCounts.critical +
     criticalEvents.filter((e) => e.severity === "critical").length;
 
-  const upcomingRenewals = await getUpcomingRenewals(8);
+  const enrichedRecords = records.map((record) => {
+    const readiness = evaluateFromInfrastructureRecord(record);
+    return {
+      ...record,
+      clientName: clientNameFromRel(record.client, clientsById),
+      clientId: clientIdFromRel(record.client),
+      computedScore: calculateInfrastructureScore(record),
+      readiness,
+    };
+  });
+
+  const hostingRenewalWatchlist = buildHostingRenewalWatchlist(
+    enrichedRecords,
+    12,
+  );
+
   const monthlyStackCost = calculateMonthlyStackCost(costs);
   const annualStackCost = records.reduce(
     (sum, record) => sum + calculateAnnualStackCost(
@@ -394,23 +447,13 @@ export async function getInfrastructureDashboard(): Promise<InfrastructureDashbo
   const marginOpportunity =
     totalMrr > 0 ? Math.round(totalMrr - monthlyStackCost) : null;
 
-  const enrichedRecords = records.map((record) => ({
-    ...record,
-    clientName: clientNameFromRel(record.client, clientsById),
-    clientId: clientIdFromRel(record.client),
-    computedScore: calculateInfrastructureScore(record),
-  }));
-
   return {
     overallHealthScore,
     overallHealthLabel,
     totalClientsTracked: records.length,
     criticalIssues,
-    upcomingRenewals: upcomingRenewals.map((r) => ({
-      ...r,
-      clientName: clientNameFromRel(r.client, clientsById),
-      clientId: clientIdFromRel(r.client),
-    })),
+    upcomingRenewals: hostingRenewalWatchlist,
+    hostingRenewalWatchlist,
     monthlyStackCost: Math.round(monthlyStackCost),
     annualStackCost: Math.round(annualStackCost),
     marginOpportunity,

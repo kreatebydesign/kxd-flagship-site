@@ -227,6 +227,8 @@ Edition 1 is in the **operate and extend** phase — not redesign.
 
 **OTP Carts Launch Readiness — Batch A (Gate Hardening)** — code/docs gate only. Verifier: `npm run verify:otp-carts-readiness`. Does **not** claim Phase 3 or Phase 4 database migrations are complete, does **not** start Phase 4 Batch B, and does **not** invent or link production client IDs.
 
+**Hosting Renewal Readiness — Batch A (Operator Visibility)** — provider-neutral renewal posture on Infrastructure Command from existing `client-infrastructure` fields (`hostingProvider`, `nextRenewalDate`, `domainExpirationDate`, SSL). Verifier: `npm run verify:hosting-renewal-readiness`. Wix is a classification/filter only — **not** a separate system. Hosting-transition **automation** remains deferred (founding-client post-v1). No migration, cron, email, or production data mutation.
+
 ### Immediate priorities
 
 1. **Phase 4 — Multi-Client Portal Access & Account Context** — Production migration verification remains blocked until DB identity + PITR gates clear; then Batch B per `docs/PHASE-4-MULTI-CLIENT-PORTAL.md`.

@@ -189,6 +189,8 @@ npm run verify:client-launch -- --client primal-motorsports
 4. Secure Credential Vault
 5. Self-service onboarding and SaaS packaging
 
+> **Note:** Operator **Hosting Renewal Readiness** visibility on Infrastructure Command (Batch A) reuses existing infrastructure dates and is **not** hosting-transition automation. Wix remains a provider classification only.
+
 ---
 
 ## Architecture pointers

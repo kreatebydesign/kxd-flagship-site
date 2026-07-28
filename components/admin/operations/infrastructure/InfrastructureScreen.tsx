@@ -21,6 +21,12 @@ import {
   infraStatusLabel,
 } from "@/lib/infrastructure/data";
 import type { InfrastructureDashboardData, InfrastructureStatus } from "@/lib/infrastructure/types";
+import {
+  formatDaysRemainingLabel,
+  providerClassLabel,
+  urgencyBadgeLabel,
+  type HostingRenewalUrgency,
+} from "@/lib/infrastructure/hosting-renewal-readiness";
 
 export interface InfrastructureScreenProps {
   data: InfrastructureDashboardData;
@@ -36,6 +42,20 @@ function statusVariant(status: string): KxdBadgeVariant {
       return "warning";
     case "critical":
       return "critical";
+    default:
+      return "default";
+  }
+}
+
+function renewalUrgencyVariant(urgency: HostingRenewalUrgency): KxdBadgeVariant {
+  switch (urgency) {
+    case "critical":
+      return "critical";
+    case "attention":
+    case "watch":
+      return "warning";
+    case "ok":
+      return "success";
     default:
       return "default";
   }
@@ -102,25 +122,54 @@ export function InfrastructureScreen({
         </div>
 
         <div className="kxd-os-operations-split" style={{ marginTop: "2rem" }}>
-          <KxdSection label="Renewal watchlist">
-            {data.upcomingRenewals.length === 0 ? (
-              <p className="kxd-os-meta">No renewals in the next 60 days.</p>
+          <KxdSection label="Hosting renewal readiness">
+            {data.hostingRenewalWatchlist.length === 0 ? (
+              <p className="kxd-os-meta">No infrastructure records to evaluate.</p>
             ) : (
               <div className="kxd-os-ops-list">
-                {data.upcomingRenewals.map((record) => (
-                  <Link
-                    key={record.id as number}
-                    href={`/admin/operations/infrastructure/${record.clientId}`}
-                    className="kxd-os-ops-list__row"
-                    style={{ textDecoration: "none", display: "block" }}
-                  >
-                    <p className="kxd-os-card__title">{String(record.clientName)}</p>
-                    <p className="kxd-os-meta">
-                      {record.primaryDomain ? String(record.primaryDomain) : "Domain TBD"} ·{" "}
-                      {formatInfraDate(record.nextRenewalDate as string)}
-                    </p>
-                  </Link>
-                ))}
+                {data.hostingRenewalWatchlist.map((record) => {
+                  const readiness = record.readiness;
+                  const soonest =
+                    readiness.hosting.daysRemaining != null &&
+                    readiness.domain.daysRemaining != null
+                      ? Math.min(
+                          readiness.hosting.daysRemaining,
+                          readiness.domain.daysRemaining,
+                        )
+                      : (readiness.hosting.daysRemaining ??
+                        readiness.domain.daysRemaining);
+                  return (
+                    <Link
+                      key={record.id as number}
+                      href={`/admin/operations/infrastructure/${record.clientId}`}
+                      className="kxd-os-ops-list__row"
+                      style={{ textDecoration: "none", display: "block" }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          gap: "0.75rem",
+                          alignItems: "flex-start",
+                        }}
+                      >
+                        <div>
+                          <p className="kxd-os-card__title">{String(record.clientName)}</p>
+                          <p className="kxd-os-meta">
+                            {record.primaryDomain
+                              ? String(record.primaryDomain)
+                              : "Domain TBD"}{" "}
+                            · {providerClassLabel(readiness.providerClass)} ·{" "}
+                            {formatDaysRemainingLabel(soonest)}
+                          </p>
+                        </div>
+                        <KxdBadge variant={renewalUrgencyVariant(readiness.overallUrgency)}>
+                          {urgencyBadgeLabel(readiness.overallUrgency)}
+                        </KxdBadge>
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
             )}
           </KxdSection>
@@ -187,6 +236,9 @@ export function InfrastructureScreen({
             <KxdTableBody>
               {filteredRecords.map((record) => {
                 const status = String(record.status ?? "unknown");
+                const readiness =
+                  record.readiness ??
+                  null;
                 return (
                   <KxdTableRow key={record.id as number}>
                     <KxdTableCell primary>{String(record.clientName)}</KxdTableCell>
@@ -202,10 +254,28 @@ export function InfrastructureScreen({
                       </KxdBadge>
                     </KxdTableCell>
                     <KxdTableCell>
-                      {record.hostingProvider ? String(record.hostingProvider) : "—"}
+                      {readiness
+                        ? providerClassLabel(readiness.providerClass)
+                        : record.hostingProvider
+                          ? String(record.hostingProvider)
+                          : "—"}
                     </KxdTableCell>
                     <KxdTableCell>
-                      {formatInfraDate(record.nextRenewalDate as string)}
+                      {readiness ? (
+                        <span style={{ display: "inline-flex", gap: "0.5rem", alignItems: "center" }}>
+                          <KxdBadge variant={renewalUrgencyVariant(readiness.overallUrgency)}>
+                            {urgencyBadgeLabel(readiness.overallUrgency)}
+                          </KxdBadge>
+                          <span className="kxd-os-meta">
+                            {formatDaysRemainingLabel(
+                              readiness.hosting.daysRemaining ??
+                                readiness.domain.daysRemaining,
+                            )}
+                          </span>
+                        </span>
+                      ) : (
+                        formatInfraDate(record.nextRenewalDate as string)
+                      )}
                     </KxdTableCell>
                     <KxdTableCell>
                       <Link
