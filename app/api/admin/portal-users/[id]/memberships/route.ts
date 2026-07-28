@@ -5,8 +5,10 @@ import { requirePayloadAdminApi } from "@/lib/admin/auth";
 import {
   ensurePortalMembership,
   listPortalMembershipsForUser,
+  MembershipSchemaUnavailableError,
   syncPortalUserLegacyClientAndPreference,
 } from "@/lib/portal/memberships";
+import { membershipUnavailableResponseBody } from "@/lib/portal/membership-schema";
 
 export const dynamic = "force-dynamic";
 
@@ -109,6 +111,9 @@ export async function POST(req: Request, context: RouteContext) {
     const memberships = await listPortalMembershipsForUser(portalUserId, { payload });
     return NextResponse.json({ ok: true, membership, memberships });
   } catch (err) {
+    if (err instanceof MembershipSchemaUnavailableError) {
+      return NextResponse.json(membershipUnavailableResponseBody(), { status: 503 });
+    }
     const message = err instanceof Error ? err.message : "Could not add membership.";
     return NextResponse.json({ ok: false, error: message }, { status: 400 });
   }

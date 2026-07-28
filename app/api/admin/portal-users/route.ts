@@ -4,8 +4,11 @@ import config from "@payload-config";
 import { requirePayloadAdminApi } from "@/lib/admin/auth";
 import {
   ensurePortalMembership,
+  MembershipSchemaUnavailableError,
+  isMembershipSchemaUnavailableError,
   syncPortalUserLegacyClientAndPreference,
 } from "@/lib/portal/memberships";
+import { MEMBERSHIP_SCHEMA_UNAVAILABLE_MESSAGE } from "@/lib/portal/membership-schema";
 
 export const dynamic = "force-dynamic";
 
@@ -92,12 +95,25 @@ export async function POST(req: Request) {
 
     createdId = created.id as number;
 
-    await ensurePortalMembership({
-      portalUserId: createdId,
-      clientId,
-      isDefault: true,
-      payload,
-    });
+    let membershipUnavailable = false;
+    try {
+      await ensurePortalMembership({
+        portalUserId: createdId,
+        clientId,
+        isDefault: true,
+        payload,
+      });
+    } catch (err) {
+      if (
+        err instanceof MembershipSchemaUnavailableError ||
+        isMembershipSchemaUnavailableError(err)
+      ) {
+        // Legacy portal-users.client remains the active authorization path.
+        membershipUnavailable = true;
+      } else {
+        throw err;
+      }
+    }
 
     await syncPortalUserLegacyClientAndPreference({
       portalUserId: createdId,
@@ -112,6 +128,12 @@ export async function POST(req: Request) {
       displayName,
       clientId,
       active,
+      ...(membershipUnavailable
+        ? {
+            membershipUnavailable: true,
+            membershipWarning: MEMBERSHIP_SCHEMA_UNAVAILABLE_MESSAGE,
+          }
+        : {}),
     });
   } catch (err) {
     if (createdId != null) {

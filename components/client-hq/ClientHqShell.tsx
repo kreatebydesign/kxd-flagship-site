@@ -8,6 +8,8 @@ import type { ResolvedExperienceProfile } from "@/lib/ces";
 import type { EditionBranding } from "@/lib/editions";
 import { editionBrandingCssVars } from "@/lib/editions";
 import { ClientNotificationsCenter } from "@/components/ces/notifications";
+import { AccountSwitcher } from "@/components/portal/AccountSwitcher";
+import type { PortalAccountSwitcherModel } from "@/lib/portal/account-context-types";
 import { ClientHqLogoutButton } from "./ClientHqLogoutButton";
 import { PortalFeedbackControl } from "./PortalFeedbackControl";
 import {
@@ -23,6 +25,8 @@ export interface ClientHqShellProps {
   companyName?: string;
   editionBranding?: EditionBranding;
   experienceProfile?: ResolvedExperienceProfile;
+  /** Server-built switcher model — null/undefined hides the control. */
+  accountSwitcher?: PortalAccountSwitcherModel | null;
   children: ReactNode;
 }
 
@@ -42,6 +46,7 @@ export function ClientHqShell({
   companyName,
   editionBranding,
   experienceProfile,
+  accountSwitcher = null,
   children,
 }: ClientHqShellProps) {
   const navGroups = getEnabledPortalNavGroups(experienceProfile);
@@ -118,6 +123,7 @@ export function ClientHqShell({
             {quietWorkspaceLabel ? (
               <p className="kxd-ces-mobile-bar__workspace">{quietWorkspaceLabel}</p>
             ) : null}
+            {accountSwitcher ? <AccountSwitcher model={accountSwitcher} /> : null}
           </div>
           <button
             type="button"
@@ -158,6 +164,7 @@ export function ClientHqShell({
             {quietWorkspaceLabel ? (
               <p className="kxd-ces-identity__workspace">{quietWorkspaceLabel}</p>
             ) : null}
+            {accountSwitcher ? <AccountSwitcher model={accountSwitcher} /> : null}
             <div className="kxd-ces-identity__rule" aria-hidden="true" />
           </div>
 

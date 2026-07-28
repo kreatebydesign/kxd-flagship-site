@@ -13,6 +13,7 @@ import {
   listPortalMembershipsForUser,
   type PortalMembershipRecord,
 } from "./memberships";
+import { probeMembershipSchemaAvailable } from "./multi-client-readiness";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDoc = Record<string, any>;
@@ -83,6 +84,8 @@ export interface PortalAccessData {
   clients: PortalAccessClientReadiness[];
   resendConfigured: boolean;
   resendWarning: string | null;
+  /** False until Phase 4 membership migration is activated. */
+  membershipSchemaAvailable: boolean;
 }
 
 function toAccessMembership(row: PortalMembershipRecord): PortalAccessMembershipRow {
@@ -228,5 +231,18 @@ export async function getPortalAccessData(): Promise<PortalAccessData> {
       ? "RESEND_API_KEY is not configured. Portal password reset emails will not send until Resend is set up."
       : null;
 
-  return { users, clients, resendConfigured, resendWarning };
+  let membershipSchemaAvailable = false;
+  try {
+    membershipSchemaAvailable = await probeMembershipSchemaAvailable(payload);
+  } catch {
+    membershipSchemaAvailable = false;
+  }
+
+  return {
+    users,
+    clients,
+    resendConfigured,
+    resendWarning,
+    membershipSchemaAvailable,
+  };
 }

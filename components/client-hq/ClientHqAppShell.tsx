@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import type { EditionBranding } from "@/lib/editions";
 import type { ResolvedExperienceProfile } from "@/lib/ces";
+import type { PortalAccountSwitcherModel } from "@/lib/portal/account-context-types";
 import { ClientHqShell } from "./ClientHqShell";
 import { resolvePortalNavId } from "@/lib/portal/nav";
 
@@ -11,11 +12,13 @@ export function ClientHqAppShell({
   companyName,
   editionBranding,
   experienceProfile,
+  accountSwitcher = null,
 }: {
   children: React.ReactNode;
   companyName?: string;
   editionBranding?: EditionBranding;
   experienceProfile?: ResolvedExperienceProfile;
+  accountSwitcher?: PortalAccountSwitcherModel | null;
 }) {
   const pathname = usePathname();
   const activeId = resolvePortalNavId(pathname);
@@ -27,6 +30,7 @@ export function ClientHqAppShell({
       companyName={companyName}
       editionBranding={editionBranding}
       experienceProfile={experienceProfile}
+      accountSwitcher={accountSwitcher}
     >
       {children}
     </ClientHqShell>

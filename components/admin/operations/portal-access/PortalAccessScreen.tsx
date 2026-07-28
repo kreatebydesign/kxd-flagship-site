@@ -321,6 +321,15 @@ function PortalAccessScreenInner({ data: initialData }: PortalAccessScreenProps)
           </p>
         ) : null}
 
+        {!initialData.membershipSchemaAvailable ? (
+          <p className="kxd-os-portal-access__notice" role="status">
+            Multi-client membership management is temporarily unavailable pending database
+            activation. Single-client portal access via the legacy primary client continues to
+            work. Membership create, disable, and default controls stay inactive until the
+            schema is activated.
+          </p>
+        ) : null}
+
         {showPrimalBanner && primalClient ? (
           <section className="kxd-os-portal-access__launch-card" aria-labelledby="primal-launch-heading">
             <div className="kxd-os-portal-access__launch-head">
@@ -643,7 +652,9 @@ function PortalAccessScreenInner({ data: initialData }: PortalAccessScreenProps)
                                   <button
                                     type="button"
                                     className="kxd-os-link-quiet"
-                                    disabled={membershipBusy}
+                                    disabled={
+                                      !initialData.membershipSchemaAvailable || membershipBusy
+                                    }
                                     onClick={() => void setDefaultMembership(user, membership)}
                                   >
                                     Set default
@@ -652,7 +663,11 @@ function PortalAccessScreenInner({ data: initialData }: PortalAccessScreenProps)
                                 <button
                                   type="button"
                                   className="kxd-os-link-quiet"
-                                  disabled={membershipBusy || membership.id < 0}
+                                  disabled={
+                                    !initialData.membershipSchemaAvailable ||
+                                    membershipBusy ||
+                                    membership.id < 0
+                                  }
                                   onClick={() =>
                                     void setMembershipStatus(
                                       user,
@@ -674,6 +689,7 @@ function PortalAccessScreenInner({ data: initialData }: PortalAccessScreenProps)
                           <select
                             value={membershipClientId}
                             onChange={(e) => setMembershipClientId(e.target.value)}
+                            disabled={!initialData.membershipSchemaAvailable || membershipBusy}
                           >
                             <option value="">Select client</option>
                             {initialData.clients
@@ -693,7 +709,11 @@ function PortalAccessScreenInner({ data: initialData }: PortalAccessScreenProps)
                         <button
                           type="button"
                           className="kxd-os-btn kxd-os-btn--secondary"
-                          disabled={membershipBusy || !membershipClientId}
+                          disabled={
+                            !initialData.membershipSchemaAvailable ||
+                            membershipBusy ||
+                            !membershipClientId
+                          }
                           onClick={() => void addMembership(user)}
                         >
                           {membershipBusy ? "Saving…" : "Add membership"}

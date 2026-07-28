@@ -1,5 +1,5 @@
 /**
- * Phase 4 Batch A — server-only portal membership resolution.
+ * Phase 4 — server-only portal membership resolution.
  * Authorization truth for multi-client portal access.
  * Never import from client components.
  */
@@ -7,31 +7,38 @@ import "server-only";
 
 import { getPayload } from "payload";
 import config from "@payload-config";
+import {
+  MEMBERSHIP_COLLECTION,
+  MembershipSchemaUnavailableError,
+  isMembershipSchemaUnavailableError,
+  withMembershipSchema,
+} from "./membership-schema";
+import {
+  dedupeActiveMembershipsByClient,
+  isClientInActiveMemberships,
+  resolveAuthorizedActiveClient,
+  type PortalMembershipRecord,
+  type PortalMembershipStatus,
+  type ResolvedPortalActiveClient,
+} from "./membership-resolve";
 
-export type PortalMembershipStatus = "active" | "disabled";
+export type {
+  PortalMembershipRecord,
+  PortalMembershipStatus,
+  ResolvedPortalActiveClient,
+} from "./membership-resolve";
 
-export type PortalMembershipRecord = {
-  id: number;
-  portalUserId: number;
-  clientId: number;
-  clientName: string;
-  clientSlug: string | null;
-  status: PortalMembershipStatus;
-  isDefault: boolean;
-};
+export {
+  dedupeActiveMembershipsByClient,
+  isClientInActiveMemberships,
+  resolveAuthorizedActiveClient,
+} from "./membership-resolve";
 
-export type ResolvedPortalActiveClient = {
-  clientId: number;
-  clientName: string;
-  clientSlug: string | null;
-  membershipId: number | null;
-  source:
-    | "last-active"
-    | "default"
-    | "legacy"
-    | "sole-active"
-    | "legacy-fallback";
-};
+export {
+  MembershipSchemaUnavailableError,
+  isMembershipSchemaUnavailableError,
+  MEMBERSHIP_SCHEMA_UNAVAILABLE_MESSAGE,
+} from "./membership-schema";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDoc = Record<string, any>;
@@ -76,6 +83,11 @@ function mapMembershipDoc(doc: AnyDoc): PortalMembershipRecord | null {
   };
 }
 
+/**
+ * List memberships for a portal user.
+ * Missing membership schema → empty array (legacy fallback path).
+ * Unrelated failures propagate.
+ */
 export async function listPortalMembershipsForUser(
   portalUserId: number,
   options?: { status?: PortalMembershipStatus | "any"; payload?: PayloadClient },
@@ -88,7 +100,7 @@ export async function listPortalMembershipsForUser(
   try {
     const result = await payload.find({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      collection: "portal-client-memberships" as any,
+      collection: MEMBERSHIP_COLLECTION as any,
       where:
         status === "any"
           ? { portalUser: { equals: portalUserId } }
@@ -107,9 +119,12 @@ export async function listPortalMembershipsForUser(
     return (result.docs as AnyDoc[])
       .map(mapMembershipDoc)
       .filter((row): row is PortalMembershipRecord => row != null);
-  } catch {
-    // Table missing / not migrated — caller handles legacy fallback.
-    return [];
+  } catch (err) {
+    if (isMembershipSchemaUnavailableError(err)) {
+      // Table missing / not migrated — caller handles legacy fallback.
+      return [];
+    }
+    throw err;
   }
 }
 
@@ -120,100 +135,6 @@ export async function listActivePortalMembershipsForUser(
   return listPortalMembershipsForUser(portalUserId, { status: "active", payload });
 }
 
-export function isClientInActiveMemberships(
-  memberships: PortalMembershipRecord[],
-  clientId: number,
-): boolean {
-  if (!Number.isFinite(clientId) || clientId <= 0) return false;
-  return memberships.some((m) => m.status === "active" && m.clientId === clientId);
-}
-
-/**
- * Resolve authorized active client from memberships + optional preference + legacy client.
- * Does not trust browser-supplied client IDs.
- */
-export function resolveAuthorizedActiveClient(input: {
-  memberships: PortalMembershipRecord[];
-  lastActiveClientId: number | null;
-  legacyClientId: number | null;
-  legacyClientName?: string | null;
-  legacyClientSlug?: string | null;
-}): ResolvedPortalActiveClient | null {
-  const active = input.memberships
-    .filter((m) => m.status === "active")
-    .slice()
-    .sort((a, b) => a.clientId - b.clientId);
-
-  if (active.length === 0) return null;
-
-  if (
-    input.lastActiveClientId != null &&
-    Number.isFinite(input.lastActiveClientId) &&
-    input.lastActiveClientId > 0
-  ) {
-    const match = active.find((m) => m.clientId === input.lastActiveClientId);
-    if (match) {
-      return {
-        clientId: match.clientId,
-        clientName: match.clientName,
-        clientSlug: match.clientSlug,
-        membershipId: match.id,
-        source: "last-active",
-      };
-    }
-  }
-
-  const defaultMembership = active.find((m) => m.isDefault);
-  if (defaultMembership) {
-    return {
-      clientId: defaultMembership.clientId,
-      clientName: defaultMembership.clientName,
-      clientSlug: defaultMembership.clientSlug,
-      membershipId: defaultMembership.id,
-      source: "default",
-    };
-  }
-
-  if (
-    input.legacyClientId != null &&
-    Number.isFinite(input.legacyClientId) &&
-    input.legacyClientId > 0
-  ) {
-    const legacyMatch = active.find((m) => m.clientId === input.legacyClientId);
-    if (legacyMatch) {
-      return {
-        clientId: legacyMatch.clientId,
-        clientName: legacyMatch.clientName,
-        clientSlug: legacyMatch.clientSlug,
-        membershipId: legacyMatch.id,
-        source: "legacy",
-      };
-    }
-  }
-
-  if (active.length === 1) {
-    const sole = active[0]!;
-    return {
-      clientId: sole.clientId,
-      clientName: sole.clientName,
-      clientSlug: sole.clientSlug,
-      membershipId: sole.id,
-      source: "sole-active",
-    };
-  }
-
-  // Multiple active memberships without default/last-active/legacy match:
-  // deterministic lowest client ID (Batch A compatibility; Batch B documents switcher).
-  const first = active[0]!;
-  return {
-    clientId: first.clientId,
-    clientName: first.clientName,
-    clientSlug: first.clientSlug,
-    membershipId: first.id,
-    source: "sole-active",
-  };
-}
-
 export async function ensurePortalMembership(input: {
   portalUserId: number;
   clientId: number;
@@ -222,60 +143,63 @@ export async function ensurePortalMembership(input: {
   payload?: PayloadClient;
 }): Promise<PortalMembershipRecord> {
   const payload = input.payload ?? (await getPayload({ config }));
-  const existing = await payload.find({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    collection: "portal-client-memberships" as any,
-    where: {
-      and: [
-        { portalUser: { equals: input.portalUserId } },
-        { client: { equals: input.clientId } },
-      ],
-    },
-    limit: 1,
-    depth: 1,
-    overrideAccess: true,
-  });
 
-  if (existing.docs.length > 0) {
-    const doc = existing.docs[0] as AnyDoc;
-    const mapped = mapMembershipDoc(doc);
-    if (!mapped) throw new Error("Invalid existing membership.");
+  return withMembershipSchema(async () => {
+    const existing = await payload.find({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      collection: MEMBERSHIP_COLLECTION as any,
+      where: {
+        and: [
+          { portalUser: { equals: input.portalUserId } },
+          { client: { equals: input.clientId } },
+        ],
+      },
+      limit: 1,
+      depth: 1,
+      overrideAccess: true,
+    });
 
-    if (mapped.status !== "active" || (input.isDefault === true && !mapped.isDefault)) {
-      const updated = await payload.update({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        collection: "portal-client-memberships" as any,
-        id: mapped.id,
-        data: {
-          status: "active",
-          ...(input.isDefault === true ? { isDefault: true } : {}),
-        },
-        overrideAccess: true,
-      });
-      const remapped = mapMembershipDoc(updated as AnyDoc);
-      if (!remapped) throw new Error("Invalid updated membership.");
-      return remapped;
+    if (existing.docs.length > 0) {
+      const doc = existing.docs[0] as AnyDoc;
+      const mapped = mapMembershipDoc(doc);
+      if (!mapped) throw new Error("Invalid existing membership.");
+
+      if (mapped.status !== "active" || (input.isDefault === true && !mapped.isDefault)) {
+        const updated = await payload.update({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          collection: MEMBERSHIP_COLLECTION as any,
+          id: mapped.id,
+          data: {
+            status: "active",
+            ...(input.isDefault === true ? { isDefault: true } : {}),
+          },
+          overrideAccess: true,
+        });
+        const remapped = mapMembershipDoc(updated as AnyDoc);
+        if (!remapped) throw new Error("Invalid updated membership.");
+        return remapped;
+      }
+
+      return mapped;
     }
 
+    const created = await payload.create({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      collection: MEMBERSHIP_COLLECTION as any,
+      data: {
+        portalUser: input.portalUserId,
+        client: input.clientId,
+        status: "active",
+        isDefault: input.isDefault === true,
+        ...(input.notes ? { notes: input.notes } : {}),
+      },
+      overrideAccess: true,
+    });
+
+    const mapped = mapMembershipDoc(created as AnyDoc);
+    if (!mapped) throw new Error("Invalid created membership.");
     return mapped;
-  }
-
-  const created = await payload.create({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    collection: "portal-client-memberships" as any,
-    data: {
-      portalUser: input.portalUserId,
-      client: input.clientId,
-      status: "active",
-      isDefault: input.isDefault === true,
-      ...(input.notes ? { notes: input.notes } : {}),
-    },
-    overrideAccess: true,
   });
-
-  const mapped = mapMembershipDoc(created as AnyDoc);
-  if (!mapped) throw new Error("Invalid created membership.");
-  return mapped;
 }
 
 export async function syncPortalUserLegacyClientAndPreference(input: {
@@ -294,4 +218,73 @@ export async function syncPortalUserLegacyClientAndPreference(input: {
     },
     overrideAccess: true,
   });
+}
+
+/**
+ * Switch active account preference after membership authorization.
+ * Does not trust browser identity — caller must supply session portalUserId.
+ */
+export async function switchPortalActiveClient(input: {
+  portalUserId: number;
+  targetClientId: number;
+  payload?: PayloadClient;
+}): Promise<ResolvedPortalActiveClient> {
+  if (!Number.isFinite(input.targetClientId) || input.targetClientId <= 0) {
+    throw new Error("PORTAL_ACCOUNT_SWITCH_DENIED");
+  }
+
+  const payload = input.payload ?? (await getPayload({ config }));
+
+  let memberships: PortalMembershipRecord[];
+  try {
+    memberships = await listActivePortalMembershipsForUser(
+      input.portalUserId,
+      payload,
+    );
+  } catch (err) {
+    if (isMembershipSchemaUnavailableError(err)) {
+      throw new MembershipSchemaUnavailableError();
+    }
+    throw err;
+  }
+
+  const active = dedupeActiveMembershipsByClient(memberships);
+
+  if (!isClientInActiveMemberships(active, input.targetClientId)) {
+    // Empty list with schema missing → unavailable; otherwise generic denial.
+    if (active.length === 0) {
+      try {
+        await withMembershipSchema(async () => {
+          await payload.find({
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            collection: MEMBERSHIP_COLLECTION as any,
+            limit: 1,
+            depth: 0,
+            overrideAccess: true,
+          });
+        });
+      } catch (err) {
+        if (err instanceof MembershipSchemaUnavailableError) throw err;
+        if (isMembershipSchemaUnavailableError(err)) {
+          throw new MembershipSchemaUnavailableError();
+        }
+      }
+    }
+    throw new Error("PORTAL_ACCOUNT_SWITCH_DENIED");
+  }
+
+  const match = active.find((m) => m.clientId === input.targetClientId)!;
+  await syncPortalUserLegacyClientAndPreference({
+    portalUserId: input.portalUserId,
+    clientId: match.clientId,
+    payload,
+  });
+
+  return {
+    clientId: match.clientId,
+    clientName: match.clientName,
+    clientSlug: match.clientSlug,
+    membershipId: match.id,
+    source: "last-active",
+  };
 }

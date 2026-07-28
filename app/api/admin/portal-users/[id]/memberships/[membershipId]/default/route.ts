@@ -4,8 +4,11 @@ import config from "@payload-config";
 import { requirePayloadAdminApi } from "@/lib/admin/auth";
 import {
   listPortalMembershipsForUser,
+  MembershipSchemaUnavailableError,
+  isMembershipSchemaUnavailableError,
   syncPortalUserLegacyClientAndPreference,
 } from "@/lib/portal/memberships";
+import { membershipUnavailableResponseBody } from "@/lib/portal/membership-schema";
 
 export const dynamic = "force-dynamic";
 
@@ -38,7 +41,10 @@ export async function POST(_req: Request, context: RouteContext) {
       depth: 0,
       overrideAccess: true,
     })) as AnyDoc;
-  } catch {
+  } catch (err) {
+    if (isMembershipSchemaUnavailableError(err)) {
+      return NextResponse.json(membershipUnavailableResponseBody(), { status: 503 });
+    }
     return NextResponse.json({ ok: false, error: "Membership not found." }, { status: 404 });
   }
 
@@ -83,6 +89,9 @@ export async function POST(_req: Request, context: RouteContext) {
     const memberships = await listPortalMembershipsForUser(portalUserId, { payload });
     return NextResponse.json({ ok: true, memberships });
   } catch (err) {
+    if (err instanceof MembershipSchemaUnavailableError || isMembershipSchemaUnavailableError(err)) {
+      return NextResponse.json(membershipUnavailableResponseBody(), { status: 503 });
+    }
     const message = err instanceof Error ? err.message : "Could not set default membership.";
     return NextResponse.json({ ok: false, error: message }, { status: 400 });
   }

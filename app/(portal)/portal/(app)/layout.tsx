@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { CesProfileProvider } from "@/components/ces/providers/CesProfileProvider";
 import { ClientHqAppShell } from "@/components/client-hq/ClientHqAppShell";
 import { resolveExperienceProfile } from "@/lib/ces/server";
+import { resolvePortalAccountContext } from "@/lib/portal/account-context";
 import { getPortalEditionBranding } from "@/lib/portal/nav";
 import { getPortalSession } from "@/lib/portal/session";
 import { needsPortalWelcome } from "@/lib/portal/welcome";
@@ -16,9 +17,10 @@ export default async function PortalAppLayout({ children }: { children: React.Re
     redirect("/portal/welcome");
   }
 
-  const [experienceProfile, editionBranding] = await Promise.all([
+  const [experienceProfile, editionBranding, accountContext] = await Promise.all([
     resolveExperienceProfile(session),
     Promise.resolve(getPortalEditionBranding()),
+    resolvePortalAccountContext(session),
   ]);
 
   return (
@@ -27,8 +29,9 @@ export default async function PortalAppLayout({ children }: { children: React.Re
         companyName={session.clientName}
         editionBranding={editionBranding}
         experienceProfile={experienceProfile}
+        accountSwitcher={accountContext.switcher}
       >
-        {children}
+        <div key={`portal-client-${session.clientId}`}>{children}</div>
       </ClientHqAppShell>
     </CesProfileProvider>
   );

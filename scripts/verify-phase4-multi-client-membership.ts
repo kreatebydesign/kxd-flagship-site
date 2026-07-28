@@ -157,8 +157,9 @@ function main() {
   assert.match(packageJson, /verify:phase4-multi-client-membership/);
   console.log("  ✔ package.json verifier script registered");
 
-  // Batch A must not include switcher / portfolio / Cusick linking.
-  assert.doesNotMatch(sessionSrc, /account\/switch|AccountSwitcher|brand switcher/i);
+  // Batch A foundation must not include portfolio overview.
+  // Account switcher ships in Batch B (separate verifier).
+  assert.doesNotMatch(sessionSrc, /combined portfolio|portal\/portfolio/i);
   assert.doesNotMatch(portalAccessUi, /portfolio view|Cusick production|otpcarts\.com/i);
   const portalAppFiles = walkFiles(
     path.join(root, "app/(portal)"),
@@ -169,11 +170,11 @@ function main() {
     const src = readFileSync(file, "utf8");
     assert.doesNotMatch(
       src,
-      /AccountSwitcher|account-switcher|combined portfolio|portal\/portfolio/i,
-      `${rel} must not introduce Batch B switcher/portfolio`,
+      /combined portfolio|portal\/portfolio/i,
+      `${rel} must not introduce portfolio overview`,
     );
   }
-  console.log("  ✔ no account-switcher or portfolio implementation in Batch A");
+  console.log("  ✔ no portfolio overview implementation (Batch F still deferred)");
 
   // Phase 3 remains operator-only / portal-inaccessible.
   assert.match(phase3Contacts, /isAuthenticated/);
