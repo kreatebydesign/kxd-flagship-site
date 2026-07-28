@@ -120,7 +120,7 @@ This track is distinct from registry phase numbers and from Intelligence Pipelin
 |-------|-------|--------|-------|
 | Phase 2 | Authenticated theming + portal date stabilization | ✅ Complete (historical) | Theme: `lib/shell/theme.ts`, Light / Dark / System. Portal dates: `a94ca60`. Later staff/Intelligence commits remain legitimate current architecture. |
 | Phase 3 | Client & Relationship Intelligence | ✅ Production-complete | Private operator workspace connecting clients, contacts, relationships, preferences, and events. Plan: `docs/PHASE-3-CLIENT-RELATIONSHIP-INTELLIGENCE.md`. Batches A–E published and production-verified at `fdb0348`. Closed — do not reopen. |
-| **Phase 4** | **Multi-Client Portal Access & Account Context** | **Defined — Batch A not started** | Reusable one-login multi-client portal membership, active-account context, account switcher, per-account surfaces, and authorized portfolio. Cusick’s four businesses are the first configured account group. Plan: `docs/PHASE-4-MULTI-CLIENT-PORTAL.md`. |
+| **Phase 4** | **Multi-Client Portal Access & Account Context** | **Batch A implemented locally — awaiting publication / production verification** | Plan: `docs/PHASE-4-MULTI-CLIENT-PORTAL.md`. Batch A: `portal-client-memberships`, additive migration `20260728_phase4_portal_client_memberships`, session membership resolution, Portal Access membership management, `verify:phase4-multi-client-membership`. Batches B–H not started. |
 
 **Phase 3 product outcome:** durable private business context for future Business Memory — not portal, not public, not calendar rewrite, not ritual/Business Memory integration in this phase.
 

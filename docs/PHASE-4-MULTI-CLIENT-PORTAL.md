@@ -1,10 +1,13 @@
 # Phase 4 — Multi-Client Portal Access & Account Context
 
-**Status:** Defined — Batch A not started  
-**Baseline (definition):** `fdb03485ab41184092033727b4661b01f42a2840` (`main` = `origin/main`, clean)  
+**Status:** Batch A implemented locally — awaiting publication / production migration verification  
+**Baseline (definition):** `5c4445fb03c0675aa50edc63a7b08ba3555e76e2`  
+**Batch A implementation baseline:** `5c4445fb03c0675aa50edc63a7b08ba3555e76e2`  
 **Companion:** `docs/KXD-OS-ROADMAP.md`, `docs/KXD-OS-CURRENT-STATE.md`, `docs/KXD-OS-V1-FOUNDING-CLIENT-EARLY-ACCESS.md`
 
 > Phase 3 Client & Relationship Intelligence is production-complete and closed. Phase 4 does not reopen Phase 3. Relationship Intelligence remains operator-only and portal-inaccessible.
+>
+> **Batch A status:** Implemented in repository (membership collection, additive migration with backfill, session membership resolution, Portal Access membership management, `verify:phase4-multi-client-membership`). **Not** production-complete until published, migrated, and verified. Batches B–H not started.
 
 ---
 
@@ -294,24 +297,26 @@ Allowed only when **all** are true:
 
 | Item | Definition |
 |------|------------|
+| **Status** | ✅ Implemented locally — awaiting publication / production migration verification |
 | **Objective** | Additive membership schema, backfill, server-only membership resolution, active-client authorization foundation, Portal Access membership management, single-client compatibility |
 | **User-visible outcome** | None required for clients; operators can manage memberships in Portal Access. Existing portal login behavior unchanged for single-membership users |
 | **Systems reused** | `portal-users`, `lib/portal/session.ts`, Portal Access (`lib/portal/access-data.ts`, `PortalAccessScreen`), existing portal API session gates, Payload migration patterns |
-| **Likely code areas** | `payload/collections/PortalUsers.ts`, new `PortalClientMemberships` collection, `payload.config.ts`, `lib/portal/session.ts`, `lib/portal/access-data.ts`, `app/api/admin/portal-users/**`, `components/admin/operations/portal-access/**`, `migrations/YYYYMMDD_phase4_portal_client_memberships.ts`, `migrations/index.ts`, `scripts/verify-phase4-*-membership*.ts` |
+| **Implemented areas** | `payload/collections/PortalClientMemberships.ts`, `payload/hooks/portal-client-memberships.ts`, `lib/portal/memberships.ts`, `lib/portal/session.ts`, Portal Access APIs/UI, `migrations/20260728_phase4_portal_client_memberships.ts`, `scripts/verify-phase4-multi-client-membership.ts` |
 | **Authorization** | Operator-only membership mutations; portal users cannot self-edit memberships via REST; session resolve validates membership |
-| **Schema / migration** | **Required** — additive membership table + optional `lastActiveClientId`; backfill from legacy `client`; unique `(portalUser, client)`; **no** destructive drop |
+| **Schema / migration** | **Required** — additive membership table + `lastActiveClientId`; backfill from legacy `client`; unique `(portalUser, client)`; **no** destructive drop |
 | **Data requirements** | Existing portal users with valid client FKs; no Cusick production linking |
-| **Verification** | New Batch A verifier(s): backfill completeness, duplicate rejection, disabled user fail-closed, session resolve uses membership when present, legacy fallback, portal-auth-boundaries still pass |
-| **Dependencies** | Phase 3 complete; baseline `fdb0348…` |
+| **Verification** | `npm run verify:phase4-multi-client-membership`; also portal-auth-boundaries / Phase 3 completion regression |
+| **Dependencies** | Phase 3 complete; definition baseline `5c4445f…` |
 | **Exclusions** | Switcher UI; combined portfolio; Cusick real-user linking; OTP Carts production create unless separate ops task; Advisor/AI; parent org; dropping legacy `client` |
 | **Stop conditions** | Proposal to merge clients; trust browser client IDs; destructive migration; Phase 3 portal exposure |
 | **Risk** | Medium–High (auth foundation) |
-| **Publication / deploy** | After Batch A verifiers + build; staging before production migration |
+| **Publication / deploy** | After Batch A verifiers + build; staging migration before production |
 
 ### Batch B — Account switcher and active-account context
 
 | Item | Definition |
 |------|------------|
+| **Status** | Not started |
 | **Objective** | Server-validated switch endpoint; persistent active account; clear identity in portal shell; safe defaults, stale state, direct links, multi-tab |
 | **User-visible outcome** | Multi-membership users see account switcher and correct company identity after switch |
 | **Systems reused** | `ClientHqShell` / CES shell, session resolve, Batch A memberships |

@@ -213,16 +213,19 @@ Edition 1 is in the **operate and extend** phase — not redesign.
 
 ### Approved next product phase
 
-**Phase 4 — Multi-Client Portal Access & Account Context** — Defined; Batch A not started.
+**Phase 4 — Multi-Client Portal Access & Account Context** — Batch A implemented locally; awaiting publication / production migration verification. Batches B–H not started.
 
 - Plan: `docs/PHASE-4-MULTI-CLIENT-PORTAL.md`
-- Reusable portal membership (one login → many authorized clients), server-validated active-account context, account switcher, per-account surfaces, authorized combined portfolio
-- First production configuration: Cusick account group (Cusick Motorsports / CMM, OTP, OTP Carts, 2475 Townsgate) as four independent clients — no parent-organization auth
-- Batch A: membership schema, backfill, session authorization foundation, Portal Access membership management — no switcher UI, no Cusick production linking
+- Batch A collection: `portal-client-memberships` (`payload/collections/PortalClientMemberships.ts`)
+- Batch A migration: `migrations/20260728_phase4_portal_client_memberships.ts` (additive; backfills from legacy `portal-users.client`; not run against production in Batch A implementation)
+- Batch A verify: `npm run verify:phase4-multi-client-membership`
+- Session resolves authorized `clientId` from memberships (+ legacy fallback); cookie still signs portal user id only
+- Portal Access manages memberships; no switcher UI; no Cusick production linking
+- First production configuration remains Cusick account group (four independent clients) after later batches + ops readiness
 
 ### Immediate priorities
 
-1. **Phase 4 — Multi-Client Portal Access & Account Context** — Implement Batch A per `docs/PHASE-4-MULTI-CLIENT-PORTAL.md`.
+1. **Phase 4 — Multi-Client Portal Access & Account Context** — Publish/deploy Batch A (migration + verification), then implement Batch B per `docs/PHASE-4-MULTI-CLIENT-PORTAL.md`.
 2. **Client operations at scale** — Repeat the Primal launch pattern using `lib/client-launch/` for every new client workspace (including OTP Carts readiness before Cusick membership linking).
 3. **Business Memory integration** — Wire `runBusinessMemory()` into rituals or intelligence when explicitly requested; foundation exists, UI does not. Phase 3 prepared durable relationship context but does not integrate Business Memory yet.
 4. **Executive experience polish** — Premium ritual presentation (KHIG) without new intelligence layers.

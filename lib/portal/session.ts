@@ -6,6 +6,10 @@ import { getPayload } from "payload";
 import config from "@payload-config";
 
 import { PORTAL_SESSION_COOKIE } from "./constants";
+import {
+  listPortalMembershipsForUser,
+  resolveAuthorizedActiveClient,
+} from "./memberships";
 
 const SESSION_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
 
@@ -53,6 +57,28 @@ function parseSignedSession(value: string, secret: string): number | null {
   return portalUserId;
 }
 
+function resolveLegacyClient(user: AnyDoc): {
+  clientId: number;
+  clientName: string;
+} | null {
+  const clientRaw = user.client;
+  const clientId =
+    typeof clientRaw === "number"
+      ? clientRaw
+      : typeof clientRaw === "object" && clientRaw !== null
+        ? ((clientRaw as AnyDoc).id as number)
+        : null;
+
+  if (!clientId || !Number.isFinite(clientId)) return null;
+
+  const clientName =
+    typeof clientRaw === "object" && clientRaw !== null && "name" in clientRaw
+      ? String((clientRaw as AnyDoc).name ?? "")
+      : "Your Company";
+
+  return { clientId, clientName: clientName || "Your Company" };
+}
+
 export async function createPortalSession(portalUserId: number): Promise<void> {
   const secret = await getPayloadSecret();
   const cookieStore = await cookies();
@@ -70,6 +96,12 @@ export async function destroyPortalSession(): Promise<void> {
   cookieStore.delete(PORTAL_SESSION_COOKIE);
 }
 
+/**
+ * Resolve authenticated portal session.
+ * Cookie authenticates portal user identity only.
+ * Active client is resolved server-side from memberships (with legacy fallback).
+ * Browser-supplied client IDs are never trusted here.
+ */
 export async function getPortalSession(): Promise<PortalSession | null> {
   const cookieStore = await cookies();
   const raw = cookieStore.get(PORTAL_SESSION_COOKIE)?.value;
@@ -82,30 +114,58 @@ export async function getPortalSession(): Promise<PortalSession | null> {
   const payload = await getPayload({ config });
 
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const user = await payload.findByID({
+    const user = (await payload.findByID({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       collection: "portal-users" as any,
       id: portalUserId,
       depth: 1,
       overrideAccess: true,
-    }) as AnyDoc;
-
-    const clientRaw = user.client;
-    const clientId =
-      typeof clientRaw === "number"
-        ? clientRaw
-        : typeof clientRaw === "object" && clientRaw !== null
-          ? (clientRaw as AnyDoc).id as number
-          : null;
-
-    if (!clientId) return null;
+    })) as AnyDoc;
 
     if (user.active === false) return null;
 
-    const clientName =
-      typeof clientRaw === "object" && clientRaw !== null && "name" in clientRaw
-        ? String((clientRaw as AnyDoc).name ?? "")
-        : "Your Company";
+    const legacy = resolveLegacyClient(user);
+    const lastActiveRaw = user.lastActiveClientId;
+    const lastActiveClientId =
+      typeof lastActiveRaw === "number" && Number.isFinite(lastActiveRaw)
+        ? lastActiveRaw
+        : typeof lastActiveRaw === "string" && lastActiveRaw.trim()
+          ? Number(lastActiveRaw)
+          : null;
+
+    const memberships = await listPortalMembershipsForUser(portalUserId, {
+      payload,
+    });
+    const activeMemberships = memberships.filter((m) => m.status === "active");
+
+    // Memberships exist but none active → fail closed (do not use unauthorized legacy).
+    if (memberships.length > 0 && activeMemberships.length === 0) {
+      return null;
+    }
+
+    let clientId: number;
+    let clientName: string;
+
+    if (activeMemberships.length > 0) {
+      const resolved = resolveAuthorizedActiveClient({
+        memberships: activeMemberships,
+        lastActiveClientId:
+          lastActiveClientId != null && Number.isFinite(lastActiveClientId)
+            ? lastActiveClientId
+            : null,
+        legacyClientId: legacy?.clientId ?? null,
+        legacyClientName: legacy?.clientName ?? null,
+      });
+      if (!resolved) return null;
+      clientId = resolved.clientId;
+      clientName = resolved.clientName;
+    } else if (legacy) {
+      // Compatibility window: no membership rows yet (pre-backfill) → legacy client.
+      clientId = legacy.clientId;
+      clientName = legacy.clientName;
+    } else {
+      return null;
+    }
 
     return {
       portalUserId,

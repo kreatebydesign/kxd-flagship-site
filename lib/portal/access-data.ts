@@ -9,6 +9,10 @@ import {
   type CesProfileStatus,
   type PortalReadinessIssue,
 } from "./readiness";
+import {
+  listPortalMembershipsForUser,
+  type PortalMembershipRecord,
+} from "./memberships";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDoc = Record<string, any>;
@@ -30,17 +34,29 @@ function normalizeCesProfileStatus(value: unknown): CesProfileStatus {
   return "none";
 }
 
+export interface PortalAccessMembershipRow {
+  id: number;
+  clientId: number;
+  clientName: string;
+  clientSlug: string | null;
+  status: "active" | "disabled";
+  isDefault: boolean;
+}
+
 export interface PortalAccessUserRow {
   id: number;
   email: string;
   displayName: string | null;
+  /** Legacy primary client — retained during Phase 4 transition. */
   clientId: number;
   clientName: string;
   clientSlug: string | null;
+  lastActiveClientId: number | null;
   active: boolean;
   welcomeCompleted: boolean;
   createdAt: string;
   payloadAdminUrl: string;
+  memberships: PortalAccessMembershipRow[];
 }
 
 export interface PortalAccessClientReadiness {
@@ -67,6 +83,17 @@ export interface PortalAccessData {
   clients: PortalAccessClientReadiness[];
   resendConfigured: boolean;
   resendWarning: string | null;
+}
+
+function toAccessMembership(row: PortalMembershipRecord): PortalAccessMembershipRow {
+  return {
+    id: row.id,
+    clientId: row.clientId,
+    clientName: row.clientName,
+    clientSlug: row.clientSlug,
+    status: row.status,
+    isDefault: row.isDefault,
+  };
 }
 
 export async function getPortalAccessData(): Promise<PortalAccessData> {
@@ -109,7 +136,9 @@ export async function getPortalAccessData(): Promise<PortalAccessData> {
     number,
     { total: number; active: number; welcomePending: number }
   >();
-  const users: PortalAccessUserRow[] = (usersResult.docs as AnyDoc[]).map((doc) => {
+
+  const users: PortalAccessUserRow[] = [];
+  for (const doc of usersResult.docs as AnyDoc[]) {
     const id = doc.id as number;
     const clientId = resolveId(doc.client) ?? 0;
     const clientRaw = doc.client;
@@ -120,6 +149,11 @@ export async function getPortalAccessData(): Promise<PortalAccessData> {
         : null;
     const active = doc.active !== false;
     const welcomeCompleted = Boolean(doc.welcomeCompletedAt);
+    const lastActiveRaw = doc.lastActiveClientId;
+    const lastActiveClientId =
+      typeof lastActiveRaw === "number" && Number.isFinite(lastActiveRaw)
+        ? lastActiveRaw
+        : null;
 
     const counts = userCounts.get(clientId) ?? { total: 0, active: 0, welcomePending: 0 };
     counts.total += 1;
@@ -129,19 +163,25 @@ export async function getPortalAccessData(): Promise<PortalAccessData> {
     }
     userCounts.set(clientId, counts);
 
-    return {
+    const memberships = (await listPortalMembershipsForUser(id, { payload })).map(
+      toAccessMembership,
+    );
+
+    users.push({
       id,
       email: String(doc.email ?? ""),
       displayName: doc.displayName ? String(doc.displayName) : null,
       clientId,
       clientName,
       clientSlug,
+      lastActiveClientId,
       active,
       welcomeCompleted: Boolean(doc.welcomeCompletedAt),
       createdAt: String(doc.createdAt ?? ""),
       payloadAdminUrl: `/admin/collections/portal-users/${id}`,
-    };
-  });
+      memberships,
+    });
+  }
 
   const readinessEnv = { resendConfigured, isProduction };
 
@@ -177,7 +217,9 @@ export async function getPortalAccessData(): Promise<PortalAccessData> {
       isProductionCandidate: isPrimalProductionCandidate(input.clientSlug),
       issues: evaluation.issues,
       payloadClientUrl: `/admin/collections/clients/${clientId}`,
-      payloadCesProfileUrl: profile ? `/admin/collections/client-experience-profiles/${profile.id}` : null,
+      payloadCesProfileUrl: profile
+        ? `/admin/collections/client-experience-profiles/${profile.id}`
+        : null,
     };
   });
 

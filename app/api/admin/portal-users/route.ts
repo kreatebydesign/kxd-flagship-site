@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import { requirePayloadAdminApi } from "@/lib/admin/auth";
+import {
+  ensurePortalMembership,
+  syncPortalUserLegacyClientAndPreference,
+} from "@/lib/portal/memberships";
 
 export const dynamic = "force-dynamic";
 
@@ -69,6 +73,8 @@ export async function POST(req: Request) {
     );
   }
 
+  let createdId: number | null = null;
+
   try {
     const created = await payload.create({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -77,21 +83,49 @@ export async function POST(req: Request) {
         email,
         displayName,
         client: clientId,
+        lastActiveClientId: clientId,
         password,
         active,
       },
       overrideAccess: true,
     });
 
+    createdId = created.id as number;
+
+    await ensurePortalMembership({
+      portalUserId: createdId,
+      clientId,
+      isDefault: true,
+      payload,
+    });
+
+    await syncPortalUserLegacyClientAndPreference({
+      portalUserId: createdId,
+      clientId,
+      payload,
+    });
+
     return NextResponse.json({
       ok: true,
-      id: created.id as number,
+      id: createdId,
       email,
       displayName,
       clientId,
       active,
     });
   } catch (err) {
+    if (createdId != null) {
+      try {
+        await payload.delete({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          collection: "portal-users" as any,
+          id: createdId,
+          overrideAccess: true,
+        });
+      } catch {
+        // Best-effort rollback if membership dual-write failed.
+      }
+    }
     const message = err instanceof Error ? err.message : "Could not create portal user.";
     return NextResponse.json({ ok: false, error: message }, { status: 400 });
   }

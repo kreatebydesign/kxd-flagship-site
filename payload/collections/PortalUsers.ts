@@ -23,10 +23,11 @@ export const PortalUsers: CollectionConfig = {
     defaultColumns: ["email", "displayName", "client", "active", "updatedAt"],
     group: PAYLOAD_GROUPS.kxdOs,
     description:
-      "Client portal login accounts. Each portal user is linked to exactly one Client record and only sees that client's data. " +
+      "Client portal login accounts. Legacy singular Client remains during Phase 4 transition; " +
+      "authorized multi-client access uses portal-client-memberships. " +
       "Preferred workflow: KXD OS → Portal Access (/admin/operations/portal-access). " +
       "Password is required on create (8+ chars). Clients can reset via /portal/forgot-password. " +
-      "LocalAPI / custom portal auth is the sign-in path — portal-users must never mutate their own client link via REST. " +
+      "LocalAPI / custom portal auth is the sign-in path — portal-users must never mutate their own client link or memberships via REST. " +
       "Local dev seed: npm run seed:portal-user -- --email user@example.com --password 'TempPass123!' --client primal-motorsports --display-name Adam",
   },
   auth: {
@@ -65,10 +66,32 @@ export const PortalUsers: CollectionConfig = {
       type: "relationship",
       relationTo: "clients",
       required: true,
-      label: "Client",
+      label: "Client (legacy primary)",
       admin: {
         description:
-          "The client this account belongs to. Portal data, CES branding, and Website Review are scoped to this client only.",
+          "Legacy singular client retained for Phase 4 compatibility and backfill. " +
+          "Authorization for multi-client access uses portal-client-memberships. " +
+          "Keep aligned with the default membership during transition.",
+      },
+    },
+    {
+      name: "lastActiveClientId",
+      type: "number",
+      label: "Last Active Client ID",
+      admin: {
+        position: "sidebar",
+        readOnly: true,
+        description:
+          "Server-managed active-account preference only. Always revalidated against active memberships. " +
+          "Never grants access by itself. Not portal-user writable via REST.",
+      },
+      access: {
+        // Portal JWT self-update must never change active-account preference.
+        update: ({ req: { user } }) => {
+          if (!user) return false;
+          if (user.collection === "portal-users") return false;
+          return user.collection === "users";
+        },
       },
     },
     {

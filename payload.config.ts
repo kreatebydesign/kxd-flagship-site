@@ -76,6 +76,7 @@ import { ClientSuccessPlans } from "./payload/collections/ClientSuccessPlans.ts"
 import { SuccessCheckIns } from "./payload/collections/SuccessCheckIns.ts";
 import { Partners } from "./payload/collections/Partners.ts";
 import { PortalUsers } from "./payload/collections/PortalUsers.ts";
+import { PortalClientMemberships } from "./payload/collections/PortalClientMemberships.ts";
 import { PlatformApplications } from "./payload/collections/PlatformApplications.ts";
 import { ProjectInquiries } from "./payload/collections/ProjectInquiries.ts";
 import { Projects } from "./payload/collections/Projects.ts";
@@ -264,6 +265,7 @@ export default buildConfig({
     Media,
     Users,
     PortalUsers,
+    PortalClientMemberships,
     JuniorCreatorUsers,
     JuniorCreatorShifts,
   ],

@@ -12,7 +12,7 @@ import {
   OpsStatusBadge,
 } from "@/components/admin/operations/shared/OpsBriefing";
 import { KxdPage } from "@/components/os";
-import type { PortalAccessData, PortalAccessUserRow } from "@/lib/portal/access-data";
+import type { PortalAccessData, PortalAccessMembershipRow, PortalAccessUserRow } from "@/lib/portal/access-data";
 import type { PortalReadinessIssue } from "@/lib/portal/readiness";
 
 function issueClass(level: PortalReadinessIssue["level"]): string {
@@ -49,6 +49,10 @@ function PortalAccessScreenInner({ data: initialData }: PortalAccessScreenProps)
   const [createSuccess, setCreateSuccess] = useState<string | null>(null);
   const [togglingId, setTogglingId] = useState<number | null>(null);
   const [toggleError, setToggleError] = useState<string | null>(null);
+  const [expandedUserId, setExpandedUserId] = useState<number | null>(null);
+  const [membershipClientId, setMembershipClientId] = useState("");
+  const [membershipBusy, setMembershipBusy] = useState(false);
+  const [membershipError, setMembershipError] = useState<string | null>(null);
 
   const [form, setForm] = useState({
     displayName: "",
@@ -63,7 +67,11 @@ function PortalAccessScreenInner({ data: initialData }: PortalAccessScreenProps)
 
   const visibleUsers = useMemo(() => {
     if (clientFilter === "all") return users;
-    return users.filter((user) => user.clientId === clientFilter);
+    return users.filter(
+      (user) =>
+        user.clientId === clientFilter ||
+        user.memberships.some((m) => m.clientId === clientFilter),
+    );
   }, [clientFilter, users]);
 
   const readinessRows = useMemo(() => {
@@ -73,6 +81,27 @@ function PortalAccessScreenInner({ data: initialData }: PortalAccessScreenProps)
 
   const primalClient = initialData.clients.find((c) => c.isProductionCandidate);
   const showPrimalBanner = clientFilter === "all" || primalClient?.clientId === clientFilter;
+
+  function applyMemberships(userId: number, memberships: PortalAccessMembershipRow[]) {
+    setUsers((prev) =>
+      prev.map((row) => {
+        if (row.id !== userId) return row;
+        const defaultMembership = memberships.find((m) => m.isDefault && m.status === "active");
+        return {
+          ...row,
+          memberships,
+          ...(defaultMembership
+            ? {
+                clientId: defaultMembership.clientId,
+                clientName: defaultMembership.clientName,
+                clientSlug: defaultMembership.clientSlug,
+                lastActiveClientId: defaultMembership.clientId,
+              }
+            : {}),
+        };
+      }),
+    );
+  }
 
   async function handleCreate(event: React.FormEvent) {
     event.preventDefault();
@@ -114,10 +143,21 @@ function PortalAccessScreenInner({ data: initialData }: PortalAccessScreenProps)
         clientId: body.clientId ?? Number.parseInt(form.clientId, 10),
         clientName: client?.clientName ?? "Client",
         clientSlug: client?.clientSlug ?? null,
+        lastActiveClientId: body.clientId ?? Number.parseInt(form.clientId, 10),
         active: true,
         welcomeCompleted: false,
         createdAt: new Date().toISOString(),
         payloadAdminUrl: `/admin/collections/portal-users/${body.id}`,
+        memberships: [
+          {
+            id: -1,
+            clientId: body.clientId ?? Number.parseInt(form.clientId, 10),
+            clientName: client?.clientName ?? "Client",
+            clientSlug: client?.clientSlug ?? null,
+            status: "active",
+            isDefault: true,
+          },
+        ],
       };
 
       setUsers((prev) => [...prev, newUser].sort((a, b) => a.email.localeCompare(b.email)));
@@ -161,13 +201,106 @@ function PortalAccessScreenInner({ data: initialData }: PortalAccessScreenProps)
     }
   }
 
+  async function addMembership(user: PortalAccessUserRow) {
+    const clientId = Number.parseInt(membershipClientId, 10);
+    if (!Number.isFinite(clientId)) {
+      setMembershipError("Select a client.");
+      return;
+    }
+    setMembershipBusy(true);
+    setMembershipError(null);
+    try {
+      const res = await fetch(`/api/admin/portal-users/${user.id}/memberships`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ clientId }),
+      });
+      const body = (await res.json()) as {
+        ok?: boolean;
+        error?: string;
+        memberships?: PortalAccessMembershipRow[];
+      };
+      if (!res.ok || !body.ok || !body.memberships) {
+        throw new Error(body.error ?? "Could not add membership.");
+      }
+      applyMemberships(user.id, body.memberships);
+      setMembershipClientId("");
+      router.refresh();
+    } catch (err) {
+      setMembershipError(err instanceof Error ? err.message : "Could not add membership.");
+    } finally {
+      setMembershipBusy(false);
+    }
+  }
+
+  async function setMembershipStatus(
+    user: PortalAccessUserRow,
+    membership: PortalAccessMembershipRow,
+    status: "active" | "disabled",
+  ) {
+    setMembershipBusy(true);
+    setMembershipError(null);
+    try {
+      const res = await fetch(
+        `/api/admin/portal-users/${user.id}/memberships/${membership.id}/status`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status }),
+        },
+      );
+      const body = (await res.json()) as {
+        ok?: boolean;
+        error?: string;
+        memberships?: PortalAccessMembershipRow[];
+      };
+      if (!res.ok || !body.ok || !body.memberships) {
+        throw new Error(body.error ?? "Could not update membership.");
+      }
+      applyMemberships(user.id, body.memberships);
+      router.refresh();
+    } catch (err) {
+      setMembershipError(err instanceof Error ? err.message : "Could not update membership.");
+    } finally {
+      setMembershipBusy(false);
+    }
+  }
+
+  async function setDefaultMembership(
+    user: PortalAccessUserRow,
+    membership: PortalAccessMembershipRow,
+  ) {
+    setMembershipBusy(true);
+    setMembershipError(null);
+    try {
+      const res = await fetch(
+        `/api/admin/portal-users/${user.id}/memberships/${membership.id}/default`,
+        { method: "POST" },
+      );
+      const body = (await res.json()) as {
+        ok?: boolean;
+        error?: string;
+        memberships?: PortalAccessMembershipRow[];
+      };
+      if (!res.ok || !body.ok || !body.memberships) {
+        throw new Error(body.error ?? "Could not set default membership.");
+      }
+      applyMemberships(user.id, body.memberships);
+      router.refresh();
+    } catch (err) {
+      setMembershipError(err instanceof Error ? err.message : "Could not set default.");
+    } finally {
+      setMembershipBusy(false);
+    }
+  }
+
   return (
     <OperationsShell activeId="portal-access">
       <KxdPage className="kxd-os-ops-page">
         <OperationsPageHero
           eyebrow="Client Portal"
           title="Portal Access"
-          lead="Create and manage client login accounts. Each user is scoped to one client and lands in that client's CES experience after sign-in."
+          lead="Create and manage client login accounts. Legacy primary client remains during Phase 4 transition; memberships authorize multi-client access."
         />
 
         {createSuccess ? (
@@ -428,45 +561,154 @@ function PortalAccessScreenInner({ data: initialData }: PortalAccessScreenProps)
               </div>
 
               {visibleUsers.map((user) => (
-                <div key={user.id} className="kxd-os-portal-access__row">
-                  <div className="kxd-os-portal-access__primary">
-                    <Link href={user.payloadAdminUrl} className="kxd-os-portal-access__name">
-                      {user.displayName ?? user.email}
-                    </Link>
-                  </div>
-                  <div className="kxd-os-portal-access__cell" data-label="Email">
-                    {user.email}
-                  </div>
-                  <div className="kxd-os-portal-access__cell" data-label="Client">
-                    {user.clientName}
-                  </div>
-                  <div className="kxd-os-portal-access__cell" data-label="Welcome">
-                    {user.welcomeCompleted ? "Complete" : "Pending"}
-                  </div>
-                  <div className="kxd-os-portal-access__cell" data-label="Created">
-                    <time dateTime={user.createdAt}>{fmtDate(user.createdAt)}</time>
-                  </div>
-                  <div className="kxd-os-portal-access__cell kxd-os-portal-access__cell--actions" data-label="Access">
-                    <OpsStatusBadge
-                      label={user.active ? "Active" : "Inactive"}
-                      variant={user.active ? "success" : "default"}
-                    />
-                    <button
-                      type="button"
-                      className="kxd-os-btn kxd-os-btn--secondary kxd-os-portal-access__toggle"
-                      disabled={togglingId === user.id}
-                      onClick={() => void toggleActive(user)}
+                <div key={user.id} className="kxd-os-portal-access__user-block">
+                  <div className="kxd-os-portal-access__row">
+                    <div className="kxd-os-portal-access__primary">
+                      <Link href={user.payloadAdminUrl} className="kxd-os-portal-access__name">
+                        {user.displayName ?? user.email}
+                      </Link>
+                    </div>
+                    <div className="kxd-os-portal-access__cell" data-label="Email">
+                      {user.email}
+                    </div>
+                    <div className="kxd-os-portal-access__cell" data-label="Client">
+                      {user.clientName}
+                      <span className="kxd-os-portal-access__readiness-slug">
+                        {" "}
+                        · legacy primary
+                      </span>
+                    </div>
+                    <div className="kxd-os-portal-access__cell" data-label="Welcome">
+                      {user.welcomeCompleted ? "Complete" : "Pending"}
+                    </div>
+                    <div className="kxd-os-portal-access__cell" data-label="Created">
+                      <time dateTime={user.createdAt}>{fmtDate(user.createdAt)}</time>
+                    </div>
+                    <div
+                      className="kxd-os-portal-access__cell kxd-os-portal-access__cell--actions"
+                      data-label="Access"
                     >
-                      {togglingId === user.id
-                        ? "Saving…"
-                        : user.active
-                          ? "Deactivate"
-                          : "Activate"}
-                    </button>
-                    <Link href={user.payloadAdminUrl} className="kxd-os-link-quiet">
-                      Edit in admin
-                    </Link>
+                      <OpsStatusBadge
+                        label={user.active ? "Active" : "Inactive"}
+                        variant={user.active ? "success" : "default"}
+                      />
+                      <button
+                        type="button"
+                        className="kxd-os-btn kxd-os-btn--secondary kxd-os-portal-access__toggle"
+                        disabled={togglingId === user.id}
+                        onClick={() => void toggleActive(user)}
+                      >
+                        {togglingId === user.id
+                          ? "Saving…"
+                          : user.active
+                            ? "Deactivate"
+                            : "Activate"}
+                      </button>
+                      <button
+                        type="button"
+                        className="kxd-os-btn kxd-os-btn--secondary kxd-os-portal-access__toggle"
+                        onClick={() => {
+                          setExpandedUserId((id) => (id === user.id ? null : user.id));
+                          setMembershipError(null);
+                          setMembershipClientId("");
+                        }}
+                      >
+                        {expandedUserId === user.id ? "Hide memberships" : "Memberships"}
+                      </button>
+                      <Link href={user.payloadAdminUrl} className="kxd-os-link-quiet">
+                        Edit in admin
+                      </Link>
+                    </div>
                   </div>
+
+                  {expandedUserId === user.id ? (
+                    <div className="kxd-os-portal-access__memberships">
+                      <p className="kxd-os-portal-access__hint">
+                        Memberships authorize which clients this login may access. Default
+                        membership aligns the legacy primary client during Phase 4 transition.
+                      </p>
+                      {user.memberships.length === 0 ? (
+                        <p className="kxd-os-portal-access__hint">No memberships yet.</p>
+                      ) : (
+                        <ul className="kxd-os-portal-access__issues">
+                          {user.memberships.map((membership) => (
+                            <li key={membership.id} className="kxd-os-portal-access__membership-row">
+                              <span>
+                                {membership.clientName}
+                                {membership.isDefault ? " · default" : ""}
+                                {membership.status === "disabled" ? " · disabled" : ""}
+                              </span>
+                              <span className="kxd-os-portal-access__membership-actions">
+                                {membership.status === "active" && !membership.isDefault ? (
+                                  <button
+                                    type="button"
+                                    className="kxd-os-link-quiet"
+                                    disabled={membershipBusy}
+                                    onClick={() => void setDefaultMembership(user, membership)}
+                                  >
+                                    Set default
+                                  </button>
+                                ) : null}
+                                <button
+                                  type="button"
+                                  className="kxd-os-link-quiet"
+                                  disabled={membershipBusy || membership.id < 0}
+                                  onClick={() =>
+                                    void setMembershipStatus(
+                                      user,
+                                      membership,
+                                      membership.status === "active" ? "disabled" : "active",
+                                    )
+                                  }
+                                >
+                                  {membership.status === "active" ? "Disable" : "Reactivate"}
+                                </button>
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                      <div className="kxd-os-portal-access__create-actions">
+                        <label className="kxd-os-portal-access__field">
+                          <span>Add membership</span>
+                          <select
+                            value={membershipClientId}
+                            onChange={(e) => setMembershipClientId(e.target.value)}
+                          >
+                            <option value="">Select client</option>
+                            {initialData.clients
+                              .filter(
+                                (client) =>
+                                  !user.memberships.some(
+                                    (m) => m.clientId === client.clientId && m.status === "active",
+                                  ),
+                              )
+                              .map((client) => (
+                                <option key={client.clientId} value={client.clientId}>
+                                  {client.clientName}
+                                </option>
+                              ))}
+                          </select>
+                        </label>
+                        <button
+                          type="button"
+                          className="kxd-os-btn kxd-os-btn--secondary"
+                          disabled={membershipBusy || !membershipClientId}
+                          onClick={() => void addMembership(user)}
+                        >
+                          {membershipBusy ? "Saving…" : "Add membership"}
+                        </button>
+                      </div>
+                      {membershipError ? (
+                        <p
+                          className="kxd-os-portal-access__notice kxd-os-portal-access__notice--error"
+                          role="alert"
+                        >
+                          {membershipError}
+                        </p>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </div>
               ))}
             </OpsCard>

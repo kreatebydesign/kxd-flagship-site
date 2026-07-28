@@ -2,6 +2,7 @@
  * seed-portal-user.ts
  *
  * Create or reset a portal user password via Payload API (reliable hashing).
+ * Also ensures the Phase 4 initial portal-client-membership + lastActiveClientId.
  * Run: npm run seed:portal-user
  *
  * Examples:
@@ -11,6 +12,10 @@
 
 import { getPayload } from "payload";
 import config from "../payload.config";
+import {
+  ensurePortalMembership,
+  syncPortalUserLegacyClientAndPreference,
+} from "../lib/portal/memberships";
 
 const DEFAULTS = {
   email: "matt.primal@kxd.local",
@@ -89,6 +94,7 @@ async function seedPortalUser() {
         email,
         displayName,
         client: clientId,
+        lastActiveClientId: clientId,
         password,
       },
       overrideAccess: true,
@@ -102,6 +108,7 @@ async function seedPortalUser() {
         email,
         displayName,
         client: clientId,
+        lastActiveClientId: clientId,
         password,
       },
       overrideAccess: true,
@@ -109,6 +116,19 @@ async function seedPortalUser() {
     portalUserId = created.id as number;
     console.log(`Created portal user #${portalUserId} (${email})`);
   }
+
+  await ensurePortalMembership({
+    portalUserId,
+    clientId,
+    isDefault: true,
+    payload,
+  });
+  await syncPortalUserLegacyClientAndPreference({
+    portalUserId,
+    clientId,
+    payload,
+  });
+  console.log(`Membership ensured for client #${clientId}`);
 
   const login = await payload.login({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
