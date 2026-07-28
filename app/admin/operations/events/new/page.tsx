@@ -3,7 +3,19 @@ import { EventCreateScreen } from "@/components/admin/operations/events/EventDet
 
 export const dynamic = "force-dynamic";
 
-export default async function NewRelationshipEventPage() {
+/**
+ * Optional `clientId` query preselects the owning client in the create form.
+ * Submission still validates ownership server-side — the query is never trusted alone.
+ */
+export default async function NewRelationshipEventPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ clientId?: string }>;
+}) {
   await requirePayloadAdminPage("/admin/operations/events/new");
-  return <EventCreateScreen />;
+  const params = await searchParams;
+  const raw = Number(params.clientId);
+  const initialClientId =
+    Number.isFinite(raw) && raw > 0 ? Math.trunc(raw) : undefined;
+  return <EventCreateScreen initialClientId={initialClientId} />;
 }

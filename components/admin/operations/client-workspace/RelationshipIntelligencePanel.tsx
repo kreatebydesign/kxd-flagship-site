@@ -562,14 +562,14 @@ export function RelationshipIntelligencePanel({
           </Link>
           {" · "}
           <Link
-            href={`/admin/operations/events/new`}
+            href={`/admin/operations/events/new?clientId=${clientId}`}
             className="kxd-os-link-quiet"
           >
-            New event →
+            New event for this client →
           </Link>
         </p>
         {events.length === 0 ? (
-          <WorkspaceEmpty message="No relationship events recorded yet. Activity will appear here once events are logged." />
+          <WorkspaceEmpty message="No relationship events recorded yet. Create one in Events workspace — it will appear here for this client." />
         ) : (
           <ul className="kxd-os-workspace-relationship__event-list">
             {events.map((event) => (

@@ -27,6 +27,7 @@
     "verify:phase3-relationship-foundation": "tsx scripts/verify-phase3-relationship-foundation.ts",
     "verify:phase3-client-intelligence": "tsx scripts/verify-phase3-client-intelligence.ts",
     "verify:phase3-relationship-events": "tsx scripts/verify-phase3-relationship-events.ts",
+    "verify:phase3-relationship-connections": "tsx scripts/verify-phase3-relationship-connections.ts",
     "verify:experience-feedback": "tsx scripts/verify-experience-feedback.ts",
     "verify:website-review-upload": "tsx scripts/verify-website-review-upload.ts",
     "verify:website-review-page-location": "tsx scripts/verify-website-review-page-location.ts",

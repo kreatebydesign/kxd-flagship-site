@@ -23,10 +23,20 @@ import {
   type EventFormState,
 } from "./RelationshipEventForm";
 
-export function EventCreateScreen() {
+export function EventCreateScreen({
+  initialClientId,
+}: {
+  initialClientId?: number;
+}) {
   const router = useRouter();
   const [clients, setClients] = useState<OperatorClientOption[]>([]);
-  const [form, setForm] = useState<EventFormState>(EMPTY_EVENT_FORM);
+  const [form, setForm] = useState<EventFormState>(() => ({
+    ...EMPTY_EVENT_FORM,
+    clientId:
+      initialClientId != null && Number.isFinite(initialClientId) && initialClientId > 0
+        ? String(initialClientId)
+        : "",
+  }));
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">(
     "idle",
   );
@@ -45,6 +55,11 @@ export function EventCreateScreen() {
           error?: string;
           clients?: OperatorClientOption[];
         };
+        if (res.status === 401 || res.status === 403) {
+          throw new Error(
+            json.error ?? "You do not have permission to create relationship events.",
+          );
+        }
         if (!res.ok || !json.success) {
           throw new Error(json.error ?? "Unable to load clients.");
         }
@@ -84,6 +99,11 @@ export function EventCreateScreen() {
         href?: string;
         id?: number;
       };
+      if (res.status === 401 || res.status === 403) {
+        throw new Error(
+          json.error ?? "You do not have permission to create relationship events.",
+        );
+      }
       if (!res.ok || !json.success) {
         throw new Error(json.error ?? "Unable to create event.");
       }
@@ -95,6 +115,11 @@ export function EventCreateScreen() {
       setError(err instanceof Error ? err.message : "Unable to create event.");
     }
   }
+
+  const selectedClientHref =
+    form.clientId && Number(form.clientId) > 0
+      ? `/admin/operations/clients/${form.clientId}?tab=relationship`
+      : null;
 
   return (
     <OperationsShell activeId="events">
@@ -108,6 +133,18 @@ export function EventCreateScreen() {
           <Link href="/admin/operations/events" className="kxd-os-link-quiet">
             ← All events
           </Link>
+          {" · "}
+          <Link href="/admin/operations/clients" className="kxd-os-link-quiet">
+            Client portfolio
+          </Link>
+          {selectedClientHref ? (
+            <>
+              {" · "}
+              <Link href={selectedClientHref} className="kxd-os-link-quiet">
+                Selected client relationship
+              </Link>
+            </>
+          ) : null}
         </p>
         {bootError ? (
           <p className="kxd-os-command-timeline-form__error" role="alert">
@@ -168,6 +205,12 @@ export function EventDetailScreen({ eventId }: { eventId: number }) {
         success?: boolean;
         clients?: OperatorClientOption[];
       };
+      if (detailRes.status === 401 || detailRes.status === 403) {
+        throw new Error(
+          detailJson.error ??
+            "You do not have permission to view this relationship event.",
+        );
+      }
       if (!detailRes.ok || !detailJson.success || !detailJson.event) {
         throw new Error(detailJson.error ?? "Event not found.");
       }
@@ -277,6 +320,10 @@ export function EventDetailScreen({ eventId }: { eventId: number }) {
           <Link href="/admin/operations/events" className="kxd-os-link-quiet">
             ← All events
           </Link>
+          {" · "}
+          <Link href="/admin/operations/clients" className="kxd-os-link-quiet">
+            Client portfolio
+          </Link>
         </p>
 
         {loading ? (
@@ -362,6 +409,13 @@ export function EventDetailScreen({ eventId }: { eventId: number }) {
                   {event.contactNames.length > 0
                     ? event.contactNames.join(", ")
                     : "None linked"}
+                  {" · "}
+                  <Link
+                    href={event.clientRelationshipHref}
+                    className="kxd-os-link-quiet"
+                  >
+                    Manage contacts on client relationship →
+                  </Link>
                 </dd>
               </div>
               {event.updatedAt ? (

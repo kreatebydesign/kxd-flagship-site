@@ -179,12 +179,12 @@ function main() {
   assert.equal(leaks.length, 0, leaks.join("; "));
   console.log("  ✔ portal/public surfaces do not import Batch C event modules/fields");
 
-  // Batch D–E not started as full scope (broader cross-link hardening may remain)
+  // Broader Phase 3 batches after C may exist; Batch E completion is separate.
   assert.doesNotMatch(
     read("docs/PHASE-3-CLIENT-RELATIONSHIP-INTELLIGENCE.md"),
-    /Batch D[^\n]*✅ Implemented/,
+    /Batch E[^\n]*✅ Implemented/,
   );
-  console.log("  ✔ Batch D–E not marked implemented");
+  console.log("  ✔ Batch E not marked implemented");
 
   console.log("\nPhase 3 Batch C Relationship Events verification passed.\n");
 }

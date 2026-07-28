@@ -77,6 +77,7 @@ export const NAV_GROUPS: OperationsNavGroup[] = [
     items: [
       { id: "genesis", label: "Genesis", href: "/admin/operations/genesis" },
       { id: "clients", label: "Portfolio", href: "/admin/operations/clients" },
+      // Relationship Events workspace (distinct from Intelligence → Timeline).
       { id: "events", label: "Events", href: "/admin/operations/events" },
       {
         id: "client-launch-wizard",

@@ -1,10 +1,10 @@
 # Phase 3 — Client & Relationship Intelligence
 
-**Status:** Batches A–C implemented (Events workspace) — Batches D–E not started  
+**Status:** Batches A–D implemented — Batch E not started  
 **Baseline (planning):** `e97a571515efabec3f47347d3a38133007b7aef0`  
 **Companion:** `docs/KXD-OS-ROADMAP.md`, `docs/KXD-OS-CURRENT-STATE.md`
 
-> Batch A: collections + migration. Batch B: client Relationship tab (contacts CRUD + read-only events). Batch C: standalone `/admin/operations/events` list/detail/create/edit. Batch D navigation refinements and Batch E hardening remain.
+> Batch A: collections + migration. Batch B: client Relationship tab (contacts CRUD + read-only events). Batch C: standalone `/admin/operations/events`. Batch D: Portfolio ↔ Relationship ↔ Events connections, permission wiring. Batch E hardening remains.
 
 ---
 
@@ -187,7 +187,7 @@ Optional non-blocking implementation choice (implementer may proceed with defaul
 
 | Item | Definition |
 |------|------------|
-| **Status** | ✅ Implemented (awaiting review/publication) |
+| **Status** | ✅ Published |
 | **Route** | `/admin/operations/events` (list), `/admin/operations/events/new` (create), `/admin/operations/events/[id]` (detail/edit) |
 | **Navigation** | Clients group → **Events** (`operations-nav.ts`); page title “Relationship Events” |
 | **Outcome** | Operator Events list + detail with search/filters, create/edit, status workflow, multi-contact association, links to client Relationship tab |
@@ -202,21 +202,25 @@ Optional non-blocking implementation choice (implementer may proceed with defaul
 | **Dependencies** | Batches A–B |
 | **Commit boundary** | One commit: Events workspace routes + UI + loaders + APIs + verify |
 | **Stop conditions** | Using Calendar/scheduling as store; renaming Timeline to Events; portal exposure |
-| **Not started** | Batch D broader connection refinements, Batch E hardening |
+| **Not started** | Batch E hardening |
 
 ### Batch D — Relationship connections and navigation
 
 | Item | Definition |
 |------|------------|
-| **Outcome** | Cross-links among Clients, Contacts, and Events; operator nav updated; permission-aware empty/loading/error states |
-| **Areas** | `components/admin/operations/shared/operations-nav.ts`, cross-link UI on Clients/Events screens, restricted-staff path allowlists if required (`lib/staff/permissions.ts`) |
-| **Dependencies** | Batches B and C |
+| **Status** | ✅ Implemented (awaiting review/publication) |
+| **Outcome** | Bidirectional Portfolio ↔ Relationship tab ↔ Events workspace links; Events remains in Clients nav; restricted staff denied on pages/APIs |
+| **Connections** | Portfolio → Events + per-client Relationship tab; Events list/detail → Portfolio / client workspace / Relationship; Relationship tab → Events + `new?clientId=` (preselect only); event contacts → Relationship tab |
+| **Navigation** | Clients → **Events** retained (distinct from Intelligence → Timeline); staff shell omits Events/Portfolio/Timeline; edition map `events: "portfolio"` unchanged |
+| **Permission wiring** | Phase 3 pages/APIs remain off `STAFF_ALLOWED_*` allowlists (documented); `requireStaffAwarePage` + `requirePayloadAdminApi` enforce direct access; permission-aware denied/empty states on Events UI |
+| **Ownership / privacy** | Owning client immutable; same-client contacts; `clientId` query never trusted alone; no private notes in URLs; `internalOnly` unchanged |
 | **Schema / migration** | None |
-| **Auth / privacy gates** | Restricted staff remain isolated from new data surfaces unless explicitly allowed (default: deny / redirect per existing staff isolation) |
-| **Verification** | Staff isolation checks; nav href resolution; `npm run verify:staff-experience` if path allowlists change |
-| **Completion criteria** | Events appears in operator nav; bidirectional deep links work; restricted staff cannot reach private relationship data |
+| **Verification** | `npm run verify:phase3-relationship-connections`; `npm run verify:staff-experience`; Batches A–C verifies; portal auth boundaries; build |
+| **Areas** | Portfolio + Events + Relationship panel cross-links, `lib/staff/permissions.ts` comments/asserts, OperationsShell staff nav comment, Batch D verifier |
+| **Dependencies** | Batches B and C |
 | **Commit boundary** | One commit: navigation + cross-links + permission wiring |
 | **Stop conditions** | Broad nav redesign; training/staff product expansion beyond permission gates |
+| **Not started** | Batch E hardening |
 
 ### Batch E — Verification, privacy hardening, and stabilization
 

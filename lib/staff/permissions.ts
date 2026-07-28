@@ -48,7 +48,14 @@ const OPERATIONS_COORDINATOR_CAPABILITIES: readonly StaffCapability[] = [
   "staff.billing.verify",
 ] as const;
 
-/** Page prefixes restricted staff may open. Deny-by-default otherwise. */
+/**
+ * Page prefixes restricted staff may open. Deny-by-default otherwise.
+ *
+ * Phase 3 relationship surfaces stay off this allowlist (Batch D):
+ * - `/admin/operations/events` (+ `/new`, `/[id]`)
+ * - `/admin/operations/clients` portfolio/workspace (except `clients/launch`)
+ * Hidden navigation is not access control — `requireStaffAwarePage` enforces this.
+ */
 export const STAFF_ALLOWED_PAGE_PREFIXES: readonly string[] = [
   "/admin/operations/staff",
   "/admin/operations/settings",
@@ -63,7 +70,11 @@ export const STAFF_ALLOWED_PAGE_PREFIXES: readonly string[] = [
 
 /** Wrap-up is under /admin/operations/staff — already covered by prefix. */
 
-/** API prefixes restricted staff may call. Deny-by-default otherwise. */
+/**
+ * API prefixes restricted staff may call. Deny-by-default otherwise.
+ *
+ * Phase 3 `/api/admin/client-relationship/**` remains denied (Batch D).
+ */
 export const STAFF_ALLOWED_API_PREFIXES: readonly string[] = [
   "/api/admin/staff",
   "/api/admin/auth/logout",

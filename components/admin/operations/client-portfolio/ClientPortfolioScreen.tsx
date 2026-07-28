@@ -110,6 +110,9 @@ export function ClientPortfolioScreen({
         <div className="kxd-os-portfolio-overview-head">
           <KxdSection label="Relationships" description={overviewDescription} />
           <div className="kxd-os-portfolio-actions">
+            <Link href="/admin/operations/events" className="kxd-os-btn kxd-os-btn--ghost">
+              Relationship Events
+            </Link>
             <Link href="/admin/operations/client-import" className="kxd-os-btn kxd-os-btn--ghost">
               Import client
             </Link>
@@ -187,6 +190,15 @@ export function ClientPortfolioScreen({
                       ) : !priority ? (
                         <span className="kxd-os-meta">—</span>
                       ) : null}
+                    </div>
+                    <div className="kxd-os-portfolio-cell__stack">
+                      <span className="kxd-os-caption">Relationship</span>
+                      <Link
+                        href={`/admin/operations/clients/${row.clientId}?tab=relationship`}
+                        className="kxd-os-link-quiet"
+                      >
+                        Contacts & events →
+                      </Link>
                     </div>
                     <div className="kxd-os-portfolio-cell__stack">
                       <span className="kxd-os-caption">Command</span>

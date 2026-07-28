@@ -12,6 +12,10 @@ import {
 import { getEditionOperationsNavGroups } from "@/lib/editions/navigation";
 import { StaffSignOutButton } from "@/components/admin/operations/staff/StaffSignOutButton";
 
+/**
+ * Restricted-staff chrome — Portfolio, Relationship Events, and Timeline stay out.
+ * Page allowlists in `lib/staff/permissions.ts` enforce the same boundary on direct URLs.
+ */
 const STAFF_NAV_GROUPS: OperationsNavGroup[] = [
   {
     label: "My work",

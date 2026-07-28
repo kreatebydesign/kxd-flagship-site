@@ -95,6 +95,36 @@ assert.equal(isStaffAllowedPagePath("/admin/collections/users", heather), false)
 assert.equal(isStaffAllowedPagePath("/admin/globals/site-settings", heather), false);
 assert.equal(isStaffAllowedPagePath("/admin/sales", heather), false);
 
+// Phase 3 Batch D — relationship surfaces remain denied for restricted staff
+assert.equal(isStaffAllowedPagePath("/admin/operations/events", heather), false);
+assert.equal(isStaffAllowedPagePath("/admin/operations/events/new", heather), false);
+assert.equal(isStaffAllowedPagePath("/admin/operations/events/12", heather), false);
+assert.equal(isStaffAllowedPagePath("/admin/operations/clients", heather), false);
+assert.equal(
+  isStaffAllowedPagePath("/admin/operations/clients/9", heather),
+  false,
+);
+assert.equal(
+  isStaffAllowedPagePath("/admin/operations/clients/9?tab=relationship", heather),
+  false,
+);
+assert.equal(
+  isStaffAllowedApiPath("/api/admin/client-relationship/events", heather),
+  false,
+);
+assert.equal(
+  isStaffAllowedApiPath("/api/admin/client-relationship/events/12", heather),
+  false,
+);
+assert.equal(
+  isStaffAllowedApiPath("/api/admin/client-relationship/contacts", heather),
+  false,
+);
+assert.equal(
+  isStaffAllowedApiPath("/api/admin/client-relationship/form-options", heather),
+  false,
+);
+
 const heatherPayloadUser = {
   id: 42,
   collection: "users" as const,

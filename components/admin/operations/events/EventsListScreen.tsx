@@ -25,6 +25,7 @@ type Timeframe = "all" | "upcoming" | "recent";
 export function EventsListScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [denied, setDenied] = useState(false);
   const [events, setEvents] = useState<OperatorRelationshipEventRow[]>([]);
   const [clients, setClients] = useState<OperatorClientOption[]>([]);
   const [q, setQ] = useState("");
@@ -37,6 +38,7 @@ export function EventsListScreen() {
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
+    setDenied(false);
     try {
       const params = new URLSearchParams();
       params.set("timeframe", timeframe);
@@ -55,6 +57,12 @@ export function EventsListScreen() {
         events?: OperatorRelationshipEventRow[];
         clients?: OperatorClientOption[];
       };
+      if (res.status === 401 || res.status === 403) {
+        setDenied(true);
+        throw new Error(
+          json.error ?? "You do not have permission to view relationship events.",
+        );
+      }
       if (!res.ok || !json.success) {
         throw new Error(json.error ?? "Unable to load relationship events.");
       }
@@ -83,6 +91,13 @@ export function EventsListScreen() {
     [events, nowMs],
   );
 
+  const hasActiveFilters =
+    Boolean(q.trim()) ||
+    clientId !== "all" ||
+    status !== "all" ||
+    category !== "all" ||
+    timeframe !== "all";
+
   return (
     <OperationsShell activeId="events">
       <KxdPage className="kxd-os-page--ops">
@@ -96,10 +111,15 @@ export function EventsListScreen() {
           <Link href="/admin/operations/events/new" className="kxd-os-btn kxd-os-btn--sm">
             New event
           </Link>
+          <Link href="/admin/operations/clients" className="kxd-os-link-quiet">
+            Client portfolio →
+          </Link>
           <p className="kxd-os-meta" aria-live="polite">
             {loading
               ? "Loading…"
-              : `${events.length} shown${upcomingCount > 0 ? ` · ${upcomingCount} upcoming planned` : ""}`}
+              : denied
+                ? "Access restricted"
+                : `${events.length} shown${upcomingCount > 0 ? ` · ${upcomingCount} upcoming planned` : ""}`}
           </p>
         </div>
 
@@ -118,6 +138,7 @@ export function EventsListScreen() {
               onChange={(e) => setQDraft(e.target.value)}
               className="kxd-os-command-timeline-form__input"
               placeholder="Search…"
+              disabled={denied}
             />
           </label>
           <label className="kxd-os-command-timeline-form__field">
@@ -126,10 +147,11 @@ export function EventsListScreen() {
               value={clientId}
               onChange={(e) => setClientId(e.target.value)}
               className="kxd-os-command-timeline-form__input"
+              disabled={denied}
             >
               <option value="all">All clients</option>
               {clients.map((c) => (
-                <option key={c.id} value={c.id}>
+                <option key={c.id} value={String(c.id)}>
                   {c.name}
                 </option>
               ))}
@@ -143,6 +165,7 @@ export function EventsListScreen() {
                 setStatus(e.target.value as RelationshipEventStatus | "all")
               }
               className="kxd-os-command-timeline-form__input"
+              disabled={denied}
             >
               <option value="all">All statuses</option>
               {(Object.keys(EVENT_STATUS_LABEL) as RelationshipEventStatus[]).map(
@@ -162,23 +185,25 @@ export function EventsListScreen() {
                 setCategory(e.target.value as RelationshipEventCategory | "all")
               }
               className="kxd-os-command-timeline-form__input"
+              disabled={denied}
             >
               <option value="all">All categories</option>
-              {(
-                Object.keys(EVENT_CATEGORY_LABEL) as RelationshipEventCategory[]
-              ).map((key) => (
-                <option key={key} value={key}>
-                  {EVENT_CATEGORY_LABEL[key]}
-                </option>
-              ))}
+              {(Object.keys(EVENT_CATEGORY_LABEL) as RelationshipEventCategory[]).map(
+                (key) => (
+                  <option key={key} value={key}>
+                    {EVENT_CATEGORY_LABEL[key]}
+                  </option>
+                ),
+              )}
             </select>
           </label>
           <label className="kxd-os-command-timeline-form__field">
-            <span>When</span>
+            <span>Timeframe</span>
             <select
               value={timeframe}
               onChange={(e) => setTimeframe(e.target.value as Timeframe)}
               className="kxd-os-command-timeline-form__input"
+              disabled={denied}
             >
               <option value="all">Upcoming then recent</option>
               <option value="upcoming">Upcoming planned</option>
@@ -186,7 +211,11 @@ export function EventsListScreen() {
             </select>
           </label>
           <div className="kxd-rel-events__filter-actions">
-            <button type="submit" className="kxd-os-btn kxd-os-btn--ghost kxd-os-btn--sm">
+            <button
+              type="submit"
+              className="kxd-os-btn kxd-os-btn--ghost kxd-os-btn--sm"
+              disabled={denied}
+            >
               Apply search
             </button>
           </div>
@@ -198,14 +227,39 @@ export function EventsListScreen() {
           </p>
         ) : null}
 
-        <OpsSectionHead label="Events" count={loading ? undefined : events.length} />
+        <OpsSectionHead label="Events" count={loading || denied ? undefined : events.length} />
 
         {loading ? (
           <p className="kxd-os-meta" aria-live="polite">
             Loading relationship events…
           </p>
+        ) : denied ? (
+          <OpsEmpty message="Access denied. Relationship Events are available to studio operators only." />
         ) : events.length === 0 ? (
-          <OpsEmpty message="No relationship events match these filters. Create an event or clear filters to see operational engagements." />
+          <div className="kxd-rel-events__empty">
+            <OpsEmpty
+              message={
+                hasActiveFilters
+                  ? "No relationship events match these filters."
+                  : "No relationship events yet."
+              }
+            />
+            <p className="kxd-os-meta" style={{ marginTop: "0.75rem" }}>
+              {hasActiveFilters ? (
+                <>Clear filters, or create an event from the toolbar.</>
+              ) : (
+                <>
+                  <Link href="/admin/operations/events/new" className="kxd-os-link-quiet">
+                    Create an event
+                  </Link>
+                  {" · "}
+                  <Link href="/admin/operations/clients" className="kxd-os-link-quiet">
+                    Open client portfolio
+                  </Link>
+                </>
+              )}
+            </p>
+          </div>
         ) : (
           <ul className="kxd-rel-events__list">
             {events.map((event) => (
@@ -248,11 +302,14 @@ export function EventsListScreen() {
                   >
                     Open
                   </Link>
+                  <Link href={event.clientHref} className="kxd-os-link-quiet">
+                    Client workspace →
+                  </Link>
                   <Link
                     href={event.clientRelationshipHref}
                     className="kxd-os-link-quiet"
                   >
-                    Client relationship →
+                    Relationship →
                   </Link>
                 </div>
               </li>
