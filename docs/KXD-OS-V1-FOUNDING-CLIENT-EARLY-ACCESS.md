@@ -25,8 +25,7 @@ This is not a wide-open public SaaS launch.
 
 ## What v1 intentionally does not include
 
-- Multi-brand organization switching
-- Parent organizations or cross-company dashboards
+- Parent organizations or cross-company dashboards as an authorization model
 - Self-service workspace provisioning
 - Full invoicing / payment center execution
 - Monthly billing recaps or Work Ledger
@@ -38,6 +37,8 @@ This is not a wide-open public SaaS launch.
 - New industry editions
 - Broad public website redesigns
 - Broad design-system rewrites
+
+> **Multi-client / multi-brand portal access** is no longer a vague post-v1 idea. It is the active product-track **Phase 4** plan: `docs/PHASE-4-MULTI-CLIENT-PORTAL.md` (membership-based one-login access to multiple independent clients; Cusick first). It is not included in the founding-client early-access baseline until Phase 4 batches ship and are production-verified.
 
 ---
 
@@ -182,7 +183,7 @@ npm run verify:client-launch -- --client primal-motorsports
 
 ## Post-v1 roadmap (explicitly deferred)
 
-1. Multi-Brand Client Workspace Provisioning
+1. ~~Multi-Brand Client Workspace Provisioning~~ → **Active as Phase 4** — see `docs/PHASE-4-MULTI-CLIENT-PORTAL.md` (membership + account context; not parent-org provisioning)
 2. Client Billing, Work Ledger, and Hosting Transitions
 3. Internal Resource Center
 4. Secure Credential Vault

@@ -2,7 +2,7 @@
 
 **Edition 1 · Engineering Memory**  
 **Status:** Permanent — repository is the source of truth  
-**Last aligned:** June 25, 2026  
+**Last aligned:** July 27, 2026  
 **Companion:** `docs/KXD-OS-ENGINEERING-BRIEF.md`, `docs/KXD-OS-ARCHITECTURE.md`, `docs/KXD-OS-ROADMAP.md`
 
 ---
@@ -203,27 +203,28 @@ Facts → Interpretation → Awareness → Narrative → Memory → Presentation
 
 Edition 1 is in the **operate and extend** phase — not redesign.
 
-### Approved next product phase
+### Completed product phase (closed)
 
-**Phase 3 — Client & Relationship Intelligence** — **Batches A–E implemented**; Batch E awaiting review/publication and production verification.
+**Phase 3 — Client & Relationship Intelligence** — ✅ Production-complete (Batches A–E published and verified; HEAD `fdb0348`).
 
 - Plan: `docs/PHASE-3-CLIENT-RELATIONSHIP-INTELLIGENCE.md`
-- Batch A collections: `client-contacts`, `client-relationship-events` (studio-operator-only)
-- Batch A migration: `migrations/20260727_phase3_client_relationship_intelligence.ts` (validated on isolated local Postgres)
-- Batch A verify: `npm run verify:phase3-relationship-foundation`
-- Batch B: Client Intelligence at `/admin/operations/clients/[id]?tab=relationship` — contacts add/edit/status; events read-only on tab
-- Batch B verify: `npm run verify:phase3-client-intelligence`
-- Batch C: Relationship Events at `/admin/operations/events` (+ `/new`, `/[id]`) — list/filter/create/edit/status; Clients nav **Events**
-- Batch C verify: `npm run verify:phase3-relationship-events`
-- Batch D: Portfolio ↔ Relationship ↔ Events bidirectional links; staff allowlists keep relationship surfaces denied; `verify:phase3-relationship-connections`
-- Batch E: privacy hardening (list note stripping, uniform 404, server-only workspace loader) + `verify:phase3-relationship-completion`
-- Explicitly excludes portal/public exposure, rituals/Business Memory wiring, Google Calendar rewrite, commercial/Stripe, deploy, and production-data mutation
+- Operator-only contacts + relationship events; Clients Relationship tab; Events workspace; portfolio connections; privacy hardening
+- Remains portal-inaccessible; do not reopen
+
+### Approved next product phase
+
+**Phase 4 — Multi-Client Portal Access & Account Context** — Defined; Batch A not started.
+
+- Plan: `docs/PHASE-4-MULTI-CLIENT-PORTAL.md`
+- Reusable portal membership (one login → many authorized clients), server-validated active-account context, account switcher, per-account surfaces, authorized combined portfolio
+- First production configuration: Cusick account group (Cusick Motorsports / CMM, OTP, OTP Carts, 2475 Townsgate) as four independent clients — no parent-organization auth
+- Batch A: membership schema, backfill, session authorization foundation, Portal Access membership management — no switcher UI, no Cusick production linking
 
 ### Immediate priorities
 
-1. **Phase 3 — Client & Relationship Intelligence** — Batches A–E implemented; next is Batch E review/publication then production deployment verification.
-2. **Client operations at scale** — Repeat the Primal launch pattern using `lib/client-launch/` for every new client workspace.
-3. **Business Memory integration** — Wire `runBusinessMemory()` into rituals or intelligence when explicitly requested; foundation exists, UI does not. Phase 3 prepares durable relationship context but does not integrate Business Memory yet.
+1. **Phase 4 — Multi-Client Portal Access & Account Context** — Implement Batch A per `docs/PHASE-4-MULTI-CLIENT-PORTAL.md`.
+2. **Client operations at scale** — Repeat the Primal launch pattern using `lib/client-launch/` for every new client workspace (including OTP Carts readiness before Cusick membership linking).
+3. **Business Memory integration** — Wire `runBusinessMemory()` into rituals or intelligence when explicitly requested; foundation exists, UI does not. Phase 3 prepared durable relationship context but does not integrate Business Memory yet.
 4. **Executive experience polish** — Premium ritual presentation (KHIG) without new intelligence layers.
 5. **Human-approved automation** — Connect Observer automation metadata and Pulse posture to rules; no autonomous execution without approval.
 
@@ -267,7 +268,8 @@ From `lib/platform/registry.ts` and `docs/KXD-OS-ROADMAP.md`:
 | `KXD-OS-ARCHITECTURE.md` | Full architecture reference |
 | `KXD-OS-PHILOSOPHY.md` | Product vision |
 | `KXD-OS-ROADMAP.md` | Edition 1 progress and next phases |
-| `PHASE-3-CLIENT-RELATIONSHIP-INTELLIGENCE.md` | Phase 3 approved plan (Client & Relationship Intelligence) |
+| `PHASE-3-CLIENT-RELATIONSHIP-INTELLIGENCE.md` | Phase 3 plan (production-complete) |
+| `PHASE-4-MULTI-CLIENT-PORTAL.md` | Phase 4 plan (next active phase) |
 | `KXD-OS-CONSTITUTION.md` | Experience standard |
 | `CLIENT-EXPERIENCE-SYSTEM-ARCHITECTURE.md` | CES architecture |
 | `.cursor/rules/kxd-os-architecture.mdc` | Cursor permanent context |
