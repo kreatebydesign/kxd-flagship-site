@@ -20,6 +20,7 @@ export const OPERATIONS_NAV_MODULE_MAP: Record<OperationsNavId, KxdModuleId> = {
   brain: "brain",
   integrations: "integrations",
   clients: "portfolio",
+  events: "portfolio",
   strategy: "strategy",
   accounts: "portfolio",
   onboarding: "onboarding",

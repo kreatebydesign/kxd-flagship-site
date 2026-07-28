@@ -553,9 +553,21 @@ export function RelationshipIntelligencePanel({
 
       <WorkspaceChapter title="Relationship events">
         <WorkspaceProse>
-          Client-scoped operational engagements. Read-only here — recording and editing
-          events arrive in a later batch. Distinct from Timeline history and Google Calendar.
+          Client-scoped operational engagements. Read-only here — create and edit in the
+          Events workspace. Distinct from Timeline history and Google Calendar.
         </WorkspaceProse>
+        <p className="kxd-os-meta" style={{ marginBottom: "0.75rem" }}>
+          <Link href="/admin/operations/events" className="kxd-os-link-quiet">
+            Open Events workspace →
+          </Link>
+          {" · "}
+          <Link
+            href={`/admin/operations/events/new`}
+            className="kxd-os-link-quiet"
+          >
+            New event →
+          </Link>
+        </p>
         {events.length === 0 ? (
           <WorkspaceEmpty message="No relationship events recorded yet. Activity will appear here once events are logged." />
         ) : (
@@ -577,10 +589,10 @@ export function RelationshipIntelligencePanel({
                     </p>
                   </div>
                   <Link
-                    href={event.href}
+                    href={`/admin/operations/events/${event.id}`}
                     className="kxd-os-link-quiet kxd-os-workspace-inline-link"
                   >
-                    Payload →
+                    Open →
                   </Link>
                 </div>
                 {event.contactNames.length > 0 && (

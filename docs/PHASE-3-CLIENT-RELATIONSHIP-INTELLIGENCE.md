@@ -1,10 +1,10 @@
 # Phase 3 — Client & Relationship Intelligence
 
-**Status:** Batch A published · Batch B implemented (Client Intelligence workspace) — Batches C–E not started  
+**Status:** Batches A–C implemented (Events workspace) — Batches D–E not started  
 **Baseline (planning):** `e97a571515efabec3f47347d3a38133007b7aef0`  
 **Companion:** `docs/KXD-OS-ROADMAP.md`, `docs/KXD-OS-CURRENT-STATE.md`
 
-> Batch A landed collections, migration, and privacy verification. Batch B extends the existing Clients workspace (`/admin/operations/clients/[id]?tab=relationship`) with contacts CRUD and read-only relationship-event context. Standalone Events UI is **not** shipped.
+> Batch A: collections + migration. Batch B: client Relationship tab (contacts CRUD + read-only events). Batch C: standalone `/admin/operations/events` list/detail/create/edit. Batch D navigation refinements and Batch E hardening remain.
 
 ---
 
@@ -168,11 +168,11 @@ Optional non-blocking implementation choice (implementer may proceed with defaul
 
 | Item | Definition |
 |------|------------|
-| **Status** | ✅ Implemented (awaiting review/publication) |
+| **Status** | ✅ Published |
 | **Location** | `/admin/operations/clients/[id]?tab=relationship` inside existing `ClientWorkspaceScreen` |
 | **Outcome** | Operator Clients detail shows relationship intelligence summary, contacts CRUD, and read-only client-scoped relationship events with Payload deep links |
 | **Contacts workflow** | Add / edit / mark active|inactive via `/api/admin/client-relationship/contacts` (+ `[id]` PATCH); client ownership forced from trusted workspace `clientId`; no hard delete; `internalOnly` kept true |
-| **Events in Batch B** | Client-scoped read-only list only — no create/edit/delete, no `/admin/operations/events`, no Events nav |
+| **Events in Batch B** | Client-scoped read-only list; links to Batch C Events workspace for create/edit — no event mutations on the Relationship tab |
 | **Privacy / ownership** | Studio-operator shell + `requirePayloadAdminApi`; portal/restricted staff denied; reads/writes scoped to selected client; forged client reassignment rejected |
 | **Activity** | No activity/audit emission for contact changes (avoids private-field leakage into broad feeds) |
 | **Schema / migration** | None — Batch A schema unchanged |
@@ -181,21 +181,28 @@ Optional non-blocking implementation choice (implementer may proceed with defaul
 | **Dependencies** | Batch A |
 | **Commit boundary** | One commit: Clients workspace intelligence UI + loaders + contact APIs + verify |
 | **Stop conditions** | Theme-system rewrite; portal surface changes; commercial/billing coupling |
-| **Not started** | Batch C standalone Events workspace, Batch D nav/cross-links, Batch E hardening completion |
+| **Not started** | Batch D broader cross-links / permission refinements, Batch E hardening completion |
 
 ### Batch C — Events workspace
 
 | Item | Definition |
 |------|------------|
-| **Outcome** | Authenticated Events list + detail routes with client/contact links and private event intelligence (including dietary/accessibility where operationally relevant) |
-| **Areas** | `app/admin/operations/events/page.tsx`, `app/admin/operations/events/[id]/page.tsx`, new components under `components/admin/operations/events/`, event loaders under `lib/` (additive), Payload deep links |
-| **Dependencies** | Batch A; Batch B preferred for shared presentation patterns |
-| **Schema / migration** | None expected beyond Batch A |
-| **Auth / privacy gates** | Same operator shell; no public routes; no portal modules; no Google Calendar write path |
-| **Verification** | `npm run build`; privacy inventory includes Events routes; confirm scheduling/calendar verify scripts unchanged |
-| **Completion criteria** | Events list/detail usable for operators; client and contact links work; private notes never leave operator surface |
-| **Commit boundary** | One commit: Events workspace routes + UI + loaders |
-| **Stop conditions** | Using `lib/google/calendar` or `lib/scheduling` as the Events store; renaming Timeline to Events; portal exposure |
+| **Status** | ✅ Implemented (awaiting review/publication) |
+| **Route** | `/admin/operations/events` (list), `/admin/operations/events/new` (create), `/admin/operations/events/[id]` (detail/edit) |
+| **Navigation** | Clients group → **Events** (`operations-nav.ts`); page title “Relationship Events” |
+| **Outcome** | Operator Events list + detail with search/filters, create/edit, status workflow, multi-contact association, links to client Relationship tab |
+| **Capabilities** | List (upcoming-then-recent ordering); filters (title, client, status, category, timeframe); create; edit; status planned/completed/cancelled; no hard delete (use cancelled) |
+| **Ownership** | Trusted `clientId` on create; owning client immutable on edit; associated contacts must belong to that client; cross-client contacts rejected |
+| **Batch B link** | Client Relationship tab remains read-only for events; links to Events workspace; events appear in client-scoped context after save |
+| **Privacy** | `requirePayloadAdminPage` + `requirePayloadAdminApi`; `internalOnly` forced true; no portal/public endpoints; no activity emission of private notes |
+| **Separation** | No Calendar sync, Timeline writes, scheduling, reminders, or automation |
+| **Schema / migration** | None — Batch A schema unchanged |
+| **Verification** | `npm run verify:phase3-relationship-events`; Batch A/B verifies; portal auth boundaries; build |
+| **Areas** | `app/admin/operations/events/**`, `components/admin/operations/events/**`, `lib/executive-client-workspace/events-data.ts`, `app/api/admin/client-relationship/events/**`, `form-options`, nav + edition map |
+| **Dependencies** | Batches A–B |
+| **Commit boundary** | One commit: Events workspace routes + UI + loaders + APIs + verify |
+| **Stop conditions** | Using Calendar/scheduling as store; renaming Timeline to Events; portal exposure |
+| **Not started** | Batch D broader connection refinements, Batch E hardening |
 
 ### Batch D — Relationship connections and navigation
 

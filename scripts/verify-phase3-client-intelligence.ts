@@ -59,7 +59,6 @@ function main() {
     "app/api/admin/client-relationship/contacts/[id]/route.ts",
   );
   const pageSrc = read("app/admin/operations/clients/[id]/page.tsx");
-  const nav = read("components/admin/operations/shared/operations-nav.ts");
   const contactsCollection = read("payload/collections/ClientContacts.ts");
   const eventsCollection = read("payload/collections/ClientRelationshipEvents.ts");
   const migrationsIndex = read("migrations/index.ts");
@@ -96,13 +95,8 @@ function main() {
   assert.match(panel, /Relationship events/);
   assert.match(panel, /Read-only/);
   assert.doesNotMatch(panel, /\/api\/admin\/client-relationship\/events/);
-  assert.doesNotMatch(panel, /Add event|Create event|Edit event|Delete event/);
-  console.log("  ✔ relationship events remain read-only in Batch B");
-
-  assert.equal(existsSync(path.join(root, "app/admin/operations/events")), false);
-  assert.doesNotMatch(nav, /\/admin\/operations\/events/);
-  assert.doesNotMatch(nav, /label:\s*"Events"/);
-  console.log("  ✔ no global Events workspace or Events navigation added");
+  assert.doesNotMatch(panel, /Create event|Edit event|Delete event/);
+  console.log("  ✔ relationship events remain read-only in Client Relationship tab");
 
   assert.match(typesSrc, /buildRelationshipIntelligenceSummary/);
   assert.doesNotMatch(typesSrc, /healthScore|sentiment|relationshipScore/);
@@ -180,13 +174,9 @@ function main() {
   }
   console.log("  ✔ Timeline/Calendar/scheduling remain separate from Batch B");
 
-  // Batch C–E signals should not exist yet
-  assert.equal(existsSync(path.join(root, "app/admin/operations/events")), false);
-  assert.doesNotMatch(
-    read("components/admin/operations/shared/operations-nav.ts"),
-    /operations\/events/,
-  );
-  console.log("  ✔ Batch C–E surfaces not started");
+  // Batch B tab remains; standalone Events may exist (Batch C+) — tab must stay read-only.
+  assert.match(panel, /tab=relationship|Relationship intelligence/);
+  console.log("  ✔ Client Relationship tab contract remains intact");
 
   console.log("\nPhase 3 Batch B Client Intelligence verification passed.\n");
 }

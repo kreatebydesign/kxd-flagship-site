@@ -4,6 +4,7 @@ export type OperationsNavId =
   | "command"
   | "today"
   | "clients"
+  | "events"
   | "accounts"
   | "onboarding"
   | "founder"
@@ -76,6 +77,7 @@ export const NAV_GROUPS: OperationsNavGroup[] = [
     items: [
       { id: "genesis", label: "Genesis", href: "/admin/operations/genesis" },
       { id: "clients", label: "Portfolio", href: "/admin/operations/clients" },
+      { id: "events", label: "Events", href: "/admin/operations/events" },
       {
         id: "client-launch-wizard",
         label: "Launch Wizard",
