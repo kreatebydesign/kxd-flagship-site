@@ -7,6 +7,12 @@ import { ExecutiveWorkspaceShell } from "@/components/admin/executive-workspace"
 import { WorkComposerHost } from "@/components/admin/work/composer";
 import { ScheduleWorkHost } from "@/components/admin/work/scheduling";
 import {
+  WebsiteReviewRequestSection,
+  WebsiteReviewSupportingSections,
+  WebsiteReviewWorkPrimaryActions,
+  clientReviewStatusLabel,
+} from "@/components/admin/work/WebsiteReviewWorkDetailSections";
+import {
   formatTimeBudgetHours,
   openWorkComposerForEdit,
   WORK_COMPOSER_UPDATED_EVENT,
@@ -34,6 +40,7 @@ import {
 } from "@/lib/scheduling/workspace";
 import { getWorkStatusActions } from "@/lib/work/transitions";
 import type { WorkListItem, WorkStatus } from "@/lib/work/types";
+import type { WebsiteReviewWorkContext } from "@/lib/work/website-review-context-types";
 
 function formatDateTime(iso: string | null): string | null {
   if (!iso) return null;
@@ -50,6 +57,15 @@ function formatDateTime(iso: string | null): string | null {
   }
 }
 
+function formatActivityLabel(action: string): string {
+  const map: Record<string, string> = {
+    created: "Created",
+    updated: "Updated",
+    "status-changed": "Status changed",
+  };
+  return map[action] ?? action.replace(/-/g, " ");
+}
+
 function MetaRow({ label, value }: { label: string; value: React.ReactNode }) {
   if (value == null || value === "") return null;
   return (
@@ -60,9 +76,21 @@ function MetaRow({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
+function completionActor(work: WorkListItem): string | null {
+  if (work.status !== "completed" && !work.completedAt) return null;
+  const history = [...(work.activityHistory ?? [])].reverse();
+  const entry = history.find(
+    (row) =>
+      row.action === "status-changed" &&
+      /→\s*Completed/i.test(row.detail ?? ""),
+  );
+  return entry?.actor ?? null;
+}
+
 export function WorkDetailClient({
   initialWork,
   currentUser,
+  websiteReviewContext = null,
   calendarEventHtmlLink = null,
   calendarWriteAt = null,
   scheduleLinkId = null,
@@ -73,6 +101,7 @@ export function WorkDetailClient({
 }: {
   initialWork: WorkListItem;
   currentUser?: WorkComposerUserOption | null;
+  websiteReviewContext?: WebsiteReviewWorkContext | null;
   calendarEventHtmlLink?: string | null;
   calendarWriteAt?: string | null;
   scheduleLinkId?: number | null;
@@ -94,6 +123,21 @@ export function WorkDetailClient({
 
   const actions = useMemo(() => getWorkStatusActions(work.status), [work.status]);
   const showSchedule = canShowScheduleWorkAction(work);
+  const hasReviewContext = websiteReviewContext != null;
+  const linkedReview = websiteReviewContext?.status === "linked";
+  const displayTitle = linkedReview
+    ? websiteReviewContext.displayTitle
+    : work.title;
+  const reviewStatusLabel = clientReviewStatusLabel(websiteReviewContext);
+  const locationSummary =
+    linkedReview && websiteReviewContext.location
+      ? [
+          websiteReviewContext.location.pageLabel,
+          websiteReviewContext.location.pagePath,
+        ]
+          .filter(Boolean)
+          .join(" · ") || null
+      : null;
 
   useEffect(() => {
     function onUpdated(e: Event) {
@@ -149,6 +193,7 @@ export function WorkDetailClient({
   const age = formatWorkStateAge(work);
   const budget = formatTimeBudgetHours(work.estimatedEffort);
   const history = [...(work.activityHistory ?? [])].reverse();
+  const completedBy = completionActor(work);
   const showCalendarSync =
     scheduleLinkId != null &&
     (work.schedulingStatus === "scheduled" ||
@@ -159,6 +204,7 @@ export function WorkDetailClient({
     recoveryState,
     syncStatus,
   });
+  const actionsBusy = busyAction != null;
 
   async function checkCalendar() {
     if (scheduleLinkId == null) return;
@@ -218,7 +264,11 @@ export function WorkDetailClient({
   return (
     <KxdShell className="kxd-os-shell--ritual">
       <ExecutiveWorkspaceShell workspaceId="work" includeWorkComposer={false}>
-        <div className="kxd-os-work-detail">
+        <div
+          className={`kxd-os-work-detail${
+            hasReviewContext ? " kxd-os-work-detail--website-review" : ""
+          }`}
+        >
           <header className="kxd-os-work-engine__header kxd-os-work-engine__header--secondary">
             <nav className="kxd-os-work-engine__nav" aria-label="Work Engine">
               <Link href={WORK_ENGINE_HOME}>Work</Link>
@@ -231,192 +281,346 @@ export function WorkDetailClient({
           </header>
 
           <main className="kxd-os-work-detail__main">
-            <p className="kxd-os-work-engine__eyebrow">Work</p>
-            <h1 className="kxd-os-work-detail__title">{work.title}</h1>
+            <p className="kxd-os-work-engine__eyebrow">
+              {hasReviewContext ? "Website Review Work" : "Work"}
+            </p>
+            <h1 className="kxd-os-work-detail__title">{displayTitle}</h1>
 
-            {work.description ? (
+            {linkedReview ? (
+              <div className="kxd-os-work-detail__summary" aria-label="Work summary">
+                <MetaRow
+                  label="Client"
+                  value={
+                    work.clientId != null && work.clientSuccessHref ? (
+                      <Link href={work.clientSuccessHref} className="kxd-os-link-quiet">
+                        {websiteReviewContext.clientName ?? work.clientName}
+                      </Link>
+                    ) : (
+                      websiteReviewContext.clientName ?? work.clientName
+                    )
+                  }
+                />
+                <MetaRow
+                  label="Submitter"
+                  value={
+                    websiteReviewContext.submittedBy
+                      ? `${websiteReviewContext.submittedBy}${
+                          websiteReviewContext.submittedByEmail
+                            ? ` · ${websiteReviewContext.submittedByEmail}`
+                            : ""
+                        }`
+                      : websiteReviewContext.submittedByEmail
+                  }
+                />
+                <MetaRow
+                  label="Submitted"
+                  value={formatDateTime(websiteReviewContext.submittedAt)}
+                />
+                <MetaRow label="Work status" value={WORK_STATUS_LABELS[work.status]} />
+                <MetaRow label="Client review status" value={reviewStatusLabel} />
+                <MetaRow label="Assigned" value={assignee} />
+                <MetaRow label="Priority" value={WORK_PRIORITY_LABELS[work.priority]} />
+                <MetaRow label="Page" value={locationSummary} />
+                {reviewStatusLabel &&
+                reviewStatusLabel.toLowerCase().includes("complete") &&
+                work.status !== "completed" &&
+                work.status !== "archived" ? (
+                  <p className="kxd-os-work-detail__status-note">
+                    Client review and Work Engine statuses are separate. Completing
+                    the review does not complete this work item.
+                  </p>
+                ) : null}
+              </div>
+            ) : work.description ? (
               <p className="kxd-os-work-detail__description">{work.description}</p>
+            ) : work.summary ? (
+              <p className="kxd-os-work-detail__description">{work.summary}</p>
             ) : (
               <p className="kxd-os-work-detail__description kxd-os-work-detail__description--empty">
                 No description.
               </p>
             )}
 
-            <div className="kxd-os-work-detail__actions">
-              <button
-                type="button"
-                className="kxd-os-work-detail__edit"
-                onClick={() => openWorkComposerForEdit(work)}
-              >
-                Edit
-              </button>
-              {showSchedule ? (
-                <button
-                  type="button"
-                  className="kxd-os-work-detail__action kxd-os-work-detail__action--schedule"
-                  disabled={busyAction != null}
-                  onClick={() => openScheduleWork(work.id)}
-                >
-                  Schedule Work
-                </button>
+            <div className="kxd-os-work-detail__actions" aria-label="Work actions">
+              {websiteReviewContext ? (
+                <WebsiteReviewWorkPrimaryActions context={websiteReviewContext} />
               ) : null}
-              {actions.map((action) => (
+
+              <div
+                className="kxd-os-work-detail__action-group"
+                aria-label="Editing and scheduling"
+              >
                 <button
-                  key={action.id}
                   type="button"
-                  className="kxd-os-work-detail__action"
-                  disabled={busyAction != null}
-                  onClick={() => void runTransition(action.status, action.id)}
+                  className="kxd-os-work-detail__edit"
+                  onClick={() => openWorkComposerForEdit(work)}
                 >
-                  {busyAction === action.id ? "…" : action.label}
+                  Edit
                 </button>
-              ))}
+                {showSchedule ? (
+                  <button
+                    type="button"
+                    className="kxd-os-work-detail__action kxd-os-work-detail__action--schedule"
+                    disabled={actionsBusy}
+                    aria-busy={busyAction === "schedule" || undefined}
+                    onClick={() => openScheduleWork(work.id)}
+                  >
+                    Schedule Work
+                  </button>
+                ) : null}
+              </div>
+
+              {actions.length > 0 ? (
+                <div
+                  className="kxd-os-work-detail__action-group kxd-os-work-detail__action-group--workflow"
+                  aria-label="Workflow status"
+                >
+                  {actions.map((action) => (
+                    <button
+                      key={action.id}
+                      type="button"
+                      className="kxd-os-work-detail__action"
+                      disabled={actionsBusy}
+                      aria-busy={busyAction === action.id || undefined}
+                      onClick={() => void runTransition(action.status, action.id)}
+                    >
+                      {busyAction === action.id ? "…" : action.label}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
             </div>
 
             {error ? <p className="kxd-os-work-composer__error">{error}</p> : null}
 
-            <section className="kxd-os-work-detail__meta" aria-label="Work details">
-              <MetaRow
-                label="Client"
-                value={
-                  work.clientId != null && work.clientSuccessHref ? (
-                    <Link href={work.clientSuccessHref} className="kxd-os-link-quiet">
-                      {work.clientName}
-                    </Link>
-                  ) : (
-                    work.clientName
-                  )
-                }
-              />
-              <MetaRow label="Project" value={work.internalProject} />
-              <MetaRow label="Status" value={WORK_STATUS_LABELS[work.status]} />
-              <MetaRow label="Priority" value={WORK_PRIORITY_LABELS[work.priority]} />
-              <MetaRow label="Due date" value={due} />
-              <MetaRow label="Start date" value={start} />
-              <MetaRow label="Planned for" value={formatWorkDue(work.plannedForDate)} />
-              <MetaRow
-                label="Scheduling"
-                value={SCHEDULING_STATUS_LABELS[work.schedulingStatus]}
-              />
-              <MetaRow
-                label="Proposed window"
-                value={
-                  work.scheduledStart && work.scheduledEnd
-                    ? `${formatDateTime(work.scheduledStart)} – ${formatDateTime(work.scheduledEnd)}`
-                    : null
-                }
-              />
-              {work.schedulingStatus === "scheduled" ||
-              work.schedulingStatus === "sync_error" ||
-              showCalendarSync ? (
-                <>
-                  <MetaRow label="Calendar" value="Matt" />
-                  {syncStatus ? (
-                    <MetaRow
-                      label="Calendar sync"
-                      value={humanSyncHealth({
-                        syncStatus,
-                        recoveryState,
-                        externalChangeClass,
-                      })}
-                    />
-                  ) : (
-                    <MetaRow label="Google Calendar" value="Linked" />
-                  )}
-                  {lastSyncAt ? (
-                    <MetaRow
-                      label="Last checked"
-                      value={formatDateTime(lastSyncAt)}
-                    />
-                  ) : null}
-                  {calendarWriteAt ? (
-                    <MetaRow
-                      label="Calendar created"
-                      value={formatDateTime(calendarWriteAt)}
-                    />
-                  ) : null}
-                  {calendarEventHtmlLink ? (
-                    <MetaRow
-                      label="Open event"
-                      value={
-                        <a
-                          href={calendarEventHtmlLink}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="kxd-os-link-quiet"
-                        >
-                          Open in Google Calendar
-                        </a>
-                      }
-                    />
-                  ) : null}
-                  {showCalendarSync ? (
-                    <MetaRow
-                      label="Synchronize"
-                      value={
-                        <button
-                          type="button"
-                          className="kxd-os-link-quiet"
-                          disabled={busyAction != null}
-                          onClick={() => void checkCalendar()}
-                          style={{
-                            background: "none",
-                            border: "none",
-                            padding: 0,
-                            cursor: busyAction != null ? "default" : "pointer",
-                            font: "inherit",
-                            color: "inherit",
-                          }}
-                        >
-                          {busyAction === "sync"
-                            ? "Checking…"
-                            : syncStatus === "error" ||
-                                recoveryState === "missing_remote" ||
-                                recoveryState === "cancelled_remote"
-                              ? "Retry Sync"
-                              : "Check Calendar"}
-                        </button>
-                      }
-                    />
-                  ) : null}
-                  {syncMessage ? (
-                    <MetaRow label="Sync result" value={syncMessage} />
-                  ) : null}
-                  {recoveryNote ? (
-                    <MetaRow label="Recovery" value={recoveryNote} />
-                  ) : null}
-                </>
-              ) : null}
-              <MetaRow label="Assigned" value={assignee} />
-              <MetaRow label="Created by" value={work.createdBy} />
-              <MetaRow label="Time budget" value={budget} />
-              <MetaRow
-                label="Tags"
-                value={work.tags.length ? work.tags.join(", ") : null}
-              />
-              <MetaRow label="Created" value={formatDateTime(work.createdAt)} />
-              <MetaRow label="Updated" value={formatDateTime(work.updatedAt)} />
-              <MetaRow label="Completed" value={formatDateTime(work.completedAt)} />
-              <MetaRow label="State age" value={age} />
+            {websiteReviewContext ? (
+              <WebsiteReviewRequestSection context={websiteReviewContext} />
+            ) : null}
+
+            {websiteReviewContext ? (
+              <WebsiteReviewSupportingSections context={websiteReviewContext} />
+            ) : null}
+
+            <section
+              className="kxd-os-work-detail__section kxd-os-work-detail__section--compact"
+              aria-labelledby="work-status-heading"
+            >
+              <h2 id="work-status-heading" className="kxd-os-work-detail__section-title">
+                Work Status &amp; Assignment
+              </h2>
+              <div className="kxd-os-work-detail__meta" aria-label="Work details">
+                {!linkedReview ? (
+                  <MetaRow
+                    label="Client"
+                    value={
+                      work.clientId != null && work.clientSuccessHref ? (
+                        <Link href={work.clientSuccessHref} className="kxd-os-link-quiet">
+                          {work.clientName}
+                        </Link>
+                      ) : (
+                        work.clientName
+                      )
+                    }
+                  />
+                ) : null}
+                <MetaRow label="Project" value={work.internalProject} />
+                <MetaRow label="Work status" value={WORK_STATUS_LABELS[work.status]} />
+                {reviewStatusLabel ? (
+                  <MetaRow label="Client review status" value={reviewStatusLabel} />
+                ) : null}
+                <MetaRow label="Priority" value={WORK_PRIORITY_LABELS[work.priority]} />
+                <MetaRow label="Due date" value={due} />
+                <MetaRow label="Start date" value={start} />
+                <MetaRow label="Planned for" value={formatWorkDue(work.plannedForDate)} />
+                <MetaRow
+                  label="Scheduling"
+                  value={SCHEDULING_STATUS_LABELS[work.schedulingStatus]}
+                />
+                <MetaRow
+                  label="Proposed window"
+                  value={
+                    work.scheduledStart && work.scheduledEnd
+                      ? `${formatDateTime(work.scheduledStart)} – ${formatDateTime(work.scheduledEnd)}`
+                      : null
+                  }
+                />
+                {work.schedulingStatus === "scheduled" ||
+                work.schedulingStatus === "sync_error" ||
+                showCalendarSync ? (
+                  <>
+                    <MetaRow label="Calendar" value="Matt" />
+                    {syncStatus ? (
+                      <MetaRow
+                        label="Calendar sync"
+                        value={humanSyncHealth({
+                          syncStatus,
+                          recoveryState,
+                          externalChangeClass,
+                        })}
+                      />
+                    ) : (
+                      <MetaRow label="Google Calendar" value="Linked" />
+                    )}
+                    {lastSyncAt ? (
+                      <MetaRow
+                        label="Last checked"
+                        value={formatDateTime(lastSyncAt)}
+                      />
+                    ) : null}
+                    {calendarWriteAt ? (
+                      <MetaRow
+                        label="Calendar created"
+                        value={formatDateTime(calendarWriteAt)}
+                      />
+                    ) : null}
+                    {calendarEventHtmlLink ? (
+                      <MetaRow
+                        label="Open event"
+                        value={
+                          <a
+                            href={calendarEventHtmlLink}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="kxd-os-link-quiet"
+                          >
+                            Open in Google Calendar
+                          </a>
+                        }
+                      />
+                    ) : null}
+                    {showCalendarSync ? (
+                      <MetaRow
+                        label="Synchronize"
+                        value={
+                          <button
+                            type="button"
+                            className="kxd-os-link-quiet"
+                            disabled={actionsBusy}
+                            onClick={() => void checkCalendar()}
+                            style={{
+                              background: "none",
+                              border: "none",
+                              padding: 0,
+                              cursor: actionsBusy ? "default" : "pointer",
+                              font: "inherit",
+                              color: "inherit",
+                            }}
+                          >
+                            {busyAction === "sync"
+                              ? "Checking…"
+                              : syncStatus === "error" ||
+                                  recoveryState === "missing_remote" ||
+                                  recoveryState === "cancelled_remote"
+                                ? "Retry Sync"
+                                : "Check Calendar"}
+                          </button>
+                        }
+                      />
+                    ) : null}
+                    {syncMessage ? (
+                      <MetaRow label="Sync result" value={syncMessage} />
+                    ) : null}
+                    {recoveryNote ? (
+                      <MetaRow label="Recovery" value={recoveryNote} />
+                    ) : null}
+                  </>
+                ) : null}
+                <MetaRow label="Assigned" value={assignee} />
+                <MetaRow label="Created by" value={work.createdBy} />
+                <MetaRow label="Time budget" value={budget} />
+                <MetaRow
+                  label="Tags"
+                  value={work.tags.length ? work.tags.join(", ") : null}
+                />
+                <MetaRow label="Created" value={formatDateTime(work.createdAt)} />
+                <MetaRow label="Updated" value={formatDateTime(work.updatedAt)} />
+                <MetaRow label="State age" value={age} />
+                {work.source === "website-review" && work.sourceId ? (
+                  <MetaRow label="Source" value={`Website Review #${work.sourceId}`} />
+                ) : null}
+              </div>
             </section>
 
-            <section className="kxd-os-work-detail__history" aria-label="Activity history">
-              <h2 className="kxd-os-work-engine__section-title">Activity</h2>
-              {history.length === 0 ? (
-                <p className="kxd-os-meta">No internal activity recorded yet.</p>
+            <section
+              className="kxd-os-work-detail__section kxd-os-work-detail__section--compact"
+              aria-labelledby="work-notes-heading"
+            >
+              <h2 id="work-notes-heading" className="kxd-os-work-detail__section-title">
+                Internal Notes
+              </h2>
+              <p className="kxd-os-work-detail__hint">
+                Internal only — not visible to the client. Edit via the Work composer.
+              </p>
+              {work.notes ? (
+                <div className="kxd-os-work-detail__prose">
+                  <p>{work.notes}</p>
+                </div>
               ) : (
-                <ul className="kxd-os-work-detail__history-list">
+                <p className="kxd-os-work-detail__fallback">No internal notes yet.</p>
+              )}
+            </section>
+
+            {(work.status === "completed" || work.completedAt) && (
+              <section
+                className="kxd-os-work-detail__section kxd-os-work-detail__section--compact"
+                aria-labelledby="work-completion-heading"
+              >
+                <h2
+                  id="work-completion-heading"
+                  className="kxd-os-work-detail__section-title"
+                >
+                  Completion Summary
+                </h2>
+                <div className="kxd-os-work-detail__meta" aria-label="Completion">
+                  <MetaRow label="Work status" value={WORK_STATUS_LABELS[work.status]} />
+                  <MetaRow
+                    label="Completed"
+                    value={formatDateTime(work.completedAt)}
+                  />
+                  <MetaRow label="Completed by" value={completedBy} />
+                </div>
+                {work.notes && work.status === "completed" ? (
+                  <div className="kxd-os-work-detail__prose">
+                    <p className="kxd-os-work-detail__hint">Work notes at completion</p>
+                    <p>{work.notes}</p>
+                  </div>
+                ) : null}
+              </section>
+            )}
+
+            <section
+              className="kxd-os-work-detail__section kxd-os-work-detail__section--compact kxd-os-work-detail__section--last"
+              aria-label="Work activity"
+            >
+              <h2 className="kxd-os-work-detail__section-title">Work Activity</h2>
+              {history.length === 0 ? (
+                <p className="kxd-os-work-detail__fallback">
+                  No internal activity recorded yet.
+                </p>
+              ) : (
+                <ol className="kxd-os-work-detail__timeline">
                   {history.map((entry, i) => (
-                    <li key={`${entry.at}-${entry.action}-${i}`}>
-                      <p className="kxd-os-body">{entry.action}</p>
-                      <p className="kxd-os-meta">
-                        {formatDateTime(entry.at)}
-                        {entry.actor ? ` · ${entry.actor}` : ""}
-                        {entry.detail ? ` · ${entry.detail}` : ""}
+                    <li
+                      key={`${entry.at}-${entry.action}-${i}`}
+                      className="kxd-os-work-detail__timeline-item"
+                    >
+                      <p className="kxd-os-work-detail__timeline-event">
+                        {formatActivityLabel(entry.action)}
                       </p>
+                      <p className="kxd-os-work-detail__timeline-meta">
+                        <time dateTime={entry.at}>
+                          {formatDateTime(entry.at)}
+                        </time>
+                        {entry.actor ? ` · ${entry.actor}` : ""}
+                      </p>
+                      {entry.detail ? (
+                        <p className="kxd-os-work-detail__timeline-note">
+                          {entry.detail}
+                        </p>
+                      ) : null}
                     </li>
                   ))}
-                </ul>
+                </ol>
               )}
             </section>
           </main>

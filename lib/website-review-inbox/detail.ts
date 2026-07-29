@@ -10,6 +10,7 @@ import { WEBSITE_WORKSPACE_EXPERIENCE_MODULE } from "@/lib/ces/modules/website-w
 import { isWebsiteReviewImageMime } from "@/lib/ces/modules/website-review/attachments";
 import type { WebsiteReviewPageContext } from "@/lib/ces/modules/website-review/types";
 import { findWorkBySource } from "@/lib/work/integration/lookup";
+import { formatVisualAnchorSummary, workEngineDetailUrl } from "@/lib/work/website-review-context-helpers";
 import type {
   ReviewWorkspaceAttachment,
   ReviewWorkspaceDetail,
@@ -50,7 +51,13 @@ function extractRequestBody(doc: AnyDoc): string {
   const bodyLines: string[] = [];
   for (let i = bodyStart + 1; i < lines.length; i++) {
     const line = lines[i] ?? "";
-    if (line.startsWith("Location:") || line.startsWith("Page URL:")) break;
+    if (
+      line.startsWith("Location:") ||
+      line.startsWith("Page URL:") ||
+      line.startsWith("Visual anchor:")
+    ) {
+      break;
+    }
     bodyLines.push(line);
   }
 
@@ -61,6 +68,11 @@ function buildLocation(doc: AnyDoc): ReviewWorkspaceLocation {
   const reviewContext = (doc.reviewContext as WebsiteReviewPageContext | null | undefined) ?? {};
   const pageContext = doc.pageContext as string | null | undefined;
   const resolved = resolveReviewPageLocation(reviewContext, pageContext);
+  const markerNumber =
+    typeof reviewContext.markerNumber === "number" &&
+    Number.isFinite(reviewContext.markerNumber)
+      ? reviewContext.markerNumber
+      : null;
 
   return {
     pageLabel: resolved.pageLabel,
@@ -68,6 +80,9 @@ function buildLocation(doc: AnyDoc): ReviewWorkspaceLocation {
     pagePath: resolved.pagePath,
     pageUrl: resolved.pageUrl ?? reviewContext.pageUrl ?? null,
     display: resolved.display,
+    markerNumber,
+    visualAnchor: formatVisualAnchorSummary(reviewContext.reviewAnchor ?? null),
+    source: reviewContext.source ? String(reviewContext.source) : null,
   };
 }
 
@@ -171,7 +186,7 @@ export async function getReviewWorkspace(
       ? {
           workId: workLink.workId,
           workNumber: workLink.workNumber ?? `WK-${String(workLink.workId).padStart(6, "0")}`,
-          adminUrl: `/admin/collections/work/${workLink.workId}`,
+          adminUrl: workEngineDetailUrl(workLink.workId),
         }
       : null,
   };

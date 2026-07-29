@@ -15,6 +15,7 @@ import {
   staffActorFromUser,
 } from "@/lib/staff";
 import { getWorkItem } from "@/lib/work/services";
+import { getWebsiteReviewWorkContext } from "@/lib/work/website-review-context";
 
 export const dynamic = "force-dynamic";
 
@@ -41,14 +42,17 @@ export default async function WorkDetailPage({
     redirect(STAFF_HOME_PATH);
   }
 
-  const scheduleLink =
+  const [scheduleLink, websiteReviewContext] = await Promise.all([
     work.activeScheduleLinkId != null
-      ? await getSchedulingProposalDetail(work.activeScheduleLinkId)
-      : null;
+      ? getSchedulingProposalDetail(work.activeScheduleLinkId)
+      : Promise.resolve(null),
+    getWebsiteReviewWorkContext(work),
+  ]);
 
   return (
     <WorkDetailClient
       initialWork={work}
+      websiteReviewContext={websiteReviewContext}
       calendarEventHtmlLink={
         scheduleLink?.link.googleEventHtmlLink ?? null
       }

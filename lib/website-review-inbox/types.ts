@@ -53,11 +53,18 @@ export interface ReviewWorkspaceLocation {
   pagePath: string | null;
   pageUrl: string | null;
   display: string | null;
+  /** Visual pin number when captured via visual review (page-scoped). */
+  markerNumber?: number | null;
+  /** Human-readable viewport / coordinate summary when an anchor exists. */
+  visualAnchor?: string | null;
+  /** How page context was captured: manual | review-url | visual-review. */
+  source?: string | null;
 }
 
 export interface ReviewWorkEngineLink {
   workId: number;
   workNumber: string;
+  /** Canonical OS Work Engine detail URL. */
   adminUrl: string;
 }
 

@@ -37,6 +37,7 @@
     "verify:experience-feedback": "tsx scripts/verify-experience-feedback.ts",
     "verify:website-review-upload": "tsx scripts/verify-website-review-upload.ts",
     "verify:website-review-page-location": "tsx scripts/verify-website-review-page-location.ts",
+    "verify:website-review-work-detail": "tsx scripts/verify-website-review-work-detail.ts",
     "verify:portal-date-hydration": "tsx scripts/verify-portal-date-hydration.ts",
     "verify:staff-experience": "tsx scripts/verify-staff-experience.ts",
     "verify:review-inbox-bulk-complete": "tsx scripts/verify-review-inbox-bulk-complete.ts",

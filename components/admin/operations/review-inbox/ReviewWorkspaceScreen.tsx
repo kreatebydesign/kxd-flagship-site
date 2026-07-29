@@ -321,6 +321,18 @@ export function ReviewWorkspaceScreen({ review: initialReview }: ReviewWorkspace
                     </dd>
                   </div>
                 ) : null}
+                {review.location.markerNumber != null ? (
+                  <div>
+                    <dt>Marker</dt>
+                    <dd>Pin #{review.location.markerNumber}</dd>
+                  </div>
+                ) : null}
+                {review.location.visualAnchor ? (
+                  <div>
+                    <dt>Visual marker</dt>
+                    <dd>{review.location.visualAnchor}</dd>
+                  </div>
+                ) : null}
               </dl>
             </section>
 

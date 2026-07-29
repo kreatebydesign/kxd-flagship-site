@@ -6,6 +6,7 @@ import type { WorkCategory, WorkPriority } from "../types";
 import { findWorkBySource, mergeWorkMetadata } from "../integration/lookup";
 import { spawnWork } from "../integration/spawn";
 import type { WorkSourceLookupResult } from "../integration/lookup";
+import { workEngineDetailUrl } from "../website-review-context-helpers";
 
 export interface SpawnWorkFromWebsiteReviewInput {
   reviewId: number;
@@ -36,12 +37,16 @@ function mapReviewPriority(priority: string): WorkPriority {
 
 function buildWorkTitle(review: ReviewWorkspaceDetail, override?: string): string {
   if (override?.trim()) return override.trim();
+  const specificTitle = review.title.trim();
+  if (specificTitle && specificTitle !== "Website revision" && specificTitle !== "Website update") {
+    return specificTitle;
+  }
   const locationLabel =
     review.location.pageLabel ?? review.location.display ?? review.location.pagePath;
-  if (locationLabel) {
+  if (locationLabel && locationLabel !== "Page not specified") {
     return `Website revision · ${locationLabel}`;
   }
-  return review.title.trim() || "Website revision";
+  return specificTitle || "Website revision";
 }
 
 function buildWorkSummary(review: ReviewWorkspaceDetail): string {
@@ -120,7 +125,7 @@ export async function spawnWorkFromWebsiteReview(
       workId: existing.workId,
       workNumber: existing.workNumber ?? `WK-${String(existing.workId).padStart(6, "0")}`,
       created: false,
-      adminUrl: `/admin/collections/work/${existing.workId}`,
+      adminUrl: workEngineDetailUrl(existing.workId),
     };
   }
 
@@ -149,6 +154,6 @@ export async function spawnWorkFromWebsiteReview(
     workId: spawned.workId,
     workNumber: spawned.workNumber,
     created: spawned.created,
-    adminUrl: `/admin/collections/work/${spawned.workId}`,
+    adminUrl: workEngineDetailUrl(spawned.workId),
   };
 }
