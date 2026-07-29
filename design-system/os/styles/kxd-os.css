@@ -6995,6 +6995,28 @@ a.kxd-os-platform-subsystem-card__title:hover {
   cursor: pointer;
 }
 
+.kxd-os-review-complete__option {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--kxd-os-space-3);
+  margin: var(--kxd-os-space-3) 0;
+  font-size: 0.9375rem;
+  color: var(--kxd-os-text-primary);
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.kxd-os-review-complete__option input {
+  margin-top: 0.2rem;
+}
+
+.kxd-os-review-complete__note {
+  margin: var(--kxd-os-space-2) 0 0;
+  font-size: 0.875rem;
+  color: var(--kxd-os-text-secondary);
+  line-height: 1.45;
+}
+
 .kxd-os-review-inbox-bulk__checkbox:disabled {
   cursor: not-allowed;
   opacity: 0.45;

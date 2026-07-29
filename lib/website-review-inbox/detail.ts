@@ -9,8 +9,10 @@ import { resolveWebsiteReviewTargetUrl } from "@/lib/ces/modules/website-review/
 import { WEBSITE_WORKSPACE_EXPERIENCE_MODULE } from "@/lib/ces/modules/website-workspace/constants";
 import { isWebsiteReviewImageMime } from "@/lib/ces/modules/website-review/attachments";
 import type { WebsiteReviewPageContext } from "@/lib/ces/modules/website-review/types";
-import { findWorkBySource } from "@/lib/work/integration/lookup";
-import { formatVisualAnchorSummary, workEngineDetailUrl } from "@/lib/work/website-review-context-helpers";
+import {
+  formatVisualAnchorSummary,
+} from "@/lib/work/website-review-context-helpers";
+import { inspectLinkedWorkForReview } from "./linked-work";
 import type {
   ReviewWorkspaceAttachment,
   ReviewWorkspaceDetail,
@@ -146,14 +148,31 @@ export async function getReviewWorkspace(
   const clientId = resolveId(doc.client);
   if (clientId == null) return null;
 
-  const [attachments, timeline, workLink, clientWebsiteUrl] = await Promise.all([
+  const [attachments, timeline, linkedWork, clientWebsiteUrl] = await Promise.all([
     loadAttachments(requestId),
     loadWebsiteReviewTimeline(clientId, requestId, doc),
-    findWorkBySource(clientId, "website-review", String(requestId)),
+    inspectLinkedWorkForReview(requestId, clientId),
     resolveWebsiteReviewTargetUrl(clientId),
   ]);
 
   const id = doc.id as number;
+  const workEngine =
+    linkedWork.workId != null &&
+    linkedWork.adminUrl &&
+    (linkedWork.eligibility === "eligible" ||
+      linkedWork.eligibility === "already_complete" ||
+      linkedWork.eligibility === "archived")
+      ? {
+          workId: linkedWork.workId,
+          workNumber:
+            linkedWork.workNumber ??
+            `WK-${String(linkedWork.workId).padStart(6, "0")}`,
+          adminUrl: linkedWork.adminUrl,
+          status: linkedWork.workStatus ?? "new",
+          statusLabel: linkedWork.workStatusLabel ?? "Inbox",
+          completionEligible: linkedWork.eligibility === "eligible",
+        }
+      : null;
 
   return {
     id,
@@ -182,13 +201,7 @@ export async function getReviewWorkspace(
       : `/portal/website-review/${id}`,
     clientCommandUrl: `/admin/operations/client-command/${clientId}`,
     workspaceUrl: `/admin/operations/review-inbox/${id}`,
-    workEngine: workLink
-      ? {
-          workId: workLink.workId,
-          workNumber: workLink.workNumber ?? `WK-${String(workLink.workId).padStart(6, "0")}`,
-          adminUrl: workEngineDetailUrl(workLink.workId),
-        }
-      : null,
+    workEngine,
   };
 }
 

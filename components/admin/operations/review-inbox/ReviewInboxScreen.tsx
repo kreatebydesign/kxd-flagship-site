@@ -24,13 +24,19 @@ import {
   type ReviewInboxBulkCompleteResult,
 } from "@/lib/website-review-inbox/bulk-eligibility";
 import {
+  formatLinkedWorkResultLine,
+  type LinkedWorkCounts,
+} from "@/lib/website-review-inbox/linked-work-types";
+import {
   REVIEW_INBOX_OPEN_STATUSES,
   REVIEW_INBOX_STATUS_OPTIONS,
   reviewInboxStatusOption,
 } from "@/lib/website-review-inbox/status";
-import type { ReviewInboxData, ReviewInboxItem, ReviewInboxRequestStatus } from "@/lib/website-review-inbox/types";
+import type { ReviewInboxData, ReviewInboxItem, ReviewInboxRequestStatus, ReviewWorkEngineLink } from "@/lib/website-review-inbox/types";
+import { ReviewCompleteConfirmDialog } from "./ReviewCompleteConfirmDialog";
 import { ReviewDeleteControl } from "./ReviewDeleteControl";
 import { ReviewInboxBulkConfirmDialog } from "./ReviewInboxBulkConfirmDialog";
+import { ReviewReconcileLinkedWorkDialog } from "./ReviewReconcileLinkedWorkDialog";
 
 function fmtDate(iso: string): string {
   return new Date(iso).toLocaleDateString("en-US", {
@@ -74,6 +80,32 @@ export function ReviewInboxScreen({ data: initialData }: ReviewInboxScreenProps)
   const [bulkError, setBulkError] = useState<string | null>(null);
   const [bulkDetailLines, setBulkDetailLines] = useState<string[]>([]);
   const [batchOperationId, setBatchOperationId] = useState<string | null>(null);
+  const [completeLinkedWork, setCompleteLinkedWork] = useState(true);
+  const [linkedWorkPreview, setLinkedWorkPreview] = useState<LinkedWorkCounts | null>(
+    null,
+  );
+  const [linkedWorkPreviewLoading, setLinkedWorkPreviewLoading] = useState(false);
+  const [reconcileOpen, setReconcileOpen] = useState(false);
+  const [reconcilePreview, setReconcilePreview] = useState<LinkedWorkCounts | null>(
+    null,
+  );
+  const [reconcilePreviewLoading, setReconcilePreviewLoading] = useState(false);
+  const [reconcileSubmitting, setReconcileSubmitting] = useState(false);
+  const [reconcileError, setReconcileError] = useState<string | null>(null);
+  const [individualCompleteItem, setIndividualCompleteItem] =
+    useState<ReviewInboxItem | null>(null);
+  const [individualCompleteOpen, setIndividualCompleteOpen] = useState(false);
+  const [individualLinkedWork, setIndividualLinkedWork] =
+    useState<ReviewWorkEngineLink | null>(null);
+  const [individualLinkedWorkLoading, setIndividualLinkedWorkLoading] =
+    useState(false);
+  const [individualCompleteLinkedWork, setIndividualCompleteLinkedWork] =
+    useState(true);
+  const [individualCompleteSubmitting, setIndividualCompleteSubmitting] =
+    useState(false);
+  const [individualCompleteError, setIndividualCompleteError] = useState<
+    string | null
+  >(null);
 
   useEffect(() => {
     if (searchParams.get("deleted") !== "1") return;
@@ -108,12 +140,88 @@ export function ReviewInboxScreen({ data: initialData }: ReviewInboxScreenProps)
     [visibleItems, selectedIds],
   );
 
+  const selectedBulkEligibleCount = useMemo(
+    () => selectedVisibleItems.filter((item) => isBulkCompleteEligibleItem(item)).length,
+    [selectedVisibleItems],
+  );
+
+  const selectedCompletedIds = useMemo(
+    () => selectedVisibleItems.filter((item) => item.status === "complete").map((i) => i.id),
+    [selectedVisibleItems],
+  );
+
   const selectedCount = selectedIds.size;
   const selectAllState = selectAllEligibleState(eligibleVisibleIds, selectedIds);
   const clientBreakdown = useMemo(
     () => clientBreakdownForSelection(visibleItems, selectedIds),
     [visibleItems, selectedIds],
   );
+
+  async function loadBulkLinkedWorkPreview(ids: number[]) {
+    setLinkedWorkPreviewLoading(true);
+    setLinkedWorkPreview(null);
+    try {
+      const res = await fetch("/api/admin/review-inbox/bulk-complete", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ids,
+          preview: true,
+        }),
+      });
+      const body = (await res.json()) as {
+        ok?: boolean;
+        linkedWork?: LinkedWorkCounts;
+        error?: string;
+      };
+      if (!res.ok || !body.ok || !body.linkedWork) {
+        setBulkError(body.error ?? "Could not preview linked Work.");
+        setLinkedWorkPreview(null);
+        return;
+      }
+      setLinkedWorkPreview(body.linkedWork);
+      setCompleteLinkedWork(body.linkedWork.eligible > 0);
+    } catch {
+      setBulkError("Could not preview linked Work.");
+      setLinkedWorkPreview(null);
+    } finally {
+      setLinkedWorkPreviewLoading(false);
+    }
+  }
+
+  async function loadReconcilePreview(ids: number[]) {
+    setReconcilePreviewLoading(true);
+    setReconcilePreview(null);
+    try {
+      const res = await fetch("/api/admin/review-inbox/reconcile-linked-work", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ids,
+          dryRun: true,
+        }),
+      });
+      const body = (await res.json()) as {
+        ok?: boolean;
+        success?: boolean;
+        linkedWork?: LinkedWorkCounts;
+        error?: string;
+      };
+      if (!res.ok || !(body.ok || body.success) || !body.linkedWork) {
+        setReconcileError(body.error ?? "Could not preview reconciliation.");
+        setReconcilePreview(null);
+        return;
+      }
+      setReconcilePreview(body.linkedWork);
+    } catch {
+      setReconcileError("Could not preview reconciliation.");
+      setReconcilePreview(null);
+    } finally {
+      setReconcilePreviewLoading(false);
+    }
+  }
 
   useEffect(() => {
     if (selectAllRef.current) {
@@ -124,7 +232,7 @@ export function ReviewInboxScreen({ data: initialData }: ReviewInboxScreenProps)
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (event.key !== "Escape") return;
-      if (confirmOpen || bulkSubmitting) return;
+      if (confirmOpen || reconcileOpen || bulkSubmitting || reconcileSubmitting) return;
       if (selectedIds.size === 0) return;
       const target = event.target as HTMLElement | null;
       if (
@@ -143,7 +251,7 @@ export function ReviewInboxScreen({ data: initialData }: ReviewInboxScreenProps)
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [confirmOpen, bulkSubmitting, selectedIds.size]);
+  }, [confirmOpen, reconcileOpen, bulkSubmitting, reconcileSubmitting, selectedIds.size]);
 
   function clearSelection(message?: string) {
     setSelectedIds(new Set());
@@ -160,8 +268,12 @@ export function ReviewInboxScreen({ data: initialData }: ReviewInboxScreenProps)
     }
   }
 
+  function canSelectItem(item: ReviewInboxItem): boolean {
+    return isBulkCompleteEligibleItem(item) || item.status === "complete";
+  }
+
   function toggleRow(item: ReviewInboxItem, checked: boolean) {
-    if (!isBulkCompleteEligibleItem(item)) return;
+    if (!canSelectItem(item)) return;
     setSelectionNotice(null);
     setSelectedIds((prev) => {
       const next = new Set(prev);
@@ -202,7 +314,71 @@ export function ReviewInboxScreen({ data: initialData }: ReviewInboxScreenProps)
     });
   }
 
-  async function updateStatus(item: ReviewInboxItem, status: ReviewInboxRequestStatus) {
+  async function openIndividualCompleteConfirm(item: ReviewInboxItem) {
+    setIndividualCompleteItem(item);
+    setIndividualCompleteOpen(true);
+    setIndividualCompleteError(null);
+    setIndividualLinkedWork(null);
+    setIndividualCompleteLinkedWork(true);
+    setIndividualLinkedWorkLoading(true);
+
+    try {
+      const res = await fetch("/api/admin/review-inbox/bulk-complete", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: [item.id], preview: true }),
+      });
+      if (res.status === 401) {
+        const returnPath = window.location.pathname;
+        window.location.href = `/admin/login?redirect=${encodeURIComponent(returnPath)}`;
+        return;
+      }
+      const body = (await res.json()) as {
+        ok?: boolean;
+        rows?: Array<{
+          eligibility?: string;
+          workId?: number | null;
+          workNumber?: string | null;
+          workStatusLabel?: string | null;
+          adminUrl?: string | null;
+        }>;
+        error?: string;
+      };
+      if (!res.ok || !body.ok) {
+        throw new Error(body.error ?? "Could not look up linked Work.");
+      }
+      const row = body.rows?.[0];
+      if (row?.workId != null && row.workId > 0) {
+        const eligible = row.eligibility === "eligible";
+        setIndividualLinkedWork({
+          workId: row.workId,
+          workNumber: row.workNumber ?? `WK-${String(row.workId).padStart(6, "0")}`,
+          adminUrl: `/admin/work/${row.workId}`,
+          statusLabel: row.workStatusLabel ?? undefined,
+          completionEligible: eligible,
+        });
+        setIndividualCompleteLinkedWork(eligible);
+      } else {
+        setIndividualLinkedWork(null);
+        setIndividualCompleteLinkedWork(false);
+      }
+    } catch (err) {
+      setIndividualCompleteError(
+        err instanceof Error ? err.message : "Could not look up linked Work.",
+      );
+      setIndividualLinkedWork(null);
+      setIndividualCompleteLinkedWork(false);
+    } finally {
+      setIndividualLinkedWorkLoading(false);
+    }
+  }
+
+  async function updateStatus(
+    item: ReviewInboxItem,
+    status: ReviewInboxRequestStatus,
+    options?: { completeLinkedWork?: boolean },
+  ) {
     if (item.status === status) return;
     const previous = item.status;
 
@@ -217,7 +393,13 @@ export function ReviewInboxScreen({ data: initialData }: ReviewInboxScreenProps)
         method: "POST",
         credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({
+          status,
+          completeLinkedWork:
+            status === "complete" && typeof options?.completeLinkedWork === "boolean"
+              ? options.completeLinkedWork
+              : undefined,
+        }),
       });
 
       if (res.status === 401) {
@@ -234,6 +416,11 @@ export function ReviewInboxScreen({ data: initialData }: ReviewInboxScreenProps)
         success?: boolean;
         status?: ReviewInboxRequestStatus;
         error?: string;
+        linkedWork?: {
+          outcome?: string;
+          workNumber?: string | null;
+          reason?: string | null;
+        } | null;
       } = {};
       try {
         body = (await res.json()) as typeof body;
@@ -259,11 +446,22 @@ export function ReviewInboxScreen({ data: initialData }: ReviewInboxScreenProps)
       }
 
       if (nextStatus === "complete") {
-        setStatusNotice(
+        let notice =
           filter === "all"
             ? `Marked complete: ${item.title}.`
-            : `Marked complete: ${item.title}. It moved out of Active — open All to find it again.`,
-        );
+            : `Marked complete: ${item.title}. It moved out of Active — open All to find it again.`;
+        if (body.linkedWork?.outcome === "completed") {
+          notice += ` Linked Work ${body.linkedWork.workNumber ?? ""} completed.`
+            .replace(/\s+/g, " ")
+            .trimEnd();
+        } else if (body.linkedWork?.outcome === "failed") {
+          notice += ` Linked Work failed: ${body.linkedWork.reason ?? "unknown error"}.`;
+        } else if (body.linkedWork?.outcome === "skipped_by_operator") {
+          notice += " Linked Work left open.";
+        } else if (body.linkedWork?.reason) {
+          notice += ` ${body.linkedWork.reason}`;
+        }
+        setStatusNotice(notice);
       } else if (
         !REVIEW_INBOX_OPEN_STATUSES.includes(nextStatus) &&
         filter === "active"
@@ -273,18 +471,35 @@ export function ReviewInboxScreen({ data: initialData }: ReviewInboxScreenProps)
         setStatusNotice(null);
       }
 
+      setIndividualCompleteOpen(false);
+      setIndividualCompleteItem(null);
       router.refresh();
     } catch (err) {
       setItems((prev) =>
         prev.map((row) => (row.id === item.id ? { ...row, status: previous } : row)),
       );
+      const message = err instanceof Error ? err.message : "Could not update status.";
       setStatusError({
         id: item.id,
-        message: err instanceof Error ? err.message : "Could not update status.",
+        message,
       });
+      setIndividualCompleteError(message);
     } finally {
       setUpdatingId(null);
+      setIndividualCompleteSubmitting(false);
     }
+  }
+
+  function handleStatusSelectChange(
+    item: ReviewInboxItem,
+    next: ReviewInboxRequestStatus,
+  ) {
+    if (next === item.status) return;
+    if (next === "complete") {
+      void openIndividualCompleteConfirm(item);
+      return;
+    }
+    void updateStatus(item, next);
   }
 
   async function confirmBulkComplete() {
@@ -310,6 +525,7 @@ export function ReviewInboxScreen({ data: initialData }: ReviewInboxScreenProps)
           ids,
           confirm: true,
           batchOperationId: nextBatchId,
+          completeLinkedWork,
         }),
       });
 
@@ -369,10 +585,17 @@ export function ReviewInboxScreen({ data: initialData }: ReviewInboxScreenProps)
       setSelectionNotice(null);
 
       const attention = bulkResults
-        .filter((row) => row.outcome !== "completed")
+        .filter(
+          (row) =>
+            row.outcome !== "completed" ||
+            row.linkedWork?.outcome === "failed",
+        )
         .slice(0, 6)
         .map((row) => {
           const label = row.title ?? `#${row.id}`;
+          if (row.linkedWork?.outcome === "failed") {
+            return `${label}: Work failed — ${row.linkedWork.reason ?? "error"}`;
+          }
           return `${label}: ${row.reason ?? row.outcome}`;
         });
       setBulkDetailLines(attention);
@@ -384,6 +607,58 @@ export function ReviewInboxScreen({ data: initialData }: ReviewInboxScreenProps)
       setBulkError(err instanceof Error ? err.message : "Could not complete selected requests.");
     } finally {
       setBulkSubmitting(false);
+    }
+  }
+
+  async function confirmReconcileLinkedWork() {
+    if (reconcileSubmitting || selectedCompletedIds.length === 0) return;
+    setReconcileSubmitting(true);
+    setReconcileError(null);
+    try {
+      const res = await fetch("/api/admin/review-inbox/reconcile-linked-work", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ids: selectedCompletedIds,
+          dryRun: false,
+          confirm: true,
+        }),
+      });
+      if (res.status === 401) {
+        const returnPath = window.location.pathname;
+        window.location.href = `/admin/login?redirect=${encodeURIComponent(returnPath)}`;
+        return;
+      }
+      const body = (await res.json()) as {
+        ok?: boolean;
+        success?: boolean;
+        linkedWork?: LinkedWorkCounts;
+        error?: string;
+        results?: Array<{
+          reviewId: number;
+          title: string;
+          work: { outcome: string; reason?: string | null };
+        }>;
+      };
+      if (!res.ok || !(body.ok || body.success) || !body.linkedWork) {
+        throw new Error(body.error ?? "Could not reconcile linked Work.");
+      }
+      setStatusNotice(formatLinkedWorkResultLine(body.linkedWork));
+      const attention = (body.results ?? [])
+        .filter((row) => row.work.outcome === "failed")
+        .slice(0, 6)
+        .map((row) => `${row.title}: ${row.work.reason ?? "failed"}`);
+      setBulkDetailLines(attention);
+      setReconcileOpen(false);
+      setSelectedIds(new Set());
+      router.refresh();
+    } catch (err) {
+      setReconcileError(
+        err instanceof Error ? err.message : "Could not reconcile linked Work.",
+      );
+    } finally {
+      setReconcileSubmitting(false);
     }
   }
 
@@ -498,18 +773,52 @@ export function ReviewInboxScreen({ data: initialData }: ReviewInboxScreenProps)
                 <button
                   type="button"
                   className="kxd-os-btn kxd-os-btn--secondary"
-                  disabled={bulkSubmitting}
+                  disabled={bulkSubmitting || reconcileSubmitting}
                   onClick={() => clearSelection()}
                 >
                   Clear selection
                 </button>
+                {selectedCompletedIds.length > 0 ? (
+                  <button
+                    type="button"
+                    className="kxd-os-btn kxd-os-btn--secondary"
+                    disabled={
+                      bulkSubmitting ||
+                      reconcileSubmitting ||
+                      selectedCompletedIds.length !== selectedCount
+                    }
+                    title={
+                      selectedCompletedIds.length !== selectedCount
+                        ? "Select only completed reviews to reconcile linked Work"
+                        : undefined
+                    }
+                    onClick={() => {
+                      setReconcileError(null);
+                      setReconcileOpen(true);
+                      void loadReconcilePreview(selectedCompletedIds);
+                    }}
+                  >
+                    Reconcile linked Work
+                  </button>
+                ) : null}
                 <button
                   type="button"
                   className="kxd-os-btn kxd-os-btn--primary"
-                  disabled={bulkSubmitting}
+                  disabled={
+                    bulkSubmitting ||
+                    reconcileSubmitting ||
+                    selectedBulkEligibleCount === 0 ||
+                    selectedBulkEligibleCount !== selectedCount
+                  }
+                  title={
+                    selectedBulkEligibleCount !== selectedCount
+                      ? "Mark Completed only applies to In progress selections"
+                      : undefined
+                  }
                   onClick={() => {
                     setBulkError(null);
                     setConfirmOpen(true);
+                    void loadBulkLinkedWorkPreview(Array.from(selectedIds));
                   }}
                 >
                   Mark Completed
@@ -536,9 +845,14 @@ export function ReviewInboxScreen({ data: initialData }: ReviewInboxScreenProps)
               {visibleItems.map((item) => {
                 const status = reviewInboxStatusOption(item.status);
                 const prioVariant = PRIO_VARIANT[item.priority] ?? "default";
-                const eligible = isBulkCompleteEligibleItem(item);
+                const eligible = canSelectItem(item);
                 const selected = selectedIds.has(item.id);
                 const checkboxId = `review-inbox-select-${item.id}`;
+                const selectHint = isBulkCompleteEligibleItem(item)
+                  ? undefined
+                  : item.status === "complete"
+                    ? "Completed — selectable for linked Work reconciliation"
+                    : "Only In progress or Completed requests can be selected";
 
                 return (
                   <div
@@ -552,15 +866,11 @@ export function ReviewInboxScreen({ data: initialData }: ReviewInboxScreenProps)
                         className="kxd-os-review-inbox-bulk__checkbox"
                         checked={eligible ? selected : false}
                         disabled={!eligible}
-                        title={
-                          eligible
-                            ? undefined
-                            : "Only In progress requests can be bulk completed"
-                        }
+                        title={selectHint}
                         aria-label={
                           eligible
                             ? `Select request: ${item.title}`
-                            : `Cannot select request: ${item.title}. Only In progress requests can be bulk completed.`
+                            : `Cannot select request: ${item.title}.`
                         }
                         onClick={(event) => event.stopPropagation()}
                         onChange={(event) => {
@@ -626,7 +936,10 @@ export function ReviewInboxScreen({ data: initialData }: ReviewInboxScreenProps)
                           aria-busy={updatingId === item.id}
                           aria-label={`Update status for ${item.title}`}
                           onChange={(e) =>
-                            void updateStatus(item, e.target.value as ReviewInboxRequestStatus)
+                            handleStatusSelectChange(
+                              item,
+                              e.target.value as ReviewInboxRequestStatus,
+                            )
                           }
                         >
                           {REVIEW_INBOX_STATUS_OPTIONS.map((option) => (
@@ -669,11 +982,39 @@ export function ReviewInboxScreen({ data: initialData }: ReviewInboxScreenProps)
         </section>
       </KxdPage>
 
+      <ReviewCompleteConfirmDialog
+        open={individualCompleteOpen}
+        reviewTitle={individualCompleteItem?.title ?? ""}
+        linkedWork={individualLinkedWork}
+        linkedWorkLoading={individualLinkedWorkLoading}
+        completeLinkedWork={individualCompleteLinkedWork}
+        onCompleteLinkedWorkChange={setIndividualCompleteLinkedWork}
+        submitting={individualCompleteSubmitting}
+        error={individualCompleteError}
+        onCancel={() => {
+          if (individualCompleteSubmitting) return;
+          setIndividualCompleteOpen(false);
+          setIndividualCompleteItem(null);
+          setIndividualCompleteError(null);
+        }}
+        onConfirm={() => {
+          if (!individualCompleteItem || individualLinkedWorkLoading) return;
+          setIndividualCompleteSubmitting(true);
+          void updateStatus(individualCompleteItem, "complete", {
+            completeLinkedWork: individualCompleteLinkedWork,
+          });
+        }}
+      />
+
       <ReviewInboxBulkConfirmDialog
         open={confirmOpen}
         selectedCount={selectedCount}
         selectedItems={selectedVisibleItems}
         clientBreakdown={clientBreakdown}
+        linkedWorkPreview={linkedWorkPreview}
+        linkedWorkPreviewLoading={linkedWorkPreviewLoading}
+        completeLinkedWork={completeLinkedWork}
+        onCompleteLinkedWorkChange={setCompleteLinkedWork}
         submitting={bulkSubmitting}
         error={bulkError}
         onCancel={() => {
@@ -682,6 +1023,21 @@ export function ReviewInboxScreen({ data: initialData }: ReviewInboxScreenProps)
           setBulkError(null);
         }}
         onConfirm={() => void confirmBulkComplete()}
+      />
+
+      <ReviewReconcileLinkedWorkDialog
+        open={reconcileOpen}
+        selectedCount={selectedCompletedIds.length}
+        preview={reconcilePreview}
+        previewLoading={reconcilePreviewLoading}
+        submitting={reconcileSubmitting}
+        error={reconcileError}
+        onCancel={() => {
+          if (reconcileSubmitting) return;
+          setReconcileOpen(false);
+          setReconcileError(null);
+        }}
+        onConfirm={() => void confirmReconcileLinkedWork()}
       />
     </OperationsShell>
   );

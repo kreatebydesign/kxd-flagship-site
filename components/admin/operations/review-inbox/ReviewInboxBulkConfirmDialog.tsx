@@ -3,6 +3,8 @@
 import { useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
 import type { BulkCompleteClientBreakdown } from "@/lib/website-review-inbox/bulk-eligibility";
+import type { LinkedWorkCounts } from "@/lib/website-review-inbox/linked-work-types";
+import { formatLinkedWorkPreviewLine } from "@/lib/website-review-inbox/linked-work-types";
 import type { ReviewInboxItem } from "@/lib/website-review-inbox/types";
 
 export interface ReviewInboxBulkConfirmDialogProps {
@@ -10,6 +12,10 @@ export interface ReviewInboxBulkConfirmDialogProps {
   selectedCount: number;
   selectedItems: ReviewInboxItem[];
   clientBreakdown: BulkCompleteClientBreakdown[];
+  linkedWorkPreview: LinkedWorkCounts | null;
+  linkedWorkPreviewLoading: boolean;
+  completeLinkedWork: boolean;
+  onCompleteLinkedWorkChange: (next: boolean) => void;
   submitting: boolean;
   error: string | null;
   onCancel: () => void;
@@ -21,6 +27,10 @@ export function ReviewInboxBulkConfirmDialog({
   selectedCount,
   selectedItems,
   clientBreakdown,
+  linkedWorkPreview,
+  linkedWorkPreviewLoading,
+  completeLinkedWork,
+  onCompleteLinkedWorkChange,
   submitting,
   error,
   onCancel,
@@ -50,6 +60,7 @@ export function ReviewInboxBulkConfirmDialog({
   const summaryItems = selectedItems.slice(0, 8);
   const remaining = selectedCount - summaryItems.length;
   const multiClient = clientBreakdown.length > 1;
+  const eligibleLinked = linkedWorkPreview?.eligible ?? 0;
 
   return createPortal(
     <div
@@ -67,7 +78,7 @@ export function ReviewInboxBulkConfirmDialog({
         aria-describedby={descId}
       >
         <h2 id={titleId} className="kxd-os-review-inbox-bulk__dialog-title">
-          Mark {selectedCount === 1 ? "request" : "requests"} Completed?
+          Complete {selectedCount === 1 ? "Website Review" : "Website Reviews"}?
         </h2>
 
         <div id={descId} className="kxd-os-review-inbox-bulk__dialog-body">
@@ -77,6 +88,27 @@ export function ReviewInboxBulkConfirmDialog({
               : `${selectedCount} eligible requests will be marked Completed.`}{" "}
             Completed requests may leave the active In Progress view.
           </p>
+
+          {linkedWorkPreviewLoading ? (
+            <p className="kxd-os-review-complete__note">Checking linked Work…</p>
+          ) : linkedWorkPreview ? (
+            <p>{formatLinkedWorkPreviewLine(linkedWorkPreview)}</p>
+          ) : null}
+
+          {eligibleLinked > 0 ? (
+            <label className="kxd-os-review-complete__option">
+              <input
+                type="checkbox"
+                className="kxd-os-review-inbox-bulk__checkbox"
+                checked={completeLinkedWork}
+                disabled={submitting || linkedWorkPreviewLoading}
+                onChange={(event) =>
+                  onCompleteLinkedWorkChange(event.target.checked)
+                }
+              />
+              <span>Also complete eligible linked Work items</span>
+            </label>
+          ) : null}
 
           {multiClient ? (
             <div className="kxd-os-review-inbox-bulk__clients">
@@ -104,7 +136,9 @@ export function ReviewInboxBulkConfirmDialog({
               <ul>
                 {summaryItems.map((item) => (
                   <li key={item.id}>
-                    <span className="kxd-os-review-inbox-bulk__summary-title">{item.title}</span>
+                    <span className="kxd-os-review-inbox-bulk__summary-title">
+                      {item.title}
+                    </span>
                     <span className="kxd-os-review-inbox-bulk__summary-meta">
                       {item.clientName}
                     </span>
@@ -120,7 +154,10 @@ export function ReviewInboxBulkConfirmDialog({
           ) : null}
 
           {error ? (
-            <p className="kxd-os-review-inbox__notice kxd-os-review-inbox__notice--error" role="alert">
+            <p
+              className="kxd-os-review-inbox__notice kxd-os-review-inbox__notice--error"
+              role="alert"
+            >
               {error}
             </p>
           ) : null}
@@ -139,7 +176,7 @@ export function ReviewInboxBulkConfirmDialog({
             ref={confirmRef}
             type="button"
             className="kxd-os-btn kxd-os-btn--primary"
-            disabled={submitting}
+            disabled={submitting || linkedWorkPreviewLoading}
             aria-busy={submitting}
             onClick={onConfirm}
           >

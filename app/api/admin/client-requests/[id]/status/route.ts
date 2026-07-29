@@ -21,6 +21,7 @@ export async function POST(
   const body = (await req.json()) as {
     status?: string;
     clientCompletionNote?: string;
+    completeLinkedWork?: boolean;
   };
   const status = body.status?.trim() ?? "";
   const clientCompletionNote = body.clientCompletionNote?.trim() || undefined;
@@ -37,6 +38,10 @@ export async function POST(
           : undefined,
       clientCompletionNote:
         status === "complete" ? clientCompletionNote : undefined,
+      completeLinkedWork:
+        status === "complete" && typeof body.completeLinkedWork === "boolean"
+          ? body.completeLinkedWork
+          : undefined,
     });
     return NextResponse.json({ success: true, ...result });
   } catch (err) {

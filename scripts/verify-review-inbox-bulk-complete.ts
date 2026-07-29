@@ -203,7 +203,23 @@ function main() {
   );
 
   const notice = formatBulkCompleteNotice(
-    { requested: 13, completed: 12, skipped: 1, failed: 0 },
+    {
+      requested: 13,
+      completed: 12,
+      skipped: 1,
+      failed: 0,
+      linkedWork: {
+        eligible: 0,
+        alreadyComplete: 0,
+        archived: 0,
+        missing: 0,
+        unlinked: 0,
+        protected: 0,
+        completed: 0,
+        failed: 0,
+        skippedByOperator: 0,
+      },
+    },
     true,
   );
   check(
@@ -216,7 +232,23 @@ function main() {
   );
 
   const fullNotice = formatBulkCompleteNotice(
-    { requested: 2, completed: 2, skipped: 0, failed: 0 },
+    {
+      requested: 2,
+      completed: 2,
+      skipped: 0,
+      failed: 0,
+      linkedWork: {
+        eligible: 0,
+        alreadyComplete: 0,
+        archived: 0,
+        missing: 0,
+        unlinked: 0,
+        protected: 0,
+        completed: 0,
+        failed: 0,
+        skippedByOperator: 0,
+      },
+    },
     true,
   );
   check(

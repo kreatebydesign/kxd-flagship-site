@@ -15,6 +15,7 @@ import {
 import type { ReviewInboxRequestStatus } from "@/lib/website-review-inbox/types";
 import type { ReviewWorkspaceAttachment, ReviewWorkspaceDetail } from "@/lib/website-review-inbox/types";
 import { ReviewDeleteControl } from "./ReviewDeleteControl";
+import { ReviewCompleteConfirmDialog } from "./ReviewCompleteConfirmDialog";
 import { ReviewSendToWorkControl } from "./ReviewSendToWorkControl";
 
 function fmtDateLong(iso: string): string {
@@ -107,18 +108,27 @@ export function ReviewWorkspaceScreen({ review: initialReview }: ReviewWorkspace
   const [statusError, setStatusError] = useState<string | null>(null);
   const [notesError, setNotesError] = useState<string | null>(null);
   const [completionNote, setCompletionNote] = useState("");
+  const [completeConfirmOpen, setCompleteConfirmOpen] = useState(false);
+  const [completeLinkedWork, setCompleteLinkedWork] = useState(
+    () => review.workEngine?.completionEligible === true,
+  );
+  const [completeSubmitting, setCompleteSubmitting] = useState(false);
+  const [completeError, setCompleteError] = useState<string | null>(null);
+  const [workResultNotice, setWorkResultNotice] = useState<string | null>(null);
 
   const statusOption = reviewInboxStatusOption(status);
   const prioVariant = PRIO_VARIANT[review.priority] ?? "default";
 
-  async function handleStatusChange(next: ReviewInboxRequestStatus) {
-    if (next === status) return;
+  async function submitStatusChange(
+    next: ReviewInboxRequestStatus,
+    options?: { completeLinkedWork?: boolean },
+  ) {
     const previous = status;
-    // Optimistic: controlled <select> otherwise snaps back while the request runs.
     setStatus(next);
     setReview((prev) => ({ ...prev, status: next }));
     setUpdatingStatus(true);
     setStatusError(null);
+    setWorkResultNotice(null);
     try {
       const res = await fetch(`/api/admin/client-requests/${review.id}/status`, {
         method: "POST",
@@ -126,9 +136,12 @@ export function ReviewWorkspaceScreen({ review: initialReview }: ReviewWorkspace
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           status: next,
-          // Optional — omit when empty; never block Complete on a note.
           clientCompletionNote:
             next === "complete" ? completionNote.trim() || undefined : undefined,
+          completeLinkedWork:
+            next === "complete" && typeof options?.completeLinkedWork === "boolean"
+              ? options.completeLinkedWork
+              : undefined,
         }),
       });
       if (res.status === 401) {
@@ -143,6 +156,11 @@ export function ReviewWorkspaceScreen({ review: initialReview }: ReviewWorkspace
         success?: boolean;
         status?: ReviewInboxRequestStatus;
         error?: string;
+        linkedWork?: {
+          outcome?: string;
+          workNumber?: string | null;
+          reason?: string | null;
+        } | null;
       } = {};
       try {
         body = (await res.json()) as typeof body;
@@ -154,14 +172,59 @@ export function ReviewWorkspaceScreen({ review: initialReview }: ReviewWorkspace
       }
       setStatus(body.status);
       setReview((prev) => ({ ...prev, status: body.status! }));
+
+      if (body.linkedWork) {
+        const lw = body.linkedWork;
+        if (lw.outcome === "completed") {
+          setWorkResultNotice(
+            `Linked Work ${lw.workNumber ?? ""} completed.`.replace(/\s+/g, " ").trim(),
+          );
+          setReview((prev) =>
+            prev.workEngine
+              ? {
+                  ...prev,
+                  workEngine: {
+                    ...prev.workEngine,
+                    status: "completed",
+                    statusLabel: "Completed",
+                    completionEligible: false,
+                  },
+                }
+              : prev,
+          );
+        } else if (lw.outcome === "failed") {
+          setWorkResultNotice(
+            `Review completed, but linked Work failed: ${lw.reason ?? "unknown error"}.`,
+          );
+        } else if (lw.outcome === "skipped_by_operator") {
+          setWorkResultNotice("Review completed. Linked Work left open.");
+        } else if (lw.reason) {
+          setWorkResultNotice(`Review completed. ${lw.reason}`);
+        }
+      }
+
+      setCompleteConfirmOpen(false);
       router.refresh();
     } catch (err) {
       setStatus(previous);
       setReview((prev) => ({ ...prev, status: previous }));
       setStatusError(err instanceof Error ? err.message : "Could not update status.");
+      setCompleteError(err instanceof Error ? err.message : "Could not update status.");
     } finally {
       setUpdatingStatus(false);
+      setCompleteSubmitting(false);
     }
+  }
+
+  async function handleStatusChange(next: ReviewInboxRequestStatus) {
+    if (next === status) return;
+    if (next === "complete") {
+      setCompleteLinkedWork(review.workEngine?.completionEligible === true);
+      setCompleteError(null);
+      setCompleteConfirmOpen(true);
+      return;
+    }
+    await submitStatusChange(next);
   }
 
   async function saveNotes() {
@@ -428,6 +491,11 @@ export function ReviewWorkspaceScreen({ review: initialReview }: ReviewWorkspace
                   {statusError}
                 </p>
               ) : null}
+              {workResultNotice ? (
+                <p className="kxd-os-review-workspace__notice" role="status">
+                  {workResultNotice}
+                </p>
+              ) : null}
 
               <div className="kxd-os-review-workspace__action-stack">
                 <Link
@@ -514,6 +582,31 @@ export function ReviewWorkspaceScreen({ review: initialReview }: ReviewWorkspace
           </aside>
         </div>
       </KxdPage>
+
+      <ReviewCompleteConfirmDialog
+        open={completeConfirmOpen}
+        reviewTitle={review.title}
+        linkedWork={review.workEngine}
+        completeLinkedWork={completeLinkedWork}
+        onCompleteLinkedWorkChange={setCompleteLinkedWork}
+        submitting={completeSubmitting || updatingStatus}
+        error={completeError}
+        onCancel={() => {
+          if (completeSubmitting || updatingStatus) return;
+          setCompleteConfirmOpen(false);
+          setCompleteError(null);
+        }}
+        onConfirm={() => {
+          setCompleteSubmitting(true);
+          setCompleteError(null);
+          void submitStatusChange("complete", {
+            completeLinkedWork:
+              review.workEngine?.completionEligible === true
+                ? completeLinkedWork
+                : false,
+          });
+        }}
+      />
     </OperationsShell>
   );
 }

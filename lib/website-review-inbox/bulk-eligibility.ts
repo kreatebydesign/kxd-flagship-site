@@ -9,6 +9,12 @@ import {
   reviewInboxStatusOption,
 } from "./status";
 import type { ReviewInboxItem, ReviewInboxRequestStatus } from "./types";
+import {
+  formatLinkedWorkResultLine,
+  tallyLinkedWorkOutcomes,
+  type LinkedWorkCompletionResult,
+  type LinkedWorkCounts,
+} from "./linked-work-types";
 
 export const REVIEW_INBOX_BULK_COMPLETE_MAX_IDS = 50;
 
@@ -36,6 +42,8 @@ export interface ReviewInboxBulkCompleteRecordResult {
   title?: string;
   clientName?: string;
   previousStatus?: ReviewInboxRequestStatus;
+  /** Linked Work outcome when completeLinkedWork was requested. */
+  linkedWork?: LinkedWorkCompletionResult | null;
 }
 
 export interface ReviewInboxBulkCompleteCounts {
@@ -43,6 +51,7 @@ export interface ReviewInboxBulkCompleteCounts {
   completed: number;
   skipped: number;
   failed: number;
+  linkedWork: LinkedWorkCounts;
 }
 
 export interface ReviewInboxBulkCompleteResult {
@@ -229,6 +238,13 @@ export function formatBulkCompleteNotice(
     parts.push(`${counts.failed} failed.`);
   }
 
+  if (counts.linkedWork) {
+    const linked = formatLinkedWorkResultLine(counts.linkedWork);
+    if (linked !== "No linked Work changes.") {
+      parts.push(linked);
+    }
+  }
+
   if (
     counts.completed > 0 &&
     filterLeavesActiveView &&
@@ -242,7 +258,9 @@ export function formatBulkCompleteNotice(
 }
 
 export function tallyBulkCompleteResults(
-  results: ReadonlyArray<Pick<ReviewInboxBulkCompleteRecordResult, "outcome">>,
+  results: ReadonlyArray<
+    Pick<ReviewInboxBulkCompleteRecordResult, "outcome" | "linkedWork">
+  >,
   requested: number,
 ): ReviewInboxBulkCompleteCounts {
   let completed = 0;
@@ -253,7 +271,12 @@ export function tallyBulkCompleteResults(
     else if (row.outcome === "skipped") skipped += 1;
     else failed += 1;
   }
-  return { requested, completed, skipped, failed };
+  const linkedWork = tallyLinkedWorkOutcomes(
+    results
+      .map((row) => row.linkedWork)
+      .filter((row): row is LinkedWorkCompletionResult => row != null),
+  );
+  return { requested, completed, skipped, failed, linkedWork };
 }
 
 export function bulkCompleteEligibleStatusLabels(): string {

@@ -33,6 +33,11 @@ export interface BulkCompleteReviewRequestsInput {
   batchOperationId?: string;
   maxIds?: number;
   concurrency?: number;
+  /**
+   * When true, also complete eligible linked Work items after each review
+   * completes. Server resolves Work from trusted source relationships.
+   */
+  completeLinkedWork?: boolean;
 }
 
 async function mapWithConcurrency<T, R>(
@@ -152,6 +157,10 @@ export async function bulkCompleteReviewRequests(
 
         const updated = await updateReviewRequestStatus(requestId, "complete", {
           actorEmail: input.actorEmail,
+          completeLinkedWork:
+            typeof input.completeLinkedWork === "boolean"
+              ? input.completeLinkedWork
+              : undefined,
         });
 
         if (!updated.ok || updated.status !== "complete") {
@@ -163,6 +172,7 @@ export async function bulkCompleteReviewRequests(
             title: resolveTitle(existing),
             clientName: resolveClientName(existing),
             previousStatus,
+            linkedWork: updated.linkedWork ?? null,
           };
         }
 
@@ -172,6 +182,7 @@ export async function bulkCompleteReviewRequests(
           title: resolveTitle(existing),
           clientName: resolveClientName(existing),
           previousStatus: previousStatus as ReviewInboxRequestStatus | undefined,
+          linkedWork: updated.linkedWork ?? null,
         };
       } catch (err) {
         const message =
@@ -193,10 +204,13 @@ export async function bulkCompleteReviewRequests(
   console.info("[KXD Review Inbox] bulk-complete", {
     batchOperationId,
     actorEmail: input.actorEmail ? "[redacted]" : undefined,
+    completeLinkedWork: input.completeLinkedWork === true,
     requested: counts.requested,
     completed: counts.completed,
     skipped: counts.skipped,
     failed: counts.failed,
+    linkedWorkCompleted: counts.linkedWork.completed,
+    linkedWorkFailed: counts.linkedWork.failed,
     duplicatesRemoved: normalized.duplicatesRemoved,
   });
 

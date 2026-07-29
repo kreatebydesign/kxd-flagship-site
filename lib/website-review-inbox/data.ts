@@ -9,6 +9,8 @@ import { WEBSITE_WORKSPACE_EXPERIENCE_MODULE } from "@/lib/ces/modules/website-w
 import type { WebsiteReviewPageContext } from "@/lib/ces/modules/website-review/types";
 import { notesPreviewFromDetails } from "@/lib/ces/modules/website-workspace/submit";
 import { processOperationalFlow } from "@/lib/operational-flow";
+import { completeLinkedWorkForReview } from "./linked-work";
+import type { LinkedWorkCompletionResult } from "./linked-work-types";
 import { REVIEW_INBOX_OPEN_STATUSES } from "./status";
 import type {
   ReviewInboxData,
@@ -203,8 +205,18 @@ export async function updateReviewRequestStatus(
   options?: {
     actorEmail?: string;
     clientCompletionNote?: string;
+    /**
+     * When completing a review, optionally complete the authorization-safe
+     * linked Work item. Server resolves the Work record — never trusts a
+     * browser-supplied Work ID.
+     */
+    completeLinkedWork?: boolean;
   },
-): Promise<{ ok: true; status: ReviewInboxRequestStatus }> {
+): Promise<{
+  ok: true;
+  status: ReviewInboxRequestStatus;
+  linkedWork?: LinkedWorkCompletionResult | null;
+}> {
   const payload = await getPayload({ config });
 
   const existing = await payload.findByID({
@@ -263,5 +275,27 @@ export async function updateReviewRequestStatus(
     console.error("[KXD Review Inbox] processOperationalFlow failed:", err);
   });
 
-  return { ok: true, status };
+  let linkedWork: LinkedWorkCompletionResult | null | undefined;
+  if (status === "complete" && typeof options?.completeLinkedWork === "boolean") {
+    if (clientId == null) {
+      linkedWork = {
+        outcome: "protected",
+        workId: null,
+        workNumber: null,
+        workStatus: null,
+        workStatusLabel: null,
+        adminUrl: null,
+        reason: "Review has no client; linked Work cannot be resolved.",
+      };
+    } else {
+      linkedWork = await completeLinkedWorkForReview({
+        reviewId: requestId,
+        clientId,
+        actorEmail: options.actorEmail,
+        completeLinkedWork: options.completeLinkedWork,
+      });
+    }
+  }
+
+  return { ok: true, status, linkedWork };
 }

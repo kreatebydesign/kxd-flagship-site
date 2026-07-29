@@ -66,6 +66,11 @@ export interface ReviewWorkEngineLink {
   workNumber: string;
   /** Canonical OS Work Engine detail URL. */
   adminUrl: string;
+  /** Current Work Engine status — present when loaded from review workspace. */
+  status?: string;
+  statusLabel?: string;
+  /** Whether completing the review can also complete this Work item. */
+  completionEligible?: boolean;
 }
 
 export interface ReviewWorkspaceDetail {
