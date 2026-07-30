@@ -20107,3 +20107,123 @@ html[data-theme="dark"] .kxd-os-theme-pref__option.is-active {
     transition: none !important;
   }
 }
+
+/* ── Website Audit Report Editor ─────────────────────────────────────────── */
+
+.kxd-audit-report-editor {
+  display: grid;
+  gap: 1.25rem;
+  max-width: 52rem;
+}
+
+.kxd-audit-report-editor__hero {
+  display: grid;
+  gap: 0.65rem;
+  margin-bottom: 0.5rem;
+}
+
+.kxd-audit-report-editor__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  font-size: 0.85rem;
+  color: var(--kxd-os-text-secondary, #6e6e73);
+}
+
+.kxd-audit-report-editor__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.kxd-audit-report-editor__panel {
+  border: 1px solid var(--kxd-os-gold-border, rgba(194, 170, 114, 0.28));
+  background: #fff;
+  padding: 1.25rem 1.35rem;
+  display: grid;
+  gap: 0.85rem;
+  border-radius: 2px;
+}
+
+.kxd-audit-report-editor__panel h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 500;
+}
+
+.kxd-audit-report-editor__panel h3 {
+  margin: 0.5rem 0 0;
+  font-size: 0.95rem;
+}
+
+.kxd-audit-report-editor__label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  color: var(--kxd-os-text-secondary, #6e6e73);
+}
+
+.kxd-audit-report-editor__label input,
+.kxd-audit-report-editor__label textarea,
+.kxd-audit-report-editor__label select,
+.kxd-audit-report-editor__plan-item select {
+  font: inherit;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  border-radius: 2px;
+  background: #fff;
+  color: #1d1d1f;
+}
+
+.kxd-audit-report-editor__row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.kxd-audit-report-editor__checks {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.kxd-audit-report-editor__check {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.kxd-audit-report-editor__finding,
+.kxd-audit-report-editor__plan-item {
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  padding-top: 0.85rem;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.kxd-audit-report-editor__finding-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.kxd-audit-report-editor__inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+}
+
+.kxd-audit-report-editor__banner {
+  padding: 0.75rem 1rem;
+  background: rgba(194, 170, 114, 0.12);
+  border: 1px solid rgba(194, 170, 114, 0.28);
+  font-size: 0.9rem;
+}
+
+.kxd-audit-report-editor__banner--error {
+  background: rgba(210, 90, 90, 0.08);
+  border-color: rgba(210, 90, 90, 0.35);
+}

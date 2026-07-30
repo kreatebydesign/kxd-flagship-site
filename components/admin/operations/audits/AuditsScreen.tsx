@@ -16,6 +16,10 @@ import {
 import { OperationsPageHero } from "@/components/admin/operations/shared/OperationsPageHero";
 import { OperationsShell } from "@/components/admin/operations/shared/OperationsShell";
 import { AUDIT_STATUS_LABEL } from "@/lib/website-audit/scoring";
+import {
+  REPORT_STATUS_LABEL,
+  type ReportStatus,
+} from "@/lib/website-audit-report/types";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AuditDoc = Record<string, any>;
@@ -60,6 +64,21 @@ function auditStatusVariant(status: string): KxdBadgeVariant {
   }
 }
 
+function reportStatusVariant(status: string): KxdBadgeVariant {
+  switch (status) {
+    case "draft":
+      return "warning";
+    case "ready-for-review":
+      return "tier";
+    case "approved":
+      return "success";
+    case "archived":
+      return "pending";
+    default:
+      return "default";
+  }
+}
+
 export function AuditsScreen({
   audits,
   total,
@@ -80,7 +99,7 @@ export function AuditsScreen({
         <OperationsPageHero
           eyebrow="KXD OS · Website Auditor"
           title="Audit Lead Desk"
-          lead="Public website audit submissions — scores, grades, and pipeline status for KXD sales follow-up."
+          lead="Public website audit submissions — scores, grades, pipeline status, and client-ready report workflow."
         />
 
         <div className="kxd-os-ops-kpi-grid">
@@ -105,7 +124,7 @@ export function AuditsScreen({
           <KxdTable>
             <KxdTableHead>
               <KxdTableRow>
-                {["Company", "Website", "Score", "Status", "Date"].map((heading) => (
+                {["Company", "Website", "Score", "Lead", "Report", "Updated"].map((heading) => (
                   <KxdTableHeaderCell key={heading}>{heading}</KxdTableHeaderCell>
                 ))}
               </KxdTableRow>
@@ -113,6 +132,9 @@ export function AuditsScreen({
             <KxdTableBody>
               {audits.map((audit) => {
                 const status = String(audit.status ?? "new-lead");
+                const reportStatus = String(audit.reportStatus ?? "none") as ReportStatus;
+                const reportLabel =
+                  REPORT_STATUS_LABEL[reportStatus] ?? REPORT_STATUS_LABEL.none;
                 return (
                   <KxdTableRow key={audit.id as number}>
                     <KxdTableCell primary>
@@ -152,13 +174,53 @@ export function AuditsScreen({
                       </KxdBadge>
                     </KxdTableCell>
                     <KxdTableCell>
-                      <p className="kxd-os-meta">{fmtDate(audit.createdAt as string)}</p>
-                      <Link
-                        href={`/website-audit/results/${audit.id}`}
-                        className="kxd-os-ops-link-row kxd-os-ops-link-row--inline"
-                      >
-                        Public report →
-                      </Link>
+                      <KxdBadge variant={reportStatusVariant(reportStatus)}>
+                        {reportLabel}
+                      </KxdBadge>
+                      <div className="kxd-os-ops-table-meta" style={{ marginTop: "0.35rem" }}>
+                        <Link
+                          href={`/admin/operations/audits/${audit.id}/report`}
+                          className="kxd-os-ops-link-row kxd-os-ops-link-row--inline"
+                        >
+                          Open Report →
+                        </Link>
+                        {reportStatus !== "none" ? (
+                          <>
+                            {" · "}
+                            <Link
+                              href={`/admin/operations/audits/${audit.id}/report/preview`}
+                              className="kxd-os-ops-link-row kxd-os-ops-link-row--inline"
+                            >
+                              Preview
+                            </Link>
+                          </>
+                        ) : null}
+                        {reportStatus === "approved" ? (
+                          <>
+                            {" · "}
+                            <a
+                              href={`/api/admin/website-audits/${audit.id}/report/pdf`}
+                              className="kxd-os-ops-link-row kxd-os-ops-link-row--inline"
+                            >
+                              PDF
+                            </a>
+                          </>
+                        ) : null}
+                      </div>
+                    </KxdTableCell>
+                    <KxdTableCell>
+                      <p className="kxd-os-meta">
+                        {fmtDate(
+                          (audit.reportUpdatedAt as string) ||
+                            (audit.reportApprovedAt as string) ||
+                            (audit.createdAt as string),
+                        )}
+                      </p>
+                      {audit.reportApprovedAt ? (
+                        <p className="kxd-os-ops-table-meta">
+                          Approved {fmtDate(audit.reportApprovedAt as string)}
+                        </p>
+                      ) : null}
                     </KxdTableCell>
                   </KxdTableRow>
                 );

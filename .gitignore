@@ -49,3 +49,6 @@ public/generated-reels/*.mp4
 # portal review attachments (client-private uploads)
 private/client-review-media/*
 !private/client-review-media/.gitkeep
+
+# local verification artifacts
+/tmp/

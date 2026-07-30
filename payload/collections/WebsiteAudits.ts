@@ -1,6 +1,7 @@
 /**
  * payload/collections/WebsiteAudits.ts
  * KXD OS Phase 6A — Website Auditor lead records
+ * Extended: internal Website Audit Report Generator (curated client deliverable).
  */
 
 import type { CollectionConfig } from "payload";
@@ -14,11 +15,18 @@ export const WebsiteAudits: CollectionConfig = {
   lockDocuments: false,
   admin: {
     useAsTitle: "company",
-    defaultColumns: ["company", "website", "overallScore", "status", "createdAt"],
+    defaultColumns: [
+      "company",
+      "website",
+      "overallScore",
+      "status",
+      "reportStatus",
+      "createdAt",
+    ],
     group: PAYLOAD_GROUPS.leads,
     description:
       "Website Auditor leads — public audit submissions with scores and recommendations. " +
-      "Dashboard: /admin/operations/audits",
+      "Client-ready reports: /admin/operations/audits · Report editor: /admin/operations/audits/{id}/report",
   },
   access: {
     read: isAuthenticated,
@@ -37,6 +45,34 @@ export const WebsiteAudits: CollectionConfig = {
             { name: "email", type: "email", required: true, label: "Email" },
             { name: "company", type: "text", label: "Company" },
             { name: "website", type: "text", required: true, label: "Website URL" },
+            {
+              name: "client",
+              type: "relationship",
+              relationTo: "clients",
+              label: "Linked Client",
+              admin: {
+                description:
+                  "Optional. Existing KXD client relationship. Canonical website is resolved server-side.",
+              },
+            },
+            {
+              name: "canonicalWebsiteUrl",
+              type: "text",
+              label: "Canonical Client Website",
+              admin: {
+                description:
+                  "Trusted client website from the client record (may differ from audited URL).",
+                readOnly: true,
+              },
+            },
+            {
+              name: "internalNotes",
+              type: "textarea",
+              label: "Internal Notes",
+              admin: {
+                description: "Operator-only. Never included in preview or PDF.",
+              },
+            },
           ],
         },
         {
@@ -58,19 +94,148 @@ export const WebsiteAudits: CollectionConfig = {
               name: "strengths",
               type: "textarea",
               label: "Strengths",
-              admin: { description: "One strength per line." },
+              admin: { description: "One strength per line. Raw auditor evidence — do not edit for report tone." },
             },
             {
               name: "opportunities",
               type: "textarea",
               label: "Improvement Opportunities",
-              admin: { description: "One opportunity per line." },
+              admin: { description: "One opportunity per line. Raw auditor evidence." },
             },
             {
               name: "recommendations",
               type: "textarea",
               label: "KXD Recommendations",
-              admin: { description: "One recommendation per line." },
+              admin: { description: "One recommendation per line. Raw auditor evidence." },
+            },
+          ],
+        },
+        {
+          label: "Report",
+          fields: [
+            {
+              name: "reportStatus",
+              type: "select",
+              required: true,
+              defaultValue: "none",
+              options: [
+                { label: "Not generated", value: "none" },
+                { label: "Draft", value: "draft" },
+                { label: "Ready for review", value: "ready-for-review" },
+                { label: "Approved", value: "approved" },
+                { label: "Archived", value: "archived" },
+              ],
+              admin: {
+                description:
+                  "Client-report lifecycle (separate from lead pipeline status). Prefer the operations report editor.",
+              },
+            },
+            {
+              name: "reportTitle",
+              type: "text",
+              label: "Report Title",
+            },
+            {
+              name: "executiveSummary",
+              type: "textarea",
+              label: "Executive Summary",
+            },
+            {
+              name: "workingWell",
+              type: "textarea",
+              label: "What Is Working Well",
+            },
+            {
+              name: "losingOpportunity",
+              type: "textarea",
+              label: "Where the Website Is Losing Opportunity",
+            },
+            {
+              name: "recommendedNextSteps",
+              type: "textarea",
+              label: "Recommended Next Steps",
+            },
+            {
+              name: "closingNote",
+              type: "textarea",
+              label: "Closing Note",
+            },
+            {
+              name: "sectionVisibility",
+              type: "json",
+              label: "Section Visibility",
+              admin: {
+                description: "Managed by the report editor.",
+              },
+            },
+            {
+              name: "findingOverrides",
+              type: "json",
+              label: "Finding Presentation Overrides",
+              admin: {
+                description: "Hide/edit client-facing finding language without changing raw evidence.",
+              },
+            },
+            {
+              name: "manualFindings",
+              type: "json",
+              label: "Manual Findings",
+              admin: {
+                description: "Operator-added findings with clear provenance.",
+              },
+            },
+            {
+              name: "recommendationPlan",
+              type: "json",
+              label: "Priority Action Plan",
+              admin: {
+                description: "Ordered, grouped recommendations for the client report.",
+              },
+            },
+            {
+              name: "approvedSnapshot",
+              type: "json",
+              label: "Approved Report Snapshot",
+              admin: {
+                description: "Immutable client-facing snapshot captured at approval.",
+                readOnly: true,
+              },
+            },
+            {
+              name: "reportGeneratedAt",
+              type: "date",
+              label: "Report Generated At",
+              admin: { date: { pickerAppearance: "dayAndTime" }, readOnly: true },
+            },
+            {
+              name: "reportUpdatedAt",
+              type: "date",
+              label: "Report Updated At",
+              admin: { date: { pickerAppearance: "dayAndTime" }, readOnly: true },
+            },
+            {
+              name: "reportApprovedAt",
+              type: "date",
+              label: "Report Approved At",
+              admin: { date: { pickerAppearance: "dayAndTime" }, readOnly: true },
+            },
+            {
+              name: "reportApprovedBy",
+              type: "text",
+              label: "Report Approved By",
+              admin: { readOnly: true },
+            },
+            {
+              name: "reportDownloadedAt",
+              type: "date",
+              label: "Report Downloaded At",
+              admin: { date: { pickerAppearance: "dayAndTime" }, readOnly: true },
+            },
+            {
+              name: "reportDownloadedBy",
+              type: "text",
+              label: "Report Downloaded By",
+              admin: { readOnly: true },
             },
           ],
         },
