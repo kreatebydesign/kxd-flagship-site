@@ -44,16 +44,20 @@ function inferCategory(text: string): AuditFindingCategory {
   }
   if (
     t.includes("response time") ||
+    t.includes("response timing") ||
     t.includes("page payload") ||
+    t.includes("page weight") ||
     t.includes("payload is heavy") ||
     t.includes("script count") ||
     t.includes("script footprint") ||
+    t.includes("scripting") ||
     t.includes("caching") ||
     t.includes("image delivery") ||
     t.includes("hosting") ||
     t.includes("http status") ||
     t.includes("load speed") ||
-    t.includes("first paint")
+    t.includes("first paint") ||
+    t.includes("interactive delivery")
   ) {
     return "performance";
   }
@@ -173,9 +177,11 @@ export function deriveAutomatedFindings(source: {
   lines(source.opportunities).forEach((text, index) => {
     const category = inferCategory(text);
     const matchedRec =
-      recs.find((r) => inferCategory(r) === category) ??
-      (recs[index] !== undefined ? recs[index] : undefined) ??
-      recs[0];
+      recs[index] !== undefined
+        ? recs[index]
+        : category === "general"
+          ? undefined
+          : recs.find((r) => inferCategory(r) === category);
     findings.push({
       id: `opportunity-${index}`,
       provenance: "automated",

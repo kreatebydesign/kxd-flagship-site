@@ -12,6 +12,7 @@ import { fileURLToPath } from "node:url";
 import {
   buildCanonicalAuditReport,
   resolveClientFacingReport,
+  resolvePreparedFor,
   stripInternalForClient,
 } from "../lib/website-audit-report/canonicalize.ts";
 import { generateAuditNarrative } from "../lib/website-audit-report/narrative.ts";
@@ -530,10 +531,77 @@ async function main() {
   assert(filename.includes("northwind"), "PDF filename includes company slug");
   assert(filename.includes("2026-07-28"), "PDF filename includes audit date");
 
+  // Local calendar stamp must match cover-facing locale date (not UTC ISO day).
+  const eveningUtc = "2026-07-30T05:00:00.000Z";
+  const localStamp = (() => {
+    const d = new Date(eveningUtc);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  })();
+  assert(
+    buildAuditReportPdfFilename({
+      ...clientFacing,
+      auditDate: eveningUtc,
+      companyName: "Stamp Check",
+    }).includes(localStamp),
+    "PDF filename date uses local calendar stamp",
+  );
+
   const { buffer, filename: renderedName } = await renderAuditReportPdf(clientFacing);
   assert(buffer.length > 1000, "PDF buffer produced");
   assert(buffer.subarray(0, 4).toString() === "%PDF", "PDF magic header");
   assert(renderedName === filename, "PDF render uses same filename helper");
+
+  const pageCountMatch = buffer.toString("latin1").match(/\/Type\s*\/Pages[\s\S]*?\/Count\s+(\d+)/);
+  const pageCount = pageCountMatch ? Number(pageCountMatch[1]) : 0;
+  assert(pageCount >= 2, "PDF has cover plus content pages");
+  assert(pageCount <= 12, "PDF page count stays within expected fixture range");
+
+  // Trailing empty-page regression: long assessment + appendix must not invent
+  // an extra header/footer-only page beyond a stable upper bound for this fixture.
+  const longNarrative = fixtureSource({
+    name: "Martin Referral — Northwind Studio",
+    executiveSummary: "Summary paragraph.\n\nSecond paragraph for length.",
+    workingWell: Array.from({ length: 6 }, (_, i) => `Working well point ${i + 1}.`).join("\n"),
+    losingOpportunity: Array.from({ length: 6 }, (_, i) => `Opportunity point ${i + 1}.`).join(
+      "\n",
+    ),
+    recommendedNextSteps: Array.from({ length: 5 }, (_, i) => `${i + 1}. Next step ${i + 1}.`).join(
+      "\n",
+    ),
+    closingNote: "Closing note for pagination regression coverage.",
+    recommendationPlan: [
+      {
+        id: "a1",
+        sourceId: "a1",
+        sourceKind: "recommendation",
+        group: "fix-first",
+        text: "Ship the primary conversion path on the homepage.",
+        order: 0,
+        hidden: false,
+      },
+      {
+        id: "a2",
+        sourceId: "a2",
+        sourceKind: "recommendation",
+        group: "improve-next",
+        text: "Tighten on-page SEO foundations across key journeys.",
+        order: 1,
+        hidden: false,
+      },
+    ],
+  });
+  const longCanonical = resolveClientFacingReport(longNarrative);
+  assert(longCanonical.preparedFor == null, "referral-style preparedFor is omitted on cover");
+  const longPdf = await renderAuditReportPdf(longCanonical);
+  const longCountMatch = longPdf.buffer
+    .toString("latin1")
+    .match(/\/Type\s*\/Pages[\s\S]*?\/Count\s+(\d+)/);
+  const longCount = longCountMatch ? Number(longCountMatch[1]) : 0;
+  assert(longCount >= 2, "long-form PDF renders multiple pages");
+  assert(
+    longCount <= pageCount + 4,
+    "long-form PDF does not balloon with an unexplained trailing page",
+  );
 
   const outDir = join(dirname(fileURLToPath(import.meta.url)), "../tmp");
   if (!existsSync(outDir)) mkdirSync(outDir, { recursive: true });
@@ -544,6 +612,20 @@ async function main() {
   // Re-read to confirm file integrity
   const disk = readFileSync(outPath);
   assert(disk.subarray(0, 4).toString() === "%PDF", "fixture PDF on disk is valid");
+
+  console.log("Prepared-for cover sanitization");
+  assert(
+    resolvePreparedFor("Martin Referral — Acme", "Acme") == null,
+    "Martin Referral preparedFor suppressed",
+  );
+  assert(
+    resolvePreparedFor("Acme Client", "Acme Client") == null,
+    "preparedFor matching company suppressed",
+  );
+  assert(
+    resolvePreparedFor("Jordan Lee", "Acme Client") === "Jordan Lee",
+    "real recipient name preserved",
+  );
 
   // Regeneration does not touch raw evidence fields conceptually
   console.log("Raw evidence preservation");

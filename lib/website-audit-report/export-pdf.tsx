@@ -174,9 +174,9 @@ const styles = StyleSheet.create({
   finding: {
     borderTopWidth: 1,
     borderTopColor: colors.line,
-    paddingTop: 9,
-    paddingBottom: 8,
-    marginBottom: 2,
+    paddingTop: 7,
+    paddingBottom: 6,
+    marginBottom: 1,
   },
   findingTitle: { fontSize: 11.2, marginBottom: 3, lineHeight: 1.3, maxWidth: 460 },
   fieldLabel: {
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.line,
     padding: 10,
-    marginBottom: 10,
+    marginBottom: 8,
   },
   actionItem: {
     flexDirection: "row",
@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     paddingBottom: 10,
     paddingHorizontal: 12,
-    marginBottom: 12,
+    marginBottom: 10,
   },
   assessmentBandTitle: { color: colors.ivoryOnBlack, fontSize: 13.5, marginBottom: 4 },
   assessmentBandLead: {
@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
     lineHeight: 1.4,
   },
   assessmentBlock: {
-    marginBottom: 12,
+    marginBottom: 9,
     paddingLeft: 9,
     borderLeftWidth: 2,
     borderLeftColor: colors.gold,
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.panel,
     padding: 10,
     marginTop: 6,
-    marginBottom: 8,
+    marginBottom: 4,
   },
   footer: {
     position: "absolute",
@@ -271,14 +271,14 @@ const styles = StyleSheet.create({
     fontSize: 8,
     marginTop: 8,
   },
-  listItem: { marginBottom: 3.5, fontFamily: "Helvetica", fontSize: 8.5, paddingLeft: 2, color: colors.muted },
+  listItem: { marginBottom: 2.5, fontFamily: "Helvetica", fontSize: 8.5, paddingLeft: 2, color: colors.muted },
   closing: {
-    marginTop: 18,
-    paddingTop: 12,
+    marginTop: 8,
+    paddingTop: 7,
     borderTopWidth: 1,
     borderTopColor: colors.line,
   },
-  closingMark: { width: 40, height: 38, marginBottom: 8 },
+  closingMark: { width: 32, height: 30, marginBottom: 6 },
   closingBrand: {
     fontSize: 7.5,
     letterSpacing: 1.6,
@@ -344,7 +344,7 @@ function PageFooter({
 function FindingBlock({ finding }: { finding: CanonicalFinding }) {
   const support = findingSupportCopy(finding);
   return (
-    <View style={styles.finding} wrap={false}>
+    <View style={styles.finding}>
       <Text style={styles.eyebrow}>
         {CATEGORY_LABEL[finding.category]} · {severityLabel(finding.severity)}
       </Text>
@@ -389,7 +389,7 @@ function AuditReportPdfDocument({ report }: { report: CanonicalAuditReport }) {
       title={`${coverDocumentType()} — ${company}`}
       author={KXD_REPORT_BRAND}
       subject={`${coverDocumentType()} — ${company}`}
-      creator="KXD OS Website Audit Report Generator"
+      creator={KXD_REPORT_BRAND}
     >
       <Page size="LETTER" style={styles.coverPage}>
         {/* eslint-disable-next-line jsx-a11y/alt-text -- @react-pdf/renderer Image has no alt prop */}
@@ -517,25 +517,25 @@ function AuditReportPdfDocument({ report }: { report: CanonicalAuditReport }) {
               </Text>
             </View>
             {report.workingWell ? (
-              <View style={styles.assessmentBlock} wrap={false}>
+              <View style={styles.assessmentBlock}>
                 <Text style={styles.assessmentHeading}>What is working well</Text>
                 <Paras text={report.workingWell} />
               </View>
             ) : null}
             {report.losingOpportunity ? (
-              <View style={styles.assessmentBlock} wrap={false}>
+              <View style={styles.assessmentBlock}>
                 <Text style={styles.assessmentHeading}>Where opportunity is being lost</Text>
                 <Paras text={report.losingOpportunity} />
               </View>
             ) : null}
             {report.recommendedNextSteps ? (
-              <View style={styles.assessmentBlock} wrap={false}>
+              <View style={styles.assessmentBlock}>
                 <Text style={styles.assessmentHeading}>Recommended next steps</Text>
                 <Paras text={report.recommendedNextSteps} />
               </View>
             ) : null}
             {report.closingNote ? (
-              <View style={styles.assessmentBlock} wrap={false}>
+              <View style={styles.assessmentBlock}>
                 <Text style={styles.assessmentHeading}>Closing note</Text>
                 <Paras text={report.closingNote} />
               </View>
@@ -543,7 +543,18 @@ function AuditReportPdfDocument({ report }: { report: CanonicalAuditReport }) {
           </View>
         ) : null}
 
-        {vis.appendix ? (
+        {!vis.appendix ? (
+          <View style={styles.closing}>
+            <Text style={styles.closingBrand}>{KXD_REPORT_BRAND}</Text>
+            <Text style={styles.closingSignoff}>Website Audit Report</Text>
+          </View>
+        ) : null}
+
+        <PageFooter domain={domain} logoPath={logoPath} />
+      </Page>
+
+      {vis.appendix ? (
+        <Page size="LETTER" style={styles.page}>
           <View style={styles.section}>
             <SectionHead index={6} title="Appendix" />
             <Text style={styles.sectionLead}>
@@ -576,19 +587,15 @@ function AuditReportPdfDocument({ report }: { report: CanonicalAuditReport }) {
                   • {item}
                 </Text>
               ))}
+              <View style={styles.closing}>
+                <Text style={styles.closingBrand}>{KXD_REPORT_BRAND}</Text>
+                <Text style={styles.closingSignoff}>Website Audit Report</Text>
+              </View>
             </View>
           </View>
-        ) : null}
-
-        <View style={styles.closing} wrap={false}>
-          {/* eslint-disable-next-line jsx-a11y/alt-text -- @react-pdf/renderer Image has no alt prop */}
-          {logoPath ? <Image src={logoPath} style={styles.closingMark} /> : null}
-          <Text style={styles.closingBrand}>{KXD_REPORT_BRAND}</Text>
-          <Text style={styles.closingSignoff}>Website Audit Report</Text>
-        </View>
-
-        <PageFooter domain={domain} logoPath={logoPath} />
-      </Page>
+          <PageFooter domain={domain} logoPath={logoPath} />
+        </Page>
+      ) : null}
     </Document>
   );
 }

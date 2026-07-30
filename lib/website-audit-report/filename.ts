@@ -12,16 +12,25 @@ function slugify(value: string): string {
     .slice(0, 60);
 }
 
+/**
+ * Calendar date for filenames — uses local date parts so the stamp matches
+ * the cover's `toLocaleDateString` display (avoids UTC day-shift, e.g. Jul 29
+ * evening Pacific becoming 2026-07-30 via toISOString).
+ */
+export function auditReportDateStamp(iso: string | null | undefined): string {
+  const d = iso ? new Date(iso) : new Date();
+  if (Number.isNaN(d.getTime())) {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  }
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
 export function buildAuditReportPdfFilename(report: CanonicalAuditReport): string {
   const company = slugify(report.companyName || "company") || "company";
-  const date = (() => {
-    try {
-      const d = new Date(report.auditDate);
-      if (Number.isNaN(d.getTime())) return new Date().toISOString().slice(0, 10);
-      return d.toISOString().slice(0, 10);
-    } catch {
-      return new Date().toISOString().slice(0, 10);
-    }
-  })();
+  const date = auditReportDateStamp(report.auditDate);
   return `kxd-website-audit-${company}-${date}.pdf`;
 }

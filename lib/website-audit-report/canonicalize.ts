@@ -43,6 +43,27 @@ function mergeVisibility(input?: SectionVisibility | null): Required<SectionVisi
   return { ...DEFAULT_SECTION_VISIBILITY, ...(input ?? {}) };
 }
 
+/**
+ * Client-facing "Prepared for" must never expose internal lead-source labels
+ * (e.g. "Martin Referral") or awkwardly duplicate the cover organization name.
+ */
+export function resolvePreparedFor(
+  contactName: string | null | undefined,
+  companyName: string,
+): string | null {
+  const name = contactName?.trim() || "";
+  if (!name) return null;
+  if (
+    /\b(referral|pipeline|internal|fixture|demo operator|localhost)\b/i.test(name)
+  ) {
+    return null;
+  }
+  if (name.toLowerCase() === companyName.trim().toLowerCase()) {
+    return null;
+  }
+  return name;
+}
+
 function applyOverride(
   finding: ReturnType<typeof deriveAutomatedFindings>[number],
   overrides: FindingOverride[],
@@ -126,7 +147,7 @@ export function buildCanonicalAuditReport(source: AuditReportSource): CanonicalA
 
   const contactName = source.name?.trim() || null;
   const contactEmail = source.email?.trim() || null;
-  const preparedFor = contactName;
+  const preparedFor = resolvePreparedFor(contactName, String(companyName));
 
   const auditDate = source.completedAt || source.createdAt || new Date().toISOString();
   const reportStatus = (source.reportStatus as ReportStatus) || "none";
