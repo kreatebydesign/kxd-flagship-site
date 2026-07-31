@@ -173,17 +173,26 @@ export async function renderBillingSummaryPdf(input: {
   contractId: number;
   terms: StructuredPaymentTerms;
   contractHash: string;
+  testMode?: boolean;
 }): Promise<{ buffer: Buffer; contentHash: string }> {
   const t = input.terms;
+  const testMode = input.testMode !== false;
   const doc = (
     <Document>
       <Page size="LETTER" style={styles.page}>
-        <Text style={styles.eyebrow}>Billing terms summary</Text>
+        {testMode ? (
+          <Text style={{ ...styles.eyebrow, color: "#c9a227" }}>
+            TEST MODE — NOT A REAL INVOICE
+          </Text>
+        ) : null}
+        <Text style={styles.eyebrow}>Billing terms summary · Kreate by Design</Text>
         <View style={styles.rule} />
         <Text style={styles.h1}>Billing terms (from executed contract)</Text>
         <Text style={styles.meta}>Proposal {input.proposalNumber}</Text>
-        <Text style={styles.meta}>Contract {input.contractId}</Text>
+        <Text style={styles.meta}>Agreement reference AGR-{input.contractId}-1</Text>
         <Text style={styles.meta}>Source hash {input.contractHash.slice(0, 16)}…</Text>
+        <Text style={styles.meta}>Support: matt@kreatebydesign.com</Text>
+        <Text style={styles.meta}>Currency USD · Taxes not collected in this pilot</Text>
         <Text style={styles.h2}>One-time</Text>
         <Text style={styles.p}>
           Total {formatCents(t.oneTimeTotalCents, t.currency)} · Deposit{" "}
@@ -204,16 +213,13 @@ export async function renderBillingSummaryPdf(input: {
         </Text>
         <Text style={styles.h2}>Tax</Text>
         <Text style={styles.p}>
-          Treatment: {t.taxes.treatment}
+          Tax: $0.00 (not collected) · Treatment: {t.taxes.treatment}
           {t.taxes.notes ? ` — ${t.taxes.notes}` : ""}
         </Text>
-        <View style={styles.notice}>
-          <Text>
-            This summary is derived from the executed contract snapshot. It is not a live invoice.
-            Mock/test Stripe drafts remain inactive until operator approval.
-          </Text>
-        </View>
-        <Footer label="Billing terms summary" />
+        <Text style={styles.meta}>
+          Statement descriptor associated with payments: KREATE BY DESIGN. This summary is derived
+          from the sealed contract snapshot — not a live Stripe demand letter.
+        </Text>
       </Page>
     </Document>
   );

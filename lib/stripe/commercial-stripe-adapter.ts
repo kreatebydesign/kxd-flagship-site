@@ -1,6 +1,6 @@
 /**
- * Phase 37I/37J — Injectable Stripe commercial adapter.
- * Reads: account + customers. Write: customers.create only (Phase 37J test mode).
+ * Phase 37I/37J/Lifecycle — Injectable Stripe commercial adapter.
+ * Reads: account + customers. Writes: customers.create (37J) + test invoices (lifecycle).
  * Fake adapter used by deterministic verification (no network).
  */
 
@@ -30,6 +30,29 @@ export type CommercialStripeCreateCustomerParams = {
   idempotencyKey: string;
 };
 
+export type CommercialStripeInvoiceSnapshot = {
+  id: string;
+  customerId: string;
+  status: string;
+  livemode: boolean;
+  amountDue: number;
+  amountPaid: number;
+  currency: string;
+  hostedInvoiceUrl: string | null;
+  paymentIntentId: string | null;
+  metadata: Record<string, string>;
+};
+
+export type CommercialStripeCreateInvoiceParams = {
+  customerId: string;
+  currency: string;
+  description: string;
+  metadata: Record<string, string>;
+  amountCents: number;
+  idempotencyKey: string;
+  automaticTaxEnabled?: false;
+};
+
 export type CommercialStripeAdapter = {
   verifyAccount(): Promise<CommercialStripeAccountSnapshot>;
   retrieveCustomer(
@@ -50,6 +73,10 @@ export type CommercialStripeAdapter = {
   createCustomer(
     params: CommercialStripeCreateCustomerParams,
   ): Promise<CommercialStripeCustomerSnapshot>;
+  createAndFinalizeInvoice(
+    params: CommercialStripeCreateInvoiceParams,
+  ): Promise<CommercialStripeInvoiceSnapshot>;
+  retrieveInvoice(invoiceId: string): Promise<CommercialStripeInvoiceSnapshot | null>;
 };
 
 function asMetadata(meta: Stripe.Metadata | null | undefined): Record<string, string> {
@@ -90,10 +117,30 @@ function mapCustomer(
   };
 }
 
-/**
- * Real Stripe adapter — account/customer reads + customers.create only.
- * Must never call customer update/delete or subscription/invoice/checkout APIs.
- */
+function mapInvoice(
+  invoice: Stripe.Invoice,
+  livemodeFallback: boolean,
+): CommercialStripeInvoiceSnapshot {
+  const pi = invoice.payment_intent;
+  const paymentIntentId =
+    typeof pi === "string" ? pi : pi && typeof pi === "object" ? pi.id : null;
+  return {
+    id: invoice.id,
+    customerId:
+      typeof invoice.customer === "string"
+        ? invoice.customer
+        : invoice.customer?.id ?? "",
+    status: String(invoice.status ?? "unknown"),
+    livemode: Boolean(invoice.livemode ?? livemodeFallback),
+    amountDue: invoice.amount_due ?? 0,
+    amountPaid: invoice.amount_paid ?? 0,
+    currency: String(invoice.currency ?? "usd").toUpperCase(),
+    hostedInvoiceUrl: invoice.hosted_invoice_url ?? null,
+    paymentIntentId,
+    metadata: asMetadata(invoice.metadata),
+  };
+}
+
 export function createLiveCommercialStripeAdapter(
   stripe: Stripe,
 ): CommercialStripeAdapter {
@@ -160,24 +207,75 @@ export function createLiveCommercialStripeAdapter(
       );
       return mapCustomer(customer, false);
     },
+    async createAndFinalizeInvoice(params) {
+      if (params.amountCents <= 0) {
+        throw new Error("Invoice amount must be positive.");
+      }
+      const invoice = await stripe.invoices.create(
+        {
+          customer: params.customerId,
+          currency: params.currency.toLowerCase(),
+          collection_method: "send_invoice",
+          days_until_due: 7,
+          auto_advance: false,
+          automatic_tax: { enabled: false },
+          description: params.description,
+          metadata: params.metadata,
+        },
+        { idempotencyKey: `${params.idempotencyKey}:invoice` },
+      );
+      await stripe.invoiceItems.create(
+        {
+          customer: params.customerId,
+          invoice: invoice.id,
+          amount: params.amountCents,
+          currency: params.currency.toLowerCase(),
+          description: params.description,
+          metadata: params.metadata,
+        },
+        { idempotencyKey: `${params.idempotencyKey}:item` },
+      );
+      const finalized = await stripe.invoices.finalizeInvoice(invoice.id, {
+        expand: ["payment_intent"],
+      });
+      return mapInvoice(finalized, false);
+    },
+    async retrieveInvoice(invoiceId: string) {
+      try {
+        const invoice = await stripe.invoices.retrieve(invoiceId, {
+          expand: ["payment_intent"],
+        });
+        return mapInvoice(invoice, false);
+      } catch (err) {
+        const code =
+          err && typeof err === "object" && "code" in err
+            ? String((err as { code?: string }).code)
+            : "";
+        if (code === "resource_missing") return null;
+        throw err;
+      }
+    },
   };
 }
 
-/** Deterministic fake for isolated tests — never contacts Stripe. */
 export function createFakeCommercialStripeAdapter(options?: {
   accountId?: string;
   livemode?: boolean;
   customers?: CommercialStripeCustomerSnapshot[];
+  invoices?: CommercialStripeInvoiceSnapshot[];
   failVerify?: boolean;
   createBehavior?: "succeed" | "fail_network";
-  /** When set, createCustomer returns this existing customer (idempotent replay). */
   idempotentCreateMap?: Map<string, string>;
+  idempotentInvoiceMap?: Map<string, string>;
 }): CommercialStripeAdapter {
   const accountId = options?.accountId ?? "acct_phase37i_test_fixture";
   const livemode = options?.livemode ?? false;
   const customers = options?.customers ?? [];
+  const invoices = options?.invoices ?? [];
   const idempotentCreateMap = options?.idempotentCreateMap ?? new Map();
+  const idempotentInvoiceMap = options?.idempotentInvoiceMap ?? new Map();
   let createSeq = 0;
+  let invoiceSeq = 0;
 
   return {
     async verifyAccount() {
@@ -236,6 +334,33 @@ export function createFakeCommercialStripeAdapter(options?: {
       customers.push(created);
       idempotentCreateMap.set(params.idempotencyKey, created.id);
       return created;
+    },
+    async createAndFinalizeInvoice(params) {
+      if (params.amountCents <= 0) throw new Error("Invoice amount must be positive.");
+      const priorId = idempotentInvoiceMap.get(params.idempotencyKey);
+      if (priorId) {
+        const prior = invoices.find((i) => i.id === priorId);
+        if (prior) return prior;
+      }
+      invoiceSeq += 1;
+      const created: CommercialStripeInvoiceSnapshot = {
+        id: `in_test_fake_${invoiceSeq}`,
+        customerId: params.customerId,
+        status: "open",
+        livemode: false,
+        amountDue: params.amountCents,
+        amountPaid: 0,
+        currency: params.currency.toUpperCase(),
+        hostedInvoiceUrl: `https://invoice.stripe.com/i/test/fake_${invoiceSeq}`,
+        paymentIntentId: `pi_test_fake_${invoiceSeq}`,
+        metadata: { ...params.metadata },
+      };
+      invoices.push(created);
+      idempotentInvoiceMap.set(params.idempotencyKey, created.id);
+      return created;
+    },
+    async retrieveInvoice(invoiceId: string) {
+      return invoices.find((i) => i.id === invoiceId) ?? null;
     },
   };
 }

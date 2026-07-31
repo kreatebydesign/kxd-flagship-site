@@ -290,6 +290,8 @@ export interface ContractLifecyclePackage {
   clientViewedAt?: string | null;
   executedCertificate?: ExecutionCertificate | null;
   billingPlan?: ProposedBillingPlan | null;
+  /** Controlled Stripe TEST MODE state — never store live objects here. */
+  stripeTest?: import("./stripe-test/invoice-logic.ts").LifecycleStripeTestState | null;
   deliveryPreviews?: LocalDeliveryPreview[];
   auditEvents?: LifecycleAuditEvent[];
   onboardingEligible?: boolean;

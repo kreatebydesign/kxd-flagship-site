@@ -26,6 +26,7 @@ import {
   type StripeReconciliationArchitecture,
   type StripeWebhookArchitecture,
 } from "./integration-readiness-types";
+import { STRIPE_PHASE_LIFECYCLE_TEST_BILLING_AUTHORIZED } from "./lifecycle-test-billing-auth";
 
 /** Synthetic fixtures for isolated tests only — never used for SDK init. */
 export const STRIPE_TEST_FIXTURES = {
@@ -100,8 +101,9 @@ export function getStripeExecutionGate(): StripeExecutionGateSnapshot {
 
 /**
  * Phase 37I/37J: test-mode customer_lookup, reconciliation_read, and
- * customer_create are narrowly authorized. All other mutation classes
- * remain closed via STRIPE_COMMERCIAL_EXECUTION_AUTHORIZED.
+ * customer_create are narrowly authorized.
+ * Lifecycle test billing: invoice_create + commercial lifecycle webhook.
+ * All other mutation classes remain closed via STRIPE_COMMERCIAL_EXECUTION_AUTHORIZED.
  */
 export function isCommercialStripeOperationAllowed(
   operation: StripeOperationClass,
@@ -115,9 +117,12 @@ export function isCommercialStripeOperationAllowed(
     // Narrow Phase 37I/37J ops — still require structural test-mode gate at call site.
     return true;
   }
-  if (operation === "webhook_receive") {
-    // Existing proposal webhook path is separate; commercial webhook expansion is not authorized.
-    return false;
+  if (
+    STRIPE_PHASE_LIFECYCLE_TEST_BILLING_AUTHORIZED &&
+    (operation === "invoice_create" || operation === "webhook_receive")
+  ) {
+    // Lifecycle test invoice + commercial webhook only — still fail-closed on live keys.
+    return true;
   }
   return STRIPE_COMMERCIAL_EXECUTION_AUTHORIZED;
 }

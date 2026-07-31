@@ -46,6 +46,8 @@ export function ContractLifecycleActions(props: {
   });
   const [voidReason, setVoidReason] = useState("");
   const [forceDespiteBillingBlockers, setForceDespiteBillingBlockers] = useState(false);
+  const [stripeTestConfirm, setStripeTestConfirm] = useState(false);
+  const [stripeHostedUrl, setStripeHostedUrl] = useState<string | null>(null);
 
   async function run(action: string, payload: Record<string, unknown>) {
     setBusy(true);
@@ -63,6 +65,9 @@ export function ContractLifecycleActions(props: {
       }
       if (typeof data.signingUrl === "string") {
         setSigningUrl(data.signingUrl);
+      }
+      if (typeof data.hostedInvoiceUrl === "string") {
+        setStripeHostedUrl(data.hostedInvoiceUrl);
       }
       if (data.preview && typeof data.preview === "object") {
         const p = data.preview as { label?: string; subject?: string; bodyText?: string };
@@ -298,8 +303,10 @@ export function ContractLifecycleActions(props: {
 
       {props.hasClientSignature ? (
         <section style={card}>
-          <h3 style={h3}>4. Billing & mock payment</h3>
-          <p style={help}>TEST/MOCK only. livemode remains false. No live Stripe objects.</p>
+          <h3 style={h3}>4. Billing — local mock</h3>
+          <p style={help}>
+            Local deterministic mock only (`cus_mock_*`). Does not contact Stripe. Keep for offline QA.
+          </p>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <button
               type="button"
@@ -327,7 +334,7 @@ export function ContractLifecycleActions(props: {
             </button>
           </div>
           {props.onboardingEligible ? (
-            <p style={okStyle}>
+            <p role="status" style={okStyle}>
               Onboarding is eligible — start onboarding remains a manual operator action.
             </p>
           ) : null}
@@ -340,6 +347,79 @@ export function ContractLifecycleActions(props: {
               ))}
             </ul>
           ) : null}
+        </section>
+      ) : null}
+
+      {props.hasClientSignature ? (
+        <section style={{ ...card, borderColor: "#c9a227", background: "#111" }}>
+          <p
+            style={{
+              margin: 0,
+              color: "#c9a227",
+              letterSpacing: "0.12em",
+              fontSize: 11,
+              textTransform: "uppercase",
+              fontFamily: "system-ui, sans-serif",
+            }}
+          >
+            Stripe test mode
+          </p>
+          <h3 style={{ ...h3, color: "#f7f1e8" }}>5. Controlled Stripe test billing</h3>
+          <p style={{ ...help, color: "#cfc6b8" }}>
+            Creates real Stripe <strong>test</strong> objects only (`sk_test_`). Live keys are rejected.
+            Payment success via signed webhook marks onboarding eligible — activation stays manual. Taxes
+            disabled. Recurring schedules remain blocked.
+          </p>
+          <label style={{ ...check, color: "#f7f1e8" }}>
+            <input
+              type="checkbox"
+              checked={stripeTestConfirm}
+              onChange={(e) => setStripeTestConfirm(e.target.checked)}
+            />
+            I confirm this is Stripe TEST MODE on a disposable fixture (not production)
+          </label>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <button
+              type="button"
+              style={btnGold}
+              disabled={busy}
+              onClick={() => void run("stripe-test-credential-status", {})}
+            >
+              Check test credentials
+            </button>
+            <button
+              type="button"
+              style={btnGold}
+              disabled={busy || !stripeTestConfirm}
+              onClick={() =>
+                void run("stripe-test-ensure-customer", { confirmed: true })
+              }
+            >
+              Create / reuse Stripe test customer
+            </button>
+            <button
+              type="button"
+              style={btn}
+              disabled={busy || !stripeTestConfirm || props.onboardingEligible}
+              onClick={() =>
+                void run("stripe-test-prepare-invoice", { confirmed: true })
+              }
+            >
+              Prepare Stripe test invoice
+            </button>
+          </div>
+          {stripeHostedUrl ? (
+            <p role="status" style={{ ...okStyle, marginTop: 12 }}>
+              TEST MODE — NOT A REAL INVOICE. Pay with Stripe test cards:{" "}
+              <a href={stripeHostedUrl} style={{ color: "#c9a227" }} rel="noreferrer">
+                Open hosted invoice
+              </a>
+            </p>
+          ) : null}
+          <p style={{ ...help, color: "#8a8070", marginTop: 10 }}>
+            Webhook endpoint (local):{" "}
+            <code>/api/stripe/commercial-lifecycle-webhook</code>
+          </p>
         </section>
       ) : null}
 
@@ -398,6 +478,13 @@ const btn: CSSProperties = {
   padding: "0.55rem 0.9rem",
   borderRadius: 2,
   cursor: "pointer",
+  fontFamily: "system-ui, sans-serif",
+  fontSize: 13,
+};
+const btnGold: CSSProperties = {
+  ...btn,
+  background: "#c9a227",
+  color: "#111",
   fontWeight: 600,
 };
 const btnGhost: CSSProperties = {

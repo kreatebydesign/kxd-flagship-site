@@ -16,6 +16,12 @@ import {
 import { generateAndFileExecutedPackage } from "@/lib/proposal-lifecycle/documents/file";
 import { getContractLifecycle } from "@/lib/proposal-lifecycle/services";
 import { newLifecycleId } from "@/lib/proposal-lifecycle/hash";
+import {
+  ensureLifecycleStripeTestCustomer,
+  prepareLifecycleStripeTestInvoice,
+} from "@/lib/proposal-lifecycle/stripe-test/service";
+import { redactStripeId } from "@/lib/stripe/commercial-credentials";
+import { resolveCommercialStripeTestCredentials } from "@/lib/stripe/commercial-credentials";
 
 export const dynamic = "force-dynamic";
 
@@ -183,6 +189,61 @@ export async function POST(
         return NextResponse.json({
           ok: true,
           documentRefs: next.documentRefs ?? [],
+        });
+      }
+      case "stripe-test-credential-status": {
+        const creds = resolveCommercialStripeTestCredentials();
+        return NextResponse.json({
+          ok: true,
+          testMode: true,
+          configured: creds.ok,
+          code: creds.ok ? null : creds.code,
+          message: creds.ok
+            ? "Stripe test credentials resolved (secret not returned)."
+            : creds.message,
+          source: creds.ok ? creds.source : null,
+          webhookConfigured: creds.ok ? Boolean(creds.webhookSecret) : false,
+        });
+      }
+      case "stripe-test-ensure-customer": {
+        if (body.confirmed !== true) {
+          throw new Error("Set confirmed:true to create/reuse a Stripe test customer.");
+        }
+        const result = await ensureLifecycleStripeTestCustomer({
+          contractId: id,
+          actor,
+          confirmed: true,
+        });
+        return NextResponse.json({
+          ok: true,
+          testMode: true,
+          livemode: false,
+          customerIdRedacted: redactStripeId(result.customerId),
+          reused: result.reused,
+          accountIdRedacted: redactStripeId(result.accountId),
+          label: "Stripe test customer",
+        });
+      }
+      case "stripe-test-prepare-invoice": {
+        if (body.confirmed !== true) {
+          throw new Error("Set confirmed:true to prepare a Stripe test invoice.");
+        }
+        const result = await prepareLifecycleStripeTestInvoice({
+          contractId: id,
+          actor,
+          confirmed: true,
+        });
+        return NextResponse.json({
+          ok: true,
+          testMode: true,
+          livemode: false,
+          invoiceIdRedacted: redactStripeId(result.invoiceId),
+          amountCents: result.amountCents,
+          currency: result.currency,
+          hostedInvoiceUrl: result.hostedInvoiceUrl,
+          label: "TEST MODE — NOT A REAL INVOICE",
+          notice:
+            "Pay with Stripe test cards only. Onboarding eligibility requires a verified webhook — activation remains manual.",
         });
       }
       default:

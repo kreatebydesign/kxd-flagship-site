@@ -54,13 +54,69 @@ Do not invent a third public roadmap. Do not expose this document via client rou
 
 ---
 
-## Blockers before controlled Stripe test-mode
+## Controlled Stripe TEST MODE (local integration)
 
-1. KXD legal entity, tax treatment, remittance, invoice numbering reviewed for real use  
-2. Explicit founder authorization for Stripe **test-mode** API calls  
-3. Webhook signature verification path for Stripe (not mock processor)  
-4. Clear separation: mock `evt_mock_*` / `cus_mock_*` never share handlers with live Stripe routes  
-5. Billing readiness cannot be force-bypassed in non-local environments  
+**Status:** Code path implemented; **real Stripe API execution requires protected `sk_test_` credentials in the local environment** (not present at last gate check).
+
+### Canonical boundary
+
+```
+Executed agreement → private filing → billing readiness
+  → Stripe TEST customer (idempotent)
+  → Stripe TEST invoice (idempotent, taxes off)
+  → Hosted invoice / test card payment
+  → Signed commercial lifecycle webhook (`livemode: false`)
+  → Onboarding eligible (manual activation still required)
+```
+
+Mock path (`cus_mock_*`, `evt_mock_*`) remains for offline QA and must never share handlers with `/api/stripe/commercial-lifecycle-webhook`.
+
+### Required local environment (placeholders only)
+
+See `.env.example`:
+
+- `STRIPE_SECRET_KEY_TEST=sk_test_…` (preferred)
+- `STRIPE_WEBHOOK_SECRET_TEST=whsec_…`
+- Optional: `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY_TEST=pk_test_…`
+- Fallback: `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` only if still test-prefixed
+- Live prefixes fail closed. Dedicated live env vars are never selected.
+
+### Webhook setup (Stripe CLI)
+
+```bash
+stripe listen --forward-to localhost:3000/api/stripe/commercial-lifecycle-webhook
+# Put the printed whsec_… into STRIPE_WEBHOOK_SECRET_TEST (never commit)
+```
+
+Operator actions (admin contract workspace): credential check → ensure test customer → prepare test invoice → pay with Stripe test cards → webhook grants eligibility.
+
+### Migrations
+
+No new migration required for Stripe TEST MODE — state lives in `lifecyclePackage.stripeTest` JSON on contracts.
+
+### Monitoring / recovery
+
+- Watch webhook rejects (signature, livemode, metadata mismatch, amount/currency)
+- Operator retry: ensure customer / prepare invoice (idempotent)
+- Do not delete evidence to recover
+
+---
+
+## Blockers before controlled Stripe test-mode **execution**
+
+1. Place `sk_test_` + `whsec_` in protected local `.env.local` (never commit)  
+2. Stripe CLI or Dashboard webhook forwarding to `/api/stripe/commercial-lifecycle-webhook`  
+3. Disposable local fixtures only — never Proposal ID 1  
+4. Confirm account mode via `accounts.retrieve()` → `livemode === false`  
+5. Complete one disposable test payment + replay + mismatch path  
+
+## Blockers before production Stripe
+
+1. Flip of broader commercial execution remains **closed** (`STRIPE_COMMERCIAL_EXECUTION_AUTHORIZED = false`)  
+2. KXD legal/tax/remittance reviewed for live invoicing (no invention)  
+3. Live keys / live webhooks remain rejected by commercial lifecycle resolvers  
+4. Recurring schedules / subscriptions still blocked in this pilot  
+5. Separate production webhook endpoint + monitoring + dual-control approval  
 
 ## Blockers before production email
 
@@ -78,6 +134,7 @@ Do not invent a third public roadmap. Do not expose this document via client rou
 4. Adversarial auth suite green against staging  
 5. Private storage mounts + no public media exposure  
 6. Release owner sign-off  
+7. Onboarding remains separately controlled after payment eligibility  
 
 ---
 
@@ -85,6 +142,7 @@ Do not invent a third public roadmap. Do not expose this document via client rou
 
 ```bash
 KXD_SERVER_ONLY_SHIM=1 npx tsx --import ./scripts/shims/register-server-only.mjs scripts/verify-proposal-lifecycle.ts
+npm run verify:lifecycle-stripe-test
 # Anonymous auth smoke (dev server):
 curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost:3000/api/admin/sales/contracts/6/lifecycle
 npx tsc --noEmit

@@ -134,7 +134,9 @@ This track is distinct from registry phase numbers and from Intelligence Pipelin
 
 Local **Commercial Lifecycle Completion & Operator Experience** plus **Security & Controlled Release Gate** hardening are implemented for mock/script-free operator + client paths (private `commercial-documents`, simulated delivery, mock Stripe, adversarial token/document checks).
 
-Production migration, live Stripe, and production email remain **blocked**. Gate document: `docs/KXD-OS-COMMERCIAL-LIFECYCLE-RELEASE-GATE.md`. Product pillar order: `docs/KXD-OS-PRODUCT-ROADMAP.md` → Future systems.
+**Stripe TEST MODE integration** is wired (credential fail-closed, test customer/invoice adapter, commercial lifecycle webhook, operator TEST MODE actions). Real Stripe API execution remains blocked until protected `sk_test_` / `whsec_` credentials are configured locally — see `docs/KXD-OS-COMMERCIAL-LIFECYCLE-RELEASE-GATE.md`.
+
+Production migration, live Stripe, and production email remain **blocked**. Product pillar order: `docs/KXD-OS-PRODUCT-ROADMAP.md` → Future systems.
 
 ---
 

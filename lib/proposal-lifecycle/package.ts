@@ -21,6 +21,7 @@ export function emptyLifecyclePackage(): ContractLifecyclePackage {
     clientViewedAt: null,
     executedCertificate: null,
     billingPlan: null,
+    stripeTest: null,
     deliveryPreviews: [],
     auditEvents: [],
     onboardingEligible: false,
