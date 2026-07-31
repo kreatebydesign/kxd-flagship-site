@@ -783,6 +783,37 @@ Do **not** update for individual engineering phase completion — that belongs i
 
 ---
 
+## Future systems (private dependency order)
+
+> Internal compass only — not a public marketing surface and not Edition 1 delivery claims.
+> Do not expose these pillars through client-visible routes or unreleased strategy pages.
+
+Future major systems must materially improve at least one of: **revenue, trust, control, intelligence, or measurable outcomes**.
+
+Approved dependency order:
+
+1. Commercial Lifecycle Completion & Operator Experience
+2. Controlled security and adversarial QA *(local release-gate hardening — see `docs/KXD-OS-COMMERCIAL-LIFECYCLE-RELEASE-GATE.md`; not Identity Vault)*
+3. KXD Identity Vault
+4. Authority & Decision Graph
+5. Business Obligation Engine
+6. Scope & Revenue Protection
+7. Client Account Inventory with connected secure vault custody
+8. Hosting Transition & Revenue Engine
+9. Proof-of-Value Engine
+10. Executive Risk Radar
+11. Business Digital Twin
+12. Evidence Graph
+13. Governed AI Workforce
+14. Client Exit & Portability
+15. SaaS productization and founding-client release
+16. Installable cloud/PWA experience
+17. Native mobile companion apps after the core platform is proven
+
+These pillars are **not** implemented by listing them here. Engineering phases remain in the platform registry and `docs/KXD-OS-ROADMAP.md`.
+
+---
+
 ## Document hierarchy (complete)
 
 | Layer | Document |

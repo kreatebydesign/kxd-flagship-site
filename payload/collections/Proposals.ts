@@ -61,10 +61,12 @@ export const Proposals: CollectionConfig = {
       options: [
         { label: "Draft", value: "draft" },
         { label: "Internal Review", value: "internal-review" },
+        { label: "Approved for Sharing", value: "approved-for-sharing" },
         { label: "Sent", value: "sent" },
         { label: "Viewed", value: "viewed" },
         { label: "Questions", value: "questions" },
         { label: "Revision Requested", value: "revision-requested" },
+        { label: "Accepted — Contract Pending", value: "accepted-contract-pending" },
         { label: "Approved", value: "approved" },
         { label: "Declined", value: "declined" },
         { label: "Rejected", value: "rejected" },
@@ -72,6 +74,27 @@ export const Proposals: CollectionConfig = {
         { label: "Archived", value: "archived" },
       ],
       admin: { position: "sidebar" },
+    },
+    {
+      name: "acceptanceMode",
+      type: "select",
+      label: "Acceptance Mode",
+      defaultValue: "accept-and-proceed-to-contract",
+      options: [
+        {
+          label: "Accept and proceed to contract",
+          value: "accept-and-proceed-to-contract",
+        },
+        {
+          label: "Binding proposal (future)",
+          value: "binding-proposal-future",
+        },
+      ],
+      admin: {
+        position: "sidebar",
+        description:
+          "Default acceptance authorizes contract preparation only — not a signed agreement.",
+      },
     },
     {
       name: "approvalStatus",
@@ -407,6 +430,115 @@ export const Proposals: CollectionConfig = {
               type: "checkbox",
               label: "Archived in Portal Resources",
               defaultValue: false,
+            },
+            {
+              name: "proposalDate",
+              type: "date",
+              label: "Proposal Date",
+              admin: { date: { pickerAppearance: "dayOnly" } },
+            },
+            {
+              name: "internalOwner",
+              type: "text",
+              label: "Internal Owner",
+            },
+            {
+              name: "scheduleCallUrl",
+              type: "text",
+              label: "Schedule Call URL",
+            },
+            {
+              name: "relatedContract",
+              type: "relationship",
+              relationTo: "contracts",
+              label: "Related Contract",
+              admin: { readOnly: true },
+            },
+            {
+              name: "shareApprovedAt",
+              type: "date",
+              label: "Share Approved At",
+              admin: { readOnly: true, date: { pickerAppearance: "dayAndTime" } },
+            },
+            {
+              name: "shareApprovedBy",
+              type: "text",
+              label: "Share Approved By",
+              admin: { readOnly: true },
+            },
+            {
+              name: "acceptedAt",
+              type: "date",
+              label: "Accepted At",
+              admin: { readOnly: true, date: { pickerAppearance: "dayAndTime" } },
+            },
+          ],
+        },
+        {
+          label: "Builder",
+          fields: [
+            {
+              name: "builderDocument",
+              type: "json",
+              label: "Builder Document",
+              admin: {
+                description:
+                  "Structured proposal document (organizations, scope groups, pricing in cents, terms).",
+              },
+            },
+            {
+              name: "versionHistory",
+              type: "json",
+              label: "Version History",
+              admin: { readOnly: true },
+            },
+            {
+              name: "shareSnapshot",
+              type: "json",
+              label: "Share Snapshot",
+              admin: {
+                readOnly: true,
+                description: "Immutable client-facing snapshot approved for sharing.",
+              },
+            },
+            {
+              name: "acceptedSnapshot",
+              type: "json",
+              label: "Accepted Snapshot",
+              admin: {
+                readOnly: true,
+                description: "Immutable accepted proposal snapshot.",
+              },
+            },
+            {
+              name: "acceptanceRecord",
+              type: "json",
+              label: "Acceptance Record",
+              admin: { readOnly: true },
+            },
+            {
+              name: "shareLinks",
+              type: "json",
+              label: "Share Links",
+              admin: { readOnly: true },
+            },
+            {
+              name: "changeRequests",
+              type: "json",
+              label: "Change Requests",
+              admin: { readOnly: true },
+            },
+            {
+              name: "publicTokenHash",
+              type: "text",
+              label: "Public Token Hash",
+              admin: { readOnly: true },
+            },
+            {
+              name: "publicTokenPrefix",
+              type: "text",
+              label: "Public Token Prefix",
+              admin: { readOnly: true },
             },
           ],
         },

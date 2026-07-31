@@ -6,11 +6,18 @@ import { publishContractRevenueHook } from "../hooks/revenue-events.ts";
 
 const STATUSES = [
   { label: "Draft", value: "draft" },
+  { label: "Internal Review", value: "internal-review" },
+  { label: "Approved for Signature", value: "approved-for-signature" },
   { label: "Sent", value: "sent" },
+  { label: "Sent for Signature", value: "sent-for-signature" },
   { label: "Viewed", value: "viewed" },
+  { label: "Partially Signed", value: "partially-signed" },
   { label: "Signed", value: "signed" },
+  { label: "Executed", value: "executed" },
   { label: "Declined", value: "declined" },
   { label: "Expired", value: "expired" },
+  { label: "Voided", value: "voided" },
+  { label: "Superseded", value: "superseded" },
   { label: "Archived", value: "archived" },
 ] as const;
 
@@ -154,6 +161,52 @@ export const Contracts: CollectionConfig = {
       type: "relationship",
       relationTo: "retainers",
       label: "Related Retainer",
+    },
+    {
+      name: "contractDraftSnapshot",
+      type: "json",
+      label: "Contract Draft Snapshot",
+      admin: {
+        description:
+          "Structured draft generated from an accepted proposal. Internal review required before sharing.",
+      },
+    },
+    {
+      name: "legalProvisions",
+      type: "json",
+      label: "Legal Provisions (Draft)",
+      admin: {
+        description:
+          "Operational draft fields only — not attorney-approved. Review before signature use.",
+      },
+    },
+    {
+      name: "executedSnapshot",
+      type: "json",
+      label: "Executed Snapshot",
+      admin: {
+        readOnly: true,
+        description: "Immutable executed document snapshot when available.",
+      },
+    },
+    {
+      name: "lifecyclePackage",
+      type: "json",
+      label: "Lifecycle Package",
+      admin: {
+        description:
+          "Structured payment terms, dual-signature evidence, billing plan, local delivery previews, and audit events. Operator workspace: /admin/sales/contracts/[id]",
+      },
+    },
+    {
+      name: "signingTokenHash",
+      type: "text",
+      label: "Signing Token Hash",
+      index: true,
+      admin: {
+        description: "Hashed client signing token — raw token never stored at rest.",
+        position: "sidebar",
+      },
     },
   ],
 };

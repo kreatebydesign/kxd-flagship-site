@@ -1,8 +1,8 @@
-import { ProposalBuilderScreen } from "@/components/admin/sales/ProposalBuilderScreen";
+import { ProposalWorkspaceScreen } from "@/components/admin/sales/ProposalWorkspaceScreen";
+import { requirePayloadAdminPage } from "@/lib/admin/auth";
 import {
   getClientsForProposalPicker,
   getLeadsForProposalPicker,
-  getSectionTemplates,
 } from "@/lib/sales/proposals";
 
 export const dynamic = "force-dynamic";
@@ -10,23 +10,23 @@ export const dynamic = "force-dynamic";
 export default async function NewProposalPage({
   searchParams,
 }: {
-  searchParams: Promise<{ leadId?: string; clientId?: string; source?: string }>;
+  searchParams: Promise<{ leadId?: string; clientId?: string }>;
 }) {
-  const params = await searchParams;
-  const [templates, leads, clients] = await Promise.all([
-    getSectionTemplates(),
+  const user = await requirePayloadAdminPage("/admin/sales/proposals/new");
+  const sp = await searchParams;
+  const [leads, clients] = await Promise.all([
     getLeadsForProposalPicker(),
     getClientsForProposalPicker(),
   ]);
 
   return (
-    <ProposalBuilderScreen
+    <ProposalWorkspaceScreen
       mode="create"
-      templates={templates}
       leads={leads}
       clients={clients}
-      initialLeadId={params.leadId ? Number(params.leadId) : undefined}
-      initialClientId={params.clientId ? Number(params.clientId) : undefined}
+      initialLeadId={sp.leadId ? Number(sp.leadId) : undefined}
+      initialClientId={sp.clientId ? Number(sp.clientId) : undefined}
+      operatorEmail={String(user.email ?? "")}
     />
   );
 }

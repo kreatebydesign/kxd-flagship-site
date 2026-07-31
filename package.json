@@ -102,7 +102,8 @@
     "repair:scheduling-proposals:apply": "KXD_SERVER_ONLY_SHIM=1 APPLY=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/repair-active-scheduling-proposals.ts",
     "verify:executive-memory": "tsx scripts/verify-executive-memory.ts",
     "configure:primal-google-ads": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/configure-primal-google-ads.ts",
-    "configure:primal-google-ads:apply": "KXD_SERVER_ONLY_SHIM=1 APPLY=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/configure-primal-google-ads.ts"
+    "configure:primal-google-ads:apply": "KXD_SERVER_ONLY_SHIM=1 APPLY=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/configure-primal-google-ads.ts",
+    "verify:proposal-builder": "tsx scripts/verify-proposal-builder.ts"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "^3.84.1",

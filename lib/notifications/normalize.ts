@@ -194,6 +194,35 @@ export function normalizeProposalNotification(proposal: AnyDoc, ctx?: Intelligen
       actionLabel: "Open",
     };
   }
+  if (status === "accepted-contract-pending" && proposal.acceptedAt) {
+    const acceptance = proposal.acceptanceRecord as
+      | { name?: string; organization?: string }
+      | null
+      | undefined;
+    const acceptor = acceptance?.name?.trim() || name;
+    const org = acceptance?.organization?.trim() || name;
+    const contractId =
+      typeof proposal.relatedContract === "object"
+        ? proposal.relatedContract?.id
+        : proposal.relatedContract;
+    return {
+      id: `proposal-accepted-${proposal.id}`,
+      virtual: true,
+      source: "sales",
+      title: `Proposal accepted — contract required`,
+      message: `Proposal ${String(proposal.proposalNumber ?? proposal.id)} was accepted by ${acceptor} for ${org}. Contract draft ready for review.`,
+      clientId: cid,
+      clientName: org,
+      severity: "success",
+      module: "Sales",
+      status: "unread",
+      href: contractId
+        ? `/admin/sales/contracts/${contractId}`
+        : `/admin/sales/proposals/${proposal.id}`,
+      createdAt: String(proposal.acceptedAt),
+      actionLabel: "Open contract",
+    };
+  }
   if (["paid", "deposit-paid"].includes(String(proposal.paymentStatus ?? ""))) {
     return {
       id: `proposal-paid-${proposal.id}`,

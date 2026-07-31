@@ -13,6 +13,15 @@ const PROPOSAL_TYPES = [
   { label: "Custom", value: "custom" },
 ] as const;
 
+const TEMPLATE_KINDS = [
+  { label: "Website design & development", value: "website-design-development" },
+  { label: "Monthly website management", value: "monthly-website-management" },
+  { label: "Marketing & advertising management", value: "marketing-advertising-management" },
+  { label: "Combined project + retainer", value: "combined-project-retainer" },
+  { label: "Sponsorship / trade partnership", value: "sponsorship-trade-partnership" },
+  { label: "Custom professional services", value: "custom-professional-services" },
+] as const;
+
 export const ProposalTemplates: CollectionConfig = {
   slug: "proposal-templates",
   labels: { singular: "Proposal Template", plural: "Proposal Templates" },
@@ -91,6 +100,25 @@ export const ProposalTemplates: CollectionConfig = {
       name: "defaultRecurring",
       type: "number",
       label: "Default Recurring ($/mo)",
+    },
+    {
+      name: "templateKind",
+      type: "select",
+      label: "Builder Template Kind",
+      options: [...TEMPLATE_KINDS],
+      admin: {
+        position: "sidebar",
+        description: "Prefills the Proposal Builder document. Editing a proposal does not modify this template.",
+      },
+    },
+    {
+      name: "builderDocument",
+      type: "json",
+      label: "Builder Document",
+      admin: {
+        description:
+          "Structured reusable proposal document. Operational wording only — not attorney-approved legal copy.",
+      },
     },
   ],
 };

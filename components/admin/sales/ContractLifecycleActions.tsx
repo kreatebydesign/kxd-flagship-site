@@ -1,0 +1,424 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useState, type CSSProperties, type FormEvent } from "react";
+
+type Blocker = { code: string; message: string };
+
+export function ContractLifecycleActions(props: {
+  contractId: number;
+  contractStatus: string;
+  hasOperatorSignature: boolean;
+  hasClientSignature: boolean;
+  onboardingEligible: boolean;
+  blockers: Blocker[];
+  defaultRecipientName: string;
+  defaultRecipientEmail: string;
+  documentRefs: Array<{ id: number; kind: string }>;
+}) {
+  const router = useRouter();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  const [signingUrl, setSigningUrl] = useState<string | null>(null);
+  const [deliveryPreview, setDeliveryPreview] = useState<string | null>(null);
+
+  const [signForm, setSignForm] = useState({
+    legalName: "",
+    title: "Principal",
+    entityName: "Kreate by Design",
+    email: "",
+    typedAcknowledgment: "",
+    authorityConfirmed: false,
+    electronicRecordsConsent: false,
+  });
+  const [sendForm, setSendForm] = useState({
+    recipientName: props.defaultRecipientName,
+    recipientEmail: props.defaultRecipientEmail,
+    confirm: false,
+  });
+  const [readinessForm, setReadinessForm] = useState({
+    legalName: "",
+    billingEmail: props.defaultRecipientEmail,
+    billingAddress: "",
+    taxTreatment: "exclusive" as const,
+    applyLocalKxdFixture: false,
+  });
+  const [voidReason, setVoidReason] = useState("");
+  const [forceDespiteBillingBlockers, setForceDespiteBillingBlockers] = useState(false);
+
+  async function run(action: string, payload: Record<string, unknown>) {
+    setBusy(true);
+    setError(null);
+    setMessage(null);
+    try {
+      const res = await fetch(`/api/admin/sales/contracts/${props.contractId}/lifecycle`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, ...payload }),
+      });
+      const data = (await res.json()) as Record<string, unknown>;
+      if (!res.ok || !data.ok) {
+        throw new Error(String(data.error ?? "Action failed."));
+      }
+      if (typeof data.signingUrl === "string") {
+        setSigningUrl(data.signingUrl);
+      }
+      if (data.preview && typeof data.preview === "object") {
+        const p = data.preview as { label?: string; subject?: string; bodyText?: string };
+        setDeliveryPreview([p.label, p.subject, p.bodyText].filter(Boolean).join("\n\n"));
+      }
+      setMessage(`Completed: ${action.replace(/-/g, " ")}.`);
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Action failed.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function onSign(e: FormEvent) {
+    e.preventDefault();
+    void run("sign-operator", signForm);
+  }
+
+  return (
+    <div style={{ display: "grid", gap: "1.25rem" }}>
+      {error ? (
+        <p role="alert" style={errStyle}>
+          {error}
+        </p>
+      ) : null}
+      {message ? (
+        <p role="status" style={okStyle}>
+          {message}
+        </p>
+      ) : null}
+
+      <section style={card}>
+        <h3 style={h3}>1. Resolve billing readiness (local fixture)</h3>
+        <p style={help}>
+          Sets reviewed client billing fields and optional local KXD invoice fixture values. Does not
+          invent production legal facts.
+        </p>
+        <label style={label}>
+          Client legal name
+          <input
+            style={input}
+            value={readinessForm.legalName}
+            onChange={(e) => setReadinessForm({ ...readinessForm, legalName: e.target.value })}
+          />
+        </label>
+        <label style={label}>
+          Billing email
+          <input
+            style={input}
+            value={readinessForm.billingEmail}
+            onChange={(e) => setReadinessForm({ ...readinessForm, billingEmail: e.target.value })}
+          />
+        </label>
+        <label style={label}>
+          Billing address
+          <input
+            style={input}
+            value={readinessForm.billingAddress}
+            onChange={(e) => setReadinessForm({ ...readinessForm, billingAddress: e.target.value })}
+          />
+        </label>
+        <label style={check}>
+          <input
+            type="checkbox"
+            checked={readinessForm.applyLocalKxdFixture}
+            onChange={(e) =>
+              setReadinessForm({ ...readinessForm, applyLocalKxdFixture: e.target.checked })
+            }
+          />
+          Apply local KXD invoice fixture (test only)
+        </label>
+        <button
+          type="button"
+          style={btn}
+          disabled={busy}
+          onClick={() =>
+            void run("resolve-readiness-fields", {
+              ...readinessForm,
+              taxTreatment: "exclusive",
+            })
+          }
+        >
+          Save readiness fields
+        </button>
+      </section>
+
+      {!props.hasOperatorSignature ? (
+        <section style={card}>
+          <h3 style={h3}>2. Sign as Kreate by Design</h3>
+          <p style={help}>
+            Typed electronic signature — acknowledgment with consent, not biometric identity
+            verification.
+          </p>
+          <form onSubmit={onSign}>
+            <label style={label}>
+              Legal name
+              <input
+                required
+                style={input}
+                value={signForm.legalName}
+                onChange={(e) => setSignForm({ ...signForm, legalName: e.target.value })}
+              />
+            </label>
+            <label style={label}>
+              Title
+              <input
+                style={input}
+                value={signForm.title}
+                onChange={(e) => setSignForm({ ...signForm, title: e.target.value })}
+              />
+            </label>
+            <label style={label}>
+              Entity
+              <input
+                style={input}
+                value={signForm.entityName}
+                onChange={(e) => setSignForm({ ...signForm, entityName: e.target.value })}
+              />
+            </label>
+            <label style={label}>
+              Email
+              <input
+                required
+                type="email"
+                style={input}
+                value={signForm.email}
+                onChange={(e) => setSignForm({ ...signForm, email: e.target.value })}
+              />
+            </label>
+            <label style={label}>
+              Type your legal name
+              <input
+                required
+                style={input}
+                value={signForm.typedAcknowledgment}
+                onChange={(e) =>
+                  setSignForm({ ...signForm, typedAcknowledgment: e.target.value })
+                }
+              />
+            </label>
+            <label style={check}>
+              <input
+                type="checkbox"
+                checked={signForm.authorityConfirmed}
+                onChange={(e) =>
+                  setSignForm({ ...signForm, authorityConfirmed: e.target.checked })
+                }
+              />
+              I am authorized to sign for Kreate by Design
+            </label>
+            <label style={check}>
+              <input
+                type="checkbox"
+                checked={signForm.electronicRecordsConsent}
+                onChange={(e) =>
+                  setSignForm({ ...signForm, electronicRecordsConsent: e.target.checked })
+                }
+              />
+              I consent to electronic records and signatures
+            </label>
+            <button type="submit" style={btn} disabled={busy}>
+              Sign agreement (operator)
+            </button>
+          </form>
+        </section>
+      ) : null}
+
+      {props.hasOperatorSignature && !props.hasClientSignature ? (
+        <section style={card}>
+          <h3 style={h3}>3. Simulate client delivery</h3>
+          <p style={help}>
+            <strong>SIMULATED LOCAL DELIVERY</strong> — no real email is sent. Confirm recipient,
+            then generate the secure signing link once.
+          </p>
+          <label style={label}>
+            Recipient name
+            <input
+              style={input}
+              value={sendForm.recipientName}
+              onChange={(e) => setSendForm({ ...sendForm, recipientName: e.target.value })}
+            />
+          </label>
+          <label style={label}>
+            Recipient email
+            <input
+              style={input}
+              value={sendForm.recipientEmail}
+              onChange={(e) => setSendForm({ ...sendForm, recipientEmail: e.target.value })}
+            />
+          </label>
+          <label style={check}>
+            <input
+              type="checkbox"
+              checked={sendForm.confirm}
+              onChange={(e) => setSendForm({ ...sendForm, confirm: e.target.checked })}
+            />
+            I confirm this is a local/test simulated delivery
+          </label>
+          <label style={check}>
+            <input
+              type="checkbox"
+              checked={forceDespiteBillingBlockers}
+              onChange={(e) => setForceDespiteBillingBlockers(e.target.checked)}
+            />
+            Force send despite unresolved KXD billing identity blockers (local QA only)
+          </label>
+          <button
+            type="button"
+            style={btn}
+            disabled={busy || !sendForm.confirm}
+            onClick={() =>
+              void run("send-for-client-signature", {
+                recipientName: sendForm.recipientName,
+                recipientEmail: sendForm.recipientEmail,
+                forceDespiteBillingBlockers,
+              })
+            }
+          >
+            Simulate send for client signature
+          </button>
+          {signingUrl ? (
+            <p style={okStyle}>
+              Secure signing URL (copy now — token not stored in plaintext):{" "}
+              <code style={{ wordBreak: "break-all" }}>{signingUrl}</code>
+            </p>
+          ) : null}
+          {deliveryPreview ? (
+            <pre style={pre}>{deliveryPreview}</pre>
+          ) : null}
+        </section>
+      ) : null}
+
+      {props.hasClientSignature ? (
+        <section style={card}>
+          <h3 style={h3}>4. Billing & mock payment</h3>
+          <p style={help}>TEST/MOCK only. livemode remains false. No live Stripe objects.</p>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <button
+              type="button"
+              style={btnGhost}
+              disabled={busy}
+              onClick={() => void run("prepare-mock-stripe", {})}
+            >
+              Prepare mock Stripe drafts
+            </button>
+            <button
+              type="button"
+              style={btn}
+              disabled={busy || props.onboardingEligible}
+              onClick={() => void run("simulate-mock-payment", { viaWebhook: true })}
+            >
+              Simulate mock payment webhook
+            </button>
+            <button
+              type="button"
+              style={btnGhost}
+              disabled={busy}
+              onClick={() => void run("regenerate-documents", {})}
+            >
+              Regenerate document package
+            </button>
+          </div>
+          {props.onboardingEligible ? (
+            <p style={okStyle}>
+              Onboarding is eligible — start onboarding remains a manual operator action.
+            </p>
+          ) : null}
+          {props.documentRefs.length > 0 ? (
+            <ul style={{ marginTop: 12, paddingLeft: 18 }}>
+              {props.documentRefs.map((d) => (
+                <li key={d.id}>
+                  <a href={`/api/admin/commercial-documents/${d.id}/download`}>{d.kind}</a>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </section>
+      ) : null}
+
+      <section style={card}>
+        <h3 style={h3}>Void contract</h3>
+        <label style={label}>
+          Reason (required)
+          <input
+            style={input}
+            value={voidReason}
+            onChange={(e) => setVoidReason(e.target.value)}
+          />
+        </label>
+        <button
+          type="button"
+          style={btnDanger}
+          disabled={busy || !voidReason.trim() || props.contractStatus === "voided"}
+          onClick={() => void run("void", { reason: voidReason })}
+        >
+          Void with reason
+        </button>
+      </section>
+    </div>
+  );
+}
+
+const card: CSSProperties = {
+  border: "1px solid rgba(255,255,255,0.1)",
+  padding: "1rem 1.1rem",
+  borderRadius: 2,
+};
+const h3: CSSProperties = { margin: "0 0 0.5rem", fontSize: "1rem", fontWeight: 500 };
+const help: CSSProperties = { opacity: 0.75, fontSize: 13, marginBottom: 12, lineHeight: 1.45 };
+const label: CSSProperties = { display: "block", marginBottom: 10, fontSize: 13 };
+const check: CSSProperties = {
+  display: "flex",
+  gap: 8,
+  alignItems: "flex-start",
+  marginBottom: 12,
+  fontSize: 13,
+};
+const input: CSSProperties = {
+  display: "block",
+  width: "100%",
+  marginTop: 4,
+  padding: "0.55rem 0.65rem",
+  borderRadius: 2,
+  border: "1px solid rgba(255,255,255,0.15)",
+  background: "rgba(0,0,0,0.25)",
+  color: "inherit",
+};
+const btn: CSSProperties = {
+  border: "none",
+  background: "#c5a65c",
+  color: "#111",
+  padding: "0.55rem 0.9rem",
+  borderRadius: 2,
+  cursor: "pointer",
+  fontWeight: 600,
+};
+const btnGhost: CSSProperties = {
+  ...btn,
+  background: "transparent",
+  color: "#c5a65c",
+  border: "1px solid #c5a65c",
+};
+const btnDanger: CSSProperties = {
+  ...btn,
+  background: "transparent",
+  color: "#e8a0a0",
+  border: "1px solid #e8a0a0",
+};
+const errStyle: CSSProperties = { color: "#e8a0a0" };
+const okStyle: CSSProperties = { color: "#b7d4a8", fontSize: 14, lineHeight: 1.45 };
+const pre: CSSProperties = {
+  whiteSpace: "pre-wrap",
+  fontSize: 12,
+  opacity: 0.85,
+  marginTop: 12,
+  padding: 12,
+  background: "rgba(0,0,0,0.3)",
+};

@@ -34,6 +34,7 @@ import { ProposalActivity } from "./payload/collections/ProposalActivity.ts";
 import { ProposalConversions } from "./payload/collections/ProposalConversions.ts";
 import { ContractTemplates } from "./payload/collections/ContractTemplates.ts";
 import { Contracts } from "./payload/collections/Contracts.ts";
+import { CommercialDocuments } from "./payload/collections/CommercialDocuments.ts";
 import { ContractActivity } from "./payload/collections/ContractActivity.ts";
 import { BillingProfiles } from "./payload/collections/BillingProfiles.ts";
 import { RevenueEvents } from "./payload/collections/RevenueEvents.ts";
@@ -238,6 +239,7 @@ export default buildConfig({
     ProposalConversions,
     ContractTemplates,
     Contracts,
+    CommercialDocuments,
     ContractActivity,
     BillingProfiles,
     RevenueEvents,

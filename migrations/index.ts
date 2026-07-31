@@ -74,6 +74,9 @@ import * as migration_20260714_phase34d_website_workspace_client_requests from '
 import * as migration_20260808_phase35a_client_plans_entitlements from './20260808_phase35a_client_plans_entitlements';
 import * as migration_20260809_phase35b_client_upgrade_requests from './20260809_phase35b_client_upgrade_requests';
 import * as migration_20260810_website_audit_report_generator from './20260810_website_audit_report_generator';
+import * as migration_20260811_proposal_contract_builder from './20260811_proposal_contract_builder';
+import * as migration_20260812_proposal_lifecycle_package from './20260812_proposal_lifecycle_package';
+import * as migration_20260813_commercial_documents from './20260813_commercial_documents';
 import * as migration_20260721_phase36a_commercial_agreements from './20260721_phase36a_commercial_agreements';
 import * as migration_20260721_phase37g_billing_configuration from './20260721_phase37g_billing_configuration';
 import * as migration_20260721_phase37i_stripe_customer_mapping from './20260721_phase37i_stripe_customer_mapping';
@@ -509,5 +512,20 @@ export const migrations = [
     up: migration_20260810_website_audit_report_generator.up,
     down: migration_20260810_website_audit_report_generator.down,
     name: '20260810_website_audit_report_generator',
+  },
+  {
+    up: migration_20260811_proposal_contract_builder.up,
+    down: migration_20260811_proposal_contract_builder.down,
+    name: '20260811_proposal_contract_builder',
+  },
+  {
+    up: migration_20260812_proposal_lifecycle_package.up,
+    down: migration_20260812_proposal_lifecycle_package.down,
+    name: '20260812_proposal_lifecycle_package',
+  },
+  {
+    up: migration_20260813_commercial_documents.up,
+    down: migration_20260813_commercial_documents.down,
+    name: '20260813_commercial_documents',
   },
 ];

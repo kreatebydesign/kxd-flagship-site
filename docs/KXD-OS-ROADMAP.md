@@ -130,6 +130,14 @@ This track is distinct from registry phase numbers and from Intelligence Pipelin
 
 ---
 
+## Commercial lifecycle (engineering status)
+
+Local **Commercial Lifecycle Completion & Operator Experience** plus **Security & Controlled Release Gate** hardening are implemented for mock/script-free operator + client paths (private `commercial-documents`, simulated delivery, mock Stripe, adversarial token/document checks).
+
+Production migration, live Stripe, and production email remain **blocked**. Gate document: `docs/KXD-OS-COMMERCIAL-LIFECYCLE-RELEASE-GATE.md`. Product pillar order: `docs/KXD-OS-PRODUCT-ROADMAP.md` → Future systems.
+
+---
+
 ## Future Direction (Edition 1 Priorities)
 
 Ordered by architectural dependency:

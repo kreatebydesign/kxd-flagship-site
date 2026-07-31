@@ -1,10 +1,10 @@
 import { notFound } from "next/navigation";
-import { ProposalBuilderScreen } from "@/components/admin/sales/ProposalBuilderScreen";
+import { ProposalWorkspaceScreen } from "@/components/admin/sales/ProposalWorkspaceScreen";
+import { requirePayloadAdminPage } from "@/lib/admin/auth";
 import {
   getClientsForProposalPicker,
   getLeadsForProposalPicker,
   getProposalById,
-  getSectionTemplates,
 } from "@/lib/sales/proposals";
 
 export const dynamic = "force-dynamic";
@@ -18,9 +18,9 @@ export default async function EditProposalPage({
   const proposalId = Number(id);
   if (!proposalId) notFound();
 
-  const [proposal, templates, leads, clients] = await Promise.all([
+  const user = await requirePayloadAdminPage(`/admin/sales/proposals/${proposalId}`);
+  const [proposal, leads, clients] = await Promise.all([
     getProposalById(proposalId),
-    getSectionTemplates(),
     getLeadsForProposalPicker(),
     getClientsForProposalPicker(),
   ]);
@@ -28,12 +28,12 @@ export default async function EditProposalPage({
   if (!proposal) notFound();
 
   return (
-    <ProposalBuilderScreen
+    <ProposalWorkspaceScreen
       mode="edit"
       proposal={proposal}
-      templates={templates}
       leads={leads}
       clients={clients}
+      operatorEmail={String(user.email ?? "")}
     />
   );
 }

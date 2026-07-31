@@ -26,11 +26,18 @@ export type LeadStatus = (typeof LEAD_STATUSES)[number];
 
 export const PROPOSAL_STATUSES = [
   "draft",
+  "internal-review",
+  "approved-for-sharing",
   "sent",
   "viewed",
+  "questions",
+  "revision-requested",
+  "accepted-contract-pending",
   "approved",
+  "declined",
   "rejected",
   "expired",
+  "archived",
 ] as const;
 
 export type ProposalStatus = (typeof PROPOSAL_STATUSES)[number];
