@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import {
   KxdBadge,
   KxdEmptyState,
@@ -56,11 +57,13 @@ export function ReportsScreen({
   clients,
   defaultMonth,
   defaultYear,
+  children,
 }: {
   dashboard: ReportingDashboardData;
   clients: { id: number; name: string; slug: string | null }[];
   defaultMonth: number;
   defaultYear: number;
+  children?: ReactNode;
 }) {
   const reports = dashboard.recentReports as ReportDoc[];
 
@@ -82,6 +85,8 @@ export function ReportsScreen({
             </Link>
           </div>
         </div>
+
+        {children}
 
         <KxdSection label="Recent Reports">
           {reports.length === 0 ? (

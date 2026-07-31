@@ -1,5 +1,8 @@
 import { ReportsScreen } from "@/components/admin/operations/reports/ReportsScreen";
+import { BrandedReportsOverview } from "@/components/admin/operations/reports/BrandedReportsOverview";
 import { getReportingDashboard } from "@/lib/reporting/engine";
+import { getBrandedReportingOverview } from "@/lib/reporting/branded-client/lifecycle";
+import { july2026ControlledPeriod } from "@/lib/reporting/branded-client/period";
 import { getPayload } from "payload";
 import config from "@payload-config";
 
@@ -7,7 +10,8 @@ export const dynamic = "force-dynamic";
 
 export default async function ReportsOperationsPage() {
   const now = new Date();
-  const [dashboard, clientsResult] = await Promise.all([
+  const period = july2026ControlledPeriod();
+  const [dashboard, clientsResult, branded] = await Promise.all([
     getReportingDashboard(),
     getPayload({ config }).then((p) =>
       p.find({
@@ -18,6 +22,7 @@ export default async function ReportsOperationsPage() {
         overrideAccess: true,
       }),
     ),
+    getBrandedReportingOverview(period),
   ]);
 
   const clients = clientsResult.docs.map((c) => ({
@@ -32,6 +37,8 @@ export default async function ReportsOperationsPage() {
       clients={clients}
       defaultMonth={now.getMonth() + 1}
       defaultYear={now.getFullYear()}
-    />
+    >
+      <BrandedReportsOverview period={branded.period} rows={branded.rows} />
+    </ReportsScreen>
   );
 }

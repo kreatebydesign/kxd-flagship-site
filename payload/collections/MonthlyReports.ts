@@ -52,6 +52,46 @@ export const MonthlyReports: CollectionConfig = {
       admin: { position: "sidebar" },
     },
     {
+      name: "approvalStatus",
+      type: "select",
+      required: true,
+      defaultValue: "draft",
+      label: "Approval Status",
+      options: [
+        { label: "Draft", value: "draft" },
+        { label: "In review", value: "in-review" },
+        { label: "Approved", value: "approved" },
+        { label: "Ready for manual delivery", value: "ready-for-manual-delivery" },
+        { label: "Archived", value: "archived" },
+      ],
+      admin: {
+        position: "sidebar",
+        description:
+          "Approval-first branded PDF lifecycle. Download does not mark the report as emailed.",
+      },
+    },
+    {
+      name: "deliveryMode",
+      type: "select",
+      defaultValue: "manual",
+      label: "Delivery Mode",
+      options: [
+        { label: "Manual delivery", value: "manual" },
+        { label: "Future automatic (not enabled)", value: "future-automatic" },
+      ],
+      admin: {
+        position: "sidebar",
+        description: "Automatic email delivery is not enabled in this release.",
+      },
+    },
+    {
+      name: "reportingTimezone",
+      type: "text",
+      label: "Reporting Timezone",
+      defaultValue: "America/Los_Angeles",
+      admin: { position: "sidebar" },
+    },
+    {
       name: "reportType",
       type: "select",
       label: "Report Type",
@@ -182,6 +222,134 @@ export const MonthlyReports: CollectionConfig = {
               type: "textarea",
               label: "Internal Notes",
               admin: { description: "Internal only — never shown on the printable report." },
+            },
+            {
+              name: "websitePerformanceNarrative",
+              type: "textarea",
+              label: "Website Performance Narrative",
+            },
+            {
+              name: "organicSearchNarrative",
+              type: "textarea",
+              label: "Organic Search Narrative",
+            },
+            {
+              name: "googleAdsNarrative",
+              type: "textarea",
+              label: "Google Ads Narrative",
+            },
+            {
+              name: "improvementsMade",
+              type: "textarea",
+              label: "Improvements and Wins",
+            },
+            {
+              name: "issuesOrRisks",
+              type: "textarea",
+              label: "Issues or Risks",
+            },
+            {
+              name: "augustPriorities",
+              type: "textarea",
+              label: "August / Next-Month Priorities",
+            },
+            {
+              name: "closingNote",
+              type: "textarea",
+              label: "Closing Note",
+            },
+            {
+              name: "includedCapabilities",
+              type: "json",
+              label: "Included Report Capabilities",
+              admin: {
+                description:
+                  "Operator-confirmed or profile-derived scope. Fail closed when ambiguous.",
+              },
+            },
+            {
+              name: "scopeConfirmedBy",
+              type: "text",
+              label: "Scope Confirmed By",
+            },
+            {
+              name: "scopeConfirmedAt",
+              type: "date",
+              label: "Scope Confirmed At",
+              admin: { date: { pickerAppearance: "dayAndTime" } },
+            },
+            {
+              name: "scopeNotes",
+              type: "textarea",
+              label: "Scope Notes",
+            },
+            {
+              name: "selectedWorkItems",
+              type: "json",
+              label: "Selected Work Items",
+              admin: {
+                description: "Client-visible completed work included before approval.",
+              },
+            },
+            {
+              name: "dataProvenance",
+              type: "json",
+              label: "Data Provenance",
+            },
+            {
+              name: "approvedSnapshot",
+              type: "json",
+              label: "Approved Snapshot",
+              admin: {
+                readOnly: true,
+                description: "Immutable approved client-facing snapshot.",
+              },
+            },
+            {
+              name: "approvedFingerprint",
+              type: "text",
+              label: "Approved Fingerprint",
+              admin: { readOnly: true, position: "sidebar" },
+            },
+            {
+              name: "reportApprovedAt",
+              type: "date",
+              label: "Report Approved At",
+              admin: { date: { pickerAppearance: "dayAndTime" }, position: "sidebar" },
+            },
+            {
+              name: "reportApprovedBy",
+              type: "text",
+              label: "Report Approved By",
+              admin: { position: "sidebar" },
+            },
+            {
+              name: "pdfGeneratedAt",
+              type: "date",
+              label: "PDF Generated At",
+              admin: { date: { pickerAppearance: "dayAndTime" }, position: "sidebar" },
+            },
+            {
+              name: "pdfDownloadedAt",
+              type: "date",
+              label: "PDF Downloaded At",
+              admin: { date: { pickerAppearance: "dayAndTime" }, position: "sidebar" },
+            },
+            {
+              name: "pdfDownloadedBy",
+              type: "text",
+              label: "PDF Downloaded By",
+              admin: { position: "sidebar" },
+            },
+            {
+              name: "pdfStorageKey",
+              type: "text",
+              label: "PDF Storage Key",
+              admin: {
+                readOnly: true,
+                position: "sidebar",
+                description: "Private relative storage key — never expose raw paths publicly.",
+              },
             },
           ],
         },

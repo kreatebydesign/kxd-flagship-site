@@ -274,6 +274,59 @@ export const ClientInfrastructure: CollectionConfig = {
                   "Daily automated sync hour in America/Los_Angeles (default 5 = 5:00 AM Pacific).",
               },
             },
+            {
+              name: "reportingEnabled",
+              type: "checkbox",
+              label: "Client Reporting Enabled",
+              defaultValue: true,
+              admin: {
+                description: "When disabled, branded monthly reports fail closed for this client.",
+              },
+            },
+            {
+              name: "reportingTimezone",
+              type: "text",
+              label: "Reporting Timezone",
+              defaultValue: "America/Los_Angeles",
+              admin: {
+                description:
+                  "IANA timezone for report period labels. Defaults to America/Los_Angeles.",
+              },
+            },
+            {
+              name: "reportingCapabilitiesOverride",
+              type: "json",
+              label: "Reporting Capabilities Override",
+              admin: {
+                description:
+                  "Optional operator-confirmed report capabilities. Never infer paid scope from integrations alone.",
+              },
+            },
+            {
+              name: "reportingRecipients",
+              type: "json",
+              label: "Reporting Recipients (Future)",
+              admin: {
+                description:
+                  "Stored for future automatic delivery. This release does not email reports.",
+              },
+            },
+            {
+              name: "reportingDayPreference",
+              type: "number",
+              label: "Preferred Reporting Day",
+              min: 1,
+              max: 28,
+              admin: {
+                description: "Future automation preference only — no scheduler in this release.",
+              },
+            },
+            {
+              name: "reportingOperatorNotes",
+              type: "textarea",
+              label: "Reporting Operator Notes",
+              admin: { description: "Internal only." },
+            },
             { name: "emailProvider", type: "text", label: "Email Provider" },
             { name: "workspaceProvider", type: "text", label: "Workspace Provider" },
             { name: "emailDomain", type: "text", label: "Email Domain" },

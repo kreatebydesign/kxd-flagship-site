@@ -158,3 +158,6 @@ export type {
   NextMonthStrategyRow,
   PerformanceReportType,
 } from "./performance-types";
+
+/** July 2026 — Approval-first branded client monthly reports (Phase A) */
+export * from "./branded-client";

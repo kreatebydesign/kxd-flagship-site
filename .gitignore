@@ -53,3 +53,4 @@ private/client-review-media/*
 # local verification artifacts
 /tmp/
 storage/commercial-documents/
+storage/branded-monthly-reports/
