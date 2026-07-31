@@ -19,15 +19,12 @@ const ROOTS = [
 
 const FORBIDDEN: Array<{ name: string; re: RegExp }> = [
   { name: "classic Visa test PAN 4242…", re: /4242424242424242/ },
-  { name: "card.number assignment", re: /card\s*:\s*\{[^}]*\bnumber\s*:/s },
+  { name: "card.number assignment", re: /card\s*:\s*\{[^}]*\bnumber\s*:/ },
   { name: "exp_month with number field nearby", re: /\bexp_month\s*:\s*\d+/ },
   { name: "exp_year with number field nearby", re: /\bexp_year\s*:\s*\d+/ },
   { name: "cvc field", re: /\bcvc\s*:\s*['"`]?\d{3,4}/ },
   { name: "tokens.create", re: /\.tokens\.create\s*\(/ },
-  {
-    name: "paymentMethods.create with card token/PAN",
-    re: /paymentMethods\.create\s*\([\s\S]*?card\s*:\s*\{[\s\S]*?(?:number|token)\s*:/,
-  },
+  { name: "paymentMethods.create with card token/PAN", re: /paymentMethods\.create\s*\([\s\S]*?card\s*:\s*\{[\s\S]*?(?:number|token)\s*:/ },
 ];
 
 let passed = 0;
