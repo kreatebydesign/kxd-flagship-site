@@ -289,6 +289,17 @@ function main() {
     healthData.includes("loadClientReportingConnection") &&
       healthData.includes("searchConsoleConfigured"),
   );
+  check(
+    "website audit lookup requires authorized client FK",
+    healthData.includes("getPortalWebsiteAudit(") &&
+      healthData.includes("authorizedClientId") &&
+      healthData.includes("client: { equals: authorizedClientId }") &&
+      healthData.includes("resolveAuditClientId(audit.client) !== authorizedClientId"),
+  );
+  check(
+    "website audit does not authorize by host contains alone",
+    !/where:\s*\{\s*website:\s*\{\s*contains:\s*websiteHost\s*\}\s*\}/.test(healthData),
+  );
 
   const analyticsScreen = read("components/client-hq/AnalyticsScreen.tsx");
   check(

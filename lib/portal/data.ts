@@ -332,32 +332,64 @@ export async function getPortalMeetings(session: PortalSession): Promise<PortalM
     });
 }
 
+function resolveAuditClientId(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value) && value > 0) return value;
+  if (value && typeof value === "object" && "id" in value) {
+    const id = Number((value as { id: number }).id);
+    return Number.isFinite(id) && id > 0 ? id : null;
+  }
+  return null;
+}
+
+/**
+ * Portal website audit lookup — Batch E isolation.
+ * Only audits explicitly linked to the authorized client are returned.
+ * Domain/host matching alone is never authorization (shared hosts must not leak).
+ */
 async function getPortalWebsiteAudit(
+  authorizedClientId: number,
   client: PortalDoc | null,
   onboarding: PortalDoc | null,
 ): Promise<PortalWebsiteAuditSummary | null> {
+  if (!Number.isFinite(authorizedClientId) || authorizedClientId <= 0) return null;
+
   const payload = await getPayload({ config });
   const website = String(onboarding?.currentWebsite ?? client?.companyWebsite ?? "").trim();
-
-  // Require a client website match — never resolve audits by email/company alone
-  // (shared contacts or company names could otherwise cross client boundaries).
-  if (!website) return null;
-
   const websiteHost = website.replace(/^https?:\/\//i, "").replace(/\/.*$/, "").trim();
-  if (!websiteHost) return null;
 
-  const result = await payload.find({
+  // Fail closed on client FK. Prefer host-aligned audits within that client only.
+  const clientClause = { client: { equals: authorizedClientId } };
+  const where = websiteHost
+    ? { and: [clientClause, { website: { contains: websiteHost } }] }
+    : clientClause;
+
+  let result = await payload.find({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     collection: "website-audits" as any,
-    where: { website: { contains: websiteHost } },
+    where,
     sort: "-createdAt",
     limit: 1,
     depth: 0,
     overrideAccess: true,
   });
 
+  // If host filter missed a client-linked audit, fall back to latest for this client only.
+  if (result.docs.length === 0 && websiteHost) {
+    result = await payload.find({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      collection: "website-audits" as any,
+      where: clientClause,
+      sort: "-createdAt",
+      limit: 1,
+      depth: 0,
+      overrideAccess: true,
+    });
+  }
+
   if (result.docs.length === 0) return null;
   const audit = result.docs[0] as PortalDoc;
+  if (resolveAuditClientId(audit.client) !== authorizedClientId) return null;
+
   return {
     id: audit.id as number,
     website: String(audit.website ?? website),
@@ -382,7 +414,7 @@ export async function getPortalWebsiteHealth(session: PortalSession): Promise<Po
     getPortalTimeline(session),
     loadClientReportingConnection(session.clientId),
   ]);
-  const latestAudit = await getPortalWebsiteAudit(client, onboarding);
+  const latestAudit = await getPortalWebsiteAudit(session.clientId, client, onboarding);
 
   const domain = String(onboarding?.currentWebsite ?? client?.companyWebsite ?? "").trim() || null;
   const hosting = onboarding?.hostingProvider ? String(onboarding.hostingProvider) : null;
