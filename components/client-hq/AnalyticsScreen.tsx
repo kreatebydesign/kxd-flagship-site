@@ -1,29 +1,19 @@
-import { KxdEmptyState, KxdPage } from "@/components/os";
+import { KxdPage } from "@/components/os";
+import { AnalyticsVisibilityWorkspace } from "@/components/portal/AnalyticsVisibilityWorkspace";
+import type { AnalyticsVisibilityModel } from "@/lib/portal/analytics-visibility";
 import { ClientHqPageHero } from "./ClientHqPageHero";
 
-export function AnalyticsScreen({ analyticsConnected }: { analyticsConnected: boolean }) {
+export function AnalyticsScreen({ model }: { model: AnalyticsVisibilityModel }) {
   return (
     <KxdPage className="kxd-os-page--ops">
       <ClientHqPageHero
         eyebrow="Intelligence"
         title="Analytics"
-        lead="Traffic, conversions, and growth signals for your digital presence."
+        lead={`Traffic, search, and tracked conversion signals for ${model.clientName} — this active account only.`}
       />
-
-      {analyticsConnected ? (
-        <div className="kxd-os-card">
-          <p className="kxd-os-section__label">Analytics connected</p>
-          <p className="kxd-os-body" style={{ marginTop: "0.75rem" }}>
-            Your analytics account is on file. Detailed reporting and dashboards are coming in a
-            future release.
-          </p>
-        </div>
-      ) : (
-        <KxdEmptyState
-          title="Analytics not connected"
-          description="Connect Google Analytics or ask your KXD team to configure reporting. Live dashboards are planned for a future release."
-        />
-      )}
+      <div className="kxd-ws-perf-wrap">
+        <AnalyticsVisibilityWorkspace model={model} />
+      </div>
     </KxdPage>
   );
 }

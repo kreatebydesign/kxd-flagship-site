@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { decidePortalReportAccess } from "@/lib/portal/analytics-visibility";
 import { getPortalSession } from "@/lib/portal/session";
 import { getReportById, recordPortalReportView } from "@/lib/reporting/engine";
 
@@ -14,20 +15,22 @@ export async function POST(
   }
 
   const { id } = await params;
-  const report = await getReportById(Number(id));
-  if (!report || report.status !== "published") {
+  const reportId = Number(id);
+  if (!Number.isFinite(reportId) || reportId <= 0) {
     return NextResponse.json({ success: false, error: "Not found." }, { status: 404 });
   }
 
-  const clientId =
-    typeof report.client === "object" && report.client !== null
-      ? (report.client as { id: number }).id
-      : report.client;
+  const report = await getReportById(reportId);
+  const access = decidePortalReportAccess({
+    report,
+    authorizedClientId: session.clientId,
+  });
 
-  if (clientId !== session.clientId) {
-    return NextResponse.json({ success: false, error: "Forbidden." }, { status: 403 });
+  // Uniform denial for forged / cross-client report ids.
+  if (!access.ok) {
+    return NextResponse.json({ success: false, error: "Not found." }, { status: 404 });
   }
 
-  await recordPortalReportView(Number(id));
+  await recordPortalReportView(reportId);
   return NextResponse.json({ success: true });
 }

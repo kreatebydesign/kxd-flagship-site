@@ -9,9 +9,11 @@ type ReportDoc = Record<string, any>;
 export function ReportsScreen({
   reports,
   filterYear,
+  clientName,
 }: {
   reports: ReportDoc[];
   filterYear?: number;
+  clientName: string;
 }) {
   const filtered = filterYear
     ? reports.filter((r) => Number(r.reportingYear) === filterYear)
@@ -24,11 +26,18 @@ export function ReportsScreen({
       <ClientHqPageHero
         eyebrow="Intelligence"
         title="Reports"
-        lead="Monthly executive reports — prepared by KXD and published to your Client HQ."
+        lead={`Monthly executive reports for ${clientName} — prepared by KXD and published to this account only.`}
       />
 
+      <p className="kxd-os-eyebrow" style={{ marginBottom: "1rem" }}>
+        {clientName}
+      </p>
+
       {years.length > 1 ? (
-        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "1.5rem" }}>
+        <nav
+          aria-label="Filter reports by year"
+          style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "1.5rem" }}
+        >
           <Link href="/portal/reports" className="kxd-os-btn kxd-os-btn--ghost">
             All years
           </Link>
@@ -37,22 +46,23 @@ export function ReportsScreen({
               {y}
             </Link>
           ))}
-        </div>
+        </nav>
       ) : null}
 
       {filtered.length === 0 ? (
         <KxdEmptyState
           title="No reports published yet"
-          description="Your monthly executive reports will appear here once KXD publishes them."
+          description="Your monthly executive reports will appear here once KXD publishes them for this account."
         />
       ) : (
-        <div className="kxd-os-card-list">
+        <div className="kxd-os-card-list" role="list" aria-label={`Published reports for ${clientName}`}>
           {filtered.map((r) => (
             <Link
               key={r.id as number}
               href={`/portal/reports/${r.id}`}
               className="kxd-os-card kxd-os-card--link"
               style={{ display: "block", marginBottom: "0.65rem", textDecoration: "none" }}
+              role="listitem"
             >
               <p className="kxd-os-card__title">{String(r.title ?? "Executive Report")}</p>
               <p className="kxd-os-meta" style={{ marginTop: "0.35rem" }}>
@@ -67,6 +77,16 @@ export function ReportsScreen({
           ))}
         </div>
       )}
+
+      <p style={{ marginTop: "1.5rem" }}>
+        <Link href="/portal/analytics" className="kxd-os-link-quiet">
+          Website performance &amp; leads
+        </Link>
+        {" · "}
+        <Link href="/portal/website-health" className="kxd-os-link-quiet">
+          Website health
+        </Link>
+      </p>
     </KxdPage>
   );
 }

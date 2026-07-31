@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { ReportViewScreen } from "@/components/client-hq";
+import { decidePortalReportAccess } from "@/lib/portal/analytics-visibility";
 import { getReportById } from "@/lib/reporting/engine";
 import { getPortalSession } from "@/lib/portal/session";
 
@@ -14,15 +15,17 @@ export default async function PortalReportViewPage({
   if (!session) redirect("/portal/login");
 
   const { id } = await params;
-  const report = await getReportById(Number(id));
-  if (!report || report.status !== "published") notFound();
+  const reportId = Number(id);
+  if (!Number.isFinite(reportId) || reportId <= 0) notFound();
 
-  const clientId =
-    typeof report.client === "object" && report.client !== null
-      ? (report.client as { id: number }).id
-      : report.client;
+  const report = await getReportById(reportId);
+  const access = decidePortalReportAccess({
+    report,
+    authorizedClientId: session.clientId,
+  });
 
-  if (clientId !== session.clientId) notFound();
+  // Uniform denial — do not reveal whether another client's report exists.
+  if (!access.ok) notFound();
 
-  return <ReportViewScreen report={report} />;
+  return <ReportViewScreen report={report!} />;
 }

@@ -20108,6 +20108,28 @@ html[data-theme="dark"] .kxd-os-theme-pref__option.is-active {
   }
 }
 
+/* ── Batch E: Analytics visibility ───────────────────────────────────────── */
+
+.kxd-analytics-vis {
+  min-width: 0;
+}
+
+.kxd-analytics-vis .kxd-os-section__label {
+  margin: 0;
+}
+
+.kxd-analytics-vis a:focus-visible,
+.kxd-analytics-vis .kxd-os-link-quiet:focus-visible {
+  outline: 2px solid var(--kxd-os-focus, currentColor);
+  outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+  .kxd-analytics-vis {
+    gap: 1.25rem;
+  }
+}
+
 /* ── Website Audit Report Editor ─────────────────────────────────────────── */
 
 .kxd-audit-report-editor {
