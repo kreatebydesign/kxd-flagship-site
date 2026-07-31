@@ -41,6 +41,7 @@
     "verify:website-review-linked-work": "tsx scripts/verify-website-review-linked-work.ts",
     "verify:website-audit-report": "tsx scripts/verify-website-audit-report.ts",
     "verify:branded-client-reports": "tsx scripts/verify-branded-client-reports.ts",
+    "verify:stripe-no-raw-card": "tsx scripts/verify-stripe-no-raw-card-data.ts",
     "verify:portal-date-hydration": "tsx scripts/verify-portal-date-hydration.ts",
     "verify:staff-experience": "tsx scripts/verify-staff-experience.ts",
     "verify:review-inbox-bulk-complete": "tsx scripts/verify-review-inbox-bulk-complete.ts",

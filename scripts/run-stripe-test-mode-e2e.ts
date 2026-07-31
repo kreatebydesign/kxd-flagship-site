@@ -7,7 +7,8 @@
  *     scripts/run-stripe-test-mode-e2e.ts
  *
  * Optional: STRIPE_E2E_PAY=1 to pay the open test invoice via Stripe test PM
- * (pm_card_visa) after prepare — still requires CLI webhook forwarding for eligibility.
+ * `pm_card_visa` after prepare — still requires CLI webhook forwarding for eligibility.
+ * Never constructs raw card numbers/CVC; never uses Tokens API card material.
  */
 import { createHash } from "crypto";
 import { mkdirSync, writeFileSync } from "fs";
@@ -34,6 +35,9 @@ import {
 } from "../lib/proposal-lifecycle/stripe-test/service.ts";
 import { redactStripeId } from "../lib/stripe/commercial-credentials.ts";
 import { getCommercialStripeClient } from "../lib/stripe/commercial-client.ts";
+
+/** Stripe-published test PaymentMethod — no raw PAN/CVC, no Tokens API. */
+export const STRIPE_TEST_PAYMENT_METHOD_VISA = "pm_card_visa";
 
 const OUT_DIR = join(process.cwd(), "tmp", "proposal-lifecycle-qa", "stripe-test-e2e");
 
@@ -301,14 +305,9 @@ async function main() {
   };
   if (process.env.STRIPE_E2E_PAY === "1") {
     const stripe = getCommercialStripeClient("invoice_create");
-    // Attach Stripe-published test token (tok_visa) — never log card material.
-    const pm = await stripe.paymentMethods.create({
-      type: "card",
-      card: { token: "tok_visa" },
-    });
-    await stripe.paymentMethods.attach(pm.id, { customer: customer.customerId });
+    // Use Stripe's published test PaymentMethod id — never construct PAN/CVC or Tokens.
     const paid = await stripe.invoices.pay(invoice.invoiceId, {
-      payment_method: pm.id,
+      payment_method: STRIPE_TEST_PAYMENT_METHOD_VISA,
     });
     payResult = {
       paid: paid.status === "paid",
@@ -388,8 +387,8 @@ async function main() {
     manualPayRequired: process.env.STRIPE_E2E_PAY !== "1",
     notice:
       process.env.STRIPE_E2E_PAY === "1"
-        ? "Paid via Stripe test token tok_visa; confirm webhook established eligibility."
-        : "Open hostedInvoiceUrl and pay with Stripe test card 4242… — then re-check eligibility.",
+        ? "Paid via Stripe test PaymentMethod pm_card_visa; confirm webhook established eligibility."
+        : "Open hostedInvoiceUrl and pay in Stripe Checkout/hosted invoice (test mode) — then re-check eligibility. Do not paste raw PAN into server code.",
   };
 
   writeFileSync(join(OUT_DIR, `report-${suffix}.json`), JSON.stringify(report, null, 2));
