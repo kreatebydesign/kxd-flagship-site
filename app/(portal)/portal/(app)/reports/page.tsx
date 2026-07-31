@@ -17,5 +17,11 @@ export default async function PortalReportsPage({
   const reports = await getPortalReports(session.clientId);
   const filterYear = params.year ? Number(params.year) : undefined;
 
-  return <ReportsScreen reports={reports} filterYear={filterYear} />;
+  return (
+    <ReportsScreen
+      reports={reports}
+      filterYear={filterYear}
+      clientName={session.clientName}
+    />
+  );
 }

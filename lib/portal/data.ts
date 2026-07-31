@@ -4,6 +4,7 @@ import { getPayload } from "payload";
 import config from "@payload-config";
 import { calculateOnboardingReadiness } from "@/lib/client-onboarding";
 import { getPortalClientTasks } from "@/lib/client-tasks";
+import { loadClientReportingConnection } from "@/lib/reporting/providers/connection";
 import { requirePortalSession, type PortalSession } from "./session";
 import type {
   PortalDoc,
@@ -375,17 +376,27 @@ async function getPortalWebsiteAudit(
 }
 
 export async function getPortalWebsiteHealth(session: PortalSession): Promise<PortalWebsiteHealthData> {
-  const [client, onboarding, timeline] = await Promise.all([
+  const [client, onboarding, timeline, connection] = await Promise.all([
     getPortalClient(session),
     getPortalOnboarding(session),
     getPortalTimeline(session),
+    loadClientReportingConnection(session.clientId),
   ]);
   const latestAudit = await getPortalWebsiteAudit(client, onboarding);
 
   const domain = String(onboarding?.currentWebsite ?? client?.companyWebsite ?? "").trim() || null;
   const hosting = onboarding?.hostingProvider ? String(onboarding.hostingProvider) : null;
   const domainRegistrar = onboarding?.domainRegistrar ? String(onboarding.domainRegistrar) : null;
-  const analyticsConnected = Boolean(onboarding?.analyticsConnected);
+  const onboardingAnalytics = Boolean(onboarding?.analyticsConnected);
+  const ga4Configured =
+    connection != null &&
+    connection.clientId === session.clientId &&
+    Boolean(connection.ga4PropertyId);
+  const searchConsoleConfigured =
+    connection != null &&
+    connection.clientId === session.clientId &&
+    Boolean(connection.searchConsoleSiteUrl);
+  const analyticsConnected = onboardingAnalytics || ga4Configured;
   const usesHttps = domain ? /^https:\/\//i.test(domain) : false;
 
   const lastDeployment = timeline.find((event) =>
@@ -433,27 +444,42 @@ export async function getPortalWebsiteHealth(session: PortalSession): Promise<Po
     },
     {
       id: "analytics",
-      label: "Analytics connected",
-      value: analyticsConnected ? "Connected" : "Not connected",
-      status: analyticsConnected ? "ok" : "pending",
+      label: "Analytics",
+      value: ga4Configured
+        ? "GA4 property on file"
+        : analyticsConnected
+          ? "Marked connected"
+          : "Not configured",
+      status: ga4Configured || analyticsConnected ? "ok" : "pending",
+      detail: ga4Configured
+        ? "Configured for this account"
+        : analyticsConnected
+          ? "Onboarding notes analytics connected; property ID not yet on file"
+          : "No GA4 property configured for this account",
     },
     {
       id: "search-console",
-      label: "Search Console connected",
-      value: "Not on file",
-      status: "unknown",
+      label: "Search Console",
+      value: searchConsoleConfigured ? "Site on file" : "Not configured",
+      status: searchConsoleConfigured ? "ok" : "pending",
+      detail: searchConsoleConfigured
+        ? "Configured for this account"
+        : "No Search Console site configured for this account",
     },
     {
       id: "forms",
       label: "Forms",
-      value: "Monitoring coming soon",
+      value: "See Analytics for tracked form facts",
       status: "pending",
+      detail:
+        "Form submission counts appear on Analytics only when reporting facts include them — never invented here.",
     },
     {
       id: "backups",
       label: "Backups",
-      value: "Monitoring coming soon",
-      status: "pending",
+      value: "Monitoring not available",
+      status: "unknown",
+      detail: "Backup monitoring is not exposed in the portal yet.",
     },
     {
       id: "deployment",
@@ -465,8 +491,25 @@ export async function getPortalWebsiteHealth(session: PortalSession): Promise<Po
   ];
 
   const knownIssues = latestAudit?.opportunities ?? [];
+  const sourceNotes: string[] = [];
+  if (!ga4Configured && !analyticsConnected) {
+    sourceNotes.push("Website analytics is not configured for this account yet.");
+  }
+  if (!searchConsoleConfigured) {
+    sourceNotes.push("Search Console is not configured for this account yet.");
+  }
+  if (!latestAudit) {
+    sourceNotes.push("No website audit is on file for this account.");
+  }
 
-  return { domain, signals, latestAudit, knownIssues };
+  return {
+    clientName: session.clientName,
+    domain,
+    signals,
+    latestAudit,
+    knownIssues,
+    sourceNotes,
+  };
 }
 
 export async function getPortalTeam(session: PortalSession): Promise<PortalTeamMember[]> {

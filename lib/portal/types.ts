@@ -28,10 +28,14 @@ export interface PortalWebsiteAuditSummary {
 }
 
 export interface PortalWebsiteHealthData {
+  /** Active account display name — session-authorized client only. */
+  clientName: string;
   domain: string | null;
   signals: PortalHealthSignal[];
   latestAudit: PortalWebsiteAuditSummary | null;
   knownIssues: string[];
+  /** Honest source notes when analytics / Search Console are not configured. */
+  sourceNotes: string[];
 }
 
 export interface PortalMeetingItem {
