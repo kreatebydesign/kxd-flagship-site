@@ -2,7 +2,10 @@
  * Controlled Stripe TEST MODE — commercial lifecycle verification (no network required).
  *   KXD_SERVER_ONLY_SHIM=1 npx tsx --import ./scripts/shims/register-server-only.mjs scripts/verify-lifecycle-stripe-test.ts
  */
-import { createFakeCommercialStripeAdapter } from "../lib/stripe/commercial-stripe-adapter.ts";
+import {
+  createFakeCommercialStripeAdapter,
+  normalizeStripeLivemodeFlag,
+} from "../lib/stripe/commercial-stripe-adapter.ts";
 import { resolveCommercialStripeTestCredentials } from "../lib/stripe/commercial-credentials.ts";
 import { detectSecretKeyMode } from "../lib/stripe/integration-readiness-logic.ts";
 import { isCommercialStripeOperationAllowed } from "../lib/stripe/integration-readiness-logic.ts";
@@ -35,6 +38,10 @@ check("invoice_create authorized for lifecycle phase", isCommercialStripeOperati
 check("subscription_create still closed", !isCommercialStripeOperationAllowed("subscription_create"));
 check("live fixture key classified live", detectSecretKeyMode(STRIPE_TEST_FIXTURES.secretLive) === "live");
 check("test fixture key classified test", detectSecretKeyMode(STRIPE_TEST_FIXTURES.secretTest) === "test");
+check("explicit false livemode is safe", normalizeStripeLivemodeFlag(false) === false);
+check("explicit true livemode is unsafe", normalizeStripeLivemodeFlag(true) === true);
+check("missing livemode fails closed as unsafe", normalizeStripeLivemodeFlag(undefined) === true);
+check("null livemode fails closed as unsafe", normalizeStripeLivemodeFlag(null) === true);
 
 const priorTest = process.env.STRIPE_SECRET_KEY_TEST;
 const priorGeneric = process.env.STRIPE_SECRET_KEY;
@@ -267,6 +274,36 @@ const failedEvt = processLifecycleStripeTestWebhookEvent({
   expectedClientId: 7,
 });
 check("payment failure does not grant eligibility", failedEvt.onboardingEligible !== true);
+
+const paidThenFail = processLifecycleStripeTestWebhookEvent({
+  event: {
+    id: "evt_stale_after_paid",
+    type: "invoice.payment_failed",
+    livemode: false,
+    data: {
+      object: {
+        id: invoice.id,
+        customer: customer.id,
+        status: "open",
+        metadata: meta,
+      },
+    },
+  },
+  plan: paid.plan!,
+  stripeTest: paid.stripeTest!,
+  expectedContractId: 99,
+  expectedClientId: 7,
+});
+check("stale failure after paid ignored", Boolean(paidThenFail.ok && paidThenFail.duplicate));
+check(
+  "stale failure does not regress paid status",
+  paidThenFail.stripeTest?.invoiceStatus === "paid",
+);
+check(
+  "stale failure preserves eligibility source",
+  paidThenFail.stripeTest?.eligibilitySource === "stripe-test-payment" &&
+    paidThenFail.onboardingEligible === true,
+);
 
 console.log(`\n${passed} passed, ${failed} failed\n`);
 if (failed) process.exit(1);

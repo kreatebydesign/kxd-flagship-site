@@ -88,9 +88,19 @@ function asMetadata(meta: Stripe.Metadata | null | undefined): Record<string, st
   return out;
 }
 
+/**
+ * Fail closed for commercial TEST MODE gates.
+ * Only an explicit `livemode: false` is treated as test; missing/undefined is unsafe (live).
+ */
+export function normalizeStripeLivemodeFlag(
+  livemode: boolean | undefined | null,
+): boolean {
+  return livemode !== false;
+}
+
 function mapCustomer(
   customer: Stripe.Customer | Stripe.DeletedCustomer,
-  livemodeFallback: boolean,
+  livemodeFallback: boolean | undefined,
 ): CommercialStripeCustomerSnapshot {
   if ("deleted" in customer && customer.deleted) {
     return {
@@ -98,7 +108,9 @@ function mapCustomer(
       name: null,
       email: null,
       deleted: true,
-      livemode: livemodeFallback,
+      livemode: normalizeStripeLivemodeFlag(
+        (customer as { livemode?: boolean }).livemode ?? livemodeFallback,
+      ),
       created: null,
       metadata: {},
     };
@@ -109,7 +121,7 @@ function mapCustomer(
     name: live.name ?? null,
     email: live.email ?? null,
     deleted: false,
-    livemode: Boolean(
+    livemode: normalizeStripeLivemodeFlag(
       (live as { livemode?: boolean }).livemode ?? livemodeFallback,
     ),
     created: typeof live.created === "number" ? live.created : null,
@@ -119,7 +131,7 @@ function mapCustomer(
 
 function mapInvoice(
   invoice: Stripe.Invoice,
-  livemodeFallback: boolean,
+  livemodeFallback: boolean | undefined,
 ): CommercialStripeInvoiceSnapshot {
   const pi = invoice.payment_intent;
   const paymentIntentId =
@@ -131,7 +143,9 @@ function mapInvoice(
         ? invoice.customer
         : invoice.customer?.id ?? "",
     status: String(invoice.status ?? "unknown"),
-    livemode: Boolean(invoice.livemode ?? livemodeFallback),
+    livemode: normalizeStripeLivemodeFlag(
+      (invoice.livemode as boolean | undefined) ?? livemodeFallback,
+    ),
     amountDue: invoice.amount_due ?? 0,
     amountPaid: invoice.amount_paid ?? 0,
     currency: String(invoice.currency ?? "usd").toUpperCase(),
@@ -147,13 +161,18 @@ export function createLiveCommercialStripeAdapter(
   return {
     async verifyAccount() {
       const account = await stripe.accounts.retrieve();
-      const livemode = Boolean((account as { livemode?: boolean }).livemode);
-      return { accountId: account.id, livemode };
+      // Account self-retrieve often omits `livemode`. Balance always includes it.
+      const balance = await stripe.balance.retrieve();
+      const accountFlag = (account as { livemode?: boolean }).livemode;
+      if (accountFlag === true || balance.livemode !== false) {
+        return { accountId: account.id, livemode: true };
+      }
+      return { accountId: account.id, livemode: false };
     },
     async retrieveCustomer(customerId: string) {
       try {
         const customer = await stripe.customers.retrieve(customerId);
-        return mapCustomer(customer, false);
+        return mapCustomer(customer, undefined);
       } catch (err) {
         const code =
           err && typeof err === "object" && "code" in err
@@ -168,8 +187,8 @@ export function createLiveCommercialStripeAdapter(
         email: email.trim(),
         limit: Math.min(Math.max(limit, 1), 10),
       });
-      const livemode = Boolean((list as { livemode?: boolean }).livemode);
-      return list.data.map((row) => mapCustomer(row, livemode));
+      const listFlag = (list as { livemode?: boolean }).livemode;
+      return list.data.map((row) => mapCustomer(row, listFlag));
     },
     async listCustomersByName(name: string, limit: number) {
       try {
@@ -178,8 +197,8 @@ export function createLiveCommercialStripeAdapter(
           query: `name~'${escaped}'`,
           limit: Math.min(Math.max(limit, 1), 10),
         });
-        const livemode = Boolean((result as { livemode?: boolean }).livemode);
-        return result.data.map((row) => mapCustomer(row, livemode));
+        const listFlag = (result as { livemode?: boolean }).livemode;
+        return result.data.map((row) => mapCustomer(row, listFlag));
       } catch {
         return [];
       }
@@ -190,8 +209,8 @@ export function createLiveCommercialStripeAdapter(
           query: `metadata['${KXD_STRIPE_CLIENT_METADATA_KEY}']:'${clientId}'`,
           limit: Math.min(Math.max(limit, 1), 10),
         });
-        const livemode = Boolean((result as { livemode?: boolean }).livemode);
-        return result.data.map((row) => mapCustomer(row, livemode));
+        const listFlag = (result as { livemode?: boolean }).livemode;
+        return result.data.map((row) => mapCustomer(row, listFlag));
       } catch {
         return [];
       }
@@ -205,7 +224,7 @@ export function createLiveCommercialStripeAdapter(
         },
         { idempotencyKey: params.idempotencyKey },
       );
-      return mapCustomer(customer, false);
+      return mapCustomer(customer, undefined);
     },
     async createAndFinalizeInvoice(params) {
       if (params.amountCents <= 0) {
@@ -238,14 +257,14 @@ export function createLiveCommercialStripeAdapter(
       const finalized = await stripe.invoices.finalizeInvoice(invoice.id, {
         expand: ["payment_intent"],
       });
-      return mapInvoice(finalized, false);
+      return mapInvoice(finalized, undefined);
     },
     async retrieveInvoice(invoiceId: string) {
       try {
         const invoice = await stripe.invoices.retrieve(invoiceId, {
           expand: ["payment_intent"],
         });
-        return mapInvoice(invoice, false);
+        return mapInvoice(invoice, undefined);
       } catch (err) {
         const code =
           err && typeof err === "object" && "code" in err

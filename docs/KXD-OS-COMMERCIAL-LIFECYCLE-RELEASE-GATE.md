@@ -104,11 +104,11 @@ No new migration required for Stripe TEST MODE — state lives in `lifecyclePack
 
 ## Blockers before controlled Stripe test-mode **execution**
 
-1. Place `sk_test_` + `whsec_` in protected local `.env.local` (never commit)  
-2. Stripe CLI or Dashboard webhook forwarding to `/api/stripe/commercial-lifecycle-webhook`  
-3. Disposable local fixtures only — never Proposal ID 1  
-4. Confirm account mode via `accounts.retrieve()` → `livemode === false`  
-5. Complete one disposable test payment + replay + mismatch path  
+1. ~~Place `sk_test_` + `whsec_` in protected local `.env.local` (never commit)~~ — local operator configured  
+2. ~~Stripe CLI or Dashboard webhook forwarding to `/api/stripe/commercial-lifecycle-webhook`~~ — active for disposable E2E  
+3. ~~Disposable local fixtures only — never Proposal ID 1~~ — verified  
+4. ~~Confirm test mode via credential prefix + Balance `livemode === false`~~ (Account self-retrieve may omit `livemode`; adapter uses Balance)  
+5. ~~Complete one disposable test payment + replay + mismatch path~~ — verified on disposable local DB  
 
 ## Blockers before production Stripe
 
@@ -143,6 +143,11 @@ No new migration required for Stripe TEST MODE — state lives in `lifecyclePack
 ```bash
 KXD_SERVER_ONLY_SHIM=1 npx tsx --import ./scripts/shims/register-server-only.mjs scripts/verify-proposal-lifecycle.ts
 npm run verify:lifecycle-stripe-test
+# Disposable E2E (local DB + Stripe CLI required; never Proposal ID 1):
+KXD_SERVER_ONLY_SHIM=1 STRIPE_E2E_PAY=1 npx tsx --env-file=.env.local \
+  --import ./scripts/shims/register-server-only.mjs scripts/run-stripe-test-mode-e2e.ts
+KXD_SERVER_ONLY_SHIM=1 CONTRACT_ID=<id> npx tsx --env-file=.env.local \
+  --import ./scripts/shims/register-server-only.mjs scripts/verify-stripe-test-e2e-followup.ts
 # Anonymous auth smoke (dev server):
 curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost:3000/api/admin/sales/contracts/6/lifecycle
 npx tsc --noEmit

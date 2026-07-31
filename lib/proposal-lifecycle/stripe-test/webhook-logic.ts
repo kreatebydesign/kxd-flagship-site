@@ -117,6 +117,24 @@ export function processLifecycleStripeTestWebhookEvent(input: {
   }
 
   if (event.type === "invoice.payment_failed" || event.type === "invoice.voided" || event.type === "invoice.marked_uncollectible") {
+    // Never regress a verified paid invoice / established eligibility on stale failure events.
+    if (
+      stripeTest.invoiceStatus === "paid" ||
+      stripeTest.eligibilitySource === "stripe-test-payment" ||
+      stripeTest.paidAt
+    ) {
+      return {
+        ok: true,
+        duplicate: true,
+        plan,
+        stripeTest: {
+          ...stripeTest,
+          processedEventIds: [...processed, event.id],
+          lastError: `ignored_stale_${event.type}`,
+        },
+        onboardingEligible: stripeTest.eligibilitySource === "stripe-test-payment",
+      };
+    }
     return {
       ok: true,
       plan,

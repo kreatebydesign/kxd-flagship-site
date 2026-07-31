@@ -416,6 +416,14 @@ export function ContractLifecycleActions(props: {
               </a>
             </p>
           ) : null}
+          {props.onboardingEligible ? (
+            <div role="status" style={{ marginTop: 12 }}>
+              <p style={{ ...okStyle, margin: 0 }}>Stripe test payment verified</p>
+              <p style={{ ...okStyle, margin: "6px 0 0" }}>
+                Onboarding eligible — activation still requires operator approval
+              </p>
+            </div>
+          ) : null}
           <p style={{ ...help, color: "#8a8070", marginTop: 10 }}>
             Webhook endpoint (local):{" "}
             <code>/api/stripe/commercial-lifecycle-webhook</code>
