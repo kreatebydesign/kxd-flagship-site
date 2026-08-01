@@ -812,6 +812,18 @@ Approved dependency order:
 
 These pillars are **not** implemented by listing them here. Engineering phases remain in the platform registry and `docs/KXD-OS-ROADMAP.md`.
 
+### Product-track alignment — Phase 5 (Client Billing Visibility)
+
+**Active product-track phase (not a Future-systems pillar rewrite):**  
+`docs/PHASE-5-CLIENT-BILLING-VISIBILITY.md` — **Phase 5 — Client Billing Visibility, Stripe Invoice Status & Monthly Work Summaries**.
+
+- Approved for phased implementation; **Batch 5A implemented/verified** in repository (`verify:phase5-batch-5a`); Batches **5B–5E not authorized**.
+- Delivers Stripe-authoritative invoice **visibility** + Stripe-hosted pay actions + honest monthly work summaries.
+- Does **not** implement Hosting Transition & Revenue Engine (Future systems item 8 remains deferred).
+- Does **not** create an accounting ledger, Work Ledger, payment vault, or Wave/QuickBooks dual-ledger.
+- Reuses Commercial Lifecycle / Phases 35–37 foundations; commercial execution gate remains closed for mutations.
+- Engineering status and batch gates: `docs/KXD-OS-ROADMAP.md`, `docs/KXD-OS-CURRENT-STATE.md`.
+
 ---
 
 ## Document hierarchy (complete)

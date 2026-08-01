@@ -80,6 +80,9 @@ export function WorkPerformanceWorkspace({
       ) : null}
 
       <Section label="Work completed this month">
+        <p className="kxd-os-meta" style={{ marginBottom: "0.75rem" }}>
+          {model.monthlySummaryScopeNote}
+        </p>
         {model.completedThisMonth.length === 0 ? (
           <Empty {...model.emptyStates.completed} />
         ) : (
@@ -89,7 +92,9 @@ export function WorkPerformanceWorkspace({
                 <p className="kxd-os-body">{item.title}</p>
                 <p className="kxd-os-meta">
                   {item.categoryLabel ? `${item.categoryLabel} · ` : ""}
-                  {(item.completedAt ?? item.updatedAt).slice(0, 10)}
+                  {item.completedAt
+                    ? item.completedAt.slice(0, 10)
+                    : "Completion date not recorded"}
                 </p>
               </li>
             ))}

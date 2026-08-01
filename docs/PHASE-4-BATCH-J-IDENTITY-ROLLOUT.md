@@ -1,7 +1,7 @@
 # Phase 4 Batch J — Identity Security Production Rollout
 
 **Purpose:** Controlled production release of Batch I identity/security foundation + compatibility verification.  
-**Not in scope:** Real client invitations, Don/Billy/Nicole/Adam/Tyler mutations, KXD Connect, Support, Academy, Meetings, Social Studio, weather, personalized workspace shell, Phase 5, Approvals product.
+**Not in scope:** Real client invitations, Don/Billy/Nicole/Adam/Tyler mutations, KXD Connect, Support, Academy, Meetings, Social Studio, weather, personalized workspace shell, Approvals product, or any Phase 5 billing/work-summary implementation (Phase 5 is a separately approved parallel lane — `docs/PHASE-5-CLIENT-BILLING-VISIBILITY.md` — and is not part of Batch J).
 
 ## Release identity
 

@@ -2,8 +2,9 @@
 
 **Edition 1 · Engineering Memory**  
 **Status:** Permanent — repository is the source of truth  
-**Last aligned:** July 27, 2026  
-**Companion:** `docs/KXD-OS-ENGINEERING-BRIEF.md`, `docs/KXD-OS-ARCHITECTURE.md`, `docs/KXD-OS-ROADMAP.md`
+**Last aligned:** August 1, 2026  
+**Companion:** `docs/KXD-OS-ENGINEERING-BRIEF.md`, `docs/KXD-OS-ARCHITECTURE.md`, `docs/KXD-OS-ROADMAP.md`  
+**Operator schedule:** Immediate priorities + Operator workflow schedule below are the authoritative next-work list (no separate Monday calendar file).
 
 ---
 
@@ -211,7 +212,7 @@ Edition 1 is in the **operate and extend** phase — not redesign.
 - Operator-only contacts + relationship events; Clients Relationship tab; Events workspace; portfolio connections; privacy hardening
 - Remains portal-inaccessible; do not reopen
 
-### Approved next product phase
+### Active product phase (not fully production-complete)
 
 **Phase 4 — Multi-Client Portal Access & Account Context** — Batches A–I implemented in repository. **Code-complete; awaiting authenticated production rollout QA** (not fully production-complete). Production membership migration already applied; Batch I additive migration `20260814_phase4_portal_identity_security` is **local/repo only until separately approved** (not applied to production in this batch).
 
@@ -226,9 +227,26 @@ Edition 1 is in the **operate and extend** phase — not redesign.
 - Batch H: completion verifier; account-switcher keyboard/a11y + long-name overflow; rollout checklist; authenticated multi-client production QA **blocked** pending safe production identity inventory
 - Batch I: private invitations, membership roles, WebAuthn passkeys, TOTP MFA, recovery codes (`verify:phase4-portal-identity-security`); Portal Access invitation UI; activation + security enrollment — implementation commit `f3cfb92`
 - Batch J: identity security production rollout procedure (`docs/PHASE-4-BATCH-J-IDENTITY-ROLLOUT.md`) + pilot runbook; real client invites/mutations still operator-gated
+- Batch J.2B.2, Primal walkthrough, and Primal reporting pilot remain **paused** pending the Monday Primal Analytics Ownership Audit
 - Remaining open risk: pre-existing public Payload `/media/...` onboarding-asset exposure (not redesigned in Batch H/I/J); serverless rate limits are best-effort
 - No Cusick production linking yet
 - First production configuration remains Cusick account group (four independent clients) after ops readiness + Don/Cusick live QA
+- **Do not mark Phase 4 fully production-complete.** Starting Phase 5 does not waive, bypass, redefine, or complete any remaining Phase 4 rollout requirement.
+
+### Approved parallel product phase
+
+**Phase 5 — Client Billing Visibility, Stripe Invoice Status & Monthly Work Summaries** — **Approved for phased implementation.** **Batch 5A implemented in repository and verified** (`verify:phase5-batch-5a`) — awaiting review/commit. Batches **5B–5E not authorized**. Phase 5 as a whole is **not** complete.
+
+- Spec: `docs/PHASE-5-CLIENT-BILLING-VISIBILITY.md`
+- Parallel **non-Primal** lane while Phase 4 production rollout remains partially blocked by the Primal Analytics Ownership Audit
+- Must remain independent of Primal analytics, GA4, Google Ads, reporting entitlements, the Primal website repository, and Primal OS
+- Reuses Phases 35–37 commercial foundations; does not reopen commercial activation/mutation scope
+- Stripe is sole client-facing invoice/payment SOT for this phase; Wave/QuickBooks are not portal invoice sources
+- Invoice reads (Batch 5B+) must use a narrow read-only authorization path separate from `STRIPE_COMMERCIAL_EXECUTION_AUTHORIZED`
+- `/portal/invoices` remains launch-hidden until Batch 5C is complete and verified
+- Hosting Transitions and KXD-generated invoice emails/dunning are excluded
+- **Batch 5A:** Monthly Work Summary Reliability — `lib/portal/work-performance/monthly-summary.ts` + Work & Performance honesty/date fixes
+- Remaining batches: 5B Stripe Invoice Read Foundation → 5C Portal Billing Visibility → 5D Staff Invoice Visibility → 5E optional Billing/Work-Summary context
 
 ### Parallel ops track (migration-independent)
 
@@ -240,11 +258,176 @@ Edition 1 is in the **operate and extend** phase — not redesign.
 
 ### Immediate priorities
 
-1. **Phase 4 — Multi-Client Portal Access & Account Context** — Production DB identity gate **cleared** (Vercel Neon store `kxd-flagship-db` / project `mute-violet-81514071` ≡ Target A). Backup/PITR gate **conditionally cleared** on Free plan (instant restore history window max **6 hours**; take a manual Neon snapshot immediately before any production migrate; Launch upgrade recommended for 7-day retention). Production migrations applied successfully (`20260727_phase3_client_relationship_intelligence`, `20260728_phase4_portal_client_memberships`, `20260810_website_audit_report_generator`; `migrate:status` batch 46, Ran = Yes); no production migrations remain pending. Batches A–H implemented in repository (`verify:phase4-multi-client-portal-completion`). Phase 4 remains **not fully production-complete** until authenticated multi-client rollout QA + Don/Cusick four-account readiness. Do not begin a later roadmap phase until that decision is explicit.
-2. **Client operations at scale** — Repeat the Primal launch pattern using `lib/client-launch/` for every new client workspace (including OTP Carts readiness before Cusick membership linking). Gate Batch A: `verify:otp-carts-readiness`.
-3. **Business Memory integration** — Wire `runBusinessMemory()` into rituals or intelligence when explicitly requested; foundation exists, UI does not. Phase 3 prepared durable relationship context but does not integrate Business Memory yet.
-4. **Executive experience polish** — Premium ritual presentation (KHIG) without new intelligence layers.
-5. **Human-approved automation** — Connect Observer automation metadata and Pulse posture to rules; no autonomous execution without approval.
+1. **Monday, August 3, 2026 — Primal Analytics Ownership Audit and GA4 Cutover Decision (High)** — 30–60 minute screen share with Adam. Full ordered workflow, ownership model, Path A/B decision rules, evidence checklist, and ChatGPT handoff prompt: see [Operator workflow schedule](#operator-workflow-schedule) below. **Blocks** Batch J.2B.2 (Primal GA4 & Ads entitle + sync), the controlled Primal existing-login walkthrough, and the Primal reporting pilot. Unrelated KXD OS development may continue before and after this audit. Do **not** enable `website-analytics` / `google-ads`, run J.2B.2, or start the walkthrough until the permanent Analytics property is selected and authenticated provider probes succeed.
+2. **Phase 4 — Multi-Client Portal Access & Account Context** — Production DB identity gate **cleared** (Vercel Neon store `kxd-flagship-db` / project `mute-violet-81514071` ≡ Target A). Backup/PITR gate **conditionally cleared** on Free plan (instant restore history window max **6 hours**; take a manual Neon snapshot immediately before any production migrate; Launch upgrade recommended for 7-day retention). Production migrations applied successfully (`20260727_phase3_client_relationship_intelligence`, `20260728_phase4_portal_client_memberships`, `20260810_website_audit_report_generator`; `migrate:status` batch 46, Ran = Yes); no production migrations remain pending. Batches A–H implemented in repository (`verify:phase4-multi-client-portal-completion`). Phase 4 remains **not fully production-complete** until authenticated multi-client rollout QA + Don/Cusick four-account readiness. Batch J / J.2B.2 / Primal walkthrough / reporting pilot remain paused as scheduled. Do **not** mark Phase 4 complete.
+3. **Phase 5 — Client Billing Visibility, Stripe Invoice Status & Monthly Work Summaries** — Approved parallel non-Primal product lane. Spec: `docs/PHASE-5-CLIENT-BILLING-VISIBILITY.md`. **Batch 5A implemented/verified in repo** (`npm run verify:phase5-batch-5a`); awaiting review/commit. Do **not** start Batches 5B–5E. Do not couple Phase 5 to Primal analytics or Batch J.2B.2.
+4. **Client operations at scale** — Repeat the Primal launch pattern using `lib/client-launch/` for every new client workspace (including OTP Carts readiness before Cusick membership linking). Gate Batch A: `verify:otp-carts-readiness`.
+5. **Business Memory integration** — Wire `runBusinessMemory()` into rituals or intelligence when explicitly requested; foundation exists, UI does not. Phase 3 prepared durable relationship context but does not integrate Business Memory yet.
+6. **Executive experience polish** — Premium ritual presentation (KHIG) without new intelligence layers.
+7. **Human-approved automation** — Connect Observer automation metadata and Pulse posture to rules; no autonomous execution without approval.
+
+### Operator workflow schedule
+
+Authoritative dated operator sessions and blockers. Update this section when a scheduled work session is added or completed. Do not create a parallel Monday calendar document.
+
+#### Monday, August 3, 2026 — Primal Analytics Ownership Audit and GA4 Cutover Decision
+
+| Field | Value |
+|-------|--------|
+| **Priority** | High |
+| **Duration** | 30–60 minutes with Adam (screen share) |
+| **Blocks** | Batch J.2B.2 — Primal GA4 & Ads Entitle + Sync; controlled Primal existing-login walkthrough; Primal reporting pilot |
+| **May continue in parallel** | Unrelated KXD OS development (not reporting entitle/sync, not pilot walkthrough) |
+
+##### Confirmed context (do not re-discover blindly)
+
+- Legacy GA4 property: `530873364`
+- Ben and Nick originally configured the legacy analytics setup
+- Matt does not currently see Primal in his Google Analytics account
+- Adam says he does not have normal Google Analytics access
+- Adam previously saw the GA4 tracker/property through a Google Ads screen with a three-dot **Manage** option — Ads visibility is **not** proof of GA4 account/property admin access
+- Legacy GA4 tracker remains installed on the active Primal Google Ads landing page (retained to avoid disrupting historical reporting/conversions)
+- Permanent ownership/admin control of the legacy property is **unverified**
+- KXD OS cannot read the legacy property — reporting SA is not Viewer: `kxd-os-reporting@kxd-os.iam.gserviceaccount.com`
+- Ads API version defect already repaired and deployed: `v18` → `v25`, commit `9e226d6`, deploy `dpl_HhApn2RdCdJZroHfe4bnRT355NmY` (production READY)
+- Google Ads API must still be enabled in GCP project `571979415347` / `kxd-os`
+- Search Console is healthy — leave undisturbed
+- Preserve Google Ads campaign history; do not modify campaigns
+- Primal OS and Primal website repository remain untouched during this audit
+- Confirmed-lead tracking remains unavailable and separate from GA4 lead actions and Ads conversions
+- No reporting entitlement activation until the permanent analytics property is selected and authenticated probes succeed
+
+##### Mandatory ownership model
+
+> **Primal owns the Analytics asset. KXD administers it. KXD OS receives read-only reporting access.**
+
+For any permanent Primal Analytics setup:
+
+| Principal | Role |
+|-----------|------|
+| Adam or a durable Primal-controlled Google account | Administrator and permanent client owner |
+| Matt / KXD Google account | Administrator |
+| `kxd-os-reporting@kxd-os.iam.gserviceaccount.com` | Viewer |
+| Ben and Nick | No access to a newly created Analytics account or property |
+
+Do **not** create the permanent Primal Analytics account or property solely under Matt’s KXD Google account. Adam must never send passwords, verification codes, recovery codes, session cookies, API keys, or other credentials — Adam signs in personally during the screen share.
+
+##### Monday objective
+
+Determine whether Primal can obtain durable administrative control of legacy GA4 property `530873364`. Based on **verified access** (not assumptions), choose:
+
+- **Path A** — Retain and secure the legacy property under proper Primal control.
+- **Path B** — If durable control cannot be obtained, create a new Primal-owned Analytics account and GA4 property while Adam is signed into a durable Primal-controlled Google account.
+
+Ownership audit first; then decide.
+
+##### Monday ordered workflow
+
+1. **Begin the screen share** — Meet with Adam; he signs into the Google account tied to Primal’s Google Ads. Confirm it is a durable Primal-controlled account (not former vendor, temporary user, or KXD).
+2. **Inspect what Adam previously saw** — Open the Google Ads screen with the GA4/tag **Manage** menu. Screenshot: full screen/section name, account/property shown, property or tag ID, Manage menu, Linked accounts / Data Manager, ownership/permission messaging. Screenshots may include business emails, account names, property IDs — never passwords, codes, tokens, payment info, or private customer data.
+3. **Test direct Analytics access** — Open `https://analytics.google.com/`. Can Adam see property `530873364`? If yes, record account name/ID, property name/ID, web stream, measurement ID, Adam’s account-level and property-level roles, current account and property Administrators, whether a durable Primal Administrator exists, whether Ben/Nick/KXD have access, whether the property can be moved into a Primal-owned Analytics account. Inspect Admin → Account access management and Admin → Property access management. **Do not add, remove, or modify users during the initial audit.** If Adam only sees the asset through Google Ads, document that distinction.
+4. **Identify current tracking architecture (read-only)** — Legacy property ID, measurement ID, active landing-page URL, installation method (GTM / Google tag / source / integration / other), GA4↔Ads link status, GA4-derived Ads conversion actions (source + Primary/Secondary), any access-denied errors. Do not expose secrets.
+5. **Choose ownership path**
+   - **Path A (retain legacy)** — Only if Primal can obtain durable admin control of `530873364`. Preferred: Adam/Primal Administrator; Matt/KXD Administrator; KXD OS SA Viewer; former vendors removed only after ownership/integrations/tracking/events/conversions verified. Before recommending move/removal, confirm preservation of historical reporting, property/stream, measurement ID, Ads link, events/key events, attribution, landing-page collection. **Do not** move property, remove users, change permissions, change tracking, or alter Google Ads during the initial audit — return evidence to ChatGPT first. Do not create a duplicate GA4 property if the existing one can be securely retained.
+   - **Path B (new Primal-owned property)** — If Adam and KXD cannot obtain durable control of `530873364` without Ben/Nick dependence. If replacement is clearly required and Adam is available, create ownership foundation while Adam remains signed into a durable Primal-controlled account: Primal-owned Analytics account, Primal Motorsports GA4 property, web data stream. Record owning Google account, account/property/stream names and IDs, measurement ID, timezone, currency, creation date. Confirm Adam/Primal Administrator, Matt/KXD Administrator, KXD OS SA Viewer; confirm all three before ending; **do not add Ben or Nick**. Ownership foundation may be created Monday only after audit proves replacement necessary. **Do not** install/remove tags, link/unlink GA4–Ads, import/modify conversions, change Primary/Secondary, enable KXD OS entitlements, or run reporting sync in this step.
+6. **Return evidence to ChatGPT** — Use the copy-ready handoff prompt below. ChatGPT decides Path A vs B cutover plan. Do not proceed into cutover without the next controlled prompt.
+7. **Later controlled cutover (record only — do not execute Monday)** — Inventory legacy tracker; preserve measurement ID/evidence; install permanent tracker on active ads landing page and on new Primal website before launch; controlled temporary overlap only if needed; avoid indefinite duplicate measurement; test page views/sessions, form submissions, `generate_lead`; link permanent GA4 to Primal Ads; audit Ads conversion actions/sources; prevent old+new GA4 conversions both counting as Primary; preserve historical Ads campaign reporting; record cutover date; confirm permanent property before KXD OS config changes; run authenticated GA4 and Ads probes; enable only appropriate Primal reporting entitlements after each probe passes; complete Batch J.2B.2 only after permanent tracker installed and validated; begin controlled Primal walkthrough only after reporting verification passes.
+
+##### Explicit restrictions (Monday audit / this schedule item)
+
+Do not: delete legacy GA4 property; remove/modify legacy tracker; unlink GA4 from Ads; add duplicate tracking without a controlled plan; modify Ads campaigns/budgets/bids/keywords/negatives/ads/assets/audiences/locations/schedules; create/modify Ads conversion actions; change Primary/Secondary or attribution; enable `website-analytics` or `google-ads`; run Batch J.2B.2; start Primal walkthrough or reporting pilot; modify Primal website repository or Primal OS; contact Ben or Nick without Matt’s approval; ask Adam for credentials; assume Ads visibility proves GA4 ownership; blend confirmed leads / GA4 lead actions / Ads conversions; disturb Search Console.
+
+##### Evidence checklist for ChatGPT
+
+Collect: Ads screen Adam remembers; linked GA4/tag/property details; whether `analytics.google.com` opens; whether `530873364` is visible; Analytics account name/ID; property/stream/measurement IDs; Adam’s exact account- and property-level roles; account/property access lists if accessible; Ben/Nick listed?; durable Primal Administrator?; KXD access?; property movable?; landing-page install method; GA4↔Ads link; GA4-derived conversion actions; Primary/Secondary config; errors/barriers; if replacement created — full new account/property/stream/measurement/timezone/currency/creation date and role confirmations; confirmation no tag/conversion/campaign/entitlement/production changes occurred.
+
+##### Copy-ready ChatGPT handoff prompt
+
+```
+---
+CHATGPT HANDOFF PROMPT
+
+We completed the Primal Analytics Ownership Audit.
+
+Adam signed into his own Primal-controlled Google account. No passwords, verification codes, recovery codes, cookies, API keys, or other credentials were shared.
+
+Here is the verified evidence:
+
+- Screen Adam originally accessed:
+- Google Ads account/customer ID:
+- Google Ads manager/MCC ID:
+- Legacy GA4 property visible from Google Ads: yes/no
+- Legacy GA4 property ID:
+- Legacy GA4 measurement ID:
+- Adam can access analytics.google.com: yes/no
+- Property 530873364 visible in Analytics: yes/no
+- Analytics account name:
+- Analytics account ID:
+- Adam’s account-level role:
+- Adam’s property-level role:
+- Current account Administrators:
+- Current property Administrators:
+- Ben or Nick still has access: yes/no/unknown
+- Durable Primal-controlled Administrator present: yes/no
+- KXD access present: yes/no
+- Property can be moved: yes/no/unknown
+- Current landing-page tag installation method:
+- Current GA4-to-Google Ads link status:
+- Existing GA4-derived Google Ads conversion actions:
+- Current Primary/Secondary conversion configuration:
+- Errors or permission barriers:
+- Screenshots attached:
+
+Replacement-property results, if required:
+
+- New Primal-owned Analytics account created: yes/no
+- Why replacement was determined necessary:
+- Permanent owning Google account:
+- New Analytics account name:
+- New Analytics account ID:
+- New GA4 property name:
+- New GA4 property ID:
+- New web-stream name:
+- New measurement ID:
+- Reporting timezone:
+- Currency:
+- Exact creation date:
+- Adam/Primal Administrator access confirmed: yes/no
+- KXD Administrator access confirmed: yes/no
+- KXD OS service-account Viewer access confirmed: yes/no
+- Ben or Nick added: no
+- New tag installed: no
+- Google Ads link changed: no
+- Google Ads conversions changed: no
+- Legacy tracker changed or removed: no
+- KXD OS entitlements changed: no
+
+Safety confirmation:
+
+- Google Ads campaigns or account settings modified: no
+- Legacy property deleted: no
+- Legacy tracker changed or removed: no
+- Primal website repository modified: no
+- Primal OS modified: no
+- Batch J.2B.2 run: no
+- Primal walkthrough or pilot started: no
+- Search Console disturbed: no
+
+Based on this verified evidence, determine whether we should:
+
+A. Retain and move or secure legacy property `530873364` under durable Primal ownership, or
+
+B. Use the new Primal-owned GA4 property and perform a controlled tracker and Google Ads conversion cutover.
+
+Then give me the exact next steps in order and one complete Cursor implementation prompt.
+
+Do not authorize deletion of historical assets, removal of the legacy tag, conversion changes, entitlement activation, or Batch J.2B.2 until the ownership and cutover plan is fully defined.
+
+The required permanent structure is:
+
+“Primal owns the Analytics asset. KXD administers it. KXD OS receives read-only reporting access.”
+---
+```
 
 ### Explicitly not in scope without request
 
@@ -290,6 +473,7 @@ From `lib/platform/registry.ts` and `docs/KXD-OS-ROADMAP.md`:
 | `PHASE-4-MULTI-CLIENT-PORTAL.md` | Phase 4 plan (Batches A–I code-complete; awaiting authenticated rollout QA) |
 | `PHASE-4-PORTAL-IDENTITY-SECURITY.md` | Batch I invitations / roles / passkeys / MFA |
 | `PHASE-4-PRODUCTION-ROLLOUT-CHECKLIST.md` | Phase 4 production rollout / authenticated QA checklist |
+| `PHASE-5-CLIENT-BILLING-VISIBILITY.md` | Phase 5 plan (Batch 5A implemented/verified in repo; 5B–5E not authorized) |
 | `KXD-OS-CONSTITUTION.md` | Experience standard |
 | `CLIENT-EXPERIENCE-SYSTEM-ARCHITECTURE.md` | CES architecture |
 | `.cursor/rules/kxd-os-architecture.mdc` | Cursor permanent context |

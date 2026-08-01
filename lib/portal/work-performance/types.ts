@@ -112,6 +112,8 @@ export type WorkPerformanceModel = {
   leads: WorkPerformanceLeads;
   wins: WorkPerformanceWin[];
   nextMoves: WorkPerformanceNextMove[];
+  /** Honest scope for the monthly completed-work summary (Batch 5A). */
+  monthlySummaryScopeNote: string;
   emptyStates: {
     completed: WorkPerformanceEmptyState;
     active: WorkPerformanceEmptyState;

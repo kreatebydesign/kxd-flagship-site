@@ -117,6 +117,10 @@ function main() {
     "iso date in period works",
     isIsoDateInPeriod("2026-06-10", period) && !isIsoDateInPeriod("2026-07-01", period),
   );
+  check(
+    "first and last UTC calendar days of month are included (Batch 5A)",
+    isIsoDateInPeriod("2026-06-01", period) && isIsoDateInPeriod("2026-06-30", period),
+  );
 
   // Isolation: mismatch throws
   let mismatch = false;
@@ -247,6 +251,44 @@ function main() {
     ],
   });
   check("only reporting-month completions counted", withWork.completedThisMonth.length === 1);
+  check(
+    "updatedAt alone cannot place work in reporting month (Batch 5A)",
+    composeWorkPerformanceModel({
+      authorizedClientId: 7,
+      clientName: "Demo",
+      clientSlug: "demo",
+      sourceClientId: 7,
+      reportingPeriod: period,
+      comparisonPeriod: comparisonPeriodFor(period),
+      completedItems: [
+        {
+          id: "edited-later",
+          title: "Edited in July",
+          completedAt: null,
+          updatedAt: "2026-06-15T00:00:00.000Z",
+          categoryLabel: null,
+          href: "/portal/deliverables",
+          source: "deliverable",
+        },
+      ],
+      activeItems: [],
+      updateRequests: {
+        entitled: true,
+        openCount: 0,
+        awaitingClientCount: 0,
+        inProgressCount: 0,
+        completedThisMonthCount: 0,
+        priority: [],
+      },
+      reportingFacts: [],
+      reportingEntitled: false,
+      nextMoveCandidates: [],
+    }).completedThisMonth.length === 0,
+  );
+  check(
+    "monthly summary scope note present (Batch 5A)",
+    withWork.monthlySummaryScopeNote.toLowerCase().includes("not a complete work ledger"),
+  );
   check("awaiting client reflected in value summary", withWork.valueSummary.awaitingClientCount === 1);
   check("conversions labeled as tracked events", withWork.leads.conversionLabel.includes("Tracked"));
   check("unsafe next-move href excluded", !withWork.nextMoves.some((m) => m.href?.includes("/admin")));

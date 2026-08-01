@@ -6,7 +6,11 @@
 import type { ReportingFact } from "@/lib/reporting/domain/types";
 import type { PeriodWindow } from "@/lib/reporting/domain/types";
 import { sanitizePortalHref } from "@/lib/portal/workspace-personalization/safe-routes";
-import { isIsoDateInPeriod, periodLabel } from "./period";
+import {
+  MONTHLY_SUMMARY_SCOPE_NOTE,
+  projectMonthlySummaryForPeriod,
+} from "./monthly-summary";
+import { periodLabel } from "./period";
 import { deriveVerifiedWins } from "./wins";
 import type {
   WorkPerformanceActiveItem,
@@ -191,7 +195,7 @@ function buildValueSummary(input: {
       activeCount,
       awaitingClientCount,
       headline: "Your workspace is ready",
-      lead: "As partnership work lands, completed items and progress will appear here for this month.",
+      lead: "As partnership work is recorded as complete, a focused monthly summary will appear here — not a full ledger of every service.",
     };
   }
   if (awaitingClientCount > 0) {
@@ -200,8 +204,8 @@ function buildValueSummary(input: {
       completedCount,
       activeCount,
       awaitingClientCount,
-      headline: `${completedCount} completed · ${awaitingClientCount} waiting on you`,
-      lead: "KXD progress is visible below — a short response from you will keep the open items moving.",
+      headline: `${completedCount} recorded complete · ${awaitingClientCount} waiting on you`,
+      lead: "Below is a focused summary of completed deliverables and Website Review work for this month, plus items that need your attention.",
     };
   }
   return {
@@ -209,8 +213,8 @@ function buildValueSummary(input: {
     completedCount,
     activeCount,
     awaitingClientCount,
-    headline: `${completedCount} completed this month · ${activeCount} underway`,
-    lead: "A clear view of what KXD delivered, what is active, and what deserves attention next.",
+    headline: `${completedCount} recorded complete this month · ${activeCount} underway`,
+    lead: "A focused view of completed deliverables and Website Review work recorded for this month — not an invoice breakdown or complete work ledger.",
   };
 }
 
@@ -240,9 +244,10 @@ export function composeWorkPerformanceModel(
     ? periodLabel(input.comparisonPeriod)
     : null;
 
-  // Keep completed items that fall in the reporting month (by completion/update day).
-  const completedThisMonth = input.completedItems.filter((item) =>
-    isIsoDateInPeriod(item.completedAt ?? item.updatedAt, input.reportingPeriod),
+  // Month bucketing uses reliable completion dates only — never updatedAt.
+  const completedThisMonth = projectMonthlySummaryForPeriod(
+    input.completedItems,
+    input.reportingPeriod,
   );
 
   const awaitingClientCount = input.activeItems.filter((i) => i.owner === "client").length;
@@ -328,8 +333,8 @@ export function composeWorkPerformanceModel(
     nextMoves,
     emptyStates: {
       completed: {
-        title: "No completed items this month yet",
-        lead: "When deliverables and website updates are completed, they will appear here for this reporting month.",
+        title: "No completed work recorded for this month",
+        lead: `${MONTHLY_SUMMARY_SCOPE_NOTE} When a deliverable or Website Review is marked complete with a completion date in this month, it will appear here.`,
       },
       active: {
         title: "Nothing in progress right now",
@@ -356,5 +361,6 @@ export function composeWorkPerformanceModel(
         lead: "Helpful next steps appear when there is a clear, authorized action available in your workspace.",
       },
     },
+    monthlySummaryScopeNote: MONTHLY_SUMMARY_SCOPE_NOTE,
   };
 }

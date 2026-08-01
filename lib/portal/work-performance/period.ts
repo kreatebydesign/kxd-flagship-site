@@ -29,5 +29,11 @@ export function isIsoDateInPeriod(iso: string | null | undefined, period: Period
   if (!iso) return false;
   const day = iso.slice(0, 10);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) return false;
-  return day >= period.start && day <= period.end;
+  // PeriodWindow start/end are full ISO timestamps — compare calendar days only.
+  const startDay = String(period.start).slice(0, 10);
+  const endDay = String(period.end).slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(startDay) || !/^\d{4}-\d{2}-\d{2}$/.test(endDay)) {
+    return false;
+  }
+  return day >= startDay && day <= endDay;
 }

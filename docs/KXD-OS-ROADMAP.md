@@ -120,13 +120,16 @@ This track is distinct from registry phase numbers and from Intelligence Pipelin
 |-------|-------|--------|-------|
 | Phase 2 | Authenticated theming + portal date stabilization | ✅ Complete (historical) | Theme: `lib/shell/theme.ts`, Light / Dark / System. Portal dates: `a94ca60`. Later staff/Intelligence commits remain legitimate current architecture. |
 | Phase 3 | Client & Relationship Intelligence | ✅ Production-complete | Private operator workspace connecting clients, contacts, relationships, preferences, and events. Plan: `docs/PHASE-3-CLIENT-RELATIONSHIP-INTELLIGENCE.md`. Batches A–E published and production-verified at `fdb0348`. Closed — do not reopen. |
-| **Phase 4** | **Multi-Client Portal Access & Account Context** | **Batches A–I code-complete; Batch J = identity security production rollout** | Plan: `docs/PHASE-4-MULTI-CLIENT-PORTAL.md`. Identity: `docs/PHASE-4-PORTAL-IDENTITY-SECURITY.md`. Batch J: `docs/PHASE-4-BATCH-J-IDENTITY-ROLLOUT.md` + pilot runbook. Verifiers: completion + `verify:phase4-portal-identity-security`. Real client activation still pilot-gated. Future Connect/Support/Academy/Meetings/Social Studio/weather/personalized shell remain roadmap — not Batch J. |
+| **Phase 4** | **Multi-Client Portal Access & Account Context** | **Batches A–I code-complete; Batch J = identity security production rollout (paused with Primal analytics blockers)** | Plan: `docs/PHASE-4-MULTI-CLIENT-PORTAL.md`. Identity: `docs/PHASE-4-PORTAL-IDENTITY-SECURITY.md`. Batch J: `docs/PHASE-4-BATCH-J-IDENTITY-ROLLOUT.md` + pilot runbook. Verifiers: Batch H completion (`verify:phase4-multi-client-portal-completion`) + `verify:phase4-portal-identity-security`. Real client activation still pilot-gated. **Not fully production-complete.** Batch J.2B.2, Primal walkthrough, and reporting pilot remain paused. Future Connect/Support/Academy/Meetings/Social Studio/weather/personalized shell remain roadmap — not Batch J. |
+| **Phase 5** | **Client Billing Visibility, Stripe Invoice Status & Monthly Work Summaries** | **Batch 5A implemented/verified in repo; 5B–5E not authorized; phase not complete** | Spec: `docs/PHASE-5-CLIENT-BILLING-VISIBILITY.md`. Parallel non-Primal lane; does not complete or waive Phase 4. Batch 5A: monthly summary date reliability (`verify:phase5-batch-5a`). Stripe invoice visibility remains Batch 5B+. Hosting Transitions and KXD invoice emails excluded. |
 
 **Phase 3 product outcome:** durable private business context for future Business Memory — not portal, not public, not calendar rewrite, not ritual/Business Memory integration in this phase.
 
 **Phase 3 privacy boundary:** relationship context, preferences, dietary notes, accessibility notes, and internal event intelligence stay authenticated and operator-only. Never enter public HTML, metadata, JSON-LD, public APIs, public serialized props, client portals, or client-facing API responses.
 
 **Phase 4 product outcome:** one portal user may access multiple authorized independent clients with server-validated active-account context and no cross-account leakage — reusable architecture; Cusick first.
+
+**Phase 5 product outcome:** clients see Stripe-backed invoice status with Stripe-hosted payment actions, plus an honest monthly completed-work summary — visibility and context only; not an accounting platform, payment vault, or Work Ledger. Reuses Phases 35–37; independent of Primal analytics.
 
 ---
 
@@ -137,6 +140,8 @@ Local **Commercial Lifecycle Completion & Operator Experience** plus **Security 
 **Stripe TEST MODE integration** is wired (credential fail-closed, test customer/invoice adapter, commercial lifecycle webhook, operator TEST MODE actions). Real Stripe API execution remains blocked until protected `sk_test_` / `whsec_` credentials are configured locally — see `docs/KXD-OS-COMMERCIAL-LIFECYCLE-RELEASE-GATE.md`.
 
 Production migration, live Stripe, and production email remain **blocked**. Product pillar order: `docs/KXD-OS-PRODUCT-ROADMAP.md` → Future systems.
+
+**Phase 5 (product track)** reuses Phases 35–37 commercial foundations for **read-only** Stripe invoice visibility and monthly work summaries. It does **not** flip `STRIPE_COMMERCIAL_EXECUTION_AUTHORIZED`, does not broaden lifecycle TEST invoicing into live mutations, and does not replace Financial Command. Spec: `docs/PHASE-5-CLIENT-BILLING-VISIBILITY.md`.
 
 ---
 

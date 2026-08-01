@@ -60,12 +60,10 @@ export async function mapRequestDocToWebsiteReviewItem(
   const attachments = await loadAttachmentsForRequest(requestId);
   const location = resolveReviewPageLocation(reviewContext, doc.pageContext as string | null);
   const pageContext = location.display;
+  // Schema-backed completion only (client-requests.completedDate).
+  // Do not invent completion from updatedAt/createdAt — Batch 5A monthly summary depends on this.
   const completedAt =
-    doc.completedDate != null
-      ? String(doc.completedDate)
-      : status === "completed" || status === "closed"
-        ? String(doc.updatedAt ?? doc.createdAt ?? "")
-        : null;
+    doc.completedDate != null ? String(doc.completedDate) : null;
 
   const completionEvent = [...timeline]
     .reverse()

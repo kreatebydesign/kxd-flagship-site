@@ -1,6 +1,9 @@
 /**
  * Server entry — resolve Work & Performance after portal session authorization.
  * Uses session.clientId only. Never accepts browser clientId as authority.
+ *
+ * Phase 5 Batch 5A: monthly completed summary uses schema completion dates only
+ * (deliverables.completedDate; Website Review completedDate via item.completedAt).
  */
 import "server-only";
 
@@ -17,12 +20,16 @@ import {
 } from "@/lib/reporting/persistence";
 import type { PeriodWindow } from "@/lib/reporting/domain/types";
 import { composeWorkPerformanceModel } from "./compose";
+import {
+  dedupeMonthlySummaryItems,
+  mapDeliverableToMonthlySummaryItem,
+  mapWebsiteReviewToMonthlySummaryItem,
+  projectMonthlySummaryForPeriod,
+} from "./monthly-summary";
 import { buildWorkPerformanceNextMoves } from "./next-moves";
 import {
   comparisonPeriodFor,
   defaultWorkPerformancePeriod,
-  isIsoDateInPeriod,
-  periodLabel,
 } from "./period";
 import type {
   WorkPerformanceActiveItem,
@@ -32,8 +39,9 @@ import type {
 
 function deliverableStatusLabel(status: string): string {
   if (status === "in-progress") return "In progress";
-  if (status === "review") return "In review";
+  if (status === "waiting-on-client") return "Waiting on you";
   if (status === "not-started") return "Queued";
+  if (status === "blocked") return "Blocked";
   if (status === "complete") return "Complete";
   return status.replace(/-/g, " ");
 }
@@ -41,17 +49,21 @@ function deliverableStatusLabel(status: string): string {
 function mapCompletedDeliverables(
   docs: Array<Record<string, unknown>>,
 ): WorkPerformanceWorkItem[] {
-  return docs
-    .filter((doc) => String(doc.status) === "complete")
-    .map((doc) => ({
-      id: `deliverable-${doc.id}`,
-      title: String(doc.title ?? "Deliverable"),
-      completedAt: doc.completedAt ? String(doc.completedAt) : null,
-      updatedAt: String(doc.updatedAt ?? doc.createdAt ?? ""),
-      categoryLabel: doc.category ? String(doc.category).replace(/-/g, " ") : null,
-      href: "/portal/deliverables",
-      source: "deliverable" as const,
-    }));
+  const out: WorkPerformanceWorkItem[] = [];
+  for (const doc of docs) {
+    if (doc.id == null) continue;
+    const item = mapDeliverableToMonthlySummaryItem({
+      id: doc.id as string | number,
+      title: doc.title,
+      status: doc.status,
+      completedDate: doc.completedDate,
+      updatedAt: doc.updatedAt,
+      createdAt: doc.createdAt,
+      category: doc.category,
+    });
+    if (item) out.push(item);
+  }
+  return out;
 }
 
 function mapActiveDeliverables(
@@ -65,7 +77,8 @@ function mapActiveDeliverables(
         id: `deliverable-${doc.id}`,
         title: String(doc.title ?? "Deliverable"),
         statusLabel: deliverableStatusLabel(status),
-        owner: status === "review" ? ("client" as const) : ("kxd" as const),
+        owner:
+          status === "waiting-on-client" ? ("client" as const) : ("kxd" as const),
         updatedAt: String(doc.updatedAt ?? doc.createdAt ?? ""),
         href: "/portal/deliverables",
         source: "deliverable" as const,
@@ -111,17 +124,14 @@ function mapReviewItems(
     source: "website-review" as const,
   }));
 
-  const completedThisMonth = websiteReview.completedReviews
-    .filter((r) => isIsoDateInPeriod(r.completedAt ?? r.updatedAt, reportingPeriod))
-    .map((r) => ({
-      id: `review-complete-${r.id}`,
-      title: r.title,
-      completedAt: r.completedAt ?? null,
-      updatedAt: r.updatedAt,
-      categoryLabel: "Website Review",
-      href: "/portal/website-review",
-      source: "website-review" as const,
-    }));
+  const completedCandidates = websiteReview.completedReviews
+    .map((r) => mapWebsiteReviewToMonthlySummaryItem(r))
+    .filter((item): item is WorkPerformanceWorkItem => item != null);
+
+  const completedThisMonth = projectMonthlySummaryForPeriod(
+    completedCandidates,
+    reportingPeriod,
+  );
 
   const awaitingClientCount = websiteReview.activeReviews.filter(
     (r) => r.status === "awaiting-your-input",
@@ -160,18 +170,6 @@ function mapActiveProjects(
 function dedupeByTitleId(items: WorkPerformanceActiveItem[]): WorkPerformanceActiveItem[] {
   const seen = new Set<string>();
   const out: WorkPerformanceActiveItem[] = [];
-  for (const item of items) {
-    const key = `${item.source}:${item.id}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    out.push(item);
-  }
-  return out;
-}
-
-function dedupeCompleted(items: WorkPerformanceWorkItem[]): WorkPerformanceWorkItem[] {
-  const seen = new Set<string>();
-  const out: WorkPerformanceWorkItem[] = [];
   for (const item of items) {
     const key = `${item.source}:${item.id}`;
     if (seen.has(key)) continue;
@@ -222,7 +220,7 @@ export async function resolvePortalWorkPerformance(input: {
     reportingPeriod,
   );
 
-  const completed = dedupeCompleted([
+  const completed = dedupeMonthlySummaryItems([
     ...mapCompletedDeliverables(docs),
     ...reviewBundle.completedThisMonth,
   ]);
@@ -249,9 +247,8 @@ export async function resolvePortalWorkPerformance(input: {
     awaitingClientCount: reviewBundle.awaitingClientCount,
     activeReviewCount: reviewBundle.inProgressCount,
     hasAnalytics: reportingEntitled && facts.length > 0,
-    completedThisMonth: completed.filter((item) =>
-      isIsoDateInPeriod(item.completedAt ?? item.updatedAt, reportingPeriod),
-    ).length,
+    completedThisMonth: projectMonthlySummaryForPeriod(completed, reportingPeriod)
+      .length,
   });
 
   return composeWorkPerformanceModel({
@@ -281,4 +278,4 @@ export async function resolvePortalWorkPerformance(input: {
   });
 }
 
-export { periodLabel };
+export { periodLabel } from "./period";

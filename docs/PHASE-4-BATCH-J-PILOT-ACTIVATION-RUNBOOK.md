@@ -77,5 +77,5 @@ Only after pilot approval:
 - No SMS MFA  
 - No domain-based access  
 - No Approvals product  
-- No Phase 5  
+- No Phase 5 work inside this Batch J pilot (Phase 5 is a separately approved parallel lane; see `docs/PHASE-5-CLIENT-BILLING-VISIBILITY.md`)  
 - No KXD Connect / Support / Academy / Meetings / Social Studio / weather / personalized shell in this activation path  

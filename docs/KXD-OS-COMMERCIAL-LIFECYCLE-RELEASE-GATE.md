@@ -118,6 +118,10 @@ No new migration required for Stripe TEST MODE — state lives in `lifecyclePack
 4. Recurring schedules / subscriptions still blocked in this pilot  
 5. Separate production webhook endpoint + monitoring + dual-control approval  
 
+### Phase 5 product-track note (does not clear these blockers)
+
+**Phase 5 — Client Billing Visibility** (`docs/PHASE-5-CLIENT-BILLING-VISIBILITY.md`) is approved for phased implementation and may add a **narrow read-only** Stripe invoice list/retrieve path separate from `STRIPE_COMMERCIAL_EXECUTION_AUTHORIZED`. Phase 5 does **not** authorize invoice creation, charging, subscriptions, refunds, dunning, production email, or flipping the commercial execution gate. Lifecycle TEST-mode invoice behavior must not be broadened by Phase 5. Live financial mutations still require a separately named and approved batch.
+
 ## Blockers before production email
 
 1. Provider selection + authenticated sender/reply-to  

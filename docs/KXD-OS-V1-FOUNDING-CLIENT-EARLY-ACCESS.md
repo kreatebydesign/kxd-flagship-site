@@ -183,8 +183,10 @@ npm run verify:client-launch -- --client primal-motorsports
 
 ## Post-v1 roadmap (explicitly deferred)
 
-1. ~~Multi-Brand Client Workspace Provisioning~~ → **Active as Phase 4** — see `docs/PHASE-4-MULTI-CLIENT-PORTAL.md` (membership + account context; not parent-org provisioning)
-2. Client Billing, Work Ledger, and Hosting Transitions
+1. ~~Multi-Brand Client Workspace Provisioning~~ → **Active as Phase 4** — see `docs/PHASE-4-MULTI-CLIENT-PORTAL.md` (membership + account context; not parent-org provisioning). Phase 4 remains **not fully production-complete**; Batch J / Primal analytics blockers unchanged.
+2. ~~Client Billing, Work Ledger, and Hosting Transitions~~ → **Split:**
+   - **Client Billing Visibility + Monthly Work Summaries** → **Approved as Phase 5** — see `docs/PHASE-5-CLIENT-BILLING-VISIBILITY.md` (Stripe invoice visibility + hosted pay; honest monthly completed-work summary; **not** a full Work Ledger or accounting platform). Batch 5A implemented/verified in repository; Batches 5B–5E not authorized.
+   - **Hosting Transitions** → remain deferred (separate future phase / Future systems Hosting Transition & Revenue Engine). Operator Hosting Renewal Readiness visibility is not hosting-transition automation.
 3. Internal Resource Center
 4. Secure Credential Vault
 5. Self-service onboarding and SaaS packaging
@@ -192,6 +194,8 @@ npm run verify:client-launch -- --client primal-motorsports
 > **Note:** Operator **Hosting Renewal Readiness** visibility on Infrastructure Command (Batch A) reuses existing infrastructure dates and is **not** hosting-transition automation. Wix remains a provider classification only.
 
 > **Note:** Operator **Client Resource Directory** (Batch A) is allowlisted visibility on Infrastructure client detail from existing infrastructure/client metadata. It is **not** a Secure Credential Vault and does **not** replace the deferred Internal Resource Center.
+
+> **Note:** Phase 5 does **not** authorize KXD-generated invoice emails, dunning, refunds, subscriptions, Wave/QuickBooks portal invoicing, or flipping commercial Stripe execution. Founding-client early access still treats full invoicing/payment-center execution as out of the v1 baseline until Phase 5 batches ship and verify.
 
 ---
 

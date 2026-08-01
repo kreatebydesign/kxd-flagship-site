@@ -10,6 +10,8 @@
 > Phase 3 Client & Relationship Intelligence is production-complete and closed. Phase 4 does not reopen Phase 3. Relationship Intelligence remains operator-only and portal-inaccessible.
 >
 > **Batch status (repository):** Batches A–H as prior; Batch I adds private invitations, membership roles, WebAuthn passkeys, TOTP MFA, recovery codes (`verify:phase4-portal-identity-security`). Additive migration `20260814_phase4_portal_identity_security` is **not** applied to production in this batch. **Not** fully production-complete until authenticated multi-client production QA, Don/Cusick four-account readiness, OTP Carts readiness, and identity/security rollout gates pass.
+>
+> **Phase 5 sequencing:** Phase 5 (Client Billing Visibility) is approved as a **parallel non-Primal product lane** while Phase 4 rollout remains partially blocked. Starting Phase 5 does **not** waive, bypass, redefine, or complete Phase 4. Batch J, Batch J.2B.2, the Primal walkthrough, and the Primal reporting pilot remain paused. Spec: `docs/PHASE-5-CLIENT-BILLING-VISIBILITY.md`. Full Work Ledger / monthly billing recaps remain outside Phase 4; Phase 5 covers honest monthly work-summary reliability plus Stripe invoice **visibility**, not a complete Work Ledger.
 
 ---
 

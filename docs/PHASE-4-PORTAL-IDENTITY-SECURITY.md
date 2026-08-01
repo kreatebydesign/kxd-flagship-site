@@ -101,4 +101,6 @@ npm run verify:phase4-portal-identity-security
 10. Keep delegated client access disabled  
 11. Rollback: revoke invites, disable memberships, disable MFA flags, redeploy prior release  
 
-**Still excluded until separately approved:** real external client email, create/invite Don/Billy/Nicole, mutate Adam/Tyler, SMS MFA, public registration, Phase 5, Approvals product, KXD Connect/Support/Academy/Meetings/Social Studio/weather/personalized shell.
+**Still excluded until separately approved:** real external client email, create/invite Don/Billy/Nicole, mutate Adam/Tyler, SMS MFA, public registration, Approvals product, KXD Connect/Support/Academy/Meetings/Social Studio/weather/personalized shell.
+
+**Phase 5 note:** Phase 5 (Client Billing Visibility) is now **separately approved** as a parallel product lane — see `docs/PHASE-5-CLIENT-BILLING-VISIBILITY.md`. Phase 5 does not authorize Batch J identity mutations, real external invites, or Phase 4 completion.
