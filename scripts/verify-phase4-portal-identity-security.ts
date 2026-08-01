@@ -340,6 +340,56 @@ function main() {
     token,
   );
   check("activate url path", activateUrl.includes("/portal/activate?token="));
+
+  const edgeMiddleware = read("middleware.ts");
+  const publicPathsBlock = edgeMiddleware.match(
+    /const PORTAL_PUBLIC_PATHS = \[([\s\S]*?)\];/,
+  )?.[1];
+  const publicPathEntries: string[] = publicPathsBlock?.match(/"[^"]+"/g) ?? [];
+  check(
+    "activate is an approved portal public path",
+    publicPathEntries.includes('"/portal/activate"'),
+  );
+  check(
+    "security enroll is not a portal public path",
+    !publicPathEntries.includes('"/portal/security/enroll"'),
+  );
+  check(
+    "settings is not a portal public path",
+    !publicPathEntries.includes('"/portal/settings"'),
+  );
+  check(
+    "portal root is not a portal public path",
+    !publicPathEntries.includes('"/portal"'),
+  );
+  check(
+    "public-path matching uses exact pathname equality",
+    edgeMiddleware.includes("pathname === p") &&
+      edgeMiddleware.includes("request.nextUrl"),
+  );
+
+  check(
+    "no-token invitation invalid",
+    validateInvitationToken({ invitation: invBase, rawToken: "" }).ok === false,
+  );
+  check(
+    "null invitation invalid",
+    validateInvitationToken({ invitation: null, rawToken: token }).ok === false,
+  );
+  check(
+    "accepted invitation rejected",
+    validateInvitationToken({
+      invitation: { ...invBase, status: "accepted" },
+      rawToken: token,
+    }).ok === false,
+  );
+  check(
+    "draft invitation rejected",
+    validateInvitationToken({
+      invitation: { ...invBase, status: "draft" },
+      rawToken: token,
+    }).ok === false,
+  );
   const html = buildInvitationEmailHtml({
     recipientName: "Don",
     companyNames: ["Cusick", "OTP"],

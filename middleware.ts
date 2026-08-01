@@ -16,6 +16,9 @@ const PORTAL_PUBLIC_PATHS = [
   "/portal/login",
   "/portal/forgot-password",
   "/portal/reset-password",
+  // Invitation activation must be reachable without a session.
+  // Query tokens live on searchParams; matching uses pathname only.
+  "/portal/activate",
 ];
 
 const JUNIOR_PUBLIC_PATHS = [

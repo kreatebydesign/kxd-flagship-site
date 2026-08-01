@@ -190,6 +190,19 @@ function main() {
       ),
   );
 
+  const portalPublicPaths = edgeMiddleware.match(
+    /const PORTAL_PUBLIC_PATHS = \[([\s\S]*?)\];/,
+  )?.[1];
+  const portalPublicEntries: string[] = portalPublicPaths?.match(/"[^"]+"/g) ?? [];
+  check(
+    "invitation activate page is an approved portal public path",
+    portalPublicEntries.includes('"/portal/activate"'),
+  );
+  check(
+    "security enrollment remains session-gated at the edge",
+    !portalPublicEntries.includes('"/portal/security/enroll"'),
+  );
+
   const portalLoginPage = read("app/(portal)/portal/(auth)/login/page.tsx");
   check(
     "portal login page redirects only after getPortalSession() succeeds",

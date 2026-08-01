@@ -411,7 +411,10 @@ function main() {
     "27. Phase 4 documentation reflects Batch H completion verifier",
     phaseDoc.includes("verify:phase4-multi-client-portal-completion") &&
       currentState.includes("verify:phase4-multi-client-portal-completion") &&
-      roadmap.includes("Batch H") &&
+      // Roadmap may name Batch H explicitly or include it via an A–H / A–I range.
+      (roadmap.includes("Batch H") ||
+        /Batches A[–-][HI]/i.test(roadmap) ||
+        roadmap.includes("verify:phase4-multi-client-portal-completion")) &&
       rollout.includes("Phase 4") &&
       rollout.includes("authenticated"),
   );

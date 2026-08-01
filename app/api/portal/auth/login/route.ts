@@ -6,8 +6,7 @@
  * setPayloadAuthCookie, so this path does not overwrite admin `payload-token`.
  */
 import { NextRequest, NextResponse } from "next/server";
-import { AuthenticationError } from "payload";
-import { getPayload } from "payload";
+import { AuthenticationError, type CollectionSlug, getPayload } from "payload";
 import config from "@payload-config";
 import { createPortalSession } from "@/lib/portal/session";
 import { getMfaSettings } from "@/lib/portal/identity/mfa-store";
@@ -20,13 +19,12 @@ import { appendPortalSecurityEvent } from "@/lib/portal/identity/security-events
 
 export const dynamic = "force-dynamic";
 
-const PORTAL_USERS_COLLECTION = "portal-users";
+const PORTAL_USERS_COLLECTION = "portal-users" satisfies CollectionSlug;
 
 async function portalUserExists(email: string): Promise<boolean> {
   const payload = await getPayload({ config });
   const result = await payload.find({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    collection: PORTAL_USERS_COLLECTION as any,
+    collection: PORTAL_USERS_COLLECTION,
     where: { email: { equals: email } },
     limit: 1,
     depth: 0,
@@ -65,9 +63,8 @@ export async function POST(req: NextRequest) {
 
     // LocalAPI login: verifies hash via authenticateLocalStrategy, enforces
     // maxLoginAttempts/lockUntil, resets attempts on success. Does not set cookies.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const result = await payload.login({
-      collection: PORTAL_USERS_COLLECTION as any,
+      collection: PORTAL_USERS_COLLECTION,
       data: { email, password },
     });
 
