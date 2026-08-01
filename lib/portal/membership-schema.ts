@@ -63,12 +63,16 @@ export function isMembershipSchemaUnavailableError(err: unknown): boolean {
   if (!mentionsMembership) return false;
 
   const code = errorCode(err);
-  if (code === "42P01" || code === "42704") return true;
+  // 42P01 undefined_table, 42704 undefined_object, 42703 undefined_column
+  // (Batch I role / can_manage_members pending migrate).
+  if (code === "42P01" || code === "42704" || code === "42703") return true;
 
   return (
     /does not exist/i.test(msg) ||
     /undefined_table/i.test(msg) ||
     /undefined_object/i.test(msg) ||
+    /undefined_column/i.test(msg) ||
+    /column .+ does not exist/i.test(msg) ||
     /relation .+ does not exist/i.test(msg) ||
     /type .+ does not exist/i.test(msg)
   );
