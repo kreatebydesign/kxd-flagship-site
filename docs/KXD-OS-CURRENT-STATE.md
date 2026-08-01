@@ -235,7 +235,7 @@ Edition 1 is in the **operate and extend** phase — not redesign.
 
 ### Approved parallel product phase
 
-**Phase 5 — Client Billing Visibility, Stripe Invoice Status & Monthly Work Summaries** — **Approved for phased implementation.** **Batches 5A–5C implemented in repository and verified** (`verify:phase5-batch-5a`, `verify:phase5-batch-5b`, `verify:phase5-batch-5c`). Batches **5D–5E not authorized**. Phase 5 as a whole is **not** complete. Portal Billing is TEST-mode read-only; clients cannot pay inside KXD OS.
+**Phase 5 — Client Billing Visibility, Stripe Invoice Status & Monthly Work Summaries** — **Approved for phased implementation.** **Batches 5A–5D implemented in repository and verified** (`verify:phase5-batch-5a`, `verify:phase5-batch-5b`, `verify:phase5-batch-5c`, `verify:phase5-batch-5d`). Batch **5E not authorized**. Phase 5 as a whole is **not** complete. Portal and staff invoice visibility are TEST-mode read-only; clients cannot pay inside KXD OS; staff cannot manage invoices.
 
 - Spec: `docs/PHASE-5-CLIENT-BILLING-VISIBILITY.md`
 - Parallel **non-Primal** lane while Phase 4 production rollout remains partially blocked by the Primal Analytics Ownership Audit
@@ -248,7 +248,8 @@ Edition 1 is in the **operate and extend** phase — not redesign.
 - **Batch 5A:** Monthly Work Summary Reliability — `lib/portal/work-performance/monthly-summary.ts` + Work & Performance honesty/date fixes
 - **Batch 5B:** Stripe Invoice Read Foundation — server-only scoped list/read + allowlisted DTO (`lib/stripe/invoice-read-*.ts`); test-mode only
 - **Batch 5C:** Portal Billing Visibility — `/portal/invoices` + eligibility-gated Billing nav (`lib/portal/billing/`)
-- Remaining batches: 5D Staff Invoice Visibility → 5E optional Billing/Work-Summary context
+- **Batch 5D:** Staff Invoice Visibility — Commercial Agreements selected-client detail + `GET /api/admin/commercial-agreements/[clientId]/invoices` (`StaffClientInvoicesSection`; Batch 5B composition via `listStaffClientInvoices`)
+- Remaining batch: 5E optional Billing/Work-Summary context (unauthorized)
 
 ### Parallel ops track (migration-independent)
 
@@ -262,7 +263,7 @@ Edition 1 is in the **operate and extend** phase — not redesign.
 
 1. **Monday, August 3, 2026 — Primal Analytics Ownership Audit and GA4 Cutover Decision (High)** — 30–60 minute screen share with Adam. Full ordered workflow, ownership model, Path A/B decision rules, evidence checklist, and ChatGPT handoff prompt: see [Operator workflow schedule](#operator-workflow-schedule) below. **Blocks** Batch J.2B.2 (Primal GA4 & Ads entitle + sync), the controlled Primal existing-login walkthrough, and the Primal reporting pilot. Unrelated KXD OS development may continue before and after this audit. Do **not** enable `website-analytics` / `google-ads`, run J.2B.2, or start the walkthrough until the permanent Analytics property is selected and authenticated provider probes succeed.
 2. **Phase 4 — Multi-Client Portal Access & Account Context** — Production DB identity gate **cleared** (Vercel Neon store `kxd-flagship-db` / project `mute-violet-81514071` ≡ Target A). Backup/PITR gate **conditionally cleared** on Free plan (instant restore history window max **6 hours**; take a manual Neon snapshot immediately before any production migrate; Launch upgrade recommended for 7-day retention). Production migrations applied successfully (`20260727_phase3_client_relationship_intelligence`, `20260728_phase4_portal_client_memberships`, `20260810_website_audit_report_generator`; `migrate:status` batch 46, Ran = Yes); no production migrations remain pending. Batches A–H implemented in repository (`verify:phase4-multi-client-portal-completion`). Phase 4 remains **not fully production-complete** until authenticated multi-client rollout QA + Don/Cusick four-account readiness. Batch J / J.2B.2 / Primal walkthrough / reporting pilot remain paused as scheduled. Do **not** mark Phase 4 complete.
-3. **Phase 5 — Client Billing Visibility, Stripe Invoice Status & Monthly Work Summaries** — Approved parallel non-Primal product lane. Spec: `docs/PHASE-5-CLIENT-BILLING-VISIBILITY.md`. **Batches 5A–5C implemented/verified in repo** (`npm run verify:phase5-batch-5a`, `npm run verify:phase5-batch-5b`, `npm run verify:phase5-batch-5c`). Do **not** start Batches 5D–5E. Do not couple Phase 5 to Primal analytics or Batch J.2B.2.
+3. **Phase 5 — Client Billing Visibility, Stripe Invoice Status & Monthly Work Summaries** — Approved parallel non-Primal product lane. Spec: `docs/PHASE-5-CLIENT-BILLING-VISIBILITY.md`. **Batches 5A–5D implemented/verified in repo** (`npm run verify:phase5-batch-5a` … `verify:phase5-batch-5d`). Do **not** start Batch 5E. Do not couple Phase 5 to Primal analytics or Batch J.2B.2.
 4. **Client operations at scale** — Repeat the Primal launch pattern using `lib/client-launch/` for every new client workspace (including OTP Carts readiness before Cusick membership linking). Gate Batch A: `verify:otp-carts-readiness`.
 5. **Business Memory integration** — Wire `runBusinessMemory()` into rituals or intelligence when explicitly requested; foundation exists, UI does not. Phase 3 prepared durable relationship context but does not integrate Business Memory yet.
 6. **Executive experience polish** — Premium ritual presentation (KHIG) without new intelligence layers.
@@ -475,7 +476,7 @@ From `lib/platform/registry.ts` and `docs/KXD-OS-ROADMAP.md`:
 | `PHASE-4-MULTI-CLIENT-PORTAL.md` | Phase 4 plan (Batches A–I code-complete; awaiting authenticated rollout QA) |
 | `PHASE-4-PORTAL-IDENTITY-SECURITY.md` | Batch I invitations / roles / passkeys / MFA |
 | `PHASE-4-PRODUCTION-ROLLOUT-CHECKLIST.md` | Phase 4 production rollout / authenticated QA checklist |
-| `PHASE-5-CLIENT-BILLING-VISIBILITY.md` | Phase 5 plan (Batches 5A–5C implemented/verified in repo; 5D–5E not authorized) |
+| `PHASE-5-CLIENT-BILLING-VISIBILITY.md` | Phase 5 plan (Batches 5A–5D implemented/verified in repo; 5E not authorized) |
 | `KXD-OS-CONSTITUTION.md` | Experience standard |
 | `CLIENT-EXPERIENCE-SYSTEM-ARCHITECTURE.md` | CES architecture |
 | `.cursor/rules/kxd-os-architecture.mdc` | Cursor permanent context |

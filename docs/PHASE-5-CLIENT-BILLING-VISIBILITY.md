@@ -1,6 +1,6 @@
 # Phase 5 — Client Billing Visibility, Stripe Invoice Status & Monthly Work Summaries
 
-**Status:** Approved for phased implementation. **Batches 5A–5C implemented in repository and verified** (`npm run verify:phase5-batch-5a`, `npm run verify:phase5-batch-5b`, `npm run verify:phase5-batch-5c`). Batches **5D–5E remain unauthorized**. Phase 5 as a whole is **not** complete. Clients can view TEST-mode Stripe invoices in the portal when eligible; they cannot pay inside KXD OS.  
+**Status:** Approved for phased implementation. **Batches 5A–5D implemented in repository and verified** (`npm run verify:phase5-batch-5a`, `npm run verify:phase5-batch-5b`, `npm run verify:phase5-batch-5c`, `npm run verify:phase5-batch-5d`). Batch **5E remains unauthorized**. Phase 5 as a whole is **not** complete. Clients and authorized operators can view TEST-mode Stripe invoices when eligible; nobody pays inside KXD OS; staff cannot manage invoices.  
 **Companion:** `docs/KXD-OS-ROADMAP.md`, `docs/KXD-OS-CURRENT-STATE.md`, `docs/KXD-OS-PRODUCT-ROADMAP.md`, `docs/KXD-OS-V1-FOUNDING-CLIENT-EARLY-ACCESS.md`, `docs/KXD-OS-COMMERCIAL-LIFECYCLE-RELEASE-GATE.md`, `docs/PHASE-4-MULTI-CLIENT-PORTAL.md`
 
 > Phase 4 Multi-Client Portal Access remains **not fully production-complete**. Phase 5 may proceed as a **parallel, non-Primal product lane**. Starting Phase 5 does **not** waive, bypass, redefine, or complete any remaining Phase 4 rollout requirement (including Batch J, Batch J.2B.2, the Primal walkthrough, or the Primal reporting pilot).
@@ -209,7 +209,7 @@ The summary must communicate its honest scope and must **not** claim to be a com
 
 ## Approved implementation batches
 
-Batches **5A–5C** are implemented in the repository and verified. Batches **5D–5E are not cleared**. Phase 5 is not complete. Billing navigation is eligibility-gated (valid test-mode Stripe customer mapping). Live Stripe invoice access remains unauthorized.
+Batches **5A–5D** are implemented in the repository and verified. Batch **5E is not cleared**. Phase 5 is not complete. Portal Billing navigation is eligibility-gated (valid test-mode Stripe customer mapping). Staff invoice visibility is embedded on Commercial Agreements detail for authorized operators only. Live Stripe invoice access remains unauthorized.
 
 ### Batch 5A — Monthly Work Summary Reliability
 
@@ -284,19 +284,36 @@ Batches **5A–5C** are implemented in the repository and verified. Batches **5D
 | Theme | Semantic `--kxd-os-*` tokens only; works with existing Light/Dark `data-theme`. No isolated Billing theme system. |
 | Verifier | `scripts/verify-phase5-batch-5c.ts` (`npm run verify:phase5-batch-5c`) |
 
-**Excluded (unchanged):** Local payment forms; mutations; internal notes; Financial Command; entitlement or customer-mapping changes; invoice emails; receipt UI; live-mode reads; staff Billing (5D)
+**Excluded (unchanged):** Local payment forms; mutations; internal notes; Financial Command; entitlement or customer-mapping changes; invoice emails; receipt UI; live-mode reads
 
 ### Batch 5D — Staff Invoice Visibility
 
-**Status:** Defined — **not authorized to start until 5C is reviewed/cleared**
+**Status:** ✅ Implemented in repository — verified (`npm run verify:phase5-batch-5d`). **Does not authorize Batch 5E.** Live Stripe reads remain unauthorized. Staff cannot manage, mutate, repair, or communicate invoices from this surface.
 
-**Objective:** Authorized operators see the same safe Stripe invoice projection per client on an existing commercial or Client Command surface.
+**Objective:** Authorized operators see the same safe Stripe invoice projection per client on an existing commercial surface.
 
-**Excluded:** New finance platform; invoice mutation; automated customer repair; client communication
+| Decision | Choice |
+|----------|--------|
+| Selected surface | Commercial Agreements client detail (`CommercialAgreementsScreen` idle detail panel) — `/admin/operations/commercial-agreements` |
+| Why | Already authenticates operators, resolves a specific client server-side, sits in commercial/billing-profile context (readiness + configuration), and avoids duplicating Financial Command or Client Command’s local invoice signals. Client Command `?tab=invoices` remains local KXD invoice facts only. |
+| Alternatives considered | Client Command invoices tab (rejected — would mix local invoice signals with Stripe projection); Financial Command (rejected — intelligence layer; Phase 5 forbids duplication); new `/admin/operations/billing` route (rejected — new finance platform). |
+| Operator authorization | Page: `requirePayloadAdminPage` + operations `requireStaffAwarePage`. API: `requirePayloadAdminApi`. Restricted staff (`isRestrictedStaff`) are **not** allowlisted for commercial-agreements pages or `/api/admin/commercial-agreements/**` — founder/admin only. |
+| Client resolution | Route param `clientId` via `parseRouteClientId` → canonical `clients` existence check → `loadBillingProfileInvoiceMapping(clientId)` → Batch 5B `listInvoicesForMappedCustomer`. Browser Stripe customer / mode / invoice / billing-profile query params rejected. |
+| Composition | `listStaffClientInvoices` (`lib/stripe/invoice-read-staff.ts`) → `projectStaffInvoiceView` (ops-toned copy; reuses Batch 5C `projectInvoiceRow`) → `StaffClientInvoicesSection` fetch of `GET /api/admin/commercial-agreements/[clientId]/invoices`. |
+| Isolation | Section keyed `staff-invoices-${selectedId}`; fetch `cache: "no-store"`; abort + sequence guard on client change; API `Cache-Control: no-store`. No cross-client cache. |
+| Mode | TEST-only (Batch 5B). Live mappings → `mode_disallowed` unavailable state. |
+| Fields | Same allowlisted Batch 5B projection: number, status, amounts (integer minor units → `formatCents`), created/due/paid dates, View invoice / Pay (open + hosted payment URL only). Raw invoice id used only as React key. |
+| Hosted actions | HTTPS `hostedInvoiceUrl` → View invoice; Pay only when status `open` and HTTPS `hostedPaymentUrl`. No receipt action (`hostedReceiptUrl` remains null). No local payment form. |
+| States | Loading; ready; empty; unavailable (mapping/mode/provider/config/auth); HTTP unauthorized; client not found; unexpected failure. Missing mapping ≠ empty. No repair/create/link controls. |
+| Navigation | No new top-level nav category. Embedded section only. Direct API access independently authenticated. |
+| Theme / a11y | Semantic `--kxd-os-*` tokens; responsive list cards (not a squeezed table); status text + badge; external-link new-tab accessible context; keyboard/focus styles; reduced-motion respected via existing tokens. Compatible with current Light/Dark `data-theme`. |
+| Verifier | `scripts/verify-phase5-batch-5d.ts` (`npm run verify:phase5-batch-5d`) |
+
+**Excluded (unchanged):** New finance platform; invoice mutation; automated customer repair; client communication; Financial Command duplication; receipt UI; live-mode reads; portal Billing changes beyond shared pure helpers
 
 ### Batch 5E — Billing and Work-Summary Context
 
-**Status:** Optional — may be skipped if it adds duplication or weakens calm portal experience
+**Status:** Optional — **not authorized**; may be skipped if it adds duplication or weakens calm portal experience
 
 **Objective:** Optionally place the approved monthly summary near Billing so clients understand completed monthly value without treating work items as invoice lines.
 
@@ -385,4 +402,4 @@ Batches **5A–5C** are implemented in the repository and verified. Batches **5D
 
 ---
 
-*Phase 5 specification — Batches 5A–5C implemented and verified in repository; Batches 5D–5E unauthorized. Phase 5 as a whole is not complete. Clients cannot pay inside KXD OS; receipts are not shown while `hostedReceiptUrl` is null.*
+*Phase 5 specification — Batches 5A–5D implemented and verified in repository; Batch 5E unauthorized. Phase 5 as a whole is not complete. Clients cannot pay inside KXD OS; staff cannot manage invoices; receipts are not shown while `hostedReceiptUrl` is null.*

@@ -8,6 +8,7 @@ import {
   OpsKpiStrip,
   OpsSectionHead,
 } from "@/components/admin/operations/shared/OpsBriefing";
+import { StaffClientInvoicesSection } from "@/components/admin/operations/commercial-agreements/StaffClientInvoicesSection";
 import { KxdPage } from "@/components/os";
 import {
   activationEligibilityLabel,
@@ -3814,6 +3815,14 @@ export function CommercialAgreementsScreen() {
                   <p className="kxd-commercial-admin__error" role="alert">
                     {saveError}
                   </p>
+                ) : null}
+
+                {selectedId ? (
+                  <StaffClientInvoicesSection
+                    key={`staff-invoices-${selectedId}`}
+                    clientId={selectedId}
+                    clientName={detail.clientName}
+                  />
                 ) : null}
 
                 {activationPhase !== "closed" ? (

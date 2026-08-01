@@ -18687,6 +18687,137 @@ a.kxd-exec-today__row:hover {
   }
 }
 
+/* Phase 5 Batch 5D — Staff Stripe invoice visibility (Commercial Agreements detail) */
+.kxd-commercial-admin__staff-invoices {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--kxd-os-border);
+}
+
+.kxd-commercial-admin__invoice-state {
+  margin: 0.75rem 0 0;
+}
+
+.kxd-commercial-admin__invoice-state-title {
+  margin: 0 0 0.35rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--kxd-os-text);
+}
+
+.kxd-commercial-admin__invoice-list {
+  list-style: none;
+  margin: 0.85rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.kxd-commercial-admin__invoice-card {
+  min-width: 0;
+  padding: 0.85rem 0.9rem;
+  border: 1px solid var(--kxd-os-border);
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--kxd-os-surface, #fff) 92%, transparent);
+}
+
+.kxd-commercial-admin__invoice-card-main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+.kxd-commercial-admin__invoice-identity {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.65rem;
+  min-width: 0;
+}
+
+.kxd-commercial-admin__invoice-number {
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--kxd-os-text);
+  word-break: break-word;
+}
+
+.kxd-commercial-admin__invoice-amount {
+  margin: 0;
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--kxd-os-text);
+  white-space: nowrap;
+}
+
+.kxd-commercial-admin__invoice-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.35rem 1rem;
+  margin: 0.7rem 0 0;
+}
+
+.kxd-commercial-admin__invoice-meta dt {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-muted);
+}
+
+.kxd-commercial-admin__invoice-meta dd {
+  margin: 0.1rem 0 0;
+  font-size: 0.88rem;
+  color: var(--kxd-os-text);
+  word-break: break-word;
+}
+
+.kxd-commercial-admin__invoice-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem 1rem;
+  margin-top: 0.75rem;
+}
+
+.kxd-commercial-admin__invoice-link {
+  color: var(--kxd-os-accent, #8a7340);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  font-size: 0.9rem;
+}
+
+.kxd-commercial-admin__invoice-link:hover {
+  color: var(--kxd-os-text);
+}
+
+.kxd-commercial-admin__invoice-link:focus-visible {
+  outline: 2px solid var(--kxd-os-focus, #8a7340);
+  outline-offset: 2px;
+}
+
+@media (max-width: 720px) {
+  .kxd-commercial-admin__invoice-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .kxd-commercial-admin__invoice-card-main {
+    flex-direction: column;
+  }
+
+  .kxd-commercial-admin__invoice-amount {
+    white-space: normal;
+  }
+
+  .kxd-commercial-admin__invoice-actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
 .kxd-commercial-admin__field input[readonly] {
   background: color-mix(in srgb, var(--kxd-os-border, #ddd) 18%, #fff);
   color: var(--kxd-os-text-muted);

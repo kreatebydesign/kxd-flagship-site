@@ -817,7 +817,7 @@ These pillars are **not** implemented by listing them here. Engineering phases r
 **Active product-track phase (not a Future-systems pillar rewrite):**  
 `docs/PHASE-5-CLIENT-BILLING-VISIBILITY.md` — **Phase 5 — Client Billing Visibility, Stripe Invoice Status & Monthly Work Summaries**.
 
-- Approved for phased implementation; **Batch 5A implemented/verified** in repository (`verify:phase5-batch-5a`); Batches **5B–5E not authorized**.
+- Approved for phased implementation; **Batches 5A–5D implemented/verified** in repository (`verify:phase5-batch-5a` … `verify:phase5-batch-5d`); Batch **5E not authorized**. Phase 5 as a whole is not complete.
 - Delivers Stripe-authoritative invoice **visibility** + Stripe-hosted pay actions + honest monthly work summaries.
 - Does **not** implement Hosting Transition & Revenue Engine (Future systems item 8 remains deferred).
 - Does **not** create an accounting ledger, Work Ledger, payment vault, or Wave/QuickBooks dual-ledger.
