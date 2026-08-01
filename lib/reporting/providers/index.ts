@@ -64,7 +64,10 @@ export {
   normalizeGoogleAdsAggregate,
   googleAdsFactsToSnapshot,
 } from "./google/ads/normalize";
-export { GOOGLE_ADS_API_VERSION } from "./google/ads/client";
+export {
+  GOOGLE_ADS_API_VERSION,
+  buildGoogleAdsSearchUrl,
+} from "./google/ads/client";
 export {
   clearReportingProviderCache,
   reportingProviderCacheKey,

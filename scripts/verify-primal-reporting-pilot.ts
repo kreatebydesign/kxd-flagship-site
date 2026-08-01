@@ -16,6 +16,10 @@ import {
   resolveProviderFreshnessPresentation,
 } from "../lib/reporting/freshness/presentation";
 import { REPORTING_PROVIDER_METRIC_SET_VERSION } from "../lib/reporting/providers/types";
+import {
+  GOOGLE_ADS_API_VERSION,
+  buildGoogleAdsSearchUrl,
+} from "../lib/reporting/providers/google/ads/client";
 import { ALL_REPORTING_CAPABILITIES } from "../lib/reporting/domain/capabilities";
 
 let passed = 0;
@@ -53,6 +57,14 @@ console.log("\nBatch J.2B — Primal reporting pilot verifier\n");
 
 check("metric set version bumps for generate_lead pipeline", () => {
   assert.equal(REPORTING_PROVIDER_METRIC_SET_VERSION, "j2b.1.0");
+});
+
+check("Google Ads REST uses current API version (not sunset v18)", () => {
+  assert.equal(GOOGLE_ADS_API_VERSION, "v25");
+  assert.match(
+    buildGoogleAdsSearchUrl("7431689593"),
+    /^https:\/\/googleads\.googleapis\.com\/v25\/customers\/7431689593\/googleAds:search$/,
+  );
 });
 
 check("reporting capabilities are distinct from CES nav modules", () => {

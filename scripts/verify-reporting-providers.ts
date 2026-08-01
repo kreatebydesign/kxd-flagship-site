@@ -57,6 +57,10 @@ import {
 } from "../lib/reporting/providers/google/auth.ts";
 import { GA4_CORE_METRICS } from "../lib/reporting/providers/google/ga4/client.ts";
 import { normalizeGa4Metrics } from "../lib/reporting/providers/google/ga4/normalize.ts";
+import {
+  GOOGLE_ADS_API_VERSION,
+  buildGoogleAdsSearchUrl,
+} from "../lib/reporting/providers/google/ads/client.ts";
 import { normalizeGoogleAdsAggregate } from "../lib/reporting/providers/google/ads/normalize.ts";
 import { normalizeSearchConsoleAggregate } from "../lib/reporting/providers/google/search-console/normalize.ts";
 import { composeReportingFromProviderResults } from "../lib/reporting/providers/compose-from-providers.ts";
@@ -169,6 +173,19 @@ assert(
   "GA4/GSC scopes unchanged (no adwords on reporting scopes)",
 );
 assert(GOOGLE_ADS_SCOPES.includes(GOOGLE_ADS_ADWORDS_SCOPE), "Ads uses adwords scope");
+assert(
+  GOOGLE_ADS_API_VERSION === "v25",
+  "Ads REST version is current major (v18 sunset returns HTML 404)",
+);
+assert(
+  buildGoogleAdsSearchUrl("7431689593") ===
+    "https://googleads.googleapis.com/v25/customers/7431689593/googleAds:search",
+  "Ads search URL uses hostname googleads.googleapis.com + current version + googleAds:search",
+);
+assert(
+  !buildGoogleAdsSearchUrl("7431689593").includes("pageSize"),
+  "Ads search URL builder does not embed pageSize",
+);
 assert(
   GOOGLE_REPORTING_CREDENTIAL_PRECEDENCE[0] === "VERCEL_OIDC_WORKLOAD_IDENTITY",
   "Vercel OIDC precedes SA JSON / OAuth",

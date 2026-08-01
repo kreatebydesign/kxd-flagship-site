@@ -13,8 +13,17 @@ import {
   getGoogleAdsDeveloperToken,
 } from "../auth";
 
-/** Stable REST version — bump when Google deprecates. */
-export const GOOGLE_ADS_API_VERSION = "v18";
+/**
+ * Stable REST version — bump when Google sunsets older majors.
+ * v18 was sunset (Aug 2025); retired versions return HTML 404 from
+ * googleads.googleapis.com instead of JSON error payloads.
+ */
+export const GOOGLE_ADS_API_VERSION = "v25";
+
+/** Canonical search resource path for the configured API version. */
+export function buildGoogleAdsSearchUrl(customerIdDigits: string): string {
+  return `https://googleads.googleapis.com/${GOOGLE_ADS_API_VERSION}/customers/${customerIdDigits}/googleAds:search`;
+}
 
 export interface GoogleAdsAggregateRequest {
   customerId: string;
@@ -97,7 +106,7 @@ export async function queryGoogleAdsAggregate(
     ? digitsOnly(input.loginCustomerId)
     : null;
 
-  const url = `https://googleads.googleapis.com/${GOOGLE_ADS_API_VERSION}/customers/${customerId}/googleAds:search`;
+  const url = buildGoogleAdsSearchUrl(customerId);
   const headers: Record<string, string> = {
     Authorization: `Bearer ${auth.accessToken}`,
     "developer-token": developerToken,
@@ -121,9 +130,9 @@ export async function queryGoogleAdsAggregate(
   }>(url, {
     method: "POST",
     headers,
+    /* Do not send pageSize — unsupported since v17 (PAGE_SIZE_NOT_SUPPORTED). */
     body: JSON.stringify({
       query: buildGoogleAdsAggregateGaql(input.startDate, input.endDate),
-      pageSize: 1,
     }),
     timeoutMs: 20_000,
   });
@@ -131,9 +140,15 @@ export async function queryGoogleAdsAggregate(
   if (!res.ok) {
     const status = res.status ?? 500;
     const code = mapHttpStatusToProviderStatus(status);
+    const raw = res.error || `Google Ads API HTTP ${status}`;
+    const looksLikeHtml404 =
+      status === 404 && /<!DOCTYPE html|<html/i.test(raw);
+    const message = looksLikeHtml404
+      ? `Google Ads API ${GOOGLE_ADS_API_VERSION} returned HTML 404 — confirm the API version is current and the Google Ads API is enabled for the Cloud project.`
+      : raw;
     return {
       ok: false,
-      error: providerError(code, res.error || `Google Ads API HTTP ${status}`, {
+      error: providerError(code, message, {
         httpStatus: status,
         retryable: status === 429 || status >= 500,
       }),

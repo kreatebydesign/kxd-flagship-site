@@ -1,5 +1,5 @@
 /**
- * Phase 4 Batch J.2B — Read-only provider access probes.
+ * Phase 4 Batch J.2B / J.2B.1 — Read-only provider access probes.
  *
  * Does NOT require CES entitlements.
  * Does NOT persist reporting facts.
@@ -10,8 +10,16 @@ import "server-only";
 
 import { defaultExecutiveReportingPeriod } from "@/lib/reporting/ingest/period";
 import { loadClientReportingConnection } from "./connection";
-import { getGoogleAdsAuthConfig, getGoogleReportingAuthConfig } from "./google/auth";
-import { queryGoogleAdsAggregate } from "./google/ads/client";
+import {
+  getGoogleAdsAuthConfig,
+  getGoogleReportingAuthConfig,
+  GOOGLE_ADS_SCOPES,
+  GOOGLE_REPORTING_SCOPES,
+} from "./google/auth";
+import {
+  GOOGLE_ADS_API_VERSION,
+  queryGoogleAdsAggregate,
+} from "./google/ads/client";
 import { GA4_CORE_METRICS, runGa4Report } from "./google/ga4/client";
 import { querySearchConsoleAggregate } from "./google/search-console/client";
 import { toProviderDate } from "./period";
@@ -21,6 +29,14 @@ export type ReportingProbeResult = {
   provider: ReportingProviderId;
   ok: boolean;
   authMode: string;
+  /** Impersonated / reporting service-account email when known (not a secret). */
+  serviceAccountEmail: string | null;
+  /** True when GOOGLE_ADS_DEVELOPER_TOKEN is present (Ads probes only). */
+  developerTokenConfigured?: boolean;
+  /** OAuth scopes used for this probe (names only). */
+  scopes: readonly string[];
+  /** Ads API version when provider is ads. */
+  apiVersion?: string;
   resource: string | null;
   message: string;
   rowCount?: number;
@@ -36,6 +52,8 @@ export async function probeReportingProvider(input: {
       provider: input.provider,
       ok: false,
       authMode: "unknown",
+      serviceAccountEmail: null,
+      scopes: [],
       resource: null,
       message: "Reporting connection could not be resolved.",
     };
@@ -47,21 +65,25 @@ export async function probeReportingProvider(input: {
 
   if (input.provider === "ga4") {
     const auth = getGoogleReportingAuthConfig();
+    const base = {
+      provider: "ga4" as const,
+      authMode: auth.mode,
+      serviceAccountEmail: auth.serviceAccountEmail ?? null,
+      scopes: GOOGLE_REPORTING_SCOPES,
+    };
     const resource = connection.ga4PropertyId;
     if (!resource) {
       return {
-        provider: "ga4",
+        ...base,
         ok: false,
-        authMode: auth.mode,
         resource: null,
         message: "ga4PropertyId is not configured.",
       };
     }
     if (auth.mode === "not-configured" || auth.mode === "invalid-configuration") {
       return {
-        provider: "ga4",
+        ...base,
         ok: false,
-        authMode: auth.mode,
         resource,
         message: `Google Reporting credentials are ${auth.mode}.`,
       };
@@ -73,9 +95,8 @@ export async function probeReportingProvider(input: {
       metrics: [...GA4_CORE_METRICS],
     });
     return {
-      provider: "ga4",
+      ...base,
       ok: probe.ok,
-      authMode: auth.mode,
       resource,
       message: probe.ok
         ? `GA4 access verified (${probe.rowCount} row(s)).`
@@ -86,21 +107,25 @@ export async function probeReportingProvider(input: {
 
   if (input.provider === "search-console") {
     const auth = getGoogleReportingAuthConfig();
+    const base = {
+      provider: "search-console" as const,
+      authMode: auth.mode,
+      serviceAccountEmail: auth.serviceAccountEmail ?? null,
+      scopes: GOOGLE_REPORTING_SCOPES,
+    };
     const resource = connection.searchConsoleSiteUrl;
     if (!resource) {
       return {
-        provider: "search-console",
+        ...base,
         ok: false,
-        authMode: auth.mode,
         resource: null,
         message: "searchConsoleSiteUrl is not configured.",
       };
     }
     if (auth.mode === "not-configured" || auth.mode === "invalid-configuration") {
       return {
-        provider: "search-console",
+        ...base,
         ok: false,
-        authMode: auth.mode,
         resource,
         message: `Google Reporting credentials are ${auth.mode}.`,
       };
@@ -111,9 +136,8 @@ export async function probeReportingProvider(input: {
       endDate: end,
     });
     return {
-      provider: "search-console",
+      ...base,
       ok: probe.ok,
-      authMode: auth.mode,
       resource,
       message: probe.ok
         ? "Search Console access verified."
@@ -122,21 +146,27 @@ export async function probeReportingProvider(input: {
   }
 
   const adsAuth = getGoogleAdsAuthConfig();
+  const base = {
+    provider: "ads" as const,
+    authMode: adsAuth.mode,
+    serviceAccountEmail: adsAuth.serviceAccountEmail ?? null,
+    developerTokenConfigured: adsAuth.developerTokenConfigured,
+    scopes: GOOGLE_ADS_SCOPES,
+    apiVersion: GOOGLE_ADS_API_VERSION,
+  };
   const resource = connection.googleAdsCustomerId;
   if (!resource) {
     return {
-      provider: "ads",
+      ...base,
       ok: false,
-      authMode: adsAuth.mode,
       resource: null,
       message: "googleAdsCustomerId is not configured.",
     };
   }
   if (adsAuth.mode === "not-configured" || adsAuth.mode === "invalid-configuration") {
     return {
-      provider: "ads",
+      ...base,
       ok: false,
-      authMode: adsAuth.mode,
       resource,
       message: `Google Ads credentials are ${adsAuth.mode}.`,
     };
@@ -148,9 +178,8 @@ export async function probeReportingProvider(input: {
     endDate: end,
   });
   return {
-    provider: "ads",
+    ...base,
     ok: probe.ok,
-    authMode: adsAuth.mode,
     resource,
     message: probe.ok
       ? `Google Ads access verified (${probe.rowCount} row(s)).`

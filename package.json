@@ -98,7 +98,7 @@
     "activate:google-ads:apply": "KXD_SERVER_ONLY_SHIM=1 APPLY=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/activate-google-ads.ts",
     "activate:website-analytics": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/activate-ga4.ts",
     "activate:website-analytics:apply": "KXD_SERVER_ONLY_SHIM=1 APPLY=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/activate-ga4.ts",
-    "verify:primal-reporting-pilot": "tsx scripts/verify-primal-reporting-pilot.ts",
+    "verify:primal-reporting-pilot": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/verify-primal-reporting-pilot.ts",
     "ingest:reporting-facts": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/ingest-reporting-facts.ts",
     "verify:reporting-ingest": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/verify-reporting-ingest.ts",
     "verify:executive-panel-metrics": "tsx scripts/verify-executive-panel-metrics.ts",
