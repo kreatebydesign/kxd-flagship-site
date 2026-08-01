@@ -38,10 +38,27 @@ export function isCesFlagshipPortal(
   return Boolean(profile && isCesModuleEnabled(profile, "website-review"));
 }
 
+export type PortalNavVisibilityOptions = {
+  /**
+   * Phase 5 Batch 5C — show Billing/Invoices only when the active client has a
+   * valid test-mode Stripe customer mapping (no entitlement mutation).
+   */
+  billingNavAvailable?: boolean;
+};
+
 export function isPortalNavVisibleForCesLaunch(
   navId: PortalNavId,
   profile?: ResolvedExperienceProfile | null,
+  options?: PortalNavVisibilityOptions,
 ): boolean {
+  /*
+   * Phase 5 Batch 5C — Billing nav is eligibility-gated for every portal profile.
+   * Direct /portal/invoices remains authenticated and shows honest unavailable states.
+   */
+  if (navId === "invoices") {
+    return options?.billingNavAvailable === true;
+  }
+
   if (!isCesFlagshipPortal(profile)) return true;
   if (navId === "overview" || navId === "website-review") return true;
   /* Inventory — CES module entitlement (Primal first). */

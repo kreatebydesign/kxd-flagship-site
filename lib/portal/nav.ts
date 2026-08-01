@@ -57,7 +57,7 @@ const NAV_ITEMS: ClientHqNavItem[] = [
   { id: "deliverables", label: "Deliverables", href: "/portal/deliverables", moduleId: "deliverables" },
   { id: "requests", label: "Requests", href: "/portal/requests", moduleId: "requests" },
   { id: "assets", label: "Assets", href: "/portal/assets", moduleId: "assets" },
-  { id: "invoices", label: "Invoices", href: "/portal/invoices", moduleId: "invoices" },
+  { id: "invoices", label: "Billing", href: "/portal/invoices", moduleId: "invoices" },
   { id: "meetings", label: "Meetings", href: "/portal/meetings", moduleId: "meetings" },
   { id: "analytics", label: "Analytics", href: "/portal/analytics", moduleId: "analytics" },
   { id: "reports", label: "Reports", href: "/portal/reports", moduleId: "reports" },
@@ -115,9 +115,13 @@ export function getEnabledClientHqNavGroups(): ClientHqNavGroup[] {
 /** Client HQ nav + CES module items when profile enables them */
 export function getEnabledPortalNavGroups(
   profile?: ResolvedExperienceProfile | null,
-  options?: { portfolioNavAvailable?: boolean },
+  options?: {
+    portfolioNavAvailable?: boolean;
+    billingNavAvailable?: boolean;
+  },
 ): PortalNavGroup[] {
   const portfolioNavAvailable = Boolean(options?.portfolioNavAvailable);
+  const billingNavAvailable = Boolean(options?.billingNavAvailable);
   const base = getEnabledClientHqNavGroups();
 
   if (!profile) {
@@ -130,11 +134,15 @@ export function getEnabledPortalNavGroups(
         return {
           label: group.label,
           items: [
-            ...group.items.map(({ id, label, href }) => ({
-              id: id as PortalNavId,
-              label,
-              href,
-            })),
+            ...group.items
+              .filter((item) =>
+                item.id === "invoices" ? billingNavAvailable : true,
+              )
+              .map(({ id, label, href }) => ({
+                id: id as PortalNavId,
+                label,
+                href,
+              })),
             ...portfolioItem,
           ],
         };
@@ -181,7 +189,9 @@ export function getEnabledPortalNavGroups(
     })
     .map((group) => ({
       ...group,
-      items: group.items.filter((item) => isPortalNavVisibleForCesLaunch(item.id, profile)),
+      items: group.items.filter((item) =>
+        isPortalNavVisibleForCesLaunch(item.id, profile, { billingNavAvailable }),
+      ),
     }))
     .filter((group) => group.items.length > 0);
 }

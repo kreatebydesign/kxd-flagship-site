@@ -29,6 +29,8 @@ export interface ClientHqShellProps {
   accountSwitcher?: PortalAccountSwitcherModel | null;
   /** Batch F — show Portfolio nav only when server authorizes multi-account portfolio. */
   portfolioNavAvailable?: boolean;
+  /** Phase 5 Batch 5C — show Billing nav only when active client has eligible Stripe mapping. */
+  billingNavAvailable?: boolean;
   children: ReactNode;
 }
 
@@ -50,10 +52,12 @@ export function ClientHqShell({
   experienceProfile,
   accountSwitcher = null,
   portfolioNavAvailable = false,
+  billingNavAvailable = false,
   children,
 }: ClientHqShellProps) {
   const navGroups = getEnabledPortalNavGroups(experienceProfile, {
     portfolioNavAvailable,
+    billingNavAvailable,
   });
   const branding = editionBranding;
   const cssVars = experienceProfile

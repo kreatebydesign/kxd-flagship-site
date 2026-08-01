@@ -583,9 +583,10 @@ async function main() {
     "app/(portal)/portal/(app)/invoices/page.tsx",
   );
   check(
-    "portal invoices page untouched by 5B (no Batch 5B import)",
-    !portalInvoices.includes("invoice-read") &&
-      !portalInvoices.includes("listPortalSessionInvoices"),
+    "Batch 5B foundation modules remain UI-free",
+    !read("lib/stripe/invoice-read-ops.ts").includes("InvoicesScreen") &&
+      !read("lib/stripe/invoice-read-service.ts").includes("InvoicesScreen") &&
+      portalInvoices.includes("getPortalSession"),
   );
 
   const hasMoreAdapter = createFakeCommercialStripeAdapter({

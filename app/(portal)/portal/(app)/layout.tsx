@@ -3,6 +3,7 @@ import { CesProfileProvider } from "@/components/ces/providers/CesProfileProvide
 import { ClientHqAppShell } from "@/components/client-hq/ClientHqAppShell";
 import { resolveExperienceProfile } from "@/lib/ces/server";
 import { resolvePortalAccountContext } from "@/lib/portal/account-context";
+import { resolvePortalBillingNavAvailable } from "@/lib/portal/billing/load";
 import { getPortalEditionBranding } from "@/lib/portal/nav";
 import { getPortalSession } from "@/lib/portal/session";
 import { needsPortalWelcome } from "@/lib/portal/welcome";
@@ -22,11 +23,13 @@ export default async function PortalAppLayout({ children }: { children: React.Re
     redirect("/portal/welcome");
   }
 
-  const [experienceProfile, editionBranding, accountContext] = await Promise.all([
-    resolveExperienceProfile(session),
-    Promise.resolve(getPortalEditionBranding()),
-    resolvePortalAccountContext(session),
-  ]);
+  const [experienceProfile, editionBranding, accountContext, billingNavAvailable] =
+    await Promise.all([
+      resolveExperienceProfile(session),
+      Promise.resolve(getPortalEditionBranding()),
+      resolvePortalAccountContext(session),
+      resolvePortalBillingNavAvailable(session),
+    ]);
 
   return (
     <CesProfileProvider profile={experienceProfile}>
@@ -38,6 +41,7 @@ export default async function PortalAppLayout({ children }: { children: React.Re
         portfolioNavAvailable={
           accountContext.portfolioAccessAvailable && accountContext.switchingAvailable
         }
+        billingNavAvailable={billingNavAvailable}
       >
         <div key={`portal-client-${session.clientId}`}>{children}</div>
       </ClientHqAppShell>

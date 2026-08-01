@@ -376,13 +376,13 @@ function main() {
       !ui.includes("completedAt ?? item.updatedAt"),
   );
 
-  const invoicesPage = read("app/(portal)/portal/(app)/invoices/page.tsx");
-  check(
-    "Batch 5A did not alter portal invoices page",
-    invoicesPage.includes("getPortalRetainers") && invoicesPage.includes("InvoicesScreen"),
-  );
-
   const monthlyPolicy = read("lib/portal/work-performance/monthly-summary.ts");
+  check(
+    "Batch 5A monthly summary remains independent of Billing/Stripe",
+    !monthlyPolicy.toLowerCase().includes("stripe") &&
+      !monthlyPolicy.includes("loadPortalBillingForSession") &&
+      !ui.includes("loadPortalBillingForSession"),
+  );
   check(
     "Batch 5A policy has no Stripe imports",
     !monthlyPolicy.toLowerCase().includes("stripe"),

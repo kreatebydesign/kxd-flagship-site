@@ -2205,6 +2205,136 @@ body:has(.kxd-exec-workspace) {
   max-width: 40rem;
 }
 
+/* Phase 5 Batch 5C — Portal Billing (semantic tokens only; Light/Dark via data-theme) */
+.kxd-os-billing {
+  display: grid;
+  gap: var(--kxd-os-space-6);
+  max-width: 44rem;
+}
+
+.kxd-os-billing__account {
+  margin: 0;
+}
+
+.kxd-os-billing-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--kxd-os-space-4);
+}
+
+.kxd-os-billing-card {
+  margin: 0;
+  padding: var(--kxd-os-space-5) var(--kxd-os-space-5);
+  border: 1px solid var(--kxd-os-border-subtle);
+  border-radius: 0.5rem;
+  background: var(--kxd-os-bg-surface);
+  display: grid;
+  gap: var(--kxd-os-space-4);
+}
+
+.kxd-os-billing-card__main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--kxd-os-space-3) var(--kxd-os-space-6);
+}
+
+.kxd-os-billing-card__identity {
+  display: grid;
+  gap: var(--kxd-os-space-2);
+  min-width: 0;
+}
+
+.kxd-os-billing-card__identity .kxd-os-card__title {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.kxd-os-billing-card__amount {
+  margin: 0;
+  font-family: var(--kxd-os-font-sans);
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--kxd-os-text-primary);
+  white-space: nowrap;
+}
+
+.kxd-os-billing-card__meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+  gap: var(--kxd-os-space-3) var(--kxd-os-space-5);
+  margin: 0;
+}
+
+.kxd-os-billing-card__meta dt {
+  margin: 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-secondary);
+}
+
+.kxd-os-billing-card__meta dd {
+  margin: 0.15rem 0 0;
+  color: var(--kxd-os-text-primary);
+  font-size: var(--kxd-os-type-body-size, 0.95rem);
+}
+
+.kxd-os-billing-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--kxd-os-space-3) var(--kxd-os-space-5);
+  padding-top: var(--kxd-os-space-1);
+}
+
+.kxd-os-billing-link {
+  color: var(--kxd-os-text-primary);
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+  font-size: 0.9375rem;
+}
+
+.kxd-os-billing-link:hover {
+  color: var(--kxd-os-accent);
+}
+
+.kxd-os-billing-link:focus-visible {
+  outline: 2px solid var(--kxd-os-border-focus);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.kxd-os-billing__note,
+.kxd-os-billing__footnote {
+  margin: 0;
+  max-width: 36rem;
+}
+
+@media (max-width: 640px) {
+  .kxd-os-billing-card__main {
+    flex-direction: column;
+  }
+
+  .kxd-os-billing-card__amount {
+    white-space: normal;
+  }
+
+  .kxd-os-billing-card__actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kxd-os-billing-link {
+    transition: none;
+  }
+}
+
 .kxd-os-ops-kpi-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
