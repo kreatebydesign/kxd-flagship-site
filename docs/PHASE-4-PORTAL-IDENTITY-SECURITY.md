@@ -2,7 +2,7 @@
 
 Private invitation-only activation, membership-scoped roles, WebAuthn passkeys, TOTP MFA, and recovery codes — additive to Phase 4 memberships/sessions.
 
-**Status:** Code-complete in repository. Production migration, real invites, and identity rollout are **unexecuted** and require separate approval.
+**Status:** Batch I code-complete at `f3cfb92`. Batch J covers production deploy + migration + smoke verification — see `docs/PHASE-4-BATCH-J-IDENTITY-ROLLOUT.md`. Real client invitations and identity mutations remain operator-gated (pilot runbook).
 
 ## Decisions (locked)
 
@@ -81,7 +81,13 @@ npm run verify:phase4-portal-identity-security
 5. Confirm cancel/fallback: invalid token shows generic error; recovery codes shown once.
 6. Login: password path with TOTP when enabled; “Continue with a passkey” when registered.
 
-## Production rollout plan (document only — not executed)
+## Production rollout
+
+- **Batch J procedure:** `docs/PHASE-4-BATCH-J-IDENTITY-ROLLOUT.md`
+- **Pilot activation (after smoke):** `docs/PHASE-4-BATCH-J-PILOT-ACTIVATION-RUNBOOK.md`
+- Broad client rollout (Matt/Don/Billy/Nicole/Adam/Tyler) remains **unexecuted** until pilot approval.
+
+### Broad client sequence (still operator-gated / unexecuted)
 
 1. Matt security enrollment  
 2. Optional KXD Client creation (separate approval)  
@@ -95,4 +101,4 @@ npm run verify:phase4-portal-identity-security
 10. Keep delegated client access disabled  
 11. Rollback: revoke invites, disable memberships, disable MFA flags, redeploy prior release  
 
-**Do not in this batch:** push/deploy as production activation, production migrate, real external client email, create/invite Don/Billy/Nicole, mutate Adam/Tyler, SMS MFA, public registration, Phase 5, Approvals product.
+**Still excluded until separately approved:** real external client email, create/invite Don/Billy/Nicole, mutate Adam/Tyler, SMS MFA, public registration, Phase 5, Approvals product, KXD Connect/Support/Academy/Meetings/Social Studio/weather/personalized shell.

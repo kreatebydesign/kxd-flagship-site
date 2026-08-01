@@ -35,9 +35,30 @@ export function PortalAccountSecurity() {
   }
 
   useEffect(() => {
-    void refresh().catch((err) =>
-      setError(err instanceof Error ? err.message : "Could not load security status."),
-    );
+    let cancelled = false;
+    async function load() {
+      try {
+        const res = await fetch("/api/portal/security/status");
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          throw new Error(data.message ?? "Could not load security status.");
+        }
+        if (cancelled) return;
+        setStatus({
+          totpEnabled: data.totpEnabled,
+          passkeys: data.passkeys ?? [],
+          mfaEncryptionConfigured: data.mfaEncryptionConfigured,
+        });
+      } catch (err) {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "Could not load security status.");
+        }
+      }
+    }
+    void load();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   async function registerPasskey() {

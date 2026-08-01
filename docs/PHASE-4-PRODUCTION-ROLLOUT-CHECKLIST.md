@@ -1,12 +1,12 @@
 # Phase 4 — Production Rollout Checklist
 
-**Status:** Repository Batches A–I code/docs complete — **authenticated production rollout QA blocked** until a safe multi-client identity, membership, and security configuration is confirmed.  
-**Companion:** `docs/PHASE-4-MULTI-CLIENT-PORTAL.md`, `docs/PHASE-4-PORTAL-IDENTITY-SECURITY.md`, `docs/KXD-OS-CURRENT-STATE.md`  
+**Status:** Batches A–I implemented; Batch J = identity security production rollout + smoke verification. Authenticated multi-company QA and real-user activation remain gated by the pilot runbook.  
+**Companion:** `docs/PHASE-4-MULTI-CLIENT-PORTAL.md`, `docs/PHASE-4-PORTAL-IDENTITY-SECURITY.md`, `docs/PHASE-4-BATCH-J-IDENTITY-ROLLOUT.md`, `docs/PHASE-4-BATCH-J-PILOT-ACTIVATION-RUNBOOK.md`, `docs/KXD-OS-CURRENT-STATE.md`  
 **Verifiers:** `npm run verify:phase4-multi-client-portal-completion`, `npm run verify:phase4-portal-identity-security`
 
 > Do not mark Phase 4 fully production-complete until the live authenticated gates below pass.  
 > Do not invent an Approvals product. Portal “client approvals” remain existing Website Review / request awaiting-input states only.  
-> Batch I production migrate / real invites / identity mutations are **unexecuted** until separately approved.
+> Real client invitations and Don/Billy/Nicole/Adam/Tyler mutations remain **unexecuted** until pilot approval.
 
 ---
 

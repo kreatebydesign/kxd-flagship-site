@@ -594,6 +594,8 @@ Authoritative detail: `docs/PHASE-4-PORTAL-IDENTITY-SECURITY.md`.
 |----------|------|
 | This file | Authoritative Phase 4 plan |
 | `docs/PHASE-4-PORTAL-IDENTITY-SECURITY.md` | Batch I invitations / roles / passkeys / MFA |
+| `docs/PHASE-4-BATCH-J-IDENTITY-ROLLOUT.md` | Batch J production deploy / migrate / smoke procedure |
+| `docs/PHASE-4-BATCH-J-PILOT-ACTIVATION-RUNBOOK.md` | Post-smoke pilot activation (not broad client rollout) |
 | `docs/PHASE-4-PRODUCTION-ROLLOUT-CHECKLIST.md` | Production rollout / authenticated QA checklist |
 | `docs/KXD-OS-ROADMAP.md` | Product-track status |
 | `docs/KXD-OS-CURRENT-STATE.md` | Engineering focus |

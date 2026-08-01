@@ -224,8 +224,9 @@ Edition 1 is in the **operate and extend** phase — not redesign.
 - Portal Access manages memberships; account switcher present; analytics/website-health/reports scoped to active account; authorized portfolio at `/portal/portfolio` for multi-membership users only
 - Batch G: requests/files/deliverables/reports/Website Review/Workspace isolation verified; portal “client approvals” locked to existing awaiting-input review/request states (no Approvals product)
 - Batch H: completion verifier; account-switcher keyboard/a11y + long-name overflow; rollout checklist; authenticated multi-client production QA **blocked** pending safe production identity inventory
-- Batch I: private invitations, membership roles, WebAuthn passkeys, TOTP MFA, recovery codes (`verify:phase4-portal-identity-security`); Portal Access invitation UI; activation + security enrollment; production identity rollout **documented only / unexecuted**
-- Remaining open risk: pre-existing public Payload `/media/...` onboarding-asset exposure (not redesigned in Batch H/I)
+- Batch I: private invitations, membership roles, WebAuthn passkeys, TOTP MFA, recovery codes (`verify:phase4-portal-identity-security`); Portal Access invitation UI; activation + security enrollment — implementation commit `f3cfb92`
+- Batch J: identity security production rollout procedure (`docs/PHASE-4-BATCH-J-IDENTITY-ROLLOUT.md`) + pilot runbook; real client invites/mutations still operator-gated
+- Remaining open risk: pre-existing public Payload `/media/...` onboarding-asset exposure (not redesigned in Batch H/I/J); serverless rate limits are best-effort
 - No Cusick production linking yet
 - First production configuration remains Cusick account group (four independent clients) after ops readiness + Don/Cusick live QA
 
