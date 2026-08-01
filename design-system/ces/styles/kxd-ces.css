@@ -2848,6 +2848,8 @@
   letter-spacing: -0.016em;
   color: var(--kxd-os-text-primary);
   margin: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .kxd-ces-identity__workspace {
@@ -2925,6 +2927,8 @@
   letter-spacing: -0.012em;
   color: var(--kxd-os-text-primary);
   line-height: 1.3;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .kxd-ces-account-switcher__chevron {
@@ -2981,6 +2985,9 @@
 .kxd-ces-account-switcher__option-name {
   font-weight: 540;
   letter-spacing: -0.01em;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .kxd-ces-account-switcher__option-meta {
@@ -9953,6 +9960,13 @@
     margin: 0;
     font-size: 0.95rem;
     font-weight: 500;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .kxd-ces-mobile-bar__identity {
+    min-width: 0;
+    flex: 1 1 auto;
   }
 
   .kxd-ces-mobile-bar__workspace {

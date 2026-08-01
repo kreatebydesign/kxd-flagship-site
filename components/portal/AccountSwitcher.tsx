@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import type { PortalAccountSwitcherModel } from "@/lib/portal/account-context-types";
 
 type Props = {
@@ -17,19 +17,56 @@ export function AccountSwitcher({ model }: Props) {
   const pathname = usePathname();
   const listId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
 
   const active =
     model.accounts.find((a) => a.clientId === model.activeClientId) ??
     model.accounts[0];
 
+  useEffect(() => {
+    if (!open) return;
+
+    const onPointerDown = (event: MouseEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", onPointerDown);
+    return () => document.removeEventListener("mousedown", onPointerDown);
+  }, [open]);
+
   if (!active || model.accounts.length < 2) return null;
+
+  function selectedAccountIndex() {
+    return Math.max(
+      0,
+      model.accounts.findIndex((a) => a.clientId === model.activeClientId),
+    );
+  }
+
+  function openList() {
+    const index = selectedAccountIndex();
+    setActiveIndex(index);
+    setOpen(true);
+    window.requestAnimationFrame(() => {
+      optionRefs.current[index]?.focus();
+    });
+  }
+
+  function closeList() {
+    setOpen(false);
+    triggerRef.current?.focus();
+  }
 
   async function selectAccount(clientId: number) {
     if (clientId === model.activeClientId || pending) {
-      setOpen(false);
+      closeList();
       return;
     }
     setPending(true);
@@ -67,30 +104,54 @@ export function AccountSwitcher({ model }: Props) {
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to switch accounts.");
+      triggerRef.current?.focus();
     } finally {
       setPending(false);
     }
   }
 
+  function moveActive(delta: number) {
+    const next =
+      (activeIndex + delta + model.accounts.length) % model.accounts.length;
+    setActiveIndex(next);
+    optionRefs.current[next]?.focus();
+  }
+
   return (
     <div className="kxd-ces-account-switcher" ref={rootRef}>
       <button
+        ref={triggerRef}
         type="button"
         className="kxd-ces-account-switcher__trigger"
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={listId}
+        aria-label={`Account: ${active.clientName}. Switch authorized account.`}
         disabled={pending}
-        onClick={() => setOpen((value) => !value)}
+        onClick={() => {
+          if (open) {
+            closeList();
+          } else {
+            openList();
+          }
+        }}
         onKeyDown={(event) => {
-          if (event.key === "Escape") setOpen(false);
-          if (event.key === "ArrowDown" && !open) {
+          if (event.key === "Escape") {
             event.preventDefault();
-            setOpen(true);
+            closeList();
+          }
+          if (
+            (event.key === "ArrowDown" || event.key === "Enter" || event.key === " ") &&
+            !open
+          ) {
+            event.preventDefault();
+            openList();
           }
         }}
       >
-        <span className="kxd-ces-account-switcher__label">Account</span>
+        <span className="kxd-ces-account-switcher__label" aria-hidden="true">
+          Account
+        </span>
         <span className="kxd-ces-account-switcher__active">{active.clientName}</span>
         <span className="kxd-ces-account-switcher__chevron" aria-hidden="true">
           {open ? "▴" : "▾"}
@@ -103,12 +164,36 @@ export function AccountSwitcher({ model }: Props) {
           className="kxd-ces-account-switcher__list"
           role="listbox"
           aria-label="Switch account"
+          onKeyDown={(event) => {
+            if (event.key === "Escape") {
+              event.preventDefault();
+              closeList();
+            } else if (event.key === "ArrowDown") {
+              event.preventDefault();
+              moveActive(1);
+            } else if (event.key === "ArrowUp") {
+              event.preventDefault();
+              moveActive(-1);
+            } else if (event.key === "Home") {
+              event.preventDefault();
+              setActiveIndex(0);
+              optionRefs.current[0]?.focus();
+            } else if (event.key === "End") {
+              event.preventDefault();
+              const last = model.accounts.length - 1;
+              setActiveIndex(last);
+              optionRefs.current[last]?.focus();
+            }
+          }}
         >
-          {model.accounts.map((account) => {
+          {model.accounts.map((account, index) => {
             const selected = account.clientId === model.activeClientId;
             return (
               <li key={account.clientId} role="presentation">
                 <button
+                  ref={(node) => {
+                    optionRefs.current[index] = node;
+                  }}
                   type="button"
                   role="option"
                   aria-selected={selected}
@@ -117,6 +202,12 @@ export function AccountSwitcher({ model }: Props) {
                   }`}
                   disabled={pending}
                   onClick={() => void selectAccount(account.clientId)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      void selectAccount(account.clientId);
+                    }
+                  }}
                 >
                   <span className="kxd-ces-account-switcher__option-name">
                     {account.clientName}

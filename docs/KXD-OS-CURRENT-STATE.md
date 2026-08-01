@@ -213,17 +213,20 @@ Edition 1 is in the **operate and extend** phase — not redesign.
 
 ### Approved next product phase
 
-**Phase 4 — Multi-Client Portal Access & Account Context** — Batches A–G implemented in repository. Batch H not started. Production membership migration already applied; Batches F–G have **no** new migration.
+**Phase 4 — Multi-Client Portal Access & Account Context** — Batches A–H implemented in repository. **Code-complete; awaiting authenticated production rollout QA** (not fully production-complete). Production membership migration already applied; Batches F–H have **no** new migration.
 
 - Plan: `docs/PHASE-4-MULTI-CLIENT-PORTAL.md`
+- Rollout checklist: `docs/PHASE-4-PRODUCTION-ROLLOUT-CHECKLIST.md`
 - Batch A collection: `portal-client-memberships` (`payload/collections/PortalClientMemberships.ts`)
 - Batch A migration: `migrations/20260728_phase4_portal_client_memberships.ts` (additive; backfills from legacy `portal-users.client`)
-- Batch A–G verify: `verify:phase4-multi-client-membership`, `verify:phase4-account-switcher`, `verify:phase4-workspace-personalization`, `verify:phase4-work-performance`, `verify:phase4-analytics-visibility`, `verify:phase4-authorized-portfolio`, `verify:phase4-requests-files-reports`
+- Batch A–H verify: `verify:phase4-multi-client-membership`, `verify:phase4-account-switcher`, `verify:phase4-workspace-personalization`, `verify:phase4-work-performance`, `verify:phase4-analytics-visibility`, `verify:phase4-authorized-portfolio`, `verify:phase4-requests-files-reports`, `verify:phase4-multi-client-portal-completion`
 - Session resolves authorized `clientId` from memberships (+ legacy fallback); cookie still signs portal user id only
 - Portal Access manages memberships; account switcher present; analytics/website-health/reports scoped to active account; authorized portfolio at `/portal/portfolio` for multi-membership users only
 - Batch G: requests/files/deliverables/reports/Website Review/Workspace isolation verified; portal “client approvals” locked to existing awaiting-input review/request states (no Approvals product)
-- No Cusick production linking
-- First production configuration remains Cusick account group (four independent clients) after Batch H + ops readiness
+- Batch H: completion verifier; account-switcher keyboard/a11y + long-name overflow; rollout checklist; authenticated multi-client production QA **blocked** pending safe production identity inventory
+- Remaining open risk: pre-existing public Payload `/media/...` onboarding-asset exposure (not redesigned in Batch H)
+- No Cusick production linking yet
+- First production configuration remains Cusick account group (four independent clients) after ops readiness + Don/Cusick live QA
 
 ### Parallel ops track (migration-independent)
 
@@ -235,7 +238,7 @@ Edition 1 is in the **operate and extend** phase — not redesign.
 
 ### Immediate priorities
 
-1. **Phase 4 — Multi-Client Portal Access & Account Context** — Production DB identity gate **cleared** (Vercel Neon store `kxd-flagship-db` / project `mute-violet-81514071` ≡ Target A). Backup/PITR gate **conditionally cleared** on Free plan (instant restore history window max **6 hours**; take a manual Neon snapshot immediately before any production migrate; Launch upgrade recommended for 7-day retention). Production migrations applied successfully (`20260727_phase3_client_relationship_intelligence`, `20260728_phase4_portal_client_memberships`, `20260810_website_audit_report_generator`; `migrate:status` batch 46, Ran = Yes); no production migrations remain pending. Batches A–G implemented in repository; next product batch is H per `docs/PHASE-4-MULTI-CLIENT-PORTAL.md` after Batch G publication/verification.
+1. **Phase 4 — Multi-Client Portal Access & Account Context** — Production DB identity gate **cleared** (Vercel Neon store `kxd-flagship-db` / project `mute-violet-81514071` ≡ Target A). Backup/PITR gate **conditionally cleared** on Free plan (instant restore history window max **6 hours**; take a manual Neon snapshot immediately before any production migrate; Launch upgrade recommended for 7-day retention). Production migrations applied successfully (`20260727_phase3_client_relationship_intelligence`, `20260728_phase4_portal_client_memberships`, `20260810_website_audit_report_generator`; `migrate:status` batch 46, Ran = Yes); no production migrations remain pending. Batches A–H implemented in repository (`verify:phase4-multi-client-portal-completion`). Phase 4 remains **not fully production-complete** until authenticated multi-client rollout QA + Don/Cusick four-account readiness. Do not begin a later roadmap phase until that decision is explicit.
 2. **Client operations at scale** — Repeat the Primal launch pattern using `lib/client-launch/` for every new client workspace (including OTP Carts readiness before Cusick membership linking). Gate Batch A: `verify:otp-carts-readiness`.
 3. **Business Memory integration** — Wire `runBusinessMemory()` into rituals or intelligence when explicitly requested; foundation exists, UI does not. Phase 3 prepared durable relationship context but does not integrate Business Memory yet.
 4. **Executive experience polish** — Premium ritual presentation (KHIG) without new intelligence layers.
@@ -282,7 +285,8 @@ From `lib/platform/registry.ts` and `docs/KXD-OS-ROADMAP.md`:
 | `KXD-OS-PHILOSOPHY.md` | Product vision |
 | `KXD-OS-ROADMAP.md` | Edition 1 progress and next phases |
 | `PHASE-3-CLIENT-RELATIONSHIP-INTELLIGENCE.md` | Phase 3 plan (production-complete) |
-| `PHASE-4-MULTI-CLIENT-PORTAL.md` | Phase 4 plan (next active phase) |
+| `PHASE-4-MULTI-CLIENT-PORTAL.md` | Phase 4 plan (Batches A–H code-complete; awaiting authenticated rollout QA) |
+| `PHASE-4-PRODUCTION-ROLLOUT-CHECKLIST.md` | Phase 4 production rollout / authenticated QA checklist |
 | `KXD-OS-CONSTITUTION.md` | Experience standard |
 | `CLIENT-EXPERIENCE-SYSTEM-ARCHITECTURE.md` | CES architecture |
 | `.cursor/rules/kxd-os-architecture.mdc` | Cursor permanent context |

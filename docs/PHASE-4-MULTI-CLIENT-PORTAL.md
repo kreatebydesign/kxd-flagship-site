@@ -1,13 +1,14 @@
 # Phase 4 — Multi-Client Portal Access & Account Context
 
-**Status:** Batches A–G implemented in repository — Batch H not started  
+**Status:** Batches A–H implemented in repository — **code-complete; awaiting authenticated production rollout QA** (not fully production-complete)  
 **Baseline (definition):** `5c4445fb03c0675aa50edc63a7b08ba3555e76e2`  
 **Batch A implementation baseline:** `5c4445fb03c0675aa50edc63a7b08ba3555e76e2`  
-**Companion:** `docs/KXD-OS-ROADMAP.md`, `docs/KXD-OS-CURRENT-STATE.md`, `docs/KXD-OS-V1-FOUNDING-CLIENT-EARLY-ACCESS.md`
+**Batch H baseline (start):** `6957ddef171a8c102eef53653a4b46c625649aeb` (Batch G published)  
+**Companion:** `docs/KXD-OS-ROADMAP.md`, `docs/KXD-OS-CURRENT-STATE.md`, `docs/KXD-OS-V1-FOUNDING-CLIENT-EARLY-ACCESS.md`, `docs/PHASE-4-PRODUCTION-ROLLOUT-CHECKLIST.md`
 
 > Phase 3 Client & Relationship Intelligence is production-complete and closed. Phase 4 does not reopen Phase 3. Relationship Intelligence remains operator-only and portal-inaccessible.
 >
-> **Batch status (repository):** Batch A membership foundation; Batch B account switcher / active-account context; Batch C workspace personalization / per-account composition; Batch D work & performance; Batch E analytics / website performance / lead visibility (`verify:phase4-analytics-visibility`); Batch F authorized combined portfolio (`verify:phase4-authorized-portfolio`); Batch G requests/files/reports isolation + approval decision (`verify:phase4-requests-files-reports`). **Not** production-complete until published and verified for the configured multi-client group. Batch H not started. This status does **not** claim Neon/production migration clearance for later batches.
+> **Batch status (repository):** Batches A–G shipped as prior; Batch H adds final completion verifier (`verify:phase4-multi-client-portal-completion`), accessibility hardening for account switching / mobile identity, and production rollout checklist. **Not** fully production-complete until authenticated multi-client production QA, Don/Cusick four-account readiness, and OTP Carts readiness gates pass. No Batch H migration.
 
 ---
 
@@ -432,18 +433,20 @@ Allowed only when **all** are true:
 
 | Item | Definition |
 |------|------------|
+| **Status** | ✅ Implemented in repository — **authenticated production QA blocked**; Phase 4 not fully complete |
 | **Objective** | Cross-account isolation verification; responsive/a11y QA; production rollout checklist; Don/Cusick presentation readiness; final Phase 4 completion verifier |
-| **User-visible outcome** | Production-ready multi-client portal for configured Cusick group |
+| **User-visible outcome** | Production-ready multi-client portal for configured Cusick group (ops-gated) |
 | **Systems reused** | All Phase 4 surfaces + founding-client smoke patterns |
-| **Likely code areas** | `scripts/verify-phase4-multi-client-portal-completion.ts`, package script `verify:phase4-multi-client-portal-completion` |
-| **Authorization** | Full matrix below |
-| **Schema / migration** | Legacy `client` deprecation only if gates met (optional; may defer) |
-| **Verification** | Final verifier + manual Don/Cusick QA checklist |
-| **Dependencies** | Batches A–G; OTP Carts readiness; operator-configured memberships |
-| **Exclusions** | Unrelated platform work |
+| **Implemented areas** | `scripts/verify-phase4-multi-client-portal-completion.ts`; package script `verify:phase4-multi-client-portal-completion`; account-switcher keyboard/a11y hardening; long-name overflow fixes; `docs/PHASE-4-PRODUCTION-ROLLOUT-CHECKLIST.md` |
+| **Authorization** | Full matrix below (static + pure-unit + prior A–G verifiers) |
+| **Schema / migration** | **None** — legacy `client` deprecation deferred |
+| **Verification** | `npm run verify:phase4-multi-client-portal-completion` + rollout checklist; Don/Cusick live QA still required |
+| **Dependencies** | Batches A–G published; OTP Carts readiness; operator-configured memberships |
+| **Exclusions** | Approvals product; parent orgs; public `/media` redesign; unrelated platform work; production membership mutations without Matt approval |
 | **Stop conditions** | Isolation failure; incomplete OTP Carts; unverified production |
 | **Risk** | Medium |
-| **Publication / deploy** | Phase 4 complete only after production verification |
+| **Publication / deploy** | Phase 4 fully complete only after production verification + Don/Cusick four-account QA |
+| **Remaining open risk** | Pre-existing public Payload `/media/...` onboarding-asset exposure — documented, **not** fixed in Batch H |
 
 ---
 
@@ -495,10 +498,21 @@ Do **not** implement these scripts in the definition task.
 
 ### Manual / ops gates (Batch H)
 
-- Desktop / tablet / mobile QA
+- Desktop / tablet / mobile QA (repository a11y hardening landed; live viewport QA remains ops)
 - Keyboard and screen-reader QA on switcher and portfolio
-- Production rollout checklist (migration, backfill, smoke)
-- Don/Cusick read-only QA across all four account contexts
+- Production rollout checklist: `docs/PHASE-4-PRODUCTION-ROLLOUT-CHECKLIST.md`
+- Don/Cusick read-only QA across all four account contexts (**blocked** until OTP Carts + membership configuration)
+- Safe authenticated multi-client production QA for Matt/KXD/Primal (**blocked** until production identity inventory confirmed)
+
+### Batch H inventory note (2026-07-31)
+
+Read-only production identity inventory could not be completed from this workstation:
+
+- `.env.production.local` contains empty placeholders for `DATABASE_URL` / Neon credentials
+- Neon MCP org listing had no accessible project for `mute-violet-81514071`
+- Local DB had no matching portal users for Matt / Don / Cusick / Primal / inventory QA identities
+
+**Do not fabricate PASS for authenticated production QA.** Propose membership mutations only with Matt’s separate approval.
 
 ---
 
@@ -518,6 +532,8 @@ Phase 4 is complete only when:
 10. All security, regression, responsive, and accessibility gates pass.
 11. The exact release is deployed and production-verified.
 12. Don/Cusick read-only QA confirms all four account contexts.
+
+**Repository Batch H posture:** items proven statically via A–H verifiers; items 11–12 and live authenticated multi-client QA remain open → Phase 4 is **code-complete but not fully production-complete**.
 
 ---
 
@@ -565,6 +581,7 @@ Phase 4 is complete only when:
 | Document | Role |
 |----------|------|
 | This file | Authoritative Phase 4 plan |
+| `docs/PHASE-4-PRODUCTION-ROLLOUT-CHECKLIST.md` | Production rollout / authenticated QA checklist |
 | `docs/KXD-OS-ROADMAP.md` | Product-track status |
 | `docs/KXD-OS-CURRENT-STATE.md` | Engineering focus |
 | `docs/KXD-OS-V1-FOUNDING-CLIENT-EARLY-ACCESS.md` | Multi-brand moved into active Phase 4 plan |

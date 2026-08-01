@@ -124,7 +124,8 @@ function main() {
   check(
     "Batch H remains final completion phase",
     phaseDoc.includes("Batch H — Privacy, responsive, accessibility, rollout, and completion") &&
-      phaseDoc.includes("Batch H not started"),
+      (phaseDoc.includes("Batch H not started") ||
+        phaseDoc.includes("verify:phase4-multi-client-portal-completion")),
   );
 
   // ── Pure membership / active-client isolation ────────────────────────
@@ -608,8 +609,11 @@ function main() {
   );
   const roadmap = read("docs/KXD-OS-ROADMAP.md");
   check(
-    "roadmap records Batches A–G / Batch H next",
-    roadmap.includes("Batches A–G") && roadmap.includes("Batch H"),
+    "roadmap records Phase 4 Batches through H",
+    roadmap.includes("Batch H") &&
+      (roadmap.includes("Batches A–G") ||
+        roadmap.includes("Batches A–H") ||
+        roadmap.includes("verify:phase4-multi-client-portal-completion")),
   );
 
   console.log("\nPhase 4 Batch G requests/files/reports verification passed.\n");

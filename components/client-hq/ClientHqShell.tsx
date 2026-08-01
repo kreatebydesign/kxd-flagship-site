@@ -135,6 +135,7 @@ export function ClientHqShell({
             className="kxd-ces-mobile-bar__toggle"
             aria-expanded={navOpen}
             aria-controls={navId}
+            aria-label={navOpen ? "Close navigation menu" : "Open navigation menu"}
             onClick={() => setNavOpen((open) => !open)}
           >
             {navOpen ? "Close menu" : "Menu"}
