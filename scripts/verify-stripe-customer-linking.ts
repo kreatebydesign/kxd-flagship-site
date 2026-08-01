@@ -84,10 +84,12 @@ async function main() {
       STRIPE_PHASE_37I_AUTHORIZED_OPERATIONS.length === 2,
   );
   check(
-    "mutation classes remain closed",
+    "execution gate closed; lifecycle invoice_create + Phase 5B reads allowed; broad mutations blocked",
     STRIPE_COMMERCIAL_EXECUTION_AUTHORIZED === false &&
+      isCommercialStripeOperationAllowed("invoice_create") &&
+      isCommercialStripeOperationAllowed("invoice_list") &&
+      isCommercialStripeOperationAllowed("invoice_read") &&
       !isCommercialStripeOperationAllowed("subscription_create") &&
-      !isCommercialStripeOperationAllowed("invoice_create") &&
       !isCommercialStripeOperationAllowed("checkout_create") &&
       !isCommercialStripeOperationAllowed("catalog_create"),
   );

@@ -65,8 +65,10 @@ async function main() {
     "customer_create allowed; financial mutations blocked",
     isCommercialStripeOperationAllowed("customer_create") &&
       STRIPE_COMMERCIAL_EXECUTION_AUTHORIZED === false &&
+      isCommercialStripeOperationAllowed("invoice_create") &&
+      isCommercialStripeOperationAllowed("invoice_list") &&
+      isCommercialStripeOperationAllowed("invoice_read") &&
       !isCommercialStripeOperationAllowed("subscription_create") &&
-      !isCommercialStripeOperationAllowed("invoice_create") &&
       !isCommercialStripeOperationAllowed("checkout_create") &&
       !isCommercialStripeOperationAllowed("catalog_create"),
   );
@@ -437,10 +439,11 @@ async function main() {
       !adapter.includes("customers.del"),
   );
   check(
-    "adapter has no subscription/invoice/checkout writes",
+    "adapter has no subscription/checkout writes (lifecycle may create test invoices)",
     !adapter.includes("subscriptions.create") &&
-      !adapter.includes("invoices.create") &&
-      !adapter.includes("checkout.sessions"),
+      !adapter.includes("checkout.sessions") &&
+      adapter.includes("createAndFinalizeInvoice") &&
+      adapter.includes("listInvoicesByCustomer"),
   );
 
   const service = read("lib/stripe/customer-creation-service.ts");

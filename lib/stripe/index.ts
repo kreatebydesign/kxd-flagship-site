@@ -90,6 +90,12 @@ export {
 export { createFakeCommercialStripeAdapter } from "./commercial-stripe-adapter";
 
 export type {
+  CommercialStripeAdapter,
+  CommercialStripeInvoiceSnapshot,
+  FakeCommercialStripeAdapter,
+} from "./commercial-stripe-adapter";
+
+export type {
   StripeCustomerCreateOutcome,
   StripeCustomerCreatePreview,
   StripeCustomerCreateResult,
@@ -127,3 +133,50 @@ export {
   type StripeCheckoutMetadata,
   type StripePaymentPurpose,
 } from "./config";
+
+export type {
+  BillingProfileInvoiceMapping,
+  InvoiceReadAvailability,
+  InvoiceReadListResult,
+  InvoiceReadOneResult,
+  InvoiceReadUnavailableCode,
+  PortalSafeStripeInvoice,
+  StripeInvoiceProviderStatus,
+  StripeInvoiceReadSnapshot,
+} from "./invoice-read-types";
+
+export {
+  INVOICE_READ_DTO_ALLOWLIST,
+  INVOICE_READ_EXCLUDED_PROVIDER_FIELDS,
+} from "./invoice-read-types";
+
+export {
+  STRIPE_PHASE_5B_AUTHORIZED_MODE,
+  STRIPE_PHASE_5B_INVOICE_LIST_DEFAULT_LIMIT,
+  STRIPE_PHASE_5B_INVOICE_LIST_MAX_LIMIT,
+  STRIPE_PHASE_5B_INVOICE_READS_AUTHORIZED,
+} from "./invoice-read-auth";
+
+export {
+  assessInvoiceReadMapping,
+  assertExactMinorUnitAmount,
+  buildSuccessfulList,
+  classifyProviderError,
+  clampInvoiceListLimit,
+  invoiceBelongsToMappedCustomer,
+  isInvoiceReadOperationAuthorized,
+  isStripeInvoiceIdFormat,
+  normalizeStripeInvoiceStatus,
+  projectPortalSafeStripeInvoice,
+  rejectBrowserInvoiceReadAuthority,
+  resolveInvoiceReadAuthorization,
+  safeInvoiceNotFound,
+  unavailableList,
+  unavailableOne,
+  unixSecondsToIsoDay,
+} from "./invoice-read-logic";
+
+export {
+  listInvoicesForMappedCustomer,
+  readInvoiceForMappedCustomer,
+} from "./invoice-read-ops";

@@ -33,14 +33,26 @@ export type CommercialStripeCreateCustomerParams = {
 export type CommercialStripeInvoiceSnapshot = {
   id: string;
   customerId: string;
+  number: string | null;
   status: string;
   livemode: boolean;
   amountDue: number;
   amountPaid: number;
+  amountRemaining: number;
   currency: string;
+  created: number | null;
+  dueDate: number | null;
+  paidAt: number | null;
   hostedInvoiceUrl: string | null;
+  /** Lifecycle/internal only — never projected to portal invoice DTOs. */
   paymentIntentId: string | null;
+  /** Lifecycle/internal only — never projected to portal invoice DTOs. */
   metadata: Record<string, string>;
+};
+
+export type CommercialStripeInvoiceListResult = {
+  invoices: CommercialStripeInvoiceSnapshot[];
+  hasMore: boolean;
 };
 
 export type CommercialStripeCreateInvoiceParams = {
@@ -77,6 +89,14 @@ export type CommercialStripeAdapter = {
     params: CommercialStripeCreateInvoiceParams,
   ): Promise<CommercialStripeInvoiceSnapshot>;
   retrieveInvoice(invoiceId: string): Promise<CommercialStripeInvoiceSnapshot | null>;
+  /**
+   * Scoped invoice list — customerId is required and must be passed to Stripe.
+   * Never call without a mapped customer.
+   */
+  listInvoicesByCustomer(
+    customerId: string,
+    limit: number,
+  ): Promise<CommercialStripeInvoiceListResult>;
 };
 
 function asMetadata(meta: Stripe.Metadata | null | undefined): Record<string, string> {
@@ -136,19 +156,29 @@ function mapInvoice(
   const pi = invoice.payment_intent;
   const paymentIntentId =
     typeof pi === "string" ? pi : pi && typeof pi === "object" ? pi.id : null;
+  const paidAt =
+    invoice.status_transitions &&
+    typeof invoice.status_transitions.paid_at === "number"
+      ? invoice.status_transitions.paid_at
+      : null;
   return {
     id: invoice.id,
     customerId:
       typeof invoice.customer === "string"
         ? invoice.customer
         : invoice.customer?.id ?? "",
+    number: typeof invoice.number === "string" ? invoice.number : null,
     status: String(invoice.status ?? "unknown"),
     livemode: normalizeStripeLivemodeFlag(
       (invoice.livemode as boolean | undefined) ?? livemodeFallback,
     ),
     amountDue: invoice.amount_due ?? 0,
     amountPaid: invoice.amount_paid ?? 0,
+    amountRemaining: invoice.amount_remaining ?? 0,
     currency: String(invoice.currency ?? "usd").toUpperCase(),
+    created: typeof invoice.created === "number" ? invoice.created : null,
+    dueDate: typeof invoice.due_date === "number" ? invoice.due_date : null,
+    paidAt,
     hostedInvoiceUrl: invoice.hosted_invoice_url ?? null,
     paymentIntentId,
     metadata: asMetadata(invoice.metadata),
@@ -261,9 +291,7 @@ export function createLiveCommercialStripeAdapter(
     },
     async retrieveInvoice(invoiceId: string) {
       try {
-        const invoice = await stripe.invoices.retrieve(invoiceId, {
-          expand: ["payment_intent"],
-        });
+        const invoice = await stripe.invoices.retrieve(invoiceId);
         return mapInvoice(invoice, undefined);
       } catch (err) {
         const code =
@@ -274,8 +302,27 @@ export function createLiveCommercialStripeAdapter(
         throw err;
       }
     },
+    async listInvoicesByCustomer(customerId: string, limit: number) {
+      const bounded = Math.min(Math.max(Math.floor(limit), 1), 48);
+      const list = await stripe.invoices.list({
+        customer: customerId,
+        limit: bounded,
+      });
+      const listFlag = (list as { livemode?: boolean }).livemode;
+      return {
+        invoices: list.data.map((row) => mapInvoice(row, listFlag)),
+        hasMore: Boolean(list.has_more),
+      };
+    },
   };
 }
+
+export type FakeCommercialStripeAdapter = CommercialStripeAdapter & {
+  /** Phase 5B verification — every list call records the customer filter supplied. */
+  readonly listInvoiceCustomerCalls: string[];
+  /** Phase 5B verification — every retrieve call records the invoice id. */
+  readonly retrieveInvoiceCalls: string[];
+};
 
 export function createFakeCommercialStripeAdapter(options?: {
   accountId?: string;
@@ -284,19 +331,56 @@ export function createFakeCommercialStripeAdapter(options?: {
   invoices?: CommercialStripeInvoiceSnapshot[];
   failVerify?: boolean;
   createBehavior?: "succeed" | "fail_network";
+  listBehavior?: "succeed" | "permission" | "auth" | "timeout" | "outage" | "malformed";
+  retrieveBehavior?: "succeed" | "permission" | "auth" | "timeout" | "outage" | "malformed";
   idempotentCreateMap?: Map<string, string>;
   idempotentInvoiceMap?: Map<string, string>;
-}): CommercialStripeAdapter {
+}): FakeCommercialStripeAdapter {
   const accountId = options?.accountId ?? "acct_phase37i_test_fixture";
   const livemode = options?.livemode ?? false;
   const customers = options?.customers ?? [];
   const invoices = options?.invoices ?? [];
   const idempotentCreateMap = options?.idempotentCreateMap ?? new Map();
   const idempotentInvoiceMap = options?.idempotentInvoiceMap ?? new Map();
+  const listInvoiceCustomerCalls: string[] = [];
+  const retrieveInvoiceCalls: string[] = [];
   let createSeq = 0;
   let invoiceSeq = 0;
 
+  function throwProviderBehavior(
+    behavior: NonNullable<typeof options>["listBehavior"],
+  ): void {
+    if (!behavior || behavior === "succeed") return;
+    if (behavior === "permission") {
+      const err = new Error("permission denied by provider");
+      (err as { type?: string }).type = "StripePermissionError";
+      (err as { code?: string }).code = "permission_denied";
+      throw err;
+    }
+    if (behavior === "auth") {
+      const err = new Error("invalid api key");
+      (err as { type?: string }).type = "StripeAuthenticationError";
+      throw err;
+    }
+    if (behavior === "timeout") {
+      const err = new Error("request timed out");
+      (err as { type?: string }).type = "StripeConnectionError";
+      (err as { code?: string }).code = "ETIMEOUT";
+      throw err;
+    }
+    if (behavior === "outage") {
+      const err = new Error("service unavailable");
+      (err as { type?: string }).type = "StripeAPIError";
+      throw err;
+    }
+    if (behavior === "malformed") {
+      throw new Error("malformed json from provider");
+    }
+  }
+
   return {
+    listInvoiceCustomerCalls,
+    retrieveInvoiceCalls,
     async verifyAccount() {
       if (options?.failVerify) throw new Error("fake_auth_failed");
       return { accountId, livemode };
@@ -365,11 +449,16 @@ export function createFakeCommercialStripeAdapter(options?: {
       const created: CommercialStripeInvoiceSnapshot = {
         id: `in_test_fake_${invoiceSeq}`,
         customerId: params.customerId,
+        number: `TEST-${invoiceSeq}`,
         status: "open",
         livemode: false,
         amountDue: params.amountCents,
         amountPaid: 0,
+        amountRemaining: params.amountCents,
         currency: params.currency.toUpperCase(),
+        created: 1_700_000_100 + invoiceSeq,
+        dueDate: 1_700_086_400 + invoiceSeq,
+        paidAt: null,
         hostedInvoiceUrl: `https://invoice.stripe.com/i/test/fake_${invoiceSeq}`,
         paymentIntentId: `pi_test_fake_${invoiceSeq}`,
         metadata: { ...params.metadata },
@@ -379,7 +468,25 @@ export function createFakeCommercialStripeAdapter(options?: {
       return created;
     },
     async retrieveInvoice(invoiceId: string) {
+      retrieveInvoiceCalls.push(invoiceId);
+      throwProviderBehavior(options?.retrieveBehavior);
       return invoices.find((i) => i.id === invoiceId) ?? null;
+    },
+    async listInvoicesByCustomer(customerId: string, limit: number) {
+      if (!customerId || !customerId.trim()) {
+        throw new Error("listInvoicesByCustomer requires a customer id");
+      }
+      listInvoiceCustomerCalls.push(customerId);
+      throwProviderBehavior(options?.listBehavior);
+      const bounded = Math.min(Math.max(Math.floor(limit), 1), 48);
+      const rows = invoices
+        .filter((i) => i.customerId === customerId)
+        .slice()
+        .sort((a, b) => (b.created ?? 0) - (a.created ?? 0));
+      return {
+        invoices: rows.slice(0, bounded),
+        hasMore: rows.length > bounded,
+      };
     },
   };
 }

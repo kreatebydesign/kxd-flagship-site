@@ -7,6 +7,7 @@
  * - customer_lookup / reconciliation_read (37I)
  * - customer_create (37J)
  * - invoice_create / webhook_receive (lifecycle test billing)
+ * - invoice_list / invoice_read (Phase 5B)
  */
 import "server-only";
 
@@ -40,10 +41,16 @@ type CommercialNetworkOp = Extract<
   | "reconciliation_read"
   | "customer_create"
   | "invoice_create"
+  | "invoice_list"
+  | "invoice_read"
 >;
 
 function assertTestModeGate(operation: CommercialNetworkOp) {
-  if (operation === "invoice_create") {
+  if (
+    operation === "invoice_create" ||
+    operation === "invoice_list" ||
+    operation === "invoice_read"
+  ) {
     const creds = resolveCommercialStripeTestCredentials();
     if (!creds.ok) {
       throw new StripeCommercialExecutionError(creds.message, creds.code);
@@ -97,7 +104,9 @@ export function getCommercialStripeClient(
     operation === "customer_lookup" ||
     operation === "reconciliation_read" ||
     operation === "customer_create" ||
-    operation === "invoice_create"
+    operation === "invoice_create" ||
+    operation === "invoice_list" ||
+    operation === "invoice_read"
   ) {
     assertTestModeGate(operation);
   }
@@ -131,6 +140,8 @@ export function canInitializeCommercialStripeClient(
     operation === "reconciliation_read" ||
     operation === "customer_create" ||
     operation === "invoice_create" ||
+    operation === "invoice_list" ||
+    operation === "invoice_read" ||
     operation === "webhook_receive"
   ) {
     return resolveCommercialStripeTestCredentials().ok;

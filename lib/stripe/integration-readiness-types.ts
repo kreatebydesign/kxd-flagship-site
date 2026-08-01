@@ -24,6 +24,8 @@ export type StripeOperationClass =
   | "subscription_create"
   | "invoice_preview"
   | "invoice_create"
+  | "invoice_list"
+  | "invoice_read"
   | "checkout_create"
   | "reconciliation_read"
   | "webhook_receive";

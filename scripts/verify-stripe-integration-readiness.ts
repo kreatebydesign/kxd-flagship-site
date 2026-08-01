@@ -147,13 +147,15 @@ function main() {
     rejectBrowserStripeAuthority({ enableExecution: true }).ok === false,
   );
   check(
-    "configuration_readiness and Phase 37I/37J ops allowed; financial mutations blocked",
+    "configuration_readiness, 37I/37J, lifecycle invoice_create, Phase 5B reads allowed; broad mutations blocked",
     isCommercialStripeOperationAllowed("configuration_readiness") &&
       isCommercialStripeOperationAllowed("customer_lookup") &&
       isCommercialStripeOperationAllowed("reconciliation_read") &&
       isCommercialStripeOperationAllowed("customer_create") &&
+      isCommercialStripeOperationAllowed("invoice_create") &&
+      isCommercialStripeOperationAllowed("invoice_list") &&
+      isCommercialStripeOperationAllowed("invoice_read") &&
       !isCommercialStripeOperationAllowed("subscription_create") &&
-      !isCommercialStripeOperationAllowed("invoice_create") &&
       !isCommercialStripeOperationAllowed("checkout_create") &&
       !isCommercialStripeOperationAllowed("catalog_create"),
   );
@@ -408,11 +410,14 @@ function main() {
       screen.includes("Execution disabled"),
   );
   check(
-    ".env.example documents names without secret values",
-    envExample.includes("STRIPE_SECRET_KEY=") &&
-      envExample.includes("Phase 37H") &&
-      !envExample.includes("sk_live_") &&
-      !envExample.includes("sk_test_"),
+    ".env.example documents names without real secret values",
+    (envExample.includes("STRIPE_SECRET_KEY=") ||
+      envExample.includes("STRIPE_SECRET_KEY_TEST=")) &&
+      (envExample.includes("Phase 37H") ||
+        envExample.includes("commercial lifecycle")) &&
+      !/sk_live_[A-Za-z0-9]{16,}/.test(envExample) &&
+      !/sk_test_[A-Za-z0-9]{16,}/.test(envExample) &&
+      !/whsec_[A-Za-z0-9]{16,}/.test(envExample),
   );
   check(
     "no migration introduced for 37H",
