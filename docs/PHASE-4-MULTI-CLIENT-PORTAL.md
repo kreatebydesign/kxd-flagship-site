@@ -1,14 +1,15 @@
 # Phase 4 — Multi-Client Portal Access & Account Context
 
-**Status:** Batches A–H implemented in repository — **code-complete; awaiting authenticated production rollout QA** (not fully production-complete)  
+**Status:** Batches A–I implemented in repository — **code-complete; awaiting authenticated production rollout QA** (not fully production-complete)  
 **Baseline (definition):** `5c4445fb03c0675aa50edc63a7b08ba3555e76e2`  
 **Batch A implementation baseline:** `5c4445fb03c0675aa50edc63a7b08ba3555e76e2`  
 **Batch H baseline (start):** `6957ddef171a8c102eef53653a4b46c625649aeb` (Batch G published)  
-**Companion:** `docs/KXD-OS-ROADMAP.md`, `docs/KXD-OS-CURRENT-STATE.md`, `docs/KXD-OS-V1-FOUNDING-CLIENT-EARLY-ACCESS.md`, `docs/PHASE-4-PRODUCTION-ROLLOUT-CHECKLIST.md`
+**Batch I baseline (start):** `74fcbc5ca049bebc994fb9f42010222fc39d2db1` (Batch H published)  
+**Companion:** `docs/KXD-OS-ROADMAP.md`, `docs/KXD-OS-CURRENT-STATE.md`, `docs/KXD-OS-V1-FOUNDING-CLIENT-EARLY-ACCESS.md`, `docs/PHASE-4-PRODUCTION-ROLLOUT-CHECKLIST.md`, `docs/PHASE-4-PORTAL-IDENTITY-SECURITY.md`
 
 > Phase 3 Client & Relationship Intelligence is production-complete and closed. Phase 4 does not reopen Phase 3. Relationship Intelligence remains operator-only and portal-inaccessible.
 >
-> **Batch status (repository):** Batches A–G shipped as prior; Batch H adds final completion verifier (`verify:phase4-multi-client-portal-completion`), accessibility hardening for account switching / mobile identity, and production rollout checklist. **Not** fully production-complete until authenticated multi-client production QA, Don/Cusick four-account readiness, and OTP Carts readiness gates pass. No Batch H migration.
+> **Batch status (repository):** Batches A–H as prior; Batch I adds private invitations, membership roles, WebAuthn passkeys, TOTP MFA, recovery codes (`verify:phase4-portal-identity-security`). Additive migration `20260814_phase4_portal_identity_security` is **not** applied to production in this batch. **Not** fully production-complete until authenticated multi-client production QA, Don/Cusick four-account readiness, OTP Carts readiness, and identity/security rollout gates pass.
 
 ---
 
@@ -574,6 +575,17 @@ Phase 4 is complete only when:
 - OTP Carts client ID in each environment (readiness gate)
 - Timing of legacy `client` column drop (after completion gates)
 
+### Batch I — Private invitations, roles, passkeys, MFA
+
+Authoritative detail: `docs/PHASE-4-PORTAL-IDENTITY-SECURITY.md`.
+
+- Invitation-only activation (operator Portal Access); client-delegated invites disabled
+- Membership roles: `client-owner` | `client-admin` | `client-member` (legacy → `client-member`)
+- WebAuthn passkeys + TOTP + recovery codes; biometrics never stored by KXD
+- Verifier: `npm run verify:phase4-portal-identity-security`
+- Early-access: email unique login; no domain grants; no public registration; no SMS MFA
+- Production identity rollout (Matt/Don/Billy/Nicole/Adam/Tyler) documented only — **unexecuted**
+
 ---
 
 ## Documentation map
@@ -581,6 +593,7 @@ Phase 4 is complete only when:
 | Document | Role |
 |----------|------|
 | This file | Authoritative Phase 4 plan |
+| `docs/PHASE-4-PORTAL-IDENTITY-SECURITY.md` | Batch I invitations / roles / passkeys / MFA |
 | `docs/PHASE-4-PRODUCTION-ROLLOUT-CHECKLIST.md` | Production rollout / authenticated QA checklist |
 | `docs/KXD-OS-ROADMAP.md` | Product-track status |
 | `docs/KXD-OS-CURRENT-STATE.md` | Engineering focus |

@@ -25,12 +25,13 @@ export const PortalClientMemberships: CollectionConfig = {
   },
   admin: {
     useAsTitle: "id",
-    defaultColumns: ["portalUser", "client", "status", "isDefault", "updatedAt"],
+    defaultColumns: ["portalUser", "client", "role", "status", "isDefault", "updatedAt"],
     group: PAYLOAD_GROUPS.kxdOs,
     description:
-      "Authorizes a portal user to access one Client account. " +
+      "Authorizes a portal user to access one Client account with a scoped role. " +
       "Each (portal user, client) pair is unique. " +
-      "Manage via KXD OS → Portal Access. Portal users cannot mutate memberships.",
+      "Manage via KXD OS → Portal Access. Portal users cannot mutate memberships. " +
+      "Early access: clients cannot manage invitations or member access.",
   },
   access: {
     // Studio operators only (isAuthenticated ≡ isStudioPayloadOperator).
@@ -58,6 +59,36 @@ export const PortalClientMemberships: CollectionConfig = {
       index: true,
       label: "Client",
       admin: { position: "sidebar" },
+    },
+    {
+      name: "role",
+      type: "select",
+      required: true,
+      defaultValue: "client-member",
+      label: "Role",
+      options: [
+        { label: "Client Owner", value: "client-owner" },
+        { label: "Client Admin", value: "client-admin" },
+        { label: "Client Member", value: "client-member" },
+      ],
+      admin: {
+        position: "sidebar",
+        description:
+          "Membership-scoped role. Legacy rows default to Client Member. " +
+          "Never elevates KXD operator authority.",
+      },
+    },
+    {
+      name: "canManageMembers",
+      type: "checkbox",
+      label: "Can manage members",
+      defaultValue: false,
+      admin: {
+        position: "sidebar",
+        description:
+          "Future delegated Access Manager capability. Always false in early access — " +
+          "clients cannot manage invitations or access.",
+      },
     },
     {
       name: "status",

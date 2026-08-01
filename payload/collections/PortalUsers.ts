@@ -113,5 +113,37 @@ export const PortalUsers: CollectionConfig = {
         date: { pickerAppearance: "dayAndTime" },
       },
     },
+    {
+      name: "termsAcceptedAt",
+      type: "date",
+      admin: {
+        position: "sidebar",
+        description: "When the portal user accepted workspace terms during invitation activation.",
+        date: { pickerAppearance: "dayAndTime" },
+        readOnly: true,
+      },
+    },
+    {
+      name: "securityEnrollmentCompletedAt",
+      type: "date",
+      admin: {
+        position: "sidebar",
+        description:
+          "When invitation activation security enrollment completed (passkey or TOTP). " +
+          "Existing production users are not forced in Batch I.",
+        date: { pickerAppearance: "dayAndTime" },
+        readOnly: true,
+      },
+    },
+    {
+      name: "lastStepUpAt",
+      type: "date",
+      admin: {
+        position: "sidebar",
+        description: "Last strong authentication used for sensitive security mutations.",
+        date: { pickerAppearance: "dayAndTime" },
+        readOnly: true,
+      },
+    },
   ],
 };

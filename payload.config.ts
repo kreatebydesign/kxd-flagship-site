@@ -78,6 +78,13 @@ import { SuccessCheckIns } from "./payload/collections/SuccessCheckIns.ts";
 import { Partners } from "./payload/collections/Partners.ts";
 import { PortalUsers } from "./payload/collections/PortalUsers.ts";
 import { PortalClientMemberships } from "./payload/collections/PortalClientMemberships.ts";
+import { PortalInvitations } from "./payload/collections/PortalInvitations.ts";
+import { PortalInvitationMemberships } from "./payload/collections/PortalInvitationMemberships.ts";
+import { PortalPasskeys } from "./payload/collections/PortalPasskeys.ts";
+import { PortalMfaSettings } from "./payload/collections/PortalMfaSettings.ts";
+import { PortalRecoveryCodes } from "./payload/collections/PortalRecoveryCodes.ts";
+import { PortalAuthChallenges } from "./payload/collections/PortalAuthChallenges.ts";
+import { PortalSecurityEvents } from "./payload/collections/PortalSecurityEvents.ts";
 import { PlatformApplications } from "./payload/collections/PlatformApplications.ts";
 import { ProjectInquiries } from "./payload/collections/ProjectInquiries.ts";
 import { Projects } from "./payload/collections/Projects.ts";
@@ -268,6 +275,13 @@ export default buildConfig({
     Users,
     PortalUsers,
     PortalClientMemberships,
+    PortalInvitations,
+    PortalInvitationMemberships,
+    PortalPasskeys,
+    PortalMfaSettings,
+    PortalRecoveryCodes,
+    PortalAuthChallenges,
+    PortalSecurityEvents,
     JuniorCreatorUsers,
     JuniorCreatorShifts,
   ],

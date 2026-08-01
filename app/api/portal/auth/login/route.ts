@@ -10,6 +10,13 @@ import { AuthenticationError } from "payload";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import { createPortalSession } from "@/lib/portal/session";
+import { getMfaSettings } from "@/lib/portal/identity/mfa-store";
+import { setPendingMfaCookie } from "@/lib/portal/identity/pending-mfa";
+import {
+  assertPortalRateLimit,
+  clientIpFromRequest,
+} from "@/lib/portal/identity/rate-limit";
+import { appendPortalSecurityEvent } from "@/lib/portal/identity/security-events";
 
 export const dynamic = "force-dynamic";
 
@@ -32,6 +39,17 @@ export async function POST(req: NextRequest) {
   let email: string | undefined;
 
   try {
+    const rate = assertPortalRateLimit({
+      bucket: "portal-login",
+      identity: clientIpFromRequest(req),
+    });
+    if (!rate.ok) {
+      return NextResponse.json(
+        { ok: false, message: "Too many sign-in attempts. Please try again shortly." },
+        { status: 429 },
+      );
+    }
+
     const body = (await req.json()) as { email?: string; password?: string };
     email = body.email?.trim().toLowerCase();
     const password = body.password;
@@ -72,9 +90,28 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    await createPortalSession(result.user.id as number);
+    const portalUserId = result.user.id as number;
+    const mfa = await getMfaSettings(portalUserId);
+    if (mfa.totpEnabled) {
+      await setPendingMfaCookie(portalUserId);
+      await appendPortalSecurityEvent({
+        type: "login.mfa_required",
+        actorKind: "portal-user",
+        actorPortalUserId: portalUserId,
+        summary: "Password verified — MFA required",
+      });
+      return NextResponse.json({ ok: true, mfaRequired: true });
+    }
 
-    return NextResponse.json({ ok: true });
+    await createPortalSession(portalUserId);
+    await appendPortalSecurityEvent({
+      type: "login.password",
+      actorKind: "portal-user",
+      actorPortalUserId: portalUserId,
+      summary: "Password login succeeded",
+    });
+
+    return NextResponse.json({ ok: true, mfaRequired: false });
   } catch (err) {
     console.error("[KXD Portal] Login failed:", err);
 

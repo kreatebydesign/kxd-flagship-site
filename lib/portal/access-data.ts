@@ -15,6 +15,10 @@ import {
 } from "./memberships";
 import { probeMembershipSchemaAvailable } from "./multi-client-readiness";
 import { diagnoseWorkspacePersonalization } from "./workspace-personalization";
+import {
+  listPortalInvitations,
+  type PortalInvitationRow,
+} from "./identity/invitations";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDoc = Record<string, any>;
@@ -43,6 +47,8 @@ export interface PortalAccessMembershipRow {
   clientSlug: string | null;
   status: "active" | "disabled";
   isDefault: boolean;
+  role: "client-owner" | "client-admin" | "client-member";
+  canManageMembers: boolean;
 }
 
 export interface PortalAccessUserRow {
@@ -93,11 +99,16 @@ export interface PortalAccessClientReadiness {
 export interface PortalAccessData {
   users: PortalAccessUserRow[];
   clients: PortalAccessClientReadiness[];
+  invitations: PortalInvitationRow[];
   resendConfigured: boolean;
   resendWarning: string | null;
   /** False until Phase 4 membership migration is activated. */
   membershipSchemaAvailable: boolean;
+  /** False until Batch I identity migration is activated. */
+  identitySchemaAvailable: boolean;
 }
+
+export type { PortalInvitationRow };
 
 function toAccessMembership(row: PortalMembershipRecord): PortalAccessMembershipRow {
   return {
@@ -107,6 +118,8 @@ function toAccessMembership(row: PortalMembershipRecord): PortalAccessMembership
     clientSlug: row.clientSlug,
     status: row.status,
     isDefault: row.isDefault,
+    role: row.role ?? "client-member",
+    canManageMembers: row.canManageMembers === true,
   };
 }
 
@@ -266,11 +279,23 @@ export async function getPortalAccessData(): Promise<PortalAccessData> {
     membershipSchemaAvailable = false;
   }
 
+  let invitations: PortalInvitationRow[] = [];
+  let identitySchemaAvailable = false;
+  try {
+    invitations = await listPortalInvitations(payload);
+    identitySchemaAvailable = true;
+  } catch {
+    invitations = [];
+    identitySchemaAvailable = false;
+  }
+
   return {
     users,
     clients,
+    invitations,
     resendConfigured,
     resendWarning,
     membershipSchemaAvailable,
+    identitySchemaAvailable,
   };
 }

@@ -213,7 +213,7 @@ Edition 1 is in the **operate and extend** phase — not redesign.
 
 ### Approved next product phase
 
-**Phase 4 — Multi-Client Portal Access & Account Context** — Batches A–H implemented in repository. **Code-complete; awaiting authenticated production rollout QA** (not fully production-complete). Production membership migration already applied; Batches F–H have **no** new migration.
+**Phase 4 — Multi-Client Portal Access & Account Context** — Batches A–I implemented in repository. **Code-complete; awaiting authenticated production rollout QA** (not fully production-complete). Production membership migration already applied; Batch I additive migration `20260814_phase4_portal_identity_security` is **local/repo only until separately approved** (not applied to production in this batch).
 
 - Plan: `docs/PHASE-4-MULTI-CLIENT-PORTAL.md`
 - Rollout checklist: `docs/PHASE-4-PRODUCTION-ROLLOUT-CHECKLIST.md`
@@ -224,7 +224,8 @@ Edition 1 is in the **operate and extend** phase — not redesign.
 - Portal Access manages memberships; account switcher present; analytics/website-health/reports scoped to active account; authorized portfolio at `/portal/portfolio` for multi-membership users only
 - Batch G: requests/files/deliverables/reports/Website Review/Workspace isolation verified; portal “client approvals” locked to existing awaiting-input review/request states (no Approvals product)
 - Batch H: completion verifier; account-switcher keyboard/a11y + long-name overflow; rollout checklist; authenticated multi-client production QA **blocked** pending safe production identity inventory
-- Remaining open risk: pre-existing public Payload `/media/...` onboarding-asset exposure (not redesigned in Batch H)
+- Batch I: private invitations, membership roles, WebAuthn passkeys, TOTP MFA, recovery codes (`verify:phase4-portal-identity-security`); Portal Access invitation UI; activation + security enrollment; production identity rollout **documented only / unexecuted**
+- Remaining open risk: pre-existing public Payload `/media/...` onboarding-asset exposure (not redesigned in Batch H/I)
 - No Cusick production linking yet
 - First production configuration remains Cusick account group (four independent clients) after ops readiness + Don/Cusick live QA
 
@@ -285,7 +286,8 @@ From `lib/platform/registry.ts` and `docs/KXD-OS-ROADMAP.md`:
 | `KXD-OS-PHILOSOPHY.md` | Product vision |
 | `KXD-OS-ROADMAP.md` | Edition 1 progress and next phases |
 | `PHASE-3-CLIENT-RELATIONSHIP-INTELLIGENCE.md` | Phase 3 plan (production-complete) |
-| `PHASE-4-MULTI-CLIENT-PORTAL.md` | Phase 4 plan (Batches A–H code-complete; awaiting authenticated rollout QA) |
+| `PHASE-4-MULTI-CLIENT-PORTAL.md` | Phase 4 plan (Batches A–I code-complete; awaiting authenticated rollout QA) |
+| `PHASE-4-PORTAL-IDENTITY-SECURITY.md` | Batch I invitations / roles / passkeys / MFA |
 | `PHASE-4-PRODUCTION-ROLLOUT-CHECKLIST.md` | Phase 4 production rollout / authenticated QA checklist |
 | `KXD-OS-CONSTITUTION.md` | Experience standard |
 | `CLIENT-EXPERIENCE-SYSTEM-ARCHITECTURE.md` | CES architecture |

@@ -14,6 +14,11 @@ import {
 import { KxdPage } from "@/components/os";
 import type { PortalAccessData, PortalAccessMembershipRow, PortalAccessUserRow } from "@/lib/portal/access-data";
 import type { PortalReadinessIssue } from "@/lib/portal/readiness";
+import {
+  PORTAL_MEMBERSHIP_ROLE_LABELS,
+  type PortalMembershipRole,
+} from "@/lib/portal/identity/roles";
+import { PortalAccessInvitationsPanel } from "./PortalAccessInvitationsPanel";
 
 function issueClass(level: PortalReadinessIssue["level"]): string {
   if (level === "blocker") return "kxd-os-portal-access__issue--blocker";
@@ -54,6 +59,8 @@ function PortalAccessScreenInner({ data: initialData }: PortalAccessScreenProps)
   const [membershipBusy, setMembershipBusy] = useState(false);
   const [membershipError, setMembershipError] = useState<string | null>(null);
 
+  const [showBreakGlassCreate, setShowBreakGlassCreate] = useState(false);
+  const [membershipRole, setMembershipRole] = useState<PortalMembershipRole>("client-member");
   const [form, setForm] = useState({
     displayName: "",
     email: "",
@@ -156,6 +163,8 @@ function PortalAccessScreenInner({ data: initialData }: PortalAccessScreenProps)
             clientSlug: client?.clientSlug ?? null,
             status: "active",
             isDefault: true,
+            role: "client-member",
+            canManageMembers: false,
           },
         ],
       };
@@ -213,7 +222,7 @@ function PortalAccessScreenInner({ data: initialData }: PortalAccessScreenProps)
       const res = await fetch(`/api/admin/portal-users/${user.id}/memberships`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ clientId }),
+        body: JSON.stringify({ clientId, role: membershipRole }),
       });
       const body = (await res.json()) as {
         ok?: boolean;
@@ -266,6 +275,46 @@ function PortalAccessScreenInner({ data: initialData }: PortalAccessScreenProps)
     }
   }
 
+  async function changeMembershipRole(
+    user: PortalAccessUserRow,
+    membership: PortalAccessMembershipRow,
+    role: PortalMembershipRole,
+  ) {
+    if (
+      !window.confirm(
+        `Change role for ${membership.clientName} to ${PORTAL_MEMBERSHIP_ROLE_LABELS[role]}?`,
+      )
+    ) {
+      return;
+    }
+    setMembershipBusy(true);
+    setMembershipError(null);
+    try {
+      const res = await fetch(
+        `/api/admin/portal-users/${user.id}/memberships/${membership.id}/role`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ role, confirm: true }),
+        },
+      );
+      const body = (await res.json()) as {
+        ok?: boolean;
+        error?: string;
+        memberships?: PortalAccessMembershipRow[];
+      };
+      if (!res.ok || !body.ok || !body.memberships) {
+        throw new Error(body.error ?? "Could not update role.");
+      }
+      applyMemberships(user.id, body.memberships);
+      router.refresh();
+    } catch (err) {
+      setMembershipError(err instanceof Error ? err.message : "Could not update role.");
+    } finally {
+      setMembershipBusy(false);
+    }
+  }
+
   async function setDefaultMembership(
     user: PortalAccessUserRow,
     membership: PortalAccessMembershipRow,
@@ -300,7 +349,14 @@ function PortalAccessScreenInner({ data: initialData }: PortalAccessScreenProps)
         <OperationsPageHero
           eyebrow="Client Portal"
           title="Portal Access"
-          lead="Create and manage client login accounts. Legacy primary client remains during Phase 4 transition; memberships authorize multi-client access."
+          lead="Invite clients privately, assign membership-scoped roles, and manage access. Invitation is the primary path; password create remains break-glass only."
+        />
+
+        <PortalAccessInvitationsPanel
+          initialInvitations={initialData.invitations}
+          clients={initialData.clients}
+          identitySchemaAvailable={initialData.identitySchemaAvailable}
+          resendConfigured={initialData.resendConfigured}
         />
 
         {createSuccess ? (
@@ -502,11 +558,18 @@ function PortalAccessScreenInner({ data: initialData }: PortalAccessScreenProps)
                 type="button"
                 className="kxd-os-btn kxd-os-btn--secondary"
                 onClick={() => {
+                  if (!showBreakGlassCreate) {
+                    const ok = window.confirm(
+                      "Break-glass: create a portal user with a temporary password? Prefer Invitations for new access.",
+                    );
+                    if (!ok) return;
+                  }
+                  setShowBreakGlassCreate((open) => !open);
                   setShowCreate((open) => !open);
                   setCreateError(null);
                 }}
               >
-                {showCreate ? "Close form" : "Add portal user"}
+                {showCreate ? "Close break-glass" : "Break-glass create"}
               </button>
             </div>
           </div>
@@ -514,6 +577,9 @@ function PortalAccessScreenInner({ data: initialData }: PortalAccessScreenProps)
           {showCreate ? (
             <OpsCard className="kxd-os-portal-access__create">
               <form onSubmit={(event) => void handleCreate(event)}>
+                <p className="kxd-os-portal-access__hint">
+                  Legacy create with password — local/break-glass only. Prefer private invitations.
+                </p>
                 <div className="kxd-os-form-grid">
                   <label className="kxd-os-portal-access__field">
                     <span>Display name</span>
@@ -564,9 +630,6 @@ function PortalAccessScreenInner({ data: initialData }: PortalAccessScreenProps)
                     />
                   </label>
                 </div>
-                <p className="kxd-os-portal-access__hint">
-                  Share credentials securely. Clients can reset their password anytime from the portal login screen.
-                </p>
                 {createError ? (
                   <p className="kxd-os-portal-access__notice kxd-os-portal-access__notice--error" role="alert">
                     {createError}
@@ -578,7 +641,7 @@ function PortalAccessScreenInner({ data: initialData }: PortalAccessScreenProps)
                     className="kxd-os-btn kxd-os-btn--primary"
                     disabled={creating}
                   >
-                    {creating ? "Creating…" : "Create portal access"}
+                    {creating ? "Creating…" : "Create with password"}
                   </button>
                 </div>
               </form>
@@ -673,10 +736,38 @@ function PortalAccessScreenInner({ data: initialData }: PortalAccessScreenProps)
                             <li key={membership.id} className="kxd-os-portal-access__membership-row">
                               <span>
                                 {membership.clientName}
+                                {" · "}
+                                {PORTAL_MEMBERSHIP_ROLE_LABELS[membership.role] ??
+                                  membership.role ??
+                                  "Client Member"}
                                 {membership.isDefault ? " · default" : ""}
                                 {membership.status === "disabled" ? " · disabled" : ""}
                               </span>
                               <span className="kxd-os-portal-access__membership-actions">
+                                <select
+                                  aria-label={`Role for ${membership.clientName}`}
+                                  value={membership.role ?? "client-member"}
+                                  disabled={
+                                    !initialData.membershipSchemaAvailable ||
+                                    membershipBusy ||
+                                    membership.id < 0
+                                  }
+                                  onChange={(e) =>
+                                    void changeMembershipRole(
+                                      user,
+                                      membership,
+                                      e.target.value as PortalMembershipRole,
+                                    )
+                                  }
+                                >
+                                  {(
+                                    Object.keys(PORTAL_MEMBERSHIP_ROLE_LABELS) as PortalMembershipRole[]
+                                  ).map((role) => (
+                                    <option key={role} value={role}>
+                                      {PORTAL_MEMBERSHIP_ROLE_LABELS[role]}
+                                    </option>
+                                  ))}
+                                </select>
                                 {membership.status === "active" && !membership.isDefault ? (
                                   <button
                                     type="button"
@@ -733,6 +824,24 @@ function PortalAccessScreenInner({ data: initialData }: PortalAccessScreenProps)
                                   {client.clientName}
                                 </option>
                               ))}
+                          </select>
+                        </label>
+                        <label className="kxd-os-portal-access__field">
+                          <span>Role</span>
+                          <select
+                            value={membershipRole}
+                            onChange={(e) =>
+                              setMembershipRole(e.target.value as PortalMembershipRole)
+                            }
+                            disabled={!initialData.membershipSchemaAvailable || membershipBusy}
+                          >
+                            {(
+                              Object.keys(PORTAL_MEMBERSHIP_ROLE_LABELS) as PortalMembershipRole[]
+                            ).map((role) => (
+                              <option key={role} value={role}>
+                                {PORTAL_MEMBERSHIP_ROLE_LABELS[role]}
+                              </option>
+                            ))}
                           </select>
                         </label>
                         <button

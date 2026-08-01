@@ -5,6 +5,11 @@
 
 export type PortalMembershipStatus = "active" | "disabled";
 
+export type PortalMembershipRole =
+  | "client-owner"
+  | "client-admin"
+  | "client-member";
+
 export type PortalMembershipRecord = {
   id: number;
   portalUserId: number;
@@ -13,6 +18,9 @@ export type PortalMembershipRecord = {
   clientSlug: string | null;
   status: PortalMembershipStatus;
   isDefault: boolean;
+  /** Phase 4 Batch I — defaults to client-member when absent (legacy fixtures). */
+  role?: PortalMembershipRole;
+  canManageMembers?: boolean;
 };
 
 export type ResolvedPortalActiveClient = {

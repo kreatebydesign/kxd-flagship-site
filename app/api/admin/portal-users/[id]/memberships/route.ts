@@ -58,11 +58,19 @@ export async function POST(req: Request, context: RouteContext) {
     return NextResponse.json({ ok: false, error: "Invalid portal user." }, { status: 400 });
   }
 
-  const body = (await req.json()) as { clientId?: number; setDefault?: boolean };
+  const body = (await req.json()) as {
+    clientId?: number;
+    setDefault?: boolean;
+    role?: string;
+  };
   const clientId = body.clientId;
   if (!clientId || !Number.isFinite(clientId)) {
     return NextResponse.json({ ok: false, error: "Client is required." }, { status: 400 });
   }
+  const role =
+    body.role === "client-owner" || body.role === "client-admin" || body.role === "client-member"
+      ? body.role
+      : "client-member";
 
   const payload = await getPayload({ config });
   const user = await loadPortalUser(payload, portalUserId);
@@ -97,6 +105,7 @@ export async function POST(req: Request, context: RouteContext) {
       portalUserId,
       clientId,
       isDefault: shouldDefault,
+      role,
       payload,
     });
 

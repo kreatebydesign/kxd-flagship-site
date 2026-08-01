@@ -6,12 +6,17 @@ import { resolvePortalAccountContext } from "@/lib/portal/account-context";
 import { getPortalEditionBranding } from "@/lib/portal/nav";
 import { getPortalSession } from "@/lib/portal/session";
 import { needsPortalWelcome } from "@/lib/portal/welcome";
+import { userRequiresSecurityEnrollment } from "@/lib/portal/identity/mfa-store";
 import "../../../../design-system/os/styles/kxd-os.css";
 import "../../../../design-system/ces/styles/kxd-ces.css";
 
 export default async function PortalAppLayout({ children }: { children: React.ReactNode }) {
   const session = await getPortalSession();
   if (!session) redirect("/portal/login");
+
+  if (await userRequiresSecurityEnrollment(session.portalUserId)) {
+    redirect("/portal/security/enroll");
+  }
 
   if (needsPortalWelcome(session)) {
     redirect("/portal/welcome");

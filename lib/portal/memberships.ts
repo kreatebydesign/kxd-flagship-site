@@ -72,6 +72,12 @@ function mapMembershipDoc(doc: AnyDoc): PortalMembershipRecord | null {
       ? String((clientRaw as AnyDoc).slug ?? "") || null
       : null;
 
+  const roleRaw = doc.role;
+  const role =
+    roleRaw === "client-owner" || roleRaw === "client-admin" || roleRaw === "client-member"
+      ? roleRaw
+      : ("client-member" as const);
+
   return {
     id,
     portalUserId,
@@ -80,6 +86,8 @@ function mapMembershipDoc(doc: AnyDoc): PortalMembershipRecord | null {
     clientSlug,
     status,
     isDefault: doc.isDefault === true,
+    role,
+    canManageMembers: doc.canManageMembers === true,
   };
 }
 
@@ -139,6 +147,7 @@ export async function ensurePortalMembership(input: {
   portalUserId: number;
   clientId: number;
   isDefault?: boolean;
+  role?: "client-owner" | "client-admin" | "client-member";
   notes?: string | null;
   payload?: PayloadClient;
 }): Promise<PortalMembershipRecord> {
@@ -191,6 +200,8 @@ export async function ensurePortalMembership(input: {
         client: input.clientId,
         status: "active",
         isDefault: input.isDefault === true,
+        role: input.role ?? "client-member",
+        canManageMembers: false,
         ...(input.notes ? { notes: input.notes } : {}),
       },
       overrideAccess: true,
