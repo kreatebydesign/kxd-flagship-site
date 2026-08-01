@@ -27,6 +27,8 @@ export interface ClientHqShellProps {
   experienceProfile?: ResolvedExperienceProfile;
   /** Server-built switcher model — null/undefined hides the control. */
   accountSwitcher?: PortalAccountSwitcherModel | null;
+  /** Batch F — show Portfolio nav only when server authorizes multi-account portfolio. */
+  portfolioNavAvailable?: boolean;
   children: ReactNode;
 }
 
@@ -47,9 +49,12 @@ export function ClientHqShell({
   editionBranding,
   experienceProfile,
   accountSwitcher = null,
+  portfolioNavAvailable = false,
   children,
 }: ClientHqShellProps) {
-  const navGroups = getEnabledPortalNavGroups(experienceProfile);
+  const navGroups = getEnabledPortalNavGroups(experienceProfile, {
+    portfolioNavAvailable,
+  });
   const branding = editionBranding;
   const cssVars = experienceProfile
     ? experienceProfile.cssVars

@@ -62,6 +62,8 @@ export function isPortalNavVisibleForCesLaunch(
   }
   /* Partnership briefing — only when presentation + memory make it available. */
   if (navId === "partnership") return true;
+  /* Batch F portfolio — multi-account capability, not a CES module. */
+  if (navId === "portfolio") return true;
   /* Executive Review — leadership narrative (Primal V1 entitlement). */
   if (
     navId === "executive-review" &&

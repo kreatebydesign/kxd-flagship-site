@@ -15,8 +15,11 @@ export type MultiClientPortalReadiness = {
   membershipSchemaAvailable: boolean;
   /** Switching UI may render only when schema is available AND caller has >1 accounts. */
   switchingCapable: boolean;
-  /** Portfolio overview remains off until an explicit future capability ships. */
-  portfolioCapable: false;
+  /**
+   * Batch F — platform can serve authorized portfolio when schema is available.
+   * Per-user access still requires resolvePortfolioAccess / account context.
+   */
+  portfolioCapable: boolean;
 };
 
 /**
@@ -50,6 +53,6 @@ export async function getMultiClientPortalReadiness(
   return {
     membershipSchemaAvailable,
     switchingCapable: membershipSchemaAvailable,
-    portfolioCapable: false,
+    portfolioCapable: membershipSchemaAvailable,
   };
 }

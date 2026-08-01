@@ -157,24 +157,11 @@ function main() {
   assert.match(packageJson, /verify:phase4-multi-client-membership/);
   console.log("  ✔ package.json verifier script registered");
 
-  // Batch A foundation must not include portfolio overview.
-  // Account switcher ships in Batch B (separate verifier).
+  // Batch A foundation must not authorize portfolio via session cookie/session resolve.
+  // Portfolio product lives in Batch F (`verify:phase4-authorized-portfolio`).
   assert.doesNotMatch(sessionSrc, /combined portfolio|portal\/portfolio/i);
   assert.doesNotMatch(portalAccessUi, /portfolio view|Cusick production|otpcarts\.com/i);
-  const portalAppFiles = walkFiles(
-    path.join(root, "app/(portal)"),
-    new Set([".ts", ".tsx"]),
-  );
-  for (const file of portalAppFiles) {
-    const rel = path.relative(root, file);
-    const src = readFileSync(file, "utf8");
-    assert.doesNotMatch(
-      src,
-      /combined portfolio|portal\/portfolio/i,
-      `${rel} must not introduce portfolio overview`,
-    );
-  }
-  console.log("  ✔ no portfolio overview implementation (Batch F still deferred)");
+  console.log("  ✔ session foundation does not embed portfolio product (Batch F separate)");
 
   // Phase 3 remains operator-only / portal-inaccessible.
   assert.match(phase3Contacts, /isAuthenticated/);

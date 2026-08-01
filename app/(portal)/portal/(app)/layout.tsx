@@ -30,6 +30,9 @@ export default async function PortalAppLayout({ children }: { children: React.Re
         editionBranding={editionBranding}
         experienceProfile={experienceProfile}
         accountSwitcher={accountContext.switcher}
+        portfolioNavAvailable={
+          accountContext.portfolioAccessAvailable && accountContext.switchingAvailable
+        }
       >
         <div key={`portal-client-${session.clientId}`}>{children}</div>
       </ClientHqAppShell>

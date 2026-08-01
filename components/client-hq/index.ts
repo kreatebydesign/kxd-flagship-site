@@ -13,6 +13,7 @@ export { ResourcesScreen } from "./ResourcesScreen";
 export { TeamScreen } from "./TeamScreen";
 export { SettingsScreen } from "./SettingsScreen";
 export { AnalyticsScreen } from "./AnalyticsScreen";
+export { PortfolioScreen } from "./PortfolioScreen";
 export { ReportsScreen } from "./ReportsScreen";
 export { ReportViewScreen } from "./ReportViewScreen";
 export { AdvisorScreen } from "./AdvisorScreen";

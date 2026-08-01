@@ -213,14 +213,14 @@ Edition 1 is in the **operate and extend** phase — not redesign.
 
 ### Approved next product phase
 
-**Phase 4 — Multi-Client Portal Access & Account Context** — Batches A–E implemented in repository; Batch A awaits publication / production migration verification. Batches F–H not started. Does **not** claim Neon/production migrate clearance.
+**Phase 4 — Multi-Client Portal Access & Account Context** — Batches A–F implemented in repository. Batches G–H not started. Production membership migration already applied; Batch F has **no** new migration.
 
 - Plan: `docs/PHASE-4-MULTI-CLIENT-PORTAL.md`
 - Batch A collection: `portal-client-memberships` (`payload/collections/PortalClientMemberships.ts`)
-- Batch A migration: `migrations/20260728_phase4_portal_client_memberships.ts` (additive; backfills from legacy `portal-users.client`; not run against production in Batch A implementation)
-- Batch A–E verify: `verify:phase4-multi-client-membership`, `verify:phase4-account-switcher`, `verify:phase4-workspace-personalization`, `verify:phase4-work-performance`, `verify:phase4-analytics-visibility`
+- Batch A migration: `migrations/20260728_phase4_portal_client_memberships.ts` (additive; backfills from legacy `portal-users.client`)
+- Batch A–F verify: `verify:phase4-multi-client-membership`, `verify:phase4-account-switcher`, `verify:phase4-workspace-personalization`, `verify:phase4-work-performance`, `verify:phase4-analytics-visibility`, `verify:phase4-authorized-portfolio`
 - Session resolves authorized `clientId` from memberships (+ legacy fallback); cookie still signs portal user id only
-- Portal Access manages memberships; account switcher present; analytics/website-health/reports scoped to active account; portfolio (Batch F) still disabled
+- Portal Access manages memberships; account switcher present; analytics/website-health/reports scoped to active account; authorized portfolio at `/portal/portfolio` for multi-membership users only
 - No Cusick production linking
 - First production configuration remains Cusick account group (four independent clients) after later batches + ops readiness
 
@@ -234,7 +234,7 @@ Edition 1 is in the **operate and extend** phase — not redesign.
 
 ### Immediate priorities
 
-1. **Phase 4 — Multi-Client Portal Access & Account Context** — Production DB identity gate **cleared** (Vercel Neon store `kxd-flagship-db` / project `mute-violet-81514071` ≡ Target A). Backup/PITR gate **conditionally cleared** on Free plan (instant restore history window max **6 hours**; take a manual Neon snapshot immediately before any production migrate; Launch upgrade recommended for 7-day retention). Production migrations applied successfully (`20260727_phase3_client_relationship_intelligence`, `20260728_phase4_portal_client_memberships`, `20260810_website_audit_report_generator`; `migrate:status` batch 46, Ran = Yes); no production migrations remain pending. Next product batch is Batch F (authorized portfolio) per `docs/PHASE-4-MULTI-CLIENT-PORTAL.md` after A–E publication/verification.
+1. **Phase 4 — Multi-Client Portal Access & Account Context** — Production DB identity gate **cleared** (Vercel Neon store `kxd-flagship-db` / project `mute-violet-81514071` ≡ Target A). Backup/PITR gate **conditionally cleared** on Free plan (instant restore history window max **6 hours**; take a manual Neon snapshot immediately before any production migrate; Launch upgrade recommended for 7-day retention). Production migrations applied successfully (`20260727_phase3_client_relationship_intelligence`, `20260728_phase4_portal_client_memberships`, `20260810_website_audit_report_generator`; `migrate:status` batch 46, Ran = Yes); no production migrations remain pending. Batch F (authorized portfolio) implemented in repository; next product batches are G–H per `docs/PHASE-4-MULTI-CLIENT-PORTAL.md` after Batch F publication/verification.
 2. **Client operations at scale** — Repeat the Primal launch pattern using `lib/client-launch/` for every new client workspace (including OTP Carts readiness before Cusick membership linking). Gate Batch A: `verify:otp-carts-readiness`.
 3. **Business Memory integration** — Wire `runBusinessMemory()` into rituals or intelligence when explicitly requested; foundation exists, UI does not. Phase 3 prepared durable relationship context but does not integrate Business Memory yet.
 4. **Executive experience polish** — Premium ritual presentation (KHIG) without new intelligence layers.

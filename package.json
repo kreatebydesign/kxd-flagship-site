@@ -35,6 +35,7 @@
     "verify:phase4-workspace-personalization": "tsx scripts/verify-phase4-workspace-personalization.ts",
     "verify:phase4-work-performance": "tsx scripts/verify-phase4-work-performance.ts",
     "verify:phase4-analytics-visibility": "tsx scripts/verify-phase4-analytics-visibility.ts",
+    "verify:phase4-authorized-portfolio": "tsx scripts/verify-phase4-authorized-portfolio.ts",
     "verify:experience-feedback": "tsx scripts/verify-experience-feedback.ts",
     "verify:website-review-upload": "tsx scripts/verify-website-review-upload.ts",
     "verify:website-review-page-location": "tsx scripts/verify-website-review-page-location.ts",

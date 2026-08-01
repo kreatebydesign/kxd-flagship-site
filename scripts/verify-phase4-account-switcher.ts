@@ -135,13 +135,19 @@ function main() {
     dedupeActiveMembershipsByClient(memberships).map((m) => m.clientId).join(",") === "10,20",
   );
 
-  // Portfolio never auto-granted
-  const portfolio = resolvePortfolioAccess({
+  // Portfolio still requires explicit portfolioAccessAvailable (Batch F gate).
+  const portfolioOff = resolvePortfolioAccess({
     switchingAvailable: true,
     authorizedClientIds: [10, 20],
     portfolioAccessAvailable: false,
   });
-  check("portfolio remains unavailable", portfolio.available === false);
+  check("portfolio unavailable when flag off", portfolioOff.available === false);
+  const portfolioOn = resolvePortfolioAccess({
+    switchingAvailable: true,
+    authorizedClientIds: [10, 20],
+    portfolioAccessAvailable: true,
+  });
+  check("portfolio available when Batch F flag on", portfolioOn.available === true);
 
   // --- Source contracts ---
   const switchRoute = read("app/api/portal/account/switch/route.ts");
@@ -192,7 +198,11 @@ function main() {
     accountContext.includes("resolvePortalAccountContext") &&
       accountContext.includes("session.portalUserId") &&
       accountContext.includes("switchingAvailable") &&
-      accountContext.includes("portfolioAccessAvailable: false"),
+      accountContext.includes("portfolioAccessAvailable"),
+  );
+  check(
+    "account context ties portfolioAccessAvailable to switchingAvailable",
+    accountContext.includes("portfolioAccessAvailable = switchingAvailable"),
   );
   check(
     "switcher only when >1 authorized accounts",
@@ -235,8 +245,8 @@ function main() {
     shell.includes("accountSwitcher") && shell.includes("AccountSwitcher"),
   );
   check(
-    "readiness gate defaults portfolio off",
-    readiness.includes("portfolioCapable: false") &&
+    "readiness gate ties portfolioCapable to membership schema",
+    readiness.includes("portfolioCapable: membershipSchemaAvailable") &&
       readiness.includes("probeMembershipSchemaAvailable"),
   );
   check(
@@ -280,8 +290,13 @@ function main() {
       !switchRoute.includes("2475"),
   );
   check(
-    "no portfolio dashboard route",
-    !layout.includes("/portal/portfolio") && !switcherUi.includes("Portfolio"),
+    "layout wires portfolio nav from account context (Batch F)",
+    layout.includes("portfolioNavAvailable") &&
+      layout.includes("portfolioAccessAvailable"),
+  );
+  check(
+    "switcher UI does not hard-code Portfolio product",
+    !switcherUi.includes("Portfolio"),
   );
 
   // Migrations untouched

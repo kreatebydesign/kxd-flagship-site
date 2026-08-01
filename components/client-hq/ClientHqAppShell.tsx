@@ -13,12 +13,14 @@ export function ClientHqAppShell({
   editionBranding,
   experienceProfile,
   accountSwitcher = null,
+  portfolioNavAvailable = false,
 }: {
   children: React.ReactNode;
   companyName?: string;
   editionBranding?: EditionBranding;
   experienceProfile?: ResolvedExperienceProfile;
   accountSwitcher?: PortalAccountSwitcherModel | null;
+  portfolioNavAvailable?: boolean;
 }) {
   const pathname = usePathname();
   const activeId = resolvePortalNavId(pathname);
@@ -31,6 +33,7 @@ export function ClientHqAppShell({
       editionBranding={editionBranding}
       experienceProfile={experienceProfile}
       accountSwitcher={accountSwitcher}
+      portfolioNavAvailable={portfolioNavAvailable}
     >
       {children}
     </ClientHqShell>

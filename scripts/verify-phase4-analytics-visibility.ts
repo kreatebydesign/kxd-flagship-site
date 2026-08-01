@@ -246,13 +246,22 @@ function main() {
   });
   check("missing report denied", missing.ok === false);
 
-  // Portfolio remains disabled
-  const portfolio = resolvePortfolioAccess({
+  // Portfolio remains gated (Batch F) — analytics batch must not bypass the flag
+  const portfolioOff = resolvePortfolioAccess({
     switchingAvailable: true,
     authorizedClientIds: [1, 2, 3],
     portfolioAccessAvailable: false,
   });
-  check("portfolio still not-enabled", portfolio.available === false && portfolio.reason === "not-enabled");
+  check(
+    "portfolio still not-enabled when flag off",
+    portfolioOff.available === false && portfolioOff.reason === "not-enabled",
+  );
+  const portfolioOn = resolvePortfolioAccess({
+    switchingAvailable: true,
+    authorizedClientIds: [1, 2, 3],
+    portfolioAccessAvailable: true,
+  });
+  check("portfolio enabled only when Batch F flag on", portfolioOn.available === true);
 
   // Route / UI / server wiring
   const analyticsPage = read("app/(portal)/portal/(app)/analytics/page.tsx");

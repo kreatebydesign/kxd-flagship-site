@@ -20130,6 +20130,116 @@ html[data-theme="dark"] .kxd-os-theme-pref__option.is-active {
   }
 }
 
+/* ── Batch F: Authorized portal portfolio ────────────────────────────────── */
+
+.kxd-portal-portfolio {
+  display: grid;
+  gap: 1.75rem;
+  min-width: 0;
+}
+
+.kxd-portal-portfolio__totals {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.kxd-portal-portfolio__kpi {
+  min-width: 0;
+  padding: 1rem 0.9rem;
+  border-radius: var(--kxd-os-radius-lg, 0.75rem);
+  background: var(--kxd-os-surface-milled, transparent), var(--kxd-os-bg-surface, transparent);
+  box-shadow: var(--kxd-os-shadow-rest, none);
+}
+
+.kxd-portal-portfolio__kpi-value {
+  margin-top: 0.5rem;
+  font-family: var(--kxd-os-font-sans);
+  font-size: clamp(1.5rem, 2.5vw, 1.875rem);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--kxd-os-text-primary);
+}
+
+.kxd-portal-portfolio__roster {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.kxd-portal-portfolio__row {
+  padding: 1rem 1.1rem;
+  border-radius: var(--kxd-os-radius-lg, 0.75rem);
+  background: var(--kxd-os-surface-milled, transparent), var(--kxd-os-bg-elevated, transparent);
+  box-shadow: var(--kxd-os-shadow-rest, none);
+}
+
+.kxd-portal-portfolio__row--active {
+  box-shadow: var(--kxd-os-shadow-hover, none);
+}
+
+.kxd-portal-portfolio__row-main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem 1.25rem;
+}
+
+.kxd-portal-portfolio__action {
+  display: grid;
+  gap: 0.35rem;
+  justify-items: end;
+}
+
+.kxd-portal-portfolio__error {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--kxd-os-text-muted);
+  max-width: 14rem;
+  text-align: right;
+}
+
+.kxd-portal-portfolio__empty {
+  margin-top: 0.5rem;
+}
+
+.kxd-portal-portfolio a:focus-visible,
+.kxd-portal-portfolio button:focus-visible {
+  outline: 2px solid var(--kxd-os-focus, currentColor);
+  outline-offset: 2px;
+}
+
+@media (max-width: 1024px) {
+  .kxd-portal-portfolio__totals {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .kxd-portal-portfolio__totals {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .kxd-portal-portfolio__action {
+    justify-items: start;
+  }
+
+  .kxd-portal-portfolio__error {
+    text-align: left;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kxd-portal-portfolio * {
+    transition: none !important;
+  }
+}
+
 /* ── Website Audit Report Editor ─────────────────────────────────────────── */
 
 .kxd-audit-report-editor {

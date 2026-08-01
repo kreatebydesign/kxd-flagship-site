@@ -82,13 +82,16 @@ export async function resolvePortalAccountContext(
     };
   }
 
+  // Portfolio is available only with server-validated multi-account switching.
+  const portfolioAccessAvailable = switchingAvailable;
+
   return {
     portalUserId: session.portalUserId,
     activeClientId: session.clientId,
     activeClientName: session.clientName,
     accessSource,
     switchingAvailable,
-    portfolioAccessAvailable: false,
+    portfolioAccessAvailable,
     authorizedClientIds,
     switcher: switchingAvailable
       ? {

@@ -4,7 +4,7 @@ import { getCesNavItems, resolveCesNavId } from "@/lib/ces/modules/nav";
 import type { CesNavGroupId } from "@/lib/ces/modules/types";
 import type { ResolvedExperienceProfile } from "@/lib/ces";
 import { isExecutiveClientBriefingAvailable } from "@/lib/executive-client-summary/availability";
-import { CLIENT_HQ_MODULES, isClientHqModuleEnabled, type ClientHqModuleId } from "./modules";
+import { isClientHqModuleEnabled, type ClientHqModuleId } from "./modules";
 import { getEditionBranding, getEditionNavigation } from "@/lib/editions";
 import { isPortalNavEnabled } from "@/lib/editions/navigation";
 import { isPortalNavVisibleForCesLaunch } from "@/lib/portal/ces-launch-safety";
@@ -12,7 +12,13 @@ import { isPortalNavVisibleForCesLaunch } from "@/lib/portal/ces-launch-safety";
 export type ClientHqNavId = ClientHqModuleId;
 /** Shared Core partnership briefing — not a CES module entitlement. */
 export type PortalBriefingNavId = "partnership";
-export type PortalNavId = ClientHqNavId | CesModuleId | PortalBriefingNavId;
+/** Phase 4 Batch F — multi-account authorized portfolio (not a CES entitlement). */
+export type PortalPortfolioNavId = "portfolio";
+export type PortalNavId =
+  | ClientHqNavId
+  | CesModuleId
+  | PortalBriefingNavId
+  | PortalPortfolioNavId;
 
 export interface ClientHqNavItem {
   id: ClientHqNavId;
@@ -109,13 +115,31 @@ export function getEnabledClientHqNavGroups(): ClientHqNavGroup[] {
 /** Client HQ nav + CES module items when profile enables them */
 export function getEnabledPortalNavGroups(
   profile?: ResolvedExperienceProfile | null,
+  options?: { portfolioNavAvailable?: boolean },
 ): PortalNavGroup[] {
+  const portfolioNavAvailable = Boolean(options?.portfolioNavAvailable);
   const base = getEnabledClientHqNavGroups();
+
   if (!profile) {
-    return base.map((group) => ({
-      label: group.label,
-      items: group.items.map(({ id, label, href }) => ({ id, label, href })),
-    }));
+    return base
+      .map((group) => {
+        const portfolioItem: PortalNavItem[] =
+          portfolioNavAvailable && group.label === "Headquarters"
+            ? [{ id: "portfolio", label: "Portfolio", href: "/portal/portfolio" }]
+            : [];
+        return {
+          label: group.label,
+          items: [
+            ...group.items.map(({ id, label, href }) => ({
+              id: id as PortalNavId,
+              label,
+              href,
+            })),
+            ...portfolioItem,
+          ],
+        };
+      })
+      .filter((group) => group.items.length > 0);
   }
 
   const cesItems = getCesNavItems(profile);
@@ -140,11 +164,17 @@ export function getEnabledPortalNavGroups(
           ? [{ id: "partnership", label: "Partnership", href: "/portal/partnership" }]
           : [];
 
+      const portfolioItem: PortalNavItem[] =
+        portfolioNavAvailable && group.label === "Headquarters"
+          ? [{ id: "portfolio", label: "Portfolio", href: "/portal/portfolio" }]
+          : [];
+
       return {
         label: group.label,
         items: [
           ...group.items.map(({ id, label, href }) => ({ id, label, href })),
           ...briefingItem,
+          ...portfolioItem,
           ...cesForGroup,
         ],
       };
@@ -157,6 +187,9 @@ export function getEnabledPortalNavGroups(
 }
 
 export function resolvePortalNavId(pathname: string): PortalNavId {
+  if (pathname === "/portal/portfolio" || pathname.startsWith("/portal/portfolio/")) {
+    return "portfolio";
+  }
   if (pathname === "/portal/partnership" || pathname.startsWith("/portal/partnership/")) {
     return "partnership";
   }

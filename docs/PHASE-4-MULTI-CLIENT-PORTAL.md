@@ -1,13 +1,13 @@
 # Phase 4 — Multi-Client Portal Access & Account Context
 
-**Status:** Batches A–E implemented in repository — Batch A awaits publication / production migration verification; Batches F–H not started  
+**Status:** Batches A–F implemented in repository — Batches G–H not started  
 **Baseline (definition):** `5c4445fb03c0675aa50edc63a7b08ba3555e76e2`  
 **Batch A implementation baseline:** `5c4445fb03c0675aa50edc63a7b08ba3555e76e2`  
 **Companion:** `docs/KXD-OS-ROADMAP.md`, `docs/KXD-OS-CURRENT-STATE.md`, `docs/KXD-OS-V1-FOUNDING-CLIENT-EARLY-ACCESS.md`
 
 > Phase 3 Client & Relationship Intelligence is production-complete and closed. Phase 4 does not reopen Phase 3. Relationship Intelligence remains operator-only and portal-inaccessible.
 >
-> **Batch status (repository):** Batch A membership foundation; Batch B account switcher / active-account context; Batch C workspace personalization / per-account composition; Batch D work & performance; Batch E analytics / website performance / lead visibility (`verify:phase4-analytics-visibility`). **Not** production-complete until published, migrated where required, and verified. Batches F–H not started. This status does **not** claim Neon/production migration clearance.
+> **Batch status (repository):** Batch A membership foundation; Batch B account switcher / active-account context; Batch C workspace personalization / per-account composition; Batch D work & performance; Batch E analytics / website performance / lead visibility (`verify:phase4-analytics-visibility`); Batch F authorized combined portfolio (`verify:phase4-authorized-portfolio`). **Not** production-complete until published and verified for the configured multi-client group. Batches G–H not started. This status does **not** claim Neon/production migration clearance for later batches.
 
 ---
 
@@ -393,13 +393,14 @@ Allowed only when **all** are true:
 
 | Item | Definition |
 |------|------------|
+| **Status** | ✅ Implemented in repository — `verify:phase4-authorized-portfolio` |
 | **Objective** | Aggregate only the user’s authorized memberships with clear per-account breakdowns |
 | **User-visible outcome** | Portfolio screen/summary across memberships |
-| **Systems reused** | Membership list + existing per-client loaders |
-| **Likely code areas** | New portal portfolio route/compose under `lib/portal/` or CES; shell nav item |
+| **Systems reused** | Membership list + existing per-client work-performance loaders + Batch D multi-site overview compose |
+| **Implemented areas** | `lib/portal/portfolio.ts`, `lib/portal/authorized-portfolio/`, `/portal/portfolio`, `PortfolioScreen`, shell nav when multi-account authorized |
 | **Authorization** | Membership-only aggregation; no parent-org shortcut; no Phase 3 relationship fields |
-| **Schema / migration** | Optional non-auth labeling only — not required |
-| **Verification** | Portfolio ⊆ memberships; user with 1 membership sees single-account equivalent; unauthorized clients absent |
+| **Schema / migration** | None |
+| **Verification** | `npm run verify:phase4-authorized-portfolio`; Portfolio ⊆ memberships; user with 1 membership sees single-account equivalent (redirect to Overview); unauthorized clients absent |
 | **Dependencies** | Batches A–E recommended (A–C minimum) |
 | **Exclusions** | Operator Client Portfolio redesign; private relationship intelligence |
 | **Stop conditions** | Slug-pattern or owner-name authorization |
@@ -453,6 +454,7 @@ Introduce focused scripts as batches land (names indicative):
 - `verify:phase4-workspace-personalization` (Batch C)
 - `verify:phase4-work-performance` (Batch D)
 - `verify:phase4-analytics-visibility` (Batch E)
+- `verify:phase4-authorized-portfolio` (Batch F)
 - …plus existing `verify:portal-auth-boundaries` / portal admin auth boundary scripts retained
 
 ### Final verifier (required for Phase 4 complete)
@@ -544,7 +546,6 @@ Phase 4 is complete only when:
 - Exact default account for Don’s login (operator choice at linking time)
 - OTP Carts client ID in each environment (readiness gate)
 - Whether portal “approvals” maps to website-review awaiting states vs deferred (Batch G)
-- Exact portfolio UI composition (Batch F)
 - Timing of legacy `client` column drop (after completion gates)
 
 ---

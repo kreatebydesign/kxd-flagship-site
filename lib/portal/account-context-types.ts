@@ -31,8 +31,8 @@ export type PortalAccountContextSummary = {
   /** True only when schema is available and user has >1 authorized accounts. */
   switchingAvailable: boolean;
   /**
-   * Portfolio overview is an explicit future capability — never auto-granted
-   * merely because the user has multiple memberships.
+   * Batch F — true only when the server authorizes a combined portfolio view
+   * (schema ready + more than one active membership). Never trust from browser.
    */
   portfolioAccessAvailable: boolean;
   authorizedClientIds: number[];

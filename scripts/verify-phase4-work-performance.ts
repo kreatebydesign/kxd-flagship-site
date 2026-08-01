@@ -327,14 +327,22 @@ function main() {
     donOverview.totals?.siteCount === 4,
   );
 
-  // Portfolio product remains disabled
+  // Portfolio product remains gated (Batch F) — flag off still denies
   check(
-    "portfolio product access remains unavailable",
+    "portfolio product access denied when flag off",
     resolvePortfolioAccess({
       switchingAvailable: true,
       authorizedClientIds: donIds,
       portfolioAccessAvailable: false,
     }).available === false,
+  );
+  check(
+    "portfolio product access allowed when Batch F flag on",
+    resolvePortfolioAccess({
+      switchingAvailable: true,
+      authorizedClientIds: donIds,
+      portfolioAccessAvailable: true,
+    }).available === true,
   );
 
   // Static wiring
