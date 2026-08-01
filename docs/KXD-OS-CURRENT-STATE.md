@@ -234,7 +234,7 @@ Edition 1 is in the **operate and extend** phase — not redesign.
 
 ### Immediate priorities
 
-1. **Phase 4 — Multi-Client Portal Access & Account Context** — Production migration verification remains blocked until DB identity + PITR gates clear; next product batch is Batch F (authorized portfolio) per `docs/PHASE-4-MULTI-CLIENT-PORTAL.md` after A–E publication/verification.
+1. **Phase 4 — Multi-Client Portal Access & Account Context** — Production DB identity gate **cleared** (Vercel Neon store `kxd-flagship-db` / project `mute-violet-81514071` ≡ Target A). Backup/PITR gate **conditionally cleared** on Free plan (instant restore history window max **6 hours**; take a manual Neon snapshot immediately before any production migrate; Launch upgrade recommended for 7-day retention). Production migrations applied successfully (`20260727_phase3_client_relationship_intelligence`, `20260728_phase4_portal_client_memberships`, `20260810_website_audit_report_generator`; `migrate:status` batch 46, Ran = Yes); no production migrations remain pending. Next product batch is Batch F (authorized portfolio) per `docs/PHASE-4-MULTI-CLIENT-PORTAL.md` after A–E publication/verification.
 2. **Client operations at scale** — Repeat the Primal launch pattern using `lib/client-launch/` for every new client workspace (including OTP Carts readiness before Cusick membership linking). Gate Batch A: `verify:otp-carts-readiness`.
 3. **Business Memory integration** — Wire `runBusinessMemory()` into rituals or intelligence when explicitly requested; foundation exists, UI does not. Phase 3 prepared durable relationship context but does not integrate Business Memory yet.
 4. **Executive experience polish** — Premium ritual presentation (KHIG) without new intelligence layers.
