@@ -21,6 +21,10 @@ import {
   loadReportingFacts,
   summarizeReportingFactProvenance,
 } from "@/lib/reporting/persistence";
+import {
+  confirmedLeadsUnavailable,
+  resolveProviderFreshnessPresentation,
+} from "@/lib/reporting/freshness/presentation";
 import { getExecutiveEvolution } from "./evolution";
 import { buildExecutivePanelMetrics } from "./panel-metrics";
 import {
@@ -39,32 +43,58 @@ import type {
 function providerDisplayLabel(providerId: string): string {
   if (providerId === "google-search-console") return "Search Console";
   if (providerId === "google-analytics-4") return "Google Analytics 4";
+  if (providerId === "google-ads") return "Google Ads";
   return providerId;
 }
 
 function buildReportingProvenance(input: {
   periodLabel: string;
+  periodEnd: string;
   factsLength: number;
   providerIds: string[];
   hasAnyReportingCapability: boolean;
   seoEnabled: boolean;
   websiteAnalyticsEnabled: boolean;
+  googleAdsEnabled: boolean;
+  sourceFetchedAt: string | null;
   /** True when persisted facts exist but all numeric values are zero. */
   zeroActivity: boolean;
 }): ExecutiveReportingProvenance {
+  const confirmed = confirmedLeadsUnavailable();
   const providerLabels = input.providerIds.map(providerDisplayLabel);
+  const freshness = resolveProviderFreshnessPresentation({
+    entitled: input.hasAnyReportingCapability,
+    connectedConfigured: input.hasAnyReportingCapability,
+    sourceFetchedAt: input.sourceFetchedAt,
+    dataThroughDate: input.periodEnd,
+    factCount: input.factsLength,
+  });
+
+  const base = {
+    dataThroughDate: freshness.dataThroughDate,
+    lastSuccessfulSyncAt: freshness.lastSuccessfulSyncAt,
+    freshnessLabel: freshness.label,
+    freshnessState: freshness.state,
+    confirmedLeadsLabel: confirmed.label,
+    confirmedLeadsDetail: confirmed.detail,
+  };
+
   if (!input.hasAnyReportingCapability) {
     return {
       periodLabel: input.periodLabel,
       providerLabels: [],
       factCount: 0,
       statusNote: "Reporting will appear here once the related capabilities are enabled.",
+      ...base,
+      freshnessLabel: "Not connected",
+      freshnessState: "not_connected",
     };
   }
   if (input.factsLength === 0) {
     const awaiting: string[] = [];
     if (input.seoEnabled) awaiting.push("Search Console");
     if (input.websiteAnalyticsEnabled) awaiting.push("Google Analytics 4");
+    if (input.googleAdsEnabled) awaiting.push("Google Ads");
     return {
       periodLabel: input.periodLabel,
       providerLabels: [],
@@ -73,15 +103,27 @@ function buildReportingProvenance(input: {
         awaiting.length > 0
           ? `${awaiting.join(" and ")} ${awaiting.length === 1 ? "is" : "are"} entitled — no facts synced for this period yet.`
           : "Waiting on the first trustworthy reporting signal.",
+      ...base,
+      freshnessLabel: freshness.label,
+      freshnessState: freshness.state,
     };
   }
+
+  const notes: string[] = [];
+  if (input.zeroActivity) {
+    notes.push("Facts synced for this period — no measurable activity recorded yet.");
+  }
+  notes.push(
+    "GA4 lead actions, Google Ads conversions, and confirmed leads are separate measurements.",
+  );
+  notes.push(confirmed.detail);
+
   return {
     periodLabel: input.periodLabel,
     providerLabels,
     factCount: input.factsLength,
-    statusNote: input.zeroActivity
-      ? "Facts synced for this period — no measurable activity recorded yet."
-      : null,
+    statusNote: notes.join(" "),
+    ...base,
   };
 }
 
@@ -195,11 +237,14 @@ export async function composeExecutivePerformance(input: {
   const hasAnyReportingCapability = enabledCapabilities.length > 0;
   const reportingProvenance = buildReportingProvenance({
     periodLabel: period.label ?? `${period.start} – ${period.end}`,
+    periodEnd: period.end,
     factsLength: factProvenance.factCount,
     providerIds: factProvenance.providerIds,
     hasAnyReportingCapability,
     seoEnabled: enabledSet.has("seo"),
     websiteAnalyticsEnabled: enabledSet.has("website-analytics"),
+    googleAdsEnabled: enabledSet.has("google-ads"),
+    sourceFetchedAt: factProvenance.fetchedAt,
     zeroActivity,
   });
 
@@ -221,8 +266,16 @@ export async function composeExecutivePerformance(input: {
       domainHealth.get(domainKey) !== undefined &&
       domainHealth.get(domainKey) !== "unknown";
     const state = panelState(capabilityEnabled, Boolean(hasDomainSignal));
+    const freshnessBlocksInsight = [
+      "stale",
+      "sync_failed",
+      "never_synchronized",
+      "unavailable",
+      "not_connected",
+      "not_enough_data",
+    ].includes(reportingProvenance.freshnessState ?? "");
     const observations =
-      state === "connected"
+      state === "connected" && !freshnessBlocksInsight
         ? bundle.observations
             .filter((o) => o.domain === domainKey)
             .slice(0, 1)
@@ -238,8 +291,17 @@ export async function composeExecutivePerformance(input: {
       title: panel.title,
       domainLabel: panel.domainLabel,
       state,
-      summary: panelSummary(state, domainHealth.get(domainKey)),
-      detail: state === "connected" && observations[0] ? observations[0] : null,
+      summary: freshnessBlocksInsight
+        ? "Waiting on current provider data"
+        : panelSummary(state, domainHealth.get(domainKey)),
+      detail:
+        freshnessBlocksInsight
+          ? reportingProvenance.freshnessLabel
+            ? `Insights paused — ${reportingProvenance.freshnessLabel.toLowerCase()}.`
+            : "Insights paused until provider data is current."
+          : state === "connected" && observations[0]
+            ? observations[0]
+            : null,
       evidenceLabels: observations,
       metrics,
     };

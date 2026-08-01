@@ -136,6 +136,16 @@ export {
   type ReportingOpsHistoryEntry,
 } from "./operations";
 
+/** Phase 4 Batch J.2B — client-facing freshness presentation (not composition time) */
+export {
+  resolveProviderFreshnessPresentation,
+  confirmedLeadsUnavailable,
+  labelForFreshnessState,
+  type ProviderFreshnessPresentation,
+  type ProviderFreshnessPresentationState,
+  type ConfirmedLeadPresentation,
+} from "./freshness/presentation";
+
 /** Performance report view helpers (existing) */
 export {
   buildPerformanceReportView,

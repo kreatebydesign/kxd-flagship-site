@@ -27,13 +27,24 @@ export type AnalyticsSourceStatus = {
 };
 
 export type AnalyticsVisibilityLeads = {
-  /** Analytics conversion / form events — not confirmed sales pipeline leads. */
+  /**
+   * Three separate measurements — never blended:
+   * 1) confirmed leads  2) GA4 generate_lead actions  3) Ads / GA4 aggregate conversions
+   */
   availability: WorkPerformanceAvailability;
   periodLabel: string;
+  /** GA4 aggregate key-event conversions — not confirmed leads. */
   conversionCount: number | null;
   conversionLabel: string;
+  /** GA4 generate_lead event count — analytics actions, not confirmed leads. */
+  generateLeadCount: number | null;
+  generateLeadLabel: string;
+  /** Legacy form_submissions fact when present — not confirmed leads. */
   formSubmissionCount: number | null;
   formSubmissionLabel: string;
+  /** Confirmed sales leads — only when a durable Primal-scoped store is connected. */
+  confirmedLeadCount: number | null;
+  confirmedLeadLabel: string;
   statusNote: string | null;
   /** CRM / sales pipeline remains operator-only. */
   salesPipelineAvailable: false;

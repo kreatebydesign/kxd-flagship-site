@@ -20,11 +20,6 @@ export function CesPartnershipBriefing({ briefing, greeting }: CesPartnershipBri
   const { overview, needsAttention, websiteReview, results, recommendation } =
     briefing;
   const story = getPartnershipStoryTimeline(briefing.clientSlug);
-  const updatedLabel = new Date().toLocaleDateString(undefined, {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
 
   return (
     <div className="kxd-ces-partnership">
@@ -37,7 +32,6 @@ export function CesPartnershipBriefing({ briefing, greeting }: CesPartnershipBri
           Everything Kreate by Design is actively delivering, planning, and recommending for{" "}
           {briefing.clientName}.
         </p>
-        <p className="kxd-ces-partnership__updated">Updated {updatedLabel}</p>
       </header>
 
       {/* Where we are */}

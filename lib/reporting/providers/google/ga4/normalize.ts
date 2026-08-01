@@ -24,6 +24,8 @@ const GA4_TO_CANONICAL: Record<string, CanonicalMetricKey> = {
   screenPageViews: "pageviews",
   conversions: "conversions",
   keyEvents: "conversions",
+  /** Explicit generate_lead event count — never aliased to conversions. */
+  generate_lead: "generate_lead",
 };
 
 function parseNumeric(raw: string | null | undefined): number | null {

@@ -84,18 +84,22 @@ check("search maps clicks / impressions / ctr / average_position", () => {
   assert.equal(executivePanelDomain("search"), "search");
 });
 
-check("website maps sessions / visitors / pageviews / conversions", () => {
+check("website maps sessions / visitors / pageviews / generate_lead / conversions", () => {
   assert.deepEqual(
     executivePanelMetricSpecs("website").map((s) => s.key),
-    ["sessions", "visitors", "pageviews", "conversions"],
+    ["sessions", "visitors", "pageviews", "generate_lead", "conversions"],
   );
   assert.equal(executivePanelDomain("website"), "website");
 });
 
-check("ads maps ad_spend / clicks / conversions / cost_per_lead (no derivation)", () => {
+check("ads maps ad_spend / clicks / Ads conversions / cost_per_lead (no derivation)", () => {
   assert.deepEqual(
     executivePanelMetricSpecs("ads").map((s) => s.key),
     ["ad_spend", "clicks", "conversions", "cost_per_lead"],
+  );
+  assert.equal(
+    executivePanelMetricSpecs("ads").find((s) => s.key === "conversions")?.label,
+    "Ads conversions",
   );
   assert.equal(executivePanelDomain("ads"), "marketing");
 });

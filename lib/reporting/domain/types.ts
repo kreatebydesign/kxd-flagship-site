@@ -67,6 +67,8 @@ export type CanonicalMetricKey =
   | "pageviews"
   | "qualified_leads"
   | "form_submissions"
+  /** GA4 generate_lead event count — analytics actions, not confirmed leads. */
+  | "generate_lead"
   | "phone_calls"
   | "conversions"
   | "conversion_rate"

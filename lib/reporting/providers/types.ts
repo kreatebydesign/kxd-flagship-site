@@ -122,4 +122,4 @@ export const REPORTING_PROVIDER_SOURCE_ID: Record<ReportingProviderId, string> =
 };
 
 /** Metric set version — bump when normalized metric selection changes. */
-export const REPORTING_PROVIDER_METRIC_SET_VERSION = "32b.1.0";
+export const REPORTING_PROVIDER_METRIC_SET_VERSION = "j2b.1.0";

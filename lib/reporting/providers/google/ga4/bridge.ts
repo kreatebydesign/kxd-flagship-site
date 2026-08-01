@@ -11,7 +11,11 @@ import { providerError } from "../../errors";
 import { periodIncludesToday, previousPeriodWindow, toProviderDate } from "../../period";
 import type { ReportingProviderResult } from "../../types";
 import { getGoogleReportingAuthConfig } from "../auth";
-import { GA4_CORE_METRICS, runGa4Report } from "./client";
+import {
+  GA4_CORE_METRICS,
+  runGa4GenerateLeadCount,
+  runGa4Report,
+} from "./client";
 import { ga4FactsToSnapshot, normalizeGa4Metrics } from "./normalize";
 
 export async function fetchGa4ReportingBridge(input: {
@@ -142,11 +146,30 @@ export async function fetchGa4ReportingBridge(input: {
     metrics,
   });
 
+  // Separate generate_lead query — never treat aggregate conversions as leads.
+  const leadCurrent = await runGa4GenerateLeadCount({
+    propertyId: connection.ga4PropertyId,
+    startDate: toProviderDate(period.start),
+    endDate: toProviderDate(period.end),
+  });
+  const leadPrevious = await runGa4GenerateLeadCount({
+    propertyId: connection.ga4PropertyId,
+    startDate: toProviderDate(priorPeriod.start),
+    endDate: toProviderDate(priorPeriod.end),
+  });
+  if (!leadCurrent.ok) {
+    warnings.push({
+      code: "metric-unavailable",
+      message:
+        "GA4 generate_lead could not be read for this period — aggregate conversions remain separate.",
+    });
+  }
+
   // Fresh retrieval even when period is partial — completeness is separate.
   const freshness = "fresh" as const;
   const confidence = includesToday ? "medium" : "high";
 
-  const { facts } = normalizeGa4Metrics({
+  const { facts: coreFacts } = normalizeGa4Metrics({
     clientId: connection.clientId,
     period,
     current: current.metrics,
@@ -156,6 +179,65 @@ export async function fetchGa4ReportingBridge(input: {
     confidence,
     propertyId: connection.ga4PropertyId,
   });
+
+  const { facts: leadFacts } = leadCurrent.ok
+    ? normalizeGa4Metrics({
+        clientId: connection.clientId,
+        period,
+        current: leadCurrent.metrics,
+        previous: leadPrevious.ok ? leadPrevious.metrics : null,
+        fetchedAt,
+        freshness,
+        confidence,
+        propertyId: connection.ga4PropertyId,
+      })
+    : { facts: [] };
+
+  // Rolling generate_lead windows (7 / 30 / 90) — separate from aggregate conversions.
+  const rollingLeadFacts: typeof leadFacts = [];
+  const endDay = toProviderDate(period.end);
+  for (const days of [7, 30, 90] as const) {
+    const end = new Date(`${endDay}T00:00:00.000Z`);
+    const start = new Date(end);
+    start.setUTCDate(start.getUTCDate() - (days - 1));
+    const rolling: PeriodWindow = {
+      start: start.toISOString().slice(0, 10),
+      end: endDay,
+      grain: days <= 7 ? "week" : "month",
+      label: `Last ${days} days`,
+    };
+    const roll = await runGa4GenerateLeadCount({
+      propertyId: connection.ga4PropertyId,
+      startDate: toProviderDate(rolling.start),
+      endDate: toProviderDate(rolling.end),
+    });
+    if (!roll.ok) {
+      warnings.push({
+        code: "metric-unavailable",
+        message: `GA4 generate_lead (${days}-day) could not be read.`,
+      });
+      continue;
+    }
+    const { facts: windowFacts } = normalizeGa4Metrics({
+      clientId: connection.clientId,
+      period: rolling,
+      current: roll.metrics,
+      previous: null,
+      fetchedAt,
+      freshness,
+      confidence,
+      propertyId: connection.ga4PropertyId,
+    });
+    for (const fact of windowFacts) {
+      if (fact.metricKey !== "generate_lead") continue;
+      rollingLeadFacts.push({
+        ...fact,
+        id: `ga4-${connection.clientId}-generate_lead-${rolling.start}_${rolling.end}`,
+      });
+    }
+  }
+
+  const facts = [...coreFacts, ...leadFacts, ...rollingLeadFacts];
 
   if (facts.length === 0 && current.rowCount === 0) {
     return {

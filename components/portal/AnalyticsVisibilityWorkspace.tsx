@@ -139,8 +139,27 @@ export function AnalyticsVisibilityWorkspace({
 
       <Section label="Leads and conversions">
         {leads.availability === "ready" &&
-        (leads.conversionCount != null || leads.formSubmissionCount != null) ? (
+        (leads.conversionCount != null ||
+          leads.generateLeadCount != null ||
+          leads.formSubmissionCount != null) ? (
           <div className="kxd-ws-perf__metrics" role="list" aria-label="Lead and conversion metrics">
+            <div className="kxd-ws-perf__metric" role="listitem">
+              <p className="kxd-os-metric__label">{leads.confirmedLeadLabel}</p>
+              <p className="kxd-os-metric__value" aria-label={leads.confirmedLeadLabel}>
+                —
+              </p>
+            </div>
+            {leads.generateLeadCount != null ? (
+              <div className="kxd-ws-perf__metric" role="listitem">
+                <p className="kxd-os-metric__label">{leads.generateLeadLabel}</p>
+                <p
+                  className="kxd-os-metric__value"
+                  aria-label={`${leads.generateLeadLabel}: ${leads.generateLeadCount}`}
+                >
+                  {leads.generateLeadCount}
+                </p>
+              </div>
+            ) : null}
             {leads.conversionCount != null ? (
               <div className="kxd-ws-perf__metric" role="listitem">
                 <p className="kxd-os-metric__label">{leads.conversionLabel}</p>

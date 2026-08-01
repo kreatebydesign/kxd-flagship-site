@@ -146,6 +146,7 @@ export type ExecutiveProgressBeat = {
 /**
  * Provenance for the Performance zone — period + source only.
  * Never invents metrics; empty providers when no ReportingFacts exist.
+ * Never uses page composition time as provider freshness.
  */
 export type ExecutiveReportingProvenance = {
   /** Requested reporting window label (e.g. "July 2026"). */
@@ -155,6 +156,26 @@ export type ExecutiveReportingProvenance = {
   factCount: number;
   /** Honest status when entitled but empty, or when no capabilities. */
   statusNote: string | null;
+  /** Provider data-through date (YYYY-MM-DD) when known. */
+  dataThroughDate: string | null;
+  /** ISO timestamp of last successful fact fetch / sync — not composition time. */
+  lastSuccessfulSyncAt: string | null;
+  /** Client-safe freshness label derived from sync/fact timestamps. */
+  freshnessLabel: string | null;
+  /** Machine freshness state for tests / UI branching. */
+  freshnessState:
+    | "current"
+    | "delayed"
+    | "stale"
+    | "sync_failed"
+    | "never_synchronized"
+    | "unavailable"
+    | "not_connected"
+    | "not_enough_data"
+    | null;
+  /** Confirmed leads are a separate category — never inferred from GA4/Ads. */
+  confirmedLeadsLabel: string;
+  confirmedLeadsDetail: string;
 };
 
 export type ExecutivePerformanceBriefing = {

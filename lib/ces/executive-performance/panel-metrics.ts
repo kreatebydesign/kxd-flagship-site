@@ -39,14 +39,15 @@ const METRICS_BY_PANEL: Record<string, MetricSpec[]> = {
     { key: "sessions", label: "Sessions", format: "count" },
     { key: "visitors", label: "Users", format: "count" },
     { key: "pageviews", label: "Pageviews", format: "count" },
-    { key: "conversions", label: "Conversions", format: "count" },
+    { key: "generate_lead", label: "GA4 lead actions", format: "count" },
+    { key: "conversions", label: "GA4 conversions", format: "count" },
   ],
   ads: [
     { key: "ad_spend", label: "Spend", format: "currency" },
     { key: "clicks", label: "Clicks", format: "count" },
-    { key: "conversions", label: "Conversions", format: "count" },
+    { key: "conversions", label: "Ads conversions", format: "count" },
     /* Canonical cost_per_lead only — never divide spend/conversions here. */
-    { key: "cost_per_lead", label: "Cost / lead", format: "currency" },
+    { key: "cost_per_lead", label: "Cost / conversion", format: "currency" },
   ],
 };
 
@@ -132,7 +133,7 @@ export function buildExecutivePanelMetrics(
       trend: fact.trend ?? null,
     });
   }
-  return metrics.slice(0, 4);
+  return metrics.slice(0, 5);
 }
 
 /** Test seam — expected mapping table for verification. */

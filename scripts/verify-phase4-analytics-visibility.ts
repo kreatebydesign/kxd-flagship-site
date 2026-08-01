@@ -197,9 +197,19 @@ function main() {
   check("tracked conversions ready", partial.leads.conversionCount === 3);
   check("form submissions surfaced when present", partial.leads.formSubmissionCount === 5);
   check(
-    "conversions labeled as tracked events",
-    /tracked/i.test(partial.leads.conversionLabel) ||
-      /analytics events/i.test(partial.leads.statusNote ?? ""),
+    "confirmed leads stay unavailable (never inferred)",
+    partial.leads.confirmedLeadCount === null &&
+      /not connected/i.test(partial.leads.confirmedLeadLabel),
+  );
+  check(
+    "three lead categories stay separate",
+    /separate/i.test(partial.leads.statusNote ?? "") &&
+      !/total leads/i.test(partial.leads.statusNote ?? ""),
+  );
+  check(
+    "conversions labeled honestly",
+    /conversion/i.test(partial.leads.conversionLabel) ||
+      /separate/i.test(partial.leads.statusNote ?? ""),
   );
   check("published reports scoped list ready", partial.reports.items.length === 1);
   check("freshness note retained", partial.analytics.freshnessNote?.includes("2026-07-02") === true);

@@ -118,63 +118,77 @@ function buildLeads(
   baseStatusNote: string | null,
 ): AnalyticsVisibilityLeads {
   const label = periodLabel(period);
+  const empty = {
+    conversionCount: null as number | null,
+    conversionLabel: "GA4 conversions",
+    generateLeadCount: null as number | null,
+    generateLeadLabel: "GA4 lead actions",
+    formSubmissionCount: null as number | null,
+    formSubmissionLabel: "Form submissions",
+    confirmedLeadCount: null as number | null,
+    confirmedLeadLabel: "Confirmed lead tracking not connected",
+    salesPipelineAvailable: false as const,
+  };
+
   if (!entitled) {
     return {
       availability: "not-entitled",
       periodLabel: label,
-      conversionCount: null,
-      conversionLabel: "Tracked website conversions",
-      formSubmissionCount: null,
-      formSubmissionLabel: "Form submissions",
+      ...empty,
       statusNote: "Lead and conversion visibility is not enabled for this workspace yet.",
-      salesPipelineAvailable: false,
     };
   }
 
-  const formFact = facts.find((f) => f.metricKey === "form_submissions");
+  const periodFacts = facts.filter(
+    (f) => f.period.start === period.start && f.period.end === period.end,
+  );
+  const formFact = periodFacts.find((f) => f.metricKey === "form_submissions");
   const formSubmissionCount =
     formFact && Number.isFinite(formFact.value) ? Math.round(formFact.value) : null;
+  const leadFact = periodFacts.find((f) => f.metricKey === "generate_lead");
+  const generateLeadCount =
+    leadFact && Number.isFinite(leadFact.value) ? Math.round(leadFact.value) : null;
 
   const hasConversion = baseConversionCount != null;
   const hasForms = formSubmissionCount != null;
+  const hasGenerateLead = generateLeadCount != null;
 
-  if (!hasConversion && !hasForms) {
+  if (!hasConversion && !hasForms && !hasGenerateLead) {
     return {
       availability: baseAvailability === "not-entitled" ? "not-entitled" : "unavailable",
       periodLabel: label,
-      conversionCount: null,
-      conversionLabel: "Tracked website conversions",
-      formSubmissionCount: null,
-      formSubmissionLabel: "Form submissions",
+      ...empty,
       statusNote:
         baseStatusNote ??
-        "Tracked website conversions and form submissions are unavailable for this period. Confirmed sales leads remain operator-only and are not shown here.",
-      salesPipelineAvailable: false,
+        "GA4 lead actions and conversions are unavailable for this period. Confirmed lead tracking is not connected. These categories are never combined.",
     };
   }
 
-  const notes: string[] = [];
+  const notes: string[] = [
+    "Confirmed leads, GA4 lead actions, and conversions are separate measurements — never one total.",
+    "Confirmed lead tracking is not connected for this workspace.",
+  ];
+  if (hasGenerateLead) {
+    notes.push("GA4 lead actions count generate_lead events, not unique people or confirmed inquiries.");
+  }
   if (hasConversion) {
-    notes.push("Conversions are analytics events — not confirmed sales pipeline leads.");
+    notes.push("GA4 conversions are aggregate key events — not confirmed leads.");
   }
   if (hasForms) {
-    notes.push("Form submissions are website form events when present in reporting facts.");
+    notes.push("Form submission facts are website events when present — not confirmed leads.");
   }
-  if (!hasConversion) {
-    notes.push("Tracked conversions are unavailable for this period.");
-  }
-  if (!hasForms) {
-    notes.push("Form submission facts are not available for this period.");
-  }
-  notes.push("Sales pipeline stays operator-only.");
 
   return {
     availability: "ready",
     periodLabel: label,
     conversionCount: baseConversionCount,
-    conversionLabel: baseConversionLabel,
+    conversionLabel: baseConversionLabel || "GA4 conversions",
+    generateLeadCount,
+    generateLeadLabel: "GA4 lead actions",
     formSubmissionCount,
     formSubmissionLabel: "Website form submissions",
+    confirmedLeadCount: null,
+    confirmedLeadLabel: "Confirmed lead tracking not connected",
     statusNote: notes.join(" "),
     salesPipelineAvailable: false,
   };

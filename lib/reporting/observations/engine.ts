@@ -105,11 +105,25 @@ export function generateReportingObservations(input: {
     push("seo_declining", "search", "attention", ["seo_visibility"]);
   }
 
-  if (metricTrendDown(snapshot, "qualified_leads") || metricTrendDown(snapshot, "conversions")) {
-    push("leads_slowing", "marketing", "attention", ["qualified_leads", "conversions", "form_submissions"]);
+  /* Lead observations use generate_lead / qualified_leads only — never Ads or GA4 aggregate conversions. */
+  if (
+    metricTrendDown(snapshot, "qualified_leads") ||
+    metricTrendDown(snapshot, "generate_lead")
+  ) {
+    push("leads_slowing", "website", "attention", [
+      "qualified_leads",
+      "generate_lead",
+      "form_submissions",
+    ]);
   }
-  if (metricTrendUp(snapshot, "qualified_leads") || metricTrendUp(snapshot, "conversions")) {
-    push("leads_improving", "marketing", "opportunity", ["qualified_leads", "conversions"]);
+  if (
+    metricTrendUp(snapshot, "qualified_leads") ||
+    metricTrendUp(snapshot, "generate_lead")
+  ) {
+    push("leads_improving", "website", "opportunity", [
+      "qualified_leads",
+      "generate_lead",
+    ]);
   }
 
   if (metricTrendUp(snapshot, "review_velocity") || metricTrendUp(snapshot, "review_count")) {

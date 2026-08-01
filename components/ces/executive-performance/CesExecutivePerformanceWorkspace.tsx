@@ -148,15 +148,28 @@ export function CesExecutivePerformanceWorkspace({
   const { presentation } = performance;
   const zones = getExecutiveZoneOrder(presentation);
   const rows = packZoneRows(zones);
-  const updatedLabel = new Date(performance.composedAt).toLocaleDateString(undefined, {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
-
   const hasHeroImage = Boolean(presentation.heroImageSrc?.trim());
   const themeStyle = executivePresentationToCssVars(presentation) as CSSProperties;
   const periodLabel = performance.reportingProvenance.periodLabel;
+  const provenance = performance.reportingProvenance;
+  const dataThroughLabel = provenance.dataThroughDate
+    ? new Date(`${provenance.dataThroughDate}T12:00:00.000Z`).toLocaleDateString(
+        undefined,
+        { month: "long", day: "numeric", year: "numeric" },
+      )
+    : null;
+  const lastSyncLabel = provenance.lastSuccessfulSyncAt
+    ? new Date(provenance.lastSuccessfulSyncAt).toLocaleDateString(undefined, {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      })
+    : null;
+  const freshnessHeroLabel = provenance.freshnessLabel
+    ? lastSyncLabel
+      ? `${provenance.freshnessLabel} · data refreshed ${lastSyncLabel}`
+      : provenance.freshnessLabel
+    : null;
 
   const zoneMap: Record<ExecutiveWorkspaceZoneId, ReactNode> = {
     summary: (
@@ -243,17 +256,38 @@ export function CesExecutivePerformanceWorkspace({
               <span className="kxd-ces-exec__provenance-key">Period</span>
               <span className="kxd-ces-exec__provenance-value">{periodLabel}</span>
             </p>
-            {performance.reportingProvenance.providerLabels.length > 0 ? (
+            {dataThroughLabel ? (
               <p className="kxd-ces-exec__provenance-row">
-                <span className="kxd-ces-exec__provenance-key">Source</span>
+                <span className="kxd-ces-exec__provenance-key">Data through</span>
+                <span className="kxd-ces-exec__provenance-value">{dataThroughLabel}</span>
+              </p>
+            ) : null}
+            {provenance.freshnessLabel ? (
+              <p className="kxd-ces-exec__provenance-row">
+                <span className="kxd-ces-exec__provenance-key">Freshness</span>
                 <span className="kxd-ces-exec__provenance-value kxd-ces-exec__provenance-value--intel">
-                  {performance.reportingProvenance.providerLabels.join(", ")}
+                  {provenance.freshnessLabel}
+                  {lastSyncLabel ? ` · last sync ${lastSyncLabel}` : ""}
                 </span>
               </p>
             ) : null}
-            {performance.reportingProvenance.statusNote ? (
+            {provenance.providerLabels.length > 0 ? (
+              <p className="kxd-ces-exec__provenance-row">
+                <span className="kxd-ces-exec__provenance-key">Source</span>
+                <span className="kxd-ces-exec__provenance-value kxd-ces-exec__provenance-value--intel">
+                  {provenance.providerLabels.join(", ")}
+                </span>
+              </p>
+            ) : null}
+            <p className="kxd-ces-exec__provenance-row">
+              <span className="kxd-ces-exec__provenance-key">Confirmed leads</span>
+              <span className="kxd-ces-exec__provenance-value">
+                {provenance.confirmedLeadsLabel}
+              </span>
+            </p>
+            {provenance.statusNote ? (
               <p className="kxd-ces-exec__provenance-note">
-                {performance.reportingProvenance.statusNote}
+                {provenance.statusNote}
               </p>
             ) : null}
           </div>
@@ -589,7 +623,9 @@ export function CesExecutivePerformanceWorkspace({
           <p className="kxd-ces-exec__workspace-title">{presentation.workspaceTitle}</p>
           <p className="kxd-ces-exec__greeting">{performance.greeting}</p>
           <p className="kxd-ces-exec__intro">{presentation.introduction}</p>
-          <p className="kxd-ces-exec__updated">Updated {updatedLabel}</p>
+          {freshnessHeroLabel ? (
+            <p className="kxd-ces-exec__updated">{freshnessHeroLabel}</p>
+          ) : null}
         </div>
       </header>
 

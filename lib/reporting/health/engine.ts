@@ -17,6 +17,7 @@ import type {
 } from "../domain/types";
 
 const POSITIVE_KEYS = new Set<CanonicalMetricKey>([
+  "generate_lead",
   "visitors",
   "sessions",
   "qualified_leads",

@@ -107,7 +107,13 @@ assert(REPORTING_PROVIDER_SOURCE_ID.ads === "google-ads", "ads sourceProviderId 
 {
   const infraPath = resolve("payload/collections/ClientInfrastructure.ts");
   const src = readFileSync(infraPath, "utf8");
-  assert(!src.includes("reportingCapabilities"), "ClientInfrastructure has no reportingCapabilities field");
+  /* Entitlements live on experience profiles — not a ClientInfrastructure field.
+   * Allow reportingCapabilitiesOverride (branded-report operator JSON), but reject a
+   * durable `name: "reportingCapabilities"` entitlement column on infrastructure. */
+  assert(
+    !/name:\s*["']reportingCapabilities["']/.test(src),
+    "ClientInfrastructure has no reportingCapabilities field",
+  );
   assert(src.includes("searchConsoleSiteUrl"), "ClientInfrastructure retains searchConsoleSiteUrl connection field");
   assert(src.includes("googleAdsCustomerId"), "ClientInfrastructure has googleAdsCustomerId field");
   assert(src.includes("googleAdsLoginCustomerId"), "ClientInfrastructure has optional login customer field");
