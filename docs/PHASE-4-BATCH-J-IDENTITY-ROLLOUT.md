@@ -30,7 +30,7 @@ Optional: `PORTAL_WEBAUTHN_RP_ID`, `PORTAL_WEBAUTHN_ORIGINS` (local overrides).
 
 Per `docs/PAYLOAD-MIGRATIONS.md`:
 
-1. Deploy the release that contains the migration.
+1. Prefer applying the additive migration **immediately before or immediately after** deploy of `f3cfb92+` — Batch I adds columns on `portal_users` / `portal_client_memberships` that Payload will query.
 2. `npm run migrate:status` against production credentials (host/db metadata only).
 3. Confirm pending includes exactly `20260814_phase4_portal_identity_security` (plus none unexpected).
 4. `KXD_CONFIRM_PRODUCTION_MIGRATE=1 npm run migrate:production`
@@ -38,6 +38,20 @@ Per `docs/PAYLOAD-MIGRATIONS.md`:
 6. Do **not** run seed scripts. Do **not** create invitations/passkeys/MFA/memberships to “prove” deploy.
 
 Deployment does **not** auto-apply Payload migrations; apply is a separate guarded command.
+
+### Batch J agent environment blocker (2026-08-01)
+
+This agent environment **cannot** materialize Vercel Production Sensitive secrets via `vercel env run` / `vercel env pull` (values decrypt empty when `.env.local` is isolated). Neon MCP has **no** access to project `mute-violet-81514071` / store `kxd-flagship-db`. Therefore `migrate:status` / `migrate:production` against production cannot be executed safely from this session.
+
+**Required operator action before/with push of Batch I code:**
+
+1. From a workstation that can decrypt Production Sensitive env (Vercel dashboard → reveal, or an authorized secret pull), export `DATABASE_URI`/`DATABASE_URL` + `PAYLOAD_SECRET` into the shell (do not commit).
+2. Confirm host is the production Neon database (not `127.0.0.1`).
+3. `npm run migrate:status` → expect pending `20260814_phase4_portal_identity_security`.
+4. Take a Neon manual snapshot.
+5. `KXD_CONFIRM_PRODUCTION_MIGRATE=1 npm run migrate:production`
+6. Confirm `Ran: Yes` once.
+7. Then push `main` (or push then migrate within the same maintenance window if following deploy-first — minimize the gap).
 
 ## Compatibility policy
 
