@@ -1,13 +1,13 @@
 # Phase 4 — Multi-Client Portal Access & Account Context
 
-**Status:** Batch A implemented locally — awaiting publication / production migration verification  
+**Status:** Batches A–E implemented in repository — Batch A awaits publication / production migration verification; Batches F–H not started  
 **Baseline (definition):** `5c4445fb03c0675aa50edc63a7b08ba3555e76e2`  
 **Batch A implementation baseline:** `5c4445fb03c0675aa50edc63a7b08ba3555e76e2`  
 **Companion:** `docs/KXD-OS-ROADMAP.md`, `docs/KXD-OS-CURRENT-STATE.md`, `docs/KXD-OS-V1-FOUNDING-CLIENT-EARLY-ACCESS.md`
 
 > Phase 3 Client & Relationship Intelligence is production-complete and closed. Phase 4 does not reopen Phase 3. Relationship Intelligence remains operator-only and portal-inaccessible.
 >
-> **Batch A status:** Implemented in repository (membership collection, additive migration with backfill, session membership resolution, Portal Access membership management, `verify:phase4-multi-client-membership`). **Not** production-complete until published, migrated, and verified. Batches B–H not started.
+> **Batch status (repository):** Batch A membership foundation; Batch B account switcher / active-account context; Batch C workspace personalization / per-account composition; Batch D work & performance; Batch E analytics / website performance / lead visibility (`verify:phase4-analytics-visibility`). **Not** production-complete until published, migrated where required, and verified. Batches F–H not started. This status does **not** claim Neon/production migration clearance.
 
 ---
 
@@ -321,7 +321,7 @@ Allowed only when **all** are true:
 
 | Item | Definition |
 |------|------------|
-| **Status** | Not started |
+| **Status** | ✅ Implemented in repository — awaiting publication / production verification with Batch A |
 | **Objective** | Server-validated switch endpoint; persistent active account; clear identity in portal shell; safe defaults, stale state, direct links, multi-tab |
 | **User-visible outcome** | Multi-membership users see account switcher and correct company identity after switch |
 | **Systems reused** | `ClientHqShell` / CES shell, session resolve, Batch A memberships |
@@ -339,6 +339,7 @@ Allowed only when **all** are true:
 
 | Item | Definition |
 |------|------------|
+| **Status** | ✅ Implemented in repository (workspace personalization / per-account composition) |
 | **Objective** | Active client identity + entitled modules only; no stale content across switches; four-account readiness without Cusick-specific auth |
 | **User-visible outcome** | `/portal` home reflects active account brand/modules |
 | **Systems reused** | CES home, connected workspace, executive performance / partnership compose, `resolveExperienceProfile` |
@@ -356,6 +357,7 @@ Allowed only when **all** are true:
 
 | Item | Definition |
 |------|------------|
+| **Status** | ✅ Implemented in repository (`lib/portal/work-performance/`, `verify:phase4-work-performance`) |
 | **Objective** | Portal-safe visibility for monthly completed work, current work, upcoming priorities — **honest** about gaps (no silent “full Work Ledger”) |
 | **User-visible outcome** | Clear work sections on dashboard or dedicated views for active account |
 | **Systems reused** | `monthly-deliverables`, website review current work, timeline/activity, work items only if already portal-safe |
@@ -373,15 +375,16 @@ Allowed only when **all** are true:
 
 | Item | Definition |
 |------|------------|
+| **Status** | ✅ Implemented in repository — `verify:phase4-analytics-visibility` |
 | **Objective** | Per-account analytics, website health/reporting, lead/form activity **where existing data supports it**; honest unavailable states |
 | **User-visible outcome** | Analytics/reports/health reflect active account only |
-| **Systems reused** | `lib/reporting/`, portal analytics/reports/website-health pages, provider connections |
-| **Likely code areas** | Portal analytics/reports routes, reporting compose, lead/form sources only if already client-scoped |
+| **Systems reused** | `lib/reporting/`, portal analytics/reports/website-health pages, provider connections, Batch D work-performance honesty |
+| **Implemented areas** | `lib/portal/analytics-visibility/`, `/portal/analytics`, website-health connection honesty, report access helper, `scripts/verify-phase4-analytics-visibility.ts` |
 | **Authorization** | Strict client scoping; no cross-account metric merge except Batch F portfolio under membership rules |
-| **Schema / migration** | None expected |
-| **Verification** | Reports/analytics scoped; forged report ids denied |
+| **Schema / migration** | None |
+| **Verification** | `npm run verify:phase4-analytics-visibility`; reports/analytics scoped; forged report ids denied |
 | **Dependencies** | Batch C (B minimum) |
-| **Exclusions** | New vendor integrations; fake metrics |
+| **Exclusions** | New vendor integrations; fake metrics; Batch F portfolio enablement; branded-report production release |
 | **Stop conditions** | Cross-account metric leakage |
 | **Risk** | Medium |
 | **Publication / deploy** | Standard |
@@ -445,8 +448,11 @@ Allowed only when **all** are true:
 
 Introduce focused scripts as batches land (names indicative):
 
-- `verify:phase4-membership-foundation` (Batch A)
+- `verify:phase4-multi-client-membership` (Batch A)
 - `verify:phase4-account-switcher` (Batch B)
+- `verify:phase4-workspace-personalization` (Batch C)
+- `verify:phase4-work-performance` (Batch D)
+- `verify:phase4-analytics-visibility` (Batch E)
 - …plus existing `verify:portal-auth-boundaries` / portal admin auth boundary scripts retained
 
 ### Final verifier (required for Phase 4 complete)
