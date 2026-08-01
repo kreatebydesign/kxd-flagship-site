@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPayload } from "payload";
 import config from "@payload-config";
+import { decidePortalRelatedProjectAccess } from "@/lib/portal/requests-files-reports";
 import { getPortalSession } from "@/lib/portal/session";
 import { spawnWorkItemFromPortalRequest } from "@/lib/work-items/spawn";
 
@@ -46,18 +47,28 @@ export async function POST(req: NextRequest) {
     if (body.requestType?.trim()) data.requestType = body.requestType.trim();
     if (body.requestDetails?.trim()) data.requestDetails = body.requestDetails.trim();
     if (body.relatedProject && Number.isFinite(body.relatedProject)) {
-      // Verify project belongs to this client
-      const project = await payload.findByID({
-        collection: "client-projects",
-        id: body.relatedProject,
-        depth: 0,
-        overrideAccess: true,
+      // Verify project belongs to this client — missing and foreign look the same.
+      let projectClient: number | null = null;
+      try {
+        const project = await payload.findByID({
+          collection: "client-projects",
+          id: body.relatedProject,
+          depth: 0,
+          overrideAccess: true,
+        });
+        projectClient =
+          typeof project.client === "number"
+            ? project.client
+            : (project.client as { id?: number })?.id ?? null;
+      } catch {
+        projectClient = null;
+      }
+
+      const projectAccess = decidePortalRelatedProjectAccess({
+        projectClientId: projectClient,
+        authorizedClientId: session.clientId,
       });
-      const projectClient =
-        typeof project.client === "number"
-          ? project.client
-          : (project.client as { id?: number })?.id;
-      if (projectClient !== session.clientId) {
+      if (!projectAccess.ok) {
         return NextResponse.json(
           { ok: false, message: "Invalid project selection." },
           { status: 400 },
@@ -66,9 +77,11 @@ export async function POST(req: NextRequest) {
       data.relatedProject = body.relatedProject;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const record = await payload.create({
+      // Payload collection typing lags portal request fields.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       collection: "client-requests" as any,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       data: data as any,
       overrideAccess: true,
     });

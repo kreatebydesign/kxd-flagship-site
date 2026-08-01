@@ -25,6 +25,7 @@ import type {
 } from "@/lib/ces/modules/website-workspace/types";
 import { resolveExperienceProfile } from "@/lib/ces/server";
 import { isCesModuleEnabled } from "@/lib/ces/types";
+import { decidePortalCesModuleApiAccess } from "@/lib/portal/requests-files-reports";
 import { getPortalSession } from "@/lib/portal/session";
 import { spawnWorkItemFromPortalRequest } from "@/lib/work-items/spawn";
 import { notifyWebsiteWorkspaceSubmitted } from "@/lib/website-review-inbox/notify-workspace";
@@ -61,7 +62,10 @@ export async function POST(req: NextRequest) {
 
   try {
     const profile = await resolveExperienceProfile(session);
-    if (!isCesModuleEnabled(profile, "website-workspace")) {
+    const moduleAccess = decidePortalCesModuleApiAccess({
+      moduleEnabled: isCesModuleEnabled(profile, "website-workspace"),
+    });
+    if (!moduleAccess.ok) {
       return NextResponse.json({ ok: false, message: "Module unavailable." }, { status: 403 });
     }
 
@@ -124,8 +128,8 @@ export async function POST(req: NextRequest) {
 
     const payload = await getPayload({ config });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const record = await payload.create({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       collection: "client-requests" as any,
       data: {
         requestTitle,
@@ -139,6 +143,7 @@ export async function POST(req: NextRequest) {
         experienceModule: WEBSITE_WORKSPACE_EXPERIENCE_MODULE,
         pageContext,
         reviewContext: context,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any,
       overrideAccess: true,
     });

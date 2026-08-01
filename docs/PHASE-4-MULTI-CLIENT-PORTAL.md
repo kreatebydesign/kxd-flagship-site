@@ -1,13 +1,13 @@
 # Phase 4 — Multi-Client Portal Access & Account Context
 
-**Status:** Batches A–F implemented in repository — Batches G–H not started  
+**Status:** Batches A–G implemented in repository — Batch H not started  
 **Baseline (definition):** `5c4445fb03c0675aa50edc63a7b08ba3555e76e2`  
 **Batch A implementation baseline:** `5c4445fb03c0675aa50edc63a7b08ba3555e76e2`  
 **Companion:** `docs/KXD-OS-ROADMAP.md`, `docs/KXD-OS-CURRENT-STATE.md`, `docs/KXD-OS-V1-FOUNDING-CLIENT-EARLY-ACCESS.md`
 
 > Phase 3 Client & Relationship Intelligence is production-complete and closed. Phase 4 does not reopen Phase 3. Relationship Intelligence remains operator-only and portal-inaccessible.
 >
-> **Batch status (repository):** Batch A membership foundation; Batch B account switcher / active-account context; Batch C workspace personalization / per-account composition; Batch D work & performance; Batch E analytics / website performance / lead visibility (`verify:phase4-analytics-visibility`); Batch F authorized combined portfolio (`verify:phase4-authorized-portfolio`). **Not** production-complete until published and verified for the configured multi-client group. Batches G–H not started. This status does **not** claim Neon/production migration clearance for later batches.
+> **Batch status (repository):** Batch A membership foundation; Batch B account switcher / active-account context; Batch C workspace personalization / per-account composition; Batch D work & performance; Batch E analytics / website performance / lead visibility (`verify:phase4-analytics-visibility`); Batch F authorized combined portfolio (`verify:phase4-authorized-portfolio`); Batch G requests/files/reports isolation + approval decision (`verify:phase4-requests-files-reports`). **Not** production-complete until published and verified for the configured multi-client group. Batch H not started. This status does **not** claim Neon/production migration clearance for later batches.
 
 ---
 
@@ -35,7 +35,7 @@ Authorization must never hard-code display labels or slugs. Slugs are discovery 
 - Combined portfolio view containing **only** authorized memberships
 - No cross-account leakage
 - No separate credentials per account
-- Client-facing “approvals” only if Batch G explicitly defines a portal-safe meaning (do not expose staff approval systems)
+- Client-facing “approvals” = existing portal-safe Website Review / request awaiting-input states only (Batch G locked; do not expose staff approval systems or invent a new Approvals product)
 
 This architecture must support future multi-brand clients without Cusick-only authorization shortcuts.
 
@@ -411,18 +411,22 @@ Allowed only when **all** are true:
 
 | Item | Definition |
 |------|------------|
-| **Objective** | Confirm requests/files/reports remain correctly scoped after switching; **define** what “client approvals” means for portal (reuse review/request states if appropriate; do not expose staff Approval Queue) |
-| **User-visible outcome** | Scoped requests/files/reports; approvals only if explicitly portal-safe |
-| **Systems reused** | Existing portal request/report/asset APIs |
-| **Likely code areas** | Portal API routes, client-hq screens, Batch G decision note in this plan or batch report |
-| **Authorization** | Session client scope; attachment/report ownership checks retained |
-| **Schema / migration** | None expected |
-| **Verification** | Cross-switch resource isolation; approval decision documented |
-| **Dependencies** | Batch B+ |
-| **Exclusions** | Staff Matt-approval systems; operator-only queues |
-| **Stop conditions** | Accidental staff approval exposure |
+| **Status** | ✅ Implemented in repository — `verify:phase4-requests-files-reports` |
+| **Objective** | Confirm requests/files/reports remain correctly scoped after switching; **lock** what “client approvals” means for portal |
+| **Product decision (locked)** | “Client approvals” means only existing portal-safe Website Review and request states where the client’s review, feedback, or input is currently required (including established “awaiting your input” terminology). **Do not** create a new Approvals product, `/portal/approvals` route, Approvals nav item, collection, generic approval workflow, or rename Website Review/requests to “Approvals.” **Do not** expose staff Approval Queue, Matt-approval systems, internal communications approvals, private notes, or operator-only workflows. Later phases must not reinterpret this decision as authorization for a broader approvals system. |
+| **Implementation type** | (1) Documented product decision; (2) focused isolation verification of existing per-active-account surfaces; (3) security hardening only for proven authorization/scoping/leakage gaps. Not a redesign, aggregate workspace, notification system, or upload-architecture change. |
+| **User-visible outcome** | Existing scoped requests/files/deliverables/reports/Website Review/Workspace flows; CES launch surfaces remain nav-aligned; no new Approvals UI |
+| **In-scope surfaces** | `/portal/requests`, `/portal/assets`, `/portal/deliverables`, `/portal/reports`, Website Review, Website Workspace request flows, portal-safe uploads/attachments for those flows, supporting loaders/APIs/direct routes, active-client switching isolation, capability gating |
+| **Systems reused** | Existing portal request/report/asset/deliverable loaders; Batch E `decidePortalReportAccess`; CES Website Review / Workspace APIs; `client-review-media` durable Blob storage; CES launch nav visibility |
+| **Implemented areas** | `lib/portal/requests-files-reports/`, report view-model hardening, CES module API gates on review/workspace upload+attachment routes, uniform attachment/related-project denials, Client HQ surface page gates, `scripts/verify-phase4-requests-files-reports.ts` |
+| **Authorization** | Session active client + active memberships; attachment/report/project ownership checks; CES module entitlement on review/workspace APIs; browser client IDs never authorize |
+| **Schema / migration** | **None** — no new collection; no production migration |
+| **Verification** | `npm run verify:phase4-requests-files-reports` — cross-switch resource isolation; approval decision documented; no Approvals route/nav; staff approval systems absent from portal |
+| **Dependencies** | Batch B+ (A–F recommended) |
+| **Exclusions** | Staff Matt-approval systems; operator-only queues; `/portal/approvals`; aggregate cross-account requests/files/reports/deliverables; portfolio work queue; new upload semantics; notifications; Batch H rollout/live QA |
+| **Stop conditions** | Accidental staff approval exposure; inventing Approvals product; schema change without separate decision |
 | **Risk** | Low–Medium |
-| **Publication / deploy** | Standard |
+| **Publication / deploy** | Standard — do not begin Batch H until Batch G is published/verified as required by ops |
 
 ### Batch H — Privacy, responsive, accessibility, rollout, and completion
 
@@ -455,6 +459,7 @@ Introduce focused scripts as batches land (names indicative):
 - `verify:phase4-work-performance` (Batch D)
 - `verify:phase4-analytics-visibility` (Batch E)
 - `verify:phase4-authorized-portfolio` (Batch F)
+- `verify:phase4-requests-files-reports` (Batch G)
 - …plus existing `verify:portal-auth-boundaries` / portal admin auth boundary scripts retained
 
 ### Final verifier (required for Phase 4 complete)
@@ -541,11 +546,16 @@ Phase 4 is complete only when:
 - Cusick = four separate clients + memberships
 - Batch A–H sequence
 
+### Locked by Batch G
+
+- Portal “client approvals” = existing Website Review / request awaiting-input (and equivalent portal-safe input-required) states only
+- No Approvals product, route, nav, collection, or staff-queue exposure in Phase 4
+- Batch G is isolation verification + proven-gap hardening for existing per-active-account request/file/report/deliverable/attachment surfaces
+
 ### Open until configuration / later batch (non-blocking for Batch A)
 
 - Exact default account for Don’s login (operator choice at linking time)
 - OTP Carts client ID in each environment (readiness gate)
-- Whether portal “approvals” maps to website-review awaiting states vs deferred (Batch G)
 - Timing of legacy `client` column drop (after completion gates)
 
 ---

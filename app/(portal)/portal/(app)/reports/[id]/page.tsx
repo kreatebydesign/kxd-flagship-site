@@ -1,6 +1,11 @@
 import { notFound, redirect } from "next/navigation";
 import { ReportViewScreen } from "@/components/client-hq";
+import { resolveExperienceProfile } from "@/lib/ces/server";
 import { decidePortalReportAccess } from "@/lib/portal/analytics-visibility";
+import {
+  isBatchGClientHqSurfaceAvailable,
+  toPortalReportViewModel,
+} from "@/lib/portal/requests-files-reports";
 import { getReportById } from "@/lib/reporting/engine";
 import { getPortalSession } from "@/lib/portal/session";
 
@@ -14,6 +19,11 @@ export default async function PortalReportViewPage({
   const session = await getPortalSession();
   if (!session) redirect("/portal/login");
 
+  const profile = await resolveExperienceProfile(session);
+  if (!isBatchGClientHqSurfaceAvailable("reports", profile)) {
+    redirect("/portal");
+  }
+
   const { id } = await params;
   const reportId = Number(id);
   if (!Number.isFinite(reportId) || reportId <= 0) notFound();
@@ -25,7 +35,11 @@ export default async function PortalReportViewPage({
   });
 
   // Uniform denial — do not reveal whether another client's report exists.
-  if (!access.ok) notFound();
+  if (!access.ok || !report) notFound();
 
-  return <ReportViewScreen report={report!} />;
+  return (
+    <ReportViewScreen
+      report={toPortalReportViewModel(report as unknown as Record<string, unknown>)}
+    />
+  );
 }

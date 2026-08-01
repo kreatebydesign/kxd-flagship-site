@@ -9,6 +9,9 @@ import { getDefaultClientReviewStorageAdapter } from "@/lib/client-review-media/
 import { resolveWebsiteReviewMimeType } from "@/lib/ces/modules/website-review/attachments";
 import { mapReviewMediaDocToAttachment } from "@/lib/ces/modules/website-review/attachments-server";
 import { WEBSITE_WORKSPACE_MAX_FILE_BYTES } from "@/lib/ces/modules/website-workspace/constants";
+import { resolveExperienceProfile } from "@/lib/ces/server";
+import { isCesModuleEnabled } from "@/lib/ces/types";
+import { decidePortalCesModuleApiAccess } from "@/lib/portal/requests-files-reports";
 import { getPortalSession } from "@/lib/portal/session";
 
 export const dynamic = "force-dynamic";
@@ -17,6 +20,14 @@ export async function POST(req: NextRequest) {
   const session = await getPortalSession();
   if (!session) {
     return NextResponse.json({ ok: false, message: "Unauthorized." }, { status: 401 });
+  }
+
+  const profile = await resolveExperienceProfile(session);
+  const moduleAccess = decidePortalCesModuleApiAccess({
+    moduleEnabled: isCesModuleEnabled(profile, "website-workspace"),
+  });
+  if (!moduleAccess.ok) {
+    return NextResponse.json({ ok: false, message: "Module unavailable." }, { status: 403 });
   }
 
   try {
@@ -77,8 +88,8 @@ export async function POST(req: NextRequest) {
 
       const payload = await getPayload({ config });
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const record = await payload.create({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         collection: "client-review-media" as any,
         data: {
           client: session.clientId,
@@ -88,6 +99,7 @@ export async function POST(req: NextRequest) {
           filesize: file.size,
           storageProvider: adapter.provider,
           storageKey: stored.key,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any,
         overrideAccess: true,
       });

@@ -18,6 +18,9 @@ import {
 } from "@/lib/ces/modules/website-review/submit";
 import type { ReviewAnchor } from "@/lib/ces/review";
 import type { WebsiteReviewPageContext } from "@/lib/ces/modules/website-review/types";
+import { resolveExperienceProfile } from "@/lib/ces/server";
+import { isCesModuleEnabled } from "@/lib/ces/types";
+import { decidePortalCesModuleApiAccess } from "@/lib/portal/requests-files-reports";
 import { getPortalSession } from "@/lib/portal/session";
 import { PORTAL_CLIENT_LANGUAGE } from "@/lib/ces/copy/portal-language";
 import { spawnWorkItemFromPortalRequest } from "@/lib/work-items/spawn";
@@ -90,6 +93,14 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    const profile = await resolveExperienceProfile(session);
+    const moduleAccess = decidePortalCesModuleApiAccess({
+      moduleEnabled: isCesModuleEnabled(profile, "website-review"),
+    });
+    if (!moduleAccess.ok) {
+      return NextResponse.json({ ok: false, message: "Module unavailable." }, { status: 403 });
+    }
+
     const body = (await req.json()) as Record<string, unknown>;
 
     const updateType = String(body.updateType ?? "").trim();

@@ -120,7 +120,7 @@ This track is distinct from registry phase numbers and from Intelligence Pipelin
 |-------|-------|--------|-------|
 | Phase 2 | Authenticated theming + portal date stabilization | ✅ Complete (historical) | Theme: `lib/shell/theme.ts`, Light / Dark / System. Portal dates: `a94ca60`. Later staff/Intelligence commits remain legitimate current architecture. |
 | Phase 3 | Client & Relationship Intelligence | ✅ Production-complete | Private operator workspace connecting clients, contacts, relationships, preferences, and events. Plan: `docs/PHASE-3-CLIENT-RELATIONSHIP-INTELLIGENCE.md`. Batches A–E published and production-verified at `fdb0348`. Closed — do not reopen. |
-| **Phase 4** | **Multi-Client Portal Access & Account Context** | **Batches A–E in repository — Batch A awaits publication / production verification; F–H not started** | Plan: `docs/PHASE-4-MULTI-CLIENT-PORTAL.md`. A: memberships + `verify:phase4-multi-client-membership`. B: account switcher. C: workspace personalization. D: work/performance. E: analytics/website performance/lead visibility (`verify:phase4-analytics-visibility`). No Neon/production migrate clearance implied. |
+| **Phase 4** | **Multi-Client Portal Access & Account Context** | **Batches A–G in repository — Batch H not started** | Plan: `docs/PHASE-4-MULTI-CLIENT-PORTAL.md`. A–F as prior; G: requests/files/reports isolation + locked portal approval decision (`verify:phase4-requests-files-reports`). No new Batch G migration. Batch H remains final completion / live QA / rollout. |
 
 **Phase 3 product outcome:** durable private business context for future Business Memory — not portal, not public, not calendar rewrite, not ritual/Business Memory integration in this phase.
 

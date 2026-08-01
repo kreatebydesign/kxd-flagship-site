@@ -13,6 +13,13 @@ import {
   WEBSITE_REVIEW_MAX_FILE_BYTES,
 } from "@/lib/ces/modules/website-review/attachments";
 import { mapReviewMediaDocToAttachment } from "@/lib/ces/modules/website-review/attachments-server";
+import { resolveExperienceProfile } from "@/lib/ces/server";
+import { isCesModuleEnabled } from "@/lib/ces/types";
+import {
+  decidePortalAttachmentAccess,
+  decidePortalCesModuleApiAccess,
+  PORTAL_ATTACHMENT_NOT_FOUND_MESSAGE,
+} from "@/lib/portal/requests-files-reports";
 import { getPortalSession } from "@/lib/portal/session";
 
 export const dynamic = "force-dynamic";
@@ -69,6 +76,14 @@ export async function POST(req: NextRequest) {
   const session = await getPortalSession();
   if (!session) {
     return NextResponse.json({ ok: false, message: "Unauthorized." }, { status: 401 });
+  }
+
+  const profile = await resolveExperienceProfile(session);
+  const moduleAccess = decidePortalCesModuleApiAccess({
+    moduleEnabled: isCesModuleEnabled(profile, "website-review"),
+  });
+  if (!moduleAccess.ok) {
+    return NextResponse.json({ ok: false, message: "Module unavailable." }, { status: 403 });
   }
 
   let mimeType: string | undefined;
@@ -129,8 +144,8 @@ export async function POST(req: NextRequest) {
 
       const payload = await getPayload({ config });
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const record = await payload.create({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         collection: "client-review-media" as any,
         data: {
           client: session.clientId,
@@ -140,6 +155,7 @@ export async function POST(req: NextRequest) {
           filesize: file.size,
           storageProvider: adapter.provider,
           storageKey: stored.key,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } as any,
         overrideAccess: true,
       });
@@ -188,6 +204,14 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ ok: false, message: "Unauthorized." }, { status: 401 });
   }
 
+  const profile = await resolveExperienceProfile(session);
+  const moduleAccess = decidePortalCesModuleApiAccess({
+    moduleEnabled: isCesModuleEnabled(profile, "website-review"),
+  });
+  if (!moduleAccess.ok) {
+    return NextResponse.json({ ok: false, message: "Module unavailable." }, { status: 403 });
+  }
+
   const idParam = req.nextUrl.searchParams.get("id");
   const mediaId = Number.parseInt(idParam ?? "", 10);
   if (!Number.isFinite(mediaId)) {
@@ -196,28 +220,42 @@ export async function DELETE(req: NextRequest) {
 
   try {
     const payload = await getPayload({ config });
-    const doc = await payload.findByID({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      collection: "client-review-media" as any,
-      id: mediaId,
-      depth: 0,
-      overrideAccess: true,
-    });
+    let doc: Record<string, unknown>;
+    try {
+      doc = (await payload.findByID({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        collection: "client-review-media" as any,
+        id: mediaId,
+        depth: 0,
+        overrideAccess: true,
+      })) as Record<string, unknown>;
+    } catch {
+      // Uniform denial — missing and foreign IDs look the same.
+      return NextResponse.json(
+        { ok: false, message: PORTAL_ATTACHMENT_NOT_FOUND_MESSAGE },
+        { status: 404 },
+      );
+    }
 
-    const row = doc as Record<string, unknown>;
     const rowClientId =
-      typeof row.client === "number"
-        ? row.client
-        : (row.client as { id?: number } | undefined)?.id;
-
-    if (rowClientId !== session.clientId) {
-      return NextResponse.json({ ok: false, message: "Not found." }, { status: 404 });
+      typeof doc.client === "number"
+        ? doc.client
+        : (doc.client as { id?: number } | undefined)?.id;
+    const ownership = decidePortalAttachmentAccess({
+      mediaClientId: typeof rowClientId === "number" ? rowClientId : null,
+      authorizedClientId: session.clientId,
+    });
+    if (!ownership.ok) {
+      return NextResponse.json(
+        { ok: false, message: PORTAL_ATTACHMENT_NOT_FOUND_MESSAGE },
+        { status: 404 },
+      );
     }
 
     const existingRequest =
-      typeof row.relatedRequest === "number"
-        ? row.relatedRequest
-        : (row.relatedRequest as { id?: number } | undefined)?.id;
+      typeof doc.relatedRequest === "number"
+        ? doc.relatedRequest
+        : (doc.relatedRequest as { id?: number } | undefined)?.id;
 
     if (existingRequest != null) {
       return NextResponse.json(
@@ -226,7 +264,7 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    await deleteClientReviewMediaObject(row);
+    await deleteClientReviewMediaObject(doc);
 
     await payload.delete({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

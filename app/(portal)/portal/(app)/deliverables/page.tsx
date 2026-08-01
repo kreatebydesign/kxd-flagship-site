@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { DeliverablesScreen } from "@/components/client-hq";
+import { resolveExperienceProfile } from "@/lib/ces/server";
 import { getPortalDeliverables } from "@/lib/portal/data";
+import { isBatchGClientHqSurfaceAvailable } from "@/lib/portal/requests-files-reports";
 import { getPortalSession } from "@/lib/portal/session";
 
 export const dynamic = "force-dynamic";
@@ -8,6 +10,11 @@ export const dynamic = "force-dynamic";
 export default async function PortalDeliverablesPage() {
   const session = await getPortalSession();
   if (!session) redirect("/portal/login");
+
+  const profile = await resolveExperienceProfile(session);
+  if (!isBatchGClientHqSurfaceAvailable("deliverables", profile)) {
+    redirect("/portal");
+  }
 
   const deliverables = await getPortalDeliverables(session);
   return <DeliverablesScreen deliverables={deliverables} />;
