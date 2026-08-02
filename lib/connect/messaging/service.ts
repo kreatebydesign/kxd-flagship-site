@@ -25,15 +25,14 @@ import {
 import { buildDirectConversationPairKey } from "./pair-key";
 import {
   clampConnectMessagePageSize,
-  compareConnectMessageOrder,
   decodeConnectMessageCursor,
   encodeConnectMessageCursor,
-  paginateConnectMessages,
 } from "./pagination";
 import {
-  derivePrivateUnreadState,
-  resolveMarkReadCursor,
-} from "./read-state";
+  advanceConnectReadPointer,
+  queryConnectMessagePage,
+  queryConnectUnreadState,
+} from "./message-query";
 import {
   loadConnectMembershipById,
   type ConnectStaffSession,
@@ -372,6 +371,15 @@ export async function createGroupConversationForSession(input: {
       message: "Group conversations require at least two participants.",
     };
   }
+  // C2/C3: hard cap including self (UI also enforces; service fails closed).
+  const GROUP_MAX = 12;
+  if (membershipIds.size > GROUP_MAX) {
+    return {
+      ok: false,
+      status: 400,
+      message: `Group conversations are limited to ${GROUP_MAX} participants.`,
+    };
+  }
 
   const payload = await getPayload({ config });
   const now = new Date().toISOString();
@@ -574,35 +582,19 @@ export async function listMessagesForSession(input: {
   const direction = input.direction ?? "before";
 
   const payload = await getPayload({ config });
-  // Fetch a bounded window larger than page size for stable in-process paging.
-  const result = await payload.find({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    collection: "connect-messages" as any,
-    where: {
-      and: [
-        { conversation: { equals: conversation!.id } },
-        { organization: { equals: input.session.organization.id } },
-      ],
-    },
-    limit: Math.min(500, limit * 10),
-    depth: 0,
-    overrideAccess: true,
-    sort: "createdAt",
-  });
-
-  const messages = (result.docs as AnyDoc[])
-    .map(mapMessage)
-    .filter((m) => m.organizationId === input.session.organization.id)
-    .sort(compareConnectMessageOrder);
-
-  const page = paginateConnectMessages({
-    messages,
+  // C3: indexed DB-native page (limit+1) — no in-process 500-message window.
+  const page = await queryConnectMessagePage({
+    payload,
+    organizationId: input.session.organization.id,
+    conversationId: conversation!.id,
     limit,
     cursor,
     direction,
   });
 
-  const authorIds = [...new Set(page.messages.map((m) => m.authorParticipantId))];
+  const authorIds = [
+    ...new Set(page.messages.map((m) => m.authorParticipantId)),
+  ];
   const authorPublicIds = new Map<number, string>();
   if (authorIds.length > 0) {
     const authors = await payload.find({
@@ -705,19 +697,55 @@ export async function sendMessageForSession(input: {
   });
 
   // Meter only after durable create — idempotent per message public id.
-  await incrementConnectMeter({
-    organizationId: input.session.organization.id,
-    meterKey: "messages_sent",
-    delta: 1,
-    periodKey: connectDailyPeriodKey(),
-    idempotencyKey: `message:${messagePublicId}`,
-    caller: { trustedServerCaller: true },
-  });
+  // Meter failure must not undo the durable message; recovery retries the same key.
+  try {
+    const meter = await incrementConnectMeter({
+      organizationId: input.session.organization.id,
+      meterKey: "messages_sent",
+      delta: 1,
+      periodKey: connectDailyPeriodKey(),
+      idempotencyKey: `message:${messagePublicId}`,
+      caller: { trustedServerCaller: true },
+    });
+    if (!meter.ok) {
+      await ensureConnectMessageMetered({
+        organizationId: input.session.organization.id,
+        messagePublicId,
+      });
+    }
+  } catch {
+    await ensureConnectMessageMetered({
+      organizationId: input.session.organization.id,
+      messagePublicId,
+    });
+  }
 
   return {
     ok: true,
     message: projectMessageSafe(mapMessage(created), participation!.publicId),
   };
+}
+
+/**
+ * Recover metering for a durable message when the first meter attempt failed.
+ * Safe to call repeatedly — idempotent key `message:{publicId}` prevents double count.
+ */
+export async function ensureConnectMessageMetered(input: {
+  organizationId: number;
+  messagePublicId: string;
+}): Promise<void> {
+  try {
+    await incrementConnectMeter({
+      organizationId: input.organizationId,
+      meterKey: "messages_sent",
+      delta: 1,
+      periodKey: connectDailyPeriodKey(),
+      idempotencyKey: `message:${input.messagePublicId}`,
+      caller: { trustedServerCaller: true },
+    });
+  } catch {
+    // Leave recoverable — next trusted retry uses the same idempotency key.
+  }
 }
 
 export async function getUnreadForSession(input: {
@@ -758,27 +786,22 @@ export async function getUnreadForSession(input: {
   }
 
   const payload = await getPayload({ config });
-  const result = await payload.find({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    collection: "connect-messages" as any,
-    where: {
-      and: [
-        { conversation: { equals: conversation!.id } },
-        { organization: { equals: input.session.organization.id } },
-      ],
-    },
-    limit: 500,
-    depth: 0,
-    overrideAccess: true,
-    sort: "createdAt",
-  });
-  const messages = (result.docs as AnyDoc[]).map(mapMessage);
-  const unread = derivePrivateUnreadState({
+  const unread = await queryConnectUnreadState({
+    payload,
+    organizationId: input.session.organization.id,
+    conversationId: conversation!.id,
     conversationPublicId: conversation!.publicId,
-    participant: participation!,
-    messages,
+    lastReadMessagePublicId: participation!.lastReadMessagePublicId,
   });
-  return { ok: true, unread };
+  return {
+    ok: true,
+    unread: {
+      conversationPublicId: conversation!.publicId,
+      unreadCount: unread.unreadCount,
+      lastReadMessagePublicId: unread.lastReadMessagePublicId,
+      latestMessagePublicId: unread.latestMessagePublicId,
+    },
+  };
 }
 
 export async function markReadForSession(input: {
@@ -821,24 +844,13 @@ export async function markReadForSession(input: {
   }
 
   const payload = await getPayload({ config });
-  const result = await payload.find({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    collection: "connect-messages" as any,
-    where: {
-      and: [
-        { conversation: { equals: conversation!.id } },
-        { organization: { equals: input.session.organization.id } },
-      ],
-    },
-    limit: 500,
-    depth: 0,
-    overrideAccess: true,
-    sort: "createdAt",
-  });
-  const messages = (result.docs as AnyDoc[]).map(mapMessage);
-  const resolved = resolveMarkReadCursor({
-    participant: participation!,
-    messages,
+  // C3: monotonic read-pointer advance — no message-window load; no identical rewrite.
+  const resolved = await advanceConnectReadPointer({
+    payload,
+    organizationId: input.session.organization.id,
+    conversationId: conversation!.id,
+    participantId: participation!.id,
+    currentLastReadMessagePublicId: participation!.lastReadMessagePublicId,
     targetMessagePublicId: input.targetMessagePublicId,
   });
   if (!resolved.ok) {
@@ -846,26 +858,27 @@ export async function markReadForSession(input: {
   }
 
   if (resolved.changed) {
-    await payload.update({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      collection: "connect-conversation-participants" as any,
-      id: participation!.id,
-      data: {
-        lastReadMessagePublicId: resolved.lastReadMessagePublicId,
-        lastReadAt: new Date().toISOString(),
-      },
-      overrideAccess: true,
-    });
     participation!.lastReadMessagePublicId = resolved.lastReadMessagePublicId;
     participation!.lastReadAt = new Date().toISOString();
   }
 
-  const unread = derivePrivateUnreadState({
+  const unread = await queryConnectUnreadState({
+    payload,
+    organizationId: input.session.organization.id,
+    conversationId: conversation!.id,
     conversationPublicId: conversation!.publicId,
-    participant: participation!,
-    messages,
+    lastReadMessagePublicId: participation!.lastReadMessagePublicId,
   });
-  return { ok: true, unread, changed: resolved.changed };
+  return {
+    ok: true,
+    unread: {
+      conversationPublicId: conversation!.publicId,
+      unreadCount: unread.unreadCount,
+      lastReadMessagePublicId: unread.lastReadMessagePublicId,
+      latestMessagePublicId: unread.latestMessagePublicId,
+    },
+    changed: resolved.changed,
+  };
 }
 
 export async function addParticipantForSession(input: {

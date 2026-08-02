@@ -5,9 +5,10 @@
  * Reads are organization-scoped — never return other organizations' meters.
  * Records never store message bodies, filenames, or personal content.
  *
- * C1: Prefer database-level atomic upsert on Postgres (`metering/atomic.ts`).
+ * C1/C3: Prefer database-level atomic CTE upsert on Postgres (`metering/atomic.ts`).
  * Sqlite local fallback retains contained read-modify-write with unique-index
- * race handling — blocking for dogfood until Postgres atomic path is used.
+ * race handling — must not define production Postgres behavior. Dogfood requires
+ * the Postgres atomic path.
  */
 
 import "server-only";

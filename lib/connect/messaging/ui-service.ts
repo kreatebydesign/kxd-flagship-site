@@ -11,7 +11,7 @@ import { getPayload } from "payload";
 import config from "@/payload.config";
 import { CONNECT_MESSAGE_MAX_LENGTH } from "../types";
 import { authorizeConnectMessaging, connectMessagingSafeError } from "./authorization";
-import { derivePrivateUnreadState } from "./read-state";
+import { queryConnectUnreadState } from "./message-query";
 import {
   createDirectConversationForSession,
   createGroupConversationForSession,
@@ -219,34 +219,14 @@ async function enrichConversation(
       ? previewBody(String((latest.docs[0] as AnyDoc).body ?? ""))
       : null;
 
-  // Private unread — bounded recent window for count (C1 scaling note).
-  const recent = await payload.find({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    collection: "connect-messages" as any,
-    where: {
-      and: [
-        { conversation: { equals: conversationId } },
-        { organization: { equals: session.organization.id } },
-      ],
-    },
-    limit: 200,
-    depth: 0,
-    overrideAccess: true,
-    sort: "createdAt",
-  });
-  const messages = (recent.docs as AnyDoc[]).map((d) => ({
-    id: Number(d.id),
-    publicId: String(d.publicId),
+  // Private unread — C3 database-native COUNT (no in-memory message window).
+  const unread = await queryConnectUnreadState({
+    payload,
     organizationId: session.organization.id,
     conversationId,
-    authorParticipantId: relId(d.authorParticipant) ?? 0,
-    body: String(d.body ?? ""),
-    createdAt: String(d.createdAt),
-  }));
-  const unread = derivePrivateUnreadState({
     conversationPublicId: publicId,
-    participant: selfParticipation ?? { lastReadMessagePublicId: null },
-    messages,
+    lastReadMessagePublicId:
+      selfParticipation?.lastReadMessagePublicId ?? null,
   });
 
   return {
