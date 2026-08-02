@@ -88,6 +88,7 @@ export function ConnectMessagingScreen({
   const [newOpen, setNewOpen] = useState(false);
   const [newType, setNewType] = useState<"direct" | "group">("direct");
   const [members, setMembers] = useState<ConnectUiEligibleMember[]>([]);
+  const [membersLoading, setMembersLoading] = useState(false);
   const [selectedEmails, setSelectedEmails] = useState<string[]>([]);
   const [groupTitle, setGroupTitle] = useState("");
   const [creating, setCreating] = useState(false);
@@ -95,6 +96,8 @@ export function ConnectMessagingScreen({
 
   const dialogTitleId = useId();
   const messagesRef = useRef<HTMLDivElement | null>(null);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const newButtonRef = useRef<HTMLButtonElement | null>(null);
   const pollInFlight = useRef(false);
   const markReadDoneFor = useRef<string | null>(null);
   const selectedIdRef = useRef<string | null>(null);
@@ -103,6 +106,32 @@ export function ConnectMessagingScreen({
   useEffect(() => {
     selectedIdRef.current = selectedId;
   }, [selectedId]);
+
+  // C3.1: Escape closes dialog even when focus is outside; restore focus to New.
+  useEffect(() => {
+    if (!newOpen) return;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    const newButton = newButtonRef.current;
+    const frame = window.requestAnimationFrame(() => {
+      dialogRef.current?.focus();
+    });
+    const onKeyDown = (e: globalThis.KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setNewOpen(false);
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      document.removeEventListener("keydown", onKeyDown);
+      if (previouslyFocused && previouslyFocused !== document.body) {
+        previouslyFocused.focus();
+      } else {
+        newButton?.focus();
+      }
+    };
+  }, [newOpen]);
 
   const selected = conversations.find((c) => c.publicId === selectedId) ?? null;
 
@@ -319,7 +348,10 @@ export function ConnectMessagingScreen({
     setSelectedEmails([]);
     setGroupTitle("");
     setNewType("direct");
+    setMembers([]);
+    setMembersLoading(true);
     const result = await fetchEligibleMembers();
+    setMembersLoading(false);
     if (!result.ok) {
       handleAccessFailure(result.kind);
       setMembersError(result.message);
@@ -327,6 +359,10 @@ export function ConnectMessagingScreen({
       return;
     }
     setMembers(result.members);
+  };
+
+  const closeNewDialog = () => {
+    setNewOpen(false);
   };
 
   const submitNew = async (e: FormEvent) => {
@@ -408,6 +444,7 @@ export function ConnectMessagingScreen({
               </button>
               <button
                 type="button"
+                ref={newButtonRef}
                 className="kxd-connect__btn kxd-connect__btn--primary"
                 onClick={() => void openNewDialog()}
               >
@@ -602,17 +639,16 @@ export function ConnectMessagingScreen({
           className="kxd-connect__dialog-backdrop"
           role="presentation"
           onMouseDown={(e) => {
-            if (e.target === e.currentTarget) setNewOpen(false);
+            if (e.target === e.currentTarget) closeNewDialog();
           }}
         >
           <div
+            ref={dialogRef}
             className="kxd-connect__dialog"
             role="dialog"
             aria-modal="true"
             aria-labelledby={dialogTitleId}
-            onKeyDown={(e) => {
-              if (e.key === "Escape") setNewOpen(false);
-            }}
+            tabIndex={-1}
           >
             <h2 id={dialogTitleId}>New conversation</h2>
             <div className="kxd-connect__tabs" role="tablist">
@@ -659,7 +695,11 @@ export function ConnectMessagingScreen({
                     ? "Select one staff member"
                     : `Select members (max ${CONNECT_GROUP_MAX_PARTICIPANTS - 1})`}
                 </label>
-                {members.length === 0 ? (
+                {membersLoading ? (
+                  <p className="kxd-connect__empty" style={{ margin: 0 }}>
+                    Loading eligible staff…
+                  </p>
+                ) : members.length === 0 ? (
                   <p className="kxd-connect__empty" style={{ margin: 0 }}>
                     No eligible staff available in this organization.
                   </p>
@@ -715,7 +755,7 @@ export function ConnectMessagingScreen({
                 <button
                   type="button"
                   className="kxd-connect__btn"
-                  onClick={() => setNewOpen(false)}
+                  onClick={closeNewDialog}
                 >
                   Cancel
                 </button>
@@ -724,6 +764,7 @@ export function ConnectMessagingScreen({
                   className="kxd-connect__btn kxd-connect__btn--primary"
                   disabled={
                     creating ||
+                    membersLoading ||
                     selectedEmails.length === 0 ||
                     (newType === "group" && !groupTitle.trim())
                   }
