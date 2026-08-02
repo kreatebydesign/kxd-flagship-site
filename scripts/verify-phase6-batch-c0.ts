@@ -429,8 +429,26 @@ async function main() {
   check("status route no-store", statusRoute.includes("no-store"));
   check("status route rejects POST", statusRoute.includes("export async function POST"));
   check("meters route rejects PUT", metersRoute.includes("export async function PUT"));
-  check("meters route no-store", metersRoute.includes("no-store"));
+  check(
+    "meters route no-store",
+    metersRoute.includes("no-store") ||
+      metersRoute.includes("CONNECT_NO_STORE_HEADERS"),
+  );
   check("meters route force-dynamic", metersRoute.includes('dynamic = "force-dynamic"'));
+  check(
+    "meters route requires Connect staff session",
+    metersRoute.includes("resolveConnectStaffSession"),
+  );
+  check(
+    "meters route rejects client-supplied organizationId",
+    metersRoute.includes('searchParams.has("organizationId")') &&
+      metersRoute.includes("Invalid meter query"),
+  );
+  check(
+    "meters route scopes to session organization",
+    metersRoute.includes("session.organization.id") &&
+      metersRoute.includes("organizationKey"),
+  );
 
   // ── 16. Edition feature regression ─────────────────────────────────────────
   check("advanced-permissions still active", isFeatureEnabled("advanced-permissions") === true);
