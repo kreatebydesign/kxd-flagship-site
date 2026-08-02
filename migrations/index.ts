@@ -89,6 +89,7 @@ import * as migration_20260728_phase4_portal_client_memberships from './20260728
 import * as migration_20260814_phase4_portal_identity_security from './20260814_phase4_portal_identity_security';
 import * as migration_20260731_branded_client_monthly_reports from './20260731_branded_client_monthly_reports';
 import * as migration_20260803_junior_creator_assigned_tasks from './20260803_junior_creator_assigned_tasks';
+import * as migration_20260815_phase6_connect_c0_foundation from './20260815_phase6_connect_c0_foundation';
 
 export const migrations = [
   {
@@ -547,5 +548,11 @@ export const migrations = [
     up: migration_20260803_junior_creator_assigned_tasks.up,
     down: migration_20260803_junior_creator_assigned_tasks.down,
     name: '20260803_junior_creator_assigned_tasks',
+  },
+  {
+    // Connect C0 — code registration only; production apply/enablement not authorized.
+    up: migration_20260815_phase6_connect_c0_foundation.up,
+    down: migration_20260815_phase6_connect_c0_foundation.down,
+    name: '20260815_phase6_connect_c0_foundation',
   },
 ];

@@ -94,6 +94,12 @@ const OPERATIONS_MODULES: EntitlementModuleDefinition[] = [
     category: "operations",
     internalOnly: true,
   },
+  {
+    key: "kxd-connect",
+    label: "KXD Connect",
+    category: "future",
+    internalOnly: true,
+  },
 ];
 
 export const ENTITLEMENT_MODULE_REGISTRY: readonly EntitlementModuleDefinition[] = [

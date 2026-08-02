@@ -86,6 +86,11 @@ import { PortalMfaSettings } from "./payload/collections/PortalMfaSettings.ts";
 import { PortalRecoveryCodes } from "./payload/collections/PortalRecoveryCodes.ts";
 import { PortalAuthChallenges } from "./payload/collections/PortalAuthChallenges.ts";
 import { PortalSecurityEvents } from "./payload/collections/PortalSecurityEvents.ts";
+import { ConnectOrganizations } from "./payload/collections/ConnectOrganizations.ts";
+import { ConnectOrganizationMemberships } from "./payload/collections/ConnectOrganizationMemberships.ts";
+import { ConnectUsageMeters } from "./payload/collections/ConnectUsageMeters.ts";
+import { ConnectUsageIdempotency } from "./payload/collections/ConnectUsageIdempotency.ts";
+import { ConnectAuditEvents } from "./payload/collections/ConnectAuditEvents.ts";
 import { PlatformApplications } from "./payload/collections/PlatformApplications.ts";
 import { ProjectInquiries } from "./payload/collections/ProjectInquiries.ts";
 import { Projects } from "./payload/collections/Projects.ts";
@@ -283,6 +288,11 @@ export default buildConfig({
     PortalRecoveryCodes,
     PortalAuthChallenges,
     PortalSecurityEvents,
+    ConnectOrganizations,
+    ConnectOrganizationMemberships,
+    ConnectUsageMeters,
+    ConnectUsageIdempotency,
+    ConnectAuditEvents,
     JuniorCreatorUsers,
     JuniorCreatorShifts,
     JuniorCreatorTasks,
