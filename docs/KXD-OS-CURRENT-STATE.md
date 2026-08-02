@@ -253,15 +253,16 @@ Edition 1 is in the **operate and extend** phase — not redesign.
 
 ### Approved parallel product phase — KXD Connect
 
-**Phase 6 — KXD Connect** — Batches **C0** and **C1** complete. Spec: `docs/PHASE-6-KXD-CONNECT.md`. Verifiers: `verify:phase6-batch-c0`, `verify:phase6-batch-c1`.
+**Phase 6 — KXD Connect** — Batches **C0–C2** complete. Spec: `docs/PHASE-6-KXD-CONNECT.md`. Verifiers: `verify:phase6-batch-c0`, `verify:phase6-batch-c1`, `verify:phase6-batch-c2`.
 
 - Multi-organization Connect tenant + membership schema; KXD is the first organization key (`kxd`), not a hard-coded authorization boundary
 - Edition feature `kxd-connect` and module `connect` default disabled; dogfood via env allowlists + kill switch
-- C1: organization-owned conversations/messages, membership, cursor pagination, private unread, trusted metering — **secure engine only**
-- No Connect UI, realtime, presence, attachments, notifications, or client exposure
+- C1: organization-owned conversations/messages, cursor pagination, private unread, trusted metering
+- C2: staff-only `/admin/connect` messaging UI (direct URL; no global nav; no dock/Buddy List)
+- No portal/client exposure, realtime transport, presence, attachments, or notifications
 - **Does not block** KXD OS Founding Client Early Access — separate readiness track from Connect MVP / pilot / commercial readiness
 - Client Communications, Connected Workspace, portal feedback, and `message-kxd` remain unchanged
-- No production migration, bootstrap, or Connect enablement authorized by C0/C1
+- No production migration, bootstrap, or Connect enablement authorized by C0–C2
 
 ### Parallel ops track (migration-independent)
 
@@ -276,7 +277,7 @@ Edition 1 is in the **operate and extend** phase — not redesign.
 1. **Monday, August 3, 2026 — Primal Analytics Ownership Audit and GA4 Cutover Decision (High)** — 30–60 minute screen share with Adam. Full ordered workflow, ownership model, Path A/B decision rules, evidence checklist, and ChatGPT handoff prompt: see [Operator workflow schedule](#operator-workflow-schedule) below. **Blocks** Batch J.2B.2 (Primal GA4 & Ads entitle + sync), the controlled Primal existing-login walkthrough, and the Primal reporting pilot. Unrelated KXD OS development may continue before and after this audit. Do **not** enable `website-analytics` / `google-ads`, run J.2B.2, or start the walkthrough until the permanent Analytics property is selected and authenticated provider probes succeed.
 2. **Phase 4 — Multi-Client Portal Access & Account Context** — Production DB identity gate **cleared** (Vercel Neon store `kxd-flagship-db` / project `mute-violet-81514071` ≡ Target A). Backup/PITR gate **conditionally cleared** on Free plan (instant restore history window max **6 hours**; take a manual Neon snapshot immediately before any production migrate; Launch upgrade recommended for 7-day retention). Production migrations applied successfully (`20260727_phase3_client_relationship_intelligence`, `20260728_phase4_portal_client_memberships`, `20260810_website_audit_report_generator`; `migrate:status` batch 46, Ran = Yes); no production migrations remain pending. Batches A–H implemented in repository (`verify:phase4-multi-client-portal-completion`). Phase 4 remains **not fully production-complete** until authenticated multi-client rollout QA + Don/Cusick four-account readiness. Batch J / J.2B.2 / Primal walkthrough / reporting pilot remain paused as scheduled. Do **not** mark Phase 4 complete.
 3. **Phase 5 — Client Billing Visibility, Stripe Invoice Status & Monthly Work Summaries** — ✅ **Complete** (Batches 5A–5D; Batch 5E intentionally skipped). Spec: `docs/PHASE-5-CLIENT-BILLING-VISIBILITY.md`. Closed product lane — do not reopen inside Phase 5. Do not couple to Primal analytics or Batch J.2B.2. Combining work summaries with billing requires a new separately authorized phase or batch.
-4. **Phase 6 — KXD Connect** — Batches C0–C1 complete (foundation + messaging engine); later batches not authorized. Spec: `docs/PHASE-6-KXD-CONNECT.md`. Keep disabled in production. Does **not** gate Founding Client Early Access.
+4. **Phase 6 — KXD Connect** — Batches C0–C2 complete (foundation + messaging engine + staff UI); later batches not authorized. Spec: `docs/PHASE-6-KXD-CONNECT.md`. Keep disabled in production. Does **not** gate Founding Client Early Access.
 5. **Client operations at scale** — Repeat the Primal launch pattern using `lib/client-launch/` for every new client workspace (including OTP Carts readiness before Cusick membership linking). Gate Batch A: `verify:otp-carts-readiness`.
 6. **Business Memory integration** — Wire `runBusinessMemory()` into rituals or intelligence when explicitly requested; foundation exists, UI does not. Phase 3 prepared durable relationship context but does not integrate Business Memory yet.
 7. **Executive experience polish** — Premium ritual presentation (KHIG) without new intelligence layers.
@@ -490,7 +491,7 @@ From `lib/platform/registry.ts` and `docs/KXD-OS-ROADMAP.md`:
 | `PHASE-4-PORTAL-IDENTITY-SECURITY.md` | Batch I invitations / roles / passkeys / MFA |
 | `PHASE-4-PRODUCTION-ROLLOUT-CHECKLIST.md` | Phase 4 production rollout / authenticated QA checklist |
 | `PHASE-5-CLIENT-BILLING-VISIBILITY.md` | Phase 5 complete (Batches 5A–5D; Batch 5E intentionally skipped) |
-| `PHASE-6-KXD-CONNECT.md` | Phase 6 Connect — Batches C0–C1 (tenancy / metering / secure messaging engine); UI excluded |
+| `PHASE-6-KXD-CONNECT.md` | Phase 6 Connect — Batches C0–C2 (tenancy / messaging engine / staff UI); dock/dogfood excluded |
 | `KXD-OS-CONSTITUTION.md` | Experience standard |
 | `CLIENT-EXPERIENCE-SYSTEM-ARCHITECTURE.md` | CES architecture |
 | `.cursor/rules/kxd-os-architecture.mdc` | Cursor permanent context |

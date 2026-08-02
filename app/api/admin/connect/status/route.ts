@@ -40,11 +40,13 @@ export async function GET() {
         staffDogfoodEligible: isStaffEmailInConnectDogfoodAllowlist(email),
         staffDogfoodAllowlistSize: getConnectStaffDogfoodEmails().size,
         organizationAllowlistSize: getConnectOrganizationAllowlist().size,
-        // Explicit: C0/C1 never surface a usable Connect UI from this route.
-        // C1 adds a secure messaging engine only — no shell/dock/inbox UI.
+        // Dogfood not activated — UI exists at /admin/connect but remains
+        // gated by evaluateConnectAccess. No global nav. No portal exposure.
         uiAvailable: false,
         messagingAvailable: false,
         messagingEngine: true,
+        staffMessagingUi: true,
+        staffMessagingPath: "/admin/connect",
       },
     },
     { headers: NO_STORE },

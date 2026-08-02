@@ -1,6 +1,9 @@
 /**
- * GET /api/admin/connect/conversations/[publicId]
- * Retrieve one authorized conversation (UI DTO). Opaque 404 when unauthorized.
+ * GET /api/admin/connect/members
+ *
+ * Smallest secure eligible-member list for starting conversations.
+ * Same-organization active staff Connect members only.
+ * Not a public directory. No portal users. No cross-org leakage.
  */
 import { NextResponse } from "next/server";
 import { requirePayloadAdminApi } from "@/lib/admin/auth";
@@ -10,47 +13,36 @@ import {
   connectUnavailable,
 } from "@/lib/connect/messaging/http";
 import { resolveConnectStaffSession } from "@/lib/connect/messaging/session";
-import { getConversationForUi } from "@/lib/connect/messaging/ui-service";
+import { listEligibleMembersForUi } from "@/lib/connect/messaging/ui-service";
 
 export const dynamic = "force-dynamic";
 
-type RouteContext = { params: Promise<{ publicId: string }> };
-
-async function requireSession() {
+export async function GET() {
   const auth = await requirePayloadAdminApi();
   if (auth instanceof NextResponse) {
     auth.headers.set("Cache-Control", "no-store, max-age=0");
     return auth;
   }
+
   const resolved = await resolveConnectStaffSession({
     staffUserId: Number(auth.id),
     staffEmail: typeof auth.email === "string" ? auth.email : null,
   });
   if (!resolved.ok) return connectUnavailable();
-  return resolved.session;
-}
-
-export async function GET(_req: Request, context: RouteContext) {
-  const session = await requireSession();
-  if (session instanceof NextResponse) return session;
-  const { publicId } = await context.params;
 
   try {
-    const result = await getConversationForUi({
-      session,
-      conversationPublicId: publicId,
-    });
+    const result = await listEligibleMembersForUi({ session: resolved.session });
     if (!result.ok) {
       return connectJson(
         { ok: false, message: result.message },
         { status: result.status },
       );
     }
-    return connectJson({ ok: true, conversation: result.conversation });
+    return connectJson({ ok: true, members: result.members });
   } catch {
-    console.error("[KXD Connect] conversation get failed");
+    console.error("[KXD Connect] members list failed");
     return connectJson(
-      { ok: false, message: "Unable to load conversation." },
+      { ok: false, message: "Unable to list members." },
       { status: 500 },
     );
   }

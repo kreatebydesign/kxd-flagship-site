@@ -676,10 +676,14 @@ async function main() {
 
   // ── 39 No Connect UI / navigation exposure ─────────────────────────────────
   check("docs exclude Connect UI from C1", docs.includes("C1") && (docs.includes("No Connect UI") || docs.includes("does not create the visible Connect experience") || docs.includes("no shell")));
+  // C1 excluded Connect UI; C2 may add /admin/connect staff messaging.
+  // Dock / Buddy List / launcher remain excluded across batches.
   check(
-    "no Connect dock/shell components",
+    "no Connect dock/launcher/buddy-list components",
     !existsSync(path.join(root, "components/connect")) &&
-      !existsSync(path.join(root, "app/admin/connect")),
+      !existsSync(path.join(root, "components/admin/connect/ConnectDock.tsx")) &&
+      !existsSync(path.join(root, "components/admin/connect/BuddyList.tsx")) &&
+      !existsSync(path.join(root, "components/admin/connect/AppLauncher.tsx")),
   );
   const payloadConfig = read("payload.config.ts");
   check("payload registers ConnectConversations", payloadConfig.includes("ConnectConversations"));

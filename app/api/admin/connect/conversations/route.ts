@@ -1,8 +1,8 @@
 /**
- * GET  /api/admin/connect/conversations — list authorized conversations
+ * GET  /api/admin/connect/conversations — list authorized conversations (UI DTOs)
  * POST /api/admin/connect/conversations — create direct or group conversation
  *
- * No Connect UI. Staff session + Connect access required. Fail closed.
+ * Staff session + Connect access required. Fail closed. No-store.
  */
 import { NextResponse } from "next/server";
 import { requirePayloadAdminApi } from "@/lib/admin/auth";
@@ -14,10 +14,10 @@ import {
 } from "@/lib/connect/messaging/http";
 import { resolveConnectStaffSession } from "@/lib/connect/messaging/session";
 import {
-  createDirectConversationForSession,
-  createGroupConversationForSession,
-  listConversationsForSession,
-} from "@/lib/connect/messaging/service";
+  createDirectConversationForUi,
+  createGroupConversationForUi,
+  listConversationsForUi,
+} from "@/lib/connect/messaging/ui-service";
 
 export const dynamic = "force-dynamic";
 
@@ -27,15 +27,11 @@ async function requireSession() {
     auth.headers.set("Cache-Control", "no-store, max-age=0");
     return auth;
   }
-  const staffUserId = Number(auth.id);
-  const staffEmail = typeof auth.email === "string" ? auth.email : null;
   const resolved = await resolveConnectStaffSession({
-    staffUserId,
-    staffEmail,
+    staffUserId: Number(auth.id),
+    staffEmail: typeof auth.email === "string" ? auth.email : null,
   });
-  if (!resolved.ok) {
-    return connectUnavailable();
-  }
+  if (!resolved.ok) return connectUnavailable();
   return resolved.session;
 }
 
@@ -44,7 +40,7 @@ export async function GET() {
   if (session instanceof NextResponse) return session;
 
   try {
-    const result = await listConversationsForSession({ session });
+    const result = await listConversationsForUi({ session });
     if (!result.ok) {
       return connectJson(
         { ok: false, message: result.message },
@@ -68,26 +64,36 @@ export async function POST(req: Request) {
   const body = await readBoundedJsonBody(req);
   if (!body.ok) return body.response;
 
+  // Reject client-supplied pair keys and internal membership IDs from UI.
+  if (body.value.directPairKey != null || body.value.otherMembershipId != null) {
+    return connectJson(
+      { ok: false, message: "Invalid create payload." },
+      { status: 400 },
+    );
+  }
+  if (body.value.memberMembershipIds != null) {
+    return connectJson(
+      { ok: false, message: "Invalid create payload." },
+      { status: 400 },
+    );
+  }
+
   const type = body.value.type;
   try {
     if (type === "direct") {
-      const otherMembershipId = Number(body.value.otherMembershipId);
-      if (!Number.isFinite(otherMembershipId) || otherMembershipId <= 0) {
+      const otherStaffEmail =
+        typeof body.value.otherStaffEmail === "string"
+          ? body.value.otherStaffEmail
+          : "";
+      if (!otherStaffEmail.trim()) {
         return connectJson(
-          { ok: false, message: "otherMembershipId is required." },
+          { ok: false, message: "otherStaffEmail is required." },
           { status: 400 },
         );
       }
-      // Reject client-supplied pair keys — server computes uniqueness.
-      if (body.value.directPairKey != null) {
-        return connectJson(
-          { ok: false, message: "Client-supplied pair keys are not allowed." },
-          { status: 400 },
-        );
-      }
-      const result = await createDirectConversationForSession({
+      const result = await createDirectConversationForUi({
         session,
-        otherMembershipId,
+        otherStaffEmail,
       });
       if (!result.ok) {
         return connectJson(
@@ -103,23 +109,22 @@ export async function POST(req: Request) {
     }
 
     if (type === "group") {
-      const rawIds = body.value.memberMembershipIds;
-      if (!Array.isArray(rawIds)) {
+      const title =
+        typeof body.value.title === "string" ? body.value.title : "";
+      const rawEmails = body.value.memberStaffEmails;
+      if (!Array.isArray(rawEmails)) {
         return connectJson(
-          { ok: false, message: "memberMembershipIds is required." },
+          { ok: false, message: "memberStaffEmails is required." },
           { status: 400 },
         );
       }
-      const memberMembershipIds = rawIds
-        .map((id) => Number(id))
-        .filter((id) => Number.isFinite(id) && id > 0);
-      const result = await createGroupConversationForSession({
+      const memberStaffEmails = rawEmails.filter(
+        (e): e is string => typeof e === "string",
+      );
+      const result = await createGroupConversationForUi({
         session,
-        memberMembershipIds,
-        title:
-          typeof body.value.title === "string" || body.value.title == null
-            ? (body.value.title as string | null | undefined)
-            : undefined,
+        title,
+        memberStaffEmails,
       });
       if (!result.ok) {
         return connectJson(
