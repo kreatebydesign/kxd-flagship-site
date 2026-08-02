@@ -1,9 +1,10 @@
 # Phase 6 — KXD Connect
 
-**Status:** Batches **C0**, **C1**, and **C2** implemented. Later batches (C3+) not authorized.  
+**Status:** Batches **C0**, **C1**, **C2**, and **C3** implemented. Later batches (C4+) not authorized.  
 **Baseline HEAD at C0 start:** `a8802ff` (Phase 5 billing visibility closed on `main`)  
 **C0 commit:** `8a208f9730dfc18c082a48373355539bbe8dd065`  
 **C1 commit:** `7fc73bf38c1ed5d9f4a4c1b06426343daebf8824`  
+**C2 commit:** `9afcaa5c43b3adab95400b49b37efe182093bfa9`  
 **Companion:** `docs/KXD-OS-ROADMAP.md`, `docs/KXD-OS-CURRENT-STATE.md`, `docs/CLIENT_COMMUNICATIONS.md`
 
 ---
@@ -31,7 +32,7 @@ Later authorized UX batches may deliver a premium AOL/macOS-inspired operating-s
 - Optional positive spoken welcome/logout experience
 - Simplified broader KXD OS navigation
 
-**These surfaces are not implemented in C0, C1, or C2.** C2 is a staff messaging foundation only — not the final Connect shell. Do not present dock/Buddy List/notifications as available. C3+ is not approved by this documentation.
+**These surfaces are not implemented in C0–C3.** C2 is a staff messaging foundation only — not the final Connect shell. C3 is local dogfood readiness validation only — not dogfood activation. Do not present dock/Buddy List/notifications as available. C4+ is not approved by this documentation.
 
 ---
 
@@ -450,36 +451,130 @@ UI DTOs expose public conversation/message IDs, labels, previews, private unread
 
 Keyboard-accessible list/composer/dialog; dialog `aria-modal` + Escape; focus-visible; aria-live send/load status; unread not color-only; reduced-motion; mobile list→thread with Back; composer `safe-area-inset-bottom`; long-string overflow wrap.
 
-### Scaling constraints
+### Scaling constraints (superseded by C3)
 
-C1’s bounded ~500-message in-process window remains acceptable for internal C2. SQL-level cursor pagination may be needed before large-history dogfood.
+C2 documented a bounded ~500-message in-process window as acceptable for early UI. **C3 retires that dependency from normal runtime paths** (see Batch C3).
 
-### Metering blocker (unchanged)
+### Metering blocker (addressed for local Postgres in C3)
 
-Postgres atomic upsert required for dogfood. SQLite RMW fallback remains a **blocker** before dogfood activation.
+Postgres atomic CTE upsert is required for dogfood. SQLite RMW fallback remains a **blocker** before dogfood activation when Postgres is unavailable.
+
+---
+
+## What Batch C3 delivers
+
+**Local dogfood readiness and cost validation** — not dogfood activation, not production enablement, not navigation exposure.
+
+| Outcome | Detail |
+|---------|--------|
+| Local fixtures | `npm run bootstrap:connect-local-fixtures` — fail-closed local-only; org + 3 staff + memberships + direct/group + sample messages |
+| Atomic metering | Single Postgres CTE: idempotency reserve + quantity upsert; concurrent unique/retry proven on local Postgres |
+| Failure recovery | Durable message first; `ensureConnectMessageMetered` retries same `message:{publicId}` key without double count |
+| DB-native history | `queryConnectMessagePage` — indexed `limit+1` cursor queries for `before`/`after` |
+| DB-native unread | `queryConnectUnreadState` — `COUNT(*)` / latest lookup; list preview no longer loads a 200-message window |
+| Monotonic mark-read | `advanceConnectReadPointer` — writes only when target is newer; identical polls do not rewrite |
+| Polling model | Unchanged C2: 12s, selected thread, visible document, `direction=after` |
+| Verifier | `npm run verify:phase6-batch-c3` (+ `verify:phase6-batch-c3-metering`) |
+
+**C3 is not authorization to activate dogfood.** Connect remains disabled by default. Production must not be migrated, bootstrapped, or enabled by this batch.
+
+### Disposition of the former ~500-message window
+
+| Former use | Classification | C3 disposition |
+|------------|----------------|----------------|
+| `listMessagesForSession` `Math.min(500, limit*10)` | thread history, older pages, incremental polling | **Removed** — DB-native page (`limit+1`) |
+| `getUnreadForSession` `limit: 500` | unread calculation | **Removed** — SQL `COUNT(*)` |
+| `markReadForSession` `limit: 500` | mark-read | **Removed** — point lookups + monotonic update |
+| UI list unread `limit: 200` | conversation preview unread | **Removed** — same COUNT path |
+| Meter list `limit: 500` | meter listing (not messages) | Unchanged — not a message window |
+| In-memory store / unit pagination helpers | verification-only | Retained for tests only |
+
+No 500-message window remains in normal UI/API messaging operation.
+
+### Atomic metering approach (C3)
+
+```sql
+WITH reserved AS (
+  INSERT INTO connect_usage_idempotency (…)
+  ON CONFLICT (organization_id, idempotency_key) DO NOTHING
+  RETURNING id
+),
+applied AS (
+  INSERT INTO connect_usage_meters (…)
+  SELECT … WHERE EXISTS (SELECT 1 FROM reserved)
+  ON CONFLICT (…) DO UPDATE SET quantity = quantity + EXCLUDED.quantity
+  RETURNING quantity
+)
+SELECT …;
+```
+
+Idempotency and increment commit together. Retries return `duplicate: true` without a second increment.
+
+### Polling cost observations (local)
+
+| Check | Observation |
+|-------|-------------|
+| Endpoint | `GET /api/admin/connect/conversations/[publicId]/messages?direction=after&cursor=…` |
+| Query path | Indexed `(conversation_id, created_at, public_id)` range, `LIMIT page+1` |
+| Empty poll | Auth + participation + one bounded message query (typically 0 rows) |
+| New-message poll | Same path; returns only rows after cursor |
+| Unread/list recompute | Empty poll does **not** refresh conversation list or mark-read |
+| Mark-read writes | Only after visible newest render (debounced); server no-ops identical/older pointers |
+| Hidden documents | Polling paused via `visibilityState` |
+| Thread change | Effect cleanup clears interval; `pollInFlight` prevents overlap |
+
+Connect is **not** realtime. Short polling only.
+
+### Local fixture setup
+
+```bash
+# Confirm local DB (127.0.0.1 / localhost or SQLite), then:
+npm run migrate:local
+CONNECT_LOCAL_FIXTURE_PASSWORD='…' npm run bootstrap:connect-local-fixtures
+```
+
+Suggested **local** env for later dogfood authorization (not set by C3; not production):
+
+- `KXD_CONNECT_ENABLED=1`
+- `KXD_CONNECT_ORG_ALLOWLIST=kxd`
+- `KXD_CONNECT_STAFF_DOGFOOD_EMAILS=connect-a@kxd.local,connect-b@kxd.local,connect-c@kxd.local`
+
+### Visual QA (C3)
+
+Local fixture environment validated via service-layer multi-session smoke (`smoke:connect-local-messaging`) plus retained C2 structural/accessibility checks (desktop two-panel, mobile list→thread, dialog Escape/`aria-modal`, focus-visible, reduced-motion, composer safe-area, long-string wrap, unread aria-label).
+
+Live interactive browser matrix was attempted against local Next; the login route failed with a pre-existing Turbopack/`@tailwindcss/postcss` resolution error (unrelated to Connect C3; production `npm run build` succeeded). Full desktop/mobile viewport + modal keyboard tour with fixture logins therefore remains an **operator confirmation** step — C3 does not claim interactive browser sign-off as complete.
+
+### Remaining blockers before dogfood activation (separate authorization)
+
+1. Explicit operator authorization for local dogfood enablement
+2. Local env flags + allowlists configured deliberately
+3. Multi-session staff smoke signed off by operator (service smoke passed in C3; interactive browser login matrix optional operator confirm)
+4. Keep production untouched; no Connect global nav; kill switch ready
+5. Soft residual: Connect org `afterChange` audit write can FK-race inside Payload transactions (logged, non-blocking; does not affect messaging/metering)
 
 ---
 
 ## Batch status
 
-| Area | C0 | C1 | C2 |
-|------|----|----|----|
-| Connect organizations | ✅ | ✅ | ✅ |
-| Connect memberships | ✅ | ✅ | ✅ |
-| Edition / allowlists / kill switch | ✅ | ✅ | ✅ |
-| Metering primitives | ✅ | ✅ + message integration + Postgres atomic upsert | ✅ (via C1 send) |
-| Audit events | ✅ | ✅ + conversation events | ✅ |
-| Conversations / participants / messages | ❌ | ✅ | ✅ |
-| Pagination / private unread | ❌ | ✅ | ✅ UI |
-| Admin messaging APIs | ❌ | ✅ | ✅ + members + UI DTOs |
-| Staff messaging UI `/admin/connect` | ❌ | ❌ | ✅ |
-| Focused verifier | ✅ c0 | ✅ c1 | ✅ `verify:phase6-batch-c2` |
-| Dock / Buddy List / launcher / presence | ❌ | ❌ | ❌ |
-| Dogfood / production enablement | ❌ | ❌ | ❌ |
+| Area | C0 | C1 | C2 | C3 |
+|------|----|----|----|----|
+| Connect organizations | ✅ | ✅ | ✅ | ✅ |
+| Connect memberships | ✅ | ✅ | ✅ | ✅ + local fixtures |
+| Edition / allowlists / kill switch | ✅ | ✅ | ✅ | ✅ |
+| Metering | ✅ | ✅ atomic upsert | ✅ | ✅ atomic CTE + concurrency proof |
+| Audit events | ✅ | ✅ | ✅ | ✅ |
+| Conversations / messages | ❌ | ✅ | ✅ | ✅ DB-native runtime |
+| Pagination / private unread | ❌ | ✅ | ✅ UI | ✅ no 500-window |
+| Staff messaging UI | ❌ | ❌ | ✅ | ✅ validated |
+| Local fixtures / migrate guards | ❌ | ❌ | ❌ | ✅ |
+| Focused verifier | c0 | c1 | c2 | `verify:phase6-batch-c3` |
+| Dock / Buddy List / presence | ❌ | ❌ | ❌ | ❌ |
+| Dogfood / production enablement | ❌ | ❌ | ❌ | ❌ (readiness only) |
 
 ---
 
-## Explicit exclusions (C0 + C1 + C2)
+## Explicit exclusions (C0 + C1 + C2 + C3)
 
 Do not treat as implemented:
 
@@ -503,7 +598,7 @@ Do not treat as implemented:
 - Global KXD OS navigation redesign
 - Staff dogfood / production enablement
 
-C1 note: C1 does not create the visible Connect experience (engine only). C2 adds staff messaging UI only.
+C1 note: C1 does not create the visible Connect experience (engine only). C2 adds staff messaging UI only. C3 validates local dogfood readiness only — not activation.
 - Existing navigation redesign
 
 ---
@@ -513,21 +608,23 @@ C1 note: C1 does not create the visible Connect experience (engine only). C2 add
 - **Client Communications ≠ KXD Connect**
 - **Portal feedback remains Client Communications / experience feedback**
 - **Connected Workspace ≠ KXD Connect**
-- **`message-kxd` remains unchanged during C0/C1** and will be deliberately replaced only in a later authorized UI batch
+- **`message-kxd` remains unchanged during C0–C3** and will be deliberately replaced only in a later authorized UI batch
 - **No paid realtime or third-party messaging service**
 
 ---
 
 ## Remaining requirements before KXD dogfood
 
-1. Apply C0 + C1 migrations on a **local/non-production** database only when ready
-2. Bootstrap KXD organization locally; grant explicit staff memberships
-3. Configure dogfood env (`KXD_CONNECT_ENABLED`, staff emails, org allowlist) — **not authorized by C2**
-4. Confirm Postgres atomic meter path is active (not sqlite RMW fallback) — **blocking**
-5. Run C0 + C1 + C2 verifiers; smoke `/admin/connect` with allowlisted local staff
+1. Apply C0 + C1 migrations on a **local/non-production** database only when ready — C3 local migrate path ready
+2. Bootstrap fixtures locally via `bootstrap:connect-local-fixtures` (or equivalent explicit memberships)
+3. Configure dogfood env (`KXD_CONNECT_ENABLED`, staff emails, org allowlist) — **not authorized by C3**
+4. Confirm Postgres atomic meter path is active (C3 CTE) — SQLite RMW still blocks dogfood
+5. Run C0–C3 verifiers; multi-session smoke `/admin/connect` with allowlisted local staff
 6. Keep kill switch available; do not enable production users
 7. Do not add Connect to global navigation until an authorized UX batch
 8. Do not expose Connect to portal/client users
+
+Passing **CP4 (Local Dogfood Readiness)** does not itself authorize dogfood activation.
 
 ---
 
@@ -535,7 +632,7 @@ C1 note: C1 does not create the visible Connect experience (engine only). C2 add
 
 1. Leave Connect disabled (default): unset `KXD_CONNECT_ENABLED`, keep kill switch available
 2. Leave `/admin/connect` ungated from global nav (direct URL remains access-controlled)
-3. If migrations must be reversed locally: run migration `down` for `20260816` then `20260815` only on non-production after backup (C2 has no migration)
+3. If migrations must be reversed locally: run migration `down` for `20260816` then `20260815` only on non-production after backup (C2/C3 add no production migration requirement; C3 index work reuses C1 indexes)
 4. Collections are additive — disabling Connect does not require deleting historical rows
 5. Do not roll back Phase 5 billing visibility or portal identity work as part of Connect rollback
 
@@ -547,6 +644,7 @@ C1 note: C1 does not create the visible Connect experience (engine only). C2 add
 npm run verify:phase6-batch-c0
 npm run verify:phase6-batch-c1
 npm run verify:phase6-batch-c2
+npm run verify:phase6-batch-c3
 npm run verify:phase5-batch-5a
 npm run verify:phase5-batch-5b
 npm run verify:phase5-batch-5c
@@ -559,8 +657,15 @@ npm run lint
 npm run build
 ```
 
+Local fixtures (development only):
+
+```bash
+npm run migrate:local
+CONNECT_LOCAL_FIXTURE_PASSWORD='…' npm run bootstrap:connect-local-fixtures
+```
+
 ---
 
-## C3 and later
+## C4 and later
 
-Not implemented. Not approved by this batch. Do not present dock, Buddy List, presence, notifications, or client Connect surfaces as available.
+Not implemented. Not approved by this batch. Do not present dock, Buddy List, presence, notifications, client Connect surfaces, or dogfood activation as available.
