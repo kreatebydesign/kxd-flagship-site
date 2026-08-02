@@ -91,6 +91,9 @@ import { ConnectOrganizationMemberships } from "./payload/collections/ConnectOrg
 import { ConnectUsageMeters } from "./payload/collections/ConnectUsageMeters.ts";
 import { ConnectUsageIdempotency } from "./payload/collections/ConnectUsageIdempotency.ts";
 import { ConnectAuditEvents } from "./payload/collections/ConnectAuditEvents.ts";
+import { ConnectConversations } from "./payload/collections/ConnectConversations.ts";
+import { ConnectConversationParticipants } from "./payload/collections/ConnectConversationParticipants.ts";
+import { ConnectMessages } from "./payload/collections/ConnectMessages.ts";
 import { PlatformApplications } from "./payload/collections/PlatformApplications.ts";
 import { ProjectInquiries } from "./payload/collections/ProjectInquiries.ts";
 import { Projects } from "./payload/collections/Projects.ts";
@@ -293,6 +296,9 @@ export default buildConfig({
     ConnectUsageMeters,
     ConnectUsageIdempotency,
     ConnectAuditEvents,
+    ConnectConversations,
+    ConnectConversationParticipants,
+    ConnectMessages,
     JuniorCreatorUsers,
     JuniorCreatorShifts,
     JuniorCreatorTasks,

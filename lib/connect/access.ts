@@ -1,13 +1,16 @@
 /**
- * Phase 6 Batch C0 — server-side Connect access evaluation.
+ * Phase 6 Batch C0/C1 — server-side Connect access evaluation.
  *
  * Evaluation order (fail closed):
  * 1. Global kill switch
  * 2. Edition feature OR operator enablement env
- * 3. Staff dogfood allowlist (C0 — portal identities denied)
+ * 3. Staff dogfood allowlist (C0/C1 — portal identities denied)
  * 4. Organization allowlist
  * 5. Organization active
  * 6. Active Connect membership
+ *
+ * C1 messaging adds conversation/participation checks in
+ * `lib/connect/messaging/authorization.ts` after this base gate.
  *
  * Client-controlled request data cannot enable Connect.
  * Portal membership alone never grants Connect access.

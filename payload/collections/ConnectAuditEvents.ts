@@ -19,7 +19,7 @@ export const ConnectAuditEvents: CollectionConfig = {
     defaultColumns: ["type", "organization", "actorKind", "summary", "createdAt"],
     group: PAYLOAD_GROUPS.system,
     description:
-      "Append-only Connect audit events for organization, membership, enablement, and meter corrections.",
+      "Append-only Connect audit events for organization, membership, enablement, meter corrections, and C1 conversation membership changes. Never stores message bodies.",
   },
   access: {
     read: isAuthenticated,
@@ -44,6 +44,17 @@ export const ConnectAuditEvents: CollectionConfig = {
         { label: "Connect enabled", value: "connect.enabled" },
         { label: "Connect disabled", value: "connect.disabled" },
         { label: "Meter adjusted", value: "meter.adjusted" },
+        { label: "Conversation created", value: "conversation.created" },
+        { label: "Conversation archived", value: "conversation.archived" },
+        { label: "Conversation reactivated", value: "conversation.reactivated" },
+        {
+          label: "Conversation participant added",
+          value: "conversation.participant_added",
+        },
+        {
+          label: "Conversation participant removed",
+          value: "conversation.participant_removed",
+        },
       ],
     },
     {

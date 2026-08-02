@@ -1,15 +1,15 @@
 /**
- * Phase 6 Batch C0 — KXD Connect foundation types.
+ * Phase 6 Batch C0/C1 — KXD Connect foundation + messaging types.
  *
  * Connect organization ≠ Client ≠ Portal account ≠ Connected Workspace.
- * These types define multi-organization tenancy primitives only.
+ * C1 adds organization-owned conversations and messages — no UI.
  */
 
 export type ConnectOrganizationStatus = "active" | "inactive";
 
 export type ConnectMembershipStatus = "active" | "disabled";
 
-/** C0 roles only — vendor/guest/partner/client-participant arrive in later batches. */
+/** C0/C1 roles only — vendor/guest/partner/client-participant arrive later. */
 export type ConnectMembershipRole =
   | "platform-operator"
   | "organization-admin"
@@ -33,6 +33,49 @@ export type ConnectMembershipRecord = {
   portalUserId: number | null;
   role: ConnectMembershipRole;
   status: ConnectMembershipStatus;
+};
+
+/** C1 conversation types for internal dogfooding only. */
+export type ConnectConversationType = "direct" | "group";
+
+export type ConnectConversationStatus = "active" | "archived";
+
+export type ConnectParticipantStatus = "active" | "left";
+
+export type ConnectConversationRecord = {
+  id: number;
+  publicId: string;
+  organizationId: number;
+  type: ConnectConversationType;
+  status: ConnectConversationStatus;
+  title: string | null;
+  /** Deterministic pair key for active direct conversations; null for groups. */
+  directPairKey: string | null;
+  createdAt: string;
+  latestMessageAt: string | null;
+};
+
+export type ConnectConversationParticipantRecord = {
+  id: number;
+  publicId: string;
+  organizationId: number;
+  conversationId: number;
+  membershipId: number;
+  status: ConnectParticipantStatus;
+  /** Private per-participant cursor — never exposed as a read receipt. */
+  lastReadMessagePublicId: string | null;
+  lastReadAt: string | null;
+  joinedAt: string;
+};
+
+export type ConnectMessageRecord = {
+  id: number;
+  publicId: string;
+  organizationId: number;
+  conversationId: number;
+  authorParticipantId: number;
+  body: string;
+  createdAt: string;
 };
 
 export type ConnectMeterKey =
@@ -61,7 +104,11 @@ export type ConnectAccessDenyReason =
   | "invalid_identity"
   | "invalid_organization"
   | "portal_identity_not_supported_in_c0"
-  | "entitlement_denied";
+  | "entitlement_denied"
+  | "conversation_inactive"
+  | "not_conversation_participant"
+  | "org_mismatch"
+  | "operation_denied";
 
 export type ConnectAccessDecision =
   | { allowed: true; organizationKey: string; role: ConnectMembershipRole }
@@ -76,8 +123,20 @@ export type ConnectAuditEventType =
   | "membership.disabled"
   | "connect.enabled"
   | "connect.disabled"
-  | "meter.adjusted";
+  | "meter.adjusted"
+  | "conversation.created"
+  | "conversation.archived"
+  | "conversation.reactivated"
+  | "conversation.participant_added"
+  | "conversation.participant_removed";
 
 export type ConnectActorKind = "operator" | "system";
 
 export const CONNECT_KXD_ORGANIZATION_KEY = "kxd" as const;
+
+/** C1 plain-text message body maximum length (characters). */
+export const CONNECT_MESSAGE_MAX_LENGTH = 4000;
+
+/** Bounded page size for message listing / polling-ready retrieval. */
+export const CONNECT_MESSAGE_PAGE_SIZE_DEFAULT = 50;
+export const CONNECT_MESSAGE_PAGE_SIZE_MAX = 100;

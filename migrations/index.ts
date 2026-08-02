@@ -90,6 +90,7 @@ import * as migration_20260814_phase4_portal_identity_security from './20260814_
 import * as migration_20260731_branded_client_monthly_reports from './20260731_branded_client_monthly_reports';
 import * as migration_20260803_junior_creator_assigned_tasks from './20260803_junior_creator_assigned_tasks';
 import * as migration_20260815_phase6_connect_c0_foundation from './20260815_phase6_connect_c0_foundation';
+import * as migration_20260816_phase6_connect_c1_messaging from './20260816_phase6_connect_c1_messaging';
 
 export const migrations = [
   {
@@ -554,5 +555,10 @@ export const migrations = [
     up: migration_20260815_phase6_connect_c0_foundation.up,
     down: migration_20260815_phase6_connect_c0_foundation.down,
     name: '20260815_phase6_connect_c0_foundation',
+  },
+  {
+    up: migration_20260816_phase6_connect_c1_messaging.up,
+    down: migration_20260816_phase6_connect_c1_messaging.down,
+    name: '20260816_phase6_connect_c1_messaging',
   },
 ];
