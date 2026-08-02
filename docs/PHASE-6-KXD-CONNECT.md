@@ -32,7 +32,7 @@ Later authorized UX batches may deliver a premium AOL/macOS-inspired operating-s
 - Optional positive spoken welcome/logout experience
 - Simplified broader KXD OS navigation
 
-**These surfaces are not implemented in C0–C5.** C2 is a staff messaging foundation only — not the final Connect shell. C3 is local dogfood readiness. C4 adds local activation controls. C5 is the structured local dogfood operating period — not production rollout, not general availability. Do not present dock/Buddy List/notifications as available. C6+ is not approved by this documentation.
+**These surfaces are not implemented in C0–C6.** C2 is a staff messaging foundation only — not the final Connect shell. C3–C5 cover local readiness, activation, and dogfood. C6 is an engineering readiness / internal release gate — not production rollout, not general availability. Do not present dock/Buddy List/notifications as available. C7+ is not approved by this documentation.
 
 ---
 
@@ -841,6 +841,39 @@ It does **not** authorize production rollout, navigation exposure, or Connect GA
 
 ---
 
-## C6 and later
+## Batch C6 — Connect readiness review and internal release gate
+
+Engineering review of Connect as feature-complete for current scope (no product expansion).
+
+### Verdict
+
+**Ready for controlled internal rollout after minor correction** (applied in C6):
+
+- `GET /api/admin/connect/meters` now requires a Connect staff session and ignores client-supplied `organizationId` (scopes to `session.organization.id`; returns `organizationKey` only).
+
+### Assessment summary
+
+| Area | Assessment |
+|------|------------|
+| Architecture | Sound layering: config/access → session → messaging auth → service/UI; fail-closed; no auth cache |
+| Operations | Activation/disable/status/runbook/dogfood harness adequate for local internal use |
+| Performance | Acceptable for small internal staff (~3–12); DB-native pagination/unread; N+1 list enrichment is non-blocking debt |
+| Security | Portal denied; UUID public IDs on messaging; org isolation on messaging paths; meters gap closed in C6 |
+| Code quality | Verifiers C0–C4 + dogfood harness; residual: quieter ops logs, archive list UX, richer error logging |
+
+### Non-blocking debt (not required for local internal rollout)
+
+1. Conversation list N+1 enrichment in `ui-service.ts`
+2. Ops `authorization.success` log volume under dogfood
+3. Archived conversations mixed into main list
+4. Soft Connect org audit FK race (pre-existing)
+
+### Explicit non-authorization
+
+C6 does **not** authorize production enablement, navigation exposure, portal/client Connect, or GA.
+
+---
+
+## C7 and later
 
 Not implemented. Not approved by this batch. Do not present dock, Buddy List, presence, notifications, client Connect surfaces, or **production** Connect enablement as available.
