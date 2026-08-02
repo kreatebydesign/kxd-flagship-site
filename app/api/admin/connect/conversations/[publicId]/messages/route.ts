@@ -3,7 +3,7 @@
  * POST /api/admin/connect/conversations/[publicId]/messages
  *
  * Cursor-paginated list + plain-text send. No-store. No auto mark-read.
- * Does not log message content.
+ * Does not log message content. UI DTOs only.
  */
 import { NextRequest, NextResponse } from "next/server";
 import { requirePayloadAdminApi } from "@/lib/admin/auth";
@@ -16,9 +16,9 @@ import {
 } from "@/lib/connect/messaging/http";
 import { resolveConnectStaffSession } from "@/lib/connect/messaging/session";
 import {
-  listMessagesForSession,
-  sendMessageForSession,
-} from "@/lib/connect/messaging/service";
+  listMessagesForUi,
+  sendMessageForUi,
+} from "@/lib/connect/messaging/ui-service";
 
 export const dynamic = "force-dynamic";
 
@@ -53,7 +53,7 @@ export async function GET(req: NextRequest, context: RouteContext) {
   const limit = limitRaw ? Number(limitRaw) : null;
 
   try {
-    const result = await listMessagesForSession({
+    const result = await listMessagesForUi({
       session,
       conversationPublicId: publicId,
       cursor,
@@ -72,6 +72,7 @@ export async function GET(req: NextRequest, context: RouteContext) {
       nextCursor: result.nextCursor,
       prevCursor: result.prevCursor,
       hasMore: result.hasMore,
+      selfParticipantPublicId: result.selfParticipantPublicId,
     });
   } catch {
     console.error("[KXD Connect] message list failed");
@@ -93,16 +94,19 @@ export async function POST(req: Request, context: RouteContext) {
   if (!("body" in body.value)) {
     return connectBadRequest("body is required.");
   }
+  // Reject client author impersonation attempts.
+  if (body.value.authorParticipantId != null) {
+    return connectJson(
+      { ok: false, message: "Connect is unavailable." },
+      { status: 403 },
+    );
+  }
 
   try {
-    const result = await sendMessageForSession({
+    const result = await sendMessageForUi({
       session,
       conversationPublicId: publicId,
       body: body.value.body,
-      claimedAuthorParticipantId:
-        body.value.authorParticipantId != null
-          ? Number(body.value.authorParticipantId)
-          : null,
     });
     if (!result.ok) {
       return connectJson(

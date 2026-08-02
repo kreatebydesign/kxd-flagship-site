@@ -14,9 +14,9 @@ import {
 } from "@/lib/connect/messaging/http";
 import { resolveConnectStaffSession } from "@/lib/connect/messaging/session";
 import {
-  getUnreadForSession,
-  markReadForSession,
-} from "@/lib/connect/messaging/service";
+  getUnreadForUi,
+  markReadForUi,
+} from "@/lib/connect/messaging/ui-service";
 
 export const dynamic = "force-dynamic";
 
@@ -42,7 +42,7 @@ export async function GET(_req: Request, context: RouteContext) {
   const { publicId } = await context.params;
 
   try {
-    const result = await getUnreadForSession({
+    const result = await getUnreadForUi({
       session,
       conversationPublicId: publicId,
     });
@@ -76,7 +76,7 @@ export async function POST(req: Request, context: RouteContext) {
       : null;
 
   try {
-    const result = await markReadForSession({
+    const result = await markReadForUi({
       session,
       conversationPublicId: publicId,
       targetMessagePublicId,
