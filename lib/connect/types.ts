@@ -96,6 +96,8 @@ export type ConnectMeterPeriodKind = "daily";
 export type ConnectAccessDenyReason =
   | "kill_switch"
   | "feature_disabled"
+  | "environment_not_allowed"
+  | "local_activation_required"
   | "not_staff_dogfood"
   | "org_not_allowlisted"
   | "org_inactive"

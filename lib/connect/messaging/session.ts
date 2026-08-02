@@ -10,7 +10,12 @@ import "server-only";
 import { getPayload } from "payload";
 import config from "@/payload.config";
 import { evaluateConnectAccess } from "../access";
+import {
+  connectOpsEventFromDenyReason,
+  logConnectOpsEvent,
+} from "../activation";
 import type {
+  ConnectAccessDenyReason,
   ConnectMembershipRecord,
   ConnectMembershipRole,
   ConnectOrganizationRecord,
@@ -76,6 +81,8 @@ export async function resolveConnectStaffSession(input: {
   });
 
   const candidates: ConnectStaffSession[] = [];
+  let lastDenyReason: ConnectAccessDenyReason | "no_membership" =
+    "no_membership";
 
   for (const doc of memberships.docs as AnyDoc[]) {
     const orgRaw = doc.organization;
@@ -114,7 +121,10 @@ export async function resolveConnectStaffSession(input: {
       editionFeatureActive: input.editionFeatureActive,
       env: input.env,
     });
-    if (!access.allowed) continue;
+    if (!access.allowed) {
+      lastDenyReason = access.reason;
+      continue;
+    }
 
     candidates.push({
       staffUserId: input.staffUserId,
@@ -126,21 +136,61 @@ export async function resolveConnectStaffSession(input: {
   }
 
   if (candidates.length === 0) {
-    return { ok: false, reason: "no_membership" };
+    const reason = lastDenyReason;
+    logConnectOpsEvent({
+      type:
+        reason === "no_membership"
+          ? "authorization.failure"
+          : connectOpsEventFromDenyReason(reason),
+      summary: `Connect session denied: ${reason}`,
+      meta: { reason, subjectKind: "staff-user" },
+    });
+    return { ok: false, reason };
   }
 
   if (input.organizationKey) {
     const key = input.organizationKey.trim().toLowerCase();
     const match = candidates.find((c) => c.organization.key === key);
-    if (!match) return { ok: false, reason: "org_not_allowlisted" };
+    if (!match) {
+      logConnectOpsEvent({
+        type: "authorization.allowlist_denied",
+        summary: "Connect session denied: org_not_allowlisted",
+        meta: { reason: "org_not_allowlisted", subjectKind: "staff-user" },
+      });
+      return { ok: false, reason: "org_not_allowlisted" };
+    }
+    logConnectOpsEvent({
+      type: "authorization.success",
+      summary: "Connect session authorized",
+      meta: {
+        organizationKey: match.organization.key,
+        role: match.role,
+        subjectKind: "staff-user",
+      },
+    });
     return { ok: true, session: match };
   }
 
   if (candidates.length === 1) {
-    return { ok: true, session: candidates[0] };
+    const session = candidates[0];
+    logConnectOpsEvent({
+      type: "authorization.success",
+      summary: "Connect session authorized",
+      meta: {
+        organizationKey: session.organization.key,
+        role: session.role,
+        subjectKind: "staff-user",
+      },
+    });
+    return { ok: true, session };
   }
 
   // Multi-org without explicit selection — fail closed (no switcher UI in C1).
+  logConnectOpsEvent({
+    type: "authorization.failure",
+    summary: "Connect session denied: operation_denied",
+    meta: { reason: "operation_denied", subjectKind: "staff-user" },
+  });
   return { ok: false, reason: "operation_denied" };
 }
 

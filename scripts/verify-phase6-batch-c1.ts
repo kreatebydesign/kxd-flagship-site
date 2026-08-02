@@ -304,6 +304,8 @@ async function main() {
     },
     operation: "list_conversations",
     editionFeatureActive: true,
+    localActivationEnabled: true,
+    environmentAllowed: true,
     env,
   });
   check("portal identity denial", portalAuth.allowed === false);
@@ -364,6 +366,8 @@ async function main() {
     organization: kxd,
     membership: mattMem,
     editionFeatureActive: false,
+    localActivationEnabled: true,
+    environmentAllowed: true,
     env: { ...process.env, KXD_CONNECT_ENABLED: undefined, KXD_CONNECT_KILL_SWITCH: undefined },
   });
   check("disabled-by-default behavior", defaultDenied.allowed === false);

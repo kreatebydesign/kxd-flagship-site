@@ -310,6 +310,8 @@ async function main() {
     organization: { key: "kxd", status: "active" },
     membership: { status: "active", role: "organization-member" },
     editionFeatureActive: false,
+    localActivationEnabled: true,
+    environmentAllowed: true,
     env: {
       ...process.env,
       KXD_CONNECT_ENABLED: undefined,

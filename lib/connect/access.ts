@@ -1,27 +1,39 @@
 /**
- * Phase 6 Batch C0/C1 — server-side Connect access evaluation.
+ * Phase 6 Batch C0/C4 — server-side Connect access evaluation.
  *
- * Evaluation order (fail closed):
+ * Evaluation order (fail closed; every layer required):
  * 1. Global kill switch
- * 2. Edition feature OR operator enablement env
- * 3. Staff dogfood allowlist (C0/C1 — portal identities denied)
- * 4. Organization allowlist
- * 5. Organization active
- * 6. Active Connect membership
+ * 2. Global Connect feature enabled (edition feature OR operator enablement env)
+ * 3. Environment allows Connect (non-production for local dogfood)
+ * 4. Local operator activation enabled (`.connect/local-activation.json`)
+ * 5. Subject kind (staff only — portal denied)
+ * 6. Staff allowlisted (activation file, else env CSV — empty denies)
+ * 7. Organization allowlisted
+ * 8. Organization active
+ * 9. Active Connect membership
  *
  * C1 messaging adds conversation/participation checks in
  * `lib/connect/messaging/authorization.ts` after this base gate.
  *
  * Client-controlled request data cannot enable Connect.
  * Portal membership alone never grants Connect access.
+ * Authorization decisions are never cached — callers re-evaluate per request.
  */
 
 import { isFeatureEnabled } from "@/lib/editions/engine";
 import {
+  connectOpsEventFromDenyReason,
+  getEffectiveConnectOrganizationAllowlist,
+  getEffectiveConnectStaffAllowlist,
+  isConnectEnvironmentAllowed,
+  isConnectLocalActivationEnabled,
+  logConnectOpsEvent,
+} from "./activation";
+import {
+  getConnectOrganizationAllowlist,
+  getConnectStaffDogfoodEmails,
   isConnectKillSwitchActive,
   isConnectOperatorEnablementOn,
-  isOrganizationKeyAllowlisted,
-  isStaffEmailInConnectDogfoodAllowlist,
 } from "./config";
 import type {
   ConnectAccessDecision,
@@ -38,7 +50,24 @@ export type ConnectAccessEvalInput = {
   membership: Pick<ConnectMembershipRecord, "status" | "role"> | null;
   /** Injected for tests — defaults to live edition evaluation. */
   editionFeatureActive?: boolean;
+  /**
+   * Injected for tests — when omitted, resolved from local activation file
+   * (production always false).
+   */
+  localActivationEnabled?: boolean;
+  /**
+   * Injected for tests — when omitted, resolved from environment gates
+   * (production always false).
+   */
+  environmentAllowed?: boolean;
+  /** Injected allowlist override for tests. */
+  staffAllowlist?: ReadonlySet<string>;
+  /** Injected org allowlist override for tests. */
+  organizationAllowlist?: ReadonlySet<string>;
+  /** When true, emit a structured ops log line (no message content). */
+  recordOpsLog?: boolean;
   env?: NodeJS.ProcessEnv;
+  cwd?: string;
 };
 
 export function isConnectEditionFeatureActive(
@@ -51,14 +80,41 @@ export function isConnectEditionFeatureActive(
 /**
  * Pure access evaluation used by services and verify scripts.
  * Never trusts browser-supplied "enableConnect" style flags.
+ * Does not memoize — safe for immediate rollback.
  */
 export function evaluateConnectAccess(
   input: ConnectAccessEvalInput,
 ): ConnectAccessDecision {
   const env = input.env ?? process.env;
+  const cwd = input.cwd;
+
+  const decide = (decision: ConnectAccessDecision): ConnectAccessDecision => {
+    if (!input.recordOpsLog) return decision;
+    if (decision.allowed) {
+      logConnectOpsEvent({
+        type: "authorization.success",
+        summary: "Connect authorization succeeded",
+        meta: {
+          organizationKey: decision.organizationKey,
+          role: decision.role,
+          subjectKind: input.subjectKind,
+        },
+      });
+      return decision;
+    }
+    logConnectOpsEvent({
+      type: connectOpsEventFromDenyReason(decision.reason),
+      summary: `Connect authorization denied: ${decision.reason}`,
+      meta: {
+        reason: decision.reason,
+        subjectKind: input.subjectKind,
+      },
+    });
+    return decision;
+  };
 
   if (isConnectKillSwitchActive(env)) {
-    return { allowed: false, reason: "kill_switch" };
+    return decide({ allowed: false, reason: "kill_switch" });
   }
 
   const featureActive =
@@ -66,42 +122,79 @@ export function evaluateConnectAccess(
     isConnectOperatorEnablementOn(env);
 
   if (!featureActive) {
-    return { allowed: false, reason: "feature_disabled" };
+    return decide({ allowed: false, reason: "feature_disabled" });
+  }
+
+  const environmentAllowed =
+    typeof input.environmentAllowed === "boolean"
+      ? input.environmentAllowed
+      : isConnectEnvironmentAllowed(env);
+
+  if (!environmentAllowed) {
+    return decide({ allowed: false, reason: "environment_not_allowed" });
+  }
+
+  const activationInjected =
+    typeof input.localActivationEnabled === "boolean";
+  const localActivationEnabled = activationInjected
+    ? input.localActivationEnabled === true
+    : isConnectLocalActivationEnabled({ cwd, env });
+
+  if (!localActivationEnabled) {
+    return decide({ allowed: false, reason: "local_activation_required" });
   }
 
   if (input.subjectKind === "portal-user") {
-    return { allowed: false, reason: "portal_identity_not_supported_in_c0" };
+    return decide({
+      allowed: false,
+      reason: "portal_identity_not_supported_in_c0",
+    });
   }
 
-  if (!isStaffEmailInConnectDogfoodAllowlist(input.staffEmail, env)) {
-    return { allowed: false, reason: "not_staff_dogfood" };
+  // Injected activation (unit tests) uses env allowlists so a developer's
+  // local activation file cannot flake verifiers. Live requests use the
+  // effective allowlist (activation file, else env) — re-read every call.
+  const staffAllowlist =
+    input.staffAllowlist ??
+    (activationInjected
+      ? getConnectStaffDogfoodEmails(env)
+      : getEffectiveConnectStaffAllowlist({ cwd, env }));
+  const normalizedEmail = input.staffEmail?.trim().toLowerCase() ?? "";
+  if (!normalizedEmail || !staffAllowlist.has(normalizedEmail)) {
+    return decide({ allowed: false, reason: "not_staff_dogfood" });
   }
 
   if (!input.organization) {
-    return { allowed: false, reason: "invalid_organization" };
+    return decide({ allowed: false, reason: "invalid_organization" });
   }
 
-  if (!isOrganizationKeyAllowlisted(input.organization.key, env)) {
-    return { allowed: false, reason: "org_not_allowlisted" };
+  const organizationAllowlist =
+    input.organizationAllowlist ??
+    (activationInjected
+      ? getConnectOrganizationAllowlist(env)
+      : getEffectiveConnectOrganizationAllowlist({ cwd, env }));
+  const orgKey = input.organization.key.trim().toLowerCase();
+  if (!orgKey || !organizationAllowlist.has(orgKey)) {
+    return decide({ allowed: false, reason: "org_not_allowlisted" });
   }
 
   if (input.organization.status !== "active") {
-    return { allowed: false, reason: "org_inactive" };
+    return decide({ allowed: false, reason: "org_inactive" });
   }
 
   if (!input.membership) {
-    return { allowed: false, reason: "no_membership" };
+    return decide({ allowed: false, reason: "no_membership" });
   }
 
   if (input.membership.status !== "active") {
-    return { allowed: false, reason: "membership_disabled" };
+    return decide({ allowed: false, reason: "membership_disabled" });
   }
 
-  return {
+  return decide({
     allowed: true,
     organizationKey: input.organization.key,
     role: input.membership.role,
-  };
+  });
 }
 
 /** Role authority for membership mutations in C0. */

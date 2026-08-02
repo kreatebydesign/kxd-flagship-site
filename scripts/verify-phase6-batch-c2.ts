@@ -98,6 +98,8 @@ async function main() {
     organization: { key: "kxd", status: "active" },
     membership: { status: "active", role: "organization-member" },
     editionFeatureActive: false,
+    localActivationEnabled: true,
+    environmentAllowed: true,
     env: { ...process.env, KXD_CONNECT_ENABLED: undefined, KXD_CONNECT_KILL_SWITCH: undefined },
   });
   check("disabled-by-default behavior", deniedDefault.allowed === false);
@@ -108,6 +110,8 @@ async function main() {
     organization: { key: "kxd", status: "active" },
     membership: { status: "active", role: "organization-member" },
     editionFeatureActive: true,
+    localActivationEnabled: true,
+    environmentAllowed: true,
     env: dogfoodEnv(),
   });
   check("portal identity denial", portalDenied.allowed === false);
@@ -118,6 +122,8 @@ async function main() {
     organization: { key: "kxd", status: "active" },
     membership: { status: "active", role: "organization-member" },
     editionFeatureActive: true,
+    localActivationEnabled: true,
+    environmentAllowed: true,
     env: dogfoodEnv({ KXD_CONNECT_KILL_SWITCH: "1" }),
   });
   check("kill-switch denial", killDenied.allowed === false);
@@ -128,6 +134,8 @@ async function main() {
     organization: { key: "kxd", status: "active" },
     membership: { status: "active", role: "organization-member" },
     editionFeatureActive: true,
+    localActivationEnabled: true,
+    environmentAllowed: true,
     env: dogfoodEnv(),
   });
   check("staff allowlist denial", staffDenied.allowed === false);
@@ -138,6 +146,8 @@ async function main() {
     organization: { key: "acme", status: "active" },
     membership: { status: "active", role: "organization-member" },
     editionFeatureActive: true,
+    localActivationEnabled: true,
+    environmentAllowed: true,
     env: dogfoodEnv(),
   });
   check("organization allowlist denial", orgDenied.allowed === false);
@@ -148,6 +158,8 @@ async function main() {
     organization: { key: "kxd", status: "inactive" },
     membership: { status: "active", role: "organization-member" },
     editionFeatureActive: true,
+    localActivationEnabled: true,
+    environmentAllowed: true,
     env: dogfoodEnv(),
   });
   check("inactive organization denial", inactiveOrg.allowed === false);
@@ -158,6 +170,8 @@ async function main() {
     organization: { key: "kxd", status: "active" },
     membership: { status: "disabled", role: "organization-member" },
     editionFeatureActive: true,
+    localActivationEnabled: true,
+    environmentAllowed: true,
     env: dogfoodEnv(),
   });
   check("inactive membership denial", inactiveMem.allowed === false);
