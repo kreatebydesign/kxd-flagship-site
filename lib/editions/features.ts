@@ -48,6 +48,12 @@ export const EDITION_FEATURE_REGISTRY: Record<EditionFeatureId, EditionFeatureDe
     label: "Email Branding Editor",
     defaultStatus: "hidden",
   },
+  "kxd-connect": {
+    id: "kxd-connect",
+    label: "KXD Connect",
+    defaultStatus: "disabled",
+    moduleId: "connect",
+  },
 };
 
 export function resolveFeatureStatus(

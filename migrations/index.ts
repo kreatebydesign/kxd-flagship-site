@@ -88,6 +88,7 @@ import * as migration_20260727_phase3_client_relationship_intelligence from './2
 import * as migration_20260728_phase4_portal_client_memberships from './20260728_phase4_portal_client_memberships';
 import * as migration_20260814_phase4_portal_identity_security from './20260814_phase4_portal_identity_security';
 import * as migration_20260731_branded_client_monthly_reports from './20260731_branded_client_monthly_reports';
+import * as migration_20260815_phase6_connect_c0_foundation from './20260815_phase6_connect_c0_foundation';
 
 export const migrations = [
   {
@@ -539,5 +540,10 @@ export const migrations = [
     up: migration_20260731_branded_client_monthly_reports.up,
     down: migration_20260731_branded_client_monthly_reports.down,
     name: '20260731_branded_client_monthly_reports',
+  },
+  {
+    up: migration_20260815_phase6_connect_c0_foundation.up,
+    down: migration_20260815_phase6_connect_c0_foundation.down,
+    name: '20260815_phase6_connect_c0_foundation',
   },
 ];
