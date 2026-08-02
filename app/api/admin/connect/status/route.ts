@@ -40,9 +40,11 @@ export async function GET() {
         staffDogfoodEligible: isStaffEmailInConnectDogfoodAllowlist(email),
         staffDogfoodAllowlistSize: getConnectStaffDogfoodEmails().size,
         organizationAllowlistSize: getConnectOrganizationAllowlist().size,
-        // Explicit: C0 never surfaces a usable Connect UI from this route.
+        // Explicit: C0/C1 never surface a usable Connect UI from this route.
+        // C1 adds a secure messaging engine only — no shell/dock/inbox UI.
         uiAvailable: false,
         messagingAvailable: false,
+        messagingEngine: true,
       },
     },
     { headers: NO_STORE },

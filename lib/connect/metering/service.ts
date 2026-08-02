@@ -1,9 +1,13 @@
 /**
- * Phase 6 Batch C0 — trusted server-side meter increment/read services.
+ * Phase 6 Batch C0/C1 — trusted server-side meter increment/read services.
  *
  * Meter writes require trusted callers (overrideAccess LocalAPI / admin routes).
  * Reads are organization-scoped — never return other organizations' meters.
  * Records never store message bodies, filenames, or personal content.
+ *
+ * C1: Prefer database-level atomic upsert on Postgres (`metering/atomic.ts`).
+ * Sqlite local fallback retains contained read-modify-write with unique-index
+ * race handling — blocking for dogfood until Postgres atomic path is used.
  */
 
 import "server-only";
@@ -12,6 +16,10 @@ import { getPayload } from "payload";
 import config from "@/payload.config";
 import { isConnectMeterKey } from "./definitions";
 import { connectDailyPeriodKey } from "./period";
+import {
+  canUseAtomicConnectMeterIncrement,
+  incrementConnectMeterAtomic,
+} from "./atomic";
 import type {
   ConnectMeterAggregate,
   ConnectMeterIncrementInput,
@@ -19,6 +27,14 @@ import type {
   ConnectMeterStore,
 } from "./store";
 import type { ConnectMeterKey, ConnectMeterPeriodKind } from "../types";
+
+/** Documented for operators — true only when Postgres atomic path is available. */
+export function connectMeterAtomicIncrementAvailable(payload: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  db?: any;
+}): boolean {
+  return canUseAtomicConnectMeterIncrement(payload);
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDoc = Record<string, any>;
@@ -85,6 +101,26 @@ async function incrementViaPayload(
 
   const payload = await getPayload({ config });
 
+  // Prefer genuinely atomic DB upsert when Postgres adapter is available.
+  if (canUseAtomicConnectMeterIncrement(payload)) {
+    const atomic = await incrementConnectMeterAtomic({
+      payload,
+      organizationId: input.organizationId,
+      meterKey: input.meterKey,
+      periodKind: input.periodKind,
+      periodKey: input.periodKey,
+      delta: input.delta,
+      idempotencyKey: input.idempotencyKey,
+    });
+    if (!(atomic.ok === false && atomic.reason === "atomic_unavailable")) {
+      return atomic as ConnectMeterIncrementResult;
+    }
+  }
+
+  // Contained fallback (sqlite / atomic unavailable):
+  // Unique indexes + create/update race handling. Concurrent distinct
+  // increments can still lose updates under read-modify-write — blocking
+  // before dogfood unless Postgres atomic path is confirmed.
   if (input.idempotencyKey) {
     const existingIdem = await payload.find({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

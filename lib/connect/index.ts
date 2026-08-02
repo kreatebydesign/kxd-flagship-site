@@ -1,8 +1,8 @@
 /**
- * Phase 6 Batch C0 — KXD Connect foundation public surface.
+ * Phase 6 Batch C0/C1 — KXD Connect public surface.
  *
- * Server-only modules (audit, bootstrap, metering/service) must be imported
- * directly from their files — they are not re-exported here.
+ * Server-only modules (audit, bootstrap, metering/service, messaging/service)
+ * must be imported directly from their files — they are not re-exported here.
  */
 
 export type {
@@ -10,17 +10,28 @@ export type {
   ConnectAccessDenyReason,
   ConnectActorKind,
   ConnectAuditEventType,
+  ConnectConversationParticipantRecord,
+  ConnectConversationRecord,
+  ConnectConversationStatus,
+  ConnectConversationType,
   ConnectMembershipRecord,
   ConnectMembershipRole,
   ConnectMembershipStatus,
+  ConnectMessageRecord,
   ConnectMeterKey,
   ConnectMeterPeriodKind,
   ConnectOrganizationRecord,
   ConnectOrganizationStatus,
+  ConnectParticipantStatus,
   ConnectSubjectKind,
 } from "./types";
 
-export { CONNECT_KXD_ORGANIZATION_KEY } from "./types";
+export {
+  CONNECT_KXD_ORGANIZATION_KEY,
+  CONNECT_MESSAGE_MAX_LENGTH,
+  CONNECT_MESSAGE_PAGE_SIZE_DEFAULT,
+  CONNECT_MESSAGE_PAGE_SIZE_MAX,
+} from "./types";
 
 export {
   evaluateConnectAccess,
@@ -69,3 +80,43 @@ export {
   type ConnectMeterIncrementResult,
   type ConnectMeterStore,
 } from "./metering/store";
+
+export {
+  createConnectPublicId,
+  isConnectPublicId,
+  normalizeConnectPublicId,
+} from "./ids";
+
+export {
+  validateConnectMessageContent,
+  validateConnectGroupTitle,
+} from "./messaging/content";
+
+export {
+  buildDirectConversationPairKey,
+  isClientSuppliedPairKeyAllowed,
+} from "./messaging/pair-key";
+
+export {
+  authorizeConnectMessaging,
+  connectMessagingSafeError,
+} from "./messaging/authorization";
+
+export {
+  clampConnectMessagePageSize,
+  compareConnectMessageOrder,
+  decodeConnectMessageCursor,
+  encodeConnectMessageCursor,
+  paginateConnectMessages,
+} from "./messaging/pagination";
+
+export {
+  assertPrivateUnreadIsolation,
+  derivePrivateUnreadState,
+  resolveMarkReadCursor,
+} from "./messaging/read-state";
+
+export {
+  InMemoryConnectMessagingStore,
+  createTestMessagingActor,
+} from "./messaging/store";

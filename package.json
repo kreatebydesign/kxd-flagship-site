@@ -39,6 +39,7 @@
     "verify:phase5-batch-5c": "tsx scripts/verify-phase5-batch-5c.ts",
     "verify:phase5-batch-5d": "tsx scripts/verify-phase5-batch-5d.ts",
     "verify:phase6-batch-c0": "tsx scripts/verify-phase6-batch-c0.ts",
+    "verify:phase6-batch-c1": "tsx scripts/verify-phase6-batch-c1.ts",
     "bootstrap:connect-kxd": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/bootstrap-connect-kxd-organization.ts",
     "verify:phase4-analytics-visibility": "tsx scripts/verify-phase4-analytics-visibility.ts",
     "verify:phase4-authorized-portfolio": "tsx scripts/verify-phase4-authorized-portfolio.ts",
