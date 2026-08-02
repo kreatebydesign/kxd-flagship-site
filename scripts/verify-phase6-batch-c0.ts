@@ -219,6 +219,8 @@ async function main() {
     organization: { key: "kxd", status: "active" },
     membership: { status: "active", role: "organization-member" },
     editionFeatureActive: false,
+    localActivationEnabled: true,
+    environmentAllowed: true,
     env: dogfoodEnv({ KXD_CONNECT_ENABLED: undefined }),
   });
   check("access denied when feature and env off", defaultDenied.allowed === false);
@@ -241,6 +243,8 @@ async function main() {
     organization: { key: "kxd", status: "active" },
     membership: { status: "active", role: "organization-member" },
     editionFeatureActive: false,
+    localActivationEnabled: true,
+    environmentAllowed: true,
     env: dogfoodEnv(),
   });
   check("access denied outside dogfood allowlist", !dogfoodDenied.allowed && dogfoodDenied.reason === "not_staff_dogfood");
@@ -257,6 +261,8 @@ async function main() {
     organization: { key: "acme", status: "active" },
     membership: { status: "active", role: "organization-member" },
     editionFeatureActive: false,
+    localActivationEnabled: true,
+    environmentAllowed: true,
     env: dogfoodEnv(),
   });
   check("access denied for non-allowlisted org", !orgDenied.allowed && orgDenied.reason === "org_not_allowlisted");
@@ -272,6 +278,8 @@ async function main() {
     organization: { key: "kxd", status: "active" },
     membership: { status: "active", role: "platform-operator" },
     editionFeatureActive: true,
+    localActivationEnabled: true,
+    environmentAllowed: true,
     env: dogfoodEnv({ KXD_CONNECT_KILL_SWITCH: "1" }),
   });
   check("kill switch fails closed", !killed.allowed && killed.reason === "kill_switch");
@@ -298,6 +306,8 @@ async function main() {
     organization: { key: "kxd", status: "active" },
     membership: { status: "active", role: "organization-member" },
     editionFeatureActive: false,
+    localActivationEnabled: true,
+    environmentAllowed: true,
     env: dogfoodEnv(),
   });
   check("dogfood path allows when all gates pass", allowed.allowed === true);
@@ -308,6 +318,8 @@ async function main() {
     organization: { key: "kxd", status: "active" },
     membership: { status: "active", role: "organization-member" },
     editionFeatureActive: false,
+    localActivationEnabled: true,
+    environmentAllowed: true,
     env: dogfoodEnv(),
   });
   check(

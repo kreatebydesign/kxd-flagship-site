@@ -58,7 +58,10 @@ export type ConnectMessagingAuthContext = {
   > | null;
   operation: ConnectMessagingOperation;
   editionFeatureActive?: boolean;
+  localActivationEnabled?: boolean;
+  environmentAllowed?: boolean;
   env?: NodeJS.ProcessEnv;
+  cwd?: string;
 };
 
 export type ConnectMessagingAuthResult =
@@ -126,7 +129,10 @@ export function authorizeConnectMessaging(
     organization: input.organization,
     membership: input.membership,
     editionFeatureActive: input.editionFeatureActive,
+    localActivationEnabled: input.localActivationEnabled,
+    environmentAllowed: input.environmentAllowed,
     env: input.env,
+    cwd: input.cwd,
   });
 
   if (!access.allowed) {

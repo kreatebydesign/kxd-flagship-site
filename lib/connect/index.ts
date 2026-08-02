@@ -50,6 +50,29 @@ export {
 } from "./config";
 
 export {
+  CONNECT_LOCAL_ACTIVATION_RELATIVE_PATH,
+  CONNECT_LOCAL_ACTIVATION_VERSION,
+  CONNECT_OPS_LOG_RELATIVE_PATH,
+  buildConnectLocalActivationFromEnv,
+  createDisabledConnectLocalActivationState,
+  getConnectActivationSnapshot,
+  getEffectiveConnectOrganizationAllowlist,
+  getEffectiveConnectStaffAllowlist,
+  isConnectEnvironmentAllowed,
+  isConnectLocalActivationEnabled,
+  isConnectProductionEnvironment,
+  logConnectOpsEvent,
+  readConnectLocalActivationState,
+  writeConnectLocalActivationState,
+} from "./activation";
+
+export type {
+  ConnectActivationSnapshot,
+  ConnectLocalActivationState,
+  ConnectOpsEventType,
+} from "./activation";
+
+export {
   connectMembershipIdentityKey,
   detectDuplicateConnectMembership,
   validateConnectMembershipDraft,

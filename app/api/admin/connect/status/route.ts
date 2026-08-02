@@ -5,14 +5,15 @@
  */
 import { NextResponse } from "next/server";
 import { requirePayloadAdminApi } from "@/lib/admin/auth";
-import { isFeatureEnabled } from "@/lib/editions";
 import {
-  getConnectOrganizationAllowlist,
-  getConnectStaffDogfoodEmails,
+  getConnectActivationSnapshot,
+  getEffectiveConnectStaffAllowlist,
+} from "@/lib/connect/activation";
+import {
   isConnectKillSwitchActive,
   isConnectOperatorEnablementOn,
-  isStaffEmailInConnectDogfoodAllowlist,
 } from "@/lib/connect/config";
+import { isFeatureEnabled } from "@/lib/editions";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +30,13 @@ export async function GET() {
   }
 
   const email = typeof auth.email === "string" ? auth.email : null;
+  const snap = getConnectActivationSnapshot({
+    editionFeatureActive: isFeatureEnabled("kxd-connect"),
+  });
+  const emailNormalized = email?.trim().toLowerCase() ?? "";
+  const staffEligible =
+    Boolean(emailNormalized) &&
+    getEffectiveConnectStaffAllowlist().has(emailNormalized);
 
   return NextResponse.json(
     {
@@ -36,17 +44,21 @@ export async function GET() {
       connect: {
         killSwitch: isConnectKillSwitchActive(),
         operatorEnablement: isConnectOperatorEnablementOn(),
-        editionFeatureActive: isFeatureEnabled("kxd-connect"),
-        staffDogfoodEligible: isStaffEmailInConnectDogfoodAllowlist(email),
-        staffDogfoodAllowlistSize: getConnectStaffDogfoodEmails().size,
-        organizationAllowlistSize: getConnectOrganizationAllowlist().size,
-        // Dogfood not activated — UI exists at /admin/connect but remains
-        // gated by evaluateConnectAccess. No global nav. No portal exposure.
+        editionFeatureActive: snap.editionFeatureActive,
+        environmentAllowed: snap.environmentAllowed,
+        localActivationEnabled: snap.localActivationEnabled,
+        dogfoodLayersReady: snap.dogfoodLayersReady,
+        staffDogfoodEligible: staffEligible,
+        staffDogfoodAllowlistSize: snap.staffAllowlistSize,
+        organizationAllowlistSize: snap.organizationAllowlistSize,
+        // Direct URL UI exists; availability still gated by evaluateConnectAccess.
+        // No global nav. No portal exposure. Production remains deny-by-default.
         uiAvailable: false,
         messagingAvailable: false,
         messagingEngine: true,
         staffMessagingUi: true,
         staffMessagingPath: "/admin/connect",
+        activationMode: "local-dogfood-operator",
       },
     },
     { headers: NO_STORE },

@@ -38,6 +38,8 @@ export type ConnectMessagingActor = {
   membership: ConnectMembershipRecord;
   organization: ConnectOrganizationRecord;
   editionFeatureActive?: boolean;
+  localActivationEnabled?: boolean;
+  environmentAllowed?: boolean;
   env?: NodeJS.ProcessEnv;
 };
 
@@ -127,6 +129,8 @@ export class InMemoryConnectMessagingStore {
       participation: participation ?? null,
       operation,
       editionFeatureActive: actor.editionFeatureActive ?? true,
+      localActivationEnabled: actor.localActivationEnabled ?? true,
+      environmentAllowed: actor.environmentAllowed ?? true,
       env: actor.env,
     });
   }
@@ -799,6 +803,8 @@ export function createTestMessagingActor(input: {
       role: input.role ?? input.membership.role,
     },
     editionFeatureActive: true,
+    localActivationEnabled: true,
+    environmentAllowed: true,
     env: input.env,
   };
 }
