@@ -587,11 +587,12 @@ async function main() {
       phase5.includes("StaffClientInvoicesSection"),
   );
   check(
-    "Phase 5 docs keep Batch 5E unauthorized",
+    "Phase 5 docs record Batch 5E as intentionally skipped / phase complete",
     phase5.includes("Batch 5E") &&
-      (phase5.includes("not authorized") ||
-        phase5.includes("unauthorized") ||
-        phase5.includes("Optional")),
+      phase5.includes("Intentionally skipped") &&
+      phase5.includes("complete") &&
+      !phase5.includes("Batch 5E remains unauthorized") &&
+      !phase5.includes("5E is not cleared"),
   );
 
   // Mutation / secrets static guards on loader

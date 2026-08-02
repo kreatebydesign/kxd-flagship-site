@@ -814,15 +814,16 @@ These pillars are **not** implemented by listing them here. Engineering phases r
 
 ### Product-track alignment — Phase 5 (Client Billing Visibility)
 
-**Active product-track phase (not a Future-systems pillar rewrite):**  
+**Completed product-track phase (not a Future-systems pillar rewrite):**  
 `docs/PHASE-5-CLIENT-BILLING-VISIBILITY.md` — **Phase 5 — Client Billing Visibility, Stripe Invoice Status & Monthly Work Summaries**.
 
-- Approved for phased implementation; **Batches 5A–5D implemented/verified** in repository (`verify:phase5-batch-5a` … `verify:phase5-batch-5d`); Batch **5E not authorized**. Phase 5 as a whole is not complete.
-- Delivers Stripe-authoritative invoice **visibility** + Stripe-hosted pay actions + honest monthly work summaries.
+- ✅ **Complete.** Batches **5A–5D** implemented/verified (`verify:phase5-batch-5a` … `verify:phase5-batch-5d`). Batch **5E intentionally skipped** so Work & Performance and Billing remain separate; work summaries are not invoice lines or billing justification.
+- Delivers Stripe-authoritative invoice **visibility** + Stripe-hosted pay actions + honest monthly work summaries (on Work & Performance).
 - Does **not** implement Hosting Transition & Revenue Engine (Future systems item 8 remains deferred).
 - Does **not** create an accounting ledger, Work Ledger, payment vault, or Wave/QuickBooks dual-ledger.
 - Reuses Commercial Lifecycle / Phases 35–37 foundations; commercial execution gate remains closed for mutations.
-- Engineering status and batch gates: `docs/KXD-OS-ROADMAP.md`, `docs/KXD-OS-CURRENT-STATE.md`.
+- Combining work summaries with billing later requires a new separately authorized phase or batch.
+- Engineering status: `docs/KXD-OS-ROADMAP.md`, `docs/KXD-OS-CURRENT-STATE.md`.
 
 ---
 

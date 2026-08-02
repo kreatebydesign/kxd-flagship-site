@@ -1,6 +1,6 @@
 # Phase 5 — Client Billing Visibility, Stripe Invoice Status & Monthly Work Summaries
 
-**Status:** Approved for phased implementation. **Batches 5A–5D implemented in repository and verified** (`npm run verify:phase5-batch-5a`, `npm run verify:phase5-batch-5b`, `npm run verify:phase5-batch-5c`, `npm run verify:phase5-batch-5d`). Batch **5E remains unauthorized**. Phase 5 as a whole is **not** complete. Clients and authorized operators can view TEST-mode Stripe invoices when eligible; nobody pays inside KXD OS; staff cannot manage invoices.  
+**Status:** ✅ **Complete.** Batches **5A–5D** implemented and verified (`npm run verify:phase5-batch-5a`, `npm run verify:phase5-batch-5b`, `npm run verify:phase5-batch-5c`, `npm run verify:phase5-batch-5d`). Batch **5E — Billing and Work-Summary Context** was reviewed and **intentionally skipped** (not unfinished, not deferred for Phase 5). Clients and authorized operators can view TEST-mode Stripe invoices when eligible; nobody pays inside KXD OS; staff cannot manage invoices. Work & Performance and Billing remain separate surfaces.  
 **Companion:** `docs/KXD-OS-ROADMAP.md`, `docs/KXD-OS-CURRENT-STATE.md`, `docs/KXD-OS-PRODUCT-ROADMAP.md`, `docs/KXD-OS-V1-FOUNDING-CLIENT-EARLY-ACCESS.md`, `docs/KXD-OS-COMMERCIAL-LIFECYCLE-RELEASE-GATE.md`, `docs/PHASE-4-MULTI-CLIENT-PORTAL.md`
 
 > Phase 4 Multi-Client Portal Access remains **not fully production-complete**. Phase 5 may proceed as a **parallel, non-Primal product lane**. Starting Phase 5 does **not** waive, bypass, redefine, or complete any remaining Phase 4 rollout requirement (including Batch J, Batch J.2B.2, the Primal walkthrough, or the Primal reporting pilot).
@@ -144,7 +144,7 @@ Batch 5C replaces the preview shell with the authenticated Billing surface at `/
 
 ## Monthly Work Summary boundary (approved)
 
-Monthly Work Summary is an **independent** client-value surface. It may appear near Billing later (Batch 5E), but it is **not** an invoice ledger, line-item generator, billing justification record, credit meter, or billable-hours report.
+Monthly Work Summary is an **independent** client-value surface delivered through Work & Performance (Batch 5A). It is **not** an invoice ledger, line-item generator, billing justification record, credit meter, billable-hours report, or evidence that a specific invoice covers specific work. Batch 5E (placing the summary beside Billing) was **intentionally skipped** so work-summary facts and invoice facts stay separately understandable.
 
 ### Trusted sources (first Phase 5 release / Batch 5A)
 
@@ -209,7 +209,7 @@ The summary must communicate its honest scope and must **not** claim to be a com
 
 ## Approved implementation batches
 
-Batches **5A–5D** are implemented in the repository and verified. Batch **5E is not cleared**. Phase 5 is not complete. Portal Billing navigation is eligibility-gated (valid test-mode Stripe customer mapping). Staff invoice visibility is embedded on Commercial Agreements detail for authorized operators only. Live Stripe invoice access remains unauthorized.
+Batches **5A–5D** are implemented in the repository and verified. Batch **5E was intentionally skipped**. Phase 5 is **complete**. Portal Billing navigation is eligibility-gated (valid test-mode Stripe customer mapping). Staff invoice visibility is embedded on Commercial Agreements detail for authorized operators only. Live Stripe invoice access, invoice mutation, receipt systems, accounting platforms, and Financial Command expansion remain unauthorized. Combining work summaries with billing in the future requires a new separately defined and authorized phase or batch.
 
 ### Batch 5A — Monthly Work Summary Reliability
 
@@ -288,7 +288,7 @@ Batches **5A–5D** are implemented in the repository and verified. Batch **5E i
 
 ### Batch 5D — Staff Invoice Visibility
 
-**Status:** ✅ Implemented in repository — verified (`npm run verify:phase5-batch-5d`). **Does not authorize Batch 5E.** Live Stripe reads remain unauthorized. Staff cannot manage, mutate, repair, or communicate invoices from this surface.
+**Status:** ✅ Implemented in repository — verified (`npm run verify:phase5-batch-5d`). Live Stripe reads remain unauthorized. Staff cannot manage, mutate, repair, or communicate invoices from this surface.
 
 **Objective:** Authorized operators see the same safe Stripe invoice projection per client on an existing commercial surface.
 
@@ -313,11 +313,21 @@ Batches **5A–5D** are implemented in the repository and verified. Batch **5E i
 
 ### Batch 5E — Billing and Work-Summary Context
 
-**Status:** Optional — **not authorized**; may be skipped if it adds duplication or weakens calm portal experience
+**Status:** ⏭ **Intentionally skipped** — reviewed and closed as a product decision (not unfinished work; not deferred within Phase 5). Will **not** be implemented as part of Phase 5.
 
-**Objective:** Optionally place the approved monthly summary near Billing so clients understand completed monthly value without treating work items as invoice lines.
+**Original objective (not implemented):** Optionally place the approved monthly summary near Billing so clients understand completed monthly value without treating work items as invoice lines.
 
-**In scope:** Presentation and navigation alignment only; clear separation of invoice facts vs work-summary facts; no accounting or causation claims unless supported by actual data.
+**Why skipped:**
+
+- Batch 5A already provides the Monthly Work Summary through Work & Performance.
+- Batch 5C already provides client invoice visibility through Billing.
+- Batch 5D already provides authorized staff invoice visibility.
+- Duplicating the monthly work summary beside invoices would add unnecessary presentation weight and could imply that completed work items are invoice lines, billing justification, or causally tied to invoice amounts.
+- Work-summary facts and invoice facts should remain separate, independently understandable product surfaces.
+- Existing portal navigation is sufficient for clients to move between Work & Performance and Billing.
+- Skipping 5E keeps Phase 5 focused and avoids unnecessary duplication or finance-platform expansion.
+
+**Standing boundary:** Work-summary records are not invoice lines, billing justification, accounting records, or evidence that a specific invoice covers specific work. Any future attempt to combine work summaries with billing requires a **new separately defined and authorized phase or batch**.
 
 ---
 
@@ -402,4 +412,4 @@ Batches **5A–5D** are implemented in the repository and verified. Batch **5E i
 
 ---
 
-*Phase 5 specification — Batches 5A–5D implemented and verified in repository; Batch 5E unauthorized. Phase 5 as a whole is not complete. Clients cannot pay inside KXD OS; staff cannot manage invoices; receipts are not shown while `hostedReceiptUrl` is null.*
+*Phase 5 specification — **complete**. Batches 5A–5D implemented and verified; Batch 5E intentionally skipped. Clients cannot pay inside KXD OS; staff cannot manage invoices; receipts are not shown while `hostedReceiptUrl` is null. No live Stripe access, invoice mutation, receipt system, accounting system, or Financial Command expansion was authorized by Phase 5.*
