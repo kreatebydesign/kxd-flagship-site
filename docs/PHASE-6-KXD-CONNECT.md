@@ -32,7 +32,7 @@ Later authorized UX batches may deliver a premium AOL/macOS-inspired operating-s
 - Optional positive spoken welcome/logout experience
 - Simplified broader KXD OS navigation
 
-**These surfaces are not implemented in C0–C4.** C2 is a staff messaging foundation only — not the final Connect shell. C3 is local dogfood readiness validation. C4 adds **local dogfood activation controls** only — not production rollout, not general availability. Do not present dock/Buddy List/notifications as available. C5+ is not approved by this documentation.
+**These surfaces are not implemented in C0–C5.** C2 is a staff messaging foundation only — not the final Connect shell. C3 is local dogfood readiness. C4 adds local activation controls. C5 is the structured local dogfood operating period — not production rollout, not general availability. Do not present dock/Buddy List/notifications as available. C6+ is not approved by this documentation.
 
 ---
 
@@ -326,7 +326,7 @@ Server-side evaluation: `evaluateConnectAccess()` then C1 messaging authorizatio
 Client-controlled request data cannot enable Connect. Kill switch fails closed.  
 Activation file and allowlists are re-read per request.
 
-**No portal navigation changes. `message-kxd` remains unchanged in C0–C4.**
+**No portal navigation changes. `message-kxd` remains unchanged in C0–C5.**
 
 Operator status (no org enumeration): `GET /api/admin/connect/status`  
 (`uiAvailable: false`, `messagingAvailable: false`, `messagingEngine: true`, activation posture fields)
@@ -602,25 +602,26 @@ It does **not** authorize production rollout, public exposure, or navigation ena
 
 ## Batch status
 
-| Area | C0 | C1 | C2 | C3 | C4 |
-|------|----|----|----|----|----|
-| Connect organizations | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Connect memberships | ✅ | ✅ | ✅ | ✅ + local fixtures | ✅ |
-| Edition / allowlists / kill switch | ✅ | ✅ | ✅ | ✅ | ✅ + local activation |
-| Metering | ✅ | ✅ atomic upsert | ✅ | ✅ atomic CTE + concurrency proof | ✅ |
-| Audit / ops logging | ✅ audit | ✅ | ✅ | ✅ | ✅ + ops log |
-| Conversations / messages | ❌ | ✅ | ✅ | ✅ DB-native runtime | ✅ |
-| Pagination / private unread | ❌ | ✅ | ✅ UI | ✅ no 500-window | ✅ |
-| Staff messaging UI | ❌ | ❌ | ✅ | ✅ validated | ✅ |
-| Local fixtures / migrate guards | ❌ | ❌ | ❌ | ✅ | ✅ |
-| Local dogfood activation operator | ❌ | ❌ | ❌ | ❌ | ✅ |
-| Focused verifier | c0 | c1 | c2 | c3 | `verify:phase6-batch-c4` |
-| Dock / Buddy List / presence | ❌ | ❌ | ❌ | ❌ | ❌ |
-| Production enablement | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Area | C0 | C1 | C2 | C3 | C4 | C5 |
+|------|----|----|----|----|----|----|
+| Connect organizations | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Connect memberships | ✅ | ✅ | ✅ | ✅ + local fixtures | ✅ | ✅ |
+| Edition / allowlists / kill switch | ✅ | ✅ | ✅ | ✅ | ✅ + local activation | ✅ |
+| Metering | ✅ | ✅ atomic upsert | ✅ | ✅ atomic CTE + concurrency proof | ✅ | ✅ |
+| Audit / ops logging | ✅ audit | ✅ | ✅ | ✅ | ✅ + ops log | ✅ exercised |
+| Conversations / messages | ❌ | ✅ | ✅ | ✅ DB-native runtime | ✅ | ✅ dogfood |
+| Pagination / private unread | ❌ | ✅ | ✅ UI | ✅ no 500-window | ✅ | ✅ dogfood |
+| Staff messaging UI | ❌ | ❌ | ✅ | ✅ validated | ✅ | ✅ HTTP dogfood |
+| Local fixtures / migrate guards | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ |
+| Local dogfood activation operator | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ exercised |
+| Structured dogfood operating period | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Focused verifier | c0 | c1 | c2 | c3 | c4 | `dogfood:connect-local` |
+| Dock / Buddy List / presence | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Production enablement | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 
 ---
 
-## Explicit exclusions (C0–C4)
+## Explicit exclusions (C0–C5)
 
 Do not treat as implemented:
 
@@ -644,7 +645,7 @@ Do not treat as implemented:
 - Global KXD OS navigation redesign
 - Production Connect enablement / general availability
 
-C1 note: C1 does not create the visible Connect experience (engine only). C2 adds staff messaging UI only. C3 validates local dogfood readiness. C4 authorizes local activation controls only — not production.
+C1 note: C1 does not create the visible Connect experience (engine only). C2 adds staff messaging UI only. C3 validates local dogfood readiness. C4 authorizes local activation controls. C5 completes the local operating period only — not production.
 
 ---
 
@@ -653,24 +654,26 @@ C1 note: C1 does not create the visible Connect experience (engine only). C2 add
 - **Client Communications ≠ KXD Connect**
 - **Portal feedback remains Client Communications / experience feedback**
 - **Connected Workspace ≠ KXD Connect**
-- **`message-kxd` remains unchanged during C0–C4** and will be deliberately replaced only in a later authorized UI batch
+- **`message-kxd` remains unchanged during C0–C5** and will be deliberately replaced only in a later authorized UI batch
 - **No paid realtime or third-party messaging service**
 
 ---
 
-## Local dogfood operator path (C4)
+## Local dogfood operator path (C4–C5)
 
 1. Apply C0 + C1 migrations on a **local/non-production** database — `npm run migrate:local`
 2. Bootstrap fixtures: `bootstrap:connect-local-fixtures` (or explicit memberships)
-3. Configure local env (`KXD_CONNECT_ENABLED`, staff emails, org allowlist); restart Next
+3. Configure local env (`KXD_CONNECT_ENABLED`, staff emails, org allowlist); restart Next with those env vars
 4. Confirm Postgres atomic meter path when generating dogfood traffic
 5. `npm run connect:local-enable`
-6. Run C0–C4 verifiers; smoke `/admin/connect` with allowlisted local staff only
-7. Keep kill switch available; do not enable production users
-8. Do not add Connect to global navigation until an authorized UX batch
-9. Do not expose Connect to portal/client users
+6. Run C0–C4 verifiers + `npm run dogfood:connect-local`; smoke `/admin/connect` with allowlisted local staff only
+7. `npm run connect:local-disable` when finished
+8. Keep kill switch available; do not enable production users
+9. Do not add Connect to global navigation until an authorized UX batch
+10. Do not expose Connect to portal/client users
 
-Passing **CP5 (Local Dogfood Activation Authorization)** authorizes controlled local internal dogfooding only — **not** production rollout.
+Passing **CP5** authorizes controlled local internal dogfooding.  
+Passing **CP6** completes the structured local operating period only — **not** production rollout.
 
 Full commands: `docs/PHASE-6-CONNECT-LOCAL-DOGFOOD-RUNBOOK.md`
 
@@ -715,11 +718,129 @@ npm run migrate:local
 CONNECT_LOCAL_FIXTURE_PASSWORD='…' npm run bootstrap:connect-local-fixtures
 npm run connect:local-enable
 npm run connect:local-status
+npm run dogfood:connect-local
 npm run connect:local-disable
 ```
 
 ---
 
-## C5 and later
+## Batch C5 — Structured local dogfood operating period
 
-Not implemented. Not approved by this batch. Do not present dock, Buddy List, presence, notifications, client Connect surfaces, or **production** Connect enablement as available. C4 is local dogfood activation authorization only.
+**Completed.** Controlled multi-session local dogfood to learn under realistic internal usage. No messaging product expansion. Production remains disabled.
+
+### How C5 was exercised
+
+1. Operator CLI: `connect:local-status` / `enable` / `disable` (idempotent; local Postgres only)
+2. Service-layer operating period: `npm run dogfood:connect-local` (60/60 scenarios)
+3. Authenticated HTTP dogfood: Payload login as fixture A/B → `/admin/connect` HTML + Connect APIs
+4. Immediate rollback: disable activation → conversations API returns unavailable; re-enable restores
+5. End state: local activation left **disabled**
+
+### Scenarios executed
+
+| Scenario | Result |
+|----------|--------|
+| Direct conversations (A↔B, A↔C) | Pass |
+| Multiple active conversations | Pass |
+| Group create + multi-member send | Pass |
+| Archived conversation (send denied, history readable) | Pass |
+| Unread + mark-read + idempotent rewrite suppression | Pass |
+| Pagination (older pages, no cross-page duplicates) | Pass |
+| Rapid exchange (12 alternating sends) | Pass |
+| Long conversation (≥40 messages, ordered, no dupes) | Pass |
+| Idle `direction=after` polls (8× empty) | Pass |
+| Poll after new message | Pass |
+| Simultaneous conversation reads | Pass |
+| Session re-resolve / switching | Pass |
+| Operator enable / disable / status | Pass |
+| Allowlist removal immediate revoke | Pass |
+| Feature disabled / activation disabled | Pass |
+| Portal / inactive org / inactive membership | Pass (fail-closed) |
+| Authenticated `/admin/connect` + APIs (fixture A/B) | Pass |
+| Rollback without deploy | Pass |
+
+### Stability observations
+
+- No message-order regressions; pages remain ASC with stable publicIds
+- No duplicate message IDs across rapid send, pagination, or long history
+- Mark-read identical target reports `changed: false` (no rewrite)
+- Authorization remains consistent across session re-resolve
+- Leaving activation disabled ends the operating period cleanly
+- Soft residual unchanged: Connect org `afterChange` audit FK race (logged, non-blocking)
+
+### Polling observations
+
+Measured on local Postgres via service `direction=after` (same path as UI short poll):
+
+| Metric | Value (C5 run) |
+|--------|----------------|
+| Idle empty-poll samples | 8 |
+| Avg poll latency | ~7.3ms |
+| Max poll latency | ~21.6ms |
+| Empty poll row count | 0 messages |
+| After new-message poll | Returns injected message only after cursor |
+| Overlap prevention (UI) | `pollInFlight` + visibility pause (unchanged from C2/C3) |
+
+No evidence of duplicate polling writes or unnecessary mark-read on empty polls.
+
+### Authorization / operator observations
+
+- Fail-closed at every expected denial reason
+- Allowlist file rewrite revokes on next session resolve (no deploy)
+- Activation disable revokes HTTP conversations immediately
+- Operator CLI is understandable: status → enable → disable
+- Ops success logging is chatty under multi-session dogfood (see findings)
+- Status keeps `uiAvailable: false` / `messagingAvailable: false` by design (no public exposure flag)
+
+### UX observations (no redesign)
+
+- Conversation list discovers directs + groups; archived rows remain visible with previews/unread
+- New conversation / group flows unchanged from C2 (eligible members endpoint returns peers)
+- Empty/unavailable states remain calm when activation is off
+- Keyboard/a11y posture from C3.1 still applies (Escape/focus, aria-live, reduced motion)
+- Interactive browser password automation was gated in this session; authenticated HTML/API path was used instead (C3.1 already covered visual matrix)
+
+### Dogfood findings
+
+**Critical**
+
+- None
+
+**High**
+
+- None (no blocking defects remaining)
+
+**Medium**
+
+1. **Ops log volume** — `authorization.success` emits on every session resolve; noisy during dogfood. Future: default to denials + activation events, sample successes. *(ops polish / not a product bug)*
+2. **Archived conversations in main list** — archived groups appear alongside active threads with unread badges. Future: archive section or filter. *(product idea / not incorrect today)*
+
+**Low**
+
+1. Status `uiAvailable: false` while dogfood layers are ready can confuse operators — intentional non-exposure flag; runbook clarifies
+2. Effective allowlist size still reports file emails while activation is disabled — accurate for sync state, easy to misread without `dogfoodLayersReady`
+3. Next.js process must be started with Connect env vars (or `.env.local`) — activation file alone is insufficient for `KXD_CONNECT_ENABLED`
+
+**Future ideas** (explicitly not bugs; not approved)
+
+- Presence, typing, read receipts, notifications, attachments, search, AI
+- Dock / Buddy List / launcher / global nav entry
+- Realtime transport (WebSockets/SSE)
+- Production activation path
+- Archive filtering / conversation mute
+- Quieter ops logging defaults
+
+### Defects fixed in C5
+
+None required. One dogfood harness assertion was corrected (expected history length after sending 40 messages). No Connect product code changes.
+
+### C5 authorization boundary
+
+Passing **CP6** completes the local operating period only.  
+It does **not** authorize production rollout, navigation exposure, or Connect GA.
+
+---
+
+## C6 and later
+
+Not implemented. Not approved by this batch. Do not present dock, Buddy List, presence, notifications, client Connect surfaces, or **production** Connect enablement as available.

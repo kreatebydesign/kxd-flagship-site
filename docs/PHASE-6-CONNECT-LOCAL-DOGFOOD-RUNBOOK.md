@@ -88,10 +88,19 @@ npm run verify:phase6-batch-c3
 npm run verify:phase6-batch-c4
 
 npm run connect:local-status
-# With fixtures + enablement:
+npm run connect:local-enable
+
+# Structured multi-session operating period (service layer)
+npm run dogfood:connect-local
+
+# With fixtures + enablement + Next started with Connect env:
 # sign in as allowlisted staff → /admin/connect
 # sign in as non-allowlisted staff → unavailable
+
+npm run connect:local-disable
 ```
+
+C5 findings live in `docs/PHASE-6-KXD-CONNECT.md` (Batch C5 section).
 
 ---
 
