@@ -539,11 +539,15 @@ Suggested **local** env for later dogfood authorization (not set by C3; not prod
 - `KXD_CONNECT_ORG_ALLOWLIST=kxd`
 - `KXD_CONNECT_STAFF_DOGFOOD_EMAILS=connect-a@kxd.local,connect-b@kxd.local,connect-c@kxd.local`
 
-### Visual QA (C3)
+### Visual QA (C3 / C3.1)
 
-Local fixture environment validated via service-layer multi-session smoke (`smoke:connect-local-messaging`) plus retained C2 structural/accessibility checks (desktop two-panel, mobile list→thread, dialog Escape/`aria-modal`, focus-visible, reduced-motion, composer safe-area, long-string wrap, unread aria-label).
+C3 validated service-layer multi-session smoke plus C2 structural/accessibility checks.
 
-Live interactive browser matrix was attempted against local Next; the login route failed with a pre-existing Turbopack/`@tailwindcss/postcss` resolution error (unrelated to Connect C3; production `npm run build` succeeded). Full desktop/mobile viewport + modal keyboard tour with fixture logins therefore remains an **operator confirmation** step — C3 does not claim interactive browser sign-off as complete.
+**C3.1** recovered the local Next.js environment (stopped a stale repo-owned `next-server` on port 3000; cleared Turbopack cache; `@tailwindcss/postcss` was already installed — stale cache/process was the blocker). Authenticated fixture visual QA completed on desktop, tablet, and mobile for `/admin/connect`.
+
+C3.1 UI polish (no redesign): New-dialog Escape closes with focus return; loading state while eligible members fetch (avoids false empty state).
+
+Residual: Turbopack may still log Payload SCSS/`@tailwindcss/postcss` resolution noise for admin chrome; Connect workspace CSS loads and the authenticated Connect UI functions. Production `npm run build` remains the authoritative compile path.
 
 ### Remaining blockers before dogfood activation (separate authorization)
 
