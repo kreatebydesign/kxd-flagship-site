@@ -7,8 +7,8 @@ import { KxdAdminLoginForm } from "./KxdAdminLoginForm";
 
 /**
  * Custom Payload Admin Login view.
- * Replaces stock LoginView so authentication uses a real semantic form with
- * Enter-key submission, while preserving Payload session cookies + redirects.
+ * Experience Refinement Phase 2 Batch B — Arrival owns Welcomed.
+ * Auth mechanics unchanged; emotional first impression is KXD OS, not CMS.
  */
 export function KxdAdminLoginView({
   initPageResult,
@@ -55,13 +55,16 @@ export function KxdAdminLoginView({
   );
 
   return (
-    <>
+    <div className="kxd-admin-login" data-experience="welcomed">
       <div className="login__brand">
         <PayloadLogo />
+        <p className="kxd-admin-login__welcome">
+          Enter your business. Today is waiting.
+        </p>
       </div>
       {!localStrategyDisabled ? (
         <KxdAdminLoginForm searchParams={searchParams} />
       ) : null}
-    </>
+    </div>
   );
 }

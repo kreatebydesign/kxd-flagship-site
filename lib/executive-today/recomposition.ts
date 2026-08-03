@@ -1,5 +1,6 @@
 /**
  * Phase 7 — Today | Batch D.1 — Founder experience recomposition.
+ * Experience Refinement Phase 2 Batch B — Morning Answer + human action language.
  *
  * Presentation-only. No new intelligence. No new data owners.
  * Rewrites tone, hierarchy, and composition over existing facts.
@@ -36,8 +37,11 @@ export interface TodayFlowPeriod {
 }
 
 export interface TodayRecomposition {
+  /** Morning Answer — chief-of-staff opening (emotion before information). */
   postureLine: string;
   daySentence: string;
+  /** Shape of the day — spacious / composed / compressed — not calendar chrome. */
+  dayShapeLine: string;
   primary: ExecutiveTodayPrimary;
   waitingForYou: TodayWaitingItem[];
   flowPeriods: TodayFlowPeriod[];
@@ -87,14 +91,28 @@ export function humanizePrimary(primary: ExecutiveTodayPrimary): ExecutiveTodayP
 function humanizeActionLabel(label: string | null): string | null {
   if (!label) return null;
   const map: Record<string, string> = {
-    "Open Work Engine": "Open Work",
-    "Open Scheduling": "See the day",
+    "Open Work Engine": "Continue the work",
+    "Open Work": "Continue the work",
+    "Open Scheduling": "See what’s next",
     Continue: "Begin",
-    "Open Focus": "Enter Focus",
+    "Open Focus": "Begin the day",
+    "Enter Focus": "Begin the day",
+    "Open Review Inbox": "Review what’s waiting",
+    "View Dashboard": "Continue",
+    "Go to Operations": "Continue",
+    "Manage Items": "Continue",
   };
-  return map[label] ?? label.replace(/^Open Work Engine$/i, "Open Work");
+  if (map[label]) return map[label];
+  if (/^open /i.test(label) && /engine|dashboard|operations/i.test(label)) {
+    return "Continue";
+  }
+  return label;
 }
 
+/**
+ * Morning Answer — deterministic chief-of-staff opening over existing truth.
+ * Experience Constitution: emotion before information; never invent facts.
+ */
 export function composePostureLine(input: {
   orientation: ExecutiveDayOrientation | null;
   businessMomentum: "quiet" | "steady" | "elevated" | "pressured";
@@ -104,33 +122,36 @@ export function composePostureLine(input: {
   const { orientation, businessMomentum, waitingCount, isCalm } = input;
 
   if (orientation === "recovery_required") {
-    return "One calendar commitment needs your attention before the day settles.";
+    return "One commitment needs you before the day can settle.";
   }
   if (orientation === "commitment_at_risk" || orientation === "overloaded") {
     return "Today is tight. Protect the decision that matters most.";
   }
   if (orientation === "compressed" || orientation === "fragmented") {
-    return "The day is fragmented — clarity will come from choosing less.";
+    return "The day is compressed — clarity comes from choosing less.";
   }
   if (waitingCount >= 3) {
-    return "A few things are waiting on you. Clear those first.";
+    return "A few decisions need you before the day opens.";
   }
-  if (waitingCount > 0) {
-    return "You're in a steady position — with a short list waiting on you.";
+  if (waitingCount === 2) {
+    return "Two decisions need you. The rest can wait.";
+  }
+  if (waitingCount === 1) {
+    return "The business is steady. One thing is waiting.";
   }
   if (isCalm || businessMomentum === "quiet" || orientation === "clear") {
-    return "You're in a good position today.";
+    return "You are clear this morning.";
   }
   if (orientation === "focused") {
-    return "You have a real focus window. Use it well.";
+    return "You have room to finish the work that matters.";
   }
   if (businessMomentum === "pressured") {
-    return "There is pressure in the studio — stay with one clear decision.";
+    return "There is pressure — stay with one clear decision.";
   }
   if (businessMomentum === "elevated") {
     return "The business is moving. Keep your attention narrow.";
   }
-  return "Everything critical is under control.";
+  return "Nothing urgent is pulling at the day.";
 }
 
 export function composeDaySentence(input: {
@@ -145,28 +166,58 @@ export function composeDaySentence(input: {
     return `Right now: ${input.happeningNow}.`;
   }
   if (input.nextCommitment) {
-    return `Next up: ${input.nextCommitment}.`;
+    return `Next: ${input.nextCommitment}.`;
   }
   if (input.orientation === "clear" || (input.isCalm && input.scheduleCount === 0)) {
-    return "Quiet day ahead — a good one to move something forward.";
+    return "Nothing urgent is pulling at the day.";
   }
   if (input.scheduleCount === 0) {
-    return "No timed commitments. The day is open.";
+    return "The day is open.";
   }
   if (input.waitingCount > 0 && input.scheduleCount <= 2) {
-    return "A light calendar with a few decisions waiting.";
+    return "A light day with a few decisions waiting.";
   }
   if (input.orientation === "balanced" || input.orientation === "focused") {
-    return "The day has shape — enough structure without crowding you.";
+    return "The day has shape without crowding you.";
   }
   if (
     input.orientation === "compressed" ||
     input.orientation === "fragmented" ||
     input.orientation === "overloaded"
   ) {
-    return "The calendar is demanding. Keep your focus list short.";
+    return "The day is demanding. Keep the focus list short.";
   }
   return "Begin with the one thing that deserves you first.";
+}
+
+/** Shape of the day — open space vs compression, not a calendar grid. */
+export function composeDayShapeLine(input: {
+  orientation: ExecutiveDayOrientation | null;
+  scheduleCount: number;
+  calendarAvailable: boolean | null;
+}): string {
+  if (input.calendarAvailable === false) {
+    return "Schedule quiet for now — your time is still yours.";
+  }
+  if (input.scheduleCount === 0) {
+    return "Spacious — no timed commitments competing for you.";
+  }
+  if (
+    input.orientation === "compressed" ||
+    input.orientation === "fragmented" ||
+    input.orientation === "overloaded" ||
+    input.orientation === "commitment_at_risk"
+  ) {
+    return input.scheduleCount === 1
+      ? "Compressed — one commitment anchors the day."
+      : `Compressed — ${input.scheduleCount} commitments shape the day.`;
+  }
+  if (input.scheduleCount <= 2) {
+    return input.scheduleCount === 1
+      ? "Composed — one important commitment."
+      : "Composed — a few important commitments.";
+  }
+  return `Full — ${input.scheduleCount} commitments across the day.`;
 }
 
 export function composeWaitingForYou(input: {
@@ -283,19 +334,19 @@ export function composeMomentumLine(input: {
   isCalm: boolean;
 }): string {
   if (input.isCalm && input.waitingCount === 0) {
-    return "Quiet momentum — a clean runway for one meaningful advance.";
+    return "Quiet runway — room for one meaningful advance.";
   }
   switch (input.businessMomentum) {
     case "quiet":
-      return "The portfolio is calm. Progress today can be deliberate.";
+      return "The studio is calm. Progress can be deliberate.";
     case "steady":
       return input.priorityCount > 0
-        ? "Steady movement across the studio. Keep finishing what you start."
+        ? "Steady movement. Finish what you start."
         : "Steady movement across the studio.";
     case "elevated":
-      return "Clients and work are advancing — protect your attention.";
+      return "Work is advancing — protect your attention.";
     case "pressured":
-      return "Pressure is present. Confidence comes from finishing one thing.";
+      return "Pressure is present. Finish one thing with confidence.";
     default:
       return "The business is moving.";
   }
@@ -351,13 +402,18 @@ export function recomposeTodayExperience(
       happeningNow: brief?.current.happeningNow ?? null,
       nextCommitment: brief?.current.nextCommitment ?? null,
     }),
+    dayShapeLine: composeDayShapeLine({
+      orientation: brief?.orientation ?? null,
+      scheduleCount: scheduleItems.length,
+      calendarAvailable: brief ? brief.freshness.calendarAvailable : null,
+    }),
     primary,
     waitingForYou,
     flowPeriods,
     scheduleEmpty:
       brief && !brief.freshness.calendarAvailable
-        ? "The calendar isn’t available — your time is still yours."
-        : "Open day. Nothing timed is competing for you.",
+        ? "Schedule quiet for now — your time is still yours."
+        : "Spacious — nothing timed is competing for you.",
     priorities: data.focus.slice(0, TODAY_PRIORITIES_LIMIT),
     momentumLine: composeMomentumLine({
       businessMomentum: extras.businessMomentum,

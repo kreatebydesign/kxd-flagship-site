@@ -1,5 +1,9 @@
 import { KXD_PAYLOAD_LOGO_SRC } from "./payload-brand";
 
+/**
+ * Founder login brand mark.
+ * Experience Refinement Phase 2 Batch B — Welcomed, not CMS marketing.
+ */
 export function PayloadLogo() {
   return (
     <div className="kxd-payload-brand">
@@ -11,7 +15,7 @@ export function PayloadLogo() {
         height={62}
       />
       <p className="kxd-payload-brand__title">KXD OS</p>
-      <p className="kxd-payload-brand__subtitle">Creative Operations Platform</p>
+      <p className="kxd-payload-brand__subtitle">Your private studio</p>
     </div>
   );
 }
