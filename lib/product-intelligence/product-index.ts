@@ -21,6 +21,7 @@ import {
   PRODUCT_INTELLIGENCE_KILL_LIST_VERSION,
   PRODUCT_INTELLIGENCE_LAWS,
   PRODUCT_INTELLIGENCE_MISSION,
+  PRODUCT_INTELLIGENCE_QUERY_VERSION,
   PRODUCT_INTELLIGENCE_SYSTEM_ID,
   PRODUCT_INTELLIGENCE_THIRTY_DAY_TEST,
 } from "./law";
@@ -34,6 +35,7 @@ import type { HallOfFameEngineResult } from "./hall-of-fame/engine";
 import type { PlatformHealthEngineResult } from "./health/engine";
 import type { AutomaticInventoryResult } from "./inventory/types";
 import type { ProductKillListEngineResult } from "./kill-list/engine";
+import type { QueryEngineResult } from "./query/engine";
 import {
   OBJECT_TYPE_REGISTRY,
   PRODUCT_INTELLIGENCE_DOMAINS,
@@ -108,6 +110,7 @@ export interface ProductIntelligenceIndex {
     hallOfFameVersion: typeof PRODUCT_INTELLIGENCE_HALL_OF_FAME_VERSION;
     killListVersion: typeof PRODUCT_INTELLIGENCE_KILL_LIST_VERSION;
     futureBetsVersion: typeof PRODUCT_INTELLIGENCE_FUTURE_BETS_VERSION;
+    queryVersion: typeof PRODUCT_INTELLIGENCE_QUERY_VERSION;
     mission: typeof PRODUCT_INTELLIGENCE_MISSION;
     thirtyDayTest: typeof PRODUCT_INTELLIGENCE_THIRTY_DAY_TEST;
     laws: typeof PRODUCT_INTELLIGENCE_LAWS;
@@ -142,6 +145,8 @@ export interface ProductIntelligenceIndex {
   productKillListEngine: ProductKillListEngineResult | null;
   /** Populated only after loadFutureBetsEngine — bet contracts (entries empty). */
   futureBetsEngine: FutureBetsEngineResult | null;
+  /** Populated only after loadQueryEngine — structured query contracts (no executed log). */
+  queryEngine: QueryEngineResult | null;
 }
 
 export function createEmptyStoreBuckets(): ProductIntelligenceStoreBuckets {
@@ -198,6 +203,7 @@ export const PRODUCT_INTELLIGENCE_ENTRY_POINTS: ProductIntelligenceEntryPoints =
         "loadHallOfFameEngine() for defining-moment contracts",
         "loadProductKillListEngine() for intentional-refusal contracts",
         "loadFutureBetsEngine() for protected-conviction contracts",
+        "loadQueryEngine() for structured Product Intelligence queries",
         "runAutomaticInventory(root) for System Map reality",
         "protected: product_dna, doctrine, vision",
         "domain objects + relationships",
@@ -216,6 +222,7 @@ export const PRODUCT_INTELLIGENCE_ENTRY_POINTS: ProductIntelligenceEntryPoints =
         "Hall of Fame (what moments made KXD OS the company it is)",
         "Product Kill List (why KXD OS intentionally does not do X)",
         "Future Bets (what KXD believes the future should look like — not commitment)",
+        "Query Engine (structured retrieval — not chat)",
         "Automatic Inventory / System Map (what exists)",
         "Current Inventory + Architecture map",
         "Active Decisions affecting the area",
@@ -225,7 +232,7 @@ export const PRODUCT_INTELLIGENCE_ENTRY_POINTS: ProductIntelligenceEntryPoints =
         "Kill List + Future Bets (discipline boundaries)",
       ],
       promptContract:
-        "Load Product Intelligence for domain X before proposing code. Load Decision Archive before changing product law. Run automatic inventory for reality. Cite Evidence IDs. If Decision missing, stop and request Decision. Prefer absorption over new surfaces. Future Bets are not roadmap. Kill List is rejection memory. Chat is not memory.",
+        "Load Product Intelligence for domain X before proposing code. Load Decision Archive before changing product law. Run automatic inventory for reality. Use Query Engine structured contracts — never chat. Cite Evidence IDs. If Decision missing, stop and request Decision. Prefer absorption over new surfaces. Future Bets are not roadmap. Kill List is rejection memory. Chat is not memory.",
     },
   };
 
@@ -249,6 +256,7 @@ export function createProductIntelligenceIndex(options?: {
       hallOfFameVersion: PRODUCT_INTELLIGENCE_HALL_OF_FAME_VERSION,
       killListVersion: PRODUCT_INTELLIGENCE_KILL_LIST_VERSION,
       futureBetsVersion: PRODUCT_INTELLIGENCE_FUTURE_BETS_VERSION,
+      queryVersion: PRODUCT_INTELLIGENCE_QUERY_VERSION,
       mission: PRODUCT_INTELLIGENCE_MISSION,
       thirtyDayTest: PRODUCT_INTELLIGENCE_THIRTY_DAY_TEST,
       laws: PRODUCT_INTELLIGENCE_LAWS,
@@ -274,6 +282,7 @@ export function createProductIntelligenceIndex(options?: {
     hallOfFameEngine: null,
     productKillListEngine: null,
     futureBetsEngine: null,
+    queryEngine: null,
   };
 }
 
@@ -420,6 +429,20 @@ export function attachFutureBetsEngine(
       ...index.stores,
       futureBets: bets.index.entries,
     },
+  };
+}
+
+/**
+ * Attach P0-K Query Engine contracts.
+ * Does not execute queries or populate Product Intelligence stores.
+ */
+export function attachQueryEngine(
+  index: ProductIntelligenceIndex,
+  query: QueryEngineResult,
+): ProductIntelligenceIndex {
+  return {
+    ...index,
+    queryEngine: query,
   };
 }
 

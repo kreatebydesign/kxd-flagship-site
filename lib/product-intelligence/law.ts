@@ -44,6 +44,8 @@ export const PRODUCT_INTELLIGENCE_HALL_OF_FAME_VERSION = "P0-H" as const;
 export const PRODUCT_INTELLIGENCE_KILL_LIST_VERSION = "P0-I" as const;
 /** Future Bets Engine — protected convictions before roadmap (contracts + index). */
 export const PRODUCT_INTELLIGENCE_FUTURE_BETS_VERSION = "P0-J" as const;
+/** Product Intelligence Query Engine — structured retrieval (contracts + resolver). */
+export const PRODUCT_INTELLIGENCE_QUERY_VERSION = "P0-K" as const;
 
 /** System identity — separate from client-facing KXD OS. */
 export const PRODUCT_INTELLIGENCE_SYSTEM_ID = "kxd-product-intelligence" as const;

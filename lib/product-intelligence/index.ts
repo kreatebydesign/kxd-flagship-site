@@ -21,6 +21,7 @@ export {
   PRODUCT_INTELLIGENCE_KILL_LIST_VERSION,
   PRODUCT_INTELLIGENCE_LAWS,
   PRODUCT_INTELLIGENCE_MISSION,
+  PRODUCT_INTELLIGENCE_QUERY_VERSION,
   PRODUCT_INTELLIGENCE_SYSTEM_ID,
   PRODUCT_INTELLIGENCE_THIRTY_DAY_TEST,
 } from "./law";
@@ -35,6 +36,7 @@ export {
   attachPlatformHealthEngine,
   attachProductEvolutionEngine,
   attachProductKillListEngine,
+  attachQueryEngine,
   createEmptyStoreBuckets,
   createProductIntelligenceIndex,
   PRODUCT_INTELLIGENCE_ENTRY_POINTS,
@@ -250,6 +252,44 @@ export type {
   FutureBetTimelineModel,
   FutureBetValidationResult,
 } from "./future-bets";
+
+export {
+  createQueryCatalog,
+  createQueryEngineIndex,
+  createStructuredQuery,
+  DEFAULT_QUERY_MAX_DEPTH,
+  findCircularPaths,
+  findDuplicateResultPaths,
+  loadQueryEngine,
+  MAX_QUERY_MAX_DEPTH,
+  QUERY_DOMAIN_OBJECT_TYPES,
+  QUERY_ENGINE_FUTURE_LINKAGES,
+  QUERY_ENGINE_LAW,
+  QUERY_ENGINE_QUESTION,
+  QUERY_FAMILIES,
+  QUERY_FAMILY_DEFINITIONS,
+  QUERY_TARGET_DOMAIN_DEFINITIONS,
+  QUERY_TARGET_DOMAINS,
+  resolveProductIntelligenceQuery,
+  resolveRelationshipPaths,
+  validateProductIntelligenceQuery,
+  verifyQueryEngineIntegrity,
+} from "./query";
+export type {
+  ProductIntelligenceQuery,
+  ProductIntelligenceQueryAnswer,
+  QueryEngineIndex,
+  QueryEngineIntegrityReport,
+  QueryEngineResult,
+  QueryFamily,
+  QueryFamilyDefinition,
+  QueryFutureLinkage,
+  QueryResolutionContext,
+  QueryResultPath,
+  QueryTargetDomain,
+  QueryTargetDomainDefinition,
+  QueryValidationResult,
+} from "./query";
 
 export {
   assertHasOwner,
