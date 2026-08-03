@@ -20,6 +20,7 @@ import {
   TODAY_PRIORITIES_LIMIT,
   TODAY_SIGNALS_LIMIT,
 } from "./presentation";
+import { recomposeTodayExperience } from "./recomposition";
 import {
   mapWorkToFocusItem,
   type ExecutiveTodayData,
@@ -130,7 +131,7 @@ export async function loadExecutiveToday(input?: {
           }
         : brief;
 
-  return {
+  const base = {
     greeting: ctx.summary.greeting,
     welcome: ctx.summary.welcome,
     dateDisplay: ctx.summary.dateDisplay,
@@ -164,5 +165,15 @@ export async function loadExecutiveToday(input?: {
     morning: ctx.morning,
     explainability: intelligence.userExplainability,
     generatedAt: ctx.generatedAt,
+  };
+
+  return {
+    ...base,
+    experience: recomposeTodayExperience(base, {
+      reviews: ctx.reviewsWaiting,
+      waitingOnKxd: ctx.waiting.waitingOnKxd,
+      blocked: ctx.blockedItems,
+      businessMomentum: ctx.businessMomentum,
+    }),
   };
 }

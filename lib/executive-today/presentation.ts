@@ -18,8 +18,9 @@ export const TODAY_EVIDENCE_LIMIT = 2;
 
 export const TODAY_EMPTY = {
   priorities: "Clear desk. Nothing needs you yet.",
-  schedule: "No timed commitments. The day is open.",
-  signals: "Quiet. Nothing that changes today’s decisions.",
+  schedule: "Open day. Nothing timed is competing for you.",
+  signals: "Nothing here changes today’s decisions.",
+  waiting: "Nothing is waiting on you.",
 } as const;
 
 export const TODAY_QUIET_EXITS = [

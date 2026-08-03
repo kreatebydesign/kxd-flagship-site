@@ -1,6 +1,6 @@
 # Phase 7 — Today
 
-**Status:** Batch A ✅ approved · Batch B ✅ approved · Batch C ✅ implemented · Batch D ✅ implemented  
+**Status:** Batch A ✅ approved · Batch B ✅ approved · Batch C ✅ implemented · Batch D ✅ implemented · Batch D.1 ✅ implemented  
 **Product home:** **Today** (`/admin/operations/today`)  
 **Retired product name:** “Command Center” (historical working title only)
 
@@ -108,55 +108,61 @@ Verifier: `npm run verify:phase7-batch-c`
 
 **Goal:** First complete Today experience — compose existing truth beautifully.
 
-### Section model (live)
+Caps, calm empties, quiet exits, and removal of Capture / capacity / end-of-day from the morning surface.
 
-| # | Section | Behavior |
-|---|---------|----------|
-| 1 | Orientation | Greeting · **Today** · calm posture · date |
-| 2 | Today’s Focus | One primary decision — visual anchor |
-| 3 | My Priorities | ≤5 curated rows · “Clear desk” when empty |
-| 4 | Today’s Schedule | Compact day-flow ≤5 · always shown · quiet empty |
-| 5 | Needs Judgment | **Absent when calm** · ≤4 exceptions |
-| 6 | What Changed | ≤6 signals · “Quiet…” when empty |
-| 7 | Quiet exits | Work · Clients · Review Inbox · Focus |
+Verifier: `npm run verify:phase7-batch-d`
 
-### Explicitly removed from morning surface
+---
 
-- Quick Capture grid (component retained for workspace hosts)  
-- Remaining-day capacity essay  
-- End-of-day closing block  
-- Connect (Batch G)  
-- Business / Weekly Snapshot (Batch F)  
+## Batch D.1 — Founder Experience Recomposition (implemented)
 
-### Presentation contracts
+**Goal:** Recompose Today so the first emotion is confidence — not report prose.
 
-`lib/executive-today/presentation.ts`
+### First viewport (exact order)
 
-- Caps: priorities 5 · schedule 5 · exceptions 4 · signals 6  
-- Calm empty language  
-- Quiet exit destinations  
+1. **How is my business?** — calm posture line (COO tone)  
+2. **What deserves me first?** — one Today’s Focus + one primary action  
+3. **Who or what is waiting?** — Waiting For You (actionable only)  
+4. **What does my day look like?** — Today’s Flow (Morning / Afternoon / Evening)
 
-### Visual standards applied
+### Supporting / background
 
-- Editorial hierarchy · large typography · whitespace before borders  
-- Soft enter motion · `prefers-reduced-motion` respected  
-- Responsive: hierarchy preserved; no widget wall stacking  
+| Section | Role |
+|---------|------|
+| Momentum | Emotional reward — movement, not KPIs |
+| Also on your desk | Batch A priorities, quieter supporting list |
+| Signals | Decision-changing change only (≤3 notable preferred) |
+| Quiet exits | Work · Clients · Review Inbox · Focus |
+
+### Language doctrine
+
+- Trusted COO tone  
+- Never robotic / analytics / enterprise filler  
+- Robotic primary copy rewritten at the presentation layer only  
+- Empty states increase confidence (“Nothing is waiting on you.”)
+
+### Architecture preserved
+
+- Same loaders / intelligence / routing / navigation / permissions  
+- `lib/executive-today/recomposition.ts` is presentation-only  
 
 ### Key files
 
 | Area | Path |
 |------|------|
 | Today screen | `components/admin/executive-today/ExecutiveTodayScreen.tsx` |
+| Recomposition | `lib/executive-today/recomposition.ts` |
 | Presentation contracts | `lib/executive-today/presentation.ts` |
-| Loader composition | `lib/executive-today/load.ts` |
+| Loader | `lib/executive-today/load.ts` |
 | Styles | `design-system/os/styles/kxd-os.css` |
-| Verifier | `scripts/verify-phase7-batch-d.ts` |
+| Verifiers | `verify:phase7-batch-d`, `verify:phase7-batch-d1` |
 
 ### Verification
 
 ```bash
 npm run verify:phase7-batch-c
 npm run verify:phase7-batch-d
+npm run verify:phase7-batch-d1
 npm run verify:executive-today-calendar
 ```
 
@@ -170,4 +176,4 @@ npm run verify:executive-today-calendar
 | **F** | Weekly Snapshot ownership on Today |
 | **G** | Connect unread exception seam (gated) |
 
-**Stop point:** Batch D complete. Do not begin Batch E until authorized.
+**Stop point:** Batch D.1 complete. Do not begin Batch E until authorized.

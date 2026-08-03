@@ -33,6 +33,22 @@ export {
   selectTodaySchedule,
 } from "./presentation";
 export {
+  composeDaySentence,
+  composeFlowPeriods,
+  composeMomentumLine,
+  composePostureLine,
+  composeWaitingForYou,
+  humanizePrimary,
+  recomposeTodayExperience,
+  selectDecisionSignals,
+} from "./recomposition";
+export type {
+  TodayDayPeriod,
+  TodayFlowPeriod,
+  TodayRecomposition,
+  TodayWaitingItem,
+} from "./recomposition";
+export {
   EXECUTIVE_TODAY_ACTIVITY_FETCH,
   selectExecutiveTodayActivity,
 } from "./activity-select";
