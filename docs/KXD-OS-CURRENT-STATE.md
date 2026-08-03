@@ -253,13 +253,14 @@ Edition 1 is in the **operate and extend** phase — not redesign.
 
 ### Internal product control plane — KXD Product Intelligence
 
-**KXD Product Intelligence** — **P0-A** architecture approved as product law; **P0-B** object contracts & system foundations complete. Spec: `docs/KXD-PRODUCT-INTELLIGENCE.md`. Verifier: `verify:product-intelligence-p0b`. Code: `lib/product-intelligence/`.
+**KXD Product Intelligence** — **P0-A** architecture approved as product law; **P0-B** object contracts complete; **P0-C** automatic System Map / platform inventory complete. Spec: `docs/KXD-PRODUCT-INTELLIGENCE.md`. Verifiers: `verify:product-intelligence-p0b`, `verify:product-intelligence-p0c`. Code: `lib/product-intelligence/` (+ `inventory/`).
 
 - Infrastructure for building KXD OS itself — **not** client-facing; does **not** change KXD OS product functionality
 - Permanent contracts for Doctrine, Product DNA, Vision, Inventory, Architecture, Experience, Design System, Evidence, Decision, Founder Friction, Competitive Insight, Roadmap Item, Technical Debt, Release, Score, Valuation, Health Snapshot, Hall of Fame, Product Kill List, Future Bet
 - Evidence Registry, relationship model, versioning, Update Engine (Doctrine / Product DNA / Vision protected), and root Product Intelligence Index
-- Stores intentionally **empty** — contracts only; no inventory/Hall of Fame/Kill List/Future Bet population, valuation, reports, or UI in P0-B
-- Next authorized batch: **P0-C** (System Map auto-inventory) only when explicitly requested
+- **P0-C:** `runAutomaticInventory()` discovers routes, APIs, collections, modules, features, editions, permissions, nav surfaces, integrations, verifiers, crons, jobs, AI capabilities, Shared Core — with product ownership, purposes, dependencies, and integrity checks
+- Hall of Fame / Kill List / Future Bets / Decision Archive / valuation remain **unpopulated** (contracts only)
+- Next authorized batch: **P0-D** (Decision Archive backfill) only when explicitly requested
 
 ### Approved product phase — Today (founder home)
 
@@ -306,7 +307,7 @@ Edition 1 is in the **operate and extend** phase — not redesign.
 3. **Phase 5 — Client Billing Visibility, Stripe Invoice Status & Monthly Work Summaries** — ✅ **Complete** (Batches 5A–5D; Batch 5E intentionally skipped). Spec: `docs/PHASE-5-CLIENT-BILLING-VISIBILITY.md`. Closed product lane — do not reopen inside Phase 5. Do not couple to Primal analytics or Batch J.2B.2. Combining work summaries with billing requires a new separately authorized phase or batch.
 4. **Phase 6 — KXD Connect** — Batches C0–C6 complete (through readiness review / internal release gate). Controlled internal readiness only; production rollout not authorized. Spec: `docs/PHASE-6-KXD-CONNECT.md`. Keep disabled in production. Does **not** gate Founding Client Early Access.
 5. **Phase 7 — Today** — Batches C–D.1 complete (home policy + experience foundation + founder recomposition). Next authorized batch is **Batch E** (absorb / retire demoted surfaces) only when explicitly requested. Spec: `docs/PHASE-7-TODAY.md`.
-6. **KXD Product Intelligence** — P0-A law + P0-B contracts complete (`lib/product-intelligence/`). Next authorized batch is **P0-C** (System Map auto-inventory) only when explicitly requested. Spec: `docs/KXD-PRODUCT-INTELLIGENCE.md`. Do not populate intelligence content until authorized.
+6. **KXD Product Intelligence** — P0-A law + P0-B contracts + P0-C automatic inventory complete (`lib/product-intelligence/`). Next authorized batch is **P0-D** (Decision Archive backfill) only when explicitly requested. Spec: `docs/KXD-PRODUCT-INTELLIGENCE.md`. Do not populate Hall of Fame / Kill List / Future Bets / valuation until authorized.
 7. **Client operations at scale** — Repeat the Primal launch pattern using `lib/client-launch/` for every new client workspace (including OTP Carts readiness before Cusick membership linking). Gate Batch A: `verify:otp-carts-readiness`.
 8. **Business Memory integration** — Wire `runBusinessMemory()` into rituals or intelligence when explicitly requested; foundation exists, UI does not. Phase 3 prepared durable relationship context but does not integrate Business Memory yet.
 9. **Human-approved automation** — Connect Observer automation metadata and Pulse posture to rules; no autonomous execution without approval.
@@ -522,7 +523,7 @@ From `lib/platform/registry.ts` and `docs/KXD-OS-ROADMAP.md`:
 | `PHASE-6-KXD-CONNECT.md` | Phase 6 Connect — Batches C0–C6 (through readiness / internal release gate); production enablement excluded |
 | `PHASE-6-CONNECT-LOCAL-DOGFOOD-RUNBOOK.md` | Local dogfood activation / rollback operator runbook (C4) |
 | `PHASE-7-TODAY.md` | Phase 7 Today — Batches A–B product law; Batches C–D.1 implemented (home policy + experience + recomposition) |
-| `KXD-PRODUCT-INTELLIGENCE.md` | Product Intelligence — P0-A law; P0-B contracts complete (`lib/product-intelligence/`) |
+| `KXD-PRODUCT-INTELLIGENCE.md` | Product Intelligence — P0-A law; P0-B contracts; P0-C automatic inventory (`lib/product-intelligence/`) |
 | `KXD-OS-CONSTITUTION.md` | Experience standard |
 | `CLIENT-EXPERIENCE-SYSTEM-ARCHITECTURE.md` | CES architecture |
 | `.cursor/rules/kxd-os-architecture.mdc` | Cursor permanent context |

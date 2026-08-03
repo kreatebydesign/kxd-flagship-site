@@ -166,17 +166,59 @@ export function verifyProductIntelligenceConsistency(): ConsistencyReport {
       message: "Index contractsVersion must be P0-B",
     });
   }
-  const storeCounts = Object.values(index.stores).reduce(
-    (sum, bucket) => sum + bucket.length,
-    0,
-  );
-  if (storeCounts !== 0 || index.evidenceRegistry.records.length !== 0) {
+  if (index.meta.inventoryVersion !== "P0-C") {
     issues.push({
-      code: "premature_population",
-      message: "P0-B stores must remain empty (contracts only)",
+      code: "inventory_version",
+      message: "Index inventoryVersion must be P0-C",
     });
   } else {
-    checksPassed.push("Stores empty — contracts only, no premature population");
+    checksPassed.push("Inventory engine version is P0-C");
+  }
+
+  // Interpretive / archive stores must stay empty until later batches.
+  const protectedEmptyStores: Array<keyof typeof index.stores> = [
+    "productDna",
+    "doctrine",
+    "vision",
+    "hallOfFame",
+    "productKillList",
+    "futureBets",
+    "valuations",
+    "decisions",
+    "founderFriction",
+    "competitiveInsights",
+  ];
+  for (const key of protectedEmptyStores) {
+    if (index.stores[key].length > 0) {
+      issues.push({
+        code: "premature_population",
+        message: `Store ${key} must remain empty until an authorized later batch`,
+      });
+    }
+  }
+  if (index.evidenceRegistry.records.length !== 0) {
+    issues.push({
+      code: "premature_evidence",
+      message: "Evidence registry population is not part of P0-C",
+    });
+  }
+  if (!issues.some((issue) => issue.code.startsWith("premature_"))) {
+    checksPassed.push(
+      "Interpretive stores empty — no Hall of Fame / Kill List / Future Bets / valuation population",
+    );
+  }
+
+  // Default singleton has no attached inventory; attach is explicit.
+  if (
+    index.automaticInventory === null &&
+    index.stores.productInventory.length !== 0
+  ) {
+    issues.push({
+      code: "inventory_attach_mismatch",
+      message: "productInventory populated without automaticInventory attach",
+    });
+  } else {
+    checksPassed.push("Inventory attach state is consistent");
   }
 
   if (!isProtectedObjectType("product_dna")) {

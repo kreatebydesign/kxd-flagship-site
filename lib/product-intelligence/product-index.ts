@@ -11,6 +11,7 @@ import {
   PRODUCT_INTELLIGENCE_ARCHITECTURE_VERSION,
   PRODUCT_INTELLIGENCE_CONTRACTS_VERSION,
   PRODUCT_INTELLIGENCE_CORE_FLOW,
+  PRODUCT_INTELLIGENCE_INVENTORY_VERSION,
   PRODUCT_INTELLIGENCE_LAWS,
   PRODUCT_INTELLIGENCE_MISSION,
   PRODUCT_INTELLIGENCE_SYSTEM_ID,
@@ -18,6 +19,7 @@ import {
 } from "./law";
 import type { ProductIntelligenceObject } from "./contracts";
 import type { EvidenceObject } from "./evidence";
+import type { AutomaticInventoryResult } from "./inventory/types";
 import {
   OBJECT_TYPE_REGISTRY,
   PRODUCT_INTELLIGENCE_DOMAINS,
@@ -83,6 +85,7 @@ export interface ProductIntelligenceIndex {
     systemId: typeof PRODUCT_INTELLIGENCE_SYSTEM_ID;
     architectureVersion: typeof PRODUCT_INTELLIGENCE_ARCHITECTURE_VERSION;
     contractsVersion: typeof PRODUCT_INTELLIGENCE_CONTRACTS_VERSION;
+    inventoryVersion: typeof PRODUCT_INTELLIGENCE_INVENTORY_VERSION;
     mission: typeof PRODUCT_INTELLIGENCE_MISSION;
     thirtyDayTest: typeof PRODUCT_INTELLIGENCE_THIRTY_DAY_TEST;
     laws: typeof PRODUCT_INTELLIGENCE_LAWS;
@@ -101,6 +104,8 @@ export interface ProductIntelligenceIndex {
   updateProposals: IntelligenceUpdateProposal[];
   stores: ProductIntelligenceStoreBuckets;
   entryPoints: ProductIntelligenceEntryPoints;
+  /** Populated only after runAutomaticInventory — reality snapshot, not narrative. */
+  automaticInventory: AutomaticInventoryResult | null;
 }
 
 export function createEmptyStoreBuckets(): ProductIntelligenceStoreBuckets {
@@ -149,6 +154,7 @@ export const PRODUCT_INTELLIGENCE_ENTRY_POINTS: ProductIntelligenceEntryPoints =
         "Load Product Intelligence for the target domain before proposing code. Cite Evidence IDs. If Decision missing, stop and request Decision. Prefer absorption over new surfaces. Never treat chat history as memory.",
       loadSequence: [
         "PRODUCT_INTELLIGENCE_INDEX",
+        "runAutomaticInventory(root) for System Map reality",
         "protected: product_dna, doctrine, vision",
         "domain objects + relationships",
         "evidence registry subset",
@@ -159,6 +165,7 @@ export const PRODUCT_INTELLIGENCE_ENTRY_POINTS: ProductIntelligenceEntryPoints =
       retrievalPack: [
         "Doctrine pack (laws)",
         "Product DNA (identity)",
+        "Automatic Inventory / System Map (what exists)",
         "Current Inventory + Architecture map",
         "Active Decisions affecting the area",
         "Open Friction + Debt",
@@ -167,13 +174,13 @@ export const PRODUCT_INTELLIGENCE_ENTRY_POINTS: ProductIntelligenceEntryPoints =
         "Kill List + Future Bets (discipline boundaries)",
       ],
       promptContract:
-        "Load Product Intelligence for domain X before proposing code. Cite Evidence IDs. If Decision missing, stop and request Decision. Prefer absorption over new surfaces. Future Bets are not roadmap. Kill List is rejection memory. Chat is not memory.",
+        "Load Product Intelligence for domain X before proposing code. Run automatic inventory for reality. Cite Evidence IDs. If Decision missing, stop and request Decision. Prefer absorption over new surfaces. Future Bets are not roadmap. Kill List is rejection memory. Chat is not memory.",
     },
   };
 
 /**
- * Build the permanent root index with empty stores.
- * This is the load entry for humans, Cursor, and future AI.
+ * Build the permanent root index with empty interpretive stores.
+ * Attach automatic inventory via attachAutomaticInventory().
  */
 export function createProductIntelligenceIndex(options?: {
   establishedAt?: string;
@@ -183,6 +190,7 @@ export function createProductIntelligenceIndex(options?: {
       systemId: PRODUCT_INTELLIGENCE_SYSTEM_ID,
       architectureVersion: PRODUCT_INTELLIGENCE_ARCHITECTURE_VERSION,
       contractsVersion: PRODUCT_INTELLIGENCE_CONTRACTS_VERSION,
+      inventoryVersion: PRODUCT_INTELLIGENCE_INVENTORY_VERSION,
       mission: PRODUCT_INTELLIGENCE_MISSION,
       thirtyDayTest: PRODUCT_INTELLIGENCE_THIRTY_DAY_TEST,
       laws: PRODUCT_INTELLIGENCE_LAWS,
@@ -200,9 +208,30 @@ export function createProductIntelligenceIndex(options?: {
     updateProposals: createEmptyUpdateProposalStore(),
     stores: createEmptyStoreBuckets(),
     entryPoints: PRODUCT_INTELLIGENCE_ENTRY_POINTS,
+    automaticInventory: null,
   };
 }
 
-/** Singleton root index (empty stores). */
+/**
+ * Attach a P0-C automatic inventory result into the index.
+ * Populates product_inventory store + discovery relationships only.
+ * Does not populate doctrine, DNA, Hall of Fame, Kill List, Future Bets, or valuation.
+ */
+export function attachAutomaticInventory(
+  index: ProductIntelligenceIndex,
+  inventory: AutomaticInventoryResult,
+): ProductIntelligenceIndex {
+  return {
+    ...index,
+    automaticInventory: inventory,
+    stores: {
+      ...index.stores,
+      productInventory: inventory.inventoryObjects,
+    },
+    relationships: [...index.relationships, ...inventory.relationships],
+  };
+}
+
+/** Singleton root index (interpretive stores empty until inventory attach). */
 export const PRODUCT_INTELLIGENCE_INDEX: ProductIntelligenceIndex =
   createProductIntelligenceIndex();
