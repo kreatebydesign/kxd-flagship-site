@@ -63,6 +63,7 @@ import { CreativeCampaigns } from "./payload/collections/CreativeCampaigns.ts";
 import { FlyerRequests } from "./payload/collections/FlyerRequests.ts";
 import { JuniorCreatorUsers } from "./payload/collections/JuniorCreatorUsers.ts";
 import { JuniorCreatorShifts } from "./payload/collections/JuniorCreatorShifts.ts";
+import { JuniorCreatorTasks } from "./payload/collections/JuniorCreatorTasks.ts";
 import { Inquiries } from "./payload/collections/Inquiries.ts";
 import { Insights } from "./payload/collections/Insights.ts";
 import { Media } from "./payload/collections/Media.ts";
@@ -284,6 +285,7 @@ export default buildConfig({
     PortalSecurityEvents,
     JuniorCreatorUsers,
     JuniorCreatorShifts,
+    JuniorCreatorTasks,
   ],
   editor: lexicalEditor(),
   i18n: {

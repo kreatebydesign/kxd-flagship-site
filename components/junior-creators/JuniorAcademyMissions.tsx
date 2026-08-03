@@ -23,9 +23,11 @@ export function JuniorAcademyMissions() {
   return (
     <section className="mb-10">
       <div style={{ marginBottom: "1.25rem" }}>
-        <Label style={{ color: C.goldDim, marginBottom: "0.5rem" }}>Academy Missions</Label>
+        <Label style={{ color: C.goldDim, marginBottom: "0.5rem" }}>
+          Junior Academy · Training
+        </Label>
         <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted, maxWidth: "40rem", lineHeight: 1.65 }}>
-          Real-world challenges that build your eye for websites, brands, and opportunities. Pick one and explore.
+          Practice missions that build your eye for websites, brands, and opportunities — separate from Assigned Tasks.
         </p>
       </div>
 

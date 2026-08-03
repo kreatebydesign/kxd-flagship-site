@@ -88,6 +88,7 @@ import * as migration_20260727_phase3_client_relationship_intelligence from './2
 import * as migration_20260728_phase4_portal_client_memberships from './20260728_phase4_portal_client_memberships';
 import * as migration_20260814_phase4_portal_identity_security from './20260814_phase4_portal_identity_security';
 import * as migration_20260731_branded_client_monthly_reports from './20260731_branded_client_monthly_reports';
+import * as migration_20260803_junior_creator_assigned_tasks from './20260803_junior_creator_assigned_tasks';
 
 export const migrations = [
   {
@@ -539,5 +540,12 @@ export const migrations = [
     up: migration_20260731_branded_client_monthly_reports.up,
     down: migration_20260731_branded_client_monthly_reports.down,
     name: '20260731_branded_client_monthly_reports',
+  },
+  {
+    // Registered after latest applied migrations so production applies this last.
+    // Filename date is calendar day of implementation (2026-08-03), not apply order.
+    up: migration_20260803_junior_creator_assigned_tasks.up,
+    down: migration_20260803_junior_creator_assigned_tasks.down,
+    name: '20260803_junior_creator_assigned_tasks',
   },
 ];

@@ -1,6 +1,6 @@
 /**
  * /admin/operations/junior-creators
- * KXD OS — Junior Creator shift review (admin only)
+ * KXD OS — Junior Creator shift review + assigned tasks (admin only)
  */
 
 import { JuniorCreatorAdminReview } from "@/components/admin/JuniorCreatorAdminReview";
