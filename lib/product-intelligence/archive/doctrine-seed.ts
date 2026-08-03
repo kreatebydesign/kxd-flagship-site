@@ -112,6 +112,13 @@ export const EDITION_1_DOCTRINE: DoctrineObject = {
         evidenceIds: [],
       },
       {
+        id: "law-product-evolution-deliberate",
+        lawClass: "build_authorization",
+        statement:
+          "KXD OS evolves through deliberate product decisions, not accumulated commits.",
+        evidenceIds: [],
+      },
+      {
         id: "law-no-automation-without-approval",
         lawClass: "build_authorization",
         statement: "No automation without explicit approval.",

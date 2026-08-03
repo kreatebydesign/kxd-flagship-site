@@ -52,6 +52,7 @@ export const DEFAULT_UPDATE_CHANNEL_BY_TYPE: Record<
   roadmap_item: "manual_approval",
   technical_debt: "generated_draft",
   release: "automatic",
+  product_evolution: "manual_approval",
   score: "generated_draft",
   valuation: "manual_approval",
   health_snapshot: "generated_draft",

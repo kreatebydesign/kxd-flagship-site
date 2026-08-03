@@ -41,6 +41,7 @@ export const PRODUCT_INTELLIGENCE_OBJECT_TYPES = [
   "roadmap_item",
   "technical_debt",
   "release",
+  "product_evolution",
   "score",
   "valuation",
   "health_snapshot",

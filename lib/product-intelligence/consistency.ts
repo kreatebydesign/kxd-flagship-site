@@ -198,9 +198,16 @@ export function verifyProductIntelligenceConsistency(): ConsistencyReport {
   } else {
     checksPassed.push("Founder Friction Engine version is P0-F");
   }
+  if (index.meta.evolutionVersion !== "P0-G") {
+    issues.push({
+      code: "evolution_version",
+      message: "Index evolutionVersion must be P0-G",
+    });
+  } else {
+    checksPassed.push("Product Evolution Ledger version is P0-G");
+  }
 
   // Later-batch stores must stay empty on the default singleton.
-  // founderFriction remains empty until authorized observation capture (contracts only in P0-F).
   const protectedEmptyStores: Array<keyof typeof index.stores> = [
     "vision",
     "hallOfFame",
@@ -209,6 +216,8 @@ export function verifyProductIntelligenceConsistency(): ConsistencyReport {
     "valuations",
     "founderFriction",
     "competitiveInsights",
+    "productEvolution",
+    "releases",
   ];
   for (const key of protectedEmptyStores) {
     if (index.stores[key].length > 0) {
@@ -221,12 +230,12 @@ export function verifyProductIntelligenceConsistency(): ConsistencyReport {
   if (index.evidenceRegistry.records.length !== 0) {
     issues.push({
       code: "premature_evidence",
-      message: "Evidence registry population is not part of P0-F",
+      message: "Evidence registry population is not part of P0-G",
     });
   }
   if (!issues.some((issue) => issue.code.startsWith("premature_"))) {
     checksPassed.push(
-      "Later-batch stores empty — no Hall of Fame / Kill List / Future Bets / Friction observations / Competitive / valuation population",
+      "Later-batch stores empty — no Hall of Fame / Kill List / Future Bets / Friction observations / Evolution ledger / Competitive / valuation population",
     );
   }
 
@@ -266,6 +275,17 @@ export function verifyProductIntelligenceConsistency(): ConsistencyReport {
     });
   } else {
     checksPassed.push("Founder Friction attach state is consistent");
+  }
+  if (
+    index.productEvolutionEngine === null &&
+    index.stores.productEvolution.length !== 0
+  ) {
+    issues.push({
+      code: "evolution_attach_mismatch",
+      message: "productEvolution populated without productEvolutionEngine attach",
+    });
+  } else {
+    checksPassed.push("Product Evolution attach state is consistent");
   }
 
   if (!isProtectedObjectType("product_dna")) {

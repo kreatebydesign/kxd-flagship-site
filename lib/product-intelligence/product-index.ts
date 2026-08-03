@@ -12,6 +12,7 @@ import {
   PRODUCT_INTELLIGENCE_ARCHIVE_VERSION,
   PRODUCT_INTELLIGENCE_CONTRACTS_VERSION,
   PRODUCT_INTELLIGENCE_CORE_FLOW,
+  PRODUCT_INTELLIGENCE_EVOLUTION_VERSION,
   PRODUCT_INTELLIGENCE_FRICTION_VERSION,
   PRODUCT_INTELLIGENCE_HEALTH_VERSION,
   PRODUCT_INTELLIGENCE_INVENTORY_VERSION,
@@ -23,6 +24,7 @@ import {
 import type { DecisionArchiveResult } from "./archive/load";
 import type { ProductIntelligenceObject } from "./contracts";
 import type { EvidenceObject } from "./evidence";
+import type { ProductEvolutionEngineResult } from "./evolution/engine";
 import type { FounderFrictionEngineResult } from "./friction/engine";
 import type { PlatformHealthEngineResult } from "./health/engine";
 import type { AutomaticInventoryResult } from "./inventory/types";
@@ -58,6 +60,7 @@ export interface ProductIntelligenceStoreBuckets {
   roadmapItems: ProductIntelligenceObject[];
   technicalDebt: ProductIntelligenceObject[];
   releases: ProductIntelligenceObject[];
+  productEvolution: ProductIntelligenceObject[];
   scores: ProductIntelligenceObject[];
   valuations: ProductIntelligenceObject[];
   healthSnapshots: ProductIntelligenceObject[];
@@ -95,6 +98,7 @@ export interface ProductIntelligenceIndex {
     archiveVersion: typeof PRODUCT_INTELLIGENCE_ARCHIVE_VERSION;
     healthVersion: typeof PRODUCT_INTELLIGENCE_HEALTH_VERSION;
     frictionVersion: typeof PRODUCT_INTELLIGENCE_FRICTION_VERSION;
+    evolutionVersion: typeof PRODUCT_INTELLIGENCE_EVOLUTION_VERSION;
     mission: typeof PRODUCT_INTELLIGENCE_MISSION;
     thirtyDayTest: typeof PRODUCT_INTELLIGENCE_THIRTY_DAY_TEST;
     laws: typeof PRODUCT_INTELLIGENCE_LAWS;
@@ -121,6 +125,8 @@ export interface ProductIntelligenceIndex {
   platformHealth: PlatformHealthEngineResult | null;
   /** Populated only after loadFounderFrictionEngine — friction contracts (observations empty). */
   founderFrictionEngine: FounderFrictionEngineResult | null;
+  /** Populated only after loadProductEvolutionEngine — evolution contracts (ledger empty). */
+  productEvolutionEngine: ProductEvolutionEngineResult | null;
 }
 
 export function createEmptyStoreBuckets(): ProductIntelligenceStoreBuckets {
@@ -138,6 +144,7 @@ export function createEmptyStoreBuckets(): ProductIntelligenceStoreBuckets {
     roadmapItems: [],
     technicalDebt: [],
     releases: [],
+    productEvolution: [],
     scores: [],
     valuations: [],
     healthSnapshots: [],
@@ -172,6 +179,7 @@ export const PRODUCT_INTELLIGENCE_ENTRY_POINTS: ProductIntelligenceEntryPoints =
         "loadDecisionArchive() for why KXD OS works this way",
         "loadPlatformHealthEngine() for health contracts (evidence-bound scores)",
         "loadFounderFrictionEngine() for friction contracts (evidence → decision path)",
+        "loadProductEvolutionEngine() for evolution ledger contracts",
         "runAutomaticInventory(root) for System Map reality",
         "protected: product_dna, doctrine, vision",
         "domain objects + relationships",
@@ -186,6 +194,7 @@ export const PRODUCT_INTELLIGENCE_ENTRY_POINTS: ProductIntelligenceEntryPoints =
         "Decision Archive (why)",
         "Platform Health Engine (is it healthier — with evidence)",
         "Founder Friction Index (what consistently slows us down)",
+        "Product Evolution Ledger (how KXD OS became what it is)",
         "Automatic Inventory / System Map (what exists)",
         "Current Inventory + Architecture map",
         "Active Decisions affecting the area",
@@ -215,6 +224,7 @@ export function createProductIntelligenceIndex(options?: {
       archiveVersion: PRODUCT_INTELLIGENCE_ARCHIVE_VERSION,
       healthVersion: PRODUCT_INTELLIGENCE_HEALTH_VERSION,
       frictionVersion: PRODUCT_INTELLIGENCE_FRICTION_VERSION,
+      evolutionVersion: PRODUCT_INTELLIGENCE_EVOLUTION_VERSION,
       mission: PRODUCT_INTELLIGENCE_MISSION,
       thirtyDayTest: PRODUCT_INTELLIGENCE_THIRTY_DAY_TEST,
       laws: PRODUCT_INTELLIGENCE_LAWS,
@@ -236,6 +246,7 @@ export function createProductIntelligenceIndex(options?: {
     decisionArchive: null,
     platformHealth: null,
     founderFrictionEngine: null,
+    productEvolutionEngine: null,
   };
 }
 
@@ -312,6 +323,25 @@ export function attachFounderFrictionEngine(
   };
 }
 
-/** Singleton root index (stores empty until inventory/archive/health/friction attach). */
+/**
+ * Attach P0-G Product Evolution Ledger contracts.
+ * Does not populate evolution entries, releases, or timelines.
+ */
+export function attachProductEvolutionEngine(
+  index: ProductIntelligenceIndex,
+  evolution: ProductEvolutionEngineResult,
+): ProductIntelligenceIndex {
+  return {
+    ...index,
+    productEvolutionEngine: evolution,
+    stores: {
+      ...index.stores,
+      productEvolution: evolution.index.entries,
+      releases: index.stores.releases,
+    },
+  };
+}
+
+/** Singleton root index (stores empty until inventory/archive/health/friction/evolution attach). */
 export const PRODUCT_INTELLIGENCE_INDEX: ProductIntelligenceIndex =
   createProductIntelligenceIndex();
