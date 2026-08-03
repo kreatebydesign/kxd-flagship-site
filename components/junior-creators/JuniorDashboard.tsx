@@ -5,6 +5,7 @@ import Link from "next/link";
 import { KxdLogo } from "@/components/ui/KxdLogo";
 import { JuniorLeadForm } from "./JuniorLeadForm";
 import { JuniorShiftCard } from "./JuniorShiftCard";
+import { JuniorAssignedTasks } from "./JuniorAssignedTasks";
 import { JuniorAcademyHero } from "./JuniorAcademyHero";
 import { JuniorDailyChallenge } from "./JuniorDailyChallenge";
 import { JuniorAcademyMissions } from "./JuniorAcademyMissions";
@@ -14,6 +15,7 @@ import { JuniorSkillTrees } from "./JuniorSkillTrees";
 import { JuniorAcademy } from "./JuniorAcademy";
 import { JuniorMilestones } from "./JuniorMilestones";
 import type { JuniorCreatorStats } from "@/lib/junior-creators/stats";
+import type { JuniorAssignedTaskView } from "@/lib/junior-creators/tasks-labels";
 import { formatEarningsCents, formatHoursFromMinutes } from "@/lib/junior-creators/week";
 import { RESEARCH_SERVICE_LABEL, RESEARCH_STATUS_LABEL } from "@/lib/research-leads";
 
@@ -47,6 +49,7 @@ type Props = {
   displayName: string;
   stats: JuniorCreatorStats;
   recentLeads: JuniorLeadRow[];
+  assignedTasks: JuniorAssignedTaskView[];
 };
 
 function Label({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
@@ -67,7 +70,12 @@ function fmtDate(iso: string): string {
   } catch { return "—"; }
 }
 
-export function JuniorDashboard({ displayName, stats, recentLeads }: Props) {
+export function JuniorDashboard({
+  displayName,
+  stats,
+  recentLeads,
+  assignedTasks,
+}: Props) {
   const router = useRouter();
 
   async function handleLogout() {
@@ -123,6 +131,8 @@ export function JuniorDashboard({ displayName, stats, recentLeads }: Props) {
         <JuniorDailyChallenge rankProgress={stats.rankProgress} />
 
         <JuniorShiftCard activeShift={stats.activeShift} />
+
+        <JuniorAssignedTasks tasks={assignedTasks} />
 
         <JuniorAcademyMissions />
 

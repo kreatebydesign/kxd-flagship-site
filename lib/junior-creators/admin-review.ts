@@ -4,6 +4,7 @@ import { getPayload } from "payload";
 import config from "@payload-config";
 import type { AdminCreatorRow, AdminShiftRow, JuniorCreatorAdminReviewData } from "./admin-review-types";
 import { getWeekKey, minutesBetween, formatEarningsCents, formatHoursFromMinutes } from "./week";
+import { listAllJuniorTasks } from "./tasks";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDoc = Record<string, any>;
@@ -132,6 +133,7 @@ export async function getJuniorCreatorAdminReviewData(): Promise<JuniorCreatorAd
   return {
     weekKey,
     creators,
+    assignedTasks: await listAllJuniorTasks({ includeArchived: false }),
     totals: {
       weekMinutes: totalWeekMinutes,
       weekEarningsCents: totalWeekEarnings,

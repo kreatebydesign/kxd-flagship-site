@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { KxdOsLogo } from "@/components/os";
+import { AdminJuniorAssignedTasks } from "@/components/admin/AdminJuniorAssignedTasks";
 import type { JuniorCreatorAdminReviewData, AdminCreatorRow, AdminShiftRow } from "@/lib/junior-creators/admin-review-types";
 import { formatEarningsCents, formatHoursFromMinutes } from "@/lib/junior-creators/week";
 
@@ -404,6 +405,14 @@ export function JuniorCreatorAdminReview({ data }: Props) {
         ) : (
           data.creators.map((creator) => <CreatorSection key={creator.id} creator={creator} />)
         )}
+
+        <AdminJuniorAssignedTasks
+          creators={data.creators.map((c) => ({
+            id: c.id,
+            displayName: c.displayName,
+          }))}
+          tasks={data.assignedTasks}
+        />
       </div>
     </div>
   );
