@@ -5,6 +5,8 @@
 **Verifiers:** `verify:product-intelligence-p0b` · `p0c` · `p0d` · `p0e` · `p0f` · `p0g` · `p0h` · `p0i` · `p0j` · `p0k`  
 **Boundary:** Infrastructure for building KXD OS — not client-facing, does not change KXD OS product functionality.
 
+**Experience law (external to this control plane):** Client-facing and operator emotional standards are governed by the **KXD Experience Constitution** (`docs/KXD-OS-CONSTITUTION.md` v2.0 — Held clarity). Experience Refinement Phase 2 Batch A is complete (`docs/PHASE-2-EXPERIENCE-REFINEMENT.md`). Product Intelligence remains the institutional memory and build-authorization plane; the Experience Constitution remains the sole permanent law for how KXD OS feels. Do not expand Product Intelligence to absorb experience UI.
+
 ## Mission
 
 Can someone understand, evaluate, and continue building KXD OS without relying on conversation history or founder memory?

@@ -1,7 +1,8 @@
 # KXD OS Visual Manifesto
 
 **Kreate by Design — Internal Operating System**  
-Version 1.0 · Art direction north star for all KXD OS screens
+Version 1.0 · Art direction north star for all KXD OS screens  
+**Experience law:** `docs/KXD-OS-CONSTITUTION.md` (KXD Experience Constitution v2.0 — Held clarity). When this Manifesto and the Constitution conflict, Constitution wins on experience; Manifesto wins on craft execution.
 
 ---
 

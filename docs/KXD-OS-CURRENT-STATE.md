@@ -261,6 +261,18 @@ Edition 1 is in the **operate and extend** phase — not redesign.
 - Hall of Fame / Kill List / Future Bets / Friction / Evolution / Competitive / valuation stores remain **unpopulated**
 - Next authorized batch: **P0-L** only when explicitly requested
 
+### Experience law — KXD Experience Constitution
+
+**Experience Refinement Phase 2 — Batch A** ✅ complete. Spec: `docs/PHASE-2-EXPERIENCE-REFINEMENT.md`. Canonical law: `docs/KXD-OS-CONSTITUTION.md` **v2.0** (sole Experience Constitution).
+
+- Emotional identity: **Held clarity** — the founder is held, not managed
+- Permanent product promise: better decisions with less effort; leave clearer, lighter, more confident, more in control
+- One emotion per primary area locked (Login Welcomed · Today Clear · Navigation Effortless · Client Command Confident · Website Review Trusted · Work Momentum · Connect Close · Commercial Safe · Creative Inspired · Reporting Proud · Portal Belonging · Search Powerful · Shell Held)
+- Founder day authored: Arrival → Morning → Planning → Client → Creative → Commercial → Review → Shutdown
+- Screen review checklist + experience governance required before major UI batches
+- First implementation initiative confirmed (not authorized): **Arrival → Today Emotional Arc**
+- Batch A is documentation / permanent experience law only — **no UI, code, routes, features, or architecture changes**
+
 ### Approved product phase — Today (founder home)
 
 **Phase 7 — Today** — Batches **A–B** approved product law; **Batches C–D.1** implemented. Spec: `docs/PHASE-7-TODAY.md`. Verifiers: `verify:phase7-batch-c`, `verify:phase7-batch-d`, `verify:phase7-batch-d1`.
@@ -306,10 +318,11 @@ Edition 1 is in the **operate and extend** phase — not redesign.
 3. **Phase 5 — Client Billing Visibility, Stripe Invoice Status & Monthly Work Summaries** — ✅ **Complete** (Batches 5A–5D; Batch 5E intentionally skipped). Spec: `docs/PHASE-5-CLIENT-BILLING-VISIBILITY.md`. Closed product lane — do not reopen inside Phase 5. Do not couple to Primal analytics or Batch J.2B.2. Combining work summaries with billing requires a new separately authorized phase or batch.
 4. **Phase 6 — KXD Connect** — Batches C0–C6 complete (through readiness review / internal release gate). Controlled internal readiness only; production rollout not authorized. Spec: `docs/PHASE-6-KXD-CONNECT.md`. Keep disabled in production. Does **not** gate Founding Client Early Access.
 5. **Phase 7 — Today** — Batches C–D.1 complete (home policy + experience foundation + founder recomposition). Next authorized batch is **Batch E** (absorb / retire demoted surfaces) only when explicitly requested. Spec: `docs/PHASE-7-TODAY.md`.
-6. **KXD Product Intelligence** — P0-A, P0-B, P0-C, P0-D, P0-E, P0-F, P0-G, P0-H, P0-I, P0-J, P0-K complete through Query Engine (`lib/product-intelligence/`). Next authorized batch is **P0-L** only when explicitly requested. Spec: `docs/KXD-PRODUCT-INTELLIGENCE.md`. Do not populate Hall of Fame / Kill List / Future Bets / Friction / Evolution / Competitive / valuation / health report generation until authorized.
-7. **Client operations at scale** — Repeat the Primal launch pattern using `lib/client-launch/` for every new client workspace (including OTP Carts readiness before Cusick membership linking). Gate Batch A: `verify:otp-carts-readiness`.
-8. **Business Memory integration** — Wire `runBusinessMemory()` into rituals or intelligence when explicitly requested; foundation exists, UI does not. Phase 3 prepared durable relationship context but does not integrate Business Memory yet.
-9. **Human-approved automation** — Connect Observer automation metadata and Pulse posture to rules; no autonomous execution without approval.
+6. **Experience Refinement Phase 2** — Batch A (Experience Constitution) complete. Canonical law: `docs/KXD-OS-CONSTITUTION.md` v2.0. Phase record: `docs/PHASE-2-EXPERIENCE-REFINEMENT.md`. Next: Arrival → Today Emotional Arc only when explicitly authorized. Do not implement experience UI without a dedicated batch.
+7. **KXD Product Intelligence** — P0-A, P0-B, P0-C, P0-D, P0-E, P0-F, P0-G, P0-H, P0-I, P0-J, P0-K complete through Query Engine (`lib/product-intelligence/`). Next authorized batch is **P0-L** only when explicitly requested. Spec: `docs/KXD-PRODUCT-INTELLIGENCE.md`. Do not populate Hall of Fame / Kill List / Future Bets / Friction / Evolution / Competitive / valuation / health report generation until authorized.
+8. **Client operations at scale** — Repeat the Primal launch pattern using `lib/client-launch/` for every new client workspace (including OTP Carts readiness before Cusick membership linking). Gate Batch A: `verify:otp-carts-readiness`.
+9. **Business Memory integration** — Wire `runBusinessMemory()` into rituals or intelligence when explicitly requested; foundation exists, UI does not. Phase 3 prepared durable relationship context but does not integrate Business Memory yet.
+10. **Human-approved automation** — Connect Observer automation metadata and Pulse posture to rules; no autonomous execution without approval.
 
 ### Operator workflow schedule
 
@@ -523,7 +536,8 @@ From `lib/platform/registry.ts` and `docs/KXD-OS-ROADMAP.md`:
 | `PHASE-6-CONNECT-LOCAL-DOGFOOD-RUNBOOK.md` | Local dogfood activation / rollback operator runbook (C4) |
 | `PHASE-7-TODAY.md` | Phase 7 Today — Batches A–B product law; Batches C–D.1 implemented (home policy + experience + recomposition) |
 | `KXD-PRODUCT-INTELLIGENCE.md` | Product Intelligence — P0-A, P0-B, P0-C, P0-D, P0-E, P0-F, P0-G, P0-H, P0-I, P0-J, P0-K (through Query Engine) |
-| `KXD-OS-CONSTITUTION.md` | Experience standard |
+| `KXD-OS-CONSTITUTION.md` | KXD Experience Constitution v2.0 — sole permanent experience law (Held clarity) |
+| `PHASE-2-EXPERIENCE-REFINEMENT.md` | Experience Refinement Phase 2 — Batch A complete; Arrival → Today next when authorized |
 | `CLIENT-EXPERIENCE-SYSTEM-ARCHITECTURE.md` | CES architecture |
 | `.cursor/rules/kxd-os-architecture.mdc` | Cursor permanent context |
 
