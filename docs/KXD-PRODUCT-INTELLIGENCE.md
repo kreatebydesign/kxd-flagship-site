@@ -1,8 +1,8 @@
 # KXD Product Intelligence
 
-**Status:** P0-A architecture approved as product law · **P0-B contracts complete** · **P0-C automatic inventory complete** · **P0-D Decision Archive initialized** · **P0-E Platform Health Engine v1 complete** · **P0-F Founder Friction Intelligence Engine complete** · **P0-G Product Evolution Ledger complete** · **P0-H Hall of Fame Engine complete** · **P0-I Product Kill List Engine complete**  
+**Status:** P0-A architecture approved as product law · **P0-B contracts complete** · **P0-C automatic inventory complete** · **P0-D Decision Archive initialized** · **P0-E Platform Health Engine v1 complete** · **P0-F Founder Friction Intelligence Engine complete** · **P0-G Product Evolution Ledger complete** · **P0-H Hall of Fame Engine complete** · **P0-I Product Kill List Engine complete** · **P0-J Future Bets Engine complete**  
 **Location:** `lib/product-intelligence/`  
-**Verifiers:** `verify:product-intelligence-p0b` · `p0c` · `p0d` · `p0e` · `p0f` · `p0g` · `p0h` · `p0i`  
+**Verifiers:** `verify:product-intelligence-p0b` · `p0c` · `p0d` · `p0e` · `p0f` · `p0g` · `p0h` · `p0i` · `p0j`  
 **Boundary:** Infrastructure for building KXD OS — not client-facing, does not change KXD OS product functionality.
 
 ## Mission
@@ -307,7 +307,36 @@ Permanent question:
 
 **P0-I state:** Contracts and empty Product Kill List Index loaded. Entries and timeline remain empty. Future linkages prepared with `implementationAuthorized: false`.
 
-**Not in P0-I:** Populated entries, rankings, Future Bets, Competitive Intelligence, valuation, weekly reviews, narratives, reports, UI, automation.
+**Not in P0-I:** Populated entries, rankings, Future Bet entries, Competitive Intelligence, valuation, weekly reviews, narratives, reports, UI, automation.
+
+## Future Bets Engine (P0-J — complete)
+
+P0-J defines the permanent system that preserves strategic ideas KXD believes in before they become roadmap items.
+
+Not promises. Not backlog. Protected convictions.
+
+Permanent question:
+
+> What does KXD believe the future should look like?
+
+| Workstream | Status |
+|------------|--------|
+| Future Bet Contract | ✅ |
+| Maturity Model (observation → retired) | ✅ |
+| Categories (closed vocabulary, 10) | ✅ |
+| Relationships (DNA / Decision / Evolution / Health / Inventory / Evidence) | ✅ |
+| Promotion Rules (never auto-roadmap) | ✅ |
+| Integrity rules | ✅ |
+| Timeline compatibility (structure only) | ✅ |
+| Future compatibility stubs | ✅ |
+
+**Load:** `loadFutureBetsEngine()` · **Attach:** `attachFutureBetsEngine(index, result)`
+
+**Law:** A Future Bet is a protected conviction — not a promise. Approved maturity still does not mean roadmap. Promotion requires evidence, Decision, review, and approval.
+
+**P0-J state:** Contracts and empty Future Bets Index loaded. Entries and timeline remain empty. Structural flags remain `approved: false` / `scheduled: false` / `neverAutoPromotesToRoadmap: true`. Future linkages prepared with `implementationAuthorized: false`.
+
+**Not in P0-J:** Populated Future Bets, roadmap items, Competitive Intelligence, valuation, weekly reviews, agent read interface, automation, strategy narratives, reports, UI.
 
 ## Implementation batches
 
@@ -322,9 +351,9 @@ Permanent question:
 | **P0-G** | Product Evolution Ledger (contracts + index) | ✅ Complete |
 | **P0-H** | Hall of Fame Engine (contracts + index) | ✅ Complete |
 | **P0-I** | Product Kill List Engine (contracts + index) | ✅ Complete |
-| **P0-J** | Agent read interface (“Load KPI pack”) | Pending |
+| **P0-J** | Future Bets Engine (contracts + index) | ✅ Complete |
 | **P0-K** | Post-batch automation that drafts intelligence updates | Pending |
-| Later | Future Bets · Competitive Intelligence · Valuation · Weekly Reviews | Pending — only when authorized |
+| Later | Competitive Intelligence · Valuation · Weekly Reviews · Agent Read Interface | Pending — only when authorized |
 | **P1+** | UI/workspace for Product Intelligence | After contracts trusted |
 
 ## Acceptance test

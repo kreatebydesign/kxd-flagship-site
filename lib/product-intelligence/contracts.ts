@@ -738,6 +738,40 @@ export type ProductKillListObject = ProductIntelligenceObjectBase<
 /* Future Bet — believed, valuable, not approved, not scheduled               */
 /* -------------------------------------------------------------------------- */
 
+/** Closed Future Bet categories — no free-form values (P0-J). */
+export type FutureBetCategory =
+  | "ai"
+  | "founder_experience"
+  | "client_experience"
+  | "workflow"
+  | "automation"
+  | "platform"
+  | "infrastructure"
+  | "commercial"
+  | "strategy"
+  | "product";
+
+/**
+ * Maturity model (P0-J).
+ * "approved" means approved as a protected conviction — still NOT roadmap.
+ */
+export type FutureBetMaturity =
+  | "observation"
+  | "exploration"
+  | "conviction"
+  | "candidate"
+  | "approved"
+  | "retired";
+
+export interface FutureBetPromotionRequirements {
+  evidenceRequired: true;
+  decisionRequired: true;
+  reviewRequired: true;
+  approvalRequired: true;
+  /** Structural: never auto-promote to roadmap. */
+  neverAutoPromotesToRoadmap: true;
+}
+
 /**
  * Future Bet.
  * Never becomes roadmap automatically. Promotion requires Decision.
@@ -746,13 +780,33 @@ export type ProductKillListObject = ProductIntelligenceObjectBase<
 export interface FutureBetDetail {
   belief: string;
   valueHypothesis: string;
-  /** Structural: not approved for build. */
+  /**
+   * Structural: not approved for build/roadmap.
+   * Distinct from maturity "approved" (protected conviction).
+   */
   approved: false;
   /** Structural: not scheduled on roadmap. */
   scheduled: false;
   /** Structural: promotion path is Decision → Roadmap only. */
   promotionRequiresDecision: true;
   neverAutoPromotesToRoadmap: true;
+  /** P0-J additive fields — required for new Future Bet objects. */
+  category: FutureBetCategory;
+  maturity: FutureBetMaturity;
+  strategicIdea: string;
+  opportunity: string;
+  problemAddressed: string;
+  whyKxdBelievesInIt: string;
+  expectedLongTermValue: string;
+  betConfidence: DecisionConfidenceClass;
+  reviewPolicy: string;
+  relatedProductDnaIds: string[];
+  relatedDecisionIds: string[];
+  relatedEvolutionIds: string[];
+  relatedHealthDomainIds: string[];
+  relatedInventoryIds: string[];
+  promotionRequirements: FutureBetPromotionRequirements;
+  recordedAt: string;
 }
 
 export type FutureBetObject = ProductIntelligenceObjectBase<
