@@ -206,6 +206,14 @@ export function verifyProductIntelligenceConsistency(): ConsistencyReport {
   } else {
     checksPassed.push("Product Evolution Ledger version is P0-G");
   }
+  if (index.meta.hallOfFameVersion !== "P0-H") {
+    issues.push({
+      code: "hall_of_fame_version",
+      message: "Index hallOfFameVersion must be P0-H",
+    });
+  } else {
+    checksPassed.push("Hall of Fame Engine version is P0-H");
+  }
 
   // Later-batch stores must stay empty on the default singleton.
   const protectedEmptyStores: Array<keyof typeof index.stores> = [
@@ -230,12 +238,12 @@ export function verifyProductIntelligenceConsistency(): ConsistencyReport {
   if (index.evidenceRegistry.records.length !== 0) {
     issues.push({
       code: "premature_evidence",
-      message: "Evidence registry population is not part of P0-G",
+      message: "Evidence registry population is not part of P0-H",
     });
   }
   if (!issues.some((issue) => issue.code.startsWith("premature_"))) {
     checksPassed.push(
-      "Later-batch stores empty — no Hall of Fame / Kill List / Future Bets / Friction observations / Evolution ledger / Competitive / valuation population",
+      "Later-batch stores empty — no Hall of Fame entries / Kill List / Future Bets / Friction observations / Evolution ledger / Competitive / valuation population",
     );
   }
 
@@ -286,6 +294,17 @@ export function verifyProductIntelligenceConsistency(): ConsistencyReport {
     });
   } else {
     checksPassed.push("Product Evolution attach state is consistent");
+  }
+  if (
+    index.hallOfFameEngine === null &&
+    index.stores.hallOfFame.length !== 0
+  ) {
+    issues.push({
+      code: "hall_of_fame_attach_mismatch",
+      message: "hallOfFame populated without hallOfFameEngine attach",
+    });
+  } else {
+    checksPassed.push("Hall of Fame attach state is consistent");
   }
 
   if (!isProtectedObjectType("product_dna")) {

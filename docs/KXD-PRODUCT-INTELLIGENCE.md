@@ -1,8 +1,8 @@
 # KXD Product Intelligence
 
-**Status:** P0-A architecture approved as product law · **P0-B contracts complete** · **P0-C automatic inventory complete** · **P0-D Decision Archive initialized** · **P0-E Platform Health Engine v1 complete** · **P0-F Founder Friction Intelligence Engine complete** · **P0-G Product Evolution Ledger complete**  
+**Status:** P0-A architecture approved as product law · **P0-B contracts complete** · **P0-C automatic inventory complete** · **P0-D Decision Archive initialized** · **P0-E Platform Health Engine v1 complete** · **P0-F Founder Friction Intelligence Engine complete** · **P0-G Product Evolution Ledger complete** · **P0-H Hall of Fame Engine complete**  
 **Location:** `lib/product-intelligence/`  
-**Verifiers:** `verify:product-intelligence-p0b` · `p0c` · `p0d` · `p0e` · `p0f` · `p0g`  
+**Verifiers:** `verify:product-intelligence-p0b` · `p0c` · `p0d` · `p0e` · `p0f` · `p0g` · `p0h`  
 **Boundary:** Infrastructure for building KXD OS — not client-facing, does not change KXD OS product functionality.
 
 ## Mission
@@ -249,7 +249,36 @@ Permanent questions:
 
 **P0-G state:** Contracts and empty Product Evolution Index loaded. Ledger entries, release stubs, and timeline remain empty. Git evidence may be linked by contract — history is not mined. Future linkages prepared with `implementationAuthorized: false`.
 
-**Not in P0-G:** Populated ledger, Hall of Fame, Kill List, Future Bets, Competitive Intelligence, valuation, weekly/monthly reviews, git mining, release notes, reports, UI, automation.
+**Not in P0-G:** Populated ledger, Hall of Fame entries, Kill List, Future Bets, Competitive Intelligence, valuation, weekly/monthly reviews, git mining, release notes, reports, UI, automation.
+
+## Hall of Fame Engine (P0-H — complete)
+
+P0-H defines the permanent system that preserves defining moments in the evolution of KXD OS.
+
+Not a marketing page. Not a changelog. Not release history.
+
+Permanent question:
+
+> What moments made KXD OS become the company it is?
+
+| Workstream | Status |
+|------------|--------|
+| Hall of Fame Contract | ✅ |
+| Qualification Rules (long-term significance) | ✅ |
+| Categories (closed vocabulary, 10) | ✅ |
+| Relationships (Decision / Evolution / DNA / Health / Inventory / Evidence) | ✅ |
+| Legacy triad (remember / never forget / changed forever) | ✅ |
+| Integrity rules | ✅ |
+| Timeline compatibility (structure only) | ✅ |
+| Future compatibility stubs | ✅ |
+
+**Load:** `loadHallOfFameEngine()` · **Attach:** `attachHallOfFameEngine(index, result)`
+
+**Law:** A Hall of Fame entry is earned. Routine releases do not qualify.
+
+**P0-H state:** Contracts and empty Hall of Fame Index loaded. Entries and timeline remain empty. Future linkages prepared with `implementationAuthorized: false`.
+
+**Not in P0-H:** Populated entries, awards, rankings, Kill List, Future Bets, Competitive Intelligence, valuation, weekly reviews, narratives, reports, UI, automation.
 
 ## Implementation batches
 
@@ -262,10 +291,11 @@ Permanent questions:
 | **P0-E** | Scorecard / Platform Health Engine v1 + movement log | ✅ Complete |
 | **P0-F** | Founder Friction Intelligence Engine (contracts + index) | ✅ Complete |
 | **P0-G** | Product Evolution Ledger (contracts + index) | ✅ Complete |
-| **P0-H** | Competitive watchlist + monthly cadence | Pending |
+| **P0-H** | Hall of Fame Engine (contracts + index) | ✅ Complete |
 | **P0-I** | Valuation model v1 (triple bands + assumptions) | Pending |
 | **P0-J** | Agent read interface (“Load KPI pack”) | Pending |
 | **P0-K** | Post-batch automation that drafts intelligence updates | Pending |
+| Later | Product Kill List · Future Bets · Competitive Intelligence · Weekly Reviews | Pending — only when authorized |
 | **P1+** | UI/workspace for Product Intelligence | After contracts trusted |
 
 ## Acceptance test

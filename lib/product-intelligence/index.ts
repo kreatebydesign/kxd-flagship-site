@@ -14,6 +14,7 @@ export {
   PRODUCT_INTELLIGENCE_CORE_FLOW,
   PRODUCT_INTELLIGENCE_EVOLUTION_VERSION,
   PRODUCT_INTELLIGENCE_FRICTION_VERSION,
+  PRODUCT_INTELLIGENCE_HALL_OF_FAME_VERSION,
   PRODUCT_INTELLIGENCE_HEALTH_VERSION,
   PRODUCT_INTELLIGENCE_INVENTORY_VERSION,
   PRODUCT_INTELLIGENCE_LAWS,
@@ -27,6 +28,7 @@ export {
   attachAutomaticInventory,
   attachDecisionArchive,
   attachFounderFrictionEngine,
+  attachHallOfFameEngine,
   attachPlatformHealthEngine,
   attachProductEvolutionEngine,
   createEmptyStoreBuckets,
@@ -159,6 +161,34 @@ export type {
 } from "./evolution";
 
 export {
+  buildHallOfFameTimeline,
+  createEmptyHallOfFameTimeline,
+  createHallOfFameIndex,
+  createHallOfFameObject,
+  HALL_OF_FAME_CATEGORIES,
+  HALL_OF_FAME_CATEGORY_DEFINITIONS,
+  HALL_OF_FAME_FUTURE_LINKAGES,
+  HALL_OF_FAME_LAW,
+  HALL_OF_FAME_QUALIFICATION_CLASSES,
+  HALL_OF_FAME_QUALIFICATION_DEFINITIONS,
+  HALL_OF_FAME_QUESTION,
+  loadHallOfFameEngine,
+  validateHallOfFameCreate,
+  verifyHallOfFameEngineIntegrity,
+} from "./hall-of-fame";
+export type {
+  HallOfFameCategoryDefinition,
+  HallOfFameCreateInput,
+  HallOfFameEngineIntegrityReport,
+  HallOfFameEngineResult,
+  HallOfFameFutureLinkage,
+  HallOfFameIndex,
+  HallOfFameQualificationDefinition,
+  HallOfFameTimelineModel,
+  HallOfFameValidationResult,
+} from "./hall-of-fame";
+
+export {
   assertHasOwner,
   CONFIDENCE_LEVELS,
   isProductIntelligenceObjectType,
@@ -269,8 +299,10 @@ export type {
   FutureBetDetail,
   FutureBetObject,
   GitEvidenceRef,
+  HallOfFameCategory,
   HallOfFameDetail,
   HallOfFameObject,
+  HallOfFameQualificationClass,
   HealthSnapshotDetail,
   HealthSnapshotObject,
   InventoryItemKind,

@@ -601,9 +601,36 @@ export type HealthSnapshotObject = ProductIntelligenceObjectBase<
 /* -------------------------------------------------------------------------- */
 
 /**
+ * Closed Hall of Fame categories — no free-form values (P0-H).
+ */
+export type HallOfFameCategory =
+  | "product"
+  | "architecture"
+  | "ux"
+  | "ai"
+  | "founder_experience"
+  | "client_experience"
+  | "commercial"
+  | "platform"
+  | "strategy"
+  | "company";
+
+/**
+ * Objective qualification classes — long-term significance only.
+ * Routine releases do not qualify.
+ */
+export type HallOfFameQualificationClass =
+  | "product_philosophy_shift"
+  | "major_architectural_evolution"
+  | "founder_workflow_breakthrough"
+  | "new_product_law"
+  | "permanent_ux_transformation";
+
+/**
  * Hall of Fame entry.
  * Records why it mattered, what changed, and what it teaches.
  * Examples (content later): Today sole home, Website Review, Shared Core, Client Command.
+ * A Hall of Fame entry is earned — not every release or feature qualifies.
  */
 export interface HallOfFameDetail {
   whyItMattered: string;
@@ -612,6 +639,25 @@ export interface HallOfFameDetail {
   occurredAt: string | null;
   relatedReleaseIds: string[];
   relatedDecisionIds: string[];
+  /** P0-H additive fields — required for new Hall of Fame objects. */
+  category: HallOfFameCategory;
+  qualificationClass: HallOfFameQualificationClass;
+  milestone: string;
+  longTermImpact: string;
+  lessonsLearned: string;
+  milestoneDate: string;
+  relatedEvolutionIds: string[];
+  relatedProductDnaIds: string[];
+  relatedInventoryIds: string[];
+  relatedHealthDomainIds: string[];
+  /** Legacy: what future builders should remember. */
+  whatFutureBuildersShouldRemember: string;
+  /** Legacy: what should never be forgotten. */
+  whatShouldNeverBeForgotten: string;
+  /** Legacy: why this changed KXD forever. */
+  whyThisChangedKxdForever: string;
+  fameConfidence: DecisionConfidenceClass;
+  reviewPolicy: string;
 }
 
 export type HallOfFameObject = ProductIntelligenceObjectBase<
