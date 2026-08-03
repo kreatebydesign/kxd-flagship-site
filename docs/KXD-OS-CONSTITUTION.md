@@ -431,25 +431,22 @@ Experience recommendations must align with Product DNA. Anything that violates P
 
 ---
 
-## 19. First implementation initiative (confirmed, not authorized here)
+## 19. First implementation initiative
 
 ### Arrival → Today Emotional Arc
 
-Confirmed as the correct first implementation initiative under this Constitution.
+**Status:** Implemented in Experience Refinement Phase 2 — Batch B (`docs/PHASE-2-EXPERIENCE-REFINEMENT.md`).
 
 **Why first:** Highest daily habit leverage; sets the emotional baseline for the entire authored day; directly enforces Held clarity, Welcomed → Clear, Today owns attention, and emotion before information.
 
-**Scope candidate (not implemented in Batch A):**
+**Shipped (Batch B):**
 
 - KXD-branded login arrival  
 - Transition into Today  
-- First five seconds  
-- Greeting and business posture  
+- First five seconds / Morning Answer  
 - One primary move  
-- Navigation presence hierarchy  
-- Removal of dashboard residue  
-
-Batch A does **not** authorize design or engineering implementation. Implementation requires an explicit later batch.
+- Navigation presence hierarchy on Today  
+- Removal of arrival dashboard residue (empty waiting/signals cards; CMS marketing tone)
 
 ---
 

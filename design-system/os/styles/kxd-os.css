@@ -14006,6 +14006,81 @@ a.kxd-os-ritual-focus__title:hover {
     border-color var(--kxd-exec-duration-base) var(--kxd-exec-ease-glide);
 }
 
+/* Arrival / Today — Held shell; Effortless nav; chrome does not compete */
+.kxd-exec-header--arrival {
+  border-bottom-color: color-mix(in srgb, var(--kxd-os-border-divider) 55%, transparent);
+  background: color-mix(in srgb, var(--kxd-os-bg-surface) 78%, transparent);
+}
+
+.kxd-exec-header--arrival .kxd-exec-header__workspace--depth {
+  opacity: 0.55;
+}
+
+.kxd-exec-header--arrival .kxd-exec-header__workspace--home.is-active {
+  opacity: 1;
+  font-weight: 600;
+}
+
+.kxd-exec-header--arrival .kxd-exec-header__action--utility {
+  opacity: 0.45;
+  color: var(--kxd-os-text-faint);
+}
+
+.kxd-exec-header--arrival .kxd-exec-header__action--utility:hover,
+.kxd-exec-header--arrival .kxd-exec-header__action--utility:focus-visible {
+  opacity: 0.9;
+}
+
+.kxd-exec-header--arrival .kxd-exec-header__identity {
+  letter-spacing: 0.06em;
+  font-size: 0.625rem;
+  opacity: 0.7;
+}
+
+.kxd-exec-header--arrival .kxd-exec-header__current {
+  opacity: 0.85;
+}
+
+.kxd-today-arrival-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.kxd-today-arrival-loading__inner {
+  text-align: center;
+}
+
+.kxd-today-arrival-loading__brand {
+  margin: 0 0 0.65rem;
+  font-family: var(--kxd-os-font-sans);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-muted);
+}
+
+.kxd-today-arrival-loading__line {
+  margin: 0;
+  font-family: var(--kxd-os-font-display, var(--kxd-os-font-sans));
+  font-size: 1.25rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--kxd-os-text-secondary);
+}
+
+.kxd-exec-today__day-shape {
+  margin: 0 0 1rem;
+  font-family: var(--kxd-os-font-sans);
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  color: var(--kxd-os-text-secondary);
+  max-width: 28rem;
+}
+
 .kxd-exec-header__left,
 .kxd-exec-header__right {
   display: flex;
@@ -14990,6 +15065,36 @@ a.kxd-exec-today__flow-link:hover {
 
   .kxd-exec-today__exits {
     gap: 0.75rem 1.1rem;
+  }
+
+  /* Mobile arrival — 30-second morning check; hierarchy not card stack */
+  .kxd-exec-header--arrival .kxd-exec-header__workspace--depth {
+    display: none;
+  }
+
+  .kxd-exec-header--arrival .kxd-exec-header__action--utility {
+    display: none;
+  }
+
+  .kxd-exec-header--arrival .kxd-exec-header__center {
+    display: none;
+  }
+
+  .kxd-exec-today__section--momentum,
+  .kxd-exec-today__section--supporting,
+  .kxd-exec-today__section--signals {
+    opacity: 0.78;
+  }
+
+  .kxd-exec-today__posture-line {
+    max-width: none;
+    font-size: clamp(1.65rem, 7vw, 2.15rem);
+  }
+
+  .kxd-exec-today__cta-link {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
   }
 }
 

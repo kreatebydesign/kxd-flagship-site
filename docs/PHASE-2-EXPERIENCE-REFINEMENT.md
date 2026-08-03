@@ -1,9 +1,10 @@
 # Experience Refinement — Phase 2
 
-**Status:** Batch A ✅ complete (Experience Constitution) · Implementation batches not authorized  
+**Status:** Batch A ✅ · Batch B ✅ (Arrival → Today Emotional Arc)  
 **Canonical experience law:** `docs/KXD-OS-CONSTITUTION.md` (v2.0 — KXD Experience Constitution)  
 **Emotional identity:** Held clarity — the founder is held, not managed  
-**Bound to:** Product Intelligence Phase 0 · Product DNA · Doctrine · Decision Archive · Founder Friction philosophy · Experience Phase 2 Direction
+**Bound to:** Product Intelligence Phase 0 · Product DNA · Doctrine · Decision Archive · Founder Friction philosophy · Experience Phase 2 Direction  
+**Verifier:** `npm run verify:experience-phase2-batch-b`
 
 ---
 
@@ -25,6 +26,7 @@ This phase is **experience before features**. It does not add Product Intelligen
 - Product Experience Audit / Experience Phase 2 Direction
 - Emotional identity: **Held clarity**
 - Permanent rule: **The founder is held, not managed**
+- Today is the sole founder home · Modules own depth
 
 ---
 
@@ -33,34 +35,63 @@ This phase is **experience before features**. It does not add Product Intelligen
 | Batch | Title | Status | Deliverable |
 |-------|-------|--------|-------------|
 | **A** | KXD Experience Constitution | ✅ Complete | Sole canonical experience law in `docs/KXD-OS-CONSTITUTION.md` v2.0 |
-| **B+** | Implementation initiatives | Pending — only when explicitly authorized | First candidate: Arrival → Today Emotional Arc |
+| **B** | Arrival → Today Emotional Arc | ✅ Complete | Login Welcomed · transition · Today Clear · nav Effortless · shell Held |
+| **C+** | Next experience initiatives | Pending — only when explicitly authorized | Candidate: Client Command Confident presence |
 
-### Batch A — what shipped
+---
 
-Documentation and permanent experience law only:
+## Batch B — Arrival → Today Emotional Arc
 
-1. Emotional identity definition  
-2. Founder / client / staff experience principles  
-3. One-emotion-per-area standards  
-4. Founder day emotional journey  
-5. Permanent experience laws  
-6. Experience rejection laws  
-7. Language, visual presence, interaction, empty-state, interruption constitutions  
-8. Premium and pride standard  
-9. Screen review checklist  
-10. Experience governance model  
-11. Confirmed first implementation initiative (not implemented)
+### Product Intelligence consulted
 
-### Batch A — what did not ship
+- Product DNA: confidence before information · calm beats clutter · business before software · Today owns attention
+- Decisions: `decision:founder-home-today` · `decision:product-philosophy`
+- Doctrine: Today sole home · cognitive load · AI not homepage
+- Constitution v2.0: Held clarity · Welcomed / Clear / Effortless / Held ownership
 
-- No code  
-- No route changes  
-- No components or UI  
-- No features  
-- No architecture redesign  
-- No Product Intelligence expansion  
-- No Product DNA or Decision Archive changes  
-- No Arrival → Today implementation  
+### Constitution laws applied
+
+- Emotion before information  
+- Confidence before information  
+- Today owns attention · modules own depth  
+- The founder is held, not managed  
+- Silence is a feature  
+- No manufactured urgency  
+- Stop adding rooms — deepen rooms that matter  
+- Language law (human, calm, direct)  
+- Navigation Effortless during arrival  
+
+### Current-state violations corrected
+
+| Violation | Correction |
+|-----------|------------|
+| Login subtitle “Creative Operations Platform” (product marketing) | “Your private studio” + welcome line |
+| Payload/CMS emotional first impression | KXD arrival copy; Enter CTA |
+| Abrupt post-auth load (no intentional handoff) | Today `loading.tsx` — “Entering your business…” |
+| Morning Answer sometimes corporate / robotic | Deterministic chief-of-staff posture lines |
+| Module-nav CTA labels (“Open Work Engine”, “Enter Focus”) | Human action language |
+| Empty Waiting card preserving layout | Omit Waiting section when nothing waits |
+| “Today’s Flow” calendar-software feel | “The day” + day shape line |
+| Header chrome competing with arrival | `kxd-exec-header--arrival` presence hierarchy |
+| “ENCRYPTED ACCESS” security theater on Today | Quiet “KXD OS” identity on arrival |
+| Empty Signals as activity residue | Omit Signals when none |
+
+### Exclusions preserved
+
+- No new features, AI chat, notifications, universal search product, Connect/Calendar expansion  
+- No Work / Client Command / Website Review / Commercial redesign  
+- No second home · no new recommendation engine · auth mechanics unchanged  
+- Staff routing unchanged · Shared Core ownership unchanged  
+
+### Visual QA evidence
+
+See batch evidence notes in final report / `docs/PHASE-2-BATCH-B-VISUAL-QA.md` when captured during dogfood. Static composition verified via `verify:experience-phase2-batch-b` + Phase 7 C/D/D.1.
+
+### Unresolved friction (observed; not auto-populated into Founder Friction)
+
+1. Executive workspace tabs still include Sales / Operations Experience / Intelligence — demoted on Today arrival but still present on desktop.  
+2. Legacy `components/admin/operations/today/TodayScreen.tsx` remains as dead dashboard residue (unmounted). Absorb/delete belongs to a later cleanup batch.  
+3. Why-this disclosure remains under primary move — useful evidence, slight analytical tone.
 
 ---
 
@@ -90,24 +121,6 @@ Arrival → Welcomed · Morning → Clear · Planning → Composed · Client Wor
 
 ---
 
-## First implementation initiative (confirmed)
-
-### Arrival → Today Emotional Arc
-
-Confirmed correct under the Constitution. **Not authorized for design/engineering until a later batch explicitly requests it.**
-
-Scope candidate:
-
-- KXD-branded login arrival  
-- Transition into Today  
-- First five seconds  
-- Greeting and business posture  
-- One primary move  
-- Navigation presence hierarchy  
-- Removal of dashboard residue  
-
----
-
 ## Governance
 
 Before any major UI batch under this phase:
@@ -133,8 +146,7 @@ No screen ships solely because lint, typecheck, and build pass.
 | `docs/KXD-OS-PHILOSOPHY.md` | Product vision |
 | `docs/KXD-PRODUCT-INTELLIGENCE.md` | Internal control plane |
 | `docs/PHASE-7-TODAY.md` | Today product law (sole founder home) |
-| Experience Phase 2 Direction canvas | Directional audit preceding Batch A |
 
 ---
 
-*Experience Refinement Phase 2 — Batch A complete. Stop until next batch is explicitly authorized.*
+*Experience Refinement Phase 2 — Batch B complete. Next experience batch only when explicitly authorized.*

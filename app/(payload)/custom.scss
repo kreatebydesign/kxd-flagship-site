@@ -97,16 +97,25 @@
     object-fit: contain;
   }
 
-  /* ── Login ─────────────────────────────────────────────────────────────── */
+  /* ── Login — Experience Phase 2 Batch B (Welcomed) ─────────────────────── */
+  .kxd-admin-login {
+    width: 100%;
+    max-width: 22rem;
+    margin: 0 auto;
+  }
+
   .login__brand {
     display: flex;
+    flex-direction: column;
+    align-items: center;
     justify-content: center;
-    margin-bottom: 1.75rem;
-    padding: 0.25rem 0 0.5rem;
+    margin-bottom: 1.5rem;
+    padding: 0.25rem 0 0.35rem;
+    text-align: center;
   }
 
   .kxd-payload-brand__title {
-    margin: 0.125rem 0 0;
+    margin: 0.35rem 0 0;
     color: var(--kxd-text);
     font-family: var(--font-body, system-ui, sans-serif);
     font-size: 0.6875rem;
@@ -117,14 +126,25 @@
   }
 
   .kxd-payload-brand__subtitle {
-    margin: 0;
+    margin: 0.2rem 0 0;
     color: var(--kxd-gold-dim);
     font-family: var(--font-body, system-ui, sans-serif);
-    font-size: 0.625rem;
+    font-size: 0.6875rem;
     font-weight: 400;
-    letter-spacing: 0.14em;
-    line-height: 1.35;
-    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    line-height: 1.4;
+    text-transform: none;
+  }
+
+  .kxd-admin-login__welcome {
+    margin: 0.85rem 0 0;
+    max-width: 18rem;
+    color: var(--theme-elevation-700, rgba(245, 241, 232, 0.72));
+    font-family: var(--font-body, system-ui, sans-serif);
+    font-size: 0.875rem;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    line-height: 1.45;
   }
 
   .login__form {

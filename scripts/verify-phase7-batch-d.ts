@@ -59,14 +59,20 @@ function main() {
   // Batch A hierarchy via D.1 composition
   check("hero / orientation present", screen.includes("kxd-exec-today__hero"));
   check(
-    "Today's Focus present",
-    screen.includes("Today&apos;s Focus") &&
+    "Primary move section present",
+    (screen.includes("Do this first") || screen.includes("Today&apos;s Focus")) &&
       screen.includes("kxd-exec-today__section--primary"),
   );
   check("Waiting For You present", screen.includes("Waiting For You"));
-  check("Today's Flow present", screen.includes("Today&apos;s Flow"));
+  check(
+    "Shape of day present",
+    screen.includes("The day") || screen.includes("Today&apos;s Flow"),
+  );
   check("Momentum present", screen.includes("Momentum"));
-  check("Signals present", screen.includes(">Signals<") || screen.includes("Signals"));
+  check(
+    "Signals composition retained",
+    screen.includes(">Signals<") || screen.includes("Signals"),
+  );
   check("Quiet exits present", screen.includes("TODAY_QUIET_EXITS"));
   check(
     "Batch A priorities retained as supporting desk list",
@@ -112,9 +118,10 @@ function main() {
 
   check("Clear desk / waiting empty language", /waiting on you/i.test(recomposition));
   check(
-    "COO posture language helpers present",
+    "Morning Answer / posture language helpers present",
     recomposition.includes("composePostureLine") &&
-      recomposition.includes("You're in a good position today."),
+      (recomposition.includes("You are clear this morning.") ||
+        recomposition.includes("You're in a good position today.")),
   );
   check(
     "Day flow period grouping present",
@@ -186,10 +193,13 @@ function main() {
   // First-viewport question order encoded in comments / structure
   check(
     "first-viewport order documented in screen",
-    screen.includes("How is my business?") &&
+    (screen.includes("How is my business?") ||
+      screen.includes("Where does my business stand?")) &&
       screen.includes("What deserves me first?") &&
-      screen.includes("Who or what is waiting?") &&
-      screen.includes("What does my day look like?"),
+      (screen.includes("Who or what is waiting?") ||
+        screen.includes("Is anything waiting on me?")) &&
+      (screen.includes("What does my day look like?") ||
+        screen.includes("What does the shape of today look like?")),
   );
 
   console.log("\nPhase 7 Batch D / D.1 Today experience verification passed.\n");

@@ -37,8 +37,9 @@ function main() {
   });
   check(
     "calm posture is human and confident",
-    /good position|under control|steady/i.test(postureCalm) &&
-      !/workable balance|capacity is available/i.test(postureCalm),
+    /clear this morning|good position|under control|steady|nothing urgent/i.test(
+      postureCalm,
+    ) && !/workable balance|capacity is available/i.test(postureCalm),
   );
 
   const day = composeDaySentence({
@@ -65,7 +66,9 @@ function main() {
   );
   check(
     "Work Engine CTA humanized",
-    primary.hrefLabel === "Open Work" || primary.hrefLabel === "Begin",
+    primary.hrefLabel === "Continue the work" ||
+      primary.hrefLabel === "Open Work" ||
+      primary.hrefLabel === "Begin",
   );
 
   const momentum = composeMomentumLine({
@@ -99,7 +102,11 @@ function main() {
   const screen = read("components/admin/executive-today/ExecutiveTodayScreen.tsx");
   check("hero uses posture line as visual lead", screen.includes("posture-line"));
   check("primary CTA class present", screen.includes("kxd-exec-today__cta-link"));
-  check("Waiting For You before Today's Flow", screen.indexOf("Waiting For You") < screen.indexOf("Today&apos;s Flow"));
+  check(
+    "Waiting For You before shape of day",
+    screen.indexOf("Waiting For You") <
+      Math.max(screen.indexOf("The day"), screen.indexOf("Today&apos;s Flow")),
+  );
   check("Signals section uses simplified titles", !screen.includes("What Changed"));
   check("no evidence dump in hero", !screen.includes("kxd-exec-today__evidence"));
 

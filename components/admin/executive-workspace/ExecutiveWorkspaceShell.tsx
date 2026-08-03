@@ -37,9 +37,15 @@ export function ExecutiveWorkspaceShell({
   includeWorkComposer = true,
   includeIntelligence = true,
 }: ExecutiveWorkspaceShellProps) {
+  const arrival = workspaceId === "today";
+
   const shell = (
-    <div className="kxd-exec-workspace">
-      <ExecutiveHeader userLabel={userLabel} />
+    <div
+      className={
+        arrival ? "kxd-exec-workspace kxd-exec-workspace--arrival" : "kxd-exec-workspace"
+      }
+    >
+      <ExecutiveHeader userLabel={userLabel} arrival={arrival} />
       <div className="kxd-exec-workspace__body">{children}</div>
       <CommandPalette />
       <ActivityCenter hideTrigger />

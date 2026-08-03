@@ -8,13 +8,16 @@ import { formatClock } from "@/lib/executive-today/brief/time-model";
 
 /**
  * Today — sole founder home.
- * Phase 7 Batch D.1 — founder experience recomposition.
+ * Phase 7 Batch D.1 + Experience Refinement Phase 2 Batch B.
  *
- * First viewport answers, in order:
- * 1. How is my business?
- * 2. What deserves me first?
- * 3. Who or what is waiting?
- * 4. What does my day look like?
+ * First viewport answers, in order (Clear within five seconds):
+ * 1. Where does my business stand? (Morning Answer)
+ * 2. What deserves me first? (one primary move)
+ * 3. Is anything waiting on me?
+ * 4. What does the shape of today look like?
+ *
+ * Constitution: emotion before information; silence when nothing waits;
+ * no dashboard residue; one primary visual authority.
  */
 export function ExecutiveTodayScreen({ data }: { data: ExecutiveTodayData }) {
   const xp = data.experience;
@@ -22,13 +25,20 @@ export function ExecutiveTodayScreen({ data }: { data: ExecutiveTodayData }) {
   const tz = brief?.bounds.timeZone ?? "America/Los_Angeles";
   const isCalm = xp.primary.from === "calm";
   const primaryHref = xp.primary.href;
-  const primaryLabel = xp.primary.hrefLabel ?? (isCalm ? "Enter Focus" : "Begin");
+  const primaryLabel =
+    xp.primary.hrefLabel ?? (isCalm ? "Begin the day" : "Begin");
+  const hasWaiting = xp.waitingForYou.length > 0;
+  const hasSignals = xp.signals.length > 0;
 
   return (
-    <KxdShell className="kxd-os-shell--ritual">
+    <KxdShell className="kxd-os-shell--ritual kxd-os-shell--arrival">
       <ExecutiveWorkspaceShell workspaceId="today">
-        <article className="kxd-exec-today" aria-label="Today">
-          {/* 1 — How is my business? */}
+        <article
+          className="kxd-exec-today"
+          aria-label="Today"
+          data-experience="clear"
+        >
+          {/* 1 — Morning Answer / Where does my business stand? */}
           <header className="kxd-exec-today__hero kxd-exec-today__enter">
             <p className="kxd-exec-today__greeting">{data.greeting}</p>
             <h1 className="kxd-exec-today__posture-line">{xp.postureLine}</h1>
@@ -40,7 +50,7 @@ export function ExecutiveTodayScreen({ data }: { data: ExecutiveTodayData }) {
             </p>
           </header>
 
-          {/* 2 — What deserves me first? */}
+          {/* 2 — One primary move */}
           <section
             className={[
               "kxd-exec-today__section",
@@ -51,7 +61,7 @@ export function ExecutiveTodayScreen({ data }: { data: ExecutiveTodayData }) {
             ].join(" ")}
             aria-labelledby="today-primary"
           >
-            <p className="kxd-exec-today__eyebrow">Today&apos;s Focus</p>
+            <p className="kxd-exec-today__eyebrow">Do this first</p>
             <h2 id="today-primary" className="kxd-exec-today__primary-title">
               {xp.primary.title}
             </h2>
@@ -60,7 +70,11 @@ export function ExecutiveTodayScreen({ data }: { data: ExecutiveTodayData }) {
             ) : null}
             {primaryHref ? (
               <p className="kxd-exec-today__cta">
-                <Link href={primaryHref} className="kxd-exec-today__cta-link">
+                <Link
+                  href={primaryHref}
+                  className="kxd-exec-today__cta-link"
+                  data-today-primary-move="true"
+                >
                   {primaryLabel}
                 </Link>
               </p>
@@ -69,25 +83,24 @@ export function ExecutiveTodayScreen({ data }: { data: ExecutiveTodayData }) {
                 <Link
                   href="/admin/operations/focus"
                   className="kxd-exec-today__cta-link"
+                  data-today-primary-move="true"
                 >
-                  Enter Focus
+                  Begin the day
                 </Link>
               </p>
             ) : null}
             <WhyThisDisclosure explainability={data.explainability} />
           </section>
 
-          {/* 3 — Who or what is waiting? */}
-          <section
-            className="kxd-exec-today__section kxd-exec-today__section--waiting kxd-exec-today__enter kxd-exec-today__enter--2"
-            aria-labelledby="today-waiting"
-          >
-            <h2 id="today-waiting" className="kxd-exec-today__label">
-              Waiting For You
-            </h2>
-            {xp.waitingForYou.length === 0 ? (
-              <p className="kxd-exec-today__empty">{xp.waitingEmpty}</p>
-            ) : (
+          {/* 3 — Waiting (only when it changes today’s decision) */}
+          {hasWaiting ? (
+            <section
+              className="kxd-exec-today__section kxd-exec-today__section--waiting kxd-exec-today__enter kxd-exec-today__enter--2"
+              aria-labelledby="today-waiting"
+            >
+              <h2 id="today-waiting" className="kxd-exec-today__label">
+                Waiting For You
+              </h2>
               <ul className="kxd-exec-today__list">
                 {xp.waitingForYou.map((item) => (
                   <li key={item.id}>
@@ -96,29 +109,34 @@ export function ExecutiveTodayScreen({ data }: { data: ExecutiveTodayData }) {
                         href={item.href}
                         className="kxd-exec-today__row kxd-exec-today__row--notable"
                       >
-                        <span className="kxd-exec-today__row-title">{item.title}</span>
+                        <span className="kxd-exec-today__row-title">
+                          {item.title}
+                        </span>
                         <span className="kxd-exec-today__row-meta">{item.meta}</span>
                       </Link>
                     ) : (
                       <div className="kxd-exec-today__row kxd-exec-today__row--notable">
-                        <span className="kxd-exec-today__row-title">{item.title}</span>
+                        <span className="kxd-exec-today__row-title">
+                          {item.title}
+                        </span>
                         <span className="kxd-exec-today__row-meta">{item.meta}</span>
                       </div>
                     )}
                   </li>
                 ))}
               </ul>
-            )}
-          </section>
+            </section>
+          ) : null}
 
-          {/* 4 — What does my day look like? */}
+          {/* 4 — Shape of the day (not calendar software) */}
           <section
             className="kxd-exec-today__section kxd-exec-today__section--flow kxd-exec-today__enter kxd-exec-today__enter--3"
             aria-labelledby="today-flow"
           >
             <h2 id="today-flow" className="kxd-exec-today__label">
-              Today&apos;s Flow
+              The day
             </h2>
+            <p className="kxd-exec-today__day-shape">{xp.dayShapeLine}</p>
             {xp.flowPeriods.length === 0 ? (
               <p className="kxd-exec-today__empty">{xp.scheduleEmpty}</p>
             ) : (
@@ -185,7 +203,7 @@ export function ExecutiveTodayScreen({ data }: { data: ExecutiveTodayData }) {
             )}
           </section>
 
-          {/* Supporting — Momentum */}
+          {/* Supporting — below first-viewport clarity */}
           <section
             className="kxd-exec-today__section kxd-exec-today__section--momentum kxd-exec-today__enter kxd-exec-today__enter--4"
             aria-labelledby="today-momentum"
@@ -196,7 +214,6 @@ export function ExecutiveTodayScreen({ data }: { data: ExecutiveTodayData }) {
             <p className="kxd-exec-today__momentum">{xp.momentumLine}</p>
           </section>
 
-          {/* Supporting — My Priorities (Batch A; quieter than first viewport) */}
           {xp.priorities.length > 0 ? (
             <section
               className="kxd-exec-today__section kxd-exec-today__section--supporting kxd-exec-today__enter kxd-exec-today__enter--5"
@@ -223,17 +240,14 @@ export function ExecutiveTodayScreen({ data }: { data: ExecutiveTodayData }) {
             </section>
           ) : null}
 
-          {/* Background — Signals */}
-          <section
-            className="kxd-exec-today__section kxd-exec-today__section--signals kxd-exec-today__enter kxd-exec-today__enter--6"
-            aria-labelledby="today-signals"
-          >
-            <h2 id="today-signals" className="kxd-exec-today__label">
-              Signals
-            </h2>
-            {xp.signals.length === 0 ? (
-              <p className="kxd-exec-today__empty">{xp.signalsEmpty}</p>
-            ) : (
+          {hasSignals ? (
+            <section
+              className="kxd-exec-today__section kxd-exec-today__section--signals kxd-exec-today__enter kxd-exec-today__enter--6"
+              aria-labelledby="today-signals"
+            >
+              <h2 id="today-signals" className="kxd-exec-today__label">
+                Signals
+              </h2>
               <ul className="kxd-exec-today__list">
                 {xp.signals.map((item) => {
                   const rowClass = [
@@ -264,8 +278,8 @@ export function ExecutiveTodayScreen({ data }: { data: ExecutiveTodayData }) {
                   );
                 })}
               </ul>
-            )}
-          </section>
+            </section>
+          ) : null}
 
           <nav
             className="kxd-exec-today__exits kxd-exec-today__enter kxd-exec-today__enter--6"
