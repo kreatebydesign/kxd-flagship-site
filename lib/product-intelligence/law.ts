@@ -32,6 +32,8 @@ export const PRODUCT_INTELLIGENCE_CONTRACTS_VERSION = "P0-B" as const;
 export const PRODUCT_INTELLIGENCE_INVENTORY_VERSION = "P0-C" as const;
 /** Decision Archive initialization + Edition 1 product-law backfill. */
 export const PRODUCT_INTELLIGENCE_ARCHIVE_VERSION = "P0-D" as const;
+/** Platform Health Engine v1 — scorecard, movement log, report contracts. */
+export const PRODUCT_INTELLIGENCE_HEALTH_VERSION = "P0-E" as const;
 
 /** System identity — separate from client-facing KXD OS. */
 export const PRODUCT_INTELLIGENCE_SYSTEM_ID = "kxd-product-intelligence" as const;

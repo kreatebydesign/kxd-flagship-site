@@ -12,6 +12,7 @@ import {
   PRODUCT_INTELLIGENCE_ARCHIVE_VERSION,
   PRODUCT_INTELLIGENCE_CONTRACTS_VERSION,
   PRODUCT_INTELLIGENCE_CORE_FLOW,
+  PRODUCT_INTELLIGENCE_HEALTH_VERSION,
   PRODUCT_INTELLIGENCE_INVENTORY_VERSION,
   PRODUCT_INTELLIGENCE_LAWS,
   PRODUCT_INTELLIGENCE_MISSION,
@@ -21,6 +22,7 @@ import {
 import type { DecisionArchiveResult } from "./archive/load";
 import type { ProductIntelligenceObject } from "./contracts";
 import type { EvidenceObject } from "./evidence";
+import type { PlatformHealthEngineResult } from "./health/engine";
 import type { AutomaticInventoryResult } from "./inventory/types";
 import {
   OBJECT_TYPE_REGISTRY,
@@ -89,6 +91,7 @@ export interface ProductIntelligenceIndex {
     contractsVersion: typeof PRODUCT_INTELLIGENCE_CONTRACTS_VERSION;
     inventoryVersion: typeof PRODUCT_INTELLIGENCE_INVENTORY_VERSION;
     archiveVersion: typeof PRODUCT_INTELLIGENCE_ARCHIVE_VERSION;
+    healthVersion: typeof PRODUCT_INTELLIGENCE_HEALTH_VERSION;
     mission: typeof PRODUCT_INTELLIGENCE_MISSION;
     thirtyDayTest: typeof PRODUCT_INTELLIGENCE_THIRTY_DAY_TEST;
     laws: typeof PRODUCT_INTELLIGENCE_LAWS;
@@ -111,6 +114,8 @@ export interface ProductIntelligenceIndex {
   automaticInventory: AutomaticInventoryResult | null;
   /** Populated only after loadDecisionArchive — institutional memory. */
   decisionArchive: DecisionArchiveResult | null;
+  /** Populated only after loadPlatformHealthEngine — health contracts (scores unobserved). */
+  platformHealth: PlatformHealthEngineResult | null;
 }
 
 export function createEmptyStoreBuckets(): ProductIntelligenceStoreBuckets {
@@ -160,6 +165,7 @@ export const PRODUCT_INTELLIGENCE_ENTRY_POINTS: ProductIntelligenceEntryPoints =
       loadSequence: [
         "PRODUCT_INTELLIGENCE_INDEX",
         "loadDecisionArchive() for why KXD OS works this way",
+        "loadPlatformHealthEngine() for health contracts (evidence-bound scores)",
         "runAutomaticInventory(root) for System Map reality",
         "protected: product_dna, doctrine, vision",
         "domain objects + relationships",
@@ -172,6 +178,7 @@ export const PRODUCT_INTELLIGENCE_ENTRY_POINTS: ProductIntelligenceEntryPoints =
         "Doctrine pack (laws)",
         "Product DNA (identity)",
         "Decision Archive (why)",
+        "Platform Health Engine (is it healthier — with evidence)",
         "Automatic Inventory / System Map (what exists)",
         "Current Inventory + Architecture map",
         "Active Decisions affecting the area",
@@ -199,6 +206,7 @@ export function createProductIntelligenceIndex(options?: {
       contractsVersion: PRODUCT_INTELLIGENCE_CONTRACTS_VERSION,
       inventoryVersion: PRODUCT_INTELLIGENCE_INVENTORY_VERSION,
       archiveVersion: PRODUCT_INTELLIGENCE_ARCHIVE_VERSION,
+      healthVersion: PRODUCT_INTELLIGENCE_HEALTH_VERSION,
       mission: PRODUCT_INTELLIGENCE_MISSION,
       thirtyDayTest: PRODUCT_INTELLIGENCE_THIRTY_DAY_TEST,
       laws: PRODUCT_INTELLIGENCE_LAWS,
@@ -218,6 +226,7 @@ export function createProductIntelligenceIndex(options?: {
     entryPoints: PRODUCT_INTELLIGENCE_ENTRY_POINTS,
     automaticInventory: null,
     decisionArchive: null,
+    platformHealth: null,
   };
 }
 
@@ -262,6 +271,20 @@ export function attachDecisionArchive(
   };
 }
 
-/** Singleton root index (stores empty until inventory/archive attach). */
+/**
+ * Attach P0-E Platform Health Engine contracts.
+ * Does not invent scored values or generate reports.
+ */
+export function attachPlatformHealthEngine(
+  index: ProductIntelligenceIndex,
+  health: PlatformHealthEngineResult,
+): ProductIntelligenceIndex {
+  return {
+    ...index,
+    platformHealth: health,
+  };
+}
+
+/** Singleton root index (stores empty until inventory/archive/health attach). */
 export const PRODUCT_INTELLIGENCE_INDEX: ProductIntelligenceIndex =
   createProductIntelligenceIndex();

@@ -371,6 +371,12 @@ export interface ScoreDetail {
   explanation: string;
   delta: number | null;
   movementNote: string | null;
+  /** P0-E additive — prior observed value when movement is recorded. */
+  previousValue?: number | null;
+  /** P0-E additive — evidence-quality confidence for this observation. */
+  scoreConfidence?: "high" | "medium" | "low" | null;
+  /** P0-E additive — next required review. */
+  reviewDate?: string | null;
 }
 
 export type ScoreObject = ProductIntelligenceObjectBase<"score", ScoreDetail>;
@@ -408,6 +414,14 @@ export interface HealthSnapshotDetail {
   scoreObjectIds: string[];
   narrativeHeadline: string;
   structuralNotes: string[];
+  /** P0-E additive — report contract fields (structure only until scored). */
+  biggestImprovement?: string | null;
+  biggestRisk?: string | null;
+  mostValuableDecision?: string | null;
+  weakestArea?: string | null;
+  recommendedFocus?: string | null;
+  reasoning?: string | null;
+  evidenceIds?: string[];
 }
 
 export type HealthSnapshotObject = ProductIntelligenceObjectBase<

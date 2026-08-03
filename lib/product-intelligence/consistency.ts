@@ -182,6 +182,14 @@ export function verifyProductIntelligenceConsistency(): ConsistencyReport {
   } else {
     checksPassed.push("Decision Archive version is P0-D");
   }
+  if (index.meta.healthVersion !== "P0-E") {
+    issues.push({
+      code: "health_version",
+      message: "Index healthVersion must be P0-E",
+    });
+  } else {
+    checksPassed.push("Platform Health Engine version is P0-E");
+  }
 
   // Later-batch stores must stay empty on the default singleton.
   const protectedEmptyStores: Array<keyof typeof index.stores> = [
@@ -204,7 +212,7 @@ export function verifyProductIntelligenceConsistency(): ConsistencyReport {
   if (index.evidenceRegistry.records.length !== 0) {
     issues.push({
       code: "premature_evidence",
-      message: "Evidence registry population is not part of P0-D",
+      message: "Evidence registry population is not part of P0-E",
     });
   }
   if (!issues.some((issue) => issue.code.startsWith("premature_"))) {
