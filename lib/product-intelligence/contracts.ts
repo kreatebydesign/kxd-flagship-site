@@ -195,6 +195,16 @@ export type DecisionOutcome =
   | "reversed"
   | "superseded";
 
+/**
+ * Decision confidence class (P0-D).
+ * Permanent should be rare and justified.
+ */
+export type DecisionConfidenceClass =
+  | "permanent"
+  | "long_term"
+  | "experimental"
+  | "temporary";
+
 export interface DecisionDetail {
   statement: string;
   decidedAt: string;
@@ -206,6 +216,18 @@ export interface DecisionDetail {
   futureReviewAt: string;
   relatedRoadmapIds: string[];
   relatedInventoryIds: string[];
+  /** P0-D additive — institutional memory fields. */
+  context: string;
+  problem: string;
+  successMetric: string;
+  decisionConfidence: DecisionConfidenceClass;
+  reviewPolicy: string;
+  relatedProductDnaIds: string[];
+  relatedDoctrineIds: string[];
+  relatedArchitectureIds: string[];
+  relatedProductIds: string[];
+  /** Source refs into established Edition 1 law (docs/commits) — not chat. */
+  sourceRefs: string[];
 }
 
 export type DecisionObject = ProductIntelligenceObjectBase<

@@ -9,6 +9,7 @@
 
 export {
   PRODUCT_INTELLIGENCE_ARCHITECTURE_VERSION,
+  PRODUCT_INTELLIGENCE_ARCHIVE_VERSION,
   PRODUCT_INTELLIGENCE_CONTRACTS_VERSION,
   PRODUCT_INTELLIGENCE_CORE_FLOW,
   PRODUCT_INTELLIGENCE_INVENTORY_VERSION,
@@ -21,6 +22,7 @@ export type { ProductIntelligenceCoreFlowStep } from "./law";
 
 export {
   attachAutomaticInventory,
+  attachDecisionArchive,
   createEmptyStoreBuckets,
   createProductIntelligenceIndex,
   PRODUCT_INTELLIGENCE_ENTRY_POINTS,
@@ -46,6 +48,19 @@ export type {
   ProductPurposeEntry,
   SystemMapSnapshot,
 } from "./inventory";
+
+export {
+  EDITION_1_DECISION_IDS,
+  EDITION_1_DECISIONS,
+  EDITION_1_DOCTRINE,
+  EDITION_1_PRODUCT_DNA,
+  loadDecisionArchive,
+  verifyDecisionArchiveIntegrity,
+} from "./archive";
+export type {
+  DecisionArchiveIntegrityReport,
+  DecisionArchiveResult,
+} from "./archive";
 
 export {
   assertHasOwner,
@@ -130,6 +145,7 @@ export type {
   CompetitiveImplicationClass,
   CompetitiveInsightDetail,
   CompetitiveInsightObject,
+  DecisionConfidenceClass,
   DecisionDetail,
   DecisionDomain,
   DecisionObject,
