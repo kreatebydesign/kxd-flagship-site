@@ -1,8 +1,8 @@
 # KXD Product Intelligence
 
-**Status:** P0-A architecture approved as product law · **P0-B contracts complete** · **P0-C automatic inventory complete** · **P0-D Decision Archive initialized** · **P0-E Platform Health Engine v1 complete** · **P0-F Founder Friction Intelligence Engine complete** · **P0-G Product Evolution Ledger complete** · **P0-H Hall of Fame Engine complete** · **P0-I Product Kill List Engine complete** · **P0-J Future Bets Engine complete**  
+**Status:** P0-A architecture approved as product law · **P0-B contracts complete** · **P0-C automatic inventory complete** · **P0-D Decision Archive initialized** · **P0-E Platform Health Engine v1 complete** · **P0-F Founder Friction Intelligence Engine complete** · **P0-G Product Evolution Ledger complete** · **P0-H Hall of Fame Engine complete** · **P0-I Product Kill List Engine complete** · **P0-J Future Bets Engine complete** · **P0-K Query Engine complete**  
 **Location:** `lib/product-intelligence/`  
-**Verifiers:** `verify:product-intelligence-p0b` · `p0c` · `p0d` · `p0e` · `p0f` · `p0g` · `p0h` · `p0i` · `p0j`  
+**Verifiers:** `verify:product-intelligence-p0b` · `p0c` · `p0d` · `p0e` · `p0f` · `p0g` · `p0h` · `p0i` · `p0j` · `p0k`  
 **Boundary:** Infrastructure for building KXD OS — not client-facing, does not change KXD OS product functionality.
 
 ## Mission
@@ -338,6 +338,34 @@ Permanent question:
 
 **Not in P0-J:** Populated Future Bets, roadmap items, Competitive Intelligence, valuation, weekly reviews, agent read interface, automation, strategy narratives, reports, UI.
 
+## Query Engine (P0-K — complete)
+
+P0-K defines the permanent structured query layer over Product Intelligence.
+
+Not AI. Not chat. Not natural language. Not search. Not UI.
+
+Permanent question:
+
+> Why does KXD work this way?
+
+| Workstream | Status |
+|------------|--------|
+| Query Contract (10 target domains) | ✅ |
+| Query Families (closed vocabulary, 10) | ✅ |
+| Relationship Resolution | ✅ |
+| Evidence Resolution | ✅ |
+| Confidence Resolution | ✅ |
+| Query Integrity | ✅ |
+| Future compatibility stubs | ✅ |
+
+**Load:** `loadQueryEngine()` · **Attach:** `attachQueryEngine(index, result)` · **Resolve:** `resolveProductIntelligenceQuery(query, context)`
+
+**Law:** Knowledge that cannot be retrieved is equivalent to knowledge that does not exist. Every answer must cite evidence. No free-form execution.
+
+**P0-K state:** Query contracts, closed families/domains, catalog of structured example queries, and resolution architecture loaded. Executed query log remains empty. Future linkages prepared with `implementationAuthorized: false`.
+
+**Not in P0-K:** AI, chat, natural language, UI, reports, automation, Competitive Intelligence, Valuation, Weekly Reviews, Agent Read Interface, populated query logs, Product Intelligence population.
+
 ## Implementation batches
 
 | Batch | Purpose | Status |
@@ -352,8 +380,9 @@ Permanent question:
 | **P0-H** | Hall of Fame Engine (contracts + index) | ✅ Complete |
 | **P0-I** | Product Kill List Engine (contracts + index) | ✅ Complete |
 | **P0-J** | Future Bets Engine (contracts + index) | ✅ Complete |
-| **P0-K** | Post-batch automation that drafts intelligence updates | Pending |
-| Later | Competitive Intelligence · Valuation · Weekly Reviews · Agent Read Interface | Pending — only when authorized |
+| **P0-K** | Product Intelligence Query Engine (contracts + resolver) | ✅ Complete |
+| **P0-L** | Next authorized Product Intelligence batch | Pending — only when requested |
+| Later | Competitive Intelligence · Valuation · Weekly Reviews · Agent Read Interface · Automation | Pending — only when authorized |
 | **P1+** | UI/workspace for Product Intelligence | After contracts trusted |
 
 ## Acceptance test

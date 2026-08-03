@@ -230,6 +230,14 @@ export function verifyProductIntelligenceConsistency(): ConsistencyReport {
   } else {
     checksPassed.push("Future Bets Engine version is P0-J");
   }
+  if (index.meta.queryVersion !== "P0-K") {
+    issues.push({
+      code: "query_version",
+      message: "Index queryVersion must be P0-K",
+    });
+  } else {
+    checksPassed.push("Query Engine version is P0-K");
+  }
 
   // Later-batch stores must stay empty on the default singleton.
   const protectedEmptyStores: Array<keyof typeof index.stores> = [
@@ -254,7 +262,7 @@ export function verifyProductIntelligenceConsistency(): ConsistencyReport {
   if (index.evidenceRegistry.records.length !== 0) {
     issues.push({
       code: "premature_evidence",
-      message: "Evidence registry population is not part of P0-J",
+      message: "Evidence registry population is not part of P0-K",
     });
   }
   if (!issues.some((issue) => issue.code.startsWith("premature_"))) {
@@ -343,6 +351,17 @@ export function verifyProductIntelligenceConsistency(): ConsistencyReport {
     });
   } else {
     checksPassed.push("Future Bets attach state is consistent");
+  }
+  if (
+    index.queryEngine !== null &&
+    index.queryEngine.index.executedQueryLog.length !== 0
+  ) {
+    issues.push({
+      code: "query_log_premature",
+      message: "Query Engine executedQueryLog must remain empty in P0-K",
+    });
+  } else {
+    checksPassed.push("Query Engine attach state is consistent");
   }
 
   if (!isProtectedObjectType("product_dna")) {
