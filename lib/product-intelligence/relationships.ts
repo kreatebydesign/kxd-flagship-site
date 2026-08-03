@@ -149,6 +149,13 @@ export const ALLOWED_RELATIONSHIP_PATTERNS: readonly RelationshipPattern[] = [
   { from: "hall_of_fame", kind: "derived_from", to: "release" },
   { from: "hall_of_fame", kind: "derived_from", to: "decision" },
   { from: "hall_of_fame", kind: "derived_from", to: "product_evolution" },
+  { from: "hall_of_fame", kind: "related_to", to: "product_dna" },
+  { from: "hall_of_fame", kind: "related_to", to: "product_inventory" },
+  { from: "hall_of_fame", kind: "related_to", to: "health_snapshot" },
+  { from: "hall_of_fame", kind: "cites", to: "evidence" },
+  { from: "hall_of_fame", kind: "related_to", to: "future_bet" },
+  { from: "hall_of_fame", kind: "related_to", to: "competitive_insight" },
+  { from: "hall_of_fame", kind: "moves", to: "valuation" },
 ];
 
 export function isRelationshipKind(value: string): value is RelationshipKind {

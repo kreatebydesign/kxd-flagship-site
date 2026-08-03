@@ -38,6 +38,8 @@ export const PRODUCT_INTELLIGENCE_HEALTH_VERSION = "P0-E" as const;
 export const PRODUCT_INTELLIGENCE_FRICTION_VERSION = "P0-F" as const;
 /** Product Evolution Ledger — chronological product evolution contracts. */
 export const PRODUCT_INTELLIGENCE_EVOLUTION_VERSION = "P0-G" as const;
+/** Hall of Fame Engine — defining product moments (contracts + index). */
+export const PRODUCT_INTELLIGENCE_HALL_OF_FAME_VERSION = "P0-H" as const;
 
 /** System identity — separate from client-facing KXD OS. */
 export const PRODUCT_INTELLIGENCE_SYSTEM_ID = "kxd-product-intelligence" as const;

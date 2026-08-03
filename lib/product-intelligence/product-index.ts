@@ -14,6 +14,7 @@ import {
   PRODUCT_INTELLIGENCE_CORE_FLOW,
   PRODUCT_INTELLIGENCE_EVOLUTION_VERSION,
   PRODUCT_INTELLIGENCE_FRICTION_VERSION,
+  PRODUCT_INTELLIGENCE_HALL_OF_FAME_VERSION,
   PRODUCT_INTELLIGENCE_HEALTH_VERSION,
   PRODUCT_INTELLIGENCE_INVENTORY_VERSION,
   PRODUCT_INTELLIGENCE_LAWS,
@@ -26,6 +27,7 @@ import type { ProductIntelligenceObject } from "./contracts";
 import type { EvidenceObject } from "./evidence";
 import type { ProductEvolutionEngineResult } from "./evolution/engine";
 import type { FounderFrictionEngineResult } from "./friction/engine";
+import type { HallOfFameEngineResult } from "./hall-of-fame/engine";
 import type { PlatformHealthEngineResult } from "./health/engine";
 import type { AutomaticInventoryResult } from "./inventory/types";
 import {
@@ -99,6 +101,7 @@ export interface ProductIntelligenceIndex {
     healthVersion: typeof PRODUCT_INTELLIGENCE_HEALTH_VERSION;
     frictionVersion: typeof PRODUCT_INTELLIGENCE_FRICTION_VERSION;
     evolutionVersion: typeof PRODUCT_INTELLIGENCE_EVOLUTION_VERSION;
+    hallOfFameVersion: typeof PRODUCT_INTELLIGENCE_HALL_OF_FAME_VERSION;
     mission: typeof PRODUCT_INTELLIGENCE_MISSION;
     thirtyDayTest: typeof PRODUCT_INTELLIGENCE_THIRTY_DAY_TEST;
     laws: typeof PRODUCT_INTELLIGENCE_LAWS;
@@ -127,6 +130,8 @@ export interface ProductIntelligenceIndex {
   founderFrictionEngine: FounderFrictionEngineResult | null;
   /** Populated only after loadProductEvolutionEngine — evolution contracts (ledger empty). */
   productEvolutionEngine: ProductEvolutionEngineResult | null;
+  /** Populated only after loadHallOfFameEngine — fame contracts (entries empty). */
+  hallOfFameEngine: HallOfFameEngineResult | null;
 }
 
 export function createEmptyStoreBuckets(): ProductIntelligenceStoreBuckets {
@@ -180,6 +185,7 @@ export const PRODUCT_INTELLIGENCE_ENTRY_POINTS: ProductIntelligenceEntryPoints =
         "loadPlatformHealthEngine() for health contracts (evidence-bound scores)",
         "loadFounderFrictionEngine() for friction contracts (evidence → decision path)",
         "loadProductEvolutionEngine() for evolution ledger contracts",
+        "loadHallOfFameEngine() for defining-moment contracts",
         "runAutomaticInventory(root) for System Map reality",
         "protected: product_dna, doctrine, vision",
         "domain objects + relationships",
@@ -195,6 +201,7 @@ export const PRODUCT_INTELLIGENCE_ENTRY_POINTS: ProductIntelligenceEntryPoints =
         "Platform Health Engine (is it healthier — with evidence)",
         "Founder Friction Index (what consistently slows us down)",
         "Product Evolution Ledger (how KXD OS became what it is)",
+        "Hall of Fame (what moments made KXD OS the company it is)",
         "Automatic Inventory / System Map (what exists)",
         "Current Inventory + Architecture map",
         "Active Decisions affecting the area",
@@ -225,6 +232,7 @@ export function createProductIntelligenceIndex(options?: {
       healthVersion: PRODUCT_INTELLIGENCE_HEALTH_VERSION,
       frictionVersion: PRODUCT_INTELLIGENCE_FRICTION_VERSION,
       evolutionVersion: PRODUCT_INTELLIGENCE_EVOLUTION_VERSION,
+      hallOfFameVersion: PRODUCT_INTELLIGENCE_HALL_OF_FAME_VERSION,
       mission: PRODUCT_INTELLIGENCE_MISSION,
       thirtyDayTest: PRODUCT_INTELLIGENCE_THIRTY_DAY_TEST,
       laws: PRODUCT_INTELLIGENCE_LAWS,
@@ -247,6 +255,7 @@ export function createProductIntelligenceIndex(options?: {
     platformHealth: null,
     founderFrictionEngine: null,
     productEvolutionEngine: null,
+    hallOfFameEngine: null,
   };
 }
 
@@ -342,6 +351,24 @@ export function attachProductEvolutionEngine(
   };
 }
 
-/** Singleton root index (stores empty until inventory/archive/health/friction/evolution attach). */
+/**
+ * Attach P0-H Hall of Fame Engine contracts.
+ * Does not populate Hall of Fame entries.
+ */
+export function attachHallOfFameEngine(
+  index: ProductIntelligenceIndex,
+  fame: HallOfFameEngineResult,
+): ProductIntelligenceIndex {
+  return {
+    ...index,
+    hallOfFameEngine: fame,
+    stores: {
+      ...index.stores,
+      hallOfFame: fame.index.entries,
+    },
+  };
+}
+
+/** Singleton root index (stores empty until inventory/archive/health/friction/evolution/fame attach). */
 export const PRODUCT_INTELLIGENCE_INDEX: ProductIntelligenceIndex =
   createProductIntelligenceIndex();
