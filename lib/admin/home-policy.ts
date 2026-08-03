@@ -11,6 +11,10 @@
  * cognitive load, always choose reducing cognitive load. The founder
  * should feel more confident after spending 30 seconds in Today than
  * before opening KXD OS.
+ *
+ * Confidence rule (Batch D):
+ * If there is ever a choice between showing more information and
+ * creating more confidence, choose confidence.
  */
 
 /** Canonical founder home path — only Today may own this role. */
