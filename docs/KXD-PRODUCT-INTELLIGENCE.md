@@ -1,8 +1,8 @@
 # KXD Product Intelligence
 
-**Status:** P0-A architecture approved as product law · **P0-B contracts complete**  
+**Status:** P0-A architecture approved as product law · **P0-B contracts complete** · **P0-C automatic inventory complete**  
 **Location:** `lib/product-intelligence/`  
-**Verifier:** `npm run verify:product-intelligence-p0b`  
+**Verifiers:** `npm run verify:product-intelligence-p0b` · `npm run verify:product-intelligence-p0c`  
 **Boundary:** Infrastructure for building KXD OS — not client-facing, does not change KXD OS product functionality.
 
 ## Mission
@@ -108,13 +108,40 @@ Load entry: `PRODUCT_INTELLIGENCE_INDEX` from `lib/product-intelligence`.
 
 Entry points defined for humans, Cursor, and future AI. No implementation UI.
 
+## Automatic inventory (P0-C — complete)
+
+P0-C discovers reality. It does not interpret meaning.
+
+| Workstream | Status |
+|------------|--------|
+| Route inventory | ✅ |
+| Product ownership map | ✅ |
+| Dependency map | ✅ |
+| System map (collections, globals, APIs, jobs, crons, scripts, permissions, editions) | ✅ |
+| Capability registry | ✅ |
+| Integration registry | ✅ |
+| Verification registry | ✅ |
+| Product purpose registry (one sentence each) | ✅ |
+| Dependency health | ✅ |
+| Inventory integrity | ✅ |
+
+**Engine:** `runAutomaticInventory(rootDir)` in `lib/product-intelligence/inventory/`  
+**Attach:** `attachAutomaticInventory(index, result)` populates `product_inventory` store only.
+
+**Answers:** “What exists?”  
+**Does not answer:** “What does it mean?”
+
+**Not in P0-C:** Hall of Fame / Kill List / Future Bet population, Decision Archive, valuation, competitive intel, reports, UI, narrative inventory docs.
+
+Reality is always discovered. Never guessed. Never manually recreated.
+
 ## Implementation batches
 
 | Batch | Purpose | Status |
 |-------|---------|--------|
 | **P0-A** | Architecture (product law) | ✅ Approved |
 | **P0-B** | Object schemas + Evidence/Decision/Friction/DNA/Fame/Kill/Bets contracts | ✅ Complete |
-| **P0-C** | System Map auto-inventory (routes/collections/APIs/verifiers) | Next |
+| **P0-C** | System Map auto-inventory (routes/collections/APIs/verifiers) | ✅ Complete |
 | **P0-D** | Decision Archive backfill for Edition 1 permanent laws | Pending |
 | **P0-E** | Scorecard v1 + movement log | Pending |
 | **P0-F** | Founder Friction capture ritual + weekly triage | Pending |

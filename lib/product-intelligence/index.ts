@@ -11,12 +11,41 @@ export {
   PRODUCT_INTELLIGENCE_ARCHITECTURE_VERSION,
   PRODUCT_INTELLIGENCE_CONTRACTS_VERSION,
   PRODUCT_INTELLIGENCE_CORE_FLOW,
+  PRODUCT_INTELLIGENCE_INVENTORY_VERSION,
   PRODUCT_INTELLIGENCE_LAWS,
   PRODUCT_INTELLIGENCE_MISSION,
   PRODUCT_INTELLIGENCE_SYSTEM_ID,
   PRODUCT_INTELLIGENCE_THIRTY_DAY_TEST,
 } from "./law";
 export type { ProductIntelligenceCoreFlowStep } from "./law";
+
+export {
+  attachAutomaticInventory,
+  createEmptyStoreBuckets,
+  createProductIntelligenceIndex,
+  PRODUCT_INTELLIGENCE_ENTRY_POINTS,
+  PRODUCT_INTELLIGENCE_INDEX,
+} from "./product-index";
+export type {
+  ProductIntelligenceEntryPoints,
+  ProductIntelligenceIndex,
+  ProductIntelligenceStoreBuckets,
+} from "./product-index";
+
+export {
+  PRODUCT_PURPOSE_REGISTRY,
+  resolveOwnerProductId,
+  runAutomaticInventory,
+  verifyInventoryIntegrity,
+} from "./inventory";
+export type {
+  AutomaticInventoryResult,
+  CapabilityRecord,
+  DependencyHealthReport,
+  InventoryIntegrityReport,
+  ProductPurposeEntry,
+  SystemMapSnapshot,
+} from "./inventory";
 
 export {
   assertHasOwner,
@@ -167,18 +196,6 @@ export type {
   ObjectTypeRegistryEntry,
   ProductIntelligenceDomain,
 } from "./registry";
-
-export {
-  createEmptyStoreBuckets,
-  createProductIntelligenceIndex,
-  PRODUCT_INTELLIGENCE_ENTRY_POINTS,
-  PRODUCT_INTELLIGENCE_INDEX,
-} from "./product-index";
-export type {
-  ProductIntelligenceEntryPoints,
-  ProductIntelligenceIndex,
-  ProductIntelligenceStoreBuckets,
-} from "./product-index";
 
 export { verifyProductIntelligenceConsistency } from "./consistency";
 export type { ConsistencyIssue, ConsistencyReport } from "./consistency";

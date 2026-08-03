@@ -51,6 +51,7 @@
     "verify:phase7-batch-d": "tsx scripts/verify-phase7-batch-d.ts",
     "verify:phase7-batch-d1": "tsx scripts/verify-phase7-batch-d1.ts",
     "verify:product-intelligence-p0b": "tsx scripts/verify-product-intelligence-p0b.ts",
+    "verify:product-intelligence-p0c": "tsx scripts/verify-product-intelligence-p0c.ts",
     "connect:local-status": "tsx --env-file=.env.local scripts/connect-local-activation.ts status",
     "connect:local-enable": "tsx --env-file=.env.local scripts/connect-local-activation.ts enable",
     "connect:local-disable": "tsx --env-file=.env.local scripts/connect-local-activation.ts disable",
