@@ -669,9 +669,34 @@ export type HallOfFameObject = ProductIntelligenceObjectBase<
 /* Product Kill List — intentional rejection archive                          */
 /* -------------------------------------------------------------------------- */
 
+/** Closed Product Kill List categories — no free-form values (P0-I). */
+export type ProductKillListCategory =
+  | "ux"
+  | "product"
+  | "architecture"
+  | "ai"
+  | "workflow"
+  | "commercial"
+  | "platform"
+  | "infrastructure"
+  | "strategy"
+  | "experience";
+
+/**
+ * Objective qualification classes — deliberate strategic rejection only.
+ * Routine bugs and abandoned prototypes do not qualify.
+ */
+export type ProductKillListQualificationClass =
+  | "identity_boundary"
+  | "philosophy_conflict"
+  | "architecture_parallel"
+  | "cognitive_load_protection"
+  | "commercial_boundary";
+
 /**
  * Product Kill List entry.
  * Protects product discipline. Optional future reconsideration date.
+ * Records deliberate refusals that define KXD OS identity.
  */
 export interface ProductKillListDetail {
   idea: string;
@@ -679,6 +704,29 @@ export interface ProductKillListDetail {
   reconsiderAt: string | null;
   relatedDecisionId: string | null;
   relatedFutureBetId: string | null;
+  /** P0-I additive fields — required for new Kill List objects. */
+  category: ProductKillListCategory;
+  qualificationClass: ProductKillListQualificationClass;
+  rejectedConcept: string;
+  problemAttemptedToSolve: string;
+  alternativesConsidered: string[];
+  chosenDirection: string;
+  tradeoffsAccepted: string;
+  longTermProductImpact: string;
+  decisionDate: string;
+  relatedDecisionIds: string[];
+  relatedProductDnaIds: string[];
+  relatedEvolutionIds: string[];
+  relatedInventoryIds: string[];
+  relatedHealthDomainIds: string[];
+  /** Boundary: what KXD protects. */
+  whatKxdProtects: string;
+  /** Boundary: what KXD refuses to become. */
+  whatKxdRefusesToBecome: string;
+  /** Boundary: why the rejection strengthens the product. */
+  whyRejectionStrengthensProduct: string;
+  killConfidence: DecisionConfidenceClass;
+  reviewPolicy: string;
 }
 
 export type ProductKillListObject = ProductIntelligenceObjectBase<

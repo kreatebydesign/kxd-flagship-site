@@ -17,6 +17,7 @@ export {
   PRODUCT_INTELLIGENCE_HALL_OF_FAME_VERSION,
   PRODUCT_INTELLIGENCE_HEALTH_VERSION,
   PRODUCT_INTELLIGENCE_INVENTORY_VERSION,
+  PRODUCT_INTELLIGENCE_KILL_LIST_VERSION,
   PRODUCT_INTELLIGENCE_LAWS,
   PRODUCT_INTELLIGENCE_MISSION,
   PRODUCT_INTELLIGENCE_SYSTEM_ID,
@@ -31,6 +32,7 @@ export {
   attachHallOfFameEngine,
   attachPlatformHealthEngine,
   attachProductEvolutionEngine,
+  attachProductKillListEngine,
   createEmptyStoreBuckets,
   createProductIntelligenceIndex,
   PRODUCT_INTELLIGENCE_ENTRY_POINTS,
@@ -189,6 +191,34 @@ export type {
 } from "./hall-of-fame";
 
 export {
+  buildProductKillListTimeline,
+  createEmptyKillListTimeline,
+  createProductKillListIndex,
+  createProductKillListObject,
+  loadProductKillListEngine,
+  PRODUCT_KILL_LIST_CATEGORIES,
+  PRODUCT_KILL_LIST_CATEGORY_DEFINITIONS,
+  PRODUCT_KILL_LIST_FUTURE_LINKAGES,
+  PRODUCT_KILL_LIST_LAW,
+  PRODUCT_KILL_LIST_QUALIFICATION_CLASSES,
+  PRODUCT_KILL_LIST_QUALIFICATION_DEFINITIONS,
+  PRODUCT_KILL_LIST_QUESTION,
+  validateProductKillListCreate,
+  verifyProductKillListEngineIntegrity,
+} from "./kill-list";
+export type {
+  ProductKillListCategoryDefinition,
+  ProductKillListCreateInput,
+  ProductKillListEngineIntegrityReport,
+  ProductKillListEngineResult,
+  ProductKillListFutureLinkage,
+  ProductKillListIndex,
+  ProductKillListQualificationDefinition,
+  ProductKillListTimelineModel,
+  ProductKillListValidationResult,
+} from "./kill-list";
+
+export {
   assertHasOwner,
   CONFIDENCE_LEVELS,
   isProductIntelligenceObjectType,
@@ -319,8 +349,10 @@ export type {
   ProductIntelligenceObject,
   ProductInventoryDetail,
   ProductInventoryObject,
+  ProductKillListCategory,
   ProductKillListDetail,
   ProductKillListObject,
+  ProductKillListQualificationClass,
   ReleaseDetail,
   ReleaseObject,
   RoadmapItemDetail,

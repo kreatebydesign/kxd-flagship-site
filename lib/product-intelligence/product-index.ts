@@ -17,6 +17,7 @@ import {
   PRODUCT_INTELLIGENCE_HALL_OF_FAME_VERSION,
   PRODUCT_INTELLIGENCE_HEALTH_VERSION,
   PRODUCT_INTELLIGENCE_INVENTORY_VERSION,
+  PRODUCT_INTELLIGENCE_KILL_LIST_VERSION,
   PRODUCT_INTELLIGENCE_LAWS,
   PRODUCT_INTELLIGENCE_MISSION,
   PRODUCT_INTELLIGENCE_SYSTEM_ID,
@@ -30,6 +31,7 @@ import type { FounderFrictionEngineResult } from "./friction/engine";
 import type { HallOfFameEngineResult } from "./hall-of-fame/engine";
 import type { PlatformHealthEngineResult } from "./health/engine";
 import type { AutomaticInventoryResult } from "./inventory/types";
+import type { ProductKillListEngineResult } from "./kill-list/engine";
 import {
   OBJECT_TYPE_REGISTRY,
   PRODUCT_INTELLIGENCE_DOMAINS,
@@ -102,6 +104,7 @@ export interface ProductIntelligenceIndex {
     frictionVersion: typeof PRODUCT_INTELLIGENCE_FRICTION_VERSION;
     evolutionVersion: typeof PRODUCT_INTELLIGENCE_EVOLUTION_VERSION;
     hallOfFameVersion: typeof PRODUCT_INTELLIGENCE_HALL_OF_FAME_VERSION;
+    killListVersion: typeof PRODUCT_INTELLIGENCE_KILL_LIST_VERSION;
     mission: typeof PRODUCT_INTELLIGENCE_MISSION;
     thirtyDayTest: typeof PRODUCT_INTELLIGENCE_THIRTY_DAY_TEST;
     laws: typeof PRODUCT_INTELLIGENCE_LAWS;
@@ -132,6 +135,8 @@ export interface ProductIntelligenceIndex {
   productEvolutionEngine: ProductEvolutionEngineResult | null;
   /** Populated only after loadHallOfFameEngine — fame contracts (entries empty). */
   hallOfFameEngine: HallOfFameEngineResult | null;
+  /** Populated only after loadProductKillListEngine — kill contracts (entries empty). */
+  productKillListEngine: ProductKillListEngineResult | null;
 }
 
 export function createEmptyStoreBuckets(): ProductIntelligenceStoreBuckets {
@@ -186,6 +191,7 @@ export const PRODUCT_INTELLIGENCE_ENTRY_POINTS: ProductIntelligenceEntryPoints =
         "loadFounderFrictionEngine() for friction contracts (evidence → decision path)",
         "loadProductEvolutionEngine() for evolution ledger contracts",
         "loadHallOfFameEngine() for defining-moment contracts",
+        "loadProductKillListEngine() for intentional-refusal contracts",
         "runAutomaticInventory(root) for System Map reality",
         "protected: product_dna, doctrine, vision",
         "domain objects + relationships",
@@ -202,6 +208,7 @@ export const PRODUCT_INTELLIGENCE_ENTRY_POINTS: ProductIntelligenceEntryPoints =
         "Founder Friction Index (what consistently slows us down)",
         "Product Evolution Ledger (how KXD OS became what it is)",
         "Hall of Fame (what moments made KXD OS the company it is)",
+        "Product Kill List (why KXD OS intentionally does not do X)",
         "Automatic Inventory / System Map (what exists)",
         "Current Inventory + Architecture map",
         "Active Decisions affecting the area",
@@ -233,6 +240,7 @@ export function createProductIntelligenceIndex(options?: {
       frictionVersion: PRODUCT_INTELLIGENCE_FRICTION_VERSION,
       evolutionVersion: PRODUCT_INTELLIGENCE_EVOLUTION_VERSION,
       hallOfFameVersion: PRODUCT_INTELLIGENCE_HALL_OF_FAME_VERSION,
+      killListVersion: PRODUCT_INTELLIGENCE_KILL_LIST_VERSION,
       mission: PRODUCT_INTELLIGENCE_MISSION,
       thirtyDayTest: PRODUCT_INTELLIGENCE_THIRTY_DAY_TEST,
       laws: PRODUCT_INTELLIGENCE_LAWS,
@@ -256,6 +264,7 @@ export function createProductIntelligenceIndex(options?: {
     founderFrictionEngine: null,
     productEvolutionEngine: null,
     hallOfFameEngine: null,
+    productKillListEngine: null,
   };
 }
 
@@ -369,6 +378,24 @@ export function attachHallOfFameEngine(
   };
 }
 
-/** Singleton root index (stores empty until inventory/archive/health/friction/evolution/fame attach). */
+/**
+ * Attach P0-I Product Kill List Engine contracts.
+ * Does not populate Kill List entries.
+ */
+export function attachProductKillListEngine(
+  index: ProductIntelligenceIndex,
+  killList: ProductKillListEngineResult,
+): ProductIntelligenceIndex {
+  return {
+    ...index,
+    productKillListEngine: killList,
+    stores: {
+      ...index.stores,
+      productKillList: killList.index.entries,
+    },
+  };
+}
+
+/** Singleton root index (stores empty until attach engines populate contract slots). */
 export const PRODUCT_INTELLIGENCE_INDEX: ProductIntelligenceIndex =
   createProductIntelligenceIndex();

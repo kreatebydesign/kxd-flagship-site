@@ -214,6 +214,14 @@ export function verifyProductIntelligenceConsistency(): ConsistencyReport {
   } else {
     checksPassed.push("Hall of Fame Engine version is P0-H");
   }
+  if (index.meta.killListVersion !== "P0-I") {
+    issues.push({
+      code: "kill_list_version",
+      message: "Index killListVersion must be P0-I",
+    });
+  } else {
+    checksPassed.push("Product Kill List Engine version is P0-I");
+  }
 
   // Later-batch stores must stay empty on the default singleton.
   const protectedEmptyStores: Array<keyof typeof index.stores> = [
@@ -238,12 +246,12 @@ export function verifyProductIntelligenceConsistency(): ConsistencyReport {
   if (index.evidenceRegistry.records.length !== 0) {
     issues.push({
       code: "premature_evidence",
-      message: "Evidence registry population is not part of P0-H",
+      message: "Evidence registry population is not part of P0-I",
     });
   }
   if (!issues.some((issue) => issue.code.startsWith("premature_"))) {
     checksPassed.push(
-      "Later-batch stores empty — no Hall of Fame entries / Kill List / Future Bets / Friction observations / Evolution ledger / Competitive / valuation population",
+      "Later-batch stores empty — no Hall of Fame / Kill List / Future Bets / Friction / Evolution / Competitive / valuation population",
     );
   }
 
@@ -305,6 +313,17 @@ export function verifyProductIntelligenceConsistency(): ConsistencyReport {
     });
   } else {
     checksPassed.push("Hall of Fame attach state is consistent");
+  }
+  if (
+    index.productKillListEngine === null &&
+    index.stores.productKillList.length !== 0
+  ) {
+    issues.push({
+      code: "kill_list_attach_mismatch",
+      message: "productKillList populated without productKillListEngine attach",
+    });
+  } else {
+    checksPassed.push("Product Kill List attach state is consistent");
   }
 
   if (!isProtectedObjectType("product_dna")) {
