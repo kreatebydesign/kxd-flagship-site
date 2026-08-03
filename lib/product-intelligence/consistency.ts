@@ -222,6 +222,14 @@ export function verifyProductIntelligenceConsistency(): ConsistencyReport {
   } else {
     checksPassed.push("Product Kill List Engine version is P0-I");
   }
+  if (index.meta.futureBetsVersion !== "P0-J") {
+    issues.push({
+      code: "future_bets_version",
+      message: "Index futureBetsVersion must be P0-J",
+    });
+  } else {
+    checksPassed.push("Future Bets Engine version is P0-J");
+  }
 
   // Later-batch stores must stay empty on the default singleton.
   const protectedEmptyStores: Array<keyof typeof index.stores> = [
@@ -246,12 +254,12 @@ export function verifyProductIntelligenceConsistency(): ConsistencyReport {
   if (index.evidenceRegistry.records.length !== 0) {
     issues.push({
       code: "premature_evidence",
-      message: "Evidence registry population is not part of P0-I",
+      message: "Evidence registry population is not part of P0-J",
     });
   }
   if (!issues.some((issue) => issue.code.startsWith("premature_"))) {
     checksPassed.push(
-      "Later-batch stores empty — no Hall of Fame / Kill List / Future Bets / Friction / Evolution / Competitive / valuation population",
+      "Later-batch stores empty — no Fame / Kill List / Future Bets / Friction / Evolution / Competitive / valuation population",
     );
   }
 
@@ -324,6 +332,17 @@ export function verifyProductIntelligenceConsistency(): ConsistencyReport {
     });
   } else {
     checksPassed.push("Product Kill List attach state is consistent");
+  }
+  if (
+    index.futureBetsEngine === null &&
+    index.stores.futureBets.length !== 0
+  ) {
+    issues.push({
+      code: "future_bets_attach_mismatch",
+      message: "futureBets populated without futureBetsEngine attach",
+    });
+  } else {
+    checksPassed.push("Future Bets attach state is consistent");
   }
 
   if (!isProtectedObjectType("product_dna")) {

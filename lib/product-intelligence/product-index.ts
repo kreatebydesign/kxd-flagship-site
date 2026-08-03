@@ -14,6 +14,7 @@ import {
   PRODUCT_INTELLIGENCE_CORE_FLOW,
   PRODUCT_INTELLIGENCE_EVOLUTION_VERSION,
   PRODUCT_INTELLIGENCE_FRICTION_VERSION,
+  PRODUCT_INTELLIGENCE_FUTURE_BETS_VERSION,
   PRODUCT_INTELLIGENCE_HALL_OF_FAME_VERSION,
   PRODUCT_INTELLIGENCE_HEALTH_VERSION,
   PRODUCT_INTELLIGENCE_INVENTORY_VERSION,
@@ -28,6 +29,7 @@ import type { ProductIntelligenceObject } from "./contracts";
 import type { EvidenceObject } from "./evidence";
 import type { ProductEvolutionEngineResult } from "./evolution/engine";
 import type { FounderFrictionEngineResult } from "./friction/engine";
+import type { FutureBetsEngineResult } from "./future-bets/engine";
 import type { HallOfFameEngineResult } from "./hall-of-fame/engine";
 import type { PlatformHealthEngineResult } from "./health/engine";
 import type { AutomaticInventoryResult } from "./inventory/types";
@@ -105,6 +107,7 @@ export interface ProductIntelligenceIndex {
     evolutionVersion: typeof PRODUCT_INTELLIGENCE_EVOLUTION_VERSION;
     hallOfFameVersion: typeof PRODUCT_INTELLIGENCE_HALL_OF_FAME_VERSION;
     killListVersion: typeof PRODUCT_INTELLIGENCE_KILL_LIST_VERSION;
+    futureBetsVersion: typeof PRODUCT_INTELLIGENCE_FUTURE_BETS_VERSION;
     mission: typeof PRODUCT_INTELLIGENCE_MISSION;
     thirtyDayTest: typeof PRODUCT_INTELLIGENCE_THIRTY_DAY_TEST;
     laws: typeof PRODUCT_INTELLIGENCE_LAWS;
@@ -137,6 +140,8 @@ export interface ProductIntelligenceIndex {
   hallOfFameEngine: HallOfFameEngineResult | null;
   /** Populated only after loadProductKillListEngine — kill contracts (entries empty). */
   productKillListEngine: ProductKillListEngineResult | null;
+  /** Populated only after loadFutureBetsEngine — bet contracts (entries empty). */
+  futureBetsEngine: FutureBetsEngineResult | null;
 }
 
 export function createEmptyStoreBuckets(): ProductIntelligenceStoreBuckets {
@@ -192,6 +197,7 @@ export const PRODUCT_INTELLIGENCE_ENTRY_POINTS: ProductIntelligenceEntryPoints =
         "loadProductEvolutionEngine() for evolution ledger contracts",
         "loadHallOfFameEngine() for defining-moment contracts",
         "loadProductKillListEngine() for intentional-refusal contracts",
+        "loadFutureBetsEngine() for protected-conviction contracts",
         "runAutomaticInventory(root) for System Map reality",
         "protected: product_dna, doctrine, vision",
         "domain objects + relationships",
@@ -209,6 +215,7 @@ export const PRODUCT_INTELLIGENCE_ENTRY_POINTS: ProductIntelligenceEntryPoints =
         "Product Evolution Ledger (how KXD OS became what it is)",
         "Hall of Fame (what moments made KXD OS the company it is)",
         "Product Kill List (why KXD OS intentionally does not do X)",
+        "Future Bets (what KXD believes the future should look like — not commitment)",
         "Automatic Inventory / System Map (what exists)",
         "Current Inventory + Architecture map",
         "Active Decisions affecting the area",
@@ -241,6 +248,7 @@ export function createProductIntelligenceIndex(options?: {
       evolutionVersion: PRODUCT_INTELLIGENCE_EVOLUTION_VERSION,
       hallOfFameVersion: PRODUCT_INTELLIGENCE_HALL_OF_FAME_VERSION,
       killListVersion: PRODUCT_INTELLIGENCE_KILL_LIST_VERSION,
+      futureBetsVersion: PRODUCT_INTELLIGENCE_FUTURE_BETS_VERSION,
       mission: PRODUCT_INTELLIGENCE_MISSION,
       thirtyDayTest: PRODUCT_INTELLIGENCE_THIRTY_DAY_TEST,
       laws: PRODUCT_INTELLIGENCE_LAWS,
@@ -265,6 +273,7 @@ export function createProductIntelligenceIndex(options?: {
     productEvolutionEngine: null,
     hallOfFameEngine: null,
     productKillListEngine: null,
+    futureBetsEngine: null,
   };
 }
 
@@ -392,6 +401,24 @@ export function attachProductKillListEngine(
     stores: {
       ...index.stores,
       productKillList: killList.index.entries,
+    },
+  };
+}
+
+/**
+ * Attach P0-J Future Bets Engine contracts.
+ * Does not populate Future Bets or create roadmap items.
+ */
+export function attachFutureBetsEngine(
+  index: ProductIntelligenceIndex,
+  bets: FutureBetsEngineResult,
+): ProductIntelligenceIndex {
+  return {
+    ...index,
+    futureBetsEngine: bets,
+    stores: {
+      ...index.stores,
+      futureBets: bets.index.entries,
     },
   };
 }
