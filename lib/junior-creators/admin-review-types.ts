@@ -24,9 +24,34 @@ export type AdminCreatorRow = {
   shifts: AdminShiftRow[];
 };
 
+export type AdminAssignedTaskRow = {
+  id: number;
+  title: string;
+  instructions: string;
+  clientLabel: string;
+  juniorCreatorUserId: number;
+  priority: "high" | "medium" | "low";
+  estimatedMinutes: number;
+  dueAt: string | null;
+  status:
+    | "assigned"
+    | "in_progress"
+    | "ready_for_review"
+    | "completed"
+    | "blocked"
+    | "cancelled";
+  completionNotes: string | null;
+  relatedLink: string | null;
+  seedKey: string | null;
+  archived: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type JuniorCreatorAdminReviewData = {
   weekKey: string;
   creators: AdminCreatorRow[];
+  assignedTasks: AdminAssignedTaskRow[];
   totals: {
     weekMinutes: number;
     weekEarningsCents: number;

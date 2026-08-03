@@ -4,6 +4,7 @@ import config from "@payload-config";
 import { JuniorDashboard, type JuniorLeadRow } from "@/components/junior-creators/JuniorDashboard";
 import { getJuniorCreatorSession } from "@/lib/junior-creators/session";
 import { getJuniorCreatorStats } from "@/lib/junior-creators/stats";
+import { listTasksForJunior } from "@/lib/junior-creators/tasks";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +17,10 @@ export default async function JuniorCreatorsDashboardPage() {
     redirect("/junior-creators/login");
   }
 
-  const stats = await getJuniorCreatorStats(session.juniorCreatorUserId);
+  const [stats, assignedTasks] = await Promise.all([
+    getJuniorCreatorStats(session.juniorCreatorUserId),
+    listTasksForJunior(session.juniorCreatorUserId),
+  ]);
 
   const payload = await getPayload({ config });
   const result = await payload.find({
@@ -45,6 +49,7 @@ export default async function JuniorCreatorsDashboardPage() {
       displayName={session.displayName}
       stats={stats}
       recentLeads={recentLeads}
+      assignedTasks={assignedTasks}
     />
   );
 }
