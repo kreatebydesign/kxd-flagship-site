@@ -253,15 +253,16 @@ Edition 1 is in the **operate and extend** phase — not redesign.
 
 ### Approved product phase — Today (founder home)
 
-**Phase 7 — Today** — Batches **A–B** approved product law; **Batch C** implemented (home policy enforcement). Spec: `docs/PHASE-7-TODAY.md`. Verifier: `verify:phase7-batch-c`.
+**Phase 7 — Today** — Batches **A–B** approved product law; **Batch C** home policy + **Batch D** experience foundation implemented. Spec: `docs/PHASE-7-TODAY.md`. Verifiers: `verify:phase7-batch-c`, `verify:phase7-batch-d`.
 
 - **Today** is the sole founder home (`/admin/operations/today`)
 - Edition `homeRoute`, founder login fallback, and `/admin/operations` landing all resolve to Today
 - Navigation is a workflow map: Today · Work · Clients · Business · Studio · System
 - Former home competitors remain reachable destinations with demoted identity (Portfolio Overview, Operations Board, Owner Snapshot, Priority Brief, Portfolio Synthesis)
 - Staff Home remains a separate persona landing
-- No Today visual redesign, new cards, or new intelligence in Batch C
-- Cognitive load rule: prefer reducing cognitive load over adding information
+- **Batch D:** Batch A section model live — Orientation · Today’s Focus · Priorities · Schedule · Needs Judgment (conditional) · What Changed · Quiet exits
+- Hard caps and calm empty states; no Connect / Weekly Snapshot / AI / charts on Today yet
+- Cognitive load + confidence rules: prefer clarity over more information
 
 ### Approved parallel product phase — KXD Connect
 
@@ -294,7 +295,7 @@ Edition 1 is in the **operate and extend** phase — not redesign.
 2. **Phase 4 — Multi-Client Portal Access & Account Context** — Production DB identity gate **cleared** (Vercel Neon store `kxd-flagship-db` / project `mute-violet-81514071` ≡ Target A). Backup/PITR gate **conditionally cleared** on Free plan (instant restore history window max **6 hours**; take a manual Neon snapshot immediately before any production migrate; Launch upgrade recommended for 7-day retention). Production migrations applied successfully (`20260727_phase3_client_relationship_intelligence`, `20260728_phase4_portal_client_memberships`, `20260810_website_audit_report_generator`; `migrate:status` batch 46, Ran = Yes); no production migrations remain pending. Batches A–H implemented in repository (`verify:phase4-multi-client-portal-completion`). Phase 4 remains **not fully production-complete** until authenticated multi-client rollout QA + Don/Cusick four-account readiness. Batch J / J.2B.2 / Primal walkthrough / reporting pilot remain paused as scheduled. Do **not** mark Phase 4 complete.
 3. **Phase 5 — Client Billing Visibility, Stripe Invoice Status & Monthly Work Summaries** — ✅ **Complete** (Batches 5A–5D; Batch 5E intentionally skipped). Spec: `docs/PHASE-5-CLIENT-BILLING-VISIBILITY.md`. Closed product lane — do not reopen inside Phase 5. Do not couple to Primal analytics or Batch J.2B.2. Combining work summaries with billing requires a new separately authorized phase or batch.
 4. **Phase 6 — KXD Connect** — Batches C0–C6 complete (through readiness review / internal release gate). Controlled internal readiness only; production rollout not authorized. Spec: `docs/PHASE-6-KXD-CONNECT.md`. Keep disabled in production. Does **not** gate Founding Client Early Access.
-5. **Phase 7 — Today** — Batch C home policy enforcement complete. Next authorized batch is **Batch D** (Today presentation alignment) only when explicitly requested. Spec: `docs/PHASE-7-TODAY.md`.
+5. **Phase 7 — Today** — Batches C–D complete (home policy + experience foundation). Next authorized batch is **Batch E** (absorb / retire demoted surfaces) only when explicitly requested. Spec: `docs/PHASE-7-TODAY.md`.
 6. **Client operations at scale** — Repeat the Primal launch pattern using `lib/client-launch/` for every new client workspace (including OTP Carts readiness before Cusick membership linking). Gate Batch A: `verify:otp-carts-readiness`.
 7. **Business Memory integration** — Wire `runBusinessMemory()` into rituals or intelligence when explicitly requested; foundation exists, UI does not. Phase 3 prepared durable relationship context but does not integrate Business Memory yet.
 8. **Human-approved automation** — Connect Observer automation metadata and Pulse posture to rules; no autonomous execution without approval.
@@ -509,7 +510,7 @@ From `lib/platform/registry.ts` and `docs/KXD-OS-ROADMAP.md`:
 | `PHASE-5-CLIENT-BILLING-VISIBILITY.md` | Phase 5 complete (Batches 5A–5D; Batch 5E intentionally skipped) |
 | `PHASE-6-KXD-CONNECT.md` | Phase 6 Connect — Batches C0–C6 (through readiness / internal release gate); production enablement excluded |
 | `PHASE-6-CONNECT-LOCAL-DOGFOOD-RUNBOOK.md` | Local dogfood activation / rollback operator runbook (C4) |
-| `PHASE-7-TODAY.md` | Phase 7 Today — Batches A–B product law; Batch C home policy enforcement implemented |
+| `PHASE-7-TODAY.md` | Phase 7 Today — Batches A–B product law; Batches C–D implemented (home policy + experience foundation) |
 | `KXD-OS-CONSTITUTION.md` | Experience standard |
 | `CLIENT-EXPERIENCE-SYSTEM-ARCHITECTURE.md` | CES architecture |
 | `.cursor/rules/kxd-os-architecture.mdc` | Cursor permanent context |

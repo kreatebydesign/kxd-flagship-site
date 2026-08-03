@@ -31,7 +31,8 @@ import type {
   ExecutiveMomentumSlice,
 } from "./types";
 
-const FOCUS_LIMIT = 4;
+/** Batch A / Batch D — My Priorities hard cap (≤5). */
+const FOCUS_LIMIT = 5;
 const ACTIVITY_LIMIT = 6;
 
 function momentumFromTone(tone: string): ExecutiveMomentumSlice["businessMomentum"] {
