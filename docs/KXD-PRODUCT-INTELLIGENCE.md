@@ -1,8 +1,8 @@
 # KXD Product Intelligence
 
-**Status:** P0-A architecture approved as product law · **P0-B contracts complete** · **P0-C automatic inventory complete** · **P0-D Decision Archive initialized** · **P0-E Platform Health Engine v1 complete** · **P0-F Founder Friction Intelligence Engine complete**  
+**Status:** P0-A architecture approved as product law · **P0-B contracts complete** · **P0-C automatic inventory complete** · **P0-D Decision Archive initialized** · **P0-E Platform Health Engine v1 complete** · **P0-F Founder Friction Intelligence Engine complete** · **P0-G Product Evolution Ledger complete**  
 **Location:** `lib/product-intelligence/`  
-**Verifiers:** `verify:product-intelligence-p0b` · `p0c` · `p0d` · `p0e` · `p0f`  
+**Verifiers:** `verify:product-intelligence-p0b` · `p0c` · `p0d` · `p0e` · `p0f` · `p0g`  
 **Boundary:** Infrastructure for building KXD OS — not client-facing, does not change KXD OS product functionality.
 
 ## Mission
@@ -218,6 +218,39 @@ Permanent question:
 
 **Not in P0-F:** Populated friction observations, Hall of Fame, Kill List, Future Bets, Competitive Intelligence, valuation, weekly/monthly reviews, health movement from friction, UI, automation.
 
+## Product Evolution Ledger (P0-G — complete)
+
+P0-G defines the permanent chronological record of how KXD OS evolves.
+
+Not git history. Not release notes. Not deployment logs.
+
+Permanent questions:
+
+> How did KXD OS become what it is today?
+
+> What were the defining moments in KXD OS?
+
+| Workstream | Status |
+|------------|--------|
+| Evolution Entry Contract | ✅ |
+| Evolution Types (closed vocabulary, 10) | ✅ |
+| Release Relationships (no isolated releases) | ✅ |
+| Git Evidence linkage contracts (no mining) | ✅ |
+| Chronological Timeline model | ✅ |
+| Product Evolution Index | ✅ |
+| Relationship Graph | ✅ |
+| Integrity Rules | ✅ |
+| Product Evolution Law (doctrine) | ✅ |
+| Future compatibility stubs | ✅ |
+
+**Load:** `loadProductEvolutionEngine()` · **Attach:** `attachProductEvolutionEngine(index, result)`
+
+**Law:** KXD OS evolves through deliberate product decisions, not accumulated commits.
+
+**P0-G state:** Contracts and empty Product Evolution Index loaded. Ledger entries, release stubs, and timeline remain empty. Git evidence may be linked by contract — history is not mined. Future linkages prepared with `implementationAuthorized: false`.
+
+**Not in P0-G:** Populated ledger, Hall of Fame, Kill List, Future Bets, Competitive Intelligence, valuation, weekly/monthly reviews, git mining, release notes, reports, UI, automation.
+
 ## Implementation batches
 
 | Batch | Purpose | Status |
@@ -228,7 +261,7 @@ Permanent question:
 | **P0-D** | Decision Archive backfill for Edition 1 permanent laws | ✅ Complete |
 | **P0-E** | Scorecard / Platform Health Engine v1 + movement log | ✅ Complete |
 | **P0-F** | Founder Friction Intelligence Engine (contracts + index) | ✅ Complete |
-| **P0-G** | Release Ledger linkage to git/deploy evidence | Pending |
+| **P0-G** | Product Evolution Ledger (contracts + index) | ✅ Complete |
 | **P0-H** | Competitive watchlist + monthly cadence | Pending |
 | **P0-I** | Valuation model v1 (triple bands + assumptions) | Pending |
 | **P0-J** | Agent read interface (“Load KPI pack”) | Pending |

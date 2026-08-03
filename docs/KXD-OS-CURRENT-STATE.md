@@ -253,13 +253,13 @@ Edition 1 is in the **operate and extend** phase — not redesign.
 
 ### Internal product control plane — KXD Product Intelligence
 
-**KXD Product Intelligence** — **P0-A, P0-B, P0-C, P0-D, P0-E, P0-F** complete through Founder Friction Intelligence Engine. Spec: `docs/KXD-PRODUCT-INTELLIGENCE.md`. Verifiers: `verify:product-intelligence-p0b` … `p0f`. Code: `lib/product-intelligence/` (+ `inventory/`, `archive/`, `health/`, `friction/`).
+**KXD Product Intelligence** — **P0-A, P0-B, P0-C, P0-D, P0-E, P0-F, P0-G** complete through Product Evolution Ledger. Spec: `docs/KXD-PRODUCT-INTELLIGENCE.md`. Verifiers: `verify:product-intelligence-p0b` … `p0g`. Code: `lib/product-intelligence/` (+ `inventory/`, `archive/`, `health/`, `friction/`, `evolution/`).
 
 - Infrastructure for building KXD OS itself — **not** client-facing; does **not** change KXD OS product functionality
-- Permanent contracts for Doctrine, Product DNA, Vision, Inventory, Architecture, Experience, Design System, Evidence, Decision, Founder Friction, Competitive Insight, Roadmap Item, Technical Debt, Release, Score, Valuation, Health Snapshot, Hall of Fame, Product Kill List, Future Bet
-- **P0-C:** automatic System Map inventory · **P0-D:** Decision Archive (8 Edition 1 Decisions + DNA/Doctrine) · **P0-E:** Platform Health Engine domains, weighting, movement log, confidence, report contract (scores unobserved; no report generation) · **P0-F:** Founder Friction categories, severity/frequency/impact/lifecycle, evidence rules, learning model, empty Friction Index
-- Hall of Fame / Kill List / Future Bets / Friction observations / Competitive / valuation remain **unpopulated**
-- Next authorized batch: **P0-G** (Release Ledger) only when explicitly requested
+- Permanent contracts for Doctrine, Product DNA, Vision, Inventory, Architecture, Experience, Design System, Evidence, Decision, Founder Friction, Competitive Insight, Roadmap Item, Technical Debt, Release, Product Evolution, Score, Valuation, Health Snapshot, Hall of Fame, Product Kill List, Future Bet
+- **P0-C:** automatic System Map inventory · **P0-D:** Decision Archive (8 Edition 1 Decisions + DNA/Doctrine) · **P0-E:** Platform Health Engine domains, weighting, movement log, confidence, report contract (scores unobserved; no report generation) · **P0-F:** Founder Friction categories, severity/frequency/impact/lifecycle, evidence rules, learning model, empty Friction Index · **P0-G:** Product Evolution Ledger types, release relationships, git evidence contracts, chronology model, empty Evolution Index
+- Hall of Fame / Kill List / Future Bets / Friction observations / Evolution ledger entries / Competitive / valuation remain **unpopulated**
+- Next authorized batch: **P0-H** (Competitive Intelligence) only when explicitly requested
 
 ### Approved product phase — Today (founder home)
 
@@ -306,7 +306,7 @@ Edition 1 is in the **operate and extend** phase — not redesign.
 3. **Phase 5 — Client Billing Visibility, Stripe Invoice Status & Monthly Work Summaries** — ✅ **Complete** (Batches 5A–5D; Batch 5E intentionally skipped). Spec: `docs/PHASE-5-CLIENT-BILLING-VISIBILITY.md`. Closed product lane — do not reopen inside Phase 5. Do not couple to Primal analytics or Batch J.2B.2. Combining work summaries with billing requires a new separately authorized phase or batch.
 4. **Phase 6 — KXD Connect** — Batches C0–C6 complete (through readiness review / internal release gate). Controlled internal readiness only; production rollout not authorized. Spec: `docs/PHASE-6-KXD-CONNECT.md`. Keep disabled in production. Does **not** gate Founding Client Early Access.
 5. **Phase 7 — Today** — Batches C–D.1 complete (home policy + experience foundation + founder recomposition). Next authorized batch is **Batch E** (absorb / retire demoted surfaces) only when explicitly requested. Spec: `docs/PHASE-7-TODAY.md`.
-6. **KXD Product Intelligence** — P0-A, P0-B, P0-C, P0-D, P0-E, P0-F complete through Founder Friction Intelligence Engine (`lib/product-intelligence/`). Next authorized batch is **P0-G** (Release Ledger) only when explicitly requested. Spec: `docs/KXD-PRODUCT-INTELLIGENCE.md`. Do not populate Hall of Fame / Kill List / Future Bets / Friction observations / Competitive / valuation / health report generation until authorized.
+6. **KXD Product Intelligence** — P0-A, P0-B, P0-C, P0-D, P0-E, P0-F, P0-G complete through Product Evolution Ledger (`lib/product-intelligence/`). Next authorized batch is **P0-H** (Competitive Intelligence) only when explicitly requested. Spec: `docs/KXD-PRODUCT-INTELLIGENCE.md`. Do not populate Hall of Fame / Kill List / Future Bets / Friction observations / Evolution ledger / Competitive / valuation / health report generation until authorized.
 7. **Client operations at scale** — Repeat the Primal launch pattern using `lib/client-launch/` for every new client workspace (including OTP Carts readiness before Cusick membership linking). Gate Batch A: `verify:otp-carts-readiness`.
 8. **Business Memory integration** — Wire `runBusinessMemory()` into rituals or intelligence when explicitly requested; foundation exists, UI does not. Phase 3 prepared durable relationship context but does not integrate Business Memory yet.
 9. **Human-approved automation** — Connect Observer automation metadata and Pulse posture to rules; no autonomous execution without approval.
@@ -522,7 +522,7 @@ From `lib/platform/registry.ts` and `docs/KXD-OS-ROADMAP.md`:
 | `PHASE-6-KXD-CONNECT.md` | Phase 6 Connect — Batches C0–C6 (through readiness / internal release gate); production enablement excluded |
 | `PHASE-6-CONNECT-LOCAL-DOGFOOD-RUNBOOK.md` | Local dogfood activation / rollback operator runbook (C4) |
 | `PHASE-7-TODAY.md` | Phase 7 Today — Batches A–B product law; Batches C–D.1 implemented (home policy + experience + recomposition) |
-| `KXD-PRODUCT-INTELLIGENCE.md` | Product Intelligence — P0-A, P0-B, P0-C, P0-D, P0-E, P0-F (through Founder Friction) |
+| `KXD-PRODUCT-INTELLIGENCE.md` | Product Intelligence — P0-A, P0-B, P0-C, P0-D, P0-E, P0-F, P0-G (through Product Evolution Ledger) |
 | `KXD-OS-CONSTITUTION.md` | Experience standard |
 | `CLIENT-EXPERIENCE-SYSTEM-ARCHITECTURE.md` | CES architecture |
 | `.cursor/rules/kxd-os-architecture.mdc` | Cursor permanent context |

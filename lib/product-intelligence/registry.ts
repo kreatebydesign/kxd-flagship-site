@@ -117,9 +117,10 @@ export const PRODUCT_INTELLIGENCE_DOMAINS = [
   {
     id: "14-release-ledger",
     order: 14,
-    title: "Release Ledger",
-    objectTypes: ["release"] as const,
-    description: "Immutable release ledger and deltas.",
+    title: "Release & Product Evolution Ledger",
+    objectTypes: ["release", "product_evolution"] as const,
+    description:
+      "Immutable releases and chronological product evolution milestones — the story of the product, not git history.",
   },
   {
     id: "15-hall-of-fame",
@@ -152,6 +153,7 @@ export const PRIMARY_OWNER_BY_TYPE: Record<
   roadmap_item: "cpo",
   technical_debt: "cto",
   release: "cto",
+  product_evolution: "cpo",
   score: "strategy",
   valuation: "strategy",
   health_snapshot: "cpo",
@@ -184,6 +186,8 @@ const PURPOSE_BY_TYPE: Record<ProductIntelligenceObjectType, string> = {
   roadmap_item: "Authorized build path from decision + evidence",
   technical_debt: "Cost-of-delay debt with promotion path",
   release: "Immutable ship ledger entry",
+  product_evolution:
+    "Meaningful product evolution milestone — not every commit or deploy",
   score: "0–100 scored dimension with explanation and evidence",
   valuation: "Triple-band valuation instrument",
   health_snapshot: "Composite platform health moment",

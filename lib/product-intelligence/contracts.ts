@@ -438,6 +438,18 @@ export type TechnicalDebtObject = ProductIntelligenceObjectBase<
 /* Release                                                                    */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * Git / deploy / verification evidence linkage (P0-G).
+ * Contracts only — no automatic git mining in this batch.
+ */
+export interface GitEvidenceRef {
+  commitSha: string | null;
+  branch: string | null;
+  deploymentId: string | null;
+  verificationRunId: string | null;
+  note: string | null;
+}
+
 export interface ReleaseDetail {
   releaseKey: string;
   shippedAt: string | null;
@@ -445,11 +457,61 @@ export interface ReleaseDetail {
   deltaSummary: string;
   relatedRoadmapIds: string[];
   postmortem: string | null;
+  /** P0-G additive — no release remains isolated. */
+  relatedDecisionIds: string[];
+  relatedInventoryIds: string[];
+  relatedVerifierIds: string[];
+  relatedHealthDomainIds: string[];
+  relatedEvolutionIds: string[];
+  gitEvidence: GitEvidenceRef[];
+  deploymentIds: string[];
+  branchNames: string[];
 }
 
 export type ReleaseObject = ProductIntelligenceObjectBase<
   "release",
   ReleaseDetail
+>;
+
+/* -------------------------------------------------------------------------- */
+/* Product Evolution                                                          */
+/* -------------------------------------------------------------------------- */
+
+/** Closed evolution type vocabulary — no free-form types (P0-G). */
+export type ProductEvolutionType =
+  | "product_milestone"
+  | "architecture_milestone"
+  | "ux_milestone"
+  | "platform_milestone"
+  | "infrastructure_milestone"
+  | "ai_milestone"
+  | "commercial_milestone"
+  | "integration_milestone"
+  | "deployment_milestone"
+  | "verification_milestone";
+
+export interface ProductEvolutionDetail {
+  evolutionType: ProductEvolutionType;
+  /** Short summary of the defining moment. */
+  summary: string;
+  /** Why this change mattered for the product — not a changelog. */
+  detailedReasoning: string;
+  /** ISO-8601 milestone date for chronology. */
+  milestoneDate: string;
+  relatedReleaseIds: string[];
+  relatedCommitShas: string[];
+  relatedVerifierIds: string[];
+  relatedInventoryIds: string[];
+  relatedDecisionIds: string[];
+  relatedProductDnaIds: string[];
+  relatedHealthMovementIds: string[];
+  relatedFrictionIds: string[];
+  gitEvidence: GitEvidenceRef[];
+}
+
+export type ProductEvolutionObject = ProductIntelligenceObjectBase<
+  "product_evolution",
+  ProductEvolutionDetail
 >;
 
 /* -------------------------------------------------------------------------- */
@@ -622,6 +684,7 @@ export type ProductIntelligenceObject =
   | RoadmapItemObject
   | TechnicalDebtObject
   | ReleaseObject
+  | ProductEvolutionObject
   | ScoreObject
   | ValuationObject
   | HealthSnapshotObject
