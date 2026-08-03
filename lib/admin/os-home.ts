@@ -1,4 +1,7 @@
 /**
- * KXD OS executive home — Apple-menu equivalent for authenticated OS surfaces.
+ * KXD OS founder home — Apple-menu equivalent for authenticated OS surfaces.
+ * Phase 7 Batch C: Today is the sole founder home.
  */
-export const KXD_OS_HOME = "/admin/operations/today" as const;
+import { FOUNDER_HOME_PATH } from "./home-policy";
+
+export const KXD_OS_HOME = FOUNDER_HOME_PATH;

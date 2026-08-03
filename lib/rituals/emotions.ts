@@ -36,12 +36,17 @@ export const WORKSPACE_EMOTIONS: WorkspaceEmotionMap[] = [
     objective: "Clients feel cared for, informed, and included.",
   },
   {
-    workspace: "Operations / Command",
+    workspace: "Today",
+    emotion: "clarity",
+    objective: "Know what needs attention before opening any module.",
+  },
+  {
+    workspace: "Operations Board",
     emotion: "control",
     objective: "See the whole studio without drowning in detail.",
   },
   {
-    workspace: "Executive Dashboard",
+    workspace: "Portfolio Overview",
     emotion: "clarity",
     objective: "One calm view of business health.",
   },

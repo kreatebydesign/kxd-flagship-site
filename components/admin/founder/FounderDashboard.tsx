@@ -144,16 +144,16 @@ export function FounderDashboard({ data, embedded = true }: Props) {
     <div className={embedded ? "kxd-os-page kxd-os-page--ops" : "kxd-os-shell"}>
       <main>
         <OperationsPageHero
-          eyebrow="Founder Studio"
+          eyebrow="Owner Snapshot"
           title={data.dateDisplay}
-          lead={`Loaded ${data.timeDisplay} · Live snapshot across clients, delivery, growth, and studio operations`}
+          lead={`Loaded ${data.timeDisplay} · Portfolio destination — not the morning start`}
           presence
         />
 
         <section className="kxd-os-section">
           <SectionHeader
-            label="Founder Snapshot"
-            sub="Real-time pulse of the business — one glance, full context"
+            label="Owner Snapshot"
+            sub="Business context for deeper review — begin the day in Today"
           />
           <SnapshotGrid metrics={data.snapshot} />
         </section>
@@ -164,7 +164,7 @@ export function FounderDashboard({ data, embedded = true }: Props) {
               label="Today's Focus"
               sub="Priority stack — overdue work, onboarding, requests, and creative blockers"
               href="/admin/operations/today"
-              linkText="Studio Today"
+              linkText="Open Today"
             />
             <FocusStack items={data.todaysFocus} />
           </section>
@@ -324,12 +324,12 @@ export function FounderDashboard({ data, embedded = true }: Props) {
           <p className="kxd-os-metric__label mb-4">Studio Systems</p>
           <div className="kxd-os-founder-quick-grid">
             {[
-              { label: "Executive", href: "/admin/operations/executive" },
               { label: "Today", href: "/admin/operations/today" },
+              { label: "Portfolio Overview", href: "/admin/operations/executive" },
               { label: "Accounts", href: "/admin/operations/accounts" },
               { label: "Creative", href: "/admin/operations/creative" },
               { label: "Research", href: "/admin/operations/research" },
-              { label: "KXD OS", href: "/os" },
+              { label: "Intelligence", href: "/admin/operations/intelligence" },
             ].map((link) => (
               <Link key={link.href} href={link.href} className="kxd-os-founder-quick-link">
                 {link.label}
@@ -339,7 +339,7 @@ export function FounderDashboard({ data, embedded = true }: Props) {
         </section>
 
         <p className="kxd-os-caption mt-10">
-          KXD OS · Founder Studio · Live Payload data · Refreshes on each request
+          KXD OS · Owner Snapshot · Live Payload data · Refreshes on each request
         </p>
       </main>
     </div>

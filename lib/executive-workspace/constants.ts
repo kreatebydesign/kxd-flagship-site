@@ -12,7 +12,7 @@ export const EXECUTIVE_WORKSPACES: ExecutiveWorkspaceDefinition[] = [
     id: "today",
     label: "Today",
     href: "/admin/operations/today",
-    description: "Executive home",
+    description: "Where the day begins",
   },
   {
     id: "work",
@@ -22,9 +22,9 @@ export const EXECUTIVE_WORKSPACES: ExecutiveWorkspaceDefinition[] = [
   },
   {
     id: "operations",
-    label: "Operations",
+    label: "Intelligence",
     href: "/admin/operations/intelligence",
-    description: "Full operating surface",
+    description: "Deep briefings",
   },
   {
     id: "training",

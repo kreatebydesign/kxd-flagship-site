@@ -44,8 +44,8 @@ export function BrainScreen({ data }: { data: BrainSnapshot }) {
     <OperationsShell activeId="brain">
       <KxdPage className="kxd-os-page--ops">
         <OperationsPageHero
-          eyebrow="KXD OS · Executive Reasoning"
-          title="KXD Brain"
+          eyebrow="KXD OS · Portfolio Synthesis"
+          title="Portfolio Synthesis"
           lead="Deterministic agency intelligence — what to pay attention to, before you ask."
         />
 
@@ -190,7 +190,7 @@ export function BrainScreen({ data }: { data: BrainSnapshot }) {
             </div>
           ) : null}
           <Link href="/admin/operations/founder-intelligence" className="kxd-os-link-quiet" style={{ display: "inline-block", marginTop: "0.75rem" }}>
-            Founder Intelligence →
+            Priority Brief →
           </Link>
         </KxdSection>
       </KxdPage>

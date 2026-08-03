@@ -108,7 +108,7 @@ export function AutomationScreen({ data }: { data: AutomationDashboardData }) {
         <OperationsPageHero
           eyebrow="KXD OS · Automation Engine"
           title="Event Engine"
-          lead="Central automation layer — modules publish standardized events. Timeline records history. Founder Intelligence consumes signals."
+          lead="Central automation layer — modules publish standardized events. Timeline records history. Intelligence and Today consume signals."
         />
 
         <div className="kxd-os-ops-kpi-grid">

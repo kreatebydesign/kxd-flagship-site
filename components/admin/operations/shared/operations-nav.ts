@@ -1,8 +1,17 @@
+/**
+ * Phase 7 Batch C — founder navigation as a workflow map.
+ *
+ * Hierarchy: Today · Work · Clients · Business · Studio · System
+ * Today is the only home. Competing aggregators remain reachable but demoted.
+ */
+
 export type OperationsNavId =
   | "executive"
   | "intelligence"
   | "command"
   | "today"
+  | "focus"
+  | "review"
   | "clients"
   | "events"
   | "accounts"
@@ -58,18 +67,46 @@ export type OperationsNavGroup = {
 
 export const NAV_GROUPS: OperationsNavGroup[] = [
   {
-    label: "Briefing",
+    label: "Today",
     items: [
       { id: "today", label: "Today", href: "/admin/operations/today" },
-      { id: "intelligence", label: "Intelligence", href: "/admin/operations/intelligence" },
-      { id: "executive", label: "Executive", href: "/admin/operations/executive" },
-      { id: "founder-intelligence", label: "Founder Intelligence", href: "/admin/operations/founder-intelligence" },
-      { id: "brain", label: "KXD Brain", href: "/admin/operations/brain" },
-      { id: "command", label: "Operations", href: "/admin/operations/command" },
-      { id: "platform", label: "Platform", href: "/admin/operations/platform" },
-      { id: "settings", label: "Settings", href: "/admin/operations/settings" },
-      { id: "integrations", label: "Integrations", href: "/admin/operations/integrations" },
-      { id: "founder", label: "Founder", href: "/admin/operations/founder" },
+      { id: "focus", label: "Focus", href: "/admin/operations/focus" },
+      { id: "review", label: "Weekly Review", href: "/admin/operations/review" },
+      {
+        id: "intelligence",
+        label: "Intelligence",
+        href: "/admin/operations/intelligence",
+      },
+    ],
+  },
+  {
+    label: "Work",
+    items: [
+      { id: "work", label: "Work", href: "/admin/work" },
+      {
+        id: "review-inbox",
+        label: "Review Inbox",
+        href: "/admin/operations/review-inbox",
+      },
+      {
+        id: "upgrade-requests",
+        label: "Upgrade Requests",
+        href: "/admin/operations/upgrade-requests",
+      },
+      { id: "playbooks", label: "Playbooks", href: "/admin/operations/playbooks" },
+      { id: "launch-qa", label: "Launch QA", href: "/admin/operations/launch-qa" },
+      {
+        id: "automation",
+        label: "Automation",
+        href: "/admin/operations/automation",
+      },
+      { id: "audits", label: "Audits", href: "/admin/operations/audits" },
+      {
+        id: "infrastructure",
+        label: "Infrastructure",
+        href: "/admin/operations/infrastructure",
+      },
+      { id: "timeline", label: "Timeline", href: "/admin/operations/timeline" },
     ],
   },
   {
@@ -90,15 +127,43 @@ export const NAV_GROUPS: OperationsNavGroup[] = [
         href: "/admin/operations/client-provisioning",
       },
       { id: "strategy", label: "Strategy Vault", href: "/admin/operations/strategy" },
-      { id: "accounts", label: "Accounts", href: "/admin/operations/accounts" },
       { id: "onboarding", label: "Onboarding", href: "/admin/operations/onboarding" },
       { id: "portal-access", label: "Portal Access", href: "/admin/operations/portal-access" },
+      {
+        id: "client-success",
+        label: "Client Success",
+        href: "/admin/operations/client-success",
+      },
+    ],
+  },
+  {
+    label: "Business",
+    items: [
+      { id: "accounts", label: "Accounts", href: "/admin/operations/accounts" },
       {
         id: "commercial-agreements",
         label: "Commercial Agreements",
         href: "/admin/operations/commercial-agreements",
       },
-      { id: "client-success", label: "Client Success", href: "/admin/operations/client-success" },
+      { id: "sales-pipeline", label: "Pipeline", href: "/admin/sales" },
+      { id: "sales-leads", label: "Leads", href: "/admin/sales/leads" },
+      { id: "sales-proposals", label: "Proposals", href: "/admin/sales/proposals" },
+      { id: "sales-templates", label: "Templates", href: "/admin/sales/templates" },
+      { id: "sales-activities", label: "Activities", href: "/admin/sales/activities" },
+      { id: "sales-forecast", label: "Forecast", href: "/admin/sales/forecast" },
+      { id: "growth", label: "Growth", href: "/admin/operations/growth" },
+      { id: "reports", label: "Reports", href: "/admin/operations/reports" },
+      {
+        id: "reporting-ops",
+        label: "Reporting Ops",
+        href: "/admin/operations/reporting",
+      },
+      // Demoted portfolio view — destination only, never home.
+      {
+        id: "executive",
+        label: "Portfolio Overview",
+        href: "/admin/operations/executive",
+      },
     ],
   },
   {
@@ -109,47 +174,39 @@ export const NAV_GROUPS: OperationsNavGroup[] = [
     ],
   },
   {
-    label: "Intelligence",
+    label: "System",
     items: [
-      { id: "audits", label: "Audits", href: "/admin/operations/audits" },
-      { id: "infrastructure", label: "Infrastructure", href: "/admin/operations/infrastructure" },
-      { id: "timeline", label: "Timeline", href: "/admin/operations/timeline" },
-      { id: "automation", label: "Automation", href: "/admin/operations/automation" },
-      { id: "launch-qa", label: "Launch QA", href: "/admin/operations/launch-qa" },
-      { id: "work", label: "Work", href: "/admin/work" },
-      { id: "review-inbox", label: "Review Inbox", href: "/admin/operations/review-inbox" },
+      { id: "settings", label: "Settings", href: "/admin/operations/settings" },
       {
-        id: "upgrade-requests",
-        label: "Upgrade Requests",
-        href: "/admin/operations/upgrade-requests",
+        id: "integrations",
+        label: "Integrations",
+        href: "/admin/operations/integrations",
       },
-      { id: "playbooks", label: "Playbooks", href: "/admin/operations/playbooks" },
-      { id: "growth", label: "Growth", href: "/admin/operations/growth" },
-      { id: "reports", label: "Reports", href: "/admin/operations/reports" },
-      {
-        id: "reporting-ops",
-        label: "Reporting Ops",
-        href: "/admin/operations/reporting",
-      },
-    ],
-  },
-  {
-    label: "Sales",
-    items: [
-      { id: "sales-pipeline", label: "Pipeline", href: "/admin/sales" },
-      { id: "sales-leads", label: "Leads", href: "/admin/sales/leads" },
-      { id: "sales-proposals", label: "Proposals", href: "/admin/sales/proposals" },
-      { id: "sales-templates", label: "Templates", href: "/admin/sales/templates" },
-      { id: "sales-activities", label: "Activities", href: "/admin/sales/activities" },
-      { id: "sales-forecast", label: "Forecast", href: "/admin/sales/forecast" },
-    ],
-  },
-  {
-    label: "Tools",
-    items: [
+      { id: "platform", label: "Platform", href: "/admin/operations/platform" },
+      { id: "training", label: "Training", href: "/admin/training" },
       { id: "staff", label: "Staff Home", href: "/admin/operations/staff" },
-      { id: "training", label: "Operations", href: "/admin/training" },
       { id: "client-import", label: "Import", href: "/admin/operations/client-import" },
+      // Demoted former home competitors — reachable, never morning start.
+      {
+        id: "command",
+        label: "Operations Board",
+        href: "/admin/operations/command",
+      },
+      {
+        id: "founder",
+        label: "Owner Snapshot",
+        href: "/admin/operations/founder",
+      },
+      {
+        id: "founder-intelligence",
+        label: "Priority Brief",
+        href: "/admin/operations/founder-intelligence",
+      },
+      {
+        id: "brain",
+        label: "Portfolio Synthesis",
+        href: "/admin/operations/brain",
+      },
     ],
   },
 ];
