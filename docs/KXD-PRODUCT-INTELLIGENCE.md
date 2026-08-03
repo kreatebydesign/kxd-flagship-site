@@ -1,8 +1,8 @@
 # KXD Product Intelligence
 
-**Status:** P0-A architecture approved as product law · **P0-B contracts complete** · **P0-C automatic inventory complete** · **P0-D Decision Archive initialized** · **P0-E Platform Health Engine v1 complete** · **P0-F Founder Friction Intelligence Engine complete** · **P0-G Product Evolution Ledger complete** · **P0-H Hall of Fame Engine complete**  
+**Status:** P0-A architecture approved as product law · **P0-B contracts complete** · **P0-C automatic inventory complete** · **P0-D Decision Archive initialized** · **P0-E Platform Health Engine v1 complete** · **P0-F Founder Friction Intelligence Engine complete** · **P0-G Product Evolution Ledger complete** · **P0-H Hall of Fame Engine complete** · **P0-I Product Kill List Engine complete**  
 **Location:** `lib/product-intelligence/`  
-**Verifiers:** `verify:product-intelligence-p0b` · `p0c` · `p0d` · `p0e` · `p0f` · `p0g` · `p0h`  
+**Verifiers:** `verify:product-intelligence-p0b` · `p0c` · `p0d` · `p0e` · `p0f` · `p0g` · `p0h` · `p0i`  
 **Boundary:** Infrastructure for building KXD OS — not client-facing, does not change KXD OS product functionality.
 
 ## Mission
@@ -278,7 +278,36 @@ Permanent question:
 
 **P0-H state:** Contracts and empty Hall of Fame Index loaded. Entries and timeline remain empty. Future linkages prepared with `implementationAuthorized: false`.
 
-**Not in P0-H:** Populated entries, awards, rankings, Kill List, Future Bets, Competitive Intelligence, valuation, weekly reviews, narratives, reports, UI, automation.
+**Not in P0-H:** Populated entries, awards, rankings, Kill List entries, Future Bets, Competitive Intelligence, valuation, weekly reviews, narratives, reports, UI, automation.
+
+## Product Kill List Engine (P0-I — complete)
+
+P0-I defines the permanent system that preserves ideas KXD intentionally chose not to become.
+
+Not a backlog. Not abandoned prototypes. Deliberate identity boundaries.
+
+Permanent question:
+
+> Why doesn't KXD OS do this?
+
+| Workstream | Status |
+|------------|--------|
+| Kill List Contract | ✅ |
+| Qualification Rules (deliberate strategic refusal) | ✅ |
+| Categories (closed vocabulary, 10) | ✅ |
+| Relationships (Decision / DNA / Evolution / Health / Inventory / Evidence) | ✅ |
+| Product Boundary triad (protects / refuses / strengthens) | ✅ |
+| Integrity rules | ✅ |
+| Timeline compatibility (structure only) | ✅ |
+| Future compatibility stubs | ✅ |
+
+**Load:** `loadProductKillListEngine()` · **Attach:** `attachProductKillListEngine(index, result)`
+
+**Law:** Every product becomes defined as much by what it refuses to build as by what it chooses to build.
+
+**P0-I state:** Contracts and empty Product Kill List Index loaded. Entries and timeline remain empty. Future linkages prepared with `implementationAuthorized: false`.
+
+**Not in P0-I:** Populated entries, rankings, Future Bets, Competitive Intelligence, valuation, weekly reviews, narratives, reports, UI, automation.
 
 ## Implementation batches
 
@@ -292,10 +321,10 @@ Permanent question:
 | **P0-F** | Founder Friction Intelligence Engine (contracts + index) | ✅ Complete |
 | **P0-G** | Product Evolution Ledger (contracts + index) | ✅ Complete |
 | **P0-H** | Hall of Fame Engine (contracts + index) | ✅ Complete |
-| **P0-I** | Valuation model v1 (triple bands + assumptions) | Pending |
+| **P0-I** | Product Kill List Engine (contracts + index) | ✅ Complete |
 | **P0-J** | Agent read interface (“Load KPI pack”) | Pending |
 | **P0-K** | Post-batch automation that drafts intelligence updates | Pending |
-| Later | Product Kill List · Future Bets · Competitive Intelligence · Weekly Reviews | Pending — only when authorized |
+| Later | Future Bets · Competitive Intelligence · Valuation · Weekly Reviews | Pending — only when authorized |
 | **P1+** | UI/workspace for Product Intelligence | After contracts trusted |
 
 ## Acceptance test

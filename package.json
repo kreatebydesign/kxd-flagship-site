@@ -57,6 +57,7 @@
     "verify:product-intelligence-p0f": "tsx scripts/verify-product-intelligence-p0f.ts",
     "verify:product-intelligence-p0g": "tsx scripts/verify-product-intelligence-p0g.ts",
     "verify:product-intelligence-p0h": "tsx scripts/verify-product-intelligence-p0h.ts",
+    "verify:product-intelligence-p0i": "tsx scripts/verify-product-intelligence-p0i.ts",
     "connect:local-status": "tsx --env-file=.env.local scripts/connect-local-activation.ts status",
     "connect:local-enable": "tsx --env-file=.env.local scripts/connect-local-activation.ts enable",
     "connect:local-disable": "tsx --env-file=.env.local scripts/connect-local-activation.ts disable",
