@@ -68,6 +68,11 @@ export interface ExecutiveTodayData {
   morning: MorningBriefPageData;
   /** Phase 28B — user-facing explainability for the primary recommendation. */
   explainability?: import("@/lib/executive-intelligence").UserFacingExplainability | null;
+  /**
+   * Phase 7 Batch D.1 — founder experience recomposition.
+   * Presentation over existing facts; not a second intelligence path.
+   */
+  experience: import("./recomposition").TodayRecomposition;
   generatedAt: string;
 }
 
@@ -101,8 +106,8 @@ export function mapActivityToTodayItem(
     }
   })();
   const client = item.clientName ? `${item.clientName} · ` : "";
-  const module = item.sourceModule ? `${item.sourceModule}` : "";
-  const metaParts = [`${client}${when}`.trim(), module].filter(Boolean);
+  const sourceModule = item.sourceModule ? `${item.sourceModule}` : "";
+  const metaParts = [`${client}${when}`.trim(), sourceModule].filter(Boolean);
 
   return {
     id: item.id,

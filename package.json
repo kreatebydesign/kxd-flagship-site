@@ -49,6 +49,7 @@
     "verify:phase6-batch-c4": "tsx scripts/verify-phase6-batch-c4.ts",
     "verify:phase7-batch-c": "tsx scripts/verify-phase7-batch-c.ts",
     "verify:phase7-batch-d": "tsx scripts/verify-phase7-batch-d.ts",
+    "verify:phase7-batch-d1": "tsx scripts/verify-phase7-batch-d1.ts",
     "connect:local-status": "tsx --env-file=.env.local scripts/connect-local-activation.ts status",
     "connect:local-enable": "tsx --env-file=.env.local scripts/connect-local-activation.ts enable",
     "connect:local-disable": "tsx --env-file=.env.local scripts/connect-local-activation.ts disable",
