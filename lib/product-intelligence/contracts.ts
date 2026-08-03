@@ -239,18 +239,105 @@ export type DecisionObject = ProductIntelligenceObjectBase<
 /* Founder Friction                                                           */
 /* -------------------------------------------------------------------------- */
 
-export type FrictionFrequency = "rare" | "weekly" | "daily" | "constant";
+/**
+ * P0-B frequencies retained; P0-F adds once/occasionally.
+ * Prefer P0-F classes for new observations.
+ */
+export type FrictionFrequency =
+  | "once"
+  | "occasionally"
+  | "rare"
+  | "weekly"
+  | "daily"
+  | "constant";
+
+/**
+ * P0-B severities retained; P0-F canonical classes are minor→critical.
+ * Prefer P0-F classes for new observations (product impact, not emotion).
+ */
 export type FrictionSeverity =
+  | "minor"
+  | "moderate"
+  | "major"
+  | "critical"
   | "annoyance"
   | "drag"
   | "blocker"
   | "trust_break";
+
+/** Recommended direction after triage (P0-B). */
 export type FrictionDirection =
   | "absorb"
   | "simplify"
   | "automate_later"
   | "ignore";
-export type FrictionStatus = "open" | "watching" | "resolved" | "accepted";
+
+/**
+ * Resolution lifecycle (P0-F).
+ * P0-B open/watching retained as aliases for observed/verified.
+ */
+export type FrictionStatus =
+  | "observed"
+  | "verified"
+  | "accepted"
+  | "planned"
+  | "in_progress"
+  | "resolved"
+  | "rejected"
+  | "superseded"
+  | "open"
+  | "watching";
+
+/** Closed category vocabulary — no free-form categories (P0-F). */
+export type FrictionCategory =
+  | "cognitive_load"
+  | "navigation"
+  | "workflow"
+  | "communication"
+  | "ai"
+  | "automation"
+  | "performance"
+  | "mobile"
+  | "client_experience"
+  | "founder_experience"
+  | "operational"
+  | "visual"
+  | "language"
+  | "commercial"
+  | "unknown";
+
+export type FrictionEffort = "trivial" | "small" | "medium" | "large" | "xlarge";
+
+export type FrictionEvidenceKind =
+  | "founder_observation"
+  | "dogfood_session"
+  | "ux_review"
+  | "support_issue"
+  | "qa"
+  | "architecture_review"
+  | "competitive_observation";
+
+export interface FrictionImpactModel {
+  founderImpact: string;
+  clientImpact: string;
+  businessImpact: string;
+  operationalImpact: string;
+  technicalImpact: string;
+}
+
+export interface FrictionLifecycleTransition {
+  from: FrictionStatus;
+  to: FrictionStatus;
+  reason: string;
+  at: string;
+  by: string;
+}
+
+export interface FrictionLearningRecord {
+  whatChanged: string;
+  whyItWorked: string;
+  whatProductIntelligenceLearned: string;
+}
 
 export interface FounderFrictionDetail {
   observation: string;
@@ -261,6 +348,24 @@ export interface FounderFrictionDetail {
   emotionalImpact: string;
   recommendedDirection: FrictionDirection;
   frictionStatus: FrictionStatus;
+  /** P0-F additive fields — required for new friction objects. */
+  category: FrictionCategory;
+  effort: FrictionEffort;
+  founderImpact: string;
+  clientImpact: string;
+  operationalImpact: string;
+  technicalImpact: string;
+  relatedInventoryIds: string[];
+  relatedDecisionIds: string[];
+  relatedRoadmapIds: string[];
+  relatedHealthDomainIds: string[];
+  relatedProductDnaIds: string[];
+  relatedTechnicalDebtIds: string[];
+  frictionEvidenceKinds: FrictionEvidenceKind[];
+  discoveredAt: string;
+  resolvedAt: string | null;
+  lifecycleTransitions: FrictionLifecycleTransition[];
+  learning: FrictionLearningRecord | null;
 }
 
 export type FounderFrictionObject = ProductIntelligenceObjectBase<
