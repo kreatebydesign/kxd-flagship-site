@@ -28,6 +28,22 @@ import { CONNECT_LOCAL_FIXTURE_STAFF } from "../lib/connect/local-fixture-staff"
 
 export { CONNECT_LOCAL_FIXTURE_STAFF };
 
+/** Narrow Payload `find`/`create` docs without unsafe overlapping casts. */
+function readConnectDocFields(doc: unknown): {
+  id: number;
+  publicId: string;
+  createdAt?: string;
+} {
+  const record =
+    doc && typeof doc === "object" ? (doc as Record<string, unknown>) : {};
+  return {
+    id: Number(record.id),
+    publicId: String(record.publicId ?? ""),
+    createdAt:
+      typeof record.createdAt === "string" ? record.createdAt : undefined,
+  };
+}
+
 async function main() {
   const target = resolveConnectLocalDbTarget();
   assertConnectLocalFixtureTarget(target);
@@ -198,9 +214,9 @@ async function main() {
   });
 
   if (existingDirect.docs.length > 0) {
-    const doc = existingDirect.docs[0] as { id: number; publicId: string };
-    directConversationId = Number(doc.id);
-    directPublicId = String(doc.publicId);
+    const doc = readConnectDocFields(existingDirect.docs[0]);
+    directConversationId = doc.id;
+    directPublicId = doc.publicId;
     await payload.update({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       collection: "connect-conversations" as any,
@@ -302,9 +318,9 @@ async function main() {
   });
 
   if (existingGroup.docs.length > 0) {
-    const doc = existingGroup.docs[0] as { id: number; publicId: string };
-    groupConversationId = Number(doc.id);
-    groupPublicId = String(doc.publicId);
+    const doc = readConnectDocFields(existingGroup.docs[0]);
+    groupConversationId = doc.id;
+    groupPublicId = doc.publicId;
     await payload.update({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       collection: "connect-conversations" as any,
@@ -358,7 +374,7 @@ async function main() {
     });
     if (existing.docs.length > 0) {
       return {
-        publicId: String((existing.docs[0] as { publicId: string }).publicId),
+        publicId: readConnectDocFields(existing.docs[0]).publicId,
         created: false,
       };
     }
@@ -381,8 +397,7 @@ async function main() {
       id: input.conversationId,
       data: {
         latestMessageAt:
-          (created as { createdAt?: string }).createdAt ??
-          new Date().toISOString(),
+          readConnectDocFields(created).createdAt ?? new Date().toISOString(),
       },
       overrideAccess: true,
     });
