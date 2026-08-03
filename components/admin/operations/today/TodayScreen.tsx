@@ -505,9 +505,9 @@ export async function TodayScreen() {
   const quickActions = [
     { label: "Reports", sub: "Client performance", href: "/admin/operations/reports" },
     { label: "Log Request", sub: "New client request", href: "/admin/operations/requests/new" },
-    { label: "Operations Hub", sub: "Studio overview", href: "/admin/operations" },
+    { label: "Work", sub: "Execution desk", href: "/admin/work" },
     { label: "Accounts", sub: "Strategic intelligence", href: "/admin/operations/accounts" },
-    { label: "Founder", sub: "Studio overview", href: "/admin/operations/founder" },
+    { label: "Owner Snapshot", sub: "Portfolio destination", href: "/admin/operations/founder" },
     { label: "Creative Engine", sub: "Campaigns & assets", href: "/admin/operations/creative" },
     { label: "Payload CMS", sub: "Content & data", href: "/admin" },
     { label: "All Requests", sub: "Client requests", href: "/admin/collections/client-requests" },
@@ -976,15 +976,15 @@ export async function TodayScreen() {
 
         <footer className="flex flex-wrap items-center justify-between gap-4">
           <p className="kxd-os-meta">
-            KXD OS · Studio Overview · Phase 2F · Live Payload data · Refreshes on each request
+            KXD OS · Today · Live Payload data · Refreshes on each request
           </p>
           <div className="flex flex-wrap items-center gap-4">
             {([
-              ["/admin/operations", "Operations"],
+              ["/admin/work", "Work"],
               ["/admin/operations/creative", "Creative"],
               ["/admin/operations/growth", "Growth"],
               ["/admin/operations/accounts", "Accounts"],
-              ["/admin/operations/founder", "Founder"],
+              ["/admin/operations/intelligence", "Intelligence"],
               ["/admin", "Payload"],
             ] as [string, string][]).map(([href, label]) => (
               <Link key={href} href={href} className="kxd-os-link-quiet">

@@ -1,5 +1,6 @@
 import type { OperationsNavId, OperationsNavItem } from "@/components/admin/operations/shared/operations-nav";
 import { NAV_GROUPS } from "@/components/admin/operations/shared/operations-nav";
+import { OPERATIONS_HOME_PATH } from "@/lib/admin/constants";
 import type { ClientHqNavId } from "@/lib/portal/nav";
 import type { QuickAction, QuickActionId } from "@/lib/quick-actions/types";
 import type { CommandSearchResult } from "@/lib/search/types";
@@ -15,6 +16,8 @@ export const OPERATIONS_NAV_MODULE_MAP: Record<OperationsNavId, KxdModuleId> = {
   platform: "operations",
   settings: "operations",
   today: "operations",
+  focus: "operations",
+  review: "operations",
   founder: "founder",
   "founder-intelligence": "brain",
   brain: "brain",
@@ -146,7 +149,7 @@ export function resolveEditionNavigation(edition: EditionDefinition): EditionRes
   return {
     operationsNavGroups,
     operationsNavItems,
-    homeRoute: edition.customNavigation?.homeRoute ?? "/admin/operations/executive",
+    homeRoute: edition.customNavigation?.homeRoute ?? OPERATIONS_HOME_PATH,
     portalNavHiddenIds: [...hidePortal],
     portalNavLabels: labelOverrides,
   };

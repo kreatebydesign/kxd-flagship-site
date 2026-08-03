@@ -6,6 +6,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
 
+import { OPERATIONS_HOME_PATH } from "@/lib/admin/constants";
+
 type LoginSearchParams = {
   redirect?: string | string[];
 };
@@ -47,9 +49,11 @@ export function KxdAdminLoginForm({
   const [loading, setLoading] = useState(false);
   const submittingRef = useRef(false);
 
+  // Phase 7 Batch C — founder login lands on Today (sole home).
+  // Restricted staff who hit Today are redirected by operations layout guard.
   const redirectTo = getSafeRedirect({
-    fallbackTo: adminRoute,
-    redirectTo: readRedirectParam(searchParams) ?? adminRoute,
+    fallbackTo: OPERATIONS_HOME_PATH,
+    redirectTo: readRedirectParam(searchParams) ?? OPERATIONS_HOME_PATH,
   });
 
   const loginAction = formatAdminURL({

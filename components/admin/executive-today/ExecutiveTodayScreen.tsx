@@ -7,7 +7,7 @@ import { formatClock } from "@/lib/executive-today/brief/time-model";
 import { ExecutiveTodayCapture } from "./ExecutiveTodayCapture";
 
 /**
- * Permanent Executive Today home — typography-first, decision-first.
+ * Today — sole founder home. Typography-first, decision-first.
  * Phase 22B visual refinement · Phase 27B calendar intelligence.
  */
 export function ExecutiveTodayScreen({ data }: { data: ExecutiveTodayData }) {

@@ -1,6 +1,7 @@
 import type { AdminViewServerProps } from "payload";
 import { redirect } from "next/navigation";
 import { getSafeRedirect } from "payload/shared";
+import { OPERATIONS_HOME_PATH } from "@/lib/admin/constants";
 import { PayloadLogo } from "./PayloadLogo";
 import { KxdAdminLoginForm } from "./KxdAdminLoginForm";
 
@@ -18,7 +19,6 @@ export function KxdAdminLoginView({
       user,
       payload: {
         config: {
-          routes: { admin: adminRoute },
           admin: { user: userSlug },
         },
         collections,
@@ -33,9 +33,10 @@ export function KxdAdminLoginView({
         ? searchParams.redirect[0]
         : undefined;
 
+  // Phase 7 Batch C — founder login lands on Today (sole home).
   const redirectUrl = getSafeRedirect({
-    fallbackTo: adminRoute,
-    redirectTo: redirectParam ?? adminRoute,
+    fallbackTo: OPERATIONS_HOME_PATH,
+    redirectTo: redirectParam ?? OPERATIONS_HOME_PATH,
   });
 
   if (user) {

@@ -92,7 +92,7 @@ export interface EditionCustomNavigation {
   hideOperationsNavIds?: OperationsNavId[];
   /** Additional operations nav items (edition-specific routes — future) */
   additionalOperationsItems?: OperationsNavItem[];
-  /** Override operations home route */
+  /** Override operations home route — must remain Today (`/admin/operations/today`) for founders */
   homeRoute?: string;
   /** Hide portal nav modules */
   hidePortalNavIds?: ClientHqNavId[];

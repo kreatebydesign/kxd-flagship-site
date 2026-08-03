@@ -38,8 +38,8 @@ const C = {
 } as const;
 
 const NAV_LINKS = [
-  ["/admin/operations/executive", "Executive"],
-  ["/admin/operations/command", "Operations"],
+  ["/admin/operations/today", "Today"],
+  ["/admin/operations/executive", "Portfolio Overview"],
   ["/admin/operations/research", "Research"],
   ["/admin/operations/audits", "Audits"],
   ["/admin/operations/onboarding", "Onboarding"],

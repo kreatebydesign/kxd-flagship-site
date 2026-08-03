@@ -77,12 +77,12 @@ export function ExecutiveScreen({ data, reporting, today }: ExecutiveScreenProps
     <OperationsShell activeId="executive">
       <KxdPage className="kxd-os-page--ops">
         <OperationsPageHero
-          eyebrow="KXD OS · Executive Overview"
-          title="Executive Overview"
-          lead={`${today} · Live snapshot across clients, delivery, onboarding, audits, and portal`}
+          eyebrow="KXD OS · Portfolio Overview"
+          title="Portfolio Overview"
+          lead={`${today} · Business destination — begin the day in Today`}
         />
 
-        <KxdSection label="Executive Overview" className="kxd-os-operations-section">
+        <KxdSection label="Portfolio Overview" className="kxd-os-operations-section">
           <div className="kxd-os-operations-overview-grid">
             {data.commandCenter.cards.map((card) => (
               <Link

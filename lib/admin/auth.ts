@@ -95,7 +95,7 @@ export async function requirePayloadAdminApi() {
  * Redirects to Payload admin login with a post-auth return path.
  */
 export async function requirePayloadAdminPage(
-  returnPath = OPERATIONS_HOME_PATH,
+  returnPath: string = OPERATIONS_HOME_PATH,
 ) {
   const user = await getPayloadAdminUser();
   if (!user) {

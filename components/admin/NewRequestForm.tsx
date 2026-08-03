@@ -227,15 +227,15 @@ export function NewRequestForm({ clients, projects }: Props) {
             Request logged.
           </h1>
           <p style={{ fontFamily: C.sans, fontSize: "0.875rem", color: "rgba(255,255,255,0.4)", maxWidth: "28rem", lineHeight: 1.6, marginBottom: "0.5rem" }}>
-            The client request has been created in Payload and is now visible in the Operations Suite.
+            The client request has been created in Payload and is now visible in Work.
           </p>
           <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.2)", marginBottom: "2.5rem" }}>
             Record ID #{submitted.id}
           </p>
 
           <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", justifyContent: "center" }}>
-            <Link href="/admin/operations" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.bgBase, background: `linear-gradient(180deg, #d1b06b 0%, #c9a962 48%, #b09040 100%)`, padding: "0.875rem 2rem", textDecoration: "none", display: "inline-block" }}>
-              Return to Dashboard
+            <Link href="/admin/operations/today" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.bgBase, background: `linear-gradient(180deg, #d1b06b 0%, #c9a962 48%, #b09040 100%)`, padding: "0.875rem 2rem", textDecoration: "none", display: "inline-block" }}>
+              Return to Today
             </Link>
             <button onClick={resetForm} style={{ fontFamily: C.sans, fontWeight: 400, fontSize: "0.8125rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.goldDim, background: "transparent", border: `1px solid ${C.borderGold}`, padding: "0.875rem 2rem", cursor: "pointer" }}>
               Log Another Request
@@ -394,8 +394,8 @@ export function NewRequestForm({ clients, projects }: Props) {
 
             {/* ── Submit row ─────────────────────────────────────────── */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap" as const, paddingTop: "0.5rem" }}>
-              <Link href="/admin/operations" style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", textDecoration: "none" }}>
-                ← Back to Dashboard
+              <Link href="/admin/operations/today" style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", textDecoration: "none" }}>
+                ← Back to Today
               </Link>
 
               <button
@@ -452,8 +452,8 @@ function PageHeader() {
           </div>
 
           <div className="flex items-center gap-5">
-            <Link href="/admin/operations" style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", textDecoration: "none" }}>
-              ← Operations
+            <Link href="/admin/operations/today" style={{ fontFamily: C.sans, fontSize: "0.8125rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(255,255,255,0.22)", textDecoration: "none" }}>
+              ← Today
             </Link>
             <Link href="/admin" style={{ fontFamily: C.sans, fontWeight: 500, fontSize: "0.8125rem", letterSpacing: "0.14em", textTransform: "uppercase", color: C.gold, opacity: 0.55, textDecoration: "none" }}>
               Payload CMS →

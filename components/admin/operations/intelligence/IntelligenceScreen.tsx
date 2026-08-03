@@ -181,7 +181,7 @@ export function IntelligenceScreen({ briefing }: { briefing: ExecutiveBriefing }
               })}
               {" · "}
               <Link href="/admin/operations/brain" className="kxd-os-link-quiet">
-                KXD Brain
+                Portfolio Synthesis
               </Link>
             </p>
           </aside>
