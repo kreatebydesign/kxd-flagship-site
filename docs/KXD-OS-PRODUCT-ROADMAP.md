@@ -18,7 +18,8 @@ This roadmap connects the governing documents:
 
 | Document | Role |
 |----------|------|
-| `KXD-OS-CONSTITUTION.md` | Experience standard — how it must feel |
+| `KXD-OS-CONSTITUTION.md` | KXD Experience Constitution v2.0 — sole permanent experience law (Held clarity) |
+| `PHASE-2-EXPERIENCE-REFINEMENT.md` | Experience Refinement Phase 2 — Batch A complete |
 | `KXD-OS-VISUAL-MANIFESTO.md` | Visual craft — how it must look |
 | `STUDIO-INTELLIGENCE-ARCHITECTURE.md` | Intelligence layer — how capability composes |
 | Platform architecture / registry | Implementation truth — what exists and what ships |
@@ -832,7 +833,7 @@ These pillars are **not** implemented by listing them here. Engineering phases r
 | Layer | Document |
 |-------|----------|
 | Product direction | **This roadmap** |
-| Experience law | `KXD-OS-CONSTITUTION.md` |
+| Experience law | `KXD-OS-CONSTITUTION.md` v2.0 (Held clarity) · Phase 2: `PHASE-2-EXPERIENCE-REFINEMENT.md` |
 | Visual law | `KXD-OS-VISUAL-MANIFESTO.md` |
 | Intelligence architecture | `STUDIO-INTELLIGENCE-ARCHITECTURE.md` |
 | Implementation truth | Platform registry, collection docs, domain docs |

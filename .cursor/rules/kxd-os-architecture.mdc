@@ -120,5 +120,5 @@ Maintain separation: **facts → interpretation → awareness → narrative → 
 - Architecture: `docs/KXD-OS-ARCHITECTURE.md`
 - Philosophy: `docs/KXD-OS-PHILOSOPHY.md`
 - Roadmap: `docs/KXD-OS-ROADMAP.md`
-- Experience: `docs/KXD-OS-CONSTITUTION.md`
+- Experience: `docs/KXD-OS-CONSTITUTION.md` (v2.0 — Held clarity; Phase 2: `docs/PHASE-2-EXPERIENCE-REFINEMENT.md`)
 - Platform registry: `lib/platform/registry.ts`

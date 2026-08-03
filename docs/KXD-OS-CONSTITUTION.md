@@ -1,652 +1,466 @@
-# The Constitution of KXD OS
+# KXD Experience Constitution
 
-**Version 1.1 · Governing Experience Standard**  
-**Status:** Permanent — all future implementation must conform  
-**Companion:** `docs/KXD-OS-VISUAL-MANIFESTO.md` (visual craft)  
-**Audience:** Founder, designers, engineers, Cursor agents
+**Version 2.0 · Permanent Emotional Operating System**  
+**Status:** Permanent — Product, Design, Engineering, AI agents, and future operators must conform  
+**Edition:** KXD OS Edition 1  
+**Approved:** Experience Refinement Phase 2 — Batch A  
+**Canonical path:** `docs/KXD-OS-CONSTITUTION.md`  
+**Companions:** `docs/KXD-OS-VISUAL-MANIFESTO.md` (visual craft) · `docs/KXD-OS-PHILOSOPHY.md` (product vision) · Product DNA / Doctrine / Decision Archive in `lib/product-intelligence/`  
+**Phase record:** `docs/PHASE-2-EXPERIENCE-REFINEMENT.md`
 
-> Also referenced as **KXD OS Product Vision** for compatibility.  
-> This document is the **Constitution** — it governs the experience. Architecture governs the implementation.
+> This is the **sole Experience Constitution** for KXD OS.  
+> It is not a visual style guide, component library, or marketing brief.  
+> It is the law governing how KXD OS feels.  
+> Architecture governs implementation. This document governs experience.
 
----
-
-## Preamble
-
-KXD OS is **the operating system for running a modern creative agency**.
-
-It is not a CRM, project manager, agency dashboard, or admin panel.
-
-It is studio software — editorial, intentional, executive, and calm.
-
-**The Constitution governs the experience.**  
-**Architecture governs the implementation.**
-
-Every future feature must conform to this document. When experience and implementation conflict, resolve toward calm, clarity, and founder time reclaimed — then align architecture to match.
+**Supersedes:** Constitution v1.1 as the governing experience standard. Enduring v1.1 principles (Respect Time, Room Test, progressive disclosure, studio intelligence that disappears) remain binding and are restated here as permanent law.
 
 ---
 
-## One sentence
+## 1. Emotional identity
 
-KXD OS is the private operating environment where Kreate by Design runs — not software that tracks work, but software that holds relationships, decisions, and momentum with calm authority while the owner leads.
+### Held clarity
 
----
+KXD OS owns one defining experience: **Held clarity.**
 
-## What KXD OS is
+The founder is **held, not managed.**
 
-KXD OS is designed to progressively run more of the studio — client delivery, operational rhythm, business intelligence, client success — so leadership can focus on relationships, strategy, investment, and growth.
+| Held clarity means | Held clarity rejects |
+|--------------------|----------------------|
+| Welcomed, not processed | Onboarding theater |
+| Held, not managed | Supervisory software |
+| Clear, not briefed by noise | Dashboard briefing dumps |
+| Confident, not monitored | Surveillance posture |
+| Guided, not controlled | Forced workflows |
+| Proud, not merely satisfied | “Good enough internal tooling” |
+| Released at day’s end | Carrying the system overnight |
 
-It is **studio software**: editorial, intentional, executive, and calm.
+**Permanent product promise**
 
----
+> KXD OS helps founders make better decisions with less effort.
 
-## What KXD OS is not
+Every interaction should leave the user:
 
-| Not this | Because |
-|----------|---------|
-| Salesforce / HubSpot | Relationships are not rows in a pipeline |
-| Monday / ClickUp | Work is not infinite task cards |
-| Retool / Firebase console | Internal tools should not feel internal |
-| Military command center | Urgency is earned, never manufactured |
-| Marketing website in a sidebar | Operations is craft, not campaign |
+- clearer  
+- lighter  
+- more confident  
+- more in control  
 
-**Reference spirit:** Apple Human Interface, Stripe, Linear, Notion, Arc, Raycast  
-**Anti-reference:** Salesforce, Monday, ClickUp, HubSpot, Dynamics
+If it does not, simplify or remove it.
 
----
-
-## Respect Time
-
-**KXD OS exists to return time to the founder.**
-
-This is a foundational principle — equal in weight to Calm Before Busy. Every decision about what to build, how to build it, and what to show must pass through it.
-
-Every feature should either:
-
-- eliminate future work
-- eliminate repeated decisions
-- eliminate unnecessary clicks
-- reduce cognitive load
-- create reusable playbooks
-- enable future automation
-
-Before introducing any feature, developers must ask:
-
-- Does this save time?
-- Does this reduce future work?
-- Can this become a playbook?
-- Can this eventually automate itself?
-
-If the answer is no to all four, reconsider whether the feature belongs.
-
-**The ultimate KPI of KXD OS is not tasks completed.**  
-**It is founder time reclaimed.**
-
-A screen that looks beautiful but adds recurring manual work violates the Constitution. A dense admin view that saves ten minutes every week may be acceptable — but only if it is on a path toward automation or elimination.
-
-Respect Time means:
-
-- Defaults should be smart enough that re-entry is rare
-- Playbooks should absorb repeatable studio rituals
-- Work items should spawn from real events, not duplicate data entry
-- Briefings should replace status meetings, not supplement them
-- Every click should earn its place
+**Ultimate KPI:** founder time reclaimed — not tasks completed, not features shipped.
 
 ---
 
-## The ten questions
+## 2. Founder experience principles
 
-### 1. If Apple designed an agency operating system… what would it feel like?
-
-It would feel like opening a **considered private instrument** — the way Logic Pro or Final Cut feels purposeful before you touch a control.
-
-You would feel:
-
-- **Oriented immediately** — one clear sense of where you are and what matters now
-- **Unhurried** — nothing screams for attention unless attention is truly required
-- **Material** — depth, weight, and typography do the work; decoration does not
-- **Confident** — large, quiet headlines; numbers that read as decisions, not data exhaust
-- **Personal** — the system knows your studio, your clients, your rhythm
-- **Invisible until needed** — power available without visual noise
-
-The emotional register is **studio-grade calm**, not enterprise-grade busy.
-
-Apple would not give you seventeen widgets. Apple would give you **the next right thing** and a path to everything else.
+1. **Today owns attention.** Modules own depth. There is never a second home.
+2. **Emotion arrives before information.** The first viewport must create the owning emotion.
+3. **Confidence before information.** If forced to choose, choose confidence.
+4. **Calm beats clutter.** Sparse surfacing. One strong moment per viewport.
+5. **Business before software.** The founder runs a company, not an app.
+6. **Invisible complexity.** Power without spectacle. Intelligence without chatbot chrome.
+7. **One truth.** Shared Core owns facts; surfaces never invent competing realities.
+8. **Premium over feature count.** Subtraction can be the premium move.
+9. **Every click reduces mental weight.** Ceremony without confidence is waste.
+10. **Silence is a feature.** When nothing needs judgment, the OS stays quiet.
+11. **The software should disappear.** The day should feel authored, not assembled.
+12. **Respect Time.** Eliminate future work, repeated decisions, unnecessary clicks, and cognitive load — or enable a playbook/automation path.
 
 ---
 
-### 2. What should every screen feel like?
+## 3. Client experience principles
 
-Every screen should feel like **a single room in the studio** — one purpose, one atmosphere, one question answered.
+Clients experience KXD OS through the portal / CES layer. Emotional owner: **Belonging.**
 
-**Entry:** A brief moment of orientation (where am I, what era of the day is this, what is the health of this domain).
-
-**Body:** The minimum information required to understand state and make the next decision.
-
-**Exit:** A clear path forward — one primary action, quiet secondary paths.
-
-Screens should never feel like:
-
-- A database exposed as UI
-- A dashboard of everything at once
-- A settings panel for the entire company
-- A wall of equal-weight cards
-
-Screens should feel like:
-
-- A briefing before a meeting
-- A desk with only today's papers on it
-- A conversation with a trusted chief of staff
-
-**The test:** Close the laptop, reopen the screen ten minutes later. Do you know what to do without re-reading the whole page?
+1. Clients feel **inside the partnership**, not granted access to software.
+2. Craft moments (especially Website Review) feel like a **trust table**, not a ticket queue.
+3. Language is partnership language — never ticket, triage, or admin leftovers.
+4. Clients see one calm truth about their relationship with Kreate.
+5. Capability is progressive; belonging is immediate.
+6. Clients should feel proud to open their workspace with a colleague present.
+7. Portal never becomes a generic SaaS shell or approval theater.
 
 ---
 
-### 3. How much information should be shown at once?
+## 4. Staff experience principles
 
-**Less than you think. More than a toy.**
+Staff operate depth modules under the same Constitution. Emotional register: **composed competence.**
 
-| Layer | Density |
-|-------|---------|
-| Hero / brief | 1 headline, 1 health line, 2–4 status statements |
-| Focus | 3 items maximum for "what matters now" |
-| Snapshot metrics | 5–7 numbers, each answering one question |
-| Lists | 5–12 visible rows; depth via navigation, not scroll |
-| Detail | Full context only when you have chosen an object |
-
-**Progressive disclosure is not optional.** The OS assumes the founder's attention is the scarcest resource in the company.
-
-Show **signal**. Link to **detail**. Never dump **inventory**.
-
-If a screen needs a legend, it has too many encodings. If it needs a tutorial, it has too many concepts at once.
+1. Staff paths must not invent a second founder home.
+2. Depth is allowed; panic is not.
+3. Operational density may increase with role — emotional calm must not decrease.
+4. Staff tools serve business truth; they do not become Retool-shaped admin culture in the founder path.
+5. System and settings remain quiet rooms — rare, intentional, never the day’s atmosphere.
+6. Staff success is measured by reduced founder interruption and preserved calm.
 
 ---
 
-### 4. What should the visual hierarchy prioritize?
+## 5. Emotional ownership by product area
 
-In order:
+**Law:** Every primary screen owns one emotion. If emotions compete, simplify until one remains.  
+Do not change an emotional owner without proven conflict with Product DNA and a Decision.
 
-1. **The executive question** this page answers (serif headline, presence)
-2. **The health of the domain** (one line — healthy, attention needed, blocked)
-3. **The next decision or action** (focus list, primary CTA)
-4. **Supporting counts** (quiet metrics — context, not story)
-5. **The roster of relationships** (client names, project names — always name-first)
-6. **Metadata** (dates, statuses, IDs — never compete with names)
-
-**Names before numbers. Decisions before data. Relationships before records.**
-
-Status color appears only when it changes behavior. Gold appears only when it commits something. Borders appear only when space alone fails.
-
----
-
-### 5. Should dashboards exist everywhere? Or should the experience become more contextual?
-
-**The experience becomes more contextual.**
-
-Dashboards are a compromise for products that do not know what you need. KXD OS should know — or should ask quietly.
-
-| Pattern | When to use |
-|---------|-------------|
-| **Daily cockpit** (`Today`, `Work`) | Once per day — studio-wide rhythm |
-| **Domain brief** (`Client Command`, `Client Success`) | When entering a relationship or portfolio domain |
-| **Object workspace** (single client, single project) | When doing work — full context, tabbed depth |
-| **Collection admin** (Payload) | When editing records — honest data UI, not disguised as product |
-
-**No dashboard sprawl.** Not every module gets a KPI grid. Not every list gets six metric cards above it.
-
-The founder's day is not "visit twelve dashboards." The founder's day is:
-
-1. What needs me today?
-2. Which client needs me?
-3. What is the next move?
-
-Context travels with the client. Intelligence travels with the relationship. Work travels with the execution layer.
+| Area | Emotion | Meaning | What creates it | What destroys it | Success recognized when | Must never happen |
+|------|---------|---------|-----------------|------------------|-------------------------|-------------------|
+| **Login** | Welcomed | Crossing into a private studio | Fast recognition; no choices at the door; immediate path to Today | Post-auth product menus; “where do you want to go?”; processed/onboarding tone | Founder feels arrived, not authenticated | Login competing with Today as a product moment |
+| **Today** | Clear | Authority restored in seconds | Posture → one focus → true exceptions → quiet exits | KPI walls; second homes; Connect/AI/charts as morning noise | 30 seconds later, more confident than before opening | Today becoming a dashboard, CRM, or chat |
+| **Navigation** | Effortless | Moving through rooms | Presence hierarchy; home loud, depth quiet, system nearly invisible | Equal-weight destinations; feature-marketing nav; cockpit language | Navigation fades from conscious thought | Nav that forces the founder to decide how to start |
+| **Client Command** | Confident | Full presence with one relationship | Relationship truth first; next judgment visible; admin buried | Hunting across tools; parallel client homes; admin-first density | Open one client and stop reconstructing context | Merging Client Command into Today |
+| **Website Review** | Trusted | Shared craft becoming durable decisions | Partnership pacing; evidence-bound notes; calm revision memory | Ticket grammar; status theater; anxious email vibes | Review replaces scattered feedback with trust | Making clients feel like ticket submitters |
+| **Work** | Momentum | Progress you can feel | Next right work; movement over inventory | Infinite card boards; busyness rewards; ClickUp gravity | Opening Work feels like the studio moving | Work becoming a second home or PM product |
+| **Connect** | Close | Quiet presence of people who matter | Continuity; internal-first intimacy; no spam | Notification theater; chat-as-home; duplicate comms centers | Presence without pressure | Connect as homepage or portal spam engine |
+| **Commercial** | Safe | Financial composure | Posture first; details on demand; one commercial truth | Alarmist red grids; vanity money dashboards; ledger-as-default | Money feels held, not performed | Manufacturing financial urgency |
+| **Creative** | Inspired | Taste and direction return | Distinct atmosphere from Work/Admin; craft presence | Asset-folder energy; status chips as creative culture | Creative reminds why the studio exists | Creative reduced to operational inventory |
+| **Reporting** | Proud | The business as a story worth owning | Editorial narrative; metrics as evidence | Chart dumps; vanity without movement; export residue | Would show a board without apology | Reports that feel like software exhaust |
+| **Client Portal** | Belonging | Membership in the partnership | Warm arrival; partnership stance; less module browsing | Generic portal chrome; granted-access feeling | Client feels inside, not outside looking in | Portal as SaaS account switcher theater |
+| **Search** | Powerful | Intention → truth | Business meaning in results; one truth retrieval | Database object dumps; scavenger hunts | Ask once, arrive at truth | Parallel search realities disagreeing with Shared Core |
+| **Global Shell** | Held | The building itself is calm architecture | Quiet chrome; rooms not panels; editorial frame | Enterprise chrome; urgency cosmetics; app-shell reminders | Frame disappears; only the day remains | Shell competing with content for attention |
 
 ---
 
-### 6. How should typography be used?
+## 6. Founder journey — the authored day
 
-Typography is **the primary UI**.
+The product is not a set of screens. It is a day. The day must feel **authored, not assembled.**
 
-| Role | Treatment |
-|------|-----------|
-| Page presence | Large serif — editorial confidence, one per viewport |
-| Executive brief | Serif or near-serif weight for names and key numbers |
-| Body | Clean sans — readable, sentence case |
-| Labels / eyebrows | Small, muted, sentence case — never shouting |
-| Metadata | Smaller still — dates, counts, secondary facts |
-
-**Typography over decoration.** If hierarchy is unclear without a box around something, the type scale is wrong.
-
-Uppercase is for rare scanning moments, not default chrome. The OS is not a warning label factory.
-
-Numbers that matter (revenue at risk, overdue count, days until launch) earn scale. Numbers that don't (row index, internal ID) earn silence.
+| Stage | Emotion | Emotional objective | Product responsibility | Failure state | Transition | Signature KXD moment |
+|-------|---------|---------------------|------------------------|---------------|------------|----------------------|
+| **Arrival** | Welcomed | Threshold into private studio | Hospitality, then Today — no decisions at the door | Feeling processed by software | Instant passage into Morning | The door that knows you — then silence before clarity |
+| **Morning** | Clear | Restore authority in under a minute | Today answers attention; one focus; exceptions only when true | Briefed by noise; morning uncertainty | Clear focus shapes Planning | The Morning Answer |
+| **Planning** | Composed | The day has a chosen shape | Priorities and flow feel selected, not listed | Endless prioritization anxiety | Composure opens Client Work | The day takes form without effort |
+| **Client Work** | Confident | Full presence with one relationship | Client Command holds context; next judgment is obvious | Reconstructing the client from fragments | Confidence frees Creative Work | One Client Truth |
+| **Creative Work** | Inspired | Taste and direction return | Creative atmosphere distinct from operations | Creative buried in task machinery | Inspiration returns to Commercial when needed | The room that remembers why you build |
+| **Commercial Work** | Safe | Money and commitment without alarm | Commercial posture first; ledgers on request | Accounting panic; vanity urgency | Safety enables honest Review | Commercial Composure |
+| **Review** | Proud | Own the story of the work and week | Narrative ownership; evidence-bound pride | Status archaeology; apology-ready exports | Pride allows Shutdown | Proud Review |
+| **Shutdown** | Released | The business can wait until tomorrow | Close open loops emotionally; do not invent new work | Reloading unfinished obligation dashboards | Release completes the day; tomorrow begins at Arrival | The OS lets go so the founder can |
 
 ---
 
-### 7. How should whitespace be used?
+## 7. Permanent experience laws
 
-Whitespace is **luxury and authority**.
+These laws are already supported by Product DNA, Doctrine, Decision Archive, and Experience Phase 2 Direction. They are binding.
 
-It communicates: *your attention is valuable; we will not waste it.*
-
-Rules:
-
-- Section breaks are generous — 48–64px+ between major movements
-- Rows breathe — padding that feels placed, not packed
-- One strong moment per viewport — surrounded by air
-- Empty space is not "wasted" — it is the product
-
-**If it feels tight, it feels cheap.**
-
-Whitespace also creates **rhythm**: brief → focus → metrics → work → depth. Without rhythm, screens become spreadsheets with rounded corners.
-
----
-
-### 8. How should studio intelligence feel?
-
-KXD OS should feel **naturally intelligent** — not like a product with "intelligence features" bolted on.
-
-The operating system quietly helps. The founder should never feel like they are operating a separate layer of machine assistance.
-
-| Avoid | Prefer |
-|-------|--------|
-| AI Recommendation | Studio Recommendation |
-| AI Draft | Prepared for Review |
-| AI Generated Proposal | Proposal Ready |
-| AI Assistant | *(no label — the OS just prepared it)* |
-| "Powered by…" chrome | Outcome in context |
-
-**Studio intelligence should disappear into the workflow.**
-
-The founder should not "go to intelligence." The OS should be capable where capability reduces friction — pre-filled context, suggested next actions, evidence-backed recommendations, prepared communications.
-
-When the OS speaks, it speaks **sparingly, specifically, and with receipts**. When it has nothing useful to say, it says nothing.
-
-Client Success already encodes this discipline: Attention Needed, Recommendations, Growth Opportunities (rare), Wins. Studio intelligence supports those categories — it does not replace executive judgment.
-
-**More intelligence should produce less interface. Never more complexity.**
+1. Every primary screen owns one emotion.  
+2. Emotion arrives before information.  
+3. Information must reduce uncertainty.  
+4. Confidence before information.  
+5. Calm beats clutter.  
+6. Business before software.  
+7. Invisible complexity.  
+8. One truth.  
+9. Premium over feature count.  
+10. Modules own depth.  
+11. Today owns attention.  
+12. The founder is held, not managed.  
+13. The software should disappear.  
+14. Every click should reduce mental weight.  
+15. Silence is a feature.  
+16. Pride is a feature.  
+17. Belonging is a feature.  
+18. Safety is a feature.  
+19. Stop adding rooms. Deepen the rooms that already matter.  
+20. No screen may manufacture urgency.  
+21. No screen may require apology in front of a sophisticated client.  
+22. If information arrives before emotion, redesign the feeling.  
+23. Urgency is earned, never performed.  
+24. More intelligence must produce less interface.  
+25. AI assists inside the experience — AI is not the homepage and not a chatbot destination.  
+26. No automation without explicit approval.  
+27. A screen fails if its purpose is only informational.
 
 ---
 
-### 9. What design principles should every future screen follow?
+## 8. Experience rejection laws — what KXD never becomes
 
-See **KXD OS Design Principles** below. Every screen must pass the **Room Test**:
+| KXD OS never becomes | Protected principle |
+|----------------------|---------------------|
+| Noisy | Calm beats clutter; silence is a feature |
+| Anxious | Held, not managed; urgency must be earned |
+| Rushed | Composure; premium restraint |
+| Feature-first | Premium over feature count |
+| Dashboard-first | Today owns attention; emotion before information |
+| Management software | Business before software; held, not managed |
+| Administrative (as daily atmosphere) | System stays quiet; Today owns the day |
+| Transactional | Trust and belonging over ticket grammar |
+| A wall of cards | One room, one strong moment; Room Test |
+| A wall of metrics | Confidence before information; names before numbers |
+| A generic SaaS shell | Studio software; Manifesto / premium pride test |
+| A chatbot homepage | Product DNA non-negotiable; AI not homepage |
+| A notification machine | Interrupt only when decisions or harm require it |
+| Software users feel forced to operate | The software should disappear; founder time reclaimed |
 
-> Does this feel like one room in a private studio — or one tab in enterprise software?
-
----
-
-### 10. What interaction principles should every developer follow?
-
-See **KXD OS Interaction Principles** below. Every feature must pass the **Next Action Test**:
-
-> Can the founder identify one obvious next action within five seconds of landing?
-
----
-
-## KXD OS Design Principles
-
-These principles govern **experience and information design**. Visual execution details live in the Visual Manifesto.
-
-### Foundational
-
-1. **Respect Time.**  
-   The ultimate KPI is founder time reclaimed — not tasks completed. Every feature must eliminate work, decisions, clicks, or cognitive load — or create a path to automation.
-
-2. **Calm before busy.**  
-   Default state is healthy and clear. Alert states are earned by real conditions.
-
-3. **Every page answers one executive question.**  
-   Not "here is data about X" — "what should I know or do about X right now?"
-
-4. **Show the next decision, not every decision.**  
-   Focus lists, briefs, and recommendations — not full inventories at entry.
-
-5. **One obvious next action.**  
-   Every screen has a primary path. Secondary paths are quiet, not competing.
-
-### Information
-
-6. **Progressive disclosure.**  
-   Summary first. Detail on intent. Admin depth on demand.
-
-7. **Name-first hierarchy.**  
-   Clients, projects, and people read larger than statuses and dates.
-
-8. **Signal over inventory.**  
-   Show what changed, what is at risk, what is due — not everything that exists.
-
-9. **Sparse by default.**  
-   Empty states are success states. Growth Opportunities are rare. Dashboards stay clean.
-
-10. **Evidence before recommendation.**  
-    Every advisory item must answer: why now? What do we know?
-
-11. **Terminal states matter.**  
-    Dismissed, archived, expired, completed — items must not accumulate forever.
-
-### Visual
-
-12. **Typography over decoration.**  
-    Scale and font carry hierarchy — not boxes, badges, and borders.
-
-13. **Fewer cards.**  
-    Not every fact needs a container. Rows in space often suffice.
-
-14. **More whitespace.**  
-    Density is not sophistication. Air is authority.
-
-15. **Depth over outlines.**  
-    Layers separate by luminance and shadow — borders are last resort.
-
-16. **Gold is material, not paint.**  
-    Reserved for commit actions and rare focus — never navigation chrome.
-
-17. **Color means something.**  
-    Critical, warning, success appear only when behavior should change.
-
-18. **One strong moment per viewport.**  
-    One serif headline, one focus block, one primary action — the rest supports.
-
-### Relationship
-
-19. **Relationships over records.**  
-    The client is the center of gravity — not the collection slug.
-
-20. **Timeline is memory.**  
-    Meaningful actions become permanent relationship history.
-
-21. **Work serves relationships.**  
-    Tasks exist to move client outcomes — not to fill a kanban.
-
-22. **Wins are celebrated quietly.**  
-    Client success is measured and visible — not gamified.
-
-### System
-
-23. **Context travels.**  
-    Entering a client should feel like entering their world — not re-navigating the whole OS.
-
-24. **Automation should be felt, not seen.**  
-    Playbooks, spawns, and hooks run the studio — the UI shows outcomes.
-
-25. **Honest admin when editing.**  
-    Payload collection screens can be dense. Product screens must not inherit that density.
-
-26. **Fast read, fast act.**  
-    Linear clarity — land, understand, move. No archaeological dig.
-
-27. **Studio pride.**  
-    The founder should feel proud showing any screen to a flagship client or partner.
-
-28. **Intelligence disappears into the workflow.**  
-    The OS prepares, suggests, and drafts — the founder commits. No separate "intelligence product" inside the product.
+**Kill List spirit (experience):** Intentionally refuse second homes, cockpit language as OS identity, notification theater, dashboard factories, and any emotional register borrowed from CRM / PM / finance-console / chatbot products.
 
 ---
 
-## KXD OS Interaction Principles
+## 9. Language constitution
 
-For developers and Cursor agents implementing any future screen.
+KXD speaks like an exceptional chief of staff: human, calm, direct, confident; warm without casual; premium without sounding expensive; clear without robotic; helpful without motivational.
 
-### Before building
+### Accept
 
-1. **Name the executive question** this page answers. Put it in the PR description.
-2. **Define the one next action** before defining the layout.
-3. **List what you are not showing** — progressive disclosure is a design choice.
-4. **Pass Respect Time** — does this save time, reduce future work, or enable a playbook?
+- Plain executive English  
+- Named relationships and concrete next moves  
+- Evidence-bound statements  
+- Quiet confidence (“Here’s what matters.”)  
+- Partnership language with clients  
+- Completion language that releases pressure  
 
-### While building
+### Reject
 
-5. **Reuse OS primitives** (`@/components/os`, Ops briefing patterns) — do not invent parallel UI.
-6. **Prefer links over modals** for depth. Prefer tabs over new routes when context must persist.
-7. **Prefer server truth** — deterministic briefs from loaded data, not client-side dashboard theater.
-8. **Do not add a KPI strip** unless each metric answers a distinct question.
-9. **Do not add a new nav item** unless the domain is genuinely top-level — most things live under Client Command or Work.
-10. **Empty states are product moments** — suggest real next actions with real routes.
-11. **Search is command infrastructure** — placeholders should describe what can be found, not generic "search…"
+- Enterprise jargon  
+- Analytics language as default voice  
+- AI filler (“leverage,” “unlock insights,” “powered by”)  
+- Scolding or productivity guilt  
+- Fake urgency (“Act now,” badge storms)  
+- Corporate reassurance fluff  
+- Feature marketing inside the product  
 
-### Motion and feedback
+### Tone examples
 
-12. **Glide, not bounce** — 150–200ms, subtle lift, respect reduced motion.
-13. **Confirm, don't perform** — motion acknowledges action; it does not celebrate it.
-14. **Optimistic only when safe** — status changes can be optimistic; financial and client-facing actions cannot.
+| Unacceptable | Acceptable |
+|--------------|------------|
+| “You have 14 critical alerts requiring immediate action.” | “Two items need your judgment today.” |
+| “No data available.” | “Nothing needs you here — the day is clear.” |
+| “Leverage AI to unlock portfolio insights.” | “Here’s what changed for Northside.” |
+| “Submit a ticket to request changes.” | “Leave a note on this section — we’ll take it from here.” |
+| “Welcome to your dashboard.” | “Good morning. Here’s where the business stands.” |
+| “Start adding items to get started.” | “When work lands here, it will be ready for you.” |
 
-### Studio intelligence and automation
+Do not treat this section as final production copy for every screen. It governs tone.
 
-15. **Prepared outputs are drafts** — human commits.
-16. **No intelligence chrome without intelligence value** — if the feature works without assistance, do not add a panel for it.
-17. **Publish activity on meaningful change** — the timeline is the studio's memory.
-18. **Use studio language** — "Prepared for Review," "Studio Recommendation," "Proposal Ready" — never productize the machinery.
-
-### Autonomy gate
-
-19. **Ask the autonomy question:**  
-    *Does this move KXD OS closer to running Kreate by Design with less founder involvement?*  
-    If not, challenge whether the feature belongs.
-
-### Quality gate
-
-20. **Room Test** — studio room, not enterprise tab.
-21. **Next Action Test** — one obvious move in five seconds.
-22. **Calm Test** — would you open this on Sunday evening without dread?
-23. **Time Test** — does this reclaim founder time within 30 days of use?
-24. **Manifesto Test** — does it pass `KXD-OS-VISUAL-MANIFESTO.md` quality bar?
+**Studio intelligence labeling:** Prefer outcome language (“Prepared for Review,” “Studio Recommendation”) over AI chrome. When the OS has nothing useful to say, it says nothing.
 
 ---
 
-## KXD OS Navigation Philosophy
+## 10. Visual presence constitution
 
-### How users should move through the OS
+Visual craft details live in `docs/KXD-OS-VISUAL-MANIFESTO.md`. Experience law for presence:
 
-Navigation is **infrastructure, not content**. The current page's story owns the viewport.
+1. Typography creates hierarchy before containers.  
+2. Whitespace must feel intentional, never empty.  
+3. Large areas are earned by importance.  
+4. Visual weight follows emotional priority.  
+5. Not every section becomes a card.  
+6. Depth comes from space, luminance, typography, and rhythm.  
+7. Premium means composed, not decorative.  
+8. The first viewport must make the next action obvious.  
+9. Mobile preserves emotional hierarchy, not just layout order.  
+10. Names before numbers. Decisions before data. Relationships before records.  
+11. Gold is rare and earned — never default chrome.  
+12. If hierarchy needs a box to be understood, the type scale is wrong.
 
-**Three speeds of movement:**
+**Conflict rule:** When Visual Manifesto and this Constitution conflict, **Constitution wins on experience**; **Visual Manifesto wins on craft execution**.
 
-| Speed | Mechanism | Feels like |
-|-------|-----------|------------|
-| **Jump** | Global search / command (Raycast) | "Take me to Hastings Motors" |
-| **Browse** | Top-level ops nav | "I'm working in Client Success today" |
-| **Dive** | Client Command → tabs → objects | "I'm inside this relationship" |
-
-The founder should rarely think about *where modules live*. They should think about *who or what needs attention*.
-
-### How pages should relate
-
-```
-Studio rhythm (Today, Work)
-        ↓
-Portfolio domains (Clients, Client Success, Growth, Sales)
-        ↓
-Client Command (per-client world)
-        ↓
-Object depth (project, request, proposal, work item)
-        ↓
-Honest admin (Payload collection edit) — when record surgery is needed
-```
-
-**Up should always mean up in context** — from work item → client workspace → portfolio → studio. Breadcrumbs and back links preserve mental model.
-
-**Sideways is tabbed, not routed** — within Client Command, switching Work / Timeline / Financial should not feel like changing applications.
-
-### How work should feel
-
-**Work is execution, not inventory.**
-
-`/admin/operations/work` is a **daily execution cockpit** — not a kanban board with metrics sprinkled on top.
-
-It answers: **"What should Matt work on next?"**
-
-- Morning: brief, focus, snapshot, then views
-- Work items spawn from real studio events (portal requests, playbooks, manual creation)
-- Kanban exists for those who want spatial status — it is not the identity of the module
-- Client-scoped work boards live at `/admin/operations/work/[clientId]` — execution in context
-
-Work should feel like **opening today's desk** — three things on top, everything else one click away.
-
-### How Client Command should feel
-
-**Client Command is the client's world.**
-
-It answers: **"What is true about this relationship right now?"**
-
-Entering Client Command for a client should feel like **walking into their studio wing** — not opening a CRM record.
-
-- **Overview** — health, focus, what needs you
-- **Timeline** — memory — what happened, in narrative order
-- **Work** — what KXD is executing for them
-- **Actions** — executive commitments with lifecycle
-- **Intelligence** — signals, memory, studio recommendations
-- **Financial** — revenue truth without spreadsheet horror
-- **Communications** — what was said, what is prepared for review
-- **Proposals / Contracts** — growth mechanics when relevant
-
-Tabs are **facets of one relationship**, not separate products.
-
-Search at `/admin/operations/client-command` is the **client roster** — name-first, health-adjacent, fast entry.
-
-### How Business Development should feel
-
-**Business Development is pipeline with restraint.**
-
-It answers: **"Where is new revenue forming — and what needs a human touch?"**
-
-- Leads and proposals are **relationships forming**, not rows to bulk-edit
-- Conversion is a **ceremony** — proposal viewed, accepted, signed, launched — not a status dropdown
-- Sales screens may be denser than operations screens — but still name-first, still calm
-- The handoff from **won proposal → Genesis → Client Command** should feel like one continuous story
-
-BD should feel like **Stripe's dashboard clarity** — precise numbers, no carnival. Urgency from real dates, not red badges on everything.
-
-### How Client Success should feel
-
-**Client Success is executive stewardship, not upsell automation.**
-
-It answers: **"Which clients need care, counsel, or celebration?"**
-
-Four categories — each with a different emotional register:
-
-| Category | Feels like | Density |
-|----------|------------|---------|
-| **Attention Needed** | Operational truth — fix this | As needed — never hidden |
-| **Recommendations** | Professional counsel — consider this | Moderate — advisory tone |
-| **Growth Opportunities** | Rare expansion signal — why now? | **Sparse** — zero is normal |
-| **Wins** | Quiet celebration — proof of value | Periodic — morale without noise |
-
-Client Success is **not a sales funnel**. It is the OS helping the founder be an excellent partner.
-
-Portfolio view: which clients need a call?  
-Client view: what is true for them specifically?  
-Lifecycle: qualified → converted / dismissed / archived / expired / snoozed — items must resolve.
-
-### How Today should feel
-
-**Today is the studio morning brief.**
-
-It answers: **"What kind of day is this?"**
-
-One cockpit per day — not competing with Work, but complementary. Today is **studio-wide** (requests, deliverables, retainers, creative queue). Work is **execution-wide** (work items). They may overlap; they should not duplicate.
+No CSS values, components, or screen redesigns are defined here.
 
 ---
 
-## Module identity summary
+## 11. Interaction constitution
 
-| Domain | Executive question | Metaphor |
-|--------|-------------------|----------|
-| **Today** | What kind of day is this? | Morning brief |
-| **Work** | What should I work on next? | Today's desk |
-| **Client Command** | What is true about this client? | Client's wing |
-| **Clients** | Who are we serving and how are they? | Roster |
-| **Client Success** | Who needs care, counsel, or celebration? | Stewardship |
-| **Growth / Sales** | Where is revenue forming? | Pipeline (restrained) |
-| **Creative** | What is in the studio? | Production floor |
-| **Playbooks** | What runs without me? | Automation layer |
-| **Strategy** | What am I thinking long-term? | Vault |
-| **Founder** | How is the business? | Owner's chair |
-
----
-
-## The long arc
-
-KXD OS evolves toward **progressive autonomy**:
-
-| Era | Founder experience |
-|-----|-------------------|
-| **Now** | OS surfaces what needs attention; founder acts |
-| **Next** | OS prepares, recommends, spawns work; founder commits |
-| **Later** | OS runs playbooks, monitors health, escalates exceptions |
-| **North star** | Founder leads — relationships, strategy, investment, growth — while the studio runs |
-
-Every implementation decision should ask: **does this move the studio toward calm autonomy — or toward busier software?**
-
-Choose calm autonomy.
+1. The fastest interface may be no interface.  
+2. Actions should preserve context.  
+3. Users should not hunt for the next step.  
+4. Confirmations should create confidence, not ceremony.  
+5. Destructive actions should feel safe and deliberate.  
+6. Progressive disclosure should protect calm.  
+7. Power tools should exist without dominating the founder path.  
+8. Every interaction should either move work forward or remove uncertainty.  
+9. No interaction exists only to prove the software is sophisticated.  
+10. Defaults should be smart enough that re-entry is rare.  
+11. One primary action per viewport; secondary paths stay quiet.  
+12. Close the laptop, reopen ten minutes later — the next move should still be obvious.
 
 ---
 
-## North Star
+## 12. Empty-state and silence constitution
 
-KXD OS should progressively evolve from software that **organizes** work…
+Empty states communicate: **control, calm, readiness, completion, confidence.**
 
-to software that **understands** work…
+Never default to:
 
-to software that **prepares** work…
+- “No data”  
+- “Nothing found”  
+- “Empty”  
+- “Start adding items”  
 
-to software that **executes** repeatable work…
+…unless technically unavoidable in internal tooling — and even then, rewrite toward composure when the surface is founder- or client-facing.
 
-allowing the founder to increasingly focus on:
+| Area | Quiet should feel like |
+|------|------------------------|
+| Today | The morning is clear; attention is light |
+| Work | Capacity, not vacancy |
+| Client Command | Stability in the relationship |
+| Website Review | Craft is settled; nothing waiting |
+| Connect | Peaceful presence, not abandonment |
+| Commercial | Solvency and order |
+| Creative | Ready studio, not blank inventory |
+| Reporting | A quiet chapter, not a missing export |
+| Portal | Partnership at rest |
+| Search | Ready for intention |
+| Navigation / Shell | Unburdened structure |
 
-- relationships
-- strategy
-- leadership
-- investment
-- growth
+**Silence is a feature.** Absence of demand is success when nothing requires judgment.
+
+---
+
+## 13. Interruption and notification law
+
+KXD interrupts only when the interruption **changes a decision** or **prevents harm.**
+
+| Class | Placement |
+|-------|-----------|
+| Requires founder judgment today | **Today** |
+| Requires depth in a domain | **Inside the owning module** |
+| Background truth that does not change decisions | **Silent** — available on demand |
+| Catastrophic / irreversible harm prevention | **Earned interruption** — rare, specific, evidence-bound |
+
+### Urgency must be earned
+
+- No badge storms  
+- No manufactured red  
+- No volume-as-importance  
+- Notification count is never a vanity metric  
+
+### Pressure prevention
+
+- Prefer once-daily orientation on Today over continuous pings  
+- Prefer module-local awareness over global alarm chrome  
+- Prefer silence when the correct action is “nothing”  
+
+No notification product is authorized by this Constitution alone.
+
+---
+
+## 14. Premium and pride standard
+
+Premium does **not** mean more decoration, more gold, larger cards, more animations, or more features.
+
+Premium means: clarity, composure, confidence, trust, excellent judgment, intentional language, graceful restraint, and pride of use.
+
+**Permanent pride test**
+
+> Would the user open this in front of a sophisticated client without apologizing that it is internal software?
+
+If the answer depends on more features, reject the direction.  
+If the answer is “it makes me feel in command of my company,” keep it.
+
+**Calm Test:** Sunday evening preview — no dread.  
+**Room Test:** One room in a private studio — or one tab in enterprise software?  
+**Manifesto Test:** Unmistakably KXD, not generic dark SaaS.
+
+---
+
+## 15. Shutdown and release laws
+
+1. End of day is an emotional product moment equal to morning.  
+2. Shutdown should **release**, not reload obligation.  
+3. Do not invent new work at the threshold of rest.  
+4. Close loops the founder must not carry; leave the rest for Tomorrow’s Today.  
+5. Success: the founder can close the laptop feeling the business is held.
+
+---
+
+## 16. Screen review checklist
+
+Every future screen must answer:
+
+1. What emotion does this screen own?  
+2. Does the first viewport create that emotion?  
+3. What is the one most important action?  
+4. What uncertainty does the screen remove?  
+5. What can disappear?  
+6. Does it feel like KXD or generic software?  
+7. Does it preserve Product DNA?  
+8. Would a premium client respect it?  
+9. Does it reduce mental weight?  
+10. Would the user miss it if it disappeared?  
+
+**Fail conditions**
+
+- Purpose is only informational  
+- Information arrives before emotion  
+- Manufactures urgency  
+- Requires apology in front of a sophisticated client  
+- Increases feature presence while decreasing calm  
+- Competes with Today as home, cockpit, or command center  
+
+---
+
+## 17. Experience governance model
+
+Before any major UI batch:
+
+1. Load Product Intelligence.  
+2. Identify the owning emotion.  
+3. Review relevant Decisions and Product DNA.  
+4. Define the intended emotional outcome.  
+5. Design.  
+6. Implement.  
+7. Visually validate.  
+8. Dogfood.  
+9. Capture Founder Friction.  
+10. Update Product Intelligence.  
+
+**Shipping rule:** No screen ships solely because lint, typecheck, and build pass.  
+Emotional outcome is a release gate equal to technical correctness.
+
+### Cursor / agent preamble
+
+When beginning any KXD OS experience batch:
+
+> Follow the **KXD Experience Constitution** (`docs/KXD-OS-CONSTITUTION.md`) and **Visual Manifesto** (`docs/KXD-OS-VISUAL-MANIFESTO.md`). Emotional identity: Held clarity. Founder is held, not managed. Today owns attention; modules own depth. Emotion before information. Confidence before information. Calm beats clutter. Business before software. One truth. Premium over feature count. Stop adding rooms — deepen the rooms that already matter. Pass the screen review checklist before shipping.
+
+---
+
+## 18. Relationship to Product Intelligence and other law
+
+| Source | Role |
+|--------|------|
+| **This Constitution** | Sole permanent experience law — how KXD OS feels |
+| Product DNA | Identity constraints harder than Doctrine — never roadmap |
+| Doctrine | Operating laws (Today sole home, Shared Core, cognitive load, AI not homepage) |
+| Decision Archive | Institutional memory of permanent product decisions |
+| Founder Friction philosophy | Capture unnecessary thinking/hesitation as evidence, not instant work |
+| Hall of Fame / Kill List / Future Bets | Earned moments · intentional refusals · convictions ≠ schedule |
+| Visual Manifesto | Craft execution of presence |
+| Philosophy | Why KXD OS exists |
+| Architecture docs | How systems are built — not how they should feel |
+
+Experience recommendations must align with Product DNA. Anything that violates Product DNA is rejected.
+
+---
+
+## 19. First implementation initiative (confirmed, not authorized here)
+
+### Arrival → Today Emotional Arc
+
+Confirmed as the correct first implementation initiative under this Constitution.
+
+**Why first:** Highest daily habit leverage; sets the emotional baseline for the entire authored day; directly enforces Held clarity, Welcomed → Clear, Today owns attention, and emotion before information.
+
+**Scope candidate (not implemented in Batch A):**
+
+- KXD-branded login arrival  
+- Transition into Today  
+- First five seconds  
+- Greeting and business posture  
+- One primary move  
+- Navigation presence hierarchy  
+- Removal of dashboard residue  
+
+Batch A does **not** authorize design or engineering implementation. Implementation requires an explicit later batch.
+
+---
+
+## 20. Enduring north star (from Constitution v1.1)
+
+KXD OS evolves toward progressive autonomy: organize → understand → prepare → execute repeatable work — while the founder leads relationships, strategy, investment, and growth.
 
 **The operating system should become calmer as it becomes more capable.**
 
-More intelligence should produce less interface.
-
-Never more complexity.
+More intelligence should produce less interface. Never more complexity.
 
 ---
 
-## Relationship to existing documents
-
-| Document | Role |
-|----------|------|
-| **This Constitution** | Governing experience standard — what it should feel like and why |
-| `KXD-OS-VISUAL-MANIFESTO.md` | Visual craft — how it should look |
-| `CLIENT_COMMAND_CENTER.md` | Architecture reference for Client Command |
-| `lib/growth/registry.ts` | Client Success category definitions |
-| Platform registry | Engineering phase truth — not UX guidance |
-
-When Visual Manifesto and Constitution conflict, **Constitution wins on experience**; **Visual Manifesto wins on craft execution**.
-
----
-
-## Cursor implementation preamble
-
-When beginning any KXD OS phase, include:
-
-> Follow **The Constitution of KXD OS** (`docs/KXD-OS-CONSTITUTION.md`) for experience and **`docs/KXD-OS-VISUAL-MANIFESTO.md`** for visual craft. Respect Time. Name the executive question. One obvious next action. Progressive disclosure. No dashboard sprawl. Studio intelligence — not AI chrome. Ask the autonomy question. Studio software, not admin panel.
-
----
-
-## Quality bar
-
-Before shipping any experience change, confirm:
-
-1. **Executive question** is answerable from the hero alone
-2. **Next action** is obvious without scrolling on a laptop
-3. **Focus area** shows ≤3 items for "now"
-4. **Metrics** each answer a different question — no vanity counts
-5. **Empty state** feels like success or clear guidance — not abandonment
-6. **Client names** dominate over status badges
-7. **Studio intelligence** (if present) has evidence and a commit path — not open-ended chat
-8. **Respect Time** — feature saves time or enables automation path
-9. **Autonomy question** — moves toward less founder involvement, not more
-10. **Calm Test** passes — Sunday evening, no dread
-11. **Manifesto Test** passes — unmistakably KXD
-12. **No new dashboard** unless the domain genuinely requires studio-wide snapshot
-
----
-
-*The Constitution of KXD OS v1.1 — governing document for all future implementation. Architecture governs implementation. This document governs experience.*
+*KXD Experience Constitution v2.0 — Experience Refinement Phase 2 Batch A. Permanent emotional operating system for KXD OS. Architecture governs implementation. This document governs experience.*

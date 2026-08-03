@@ -125,6 +125,7 @@ This track is distinct from registry phase numbers and from Intelligence Pipelin
 | **Phase 6** | **KXD Connect** | **Batches C0–C6 complete** (through readiness review / internal release gate). Production rollout not authorized. | Spec: `docs/PHASE-6-KXD-CONNECT.md`. Runbook: `docs/PHASE-6-CONNECT-LOCAL-DOGFOOD-RUNBOOK.md`. C5: dogfood period. C6: readiness gate (meters auth hardened). **Does not block** KXD OS Founding Client Early Access. |
 | **Phase 7** | **Today** | **Batches A–B approved; Batches C–D.1 implemented** | Spec: `docs/PHASE-7-TODAY.md`. Today is the sole founder home. Batch C: home ownership + nav identity. Batch D: experience foundation. Batch D.1: founder recomposition (posture, Focus, Waiting For You, Day Flow, Momentum). Next: Batch E (absorb/retire) when authorized. |
 | **Product Intelligence** | **KXD Product Intelligence (internal control plane)** | **P0-A approved; P0-B through P0-K complete** | Spec: `docs/KXD-PRODUCT-INTELLIGENCE.md`. Contracts through Query Engine in `lib/product-intelligence/`. Verifiers: `verify:product-intelligence-p0b` … `p0k`. Not client-facing. Observation/entry stores empty through Fame, Kill List, and Future Bets; Competitive / valuation still empty. Query executed log empty. Next: **P0-L** when authorized. |
+| **Experience Refinement Phase 2** | **KXD Experience Constitution + emotional OS** | **Batch A ✅ complete** | Spec: `docs/PHASE-2-EXPERIENCE-REFINEMENT.md`. Canonical law: `docs/KXD-OS-CONSTITUTION.md` v2.0. Emotional identity: Held clarity. Documentation / permanent experience law only — no UI implementation in Batch A. Next candidate: **Arrival → Today Emotional Arc** when explicitly authorized. |
 
 **Phase 3 product outcome:** durable private business context for future Business Memory — not portal, not public, not calendar rewrite, not ritual/Business Memory integration in this phase.
 
@@ -228,7 +229,8 @@ From `lib/platform/registry.ts`:
 | `KXD-OS-PHILOSOPHY.md` | Vision and principles |
 | `KXD-OS-ROADMAP.md` | This document — build progress |
 | `KXD-OS-PRODUCT-ROADMAP.md` | 5–10 year product eras |
-| `KXD-OS-CONSTITUTION.md` | Experience standard |
+| `KXD-OS-CONSTITUTION.md` | KXD Experience Constitution v2.0 — sole permanent experience law |
+| `PHASE-2-EXPERIENCE-REFINEMENT.md` | Experience Refinement Phase 2 (Batch A complete) |
 | `PHASE-3-CLIENT-RELATIONSHIP-INTELLIGENCE.md` | Phase 3 definition + batches (production-complete) |
 | `PHASE-4-MULTI-CLIENT-PORTAL.md` | Phase 4 definition + batches (next active phase) |
 | `KXD-PRODUCT-INTELLIGENCE.md` | Product Intelligence control plane — P0-A, P0-B, P0-C, P0-D, P0-E, P0-F, P0-G, P0-H, P0-I, P0-J, P0-K (through Query Engine) |

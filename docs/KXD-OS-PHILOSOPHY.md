@@ -152,7 +152,7 @@ Before any significant build, ask:
 
 If the answer is no to all, reconsider.
 
-Full standard: `docs/KXD-OS-CONSTITUTION.md`
+Full standard: `docs/KXD-OS-CONSTITUTION.md` (KXD Experience Constitution v2.0 — Held clarity)
 
 ---
 
@@ -162,6 +162,7 @@ Full standard: `docs/KXD-OS-CONSTITUTION.md`
 |----------|------|
 | `KXD-OS-ARCHITECTURE.md` | Implementation reference |
 | `KXD-OS-ROADMAP.md` | Phase progress and direction |
-| `KXD-OS-CONSTITUTION.md` | Governing experience standard |
+| `KXD-OS-CONSTITUTION.md` | KXD Experience Constitution v2.0 — sole permanent experience law |
+| `PHASE-2-EXPERIENCE-REFINEMENT.md` | Experience Refinement Phase 2 record |
 | `KXD-OS-VISUAL-MANIFESTO.md` | Visual craft |
 | `KXD-OS-PRODUCT-ROADMAP.md` | Long-term product compass |
