@@ -12,6 +12,7 @@ export {
   PRODUCT_INTELLIGENCE_ARCHIVE_VERSION,
   PRODUCT_INTELLIGENCE_CONTRACTS_VERSION,
   PRODUCT_INTELLIGENCE_CORE_FLOW,
+  PRODUCT_INTELLIGENCE_HEALTH_VERSION,
   PRODUCT_INTELLIGENCE_INVENTORY_VERSION,
   PRODUCT_INTELLIGENCE_LAWS,
   PRODUCT_INTELLIGENCE_MISSION,
@@ -23,6 +24,7 @@ export type { ProductIntelligenceCoreFlowStep } from "./law";
 export {
   attachAutomaticInventory,
   attachDecisionArchive,
+  attachPlatformHealthEngine,
   createEmptyStoreBuckets,
   createProductIntelligenceIndex,
   PRODUCT_INTELLIGENCE_ENTRY_POINTS,
@@ -61,6 +63,30 @@ export type {
   DecisionArchiveIntegrityReport,
   DecisionArchiveResult,
 } from "./archive";
+
+export {
+  computeCategoryComposite,
+  computeOverallPlatformHealth,
+  HEALTH_DOMAIN_DEFINITIONS,
+  HEALTH_DOMAIN_IDS,
+  loadPlatformHealthEngine,
+  PLATFORM_HEALTH_QUESTION,
+  PLATFORM_HEALTH_REPORT_CONTRACT,
+  PLATFORM_HEALTH_WEIGHTING,
+  resolveHealthConfidence,
+  validateHealthMovement,
+  verifyPlatformHealthEngineIntegrity,
+} from "./health";
+export type {
+  HealthDomainDefinition,
+  HealthDomainId,
+  HealthMovementRecord,
+  HealthScoreObservation,
+  PlatformHealthEngine,
+  PlatformHealthEngineResult,
+  PlatformHealthReportContract,
+  ProposedHealthMovement,
+} from "./health";
 
 export {
   assertHasOwner,

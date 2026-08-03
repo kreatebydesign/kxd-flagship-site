@@ -1,8 +1,8 @@
 # KXD Product Intelligence
 
-**Status:** P0-A architecture approved as product law · **P0-B contracts complete** · **P0-C automatic inventory complete** · **P0-D Decision Archive initialized**  
+**Status:** P0-A architecture approved as product law · **P0-B contracts complete** · **P0-C automatic inventory complete** · **P0-D Decision Archive initialized** · **P0-E Platform Health Engine v1 complete**  
 **Location:** `lib/product-intelligence/`  
-**Verifiers:** `verify:product-intelligence-p0b` · `p0c` · `p0d`  
+**Verifiers:** `verify:product-intelligence-p0b` · `p0c` · `p0d` · `p0e`  
 **Boundary:** Infrastructure for building KXD OS — not client-facing, does not change KXD OS product functionality.
 
 ## Mission
@@ -158,6 +158,35 @@ Every archived decision answers: what · why · alternatives · tradeoffs · suc
 
 **Not in P0-D:** Hall of Fame, Kill List, Future Bets, Founder Friction, Competitive Intelligence, valuation, reports, UI.
 
+## Platform Health Engine (P0-E — complete)
+
+P0-E defines the permanent engine that evaluates whether KXD OS is becoming healthier over time.
+
+Permanent question:
+
+> Is KXD OS becoming a better company to own, a better product to build, and a better platform for clients?
+
+| Workstream | Status |
+|------------|--------|
+| Product Health domains (6) | ✅ |
+| Technical Health domains (6) | ✅ |
+| Business Health domains (6) | ✅ |
+| Strategic Health domains (5) | ✅ |
+| Overall Platform Health weighting | ✅ |
+| Movement Log contracts + enforcement | ✅ |
+| Confidence Engine | ✅ |
+| Health relationships | ✅ |
+| Review cadence | ✅ |
+| Platform Health Report contract (structure only) | ✅ |
+
+**Load:** `loadPlatformHealthEngine()` · **Attach:** `attachPlatformHealthEngine(index, result)`
+
+**Laws:** No score without evidence. No movement without explanation. Overall is a weighted composite — not a flat average. Feature counts and commit counts are forbidden as evidence.
+
+**P0-E state:** Domain contracts loaded; all score observations remain **unobserved** (no invented numbers). Report generation unauthorized.
+
+**Not in P0-E:** Generated health reports, valuation, dashboards, weekly/monthly narrative reviews, Hall of Fame / Kill List / Future Bets / Friction / Competitive population, UI.
+
 ## Implementation batches
 
 | Batch | Purpose | Status |
@@ -166,7 +195,8 @@ Every archived decision answers: what · why · alternatives · tradeoffs · suc
 | **P0-B** | Object schemas + Evidence/Decision/Friction/DNA/Fame/Kill/Bets contracts | ✅ Complete |
 | **P0-C** | System Map auto-inventory (routes/collections/APIs/verifiers) | ✅ Complete |
 | **P0-D** | Decision Archive backfill for Edition 1 permanent laws | ✅ Complete |
-| **P0-E** | Scorecard v1 + movement log | Pending |
+| **P0-E** | Scorecard / Platform Health Engine v1 + movement log | ✅ Complete |
+| **P0-F** | Founder Friction capture ritual + weekly triage | Pending |
 | **P0-F** | Founder Friction capture ritual + weekly triage | Pending |
 | **P0-G** | Release Ledger linkage to git/deploy evidence | Pending |
 | **P0-H** | Competitive watchlist + monthly cadence | Pending |
