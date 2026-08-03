@@ -124,7 +124,7 @@ This track is distinct from registry phase numbers and from Intelligence Pipelin
 | **Phase 5** | **Client Billing Visibility, Stripe Invoice Status & Monthly Work Summaries** | ✅ **Complete** (Batches 5A–5D; Batch 5E intentionally skipped) | Spec: `docs/PHASE-5-CLIENT-BILLING-VISIBILITY.md`. Parallel non-Primal lane; does not complete or waive Phase 4. Batch 5A: monthly summary on Work & Performance. Batch 5B: Stripe invoice read foundation. Batch 5C: portal Billing UI. Batch 5D: staff invoice visibility on Commercial Agreements detail. Batch 5E skipped so work-summary and invoice facts stay separate. TEST-mode read-only; no invoice management, live Stripe expansion, receipts, accounting, or Financial Command expansion. Hosting Transitions and KXD invoice emails excluded. |
 | **Phase 6** | **KXD Connect** | **Batches C0–C6 complete** (through readiness review / internal release gate). Production rollout not authorized. | Spec: `docs/PHASE-6-KXD-CONNECT.md`. Runbook: `docs/PHASE-6-CONNECT-LOCAL-DOGFOOD-RUNBOOK.md`. C5: dogfood period. C6: readiness gate (meters auth hardened). **Does not block** KXD OS Founding Client Early Access. |
 | **Phase 7** | **Today** | **Batches A–B approved; Batches C–D.1 implemented** | Spec: `docs/PHASE-7-TODAY.md`. Today is the sole founder home. Batch C: home ownership + nav identity. Batch D: experience foundation. Batch D.1: founder recomposition (posture, Focus, Waiting For You, Day Flow, Momentum). Next: Batch E (absorb/retire) when authorized. |
-| **Product Intelligence** | **KXD Product Intelligence (internal control plane)** | **P0-A approved; P0-B–C complete** | Spec: `docs/KXD-PRODUCT-INTELLIGENCE.md`. Contracts + `runAutomaticInventory()` in `lib/product-intelligence/`. Verifiers: `verify:product-intelligence-p0b`, `verify:product-intelligence-p0c`. Not client-facing. Reality discovery complete; interpretive archives still empty. Next: **P0-D** Decision Archive backfill when authorized. |
+| **Product Intelligence** | **KXD Product Intelligence (internal control plane)** | **P0-A approved; P0-B, P0-C, P0-D complete** | Spec: `docs/KXD-PRODUCT-INTELLIGENCE.md`. Contracts + inventory + Decision Archive in `lib/product-intelligence/`. Verifiers: `verify:product-intelligence-p0b` … `p0d`. Not client-facing. Edition 1 Decisions + DNA/Doctrine seeded; Hall of Fame / Kill List / Future Bets / Friction still empty. Next: **P0-E** Scorecard v1 when authorized. |
 
 **Phase 3 product outcome:** durable private business context for future Business Memory — not portal, not public, not calendar rewrite, not ritual/Business Memory integration in this phase.
 
@@ -231,7 +231,7 @@ From `lib/platform/registry.ts`:
 | `KXD-OS-CONSTITUTION.md` | Experience standard |
 | `PHASE-3-CLIENT-RELATIONSHIP-INTELLIGENCE.md` | Phase 3 definition + batches (production-complete) |
 | `PHASE-4-MULTI-CLIENT-PORTAL.md` | Phase 4 definition + batches (next active phase) |
-| `KXD-PRODUCT-INTELLIGENCE.md` | Product Intelligence control plane — P0-A law; P0-B contracts; P0-C inventory |
+| `KXD-PRODUCT-INTELLIGENCE.md` | Product Intelligence control plane — P0-A–D (through Decision Archive) |
 | `.cursor/rules/kxd-os-architecture.mdc` | Cursor agent rule |
 
 ---

@@ -1,8 +1,8 @@
 # KXD Product Intelligence
 
-**Status:** P0-A architecture approved as product law · **P0-B contracts complete** · **P0-C automatic inventory complete**  
+**Status:** P0-A architecture approved as product law · **P0-B contracts complete** · **P0-C automatic inventory complete** · **P0-D Decision Archive initialized**  
 **Location:** `lib/product-intelligence/`  
-**Verifiers:** `npm run verify:product-intelligence-p0b` · `npm run verify:product-intelligence-p0c`  
+**Verifiers:** `verify:product-intelligence-p0b` · `p0c` · `p0d`  
 **Boundary:** Infrastructure for building KXD OS — not client-facing, does not change KXD OS product functionality.
 
 ## Mission
@@ -135,6 +135,29 @@ P0-C discovers reality. It does not interpret meaning.
 
 Reality is always discovered. Never guessed. Never manually recreated.
 
+## Decision Archive (P0-D — initialized)
+
+P0-D backfills permanent Edition 1 product decisions as institutional memory.
+
+| Workstream | Status |
+|------------|--------|
+| Founder Home (Today sole home) | ✅ |
+| Client Command HQ | ✅ |
+| Shared Core | ✅ |
+| Product Philosophy → Product DNA | ✅ |
+| Connect internal-first | ✅ |
+| Connected storage philosophy | ✅ |
+| AI operating philosophy | ✅ |
+| Product Intelligence itself | ✅ |
+| Decision confidence classes | ✅ |
+| Decision relationships (DNA / Doctrine / inventory / products) | ✅ |
+
+**Load:** `loadDecisionArchive()` · **Attach:** `attachDecisionArchive(index, archive)`
+
+Every archived decision answers: what · why · alternatives · tradeoffs · success metric · review policy · confidence.
+
+**Not in P0-D:** Hall of Fame, Kill List, Future Bets, Founder Friction, Competitive Intelligence, valuation, reports, UI.
+
 ## Implementation batches
 
 | Batch | Purpose | Status |
@@ -142,7 +165,7 @@ Reality is always discovered. Never guessed. Never manually recreated.
 | **P0-A** | Architecture (product law) | ✅ Approved |
 | **P0-B** | Object schemas + Evidence/Decision/Friction/DNA/Fame/Kill/Bets contracts | ✅ Complete |
 | **P0-C** | System Map auto-inventory (routes/collections/APIs/verifiers) | ✅ Complete |
-| **P0-D** | Decision Archive backfill for Edition 1 permanent laws | Pending |
+| **P0-D** | Decision Archive backfill for Edition 1 permanent laws | ✅ Complete |
 | **P0-E** | Scorecard v1 + movement log | Pending |
 | **P0-F** | Founder Friction capture ritual + weekly triage | Pending |
 | **P0-G** | Release Ledger linkage to git/deploy evidence | Pending |

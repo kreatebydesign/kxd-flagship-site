@@ -174,17 +174,22 @@ export function verifyProductIntelligenceConsistency(): ConsistencyReport {
   } else {
     checksPassed.push("Inventory engine version is P0-C");
   }
+  if (index.meta.archiveVersion !== "P0-D") {
+    issues.push({
+      code: "archive_version",
+      message: "Index archiveVersion must be P0-D",
+    });
+  } else {
+    checksPassed.push("Decision Archive version is P0-D");
+  }
 
-  // Interpretive / archive stores must stay empty until later batches.
+  // Later-batch stores must stay empty on the default singleton.
   const protectedEmptyStores: Array<keyof typeof index.stores> = [
-    "productDna",
-    "doctrine",
     "vision",
     "hallOfFame",
     "productKillList",
     "futureBets",
     "valuations",
-    "decisions",
     "founderFriction",
     "competitiveInsights",
   ];
@@ -199,16 +204,16 @@ export function verifyProductIntelligenceConsistency(): ConsistencyReport {
   if (index.evidenceRegistry.records.length !== 0) {
     issues.push({
       code: "premature_evidence",
-      message: "Evidence registry population is not part of P0-C",
+      message: "Evidence registry population is not part of P0-D",
     });
   }
   if (!issues.some((issue) => issue.code.startsWith("premature_"))) {
     checksPassed.push(
-      "Interpretive stores empty — no Hall of Fame / Kill List / Future Bets / valuation population",
+      "Later-batch stores empty — no Hall of Fame / Kill List / Future Bets / Friction / Competitive / valuation population",
     );
   }
 
-  // Default singleton has no attached inventory; attach is explicit.
+  // Default singleton has no attached inventory/archive; attach is explicit.
   if (
     index.automaticInventory === null &&
     index.stores.productInventory.length !== 0
@@ -219,6 +224,20 @@ export function verifyProductIntelligenceConsistency(): ConsistencyReport {
     });
   } else {
     checksPassed.push("Inventory attach state is consistent");
+  }
+  if (
+    index.decisionArchive === null &&
+    (index.stores.decisions.length !== 0 ||
+      index.stores.productDna.length !== 0 ||
+      index.stores.doctrine.length !== 0)
+  ) {
+    issues.push({
+      code: "archive_attach_mismatch",
+      message:
+        "decisions/productDna/doctrine populated without decisionArchive attach",
+    });
+  } else {
+    checksPassed.push("Decision Archive attach state is consistent");
   }
 
   if (!isProtectedObjectType("product_dna")) {
