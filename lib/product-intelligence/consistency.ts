@@ -190,8 +190,17 @@ export function verifyProductIntelligenceConsistency(): ConsistencyReport {
   } else {
     checksPassed.push("Platform Health Engine version is P0-E");
   }
+  if (index.meta.frictionVersion !== "P0-F") {
+    issues.push({
+      code: "friction_version",
+      message: "Index frictionVersion must be P0-F",
+    });
+  } else {
+    checksPassed.push("Founder Friction Engine version is P0-F");
+  }
 
   // Later-batch stores must stay empty on the default singleton.
+  // founderFriction remains empty until authorized observation capture (contracts only in P0-F).
   const protectedEmptyStores: Array<keyof typeof index.stores> = [
     "vision",
     "hallOfFame",
@@ -212,12 +221,12 @@ export function verifyProductIntelligenceConsistency(): ConsistencyReport {
   if (index.evidenceRegistry.records.length !== 0) {
     issues.push({
       code: "premature_evidence",
-      message: "Evidence registry population is not part of P0-E",
+      message: "Evidence registry population is not part of P0-F",
     });
   }
   if (!issues.some((issue) => issue.code.startsWith("premature_"))) {
     checksPassed.push(
-      "Later-batch stores empty — no Hall of Fame / Kill List / Future Bets / Friction / Competitive / valuation population",
+      "Later-batch stores empty — no Hall of Fame / Kill List / Future Bets / Friction observations / Competitive / valuation population",
     );
   }
 
@@ -246,6 +255,17 @@ export function verifyProductIntelligenceConsistency(): ConsistencyReport {
     });
   } else {
     checksPassed.push("Decision Archive attach state is consistent");
+  }
+  if (
+    index.founderFrictionEngine === null &&
+    index.stores.founderFriction.length !== 0
+  ) {
+    issues.push({
+      code: "friction_attach_mismatch",
+      message: "founderFriction populated without founderFrictionEngine attach",
+    });
+  } else {
+    checksPassed.push("Founder Friction attach state is consistent");
   }
 
   if (!isProtectedObjectType("product_dna")) {

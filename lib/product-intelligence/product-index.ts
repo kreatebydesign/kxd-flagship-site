@@ -12,6 +12,7 @@ import {
   PRODUCT_INTELLIGENCE_ARCHIVE_VERSION,
   PRODUCT_INTELLIGENCE_CONTRACTS_VERSION,
   PRODUCT_INTELLIGENCE_CORE_FLOW,
+  PRODUCT_INTELLIGENCE_FRICTION_VERSION,
   PRODUCT_INTELLIGENCE_HEALTH_VERSION,
   PRODUCT_INTELLIGENCE_INVENTORY_VERSION,
   PRODUCT_INTELLIGENCE_LAWS,
@@ -22,6 +23,7 @@ import {
 import type { DecisionArchiveResult } from "./archive/load";
 import type { ProductIntelligenceObject } from "./contracts";
 import type { EvidenceObject } from "./evidence";
+import type { FounderFrictionEngineResult } from "./friction/engine";
 import type { PlatformHealthEngineResult } from "./health/engine";
 import type { AutomaticInventoryResult } from "./inventory/types";
 import {
@@ -92,6 +94,7 @@ export interface ProductIntelligenceIndex {
     inventoryVersion: typeof PRODUCT_INTELLIGENCE_INVENTORY_VERSION;
     archiveVersion: typeof PRODUCT_INTELLIGENCE_ARCHIVE_VERSION;
     healthVersion: typeof PRODUCT_INTELLIGENCE_HEALTH_VERSION;
+    frictionVersion: typeof PRODUCT_INTELLIGENCE_FRICTION_VERSION;
     mission: typeof PRODUCT_INTELLIGENCE_MISSION;
     thirtyDayTest: typeof PRODUCT_INTELLIGENCE_THIRTY_DAY_TEST;
     laws: typeof PRODUCT_INTELLIGENCE_LAWS;
@@ -116,6 +119,8 @@ export interface ProductIntelligenceIndex {
   decisionArchive: DecisionArchiveResult | null;
   /** Populated only after loadPlatformHealthEngine — health contracts (scores unobserved). */
   platformHealth: PlatformHealthEngineResult | null;
+  /** Populated only after loadFounderFrictionEngine — friction contracts (observations empty). */
+  founderFrictionEngine: FounderFrictionEngineResult | null;
 }
 
 export function createEmptyStoreBuckets(): ProductIntelligenceStoreBuckets {
@@ -166,6 +171,7 @@ export const PRODUCT_INTELLIGENCE_ENTRY_POINTS: ProductIntelligenceEntryPoints =
         "PRODUCT_INTELLIGENCE_INDEX",
         "loadDecisionArchive() for why KXD OS works this way",
         "loadPlatformHealthEngine() for health contracts (evidence-bound scores)",
+        "loadFounderFrictionEngine() for friction contracts (evidence → decision path)",
         "runAutomaticInventory(root) for System Map reality",
         "protected: product_dna, doctrine, vision",
         "domain objects + relationships",
@@ -179,6 +185,7 @@ export const PRODUCT_INTELLIGENCE_ENTRY_POINTS: ProductIntelligenceEntryPoints =
         "Product DNA (identity)",
         "Decision Archive (why)",
         "Platform Health Engine (is it healthier — with evidence)",
+        "Founder Friction Index (what consistently slows us down)",
         "Automatic Inventory / System Map (what exists)",
         "Current Inventory + Architecture map",
         "Active Decisions affecting the area",
@@ -207,6 +214,7 @@ export function createProductIntelligenceIndex(options?: {
       inventoryVersion: PRODUCT_INTELLIGENCE_INVENTORY_VERSION,
       archiveVersion: PRODUCT_INTELLIGENCE_ARCHIVE_VERSION,
       healthVersion: PRODUCT_INTELLIGENCE_HEALTH_VERSION,
+      frictionVersion: PRODUCT_INTELLIGENCE_FRICTION_VERSION,
       mission: PRODUCT_INTELLIGENCE_MISSION,
       thirtyDayTest: PRODUCT_INTELLIGENCE_THIRTY_DAY_TEST,
       laws: PRODUCT_INTELLIGENCE_LAWS,
@@ -227,6 +235,7 @@ export function createProductIntelligenceIndex(options?: {
     automaticInventory: null,
     decisionArchive: null,
     platformHealth: null,
+    founderFrictionEngine: null,
   };
 }
 
@@ -285,6 +294,24 @@ export function attachPlatformHealthEngine(
   };
 }
 
-/** Singleton root index (stores empty until inventory/archive/health attach). */
+/**
+ * Attach P0-F Founder Friction Engine contracts.
+ * Does not populate friction observations.
+ */
+export function attachFounderFrictionEngine(
+  index: ProductIntelligenceIndex,
+  friction: FounderFrictionEngineResult,
+): ProductIntelligenceIndex {
+  return {
+    ...index,
+    founderFrictionEngine: friction,
+    stores: {
+      ...index.stores,
+      founderFriction: friction.index.frictions,
+    },
+  };
+}
+
+/** Singleton root index (stores empty until inventory/archive/health/friction attach). */
 export const PRODUCT_INTELLIGENCE_INDEX: ProductIntelligenceIndex =
   createProductIntelligenceIndex();

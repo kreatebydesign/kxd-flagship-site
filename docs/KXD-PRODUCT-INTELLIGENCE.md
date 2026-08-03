@@ -1,8 +1,8 @@
 # KXD Product Intelligence
 
-**Status:** P0-A architecture approved as product law · **P0-B contracts complete** · **P0-C automatic inventory complete** · **P0-D Decision Archive initialized** · **P0-E Platform Health Engine v1 complete**  
+**Status:** P0-A architecture approved as product law · **P0-B contracts complete** · **P0-C automatic inventory complete** · **P0-D Decision Archive initialized** · **P0-E Platform Health Engine v1 complete** · **P0-F Founder Friction Intelligence Engine complete**  
 **Location:** `lib/product-intelligence/`  
-**Verifiers:** `verify:product-intelligence-p0b` · `p0c` · `p0d` · `p0e`  
+**Verifiers:** `verify:product-intelligence-p0b` · `p0c` · `p0d` · `p0e` · `p0f`  
 **Boundary:** Infrastructure for building KXD OS — not client-facing, does not change KXD OS product functionality.
 
 ## Mission
@@ -185,7 +185,38 @@ Permanent question:
 
 **P0-E state:** Domain contracts loaded; all score observations remain **unobserved** (no invented numbers). Report generation unauthorized.
 
-**Not in P0-E:** Generated health reports, valuation, dashboards, weekly/monthly narrative reviews, Hall of Fame / Kill List / Future Bets / Friction / Competitive population, UI.
+**Not in P0-E:** Generated health reports, valuation, dashboards, weekly/monthly narrative reviews, Hall of Fame / Kill List / Future Bets / Friction observations / Competitive population, UI.
+
+## Founder Friction Intelligence Engine (P0-F — complete)
+
+P0-F defines the permanent system that captures real founder friction while operating KXD OS.
+
+Purpose: discover where the product creates unnecessary thinking, hesitation, confusion, repetition, or effort — as evidence, not immediate work.
+
+Permanent question:
+
+> What consistently slows us down?
+
+| Workstream | Status |
+|------------|--------|
+| Friction Categories (closed vocabulary, 15) | ✅ |
+| Severity Model (minor → critical) | ✅ |
+| Frequency Model (once → constant) | ✅ |
+| Impact Model (founder / client / business / operational / technical) | ✅ |
+| Relationships (inventory, decisions, DNA, health, roadmap, evidence, debt) | ✅ |
+| Resolution Lifecycle (observed → resolved / rejected / superseded) | ✅ |
+| Friction Evidence kinds (no anonymous) | ✅ |
+| Founder Friction Index (root structure) | ✅ |
+| Product Learning on resolve | ✅ |
+| Future linkage stubs (health / valuation / competitive / weekly reviews) | ✅ |
+
+**Load:** `loadFounderFrictionEngine()` · **Attach:** `attachFounderFrictionEngine(index, result)`
+
+**Laws:** Every feature request is not a friction. Every friction may become evidence → decision → roadmap → improvement. Nothing skips to implementation. No free-form categories. No anonymous evidence. Every lifecycle transition requires a reason. Resolved friction records what changed, why it worked, and what Product Intelligence learned.
+
+**P0-F state:** Contracts and empty Founder Friction Index loaded. Observation store remains empty. Future linkages prepared with `implementationAuthorized: false`.
+
+**Not in P0-F:** Populated friction observations, Hall of Fame, Kill List, Future Bets, Competitive Intelligence, valuation, weekly/monthly reviews, health movement from friction, UI, automation.
 
 ## Implementation batches
 
@@ -196,8 +227,7 @@ Permanent question:
 | **P0-C** | System Map auto-inventory (routes/collections/APIs/verifiers) | ✅ Complete |
 | **P0-D** | Decision Archive backfill for Edition 1 permanent laws | ✅ Complete |
 | **P0-E** | Scorecard / Platform Health Engine v1 + movement log | ✅ Complete |
-| **P0-F** | Founder Friction capture ritual + weekly triage | Pending |
-| **P0-F** | Founder Friction capture ritual + weekly triage | Pending |
+| **P0-F** | Founder Friction Intelligence Engine (contracts + index) | ✅ Complete |
 | **P0-G** | Release Ledger linkage to git/deploy evidence | Pending |
 | **P0-H** | Competitive watchlist + monthly cadence | Pending |
 | **P0-I** | Valuation model v1 (triple bands + assumptions) | Pending |
