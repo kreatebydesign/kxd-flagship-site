@@ -197,6 +197,8 @@ npm run verify:client-launch -- --client primal-motorsports
 
 > **Note:** Phase 5 does **not** authorize KXD-generated invoice emails, dunning, refunds, subscriptions, Wave/QuickBooks portal invoicing, or flipping commercial Stripe execution. Founding-client early access still treats full invoicing/payment-center execution as out of the v1 baseline until Phase 5 batches ship and verify.
 
+> **Note:** Phase 6 — KXD Connect (`docs/PHASE-6-KXD-CONNECT.md`) is a **separate readiness track**. Connect is **not** mandatory for initial KXD OS Founding Client Early Access and does **not** block that launch. Client Communications, Connected Workspace, portal feedback, and `message-kxd` remain distinct from Connect.
+
 ---
 
 ## Architecture pointers

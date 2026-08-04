@@ -122,6 +122,10 @@ This track is distinct from registry phase numbers and from Intelligence Pipelin
 | Phase 3 | Client & Relationship Intelligence | ✅ Production-complete | Private operator workspace connecting clients, contacts, relationships, preferences, and events. Plan: `docs/PHASE-3-CLIENT-RELATIONSHIP-INTELLIGENCE.md`. Batches A–E published and production-verified at `fdb0348`. Closed — do not reopen. |
 | **Phase 4** | **Multi-Client Portal Access & Account Context** | **Batches A–I code-complete; Batch J = identity security production rollout (paused with Primal analytics blockers)** | Plan: `docs/PHASE-4-MULTI-CLIENT-PORTAL.md`. Identity: `docs/PHASE-4-PORTAL-IDENTITY-SECURITY.md`. Batch J: `docs/PHASE-4-BATCH-J-IDENTITY-ROLLOUT.md` + pilot runbook. Verifiers: Batch H completion (`verify:phase4-multi-client-portal-completion`) + `verify:phase4-portal-identity-security`. Real client activation still pilot-gated. **Not fully production-complete.** Batch J.2B.2, Primal walkthrough, and reporting pilot remain paused. Future Connect/Support/Academy/Meetings/Social Studio/weather/personalized shell remain roadmap — not Batch J. |
 | **Phase 5** | **Client Billing Visibility, Stripe Invoice Status & Monthly Work Summaries** | ✅ **Complete** (Batches 5A–5D; Batch 5E intentionally skipped) | Spec: `docs/PHASE-5-CLIENT-BILLING-VISIBILITY.md`. Parallel non-Primal lane; does not complete or waive Phase 4. Batch 5A: monthly summary on Work & Performance. Batch 5B: Stripe invoice read foundation. Batch 5C: portal Billing UI. Batch 5D: staff invoice visibility on Commercial Agreements detail. Batch 5E skipped so work-summary and invoice facts stay separate. TEST-mode read-only; no invoice management, live Stripe expansion, receipts, accounting, or Financial Command expansion. Hosting Transitions and KXD invoice emails excluded. |
+| **Phase 6** | **KXD Connect** | **Batches C0–C6 complete** (through readiness review / internal release gate). Production rollout not authorized. | Spec: `docs/PHASE-6-KXD-CONNECT.md`. Runbook: `docs/PHASE-6-CONNECT-LOCAL-DOGFOOD-RUNBOOK.md`. C5: dogfood period. C6: readiness gate (meters auth hardened). **Does not block** KXD OS Founding Client Early Access. |
+| **Phase 7** | **Today** | **Batches A–B approved; Batches C–D.1 implemented** | Spec: `docs/PHASE-7-TODAY.md`. Today is the sole founder home. Batch C: home ownership + nav identity. Batch D: experience foundation. Batch D.1: founder recomposition (posture, Focus, Waiting For You, Day Flow, Momentum). Next: Batch E (absorb/retire) when authorized. |
+| **Product Intelligence** | **KXD Product Intelligence (internal control plane)** | **P0-A approved; P0-B through P0-K complete** | Spec: `docs/KXD-PRODUCT-INTELLIGENCE.md`. Contracts through Query Engine in `lib/product-intelligence/`. Verifiers: `verify:product-intelligence-p0b` … `p0k`. Not client-facing. Observation/entry stores empty through Fame, Kill List, and Future Bets; Competitive / valuation still empty. Query executed log empty. Next: **P0-L** when authorized. |
+| **Experience Refinement Phase 2** | **KXD Experience Constitution + Arrival → Today** | **Batch A ✅ · Batch B ✅** | Spec: `docs/PHASE-2-EXPERIENCE-REFINEMENT.md`. Law: `docs/KXD-OS-CONSTITUTION.md` v2.0. Batch B: login Welcomed, Today Clear, arrival nav Effortless/Held. Verifier: `verify:experience-phase2-batch-b`. No new features. Next experience batch only when authorized. |
 
 **Phase 3 product outcome:** durable private business context for future Business Memory — not portal, not public, not calendar rewrite, not ritual/Business Memory integration in this phase.
 
@@ -130,6 +134,10 @@ This track is distinct from registry phase numbers and from Intelligence Pipelin
 **Phase 4 product outcome:** one portal user may access multiple authorized independent clients with server-validated active-account context and no cross-account leakage — reusable architecture; Cusick first.
 
 **Phase 5 product outcome:** clients see Stripe-backed invoice status with Stripe-hosted payment actions, plus an honest monthly completed-work summary — visibility and context only; not an accounting platform, payment vault, or Work Ledger. Reuses Phases 35–37; independent of Primal analytics.
+
+**Phase 6 product outcome (C0–C6):** organization-owned Connect tenancy, secure messaging engine, staff-only `/admin/connect` UI, local activation controls, completed local dogfood operating period, and an engineering readiness / internal release gate — not the full Connect shell (no dock/Buddy List/notifications). Production enablement not authorized. Client Communications, Connected Workspace, and `message-kxd` remain distinct and unchanged.
+
+**Phase 7 product outcome (through Batch D.1):** Today is the permanent founder home. The morning surface answers how the business stands, what deserves attention first, what is waiting, and how the day feels — in COO language with a clear visual anchor. Competing aggregators remain destinations without home semantics. Batches E–G remain for absorb/retire, weekly snapshot, and Connect seam.
 
 ---
 
@@ -221,9 +229,11 @@ From `lib/platform/registry.ts`:
 | `KXD-OS-PHILOSOPHY.md` | Vision and principles |
 | `KXD-OS-ROADMAP.md` | This document — build progress |
 | `KXD-OS-PRODUCT-ROADMAP.md` | 5–10 year product eras |
-| `KXD-OS-CONSTITUTION.md` | Experience standard |
+| `KXD-OS-CONSTITUTION.md` | KXD Experience Constitution v2.0 — sole permanent experience law |
+| `PHASE-2-EXPERIENCE-REFINEMENT.md` | Experience Refinement Phase 2 (Batch A complete) |
 | `PHASE-3-CLIENT-RELATIONSHIP-INTELLIGENCE.md` | Phase 3 definition + batches (production-complete) |
 | `PHASE-4-MULTI-CLIENT-PORTAL.md` | Phase 4 definition + batches (next active phase) |
+| `KXD-PRODUCT-INTELLIGENCE.md` | Product Intelligence control plane — P0-A, P0-B, P0-C, P0-D, P0-E, P0-F, P0-G, P0-H, P0-I, P0-J, P0-K (through Query Engine) |
 | `.cursor/rules/kxd-os-architecture.mdc` | Cursor agent rule |
 
 ---

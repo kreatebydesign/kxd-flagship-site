@@ -101,14 +101,14 @@ export function FounderIntelligenceScreen({ data }: { data: FounderBriefingData 
     <OperationsShell activeId="founder-intelligence">
       <KxdPage className="kxd-os-page--ops">
         <OperationsPageHero
-          eyebrow="KXD OS · Founder Intelligence"
+          eyebrow="KXD OS · Priority Brief"
           title={data.dateDisplay}
-          lead={`Morning command brief · ${data.timeDisplay}`}
+          lead={`Deep priority view · ${data.timeDisplay}`}
           presence
         />
 
         <section className="kxd-os-card" style={{ marginBottom: "2rem" }}>
-          <p className="kxd-os-section__label">Morning brief</p>
+          <p className="kxd-os-section__label">Priority summary</p>
           <p className="kxd-os-headline" style={{ fontSize: "1.25rem", marginTop: "0.75rem" }}>
             {data.morningBrief.summary}
           </p>

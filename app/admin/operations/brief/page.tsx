@@ -1,13 +1,14 @@
 /**
  * /admin/operations/brief
- * Morning Brief is now composed into Executive Today.
+ * Morning Brief merges into Today — not a competing home.
+ * Phase 7 Batch B/C home policy.
  */
 
 import { redirect } from "next/navigation";
-import { EXECUTIVE_TODAY_HOME } from "@/lib/executive-today";
+import { FOUNDER_HOME_PATH } from "@/lib/admin/home-policy";
 
 export const dynamic = "force-dynamic";
 
 export default function MorningBriefRedirectPage() {
-  redirect(EXECUTIVE_TODAY_HOME);
+  redirect(FOUNDER_HOME_PATH);
 }

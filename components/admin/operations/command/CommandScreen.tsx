@@ -258,8 +258,8 @@ export function CommandScreen({
     <OperationsShell activeId="command" dateDisplay={today}>
       <KxdPage className="kxd-os-page--ops">
         <OperationsPageHero
-          eyebrow="KXD OS · Operations"
-          title="Operations Suite"
+          eyebrow="KXD OS · Operations Board"
+          title="Operations Board"
           lead={`${today} · A calm view across clients, retainers, deliverables, and requests.`}
         />
 

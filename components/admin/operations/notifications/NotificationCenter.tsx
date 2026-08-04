@@ -311,7 +311,7 @@ export function NotificationCenter() {
                 <div className="kxd-notif-empty-state">
                   <p className="kxd-os-headline kxd-os-headline--sm">Inbox clear</p>
                   <p className="kxd-os-meta">
-                    No operational signals right now. Automation, Brain, and Founder Intelligence
+                    No operational signals right now. Automation, Portfolio Synthesis, and Priority Brief
                     will surface here when action is needed.
                   </p>
                 </div>

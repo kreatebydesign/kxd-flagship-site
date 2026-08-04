@@ -78,7 +78,7 @@ Do not introduce Edition 2 concepts, parallel platforms, or "temporary" shortcut
 
 ### Premium software craftsmanship
 
-KHIG standards apply: calm executive UI, editorial typography, intentional motion, evidence-bound language. Complex underneath. Simple on top. See `docs/KXD-OS-CONSTITUTION.md` and `design-system/os/`.
+KHIG standards apply: calm executive UI, editorial typography, intentional motion, evidence-bound language. Complex underneath. Simple on top. Experience law: **KXD Experience Constitution** (`docs/KXD-OS-CONSTITUTION.md` v2.0) — Held clarity; founder held, not managed; emotion before information. Visual craft: `docs/KXD-OS-VISUAL-MANIFESTO.md` and `design-system/os/`.
 
 ---
 

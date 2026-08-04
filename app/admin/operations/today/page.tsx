@@ -1,6 +1,6 @@
 /**
- * /admin/operations/today — Executive Today (permanent KXD OS home)
- * Phase 22A
+ * /admin/operations/today — Today (sole founder home)
+ * Phase 22A foundation · Phase 7 Batch C home policy · Batch D experience
  */
 
 import { ExecutiveTodayScreen } from "@/components/admin/executive-today";

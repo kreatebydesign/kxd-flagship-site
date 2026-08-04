@@ -22,6 +22,7 @@ export const KXD_MODULE_IDS: KxdModuleId[] = [
   "founder",
   "portfolio",
   "operations",
+  "connect",
 ];
 
 export const KXD_MODULE_REGISTRY: Record<KxdModuleId, KxdModuleDefinition> = {
@@ -193,6 +194,17 @@ export const KXD_MODULE_REGISTRY: Record<KxdModuleId, KxdModuleDefinition> = {
     required: true,
     editionSupport: "all",
     description: "Today, command, and daily operations surfaces",
+  },
+  connect: {
+    id: "connect",
+    name: "KXD Connect",
+    category: "platform",
+    required: false,
+    // Unsupported by every edition until a later batch explicitly enables it.
+    // Prevents schema presence from granting Connect module access.
+    editionSupport: [],
+    description:
+      "Secure multi-organization messaging foundation. Disabled by default in C0.",
   },
 };
 

@@ -37,7 +37,8 @@ export type KxdModuleId =
   | "audits"
   | "founder"
   | "portfolio"
-  | "operations";
+  | "operations"
+  | "connect";
 
 export type KxdModuleCategory =
   | "intelligence"
@@ -58,7 +59,8 @@ export type EditionFeatureId =
   | "edition-switcher"
   | "advanced-permissions"
   | "portal-white-label"
-  | "email-branding-editor";
+  | "email-branding-editor"
+  | "kxd-connect";
 
 export type EditionRoleId =
   | "owner"
@@ -90,7 +92,7 @@ export interface EditionCustomNavigation {
   hideOperationsNavIds?: OperationsNavId[];
   /** Additional operations nav items (edition-specific routes — future) */
   additionalOperationsItems?: OperationsNavItem[];
-  /** Override operations home route */
+  /** Override operations home route — must remain Today (`/admin/operations/today`) for founders */
   homeRoute?: string;
   /** Hide portal nav modules */
   hidePortalNavIds?: ClientHqNavId[];

@@ -1,13 +1,14 @@
 import type { AdminViewServerProps } from "payload";
 import { redirect } from "next/navigation";
 import { getSafeRedirect } from "payload/shared";
+import { OPERATIONS_HOME_PATH } from "@/lib/admin/constants";
 import { PayloadLogo } from "./PayloadLogo";
 import { KxdAdminLoginForm } from "./KxdAdminLoginForm";
 
 /**
  * Custom Payload Admin Login view.
- * Replaces stock LoginView so authentication uses a real semantic form with
- * Enter-key submission, while preserving Payload session cookies + redirects.
+ * Experience Refinement Phase 2 Batch B — Arrival owns Welcomed.
+ * Auth mechanics unchanged; emotional first impression is KXD OS, not CMS.
  */
 export function KxdAdminLoginView({
   initPageResult,
@@ -18,7 +19,6 @@ export function KxdAdminLoginView({
       user,
       payload: {
         config: {
-          routes: { admin: adminRoute },
           admin: { user: userSlug },
         },
         collections,
@@ -33,9 +33,10 @@ export function KxdAdminLoginView({
         ? searchParams.redirect[0]
         : undefined;
 
+  // Phase 7 Batch C — founder login lands on Today (sole home).
   const redirectUrl = getSafeRedirect({
-    fallbackTo: adminRoute,
-    redirectTo: redirectParam ?? adminRoute,
+    fallbackTo: OPERATIONS_HOME_PATH,
+    redirectTo: redirectParam ?? OPERATIONS_HOME_PATH,
   });
 
   if (user) {
@@ -54,13 +55,16 @@ export function KxdAdminLoginView({
   );
 
   return (
-    <>
+    <div className="kxd-admin-login" data-experience="welcomed">
       <div className="login__brand">
         <PayloadLogo />
+        <p className="kxd-admin-login__welcome">
+          Enter your business. Today is waiting.
+        </p>
       </div>
       {!localStrategyDisabled ? (
         <KxdAdminLoginForm searchParams={searchParams} />
       ) : null}
-    </>
+    </div>
   );
 }

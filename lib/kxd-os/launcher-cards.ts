@@ -30,11 +30,20 @@ export type LauncherCard = {
 
 export const LAUNCHER_CARDS: LauncherCard[] = [
   {
+    id: "today",
+    title: "Today",
+    description: "Where the day begins — one calm answer to what needs attention.",
+    href: "/admin/operations/today",
+    tag: "Home",
+    section: "studio",
+    permission: "executive",
+  },
+  {
     id: "executive",
-    title: "Executive Overview",
-    description: "Studio-wide snapshot — clients, delivery pipeline, onboarding, and growth metrics.",
+    title: "Portfolio Overview",
+    description: "Business destination — clients, delivery pipeline, onboarding, and growth metrics.",
     href: "/admin/operations/executive",
-    tag: "Executive",
+    tag: "Business",
     section: "studio",
     permission: "executive",
   },

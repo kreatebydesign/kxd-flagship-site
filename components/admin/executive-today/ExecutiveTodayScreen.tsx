@@ -1,174 +1,125 @@
 import Link from "next/link";
-import { KxdIntelligenceMark, KxdShell } from "@/components/os";
+import { KxdShell } from "@/components/os";
 import { ExecutiveWorkspaceShell } from "@/components/admin/executive-workspace";
 import { WhyThisDisclosure } from "@/components/admin/executive-intelligence/WhyThisDisclosure";
 import type { ExecutiveTodayData } from "@/lib/executive-today";
+import { TODAY_QUIET_EXITS } from "@/lib/executive-today/presentation";
 import { formatClock } from "@/lib/executive-today/brief/time-model";
-import { ExecutiveTodayCapture } from "./ExecutiveTodayCapture";
 
 /**
- * Permanent Executive Today home — typography-first, decision-first.
- * Phase 22B visual refinement · Phase 27B calendar intelligence.
+ * Today — sole founder home.
+ * Phase 7 Batch D.1 + Experience Refinement Phase 2 Batch B.
+ *
+ * First viewport answers, in order (Clear within five seconds):
+ * 1. Where does my business stand? (Morning Answer)
+ * 2. What deserves me first? (one primary move)
+ * 3. Is anything waiting on me?
+ * 4. What does the shape of today look like?
+ *
+ * Constitution: emotion before information; silence when nothing waits;
+ * no dashboard residue; one primary visual authority.
  */
 export function ExecutiveTodayScreen({ data }: { data: ExecutiveTodayData }) {
+  const xp = data.experience;
   const brief = data.brief;
-  const primaryClass =
-    data.primary.from === "calm"
-      ? "kxd-exec-today__primary kxd-exec-today__primary--calm"
-      : "kxd-exec-today__primary";
-
   const tz = brief?.bounds.timeZone ?? "America/Los_Angeles";
+  const isCalm = xp.primary.from === "calm";
+  const primaryHref = xp.primary.href;
+  const primaryLabel =
+    xp.primary.hrefLabel ?? (isCalm ? "Begin the day" : "Begin");
+  const hasWaiting = xp.waitingForYou.length > 0;
+  const hasSignals = xp.signals.length > 0;
 
   return (
-    <KxdShell className="kxd-os-shell--ritual">
+    <KxdShell className="kxd-os-shell--ritual kxd-os-shell--arrival">
       <ExecutiveWorkspaceShell workspaceId="today">
-        <article className="kxd-exec-today">
+        <article
+          className="kxd-exec-today"
+          aria-label="Today"
+          data-experience="clear"
+        >
+          {/* 1 — Morning Answer / Where does my business stand? */}
           <header className="kxd-exec-today__hero kxd-exec-today__enter">
             <p className="kxd-exec-today__greeting">{data.greeting}</p>
-            <h1 className="kxd-exec-today__headline">Today</h1>
-            <p className="kxd-exec-today__welcome">
-              {brief?.orientationSummary ?? data.welcome}
-            </p>
+            <h1 className="kxd-exec-today__posture-line">{xp.postureLine}</h1>
+            <p className="kxd-exec-today__day-sentence">{xp.daySentence}</p>
             <p className="kxd-exec-today__meta">
-              {data.dateDisplay}
+              <span className="kxd-exec-today__brand">Today</span>
               <span aria-hidden> · </span>
-              {data.timeDisplay}
-              {brief ? (
-                <>
-                  <span aria-hidden> · </span>
-                  <span className="kxd-exec-today__orientation">
-                    {brief.orientation.replace(/_/g, " ")}
-                  </span>
-                </>
-              ) : null}
+              <time dateTime={data.generatedAt}>{data.dateDisplay}</time>
             </p>
-            {brief?.current.happeningNow || brief?.current.nextCommitment ? (
-              <p className="kxd-exec-today__now">
-                {brief.current.happeningNow
-                  ? `Now · ${brief.current.happeningNow}`
-                  : brief.current.nextCommitment
-                    ? `Next · ${brief.current.nextCommitment}`
-                    : null}
-                {brief.current.minutesRemaining != null
-                  ? ` · ${brief.current.minutesRemaining}m left`
-                  : brief.current.nextStartsInMinutes != null
-                    ? ` · in ${brief.current.nextStartsInMinutes}m`
-                    : null}
-              </p>
-            ) : null}
-            {brief?.freshness ? (
-              <p className="kxd-exec-today__freshness">{brief.freshness.label}</p>
-            ) : null}
           </header>
 
+          {/* 2 — One primary move */}
           <section
-            className={`kxd-exec-today__section kxd-exec-today__section--primary kxd-exec-today__enter kxd-exec-today__enter--1 ${primaryClass}`}
+            className={[
+              "kxd-exec-today__section",
+              "kxd-exec-today__section--primary",
+              "kxd-exec-today__enter",
+              "kxd-exec-today__enter--1",
+              isCalm ? "kxd-exec-today__primary--calm" : "kxd-exec-today__primary",
+            ].join(" ")}
             aria-labelledby="today-primary"
           >
-            <KxdIntelligenceMark className="kxd-exec-today__intel-mark" />
-            <h2 id="today-primary" className="kxd-exec-today__label">
-              Do this next
+            <p className="kxd-exec-today__eyebrow">Do this first</p>
+            <h2 id="today-primary" className="kxd-exec-today__primary-title">
+              {xp.primary.title}
             </h2>
-            <p className="kxd-exec-today__primary-title">{data.primary.title}</p>
-            <p className="kxd-exec-today__primary-detail">{data.primary.detail}</p>
-            <p className="kxd-exec-today__reason">{data.primary.reason}</p>
-            {brief?.recommendation.evidence?.length ? (
-              <ul className="kxd-exec-today__evidence">
-                {brief.recommendation.evidence.slice(0, 3).map((line) => (
-                  <li key={line}>{line}</li>
-                ))}
-              </ul>
+            {xp.primary.detail ? (
+              <p className="kxd-exec-today__primary-detail">{xp.primary.detail}</p>
             ) : null}
-            {data.primary.href ? (
-              <p className="kxd-exec-today__link kxd-exec-today__link--primary">
-                <Link href={data.primary.href}>
-                  {data.primary.hrefLabel ?? "Continue"}
+            {primaryHref ? (
+              <p className="kxd-exec-today__cta">
+                <Link
+                  href={primaryHref}
+                  className="kxd-exec-today__cta-link"
+                  data-today-primary-move="true"
+                >
+                  {primaryLabel}
+                </Link>
+              </p>
+            ) : isCalm ? (
+              <p className="kxd-exec-today__cta">
+                <Link
+                  href="/admin/operations/focus"
+                  className="kxd-exec-today__cta-link"
+                  data-today-primary-move="true"
+                >
+                  Begin the day
                 </Link>
               </p>
             ) : null}
             <WhyThisDisclosure explainability={data.explainability} />
           </section>
 
-          {brief && brief.dayFlow.length > 0 ? (
+          {/* 3 — Waiting (only when it changes today’s decision) */}
+          {hasWaiting ? (
             <section
-              className="kxd-exec-today__section kxd-exec-today__section--flow kxd-exec-today__enter kxd-exec-today__enter--2"
-              aria-labelledby="today-flow"
+              className="kxd-exec-today__section kxd-exec-today__section--waiting kxd-exec-today__enter kxd-exec-today__enter--2"
+              aria-labelledby="today-waiting"
             >
-              <h2 id="today-flow" className="kxd-exec-today__label">
-                Day flow
-              </h2>
-              <ol className="kxd-exec-today__flow">
-                {brief.dayFlow.map((item) => {
-                  const rowClass = [
-                    "kxd-exec-today__flow-item",
-                    `kxd-exec-today__flow-item--${item.state}`,
-                    `kxd-exec-today__flow-item--${item.kind}`,
-                  ].join(" ");
-                  const timeLabel = item.allDay
-                    ? "All day"
-                    : item.startIso && item.endIso
-                      ? `${formatClock(item.startIso, tz)} – ${formatClock(item.endIso, tz)}`
-                      : item.startIso
-                        ? formatClock(item.startIso, tz)
-                        : "—";
-                  const body = (
-                    <>
-                      <span className="kxd-exec-today__flow-time">{timeLabel}</span>
-                      <span className="kxd-exec-today__flow-main">
-                        <span className="kxd-exec-today__flow-title">{item.title}</span>
-                        {item.detail ? (
-                          <span className="kxd-exec-today__flow-detail">{item.detail}</span>
-                        ) : null}
-                      </span>
-                      {item.durationMinutes != null && !item.allDay ? (
-                        <span className="kxd-exec-today__flow-dur">
-                          {item.durationMinutes}m
-                        </span>
-                      ) : null}
-                    </>
-                  );
-                  const href = item.workHref ?? item.calendarHtmlLink;
-                  return (
-                    <li key={item.id} className={rowClass}>
-                      {href ? (
-                        <Link
-                          href={href}
-                          className="kxd-exec-today__flow-link"
-                          target={item.calendarHtmlLink && !item.workHref ? "_blank" : undefined}
-                          rel={item.calendarHtmlLink && !item.workHref ? "noreferrer" : undefined}
-                        >
-                          {body}
-                        </Link>
-                      ) : (
-                        <div className="kxd-exec-today__flow-link">{body}</div>
-                      )}
-                    </li>
-                  );
-                })}
-              </ol>
-            </section>
-          ) : null}
-
-          {brief && brief.attention.length > 0 ? (
-            <section
-              className="kxd-exec-today__section kxd-exec-today__enter kxd-exec-today__enter--3"
-              aria-labelledby="today-attention"
-            >
-              <h2 id="today-attention" className="kxd-exec-today__label">
-                Needs judgment
+              <h2 id="today-waiting" className="kxd-exec-today__label">
+                Waiting For You
               </h2>
               <ul className="kxd-exec-today__list">
-                {brief.attention.map((item) => (
+                {xp.waitingForYou.map((item) => (
                   <li key={item.id}>
                     {item.href ? (
-                      <Link href={item.href} className="kxd-exec-today__row kxd-exec-today__row--notable">
-                        <span className="kxd-exec-today__row-title">{item.title}</span>
-                        <span className="kxd-exec-today__row-meta">{item.evidence}</span>
+                      <Link
+                        href={item.href}
+                        className="kxd-exec-today__row kxd-exec-today__row--notable"
+                      >
+                        <span className="kxd-exec-today__row-title">
+                          {item.title}
+                        </span>
+                        <span className="kxd-exec-today__row-meta">{item.meta}</span>
                       </Link>
                     ) : (
                       <div className="kxd-exec-today__row kxd-exec-today__row--notable">
-                        <span className="kxd-exec-today__row-title">{item.title}</span>
-                        <span className="kxd-exec-today__row-meta">{item.evidence}</span>
+                        <span className="kxd-exec-today__row-title">
+                          {item.title}
+                        </span>
+                        <span className="kxd-exec-today__row-meta">{item.meta}</span>
                       </div>
                     )}
                   </li>
@@ -177,42 +128,107 @@ export function ExecutiveTodayScreen({ data }: { data: ExecutiveTodayData }) {
             </section>
           ) : null}
 
-          {brief ? (
-            <section
-              className="kxd-exec-today__section kxd-exec-today__enter kxd-exec-today__enter--4"
-              aria-labelledby="today-capacity"
-            >
-              <h2 id="today-capacity" className="kxd-exec-today__label">
-                Remaining day
-              </h2>
-              <p className="kxd-exec-today__intel-headline">{brief.capacity.summary}</p>
-              <p className="kxd-exec-today__intel-summary">
-                {brief.capacity.capacityConfidence === "unknown"
-                  ? "Duration estimates are incomplete — capacity is directional, not precise."
-                  : brief.capacity.capacityConfidence === "partial"
-                    ? "Some Work lacks duration estimates — treat capacity as partial."
-                    : null}
-              </p>
-            </section>
-          ) : null}
-
+          {/* 4 — Shape of the day (not calendar software) */}
           <section
-            className="kxd-exec-today__section kxd-exec-today__enter kxd-exec-today__enter--5"
-            aria-labelledby="today-focus"
+            className="kxd-exec-today__section kxd-exec-today__section--flow kxd-exec-today__enter kxd-exec-today__enter--3"
+            aria-labelledby="today-flow"
           >
-            <div className="kxd-exec-today__section-head">
-              <h2 id="today-focus" className="kxd-exec-today__label">
-                Today&apos;s Work
-              </h2>
-              <Link href="/admin/work" className="kxd-exec-today__section-link">
-                Work Engine
-              </Link>
-            </div>
-            {data.focus.length === 0 ? (
-              <p className="kxd-exec-today__empty">Nothing due or in motion for today.</p>
+            <h2 id="today-flow" className="kxd-exec-today__label">
+              The day
+            </h2>
+            <p className="kxd-exec-today__day-shape">{xp.dayShapeLine}</p>
+            {xp.flowPeriods.length === 0 ? (
+              <p className="kxd-exec-today__empty">{xp.scheduleEmpty}</p>
             ) : (
+              <div className="kxd-exec-today__periods">
+                {xp.flowPeriods.map((group) => (
+                  <div key={group.period} className="kxd-exec-today__period">
+                    <p className="kxd-exec-today__period-label">{group.period}</p>
+                    <ol className="kxd-exec-today__flow">
+                      {group.items.map((item) => {
+                        const rowClass = [
+                          "kxd-exec-today__flow-item",
+                          `kxd-exec-today__flow-item--${item.state}`,
+                          `kxd-exec-today__flow-item--${item.kind}`,
+                        ].join(" ");
+                        const timeLabel = item.allDay
+                          ? "All day"
+                          : item.startIso && item.endIso
+                            ? `${formatClock(item.startIso, tz)} – ${formatClock(item.endIso, tz)}`
+                            : item.startIso
+                              ? formatClock(item.startIso, tz)
+                              : "—";
+                        const body = (
+                          <>
+                            <span className="kxd-exec-today__flow-time">
+                              {timeLabel}
+                            </span>
+                            <span className="kxd-exec-today__flow-main">
+                              <span className="kxd-exec-today__flow-title">
+                                {item.title}
+                              </span>
+                            </span>
+                          </>
+                        );
+                        const href = item.workHref ?? item.calendarHtmlLink;
+                        return (
+                          <li key={item.id} className={rowClass}>
+                            {href ? (
+                              <Link
+                                href={href}
+                                className="kxd-exec-today__flow-link"
+                                target={
+                                  item.calendarHtmlLink && !item.workHref
+                                    ? "_blank"
+                                    : undefined
+                                }
+                                rel={
+                                  item.calendarHtmlLink && !item.workHref
+                                    ? "noreferrer"
+                                    : undefined
+                                }
+                              >
+                                {body}
+                              </Link>
+                            ) : (
+                              <div className="kxd-exec-today__flow-link">{body}</div>
+                            )}
+                          </li>
+                        );
+                      })}
+                    </ol>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+
+          {/* Supporting — below first-viewport clarity */}
+          <section
+            className="kxd-exec-today__section kxd-exec-today__section--momentum kxd-exec-today__enter kxd-exec-today__enter--4"
+            aria-labelledby="today-momentum"
+          >
+            <h2 id="today-momentum" className="kxd-exec-today__label">
+              Momentum
+            </h2>
+            <p className="kxd-exec-today__momentum">{xp.momentumLine}</p>
+          </section>
+
+          {xp.priorities.length > 0 ? (
+            <section
+              className="kxd-exec-today__section kxd-exec-today__section--supporting kxd-exec-today__enter kxd-exec-today__enter--5"
+              aria-labelledby="today-priorities"
+            >
+              <div className="kxd-exec-today__section-head">
+                <h2 id="today-priorities" className="kxd-exec-today__label">
+                  Also on your desk
+                </h2>
+                <Link href="/admin/work" className="kxd-exec-today__section-link">
+                  Work
+                </Link>
+              </div>
               <ul className="kxd-exec-today__list">
-                {data.focus.map((item) => (
+                {xp.priorities.map((item) => (
                   <li key={item.id}>
                     <Link href={item.href} className="kxd-exec-today__row">
                       <span className="kxd-exec-today__row-title">{item.title}</span>
@@ -221,25 +237,24 @@ export function ExecutiveTodayScreen({ data }: { data: ExecutiveTodayData }) {
                   </li>
                 ))}
               </ul>
-            )}
-          </section>
+            </section>
+          ) : null}
 
-          <section
-            className="kxd-exec-today__section kxd-exec-today__enter kxd-exec-today__enter--6"
-            aria-labelledby="today-activity"
-          >
-            <h2 id="today-activity" className="kxd-exec-today__label">
-              What changed
-            </h2>
-            {data.activity.length === 0 ? (
-              <p className="kxd-exec-today__empty">{data.activityEmptyMessage}</p>
-            ) : (
+          {hasSignals ? (
+            <section
+              className="kxd-exec-today__section kxd-exec-today__section--signals kxd-exec-today__enter kxd-exec-today__enter--6"
+              aria-labelledby="today-signals"
+            >
+              <h2 id="today-signals" className="kxd-exec-today__label">
+                Signals
+              </h2>
               <ul className="kxd-exec-today__list">
-                {data.activity.map((item) => {
+                {xp.signals.map((item) => {
                   const rowClass = [
                     "kxd-exec-today__row",
-                    item.emphasis === "notable" ? "kxd-exec-today__row--notable" : "",
-                    item.read ? "kxd-exec-today__row--read" : "",
+                    item.emphasis === "notable"
+                      ? "kxd-exec-today__row--notable"
+                      : "",
                   ]
                     .filter(Boolean)
                     .join(" ");
@@ -248,43 +263,38 @@ export function ExecutiveTodayScreen({ data }: { data: ExecutiveTodayData }) {
                     <li key={item.id}>
                       {item.href ? (
                         <Link href={item.href} className={rowClass}>
-                          <span className="kxd-exec-today__row-title">{item.title}</span>
-                          <span className="kxd-exec-today__row-meta">{item.meta}</span>
+                          <span className="kxd-exec-today__row-title">
+                            {item.title}
+                          </span>
                         </Link>
                       ) : (
                         <div className={rowClass}>
-                          <span className="kxd-exec-today__row-title">{item.title}</span>
-                          <span className="kxd-exec-today__row-meta">{item.meta}</span>
+                          <span className="kxd-exec-today__row-title">
+                            {item.title}
+                          </span>
                         </div>
                       )}
                     </li>
                   );
                 })}
               </ul>
-            )}
-          </section>
-
-          <section
-            className="kxd-exec-today__section kxd-exec-today__section--capture kxd-exec-today__enter kxd-exec-today__enter--7"
-            aria-labelledby="today-capture"
-          >
-            <h2 id="today-capture" className="kxd-exec-today__label">
-              Quick Capture
-            </h2>
-            <ExecutiveTodayCapture />
-          </section>
-
-          {brief ? (
-            <section
-              className="kxd-exec-today__section kxd-exec-today__section--close kxd-exec-today__enter kxd-exec-today__enter--8"
-              aria-labelledby="today-close"
-            >
-              <h2 id="today-close" className="kxd-exec-today__label">
-                End of day
-              </h2>
-              <p className="kxd-exec-today__closing">{brief.closing.successLooksLike}</p>
             </section>
           ) : null}
+
+          <nav
+            className="kxd-exec-today__exits kxd-exec-today__enter kxd-exec-today__enter--6"
+            aria-label="Continue into the business"
+          >
+            {TODAY_QUIET_EXITS.map((exit) => (
+              <Link
+                key={exit.href}
+                href={exit.href}
+                className="kxd-exec-today__exit"
+              >
+                {exit.label}
+              </Link>
+            ))}
+          </nav>
         </article>
       </ExecutiveWorkspaceShell>
     </KxdShell>

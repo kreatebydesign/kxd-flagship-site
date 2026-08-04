@@ -54,3 +54,6 @@ private/client-review-media/*
 /tmp/
 storage/commercial-documents/
 storage/branded-monthly-reports/
+
+# KXD Connect local dogfood activation (operator-owned; never commit)
+.connect/

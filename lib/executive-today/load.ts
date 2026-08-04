@@ -11,12 +11,16 @@ import {
   composeExecutiveIntelligence,
   mapRecommendationToTodayPrimary,
 } from "@/lib/executive-intelligence";
-import {
-  EXECUTIVE_SIGNALS_EMPTY_MESSAGE,
-  mapSignalToListItem,
-} from "@/lib/executive-signals";
+import { mapSignalToListItem } from "@/lib/executive-signals";
 import { loadBriefingContext } from "@/lib/intelligence/briefings/builder";
 import { buildExecutiveTodayBrief } from "./brief/load-brief";
+import {
+  TODAY_EMPTY,
+  TODAY_EXCEPTIONS_LIMIT,
+  TODAY_PRIORITIES_LIMIT,
+  TODAY_SIGNALS_LIMIT,
+} from "./presentation";
+import { recomposeTodayExperience } from "./recomposition";
 import {
   mapWorkToFocusItem,
   type ExecutiveTodayData,
@@ -118,18 +122,25 @@ export async function loadExecutiveToday(input?: {
               hrefLabel: "Open Review Inbox",
               severity: "watch" as const,
             },
-          ].slice(0, 6),
+          ].slice(0, TODAY_EXCEPTIONS_LIMIT),
         }
-      : brief;
+      : brief
+        ? {
+            ...brief,
+            attention: brief.attention.slice(0, TODAY_EXCEPTIONS_LIMIT),
+          }
+        : brief;
 
-  return {
+  const base = {
     greeting: ctx.summary.greeting,
     welcome: ctx.summary.welcome,
     dateDisplay: ctx.summary.dateDisplay,
     timeDisplay: ctx.summary.timeDisplay,
     primary,
-    focus: ctx.todayWork.map(mapWorkToFocusItem),
-    activity: ctx.executiveSignals.map((signal) => {
+    focus: ctx.todayWork
+      .slice(0, TODAY_PRIORITIES_LIMIT)
+      .map(mapWorkToFocusItem),
+    activity: ctx.executiveSignals.slice(0, TODAY_SIGNALS_LIMIT).map((signal) => {
       const mapped = mapSignalToListItem(signal);
       return {
         id: mapped.id,
@@ -140,7 +151,7 @@ export async function loadExecutiveToday(input?: {
         emphasis: mapped.emphasis === "strong" ? ("notable" as const) : ("quiet" as const),
       };
     }),
-    activityEmptyMessage: ctx.signalsEmptyMessage || EXECUTIVE_SIGNALS_EMPTY_MESSAGE,
+    activityEmptyMessage: TODAY_EMPTY.signals,
     intelligence: {
       postureLabel: briefWithReviews
         ? briefWithReviews.orientation.replace(/_/g, " ")
@@ -154,5 +165,15 @@ export async function loadExecutiveToday(input?: {
     morning: ctx.morning,
     explainability: intelligence.userExplainability,
     generatedAt: ctx.generatedAt,
+  };
+
+  return {
+    ...base,
+    experience: recomposeTodayExperience(base, {
+      reviews: ctx.reviewsWaiting,
+      waitingOnKxd: ctx.waiting.waitingOnKxd,
+      blocked: ctx.blockedItems,
+      businessMomentum: ctx.businessMomentum,
+    }),
   };
 }
