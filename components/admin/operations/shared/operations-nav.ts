@@ -50,6 +50,7 @@ export type OperationsNavId =
   | "brain"
   | "integrations"
   | "platform"
+  | "tools"
   | "settings"
   | "training"
   | "staff";
@@ -71,7 +72,11 @@ export const NAV_GROUPS: OperationsNavGroup[] = [
     items: [
       { id: "today", label: "Today", href: "/admin/operations/today" },
       { id: "focus", label: "Focus", href: "/admin/operations/focus" },
-      { id: "review", label: "Weekly Review", href: "/admin/operations/review" },
+      {
+        id: "review",
+        label: "Weekly Review",
+        href: "/admin/operations/review",
+      },
       {
         id: "intelligence",
         label: "Intelligence",
@@ -93,8 +98,16 @@ export const NAV_GROUPS: OperationsNavGroup[] = [
         label: "Upgrade Requests",
         href: "/admin/operations/upgrade-requests",
       },
-      { id: "playbooks", label: "Playbooks", href: "/admin/operations/playbooks" },
-      { id: "launch-qa", label: "Launch QA", href: "/admin/operations/launch-qa" },
+      {
+        id: "playbooks",
+        label: "Playbooks",
+        href: "/admin/operations/playbooks",
+      },
+      {
+        id: "launch-qa",
+        label: "Launch QA",
+        href: "/admin/operations/launch-qa",
+      },
       {
         id: "automation",
         label: "Automation",
@@ -126,9 +139,21 @@ export const NAV_GROUPS: OperationsNavGroup[] = [
         label: "Provisioning",
         href: "/admin/operations/client-provisioning",
       },
-      { id: "strategy", label: "Strategy Vault", href: "/admin/operations/strategy" },
-      { id: "onboarding", label: "Onboarding", href: "/admin/operations/onboarding" },
-      { id: "portal-access", label: "Portal Access", href: "/admin/operations/portal-access" },
+      {
+        id: "strategy",
+        label: "Strategy Vault",
+        href: "/admin/operations/strategy",
+      },
+      {
+        id: "onboarding",
+        label: "Onboarding",
+        href: "/admin/operations/onboarding",
+      },
+      {
+        id: "portal-access",
+        label: "Portal Access",
+        href: "/admin/operations/portal-access",
+      },
       {
         id: "client-success",
         label: "Client Success",
@@ -147,10 +172,26 @@ export const NAV_GROUPS: OperationsNavGroup[] = [
       },
       { id: "sales-pipeline", label: "Pipeline", href: "/admin/sales" },
       { id: "sales-leads", label: "Leads", href: "/admin/sales/leads" },
-      { id: "sales-proposals", label: "Proposals", href: "/admin/sales/proposals" },
-      { id: "sales-templates", label: "Templates", href: "/admin/sales/templates" },
-      { id: "sales-activities", label: "Activities", href: "/admin/sales/activities" },
-      { id: "sales-forecast", label: "Forecast", href: "/admin/sales/forecast" },
+      {
+        id: "sales-proposals",
+        label: "Proposals",
+        href: "/admin/sales/proposals",
+      },
+      {
+        id: "sales-templates",
+        label: "Templates",
+        href: "/admin/sales/templates",
+      },
+      {
+        id: "sales-activities",
+        label: "Activities",
+        href: "/admin/sales/activities",
+      },
+      {
+        id: "sales-forecast",
+        label: "Forecast",
+        href: "/admin/sales/forecast",
+      },
       { id: "growth", label: "Growth", href: "/admin/operations/growth" },
       { id: "reports", label: "Reports", href: "/admin/operations/reports" },
       {
@@ -183,9 +224,14 @@ export const NAV_GROUPS: OperationsNavGroup[] = [
         href: "/admin/operations/integrations",
       },
       { id: "platform", label: "Platform", href: "/admin/operations/platform" },
+      { id: "tools", label: "Tools", href: "/admin/operations/tools" },
       { id: "training", label: "Training", href: "/admin/training" },
       { id: "staff", label: "Staff Home", href: "/admin/operations/staff" },
-      { id: "client-import", label: "Import", href: "/admin/operations/client-import" },
+      {
+        id: "client-import",
+        label: "Import",
+        href: "/admin/operations/client-import",
+      },
       // Demoted former home competitors — reachable, never morning start.
       {
         id: "command",

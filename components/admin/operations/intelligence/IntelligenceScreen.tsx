@@ -8,6 +8,7 @@ import {
 } from "@/components/admin/operations/shared/OpsBriefing";
 import { KxdPage } from "@/components/os";
 import type { ExecutiveBriefing } from "@/lib/intelligence/briefings";
+import { formatDisplayDateTimePacific } from "@/lib/platform/timezone";
 import { ExecutiveHealthSummary } from "./ExecutiveHealthSummary";
 import { ExecutiveInsights } from "./ExecutiveInsights";
 import { ExecutiveNarrativeBlock } from "./ExecutiveNarrative";
@@ -15,16 +16,25 @@ import { NarrativeSection } from "./NarrativeSection";
 import { PrimaryRecommendation } from "./PrimaryRecommendation";
 import { RecommendationCard } from "./RecommendationCard";
 
-export function IntelligenceScreen({ briefing }: { briefing: ExecutiveBriefing }) {
+export function IntelligenceScreen({
+  briefing,
+}: {
+  briefing: ExecutiveBriefing;
+}) {
   const additionalRecommendations = briefing.primaryRecommendation
-    ? briefing.recommendedActions.filter((item) => item.id !== briefing.primaryRecommendation!.id)
+    ? briefing.recommendedActions.filter(
+        (item) => item.id !== briefing.primaryRecommendation!.id,
+      )
     : briefing.recommendedActions;
 
   return (
     <OperationsShell activeId="intelligence">
       <KxdPage className="kxd-os-page--ops kxd-os-intelligence">
         <div className="kxd-os-intelligence-ritual-entry">
-          <Link href="/admin/operations/brief" className="kxd-os-ritual-entry-link">
+          <Link
+            href="/admin/operations/brief"
+            className="kxd-os-ritual-entry-link"
+          >
             Open Morning Brief →
           </Link>
         </div>
@@ -38,7 +48,9 @@ export function IntelligenceScreen({ briefing }: { briefing: ExecutiveBriefing }
 
         <ExecutiveHealthSummary snapshot={briefing.healthSnapshot} />
 
-        <PrimaryRecommendation recommendation={briefing.primaryRecommendation} />
+        <PrimaryRecommendation
+          recommendation={briefing.primaryRecommendation}
+        />
 
         <ExecutiveInsights insights={briefing.executiveInsights} />
 
@@ -46,7 +58,12 @@ export function IntelligenceScreen({ briefing }: { briefing: ExecutiveBriefing }
 
         <div className="kxd-os-intelligence-layout">
           <div className="kxd-os-intelligence-main">
-            <NarrativeSection label="What Changed" href="/admin/operations/timeline" linkText="Timeline" subdued>
+            <NarrativeSection
+              label="What Changed"
+              href="/admin/operations/timeline"
+              linkText="View timeline"
+              subdued
+            >
               {briefing.whatChanged.length === 0 ? (
                 <OpsEmpty message="No meaningful changes in the last 48 hours." />
               ) : (
@@ -55,7 +72,9 @@ export function IntelligenceScreen({ briefing }: { briefing: ExecutiveBriefing }
                     {briefing.whatChanged.map((item) => (
                       <OpsListRow key={item.id} href={item.href}>
                         <div>
-                          <p className="kxd-os-intelligence-row__title">{item.label}</p>
+                          <p className="kxd-os-intelligence-row__title">
+                            {item.label}
+                          </p>
                           <p className="kxd-os-meta">{item.detail}</p>
                         </div>
                       </OpsListRow>
@@ -65,7 +84,12 @@ export function IntelligenceScreen({ briefing }: { briefing: ExecutiveBriefing }
               )}
             </NarrativeSection>
 
-            <NarrativeSection label="Top Priorities" href="/admin/operations/work" linkText="Work" subdued>
+            <NarrativeSection
+              label="Top Priorities"
+              href="/admin/operations/work"
+              linkText="Work"
+              subdued
+            >
               {briefing.topPriorities.length === 0 ? (
                 <OpsEmpty message="No urgent priorities — operations are clear." />
               ) : (
@@ -76,7 +100,9 @@ export function IntelligenceScreen({ briefing }: { briefing: ExecutiveBriefing }
                         <div className="kxd-os-intelligence-priority">
                           <span className="kxd-os-meta">{index + 1}</span>
                           <div>
-                            <p className="kxd-os-intelligence-row__title">{item.title}</p>
+                            <p className="kxd-os-intelligence-row__title">
+                              {item.title}
+                            </p>
                             <p className="kxd-os-meta">{item.reason}</p>
                           </div>
                           <OpsStatusBadge
@@ -101,7 +127,11 @@ export function IntelligenceScreen({ briefing }: { briefing: ExecutiveBriefing }
               <NarrativeSection label="Additional Recommendations" subdued>
                 <div className="kxd-os-recommendation-stack">
                   {additionalRecommendations.map((item) => (
-                    <RecommendationCard key={item.id} recommendation={item} variant="compact" />
+                    <RecommendationCard
+                      key={item.id}
+                      recommendation={item}
+                      variant="compact"
+                    />
                   ))}
                 </div>
               </NarrativeSection>
@@ -118,7 +148,9 @@ export function IntelligenceScreen({ briefing }: { briefing: ExecutiveBriefing }
                     {briefing.businessRisks.map((item) => (
                       <OpsListRow key={item.id} href={item.href}>
                         <div>
-                          <p className="kxd-os-intelligence-row__title">{item.title}</p>
+                          <p className="kxd-os-intelligence-row__title">
+                            {item.title}
+                          </p>
                           <p className="kxd-os-meta">{item.reason}</p>
                         </div>
                       </OpsListRow>
@@ -137,7 +169,9 @@ export function IntelligenceScreen({ briefing }: { briefing: ExecutiveBriefing }
                     {briefing.businessOpportunities.map((item) => (
                       <OpsListRow key={item.id} href={item.href}>
                         <div>
-                          <p className="kxd-os-intelligence-row__title">{item.title}</p>
+                          <p className="kxd-os-intelligence-row__title">
+                            {item.title}
+                          </p>
                           <p className="kxd-os-meta">{item.reason}</p>
                         </div>
                       </OpsListRow>
@@ -148,23 +182,34 @@ export function IntelligenceScreen({ briefing }: { briefing: ExecutiveBriefing }
             </NarrativeSection>
 
             <NarrativeSection label="Platform Status" subdued>
-              <OpsCard>
-                <p className="kxd-os-meta">{briefing.platformStatus.summary}</p>
+              <OpsCard className="kxd-os-intelligence-platform-card">
+                <p className="kxd-os-meta kxd-os-intelligence-platform__summary">
+                  {briefing.platformStatus.summary}
+                </p>
                 <ul className="kxd-os-intelligence-platform">
                   {briefing.platformStatus.items.map((item) => (
-                    <li key={item.label}>
-                      <span>{item.label}</span>
-                      <OpsStatusBadge
-                        label={item.status}
-                        variant={
-                          item.status === "warning"
-                            ? "critical"
-                            : item.status === "attention"
-                              ? "warning"
-                              : "success"
-                        }
-                      />
-                      <span className="kxd-os-meta">{item.detail}</span>
+                    <li
+                      key={item.label}
+                      className="kxd-os-intelligence-platform__row"
+                    >
+                      <div className="kxd-os-intelligence-platform__row-head">
+                        <span className="kxd-os-intelligence-platform__label">
+                          {item.label}
+                        </span>
+                        <OpsStatusBadge
+                          label={item.status}
+                          variant={
+                            item.status === "warning"
+                              ? "critical"
+                              : item.status === "attention"
+                                ? "warning"
+                                : "success"
+                          }
+                        />
+                      </div>
+                      <span className="kxd-os-meta kxd-os-intelligence-platform__detail">
+                        {item.detail}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -172,15 +217,12 @@ export function IntelligenceScreen({ briefing }: { briefing: ExecutiveBriefing }
             </NarrativeSection>
 
             <p className="kxd-os-meta kxd-os-intelligence-generated">
-              Generated{" "}
-              {new Date(briefing.generatedAt).toLocaleString("en-US", {
-                month: "short",
-                day: "numeric",
-                hour: "numeric",
-                minute: "2-digit",
-              })}
+              Generated {formatDisplayDateTimePacific(briefing.generatedAt)}
               {" · "}
-              <Link href="/admin/operations/brain" className="kxd-os-link-quiet">
+              <Link
+                href="/admin/operations/brain"
+                className="kxd-os-link-quiet"
+              >
                 Portfolio Synthesis
               </Link>
             </p>

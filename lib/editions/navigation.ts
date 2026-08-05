@@ -1,4 +1,7 @@
-import type { OperationsNavId, OperationsNavItem } from "@/components/admin/operations/shared/operations-nav";
+import type {
+  OperationsNavId,
+  OperationsNavItem,
+} from "@/components/admin/operations/shared/operations-nav";
 import { NAV_GROUPS } from "@/components/admin/operations/shared/operations-nav";
 import { OPERATIONS_HOME_PATH } from "@/lib/admin/constants";
 import type { ClientHqNavId } from "@/lib/portal/nav";
@@ -7,13 +10,18 @@ import type { CommandSearchResult } from "@/lib/search/types";
 import { getConfiguredEditionId } from "./configuration";
 import { getEditionById } from "./registry";
 import { isModuleEnabledForEdition } from "./modules";
-import type { EditionDefinition, EditionResolvedNavigation, KxdModuleId } from "./types";
+import type {
+  EditionDefinition,
+  EditionResolvedNavigation,
+  KxdModuleId,
+} from "./types";
 
 export const OPERATIONS_NAV_MODULE_MAP: Record<OperationsNavId, KxdModuleId> = {
   executive: "reporting",
   intelligence: "brain",
   command: "operations",
   platform: "operations",
+  tools: "operations",
   settings: "operations",
   today: "operations",
   focus: "operations",
@@ -126,7 +134,9 @@ export const SEARCH_PROVIDER_MODULE_MAP: Record<string, KxdModuleId> = {
   "creative-assets": "creative",
 };
 
-export function resolveEditionNavigation(edition: EditionDefinition): EditionResolvedNavigation {
+export function resolveEditionNavigation(
+  edition: EditionDefinition,
+): EditionResolvedNavigation {
   const hideOps = new Set(edition.customNavigation?.hideOperationsNavIds ?? []);
   const hidePortal = new Set(edition.customNavigation?.hidePortalNavIds ?? []);
   const labelOverrides = edition.customNavigation?.portalNavLabels ?? {};
@@ -198,17 +208,24 @@ export function filterEditionSearchResults(
   });
 }
 
-export function getEditionOperationsNavGroups(edition?: EditionDefinition): typeof NAV_GROUPS {
+export function getEditionOperationsNavGroups(
+  edition?: EditionDefinition,
+): typeof NAV_GROUPS {
   const ed = edition ?? getEditionById(getConfiguredEditionId());
   return resolveEditionNavigation(ed).operationsNavGroups;
 }
 
-export function getEditionOperationsNavItems(edition?: EditionDefinition): OperationsNavItem[] {
+export function getEditionOperationsNavItems(
+  edition?: EditionDefinition,
+): OperationsNavItem[] {
   const ed = edition ?? getEditionById(getConfiguredEditionId());
   return resolveEditionNavigation(ed).operationsNavItems;
 }
 
-export function isPortalNavEnabled(navId: ClientHqNavId, edition?: EditionDefinition): boolean {
+export function isPortalNavEnabled(
+  navId: ClientHqNavId,
+  edition?: EditionDefinition,
+): boolean {
   const ed = edition ?? getEditionById(getConfiguredEditionId());
   if (ed.customNavigation?.hidePortalNavIds?.includes(navId)) return false;
   const moduleId = PORTAL_NAV_MODULE_MAP[navId];
