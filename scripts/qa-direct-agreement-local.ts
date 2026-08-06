@@ -266,7 +266,7 @@ async function main() {
     id: sentDocId,
     depth: 0,
     overrideAccess: true,
-  })) as {
+  })) as unknown as {
     storageKey: string;
     storageProvider?: string;
     contentHash: string;
@@ -332,7 +332,7 @@ async function main() {
     id: executedDocId,
     depth: 0,
     overrideAccess: true,
-  })) as {
+  })) as unknown as {
     storageKey: string;
     storageProvider?: string;
     contentHash: string;
@@ -495,7 +495,17 @@ async function main() {
     id: contractId,
     depth: 0,
     overrideAccess: true,
-  })) as { directAgreementTerms?: { exclusions?: string; scope?: string; capacityHoursPerMonth?: number; rolloverPolicy?: string; autoRenew?: boolean }; projectAmount?: number; monthlyAmount?: number | null };
+  })) as unknown as {
+    directAgreementTerms?: {
+      exclusions?: string;
+      scope?: string;
+      capacityHoursPerMonth?: number;
+      rolloverPolicy?: string;
+      autoRenew?: boolean;
+    };
+    projectAmount?: number;
+    monthlyAmount?: number | null;
+  };
   assert(refreshed.directAgreementTerms?.exclusions?.includes("Printing"), "exclusions");
   assert(refreshed.directAgreementTerms?.scope?.includes("Campaign Lite"), "scope");
   assert(refreshed.directAgreementTerms?.capacityHoursPerMonth === 3, "hours");
