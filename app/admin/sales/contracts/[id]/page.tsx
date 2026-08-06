@@ -181,6 +181,23 @@ export default async function ContractLifecycleWorkspacePage({
             </Panel>
           ) : null}
 
+          <Panel title="Document version history">
+            {(pkg.documentRefs ?? []).length === 0 ? (
+              <p>No filed commercial documents yet.</p>
+            ) : (
+              <ul style={{ paddingLeft: "1.2rem", lineHeight: 1.55 }}>
+                {(pkg.documentRefs ?? []).map((d) => (
+                  <li key={`${d.kind}-${d.id}-${d.contentHash}`}>
+                    <strong>{d.kind}</strong> · v{d.version} · #{d.id}
+                    <span style={{ opacity: 0.65 }}> · {d.generatedAt}</span>
+                    {" · "}
+                    <a href={`/api/admin/commercial-documents/${d.id}/download`}>Download</a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Panel>
+
           <Panel title="Operator actions">
             <ContractLifecycleActions
               contractId={id}

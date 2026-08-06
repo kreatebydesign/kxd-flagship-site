@@ -39,3 +39,4 @@ export {
   recordExternalAcceptance,
   recordPaymentAuthorization,
 } from "./services";
+export { DEFAULT_LEGAL_COPY } from "./default-legal-copy";

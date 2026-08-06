@@ -60,6 +60,27 @@ export function ContractLifecycleActions(props: {
     evidenceReference: "",
     operatorLegalName: "",
   });
+  const [payAuth, setPayAuth] = useState({
+    authorizedBy: "",
+    cardholderName: "",
+    authorizationMethod: "email",
+    authorizedAt: "",
+    scope: "",
+    amountDollars: "",
+    evidenceNotes: "",
+    stripeCustomerId: "",
+    stripePaymentMethodId: "",
+    cardBrand: "",
+    cardLast4: "",
+  });
+  const [payRefs, setPayRefs] = useState({
+    stripeInvoiceId: "",
+    stripePaymentIntentId: "",
+    stripeChargeId: "",
+    hostedInvoiceUrl: "",
+    receiptUrl: "",
+    paymentStatus: "paid",
+  });
   const isDirect = props.agreementSource === "direct-agreement";
 
   async function run(action: string, payload: Record<string, unknown>) {
@@ -242,6 +263,206 @@ export function ContractLifecycleActions(props: {
               ))}
             </ul>
           ) : null}
+        </section>
+      ) : null}
+
+      {isDirect && (props.hasExternalAcceptance || props.hasClientSignature) ? (
+        <section style={card}>
+          <h3 style={h3}>Payment authorization (safe metadata only)</h3>
+          <p style={help}>
+            Store Stripe IDs, brand, and last four only. Never enter PAN, CVC, or raw card numbers.
+            Charges remain in Stripe Dashboard for this workflow.
+          </p>
+          <label style={label}>
+            Authorized by
+            <input
+              style={input}
+              value={payAuth.authorizedBy}
+              onChange={(e) => setPayAuth((s) => ({ ...s, authorizedBy: e.target.value }))}
+            />
+          </label>
+          <label style={label}>
+            Cardholder name (if different)
+            <input
+              style={input}
+              value={payAuth.cardholderName}
+              onChange={(e) => setPayAuth((s) => ({ ...s, cardholderName: e.target.value }))}
+            />
+          </label>
+          <label style={label}>
+            Authorization date
+            <input
+              style={input}
+              type="date"
+              value={payAuth.authorizedAt}
+              onChange={(e) => setPayAuth((s) => ({ ...s, authorizedAt: e.target.value }))}
+            />
+          </label>
+          <label style={label}>
+            Scope
+            <input
+              style={input}
+              value={payAuth.scope}
+              onChange={(e) => setPayAuth((s) => ({ ...s, scope: e.target.value }))}
+            />
+          </label>
+          <label style={label}>
+            Amount authorized (USD)
+            <input
+              style={input}
+              inputMode="decimal"
+              value={payAuth.amountDollars}
+              onChange={(e) => setPayAuth((s) => ({ ...s, amountDollars: e.target.value }))}
+            />
+          </label>
+          <label style={label}>
+            Evidence notes
+            <textarea
+              style={{ ...input, minHeight: 70 }}
+              value={payAuth.evidenceNotes}
+              onChange={(e) => setPayAuth((s) => ({ ...s, evidenceNotes: e.target.value }))}
+            />
+          </label>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+            <label style={label}>
+              Stripe customer ID
+              <input
+                style={input}
+                value={payAuth.stripeCustomerId}
+                onChange={(e) => setPayAuth((s) => ({ ...s, stripeCustomerId: e.target.value }))}
+              />
+            </label>
+            <label style={label}>
+              PaymentMethod ID
+              <input
+                style={input}
+                value={payAuth.stripePaymentMethodId}
+                onChange={(e) =>
+                  setPayAuth((s) => ({ ...s, stripePaymentMethodId: e.target.value }))
+                }
+              />
+            </label>
+            <label style={label}>
+              Card brand
+              <input
+                style={input}
+                value={payAuth.cardBrand}
+                onChange={(e) => setPayAuth((s) => ({ ...s, cardBrand: e.target.value }))}
+              />
+            </label>
+            <label style={label}>
+              Last four
+              <input
+                style={input}
+                maxLength={4}
+                value={payAuth.cardLast4}
+                onChange={(e) => setPayAuth((s) => ({ ...s, cardLast4: e.target.value }))}
+              />
+            </label>
+          </div>
+          <button
+            type="button"
+            style={btn}
+            disabled={busy}
+            onClick={() =>
+              void run("record-payment-authorization", {
+                authorizationType: "card-charge-authorization",
+                authorizedBy: payAuth.authorizedBy,
+                cardholderName: payAuth.cardholderName || null,
+                authorizationMethod: payAuth.authorizationMethod,
+                authorizedAt: payAuth.authorizedAt,
+                scope: payAuth.scope,
+                amountAuthorizedCents: Math.round(Number(payAuth.amountDollars || 0) * 100),
+                evidenceNotes: payAuth.evidenceNotes,
+                stripeCustomerId: payAuth.stripeCustomerId || null,
+                stripePaymentMethodId: payAuth.stripePaymentMethodId || null,
+                cardBrand: payAuth.cardBrand || null,
+                cardLast4: payAuth.cardLast4 || null,
+              })
+            }
+          >
+            Record authorization
+          </button>
+
+          <h3 style={{ ...h3, marginTop: 20 }}>Link Stripe payment / mark paid</h3>
+          <p style={help}>
+            After charging in Stripe Dashboard, paste safe IDs and URLs. Does not create MRR.
+          </p>
+          <label style={label}>
+            Invoice ID
+            <input
+              style={input}
+              value={payRefs.stripeInvoiceId}
+              onChange={(e) => setPayRefs((s) => ({ ...s, stripeInvoiceId: e.target.value }))}
+            />
+          </label>
+          <label style={label}>
+            PaymentIntent ID
+            <input
+              style={input}
+              value={payRefs.stripePaymentIntentId}
+              onChange={(e) => setPayRefs((s) => ({ ...s, stripePaymentIntentId: e.target.value }))}
+            />
+          </label>
+          <label style={label}>
+            Charge ID
+            <input
+              style={input}
+              value={payRefs.stripeChargeId}
+              onChange={(e) => setPayRefs((s) => ({ ...s, stripeChargeId: e.target.value }))}
+            />
+          </label>
+          <label style={label}>
+            Hosted invoice URL
+            <input
+              style={input}
+              value={payRefs.hostedInvoiceUrl}
+              onChange={(e) => setPayRefs((s) => ({ ...s, hostedInvoiceUrl: e.target.value }))}
+            />
+          </label>
+          <label style={label}>
+            Receipt URL
+            <input
+              style={input}
+              value={payRefs.receiptUrl}
+              onChange={(e) => setPayRefs((s) => ({ ...s, receiptUrl: e.target.value }))}
+            />
+          </label>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <button
+              type="button"
+              style={btnGhost}
+              disabled={busy}
+              onClick={() =>
+                void run("link-payment-references", {
+                  ...payRefs,
+                  stripeCustomerId: payAuth.stripeCustomerId || null,
+                  markPaid: false,
+                })
+              }
+            >
+              Link payment references
+            </button>
+            <button
+              type="button"
+              style={btn}
+              disabled={
+                busy ||
+                props.commercialStatus === "paid" ||
+                props.commercialStatus === "active"
+              }
+              onClick={() =>
+                void run("link-payment-references", {
+                  ...payRefs,
+                  stripeCustomerId: payAuth.stripeCustomerId || null,
+                  paymentStatus: "paid",
+                  markPaid: true,
+                })
+              }
+            >
+              Mark paid
+            </button>
+          </div>
         </section>
       ) : null}
 

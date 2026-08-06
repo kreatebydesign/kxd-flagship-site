@@ -2,21 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent, type ReactNode } from "react";
-
-const DEFAULT_LEGAL = {
-  cancellationRefundLanguage:
-    "Fees prepaid for a fixed service term are non-refundable except where required by law or as otherwise agreed in writing by Kreate by Design.",
-  intellectualPropertyLanguage:
-    "Upon full payment, the client receives a license to use deliverables created for the engagement. Kreate by Design retains ownership of pre-existing tools, frameworks, and know-how.",
-  portfolioUseLanguage:
-    "Kreate by Design may reference the engagement and non-confidential work product in its portfolio unless the client requests otherwise in writing.",
-  clientResponsibilities:
-    "Client will provide timely content, approvals, access, and feedback required to perform the services. Delays may affect timelines.",
-  renewalBehavior: "Agreement ends on the service end date unless extended in writing. No automatic renewal.",
-  overagePreapprovalRule:
-    "Work exceeding included monthly capacity must be discussed and approved in writing before proceeding. Larger standalone projects are separately scoped.",
-  paymentTerms: "One-time prepaid fee due upon acceptance. No unexpected charges.",
-};
+import { DEFAULT_LEGAL_COPY } from "@/lib/direct-agreement/default-legal-copy";
 
 export function DirectAgreementCreateForm(props: {
   clientId: number;
@@ -46,7 +32,13 @@ export function DirectAgreementCreateForm(props: {
     billingEmail: "",
     billingContactName: "",
     payerLegalName: "",
-    ...DEFAULT_LEGAL,
+    overagePreapprovalRule: DEFAULT_LEGAL_COPY.overagePreapprovalRule as string,
+    paymentTerms: DEFAULT_LEGAL_COPY.paymentTerms as string,
+    cancellationRefundLanguage: DEFAULT_LEGAL_COPY.cancellationRefundLanguage as string,
+    intellectualPropertyLanguage: DEFAULT_LEGAL_COPY.intellectualPropertyLanguage as string,
+    portfolioUseLanguage: DEFAULT_LEGAL_COPY.portfolioUseLanguage as string,
+    clientResponsibilities: DEFAULT_LEGAL_COPY.clientResponsibilities as string,
+    renewalBehavior: DEFAULT_LEGAL_COPY.renewalBehavior as string,
   });
 
   function set<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {

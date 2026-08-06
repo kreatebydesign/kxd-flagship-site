@@ -304,13 +304,15 @@ console.log("verify:direct-agreement-workflow");
     existsSync(join(root, "migrations/20260817_direct_agreement_workflow.ts")),
     true,
   );
+  const index = read("migrations/index.ts");
+  assert.match(index, /20260817_direct_agreement_workflow/);
   const contracts = read("payload/collections/Contracts.ts");
   assert.match(contracts, /agreementSource/);
   assert.match(contracts, /directAgreementTerms/);
   const docs = read("payload/collections/CommercialDocuments.ts");
   assert.match(docs, /storageProvider/);
   assert.match(docs, /direct-agreement/);
-  ok("Migration and schema fields present");
+  ok("Migration registered and schema fields present");
 }
 
 console.log(`\nPassed ${passed} checks.`);
