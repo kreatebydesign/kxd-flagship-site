@@ -19,7 +19,7 @@ type CommercialDocRow = {
 };
 
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const auth = await requirePayloadAdminApi();
@@ -29,6 +29,8 @@ export async function GET(
   if (!id) {
     return NextResponse.json({ ok: false, error: "Invalid id." }, { status: 400 });
   }
+  const dispositionParam = new URL(req.url).searchParams.get("disposition");
+  const inline = dispositionParam === "inline";
 
   const payload = await getPayload({ config });
   let doc: CommercialDocRow | null = null;
@@ -70,7 +72,7 @@ export async function GET(
     return new NextResponse(new Uint8Array(buffer), {
       headers: {
         "Content-Type": String(doc.mimeType ?? "application/pdf"),
-        "Content-Disposition": `attachment; filename="${filename}"`,
+        "Content-Disposition": `${inline ? "inline" : "attachment"}; filename="${filename}"`,
         "Cache-Control": "no-store",
         "X-Robots-Tag": "noindex, nofollow",
         "Referrer-Policy": "no-referrer",

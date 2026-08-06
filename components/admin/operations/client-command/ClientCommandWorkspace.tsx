@@ -10,14 +10,17 @@ import {
   commandWorkspaceHref,
   type CommandWorkspaceTabId,
 } from "@/lib/client-command/tabs";
+import type { CommercialSectionId } from "@/lib/client-command/commercial/types";
 import { CommandWorkspaceTabPanel } from "./CommandWorkspaceTabPanel";
 
 export function ClientCommandWorkspace({
   data,
   activeTab,
+  commercialSection = "overview",
 }: {
   data: ClientWorkspaceBundle;
   activeTab: CommandWorkspaceTabId;
+  commercialSection?: CommercialSectionId;
 }) {
   const { header } = data;
   const statusLabel = header.relationshipStatus
@@ -35,6 +38,8 @@ export function ClientCommandWorkspace({
 
           <div className="kxd-os-command-workspace__identity">
             {header.logoUrl ? (
+              // Client logos are arbitrary remote URLs; next/image domain allowlist is not used here.
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={header.logoUrl}
                 alt=""
@@ -120,7 +125,7 @@ export function ClientCommandWorkspace({
                   ? data.workBoard.stats.openCount
                 : tab.id === "actions" && data.actions.openCount > 0
                   ? data.actions.openCount
-                  : tab.id === "proposals" && data.proposals.pendingFollowUpCount > 0
+                  : tab.id === "commercial" && data.proposals.pendingFollowUpCount > 0
                     ? data.proposals.pendingFollowUpCount
                     : null;
             return (
@@ -141,7 +146,11 @@ export function ClientCommandWorkspace({
         </nav>
 
         <main className="kxd-os-command-workspace__content">
-          <CommandWorkspaceTabPanel tab={activeTab} data={data} />
+          <CommandWorkspaceTabPanel
+            tab={activeTab}
+            data={data}
+            commercialSection={commercialSection}
+          />
         </main>
       </div>
     </div>

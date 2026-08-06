@@ -41,10 +41,10 @@ export default async function CreateDirectAgreementPage({
         <KxdSection>
           <div style={{ marginBottom: "1rem" }}>
             <Link
-              href={`/admin/operations/client-command/${clientId}?tab=contracts`}
+              href={`/admin/operations/client-command/${clientId}?tab=commercial&section=agreements`}
               className="kxd-os-link-quiet"
             >
-              ← Back to contracts
+              ← Back to Commercial
             </Link>
           </div>
           <DirectAgreementCreateForm

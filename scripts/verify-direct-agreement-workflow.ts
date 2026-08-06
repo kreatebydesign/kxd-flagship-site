@@ -244,10 +244,16 @@ console.log("verify:direct-agreement-workflow");
 // 17 commercial workspace filter (UI links by clientId)
 {
   const panel = read(
-    "components/admin/operations/client-command/ClientContractsPanel.tsx",
+    "components/admin/operations/client-command/commercial/CommercialWorkspace.tsx",
   );
   assert.match(panel, /Create Direct Agreement/);
   assert.match(panel, /client-command\/\$\{data\.clientId\}/);
+  const agreements = read(
+    "components/admin/operations/client-command/commercial/CommercialAgreements.tsx",
+  );
+  assert.match(agreements, /Create Direct Agreement/);
+  const sections = read("lib/client-command/commercial/sections.ts");
+  assert.match(sections, /commercial\/agreements/);
   ok("17. Commercial workspace surfaces are client-scoped");
 }
 

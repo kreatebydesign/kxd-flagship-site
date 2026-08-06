@@ -23,6 +23,7 @@ import { daysSince } from "@/lib/intelligence/context";
 import { getClientWorkBoard } from "@/lib/client-tasks/engine";
 import { loadClientCommandCenter } from "./engine";
 import { buildWorkspaceQuickActions } from "./workspace-actions";
+import { loadClientCommercialWorkspace } from "./commercial/load-commercial-workspace";
 import type {
   ClientWorkspaceBundle,
   WorkspaceAnalyticsSnapshot,
@@ -31,7 +32,11 @@ import type {
 } from "./workspace-types";
 import type { CommandDoc } from "./types";
 
-function buildInvoices(proposals: CommandDoc[], retainers: CommandDoc[]): WorkspaceInvoiceRow[] {
+function buildInvoices(
+  clientId: number,
+  proposals: CommandDoc[],
+  retainers: CommandDoc[],
+): WorkspaceInvoiceRow[] {
   const rows: WorkspaceInvoiceRow[] = [];
 
   for (const p of proposals) {
@@ -61,7 +66,7 @@ function buildInvoices(proposals: CommandDoc[], retainers: CommandDoc[]): Worksp
         amount: r.monthlyAmount != null ? Number(r.monthlyAmount) : null,
         status: String(r.billingStatus ?? "scheduled"),
         date: (r.nextInvoiceDate as string) || null,
-        href: `/admin/collections/retainers/${r.id}`,
+        href: `/admin/operations/client-command/${clientId}?tab=commercial&section=overview`,
         source: "retainer",
       });
     }
@@ -163,7 +168,7 @@ export async function loadClientWorkspaceBundle(
     loadClientCommunications(clientId),
   ]);
 
-  const invoices = buildInvoices(proposalDocs, retainers);
+  const invoices = buildInvoices(clientId, proposalDocs, retainers);
   const creativeAssets = await fetchDocs("creative-assets", clientId);
   const brandKits = await fetchDocs("brand-kits", clientId);
   const filesMerged = buildFiles(creativeAssets, brandKits);
@@ -298,6 +303,12 @@ export async function loadClientWorkspaceBundle(
 
   const workBoard = await getClientWorkBoard(clientId);
 
+  const commercial = await loadClientCommercialWorkspace({
+    clientId,
+    timelineEvents,
+    workspaceInvoices: invoices,
+  });
+
   return {
     ...partialBundle,
     memory,
@@ -308,6 +319,7 @@ export async function loadClientWorkspaceBundle(
     conversionIntelligence,
     financial,
     financialIntelligence,
+    commercial,
     workBoard,
   };
 }

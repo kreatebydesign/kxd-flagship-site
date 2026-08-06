@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
       contractId: result.contractId,
       proposalCreated: false,
       agreementSource: "direct-agreement",
-      href: `/admin/sales/contracts/${result.contractId}`,
+      href: `/admin/operations/client-command/${body.clientId}/commercial/agreements/${result.contractId}`,
     });
   } catch (err) {
     return NextResponse.json(

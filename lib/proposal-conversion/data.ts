@@ -3,7 +3,6 @@ import "server-only";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import { displayContractStatus, isUnsignedContract } from "@/lib/contracts/lifecycle";
-import { displayConversionStatus } from "./lifecycle";
 import type {
   WorkspaceContractsSnapshot,
   WorkspaceContractRow,
@@ -47,7 +46,7 @@ function toContractRow(doc: AnyDoc, clientId: number): WorkspaceContractRow {
     signedAt: doc.signedAt ? String(doc.signedAt) : null,
     expiresAt: doc.expiresAt ? String(doc.expiresAt) : null,
     signerName: doc.signerName ? String(doc.signerName) : null,
-    href: `/admin/operations/client-command/${clientId}?tab=contracts`,
+    href: `/admin/operations/client-command/${clientId}/commercial/agreements/${id}`,
   };
 }
 
@@ -96,7 +95,7 @@ export async function loadClientContractsSnapshot(
       conversionMode: String(row.conversionMode ?? "hybrid") as ConversionMode,
       launchStatus: String(row.launchStatus ?? "queued") as LaunchStatus,
       convertedAt: row.convertedAt ? String(row.convertedAt) : null,
-      href: `/admin/operations/client-command/${clientId}?tab=contracts`,
+      href: `/admin/operations/client-command/${clientId}?tab=commercial&section=agreements`,
     };
   });
 

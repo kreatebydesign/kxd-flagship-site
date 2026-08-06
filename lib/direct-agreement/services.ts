@@ -142,7 +142,7 @@ export async function createDirectAgreement(
       relatedLinks: [
         {
           label: "Open agreement",
-          href: `/admin/sales/contracts/${contractId}`,
+          href: `/admin/operations/client-command/${input.clientId}/commercial/agreements/${contractId}`,
         },
       ],
       internalOnly: true,
