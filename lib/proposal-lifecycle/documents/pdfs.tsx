@@ -246,18 +246,30 @@ export async function renderExternalAcceptanceExecutedPdf(input: {
 export async function renderCertificatePdf(
   cert: ExecutionCertificate,
 ): Promise<{ buffer: Buffer; contentHash: string }> {
+  const external = cert.acceptanceMode === "external-acceptance";
+  const directRef =
+    !cert.proposalId ||
+    cert.proposalNumber.startsWith("DIRECT-") ||
+    cert.proposalId <= 0;
+  const sourceLabel = directRef
+    ? `Reference ${cert.proposalNumber} · v${cert.proposalVersion}`
+    : `Proposal ${cert.proposalNumber} · v${cert.proposalVersion}`;
   const doc = (
     <Document>
       <Page size="LETTER" style={styles.page}>
-        <Text style={styles.eyebrow}>Completion certificate</Text>
+        <Text style={styles.eyebrow}>
+          {external ? "Completion certificate · external acceptance" : "Completion certificate"}
+        </Text>
         <View style={styles.rule} />
-        <Text style={styles.h1}>Execution certificate</Text>
+        <Text style={styles.h1}>
+          {external ? "Acceptance certificate" : "Execution certificate"}
+        </Text>
         <Text style={styles.p}>Agreement {cert.agreementId}</Text>
-        <Text style={styles.meta}>Proposal {cert.proposalNumber} · v{cert.proposalVersion}</Text>
+        <Text style={styles.meta}>{sourceLabel}</Text>
         <Text style={styles.meta}>Contract {cert.contractId} · v{cert.contractVersion}</Text>
         <Text style={styles.meta}>Verification {cert.verificationId}</Text>
         <Text style={styles.meta}>Document hash {cert.documentHash}</Text>
-        <Text style={styles.h2}>Signers</Text>
+        <Text style={styles.h2}>{external ? "Parties" : "Signers"}</Text>
         <Text style={styles.p}>
           Kreate by Design: {cert.kxdSignerName} · {cert.kxdSignedAt}
         </Text>
@@ -268,12 +280,12 @@ export async function renderCertificatePdf(
         <Text style={styles.p}>Sealed {cert.sealedAt}</Text>
         <View style={styles.notice}>
           <Text>
-            Certificate of electronic execution. Typed names are electronic acknowledgments with
-            recorded consent — not biometric identity proof. IP and user-agent evidence is retained
-            internally and omitted from this client certificate.
+            {external
+              ? "Certificate of externally recorded acceptance. This record documents operator-verified external evidence and is not an electronic signature. No signature image, IP address, or signer authentication was fabricated for this certificate."
+              : "Certificate of electronic execution. Typed names are electronic acknowledgments with recorded consent — not biometric identity proof. IP and user-agent evidence is retained internally and omitted from this client certificate."}
           </Text>
         </View>
-        <Footer label="Execution certificate" />
+        <Footer label={external ? "Acceptance certificate" : "Execution certificate"} />
       </Page>
     </Document>
   );
@@ -303,7 +315,11 @@ export async function renderBillingSummaryPdf(input: {
         <Text style={styles.eyebrow}>Billing terms summary · Kreate by Design</Text>
         <View style={styles.rule} />
         <Text style={styles.h1}>Billing terms (from executed contract)</Text>
-        <Text style={styles.meta}>Proposal {input.proposalNumber}</Text>
+        <Text style={styles.meta}>
+          {input.proposalNumber.startsWith("DIRECT-") || t.commercialSource === "direct-agreement"
+            ? `Reference ${input.proposalNumber}`
+            : `Proposal ${input.proposalNumber}`}
+        </Text>
         <Text style={styles.meta}>Agreement reference AGR-{input.contractId}-1</Text>
         <Text style={styles.meta}>Source hash {input.contractHash.slice(0, 16)}…</Text>
         <Text style={styles.meta}>Support: matt@kreatebydesign.com</Text>

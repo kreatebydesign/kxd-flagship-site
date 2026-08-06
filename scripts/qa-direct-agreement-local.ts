@@ -229,14 +229,18 @@ async function main() {
 
   assert(String(contractAfterCreate.agreementSource) === "direct-agreement", "source");
   assert(!contractAfterCreate.proposal, "proposal must be empty");
-  assert(Number(contractAfterCreate.client) === clientId || 
-    (typeof contractAfterCreate.client === "object" &&
-      contractAfterCreate.client &&
-      Number((contractAfterCreate.client as { id: number }).id) === clientId),
-    "client preserved");
-  assert(String(contractAfterCreate.startDate).startsWith("2026-08-04") || 
-    String(contractAfterCreate.startDate).includes("2026-08-04"),
-    "start date");
+  assert(
+    Number(contractAfterCreate.client) === clientId ||
+      (typeof contractAfterCreate.client === "object" &&
+        contractAfterCreate.client &&
+        Number((contractAfterCreate.client as { id: number }).id) === clientId),
+    "client preserved",
+  );
+  assert(
+    String(contractAfterCreate.startDate).startsWith("2026-08-04") ||
+      String(contractAfterCreate.startDate).includes("2026-08-04"),
+    "start date",
+  );
   pass("3. Client preserved; source is direct-agreement");
   pass("5. Service start/end dates persisted on contract");
 

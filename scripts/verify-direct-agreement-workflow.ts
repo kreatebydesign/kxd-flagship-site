@@ -190,6 +190,10 @@ console.log("verify:direct-agreement-workflow");
   assert.match(file, /kind: "executed-contract"/);
   assert.match(file, /externalAcceptance/);
   assert.match(file, /if \(input\.canonical && proposalId\)/);
+  const pdfs = read("lib/proposal-lifecycle/documents/pdfs.tsx");
+  assert.match(pdfs, /acceptanceMode === "external-acceptance"/);
+  assert.match(pdfs, /Certificate of externally recorded acceptance/);
+  assert.match(pdfs, /Commercial source: direct-agreement · No proposal record/);
   ok("9–10. Sent and executed PDF paths; Direct Agreement filing without proposal");
 }
 
