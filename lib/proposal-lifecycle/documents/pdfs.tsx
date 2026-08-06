@@ -84,6 +84,7 @@ export async function renderExecutedContractPdf(input: {
   operator: TypedSignatureEvidence;
   client: TypedSignatureEvidence;
   sealedAt: string;
+  omitProposalLabel?: boolean;
 }): Promise<{ buffer: Buffer; contentHash: string }> {
   const doc = (
     <Document>
@@ -91,7 +92,11 @@ export async function renderExecutedContractPdf(input: {
         <Text style={styles.eyebrow}>Fully executed agreement</Text>
         <View style={styles.rule} />
         <Text style={styles.h1}>{input.title}</Text>
-        <Text style={styles.meta}>Proposal {input.proposalNumber}</Text>
+        {input.omitProposalLabel ? (
+          <Text style={styles.meta}>Direct Agreement (no proposal)</Text>
+        ) : (
+          <Text style={styles.meta}>Proposal {input.proposalNumber}</Text>
+        )}
         <Text style={styles.meta}>Agreement ID AGR-{input.contractId}-1</Text>
         <Text style={styles.meta}>Document hash {input.documentHash.slice(0, 16)}…</Text>
         <Text style={styles.meta}>Sealed {input.sealedAt}</Text>
@@ -119,6 +124,116 @@ export async function renderExecutedContractPdf(input: {
           </Text>
         </View>
         <Footer label="Executed agreement" />
+      </Page>
+    </Document>
+  );
+  const instance = pdf(doc);
+  const blob = await instance.toBlob();
+  const buffer = Buffer.from(await blob.arrayBuffer());
+  return { buffer, contentHash: sha256Hex(buffer.toString("base64")) };
+}
+
+export async function renderDirectAgreementSentPdf(input: {
+  title: string;
+  body: string;
+  contractId: number;
+  terms: StructuredPaymentTerms;
+  termsVersion: number;
+  statusLabel: string;
+}): Promise<{ buffer: Buffer; contentHash: string }> {
+  const t = input.terms;
+  const doc = (
+    <Document>
+      <Page size="LETTER" style={styles.page}>
+        <Text style={styles.eyebrow}>Direct Agreement · pending acceptance</Text>
+        <View style={styles.rule} />
+        <Text style={styles.h1}>{input.title}</Text>
+        <Text style={styles.meta}>Agreement ID DA-{input.contractId}</Text>
+        <Text style={styles.meta}>Terms version {input.termsVersion}</Text>
+        <Text style={styles.meta}>{input.statusLabel}</Text>
+        <Text style={styles.meta}>
+          Commercial source: direct-agreement · No proposal record
+        </Text>
+        <Text style={styles.h2}>Agreement</Text>
+        <Text style={styles.p}>{input.body || "Agreement body on file."}</Text>
+        <Text style={styles.h2}>Payment summary</Text>
+        <Text style={styles.p}>
+          One-time {formatCents(t.oneTimeTotalCents, t.currency)} · Monthly{" "}
+          {formatCents(t.monthlyTotalCents, t.currency)} ({t.recurring.cadence})
+        </Text>
+        <Text style={styles.p}>{t.initialPayment.dueTerms}</Text>
+        <View style={styles.notice}>
+          <Text>
+            This PDF is an immutable finalized snapshot generated for sending. It is not executed
+            until electronic signature or externally recorded acceptance is completed. Structured
+            contract fields remain the source of truth.
+          </Text>
+        </View>
+        <Footer label="Direct Agreement — sent snapshot" />
+      </Page>
+    </Document>
+  );
+  const instance = pdf(doc);
+  const blob = await instance.toBlob();
+  const buffer = Buffer.from(await blob.arrayBuffer());
+  return { buffer, contentHash: sha256Hex(buffer.toString("base64")) };
+}
+
+export async function renderExternalAcceptanceExecutedPdf(input: {
+  title: string;
+  body: string;
+  contractId: number;
+  documentHash: string;
+  terms: StructuredPaymentTerms;
+  externalAcceptance: import("../../direct-agreement/types.ts").ExternalAcceptanceRecord;
+  operator: TypedSignatureEvidence;
+  sealedAt: string;
+}): Promise<{ buffer: Buffer; contentHash: string }> {
+  const ea = input.externalAcceptance;
+  const doc = (
+    <Document>
+      <Page size="LETTER" style={styles.page}>
+        <Text style={styles.eyebrow}>Executed via externally recorded acceptance</Text>
+        <View style={styles.rule} />
+        <Text style={styles.h1}>{input.title}</Text>
+        <Text style={styles.meta}>Agreement ID AGR-{input.contractId}-1</Text>
+        <Text style={styles.meta}>Document hash {input.documentHash.slice(0, 16)}…</Text>
+        <Text style={styles.meta}>Sealed {input.sealedAt}</Text>
+        <Text style={styles.meta}>Direct Agreement — no proposal</Text>
+        <Text style={styles.h2}>Agreement</Text>
+        <Text style={styles.p}>{input.body || "Agreement body on file."}</Text>
+        <Text style={styles.h2}>Kreate by Design operator acknowledgment</Text>
+        <Text style={styles.p}>
+          {input.operator.legalName}, {input.operator.title} · {input.operator.entityName}
+        </Text>
+        <Text style={styles.meta}>Recorded {input.operator.signedAt}</Text>
+        <Text style={styles.h2}>Externally recorded acceptance</Text>
+        <Text style={styles.p}>
+          This acceptance was recorded from external evidence and was not completed through KXD
+          electronic signing.
+        </Text>
+        <Text style={styles.p}>Accepted by: {ea.acceptedBy}</Text>
+        <Text style={styles.p}>Acceptance date: {ea.acceptedAt}</Text>
+        <Text style={styles.p}>Method: {ea.method}</Text>
+        <Text style={styles.p}>Evidence notes: {ea.evidenceNotes}</Text>
+        <Text style={styles.meta}>
+          Recorded by {ea.recordedBy} at {ea.recordedAt}
+        </Text>
+        {ea.evidenceReference ? (
+          <Text style={styles.meta}>Evidence reference: {ea.evidenceReference}</Text>
+        ) : null}
+        <Text style={styles.h2}>Payment summary</Text>
+        <Text style={styles.p}>
+          One-time {formatCents(input.terms.oneTimeTotalCents, input.terms.currency)} · Monthly{" "}
+          {formatCents(input.terms.monthlyTotalCents, input.terms.currency)}
+        </Text>
+        <View style={styles.notice}>
+          <Text>
+            Externally recorded acceptance is not an electronic signature. No signature image, IP
+            address, or signer authentication was fabricated for this record.
+          </Text>
+        </View>
+        <Footer label="Executed — external acceptance" />
       </Page>
     </Document>
   );

@@ -65,6 +65,7 @@ export function deriveStructuredPaymentTerms(
     billingEmail: canonical.primaryContact?.email ?? "",
     payerLegalName: canonical.primaryOrganization,
     brandName: canonical.organizations.map((o) => o.name).join(" · ") || undefined,
+    commercialSource: "proposal",
     sourceProposalNumber: canonical.proposalNumber,
     sourceProposalVersion: canonical.version,
     sourceAcceptanceHash: acceptanceHash,

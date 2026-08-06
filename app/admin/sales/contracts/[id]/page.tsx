@@ -185,8 +185,11 @@ export default async function ContractLifecycleWorkspacePage({
             <ContractLifecycleActions
               contractId={id}
               contractStatus={contractStatus}
+              agreementSource={String(contract.agreementSource ?? "proposal")}
+              commercialStatus={pkg.commercialStatus ?? null}
               hasOperatorSignature={Boolean(pkg.operatorSignature)}
               hasClientSignature={Boolean(pkg.clientSignature)}
+              hasExternalAcceptance={Boolean(pkg.externalAcceptance)}
               onboardingEligible={Boolean(pkg.onboardingEligible)}
               blockers={blockers.map((b) => ({ code: b.code, message: b.message }))}
               defaultRecipientName={String(
@@ -199,6 +202,11 @@ export default async function ContractLifecycleWorkspacePage({
                   "",
               )}
               documentRefs={(pkg.documentRefs ?? []).map((d) => ({ id: d.id, kind: d.kind }))}
+              externalAcceptanceSummary={
+                pkg.externalAcceptance
+                  ? `Externally recorded: ${pkg.externalAcceptance.acceptedBy} via ${pkg.externalAcceptance.method} on ${pkg.externalAcceptance.acceptedAt}. Not an electronic signature.`
+                  : null
+              }
             />
           </Panel>
 

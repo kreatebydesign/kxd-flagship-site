@@ -111,6 +111,39 @@ export const Contracts: CollectionConfig = {
       admin: { date: { pickerAppearance: "dayAndTime" } },
     },
     {
+      name: "serviceEndDate",
+      type: "date",
+      label: "Service End Date",
+      admin: {
+        date: { pickerAppearance: "dayAndTime" },
+        description: "Service period end for Direct Agreements. Prefer over expiresAt when both set.",
+      },
+    },
+    {
+      name: "agreementSource",
+      type: "select",
+      label: "Agreement Source",
+      defaultValue: "proposal",
+      options: [
+        { label: "Proposal", value: "proposal" },
+        { label: "Direct Agreement", value: "direct-agreement" },
+      ],
+      admin: {
+        position: "sidebar",
+        description:
+          "How this engagement began. Direct Agreement never creates or implies a proposal.",
+      },
+    },
+    {
+      name: "directAgreementTerms",
+      type: "json",
+      label: "Direct Agreement Terms",
+      admin: {
+        description:
+          "Structured commercial terms for Direct Agreements. Source of truth for payment-term derivation — do not hand-edit lifecycle JSON.",
+      },
+    },
+    {
       name: "sentAt",
       type: "date",
       admin: { date: { pickerAppearance: "dayAndTime" }, position: "sidebar" },

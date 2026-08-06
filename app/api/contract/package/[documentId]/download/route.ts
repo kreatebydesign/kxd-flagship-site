@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import {
-  readCommercialDocumentFile,
+  readCommercialDocumentBytes,
   verifyCommercialDocumentIntegrity,
 } from "@/lib/proposal-lifecycle/documents/file";
 import { hashPublicToken, timingSafeEqualHex } from "@/lib/proposal-lifecycle/hash";
@@ -13,6 +13,7 @@ export const dynamic = "force-dynamic";
 type CommercialDocRow = {
   id: number;
   storageKey?: string;
+  storageProvider?: string | null;
   mimeType?: string;
   title?: string;
   contentHash?: string;
@@ -94,7 +95,10 @@ export async function GET(
   }
 
   try {
-    const buffer = readCommercialDocumentFile(String(doc.storageKey));
+    const buffer = await readCommercialDocumentBytes({
+      storageKey: String(doc.storageKey),
+      storageProvider: doc.storageProvider,
+    });
     const integrity = verifyCommercialDocumentIntegrity({
       buffer,
       contentHash: doc.contentHash,

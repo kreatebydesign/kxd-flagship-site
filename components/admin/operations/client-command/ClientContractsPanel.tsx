@@ -30,12 +30,20 @@ export function ClientContractsPanel({ data }: { data: ClientWorkspaceBundle }) 
     <div className="kxd-os-contracts">
       <header className="kxd-os-contracts__hero">
         <div>
-          <p className="kxd-os-eyebrow">Executive legal</p>
-          <h2 className="kxd-os-contracts__title">Contracts & conversion</h2>
+          <p className="kxd-os-eyebrow">Commercial</p>
+          <h2 className="kxd-os-contracts__title">Agreements & contracts</h2>
           <p className="kxd-os-contracts__lead">
-            Service agreements, signature status, proposal conversion history, and launch queue.
+            Service agreements, Direct Agreements, signature status, proposal conversion history, and
+            launch queue — filtered to this client.
           </p>
         </div>
+        <Link
+          href={`/admin/operations/client-command/${data.clientId}/direct-agreement/new`}
+          className="kxd-os-btn"
+          style={{ borderRadius: 2, alignSelf: "flex-start" }}
+        >
+          Create Direct Agreement
+        </Link>
       </header>
 
       <WorkspaceKpiGrid
@@ -46,6 +54,51 @@ export function ClientContractsPanel({ data }: { data: ClientWorkspaceBundle }) 
           { label: "Conversions", value: String(snapshot.conversions.length) },
         ]}
       />
+
+      <WorkspaceChapter title="Commercial map" variant="compact">
+        <ul className="kxd-os-contracts-intel">
+          <li className="kxd-os-contracts-intel__item">
+            <div>
+              <strong>Proposals</strong>
+              <p className="kxd-os-contracts-intel__reason">Existing proposal workspace for this client.</p>
+            </div>
+            <Link
+              href={`/admin/operations/client-command/${data.clientId}?tab=proposals`}
+              className="kxd-os-link-quiet"
+            >
+              Open →
+            </Link>
+          </li>
+          <li className="kxd-os-contracts-intel__item">
+            <div>
+              <strong>Invoices & payments</strong>
+              <p className="kxd-os-contracts-intel__reason">
+                Stripe/invoice reads and payment metadata — no raw card data.
+              </p>
+            </div>
+            <Link
+              href={`/admin/operations/client-command/${data.clientId}?tab=invoices`}
+              className="kxd-os-link-quiet"
+            >
+              Open →
+            </Link>
+          </li>
+          <li className="kxd-os-contracts-intel__item">
+            <div>
+              <strong>Commercial activity</strong>
+              <p className="kxd-os-contracts-intel__reason">
+                Timeline events for proposals, agreements, acceptance, and payments.
+              </p>
+            </div>
+            <Link
+              href={`/admin/operations/client-command/${data.clientId}?tab=timeline`}
+              className="kxd-os-link-quiet"
+            >
+              Open →
+            </Link>
+          </li>
+        </ul>
+      </WorkspaceChapter>
 
       {current ? (
         <WorkspaceChapter title="Current contract" variant="compact">
@@ -67,12 +120,17 @@ export function ClientContractsPanel({ data }: { data: ClientWorkspaceBundle }) 
             <WorkspaceMetaLine label="Signer" value={current.signerName ?? "—"} />
             {current.proposalTitle ? (
               <WorkspaceMetaLine label="Source proposal" value={current.proposalTitle} />
-            ) : null}
+            ) : (
+              <WorkspaceMetaLine label="Source" value="Direct Agreement / no proposal" />
+            )}
+            <Link href={`/admin/sales/contracts/${current.id}`} className="kxd-os-link-quiet">
+              Open lifecycle workspace →
+            </Link>
           </div>
         </WorkspaceChapter>
       ) : (
         <WorkspaceChapter title="Current contract" variant="compact">
-          <WorkspaceEmpty message="No contract on file — convert an approved proposal to generate one." />
+          <WorkspaceEmpty message="No contract on file — create a Direct Agreement or convert an approved proposal." />
         </WorkspaceChapter>
       )}
 
@@ -121,12 +179,18 @@ export function ClientContractsPanel({ data }: { data: ClientWorkspaceBundle }) 
           <ul className="kxd-os-contracts-list">
             {snapshot.contracts.map((row) => (
               <li key={row.id} className="kxd-os-contracts-list__item">
-                <span className="kxd-os-contracts-list__title">{row.title}</span>
+                <Link href={`/admin/sales/contracts/${row.id}`} className="kxd-os-contracts-list__title">
+                  {row.title}
+                </Link>
                 <div className="kxd-os-contracts-list__meta">
                   <span className="kxd-os-workspace-badge">{displayContractStatus(row.status)}</span>
                   <span>{fmtMoney(row.projectAmount)}</span>
                   {row.monthlyAmount != null ? <span>{fmtMoney(row.monthlyAmount)}/mo</span> : null}
-                  {row.proposalTitle ? <span>From {row.proposalTitle}</span> : null}
+                  {row.proposalTitle ? (
+                    <span>From {row.proposalTitle}</span>
+                  ) : (
+                    <span>Direct Agreement</span>
+                  )}
                 </div>
               </li>
             ))}

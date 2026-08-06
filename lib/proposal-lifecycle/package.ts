@@ -31,6 +31,13 @@ export function emptyLifecyclePackage(): ContractLifecyclePackage {
     voidReason: null,
     supersededByContractId: null,
     lineageParentContractId: null,
+    commercialStatus: null,
+    commercialSource: null,
+    termsFinalizedAt: null,
+    termsLockedHash: null,
+    externalAcceptance: null,
+    paymentAuthorization: null,
+    paymentReferences: null,
   };
 }
 

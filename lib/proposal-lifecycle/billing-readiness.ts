@@ -64,12 +64,17 @@ export function assessBillingReadiness(input: {
   const identity = input.pkg.clientBillingIdentity;
 
   if (!input.canonical) {
-    issues.push({
-      code: "missing-accepted-snapshot",
-      severity: "blocker",
-      field: "acceptedSnapshot",
-      message: "Accepted proposal snapshot is required.",
-    });
+    const isDirect =
+      input.pkg.commercialSource === "direct-agreement" ||
+      input.terms?.commercialSource === "direct-agreement";
+    if (!isDirect) {
+      issues.push({
+        code: "missing-accepted-snapshot",
+        severity: "blocker",
+        field: "acceptedSnapshot",
+        message: "Accepted proposal snapshot is required.",
+      });
+    }
   }
 
   if (!input.terms) {

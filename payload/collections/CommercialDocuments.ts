@@ -4,7 +4,7 @@ import { PAYLOAD_GROUPS } from "../admin/groups.ts";
 
 /**
  * Private commercial agreement artifact registry.
- * Files live under storage/commercial-documents/ (not public/).
+ * Files via local (dev) or Vercel Blob (production) adapters.
  * Downloads only via authorized API routes — never raw storage URLs.
  */
 export const CommercialDocuments: CollectionConfig = {
@@ -14,7 +14,7 @@ export const CommercialDocuments: CollectionConfig = {
   lockDocuments: false,
   admin: {
     useAsTitle: "title",
-    defaultColumns: ["title", "kind", "contract", "generatedAt"],
+    defaultColumns: ["title", "kind", "contract", "client", "generatedAt"],
     group: PAYLOAD_GROUPS.kxdOs,
     description:
       "Executed proposal/contract PDFs and certificates. Private storage — never public/media.",
@@ -33,10 +33,14 @@ export const CommercialDocuments: CollectionConfig = {
       required: true,
       options: [
         { label: "Accepted Proposal", value: "accepted-proposal" },
+        { label: "Direct Agreement (sent)", value: "direct-agreement" },
         { label: "Executed Contract", value: "executed-contract" },
         { label: "Execution Certificate", value: "certificate" },
         { label: "Billing Terms Summary", value: "billing-summary" },
         { label: "Package Manifest", value: "package-manifest" },
+        { label: "Invoice (future PDF)", value: "invoice" },
+        { label: "Receipt (future PDF)", value: "receipt" },
+        { label: "Authorization Evidence", value: "authorization-evidence" },
       ],
     },
     { name: "proposal", type: "relationship", relationTo: "proposals" },
@@ -46,7 +50,15 @@ export const CommercialDocuments: CollectionConfig = {
       relationTo: "contracts",
       required: true,
     },
-    { name: "client", type: "relationship", relationTo: "clients" },
+    {
+      name: "client",
+      type: "relationship",
+      relationTo: "clients",
+      admin: {
+        description:
+          "Required on all new Direct Agreement filing paths. Legacy rows may be empty.",
+      },
+    },
     { name: "version", type: "number", required: true, defaultValue: 1 },
     { name: "contentHash", type: "text", required: true, index: true },
     {
@@ -54,7 +66,19 @@ export const CommercialDocuments: CollectionConfig = {
       type: "text",
       required: true,
       admin: {
-        description: "Relative key under storage/commercial-documents — never expose publicly.",
+        description: "Storage key — never expose as a public URL.",
+      },
+    },
+    {
+      name: "storageProvider",
+      type: "select",
+      defaultValue: "local",
+      options: [
+        { label: "Local", value: "local" },
+        { label: "Vercel Blob", value: "vercel-blob" },
+      ],
+      admin: {
+        description: "local for development; vercel-blob for production writes.",
       },
     },
     { name: "mimeType", type: "text", required: true, defaultValue: "application/pdf" },
@@ -81,6 +105,16 @@ export const CommercialDocuments: CollectionConfig = {
       name: "generatedAt",
       type: "date",
       required: true,
+      admin: { date: { pickerAppearance: "dayAndTime" } },
+    },
+    {
+      name: "sentAt",
+      type: "date",
+      admin: { date: { pickerAppearance: "dayAndTime" } },
+    },
+    {
+      name: "acceptedAt",
+      type: "date",
       admin: { date: { pickerAppearance: "dayAndTime" } },
     },
     { name: "partyNames", type: "json" },

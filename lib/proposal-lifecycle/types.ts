@@ -148,6 +148,8 @@ export interface TypedSignatureEvidence {
   signatureHash: string;
 }
 
+export type CommercialTermsSource = "proposal" | "direct-agreement";
+
 export interface StructuredPaymentTerms {
   schemaVersion: 1;
   currency: string;
@@ -182,6 +184,8 @@ export interface StructuredPaymentTerms {
   billingEmail?: string;
   payerLegalName?: string;
   brandName?: string;
+  /** Discriminator — proposal snapshot vs Direct Agreement fields. */
+  commercialSource?: CommercialTermsSource;
   sourceProposalNumber: string;
   sourceProposalVersion: number;
   sourceAcceptanceHash?: string;
@@ -261,6 +265,8 @@ export interface ExecutionCertificate {
   consentVersion: string;
   verificationId: string;
   sealedAt: string;
+  /** When acceptance was recorded externally (not e-sign). */
+  acceptanceMode?: "electronic-signature" | "external-acceptance";
 }
 
 export interface ContractLifecyclePackage {
@@ -309,6 +315,36 @@ export interface ContractLifecyclePackage {
   voidReason?: string | null;
   supersededByContractId?: number | null;
   lineageParentContractId?: number | null;
+  /** Direct Agreement commercial progression (not e-sign status). */
+  commercialStatus?:
+    | "draft"
+    | "finalized"
+    | "sent"
+    | "accepted"
+    | "payment-pending"
+    | "paid"
+    | "active"
+    | "completed"
+    | "cancelled"
+    | null;
+  commercialSource?: CommercialTermsSource | null;
+  termsFinalizedAt?: string | null;
+  termsLockedHash?: string | null;
+  /** Externally recorded acceptance — never fabricated e-sign. */
+  externalAcceptance?: import("../direct-agreement/types.ts").ExternalAcceptanceRecord | null;
+  /** Payment authorization metadata — Stripe IDs / brand / last4 only. */
+  paymentAuthorization?: import("../direct-agreement/types.ts").PaymentAuthorizationRecord | null;
+  paymentReferences?: {
+    stripeCustomerId?: string | null;
+    stripeInvoiceId?: string | null;
+    stripePaymentIntentId?: string | null;
+    stripeChargeId?: string | null;
+    hostedInvoiceUrl?: string | null;
+    receiptUrl?: string | null;
+    paymentStatus?: string | null;
+    linkedAt?: string | null;
+    linkedBy?: string | null;
+  } | null;
 }
 
 export interface LifecycleAuditEvent {
