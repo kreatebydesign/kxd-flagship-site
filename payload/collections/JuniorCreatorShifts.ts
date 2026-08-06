@@ -7,6 +7,7 @@ import type { CollectionConfig } from "payload";
 import {
   isPayloadAdminUser,
   isStudioPayloadOperator,
+  studioOperatorFieldAccess,
 } from "../access/index.ts";
 import { PAYLOAD_GROUPS } from "../admin/groups.ts";
 
@@ -172,6 +173,7 @@ export const JuniorCreatorShifts: CollectionConfig = {
       type: "json",
       label: "Correction Audit",
       access: {
+        read: studioOperatorFieldAccess,
         create: () => false,
         update: () => false,
       },
