@@ -89,6 +89,7 @@ import * as migration_20260728_phase4_portal_client_memberships from './20260728
 import * as migration_20260814_phase4_portal_identity_security from './20260814_phase4_portal_identity_security';
 import * as migration_20260731_branded_client_monthly_reports from './20260731_branded_client_monthly_reports';
 import * as migration_20260803_junior_creator_assigned_tasks from './20260803_junior_creator_assigned_tasks';
+import * as migration_20260817_junior_creator_shift_corrections from './20260817_junior_creator_shift_corrections';
 import * as migration_20260815_phase6_connect_c0_foundation from './20260815_phase6_connect_c0_foundation';
 import * as migration_20260816_phase6_connect_c1_messaging from './20260816_phase6_connect_c1_messaging';
 
@@ -549,6 +550,11 @@ export const migrations = [
     up: migration_20260803_junior_creator_assigned_tasks.up,
     down: migration_20260803_junior_creator_assigned_tasks.down,
     name: '20260803_junior_creator_assigned_tasks',
+  },
+  {
+    up: migration_20260817_junior_creator_shift_corrections.up,
+    down: migration_20260817_junior_creator_shift_corrections.down,
+    name: '20260817_junior_creator_shift_corrections',
   },
   {
     // Connect C0 — code registration only; production apply/enablement not authorized.

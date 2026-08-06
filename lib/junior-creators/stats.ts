@@ -53,8 +53,8 @@ function hasDetailedNotes(notes: unknown): boolean {
   return typeof notes === "string" && notes.trim().length >= 20;
 }
 
-function earningsFromMinutes(minutes: number, hourlyRateCents: number): number {
-  return Math.round((minutes * hourlyRateCents) / 60);
+function earningsFromMinutes(minutes: number, hourlyRateCents: number, payAdjustmentCents = 0): number {
+  return Math.round((minutes * hourlyRateCents) / 60) + payAdjustmentCents;
 }
 
 export async function getJuniorCreatorStats(juniorCreatorUserId: number): Promise<JuniorCreatorStats> {
@@ -129,10 +129,11 @@ export async function getJuniorCreatorStats(juniorCreatorUserId: number): Promis
 
     if (status === "completed") {
       const mins = Number(shift.totalMinutes ?? 0);
-      if (mins > 0) {
+      const payAdjustmentCents = Number(shift.payAdjustmentCents ?? 0);
+      if (mins > 0 || payAdjustmentCents !== 0) {
         lifetimeHoursMinutes += mins;
         minutesPerWeek[weekKey] = (minutesPerWeek[weekKey] ?? 0) + mins;
-        const earned = earningsFromMinutes(mins, rate);
+        const earned = earningsFromMinutes(mins, rate, payAdjustmentCents);
         earningsPerWeek[weekKey] = (earningsPerWeek[weekKey] ?? 0) + earned;
 
         if (weekKey === currentWeekKey) {
@@ -153,7 +154,7 @@ export async function getJuniorCreatorStats(juniorCreatorUserId: number): Promis
 
   const personalBests: JuniorCreatorPersonalBests = {
     bestEarningsWeekCents: Object.values(earningsPerWeek).length
-      ? Math.max(...Object.values(earningsPerWeek))
+      ? Math.max(0, ...Object.values(earningsPerWeek))
       : 0,
     bestHoursWeekMinutes: Object.values(minutesPerWeek).length
       ? Math.max(...Object.values(minutesPerWeek))

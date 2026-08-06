@@ -148,7 +148,9 @@
     "configure:primal-google-ads": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/configure-primal-google-ads.ts",
     "configure:primal-google-ads:apply": "KXD_SERVER_ONLY_SHIM=1 APPLY=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/configure-primal-google-ads.ts",
     "verify:proposal-builder": "tsx scripts/verify-proposal-builder.ts",
-    "verify:lifecycle-stripe-test": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/verify-lifecycle-stripe-test.ts"
+    "verify:lifecycle-stripe-test": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/verify-lifecycle-stripe-test.ts",
+    "repair:junior-shift-credit": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/reset-junior-shift-credit.ts",
+    "repair:junior-shift-credit:apply": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/reset-junior-shift-credit.ts --apply"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "^3.84.1",

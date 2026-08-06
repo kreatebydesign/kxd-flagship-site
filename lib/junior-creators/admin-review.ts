@@ -9,13 +9,14 @@ import { listAllJuniorTasks } from "./tasks";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDoc = Record<string, any>;
 
-function earningsFromMinutes(minutes: number, hourlyRateCents: number): number {
-  return Math.round((minutes * hourlyRateCents) / 60);
+function earningsFromMinutes(minutes: number, hourlyRateCents: number, payAdjustmentCents = 0): number {
+  return Math.round((minutes * hourlyRateCents) / 60) + payAdjustmentCents;
 }
 
 function mapShift(doc: AnyDoc, elapsedOverride?: number): AdminShiftRow {
   const status = String(doc.status ?? "");
   const rate = Number(doc.hourlyRateCents ?? 0);
+  const payAdjustmentCents = Number(doc.payAdjustmentCents ?? 0);
   let mins = Number(doc.totalMinutes ?? 0);
 
   if (status === "active" && elapsedOverride !== undefined) {
@@ -31,7 +32,9 @@ function mapShift(doc: AnyDoc, elapsedOverride?: number): AdminShiftRow {
     weekKey: String(doc.weekKey ?? ""),
     hourlyRateCents: rate,
     notes: doc.notes ? String(doc.notes) : null,
-    estimatedCents: earningsFromMinutes(mins, rate),
+    payAdjustmentCents,
+    estimatedCents: earningsFromMinutes(mins, rate, payAdjustmentCents),
+    correctionAudit: Array.isArray(doc.correctionAudit) ? doc.correctionAudit : [],
   };
 }
 
@@ -102,7 +105,7 @@ export async function getJuniorCreatorAdminReviewData(): Promise<JuniorCreatorAd
       if (status === "completed") {
         const mins = Number(s.totalMinutes ?? 0);
         const row = mapShift(s);
-        if (s.weekKey === weekKey && mins > 0) {
+        if (s.weekKey === weekKey && (mins > 0 || row.payAdjustmentCents !== 0)) {
           weekMinutes += mins;
           weekEarningsCents += row.estimatedCents;
         }

@@ -7,7 +7,9 @@ export type AdminShiftRow = {
   weekKey: string;
   hourlyRateCents: number;
   notes: string | null;
+  payAdjustmentCents: number;
   estimatedCents: number;
+  correctionAudit: unknown[];
 };
 
 export type AdminCreatorRow = {
