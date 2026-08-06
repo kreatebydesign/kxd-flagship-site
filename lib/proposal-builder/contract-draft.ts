@@ -1,8 +1,12 @@
 /**
  * Map an accepted proposal snapshot into an internal contract draft.
- * Language is operational/draft only — not attorney-approved.
+ * Cancellation/termination/refunds use the canonical KXD standard from
+ * lib/commercial-legal. Other legal provisions remain draft until reviewed.
  */
 
+import {
+  STANDARD_CANCELLATION_TERMINATION_AND_REFUNDS,
+} from "../commercial-legal/standard-cancellation-refunds.ts";
 import { formatCents } from "./money.ts";
 import {
   DEFAULT_LEGAL_DRAFT_NOTICE,
@@ -14,8 +18,7 @@ import {
 function defaultLegal(): ContractLegalProvisions {
   return {
     draftNotice: DEFAULT_LEGAL_DRAFT_NOTICE,
-    termAndTermination:
-      "[DRAFT — review required] Term begins on the effective date and continues until completion of the stated scope or earlier termination as agreed in writing.",
+    termAndTermination: STANDARD_CANCELLATION_TERMINATION_AND_REFUNDS,
     paymentDefault:
       "[DRAFT — review required] Invoices are due as stated in the payment schedule. Late amounts may pause work after written notice.",
     intellectualProperty:

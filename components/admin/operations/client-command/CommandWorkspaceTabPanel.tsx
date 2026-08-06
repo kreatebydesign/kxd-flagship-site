@@ -4,6 +4,8 @@ import { fmtFinancialMoney } from "@/lib/financial-command/client";
 import { fmtWorkspaceDate } from "@/lib/executive-client-workspace/theme";
 import type { ClientWorkspaceBundle } from "@/lib/client-command/workspace-types";
 import type { CommandWorkspaceTabId } from "@/lib/client-command/tabs";
+import type { CommercialSectionId } from "@/lib/client-command/commercial/types";
+import { commercialWorkspaceHref } from "@/lib/client-command/commercial/sections";
 import {
   WorkspaceChapter,
   WorkspaceEmpty,
@@ -17,13 +19,11 @@ import { ClientTimelinePanel } from "./ClientTimelinePanel";
 import { ClientCommunicationsPanel } from "./ClientCommunicationsPanel";
 import { ClientIntelligencePanel } from "./ClientIntelligencePanel";
 import { ClientActionsPanel } from "./ClientActionsPanel";
-import { ClientProposalsPanel } from "./ClientProposalsPanel";
-import { ClientContractsPanel } from "./ClientContractsPanel";
-import { ClientFinancialPanel } from "./ClientFinancialPanel";
 import { ClientWorkPanel } from "./ClientWorkPanel";
 import { ClientInventoryPanel } from "./ClientInventoryPanel";
 import { ClientPlansAccessPanel } from "./ClientPlansAccessPanel";
 import { ClientUpgradeRequestsPanel } from "./ClientUpgradeRequestsPanel";
+import { CommercialWorkspace } from "./commercial/CommercialWorkspace";
 
 function statusLabel(status: string): string {
   return status.replace(/-/g, " ");
@@ -32,9 +32,11 @@ function statusLabel(status: string): string {
 export function CommandWorkspaceTabPanel({
   tab,
   data,
+  commercialSection = "overview",
 }: {
   tab: CommandWorkspaceTabId;
   data: ClientWorkspaceBundle;
+  commercialSection?: CommercialSectionId;
 }) {
   switch (tab) {
     case "overview":
@@ -47,10 +49,8 @@ export function CommandWorkspaceTabPanel({
       return <ProjectsPanel data={data} />;
     case "requests":
       return <RequestsPanel data={data} />;
-    case "invoices":
-      return <InvoicesPanel data={data} />;
-    case "retainers":
-      return <RetainersPanel data={data} />;
+    case "commercial":
+      return <CommercialWorkspace data={data} section={commercialSection} />;
     case "files":
       return <FilesPanel data={data} />;
     case "inventory":
@@ -63,12 +63,6 @@ export function CommandWorkspaceTabPanel({
       return <ClientIntelligencePanel data={data} />;
     case "actions":
       return <ClientActionsPanel data={data} />;
-    case "proposals":
-      return <ClientProposalsPanel data={data} />;
-    case "contracts":
-      return <ClientContractsPanel data={data} />;
-    case "financial":
-      return <ClientFinancialPanel data={data} />;
     case "meetings":
       return <MeetingsPanel data={data} />;
     case "notes":
@@ -203,7 +197,7 @@ function OverviewPanel({ data }: { data: ClientWorkspaceBundle }) {
           />
         </div>
         <Link
-          href={`/admin/operations/client-command/${data.clientId}?tab=financial`}
+          href={commercialWorkspaceHref(data.clientId, "overview")}
           className="kxd-os-link-quiet kxd-os-workspace-inline-link"
         >
           Full financial command →
@@ -288,7 +282,7 @@ function OverviewPanel({ data }: { data: ClientWorkspaceBundle }) {
             value={data.proposals.current?.title ?? "—"}
           />
           <Link
-            href={`/admin/operations/client-command/${data.clientId}?tab=proposals`}
+            href={commercialWorkspaceHref(data.clientId, "proposals")}
             className="kxd-os-link-quiet kxd-os-workspace-inline-link"
           >
             Proposal workspace →
@@ -443,88 +437,6 @@ function RequestsPanel({ data }: { data: ClientWorkspaceBundle }) {
         );
       })}
     </div>
-  );
-}
-
-function InvoicesPanel({ data }: { data: ClientWorkspaceBundle }) {
-  const invoices = data.invoices;
-  const total = invoices.reduce((s, i) => s + (i.amount ?? 0), 0);
-  const paid = invoices.filter((i) => /paid|deposit-paid|current/i.test(i.status));
-
-  if (invoices.length === 0) {
-    return (
-      <WorkspaceChapter title="Invoices">
-        <WorkspaceEmpty
-          message="Invoice history appears from proposals and retainer billing records. No payment records yet."
-        />
-      </WorkspaceChapter>
-    );
-  }
-
-  return (
-    <WorkspaceChapter title="Invoices">
-      <WorkspaceStatRow>
-        <WorkspaceStat label="Total tracked" value={fmtExecutiveMoney(total)} />
-        <WorkspaceStat label="Paid signals" value={String(paid.length)} />
-        <WorkspaceStat
-          label="Average"
-          value={
-            invoices.length
-              ? fmtExecutiveMoney(total / invoices.length)
-              : "—"
-          }
-        />
-      </WorkspaceStatRow>
-      <ul className="kxd-os-workspace-list">
-        {invoices.map((i) => (
-          <li key={`${i.source}-${i.id}`} className="kxd-os-workspace-list__item">
-            <Link href={i.href} className="kxd-os-link-quiet">
-              {i.title} · {i.status}
-              {i.amount != null ? ` · ${fmtExecutiveMoney(i.amount)}` : ""}
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </WorkspaceChapter>
-  );
-}
-
-function RetainersPanel({ data }: { data: ClientWorkspaceBundle }) {
-  const retainers = data.retainerDocs;
-
-  if (retainers.length === 0) {
-    return (
-      <WorkspaceChapter title="Retainers">
-        <WorkspaceEmpty message="No retainers configured for this client." />
-        <Link
-          href={`/admin/collections/retainers/create?client=${data.clientId}`}
-          className="kxd-os-link-quiet kxd-os-workspace-inline-link"
-        >
-          Add retainer →
-        </Link>
-      </WorkspaceChapter>
-    );
-  }
-
-  return (
-    <WorkspaceChapter title="Retainers">
-      <ul className="kxd-os-workspace-project-list">
-        {retainers.map((r) => (
-          <li key={r.id} className="kxd-os-workspace-project-list__item">
-            <Link href={`/admin/collections/retainers/${r.id}`}>
-              <span className="kxd-os-workspace-project-list__name">
-                {String(r.retainerName ?? "Retainer")}
-              </span>
-              <span className="kxd-os-workspace-project-list__meta">
-                {r.monthlyAmount != null ? fmtExecutiveMoney(Number(r.monthlyAmount)) : "—"} / mo
-                {r.billingStatus ? ` · ${statusLabel(String(r.billingStatus))}` : ""}
-                {r.renewalDate ? ` · Renews ${fmtWorkspaceDate(String(r.renewalDate))}` : ""}
-              </span>
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </WorkspaceChapter>
   );
 }
 

@@ -14,6 +14,7 @@ import type {
   WorkspaceFinancialSnapshot,
 } from "@/lib/financial-command/client";
 import type { ClientMemorySnapshot } from "./memory/types";
+import type { ClientCommercialWorkspaceSnapshot } from "./commercial/types";
 
 export interface CommandHubClientRow {
   clientId: number;
@@ -121,6 +122,7 @@ export interface ClientWorkspaceBundle extends ClientCommandCenterData {
   conversionIntelligence: ConversionIntelligenceSnapshot;
   financial: WorkspaceFinancialSnapshot;
   financialIntelligence: FinancialIntelligenceSnapshot;
+  commercial: ClientCommercialWorkspaceSnapshot;
   memory: ClientMemorySnapshot;
   workBoard: ClientWorkBoardData | null;
   workspaceQuickActions: CommandWorkspaceQuickAction[];
@@ -152,5 +154,6 @@ export type ClientWorkspaceMemoryInput = Omit<
   | "conversionIntelligence"
   | "financial"
   | "financialIntelligence"
+  | "commercial"
   | "workBoard"
 >;

@@ -17,11 +17,14 @@ export const publishContractLifecycleHook: CollectionAfterChangeHook = async ({
 
   try {
     if (operation === "create") {
+      const isDirect = String(doc.agreementSource ?? "") === "direct-agreement";
       await publishContractLifecycleEvent(
         doc as AnyDoc,
         "contract.created",
         req.payload,
-        "Contract drafted from proposal conversion.",
+        isDirect
+          ? "Direct Agreement drafted (no proposal)."
+          : "Contract drafted from proposal conversion.",
       );
       return doc;
     }

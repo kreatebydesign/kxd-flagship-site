@@ -108,16 +108,42 @@ export async function getContractLifecycle(contractId: number): Promise<{
 }
 
 export async function ensureLifecycleHydrated(contractId: number): Promise<ContractLifecyclePackage> {
-  const { pkg, canonical, proposal } = await getContractLifecycle(contractId);
+  const { pkg, canonical, proposal, contract } = await getContractLifecycle(contractId);
   let next = pkg;
+
   if (!next.structuredPaymentTerms && canonical) {
     const acceptanceHash =
       (proposal?.acceptanceRecord as { acceptanceHash?: string } | null)?.acceptanceHash;
     next = {
       ...next,
       structuredPaymentTerms: deriveStructuredPaymentTerms(canonical, acceptanceHash),
+      commercialSource: next.commercialSource ?? "proposal",
     };
   }
+
+  if (
+    !next.structuredPaymentTerms &&
+    String(contract.agreementSource) === "direct-agreement"
+  ) {
+    const { parseStoredDirectAgreementTerms } = await import(
+      "../direct-agreement/validate.ts"
+    );
+    const { deriveStructuredPaymentTermsFromDirectAgreement } = await import(
+      "../direct-agreement/payment-terms.ts"
+    );
+    const daTerms = parseStoredDirectAgreementTerms(contract.directAgreementTerms);
+    if (daTerms) {
+      next = {
+        ...next,
+        structuredPaymentTerms: deriveStructuredPaymentTermsFromDirectAgreement(
+          daTerms,
+          contractId,
+        ),
+        commercialSource: "direct-agreement",
+      };
+    }
+  }
+
   const issues = assessBillingReadiness({
     canonical,
     terms: next.structuredPaymentTerms ?? null,
@@ -582,23 +608,47 @@ export async function signContractAsClient(
     completionTokenExpiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 90).toISOString(),
   };
 
-  if (terms && canonical && operatorSignature) {
+  if (terms && operatorSignature) {
     try {
       const { generateAndFileExecutedPackage } = await import("./documents/file.ts");
+      const clientId = asId(contract.client);
+      if (!clientId) {
+        throw new Error("Executed package filing requires a client relationship.");
+      }
+      let executedBody = String(contract.body ?? "");
+      if (String(contract.agreementSource) === "direct-agreement") {
+        const { parseStoredDirectAgreementTerms } = await import(
+          "../direct-agreement/validate.ts"
+        );
+        const { composeDirectAgreementDocumentBody } = await import(
+          "../commercial-legal/compose-direct-agreement-document.ts"
+        );
+        const daTerms = parseStoredDirectAgreementTerms(contract.directAgreementTerms);
+        if (daTerms) {
+          executedBody = composeDirectAgreementDocumentBody({
+            body: executedBody,
+            terms: daTerms,
+          });
+        }
+      }
       next = await generateAndFileExecutedPackage({
         contractId: contract.id,
-        proposalId,
-        clientId: asId(contract.client),
-        proposalNumber: String(proposal?.proposalNumber ?? ""),
+        proposalId: proposalId || null,
+        clientId,
+        proposalNumber: String(proposal?.proposalNumber ?? terms.sourceProposalNumber ?? ""),
         contractTitle: String(contract.title ?? "Agreement"),
-        contractBody: String(contract.body ?? ""),
-        canonical,
+        contractBody: executedBody,
+        canonical: canonical ?? null,
         certificate,
         operator: operatorSignature,
         client: clientSig,
         terms,
         pkg: next,
       });
+      next = {
+        ...next,
+        commercialStatus: next.commercialStatus ?? "accepted",
+      };
     } catch (err) {
       next = appendAudit(next, {
         actor: "system",

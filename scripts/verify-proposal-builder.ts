@@ -191,6 +191,11 @@ function main() {
   check("contract starts draft", contract.status === "draft");
   check("contract references proposal number", contract.proposalNumber === canonical.proposalNumber);
   check("contract marked draft notice", contract.legal.draftNotice.includes("NOT attorney-approved") || contract.legal.draftNotice.includes("DRAFT"));
+  check(
+    "contract termAndTermination uses canonical cancellation/refund standard",
+    Boolean(contract.legal.termAndTermination?.includes("Client cancellation.")) &&
+      Boolean(contract.legal.termAndTermination?.includes("Non-refundable fees.")),
+  );
 
   // Idempotency markers (hash uniqueness)
   const h1 = hashShareToken("token-a");

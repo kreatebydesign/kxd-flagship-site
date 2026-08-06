@@ -92,6 +92,7 @@ import * as migration_20260803_junior_creator_assigned_tasks from './20260803_ju
 import * as migration_20260815_phase6_connect_c0_foundation from './20260815_phase6_connect_c0_foundation';
 import * as migration_20260816_phase6_connect_c1_messaging from './20260816_phase6_connect_c1_messaging';
 import * as migration_20260806_161412_junior_creator_shift_corrections from './20260806_161412_junior_creator_shift_corrections';
+import * as migration_20260817_direct_agreement_workflow from './20260817_direct_agreement_workflow';
 
 export const migrations = [
   {
@@ -567,5 +568,12 @@ export const migrations = [
     up: migration_20260806_161412_junior_creator_shift_corrections.up,
     down: migration_20260806_161412_junior_creator_shift_corrections.down,
     name: '20260806_161412_junior_creator_shift_corrections',
+  },
+  {
+    // Direct Agreement workflow — additive contract + commercial-document fields.
+    // Local apply only until production migration is authorized.
+    up: migration_20260817_direct_agreement_workflow.up,
+    down: migration_20260817_direct_agreement_workflow.down,
+    name: '20260817_direct_agreement_workflow',
   },
 ];

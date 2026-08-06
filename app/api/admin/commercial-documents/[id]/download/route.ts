@@ -3,7 +3,7 @@ import { requirePayloadAdminApi } from "@/lib/admin/auth";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import {
-  readCommercialDocumentFile,
+  readCommercialDocumentBytes,
   verifyCommercialDocumentIntegrity,
 } from "@/lib/proposal-lifecycle/documents/file";
 
@@ -11,6 +11,7 @@ export const dynamic = "force-dynamic";
 
 type CommercialDocRow = {
   storageKey?: string;
+  storageProvider?: string | null;
   mimeType?: string;
   title?: string;
   contentHash?: string;
@@ -18,7 +19,7 @@ type CommercialDocRow = {
 };
 
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const auth = await requirePayloadAdminApi();
@@ -28,6 +29,8 @@ export async function GET(
   if (!id) {
     return NextResponse.json({ ok: false, error: "Invalid id." }, { status: 400 });
   }
+  const dispositionParam = new URL(req.url).searchParams.get("disposition");
+  const inline = dispositionParam === "inline";
 
   const payload = await getPayload({ config });
   let doc: CommercialDocRow | null = null;
@@ -47,7 +50,10 @@ export async function GET(
   }
 
   try {
-    const buffer = readCommercialDocumentFile(String(doc.storageKey));
+    const buffer = await readCommercialDocumentBytes({
+      storageKey: String(doc.storageKey),
+      storageProvider: doc.storageProvider,
+    });
     const integrity = verifyCommercialDocumentIntegrity({
       buffer,
       contentHash: doc.contentHash,
@@ -66,7 +72,7 @@ export async function GET(
     return new NextResponse(new Uint8Array(buffer), {
       headers: {
         "Content-Type": String(doc.mimeType ?? "application/pdf"),
-        "Content-Disposition": `attachment; filename="${filename}"`,
+        "Content-Disposition": `${inline ? "inline" : "attachment"}; filename="${filename}"`,
         "Cache-Control": "no-store",
         "X-Robots-Tag": "noindex, nofollow",
         "Referrer-Policy": "no-referrer",
