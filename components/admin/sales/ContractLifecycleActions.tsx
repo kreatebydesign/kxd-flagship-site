@@ -19,6 +19,10 @@ export function ContractLifecycleActions(props: {
   defaultRecipientEmail: string;
   documentRefs: Array<{ id: number; kind: string }>;
   externalAcceptanceSummary?: string | null;
+  /** When parent surface already shows acceptance, hide the duplicate summary card. */
+  suppressAcceptanceSummary?: boolean;
+  /** Hide authorization edit form while parent shows a read-only summary. */
+  suppressAuthorizationForm?: boolean;
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -245,7 +249,7 @@ export function ContractLifecycleActions(props: {
         </section>
       ) : null}
 
-      {props.hasExternalAcceptance ? (
+      {props.hasExternalAcceptance && !props.suppressAcceptanceSummary ? (
         <section style={card}>
           <h3 style={h3}>External acceptance on file</h3>
           <p style={okStyle}>
@@ -268,6 +272,8 @@ export function ContractLifecycleActions(props: {
 
       {isDirect && (props.hasExternalAcceptance || props.hasClientSignature) ? (
         <section style={card}>
+          {!props.suppressAuthorizationForm ? (
+            <>
           <h3 style={h3}>Payment authorization (safe metadata only)</h3>
           <p style={help}>
             Store Stripe IDs, brand, and last four only. Never enter PAN, CVC, or raw card numbers.
@@ -383,8 +389,12 @@ export function ContractLifecycleActions(props: {
           >
             Record authorization
           </button>
+            </>
+          ) : null}
 
-          <h3 style={{ ...h3, marginTop: 20 }}>Link Stripe payment / mark paid</h3>
+          <h3 style={{ ...h3, marginTop: props.suppressAuthorizationForm ? 0 : 20 }}>
+            Link Stripe payment / mark paid
+          </h3>
           <p style={help}>
             After charging in Stripe Dashboard, paste safe IDs and URLs. Does not create MRR.
           </p>

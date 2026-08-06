@@ -16,9 +16,10 @@ export function CommercialTimeline({ data }: { data: ClientWorkspaceBundle }) {
       {!rows.length ? (
         <WorkspaceEmpty message="No commercial timeline events yet." />
       ) : (
-        <ol className="kxd-os-commercial-timeline">
+        <ol className="kxd-os-commercial-timeline kxd-os-commercial-timeline--rail">
           {rows.map((row) => (
             <li key={row.id} className="kxd-os-commercial-timeline__item">
+              <div className="kxd-os-commercial-timeline__rail" aria-hidden />
               <div className="kxd-os-commercial-timeline__when">
                 {row.occurredAt ? fmtWorkspaceDate(row.occurredAt) : "—"}
               </div>

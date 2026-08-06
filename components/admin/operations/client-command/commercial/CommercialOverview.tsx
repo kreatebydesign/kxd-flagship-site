@@ -16,32 +16,38 @@ export function CommercialOverview({ data }: { data: ClientWorkspaceBundle }) {
 
   return (
     <div className="kxd-os-commercial-overview">
-      <div className="kxd-os-commercial-summary-grid">
-        <SummaryCard label="Agreement" value={o.agreementTitle ?? "None"}>
-          {o.agreementHref ? (
-            <Link href={o.agreementHref} className="kxd-os-link-quiet">
-              Open agreement →
-            </Link>
-          ) : null}
-        </SummaryCard>
-        <SummaryCard label="Status">
-          <CommercialStatusBadge label={o.statusLabel} tone={statusTone(o.statusLabel)} />
-        </SummaryCard>
-        <SummaryCard label="Payment" value={o.paymentStatusLabel} />
-        <SummaryCard label="Invoice" value={o.invoiceAmountLabel} />
-        <SummaryCard
-          label="Term"
+      <div className="kxd-os-commercial-kpi-grid">
+        <OverviewKpi
+          label="Agreement"
+          value={o.agreementTitle ?? "None"}
+          href={o.agreementHref}
+        />
+        <OverviewKpi
+          label="Status"
+          valueNode={
+            <CommercialStatusBadge label={o.statusLabel} tone={statusTone(o.statusLabel)} />
+          }
+        />
+        <OverviewKpi label="Invoice amount" value={o.invoiceAmountLabel} emphasize />
+        <OverviewKpi label="Payment status" value={o.paymentStatusLabel} />
+        <OverviewKpi
+          label="Service term"
           value={
             o.termStart
               ? `${fmtWorkspaceDate(o.termStart)}${o.termEnd ? ` → ${fmtWorkspaceDate(o.termEnd)}` : ""}`
               : "—"
           }
         />
-        <SummaryCard label="Hours included" value={o.hoursIncludedLabel} />
-        <SummaryCard label="Hours used" value={o.hoursUsedLabel} />
-        <SummaryCard label="Remaining" value={o.hoursRemainingLabel} />
-        <SummaryCard label="Payment method" value={o.paymentMethodLabel} />
-        <SummaryCard label="Renewal" value={o.renewalLabel} />
+        <OverviewKpi label="Included hours" value={o.hoursIncludedLabel} />
+      </div>
+
+      <div className="kxd-os-commercial-overview__secondary">
+        <div className="kxd-os-commercial-summary-grid kxd-os-commercial-summary-grid--compact">
+          <SummaryCard label="Hours used" value={o.hoursUsedLabel} />
+          <SummaryCard label="Remaining" value={o.hoursRemainingLabel} />
+          <SummaryCard label="Payment method" value={o.paymentMethodLabel} />
+          <SummaryCard label="Renewal" value={o.renewalLabel} />
+        </div>
       </div>
 
       <div className="kxd-os-workspace-dossier-columns">
@@ -134,6 +140,38 @@ export function CommercialOverview({ data }: { data: ClientWorkspaceBundle }) {
             />
           </div>
         </WorkspaceChapter>
+      ) : null}
+    </div>
+  );
+}
+
+function OverviewKpi({
+  label,
+  value,
+  valueNode,
+  href,
+  emphasize,
+}: {
+  label: string;
+  value?: string;
+  valueNode?: ReactNode;
+  href?: string | null;
+  emphasize?: boolean;
+}) {
+  return (
+    <div
+      className={`kxd-os-commercial-kpi${emphasize ? " kxd-os-commercial-kpi--emphasize" : ""}`}
+    >
+      <span className="kxd-os-commercial-kpi__label">{label}</span>
+      {valueNode ?? (
+        <span className="kxd-os-commercial-kpi__value" title={value}>
+          {value}
+        </span>
+      )}
+      {href ? (
+        <Link href={href} className="kxd-os-link-quiet">
+          Open →
+        </Link>
       ) : null}
     </div>
   );

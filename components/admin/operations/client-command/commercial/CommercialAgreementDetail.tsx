@@ -1,17 +1,22 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { fmtWorkspaceDate } from "@/lib/executive-client-workspace/theme";
 import { formatCents } from "@/lib/proposal-builder/money";
-import { documentKindLabel, formatCommercialStatus, formatPaymentMethodLabel } from "@/lib/client-command/commercial/map-agreement";
+import {
+  documentKindLabel,
+  formatCommercialStatus,
+  formatPaymentMethodLabel,
+} from "@/lib/client-command/commercial/map-agreement";
 import { commercialWorkspaceHref } from "@/lib/client-command/commercial/sections";
 import type { DirectAgreementTerms } from "@/lib/direct-agreement/types";
 import type { ContractLifecyclePackage } from "@/lib/proposal-lifecycle/types";
-import { ContractLifecycleActions } from "@/components/admin/sales/ContractLifecycleActions";
-import {
-  WorkspaceChapter,
-  WorkspaceEmpty,
-  WorkspaceMetaLine,
-} from "@/components/admin/operations/client-workspace/WorkspacePrimitives";
+import { WorkspaceEmpty } from "@/components/admin/operations/client-workspace/WorkspacePrimitives";
 import { CommercialStatusBadge, statusTone } from "./CommercialStatusBadge";
+import { CommercialLifecyclePanel } from "./CommercialLifecyclePanel";
+import {
+  formatPaymentStatusLabel,
+  splitChecklistItems,
+} from "./presentation";
 
 export function CommercialAgreementDetail(props: {
   clientId: number;
@@ -49,6 +54,38 @@ export function CommercialAgreementDetail(props: {
     docs.find((d) => d.kind === "direct-agreement") ??
     docs[0];
 
+  const invoiceAmount =
+    terms != null
+      ? formatCents(terms.oneTimeTotalCents, terms.currency)
+      : daTerms
+        ? formatCents(daTerms.oneTimeAmountCents as never)
+        : "—";
+
+  const paymentStatusLabel = formatPaymentStatusLabel(
+    pkg.paymentReferences?.paymentStatus ||
+      (status === "paid" || status === "active"
+        ? "paid"
+        : status === "payment-pending"
+          ? "payment-pending"
+          : "pending"),
+  );
+
+  const termLabel =
+    daTerms?.serviceStartDate != null
+      ? `${fmtWorkspaceDate(daTerms.serviceStartDate)}${
+          daTerms.serviceEndDate ? ` → ${fmtWorkspaceDate(daTerms.serviceEndDate)}` : ""
+        }`
+      : "—";
+
+  const hoursLabel =
+    daTerms?.capacityHoursPerMonth != null
+      ? `${daTerms.capacityHoursPerMonth} / month`
+      : "—";
+
+  const serviceItems = splitChecklistItems(daTerms?.includedServices);
+  const exclusionItems = splitChecklistItems(daTerms?.exclusions);
+  const auth = pkg.paymentAuthorization;
+
   return (
     <div className="kxd-os-commercial-detail">
       <div className="kxd-os-commercial-detail__crumbs">
@@ -73,140 +110,146 @@ export function CommercialAgreementDetail(props: {
         <CommercialStatusBadge label={statusLabel} tone={statusTone(statusLabel)} />
       </header>
 
+      <div className="kxd-os-commercial-kpi-grid">
+        <Kpi label="Agreement" value={title} />
+        <Kpi
+          label="Status"
+          valueNode={<CommercialStatusBadge label={statusLabel} tone={statusTone(statusLabel)} />}
+        />
+        <Kpi label="Invoice amount" value={invoiceAmount} emphasize />
+        <Kpi label="Payment status" value={paymentStatusLabel} />
+        <Kpi label="Service term" value={termLabel} />
+        <Kpi label="Included hours" value={hoursLabel} />
+      </div>
+
       <div className="kxd-os-commercial-detail__grid">
         <div className="kxd-os-commercial-detail__main">
-          <WorkspaceChapter title="Commercial summary" variant="compact">
-            <div className="kxd-os-commercial-meta-row">
-              <WorkspaceMetaLine
-                label="One-time"
-                value={
-                  terms
-                    ? formatCents(terms.oneTimeTotalCents, terms.currency)
-                    : daTerms
-                      ? formatCents(daTerms.oneTimeAmountCents as never)
-                      : "—"
-                }
-              />
-              <WorkspaceMetaLine
-                label="Monthly"
-                value={
-                  terms
-                    ? formatCents(terms.monthlyTotalCents, terms.currency)
-                    : daTerms
-                      ? formatCents(daTerms.monthlyAmountCents as never)
-                      : "—"
-                }
-              />
-              <WorkspaceMetaLine
-                label="Start"
-                value={
-                  daTerms?.serviceStartDate
-                    ? fmtWorkspaceDate(daTerms.serviceStartDate)
-                    : "—"
-                }
-              />
-              <WorkspaceMetaLine
-                label="End"
-                value={
-                  daTerms?.serviceEndDate ? fmtWorkspaceDate(daTerms.serviceEndDate) : "—"
-                }
-              />
-              <WorkspaceMetaLine
-                label="Hours"
-                value={
-                  daTerms?.capacityHoursPerMonth != null
-                    ? `${daTerms.capacityHoursPerMonth} / mo`
-                    : "—"
-                }
-              />
-              <WorkspaceMetaLine
-                label="Payment method"
-                value={formatPaymentMethodLabel(
-                  pkg.paymentAuthorization?.cardBrand,
-                  pkg.paymentAuthorization?.cardLast4,
-                )}
-              />
-            </div>
-          </WorkspaceChapter>
-
           {daTerms ? (
-            <>
-              <WorkspaceChapter title="Scope" variant="compact">
+            <div className="kxd-os-commercial-stack">
+              <section className="kxd-os-commercial-panel-card">
+                <h3>Scope</h3>
                 <p className="kxd-os-commercial-prose">{daTerms.scope || "—"}</p>
-              </WorkspaceChapter>
-              <WorkspaceChapter title="Included services" variant="compact">
-                <p className="kxd-os-commercial-prose">{daTerms.includedServices || "—"}</p>
-              </WorkspaceChapter>
-              <WorkspaceChapter title="Limits & exclusions" variant="compact">
-                <p className="kxd-os-commercial-prose">{daTerms.exclusions || "—"}</p>
+              </section>
+
+              <section className="kxd-os-commercial-panel-card">
+                <h3>Included services</h3>
+                {serviceItems.length ? (
+                  <ul className="kxd-os-commercial-checklist">
+                    {serviceItems.map((item) => (
+                      <li key={item}>
+                        <span className="kxd-os-commercial-checklist__mark" aria-hidden>
+                          ✓
+                        </span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <WorkspaceEmpty message="No included services listed." />
+                )}
+              </section>
+
+              <section className="kxd-os-commercial-panel-card">
+                <h3>Limits & exclusions</h3>
+                {exclusionItems.length ? (
+                  <ul className="kxd-os-commercial-checklist kxd-os-commercial-checklist--muted">
+                    {exclusionItems.map((item) => (
+                      <li key={item}>
+                        <span className="kxd-os-commercial-checklist__mark" aria-hidden>
+                          —
+                        </span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="kxd-os-commercial-prose">{daTerms.exclusions || "—"}</p>
+                )}
                 <p className="kxd-os-commercial-muted">
-                  Rollover: {daTerms.rolloverPolicy === "none" ? "No automatic rollover" : "Manual approval"}
-                  {daTerms.revisionAllowance ? ` · Revisions: ${daTerms.revisionAllowance}` : ""}
+                  Rollover:{" "}
+                  {daTerms.rolloverPolicy === "none"
+                    ? "No automatic rollover"
+                    : "Manual approval"}
+                  {daTerms.revisionAllowance
+                    ? ` · Revisions: ${daTerms.revisionAllowance}`
+                    : ""}
                 </p>
-              </WorkspaceChapter>
-              <WorkspaceChapter title="Payment terms" variant="compact">
+              </section>
+
+              <section className="kxd-os-commercial-panel-card">
+                <h3>Payment terms</h3>
                 <p className="kxd-os-commercial-prose">{daTerms.paymentTerms || "—"}</p>
-              </WorkspaceChapter>
-            </>
+                <p className="kxd-os-commercial-muted">
+                  Method:{" "}
+                  {formatPaymentMethodLabel(auth?.cardBrand, auth?.cardLast4)}
+                </p>
+              </section>
+            </div>
           ) : (
-            <WorkspaceChapter title="Agreement terms" variant="compact">
+            <section className="kxd-os-commercial-panel-card">
+              <h3>Agreement terms</h3>
               <WorkspaceEmpty message="Structured Direct Agreement terms are not on this record. Proposal-linked agreements use the proposal lifecycle package." />
-            </WorkspaceChapter>
+            </section>
           )}
 
-          <WorkspaceChapter title="Documents" variant="compact">
-            <div id="documents" />
+          <section className="kxd-os-commercial-panel-card" id="documents">
+            <h3>Documents</h3>
             {!docs.length ? (
               <WorkspaceEmpty message="No filed documents yet." />
             ) : (
-              <ul className="kxd-os-commercial-doc-list">
+              <div className="kxd-os-commercial-doc-grid">
                 {docs.map((d) => (
-                  <li key={`${d.kind}-${d.id}`}>
-                    <div>
-                      <strong>{documentKindLabel(d.kind)}</strong>
-                      <span className="kxd-os-commercial-muted">
-                        {" "}
-                        · v{d.version} · {d.generatedAt ? fmtWorkspaceDate(d.generatedAt) : "—"}
+                  <article key={`${d.kind}-${d.id}`} className="kxd-os-commercial-doc-card">
+                    <div className="kxd-os-commercial-doc-card__top">
+                      <span className="kxd-os-commercial-doc-card__type">
+                        {documentKindLabel(d.kind)}
                       </span>
+                      <span className="kxd-os-commercial-doc-card__ver">v{d.version}</span>
                     </div>
-                    <a
-                      href={`/api/admin/commercial-documents/${d.id}/download`}
-                      className="kxd-os-link-quiet"
-                    >
-                      Download
-                    </a>
-                  </li>
+                    <p className="kxd-os-commercial-doc-card__date">
+                      {d.generatedAt ? fmtWorkspaceDate(d.generatedAt) : "—"}
+                    </p>
+                    <div className="kxd-os-commercial-doc-card__actions">
+                      <a
+                        href={`/api/admin/commercial-documents/${d.id}/download?disposition=inline`}
+                        className="kxd-os-btn kxd-os-btn--ghost kxd-os-btn--sm"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Preview
+                      </a>
+                      <a
+                        href={`/api/admin/commercial-documents/${d.id}/download`}
+                        className="kxd-os-btn kxd-os-btn--ghost kxd-os-btn--sm"
+                      >
+                        Download
+                      </a>
+                    </div>
+                  </article>
                 ))}
-              </ul>
+              </div>
             )}
-          </WorkspaceChapter>
-
-          {pkg.externalAcceptance ? (
-            <WorkspaceChapter title="External acceptance" variant="compact">
-              <p className="kxd-os-commercial-prose">
-                Accepted by {pkg.externalAcceptance.acceptedBy} via{" "}
-                {pkg.externalAcceptance.method} on {pkg.externalAcceptance.acceptedAt}.{" "}
-                <strong>Not an electronic signature.</strong>
+            {docs.length > 1 ? (
+              <p className="kxd-os-commercial-muted" style={{ marginTop: "0.75rem" }}>
+                Version history is preserved as separate immutable documents.
               </p>
-              {pkg.externalAcceptance.evidenceNotes ? (
-                <p className="kxd-os-commercial-notes">{pkg.externalAcceptance.evidenceNotes}</p>
-              ) : null}
-            </WorkspaceChapter>
-          ) : null}
+            ) : null}
+          </section>
         </div>
 
         <aside className="kxd-os-commercial-detail__aside">
-          <WorkspaceChapter title="Quick actions" variant="compact">
-            <div className="kxd-os-commercial-quick-actions">
+          <section className="kxd-os-commercial-panel-card">
+            <h3>Quick actions</h3>
+            <div className="kxd-os-commercial-action-grid">
               {primaryDoc ? (
                 <>
                   <a
                     href={`/api/admin/commercial-documents/${primaryDoc.id}/download?disposition=inline`}
-                    className="kxd-os-btn kxd-os-btn--ghost"
+                    className="kxd-os-btn"
                     target="_blank"
                     rel="noreferrer"
                   >
-                    View PDF
+                    Preview agreement
                   </a>
                   <a
                     href={`/api/admin/commercial-documents/${primaryDoc.id}/download`}
@@ -228,37 +271,138 @@ export function CommercialAgreementDetail(props: {
               >
                 Payments
               </Link>
+              <a href="#lifecycle" className="kxd-os-btn kxd-os-btn--ghost">
+                Record acceptance
+              </a>
+              <a href="#lifecycle" className="kxd-os-btn kxd-os-btn--ghost">
+                Authorization
+              </a>
+              <a href="#lifecycle" className="kxd-os-btn kxd-os-btn--ghost">
+                Activate service
+              </a>
             </div>
-          </WorkspaceChapter>
+          </section>
 
-          <WorkspaceChapter title="Operator workflow" variant="compact">
-            <p className="kxd-os-commercial-muted" style={{ marginBottom: "0.75rem" }}>
-              Finalize, acceptance, authorization, and activation — progressive controls below.
-            </p>
-            <div className="kxd-os-commercial-actions-shell">
-              <ContractLifecycleActions
-                contractId={contractId}
-                contractStatus={contractStatus}
-                agreementSource={agreementSource}
-                commercialStatus={pkg.commercialStatus ?? null}
-                hasOperatorSignature={Boolean(pkg.operatorSignature)}
-                hasClientSignature={Boolean(pkg.clientSignature)}
-                hasExternalAcceptance={Boolean(pkg.externalAcceptance)}
-                onboardingEligible={Boolean(pkg.onboardingEligible)}
-                blockers={blockers}
-                defaultRecipientName={defaultRecipientName}
-                defaultRecipientEmail={defaultRecipientEmail}
-                documentRefs={docs.map((d) => ({ id: d.id, kind: d.kind }))}
-                externalAcceptanceSummary={
-                  pkg.externalAcceptance
-                    ? `Externally recorded: ${pkg.externalAcceptance.acceptedBy} via ${pkg.externalAcceptance.method} on ${pkg.externalAcceptance.acceptedAt}. Not an electronic signature.`
-                    : null
-                }
-              />
+          <section className="kxd-os-commercial-panel-card">
+            <h3>Commercial status</h3>
+            <div className="kxd-os-commercial-status-stack">
+              <div>
+                <span className="kxd-os-commercial-summary-card__label">Agreement</span>
+                <div>
+                  <CommercialStatusBadge label={statusLabel} tone={statusTone(statusLabel)} />
+                </div>
+              </div>
+              <div>
+                <span className="kxd-os-commercial-summary-card__label">Payment</span>
+                <p className="kxd-os-commercial-status-stack__value">{paymentStatusLabel}</p>
+              </div>
+              <div>
+                <span className="kxd-os-commercial-summary-card__label">Service</span>
+                <p className="kxd-os-commercial-status-stack__value">
+                  {status === "active" ? "Active" : "Not activated"}
+                </p>
+              </div>
             </div>
-          </WorkspaceChapter>
+          </section>
+
+          {pkg.externalAcceptance ? (
+            <section className="kxd-os-commercial-panel-card kxd-os-commercial-panel-card--accent">
+              <h3>Acceptance</h3>
+              <p className="kxd-os-commercial-callout">
+                Externally recorded — not an electronic signature
+              </p>
+              <dl className="kxd-os-commercial-kv">
+                <div>
+                  <dt>Accepted by</dt>
+                  <dd>{pkg.externalAcceptance.acceptedBy}</dd>
+                </div>
+                <div>
+                  <dt>Method</dt>
+                  <dd>{pkg.externalAcceptance.method}</dd>
+                </div>
+                <div>
+                  <dt>Date</dt>
+                  <dd>{fmtWorkspaceDate(pkg.externalAcceptance.acceptedAt)}</dd>
+                </div>
+              </dl>
+              {pkg.externalAcceptance.evidenceNotes ? (
+                <p className="kxd-os-commercial-notes">
+                  <strong>Evidence</strong>
+                  <br />
+                  {pkg.externalAcceptance.evidenceNotes}
+                </p>
+              ) : null}
+            </section>
+          ) : (
+            <section className="kxd-os-commercial-panel-card">
+              <h3>Acceptance</h3>
+              <p className="kxd-os-commercial-muted">
+                No acceptance recorded yet. Use Lifecycle controls to record external acceptance.
+              </p>
+            </section>
+          )}
+
+          <div id="lifecycle">
+            <CommercialLifecyclePanel
+              contractId={contractId}
+              contractStatus={contractStatus}
+              agreementSource={agreementSource}
+              commercialStatus={pkg.commercialStatus ?? null}
+              hasOperatorSignature={Boolean(pkg.operatorSignature)}
+              hasClientSignature={Boolean(pkg.clientSignature)}
+              hasExternalAcceptance={Boolean(pkg.externalAcceptance)}
+              onboardingEligible={Boolean(pkg.onboardingEligible)}
+              blockers={blockers}
+              defaultRecipientName={defaultRecipientName}
+              defaultRecipientEmail={defaultRecipientEmail}
+              documentRefs={docs.map((d) => ({ id: d.id, kind: d.kind }))}
+              externalAcceptanceSummary={
+                pkg.externalAcceptance
+                  ? `Externally recorded: ${pkg.externalAcceptance.acceptedBy} via ${pkg.externalAcceptance.method} on ${pkg.externalAcceptance.acceptedAt}. Not an electronic signature.`
+                  : null
+              }
+              authorizationSummary={
+                auth
+                  ? {
+                      authorizedBy: auth.authorizedBy,
+                      method: auth.authorizationMethod,
+                      authorizedAt: auth.authorizedAt,
+                      amountCents: auth.amountAuthorizedCents,
+                      notes: auth.evidenceNotes,
+                      cardBrand: auth.cardBrand ?? null,
+                      cardLast4: auth.cardLast4 ?? null,
+                    }
+                  : null
+              }
+            />
+          </div>
         </aside>
       </div>
+    </div>
+  );
+}
+
+function Kpi({
+  label,
+  value,
+  valueNode,
+  emphasize,
+}: {
+  label: string;
+  value?: string;
+  valueNode?: ReactNode;
+  emphasize?: boolean;
+}) {
+  return (
+    <div
+      className={`kxd-os-commercial-kpi${emphasize ? " kxd-os-commercial-kpi--emphasize" : ""}`}
+    >
+      <span className="kxd-os-commercial-kpi__label">{label}</span>
+      {valueNode ?? (
+        <span className="kxd-os-commercial-kpi__value" title={value}>
+          {value}
+        </span>
+      )}
     </div>
   );
 }

@@ -16,40 +16,40 @@ export function CommercialDocuments({ data }: { data: ClientWorkspaceBundle }) {
       {!rows.length ? (
         <WorkspaceEmpty message="No commercial documents filed for this client." />
       ) : (
-        <div className="kxd-os-commercial-card-list">
+        <div className="kxd-os-commercial-doc-grid kxd-os-commercial-doc-grid--wide">
           {rows.map((row) => (
-            <article key={row.id} className="kxd-os-commercial-card">
-              <div className="kxd-os-commercial-card__main">
-                <div className="kxd-os-commercial-card__title-row">
-                  <h3 className="kxd-os-commercial-card__title">{row.title}</h3>
-                  <CommercialStatusBadge label={row.status} tone={statusTone(row.status)} />
-                </div>
-                <p className="kxd-os-commercial-card__meta">
-                  {row.kindLabel}
-                  {" · v"}
-                  {row.version}
-                  {" · "}
-                  {row.generatedAt ? fmtWorkspaceDate(row.generatedAt) : "—"}
-                  {row.agreementTitle ? ` · ${row.agreementTitle}` : ""}
-                </p>
+            <article key={row.id} className="kxd-os-commercial-doc-card">
+              <div className="kxd-os-commercial-doc-card__top">
+                <span className="kxd-os-commercial-doc-card__type">{row.kindLabel}</span>
+                <CommercialStatusBadge label={row.status} tone={statusTone(row.status)} />
               </div>
-              <div className="kxd-os-commercial-card__actions">
+              <h3 className="kxd-os-commercial-doc-card__title">{row.title}</h3>
+              <p className="kxd-os-commercial-doc-card__date">
+                v{row.version}
+                {" · "}
+                {row.generatedAt ? fmtWorkspaceDate(row.generatedAt) : "—"}
+                {row.agreementTitle ? ` · ${row.agreementTitle}` : ""}
+              </p>
+              <div className="kxd-os-commercial-doc-card__actions">
                 <button
                   type="button"
-                  className="kxd-os-link-quiet"
+                  className="kxd-os-btn kxd-os-btn--ghost kxd-os-btn--sm"
                   onClick={() => setPreviewId(previewId === row.id ? null : row.id)}
                 >
                   {previewId === row.id ? "Hide preview" : "Preview"}
                 </button>
-                <a href={row.downloadHref} className="kxd-os-link-quiet">
+                <a
+                  href={row.downloadHref}
+                  className="kxd-os-btn kxd-os-btn--ghost kxd-os-btn--sm"
+                >
                   Download
                 </a>
                 {row.contractId ? (
                   <Link
-                    href={`/admin/operations/client-command/${data.clientId}/commercial/agreements/${row.contractId}`}
-                    className="kxd-os-link-quiet"
+                    href={`/admin/operations/client-command/${data.clientId}/commercial/agreements/${row.contractId}#documents`}
+                    className="kxd-os-btn kxd-os-btn--ghost kxd-os-btn--sm"
                   >
-                    Agreement
+                    Version history
                   </Link>
                 ) : null}
               </div>
