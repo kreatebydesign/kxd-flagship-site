@@ -71,6 +71,7 @@ function ShiftAdminActions({ shift }: { shift: AdminShiftRow }) {
   const router = useRouter();
   const [adminNote, setAdminNote] = useState("");
   const [minutes, setMinutes] = useState(String(shift.totalMinutes));
+  const [payAdjustmentDollars, setPayAdjustmentDollars] = useState(String((shift.payAdjustmentCents / 100).toFixed(2)));
   const [notes, setNotes] = useState(shift.notes ?? "");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -147,6 +148,14 @@ function ShiftAdminActions({ shift }: { shift: AdminShiftRow }) {
             onChange={(e) => setMinutes(e.target.value)}
             style={inputStyle}
           />
+          <input
+            type="number"
+            step="0.01"
+            value={payAdjustmentDollars}
+            onChange={(e) => setPayAdjustmentDollars(e.target.value)}
+            placeholder="Bonus/correction dollars, e.g. 10.00"
+            style={{ ...inputStyle, marginTop: "0.5rem" }}
+          />
           <textarea
             value={adminNote}
             onChange={(e) => setAdminNote(e.target.value)}
@@ -161,6 +170,7 @@ function ShiftAdminActions({ shift }: { shift: AdminShiftRow }) {
               patch({
                 action: "adjustMinutes",
                 totalMinutes: Number(minutes),
+                payAdjustmentCents: Math.round(Number(payAdjustmentDollars || 0) * 100),
                 adminNote,
               })
             }
@@ -219,7 +229,65 @@ function ShiftAdminActions({ shift }: { shift: AdminShiftRow }) {
   );
 }
 
-function CreatorSection({ creator }: { creator: AdminCreatorRow }) {
+
+function ManualAdjustmentForm({ creator, weekKey }: { creator: AdminCreatorRow; weekKey: string }) {
+  const router = useRouter();
+  const [minutes, setMinutes] = useState("60");
+  const [payAdjustmentDollars, setPayAdjustmentDollars] = useState("0.00");
+  const [adminNote, setAdminNote] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function createAdjustment() {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/admin/junior-creator-shifts", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "createAdjustment",
+          juniorCreatorUserId: creator.id,
+          totalMinutes: Number(minutes || 0),
+          hourlyRateCents: creator.hourlyRateCents,
+          payAdjustmentCents: Math.round(Number(payAdjustmentDollars || 0) * 100),
+          weekKey,
+          adminNote,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setError(data.error ?? "Manual correction failed.");
+        return;
+      }
+      setMinutes("60");
+      setPayAdjustmentDollars("0.00");
+      setAdminNote("");
+      router.refresh();
+    } catch {
+      setError("Network error.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div style={{ background: C.bgElevated, border: `1px solid ${C.border}`, padding: "1rem 1.25rem", marginBottom: "1px" }}>
+      <Label style={{ marginBottom: "0.5rem" }}>Manual Time / Pay Correction</Label>
+      <div className="grid gap-2 sm:grid-cols-3">
+        <input type="number" min={0} value={minutes} onChange={(e) => setMinutes(e.target.value)} placeholder="Minutes" style={inputStyle} />
+        <input type="number" step="0.01" value={payAdjustmentDollars} onChange={(e) => setPayAdjustmentDollars(e.target.value)} placeholder="Bonus/correction dollars" style={inputStyle} />
+        <textarea value={adminNote} onChange={(e) => setAdminNote(e.target.value)} placeholder="Required reason — e.g. founder credit, bonus, correction…" rows={1} style={{ ...inputStyle, resize: "vertical" }} />
+      </div>
+      <button type="button" disabled={loading} onClick={createAdjustment} style={{ marginTop: "0.5rem", fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.12em", textTransform: "uppercase", color: C.cream, background: C.bgElevated, border: `1px solid ${C.borderGold}`, padding: "0.5rem 0.75rem", cursor: loading ? "wait" : "pointer" }}>
+        Add Manual Correction
+      </button>
+      {error && <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.red, marginTop: "0.5rem" }}>{error}</p>}
+    </div>
+  );
+}
+
+function CreatorSection({ creator, weekKey }: { creator: AdminCreatorRow; weekKey: string }) {
   return (
     <section style={{ marginBottom: "2rem" }}>
       <div
@@ -254,6 +322,8 @@ function CreatorSection({ creator }: { creator: AdminCreatorRow }) {
           </p>
         )}
       </div>
+
+      <ManualAdjustmentForm creator={creator} weekKey={weekKey} />
 
       {creator.shifts.length === 0 ? (
         <div style={{ background: C.bgElevated, border: `1px solid ${C.border}`, padding: "1rem 1.25rem" }}>
@@ -295,6 +365,7 @@ function CreatorSection({ creator }: { creator: AdminCreatorRow }) {
                   <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.28)", marginTop: "0.25rem" }}>
                     Week {shift.weekKey} · {formatHoursFromMinutes(shift.totalMinutes)} · Est.{" "}
                     {formatEarningsCents(shift.estimatedCents)}
+                    {shift.payAdjustmentCents !== 0 ? ` · Adjustment ${formatEarningsCents(shift.payAdjustmentCents)}` : ""}
                   </p>
                 </div>
                 <Link
@@ -311,6 +382,19 @@ function CreatorSection({ creator }: { creator: AdminCreatorRow }) {
                   Payload →
                 </Link>
               </div>
+              {shift.correctionAudit.length > 0 && (
+                <p
+                  style={{
+                    fontFamily: C.sans,
+                    fontSize: "0.75rem",
+                    color: C.goldDim,
+                    marginTop: "0.75rem",
+                    lineHeight: 1.5,
+                  }}
+                >
+                  Audit entries retained: {shift.correctionAudit.length}
+                </p>
+              )}
               {shift.notes && (
                 <p
                   style={{
@@ -374,8 +458,8 @@ export function JuniorCreatorAdminReview({ data }: Props) {
             Junior Creator Review
           </h1>
           <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted, marginTop: "0.75rem", maxWidth: "40rem", lineHeight: 1.6 }}>
-            Review shift time, weekly hours, and estimated earnings. Void shifts or adjust completed minutes with a
-            required admin note — estimates only, not payroll.
+            Review shift time, weekly hours, estimated earnings, and manual time/pay corrections. Void shifts, add founder credits,
+            or adjust completed minutes with a required admin note — estimates only, not payroll.
           </p>
           <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.28)", marginTop: "0.5rem" }}>
             Week of {data.weekKey} (Monday start)
@@ -403,7 +487,7 @@ export function JuniorCreatorAdminReview({ data }: Props) {
             No junior creator users yet. Add accounts in Payload.
           </p>
         ) : (
-          data.creators.map((creator) => <CreatorSection key={creator.id} creator={creator} />)
+          data.creators.map((creator) => <CreatorSection key={creator.id} creator={creator} weekKey={data.weekKey} />)
         )}
 
         <AdminJuniorAssignedTasks

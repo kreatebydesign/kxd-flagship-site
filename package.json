@@ -39,6 +39,9 @@
     "verify:phase5-batch-5c": "tsx scripts/verify-phase5-batch-5c.ts",
     "verify:phase5-batch-5d": "tsx scripts/verify-phase5-batch-5d.ts",
     "verify:junior-assigned-tasks": "tsx scripts/verify-junior-assigned-tasks.ts",
+    "verify:junior-shift-correction-permissions": "node --import tsx scripts/verify-junior-shift-correction-permissions.ts",
+    "verify:junior-shift-correction-safety": "node --import tsx scripts/verify-junior-shift-correction-safety.ts",
+    "verify:junior-shift-correction-concurrency": "KXD_SERVER_ONLY_SHIM=1 node --import ./scripts/shims/register-server-only.mjs --import tsx --env-file=.env.local scripts/verify-junior-shift-correction-concurrency.ts",
     "verify:junior-assigned-tasks-runtime": "KXD_SERVER_ONLY_SHIM=1 tsx --env-file=.env.local --import ./scripts/shims/register-server-only.mjs scripts/verify-junior-assigned-tasks-runtime.ts",
     "seed:harlow-junior-tasks": "KXD_SERVER_ONLY_SHIM=1 tsx --env-file=.env.local --import ./scripts/shims/register-server-only.mjs scripts/seed-harlow-junior-assigned-tasks.ts --",
     "verify:phase6-batch-c0": "tsx scripts/verify-phase6-batch-c0.ts",
@@ -148,7 +151,9 @@
     "configure:primal-google-ads": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/configure-primal-google-ads.ts",
     "configure:primal-google-ads:apply": "KXD_SERVER_ONLY_SHIM=1 APPLY=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/configure-primal-google-ads.ts",
     "verify:proposal-builder": "tsx scripts/verify-proposal-builder.ts",
-    "verify:lifecycle-stripe-test": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/verify-lifecycle-stripe-test.ts"
+    "verify:lifecycle-stripe-test": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/verify-lifecycle-stripe-test.ts",
+    "repair:junior-shift-credit": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/reset-junior-shift-credit.ts",
+    "repair:junior-shift-credit:apply": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/reset-junior-shift-credit.ts --apply"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "^3.84.1",
