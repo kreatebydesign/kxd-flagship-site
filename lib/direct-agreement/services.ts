@@ -1,5 +1,6 @@
 import { getPayload } from "payload";
 import config from "@payload-config";
+import { composeDirectAgreementDocumentBody } from "@/lib/commercial-legal";
 import { publishClientActivity } from "@/lib/client-command/activity/publish";
 import { newLifecycleId, stableJsonHash } from "@/lib/proposal-lifecycle/hash";
 import { computeDocumentHash, hashPaymentTerms } from "@/lib/proposal-lifecycle/executed-seal";
@@ -205,11 +206,16 @@ export async function finalizeDirectAgreement(input: {
     toStatus: "finalized",
   });
 
+  const documentBody = composeDirectAgreementDocumentBody({
+    body: String(contract.body ?? ""),
+    terms,
+  });
+
   pkg = await generateAndFileDirectAgreementSentSnapshot({
     contractId: input.contractId,
     clientId,
     contractTitle: String(contract.title ?? ""),
-    contractBody: String(contract.body ?? ""),
+    contractBody: documentBody,
     terms: structured,
     termsVersion: terms.termsVersion,
     pkg,
@@ -370,13 +376,20 @@ export async function recordExternalAcceptance(input: {
     reason: `Externally recorded acceptance via ${externalAcceptance.method} — not electronic signature`,
   });
 
+  const daTerms = parseStoredDirectAgreementTerms(contract.directAgreementTerms);
+  if (!daTerms) throw new Error("Direct Agreement terms are missing or invalid.");
+  const documentBody = composeDirectAgreementDocumentBody({
+    body: String(contract.body ?? ""),
+    terms: daTerms,
+  });
+
   pkg = await generateAndFileExecutedPackage({
     contractId: input.contractId,
     proposalId: null,
     clientId,
     proposalNumber: pkg.structuredPaymentTerms!.sourceProposalNumber,
     contractTitle: String(contract.title ?? ""),
-    contractBody: String(contract.body ?? ""),
+    contractBody: documentBody,
     canonical: null,
     certificate,
     operator,

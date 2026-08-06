@@ -6,7 +6,13 @@ import assert from "node:assert/strict";
 import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import {
+  composeDirectAgreementDocumentBody,
+  STANDARD_CANCELLATION_REFUND_MARKERS,
+  STANDARD_CANCELLATION_TERMINATION_AND_REFUNDS,
+} from "../lib/commercial-legal";
+import {
   assertOneTimeHasNoRecurring,
+  DEFAULT_LEGAL_COPY,
   deriveStructuredPaymentTermsFromDirectAgreement,
   validateCreateDirectAgreementInput,
   validateExternalAcceptanceInput,
@@ -105,6 +111,64 @@ console.log("verify:direct-agreement-workflow");
   assert.match(src, /agreementSource: "direct-agreement"/);
   assert.doesNotMatch(src, /collection:\s*"proposals"/);
   ok("2–3. No proposal create; source is direct-agreement");
+}
+
+// Canonical cancellation / refund legal copy
+{
+  assert.equal(
+    DEFAULT_LEGAL_COPY.cancellationRefundLanguage,
+    STANDARD_CANCELLATION_TERMINATION_AND_REFUNDS,
+  );
+  for (const marker of STANDARD_CANCELLATION_REFUND_MARKERS) {
+    assert.match(DEFAULT_LEGAL_COPY.cancellationRefundLanguage, new RegExp(marker.replace(".", "\\.")));
+  }
+  assert.match(
+    read("lib/direct-agreement/default-legal-copy.ts"),
+    /STANDARD_CANCELLATION_TERMINATION_AND_REFUNDS/,
+  );
+  assert.match(
+    read("lib/proposal-builder/contract-draft.ts"),
+    /STANDARD_CANCELLATION_TERMINATION_AND_REFUNDS/,
+  );
+  assert.doesNotMatch(
+    DEFAULT_LEGAL_COPY.cancellationRefundLanguage,
+    /Robin Cole|Campaign Lite|Henry/,
+  );
+  const composed = composeDirectAgreementDocumentBody({
+    body: "Scope body for Campaign Lite support.",
+    terms: {
+      schemaVersion: 1,
+      commercialStructure: "one-time",
+      oneTimeAmountCents: 85000,
+      monthlyAmountCents: 0,
+      currency: "USD",
+      serviceStartDate: "2026-08-04",
+      serviceEndDate: "2026-11-04",
+      scope: "Campaign Lite",
+      includedServices: "Hours",
+      exclusions: "Printing",
+      capacityHoursPerMonth: 3,
+      rolloverPolicy: "none",
+      revisionAllowance: "Two rounds",
+      overagePreapprovalRule: DEFAULT_LEGAL_COPY.overagePreapprovalRule,
+      paymentTerms: DEFAULT_LEGAL_COPY.paymentTerms,
+      cancellationRefundLanguage: DEFAULT_LEGAL_COPY.cancellationRefundLanguage,
+      intellectualPropertyLanguage: DEFAULT_LEGAL_COPY.intellectualPropertyLanguage,
+      portfolioUseLanguage: DEFAULT_LEGAL_COPY.portfolioUseLanguage,
+      clientResponsibilities: DEFAULT_LEGAL_COPY.clientResponsibilities,
+      renewalBehavior: DEFAULT_LEGAL_COPY.renewalBehavior,
+      autoRenew: false,
+      termsVersion: 1,
+    },
+  });
+  assert.match(composed, /Scope body for Campaign Lite support/);
+  assert.match(composed, /Client cancellation\./);
+  assert.match(composed, /Fixed-term and prepaid agreements\./);
+  assert.match(composed, /Non-refundable fees\./);
+  assert.match(read("lib/direct-agreement/services.ts"), /composeDirectAgreementDocumentBody/);
+  // New filings only — existing commercial-document rows are never rewritten in place.
+  assert.match(read("lib/proposal-lifecycle/documents/storage/vercel-blob.ts"), /allowOverwrite:\s*false/);
+  ok("Canonical cancellation/refund language is shared and composed into new DA documents");
 }
 
 // 4 structured payment terms without proposal

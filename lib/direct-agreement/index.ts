@@ -40,3 +40,9 @@ export {
   recordPaymentAuthorization,
 } from "./services";
 export { DEFAULT_LEGAL_COPY } from "./default-legal-copy";
+export {
+  composeDirectAgreementDocumentBody,
+  STANDARD_CANCELLATION_REFUND_MARKERS,
+  STANDARD_CANCELLATION_TERMINATION_AND_REFUNDS,
+  STANDARD_RENEWAL_BEHAVIOR,
+} from "@/lib/commercial-legal";

@@ -615,13 +615,29 @@ export async function signContractAsClient(
       if (!clientId) {
         throw new Error("Executed package filing requires a client relationship.");
       }
+      let executedBody = String(contract.body ?? "");
+      if (String(contract.agreementSource) === "direct-agreement") {
+        const { parseStoredDirectAgreementTerms } = await import(
+          "../direct-agreement/validate.ts"
+        );
+        const { composeDirectAgreementDocumentBody } = await import(
+          "../commercial-legal/compose-direct-agreement-document.ts"
+        );
+        const daTerms = parseStoredDirectAgreementTerms(contract.directAgreementTerms);
+        if (daTerms) {
+          executedBody = composeDirectAgreementDocumentBody({
+            body: executedBody,
+            terms: daTerms,
+          });
+        }
+      }
       next = await generateAndFileExecutedPackage({
         contractId: contract.id,
         proposalId: proposalId || null,
         clientId,
         proposalNumber: String(proposal?.proposalNumber ?? terms.sourceProposalNumber ?? ""),
         contractTitle: String(contract.title ?? "Agreement"),
-        contractBody: String(contract.body ?? ""),
+        contractBody: executedBody,
         canonical: canonical ?? null,
         certificate,
         operator: operatorSignature,

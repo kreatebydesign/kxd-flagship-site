@@ -230,10 +230,10 @@ export function DirectAgreementCreateForm(props: {
       <Field label="Agreement body (legal copy)">
         <textarea required rows={10} value={form.body} onChange={(e) => set("body", e.target.value)} />
       </Field>
-      <Field label="Cancellation / refund">
+      <Field label="Cancellation, termination, and refunds (standard — editable per deal)">
         <textarea
           required
-          rows={2}
+          rows={14}
           value={form.cancellationRefundLanguage}
           onChange={(e) => set("cancellationRefundLanguage", e.target.value)}
         />

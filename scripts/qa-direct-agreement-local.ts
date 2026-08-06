@@ -544,9 +544,11 @@ async function main() {
   writeFileSync(
     join(outDir, "legal-copy-for-matt.md"),
     [
-      "# Default Direct Agreement legal copy (for Matt review)",
+      "# Default Direct Agreement legal copy",
       "",
-      "## Cancellation / Refunds",
+      "Canonical source: `lib/commercial-legal/standard-cancellation-refunds.ts`",
+      "",
+      "## Cancellation, Termination, and Refunds",
       DEFAULT_LEGAL_COPY.cancellationRefundLanguage,
       "",
       "## Intellectual property",
