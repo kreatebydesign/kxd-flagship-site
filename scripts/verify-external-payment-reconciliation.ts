@@ -262,7 +262,12 @@ console.log("verify:external-payment-reconciliation");
   assert.equal(contractedValueFromContract(executedDa), 850);
   assert.equal(oneTimeContractValue(executedDa), 850);
   assert.equal(contractedValueFromContract({ status: "draft", projectAmount: 850 }), 0);
-  ok("7. one-time DA financial recognition (executed → contracted value)");
+  // Executive snapshot must count recognized contracts in contractedRevenue only —
+  // not also in oneTimeProjectRevenue (that bucket remains client-projects).
+  const snapshots = read("lib/financial-command/snapshots.ts");
+  assert.ok(snapshots.includes("contractedRevenue += recognized"));
+  assert.equal(snapshots.includes("oneTimeProjectRevenue += oneTimeContractValue"), false);
+  ok("7. one-time DA financial recognition (executed → contracted value once)");
 }
 
 // 8. MRR remains zero for one-time DA
@@ -396,6 +401,52 @@ console.log("verify:external-payment-reconciliation");
   assert.ok(css.includes(".kxd-os-commercial-confirm"));
   assert.ok(css.includes("border: 1.5px solid"));
   ok("15. strong form + confirmation CSS present");
+}
+
+// URL safety
+{
+  const badUrl = validateRecordExternalPaymentInput(
+    {
+      source: "imported-external-stripe-payment",
+      amountCents: 85000,
+      currency: "USD",
+      paidAt: "2026-08-04",
+      livemode: true,
+      stripePaymentIntentId: "pi_TestRobin850",
+      receiptUrl: "javascript:alert(1)",
+    },
+    {
+      contractId: 99,
+      commercialStatus: "payment-pending",
+      agreementSource: "direct-agreement",
+      obligationCents: 85000,
+      existingReferences: null,
+    },
+  );
+  assert.equal(badUrl.ok, false);
+  if (!badUrl.ok) assert.ok(badUrl.errors.receiptUrl);
+  ok("16. unsafe receipt URL rejected");
+}
+
+// Signed proposal contracts still recognized; retainers remain MRR source
+{
+  assert.equal(
+    contractedValueFromContract({
+      status: "signed",
+      projectAmount: 1200,
+      monthlyAmount: 0,
+    }),
+    1200,
+  );
+  assert.equal(
+    contractedValueFromContract({
+      status: "signed",
+      projectAmount: 0,
+      monthlyAmount: 500,
+    }),
+    6000,
+  );
+  ok("17. proposal-signed contracts remain recognized; monthly annualizes in contracted value only");
 }
 
 console.log(`\nPassed ${passed} checks.`);

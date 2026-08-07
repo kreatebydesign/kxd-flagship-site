@@ -51,6 +51,32 @@ function normalizeCurrency(value: unknown): string {
     .toUpperCase();
 }
 
+/** Safe receipt / hosted-invoice URLs only — https preferred; http allowed for local fixtures. */
+function validateSafeHttpUrl(
+  value: string | null,
+  label: string,
+  errors: FieldErrors,
+  key: string,
+): string | null {
+  if (!value) return null;
+  let parsed: URL;
+  try {
+    parsed = new URL(value);
+  } catch {
+    errors[key] = `${label} must be a valid URL.`;
+    return null;
+  }
+  if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+    errors[key] = `${label} must use http or https.`;
+    return null;
+  }
+  if (parsed.username || parsed.password) {
+    errors[key] = `${label} must not include credentials.`;
+    return null;
+  }
+  return value;
+}
+
 export function obligationAmountCents(input: {
   daTerms: DirectAgreementTerms | null;
   pkg: ContractLifecyclePackage;
@@ -224,8 +250,18 @@ export function validateRecordExternalPaymentInput(
   const stripePaymentIntentId = trimOrNull(input.stripePaymentIntentId);
   const stripeChargeId = trimOrNull(input.stripeChargeId);
   const stripeInvoiceId = trimOrNull(input.stripeInvoiceId);
-  const receiptUrl = trimOrNull(input.receiptUrl);
-  const hostedInvoiceUrl = trimOrNull(input.hostedInvoiceUrl);
+  const receiptUrl = validateSafeHttpUrl(
+    trimOrNull(input.receiptUrl),
+    "Receipt URL",
+    errors,
+    "receiptUrl",
+  );
+  const hostedInvoiceUrl = validateSafeHttpUrl(
+    trimOrNull(input.hostedInvoiceUrl),
+    "Hosted invoice URL",
+    errors,
+    "hostedInvoiceUrl",
+  );
   const operatorNote = trimOrNull(input.operatorNote);
 
   const idFields = {

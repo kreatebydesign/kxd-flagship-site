@@ -8,7 +8,6 @@ import type { ExecutiveFinancialMetrics } from "./types";
 import { relId } from "./timeline-publish";
 import {
   contractedValueFromContract,
-  oneTimeContractValue,
   shouldIncludeRevenueEventInLifetimeValue,
 } from "./contract-value";
 
@@ -162,9 +161,10 @@ export async function buildExecutiveFinancialMetrics(
     const recognized = contractedValueFromContract(contract);
 
     if (recognized > 0) {
+      // Contracted revenue is the single home for recognized agreement value.
+      // Do not also add projectAmount into oneTimeProjectRevenue (client-projects only)
+      // or the same engagement would surface twice on the executive snapshot.
       contractedRevenue += recognized;
-      // One-time Direct Agreement / project contract value — not MRR.
-      oneTimeProjectRevenue += oneTimeContractValue(contract);
 
       const clientId = relId(contract.client);
       if (clientId) {
