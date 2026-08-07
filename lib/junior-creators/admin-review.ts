@@ -13,6 +13,21 @@ function earningsFromMinutes(minutes: number, hourlyRateCents: number, payAdjust
   return Math.round((minutes * hourlyRateCents) / 60) + payAdjustmentCents;
 }
 
+function displayStatusFor(doc: AnyDoc): string {
+  const status = String(doc.status ?? "");
+  if (status === "active") return "Active";
+  if (status === "voided") return "Voided/corrected";
+  const stopReason = doc.stopReason ? String(doc.stopReason) : "";
+  if (
+    stopReason === "inactivity_timeout" ||
+    stopReason === "max_shift_timeout" ||
+    stopReason === "system_recovery"
+  ) {
+    return "Auto-stopped";
+  }
+  return "Completed";
+}
+
 function mapShift(doc: AnyDoc, elapsedOverride?: number): AdminShiftRow {
   const status = String(doc.status ?? "");
   const rate = Number(doc.hourlyRateCents ?? 0);
@@ -22,6 +37,8 @@ function mapShift(doc: AnyDoc, elapsedOverride?: number): AdminShiftRow {
   if (status === "active" && elapsedOverride !== undefined) {
     mins = elapsedOverride;
   }
+
+  const stopReason = doc.stopReason ? String(doc.stopReason) : null;
 
   return {
     id: doc.id as number,
@@ -35,6 +52,10 @@ function mapShift(doc: AnyDoc, elapsedOverride?: number): AdminShiftRow {
     payAdjustmentCents,
     estimatedCents: earningsFromMinutes(mins, rate, payAdjustmentCents),
     correctionAudit: Array.isArray(doc.correctionAudit) ? doc.correctionAudit : [],
+    stopReason,
+    lastActivityAt: doc.lastActivityAt ? String(doc.lastActivityAt) : null,
+    automaticStopAt: doc.automaticStopAt ? String(doc.automaticStopAt) : null,
+    displayStatus: displayStatusFor(doc),
   };
 }
 

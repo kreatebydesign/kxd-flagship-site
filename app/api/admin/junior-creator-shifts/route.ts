@@ -163,6 +163,7 @@ export async function PATCH(req: NextRequest) {
           status: "voided",
           totalMinutes: 0,
           payAdjustmentCents: 0,
+          stopReason: "admin_correction",
           notes: appendAdminNote(
             existing.notes ? String(existing.notes) : null,
             adminAuditLine("void", adminNote),

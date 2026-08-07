@@ -10,6 +10,10 @@ export type AdminShiftRow = {
   payAdjustmentCents: number;
   estimatedCents: number;
   correctionAudit: unknown[];
+  stopReason: string | null;
+  lastActivityAt: string | null;
+  automaticStopAt: string | null;
+  displayStatus: string;
 };
 
 export type AdminCreatorRow = {

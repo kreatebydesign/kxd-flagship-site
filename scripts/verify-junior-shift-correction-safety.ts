@@ -28,12 +28,16 @@ assert.equal(
   false,
   "repair must not derive incident week from current date",
 );
+assert.match(repairArgs, /--harlow-incident-week/);
+assert.match(repairArgs, /--sasha-incident-week/);
 assert.match(repairArgs, /--incident-week/);
 assert.match(repairScript, /parseRepairArgs/);
 assert.match(repairScript, /assertSnapshotMatches/);
 assert.match(repairScript, /loadShiftExact/);
 assert.match(repairScript, /withJuniorShiftCorrectionTransaction/);
 assert.match(repairScript, /Preflight snapshots matched/);
+assert.match(repairScript, /harlowIncidentWeek/);
+assert.match(repairScript, /sashaIncidentWeek/);
 
 assert.doesNotThrow(() => assertMondayIncidentWeek("2026-07-27"));
 assert.throws(() => assertMondayIncidentWeek("2026-07-28"), /Monday/);
@@ -59,15 +63,35 @@ assert.throws(
   /sasha-snapshot/,
 );
 
-const parsed = parseRepairArgs([
+const parsedShared = parseRepairArgs([
   "--incident-week=2026-07-27",
   `--harlow-snapshot=${sampleSnapshot}`,
   `--sasha-snapshot=${sampleSnapshot.replace('"shiftId":12', '"shiftId":13').replace('"juniorId":3', '"juniorId":4')}`,
 ]);
-assert.equal(parsed.incidentWeek, "2026-07-27");
-assert.equal(parsed.harlow.shiftId, 12);
-assert.equal(parsed.sasha.shiftId, 13);
-assert.equal(parsed.apply, false);
+assert.equal(parsedShared.harlowIncidentWeek, "2026-07-27");
+assert.equal(parsedShared.sashaIncidentWeek, "2026-07-27");
+assert.equal(parsedShared.harlow.shiftId, 12);
+assert.equal(parsedShared.sasha.shiftId, 13);
+assert.equal(parsedShared.apply, false);
+
+const parsedSplit = parseRepairArgs([
+  "--harlow-incident-week=2026-08-03",
+  "--sasha-incident-week=2026-06-22",
+  `--harlow-snapshot=${sampleSnapshot}`,
+  `--sasha-snapshot=${sampleSnapshot.replace('"shiftId":12', '"shiftId":13').replace('"juniorId":3', '"juniorId":4')}`,
+]);
+assert.equal(parsedSplit.harlowIncidentWeek, "2026-08-03");
+assert.equal(parsedSplit.sashaIncidentWeek, "2026-06-22");
+
+assert.throws(
+  () =>
+    parseRepairArgs([
+      "--harlow-incident-week=2026-08-03",
+      `--harlow-snapshot=${sampleSnapshot}`,
+      `--sasha-snapshot=${sampleSnapshot.replace('"shiftId":12', '"shiftId":13')}`,
+    ]),
+  /both --harlow-incident-week and --sasha-incident-week/,
+);
 
 assert.match(txnHelper, /FOR UPDATE/);
 assert.match(txnHelper, /lockJuniorShiftRowsForUpdate/);

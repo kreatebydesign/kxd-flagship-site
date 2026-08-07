@@ -16,7 +16,8 @@ export type RepairExpectedSnapshot = {
 
 export type RepairArgs = {
   apply: boolean;
-  incidentWeek: string;
+  harlowIncidentWeek: string;
+  sashaIncidentWeek: string;
   harlow: RepairExpectedSnapshot;
   sasha: RepairExpectedSnapshot;
 };
@@ -35,9 +36,9 @@ export function parseBooleanFlag(argv: string[], flag: string): boolean {
   return argv.includes(flag) || process.env.APPLY === "1";
 }
 
-export function assertMondayIncidentWeek(weekKey: string): string {
+export function assertMondayIncidentWeek(weekKey: string, flagLabel = "--incident-week"): string {
   if (!WEEK_KEY_RE.test(weekKey)) {
-    throw new Error("--incident-week must be YYYY-MM-DD.");
+    throw new Error(`${flagLabel} must be YYYY-MM-DD.`);
   }
   const [year, month, day] = weekKey.split("-").map(Number);
   const local = new Date(year, month - 1, day);
@@ -46,10 +47,10 @@ export function assertMondayIncidentWeek(weekKey: string): string {
     local.getMonth() !== month - 1 ||
     local.getDate() !== day
   ) {
-    throw new Error("--incident-week must be a real calendar date.");
+    throw new Error(`${flagLabel} must be a real calendar date.`);
   }
   if (local.getDay() !== 1) {
-    throw new Error("--incident-week must be a Monday (week key).");
+    throw new Error(`${flagLabel} must be a Monday (week key).`);
   }
   return weekKey;
 }
@@ -136,13 +137,51 @@ export function parseExpectedSnapshot(
   };
 }
 
-export function parseRepairArgs(argv: string[] = process.argv.slice(2)): RepairArgs {
-  const incidentWeekRaw = readArg(argv, "--incident-week");
-  if (!incidentWeekRaw) {
-    throw new Error("--incident-week YYYY-MM-DD is required (do not derive from today).");
+/**
+ * Resolve per-junior incident weeks.
+ *
+ * Preferred: --harlow-incident-week + --sasha-incident-week (may differ).
+ * Compatibility: single --incident-week applies to both when per-junior flags omitted.
+ * Never derive from today.
+ */
+export function resolveIncidentWeeks(argv: string[]): {
+  harlowIncidentWeek: string;
+  sashaIncidentWeek: string;
+} {
+  const sharedRaw = readArg(argv, "--incident-week");
+  const harlowRaw = readArg(argv, "--harlow-incident-week");
+  const sashaRaw = readArg(argv, "--sasha-incident-week");
+
+  if (harlowRaw || sashaRaw) {
+    if (!harlowRaw || !sashaRaw) {
+      throw new Error(
+        "When using per-junior weeks, both --harlow-incident-week and --sasha-incident-week are required.",
+      );
+    }
+    return {
+      harlowIncidentWeek: assertMondayIncidentWeek(
+        harlowRaw.trim(),
+        "--harlow-incident-week",
+      ),
+      sashaIncidentWeek: assertMondayIncidentWeek(
+        sashaRaw.trim(),
+        "--sasha-incident-week",
+      ),
+    };
   }
 
-  const incidentWeek = assertMondayIncidentWeek(incidentWeekRaw.trim());
+  if (!sharedRaw) {
+    throw new Error(
+      "Provide --harlow-incident-week and --sasha-incident-week (or shared --incident-week). Do not derive from today.",
+    );
+  }
+
+  const shared = assertMondayIncidentWeek(sharedRaw.trim(), "--incident-week");
+  return { harlowIncidentWeek: shared, sashaIncidentWeek: shared };
+}
+
+export function parseRepairArgs(argv: string[] = process.argv.slice(2)): RepairArgs {
+  const { harlowIncidentWeek, sashaIncidentWeek } = resolveIncidentWeeks(argv);
   const harlow = parseExpectedSnapshot(readArg(argv, "--harlow-snapshot"), "harlow");
   const sasha = parseExpectedSnapshot(readArg(argv, "--sasha-snapshot"), "sasha");
 
@@ -152,7 +191,8 @@ export function parseRepairArgs(argv: string[] = process.argv.slice(2)): RepairA
 
   return {
     apply: parseBooleanFlag(argv, "--apply"),
-    incidentWeek,
+    harlowIncidentWeek,
+    sashaIncidentWeek,
     harlow,
     sasha,
   };
