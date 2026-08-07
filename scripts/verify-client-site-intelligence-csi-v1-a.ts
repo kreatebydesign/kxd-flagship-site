@@ -487,13 +487,16 @@ async function main() {
     assert.equal(CSI_SIGNATURE_HEADER, "x-kxd-csi-signature");
     assert.equal(CSI_TIMESTAMP_HEADER, "x-kxd-csi-timestamp");
 
-    // Migration name follows ascending sequence after 20260822 — not calendar day Aug 7.
-    assert.ok(migrationsIndex.includes("20260822_continuous_intelligence_ops"));
+    // On clean main release: CSI migration follows junior-creator timer safety.
+    // Do not require Sign/Continuous Intelligence migrations on this branch.
+    assert.ok(migrationsIndex.includes("20260807_junior_creator_timer_safety"));
     assert.ok(migrationsIndex.includes("20260823_client_site_events"));
     assert.ok(
       migrationsIndex.indexOf("20260823_client_site_events") >
-        migrationsIndex.indexOf("20260822_continuous_intelligence_ops"),
+        migrationsIndex.indexOf("20260807_junior_creator_timer_safety"),
     );
+    assert.ok(!migrationsIndex.includes("20260822_continuous_intelligence_ops"));
+    assert.ok(!migrationsIndex.includes("20260819_kxd_sign_operator_signature_profiles"));
 
     assert.ok(existsSync(join(root, "lib/client-site-intelligence/index.ts")));
     assert.ok(existsSync(join(root, "migrations/20260823_client_site_events.ts")));
