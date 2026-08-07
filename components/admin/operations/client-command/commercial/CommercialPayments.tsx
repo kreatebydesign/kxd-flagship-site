@@ -3,16 +3,29 @@ import type { ClientWorkspaceBundle } from "@/lib/client-command/workspace-types
 import { formatPaymentMethodLabel } from "@/lib/client-command/commercial/map-agreement";
 import { WorkspaceEmpty } from "@/components/admin/operations/client-workspace/WorkspacePrimitives";
 import { CommercialStatusBadge, statusTone } from "./CommercialStatusBadge";
+import { RecordExternalPaymentForm } from "./RecordExternalPaymentForm";
+
+function provenanceLabel(source: string | null, livemode: boolean | null): string {
+  if (source === "imported-external-stripe-payment") {
+    return livemode === true ? "Imported Stripe · LIVE" : livemode === false ? "Imported Stripe · TEST" : "Imported Stripe";
+  }
+  if (source === "kxd-stripe-lifecycle") return "KXD Stripe lifecycle · TEST";
+  if (source === "manual-non-stripe") return "Manual · non-Stripe";
+  return "Payment reference";
+}
 
 export function CommercialPayments({ data }: { data: ClientWorkspaceBundle }) {
   const rows = data.commercial.payments;
+  const eligible = data.commercial.externalPaymentEligibleAgreements ?? [];
 
   return (
     <div className="kxd-os-commercial-section">
       <p className="kxd-os-commercial-lead">
-        Safe Stripe metadata only. Card numbers and CVC are never stored or shown. Live charging is
-        not available from this workspace.
+        Safe Stripe metadata only. Card numbers and CVC are never stored or shown. Recording an
+        external payment reconciles an already-completed payment — it does not charge a card.
       </p>
+
+      <RecordExternalPaymentForm clientId={data.clientId} eligibleAgreements={eligible} />
 
       {!rows.length ? (
         <WorkspaceEmpty message="No payment records for this client." />
@@ -33,9 +46,15 @@ export function CommercialPayments({ data }: { data: ClientWorkspaceBundle }) {
                 <p className="kxd-os-commercial-card__meta">
                   Amount {row.amountLabel}
                   {" · "}
+                  {provenanceLabel(row.source, row.livemode)}
+                  {" · "}
                   {formatPaymentMethodLabel(row.cardBrand, row.cardLast4)}
                 </p>
                 <dl className="kxd-os-commercial-dl">
+                  <div>
+                    <dt>Paid</dt>
+                    <dd>{row.paidAt ? row.paidAt.slice(0, 10) : row.linkedAt?.slice(0, 10) ?? "—"}</dd>
+                  </div>
                   <div>
                     <dt>Customer</dt>
                     <dd>{row.stripeCustomerId ?? "—"}</dd>
@@ -53,6 +72,9 @@ export function CommercialPayments({ data }: { data: ClientWorkspaceBundle }) {
                     <dd>{row.stripeChargeId ?? "—"}</dd>
                   </div>
                 </dl>
+                {row.operatorNote ? (
+                  <p className="kxd-os-commercial-notes">{row.operatorNote}</p>
+                ) : null}
               </div>
               <div className="kxd-os-commercial-card__actions">
                 {row.agreementId ? (

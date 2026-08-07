@@ -4,6 +4,8 @@ export const REVENUE_EVENT_LABELS: Record<RevenueEventType, string> = {
   "revenue.proposal-approved": "Proposal Approved",
   "revenue.proposal-converted": "Proposal Converted",
   "revenue.contract-signed": "Contract Signed",
+  "revenue.contract-executed": "Direct Agreement Executed",
+  "revenue.external-payment-recorded": "External Payment Recorded",
   "revenue.retainer-started": "Retainer Started",
   "revenue.retainer-renewed": "Retainer Renewed",
   "revenue.retainer-ended": "Retainer Ended",

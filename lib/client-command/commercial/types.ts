@@ -75,6 +75,21 @@ export interface CommercialPaymentRow {
   cardBrand: string | null;
   cardLast4: string | null;
   linkedAt: string | null;
+  source: string | null;
+  livemode: boolean | null;
+  paidAt: string | null;
+  operatorNote: string | null;
+  idempotencyKey: string | null;
+}
+
+/** Agreements eligible for Record External Payment from Commercial → Payments. */
+export interface CommercialExternalPaymentEligibleAgreement {
+  agreementId: number;
+  title: string;
+  commercialStatus: string;
+  obligationAmountCents: number;
+  currency: string;
+  href: string;
 }
 
 export interface CommercialAuthorizationRow {
@@ -154,4 +169,5 @@ export interface ClientCommercialWorkspaceSnapshot {
   receipts: CommercialReceiptRow[];
   timeline: CommercialTimelineRow[];
   primaryAgreementId: number | null;
+  externalPaymentEligibleAgreements: CommercialExternalPaymentEligibleAgreement[];
 }

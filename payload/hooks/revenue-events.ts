@@ -48,23 +48,40 @@ export const publishContractRevenueHook: CollectionAfterChangeHook = async ({
 }) => {
   const status = String(doc.status ?? "");
   const prev = String((previousDoc as AnyDoc | undefined)?.status ?? "");
-  if (status !== "signed" || prev === "signed") return doc;
+  const recognized = status === "signed" || status === "executed";
+  const wasRecognized = prev === "signed" || prev === "executed";
+  if (!recognized || wasRecognized) return doc;
 
   try {
     const contractId = doc.id as number;
     const clientId = relId(doc.client);
     const monthly = Number(doc.monthlyAmount ?? 0);
     const project = Number(doc.projectAmount ?? 0);
+    const isDirectAgreement = String(doc.agreementSource ?? "") === "direct-agreement";
+    const eventType = isDirectAgreement
+      ? "revenue.contract-executed"
+      : "revenue.contract-signed";
     await publishRevenueEvent(
       {
-        eventType: "revenue.contract-signed",
-        title: `Contract signed · ${doc.title}`,
-        summary: "Contract executed — contracted revenue recognized.",
+        eventType,
+        title: isDirectAgreement
+          ? `Direct Agreement executed · ${doc.title}`
+          : `Contract signed · ${doc.title}`,
+        summary: isDirectAgreement
+          ? "Direct Agreement executed — contracted value recognized (not MRR unless monthly)."
+          : "Contract executed — contracted revenue recognized.",
         amount: project + monthly * 12,
         clientId,
         contractId,
         proposalId: relId(doc.proposal) ?? undefined,
-        dedupeKey: `contract-signed:${contractId}`,
+        dedupeKey: isDirectAgreement
+          ? `contract-executed:${contractId}`
+          : `contract-signed:${contractId}`,
+        metadata: {
+          agreementSource: doc.agreementSource ?? null,
+          projectAmount: project,
+          monthlyAmount: monthly,
+        },
       },
       req.payload,
     );

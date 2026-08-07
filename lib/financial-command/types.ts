@@ -2,6 +2,8 @@ export type RevenueEventType =
   | "revenue.proposal-approved"
   | "revenue.proposal-converted"
   | "revenue.contract-signed"
+  | "revenue.contract-executed"
+  | "revenue.external-payment-recorded"
   | "revenue.retainer-started"
   | "revenue.retainer-renewed"
   | "revenue.retainer-ended"

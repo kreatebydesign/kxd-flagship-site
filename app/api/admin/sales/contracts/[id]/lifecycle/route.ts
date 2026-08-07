@@ -27,6 +27,7 @@ import {
   finalizeDirectAgreement,
   linkPaymentReferences,
   recordExternalAcceptance,
+  recordExternalPayment,
   recordPaymentAuthorization,
 } from "@/lib/direct-agreement";
 
@@ -112,12 +113,67 @@ export async function POST(
               : null,
             receiptUrl: body.receiptUrl ? String(body.receiptUrl) : null,
             paymentStatus: body.paymentStatus ? String(body.paymentStatus) : null,
+            source: body.source
+              ? (String(body.source) as
+                  | "imported-external-stripe-payment"
+                  | "kxd-stripe-lifecycle"
+                  | "manual-non-stripe")
+              : undefined,
+            livemode:
+              body.livemode === true ? true : body.livemode === false ? false : null,
+            amountCents:
+              body.amountCents != null && body.amountCents !== ""
+                ? Number(body.amountCents)
+                : null,
+            currency: body.currency ? String(body.currency) : null,
+            paidAt: body.paidAt ? String(body.paidAt) : null,
+            operatorNote: body.operatorNote ? String(body.operatorNote) : null,
+            idempotencyKey: body.idempotencyKey ? String(body.idempotencyKey) : null,
           },
         });
         return NextResponse.json({
           ok: true,
           commercialStatus: result.pkg.commercialStatus,
           paymentReferences: result.pkg.paymentReferences,
+        });
+      }
+      case "record-external-payment": {
+        const result = await recordExternalPayment({
+          contractId: id,
+          actor,
+          payment: {
+            source: String(body.source ?? "") as
+              | "imported-external-stripe-payment"
+              | "kxd-stripe-lifecycle"
+              | "manual-non-stripe",
+            amountCents: Number(body.amountCents),
+            currency: String(body.currency ?? "USD"),
+            paidAt: String(body.paidAt ?? ""),
+            livemode:
+              body.livemode === true ? true : body.livemode === false ? false : null,
+            stripeCustomerId: body.stripeCustomerId
+              ? String(body.stripeCustomerId)
+              : null,
+            stripePaymentIntentId: body.stripePaymentIntentId
+              ? String(body.stripePaymentIntentId)
+              : null,
+            stripeChargeId: body.stripeChargeId ? String(body.stripeChargeId) : null,
+            stripeInvoiceId: body.stripeInvoiceId ? String(body.stripeInvoiceId) : null,
+            receiptUrl: body.receiptUrl ? String(body.receiptUrl) : null,
+            hostedInvoiceUrl: body.hostedInvoiceUrl
+              ? String(body.hostedInvoiceUrl)
+              : null,
+            operatorNote: body.operatorNote ? String(body.operatorNote) : null,
+          },
+        });
+        return NextResponse.json({
+          ok: true,
+          commercialStatus: result.pkg.commercialStatus,
+          paymentReferences: result.pkg.paymentReferences,
+          idempotentReplay: result.idempotentReplay,
+          billingProfile: result.billingProfile,
+          confirmation: result.confirmation,
+          noStripeMutation: true,
         });
       }
       case "activate-direct-agreement-service": {

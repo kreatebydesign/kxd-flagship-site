@@ -6,6 +6,8 @@ const EVENT_TYPES = [
   { label: "Proposal Approved", value: "revenue.proposal-approved" },
   { label: "Proposal Converted", value: "revenue.proposal-converted" },
   { label: "Contract Signed", value: "revenue.contract-signed" },
+  { label: "Direct Agreement Executed", value: "revenue.contract-executed" },
+  { label: "External Payment Recorded", value: "revenue.external-payment-recorded" },
   { label: "Retainer Started", value: "revenue.retainer-started" },
   { label: "Retainer Renewed", value: "revenue.retainer-renewed" },
   { label: "Retainer Ended", value: "revenue.retainer-ended" },
