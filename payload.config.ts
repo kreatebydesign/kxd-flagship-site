@@ -9,6 +9,7 @@ import sharp from "sharp";
 
 import { AutomationEvents } from "./payload/collections/AutomationEvents.ts";
 import { AutomationNotifications } from "./payload/collections/AutomationNotifications.ts";
+import { ClientSiteEvents } from "./payload/collections/ClientSiteEvents.ts";
 import { BrandKitAssets } from "./payload/collections/BrandKitAssets.ts";
 import { BrandKits } from "./payload/collections/BrandKits.ts";
 import { CaseStudies } from "./payload/collections/CaseStudies.ts";
@@ -240,6 +241,7 @@ export default buildConfig({
     TrainingLearnerProgress,
     AutomationEvents,
     AutomationNotifications,
+    ClientSiteEvents,
     Playbooks,
     PlaybookSteps,
     PlaybookRuns,
