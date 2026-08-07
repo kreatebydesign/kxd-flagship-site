@@ -15,13 +15,21 @@ import {
   assertOneTimeHasNoRecurring,
   deriveStructuredPaymentTermsFromDirectAgreement,
 } from "./payment-terms";
-import type { CreateDirectAgreementInput } from "./types";
+import type { CreateDirectAgreementInput, DirectAgreementPaymentReferences } from "./types";
+import {
+  assertNoStripeMutationInExternalPaymentPath,
+  findDuplicateStripeObjectConflict,
+  obligationAmountCents,
+  validateRecordExternalPaymentInput,
+  type RecordExternalPaymentInput,
+} from "./external-payment";
 import {
   parseStoredDirectAgreementTerms,
   validateCreateDirectAgreementInput,
   validateExternalAcceptanceInput,
   validatePaymentAuthorizationInput,
 } from "./validate";
+import { publishRevenueEvent } from "@/lib/financial-command/timeline-publish";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDoc = Record<string, any>;
@@ -545,11 +553,60 @@ export async function recordPaymentAuthorization(input: {
   return { pkg };
 }
 
+/**
+ * Ensure a KXD-only billing-profiles row exists for organizational readiness.
+ * Does not create or link Stripe customers. Does not write LIVE Stripe IDs.
+ */
+export async function ensureBillingProfileShell(input: {
+  clientId: number;
+  billingContact?: string | null;
+  billingEmail?: string | null;
+  actor: string;
+}): Promise<{ billingProfileId: number; created: boolean }> {
+  const payload = await payloadClient();
+  const existing = await payload.find({
+    collection: "billing-profiles" as never,
+    where: { client: { equals: input.clientId } },
+    limit: 1,
+    depth: 0,
+    overrideAccess: true,
+  });
+  if (existing.docs[0]) {
+    return {
+      billingProfileId: Number((existing.docs[0] as AnyDoc).id),
+      created: false,
+    };
+  }
+
+  const created = (await payload.create({
+    collection: "billing-profiles" as never,
+    data: {
+      client: input.clientId,
+      billingStatus: "partial",
+      currencyCode: "usd",
+      paymentTerms: "due-on-receipt",
+      billingContact: input.billingContact?.trim() || undefined,
+      billingEmail: input.billingEmail?.trim() || undefined,
+      missingSetupFlags: [
+        ...(input.billingEmail ? [] : ["missing-billing-email"]),
+        ...(input.billingContact ? [] : ["missing-billing-contact"]),
+        "missing-external-id",
+      ],
+      executiveNotes: `Billing profile shell created during external payment reconciliation by ${input.actor}. No Stripe customer linked.`,
+    } as never,
+    overrideAccess: true,
+  })) as AnyDoc;
+
+  return { billingProfileId: Number(created.id), created: true };
+}
+
 export async function linkPaymentReferences(input: {
   contractId: number;
   actor: string;
-  references: NonNullable<ContractLifecyclePackage["paymentReferences"]>;
+  references: DirectAgreementPaymentReferences;
   markPaid?: boolean;
+  /** When true, skip duplicate Stripe-ID rejection (caller already validated). */
+  allowProvenanceMerge?: boolean;
 }): Promise<{ pkg: ContractLifecyclePackage }> {
   const payload = await payloadClient();
   const contract = (await payload.findByID({
@@ -562,13 +619,38 @@ export async function linkPaymentReferences(input: {
   if (!clientId) throw new Error("Client relationship required.");
 
   let pkg = normalizeLifecyclePackage(contract.lifecyclePackage);
+
+  if (!input.allowProvenanceMerge) {
+    const conflict = findDuplicateStripeObjectConflict(pkg.paymentReferences, {
+      stripePaymentIntentId: input.references.stripePaymentIntentId,
+      stripeChargeId: input.references.stripeChargeId,
+      stripeInvoiceId: input.references.stripeInvoiceId,
+      idempotencyKey: input.references.idempotencyKey,
+    });
+    if (
+      conflict &&
+      !conflict.startsWith("duplicate:") &&
+      pkg.paymentReferences?.paymentStatus === "paid"
+    ) {
+      throw new Error(conflict);
+    }
+    if (
+      conflict?.startsWith("duplicate:") &&
+      pkg.commercialStatus === "paid" &&
+      input.markPaid
+    ) {
+      return { pkg };
+    }
+  }
+
+  const linkedAt = input.references.linkedAt ?? new Date().toISOString();
   pkg = {
     ...pkg,
     paymentReferences: {
       ...pkg.paymentReferences,
       ...input.references,
-      linkedAt: new Date().toISOString(),
-      linkedBy: input.actor,
+      linkedAt,
+      linkedBy: input.references.linkedBy ?? input.actor,
     },
     commercialStatus: input.markPaid
       ? "paid"
@@ -581,6 +663,10 @@ export async function linkPaymentReferences(input: {
     action: input.markPaid
       ? "direct-agreement.payment-recorded"
       : "direct-agreement.payment-references-linked",
+    toStatus: input.markPaid ? "paid" : pkg.commercialStatus ?? null,
+    reason: input.references.source
+      ? `Payment references linked (source=${input.references.source}; no Stripe mutation)`
+      : "Safe Stripe metadata only. No live charge performed by KXD OS.",
   });
 
   await payload.update({
@@ -602,15 +688,207 @@ export async function linkPaymentReferences(input: {
       title: input.markPaid
         ? `Payment recorded — ${String(contract.title)}`
         : `Payment references linked — ${String(contract.title)}`,
-      summary: "Safe Stripe metadata only. No live charge performed by KXD OS.",
+      summary: "Safe Stripe metadata only. No Stripe charge was created by KXD OS.",
       author: input.actor,
-      metadata: { ...(input.references as Record<string, unknown>) },
+      metadata: {
+        source: input.references.source ?? null,
+        livemode: input.references.livemode ?? null,
+        idempotencyKey: input.references.idempotencyKey ?? null,
+        stripePaymentIntentId: input.references.stripePaymentIntentId ?? null,
+        stripeChargeId: input.references.stripeChargeId ?? null,
+        stripeInvoiceId: input.references.stripeInvoiceId ?? null,
+        amountCents: input.references.amountCents ?? null,
+      },
       internalOnly: true,
     },
     payload,
   );
 
   return { pkg };
+}
+
+/**
+ * Operator reconciliation of an already-completed external payment.
+ * Does not call Stripe. Does not create charges, invoices, customers, or subscriptions.
+ */
+export async function recordExternalPayment(input: {
+  contractId: number;
+  actor: string;
+  payment: RecordExternalPaymentInput;
+}): Promise<{
+  pkg: ContractLifecyclePackage;
+  idempotentReplay: boolean;
+  billingProfile: { billingProfileId: number; created: boolean };
+  confirmation: {
+    title: string;
+    amountLabel: string;
+    sourceLabel: string;
+    commercialStatus: "paid";
+    recordedAt: string;
+    nextAction: "activate-service";
+    noStripeChargeCreated: true;
+  };
+}> {
+  assertNoStripeMutationInExternalPaymentPath();
+
+  const payload = await payloadClient();
+  const contract = (await payload.findByID({
+    collection: CONTRACTS as never,
+    id: input.contractId,
+    depth: 0,
+    overrideAccess: true,
+  })) as AnyDoc;
+  const clientId = asId(contract.client);
+  if (!clientId) throw new Error("Client relationship required.");
+
+  const pkg = normalizeLifecyclePackage(contract.lifecyclePackage);
+  const daTerms = parseStoredDirectAgreementTerms(contract.directAgreementTerms);
+  const obligationCents = obligationAmountCents({
+    daTerms,
+    pkg,
+    projectAmountDollars:
+      contract.projectAmount != null ? Number(contract.projectAmount) : null,
+  });
+
+  const validated = validateRecordExternalPaymentInput(input.payment, {
+    contractId: input.contractId,
+    commercialStatus: pkg.commercialStatus,
+    agreementSource: contract.agreementSource ? String(contract.agreementSource) : null,
+    obligationCents,
+    existingReferences: pkg.paymentReferences,
+  });
+
+  if (!validated.ok) {
+    throw new Error(
+      Object.entries(validated.errors)
+        .map(([k, v]) => `${k}: ${v}`)
+        .join("; "),
+    );
+  }
+
+  const billingProfile = await ensureBillingProfileShell({
+    clientId,
+    billingContact: daTerms?.billingContactName ?? daTerms?.payerLegalName ?? null,
+    billingEmail: daTerms?.billingEmail ?? null,
+    actor: input.actor,
+  });
+
+  if (validated.idempotentReplay) {
+    const amountCents = validated.references.amountCents ?? obligationCents ?? 0;
+    return {
+      pkg,
+      idempotentReplay: true,
+      billingProfile,
+      confirmation: {
+        title: "Payment already recorded",
+        amountLabel: `$${(amountCents / 100).toFixed(2)}`,
+        sourceLabel:
+          validated.references.source === "manual-non-stripe" ? "Manual" : "Stripe",
+        commercialStatus: "paid",
+        recordedAt: validated.references.importedAt ?? validated.references.linkedAt ?? new Date().toISOString(),
+        nextAction: "activate-service",
+        noStripeChargeCreated: true,
+      },
+    };
+  }
+
+  const recordedAt = new Date().toISOString();
+  const references: DirectAgreementPaymentReferences = {
+    ...validated.references,
+    importedAt: recordedAt,
+    importedBy: input.actor,
+    linkedAt: recordedAt,
+    linkedBy: input.actor,
+  };
+
+  const { pkg: next } = await linkPaymentReferences({
+    contractId: input.contractId,
+    actor: input.actor,
+    references,
+    markPaid: true,
+    allowProvenanceMerge: true,
+  });
+
+  // Append a more specific audit event for external reconciliation.
+  let sealed = next;
+  sealed = appendAudit(sealed, {
+    actor: input.actor,
+    action: "direct-agreement.external-payment-recorded",
+    fromStatus: pkg.commercialStatus ?? null,
+    toStatus: "paid",
+    reason: `External payment reconciled (${references.source}; livemode=${String(references.livemode)}; no Stripe mutation)`,
+    correlationId: references.idempotencyKey ?? null,
+  });
+
+  await payload.update({
+    collection: CONTRACTS as never,
+    id: input.contractId,
+    data: { lifecyclePackage: sealed } as never,
+    overrideAccess: true,
+  });
+
+  const amountCents = references.amountCents ?? obligationCents ?? 0;
+  await publishRevenueEvent(
+    {
+      eventType: "revenue.external-payment-recorded",
+      title: `External payment recorded · ${String(contract.title)}`,
+      summary:
+        "Already-completed payment reconciled into KXD OS. No Stripe charge was created.",
+      amount: amountCents / 100,
+      clientId,
+      contractId: input.contractId,
+      dedupeKey: references.idempotencyKey ?? `external-payment:${input.contractId}`,
+      metadata: {
+        source: references.source,
+        livemode: references.livemode,
+        stripePaymentIntentId: references.stripePaymentIntentId,
+        stripeChargeId: references.stripeChargeId,
+        stripeInvoiceId: references.stripeInvoiceId,
+        billingProfileId: billingProfile.billingProfileId,
+        noStripeMutation: true,
+      },
+    },
+    payload,
+  );
+
+  await publishClientActivity(
+    {
+      clientId,
+      sourceModule: "Sales",
+      sourceType: "contract",
+      sourceId: input.contractId,
+      eventType: "direct-agreement.external-payment-recorded",
+      title: `External payment recorded — ${String(contract.title)}`,
+      summary: `${(amountCents / 100).toFixed(2)} ${references.currency ?? "USD"} · ${references.source} · Paid. No Stripe charge was created by KXD OS.`,
+      author: input.actor,
+      metadata: {
+        source: references.source,
+        livemode: references.livemode,
+        idempotencyKey: references.idempotencyKey,
+        amountCents,
+        billingProfileId: billingProfile.billingProfileId,
+        billingProfileCreated: billingProfile.created,
+        noStripeMutation: true,
+      },
+      internalOnly: true,
+    },
+    payload,
+  );
+
+  return {
+    pkg: sealed,
+    idempotentReplay: false,
+    billingProfile,
+    confirmation: {
+      title: "Payment recorded",
+      amountLabel: `$${(amountCents / 100).toFixed(2)}`,
+      sourceLabel: references.source === "manual-non-stripe" ? "Manual" : "Stripe",
+      commercialStatus: "paid",
+      recordedAt,
+      nextAction: "activate-service",
+      noStripeChargeCreated: true,
+    },
+  };
 }
 
 export async function activateDirectAgreementService(input: {

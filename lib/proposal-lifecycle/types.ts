@@ -334,17 +334,7 @@ export interface ContractLifecyclePackage {
   externalAcceptance?: import("../direct-agreement/types.ts").ExternalAcceptanceRecord | null;
   /** Payment authorization metadata — Stripe IDs / brand / last4 only. */
   paymentAuthorization?: import("../direct-agreement/types.ts").PaymentAuthorizationRecord | null;
-  paymentReferences?: {
-    stripeCustomerId?: string | null;
-    stripeInvoiceId?: string | null;
-    stripePaymentIntentId?: string | null;
-    stripeChargeId?: string | null;
-    hostedInvoiceUrl?: string | null;
-    receiptUrl?: string | null;
-    paymentStatus?: string | null;
-    linkedAt?: string | null;
-    linkedBy?: string | null;
-  } | null;
+  paymentReferences?: import("../direct-agreement/types.ts").DirectAgreementPaymentReferences | null;
 }
 
 export interface LifecycleAuditEvent {

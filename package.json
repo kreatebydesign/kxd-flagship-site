@@ -85,6 +85,7 @@
     "verify:branded-client-reports": "tsx scripts/verify-branded-client-reports.ts",
     "verify:stripe-no-raw-card": "tsx scripts/verify-stripe-no-raw-card-data.ts",
     "verify:direct-agreement": "tsx scripts/verify-direct-agreement-workflow.ts",
+    "verify:external-payment": "tsx scripts/verify-external-payment-reconciliation.ts",
     "verify:portal-date-hydration": "tsx scripts/verify-portal-date-hydration.ts",
     "verify:staff-experience": "tsx scripts/verify-staff-experience.ts",
     "verify:review-inbox-bulk-complete": "tsx scripts/verify-review-inbox-bulk-complete.ts",

@@ -3,6 +3,7 @@ export type {
   CommercialAgreementRow,
   CommercialAuthorizationRow,
   CommercialDocumentRow,
+  CommercialExternalPaymentEligibleAgreement,
   CommercialInvoiceRow,
   CommercialOverviewSnapshot,
   CommercialPaymentRow,

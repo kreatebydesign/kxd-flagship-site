@@ -6,6 +6,11 @@ import { isOpenProposalStatus } from "@/lib/executive-proposals/lifecycle";
 import { isUnsignedContract } from "@/lib/contracts/lifecycle";
 import type { ExecutiveFinancialMetrics } from "./types";
 import { relId } from "./timeline-publish";
+import {
+  contractedValueFromContract,
+  oneTimeContractValue,
+  shouldIncludeRevenueEventInLifetimeValue,
+} from "./contract-value";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDoc = Record<string, any>;
@@ -154,9 +159,27 @@ export async function buildExecutiveFinancialMetrics(
     const status = String(contract.status ?? "");
     const monthly = Number(contract.monthlyAmount ?? 0);
     const project = Number(contract.projectAmount ?? 0);
+    const recognized = contractedValueFromContract(contract);
 
-    if (status === "signed") {
-      contractedRevenue += project + monthly * 12;
+    if (recognized > 0) {
+      contractedRevenue += recognized;
+      // One-time Direct Agreement / project contract value — not MRR.
+      oneTimeProjectRevenue += oneTimeContractValue(contract);
+
+      const clientId = relId(contract.client);
+      if (clientId) {
+        const clientName =
+          typeof contract.client === "object" && contract.client !== null
+            ? String((contract.client as AnyDoc).name ?? "Client")
+            : "Client";
+        const existing = revenueByClient.get(clientId) ?? {
+          clientName,
+          mrr: 0,
+          total: 0,
+        };
+        existing.total += recognized;
+        revenueByClient.set(clientId, existing);
+      }
     }
     if (isUnsignedContract(status) && contract.sentAt) {
       atRiskRevenue += project + monthly * 12;
@@ -314,13 +337,17 @@ export async function buildClientFinancialMetrics(
     const status = String(contract.status ?? "");
     const monthly = Number(contract.monthlyAmount ?? 0);
     const project = Number(contract.projectAmount ?? 0);
-    if (status === "signed") contractedValue += project + monthly * 12;
+    contractedValue += contractedValueFromContract(contract);
     if (isUnsignedContract(status)) atRiskAmount += project + monthly * 12;
   }
 
+  // contractedValue already includes signed/executed agreements — skip duplicate
+  // contract revenue-event amounts so one-time DAs are not double-counted in LTV.
   let lifetimeValue = mrr * 12 + projectValue + contractedValue;
   for (const event of eventsR.docs as AnyDoc[]) {
-    if (event.amount != null) lifetimeValue += Number(event.amount);
+    if (event.amount == null) continue;
+    if (!shouldIncludeRevenueEventInLifetimeValue(event.eventType)) continue;
+    lifetimeValue += Number(event.amount);
   }
 
   return {

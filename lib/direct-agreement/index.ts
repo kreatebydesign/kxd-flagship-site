@@ -3,10 +3,12 @@ export type {
   CommercialStructure,
   CreateDirectAgreementInput,
   DirectAgreementCommercialStatus,
+  DirectAgreementPaymentReferences,
   DirectAgreementTerms,
   ExternalAcceptanceMethod,
   ExternalAcceptanceRecord,
   PaymentAuthorizationRecord,
+  PaymentProvenanceSource,
   RolloverPolicy,
 } from "./types";
 export {
@@ -15,6 +17,7 @@ export {
   DIRECT_AGREEMENT_COMMERCIAL_STATUSES,
   EXTERNAL_ACCEPTANCE_METHODS,
   FORBIDDEN_CARD_FIELD_NAMES,
+  PAYMENT_PROVENANCE_SOURCES,
   ROLLOVER_POLICIES,
 } from "./types";
 export {
@@ -27,6 +30,15 @@ export {
   validatePaymentAuthorizationInput,
 } from "./validate";
 export {
+  assertNoStripeMutationInExternalPaymentPath,
+  buildExternalPaymentIdempotencyKey,
+  findDuplicateStripeObjectConflict,
+  isEligibleForExternalPaymentRecording,
+  obligationAmountCents,
+  validateRecordExternalPaymentInput,
+  type RecordExternalPaymentInput,
+} from "./external-payment";
+export {
   assertOneTimeHasNoRecurring,
   deriveStructuredPaymentTermsFromDirectAgreement,
   directAgreementSourceLabel,
@@ -34,9 +46,11 @@ export {
 export {
   activateDirectAgreementService,
   createDirectAgreement,
+  ensureBillingProfileShell,
   finalizeDirectAgreement,
   linkPaymentReferences,
   recordExternalAcceptance,
+  recordExternalPayment,
   recordPaymentAuthorization,
 } from "./services";
 export { DEFAULT_LEGAL_COPY } from "./default-legal-copy";

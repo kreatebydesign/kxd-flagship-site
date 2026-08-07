@@ -24,11 +24,16 @@ import type {
   ClientCommercialWorkspaceSnapshot,
   CommercialAuthorizationRow,
   CommercialDocumentRow,
+  CommercialExternalPaymentEligibleAgreement,
   CommercialInvoiceRow,
   CommercialPaymentRow,
   CommercialReceiptRow,
 } from "./types";
 import { commercialAgreementHref } from "./sections";
+import {
+  isEligibleForExternalPaymentRecording,
+  obligationAmountCents,
+} from "@/lib/direct-agreement/external-payment";
 
 type AnyDoc = Record<string, unknown> & { id: number };
 
@@ -155,6 +160,7 @@ export async function loadClientCommercialWorkspace(input: {
   const authorizations: CommercialAuthorizationRow[] = [];
   const invoices: CommercialInvoiceRow[] = [];
   const receipts: CommercialReceiptRow[] = [];
+  const externalPaymentEligibleAgreements: CommercialExternalPaymentEligibleAgreement[] = [];
   const auditTimeline = [];
 
   for (const doc of contracts) {
@@ -164,9 +170,36 @@ export async function loadClientCommercialWorkspace(input: {
     const terms = pkg.structuredPaymentTerms;
     const da = parseStoredDirectAgreementTerms(doc.directAgreementTerms) as DirectAgreementTerms | null;
     const amountCents =
-      da?.oneTimeAmountCents ?? terms?.oneTimeTotalCents ?? null;
+      pkg.paymentReferences?.amountCents ??
+      da?.oneTimeAmountCents ??
+      terms?.oneTimeTotalCents ??
+      null;
     const amountLabel =
       amountCents != null && amountCents > 0 ? formatCents(amountCents as never) : "—";
+
+    if (
+      String(doc.agreementSource ?? "") === "direct-agreement" &&
+      isEligibleForExternalPaymentRecording(pkg) &&
+      ["accepted", "payment-pending"].includes(String(pkg.commercialStatus ?? ""))
+    ) {
+      const obligation =
+        obligationAmountCents({
+          daTerms: da,
+          pkg,
+          projectAmountDollars:
+            doc.projectAmount != null ? Number(doc.projectAmount) : null,
+        }) ?? 0;
+      if (obligation > 0) {
+        externalPaymentEligibleAgreements.push({
+          agreementId: contractId,
+          title,
+          commercialStatus: String(pkg.commercialStatus ?? ""),
+          obligationAmountCents: obligation,
+          currency: da?.currency ?? "USD",
+          href: commercialAgreementHref(clientId, contractId),
+        });
+      }
+    }
 
     if (pkg.paymentReferences || pkg.commercialStatus === "paid" || pkg.commercialStatus === "active") {
       payments.push({
@@ -189,6 +222,16 @@ export async function loadClientCommercialWorkspace(input: {
         cardBrand: pkg.paymentAuthorization?.cardBrand ?? null,
         cardLast4: pkg.paymentAuthorization?.cardLast4 ?? null,
         linkedAt: pkg.paymentReferences?.linkedAt ?? null,
+        source: pkg.paymentReferences?.source ?? null,
+        livemode:
+          pkg.paymentReferences?.livemode === true
+            ? true
+            : pkg.paymentReferences?.livemode === false
+              ? false
+              : null,
+        paidAt: pkg.paymentReferences?.paidAt ?? null,
+        operatorNote: pkg.paymentReferences?.operatorNote ?? null,
+        idempotencyKey: pkg.paymentReferences?.idempotencyKey ?? null,
       });
     }
 
@@ -242,15 +285,23 @@ export async function loadClientCommercialWorkspace(input: {
       });
     }
 
-    if (pkg.paymentReferences?.receiptUrl || pkg.paymentReferences?.stripeChargeId) {
+    if (
+      pkg.paymentReferences?.receiptUrl ||
+      pkg.paymentReferences?.stripeChargeId ||
+      (pkg.paymentReferences?.paymentStatus === "paid" &&
+        pkg.paymentReferences?.hostedInvoiceUrl)
+    ) {
       receipts.push({
         id: `rcpt-${contractId}`,
         title: `Receipt · ${title}`,
         amountLabel,
-        date: pkg.paymentReferences.linkedAt ?? null,
+        date: pkg.paymentReferences.paidAt ?? pkg.paymentReferences.linkedAt ?? null,
         agreementId: contractId,
         agreementTitle: title,
-        receiptUrl: pkg.paymentReferences.receiptUrl ?? null,
+        receiptUrl:
+          pkg.paymentReferences.receiptUrl ??
+          pkg.paymentReferences.hostedInvoiceUrl ??
+          null,
         stripeChargeId: pkg.paymentReferences.stripeChargeId ?? null,
       });
     }
@@ -310,6 +361,7 @@ export async function loadClientCommercialWorkspace(input: {
     receipts,
     timeline,
     primaryAgreementId: primaryAgreement?.id ?? null,
+    externalPaymentEligibleAgreements,
   };
 }
 
@@ -342,6 +394,7 @@ export function emptyCommercialWorkspace(clientId: number): ClientCommercialWork
     receipts: [],
     timeline: [],
     primaryAgreementId: null,
+    externalPaymentEligibleAgreements: [],
   };
 }
 

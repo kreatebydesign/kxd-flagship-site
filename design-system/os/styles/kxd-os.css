@@ -21525,6 +21525,259 @@ html[data-theme="dark"] .kxd-os-theme-pref__option.is-active {
   gap: var(--kxd-os-space-4);
 }
 
+/* ── Record External Payment (Commercial → Payments) ─────────────────── */
+
+.kxd-os-commercial-record-payment {
+  display: flex;
+  flex-direction: column;
+  gap: var(--kxd-os-space-4);
+  margin-bottom: var(--kxd-os-space-5);
+}
+
+.kxd-os-commercial-record-payment__cta {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.1rem 1.2rem;
+  border: 1px solid rgba(194, 170, 114, 0.45);
+  border-radius: var(--kxd-os-radius-md);
+  background: linear-gradient(180deg, rgba(194, 170, 114, 0.1), var(--kxd-os-bg-surface));
+}
+
+.kxd-os-commercial-record-payment__cta h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--kxd-os-text-primary);
+}
+
+.kxd-os-commercial-record-payment__cta p {
+  margin: 0;
+  max-width: 40rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--kxd-os-text-secondary);
+}
+
+.kxd-os-commercial-record-payment__form {
+  padding: 1.25rem 1.35rem;
+  border: 1px solid var(--kxd-os-border-strong, rgba(30, 30, 30, 0.18));
+  border-radius: var(--kxd-os-radius-md);
+  background: var(--kxd-os-bg-elevated, #fff);
+  box-shadow: var(--kxd-os-shadow-rest);
+}
+
+.kxd-os-commercial-record-payment__header {
+  margin-bottom: 1rem;
+}
+
+.kxd-os-commercial-record-payment__header h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--kxd-os-text-primary);
+}
+
+.kxd-os-commercial-record-payment__header p {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--kxd-os-text-secondary);
+}
+
+.kxd-os-commercial-record-payment__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem 1rem;
+  margin-bottom: 0.85rem;
+}
+
+.kxd-os-commercial-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 0;
+}
+
+.kxd-os-commercial-field__label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--kxd-os-text-primary);
+}
+
+.kxd-os-commercial-field__label em {
+  font-style: normal;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-faint);
+}
+
+.kxd-os-commercial-field__help {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--kxd-os-text-muted);
+}
+
+.kxd-os-commercial-field__help--block {
+  grid-column: 1 / -1;
+  margin: -0.25rem 0 0.25rem;
+}
+
+.kxd-os-commercial-control,
+.kxd-os-commercial-control--textarea {
+  width: 100%;
+  min-height: 2.65rem;
+  padding: 0.65rem 0.8rem;
+  font-family: var(--kxd-os-font-sans);
+  font-size: 0.9rem;
+  color: var(--kxd-os-text-primary);
+  background: #fff;
+  border: 1.5px solid rgba(28, 28, 28, 0.28);
+  border-radius: 0.4rem;
+  outline: none;
+  appearance: none;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    background-color 140ms ease;
+}
+
+select.kxd-os-commercial-control {
+  background-image: linear-gradient(45deg, transparent 50%, #555 50%),
+    linear-gradient(135deg, #555 50%, transparent 50%);
+  background-position:
+    calc(100% - 16px) calc(50% - 3px),
+    calc(100% - 11px) calc(50% - 3px);
+  background-size:
+    5px 5px,
+    5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 2rem;
+}
+
+.kxd-os-commercial-control--textarea {
+  min-height: 5.5rem;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.kxd-os-commercial-control:hover,
+.kxd-os-commercial-control--textarea:hover {
+  border-color: rgba(28, 28, 28, 0.45);
+}
+
+.kxd-os-commercial-control:focus,
+.kxd-os-commercial-control--textarea:focus {
+  border-color: #1f5fbf;
+  box-shadow:
+    0 0 0 3px rgba(31, 95, 191, 0.18),
+    inset 0 1px 2px rgba(0, 0, 0, 0.03);
+  background: #fff;
+}
+
+.kxd-os-commercial-record-payment__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 0.35rem;
+}
+
+.kxd-os-commercial-record-payment__error {
+  margin: 0.35rem 0 0;
+  padding: 0.65rem 0.8rem;
+  border-radius: 0.4rem;
+  border: 1px solid rgba(176, 42, 42, 0.35);
+  background: rgba(176, 42, 42, 0.08);
+  color: #8a1f1f;
+  font-size: 0.875rem;
+  font-weight: 550;
+}
+
+.kxd-os-commercial-confirm {
+  padding: 1.25rem 1.35rem;
+  border: 2px solid #1f7a3a;
+  border-radius: var(--kxd-os-radius-md);
+  background: linear-gradient(180deg, rgba(31, 122, 58, 0.12), #fff);
+  box-shadow: 0 8px 24px rgba(20, 70, 35, 0.08);
+}
+
+.kxd-os-commercial-confirm__eyebrow {
+  margin: 0 0 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #1f7a3a;
+}
+
+.kxd-os-commercial-confirm__title {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 650;
+  color: #143d22;
+}
+
+.kxd-os-commercial-confirm__summary {
+  margin: 0.35rem 0 0.85rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--kxd-os-text-primary);
+}
+
+.kxd-os-commercial-confirm__meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem 1rem;
+  margin: 0 0 0.85rem;
+}
+
+.kxd-os-commercial-confirm__meta dt {
+  font-size: 0.7rem;
+  font-weight: 650;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-faint);
+}
+
+.kxd-os-commercial-confirm__meta dd {
+  margin: 0.15rem 0 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--kxd-os-text-primary);
+}
+
+.kxd-os-commercial-confirm__notice {
+  margin: 0 0 1rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 0.35rem;
+  background: rgba(20, 61, 34, 0.08);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #143d22;
+}
+
+.kxd-os-commercial-confirm__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+}
+
+.kxd-os-commercial-confirm__done {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 650;
+  color: #1f7a3a;
+}
+
 @media (max-width: 1180px) {
   .kxd-os-commercial-kpi-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -21546,6 +21799,15 @@ html[data-theme="dark"] .kxd-os-theme-pref__option.is-active {
 
   .kxd-os-commercial-action-grid {
     grid-template-columns: 1fr;
+  }
+
+  .kxd-os-commercial-record-payment__grid,
+  .kxd-os-commercial-confirm__meta {
+    grid-template-columns: 1fr;
+  }
+
+  .kxd-os-commercial-record-payment__cta {
+    flex-direction: column;
   }
 
   .kxd-os-commercial-timeline--rail .kxd-os-commercial-timeline__item {

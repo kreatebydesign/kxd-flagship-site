@@ -155,6 +155,43 @@ export type PaymentAuthorizationRecord = {
   paymentStatus?: string | null;
 };
 
+/** How a payment reference entered KXD OS — never invent Stripe charges. */
+export const PAYMENT_PROVENANCE_SOURCES = [
+  "imported-external-stripe-payment",
+  "kxd-stripe-lifecycle",
+  "manual-non-stripe",
+] as const;
+export type PaymentProvenanceSource = (typeof PAYMENT_PROVENANCE_SOURCES)[number];
+
+/**
+ * Safe payment linkage stored on lifecyclePackage.paymentReferences.
+ * Never stores PAN, CVC, or raw card credentials.
+ */
+export type DirectAgreementPaymentReferences = {
+  stripeCustomerId?: string | null;
+  stripeInvoiceId?: string | null;
+  stripePaymentIntentId?: string | null;
+  stripeChargeId?: string | null;
+  hostedInvoiceUrl?: string | null;
+  receiptUrl?: string | null;
+  paymentStatus?: string | null;
+  linkedAt?: string | null;
+  linkedBy?: string | null;
+  /** Recorded payment amount in cents (obligation-compatible). */
+  amountCents?: number | null;
+  currency?: string | null;
+  /** Calendar/ISO date the external payment completed. */
+  paidAt?: string | null;
+  operatorNote?: string | null;
+  source?: PaymentProvenanceSource | null;
+  /** true = LIVE Stripe object; false = TEST; null = non-Stripe / unknown. */
+  livemode?: boolean | null;
+  importedAt?: string | null;
+  importedBy?: string | null;
+  /** Deterministic key — prevents duplicate financial effects. */
+  idempotencyKey?: string | null;
+};
+
 /** Forbidden field names — verify scripts scan for these patterns. */
 export const FORBIDDEN_CARD_FIELD_NAMES = [
   "cardNumber",

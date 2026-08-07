@@ -93,6 +93,7 @@ import * as migration_20260815_phase6_connect_c0_foundation from './20260815_pha
 import * as migration_20260816_phase6_connect_c1_messaging from './20260816_phase6_connect_c1_messaging';
 import * as migration_20260806_161412_junior_creator_shift_corrections from './20260806_161412_junior_creator_shift_corrections';
 import * as migration_20260817_direct_agreement_workflow from './20260817_direct_agreement_workflow';
+import * as migration_20260818_external_payment_revenue_event_types from './20260818_external_payment_revenue_event_types';
 
 export const migrations = [
   {
@@ -575,5 +576,11 @@ export const migrations = [
     up: migration_20260817_direct_agreement_workflow.up,
     down: migration_20260817_direct_agreement_workflow.down,
     name: '20260817_direct_agreement_workflow',
+  },
+  {
+    // External payment reconciliation — additive revenue-events enum values only.
+    up: migration_20260818_external_payment_revenue_event_types.up,
+    down: migration_20260818_external_payment_revenue_event_types.down,
+    name: '20260818_external_payment_revenue_event_types',
   },
 ];
