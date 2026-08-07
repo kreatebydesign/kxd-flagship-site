@@ -349,19 +349,28 @@ function CreatorSection({ creator, weekKey }: { creator: AdminCreatorRow; weekKe
                       letterSpacing: "0.12em",
                       textTransform: "uppercase",
                       color:
-                        shift.status === "active"
+                        shift.displayStatus === "Active"
                           ? C.goldDim
-                          : shift.status === "voided"
+                          : shift.displayStatus === "Voided/corrected"
                             ? "rgba(255,255,255,0.28)"
-                            : C.creamMuted,
+                            : shift.displayStatus === "Auto-stopped"
+                              ? "#e0a86a"
+                              : C.creamMuted,
                     }}
                   >
-                    {shift.status}
+                    {shift.displayStatus}
+                    {shift.stopReason ? ` · ${shift.stopReason}` : ""}
                   </p>
                   <p style={{ fontFamily: C.sans, fontSize: "0.75rem", color: C.cream, marginTop: "0.35rem" }}>
                     {fmtDateTime(shift.startedAt)}
                     {shift.endedAt ? ` → ${fmtDateTime(shift.endedAt)}` : ""}
                   </p>
+                  {shift.lastActivityAt && (
+                    <p style={{ fontFamily: C.sans, fontSize: "0.75rem", color: "rgba(255,255,255,0.28)", marginTop: "0.2rem" }}>
+                      Last activity {fmtDateTime(shift.lastActivityAt)}
+                      {shift.automaticStopAt ? ` · Auto-stop applied ${fmtDateTime(shift.automaticStopAt)}` : ""}
+                    </p>
+                  )}
                   <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.28)", marginTop: "0.25rem" }}>
                     Week {shift.weekKey} · {formatHoursFromMinutes(shift.totalMinutes)} · Est.{" "}
                     {formatEarningsCents(shift.estimatedCents)}

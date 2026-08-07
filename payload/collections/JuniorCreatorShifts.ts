@@ -22,6 +22,9 @@ const FINANCIAL_AUDIT_FIELDS = [
   "weekKey",
   "hourlyRateCents",
   "payAdjustmentCents",
+  "stopReason",
+  "lastActivityAt",
+  "automaticStopAt",
 ] as const;
 
 function normalized(value: unknown): unknown {
@@ -122,10 +125,45 @@ export const JuniorCreatorShifts: CollectionConfig = {
       admin: { date: { pickerAppearance: "dayAndTime" } },
     },
     {
+      name: "lastActivityAt",
+      type: "date",
+      label: "Last Activity At",
+      admin: {
+        date: { pickerAppearance: "dayAndTime" },
+        description:
+          "Server-clock timestamp of last KXD OS activity while the shift is active. Used for inactivity safety.",
+      },
+    },
+    {
       name: "totalMinutes",
       type: "number",
       label: "Total Minutes",
       admin: { description: "Calculated server-side when a shift ends." },
+    },
+    {
+      name: "stopReason",
+      type: "select",
+      label: "Stop Reason",
+      options: [
+        { label: "Manual", value: "manual" },
+        { label: "Admin correction", value: "admin_correction" },
+        { label: "Inactivity timeout", value: "inactivity_timeout" },
+        { label: "Max shift timeout", value: "max_shift_timeout" },
+        { label: "System recovery", value: "system_recovery" },
+      ],
+      admin: {
+        position: "sidebar",
+        description: "Why the shift ended. Auto-stopped shifts are still status=completed.",
+      },
+    },
+    {
+      name: "automaticStopAt",
+      type: "date",
+      label: "Automatic Stop At",
+      admin: {
+        date: { pickerAppearance: "dayAndTime" },
+        description: "Wall-clock moment the system applied an automatic stop (may differ from endedAt).",
+      },
     },
     {
       name: "weekKey",

@@ -34,6 +34,8 @@ export type JuniorCreatorStats = {
     id: number;
     startedAt: string;
     hourlyRateCents: number;
+    lastActivityAt: string;
+    stopReason: string | null;
   } | null;
 };
 

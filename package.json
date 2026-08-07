@@ -42,6 +42,8 @@
     "verify:junior-shift-correction-permissions": "node --import tsx scripts/verify-junior-shift-correction-permissions.ts",
     "verify:junior-shift-correction-safety": "node --import tsx scripts/verify-junior-shift-correction-safety.ts",
     "verify:junior-shift-correction-concurrency": "KXD_SERVER_ONLY_SHIM=1 node --import ./scripts/shims/register-server-only.mjs --import tsx --env-file=.env.local scripts/verify-junior-shift-correction-concurrency.ts",
+    "verify:junior-timer-safety": "node --import tsx scripts/verify-junior-timer-safety.ts",
+    "inspect:junior-shift-repair": "tsx scripts/inspect-junior-shift-repair-state.ts",
     "verify:junior-assigned-tasks-runtime": "KXD_SERVER_ONLY_SHIM=1 tsx --env-file=.env.local --import ./scripts/shims/register-server-only.mjs scripts/verify-junior-assigned-tasks-runtime.ts",
     "seed:harlow-junior-tasks": "KXD_SERVER_ONLY_SHIM=1 tsx --env-file=.env.local --import ./scripts/shims/register-server-only.mjs scripts/seed-harlow-junior-assigned-tasks.ts --",
     "verify:phase6-batch-c0": "tsx scripts/verify-phase6-batch-c0.ts",

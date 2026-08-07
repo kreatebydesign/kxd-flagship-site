@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/reporting-sweep",
       "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/junior-creator-shift-safety",
+      "schedule": "*/5 * * * *"
     }
   ]
 }
