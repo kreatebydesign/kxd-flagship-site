@@ -95,6 +95,7 @@ import * as migration_20260806_161412_junior_creator_shift_corrections from './2
 import * as migration_20260817_direct_agreement_workflow from './20260817_direct_agreement_workflow';
 import * as migration_20260818_external_payment_revenue_event_types from './20260818_external_payment_revenue_event_types';
 import * as migration_20260807_junior_creator_timer_safety from './20260807_junior_creator_timer_safety';
+import * as migration_20260823_client_site_events from './20260823_client_site_events';
 
 export const migrations = [
   {
@@ -589,5 +590,12 @@ export const migrations = [
     up: migration_20260807_junior_creator_timer_safety.up,
     down: migration_20260807_junior_creator_timer_safety.down,
     name: '20260807_junior_creator_timer_safety',
+  },
+  {
+    // Client Site Intelligence csi-v1-a — Client Site Event Registry (additive).
+    // Local apply only until production migration is authorized. Not CRM / not PI meaning.
+    up: migration_20260823_client_site_events.up,
+    down: migration_20260823_client_site_events.down,
+    name: '20260823_client_site_events',
   },
 ];

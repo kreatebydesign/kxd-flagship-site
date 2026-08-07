@@ -534,6 +534,91 @@ export const EDITION_1_DECISIONS: DecisionObject[] = [
       ],
     },
   }),
+
+  decision({
+    id: "decision:client-site-intelligence-v1",
+    title: "Client Site Intelligence V1 — OTP Carts reference approval",
+    ownerRole: "founder",
+    createdAt: "2026-08-07T18:30:00.000Z",
+    lastReviewedAt: "2026-08-07T18:30:00.000Z",
+    nextReviewAt: "2027-02-07T00:00:00.000Z",
+    evidenceIds: [
+      "evidence:client-site-intelligence-pre-build-gate",
+      "evidence:otp-carts-website-lead-attribution-phase-1",
+      "evidence:otp-carts-seo-foundation-batch-1-production",
+      "evidence:otp-carts-gsc-site-url-config-in-kxd-os",
+      "evidence:otp-carts-launch-readiness-gate",
+      "evidence:activity-engine-canonical-relationship-memory",
+    ],
+    relatedObjectIds: [
+      PRODUCT_DNA_OBJECT_ID,
+      DOCTRINE_OBJECT_ID,
+      "capability:client-site-intelligence",
+      "architecture:client-site-event-ingest",
+      "roadmap:client-site-intelligence-v1",
+      "roadmap:otp-carts-seo-organic-growth",
+      "debt:client-visible-activity-timeline-unification",
+      "kill:website-lead-crm",
+      "kill:auto-commission-on-website-lead-submit",
+      "kill:client-portal-commit-deploy-noise-feed",
+    ],
+    summary:
+      "PROCEED WITH CHANGES — Human Decision approved Client Site Intelligence V1: generalized ClientSiteEvent, OTP Carts first reference, leads≠CRM, commission orthogonal + human-confirmed only ($300), Activity Engine as work memory, parallel OTP SEO. NOT implemented.",
+    version: "1.0.0",
+    detail: {
+      statement:
+        "Client Site Intelligence V1 is approved as a major Shared Core capability with OTP Carts (otp-carts) as the first production reference. APPROVED: generalized ClientSiteEvent; website leads as attribution/events not CRM; lead capture, confirmed sale, commission obligation, payment, and service remain orthogonal; OTP sale attribution requires explicit human confirmation; OTP commission is $300 per human-confirmed website-attributed cart sale; no commission becomes due merely from form submission; Activity Engine remains canonical relationship/work memory; Work & Performance/client portal consume that memory rather than a second monthly-work ledger; July/August 2026 OTP work will be manually and honestly backfilled from evidence; future client-visible automated work milestones require trustworthy evidence and visibility controls; developer noise must not become client-facing work; OTP SEO/content growth proceeds independently in parallel. EXPLICITLY NOT APPROVED: website-lead CRM; automatic commission on form submission; Stripe auto-invoicing commissions; parallel monthly-work database/system; broad GitHub/Vercel/GSC/GA4 client-visible auto-ingestion; event-bus/queue infrastructure without demonstrated need; merging OTP Carts with On Track Performance; using Product Intelligence or Continuous Intelligence as the operational lead store.",
+      decidedAt: "2026-08-07",
+      domain: "product",
+      context:
+        "OTP Carts production website (https://www.otpcarts.com) has SEO Foundation Batch 1 and Website Lead Attribution Phase 1 (external commit 88da435f647e5d24be7a5f49ff739f2dcb552a2d) with recordWebsiteLead() as the future KXD OS ingest seam. Business need: organic visibility, attributable website→sale→$300 bonus, light OTP ops, Don-visible monthly KXD value via client portal — without CRM gravity or developer-noise theater. MAJOR_CAPABILITY_PI_GATE requires this Human Decision before Shared Core ingest implementation.",
+      problem:
+        "Without a generalized client-site intelligence architecture, OTP work becomes a silo; website leads cannot become trustworthy attribution; commission can be incorrectly auto-assumed; and monthly client value risks a second ledger or vanity activity feed.",
+      reason:
+        "The smallest correct V1 that strengthens the whole platform is a Shared Core ClientSiteEvent contract with OTP as reference, a minimal human-confirmed sale→commission lifecycle, Activity Engine reuse for work memory, and a parallel SEO growth track — while refusing CRM, auto-commission, parallel monthly systems, and client-visible engineering noise.",
+      alternativesConsidered: [
+        "Build an OTP-only lead/commission silo in KXD OS",
+        "Treat website leads as sales-leads CRM pipeline",
+        "Auto-mark commission due on form submit",
+        "Create a parallel monthly-work database for Don's portal",
+        "Pipe GitHub/Vercel/GSC/GA4 noise into the client portal",
+        "Block OTP SEO work until ingest is complete",
+        "Store operational leads inside Product Intelligence / Continuous Intelligence",
+      ],
+      tradeoffs: [
+        "V1 will not yet automate multi-source work evidence into client-visible milestones",
+        "Human sale confirmation remains required before commission due",
+        "Timeline unification debt remains open — must not invent a third memory plane",
+        "GSC indexing/performance reality is not fully evidenced in this repository and must not be fabricated",
+      ],
+      outcome: "validated",
+      futureReviewAt: "2027-02-07T00:00:00.000Z",
+      successMetric:
+        "After csi-v1-a→d: OTP website leads ingest idempotently into Shared Core; human confirmation gates commission_due; Activity Engine carries curated monthly value (including honest July/August 2026 backfill); portal surfaces meaningful business value only; OTP SEO track continues; no CRM, no auto-commission, no parallel monthly ledger, no PI/CI lead store.",
+      decisionConfidence: "long_term",
+      reviewPolicy:
+        "Review after csi-v1-d and before authorizing broad multi-source client-visible auto-ingestion or additional client-site adapters beyond OTP. Any expansion into CRM, auto-commission, or queue bus requires a new Decision.",
+      relatedRoadmapIds: [
+        "roadmap:client-site-intelligence-v1",
+        "roadmap:otp-carts-seo-organic-growth",
+      ],
+      relatedInventoryIds: ["capability:client-site-intelligence"],
+      relatedProductDnaIds: [PRODUCT_DNA_OBJECT_ID],
+      relatedDoctrineIds: [DOCTRINE_OBJECT_ID],
+      relatedArchitectureIds: ["architecture:client-site-event-ingest"],
+      relatedProductIds: ["client-site-intelligence", "platform", "otp-carts"],
+      sourceRefs: [
+        "lib/product-intelligence/client-site-intelligence/",
+        "lib/activity-engine/",
+        "lib/portal/work-performance/",
+        "lib/client-launch/otp-carts-readiness.ts",
+        "docs/CLIENT-EXPERIENCE-SYSTEM-ARCHITECTURE.md",
+        "docs/KXD-OS-ROADMAP.md",
+        "https://www.otpcarts.com",
+        "88da435f647e5d24be7a5f49ff739f2dcb552a2d",
+      ],
+    },
+  }),
 ];
 
 export const EDITION_1_DECISION_IDS = EDITION_1_DECISIONS.map((d) => d.id);

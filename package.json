@@ -66,6 +66,8 @@
     "verify:product-intelligence-p0i": "tsx scripts/verify-product-intelligence-p0i.ts",
     "verify:product-intelligence-p0j": "tsx scripts/verify-product-intelligence-p0j.ts",
     "verify:product-intelligence-p0k": "tsx scripts/verify-product-intelligence-p0k.ts",
+    "verify:product-intelligence-client-site-intelligence": "node --import tsx scripts/verify-product-intelligence-client-site-intelligence.ts",
+    "verify:client-site-intelligence-csi-v1-a": "node --import tsx scripts/verify-client-site-intelligence-csi-v1-a.ts",
     "connect:local-status": "tsx --env-file=.env.local scripts/connect-local-activation.ts status",
     "connect:local-enable": "tsx --env-file=.env.local scripts/connect-local-activation.ts enable",
     "connect:local-disable": "tsx --env-file=.env.local scripts/connect-local-activation.ts disable",

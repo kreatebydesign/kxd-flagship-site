@@ -25,9 +25,11 @@ export const EDITION_1_DOCTRINE: DoctrineObject = {
     "decision:client-command-hq",
     "decision:connect-internal-first",
     "decision:product-intelligence",
+    "decision:client-site-intelligence-v1",
   ],
   confidence: "declared",
-  summary: "Edition 1 operating laws referenced by the Decision Archive.",
+  summary:
+    "Edition 1 operating laws referenced by the Decision Archive, including Client Site Intelligence laws and the major-capability PI gate.",
   detail: {
     productLaws: [
       {
@@ -57,6 +59,20 @@ export const EDITION_1_DOCTRINE: DoctrineObject = {
           "If there is a choice between more information and more confidence, choose confidence.",
         evidenceIds: [],
       },
+      {
+        id: "law-client-site-events-not-crm",
+        lawClass: "product",
+        statement:
+          "Client-site events (including website leads) are attribution and operational facts — not a CRM or sales pipeline. KXD OS must not force client staff into heavy lead-stage hygiene for website forms.",
+        evidenceIds: [],
+      },
+      {
+        id: "law-client-visible-activity-business-value",
+        lawClass: "product",
+        statement:
+          "Client-visible activity must represent meaningful business value. Commits, CI runs, failed deploys, file diffs, dependency bumps, and other developer noise must not appear as client-facing work.",
+        evidenceIds: [],
+      },
     ],
     architectureLaws: [
       {
@@ -78,6 +94,20 @@ export const EDITION_1_DOCTRINE: DoctrineObject = {
         lawClass: "architecture",
         statement:
           "Connect remains distinct from Client Communications, portal feedback, and message-kxd until deliberately replaced.",
+        evidenceIds: [],
+      },
+      {
+        id: "law-lead-sale-commission-orthogonal",
+        lawClass: "architecture",
+        statement:
+          "Lead capture, confirmed sale, commission obligation, payment, and service are orthogonal. Website form submission must never automatically create commission due; OTP website-attributed commission becomes due only after explicit human sale confirmation.",
+        evidenceIds: [],
+      },
+      {
+        id: "law-activity-engine-client-work-memory",
+        lawClass: "architecture",
+        statement:
+          "Activity Engine is the canonical relationship and client-work memory. Portal Work & Performance and client-visible surfaces must consume that memory — do not invent a parallel monthly-work ledger or second activity plane for Client Site Intelligence.",
         evidenceIds: [],
       },
     ],
@@ -124,8 +154,22 @@ export const EDITION_1_DOCTRINE: DoctrineObject = {
         statement: "No automation without explicit approval.",
         evidenceIds: [],
       },
+      {
+        id: "law-major-capability-pi-gate",
+        lawClass: "build_authorization",
+        statement:
+          "Major capabilities follow IDEA → Product Intelligence review → Human Decision → Implementation → Verification → Product Intelligence evidence update → Release/Health/Valuation update. Exempt: bug fixes, copy, small UI polish, verifier-only work, dependency bumps, and non-semantic refactors.",
+        evidenceIds: [],
+      },
+      {
+        id: "law-client-site-intelligence-scoped-v1",
+        lawClass: "build_authorization",
+        statement:
+          "Client Site Intelligence V1 authorizes generalized ClientSiteEvent ingest with OTP Carts as first reference. Forbidden until a new Decision: website-lead CRM, auto-commission on form submit, Stripe auto-invoicing of commissions, parallel monthly-work databases, broad GitHub/Vercel/GSC/GA4 client-visible auto-ingestion, event-bus/queue infrastructure without demonstrated need, merging otp-carts with On Track Performance, and using Product Intelligence or Continuous Intelligence as the operational lead store.",
+        evidenceIds: [],
+      },
     ],
   },
   updateChannel: "protected",
-  version: "1.0.0",
+  version: "1.1.0",
 };

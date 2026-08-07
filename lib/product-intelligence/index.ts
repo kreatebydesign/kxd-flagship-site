@@ -77,6 +77,25 @@ export type {
 } from "./archive";
 
 export {
+  CSI_IDS,
+  CSI_RECORDED_AT,
+  CSI_REVIEW_AT,
+  CSI_V1A_RECORDED_AT,
+  CLIENT_SITE_INTELLIGENCE_EVIDENCE,
+  CLIENT_SITE_INTELLIGENCE_EVIDENCE_IDS,
+  CLIENT_SITE_INTELLIGENCE_IMPLEMENTATION_BATCHES,
+  CLIENT_SITE_INTELLIGENCE_PI_VERDICT,
+  CLIENT_SITE_INTELLIGENCE_PRE_BUILD_GATE,
+  CLIENT_SITE_INTELLIGENCE_V1_SCOPE,
+  MAJOR_CAPABILITY_PI_GATE,
+  OTP_CARTS_LEAD_ATTRIBUTION_SHA,
+  OTP_CARTS_PRODUCTION_URL,
+  attachClientSiteIntelligenceMemory,
+  loadClientSiteIntelligenceMemory,
+} from "./client-site-intelligence";
+export type { ClientSiteIntelligenceMemoryPack } from "./client-site-intelligence";
+
+export {
   computeCategoryComposite,
   computeOverallPlatformHealth,
   HEALTH_DOMAIN_DEFINITIONS,
