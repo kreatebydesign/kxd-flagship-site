@@ -26,7 +26,10 @@ export const CLIENT_SITE_SENSITIVITY = [
 
 export type ClientSiteSensitivity = (typeof CLIENT_SITE_SENSITIVITY)[number];
 
-export const CLIENT_SITE_VISIBILITY = ["internal_only", "client_visible"] as const;
+export const CLIENT_SITE_VISIBILITY = [
+  "internal_only",
+  "client_visible",
+] as const;
 
 export type ClientSiteVisibility = (typeof CLIENT_SITE_VISIBILITY)[number];
 
@@ -39,6 +42,25 @@ export const CLIENT_SITE_PROCESSING_STATUS = [
 
 export type ClientSiteProcessingStatus =
   (typeof CLIENT_SITE_PROCESSING_STATUS)[number];
+
+export const CLIENT_SITE_LIFECYCLE_STATUSES = [
+  "new",
+  "acknowledged",
+  "sold_confirmed",
+  "closed_no_sale",
+] as const;
+
+export type ClientSiteLifecycleStatus =
+  (typeof CLIENT_SITE_LIFECYCLE_STATUSES)[number];
+
+export const CLIENT_SITE_COMMISSION_STATUSES = [
+  "not_due",
+  "due",
+  "paid",
+] as const;
+
+export type ClientSiteCommissionStatus =
+  (typeof CLIENT_SITE_COMMISSION_STATUSES)[number];
 
 /** Canonical website-lead lifecycle on ingest — authority fields are forced. */
 export const WEBSITE_LEAD_INGEST_LIFECYCLE_STATUS = "new" as const;
@@ -96,6 +118,17 @@ export interface ClientSiteEventRecord {
   ingestMeta: Record<string, unknown>;
   activityTimelineEventId: number | null;
   idempotencyKey: string;
+  lifecycleStatus: ClientSiteLifecycleStatus;
+  commissionStatus: ClientSiteCommissionStatus;
+  commissionAmountCents: number | null;
+  soldAt: string | null;
+  saleReference: string | null;
+  cartModelReference: string | null;
+  confirmedById: number | null;
+  confirmedAt: string | null;
+  commissionPaidAt: string | null;
+  commissionPaymentReference: string | null;
+  commissionPaidById: number | null;
 }
 
 export interface PersistClientSiteEventInput {

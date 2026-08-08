@@ -62,11 +62,11 @@ export const CLIENT_SITE_INTELLIGENCE_IMPLEMENTATION_BATCHES = [
   {
     id: "csi-v1-b",
     title: "Operator confirm-sale / commission obligation states",
-    note: "Minimal human confirmation UI. Orthogonal to Stripe billing and service activation.",
+    note: "Minimal human confirmation UI with internal lifecycle Activity. Orthogonal to Stripe billing and service activation.",
   },
   {
     id: "csi-v1-c",
-    title: "Activity publish + curated July/August 2026 OTP monthly value backfill",
+    title: "Curated July/August 2026 OTP monthly value backfill",
     note: "Activity Engine only. No second monthly ledger. Honest dates/evidence only.",
   },
   {
@@ -76,7 +76,8 @@ export const CLIENT_SITE_INTELLIGENCE_IMPLEMENTATION_BATCHES = [
   },
   {
     id: "after-csi-v1",
-    title: "Curated adapters (GSC/Vercel/GitHub) + additional managed client sites",
+    title:
+      "Curated adapters (GSC/Vercel/GitHub) + additional managed client sites",
     note: "Requires trustworthy evidence + visibility controls; never auto-noise.",
   },
 ] as const;
@@ -130,13 +131,13 @@ export const CLIENT_SITE_INTELLIGENCE_PRE_BUILD_GATE = {
   referenceClientKey: "otp-carts",
   foundationBatch: "csi-v1-a",
   foundationImplementedLocally: true,
-  foundationProductionProven: false,
-  nextImplementationBatch: "csi-v1-b",
+  foundationProductionProven: true,
+  nextImplementationBatch: "csi-v1-c",
   ingestApiImplemented: true,
   hmacImplemented: true,
   collectionsImplemented: true,
-  saleConfirmationUiImplemented: false,
-  commissionUiImplemented: false,
+  saleConfirmationUiImplemented: true,
+  commissionUiImplemented: true,
   julyAugustBackfillImplemented: false,
   continuousIntelligenceUnchanged: true,
   productDnaUnchanged: true,

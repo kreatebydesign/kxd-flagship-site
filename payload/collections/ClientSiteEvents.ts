@@ -171,6 +171,89 @@ export const ClientSiteEvents: CollectionConfig = {
       admin: { readOnly: true },
     },
     {
+      name: "lifecycleStatus",
+      type: "select",
+      required: true,
+      defaultValue: "new",
+      index: true,
+      options: [
+        { label: "New", value: "new" },
+        { label: "Acknowledged", value: "acknowledged" },
+        { label: "Sale Confirmed", value: "sold_confirmed" },
+        { label: "Closed — No Sale", value: "closed_no_sale" },
+      ],
+      admin: {
+        readOnly: true,
+        description:
+          "Authoritative operator lifecycle. Website ingest cannot change this field.",
+      },
+    },
+    {
+      name: "commissionStatus",
+      type: "select",
+      required: true,
+      defaultValue: "not_due",
+      index: true,
+      options: [
+        { label: "Not Due", value: "not_due" },
+        { label: "Due", value: "due" },
+        { label: "Paid", value: "paid" },
+      ],
+      admin: {
+        readOnly: true,
+        description:
+          "Internal commission obligation state. Never controlled by website ingest.",
+      },
+    },
+    {
+      name: "commissionAmountCents",
+      type: "number",
+      min: 0,
+      admin: {
+        readOnly: true,
+        description:
+          "Authoritative commission amount, created only by operator sale confirmation.",
+      },
+    },
+    {
+      name: "soldAt",
+      type: "date",
+      admin: { readOnly: true, date: { pickerAppearance: "dayAndTime" } },
+    },
+    { name: "saleReference", type: "text", admin: { readOnly: true } },
+    { name: "cartModelReference", type: "text", admin: { readOnly: true } },
+    {
+      name: "confirmedBy",
+      type: "relationship",
+      relationTo: "users",
+      admin: { readOnly: true },
+    },
+    {
+      name: "confirmedAt",
+      type: "date",
+      admin: { readOnly: true, date: { pickerAppearance: "dayAndTime" } },
+    },
+    {
+      name: "commissionPaidAt",
+      type: "date",
+      admin: { readOnly: true, date: { pickerAppearance: "dayAndTime" } },
+    },
+    {
+      name: "commissionPaymentReference",
+      type: "text",
+      admin: {
+        readOnly: true,
+        description:
+          "Optional safe payment reference or operator note. No card data.",
+      },
+    },
+    {
+      name: "commissionPaidBy",
+      type: "relationship",
+      relationTo: "users",
+      admin: { readOnly: true },
+    },
+    {
       name: "payload",
       type: "json",
       required: true,
@@ -196,7 +279,8 @@ export const ClientSiteEvents: CollectionConfig = {
       type: "number",
       label: "Activity Timeline Event ID",
       admin: {
-        description: "Linked executive-timeline-events id when Activity was published.",
+        description:
+          "Linked executive-timeline-events id when Activity was published.",
         readOnly: true,
       },
     },

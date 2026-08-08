@@ -4,7 +4,10 @@ import type { ClientCommandCenterData, CommandDoc } from "./types";
 
 import type { WorkspaceCommunicationsSnapshot } from "./communications/types";
 import type { WorkspaceActionsSnapshot } from "./actions/types";
-import type { WorkspaceProposalsSnapshot, ProposalIntelligenceSnapshot } from "@/lib/executive-proposals/client";
+import type {
+  WorkspaceProposalsSnapshot,
+  ProposalIntelligenceSnapshot,
+} from "@/lib/executive-proposals/client";
 import type {
   ConversionIntelligenceSnapshot,
   WorkspaceContractsSnapshot,
@@ -15,6 +18,7 @@ import type {
 } from "@/lib/financial-command/client";
 import type { ClientMemorySnapshot } from "./memory/types";
 import type { ClientCommercialWorkspaceSnapshot } from "./commercial/types";
+import type { ClientSiteIntelligenceSnapshot } from "@/lib/client-site-intelligence/load";
 
 export interface CommandHubClientRow {
   clientId: number;
@@ -123,6 +127,7 @@ export interface ClientWorkspaceBundle extends ClientCommandCenterData {
   financial: WorkspaceFinancialSnapshot;
   financialIntelligence: FinancialIntelligenceSnapshot;
   commercial: ClientCommercialWorkspaceSnapshot;
+  siteIntelligence: ClientSiteIntelligenceSnapshot;
   memory: ClientMemorySnapshot;
   workBoard: ClientWorkBoardData | null;
   workspaceQuickActions: CommandWorkspaceQuickAction[];
@@ -155,5 +160,6 @@ export type ClientWorkspaceMemoryInput = Omit<
   | "financial"
   | "financialIntelligence"
   | "commercial"
+  | "siteIntelligence"
   | "workBoard"
 >;

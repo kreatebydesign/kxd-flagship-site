@@ -12,6 +12,7 @@ import {
   CSI_MAX_BODY_BYTES,
   CSI_SIGNATURE_HEADER,
   CSI_TIMESTAMP_HEADER,
+  DEFAULT_OTP_COMMISSION_AMOUNT_CENTS,
   type CsiSourceCredentialBinding,
 } from "./constants";
 import { resolveCsiIngestSecret } from "./credentials";
@@ -219,6 +220,8 @@ export async function ingestClientSiteWebhook(input: {
 
   // Never create commission obligations from ingest.
   if (
+    normalized.payload.commissionAmountCents !==
+      DEFAULT_OTP_COMMISSION_AMOUNT_CENTS ||
     normalized.payload.commissionStatus !== "not_due" ||
     normalized.payload.soldAt !== null ||
     normalized.payload.saleReference !== null

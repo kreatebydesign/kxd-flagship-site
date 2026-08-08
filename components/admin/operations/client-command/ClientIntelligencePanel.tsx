@@ -13,6 +13,7 @@ import {
   WorkspaceMetaLine,
   WorkspaceProse,
 } from "@/components/admin/operations/client-workspace/WorkspacePrimitives";
+import { ClientSiteIntelligencePanel } from "./ClientSiteIntelligencePanel";
 
 function ScoreCard({ label, value }: { label: string; value: number }) {
   return (
@@ -219,6 +220,8 @@ export function ClientIntelligencePanel({ data }: { data: ClientWorkspaceBundle 
         <ScoreCard label="Retention risk" value={memory.scores.retentionRiskScore} />
         <ScoreCard label="Momentum" value={memory.scores.momentumScore} />
       </div>
+
+      <ClientSiteIntelligencePanel snapshot={data.siteIntelligence} />
 
       <WorkspaceChapter title="Executive summary" variant="compact">
         <ul className="kxd-os-workspace-list">

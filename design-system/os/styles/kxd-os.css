@@ -5674,6 +5674,22 @@ body:has(.kxd-exec-workspace) {
   color: var(--kxd-os-text-muted);
 }
 
+.kxd-os-command-timeline-form__confirmation {
+  display: grid;
+  grid-template-columns: 1rem minmax(0, 1fr);
+  align-items: start;
+  gap: 0.625rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--kxd-os-text-secondary);
+}
+
+.kxd-os-command-timeline-form__confirmation input {
+  width: 1rem;
+  height: 1rem;
+  margin: 0.1rem 0 0;
+}
+
 .kxd-os-command-timeline-form__input {
   font: inherit;
   padding: 0.5rem 0.65rem;
