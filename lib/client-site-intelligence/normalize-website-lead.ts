@@ -131,19 +131,18 @@ export function normalizeWebsiteLeadPayload(
     rejectedAuthorityFields.push("lifecycleStatus");
   }
 
-  let commissionAmountCents = DEFAULT_OTP_COMMISSION_AMOUNT_CENTS;
   const amountRaw = readNested(
     flat,
     "commissionAmountCents",
     "commission_amount_cents",
   );
-  if (typeof amountRaw === "number" && Number.isFinite(amountRaw)) {
-    const n = Math.trunc(amountRaw);
-    if (n >= 0 && n <= 1_000_000) commissionAmountCents = n;
-  } else if (typeof amountRaw === "string" && /^\d+$/.test(amountRaw.trim())) {
-    const n = Number(amountRaw.trim());
-    if (n >= 0 && n <= 1_000_000) commissionAmountCents = n;
+  if (
+    amountRaw != null &&
+    String(amountRaw).trim() !== String(DEFAULT_OTP_COMMISSION_AMOUNT_CENTS)
+  ) {
+    rejectedAuthorityFields.push("commissionAmountCents");
   }
+  const commissionAmountCents = DEFAULT_OTP_COMMISSION_AMOUNT_CENTS;
 
   const payload: WebsiteLeadNormalizedPayload = {
     leadId,

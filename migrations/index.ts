@@ -96,6 +96,7 @@ import * as migration_20260817_direct_agreement_workflow from './20260817_direct
 import * as migration_20260818_external_payment_revenue_event_types from './20260818_external_payment_revenue_event_types';
 import * as migration_20260807_junior_creator_timer_safety from './20260807_junior_creator_timer_safety';
 import * as migration_20260823_client_site_events from './20260823_client_site_events';
+import * as migration_20260824_csi_v1b_sale_commission from './20260824_csi_v1b_sale_commission';
 
 export const migrations = [
   {
@@ -597,5 +598,11 @@ export const migrations = [
     up: migration_20260823_client_site_events.up,
     down: migration_20260823_client_site_events.down,
     name: '20260823_client_site_events',
+  },
+  {
+    // CSI v1-b — operator-confirmed sale + commission lifecycle (additive).
+    up: migration_20260824_csi_v1b_sale_commission.up,
+    down: migration_20260824_csi_v1b_sale_commission.down,
+    name: '20260824_csi_v1b_sale_commission',
   },
 ];

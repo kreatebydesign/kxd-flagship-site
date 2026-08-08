@@ -58,7 +58,8 @@ function mapDoc(doc: Record<string, unknown>): ClientSiteEventRecord {
     occurredAt: String(doc.occurredAt ?? ""),
     receivedAt: String(doc.receivedAt ?? ""),
     sensitivity: doc.sensitivity as ClientSiteEventRecord["sensitivity"],
-    visibilityState: doc.visibilityState as ClientSiteEventRecord["visibilityState"],
+    visibilityState:
+      doc.visibilityState as ClientSiteEventRecord["visibilityState"],
     processingStatus:
       doc.processingStatus as ClientSiteEventRecord["processingStatus"],
     payload: (doc.payload as ClientSiteEventRecord["payload"]) ?? {},
@@ -68,6 +69,39 @@ function mapDoc(doc: Record<string, unknown>): ClientSiteEventRecord {
         ? Number(doc.activityTimelineEventId)
         : null,
     idempotencyKey: String(doc.idempotencyKey ?? ""),
+    lifecycleStatus:
+      (doc.lifecycleStatus as ClientSiteEventRecord["lifecycleStatus"]) ??
+      "new",
+    commissionStatus:
+      (doc.commissionStatus as ClientSiteEventRecord["commissionStatus"]) ??
+      "not_due",
+    commissionAmountCents:
+      doc.commissionAmountCents != null
+        ? Number(doc.commissionAmountCents)
+        : null,
+    soldAt: doc.soldAt != null ? String(doc.soldAt) : null,
+    saleReference: doc.saleReference != null ? String(doc.saleReference) : null,
+    cartModelReference:
+      doc.cartModelReference != null ? String(doc.cartModelReference) : null,
+    confirmedById:
+      doc.confirmedBy != null
+        ? typeof doc.confirmedBy === "number"
+          ? doc.confirmedBy
+          : Number((doc.confirmedBy as { id?: unknown }).id)
+        : null,
+    confirmedAt: doc.confirmedAt != null ? String(doc.confirmedAt) : null,
+    commissionPaidAt:
+      doc.commissionPaidAt != null ? String(doc.commissionPaidAt) : null,
+    commissionPaymentReference:
+      doc.commissionPaymentReference != null
+        ? String(doc.commissionPaymentReference)
+        : null,
+    commissionPaidById:
+      doc.commissionPaidBy != null
+        ? typeof doc.commissionPaidBy === "number"
+          ? doc.commissionPaidBy
+          : Number((doc.commissionPaidBy as { id?: unknown }).id)
+        : null,
   };
 }
 
@@ -107,6 +141,9 @@ export function createPayloadClientSiteEventStore(
           ingestMeta: input.ingestMeta,
           idempotencyKey: input.idempotencyKey,
           activityTimelineEventId: null,
+          lifecycleStatus: "new",
+          commissionStatus: "not_due",
+          commissionAmountCents: null,
         },
         overrideAccess: true,
       });
@@ -163,7 +200,9 @@ export function createMemoryClientSiteEventStore(): ClientSiteEventStore & {
     },
     async create(input) {
       return withKeyLock(input.idempotencyKey, async () => {
-        const existing = rows.find((r) => r.idempotencyKey === input.idempotencyKey);
+        const existing = rows.find(
+          (r) => r.idempotencyKey === input.idempotencyKey,
+        );
         if (existing) {
           const err = new Error(
             `duplicate key value violates unique constraint 23505 (${input.idempotencyKey})`,
@@ -186,6 +225,17 @@ export function createMemoryClientSiteEventStore(): ClientSiteEventStore & {
           ingestMeta: input.ingestMeta,
           activityTimelineEventId: null,
           idempotencyKey: input.idempotencyKey,
+          lifecycleStatus: "new",
+          commissionStatus: "not_due",
+          commissionAmountCents: null,
+          soldAt: null,
+          saleReference: null,
+          cartModelReference: null,
+          confirmedById: null,
+          confirmedAt: null,
+          commissionPaidAt: null,
+          commissionPaymentReference: null,
+          commissionPaidById: null,
         };
         rows.push(record);
         return record;

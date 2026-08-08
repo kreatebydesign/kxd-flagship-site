@@ -105,7 +105,7 @@ async function main() {
     assert.equal(CLIENT_SITE_INTELLIGENCE_PRE_BUILD_GATE.hmacImplemented, true);
     assert.equal(CLIENT_SITE_INTELLIGENCE_PRE_BUILD_GATE.collectionsImplemented, true);
     assert.equal(CLIENT_SITE_INTELLIGENCE_PRE_BUILD_GATE.implemented, false);
-    assert.equal(CLIENT_SITE_INTELLIGENCE_PRE_BUILD_GATE.nextImplementationBatch, "csi-v1-b");
+    assert.equal(CLIENT_SITE_INTELLIGENCE_PRE_BUILD_GATE.nextImplementationBatch, "csi-v1-c");
     assert.ok(CLIENT_SITE_EVENT_CLASSES.includes("website_lead"));
     assert.ok(CLIENT_SITE_EVENT_CLASSES.includes("confirmed_sale"));
     assert.ok(CLIENT_SITE_EVENT_CLASSES.includes("seo_milestone"));
@@ -191,6 +191,7 @@ async function main() {
     const normalized = normalizeWebsiteLeadPayload(
       leadBody({
         commissionStatus: "commission_due",
+        commissionAmountCents: 0,
         soldAt: "2026-08-07T20:00:00.000Z",
         saleReference: "SALE-1",
         status: "sold_confirmed",
@@ -199,10 +200,14 @@ async function main() {
     assert.equal(normalized.ok, true);
     if (normalized.ok) {
       assert.equal(normalized.payload.commissionStatus, "not_due");
+      assert.equal(normalized.payload.commissionAmountCents, 30000);
       assert.equal(normalized.payload.soldAt, null);
       assert.equal(normalized.payload.saleReference, null);
       assert.equal(normalized.payload.lifecycleStatus, "new");
       assert.ok(normalized.rejectedAuthorityFields.includes("commissionStatus"));
+      assert.ok(
+        normalized.rejectedAuthorityFields.includes("commissionAmountCents"),
+      );
       assert.ok(normalized.rejectedAuthorityFields.includes("soldAt"));
       assert.equal(normalized.payload.customer.email, "buyer@example.com");
       assert.ok((normalized.payload.customer.message ?? "").length <= 2000);
@@ -501,10 +506,7 @@ async function main() {
     assert.ok(existsSync(join(root, "lib/client-site-intelligence/index.ts")));
     assert.ok(existsSync(join(root, "migrations/20260823_client_site_events.ts")));
 
-    // No sale/commission UI / portal work surfaces in this batch
-    assert.ok(!existsSync(join(root, "lib/client-site-intelligence/commission.ts")));
-    assert.ok(!existsSync(join(root, "lib/client-site-intelligence/sale-confirmation.ts")));
-    ok("files, access policy, secrets, migration sequence, no commission UI");
+    ok("files, access policy, secrets, and migration sequence");
   }
 
   {

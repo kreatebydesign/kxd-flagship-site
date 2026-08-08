@@ -24,6 +24,7 @@ import { getClientWorkBoard } from "@/lib/client-tasks/engine";
 import { loadClientCommandCenter } from "./engine";
 import { buildWorkspaceQuickActions } from "./workspace-actions";
 import { loadClientCommercialWorkspace } from "./commercial/load-commercial-workspace";
+import { loadClientSiteIntelligence } from "@/lib/client-site-intelligence/load";
 import type {
   ClientWorkspaceBundle,
   WorkspaceAnalyticsSnapshot,
@@ -154,6 +155,7 @@ export async function loadClientWorkspaceBundle(
     tasks,
     infrastructure,
     communications,
+    siteIntelligence,
   ] = await Promise.all([
     loadClientActivityTimeline(clientId),
     fetchDocs("client-requests", clientId, "-createdAt", 80),
@@ -166,6 +168,7 @@ export async function loadClientWorkspaceBundle(
     fetchDocs("client-tasks", clientId, "-updatedAt", 40),
     getClientInfrastructure(clientId),
     loadClientCommunications(clientId),
+    loadClientSiteIntelligence(clientId),
   ]);
 
   const invoices = buildInvoices(clientId, proposalDocs, retainers);
@@ -244,6 +247,7 @@ export async function loadClientWorkspaceBundle(
     portalUsers,
     taskDocs: tasks,
     communications,
+    siteIntelligence,
     workspaceQuickActions: buildWorkspaceQuickActions(clientId, primaryEmail),
     analytics,
     header: {
