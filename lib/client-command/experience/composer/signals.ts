@@ -6,6 +6,10 @@ import { getExecutivePresentation } from "@/lib/ces/executive-performance/presen
 import { WEBSITE_REVIEW_EXPERIENCE_MODULE } from "@/lib/ces/modules/website-review/constants";
 import { WEBSITE_WORKSPACE_EXPERIENCE_MODULE } from "@/lib/ces/modules/website-workspace/constants";
 import { loadOperatorExperienceSnapshot } from "../load";
+import {
+  extractGa4PropertyIdFromEvidence,
+  proposeSearchConsoleSiteUrl,
+} from "./readiness";
 import type { ExperienceSignals } from "./types";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -75,6 +79,9 @@ export async function loadExperienceSignals(
 
   let hasHostingInfra = false;
   let primaryDomain: string | null = null;
+  let infrastructureId: number | null = null;
+  let searchConsoleStatus: string | null = null;
+  let analyticsProvider: string | null = null;
   try {
     const infra = await payload.find({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -82,18 +89,93 @@ export async function loadExperienceSignals(
       where: { client: { equals: clientId } },
       limit: 1,
       depth: 0,
+      sort: "-updatedAt",
       overrideAccess: true,
     });
     const doc = infra.docs[0] as AnyDoc | undefined;
+    infrastructureId = doc?.id != null ? Number(doc.id) : null;
     primaryDomain =
       typeof doc?.primaryDomain === "string" && doc.primaryDomain.trim()
         ? doc.primaryDomain.trim()
         : null;
+    searchConsoleStatus =
+      typeof doc?.searchConsoleStatus === "string" ? doc.searchConsoleStatus : null;
+    analyticsProvider =
+      typeof doc?.analyticsProvider === "string" && doc.analyticsProvider.trim()
+        ? doc.analyticsProvider.trim()
+        : null;
     hasHostingInfra = Boolean(
-      doc?.hostingProvider || doc?.dnsProvider || primaryDomain,
+      doc?.hostingProvider || doc?.dnsProvider || primaryDomain || doc?.productionUrl,
     );
   } catch {
     hasHostingInfra = false;
+  }
+
+  let executiveAnalyticsStatus: string | null = null;
+  let executiveSearchConsoleStatus: string | null = null;
+  try {
+    const exec = await payload.find({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      collection: "executive-client-profiles" as any,
+      where: { client: { equals: clientId } },
+      limit: 1,
+      depth: 0,
+      overrideAccess: true,
+    });
+    const doc = exec.docs[0] as AnyDoc | undefined;
+    if (typeof doc?.analyticsStatus === "string" && doc.analyticsStatus.trim()) {
+      executiveAnalyticsStatus = doc.analyticsStatus.trim();
+    }
+    if (typeof doc?.searchConsoleStatus === "string" && doc.searchConsoleStatus.trim()) {
+      executiveSearchConsoleStatus = doc.searchConsoleStatus.trim();
+    }
+  } catch {
+    executiveAnalyticsStatus = null;
+  }
+
+  let discoveredGa4PropertyId: string | null = null;
+  try {
+    const facts = await payload.find({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      collection: "reporting-facts" as any,
+      where: {
+        and: [{ client: { equals: clientId } }, { providerId: { equals: "ga4" } }],
+      },
+      limit: 8,
+      depth: 0,
+      overrideAccess: true,
+    });
+    for (const doc of facts.docs as AnyDoc[]) {
+      discoveredGa4PropertyId = extractGa4PropertyIdFromEvidence(doc.evidenceRefs);
+      if (discoveredGa4PropertyId) break;
+    }
+  } catch {
+    discoveredGa4PropertyId = null;
+  }
+
+  let brandKit: ExperienceSignals["brandKit"] = null;
+  try {
+    const kits = await payload.find({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      collection: "brand-kits" as any,
+      where: { client: { equals: clientId } },
+      limit: 1,
+      depth: 0,
+      sort: "-updatedAt",
+      overrideAccess: true,
+    });
+    const doc = kits.docs[0] as AnyDoc | undefined;
+    if (doc?.id != null) {
+      brandKit = {
+        id: Number(doc.id),
+        href: `/admin/collections/brand-kits/${doc.id}`,
+        primaryColor: typeof doc.primaryColor === "string" ? doc.primaryColor : "",
+        secondaryColor: typeof doc.secondaryColor === "string" ? doc.secondaryColor : "",
+        accentColor: typeof doc.accentColor === "string" ? doc.accentColor : "",
+      };
+    }
+  } catch {
+    brandKit = null;
   }
 
   const ga4 = snapshot.integrations.find((row) => row.id === "ga4");
@@ -141,6 +223,19 @@ export async function loadExperienceSignals(
   ]);
 
   const presentation = getExecutivePresentation(snapshot.clientSlug);
+  const presentationLogoUrl =
+    typeof presentation?.logoSrc === "string" && presentation.logoSrc.trim()
+      ? presentation.logoSrc.trim()
+      : null;
+  const presentationAccent =
+    typeof presentation?.actionAccent === "string" && presentation.actionAccent.trim()
+      ? presentation.actionAccent.trim()
+      : null;
+  const onboardingHref = snapshot.logo.onboardingHref;
+  const proposedSearchConsoleSiteUrl = proposeSearchConsoleSiteUrl(
+    snapshot.websiteUrl,
+    primaryDomain,
+  );
 
   return {
     clientId,
@@ -187,6 +282,28 @@ export async function loadExperienceSignals(
     },
     logoHasFile: snapshot.logo.hasLogo,
     logoSource: snapshot.logo.source,
+    infrastructureId,
+    searchConsoleStatus,
+    analyticsProvider,
+    executiveAnalyticsStatus,
+    executiveSearchConsoleStatus,
+    proposedSearchConsoleSiteUrl,
+    discoveredGa4PropertyId,
+    brandKit,
+    presentationLogoUrl,
+    presentationAccent,
+    ownerHrefs: {
+      infrastructure: `/admin/operations/infrastructure/${clientId}`,
+      infrastructureEdit: infrastructureId
+        ? `/admin/collections/client-infrastructure/${infrastructureId}`
+        : null,
+      inventory: `/admin/operations/client-command/${clientId}?tab=inventory`,
+      inventoryCreate: "/admin/collections/client-inventory-vehicles/create",
+      onboarding: onboardingHref ?? "/admin/operations/onboarding",
+      onboardingCreate: "/admin/collections/client-onboarding/create",
+      brandKitCreate: "/admin/collections/brand-kits/create",
+      reportingOps: `/admin/operations/reporting/${clientId}`,
+    },
     inventoryCount: snapshot.inventoryRecordCount,
     websiteReviewCount,
     websiteWorkspaceCount,

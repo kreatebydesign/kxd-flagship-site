@@ -64,6 +64,7 @@ async function main() {
           hasEnabledPresentation: signals.hasEnabledPresentation,
           logoHasFile: signals.logoHasFile,
         },
+        readiness: recommendation.readiness,
         recommendation,
       },
       null,

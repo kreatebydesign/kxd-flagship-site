@@ -28,4 +28,6 @@ export {
 export type {
   ExperienceRecommendation,
   ExperienceActivateInput,
+  ExperienceReadiness,
+  ExperienceDependency,
 } from "./composer";

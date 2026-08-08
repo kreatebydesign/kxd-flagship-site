@@ -21976,3 +21976,31 @@ select.kxd-os-commercial-control {
 .kxd-ces-composer {
   margin-bottom: 1rem;
 }
+
+.kxd-ces-exp__dep-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.35rem 0.75rem;
+}
+
+.kxd-ces-exp__discover {
+  margin-top: 0.75rem;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.kxd-ces-exp__candidate {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.35rem 0.85rem;
+}
+
+.kxd-ces-exp__candidate-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}

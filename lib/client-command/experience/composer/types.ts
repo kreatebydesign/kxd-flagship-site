@@ -21,6 +21,64 @@ export type ModuleRecommendationDecision =
   | "gated"
   | "locked";
 
+export type DependencyResolutionClass =
+  | "satisfied"
+  | "auto-resolvable"
+  | "actionable"
+  | "external";
+
+export type DependencyLaunchImpact = "blocking" | "optional";
+
+export type ExperienceProvisionKind = "none" | "navigate" | "apply-discovered" | "discover";
+
+export type ExperienceDiscoverKind = "branding" | "ga4" | "search-console";
+
+export type ExperienceProvisionActionId =
+  | "apply-search-console-site-url"
+  | "apply-discovered-ga4-property"
+  | "import-branding-logo"
+  | "import-branding-colors";
+
+export type ExperienceDependencyId =
+  | "logo"
+  | "brand-colors"
+  | "ga4"
+  | "search-console"
+  | "inventory"
+  | "reports"
+  | "access"
+  | "website";
+
+export type ExperienceProvisionAction = {
+  kind: ExperienceProvisionKind;
+  label: string;
+  href: string | null;
+  actionId: ExperienceProvisionActionId | null;
+  discoverKind: ExperienceDiscoverKind | null;
+};
+
+export type ExperienceDependency = {
+  id: ExperienceDependencyId;
+  label: string;
+  status: "satisfied" | "unresolved";
+  resolutionClass: DependencyResolutionClass;
+  launchImpact: DependencyLaunchImpact;
+  reason: string;
+  ownerSystem: string;
+  ownerHref: string | null;
+  relatedModules: PortalModuleId[];
+  discoveredValue: string | null;
+  provision: ExperienceProvisionAction;
+};
+
+export type ExperienceReadiness = {
+  launchReadinessPercent: number;
+  moduleReadinessPercent: number;
+  activationEligible: boolean;
+  activationBlockers: string[];
+  dependencies: ExperienceDependency[];
+};
+
 export type ExperienceBrandingRecommendation = {
   clientName: string;
   clientNameSource: RecommendationConfidence;
@@ -96,6 +154,32 @@ export type ExperienceSignals = {
   };
   logoHasFile: boolean;
   logoSource: string;
+  infrastructureId: number | null;
+  searchConsoleStatus: string | null;
+  analyticsProvider: string | null;
+  executiveAnalyticsStatus: string | null;
+  executiveSearchConsoleStatus: string | null;
+  proposedSearchConsoleSiteUrl: string | null;
+  discoveredGa4PropertyId: string | null;
+  brandKit: {
+    id: number;
+    href: string;
+    primaryColor: string;
+    secondaryColor: string;
+    accentColor: string;
+  } | null;
+  presentationLogoUrl: string | null;
+  presentationAccent: string | null;
+  ownerHrefs: {
+    infrastructure: string;
+    infrastructureEdit: string | null;
+    inventory: string;
+    inventoryCreate: string;
+    onboarding: string;
+    onboardingCreate: string;
+    brandKitCreate: string;
+    reportingOps: string;
+  };
   inventoryCount: number;
   websiteReviewCount: number;
   websiteWorkspaceCount: number;
@@ -130,6 +214,7 @@ export type ExperienceRecommendation = {
   homeShell: "ces" | "hq";
   integrations: OperatorIntegrationStatusRow[];
   portalAccess: OperatorPortalAccessStatus;
+  readiness: ExperienceReadiness;
   notes: string[];
   mutatesProfile: false;
 };

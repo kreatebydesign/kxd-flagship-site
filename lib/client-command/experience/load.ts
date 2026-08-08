@@ -21,12 +21,17 @@ import {
   normalizeSupportTone,
   parseTerminology,
 } from "@/lib/ces/profile/defaults";
+import { getExecutivePresentation } from "@/lib/ces/executive-performance/presentation";
 import {
   composeOperatorHomeShell,
   composeOperatorModuleRows,
   composeOperatorNavPreview,
   type ExperienceComposeInput,
 } from "./compose";
+function isTrustedClientAccent(value: string): boolean {
+  const trimmed = value.trim();
+  return Boolean(trimmed.startsWith("#") && trimmed.toUpperCase() !== "#C9A962");
+}
 import { composeOperatorExperienceWarnings } from "./warnings";
 import type {
   ExperienceProfileStatus,
@@ -334,18 +339,68 @@ export async function loadOperatorExperienceSnapshot(
     onboardingLogo = null;
   }
 
-  const brandKit =
+  let brandKit =
     profile?.brandKit && typeof profile.brandKit === "object"
       ? (profile.brandKit as AnyDoc)
       : null;
-  const logoUrl = logoOverride ?? onboardingLogo;
+  if (!brandKit) {
+    try {
+      const kits = await payload.find({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        collection: "brand-kits" as any,
+        where: { client: { equals: clientId } },
+        limit: 1,
+        depth: 0,
+        sort: "-updatedAt",
+        overrideAccess: true,
+      });
+      brandKit = (kits.docs[0] as AnyDoc | undefined) ?? null;
+    } catch {
+      brandKit = null;
+    }
+  }
+
+  const presentation = getExecutivePresentation(clientSlug);
+  const presentationLogo =
+    typeof presentation?.logoSrc === "string" && presentation.logoSrc.trim()
+      ? presentation.logoSrc.trim()
+      : null;
+  const logoUrl = logoOverride ?? onboardingLogo ?? presentationLogo;
   const logoSource = logoOverride
     ? "profile-override"
     : onboardingLogo
       ? "onboarding"
-      : brandKit
-        ? "brand-kit"
+      : presentationLogo
+        ? "presentation"
         : "none";
+
+  const kitPrimary =
+    typeof brandKit?.primaryColor === "string" ? brandKit.primaryColor : "";
+  const kitSecondary =
+    typeof brandKit?.secondaryColor === "string" ? brandKit.secondaryColor : "";
+  const kitAccent =
+    typeof brandKit?.accentColor === "string" ? brandKit.accentColor : "";
+  const presentationAccent =
+    typeof presentation?.actionAccent === "string" ? presentation.actionAccent : "";
+  const profileAccent =
+    typeof profile?.accentColor === "string" ? profile.accentColor : "";
+  const resolvedAccent = isTrustedClientAccent(profileAccent)
+    ? profileAccent
+    : isTrustedClientAccent(kitAccent)
+      ? kitAccent
+      : isTrustedClientAccent(presentationAccent)
+        ? presentationAccent
+        : "#3A3A3A";
+  const resolvedPrimary = String(
+    profile?.primaryColor ||
+      (isTrustedClientAccent(kitPrimary) ? kitPrimary : "") ||
+      "#0B0B0B",
+  );
+  const resolvedSecondary = String(
+    profile?.secondaryColor ||
+      (isTrustedClientAccent(kitSecondary) ? kitSecondary : "") ||
+      "#141414",
+  );
 
   const [entitlements, reporting, mapping, inventoryCount, portalAccess] =
     await Promise.all([
@@ -376,11 +431,9 @@ export async function loadOperatorExperienceSnapshot(
     websiteUrl,
     logoUrl,
     visual: {
-      primaryColor: String(profile?.primaryColor ?? brandKit?.primaryColor ?? "#0B0B0B"),
-      secondaryColor: String(
-        profile?.secondaryColor ?? brandKit?.secondaryColor ?? "#141414",
-      ),
-      accentColor: String(profile?.accentColor ?? brandKit?.accentColor ?? "#C9A962"),
+      primaryColor: resolvedPrimary,
+      secondaryColor: resolvedSecondary,
+      accentColor: resolvedAccent,
       borderRadiusPreset: normalizeBorderRadius(profile?.borderRadiusPreset),
       motionPreset: normalizeMotionPreset(profile?.motionPreset),
     },
@@ -437,7 +490,7 @@ export async function loadOperatorExperienceSnapshot(
       supportTone: composeInput.hospitality?.supportTone ?? "warm-professional",
       primaryColor: composeInput.visual?.primaryColor ?? "#0B0B0B",
       secondaryColor: composeInput.visual?.secondaryColor ?? "#141414",
-      accentColor: composeInput.visual?.accentColor ?? "#C9A962",
+      accentColor: composeInput.visual?.accentColor ?? "#3A3A3A",
       borderRadiusPreset: composeInput.visual?.borderRadiusPreset ?? "default",
       motionPreset: composeInput.visual?.motionPreset ?? "calm",
       showKxdPartnerMark: composeInput.hospitality?.showPartnerMark !== false,

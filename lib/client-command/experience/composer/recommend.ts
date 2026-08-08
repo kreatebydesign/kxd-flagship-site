@@ -20,6 +20,10 @@ import {
   operatorModuleKind,
   planAllowsPortalModule,
 } from "../module-catalog";
+import {
+  composeExperienceReadiness,
+  isTrustedClientAccent,
+} from "./readiness";
 import type {
   ExperienceBrandingRecommendation,
   ExperienceModuleRecommendation,
@@ -66,13 +70,32 @@ export function recommendBranding(
   let secondary = existing.secondaryColor || CONSERVATIVE_SECONDARY;
 
   if (!existing.accentColor.trim() || accentLooksLikeKxdDefault) {
-    colorSource = signals.logoHasFile ? "inferred" : "missing";
-    accent = CONSERVATIVE_ACCENT;
-    primary = CONSERVATIVE_PRIMARY;
-    secondary = CONSERVATIVE_SECONDARY;
-    colorNote = accentLooksLikeKxdDefault
-      ? "Existing accent matches KXD OS gold and is not treated as client brand. Conservative charcoal recommended until a client color is stored."
-      : "No client brand color on file. Conservative neutrals recommended — do not ship KXD gold as the client brand.";
+    const kit = signals.brandKit;
+    if (kit && isTrustedClientAccent(kit.accentColor)) {
+      colorSource = "authoritative";
+      accent = kit.accentColor;
+      primary = isTrustedClientAccent(kit.primaryColor)
+        ? kit.primaryColor
+        : CONSERVATIVE_PRIMARY;
+      secondary = isTrustedClientAccent(kit.secondaryColor)
+        ? kit.secondaryColor
+        : CONSERVATIVE_SECONDARY;
+      colorNote = "Using brand-kit colors already stored for this client.";
+    } else if (isTrustedClientAccent(signals.presentationAccent)) {
+      colorSource = "authoritative";
+      accent = signals.presentationAccent as string;
+      primary = CONSERVATIVE_PRIMARY;
+      secondary = CONSERVATIVE_SECONDARY;
+      colorNote = "Using presentation registry accent already stored for this client.";
+    } else {
+      colorSource = signals.logoHasFile ? "inferred" : "missing";
+      accent = CONSERVATIVE_ACCENT;
+      primary = CONSERVATIVE_PRIMARY;
+      secondary = CONSERVATIVE_SECONDARY;
+      colorNote = accentLooksLikeKxdDefault
+        ? "Existing accent matches KXD OS gold and is not treated as client brand. Conservative charcoal recommended until a client color is stored."
+        : "No client brand color on file. Conservative neutrals recommended — do not ship KXD gold as the client brand.";
+    }
   }
 
   const welcomeAuthoritative = Boolean(existing.welcomeEyebrow.trim());
@@ -105,11 +128,17 @@ export function recommendBranding(
     showKxdPartnerMark: existing.showKxdPartnerMark !== false,
     partnerFooterLine:
       existing.partnerFooterLine.trim() || "Powered by Kreate by Design",
-    logoHasFile: signals.logoHasFile,
-    logoSource: signals.logoSource,
-    logoNote: signals.logoHasFile
-      ? `Logo on file (${signals.logoSource}).`
-      : "No client logo on file. Add a logo before inviting the client.",
+    logoHasFile: signals.logoHasFile || Boolean(signals.presentationLogoUrl),
+    logoSource:
+      signals.logoHasFile
+        ? signals.logoSource
+        : signals.presentationLogoUrl
+          ? "presentation"
+          : signals.logoSource,
+    logoNote:
+      signals.logoHasFile || signals.presentationLogoUrl
+        ? `Logo on file (${signals.logoHasFile ? signals.logoSource : "presentation"}).`
+        : "No client logo in onboarding, CES profile, or presentation registry. Add a logo before client launch.",
   };
 }
 
@@ -595,6 +624,12 @@ export function composeExperienceRecommendation(
   const hidden = modules.filter(
     (m) => m.decision === "exclude" || m.decision === "locked",
   ).length;
+  const readiness = composeExperienceReadiness({
+    signals,
+    branding,
+    modules,
+    acceptedModules: activationModules,
+  });
   const composeInput = {
     clientId: signals.clientId,
     clientName: branding.clientName,
@@ -643,8 +678,7 @@ export function composeExperienceRecommendation(
   return {
     clientId: signals.clientId,
     generatedAt: new Date().toISOString(),
-    readinessPercent:
-      recommended === 0 ? 100 : Math.round((ready / recommended) * 100),
+    readinessPercent: readiness.launchReadinessPercent,
     counts: {
       recommended,
       ready,
@@ -658,6 +692,7 @@ export function composeExperienceRecommendation(
     homeShell: composeOperatorHomeShell(composeInput),
     integrations: signals.integrations,
     portalAccess: signals.portalAccess,
+    readiness,
     notes,
     mutatesProfile: false,
   };

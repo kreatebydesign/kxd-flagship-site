@@ -70,7 +70,7 @@ export type OperatorExperienceBranding = {
 
 export type OperatorExperienceLogoStatus = {
   hasLogo: boolean;
-  source: "profile-override" | "onboarding" | "brand-kit" | "none";
+  source: "profile-override" | "onboarding" | "presentation" | "brand-kit" | "none";
   url: string | null;
   profileEditHref: string | null;
   brandKitHref: string | null;
