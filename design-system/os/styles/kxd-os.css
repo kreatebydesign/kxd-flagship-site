@@ -21961,7 +21961,9 @@ select.kxd-os-commercial-control {
 }
 
 .kxd-ces-exp__advanced {
-  margin-top: 0.25rem;
+  margin-top: 1.5rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--kxd-os-border);
 }
 
 .kxd-ces-exp__advanced summary {
@@ -21971,6 +21973,11 @@ select.kxd-os-commercial-control {
   text-transform: uppercase;
   color: var(--kxd-os-text-muted);
   margin-bottom: 1rem;
+  list-style: none;
+}
+
+.kxd-ces-exp__advanced summary::-webkit-details-marker {
+  display: none;
 }
 
 .kxd-ces-composer {

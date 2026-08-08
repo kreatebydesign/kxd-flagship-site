@@ -373,5 +373,15 @@ export const Clients: CollectionConfig = {
           "Negotiated or legacy commercial terms. Internal only — never shown in the client portal.",
       },
     },
+    {
+      name: "commercialRelationshipLabel",
+      type: "text",
+      label: "Commercial Relationship Label",
+      admin: {
+        position: "sidebar",
+        description:
+          "Presentation/grouping label only (e.g. a multi-business partnership name). Not a contract FK, not a multi-client relation, and does not merge clients, CES, or commercial scope.",
+      },
+    },
   ],
 };

@@ -67,6 +67,24 @@ const load = read("lib/client-command/experience/load.ts");
 const workspace = read("components/admin/operations/client-command/CommandWorkspaceTabPanel.tsx");
 const actions = read("lib/client-command/workspace-actions.ts");
 
+const composerUi = read(
+  "components/admin/operations/client-command/ClientExperienceComposer.tsx",
+);
+const servicesRoute = read("app/api/admin/clients/[clientId]/experience/services/route.ts");
+check(
+  "Composer commercial review wraps discovery in Advanced Configuration",
+  composerUi.includes("Active services") &&
+    composerUi.includes("Advanced Configuration") &&
+    composerUi.includes("/experience/services") &&
+    composerUi.includes("Manage Experience"),
+);
+check(
+  "Service assignment API is studio-gated and never activates CES",
+  servicesRoute.includes("isStudioPayloadOperator") &&
+    servicesRoute.includes("mutatesProfile: false") &&
+    servicesRoute.includes("invites: false") &&
+    !servicesRoute.includes("activateRecommendedExperience"),
+);
 check(
   "Experience tab registered in Client Command",
   tabs.includes('{ id: "experience", label: "Experience" }'),

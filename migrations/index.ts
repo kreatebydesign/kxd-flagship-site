@@ -97,6 +97,7 @@ import * as migration_20260818_external_payment_revenue_event_types from './2026
 import * as migration_20260807_junior_creator_timer_safety from './20260807_junior_creator_timer_safety';
 import * as migration_20260823_client_site_events from './20260823_client_site_events';
 import * as migration_20260824_csi_v1b_sale_commission from './20260824_csi_v1b_sale_commission';
+import * as migration_20260825_client_service_assignments from './20260825_client_service_assignments';
 
 export const migrations = [
   {
@@ -604,5 +605,10 @@ export const migrations = [
     up: migration_20260824_csi_v1b_sale_commission.up,
     down: migration_20260824_csi_v1b_sale_commission.down,
     name: '20260824_csi_v1b_sale_commission',
+  },
+  {
+    up: migration_20260825_client_service_assignments.up,
+    down: migration_20260825_client_service_assignments.down,
+    name: '20260825_client_service_assignments',
   },
 ];

@@ -112,9 +112,12 @@ export async function saveOperatorExperience(
     | { id: number; enabledModules?: unknown; terminology?: unknown; profileName?: string }
     | undefined;
 
-  const reportingKept = normalizeReportingCapabilityList(
-    asStringArray(existing?.enabledModules),
-  );
+  const reportingKept = [
+    ...new Set([
+      ...normalizeReportingCapabilityList(asStringArray(existing?.enabledModules)),
+      ...normalizeReportingCapabilityList(input.selectedPortalModules),
+    ]),
+  ];
   const enabledModules = [...selected, ...reportingKept];
 
   const data = {

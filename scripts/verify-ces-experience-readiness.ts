@@ -14,6 +14,8 @@ import {
   proposeSearchConsoleSiteUrl,
 } from "../lib/client-command/experience/composer/readiness.ts";
 import type { ExperienceSignals } from "../lib/client-command/experience/composer/types.ts";
+import { EMPTY_SERVICE_SCOPE } from "../lib/service-capabilities/resolve.ts";
+import { GROWTH_INFRASTRUCTURE_SHOWROOM_SCOPE, resolveServiceScope } from "../lib/service-capabilities/index.ts";
 
 const root = process.cwd();
 let passed = 0;
@@ -55,6 +57,7 @@ function baseSignals(partial: Partial<ExperienceSignals> = {}): ExperienceSignal
     commercialAgreementId: null,
     currentServices: "SEO\nInventory Visibility\nWebsite Management",
     industry: null,
+    serviceScope: EMPTY_SERVICE_SCOPE,
     hasHostingInfra: true,
     primaryDomain: "example.com",
     ga4PropertyId: null,
@@ -228,6 +231,21 @@ const gold = composeExperienceRecommendation(
   }),
 );
 check("KXD gold still rejected as client brand", gold.branding.accentColor !== "#C9A962");
+
+const commercialReady = composeExperienceRecommendation(
+  baseSignals({
+    websiteUrl: "https://example.com",
+    serviceScope: resolveServiceScope({
+      assignments: GROWTH_INFRASTRUCTURE_SHOWROOM_SCOPE.assignments,
+    }),
+  }),
+);
+const commercialAnalytics = commercialReady.modules.find((m) => m.id === "analytics");
+check(
+  "missing GA4 is readiness, not missing commercial entitlement",
+  commercialAnalytics?.decision === "needs-setup" &&
+    Boolean(commercialAnalytics.reason.includes("commercial")),
+);
 
 const shaped = composeExperienceRecommendation(
   baseSignals({

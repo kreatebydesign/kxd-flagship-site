@@ -6,6 +6,8 @@ import { getExecutivePresentation } from "@/lib/ces/executive-performance/presen
 import { WEBSITE_REVIEW_EXPERIENCE_MODULE } from "@/lib/ces/modules/website-review/constants";
 import { WEBSITE_WORKSPACE_EXPERIENCE_MODULE } from "@/lib/ces/modules/website-workspace/constants";
 import { loadOperatorExperienceSnapshot } from "../load";
+import { EMPTY_SERVICE_SCOPE } from "@/lib/service-capabilities";
+import { loadResolvedServiceScope } from "@/lib/service-capabilities/assignments";
 import {
   extractGa4PropertyIdFromEvidence,
   proposeSearchConsoleSiteUrl,
@@ -191,6 +193,7 @@ export async function loadExperienceSignals(
     assetCount,
     meetingCount,
     brandKitAssets,
+    serviceScope,
   ] = await Promise.all([
     countWhere("client-requests", {
       and: [
@@ -220,6 +223,7 @@ export async function loadExperienceSignals(
     countWhere("creative-assets", { client: { equals: clientId } }),
     countWhere("success-check-ins", { client: { equals: clientId } }),
     countWhere("brand-kits", { client: { equals: clientId } }),
+    loadResolvedServiceScope(clientId).catch(() => EMPTY_SERVICE_SCOPE),
   ]);
 
   const presentation = getExecutivePresentation(snapshot.clientSlug);
@@ -254,6 +258,7 @@ export async function loadExperienceSignals(
         : null,
     currentServices,
     industry,
+    serviceScope,
     hasHostingInfra,
     primaryDomain,
     ga4PropertyId: ga4?.status === "configured" ? ga4.detail : null,

@@ -12,6 +12,8 @@ import {
   recommendModules,
 } from "../lib/client-command/experience/composer/recommend.ts";
 import type { ExperienceSignals } from "../lib/client-command/experience/composer/types.ts";
+import { EMPTY_SERVICE_SCOPE } from "../lib/service-capabilities/resolve.ts";
+import { GROWTH_INFRASTRUCTURE_SHOWROOM_SCOPE, resolveServiceScope } from "../lib/service-capabilities/index.ts";
 
 const root = process.cwd();
 let passed = 0;
@@ -53,6 +55,7 @@ function baseSignals(partial: Partial<ExperienceSignals>): ExperienceSignals {
     commercialAgreementId: null,
     currentServices: null,
     industry: null,
+    serviceScope: EMPTY_SERVICE_SCOPE,
     hasHostingInfra: false,
     primaryDomain: null,
     ga4PropertyId: null,
@@ -244,6 +247,35 @@ const billingOff = composeExperienceRecommendation(
 check(
   "billing stays gated off without Stripe eligibility",
   billingOff.modules.find((m) => m.id === "invoices")?.acceptedDefault === false,
+);
+
+const commercial = composeExperienceRecommendation(
+  baseSignals({
+    websiteUrl: "https://example.com",
+    serviceScope: resolveServiceScope({
+      assignments: GROWTH_INFRASTRUCTURE_SHOWROOM_SCOPE.assignments,
+    }),
+  }),
+);
+const commercialIds = commercial.modules
+  .filter((m) => m.decision === "include" || m.decision === "needs-setup")
+  .map((m) => m.id);
+check(
+  "authoritative commercial scope drives CES before haystack",
+  [
+    "website-workspace",
+    "website-review",
+    "website-health",
+    "requests",
+    "inventory",
+    "analytics",
+    "executive-review",
+    "executive-performance",
+  ].every((id) => commercialIds.includes(id as never)),
+);
+check(
+  "commercial notes cite active services, not keyword haystack",
+  commercial.notes.some((note) => note.includes("active commercial services")),
 );
 
 const previewStart = read("app/api/admin/portal/preview/start/route.ts");

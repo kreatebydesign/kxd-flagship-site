@@ -20,6 +20,7 @@ import {
 import { resolveMediaAssetUrl } from "../lib/client-command/experience/media-url.ts";
 import { composeExperienceRecommendation } from "../lib/client-command/experience/composer/recommend.ts";
 import type { ExperienceSignals } from "../lib/client-command/experience/composer/types.ts";
+import { EMPTY_SERVICE_SCOPE } from "../lib/service-capabilities/resolve.ts";
 import {
   classifyGscSite,
   findImportableGa4Property,
@@ -320,6 +321,7 @@ function miniSignals(partial: Partial<ExperienceSignals> = {}): ExperienceSignal
     commercialAgreementId: null,
     currentServices: "SEO\nWebsite Management",
     industry: null,
+    serviceScope: EMPTY_SERVICE_SCOPE,
     hasHostingInfra: true,
     primaryDomain: "example.com",
     ga4PropertyId: null,

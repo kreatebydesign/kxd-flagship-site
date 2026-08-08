@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PortalPreviewQuickAction } from "./PortalPreviewQuickAction";
 import type {
   ExperienceDependency,
@@ -8,6 +8,11 @@ import type {
   ExperienceRecommendation,
 } from "@/lib/client-command/experience/composer/types";
 import type { OperatorExperienceSnapshot } from "@/lib/client-command/experience/types";
+import type {
+  ResolvedServiceScope,
+  ServiceCapabilityDefinition,
+  ServiceCapabilityId,
+} from "@/lib/service-capabilities";
 
 type RecommendResponse = {
   ok?: boolean;
@@ -24,6 +29,13 @@ type ActivateResponse = {
 type ProvisionResponse = {
   ok?: boolean;
   message?: string;
+};
+
+type ServicesResponse = {
+  ok?: boolean;
+  message?: string;
+  catalog?: ServiceCapabilityDefinition[];
+  scope?: ResolvedServiceScope;
 };
 
 type DiscoverResponse = {
@@ -85,6 +97,10 @@ export function ClientExperienceComposer({
   onActivated: (experience: OperatorExperienceSnapshot) => void;
 }) {
   const [generating, setGenerating] = useState(false);
+  const [serviceBusy, setServiceBusy] = useState<string | null>(null);
+  const [catalog, setCatalog] = useState<ServiceCapabilityDefinition[]>([]);
+  const [scope, setScope] = useState<ResolvedServiceScope | null>(null);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
   const [activating, setActivating] = useState(false);
   const [provisioning, setProvisioning] = useState<string | null>(null);
   const [discovering, setDiscovering] = useState<ExperienceDiscoverKind | null>(null);
@@ -100,6 +116,19 @@ export function ClientExperienceComposer({
     null,
   );
   const [accepted, setAccepted] = useState<Set<string>>(new Set());
+
+  async function loadServices() {
+    const res = await fetch(`/api/admin/clients/${clientId}/experience/services`, {
+      credentials: "same-origin",
+    });
+    const json = (await res.json()) as ServicesResponse;
+    if (!res.ok || !json.ok || !json.scope || !json.catalog) {
+      throw new Error(json.message || "Unable to load commercial services.");
+    }
+    setCatalog(json.catalog);
+    setScope(json.scope);
+    return json.scope;
+  }
 
   async function generate(options?: { preserveFeedback?: boolean }) {
     setGenerating(true);
@@ -122,6 +151,60 @@ export function ClientExperienceComposer({
       setError(err instanceof Error ? err.message : "Unable to generate recommendation.");
     } finally {
       setGenerating(false);
+    }
+  }
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        await loadServices();
+        await generate({ preserveFeedback: true });
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Unable to compose experience.");
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- initial commercial review load
+  }, [clientId]);
+
+  async function updateService(action: "activate" | "end", capabilityId: ServiceCapabilityId) {
+    setServiceBusy(capabilityId);
+    setError(null);
+    try {
+      const active = scope?.assignments.find(
+        (row) => row.capabilityId === capabilityId && row.status === "active",
+      );
+      const res = await fetch(`/api/admin/clients/${clientId}/experience/services`, {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(
+          action === "activate"
+            ? {
+                action: "activate",
+                capabilityId,
+                source: catalog.find((row) => row.id === capabilityId)?.kind === "add-on"
+                  ? "add-on"
+                  : "legacy-manual",
+              }
+            : { action: "end", assignmentId: active?.id },
+        ),
+      });
+      const json = (await res.json()) as ServicesResponse;
+      if (!res.ok || !json.ok || !json.scope) {
+        throw new Error(json.message || "Unable to update services.");
+      }
+      setScope(json.scope);
+      if (json.catalog) setCatalog(json.catalog);
+      setNotice(
+        action === "activate"
+          ? "Active services updated. Experience recomposed — Approve & Activate still required."
+          : "Service ended. Historical assignment kept. Experience recomposed.",
+      );
+      await generate({ preserveFeedback: true });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to update services.");
+    } finally {
+      setServiceBusy(null);
     }
   }
 
@@ -285,7 +368,9 @@ export function ClientExperienceComposer({
   const grouped = useMemo(() => {
     const rec = recommendation?.modules ?? [];
     return {
-      recommended: rec.filter((m) => m.decision === "include" || m.decision === "always"),
+      recommended: rec.filter(
+        (m) => m.decision === "include" || m.decision === "always" || m.decision === "needs-setup",
+      ),
       needsSetup: rec.filter((m) => m.decision === "needs-setup"),
       gated: rec.filter((m) => m.decision === "gated"),
       excluded: rec.filter((m) => m.decision === "exclude" || m.decision === "locked"),
@@ -304,8 +389,9 @@ export function ClientExperienceComposer({
         <div>
           <p className="kxd-os-section__label">Client Experience</p>
           <p className="kxd-os-meta" style={{ marginTop: "0.35rem" }}>
-            KXD OS proposes the experience from known client truth, then shows exactly what
-            must be provisioned before launch. Preview anytime. Approve & Activate stays explicit.
+            Commercial services compose the workspace. Integrations affect readiness, not
+            entitlement. Preview anytime. Approve & Activate stays explicit. Invite stays on
+            Manage Portal Access.
           </p>
         </div>
         {recommendation ? (
@@ -314,6 +400,10 @@ export function ClientExperienceComposer({
           </span>
         ) : null}
       </div>
+
+      {scope?.relationshipLabel ? (
+        <p className="kxd-os-meta">Commercial relationship · {scope.relationshipLabel}</p>
+      ) : null}
 
       {recommendation ? (
         <p className="kxd-os-meta">
@@ -334,16 +424,71 @@ export function ClientExperienceComposer({
         </p>
       ) : null}
 
-      <div className="kxd-plans-access__actions">
-        <button
-          type="button"
-          className="kxd-plans-access__save"
-          disabled={generating}
-          onClick={() => void generate()}
-        >
-          {generating ? "Analyzing…" : "Generate Recommended Experience"}
-        </button>
-      </div>
+      <h3 className="kxd-ces-exp__h">Active services</h3>
+      <ul className="kxd-ces-exp__modules">
+        {catalog
+          .filter((entry) => entry.kind !== "add-on")
+          .map((entry) => {
+            const active = scope?.assignments.some(
+              (row) => row.capabilityId === entry.id && row.status === "active",
+            );
+            return (
+              <li key={entry.id} className="kxd-ces-exp__module">
+                <label className="kxd-ces-exp__check">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(active)}
+                    disabled={Boolean(serviceBusy) || generating}
+                    onChange={(e) =>
+                      void updateService(e.target.checked ? "activate" : "end", entry.id)
+                    }
+                  />
+                  <span>
+                    <strong>{entry.label}</strong>
+                    <span className="kxd-os-meta">
+                      {" "}
+                      · {entry.kind === "performance" ? "Commercial only" : entry.kind}
+                    </span>
+                  </span>
+                </label>
+                <div className="kxd-ces-exp__module-meta">
+                  <span className="kxd-os-meta">{entry.summary}</span>
+                </div>
+              </li>
+            );
+          })}
+      </ul>
+
+      <h3 className="kxd-ces-exp__h">Optional / available add-ons</h3>
+      <ul className="kxd-ces-exp__modules">
+        {catalog
+          .filter((entry) => entry.kind === "add-on")
+          .map((entry) => {
+            const active = scope?.assignments.some(
+              (row) => row.capabilityId === entry.id && row.status === "active",
+            );
+            return (
+              <li key={entry.id} className="kxd-ces-exp__module">
+                <label className="kxd-ces-exp__check">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(active)}
+                    disabled={Boolean(serviceBusy) || generating}
+                    onChange={(e) =>
+                      void updateService(e.target.checked ? "activate" : "end", entry.id)
+                    }
+                  />
+                  <span>
+                    <strong>{entry.label}</strong>
+                  </span>
+                </label>
+                <div className="kxd-ces-exp__module-meta">
+                  <span className="kxd-os-meta">{entry.summary}</span>
+                </div>
+              </li>
+            );
+          })}
+      </ul>
 
       {recommendation ? (
         <>
@@ -355,7 +500,7 @@ export function ClientExperienceComposer({
             </ul>
           ) : null}
 
-          <h3 className="kxd-ces-exp__h">Recommended Experience</h3>
+          <h3 className="kxd-ces-exp__h">Client Experience</h3>
           <ul className="kxd-ces-exp__modules">
             {grouped.recommended.map((row) => (
               <li key={row.id} className="kxd-ces-exp__module">
@@ -378,6 +523,58 @@ export function ClientExperienceComposer({
             ))}
           </ul>
 
+          <h3 className="kxd-ces-exp__h">Branding</h3>
+          <p className="kxd-os-meta">
+            {recommendation.branding.clientName} · Logo:{" "}
+            {recommendation.branding.logoHasFile ? "On file" : "Missing"} · Colors:{" "}
+            {recommendation.branding.colorSource === "authoritative"
+              ? "Complete"
+              : "Incomplete"}
+            . {recommendation.branding.colorNote}
+          </p>
+
+          <h3 className="kxd-ces-exp__h">Integrations</h3>
+          <ul className="kxd-plans-access__list kxd-plans-access__list--effective">
+            {recommendation.integrations.slice(0, 6).map((row) => (
+              <li key={row.id}>
+                {row.label}
+                <span>{row.status === "configured" ? "Connected" : row.detail || row.status}</span>
+              </li>
+            ))}
+          </ul>
+
+          <h3 className="kxd-ces-exp__h">Access</h3>
+          <p className="kxd-os-meta">
+            {accessDep?.reason ??
+              `Memberships: ${recommendation.portalAccess.activeMembershipCount}. Invites stay on Manage Portal Access.`}
+          </p>
+
+          <details
+            className="kxd-ces-exp__advanced"
+            open={advancedOpen}
+            onToggle={(e) => setAdvancedOpen((e.target as HTMLDetailsElement).open)}
+          >
+            <summary>Advanced Configuration</summary>
+            <p className="kxd-os-meta">
+              Discovery, per-dependency provisioning, and manual module review. Not the normal
+              commercial workflow.
+            </p>
+            <div className="kxd-plans-access__actions">
+              <button
+                type="button"
+                className="kxd-os-link-quiet"
+                disabled={generating}
+                onClick={() => void generate()}
+              >
+                {generating ? "Analyzing…" : "Regenerate from current truth"}
+              </button>
+              <a
+                className="kxd-os-link-quiet"
+                href={`/admin/operations/client-command/${clientId}?tab=experience`}
+              >
+                Manage Experience
+              </a>
+            </div>
           {setupDeps.length ? (
             <>
               <h3 className="kxd-ces-exp__h">Needs Setup</h3>
@@ -472,29 +669,6 @@ export function ClientExperienceComposer({
             </>
           ) : null}
 
-          <h3 className="kxd-ces-exp__h">Branding</h3>
-          <p className="kxd-os-meta">
-            {recommendation.branding.clientName} · Logo:{" "}
-            {recommendation.branding.logoHasFile ? "On file" : "Missing"} · Colors:{" "}
-            {recommendation.branding.colorSource === "authoritative"
-              ? "Complete"
-              : "Incomplete"}
-            . {recommendation.branding.colorNote}
-          </p>
-
-          <h3 className="kxd-ces-exp__h">Access</h3>
-          <p className="kxd-os-meta">
-            {accessDep?.reason ??
-              `Memberships: ${recommendation.portalAccess.activeMembershipCount}. Invites stay on Manage Portal Access.`}
-          </p>
-          {accessDep?.provision.href ? (
-            <p>
-              <a className="kxd-os-link-quiet" href={accessDep.provision.href}>
-                Manage Portal Access
-              </a>
-            </p>
-          ) : null}
-
           <h3 className="kxd-ces-exp__h">Not Included</h3>
           <ul className="kxd-plans-access__list kxd-plans-access__list--effective">
             {[...grouped.gated, ...grouped.excluded].map((row) => (
@@ -521,6 +695,7 @@ export function ClientExperienceComposer({
               </ul>
             </div>
           ))}
+          </details>
 
           {liveReadiness && !liveReadiness.activationEligible ? (
             <ul className="kxd-ces-exp__warnings">

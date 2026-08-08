@@ -48,6 +48,9 @@ export async function activateRecommendedExperience(
     showKxdPartnerMark: input.branding.showKxdPartnerMark,
     partnerFooterLine: input.branding.partnerFooterLine,
     terminology: {},
-    selectedPortalModules: input.acceptedModules,
+    selectedPortalModules: [
+      ...input.acceptedModules,
+      ...signals.serviceScope.grantedReporting,
+    ],
   });
 }

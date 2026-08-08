@@ -4,6 +4,7 @@ import type {
   ExperienceSupportTone,
 } from "@/lib/ces/types";
 import type { PortalModuleId } from "@/lib/ces/modules/canonical";
+import type { ResolvedServiceScope } from "@/lib/service-capabilities";
 import type {
   OperatorExperienceNavPreviewGroup,
   OperatorExperienceSnapshot,
@@ -126,6 +127,7 @@ export type ExperienceSignals = {
   commercialAgreementId: string | null;
   currentServices: string | null;
   industry: string | null;
+  serviceScope: ResolvedServiceScope;
   hasHostingInfra: boolean;
   primaryDomain: string | null;
   ga4PropertyId: string | null;

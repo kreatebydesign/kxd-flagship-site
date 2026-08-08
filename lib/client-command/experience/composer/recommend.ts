@@ -142,6 +142,73 @@ export function recommendBranding(
   };
 }
 
+function decideFromCommercialScope(
+  id: PortalModuleId,
+  signals: ExperienceSignals,
+): Pick<
+  ExperienceModuleRecommendation,
+  "decision" | "acceptedDefault" | "reason" | "blocker"
+> | null {
+  if (!signals.serviceScope.hasAuthoritativeScope) return null;
+  const granted = signals.serviceScope.grantedModules.includes(id);
+  if (!granted) {
+    return {
+      decision: "exclude",
+      acceptedDefault: false,
+      reason: "Not in this client's active commercial service scope.",
+      blocker: null,
+    };
+  }
+
+  if (id === "analytics" && !signals.ga4PropertyId) {
+    return {
+      decision: "needs-setup",
+      acceptedDefault: false,
+      reason: "Active commercial analytics scope. GA4 is not connected yet.",
+      blocker: "GA4 not configured.",
+    };
+  }
+  if (id === "website-health" && !signals.searchConsoleSiteUrl && !signals.ga4PropertyId) {
+    return {
+      decision: "needs-setup",
+      acceptedDefault: false,
+      reason: "Active commercial website/search scope. Search Console is not connected yet.",
+      blocker: "Search Console not configured.",
+    };
+  }
+  if (id === "inventory" && signals.inventoryCount <= 0) {
+    return {
+      decision: "needs-setup",
+      acceptedDefault: false,
+      reason: "Active commercial inventory scope. No listings exist yet.",
+      blocker: "Add inventory listings before activating this module.",
+    };
+  }
+  if (id === "reports" && signals.publishedReportCount <= 0) {
+    return {
+      decision: "needs-setup",
+      acceptedDefault: false,
+      reason: "Active commercial reporting scope. No published client reports yet.",
+      blocker: "Publish or connect reporting before activating Reports.",
+    };
+  }
+  if (id === "website-review" && !signals.websiteUrl && !signals.primaryDomain) {
+    return {
+      decision: "needs-setup",
+      acceptedDefault: false,
+      reason: "Active managed-website scope. Website / domain is not on file yet.",
+      blocker: "Add the managed website URL.",
+    };
+  }
+
+  return {
+    decision: "include",
+    acceptedDefault: true,
+    reason: "Granted by active commercial services.",
+    blocker: null,
+  };
+}
+
 function decideToggleable(
   id: PortalModuleId,
   signals: ExperienceSignals,
@@ -170,6 +237,9 @@ function decideToggleable(
       blocker: null,
     };
   }
+
+  const fromScope = decideFromCommercialScope(id, signals);
+  if (fromScope) return fromScope;
 
   switch (id) {
     case "website-review": {
@@ -636,7 +706,9 @@ export function composeExperienceRecommendation(
     clientSlug: signals.clientSlug,
     profileStatus: "active" as const,
     selectedPortalModules: activationModules,
-    reportingCapabilities: signals.reportingCapabilities,
+    reportingCapabilities: [
+      ...new Set([...signals.reportingCapabilities, ...signals.serviceScope.grantedReporting]),
+    ],
     entitlements: signals.entitlements,
     billingNavAvailable: signals.billingNavAvailable,
     portfolioNavAvailable: signals.portfolioNavAvailable,
@@ -667,6 +739,13 @@ export function composeExperienceRecommendation(
   }
   if (branding.colorSource !== "authoritative") {
     notes.push(branding.colorNote);
+  }
+  if (signals.serviceScope.hasAuthoritativeScope) {
+    notes.push(
+      signals.serviceScope.relationshipLabel
+        ? `Experience composed from active services for ${signals.serviceScope.relationshipLabel}.`
+        : "Experience composed from active commercial services.",
+    );
   }
   if (signals.profileStatus === "active") {
     notes.push(
