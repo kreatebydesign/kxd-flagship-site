@@ -4,6 +4,7 @@ import { getPayload } from "payload";
 import config from "@payload-config";
 import type { ResolvedExperienceProfile } from "@/lib/ces/types";
 import { isCesModuleEnabled } from "@/lib/ces";
+import { isPortalModuleVisible } from "@/lib/ces/modules/visibility";
 import type { WebsiteReviewLandingData, WebsiteReviewItem } from "@/lib/ces/modules/website-review/types";
 import {
   reviewStatusLabel,
@@ -13,7 +14,6 @@ import {
 import {
   clientDeliverableCategoryLabel,
   containsInternalLanguage,
-  isCesFlagshipPortal,
   isCesLaunchDeliverablesPageReady,
   isClientSafeTimelineDoc,
   isPlaceholderDeliverableTitle,
@@ -274,11 +274,14 @@ function buildQuickActions(
   websiteUrl: string | null,
 ): ConnectedQuickAction[] {
   const websiteReviewEnabled = isCesModuleEnabled(profile, "website-review");
-  const cesLaunch = isCesFlagshipPortal(profile);
   const reviewWebsiteEnabled = Boolean(websiteUrl && websiteReviewEnabled);
   const startReviewEnabled = websiteReviewEnabled;
-  const uploadEnabled = cesLaunch ? false : isPortalNavEnabled("assets");
-  const messageEnabled = cesLaunch ? false : isPortalNavEnabled("requests");
+  const uploadEnabled =
+    isPortalNavEnabled("assets") &&
+    isPortalModuleVisible("assets", { profile });
+  const messageEnabled =
+    isPortalNavEnabled("requests") &&
+    isPortalModuleVisible("requests", { profile });
 
   return [
     {

@@ -1,8 +1,9 @@
 import { redirect } from "next/navigation";
-import { CesPortalHome, shouldUseCesPortalHome } from "@/components/ces/portal";
+import { CesPortalHome } from "@/components/ces/portal";
 import { OverviewScreen } from "@/components/client-hq";
 import { composeExecutivePerformance } from "@/lib/ces/executive-performance/compose";
 import { composePartnershipBriefing } from "@/lib/ces/partnership/compose";
+import { resolvePortalHomeComposition } from "@/lib/ces/modules/home";
 import { resolveExperienceProfile } from "@/lib/ces/server";
 import { getWebsiteReviewLanding } from "@/lib/ces/modules/website-review/data";
 import { getConnectedWorkspaceData } from "@/lib/portal/connected-workspace";
@@ -29,7 +30,9 @@ export default async function PortalOverviewPage() {
     experienceProfile: profile,
   });
 
-  if (shouldUseCesPortalHome(profile)) {
+  const home = resolvePortalHomeComposition({ profile });
+
+  if (home.shell === "ces") {
     const websiteReview = await getWebsiteReviewLanding(session, profile);
     const workPerformance = await resolvePortalWorkPerformance({
       session,

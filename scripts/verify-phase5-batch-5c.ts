@@ -394,10 +394,13 @@ function main() {
     launch.includes('"invoices"') &&
       launch.includes("billingNavAvailable"),
   );
+  const canonical = read("lib/ces/modules/canonical.ts");
   check(
     "nav label is Billing for /portal/invoices",
-    nav.includes('label: "Billing"') &&
-      nav.includes('href: "/portal/invoices"'),
+    (nav.includes('label: "Billing"') && nav.includes('href: "/portal/invoices"')) ||
+      (canonical.includes('key: "invoices"') &&
+        canonical.includes('label: "Billing"') &&
+        canonical.includes('href: "/portal/invoices"')),
   );
   check(
     "no HTTP invoice API route introduced",

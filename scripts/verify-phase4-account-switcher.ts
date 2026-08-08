@@ -167,8 +167,10 @@ function main() {
   const migrationFile = read("migrations/20260728_phase4_portal_client_memberships.ts");
 
   check(
-    "switch route requires portal session",
-    switchRoute.includes("getPortalSession") && switchRoute.includes("session.portalUserId"),
+    "switch route requires write session (preview cannot switch)",
+    switchRoute.includes("getPortalWriteSession") &&
+      switchRoute.includes("session.portalUserId") &&
+      !switchRoute.includes("getPortalSession"),
   );
   check(
     "switch route rejects unauthorized client generically",

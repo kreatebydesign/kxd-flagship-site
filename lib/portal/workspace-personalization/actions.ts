@@ -2,16 +2,16 @@
  * Safe action catalog — every href must be an allowlisted /portal destination.
  */
 
-import type { ResolvedExperienceProfile } from "@/lib/ces";
-import { isCesModuleEnabled } from "@/lib/ces";
-import { isClientHqModuleEnabled } from "@/lib/portal/modules";
+import type { CesModuleId, ResolvedExperienceProfile } from "@/lib/ces";
+import { isPortalModuleVisible } from "@/lib/ces/modules/visibility";
+import type { ClientHqModuleId } from "@/lib/portal/modules";
 import type { WorkspaceAction } from "./types";
 import { sanitizePortalHref } from "./safe-routes";
 
 type ActionDefinition = WorkspaceAction & {
   requires?:
-    | { kind: "ces"; moduleId: Parameters<typeof isCesModuleEnabled>[1] }
-    | { kind: "client-hq"; moduleId: Parameters<typeof isClientHqModuleEnabled>[0] }
+    | { kind: "ces"; moduleId: CesModuleId }
+    | { kind: "client-hq"; moduleId: ClientHqModuleId }
     | { kind: "always" };
 };
 
@@ -82,8 +82,9 @@ function isActionAvailable(
   if (!href) return false;
   const requires = action.requires ?? { kind: "always" as const };
   if (requires.kind === "always") return true;
-  if (requires.kind === "ces") return isCesModuleEnabled(profile, requires.moduleId);
-  if (requires.kind === "client-hq") return isClientHqModuleEnabled(requires.moduleId);
+  if (requires.kind === "ces" || requires.kind === "client-hq") {
+    return isPortalModuleVisible(requires.moduleId, { profile });
+  }
   return false;
 }
 

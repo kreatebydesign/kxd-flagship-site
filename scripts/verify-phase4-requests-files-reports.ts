@@ -63,10 +63,15 @@ function check(label: string, pass: boolean, detail?: string) {
   assert.ok(pass, detail ? `${label}: ${detail}` : label);
 }
 
-function stubProfile(enabledModules: ResolvedExperienceProfile["enabledModules"]): ResolvedExperienceProfile {
+function stubProfile(
+  enabledModules: ResolvedExperienceProfile["enabledModules"],
+  extras?: Partial<
+    Pick<ResolvedExperienceProfile, "source" | "enabledPortalModules">
+  >,
+): ResolvedExperienceProfile {
   return {
-    profileId: null,
-    source: "fallback",
+    profileId: extras?.source === "profile" ? 1 : null,
+    source: extras?.source ?? "fallback",
     identity: {
       clientId: 1,
       clientName: "Fixture",
@@ -92,6 +97,7 @@ function stubProfile(enabledModules: ResolvedExperienceProfile["enabledModules"]
       showPartnerMark: true,
     },
     enabledModules,
+    enabledPortalModules: extras?.enabledPortalModules,
     reportingCapabilities: [],
     presentation: null,
     terminology: {},
@@ -477,17 +483,25 @@ function main() {
       (wwQueries.includes("equals: clientId") || wwQueries.includes("clientId")),
   );
 
-  // ── Surface gating mirrors CES launch nav ────────────────────────────
-  const flagship = stubProfile(["website-review"]);
+  // ── Surface gating mirrors unified portal visibility (Phase 2) ───────
+  const websiteReviewOnly = stubProfile(["website-review"]);
   const classic = stubProfile([]);
+  const explicitHq = stubProfile(["website-review"], {
+    source: "profile",
+    enabledPortalModules: ["website-review", "projects"],
+  });
   for (const surface of BATCH_G_CLIENT_HQ_SURFACE_IDS) {
     check(
-      `flagship CES hides ${surface} surface`,
-      isBatchGClientHqSurfaceAvailable(surface, flagship) === false,
+      `website-review entitlement does not hide ${surface}`,
+      isBatchGClientHqSurfaceAvailable(surface, websiteReviewOnly) === true,
     );
     check(
-      `non-flagship keeps ${surface} surface available`,
+      `unconfigured CES keeps ${surface} surface available`,
       isBatchGClientHqSurfaceAvailable(surface, classic) === true,
+    );
+    check(
+      `explicit HQ allowlist hides unlisted ${surface}`,
+      isBatchGClientHqSurfaceAvailable(surface, explicitHq) === false,
     );
   }
 
@@ -584,8 +598,9 @@ function main() {
   const switchRoute = read("app/api/portal/account/switch/route.ts");
   check(
     "account switch revalidates via switchPortalActiveClient",
-    switchRoute.includes("getPortalSession") &&
-      switchRoute.includes("switchPortalActiveClient"),
+    switchRoute.includes("getPortalWriteSession") &&
+      switchRoute.includes("switchPortalActiveClient") &&
+      !switchRoute.includes("getPortalSession"),
   );
   check(
     "account switch never trusts browser client alone",

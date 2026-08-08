@@ -2,13 +2,14 @@
 
 import type { ReportingCapabilityId } from "@/lib/reporting/domain/capabilities";
 import type { ExperiencePresentation } from "./executive-performance/types";
+import type {
+  CesExperienceModuleId,
+  PortalModuleId,
+} from "./modules/canonical";
 
-export type CesModuleId =
-  | "website-review"
-  | "website-workspace"
-  | "executive-performance"
-  | "executive-review"
-  | "inventory";
+export type CesModuleId = CesExperienceModuleId;
+
+export type { PortalModuleId };
 
 export type ExperienceProfileSource = "profile" | "fallback";
 
@@ -56,6 +57,12 @@ export interface ResolvedExperienceProfile {
   visual: ExperienceVisual;
   hospitality: ExperienceHospitality;
   enabledModules: CesModuleId[];
+  /**
+   * All client-facing portal module ids from the experience profile JSON
+   * (CES experience modules + former Client HQ surfaces). Optional on older
+   * fixtures — visibility falls back to enabledModules.
+   */
+  enabledPortalModules?: PortalModuleId[];
   /**
    * Reporting capabilities enabled for this client experience.
    * Sourced from experience profile JSON — gates Executive Performance panels.

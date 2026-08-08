@@ -7,8 +7,7 @@
  */
 
 import type { ResolvedExperienceProfile } from "@/lib/ces";
-import { isCesModuleEnabled } from "@/lib/ces";
-import { isClientHqModuleEnabled } from "@/lib/portal/modules";
+import { isPortalModuleVisible } from "@/lib/ces/modules/visibility";
 import { resolveWorkspaceActions } from "./actions";
 import { buildNeutralIdentity, NEUTRAL_EMPTY_STATES, NEUTRAL_WELCOME } from "./defaults";
 import { sanitizeAccentColor, sanitizeLogoUrl } from "./identity";
@@ -49,11 +48,8 @@ function moduleAvailable(
   const def = getWorkspaceModuleDefinition(key);
   if (!def) return false;
   if (def.capability.kind === "always") return true;
-  if (def.capability.kind === "ces") {
-    return isCesModuleEnabled(profile, def.capability.moduleId);
-  }
-  if (def.capability.kind === "client-hq") {
-    return isClientHqModuleEnabled(def.capability.moduleId);
+  if (def.capability.kind === "ces" || def.capability.kind === "client-hq") {
+    return isPortalModuleVisible(def.capability.moduleId, { profile });
   }
   return false;
 }
@@ -159,10 +155,7 @@ function buildEmptyStates(
   return states;
 }
 
-function resolveWelcome(
-  definition: WorkspaceProfileDefinition,
-  clientName: string,
-): WorkspaceWelcomeModel {
+function resolveWelcome(definition: WorkspaceProfileDefinition): WorkspaceWelcomeModel {
   const welcome = definition.welcome ?? NEUTRAL_WELCOME;
   return {
     eyebrow: welcome.eyebrow || NEUTRAL_WELCOME.eyebrow,
@@ -248,7 +241,7 @@ export function resolveWorkspacePersonalization(
 
   const recommendations = buildWorkspaceRecommendations(primaryActions);
   const emptyStates = buildEmptyStates(terminology, experienceProfile);
-  const welcome = resolveWelcome(definition, clientName);
+  const welcome = resolveWelcome(definition);
 
   return {
     clientId: authorizedClientId,

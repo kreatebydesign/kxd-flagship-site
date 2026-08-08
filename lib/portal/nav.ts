@@ -2,15 +2,20 @@ import type { CesModuleId } from "@/lib/ces";
 import { CES_MODULE_REGISTRY } from "@/lib/ces/modules/registry";
 import { getCesNavItems, resolveCesNavId } from "@/lib/ces/modules/nav";
 import type { CesNavGroupId } from "@/lib/ces/modules/types";
+import {
+  CLIENT_HQ_PORTAL_MODULE_IDS,
+  getCanonicalCapability,
+  type ClientHqPortalModuleId,
+  type PortalModuleId,
+} from "@/lib/ces/modules/canonical";
+import { isPortalModuleVisible } from "@/lib/ces/modules/visibility";
 import type { ResolvedExperienceProfile } from "@/lib/ces";
-import { isExecutiveClientBriefingAvailable } from "@/lib/executive-client-summary/availability";
-import { isClientHqModuleEnabled, type ClientHqModuleId } from "./modules";
 import { getEditionBranding, getEditionNavigation } from "@/lib/editions";
 import { isPortalNavEnabled } from "@/lib/editions/navigation";
-import { isPortalNavVisibleForCesLaunch } from "@/lib/portal/ces-launch-safety";
+import { isClientHqModuleEnabled, type ClientHqModuleId } from "./modules";
 
 export type ClientHqNavId = ClientHqModuleId;
-/** Shared Core partnership briefing — not a CES module entitlement. */
+/** Shared Core partnership briefing — nav id aliases executive-performance. */
 export type PortalBriefingNavId = "partnership";
 /** Phase 4 Batch F — multi-account authorized portfolio (not a CES entitlement). */
 export type PortalPortfolioNavId = "portfolio";
@@ -51,51 +56,39 @@ const PORTAL_GROUP_TO_CES: Record<string, CesNavGroupId> = {
   Account: "account",
 };
 
-const NAV_ITEMS: ClientHqNavItem[] = [
-  { id: "overview", label: "Overview", href: "/portal", moduleId: "overview" },
-  { id: "projects", label: "Projects", href: "/portal/projects", moduleId: "projects" },
-  { id: "deliverables", label: "Deliverables", href: "/portal/deliverables", moduleId: "deliverables" },
-  { id: "requests", label: "Requests", href: "/portal/requests", moduleId: "requests" },
-  { id: "assets", label: "Assets", href: "/portal/assets", moduleId: "assets" },
-  { id: "invoices", label: "Billing", href: "/portal/invoices", moduleId: "invoices" },
-  { id: "meetings", label: "Meetings", href: "/portal/meetings", moduleId: "meetings" },
-  { id: "analytics", label: "Analytics", href: "/portal/analytics", moduleId: "analytics" },
-  { id: "reports", label: "Reports", href: "/portal/reports", moduleId: "reports" },
-  { id: "website-health", label: "Website Health", href: "/portal/website-health", moduleId: "website-health" },
-  { id: "resources", label: "Resources", href: "/portal/resources", moduleId: "resources" },
-  { id: "team", label: "Team", href: "/portal/team", moduleId: "team" },
-  { id: "settings", label: "Settings", href: "/portal/settings", moduleId: "settings" },
-  { id: "advisor", label: "AI Advisor", href: "/portal/advisor", moduleId: "advisor" },
-];
+const GROUP_LABELS: Record<CesNavGroupId, string> = {
+  headquarters: "Headquarters",
+  work: "Work",
+  library: "Library",
+  intelligence: "Intelligence",
+  account: "Account",
+};
 
-export const CLIENT_HQ_NAV_GROUPS: ClientHqNavGroup[] = [
-  {
-    label: "Headquarters",
-    items: NAV_ITEMS.filter((i) => i.id === "overview"),
-  },
-  {
-    label: "Work",
-    items: NAV_ITEMS.filter((i) =>
-      ["projects", "deliverables", "requests"].includes(i.id),
-    ),
-  },
-  {
-    label: "Library",
-    items: NAV_ITEMS.filter((i) => ["assets", "resources"].includes(i.id)),
-  },
-  {
-    label: "Intelligence",
-    items: NAV_ITEMS.filter((i) =>
-      ["website-health", "analytics", "reports", "advisor"].includes(i.id),
-    ),
-  },
-  {
-    label: "Account",
-    items: NAV_ITEMS.filter((i) =>
-      ["invoices", "meetings", "team", "settings"].includes(i.id),
-    ),
-  },
-];
+function hqNavItem(id: ClientHqPortalModuleId): ClientHqNavItem {
+  const def = getCanonicalCapability(id);
+  return {
+    id,
+    label: def?.label ?? id,
+    href: def?.portal?.href ?? `/portal/${id}`,
+    moduleId: id,
+  };
+}
+
+const NAV_ITEMS: ClientHqNavItem[] = CLIENT_HQ_PORTAL_MODULE_IDS.map(hqNavItem);
+
+export const CLIENT_HQ_NAV_GROUPS: ClientHqNavGroup[] = (
+  ["headquarters", "work", "library", "intelligence", "account"] as CesNavGroupId[]
+).map((groupId) => ({
+  label: GROUP_LABELS[groupId],
+  items: NAV_ITEMS.filter((item) => {
+    const def = getCanonicalCapability(item.id);
+    return def?.portal?.navGroup === groupId;
+  }).sort((a, b) => {
+    const orderA = getCanonicalCapability(a.id)?.portal?.navOrder ?? 0;
+    const orderB = getCanonicalCapability(b.id)?.portal?.navOrder ?? 0;
+    return orderA - orderB;
+  }),
+})).filter((group) => group.items.length > 0);
 
 export function getEnabledClientHqNavGroups(): ClientHqNavGroup[] {
   const editionNav = getEditionNavigation();
@@ -112,7 +105,12 @@ export function getEnabledClientHqNavGroups(): ClientHqNavGroup[] {
   })).filter((group) => group.items.length > 0);
 }
 
-/** Client HQ nav + CES module items when profile enables them */
+function navIdForPortalModule(moduleId: PortalModuleId): PortalNavId {
+  if (moduleId === "executive-performance") return "partnership";
+  return moduleId as PortalNavId;
+}
+
+/** Client HQ nav + CES module items — visibility is entitlement-aware, not flagship. */
 export function getEnabledPortalNavGroups(
   profile?: ResolvedExperienceProfile | null,
   options?: {
@@ -150,8 +148,15 @@ export function getEnabledPortalNavGroups(
       .filter((group) => group.items.length > 0);
   }
 
-  const cesItems = getCesNavItems(profile);
-  const briefingAvailable = isExecutiveClientBriefingAvailable(profile.identity.clientSlug);
+  const visibilityCtx = {
+    profile,
+    billingNavAvailable,
+    portfolioNavAvailable,
+  };
+
+  const cesItems = getCesNavItems(profile).filter((item) =>
+    isPortalModuleVisible(item.moduleId, visibilityCtx),
+  );
 
   return base
     .map((group) => {
@@ -162,26 +167,41 @@ export function getEnabledPortalNavGroups(
           return def?.navGroup === cesGroupId;
         })
         .map((item) => ({
-          id: item.id as PortalNavId,
+          id: navIdForPortalModule(item.moduleId as PortalModuleId),
           label: item.label,
           href: item.href,
         }));
-
-      const briefingItem: PortalNavItem[] =
-        briefingAvailable && group.label === "Headquarters"
-          ? [{ id: "partnership", label: "Partnership", href: "/portal/partnership" }]
-          : [];
 
       const portfolioItem: PortalNavItem[] =
         portfolioNavAvailable && group.label === "Headquarters"
           ? [{ id: "portfolio", label: "Portfolio", href: "/portal/portfolio" }]
           : [];
 
+      const partnershipItem: PortalNavItem[] =
+        group.label === "Headquarters" &&
+        isPortalModuleVisible("executive-performance", visibilityCtx) &&
+        !cesForGroup.some((item) => item.id === "partnership")
+          ? [
+              {
+                id: "partnership",
+                label:
+                  profile.terminology["nav.executive-performance"] ??
+                  getCanonicalCapability("executive-performance")?.label ??
+                  "Partnership",
+                href: "/portal/partnership",
+              },
+            ]
+          : [];
+
       return {
         label: group.label,
         items: [
-          ...group.items.map(({ id, label, href }) => ({ id, label, href })),
-          ...briefingItem,
+          ...group.items.map(({ id, label, href }) => ({
+            id: id as PortalNavId,
+            label,
+            href,
+          })),
+          ...partnershipItem,
           ...portfolioItem,
           ...cesForGroup,
         ],
@@ -189,9 +209,11 @@ export function getEnabledPortalNavGroups(
     })
     .map((group) => ({
       ...group,
-      items: group.items.filter((item) =>
-        isPortalNavVisibleForCesLaunch(item.id, profile, { billingNavAvailable }),
-      ),
+      items: group.items.filter((item) => {
+        const moduleKey =
+          item.id === "partnership" ? "executive-performance" : item.id;
+        return isPortalModuleVisible(moduleKey, visibilityCtx);
+      }),
     }))
     .filter((group) => group.items.length > 0);
 }
@@ -205,7 +227,11 @@ export function resolvePortalNavId(pathname: string): PortalNavId {
   }
 
   const cesId = resolveCesNavId(pathname);
-  if (cesId) return cesId as PortalNavId;
+  if (cesId) {
+    return cesId === "executive-performance"
+      ? "partnership"
+      : (cesId as PortalNavId);
+  }
 
   const allItems = CLIENT_HQ_NAV_GROUPS.flatMap((g) => g.items);
   const sorted = [...allItems].sort((a, b) => b.href.length - a.href.length);

@@ -1,56 +1,58 @@
+import {
+  listCesRegistryDefinitions,
+  type PortalModuleId,
+} from "./canonical";
 import type { CesModuleDefinition } from "./types";
+import type { CesModuleId } from "../types";
 
-export const CES_MODULE_REGISTRY: CesModuleDefinition[] = [
-  {
-    moduleId: "executive-review",
-    label: "Executive Review",
-    navGroup: "headquarters",
-    navOrder: 2,
-    routes: {
-      landing: "/portal/executive-review",
-      request: "/portal/executive-review",
-      detail: () => "/portal/executive-review",
-    },
-    vocabularyNamespace: "executive-review",
-  },
-  {
-    moduleId: "website-review",
-    label: "Website Review",
-    navGroup: "work",
-    navOrder: 5,
-    routes: {
-      landing: "/portal/website-review",
-      request: "/portal/website-review/request",
-      detail: (id) => `/portal/website-review/${id}`,
-    },
-    vocabularyNamespace: "website-review",
-  },
-  {
-    moduleId: "website-workspace",
-    label: "Website Workspace",
-    navGroup: "work",
-    navOrder: 6,
-    routes: {
-      landing: "/portal/website-workspace",
-      request: "/portal/website-workspace",
-      detail: (id) => `/portal/website-workspace/requests/${id}`,
-    },
-    vocabularyNamespace: "website-workspace",
-  },
-  {
-    moduleId: "inventory",
-    label: "Inventory",
-    navGroup: "work",
-    navOrder: 8,
-    routes: {
-      landing: "/portal/inventory",
-      request: "/portal/inventory/new",
-      detail: (id) => `/portal/inventory/${id}`,
-    },
-    vocabularyNamespace: "inventory",
-  },
-];
+function requestPath(href: string): string {
+  if (href === "/portal/website-review") return "/portal/website-review/request";
+  if (href === "/portal/website-workspace") return "/portal/website-workspace";
+  if (href === "/portal/inventory") return "/portal/inventory/new";
+  return href;
+}
+
+function detailPath(href: string): (id: string) => string {
+  if (href === "/portal/website-review") {
+    return (id) => `/portal/website-review/${id}`;
+  }
+  if (href === "/portal/website-workspace") {
+    return (id) => `/portal/website-workspace/requests/${id}`;
+  }
+  if (href === "/portal/inventory") {
+    return (id) => `/portal/inventory/${id}`;
+  }
+  return () => href;
+}
+
+/** CES experience modules — derived from the canonical capability registry. */
+export const CES_MODULE_REGISTRY: CesModuleDefinition[] = listCesRegistryDefinitions()
+  .filter((def) => def.portal)
+  .map((def) => {
+    const portal = def.portal!;
+    return {
+      moduleId: def.key as CesModuleId,
+      label: def.label,
+      navGroup: portal.navGroup,
+      navOrder: portal.navOrder,
+      routes: {
+        landing: portal.href,
+        request: requestPath(portal.href),
+        detail: detailPath(portal.href),
+      },
+      vocabularyNamespace: portal.vocabularyNamespace ?? def.key,
+    };
+  })
+  .sort((a, b) => a.navOrder - b.navOrder);
 
 export function getCesModuleDefinition(moduleId: string): CesModuleDefinition | undefined {
-  return CES_MODULE_REGISTRY.find((m) => m.moduleId === moduleId);
+  const canonical =
+    moduleId === "partnership" ? "executive-performance" : moduleId;
+  return CES_MODULE_REGISTRY.find((m) => m.moduleId === canonical);
 }
+
+export function isCesRegistryModuleId(moduleId: string): moduleId is CesModuleId {
+  return CES_MODULE_REGISTRY.some((m) => m.moduleId === moduleId);
+}
+
+export type { PortalModuleId };

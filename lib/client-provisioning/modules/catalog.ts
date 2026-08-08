@@ -1,6 +1,6 @@
 /**
  * Reusable module catalog for Client Provisioning.
- * Entitlements map to Shared Core IDs — no client-specific branching.
+ * Entitlement IDs must map to lib/ces/modules/canonical — no parallel truth.
  */
 
 import type {

@@ -4,12 +4,16 @@ import { getPayload } from "payload";
 import config from "@payload-config";
 import { getEditionBranding } from "@/lib/editions";
 import type { PortalSession } from "@/lib/portal/session";
-import {
-  ALL_REPORTING_CAPABILITIES,
-  type ReportingCapabilityId,
-} from "@/lib/reporting/domain/capabilities";
+import type { ReportingCapabilityId } from "@/lib/reporting/domain/capabilities";
 import { getExecutivePresentation } from "../executive-performance/presentation";
 import type { CesModuleId, ResolvedExperienceProfile } from "../types";
+import {
+  isCesExperienceModuleId,
+  normalizeCesExperienceModuleList,
+  normalizePortalModuleList,
+  normalizeReportingCapabilityList,
+  type PortalModuleId,
+} from "../modules/canonical";
 import {
   buildFallbackHospitality,
   buildFallbackVisual,
@@ -27,16 +31,6 @@ type AnyDoc = Record<string, unknown>;
 
 const COLLECTION = "client-experience-profiles";
 
-const CES_MODULE_IDS = new Set<CesModuleId>([
-  "website-review",
-  "website-workspace",
-  "executive-performance",
-  "executive-review",
-  "inventory",
-]);
-
-const REPORTING_CAPABILITY_SET = new Set<string>(ALL_REPORTING_CAPABILITIES);
-
 function mediaUrl(value: unknown): string | null {
   if (!value || typeof value !== "object") return null;
   const doc = value as AnyDoc;
@@ -44,18 +38,15 @@ function mediaUrl(value: unknown): string | null {
 }
 
 function normalizeEnabledModules(value: unknown): CesModuleId[] {
-  if (!Array.isArray(value)) return [];
-  return value.filter((item): item is CesModuleId =>
-    typeof item === "string" && CES_MODULE_IDS.has(item as CesModuleId),
-  );
+  return normalizeCesExperienceModuleList(Array.isArray(value) ? value : []);
 }
 
 function normalizeReportingCapabilities(value: unknown): ReportingCapabilityId[] {
-  if (!Array.isArray(value)) return [];
-  return value.filter(
-    (item): item is ReportingCapabilityId =>
-      typeof item === "string" && REPORTING_CAPABILITY_SET.has(item),
-  );
+  return normalizeReportingCapabilityList(Array.isArray(value) ? value : []);
+}
+
+function normalizeEnabledPortalModules(value: unknown): PortalModuleId[] {
+  return normalizePortalModuleList(Array.isArray(value) ? value : []);
 }
 
 async function loadOnboardingLogo(clientId: number): Promise<string | null> {
@@ -73,6 +64,13 @@ async function loadOnboardingLogo(clientId: number): Promise<string | null> {
   const logoFiles = onboarding.logoFiles;
   if (!Array.isArray(logoFiles) || logoFiles.length === 0) return null;
   return mediaUrl(logoFiles[0]);
+}
+
+function syncEnabledPortalModules(profile: ResolvedExperienceProfile): void {
+  const fromCes = profile.enabledModules.filter((id) => isCesExperienceModuleId(id));
+  const existing = profile.enabledPortalModules ?? [];
+  const merged = normalizePortalModuleList([...existing, ...fromCes]);
+  profile.enabledPortalModules = merged;
 }
 
 function ensurePrimalWebsiteWorkspace(profile: ResolvedExperienceProfile): void {
@@ -104,6 +102,7 @@ function ensurePrimalExecutiveReview(profile: ResolvedExperienceProfile): void {
 function finalizeProfile(profile: ResolvedExperienceProfile): ResolvedExperienceProfile {
   ensurePrimalWebsiteWorkspace(profile);
   ensurePrimalExecutiveReview(profile);
+  syncEnabledPortalModules(profile);
   const presentation = getExecutivePresentation(profile.identity.clientSlug);
   profile.presentation = presentation;
   /* Presentation Registry supplies brand mark when no CMS/onboarding logo exists. */
@@ -152,6 +151,14 @@ async function applyClientPlanEntitlements(
     profile.reportingCapabilities = profile.reportingCapabilities.filter(
       (capability) => allowed.has(capability),
     );
+    /* HQ portal ids are not plan-catalogued yet — keep them; never keep internal keys. */
+    profile.enabledPortalModules = normalizePortalModuleList([
+      ...(profile.enabledPortalModules ?? []),
+      ...profile.enabledModules,
+    ]).filter((moduleId) => {
+      if (isCesExperienceModuleId(moduleId)) return allowed.has(moduleId);
+      return true;
+    });
   } catch (err) {
     console.error(
       "[KXD CES] Client plan entitlement gate failed; keeping CES modules:",
@@ -202,6 +209,7 @@ export async function resolveExperienceProfile(
           visual: fallbackVisual,
           hospitality: buildFallbackHospitality(clientName, editionBranding),
           enabledModules: [],
+          enabledPortalModules: [],
           reportingCapabilities: [],
           presentation: null,
           terminology: {},
@@ -290,6 +298,7 @@ export async function resolveExperienceProfile(
       visual,
       hospitality,
       enabledModules: normalizeEnabledModules(enabledRaw),
+      enabledPortalModules: normalizeEnabledPortalModules(enabledRaw),
       reportingCapabilities: normalizeReportingCapabilities(enabledRaw),
       presentation: null,
       terminology: parseTerminology(profileDoc.terminology),

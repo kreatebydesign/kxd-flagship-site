@@ -18,6 +18,13 @@ export const PRIMAL_EXPERIENCE_PROFILE = {
   reassuranceLine: "Every revision is tracked. Nothing gets lost.",
   supportTone: "direct" as const,
   portalSidebarLabel: "Partnership workspace",
+  /**
+   * Intended Primal portal allowlist = these CES modules only.
+   * HQ surfaces (analytics, reports, projects, deliverables, requests,
+   * website-health, assets, resources, team, meetings, advisor) stay off
+   * until Phase 3 explicitly enables them after confirming client-facing value.
+   * Do not inject HQ modules via slug-based portal switching.
+   */
   enabledModules: [
     "website-review",
     "website-workspace",

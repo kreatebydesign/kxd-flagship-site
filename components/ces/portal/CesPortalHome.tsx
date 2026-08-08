@@ -1,5 +1,4 @@
 import type { ResolvedExperienceProfile } from "@/lib/ces";
-import { isCesModuleEnabled } from "@/lib/ces";
 import type { PartnershipBriefing } from "@/lib/ces/partnership";
 import type { ExecutivePerformanceBriefing } from "@/lib/ces/executive-performance";
 import type { WebsiteReviewLandingData } from "@/lib/ces/modules/website-review/types";
@@ -7,6 +6,7 @@ import type { ConnectedWorkspaceData } from "@/lib/portal/connected-workspace";
 import type { WorkspacePersonalizationModel } from "@/lib/portal/workspace-personalization";
 import type { WorkPerformanceModel } from "@/lib/portal/work-performance";
 import { isCesFlagshipPortal } from "@/lib/portal/ces-launch-safety";
+import { shouldUseCesPortalHome as resolveCesHomeShell } from "@/lib/ces/modules/home";
 import { portalFirstName, portalTimeGreeting } from "@/lib/portal/greeting";
 import { CesPage } from "@/components/ces/primitives";
 import { CesPartnershipBriefing } from "@/components/ces/partnership";
@@ -81,5 +81,5 @@ export function CesPortalHome({
 export function shouldUseCesPortalHome(
   profile: ResolvedExperienceProfile | null | undefined,
 ): boolean {
-  return Boolean(profile && isCesModuleEnabled(profile, "website-review"));
+  return resolveCesHomeShell(profile);
 }

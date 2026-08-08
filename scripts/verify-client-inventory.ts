@@ -69,7 +69,7 @@ function main() {
   const payloadConfig = read("payload.config.ts");
   const types = read("lib/ces/types.ts");
   const registry = read("lib/ces/modules/registry.ts");
-  const resolve = read("lib/ces/profile/resolve.ts");
+  const canonical = read("lib/ces/modules/canonical.ts");
   const publicMap = read("lib/inventory/public-map.ts");
   const publicRoute = read("app/api/public/inventory/[clientSlug]/route.ts");
   const portalRoute = read("app/api/portal/inventory/route.ts");
@@ -91,9 +91,13 @@ function main() {
   );
   check(
     "CES module id includes inventory",
-    types.includes('"inventory"') &&
-      resolve.includes('"inventory"') &&
-      registry.includes('moduleId: "inventory"'),
+    (types.includes('"inventory"') ||
+      types.includes("CesExperienceModuleId") ||
+      canonical.includes('"inventory"')) &&
+      canonical.includes('key: "inventory"') &&
+      canonical.includes("cesRegistry: true") &&
+      (registry.includes('moduleId: "inventory"') ||
+        registry.includes("listCesRegistryDefinitions")),
   );
   check(
     "Primal entitlements include inventory only as intentional enablement",
@@ -103,7 +107,9 @@ function main() {
   );
   check(
     "portal launch safety allows inventory when enabled",
-    launchSafety.includes('navId === "inventory"'),
+    launchSafety.includes("isPortalModuleVisible") &&
+      (launchSafety.includes('navId === "inventory"') ||
+        canonical.includes('key: "inventory"')),
   );
   check(
     "operations Client Command includes inventory tab",

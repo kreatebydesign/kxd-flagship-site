@@ -117,6 +117,8 @@
     "verify:stripe-customer-linking": "tsx scripts/verify-stripe-customer-linking.ts",
     "verify:stripe-customer-creation": "tsx scripts/verify-stripe-customer-creation.ts",
     "verify:client-plans": "tsx scripts/verify-client-plans-entitlements.ts",
+    "verify:ces-canonical-modules": "tsx scripts/verify-ces-canonical-modules.ts",
+    "verify:ces-unified-nav-home": "tsx scripts/verify-ces-unified-nav-home.ts",
     "verify:client-upgrade-requests": "tsx scripts/verify-client-upgrade-requests.ts",
     "verify:client-inventory": "tsx scripts/verify-client-inventory.ts",
     "verify:scheduling": "tsx scripts/verify-scheduling-domain.ts",

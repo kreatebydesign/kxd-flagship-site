@@ -1,24 +1,16 @@
 import type { ResolvedExperienceProfile } from "@/lib/ces/types";
 import { isCesModuleEnabled } from "@/lib/ces";
+import { isPortalModuleVisible } from "@/lib/ces/modules/visibility";
 import type { ClientHqNavId } from "./nav";
 import type { PortalNavId } from "./nav";
 
-/** CES flagship launch — only Website Review surfaces are client-ready. */
-export const CES_LAUNCH_HIDDEN_NAV_IDS: readonly ClientHqNavId[] = [
-  "projects",
-  "deliverables",
-  "requests",
-  "assets",
-  "invoices",
-  "meetings",
-  "analytics",
-  "reports",
-  "website-health",
-  "resources",
-  "team",
-  "settings",
-  "advisor",
-] as const;
+/**
+ * @deprecated Phase 2 — flagship hide-all is retired.
+ * Kept as an empty list so historic verifiers can assert the constant exists
+ * without restoring the Client HQ vs CES product split.
+ * Billing remains eligibility-gated via billingNavAvailable.
+ */
+export const CES_LAUNCH_HIDDEN_NAV_IDS: readonly ClientHqNavId[] = [] as const;
 
 export type CesLaunchQuickActionId =
   | "review-website"
@@ -32,6 +24,10 @@ const INTERNAL_ACTIVITY_PATTERN =
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDoc = Record<string, any>;
 
+/**
+ * @deprecated Phase 2 — not a portal-product switch.
+ * True only when Website Review is entitled. Used for launch-guide copy / CSS.
+ */
 export function isCesFlagshipPortal(
   profile: ResolvedExperienceProfile | null | undefined,
 ): boolean {
@@ -44,59 +40,39 @@ export type PortalNavVisibilityOptions = {
    * valid test-mode Stripe customer mapping (no entitlement mutation).
    */
   billingNavAvailable?: boolean;
+  portfolioNavAvailable?: boolean;
 };
 
+/**
+ * Portal nav visibility — delegates to unified module visibility.
+ * Website Review no longer hides other client-facing modules.
+ */
 export function isPortalNavVisibleForCesLaunch(
   navId: PortalNavId,
   profile?: ResolvedExperienceProfile | null,
   options?: PortalNavVisibilityOptions,
 ): boolean {
-  /*
-   * Phase 5 Batch 5C — Billing nav is eligibility-gated for every portal profile.
-   * Direct /portal/invoices remains authenticated and shows honest unavailable states.
-   */
-  if (navId === "invoices") {
-    return options?.billingNavAvailable === true;
+  if (!profile) {
+    if (navId === "invoices") return options?.billingNavAvailable === true;
+    if (navId === "portfolio") return options?.portfolioNavAvailable === true;
+    return true;
   }
 
-  if (!isCesFlagshipPortal(profile)) return true;
-  if (navId === "overview" || navId === "website-review") return true;
-  /* Inventory — CES module entitlement (Primal first). */
-  if (
-    navId === "inventory" &&
-    profile &&
-    isCesModuleEnabled(profile, "inventory")
-  ) {
-    return true;
-  }
-  /* Website Workspace — managed website collaboration (Primal first). */
-  if (
-    navId === "website-workspace" &&
-    profile &&
-    isCesModuleEnabled(profile, "website-workspace")
-  ) {
-    return true;
-  }
-  /* Partnership briefing — only when presentation + memory make it available. */
-  if (navId === "partnership") return true;
-  /* Batch F portfolio — multi-account capability, not a CES module. */
-  if (navId === "portfolio") return true;
-  /* Executive Review — leadership narrative (Primal V1 entitlement). */
-  if (
-    navId === "executive-review" &&
-    profile &&
-    isCesModuleEnabled(profile, "executive-review")
-  ) {
-    return true;
-  }
-  if (CES_LAUNCH_HIDDEN_NAV_IDS.includes(navId as ClientHqNavId)) return false;
-  return false;
+  const moduleKey =
+    navId === "partnership" ? "executive-performance" : navId;
+
+  return isPortalModuleVisible(moduleKey, {
+    profile,
+    billingNavAvailable: options?.billingNavAvailable,
+    portfolioNavAvailable: options?.portfolioNavAvailable,
+  });
 }
 
 export function isCesLaunchDeliverablesPageReady(
   profile?: ResolvedExperienceProfile | null,
 ): boolean {
-  return !isCesFlagshipPortal(profile);
+  if (!profile) return true;
+  return isPortalModuleVisible("deliverables", { profile });
 }
 
 export function isClientSafeTimelineDoc(doc: AnyDoc): boolean {

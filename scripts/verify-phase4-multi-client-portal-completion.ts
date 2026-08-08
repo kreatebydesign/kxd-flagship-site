@@ -66,10 +66,13 @@ function check(label: string, pass: boolean, detail?: string) {
 
 function stubProfile(
   enabledModules: ResolvedExperienceProfile["enabledModules"],
+  extras?: Partial<
+    Pick<ResolvedExperienceProfile, "source" | "enabledPortalModules">
+  >,
 ): ResolvedExperienceProfile {
   return {
-    profileId: null,
-    source: "fallback",
+    profileId: extras?.source === "profile" ? 1 : null,
+    source: extras?.source ?? "fallback",
     identity: {
       clientId: 1,
       clientName: "Fixture",
@@ -95,6 +98,7 @@ function stubProfile(
       showPartnerMark: true,
     },
     enabledModules,
+    enabledPortalModules: extras?.enabledPortalModules,
     reportingCapabilities: [],
     presentation: null,
     terminology: {},
@@ -201,8 +205,9 @@ function main() {
   const switchRoute = read("app/api/portal/account/switch/route.ts");
   check(
     "7. browser-supplied client IDs cannot grant access alone",
-    switchRoute.includes("getPortalSession") &&
+    switchRoute.includes("getPortalWriteSession") &&
       switchRoute.includes("switchPortalActiveClient") &&
+      !switchRoute.includes("getPortalSession") &&
       !isClientInActiveMemberships(multi, 999),
   );
   const sessionSrc = read("lib/portal/session.ts");
@@ -281,12 +286,19 @@ function main() {
   );
 
   // ── 16–18 CES fail-closed, attachments, cross-client leak ────────────
-  const flagship = stubProfile(["website-review"]);
+  const websiteReviewOnly = stubProfile(["website-review"]);
+  const explicitHq = stubProfile(["website-review"], {
+    source: "profile",
+    enabledPortalModules: ["website-review", "projects"],
+  });
   check(
-    "16. CES-disabled modules fail closed for Batch G surfaces",
+    "16. Website Review is not a hide-all; explicit HQ allowlist fails closed",
     BATCH_G_CLIENT_HQ_SURFACE_IDS.every(
-      (surface) => isBatchGClientHqSurfaceAvailable(surface, flagship) === false,
+      (surface) => isBatchGClientHqSurfaceAvailable(surface, websiteReviewOnly) === true,
     ) &&
+      BATCH_G_CLIENT_HQ_SURFACE_IDS.every(
+        (surface) => isBatchGClientHqSurfaceAvailable(surface, explicitHq) === false,
+      ) &&
       decidePortalCesModuleApiAccess({ moduleEnabled: false }).ok === false,
   );
   check(

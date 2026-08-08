@@ -13,6 +13,14 @@ export type {
 
 export { isCesModuleEnabled } from "./types";
 
+export type { PortalModuleId } from "./modules/canonical";
+export {
+  CANONICAL_CAPABILITY_REGISTRY,
+  canonicalizeCapabilityKey,
+  isInternalOnlyCapability,
+  isPortalModuleId,
+} from "./modules/canonical";
+
 export {
   getExecutivePresentation,
   isExecutivePerformanceAvailable,

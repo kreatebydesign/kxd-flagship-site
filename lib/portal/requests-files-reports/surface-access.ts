@@ -9,8 +9,7 @@ import type { BatchGClientHqSurfaceId } from "./types";
 
 /**
  * Whether an in-scope Client HQ surface may be opened for the active account.
- * Flagship CES profiles hide classic Requests/Assets/Deliverables/Reports in
- * nav; direct URLs must fail closed the same way.
+ * Direct URLs must match unified portal module visibility (not a flagship hide).
  */
 export function isBatchGClientHqSurfaceAvailable(
   navId: BatchGClientHqSurfaceId,
