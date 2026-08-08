@@ -49,6 +49,11 @@ export function buildWorkspaceQuickActions(
       href: `/admin/collections/creative-assets/create?client=${clientId}`,
     },
     {
+      id: "manage-client-experience",
+      label: "Manage Client Experience",
+      href: `/admin/operations/client-command/${clientId}?tab=experience`,
+    },
+    {
       id: "preview-portal",
       label: "Preview Portal",
       href: `/portal`,

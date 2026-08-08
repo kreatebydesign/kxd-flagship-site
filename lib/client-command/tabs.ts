@@ -21,6 +21,7 @@ export const COMMAND_WORKSPACE_TABS = [
   { id: "meetings", label: "Meetings" },
   { id: "notes", label: "Notes" },
   { id: "analytics", label: "Analytics" },
+  { id: "experience", label: "Experience" },
   { id: "settings", label: "Settings" },
 ] as const;
 

@@ -22,6 +22,7 @@ import { ClientActionsPanel } from "./ClientActionsPanel";
 import { ClientWorkPanel } from "./ClientWorkPanel";
 import { ClientInventoryPanel } from "./ClientInventoryPanel";
 import { ClientPlansAccessPanel } from "./ClientPlansAccessPanel";
+import { ClientExperiencePanel } from "./ClientExperiencePanel";
 import { ClientUpgradeRequestsPanel } from "./ClientUpgradeRequestsPanel";
 import { CommercialWorkspace } from "./commercial/CommercialWorkspace";
 
@@ -69,6 +70,8 @@ export function CommandWorkspaceTabPanel({
       return <NotesPanel data={data} />;
     case "analytics":
       return <AnalyticsPanel data={data} />;
+    case "experience":
+      return <ClientExperiencePanel clientId={data.clientId} />;
     case "settings":
       return <SettingsPanel data={data} />;
     default:
@@ -643,6 +646,11 @@ function SettingsPanel({ data }: { data: ClientWorkspaceBundle }) {
             label: "Infrastructure registry",
             detail: "Domains, hosting, stack",
             href: `/admin/operations/infrastructure/${data.clientId}`,
+          },
+          {
+            label: "Client Experience",
+            detail: "Manage portal modules, branding, and preview",
+            href: `/admin/operations/client-command/${data.clientId}?tab=experience`,
           },
           {
             label: "Client HQ",

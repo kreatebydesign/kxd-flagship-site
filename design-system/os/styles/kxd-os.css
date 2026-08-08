@@ -18078,6 +18078,7 @@ a.kxd-exec-today__flow-link:hover {
 }
 
 .kxd-plans-access__field select,
+.kxd-plans-access__field input,
 .kxd-plans-access__field textarea {
   width: 100%;
   border: 1px solid var(--kxd-os-border);
@@ -18092,6 +18093,7 @@ a.kxd-exec-today__flow-link:hover {
 }
 
 .kxd-plans-access__field select:focus,
+.kxd-plans-access__field input:focus,
 .kxd-plans-access__field textarea:focus,
 .kxd-plans-access__check input:focus-visible,
 .kxd-plans-access__save:focus-visible {
@@ -21863,6 +21865,97 @@ select.kxd-os-commercial-control {
   }
 
   .kxd-os-commercial-kv {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Phase 3 — Manage Client Experience ─────────────────────────────────── */
+
+.kxd-ces-exp {
+  padding: 1.25rem 1.35rem 1.4rem;
+}
+
+.kxd-ces-exp__h {
+  margin: 1.5rem 0 0.55rem;
+  font-size: 0.92rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.kxd-ces-exp__h--sub {
+  margin-top: 1rem;
+  font-size: 0.78rem;
+  color: var(--kxd-os-text-muted);
+}
+
+.kxd-ces-exp__warnings {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid color-mix(in srgb, var(--kxd-os-warning) 45%, var(--kxd-os-border));
+  display: grid;
+  gap: 0.4rem;
+  font-size: 0.88rem;
+}
+
+.kxd-ces-exp__error {
+  color: var(--kxd-os-warning);
+}
+
+.kxd-ces-exp__check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0.75rem 0;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.kxd-ces-exp__logo {
+  margin: 0.35rem 0 1rem;
+}
+
+.kxd-ces-exp__modules {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.kxd-ces-exp__module {
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--kxd-os-border);
+}
+
+.kxd-ces-exp__module-meta {
+  display: grid;
+  gap: 0.2rem;
+  margin: 0.35rem 0 0 1.45rem;
+}
+
+.kxd-ces-exp__state {
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-muted);
+}
+
+.kxd-ces-exp__state--visible {
+  color: var(--kxd-os-gold, #b8974a);
+}
+
+.kxd-ces-exp__state--ineligible,
+.kxd-ces-exp__state--locked {
+  color: var(--kxd-os-warning);
+}
+
+.kxd-ces-exp__nav-group {
+  margin-top: 0.75rem;
+}
+
+@media (max-width: 800px) {
+  .kxd-ces-exp .kxd-plans-access__grid {
     grid-template-columns: 1fr;
   }
 }
