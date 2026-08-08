@@ -21985,6 +21985,10 @@ select.kxd-os-commercial-control {
   gap: 0.35rem 0.75rem;
 }
 
+.kxd-ces-exp__notice {
+  color: var(--kxd-os-text, inherit);
+}
+
 .kxd-ces-exp__discover {
   margin-top: 0.75rem;
   display: grid;

@@ -10,6 +10,7 @@ import { applyExperienceProvision } from "@/lib/client-command/experience/compos
 import type { ExperienceProvisionActionId } from "@/lib/client-command/experience/composer/types";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 const ACTIONS = new Set<ExperienceProvisionActionId>([
   "apply-search-console-site-url",

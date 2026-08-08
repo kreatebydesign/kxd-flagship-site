@@ -8,6 +8,11 @@ import { isCesModuleEnabled } from "@/lib/ces";
 import { resolveExperienceProfile } from "@/lib/ces/server";
 import { getPortalWriteSession } from "@/lib/portal/session";
 import { mapPublicImage, resolveMediaPath, toAbsoluteMediaUrl } from "@/lib/inventory/media";
+import {
+  isDurablePayloadMediaUrl,
+  requireDurablePayloadMedia,
+} from "@/lib/media/payload-storage";
+import { resolveMediaAssetUrl } from "@/lib/client-command/experience/media-url";
 
 export const dynamic = "force-dynamic";
 
@@ -48,6 +53,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const storageReady = requireDurablePayloadMedia();
+    if (!storageReady.ok) {
+      return NextResponse.json({ ok: false, message: storageReady.error }, { status: 503 });
+    }
+
     const buffer = Buffer.from(await file.arrayBuffer());
     const payload = await getPayload({ config });
     const created = await payload.create({
@@ -67,6 +77,25 @@ export async function POST(req: NextRequest) {
       },
       overrideAccess: true,
     });
+
+    const durableUrl =
+      resolveMediaAssetUrl(created) ||
+      resolveMediaPath(created, "card")?.path ||
+      null;
+    if (!isDurablePayloadMediaUrl(durableUrl)) {
+      const createdId = Number((created as { id?: number }).id);
+      if (Number.isFinite(createdId)) {
+        try {
+          await payload.delete({ collection: "media", id: createdId, overrideAccess: true });
+        } catch {
+          /* best-effort rollback */
+        }
+      }
+      return NextResponse.json(
+        { ok: false, message: "Image uploaded without durable storage. Nothing was saved." },
+        { status: 500 },
+      );
+    }
 
     const resolved = resolveMediaPath(created, "card");
     const publicImage = mapPublicImage(created, "card");

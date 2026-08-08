@@ -12,6 +12,7 @@ import { validateInventoryInput, normalizeInventoryInput } from "../lib/inventor
 import { suggestInventorySlug, normalizeInventorySlug } from "../lib/inventory/slug";
 import type { InventoryVehicleRecord } from "../lib/inventory/types";
 import { PRIMAL_EXPERIENCE_PROFILE } from "../lib/ces/profile/primal";
+import { resolveMediaPath, toAbsoluteMediaUrl } from "../lib/inventory/media";
 
 const root = process.cwd();
 
@@ -223,6 +224,21 @@ function main() {
   check(
     "upload does not use client-review-media",
     !read("app/api/portal/inventory/upload/route.ts").includes("client-review-media"),
+  );
+  check(
+    "inventory upload fail-closes without durable Payload media",
+    read("app/api/portal/inventory/upload/route.ts").includes("requireDurablePayloadMedia") &&
+      read("app/api/portal/inventory/upload/route.ts").includes("isDurablePayloadMediaUrl"),
+  );
+  check(
+    "inventory blob https URLs are not rewritten to site-relative paths",
+    resolveMediaPath({
+      id: 9,
+      url: "https://abc123xyz.public.blob.vercel-storage.com/car.png",
+      alt: "Car",
+    })?.path === "https://abc123xyz.public.blob.vercel-storage.com/car.png" &&
+      toAbsoluteMediaUrl("https://abc123xyz.public.blob.vercel-storage.com/car.png") ===
+        "https://abc123xyz.public.blob.vercel-storage.com/car.png",
   );
 
   console.log("\nPhase 34B verification passed.\n");

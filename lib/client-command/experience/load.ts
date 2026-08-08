@@ -33,6 +33,7 @@ function isTrustedClientAccent(value: string): boolean {
   return Boolean(trimmed.startsWith("#") && trimmed.toUpperCase() !== "#C9A962");
 }
 import { composeOperatorExperienceWarnings } from "./warnings";
+import { relMediaId, resolveMediaAssetUrl } from "./media-url";
 import type {
   ExperienceProfileStatus,
   OperatorExperienceSnapshot,
@@ -54,9 +55,7 @@ function relId(value: unknown): number | null {
 }
 
 function mediaUrl(value: unknown): string | null {
-  if (!value || typeof value !== "object") return null;
-  const url = (value as AnyDoc).url;
-  return typeof url === "string" && url.trim() ? url : null;
+  return resolveMediaAssetUrl(value);
 }
 
 function asStatus(value: unknown): ExperienceProfileStatus {
@@ -334,7 +333,25 @@ export async function loadOperatorExperienceSnapshot(
     const doc = onboarding.docs[0] as AnyDoc | undefined;
     onboardingId = doc?.id != null ? Number(doc.id) : null;
     const files = doc?.logoFiles;
-    if (Array.isArray(files) && files[0]) onboardingLogo = mediaUrl(files[0]);
+    if (Array.isArray(files) && files[0]) {
+      onboardingLogo = mediaUrl(files[0]);
+      if (!onboardingLogo) {
+        const mediaId = relMediaId(files[0]);
+        if (mediaId != null) {
+          try {
+            const mediaDoc = await payload.findByID({
+              collection: "media",
+              id: mediaId,
+              depth: 0,
+              overrideAccess: true,
+            });
+            onboardingLogo = mediaUrl(mediaDoc);
+          } catch {
+            onboardingLogo = null;
+          }
+        }
+      }
+    }
   } catch {
     onboardingLogo = null;
   }

@@ -59,6 +59,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "www.kreatebydesign.com",
       },
+      {
+        protocol: "https",
+        hostname: "*.public.blob.vercel-storage.com",
+      },
     ],
   },
 };

@@ -101,10 +101,12 @@ export function ClientExperienceComposer({
   );
   const [accepted, setAccepted] = useState<Set<string>>(new Set());
 
-  async function generate() {
+  async function generate(options?: { preserveFeedback?: boolean }) {
     setGenerating(true);
-    setError(null);
-    setNotice(null);
+    if (!options?.preserveFeedback) {
+      setError(null);
+      setNotice(null);
+    }
     try {
       const res = await fetch(`/api/admin/clients/${clientId}/experience/recommend`, {
         credentials: "same-origin",
@@ -198,14 +200,24 @@ export function ClientExperienceComposer({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ actionId, candidateValue }),
       });
-      const json = (await res.json()) as ProvisionResponse;
-      if (!res.ok || !json.ok) {
-        throw new Error(json.message || "Unable to apply provisioning action.");
+      let json: ProvisionResponse;
+      try {
+        json = (await res.json()) as ProvisionResponse;
+      } catch {
+        throw new Error(
+          res.ok
+            ? "Import returned an unreadable response."
+            : `Import failed (${res.status}). Nothing was saved.`,
+        );
       }
-      setNotice(json.message || "Provisioning applied.");
-      await generate();
+      if (!res.ok || !json.ok) {
+        throw new Error(json.message || `Import failed (${res.status}). Nothing was saved.`);
+      }
+      setNotice(json.message || "Import complete.");
+      await generate({ preserveFeedback: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to apply provisioning action.");
+      setNotice(null);
     } finally {
       setProvisioning(null);
     }
@@ -316,7 +328,11 @@ export function ClientExperienceComposer({
           {error}
         </p>
       ) : null}
-      {notice ? <p className="kxd-os-meta">{notice}</p> : null}
+      {notice ? (
+        <p className="kxd-os-meta kxd-ces-exp__notice" role="status">
+          {notice}
+        </p>
+      ) : null}
 
       <div className="kxd-plans-access__actions">
         <button

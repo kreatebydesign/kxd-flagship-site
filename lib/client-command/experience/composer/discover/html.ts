@@ -279,6 +279,33 @@ export function isSameManagedOrigin(managedOrigin: string, candidateUrl: string)
   }
 }
 
+/** Origin + pathname identity — ignores www, trailing slash, and cache-busting query strings. */
+export function assetIdentityKey(url: string): string | null {
+  try {
+    const parsed = new URL(url);
+    const pathname = parsed.pathname.replace(/\/+$/, "") || "/";
+    return `${normalizeHostname(parsed.hostname)}${pathname}`;
+  } catch {
+    return null;
+  }
+}
+
+export function logoUrlsMatch(a: string, b: string): boolean {
+  const left = assetIdentityKey(a);
+  const right = assetIdentityKey(b);
+  return Boolean(left && right && left === right);
+}
+
+export function isManagedSiteAsset(
+  candidateUrl: string,
+  websiteUrl: string | null | undefined,
+  primaryDomain: string | null | undefined,
+): boolean {
+  const managed = resolveManagedSiteUrl(websiteUrl, primaryDomain);
+  if (!managed) return false;
+  return isSameManagedOrigin(managed, candidateUrl);
+}
+
 export function gscSiteMatchesHost(siteUrl: string, host: string): boolean {
   const normalized = normalizeHostname(host);
   const trimmed = siteUrl.trim();

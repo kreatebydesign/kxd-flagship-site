@@ -1,6 +1,12 @@
 import path from "path";
 import { fileURLToPath } from "url";
+import { vercelBlobStorage } from "@payloadcms/storage-vercel-blob";
 import { loadEnv } from "payload/node";
+import {
+  generatePayloadMediaFileUrl,
+  payloadMediaBlobToken,
+  shouldEnablePayloadMediaBlobStorage,
+} from "./lib/media/payload-storage.ts";
 import { postgresAdapter } from "@payloadcms/db-postgres";
 import { sqliteAdapter } from "@payloadcms/db-sqlite";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
@@ -344,5 +350,17 @@ export default buildConfig({
         push: true,
       }),
   sharp,
-  plugins: [],
+  plugins: [
+    vercelBlobStorage({
+      enabled: shouldEnablePayloadMediaBlobStorage(),
+      token: payloadMediaBlobToken(),
+      addRandomSuffix: true,
+      collections: {
+        media: {
+          disablePayloadAccessControl: true,
+          generateFileURL: ({ filename }) => generatePayloadMediaFileUrl({ filename }),
+        },
+      },
+    }),
+  ],
 });

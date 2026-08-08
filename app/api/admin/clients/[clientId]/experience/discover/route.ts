@@ -10,6 +10,7 @@ import { discoverExperienceDependencies } from "@/lib/client-command/experience/
 import type { ExperienceDiscoverKind } from "@/lib/client-command/experience/composer/types";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 const KINDS = new Set<ExperienceDiscoverKind | "all">([
   "all",

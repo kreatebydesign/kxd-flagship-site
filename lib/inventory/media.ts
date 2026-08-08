@@ -51,12 +51,13 @@ export function resolveMediaPath(
 
   const sized =
     prefer !== "original" ? doc.sizes?.[prefer]?.url : null;
-  const path = String(sized || doc.url || "").trim();
-  if (!path) return null;
+  const raw = String(sized || doc.url || "").trim();
+  if (!raw) return null;
+  const path = /^https?:\/\//i.test(raw) || raw.startsWith("/") ? raw : `/${raw}`;
 
   return {
     id,
-    path: path.startsWith("/") ? path : `/${path}`,
+    path,
     alt: String(doc.alt || doc.filename || "Vehicle photo"),
   };
 }

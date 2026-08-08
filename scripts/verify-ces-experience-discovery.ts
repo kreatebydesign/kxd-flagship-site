@@ -9,8 +9,17 @@ import {
   extractColorCandidates,
   extractLogoCandidates,
   extractMeasurementIds,
+  isManagedSiteAsset,
   isSameManagedOrigin,
+  logoUrlsMatch,
 } from "../lib/client-command/experience/composer/discover/html.ts";
+import {
+  isSvgLogo,
+  prepareManagedLogoUpload,
+} from "../lib/client-command/experience/composer/import-logo.ts";
+import { resolveMediaAssetUrl } from "../lib/client-command/experience/media-url.ts";
+import { composeExperienceRecommendation } from "../lib/client-command/experience/composer/recommend.ts";
+import type { ExperienceSignals } from "../lib/client-command/experience/composer/types.ts";
 import {
   classifyGscSite,
   findImportableGa4Property,
@@ -101,6 +110,54 @@ check(
   "same-origin managed website proof is required",
   isSameManagedOrigin("https://example-carts.com", "https://www.example-carts.com/media/brand/logo-example-mark.svg") &&
     !isSameManagedOrigin("https://example-carts.com", "https://other-client.com/logo.svg"),
+);
+check(
+  "logo import matches www/apex and ignores cache-busting query strings",
+  logoUrlsMatch(
+    "https://www.example-carts.com/media/brand/logo-example-mark.svg",
+    "https://example-carts.com/media/brand/logo-example-mark.svg?dpl=abc",
+  ) &&
+    !logoUrlsMatch(
+      "https://example-carts.com/media/brand/logo-example-mark.svg",
+      "https://other-client.com/media/brand/logo-example-mark.svg",
+    ),
+);
+check(
+  "cross-client managed-site asset cannot be imported",
+  isManagedSiteAsset(
+    "https://www.example-carts.com/media/brand/logo-example-mark.svg",
+    "https://example-carts.com",
+    "example-carts.com",
+  ) &&
+    !isManagedSiteAsset(
+      "https://other-client.com/media/brand/logo.svg",
+      "https://example-carts.com",
+      "example-carts.com",
+    ),
+);
+
+const svgUpload = await prepareManagedLogoUpload({
+  buffer: Buffer.from(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="40" height="20"><rect width="40" height="20" fill="#1F4E79"/></svg>',
+  ),
+  mime: "image/svg+xml",
+  filename: "logo-example-mark.svg",
+});
+check("SVG logos are detected before Payload media create", isSvgLogo("image/svg+xml", "logo.svg"));
+check(
+  "SVG import rasterizes to PNG for the existing media collection",
+  svgUpload.ok === true &&
+    svgUpload.ok &&
+    svgUpload.file.mime === "image/png" &&
+    svgUpload.file.filename.endsWith(".png") &&
+    svgUpload.file.rasterizedFromSvg &&
+    svgUpload.file.buffer.length > 0,
+);
+check(
+  "experience loader resolves filename-only media as a logo URL",
+  resolveMediaAssetUrl({ id: 44, filename: "logo-example-mark.png" }) === "/media/logo-example-mark.png" &&
+    resolveMediaAssetUrl({ id: 44, url: "/media/stored.png" }) === "/media/stored.png" &&
+    resolveMediaAssetUrl(44) === null,
 );
 
 const clientA = scoreGa4Property({
@@ -220,6 +277,134 @@ const load = read("lib/client-command/experience/load.ts");
 check(
   "existing experience loader still resolves active profiles independently",
   load.includes("client-experience-profiles") && load.includes("asStatus(profile.status)"),
+);
+check(
+  "loader uses shared media URL resolver and can hydrate numeric logo IDs",
+  load.includes("resolveMediaAssetUrl") && load.includes("relMediaId") && load.includes('collection: "media"'),
+);
+check(
+  "logo import no longer requires a brittle exact URL rematch",
+  provisionLib.includes("prepareManagedLogoUpload") &&
+    provisionLib.includes("isManagedSiteAsset") &&
+    !provisionLib.includes("logos.find((logo) => logo.url === candidateUrl)"),
+);
+check(
+  "failed logo import rolls back media and onboarding instead of leaving partial state",
+  provisionLib.includes("rollbackLogoImport") &&
+    provisionLib.includes("createdOnboardingId") &&
+    provisionLib.includes("previousLogoFiles") &&
+    provisionLib.includes("durable file URL"),
+);
+check(
+  "logo import requires durable Payload media storage before attach",
+  provisionLib.includes("requireDurablePayloadMedia") &&
+    provisionLib.includes("isDurablePayloadMediaUrl"),
+);
+check(
+  "UI keeps import confirmation while refreshing readiness",
+  ui.includes("preserveFeedback") &&
+    ui.includes('role="status"') &&
+    ui.includes("Import failed") &&
+    ui.includes("Nothing was saved"),
+);
+
+function miniSignals(partial: Partial<ExperienceSignals> = {}): ExperienceSignals {
+  return {
+    clientId: 99,
+    clientName: "Example Client",
+    clientSlug: "example-client",
+    clientStatus: "active",
+    websiteUrl: "https://example.com",
+    brandTier: null,
+    monthlyRetainerAmount: 300,
+    commercialAgreementId: null,
+    currentServices: "SEO\nWebsite Management",
+    industry: null,
+    hasHostingInfra: true,
+    primaryDomain: "example.com",
+    ga4PropertyId: null,
+    searchConsoleSiteUrl: null,
+    reportingCapabilities: [],
+    entitlements: { isLegacy: true, isPaused: false, planKey: null, effectiveModules: [] },
+    profileStatus: "none",
+    existingSelectedModules: [],
+    existingBranding: {
+      portalSidebarLabel: "",
+      welcomeEyebrow: "",
+      reassuranceLine: "",
+      supportTone: "warm-professional",
+      primaryColor: "",
+      secondaryColor: "",
+      accentColor: "",
+      borderRadiusPreset: "default",
+      motionPreset: "calm",
+      showKxdPartnerMark: true,
+      partnerFooterLine: "",
+    },
+    logoHasFile: false,
+    logoSource: "none",
+    infrastructureId: 12,
+    searchConsoleStatus: "unknown",
+    analyticsProvider: null,
+    executiveAnalyticsStatus: null,
+    executiveSearchConsoleStatus: null,
+    proposedSearchConsoleSiteUrl: "sc-domain:example.com",
+    discoveredGa4PropertyId: null,
+    brandKit: null,
+    presentationLogoUrl: null,
+    presentationAccent: null,
+    ownerHrefs: {
+      infrastructure: "/admin/operations/infrastructure/99",
+      infrastructureEdit: "/admin/collections/client-infrastructure/12",
+      inventory: "/admin/operations/client-command/99?tab=inventory",
+      inventoryCreate: "/admin/collections/client-inventory-vehicles/create",
+      onboarding: "/admin/operations/onboarding",
+      onboardingCreate: "/admin/collections/client-onboarding/create",
+      brandKitCreate: "/admin/collections/brand-kits/create",
+      reportingOps: "/admin/operations/reporting/99",
+    },
+    inventoryCount: 0,
+    websiteReviewCount: 0,
+    websiteWorkspaceCount: 0,
+    projectCount: 0,
+    openRequestCount: 0,
+    deliverableCount: 0,
+    publishedReportCount: 0,
+    assetCount: 0,
+    meetingCount: 0,
+    billingNavAvailable: false,
+    portfolioNavAvailable: false,
+    hasPortalMembership: false,
+    hasEnabledPresentation: false,
+    integrations: [],
+    portalAccess: {
+      primaryContact: null,
+      membershipCount: 0,
+      activeMembershipCount: 0,
+      hasPortalMembership: false,
+      pendingInvitationCount: 0,
+      multiAccountContacts: 0,
+      manageHref: "/admin/operations/portal-access?client=99",
+      contacts: [],
+      invitations: [],
+    },
+    ...partial,
+  };
+}
+
+const missingLogo = composeExperienceRecommendation(miniSignals());
+const importedLogo = composeExperienceRecommendation(
+  miniSignals({ logoHasFile: true, logoSource: "onboarding" }),
+);
+check(
+  "readiness reports logo missing until onboarding media resolves",
+  missingLogo.branding.logoHasFile === false &&
+    missingLogo.readiness.dependencies.find((d) => d.id === "logo")?.status === "unresolved",
+);
+check(
+  "canonical onboarding logo clears the readiness logo blocker",
+  importedLogo.branding.logoHasFile === true &&
+    importedLogo.readiness.dependencies.find((d) => d.id === "logo")?.status === "satisfied",
 );
 
 if (failed > 0) {

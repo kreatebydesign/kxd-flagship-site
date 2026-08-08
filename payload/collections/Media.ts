@@ -8,8 +8,13 @@ export const Media: CollectionConfig = {
   admin: {
     group: PAYLOAD_GROUPS.system,
   },
+  // Intentionally public: CES logos, inventory photos, and site media are
+  // meant to be readable without auth. Private files stay on commercial-documents
+  // / client-review-media. Production uploads use Vercel Blob; local uses staticDir.
   upload: {
     staticDir: "public/media",
+    disableLocalStorage: Boolean(process.env.VERCEL || process.env.VERCEL_ENV) &&
+      !process.env.BLOB_READ_WRITE_TOKEN?.trim(),
     mimeTypes: ["image/*", "video/mp4", "video/webm"],
     imageSizes: [
       {

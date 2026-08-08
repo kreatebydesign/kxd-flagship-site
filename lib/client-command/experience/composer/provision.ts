@@ -9,12 +9,18 @@ import path from "node:path";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import { normalizeGa4PropertyId } from "@/lib/reporting/providers/connection-resolve";
+import { resolveMediaAssetUrl } from "../media-url";
 import { discoverExperienceDependencies } from "./discover";
 import { findImportableGa4Property, findImportableGscSite } from "./discover/google-match";
-import { isSameManagedOrigin } from "./discover/html";
+import { isManagedSiteAsset, resolveManagedSiteUrl } from "./discover/html";
+import { prepareManagedLogoUpload } from "./import-logo";
 import { isKxdGoldHex, isTrustedClientAccent } from "./readiness";
 import { loadExperienceSignals } from "./signals";
 import type { ExperienceProvisionActionId } from "./types";
+import {
+  isDurablePayloadMediaUrl,
+  requireDurablePayloadMedia,
+} from "@/lib/media/payload-storage";
 
 export type ExperienceProvisionInput = {
   actionId: ExperienceProvisionActionId;
@@ -167,79 +173,154 @@ export async function applyExperienceProvision(
   if (actionId === "import-branding-logo") {
     const candidateUrl = input.candidateValue?.trim();
     if (!candidateUrl) return fail(actionId, "Select a discovered logo to import.");
-    const discovery = await discoverExperienceDependencies(clientId, "branding");
-    if (!discovery.ok) return fail(actionId, discovery.message);
-    const branding = discovery.branding;
-    if (!branding?.siteUrl) return fail(actionId, "No managed website is available for this client.");
-    const match = branding.logos.find((logo) => logo.url === candidateUrl);
-    if (!match || !isSameManagedOrigin(branding.siteUrl, candidateUrl)) {
-      return fail(actionId, "That logo is not a same-origin candidate for this client's managed website.");
+    if (!isManagedSiteAsset(candidateUrl, signals.websiteUrl, signals.primaryDomain)) {
+      return fail(
+        actionId,
+        "That logo is not on this client's known managed website / domain, so it cannot be imported.",
+      );
     }
-    const file = await downloadManagedAsset(candidateUrl);
-    if (!file.ok) return fail(actionId, `Could not copy logo: ${file.error}`);
+    const storageReady = requireDurablePayloadMedia();
+    if (!storageReady.ok) return fail(actionId, storageReady.error);
 
-    let mediaId: number;
+    const downloaded = await downloadManagedAsset(candidateUrl);
+    if (!downloaded.ok) return fail(actionId, `Could not copy logo: ${downloaded.error}`);
+    const prepared = await prepareManagedLogoUpload(downloaded);
+    if (!prepared.ok) return fail(actionId, prepared.error);
+
+    let mediaId: number | null = null;
+    let previousLogoFiles: number[] | null = null;
+    let existingOnboardingId: number | null = null;
+    let createdOnboardingId: number | null = null;
+
+    const rollbackLogoImport = async () => {
+      if (mediaId != null) {
+        try {
+          await payload.delete({ collection: "media", id: mediaId, overrideAccess: true });
+        } catch {
+          /* best-effort rollback */
+        }
+      }
+      if (createdOnboardingId != null) {
+        try {
+          await payload.delete({
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            collection: "client-onboarding" as any,
+            id: createdOnboardingId,
+            overrideAccess: true,
+          });
+        } catch {
+          /* best-effort rollback */
+        }
+      } else if (existingOnboardingId != null && previousLogoFiles != null) {
+        try {
+          await payload.update({
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            collection: "client-onboarding" as any,
+            id: existingOnboardingId,
+            data: { logoFiles: previousLogoFiles },
+            overrideAccess: true,
+          });
+        } catch {
+          /* best-effort rollback */
+        }
+      }
+    };
+
     try {
       const created = await payload.create({
         collection: "media",
-        data: { alt: `${signals.clientName} logo` },
+        data: {
+          alt: `${signals.clientName} logo`,
+          caption: `Imported from ${candidateUrl}${prepared.file.rasterizedFromSvg ? " (SVG stored as PNG for CES media)" : ""}`,
+        },
         file: {
-          data: file.buffer,
-          mimetype: file.mime,
-          name: file.filename,
-          size: file.buffer.byteLength,
+          data: prepared.file.buffer,
+          mimetype: prepared.file.mime,
+          name: prepared.file.filename,
+          size: prepared.file.buffer.byteLength,
         },
         overrideAccess: true,
       });
       mediaId = Number(created.id);
-      if (!Number.isFinite(mediaId)) return fail(actionId, "Media record was created without an id.");
+      if (!Number.isFinite(mediaId)) {
+        return fail(actionId, "Media record was created without an id.");
+      }
+      const createdUrl = resolveMediaAssetUrl(created);
+      if (!isDurablePayloadMediaUrl(createdUrl)) {
+        await rollbackLogoImport();
+        return fail(
+          actionId,
+          "Media record was created without a durable file URL. Nothing was attached to onboarding.",
+        );
+      }
+
+      const existing = await payload.find({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        collection: "client-onboarding" as any,
+        where: { client: { equals: clientId } },
+        limit: 1,
+        depth: 0,
+        overrideAccess: true,
+      });
+      const onboarding = existing.docs[0] as { id?: number; logoFiles?: unknown[] } | undefined;
+      const existingIds = Array.isArray(onboarding?.logoFiles)
+        ? onboarding!.logoFiles.map(relId).filter((id): id is number => id != null)
+        : [];
+      const logoFiles = [mediaId, ...existingIds.filter((id) => id !== mediaId)];
+
+      if (onboarding?.id != null) {
+        existingOnboardingId = Number(onboarding.id);
+        previousLogoFiles = existingIds;
+        await payload.update({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          collection: "client-onboarding" as any,
+          id: onboarding.id,
+          data: { logoFiles },
+          overrideAccess: true,
+        });
+      } else {
+        const createdOnboarding = await payload.create({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          collection: "client-onboarding" as any,
+          data: {
+            client: clientId,
+            businessName: signals.clientName,
+            status: "draft",
+            currentWebsite: signals.websiteUrl,
+            logoFiles,
+          },
+          overrideAccess: true,
+        });
+        createdOnboardingId = Number((createdOnboarding as { id?: number }).id);
+      }
+
+      const verify = await payload.find({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        collection: "client-onboarding" as any,
+        where: { client: { equals: clientId } },
+        limit: 1,
+        depth: 1,
+        overrideAccess: true,
+      });
+      const stored = (verify.docs[0] as { logoFiles?: unknown[] } | undefined)?.logoFiles?.[0];
+      const resolved = resolveMediaAssetUrl(stored);
+      if (!isDurablePayloadMediaUrl(resolved)) {
+        await rollbackLogoImport();
+        return fail(
+          actionId,
+          "Logo media was created but Client Onboarding did not persist a durable logo file. Import was rolled back.",
+        );
+      }
     } catch (err) {
+      await rollbackLogoImport();
       const message = err instanceof Error ? err.message : "Media create failed";
-      return fail(
-        actionId,
-        `Could not store the logo in Media. ${/\.svg|svg\+xml/i.test(file.mime + file.filename) ? "SVG may need a PNG/JPG candidate instead. " : ""}${message}`,
-      );
+      return fail(actionId, `Could not store the logo in Media. ${message}`);
     }
 
-    const existing = await payload.find({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      collection: "client-onboarding" as any,
-      where: { client: { equals: clientId } },
-      limit: 1,
-      depth: 0,
-      overrideAccess: true,
-    });
-    const onboarding = existing.docs[0] as { id?: number; logoFiles?: unknown[] } | undefined;
-    const existingIds = Array.isArray(onboarding?.logoFiles)
-      ? onboarding!.logoFiles.map(relId).filter((id): id is number => id != null)
-      : [];
-    const logoFiles = [mediaId, ...existingIds.filter((id) => id !== mediaId)];
-
-    if (onboarding?.id != null) {
-      await payload.update({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        collection: "client-onboarding" as any,
-        id: onboarding.id,
-        data: { logoFiles },
-        overrideAccess: true,
-      });
-    } else {
-      await payload.create({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        collection: "client-onboarding" as any,
-        data: {
-          client: clientId,
-          businessName: signals.clientName,
-          status: "draft",
-          currentWebsite: signals.websiteUrl,
-          logoFiles,
-        },
-        overrideAccess: true,
-      });
-    }
+    const origin = resolveManagedSiteUrl(signals.websiteUrl, signals.primaryDomain);
     return ok(
       actionId,
-      "Imported the approved logo into Client Onboarding. It is now the canonical CES logo source.",
+      `${signals.clientName} logo imported into Client Onboarding from ${origin || "the managed website"}.`,
     );
   }
 
