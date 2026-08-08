@@ -147,14 +147,36 @@ export async function generateAndFileDirectAgreementSentSnapshot(input: {
   termsVersion: number;
   pkg: ContractLifecyclePackage;
   actor?: string | null;
+  clientName?: string | null;
+  serviceStartDate?: string | null;
+  serviceEndDate?: string | null;
 }): Promise<ContractLifecyclePackage> {
+  let clientName = String(input.clientName ?? "").trim();
+  if (!clientName) {
+    try {
+      const payload = await getPayload({ config });
+      const client = (await payload.findByID({
+        collection: "clients" as never,
+        id: input.clientId,
+        depth: 0,
+        overrideAccess: true,
+      })) as { name?: string };
+      clientName = String(client?.name ?? "").trim();
+    } catch {
+      clientName = "";
+    }
+  }
+
   const rendered = await renderDirectAgreementSentPdf({
     title: input.contractTitle,
     body: input.contractBody,
     contractId: input.contractId,
     terms: input.terms,
     termsVersion: input.termsVersion,
-    statusLabel: "Finalized — pending acceptance",
+    statusLabel: "For review",
+    clientName: clientName || null,
+    serviceStartDate: input.serviceStartDate ?? null,
+    serviceEndDate: input.serviceEndDate ?? null,
   });
 
   const priorSent = (input.pkg.documentRefs ?? []).filter((d) => d.kind === "direct-agreement");
@@ -174,7 +196,10 @@ export async function generateAndFileDirectAgreementSentSnapshot(input: {
     mimeType: "application/pdf",
     sourceSnapshotRef: `direct-agreement:${input.terms.derivedAt}:${input.termsVersion}`,
     executionStatus: "draft",
-    partyNames: { client: String(input.clientId), kxd: "Kreate by Design" },
+    partyNames: {
+      client: clientName || String(input.clientId),
+      kxd: "Kreate by Design",
+    },
     lineageParentId,
     sentAt: now,
   });

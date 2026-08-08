@@ -257,7 +257,21 @@ console.log("verify:direct-agreement-workflow");
   const pdfs = read("lib/proposal-lifecycle/documents/pdfs.tsx");
   assert.match(pdfs, /acceptanceMode === "external-acceptance"/);
   assert.match(pdfs, /Certificate of externally recorded acceptance/);
-  assert.match(pdfs, /Commercial source: direct-agreement · No proposal record/);
+  assert.match(pdfs, /resolveKxdReportLogoAsset/);
+  assert.match(pdfs, /parseDirectAgreementBodySections/);
+  assert.match(pdfs, /Prepared by/);
+  assert.match(pdfs, /Prepared for/);
+  assert.doesNotMatch(pdfs, /Commercial source: direct-agreement/);
+  assert.doesNotMatch(pdfs, /No proposal record/);
+  const sentStart = pdfs.indexOf("export async function renderDirectAgreementSentPdf");
+  const sentEnd = pdfs.indexOf("export async function renderExternalAcceptanceExecutedPdf");
+  const sentFn = pdfs.slice(sentStart, sentEnd);
+  assert.match(sentFn, /<Image /);
+  assert.match(sentFn, /Service agreement/);
+  assert.doesNotMatch(sentFn, /Typed electronic signatures/);
+  assert.doesNotMatch(sentFn, /structured contract fields/i);
+  assert.doesNotMatch(sentFn, /sent snapshot/i);
+  assert.doesNotMatch(sentFn, /electronic signature/);
   ok("9–10. Sent and executed PDF paths; Direct Agreement filing without proposal");
 }
 

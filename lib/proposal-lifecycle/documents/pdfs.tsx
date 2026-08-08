@@ -3,7 +3,11 @@
  */
 
 import React from "react";
-import { Document, Page, Text, View, StyleSheet, pdf } from "@react-pdf/renderer";
+import { Document, Image, Page, Text, View, StyleSheet, pdf } from "@react-pdf/renderer";
+import { STANDARD_CANCELLATION_TERMINATION_AND_REFUNDS_TITLE } from "../../commercial-legal/standard-cancellation-refunds.ts";
+import { KXD_REPORT_BRAND, kxdReportContactLine } from "../../kxd-report-engine/contact.ts";
+import { resolveKxdReportLogoAsset } from "../../kxd-report-engine/logos.ts";
+import { formatProposalCalendarDate } from "../../proposal-builder/calendar-date.ts";
 import {
   ensureProposalPdfFonts,
   PROPOSAL_PDF_SANS,
@@ -28,6 +32,15 @@ const styles = StyleSheet.create({
     fontFamily: PROPOSAL_PDF_SANS,
     fontSize: 10,
     color: "#1a1a1a",
+  },
+  sentPage: {
+    paddingTop: 48,
+    paddingBottom: 48,
+    paddingHorizontal: 48,
+    fontFamily: PROPOSAL_PDF_SANS,
+    fontSize: 10,
+    color: "#1a1a1a",
+    backgroundColor: "#ffffff",
   },
   eyebrow: {
     fontSize: 8,
@@ -65,7 +78,103 @@ const styles = StyleSheet.create({
     fontSize: 9,
     lineHeight: 1.4,
   },
+  logo: {
+    width: 52,
+    height: 49,
+    marginBottom: 18,
+  },
+  parties: {
+    flexDirection: "row",
+    gap: 28,
+    marginTop: 4,
+    marginBottom: 14,
+  },
+  partyCol: {
+    flex: 1,
+  },
+  partyLabel: {
+    fontSize: 8,
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
+    color: "#8a7a5c",
+    marginBottom: 6,
+  },
+  partyName: {
+    fontFamily: PROPOSAL_PDF_SERIF,
+    fontSize: 12,
+    marginBottom: 3,
+  },
+  summaryBox: {
+    marginTop: 4,
+    marginBottom: 8,
+    paddingTop: 10,
+    paddingBottom: 4,
+    borderTopWidth: 1,
+    borderTopColor: "#e6e0d4",
+  },
 });
+
+const DIRECT_AGREEMENT_BODY_SECTION_TITLES = [
+  STANDARD_CANCELLATION_TERMINATION_AND_REFUNDS_TITLE,
+  "Intellectual property",
+  "Portfolio use",
+  "Client responsibilities",
+  "Overage / pre-approval",
+  "Payment terms",
+  "Renewal",
+  "Scope",
+  "Included services",
+  "Exclusions",
+] as const;
+
+function isDirectAgreementBodySectionTitle(line: string): boolean {
+  const normalized = line.trim().toLowerCase();
+  if (!normalized) return false;
+  return DIRECT_AGREEMENT_BODY_SECTION_TITLES.some(
+    (title) => title.toLowerCase() === normalized,
+  );
+}
+
+/** Split composed Direct Agreement body into titled sections and readable paragraphs. */
+export function parseDirectAgreementBodySections(
+  body: string,
+): Array<{ title: string; paragraphs: string[] }> {
+  const lines = String(body ?? "").replace(/\r\n/g, "\n").split("\n");
+  const sections: Array<{ title: string; paragraphs: string[] }> = [];
+  let title = "Scope";
+  let paragraphs: string[] = [];
+  let buffer: string[] = [];
+
+  const flushParagraph = () => {
+    const text = buffer.join(" ").replace(/\s+/g, " ").trim();
+    if (text) paragraphs.push(text);
+    buffer = [];
+  };
+
+  const flushSection = () => {
+    flushParagraph();
+    if (paragraphs.length > 0) {
+      sections.push({ title, paragraphs });
+    }
+    paragraphs = [];
+  };
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (isDirectAgreementBodySectionTitle(trimmed)) {
+      flushSection();
+      title = trimmed;
+      continue;
+    }
+    if (!trimmed) {
+      flushParagraph();
+      continue;
+    }
+    buffer.push(trimmed);
+  }
+  flushSection();
+  return sections;
+}
 
 function Footer({ label }: { label: string }) {
   return (
@@ -140,36 +249,122 @@ export async function renderDirectAgreementSentPdf(input: {
   terms: StructuredPaymentTerms;
   termsVersion: number;
   statusLabel: string;
+  clientName?: string | null;
+  serviceStartDate?: string | null;
+  serviceEndDate?: string | null;
 }): Promise<{ buffer: Buffer; contentHash: string }> {
   const t = input.terms;
+  const logo = resolveKxdReportLogoAsset();
+  const clientName =
+    String(input.clientName ?? "").trim() ||
+    String(t.payerLegalName ?? "").trim() ||
+    String(t.brandName ?? "").trim() ||
+    "Client";
+  const payerLegalName = String(t.payerLegalName ?? "").trim();
+  const brandName = String(t.brandName ?? "").trim();
+  const startLabel = input.serviceStartDate
+    ? formatProposalCalendarDate(input.serviceStartDate)
+    : "";
+  const endLabel = input.serviceEndDate
+    ? formatProposalCalendarDate(input.serviceEndDate)
+    : "";
+  const periodLabel =
+    startLabel && startLabel !== "—" && endLabel && endLabel !== "—"
+      ? `${startLabel} — ${endLabel}`
+      : startLabel && startLabel !== "—"
+        ? startLabel
+        : null;
+  const showMonthly = t.monthlyTotalCents > 0 && t.recurring.cadence !== "none";
+  const sections = parseDirectAgreementBodySections(input.body);
+  const bodySections =
+    sections.length > 0
+      ? sections
+      : [{ title: "Scope", paragraphs: ["Agreement body on file."] }];
+  void input.statusLabel;
+  void input.termsVersion;
+
   const doc = (
-    <Document>
-      <Page size="LETTER" style={styles.page}>
-        <Text style={styles.eyebrow}>Direct Agreement · pending acceptance</Text>
+    <Document
+      title={input.title}
+      author={KXD_REPORT_BRAND}
+      subject={`Service agreement · ${clientName}`}
+    >
+      <Page size="LETTER" style={styles.sentPage}>
+        {logo.exists ? (
+          // react-pdf Image has no alt prop; decorative brand mark
+          // eslint-disable-next-line jsx-a11y/alt-text
+          <Image src={logo.absolutePath} style={styles.logo} />
+        ) : null}
+        <Text style={styles.eyebrow}>Service agreement</Text>
         <View style={styles.rule} />
         <Text style={styles.h1}>{input.title}</Text>
-        <Text style={styles.meta}>Agreement ID DA-{input.contractId}</Text>
-        <Text style={styles.meta}>Terms version {input.termsVersion}</Text>
-        <Text style={styles.meta}>{input.statusLabel}</Text>
-        <Text style={styles.meta}>
-          Commercial source: direct-agreement · No proposal record
-        </Text>
-        <Text style={styles.h2}>Agreement</Text>
-        <Text style={styles.p}>{input.body || "Agreement body on file."}</Text>
-        <Text style={styles.h2}>Payment summary</Text>
-        <Text style={styles.p}>
-          One-time {formatCents(t.oneTimeTotalCents, t.currency)} · Monthly{" "}
-          {formatCents(t.monthlyTotalCents, t.currency)} ({t.recurring.cadence})
-        </Text>
-        <Text style={styles.p}>{t.initialPayment.dueTerms}</Text>
+        <Text style={styles.meta}>Agreement reference DA-{input.contractId}</Text>
+
+        <View style={styles.parties}>
+          <View style={styles.partyCol}>
+            <Text style={styles.partyLabel}>Prepared by</Text>
+            <Text style={styles.partyName}>{KXD_REPORT_BRAND}</Text>
+            <Text style={styles.meta}>{kxdReportContactLine()}</Text>
+          </View>
+          <View style={styles.partyCol}>
+            <Text style={styles.partyLabel}>Prepared for</Text>
+            <Text style={styles.partyName}>{clientName}</Text>
+            {payerLegalName && payerLegalName !== clientName ? (
+              <Text style={styles.meta}>{payerLegalName}</Text>
+            ) : null}
+            {brandName && brandName !== clientName && brandName !== payerLegalName ? (
+              <Text style={styles.meta}>{brandName}</Text>
+            ) : null}
+          </View>
+        </View>
+
+        <View style={styles.summaryBox}>
+          {periodLabel ? (
+            <>
+              <Text style={styles.h2}>Service period</Text>
+              <Text style={styles.p}>{periodLabel}</Text>
+            </>
+          ) : null}
+          <Text style={styles.h2}>Investment</Text>
+          <Text style={styles.p}>
+            {formatCents(t.oneTimeTotalCents, t.currency)}
+            {t.oneTimeTotalCents > 0 && !showMonthly ? " prepaid" : ""}
+          </Text>
+          {showMonthly ? (
+            <Text style={styles.p}>
+              {formatCents(t.monthlyTotalCents, t.currency)} per month
+            </Text>
+          ) : null}
+          {t.initialPayment.dueTerms ? (
+            <Text style={styles.p}>{t.initialPayment.dueTerms}</Text>
+          ) : null}
+        </View>
+
+        {bodySections.map((section) => (
+          <View key={section.title}>
+            <View wrap={false}>
+              <Text style={styles.h2}>{section.title}</Text>
+              {section.paragraphs[0] ? (
+                <Text style={styles.p}>{section.paragraphs[0]}</Text>
+              ) : null}
+            </View>
+            {section.paragraphs.slice(1).map((paragraph, index) => (
+              <Text key={`${section.title}-${index + 1}`} style={styles.p}>
+                {paragraph}
+              </Text>
+            ))}
+          </View>
+        ))}
+
         <View style={styles.notice}>
           <Text>
-            This PDF is an immutable finalized snapshot generated for sending. It is not executed
-            until electronic signature or externally recorded acceptance is completed. Structured
-            contract fields remain the source of truth.
+            This agreement is provided for review. It is not executed until the client’s acceptance
+            is confirmed.
           </Text>
         </View>
-        <Footer label="Direct Agreement — sent snapshot" />
+        <Text style={styles.footer} fixed>
+          {kxdReportContactLine()}
+        </Text>
       </Page>
     </Document>
   );

@@ -219,6 +219,19 @@ export async function finalizeDirectAgreement(input: {
     terms,
   });
 
+  let clientName = "";
+  try {
+    const clientDoc = (await payload.findByID({
+      collection: "clients" as never,
+      id: clientId,
+      depth: 0,
+      overrideAccess: true,
+    })) as AnyDoc;
+    clientName = String(clientDoc?.name ?? "").trim();
+  } catch {
+    clientName = "";
+  }
+
   pkg = await generateAndFileDirectAgreementSentSnapshot({
     contractId: input.contractId,
     clientId,
@@ -228,6 +241,9 @@ export async function finalizeDirectAgreement(input: {
     termsVersion: terms.termsVersion,
     pkg,
     actor: input.actor,
+    clientName: clientName || null,
+    serviceStartDate: terms.serviceStartDate,
+    serviceEndDate: terms.serviceEndDate,
   });
 
   await payload.update({
