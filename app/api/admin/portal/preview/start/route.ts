@@ -14,6 +14,8 @@ import {
   buildOperatorPortalPreviewSession,
   setOperatorPortalPreviewCookie,
 } from "@/lib/portal/operator-preview";
+import { sanitizeSelectedPortalModules } from "@/lib/client-command/experience/compose";
+import type { OperatorPreviewDraftComposition } from "@/lib/portal/operator-preview/types";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -36,7 +38,7 @@ export async function POST(request: Request) {
     );
   }
 
-  let body: { clientId?: number };
+  let body: { clientId?: number; draftComposition?: OperatorPreviewDraftComposition };
   try {
     body = (await request.json()) as typeof body;
   } catch {
@@ -92,12 +94,27 @@ export async function POST(request: Request) {
     );
   }
 
+  const draftRaw = body.draftComposition;
+  const draftComposition: OperatorPreviewDraftComposition | undefined =
+    draftRaw && typeof draftRaw === "object"
+      ? {
+          modules: sanitizeSelectedPortalModules(
+            Array.isArray(draftRaw.modules) ? draftRaw.modules.map(String) : [],
+          ),
+          branding:
+            draftRaw.branding && typeof draftRaw.branding === "object"
+              ? draftRaw.branding
+              : undefined,
+        }
+      : undefined;
+
   const session = buildOperatorPortalPreviewSession({
     adminUserId,
     adminEmail,
     clientId,
     clientName,
     clientSlug,
+    draftComposition,
   });
 
   // Never carry a real portal-user cookie into preview (avoids Don attribution).

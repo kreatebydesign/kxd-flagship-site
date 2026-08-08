@@ -72,6 +72,7 @@ export function buildOperatorPortalPreviewSession(input: {
   clientId: number;
   clientName: string;
   clientSlug: string | null;
+  draftComposition?: OperatorPortalPreviewSession["draftComposition"];
 }): OperatorPortalPreviewSession {
   const startedAt = new Date().toISOString();
   return {
@@ -83,6 +84,7 @@ export function buildOperatorPortalPreviewSession(input: {
     clientSlug: input.clientSlug,
     startedAt,
     expiresAt: new Date(Date.now() + PREVIEW_TTL_MS).toISOString(),
+    ...(input.draftComposition ? { draftComposition: input.draftComposition } : {}),
   };
 }
 

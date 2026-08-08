@@ -20,3 +20,12 @@ export {
 } from "./module-catalog";
 export { loadOperatorExperienceSnapshot } from "./load";
 export { saveOperatorExperience } from "./save";
+export {
+  loadExperienceSignals,
+  composeExperienceRecommendation,
+  activateRecommendedExperience,
+} from "./composer";
+export type {
+  ExperienceRecommendation,
+  ExperienceActivateInput,
+} from "./composer";

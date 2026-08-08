@@ -5,9 +5,14 @@ import { useState } from "react";
 export function PortalPreviewQuickAction({
   clientId,
   label = "Preview Portal",
+  draftComposition,
 }: {
   clientId: number;
   label?: string;
+  draftComposition?: {
+    modules: string[];
+    branding?: Record<string, string | undefined>;
+  };
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -19,7 +24,10 @@ export function PortalPreviewQuickAction({
       const res = await fetch("/api/admin/portal/preview/start", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ clientId }),
+        body: JSON.stringify({
+          clientId,
+          ...(draftComposition ? { draftComposition } : {}),
+        }),
       });
       const data = (await res.json().catch(() => ({}))) as {
         success?: boolean;

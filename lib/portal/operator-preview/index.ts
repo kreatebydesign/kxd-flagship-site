@@ -1,4 +1,7 @@
-export type { OperatorPortalPreviewSession } from "./types";
+export type {
+  OperatorPortalPreviewSession,
+  OperatorPreviewDraftComposition,
+} from "./types";
 export {
   buildOperatorPortalPreviewSession,
   decodeOperatorPortalPreviewSession,

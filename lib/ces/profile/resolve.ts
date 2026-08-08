@@ -9,6 +9,7 @@ import { getExecutivePresentation } from "../executive-performance/presentation"
 import type { CesModuleId, ResolvedExperienceProfile } from "../types";
 import {
   isCesExperienceModuleId,
+  isInternalOnlyCapability,
   normalizeCesExperienceModuleList,
   normalizePortalModuleList,
   normalizeReportingCapabilityList,
@@ -199,6 +200,10 @@ export async function resolveExperienceProfile(
     websiteUrl,
   };
 
+  const draft = session.isOperatorPreview
+    ? session.operatorPreview?.draftComposition
+    : null;
+
   const fallbackVisual = buildFallbackVisual(editionBranding);
   const fallback = await applyClientPlanEntitlements(
     finalizeProfile(
@@ -237,7 +242,56 @@ export async function resolveExperienceProfile(
     });
     profileDoc = result.docs.length > 0 ? (result.docs[0] as AnyDoc) : null;
   } catch {
-    return fallback;
+    if (!draft) return fallback;
+    profileDoc = null;
+  }
+
+  if (draft) {
+    const onboardingLogo = await loadOnboardingLogo(session.clientId);
+    const draftModules = normalizePortalModuleList(draft.modules).filter(
+      (id) => !isInternalOnlyCapability(id) && id !== "advisor",
+    );
+    const branding = draft.branding ?? {};
+    const draftResolved = mergeProfileWithFallback(
+      {
+        source: "profile",
+        identity: {
+          ...identityBase,
+          clientName: branding.clientName?.trim() || clientName,
+          logoUrl: onboardingLogo,
+        },
+        visual: {
+          primaryColor: branding.primaryColor || fallbackVisual.primaryColor,
+          secondaryColor: branding.secondaryColor || fallbackVisual.secondaryColor,
+          accentColor: branding.accentColor || fallbackVisual.accentColor,
+          surfaceTint: null,
+          borderRadiusPreset: "default",
+          motionPreset: "calm",
+        },
+        hospitality: {
+          welcomeEyebrow:
+            branding.welcomeEyebrow ||
+            buildFallbackHospitality(clientName, editionBranding).welcomeEyebrow,
+          reassuranceLine:
+            branding.reassuranceLine ||
+            buildFallbackHospitality(clientName, editionBranding).reassuranceLine,
+          supportTone: normalizeSupportTone(branding.supportTone),
+          portalSidebarLabel: branding.portalSidebarLabel || clientName,
+          partnerFooterLine: CES_DEFAULT_PARTNER_FOOTER,
+          showPartnerMark: true,
+        },
+        enabledModules: normalizeEnabledModules(draftModules),
+        enabledPortalModules: draftModules,
+        reportingCapabilities: normalizeReportingCapabilities(
+          profileDoc ? (profileDoc as AnyDoc).enabledModules : [],
+        ),
+        presentation: null,
+        terminology: {},
+        cssVars: {},
+      },
+      editionBranding,
+    );
+    return applyClientPlanEntitlements(finalizeProfile(draftResolved));
   }
 
   if (!profileDoc) {

@@ -21959,3 +21959,20 @@ select.kxd-os-commercial-control {
     grid-template-columns: 1fr;
   }
 }
+
+.kxd-ces-exp__advanced {
+  margin-top: 0.25rem;
+}
+
+.kxd-ces-exp__advanced summary {
+  cursor: pointer;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-muted);
+  margin-bottom: 1rem;
+}
+
+.kxd-ces-composer {
+  margin-bottom: 1rem;
+}

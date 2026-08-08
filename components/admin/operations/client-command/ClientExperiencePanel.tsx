@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { PortalPreviewQuickAction } from "./PortalPreviewQuickAction";
+import { ClientExperienceComposer } from "./ClientExperienceComposer";
 import {
   composeOperatorHomeShell,
   composeOperatorModuleRows,
@@ -201,7 +202,34 @@ export function ClientExperiencePanel({ clientId }: { clientId: number }) {
   const statusRows = modules.filter((row) => row.kind !== "toggle");
 
   return (
+    <>
+    <ClientExperienceComposer
+      clientId={clientId}
+      onActivated={(exp) => {
+        setSnapshot(exp);
+        setForm({
+          profileStatus: exp.profileStatus === "none" ? "draft" : exp.profileStatus,
+          clientName: exp.branding.clientName,
+          portalSidebarLabel: exp.branding.portalSidebarLabel,
+          welcomeEyebrow: exp.branding.welcomeEyebrow,
+          reassuranceLine: exp.branding.reassuranceLine,
+          supportTone: exp.branding.supportTone,
+          primaryColor: exp.branding.primaryColor,
+          secondaryColor: exp.branding.secondaryColor,
+          accentColor: exp.branding.accentColor,
+          borderRadiusPreset: exp.branding.borderRadiusPreset,
+          motionPreset: exp.branding.motionPreset,
+          showKxdPartnerMark: exp.branding.showKxdPartnerMark,
+          partnerFooterLine: exp.branding.partnerFooterLine,
+          terminology: { ...exp.branding.terminology },
+          selectedPortalModules: [...exp.selectedPortalModules],
+        });
+        setSuccess("Recommended experience activated. Preview Portal to confirm live composition.");
+      }}
+    />
     <section className="kxd-os-card kxd-ces-exp">
+      <details className="kxd-ces-exp__advanced">
+        <summary>Advanced Configuration</summary>
       <div className="kxd-plans-access__head">
         <div>
           <p className="kxd-os-section__label">Manage Client Experience</p>
@@ -590,6 +618,8 @@ export function ClientExperiencePanel({ clientId }: { clientId: number }) {
           Plans & Access →
         </Link>
       </div>
+      </details>
     </section>
+    </>
   );
 }
