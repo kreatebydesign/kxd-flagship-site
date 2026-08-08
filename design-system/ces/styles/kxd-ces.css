@@ -11007,3 +11007,57 @@
   color: var(--kxd-os-text-faint) !important;
   opacity: 1 !important;
 }
+
+/* Operator Portal Preview — studio-only banner (not client chrome). */
+.kxd-operator-portal-preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.65rem 1.1rem;
+  background: color-mix(in srgb, var(--kxd-os-text-primary, #111) 92%, #c45c26);
+  color: #f7f4ef;
+  border-bottom: 1px solid color-mix(in srgb, #f7f4ef 18%, transparent);
+  z-index: 40;
+}
+
+.kxd-operator-portal-preview__copy {
+  min-width: 0;
+}
+
+.kxd-operator-portal-preview__eyebrow {
+  margin: 0;
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.72;
+}
+
+.kxd-operator-portal-preview__title {
+  margin: 0.1rem 0 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.kxd-operator-portal-preview__note {
+  margin: 0.15rem 0 0;
+  font-size: 0.75rem;
+  opacity: 0.78;
+}
+
+.kxd-operator-portal-preview__exit {
+  flex-shrink: 0;
+  border: 1px solid color-mix(in srgb, #f7f4ef 35%, transparent);
+  background: transparent;
+  color: #f7f4ef;
+  border-radius: 0.35rem;
+  padding: 0.4rem 0.75rem;
+  font: inherit;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.kxd-operator-portal-preview__exit:hover {
+  background: color-mix(in srgb, #f7f4ef 12%, transparent);
+}

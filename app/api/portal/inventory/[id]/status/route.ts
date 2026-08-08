@@ -3,7 +3,7 @@ import { getPayload } from "payload";
 import config from "@payload-config";
 import { isCesModuleEnabled } from "@/lib/ces";
 import { resolveExperienceProfile } from "@/lib/ces/server";
-import { getPortalSession } from "@/lib/portal/session";
+import { getPortalWriteSession } from "@/lib/portal/session";
 import { updateInventoryVehicle } from "@/lib/inventory/server";
 import { toPublicInventoryVehicle } from "@/lib/inventory/public-map";
 import { INVENTORY_LISTING_STATUSES } from "@/lib/inventory/types";
@@ -15,7 +15,7 @@ export async function POST(
   req: NextRequest,
   context: { params: Promise<{ id: string }> },
 ) {
-  const session = await getPortalSession();
+  const session = await getPortalWriteSession();
   if (!session) {
     return NextResponse.json({ ok: false, message: "Unauthorized." }, { status: 401 });
   }

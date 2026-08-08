@@ -102,6 +102,11 @@ export interface CommandWorkspaceQuickAction {
   label: string;
   href: string;
   external?: boolean;
+  /**
+   * Client-side action instead of navigation.
+   * `portal-preview-start` posts to operator preview start for this client.
+   */
+  action?: "portal-preview-start";
 }
 
 export interface ClientWorkspaceBundle extends ClientCommandCenterData {

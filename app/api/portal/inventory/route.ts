@@ -6,7 +6,11 @@ import { getPayload } from "payload";
 import config from "@payload-config";
 import { resolveExperienceProfile } from "@/lib/ces/server";
 import { isCesModuleEnabled } from "@/lib/ces";
-import { getPortalSession } from "@/lib/portal/session";
+import {
+  getPortalSession,
+  getPortalWriteSession,
+  portalPreviewReadOnlyResponse,
+} from "@/lib/portal/session";
 import {
   createInventoryVehicle,
   listInventoryForClient,
@@ -16,7 +20,7 @@ import type { InventoryListingStatus, InventoryVehicleInput } from "@/lib/invent
 
 export const dynamic = "force-dynamic";
 
-async function requireInventorySession() {
+async function requireInventoryReadSession() {
   const session = await getPortalSession();
   if (!session) return { error: NextResponse.json({ ok: false, message: "Unauthorized." }, { status: 401 }) };
   const profile = await resolveExperienceProfile(session);
@@ -26,8 +30,24 @@ async function requireInventorySession() {
   return { session, profile };
 }
 
+async function requireInventoryWriteSession() {
+  const session = await getPortalWriteSession();
+  if (!session) {
+    const preview = await getPortalSession();
+    if (preview?.isOperatorPreview) {
+      return { error: portalPreviewReadOnlyResponse() };
+    }
+    return { error: NextResponse.json({ ok: false, message: "Unauthorized." }, { status: 401 }) };
+  }
+  const profile = await resolveExperienceProfile(session);
+  if (!isCesModuleEnabled(profile, "inventory")) {
+    return { error: NextResponse.json({ ok: false, message: "Inventory is not enabled." }, { status: 403 }) };
+  }
+  return { session, profile };
+}
+
 export async function GET(req: NextRequest) {
-  const gate = await requireInventorySession();
+  const gate = await requireInventoryReadSession();
   if ("error" in gate) return gate.error;
 
   const status = (req.nextUrl.searchParams.get("status") || "all") as
@@ -49,7 +69,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const gate = await requireInventorySession();
+  const gate = await requireInventoryWriteSession();
   if ("error" in gate) return gate.error;
 
   try {

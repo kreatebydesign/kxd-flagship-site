@@ -4,6 +4,7 @@ import { getPayload } from "payload";
 import config from "@payload-config";
 import { PAYLOAD_AUTH_COOKIE_PREFIX } from "@/lib/admin/constants";
 import { clearStaffPreviewCookie } from "@/lib/staff/preview";
+import { clearOperatorPortalPreviewCookie } from "@/lib/portal/operator-preview";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -57,6 +58,12 @@ export async function POST() {
 
   try {
     await clearStaffPreviewCookie();
+  } catch {
+    /* best-effort */
+  }
+
+  try {
+    await clearOperatorPortalPreviewCookie();
   } catch {
     /* best-effort */
   }

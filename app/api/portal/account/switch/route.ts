@@ -9,7 +9,7 @@ import {
   switchPortalActiveClient,
 } from "@/lib/portal/memberships";
 import { membershipUnavailableResponseBody } from "@/lib/portal/membership-schema";
-import { getPortalSession } from "@/lib/portal/session";
+import { getPortalWriteSession } from "@/lib/portal/session";
 
 export const dynamic = "force-dynamic";
 
@@ -67,7 +67,7 @@ function isTrustedPortalMutation(req: NextRequest): boolean {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await getPortalSession();
+  const session = await getPortalWriteSession();
   if (!session) return unauthorized();
 
   if (!isTrustedPortalMutation(req)) {

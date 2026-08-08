@@ -26,7 +26,10 @@ import type {
 import { resolveExperienceProfile } from "@/lib/ces/server";
 import { isCesModuleEnabled } from "@/lib/ces/types";
 import { decidePortalCesModuleApiAccess } from "@/lib/portal/requests-files-reports";
-import { getPortalSession } from "@/lib/portal/session";
+import {
+  getPortalSession,
+  portalPreviewReadOnlyResponse,
+} from "@/lib/portal/session";
 import { spawnWorkItemFromPortalRequest } from "@/lib/work-items/spawn";
 import { notifyWebsiteWorkspaceSubmitted } from "@/lib/website-review-inbox/notify-workspace";
 
@@ -58,6 +61,9 @@ export async function POST(req: NextRequest) {
   const session = await getPortalSession();
   if (!session) {
     return NextResponse.json({ ok: false, message: "Unauthorized." }, { status: 401 });
+  }
+  if (session.isOperatorPreview) {
+    return portalPreviewReadOnlyResponse();
   }
 
   try {

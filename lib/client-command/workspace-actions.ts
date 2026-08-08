@@ -49,10 +49,15 @@ export function buildWorkspaceQuickActions(
       href: `/admin/collections/creative-assets/create?client=${clientId}`,
     },
     {
-      id: "open-portal",
-      label: "Open Portal",
+      id: "preview-portal",
+      label: "Preview Portal",
       href: `/portal`,
-      external: true,
+      action: "portal-preview-start",
+    },
+    {
+      id: "manage-portal-access",
+      label: "Manage Portal Access",
+      href: `/admin/operations/portal-access?client=${clientId}`,
     },
   ];
 

@@ -3,7 +3,11 @@ import { getPayload } from "payload";
 import config from "@payload-config";
 import { isCesModuleEnabled } from "@/lib/ces";
 import { resolveExperienceProfile } from "@/lib/ces/server";
-import { getPortalSession } from "@/lib/portal/session";
+import {
+  getPortalSession,
+  getPortalWriteSession,
+  portalPreviewReadOnlyResponse,
+} from "@/lib/portal/session";
 import {
   getInventoryVehicleForClient,
   updateInventoryVehicle,
@@ -13,9 +17,32 @@ import type { InventoryVehicleInput } from "@/lib/inventory/types";
 
 export const dynamic = "force-dynamic";
 
-async function requireInventorySession() {
+async function requireInventoryReadSession() {
   const session = await getPortalSession();
   if (!session) {
+    return {
+      error: NextResponse.json({ ok: false, message: "Unauthorized." }, { status: 401 }),
+    };
+  }
+  const profile = await resolveExperienceProfile(session);
+  if (!isCesModuleEnabled(profile, "inventory")) {
+    return {
+      error: NextResponse.json(
+        { ok: false, message: "Inventory is not enabled." },
+        { status: 403 },
+      ),
+    };
+  }
+  return { session };
+}
+
+async function requireInventoryWriteSession() {
+  const session = await getPortalWriteSession();
+  if (!session) {
+    const preview = await getPortalSession();
+    if (preview?.isOperatorPreview) {
+      return { error: portalPreviewReadOnlyResponse() };
+    }
     return {
       error: NextResponse.json({ ok: false, message: "Unauthorized." }, { status: 401 }),
     };
@@ -36,7 +63,7 @@ export async function GET(
   _req: NextRequest,
   context: { params: Promise<{ id: string }> },
 ) {
-  const gate = await requireInventorySession();
+  const gate = await requireInventoryReadSession();
   if ("error" in gate) return gate.error;
   const { id } = await context.params;
   const vehicleId = Number(id);
@@ -65,7 +92,7 @@ export async function PATCH(
   req: NextRequest,
   context: { params: Promise<{ id: string }> },
 ) {
-  const gate = await requireInventorySession();
+  const gate = await requireInventoryWriteSession();
   if ("error" in gate) return gate.error;
   const { id } = await context.params;
   const vehicleId = Number(id);
@@ -84,7 +111,11 @@ export async function PATCH(
     });
     if (!result.ok) {
       return NextResponse.json(
-        { ok: false, message: result.message },
+        {
+          ok: false,
+          message: result.message,
+          issues: "issues" in result ? result.issues : undefined,
+        },
         { status: 400 },
       );
     }

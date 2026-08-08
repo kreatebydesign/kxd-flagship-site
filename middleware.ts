@@ -5,7 +5,12 @@ import {
   payloadAdminLoginUrl,
   requiresPayloadAdminAuth,
 } from "@/lib/admin/middleware";
-import { PORTAL_SESSION_COOKIE, PORTAL_HOST } from "@/lib/portal/constants";
+import {
+  isWellFormedOperatorPortalPreviewCookie,
+  OPERATOR_PORTAL_PREVIEW_COOKIE,
+  PORTAL_SESSION_COOKIE,
+  PORTAL_HOST,
+} from "@/lib/portal/constants";
 import { JUNIOR_CREATOR_SESSION_COOKIE } from "@/lib/junior-creators/constants";
 import {
   isAuthorizedCronBearer,
@@ -103,6 +108,12 @@ export function middleware(request: NextRequest) {
     // Presence alone is not enough — forged/malformed cookies must not count as
     // authenticated, or login↔workspace redirects can loop forever.
     const hasSession = isWellFormedPortalSessionCookie(rawSession);
+    const rawOperatorPreview = request.cookies.get(
+      OPERATOR_PORTAL_PREVIEW_COOKIE,
+    )?.value;
+    const hasOperatorPreview =
+      isWellFormedOperatorPortalPreviewCookie(rawOperatorPreview) &&
+      hasPayloadAuthCookie(request);
 
     if (rawSession && !hasSession) {
       const response = isPublic
@@ -131,7 +142,8 @@ export function middleware(request: NextRequest) {
       return NextResponse.next();
     }
 
-    if (!hasSession) {
+    // Studio operator preview: admin cookie + signed preview cookie (no portal-user cookie).
+    if (!hasSession && !hasOperatorPreview) {
       const loginUrl = new URL("/portal/login", request.url);
       loginUrl.searchParams.set("redirect", pathname);
       return NextResponse.redirect(loginUrl);

@@ -6,7 +6,7 @@ import { getPayload } from "payload";
 import config from "@payload-config";
 import { isCesModuleEnabled } from "@/lib/ces";
 import { resolveExperienceProfile } from "@/lib/ces/server";
-import { getPortalSession } from "@/lib/portal/session";
+import { getPortalWriteSession } from "@/lib/portal/session";
 import { mapPublicImage, resolveMediaPath, toAbsoluteMediaUrl } from "@/lib/inventory/media";
 
 export const dynamic = "force-dynamic";
@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
 const MAX_BYTES = 12 * 1024 * 1024;
 
 export async function POST(req: NextRequest) {
-  const session = await getPortalSession();
+  const session = await getPortalWriteSession();
   if (!session) {
     return NextResponse.json({ ok: false, message: "Unauthorized." }, { status: 401 });
   }

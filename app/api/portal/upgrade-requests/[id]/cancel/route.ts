@@ -2,7 +2,7 @@
  * POST /api/portal/upgrade-requests/[id]/cancel
  */
 import { NextRequest, NextResponse } from "next/server";
-import { getPortalSession } from "@/lib/portal/session";
+import { getPortalWriteSession } from "@/lib/portal/session";
 import {
   cancelClientUpgradeRequest,
   UpgradeRequestError,
@@ -20,7 +20,7 @@ export async function POST(
   _req: NextRequest,
   context: { params: Promise<{ id: string }> },
 ) {
-  const session = await getPortalSession();
+  const session = await getPortalWriteSession();
   if (!session) {
     return NextResponse.json(
       { ok: false, message: "Unauthorized." },

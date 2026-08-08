@@ -12,6 +12,7 @@ import { AccountSwitcher } from "@/components/portal/AccountSwitcher";
 import type { PortalAccountSwitcherModel } from "@/lib/portal/account-context-types";
 import { ClientHqLogoutButton } from "./ClientHqLogoutButton";
 import { PortalFeedbackControl } from "./PortalFeedbackControl";
+import { OperatorPortalPreviewBanner } from "@/components/portal/OperatorPortalPreviewBanner";
 import {
   clientHqNavIsActive,
   getEnabledPortalNavGroups,
@@ -31,6 +32,8 @@ export interface ClientHqShellProps {
   portfolioNavAvailable?: boolean;
   /** Phase 5 Batch 5C — show Billing nav only when active client has eligible Stripe mapping. */
   billingNavAvailable?: boolean;
+  /** Studio operator single-client preview — not a portal-user session. */
+  operatorPreview?: { clientName: string } | null;
   children: ReactNode;
 }
 
@@ -53,6 +56,7 @@ export function ClientHqShell({
   accountSwitcher = null,
   portfolioNavAvailable = false,
   billingNavAvailable = false,
+  operatorPreview = null,
   children,
 }: ClientHqShellProps) {
   const navGroups = getEnabledPortalNavGroups(experienceProfile, {
@@ -126,6 +130,9 @@ export function ClientHqShell({
         className={`kxd-os-app${navOpen ? " kxd-ces-nav-open" : ""}`}
         style={cssVars as CSSProperties}
       >
+        {operatorPreview ? (
+          <OperatorPortalPreviewBanner clientName={operatorPreview.clientName} />
+        ) : null}
         <div className="kxd-ces-mobile-bar">
           <div className="kxd-ces-mobile-bar__identity">
             <p className="kxd-ces-mobile-bar__name">{displayName}</p>
@@ -206,8 +213,8 @@ export function ClientHqShell({
           </div>
 
           <div className="kxd-os-sidebar__foot">
-            <ClientNotificationsCenter />
-            <PortalFeedbackControl />
+            {operatorPreview ? null : <ClientNotificationsCenter />}
+            {operatorPreview ? null : <PortalFeedbackControl />}
             {reassuranceLine ? (
               <p className="kxd-ces-trust-line">
                 <span className="kxd-ces-trust-line__dot" aria-hidden="true" />
@@ -225,7 +232,7 @@ export function ClientHqShell({
                 )}
               </p>
             ) : null}
-            <ClientHqLogoutButton />
+            <ClientHqLogoutButton isOperatorPreview={Boolean(operatorPreview)} />
           </div>
         </aside>
 

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getPortalSession } from "@/lib/portal/session";
+import { getPortalWriteSession } from "@/lib/portal/session";
 import { confirmTotpEnrollment } from "@/lib/portal/identity/mfa-store";
 import { assertPortalMutatingOrigin } from "@/lib/portal/identity/origin";
 import {
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, message: "Too many attempts." }, { status: 429 });
   }
 
-  const session = await getPortalSession();
+  const session = await getPortalWriteSession();
   if (!session) {
     return NextResponse.json({ ok: false, message: "Unauthorized." }, { status: 401 });
   }

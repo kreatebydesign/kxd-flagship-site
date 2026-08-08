@@ -3,7 +3,7 @@
  * Founding-client early-access feedback. Client identity from portal session only.
  */
 import { NextRequest, NextResponse } from "next/server";
-import { getPortalSession } from "@/lib/portal/session";
+import { getPortalWriteSession } from "@/lib/portal/session";
 import {
   isExperienceFeedbackType,
   submitExperienceFeedback,
@@ -24,7 +24,7 @@ function unauthorized() {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await getPortalSession();
+  const session = await getPortalWriteSession();
   if (!session) return unauthorized();
 
   try {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { RegistrationResponseJSON } from "@simplewebauthn/server";
-import { getPortalSession } from "@/lib/portal/session";
+import { getPortalWriteSession } from "@/lib/portal/session";
 import { verifyRegistration } from "@/lib/portal/identity/webauthn";
 import { savePasskeyRegistration } from "@/lib/portal/identity/mfa-store";
 import { markStepUp } from "@/lib/portal/identity/mfa-store";
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, message: "Too many attempts." }, { status: 429 });
   }
 
-  const session = await getPortalSession();
+  const session = await getPortalWriteSession();
   if (!session) {
     return NextResponse.json({ ok: false, message: "Unauthorized." }, { status: 401 });
   }

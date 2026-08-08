@@ -4786,6 +4786,31 @@ body:has(.kxd-exec-workspace) {
   color: var(--kxd-os-text-primary);
 }
 
+button.kxd-os-command-workspace__action {
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  width: 100%;
+}
+
+button.kxd-os-command-workspace__action:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.kxd-os-command-workspace__action-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.kxd-os-command-workspace__action-error {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--kxd-os-danger, #b42318);
+}
+
 .kxd-os-command-workspace__body {
   display: grid;
   grid-template-columns: 11rem 1fr;

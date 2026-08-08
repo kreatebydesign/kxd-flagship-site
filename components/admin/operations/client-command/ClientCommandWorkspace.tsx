@@ -12,6 +12,7 @@ import {
 } from "@/lib/client-command/tabs";
 import type { CommercialSectionId } from "@/lib/client-command/commercial/types";
 import { CommandWorkspaceTabPanel } from "./CommandWorkspaceTabPanel";
+import { PortalPreviewQuickAction } from "./PortalPreviewQuickAction";
 
 export function ClientCommandWorkspace({
   data,
@@ -100,17 +101,25 @@ export function ClientCommandWorkspace({
         <div className="kxd-os-command-workspace__actions">
           <p className="kxd-os-command-workspace__actions-label">Quick actions</p>
           <div className="kxd-os-command-workspace__actions-grid">
-            {data.workspaceQuickActions.map((action) => (
-              <Link
-                key={action.id}
-                href={action.href}
-                className="kxd-os-command-workspace__action"
-                target={action.external ? "_blank" : undefined}
-                rel={action.external ? "noreferrer" : undefined}
-              >
-                {action.label}
-              </Link>
-            ))}
+            {data.workspaceQuickActions.map((action) =>
+              action.action === "portal-preview-start" ? (
+                <PortalPreviewQuickAction
+                  key={action.id}
+                  clientId={data.clientId}
+                  label={action.label}
+                />
+              ) : (
+                <Link
+                  key={action.id}
+                  href={action.href}
+                  className="kxd-os-command-workspace__action"
+                  target={action.external ? "_blank" : undefined}
+                  rel={action.external ? "noreferrer" : undefined}
+                >
+                  {action.label}
+                </Link>
+              ),
+            )}
           </div>
         </div>
       </header>

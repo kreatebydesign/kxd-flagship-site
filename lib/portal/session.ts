@@ -2,14 +2,19 @@ import "server-only";
 
 import { createHmac, timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
 import { getPayload } from "payload";
 import config from "@payload-config";
 
+import { isStudioPayloadOperator } from "../../payload/access/index.ts";
+import { getPayloadAdminUser } from "@/lib/admin/auth";
 import { PORTAL_SESSION_COOKIE } from "./constants";
 import {
   listPortalMembershipsForUser,
   resolveAuthorizedActiveClient,
 } from "./memberships";
+import { getOperatorPortalPreviewCookieSession } from "./operator-preview/cookie";
+import type { OperatorPortalPreviewSession } from "./operator-preview/types";
 
 const SESSION_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
 
@@ -20,6 +25,10 @@ export type PortalSession = {
   displayName: string;
   clientName: string;
   welcomeCompletedAt: string | null;
+  /** True when a studio operator is previewing this client portal. */
+  isOperatorPreview: boolean;
+  /** Present only for operator preview — never a portal-user identity. */
+  operatorPreview: OperatorPortalPreviewSession | null;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -79,6 +88,67 @@ function resolveLegacyClient(user: AnyDoc): {
   return { clientId, clientName: clientName || "Your Company" };
 }
 
+function asPortalUserSession(input: {
+  portalUserId: number;
+  clientId: number;
+  email: string;
+  displayName: string;
+  clientName: string;
+  welcomeCompletedAt: string | null;
+}): PortalSession {
+  return {
+    ...input,
+    isOperatorPreview: false,
+    operatorPreview: null,
+  };
+}
+
+async function resolveOperatorPreviewSession(): Promise<PortalSession | null> {
+  const preview = await getOperatorPortalPreviewCookieSession();
+  if (!preview) return null;
+
+  const admin = await getPayloadAdminUser();
+  if (!admin || !isStudioPayloadOperator(admin)) {
+    return null;
+  }
+
+  const adminId = Number(admin.id);
+  if (!Number.isFinite(adminId) || adminId !== preview.adminUserId) {
+    // Cookie must match the currently authenticated studio operator.
+    return null;
+  }
+
+  // Re-validate client still exists (fail closed if deleted).
+  try {
+    const payload = await getPayload({ config });
+    const client = (await payload.findByID({
+      collection: "clients",
+      id: preview.clientId,
+      depth: 0,
+      overrideAccess: true,
+    })) as AnyDoc | null;
+    if (!client) return null;
+    const clientName = String(client.name ?? preview.clientName ?? "Client");
+    return {
+      // Sentinel — never a real portal-users row. Writes must check isOperatorPreview.
+      portalUserId: 0,
+      clientId: preview.clientId,
+      email: preview.adminEmail,
+      displayName: `Operator Preview · ${clientName}`,
+      clientName,
+      // Skip welcome / MFA enrollment gates for operator preview.
+      welcomeCompletedAt: preview.startedAt,
+      isOperatorPreview: true,
+      operatorPreview: {
+        ...preview,
+        clientName,
+      },
+    };
+  } catch {
+    return null;
+  }
+}
+
 export async function createPortalSession(portalUserId: number): Promise<void> {
   const secret = await getPayloadSecret();
   const cookieStore = await cookies();
@@ -97,12 +167,15 @@ export async function destroyPortalSession(): Promise<void> {
 }
 
 /**
- * Resolve authenticated portal session.
- * Cookie authenticates portal user identity only.
- * Active client is resolved server-side from memberships (with legacy fallback).
- * Browser-supplied client IDs are never trusted here.
+ * Resolve authenticated portal access.
+ * Operator preview (studio admin cookie + preview cookie) takes precedence over
+ * a portal-user session so preview is never attributed to a client identity.
+ * Active client for portal users is resolved server-side from memberships.
  */
 export async function getPortalSession(): Promise<PortalSession | null> {
+  const previewSession = await resolveOperatorPreviewSession();
+  if (previewSession) return previewSession;
+
   const cookieStore = await cookies();
   const raw = cookieStore.get(PORTAL_SESSION_COOKIE)?.value;
   if (!raw) return null;
@@ -167,7 +240,7 @@ export async function getPortalSession(): Promise<PortalSession | null> {
       return null;
     }
 
-    return {
+    return asPortalUserSession({
       portalUserId,
       clientId,
       email: String(user.email ?? ""),
@@ -176,16 +249,59 @@ export async function getPortalSession(): Promise<PortalSession | null> {
       welcomeCompletedAt: user.welcomeCompletedAt
         ? String(user.welcomeCompletedAt)
         : null,
-    };
+    });
   } catch {
     return null;
   }
+}
+
+/**
+ * Portal session that may mutate client-owned data.
+ * Operator preview is read-only and returns null (caller → 401/403).
+ */
+export async function getPortalWriteSession(): Promise<PortalSession | null> {
+  const session = await getPortalSession();
+  if (!session || session.isOperatorPreview) return null;
+  return session;
 }
 
 export async function requirePortalSession(): Promise<PortalSession> {
   const session = await getPortalSession();
   if (!session) {
     throw new Error("PORTAL_UNAUTHORIZED");
+  }
+  return session;
+}
+
+/** JSON 403 helper for mutating portal APIs under operator preview. */
+export function portalPreviewReadOnlyResponse(): NextResponse {
+  return NextResponse.json(
+    {
+      ok: false,
+      success: false,
+      error: "Operator preview is read-only. Exit preview to use client actions.",
+      code: "operator_preview_readonly",
+    },
+    { status: 403 },
+  );
+}
+
+/**
+ * Gate a portal API. Returns the session, or a NextResponse error.
+ * Pass `{ write: true }` for any mutating route.
+ */
+export async function gatePortalApiSession(options?: {
+  write?: boolean;
+}): Promise<PortalSession | NextResponse> {
+  const session = await getPortalSession();
+  if (!session) {
+    return NextResponse.json(
+      { ok: false, success: false, error: "Unauthorized." },
+      { status: 401 },
+    );
+  }
+  if (options?.write && session.isOperatorPreview) {
+    return portalPreviewReadOnlyResponse();
   }
   return session;
 }

@@ -15,19 +15,24 @@ export default async function PortalAppLayout({ children }: { children: React.Re
   const session = await getPortalSession();
   if (!session) redirect("/portal/login");
 
-  if (await userRequiresSecurityEnrollment(session.portalUserId)) {
-    redirect("/portal/security/enroll");
-  }
+  // Operator preview skips client MFA enrollment and welcome rituals.
+  if (!session.isOperatorPreview) {
+    if (await userRequiresSecurityEnrollment(session.portalUserId)) {
+      redirect("/portal/security/enroll");
+    }
 
-  if (needsPortalWelcome(session)) {
-    redirect("/portal/welcome");
+    if (needsPortalWelcome(session)) {
+      redirect("/portal/welcome");
+    }
   }
 
   const [experienceProfile, editionBranding, accountContext, billingNavAvailable] =
     await Promise.all([
       resolveExperienceProfile(session),
       Promise.resolve(getPortalEditionBranding()),
-      resolvePortalAccountContext(session),
+      session.isOperatorPreview
+        ? Promise.resolve(null)
+        : resolvePortalAccountContext(session),
       resolvePortalBillingNavAvailable(session),
     ]);
 
@@ -37,11 +42,19 @@ export default async function PortalAppLayout({ children }: { children: React.Re
         companyName={session.clientName}
         editionBranding={editionBranding}
         experienceProfile={experienceProfile}
-        accountSwitcher={accountContext.switcher}
+        accountSwitcher={accountContext?.switcher ?? null}
         portfolioNavAvailable={
-          accountContext.portfolioAccessAvailable && accountContext.switchingAvailable
+          Boolean(
+            accountContext?.portfolioAccessAvailable &&
+              accountContext?.switchingAvailable,
+          )
         }
         billingNavAvailable={billingNavAvailable}
+        operatorPreview={
+          session.isOperatorPreview
+            ? { clientName: session.clientName }
+            : null
+        }
       >
         <div key={`portal-client-${session.clientId}`}>{children}</div>
       </ClientHqAppShell>

@@ -3,12 +3,12 @@
  */
 import { NextResponse } from "next/server";
 import { markAllClientNotificationsRead } from "@/lib/ces/modules/notifications";
-import { getPortalSession } from "@/lib/portal/session";
+import { getPortalWriteSession } from "@/lib/portal/session";
 
 export const dynamic = "force-dynamic";
 
 export async function POST() {
-  const session = await getPortalSession();
+  const session = await getPortalWriteSession();
   if (!session) {
     return NextResponse.json({ ok: false, message: "Unauthorized." }, { status: 401 });
   }

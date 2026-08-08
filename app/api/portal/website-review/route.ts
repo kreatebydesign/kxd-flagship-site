@@ -21,7 +21,10 @@ import type { WebsiteReviewPageContext } from "@/lib/ces/modules/website-review/
 import { resolveExperienceProfile } from "@/lib/ces/server";
 import { isCesModuleEnabled } from "@/lib/ces/types";
 import { decidePortalCesModuleApiAccess } from "@/lib/portal/requests-files-reports";
-import { getPortalSession } from "@/lib/portal/session";
+import {
+  getPortalSession,
+  portalPreviewReadOnlyResponse,
+} from "@/lib/portal/session";
 import { PORTAL_CLIENT_LANGUAGE } from "@/lib/ces/copy/portal-language";
 import { spawnWorkItemFromPortalRequest } from "@/lib/work-items/spawn";
 import { notifyWebsiteReviewSubmitted } from "@/lib/website-review-inbox/notify";
@@ -90,6 +93,9 @@ export async function POST(req: NextRequest) {
       },
       { status: 401 },
     );
+  }
+  if (session.isOperatorPreview) {
+    return portalPreviewReadOnlyResponse();
   }
 
   try {

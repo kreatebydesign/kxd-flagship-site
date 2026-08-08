@@ -3,7 +3,10 @@
  * Client identity from portal session only.
  */
 import { NextRequest, NextResponse } from "next/server";
-import { getPortalSession } from "@/lib/portal/session";
+import {
+  getPortalSession,
+  portalPreviewReadOnlyResponse,
+} from "@/lib/portal/session";
 import { resolveClientEntitlements } from "@/lib/client-plans";
 import {
   createClientUpgradeRequest,
@@ -49,6 +52,9 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   const session = await getPortalSession();
   if (!session) return unauthorized();
+  if (session.isOperatorPreview) {
+    return portalPreviewReadOnlyResponse();
+  }
 
   try {
     const body = (await req.json()) as {

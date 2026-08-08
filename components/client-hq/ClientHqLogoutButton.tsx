@@ -1,7 +1,21 @@
 "use client";
 
-export function ClientHqLogoutButton() {
+export function ClientHqLogoutButton({
+  isOperatorPreview = false,
+}: {
+  isOperatorPreview?: boolean;
+}) {
   async function handleLogout() {
+    if (isOperatorPreview) {
+      const res = await fetch("/api/portal/preview/exit", { method: "POST" });
+      const data = (await res.json().catch(() => ({}))) as {
+        redirectTo?: string;
+      };
+      window.location.href =
+        data.redirectTo || "/admin/operations/client-command";
+      return;
+    }
+
     await fetch("/api/portal/auth/logout", { method: "POST" });
     window.location.href = "/portal/login";
   }
@@ -9,10 +23,10 @@ export function ClientHqLogoutButton() {
   return (
     <button
       type="button"
-      onClick={handleLogout}
+      onClick={() => void handleLogout()}
       className="kxd-ces-logout"
     >
-      Sign out
+      {isOperatorPreview ? "Exit Preview" : "Sign out"}
     </button>
   );
 }

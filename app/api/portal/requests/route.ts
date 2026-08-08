@@ -6,13 +6,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import { decidePortalRelatedProjectAccess } from "@/lib/portal/requests-files-reports";
-import { getPortalSession } from "@/lib/portal/session";
+import { getPortalWriteSession } from "@/lib/portal/session";
 import { spawnWorkItemFromPortalRequest } from "@/lib/work-items/spawn";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
-  const session = await getPortalSession();
+  const session = await getPortalWriteSession();
   if (!session) {
     return NextResponse.json({ ok: false, message: "Unauthorized." }, { status: 401 });
   }

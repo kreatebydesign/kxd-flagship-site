@@ -12,12 +12,12 @@ import { WEBSITE_WORKSPACE_MAX_FILE_BYTES } from "@/lib/ces/modules/website-work
 import { resolveExperienceProfile } from "@/lib/ces/server";
 import { isCesModuleEnabled } from "@/lib/ces/types";
 import { decidePortalCesModuleApiAccess } from "@/lib/portal/requests-files-reports";
-import { getPortalSession } from "@/lib/portal/session";
+import { getPortalWriteSession } from "@/lib/portal/session";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
-  const session = await getPortalSession();
+  const session = await getPortalWriteSession();
   if (!session) {
     return NextResponse.json({ ok: false, message: "Unauthorized." }, { status: 401 });
   }

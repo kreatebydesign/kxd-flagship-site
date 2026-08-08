@@ -24,6 +24,8 @@
     "seed:portal-user": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/seed-portal-user.ts",
     "verify:primal-portal": "tsx scripts/verify-primal-portal-readiness.ts",
     "verify:portal-auth-boundaries": "tsx scripts/verify-portal-admin-auth-boundaries.ts",
+    "verify:operator-portal-preview": "tsx scripts/verify-operator-portal-preview.ts",
+    "inspect:otp-carts-portal-access": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/inspect-otp-carts-portal-access.ts",
     "verify:phase3-relationship-foundation": "tsx scripts/verify-phase3-relationship-foundation.ts",
     "verify:phase3-client-intelligence": "tsx scripts/verify-phase3-client-intelligence.ts",
     "verify:phase3-relationship-events": "tsx scripts/verify-phase3-relationship-events.ts",
