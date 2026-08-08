@@ -17,6 +17,8 @@ import {
   formatPaymentStatusLabel,
   splitChecklistItems,
 } from "./presentation";
+import { canGenerateCourtesyBrandedRestatement } from "@/lib/direct-agreement";
+import { GenerateBrandedRestatementAction } from "./GenerateBrandedRestatementAction";
 
 export function CommercialAgreementDetail(props: {
   clientId: number;
@@ -271,6 +273,14 @@ export function CommercialAgreementDetail(props: {
               >
                 Payments
               </Link>
+              {canGenerateCourtesyBrandedRestatement({
+                agreementSource,
+                commercialStatus: pkg.commercialStatus ?? null,
+                hasExternalAcceptance: Boolean(pkg.externalAcceptance),
+                hasExecutedCertificate: Boolean(pkg.executedCertificate),
+              }) ? (
+                <GenerateBrandedRestatementAction contractId={contractId} />
+              ) : null}
               <a href="#lifecycle" className="kxd-os-btn kxd-os-btn--ghost">
                 Record acceptance
               </a>

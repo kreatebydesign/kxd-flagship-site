@@ -20,6 +20,7 @@ import {
   buildPackageManifest,
   renderBillingSummaryPdf,
   renderCertificatePdf,
+  renderDirectAgreementCourtesyRestatementPdf,
   renderDirectAgreementSentPdf,
   renderExecutedContractPdf,
   renderExternalAcceptanceExecutedPdf,
@@ -223,6 +224,113 @@ export async function generateAndFileDirectAgreementSentSnapshot(input: {
     reason: `Filed sent Direct Agreement snapshot v${version}`,
   });
   return next;
+}
+
+/** Courtesy branded restatement of an already-executed Direct Agreement. Does not file a certificate. */
+export async function generateAndFileCourtesyBrandedRestatement(input: {
+  contractId: number;
+  clientId: number;
+  contractTitle: string;
+  contractBody: string;
+  terms: StructuredPaymentTerms;
+  pkg: ContractLifecyclePackage;
+  actor?: string | null;
+  clientName?: string | null;
+  serviceStartDate?: string | null;
+  serviceEndDate?: string | null;
+  acceptedBy: string;
+  acceptedAtLabel: string;
+  acceptanceMethodLabel: string;
+  collectedAmountCents: number;
+  balanceDueCents: number;
+  agreementReference: string;
+  certificateVerificationId?: string | null;
+  documentHash?: string | null;
+}): Promise<{ pkg: ContractLifecyclePackage; documentId: number; version: number }> {
+  let clientName = String(input.clientName ?? "").trim();
+  if (!clientName) {
+    try {
+      const payload = await getPayload({ config });
+      const client = (await payload.findByID({
+        collection: "clients" as never,
+        id: input.clientId,
+        depth: 0,
+        overrideAccess: true,
+      })) as { name?: string };
+      clientName = String(client?.name ?? "").trim();
+    } catch {
+      clientName = "";
+    }
+  }
+
+  const rendered = await renderDirectAgreementCourtesyRestatementPdf({
+    title: input.contractTitle,
+    body: input.contractBody,
+    contractId: input.contractId,
+    terms: input.terms,
+    clientName: clientName || null,
+    serviceStartDate: input.serviceStartDate ?? null,
+    serviceEndDate: input.serviceEndDate ?? null,
+    acceptedBy: input.acceptedBy,
+    acceptedAtLabel: input.acceptedAtLabel,
+    acceptanceMethodLabel: input.acceptanceMethodLabel,
+    collectedAmountCents: input.collectedAmountCents,
+    balanceDueCents: input.balanceDueCents,
+    agreementReference: input.agreementReference,
+    certificateVerificationId: input.certificateVerificationId ?? null,
+    documentHash: input.documentHash ?? null,
+  });
+
+  const refs = input.pkg.documentRefs ?? [];
+  const executed = [...refs].reverse().find((d) => d.kind === "executed-contract");
+  const sent = [...refs].reverse().find((d) => d.kind === "direct-agreement");
+  const lineageParentId = executed?.id ?? sent?.id ?? null;
+  const agreementVersions = refs
+    .filter((d) => d.kind === "direct-agreement" || d.kind === "executed-contract")
+    .map((d) => Number(d.version) || 0);
+  const version = Math.max(0, ...agreementVersions) + 1;
+  const now = new Date().toISOString();
+  const hashKey = input.documentHash || rendered.contentHash;
+
+  const id = await fileBuffer({
+    title: `Courtesy restatement DA-${input.contractId}-v${version}`,
+    kind: "direct-agreement",
+    contractId: input.contractId,
+    proposalId: null,
+    clientId: input.clientId,
+    version,
+    contentHash: rendered.contentHash,
+    buffer: rendered.buffer,
+    mimeType: "application/pdf",
+    sourceSnapshotRef: `courtesy-restatement:${hashKey}`,
+    executionStatus: "executed",
+    partyNames: {
+      client: clientName || String(input.clientId),
+      kxd: "Kreate by Design",
+    },
+    lineageParentId,
+    acceptedAt: null,
+  });
+
+  let next = normalizeLifecyclePackage(input.pkg);
+  next = {
+    ...next,
+    documentRefs: mergeDocumentRefs(next, [
+      {
+        id,
+        kind: "direct-agreement",
+        contentHash: rendered.contentHash,
+        version,
+        generatedAt: now,
+      },
+    ]),
+  };
+  next = appendAudit(next, {
+    actor: input.actor ?? "system",
+    action: "documents.direct-agreement-courtesy-restatement-filed",
+    reason: `Filed courtesy branded restatement v${version} — acceptance, payment, and certificate unchanged`,
+  });
+  return { pkg: next, documentId: id, version };
 }
 
 export async function generateAndFileExecutedPackage(input: {

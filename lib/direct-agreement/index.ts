@@ -48,11 +48,17 @@ export {
   createDirectAgreement,
   ensureBillingProfileShell,
   finalizeDirectAgreement,
+  generateCourtesyBrandedRestatement,
   linkPaymentReferences,
   recordExternalAcceptance,
   recordExternalPayment,
   recordPaymentAuthorization,
 } from "./services";
+export {
+  canGenerateCourtesyBrandedRestatement,
+  deriveCourtesyRestatementPaymentPresentation,
+  formatExternalAcceptanceMethodLabel,
+} from "./restatement";
 export { DEFAULT_LEGAL_COPY } from "./default-legal-copy";
 export {
   composeDirectAgreementDocumentBody,

@@ -25,6 +25,7 @@ import { resolveCommercialStripeTestCredentials } from "@/lib/stripe/commercial-
 import {
   activateDirectAgreementService,
   finalizeDirectAgreement,
+  generateCourtesyBrandedRestatement,
   linkPaymentReferences,
   recordExternalAcceptance,
   recordExternalPayment,
@@ -181,6 +182,30 @@ export async function POST(
         return NextResponse.json({
           ok: true,
           commercialStatus: result.pkg.commercialStatus,
+        });
+      }
+      case "generate-courtesy-branded-restatement": {
+        const result = await generateCourtesyBrandedRestatement({
+          contractId: id,
+          actor,
+        });
+        return NextResponse.json({
+          ok: true,
+          commercialStatus: result.pkg.commercialStatus,
+          documentId: result.documentId,
+          version: result.version,
+          documentRefs: result.pkg.documentRefs ?? [],
+          preserved: {
+            commercialStatus: result.preserved.commercialStatus,
+            contractStatus: result.preserved.contractStatus,
+            hasExternalAcceptance: Boolean(result.preserved.externalAcceptance),
+            hasExecutedCertificate: Boolean(result.preserved.executedCertificate),
+            paymentStatus: result.preserved.paymentReferences?.paymentStatus ?? null,
+            termsLockedHash: result.preserved.termsLockedHash,
+          },
+          noAcceptanceChange: true,
+          noPaymentChange: true,
+          noCertificateGenerated: true,
         });
       }
       case "sign-operator": {

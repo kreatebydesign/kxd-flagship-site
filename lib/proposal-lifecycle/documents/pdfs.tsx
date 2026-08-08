@@ -374,6 +374,156 @@ export async function renderDirectAgreementSentPdf(input: {
   return { buffer, contentHash: sha256Hex(buffer.toString("base64")) };
 }
 
+export async function renderDirectAgreementCourtesyRestatementPdf(input: {
+  title: string;
+  body: string;
+  contractId: number;
+  terms: StructuredPaymentTerms;
+  clientName?: string | null;
+  serviceStartDate?: string | null;
+  serviceEndDate?: string | null;
+  acceptedBy: string;
+  acceptedAtLabel: string;
+  acceptanceMethodLabel: string;
+  collectedAmountCents: number;
+  balanceDueCents: number;
+  agreementReference: string;
+  certificateVerificationId?: string | null;
+  documentHash?: string | null;
+}): Promise<{ buffer: Buffer; contentHash: string }> {
+  const t = input.terms;
+  const logo = resolveKxdReportLogoAsset();
+  const clientName =
+    String(input.clientName ?? "").trim() ||
+    String(t.payerLegalName ?? "").trim() ||
+    String(t.brandName ?? "").trim() ||
+    "Client";
+  const payerLegalName = String(t.payerLegalName ?? "").trim();
+  const brandName = String(t.brandName ?? "").trim();
+  const startLabel = input.serviceStartDate
+    ? formatProposalCalendarDate(input.serviceStartDate)
+    : "";
+  const endLabel = input.serviceEndDate
+    ? formatProposalCalendarDate(input.serviceEndDate)
+    : "";
+  const periodLabel =
+    startLabel && startLabel !== "—" && endLabel && endLabel !== "—"
+      ? `${startLabel} — ${endLabel}`
+      : startLabel && startLabel !== "—"
+        ? startLabel
+        : null;
+  const showMonthly = t.monthlyTotalCents > 0 && t.recurring.cadence !== "none";
+  const sections = parseDirectAgreementBodySections(input.body);
+  const bodySections =
+    sections.length > 0
+      ? sections
+      : [{ title: "Scope", paragraphs: ["Agreement body on file."] }];
+  const hashShort = input.documentHash ? `${input.documentHash.slice(0, 16)}…` : null;
+
+  const doc = (
+    <Document
+      title={`${input.title} · courtesy restatement`}
+      author={KXD_REPORT_BRAND}
+      subject={`Courtesy restatement · ${clientName}`}
+    >
+      <Page size="LETTER" style={styles.sentPage}>
+        {logo.exists ? (
+          // react-pdf Image has no alt prop; decorative brand mark
+          // eslint-disable-next-line jsx-a11y/alt-text
+          <Image src={logo.absolutePath} style={styles.logo} />
+        ) : null}
+        <Text style={styles.eyebrow}>Courtesy restatement · executed agreement</Text>
+        <View style={styles.rule} />
+        <Text style={styles.h1}>{input.title}</Text>
+        <Text style={styles.meta}>Agreement reference {input.agreementReference}</Text>
+        {hashShort ? <Text style={styles.meta}>Original document hash {hashShort}</Text> : null}
+        {input.certificateVerificationId ? (
+          <Text style={styles.meta}>
+            Execution certificate {input.certificateVerificationId}
+          </Text>
+        ) : null}
+
+        <View style={styles.parties}>
+          <View style={styles.partyCol}>
+            <Text style={styles.partyLabel}>Prepared by</Text>
+            <Text style={styles.partyName}>{KXD_REPORT_BRAND}</Text>
+            <Text style={styles.meta}>{kxdReportContactLine()}</Text>
+          </View>
+          <View style={styles.partyCol}>
+            <Text style={styles.partyLabel}>Prepared for</Text>
+            <Text style={styles.partyName}>{clientName}</Text>
+            {payerLegalName && payerLegalName !== clientName ? (
+              <Text style={styles.meta}>{payerLegalName}</Text>
+            ) : null}
+            {brandName && brandName !== clientName && brandName !== payerLegalName ? (
+              <Text style={styles.meta}>{brandName}</Text>
+            ) : null}
+          </View>
+        </View>
+
+        <View style={styles.summaryBox}>
+          {periodLabel ? (
+            <>
+              <Text style={styles.h2}>Service period</Text>
+              <Text style={styles.p}>{periodLabel}</Text>
+            </>
+          ) : null}
+          <Text style={styles.h2}>Investment</Text>
+          <Text style={styles.p}>
+            {formatCents(t.oneTimeTotalCents, t.currency)}
+            {t.oneTimeTotalCents > 0 && !showMonthly ? " prepaid" : ""}
+          </Text>
+          {showMonthly ? (
+            <Text style={styles.p}>
+              {formatCents(t.monthlyTotalCents, t.currency)} per month
+            </Text>
+          ) : null}
+          <Text style={styles.p}>
+            Prepaid amount collected:{" "}
+            {formatCents(input.collectedAmountCents, t.currency)}
+          </Text>
+          <Text style={styles.p}>
+            Balance due: {formatCents(input.balanceDueCents, t.currency)}
+          </Text>
+        </View>
+
+        <View style={styles.notice}>
+          <Text>
+            This is a courtesy restatement of an already executed agreement. It is not a new offer.
+            No new signature or acceptance is required. Original acceptance remains{" "}
+            {input.acceptedAtLabel} by {input.acceptanceMethodLabel}
+            {input.acceptedBy ? ` (${input.acceptedBy})` : ""}.
+          </Text>
+        </View>
+
+        {bodySections.map((section) => (
+          <View key={section.title}>
+            <View wrap={false}>
+              <Text style={styles.h2}>{section.title}</Text>
+              {section.paragraphs[0] ? (
+                <Text style={styles.p}>{section.paragraphs[0]}</Text>
+              ) : null}
+            </View>
+            {section.paragraphs.slice(1).map((paragraph, index) => (
+              <Text key={`${section.title}-${index + 1}`} style={styles.p}>
+                {paragraph}
+              </Text>
+            ))}
+          </View>
+        ))}
+
+        <Text style={styles.footer} fixed>
+          {kxdReportContactLine()}
+        </Text>
+      </Page>
+    </Document>
+  );
+  const instance = pdf(doc);
+  const blob = await instance.toBlob();
+  const buffer = Buffer.from(await blob.arrayBuffer());
+  return { buffer, contentHash: sha256Hex(buffer.toString("base64")) };
+}
+
 export async function renderExternalAcceptanceExecutedPdf(input: {
   title: string;
   body: string;
@@ -498,7 +648,7 @@ export async function renderBillingSummaryPdf(input: {
   testMode?: boolean;
 }): Promise<{ buffer: Buffer; contentHash: string }> {
   const t = input.terms;
-  const testMode = input.testMode !== false;
+  const testMode = input.testMode === true;
   const doc = (
     <Document>
       <Page size="LETTER" style={styles.page}>

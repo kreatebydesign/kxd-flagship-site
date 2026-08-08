@@ -163,7 +163,25 @@ export function ContractLifecycleActions(props: {
             >
               Activate service (manual)
             </button>
+            {props.hasExternalAcceptance &&
+            (props.commercialStatus === "paid" || props.commercialStatus === "active") ? (
+              <button
+                type="button"
+                style={btn}
+                disabled={busy}
+                onClick={() => void run("generate-courtesy-branded-restatement", {})}
+              >
+                Generate Branded Restatement
+              </button>
+            ) : null}
           </div>
+          {props.hasExternalAcceptance &&
+          (props.commercialStatus === "paid" || props.commercialStatus === "active") ? (
+            <p style={help}>
+              Branded restatement files a courtesy PDF of the locked terms. It does not create a
+              new signature request, certificate, or payment record.
+            </p>
+          ) : null}
         </section>
       ) : null}
 

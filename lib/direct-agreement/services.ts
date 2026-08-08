@@ -7,9 +7,16 @@ import { computeDocumentHash, hashPaymentTerms } from "@/lib/proposal-lifecycle/
 import { buildTypedSignature } from "@/lib/proposal-lifecycle/signatures";
 import { appendAudit, emptyLifecyclePackage, normalizeLifecyclePackage } from "@/lib/proposal-lifecycle/package";
 import {
+  generateAndFileCourtesyBrandedRestatement,
   generateAndFileDirectAgreementSentSnapshot,
   generateAndFileExecutedPackage,
 } from "@/lib/proposal-lifecycle/documents/file";
+import { formatProposalCalendarDate } from "@/lib/proposal-builder/calendar-date";
+import {
+  canGenerateCourtesyBrandedRestatement,
+  deriveCourtesyRestatementPaymentPresentation,
+  formatExternalAcceptanceMethodLabel,
+} from "./restatement";
 import type { ContractLifecyclePackage } from "@/lib/proposal-lifecycle/types";
 import {
   assertOneTimeHasNoRecurring,
@@ -964,4 +971,173 @@ export async function activateDirectAgreementService(input: {
   );
 
   return { pkg };
+}
+
+export async function generateCourtesyBrandedRestatement(input: {
+  contractId: number;
+  actor: string;
+}): Promise<{
+  pkg: ContractLifecyclePackage;
+  documentId: number;
+  version: number;
+  preserved: {
+    commercialStatus: ContractLifecyclePackage["commercialStatus"];
+    externalAcceptance: ContractLifecyclePackage["externalAcceptance"];
+    executedCertificate: ContractLifecyclePackage["executedCertificate"];
+    paymentReferences: ContractLifecyclePackage["paymentReferences"];
+    termsLockedHash: ContractLifecyclePackage["termsLockedHash"];
+    clientSignature: ContractLifecyclePackage["clientSignature"];
+    contractStatus: string;
+  };
+}> {
+  const payload = await payloadClient();
+  const contract = (await payload.findByID({
+    collection: CONTRACTS as never,
+    id: input.contractId,
+    depth: 0,
+    overrideAccess: true,
+  })) as AnyDoc;
+
+  if (String(contract.agreementSource) !== "direct-agreement") {
+    throw new Error("Courtesy restatement applies only to Direct Agreements.");
+  }
+  const clientId = asId(contract.client);
+  if (!clientId) throw new Error("Client relationship required.");
+
+  let pkg = normalizeLifecyclePackage(contract.lifecyclePackage);
+  const before = {
+    commercialStatus: pkg.commercialStatus,
+    externalAcceptance: pkg.externalAcceptance,
+    executedCertificate: pkg.executedCertificate,
+    paymentReferences: pkg.paymentReferences,
+    termsLockedHash: pkg.termsLockedHash,
+    clientSignature: pkg.clientSignature,
+    contractStatus: String(contract.status ?? ""),
+  };
+
+  if (
+    !canGenerateCourtesyBrandedRestatement({
+      agreementSource: String(contract.agreementSource ?? ""),
+      commercialStatus: pkg.commercialStatus ?? null,
+      hasExternalAcceptance: Boolean(pkg.externalAcceptance),
+      hasExecutedCertificate: Boolean(pkg.executedCertificate),
+    })
+  ) {
+    throw new Error(
+      "Courtesy restatement requires an executed, paid or active Direct Agreement. Acceptance and payment must already be on file.",
+    );
+  }
+
+  const terms = parseStoredDirectAgreementTerms(contract.directAgreementTerms);
+  if (!terms) throw new Error("Direct Agreement terms are missing or invalid.");
+  const structured =
+    pkg.structuredPaymentTerms ??
+    deriveStructuredPaymentTermsFromDirectAgreement(terms, input.contractId);
+
+  const payment = deriveCourtesyRestatementPaymentPresentation({
+    commercialStatus: pkg.commercialStatus,
+    paymentReferences: pkg.paymentReferences,
+    oneTimeAmountCents: terms.oneTimeAmountCents,
+  });
+  if (!payment.collected || payment.balanceDueCents !== 0) {
+    throw new Error(
+      "Courtesy restatement with collected prepaid / $0 balance requires recorded payment state.",
+    );
+  }
+
+  const ea = pkg.externalAcceptance;
+  const cert = pkg.executedCertificate;
+  const acceptedBy = String(ea?.acceptedBy ?? cert?.clientSignerName ?? "").trim();
+  const acceptedAtRaw = String(ea?.acceptedAt ?? cert?.clientSignedAt ?? "").trim();
+  const acceptedAtLabel = acceptedAtRaw
+    ? formatProposalCalendarDate(acceptedAtRaw)
+    : "the original acceptance date";
+  const acceptanceMethodLabel = formatExternalAcceptanceMethodLabel(ea?.method ?? "email");
+
+  let clientName = "";
+  try {
+    const clientDoc = (await payload.findByID({
+      collection: "clients" as never,
+      id: clientId,
+      depth: 0,
+      overrideAccess: true,
+    })) as AnyDoc;
+    clientName = String(clientDoc?.name ?? "").trim();
+  } catch {
+    clientName = "";
+  }
+
+  const documentBody = composeDirectAgreementDocumentBody({
+    body: String(contract.body ?? ""),
+    terms,
+  });
+
+  const filed = await generateAndFileCourtesyBrandedRestatement({
+    contractId: input.contractId,
+    clientId,
+    contractTitle: String(contract.title ?? ""),
+    contractBody: documentBody,
+    terms: structured,
+    pkg,
+    actor: input.actor,
+    clientName: clientName || null,
+    serviceStartDate: terms.serviceStartDate,
+    serviceEndDate: terms.serviceEndDate,
+    acceptedBy,
+    acceptedAtLabel,
+    acceptanceMethodLabel,
+    collectedAmountCents: payment.collectedAmountCents,
+    balanceDueCents: payment.balanceDueCents,
+    agreementReference: cert?.agreementId || `DA-${input.contractId}`,
+    certificateVerificationId: cert?.verificationId ?? null,
+    documentHash: cert?.documentHash ?? pkg.termsLockedHash ?? null,
+  });
+
+  pkg = {
+    ...filed.pkg,
+    commercialStatus: before.commercialStatus,
+    externalAcceptance: before.externalAcceptance,
+    executedCertificate: before.executedCertificate,
+    paymentReferences: before.paymentReferences,
+    termsLockedHash: before.termsLockedHash,
+    clientSignature: before.clientSignature,
+  };
+
+  await payload.update({
+    collection: CONTRACTS as never,
+    id: input.contractId,
+    data: { lifecyclePackage: pkg } as never,
+    overrideAccess: true,
+  });
+
+  await publishClientActivity(
+    {
+      clientId,
+      sourceModule: "Sales",
+      sourceType: "contract",
+      sourceId: input.contractId,
+      eventType: "direct-agreement.courtesy-restatement-filed",
+      title: `Courtesy branded restatement filed — ${String(contract.title)}`,
+      summary:
+        "Branded restatement PDF filed. Original acceptance, payment, certificate, and service status were not changed.",
+      author: input.actor,
+      metadata: {
+        contractId: input.contractId,
+        documentId: filed.documentId,
+        version: filed.version,
+        noAcceptanceChange: true,
+        noPaymentChange: true,
+        noCertificateGenerated: true,
+      },
+      internalOnly: true,
+    },
+    payload,
+  );
+
+  return {
+    pkg,
+    documentId: filed.documentId,
+    version: filed.version,
+    preserved: before,
+  };
 }
