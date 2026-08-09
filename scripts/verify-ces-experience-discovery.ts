@@ -270,6 +270,39 @@ check(
     !ui.includes('provisioning === "import-branding-logo" ? "Importing'),
 );
 check(
+  "candidate confirmation actions use the existing primary button hierarchy",
+  ui.includes('className="kxd-plans-access__save"') &&
+    ui.includes('"Verified match · confirm connection"') &&
+    ui.includes('"Connecting…"') &&
+    ui.includes('"Use This Property"'),
+);
+check(
+  "non-actionable Google candidates cannot imply safe connection",
+  ui.includes('"Not verified · review only"') &&
+    ui.includes('"Not verified · cannot connect"') &&
+    ui.includes("No connection action is available for this candidate."),
+);
+check(
+  "candidate evidence stays explicit",
+  ui.includes("Canonical property ID:") &&
+    ui.includes("Canonical site ID:") &&
+    ui.includes("Verification:") &&
+    ui.includes("Confidence:") &&
+    ui.includes("Match evidence:"),
+);
+check(
+  "logo import uses the same primary candidate action hierarchy",
+  ui.includes("Managed-site candidate") &&
+    ui.includes('"Import This Logo"') &&
+    ui.includes("kxd-ces-exp__candidate--actionable"),
+);
+check(
+  "successful integration refresh resolves to a clear Connected state",
+  ui.includes("row.status === \"configured\"") &&
+    ui.includes("kxd-plans-access__badge--active") &&
+    ui.includes("Connected"),
+);
+check(
   "branding discovery sits in the main Branding section, not only Advanced",
   ui.includes("kxd-ces-exp__branding") &&
     ui.indexOf("Discover From Managed Website") < ui.indexOf("Advanced Configuration"),

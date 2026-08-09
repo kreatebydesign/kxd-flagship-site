@@ -54,6 +54,7 @@ type DiscoverResponse = {
     candidates?: Array<{
       propertyId: string;
       displayName: string;
+      accountDisplayName: string;
       confidence: string;
       reason: string;
       importable: boolean;
@@ -658,9 +659,16 @@ export function ClientExperienceComposer({
                   <li key={row.id}>
                     {row.label}
                     <span>
-                      {row.status === "configured"
-                        ? `Connected${row.value ? ` · ${row.value}` : ""}`
-                        : row.detail || row.status}
+                      {row.status === "configured" ? (
+                        <>
+                          <strong className="kxd-plans-access__badge kxd-plans-access__badge--active">
+                            Connected
+                          </strong>
+                          {row.value ? ` · ${row.value}` : ""}
+                        </>
+                      ) : (
+                        row.detail || row.status
+                      )}
                     </span>
                   </li>
                 ))}
@@ -949,17 +957,21 @@ function DiscoveryCandidates({
         ) : null}
         {depId === "logo"
           ? (branding.logos ?? []).map((logo) => (
-              <div key={logo.url} className="kxd-ces-exp__candidate">
-                <span>
-                  {logo.url}
-                  <span className="kxd-os-meta">
-                    {" "}
-                    · {logo.source} · {logo.confidence}
+              <div
+                key={logo.url}
+                className="kxd-ces-exp__candidate kxd-ces-exp__candidate--actionable"
+              >
+                <div className="kxd-ces-exp__candidate-evidence">
+                  <span className="kxd-plans-access__badge kxd-plans-access__badge--active">
+                    Managed-site candidate
                   </span>
-                </span>
+                  <strong>Logo from {logo.source}</strong>
+                  <span className="kxd-os-meta">{logo.url}</span>
+                  <span className="kxd-os-meta">Confidence: {logo.confidence}</span>
+                </div>
                 <button
                   type="button"
-                  className="kxd-os-link-quiet"
+                  className="kxd-plans-access__save"
                   disabled={Boolean(provisioning)}
                   onClick={() => onImportLogo(logo.url)}
                 >
@@ -1031,27 +1043,44 @@ function DiscoveryCandidates({
           </p>
         ) : null}
         {(ga4.candidates ?? []).map((row) => (
-          <div key={row.propertyId} className="kxd-ces-exp__candidate">
-            <span>
-              {row.displayName} · {row.propertyId}
-              <span className="kxd-os-meta">
-                {" "}
-                · {row.confidence} · {row.reason}
+          <div
+            key={row.propertyId}
+            className={`kxd-ces-exp__candidate ${
+              row.importable
+                ? "kxd-ces-exp__candidate--actionable"
+                : "kxd-ces-exp__candidate--non-actionable"
+            }`}
+          >
+            <div className="kxd-ces-exp__candidate-evidence">
+              <span
+                className={`kxd-plans-access__badge ${
+                  row.importable ? "kxd-plans-access__badge--active" : ""
+                }`}
+              >
+                {row.importable ? "Verified match · confirm connection" : "Not verified · review only"}
               </span>
-            </span>
+              <strong>{row.displayName}</strong>
+              <span className="kxd-os-meta">Canonical property ID: {row.propertyId}</span>
+              <span className="kxd-os-meta">
+                Account: {row.accountDisplayName || "Google Analytics"} · Access: listed for the
+                connected reporting identity
+              </span>
+              <span className="kxd-os-meta">Confidence: {row.confidence}</span>
+              <span className="kxd-os-meta">Match evidence: {row.reason}</span>
+            </div>
             {row.importable ? (
               <button
                 type="button"
-                className="kxd-os-link-quiet"
+                className="kxd-plans-access__save"
                 disabled={Boolean(provisioning)}
                 onClick={() => onUseGa4(row.propertyId)}
               >
                 {isProvisionBusy(provisioning, "apply-discovered-ga4-property", row.propertyId)
-                  ? "Applying…"
+                  ? "Connecting…"
                   : "Use This Property"}
               </button>
             ) : (
-              <span className="kxd-os-meta">Not confirmed for this site</span>
+              <span className="kxd-os-meta">Connection unavailable until website evidence matches.</span>
             )}
           </div>
         ))}
@@ -1067,27 +1096,44 @@ function DiscoveryCandidates({
         <p className="kxd-os-meta">{gsc.capability?.message}</p>
         {gsc.capability?.missing ? <p className="kxd-os-meta">Missing: {gsc.capability.missing}</p> : null}
         {(gsc.candidates ?? []).map((row) => (
-          <div key={row.siteUrl} className="kxd-ces-exp__candidate">
-            <span>
-              {row.siteUrl}
-              <span className="kxd-os-meta">
-                {" "}
-                · {row.state.replace(/_/g, " ")} · {row.confidence} · {row.reason}
+          <div
+            key={row.siteUrl}
+            className={`kxd-ces-exp__candidate ${
+              row.importable
+                ? "kxd-ces-exp__candidate--actionable"
+                : "kxd-ces-exp__candidate--non-actionable"
+            }`}
+          >
+            <div className="kxd-ces-exp__candidate-evidence">
+              <span
+                className={`kxd-plans-access__badge ${
+                  row.importable ? "kxd-plans-access__badge--active" : ""
+                }`}
+              >
+                {row.importable ? "Verified match · confirm connection" : "Not verified · cannot connect"}
               </span>
-            </span>
+              <strong>Search Console property</strong>
+              <span className="kxd-os-meta">Canonical site ID: {row.siteUrl}</span>
+              <span className="kxd-os-meta">
+                Verification: {row.state.replace(/_/g, " ")} · Access:{" "}
+                {row.permissionLevel || "not granted"}
+              </span>
+              <span className="kxd-os-meta">Confidence: {row.confidence}</span>
+              <span className="kxd-os-meta">Match evidence: {row.reason}</span>
+            </div>
             {row.importable ? (
               <button
                 type="button"
-                className="kxd-os-link-quiet"
+                className="kxd-plans-access__save"
                 disabled={Boolean(provisioning)}
                 onClick={() => onUseGsc(row.siteUrl)}
               >
                 {isProvisionBusy(provisioning, "apply-search-console-site-url", row.siteUrl)
-                  ? "Applying…"
+                  ? "Connecting…"
                   : "Use This Property"}
               </button>
             ) : (
-              <span className="kxd-os-meta">Not verified for connected account</span>
+              <span className="kxd-os-meta">No connection action is available for this candidate.</span>
             )}
           </div>
         ))}

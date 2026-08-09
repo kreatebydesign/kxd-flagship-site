@@ -22010,9 +22010,32 @@ select.kxd-os-commercial-control {
 .kxd-ces-exp__candidate {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
-  gap: 0.35rem 0.85rem;
+  gap: 0.8rem 1rem;
+  padding: 0.85rem;
+  border: 1px solid var(--kxd-os-border);
+  border-radius: 2px;
+}
+
+.kxd-ces-exp__candidate--actionable {
+  border-color: color-mix(in srgb, var(--kxd-os-gold, #b8974a) 48%, var(--kxd-os-border));
+  background: color-mix(in srgb, var(--kxd-os-gold, #b8974a) 5%, var(--kxd-os-surface, #fff));
+}
+
+.kxd-ces-exp__candidate--non-actionable {
+  background: color-mix(in srgb, var(--kxd-os-text-muted) 3%, var(--kxd-os-surface, #fff));
+}
+
+.kxd-ces-exp__candidate-evidence {
+  display: grid;
+  gap: 0.3rem;
+  min-width: min(100%, 22rem);
+  max-width: 48rem;
+}
+
+.kxd-ces-exp__candidate-evidence > .kxd-plans-access__badge {
+  justify-self: start;
 }
 
 .kxd-ces-exp__candidate-actions {
