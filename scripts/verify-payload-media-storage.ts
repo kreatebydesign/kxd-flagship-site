@@ -8,6 +8,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { bundledPublicMediaSrc, BUNDLED_PUBLIC_MEDIA_PATHS } from "../lib/media/bundled-public-media.ts";
 import {
+  explainPayloadMediaUploadFailure,
   generatePayloadMediaFileUrl,
   isDurablePayloadMediaUrl,
   payloadMediaBlobToken,
@@ -71,6 +72,7 @@ async function main() {
   const provision = read("lib/client-command/experience/composer/provision.ts");
   const inventoryUpload = read("app/api/portal/inventory/upload/route.ts");
   const inventoryMedia = read("lib/inventory/media.ts");
+  const storageSrc = read("lib/media/payload-storage.ts");
   const pkg = read("package.json");
   const nextConfig = read("next.config.ts");
   const access = read("payload/access/index.ts");
@@ -102,8 +104,19 @@ async function main() {
     !commercialCol.includes("publicRead") && !reviewCol.includes("publicRead"),
   );
   check(
-    "Vercel without blob token disables local ephemeral media writes",
-    mediaCol.includes("disableLocalStorage") && mediaCol.includes("BLOB_READ_WRITE_TOKEN"),
+    "Vercel without public media token disables local ephemeral media writes",
+    mediaCol.includes("disableLocalStorage") &&
+      mediaCol.includes("payloadMediaBlobToken") &&
+      !mediaCol.includes("BLOB_READ_WRITE_TOKEN"),
+  );
+  const mediaTokenFn =
+    storageSrc.match(/export function payloadMediaBlobToken\(\)[\s\S]*?\n\}/)?.[0] ?? "";
+  check(
+    "media storage policy does not reuse the private commercial blob token",
+    storageSrc.includes("MEDIA_BLOB_READ_WRITE_TOKEN") &&
+      storageSrc.includes("BLOB_READ_WRITE_TOKEN is reserved") &&
+      mediaTokenFn.includes("MEDIA_BLOB_TOKEN_ENV") &&
+      !mediaTokenFn.includes("BLOB_READ_WRITE_TOKEN"),
   );
   check(
     "logo import fail-closes without durable storage and rolls back onboarding",
@@ -145,12 +158,13 @@ async function main() {
     {
       VERCEL: "1",
       VERCEL_ENV: "production",
+      MEDIA_BLOB_READ_WRITE_TOKEN: undefined,
       BLOB_READ_WRITE_TOKEN: undefined,
       BLOB_STORE_ID: "store_only_is_not_enough",
     },
     () => {
-      check("production-like without RW token does not enable Payload adapter", !shouldEnablePayloadMediaBlobStorage());
-      check("production-like without RW token fail-closes uploads", !requireDurablePayloadMedia().ok);
+      check("production-like without public media token does not enable Payload adapter", !shouldEnablePayloadMediaBlobStorage());
+      check("production-like without public media token fail-closes uploads", !requireDurablePayloadMedia().ok);
       check(
         "ephemeral /media upload URL is rejected on Vercel",
         !isDurablePayloadMediaUrl("/media/runtime-upload-not-bundled.png"),
@@ -162,10 +176,31 @@ async function main() {
     },
   );
 
+  const privateToken = "vercel_blob_rw_private1_secretpart";
+  withEnv(
+    {
+      VERCEL: "1",
+      VERCEL_ENV: "production",
+      BLOB_READ_WRITE_TOKEN: privateToken,
+      MEDIA_BLOB_READ_WRITE_TOKEN: undefined,
+    },
+    () => {
+      check("private commercial token alone does not enable public media adapter", !shouldEnablePayloadMediaBlobStorage());
+      check("private commercial token alone fail-closes public media uploads", !requireDurablePayloadMedia().ok);
+    },
+  );
+
   const sampleToken = "vercel_blob_rw_abc123xyz_secretpart";
-  withEnv({ VERCEL: "1", VERCEL_ENV: "production", BLOB_READ_WRITE_TOKEN: sampleToken }, () => {
-    check("RW token enables Payload adapter", shouldEnablePayloadMediaBlobStorage());
-    check("requireDurablePayloadMedia passes when token present", requireDurablePayloadMedia().ok);
+  withEnv(
+    {
+      VERCEL: "1",
+      VERCEL_ENV: "production",
+      MEDIA_BLOB_READ_WRITE_TOKEN: sampleToken,
+      BLOB_READ_WRITE_TOKEN: privateToken,
+    },
+    () => {
+    check("public media token enables Payload adapter", shouldEnablePayloadMediaBlobStorage());
+    check("requireDurablePayloadMedia passes when public media token is distinct", requireDurablePayloadMedia().ok);
     check(
       "token parses public blob base URL",
       vercelBlobPublicBaseUrlFromToken() === "https://abc123xyz.public.blob.vercel-storage.com",
@@ -180,13 +215,40 @@ async function main() {
       generatePayloadMediaFileUrl({ filename: "LS_PRIMAL_SEBRING2026_03.jpg" }) ===
         "/media/LS_PRIMAL_SEBRING2026_03.jpg",
     );
-    check("payloadMediaBlobToken returns configured token", payloadMediaBlobToken() === sampleToken);
-  });
+    check("payloadMediaBlobToken returns configured public media token", payloadMediaBlobToken() === sampleToken);
+    },
+  );
 
-  withEnv({ VERCEL: undefined, VERCEL_ENV: undefined, BLOB_READ_WRITE_TOKEN: undefined }, () => {
+  withEnv(
+    {
+      VERCEL: "1",
+      VERCEL_ENV: "production",
+      MEDIA_BLOB_READ_WRITE_TOKEN: privateToken,
+      BLOB_READ_WRITE_TOKEN: privateToken,
+    },
+    () => {
+      check("reusing the private store token as MEDIA token fail-closes", !requireDurablePayloadMedia().ok);
+    },
+  );
+
+  withEnv({ VERCEL: undefined, VERCEL_ENV: undefined, MEDIA_BLOB_READ_WRITE_TOKEN: undefined }, () => {
     check("local /media URLs remain durable without Vercel", isDurablePayloadMediaUrl("/media/dev-upload.png"));
     check("local without token does not enable blob adapter", !shouldEnablePayloadMediaBlobStorage());
   });
+
+  check(
+    "private-store Blob error is explained without leaking internals",
+    explainPayloadMediaUploadFailure(
+      new Error("There was an error while uploading files corresponding to the collection media with filename logo-otp-mark.png:", {
+        cause: new Error("Vercel Blob: Cannot use public access on a private store. The store is configured with private access."),
+      }),
+    ).includes("separate public Vercel Blob store") &&
+      explainPayloadMediaUploadFailure(
+        new Error("There was an error while uploading files corresponding to the collection media with filename logo-otp-mark.png:", {
+          cause: new Error("Vercel Blob: Cannot use public access on a private store. The store is configured with private access."),
+        }),
+      ).includes("MEDIA_BLOB_READ_WRITE_TOKEN"),
+  );
 
   check("https media URLs are durable", isDurablePayloadMediaUrl("https://cdn.example.com/logo.png"));
   check("empty media URL is not durable", !isDurablePayloadMediaUrl("") && !isDurablePayloadMediaUrl(null));

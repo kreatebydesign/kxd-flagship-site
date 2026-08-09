@@ -18,6 +18,7 @@ import { isKxdGoldHex, isTrustedClientAccent } from "./readiness";
 import { loadExperienceSignals } from "./signals";
 import type { ExperienceProvisionActionId } from "./types";
 import {
+  explainPayloadMediaUploadFailure,
   isDurablePayloadMediaUrl,
   requireDurablePayloadMedia,
 } from "@/lib/media/payload-storage";
@@ -313,8 +314,7 @@ export async function applyExperienceProvision(
       }
     } catch (err) {
       await rollbackLogoImport();
-      const message = err instanceof Error ? err.message : "Media create failed";
-      return fail(actionId, `Could not store the logo in Media. ${message}`);
+      return fail(actionId, explainPayloadMediaUploadFailure(err));
     }
 
     const origin = resolveManagedSiteUrl(signals.websiteUrl, signals.primaryDomain);

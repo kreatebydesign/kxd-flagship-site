@@ -311,14 +311,17 @@ check(
 check(
   "logo import requires durable Payload media storage before attach",
   provisionLib.includes("requireDurablePayloadMedia") &&
-    provisionLib.includes("isDurablePayloadMediaUrl"),
+    provisionLib.includes("isDurablePayloadMediaUrl") &&
+    provisionLib.includes("explainPayloadMediaUploadFailure"),
 );
 check(
   "UI keeps import confirmation while refreshing readiness",
   ui.includes("preserveFeedback") &&
     ui.includes('role="status"') &&
     ui.includes("Import failed") &&
-    ui.includes("Nothing was saved"),
+    ui.includes("Nothing was saved") &&
+    ui.includes("Branding") &&
+    ui.includes('role="alert"'),
 );
 
 function miniSignals(partial: Partial<ExperienceSignals> = {}): ExperienceSignals {

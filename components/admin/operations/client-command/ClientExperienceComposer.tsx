@@ -547,6 +547,16 @@ export function ClientExperienceComposer({
 
           <h3 className="kxd-ces-exp__h">Branding</h3>
           <div className="kxd-ces-exp__branding">
+            {error ? (
+              <p className="kxd-os-meta kxd-ces-exp__error" role="alert">
+                {error}
+              </p>
+            ) : null}
+            {notice ? (
+              <p className="kxd-os-meta kxd-ces-exp__notice" role="status">
+                {notice}
+              </p>
+            ) : null}
             <p className="kxd-os-meta">
               {recommendation.branding.clientName} · Logo:{" "}
               {recommendation.branding.logoHasFile ? "On file" : "Missing"} · Colors:{" "}

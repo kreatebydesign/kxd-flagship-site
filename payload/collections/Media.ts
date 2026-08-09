@@ -1,6 +1,10 @@
 import type { CollectionConfig } from "payload";
 import { publicRead } from "../access/index.ts";
 import { PAYLOAD_GROUPS } from "../admin/groups.ts";
+import {
+  isVercelRuntime,
+  payloadMediaBlobToken,
+} from "../../lib/media/payload-storage.ts";
 
 export const Media: CollectionConfig = {
   slug: "media",
@@ -13,8 +17,7 @@ export const Media: CollectionConfig = {
   // / client-review-media. Production uploads use Vercel Blob; local uses staticDir.
   upload: {
     staticDir: "public/media",
-    disableLocalStorage: Boolean(process.env.VERCEL || process.env.VERCEL_ENV) &&
-      !process.env.BLOB_READ_WRITE_TOKEN?.trim(),
+    disableLocalStorage: isVercelRuntime() && !payloadMediaBlobToken(),
     mimeTypes: ["image/*", "video/mp4", "video/webm"],
     imageSizes: [
       {
