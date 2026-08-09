@@ -72,8 +72,11 @@ const composerUi = read(
 );
 const servicesRoute = read("app/api/admin/clients/[clientId]/experience/services/route.ts");
 check(
-  "Composer commercial review wraps discovery in Advanced Configuration",
+  "Composer commercial Branding hosts managed-site logo discovery",
   composerUi.includes("Active services") &&
+    composerUi.includes(">Branding</h3>") &&
+    composerUi.includes("Discover From Managed Website") &&
+    composerUi.includes("import-branding-logo") &&
     composerUi.includes("Advanced Configuration") &&
     composerUi.includes("/experience/services") &&
     composerUi.includes("Manage Experience"),

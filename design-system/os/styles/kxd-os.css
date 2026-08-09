@@ -21960,6 +21960,11 @@ select.kxd-os-commercial-control {
   }
 }
 
+.kxd-ces-exp__branding {
+  display: grid;
+  gap: 0.75rem;
+}
+
 .kxd-ces-exp__advanced {
   margin-top: 1.5rem;
   padding-top: 0.85rem;

@@ -89,6 +89,20 @@ function classLabel(value: ExperienceDependency["resolutionClass"]): string {
   return "External";
 }
 
+function provisionBusyKey(actionId: string, candidateValue?: string | null): string {
+  return candidateValue ? `${actionId}::${candidateValue}` : actionId;
+}
+
+function isProvisionBusy(
+  provisioning: string | null,
+  actionId: string,
+  candidateValue?: string | null,
+): boolean {
+  if (!provisioning) return false;
+  if (candidateValue) return provisioning === provisionBusyKey(actionId, candidateValue);
+  return provisioning === actionId || provisioning.startsWith(`${actionId}::`);
+}
+
 export function ClientExperienceComposer({
   clientId,
   onActivated,
@@ -273,7 +287,7 @@ export function ClientExperienceComposer({
 
   async function provision(actionId: string, candidateValue?: string) {
     if (!actionId || provisioning) return;
-    setProvisioning(actionId);
+    setProvisioning(provisionBusyKey(actionId, candidateValue));
     setError(null);
     setNotice(null);
     try {
@@ -379,8 +393,16 @@ export function ClientExperienceComposer({
 
   const setupDeps =
     recommendation?.readiness.dependencies.filter(
-      (dep) => dep.status === "unresolved" && dep.id !== "access",
+      (dep) =>
+        dep.status === "unresolved" &&
+        dep.id !== "access" &&
+        dep.id !== "logo" &&
+        dep.id !== "brand-colors",
     ) ?? [];
+  const brandingNeedsImport =
+    Boolean(recommendation) &&
+    (!recommendation!.branding.logoHasFile ||
+      recommendation!.branding.colorSource !== "authoritative");
   const accessDep = recommendation?.readiness.dependencies.find((dep) => dep.id === "access");
 
   return (
@@ -524,14 +546,76 @@ export function ClientExperienceComposer({
           </ul>
 
           <h3 className="kxd-ces-exp__h">Branding</h3>
-          <p className="kxd-os-meta">
-            {recommendation.branding.clientName} · Logo:{" "}
-            {recommendation.branding.logoHasFile ? "On file" : "Missing"} · Colors:{" "}
-            {recommendation.branding.colorSource === "authoritative"
-              ? "Complete"
-              : "Incomplete"}
-            . {recommendation.branding.colorNote}
-          </p>
+          <div className="kxd-ces-exp__branding">
+            <p className="kxd-os-meta">
+              {recommendation.branding.clientName} · Logo:{" "}
+              {recommendation.branding.logoHasFile ? "On file" : "Missing"} · Colors:{" "}
+              {recommendation.branding.colorSource === "authoritative"
+                ? "Complete"
+                : "Incomplete"}
+              . {recommendation.branding.colorNote}
+            </p>
+            {brandingNeedsImport ? (
+              <div className="kxd-plans-access__actions">
+                <button
+                  type="button"
+                  className="kxd-plans-access__save"
+                  disabled={Boolean(discovering) || Boolean(provisioning)}
+                  onClick={() => void discover("branding")}
+                >
+                  {discovering === "branding"
+                    ? "Discovering…"
+                    : "Discover From Managed Website"}
+                </button>
+              </div>
+            ) : null}
+            {discoveries.branding ? (
+              <>
+                {!recommendation.branding.logoHasFile ? (
+                  <DiscoveryCandidates
+                    depId="logo"
+                    discovery={discoveries.branding}
+                    selectedColors={selectedColors}
+                    onSelectColor={(role, hex) =>
+                      setSelectedColors((prev) => ({ ...prev, [role]: hex }))
+                    }
+                    provisioning={provisioning}
+                    onImportLogo={(url) => void provision("import-branding-logo", url)}
+                    onImportColors={() =>
+                      void provision("import-branding-colors", JSON.stringify(selectedColors))
+                    }
+                    onUseGa4={(propertyId) =>
+                      void provision("apply-discovered-ga4-property", propertyId)
+                    }
+                    onUseGsc={(siteUrl) =>
+                      void provision("apply-search-console-site-url", siteUrl)
+                    }
+                  />
+                ) : null}
+                {recommendation.branding.colorSource !== "authoritative" ? (
+                  <DiscoveryCandidates
+                    depId="brand-colors"
+                    discovery={discoveries.branding}
+                    selectedColors={selectedColors}
+                    onSelectColor={(role, hex) =>
+                      setSelectedColors((prev) => ({ ...prev, [role]: hex }))
+                    }
+                    provisioning={provisioning}
+                    onImportLogo={(url) => void provision("import-branding-logo", url)}
+                    onImportColors={() =>
+                      void provision("import-branding-colors", JSON.stringify(selectedColors))
+                    }
+                    onUseGa4={(propertyId) =>
+                      void provision("apply-discovered-ga4-property", propertyId)
+                    }
+                    onUseGsc={(siteUrl) =>
+                      void provision("apply-search-console-site-url", siteUrl)
+                    }
+                  />
+                ) : null}
+              </>
+            ) : null}
+          </div>
 
           <h3 className="kxd-ces-exp__h">Integrations</h3>
           <ul className="kxd-plans-access__list kxd-plans-access__list--effective">
@@ -556,8 +640,8 @@ export function ClientExperienceComposer({
           >
             <summary>Advanced Configuration</summary>
             <p className="kxd-os-meta">
-              Discovery, per-dependency provisioning, and manual module review. Not the normal
-              commercial workflow.
+              Integrations, inventory setup, and manual module review. Branding import lives in
+              the Branding section above.
             </p>
             <div className="kxd-plans-access__actions">
               <button
@@ -600,7 +684,9 @@ export function ClientExperienceComposer({
                           disabled={Boolean(provisioning)}
                           onClick={() => void provision(dep.provision.actionId!)}
                         >
-                          {provisioning === dep.provision.actionId ? "Applying…" : dep.provision.label}
+                          {isProvisionBusy(provisioning, dep.provision.actionId)
+                            ? "Applying…"
+                            : dep.provision.label}
                         </button>
                       ) : null}
                       {dep.provision.kind === "discover" && dep.provision.discoverKind ? (
@@ -779,7 +865,9 @@ function DiscoveryCandidates({
                   disabled={Boolean(provisioning)}
                   onClick={() => onImportLogo(logo.url)}
                 >
-                  {provisioning === "import-branding-logo" ? "Importing…" : "Import This Logo"}
+                  {isProvisionBusy(provisioning, "import-branding-logo", logo.url)
+                    ? "Importing…"
+                    : "Import This Logo"}
                 </button>
               </div>
             ))
@@ -819,7 +907,9 @@ function DiscoveryCandidates({
                   disabled={Boolean(provisioning) || !selectedColors.primary}
                   onClick={onImportColors}
                 >
-                  {provisioning === "import-branding-colors" ? "Importing…" : "Import Selected Colors"}
+                  {isProvisionBusy(provisioning, "import-branding-colors")
+                    ? "Importing…"
+                    : "Import Selected Colors"}
                 </button>
               </div>
             ) : null}
@@ -858,7 +948,9 @@ function DiscoveryCandidates({
                 disabled={Boolean(provisioning)}
                 onClick={() => onUseGa4(row.propertyId)}
               >
-                Use This Property
+                {isProvisionBusy(provisioning, "apply-discovered-ga4-property", row.propertyId)
+                  ? "Applying…"
+                  : "Use This Property"}
               </button>
             ) : (
               <span className="kxd-os-meta">Not confirmed for this site</span>
@@ -892,7 +984,9 @@ function DiscoveryCandidates({
                 disabled={Boolean(provisioning)}
                 onClick={() => onUseGsc(row.siteUrl)}
               >
-                Use This Property
+                {isProvisionBusy(provisioning, "apply-search-console-site-url", row.siteUrl)
+                  ? "Applying…"
+                  : "Use This Property"}
               </button>
             ) : (
               <span className="kxd-os-meta">Not verified for connected account</span>

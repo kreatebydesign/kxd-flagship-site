@@ -284,8 +284,10 @@ check(
 
 const ui = read("components/admin/operations/client-command/ClientExperienceComposer.tsx");
 check(
-  "composer is commercial review with Advanced Configuration",
+  "composer is commercial review with Branding discovery and Advanced Configuration",
   ui.includes("Active services") &&
+    ui.includes("Discover From Managed Website") &&
+    ui.includes("import-branding-logo") &&
     ui.includes("Advanced Configuration") &&
     ui.includes("/experience/services") &&
     ui.includes("Approve & Activate"),

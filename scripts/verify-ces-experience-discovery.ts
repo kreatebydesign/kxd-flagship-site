@@ -259,8 +259,20 @@ check(
   "UI discover buttons are wired",
   ui.includes("/experience/discover") &&
     ui.includes("discoverKind") &&
+    ui.includes("Discover From Managed Website") &&
     ui.includes("Import This Logo") &&
     ui.includes("Use This Property"),
+);
+check(
+  "logo import loading state is scoped to the selected candidate",
+  ui.includes('isProvisionBusy(provisioning, "import-branding-logo", logo.url)') &&
+    ui.includes("function provisionBusyKey") &&
+    !ui.includes('provisioning === "import-branding-logo" ? "Importing'),
+);
+check(
+  "branding discovery sits in the main Branding section, not only Advanced",
+  ui.includes("kxd-ces-exp__branding") &&
+    ui.indexOf("Discover From Managed Website") < ui.indexOf("Advanced Configuration"),
 );
 check(
   "Inventory stays navigate-only until a reusable adapter exists",
