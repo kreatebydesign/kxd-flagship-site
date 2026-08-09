@@ -16,6 +16,10 @@ import {
   formatInfraDate,
   infraStatusLabel,
 } from "@/lib/infrastructure/data";
+import {
+  describeGa4InfrastructureConnection,
+  describeSearchConsoleInfrastructureConnection,
+} from "@/lib/infrastructure/google-connection-display";
 import type { ClientInfrastructureDetail, InfraDoc } from "@/lib/infrastructure/types";
 import {
   formatDaysRemainingLabel,
@@ -280,9 +284,19 @@ export function InfrastructureClientScreen({
                 <DetailGrid
                   rows={[
                     { label: "Analytics provider", value: field(record, "analyticsProvider") },
-                    { label: "GA4 property", value: field(record, "ga4PropertyId") },
                     {
-                      label: "Search Console",
+                      label: "GA4 property",
+                      value: describeGa4InfrastructureConnection(record.ga4PropertyId).value,
+                    },
+                    {
+                      label: "Search Console property",
+                      value: describeSearchConsoleInfrastructureConnection({
+                        searchConsoleSiteUrl: record.searchConsoleSiteUrl,
+                        searchConsoleStatus: record.searchConsoleStatus,
+                      }).value,
+                    },
+                    {
+                      label: "Search Console status",
                       value: field(record, "searchConsoleStatus"),
                     },
                   ]}

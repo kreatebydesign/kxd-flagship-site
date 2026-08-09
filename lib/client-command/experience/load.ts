@@ -210,12 +210,16 @@ function integrationRows(input: {
   reportingCapabilities: string[];
   billingEligible: boolean;
   websiteUrl: string | null;
+  infrastructureId: number | null;
 }): OperatorIntegrationStatusRow[] {
   const entitledAnalytics =
     input.reportingCapabilities.includes("website-analytics") ||
     input.reportingCapabilities.includes("seo") ||
     input.reportingCapabilities.includes("executive-reporting");
-  const infraHref = `/admin/operations/infrastructure/${input.clientId}`;
+  const experienceHref = `/admin/operations/client-command/${input.clientId}?tab=experience`;
+  const infraRecordHref = input.infrastructureId
+    ? `/admin/collections/client-infrastructure/${input.infrastructureId}`
+    : `/admin/operations/infrastructure/${input.clientId}`;
   const billingHref = `/admin/operations/client-command/${input.clientId}/commercial/overview`;
 
   const ga4Status: OperatorIntegrationStatusRow["status"] = input.ga4
@@ -234,15 +238,21 @@ function integrationRows(input: {
       id: "ga4",
       label: "GA4",
       status: ga4Status,
-      detail: input.ga4 ? "Property on file." : "No GA4 property on infrastructure.",
-      href: infraHref,
+      detail: input.ga4
+        ? `Property ${input.ga4} on file.`
+        : "No GA4 property on infrastructure.",
+      value: input.ga4,
+      href: input.ga4 ? infraRecordHref : experienceHref,
     },
     {
       id: "search-console",
       label: "Search Console",
       status: gscStatus,
-      detail: input.gsc ? "Site URL on file." : "No Search Console site on infrastructure.",
-      href: infraHref,
+      detail: input.gsc
+        ? `Site ${input.gsc} on file.`
+        : "No Search Console site on infrastructure.",
+      value: input.gsc,
+      href: input.gsc ? infraRecordHref : experienceHref,
     },
     {
       id: "reporting",
@@ -474,6 +484,7 @@ export async function loadOperatorExperienceSnapshot(
     reportingCapabilities,
     billingEligible: billingNavAvailable,
     websiteUrl,
+    infrastructureId: reporting?.infrastructureId ?? null,
   });
 
   const warnings = composeOperatorExperienceWarnings({

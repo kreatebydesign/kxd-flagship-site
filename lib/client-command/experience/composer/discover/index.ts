@@ -32,8 +32,12 @@ export async function discoverExperienceDependencies(
   if (!signals) return { ok: false, message: "Client not found." };
 
   const host = hostnameFromWebsite(signals.websiteUrl, signals.primaryDomain);
-  const branding =
-    kind === "all" || kind === "branding"
+  const includeBranding = kind === "all" || kind === "branding";
+  const includeGa4 = kind === "all" || kind === "ga4" || kind === "google";
+  const includeGsc = kind === "all" || kind === "search-console" || kind === "google";
+
+  const siteFacts =
+    includeBranding || includeGa4
       ? await discoverManagedWebsiteBranding({
           websiteUrl: signals.websiteUrl,
           primaryDomain: signals.primaryDomain,
@@ -41,29 +45,17 @@ export async function discoverExperienceDependencies(
         })
       : null;
 
-  const siteMeasurementIds = branding?.measurementIds ?? [];
-  const ga4 =
-    kind === "all" || kind === "ga4"
-      ? await discoverGa4Properties({
-          clientName: signals.clientName,
-          host,
-          siteMeasurementIds:
-            kind === "ga4"
-              ? (
-                  await discoverManagedWebsiteBranding({
-                    websiteUrl: signals.websiteUrl,
-                    primaryDomain: signals.primaryDomain,
-                    clientName: signals.clientName,
-                  })
-                ).measurementIds
-              : siteMeasurementIds,
-        })
-      : null;
+  const ga4 = includeGa4
+    ? await discoverGa4Properties({
+        clientName: signals.clientName,
+        host,
+        siteMeasurementIds: siteFacts?.measurementIds ?? [],
+      })
+    : null;
 
-  const searchConsole =
-    kind === "all" || kind === "search-console"
-      ? await discoverSearchConsoleProperties({ host })
-      : null;
+  const searchConsole = includeGsc
+    ? await discoverSearchConsoleProperties({ host })
+    : null;
 
   return {
     ok: true,
@@ -72,7 +64,7 @@ export async function discoverExperienceDependencies(
     invites: false,
     clientId,
     kind,
-    branding,
+    branding: includeBranding ? siteFacts : null,
     ga4,
     searchConsole,
   };

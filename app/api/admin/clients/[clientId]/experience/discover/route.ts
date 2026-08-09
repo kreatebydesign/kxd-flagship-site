@@ -17,6 +17,7 @@ const KINDS = new Set<ExperienceDiscoverKind | "all">([
   "branding",
   "ga4",
   "search-console",
+  "google",
 ]);
 
 export async function GET(

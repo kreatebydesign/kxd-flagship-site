@@ -16,6 +16,10 @@ import {
 import type { ExperienceSignals } from "../lib/client-command/experience/composer/types.ts";
 import { EMPTY_SERVICE_SCOPE } from "../lib/service-capabilities/resolve.ts";
 import { GROWTH_INFRASTRUCTURE_SHOWROOM_SCOPE, resolveServiceScope } from "../lib/service-capabilities/index.ts";
+import {
+  describeGa4InfrastructureConnection,
+  describeSearchConsoleInfrastructureConnection,
+} from "../lib/infrastructure/google-connection-display.ts";
 
 const root = process.cwd();
 let passed = 0;
@@ -162,14 +166,16 @@ check(
   "Search Console offers discover rather than blind apply",
   gsc?.resolutionClass === "actionable" &&
     gsc.provision.kind === "discover" &&
-    gsc.provision.discoverKind === "search-console" &&
+    gsc.provision.discoverKind === "google" &&
+    gsc.provision.label === "Discover Google Integrations" &&
     gsc.provision.actionId == null,
 );
 check(
   "GA4 offers authenticated property discovery when missing",
   ga4?.resolutionClass === "actionable" &&
     ga4.provision.kind === "discover" &&
-    ga4.provision.discoverKind === "ga4",
+    ga4.provision.discoverKind === "google" &&
+    ga4.provision.label === "Discover Google Integrations",
 );
 check(
   "Inventory links to existing Client Command inventory",
@@ -231,6 +237,21 @@ const gold = composeExperienceRecommendation(
   }),
 );
 check("KXD gold still rejected as client brand", gold.branding.accentColor !== "#C9A962");
+
+const statusWithoutSite = composeExperienceRecommendation(
+  baseSignals({
+    searchConsoleStatus: "connected",
+    searchConsoleSiteUrl: null,
+    proposedSearchConsoleSiteUrl: "sc-domain:example.com",
+  }),
+);
+const statusGsc = statusWithoutSite.readiness.dependencies.find((d) => d.id === "search-console");
+check(
+  "Infrastructure Search Console status enum is not a CES connection",
+  statusGsc?.status === "unresolved" &&
+    statusGsc.provision.discoverKind === "google" &&
+    Boolean(statusGsc.reason.includes("independent of the site URL")),
+);
 
 const commercialReady = composeExperienceRecommendation(
   baseSignals({
@@ -297,6 +318,19 @@ const ui = read("components/admin/operations/client-command/ClientExperienceComp
 check(
   "UI preview remains available while activate can disable",
   ui.includes("Preview Experience") && ui.includes("activationEligible"),
+);
+check(
+  "Infrastructure display treats missing GSC site URL as not connected",
+  describeSearchConsoleInfrastructureConnection({
+    searchConsoleSiteUrl: null,
+    searchConsoleStatus: "connected",
+  }).connected === false &&
+    describeSearchConsoleInfrastructureConnection({
+      searchConsoleSiteUrl: "sc-domain:example.com",
+      searchConsoleStatus: "unknown",
+    }).connected === true &&
+    describeGa4InfrastructureConnection("properties/555666777").value === "555666777" &&
+    describeGa4InfrastructureConnection("G-ABCDEF12XY").connected === false,
 );
 
 if (failed > 0) {

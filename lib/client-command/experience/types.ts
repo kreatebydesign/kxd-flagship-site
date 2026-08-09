@@ -82,6 +82,8 @@ export type OperatorIntegrationStatusRow = {
   label: string;
   status: "configured" | "not-configured" | "entitled-unconfigured" | "not-entitled";
   detail: string;
+  /** Canonical stored identifier when configured (GA4 property ID, GSC site URL). Never prose. */
+  value?: string | null;
   href: string | null;
 };
 

@@ -22,6 +22,10 @@ import {
   type HostingRenewalUrgency,
 } from "./hosting-renewal-readiness";
 import { buildClientResourceDirectoryFromRecords } from "./client-resource-directory";
+import {
+  describeGa4InfrastructureConnection,
+  describeSearchConsoleInfrastructureConnection,
+} from "./google-connection-display";
 
 function asNumber(value: unknown): number | null {
   if (typeof value === "number" && Number.isFinite(value)) return value;
@@ -70,6 +74,11 @@ export function getInfrastructureHealthSignals(record: InfraDoc | null): Infrast
   const readiness = evaluateFromInfrastructureRecord(record);
   const domainDays = readiness.domain.daysRemaining;
   const sslDays = readiness.ssl.daysRemaining;
+  const ga4Connection = describeGa4InfrastructureConnection(record.ga4PropertyId);
+  const gscConnection = describeSearchConsoleInfrastructureConnection({
+    searchConsoleSiteUrl: record.searchConsoleSiteUrl,
+    searchConsoleStatus: record.searchConsoleStatus,
+  });
 
   return [
     {
@@ -148,23 +157,23 @@ export function getInfrastructureHealthSignals(record: InfraDoc | null): Infrast
     {
       id: "analytics",
       label: "Analytics",
-      value: record.ga4PropertyId
-        ? `GA4 · ${record.ga4PropertyId}`
+      value: ga4Connection.connected
+        ? `GA4 · ${ga4Connection.value}`
         : record.analyticsProvider
           ? String(record.analyticsProvider)
           : "Not on file",
-      status: record.ga4PropertyId || record.analyticsProvider ? "ok" : "unknown",
+      status: ga4Connection.connected ? "ok" : "unknown",
     },
     {
       id: "search-console",
       label: "Search Console",
-      value: String(record.searchConsoleStatus ?? "unknown"),
-      status:
-        record.searchConsoleStatus === "connected"
-          ? "ok"
-          : record.searchConsoleStatus === "not-connected"
-            ? "warning"
-            : "unknown",
+      value: gscConnection.value,
+      status: gscConnection.connected
+        ? "ok"
+        : record.searchConsoleStatus === "not-connected" ||
+            record.searchConsoleStatus === "connected"
+          ? "warning"
+          : "unknown",
     },
   ];
 }

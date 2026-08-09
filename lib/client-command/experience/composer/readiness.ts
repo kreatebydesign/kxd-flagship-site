@@ -219,10 +219,10 @@ export function composeExperienceReadiness(input: {
       resolutionClass = "actionable";
       provision = {
         kind: "discover",
-        label: "Discover Google Analytics Property",
+        label: "Discover Google Integrations",
         href: hrefs.infrastructureEdit ?? hrefs.infrastructure,
         actionId: null,
-        discoverKind: "ga4",
+        discoverKind: "google",
       };
     }
     dependencies.push({
@@ -269,10 +269,10 @@ export function composeExperienceReadiness(input: {
       resolutionClass = "actionable";
       provision = {
         kind: "discover",
-        label: "Discover Search Console Property",
+        label: "Discover Google Integrations",
         href: hrefs.infrastructureEdit ?? hrefs.infrastructure,
         actionId: null,
-        discoverKind: "search-console",
+        discoverKind: "google",
       };
     } else {
       reason = "Website Health is appropriate, but no domain exists from which to propose a Search Console property.";

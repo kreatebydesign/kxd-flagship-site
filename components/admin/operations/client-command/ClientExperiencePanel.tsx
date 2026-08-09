@@ -547,6 +547,7 @@ export function ClientExperiencePanel({ clientId }: { clientId: number }) {
             {row.label}
             <span>
               {row.status.replace(/-/g, " ")} — {row.detail}
+              {row.value ? ` (${row.value})` : ""}
               {row.href ? (
                 <>
                   {" "}

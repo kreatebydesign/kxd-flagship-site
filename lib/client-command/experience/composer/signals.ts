@@ -9,6 +9,11 @@ import { loadOperatorExperienceSnapshot } from "../load";
 import { EMPTY_SERVICE_SCOPE } from "@/lib/service-capabilities";
 import { loadResolvedServiceScope } from "@/lib/service-capabilities/assignments";
 import {
+  normalizeGa4PropertyId,
+  normalizeSearchConsoleSiteUrl,
+  resolveInfrastructureForClient,
+} from "@/lib/reporting/providers/connection-resolve";
+import {
   extractGa4PropertyIdFromEvidence,
   proposeSearchConsoleSiteUrl,
 } from "./readiness";
@@ -84,17 +89,24 @@ export async function loadExperienceSignals(
   let infrastructureId: number | null = null;
   let searchConsoleStatus: string | null = null;
   let analyticsProvider: string | null = null;
+  let ga4PropertyId: string | null = null;
+  let searchConsoleSiteUrl: string | null = null;
   try {
     const infra = await payload.find({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       collection: "client-infrastructure" as any,
       where: { client: { equals: clientId } },
-      limit: 1,
+      limit: 5,
       depth: 0,
       sort: "-updatedAt",
       overrideAccess: true,
     });
-    const doc = infra.docs[0] as AnyDoc | undefined;
+    const picked = resolveInfrastructureForClient(
+      clientId,
+      infra.docs as unknown as Record<string, unknown>[],
+    );
+    const doc =
+      picked && picked !== "cross-client" ? (picked as AnyDoc) : undefined;
     infrastructureId = doc?.id != null ? Number(doc.id) : null;
     primaryDomain =
       typeof doc?.primaryDomain === "string" && doc.primaryDomain.trim()
@@ -106,6 +118,12 @@ export async function loadExperienceSignals(
       typeof doc?.analyticsProvider === "string" && doc.analyticsProvider.trim()
         ? doc.analyticsProvider.trim()
         : null;
+    ga4PropertyId = normalizeGa4PropertyId(
+      typeof doc?.ga4PropertyId === "string" ? doc.ga4PropertyId : null,
+    );
+    searchConsoleSiteUrl = normalizeSearchConsoleSiteUrl(
+      typeof doc?.searchConsoleSiteUrl === "string" ? doc.searchConsoleSiteUrl : null,
+    );
     hasHostingInfra = Boolean(
       doc?.hostingProvider || doc?.dnsProvider || primaryDomain || doc?.productionUrl,
     );
@@ -179,9 +197,6 @@ export async function loadExperienceSignals(
   } catch {
     brandKit = null;
   }
-
-  const ga4 = snapshot.integrations.find((row) => row.id === "ga4");
-  const gsc = snapshot.integrations.find((row) => row.id === "search-console");
 
   const [
     websiteReviewCount,
@@ -261,8 +276,8 @@ export async function loadExperienceSignals(
     serviceScope,
     hasHostingInfra,
     primaryDomain,
-    ga4PropertyId: ga4?.status === "configured" ? ga4.detail : null,
-    searchConsoleSiteUrl: gsc?.status === "configured" ? gsc.detail : null,
+    ga4PropertyId,
+    searchConsoleSiteUrl,
     reportingCapabilities: snapshot.reportingCapabilities,
     entitlements: {
       isLegacy: snapshot.plan.isLegacy,

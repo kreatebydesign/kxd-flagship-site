@@ -120,7 +120,10 @@ export async function applyExperienceProvision(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       collection: "client-infrastructure" as any,
       id: signals.infrastructureId,
-      data: { searchConsoleSiteUrl: match.siteUrl },
+      data: {
+        searchConsoleSiteUrl: match.siteUrl,
+        searchConsoleStatus: "connected",
+      },
       overrideAccess: true,
     });
     return ok(

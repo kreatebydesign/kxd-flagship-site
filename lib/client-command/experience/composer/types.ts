@@ -32,7 +32,7 @@ export type DependencyLaunchImpact = "blocking" | "optional";
 
 export type ExperienceProvisionKind = "none" | "navigate" | "apply-discovered" | "discover";
 
-export type ExperienceDiscoverKind = "branding" | "ga4" | "search-console";
+export type ExperienceDiscoverKind = "branding" | "ga4" | "search-console" | "google";
 
 export type ExperienceProvisionActionId =
   | "apply-search-console-site-url"

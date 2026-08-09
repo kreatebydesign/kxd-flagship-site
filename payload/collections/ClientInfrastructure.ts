@@ -225,8 +225,12 @@ export const ClientInfrastructure: CollectionConfig = {
             {
               name: "searchConsoleStatus",
               type: "select",
-              label: "Search Console",
+              label: "Search Console Status",
               defaultValue: "unknown",
+              admin: {
+                description:
+                  "Operator health note only. Reporting ingest and Client Experience require Search Console Site URL — this enum is not a connection.",
+              },
               options: [
                 { label: "Unknown", value: "unknown" },
                 { label: "Connected", value: "connected" },

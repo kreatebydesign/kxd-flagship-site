@@ -334,7 +334,17 @@ export function ClientExperienceComposer({
       if (!res.ok || !json.ok) {
         throw new Error(json.message || "Unable to discover candidates.");
       }
-      setDiscoveries((prev) => ({ ...prev, [kind]: json }));
+      setDiscoveries((prev) => {
+        const next: Partial<Record<ExperienceDiscoverKind, DiscoverResponse>> = {
+          ...prev,
+          [kind]: json,
+        };
+        if (kind === "google") {
+          next.ga4 = json;
+          next["search-console"] = json;
+        }
+        return next;
+      });
       const firstAccent = json.branding?.colors?.find((c) => c.role === "accent")?.hex;
       const firstPrimary = json.branding?.colors?.find((c) => c.role === "primary")?.hex;
       const firstSecondary = json.branding?.colors?.find((c) => c.role === "secondary")?.hex;
@@ -397,8 +407,16 @@ export function ClientExperienceComposer({
         dep.status === "unresolved" &&
         dep.id !== "access" &&
         dep.id !== "logo" &&
-        dep.id !== "brand-colors",
+        dep.id !== "brand-colors" &&
+        dep.id !== "ga4" &&
+        dep.id !== "search-console",
     ) ?? [];
+  const ga4Dep = recommendation?.readiness.dependencies.find((dep) => dep.id === "ga4");
+  const gscDep = recommendation?.readiness.dependencies.find((dep) => dep.id === "search-console");
+  const googleNeedsDiscover =
+    (ga4Dep && ga4Dep.status !== "satisfied") || (gscDep && gscDep.status !== "satisfied");
+  const googleDiscovery =
+    discoveries.google || discoveries.ga4 || discoveries["search-console"] || null;
   const brandingNeedsImport =
     Boolean(recommendation) &&
     (!recommendation!.branding.logoHasFile ||
@@ -628,14 +646,84 @@ export function ClientExperienceComposer({
           </div>
 
           <h3 className="kxd-ces-exp__h">Integrations</h3>
-          <ul className="kxd-plans-access__list kxd-plans-access__list--effective">
-            {recommendation.integrations.slice(0, 6).map((row) => (
-              <li key={row.id}>
-                {row.label}
-                <span>{row.status === "configured" ? "Connected" : row.detail || row.status}</span>
-              </li>
-            ))}
-          </ul>
+          <div className="kxd-ces-exp__integrations">
+            <p className="kxd-os-meta">
+              Active services determine entitlement. Stored GA4 / Search Console properties
+              determine readiness. Credentials stay on the connected Google Reporting identity.
+            </p>
+            <ul className="kxd-plans-access__list kxd-plans-access__list--effective">
+              {recommendation.integrations
+                .filter((row) => row.id === "ga4" || row.id === "search-console" || row.id === "website")
+                .map((row) => (
+                  <li key={row.id}>
+                    {row.label}
+                    <span>
+                      {row.status === "configured"
+                        ? `Connected${row.value ? ` · ${row.value}` : ""}`
+                        : row.detail || row.status}
+                    </span>
+                  </li>
+                ))}
+            </ul>
+            {googleNeedsDiscover ? (
+              <div className="kxd-plans-access__actions">
+                <button
+                  type="button"
+                  className="kxd-plans-access__save"
+                  disabled={Boolean(discovering) || Boolean(provisioning)}
+                  onClick={() => void discover("google")}
+                >
+                  {discovering === "google" ? "Discovering…" : "Discover Google Integrations"}
+                </button>
+              </div>
+            ) : null}
+            {googleDiscovery && googleNeedsDiscover ? (
+              <>
+                {ga4Dep && ga4Dep.status !== "satisfied" ? (
+                  <DiscoveryCandidates
+                    depId="ga4"
+                    discovery={googleDiscovery}
+                    selectedColors={selectedColors}
+                    onSelectColor={(role, hex) =>
+                      setSelectedColors((prev) => ({ ...prev, [role]: hex }))
+                    }
+                    provisioning={provisioning}
+                    onImportLogo={(url) => void provision("import-branding-logo", url)}
+                    onImportColors={() =>
+                      void provision("import-branding-colors", JSON.stringify(selectedColors))
+                    }
+                    onUseGa4={(propertyId) =>
+                      void provision("apply-discovered-ga4-property", propertyId)
+                    }
+                    onUseGsc={(siteUrl) =>
+                      void provision("apply-search-console-site-url", siteUrl)
+                    }
+                  />
+                ) : null}
+                {gscDep && gscDep.status !== "satisfied" ? (
+                  <DiscoveryCandidates
+                    depId="search-console"
+                    discovery={googleDiscovery}
+                    selectedColors={selectedColors}
+                    onSelectColor={(role, hex) =>
+                      setSelectedColors((prev) => ({ ...prev, [role]: hex }))
+                    }
+                    provisioning={provisioning}
+                    onImportLogo={(url) => void provision("import-branding-logo", url)}
+                    onImportColors={() =>
+                      void provision("import-branding-colors", JSON.stringify(selectedColors))
+                    }
+                    onUseGa4={(propertyId) =>
+                      void provision("apply-discovered-ga4-property", propertyId)
+                    }
+                    onUseGsc={(siteUrl) =>
+                      void provision("apply-search-console-site-url", siteUrl)
+                    }
+                  />
+                ) : null}
+              </>
+            ) : null}
+          </div>
 
           <h3 className="kxd-ces-exp__h">Access</h3>
           <p className="kxd-os-meta">

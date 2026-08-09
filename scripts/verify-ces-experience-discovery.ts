@@ -275,6 +275,31 @@ check(
     ui.indexOf("Discover From Managed Website") < ui.indexOf("Advanced Configuration"),
 );
 check(
+  "Google integration discovery sits in the main Integrations section",
+  ui.includes("Discover Google Integrations") &&
+    ui.includes('discover("google")') &&
+    ui.indexOf("Discover Google Integrations") < ui.indexOf("Advanced Configuration") &&
+    ui.indexOf("kxd-ces-exp__integrations") < ui.indexOf("Advanced Configuration"),
+);
+check(
+  "discover route accepts combined google kind",
+  discoverRoute.includes('"google"') && discoverRoute.includes("KINDS"),
+);
+const signalsSrc = read("lib/client-command/experience/composer/signals.ts");
+check(
+  "CES signals read infrastructure property IDs rather than integration prose",
+  signalsSrc.includes("normalizeGa4PropertyId") &&
+    signalsSrc.includes("normalizeSearchConsoleSiteUrl") &&
+    signalsSrc.includes("resolveInfrastructureForClient") &&
+    !signalsSrc.includes("ga4.detail") &&
+    !signalsSrc.includes("gsc.detail"),
+);
+check(
+  "confirmed Search Console persist aligns status enum with stored site URL",
+  provisionLib.includes("searchConsoleSiteUrl: match.siteUrl") &&
+    provisionLib.includes('searchConsoleStatus: "connected"'),
+);
+check(
   "Inventory stays navigate-only until a reusable adapter exists",
   readiness.includes('label: "Open Inventory"') &&
     readiness.includes("signed site→OS inventory adapter"),
