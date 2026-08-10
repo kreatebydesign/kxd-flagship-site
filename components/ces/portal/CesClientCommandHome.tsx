@@ -1,5 +1,8 @@
 import Link from "next/link";
-import type { ClientHomePresentation, ClientHomePresentationItem } from "@/lib/ces/modules/home";
+import type {
+  ClientHomePresentation,
+  ClientHomePresentationItem,
+} from "@/lib/ces/modules/home";
 
 function HomeItem({ item }: { item: ClientHomePresentationItem }) {
   const content = (
@@ -29,14 +32,12 @@ function HomeListSection({
   eyebrow,
   title,
   items,
-  emptyTitle,
   emptyLead,
   id,
 }: {
   eyebrow: string;
   title: string;
   items: ClientHomePresentationItem[];
-  emptyTitle: string;
   emptyLead: string;
   id: string;
 }) {
@@ -53,10 +54,7 @@ function HomeListSection({
           ))}
         </ul>
       ) : (
-        <div className="kxd-ces-empty">
-          <p className="kxd-ces-empty__title">{emptyTitle}</p>
-          <p className="kxd-ces-empty__lead">{emptyLead}</p>
-        </div>
+        <p className="kxd-client-home__empty-note">{emptyLead}</p>
       )}
     </section>
   );
@@ -73,81 +71,123 @@ export function CesClientCommandHome({
 }) {
   return (
     <div className="kxd-client-home">
-      <header className="kxd-client-home__hero">
-        <p className="kxd-client-home__eyebrow">{home.opening.eyebrow}</p>
-        <h1>{home.opening.title}</h1>
-        <p className="kxd-client-home__lead">{home.opening.lead}</p>
+      <header className="kxd-client-home__welcome">
+        <p className="kxd-client-home__eyebrow">{home.welcome.eyebrow}</p>
+        <h1>{home.welcome.greeting}</h1>
+        <p className="kxd-client-home__lead">{home.welcome.lead}</p>
         {showPartnership ? (
           <Link href="/portal/partnership" className="kxd-ces-btn kxd-ces-btn--ghost">
-            View your KXD partnership
+            View your partnership
           </Link>
         ) : null}
       </header>
 
-      <section className="kxd-client-home__snapshot" aria-labelledby="client-snapshot-title">
-        <div>
-          <p className="kxd-client-home__eyebrow">Executive snapshot</p>
-          <h2 id="client-snapshot-title">The business, at a glance</h2>
-        </div>
-        <dl>
-          {home.snapshot.map((fact) => (
-            <div key={fact.label}>
-              <dt>{fact.label}</dt>
-              <dd>{fact.value}</dd>
-            </div>
-          ))}
-        </dl>
+      <section className="kxd-client-home__attention" aria-labelledby="client-attention-title">
+        <p className="kxd-client-home__eyebrow">Needs your attention</p>
+        <h2 id="client-attention-title" className="kxd-client-home__section-title">
+          {home.attention.items.length > 0
+            ? "Where your input helps"
+            : home.attention.allClearTitle}
+        </h2>
+        {home.attention.items.length > 0 ? (
+          <ul className="kxd-client-home__list">
+            {home.attention.items.map((item) => (
+              <HomeItem key={item.id} item={item} />
+            ))}
+          </ul>
+        ) : (
+          <p className="kxd-client-home__empty-note">{home.attention.allClearLead}</p>
+        )}
       </section>
 
       {showWork ? (
         <>
           <HomeListSection
             id="client-accomplishments-title"
-            eyebrow="KXD accomplishments"
-            title="What moved forward"
+            eyebrow="What KXD accomplished"
+            title="Completed work"
             items={home.accomplishments}
-            emptyTitle="No completed work recorded this month"
-            emptyLead="KXD only shows completed work here when it is supported by a recorded deliverable, project, or review."
+            emptyLead="No completed work has been recorded for this period yet."
           />
           <HomeListSection
             id="client-active-work-title"
-            eyebrow="Active work"
-            title="What KXD is advancing"
-            items={home.activeWork}
-            emptyTitle="No active work needs a status card"
-            emptyLead="Your partnership remains active. New work appears here as it enters the shared workflow."
+            eyebrow="What KXD is advancing"
+            title="Currently underway"
+            items={home.advancing}
+            emptyLead="Current work will appear here as it is recorded."
           />
         </>
       ) : null}
 
-      <HomeListSection
-        id="client-attention-title"
-        eyebrow="Your attention"
-        title="Where your input helps"
-        items={home.attention}
-        emptyTitle="Nothing is waiting on you"
-        emptyLead="KXD can continue managing the current work without anything from you right now."
-      />
+      {home.performance.visible ? (
+        <section className="kxd-client-home__performance" aria-labelledby="client-performance-title">
+          <p className="kxd-client-home__eyebrow">How the business is performing</p>
+          <h2 id="client-performance-title" className="kxd-client-home__section-title">
+            Website &amp; search activity
+          </h2>
+          {home.performance.facts.length > 0 ? (
+            <dl className="kxd-client-home__facts">
+              {home.performance.facts.map((fact) => (
+                <div key={fact.id}>
+                  <dt>{fact.label}</dt>
+                  <dd>{fact.value}</dd>
+                  {fact.detail ? <p>{fact.detail}</p> : null}
+                </div>
+              ))}
+            </dl>
+          ) : (
+            <p className="kxd-client-home__empty-note">
+              {home.performance.statusNote ?? "Performance reporting is being prepared."}
+            </p>
+          )}
+          {home.performance.href ? (
+            <Link href={home.performance.href} className="kxd-client-home__quiet-link">
+              Open performance
+            </Link>
+          ) : null}
+        </section>
+      ) : null}
 
-      <HomeListSection
-        id="client-opportunities-title"
-        eyebrow="Opportunities"
-        title="Evidence-backed next moves"
-        items={home.opportunities}
-        emptyTitle="No recommendation needs your attention"
-        emptyLead="KXD will surface an opportunity here when the work or reporting evidence supports one."
-      />
+      {home.businessImpact ? (
+        <section className="kxd-client-home__impact" aria-labelledby="client-impact-title">
+          <p className="kxd-client-home__eyebrow">Leads &amp; business impact</p>
+          <h2 id="client-impact-title" className="kxd-client-home__section-title">
+            Opportunities created
+          </h2>
+          <ul className="kxd-client-home__list">
+            {home.businessImpact.items.map((item) => (
+              <HomeItem key={item.id} item={item} />
+            ))}
+          </ul>
+          {home.businessImpact.note ? <p className="kxd-client-home__note">{home.businessImpact.note}</p> : null}
+        </section>
+      ) : null}
 
-      <section className="kxd-client-home__next" aria-labelledby="client-next-title">
-        <p className="kxd-client-home__eyebrow">What&apos;s next</p>
-        <h2 id="client-next-title">{home.next.title}</h2>
-        <p>{home.next.detail}</p>
-        {home.next.href ? (
-          <Link href={home.next.href} className="kxd-ces-btn kxd-ces-btn--primary">
-            Continue
-          </Link>
-        ) : null}
-      </section>
+      {home.services.length > 0 ? (
+        <section className="kxd-client-home__services" aria-labelledby="client-services-title">
+          <p className="kxd-client-home__eyebrow">Included in this partnership</p>
+          <h2 id="client-services-title" className="kxd-client-home__section-title">
+            What KXD manages for you
+          </h2>
+          <ul className="kxd-client-home__service-list">
+            {home.services.map((service) => (
+              <li key={service.id}>
+                {service.href ? (
+                  <Link href={service.href} className="kxd-client-home__service">
+                    <h3>{service.title}</h3>
+                    {service.detail ? <p>{service.detail}</p> : null}
+                  </Link>
+                ) : (
+                  <div className="kxd-client-home__service">
+                    <h3>{service.title}</h3>
+                    {service.detail ? <p>{service.detail}</p> : null}
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
     </div>
   );
 }

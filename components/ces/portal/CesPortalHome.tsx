@@ -11,9 +11,9 @@ import {
   isHomeZoneVisible,
   resolveCesHomeSurface,
   shouldUseCesPortalHome as resolveCesHomeShell,
+  type ClientHomeBusinessImpact,
   type PortalHomeComposition,
 } from "@/lib/ces/modules/home";
-import { portalFirstName, portalTimeGreeting } from "@/lib/portal/greeting";
 import { CesPage } from "@/components/ces/primitives";
 import { CesPartnershipBriefing } from "@/components/ces/partnership";
 import { CesExecutivePerformanceWorkspace } from "@/components/ces/executive-performance";
@@ -21,7 +21,7 @@ import { WorkspaceFocusStrip } from "@/components/portal/WorkspaceFocusStrip";
 import { CesClientCommandHome } from "./CesClientCommandHome";
 
 export interface CesPortalHomeProps {
-  displayName: string;
+  greeting: string;
   profile: ResolvedExperienceProfile;
   websiteReview: WebsiteReviewLandingData;
   connected: ConnectedWorkspaceData;
@@ -34,10 +34,12 @@ export interface CesPortalHomeProps {
   workPerformance?: WorkPerformanceModel | null;
   /** Canonical entitlement-aware home-zone composition. */
   homeComposition: PortalHomeComposition;
+  /** Future confirmed lead aggregates only — omit when unavailable. */
+  businessImpact?: ClientHomeBusinessImpact | null;
 }
 
 export function CesPortalHome({
-  displayName,
+  greeting,
   profile,
   briefing,
   websiteReview,
@@ -45,9 +47,8 @@ export function CesPortalHome({
   personalization = null,
   workPerformance = null,
   homeComposition,
+  businessImpact = null,
 }: CesPortalHomeProps) {
-  const firstName = portalFirstName(displayName);
-  const greeting = portalTimeGreeting(firstName);
   const flagship = isCesFlagshipPortal(profile);
   const homeSurface = resolveCesHomeSurface({
     homeComposition,
@@ -58,11 +59,11 @@ export function CesPortalHome({
   const clientHome =
     homeSurface === "client-command" && workPerformance
       ? composeClientHomePresentation({
-          displayName,
           greeting,
           profile,
           briefing,
           workPerformance,
+          businessImpact,
         })
       : null;
 

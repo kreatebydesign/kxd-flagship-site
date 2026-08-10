@@ -176,13 +176,12 @@ function main() {
   check(
     "commercial service adapter hides performance mechanics and capability IDs",
     services.items.length === 1 &&
-      services.items[0]?.label === "Managed Website" &&
+      services.items[0]?.label === "Website Management" &&
       !JSON.stringify(services).includes("managed_website") &&
       !JSON.stringify(services).includes("performance_component"),
   );
 
   const home = composeClientHomePresentation({
-    displayName: "Avery Owner",
     greeting: "Good afternoon, Avery.",
     profile,
     briefing,
@@ -190,10 +189,11 @@ function main() {
   });
   check(
     "home hierarchy uses recorded work and preserves calm empty attention",
-    home.opening.title === "Good afternoon, Avery." &&
+    home.welcome.greeting === "Good afternoon, Avery." &&
       home.accomplishments[0]?.title === "Website update" &&
-      home.activeWork[0]?.title === "Search review" &&
-      home.attention.length === 0,
+      home.advancing[0]?.title === "Search review" &&
+      home.attention.items.length === 0 &&
+      home.businessImpact === null,
   );
 
   const composition = resolvePortalHomeComposition({ profile });
@@ -334,7 +334,7 @@ function main() {
     "client primitives preserve keyboard focus, reduced motion, and semantic sections",
     cesStyles.includes(":focus-visible") &&
       cesStyles.includes("@media (prefers-reduced-motion: reduce)") &&
-      commandHome.includes('aria-labelledby="client-snapshot-title"') &&
+      commandHome.includes('aria-labelledby="client-attention-title"') &&
       commandHome.includes("aria-labelledby={id}"),
   );
 

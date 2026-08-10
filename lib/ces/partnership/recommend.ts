@@ -59,7 +59,7 @@ export function decideClientRecommendation(input: RecommendInput): PartnershipRe
   return {
     headline: "No current action is required",
     rationale:
-      "Nothing is waiting on you right now. Recommendations will appear here as supporting activity is recorded.",
+      "You're all caught up. KXD will continue managing the current partnership work.",
     evidenceLabels,
   };
 }

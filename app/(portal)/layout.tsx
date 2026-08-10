@@ -20,7 +20,10 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "Workspace",
+  title: {
+    default: "Your partnership",
+    template: "%s · Kreate by Design",
+  },
   robots: { index: false, follow: false },
 };
 

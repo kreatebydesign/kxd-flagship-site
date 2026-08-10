@@ -18,6 +18,11 @@ import {
   getEnabledPortalNavGroups,
   type PortalNavId,
 } from "@/lib/portal/nav";
+import {
+  clientPortalNavGroupLabel,
+  isGenericWorkspaceSidebarLabel,
+} from "@/lib/ces/copy/client-nav-labels";
+import { resolvePortalHomeShell } from "@/lib/ces/modules/home";
 
 export interface ClientHqShellProps {
   activeId: PortalNavId;
@@ -95,13 +100,18 @@ export function ClientHqShell({
   }, [navOpen]);
 
   const displayName =
-    experienceProfile?.identity.clientName ?? companyName ?? "Your workspace";
+    experienceProfile?.identity.clientName ?? companyName ?? "Your partnership";
   const sidebarLabel =
     experienceProfile?.hospitality.portalSidebarLabel ??
     branding?.portal.sidebarLabel ??
-    "Your workspace";
+    "";
   const quietWorkspaceLabel =
-    sidebarLabel && !labelsMatch(sidebarLabel, displayName) ? sidebarLabel : null;
+    sidebarLabel &&
+    !labelsMatch(sidebarLabel, displayName) &&
+    !isGenericWorkspaceSidebarLabel(sidebarLabel)
+      ? sidebarLabel
+      : null;
+  const cesShell = resolvePortalHomeShell(experienceProfile);
   const reassuranceLine = experienceProfile?.hospitality.reassuranceLine;
   const partnerLine = experienceProfile?.hospitality.partnerFooterLine;
   /**
@@ -123,16 +133,35 @@ export function ClientHqShell({
     experienceProfile?.identity.logoAlt ??
     experienceProfile?.presentation?.logoAlt ??
     displayName;
+  const logoCarriesName = Boolean(
+    clientLogo && labelsMatch(clientLogoAlt, displayName),
+  );
 
   return (
-    <KxdShell className="kxd-os-shell--app">
+    <>
+      {operatorPreview ? (
+        <OperatorPortalPreviewBanner clientName={operatorPreview.clientName} />
+      ) : null}
+      <KxdShell className="kxd-os-shell--app">
+      <input
+        id={`${navId}-toggle`}
+        className="kxd-ces-nav-check"
+        type="checkbox"
+        checked={navOpen}
+        onChange={(event) => setNavOpen(event.target.checked)}
+        tabIndex={-1}
+        aria-hidden="true"
+      />
+      <button
+        type="button"
+        className="kxd-ces-nav-scrim"
+        aria-label="Close navigation"
+        onClick={() => setNavOpen(false)}
+      />
       <div
         className={`kxd-os-app${navOpen ? " kxd-ces-nav-open" : ""}`}
         style={cssVars as CSSProperties}
       >
-        {operatorPreview ? (
-          <OperatorPortalPreviewBanner clientName={operatorPreview.clientName} />
-        ) : null}
         <div className="kxd-ces-mobile-bar">
           <div className="kxd-ces-mobile-bar__identity">
             <p className="kxd-ces-mobile-bar__name">{displayName}</p>
@@ -141,26 +170,16 @@ export function ClientHqShell({
             ) : null}
             {accountSwitcher ? <AccountSwitcher model={accountSwitcher} /> : null}
           </div>
-          <button
-            type="button"
+          <label
+            htmlFor={`${navId}-toggle`}
             className="kxd-ces-mobile-bar__toggle"
             aria-expanded={navOpen}
             aria-controls={navId}
             aria-label={navOpen ? "Close navigation menu" : "Open navigation menu"}
-            onClick={() => setNavOpen((open) => !open)}
           >
             {navOpen ? "Close menu" : "Menu"}
-          </button>
+          </label>
         </div>
-
-        {navOpen ? (
-          <button
-            type="button"
-            className="kxd-ces-nav-scrim"
-            aria-label="Close navigation"
-            onClick={() => setNavOpen(false)}
-          />
-        ) : null}
 
         <aside
           id={navId}
@@ -168,7 +187,11 @@ export function ClientHqShell({
           aria-label={displayName}
           aria-hidden={mobileNavMode ? !navOpen : undefined}
         >
-          <div className="kxd-ces-identity">
+          <div
+            className={`kxd-ces-identity${clientLogo ? " kxd-ces-identity--has-logo" : ""}${
+              logoCarriesName ? " kxd-ces-identity--logo-wordmark" : ""
+            }`}
+          >
             {clientLogo ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -177,9 +200,14 @@ export function ClientHqShell({
                 className="kxd-ces-identity__logo"
               />
             ) : null}
-            <p className="kxd-ces-identity__name">{displayName}</p>
+            {logoCarriesName ? null : (
+              <p className="kxd-ces-identity__name">{displayName}</p>
+            )}
             {quietWorkspaceLabel ? (
               <p className="kxd-ces-identity__workspace">{quietWorkspaceLabel}</p>
+            ) : null}
+            {cesShell === "ces" ? (
+              <p className="kxd-ces-identity__partner">Private KXD partnership</p>
             ) : null}
             {accountSwitcher ? <AccountSwitcher model={accountSwitcher} /> : null}
             <div className="kxd-ces-identity__rule" aria-hidden="true" />
@@ -191,6 +219,11 @@ export function ClientHqShell({
                 key={group.label}
                 className={`kxd-os-sidebar__group${groupIndex > 0 ? " kxd-os-sidebar__group--sep" : ""}`}
               >
+                {cesShell === "ces" && clientPortalNavGroupLabel(group.label) ? (
+                  <p className="kxd-os-sidebar__group-label">
+                    {clientPortalNavGroupLabel(group.label)}
+                  </p>
+                ) : null}
                 <ul className="kxd-os-sidebar__list">
                   {group.items.map((item) => {
                     const isActive = item.id === activeId;
@@ -238,7 +271,8 @@ export function ClientHqShell({
 
         <div className="kxd-os-app__main">{children}</div>
       </div>
-    </KxdShell>
+      </KxdShell>
+    </>
   );
 }
 

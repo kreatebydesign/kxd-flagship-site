@@ -13,6 +13,8 @@ import type { ResolvedExperienceProfile } from "@/lib/ces";
 import { getEditionBranding, getEditionNavigation } from "@/lib/editions";
 import { isPortalNavEnabled } from "@/lib/editions/navigation";
 import { isClientHqModuleEnabled, type ClientHqModuleId } from "./modules";
+import { clientPortalNavLabel } from "@/lib/ces/copy/client-nav-labels";
+import { resolvePortalHomeShell } from "@/lib/ces/modules/home";
 
 export type ClientHqNavId = ClientHqModuleId;
 /** Shared Core partnership briefing — nav id aliases executive-performance. */
@@ -153,6 +155,9 @@ export function getEnabledPortalNavGroups(
     billingNavAvailable,
     portfolioNavAvailable,
   };
+  const useClientLabels = resolvePortalHomeShell(profile) === "ces";
+  const relabel = (id: string, label: string) =>
+    useClientLabels ? clientPortalNavLabel(id, profile.terminology, label) : label;
 
   const cesItems = getCesNavItems(profile).filter((item) =>
     isPortalModuleVisible(item.moduleId, visibilityCtx),
@@ -168,7 +173,7 @@ export function getEnabledPortalNavGroups(
         })
         .map((item) => ({
           id: navIdForPortalModule(item.moduleId as PortalModuleId),
-          label: item.label,
+          label: relabel(item.moduleId, item.label),
           href: item.href,
         }));
 
@@ -184,10 +189,12 @@ export function getEnabledPortalNavGroups(
           ? [
               {
                 id: "partnership",
-                label:
+                label: relabel(
+                  "executive-performance",
                   profile.terminology["nav.executive-performance"] ??
-                  getCanonicalCapability("executive-performance")?.label ??
-                  "Partnership",
+                    getCanonicalCapability("executive-performance")?.label ??
+                    "Partnership",
+                ),
                 href: "/portal/partnership",
               },
             ]
@@ -198,7 +205,7 @@ export function getEnabledPortalNavGroups(
         items: [
           ...group.items.map(({ id, label, href }) => ({
             id: id as PortalNavId,
-            label,
+            label: relabel(id, label),
             href,
           })),
           ...partnershipItem,

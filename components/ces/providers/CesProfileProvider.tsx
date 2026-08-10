@@ -2,14 +2,17 @@
 
 import { createContext, useContext, type ReactNode } from "react";
 import type { ResolvedExperienceProfile } from "@/lib/ces";
+import type { PortalHomeShell } from "@/lib/ces/modules/home";
 
 const CesProfileContext = createContext<ResolvedExperienceProfile | null>(null);
 
 export function CesProfileProvider({
   profile,
+  shell = "hq",
   children,
 }: {
   profile: ResolvedExperienceProfile;
+  shell?: PortalHomeShell;
   children: ReactNode;
 }) {
   return (
@@ -17,6 +20,7 @@ export function CesProfileProvider({
       <div
         className="kxd-ces-app"
         data-ces-source={profile.source}
+        data-ces-shell={shell}
         data-ces-tone={profile.hospitality.supportTone}
         style={profile.cssVars as React.CSSProperties}
       >

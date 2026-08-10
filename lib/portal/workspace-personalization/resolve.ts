@@ -267,9 +267,12 @@ export function formatWorkspaceWelcomeTitle(
   portalDisplayName: string,
 ): string {
   const first =
-    portalDisplayName.split(/\s+/)[0]?.trim() || portalDisplayName.trim() || "there";
+    portalDisplayName.split(/\s+/)[0]?.trim() || portalDisplayName.trim() || "";
   if (model.welcome.titleTemplate === "welcome-workspace") {
     return model.identity.workspaceName;
+  }
+  if (!first || /^(operator|preview)$/i.test(first)) {
+    return "Welcome back.";
   }
   return `Welcome back, ${first}`;
 }

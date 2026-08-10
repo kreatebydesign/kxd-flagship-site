@@ -15,6 +15,7 @@ import {
 } from "./memberships";
 import { getOperatorPortalPreviewCookieSession } from "./operator-preview/cookie";
 import type { OperatorPortalPreviewSession } from "./operator-preview/types";
+import { resolvePortalGreetingName } from "./greeting";
 
 const SESSION_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
 
@@ -23,6 +24,11 @@ export type PortalSession = {
   clientId: number;
   email: string;
   displayName: string;
+  /**
+   * Hospitality first name for greetings. Never an audit/preview label.
+   * Empty in operator preview when no real member identity exists.
+   */
+  greetingName: string;
   clientName: string;
   welcomeCompletedAt: string | null;
   /** True when a studio operator is previewing this client portal. */
@@ -98,6 +104,10 @@ function asPortalUserSession(input: {
 }): PortalSession {
   return {
     ...input,
+    greetingName: resolvePortalGreetingName({
+      displayName: input.displayName,
+      isOperatorPreview: false,
+    }),
     isOperatorPreview: false,
     operatorPreview: null,
   };
@@ -135,6 +145,7 @@ async function resolveOperatorPreviewSession(): Promise<PortalSession | null> {
       clientId: preview.clientId,
       email: preview.adminEmail,
       displayName: `Operator Preview · ${clientName}`,
+      greetingName: "",
       clientName,
       // Skip welcome / MFA enrollment gates for operator preview.
       welcomeCompletedAt: preview.startedAt,

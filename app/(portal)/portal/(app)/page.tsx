@@ -8,7 +8,7 @@ import { resolveExperienceProfile } from "@/lib/ces/server";
 import { getWebsiteReviewLanding } from "@/lib/ces/modules/website-review/data";
 import { getConnectedWorkspaceData } from "@/lib/portal/connected-workspace";
 import { getPortalOverview } from "@/lib/portal/data";
-import { portalFirstName, portalTimeGreeting } from "@/lib/portal/greeting";
+import { composePortalGreeting } from "@/lib/portal/compose-greeting";
 import { getPortalSession } from "@/lib/portal/session";
 import { resolvePortalWorkspacePersonalization } from "@/lib/portal/workspace-personalization/server";
 import { resolvePortalWorkPerformance } from "@/lib/portal/work-performance/server";
@@ -46,7 +46,7 @@ export default async function PortalOverviewPage() {
       websiteReview,
       connected,
     });
-    const greeting = portalTimeGreeting(portalFirstName(session.displayName));
+    const greeting = await composePortalGreeting(session);
     const performance = await composeExecutivePerformance({
       profile,
       briefing,
@@ -55,7 +55,7 @@ export default async function PortalOverviewPage() {
     });
     return (
       <CesPortalHome
-        displayName={session.displayName}
+        greeting={greeting}
         profile={profile}
         websiteReview={websiteReview}
         connected={connected}
@@ -76,7 +76,7 @@ export default async function PortalOverviewPage() {
 
   return (
     <OverviewScreen
-      displayName={session.displayName}
+      displayName={session.greetingName || session.clientName}
       data={data}
       personalization={personalization}
       workPerformance={workPerformance}

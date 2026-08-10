@@ -1,4 +1,5 @@
 import type { ExperienceVisual } from "../types";
+import { resolveCesBrandColor, resolveCesInteractiveAccent } from "./accent";
 
 const BORDER_RADIUS: Record<ExperienceVisual["borderRadiusPreset"], string> = {
   soft: "14px",
@@ -13,10 +14,13 @@ const MOTION_DURATION: Record<ExperienceVisual["motionPreset"], string> = {
 };
 
 export function experienceProfileToCssVars(visual: ExperienceVisual): Record<string, string> {
+  const brand = resolveCesBrandColor(visual.accentColor);
+  const accent = resolveCesInteractiveAccent(visual.accentColor);
   return {
     "--kxd-ces-primary": visual.primaryColor,
     "--kxd-ces-secondary": visual.secondaryColor,
-    "--kxd-ces-accent": visual.accentColor,
+    "--kxd-ces-brand": brand,
+    "--kxd-ces-accent": accent,
     "--kxd-ces-surface-tint": visual.surfaceTint ?? "transparent",
     "--kxd-ces-radius-md": BORDER_RADIUS[visual.borderRadiusPreset],
     "--kxd-ces-radius-lg": visual.borderRadiusPreset === "soft" ? "18px" : "12px",

@@ -25,8 +25,11 @@ import {
   normalizeSupportTone,
   parseTerminology,
 } from "./defaults";
+import { resolveCesBrandColor, resolveCesInteractiveAccent } from "./accent";
 import { experienceProfileToCssVars } from "./tokens";
 import { PRIMAL_CLIENT_SLUG, PRIMAL_EXPERIENCE_PROFILE } from "./primal";
+import { resolveMediaAssetUrl } from "@/lib/client-command/experience/media-url";
+import { generatePayloadMediaFileUrl } from "@/lib/media/payload-storage";
 
 type AnyDoc = Record<string, unknown>;
 
@@ -35,7 +38,18 @@ const COLLECTION = "client-experience-profiles";
 function mediaUrl(value: unknown): string | null {
   if (!value || typeof value !== "object") return null;
   const doc = value as AnyDoc;
-  return doc.url ? String(doc.url) : null;
+  const resolved = resolveMediaAssetUrl(value);
+  const isEphemeralApi =
+    Boolean(resolved) &&
+    (resolved!.startsWith("/api/media/file/") || resolved!.includes("/api/media/file/"));
+  if (resolved && !isEphemeralApi) return resolved;
+  const filename = String(doc.filename ?? "").trim();
+  const prefix = String(doc.prefix ?? "").trim();
+  if (filename) {
+    const generated = generatePayloadMediaFileUrl({ filename, prefix: prefix || null });
+    if (generated) return generated;
+  }
+  return isEphemeralApi ? null : resolved;
 }
 
 function normalizeEnabledModules(value: unknown): CesModuleId[] {
@@ -119,7 +133,10 @@ function finalizeProfile(profile: ResolvedExperienceProfile): ResolvedExperience
       ? {
           "--kxd-ces-hero-image": `url(${presentation.heroImageSrc})`,
           ...(presentation.actionAccent
-            ? { "--kxd-ces-accent": presentation.actionAccent }
+            ? {
+                "--kxd-ces-brand": resolveCesBrandColor(presentation.actionAccent),
+                "--kxd-ces-accent": resolveCesInteractiveAccent(presentation.actionAccent),
+              }
             : {}),
           ...(presentation.intelligenceAccent
             ? {

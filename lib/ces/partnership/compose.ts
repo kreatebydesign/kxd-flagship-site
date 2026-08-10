@@ -287,7 +287,7 @@ export async function composePartnershipBriefing(input: {
       attentionAction ??
       (hasActiveReviews
         ? "Complete the current website review"
-        : "Recommendations will appear as supporting activity is recorded"),
+        : "KXD will continue managing the current partnership work"),
     recommendationLine: recommendation.headline,
   };
 

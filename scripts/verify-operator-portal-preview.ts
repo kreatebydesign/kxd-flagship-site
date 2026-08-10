@@ -144,6 +144,18 @@ function main() {
     banner.includes("Operator Preview ·") && banner.includes("Exit Preview"),
   );
 
+  const shell = read("components/client-hq/ClientHqShell.tsx");
+  check(
+    "preview banner sits outside .kxd-os-app so it cannot steal a grid track",
+    /operatorPreview[\s\S]*OperatorPortalPreviewBanner[\s\S]*className=\{`kxd-os-app/.test(shell) &&
+      !/kxd-os-app[\s\S]*OperatorPortalPreviewBanner/.test(shell),
+  );
+  check(
+    "preview banner sits outside KxdShell so large-desktop atelier cannot clip studio chrome",
+    shell.indexOf("OperatorPortalPreviewBanner") < shell.indexOf("<KxdShell") &&
+      shell.indexOf("OperatorPortalPreviewBanner") < shell.indexOf("kxd-os-shell--app"),
+  );
+
   const switchRoute = read("app/api/portal/account/switch/route.ts");
   check(
     "account switch uses write session (preview cannot switch clients)",

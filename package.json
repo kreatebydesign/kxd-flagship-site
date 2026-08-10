@@ -129,6 +129,7 @@
     "verify:client-upgrade-requests": "tsx scripts/verify-client-upgrade-requests.ts",
     "verify:client-inventory": "tsx scripts/verify-client-inventory.ts",
     "verify:client-experience-doctrine": "tsx scripts/verify-client-experience-doctrine.ts",
+    "verify:luxury-ces-foundation": "tsx scripts/verify-luxury-ces-foundation.ts",
     "verify:scheduling": "tsx scripts/verify-scheduling-domain.ts",
     "verify:calendar": "tsx scripts/verify-google-calendar-read.ts",
     "verify:calendar-write": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/verify-calendar-write.ts",

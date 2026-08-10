@@ -1,13 +1,20 @@
 /**
- * Unified portal home composition — Phase 2.
- * Architecture/composition only. Does not redesign CES or Client HQ visuals.
+ * Unified portal home composition — Phase 2 + luxury briefing presentation.
+ * Entitlements remain canonical. This file only composes client-facing presentation.
  */
 
+import { clientMetricLabel } from "../copy/portal-language";
+import { clientServiceCapabilityCopy } from "../partnership/service-value";
 import { isCesModuleEnabled, type ResolvedExperienceProfile } from "../types";
 import type { PartnershipBriefing } from "../partnership/types";
 import type { WorkPerformanceModel } from "@/lib/portal/work-performance";
-import { CES_EXPERIENCE_MODULE_IDS, type PortalModuleId } from "./canonical";
+import {
+  CES_EXPERIENCE_MODULE_IDS,
+  getCanonicalCapability,
+  type PortalModuleId,
+} from "./canonical";
 import { isPortalModuleVisible, type PortalModuleVisibilityContext } from "./visibility";
+import { SERVICE_CAPABILITY_CATALOG } from "@/lib/service-capabilities";
 
 export type PortalHomeZoneId =
   | "executive-performance"
@@ -49,22 +56,47 @@ export type ClientHomePresentationItem = {
   href: string | null;
 };
 
+export type ClientHomePerformanceFact = {
+  id: string;
+  label: string;
+  value: string;
+  detail: string | null;
+};
+
+export type ClientHomeBusinessImpact = {
+  items: ClientHomePresentationItem[];
+  note: string | null;
+};
+
+export type ClientHomeService = {
+  id: string;
+  title: string;
+  detail: string | null;
+  href: string | null;
+};
+
 export type ClientHomePresentation = {
-  opening: {
+  welcome: {
     eyebrow: string;
-    title: string;
+    greeting: string;
     lead: string;
   };
-  snapshot: Array<{ label: string; value: string }>;
+  attention: {
+    items: ClientHomePresentationItem[];
+    allClearTitle: string;
+    allClearLead: string;
+  };
   accomplishments: ClientHomePresentationItem[];
-  activeWork: ClientHomePresentationItem[];
-  attention: ClientHomePresentationItem[];
-  opportunities: ClientHomePresentationItem[];
-  next: {
-    title: string;
-    detail: string;
+  advancing: ClientHomePresentationItem[];
+  performance: {
+    visible: boolean;
+    facts: ClientHomePerformanceFact[];
+    statusNote: string | null;
     href: string | null;
   };
+  /** Future Lead & Business Impact band. Omit entirely when null. */
+  businessImpact: ClientHomeBusinessImpact | null;
+  services: ClientHomeService[];
 };
 
 const ZONE_MODULE: Record<PortalHomeZoneId, PortalModuleId | null> = {
@@ -158,31 +190,165 @@ export function resolveCesHomeSurface(input: {
   return "partnership-briefing";
 }
 
+function moduleHref(moduleId: PortalModuleId): string | null {
+  return getCanonicalCapability(moduleId)?.portal?.href ?? null;
+}
+
+function firstVisibleModuleHref(
+  moduleIds: readonly string[],
+  ctx: PortalModuleVisibilityContext,
+): string | null {
+  for (const id of moduleIds) {
+    if (!isPortalModuleVisible(id, ctx)) continue;
+    const href = moduleHref(id as PortalModuleId);
+    if (href) return href;
+  }
+  return null;
+}
+
+function serviceMentions(services: ClientHomeService[], pattern: RegExp): boolean {
+  return services.some(
+    (service) => pattern.test(service.title) || pattern.test(service.detail ?? ""),
+  );
+}
+
+function composeWelcomeLead(services: ClientHomeService[]): string {
+  if (services.length === 0) {
+    return "This is your private Kreate by Design partnership space. Ongoing work stays organized here.";
+  }
+
+  const parts: string[] = [];
+  if (serviceMentions(services, /website|hosting/i)) parts.push("your website");
+  if (serviceMentions(services, /search|seo|visibility/i)) parts.push("search visibility");
+  if (serviceMentions(services, /analytics|performance/i)) {
+    parts.push("performance reporting");
+  }
+  if (serviceMentions(services, /inventory|showroom/i)) parts.push("inventory");
+
+  if (parts.length >= 2) {
+    const last = parts[parts.length - 1];
+    const head = parts.slice(0, -1);
+    const joined =
+      head.length === 1 ? `${head[0]} and ${last}` : `${head.join(", ")}, and ${last}`;
+    return `KXD is managing the digital services included in your partnership and keeping ${joined} organized here.`;
+  }
+  if (parts.length === 1) {
+    return `KXD is managing the digital services included in your partnership, including ${parts[0]}.`;
+  }
+  if (services.length === 1 && services[0]) {
+    return `KXD is managing ${services[0].title.toLowerCase()} for this partnership.`;
+  }
+  return "KXD is managing the digital services included in your partnership and keeping ongoing work organized here.";
+}
+
+function composePerformance(
+  workPerformance: WorkPerformanceModel,
+  ctx: PortalModuleVisibilityContext,
+  services: ClientHomeService[],
+): ClientHomePresentation["performance"] {
+  const commerciallyEntitled = serviceMentions(
+    services,
+    /analytics|performance reporting|search visibility|seo/i,
+  );
+  const searchVisible =
+    isPortalModuleVisible("analytics", ctx) || isPortalModuleVisible("website-health", ctx);
+
+  if (!commerciallyEntitled) {
+    return { visible: false, facts: [], statusNote: null, href: null };
+  }
+
+  const href = firstVisibleModuleHref(["analytics", "website-health", "reports"], ctx);
+
+  if (workPerformance.analytics.availability === "ready") {
+    const facts = workPerformance.analytics.metrics.slice(0, 4).map((metric) => ({
+      id: metric.key,
+      label: clientMetricLabel(metric.key, metric.label),
+      value: metric.valueLabel,
+      detail: metric.domain === "search" && searchVisible ? metric.deltaLabel : null,
+    }));
+    if (facts.length > 0) {
+      return {
+        visible: true,
+        facts,
+        statusNote: null,
+        href,
+      };
+    }
+  }
+
+  return {
+    visible: true,
+    facts: [],
+    statusNote: "Performance reporting is being prepared.",
+    href,
+  };
+}
+
+function composeHomeServices(
+  briefing: PartnershipBriefing,
+  ctx: PortalModuleVisibilityContext,
+): ClientHomeService[] {
+  return briefing.services.items.map((item) => {
+    const capability = SERVICE_CAPABILITY_CATALOG.find((entry) => {
+      const copy = clientServiceCapabilityCopy(entry);
+      return copy.label === item.label || entry.label === item.label;
+    });
+    return {
+      id: item.id,
+      title: item.label,
+      detail: item.value,
+      href: capability ? firstVisibleModuleHref(capability.grantsModules, ctx) : null,
+    };
+  });
+}
+
+function isLegitimateBusinessImpact(
+  impact: ClientHomeBusinessImpact | null | undefined,
+): impact is ClientHomeBusinessImpact {
+  if (!impact || impact.items.length === 0) return false;
+  const blob = JSON.stringify(impact).toLowerCase();
+  if (
+    blob.includes("$300") ||
+    blob.includes("commission") ||
+    blob.includes("ga4") ||
+    blob.includes("reportingfacts") ||
+    blob.includes("property id") ||
+    blob.includes("ingest")
+  ) {
+    return false;
+  }
+  return impact.items.every((item) => item.title.trim().length > 0);
+}
+
 /**
  * Read-only client presentation adapter. It reshapes existing evidence and
  * recommendations; it does not create a second intelligence layer.
  */
 export function composeClientHomePresentation(input: {
-  displayName: string;
   greeting: string;
   profile: ResolvedExperienceProfile;
   briefing: PartnershipBriefing;
   workPerformance: WorkPerformanceModel;
+  /** Future confirmed/client-safe aggregates only. Never invent from GA4. */
+  businessImpact?: ClientHomeBusinessImpact | null;
 }): ClientHomePresentation {
-  const { greeting, briefing, workPerformance } = input;
-  const attention: ClientHomePresentationItem[] = workPerformance.currentlyInProgress
+  const { greeting, profile, briefing, workPerformance } = input;
+  const ctx: PortalModuleVisibilityContext = { profile };
+  const services = composeHomeServices(briefing, ctx);
+
+  const attentionItems: ClientHomePresentationItem[] = workPerformance.currentlyInProgress
     .filter((item) => item.owner === "client" || item.owner === "shared")
     .slice(0, 3)
     .map((item) => ({
       id: item.id,
       title: item.title,
       detail: item.statusLabel,
-      meta: item.owner === "client" ? "Waiting on you" : "Shared next step",
+      meta: item.owner === "client" ? "Waiting on you" : "Needs your input too",
       href: item.href,
     }));
 
-  if (attention.length === 0 && briefing.needsAttention.action) {
-    attention.push({
+  if (attentionItems.length === 0 && briefing.needsAttention.action) {
+    attentionItems.push({
       id: "partnership-attention",
       title: briefing.needsAttention.action,
       detail: null,
@@ -191,41 +357,21 @@ export function composeClientHomePresentation(input: {
     });
   }
 
-  const opportunities = workPerformance.nextMoves.slice(0, 3).map((item) => ({
-    id: item.id,
-    title: item.title,
-    detail: item.lead,
-    meta: "Recommended next move",
-    href: item.href,
-  }));
-  const primaryNext = opportunities[0];
+  const businessImpact = isLegitimateBusinessImpact(input.businessImpact ?? null)
+    ? input.businessImpact!
+    : null;
 
   return {
-    opening: {
-      eyebrow: "Private business command center",
-      title: greeting,
-      lead: briefing.recommendation.rationale,
+    welcome: {
+      eyebrow: profile.hospitality.welcomeEyebrow?.trim() || "Your partnership",
+      greeting,
+      lead: composeWelcomeLead(services),
     },
-    snapshot: [
-      {
-        label: "Completed this month",
-        value: String(workPerformance.valueSummary.completedCount),
-      },
-      {
-        label: "Active work",
-        value: String(workPerformance.valueSummary.activeCount),
-      },
-      {
-        label: "Waiting on you",
-        value: String(workPerformance.valueSummary.awaitingClientCount),
-      },
-      ...(workPerformance.analytics.availability === "ready"
-        ? workPerformance.analytics.metrics.slice(0, 1).map((metric) => ({
-            label: metric.label,
-            value: metric.valueLabel,
-          }))
-        : []),
-    ],
+    attention: {
+      items: attentionItems,
+      allClearTitle: "Nothing needs your attention.",
+      allClearLead: "You're all caught up.",
+    },
     accomplishments: workPerformance.completedThisMonth.slice(0, 4).map((item) => ({
       id: item.id,
       title: item.title,
@@ -238,7 +384,7 @@ export function composeClientHomePresentation(input: {
         : "Completed this month",
       href: item.href,
     })),
-    activeWork: workPerformance.currentlyInProgress.slice(0, 4).map((item) => ({
+    advancing: workPerformance.currentlyInProgress.slice(0, 4).map((item) => ({
       id: item.id,
       title: item.title,
       detail: item.statusLabel,
@@ -246,19 +392,13 @@ export function composeClientHomePresentation(input: {
         item.owner === "client"
           ? "Waiting on you"
           : item.owner === "shared"
-            ? "Shared next step"
+            ? "Needs your input too"
             : "KXD is managing this",
       href: item.href,
     })),
-    attention,
-    opportunities,
-    next: {
-      title: primaryNext?.title ?? briefing.overview.nextMilestone,
-      detail:
-        primaryNext?.detail ??
-        "KXD will keep this workspace current as the next agreed priority advances.",
-      href: primaryNext?.href ?? null,
-    },
+    performance: composePerformance(workPerformance, ctx, services),
+    businessImpact,
+    services,
   };
 }
 
