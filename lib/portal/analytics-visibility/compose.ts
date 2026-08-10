@@ -72,38 +72,38 @@ function buildSources(input: {
   return [
     {
       id: "ga4",
-      label: "Google Analytics 4",
+      label: "Website activity",
       state: ga4State,
       detail:
         ga4State === "configured"
-          ? "Property on file for this account"
+          ? "Measurement is connected for this business"
           : ga4State === "not-entitled"
-            ? "Analytics is not enabled for this workspace yet"
-            : "No GA4 property configured for this account",
+            ? "Website measurement is not part of the active partnership"
+            : "Website measurement is not connected yet",
     },
     {
       id: "search-console",
-      label: "Search Console",
+      label: "Search visibility",
       state: gscState,
       detail:
         gscState === "configured"
-          ? "Site URL on file for this account"
+          ? "Google Search measurement is connected for this business"
           : gscState === "not-entitled"
-            ? "Search visibility is not enabled for this workspace yet"
-            : "No Search Console site configured for this account",
+            ? "Search visibility reporting is not part of the active partnership"
+            : "Search visibility measurement is not connected yet",
     },
     {
       id: "reporting-facts",
-      label: "Synced reporting facts",
+      label: "Reporting update",
       state: factsState,
       detail:
         factsState === "connected"
-          ? input.freshnessNote ?? "Verified facts available for the reporting period"
+          ? (input.freshnessNote ?? "Verified results are available for this period")
           : factsState === "unavailable"
-            ? "Sources are configured, but no facts are available for this period yet — not shown as zero"
+            ? "Measurement is connected, but this period is not ready yet — missing results are never shown as zero"
             : factsState === "not-entitled"
-              ? "Reporting capabilities are not enabled for this workspace"
-              : "No analytics sources are configured for this account",
+              ? "Performance reporting is not part of the active partnership"
+              : "No website measurement is connected yet",
     },
   ];
 }
@@ -120,9 +120,9 @@ function buildLeads(
   const label = periodLabel(period);
   const empty = {
     conversionCount: null as number | null,
-    conversionLabel: "GA4 conversions",
+    conversionLabel: "Tracked website actions",
     generateLeadCount: null as number | null,
-    generateLeadLabel: "GA4 lead actions",
+    generateLeadLabel: "Tracked inquiry actions",
     formSubmissionCount: null as number | null,
     formSubmissionLabel: "Form submissions",
     confirmedLeadCount: null as number | null,
@@ -160,19 +160,21 @@ function buildLeads(
       ...empty,
       statusNote:
         baseStatusNote ??
-        "GA4 lead actions and conversions are unavailable for this period. Confirmed lead tracking is not connected. These categories are never combined.",
+        "Tracked inquiry actions and website actions are unavailable for this period. Confirmed lead tracking is not connected. These categories are never combined.",
     };
   }
 
   const notes: string[] = [
-    "Confirmed leads, GA4 lead actions, and conversions are separate measurements — never one total.",
+    "Confirmed leads, tracked inquiry actions, and other website actions are separate measurements — never one total.",
     "Confirmed lead tracking is not connected for this workspace.",
   ];
   if (hasGenerateLead) {
-    notes.push("GA4 lead actions count generate_lead events, not unique people or confirmed inquiries.");
+    notes.push(
+      "Tracked inquiry actions are website events, not unique people or confirmed inquiries.",
+    );
   }
   if (hasConversion) {
-    notes.push("GA4 conversions are aggregate key events — not confirmed leads.");
+    notes.push("Tracked website actions are aggregate events — not confirmed leads.");
   }
   if (hasForms) {
     notes.push("Form submission facts are website events when present — not confirmed leads.");
@@ -182,9 +184,9 @@ function buildLeads(
     availability: "ready",
     periodLabel: label,
     conversionCount: baseConversionCount,
-    conversionLabel: baseConversionLabel || "GA4 conversions",
+    conversionLabel: baseConversionLabel || "Tracked website actions",
     generateLeadCount,
-    generateLeadLabel: "GA4 lead actions",
+    generateLeadLabel: "Tracked inquiry actions",
     formSubmissionCount,
     formSubmissionLabel: "Website form submissions",
     confirmedLeadCount: null,
@@ -194,9 +196,7 @@ function buildLeads(
   };
 }
 
-function buildReports(
-  items: AnalyticsVisibilityReportItem[],
-): AnalyticsVisibilityReports {
+function buildReports(items: AnalyticsVisibilityReportItem[]): AnalyticsVisibilityReports {
   if (items.length === 0) {
     return {
       availability: "empty",

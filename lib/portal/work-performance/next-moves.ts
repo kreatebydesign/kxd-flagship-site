@@ -5,7 +5,7 @@
 
 import type { ResolvedExperienceProfile } from "@/lib/ces";
 import { isCesModuleEnabled } from "@/lib/ces";
-import { isClientHqModuleEnabled } from "@/lib/portal/modules";
+import { isPortalModuleVisible } from "@/lib/ces/modules/visibility";
 import { sanitizePortalHref } from "@/lib/portal/workspace-personalization/safe-routes";
 import type { WorkPerformanceNextMove } from "./types";
 
@@ -28,10 +28,7 @@ export function buildWorkPerformanceNextMoves(input: {
         href,
       });
     }
-  } else if (
-    input.activeReviewCount > 0 &&
-    isCesModuleEnabled(input.profile, "website-review")
-  ) {
+  } else if (input.activeReviewCount > 0 && isCesModuleEnabled(input.profile, "website-review")) {
     const href = sanitizePortalHref("/portal/website-review");
     if (href) {
       moves.push({
@@ -53,7 +50,7 @@ export function buildWorkPerformanceNextMoves(input: {
     }
   }
 
-  if (input.hasAnalytics && isClientHqModuleEnabled("reports")) {
+  if (input.hasAnalytics && isPortalModuleVisible("reports", { profile: input.profile })) {
     const href = sanitizePortalHref("/portal/reports");
     if (href) {
       moves.push({
@@ -65,7 +62,10 @@ export function buildWorkPerformanceNextMoves(input: {
     }
   }
 
-  if (input.completedThisMonth === 0 && isClientHqModuleEnabled("deliverables")) {
+  if (
+    input.completedThisMonth === 0 &&
+    isPortalModuleVisible("deliverables", { profile: input.profile })
+  ) {
     const href = sanitizePortalHref("/portal/deliverables");
     if (href) {
       moves.push({
@@ -77,7 +77,7 @@ export function buildWorkPerformanceNextMoves(input: {
     }
   }
 
-  if (isClientHqModuleEnabled("requests") && moves.length < 3) {
+  if (isPortalModuleVisible("requests", { profile: input.profile }) && moves.length < 3) {
     const href = sanitizePortalHref("/portal/requests");
     if (href) {
       moves.push({

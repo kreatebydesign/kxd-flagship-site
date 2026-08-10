@@ -13,6 +13,7 @@ import { suggestInventorySlug, normalizeInventorySlug } from "../lib/inventory/s
 import type { InventoryVehicleRecord } from "../lib/inventory/types";
 import { PRIMAL_EXPERIENCE_PROFILE } from "../lib/ces/profile/primal";
 import { resolveMediaPath, toAbsoluteMediaUrl } from "../lib/inventory/media";
+import { normalizeInventorySourceIdentity } from "../lib/inventory/source";
 
 const root = process.cwd();
 
@@ -53,6 +54,9 @@ function fixture(partial: Partial<InventoryVehicleRecord>): InventoryVehicleReco
     publishedAt: "2026-07-14T00:00:00.000Z",
     soldAt: null,
     externalUrl: null,
+    sourceSystem: null,
+    sourceExternalId: null,
+    lastSourceSyncAt: null,
     createdBy: "a@b.com",
     updatedBy: "a@b.com",
     createdAt: null,
@@ -76,6 +80,9 @@ function main() {
   const portalRoute = read("app/api/portal/inventory/route.ts");
   const launchSafety = read("lib/portal/ces-launch-safety.ts");
   const tabs = read("lib/client-command/tabs.ts");
+  const sourceMigration = read("migrations/20260809_client_inventory_source_identity.ts");
+  const inventoryServer = read("lib/inventory/server.ts");
+  const inventoryImporter = read("scripts/import-client-inventory.ts");
 
   check(
     "collection ClientInventoryVehicles exists",
@@ -86,10 +93,7 @@ function main() {
     migrationsIndex.includes("20260714_phase34b_client_inventory_vehicles") &&
       migration.includes("client_inventory_vehicles"),
   );
-  check(
-    "payload.config registers collection",
-    payloadConfig.includes("ClientInventoryVehicles"),
-  );
+  check("payload.config registers collection", payloadConfig.includes("ClientInventoryVehicles"));
   check(
     "CES module id includes inventory",
     (types.includes('"inventory"') ||
@@ -102,15 +106,12 @@ function main() {
   );
   check(
     "Primal entitlements include inventory only as intentional enablement",
-    (PRIMAL_EXPERIENCE_PROFILE.enabledModules as readonly string[]).includes(
-      "inventory",
-    ),
+    (PRIMAL_EXPERIENCE_PROFILE.enabledModules as readonly string[]).includes("inventory"),
   );
   check(
     "portal launch safety allows inventory when enabled",
     launchSafety.includes("isPortalModuleVisible") &&
-      (launchSafety.includes('navId === "inventory"') ||
-        canonical.includes('key: "inventory"')),
+      (launchSafety.includes('navId === "inventory"') || canonical.includes('key: "inventory"')),
   );
   check(
     "operations Client Command includes inventory tab",
@@ -135,8 +136,38 @@ function main() {
   );
   check(
     "no stored section field",
-    !collection.includes('name: "section"') &&
-      publicMap.includes("deriveInventoryGroup"),
+    !collection.includes('name: "section"') && publicMap.includes("deriveInventoryGroup"),
+  );
+  check(
+    "inventory source identity is additive and unique per client",
+    collection.includes('name: "sourceSystem"') &&
+      collection.includes('name: "sourceExternalId"') &&
+      sourceMigration.includes("client_inventory_vehicles_source_identity_uidx") &&
+      migrationsIndex.includes("20260809_client_inventory_source_identity"),
+  );
+  check(
+    "source import is idempotent and review-first",
+    inventoryServer.includes("upsertInventoryVehicleFromSource") &&
+      inventoryServer.includes('listingStatus: "draft"') &&
+      inventoryServer.includes("findInventoryVehicleBySource") &&
+      inventoryImporter.includes('"--apply"') &&
+      inventoryImporter.includes("Dry run validated"),
+  );
+  check(
+    "client-facing inventory errors do not say slug",
+    inventoryServer.includes("That vehicle page address is already in use.") &&
+      !inventoryServer.includes("That slug is already in use"),
+  );
+  check(
+    "source identities normalize safely",
+    normalizeInventorySourceIdentity({
+      sourceSystem: " Dealer-Feed ",
+      sourceExternalId: " unit-100 ",
+    })?.sourceSystem === "dealer-feed" &&
+      normalizeInventorySourceIdentity({
+        sourceSystem: "../unsafe",
+        sourceExternalId: "unit-100",
+      }) === null,
   );
 
   check(
@@ -200,14 +231,8 @@ function main() {
   const pub = toPublicInventoryVehicle(fixture({}));
   check("public mapper returns vehicle for available", Boolean(pub));
   check("public mapper omits VIN", pub != null && !("vin" in pub));
-  check(
-    "public mapper includes inventoryGroup",
-    pub?.inventoryGroup === "new",
-  );
-  check(
-    "public image URLs are absolute",
-    Boolean(pub?.primaryImage?.url?.startsWith("http")),
-  );
+  check("public mapper includes inventoryGroup", pub?.inventoryGroup === "new");
+  check("public image URLs are absolute", Boolean(pub?.primaryImage?.url?.startsWith("http")));
 
   const draftPublic = toPublicInventoryVehicle(fixture({ listingStatus: "draft" }));
   check("draft excluded from public mapper", draftPublic === null);

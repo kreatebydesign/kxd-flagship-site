@@ -4,12 +4,11 @@ import type { Payload } from "payload";
 import { INVENTORY_COLLECTION } from "./constants";
 import { parseInventoryVehicleDoc } from "./parse";
 import { toPublicInventoryVehicle } from "./public-map";
-import {
-  normalizeInventoryInput,
-  validateInventoryInput,
-} from "./validate";
+import { normalizeInventorySourceIdentity } from "./source";
+import { normalizeInventoryInput, validateInventoryInput } from "./validate";
 import type {
   InventoryListingStatus,
+  InventorySourceIdentity,
   InventoryVehicleInput,
   InventoryVehicleRecord,
   PublicInventoryClient,
@@ -33,9 +32,7 @@ function statusTimestamps(
   const patch: { publishedAt?: string | null; soldAt?: string | null } = {};
 
   if (
-    (nextStatus === "available" ||
-      nextStatus === "pending" ||
-      nextStatus === "coming_soon") &&
+    (nextStatus === "available" || nextStatus === "pending" || nextStatus === "coming_soon") &&
     !previous?.publishedAt
   ) {
     patch.publishedAt = now;
@@ -122,9 +119,7 @@ export async function assertSlugAvailable(
       and: [
         { client: { equals: clientId } },
         { slug: { equals: slug } },
-        ...(excludeId
-          ? [{ id: { not_equals: excludeId } }]
-          : []),
+        ...(excludeId ? [{ id: { not_equals: excludeId } }] : []),
       ],
     } as never,
     limit: 1,
@@ -140,24 +135,35 @@ export async function createInventoryVehicle(
     clientId: number;
     data: InventoryVehicleInput;
     actor: string;
+    source?: InventorySourceIdentity;
   },
-): Promise<{ ok: true; vehicle: InventoryVehicleRecord } | { ok: false; message: string; issues?: unknown }> {
+): Promise<
+  { ok: true; vehicle: InventoryVehicleRecord } | { ok: false; message: string; issues?: unknown }
+> {
   const issues = validateInventoryInput(input.data);
   if (issues.length) {
-    return { ok: false, message: issues[0]?.message ?? "Invalid vehicle.", issues };
+    return {
+      ok: false,
+      message: issues[0]?.message ?? "Invalid vehicle.",
+      issues,
+    };
   }
   const normalized = normalizeInventoryInput(input.data);
-  const available = await assertSlugAvailable(
-    payload,
-    input.clientId,
-    normalized.slug,
-  );
+  const available = await assertSlugAvailable(payload, input.clientId, normalized.slug);
   if (!available) {
-    return { ok: false, message: "That slug is already in use for this client." };
+    return {
+      ok: false,
+      message: "That vehicle page address is already in use.",
+    };
   }
 
   const listingStatus = normalized.listingStatus ?? "draft";
   const stamps = statusTimestamps(listingStatus);
+  const source = input.source ? normalizeInventorySourceIdentity(input.source) : null;
+  if (input.source && !source) {
+    return { ok: false, message: "Invalid inventory source identity." };
+  }
+  const sourceSyncAt = source ? new Date().toISOString() : undefined;
 
   const created = await payload.create({
     collection: INVENTORY_COLLECTION as never,
@@ -185,6 +191,9 @@ export async function createInventoryVehicle(
       gallery: (normalized.galleryImageIds ?? []).map((image) => ({ image })),
       sortOrder: normalized.sortOrder ?? 0,
       externalUrl: normalized.externalUrl ?? undefined,
+      sourceSystem: source?.sourceSystem,
+      sourceExternalId: source?.sourceExternalId,
+      lastSourceSyncAt: sourceSyncAt,
       publishedAt: stamps.publishedAt,
       soldAt: stamps.soldAt,
       createdBy: input.actor,
@@ -199,20 +208,122 @@ export async function createInventoryVehicle(
   return { ok: true, vehicle };
 }
 
+export async function findInventoryVehicleBySource(
+  payload: Payload,
+  clientId: number,
+  source: InventorySourceIdentity,
+): Promise<InventoryVehicleRecord | null> {
+  const normalized = normalizeInventorySourceIdentity(source);
+  if (!normalized) return null;
+
+  const result = await payload.find({
+    collection: INVENTORY_COLLECTION as never,
+    where: {
+      and: [
+        { client: { equals: clientId } },
+        { sourceSystem: { equals: normalized.sourceSystem } },
+        { sourceExternalId: { equals: normalized.sourceExternalId } },
+      ],
+    } as never,
+    limit: 1,
+    depth: 2,
+    overrideAccess: true,
+  });
+
+  return parseInventoryVehicleDoc(result.docs[0]);
+}
+
+/**
+ * Idempotent inventory-source boundary.
+ * New source records always enter as drafts for review. Repeat imports update
+ * the same canonical vehicle while preserving its reviewed publication state.
+ */
+export async function upsertInventoryVehicleFromSource(
+  payload: Payload,
+  input: {
+    clientId: number;
+    source: InventorySourceIdentity;
+    data: InventoryVehicleInput;
+    actor: string;
+  },
+): Promise<
+  | { ok: true; action: "created" | "updated"; vehicle: InventoryVehicleRecord }
+  | { ok: false; message: string; issues?: unknown }
+> {
+  const source = normalizeInventorySourceIdentity(input.source);
+  if (!source) {
+    return { ok: false, message: "Invalid inventory source identity." };
+  }
+
+  let existing = await findInventoryVehicleBySource(payload, input.clientId, source);
+
+  if (!existing) {
+    try {
+      const created = await createInventoryVehicle(payload, {
+        clientId: input.clientId,
+        actor: input.actor,
+        source,
+        data: {
+          ...input.data,
+          listingStatus: "draft",
+        },
+      });
+      if (!created.ok) return created;
+      return { ok: true, action: "created", vehicle: created.vehicle };
+    } catch {
+      // A concurrent import may have won the source-identity unique index.
+      existing = await findInventoryVehicleBySource(payload, input.clientId, source);
+      if (!existing) {
+        return {
+          ok: false,
+          message: "Could not import this inventory record.",
+        };
+      }
+    }
+  }
+
+  const updated = await updateInventoryVehicle(payload, {
+    clientId: input.clientId,
+    vehicleId: existing.id,
+    actor: input.actor,
+    data: {
+      ...input.data,
+      listingStatus: existing.listingStatus,
+    },
+  });
+  if (!updated.ok) return updated;
+
+  const synced = await payload.update({
+    collection: INVENTORY_COLLECTION as never,
+    id: existing.id,
+    data: {
+      sourceSystem: source.sourceSystem,
+      sourceExternalId: source.sourceExternalId,
+      lastSourceSyncAt: new Date().toISOString(),
+      updatedBy: input.actor,
+    } as never,
+    depth: 2,
+    overrideAccess: true,
+  });
+  const vehicle = parseInventoryVehicleDoc(synced);
+  if (!vehicle) {
+    return { ok: false, message: "Could not parse imported inventory record." };
+  }
+  return { ok: true, action: "updated", vehicle };
+}
+
 export async function updateInventoryVehicle(
   payload: Payload,
   input: {
     clientId: number;
     vehicleId: number;
-    data: Partial<InventoryVehicleInput> & { listingStatus?: InventoryListingStatus };
+    data: Partial<InventoryVehicleInput> & {
+      listingStatus?: InventoryListingStatus;
+    };
     actor: string;
   },
 ): Promise<{ ok: true; vehicle: InventoryVehicleRecord } | { ok: false; message: string }> {
-  const existing = await getInventoryVehicleForClient(
-    payload,
-    input.clientId,
-    input.vehicleId,
-  );
+  const existing = await getInventoryVehicleForClient(payload, input.clientId, input.vehicleId);
   if (!existing) return { ok: false, message: "Vehicle not found." };
 
   const merged: InventoryVehicleInput = {
@@ -227,41 +338,28 @@ export async function updateInventoryVehicle(
     featured: input.data.featured ?? existing.featured,
     price: input.data.price !== undefined ? input.data.price : existing.price,
     priceDisplayMode: input.data.priceDisplayMode ?? existing.priceDisplayMode,
-    mileage:
-      input.data.mileage !== undefined ? input.data.mileage : existing.mileage,
+    mileage: input.data.mileage !== undefined ? input.data.mileage : existing.mileage,
     vin: input.data.vin !== undefined ? input.data.vin : existing.vin,
     stockNumber:
-      input.data.stockNumber !== undefined
-        ? input.data.stockNumber
-        : existing.stockNumber,
-    summary:
-      input.data.summary !== undefined ? input.data.summary : existing.summary,
+      input.data.stockNumber !== undefined ? input.data.stockNumber : existing.stockNumber,
+    summary: input.data.summary !== undefined ? input.data.summary : existing.summary,
     description:
-      input.data.description !== undefined
-        ? input.data.description
-        : existing.description,
+      input.data.description !== undefined ? input.data.description : existing.description,
     specifications:
       input.data.specifications ??
       existing.specifications.map((row) => ({
         label: row.label,
         value: row.value,
       })),
-    highlights:
-      input.data.highlights ?? existing.highlights.map((row) => row.text),
+    highlights: input.data.highlights ?? existing.highlights.map((row) => row.text),
     primaryImageId:
       input.data.primaryImageId !== undefined
         ? input.data.primaryImageId
-        : existing.primaryImage?.id ?? null,
-    galleryImageIds:
-      input.data.galleryImageIds ?? existing.gallery.map((image) => image.id),
-    sortOrder:
-      input.data.sortOrder !== undefined
-        ? input.data.sortOrder
-        : existing.sortOrder,
+        : (existing.primaryImage?.id ?? null),
+    galleryImageIds: input.data.galleryImageIds ?? existing.gallery.map((image) => image.id),
+    sortOrder: input.data.sortOrder !== undefined ? input.data.sortOrder : existing.sortOrder,
     externalUrl:
-      input.data.externalUrl !== undefined
-        ? input.data.externalUrl
-        : existing.externalUrl,
+      input.data.externalUrl !== undefined ? input.data.externalUrl : existing.externalUrl,
   };
 
   const issues = validateInventoryInput(merged);
@@ -276,7 +374,10 @@ export async function updateInventoryVehicle(
     input.vehicleId,
   );
   if (!available) {
-    return { ok: false, message: "That slug is already in use for this client." };
+    return {
+      ok: false,
+      message: "That vehicle page address is already in use.",
+    };
   }
 
   const listingStatus = normalized.listingStatus ?? existing.listingStatus;
@@ -308,9 +409,7 @@ export async function updateInventoryVehicle(
       gallery: (normalized.galleryImageIds ?? []).map((image) => ({ image })),
       sortOrder: normalized.sortOrder ?? 0,
       externalUrl: normalized.externalUrl ?? null,
-      ...(stamps.publishedAt !== undefined
-        ? { publishedAt: stamps.publishedAt }
-        : {}),
+      ...(stamps.publishedAt !== undefined ? { publishedAt: stamps.publishedAt } : {}),
       ...(stamps.soldAt !== undefined ? { soldAt: stamps.soldAt } : {}),
       updatedBy: input.actor,
     } as never,
@@ -323,9 +422,7 @@ export async function updateInventoryVehicle(
 
   if (listingStatus !== existing.listingStatus) {
     try {
-      const { publishInventoryActivity } = await import(
-        "@/lib/client-command/activity/inventory"
-      );
+      const { publishInventoryActivity } = await import("@/lib/client-command/activity/inventory");
       if (listingStatus === "hidden" && isPublicListable(existing.listingStatus)) {
         await publishInventoryActivity({
           clientId: input.clientId,
@@ -334,10 +431,7 @@ export async function updateInventoryVehicle(
           kind: "hidden",
           author: input.actor,
         });
-      } else if (
-        isPublicListable(listingStatus) &&
-        !isPublicListable(existing.listingStatus)
-      ) {
+      } else if (isPublicListable(listingStatus) && !isPublicListable(existing.listingStatus)) {
         await publishInventoryActivity({
           clientId: input.clientId,
           vehicleId: vehicle.id,
@@ -366,11 +460,7 @@ export async function duplicateInventoryVehicle(
   payload: Payload,
   input: { clientId: number; vehicleId: number; actor: string },
 ): Promise<{ ok: true; vehicle: InventoryVehicleRecord } | { ok: false; message: string }> {
-  const existing = await getInventoryVehicleForClient(
-    payload,
-    input.clientId,
-    input.vehicleId,
-  );
+  const existing = await getInventoryVehicleForClient(payload, input.clientId, input.vehicleId);
   if (!existing) return { ok: false, message: "Vehicle not found." };
 
   const baseSlug = `${existing.slug}-copy`;
@@ -399,9 +489,7 @@ export async function duplicateInventoryVehicle(
       priceDisplayMode: existing.priceDisplayMode,
       mileage: existing.mileage,
       vin: null,
-      stockNumber: existing.stockNumber
-        ? `${existing.stockNumber}-COPY`
-        : null,
+      stockNumber: existing.stockNumber ? `${existing.stockNumber}-COPY` : null,
       summary: existing.summary,
       description: existing.description,
       specifications: existing.specifications.map((row) => ({
@@ -435,9 +523,7 @@ export async function resolvePublicInventoryClient(
     slug: String(client.slug ?? clientSlug),
     name: String(client.name ?? clientSlug),
     website: client.companyWebsite ? String(client.companyWebsite) : null,
-    contactEmail: client.primaryContactEmail
-      ? String(client.primaryContactEmail)
-      : null,
+    contactEmail: client.primaryContactEmail ? String(client.primaryContactEmail) : null,
   };
 }
 

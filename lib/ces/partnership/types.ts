@@ -34,6 +34,17 @@ export interface PartnershipDeliveredItem {
   evidence: PartnershipEvidenceKind;
 }
 
+export interface PartnershipServiceItem {
+  id: string;
+  label: string;
+  value: string;
+}
+
+export interface PartnershipServiceSummary {
+  relationshipLabel: string | null;
+  items: PartnershipServiceItem[];
+}
+
 export interface PartnershipCurrentState {
   initiative: string;
   websiteStage: string;
@@ -109,6 +120,7 @@ export interface PartnershipBriefing {
   clientSlug: string | null;
   clientName: string;
   overview: PartnershipOverview;
+  services: PartnershipServiceSummary;
   sincePartnering: PartnershipMilestone[];
   delivered: PartnershipDeliveredItem[];
   currentState: PartnershipCurrentState;

@@ -49,8 +49,7 @@ export const PORTAL_CLIENT_LANGUAGE = {
   ] as const,
   welcomeBody:
     "This is your professional collaboration workspace — not a generic dashboard. Every website update is organized here.",
-  welcomeClosingWithBrand: (clientName: string) =>
-    `Focus on ${clientName}. We'll handle the rest.`,
+  welcomeClosingWithBrand: (clientName: string) => `Focus on ${clientName}. We'll handle the rest.`,
   welcomeClosingNoBrand: "Focus on what matters most. We'll handle the rest.",
   welcomeStartReviewing: "Review your website",
   welcomeEnterWorkspace: "Go to workspace",
@@ -80,8 +79,7 @@ export const PORTAL_CLIENT_LANGUAGE = {
   reviewActiveSection: "Active revisions",
   reviewCompletedSection: "Completed History",
   reviewEmptyTitle: "No updates yet",
-  reviewEmptyLead:
-    "Submit your first website review request and we'll organize every update here.",
+  reviewEmptyLead: "Submit your first website review request and we'll organize every update here.",
   reviewEmptyCta: "Start a revision",
 
   reviewReassuranceLine1: "Every revision is tracked. Nothing gets lost.",
@@ -104,7 +102,8 @@ export const PORTAL_CLIENT_LANGUAGE = {
   requestLocationHint:
     "Select the page this request applies to. You can also choose Different page and enter a path.",
   requestConfirmIntro: "Does this look right?",
-  contextFromReviewUrl: "We pre-filled the page from your review link. Adjust anything before sending.",
+  contextFromReviewUrl:
+    "We pre-filled the page from your review link. Adjust anything before sending.",
   requestFlowStepFocus: "What to change",
   requestFlowStepDetails: "Your notes",
   requestFlowStepConfirm: "Review & send",
@@ -113,8 +112,7 @@ export const PORTAL_CLIENT_LANGUAGE = {
   confirmMessage:
     "Your feedback is with our team. We'll keep you updated here as work moves forward.",
   confirmReferenceLabel: "Reference",
-  submitError:
-    "We couldn't send your revision just now. Please try again in a moment.",
+  submitError: "We couldn't send your revision just now. Please try again in a moment.",
   sessionExpired:
     "Your session expired. Sign in again to continue — your notes on this screen are still here.",
   sessionExpiredAction: "Sign in again",
@@ -184,8 +182,7 @@ export const PORTAL_CLIENT_LANGUAGE = {
 
   authLoginEyebrow: "Your workspace",
   authLoginTitle: "Sign in",
-  authLoginLead:
-    "Review your site, share feedback, and follow every revision — all in one place.",
+  authLoginLead: "Review your site, share feedback, and follow every revision — all in one place.",
   authLoginEmail: "Email",
   authLoginPassword: "Password",
   authLoginSubmit: "Sign in",
@@ -193,8 +190,7 @@ export const PORTAL_CLIENT_LANGUAGE = {
   authLoginForgot: "Forgot your password?",
   authLoginErrorGeneric: "We couldn't sign you in. Please check your email and password.",
   authLoginErrorUnavailable: "Sign-in is temporarily unavailable. Please try again shortly.",
-  authLoginErrorInactive:
-    "This workspace account isn't active. Please reach out to us for help.",
+  authLoginErrorInactive: "This workspace account isn't active. Please reach out to us for help.",
 
   authForgotTitle: "Reset your workspace password",
   authForgotLead: "We'll send a secure link to the email on your account.",
@@ -237,8 +233,7 @@ export const PORTAL_CLIENT_LANGUAGE = {
   connectedRecentActivityEmpty:
     "Updates will appear here as revisions move forward. Start with a website review when you're ready.",
   connectedDeliverables: "Latest deliverables",
-  connectedDeliverablesEmpty:
-    "New deliverables will appear here when they're ready to share.",
+  connectedDeliverablesEmpty: "New deliverables will appear here when they're ready to share.",
   connectedQuickActions: "Quick actions",
   connectedQuickActionReviewWebsite: "Review website",
   connectedQuickActionStartReview: "Submit feedback",
@@ -261,4 +256,60 @@ export function portalCopy(
   fallback: string,
 ): string {
   return profileTerminology?.[key] ?? fallback;
+}
+
+const CLIENT_STATUS_LABELS: Record<string, string> = {
+  new: "Received",
+  triaged: "Reviewed by KXD",
+  "not-started": "Planned",
+  "in-progress": "KXD is working on it",
+  "waiting-on-client": "Waiting on you",
+  "awaiting-client": "Waiting on you",
+  review: "Ready for review",
+  complete: "Complete",
+  completed: "Complete",
+  closed: "Complete",
+  declined: "Not moving forward",
+  blocked: "On hold",
+  paused: "On hold",
+  archived: "Archived",
+  active: "Active",
+  draft: "Draft",
+  available: "Available",
+  pending: "Pending",
+  sold: "Sold",
+  "coming-soon": "Coming soon",
+};
+
+const CLIENT_METRIC_LABELS: Record<string, string> = {
+  sessions: "Website visits",
+  visitors: "People who visited",
+  users: "People who visited",
+  clicks: "Visits from Google Search",
+  impressions: "Times seen in Google Search",
+  conversions: "Tracked website actions",
+  conversion: "Tracked website actions",
+  ctr: "Search result click rate",
+  generate_lead: "Tracked inquiry actions",
+  form_submissions: "Website form submissions",
+};
+
+export function clientStatusLabel(
+  status: string | null | undefined,
+  fallback = "Status unavailable",
+): string {
+  if (!status) return fallback;
+  const normalized = status.trim().toLowerCase().replaceAll("_", "-");
+  return (
+    CLIENT_STATUS_LABELS[normalized] ??
+    normalized
+      .split("-")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ")
+  );
+}
+
+export function clientMetricLabel(key: string, fallback?: string | null): string {
+  const normalized = key.trim().toLowerCase().replaceAll("-", "_");
+  return CLIENT_METRIC_LABELS[normalized] ?? fallback?.trim() ?? "Website activity";
 }

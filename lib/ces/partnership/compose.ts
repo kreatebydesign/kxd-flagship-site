@@ -8,14 +8,19 @@ import "server-only";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import type { ResolvedExperienceProfile } from "@/lib/ces/types";
-import type { WebsiteReviewLandingData, WebsiteReviewItem } from "@/lib/ces/modules/website-review/types";
+import type {
+  WebsiteReviewLandingData,
+  WebsiteReviewItem,
+} from "@/lib/ces/modules/website-review/types";
 import { reviewStatusLabel } from "@/lib/ces/vocabulary/website-review";
 import type { ConnectedWorkspaceData } from "@/lib/portal/connected-workspace";
 import type { PortalSession } from "@/lib/portal/session";
+import { loadResolvedServiceScope } from "@/lib/service-capabilities/assignments";
 import { getBoardFutureModules } from "./capabilities";
 import { getPartnershipMilestones } from "./milestones";
 import { loadPartnershipResults } from "./outcomes";
 import { decideClientRecommendation } from "./recommend";
+import { composePartnershipServiceSummary } from "./service-value";
 import type {
   PartnershipBriefing,
   PartnershipDeliveredItem,
@@ -46,14 +51,14 @@ function buildWebsiteReviewSnapshot(
   const hasRevisions =
     websiteReview.activeReviews.length + websiteReview.completedReviews.length > 0;
 
-  let nextStep = "We'll keep every note organized here.";
+  let nextStep = "Website notes will be organized here when you share them.";
   if (awaiting.length > 0) {
     nextStep =
       "One open revision is waiting for your eye. A short response is all we need to continue.";
   } else if (websiteReview.activeReviews.length > 0) {
     nextStep = "Our team is advancing the open revisions.";
-  } else if (websiteReview.websiteUrl) {
-    nextStep = "Review the latest version and leave anything you'd like us to refine.";
+  } else if (hasRevisions) {
+    nextStep = "No open revision is waiting on you.";
   }
 
   return {
@@ -61,10 +66,10 @@ function buildWebsiteReviewSnapshot(
       ? reviewStatusLabel(latest.status)
       : hasRevisions
         ? "Organized and in good hands"
-        : "Ready whenever you are",
+        : "No website reviews yet",
     timelineLabel: hasRevisions
       ? `${websiteReview.activeReviews.length} active · ${websiteReview.completedReviews.length} complete`
-      : "Waiting for your first round of notes",
+      : "No website reviews recorded yet",
     latestRevisionTitle: latest?.title ?? null,
     latestRevisionHref: latest ? `/portal/website-review/${latest.id}` : null,
     latestKxdResponse: latestTimelineLabel(latest),
@@ -79,26 +84,19 @@ function buildDelivered(input: {
   websiteReview: WebsiteReviewLandingData;
   reportCount: number;
   retainerOnFile: boolean;
-  portalLive: boolean;
+  services: ReturnType<typeof composePartnershipServiceSummary>;
 }): PartnershipDeliveredItem[] {
   const completedReviews = input.websiteReview.completedReviews.length;
   const activeReviews = input.websiteReview.activeReviews.length;
   const items: PartnershipDeliveredItem[] = [];
-
-  items.push({
-    id: "website-rebuild",
-    label: "Website rebuild",
-    value: null,
-    detail: "Flagship site rebuilt and refining toward launch",
-    evidence: "curated",
-  });
 
   if (completedReviews > 0) {
     items.push({
       id: "revisions-complete",
       label: "Website revisions completed",
       value: completedReviews,
-      detail: completedReviews === 1 ? "1 revision resolved" : `${completedReviews} revisions resolved`,
+      detail:
+        completedReviews === 1 ? "1 revision resolved" : `${completedReviews} revisions resolved`,
       evidence: "computed",
     });
   }
@@ -109,34 +107,20 @@ function buildDelivered(input: {
       label: "Revisions in progress",
       value: activeReviews,
       detail:
-        activeReviews === 1 ? "1 revision currently active" : `${activeReviews} revisions currently active`,
+        activeReviews === 1
+          ? "1 revision currently active"
+          : `${activeReviews} revisions currently active`,
       evidence: "computed",
     });
   }
 
-  items.push({
-    id: "google-ads",
-    label: "Growth advertising",
-    value: null,
-    detail: "Visibility and qualified traffic under continuous care",
-    evidence: "curated",
-  });
-
-  items.push({
-    id: "conversion-tracking",
-    label: "Conversion tracking",
-    value: null,
-    detail: "Lead tracking verified and working",
-    evidence: "report",
-  });
-
-  if (input.portalLive) {
+  for (const service of input.services.items) {
     items.push({
-      id: "portal",
-      label: "Private partnership workspace",
+      id: `service-${service.id}`,
+      label: service.label,
       value: null,
-      detail: "A calm place for leadership to follow the work",
-      evidence: "curated",
+      detail: service.value,
+      evidence: "computed",
     });
   }
 
@@ -197,34 +181,20 @@ function buildProgress(
 
   if (resultsPeriod) {
     items.push({
-      id: "ads-period",
-      label: "Growth optimization cycle completed",
+      id: "reporting-period",
+      label: "A performance review was prepared",
       detail: resultsPeriod,
       at: null,
     });
   }
 
   if (items.length === 0) {
-    items.push(
-      {
-        id: "portal-live",
-        label: "Your partnership workspace opened",
-        detail: "Leadership now has a quiet place to follow everything with us",
-        at: null,
-      },
-      {
-        id: "review-ready",
-        label: "A private review rhythm introduced",
-        detail: "Every note stays organized so refinement stays confident",
-        at: null,
-      },
-      {
-        id: "ads-active",
-        label: "Advertising continues",
-        detail: "Visibility and qualified interest remain part of the active relationship",
-        at: null,
-      },
-    );
+    items.push({
+      id: "portal-live",
+      label: "Your KXD workspace is available",
+      detail: "Recorded activity will appear here as work is captured",
+      at: null,
+    });
   }
 
   return items.slice(0, 7);
@@ -240,10 +210,7 @@ async function loadSupportCounts(clientId: number): Promise<{
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       collection: "monthly-reports" as any,
       where: {
-        and: [
-          { client: { equals: clientId } },
-          { status: { in: ["ready", "published"] } },
-        ],
+        and: [{ client: { equals: clientId } }, { status: { in: ["ready", "published"] } }],
       },
       limit: 20,
       depth: 0,
@@ -276,10 +243,12 @@ export async function composePartnershipBriefing(input: {
   const slug = profile.identity.clientSlug;
   const clientName = profile.identity.clientName || session.clientName || "Partnership";
 
-  const [results, counts] = await Promise.all([
+  const [results, counts, serviceScope] = await Promise.all([
     loadPartnershipResults(session.clientId),
     loadSupportCounts(session.clientId),
+    loadResolvedServiceScope(session.clientId),
   ]);
+  const services = composePartnershipServiceSummary(serviceScope);
 
   const hasAwaitingClient = websiteReview.activeReviews.some(
     (r) => r.status === "awaiting-your-input",
@@ -302,20 +271,23 @@ export async function composePartnershipBriefing(input: {
     attentionAction = awaiting
       ? `Leave a note on “${awaiting.title}”`
       : "Leave a short note on the open revision";
-    attentionHref = awaiting
-      ? `/portal/website-review/${awaiting.id}`
-      : "/portal/website-review";
-  } else if (!hasActiveReviews && websiteReview.websiteUrl) {
-    attentionAction = "Review the website and leave any remaining notes";
-    attentionHref = "/portal/website-review/session/new";
+    attentionHref = awaiting ? `/portal/website-review/${awaiting.id}` : "/portal/website-review";
   }
 
+  const activeWork = connected.currentWork.find((item) => item.group === "in-progress");
+  const latestProgress = connected.recentActivity[0];
+  const primaryService = services.items[0];
   const overview = {
-    relationshipStatus: "Active partnership",
-    currentPhase: "Refining the website toward launch",
-    currentFocus: "Completing remaining revisions while growth stays steady",
-    lastMajorMilestone: "Your partnership workspace opened",
-    nextMilestone: "Website launch",
+    relationshipStatus: "Your KXD workspace is available",
+    currentPhase: serviceScope.relationshipLabel ?? "No phase is recorded yet",
+    currentFocus:
+      activeWork?.title ?? primaryService?.value ?? "No current focus is recorded",
+    lastMajorMilestone: latestProgress?.label ?? "No milestone is recorded yet",
+    nextMilestone:
+      attentionAction ??
+      (hasActiveReviews
+        ? "Complete the current website review"
+        : "Recommendations will appear as supporting activity is recorded"),
     recommendationLine: recommendation.headline,
   };
 
@@ -326,35 +298,45 @@ export async function composePartnershipBriefing(input: {
     clientSlug: slug,
     clientName,
     overview,
+    services,
     sincePartnering: getPartnershipMilestones(slug),
     delivered: buildDelivered({
       websiteReview,
       reportCount: counts.reportCount,
       retainerOnFile: counts.retainerOnFile,
-      portalLive: true,
+      services,
     }),
     currentState: {
-      initiative: "Bringing the website to launch",
+      initiative: activeWork?.title ?? primaryService?.label ?? "No current initiative is recorded",
       websiteStage: websiteReview.websiteUrl
-        ? "Review Website in refinement"
-        : "Website address still being confirmed",
+        ? "Website on file"
+        : "Website details are being confirmed",
       reviewState: websiteSnapshot.statusLabel,
       outstandingClientAction: attentionAction,
       outstandingKxdAction: hasActiveReviews
         ? "Advancing the open website revisions with care"
-        : "Refining the website and sustaining growth thoughtfully",
-      partnershipHealth: "Strong, organized, and moving forward together",
+        : primaryService
+          ? primaryService.value
+          : "No KXD action is recorded right now",
+      partnershipHealth: hasAwaitingClient
+        ? "Moving forward with one item waiting on you"
+        : "No current action is required",
     },
     needsAttention: {
       action: attentionAction,
       href: attentionHref,
-      emptyMessage: "Nothing is needed from you right now. Everything is in good hands.",
+      emptyMessage: "No current action is required.",
     },
     websiteReview: websiteSnapshot,
     recentProgress: buildProgress(safeConnected, websiteReview, results?.periodLabel ?? null),
     results,
     recommendation,
-    futureModules: getBoardFutureModules(),
+    futureModules: getBoardFutureModules([
+      ...profile.enabledModules,
+      ...profile.reportingCapabilities,
+      ...serviceScope.grantedModules,
+      ...serviceScope.grantedReporting,
+    ]),
     billingPreview: {
       title: "Account & Billing",
       lead: "Invoices and payments will live here as the partnership expands — quiet, clear, and secure.",

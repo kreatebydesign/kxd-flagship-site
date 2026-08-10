@@ -12,5 +12,5 @@ export default async function InventoryNewPage() {
   const profile = await resolveExperienceProfile(session);
   requireCesModule(profile, "inventory");
 
-  return <InventoryEditor profile={profile} mode="create" />;
+  return <InventoryEditor mode="create" />;
 }

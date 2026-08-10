@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  useEffect,
-  useId,
-  useRef,
-  useState,
-  type RefObject,
-} from "react";
+import { useEffect, useId, useRef, useState, useSyncExternalStore, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import type { WebsiteReviewAttachmentMeta } from "@/lib/ces/modules/website-review/attachments";
 import { formatAttachmentSize } from "@/lib/ces/modules/website-review/attachments";
@@ -30,6 +24,8 @@ function supportsImages(section: WebsiteWorkspaceSectionDefinition): boolean {
   return section.fields.includes("image") || section.fields.includes("images");
 }
 
+const subscribeToBrowser = () => () => {};
+
 export function WebsiteWorkspaceEditPanel({
   open,
   pageSlug,
@@ -42,7 +38,11 @@ export function WebsiteWorkspaceEditPanel({
   const titleId = useId();
   const panelRef = useRef<HTMLElement | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(
+    subscribeToBrowser,
+    () => true,
+    () => false,
+  );
   const [heading, setHeading] = useState("");
   const [body, setBody] = useState("");
   const [cta, setCta] = useState("");
@@ -54,27 +54,11 @@ export function WebsiteWorkspaceEditPanel({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!open || !section) return;
-    setHeading("");
-    setBody("");
-    setCta("");
-    setNotes("");
-    setAttachments([]);
-    setError(null);
-    setPending(false);
-    setUploading(false);
-    setDragging(false);
-  }, [open, section]);
-
-  useEffect(() => {
     if (!open) return;
 
     const previousOverflow = document.body.style.overflow;
     const previousPaddingRight = document.body.style.paddingRight;
+    const returnFocusTarget = returnFocusRef?.current;
     const scrollbarGap = window.innerWidth - document.documentElement.clientWidth;
 
     document.body.style.overflow = "hidden";
@@ -100,7 +84,7 @@ export function WebsiteWorkspaceEditPanel({
       document.body.style.overflow = previousOverflow;
       document.body.style.paddingRight = previousPaddingRight;
       window.removeEventListener("keydown", onKey);
-      returnFocusRef?.current?.focus();
+      returnFocusTarget?.focus();
     };
   }, [open, onClose, returnFocusRef]);
 
@@ -182,7 +166,11 @@ export function WebsiteWorkspaceEditPanel({
           attachmentIds: attachments.map((item) => item.id),
         }),
       });
-      const json = (await res.json()) as { ok?: boolean; id?: number; message?: string };
+      const json = (await res.json()) as {
+        ok?: boolean;
+        id?: number;
+        message?: string;
+      };
       if (!res.ok || !json.ok || !json.id) {
         throw new Error(json.message || "Could not submit request.");
       }
@@ -246,7 +234,7 @@ export function WebsiteWorkspaceEditPanel({
             ) : null}
             {showCta ? (
               <div className="kxd-ws-snapshot__block">
-                <span>CTA</span>
+                <span>Button text</span>
                 <p>{section.current.cta || "—"}</p>
               </div>
             ) : null}
@@ -290,7 +278,7 @@ export function WebsiteWorkspaceEditPanel({
             ) : null}
             {showCta ? (
               <label className="kxd-ws-field">
-                <span>New CTA</span>
+                <span>New button text</span>
                 <input
                   className="kxd-ws-input"
                   value={cta}

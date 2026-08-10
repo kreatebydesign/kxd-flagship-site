@@ -29,11 +29,7 @@ export type PortalMediaAsset = {
   alt: string;
 };
 
-async function scopedFind(
-  collection: string,
-  clientId: number,
-  extra?: Record<string, unknown>,
-) {
+async function scopedFind(collection: string, clientId: number, extra?: Record<string, unknown>) {
   const payload = await getPayload({ config });
   return payload.find({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -56,7 +52,12 @@ export async function getPortalDashboard(session: PortalSession) {
     scopedFind("client-projects", clientId),
     scopedFind("client-requests", clientId),
     scopedFind("monthly-deliverables", clientId),
-    payload.findByID({ collection: "clients", id: clientId, depth: 0, overrideAccess: true }),
+    payload.findByID({
+      collection: "clients",
+      id: clientId,
+      depth: 0,
+      overrideAccess: true,
+    }),
     payload.find({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       collection: "client-onboarding" as any,
@@ -67,13 +68,14 @@ export async function getPortalDashboard(session: PortalSession) {
     }),
   ]);
 
-  const projects = projectsR.status === "fulfilled" ? projectsR.value.docs as AnyDoc[] : [];
-  const requests = requestsR.status === "fulfilled" ? requestsR.value.docs as AnyDoc[] : [];
-  const deliverables = deliverablesR.status === "fulfilled" ? deliverablesR.value.docs as AnyDoc[] : [];
-  const client = clientR.status === "fulfilled" ? clientR.value as AnyDoc : null;
+  const projects = projectsR.status === "fulfilled" ? (projectsR.value.docs as AnyDoc[]) : [];
+  const requests = requestsR.status === "fulfilled" ? (requestsR.value.docs as AnyDoc[]) : [];
+  const deliverables =
+    deliverablesR.status === "fulfilled" ? (deliverablesR.value.docs as AnyDoc[]) : [];
+  const client = clientR.status === "fulfilled" ? (clientR.value as AnyDoc) : null;
   const onboardingDoc =
     onboardingR.status === "fulfilled" && onboardingR.value.docs.length > 0
-      ? onboardingR.value.docs[0] as AnyDoc
+      ? (onboardingR.value.docs[0] as AnyDoc)
       : null;
 
   const activeProjects = projects.filter(
@@ -84,18 +86,14 @@ export async function getPortalDashboard(session: PortalSession) {
     (r) => !["complete", "declined"].includes(String(r.status)),
   ).length;
 
-  const pendingDeliverables = deliverables.filter(
-    (d) => d.status !== "complete",
-  ).length;
+  const pendingDeliverables = deliverables.filter((d) => d.status !== "complete").length;
 
-  const completedDeliverables = deliverables.filter(
-    (d) => d.status === "complete",
-  ).length;
+  const completedDeliverables = deliverables.filter((d) => d.status === "complete").length;
 
   const onboardingStatus = client?.osOnboardingStatus ?? "Not started";
-  const readinessScore = client?.osOnboardingReadinessScore ?? (
-    onboardingDoc ? calculateOnboardingReadiness(onboardingDoc).score : 0
-  );
+  const readinessScore =
+    client?.osOnboardingReadinessScore ??
+    (onboardingDoc ? calculateOnboardingReadiness(onboardingDoc).score : 0);
 
   const recentProjects = [...projects]
     .sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt)))
@@ -149,10 +147,7 @@ function mediaFromDoc(doc: AnyDoc, category: string): PortalMediaAsset | null {
   };
 }
 
-function collectMediaFromRels(
-  items: unknown,
-  category: string,
-): PortalMediaAsset[] {
+function collectMediaFromRels(items: unknown, category: string): PortalMediaAsset[] {
   if (!Array.isArray(items)) return [];
   const assets: PortalMediaAsset[] = [];
   for (const item of items) {
@@ -355,7 +350,10 @@ async function getPortalWebsiteAudit(
 
   const payload = await getPayload({ config });
   const website = String(onboarding?.currentWebsite ?? client?.companyWebsite ?? "").trim();
-  const websiteHost = website.replace(/^https?:\/\//i, "").replace(/\/.*$/, "").trim();
+  const websiteHost = website
+    .replace(/^https?:\/\//i, "")
+    .replace(/\/.*$/, "")
+    .trim();
 
   // Fail closed on client FK. Prefer host-aligned audits within that client only.
   const clientClause = { client: { equals: authorizedClientId } };
@@ -407,7 +405,9 @@ async function getPortalWebsiteAudit(
   };
 }
 
-export async function getPortalWebsiteHealth(session: PortalSession): Promise<PortalWebsiteHealthData> {
+export async function getPortalWebsiteHealth(
+  session: PortalSession,
+): Promise<PortalWebsiteHealthData> {
   const [client, onboarding, timeline, connection] = await Promise.all([
     getPortalClient(session),
     getPortalOnboarding(session),
@@ -418,8 +418,6 @@ export async function getPortalWebsiteHealth(session: PortalSession): Promise<Po
 
   const domain = String(onboarding?.currentWebsite ?? client?.companyWebsite ?? "").trim() || null;
   const hosting = onboarding?.hostingProvider ? String(onboarding.hostingProvider) : null;
-  const domainRegistrar = onboarding?.domainRegistrar ? String(onboarding.domainRegistrar) : null;
-  const onboardingAnalytics = Boolean(onboarding?.analyticsConnected);
   const ga4Configured =
     connection != null &&
     connection.clientId === session.clientId &&
@@ -428,11 +426,12 @@ export async function getPortalWebsiteHealth(session: PortalSession): Promise<Po
     connection != null &&
     connection.clientId === session.clientId &&
     Boolean(connection.searchConsoleSiteUrl);
-  const analyticsConnected = onboardingAnalytics || ga4Configured;
   const usesHttps = domain ? /^https:\/\//i.test(domain) : false;
 
   const lastDeployment = timeline.find((event) =>
-    ["deployment", "website-launch", "client-launch", "portal-launch"].includes(String(event.eventType)),
+    ["deployment", "website-launch", "client-launch", "portal-launch"].includes(
+      String(event.eventType),
+    ),
   );
 
   const scoreStatus = (score: number | null | undefined): PortalHealthSignal["status"] => {
@@ -445,78 +444,60 @@ export async function getPortalWebsiteHealth(session: PortalSession): Promise<Po
   const signals: PortalHealthSignal[] = [
     {
       id: "domain",
-      label: "Domain",
-      value: domainRegistrar ?? (domain ? "Registered" : "Not on file"),
+      label: "Website address",
+      value: domain ? "Active" : "Not available",
       status: domain ? "ok" : "unknown",
       detail: domain ?? undefined,
     },
     {
       id: "hosting",
-      label: "Hosting",
-      value: hosting ?? "Not on file",
+      label: "Website service",
+      value: hosting ? "Active" : "Details pending",
       status: hosting ? "ok" : "unknown",
     },
     {
       id: "ssl",
-      label: "SSL",
-      value: domain ? (usesHttps ? "Secure (HTTPS)" : "Review recommended") : "Not on file",
+      label: "Website security",
+      value: domain ? (usesHttps ? "Secure" : "KXD review recommended") : "Not available",
       status: domain ? (usesHttps ? "ok" : "warning") : "unknown",
     },
     {
       id: "performance",
-      label: "Performance",
-      value: latestAudit?.performanceScore != null ? `${latestAudit.performanceScore}/100` : "Awaiting audit",
+      label: "Website speed",
+      value:
+        latestAudit?.performanceScore != null
+          ? `${latestAudit.performanceScore}/100`
+          : "Awaiting audit",
       status: scoreStatus(latestAudit?.performanceScore),
     },
     {
       id: "seo",
-      label: "SEO score",
+      label: "Search foundation",
       value: latestAudit?.seoScore != null ? `${latestAudit.seoScore}/100` : "Awaiting audit",
       status: scoreStatus(latestAudit?.seoScore),
     },
     {
       id: "analytics",
-      label: "Analytics",
-      value: ga4Configured
-        ? "GA4 property on file"
-        : analyticsConnected
-          ? "Marked connected"
-          : "Not configured",
-      status: ga4Configured || analyticsConnected ? "ok" : "pending",
+      label: "Website activity",
+      value: ga4Configured ? "Connected" : "Connection pending",
+      status: ga4Configured ? "ok" : "pending",
       detail: ga4Configured
-        ? "Configured for this account"
-        : analyticsConnected
-          ? "Onboarding notes analytics connected; property ID not yet on file"
-          : "No GA4 property configured for this account",
+        ? "KXD can measure website visits and activity"
+        : "KXD is not receiving verified website activity yet",
     },
     {
       id: "search-console",
-      label: "Search Console",
-      value: searchConsoleConfigured ? "Site on file" : "Not configured",
+      label: "Search visibility",
+      value: searchConsoleConfigured ? "Connected" : "Connection pending",
       status: searchConsoleConfigured ? "ok" : "pending",
       detail: searchConsoleConfigured
-        ? "Configured for this account"
-        : "No Search Console site configured for this account",
-    },
-    {
-      id: "forms",
-      label: "Forms",
-      value: "See Analytics for tracked form facts",
-      status: "pending",
-      detail:
-        "Form submission counts appear on Analytics only when reporting facts include them — never invented here.",
-    },
-    {
-      id: "backups",
-      label: "Backups",
-      value: "Monitoring not available",
-      status: "unknown",
-      detail: "Backup monitoring is not exposed in the portal yet.",
+        ? "KXD can measure how the website appears in Google Search"
+        : "KXD is not receiving verified search visibility yet",
     },
     {
       id: "deployment",
-      label: "Last deployment",
-      value: lastDeployment ? String(lastDeployment.title) : "No deployments logged",
+      label: "Latest website release",
+      value: lastDeployment ? String(lastDeployment.title) : "No release recorded",
       status: lastDeployment ? "ok" : "unknown",
       detail: lastDeployment?.eventDate ? String(lastDeployment.eventDate) : undefined,
     },
@@ -524,14 +505,14 @@ export async function getPortalWebsiteHealth(session: PortalSession): Promise<Po
 
   const knownIssues = latestAudit?.opportunities ?? [];
   const sourceNotes: string[] = [];
-  if (!ga4Configured && !analyticsConnected) {
-    sourceNotes.push("Website analytics is not configured for this account yet.");
+  if (!ga4Configured) {
+    sourceNotes.push("Verified website activity measurement is not connected yet.");
   }
   if (!searchConsoleConfigured) {
-    sourceNotes.push("Search Console is not configured for this account yet.");
+    sourceNotes.push("Verified search visibility measurement is not connected yet.");
   }
   if (!latestAudit) {
-    sourceNotes.push("No website audit is on file for this account.");
+    sourceNotes.push("KXD has not published a website audit for this business yet.");
   }
 
   return {
@@ -591,9 +572,7 @@ export async function getPortalTeam(session: PortalSession): Promise<PortalTeamM
 
   for (const member of teamMembersR.docs as PortalDoc[]) {
     const portrait =
-      member.portrait && typeof member.portrait === "object"
-        ? mediaUrl(member.portrait)
-        : null;
+      member.portrait && typeof member.portrait === "object" ? mediaUrl(member.portrait) : null;
     members.push({
       id: `kxd-${member.id}`,
       name: String(member.name ?? "KXD Team"),
@@ -694,25 +673,20 @@ export async function getPortalOverview(session: PortalSession): Promise<PortalO
       ? executive.clientHealthScore
       : dashboard.readinessScore;
 
-  const healthLabel =
-    executive?.relationshipStatus
-      ? formatTierLabel(String(executive.relationshipStatus))
-      : client?.relationshipStatus
-        ? formatTierLabel(String(client.relationshipStatus))
-        : dashboard.onboardingStatus;
+  const healthLabel = executive?.relationshipStatus
+    ? formatTierLabel(String(executive.relationshipStatus))
+    : client?.relationshipStatus
+      ? formatTierLabel(String(client.relationshipStatus))
+      : dashboard.onboardingStatus;
 
   const upcomingMeeting = timeline.find((event) => {
     if (String(event.eventType) !== "meeting") return false;
     return new Date(String(event.eventDate)).getTime() >= Date.now();
   });
 
-  const activeProject = projects.find(
-    (p) => !["archived", "launched"].includes(String(p.status)),
-  );
+  const activeProject = projects.find((p) => !["archived", "launched"].includes(String(p.status)));
 
-  const deliverablesDue = deliverables.filter(
-    (d) => d.status !== "complete" && d.dueDate,
-  ).length;
+  const deliverablesDue = deliverables.filter((d) => d.status !== "complete" && d.dueDate).length;
 
   const recentCompleted = deliverables
     .filter((d) => d.status === "complete")
@@ -751,7 +725,9 @@ export async function getPortalOverview(session: PortalSession): Promise<PortalO
     companyName: session.clientName,
     logoUrl,
     relationshipStart,
-    plan: formatTierLabel(String(client?.brandTier ?? executive?.clientTier ?? activeRetainer?.retainerName)),
+    plan: formatTierLabel(
+      String(client?.brandTier ?? executive?.clientTier ?? activeRetainer?.retainerName),
+    ),
     monthlyInvestment,
     healthScore,
     healthLabel,

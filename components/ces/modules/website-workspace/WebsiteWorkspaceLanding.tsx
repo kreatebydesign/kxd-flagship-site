@@ -8,7 +8,7 @@ import {
   formatWorkspaceSubmittedAt,
 } from "@/lib/ces/modules/website-workspace/presentation";
 import { portalCopy } from "@/lib/ces/copy/portal-language";
-import { CesHero, CesPage } from "@/components/ces/primitives";
+import { CesEmptyState, CesHero, CesPage } from "@/components/ces/primitives";
 import { WebsiteWorkspaceStatus } from "./WebsiteWorkspaceStatus";
 
 type Props = {
@@ -59,18 +59,17 @@ export function WebsiteWorkspaceLanding({ profile, data }: Props) {
           </div>
           {data.openRequestCount > 0 ? (
             <p className="kxd-ws-open-count">
-              {data.openRequestCount} open request{data.openRequestCount === 1 ? "" : "s"}
+              {data.openRequestCount} open request
+              {data.openRequestCount === 1 ? "" : "s"}
             </p>
           ) : null}
         </header>
 
         {data.pages.length === 0 ? (
-          <div className="kxd-ces-empty">
-            <p className="kxd-ces-empty__title">Workspace catalog coming soon</p>
-            <p className="kxd-ces-empty__lead">
-              Your website structure will appear here once prepared for collaboration.
-            </p>
-          </div>
+          <CesEmptyState
+            title="Your website workspace is being prepared"
+            lead="The page structure will appear here once KXD has reviewed it for structured collaboration."
+          />
         ) : (
           <ul className="kxd-ws-page-grid">
             {data.pages.map((page) => (
@@ -84,7 +83,8 @@ export function WebsiteWorkspaceLanding({ profile, data }: Props) {
                   <div className="kxd-ws-page-card__meta">
                     <span>Updated {page.lastUpdated}</span>
                     <span>
-                      {page.sectionCount} section{page.sectionCount === 1 ? "" : "s"}
+                      {page.sectionCount} section
+                      {page.sectionCount === 1 ? "" : "s"}
                     </span>
                     {page.openRequestCount > 0 ? (
                       <span className="kxd-ws-page-card__active">

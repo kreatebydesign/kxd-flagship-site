@@ -1,19 +1,18 @@
-import { KxdPage } from "@/components/os";
+import { CesHero, CesPage } from "@/components/ces/primitives";
 import { AnalyticsVisibilityWorkspace } from "@/components/portal/AnalyticsVisibilityWorkspace";
 import type { AnalyticsVisibilityModel } from "@/lib/portal/analytics-visibility";
-import { ClientHqPageHero } from "./ClientHqPageHero";
 
 export function AnalyticsScreen({ model }: { model: AnalyticsVisibilityModel }) {
   return (
-    <KxdPage className="kxd-os-page--ops">
-      <ClientHqPageHero
+    <CesPage className="kxd-client-module kxd-client-module--analytics">
+      <CesHero
         eyebrow="Intelligence"
         title="Analytics"
-        lead={`Traffic, search, and tracked conversion signals for ${model.clientName} — this active account only.`}
+        lead={`How people find and use ${model.clientName}'s website, translated into business language.`}
       />
       <div className="kxd-ws-perf-wrap">
         <AnalyticsVisibilityWorkspace model={model} />
       </div>
-    </KxdPage>
+    </CesPage>
   );
 }

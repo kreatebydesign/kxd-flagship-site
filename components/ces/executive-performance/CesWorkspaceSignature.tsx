@@ -6,7 +6,7 @@
 
 export function CesWorkspaceSignature() {
   return (
-    <footer className="kxd-ces-exec__signature" aria-label="KXD OS signature">
+    <footer className="kxd-ces-exec__signature" aria-label="Kreate by Design signature">
       <div className="kxd-ces-exec__signature-rule" aria-hidden="true" />
       <div className="kxd-ces-exec__signature-inner">
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -18,7 +18,7 @@ export function CesWorkspaceSignature() {
           height={26}
         />
         <div className="kxd-ces-exec__signature-copy">
-          <p className="kxd-ces-exec__signature-line">Powered by KXD OS</p>
+          <p className="kxd-ces-exec__signature-line">Managed by Kreate by Design</p>
           <p className="kxd-ces-exec__signature-line kxd-ces-exec__signature-line--quiet">
             Designed by Kreate by Design
           </p>

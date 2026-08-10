@@ -6,14 +6,19 @@ import type { ConnectedWorkspaceData } from "@/lib/portal/connected-workspace";
 import type { WorkspacePersonalizationModel } from "@/lib/portal/workspace-personalization";
 import type { WorkPerformanceModel } from "@/lib/portal/work-performance";
 import { isCesFlagshipPortal } from "@/lib/portal/ces-launch-safety";
-import { shouldUseCesPortalHome as resolveCesHomeShell } from "@/lib/ces/modules/home";
+import {
+  composeClientHomePresentation,
+  isHomeZoneVisible,
+  resolveCesHomeSurface,
+  shouldUseCesPortalHome as resolveCesHomeShell,
+  type PortalHomeComposition,
+} from "@/lib/ces/modules/home";
 import { portalFirstName, portalTimeGreeting } from "@/lib/portal/greeting";
 import { CesPage } from "@/components/ces/primitives";
 import { CesPartnershipBriefing } from "@/components/ces/partnership";
 import { CesExecutivePerformanceWorkspace } from "@/components/ces/executive-performance";
 import { WorkspaceFocusStrip } from "@/components/portal/WorkspaceFocusStrip";
-import { WorkPerformanceWorkspace } from "@/components/portal/WorkPerformanceWorkspace";
-import { PortalUpgradeOpportunities } from "./PortalUpgradeOpportunities";
+import { CesClientCommandHome } from "./CesClientCommandHome";
 
 export interface CesPortalHomeProps {
   displayName: string;
@@ -27,6 +32,8 @@ export interface CesPortalHomeProps {
   personalization?: WorkspacePersonalizationModel | null;
   /** Batch D — monthly work & performance workspace for the active client. */
   workPerformance?: WorkPerformanceModel | null;
+  /** Canonical entitlement-aware home-zone composition. */
+  homeComposition: PortalHomeComposition;
 }
 
 export function CesPortalHome({
@@ -37,27 +44,44 @@ export function CesPortalHome({
   performance,
   personalization = null,
   workPerformance = null,
+  homeComposition,
 }: CesPortalHomeProps) {
   const firstName = portalFirstName(displayName);
   const greeting = portalTimeGreeting(firstName);
   const flagship = isCesFlagshipPortal(profile);
-  const useExecutive = Boolean(performance);
+  const homeSurface = resolveCesHomeSurface({
+    homeComposition,
+    hasExecutivePerformance: Boolean(performance),
+    hasWorkPerformance: Boolean(workPerformance),
+  });
+  const useExecutive = homeSurface === "executive-performance";
+  const clientHome =
+    homeSurface === "client-command" && workPerformance
+      ? composeClientHomePresentation({
+          displayName,
+          greeting,
+          profile,
+          briefing,
+          workPerformance,
+        })
+      : null;
 
   return (
     <CesPage
       className={`kxd-ces-portal-home kxd-ces-portal-home--briefing kxd-ces-page--enter${
         flagship ? " kxd-ces-portal-home--flagship" : ""
-      }${useExecutive ? " kxd-ces-portal-home--executive" : ""}`}
+      }${useExecutive ? " kxd-ces-portal-home--executive" : ""}${
+        clientHome ? " kxd-ces-portal-home--command" : ""
+      }`}
     >
-      <div
-        data-workspace-client={
-          workPerformance?.clientId ??
-          personalization?.clientId ??
-          profile.identity.clientId
-        }
-        data-workspace-profile={personalization?.profileKey ?? "default"}
-      >
-        {useExecutive && performance ? (
+      <div>
+        {clientHome ? (
+          <CesClientCommandHome
+            home={clientHome}
+            showWork={isHomeZoneVisible(homeComposition, "work-performance")}
+            showPartnership={isHomeZoneVisible(homeComposition, "partnership-briefing")}
+          />
+        ) : useExecutive && performance ? (
           <CesExecutivePerformanceWorkspace
             performance={performance}
             websiteReview={websiteReview}
@@ -65,14 +89,9 @@ export function CesPortalHome({
         ) : (
           <CesPartnershipBriefing briefing={briefing} greeting={greeting} />
         )}
-        {workPerformance ? (
-          <div className="kxd-ws-perf-wrap">
-            <WorkPerformanceWorkspace model={workPerformance} />
-          </div>
-        ) : personalization && !useExecutive ? (
+        {!clientHome && personalization && !useExecutive ? (
           <WorkspaceFocusStrip personalization={personalization} />
         ) : null}
-        <PortalUpgradeOpportunities />
       </div>
     </CesPage>
   );

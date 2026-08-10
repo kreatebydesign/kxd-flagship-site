@@ -3,16 +3,16 @@
  * These are relationship facts, not fabricated KPI counts.
  */
 
-import {
-  memoryToMilestones,
-  memoryToStoryBeats,
-} from "@/lib/executive-memory";
+import { memoryToMilestones, memoryToStoryBeats } from "@/lib/executive-memory";
 import type { PartnershipMilestone } from "./types";
 
 /** Generic CES flagship milestones when no slug-specific memory exists. */
 const DEFAULT_FLAGSHIP: PartnershipMilestone[] = [
-  { id: "operating-portal", label: "Your partnership workspace opened", complete: true },
-  { id: "review-workflow", label: "A private review rhythm introduced", complete: true },
+  {
+    id: "operating-portal",
+    label: "Your partnership workspace opened",
+    complete: true,
+  },
 ];
 
 export function getPartnershipMilestones(slug: string | null): PartnershipMilestone[] {

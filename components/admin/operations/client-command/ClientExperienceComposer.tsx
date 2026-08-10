@@ -104,6 +104,10 @@ function isProvisionBusy(
   return provisioning === actionId || provisioning.startsWith(`${actionId}::`);
 }
 
+function experienceSetupAnchor(dependencyId: string): string {
+  return `experience-setup-${dependencyId}`;
+}
+
 export function ClientExperienceComposer({
   clientId,
   onActivated,
@@ -424,6 +428,17 @@ export function ClientExperienceComposer({
       recommendation!.branding.colorSource !== "authoritative");
   const accessDep = recommendation?.readiness.dependencies.find((dep) => dep.id === "access");
 
+  function revealModuleSetup(moduleId: ExperienceDependency["relatedModules"][number]) {
+    const dependency = setupDeps.find((dep) => dep.relatedModules.includes(moduleId));
+    if (!dependency) return;
+    setAdvancedOpen(true);
+    window.requestAnimationFrame(() => {
+      const target = document.getElementById(experienceSetupAnchor(dependency.id));
+      target?.focus({ preventScroll: true });
+      target?.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  }
+
   return (
     <section className="kxd-os-card kxd-ces-exp kxd-ces-composer">
       <div className="kxd-plans-access__head">
@@ -449,7 +464,32 @@ export function ClientExperienceComposer({
       {recommendation ? (
         <p className="kxd-os-meta">
           Modules ready {recommendation.counts.ready}/{recommendation.counts.recommended} ·
-          Needs setup {recommendation.counts.needsSetup} · Shell{" "}
+          Needs setup:{" "}
+          {grouped.needsSetup.length === 0
+            ? "None"
+            : grouped.needsSetup.map((row, index) => {
+                const dependency = setupDeps.find((dep) =>
+                  dep.relatedModules.includes(row.id),
+                );
+                return (
+                  <span key={row.id}>
+                    {index > 0 ? ", " : null}
+                    {dependency ? (
+                      <button
+                        type="button"
+                        className="kxd-os-link-quiet"
+                        aria-controls={experienceSetupAnchor(dependency.id)}
+                        onClick={() => revealModuleSetup(row.id)}
+                      >
+                        {row.label}
+                      </button>
+                    ) : (
+                      row.label
+                    )}
+                  </span>
+                );
+              })}{" "}
+          · Shell{" "}
           {recommendation.homeShell === "ces" ? "CES" : "Client HQ"}
         </p>
       ) : null}
@@ -770,7 +810,12 @@ export function ClientExperienceComposer({
               <h3 className="kxd-ces-exp__h">Needs Setup</h3>
               <ul className="kxd-ces-exp__modules">
                 {setupDeps.map((dep) => (
-                  <li key={dep.id} className="kxd-ces-exp__module">
+                  <li
+                    key={dep.id}
+                    id={experienceSetupAnchor(dep.id)}
+                    className="kxd-ces-exp__module"
+                    tabIndex={-1}
+                  >
                     <div className="kxd-ces-exp__dep-head">
                       <strong>{dep.label}</strong>
                       <span className="kxd-ces-exp__state kxd-ces-exp__state--ineligible">

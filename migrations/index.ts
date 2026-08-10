@@ -62,6 +62,7 @@ import * as migration_20260804_phase26c_calendar_write_fields from './20260804_p
 import * as migration_20260805_phase26c1_timeline_source_module_work from './20260805_phase26c1_timeline_source_module_work';
 import * as migration_20260806_phase27a_calendar_sync_fields from './20260806_phase27a_calendar_sync_fields';
 import * as migration_20260807_phase28b_sales_leads_estimated_mrr_column from './20260807_phase28b_sales_leads_estimated_mrr_column';
+import * as migration_20260809_client_inventory_source_identity from './20260809_client_inventory_source_identity';
 import * as migration_20260712_phase29c_reporting_provider_connections from './20260712_phase29c_reporting_provider_connections';
 import * as migration_20260713_phase31c_reporting_facts from './20260713_phase31c_reporting_facts';
 import * as migration_20260713_phase32b_google_ads_customer_fields from './20260713_phase32b_google_ads_customer_fields';
@@ -610,5 +611,11 @@ export const migrations = [
     up: migration_20260825_client_service_assignments.up,
     down: migration_20260825_client_service_assignments.down,
     name: '20260825_client_service_assignments',
+  },
+  {
+    // Inventory source identity — additive and registered only; production apply requires approval.
+    up: migration_20260809_client_inventory_source_identity.up,
+    down: migration_20260809_client_inventory_source_identity.down,
+    name: '20260809_client_inventory_source_identity',
   },
 ];

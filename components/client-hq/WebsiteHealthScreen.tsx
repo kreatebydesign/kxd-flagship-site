@@ -1,6 +1,5 @@
-import Link from "next/link";
-import { KxdBadge, KxdEmptyState, KxdPage } from "@/components/os";
-import { ClientHqPageHero } from "./ClientHqPageHero";
+import { KxdBadge } from "@/components/os";
+import { CesDisclosure, CesEmptyState, CesHero, CesPage } from "@/components/ces/primitives";
 import type { PortalWebsiteHealthData } from "@/lib/portal/types";
 import { fmtPortalDate } from "@/lib/portal/format";
 
@@ -14,7 +13,7 @@ function signalVariant(status: string): "success" | "warning" | "pending" | "def
 function signalStatusLabel(status: string): string {
   if (status === "ok") return "Healthy";
   if (status === "warning") return "Needs attention";
-  if (status === "pending") return "Pending";
+  if (status === "pending") return "KXD is preparing this";
   return "Unknown";
 }
 
@@ -22,11 +21,11 @@ export function WebsiteHealthScreen({ data }: { data: PortalWebsiteHealthData })
   const audit = data.latestAudit;
 
   return (
-    <KxdPage className="kxd-os-page--ops">
-      <ClientHqPageHero
+    <CesPage className="kxd-client-module kxd-client-module--health">
+      <CesHero
         eyebrow="Intelligence"
         title="Website Health"
-        lead={`Domain, performance, SEO, and connection signals for ${data.clientName}.`}
+        lead={`A calm view of the website signals KXD can verify for ${data.clientName}.`}
       />
 
       <p className="kxd-os-eyebrow" style={{ marginBottom: "0.5rem" }}>
@@ -41,26 +40,6 @@ export function WebsiteHealthScreen({ data }: { data: PortalWebsiteHealthData })
           No primary domain on file for this account.
         </p>
       )}
-
-      {data.sourceNotes.length > 0 ? (
-        <section
-          className="kxd-os-card"
-          style={{ marginBottom: "1.5rem" }}
-          aria-label="Data availability notes"
-        >
-          <p className="kxd-os-section__label">Data availability</p>
-          <ul className="kxd-os-body" style={{ marginTop: "0.75rem", paddingLeft: "1.25rem" }}>
-            {data.sourceNotes.map((note) => (
-              <li key={note}>{note}</li>
-            ))}
-          </ul>
-          <p style={{ marginTop: "0.75rem" }}>
-            <Link href="/portal/analytics" className="kxd-os-link-quiet">
-              Open analytics &amp; lead visibility
-            </Link>
-          </p>
-        </section>
-      ) : null}
 
       <div
         style={{
@@ -90,10 +69,29 @@ export function WebsiteHealthScreen({ data }: { data: PortalWebsiteHealthData })
         ))}
       </div>
 
+      <section className="kxd-os-card" style={{ marginBottom: "2rem" }}>
+        <h2 className="kxd-os-section__label">What this means</h2>
+        <p className="kxd-os-body" style={{ marginTop: "0.75rem" }}>
+          Healthy signals offer reassurance that the website foundation is available and measurable.
+          Anything marked for attention is an area KXD can review with you.
+        </p>
+        <p className="kxd-os-meta" style={{ marginTop: "0.75rem" }}>
+          KXD uses connected measurements and published audits here. Missing information is left
+          pending rather than presented as healthy.
+        </p>
+      </section>
+
       {audit ? (
         <section className="kxd-os-card" style={{ marginBottom: "2rem" }} aria-label="Latest audit">
           <h2 className="kxd-os-section__label">Latest audit</h2>
-          <div style={{ display: "flex", gap: "2rem", flexWrap: "wrap", alignItems: "baseline" }}>
+          <div
+            style={{
+              display: "flex",
+              gap: "2rem",
+              flexWrap: "wrap",
+              alignItems: "baseline",
+            }}
+          >
             <p
               className="kxd-os-metric__value"
               aria-label={`Overall score ${audit.overallScore ?? "unavailable"}${
@@ -119,9 +117,9 @@ export function WebsiteHealthScreen({ data }: { data: PortalWebsiteHealthData })
           ) : null}
         </section>
       ) : (
-        <KxdEmptyState
-          title="No audit on file"
-          description="A KXD website audit will appear here when available for this account. Request one from your account team."
+        <CesEmptyState
+          title="No website review published yet"
+          lead="A KXD website review will appear here when the evidence and recommendations are ready."
         />
       )}
 
@@ -135,6 +133,16 @@ export function WebsiteHealthScreen({ data }: { data: PortalWebsiteHealthData })
           </ul>
         </section>
       ) : null}
-    </KxdPage>
+
+      {data.sourceNotes.length > 0 ? (
+        <CesDisclosure summary="About this view">
+          <ul className="kxd-os-body">
+            {data.sourceNotes.map((note) => (
+              <li key={note}>{note}</li>
+            ))}
+          </ul>
+        </CesDisclosure>
+      ) : null}
+    </CesPage>
   );
 }

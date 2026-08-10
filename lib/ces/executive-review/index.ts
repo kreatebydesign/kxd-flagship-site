@@ -19,7 +19,7 @@ export type {
   ExecutiveReviewOngoingItem,
 } from "./types";
 
-export { isExecutiveReviewAvailable } from "./availability";
+export { isExecutiveReviewAvailable, isExecutiveReviewEntitled } from "./availability";
 export { composeExecutiveReview, type ExecutiveReviewComposeResult } from "./compose";
 export {
   getExecutiveReviewPack,

@@ -170,8 +170,20 @@ function main() {
     sourceClientId: 7,
     reportingPeriod: period,
     reportingFacts: [
-      fact({ clientId: 7, metricKey: "sessions", value: 120, previousValue: 100, delta: 20 }),
-      fact({ clientId: 7, metricKey: "conversions", value: 3, previousValue: 1, delta: 2 }),
+      fact({
+        clientId: 7,
+        metricKey: "sessions",
+        value: 120,
+        previousValue: 100,
+        delta: 20,
+      }),
+      fact({
+        clientId: 7,
+        metricKey: "conversions",
+        value: 3,
+        previousValue: 1,
+        delta: 2,
+      }),
       fact({ clientId: 7, metricKey: "form_submissions", value: 5 }),
     ],
     reportingEntitled: true,
@@ -212,7 +224,10 @@ function main() {
       /separate/i.test(partial.leads.statusNote ?? ""),
   );
   check("published reports scoped list ready", partial.reports.items.length === 1);
-  check("freshness note retained", partial.analytics.freshnessNote?.includes("2026-07-02") === true);
+  check(
+    "freshness note retained",
+    partial.analytics.freshnessNote?.includes("2026-07-02") === true,
+  );
 
   // Error load state
   const errored = composeAnalyticsVisibilityModel({
@@ -292,7 +307,7 @@ function main() {
   check(
     "report view API denies forged ids uniformly",
     reportViewApi.includes("decidePortalReportAccess") &&
-      reportViewApi.includes('status: 404') &&
+      reportViewApi.includes("status: 404") &&
       !reportViewApi.includes("Forbidden"),
   );
 
@@ -330,11 +345,12 @@ function main() {
   const workspace = read("components/portal/AnalyticsVisibilityWorkspace.tsx");
   check(
     "workspace covers sources, performance, leads, reports, retry",
-    workspace.includes("Data sources") &&
+    workspace.includes("About these results") &&
+      workspace.includes("model.sources.map") &&
       workspace.includes("Website performance") &&
       workspace.includes("Leads and conversions") &&
       workspace.includes("Retry") &&
-      workspace.includes("data-workspace-client"),
+      !workspace.includes("data-workspace-client"),
   );
 
   const server = read("lib/portal/analytics-visibility/server.ts");
@@ -364,10 +380,7 @@ function main() {
 
   // Package script
   const packageJson = read("package.json");
-  check(
-    "package script registered",
-    packageJson.includes("verify:phase4-analytics-visibility"),
-  );
+  check("package script registered", packageJson.includes("verify:phase4-analytics-visibility"));
 
   // Docs acknowledge Batch E
   const phase4 = read("docs/PHASE-4-MULTI-CLIENT-PORTAL.md");

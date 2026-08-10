@@ -48,16 +48,12 @@ function asStatus(value: unknown): InventoryListingStatus {
 }
 
 function asPriceMode(value: unknown): InventoryPriceDisplayMode {
-  return INVENTORY_PRICE_DISPLAY_MODES.includes(
-    value as InventoryPriceDisplayMode,
-  )
+  return INVENTORY_PRICE_DISPLAY_MODES.includes(value as InventoryPriceDisplayMode)
     ? (value as InventoryPriceDisplayMode)
     : "exact";
 }
 
-export function parseInventoryVehicleDoc(
-  raw: unknown,
-): InventoryVehicleRecord | null {
+export function parseInventoryVehicleDoc(raw: unknown): InventoryVehicleRecord | null {
   const doc = asDoc(raw);
   if (!doc) return null;
   const id = Number(doc.id);
@@ -144,12 +140,13 @@ export function parseInventoryVehicleDoc(
     highlights,
     primaryImage: mediaRef(doc.primaryImage),
     gallery,
-    sortOrder: Number.isFinite(Number(doc.sortOrder))
-      ? Number(doc.sortOrder)
-      : 0,
+    sortOrder: Number.isFinite(Number(doc.sortOrder)) ? Number(doc.sortOrder) : 0,
     publishedAt: doc.publishedAt ? String(doc.publishedAt) : null,
     soldAt: doc.soldAt ? String(doc.soldAt) : null,
     externalUrl: doc.externalUrl ? String(doc.externalUrl).trim() : null,
+    sourceSystem: doc.sourceSystem ? String(doc.sourceSystem).trim() : null,
+    sourceExternalId: doc.sourceExternalId ? String(doc.sourceExternalId).trim() : null,
+    lastSourceSyncAt: doc.lastSourceSyncAt ? String(doc.lastSourceSyncAt) : null,
     createdBy: doc.createdBy ? String(doc.createdBy) : null,
     updatedBy: doc.updatedBy ? String(doc.updatedBy) : null,
     createdAt: doc.createdAt ? String(doc.createdAt) : null,

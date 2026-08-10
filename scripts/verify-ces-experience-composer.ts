@@ -139,6 +139,7 @@ check(
 
 const recommendRoute = read("app/api/admin/clients/[clientId]/experience/recommend/route.ts");
 const activateRoute = read("app/api/admin/clients/[clientId]/experience/activate/route.ts");
+const composerUi = read("components/admin/operations/client-command/ClientExperienceComposer.tsx");
 check(
   "recommend route is GET-only and studio gated",
   recommendRoute.includes("export async function GET") &&
@@ -153,10 +154,22 @@ check(
 );
 check(
   "generate UI does not write profile",
-  read("components/admin/operations/client-command/ClientExperienceComposer.tsx").includes(
-    "/experience/recommend",
-  ) &&
+  composerUi.includes("/experience/recommend") &&
     read("lib/client-command/experience/composer/recommend.ts").includes("mutatesProfile: false"),
+);
+check(
+  "readiness summary names actual setup modules and supports multiple",
+  composerUi.includes("grouped.needsSetup.map") &&
+    composerUi.includes("Needs setup:") &&
+    !composerUi.includes("Needs setup {recommendation.counts.needsSetup}"),
+);
+check(
+  "readiness summary reveals and focuses stable generic setup anchors",
+  composerUi.includes("experienceSetupAnchor") &&
+    composerUi.includes("setAdvancedOpen(true)") &&
+    composerUi.includes("scrollIntoView") &&
+    composerUi.includes("aria-controls") &&
+    composerUi.includes("tabIndex={-1}"),
 );
 
 const advisor = recommendModules(baseSignals({})).find((m) => m.id === "advisor");

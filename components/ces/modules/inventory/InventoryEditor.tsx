@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
-import type { ResolvedExperienceProfile } from "@/lib/ces";
 import type {
   InventoryVehicleInput,
   InventoryVehicleRecord,
@@ -23,7 +22,6 @@ import { KxdToggle } from "@/components/os";
 import { CesPage } from "@/components/ces/primitives";
 
 type Props = {
-  profile: ResolvedExperienceProfile;
   mode: "create" | "edit";
   initial?: InventoryVehicleRecord | null;
   initialPreview?: PublicInventoryVehicle | null;
@@ -86,9 +84,7 @@ function fromRecord(record?: InventoryVehicleRecord | null): FormState {
     primaryImageUrl: record?.primaryImage?.url ?? null,
     gallery: record?.gallery ?? [],
     highlightsText: (record?.highlights ?? []).map((row) => row.text).join("\n"),
-    specsText: (record?.specifications ?? [])
-      .map((row) => `${row.label}: ${row.value}`)
-      .join("\n"),
+    specsText: (record?.specifications ?? []).map((row) => `${row.label}: ${row.value}`).join("\n"),
   };
 }
 
@@ -118,8 +114,7 @@ function toPayload(form: FormState): InventoryVehicleInput {
     listingStatus: form.listingStatus as InventoryVehicleInput["listingStatus"],
     featured: form.featured,
     price: form.price ? Number(form.price) : null,
-    priceDisplayMode:
-      form.priceDisplayMode as InventoryVehicleInput["priceDisplayMode"],
+    priceDisplayMode: form.priceDisplayMode as InventoryVehicleInput["priceDisplayMode"],
     mileage: form.mileage ? Number(form.mileage) : null,
     vin: form.vin || null,
     stockNumber: form.stockNumber || null,
@@ -212,8 +207,19 @@ function UploadZone({
       }}
     >
       <span className="kxd-inv-upload__icon" aria-hidden>
-        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <path d="M12 16V7m0 0l-3.5 3.5M12 7l3.5 3.5" strokeLinecap="round" strokeLinejoin="round" />
+        <svg
+          viewBox="0 0 24 24"
+          width="26"
+          height="26"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+        >
+          <path
+            d="M12 16V7m0 0l-3.5 3.5M12 7l3.5 3.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
           <path d="M5 16.5V18a2 2 0 002 2h10a2 2 0 002-2v-1.5" strokeLinecap="round" />
         </svg>
       </span>
@@ -238,12 +244,7 @@ function UploadZone({
   );
 }
 
-export function InventoryEditor({
-  profile,
-  mode,
-  initial,
-  initialPreview,
-}: Props) {
+export function InventoryEditor({ mode, initial, initialPreview }: Props) {
   const router = useRouter();
   const [form, setForm] = useState(() => fromRecord(initial));
   const [slugTouched, setSlugTouched] = useState(Boolean(initial?.slug));
@@ -274,11 +275,7 @@ export function InventoryEditor({
       const next = { ...prev, [key]: value };
       if (
         !slugTouched &&
-        (key === "year" ||
-          key === "make" ||
-          key === "model" ||
-          key === "trim" ||
-          key === "title")
+        (key === "year" || key === "make" || key === "model" || key === "trim" || key === "title")
       ) {
         next.slug = suggestInventorySlug({
           year: next.year ? Number(next.year) : null,
@@ -404,9 +401,7 @@ export function InventoryEditor({
       setSaved(false);
       const payload = toPayload(form);
       const response = await fetch(
-        mode === "create"
-          ? "/api/portal/inventory"
-          : `/api/portal/inventory/${initial?.id}`,
+        mode === "create" ? "/api/portal/inventory" : `/api/portal/inventory/${initial?.id}`,
         {
           method: mode === "create" ? "POST" : "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -437,11 +432,14 @@ export function InventoryEditor({
           </p>
           <h1 className="kxd-inv-pagehead__title">{pageTitle}</h1>
           <p className="kxd-inv-pagehead__lead">
-            Compose the listing carefully. VIN stays private. Public showroom only
-            includes Available, Pending, and Coming Soon.
+            Compose the listing carefully. VIN stays private. Public showroom only includes
+            Available, Pending, and Coming Soon.
           </p>
         </div>
-        <Link href="/portal/inventory" className="kxd-ces-btn kxd-ces-btn--ghost kxd-inv-pagehead__back">
+        <Link
+          href="/portal/inventory"
+          className="kxd-ces-btn kxd-ces-btn--ghost kxd-inv-pagehead__back"
+        >
           ← Back to inventory
         </Link>
       </header>
@@ -459,10 +457,7 @@ export function InventoryEditor({
 
       <div className="kxd-inv-editor__layout">
         <div className="kxd-inv-editor__main">
-          <section
-            className="kxd-inv-panel kxd-inv-panel--primary"
-            aria-labelledby="inv-identity"
-          >
+          <section className="kxd-inv-panel kxd-inv-panel--primary" aria-labelledby="inv-identity">
             <header className="kxd-inv-panel__head">
               <SectionNum n="01" />
               <div>
@@ -480,7 +475,7 @@ export function InventoryEditor({
                 />
               </Field>
               <div className="kxd-inv-form__grid">
-                <Field label="Slug">
+                <Field label="Vehicle page address">
                   <input
                     className="kxd-inv-input"
                     value={form.slug}
@@ -533,10 +528,7 @@ export function InventoryEditor({
             </div>
           </section>
 
-          <section
-            className="kxd-inv-panel kxd-inv-panel--secondary"
-            aria-labelledby="inv-pricing"
-          >
+          <section className="kxd-inv-panel kxd-inv-panel--secondary" aria-labelledby="inv-pricing">
             <header className="kxd-inv-panel__head">
               <SectionNum n="02" />
               <div>
@@ -590,7 +582,14 @@ export function InventoryEditor({
                 <Field label="VIN (private)">
                   <div className="kxd-inv-input-affix kxd-inv-input-affix--lock">
                     <span className="kxd-inv-lock" aria-hidden>
-                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.6">
+                      <svg
+                        viewBox="0 0 24 24"
+                        width="14"
+                        height="14"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.6"
+                      >
                         <rect x="5" y="11" width="14" height="10" rx="2" />
                         <path d="M8 11V8a4 4 0 018 0v3" />
                       </svg>
@@ -647,15 +646,12 @@ export function InventoryEditor({
             </div>
           </section>
 
-          <section
-            className="kxd-inv-panel kxd-inv-panel--editorial"
-            aria-labelledby="inv-copy"
-          >
+          <section className="kxd-inv-panel kxd-inv-panel--editorial" aria-labelledby="inv-copy">
             <header className="kxd-inv-panel__head">
               <SectionNum n="03" />
               <div>
                 <h2 id="inv-copy">Description</h2>
-                <p>Editorial copy and structured facts for the vehicle page.</p>
+                <p>Listing description and vehicle details for the public page.</p>
               </div>
             </header>
             <div className="kxd-inv-form__stack">
@@ -663,9 +659,7 @@ export function InventoryEditor({
                 <textarea
                   className="kxd-inv-input kxd-inv-input--textarea kxd-inv-input--textarea-lg"
                   value={form.description}
-                  onChange={(e) =>
-                    update("description", e.target.value.slice(0, DESC_LIMIT))
-                  }
+                  onChange={(e) => update("description", e.target.value.slice(0, DESC_LIMIT))}
                   rows={12}
                   placeholder="Write a precise, buyer-facing description…"
                 />
@@ -678,9 +672,7 @@ export function InventoryEditor({
                   <textarea
                     className="kxd-inv-input kxd-inv-input--textarea kxd-inv-input--textarea-md"
                     value={form.highlightsText}
-                    onChange={(e) =>
-                      update("highlightsText", e.target.value.slice(0, LINE_LIMIT))
-                    }
+                    onChange={(e) => update("highlightsText", e.target.value.slice(0, LINE_LIMIT))}
                     rows={9}
                   />
                   <span className="kxd-inv-counter">
@@ -691,9 +683,7 @@ export function InventoryEditor({
                   <textarea
                     className="kxd-inv-input kxd-inv-input--textarea kxd-inv-input--textarea-md"
                     value={form.specsText}
-                    onChange={(e) =>
-                      update("specsText", e.target.value.slice(0, LINE_LIMIT))
-                    }
+                    onChange={(e) => update("specsText", e.target.value.slice(0, LINE_LIMIT))}
                     rows={9}
                     placeholder={"Engine: RPE 1340\nTransmission: Sequential"}
                   />
@@ -710,7 +700,14 @@ export function InventoryEditor({
           <section className="kxd-inv-railcard" aria-labelledby="inv-visibility">
             <header className="kxd-inv-railcard__head">
               <span className="kxd-inv-railcard__icon" aria-hidden>
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <svg
+                  viewBox="0 0 24 24"
+                  width="16"
+                  height="16"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                >
                   <path d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z" />
                 </svg>
               </span>
@@ -721,7 +718,14 @@ export function InventoryEditor({
               <span className="kxd-inv-field__label">Public status</span>
               <div className="kxd-inv-status-select">
                 <span className="kxd-inv-lock" aria-hidden>
-                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.6">
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="13"
+                    height="13"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                  >
                     <rect x="5" y="11" width="14" height="10" rx="2" />
                     <path d="M8 11V8a4 4 0 018 0v3" />
                   </svg>
@@ -729,9 +733,7 @@ export function InventoryEditor({
                 <select
                   className="kxd-inv-input"
                   value={isPublic ? "public" : "private"}
-                  onChange={(e) =>
-                    setPublicVisibility(e.target.value as "public" | "private")
-                  }
+                  onChange={(e) => setPublicVisibility(e.target.value as "public" | "private")}
                 >
                   <option value="private">Private</option>
                   <option value="public">Public</option>
@@ -751,9 +753,7 @@ export function InventoryEditor({
             <div className="kxd-inv-toggle-row">
               <div>
                 <p className="kxd-inv-toggle-row__label">Featured on showroom</p>
-                <p className="kxd-inv-field__hint">
-                  Elevates the vehicle when publicly visible.
-                </p>
+                <p className="kxd-inv-field__hint">Elevates the vehicle when publicly visible.</p>
               </div>
               <KxdToggle
                 label={<span className="sr-only">Featured on showroom</span>}
@@ -766,7 +766,14 @@ export function InventoryEditor({
           <section className="kxd-inv-railcard kxd-inv-railcard--media" aria-labelledby="inv-media">
             <header className="kxd-inv-railcard__head">
               <span className="kxd-inv-railcard__icon" aria-hidden>
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <svg
+                  viewBox="0 0 24 24"
+                  width="16"
+                  height="16"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                >
                   <rect x="3" y="5" width="18" height="14" rx="2" />
                   <circle cx="9" cy="11" r="1.5" />
                   <path d="M21 16l-5-5-7 7" />
@@ -812,7 +819,8 @@ export function InventoryEditor({
 
               <div className="kxd-inv-media-rail__foot">
                 <span>
-                  {form.gallery.length} image{form.gallery.length === 1 ? "" : "s"}
+                  {form.gallery.length} image
+                  {form.gallery.length === 1 ? "" : "s"}
                 </span>
                 <button
                   type="button"
@@ -865,7 +873,14 @@ export function InventoryEditor({
           <section className="kxd-inv-railcard" aria-labelledby="inv-preview">
             <header className="kxd-inv-railcard__head">
               <span className="kxd-inv-railcard__icon" aria-hidden>
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <svg
+                  viewBox="0 0 24 24"
+                  width="16"
+                  height="16"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                >
                   <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z" />
                   <circle cx="12" cy="12" r="2.5" />
                 </svg>
@@ -894,29 +909,32 @@ export function InventoryEditor({
                   </div>
                   <h3>{preview.title}</h3>
                   <p>{formatInventoryIdentity(preview)}</p>
-                  <p className="kxd-inv-preview-card__price">
-                    {formatInventoryPrice(preview)}
-                  </p>
+                  <p className="kxd-inv-preview-card__price">{formatInventoryPrice(preview)}</p>
                 </div>
               </article>
             ) : (
               <div className="kxd-inv-preview-empty">
                 <span className="kxd-inv-preview-empty__glyph" aria-hidden>
-                  <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" strokeWidth="1.4">
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="28"
+                    height="28"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.4"
+                  >
                     <rect x="3" y="5" width="18" height="14" rx="2" />
                     <circle cx="9" cy="11" r="1.5" />
                     <path d="M21 16l-5-5-7 7" />
                   </svg>
                 </span>
                 <p>
-                  Vehicle preview will appear here. Preview updates automatically as
-                  you save changes.
+                  Vehicle preview will appear here. Preview updates automatically as you save
+                  changes.
                 </p>
                 <p className="kxd-inv-field__hint">
                   Draft pricing reads as {livePrice}.{" "}
-                  {isPublic
-                    ? "Current status is public."
-                    : "Current status is private."}
+                  {isPublic ? "Current status is public." : "Current status is private."}
                 </p>
               </div>
             )}
@@ -932,7 +950,10 @@ export function InventoryEditor({
             >
               {pending ? "Saving…" : "Save vehicle"}
             </button>
-            <Link href="/portal/inventory" className="kxd-ces-btn kxd-ces-btn--ghost kxd-inv-actions__cancel">
+            <Link
+              href="/portal/inventory"
+              className="kxd-ces-btn kxd-ces-btn--ghost kxd-inv-actions__cancel"
+            >
               Cancel
             </Link>
             {mode === "edit" ? (
@@ -943,7 +964,14 @@ export function InventoryEditor({
                 onClick={() => update("listingStatus", "hidden")}
               >
                 <span aria-hidden>
-                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="15"
+                    height="15"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                  >
                     <path d="M3 3l18 18" />
                     <path d="M10.6 10.7a2.5 2.5 0 003.5 3.5" />
                     <path d="M9.9 5.1A10.5 10.5 0 0121.9 12S18.4 18 12 18c-.9 0-1.7-.1-2.5-.3" />
@@ -955,8 +983,8 @@ export function InventoryEditor({
             ) : null}
             {mode === "edit" ? (
               <p className="kxd-inv-actions__note">
-                Sets status to Hidden. Save to apply. Permanent deletion stays in KXD OS
-                admin.
+                Sets status to Hidden. Save to apply. Contact your KXD team if this listing should
+                be permanently removed.
               </p>
             ) : null}
           </section>

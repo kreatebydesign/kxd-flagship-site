@@ -6,10 +6,7 @@
 import type { ReportingFact } from "@/lib/reporting/domain/types";
 import type { PeriodWindow } from "@/lib/reporting/domain/types";
 import { sanitizePortalHref } from "@/lib/portal/workspace-personalization/safe-routes";
-import {
-  MONTHLY_SUMMARY_SCOPE_NOTE,
-  projectMonthlySummaryForPeriod,
-} from "./monthly-summary";
+import { MONTHLY_SUMMARY_SCOPE_NOTE, projectMonthlySummaryForPeriod } from "./monthly-summary";
 import { periodLabel } from "./period";
 import { deriveVerifiedWins } from "./wins";
 import type {
@@ -49,12 +46,16 @@ const METRIC_SPECS: Array<{
   label: string;
   domain: WorkPerformanceMetric["domain"];
 }> = [
-  { key: "sessions", label: "Sessions", domain: "website" },
-  { key: "visitors", label: "Users", domain: "website" },
-  { key: "clicks", label: "Search clicks", domain: "search" },
-  { key: "impressions", label: "Search impressions", domain: "search" },
-  { key: "conversions", label: "Tracked conversions", domain: "website" },
-  { key: "ctr", label: "CTR", domain: "search" },
+  { key: "sessions", label: "Website visits", domain: "website" },
+  { key: "visitors", label: "People who visited", domain: "website" },
+  { key: "clicks", label: "Visits from Google Search", domain: "search" },
+  {
+    key: "impressions",
+    label: "Times seen in Google Search",
+    domain: "search",
+  },
+  { key: "conversions", label: "Tracked website actions", domain: "website" },
+  { key: "ctr", label: "Search result click rate", domain: "search" },
 ];
 
 function formatMetricValue(fact: ReportingFact): string {
@@ -175,8 +176,7 @@ function buildLeads(
     periodLabel: label,
     conversionCount: Math.round(conversion.value),
     conversionLabel: "Tracked website conversions",
-    statusNote:
-      "These are analytics conversion events — not confirmed sales pipeline leads.",
+    statusNote: "These are analytics conversion events — not confirmed sales pipeline leads.",
     salesPipelineAvailable: false,
   };
 }
@@ -218,10 +218,7 @@ function buildValueSummary(input: {
   };
 }
 
-function availabilityFromCounts(
-  entitled: boolean,
-  count: number,
-): WorkPerformanceAvailability {
+function availabilityFromCounts(entitled: boolean, count: number): WorkPerformanceAvailability {
   if (!entitled) return "not-entitled";
   return count > 0 ? "ready" : "empty";
 }
@@ -240,9 +237,7 @@ export function composeWorkPerformanceModel(
   }
 
   const reportingLabel = periodLabel(input.reportingPeriod);
-  const comparisonLabel = input.comparisonPeriod
-    ? periodLabel(input.comparisonPeriod)
-    : null;
+  const comparisonLabel = input.comparisonPeriod ? periodLabel(input.comparisonPeriod) : null;
 
   // Month bucketing uses reliable completion dates only — never updatedAt.
   const completedThisMonth = projectMonthlySummaryForPeriod(
@@ -254,8 +249,8 @@ export function composeWorkPerformanceModel(
   const activeCount = input.activeItems.length;
 
   const requestActionHref = input.updateRequests.entitled
-    ? sanitizePortalHref(input.updateRequests.primaryActionHref ?? "/portal/website-review") ??
-      sanitizePortalHref("/portal/requests")
+    ? (sanitizePortalHref(input.updateRequests.primaryActionHref ?? "/portal/website-review") ??
+      sanitizePortalHref("/portal/requests"))
     : null;
 
   const updateRequests: WorkPerformanceRequestSummary = {
@@ -297,11 +292,7 @@ export function composeWorkPerformanceModel(
     input.reportingPeriod,
     input.analyticsFreshnessNote ?? null,
   );
-  const leads = buildLeads(
-    input.reportingFacts,
-    input.reportingEntitled,
-    input.reportingPeriod,
-  );
+  const leads = buildLeads(input.reportingFacts, input.reportingEntitled, input.reportingPeriod);
   const wins = deriveVerifiedWins(input.reportingFacts);
 
   const nextMoves = input.nextMoveCandidates
@@ -346,7 +337,7 @@ export function composeWorkPerformanceModel(
       },
       analytics: {
         title: "Analytics unavailable",
-        lead: "Reporting appears here only when entitled capabilities have synced facts for the period.",
+        lead: "Website results appear here when the active partnership includes reporting and verified information is available for the period.",
       },
       leads: {
         title: "Lead tracking unavailable",

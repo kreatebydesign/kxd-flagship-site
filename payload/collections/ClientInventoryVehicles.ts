@@ -63,7 +63,12 @@ export const ClientInventoryVehicles: CollectionConfig = {
       fields: [
         { name: "year", type: "number", admin: { width: "25%" } },
         { name: "make", type: "text", required: true, admin: { width: "25%" } },
-        { name: "model", type: "text", required: true, admin: { width: "25%" } },
+        {
+          name: "model",
+          type: "text",
+          required: true,
+          admin: { width: "25%" },
+        },
         {
           name: "trim",
           type: "text",
@@ -227,6 +232,35 @@ export const ClientInventoryVehicles: CollectionConfig = {
       type: "text",
       label: "External URL",
       admin: { position: "sidebar" },
+    },
+    {
+      name: "sourceSystem",
+      type: "text",
+      index: true,
+      admin: {
+        readOnly: true,
+        position: "sidebar",
+        description: "Stable source name for reviewed, repeatable imports.",
+      },
+    },
+    {
+      name: "sourceExternalId",
+      type: "text",
+      index: true,
+      admin: {
+        readOnly: true,
+        position: "sidebar",
+        description: "Stable record ID from the inventory source.",
+      },
+    },
+    {
+      name: "lastSourceSyncAt",
+      type: "date",
+      admin: {
+        readOnly: true,
+        position: "sidebar",
+        date: { pickerAppearance: "dayAndTime" },
+      },
     },
     {
       name: "createdBy",

@@ -1,4 +1,5 @@
 import { KXD_BUSINESS_TIMEZONE } from "@/lib/platform/timezone";
+import { clientStatusLabel } from "@/lib/ces/copy/portal-language";
 
 /**
  * Portal display dates must be hydration-stable: explicit locale + business
@@ -32,11 +33,7 @@ export function projectProgress(status: string | null | undefined): number {
 }
 
 export function statusLabel(status: string | null | undefined): string {
-  if (!status) return "—";
-  return status
-    .split("-")
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(" ");
+  return clientStatusLabel(status, "—");
 }
 
 export const PROJECT_STATUS_COLOR: Record<string, string> = {

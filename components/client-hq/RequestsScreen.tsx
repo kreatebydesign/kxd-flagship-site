@@ -1,6 +1,6 @@
-import { KxdBadge, KxdEmptyState, KxdPage } from "@/components/os";
+import { KxdBadge } from "@/components/os";
+import { CesEmptyState, CesHero, CesPage } from "@/components/ces/primitives";
 import { NewRequestForm } from "@/components/portal/NewRequestForm";
-import { ClientHqPageHero } from "./ClientHqPageHero";
 import type { PortalDoc } from "@/lib/portal/types";
 import { fmtPortalDate, statusLabel } from "@/lib/portal/format";
 
@@ -12,8 +12,8 @@ export function RequestsScreen({
   projectOptions: Array<{ id: number; name: string }>;
 }) {
   return (
-    <KxdPage className="kxd-os-page--ops">
-      <ClientHqPageHero
+    <CesPage className="kxd-client-module kxd-client-module--requests">
+      <CesHero
         eyebrow="Work"
         title="Requests"
         lead="Submit changes, ask questions, and track responses from your KXD team."
@@ -22,16 +22,23 @@ export function RequestsScreen({
       <div className="kxd-os-operations-split">
         <div>
           {requests.length === 0 ? (
-            <KxdEmptyState
+            <CesEmptyState
               title="No requests yet"
-              description="Use the form to submit your first request."
+              lead="Use the form to share the first change or question with your KXD team."
             />
           ) : (
             <div className="kxd-os-ops-list">
               {requests.map((req) => (
                 <article key={req.id as number} className="kxd-os-card">
                   <p className="kxd-os-card__title">{String(req.requestTitle)}</p>
-                  <div style={{ display: "flex", gap: "0.75rem", marginTop: "0.5rem", flexWrap: "wrap" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "0.75rem",
+                      marginTop: "0.5rem",
+                      flexWrap: "wrap",
+                    }}
+                  >
                     <KxdBadge variant="status">{statusLabel(req.status as string)}</KxdBadge>
                     <span className="kxd-os-meta">
                       Submitted {fmtPortalDate(req.createdAt as string)}
@@ -48,6 +55,6 @@ export function RequestsScreen({
           <NewRequestForm projects={projectOptions} />
         </aside>
       </div>
-    </KxdPage>
+    </CesPage>
   );
 }

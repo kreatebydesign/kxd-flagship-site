@@ -77,8 +77,11 @@ export const BOARD_FUTURE_MODULE_IDS = [
   "account-management",
 ] as const;
 
-export function getBoardFutureModules(): PartnershipFutureModule[] {
-  return BOARD_FUTURE_MODULE_IDS.map((id) => {
+export function getBoardFutureModules(
+  entitledIds: readonly string[] = [],
+): PartnershipFutureModule[] {
+  const entitled = new Set(entitledIds);
+  return BOARD_FUTURE_MODULE_IDS.filter((id) => !entitled.has(id)).map((id) => {
     const def = CLIENT_CAPABILITY_REGISTRY.find((m) => m.id === id);
     const status = def?.status ?? "planned";
     return {

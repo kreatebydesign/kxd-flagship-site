@@ -21,8 +21,7 @@ export function WebsiteWorkspacePageView({ profile, page, websiteUrl }: Props) {
   const t = profile.terminology;
   const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
-  const activeSection =
-    page.sections.find((section) => section.id === activeSectionId) ?? null;
+  const activeSection = page.sections.find((section) => section.id === activeSectionId) ?? null;
 
   function openSection(sectionId: string, trigger: HTMLButtonElement) {
     triggerRef.current = trigger;
@@ -64,8 +63,8 @@ export function WebsiteWorkspacePageView({ profile, page, websiteUrl }: Props) {
           <div>
             <p className="kxd-ws-page-path">{page.path}</p>
             <p className="kxd-ws-section-lead">
-              Last updated {formatWorkspaceLastUpdated(page.lastUpdated)} ·{" "}
-              {page.sections.length} editable sections
+              Last updated {formatWorkspaceLastUpdated(page.lastUpdated)} · {page.sections.length}{" "}
+              editable sections
             </p>
           </div>
         </header>
@@ -110,6 +109,7 @@ export function WebsiteWorkspacePageView({ profile, page, websiteUrl }: Props) {
       </section>
 
       <WebsiteWorkspaceEditPanel
+        key={activeSectionId ?? "closed"}
         open={activeSectionId != null}
         pageSlug={page.slug}
         pageTitle={page.title}

@@ -1,9 +1,9 @@
 import { notFound, redirect } from "next/navigation";
-import { CesExecutiveReview } from "@/components/ces/executive-review";
 import {
-  composeExecutiveReview,
-  isExecutiveReviewAvailable,
-} from "@/lib/ces/executive-review";
+  CesExecutiveReview,
+  CesExecutiveReviewUnavailable,
+} from "@/components/ces/executive-review";
+import { composeExecutiveReview, isExecutiveReviewEntitled } from "@/lib/ces/executive-review";
 import { resolveExperienceProfile } from "@/lib/ces/server";
 import { getPortalSession } from "@/lib/portal/session";
 
@@ -15,13 +15,13 @@ export default async function PortalExecutiveReviewPage() {
 
   const profile = await resolveExperienceProfile(session);
 
-  if (!isExecutiveReviewAvailable(profile)) {
+  if (!isExecutiveReviewEntitled(profile)) {
     notFound();
   }
 
   const result = composeExecutiveReview(profile);
   if (!result.available) {
-    notFound();
+    return <CesExecutiveReviewUnavailable clientName={profile.identity.clientName} />;
   }
 
   return <CesExecutiveReview pack={result.pack} />;

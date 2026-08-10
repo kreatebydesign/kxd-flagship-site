@@ -12,6 +12,25 @@ export type CesExecutiveReviewProps = {
   pack: ExecutiveReviewPack;
 };
 
+export function CesExecutiveReviewUnavailable({ clientName }: { clientName: string }) {
+  return (
+    <main className="kxd-ces-review">
+      <header className="kxd-ces-review__hero">
+        <p className="kxd-ces-review__eyebrow">Executive review</p>
+        <h1 className="kxd-ces-review__title">Your next review is being prepared.</h1>
+        <p className="kxd-ces-review__lead">
+          KXD will publish {clientName}&apos;s long-form strategic review here when its evidence and
+          recommendations are ready. Your live partnership and current work remain available in the
+          meantime.
+        </p>
+        <Link className="kxd-ces-review__back" href="/portal">
+          Return to your partnership
+        </Link>
+      </header>
+    </main>
+  );
+}
+
 function statusLabel(status: ExecutiveReviewStatus): string {
   if (status === "built") return "Built";
   if (status === "in-progress") return "In Progress";
@@ -43,10 +62,7 @@ function DualSeriesChart({ chart }: { chart: ExecutiveReviewChart }) {
   const plotW = width - padX * 2;
   const plotH = height - padY * 2;
   const maxPrimary = Math.max(...chart.points.map((p) => p.value), 1);
-  const maxSecondary = Math.max(
-    ...chart.points.map((p) => p.secondary ?? 0),
-    1,
-  );
+  const maxSecondary = Math.max(...chart.points.map((p) => p.secondary ?? 0), 1);
   const n = chart.points.length;
 
   const primaryPoints = chart.points.map((point, i) => {
@@ -415,7 +431,10 @@ export function CesExecutiveReview({ pack }: CesExecutiveReviewProps) {
                   ))}
                 </ul>
                 {panel.themes && panel.themes.length > 0 ? (
-                  <ul className="kxd-ces-review__themes" aria-label={`${panel.title} intent themes`}>
+                  <ul
+                    className="kxd-ces-review__themes"
+                    aria-label={`${panel.title} intent themes`}
+                  >
                     {panel.themes.map((theme) => (
                       <li key={theme}>{theme}</li>
                     ))}
@@ -486,11 +505,7 @@ export function CesExecutiveReview({ pack }: CesExecutiveReviewProps) {
                 </div>
                 <figure className="kxd-ces-review__capability-media">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={capability.media.src}
-                    alt={capability.media.alt}
-                    loading="lazy"
-                  />
+                  <img src={capability.media.src} alt={capability.media.alt} loading="lazy" />
                   <figcaption>{capability.media.caption}</figcaption>
                 </figure>
               </article>
@@ -606,9 +621,7 @@ export function CesExecutiveReview({ pack }: CesExecutiveReviewProps) {
           </div>
           <figure className="kxd-ces-review__future-media">
             <div className="kxd-ces-review__frame-meta">
-              <span className="kxd-ces-review__frame-label">
-                {pack.vision.futureMedia.label}
-              </span>
+              <span className="kxd-ces-review__frame-label">{pack.vision.futureMedia.label}</span>
               {pack.vision.futureMedia.status ? (
                 <StatusTag status={pack.vision.futureMedia.status} />
               ) : null}

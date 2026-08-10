@@ -7,12 +7,12 @@ import type { ReportingFact } from "@/lib/reporting/domain/types";
 import type { WorkPerformanceWin } from "./types";
 
 const WIN_METRIC_LABELS: Record<string, string> = {
-  sessions: "Website sessions",
-  visitors: "Website users",
-  clicks: "Search clicks",
-  impressions: "Search impressions",
-  conversions: "Tracked conversions",
-  ctr: "Click-through rate",
+  sessions: "Website visits",
+  visitors: "People visiting the website",
+  clicks: "Visits from Google Search",
+  impressions: "Visibility in Google Search",
+  conversions: "Tracked website actions",
+  ctr: "Search result click rate",
 };
 
 /** Minimum relative improvement (10%) and absolute movement to count as a win. */
@@ -74,5 +74,10 @@ export function deriveVerifiedWins(facts: ReportingFact[]): WorkPerformanceWin[]
   return candidates
     .sort((a, b) => b.score - a.score)
     .slice(0, 3)
-    .map(({ score: _score, ...win }) => win);
+    .map(({ id, title, lead, evidenceLabel }) => ({
+      id,
+      title,
+      lead,
+      evidenceLabel,
+    }));
 }

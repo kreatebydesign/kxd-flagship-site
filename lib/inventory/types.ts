@@ -15,23 +15,14 @@ export const INVENTORY_LISTING_STATUSES = [
 ] as const;
 export type InventoryListingStatus = (typeof INVENTORY_LISTING_STATUSES)[number];
 
-export const INVENTORY_PRICE_DISPLAY_MODES = [
-  "exact",
-  "contact",
-  "call",
-  "hidden",
-] as const;
+export const INVENTORY_PRICE_DISPLAY_MODES = ["exact", "contact", "call", "hidden"] as const;
 export type InventoryPriceDisplayMode = (typeof INVENTORY_PRICE_DISPLAY_MODES)[number];
 
 /** Derived for public DTO only — never stored. */
 export const INVENTORY_GROUPS = ["new", "used", "coming_soon"] as const;
 export type InventoryGroup = (typeof INVENTORY_GROUPS)[number];
 
-export const PUBLIC_LISTABLE_STATUSES = [
-  "available",
-  "pending",
-  "coming_soon",
-] as const;
+export const PUBLIC_LISTABLE_STATUSES = ["available", "pending", "coming_soon"] as const;
 export type PublicListableStatus = (typeof PUBLIC_LISTABLE_STATUSES)[number];
 
 export type InventoryMediaRef = {
@@ -84,6 +75,10 @@ export type InventoryVehicleRecord = {
   publishedAt: string | null;
   soldAt: string | null;
   externalUrl: string | null;
+  /** Internal source identity for safe repeat imports; never exposed publicly. */
+  sourceSystem: string | null;
+  sourceExternalId: string | null;
+  lastSourceSyncAt: string | null;
   createdBy: string | null;
   updatedBy: string | null;
   createdAt: string | null;
@@ -150,4 +145,14 @@ export type InventoryVehicleInput = {
   galleryImageIds?: number[];
   sortOrder?: number;
   externalUrl?: string | null;
+};
+
+export type InventorySourceIdentity = {
+  sourceSystem: string;
+  sourceExternalId: string;
+};
+
+export type InventorySourceVehicleInput = {
+  source: InventorySourceIdentity;
+  data: InventoryVehicleInput;
 };

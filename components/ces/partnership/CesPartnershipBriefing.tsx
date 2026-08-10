@@ -1,14 +1,15 @@
 import Link from "next/link";
-import {
-  getPartnershipStoryTimeline,
-  type PartnershipBriefing,
-} from "@/lib/ces/partnership";
+import { getPartnershipStoryTimeline, type PartnershipBriefing } from "@/lib/ces/partnership";
 
 function formatProgressDate(iso: string | null): string | null {
   if (!iso) return null;
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return null;
-  return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  return d.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
 export interface CesPartnershipBriefingProps {
@@ -17,8 +18,7 @@ export interface CesPartnershipBriefingProps {
 }
 
 export function CesPartnershipBriefing({ briefing, greeting }: CesPartnershipBriefingProps) {
-  const { overview, needsAttention, websiteReview, results, recommendation } =
-    briefing;
+  const { overview, services, needsAttention, websiteReview, results, recommendation } = briefing;
   const story = getPartnershipStoryTimeline(briefing.clientSlug);
 
   return (
@@ -67,6 +67,26 @@ export function CesPartnershipBriefing({ briefing, greeting }: CesPartnershipBri
           </div>
         </dl>
       </section>
+
+      {services.items.length > 0 ? (
+        <section className="kxd-ces-partnership__section" aria-labelledby="services-heading">
+          <p className="kxd-ces-partnership__section-eyebrow">Your KXD partnership</p>
+          <h2 id="services-heading" className="kxd-ces-partnership__heading">
+            What KXD Is Managing
+          </h2>
+          {services.relationshipLabel ? (
+            <p className="kxd-ces-partnership__section-lead">{services.relationshipLabel}</p>
+          ) : null}
+          <ul className="kxd-ces-partnership__delivered">
+            {services.items.map((service) => (
+              <li key={service.id} className="kxd-ces-partnership__delivered-item">
+                <span className="kxd-ces-partnership__delivered-label">{service.label}</span>
+                <p className="kxd-ces-partnership__delivered-detail">{service.value}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       {/* Editorial relationship timeline */}
       <section
@@ -281,7 +301,10 @@ export function CesPartnershipBriefing({ briefing, greeting }: CesPartnershipBri
                   </a>
                 </>
               ) : (
-                <Link href="/portal/website-review/request" className="kxd-ces-btn kxd-ces-btn--primary">
+                <Link
+                  href="/portal/website-review/request"
+                  className="kxd-ces-btn kxd-ces-btn--primary"
+                >
                   Share feedback
                 </Link>
               )}
@@ -303,12 +326,18 @@ export function CesPartnershipBriefing({ briefing, greeting }: CesPartnershipBri
                   >
                     Review Website
                   </Link>
-                  <Link href="/portal/website-review/request" className="kxd-ces-btn kxd-ces-btn--ghost">
+                  <Link
+                    href="/portal/website-review/request"
+                    className="kxd-ces-btn kxd-ces-btn--ghost"
+                  >
                     Share written notes
                   </Link>
                 </>
               ) : (
-                <Link href="/portal/website-review/request" className="kxd-ces-btn kxd-ces-btn--primary">
+                <Link
+                  href="/portal/website-review/request"
+                  className="kxd-ces-btn kxd-ces-btn--primary"
+                >
                   Share feedback
                 </Link>
               )}
@@ -410,27 +439,30 @@ export function CesPartnershipBriefing({ briefing, greeting }: CesPartnershipBri
       </section>
 
       {/* Looking ahead */}
-      <section className="kxd-ces-partnership__section" aria-labelledby="looking-ahead-heading">
-        <p className="kxd-ces-partnership__section-eyebrow">Expansion</p>
-        <h2 id="looking-ahead-heading" className="kxd-ces-partnership__heading">
-          Looking Ahead
-        </h2>
-        <p className="kxd-ces-partnership__section-lead">
-          Capabilities planned for the partnership — labeled honestly, never oversold.
-        </p>
-        <ul className="kxd-ces-partnership__modules">
-          {briefing.futureModules.map((mod) => (
-            <li key={mod.id} className="kxd-ces-partnership__module">
-              <span className="kxd-ces-partnership__module-label">{mod.label}</span>
-              <span
-                className={`kxd-ces-partnership__module-status kxd-ces-partnership__module-status--${mod.status}`}
-              >
-                {mod.statusLabel}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </section>
+      {briefing.futureModules.length > 0 ? (
+        <section className="kxd-ces-partnership__section" aria-labelledby="looking-ahead-heading">
+          <p className="kxd-ces-partnership__section-eyebrow">Expansion</p>
+          <h2 id="looking-ahead-heading" className="kxd-ces-partnership__heading">
+            Looking Ahead
+          </h2>
+          <p className="kxd-ces-partnership__section-lead">
+            Possible next opportunities — not current services unless already listed in your
+            partnership above.
+          </p>
+          <ul className="kxd-ces-partnership__modules">
+            {briefing.futureModules.map((mod) => (
+              <li key={mod.id} className="kxd-ces-partnership__module">
+                <span className="kxd-ces-partnership__module-label">{mod.label}</span>
+                <span
+                  className={`kxd-ces-partnership__module-status kxd-ces-partnership__module-status--${mod.status}`}
+                >
+                  {mod.statusLabel}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       {/* Billing — quiet */}
       <section

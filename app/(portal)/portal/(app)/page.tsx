@@ -63,6 +63,7 @@ export default async function PortalOverviewPage() {
         performance={performance}
         personalization={personalization}
         workPerformance={workPerformance}
+        homeComposition={home}
       />
     );
   }

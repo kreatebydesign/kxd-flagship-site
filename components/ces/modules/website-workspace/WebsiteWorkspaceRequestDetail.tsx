@@ -11,13 +11,7 @@ type Props = {
   request: WebsiteWorkspaceRequestDetail;
 };
 
-function ContentBlock({
-  label,
-  value,
-}: {
-  label: string;
-  value?: string | null;
-}) {
+function ContentBlock({ label, value }: { label: string; value?: string | null }) {
   return (
     <div className="kxd-ws-snapshot__block">
       <span>{label}</span>
@@ -51,7 +45,7 @@ export function WebsiteWorkspaceRequestDetailView({ profile, request }: Props) {
           <h2>Current content</h2>
           <ContentBlock label="Heading" value={request.current.heading} />
           <ContentBlock label="Body" value={request.current.body} />
-          <ContentBlock label="CTA" value={request.current.cta} />
+          <ContentBlock label="Button text" value={request.current.cta} />
           {request.current.imageUrl ? (
             <div className="kxd-ws-snapshot__media">
               <span>Image</span>
@@ -65,7 +59,7 @@ export function WebsiteWorkspaceRequestDetailView({ profile, request }: Props) {
           <h2>Requested changes</h2>
           <ContentBlock label="Heading" value={request.requested.heading} />
           <ContentBlock label="Body" value={request.requested.body} />
-          <ContentBlock label="CTA" value={request.requested.cta} />
+          <ContentBlock label="Button text" value={request.requested.cta} />
           <ContentBlock label="Notes" value={request.notes} />
           {request.attachments.length > 0 ? (
             <div className="kxd-ws-detail-attachments">

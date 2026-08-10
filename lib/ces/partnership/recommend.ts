@@ -44,26 +44,22 @@ export function decideClientRecommendation(input: RecommendInput): PartnershipRe
       headline: "We recommend a closer look at the landing experience",
       rationale:
         "Recent advertising priorities point to the landing experience. Aligning that page with arriving interest is the clearest next step — we can guide that together.",
-      evidenceLabels: ["Campaign priorities from prepared reports", "Landing experience worth reviewing"],
-    };
-  }
-
-  if (input.websiteUrl) {
-    return {
-      headline: "Let's finish refining the site ahead of launch",
-      rationale:
-        "Here's the clearest picture of where things stand today. Completing the remaining website revisions is the surest path to a launch that feels worthy of the brand.",
       evidenceLabels: [
-        "Website work in the current phase",
-        "Your private workspace is ready for review",
+        "Campaign priorities from prepared reports",
+        "Landing experience worth reviewing",
       ],
     };
   }
 
+  const evidenceLabels = [
+    ...(input.websiteUrl ? ["Website on file"] : []),
+    "No open website revision is waiting on you",
+  ];
+
   return {
-    headline: "Keep refining what is already working",
+    headline: "No current action is required",
     rationale:
-      "The foundation is in place. The calm next step is polishing what already serves you well before expanding into anything new.",
-    evidenceLabels: ["Partnership foundations established"],
+      "Nothing is waiting on you right now. Recommendations will appear here as supporting activity is recorded.",
+    evidenceLabels,
   };
 }

@@ -49,6 +49,12 @@ function main() {
     "Every module has honest status label",
     modules.every((m) => ["Planned", "In Development", "Available Next"].includes(m.statusLabel)),
   );
+  check(
+    "Entitled future-module ids are omitted from the opportunity board",
+    getBoardFutureModules(["seo", "google-ads"]).every(
+      (module) => module.id !== "seo" && module.id !== "google-ads",
+    ),
+  );
   check("Capability registry is Shared Core ready", CLIENT_CAPABILITY_REGISTRY.length >= 10);
 
   const rec = decideClientRecommendation({
@@ -61,8 +67,10 @@ function main() {
   check("Exactly one recommendation headline", Boolean(rec.headline));
   check("Recommendation has evidence", rec.evidenceLabels.length >= 1);
   check(
-    "Default recommendation targets website launch",
-    /website|launch|revision/i.test(rec.headline),
+    "Default recommendation stays evidence-bound",
+    rec.headline === "No current action is required" &&
+      rec.evidenceLabels.includes("Website on file") &&
+      !/launch/i.test(`${rec.headline} ${rec.rationale}`),
   );
 
   const awaitingRec = decideClientRecommendation({
@@ -89,7 +97,7 @@ function main() {
   });
   check(
     "Awaiting-client recommendation asks for response",
-    /respond|revision/i.test(awaitingRec.headline),
+    /note|respond|revision/i.test(`${awaitingRec.headline} ${awaitingRec.rationale}`),
   );
 
   console.log(`\n${passed} checks passed.\n`);

@@ -35,10 +35,7 @@ function statusClass(status: UpgradeRequestStatus): string {
   }
 }
 
-function statusDetail(
-  status: UpgradeRequestStatus,
-  accessGranted: boolean,
-): string {
+function statusDetail(status: UpgradeRequestStatus, accessGranted: boolean): string {
   if (accessGranted) return `${upgradeStatusLabel(status)} · Access granted`;
   if (status === "approved") {
     return "Approved · Access not yet enabled by KXD";
@@ -47,10 +44,7 @@ function statusDetail(
 }
 
 /** Secondary access note for history rows — keeps status from repeating. */
-function historyAccessNote(
-  status: UpgradeRequestStatus,
-  accessGranted: boolean,
-): string | null {
+function historyAccessNote(status: UpgradeRequestStatus, accessGranted: boolean): string | null {
   if (accessGranted) return "Access is now available in your workspace.";
   if (status === "approved") return "Access not yet enabled by KXD.";
   return null;
@@ -128,8 +122,8 @@ export function PortalUpgradeOpportunities() {
         setFormError(
           json.message ||
             (json.code === "approved_awaiting_access"
-              ? "This capability was already approved and is awaiting enablement by KXD."
-              : "You already have an open request for this capability."),
+              ? "This service was already approved and KXD is preparing access."
+              : "You already have an open request for this service."),
         );
         setActiveKey(null);
         setMessage("");
@@ -176,7 +170,7 @@ export function PortalUpgradeOpportunities() {
   if (loading) {
     return (
       <section className="kxd-upgrade" aria-busy="true">
-        <p className="kxd-upgrade__eyebrow">Workspace capabilities</p>
+        <p className="kxd-upgrade__eyebrow">Additional services</p>
         <p className="kxd-upgrade__meta">Loading…</p>
       </section>
     );
@@ -185,7 +179,7 @@ export function PortalUpgradeOpportunities() {
   if (error) {
     return (
       <section className="kxd-upgrade">
-        <p className="kxd-upgrade__eyebrow">Workspace capabilities</p>
+        <p className="kxd-upgrade__eyebrow">Additional services</p>
         <p className="kxd-upgrade__error">{error}</p>
       </section>
     );
@@ -198,119 +192,111 @@ export function PortalUpgradeOpportunities() {
   return (
     <section className="kxd-upgrade" aria-labelledby="kxd-upgrade-heading">
       <header className="kxd-upgrade__head">
-        <p className="kxd-upgrade__eyebrow">Workspace capabilities</p>
+        <p className="kxd-upgrade__eyebrow">Additional services</p>
         <h2 id="kxd-upgrade-heading" className="kxd-upgrade__title">
-          Expand what your workspace can do
+          Explore additional support
         </h2>
         <p className="kxd-upgrade__lead">
-          Request access to additional capabilities when they would help your
-          team. Submitting a request does not unlock access immediately.
+          Request an additional service when it would help your team. KXD will review the request
+          with you before anything changes.
         </p>
         {planPaused ? (
           <p className="kxd-upgrade__paused" role="status">
-            Workspace access is currently paused. Contact KXD before requesting
-            individual capabilities.
+            Workspace access is currently paused. Contact KXD before requesting individual services.
           </p>
         ) : null}
       </header>
 
       {!planPaused && capabilities.length > 0 ? (
-      <div className="kxd-upgrade__grid">
-        {capabilities.map((card) => {
-          const open = activeKey === card.moduleKey;
-          return (
-            <article key={card.moduleKey} className="kxd-upgrade__card">
-              <h3 className="kxd-upgrade__card-title">{card.label}</h3>
-              <p className="kxd-upgrade__card-summary">{card.summary}</p>
-              <p className="kxd-upgrade__card-value">{card.valueLine}</p>
+        <div className="kxd-upgrade__grid">
+          {capabilities.map((card) => {
+            const open = activeKey === card.moduleKey;
+            return (
+              <article key={card.moduleKey} className="kxd-upgrade__card">
+                <h3 className="kxd-upgrade__card-title">{card.label}</h3>
+                <p className="kxd-upgrade__card-summary">{card.summary}</p>
+                <p className="kxd-upgrade__card-value">{card.valueLine}</p>
 
-              {card.accessGranted ? (
-                <p className="kxd-upgrade__status kxd-upgrade__status--approved">
-                  Access available
-                </p>
-              ) : card.activeRequest ? (
-                <div className="kxd-upgrade__request-state">
-                  <p
-                    className={`kxd-upgrade__status ${statusClass(card.activeRequest.status)}`}
-                  >
-                    {statusDetail(
-                      card.activeRequest.status,
-                      card.activeRequest.accessGranted,
-                    )}
+                {card.accessGranted ? (
+                  <p className="kxd-upgrade__status kxd-upgrade__status--approved">
+                    Access available
                   </p>
-                  {(card.activeRequest.status === "submitted" ||
-                    card.activeRequest.status === "reviewing") && (
-                    <button
-                      type="button"
-                      className="kxd-upgrade__text-btn"
-                      disabled={submitting}
-                      onClick={() => void cancelRequest(card.activeRequest!.id)}
-                    >
-                      Cancel request
-                    </button>
-                  )}
-                </div>
-              ) : card.canRequest ? (
-                <>
-                  {!open ? (
-                    <button
-                      type="button"
-                      className="kxd-upgrade__btn"
-                      onClick={() => {
-                        setActiveKey(card.moduleKey);
-                        setFormError(null);
-                        setFormSuccess(null);
-                      }}
-                    >
-                      Request access
-                    </button>
-                  ) : (
-                    <div className="kxd-upgrade__form">
-                      <label className="kxd-upgrade__label">
-                        Optional message
-                        <textarea
-                          value={message}
-                          onChange={(e) => setMessage(e.target.value)}
-                          rows={3}
-                          maxLength={2000}
-                          disabled={submitting}
-                          placeholder="Tell us how this would help your team."
-                        />
-                      </label>
-                      <div className="kxd-upgrade__form-actions">
-                        <button
-                          type="button"
-                          className="kxd-upgrade__btn"
-                          disabled={submitting}
-                          aria-busy={submitting}
-                          onClick={() => void submit(card.moduleKey)}
-                        >
-                          {submitting ? "Submitting…" : "Submit request"}
-                        </button>
-                        <button
-                          type="button"
-                          className="kxd-upgrade__text-btn"
-                          disabled={submitting}
-                          onClick={() => {
-                            setActiveKey(null);
-                            setMessage("");
-                          }}
-                        >
-                          Close
-                        </button>
+                ) : card.activeRequest ? (
+                  <div className="kxd-upgrade__request-state">
+                    <p className={`kxd-upgrade__status ${statusClass(card.activeRequest.status)}`}>
+                      {statusDetail(card.activeRequest.status, card.activeRequest.accessGranted)}
+                    </p>
+                    {(card.activeRequest.status === "submitted" ||
+                      card.activeRequest.status === "reviewing") && (
+                      <button
+                        type="button"
+                        className="kxd-upgrade__text-btn"
+                        disabled={submitting}
+                        onClick={() => void cancelRequest(card.activeRequest!.id)}
+                      >
+                        Cancel request
+                      </button>
+                    )}
+                  </div>
+                ) : card.canRequest ? (
+                  <>
+                    {!open ? (
+                      <button
+                        type="button"
+                        className="kxd-upgrade__btn"
+                        onClick={() => {
+                          setActiveKey(card.moduleKey);
+                          setFormError(null);
+                          setFormSuccess(null);
+                        }}
+                      >
+                        Request access
+                      </button>
+                    ) : (
+                      <div className="kxd-upgrade__form">
+                        <label className="kxd-upgrade__label">
+                          Optional message
+                          <textarea
+                            value={message}
+                            onChange={(e) => setMessage(e.target.value)}
+                            rows={3}
+                            maxLength={2000}
+                            disabled={submitting}
+                            placeholder="Tell us how this would help your team."
+                          />
+                        </label>
+                        <div className="kxd-upgrade__form-actions">
+                          <button
+                            type="button"
+                            className="kxd-upgrade__btn"
+                            disabled={submitting}
+                            aria-busy={submitting}
+                            onClick={() => void submit(card.moduleKey)}
+                          >
+                            {submitting ? "Submitting…" : "Submit request"}
+                          </button>
+                          <button
+                            type="button"
+                            className="kxd-upgrade__text-btn"
+                            disabled={submitting}
+                            onClick={() => {
+                              setActiveKey(null);
+                              setMessage("");
+                            }}
+                          >
+                            Close
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <p className="kxd-upgrade__meta">
-                  Not available to request right now.
-                </p>
-              )}
-            </article>
-          );
-        })}
-      </div>
+                    )}
+                  </>
+                ) : (
+                  <p className="kxd-upgrade__meta">Not available to request right now.</p>
+                )}
+              </article>
+            );
+          })}
+        </div>
       ) : null}
 
       {planPaused && capabilities.length > 0 ? (
@@ -319,13 +305,8 @@ export function PortalUpgradeOpportunities() {
             card.activeRequest ? (
               <article key={card.moduleKey} className="kxd-upgrade__card">
                 <h3 className="kxd-upgrade__card-title">{card.label}</h3>
-                <p
-                  className={`kxd-upgrade__status ${statusClass(card.activeRequest.status)}`}
-                >
-                  {statusDetail(
-                    card.activeRequest.status,
-                    card.activeRequest.accessGranted,
-                  )}
+                <p className={`kxd-upgrade__status ${statusClass(card.activeRequest.status)}`}>
+                  {statusDetail(card.activeRequest.status, card.activeRequest.accessGranted)}
                 </p>
               </article>
             ) : null,
@@ -335,9 +316,7 @@ export function PortalUpgradeOpportunities() {
 
       <div aria-live="polite">
         {formError ? <p className="kxd-upgrade__error">{formError}</p> : null}
-        {formSuccess ? (
-          <p className="kxd-upgrade__success">{formSuccess}</p>
-        ) : null}
+        {formSuccess ? <p className="kxd-upgrade__success">{formSuccess}</p> : null}
       </div>
 
       {requests.length > 0 ? (
@@ -350,30 +329,19 @@ export function PortalUpgradeOpportunities() {
                 <li key={row.id} className="kxd-upgrade__history-item">
                   <div className="kxd-upgrade__history-item-head">
                     <div className="kxd-upgrade__history-item-identity">
-                      <p className="kxd-upgrade__history-item-title">
-                        {row.moduleLabel}
-                      </p>
-                      <p
-                        className={`kxd-upgrade__status ${statusClass(row.status)}`}
-                      >
+                      <p className="kxd-upgrade__history-item-title">{row.moduleLabel}</p>
+                      <p className={`kxd-upgrade__status ${statusClass(row.status)}`}>
                         {upgradeStatusLabel(row.status)}
                       </p>
                     </div>
-                    <time
-                      className="kxd-upgrade__history-item-date"
-                      dateTime={row.createdAt}
-                    >
+                    <time className="kxd-upgrade__history-item-date" dateTime={row.createdAt}>
                       Submitted {formatRequestDate(row.createdAt)}
                     </time>
                   </div>
                   {row.clientMessage ? (
-                    <p className="kxd-upgrade__history-message">
-                      {row.clientMessage}
-                    </p>
+                    <p className="kxd-upgrade__history-message">{row.clientMessage}</p>
                   ) : null}
-                  {accessNote ? (
-                    <p className="kxd-upgrade__history-note">{accessNote}</p>
-                  ) : null}
+                  {accessNote ? <p className="kxd-upgrade__history-note">{accessNote}</p> : null}
                 </li>
               );
             })}

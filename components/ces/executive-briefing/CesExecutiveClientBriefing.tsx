@@ -10,13 +10,7 @@ export type CesExecutiveClientBriefingProps = {
   briefing: ExecutiveClientBriefing | ExecutiveClientBriefingUnavailable;
 };
 
-function Chapter({
-  title,
-  children,
-}: {
-  title: string;
-  children: ReactNode;
-}) {
+function Chapter({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="kxd-ces-briefing__section">
       <h2 className="kxd-ces-briefing__heading">{title}</h2>
@@ -36,7 +30,7 @@ function CesExecutiveClientBriefingUnavailableView({
       <h1 className="kxd-ces-briefing__title">Executive briefing</h1>
       <p className="kxd-ces-briefing__lead">
         {briefing.reason === "no-memory"
-          ? "An executive partnership briefing will appear here once the relationship history is authored."
+          ? "An executive partnership briefing will appear here once KXD has prepared the relationship history."
           : "This executive briefing isn’t available for this workspace yet."}
       </p>
       <Link href="/portal" className="kxd-ces-btn kxd-ces-btn--ghost">
