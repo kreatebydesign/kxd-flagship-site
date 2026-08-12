@@ -1,11 +1,12 @@
 /**
- * GET /api/junior-creators/leads — own leads
  * POST /api/junior-creators/leads — submit lead (session-scoped)
+ * GET  /api/junior-creators/leads — own leads
  */
 import { NextRequest, NextResponse } from "next/server";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import { getJuniorCreatorSession } from "@/lib/junior-creators/session";
+import { normalizeResearchIntake } from "@/lib/research-leads/intake";
 
 export const dynamic = "force-dynamic";
 
@@ -38,24 +39,47 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
+    const normalized = normalizeResearchIntake({
+      opportunityUrl: body.opportunityUrl,
+      contactEmail: body.contactEmail,
+      contactPhone: body.contactPhone,
+      leadUrl: body.leadUrl,
+      businessName: body.businessName,
+      city: body.city,
+      state: body.state,
+      estimatedService: body.estimatedService,
+      notes: body.notes,
+      source: body.source,
+    });
+
+    if (!normalized.ok) {
+      return NextResponse.json({ ok: false, message: normalized.message }, { status: 400 });
+    }
+
     const payload = await getPayload({ config });
+    const d = normalized.data;
 
     const data: Record<string, unknown> = {
       juniorCreatorUser: session.juniorCreatorUserId,
       researcherName: session.displayName,
-      source: body.source?.trim() || "Craigslist",
+      source: d.source,
       status: "new",
     };
 
-    if (body.state?.trim()) data.state = body.state.trim();
-    if (body.city?.trim()) data.city = body.city.trim();
-    if (body.leadUrl?.trim()) data.leadUrl = body.leadUrl.trim();
-    if (body.estimatedService) data.estimatedService = body.estimatedService;
-    if (body.notes?.trim()) data.notes = body.notes.trim();
+    if (d.state) data.state = d.state;
+    if (d.city) data.city = d.city;
+    if (d.businessName) data.businessName = d.businessName;
+    if (d.opportunityUrl) data.opportunityUrl = d.opportunityUrl;
+    if (d.contactEmail) data.contactEmail = d.contactEmail;
+    if (d.contactPhone) data.contactPhone = d.contactPhone;
+    if (d.leadUrl) data.leadUrl = d.leadUrl;
+    if (d.estimatedService) data.estimatedService = d.estimatedService;
+    if (d.notes) data.notes = d.notes;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const record = await payload.create({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       collection: "research-leads" as any,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       data: data as any,
       overrideAccess: true,
     });

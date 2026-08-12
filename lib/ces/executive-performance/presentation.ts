@@ -60,8 +60,22 @@ function stubPresentation(input: {
   };
 }
 
+const ROBIN_COLE_PRESENTATION: ExperiencePresentation = {
+  ...stubPresentation({
+    logoAlt: "Robin Cole for Tracy",
+    heroImageAlt: "Robin Cole for Tracy City Council",
+  }),
+  logoSrc: "/migrated-assets/logos/robin-cole/icon.png",
+  logoAlt: "Robin Cole for Tracy",
+  actionAccent: "#C5EE9C",
+  intelligenceAccent: "#050820",
+};
+
 const BY_SLUG: Record<string, ExperiencePresentation> = {
   "primal-motorsports": PRIMAL_PRESENTATION,
+  "robin-cole": ROBIN_COLE_PRESENTATION,
+  "robin-for-tracy": ROBIN_COLE_PRESENTATION,
+  "robin-cole-for-tracy": ROBIN_COLE_PRESENTATION,
   "cusick-morgan-motorsports": stubPresentation({
     logoAlt: "Cusick Morgan Motorsports",
     heroImageAlt: "Cusick Morgan Motorsports",

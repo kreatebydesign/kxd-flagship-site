@@ -64,6 +64,7 @@ import * as migration_20260806_phase27a_calendar_sync_fields from './20260806_ph
 import * as migration_20260807_phase28b_sales_leads_estimated_mrr_column from './20260807_phase28b_sales_leads_estimated_mrr_column';
 import * as migration_20260809_client_inventory_source_identity from './20260809_client_inventory_source_identity';
 import * as migration_20260826_qr_codes from './20260826_qr_codes';
+import * as migration_20260827_revenue_pipeline_foundation from './20260827_revenue_pipeline_foundation';
 import * as migration_20260712_phase29c_reporting_provider_connections from './20260712_phase29c_reporting_provider_connections';
 import * as migration_20260713_phase31c_reporting_facts from './20260713_phase31c_reporting_facts';
 import * as migration_20260713_phase32b_google_ads_customer_fields from './20260713_phase32b_google_ads_customer_fields';
@@ -625,5 +626,13 @@ export const migrations = [
     up: migration_20260826_qr_codes.up,
     down: migration_20260826_qr_codes.down,
     name: '20260826_qr_codes',
+  },
+  {
+    // Revenue Pipeline foundation — research intake enrichment + sales opportunity linkage.
+    // Additive only. Local apply until production migration is authorized.
+    // Production may surface Payload batch=-1 confirm; do not auto-answer.
+    up: migration_20260827_revenue_pipeline_foundation.up,
+    down: migration_20260827_revenue_pipeline_foundation.down,
+    name: '20260827_revenue_pipeline_foundation',
   },
 ];

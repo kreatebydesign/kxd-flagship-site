@@ -34,7 +34,13 @@ export interface OperationsShellProps {
   children: ReactNode;
   /** Restricted staff chrome — hide full studio navigation and Payload. */
   variant?: "full" | "staff";
+  /**
+   * When false, omit the global Quick Actions bar so a dedicated workspace
+   * (e.g. Sales Pipeline) can own the first viewport. Default true.
+   */
+  showQuickActions?: boolean;
 }
+
 
 /**
  * Operations chrome. Brand mark lives once in ExecutiveHeader (top-left).
@@ -47,6 +53,7 @@ export function OperationsShell({
   clientId,
   children,
   variant = "full",
+  showQuickActions = true,
 }: OperationsShellProps) {
   const navGroups =
     variant === "staff" ? STAFF_NAV_GROUPS : getEditionOperationsNavGroups();
@@ -100,7 +107,7 @@ export function OperationsShell({
           </aside>
 
           <div className="kxd-os-app__main">
-            {!isStaff ? <QuickActionBar clientId={clientId} /> : null}
+            {!isStaff && showQuickActions ? <QuickActionBar clientId={clientId} /> : null}
             {children}
           </div>
         </div>

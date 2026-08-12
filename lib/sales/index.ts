@@ -5,6 +5,10 @@ export * from "./analytics";
 export * from "./contracts";
 export * from "./timeline-events";
 export { getPipelineBoard, getLeadsList, updateLeadPipelineStatus } from "./pipeline";
+export { getSalesWorkspace, type SalesWorkspaceData, type SalesOpportunityCard } from "./workspace";
+export { promoteResearchLeadToSales, type PromoteResearchLeadResult } from "./promote-research-lead";
+export { NEXT_ACTIONS, NEXT_ACTION_LABEL, isNextAction, type NextAction } from "./next-action";
+export { WORKSPACE_SECTIONS, WORKSPACE_MOVES, STATUS_TO_SECTION } from "./workspace-stages";
 export {
   generateProposalNumber,
   getProposalsList,

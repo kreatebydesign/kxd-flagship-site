@@ -57,7 +57,44 @@ export const ResearchLeads: CollectionConfig = {
     },
     { name: "state", type: "text", label: "State" },
     { name: "city", type: "text", label: "City" },
-    { name: "leadUrl", type: "text", label: "Lead URL" },
+    {
+      name: "businessName",
+      type: "text",
+      label: "Business / Person Name",
+      admin: {
+        description: "Optional identity for the opportunity. Encouraged when known.",
+      },
+    },
+    {
+      name: "opportunityUrl",
+      type: "text",
+      label: "Opportunity URL",
+      admin: {
+        description: "Page where the opportunity was found (Craigslist, website, etc.).",
+      },
+    },
+    {
+      name: "contactEmail",
+      type: "email",
+      label: "Contact Email",
+      admin: {
+        description: "Contact email if provided. Never store emails in URL fields.",
+      },
+    },
+    {
+      name: "contactPhone",
+      type: "text",
+      label: "Phone",
+    },
+    {
+      name: "leadUrl",
+      type: "text",
+      label: "Lead URL (legacy)",
+      admin: {
+        description:
+          "Legacy single URL/contact field. Prefer opportunityUrl / contactEmail for new submissions.",
+      },
+    },
     { name: "category", type: "text", label: "Category" },
     {
       name: "estimatedService",
@@ -74,6 +111,27 @@ export const ResearchLeads: CollectionConfig = {
       ],
     },
     { name: "notes", type: "textarea", label: "Notes" },
+    {
+      name: "promotedSalesLead",
+      type: "relationship",
+      relationTo: "sales-leads",
+      label: "Promoted Sales Opportunity",
+      admin: {
+        position: "sidebar",
+        description: "Set when this research lead is promoted into Sales. Never deleted on promote.",
+        readOnly: true,
+      },
+    },
+    {
+      name: "promotedAt",
+      type: "date",
+      label: "Promoted At",
+      admin: {
+        position: "sidebar",
+        readOnly: true,
+        date: { pickerAppearance: "dayAndTime" },
+      },
+    },
     {
       name: "status",
       type: "select",

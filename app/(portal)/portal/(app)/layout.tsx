@@ -10,14 +10,43 @@ import { getPortalEditionBranding } from "@/lib/portal/nav";
 import { getPortalSession } from "@/lib/portal/session";
 import { needsPortalWelcome } from "@/lib/portal/welcome";
 import { userRequiresSecurityEnrollment } from "@/lib/portal/identity/mfa-store";
+import {
+  isRobinColeClient,
+  ROBIN_COLE_APPLE_ICON_SRC,
+  ROBIN_COLE_FAVICON_SRC,
+  ROBIN_COLE_LOGO_SRC,
+} from "@/lib/ces/profile/robin-cole";
 import "../../../../design-system/os/styles/kxd-os.css";
 import "../../../../design-system/ces/styles/kxd-ces.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   const session = await getPortalSession();
   const clientName = session?.clientName?.trim();
+  const profile = session ? await resolveExperienceProfile(session) : null;
+  const logoUrl = profile?.identity.logoUrl?.trim() || null;
+  const robin = isRobinColeClient({
+    clientSlug: profile?.identity.clientSlug,
+    clientName: profile?.identity.clientName ?? clientName,
+  });
+
+  const icons: Metadata["icons"] = logoUrl
+    ? {
+        icon: [{ url: logoUrl }],
+        apple: [{ url: logoUrl }],
+      }
+    : robin
+      ? {
+          icon: [
+            { url: ROBIN_COLE_FAVICON_SRC, sizes: "any" },
+            { url: ROBIN_COLE_LOGO_SRC, type: "image/png", sizes: "48x48" },
+          ],
+          apple: [{ url: ROBIN_COLE_APPLE_ICON_SRC, sizes: "180x180", type: "image/png" }],
+        }
+      : undefined;
+
   return {
     title: clientName || "Your partnership",
+    ...(icons ? { icons } : {}),
   };
 }
 

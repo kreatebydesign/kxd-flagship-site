@@ -1,13 +1,16 @@
 /**
  * /api/admin/sales/leads
  * POST — create lead / prospect (does not create a client)
- * PATCH — update pipeline status
+ * PATCH — update pipeline status and/or next action
  */
 import { NextRequest, NextResponse } from "next/server";
 import { requirePayloadAdminApi } from "@/lib/admin/auth";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import { LEAD_STATUSES } from "@/lib/sales/types";
+import { isNextAction } from "@/lib/sales/next-action";
+import { SECTION_LABEL, STATUS_TO_SECTION } from "@/lib/sales/workspace-stages";
+import { logSalesActivity } from "@/lib/sales/activities";
 
 export const dynamic = "force-dynamic";
 
@@ -55,7 +58,6 @@ export async function POST(req: NextRequest) {
 
     const payload = await getPayload({ config });
 
-    // Practical duplicate guard among open pipeline leads — does not create clients.
     if (email) {
       const byEmail = await payload.find({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -123,6 +125,7 @@ export async function POST(req: NextRequest) {
         probability: body.probability ? Number(body.probability) : 25,
         notes: String(body.notes ?? "").trim() || undefined,
         status: "new",
+        nextAction: "respond-today",
       },
       overrideAccess: true,
     });
@@ -146,20 +149,68 @@ export async function PATCH(req: NextRequest) {
   try {
     const body = await req.json();
     const id = Number(body.id);
-    const status = body.status;
 
-    if (!id || !status || !VALID_STATUSES.has(status)) {
-      return NextResponse.json({ success: false, error: "Valid id and status required." }, { status: 400 });
+    if (!id) {
+      return NextResponse.json({ success: false, error: "Valid id required." }, { status: 400 });
+    }
+
+    const data: Record<string, unknown> = {};
+    if (body.status != null) {
+      if (!VALID_STATUSES.has(body.status)) {
+        return NextResponse.json({ success: false, error: "Invalid status." }, { status: 400 });
+      }
+      data.status = body.status;
+    }
+    if (body.nextAction != null) {
+      if (!isNextAction(body.nextAction)) {
+        return NextResponse.json({ success: false, error: "Invalid next action." }, { status: 400 });
+      }
+      data.nextAction = body.nextAction;
+    }
+    if (body.nextActionNote != null) {
+      data.nextActionNote = String(body.nextActionNote).trim() || null;
+    }
+
+    if (Object.keys(data).length === 0) {
+      return NextResponse.json(
+        { success: false, error: "Provide status and/or nextAction." },
+        { status: 400 },
+      );
     }
 
     const payload = await getPayload({ config });
+    const existing = await payload.findByID({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      collection: "sales-leads" as any,
+      id,
+      depth: 0,
+      overrideAccess: true,
+    });
+
     await payload.update({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       collection: "sales-leads" as any,
       id,
-      data: { status },
+      data,
       overrideAccess: true,
     });
+
+    if (data.status && String(existing.status) !== String(data.status)) {
+      const section = STATUS_TO_SECTION[String(data.status)] ?? "new-leads";
+      try {
+        await logSalesActivity({
+          activityType: data.status === "won" ? "note" : "follow-up",
+          title:
+            data.status === "won"
+              ? "Opportunity won"
+              : `Stage → ${SECTION_LABEL[section]}`,
+          summary: `${String(existing.companyName ?? "Opportunity")} moved to ${SECTION_LABEL[section]}.`,
+          leadId: id,
+        });
+      } catch (err) {
+        console.error("[KXD Sales] Stage activity log failed:", err);
+      }
+    }
 
     return NextResponse.json({ success: true });
   } catch (err) {

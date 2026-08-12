@@ -28,6 +28,11 @@ import {
 import { resolveCesBrandColor, resolveCesInteractiveAccent } from "./accent";
 import { experienceProfileToCssVars } from "./tokens";
 import { PRIMAL_CLIENT_SLUG, PRIMAL_EXPERIENCE_PROFILE } from "./primal";
+import {
+  isRobinColeClient,
+  ROBIN_COLE_LOGO_ALT,
+  ROBIN_COLE_LOGO_SRC,
+} from "./robin-cole";
 import { resolveMediaAssetUrl } from "@/lib/client-command/experience/media-url";
 import { generatePayloadMediaFileUrl } from "@/lib/media/payload-storage";
 
@@ -114,9 +119,26 @@ function ensurePrimalExecutiveReview(profile: ResolvedExperienceProfile): void {
   }
 }
 
+/** Ensure Robin Cole campaign mark is present when CMS/onboarding logo is absent. */
+function ensureRobinColeBrand(profile: ResolvedExperienceProfile): void {
+  if (
+    !isRobinColeClient({
+      clientSlug: profile.identity.clientSlug,
+      clientName: profile.identity.clientName,
+    })
+  ) {
+    return;
+  }
+  if (!profile.identity.logoUrl) {
+    profile.identity.logoUrl = ROBIN_COLE_LOGO_SRC;
+    profile.identity.logoAlt = ROBIN_COLE_LOGO_ALT;
+  }
+}
+
 function finalizeProfile(profile: ResolvedExperienceProfile): ResolvedExperienceProfile {
   ensurePrimalWebsiteWorkspace(profile);
   ensurePrimalExecutiveReview(profile);
+  ensureRobinColeBrand(profile);
   syncEnabledPortalModules(profile);
   const presentation = getExecutivePresentation(profile.identity.clientSlug);
   profile.presentation = presentation;
@@ -127,6 +149,8 @@ function finalizeProfile(profile: ResolvedExperienceProfile): ResolvedExperience
       profile.identity.logoAlt = presentation.logoAlt;
     }
   }
+  /* Re-apply after presentation merge so Robin still wins when registry is empty. */
+  ensureRobinColeBrand(profile);
   profile.cssVars = {
     ...experienceProfileToCssVars(profile.visual),
     ...(presentation

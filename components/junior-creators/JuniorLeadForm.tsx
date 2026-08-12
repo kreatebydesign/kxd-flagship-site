@@ -41,12 +41,26 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
+function FieldHint({ children }: { children: React.ReactNode }) {
+  return (
+    <p style={{
+      fontFamily: C.sans, fontSize: "0.75rem",
+      color: "rgba(255,255,255,0.32)", marginTop: "0.35rem", lineHeight: 1.4,
+    }}>
+      {children}
+    </p>
+  );
+}
+
 export function JuniorLeadForm() {
   const router = useRouter();
   const [source, setSource] = useState("Craigslist");
   const [state, setState] = useState("");
   const [city, setCity] = useState("");
-  const [leadUrl, setLeadUrl] = useState("");
+  const [businessName, setBusinessName] = useState("");
+  const [opportunityUrl, setOpportunityUrl] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
   const [estimatedService, setEstimatedService] = useState("");
   const [notes, setNotes] = useState("");
   const [error, setError] = useState("");
@@ -66,7 +80,10 @@ export function JuniorLeadForm() {
           source,
           state,
           city,
-          leadUrl,
+          businessName,
+          opportunityUrl,
+          contactEmail,
+          contactPhone,
           estimatedService: estimatedService || undefined,
           notes,
         }),
@@ -78,7 +95,10 @@ export function JuniorLeadForm() {
       }
       setState("");
       setCity("");
-      setLeadUrl("");
+      setBusinessName("");
+      setOpportunityUrl("");
+      setContactEmail("");
+      setContactPhone("");
       setEstimatedService("");
       setNotes("");
       setSuccess(true);
@@ -102,6 +122,15 @@ export function JuniorLeadForm() {
           </select>
         </div>
         <div>
+          <FieldLabel>Business / Person Name</FieldLabel>
+          <input
+            value={businessName}
+            onChange={(e) => setBusinessName(e.target.value)}
+            placeholder="Optional — if you know it"
+            style={inputStyle}
+          />
+        </div>
+        <div>
           <FieldLabel>State</FieldLabel>
           <input value={state} onChange={(e) => setState(e.target.value)} placeholder="OR" style={inputStyle} />
         </div>
@@ -110,8 +139,34 @@ export function JuniorLeadForm() {
           <input value={city} onChange={(e) => setCity(e.target.value)} placeholder="Portland" style={inputStyle} />
         </div>
         <div className="sm:col-span-2">
-          <FieldLabel>Opportunity URL</FieldLabel>
-          <input value={leadUrl} onChange={(e) => setLeadUrl(e.target.value)} placeholder="https://..." style={inputStyle} />
+          <FieldLabel>Opportunity Link</FieldLabel>
+          <input
+            value={opportunityUrl}
+            onChange={(e) => setOpportunityUrl(e.target.value)}
+            placeholder="https://…"
+            style={inputStyle}
+          />
+          <FieldHint>Paste the page where you found the opportunity.</FieldHint>
+        </div>
+        <div>
+          <FieldLabel>Contact Email</FieldLabel>
+          <input
+            type="email"
+            value={contactEmail}
+            onChange={(e) => setContactEmail(e.target.value)}
+            placeholder="name@example.com"
+            style={inputStyle}
+          />
+          <FieldHint>Paste their email here if one is provided.</FieldHint>
+        </div>
+        <div>
+          <FieldLabel>Phone</FieldLabel>
+          <input
+            value={contactPhone}
+            onChange={(e) => setContactPhone(e.target.value)}
+            placeholder="Optional"
+            style={inputStyle}
+          />
         </div>
         <div>
           <FieldLabel>Recommended Service</FieldLabel>
@@ -133,6 +188,12 @@ export function JuniorLeadForm() {
           />
         </div>
       </div>
+      <p style={{
+        fontFamily: C.sans, fontSize: "0.75rem", color: "rgba(255,255,255,0.28)",
+        marginTop: "1rem", lineHeight: 1.45,
+      }}>
+        Include at least one: Opportunity Link, Contact Email, or Phone.
+      </p>
       {error && (
         <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.red, marginTop: "1rem" }}>{error}</p>
       )}

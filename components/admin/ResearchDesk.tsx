@@ -39,12 +39,12 @@ const C = {
 
 const NAV_LINKS = [
   ["/admin/operations/today", "Today"],
-  ["/admin/operations/executive", "Portfolio Overview"],
+  ["/admin/sales", "Sales"],
   ["/admin/operations/research", "Research"],
   ["/admin/operations/audits", "Audits"],
   ["/admin/operations/onboarding", "Onboarding"],
-  ["/admin/operations/playbooks", "Playbooks"],
 ] as const;
+
 
 export type ResearchLeadRow = {
   id: number;
@@ -52,10 +52,17 @@ export type ResearchLeadRow = {
   source: string;
   state: string | null;
   city: string | null;
+  businessName: string | null;
+  opportunityUrl: string | null;
+  contactEmail: string | null;
+  contactPhone: string | null;
   leadUrl: string | null;
   estimatedService: string | null;
   status: string;
   createdAt: string;
+  ageLabel: string;
+  promotedSalesLeadId: number | null;
+  promotedAt: string | null;
 };
 
 export type ResearchMetrics = {
@@ -63,6 +70,7 @@ export type ResearchMetrics = {
   new: number;
   qualified: number;
   closedWon: number;
+  promoted: number;
 };
 
 type Props = {
@@ -95,12 +103,6 @@ const inputStyle: React.CSSProperties = {
   padding: "0.625rem 0.75rem",
   outline: "none",
 };
-
-function fmtDate(iso: string): string {
-  try {
-    return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-  } catch { return "—"; }
-}
 
 function buildFilterHref(status: string, researcher: string): string {
   const params = new URLSearchParams();
@@ -159,9 +161,14 @@ export function ResearchDesk({ leads, metrics, researchers, filterStatus, filter
   const [source, setSource] = useState("Craigslist");
   const [state, setState] = useState("");
   const [city, setCity] = useState("");
-  const [leadUrl, setLeadUrl] = useState("");
+  const [businessName, setBusinessName] = useState("");
+  const [opportunityUrl, setOpportunityUrl] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
   const [estimatedService, setEstimatedService] = useState("");
   const [notes, setNotes] = useState("");
+  const [promotingId, setPromotingId] = useState<number | null>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -181,7 +188,10 @@ export function ResearchDesk({ leads, metrics, researchers, filterStatus, filter
           source,
           state,
           city,
-          leadUrl,
+          businessName,
+          opportunityUrl,
+          contactEmail,
+          contactPhone,
           estimatedService: estimatedService || undefined,
           notes,
         }),
@@ -195,10 +205,14 @@ export function ResearchDesk({ leads, metrics, researchers, filterStatus, filter
       setSource("Craigslist");
       setState("");
       setCity("");
-      setLeadUrl("");
+      setBusinessName("");
+      setOpportunityUrl("");
+      setContactEmail("");
+      setContactPhone("");
       setEstimatedService("");
       setNotes("");
       setFormSuccess(true);
+      setShowAddForm(false);
       router.refresh();
     } catch {
       setFormError("Network error — try again.");
@@ -207,11 +221,33 @@ export function ResearchDesk({ leads, metrics, researchers, filterStatus, filter
     }
   }
 
+  async function promoteLead(id: number) {
+    if (promotingId) return;
+    setPromotingId(id);
+    try {
+      const res = await fetch("/api/admin/research-leads/promote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ researchLeadId: id }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setFormError(data.error || "Promote failed.");
+        return;
+      }
+      router.refresh();
+    } catch {
+      setFormError("Network error — promote failed.");
+    } finally {
+      setPromotingId(null);
+    }
+  }
+
   const KPI = [
     { label: "Total Leads", value: metrics.total, accent: C.cream },
     { label: "New Leads", value: metrics.new, accent: "#A8B4C8" },
-    { label: "Qualified Leads", value: metrics.qualified, accent: "#A8B4C8" },
-    { label: "Closed Won", value: metrics.closedWon, accent: C.gold },
+    { label: "Qualified", value: metrics.qualified, accent: "#A8B4C8" },
+    { label: "Promoted", value: metrics.promoted, accent: C.gold },
   ];
 
   return (
@@ -261,14 +297,37 @@ export function ResearchDesk({ leads, metrics, researchers, filterStatus, filter
             Research Desk
           </h1>
           <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted, marginTop: "0.75rem", maxWidth: "36rem" }}>
-            KXD internal research desk — capture Craigslist and manual opportunities, qualify leads, and track outcomes across the team.
+            Review incoming research, then promote what is worth pursuing into Sales.
           </p>
+          <div className="mt-5 flex flex-wrap items-center gap-3">
+            <Link
+              href="/admin/sales"
+              style={{
+                fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.14em",
+                textTransform: "uppercase", color: C.gold, textDecoration: "none",
+                border: `1px solid ${C.borderGold}`, padding: "0.55rem 0.9rem", background: C.goldFaint,
+              }}
+            >
+              Open Sales Pipeline
+            </Link>
+            <button
+              type="button"
+              onClick={() => setShowAddForm((v) => !v)}
+              style={{
+                fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.14em",
+                textTransform: "uppercase", color: C.creamMuted, background: "transparent",
+                border: `1px solid ${C.border}`, padding: "0.55rem 0.9rem", cursor: "pointer",
+              }}
+            >
+              {showAddForm ? "Cancel" : "+ Add Research Lead"}
+            </button>
+          </div>
         </div>
 
         {/* Metrics */}
-        <div className="mb-10 grid grid-cols-2 sm:grid-cols-4" style={{ gap: "1px", background: C.border, border: `1px solid ${C.border}` }}>
+        <div className="mb-8 grid grid-cols-2 sm:grid-cols-4" style={{ gap: "1px", background: C.border, border: `1px solid ${C.border}` }}>
           {KPI.map((k) => (
-            <div key={k.label} style={{ background: C.bgElevated, padding: "1.25rem 1.375rem" }}>
+            <div key={k.label} style={{ background: C.bgElevated, padding: "1.1rem 1.25rem" }}>
               <FieldLabel>{k.label}</FieldLabel>
               <p style={{ fontFamily: C.serif, fontWeight: 300, fontSize: "1.5rem", color: k.accent, marginTop: "0.5rem", lineHeight: 1 }}>
                 {k.value}
@@ -277,91 +336,108 @@ export function ResearchDesk({ leads, metrics, researchers, filterStatus, filter
           ))}
         </div>
 
-        {metrics.total > 0 && metrics.qualified === 0 && (
-          <div style={{ background: C.bgElevated, border: `1px solid ${C.border}`, padding: "1rem 1.25rem", marginBottom: "2rem" }}>
-            <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.3)" }}>
-              No qualified opportunities yet.
-            </p>
-          </div>
-        )}
-
-        {/* Submission form */}
-        <section className="mb-10">
-          <FieldLabel style={{ color: C.goldDim, marginBottom: "1rem" }}>Submit Research Lead</FieldLabel>
-          <form
-            onSubmit={handleSubmit}
-            style={{ background: C.bgElevated, border: `1px solid ${C.border}`, padding: "1.5rem 1.625rem" }}
-          >
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <div>
-                <FieldLabel>Researcher</FieldLabel>
-                <select required value={researcherName} onChange={(e) => setResearcherName(e.target.value)} style={inputStyle}>
-                  <option value="">Select researcher…</option>
-                  {RESEARCH_RESEARCHERS.map((r) => (
-                    <option key={r.value} value={r.value}>{r.label}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <FieldLabel>Lead Source</FieldLabel>
-                <select value={source} onChange={(e) => setSource(e.target.value)} style={inputStyle}>
-                  {RESEARCH_LEAD_SOURCES.map((s) => (
-                    <option key={s.value} value={s.value}>{s.label}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <FieldLabel>State</FieldLabel>
-                <input value={state} onChange={(e) => setState(e.target.value)} placeholder="OR" style={inputStyle} />
-              </div>
-              <div>
-                <FieldLabel>City</FieldLabel>
-                <input value={city} onChange={(e) => setCity(e.target.value)} placeholder="Portland" style={inputStyle} />
-              </div>
-              <div className="sm:col-span-2">
-                <FieldLabel>Opportunity URL</FieldLabel>
-                <input value={leadUrl} onChange={(e) => setLeadUrl(e.target.value)} placeholder="https://..." style={inputStyle} />
-              </div>
-              <div>
-                <FieldLabel>Recommended Service</FieldLabel>
-                <select value={estimatedService} onChange={(e) => setEstimatedService(e.target.value)} style={inputStyle}>
-                  <option value="">Select service…</option>
-                  {RESEARCH_SERVICES.map((s) => (
-                    <option key={s.value} value={s.value}>{s.label}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="sm:col-span-2 lg:col-span-3">
-                <FieldLabel>Research Notes</FieldLabel>
-                <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} placeholder="Opportunity context, fit signals, follow-up notes…" style={{ ...inputStyle, resize: "vertical" }} />
-              </div>
-            </div>
-            {formError && (
-              <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.red, marginTop: "1rem" }}>{formError}</p>
-            )}
-            {formSuccess && (
-              <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.gold, marginTop: "1rem" }}>Lead submitted successfully.</p>
-            )}
-            <button
-              type="submit"
-              disabled={submitting}
-              style={{
-                marginTop: "1.25rem", fontFamily: C.sans, fontWeight: 500,
-                fontSize: "0.6875rem", letterSpacing: "0.14em", textTransform: "uppercase",
-                color: C.bgBase, background: C.gold, border: "none",
-                padding: "0.75rem 1.5rem", cursor: submitting ? "wait" : "pointer",
-                opacity: submitting ? 0.7 : 1,
-              }}
+        {showAddForm ? (
+          <section className="mb-8">
+            <FieldLabel style={{ color: C.goldDim, marginBottom: "1rem" }}>Add Research Lead</FieldLabel>
+            <form
+              onSubmit={handleSubmit}
+              style={{ background: C.bgElevated, border: `1px solid ${C.border}`, padding: "1.5rem 1.625rem" }}
             >
-              {submitting ? "Submitting…" : "Submit Research Lead"}
-            </button>
-          </form>
-        </section>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div>
+                  <FieldLabel>Researcher</FieldLabel>
+                  <select required value={researcherName} onChange={(e) => setResearcherName(e.target.value)} style={inputStyle}>
+                    <option value="">Select researcher…</option>
+                    {RESEARCH_RESEARCHERS.map((r) => (
+                      <option key={r.value} value={r.value}>{r.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <FieldLabel>Lead Source</FieldLabel>
+                  <select value={source} onChange={(e) => setSource(e.target.value)} style={inputStyle}>
+                    {RESEARCH_LEAD_SOURCES.map((s) => (
+                      <option key={s.value} value={s.value}>{s.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <FieldLabel>State</FieldLabel>
+                  <input value={state} onChange={(e) => setState(e.target.value)} placeholder="OR" style={inputStyle} />
+                </div>
+                <div>
+                  <FieldLabel>City</FieldLabel>
+                  <input value={city} onChange={(e) => setCity(e.target.value)} placeholder="Portland" style={inputStyle} />
+                </div>
+                <div>
+                  <FieldLabel>Business / Person</FieldLabel>
+                  <input value={businessName} onChange={(e) => setBusinessName(e.target.value)} placeholder="Optional" style={inputStyle} />
+                </div>
+                <div className="sm:col-span-2">
+                  <FieldLabel>Opportunity Link</FieldLabel>
+                  <input value={opportunityUrl} onChange={(e) => setOpportunityUrl(e.target.value)} placeholder="https://…" style={inputStyle} />
+                </div>
+                <div>
+                  <FieldLabel>Contact Email</FieldLabel>
+                  <input type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} placeholder="name@example.com" style={inputStyle} />
+                </div>
+                <div>
+                  <FieldLabel>Phone</FieldLabel>
+                  <input value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} placeholder="Optional" style={inputStyle} />
+                </div>
+                <div>
+                  <FieldLabel>Recommended Service</FieldLabel>
+                  <select value={estimatedService} onChange={(e) => setEstimatedService(e.target.value)} style={inputStyle}>
+                    <option value="">Select service…</option>
+                    {RESEARCH_SERVICES.map((s) => (
+                      <option key={s.value} value={s.value}>{s.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="sm:col-span-2 lg:col-span-3">
+                  <FieldLabel>Research Notes</FieldLabel>
+                  <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} placeholder="Opportunity context, fit signals, follow-up notes…" style={{ ...inputStyle, resize: "vertical" }} />
+                </div>
+              </div>
+              <p style={{ fontFamily: C.sans, fontSize: "0.75rem", color: "rgba(255,255,255,0.28)", marginTop: "0.85rem" }}>
+                Require at least one: Opportunity Link, Contact Email, or Phone.
+              </p>
+              {formError && (
+                <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.red, marginTop: "1rem" }}>{formError}</p>
+              )}
+              {formSuccess && (
+                <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.gold, marginTop: "1rem" }}>Lead submitted successfully.</p>
+              )}
+              <button
+                type="submit"
+                disabled={submitting}
+                style={{
+                  marginTop: "1.25rem", fontFamily: C.sans, fontWeight: 500,
+                  fontSize: "0.6875rem", letterSpacing: "0.14em", textTransform: "uppercase",
+                  color: C.bgBase, background: C.gold, border: "none",
+                  padding: "0.75rem 1.5rem", cursor: submitting ? "wait" : "pointer",
+                  opacity: submitting ? 0.7 : 1,
+                }}
+              >
+                {submitting ? "Submitting…" : "Submit Research Lead"}
+              </button>
+            </form>
+          </section>
+        ) : null}
 
-        {/* Filters + queue */}
+        {!showAddForm && formError ? (
+          <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.red, marginBottom: "1rem" }}>{formError}</p>
+        ) : null}
+
+        {/* Queue — primary purpose */}
         <section>
           <div className="mb-4 flex flex-wrap items-end justify-between gap-4">
-            <FieldLabel style={{ color: C.goldDim }}>Lead Queue</FieldLabel>
+            <div>
+              <FieldLabel style={{ color: C.goldDim }}>Incoming research</FieldLabel>
+              <p style={{ fontFamily: C.sans, fontSize: "0.75rem", color: "rgba(255,255,255,0.32)", marginTop: "0.35rem" }}>
+                Decide what is worth pursuing.
+              </p>
+            </div>
             <div className="flex flex-wrap gap-3">
               <div>
                 <FieldLabel>Status</FieldLabel>
@@ -421,64 +497,127 @@ export function ResearchDesk({ leads, metrics, researchers, filterStatus, filter
           ) : (
             <div style={{ border: `1px solid ${C.border}` }}>
               {leads.map((lead, i) => {
-                const location = [lead.city, lead.state].filter(Boolean).join(", ") || "—";
+                const location = [lead.city, lead.state].filter(Boolean).join(", ") || null;
                 const service = lead.estimatedService
                   ? RESEARCH_SERVICE_LABEL[lead.estimatedService] ?? lead.estimatedService
-                  : "—";
-                const url = lead.leadUrl?.trim();
+                  : null;
+                const title = lead.businessName?.trim() || service || location || `Research #${lead.id}`;
+                const context = [
+                  service && lead.businessName ? service : null,
+                  location,
+                  `Sourced by ${lead.researcherName}`,
+                  lead.ageLabel,
+                ].filter(Boolean).join(" · ");
+                const contactHint = lead.contactEmail || lead.contactPhone || null;
+                const secondaryBtn: React.CSSProperties = {
+                  fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.12em",
+                  textTransform: "uppercase", color: C.goldDim, textDecoration: "none",
+                  background: "transparent", border: "none", cursor: "pointer", padding: "0.45rem 0.35rem",
+                };
+                const primaryBtn: React.CSSProperties = {
+                  fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.14em",
+                  textTransform: "uppercase", color: C.bgBase, textDecoration: "none",
+                  border: "none", padding: "0.55rem 0.9rem",
+                  background: C.gold, cursor: "pointer",
+                };
 
                 return (
                   <div
                     key={lead.id}
                     style={{
-                      background: C.bgElevated, padding: "1rem 1.25rem",
+                      background: C.bgElevated, padding: "1.15rem 1.25rem",
                       borderBottom: i < leads.length - 1 ? `1px solid ${C.border}` : "none",
-                      display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "1rem",
+                      display: "flex", flexWrap: "wrap", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem",
                     }}
                   >
-                    <div style={{ minWidth: "12rem", flex: 1 }}>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <StatusSelect id={lead.id} status={lead.status} />
-                        <span style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted }}>
-                          {RESEARCH_STATUS_LABEL[lead.status]}
-                        </span>
+                    <div style={{ minWidth: "14rem", flex: 1 }}>
+                      <div className="flex flex-wrap items-center gap-2" style={{ marginBottom: "0.45rem" }}>
+                        {lead.promotedSalesLeadId ? (
+                          <span style={{
+                            fontFamily: C.sans, fontSize: "0.625rem", letterSpacing: "0.12em",
+                            textTransform: "uppercase", color: C.gold,
+                            border: `1px solid ${C.borderGold}`, padding: "0.15rem 0.45rem",
+                          }}>
+                            Promoted
+                          </span>
+                        ) : (
+                          <span style={{
+                            fontFamily: C.sans, fontSize: "0.625rem", letterSpacing: "0.12em",
+                            textTransform: "uppercase", color: RESEARCH_STATUS_COLOR[lead.status] ?? C.creamMuted,
+                          }}>
+                            {RESEARCH_STATUS_LABEL[lead.status] ?? lead.status}
+                          </span>
+                        )}
                       </div>
-                      <p style={{ fontFamily: C.sans, fontSize: "0.75rem", color: C.cream, marginTop: "0.5rem" }}>
-                        {lead.researcherName} · {location}
+                      <p style={{ fontFamily: C.serif, fontWeight: 400, fontSize: "1.25rem", color: C.cream, lineHeight: 1.2 }}>
+                        {title}
                       </p>
-                      <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: "rgba(255,255,255,0.28)", marginTop: "0.25rem" }}>
-                        {fmtDate(lead.createdAt)} · {service} · {lead.source}
+                      <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted, marginTop: "0.4rem", lineHeight: 1.45 }}>
+                        {context}
                       </p>
+                      {contactHint ? (
+                        <p style={{ fontFamily: C.sans, fontSize: "0.75rem", color: "rgba(255,255,255,0.32)", marginTop: "0.35rem" }}>
+                          {lead.contactEmail ? lead.contactEmail : null}
+                          {lead.contactEmail && lead.contactPhone ? " · " : ""}
+                          {lead.contactPhone ? lead.contactPhone : null}
+                        </p>
+                      ) : lead.opportunityUrl ? (
+                        <p style={{ fontFamily: C.sans, fontSize: "0.75rem", color: "rgba(255,255,255,0.32)", marginTop: "0.35rem" }}>
+                          Opportunity link available
+                        </p>
+                      ) : null}
+                      <div style={{ marginTop: "0.65rem" }}>
+                        <StatusSelect id={lead.id} status={lead.status} />
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      {url ? (
-                        <a
-                          href={url.startsWith("http") ? url : `https://${url}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{
-                            fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.14em",
-                            textTransform: "uppercase", color: C.gold, textDecoration: "none",
-                            border: `1px solid ${C.borderGold}`, padding: "0.5rem 0.875rem",
-                            background: C.goldFaint,
-                          }}
+                    <div className="flex flex-col items-end gap-2" style={{ minWidth: "9rem" }}>
+                      {lead.promotedSalesLeadId ? (
+                        <Link href={`/admin/sales?focus=${lead.promotedSalesLeadId}`} style={primaryBtn}>
+                          Open in Sales
+                        </Link>
+                      ) : lead.status !== "rejected" && lead.status !== "closed-lost" ? (
+                        <button
+                          type="button"
+                          disabled={promotingId === lead.id}
+                          onClick={() => promoteLead(lead.id)}
+                          style={{ ...primaryBtn, opacity: promotingId === lead.id ? 0.7 : 1 }}
                         >
-                          Open URL
-                        </a>
-                      ) : (
-                        <span style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: "rgba(255,255,255,0.2)" }}>
-                          No URL
-                        </span>
-                      )}
-                      <Link
-                        href={`/admin/collections/research-leads/${lead.id}`}
-                        style={{
-                          fontFamily: C.sans, fontSize: "0.6875rem", letterSpacing: "0.12em",
-                          textTransform: "uppercase", color: C.goldDim, textDecoration: "none",
-                        }}
-                      >
-                        Edit →
-                      </Link>
+                          {promotingId === lead.id ? "Promoting…" : "Promote to Sales"}
+                        </button>
+                      ) : null}
+                      <div className="flex flex-wrap items-center justify-end gap-1">
+                        {lead.opportunityUrl ? (
+                          <a
+                            href={lead.opportunityUrl.startsWith("http") ? lead.opportunityUrl : `https://${lead.opportunityUrl}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={secondaryBtn}
+                          >
+                            View
+                          </a>
+                        ) : null}
+                        {lead.contactEmail ? (
+                          <a href={`mailto:${lead.contactEmail}`} style={secondaryBtn}>Email</a>
+                        ) : null}
+                        {lead.contactPhone ? (
+                          <a href={`tel:${lead.contactPhone.replace(/[^\d+]/g, "")}`} style={secondaryBtn}>Call</a>
+                        ) : null}
+                        {lead.status !== "rejected" && !lead.promotedSalesLeadId ? (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              void fetch("/api/admin/research-leads", {
+                                method: "PATCH",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ id: lead.id, status: "rejected" }),
+                              }).then((r) => { if (r.ok) router.refresh(); });
+                            }}
+                            style={secondaryBtn}
+                          >
+                            Skip
+                          </button>
+                        ) : null}
+                      </div>
                     </div>
                   </div>
                 );

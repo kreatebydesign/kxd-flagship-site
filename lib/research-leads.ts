@@ -3,6 +3,17 @@
  * Lead Research Desk — shared labels and options
  */
 
+export {
+  normalizeResearchIntake,
+  resolveResearchContactDisplay,
+  classifyLegacyLeadUrl,
+  looksLikeEmail,
+  looksLikeHttpUrl,
+  type ResearchIntakeInput,
+  type NormalizedResearchIntake,
+  type ResearchIntakeResult,
+} from "./research-leads/intake";
+
 export const RESEARCH_RESEARCHERS = [
   { value: "Matt", label: "Matt" },
   { value: "Sasha", label: "Sasha" },

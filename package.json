@@ -73,6 +73,8 @@
     "verify:client-site-intelligence-csi-v1-b": "node --import tsx scripts/verify-client-site-intelligence-csi-v1-b.ts",
     "verify:client-site-intelligence-csi-v1-b-db": "KXD_SERVER_ONLY_SHIM=1 node --import ./scripts/shims/register-server-only.mjs --import tsx scripts/verify-client-site-intelligence-csi-v1-b-db.ts",
     "verify:qr-generator-v1": "node --import tsx scripts/verify-qr-generator-v1.ts",
+    "verify:revenue-pipeline-foundation": "node --import tsx scripts/verify-revenue-pipeline-foundation.ts",
+    "verify:robin-cole-branding": "node --import tsx scripts/verify-robin-cole-branding.ts",
     "connect:local-status": "tsx --env-file=.env.local scripts/connect-local-activation.ts status",
     "connect:local-enable": "tsx --env-file=.env.local scripts/connect-local-activation.ts enable",
     "connect:local-disable": "tsx --env-file=.env.local scripts/connect-local-activation.ts disable",
