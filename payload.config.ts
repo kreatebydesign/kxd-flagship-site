@@ -31,6 +31,7 @@ import { ClientProjects } from "./payload/collections/ClientProjects.ts";
 import { ClientRequests } from "./payload/collections/ClientRequests.ts";
 import { ClientUpgradeRequests } from "./payload/collections/ClientUpgradeRequests.ts";
 import { ClientServiceAssignments } from "./payload/collections/ClientServiceAssignments.ts";
+import { QrCodes } from "./payload/collections/QrCodes.ts";
 import { ClientReviewMedia } from "./payload/collections/ClientReviewMedia.ts";
 import { ClientTasks } from "./payload/collections/ClientTasks.ts";
 import { Work } from "./payload/collections/Work.ts";
@@ -226,6 +227,7 @@ export default buildConfig({
     ClientRequests,
     ClientUpgradeRequests,
     ClientServiceAssignments,
+    QrCodes,
     ClientReviewMedia,
     ClientCommunications,
     ClientActions,

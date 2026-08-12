@@ -57,6 +57,7 @@ export const OPERATIONS_NAV_MODULE_MAP: Record<OperationsNavId, KxdModuleId> = {
   staff: "operations",
   genesis: "onboarding",
   "launch-qa": "work",
+  "qr-generator": "operations",
 };
 
 export const PORTAL_NAV_MODULE_MAP: Record<ClientHqNavId, KxdModuleId> = {

@@ -1,7 +1,7 @@
 /**
  * Phase 7 Batch C — founder navigation as a workflow map.
  *
- * Hierarchy: Today · Work · Clients · Business · Studio · System
+ * Hierarchy: Today · Work · Clients · Business · Studio · Tools · System
  * Today is the only home. Competing aggregators remain reachable but demoted.
  */
 
@@ -52,7 +52,8 @@ export type OperationsNavId =
   | "platform"
   | "settings"
   | "training"
-  | "staff";
+  | "staff"
+  | "qr-generator";
 
 export type OperationsNavItem = {
   id: OperationsNavId;
@@ -171,6 +172,16 @@ export const NAV_GROUPS: OperationsNavGroup[] = [
     items: [
       { id: "creative", label: "Creative", href: "/admin/operations/creative" },
       { id: "reels", label: "Reels", href: "/admin/operations/reels" },
+    ],
+  },
+  {
+    label: "Tools",
+    items: [
+      {
+        id: "qr-generator",
+        label: "QR Generator",
+        href: "/admin/operations/tools/qr-generator",
+      },
     ],
   },
   {
