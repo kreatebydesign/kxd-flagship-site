@@ -3,16 +3,22 @@ import { KxdEmptyState, KxdPage } from "@/components/os";
 import { ClientHqPageHero } from "./ClientHqPageHero";
 import type { PortalResourceCategory } from "@/lib/portal/types";
 
-export function ResourcesScreen({ categories }: { categories: PortalResourceCategory[] }) {
+export function ResourcesScreen({
+  categories,
+  eyebrow = "Library",
+  title = "Resources",
+  lead = "Guides, training, support, and brand standards for your engagement.",
+}: {
+  categories: PortalResourceCategory[];
+  eyebrow?: string;
+  title?: string;
+  lead?: string;
+}) {
   const hasItems = categories.some((c) => c.items.length > 0);
 
   return (
     <KxdPage className="kxd-os-page--ops">
-      <ClientHqPageHero
-        eyebrow="Library"
-        title="Resources"
-        lead="Guides, training, support, and brand standards for your engagement."
-      />
+      <ClientHqPageHero eyebrow={eyebrow} title={title} lead={lead} />
 
       <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
         {categories.map((category) => (
@@ -28,7 +34,11 @@ export function ResourcesScreen({ categories }: { categories: PortalResourceCate
                 {category.items.map((item) => (
                   <div key={item.title} className="kxd-os-ops-list__row">
                     {item.href ? (
-                      <Link href={item.href} className="kxd-os-card__title" style={{ textDecoration: "none" }}>
+                      <Link
+                        href={item.href}
+                        className="kxd-os-card__title"
+                        style={{ textDecoration: "none" }}
+                      >
                         {item.title}
                       </Link>
                     ) : (

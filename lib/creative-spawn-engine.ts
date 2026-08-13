@@ -4,13 +4,19 @@
  * Campaign Spawn Engine — manual trigger version.
  *
  * Given a campaign ID, reads generationConfig and creates the configured number
- * of creative work items (flyers, social posts, videos, brand kit) in Payload,
- * all linked back to the source campaign.
+ * of creative work items (flyers, social posts, videos) in Payload, linked back
+ * to the source campaign where the schema supports it.
+ *
+ * Brand kits are client-owned (Client → Brand Kit → Assets). There is no
+ * Brand Kit → Creative Campaign foreign key in the shipped schema, so
+ * `createBrandKit` cannot safely preserve campaign-specific association and
+ * is deferred (reported in errors; no inventing of kit↔campaign state).
  *
  * IDEMPOTENCY GUARANTEE:
  *   Before creating any record type, the engine counts existing records already
  *   linked to the campaign. Only the deficit (requested − existing) is created.
- *   Running spawn twice on the same campaign with the same config is safe.
+ *   Running spawn twice on the same campaign with the same config is safe
+ *   for flyers, social posts, and videos.
  *
  * SAFETY:
  *   All Payload operations are wrapped in try/catch. Individual failures are
@@ -50,14 +56,6 @@ export interface SpawnResult {
 type AnyRecord = Record<string, any>;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
-function slugify(str: string): string {
-  return str
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "")
-    .slice(0, 80);
-}
 
 /** Resolve a relationship field value to a numeric ID. */
 function resolveId(rel: unknown): number | null {
@@ -114,7 +112,6 @@ export async function spawnCreativeFromCampaign(campaignId: number): Promise<Spa
     return result;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let campaign: AnyRecord;
   try {
     campaign = await payload.findByID({
@@ -150,30 +147,22 @@ export async function spawnCreativeFromCampaign(campaignId: number): Promise<Spa
     return result;
   }
 
-  // ── 3. Brand Kit ──────────────────────────────────────────────────────────
+  // ── 3. Brand Kit (deferred — no campaign FK on brand_kits) ────────────────
+  //
+  // Production schema: Brand Kits are client-owned only. Spawning a kit from a
+  // Creative Campaign would either write a nonexistent brand_kits.campaign_id
+  // or create an unassociated client kit without safe idempotency. Creative
+  // Campaign → Brand Kit (creative_campaigns.brand_kit_id) is a separate
+  // future schema decision and is not completed here.
 
   if (wantBrandKit) {
-    const existing = await countExisting(payload, "brand-kits", "campaign", campaignId);
-    if (existing >= 1) {
-      result.skipped.brandKits = 1;
-    } else {
-      try {
-        const brandKitSlug = `${slugify(result.campaignTitle)}-brand-kit-${Date.now().toString(36)}`;
-        await payload.create({
-          collection: "brand-kits",
-          data: {
-            brandName:    `${result.campaignTitle} — Brand Kit`,
-            slug:         brandKitSlug,
-            status:       "draft",
-            ...(clientId   ? { client: clientId }     : {}),
-            campaign:     campaignId,
-          },
-        });
-        result.created.brandKits++;
-      } catch (err) {
-        errors.push(`Brand kit creation failed: ${String(err)}`);
-      }
-    }
+    result.skipped.brandKits = 1;
+    errors.push(
+      "Brand kit spawn deferred: Brand Kits are client-owned and have no "
+      + "Creative Campaign relationship in the shipped schema. Configure or "
+      + "create the client Brand Kit separately (e.g. CES / admin). "
+      + "Campaign-linked kit association requires a future product/schema decision.",
+    );
   }
 
   // ── 4. Flyer Requests ─────────────────────────────────────────────────────

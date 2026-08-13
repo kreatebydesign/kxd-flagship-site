@@ -16,6 +16,12 @@ import type {
   PortalWebsiteAuditSummary,
   PortalWebsiteHealthData,
 } from "./types";
+import {
+  getBrandKitPortalResourceCategories,
+  getPortalResourceCategories,
+} from "./resource-categories";
+
+export { getPortalResourceCategories } from "./resource-categories";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDoc = Record<string, any>;
@@ -585,51 +591,122 @@ export async function getPortalTeam(session: PortalSession): Promise<PortalTeamM
   return members;
 }
 
-export function getPortalResourceCategories(): PortalResourceCategory[] {
-  return [
+/**
+ * Client-scoped Resources categories.
+ * Brand Kit surface only when a kit exists; otherwise classic generic categories.
+ */
+export async function getPortalResourceCategoriesForClient(
+  clientId: number,
+  options?: {
+    brandKitId?: number | null;
+    brandName?: string | null;
+    /** Capability-aware support destination (e.g. website-review when entitled). */
+    supportHref?: string | null;
+    supportTitle?: string | null;
+    supportDescription?: string | null;
+  },
+): Promise<PortalResourceCategory[]> {
+  if (!clientId || !Number.isFinite(clientId)) {
+    return getPortalResourceCategories();
+  }
+
+  const payload = await getPayload({ config });
+  let brandKit: {
+    id: number;
+    brandName: string;
+    primaryColor?: string | null;
+    secondaryColor?: string | null;
+    accentColor?: string | null;
+    neutralColor?: string | null;
+  } | null = null;
+
+  try {
+    if (options?.brandKitId) {
+      const doc = (await payload.findByID({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        collection: "brand-kits" as any,
+        id: options.brandKitId,
+        depth: 0,
+        overrideAccess: true,
+      })) as AnyDoc;
+      brandKit = {
+        id: Number(doc.id),
+        brandName: String(doc.brandName ?? options.brandName ?? "Brand Kit"),
+        primaryColor: doc.primaryColor ? String(doc.primaryColor) : null,
+        secondaryColor: doc.secondaryColor ? String(doc.secondaryColor) : null,
+        accentColor: doc.accentColor ? String(doc.accentColor) : null,
+        neutralColor: doc.neutralColor ? String(doc.neutralColor) : null,
+      };
+    } else {
+      const kits = await payload.find({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        collection: "brand-kits" as any,
+        where: { client: { equals: clientId } },
+        limit: 1,
+        sort: "-updatedAt",
+        depth: 0,
+        overrideAccess: true,
+      });
+      if (kits.docs.length > 0) {
+        const doc = kits.docs[0] as AnyDoc;
+        brandKit = {
+          id: Number(doc.id),
+          brandName: String(doc.brandName ?? options?.brandName ?? "Brand Kit"),
+          primaryColor: doc.primaryColor ? String(doc.primaryColor) : null,
+          secondaryColor: doc.secondaryColor ? String(doc.secondaryColor) : null,
+          accentColor: doc.accentColor ? String(doc.accentColor) : null,
+          neutralColor: doc.neutralColor ? String(doc.neutralColor) : null,
+        };
+      }
+    }
+  } catch {
+    brandKit = null;
+  }
+
+  if (!brandKit) {
+    return getPortalResourceCategories();
+  }
+
+  let assets: Array<{ title: string; description?: string | null; href?: string | null }> = [];
+  try {
+    const assetResult = await payload.find({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      collection: "brand-kit-assets" as any,
+      where: {
+        and: [
+          { brandKit: { equals: brandKit.id } },
+          { status: { in: ["approved", "delivered"] } },
+        ],
+      },
+      limit: 24,
+      sort: "title",
+      depth: 0,
+      overrideAccess: true,
+    });
+    assets = (assetResult.docs as AnyDoc[]).map((doc) => ({
+      title: String(doc.title ?? "Brand asset"),
+      description: doc.notes ? String(doc.notes) : doc.assetType ? String(doc.assetType) : null,
+      href: doc.externalUrl ? String(doc.externalUrl) : null,
+    }));
+  } catch {
+    assets = [];
+  }
+
+  return getBrandKitPortalResourceCategories(
     {
-      id: "guides",
-      title: "Guides",
-      description: "Step-by-step documentation for your engagement.",
-      items: [],
+      brandName: brandKit.brandName,
+      primaryColor: brandKit.primaryColor,
+      secondaryColor: brandKit.secondaryColor,
+      accentColor: brandKit.accentColor,
+      neutralColor: brandKit.neutralColor,
+      assets,
     },
     {
-      id: "training",
-      title: "Training",
-      description: "Onboarding and platform training materials.",
-      items: [],
+      supportHref: options?.supportHref ?? undefined,
+      supportTitle: options?.supportTitle ?? undefined,
+      supportDescription: options?.supportDescription ?? undefined,
     },
-    {
-      id: "videos",
-      title: "Videos",
-      description: "Walkthroughs, tutorials, and recorded sessions.",
-      items: [],
-    },
-    {
-      id: "support",
-      title: "Support",
-      description: "How to reach your KXD team and get help quickly.",
-      items: [
-        {
-          title: "Submit a request",
-          description: "Open a new request from your headquarters.",
-          href: "/portal/requests",
-        },
-      ],
-    },
-    {
-      id: "brand-standards",
-      title: "Brand standards",
-      description: "Logo usage, voice, and visual identity references.",
-      items: [
-        {
-          title: "View brand assets",
-          description: "Logos, guidelines, and marketing files.",
-          href: "/portal/assets",
-        },
-      ],
-    },
-  ];
+  );
 }
 
 export async function getPortalOverview(session: PortalSession): Promise<PortalOverviewData> {

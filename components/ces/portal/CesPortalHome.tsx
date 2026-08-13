@@ -5,6 +5,7 @@ import type { WebsiteReviewLandingData } from "@/lib/ces/modules/website-review/
 import type { ConnectedWorkspaceData } from "@/lib/portal/connected-workspace";
 import type { WorkspacePersonalizationModel } from "@/lib/portal/workspace-personalization";
 import type { WorkPerformanceModel } from "@/lib/portal/work-performance";
+import type { ActiveEngagementSnapshot } from "@/lib/portal/active-engagement";
 import { isCesFlagshipPortal } from "@/lib/portal/ces-launch-safety";
 import {
   composeClientHomePresentation,
@@ -36,6 +37,8 @@ export interface CesPortalHomeProps {
   homeComposition: PortalHomeComposition;
   /** Future confirmed lead aggregates only — omit when unavailable. */
   businessImpact?: ClientHomeBusinessImpact | null;
+  /** Reusable Active Engagement summary from commercial records. */
+  engagement?: ActiveEngagementSnapshot | null;
 }
 
 export function CesPortalHome({
@@ -48,6 +51,7 @@ export function CesPortalHome({
   workPerformance = null,
   homeComposition,
   businessImpact = null,
+  engagement = null,
 }: CesPortalHomeProps) {
   const flagship = isCesFlagshipPortal(profile);
   const homeSurface = resolveCesHomeSurface({
@@ -67,6 +71,11 @@ export function CesPortalHome({
         })
       : null;
 
+  const engagementEyebrow =
+    profile.terminology["portal.engagement.eyebrow"] ?? "Active engagement";
+  const engagementTitle =
+    profile.terminology["portal.engagement.title"] ?? "Your support";
+
   return (
     <CesPage
       className={`kxd-ces-portal-home kxd-ces-portal-home--briefing kxd-ces-page--enter${
@@ -81,6 +90,9 @@ export function CesPortalHome({
             home={clientHome}
             showWork={isHomeZoneVisible(homeComposition, "work-performance")}
             showPartnership={isHomeZoneVisible(homeComposition, "partnership-briefing")}
+            engagement={engagement}
+            engagementEyebrow={engagementEyebrow}
+            engagementTitle={engagementTitle}
           />
         ) : useExecutive && performance ? (
           <CesExecutivePerformanceWorkspace
@@ -88,7 +100,13 @@ export function CesPortalHome({
             websiteReview={websiteReview}
           />
         ) : (
-          <CesPartnershipBriefing briefing={briefing} greeting={greeting} />
+          <CesPartnershipBriefing
+            briefing={briefing}
+            greeting={greeting}
+            engagement={engagement}
+            engagementEyebrow={engagementEyebrow}
+            engagementTitle={engagementTitle}
+          />
         )}
         {!clientHome && personalization && !useExecutive ? (
           <WorkspaceFocusStrip personalization={personalization} />

@@ -34,4 +34,14 @@ export {
   buildFallbackVisual,
 } from "./profile/defaults";
 
+export {
+  CAMPAIGN_HQ_EXPERIENCE_KIND,
+  CAMPAIGN_HQ_KIND_TERMINOLOGY_KEY,
+  CAMPAIGN_HQ_RECOMMENDED_MODULES,
+  CAMPAIGN_HQ_AUTHORITATIVE_TERMINOLOGY_KEYS,
+  buildCampaignHqProfileConfig,
+  isCampaignHqExperience,
+  mergeCampaignHqTerminology,
+} from "./profile/campaign-hq";
+
 export { experienceProfileToCssVars } from "./profile/tokens";

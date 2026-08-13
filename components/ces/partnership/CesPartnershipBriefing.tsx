@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { getPartnershipStoryTimeline, type PartnershipBriefing } from "@/lib/ces/partnership";
+import type { ActiveEngagementSnapshot } from "@/lib/portal/active-engagement";
+import { ActiveEngagementCard } from "@/components/ces/portal/ActiveEngagementCard";
 
 function formatProgressDate(iso: string | null): string | null {
   if (!iso) return null;
@@ -15,9 +17,18 @@ function formatProgressDate(iso: string | null): string | null {
 export interface CesPartnershipBriefingProps {
   briefing: PartnershipBriefing;
   greeting: string;
+  engagement?: ActiveEngagementSnapshot | null;
+  engagementEyebrow?: string;
+  engagementTitle?: string;
 }
 
-export function CesPartnershipBriefing({ briefing, greeting }: CesPartnershipBriefingProps) {
+export function CesPartnershipBriefing({
+  briefing,
+  greeting,
+  engagement = null,
+  engagementEyebrow,
+  engagementTitle,
+}: CesPartnershipBriefingProps) {
   const { overview, services, needsAttention, websiteReview, results, recommendation } = briefing;
   const story = getPartnershipStoryTimeline(briefing.clientSlug);
 
@@ -33,6 +44,12 @@ export function CesPartnershipBriefing({ briefing, greeting }: CesPartnershipBri
           {briefing.clientName}.
         </p>
       </header>
+
+      <ActiveEngagementCard
+        engagement={engagement}
+        eyebrow={engagementEyebrow}
+        title={engagementTitle}
+      />
 
       {/* Where we are */}
       <section className="kxd-ces-partnership__section" aria-labelledby="where-we-stand-heading">

@@ -67,8 +67,10 @@ const ROBIN_COLE_PRESENTATION: ExperiencePresentation = {
   }),
   logoSrc: "/migrated-assets/logos/robin-cole/icon.png",
   logoAlt: "Robin Cole for Tracy",
+  /* Canonical campaign Brand Kit accents — Primary Green / Primary Blue. */
   actionAccent: "#C5EE9C",
-  intelligenceAccent: "#050820",
+  intelligenceAccent: "#00008E",
+  workspaceEyebrow: "Campaign HQ",
 };
 
 const BY_SLUG: Record<string, ExperiencePresentation> = {

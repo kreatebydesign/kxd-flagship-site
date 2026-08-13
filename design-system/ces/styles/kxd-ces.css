@@ -11741,3 +11741,69 @@ label.kxd-ces-mobile-bar__toggle {
     font-size: 0.75rem;
   }
 }
+
+/* ── Active Engagement (reusable CES commercial summary) ─────────────────── */
+
+.kxd-active-engagement {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  max-width: 42rem;
+  padding: 1.25rem 0 0.25rem;
+  border-top: 1px solid color-mix(in srgb, var(--kxd-os-border, #d8d4cc) 85%, transparent);
+}
+
+.kxd-active-engagement__eyebrow {
+  margin: 0;
+  color: var(--kxd-os-text-muted, #6b675f);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.kxd-active-engagement__title {
+  margin: 0;
+  color: var(--kxd-os-text, #141414);
+  font-family: var(--kxd-os-font-serif, Georgia, serif);
+  font-size: clamp(1.35rem, 2.2vw, 1.75rem);
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+}
+
+.kxd-active-engagement__facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  gap: 0.85rem 1.25rem;
+  margin: 0.35rem 0 0;
+}
+
+.kxd-active-engagement__fact dt {
+  margin: 0;
+  color: var(--kxd-os-text-muted, #6b675f);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.kxd-active-engagement__fact dd {
+  margin: 0.2rem 0 0;
+  color: var(--kxd-os-text, #141414);
+  font-size: 0.98rem;
+  line-height: 1.4;
+}
+
+.kxd-active-engagement__included {
+  margin: 0.15rem 0 0;
+  max-width: 40rem;
+  color: var(--kxd-os-text-muted, #6b675f);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.kxd-client-home .kxd-active-engagement,
+.kxd-ces-partnership .kxd-active-engagement {
+  margin-bottom: 0.5rem;
+}

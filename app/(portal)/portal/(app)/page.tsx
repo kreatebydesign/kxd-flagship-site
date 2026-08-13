@@ -12,6 +12,7 @@ import { composePortalGreeting } from "@/lib/portal/compose-greeting";
 import { getPortalSession } from "@/lib/portal/session";
 import { resolvePortalWorkspacePersonalization } from "@/lib/portal/workspace-personalization/server";
 import { resolvePortalWorkPerformance } from "@/lib/portal/work-performance/server";
+import { loadActiveEngagementForClient } from "@/lib/portal/active-engagement";
 
 export const dynamic = "force-dynamic";
 
@@ -34,12 +35,15 @@ export default async function PortalOverviewPage() {
 
   if (home.shell === "ces") {
     const websiteReview = await getWebsiteReviewLanding(session, profile);
-    const workPerformance = await resolvePortalWorkPerformance({
-      session,
-      experienceProfile: profile,
-      websiteReview,
-    });
-    const connected = await getConnectedWorkspaceData(session, profile, websiteReview);
+    const [workPerformance, connected, engagement] = await Promise.all([
+      resolvePortalWorkPerformance({
+        session,
+        experienceProfile: profile,
+        websiteReview,
+      }),
+      getConnectedWorkspaceData(session, profile, websiteReview),
+      loadActiveEngagementForClient(session.clientId),
+    ]);
     const briefing = await composePartnershipBriefing({
       session,
       profile,
@@ -64,6 +68,7 @@ export default async function PortalOverviewPage() {
         personalization={personalization}
         workPerformance={workPerformance}
         homeComposition={home}
+        engagement={engagement}
       />
     );
   }

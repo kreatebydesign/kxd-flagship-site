@@ -363,9 +363,13 @@ export function composeClientHomePresentation(input: {
 
   return {
     welcome: {
-      eyebrow: profile.hospitality.welcomeEyebrow?.trim() || "Your partnership",
+      eyebrow:
+        profile.terminology["portal.home.eyebrow"]?.trim() ||
+        profile.hospitality.welcomeEyebrow?.trim() ||
+        "Your partnership",
       greeting,
-      lead: composeWelcomeLead(services),
+      lead:
+        profile.terminology["portal.home.lead"]?.trim() || composeWelcomeLead(services),
     },
     attention: {
       items: attentionItems,

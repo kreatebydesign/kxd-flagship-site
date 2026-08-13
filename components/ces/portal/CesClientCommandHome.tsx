@@ -3,6 +3,8 @@ import type {
   ClientHomePresentation,
   ClientHomePresentationItem,
 } from "@/lib/ces/modules/home";
+import type { ActiveEngagementSnapshot } from "@/lib/portal/active-engagement";
+import { ActiveEngagementCard } from "./ActiveEngagementCard";
 
 function HomeItem({ item }: { item: ClientHomePresentationItem }) {
   const content = (
@@ -64,10 +66,16 @@ export function CesClientCommandHome({
   home,
   showWork,
   showPartnership,
+  engagement = null,
+  engagementEyebrow,
+  engagementTitle,
 }: {
   home: ClientHomePresentation;
   showWork: boolean;
   showPartnership: boolean;
+  engagement?: ActiveEngagementSnapshot | null;
+  engagementEyebrow?: string;
+  engagementTitle?: string;
 }) {
   return (
     <div className="kxd-client-home">
@@ -81,6 +89,12 @@ export function CesClientCommandHome({
           </Link>
         ) : null}
       </header>
+
+      <ActiveEngagementCard
+        engagement={engagement}
+        eyebrow={engagementEyebrow}
+        title={engagementTitle}
+      />
 
       <section className="kxd-client-home__attention" aria-labelledby="client-attention-title">
         <p className="kxd-client-home__eyebrow">Needs your attention</p>

@@ -31,11 +31,6 @@ export const BrandKits: CollectionConfig = {
             { name: "slug",         type: "text", required: true, unique: true, label: "Slug" },
             { name: "client",       type: "relationship", relationTo: "clients", required: true, label: "Client" },
             { name: "relatedProject", type: "relationship", relationTo: "client-projects", label: "Related Project" },
-            {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              name: "campaign", type: "relationship", relationTo: "creative-campaigns" as any, label: "Related Campaign",
-              admin: { description: "Campaign this brand kit was built to support." },
-            },
             { name: "industry",     type: "text",     label: "Industry" },
             { name: "audience",     type: "textarea", label: "Target Audience" },
             { name: "brandPersonality",    type: "textarea", label: "Brand Personality" },
