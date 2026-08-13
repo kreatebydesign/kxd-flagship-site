@@ -4,6 +4,7 @@ import { isCesModuleEnabled } from "@/lib/ces";
 import { isPortalModuleVisible } from "@/lib/ces/modules/visibility";
 import { isCampaignHqExperience } from "@/lib/ces/profile/campaign-hq";
 import { resolveExperienceProfile } from "@/lib/ces/server";
+import { loadPortalBrandKitPresentation } from "@/lib/portal/brand-kit";
 import { getPortalResourceCategoriesForClient } from "@/lib/portal/data";
 import { getPortalSession } from "@/lib/portal/session";
 
@@ -21,16 +22,19 @@ export default async function PortalResourcesPage() {
   const websiteReviewEntitled = isCesModuleEnabled(profile, "website-review");
   const campaignHq = isCampaignHqExperience(profile);
 
-  const categories = await getPortalResourceCategoriesForClient(session.clientId, {
-    brandName: profile.identity.clientName,
-    supportHref: websiteReviewEntitled ? "/portal/website-review" : "/portal/requests",
-    supportTitle: websiteReviewEntitled ? "Submit a website update" : "Submit a request",
-    supportDescription: websiteReviewEntitled
-      ? "Share precise feedback through Website Review."
-      : "Open a new request from your headquarters.",
-  });
+  const [categories, brandKit] = await Promise.all([
+    getPortalResourceCategoriesForClient(session.clientId, {
+      brandName: profile.identity.clientName,
+      supportHref: websiteReviewEntitled ? "/portal/website-review" : "/portal/requests",
+      supportTitle: websiteReviewEntitled ? "Submit a website update" : "Submit a request",
+      supportDescription: websiteReviewEntitled
+        ? "Share precise feedback through Website Review."
+        : "Open a new request from your headquarters.",
+    }),
+    loadPortalBrandKitPresentation(session.clientId),
+  ]);
 
-  const useCampaignCopy = campaignHq || categories.some((c) => c.id === "brand-kit");
+  const useCampaignCopy = campaignHq || Boolean(brandKit) || categories.some((c) => c.id === "brand-kit");
   const title = useCampaignCopy
     ? profile.terminology["nav.resources"]?.trim() ||
       profile.terminology["resources.title"]?.trim() ||
@@ -47,6 +51,7 @@ export default async function PortalResourcesPage() {
   return (
     <ResourcesScreen
       categories={categories}
+      brandKit={brandKit}
       eyebrow={eyebrow}
       title={title}
       lead={lead}

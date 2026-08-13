@@ -75,11 +75,11 @@ export const ROBIN_BRAND_KIT = {
   // docs/brand/visual-language.md Character + docs/brand/do-dont.md editorial character
   voiceTone:
     "Confident, local, rooted — “Deep Roots. Forward Focused.” Maintain the editorial campaign character.",
-  // docs/brand/do-dont.md → DO
+  // docs/brand/do-dont.md → DO (client-safe wording; no internal repo paths)
   doRules: [
     "Use official campaign colors: blue #00008E, green #C5EE9C, white #FFFFFF, black #000000",
-    "Check the Brand Kit (docs/brand/, client package, lib/brand/robin-cole.ts) before creating anything new",
-    "Reuse approved photography from lib/robin-images.ts / Brand Kit / handout assets",
+    "Check the approved Brand Kit before creating anything new",
+    "Reuse approved campaign photography and existing campaign assets whenever possible",
     "Use established Playfair Display + DM Sans hierarchy on digital surfaces",
     "Maintain the editorial campaign character already on robinfortracy.com",
     "Use existing campaign marks (primary logo, water tower) instead of inventing replacements",
@@ -87,7 +87,7 @@ export const ROBIN_BRAND_KIT = {
     "Prefer authentic Robin photography over synthetic generation",
     "Keep legal line accurate when required: Paid for by Robin Cole for City Council 2026 FPPC #1492410 (full form)",
   ].join("\n"),
-  // docs/brand/do-dont.md → DON'T
+  // docs/brand/do-dont.md → DON'T (client-safe wording; no internal repo paths)
   dontRules: [
     "Approximate Robin’s blue or green (“close enough” navy/teal/lime)",
     "Invent new campaign colors or elevate legacy #000066 to official blue",
@@ -100,11 +100,11 @@ export const ROBIN_BRAND_KIT = {
     "Invent disclaimer / paid-for-by language",
     "Treat every channel as having identical disclosure requirements",
     "Redesign the live site or print system under the guise of “brand cleanup”",
-    "Copy binaries into docs/brand/ or lib/brand/",
+    "Recreate or duplicate brand source files outside approved campaign materials",
   ].join("\n"),
-  // Brand Guide logo usage + canonical source pointer
+  // Brand Guide logo usage (client-safe; no internal repo paths)
   logoNotes: [
-    "Canonical Brand Kit lives in the Robin campaign website repository (lib/brand/robin-cole.ts, docs/brand/, deliverables/Robin-Cole-Campaign-Brand-Kit/).",
+    "Use the approved campaign logo and Brand Kit guidance as the source of truth for campaign materials.",
     "Do not redraw, stretch, or recolor the logo.",
     "Clear space: maintain clear space equal to the height of the letter “R” in ROBIN COLE around all sides of the logo where possible.",
     "Minimum size — Print: 6 inches wide on yard signs; 12 inches wide on banners. Digital: 180px wide for web header; 512px for social profile.",

@@ -24,6 +24,7 @@ import {
   getGenericPortalResourceCategories,
   getPortalResourceCategories,
 } from "../lib/portal/resource-categories";
+import { composePortalBrandKitPresentation } from "../lib/portal/brand-kit/compose";
 import {
   assertRobinPortalUserIdentity,
   ROBIN_CLIENT_ID,
@@ -190,6 +191,56 @@ function main() {
       ),
       false,
     );
+  });
+
+  check("Reusable Brand Kit guide omits empty sections and operator fields", () => {
+    const full = composePortalBrandKitPresentation({
+      kit: {
+        brandName: "Example Campaign",
+        taglineOptions: "Forward focused",
+        primaryColor: "#00008E",
+        accentColor: "#C5EE9C",
+        positioningStatement: "A clear positioning statement.",
+        doRules: "Use approved colors\nProtect the mark",
+        dontRules: "",
+        brandKeywords: "local, rooted",
+        socialBio: "Example bio",
+        websiteIntroCopy: "Intro copy",
+      },
+      assets: [
+        {
+          id: 1,
+          title: "Campaign logo",
+          externalUrl: "/migrated-assets/logos/robin-cole/logo.png",
+          notes: "Primary lockup",
+          assetType: "logo",
+        },
+      ],
+    });
+    assert.ok(full);
+    assert.equal(full?.tagline, "Forward focused");
+    assert.equal(full?.dontRules.length, 0);
+    assert.equal(full?.heroLogo?.src.includes("logo.png"), true);
+    assert.equal(full?.colors.length, 2);
+    assert.deepEqual(full?.keywords, ["local", "rooted"]);
+
+    const emptyish = composePortalBrandKitPresentation({
+      kit: { brandName: "Empty Shell" },
+      assets: [],
+    });
+    assert.equal(emptyish, null);
+
+    const guide = read("components/ces/portal/BrandKitGuide.tsx");
+    assert.ok(guide.includes("BrandKitGuide"));
+    assert.equal(guide.includes("internalNotes"), false);
+    assert.equal(guide.includes("nextAction"), false);
+    const page = read("app/(portal)/portal/(app)/resources/page.tsx");
+    assert.ok(page.includes("loadPortalBrandKitPresentation"));
+    const screen = read("components/client-hq/ResourcesScreen.tsx");
+    assert.ok(screen.includes("BrandKitGuide"));
+    const compose = read("lib/portal/brand-kit/compose.ts");
+    assert.equal(compose.includes("internalNotes"), false);
+    assert.equal(compose.includes("nextActionDueDate"), false);
   });
 
   check("Robin detection remains scoped (no marketing/login leak helpers)", () => {
