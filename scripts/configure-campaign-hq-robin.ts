@@ -47,6 +47,11 @@ export {
  *   CAMPAIGN_HQ_BARBARA_PORTAL_EMAIL
  */
 
+/**
+ * Canonical Brand Kit mapping for Robin Cole Campaign HQ.
+ * Source priority: lib/brand/robin-cole.ts → docs/brand/ → Brand Kit deliverable → Press Kit.
+ * Do not invent strategy copy. Do not reintroduce Join Robin as primaryCTA.
+ */
 export const ROBIN_BRAND_KIT = {
   brandName: "Robin Cole for Tracy",
   slug: "robin-cole-campaign",
@@ -56,14 +61,73 @@ export const ROBIN_BRAND_KIT = {
   accentColor: "#C5EE9C",
   neutralColor: "#FFFFFF",
   status: "approved" as const,
-  logoNotes:
-    "Canonical Brand Kit lives in the campaign website repository. KXD OS holds the operational representation for Campaign HQ.",
+  // lib/brand/robin-cole.ts → CAMPAIGN_IDENTITY.tagline
+  taglineOptions: "Deep Roots. Forward Focused.",
+  // docs/brand/typography.md + 05_BRAND_GUIDE/TYPOGRAPHY.md + Brand Guide Typography Direction
+  typographyDirection:
+    "Digital: Playfair Display (display/headlines); DM Sans (body/UI); Playfair Display italic for editorial emphasis, quotes, and taglines. Print fallbacks when vendors cannot use web fonts: Arial Bold or Helvetica Bold (headlines); Arial or Helvetica Regular (body); Arial Bold Italic (tagline/emphasis). Yard signs and banners rely on approved artwork typography — do not substitute fonts on print pieces.",
+  // docs/brand/visual-language.md → Character
+  brandPersonality:
+    "Editorial campaign, not generic nonprofit template. Confident, local, rooted — “Deep Roots. Forward Focused.” Strong navy fields with green accents; Playfair for display; DM Sans for UI/body; warm cream / paper supporting surfaces on light sections.",
+  // deliverables/.../Press_Kit/Campaign-Boilerplate.md
+  positioningStatement:
+    "Robin Cole is a Tracy resident running for Tracy City Council District 1. A neighbor first and leader second, Robin moved to Tracy in 1980, raised her family here, and built a career in finance, banking, and project management. She is campaigning to protect Tracy’s quality of life, support responsible growth, and ensure District 1 families, neighborhoods, and small businesses have a stronger voice at City Hall. Learn more at robinfortracy.com.",
+  // docs/brand/visual-language.md Character + docs/brand/do-dont.md editorial character
   voiceTone:
-    "Clear, confident, community-focused. Civic and approachable — never partisan flash.",
-  doRules: "Use approved navy (#00008E), green (#C5EE9C), white, and black only.",
-  dontRules: "Do not substitute gold/KXD accents or approximate campaign colors.",
-  primaryCTA: "Join Robin",
-  websiteIntroCopy: "Robin Cole for Tracy City Council",
+    "Confident, local, rooted — “Deep Roots. Forward Focused.” Maintain the editorial campaign character.",
+  // docs/brand/do-dont.md → DO
+  doRules: [
+    "Use official campaign colors: blue #00008E, green #C5EE9C, white #FFFFFF, black #000000",
+    "Check the Brand Kit (docs/brand/, client package, lib/brand/robin-cole.ts) before creating anything new",
+    "Reuse approved photography from lib/robin-images.ts / Brand Kit / handout assets",
+    "Use established Playfair Display + DM Sans hierarchy on digital surfaces",
+    "Maintain the editorial campaign character already on robinfortracy.com",
+    "Use existing campaign marks (primary logo, water tower) instead of inventing replacements",
+    "Check disclosure / paid-for-by requirements by communication channel",
+    "Prefer authentic Robin photography over synthetic generation",
+    "Keep legal line accurate when required: Paid for by Robin Cole for City Council 2026 FPPC #1492410 (full form)",
+  ].join("\n"),
+  // docs/brand/do-dont.md → DON'T
+  dontRules: [
+    "Approximate Robin’s blue or green (“close enough” navy/teal/lime)",
+    "Invent new campaign colors or elevate legacy #000066 to official blue",
+    "Create replacement logos unnecessarily",
+    "Generate synthetic Robin imagery when approved photography works",
+    "Invent endorsements, quotes, or organizational support",
+    "Invent candidate positions or policy claims",
+    "Invent campaign facts, poll numbers, or achievements",
+    "Invent URLs, QR destinations, dates, times, or event details",
+    "Invent disclaimer / paid-for-by language",
+    "Treat every channel as having identical disclosure requirements",
+    "Redesign the live site or print system under the guise of “brand cleanup”",
+    "Copy binaries into docs/brand/ or lib/brand/",
+  ].join("\n"),
+  // Brand Guide logo usage + canonical source pointer
+  logoNotes: [
+    "Canonical Brand Kit lives in the Robin campaign website repository (lib/brand/robin-cole.ts, docs/brand/, deliverables/Robin-Cole-Campaign-Brand-Kit/).",
+    "Do not redraw, stretch, or recolor the logo.",
+    "Clear space: maintain clear space equal to the height of the letter “R” in ROBIN COLE around all sides of the logo where possible.",
+    "Minimum size — Print: 6 inches wide on yard signs; 12 inches wide on banners. Digital: 180px wide for web header; 512px for social profile.",
+    "Incorrect usage: do not change campaign blue or green values; do not stretch or squash the logo; do not place the full logo on busy photo backgrounds without a solid field; do not recreate the water tower mark separately from approved artwork; do not use low-resolution exports for print.",
+  ].join("\n"),
+  // Email signature (preserve signature wording; tagline punctuation as in signature file)
+  socialBio: [
+    "Robin Cole",
+    "Candidate, Tracy City Council District 1",
+    "Deep Roots, Forward Focused",
+    "",
+    "https://www.robinfortracy.com",
+    "info@robinfortracy.com",
+  ].join("\n"),
+  // Campaign-Facts.md Quick Talking Points → Priorities terminology
+  brandKeywords:
+    "neighborhoods, responsible growth, local business, healthcare accountability, listening to residents",
+  // lib/brand/robin-cole.ts CAMPAIGN_IDENTITY (short intro; not full boilerplate)
+  websiteIntroCopy: "Robin Cole for Tracy City Council District 1",
+  // No clearly approved Brand Kit primary CTA — clear unsupported Phase 1 "Join Robin"
+  primaryCTA: null as string | null,
+  secondaryCTA: null as string | null,
+  // Intentionally blank: audience, canvaDirection
 };
 
 const BRAND_ASSETS: Array<{
@@ -326,14 +390,21 @@ async function main() {
     secondaryColor: ROBIN_BRAND_KIT.secondaryColor,
     accentColor: ROBIN_BRAND_KIT.accentColor,
     neutralColor: ROBIN_BRAND_KIT.neutralColor,
+    taglineOptions: ROBIN_BRAND_KIT.taglineOptions,
+    typographyDirection: ROBIN_BRAND_KIT.typographyDirection,
+    brandPersonality: ROBIN_BRAND_KIT.brandPersonality,
+    positioningStatement: ROBIN_BRAND_KIT.positioningStatement,
     logoNotes: ROBIN_BRAND_KIT.logoNotes,
     voiceTone: ROBIN_BRAND_KIT.voiceTone,
     doRules: ROBIN_BRAND_KIT.doRules,
     dontRules: ROBIN_BRAND_KIT.dontRules,
+    socialBio: ROBIN_BRAND_KIT.socialBio,
+    brandKeywords: ROBIN_BRAND_KIT.brandKeywords,
     primaryCTA: ROBIN_BRAND_KIT.primaryCTA,
+    secondaryCTA: ROBIN_BRAND_KIT.secondaryCTA,
     websiteIntroCopy: ROBIN_BRAND_KIT.websiteIntroCopy,
     status: ROBIN_BRAND_KIT.status,
-    nextAction: "Operational Brand Kit synced for Campaign HQ",
+    nextAction: "Canonical Brand Kit fields synced for Campaign HQ",
   };
 
   if (brandKitId) {
