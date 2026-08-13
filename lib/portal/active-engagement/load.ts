@@ -60,9 +60,7 @@ function periodLabel(start: string | null, end: string | null): string | null {
 
 function summarizeIncluded(raw: string | null | undefined): string | null {
   const text = String(raw ?? "").trim();
-  if (!text) return null;
-  if (text.length <= 220) return text;
-  return `${text.slice(0, 217).trim()}…`;
+  return text || null;
 }
 
 function scoreStatus(status: string): number {

@@ -24,6 +24,7 @@
 
   /* Text — graphite hierarchy (solid colors, not weak alpha) */
   --kxd-os-text-primary: #1d1d1f;
+  --kxd-os-text: var(--kxd-os-text-primary);
   --kxd-os-text-secondary: #6e6e73;
   --kxd-os-text-muted: #6e6e73;
   --kxd-os-text-faint: #86868b;
@@ -20474,6 +20475,7 @@ html[data-theme="dark"] {
   --kxd-os-bg-selected: rgba(10, 132, 255, 0.18);
 
   --kxd-os-text-primary: #f5f5f7;
+  --kxd-os-text: var(--kxd-os-text-primary);
   --kxd-os-text-secondary: #a1a1a6;
   --kxd-os-text-muted: #a1a1a6;
   --kxd-os-text-faint: #8e8e93;

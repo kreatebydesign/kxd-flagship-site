@@ -32,6 +32,7 @@ import {
   isRobinColeClient,
   ROBIN_COLE_LOGO_ALT,
   ROBIN_COLE_LOGO_SRC,
+  ROBIN_COLE_SIDEBAR_LOGO_SRC,
 } from "./robin-cole";
 import { resolveMediaAssetUrl } from "@/lib/client-command/experience/media-url";
 import { generatePayloadMediaFileUrl } from "@/lib/media/payload-storage";
@@ -119,7 +120,7 @@ function ensurePrimalExecutiveReview(profile: ResolvedExperienceProfile): void {
   }
 }
 
-/** Ensure Robin Cole campaign mark is present when CMS/onboarding logo is absent. */
+/** Ensure Robin Cole campaign lockup is used instead of the compact app icon. */
 function ensureRobinColeBrand(profile: ResolvedExperienceProfile): void {
   if (
     !isRobinColeClient({
@@ -129,8 +130,9 @@ function ensureRobinColeBrand(profile: ResolvedExperienceProfile): void {
   ) {
     return;
   }
-  if (!profile.identity.logoUrl) {
-    profile.identity.logoUrl = ROBIN_COLE_LOGO_SRC;
+  const logo = profile.identity.logoUrl?.trim() || null;
+  if (!logo || logo === ROBIN_COLE_LOGO_SRC) {
+    profile.identity.logoUrl = ROBIN_COLE_SIDEBAR_LOGO_SRC;
     profile.identity.logoAlt = ROBIN_COLE_LOGO_ALT;
   }
 }

@@ -11311,7 +11311,7 @@
 
 .kxd-client-home__eyebrow {
   margin: 0;
-  color: var(--kxd-ces-accent);
+  color: var(--kxd-os-text-secondary);
   font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.12em;
@@ -11547,6 +11547,12 @@ a.kxd-client-home__service:hover {
   gap: 0.7rem;
 }
 
+.kxd-ces-app[data-ces-shell="ces"] .kxd-ces-identity--has-logo .kxd-ces-identity__logo {
+  width: 100%;
+  max-width: 11.5rem;
+  max-height: 3.25rem;
+}
+
 .kxd-ces-app[data-ces-shell="ces"] .kxd-os-sidebar__group-label {
   display: block;
   margin: 0;
@@ -11764,7 +11770,7 @@ label.kxd-ces-mobile-bar__toggle {
 
 .kxd-active-engagement__title {
   margin: 0;
-  color: var(--kxd-os-text, #141414);
+  color: var(--kxd-os-text-primary);
   font-family: var(--kxd-os-font-serif, Georgia, serif);
   font-size: clamp(1.35rem, 2.2vw, 1.75rem);
   font-weight: 400;
@@ -11790,7 +11796,7 @@ label.kxd-ces-mobile-bar__toggle {
 
 .kxd-active-engagement__fact dd {
   margin: 0.2rem 0 0;
-  color: var(--kxd-os-text, #141414);
+  color: var(--kxd-os-text-primary);
   font-size: 0.98rem;
   line-height: 1.4;
 }
@@ -11801,6 +11807,10 @@ label.kxd-ces-mobile-bar__toggle {
   color: var(--kxd-os-text-muted, #6b675f);
   font-size: 0.95rem;
   line-height: 1.55;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
 }
 
 .kxd-client-home .kxd-active-engagement,

@@ -5,7 +5,11 @@
  * Robin's campaign instead of leaking KXD marketing favicon/logo.
  */
 
+/** Favicon / compact mark — not the sidebar wordmark. */
 export const ROBIN_COLE_LOGO_SRC = "/migrated-assets/logos/robin-cole/icon.png";
+/** Primary campaign lockup for portal sidebar identity. */
+export const ROBIN_COLE_SIDEBAR_LOGO_SRC =
+  "/migrated-assets/logos/robin-cole/logo.png";
 export const ROBIN_COLE_FAVICON_SRC = "/migrated-assets/logos/robin-cole/favicon.ico";
 export const ROBIN_COLE_APPLE_ICON_SRC =
   "/migrated-assets/logos/robin-cole/apple-touch-icon.png";

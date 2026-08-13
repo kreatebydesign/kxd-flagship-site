@@ -9,6 +9,7 @@ import {
   isRobinColeClient,
   ROBIN_COLE_FAVICON_SRC,
   ROBIN_COLE_LOGO_SRC,
+  ROBIN_COLE_SIDEBAR_LOGO_SRC,
 } from "../lib/ces/profile/robin-cole";
 
 const ROOT = process.cwd();
@@ -68,11 +69,15 @@ function main() {
       "utf8",
     );
     assert.ok(resolve.includes("ensureRobinColeBrand"));
-    assert.ok(resolve.includes("ROBIN_COLE_LOGO_SRC"));
+    assert.ok(resolve.includes("ROBIN_COLE_SIDEBAR_LOGO_SRC"));
   });
 
   check("constants point at migrated Robin assets", () => {
     assert.equal(ROBIN_COLE_LOGO_SRC, "/migrated-assets/logos/robin-cole/icon.png");
+    assert.equal(
+      ROBIN_COLE_SIDEBAR_LOGO_SRC,
+      "/migrated-assets/logos/robin-cole/logo.png",
+    );
     assert.equal(
       ROBIN_COLE_FAVICON_SRC,
       "/migrated-assets/logos/robin-cole/favicon.ico",

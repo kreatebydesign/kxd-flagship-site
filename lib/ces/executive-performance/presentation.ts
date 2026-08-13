@@ -65,7 +65,7 @@ const ROBIN_COLE_PRESENTATION: ExperiencePresentation = {
     logoAlt: "Robin Cole for Tracy",
     heroImageAlt: "Robin Cole for Tracy City Council",
   }),
-  logoSrc: "/migrated-assets/logos/robin-cole/icon.png",
+  logoSrc: "/migrated-assets/logos/robin-cole/logo.png",
   logoAlt: "Robin Cole for Tracy",
   /* Canonical campaign Brand Kit accents — Primary Green / Primary Blue. */
   actionAccent: "#C5EE9C",
