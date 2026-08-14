@@ -1,0 +1,193 @@
+/**
+ * Scoped portal report presentation — isolated from CES / portal shell theme.
+ * Imported only by ReportViewScreen. Does not alter global portal typography.
+ */
+
+.kxd-report-portal-embed {
+  isolation: isolate;
+  color-scheme: light;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #080808;
+  --kxd-report-text: #141414;
+  --kxd-report-heading: #0a0a0a;
+  --kxd-report-muted: #5c564c;
+  --kxd-report-surface: #fffdf8;
+  --kxd-report-panel: #f3ebe0;
+  --kxd-report-line: #e2d8c8;
+  --kxd-report-gold: #6d5620;
+  --kxd-report-gold-bright: #c5a65c;
+  --kxd-report-link: #7a6528;
+  --kxd-report-cover-bg: #080808;
+  --kxd-report-cover-text: #f7f1e6;
+  --kxd-report-cover-muted: #c9c2b5;
+  --kxd-report-metric-value: #0a0a0a;
+}
+
+.kxd-report-portal-embed .kxd-report-portal-root {
+  color: var(--kxd-report-text);
+  font-family: system-ui, -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  line-height: 1.55;
+}
+
+/* ── Branded monthly / audit report (export-html) ─────────────────────────── */
+
+.kxd-report-portal-embed .kxd-report-portal-root .cover {
+  background: var(--kxd-report-cover-bg) !important;
+  color: var(--kxd-report-cover-text) !important;
+}
+
+.kxd-report-portal-embed .kxd-report-portal-root .cover h1,
+.kxd-report-portal-embed .kxd-report-portal-root .cover p,
+.kxd-report-portal-embed .kxd-report-portal-root .cover-meta,
+.kxd-report-portal-embed .kxd-report-portal-root .cover-eyebrow {
+  color: var(--kxd-report-cover-text) !important;
+}
+
+.kxd-report-portal-embed .kxd-report-portal-root .cover-meta,
+.kxd-report-portal-embed .kxd-report-portal-root .cover-eyebrow {
+  color: var(--kxd-report-cover-muted) !important;
+}
+
+.kxd-report-portal-embed .kxd-report-portal-root .wrap {
+  background: var(--kxd-report-surface) !important;
+  color: var(--kxd-report-text) !important;
+}
+
+.kxd-report-portal-embed .kxd-report-portal-root .section,
+.kxd-report-portal-embed .kxd-report-portal-root .body,
+.kxd-report-portal-embed .kxd-report-portal-root .wrap p,
+.kxd-report-portal-embed .kxd-report-portal-root .wrap li,
+.kxd-report-portal-embed .kxd-report-portal-root .wrap ul,
+.kxd-report-portal-embed .kxd-report-portal-root .wrap ol {
+  color: var(--kxd-report-text) !important;
+}
+
+.kxd-report-portal-embed .kxd-report-portal-root h2 {
+  color: var(--kxd-report-heading) !important;
+  border-bottom-color: var(--kxd-report-line) !important;
+}
+
+.kxd-report-portal-embed .kxd-report-portal-root .provenance,
+.kxd-report-portal-embed .kxd-report-portal-root .snapshot-lead,
+.kxd-report-portal-embed .kxd-report-portal-root .metric-meta,
+.kxd-report-portal-embed .kxd-report-portal-root footer {
+  color: var(--kxd-report-muted) !important;
+}
+
+.kxd-report-portal-embed .kxd-report-portal-root .metric {
+  background: var(--kxd-report-panel) !important;
+  border-color: var(--kxd-report-line) !important;
+}
+
+.kxd-report-portal-embed .kxd-report-portal-root .metric-label {
+  color: var(--kxd-report-gold) !important;
+}
+
+.kxd-report-portal-embed .kxd-report-portal-root .metric-value {
+  color: var(--kxd-report-metric-value) !important;
+}
+
+.kxd-report-portal-embed .kxd-report-portal-root .panel {
+  background: var(--kxd-report-panel) !important;
+  border-color: var(--kxd-report-line) !important;
+  color: var(--kxd-report-text) !important;
+}
+
+.kxd-report-portal-embed .kxd-report-portal-root .panel strong,
+.kxd-report-portal-embed .kxd-report-portal-root .panel li {
+  color: var(--kxd-report-text) !important;
+}
+
+.kxd-report-portal-embed .kxd-report-portal-root a {
+  color: var(--kxd-report-link) !important;
+  text-decoration-color: color-mix(in srgb, var(--kxd-report-link) 55%, transparent);
+}
+
+.kxd-report-portal-embed .kxd-report-portal-root a:hover {
+  color: var(--kxd-report-gold-bright) !important;
+}
+
+.kxd-report-portal-embed .kxd-report-portal-root .cover-rule {
+  background: var(--kxd-report-gold-bright) !important;
+}
+
+.kxd-report-portal-embed .kxd-report-portal-root .internal {
+  display: none !important;
+}
+
+/* ── Legacy executive report HTML (export.ts) ───────────────────────────── */
+
+.kxd-report-portal-embed .kxd-report-portal-root .kxd-report {
+  background: var(--kxd-report-surface) !important;
+  color: var(--kxd-report-text) !important;
+}
+
+.kxd-report-portal-embed .kxd-report-portal-root .kxd-report-hero {
+  background: var(--kxd-report-cover-bg) !important;
+  color: var(--kxd-report-cover-text) !important;
+  border-bottom-color: color-mix(in srgb, var(--kxd-report-cover-text) 12%, transparent) !important;
+  padding: 2.5rem 1.5rem 2rem;
+  margin: 0;
+}
+
+.kxd-report-portal-embed .kxd-report-portal-root .kxd-report-title,
+.kxd-report-portal-embed .kxd-report-portal-root .kxd-report-lead,
+.kxd-report-portal-embed .kxd-report-portal-root .kxd-report-eyebrow {
+  color: var(--kxd-report-cover-text) !important;
+}
+
+.kxd-report-portal-embed .kxd-report-portal-root .kxd-report-eyebrow {
+  color: var(--kxd-report-cover-muted) !important;
+}
+
+.kxd-report-portal-embed .kxd-report-portal-root .kxd-report-section h2 {
+  color: var(--kxd-report-heading) !important;
+}
+
+.kxd-report-portal-embed .kxd-report-portal-root .kxd-report-body,
+.kxd-report-portal-embed .kxd-report-portal-root .kxd-report-body p,
+.kxd-report-portal-embed .kxd-report-portal-root .kxd-report-body li {
+  color: var(--kxd-report-text) !important;
+}
+
+.kxd-report-portal-embed .kxd-report-portal-root .kxd-report-kpi {
+  background: var(--kxd-report-panel) !important;
+  border: 1px solid var(--kxd-report-line) !important;
+}
+
+.kxd-report-portal-embed .kxd-report-portal-root .kxd-report-kpi__label {
+  color: var(--kxd-report-gold) !important;
+}
+
+.kxd-report-portal-embed .kxd-report-portal-root .kxd-report-kpi__value {
+  color: var(--kxd-report-metric-value) !important;
+}
+
+.kxd-report-portal-embed .kxd-report-portal-root .kxd-report-muted,
+.kxd-report-portal-embed .kxd-report-portal-root .kxd-report-timeline-item time {
+  color: var(--kxd-report-muted) !important;
+}
+
+.kxd-report-portal-embed .kxd-report-portal-root .kxd-report-timeline-item {
+  color: var(--kxd-report-text) !important;
+  border-bottom-color: var(--kxd-report-line) !important;
+}
+
+@media (max-width: 640px) {
+  .kxd-report-portal-embed .kxd-report-portal-root .wrap {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .kxd-report-portal-embed .kxd-report-portal-root .metrics {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kxd-report-portal-embed .kxd-report-portal-root * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

@@ -171,6 +171,9 @@ export function buildBrandedReportHtml(
     font-family: ${KXD_REPORT_TYPE.body};
     line-height: 1.55;
   }
+  .kxd-branded-report {
+    color: var(--ink);
+  }
   .cover {
     background: var(--black);
     color: var(--ivory);
@@ -206,6 +209,7 @@ export function buildBrandedReportHtml(
     margin: 0 auto;
     padding: 2.5rem 1.5rem 4rem;
     background: ${wrapBg};
+    color: var(--ink);
   }
   h2 {
     font-family: ${KXD_REPORT_TYPE.display};
@@ -213,8 +217,9 @@ export function buildBrandedReportHtml(
     margin: 0 0 0.35rem;
     padding-bottom: 0.4rem;
     border-bottom: 1px solid var(--line);
+    color: var(--ink);
   }
-  .section { margin: 2rem 0; }
+  .section { margin: 2rem 0; color: var(--ink); }
   .provenance {
     color: var(--muted);
     font-size: 0.75rem;
@@ -222,7 +227,7 @@ export function buildBrandedReportHtml(
     letter-spacing: 0.08em;
     margin: 0 0 0.75rem;
   }
-  .body { white-space: pre-wrap; }
+  .body { white-space: pre-wrap; color: var(--ink); }
   .snapshot-lead {
     color: var(--muted);
     font-size: 0.92rem;
@@ -253,6 +258,7 @@ export function buildBrandedReportHtml(
   .metric-value {
     font-family: ${KXD_REPORT_TYPE.display};
     font-size: 1.45rem;
+    color: var(--ink);
   }
   .metric-meta {
     color: var(--muted);
@@ -264,7 +270,9 @@ export function buildBrandedReportHtml(
     background: ${panelBg};
     padding: 1rem 1.1rem;
     margin: 1rem 0;
+    color: var(--ink);
   }
+  .panel li, .panel p, .panel strong { color: var(--ink); }
   .internal { border-color: #c45; background: #fff5f5; }
   footer {
     margin-top: 3rem;
@@ -283,7 +291,7 @@ export function buildBrandedReportHtml(
   }
 </style>
 </head>
-<body>
+<body class="kxd-branded-report">
   <header class="cover">
     <div class="cover-eyebrow">${escapeHtml(coverEyebrow)}</div>
     <div class="cover-rule"></div>

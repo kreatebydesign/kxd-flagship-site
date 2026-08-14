@@ -1,19 +1,28 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import Link from "next/link";
 import { KxdPage } from "@/components/os";
 import { ClientHqPageHero } from "./ClientHqPageHero";
 import { monthLabel } from "@/lib/reporting/templates";
 import { buildReportDownloadFilename } from "@/lib/reporting/export";
+import {
+  preparePortalReportEmbedHtml,
+  resolvePortalReportHtmlSource,
+} from "@/lib/reporting/portal/embed";
 import type { PortalReportViewModel } from "@/lib/portal/requests-files-reports";
+import "./kxd-report-portal-embed.css";
 
 export function ReportViewScreen({ report }: { report: PortalReportViewModel }) {
   useEffect(() => {
     fetch(`/api/portal/reports/${report.id}/view`, { method: "POST" }).catch(() => {});
   }, [report.id]);
 
-  const html = report.portalHtml || report.htmlExport;
+  const sourceHtml = resolvePortalReportHtmlSource(report);
+  const embedHtml = useMemo(
+    () => (sourceHtml ? preparePortalReportEmbedHtml(sourceHtml) : ""),
+    [sourceHtml],
+  );
 
   function downloadHtml() {
     const exportHtml = report.htmlExport || report.portalHtml;
@@ -37,7 +46,7 @@ export function ReportViewScreen({ report }: { report: PortalReportViewModel }) 
         <Link href="/portal/reports" className="kxd-os-btn kxd-os-btn--ghost">
           ← All reports
         </Link>
-        {html ? (
+        {sourceHtml ? (
           <button type="button" className="kxd-os-btn kxd-os-btn--ghost" onClick={downloadHtml}>
             Download report
           </button>
@@ -49,11 +58,10 @@ export function ReportViewScreen({ report }: { report: PortalReportViewModel }) 
         lead={monthLabel(report.reportingMonth, report.reportingYear)}
         presence
       />
-      {html ? (
+      {embedHtml ? (
         <div
           className="kxd-report-portal-embed"
-          style={{ borderRadius: "4px", overflow: "hidden", background: "#080808" }}
-          dangerouslySetInnerHTML={{ __html: html }}
+          dangerouslySetInnerHTML={{ __html: embedHtml }}
         />
       ) : (
         <p className="kxd-os-body">Report content is not available.</p>

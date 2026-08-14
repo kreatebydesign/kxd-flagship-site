@@ -19,6 +19,15 @@ export {
   publishMonthlyReport,
   recordPortalReportView,
 } from "./engine";
+export {
+  extractReportDocumentBody,
+  preparePortalReportEmbedHtml,
+  resolvePortalReportHtmlSource,
+  contrastRatio,
+  meetsWcagAaLargeText,
+  meetsWcagAaNormalText,
+  relativeLuminance,
+} from "./portal";
 
 /** Phase 29B — Intelligence Reporting Domain */
 export * from "./domain";
