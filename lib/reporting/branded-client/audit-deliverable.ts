@@ -140,7 +140,7 @@ const SECTION_ORDER: Array<{
   { id: "repairs", narrativeKey: "workCompleted" },
   { id: "protected", narrativeKey: "improvementsAndWins" },
   { id: "measurement", narrativeKey: "augustPriorities" },
-  { id: "growth", narrativeKey: "recommendations", variant: "callout" },
+  { id: "growth", narrativeKey: "googleAds", variant: "callout" },
 ];
 
 export function buildAuditDeliverableViewModel(

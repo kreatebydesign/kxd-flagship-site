@@ -67,7 +67,7 @@ function buildFixtureSnapshot() {
       improvementsAndWins: narratives.improvementsMade,
       issuesOrRisks: narratives.issuesOrRisks,
       augustPriorities: narratives.augustPriorities,
-      recommendations: narratives.recommendations,
+      googleAds: narratives.googleAdsNarrative,
       closing: narratives.closingNote,
     },
     internalNotes: "operator-only",

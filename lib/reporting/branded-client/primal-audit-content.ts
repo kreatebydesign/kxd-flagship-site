@@ -27,7 +27,7 @@ export type PrimalAuditNarrativePatch = {
   improvementsMade: string;
   issuesOrRisks: string;
   augustPriorities: string;
-  recommendations: string;
+  googleAdsNarrative: string;
   closingNote: string;
 };
 
@@ -65,7 +65,7 @@ We reconciled verified spend and click totals from manual Google Ads export evid
 • Lead quality and disposition
 • Booking and sales opportunities`,
 
-    recommendations: `The upper funnel is not being eliminated. Demand Gen was paused as a protective measure while KXD corrected measurement, targeting, and creative quality. Once Search produces approximately two weeks of clean, confirmed lead data and the remarketing audience is sufficient, KXD will rebuild upper-funnel traffic as a controlled remarketing campaign. The rebuild will use tighter audiences, optimized targeting disabled, corrected creative and claims, and verified lead measurement. The controlled relaunch will begin around $10 per day and may scale toward $20 per day when confirmed performance supports it.
+    googleAdsNarrative: `The upper funnel is not being eliminated. Demand Gen was paused as a protective measure while KXD corrected measurement, targeting, and creative quality. Once Search produces approximately two weeks of clean, confirmed lead data and the remarketing audience is sufficient, KXD will rebuild upper-funnel traffic as a controlled remarketing campaign. The rebuild will use tighter audiences, optimized targeting disabled, corrected creative and claims, and verified lead measurement. The controlled relaunch will begin around $10 per day and may scale toward $20 per day when confirmed performance supports it.
 
 Search remains the high-intent foundation during stabilization. Search is being rebuilt around exact and phrase buyer intent, brand terms, and premium race-car experience positioning. KXD will continue expanding intelligently after the measurement foundation is trustworthy. This is optimization and controlled growth — not a permanent reduction in reach. No campaign history, useful data, or assets were deleted.
 

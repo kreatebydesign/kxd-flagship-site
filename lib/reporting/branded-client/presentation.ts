@@ -38,7 +38,6 @@ export function presentationForReportDoc(doc: AnyDoc): BrandedReportPresentation
       hiddenNarrativeKeys: [
         "websitePerformance",
         "organicSearch",
-        "googleAds",
       ],
       sectionTitles: {
         executiveSummary: "Executive summary",
@@ -46,7 +45,7 @@ export function presentationForReportDoc(doc: AnyDoc): BrandedReportPresentation
         issuesOrRisks: "What KXD found",
         improvementsAndWins: "What was intentionally protected",
         augustPriorities: "Next measurement window",
-        recommendations: "Next steps — Growth rebuild",
+        googleAds: "Next steps — Growth rebuild",
         closing: "Closing",
       },
     };

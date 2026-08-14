@@ -8,14 +8,22 @@
 
 import { getPayload } from "payload";
 import config from "@payload-config";
+import { composeBrandedReportSnapshot } from "@/lib/reporting/branded-client/compose";
+import { buildBrandedReportHtml } from "@/lib/reporting/branded-client/export-html";
+import { renderBrandedReportPdf } from "@/lib/reporting/branded-client/export-pdf";
 import {
-  approveBrandedReport,
-  generateBrandedReportPdf,
-  reopenBrandedReportToDraft,
-  saveBrandedReportDraft,
-  submitBrandedReportForReview,
-} from "@/lib/reporting/branded-client/lifecycle";
+  buildManualAuditMetrics,
+  isVerifiedAuditTotals,
+} from "@/lib/reporting/branded-client/manual-audit-metrics";
+import {
+  brandedReportPeriodFromDoc,
+  GOOGLE_ADS_AUDIT_REPAIR_KIND,
+  presentationForReportDoc,
+  reportKindFromDoc,
+} from "@/lib/reporting/branded-client/presentation";
+import { withFingerprint } from "@/lib/reporting/branded-client/snapshot";
 import { buildPrimalGoogleAdsAuditNarratives } from "@/lib/reporting/branded-client/primal-audit-content";
+import type { BrandedReportSnapshot } from "@/lib/reporting/branded-client/types";
 import {
   PRODUCTION_PRIMAL_CLIENT_ID,
   REPORT_IDENTITY,
@@ -24,6 +32,10 @@ import {
 const REPORT_ID = 3;
 const CLIENT_ID = PRODUCTION_PRIMAL_CLIENT_ID;
 const OPERATOR = "KXD Operations";
+const COLLECTION = "monthly-reports";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyDoc = Record<string, any>;
 
 function databaseUri(): string {
   const uri = process.env.DATABASE_URI?.trim() || process.env.DATABASE_URL?.trim() || "";
@@ -31,19 +43,79 @@ function databaseUri(): string {
   return uri;
 }
 
+function clientNameOf(doc: AnyDoc): string {
+  const client = doc.client;
+  if (client && typeof client === "object" && client.name) return String(client.name);
+  return "Client";
+}
+
+function composeAuditSnapshotFromDoc(doc: AnyDoc): BrandedReportSnapshot {
+  const timezone =
+    (typeof doc.reportingTimezone === "string" && doc.reportingTimezone) ||
+    "America/Los_Angeles";
+  const period = brandedReportPeriodFromDoc({
+    periodStart: String(doc.periodStart),
+    periodEnd: String(doc.periodEnd),
+    reportingYear: Number(doc.reportingYear) || null,
+    reportingMonth: Number(doc.reportingMonth) || null,
+    timezone,
+  });
+  const presentation = presentationForReportDoc(doc);
+  const provenance =
+    doc.dataProvenance && typeof doc.dataProvenance === "object"
+      ? (doc.dataProvenance as Record<string, unknown>)
+      : null;
+  const verifiedTotals = provenance?.verifiedTotals;
+  const metrics =
+    reportKindFromDoc(doc) === GOOGLE_ADS_AUDIT_REPAIR_KIND &&
+    isVerifiedAuditTotals(verifiedTotals)
+      ? buildManualAuditMetrics(verifiedTotals, period)
+      : [];
+
+  const snapshotBase = composeBrandedReportSnapshot({
+    reportId: Number(doc.id),
+    clientId: CLIENT_ID,
+    clientName: clientNameOf(doc),
+    version: Number(doc.version ?? 1),
+    period,
+    scope: {
+      includedCapabilities: ["google-ads"],
+      source: "operator-confirmed",
+      confirmedBy: OPERATOR,
+      confirmedAt: new Date().toISOString(),
+      notes: null,
+    },
+    verifiedMetrics: metrics,
+    dataSources: [],
+    workItems: [],
+    presentation,
+    narratives: {
+      executiveSummary: String(doc.executiveSummary ?? ""),
+      workCompleted: String(doc.workCompleted ?? ""),
+      improvementsAndWins: String(doc.improvementsMade ?? ""),
+      issuesOrRisks: String(doc.issuesOrRisks ?? ""),
+      augustPriorities: String(doc.augustPriorities ?? ""),
+      googleAds: String(doc.googleAdsNarrative ?? ""),
+      closing: String(doc.closingNote ?? ""),
+    },
+    internalNotes: String(doc.internalNotes ?? ""),
+  });
+
+  return withFingerprint(snapshotBase);
+}
+
 async function main() {
   const apply = process.env.APPLY === "1";
-  const uri = databaseUri();
-  process.env.DATABASE_URI = uri;
+  process.env.DATABASE_URI = databaseUri();
 
   const payload = await getPayload({ config });
-  const existing = await payload.findByID({
+  const existing = (await payload.findByID({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    collection: "monthly-reports" as any,
+    collection: COLLECTION as any,
     id: REPORT_ID,
-    depth: 0,
+    depth: 1,
     overrideAccess: true,
-  });
+  })) as AnyDoc;
 
   const provenance = (existing.dataProvenance ?? {}) as Record<string, unknown>;
   if (provenance.reportIdentity !== REPORT_IDENTITY) {
@@ -76,7 +148,6 @@ async function main() {
         currentApproval: existing.approvalStatus,
         preservedPublishedAt,
         preservedViewCount,
-        narrativeKeys: Object.keys(narratives),
       },
       null,
       2,
@@ -88,19 +159,76 @@ async function main() {
     return;
   }
 
-  await reopenBrandedReportToDraft(REPORT_ID, CLIENT_ID);
-  await saveBrandedReportDraft(REPORT_ID, CLIENT_ID, narratives);
-  await submitBrandedReportForReview(REPORT_ID, CLIENT_ID);
-  const { snapshot: approvedSnapshot } = await approveBrandedReport(
-    REPORT_ID,
-    CLIENT_ID,
-    OPERATOR,
-  );
-  await generateBrandedReportPdf(REPORT_ID, CLIENT_ID, OPERATOR);
+  const nextVersion =
+    existing.approvalStatus === "approved" ||
+    existing.approvalStatus === "ready-for-manual-delivery"
+      ? Number(existing.version ?? 1) + 1
+      : Number(existing.version ?? 1);
+
+  let doc = (await payload.update({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    collection: COLLECTION as any,
+    id: REPORT_ID,
+    data: {
+      approvalStatus: "draft",
+      status: "draft",
+      version: nextVersion,
+      approvedSnapshot: null,
+      approvedFingerprint: null,
+      reportApprovedAt: null,
+      reportApprovedBy: null,
+      executiveSummary: narratives.executiveSummary,
+      workCompleted: narratives.workCompleted,
+      improvementsMade: narratives.improvementsMade,
+      issuesOrRisks: narratives.issuesOrRisks,
+      augustPriorities: narratives.augustPriorities,
+      googleAdsNarrative: narratives.googleAdsNarrative,
+      closingNote: narratives.closingNote,
+    },
+    depth: 1,
+    overrideAccess: true,
+  })) as AnyDoc;
+
+  doc = (await payload.update({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    collection: COLLECTION as any,
+    id: REPORT_ID,
+    data: {
+      approvalStatus: "in-review",
+      status: "ready",
+    },
+    depth: 1,
+    overrideAccess: true,
+  })) as AnyDoc;
+
+  const snapshot = composeAuditSnapshotFromDoc(doc);
+  const htmlExport = buildBrandedReportHtml(snapshot, { includeInternalNotes: false });
+  const { buffer: pdfBuffer, filename: pdfFilename } = await renderBrandedReportPdf(snapshot);
+
+  doc = (await payload.update({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    collection: COLLECTION as any,
+    id: REPORT_ID,
+    data: {
+      approvalStatus: "approved",
+      status: "ready",
+      approvedSnapshot: snapshot,
+      approvedFingerprint: snapshot.fingerprint,
+      reportApprovedAt: new Date().toISOString(),
+      reportApprovedBy: OPERATOR,
+      approvedBy: OPERATOR,
+      reportData: snapshot,
+      htmlExport,
+      pdfGeneratedAt: new Date().toISOString(),
+      deliveryMode: "manual",
+    },
+    depth: 1,
+    overrideAccess: true,
+  })) as AnyDoc;
 
   await payload.update({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    collection: "monthly-reports" as any,
+    collection: COLLECTION as any,
     id: REPORT_ID,
     data: {
       status: "published",
@@ -121,8 +249,10 @@ async function main() {
       {
         ok: true,
         reportId: REPORT_ID,
-        fingerprint: approvedSnapshot.fingerprint,
-        version: approvedSnapshot.version,
+        fingerprint: snapshot.fingerprint,
+        version: snapshot.version,
+        pdfFilename,
+        pdfBytes: pdfBuffer.length,
         status: "published",
         clientVisible: true,
       },

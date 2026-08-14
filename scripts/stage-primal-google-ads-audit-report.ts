@@ -82,7 +82,7 @@ function buildReportPayload() {
     improvementsMade: narratives.improvementsMade,
     issuesOrRisks: narratives.issuesOrRisks,
     augustPriorities: narratives.augustPriorities,
-    recommendations: narratives.recommendations,
+    googleAdsNarrative: narratives.googleAdsNarrative,
     closingNote: narratives.closingNote,
     internalNotes: `Report identity: ${REPORT_IDENTITY}. Operator staging only. clientVisible=false in dataProvenance. Do not publish without explicit approval.`,
     clientFacingNotes: null,
