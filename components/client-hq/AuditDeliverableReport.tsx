@@ -14,6 +14,25 @@ function formatGeneratedDate(iso: string): string {
   });
 }
 
+function DownloadIcon() {
+  return (
+    <svg
+      className="kxd-audit-deliverable__download-icon"
+      viewBox="0 0 16 16"
+      fill="none"
+      aria-hidden
+    >
+      <path
+        d="M8 2.25v7.5M8 9.75 5.25 7M8 9.75l2.75-2.75M3.5 11.75v1a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1v-1"
+        stroke="currentColor"
+        strokeWidth="1.35"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 function BulletList({ items }: { items: string[] }) {
   if (items.length === 0) return null;
   return (
@@ -58,14 +77,26 @@ export function AuditDeliverableReport({
     >
       <header className="kxd-audit-deliverable__cover">
         <div className="kxd-audit-deliverable__cover-inner">
-          {model.cover.logoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element -- client logo from CES profile
-            <img
-              src={model.cover.logoUrl}
-              alt=""
-              className="kxd-audit-deliverable__logo"
-            />
-          ) : null}
+          <div className="kxd-audit-deliverable__cover-top">
+            <div className="kxd-audit-deliverable__brand">
+              {model.cover.logoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element -- client logo from CES profile
+                <img
+                  src={model.cover.logoUrl}
+                  alt=""
+                  className="kxd-audit-deliverable__logo"
+                />
+              ) : null}
+            </div>
+            <a
+              href={pdfHref}
+              className="kxd-audit-deliverable__download"
+              download={model.pdfFilename}
+            >
+              <DownloadIcon />
+              Download PDF
+            </a>
+          </div>
           <p className="kxd-audit-deliverable__eyebrow">{model.cover.eyebrow}</p>
           <div className="kxd-audit-deliverable__rule" aria-hidden />
           <h1 className="kxd-audit-deliverable__title">{model.cover.title}</h1>
@@ -87,15 +118,7 @@ export function AuditDeliverableReport({
         </div>
       </header>
 
-      <div className="kxd-audit-deliverable__toolbar">
-        <a
-          href={pdfHref}
-          className="kxd-ces-btn kxd-ces-btn--primary kxd-audit-deliverable__download"
-          download={model.pdfFilename}
-        >
-          Download PDF
-        </a>
-      </div>
+      <div className="kxd-audit-deliverable__transition" aria-hidden />
 
       <div className="kxd-audit-deliverable__sheet">
         <section className="kxd-audit-deliverable__section" aria-labelledby="audit-exec-summary">

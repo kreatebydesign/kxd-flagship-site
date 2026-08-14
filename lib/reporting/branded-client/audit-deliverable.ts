@@ -4,11 +4,56 @@
 
 import { KXD_REPORT_CONTACT_EMAIL } from "@/lib/kxd-report-engine/contact";
 import {
+  contrastRatio,
+  meetsWcagAaLargeText,
+  meetsWcagAaNormalText,
+} from "@/lib/reporting/portal/contrast";
+import {
   GOOGLE_ADS_AUDIT_REPAIR_KIND,
   narrativeTitleForSnapshot,
 } from "./presentation";
 import { PRIMAL_AUDIT_PDF_FILENAME } from "./primal-audit-content";
 import type { BrandedMetric, BrandedReportSnapshot } from "./types";
+
+export const AUDIT_DELIVERABLE_HERO_PALETTE = {
+  background: "#0A0A0A",
+  title: "#F7F3EB",
+  body: "#D0C9C0",
+  label: "#A39A90",
+  meta: "#E8E2D8",
+  accent: "#A83424",
+} as const;
+
+export const REJECTED_PRIMAL_AUDIT_PHRASES = [
+  "Broad targeting and weak terms consumed budget without reliable conversion evidence",
+  "Demand Gen targeting and placement evidence were not strong enough to justify continued uncontrolled spend",
+] as const;
+
+export function auditDeliverableHeroContrastReport(): Array<{
+  element: string;
+  ratio: number | null;
+  passesAa: boolean;
+}> {
+  const bg = AUDIT_DELIVERABLE_HERO_PALETTE.background;
+  const checks = [
+    { element: "title", fg: AUDIT_DELIVERABLE_HERO_PALETTE.title, large: true },
+    { element: "client/body", fg: AUDIT_DELIVERABLE_HERO_PALETTE.body, large: false },
+    { element: "eyebrow/label", fg: AUDIT_DELIVERABLE_HERO_PALETTE.label, large: false },
+    { element: "metadata value", fg: AUDIT_DELIVERABLE_HERO_PALETTE.meta, large: false },
+  ];
+  return checks.map(({ element, fg, large }) => {
+    const ratio = contrastRatio(fg, bg);
+    return {
+      element,
+      ratio,
+      passesAa: large ? meetsWcagAaLargeText(ratio) : meetsWcagAaNormalText(ratio),
+    };
+  });
+}
+
+export function primalAuditContentHasRejectedPhrases(text: string): string[] {
+  return REJECTED_PRIMAL_AUDIT_PHRASES.filter((phrase) => text.includes(phrase));
+}
 
 export type AuditDeliverableMetric = {
   key: string;
@@ -123,7 +168,7 @@ function mapMetrics(metrics: BrandedMetric[]): AuditDeliverableMetric[] {
     value: metric.displayValue,
     note:
       metric.key.includes("Conversions")
-        ? "Platform-reported — not a confirmed business inquiry"
+        ? "Platform-reported — shown for reference only"
         : metric.note && !metric.note.includes("contaminated")
           ? metric.note
           : undefined,
@@ -203,10 +248,10 @@ export function buildAuditDeliverableViewModel(
     executiveSummary,
     performanceLead:
       presentation?.performanceSnapshotLead ??
-      "Verified audit totals — manually reconciled from Google Ads exports.",
+      "These figures come from manually reconciled Google Ads exports for the audit period.",
     metrics: mapMetrics(snapshot.metrics),
     conversionDisclaimer:
-      "Platform-reported conversions reflect Google Ads signals that were historically unreliable for confirmed inquiries. Credible calls and confirmed form submissions are the measurement foundation going forward.",
+      "Platform-reported conversions are included for reference. Going forward, measurement will prioritize forms Primal receives and qualified calls lasting at least 60 seconds.",
     sections,
     closing: {
       paragraphs: closingParsed.paragraphs,

@@ -42,17 +42,17 @@ function createAuditStyles(accentHex: string) {
 
   return StyleSheet.create({
     coverPage: {
-      backgroundColor: "#0B0B0B",
+      backgroundColor: "#0A0A0A",
       paddingTop: 56,
       paddingBottom: 48,
       paddingHorizontal: 48,
-      color: "#F4F1EC",
+      color: "#D0C9C0",
     },
     coverEyebrow: {
       fontSize: 8,
       letterSpacing: 2,
       textTransform: "uppercase",
-      color: "#9B9488",
+      color: "#A39A90",
       marginBottom: 10,
       fontFamily: "Helvetica",
     },
@@ -67,12 +67,12 @@ function createAuditStyles(accentHex: string) {
       lineHeight: 1.15,
       marginBottom: 6,
       fontFamily: "Times-Roman",
-      color: "#F4F1EC",
+      color: "#F7F3EB",
       maxWidth: 380,
     },
     coverClient: {
       fontSize: 11,
-      color: "#B8B0A4",
+      color: "#D0C9C0",
       marginBottom: 18,
       fontFamily: "Helvetica",
     },
@@ -82,8 +82,8 @@ function createAuditStyles(accentHex: string) {
       fontFamily: "Helvetica",
       fontSize: 9,
     },
-    coverMetaLabel: { width: 92, color: "#9B9488" },
-    coverMetaValue: { flex: 1, color: "#F4F1EC" },
+    coverMetaLabel: { width: 92, color: "#A39A90" },
+    coverMetaValue: { flex: 1, color: "#E8E2D8" },
     page: {
       paddingTop: 42,
       paddingBottom: 52,

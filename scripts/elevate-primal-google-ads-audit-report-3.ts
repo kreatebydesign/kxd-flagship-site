@@ -159,6 +159,21 @@ async function main() {
     return;
   }
 
+  // Contain during revision — preserve publishedAt, viewCount, and event 215.
+  await payload.update({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    collection: COLLECTION as any,
+    id: REPORT_ID,
+    data: {
+      status: "ready",
+      dataProvenance: {
+        ...provenance,
+        clientVisible: false,
+      },
+    },
+    overrideAccess: true,
+  });
+
   const nextVersion =
     existing.approvalStatus === "approved" ||
     existing.approvalStatus === "ready-for-manual-delivery"
@@ -238,7 +253,7 @@ async function main() {
         ...provenance,
         clientVisible: true,
         operatorOnly: false,
-        deliverableVersion: 2,
+        deliverableVersion: 3,
       },
     },
     overrideAccess: true,

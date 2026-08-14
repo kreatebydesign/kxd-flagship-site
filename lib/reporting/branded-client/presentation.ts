@@ -28,7 +28,7 @@ export function presentationForReportDoc(doc: AnyDoc): BrandedReportPresentation
       coverTitle: "Google Ads Audit & Repair Report",
       coverEyebrow: "Audit & repair deliverable",
       performanceSnapshotLead:
-        "Verified audit totals — manually reconciled from Google Ads exports. These figures reflect manual export evidence and are not a live KXD OS Google Ads connection.",
+        "These figures come from manually reconciled Google Ads exports for the audit period. They reflect export evidence, not a live platform connection.",
       hideDataFreshnessPanel: true,
       hideOutOfScope: true,
       hideWorkCompletedList: true,

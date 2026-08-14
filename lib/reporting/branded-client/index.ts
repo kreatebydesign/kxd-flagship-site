@@ -16,6 +16,10 @@ export { renderBrandedReportPdf } from "./export-pdf";
 export {
   buildAuditDeliverableViewModel,
   auditDeliverableHasDuplicateHeadings,
+  auditDeliverableHeroContrastReport,
+  primalAuditContentHasRejectedPhrases,
+  AUDIT_DELIVERABLE_HERO_PALETTE,
+  REJECTED_PRIMAL_AUDIT_PHRASES,
   parseNarrativeBody,
   type AuditDeliverableViewModel,
 } from "./audit-deliverable";

@@ -9,9 +9,11 @@ import path from "node:path";
 import { decidePortalReportAccess } from "../lib/portal/analytics-visibility/report-access";
 import {
   auditDeliverableHasDuplicateHeadings,
+  auditDeliverableHeroContrastReport,
   buildAuditDeliverableViewModel,
   buildPrimalGoogleAdsAuditNarratives,
   composeBrandedReportSnapshot,
+  primalAuditContentHasRejectedPhrases,
   PRIMAL_VERIFIED_TOTALS,
 } from "../lib/reporting/branded-client";
 import { parseNarrativeBody } from "../lib/reporting/branded-client/audit-deliverable";
@@ -124,6 +126,34 @@ async function main() {
   });
   assert(allowed.ok, "Published Primal access should be allowed");
 
+  const narratives = buildPrimalGoogleAdsAuditNarratives();
+  const rejected = [
+    ...primalAuditContentHasRejectedPhrases(narratives.issuesOrRisks),
+    ...primalAuditContentHasRejectedPhrases(JSON.stringify(model)),
+  ];
+  assert(rejected.length === 0, `Rejected phrases present: ${rejected.join("; ")}`);
+
+  const heroCss = read("components/client-hq/audit-deliverable-report.css");
+  assert(
+    !heroCss.includes("--kxd-os-text-primary"),
+    "Hero CSS must not inherit portal text-primary tokens",
+  );
+  assert(
+    heroCss.includes("--kxd-audit-hero-title: #f7f3eb"),
+    "Hero title color must be explicitly scoped",
+  );
+  assert(
+    heroCss.includes("background: var(--kxd-audit-accent) !important"),
+    "Download button must use Primal accent explicitly",
+  );
+
+  const contrast = auditDeliverableHeroContrastReport();
+  const contrastFailures = contrast.filter((row) => !row.passesAa);
+  assert(
+    contrastFailures.length === 0,
+    `Hero contrast failures: ${contrastFailures.map((row) => row.element).join(", ")}`,
+  );
+
   console.log(
     JSON.stringify(
       {
@@ -131,6 +161,7 @@ async function main() {
         metrics: model.metrics.length,
         sections: model.sections.map((section) => section.title),
         pdfFilename: model.pdfFilename,
+        heroContrast: contrast,
       },
       null,
       2,
