@@ -3,6 +3,7 @@ import { ReportViewScreen } from "@/components/client-hq";
 import { resolveExperienceProfile } from "@/lib/ces/server";
 import { decidePortalReportAccess } from "@/lib/portal/analytics-visibility";
 import {
+  buildPortalAuditDeliverableViewModel,
   isBatchGClientHqSurfaceAvailable,
   toPortalReportViewModel,
 } from "@/lib/portal/requests-files-reports";
@@ -37,9 +38,18 @@ export default async function PortalReportViewPage({
   // Uniform denial — do not reveal whether another client's report exists.
   if (!access.ok || !report) notFound();
 
+  const viewModel = toPortalReportViewModel(report as unknown as Record<string, unknown>);
+  const auditDeliverable = buildPortalAuditDeliverableViewModel(
+    report as unknown as Record<string, unknown>,
+    profile,
+  );
+
   return (
     <ReportViewScreen
-      report={toPortalReportViewModel(report as unknown as Record<string, unknown>)}
+      report={{
+        ...viewModel,
+        auditDeliverable: auditDeliverable ?? undefined,
+      }}
     />
   );
 }

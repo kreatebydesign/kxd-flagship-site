@@ -21,8 +21,9 @@ import { KXD_REPORT_COLORS } from "@/lib/kxd-report-engine/tokens";
 import { resolveKxdReportLogoAsset } from "@/lib/kxd-report-engine/logos";
 import { formatSectionIndex } from "@/lib/kxd-report-engine/section";
 import { REPORT_SCOPE_LABEL, type BrandedReportSnapshot } from "./types";
-import { buildBrandedReportPdfFilename } from "./filename";
+import { resolveBrandedReportPdfFilename } from "./filename";
 import { assertNoSecretLeak, stripInternalNotesFromSnapshot } from "./sanitize";
+import { renderAuditDeliverablePdf } from "./export-audit-deliverable-pdf";
 
 const colors = KXD_REPORT_COLORS;
 
@@ -323,10 +324,20 @@ function BrandedMonthlyReportDocument({
 
 export async function renderBrandedReportPdf(
   snapshot: BrandedReportSnapshot,
+  options?: {
+    auditPeriodLabel?: string;
+    repairDateLabel?: string;
+    preparedBy?: string | null;
+    logoSrc?: string | null;
+  },
 ): Promise<{ buffer: Buffer; filename: string }> {
   const clientFacing = stripInternalNotesFromSnapshot(snapshot) as BrandedReportSnapshot;
   if (clientFacing.internalNotes) {
     throw new Error("Internal notes must not enter the client PDF.");
+  }
+
+  if (clientFacing.presentation?.useAuditTheme === true) {
+    return renderAuditDeliverablePdf(clientFacing, options);
   }
 
   const logo = resolveKxdReportLogoAsset();
@@ -346,10 +357,6 @@ export async function renderBrandedReportPdf(
 
   return {
     buffer,
-    filename: buildBrandedReportPdfFilename({
-      clientName: clientFacing.clientName,
-      periodLabel: clientFacing.period.label,
-      version: clientFacing.version,
-    }),
+    filename: resolveBrandedReportPdfFilename(clientFacing),
   };
 }

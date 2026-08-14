@@ -151,6 +151,8 @@ export type BrandedReportPresentation = {
   hideWorkCompletedList?: boolean;
   hideNarrativeProvenance?: boolean;
   useAuditTheme?: boolean;
+  /** Client CES accent for audit deliverable portal + PDF presentation. */
+  auditBrandAccent?: string;
   hiddenNarrativeKeys?: string[];
   sectionTitles?: Partial<{
     executiveSummary: string;

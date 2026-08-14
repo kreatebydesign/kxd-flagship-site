@@ -34,18 +34,19 @@ export function presentationForReportDoc(doc: AnyDoc): BrandedReportPresentation
       hideWorkCompletedList: true,
       hideNarrativeProvenance: true,
       useAuditTheme: true,
+      auditBrandAccent: "#A83424",
       hiddenNarrativeKeys: [
         "websitePerformance",
         "organicSearch",
         "googleAds",
-        "recommendations",
       ],
       sectionTitles: {
         executiveSummary: "Executive summary",
-        workCompleted: "Repairs completed August 13, 2026",
-        issuesOrRisks: "What the audit found",
-        improvementsAndWins: "What was intentionally not changed",
+        workCompleted: "Repairs completed",
+        issuesOrRisks: "What KXD found",
+        improvementsAndWins: "What was intentionally protected",
         augustPriorities: "Next measurement window",
+        recommendations: "Next steps — Growth rebuild",
         closing: "Closing",
       },
     };

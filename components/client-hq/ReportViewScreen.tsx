@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
 import { KxdPage } from "@/components/os";
-import { ClientHqPageHero } from "./ClientHqPageHero";
+import { AuditDeliverableReport } from "./AuditDeliverableReport";
 import { monthLabel } from "@/lib/reporting/templates";
-import { buildReportDownloadFilename } from "@/lib/reporting/export";
 import {
   preparePortalReportEmbedHtml,
   resolvePortalReportHtmlSource,
@@ -18,26 +17,28 @@ export function ReportViewScreen({ report }: { report: PortalReportViewModel }) 
     fetch(`/api/portal/reports/${report.id}/view`, { method: "POST" }).catch(() => {});
   }, [report.id]);
 
-  const sourceHtml = resolvePortalReportHtmlSource(report);
-  const embedHtml = useMemo(
-    () => (sourceHtml ? preparePortalReportEmbedHtml(sourceHtml) : ""),
-    [sourceHtml],
-  );
+  const auditDeliverable = report.auditDeliverable;
+  const sourceHtml = auditDeliverable ? "" : resolvePortalReportHtmlSource(report);
+  const embedHtml = auditDeliverable
+    ? ""
+    : sourceHtml
+      ? preparePortalReportEmbedHtml(sourceHtml)
+      : "";
 
-  function downloadHtml() {
-    const exportHtml = report.htmlExport || report.portalHtml;
-    if (!exportHtml) return;
-    const blob = new Blob([exportHtml], { type: "text/html" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = buildReportDownloadFilename({
-      title: report.title,
-      reportingMonth: report.reportingMonth,
-      reportingYear: report.reportingYear,
-    });
-    a.click();
-    URL.revokeObjectURL(url);
+  if (auditDeliverable) {
+    return (
+      <KxdPage className="kxd-os-page--ops">
+        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "1rem" }}>
+          <Link href="/portal/reports" className="kxd-ces-btn kxd-ces-btn--ghost">
+            ← All reports
+          </Link>
+        </div>
+        <AuditDeliverableReport
+          model={auditDeliverable}
+          pdfHref={`/api/portal/reports/${report.id}/pdf`}
+        />
+      </KxdPage>
+    );
   }
 
   return (
@@ -46,18 +47,12 @@ export function ReportViewScreen({ report }: { report: PortalReportViewModel }) 
         <Link href="/portal/reports" className="kxd-os-btn kxd-os-btn--ghost">
           ← All reports
         </Link>
-        {sourceHtml ? (
-          <button type="button" className="kxd-os-btn kxd-os-btn--ghost" onClick={downloadHtml}>
-            Download report
-          </button>
-        ) : null}
       </div>
-      <ClientHqPageHero
-        eyebrow="Executive Report"
-        title={report.title}
-        lead={monthLabel(report.reportingMonth, report.reportingYear)}
-        presence
-      />
+      <div style={{ marginBottom: "1rem" }}>
+        <p className="kxd-os-eyebrow">Executive Report</p>
+        <h1 className="kxd-os-page-title">{report.title}</h1>
+        <p className="kxd-os-lead">{monthLabel(report.reportingMonth, report.reportingYear)}</p>
+      </div>
       {embedHtml ? (
         <div
           className="kxd-report-portal-embed"

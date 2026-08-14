@@ -814,6 +814,52 @@ export async function generateBrandedReportPdf(
   return { buffer, filename, fingerprint };
 }
 
+/** Authenticated portal PDF — read-only; does not mutate approval status. */
+export async function getPortalBrandedReportPdf(
+  reportId: number,
+  expectedClientId: number,
+): Promise<{ buffer: Buffer; filename: string }> {
+  const doc = await loadReport(reportId, 1);
+  assertClientMatch(doc, expectedClientId);
+
+  const status = isApprovalStatus(doc.approvalStatus) ? doc.approvalStatus : "draft";
+  if (status !== "approved" && status !== "ready-for-manual-delivery") {
+    throw new BrandedReportError("Approved report snapshot required.", 404);
+  }
+  if (String(doc.status ?? "") !== "published") {
+    throw new BrandedReportError("Report is not published.", 404);
+  }
+
+  const stored = doc.approvedSnapshot as BrandedReportSnapshot | null;
+  const fingerprint = String(doc.approvedFingerprint ?? "");
+  if (!stored || !fingerprint) {
+    throw new BrandedReportError("Approved snapshot is missing.", 404);
+  }
+  assertSnapshotImmutable(stored, fingerprint);
+  if (stored.clientId !== expectedClientId || Number(stored.reportId) !== reportId) {
+    throw new BrandedReportError("Cross-client snapshot substitution rejected.", 403);
+  }
+
+  const provenance =
+    doc.dataProvenance && typeof doc.dataProvenance === "object"
+      ? (doc.dataProvenance as Record<string, unknown>)
+      : null;
+
+  const { buffer, filename } = await renderBrandedReportPdf(stored, {
+    auditPeriodLabel:
+      typeof provenance?.auditPeriodLabel === "string"
+        ? provenance.auditPeriodLabel
+        : undefined,
+    repairDateLabel:
+      typeof provenance?.repairDate === "string" ? provenance.repairDate : undefined,
+    preparedBy:
+      typeof doc.preparedBy === "string" && doc.preparedBy.trim()
+        ? doc.preparedBy
+        : undefined,
+  });
+  return { buffer, filename };
+}
+
 export async function archiveBrandedReport(
   reportId: number,
   expectedClientId: number,

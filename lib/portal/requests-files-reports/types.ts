@@ -19,6 +19,8 @@ export type PortalReportViewModel = {
   reportingYear: number;
   portalHtml: string;
   htmlExport: string;
+  /** Premium audit deliverable presentation when report kind supports it. */
+  auditDeliverable?: import("@/lib/reporting/branded-client/audit-deliverable").AuditDeliverableViewModel;
 };
 
 export const BATCH_G_CLIENT_HQ_SURFACE_IDS = [

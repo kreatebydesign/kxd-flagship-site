@@ -37,6 +37,8 @@ export {
   toPortalReportViewModel,
 } from "./report-view";
 
+export { buildPortalAuditDeliverableViewModel } from "./audit-deliverable";
+
 export { isBatchGClientHqSurfaceAvailable } from "./surface-access";
 
 export {

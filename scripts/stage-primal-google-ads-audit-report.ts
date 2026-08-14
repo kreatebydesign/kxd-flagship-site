@@ -15,6 +15,10 @@
 
 import { getPayload } from "payload";
 import config from "@payload-config";
+import {
+  buildPrimalGoogleAdsAuditNarratives,
+  PRIMAL_VERIFIED_TOTALS,
+} from "@/lib/reporting/branded-client/primal-audit-content";
 
 export const PRIMAL_CLIENT_SLUG = "primal-motorsports";
 export const PRODUCTION_PRIMAL_CLIENT_ID = 1;
@@ -30,16 +34,7 @@ const PERIOD_START = "2026-05-15T00:00:00.000Z";
 const PERIOD_END = "2026-08-12T23:59:59.999Z";
 
 /** Verified 90-day totals — task brief only. */
-export const VERIFIED_TOTALS = {
-  totalSpendReviewed: 9000.53,
-  searchSpend: 7393.67,
-  demandGenSpend: 1606.86,
-  searchClicks: 763,
-  demandGenClicks: 1876,
-  searchReportedConversions: 5,
-  demandGenReportedConversions: 13,
-  credibleCallsFromAds60s: 2,
-} as const;
+export const VERIFIED_TOTALS = PRIMAL_VERIFIED_TOTALS;
 
 type RuntimeEnvironment = "production" | "non-production";
 
@@ -69,7 +64,7 @@ function expectedClientId(env: RuntimeEnvironment): number {
 }
 
 function buildReportPayload() {
-  const t = VERIFIED_TOTALS;
+  const narratives = buildPrimalGoogleAdsAuditNarratives();
   return {
     title: REPORT_TITLE,
     status: "draft" as const,
@@ -82,65 +77,13 @@ function buildReportPayload() {
     periodStart: PERIOD_START,
     periodEnd: PERIOD_END,
     preparedBy: "Kreate by Design",
-    executiveSummary: `Kreate by Design completed a Google Ads audit and repair for Primal Motorsports covering ${AUDIT_PERIOD_LABEL}. Repairs were completed on ${REPAIR_DATE_LABEL}.
-
-This report documents verified spend and click totals from manual Google Ads export evidence, historically contaminated conversion reporting, credible call evidence, and the account repairs completed on ${REPAIR_DATE_LABEL}. Platform-reported conversions are not presented as confirmed business outcomes.`,
-    googleAdsNarrative: `Audit period: ${AUDIT_PERIOD_LABEL}.
-Repair completed: ${REPAIR_DATE_LABEL}.
-
-Verified 90-day totals reviewed:
-• Total spend reviewed: $${t.totalSpendReviewed.toFixed(2)}
-• Search spend: $${t.searchSpend.toFixed(2)} · ${t.searchClicks} clicks
-• Demand Gen spend: $${t.demandGenSpend.toFixed(2)} · ${t.demandGenClicks} clicks
-• Search reported conversions: ${t.searchReportedConversions} — historically contaminated
-• Demand Gen reported conversions: ${t.demandGenReportedConversions} — historically contaminated
-• Credible calls meeting 60-second threshold: ${t.credibleCallsFromAds60s} — pending Primal confirmation
-
-Source: verified manual export evidence reconciled from Google Ads exports. Not a live KXD OS connection.`,
-    workCompleted: `Repairs completed August 13, 2026:
-
-• Repaired and verified website lead delivery end to end
-• Corrected conversion-action bidding priorities
-• Kept confirmed website submissions and 60-second Calls from ads as Primary
-• Changed phone-link clicks, email clicks, and Google-hosted lead form actions to Secondary
-• Paused all enabled broad-match keywords
-• Paused four weak phrase-match keywords
-• Added four campaign-level negative keywords
-• Paused Demand Gen pending controlled rebuild
-• Changed location targeting from presence-or-interest to physical presence
-• Retained East Coast feeder states based on Primal's customer-travel history
-• Enabled a clean responsive Search ad
-• Paused three claim-heavy legacy Search ads
-• Detached the Google-hosted lead-form asset
-• Paused unsupported scarcity, licensing, and urgency assets
-• Preserved Search Partners off
-• Preserved Display Network off
-• Preserved AI Max off
-• Preserved campaign broad match off
-• Preserved the $80/day Search budget
-• Made no budget increase`,
-    improvementsMade: `What was intentionally not changed:
-
-• No budget increase
-• No aggressive device reduction
-• No aggressive ad scheduling
-• No change to the 60-second call threshold
-• No Google broad-match recommendation
-• No AI Max
-• No removal of East Coast feeder markets
-• No claim that platform conversions equal confirmed leads`,
-    issuesOrRisks: `What the audit found:
-
-• The previous landing page could record a generate_lead event even when server-side email delivery failed.
-• Google therefore received conversion signals that did not reliably represent inquiries received by Primal.
-• All five conversion actions had been Primary and could influence automated bidding.
-• Broad match consumed approximately $2,013.23 for one historically recorded conversion.
-• Five surrounding states spent approximately $3,233 with no recorded Search conversions, but the broken form makes that result inconclusive.
-• Primal confirmed that East Coast customers travel to Atlanta for schools and vehicle purchases, so those feeder states were retained.
-• Demand Gen used optimized targeting beyond strict remarketing.
-• The only recorded website-placement conversion came from pc-facile.com and was not accepted as credible lead evidence.
-• Demand Gen creative contained "Real Track Experienceq."
-• Historical Google conversion counts must not be represented as confirmed received inquiries.`,
+    executiveSummary: narratives.executiveSummary,
+    workCompleted: narratives.workCompleted,
+    improvementsMade: narratives.improvementsMade,
+    issuesOrRisks: narratives.issuesOrRisks,
+    augustPriorities: narratives.augustPriorities,
+    recommendations: narratives.recommendations,
+    closingNote: narratives.closingNote,
     internalNotes: `Report identity: ${REPORT_IDENTITY}. Operator staging only. clientVisible=false in dataProvenance. Do not publish without explicit approval.`,
     clientFacingNotes: null,
     dataProvenance: {
@@ -153,18 +96,6 @@ Source: verified manual export evidence reconciled from Google Ads exports. Not 
       verifiedTotals: VERIFIED_TOTALS,
       stagedBy: "scripts/stage-primal-google-ads-audit-report.ts",
     },
-    augustPriorities: `Next measurement window:
-
-• Confirmed forms received by Primal
-• Qualified calls lasting at least 60 seconds
-• Search-term quality
-• Georgia Core versus East Coast Destination performance
-• Device performance after clean form data accumulates
-• Cost per confirmed inquiry
-• Lead quality confirmed by Primal
-• Booking and sales opportunities
-• Whether Demand Gen should be rebuilt as strict remarketing`,
-    closingNote: `Prepared by Kreate by Design for Primal Motorsports. Audit period ${AUDIT_PERIOD_LABEL}. Repairs completed ${REPAIR_DATE_LABEL}. Verified figures reflect manual export evidence; platform conversion totals are documented as historically contaminated, not as confirmed business outcomes.`,
   };
 }
 

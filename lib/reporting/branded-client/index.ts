@@ -13,3 +13,17 @@ export * from "./compose";
 export * from "./filename";
 export { buildBrandedReportHtml } from "./export-html";
 export { renderBrandedReportPdf } from "./export-pdf";
+export {
+  buildAuditDeliverableViewModel,
+  auditDeliverableHasDuplicateHeadings,
+  parseNarrativeBody,
+  type AuditDeliverableViewModel,
+} from "./audit-deliverable";
+export {
+  buildPrimalGoogleAdsAuditNarratives,
+  PRIMAL_AUDIT_PDF_FILENAME,
+  PRIMAL_AUDIT_PERIOD_LABEL,
+  PRIMAL_AUDIT_REPAIR_DATE_LABEL,
+  PRIMAL_VERIFIED_TOTALS,
+} from "./primal-audit-content";
+export { resolveBrandedReportPdfFilename } from "./filename";
