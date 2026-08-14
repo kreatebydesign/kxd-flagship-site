@@ -32,6 +32,31 @@ export function stripInternalNotesFromSnapshot<T extends { internalNotes?: strin
   return { ...snapshot, internalNotes: "" };
 }
 
+const CLIENT_FACING_LEAK_PATTERNS: RegExp[] = [
+  /\bclientVisible\s*=\s*false\b/gi,
+  /\bclientVisible:\s*false\b/gi,
+  /\bMatt approves?\b/gi,
+  /\breport identity\b/gi,
+  /\boperator staging\b/gi,
+  /\bdraft mechanics\b/gi,
+  /\binternal implementation instructions?\b/gi,
+  /\bpremium partnership\b/gi,
+  /\bSEO upgrade\b/gi,
+  /\bprimal-google-ads-audit-[0-9-]+\b/gi,
+  /\boperator-only\b/gi,
+  /\bin-review\b/gi,
+  /\bdataProvenance\b/gi,
+];
+
+export function stripClientFacingOperatorLeaks(value: unknown, maxLen = 12000): string {
+  let text = sanitizeReportText(value, maxLen);
+  for (const pattern of CLIENT_FACING_LEAK_PATTERNS) {
+    pattern.lastIndex = 0;
+    text = text.replace(pattern, "").trim();
+  }
+  return text.replace(/\n{3,}/g, "\n\n").trim();
+}
+
 const LEAK_PATTERNS: RegExp[] = [
   /sk_live_[A-Za-z0-9]+/gi,
   /sk_test_[A-Za-z0-9]+/gi,

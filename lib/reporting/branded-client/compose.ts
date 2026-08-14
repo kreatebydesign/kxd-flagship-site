@@ -7,7 +7,8 @@ import { KXD_REPORT_CONTACT_EMAIL, KXD_REPORT_BRAND } from "@/lib/kxd-report-eng
 import { comparisonPeriodFor } from "./period";
 import { buildBrandedMetric, freshnessFromSyncAt } from "./metrics";
 import { buildOutOfScopeOpportunities, scopeIncludes } from "./scope";
-import { sanitizeReportText } from "./sanitize";
+import { sanitizeReportText, stripClientFacingOperatorLeaks } from "./sanitize";
+import type { BrandedReportPresentation } from "./types";
 import { withFingerprint } from "./snapshot";
 import type {
   BrandedMetric,
@@ -44,6 +45,7 @@ export type ComposeBrandedReportInput = {
     closing: string;
   }>;
   internalNotes?: string;
+  presentation?: BrandedReportPresentation;
 };
 
 function narrative(
@@ -56,7 +58,7 @@ function narrative(
   return {
     key,
     title,
-    body: sanitizeReportText(body),
+    body: stripClientFacingOperatorLeaks(sanitizeReportText(body)),
     provenance,
     editable,
   };
@@ -335,8 +337,12 @@ export function composeBrandedReportSnapshot(
         true,
       ),
     },
-    outOfScopeOpportunities: buildOutOfScopeOpportunities(input.scope),
+    outOfScopeOpportunities:
+      input.presentation?.hideOutOfScope === true
+        ? []
+        : buildOutOfScopeOpportunities(input.scope),
     internalNotes: sanitizeReportText(input.internalNotes ?? "", 8000),
+    presentation: input.presentation,
   };
 
   return withFingerprint(snapshotBase);

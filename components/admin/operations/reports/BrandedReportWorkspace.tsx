@@ -198,6 +198,9 @@ export function BrandedReportWorkspace({
     });
   }
 
+  const reportLabel =
+    snapshot.presentation?.documentTitle ?? "Branded monthly report";
+
   return (
     <div className="kxd-os-page kxd-os-page--ops">
       <nav aria-label="Breadcrumb" style={{ marginBottom: "1rem" }}>
@@ -205,7 +208,7 @@ export function BrandedReportWorkspace({
       </nav>
 
       <header>
-        <p className="kxd-os-eyebrow">Branded monthly report</p>
+        <p className="kxd-os-eyebrow">{reportLabel}</p>
         <h1 className="kxd-os-h1">{clientName}</h1>
         <p className="kxd-os-lead">
           {periodLabel} · {timezone} · Version {version} ·{" "}
@@ -235,8 +238,16 @@ export function BrandedReportWorkspace({
           {confirmApprove ? "Confirm approval" : "Approve"}
         </button>
         <button type="button" className="kxd-os-btn kxd-os-btn--secondary" disabled={pending} onClick={preview}>
-          Preview
+          Preview HTML
         </button>
+        <Link
+          href={`/admin/operations/reports/branded/${reportId}/preview?clientId=${clientId}`}
+          className="kxd-os-btn kxd-os-btn--secondary"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Client presentation
+        </Link>
         <button
           type="button"
           className="kxd-os-btn kxd-os-btn--primary"

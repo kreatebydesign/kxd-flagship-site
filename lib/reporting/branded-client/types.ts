@@ -140,6 +140,32 @@ export type BrandedReportScopeDecision = {
   notes: string | null;
 };
 
+export type BrandedReportPresentation = {
+  kind: string;
+  documentTitle: string;
+  coverTitle: string;
+  coverEyebrow?: string;
+  performanceSnapshotLead?: string;
+  hideDataFreshnessPanel?: boolean;
+  hideOutOfScope?: boolean;
+  hideWorkCompletedList?: boolean;
+  hideNarrativeProvenance?: boolean;
+  useAuditTheme?: boolean;
+  hiddenNarrativeKeys?: string[];
+  sectionTitles?: Partial<{
+    executiveSummary: string;
+    websitePerformance: string;
+    organicSearch: string;
+    googleAds: string;
+    workCompleted: string;
+    improvementsAndWins: string;
+    issuesOrRisks: string;
+    recommendations: string;
+    augustPriorities: string;
+    closing: string;
+  }>;
+};
+
 export type BrandedReportSnapshot = {
   schemaVersion: 1;
   reportId: number;
@@ -148,6 +174,7 @@ export type BrandedReportSnapshot = {
   version: number;
   period: BrandedReportPeriod;
   generatedAt: string;
+  presentation?: BrandedReportPresentation;
   scope: BrandedReportScopeDecision;
   dataSources: DataSourcePresence[];
   metrics: BrandedMetric[];

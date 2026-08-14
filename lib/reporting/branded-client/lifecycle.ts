@@ -18,6 +18,13 @@ import type { ReportingCapabilityId } from "@/lib/reporting/domain";
 import { composeBrandedReportSnapshot } from "./compose";
 import { renderBrandedReportPdf } from "./export-pdf";
 import { buildBrandedReportHtml } from "./export-html";
+import { buildManualAuditMetrics, isVerifiedAuditTotals } from "./manual-audit-metrics";
+import {
+  GOOGLE_ADS_AUDIT_REPAIR_KIND,
+  brandedReportPeriodFromDoc,
+  presentationForReportDoc,
+  reportKindFromDoc,
+} from "./presentation";
 import { july2026ControlledPeriod, createBrandedReportPeriod } from "./period";
 import { resolveReportScope, scopeIncludes, isReportScopeCapability } from "./scope";
 import { buildBrandedMetric, freshnessFromSyncAt } from "./metrics";
@@ -372,11 +379,11 @@ export async function composeSnapshotForReportDoc(
 
   const period =
     doc.periodStart && doc.periodEnd
-      ? createBrandedReportPeriod({
-          year: Number(doc.reportingYear) || 2026,
-          month: Number(doc.reportingMonth) || 7,
-          startDay: new Date(String(doc.periodStart)).getUTCDate(),
-          endDay: new Date(String(doc.periodEnd)).getUTCDate(),
+      ? brandedReportPeriodFromDoc({
+          periodStart: String(doc.periodStart),
+          periodEnd: String(doc.periodEnd),
+          reportingYear: Number(doc.reportingYear) || null,
+          reportingMonth: Number(doc.reportingMonth) || null,
           timezone,
         })
       : july2026ControlledPeriod(timezone);
@@ -406,6 +413,22 @@ export async function composeSnapshotForReportDoc(
     scope.includedCapabilities,
   );
 
+  const presentation = presentationForReportDoc(doc);
+  const reportKind = reportKindFromDoc(doc);
+  const provenance =
+    doc.dataProvenance && typeof doc.dataProvenance === "object"
+      ? (doc.dataProvenance as Record<string, unknown>)
+      : null;
+  const verifiedTotals = provenance?.verifiedTotals;
+
+  let metricsForCompose = verifiedMetrics;
+  if (
+    reportKind === GOOGLE_ADS_AUDIT_REPAIR_KIND &&
+    isVerifiedAuditTotals(verifiedTotals)
+  ) {
+    metricsForCompose = buildManualAuditMetrics(verifiedTotals, period);
+  }
+
   return composeBrandedReportSnapshot({
     reportId: Number(doc.id),
     clientId,
@@ -413,9 +436,10 @@ export async function composeSnapshotForReportDoc(
     version: Number(doc.version ?? 1),
     period,
     scope,
-    verifiedMetrics,
+    verifiedMetrics: metricsForCompose,
     dataSources,
     workItems: workItemsFromDoc(doc),
+    presentation,
     narratives: {
       executiveSummary: doc.executiveSummary ? String(doc.executiveSummary) : undefined,
       websitePerformance: doc.websitePerformanceNarrative

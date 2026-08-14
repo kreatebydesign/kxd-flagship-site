@@ -67,6 +67,7 @@ export function buildBrandedMetric(input: {
   completeness?: MetricCompleteness;
   provenance?: MetricProvenanceKind;
   note?: string | null;
+  displayValue?: string;
 }): BrandedMetric {
   const { percent, label: percentChangeLabel } = safePercentChange(
     input.value,
@@ -93,7 +94,7 @@ export function buildBrandedMetric(input: {
     key: input.key,
     label: input.label,
     value: input.value,
-    displayValue: formatMetricNumber(input.value, input.unit),
+    displayValue: input.displayValue ?? formatMetricNumber(input.value, input.unit),
     unit: input.unit,
     periodStart: input.periodStart,
     periodEnd: input.periodEnd,
