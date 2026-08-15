@@ -18,8 +18,17 @@ export type InsightPreview = {
 };
 
 export type InsightDetail = InsightPreview & {
-  body: string[]; // paragraphs for static content
+  body: string[]; // paragraphs for static content; "## " prefix = section heading; [label](/path) = links
   payloadContent?: unknown; // Lexical JSON when sourced from CMS
+  keywords?: string[];
+  cta?: {
+    headline: string;
+    subCopy: string;
+    primaryLabel: string;
+    primaryHref: string;
+    secondaryLabel?: string;
+    secondaryHref?: string;
+  };
 };
 
 // ── Categories ────────────────────────────────────────────────────────────────
@@ -44,6 +53,105 @@ export const STATIC_INSIGHTS: InsightDetail[] = [
   // ── Luxury Web Design ──────────────────────────────────────────────────────
 
   {
+    slug: "how-to-know-when-your-business-website-needs-a-redesign",
+    title: "How to Know When Your Business Website Needs a Redesign",
+    excerpt:
+      "A redesign is rarely about looking dated. It is about recognizing when the website no longer represents, supports, or moves the business forward — and deciding what kind of change is actually required.",
+    category: "luxury-web-design",
+    categoryLabel: "Luxury Web Design",
+    author: "Matt Kreate",
+    publishedAt: "2026-08-15",
+    readingTime: 11,
+    featured: true,
+    keywords: [
+      "When to Redesign a Website",
+      "Signs Your Website Needs a Redesign",
+      "Business Website Redesign",
+      "Website Redesign vs Refresh",
+      "Underperforming Business Website",
+      "Website Audit",
+    ],
+    cta: {
+      headline: "Not sure which kind of problem you have?",
+      subCopy:
+        "Run KXD Intelligence for a diagnostic read of the current homepage — or start a project conversation if you already know the site needs to change.",
+      primaryLabel: "Run KXD Intelligence",
+      primaryHref: "/website-audit",
+      secondaryLabel: "Start a Project",
+      secondaryHref: "/start-project",
+    },
+    body: [
+      "Most conversations about redesign start in the wrong place. Someone says the site looks old. Someone else says a competitor looks newer. A committee agrees that a fresh coat of paint would help.",
+      "Sometimes visual age is real. Typography, layout habits, and presentation standards do drift. But in the work KXD does with established businesses, the more important question is almost never \"does this look current?\" It is \"does this website still accurately represent the company, help the right people understand it, and move qualified interest forward?\"",
+      "A website usually needs a redesign when a disconnect has grown between the business and the digital experience speaking for it. The company has matured. The offer has sharpened. The audience has changed. The website is still describing an earlier version of the organization.",
+      "That is a different problem from taste. And it requires a different kind of honesty.",
+
+      "## 1. The business has outgrown the website",
+      "This is the most common pattern we see — and the easiest one to miss from inside the company.",
+      "Services expanded. Packaging changed. The audience shifted from whoever would buy toward a more specific kind of buyer. The company became more capable, more selective, or more operationally complex. Meanwhile the website kept the structure, language, and priorities of an earlier chapter.",
+      "When that happens, the site starts telling an incomplete story. Valuable offerings get buried. Navigation still reflects old business units. The homepage argues for a company that no longer exists in quite that form.",
+      "The signal is not always aesthetic. It is often organizational: the website can no longer explain what the business has become.",
+
+      "## 2. The company feels stronger in person than it does online",
+      "Some of the strongest companies KXD has worked with shared a quiet frustration: people who met them in the real world trusted them immediately. People who only met them online hesitated.",
+      "That credibility gap matters. A serious business can look smaller, less established, or less capable than it is when the site presents thin proof, soft hierarchy, and an experience that does not match the standard of the work.",
+      "This is not a request to \"make it prettier.\" It is a request to make the digital presence hold the same weight the business already holds in delivery, conversations, and reputation.",
+      "In [Martinsen Construction](/work/martinsen-construction), the fieldwork was already precise. The site needed to communicate that trust before the first call — clearer service pathways, stronger credibility, and inquiry readiness that matched the company behind it.",
+
+      "## 3. Visitors cannot quickly understand what the company does",
+      "If a capable visitor lands on the site and cannot answer three basic questions quickly — what you do, who it is for, and what happens next — the architecture is working against the business.",
+      "Common causes: competing messages on the same screen, legacy navigation that maps internal org charts instead of customer decisions, service pages that bury the actual offer, and customer paths that split attention instead of creating sequence.",
+      "Clarity is not a copywriting flourish. It is commercial infrastructure. Ambiguity forces prospects to work harder than they should — and most of them will not.",
+
+      "## 4. The website attracts the wrong inquiries — or makes good ones difficult",
+      "Not every traffic problem is solved by more traffic.",
+      "Sometimes the site is inviting the wrong conversations: price shoppers for a premium offer, tire-kickers for a specialized service, or people who misunderstand scope because the site never set expectations. Sometimes the opposite is true — the right people arrive, then stall because forms are unclear, next steps are buried, or the inquiry path creates friction.",
+      "A useful redesign often has a filtering job as much as a conversion job. It should communicate who the business is for, expose the right service or product, make the next step obvious, and reduce poor-fit volume without inventing performance promises.",
+      "[AutoDV8ions](/work/autodv8ions) is a public example of presence and inquiry architecture designed to filter for qualified interest — not simply to collect more form fills.",
+
+      "## 5. The experience breaks down on the device customers actually use",
+      "Most first visits still happen on phones. When the mobile experience feels cramped, slow, or improvisational, credibility erodes before the offer has a chance.",
+      "Performance, tap targets, readable hierarchy, and basic usability are not \"technical niceties.\" They are part of how serious the business feels. You do not need a Core Web Vitals lecture to recognize the pattern: if the site feels heavy or awkward in the hand, people leave with a vague sense that something is off.",
+      "That feeling is enough to lose a conversation you never get to have.",
+
+      "## 6. Search engines cannot clearly understand the business",
+      "Search visibility is not just a keyword problem. If page structure is weak, service focus is muddy, content is outdated, and internal relationships between pages are thin, search engines struggle to understand what the company actually does — for the same reasons humans do.",
+      "Redesign and search strategy sometimes belong together because both depend on clarity: what the business is, what pages exist to support that, and how those pages reinforce each other. Adding keywords to a confused architecture rarely fixes the underlying signal problem.",
+      "When the issue is discoverability and measurement rather than representation, the work may lean more toward [Growth Infrastructure](/services/growth-infrastructure) than a full rebuild. The diagnosis matters.",
+
+      "## 7. The strongest proof is missing or buried",
+      "Established businesses often have better evidence than their websites show: real work, recognizable relationships, depth of capability, case studies, or reviews that exist somewhere else entirely.",
+      "When proof is absent or hard to find, prospects are asked to take the company's seriousness on faith. Some will. Many will not — especially when the purchase involves trust, money, or operational risk.",
+      "A redesign that resurfaces legitimate proof is not vanity. It is alignment between what the company can demonstrate and what the site bothers to show.",
+
+      "## 8. The website has become disconnected from how the business actually operates",
+      "This is where KXD's work often diverges from a conventional agency redesign conversation.",
+      "Sometimes the public site is only the visible layer. Behind it: manual inquiry routing, disconnected CRM habits, duplicate data entry, client portals that never got built, payment or scheduling friction, dashboards that live in someone's head. The website can look improved while the business still absorbs the same operational drag.",
+      "Important distinction: not every redesign needs custom software. Many businesses only need a stronger website — clearer presence, better journeys, and inquiry paths that match the standard of the work. That is the core of [Website Experiences](/services/luxury-website-experiences).",
+      "For others, the redesign exposes a deeper systems problem that should be solved intentionally rather than hidden behind a prettier frontend. [Primal Motorsports](/work/primal-motorsports) is a public example where the real need extended beyond a marketing site into member experience, operations visibility, and a connected digital foundation. That depth is selective. It is not the default recommendation for every visitor reading this.",
+
+      "## When a redesign is not the answer",
+      "KXD should not sound like a studio that wants every business to rebuild.",
+      "A redesign may not be necessary when the site already communicates clearly and the real issue is traffic; when the offer itself is unresolved; when demand is weak; when leadership has not defined what the website is supposed to accomplish; when a specific page or pathway can be repaired without rebuilding everything; or when analytics already point to a narrower problem.",
+      "If the business cannot articulate what success looks like for the site, starting with a full rebuild is usually premature. Diagnosis first. Scope second.",
+
+      "## Refresh, redesign, growth problem, or systems problem",
+      "A practical distinction helps:",
+      "Refresh: presentation and polish while strategy, structure, and journeys remain essentially sound.",
+      "Redesign or rebuild: positioning, information architecture, content hierarchy, technology foundations, or conversion paths need meaningful change. See [Website Experiences](/services/luxury-website-experiences).",
+      "Growth problem: the site may already be capable, but not enough qualified people reach it, or measurement and lead pathways are weak. See [Growth Infrastructure](/services/growth-infrastructure).",
+      "Systems problem: the customer-facing site is exposing deeper workflow, CRM, portal, or operational fragmentation. [Platforms](/platforms) explains what that kind of work can look like when it is genuinely warranted — not when a business only needs a better website.",
+      "The right move depends on what the business has become and what the website now needs to accomplish. Cosmetic preference is not a strategy.",
+
+      "## Start with diagnosis, not assumptions",
+      "If you are unsure which category your website falls into, do not begin by collecting mood boards.",
+      "[KXD Intelligence](/website-audit) evaluates the current homepage across performance, SEO foundations, mobile readiness, conversion pathways, and brand presentation — then surfaces where pressure actually concentrates. It is a diagnostic step, not a free sales pitch and not a guarantee of outcomes.",
+      "From there, the path can stay simple: strengthen the website, improve growth infrastructure, or — only when the business requires it — go deeper into operational systems. The point of the diagnosis is to keep the response proportional.",
+      "A website that no longer matches the company is not a vanity issue. It is a representation and operating issue. The businesses that handle it well do not rush to decorate the gap. They decide, with clarity, what the digital experience must do next.",
+    ],
+  },
+
+  {
     slug: "why-your-website-is-losing-premium-clients",
     title: "Why Your Website Is Losing Premium Clients Before They Reach Out",
     excerpt:
@@ -60,6 +168,7 @@ export const STATIC_INSIGHTS: InsightDetail[] = [
       "Performance is another silent filter. A site that loads in four seconds won't register as a technical problem to the person visiting — they'll just experience a vague sense of disorganization. Premium buyers aren't conscious of page speed. They just don't wait.",
       "The copy problem is subtler. Generic headlines — \"We help businesses grow,\" \"Your success is our mission\" — don't signal expertise, they signal that no one has done the hard work of saying something specific. Premium buyers have been burned before. They're looking for evidence of thinking.",
       "A premium website doesn't just present your business. It does a specific job: making the right kind of person feel like they're in exactly the right place. Every decision — the whitespace, the typography, the absence of things as much as the presence of things — is in service of that moment of recognition. That's the work.",
+      "If the problem feels less like \"premium buyers bouncing\" and more like a deeper mismatch between the company and the site representing it, [read how to know when a business website actually needs a redesign](/insights/how-to-know-when-your-business-website-needs-a-redesign).",
     ],
   },
 

@@ -13,8 +13,32 @@ export const metadata: Metadata = buildMetadata({
   noIndex: false,
 });
 
-// Try to fetch live insights from Payload; fall back to static seed data.
+// Prefer Payload when available; always include static insights not yet in CMS.
 async function getInsights(): Promise<InsightPreview[]> {
+  const staticPreviews: InsightPreview[] = STATIC_INSIGHTS.map(
+    ({
+      slug,
+      title,
+      excerpt,
+      category,
+      categoryLabel,
+      author,
+      publishedAt,
+      readingTime,
+      featured,
+    }) => ({
+      slug,
+      title,
+      excerpt,
+      category,
+      categoryLabel,
+      author,
+      publishedAt,
+      readingTime,
+      featured,
+    }),
+  );
+
   try {
     const { getPayload } = await import("payload");
     const config = (await import("@payload-config")).default;
@@ -28,7 +52,7 @@ async function getInsights(): Promise<InsightPreview[]> {
     });
 
     if (result.docs.length > 0) {
-      return result.docs.map((doc) => ({
+      const fromCms: InsightPreview[] = result.docs.map((doc) => ({
         slug: String(doc.slug ?? ""),
         title: String(doc.title ?? ""),
         excerpt: String(doc.excerpt ?? ""),
@@ -43,15 +67,22 @@ async function getInsights(): Promise<InsightPreview[]> {
         publishedAt: doc.publishedAt
           ? new Date(doc.publishedAt as string).toISOString().split("T")[0]
           : new Date().toISOString().split("T")[0],
-        readingTime: typeof doc.readingTimeMinutes === "number" ? doc.readingTimeMinutes : 5,
+        readingTime:
+          typeof doc.readingTimeMinutes === "number" ? doc.readingTimeMinutes : 5,
         featured: Boolean(doc.featured),
       }));
+
+      const cmsSlugs = new Set(fromCms.map((a) => a.slug));
+      const staticOnly = staticPreviews.filter((a) => !cmsSlugs.has(a.slug));
+      return [...fromCms, ...staticOnly].sort((a, b) =>
+        a.publishedAt < b.publishedAt ? 1 : a.publishedAt > b.publishedAt ? -1 : 0,
+      );
     }
   } catch {
     // Payload unavailable at build time — use static seed
   }
 
-  return STATIC_INSIGHTS;
+  return staticPreviews;
 }
 
 export default async function InsightsPage() {

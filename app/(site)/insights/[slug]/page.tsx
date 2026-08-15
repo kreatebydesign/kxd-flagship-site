@@ -109,13 +109,44 @@ export async function generateMetadata({
   return buildMetadata({
     title: article.title,
     description: article.excerpt,
-    path: `/insights/${slug}`,
+    path: `/insights/${article.slug}`,
     type: "article",
     publishedTime: article.publishedAt,
+    keywords: article.keywords,
   });
 }
 
 // ── Article body renderer ─────────────────────────────────────────────────────
+
+function renderInlineText(text: string) {
+  const parts: Array<string | { label: string; href: string }> = [];
+  const linkRe = /\[([^\]]+)\]\((\/[^)]+|https?:\/\/[^)]+)\)/g;
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = linkRe.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(text.slice(lastIndex, match.index));
+    }
+    parts.push({ label: match[1], href: match[2] });
+    lastIndex = match.index + match[0].length;
+  }
+  if (lastIndex < text.length) parts.push(text.slice(lastIndex));
+
+  return parts.map((part, i) => {
+    if (typeof part === "string") return <span key={i}>{part}</span>;
+    return (
+      <Link
+        key={i}
+        href={part.href}
+        className="underline decoration-[rgba(197,166,92,0.45)] underline-offset-[0.22em] transition-colors hover:text-[var(--kxd-cream)] hover:decoration-[var(--kxd-gold)]"
+        style={{ color: "var(--kxd-cream)" }}
+      >
+        {part.label}
+      </Link>
+    );
+  });
+}
 
 function ArticleBody({
   body,
@@ -124,22 +155,43 @@ function ArticleBody({
   body: string[];
   payloadContent?: unknown;
 }) {
-  // Static content (string paragraphs)
+  // Static content (string paragraphs / optional "## " headings)
   if (body.length > 0) {
     return (
       <div className="space-y-6">
-        {body.map((paragraph, i) => (
-          <p
-            key={i}
-            className="font-sans font-light leading-[1.85]"
-            style={{
-              fontSize: "clamp(1rem, 1.3vw, 1.0625rem)",
-              color: "var(--kxd-cream-soft)",
-            }}
-          >
-            {paragraph}
-          </p>
-        ))}
+        {body.map((block, i) => {
+          const heading = block.match(/^##\s+(.+)$/);
+          if (heading) {
+            return (
+              <h2
+                key={i}
+                className="font-serif font-light"
+                style={{
+                  fontSize: "clamp(1.25rem, 2vw, 1.5rem)",
+                  color: "var(--kxd-cream)",
+                  lineHeight: 1.25,
+                  marginTop: i === 0 ? "0" : "clamp(2.25rem, 4vw, 3rem)",
+                  maxWidth: "36rem",
+                }}
+              >
+                {heading[1]}
+              </h2>
+            );
+          }
+
+          return (
+            <p
+              key={i}
+              className="font-sans font-light leading-[1.85]"
+              style={{
+                fontSize: "clamp(1rem, 1.3vw, 1.0625rem)",
+                color: "var(--kxd-cream-soft)",
+              }}
+            >
+              {renderInlineText(block)}
+            </p>
+          );
+        })}
       </div>
     );
   }
@@ -509,12 +561,17 @@ export default async function InsightDetailPage({
 
       {/* ── Final CTA ─────────────────────────────────────────────────────────── */}
       <FinalCtaBand
-        headline="Ready to Build Something Exceptional?"
-        subCopy="KXD partners with ambitious businesses to create digital experiences, operational systems, and brands built to endure."
-        primaryLabel="Start a Partnership"
-        primaryHref="/start-project"
-        secondaryHref="/work"
-        secondaryLabel="Explore Our Work"
+        headline={
+          article.cta?.headline ?? "Ready to Build Something Exceptional?"
+        }
+        subCopy={
+          article.cta?.subCopy ??
+          "KXD partners with ambitious businesses to create digital experiences, operational systems, and brands built to endure."
+        }
+        primaryLabel={article.cta?.primaryLabel ?? "Start a Partnership"}
+        primaryHref={article.cta?.primaryHref ?? "/start-project"}
+        secondaryHref={article.cta?.secondaryHref ?? "/work"}
+        secondaryLabel={article.cta?.secondaryLabel ?? "Explore Our Work"}
       />
     </>
   );
