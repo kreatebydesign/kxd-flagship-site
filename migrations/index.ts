@@ -65,6 +65,7 @@ import * as migration_20260807_phase28b_sales_leads_estimated_mrr_column from '.
 import * as migration_20260809_client_inventory_source_identity from './20260809_client_inventory_source_identity';
 import * as migration_20260826_qr_codes from './20260826_qr_codes';
 import * as migration_20260827_revenue_pipeline_foundation from './20260827_revenue_pipeline_foundation';
+import * as migration_20260828_research_lead_qualification from './20260828_research_lead_qualification';
 import * as migration_20260712_phase29c_reporting_provider_connections from './20260712_phase29c_reporting_provider_connections';
 import * as migration_20260713_phase31c_reporting_facts from './20260713_phase31c_reporting_facts';
 import * as migration_20260713_phase32b_google_ads_customer_fields from './20260713_phase32b_google_ads_customer_fields';
@@ -634,5 +635,12 @@ export const migrations = [
     up: migration_20260827_revenue_pipeline_foundation.up,
     down: migration_20260827_revenue_pipeline_foundation.down,
     name: '20260827_revenue_pipeline_foundation',
+  },
+  {
+    // Research Desk qualification — grade + rejectReason + qualificationEvidence.
+    // Additive only. No backfill. Existing research leads remain valid with nulls.
+    up: migration_20260828_research_lead_qualification.up,
+    down: migration_20260828_research_lead_qualification.down,
+    name: '20260828_research_lead_qualification',
   },
 ];

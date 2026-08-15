@@ -14,7 +14,15 @@ export const ResearchLeads: CollectionConfig = {
   lockDocuments: false,
   admin: {
     useAsTitle: "researcherName",
-    defaultColumns: ["researcherName", "city", "state", "estimatedService", "status", "createdAt"],
+    defaultColumns: [
+      "researcherName",
+      "city",
+      "state",
+      "estimatedService",
+      "grade",
+      "status",
+      "createdAt",
+    ],
     group: PAYLOAD_GROUPS.leads,
     description:
       "Internal lead research submissions — Craigslist and manual opportunity tracking. " +
@@ -111,6 +119,52 @@ export const ResearchLeads: CollectionConfig = {
       ],
     },
     { name: "notes", type: "textarea", label: "Notes" },
+    {
+      name: "grade",
+      type: "select",
+      label: "Opportunity Grade",
+      options: [
+        { label: "A+", value: "A+" },
+        { label: "A", value: "A" },
+        { label: "B", value: "B" },
+        { label: "C", value: "C" },
+        { label: "D", value: "D" },
+        { label: "F", value: "F" },
+      ],
+      admin: {
+        description: "Human-entered opportunity quality. Optional on historical records.",
+      },
+    },
+    {
+      name: "rejectReason",
+      type: "select",
+      label: "Reject Reason",
+      options: [
+        { label: "Spam", value: "spam" },
+        { label: "International", value: "international" },
+        { label: "Commission-only", value: "commission-only" },
+        { label: "Internship", value: "internship" },
+        { label: "Barter", value: "barter" },
+        { label: "Crypto", value: "crypto" },
+        { label: "Recruiter", value: "recruiter" },
+        { label: "Duplicate", value: "duplicate" },
+        { label: "Irrelevant", value: "irrelevant" },
+        { label: "Low-value", value: "low-value" },
+        { label: "Other", value: "other" },
+      ],
+      admin: {
+        description: "Required when status is Rejected. Explains why junk was skipped.",
+      },
+    },
+    {
+      name: "qualificationEvidence",
+      type: "textarea",
+      label: "Qualification Evidence",
+      admin: {
+        description:
+          "Short human note on why this is or is not worth KXD time. Encouraged when reject reason is Other.",
+      },
+    },
     {
       name: "promotedSalesLead",
       type: "relationship",

@@ -9,7 +9,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { KxdOsLogo } from "@/components/os";
 import {
+  RESEARCH_GRADES,
+  RESEARCH_GRADE_COLOR,
   RESEARCH_LEAD_SOURCES,
+  RESEARCH_REJECT_REASONS,
+  RESEARCH_REJECT_REASON_LABEL,
   RESEARCH_RESEARCHERS,
   RESEARCH_SERVICES,
   RESEARCH_STATUSES,
@@ -59,6 +63,9 @@ export type ResearchLeadRow = {
   leadUrl: string | null;
   estimatedService: string | null;
   status: string;
+  grade: string | null;
+  rejectReason: string | null;
+  qualificationEvidence: string | null;
   createdAt: string;
   ageLabel: string;
   promotedSalesLeadId: number | null;
@@ -112,20 +119,48 @@ function buildFilterHref(status: string, researcher: string): string {
   return q ? `/admin/operations/research?${q}` : "/admin/operations/research";
 }
 
-function StatusSelect({ id, status }: { id: number; status: string }) {
+async function patchResearchLead(
+  id: number,
+  payload: Record<string, unknown>,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    const res = await fetch("/api/admin/research-leads", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, ...payload }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.success) {
+      return { ok: false, error: String(data.error || "Update failed.") };
+    }
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "Network error — try again." };
+  }
+}
+
+function StatusSelect({
+  id,
+  status,
+  onRequestReject,
+}: {
+  id: number;
+  status: string;
+  onRequestReject: () => void;
+}) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
 
   async function onChange(next: string) {
     if (next === status || pending) return;
+    if (next === "rejected") {
+      onRequestReject();
+      return;
+    }
     setPending(true);
     try {
-      const res = await fetch("/api/admin/research-leads", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, status: next }),
-      });
-      if (res.ok) router.refresh();
+      const result = await patchResearchLead(id, { status: next });
+      if (result.ok) router.refresh();
     } finally {
       setPending(false);
     }
@@ -151,6 +186,210 @@ function StatusSelect({ id, status }: { id: number; status: string }) {
   );
 }
 
+function GradeSelect({ id, grade }: { id: number; grade: string | null }) {
+  const router = useRouter();
+  const [pending, setPending] = useState(false);
+  const current = grade ?? "";
+
+  async function onChange(next: string) {
+    if (next === current || pending) return;
+    setPending(true);
+    try {
+      const result = await patchResearchLead(id, { grade: next || null });
+      if (result.ok) router.refresh();
+    } finally {
+      setPending(false);
+    }
+  }
+
+  return (
+    <select
+      value={current}
+      disabled={pending}
+      onChange={(e) => onChange(e.target.value)}
+      aria-label="Opportunity grade"
+      style={{
+        fontFamily: C.sans, fontSize: "0.6875rem", fontWeight: 600,
+        letterSpacing: "0.08em",
+        color: current ? (RESEARCH_GRADE_COLOR[current] ?? C.cream) : C.creamMuted,
+        background: C.bgInput, border: `1px solid ${C.border}`,
+        padding: "0.35rem 0.5rem", cursor: pending ? "wait" : "pointer",
+        minWidth: "4.5rem",
+      }}
+    >
+      <option value="">Grade…</option>
+      {RESEARCH_GRADES.map((g) => (
+        <option key={g.value} value={g.value}>{g.label}</option>
+      ))}
+    </select>
+  );
+}
+
+function EvidenceEditor({
+  id,
+  evidence,
+}: {
+  id: number;
+  evidence: string | null;
+}) {
+  const router = useRouter();
+  const [value, setValue] = useState(evidence ?? "");
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState("");
+  const dirty = value !== (evidence ?? "");
+
+  async function save() {
+    if (!dirty || pending) return;
+    setPending(true);
+    setError("");
+    try {
+      const result = await patchResearchLead(id, { qualificationEvidence: value });
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
+      router.refresh();
+    } finally {
+      setPending(false);
+    }
+  }
+
+  return (
+    <div style={{ marginTop: "0.65rem" }}>
+      <FieldLabel>Qualification evidence</FieldLabel>
+      <textarea
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        rows={2}
+        placeholder="Why pursue or skip — e.g. clear website ask, direct contact…"
+        style={{ ...inputStyle, resize: "vertical", fontSize: "0.75rem" }}
+      />
+      <div className="flex flex-wrap items-center gap-2" style={{ marginTop: "0.4rem" }}>
+        <button
+          type="button"
+          disabled={!dirty || pending}
+          onClick={() => void save()}
+          style={{
+            fontFamily: C.sans, fontSize: "0.625rem", letterSpacing: "0.12em",
+            textTransform: "uppercase", color: dirty ? C.gold : "rgba(255,255,255,0.28)",
+            background: "transparent", border: `1px solid ${dirty ? C.borderGold : C.border}`,
+            padding: "0.35rem 0.55rem", cursor: dirty && !pending ? "pointer" : "default",
+            opacity: pending ? 0.7 : 1,
+          }}
+        >
+          {pending ? "Saving…" : "Save evidence"}
+        </button>
+        {error ? (
+          <span style={{ fontFamily: C.sans, fontSize: "0.6875rem", color: C.red }}>{error}</span>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function RejectPanel({
+  id,
+  onCancel,
+  onError,
+  onSuccess,
+}: {
+  id: number;
+  onCancel: () => void;
+  onError: (message: string) => void;
+  onSuccess: () => void;
+}) {
+  const router = useRouter();
+  const [reason, setReason] = useState("");
+  const [evidence, setEvidence] = useState("");
+  const [pending, setPending] = useState(false);
+
+  async function confirm() {
+    if (!reason || pending) return;
+    if (reason === "other" && !evidence.trim()) {
+      onError("Add a short note when reject reason is Other.");
+      return;
+    }
+    setPending(true);
+    try {
+      const payload: Record<string, unknown> = {
+        status: "rejected",
+        rejectReason: reason,
+      };
+      if (evidence.trim()) payload.qualificationEvidence = evidence.trim();
+      const result = await patchResearchLead(id, payload);
+      if (!result.ok) {
+        onError(result.error);
+        return;
+      }
+      onSuccess();
+      router.refresh();
+    } finally {
+      setPending(false);
+    }
+  }
+
+  return (
+    <div
+      style={{
+        marginTop: "0.75rem",
+        padding: "0.75rem",
+        border: `1px solid ${C.border}`,
+        background: C.bgInput,
+      }}
+    >
+      <FieldLabel style={{ color: C.red }}>Reject reason</FieldLabel>
+      <select
+        value={reason}
+        onChange={(e) => setReason(e.target.value)}
+        style={{ ...inputStyle, fontSize: "0.75rem", marginBottom: "0.55rem" }}
+      >
+        <option value="">Select reason…</option>
+        {RESEARCH_REJECT_REASONS.map((r) => (
+          <option key={r.value} value={r.value}>{r.label}</option>
+        ))}
+      </select>
+      <FieldLabel>
+        {reason === "other" ? "Evidence (recommended for Other)" : "Evidence (optional)"}
+      </FieldLabel>
+      <textarea
+        value={evidence}
+        onChange={(e) => setEvidence(e.target.value)}
+        rows={2}
+        placeholder="Brief note — why this is not a KXD opportunity…"
+        style={{ ...inputStyle, resize: "vertical", fontSize: "0.75rem" }}
+      />
+      <div className="flex flex-wrap gap-2" style={{ marginTop: "0.55rem" }}>
+        <button
+          type="button"
+          disabled={!reason || pending}
+          onClick={() => void confirm()}
+          style={{
+            fontFamily: C.sans, fontSize: "0.625rem", letterSpacing: "0.12em",
+            textTransform: "uppercase", color: C.bgBase, background: C.red,
+            border: "none", padding: "0.45rem 0.7rem",
+            cursor: !reason || pending ? "default" : "pointer",
+            opacity: !reason || pending ? 0.6 : 1,
+          }}
+        >
+          {pending ? "Rejecting…" : "Confirm reject"}
+        </button>
+        <button
+          type="button"
+          disabled={pending}
+          onClick={onCancel}
+          style={{
+            fontFamily: C.sans, fontSize: "0.625rem", letterSpacing: "0.12em",
+            textTransform: "uppercase", color: C.creamMuted, background: "transparent",
+            border: `1px solid ${C.border}`, padding: "0.45rem 0.7rem", cursor: "pointer",
+          }}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function ResearchDesk({ leads, metrics, researchers, filterStatus, filterResearcher }: Props) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
@@ -168,6 +407,7 @@ export function ResearchDesk({ leads, metrics, researchers, filterStatus, filter
   const [estimatedService, setEstimatedService] = useState("");
   const [notes, setNotes] = useState("");
   const [promotingId, setPromotingId] = useState<number | null>(null);
+  const [rejectingId, setRejectingId] = useState<number | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -548,6 +788,16 @@ export function ResearchDesk({ leads, metrics, researchers, filterStatus, filter
                             {RESEARCH_STATUS_LABEL[lead.status] ?? lead.status}
                           </span>
                         )}
+                        {lead.grade ? (
+                          <span style={{
+                            fontFamily: C.sans, fontSize: "0.625rem", letterSpacing: "0.12em",
+                            textTransform: "uppercase",
+                            color: RESEARCH_GRADE_COLOR[lead.grade] ?? C.cream,
+                            border: `1px solid ${C.border}`, padding: "0.15rem 0.45rem",
+                          }}>
+                            Grade {lead.grade}
+                          </span>
+                        ) : null}
                       </div>
                       <p style={{ fontFamily: C.serif, fontWeight: 400, fontSize: "1.25rem", color: C.cream, lineHeight: 1.2 }}>
                         {title}
@@ -566,9 +816,43 @@ export function ResearchDesk({ leads, metrics, researchers, filterStatus, filter
                           Opportunity link available
                         </p>
                       ) : null}
-                      <div style={{ marginTop: "0.65rem" }}>
-                        <StatusSelect id={lead.id} status={lead.status} />
+                      {lead.status === "rejected" && lead.rejectReason ? (
+                        <p style={{ fontFamily: C.sans, fontSize: "0.75rem", color: C.red, marginTop: "0.4rem" }}>
+                          Rejected · {RESEARCH_REJECT_REASON_LABEL[lead.rejectReason] ?? lead.rejectReason}
+                        </p>
+                      ) : null}
+                      {lead.qualificationEvidence ? (
+                        <p style={{
+                          fontFamily: C.sans, fontSize: "0.75rem", color: "rgba(255,255,255,0.45)",
+                          marginTop: "0.45rem", lineHeight: 1.45, maxWidth: "36rem",
+                        }}>
+                          {lead.qualificationEvidence}
+                        </p>
+                      ) : null}
+                      <div className="flex flex-wrap items-center gap-2" style={{ marginTop: "0.65rem" }}>
+                        <GradeSelect id={lead.id} grade={lead.grade} />
+                        <StatusSelect
+                          id={lead.id}
+                          status={lead.status}
+                          onRequestReject={() => {
+                            setFormError("");
+                            setRejectingId(lead.id);
+                          }}
+                        />
                       </div>
+                      <EvidenceEditor
+                        key={`evidence-${lead.id}-${lead.qualificationEvidence ?? ""}`}
+                        id={lead.id}
+                        evidence={lead.qualificationEvidence}
+                      />
+                      {rejectingId === lead.id ? (
+                        <RejectPanel
+                          id={lead.id}
+                          onCancel={() => setRejectingId(null)}
+                          onError={(message) => setFormError(message)}
+                          onSuccess={() => setRejectingId(null)}
+                        />
+                      ) : null}
                     </div>
                     <div className="flex flex-col items-end gap-2" style={{ minWidth: "9rem" }}>
                       {lead.promotedSalesLeadId ? (
@@ -606,11 +890,8 @@ export function ResearchDesk({ leads, metrics, researchers, filterStatus, filter
                           <button
                             type="button"
                             onClick={() => {
-                              void fetch("/api/admin/research-leads", {
-                                method: "PATCH",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({ id: lead.id, status: "rejected" }),
-                              }).then((r) => { if (r.ok) router.refresh(); });
+                              setFormError("");
+                              setRejectingId(lead.id);
                             }}
                             style={secondaryBtn}
                           >

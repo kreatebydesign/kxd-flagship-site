@@ -1,22 +1,47 @@
 /**
  * /api/admin/research-leads
  * POST — create research lead
- * PATCH — quick status update
+ * PATCH — status / grade / qualification evidence / reject reason
  */
 import { NextRequest, NextResponse } from "next/server";
 import { requirePayloadAdminApi } from "@/lib/admin/auth";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import {
+  RESEARCH_GRADES,
+  RESEARCH_REJECT_REASONS,
   RESEARCH_RESEARCHERS,
   RESEARCH_STATUSES,
   normalizeResearchIntake,
+  type ResearchGrade,
+  type ResearchRejectReason,
+  type ResearchStatus,
 } from "@/lib/research-leads";
 
 export const dynamic = "force-dynamic";
 
 const VALID_STATUSES = new Set(RESEARCH_STATUSES.map((s) => s.value));
 const VALID_RESEARCHERS = new Set(RESEARCH_RESEARCHERS.map((r) => r.value));
+const VALID_GRADES = new Set(RESEARCH_GRADES.map((g) => g.value));
+const VALID_REJECT_REASONS = new Set(RESEARCH_REJECT_REASONS.map((r) => r.value));
+
+function parseOptionalGrade(value: unknown): ResearchGrade | null | undefined {
+  if (value === undefined) return undefined;
+  if (value === null || value === "") return null;
+  if (typeof value === "string" && VALID_GRADES.has(value as ResearchGrade)) {
+    return value as ResearchGrade;
+  }
+  return undefined;
+}
+
+function parseOptionalRejectReason(value: unknown): ResearchRejectReason | null | undefined {
+  if (value === undefined) return undefined;
+  if (value === null || value === "") return null;
+  if (typeof value === "string" && VALID_REJECT_REASONS.has(value as ResearchRejectReason)) {
+    return value as ResearchRejectReason;
+  }
+  return undefined;
+}
 
 export async function POST(req: NextRequest) {
   const auth = await requirePayloadAdminApi();
@@ -25,7 +50,10 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    if (!body.researcherName?.trim() || !VALID_RESEARCHERS.has(body.researcherName.trim() as typeof RESEARCH_RESEARCHERS[number]["value"])) {
+    if (
+      !body.researcherName?.trim() ||
+      !VALID_RESEARCHERS.has(body.researcherName.trim() as (typeof RESEARCH_RESEARCHERS)[number]["value"])
+    ) {
       return NextResponse.json({ success: false, error: "Select a valid researcher." }, { status: 400 });
     }
 
@@ -89,10 +117,77 @@ export async function PATCH(req: NextRequest) {
   try {
     const body = await req.json();
     const id = Number(body.id);
-    const status = body.status;
 
-    if (!id || !status || !VALID_STATUSES.has(status as typeof RESEARCH_STATUSES[number]["value"])) {
-      return NextResponse.json({ success: false, error: "Valid id and status required." }, { status: 400 });
+    if (!id || !Number.isFinite(id)) {
+      return NextResponse.json({ success: false, error: "Valid id required." }, { status: 400 });
+    }
+
+    const hasStatus = body.status !== undefined;
+    const hasGrade = Object.prototype.hasOwnProperty.call(body, "grade");
+    const hasEvidence = Object.prototype.hasOwnProperty.call(body, "qualificationEvidence");
+    const hasRejectReason = Object.prototype.hasOwnProperty.call(body, "rejectReason");
+
+    if (!hasStatus && !hasGrade && !hasEvidence && !hasRejectReason) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Provide status, grade, qualificationEvidence, and/or rejectReason.",
+        },
+        { status: 400 },
+      );
+    }
+
+    const data: Record<string, unknown> = {};
+
+    if (hasStatus) {
+      const status = body.status;
+      if (!status || !VALID_STATUSES.has(status as ResearchStatus)) {
+        return NextResponse.json({ success: false, error: "Valid status required." }, { status: 400 });
+      }
+      data.status = status;
+
+      if (status === "rejected") {
+        const reason = parseOptionalRejectReason(body.rejectReason);
+        if (!reason) {
+          return NextResponse.json(
+            { success: false, error: "Select a reject reason when rejecting a lead." },
+            { status: 400 },
+          );
+        }
+        data.rejectReason = reason;
+      }
+    }
+
+    if (hasGrade) {
+      const grade = parseOptionalGrade(body.grade);
+      if (grade === undefined) {
+        return NextResponse.json({ success: false, error: "Valid grade required." }, { status: 400 });
+      }
+      data.grade = grade;
+    }
+
+    if (hasEvidence) {
+      if (typeof body.qualificationEvidence !== "string" && body.qualificationEvidence !== null) {
+        return NextResponse.json(
+          { success: false, error: "qualificationEvidence must be text." },
+          { status: 400 },
+        );
+      }
+      data.qualificationEvidence =
+        typeof body.qualificationEvidence === "string"
+          ? body.qualificationEvidence.trim() || null
+          : null;
+    }
+
+    if (hasRejectReason && !(hasStatus && body.status === "rejected")) {
+      const reason = parseOptionalRejectReason(body.rejectReason);
+      if (reason === undefined) {
+        return NextResponse.json(
+          { success: false, error: "Valid reject reason required." },
+          { status: 400 },
+        );
+      }
+      data.rejectReason = reason;
     }
 
     const payload = await getPayload({ config });
@@ -101,14 +196,15 @@ export async function PATCH(req: NextRequest) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       collection: "research-leads" as any,
       id,
-      data: { status },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      data: data as any,
     });
 
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("[KXD] Failed to update research lead:", err);
     return NextResponse.json(
-      { success: false, error: "Failed to update status." },
+      { success: false, error: "Failed to update research lead." },
       { status: 500 },
     );
   }

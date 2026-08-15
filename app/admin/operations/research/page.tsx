@@ -90,6 +90,11 @@ export default async function ResearchDeskPage({
       leadUrl: l.leadUrl ? String(l.leadUrl) : null,
       estimatedService: l.estimatedService ? String(l.estimatedService) : null,
       status: String(l.status ?? "new"),
+      grade: l.grade ? String(l.grade) : null,
+      rejectReason: l.rejectReason ? String(l.rejectReason) : null,
+      qualificationEvidence: l.qualificationEvidence
+        ? String(l.qualificationEvidence)
+        : null,
       createdAt: String(l.createdAt ?? ""),
       ageLabel: ageLabel(String(l.createdAt ?? "")),
       promotedSalesLeadId,

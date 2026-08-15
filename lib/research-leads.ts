@@ -69,3 +69,43 @@ export const RESEARCH_STATUS_COLOR: Record<string, string> = {
   "closed-won": "#C9A962",
   "closed-lost": "rgba(255,255,255,0.35)",
 };
+
+export const RESEARCH_GRADES = [
+  { value: "A+", label: "A+" },
+  { value: "A", label: "A" },
+  { value: "B", label: "B" },
+  { value: "C", label: "C" },
+  { value: "D", label: "D" },
+  { value: "F", label: "F" },
+] as const;
+
+export type ResearchGrade = (typeof RESEARCH_GRADES)[number]["value"];
+
+export const RESEARCH_REJECT_REASONS = [
+  { value: "spam", label: "Spam" },
+  { value: "international", label: "International" },
+  { value: "commission-only", label: "Commission-only" },
+  { value: "internship", label: "Internship" },
+  { value: "barter", label: "Barter" },
+  { value: "crypto", label: "Crypto" },
+  { value: "recruiter", label: "Recruiter" },
+  { value: "duplicate", label: "Duplicate" },
+  { value: "irrelevant", label: "Irrelevant" },
+  { value: "low-value", label: "Low-value" },
+  { value: "other", label: "Other" },
+] as const;
+
+export type ResearchRejectReason = (typeof RESEARCH_REJECT_REASONS)[number]["value"];
+
+export const RESEARCH_REJECT_REASON_LABEL: Record<string, string> = Object.fromEntries(
+  RESEARCH_REJECT_REASONS.map((r) => [r.value, r.label]),
+);
+
+export const RESEARCH_GRADE_COLOR: Record<string, string> = {
+  "A+": "#6fbf8f",
+  A: "#6fbf8f",
+  B: "#96d2c8",
+  C: "#E8C468",
+  D: "#d25a5a",
+  F: "#d25a5a",
+};
