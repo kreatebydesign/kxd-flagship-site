@@ -86,6 +86,17 @@ export type ClientHomePresentation = {
     allClearTitle: string;
     allClearLead: string;
   };
+  /** Batch 1 — plain-language performance story from ReportingFacts. */
+  valueStory: {
+    visible: boolean;
+    availability: string;
+    whatMovedForward: string;
+    whatItMeans: string;
+    strongestSignal: string | null;
+    whatKxdIsWatching: string;
+    smartestNextMove: string;
+    periodLabel: string;
+  } | null;
   accomplishments: ClientHomePresentationItem[];
   advancing: ClientHomePresentationItem[];
   performance: {
@@ -94,9 +105,18 @@ export type ClientHomePresentation = {
     statusNote: string | null;
     href: string | null;
   };
+  /** Batch 1 — hosting/domain care continuity (allowlisted). */
+  careContinuity: {
+    visible: boolean;
+    headline: string;
+    lead: string;
+    lines: Array<{ id: string; label: string; value: string; detail: string | null }>;
+    responsiblePartyLabel: string | null;
+  } | null;
   /** Future Lead & Business Impact band. Omit entirely when null. */
   businessImpact: ClientHomeBusinessImpact | null;
   services: ClientHomeService[];
+  nextMoves: ClientHomePresentationItem[];
 };
 
 const ZONE_MODULE: Record<PortalHomeZoneId, PortalModuleId | null> = {
@@ -276,6 +296,18 @@ function composePerformance(
     }
   }
 
+  // Avoid an empty “supporting detail” wall when the plain-language story
+  // already explains disconnected / new-tracking / preparing states.
+  const storyAvailability = workPerformance.clientValue?.performanceStory.availability;
+  if (
+    storyAvailability === "disconnected" ||
+    storyAvailability === "new-tracking" ||
+    storyAvailability === "not-entitled" ||
+    storyAvailability === "insufficient"
+  ) {
+    return { visible: false, facts: [], statusNote: null, href };
+  }
+
   return {
     visible: true,
     facts: [],
@@ -361,6 +393,31 @@ export function composeClientHomePresentation(input: {
     ? input.businessImpact!
     : null;
 
+  const value = workPerformance.clientValue;
+  const valueStory = value
+    ? {
+        visible: true,
+        availability: value.performanceStory.availability,
+        whatMovedForward: value.performanceStory.whatMovedForward,
+        whatItMeans: value.performanceStory.whatItMeans,
+        strongestSignal: value.performanceStory.strongestSignal,
+        whatKxdIsWatching: value.performanceStory.whatKxdIsWatching,
+        smartestNextMove: value.performanceStory.smartestNextMove,
+        periodLabel: value.performanceStory.periodLabel,
+      }
+    : null;
+
+  const careContinuity = value
+    ? {
+        // Keep calm empty-state copy; hide only when there is nothing useful to say.
+        visible: value.careContinuity.status !== "not-configured",
+        headline: value.careContinuity.headline,
+        lead: value.careContinuity.lead,
+        lines: value.careContinuity.lines,
+        responsiblePartyLabel: value.careContinuity.responsiblePartyLabel,
+      }
+    : null;
+
   return {
     welcome: {
       eyebrow:
@@ -376,6 +433,7 @@ export function composeClientHomePresentation(input: {
       allClearTitle: "Nothing needs your attention.",
       allClearLead: "You're all caught up.",
     },
+    valueStory,
     accomplishments: workPerformance.completedThisMonth.slice(0, 4).map((item) => ({
       id: item.id,
       title: item.title,
@@ -401,8 +459,16 @@ export function composeClientHomePresentation(input: {
       href: item.href,
     })),
     performance: composePerformance(workPerformance, ctx, services),
+    careContinuity,
     businessImpact,
     services,
+    nextMoves: workPerformance.nextMoves.slice(0, 3).map((move) => ({
+      id: move.id,
+      title: move.title,
+      detail: move.lead,
+      meta: null,
+      href: move.href,
+    })),
   };
 }
 

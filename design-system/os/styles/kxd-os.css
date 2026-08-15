@@ -20663,6 +20663,18 @@ html[data-theme="dark"] .kxd-os-theme-pref__option.is-active {
   margin-top: 0.5rem;
 }
 
+.kxd-ws-perf__stack-xs {
+  margin-top: 0.5rem;
+}
+
+.kxd-ws-perf__stack-sm {
+  margin-top: 0.75rem;
+}
+
+.kxd-ws-perf__stack-before {
+  margin-bottom: 0.75rem;
+}
+
 .kxd-ws-perf__metrics {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));

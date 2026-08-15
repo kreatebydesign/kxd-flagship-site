@@ -19,6 +19,8 @@ import {
   summarizeReportingFactProvenance,
 } from "@/lib/reporting/persistence";
 import type { PeriodWindow } from "@/lib/reporting/domain/types";
+import { loadClientReportingConnection } from "@/lib/reporting/providers/connection";
+import { loadClientValueCareInput } from "@/lib/portal/client-value/server";
 import { composeWorkPerformanceModel } from "./compose";
 import {
   dedupeMonthlySummaryItems,
@@ -204,13 +206,18 @@ export async function resolvePortalWorkPerformance(input: {
   );
   const reportingEntitled = reportingCapabilities.length > 0;
 
-  const [deliverableDocs, projectDocs, facts] = await Promise.all([
+  const [deliverableDocs, projectDocs, facts, connection, careInput] = await Promise.all([
     getPortalDeliverables(session),
     getPortalProjects(session),
     reportingEntitled
       ? loadReportingFacts({ clientId: session.clientId, period: reportingPeriod })
       : Promise.resolve([]),
+    loadClientReportingConnection(session.clientId),
+    loadClientValueCareInput(session.clientId),
   ]);
+
+  const scopedConnection =
+    connection && connection.clientId === session.clientId ? connection : null;
 
   const docs = deliverableDocs as unknown as Array<Record<string, unknown>>;
   const projects = projectDocs as unknown as Array<Record<string, unknown>>;
@@ -275,6 +282,9 @@ export async function resolvePortalWorkPerformance(input: {
     reportingEntitled,
     analyticsFreshnessNote: freshnessNote,
     nextMoveCandidates: nextMoves,
+    ga4Mapped: Boolean(scopedConnection?.ga4PropertyId),
+    gscMapped: Boolean(scopedConnection?.searchConsoleSiteUrl),
+    careInput,
   });
 }
 

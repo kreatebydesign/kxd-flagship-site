@@ -6,6 +6,10 @@
 import type { ReportingFact } from "@/lib/reporting/domain/types";
 import type { PeriodWindow } from "@/lib/reporting/domain/types";
 import { sanitizePortalHref } from "@/lib/portal/workspace-personalization/safe-routes";
+import {
+  composeClientValueProjection,
+  type ComposeCareContinuityInput,
+} from "@/lib/portal/client-value";
 import { MONTHLY_SUMMARY_SCOPE_NOTE, projectMonthlySummaryForPeriod } from "./monthly-summary";
 import { periodLabel } from "./period";
 import { deriveVerifiedWins } from "./wins";
@@ -39,6 +43,11 @@ export type ComposeWorkPerformanceInput = {
   reportingEntitled: boolean;
   analyticsFreshnessNote?: string | null;
   nextMoveCandidates: WorkPerformanceNextMove[];
+  /** Connection mapping flags — never property IDs. */
+  ga4Mapped?: boolean;
+  gscMapped?: boolean;
+  /** Allowlisted care input from infrastructure. */
+  careInput?: ComposeCareContinuityInput;
 };
 
 const METRIC_SPECS: Array<{
@@ -303,6 +312,18 @@ export function composeWorkPerformanceModel(
     }))
     .slice(0, 4);
 
+  const clientValue = composeClientValueProjection({
+    authorizedClientId: input.authorizedClientId,
+    sourceClientId: input.sourceClientId,
+    reportingFacts: input.reportingFacts,
+    reportingEntitled: input.reportingEntitled,
+    reportingPeriod: input.reportingPeriod,
+    ga4Mapped: Boolean(input.ga4Mapped),
+    gscMapped: Boolean(input.gscMapped),
+    nextMoveHint: nextMoves[0]?.lead ?? nextMoves[0]?.title ?? null,
+    care: input.careInput ?? {},
+  });
+
   return {
     clientId: input.authorizedClientId,
     clientName: input.clientName,
@@ -322,6 +343,7 @@ export function composeWorkPerformanceModel(
     leads,
     wins,
     nextMoves,
+    clientValue,
     emptyStates: {
       completed: {
         title: "No completed work recorded for this month",

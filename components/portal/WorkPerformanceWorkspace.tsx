@@ -56,6 +56,20 @@ export function WorkPerformanceWorkspace({
         </p>
       </header>
 
+      {model.clientValue ? (
+        <Section label="What moved forward">
+          <p className="kxd-os-body">{model.clientValue.performanceStory.whatMovedForward}</p>
+          <p className="kxd-os-meta kxd-ws-perf__stack-sm">
+            {model.clientValue.performanceStory.whatItMeans}
+          </p>
+          {model.clientValue.performanceStory.strongestSignal ? (
+            <p className="kxd-os-meta kxd-ws-perf__stack-xs">
+              {model.clientValue.performanceStory.strongestSignal}
+            </p>
+          ) : null}
+        </Section>
+      ) : null}
+
       {multiSite?.available && multiSite.totals ? (
         <Section label="Your authorized businesses">
           <p className="kxd-os-meta" style={{ marginBottom: "0.75rem" }}>
@@ -152,6 +166,33 @@ export function WorkPerformanceWorkspace({
         ) : null}
       </Section>
 
+      {model.clientValue &&
+      model.clientValue.careContinuity.status !== "not-configured" ? (
+        <Section label="Hosting & domain care">
+          <p className="kxd-os-card__title">{model.clientValue.careContinuity.headline}</p>
+          <p className="kxd-os-meta kxd-ws-perf__stack-xs">
+            {model.clientValue.careContinuity.lead}
+          </p>
+          {model.clientValue.careContinuity.responsiblePartyLabel ? (
+            <p className="kxd-os-meta kxd-ws-perf__stack-xs">
+              {model.clientValue.careContinuity.responsiblePartyLabel}
+            </p>
+          ) : null}
+          {model.clientValue.careContinuity.lines.length > 0 ? (
+            <ul className="kxd-ws-perf__list kxd-ws-perf__stack-sm">
+              {model.clientValue.careContinuity.lines.map((line) => (
+                <li key={line.id}>
+                  <p className="kxd-os-body">
+                    {line.label}: {line.value}
+                  </p>
+                  {line.detail ? <p className="kxd-os-meta">{line.detail}</p> : null}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </Section>
+      ) : null}
+
       <Section label="Website performance">
         {analytics.availability === "ready" && analytics.metrics.length > 0 ? (
           <>
@@ -218,6 +259,11 @@ export function WorkPerformanceWorkspace({
       </Section>
 
       <Section label="Recommended next moves">
+        {model.clientValue ? (
+          <p className="kxd-os-body kxd-ws-perf__stack-before">
+            {model.clientValue.performanceStory.smartestNextMove}
+          </p>
+        ) : null}
         {model.nextMoves.length === 0 ? (
           <Empty {...model.emptyStates.nextMoves} />
         ) : (

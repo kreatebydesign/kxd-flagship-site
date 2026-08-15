@@ -11348,6 +11348,26 @@
   line-height: 1.6;
 }
 
+.kxd-client-home__eyebrow--nested {
+  margin-top: 1.25rem;
+}
+
+.kxd-client-home__stack-xs {
+  margin-top: 0.5rem;
+}
+
+.kxd-client-home__stack-sm {
+  margin-top: 0.75rem;
+}
+
+.kxd-client-home__stack-md {
+  margin-top: 1rem;
+}
+
+.kxd-client-home__value-story .kxd-client-home__lead {
+  margin-top: 0.85rem;
+}
+
 .kxd-client-home__list,
 .kxd-client-home__service-list {
   display: flex;

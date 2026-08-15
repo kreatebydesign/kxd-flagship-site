@@ -77,6 +77,11 @@ export function CesClientCommandHome({
   engagementEyebrow?: string;
   engagementTitle?: string;
 }) {
+  const story = home.valueStory;
+  const care = home.careContinuity;
+  const showCare = Boolean(care?.visible);
+  const showWatchingFallback = Boolean(story) && !showCare;
+
   return (
     <div className="kxd-client-home">
       <header className="kxd-client-home__welcome">
@@ -114,11 +119,30 @@ export function CesClientCommandHome({
         )}
       </section>
 
+      {story ? (
+        <section
+          className="kxd-client-home__section kxd-client-home__value-story"
+          aria-labelledby="client-value-story-title"
+        >
+          <p className="kxd-client-home__eyebrow">What moved forward</p>
+          <h2 id="client-value-story-title" className="kxd-client-home__section-title">
+            Your website story
+          </h2>
+          <p className="kxd-client-home__lead">{story.whatMovedForward}</p>
+          <p className="kxd-client-home__eyebrow kxd-client-home__eyebrow--nested">What it means</p>
+          <p className="kxd-client-home__empty-note">{story.whatItMeans}</p>
+          {story.strongestSignal ? (
+            <p className="kxd-client-home__note kxd-client-home__stack-sm">{story.strongestSignal}</p>
+          ) : null}
+          <p className="kxd-os-meta kxd-client-home__stack-sm">Period: {story.periodLabel}</p>
+        </section>
+      ) : null}
+
       {showWork ? (
         <>
           <HomeListSection
             id="client-accomplishments-title"
-            eyebrow="What KXD accomplished"
+            eyebrow="What KXD completed"
             title="Completed work"
             items={home.accomplishments}
             emptyLead="No completed work has been recorded for this period yet."
@@ -133,9 +157,48 @@ export function CesClientCommandHome({
         </>
       ) : null}
 
+      {showCare && care ? (
+        <section
+          className="kxd-client-home__section kxd-client-home__care"
+          aria-labelledby="client-care-title"
+        >
+          <p className="kxd-client-home__eyebrow">Hosting &amp; domain care</p>
+          <h2 id="client-care-title" className="kxd-client-home__section-title">
+            {care.headline}
+          </h2>
+          <p className="kxd-client-home__empty-note">{care.lead}</p>
+          {care.responsiblePartyLabel ? (
+            <p className="kxd-client-home__note kxd-client-home__stack-xs">
+              {care.responsiblePartyLabel}
+            </p>
+          ) : null}
+          {care.lines.length > 0 ? (
+            <dl className="kxd-client-home__facts kxd-client-home__stack-md">
+              {care.lines.map((line) => (
+                <div key={line.id}>
+                  <dt>{line.label}</dt>
+                  <dd>{line.value}</dd>
+                  {line.detail ? <p>{line.detail}</p> : null}
+                </div>
+              ))}
+            </dl>
+          ) : null}
+        </section>
+      ) : null}
+
+      {showWatchingFallback && story ? (
+        <section className="kxd-client-home__section" aria-labelledby="client-watching-title">
+          <p className="kxd-client-home__eyebrow">Partnership care</p>
+          <h2 id="client-watching-title" className="kxd-client-home__section-title">
+            What KXD continues to handle
+          </h2>
+          <p className="kxd-client-home__empty-note">{story.whatKxdIsWatching}</p>
+        </section>
+      ) : null}
+
       {home.performance.visible ? (
         <section className="kxd-client-home__performance" aria-labelledby="client-performance-title">
-          <p className="kxd-client-home__eyebrow">How the business is performing</p>
+          <p className="kxd-client-home__eyebrow">Supporting detail</p>
           <h2 id="client-performance-title" className="kxd-client-home__section-title">
             Website &amp; search activity
           </h2>
@@ -173,9 +236,30 @@ export function CesClientCommandHome({
               <HomeItem key={item.id} item={item} />
             ))}
           </ul>
-          {home.businessImpact.note ? <p className="kxd-client-home__note">{home.businessImpact.note}</p> : null}
+          {home.businessImpact.note ? (
+            <p className="kxd-client-home__note">{home.businessImpact.note}</p>
+          ) : null}
         </section>
       ) : null}
+
+      {(story || home.nextMoves.length > 0) && (
+        <section className="kxd-client-home__section" aria-labelledby="client-next-title">
+          <p className="kxd-client-home__eyebrow">What should happen next</p>
+          <h2 id="client-next-title" className="kxd-client-home__section-title">
+            Smartest next move
+          </h2>
+          {story ? (
+            <p className="kxd-client-home__empty-note">{story.smartestNextMove}</p>
+          ) : null}
+          {home.nextMoves.length > 0 ? (
+            <ul className="kxd-client-home__list kxd-client-home__stack-md">
+              {home.nextMoves.map((item) => (
+                <HomeItem key={item.id} item={item} />
+              ))}
+            </ul>
+          ) : null}
+        </section>
+      )}
 
       {home.services.length > 0 ? (
         <section className="kxd-client-home__services" aria-labelledby="client-services-title">

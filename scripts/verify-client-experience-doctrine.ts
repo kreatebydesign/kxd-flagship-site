@@ -149,6 +149,7 @@ const work = {
   },
   wins: [],
   nextMoves: [],
+  clientValue: null,
   monthlySummaryScopeNote: "Recorded work only.",
   emptyStates: {
     completed: { title: "None", lead: "None" },

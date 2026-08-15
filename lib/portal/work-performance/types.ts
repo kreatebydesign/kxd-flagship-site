@@ -3,6 +3,8 @@
  * Authorization never trusts this model from the browser.
  */
 
+import type { ClientValueProjection } from "@/lib/portal/client-value";
+
 export type WorkPerformanceAvailability =
   | "ready"
   | "empty"
@@ -112,6 +114,8 @@ export type WorkPerformanceModel = {
   leads: WorkPerformanceLeads;
   wins: WorkPerformanceWin[];
   nextMoves: WorkPerformanceNextMove[];
+  /** Batch 1 — plain-language value story + care continuity (optional until composed). */
+  clientValue: ClientValueProjection | null;
   /** Honest scope for the monthly completed-work summary (Batch 5A). */
   monthlySummaryScopeNote: string;
   emptyStates: {
