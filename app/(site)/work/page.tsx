@@ -18,13 +18,14 @@ import { breadcrumbSchema, itemListSchema } from "@/lib/seo/schema";
 export const metadata: Metadata = buildMetadata({
   title: "Work",
   description:
-    "Selected work from Kreate by Design — luxury websites, brand systems, growth infrastructure, and operational platforms across ambitious brands.",
+    "Selected work from Kreate by Design — website redesigns, brand systems, growth infrastructure, and operational platforms for ambitious businesses.",
   path: "/work",
   keywords: [
-    "Luxury Website Design",
+    "Website Redesign Portfolio",
     "Premium Web Design Portfolio",
     "Brand Systems Agency",
     "Growth Infrastructure",
+    "Client Portal Case Studies",
   ],
 });
 
@@ -187,9 +188,9 @@ export default async function WorkPage() {
               maxWidth: "34rem",
             }}
           >
-            Selected work across ambitious brands, local leaders, and growing
-            companies — each built with the same level of care, clarity, and
-            intent.
+            Selected work across motorsports, automotive, service businesses,
+            and hospitality — websites, growth infrastructure, and operational
+            systems built with the same standard of clarity and intent.
           </p>
 
           {totalCount > 0 && (

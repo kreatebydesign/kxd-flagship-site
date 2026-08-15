@@ -5,34 +5,34 @@ import { buildMetadata } from "@/lib/seo/metadata";
 import { breadcrumbSchema, webPageSchema } from "@/lib/seo/schema";
 
 export const metadata: Metadata = buildMetadata({
-  title: "KXD Intelligence — Website Diagnostic",
+  title: "KXD Intelligence — Website Audit",
   description:
-    "KXD Intelligence is our AI-powered website diagnostic — a strategic review across performance, SEO, mobile experience, conversion, and brand presentation with clear prioritized improvements.",
+    "Something about your website isn't working the way it should. KXD Intelligence reviews homepage performance, SEO foundations, mobile readiness, conversion paths, and brand presentation — then shows where the pressure is.",
   path: "/website-audit",
   keywords: [
     "KXD Intelligence",
-    "Website Diagnostic",
-    "AI Website Audit",
-    "Website Performance Review",
-    "SEO Audit",
-    "Luxury Web Design Audit",
-    "Website Scorecard",
+    "Website Audit",
+    "Website Performance",
+    "Website Redesign Diagnostic",
+    "Website Problems",
+    "Conversion Path Review",
+    "Website Quality Review",
   ],
 });
 
 const TRUST = [
-  "Instant results",
-  "No generic SaaS templates",
-  "Built for serious brands",
-  "Reviewed by KXD strategy team",
+  "Instant diagnostic",
+  "Honest scorecard",
+  "No generic SEO report dump",
+  "Built to start the right conversation",
 ] as const;
 
 const SIGNALS = [
-  { label: "Performance", desc: "Load speed and page weight signals" },
-  { label: "SEO", desc: "Titles, meta data, and hierarchy" },
-  { label: "Mobile", desc: "Viewport and mobile readiness" },
-  { label: "Conversion", desc: "CTAs, forms, and lead paths" },
-  { label: "Brand", desc: "Typography, identity, and polish" },
+  { label: "Performance", desc: "Response speed and page weight signals" },
+  { label: "SEO", desc: "Titles, meta data, and heading hierarchy" },
+  { label: "Mobile", desc: "Viewport and mobile readiness cues" },
+  { label: "Conversion", desc: "CTAs, forms, and inquiry path signals" },
+  { label: "Brand", desc: "Typography, identity cues, and presentation polish" },
 ] as const;
 
 const SIGNAL_SUMMARY = SIGNALS.map((s) => s.label).join(" · ");
@@ -43,9 +43,9 @@ export default function WebsiteAuditPage() {
       { name: "KXD Intelligence", path: "/website-audit" },
     ]),
     webPageSchema({
-      title: "KXD Intelligence — Website Diagnostic",
+      title: "KXD Intelligence — Website Audit",
       description:
-        "AI-powered website diagnostic across performance, SEO, mobile, conversion, and brand presentation.",
+        "Diagnostic website audit across performance, SEO, mobile, conversion, and brand presentation.",
       path: "/website-audit",
     }),
   ];
@@ -66,13 +66,14 @@ export default function WebsiteAuditPage() {
           <p className="kxd-eyebrow">KXD Intelligence</p>
           <h1
             className="kxd-serif-title mt-5"
-            style={{ fontSize: "clamp(2.25rem, 4.8vw, 3.5rem)", maxWidth: "36rem", lineHeight: 1.05 }}
+            style={{ fontSize: "clamp(2.25rem, 4.8vw, 3.5rem)", maxWidth: "38rem", lineHeight: 1.05 }}
           >
-            Know where your website stands — before you invest in the next version.
+            Something about the website isn&apos;t working the way it should.
           </h1>
-          <p className="kxd-body mt-6" style={{ maxWidth: "38rem", lineHeight: 1.8 }}>
-            A focused audit across performance, SEO, mobile experience, conversion, and brand
-            presentation. Clear scores, honest opportunities, and a path forward — not enterprise SEO noise.
+          <p className="kxd-body mt-6" style={{ maxWidth: "40rem", lineHeight: 1.8 }}>
+            KXD Intelligence evaluates your homepage to surface meaningful issues and
+            opportunities — performance, discoverability, mobile experience, inquiry paths,
+            and brand presentation. Clear scores. Honest gaps. A useful next step.
           </p>
           <div className="mt-10 flex flex-wrap gap-x-8 gap-y-3">
             {TRUST.map((item) => (
@@ -97,10 +98,11 @@ export default function WebsiteAuditPage() {
             <div className="kxd-audit-panel">
               <div className="kxd-audit-panel__header">
                 <p className="kxd-eyebrow" style={{ opacity: 0.65 }}>Start Your Audit</p>
-                <h2 className="kxd-audit-panel__title">Submit your website</h2>
+                <h2 className="kxd-audit-panel__title">Run the diagnostic</h2>
                 <p className="kxd-audit-panel__lede">
-                  Enter your details and URL. KXD analyzes your homepage signals and generates a
-                  scorecard with prioritized improvements.
+                  Enter your details and URL. KXD analyzes publicly visible homepage signals
+                  and returns a scorecard with prioritized observations — not an enterprise
+                  crawl dump.
                 </p>
               </div>
               <div className="kxd-audit-panel__body">
@@ -111,7 +113,7 @@ export default function WebsiteAuditPage() {
             <aside className="flex flex-col gap-6">
               <div className="kxd-audit-panel">
                 <div className="kxd-audit-panel__header">
-                  <p className="kxd-eyebrow" style={{ opacity: 0.65 }}>What We Measure</p>
+                  <p className="kxd-eyebrow" style={{ opacity: 0.65 }}>What We Evaluate</p>
                   <p className="kxd-audit-panel__lede">{SIGNAL_SUMMARY}</p>
                 </div>
                 <div>
@@ -142,7 +144,9 @@ export default function WebsiteAuditPage() {
                   paddingInline: "0.125rem",
                 }}
               >
-                &ldquo;This isn&rsquo;t a crawler report — it&rsquo;s a strategic snapshot built to start the right conversation.&rdquo;
+                &ldquo;Diagnosis first. Then a clear path toward the KXD capability that
+                actually fits — website, growth, or deeper systems when the business needs
+                them.&rdquo;
               </p>
             </aside>
           </div>

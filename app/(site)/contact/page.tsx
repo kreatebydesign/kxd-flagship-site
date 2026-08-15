@@ -7,13 +7,13 @@ import { absoluteUrl, buildMetadata } from "@/lib/seo/metadata";
 const CONTACT_CANONICAL_PATH = "/contact";
 
 const contactMetadata = buildMetadata({
-  title: "Start a Project",
+  title: "Contact",
   description:
-    "Apply to work with Kreate by Design. KXD takes on a limited number of engagements — each reviewed personally to ensure the right fit.",
+    "Reach Kreate by Design for website, growth infrastructure, and platform conversations. Every inquiry is reviewed personally for fit.",
   path: CONTACT_CANONICAL_PATH,
   keywords: [
-    "Hire Luxury Web Designer",
-    "Premium Web Design Agency Contact",
+    "Contact Kreate by Design",
+    "Hire Premium Web Designer",
     "Start a Web Design Project",
     "KXD Project Inquiry",
   ],

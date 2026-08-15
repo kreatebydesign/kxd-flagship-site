@@ -29,12 +29,12 @@ export const OUTCOME_CAPABILITY_VISUALS: Record<string, WorkVisual> = {
     label: "Primal Motorsports",
     objectPosition: "top center",
   },
-  Branding: {
-    src: "/media/cusickmotorsports-com-full-brand-2026-06-15T06-05-15-2400x1350.png",
-    alt: "Cusick Morgan Motorsports — brand identity systems",
-    href: "/work/cusick-morgan-motorsports",
-    label: "Cusick Morgan Motorsports",
-    objectPosition: "center",
+  Growth: {
+    src: "/images/work/screenshots/martinsen-construction/desktop-home.webp",
+    alt: "Martinsen Construction — contractor website rebuild",
+    href: "/work/martinsen-construction",
+    label: "Martinsen Construction",
+    objectPosition: "top",
   },
   Systems: {
     src: "/migrated-assets/case-studies/primal-motorsports/ops-hero.webp",
@@ -73,9 +73,10 @@ export const SYSTEMS_MOMENTUM_VISUALS: WorkVisual[] = [
   },
 ];
 
+/** Homepage proof mix: systems/motorsports + automotive/motorsports + contractor/service */
 export const HOMEPAGE_CASE_STUDY_SLUGS = {
   featured: "primal-motorsports",
-  secondary: ["cusick-morgan-motorsports", "spur-restaurant"] as const,
+  secondary: ["cusick-morgan-motorsports", "martinsen-construction"] as const,
 };
 
 export const PROCESS_EXECUTION_VISUAL: WorkVisual = {

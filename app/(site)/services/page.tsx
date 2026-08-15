@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getPayload } from "payload";
-import config from "@payload-config";
+import {
+  STATIC_SERVICE_DETAILS,
+  STATIC_SERVICE_SLUGS,
+} from "@/lib/content/service-details";
 import { HOMEPAGE_SERVICES } from "@/lib/homepage";
 import { FinalCtaBand } from "@/components/ui/FinalCtaBand";
 import { GoldAtmosphere } from "@/components/ui/surfaces/GoldAtmosphere";
@@ -12,88 +14,55 @@ import { StructuredData } from "@/components/seo/StructuredData";
 export const metadata: Metadata = buildMetadata({
   title: "Services",
   description:
-    "Luxury websites, brand systems, growth infrastructure, and operational platforms — built with discipline by Kreate by Design.",
+    "Brand systems, website experiences, growth infrastructure, and operational platforms — built with discipline by Kreate by Design.",
   path: "/services",
   keywords: [
-    "Luxury Website Design",
-    "Los Angeles Web Design",
+    "Website Redesign",
+    "Brand Systems",
     "Growth Infrastructure",
     "Operational Systems",
+    "Client Portals",
   ],
 });
 
 interface ServiceItem {
   slug: string;
   title: string;
-  category: string;
+  categoryLabel: string;
   headline: string;
   summary: string;
   bestFor: string[];
   ctaLabel: string;
-  featured: boolean;
 }
 
-const CATEGORY_NAMES: Record<string, string> = {
-  "luxury-websites": "Flagship Offering",
-  "brand-systems-identity": "Brand",
-  "growth-infrastructure": "Growth",
-  "operational-platforms": "Platforms",
-  "enterprise-systems": "Enterprise",
-  ecommerce: "Commerce",
-  "ongoing-partnership": "Partnership",
-};
+/**
+ * Overview uses static service details in homepage ladder order so CMS seed
+ * copy cannot drift acquisition positioning.
+ */
+function fetchServices(): ServiceItem[] {
+  const orderedSlugs = [
+    ...HOMEPAGE_SERVICES.map((s) => String(s.slug)),
+    ...STATIC_SERVICE_SLUGS.filter(
+      (slug) => !HOMEPAGE_SERVICES.some((s) => s.slug === slug),
+    ),
+  ];
 
-function categoryDisplay(cat: string): string {
-  return CATEGORY_NAMES[cat] ?? cat;
+  return orderedSlugs
+    .map((slug) => STATIC_SERVICE_DETAILS[slug])
+    .filter(Boolean)
+    .map((detail) => ({
+      slug: detail.slug,
+      title: detail.title,
+      categoryLabel: detail.categoryLabel,
+      headline: detail.headline,
+      summary: detail.summary,
+      bestFor: detail.bestFor.slice(0, 3),
+      ctaLabel: "Explore Service",
+    }));
 }
 
-async function fetchServices(): Promise<ServiceItem[]> {
-  try {
-    const payload = await getPayload({ config });
-    const { docs } = await payload.find({
-      collection: "services",
-      where: { status: { equals: "published" } },
-      sort: "order",
-      limit: 20,
-      depth: 0,
-    });
-
-    if (docs.length > 0) {
-      return (docs as unknown as Array<Record<string, unknown>>).map((doc) => ({
-        slug: String(doc.slug),
-        title: String(doc.title),
-        category: String(doc.category),
-        headline: String((doc.headline as string) || doc.title),
-        summary: String(doc.summary),
-        bestFor: (
-          Array.isArray(doc.bestFor)
-            ? (doc.bestFor as Array<{ item: string }>)
-            : []
-        )
-          .slice(0, 3)
-          .map((b) => b.item),
-        ctaLabel: String((doc.ctaLabel as string) || "Explore Service"),
-        featured: Boolean(doc.featured),
-      }));
-    }
-  } catch {
-    // fall through to static data
-  }
-
-  return HOMEPAGE_SERVICES.map((s) => ({
-    slug: String(s.slug),
-    title: s.title,
-    category: String(s.slug),
-    headline: s.summary,
-    summary: s.creates,
-    bestFor: [s.forWho],
-    ctaLabel: String(s.cta),
-    featured: s.primary,
-  }));
-}
-
-export default async function ServicesPage() {
-  const services = await fetchServices();
+export default function ServicesPage() {
+  const services = fetchServices();
 
   return (
     <>
@@ -130,10 +99,10 @@ export default async function ServicesPage() {
               color: "var(--kxd-cream)",
             }}
           >
-            Built for Brands
+            Presence. Growth.
             <br />
             <em style={{ fontStyle: "italic", color: "var(--kxd-cream-soft)" }}>
-              Ready to Grow.
+              Deeper Systems.
             </em>
           </h1>
 
@@ -143,12 +112,12 @@ export default async function ServicesPage() {
               fontSize: "clamp(1rem, 1.5vw, 1.1875rem)",
               lineHeight: 1.8,
               color: "var(--kxd-cream-muted)",
-              maxWidth: "38rem",
+              maxWidth: "40rem",
             }}
           >
-            Digital experiences, operational systems, and growth infrastructure
-            designed to support ambitious businesses through every stage of
-            expansion.
+            KXD starts where the business needs clarity most — brand, website,
+            growth infrastructure, or operational platforms — and goes deeper
+            only when the work requires it.
           </p>
         </div>
       </section>
@@ -167,7 +136,7 @@ export default async function ServicesPage() {
             maxWidth: "64rem",
           }}
         >
-          <p className="kxd-eyebrow">How We Work</p>
+          <p className="kxd-eyebrow">How Engagements Move</p>
 
           <h2
             className="mt-5 font-serif font-light"
@@ -178,8 +147,8 @@ export default async function ServicesPage() {
               maxWidth: "28ch",
             }}
           >
-            We don&apos;t offer disconnected services. We build systems designed to
-            create momentum.
+            Enter through brand, website, growth, or systems. Expand only when
+            it makes business sense.
           </h2>
 
           <p
@@ -191,9 +160,11 @@ export default async function ServicesPage() {
               maxWidth: "40rem",
             }}
           >
-            Every engagement combines strategy, execution, and long-term thinking
-            to strengthen brands, improve operations, and support sustainable
-            growth.
+            Some clients need a stronger presence. Others need measurement and
+            demand structure. A smaller set needs portals, workflows, and
+            operational infrastructure. KXD stays involved deeper than a
+            traditional agency when the business requires it — without forcing
+            every engagement into a funnel.
           </p>
         </div>
       </section>
@@ -235,7 +206,7 @@ export default async function ServicesPage() {
                           padding: "0.25rem 0.625rem",
                         }}
                       >
-                        {categoryDisplay(service.category)}
+                        {service.categoryLabel}
                       </span>
 
                       <h2
@@ -247,7 +218,7 @@ export default async function ServicesPage() {
                           color: "var(--kxd-cream)",
                         }}
                       >
-                        {service.headline}
+                        {service.title}
                       </h2>
 
                       <p
@@ -340,7 +311,7 @@ export default async function ServicesPage() {
 
       <FinalCtaBand
         headline="Ready to Build With Intention?"
-        subCopy="KXD partners with a limited number of brands each year to create digital experiences and operational systems designed for long-term growth."
+        subCopy="KXD partners with a limited number of businesses at a time — whether the next step is presence, growth, or deeper systems."
         secondaryHref="/investment"
         secondaryLabel="View Investment"
       />

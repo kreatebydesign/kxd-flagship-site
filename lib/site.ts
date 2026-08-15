@@ -2,9 +2,9 @@ export const SITE = {
   name: "Kreate by Design",
   shortName: "KXD",
   tagline:
-    "Luxury digital experiences, growth infrastructure, and operational systems.",
+    "Premium websites, growth infrastructure, and operational systems.",
   description:
-    "Kreate by Design — luxury websites, growth infrastructure, and operational platforms. Los Angeles, California. Built with discipline.",
+    "Kreate by Design builds premium websites, growth infrastructure, and operational platforms for ambitious businesses across the United States. Studio based in Los Angeles, California.",
   url: process.env.NEXT_PUBLIC_SITE_URL || "https://www.kreatebydesign.com",
   locale: "en_US",
   email: "matt@kreatebydesign.com",
@@ -26,7 +26,9 @@ export const SITE = {
 
 export const HEADER_NAV = [
   { label: "Home", href: "/" },
-  { label: "Projects", href: "/work" },
+  { label: "Work", href: "/work" },
+  { label: "Services", href: "/services" },
+  { label: "Platforms", href: "/platforms" },
   { label: "About Us", href: "/about" },
 ] as const;
 

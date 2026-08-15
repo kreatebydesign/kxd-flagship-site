@@ -22,7 +22,7 @@ export function absoluteUrl(path = "/"): string {
 export function buildMetadata(input: SeoInput = {}): Metadata {
   const title = input.title
     ? `${input.title} · ${SITE.shortName}`
-    : `${SITE.shortName} · Luxury Digital Experiences & Infrastructure`;
+    : `${SITE.shortName} · ${SITE.tagline}`;
 
   const description = input.description || SITE.description;
   const path = input.path || "/";

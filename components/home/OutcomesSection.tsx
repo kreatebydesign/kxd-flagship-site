@@ -8,27 +8,27 @@ import {
 const CAPABILITIES = [
   {
     category: "Websites",
-    headline: "Websites designed to be remembered.",
+    headline: "Presence that earns the next conversation.",
     result:
-      "We create digital experiences that build trust, shape perception, and help businesses stand apart.",
+      "Website experiences and redesigns that strengthen market presence, clarify the offer, and convert qualified interest.",
   },
   {
-    category: "Branding",
-    headline: "Brands built with intention.",
+    category: "Growth",
+    headline: "Demand with structure behind it.",
     result:
-      "Identity systems designed to create clarity, recognition, and lasting impact.",
+      "Lead pathways, analytics, and discovery infrastructure that turn attention into clearer customer journeys.",
   },
   {
     category: "Systems",
-    headline: "Systems built to scale.",
+    headline: "Operations that match the brand.",
     result:
-      "Operational infrastructure, automations, and internal tools designed to support growth behind the scenes.",
+      "Portals, workflows, and internal infrastructure designed to support how the business actually runs.",
   },
   {
     category: "Partnership",
     headline: "Partnerships built for what's next.",
     result:
-      "Ongoing creative and strategic support for businesses committed to long-term growth.",
+      "Ongoing creative and operating support for businesses committed to compounding growth.",
   },
 ] as const;
 
@@ -53,7 +53,7 @@ export function OutcomesSection() {
                 maxWidth: "26rem",
               }}
             >
-              Built for every stage of your growth.
+              Premium presence. Qualified demand. Operational clarity.
             </h2>
 
             <p
@@ -63,9 +63,9 @@ export function OutcomesSection() {
                 lineHeight: 1.85,
               }}
             >
-              KXD builds the website, the brand, and the systems behind it.
-              Every engagement is structured to create output that compounds
-              in value long after the work is delivered.
+              KXD builds the website, the growth layer, and the systems behind
+              them — so established businesses look sharp, convert better, and
+              operate with less friction.
             </p>
 
             <Link
@@ -184,19 +184,19 @@ export function OutcomesSection() {
         >
           {[
             {
-              title: "Positioning",
+              title: "Presence",
               description:
-                "Strengthening how brands are perceived by the people they want to reach.",
+                "Strengthening how established businesses are perceived before the first conversation.",
+            },
+            {
+              title: "Demand",
+              description:
+                "Clearer journeys from interest to inquiry — built for conversion quality, not vanity traffic.",
             },
             {
               title: "Operations",
               description:
-                "Creating clarity and efficiency through better systems and workflows.",
-            },
-            {
-              title: "Growth",
-              description:
-                "Building infrastructure capable of supporting what comes next.",
+                "Infrastructure that supports growth behind the brand without becoming generic software.",
             },
           ].map((pillar) => (
             <div key={pillar.title}>

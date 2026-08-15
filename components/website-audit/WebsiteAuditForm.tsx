@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { ANALYTICS_EVENTS } from "@/lib/analytics/config";
+import { trackPublicEvent } from "@/lib/analytics/track";
 
 type FormState = "idle" | "submitting" | "error";
 
@@ -19,6 +21,10 @@ export function WebsiteAuditForm() {
     setState("submitting");
     setError("");
 
+    trackPublicEvent(ANALYTICS_EVENTS.websiteAuditStarted, {
+      has_company: Boolean(company.trim()),
+    });
+
     try {
       const res = await fetch("/api/website-audit", {
         method: "POST",
@@ -31,6 +37,14 @@ export function WebsiteAuditForm() {
         setState("error");
         return;
       }
+
+      trackPublicEvent(ANALYTICS_EVENTS.websiteAuditCompleted, {
+        audit_id: String(data.id ?? ""),
+        grade: data.grade ? String(data.grade) : undefined,
+        score:
+          typeof data.overallScore === "number" ? data.overallScore : undefined,
+      });
+
       router.push(`/website-audit/results/${data.id}`);
     } catch {
       setError("Network error. Please try again.");
@@ -77,7 +91,9 @@ export function WebsiteAuditForm() {
 
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
-          <label className="font-sans" style={labelStyle}>Name</label>
+          <label className="font-sans" style={labelStyle}>
+            Name
+          </label>
           <input
             required
             value={name}
@@ -88,7 +104,9 @@ export function WebsiteAuditForm() {
           />
         </div>
         <div>
-          <label className="font-sans" style={labelStyle}>Email</label>
+          <label className="font-sans" style={labelStyle}>
+            Email
+          </label>
           <input
             type="email"
             required
@@ -103,7 +121,9 @@ export function WebsiteAuditForm() {
 
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
-          <label className="font-sans" style={labelStyle}>Company</label>
+          <label className="font-sans" style={labelStyle}>
+            Company
+          </label>
           <input
             value={company}
             onChange={(e) => setCompany(e.target.value)}
@@ -113,7 +133,9 @@ export function WebsiteAuditForm() {
           />
         </div>
         <div>
-          <label className="font-sans" style={labelStyle}>Website URL</label>
+          <label className="font-sans" style={labelStyle}>
+            Website URL
+          </label>
           <input
             type="url"
             required
@@ -132,14 +154,15 @@ export function WebsiteAuditForm() {
         className="kxd-btn-primary font-sans uppercase disabled:opacity-50"
         style={{ fontSize: "0.625rem", letterSpacing: "0.14em", marginTop: "0.5rem" }}
       >
-        {state === "submitting" ? "Analyzing Website…" : "Submit Audit →"}
+        {state === "submitting" ? "Analyzing Website…" : "Run KXD Intelligence →"}
       </button>
 
       <p
         className="font-sans font-light"
         style={{ fontSize: "0.6875rem", color: "rgba(255,255,255,0.28)", lineHeight: 1.6 }}
       >
-        Free instant report. No spam. KXD uses this to prepare a relevant strategy conversation.
+        Instant diagnostic. Results stay private to you. Contact details help KXD prepare a
+        relevant follow-up if you choose to continue.
       </p>
     </form>
   );

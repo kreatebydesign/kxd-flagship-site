@@ -20,7 +20,7 @@ Platforms, pricing, and insights remain separate routes — not homepage section
 ## Hero Composition
 
 ```
-[Eyebrow / meta]          EST. 2020 · Portland, Oregon (or live location)
+[Eyebrow / meta]          EST. 2020 · Los Angeles studio · United States
 
 LUXURY                    ← Cormorant, uppercase, stacked
 WEBDESIGN                 ← second line, same display system
@@ -36,6 +36,7 @@ SCROLL ↓
 - Background: `#0a0a0a` → `#070707` gradient + gold radial glow + noise overlay
 - No sentence-case soft headline
 - No blue primary button — gold gradient or white ghost
+- Do not use Portland / Oregon / PNW as KXD acquisition geography
 
 ## Services — "Built Beyond Standards."
 
@@ -84,4 +85,4 @@ Foundation tokens and utilities are corrected. **Page components are not rebuilt
 
 Structured data: Organization + LocalBusiness + WebSite on homepage publish.
 
-Primary keywords: Luxury Website Design, Portland Web Design Agency.
+Primary keywords: Luxury Website Design, Premium Website Design (national). Supporting: California studio equity. Do not target Portland / Oregon agency keywords.

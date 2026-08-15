@@ -33,11 +33,11 @@ export function WebsiteAuditorSection() {
                 lineHeight: 1.85,
               }}
             >
-              KXD Intelligence is our proprietary, AI-powered diagnostic — the
-              same strategic lens we apply to every KXD build. It reviews
-              performance, discoverability, experience, conversion, and brand
-              presentation, then delivers a prioritized scorecard with clear next
-              steps.
+              KXD Intelligence is our proprietary diagnostic — the same
+              strategic lens we apply before a rebuild or systems engagement.
+              It reviews performance, discoverability, experience, conversion,
+              and brand presentation, then delivers a prioritized scorecard
+              that starts the right conversation.
             </p>
 
             <p
@@ -49,7 +49,8 @@ export function WebsiteAuditorSection() {
                 maxWidth: "32rem",
               }}
             >
-              A considered assessment before you invest in what comes next.
+              Diagnosis first. Then a clear path toward the KXD solution that
+              fits.
             </p>
 
             <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
@@ -57,10 +58,10 @@ export function WebsiteAuditorSection() {
                 Run KXD Intelligence
               </Link>
               <Link
-                href="/website-audit"
+                href="/work"
                 className="kxd-ui-label text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)]"
               >
-                How the diagnostic works →
+                See how we rebuild →
               </Link>
             </div>
           </div>

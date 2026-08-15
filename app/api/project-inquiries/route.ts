@@ -30,6 +30,9 @@ export async function POST(request: Request) {
     timeline,
     assetsAvailable,
     notes,
+    referralSource,
+    inquirySource,
+    auditId,
   } = body;
 
   if (!companyName || !contactName || !email) {
@@ -38,6 +41,28 @@ export async function POST(request: Request) {
       { status: 422 },
     );
   }
+
+  const sourceLabel =
+    String(inquirySource || referralSource || "") === "kxd-intelligence" ||
+    String(inquirySource || "") === "website-audit" ||
+    String(notes || "").includes("[KXD Intelligence context]")
+      ? "KXD Intelligence"
+      : "Start Project";
+
+  const notesWithAttribution = (() => {
+    const base = notes ? String(notes) : "";
+    const referral = referralSource ? String(referralSource) : "";
+    const audit = auditId ? String(auditId) : "";
+    if (!referral && !audit) return base || undefined;
+    const meta = [
+      referral ? `Referral source: ${referral}` : null,
+      audit ? `Audit ID: ${audit}` : null,
+    ]
+      .filter(Boolean)
+      .join("\n");
+    if (base.includes("Referral source:") || base.includes("Audit ID:")) return base;
+    return base ? `${base}\n\n${meta}` : meta;
+  })();
 
   // ── Save to Payload ───────────────────────────────────────────────────────
   let inquiry: { id: number | string } | null = null;
@@ -65,7 +90,7 @@ export async function POST(request: Request) {
           : assetsAvailable
             ? String(assetsAvailable)
             : undefined,
-        notes: notes ? String(notes) : undefined,
+        notes: notesWithAttribution,
         status: "new",
         submittedAt: new Date().toISOString(),
       },
@@ -97,11 +122,11 @@ export async function POST(request: Request) {
         from: "Kreate by Design <matt@kreatebydesign.com>",
         to,
         replyTo: String(email),
-        subject: `New Project Application — ${String(companyName)} (${String(contactName)})`,
+        subject: `New Project Application — ${String(companyName)} (${sourceLabel})`,
         html: `
 <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:32px;background:#0a0a0a;color:#e8ded0;">
   <div style="border-bottom:1px solid rgba(197,166,92,0.3);padding-bottom:24px;margin-bottom:28px;">
-    <p style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#C5A65C;margin:0 0 8px;">KXD Project Application</p>
+    <p style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#C5A65C;margin:0 0 8px;">KXD Project Application · ${sourceLabel}</p>
     <h1 style="font-size:22px;font-weight:300;color:#f8f3ea;margin:0;">${String(companyName)}</h1>
     <p style="font-size:13px;color:#bfb7aa;margin:4px 0 0;">${String(contactName)} &bull; ${String(email)}</p>
   </div>
@@ -109,6 +134,8 @@ export async function POST(request: Request) {
   <table style="width:100%;border-collapse:collapse;font-size:13px;">
     ${websiteUrl ? `<tr><td style="padding:8px 0;color:#bfb7aa;width:160px;">Website</td><td style="padding:8px 0;color:#e8ded0;">${String(websiteUrl)}</td></tr>` : ""}
     ${phone ? `<tr><td style="padding:8px 0;color:#bfb7aa;">Phone</td><td style="padding:8px 0;color:#e8ded0;">${String(phone)}</td></tr>` : ""}
+    ${referralSource ? `<tr><td style="padding:8px 0;color:#bfb7aa;">Referral</td><td style="padding:8px 0;color:#e8ded0;">${String(referralSource)}</td></tr>` : ""}
+    ${auditId ? `<tr><td style="padding:8px 0;color:#bfb7aa;">Audit ID</td><td style="padding:8px 0;color:#e8ded0;">${String(auditId)}</td></tr>` : ""}
     <tr><td style="padding:8px 0;color:#bfb7aa;">Services</td><td style="padding:8px 0;color:#e8ded0;">${services}</td></tr>
     ${investmentRange ? `<tr><td style="padding:8px 0;color:#bfb7aa;">Investment</td><td style="padding:8px 0;color:#e8ded0;">${String(investmentRange)}</td></tr>` : ""}
     ${timeline ? `<tr><td style="padding:8px 0;color:#bfb7aa;">Timeline</td><td style="padding:8px 0;color:#e8ded0;">${String(timeline)}</td></tr>` : ""}
@@ -121,14 +148,14 @@ export async function POST(request: Request) {
     <p style="font-size:14px;line-height:1.7;color:#e8ded0;margin:0;">${String(businessGoals).replace(/\n/g, "<br>")}</p>
   </div>` : ""}
 
-  ${notes ? `
+  ${notesWithAttribution ? `
   <div style="margin-top:20px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.07);">
     <p style="font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:#bfb7aa;margin:0 0 10px;">Additional Notes</p>
-    <p style="font-size:14px;line-height:1.7;color:#e8ded0;margin:0;">${String(notes).replace(/\n/g, "<br>")}</p>
+    <p style="font-size:14px;line-height:1.7;color:#e8ded0;margin:0;">${String(notesWithAttribution).replace(/\n/g, "<br>")}</p>
   </div>` : ""}
 
   <div style="margin-top:32px;padding-top:20px;border-top:1px solid rgba(197,166,92,0.2);font-size:11px;color:rgba(191,183,170,0.4);">
-    Submitted via /start-project &bull; Payload ID: ${inquiry?.id ?? "—"}
+    Submitted via /start-project (${sourceLabel}) &bull; Payload ID: ${inquiry?.id ?? "—"}
   </div>
 </div>`,
       });

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPayload } from "payload";
 import config from "@payload-config";
-import { CASE_STUDIES, HIDDEN_PROJECT_SLUGS, PROJECTS, type CaseStudy, type ShowcaseImage } from "@/lib/projects";
+import { CASE_STUDIES, HIDDEN_PROJECT_SLUGS, PROJECTS, getCaseStudyCapabilityLinks, getRelatedProjects, type CaseStudy, type ShowcaseImage } from "@/lib/projects";
 import { ProjectCard } from "@/components/ui/ProjectCard";
 import { StructuredData } from "@/components/seo/StructuredData";
 import { buildMetadata } from "@/lib/seo/metadata";
@@ -260,7 +260,8 @@ export default async function CaseStudyPage({ params }: Props) {
 
   if (!cs) notFound();
 
-  const related = PROJECTS.filter((p) => p.slug !== slug && !p.hidden).slice(0, 3);
+  const related = getRelatedProjects(slug, 3);
+  const capabilityLinks = getCaseStudyCapabilityLinks(slug);
   const projectMeta = PROJECTS.find((p) => p.slug === slug);
   const caseStudyImage = projectMeta?.image ?? cs.image;
 
@@ -1007,7 +1008,7 @@ export default async function CaseStudyPage({ params }: Props) {
                   className="kxd-serif-title mt-4"
                   style={{ fontSize: "clamp(1.375rem, 2.5vw, 1.875rem)" }}
                 >
-                  More from the portfolio.
+                  Related proof.
                 </h2>
               </div>
               <Link
@@ -1080,14 +1081,14 @@ export default async function CaseStudyPage({ params }: Props) {
                 textAlign: "center",
               }}
             >
-              From luxury websites to operational platforms, KXD helps ambitious
-              brands create digital experiences that remain clear, useful, and
-              trusted long after launch.
+              From premium websites to operational platforms, KXD helps
+              established businesses create digital presence and systems that
+              remain clear, useful, and trusted long after launch.
             </p>
 
             <div className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-4">
               <Link href="/start-project" className="kxd-btn-primary">
-                Start a Partnership
+                Start a Project
               </Link>
               <Link
                 href="/work"
@@ -1110,6 +1111,21 @@ export default async function CaseStudyPage({ params }: Props) {
                 </span>
               </Link>
             </div>
+
+            {capabilityLinks.length > 0 ? (
+              <div className="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
+                {capabilityLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="kxd-ui-label inline-flex items-center gap-2 text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)]"
+                  >
+                    {link.label}
+                    <span aria-hidden>→</span>
+                  </Link>
+                ))}
+              </div>
+            ) : null}
           </div>
         </div>
       </section>

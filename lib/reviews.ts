@@ -1,11 +1,12 @@
 /**
- * Review data layer — structured for future Google Business Profile sync.
+ * Review data layer — structured for Google Business Profile sync.
  *
- * TODO: When Google Reviews sync is configured (GOOGLE_PLACES_API_KEY +
- * GOOGLE_PLACE_ID), real reviews are fetched via lib/google-reviews.ts and
- * these placeholder entries are bypassed automatically. Before enabling,
- * implement an approval/curation flow so only verified client reviews appear.
- * See lib/google-reviews.ts for the full integration spec.
+ * Public surfaces must only show verified reviews (source: "google" or
+ * curated "manual"). Placeholder/fake testimonials are not served publicly.
+ *
+ * When GOOGLE_PLACES_API_KEY + GOOGLE_PLACE_ID are configured, reviews are
+ * fetched via lib/google-reviews.ts. Until then, public review UI and review
+ * schema remain empty.
  */
 
 export type ReviewItem = {
@@ -18,35 +19,12 @@ export type ReviewItem = {
   externalId?: string;
 };
 
-export const PLACEHOLDER_REVIEWS: ReviewItem[] = [
-  {
-    id: "review-1",
-    author: "Team Principal",
-    company: "Cusick Morgan Motorsports",
-    rating: 5,
-    text: "They understood our brand immediately. Clean build, direct communication, no wasted motion.",
-    source: "placeholder",
-  },
-  {
-    id: "review-2",
-    author: "Operations Lead",
-    company: "Primal Motorsports",
-    rating: 5,
-    text: "Worked directly with Matt throughout. The site reads sharp and serious — exactly what we needed.",
-    source: "placeholder",
-  },
-  {
-    id: "review-3",
-    author: "Hospitality Director",
-    company: "Plate the Umpqua",
-    rating: 5,
-    text: "Our digital presence finally matches the care we put into the guest experience.",
-    source: "placeholder",
-  },
-];
+/** @deprecated Empty by design — do not reintroduce fake public testimonials. */
+export const PLACEHOLDER_REVIEWS: ReviewItem[] = [];
 
+/** Public static reviews — empty until verified Google/manual curation is wired. */
 export function getPublicReviews(): ReviewItem[] {
-  return PLACEHOLDER_REVIEWS.filter((r) => r.rating >= 4.5);
+  return [];
 }
 
 export function getAggregateRating(reviews: ReviewItem[]): number {

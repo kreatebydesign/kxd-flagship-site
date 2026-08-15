@@ -3,9 +3,9 @@ import { HeroWorkReel } from "./HeroWorkReel";
 import { HeroCursorGlowLazy } from "./HeroCursorGlowLazy";
 
 const PROOF_POINTS = [
-  "Websites that convert attention into demand.",
-  "Systems that remove operational friction.",
-  "Built for brands ready to grow intentionally.",
+  "Premium websites that convert attention into demand.",
+  "Growth infrastructure that structures opportunity.",
+  "Operational systems that remove friction behind the brand.",
 ];
 
 /*
@@ -128,7 +128,8 @@ export function HeroSection() {
                 marginTop: "clamp(3.5rem, 5.5vw, 5rem)",
               }}
             >
-              Thoughtfully crafted digital experiences for businesses building what&rsquo;s next.
+              Premium websites, growth infrastructure, and operational systems
+              for established businesses ready to grow with intention.
             </p>
 
             <div

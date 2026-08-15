@@ -3,10 +3,12 @@ import { FinalCtaBand } from "@/components/ui/FinalCtaBand";
 export function FinalCtaSection() {
   return (
     <FinalCtaBand
-      secondaryHref="/investment"
-      secondaryLabel="View Investment"
-      headline="Build the Infrastructure Behind Growth."
-      subCopy="KXD operates with a limited number of brands each year — designing and running the creative systems, production infrastructure, and operational frameworks that compound in value over time."
+      primaryLabel="Start a Project"
+      primaryHref="/start-project"
+      secondaryHref="/website-audit"
+      secondaryLabel="Run KXD Intelligence"
+      headline="Ready to build — or ready to diagnose?"
+      subCopy="If you already know the work needs to happen, start a project conversation. If something feels off but you need clarity first, run KXD Intelligence — then talk with intent."
     />
   );
 }

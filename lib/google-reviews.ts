@@ -10,7 +10,7 @@
  *     X-Goog-Api-Key:   <GOOGLE_PLACES_API_KEY>
  *     X-Goog-FieldMask: id,displayName,rating,userRatingCount,reviews
  *
- * Environment variables required (all optional — falls back to PLACEHOLDER_REVIEWS):
+ * Environment variables required (all optional — returns no reviews when absent):
  *   GOOGLE_PLACES_API_KEY  — Google Cloud API key with "Places API (New)" enabled
  *   GOOGLE_PLACE_ID        — Google Maps Place ID for the KXD business listing
  *                            Find yours: https://developers.google.com/maps/documentation/javascript/examples/places-placeid-finder
@@ -18,16 +18,18 @@
  * Caching:
  *   Responses are cached at the Next.js data cache layer for CACHE_TTL seconds
  *   (default 3600s / 1 hour). The page becomes ISR when credentials are active.
- *   During build, if credentials are absent, no fetch is made and the page
- *   renders as fully static with fallback reviews — zero build impact.
+ *   During build, if credentials are absent, no fetch is made and public UI
+ *   omits the reviews section — zero build impact, no invented testimonials.
  *
  * Safety:
  *   Any failure (missing credentials, network error, bad API response, empty
- *   results after filtering) silently returns PLACEHOLDER_REVIEWS so the site
- *   never breaks or shows blank content.
+ *   results after filtering) returns an empty list. Public surfaces must not
+ *   invent ratings, testimonials, or aggregate review schema.
  */
 
-import { PLACEHOLDER_REVIEWS, getAggregateRating, type ReviewItem } from "@/lib/reviews";
+import { getAggregateRating, type ReviewItem } from "@/lib/reviews";
+
+const NO_PUBLIC_REVIEWS: ReviewItem[] = [];
 
 /** Cache duration in seconds. 1 hour by default. */
 const CACHE_TTL = 3600;
@@ -196,7 +198,7 @@ async function _fetchFromPlacesAPI(bypassCache = false): Promise<FetchResult> {
 
   if (!apiKey || !placeId) {
     return {
-      reviews:    PLACEHOLDER_REVIEWS,
+      reviews:    NO_PUBLIC_REVIEWS,
       isFallback: true,
       debug: {
         ...baseDebug,
@@ -233,7 +235,7 @@ async function _fetchFromPlacesAPI(bypassCache = false): Promise<FetchResult> {
       const rawText = await res.text().catch(() => "(unreadable)");
       console.warn(`[KXD GOOGLE REVIEWS DEBUG] HTTP ${res.status} non-JSON body: ${rawText.slice(0, 300)}`);
       return {
-        reviews:    PLACEHOLDER_REVIEWS,
+        reviews:    NO_PUBLIC_REVIEWS,
         isFallback: true,
         debug: {
           ...baseDebug,
@@ -269,7 +271,7 @@ async function _fetchFromPlacesAPI(bypassCache = false): Promise<FetchResult> {
 
     if (!res.ok) {
       return {
-        reviews:    PLACEHOLDER_REVIEWS,
+        reviews:    NO_PUBLIC_REVIEWS,
         isFallback: true,
         debug: {
           ...baseDebug,
@@ -294,8 +296,8 @@ async function _fetchFromPlacesAPI(bypassCache = false): Promise<FetchResult> {
       baseDebug.likelyCause = deriveLikelyCause(
         res.status, "OK", null, baseDebug.hasReviewsArray, baseDebug.reviewCountFromGoogle
       );
-      console.info("[KXD GOOGLE REVIEWS DEBUG] No reviews passed filter — using fallback.");
-      return { reviews: PLACEHOLDER_REVIEWS, isFallback: true, debug: baseDebug };
+      console.info("[KXD GOOGLE REVIEWS DEBUG] No reviews passed filter — returning empty public list.");
+      return { reviews: NO_PUBLIC_REVIEWS, isFallback: true, debug: baseDebug };
     }
 
     return { reviews: filtered, isFallback: false, debug: baseDebug };
@@ -304,7 +306,7 @@ async function _fetchFromPlacesAPI(bypassCache = false): Promise<FetchResult> {
     const errStr = String(err);
     console.warn("[KXD GOOGLE REVIEWS DEBUG] Fetch threw:", errStr);
     return {
-      reviews:    PLACEHOLDER_REVIEWS,
+      reviews:    NO_PUBLIC_REVIEWS,
       isFallback: true,
       debug: {
         ...baseDebug,
@@ -318,12 +320,12 @@ async function _fetchFromPlacesAPI(bypassCache = false): Promise<FetchResult> {
 // ── Public API ────────────────────────────────────────────────────────────────
 
 /**
- * Returns Google Business Profile reviews, or PLACEHOLDER_REVIEWS if anything
- * fails or credentials are not configured.
+ * Returns verified Google Business Profile reviews, or an empty list if
+ * anything fails or credentials are not configured.
  *
  * Called from ReviewsSection (async server component). Cached per Next.js
  * data cache (1h revalidation) — will not hit the API on every request.
- * When credentials are absent, returns PLACEHOLDER_REVIEWS without any fetch.
+ * When credentials are absent, returns [] without any fetch.
  */
 export async function getGoogleReviews(): Promise<ReviewItem[]> {
   const { reviews } = await _fetchFromPlacesAPI(false);

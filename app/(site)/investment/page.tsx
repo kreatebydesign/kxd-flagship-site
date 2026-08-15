@@ -8,12 +8,11 @@ export const metadata: Metadata = buildMetadata({
     "Investment levels for luxury website experiences, brand systems, growth infrastructure, and enterprise platform work. Every engagement is scoped to the goals and vision of each brand.",
   path: "/investment",
   keywords: [
-    "Luxury Web Design Pricing",
     "Premium Website Design Cost",
     "Brand Systems Investment",
     "Enterprise Platform Development Cost",
     "Growth Infrastructure Investment",
-    "Digital Agency Investment Levels",
+    "Website Redesign Pricing",
   ],
 });
 

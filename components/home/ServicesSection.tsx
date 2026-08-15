@@ -24,7 +24,7 @@ export function ServicesSection() {
                 maxWidth: "24ch",
               }}
             >
-              Systems Designed to Create Momentum.
+              Presence. Growth. Systems.
             </h2>
 
             <p
@@ -34,10 +34,9 @@ export function ServicesSection() {
                 lineHeight: 1.85,
               }}
             >
-              We don&apos;t offer disconnected services. KXD combines strategy,
-              execution, and operational thinking to help ambitious businesses
-              build stronger brands, improve performance, and support long-term
-              growth.
+              Websites are the entry point. Growth infrastructure structures
+              demand. Operational systems run what the brand needs next. KXD
+              builds the ladder — not disconnected services.
             </p>
           </div>
 

@@ -4,6 +4,11 @@ import { notFound } from "next/navigation";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import { HOMEPAGE_SERVICES } from "@/lib/homepage";
+import {
+  getStaticServiceDetail,
+  STATIC_SERVICE_SLUGS,
+  type StaticServiceDetail,
+} from "@/lib/content/service-details";
 import { FinalCtaBand } from "@/components/ui/FinalCtaBand";
 import { GoldAtmosphere } from "@/components/ui/surfaces/GoldAtmosphere";
 import { buildMetadata } from "@/lib/seo/metadata";
@@ -34,6 +39,9 @@ interface ServiceDetail {
   secondaryCtaLabel: string | null;
   secondaryCtaHref: string | null;
   faqs: Array<{ question: string; answer: string }>;
+  keywords: string[];
+  proof: StaticServiceDetail["proof"];
+  relationshipNote: string | null;
 }
 
 // ── Data helpers ─────────────────────────────────────────────────────────────
@@ -44,6 +52,33 @@ function arr<T>(val: unknown): T[] {
 
 function str(val: unknown, fallback = ""): string {
   return typeof val === "string" && val.length > 0 ? val : fallback;
+}
+
+function fromStatic(detail: StaticServiceDetail): ServiceDetail {
+  return {
+    slug: detail.slug,
+    title: detail.title,
+    category: detail.category,
+    eyebrow: detail.eyebrow,
+    headline: detail.headline,
+    summary: detail.summary,
+    bestFor: detail.bestFor,
+    deliverables: detail.deliverables,
+    outcomes: detail.outcomes,
+    process: detail.process,
+    investmentLabel: detail.investmentLabel,
+    investmentRange: detail.investmentRange,
+    timelineLabel: detail.timelineLabel,
+    engagementType: detail.engagementType,
+    ctaLabel: detail.ctaLabel,
+    ctaHref: detail.ctaHref,
+    secondaryCtaLabel: detail.secondaryCtaLabel,
+    secondaryCtaHref: detail.secondaryCtaHref,
+    faqs: detail.faqs,
+    keywords: detail.keywords,
+    proof: detail.proof,
+    relationshipNote: detail.relationshipNote,
+  };
 }
 
 function docToDetail(d: Record<string, unknown>): ServiceDetail {
@@ -63,36 +98,13 @@ function docToDetail(d: Record<string, unknown>): ServiceDetail {
     timelineLabel: str(d.timelineLabel) || null,
     engagementType: str(d.engagementType) || null,
     ctaLabel: str(d.ctaLabel) || "Start a Project",
-    ctaHref: str(d.ctaHref) || "/contact",
+    ctaHref: str(d.ctaHref) || "/start-project",
     secondaryCtaLabel: str(d.secondaryCtaLabel) || null,
     secondaryCtaHref: str(d.secondaryCtaHref) || null,
     faqs: arr<{ question: string; answer: string }>(d.faqs),
-  };
-}
-
-function staticFallback(slug: string): ServiceDetail | null {
-  const s = HOMEPAGE_SERVICES.find((x) => x.slug === slug);
-  if (!s) return null;
-  return {
-    slug: String(s.slug),
-    title: s.title,
-    category: String(s.slug),
-    eyebrow: null,
-    headline: s.summary,
-    summary: s.creates,
-    bestFor: [s.forWho],
-    deliverables: [s.creates],
-    outcomes: [s.whyMatters],
-    process: [],
-    investmentLabel: null,
-    investmentRange: null,
-    timelineLabel: null,
-    engagementType: null,
-    ctaLabel: String(s.cta),
-    ctaHref: "/contact",
-    secondaryCtaLabel: "All Services",
-    secondaryCtaHref: "/services",
-    faqs: [],
+    keywords: [str(d.title), "KXD Service"],
+    proof: [],
+    relationshipNote: null,
   };
 }
 
@@ -106,7 +118,10 @@ async function getAllSlugs(): Promise<string[]> {
       depth: 0,
     });
     if (docs.length > 0) {
-      return (docs as unknown as Array<{ slug: string }>).map((d) => d.slug);
+      const payloadSlugs = (docs as unknown as Array<{ slug: string }>).map(
+        (d) => d.slug,
+      );
+      return [...new Set([...STATIC_SERVICE_SLUGS, ...payloadSlugs])];
     }
   } catch {
     // fall through
@@ -114,7 +129,15 @@ async function getAllSlugs(): Promise<string[]> {
   return HOMEPAGE_SERVICES.map((s) => String(s.slug));
 }
 
+/**
+ * Static marketing content is authoritative for acquisition positioning.
+ * Payload may still publish additional slugs; core four render from
+ * lib/content/service-details.ts.
+ */
 async function fetchService(slug: string): Promise<ServiceDetail | null> {
+  const staticDetail = getStaticServiceDetail(slug);
+  if (staticDetail) return fromStatic(staticDetail);
+
   try {
     const payload = await getPayload({ config });
     const { docs } = await payload.find({
@@ -132,9 +155,9 @@ async function fetchService(slug: string): Promise<ServiceDetail | null> {
       return docToDetail(docs[0] as unknown as Record<string, unknown>);
     }
   } catch {
-    // fall through to static
+    // fall through
   }
-  return staticFallback(slug);
+  return null;
 }
 
 // ── Next.js exports ───────────────────────────────────────────────────────────
@@ -152,7 +175,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: service.title,
     description: service.summary,
     path: `/services/${service.slug}`,
-    keywords: [service.title, "KXD Service", "Luxury Digital Studio"],
+    keywords: service.keywords,
   });
 }
 
@@ -200,6 +223,11 @@ export default async function ServiceDetailPage({ params }: Props) {
   const hasOutcomes = service.outcomes.length > 0;
   const hasProcess = service.process.length > 0;
   const hasFaqs = service.faqs.length > 0;
+  const hasProof = service.proof.length > 0;
+  const isEnterprisePlatforms = service.slug === "enterprise-platforms";
+
+  const heroSecondaryLabel = service.secondaryCtaLabel;
+  const heroSecondaryHref = service.secondaryCtaHref;
 
   return (
     <>
@@ -238,12 +266,7 @@ export default async function ServiceDetailPage({ params }: Props) {
           </Link>
 
           <div className="mt-8">
-            <p className="kxd-eyebrow">
-              {service.eyebrow ||
-                (service.category === "luxury-websites"
-                  ? "Flagship Offering"
-                  : "Service")}
-            </p>
+            <p className="kxd-eyebrow">{service.eyebrow || "Service"}</p>
 
             <h1
               className="mt-5 font-serif font-light"
@@ -273,9 +296,9 @@ export default async function ServiceDetailPage({ params }: Props) {
               <Link href={service.ctaHref} className="kxd-btn-primary">
                 {service.ctaLabel}
               </Link>
-              {service.secondaryCtaLabel && service.secondaryCtaHref && (
+              {heroSecondaryLabel && heroSecondaryHref && (
                 <Link
-                  href={service.secondaryCtaHref}
+                  href={heroSecondaryHref}
                   className="group inline-flex items-center gap-2 font-sans uppercase"
                   style={{
                     fontSize: "0.625rem",
@@ -284,7 +307,7 @@ export default async function ServiceDetailPage({ params }: Props) {
                   }}
                 >
                   <span className="transition-colors group-hover:text-[var(--kxd-cream)]">
-                    {service.secondaryCtaLabel}
+                    {heroSecondaryLabel}
                   </span>
                   <span
                     aria-hidden
@@ -387,11 +410,35 @@ export default async function ServiceDetailPage({ params }: Props) {
         </div>
       )}
 
+      {service.relationshipNote && (
+        <section
+          style={{
+            background: "var(--kxd-black-base)",
+            borderBottom: "1px solid var(--kxd-border-white)",
+          }}
+        >
+          <div className="kxd-container py-10 lg:py-12" style={{ maxWidth: "58rem" }}>
+            <p className="kxd-eyebrow">How This Fits</p>
+            <p
+              className="mt-4 font-serif font-light"
+              style={{
+                fontSize: "clamp(1.0625rem, 1.6vw, 1.25rem)",
+                lineHeight: 1.75,
+                color: "var(--kxd-cream-soft)",
+                maxWidth: "40rem",
+              }}
+            >
+              {service.relationshipNote}
+            </p>
+          </div>
+        </section>
+      )}
+
       {/* ── Who It's For ── */}
       {hasBestFor && (
         <section
           className="kxd-section"
-          style={{ background: "var(--kxd-black-base)" }}
+          style={{ background: "var(--kxd-black-deep)" }}
         >
           <div className="kxd-container">
             <div className="grid gap-12 lg:grid-cols-[1fr_2fr] lg:gap-20">
@@ -486,8 +533,8 @@ export default async function ServiceDetailPage({ params }: Props) {
         >
           <div className="kxd-container" style={{ maxWidth: "54rem" }}>
             <SectionHeading
-              label="Client Outcomes"
-              title="The results that follow."
+              label="Outcomes"
+              title="What this work is meant to enable."
             />
             <ul className="mt-12 space-y-5">
               {service.outcomes.map((item, i) => (
@@ -568,6 +615,70 @@ export default async function ServiceDetailPage({ params }: Props) {
         </section>
       )}
 
+      {hasProof && (
+        <section
+          className="kxd-section"
+          style={{
+            background: "var(--kxd-black-deep)",
+            borderTop: "1px solid var(--kxd-border-white)",
+          }}
+        >
+          <div className="kxd-container" style={{ maxWidth: "58rem" }}>
+            <SectionHeading label="Proof" title="Relevant work." />
+            <div
+              className="mt-12 grid gap-px"
+              style={{
+                border: "1px solid var(--kxd-border-white)",
+                background: "var(--kxd-border-white)",
+              }}
+            >
+              {service.proof.map((item) => (
+                <Link
+                  key={item.slug}
+                  href={`/work/${item.slug}`}
+                  className="block p-7 transition-colors hover:bg-[var(--kxd-black-elevated)]"
+                  style={{
+                    background: "var(--kxd-black-base)",
+                    textDecoration: "none",
+                  }}
+                >
+                  <p
+                    className="font-serif font-light"
+                    style={{
+                      fontSize: "clamp(1.125rem, 1.6vw, 1.375rem)",
+                      color: "var(--kxd-cream)",
+                    }}
+                  >
+                    {item.title}
+                  </p>
+                  <p
+                    className="mt-2 font-sans font-light"
+                    style={{
+                      fontSize: "0.875rem",
+                      lineHeight: 1.7,
+                      color: "var(--kxd-cream-muted)",
+                      maxWidth: "36rem",
+                    }}
+                  >
+                    {item.note}
+                  </p>
+                  <p
+                    className="mt-4 font-sans uppercase"
+                    style={{
+                      fontSize: "0.5625rem",
+                      letterSpacing: "0.14em",
+                      color: "var(--kxd-gold)",
+                    }}
+                  >
+                    View case study →
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ── Common Questions ── */}
       {hasFaqs && (
         <section
@@ -613,12 +724,67 @@ export default async function ServiceDetailPage({ params }: Props) {
         </section>
       )}
 
+      {isEnterprisePlatforms && (
+        <section
+          style={{
+            background: "var(--kxd-black-deep)",
+            borderBottom: "1px solid var(--kxd-border-white)",
+          }}
+        >
+          <div className="kxd-container py-10 lg:py-12" style={{ maxWidth: "58rem" }}>
+            <p className="kxd-eyebrow">Capability Evidence</p>
+            <h2
+              className="mt-4 font-serif font-light"
+              style={{
+                fontSize: "clamp(1.25rem, 2.2vw, 1.75rem)",
+                color: "var(--kxd-cream)",
+                maxWidth: "32rem",
+                lineHeight: 1.2,
+              }}
+            >
+              This engagement builds platforms. See what that looks like in practice.
+            </h2>
+            <p
+              className="mt-4 font-sans font-light"
+              style={{
+                fontSize: "0.9375rem",
+                lineHeight: 1.8,
+                color: "var(--kxd-cream-muted)",
+                maxWidth: "36rem",
+              }}
+            >
+              Enterprise Platforms is the commercial path. Platforms is where we
+              explain the systems we build — portals, dashboards, and operational
+              infrastructure — with proof from live engagements.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-4">
+              <Link
+                href="/platforms"
+                className="kxd-ui-label inline-flex items-center gap-2 text-[var(--kxd-gold)] transition hover:text-[var(--kxd-gold-light)]"
+              >
+                Explore Platforms
+                <span aria-hidden>→</span>
+              </Link>
+              <Link
+                href="/work/primal-motorsports"
+                className="kxd-ui-label inline-flex items-center gap-2 text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)]"
+              >
+                View Primal Motorsports
+                <span aria-hidden>→</span>
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
       <FinalCtaBand
         showEmail={false}
-        secondaryHref="/services"
-        secondaryLabel="All Services"
+        primaryLabel={service.ctaLabel}
+        primaryHref={service.ctaHref}
+        secondaryHref={service.secondaryCtaHref || "/services"}
+        secondaryLabel={service.secondaryCtaLabel || "All Services"}
         headline={`Begin Your ${service.title} Engagement.`}
-        subCopy="KXD partners with select brands. Every project starts with a conversation."
+        subCopy="KXD partners with a limited number of businesses at a time. Every engagement starts with a clear conversation."
       />
     </>
   );

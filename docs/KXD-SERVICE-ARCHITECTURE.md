@@ -228,10 +228,13 @@ Stripe deposits attach to discovery calls for Tier 1 and Tier 4 — architecture
 | Luxury Website Design | `/`, `/services/luxury-website-experiences` |
 | Hospitality Website Design | `/work`, case: Plate the Umpqua |
 | Motorsports Website Development | `/work`, cases: Primal, Cusick Morgan |
-| Portland / Oregon Web Design Agency | `/`, `/about` |
-| Enterprise Website Development | `/services/enterprise-platforms-operational-systems` |
 | Membership Platform Development | `/platforms` |
 | Operational Platform Development | `/platforms` |
+| Client Portal Development | `/platforms`, `/services/enterprise-platforms` |
+| Enterprise Website Development | `/services/enterprise-platforms` |
+| California Premium Web Design (supporting equity only) | `/`, `/about` |
+
+**Not acquisition targets:** Portland / Oregon / Roseburg / PNW / Beverly Hills agency keywords. Client geography in case studies may remain factual.
 
 ---
 

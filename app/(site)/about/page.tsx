@@ -7,9 +7,13 @@ import { buildMetadata } from "@/lib/seo/metadata";
 
 export const metadata: Metadata = buildMetadata({
   title: "About",
-  description: `${SITE.name} is a founder-led luxury digital studio — websites, growth systems, and operational platforms built with discipline.`,
+  description: `${SITE.name} is a founder-led digital studio — websites, growth systems, and operational platforms built with discipline.`,
   path: "/about",
-  keywords: ["Premium Web Design Agency", "Luxury Website Design", "Founder-Led Digital Studio"],
+  keywords: [
+    "Founder-Led Digital Studio",
+    "Premium Website Design",
+    "Kreate by Design About",
+  ],
 });
 
 const BELIEFS = [

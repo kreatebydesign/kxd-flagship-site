@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { buildMetadata } from "@/lib/seo/metadata";
 import { INQUIRY_EMAIL, SITE } from "@/lib/site";
 import { StartProjectForm } from "@/components/start-project/StartProjectForm";
@@ -13,7 +14,7 @@ export const metadata: Metadata = buildMetadata({
   keywords: [
     "Start a Web Design Project",
     "KXD Project Application",
-    "Luxury Web Design Intake",
+    "Website Redesign Inquiry",
     "Premium Website Application",
     "Hire KXD Digital Studio",
     "Brand Growth Partnership",
@@ -121,7 +122,9 @@ export default function StartProjectPage() {
       >
         <div className="kxd-container">
           <div className="grid gap-12 lg:grid-cols-[1fr_20rem] lg:gap-16 lg:items-start">
-            <StartProjectForm />
+            <Suspense fallback={<div className="min-h-[32rem]" aria-hidden />}>
+              <StartProjectForm />
+            </Suspense>
 
             <aside className="space-y-8 lg:pt-2">
               <div

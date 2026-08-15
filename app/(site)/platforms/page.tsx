@@ -17,7 +17,6 @@ export const metadata: Metadata = buildMetadata({
     "Motorsports Platform Development",
     "Enterprise Dashboard Development",
     "Custom CRM Systems",
-    "Business Operations Software",
     "Digital Operations Platforms",
   ],
 });
@@ -198,6 +197,52 @@ export default function PlatformsPage() {
                 </p>
               </div>
             ))}
+          </div>
+
+          <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
+            <Link href="/start-project" className="kxd-btn-primary">
+              Start a Project
+            </Link>
+            <Link
+              href="/work/primal-motorsports"
+              className="group inline-flex items-center gap-2 font-sans font-medium uppercase"
+              style={{
+                fontSize: "0.6875rem",
+                letterSpacing: "var(--tracking-button)",
+                color: "var(--kxd-cream-muted)",
+              }}
+            >
+              <span className="transition-colors duration-200 group-hover:text-[var(--kxd-cream)]">
+                View Primal Case Study
+              </span>
+              <span
+                aria-hidden
+                className="inline-block transition-transform duration-300 group-hover:translate-x-1"
+                style={{ color: "var(--kxd-gold)" }}
+              >
+                →
+              </span>
+            </Link>
+            <Link
+              href="/services/enterprise-platforms"
+              className="group inline-flex items-center gap-2 font-sans font-medium uppercase"
+              style={{
+                fontSize: "0.6875rem",
+                letterSpacing: "var(--tracking-button)",
+                color: "var(--kxd-cream-muted)",
+              }}
+            >
+              <span className="transition-colors duration-200 group-hover:text-[var(--kxd-cream)]">
+                View Engagement
+              </span>
+              <span
+                aria-hidden
+                className="inline-block transition-transform duration-300 group-hover:translate-x-1"
+                style={{ color: "var(--kxd-gold)" }}
+              >
+                →
+              </span>
+            </Link>
           </div>
         </div>
       </section>
@@ -646,12 +691,12 @@ export default function PlatformsPage() {
 
       {/* ── Final CTA ─────────────────────────────────────────────────────────── */}
       <FinalCtaBand
-        headline="Build What Others Can't."
-        subCopy="For organizations ready to align operations with experience."
-        primaryLabel="Start a Partnership"
+        headline="Build the systems behind the brand."
+        subCopy="If the capability fits, start a project conversation. If you want the commercial engagement path, review Enterprise Platforms."
+        primaryLabel="Start a Project"
         primaryHref="/start-project"
-        secondaryHref="/work"
-        secondaryLabel="Explore Our Work"
+        secondaryHref="/services/enterprise-platforms"
+        secondaryLabel="Enterprise Platforms Engagement"
       />
     </>
   );

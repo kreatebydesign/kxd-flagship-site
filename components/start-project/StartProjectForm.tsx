@@ -1,6 +1,9 @@
 "use client";
 
-import { useState, type ChangeEvent } from "react";
+import { useEffect, useState, type ChangeEvent } from "react";
+import { useSearchParams } from "next/navigation";
+import { ANALYTICS_EVENTS } from "@/lib/analytics/config";
+import { trackPublicEvent } from "@/lib/analytics/track";
 
 const STEPS = [
   { number: "01", title: "Tell us about your business", subtitle: "The brand, company, or idea we may be building around." },
@@ -60,6 +63,7 @@ const ASSET_OPTIONS = [
 ];
 
 const REFERRAL_OPTIONS = [
+  { value: "kxd-intelligence", label: "KXD Intelligence (Website Audit)" },
   { value: "google-search", label: "Google Search" },
   { value: "referral", label: "Referral" },
   { value: "social-media", label: "Social Media" },
@@ -68,6 +72,28 @@ const REFERRAL_OPTIONS = [
   { value: "portfolio", label: "Previous Work / Portfolio" },
   { value: "other", label: "Other" },
 ];
+
+function buildIntelligenceNotes(input: {
+  auditId: string;
+  website: string;
+  grade: string;
+  score: string;
+  existingNotes: string;
+}): string {
+  const block = [
+    "[KXD Intelligence context]",
+    "Source: KXD Intelligence website audit",
+    `Audit ID: ${input.auditId || "—"}`,
+    `Audited website: ${input.website || "—"}`,
+    `Grade: ${input.grade || "—"}`,
+    `Overall score: ${input.score || "—"}`,
+  ].join("\n");
+
+  const existing = input.existingNotes.trim();
+  if (!existing) return block;
+  if (existing.includes("[KXD Intelligence context]")) return existing;
+  return `${block}\n\n${existing}`;
+}
 
 interface FormData {
   companyName: string;
@@ -277,11 +303,53 @@ function ProgressBar({ step }: { step: number }) {
 }
 
 export function StartProjectForm() {
+  const searchParams = useSearchParams();
   const [step, setStep] = useState(0);
   const [data, setData] = useState<FormData>(EMPTY);
   const [submitState, setSubmitState] = useState<SubmitState>("idle");
   const [submitError, setSubmitError] = useState("");
   const [validationError, setValidationError] = useState("");
+  const [intelligencePrefillApplied, setIntelligencePrefillApplied] = useState(false);
+  const [fromIntelligence, setFromIntelligence] = useState(false);
+  const [auditId, setAuditId] = useState("");
+
+  useEffect(() => {
+    if (intelligencePrefillApplied) return;
+
+    const source = (searchParams.get("source") || "").toLowerCase();
+    const isIntelligence =
+      source === "kxd-intelligence" || source === "website-audit";
+    if (!isIntelligence) {
+      setIntelligencePrefillApplied(true);
+      return;
+    }
+
+    const website = searchParams.get("website") || "";
+    const company = searchParams.get("company") || "";
+    const grade = searchParams.get("grade") || "";
+    const score = searchParams.get("score") || "";
+    const id = searchParams.get("auditId") || "";
+
+    setFromIntelligence(true);
+    setAuditId(id);
+    setData((prev) => ({
+      ...prev,
+      companyName: prev.companyName || company,
+      websiteUrl: prev.websiteUrl || website,
+      referralSource: prev.referralSource || "kxd-intelligence",
+      notes: buildIntelligenceNotes({
+        auditId: id,
+        website,
+        grade,
+        score,
+        existingNotes: prev.notes,
+      }),
+      assetsAvailable: prev.assetsAvailable.includes("Existing website")
+        ? prev.assetsAvailable
+        : [...prev.assetsAvailable, "Existing website"],
+    }));
+    setIntelligencePrefillApplied(true);
+  }, [searchParams, intelligencePrefillApplied]);
 
   function patch(updates: Partial<FormData>) {
     setData((prev) => ({ ...prev, ...updates }));
@@ -338,11 +406,30 @@ export function StartProjectForm() {
     setSubmitState("submitting");
     setSubmitError("");
 
+    const notes =
+      fromIntelligence || data.referralSource === "kxd-intelligence"
+        ? buildIntelligenceNotes({
+            auditId,
+            website: data.websiteUrl,
+            grade: searchParams.get("grade") || "",
+            score: searchParams.get("score") || "",
+            existingNotes: data.notes,
+          })
+        : data.notes;
+
+    const payload = {
+      ...data,
+      notes,
+      referralSource: data.referralSource || (fromIntelligence ? "kxd-intelligence" : ""),
+      inquirySource: fromIntelligence ? "kxd-intelligence" : "start-project",
+      auditId: auditId || undefined,
+    };
+
     try {
       const res = await fetch("/api/project-inquiries", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify(payload),
       });
 
       const json = await res.json();
@@ -350,6 +437,11 @@ export function StartProjectForm() {
       if (!res.ok) {
         throw new Error(json.error ?? "Submission failed");
       }
+
+      trackPublicEvent(ANALYTICS_EVENTS.inquirySubmit, {
+        source: payload.inquirySource,
+        audit_id: auditId || undefined,
+      });
 
       setSubmitState("success");
     } catch (err) {
@@ -394,8 +486,9 @@ export function StartProjectForm() {
             maxWidth: "28rem",
           }}
         >
-          Every application is reviewed personally. If it&rsquo;s the right fit,
-          you&rsquo;ll hear from us within 2 business days.
+          {fromIntelligence
+            ? "Your KXD Intelligence context is attached. Every application is reviewed personally — if it is the right fit, you will hear from us within 2 business days."
+            : "Every application is reviewed personally. If it is the right fit, you will hear from us within 2 business days."}
         </p>
         <button
           type="button"
@@ -403,6 +496,8 @@ export function StartProjectForm() {
             setSubmitState("idle");
             setStep(0);
             setData(EMPTY);
+            setFromIntelligence(false);
+            setAuditId("");
           }}
           className="mt-10 font-sans text-sm font-medium text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)]"
         >
@@ -430,6 +525,36 @@ export function StartProjectForm() {
           padding: "clamp(2rem,4vw,3rem) clamp(1.75rem,4vw,3rem)",
         }}
       >
+        {fromIntelligence && (
+          <div
+            className="mb-8 border-l pl-4"
+            style={{ borderColor: "var(--kxd-border-gold)" }}
+          >
+            <p
+              className="font-sans uppercase"
+              style={{
+                fontSize: "0.5rem",
+                letterSpacing: "0.14em",
+                color: "var(--kxd-gold)",
+              }}
+            >
+              Continuing from KXD Intelligence
+            </p>
+            <p
+              className="mt-2 font-sans font-light"
+              style={{
+                fontSize: "0.8125rem",
+                lineHeight: 1.65,
+                color: "var(--kxd-cream-muted)",
+                maxWidth: "34rem",
+              }}
+            >
+              Your audit context is attached to this application so the first conversation
+              can start from what was already diagnosed.
+            </p>
+          </div>
+        )}
+
         <ProgressBar step={step} />
 
         <p className="mb-3 font-sans text-sm font-medium text-[var(--kxd-cream-muted)]">

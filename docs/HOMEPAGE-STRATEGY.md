@@ -54,16 +54,16 @@ This is digital luxury by KXD.
   [CONTACT US]    [VIEW CASES]
 
 EST. 2020          SCROLL          DIGITAL EXCELLENCE
-Los Angeles / Portland
+Los Angeles (studio) · United States
 ```
 
 **Evolution upgrades:**
 - `hero-bg.jpg` texture with WebP fallback
 - Responsive type clamp
 - Preload critical assets
-- Update location to Portland, Oregon (current studio) with LA heritage note in About only
+- Keep Los Angeles as factual studio context only; do **not** position KXD as a Portland, Oregon, Roseburg, or PNW agency. National acquisition frame first.
 
-**Primary message:** Luxury websites — not platforms, not agency services.
+**Primary message:** Premium websites and digital systems — not a generic local web-design agency.
 
 ---
 
@@ -148,9 +148,9 @@ Between logo wall and final CTA, add compact trust signals:
 
 | Signal | Source |
 |--------|--------|
-| Google Reviews aggregate | Payload `reviews` — 4.5+ only |
-| Star rating display | Computed aggregate |
-| Optional testimonial pull | Payload `testimonials` — single rotating quote |
+| Google Reviews aggregate | Verified Google Business Profile only — omit until live |
+| Star rating display | Computed only from verified reviews |
+| Optional testimonial pull | Curated verified testimonials only — never placeholders |
 
 **Visual:** Gold stars, muted count, fits dark editorial band — not a bright widget.
 
@@ -197,10 +197,11 @@ building at the highest level. If that's you, let's talk.
 |---------|-------|
 | Title | KXD \| Luxury Web Design & Brand Strategy |
 | Description | Precision. Clarity. Presence. This is digital luxury by KXD. |
-| Schema | Organization + LocalBusiness + WebSite + Review (when populated) |
+| Schema | Organization + LocalBusiness + WebSite (+ Review only when verified) |
 | H1 | LUXURY WEBDESIGN (visual — semantic H1 via stacked display) |
-| Primary keyword | Luxury Website Design |
-| Secondary | Portland Web Design Agency, Oregon Web Design Agency |
+| Primary keyword | Luxury Website Design / Premium Website Design |
+| Secondary | Operational platforms, motorsports, hospitality, client portals (national) |
+| Geography | National-first; California / LA as supporting studio equity only — not Portland/Oregon/PNW agency targeting |
 
 ---
 

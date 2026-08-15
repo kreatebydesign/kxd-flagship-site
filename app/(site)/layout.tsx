@@ -5,6 +5,7 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { buildMetadata } from "@/lib/seo/metadata";
 import { SEO_KEYWORDS } from "@/lib/seo/site";
+import { SITE } from "@/lib/site";
 import "../globals.css";
 
 export const viewport = {
@@ -42,9 +43,9 @@ const outfit = Outfit({
 
 export const metadata: Metadata = {
   ...buildMetadata({
-    title: "Luxury Digital Experiences & Infrastructure",
-    description:
-      "Kreate by Design is a luxury web design agency specializing in premium website experiences, brand systems, and growth infrastructure. Direct strategy, senior-level execution — designed to endure.",
+    title: "Premium Websites, Growth Infrastructure & Operational Systems",
+    description: SITE.description,
+    path: "/",
     keywords: [...SEO_KEYWORDS],
   }),
   icons: {

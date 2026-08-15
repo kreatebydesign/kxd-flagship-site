@@ -38,8 +38,8 @@ export function CaseStudiesSection() {
             className="kxd-body-sm lg:text-right"
             style={{ maxWidth: "24rem" }}
           >
-            Website rebuilds, brand systems, and operational platforms for
-            ambitious brands across motorsports and hospitality.
+            Premium presence, growth infrastructure, and operational systems —
+            shown through motorsports, automotive, and service-business work.
           </p>
         </div>
 

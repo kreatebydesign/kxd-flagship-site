@@ -11,6 +11,7 @@ import { KxdLogo } from "@/components/ui/KxdLogo";
 const NAV_LINKS = [
   { label: "Work",         href: "/work" },
   { label: "Services",     href: "/services" },
+  { label: "Platforms",    href: "/platforms" },
   { label: "Investment",   href: "/investment" },
   { label: "Partnerships", href: "/pricing" },
   { label: "About",        href: "/about" },
@@ -204,6 +205,14 @@ export function SiteHeader() {
                   </li>
                 ))}
               </ul>
+              <Link
+                href="/platforms"
+                className="kxd-ui-label mt-7 inline-flex items-center gap-2 text-[var(--kxd-gold)] transition hover:text-[var(--kxd-gold-light)]"
+                onClick={() => setMegaOpen(false)}
+              >
+                Explore Platforms
+                <span aria-hidden>→</span>
+              </Link>
             </div>
 
             {/* Col 3 — Founder statement */}

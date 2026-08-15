@@ -6,11 +6,18 @@ import { KxdLogo } from "@/components/ui/KxdLogo";
 const NAV_LINKS = [
   { label: "Work",         href: "/work" },
   { label: "Services",     href: "/services" },
+  { label: "Platforms",    href: "/platforms" },
   { label: "Investment",   href: "/investment" },
   { label: "Partnerships", href: "/pricing" },
   { label: "About",        href: "/about" },
   { label: "Contact",      href: "/contact" },
 ];
+
+const DISCOVER_LINKS = [
+  { label: "KXD Intelligence", href: "/website-audit" },
+  { label: "Insights", href: "/insights" },
+  { label: "Start a Project", href: "/start-project" },
+] as const;
 
 const utilityLinkClass =
   "text-[0.8125rem] font-light text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)]";
@@ -87,9 +94,20 @@ export function SiteFooter() {
             </ul>
           </div>
 
-          {/* Connect */}
+          {/* Connect + discovery */}
           <div>
-            <p className="kxd-eyebrow mb-5">Connect</p>
+            <p className="kxd-eyebrow mb-5">Discover</p>
+            <ul className="space-y-3">
+              {DISCOVER_LINKS.map((link) => (
+                <li key={link.href}>
+                  <Link href={link.href} className={utilityLinkClass}>
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+
+            <p className="kxd-eyebrow mb-5 mt-10">Connect</p>
             <div className="space-y-3">
               <a
                 href={SITE.social.instagram}

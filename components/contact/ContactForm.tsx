@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { ANALYTICS_EVENTS } from "@/lib/analytics/config";
+import { trackPublicEvent } from "@/lib/analytics/track";
 import { SITE } from "@/lib/site";
 import {
   PARTNERSHIP_PACKAGES,
@@ -106,6 +108,12 @@ export function ContactForm() {
 
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Submission failed");
+
+      trackPublicEvent(ANALYTICS_EVENTS.inquirySubmit, {
+        source: selectedPartnership
+          ? "partnership-pricing"
+          : "contact",
+      });
 
       setState("success");
       form.reset();

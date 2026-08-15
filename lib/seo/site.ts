@@ -1,13 +1,14 @@
 export { SITE as SITE_URL } from "@/lib/site";
 
 export const SEO_KEYWORDS = [
-  /* Core brand */
-  "Luxury Website Design Agency",
-  "Premium Web Design",
-  "High-End Web Design",
-  "Luxury Digital Studio",
-  /* Location */
-  "Los Angeles Web Design Agency",
+  /* Core brand — national digital systems studio */
+  "Premium Website Design",
+  "Website Redesign",
+  "Digital Systems Studio",
+  "Luxury Website Design",
+  "Premium Digital Studio",
+  "Website Audit",
+  /* Supporting California equity (not primary agency identity) */
   "California Premium Web Design",
   /* Industry verticals */
   "Motorsports Web Design",
@@ -15,6 +16,7 @@ export const SEO_KEYWORDS = [
   "Hospitality Website Design",
   "Luxury Hospitality Digital Experience",
   "Automotive Brand Website",
+  "Contractor Website Design",
   "Salon Website Design",
   "Civic Organization Website",
   /* Service types */
@@ -22,12 +24,11 @@ export const SEO_KEYWORDS = [
   "Growth Infrastructure Services",
   "Enterprise Platform Development",
   "Operational Platform Design",
-  "Custom Web Application Development",
+  "Client Portal Development",
   /* Intent/qualifier */
-  "Hire Luxury Web Designer",
+  "Hire Premium Web Designer",
   "Premium Website Design Cost",
-  "Best Web Design Agency",
-  "Boutique Web Design Agency",
+  "Boutique Digital Studio",
 ] as const;
 
 export const DEFAULT_OG_IMAGE = "/media/og/kxd-default.jpg";

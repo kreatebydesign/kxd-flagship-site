@@ -48,20 +48,20 @@ export type CaseStudy = {
 // PROJECTS — authoritative listing order
 //
 // Primary (Selected Work — featured first):
-//   1. Cusick Morgan Motorsports (full-width featured card)
-//   2. Primal Motorsports
-//   3. Plate the Umpqua
-//   4. Spur Restaurant & Bar
+//   1. Primal Motorsports (full-width featured — systems + motorsports)
+//   2. Cusick Morgan Motorsports
+//   3. AutoDV8ions
+//   4. Martinsen Construction
 //
 // Secondary (Further Work):
-//   5. SBE / Hyde Lounge
-//   6. Golden State Warriors
-//   7. On Track Performance
-//   8. AutoDV8ions
-//   9. Martinsen Construction
-//  10. E. Davis Enterprises
-//  11. La Cocina
-//  12. Hair Mafia Salon
+//   5. E. Davis Enterprises
+//   6. On Track Performance
+//   7. Spur Restaurant & Bar
+//   8. Plate the Umpqua
+//   9. SBE / Hyde Lounge
+//  10. Golden State Warriors
+//  11. Hair Mafia Salon
+//  12. La Cocina
 //
 // Hidden (no quality screenshot / not portfolio fit):
 //   — Dialed In Electric (imagery pending)
@@ -73,14 +73,15 @@ export const PROJECTS: ProjectItem[] = [
 
   {
     // 1 — Full-width featured card on /work
-    slug: "cusick-morgan-motorsports",
-    title: "Cusick Morgan Motorsports",
+    slug: "primal-motorsports",
+    title: "Primal Motorsports",
     industry: "Motorsports",
-    service: "Luxury Website Experiences",
-    outcome: "A racing presence with the speed and discipline of the team behind it.",
+    service: "Enterprise Platforms & Operational Systems",
+    outcome:
+      "Flagship website, member portal, and operations layer for a modern motorsports organization.",
     description:
-      "Cinematic web design built for a professional motorsport program operating at full throttle.",
-    image: "/media/cusickmotorsports-com-hero-2026-06-15T06-05-15.png",
+      "Website, driver portal, and operational infrastructure — built as one system for partners, members, and leadership.",
+    image: "/migrated-assets/case-studies/primal-motorsports/homepage-02.webp",
     year: "2025",
     featured: true,
     tier: "primary",
@@ -88,20 +89,100 @@ export const PROJECTS: ProjectItem[] = [
   },
   {
     // 2
-    slug: "primal-motorsports",
-    title: "Primal Motorsports",
+    slug: "cusick-morgan-motorsports",
+    title: "Cusick Morgan Motorsports",
     industry: "Motorsports",
     service: "Luxury Website Experiences",
-    outcome: "Flagship presence for a performance brand that competes at the top.",
+    outcome:
+      "A partnership-ready racing presence built to earn credibility before the first meeting.",
     description:
-      "Website, membership architecture, and growth infrastructure for one of motorsports' most ambitious brands.",
-    image: "/migrated-assets/case-studies/primal-motorsports/homepage-02.webp",
+      "Premium team website with structured sponsor pathways for a professional motorsport program.",
+    image: "/media/cusickmotorsports-com-hero-2026-06-15T06-05-15.png",
     year: "2025",
     tier: "primary",
     imagePosition: "top center",
   },
   {
     // 3
+    slug: "autodv8ions",
+    title: "AutoDV8ions",
+    industry: "Automotive",
+    service: "Brand Systems & Identity",
+    outcome:
+      "Boutique automotive presence that filters for qualified, quality-focused clients.",
+    description:
+      "Brand-forward website and inquiry architecture for an automotive studio built on precision.",
+    image: "/migrated-assets/case-studies/autodv8ions/hero.webp",
+    logo: "/migrated-assets/logos/dv8.svg",
+    year: "2025",
+    tier: "primary",
+    imagePosition: "top center",
+  },
+  {
+    // 4
+    slug: "martinsen-construction",
+    title: "Martinsen Construction",
+    industry: "Construction",
+    service: "Luxury Website Experiences",
+    outcome:
+      "A contractor website built for credibility, clear services, and inquiry readiness.",
+    description:
+      "Website rebuild for an established contractor — service pathways, trust signals, and conversion-ready structure.",
+    image: "/images/work/screenshots/martinsen-construction/desktop-home.png",
+    logo: "/migrated-assets/logos/martinsen-construction-logo.svg",
+    year: "2026",
+    tier: "primary",
+    imagePosition: "top center",
+  },
+
+  // ── SECONDARY — Further Work ──────────────────────────────────────────────
+
+  {
+    // 5
+    slug: "e-davis-enterprises",
+    title: "E. Davis Enterprises",
+    industry: "Energy / Trades",
+    service: "Growth Infrastructure",
+    outcome:
+      "Service-business website and operational systems for a trades company built on reliability.",
+    description:
+      "Website rebuild plus ongoing technology partnership spanning CRM workflows, payments, and analytics.",
+    image: "/images/work/screenshots/e-davis-enterprises/desktop-home.png",
+    year: "2026",
+    tier: "secondary",
+    imagePosition: "top center",
+  },
+  {
+    // 6
+    slug: "on-track-performance",
+    title: "On Track Performance",
+    industry: "Motorsports",
+    service: "Luxury Website Experiences",
+    outcome:
+      "Performance-shop presence built to attract serious motorsports clients.",
+    description:
+      "Website for an automotive performance shop — clear capability, precise positioning, right-client filter.",
+    image: "/migrated-assets/projects/otp.jpg",
+    year: "2024",
+    tier: "secondary",
+    imagePosition: "center",
+  },
+  {
+    // 7
+    slug: "spur-restaurant",
+    title: "Spur Restaurant & Bar",
+    industry: "Hospitality",
+    service: "Luxury Website Experiences",
+    outcome: "A restaurant presence as considered as the atmosphere inside.",
+    description:
+      "Premium web design for a restaurant and bar built on local reputation.",
+    image: "/migrated-assets/case-studies/spur-restaurant/hero.webp",
+    year: "2026",
+    tier: "secondary",
+    imagePosition: "top center",
+  },
+  {
+    // 8
     slug: "plate-the-umpqua",
     title: "Plate the Umpqua",
     industry: "Hospitality",
@@ -112,28 +193,11 @@ export const PROJECTS: ProjectItem[] = [
     image: "/migrated-assets/case-studies/plate-the-umpqua/hero.webp",
     logo: "/migrated-assets/logos/plate-the-umpqua.svg",
     year: "2025",
-    tier: "primary",
+    tier: "secondary",
     imagePosition: "top center",
   },
   {
-    // 4
-    slug: "spur-restaurant",
-    title: "Spur Restaurant & Bar",
-    industry: "Hospitality",
-    service: "Luxury Website Experiences",
-    outcome: "A restaurant presence as considered as the atmosphere inside.",
-    description:
-      "Premium web design for a restaurant and bar built on local reputation.",
-    image: "/migrated-assets/case-studies/spur-restaurant/hero.webp",
-    year: "2026",
-    tier: "primary",
-    imagePosition: "top center",
-  },
-
-  // ── SECONDARY — Further Work ──────────────────────────────────────────────
-
-  {
-    // 5
+    // 9
     slug: "sbe-hyde-lounge",
     title: "SBE / Hyde Lounge",
     industry: "Hospitality",
@@ -147,7 +211,7 @@ export const PROJECTS: ProjectItem[] = [
     imagePosition: "top center",
   },
   {
-    // 6
+    // 10
     slug: "golden-state-warriors",
     title: "Golden State Warriors",
     industry: "NBA",
@@ -161,79 +225,7 @@ export const PROJECTS: ProjectItem[] = [
     imagePosition: "top center",
   },
   {
-    // 7
-    slug: "on-track-performance",
-    title: "On Track Performance",
-    industry: "Motorsports",
-    service: "Luxury Website Experiences",
-    outcome: "Performance-forward digital presence for a motorsports business built on precision.",
-    description:
-      "Website and brand presence for an automotive performance shop with a track-day culture.",
-    image: "/migrated-assets/projects/otp.jpg",
-    year: "2024",
-    tier: "secondary",
-    imagePosition: "center",
-  },
-  {
-    // 8
-    slug: "autodv8ions",
-    title: "AutoDV8ions",
-    industry: "Automotive",
-    service: "Brand Systems & Identity",
-    outcome: "Boutique automotive identity with a point of view sharp enough to cut.",
-    description:
-      "Brand-forward web design for an automotive studio that refuses to look like everyone else.",
-    image: "/migrated-assets/case-studies/autodv8ions/hero.webp",
-    logo: "/migrated-assets/logos/dv8.svg",
-    year: "2025",
-    tier: "secondary",
-    imagePosition: "top center",
-  },
-  {
-    // 9
-    slug: "martinsen-construction",
-    title: "Martinsen Construction",
-    industry: "Construction",
-    service: "Luxury Website Experiences",
-    outcome: "A contractor presence built with the same precision as the work on site.",
-    description:
-      "Website rebuild for a Central Oregon general contractor — residential construction, remodeling, and site development.",
-    image: "/images/work/screenshots/martinsen-construction/desktop-home.png",
-    logo: "/migrated-assets/logos/martinsen-construction-logo.svg",
-    year: "2026",
-    tier: "secondary",
-    imagePosition: "top center",
-  },
-  {
-    // 10
-    slug: "e-davis-enterprises",
-    title: "E. Davis Enterprises",
-    industry: "Energy / Trades",
-    service: "Luxury Website Experiences",
-    outcome: "A service business that looks as professional as the work it delivers.",
-    description:
-      "Website rebuild for a family-owned propane, natural gas, and generator services company in Southern Oregon.",
-    image: "/images/work/screenshots/e-davis-enterprises/desktop-home.png",
-    year: "2026",
-    tier: "secondary",
-    imagePosition: "top center",
-  },
-  {
     // 11
-    slug: "la-cocina",
-    title: "La Cocina",
-    industry: "Hospitality",
-    service: "Luxury Website Experiences",
-    outcome: "A restaurant website as warm and intentional as the kitchen.",
-    description:
-      "Website rebuild for a family-owned Mexican restaurant in Roseburg, Oregon.",
-    image: "/images/work/screenshots/la-cocina/desktop-home.png",
-    year: "2026",
-    tier: "secondary",
-    imagePosition: "top center",
-  },
-  {
-    // 12
     slug: "hair-mafia",
     title: "Hair Mafia Salon",
     industry: "Beauty / Lifestyle",
@@ -242,6 +234,20 @@ export const PROJECTS: ProjectItem[] = [
     description:
       "Brand-forward web experience for a premium salon built on artistry and reputation.",
     image: "/migrated-assets/case-studies/hair-mafia/hero.webp",
+    year: "2026",
+    tier: "secondary",
+    imagePosition: "top center",
+  },
+  {
+    // 12
+    slug: "la-cocina",
+    title: "La Cocina",
+    industry: "Hospitality",
+    service: "Luxury Website Experiences",
+    outcome: "A restaurant website as warm and intentional as the kitchen.",
+    description:
+      "Website rebuild for a family-owned Mexican restaurant in Roseburg, Oregon.",
+    image: "/images/work/screenshots/la-cocina/desktop-home.png",
     year: "2026",
     tier: "secondary",
     imagePosition: "top center",
@@ -294,36 +300,137 @@ export const HIDDEN_PROJECT_SLUGS = new Set(
 export const PRIMARY_PROJECTS = PUBLIC_PROJECTS.filter((p) => p.tier === "primary");
 export const SECONDARY_PROJECTS = PUBLIC_PROJECTS.filter((p) => p.tier === "secondary");
 
+export type CapabilityLink = { label: string; href: string };
+
+/** Contextual related-work discovery — acquisition-aligned, public projects only. */
+export const CASE_STUDY_RELATED_SLUGS: Record<string, readonly string[]> = {
+  "primal-motorsports": [
+    "cusick-morgan-motorsports",
+    "autodv8ions",
+    "on-track-performance",
+  ],
+  "cusick-morgan-motorsports": [
+    "primal-motorsports",
+    "autodv8ions",
+    "on-track-performance",
+  ],
+  "autodv8ions": [
+    "primal-motorsports",
+    "cusick-morgan-motorsports",
+    "on-track-performance",
+  ],
+  "on-track-performance": [
+    "primal-motorsports",
+    "cusick-morgan-motorsports",
+    "autodv8ions",
+  ],
+  "martinsen-construction": [
+    "e-davis-enterprises",
+    "primal-motorsports",
+    "autodv8ions",
+  ],
+  "e-davis-enterprises": [
+    "martinsen-construction",
+    "primal-motorsports",
+    "on-track-performance",
+  ],
+};
+
+/** Capability destinations that deepen proof without inventing scope. */
+export const CASE_STUDY_CAPABILITY_LINKS: Record<string, readonly CapabilityLink[]> = {
+  "primal-motorsports": [
+    { label: "Explore Platforms", href: "/platforms" },
+    { label: "Enterprise Platforms Engagement", href: "/services/enterprise-platforms" },
+  ],
+  "cusick-morgan-motorsports": [
+    { label: "Website Experiences", href: "/services/luxury-website-experiences" },
+    { label: "Explore Platforms", href: "/platforms" },
+  ],
+  "autodv8ions": [
+    { label: "Website Experiences", href: "/services/luxury-website-experiences" },
+    { label: "Growth Infrastructure", href: "/services/growth-infrastructure" },
+  ],
+  "on-track-performance": [
+    { label: "Website Experiences", href: "/services/luxury-website-experiences" },
+    { label: "View All Work", href: "/work" },
+  ],
+  "martinsen-construction": [
+    { label: "Website Experiences", href: "/services/luxury-website-experiences" },
+    { label: "Growth Infrastructure", href: "/services/growth-infrastructure" },
+  ],
+  "e-davis-enterprises": [
+    { label: "Growth Infrastructure", href: "/services/growth-infrastructure" },
+    { label: "Explore Platforms", href: "/platforms" },
+  ],
+};
+
+export function getRelatedProjects(slug: string, limit = 3): ProjectItem[] {
+  const preferred = CASE_STUDY_RELATED_SLUGS[slug] ?? [];
+  const picked: ProjectItem[] = [];
+  const seen = new Set<string>([slug]);
+
+  for (const relatedSlug of preferred) {
+    if (seen.has(relatedSlug)) continue;
+    const project = PROJECTS.find((p) => p.slug === relatedSlug && !p.hidden);
+    if (!project) continue;
+    picked.push(project);
+    seen.add(relatedSlug);
+    if (picked.length >= limit) return picked;
+  }
+
+  const current = PROJECTS.find((p) => p.slug === slug);
+  const pool = PUBLIC_PROJECTS.filter((p) => !seen.has(p.slug));
+  const sameIndustry = pool.filter((p) => current && p.industry === current.industry);
+  const remainder = pool.filter((p) => !current || p.industry !== current.industry);
+
+  for (const project of [...sameIndustry, ...remainder]) {
+    picked.push(project);
+    if (picked.length >= limit) break;
+  }
+
+  return picked;
+}
+
+export function getCaseStudyCapabilityLinks(slug: string): readonly CapabilityLink[] {
+  return CASE_STUDY_CAPABILITY_LINKS[slug] ?? [];
+}
+
 export const CASE_STUDIES: Record<string, CaseStudy> = {
   "primal-motorsports": {
     slug: "primal-motorsports",
     title: "Primal Motorsports",
     industry: "Motorsports",
-    scope: ["Luxury Website Experiences", "Growth Infrastructure", "Operational Platform"],
-    tagline: "Building the digital foundation for a modern motorsports organization.",
+    scope: [
+      "Luxury Website Experiences",
+      "Growth Infrastructure",
+      "Enterprise Platforms & Operational Systems",
+    ],
+    tagline:
+      "Website, member portal, and operations infrastructure for a modern motorsports organization.",
     url: "https://primalmotorsports.com",
     status: "Live",
     year: "2025",
     image: "/migrated-assets/case-studies/primal-motorsports/hero.webp",
     context:
-      "Primal Motorsports isn't a weekend racing club. It's a competitive organization with professional drivers, live events, and a growing ecosystem of partners, members, and fans. The brand had real momentum and real credibility — but the digital infrastructure didn't reflect either. What existed online was a starting point. What the organization needed was a foundation.",
+      "Primal Motorsports isn't a weekend racing club. It's a competitive organization with professional drivers, live events, and a growing ecosystem of partners, members, and fans. The brand had real momentum and real credibility — but the digital infrastructure didn't reflect either. What existed online was a starting point. What the organization needed was a foundation that could carry presence, membership, and operations together.",
     challenge:
-      "Three distinct audiences, three distinct needs — and no existing infrastructure to serve any of them well. Prospective partners needed to see a brand worthy of serious investment. Team members needed operational tools that matched how they actually worked. Leadership needed visibility across the organization without adding overhead. A single marketing website wasn't going to solve that. The scope required architecture, not decoration.",
+      "Three distinct audiences, three distinct needs — and no existing infrastructure to serve any of them well. Prospective partners needed to see a brand worthy of serious investment. Team members needed portal access and workflows that matched how they actually worked. Leadership needed visibility across the organization without adding overhead. A single marketing website wasn't going to solve that. The scope required architecture, not decoration.",
     strategy:
-      "Strategy first. KXD mapped each audience independently — what they needed to see, what they needed to do, and what a failed digital experience would cost the organization. From there, the architecture emerged: a premium public-facing presence designed around partner credibility, a member dashboard built for team accountability and access, and an operations interface that gave leadership the visibility to run the organization with confidence. Every decision was evaluated against the same standard: does this serve the organization's actual goals, or does it just look like a motorsports website?",
+      "Strategy first. KXD mapped each audience independently — what they needed to see, what they needed to do, and what a failed digital experience would cost the organization. From there, the architecture emerged: a premium public-facing presence designed around partner credibility, a member/driver portal built for accountability and access, and an operations interface that gave leadership visibility to run the organization with confidence. Every decision was evaluated against the same standard: does this serve the organization's actual goals, or does it just look like a motorsports website?",
     execution: [
-      "Flagship website — premium brand presence built for partner and sponsor conversations, with clear positioning, cinematic visual treatment, and structured inquiry pathways.",
-      "Driver dashboard — member-facing experience enabling team workflows, driver data access, and organizational accountability.",
-      "Operations interface — internal platform giving leadership visibility across events, logistics, and team coordination without adding administrative complexity.",
+      "Flagship website rebuild — premium brand presence for partner and sponsor conversations, with clear positioning and structured inquiry pathways.",
+      "Driver / member portal — authenticated experience supporting team workflows, access, and organizational accountability.",
+      "Operations interface — internal platform giving leadership visibility across events, logistics, and coordination without adding administrative complexity.",
+      "Growth infrastructure — connected digital foundation so public presence, membership, and operations reinforce each other instead of living as disconnected tools.",
     ],
     qualitativeOutcomes: [
       "Flagship digital presence that holds weight in partner and sponsor conversations",
-      "Member infrastructure that supports team accountability and operational clarity",
-      "Internal operations layer that scales with organizational growth",
-      "A unified digital identity across three distinct audience experiences",
+      "Member portal infrastructure that supports team accountability and operational clarity",
+      "Internal operations layer designed to scale with organizational growth",
+      "Unified digital identity across public, member, and leadership experiences",
     ],
     whyItWorked:
-      "The result works because it was designed around the organization's actual needs — not what a motorsports website is supposed to look like. Every section earns its place. Every experience serves a defined audience. The outcome wasn't driven by trend or template — it came from asking harder questions upfront and holding the architecture to the same standard the team holds itself on track.",
+      "The result works because it was designed around the organization's actual needs — not what a motorsports website is supposed to look like. The website earns trust. The portal supports the team. The operations layer gives leadership visibility. Every experience serves a defined audience. That is the difference between a redesign and a digital system.",
     showcaseImages: [
       {
         src: "/migrated-assets/case-studies/primal-motorsports/homepage-full.webp",
@@ -343,7 +450,7 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
       {
         src: "/migrated-assets/case-studies/primal-motorsports/ops-hero.webp",
         alt: "Primal OS — executive operations interface",
-        caption: "Primal OS — operations layer",
+        caption: "Operations layer",
       },
     ],
   },
@@ -353,7 +460,8 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     title: "Cusick Morgan Motorsports",
     industry: "Motorsports",
     scope: ["Luxury Website Experiences", "Brand Systems & Identity"],
-    tagline: "A premium digital experience built around performance and growth.",
+    tagline:
+      "A partnership-ready motorsports presence built to earn credibility before the first conversation.",
     url: "https://cusickmotorsports.com",
     status: "Live",
     year: "2025",
@@ -365,9 +473,9 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     strategy:
       "Partnership visibility was the north star. Every design decision — layout, content hierarchy, imagery treatment — was evaluated through one lens: does this make a potential partner more confident in this team? Secondary to that, team identity. The brand had to feel like a serious competitive operation — not a hobby club with a well-designed website. Copy was written to position results, not just announce them. The information architecture was built to guide a sponsor from interest to inquiry without friction.",
     execution: [
-      "Team website — cinematic design built around the team's competitive identity, race history, and driver profiles.",
-      "Partner & sponsor pathways — structured content and inquiry architecture designed to move a prospect from interest to conversation.",
-      "Brand system alignment — visual language and copy direction that carries weight in a boardroom as much as in a browser.",
+      "Team website — cinematic design built around competitive identity, race history, and driver profiles.",
+      "Partner and sponsor pathways — structured content and inquiry architecture designed to move interest into conversation.",
+      "Brand system alignment — visual language and copy direction that holds up in a boardroom as much as in a browser.",
     ],
     qualitativeOutcomes: [
       "Professional digital presence that earns credibility before the first conversation",
@@ -376,7 +484,7 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
       "Digital foundation that holds up in presentations, pitch decks, and introductions",
     ],
     whyItWorked:
-      "It worked because the goals were defined before the design started. Not 'we need a website' — but 'we need partners, and we need this to get us in the room.' That clarity drove every decision. When the purpose is specific, the outcome is specific. Generic briefs produce generic work. This wasn't generic.",
+      "It worked because the goals were defined before the design started. Not 'we need a website' — but 'we need partners, and we need this to get us in the room.' That clarity drove every decision. When the purpose is specific, the outcome is specific.",
     showcaseImages: [
       {
         src: "/migrated-assets/case-studies/cusick-morgan-motorsports/hero.webp",
@@ -450,7 +558,8 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     title: "AutoDV8ions",
     industry: "Automotive",
     scope: ["Brand Systems & Identity", "Luxury Website Experiences"],
-    tagline: "Transforming automotive interest into qualified opportunities.",
+    tagline:
+      "Automotive brand presence and inquiry architecture built to convert qualified interest.",
     url: "https://autodv8ions.com",
     status: "Live",
     year: "2025",
@@ -459,13 +568,13 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     context:
       "AutoDV8ions is a boutique automotive studio that earns its reputation through precision and a point of view. Referral-driven, quality-focused, and deeply committed to doing the work right — the kind of studio where every client is a qualified one. The work was exceptional. The digital introduction wasn't anywhere close.",
     challenge:
-      "Reputation is powerful. It's also invisible online. The studio's craftsmanship and aesthetic were well-known to those who already knew — but without a digital presence that matched the studio's standard, growth was limited to the reach of existing word-of-mouth. Qualified prospects were finding nothing, or finding something that didn't reflect the quality of the actual work.",
+      "Reputation is powerful. It's also invisible online. The studio's craftsmanship was well-known to those who already knew — but without a digital presence that matched the studio's standard, growth was limited to existing word-of-mouth. Qualified prospects were finding nothing, or finding something that didn't reflect the quality of the actual work.",
     strategy:
-      "Lead with identity, not services. The strategy wasn't to build a bigger audience — it was to build the right first impression for the right client. The website had to function as a portfolio, a filter, and a statement — in that order. Design itself as demonstration: if the site looks like it was built with care and precision, it sets the expectation that the studio operates the same way. Copy was written to speak to a client who already has taste, not to explain why taste matters.",
+      "Lead with identity, not a generic service list. The website had to function as a portfolio, a filter, and a statement — in that order. Design itself as demonstration: if the site looks like it was built with care and precision, it sets the expectation that the studio operates the same way. Copy was written to speak to a client who already has taste, not to explain why taste matters.",
     execution: [
-      "Brand-forward website — identity-led design built to communicate the studio's point of view before its service list.",
-      "Inquiry and lead architecture — structured pathways that convert qualified interest into direct opportunities.",
-      "Brand system refinement — visual language, tone, and positioning that carries the studio's standard across every touchpoint.",
+      "Brand-forward website — identity-led design that communicates the studio's point of view before its service list.",
+      "Inquiry and lead architecture — structured pathways that convert qualified interest into direct conversations.",
+      "Brand system refinement — visual language, tone, and positioning that carry the studio's standard across every touchpoint.",
     ],
     qualitativeOutcomes: [
       "Digital identity that reflects the studio's precision and point of view",
@@ -474,7 +583,7 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
       "First impression that matches the standard of the actual work",
     ],
     whyItWorked:
-      "It works because it's specific. It's not trying to appeal to everyone — it's built for the client who already has taste, who recognizes quality when they see it, and wants to work with people who hold the same standard. That specificity is the strategy. Broad positioning produces unqualified inquiries. Sharp positioning produces the right ones.",
+      "It works because it's specific. It's not trying to appeal to everyone — it's built for the client who already recognizes quality and wants to work with people who hold the same standard. Broad positioning produces unqualified inquiries. Sharp positioning produces the right ones.",
     showcaseImages: [
       {
         src: "/migrated-assets/case-studies/autodv8ions/hero.webp",
@@ -530,7 +639,8 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     title: "On Track Performance",
     industry: "Motorsports",
     scope: ["Luxury Website Experiences"],
-    tagline: "Performance-forward digital presence for a motorsports business built on precision.",
+    tagline:
+      "Automotive performance-shop website built to attract serious motorsports clients.",
     url: "https://on-track-performance.com",
     status: "Live",
     year: "2024",
@@ -538,19 +648,20 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     context:
       "On Track Performance serves a customer who knows the difference. Whether it's track preparation, alignment, or suspension work — the clients who walk through the door have standards. The website had to meet them.",
     challenge:
-      "Automotive performance shops tend to look the same — loud, cluttered, aimed at everyone. The goal was a site that looked like a shop that turns away work it doesn't want.",
+      "Automotive performance shops often look interchangeable online — loud, cluttered, aimed at everyone. On Track needed a presence that communicated precision and filtered for the right client profile.",
     strategy:
-      "Precision over volume. The design language had to reflect the shop's actual standards — sharp, clean, and built for the client who already knows what they need.",
+      "Precision over volume. The design language, service clarity, and content hierarchy had to reflect the shop's actual standards — sharp, clean, and built for the client who already knows what they need.",
     execution: [
       "Performance-aligned website built for a motorsports audience that values precision.",
-      "Content architecture that communicates capability without overselling.",
+      "Content architecture that communicates capability clearly and supports inquiry without overselling.",
     ],
     qualitativeOutcomes: [
       "Digital presence that reflects the shop's performance standards",
       "First impression that attracts the right client profile",
+      "Clearer path from interest to contact for serious motorsports work",
     ],
     whyItWorked:
-      "Specificity is a filter. A site that looks like it was built for serious motorsports clients attracts serious motorsports clients. That was the goal — and the outcome.",
+      "Specificity is a filter. A site built for serious motorsports clients attracts serious motorsports clients. That was the goal — and the outcome.",
     showcaseImages: [
       {
         src: "/migrated-assets/projects/otp.jpg",
@@ -763,28 +874,31 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     title: "Martinsen Construction",
     industry: "Construction",
     scope: ["Luxury Website Experiences"],
-    tagline: "A contractor website built with the same precision as the work on site.",
+    tagline:
+      "A contractor website built for credibility, clear services, and inquiry readiness.",
     url: "https://www.martinsenconstruction.com",
     status: "Live",
     year: "2026",
     image: "/images/work/screenshots/martinsen-construction/desktop-home.png",
     logo: "/migrated-assets/logos/martinsen-construction-logo.svg",
     context:
-      "Martinsen Construction serves Central Oregon with residential construction, remodeling, ADUs, and site development. The work is precise and professional — the website needed to communicate that before the first call.",
+      "Martinsen Construction is an established contractor serving Central Oregon with residential construction, remodeling, ADUs, and site development. The fieldwork is precise and professional. The website needed to communicate that trust before the first call — not merely decorate the brand.",
     challenge:
-      "Most contractor websites look interchangeable. Martinsen needed a digital presence that communicated licensed expertise, local trust, and premium craftsmanship.",
+      "Most contractor websites look interchangeable: generic galleries, unclear services, weak paths to contact. Martinsen needed a digital presence that communicated licensed expertise, service clarity, and conversion readiness for homeowners and commercial prospects evaluating who to call.",
     strategy:
-      "Lead with credibility and clarity. Service architecture, licensing proof, and a professional first impression that matches the standard of the build.",
+      "Lead with credibility and clarity. Structure services so prospects can find the right work quickly. Make professionalism and next-step inquiry obvious. The website had to earn the call — not just look better than a template.",
     execution: [
-      "Premium contractor website — clear service pathways and professional presentation.",
-      "Brand-aligned design that elevates perception in a competitive local market.",
+      "Contractor website rebuild with clear residential and commercial service pathways.",
+      "Trust-first presentation — professional structure that matches the standard of work on site.",
+      "Inquiry-ready conversion architecture so interested prospects can move from evaluation to contact without friction.",
     ],
     qualitativeOutcomes: [
       "Digital presence that reflects licensed, professional construction standards",
       "Clear service architecture for residential and commercial prospects",
+      "Stronger inquiry readiness for prospects ready to request a conversation or quote",
     ],
     whyItWorked:
-      "Contractors win on trust. A website that looks as intentional as the work itself is a trust signal before anyone reads a word.",
+      "Contractors win on trust before they win on price. A website that makes services clear and the next step obvious is a business system, not a brochure. Client geography remains factual; the commercial lesson is national: established service businesses need conversion-ready presence.",
     showcaseImages: [
       {
         src: "/images/work/screenshots/martinsen-construction/desktop-home.png",
@@ -798,33 +912,38 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     slug: "e-davis-enterprises",
     title: "E. Davis Enterprises",
     industry: "Energy / Trades",
-    scope: ["Luxury Website Experiences"],
-    tagline: "A service business website built for trust and clarity.",
+    scope: ["Luxury Website Experiences", "Growth Infrastructure"],
+    tagline:
+      "Service-business website and operational systems for a trades company built on reliability.",
     url: "https://www.edavisoregon.com",
     status: "Live",
     year: "2026",
     image: "/images/work/screenshots/e-davis-enterprises/desktop-home.png",
     context:
-      "E. Davis Enterprises is a family-owned propane, natural gas, and generator services company serving Southern Oregon. The business is built on reliability — the website had to communicate that immediately.",
+      "E. Davis Enterprises is a family-owned propane, natural gas, and generator services company serving Southern Oregon. The business is built on reliability. KXD's role expanded beyond a website rebuild into an ongoing technology partnership supporting how the company presents itself and how work moves behind the scenes.",
     challenge:
-      "Service businesses in trades and energy often default to cluttered, outdated websites. E. Davis needed a presence that felt as professional as the work delivered on site.",
+      "Service businesses in trades and energy often default to cluttered, outdated websites — and disconnected tools for the work after the lead arrives. E. Davis needed a professional digital presence and operational infrastructure that matched the seriousness of the field team.",
     strategy:
-      "Clarity first. Service pathways, licensing proof, and a calm, confident design language that builds trust before the first call.",
+      "Start with clarity on the public side: service pathways, trust, and inquiry readiness. Then support the business with operational systems — custom CRM workflows, payment/invoicing infrastructure, and analytics — so the website and internal operations reinforce each other as an ongoing partnership.",
     execution: [
-      "Service business website rebuild with clear inquiry pathways.",
-      "Brand presentation aligned to a family-owned, licensed operation.",
+      "Service-business website rebuild with clear inquiry pathways across propane, gas, and generator work.",
+      "Custom CRM and workflow support so leads and service operations have a structured home beyond the inbox.",
+      "Payment and invoicing infrastructure via Stripe, plus analytics foundation for ongoing visibility.",
+      "Managed technology partnership — continuous support for digital presence and operational tooling as the business evolves.",
     ],
     qualitativeOutcomes: [
       "Professional first impression for residential and commercial prospects",
       "Clear service architecture across propane, gas, and generator work",
+      "Operational systems supporting CRM workflows, payments, and analytics beyond the website alone",
+      "Ongoing technology partnership instead of a one-time launch handoff",
     ],
     whyItWorked:
-      "When the website matches the professionalism of the field team, every lead starts with confidence instead of skepticism.",
+      "When the website matches the professionalism of the field team, every lead starts with confidence. When CRM, payments, and analytics sit behind that presence, the engagement becomes infrastructure — not just a redesign. Client location is factual context; the capability applies to established service businesses that have outgrown disconnected tools.",
     showcaseImages: [
       {
         src: "/images/work/screenshots/e-davis-enterprises/desktop-home.png",
         alt: "E. Davis Enterprises — website rebuild",
-        caption: "Service business rebuild",
+        caption: "Service business website",
       },
     ],
   },

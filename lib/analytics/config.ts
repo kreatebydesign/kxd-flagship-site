@@ -68,4 +68,9 @@ export const ANALYTICS_EVENTS = {
   serviceView: "service_view",
   pricingView: "pricing_view",
   contactClick: "contact_click",
+  /** KXD Intelligence — /website-audit */
+  websiteAuditStarted: "website_audit_started",
+  websiteAuditCompleted: "website_audit_completed",
+  intelligenceResultsViewed: "intelligence_results_viewed",
+  intelligenceStartProjectClick: "intelligence_start_project_click",
 } as const;

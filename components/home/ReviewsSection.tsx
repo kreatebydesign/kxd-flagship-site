@@ -1,13 +1,9 @@
 /**
  * ReviewsSection — async server component.
  *
- * Fetches reviews from Google Business Profile (via lib/google-reviews.ts)
- * when GOOGLE_PLACES_API_KEY + GOOGLE_PLACE_ID are configured.
- * Falls back silently to PLACEHOLDER_REVIEWS if credentials are absent or if
- * anything in the fetch pipeline fails.
- *
- * Cached at the Next.js data layer (1hr revalidation). The page renders as
- * fully static during build when credentials are not present.
+ * Renders only when verified Google Business Profile reviews are available
+ * (via lib/google-reviews.ts). Returns null when credentials are absent or
+ * no reviews pass the quality filter — never invents testimonials or ratings.
  */
 
 import { getGoogleReviews, getAggregateRating } from "@/lib/google-reviews";
@@ -110,10 +106,16 @@ function ReviewCard({
 }
 
 export async function ReviewsSection() {
-  const reviews     = await getGoogleReviews();
-  const avgRating   = getAggregateRating(reviews);
-  const displayRating = avgRating > 0 ? avgRating.toFixed(1) : "5.0";
-  const isFromGoogle = reviews.some(r => r.source === "google");
+  const reviews = await getGoogleReviews();
+  const verified = reviews.filter((r) => r.source === "google" || r.source === "manual");
+
+  if (verified.length === 0) {
+    return null;
+  }
+
+  const avgRating = getAggregateRating(verified);
+  const displayRating = avgRating > 0 ? avgRating.toFixed(1) : null;
+  const isFromGoogle = verified.some((r) => r.source === "google");
 
   return (
     <section
@@ -151,45 +153,47 @@ export async function ReviewsSection() {
             </p>
           </div>
 
-          <div
-            className="flex items-center gap-5 self-end border-l pl-8"
-            style={{ borderColor: "var(--kxd-border-gold)" }}
-          >
-            <div>
-              <p
-                className="font-serif font-light"
-                style={{
-                  fontSize: "2.5rem",
-                  color: "var(--kxd-gold)",
-                  lineHeight: 1,
-                }}
-              >
-                {displayRating}
-              </p>
-
-              <GoldStars rating={avgRating || 5} />
-            </div>
-
+          {displayRating && (
             <div
-              className="h-10 w-px"
-              aria-hidden
-              style={{ background: "var(--kxd-border-white)" }}
-            />
+              className="flex items-center gap-5 self-end border-l pl-8"
+              style={{ borderColor: "var(--kxd-border-gold)" }}
+            >
+              <div>
+                <p
+                  className="font-serif font-light"
+                  style={{
+                    fontSize: "2.5rem",
+                    color: "var(--kxd-gold)",
+                    lineHeight: 1,
+                  }}
+                >
+                  {displayRating}
+                </p>
 
-            <div>
-              <p className="kxd-label">{isFromGoogle ? "Google Verified" : "Client Verified"}</p>
-              <p className="kxd-label mt-1">{isFromGoogle ? "Public Record" : "Direct Record"}</p>
+                <GoldStars rating={avgRating} />
+              </div>
+
+              <div
+                className="h-10 w-px"
+                aria-hidden
+                style={{ background: "var(--kxd-border-white)" }}
+              />
+
+              <div>
+                <p className="kxd-label">{isFromGoogle ? "Google Verified" : "Client Verified"}</p>
+                <p className="kxd-label mt-1">{isFromGoogle ? "Public Record" : "Direct Record"}</p>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         <div>
-          {reviews.map((review, i) => (
+          {verified.map((review, i) => (
             <ReviewCard
               key={review.id}
               review={review}
               isFirst={i === 0}
-              isLast={i === reviews.length - 1}
+              isLast={i === verified.length - 1}
             />
           ))}
         </div>

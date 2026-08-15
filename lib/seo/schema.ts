@@ -66,9 +66,9 @@ export function localBusinessSchema() {
     email: SITE.email,
     priceRange: "$$$$",
     areaServed: [
-      { "@type": "City", name: "Los Angeles" },
-      { "@type": "State", name: "California" },
       { "@type": "Country", name: "United States" },
+      { "@type": "State", name: "California" },
+      { "@type": "City", name: "Los Angeles" },
     ],
     address: {
       "@type": "PostalAddress",
@@ -110,8 +110,8 @@ export function breadcrumbSchema(items: { name: string; path: string }[]) {
 
 /**
  * Deprecated compatibility helper.
- * Reviews should be passed into organizationSchema(reviews) so the homepage
- * only outputs one Organization object with one stable @id.
+ * Reviews should be passed into organizationSchema(reviews) only when verified.
+ * Do not pass placeholder or invented testimonials.
  */
 export function reviewSchema(reviews: {
   authorName: string;
