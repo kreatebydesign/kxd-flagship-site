@@ -1062,6 +1062,9 @@ main {
  * 10.5–11rem at most viewports. GPU-composited opacity — no layout cost.
  */
 .kxd-work-reel {
+  position: relative;
+  isolation: isolate;
+  contain: layout paint;
   overflow: hidden;
   border-top: 1px solid var(--kxd-border-gold);
   border-bottom: 1px solid var(--kxd-border-white);
@@ -1091,6 +1094,7 @@ main {
 .kxd-work-reel__track {
   display: flex;
   align-items: center;
+  width: max-content;
   height: 100%;
   gap: clamp(1.5rem, 3vw, 2.5rem);
   padding-left: clamp(1.5rem, 3vw, 2.5rem);

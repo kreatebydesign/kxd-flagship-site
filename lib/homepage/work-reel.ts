@@ -29,7 +29,10 @@ export const WORK_REEL_FRAMES: WorkReelFrame[] = [
   },
   {
     // Plate the Umpqua — regional hospitality/dining
-    src: "/migrated-assets/case-studies/plate-the-umpqua/hero.webp",
+    // Use an editorial section crop here. The hero capture contains a
+    // "Request Availability" CTA that reads as repeated site chrome when
+    // this frame is duplicated for the continuous reel.
+    src: "/migrated-assets/case-studies/plate-the-umpqua/homepage-03.webp",
     alt: "Plate the Umpqua",
     objectPosition: "top center",
   },
