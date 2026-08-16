@@ -25,6 +25,7 @@ import { loadClientCommandCenter } from "./engine";
 import { buildWorkspaceQuickActions } from "./workspace-actions";
 import { loadClientCommercialWorkspace } from "./commercial/load-commercial-workspace";
 import { loadClientSiteIntelligence } from "@/lib/client-site-intelligence/load";
+import { loadClientLeadLedger } from "@/lib/managed-client-leads/load";
 import type {
   ClientWorkspaceBundle,
   WorkspaceAnalyticsSnapshot,
@@ -171,6 +172,13 @@ export async function loadClientWorkspaceBundle(
     loadClientSiteIntelligence(clientId),
   ]);
 
+  const client = workspace.client;
+  const clientKey = String(client.slug ?? "").trim();
+  const leadOperations = await loadClientLeadLedger({
+    clientId,
+    clientKey: clientKey || `client-${clientId}`,
+  });
+
   const invoices = buildInvoices(clientId, proposalDocs, retainers);
   const creativeAssets = await fetchDocs("creative-assets", clientId);
   const brandKits = await fetchDocs("brand-kits", clientId);
@@ -193,7 +201,6 @@ export async function loadClientWorkspaceBundle(
       }
     : null;
 
-  const client = workspace.client;
   const profile = workspace.profile;
   const row = workspace.row;
 
@@ -248,6 +255,7 @@ export async function loadClientWorkspaceBundle(
     taskDocs: tasks,
     communications,
     siteIntelligence,
+    leadOperations,
     workspaceQuickActions: buildWorkspaceQuickActions(clientId, primaryEmail),
     analytics,
     header: {

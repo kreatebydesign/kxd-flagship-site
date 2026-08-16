@@ -18,6 +18,7 @@ import {
 import { ClientTimelinePanel } from "./ClientTimelinePanel";
 import { ClientCommunicationsPanel } from "./ClientCommunicationsPanel";
 import { ClientIntelligencePanel } from "./ClientIntelligencePanel";
+import { ClientLeadOperationsPanel } from "./ClientLeadOperationsPanel";
 import { ClientActionsPanel } from "./ClientActionsPanel";
 import { ClientWorkPanel } from "./ClientWorkPanel";
 import { ClientInventoryPanel } from "./ClientInventoryPanel";
@@ -62,6 +63,8 @@ export function CommandWorkspaceTabPanel({
       return <ClientCommunicationsPanel data={data} />;
     case "intelligence":
       return <ClientIntelligencePanel data={data} />;
+    case "leads":
+      return <ClientLeadOperationsPanel ledger={data.leadOperations} />;
     case "actions":
       return <ClientActionsPanel data={data} />;
     case "meetings":

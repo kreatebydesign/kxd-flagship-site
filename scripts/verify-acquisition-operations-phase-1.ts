@@ -11,7 +11,6 @@ import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import {
   ACQUISITION_CONTEXTS,
-  ACQUISITION_OPERATIONS_PHASE_1,
   CANONICAL_OWNERS,
   KXD_CANONICAL_SALES_COLLECTION,
   KXD_SOURCE_RECORD_TYPES,
@@ -69,8 +68,10 @@ async function main() {
     assert.equal(isAcquisitionContext("managed_client"), true);
     assert.equal(isAcquisitionContext("primal"), false);
     assert.equal(ACQUISITION_CONTEXTS.managed_client, "managed_client");
-    assert.equal(getManagedClientLeadPolicy("primal-motorsports"), null);
-    assert.equal(getManagedClientLeadPolicy("otp-carts"), null);
+    // Phase 2 registers policies by clientKey — shared callers still must not branch on product names.
+    assert.ok(getManagedClientLeadPolicy("primal-motorsports"));
+    assert.ok(getManagedClientLeadPolicy("otp-carts"));
+    assert.equal(getManagedClientLeadPolicy("unknown-client"), null);
   });
 
   await check("provenance / source identity helpers", () => {
@@ -169,10 +170,7 @@ async function main() {
     assertFileContains("app/api/inquiries/route.ts", "slice(0, 200)");
   });
 
-  await check("Phase 1 does not build Phase 2 / CSI CRM / OTP changes", () => {
-    assert.ok(
-      ACQUISITION_OPERATIONS_PHASE_1.deferred.includes("client-inquiries persistence"),
-    );
+  await check("Phase 1 KXD promote does not touch CSI CRM / OTP commission", () => {
     assertFileDoesNotContain(
       "lib/sales/promote-inbound.ts",
       "client-site-events",
@@ -181,7 +179,11 @@ async function main() {
       "lib/sales/promote-inbound.ts",
       "commission",
     );
-    assert.equal(existsSync(path.join(ROOT, "payload/collections/ClientInquiries.ts")), false);
+    // Phase 2 owns client-inquiries; Phase 1 promote path must never write them.
+    assertFileDoesNotContain(
+      "lib/sales/promote-inbound.ts",
+      "client-inquiries",
+    );
   });
 
   await check("Phase 17 registry reflects partial progress only", () => {

@@ -1,9 +1,11 @@
 /**
- * Acquisition & Lead Operations — shared domain contracts (Phase 1).
+ * Acquisition & Lead Operations — shared domain contracts.
  *
- * Coordinates KXD Acquisition and future Managed Client Lead Operations.
+ * Coordinates KXD Acquisition and Managed Client Lead Operations.
  * Does not create a universal lead collection or CRM silo.
  */
+
+import "./policies/register";
 
 export {
   ACQUISITION_CONTEXTS,
@@ -43,7 +45,11 @@ export {
 export {
   MANAGED_CLIENT_LEAD_POLICY_REGISTRY,
   getManagedClientLeadPolicy,
+  listManagedClientLeadPolicies,
+  registerManagedClientLeadPolicy,
+  isChannelAllowedForPolicy,
   type ManagedClientLeadPolicy,
+  type ManagedClientLeadChannel,
 } from "./policy";
 
 export type {
@@ -63,11 +69,27 @@ export const ACQUISITION_OPERATIONS_PHASE_1 = {
     "Partial Phase 17 Lead Funnel Unification (KXD Acquisition handoffs only)",
   ],
   deferred: [
-    "client-inquiries persistence",
-    "Managed Client Lead Operations / Primal activation",
-    "Ads ↔ inquiry reconciliation",
+    "Full Phase 17 normalization",
     "CSI CRM expansion",
     "OTP commission changes",
-    "Full Phase 17 normalization",
+  ],
+} as const;
+
+/** Phase 2 scope note — managed-client inquiry ledger. */
+export const ACQUISITION_OPERATIONS_PHASE_2 = {
+  id: "acquisition-lead-operations-phase-2",
+  implements: [
+    "client-inquiries persistence (managed-client received inquiries)",
+    "Client policy registry (Primal + OTP compatibility)",
+    "Attribution ↔ inquiry reconciliation states",
+    "Operator Client Command Leads tab",
+    "OTP CSI website_lead → inquiry draft adapter (no auto-ingest, no commission)",
+  ],
+  deferred: [
+    "Portal Lead Operations module",
+    "Automatic CSI → client-inquiry ingest wiring",
+    "Automated AI qualification",
+    "Primal production GA4 sync jobs",
+    "OTP production Lead Operations activation beyond adapter readiness",
   ],
 } as const;

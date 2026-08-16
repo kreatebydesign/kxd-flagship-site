@@ -10,7 +10,7 @@ export const CANONICAL_OWNERS = {
   kxd_inbound_project_inquiry: "project-inquiries",
   kxd_inbound_website_audit: "website-audits",
   managed_client_site_event: "client-site-events",
-  /** Phase 2 — do not create persistence in Phase 1. */
+  /** Managed Client Lead Operations — received inquiries for a managed client. */
   managed_client_received_inquiry: "client-inquiries",
   attribution_reporting: "reporting",
   relationship_work_memory: "activity-engine",

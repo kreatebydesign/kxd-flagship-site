@@ -67,6 +67,7 @@ import * as migration_20260826_qr_codes from './20260826_qr_codes';
 import * as migration_20260827_revenue_pipeline_foundation from './20260827_revenue_pipeline_foundation';
 import * as migration_20260828_research_lead_qualification from './20260828_research_lead_qualification';
 import * as migration_20260829_acquisition_inbound_sales_promotion from './20260829_acquisition_inbound_sales_promotion';
+import * as migration_20260830_managed_client_lead_operations from './20260830_managed_client_lead_operations';
 import * as migration_20260712_phase29c_reporting_provider_connections from './20260712_phase29c_reporting_provider_connections';
 import * as migration_20260713_phase31c_reporting_facts from './20260713_phase31c_reporting_facts';
 import * as migration_20260713_phase32b_google_ads_customer_fields from './20260713_phase32b_google_ads_customer_fields';
@@ -651,5 +652,13 @@ export const migrations = [
     up: migration_20260829_acquisition_inbound_sales_promotion.up,
     down: migration_20260829_acquisition_inbound_sales_promotion.down,
     name: '20260829_acquisition_inbound_sales_promotion',
+  },
+  {
+    // Managed Client Lead Operations Phase 2 — client-inquiries ledger.
+    // Additive only. Local apply until production migration is authorized.
+    // Never writes into sales-leads. No commission columns.
+    up: migration_20260830_managed_client_lead_operations.up,
+    down: migration_20260830_managed_client_lead_operations.down,
+    name: '20260830_managed_client_lead_operations',
   },
 ];

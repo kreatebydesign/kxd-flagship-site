@@ -19,6 +19,7 @@ import type {
 import type { ClientMemorySnapshot } from "./memory/types";
 import type { ClientCommercialWorkspaceSnapshot } from "./commercial/types";
 import type { ClientSiteIntelligenceSnapshot } from "@/lib/client-site-intelligence/load";
+import type { ClientLeadLedgerSnapshot } from "@/lib/managed-client-leads/types";
 
 export interface CommandHubClientRow {
   clientId: number;
@@ -133,6 +134,7 @@ export interface ClientWorkspaceBundle extends ClientCommandCenterData {
   financialIntelligence: FinancialIntelligenceSnapshot;
   commercial: ClientCommercialWorkspaceSnapshot;
   siteIntelligence: ClientSiteIntelligenceSnapshot;
+  leadOperations: ClientLeadLedgerSnapshot;
   memory: ClientMemorySnapshot;
   workBoard: ClientWorkBoardData | null;
   workspaceQuickActions: CommandWorkspaceQuickAction[];
@@ -166,5 +168,6 @@ export type ClientWorkspaceMemoryInput = Omit<
   | "financialIntelligence"
   | "commercial"
   | "siteIntelligence"
+  | "leadOperations"
   | "workBoard"
 >;
