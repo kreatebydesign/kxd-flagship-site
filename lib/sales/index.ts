@@ -7,6 +7,16 @@ export * from "./timeline-events";
 export { getPipelineBoard, getLeadsList, updateLeadPipelineStatus } from "./pipeline";
 export { getSalesWorkspace, type SalesWorkspaceData, type SalesOpportunityCard } from "./workspace";
 export { promoteResearchLeadToSales, type PromoteResearchLeadResult } from "./promote-research-lead";
+export {
+  promoteInquiryToSales,
+  promoteProjectInquiryToSales,
+  promoteWebsiteAuditToSales,
+} from "./promote-inbound";
+export {
+  isInquiryEligibleForPromotion,
+  isProjectInquiryEligibleForPromotion,
+  isWebsiteAuditEligibleForPromotion,
+} from "./promote-helpers";
 export { NEXT_ACTIONS, NEXT_ACTION_LABEL, isNextAction, type NextAction } from "./next-action";
 export { WORKSPACE_SECTIONS, WORKSPACE_MOVES, STATUS_TO_SECTION } from "./workspace-stages";
 export {

@@ -89,6 +89,7 @@ export async function POST(request: Request) {
           | undefined,
         message: body.message.trim(),
         source: body.source || "project-application",
+        referral: body.referral?.trim().slice(0, 200) || undefined,
         partnershipPackage,
         status: "new",
       } as never,

@@ -33,6 +33,10 @@ export type SalesOpportunityCard = {
   location: string | null;
   sourcedBy: string | null;
   sourceResearchLeadId: number | null;
+  sourceInquiryId: number | null;
+  sourceProjectInquiryId: number | null;
+  sourceWebsiteAuditId: number | null;
+  sourceLabel: string | null;
   status: string;
   sectionId: WorkspaceSectionId;
   sectionLabel: string;
@@ -96,6 +100,20 @@ function toCard(lead: SalesDoc): SalesOpportunityCard {
     ? RESEARCH_SERVICE_LABEL[rawService] ?? rawService
     : null;
 
+  const sourceResearchLeadId = relId(lead.sourceResearchLead);
+  const sourceInquiryId = relId(lead.sourceInquiry);
+  const sourceProjectInquiryId = relId(lead.sourceProjectInquiry);
+  const sourceWebsiteAuditId = relId(lead.sourceWebsiteAudit);
+  const sourceLabel = sourceResearchLeadId
+    ? "From research"
+    : sourceInquiryId
+      ? "From contact inquiry"
+      : sourceProjectInquiryId
+        ? "From start project"
+        : sourceWebsiteAuditId
+          ? "From website audit"
+          : null;
+
   return {
     id: Number(lead.id),
     companyName: String(lead.companyName ?? "Prospect"),
@@ -107,7 +125,11 @@ function toCard(lead: SalesDoc): SalesOpportunityCard {
     service,
     location: null,
     sourcedBy: lead.sourcedByName ? String(lead.sourcedByName) : null,
-    sourceResearchLeadId: relId(lead.sourceResearchLead),
+    sourceResearchLeadId,
+    sourceInquiryId,
+    sourceProjectInquiryId,
+    sourceWebsiteAuditId,
+    sourceLabel,
     status,
     sectionId,
     sectionLabel: SECTION_LABEL[sectionId],

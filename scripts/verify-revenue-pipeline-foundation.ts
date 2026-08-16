@@ -51,7 +51,12 @@ async function main() {
     assertFileContains("components/admin/sales/PipelineScreen.tsx", "Who needs you");
     assertFileContains("components/admin/sales/PipelineScreen.tsx", "showQuickActions={false}");
     assertFileContains("components/admin/ResearchDesk.tsx", "Promote to Sales");
-    assertFileContains("components/admin/ResearchDesk.tsx", "+ Add Research Lead");
+    // Capability invariant: operators can open an add form that POSTs to research-leads.
+    // Do not assert a brittle literal button chrome string (label casing/punctuation may change).
+    assertFileContains("components/admin/ResearchDesk.tsx", "showAddForm");
+    assertFileContains("components/admin/ResearchDesk.tsx", "/api/admin/research-leads");
+    assertFileContains("app/api/admin/research-leads/route.ts", "requirePayloadAdminApi");
+    assertFileContains("app/api/admin/research-leads/route.ts", "export async function POST");
   });
 
   await check("1. opportunity URL only is accepted", () => {

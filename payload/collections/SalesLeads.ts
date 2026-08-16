@@ -70,6 +70,42 @@ export const SalesLeads: CollectionConfig = {
       },
     },
     {
+      name: "sourceInquiry",
+      type: "relationship",
+      relationTo: "inquiries",
+      label: "Source Inquiry",
+      unique: true,
+      admin: {
+        position: "sidebar",
+        description: "Original /contact inquiry intake record.",
+        readOnly: true,
+      },
+    },
+    {
+      name: "sourceProjectInquiry",
+      type: "relationship",
+      relationTo: "project-inquiries",
+      label: "Source Project Inquiry",
+      unique: true,
+      admin: {
+        position: "sidebar",
+        description: "Original /start-project intake record.",
+        readOnly: true,
+      },
+    },
+    {
+      name: "sourceWebsiteAudit",
+      type: "relationship",
+      relationTo: "website-audits",
+      label: "Source Website Audit",
+      unique: true,
+      admin: {
+        position: "sidebar",
+        description: "Original Website Audit diagnostic lead.",
+        readOnly: true,
+      },
+    },
+    {
       name: "sourcedByJuniorCreator",
       type: "relationship",
       relationTo: "junior-creator-users",

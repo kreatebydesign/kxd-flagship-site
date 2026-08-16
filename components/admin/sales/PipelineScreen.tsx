@@ -220,6 +220,33 @@ function OpportunityRow({
                   From research
                 </Link>
               </>
+            ) : card.sourceInquiryId ? (
+              <>
+                {" · "}
+                <Link
+                  href={`/admin/collections/inquiries/${card.sourceInquiryId}`}
+                  className="kxd-os-meta"
+                >
+                  From contact inquiry
+                </Link>
+              </>
+            ) : card.sourceProjectInquiryId ? (
+              <>
+                {" · "}
+                <Link
+                  href={`/admin/collections/project-inquiries/${card.sourceProjectInquiryId}`}
+                  className="kxd-os-meta"
+                >
+                  From start project
+                </Link>
+              </>
+            ) : card.sourceWebsiteAuditId ? (
+              <>
+                {" · "}
+                <Link href="/admin/operations/audits" className="kxd-os-meta">
+                  From website audit
+                </Link>
+              </>
             ) : null}
           </p>
         </div>

@@ -75,6 +75,7 @@
     "verify:client-site-intelligence-csi-v1-b-db": "KXD_SERVER_ONLY_SHIM=1 node --import ./scripts/shims/register-server-only.mjs --import tsx scripts/verify-client-site-intelligence-csi-v1-b-db.ts",
     "verify:qr-generator-v1": "node --import tsx scripts/verify-qr-generator-v1.ts",
     "verify:revenue-pipeline-foundation": "node --import tsx scripts/verify-revenue-pipeline-foundation.ts",
+    "verify:acquisition-operations-phase-1": "node --import tsx scripts/verify-acquisition-operations-phase-1.ts",
     "verify:robin-cole-branding": "node --import tsx scripts/verify-robin-cole-branding.ts",
     "verify:campaign-hq-phase1": "node --import tsx scripts/verify-campaign-hq-phase1.ts",
     "configure:campaign-hq-robin": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/configure-campaign-hq-robin.ts",

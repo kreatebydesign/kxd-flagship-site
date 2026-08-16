@@ -106,7 +106,7 @@ From `lib/platform/registry.ts` — not yet implemented:
 | 14 | Automation Module Connection | Wire modules to automation publishers |
 | 15 | Intelligence Performance | Incremental loading, caching, materialized health |
 | 16 | Live Analytics Completion | GA4 / Search Console into reporting |
-| 17 (registry) | Lead Funnel Unification | Normalize research-leads, sales-leads, audits |
+| 17 (registry) | Lead Funnel Unification | **In progress (partial):** Research → Sales + inbound → `sales-leads` promotion with provenance. Managed Client Lead Ops remains a sibling Phase 2 track. |
 
 > **Note:** Registry "Phase 17" (Lead Funnel) is distinct from engineering "Phase 17" (Intelligence Pipeline Foundations).
 

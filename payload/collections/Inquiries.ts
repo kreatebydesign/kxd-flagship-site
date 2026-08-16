@@ -102,6 +102,16 @@ export const Inquiries: CollectionConfig = {
               },
             },
             {
+              name: "referral",
+              type: "text",
+              label: "Referral / How They Heard About KXD",
+              maxLength: 200,
+              admin: {
+                description:
+                  "Persisted from the contact form referral field when provided.",
+              },
+            },
+            {
               name: "website",
               type: "text",
               admin: {
@@ -258,6 +268,27 @@ export const Inquiries: CollectionConfig = {
       admin: {
         position: "sidebar",
         description: "Internal priority level.",
+      },
+    },
+    {
+      name: "promotedSalesLead",
+      type: "relationship",
+      relationTo: "sales-leads",
+      label: "Promoted Sales Opportunity",
+      admin: {
+        position: "sidebar",
+        description: "Canonical KXD Sales opportunity created from this inquiry.",
+        readOnly: true,
+      },
+    },
+    {
+      name: "promotedAt",
+      type: "date",
+      label: "Promoted At",
+      admin: {
+        position: "sidebar",
+        readOnly: true,
+        date: { pickerAppearance: "dayAndTime" },
       },
     },
   ],

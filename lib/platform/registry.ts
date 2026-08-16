@@ -307,8 +307,9 @@ export const PLATFORM_PHASES: PlatformPhaseDefinition[] = [
     id: "phase-17",
     number: "17",
     title: "Lead Funnel Unification",
-    status: "planned",
-    description: "Normalize research-leads, sales-leads, and website-audits into a shared pipeline model.",
+    status: "in-progress",
+    description:
+      "Partial: Research → Sales (existing) + intentional inbound → sales-leads promotion (inquiries, project-inquiries, website-audits) with durable provenance. Remaining: deeper intake normalization, Growth alignment, Managed Client Lead Operations (separate sibling context).",
   },
 ];
 

@@ -13,6 +13,7 @@ import {
   KxdTableRow,
   type KxdBadgeVariant,
 } from "@/components/os";
+import { PromoteToSalesButton } from "@/components/admin/acquisition/PromoteToSalesButton";
 import { OperationsPageHero } from "@/components/admin/operations/shared/OperationsPageHero";
 import { OperationsShell } from "@/components/admin/operations/shared/OperationsShell";
 import { AUDIT_STATUS_LABEL } from "@/lib/website-audit/scoring";
@@ -23,6 +24,15 @@ import {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AuditDoc = Record<string, any>;
+
+function relId(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (value && typeof value === "object" && "id" in value) {
+    const id = (value as { id: unknown }).id;
+    if (typeof id === "number") return id;
+  }
+  return null;
+}
 
 export interface AuditsScreenProps {
   audits: AuditDoc[];
@@ -124,7 +134,7 @@ export function AuditsScreen({
           <KxdTable>
             <KxdTableHead>
               <KxdTableRow>
-                {["Company", "Website", "Score", "Lead", "Report", "Updated"].map((heading) => (
+                {["Company", "Website", "Score", "Lead", "Report", "Sales", "Updated"].map((heading) => (
                   <KxdTableHeaderCell key={heading}>{heading}</KxdTableHeaderCell>
                 ))}
               </KxdTableRow>
@@ -135,6 +145,7 @@ export function AuditsScreen({
                 const reportStatus = String(audit.reportStatus ?? "none") as ReportStatus;
                 const reportLabel =
                   REPORT_STATUS_LABEL[reportStatus] ?? REPORT_STATUS_LABEL.none;
+                const promotedSalesLeadId = relId(audit.promotedSalesLead);
                 return (
                   <KxdTableRow key={audit.id as number}>
                     <KxdTableCell primary>
@@ -207,6 +218,15 @@ export function AuditsScreen({
                           </>
                         ) : null}
                       </div>
+                    </KxdTableCell>
+                    <KxdTableCell>
+                      <PromoteToSalesButton
+                        sourceType="website_audit"
+                        sourceId={Number(audit.id)}
+                        alreadyPromoted={promotedSalesLeadId != null}
+                        salesLeadId={promotedSalesLeadId}
+                        disabled={status === "closed-lost"}
+                      />
                     </KxdTableCell>
                     <KxdTableCell>
                       <p className="kxd-os-meta">

@@ -7,6 +7,7 @@ import {
   OpsListRow,
   OpsSectionHead,
 } from "@/components/admin/operations/shared/OpsBriefing";
+import { PromoteToSalesButton } from "@/components/admin/acquisition/PromoteToSalesButton";
 import {
   KxdBadge,
   KxdButton,
@@ -26,6 +27,15 @@ import {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDoc = Record<string, any>;
+
+function relId(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (value && typeof value === "object" && "id" in value) {
+    const id = (value as { id: unknown }).id;
+    if (typeof id === "number") return id;
+  }
+  return null;
+}
 
 const BUDGET_MIDPOINTS: Record<string, number> = {
   "under-5k": 3_500,
@@ -69,6 +79,7 @@ interface ScoredLead {
   estValue: number;
   followUpDate: string | null;
   createdAt: string;
+  promotedSalesLeadId: number | null;
 }
 
 function fmtMoney(n: number | null | undefined): string {
@@ -128,6 +139,7 @@ function scoreInquiry(doc: AnyDoc): ScoredLead {
     estValue: BUDGET_MIDPOINTS[budget] ?? 0,
     followUpDate: (doc.followUpDate as string) ?? null,
     createdAt: (doc.createdAt as string) ?? "",
+    promotedSalesLeadId: relId(doc.promotedSalesLead),
   };
 }
 
@@ -166,6 +178,7 @@ function scoreProjectInquiry(doc: AnyDoc): ScoredLead {
     estValue: INVESTMENT_MIDPOINTS[inv] ?? 0,
     followUpDate: null,
     createdAt: (doc.createdAt as string) ?? "",
+    promotedSalesLeadId: relId(doc.promotedSalesLead),
   };
 }
 
@@ -325,11 +338,18 @@ export function GrowthScreen({
           ) : (
             <KxdSurface variant="glass" className="kxd-os-ops-briefing-surface">
               <div className="kxd-os-list-stack">
-                {scoredLeads.slice(0, 14).map((lead) => (
-                  <OpsListRow key={`${lead.type}-${lead.id}`} href="/admin/collections/inquiries">
+                {scoredLeads.slice(0, 14).map((lead) => {
+                  const detailHref =
+                    lead.type === "inquiry"
+                      ? `/admin/collections/inquiries/${lead.id}`
+                      : `/admin/collections/project-inquiries/${lead.id}`;
+                  return (
+                  <OpsListRow key={`${lead.type}-${lead.id}`}>
                     <div className="kxd-os-ops-list-row__main">
                       <p className="kxd-os-ops-list-row__title">
-                        {lead.company !== "—" ? lead.company : lead.name}
+                        <Link href={detailHref} className="kxd-os-ops-link-row">
+                          {lead.company !== "—" ? lead.company : lead.name}
+                        </Link>
                       </p>
                       <p className="kxd-os-ops-list-row__meta">
                         {lead.service} · {fmtMoney(lead.estValue)} · Received {fmtDate(lead.createdAt)}
@@ -341,9 +361,24 @@ export function GrowthScreen({
                     <div className="flex items-center gap-2">
                       <KxdBadge variant={statusVariant(lead.status)}>{lead.status.replace(/-/g, " ")}</KxdBadge>
                       <KxdBadge variant={scoreVariant(lead.score)}>Score {lead.score}</KxdBadge>
+                      {lead.promotedSalesLeadId ? (
+                        <KxdBadge variant="success">In Sales</KxdBadge>
+                      ) : null}
+                      <PromoteToSalesButton
+                        sourceType={lead.type === "inquiry" ? "inquiry" : "project_inquiry"}
+                        sourceId={lead.id}
+                        alreadyPromoted={lead.promotedSalesLeadId != null}
+                        salesLeadId={lead.promotedSalesLeadId}
+                        disabled={
+                          lead.type === "inquiry"
+                            ? lead.status === "spam" || lead.status === "archived"
+                            : lead.status === "closed" || lead.status === "completed"
+                        }
+                      />
                     </div>
                   </OpsListRow>
-                ))}
+                  );
+                })}
               </div>
             </KxdSurface>
           )}

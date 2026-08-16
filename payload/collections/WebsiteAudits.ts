@@ -265,5 +265,27 @@ export const WebsiteAudits: CollectionConfig = {
         date: { pickerAppearance: "dayAndTime" },
       },
     },
+    {
+      name: "promotedSalesLead",
+      type: "relationship",
+      relationTo: "sales-leads",
+      label: "Promoted Sales Opportunity",
+      admin: {
+        position: "sidebar",
+        description:
+          "Canonical KXD Sales opportunity. Website Audit remains the diagnostic source of truth.",
+        readOnly: true,
+      },
+    },
+    {
+      name: "promotedAt",
+      type: "date",
+      label: "Promoted At",
+      admin: {
+        position: "sidebar",
+        readOnly: true,
+        date: { pickerAppearance: "dayAndTime" },
+      },
+    },
   ],
 };
