@@ -114,6 +114,8 @@ async function main() {
     assert.equal(otp!.commissionAmountCents, 30_000);
     assert.equal(otp!.supportsSaleConfirmation, false);
     assert.equal(otp!.portalModuleEnabled, false);
+    assert.equal(primal!.autoIngestFromWebsiteForm, true);
+    assert.equal(otp!.autoIngestFromWebsiteForm, false);
     assert.equal(isChannelAllowedForPolicy(primal!, "form"), true);
     assert.equal(listManagedClientLeadPolicies().length >= 2, true);
 

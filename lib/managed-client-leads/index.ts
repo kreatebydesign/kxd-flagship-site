@@ -42,3 +42,14 @@ export {
 } from "./otp-compatibility";
 
 export type { CsiWebsiteLeadEvidence } from "./otp-compatibility";
+
+export {
+  MCI_FORM_INGEST_CREDENTIAL_REGISTRY,
+  MCI_FORM_SIGNATURE_HEADER,
+  MCI_FORM_TIMESTAMP_HEADER,
+  PRIMAL_MOTORSPORTS_FORM_INGEST_SECRET_ENV,
+  PRIMAL_WEB_SUBMISSION_ID_PATTERN,
+  computeMciFormSignatureBase64,
+  normalizeMciFormIngestPayload,
+  verifyMciFormIngestSignature,
+} from "./form-ingest";

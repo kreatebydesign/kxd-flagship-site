@@ -22,4 +22,6 @@ export const PRIMAL_MOTORSPORTS_LEAD_POLICY: ManagedClientLeadPolicy = {
   commissionOnConfirmedSale: false,
   commissionAmountCents: null,
   portalModuleEnabled: false,
+  /** Phase 3 — racing-school form success may signed-ingest into client-inquiries. */
+  autoIngestFromWebsiteForm: true,
 };

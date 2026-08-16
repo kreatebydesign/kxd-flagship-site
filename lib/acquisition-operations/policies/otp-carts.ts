@@ -25,4 +25,6 @@ export const OTP_CARTS_LEAD_POLICY: ManagedClientLeadPolicy = {
   commissionOnConfirmedSale: true,
   commissionAmountCents: 30_000,
   portalModuleEnabled: false,
+  /** OTP keeps CSI sale/commission path; managed-client auto-ingest stays off. */
+  autoIngestFromWebsiteForm: false,
 };

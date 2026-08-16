@@ -93,3 +93,21 @@ export const ACQUISITION_OPERATIONS_PHASE_2 = {
     "OTP production Lead Operations activation beyond adapter readiness",
   ],
 } as const;
+
+/** Phase 3 — Primal form-success signed ingest into client-inquiries. */
+export const ACQUISITION_OPERATIONS_PHASE_3 = {
+  id: "acquisition-lead-operations-phase-3",
+  implements: [
+    "Signed managed-client website form ingest webhook",
+    "Primal autoIngestFromWebsiteForm policy gate",
+    "Form success = inquiry receipt truth (not GA4/Ads/CSI)",
+    "Exactly-once via sourceExternalId → receiveManagedClientInquiry",
+  ],
+  deferred: [
+    "Phone / CallRail automation",
+    "OTP managed-client auto-ingest",
+    "Portal Lead Operations module",
+    "Automatic CSI → client-inquiry bridge",
+    "GA4 per-event reconciliation jobs",
+  ],
+} as const;

@@ -56,6 +56,11 @@ export type ManagedClientLeadPolicy = {
   commissionAmountCents: number | null;
   /** Client portal module — deferred off for V1. */
   portalModuleEnabled: boolean;
+  /**
+   * Whether signed website form-success may auto-create client-inquiries.
+   * GA4 / Ads / CSI evidence must never flip this on by themselves.
+   */
+  autoIngestFromWebsiteForm: boolean;
 };
 
 /** Populated by policy registration modules — empty until policies load. */
