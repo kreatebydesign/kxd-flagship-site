@@ -240,20 +240,52 @@ function main() {
   check(
     "team invitation honesty in confirmation",
     buildLaunchConfirmationSummary(fixtureClient("Invite Co", "starter"))
-      .invitationsWillBeSent === false,
+      .invitationsWillBeSent === true &&
+      buildLaunchConfirmationSummary(fixtureClient("Invite Co", "starter"))
+        .invitationStatusLabel.toLowerCase()
+        .includes("portal access invitation"),
+  );
+
+  const noInvitePayload = fixtureClient("Later Co", "starter");
+  noInvitePayload.team = noInvitePayload.team.map((m) => ({
+    ...m,
+    inviteOnLaunch: false,
+  }));
+  check(
+    "deferred team invites stay honest",
+    buildLaunchConfirmationSummary(noInvitePayload).invitationsWillBeSent === false,
   );
 
   check(
-    "existing portal email collision validated",
+    "existing portal email is warning when inviting on launch",
     validateTeamStep(fixtureClient("Portal Co", "starter").team, {
       existingPortalEmails: [`alex@${normalizeClientSlug("Portal Co")}.example`],
-    }).some((issue) => issue.code === "team.email.exists"),
+    }).some(
+      (issue) =>
+        issue.code === "team.email.exists" && issue.level === "warning",
+    ),
+  );
+
+  const noInviteExisting = fixtureClient("Portal Co 2", "starter");
+  noInviteExisting.team = noInviteExisting.team.map((m) => ({
+    ...m,
+    inviteOnLaunch: false,
+  }));
+  check(
+    "existing portal email remains error when not inviting",
+    validateTeamStep(noInviteExisting.team, {
+      existingPortalEmails: [`alex@${normalizeClientSlug("Portal Co 2")}.example`],
+    }).some(
+      (issue) =>
+        issue.code === "team.email.exists" && issue.level === "error",
+    ),
   );
 
   check(
-    "shell does not claim invitation delivered",
-    !shell.toLowerCase().includes("invitation sent") &&
-      !shell.toLowerCase().includes("email delivered"),
+    "shell does not claim fake invite queue delivery",
+    !shell.includes("inviteQueued: true") &&
+      !shell.toLowerCase().includes("invite queued") &&
+      !shell.toLowerCase().includes("email invitations are not sent"),
   );
 
   check(

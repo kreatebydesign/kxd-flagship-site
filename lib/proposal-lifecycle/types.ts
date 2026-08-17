@@ -302,6 +302,24 @@ export interface ContractLifecyclePackage {
   auditEvents?: LifecycleAuditEvent[];
   onboardingEligible?: boolean;
   onboardingEligibleAt?: string | null;
+  /**
+   * Commercial → Client Launch Handoff V0 state (JSON on lifecycle package).
+   * No schema migration — operator bridge only.
+   */
+  launchHandoff?: {
+    draftId?: string | number | null;
+    launchedClientId?: number | null;
+    launchedAt?: string | null;
+    invitationIds?: number[];
+    lastInvitationOutcomes?: Array<{
+      email: string;
+      role: string;
+      invitationId: number | null;
+      status: string;
+      emailSent: boolean;
+      message: string;
+    }>;
+  } | null;
   /** Filed commercial document IDs (idempotent). */
   documentRefs?: Array<{
     id: number;

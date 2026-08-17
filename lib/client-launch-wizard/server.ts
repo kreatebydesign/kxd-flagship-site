@@ -105,16 +105,41 @@ export async function getLaunchDraft(
   }
 }
 
+function reuseLinkedClientId(
+  draftPayload: LaunchWizardDraftPayload | null | undefined,
+): number | null {
+  const handoff = draftPayload?.commercialHandoff;
+  if (!handoff?.reuseExistingClient) return null;
+  return typeof handoff.sourceClientId === "number" ? handoff.sourceClientId : null;
+}
+
+function clientWhereEquals(
+  field: "slug" | "name",
+  value: string,
+  excludeClientId?: number | null,
+) {
+  if (excludeClientId != null) {
+    return {
+      and: [
+        { [field]: { equals: value } },
+        { id: { not_equals: excludeClientId } },
+      ],
+    };
+  }
+  return { [field]: { equals: value } };
+}
+
 export async function findSlugCollisions(
   payload: Payload,
   slug: string,
   excludeDraftId?: string | number,
+  excludeClientId?: number | null,
 ): Promise<{ slugTakenByClient: boolean; slugTakenByDraft: boolean; nameTakenByClient: boolean }> {
   const normalized = normalizeClientSlug(slug);
   const [clients, drafts, names] = await Promise.all([
     payload.find({
       collection: "clients",
-      where: { slug: { equals: normalized } },
+      where: clientWhereEquals("slug", normalized, excludeClientId),
       limit: 1,
       depth: 0,
     }),
@@ -134,7 +159,7 @@ export async function findSlugCollisions(
     }),
     payload.find({
       collection: "clients",
-      where: { name: { equals: slug } },
+      where: clientWhereEquals("name", slug, excludeClientId),
       limit: 1,
       depth: 0,
     }),
@@ -151,13 +176,14 @@ export async function findIdentityCollisions(
   payload: Payload,
   identity: LaunchWizardDraftPayload["identity"],
   excludeDraftId?: string | number,
+  excludeClientId?: number | null,
 ) {
   const slug = normalizeClientSlug(identity.clientSlug || identity.businessName);
   const name = identity.businessName.trim();
   const [bySlug, byDraft, byName] = await Promise.all([
     payload.find({
       collection: "clients",
-      where: { slug: { equals: slug } },
+      where: clientWhereEquals("slug", slug, excludeClientId),
       limit: 1,
       depth: 0,
     }),
@@ -178,7 +204,7 @@ export async function findIdentityCollisions(
     name
       ? payload.find({
           collection: "clients",
-          where: { name: { equals: name } },
+          where: clientWhereEquals("name", name, excludeClientId),
           limit: 1,
           depth: 0,
         })
@@ -336,6 +362,7 @@ export async function saveLaunchDraftStep(input: {
     input.payload,
     merged.identity,
     input.draftId,
+    reuseLinkedClientId(merged),
   );
   const existingPortalEmails = await findExistingPortalEmails(
     input.payload,
@@ -413,6 +440,7 @@ export async function launchFromDraft(input: {
     input.payload,
     existing.payload.identity,
     input.draftId,
+    reuseLinkedClientId(existing.payload),
   );
   const existingPortalEmails = await findExistingPortalEmails(
     input.payload,

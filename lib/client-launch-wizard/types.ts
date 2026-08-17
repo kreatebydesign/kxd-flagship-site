@@ -154,6 +154,14 @@ export interface LaunchWizardValidationIssue {
   level: "error" | "warning";
 }
 
+/** Optional commercial → launch handoff metadata (V0). Stored in draft JSON — no schema migration. */
+export interface LaunchWizardCommercialHandoff {
+  contractId: number;
+  proposalId: number | null;
+  sourceClientId: number | null;
+  reuseExistingClient: boolean;
+}
+
 export interface LaunchWizardDraftPayload {
   identity: LaunchWizardIdentity;
   package: LaunchWizardPackageSelection;
@@ -162,6 +170,8 @@ export interface LaunchWizardDraftPayload {
   infrastructure: LaunchWizardInfrastructure;
   team: LaunchWizardTeamMember[];
   automation: LaunchWizardAutomation;
+  /** Present when draft was created from modern commercial lifecycle handoff. */
+  commercialHandoff?: LaunchWizardCommercialHandoff | null;
 }
 
 export interface LaunchWizardDraftRecord {
@@ -207,7 +217,25 @@ export interface LaunchWizardResult {
   packageLabel: string;
   experienceChoiceId: LaunchExperienceChoiceId;
   modulesEnabled: string[];
-  portalUsersCreated: Array<{ email: string; role: LaunchPortalRole; inviteQueued: boolean }>;
+  portalUsersCreated: Array<{
+    email: string;
+    role: LaunchPortalRole;
+    /**
+     * @deprecated Use invitationStatus — never claim "queued" without a real send.
+     */
+    inviteQueued?: boolean;
+    invitationId?: number | null;
+    invitationStatus?:
+      | "ready-to-invite"
+      | "sending"
+      | "invitation-sent"
+      | "invitation-delivery-failed"
+      | "already-invited"
+      | "access-active"
+      | "skipped";
+    emailSent?: boolean;
+    invitationMessage?: string;
+  }>;
   portalUsersPending: Array<{ email: string; role: LaunchPortalRole }>;
   reportingProviders: Array<{
     provider: string;

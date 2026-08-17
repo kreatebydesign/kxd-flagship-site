@@ -362,6 +362,11 @@ export function CommercialAgreementDetail(props: {
               hasClientSignature={Boolean(pkg.clientSignature)}
               hasExternalAcceptance={Boolean(pkg.externalAcceptance)}
               onboardingEligible={Boolean(pkg.onboardingEligible)}
+              launchedClientId={
+                typeof pkg.launchHandoff?.launchedClientId === "number"
+                  ? pkg.launchHandoff.launchedClientId
+                  : null
+              }
               blockers={blockers}
               defaultRecipientName={defaultRecipientName}
               defaultRecipientEmail={defaultRecipientEmail}

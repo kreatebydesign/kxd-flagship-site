@@ -150,7 +150,7 @@ const STEP_HEADING: Record<
   },
   team: {
     title: "Portal access",
-    lead: "People who will use the client workspace. Email invitations are not sent yet.",
+    lead: "People who will use the client workspace. Checked seats receive a Portal Access invitation on launch.",
   },
   automation: {
     title: "Reporting rhythm",
@@ -886,11 +886,21 @@ export function ClientLaunchWizardShell({ initialDraft, openDrafts }: Props) {
               </strong>
             </div>
             <div>
-              <span>Portal users</span>
+              <span>Portal access</span>
               <strong>
                 {resultView.portalUsersCreated.length
-                  ? `${resultView.portalUsersCreated.length} created · email not sent`
-                  : "None created"}
+                  ? resultView.portalUsersCreated
+                      .map((row) => {
+                        const status = row.invitationStatus ?? (row.emailSent ? "invitation-sent" : "unknown");
+                        if (status === "invitation-sent") return `${row.email}: invitation sent`;
+                        if (status === "invitation-delivery-failed")
+                          return `${row.email}: delivery failed — resend in Portal Access`;
+                        if (status === "already-invited") return `${row.email}: already invited`;
+                        if (status === "access-active") return `${row.email}: access active`;
+                        return `${row.email}: ${status}`;
+                      })
+                      .join(" · ")
+                  : "No invitations sent"}
               </strong>
             </div>
           </div>
@@ -1777,8 +1787,9 @@ export function ClientLaunchWizardShell({ initialDraft, openDrafts }: Props) {
               <div className="kxd-launch-wizard__empty-state">
                 <p>No portal users yet</p>
                 <p className="kxd-launch-wizard__hint">
-                  Add the people who should receive portal access. Records can be
-                  created at launch; email invitations are not sent in this phase.
+                  Add the people who should receive portal access. Selecting
+                  invitation on launch sends a real Portal Access email with a
+                  secure activate link.
                 </p>
               </div>
             ) : (
@@ -1871,15 +1882,15 @@ export function ClientLaunchWizardShell({ initialDraft, openDrafts }: Props) {
                           }))
                         }
                       />
-                      Create user on launch
+                      Create invitation on launch
                     </label>
                     <span
                       className="kxd-launch-wizard__invite-note"
                       data-state={member.inviteOnLaunch ? "record" : "draft"}
                     >
                       {member.inviteOnLaunch
-                        ? "Access at launch · email not sent"
-                        : "Draft only"}
+                        ? "Portal Access invitation on launch"
+                        : "Saved for later"}
                     </span>
                     <button
                       type="button"

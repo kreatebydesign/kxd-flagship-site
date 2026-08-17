@@ -171,6 +171,24 @@ export function normalizeLaunchWizardPayload(raw: unknown): LaunchWizardDraftPay
       )
     : [];
 
+  const handoffRaw =
+    src.commercialHandoff && typeof src.commercialHandoff === "object"
+      ? (src.commercialHandoff as Record<string, unknown>)
+      : null;
+  const commercialHandoff =
+    handoffRaw && typeof handoffRaw.contractId === "number"
+      ? {
+          contractId: handoffRaw.contractId,
+          proposalId:
+            typeof handoffRaw.proposalId === "number" ? handoffRaw.proposalId : null,
+          sourceClientId:
+            typeof handoffRaw.sourceClientId === "number"
+              ? handoffRaw.sourceClientId
+              : null,
+          reuseExistingClient: handoffRaw.reuseExistingClient === true,
+        }
+      : null;
+
   return {
     identity: {
       businessName: asString(identity.businessName),
@@ -232,5 +250,6 @@ export function normalizeLaunchWizardPayload(raw: unknown): LaunchWizardDraftPay
       entitledProviders,
       executiveBriefingPreferred: asBool(automation.executiveBriefingPreferred),
     },
+    ...(commercialHandoff ? { commercialHandoff } : {}),
   };
 }

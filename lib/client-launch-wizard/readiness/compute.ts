@@ -102,7 +102,9 @@ export function computeLaunchReadiness(
       summary:
         payload.team.length === 0
           ? "No portal users yet — can be added after launch"
-          : `${invited.length} user record${invited.length === 1 ? "" : "s"} on launch · ${savedOnly.length} saved for later · email invitations not sent in this phase`,
+          : invited.length > 0
+            ? `${invited.length} Portal Access invitation${invited.length === 1 ? "" : "s"} on launch · ${savedOnly.length} saved for later`
+            : `${savedOnly.length} saved for later — no invitations on launch`,
     },
     {
       id: "reporting",

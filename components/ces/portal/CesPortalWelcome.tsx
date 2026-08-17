@@ -69,6 +69,39 @@ export function CesPortalWelcome({ profile, clientName, websiteUrl }: CesPortalW
           <p className="kxd-ces-welcome__intro">{intro}</p>
           <p className="kxd-ces-welcome__lead">{PORTAL_CLIENT_LANGUAGE.welcomeBody}</p>
 
+          <div className="kxd-ces-welcome__purpose kxd-ces-welcome__next-steps">
+            <p className="kxd-ces-welcome__purpose-heading">
+              {PORTAL_CLIENT_LANGUAGE.engagementActiveEyebrow}
+            </p>
+            <p className="kxd-ces-welcome__intro" style={{ marginTop: 0 }}>
+              {PORTAL_CLIENT_LANGUAGE.engagementActiveTitle}
+            </p>
+            <p className="kxd-ces-welcome__purpose-heading">
+              {PORTAL_CLIENT_LANGUAGE.needsFromYouHeading}
+            </p>
+            <ol className="kxd-ces-welcome__purpose-steps">
+              {PORTAL_CLIENT_LANGUAGE.needsFromYouItems.map((step) => (
+                <li key={step}>{step}</li>
+              ))}
+            </ol>
+            <p className="kxd-ces-welcome__purpose-heading">
+              {PORTAL_CLIENT_LANGUAGE.kxdDoingHeading}
+            </p>
+            <ol className="kxd-ces-welcome__purpose-steps">
+              {PORTAL_CLIENT_LANGUAGE.kxdDoingItems.map((step) => (
+                <li key={step}>{step}</li>
+              ))}
+            </ol>
+            <p className="kxd-ces-welcome__purpose-heading">
+              {PORTAL_CLIENT_LANGUAGE.upcomingHeading}
+            </p>
+            <ol className="kxd-ces-welcome__purpose-steps">
+              {PORTAL_CLIENT_LANGUAGE.upcomingItems.map((step) => (
+                <li key={step}>{step}</li>
+              ))}
+            </ol>
+          </div>
+
           <div className="kxd-ces-welcome__purpose">
             <p className="kxd-ces-welcome__purpose-heading">
               {PORTAL_CLIENT_LANGUAGE.welcomePurposeHeading}

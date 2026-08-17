@@ -57,6 +57,28 @@ export const PORTAL_CLIENT_LANGUAGE = {
   welcomeEntering: "Opening workspace…",
   welcomeError: "We couldn't open your workspace just now. Please try again.",
 
+  /** Commercial → launch handoff V0 — concise first-run next steps */
+  engagementActiveEyebrow: "Your engagement is active",
+  engagementActiveTitle: "Here's what happens next",
+  needsFromYouHeading: "What we need from you",
+  needsFromYouItems: [
+    "Confirm your primary contact details stay current.",
+    "Share brand assets, domain access, and any login credentials we request securely.",
+    "Use Website Review when you're ready to leave precise feedback.",
+  ] as const,
+  kxdDoingHeading: "What KXD is doing",
+  kxdDoingItems: [
+    "Your private workspace is prepared and ready.",
+    "We're organizing the first milestones for your engagement.",
+    "Design and delivery work begins from the plan we agreed.",
+  ] as const,
+  upcomingHeading: "Upcoming",
+  upcomingItems: [
+    "Kickoff alignment and asset collection",
+    "First draft / milestone review",
+    "Ongoing collaboration in this workspace",
+  ] as const,
+
   revisionGoneTitle: "This revision is no longer available",
   revisionGoneLead:
     "It may have been removed or the link is no longer active. Your other revisions are still organized in Website Review.",

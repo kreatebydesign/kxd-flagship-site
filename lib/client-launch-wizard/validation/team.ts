@@ -47,8 +47,11 @@ export function validateTeamStep(
           stepId: "team",
           field: member.id,
           code: "team.email.exists",
-          message: `Portal user already exists for ${email}.`,
-          level: "error",
+          message: member.inviteOnLaunch
+            ? `Portal user already exists for ${email}. Launch will send a Portal Access invitation to expand membership.`
+            : `Portal user already exists for ${email}.`,
+          // Invitation path supports expansion — do not hard-block launch.
+          level: member.inviteOnLaunch ? "warning" : "error",
         });
       }
     }

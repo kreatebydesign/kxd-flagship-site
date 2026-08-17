@@ -17,7 +17,8 @@ export type LaunchConfirmationSummary = {
   monthlyCreditsLabel: string;
   approvedAddOnsLabel: string;
   portalUsersToCreate: number;
-  invitationsWillBeSent: false;
+  /** True when launch will attempt real Portal Access invitation emails. */
+  invitationsWillBeSent: boolean;
   invitationStatusLabel: string;
   modulesEnabled: string[];
   automationEnabled: boolean;
@@ -59,6 +60,8 @@ export function buildLaunchConfirmationSummary(
   const formatMoney = (value: number | null) =>
     value == null ? "Custom / not set" : `$${value.toLocaleString("en-US")}`;
 
+  const willInvite = inviteOnLaunch.length > 0;
+
   return {
     businessName: payload.identity.businessName.trim() || "Untitled client",
     packageLabel:
@@ -80,11 +83,10 @@ export function buildLaunchConfirmationSummary(
             .join(", ")
         : "None selected",
     portalUsersToCreate: inviteOnLaunch.length,
-    invitationsWillBeSent: false,
-    invitationStatusLabel:
-      inviteOnLaunch.length > 0
-        ? "Portal user records will be created. Email invitations are not sent in this phase — credentials are not displayed."
-        : "No portal users will be created on launch.",
+    invitationsWillBeSent: willInvite,
+    invitationStatusLabel: willInvite
+      ? `${inviteOnLaunch.length} Portal Access invitation${inviteOnLaunch.length === 1 ? "" : "s"} will be sent on launch (membership + secure activate link). Delivery failures remain recoverable in Portal Access.`
+      : "No invitations will be sent on launch.",
     modulesEnabled: modules,
     automationEnabled: payload.automation.reportingAutomationEnabled,
     syncHourLabel: payload.automation.reportingAutomationEnabled
@@ -92,15 +94,20 @@ export function buildLaunchConfirmationSummary(
       : null,
     integrationsAwaitingAuthorization: awaiting,
     createsRecords: [
-      "Client record",
+      payload.commercialHandoff?.reuseExistingClient
+        ? "Reuse linked client record (no duplicate)"
+        : "Client record",
       "Executive client profile",
       "CES experience profile with selected entitlements",
       "Client infrastructure record",
       "Launch timeline event",
-      ...(inviteOnLaunch.length
+      ...(willInvite
         ? [
-            `${inviteOnLaunch.length} portal user record${inviteOnLaunch.length === 1 ? "" : "s"}`,
+            `${inviteOnLaunch.length} Portal Access invitation${inviteOnLaunch.length === 1 ? "" : "s"} (membership + email)`,
           ]
+        : []),
+      ...(payload.commercialHandoff?.contractId
+        ? [`Commercial association to contract #${payload.commercialHandoff.contractId}`]
         : []),
     ],
   };

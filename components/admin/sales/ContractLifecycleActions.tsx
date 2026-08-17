@@ -729,7 +729,9 @@ export function ContractLifecycleActions(props: {
           </div>
           {props.onboardingEligible ? (
             <p role="status" style={okStyle}>
-              Onboarding is eligible — start onboarding remains a manual operator action.
+              Onboarding eligible — use <strong>Start Client Launch</strong> above to open
+              the Launch Wizard. Do not use the legacy public-proposal Checkout path for new
+              KXD deals.
             </p>
           ) : null}
           {props.documentRefs.length > 0 ? (

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ContractLifecycleActions } from "@/components/admin/sales/ContractLifecycleActions";
 import { CommercialDisclosure } from "./CommercialDisclosure";
+import { StartClientLaunchButton } from "./StartClientLaunchButton";
 import { formatPaymentMethodLabel } from "@/lib/client-command/commercial/map-agreement";
 import { formatCents } from "@/lib/proposal-builder/money";
 import { fmtWorkspaceDate } from "@/lib/executive-client-workspace/theme";
@@ -26,6 +27,7 @@ export function CommercialLifecyclePanel(props: {
   hasClientSignature: boolean;
   hasExternalAcceptance: boolean;
   onboardingEligible: boolean;
+  launchedClientId?: number | null;
   blockers: Array<{ code: string; message: string }>;
   defaultRecipientName: string;
   defaultRecipientEmail: string;
@@ -47,6 +49,12 @@ export function CommercialLifecyclePanel(props: {
 
   return (
     <div className="kxd-os-commercial-lifecycle-panel">
+      <StartClientLaunchButton
+        contractId={props.contractId}
+        onboardingEligible={props.onboardingEligible}
+        alreadyLaunchedClientId={props.launchedClientId ?? null}
+      />
+
       {props.authorizationSummary && !editingAuth ? (
         <div className="kxd-os-commercial-panel-card">
           <div className="kxd-os-commercial-panel-card__head">

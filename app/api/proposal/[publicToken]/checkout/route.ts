@@ -3,6 +3,10 @@ import { getPayload } from "payload";
 import config from "@payload-config";
 import { createProposalCheckoutSession } from "@/lib/sales/payments";
 import { isProposalLinkValid } from "@/lib/sales/public-core";
+import {
+  isModernCommercialProposal,
+  LEGACY_CHECKOUT_BLOCKED_MESSAGE,
+} from "@/lib/commercial-launch-handoff/legacy-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +27,17 @@ export async function POST(
   const proposal = result.docs[0];
   if (!proposal || !isProposalLinkValid(proposal as Record<string, unknown>)) {
     return NextResponse.json({ success: false, error: "Proposal not available." }, { status: 404 });
+  }
+
+  if (isModernCommercialProposal(proposal as Record<string, unknown>)) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: LEGACY_CHECKOUT_BLOCKED_MESSAGE,
+        code: "modern-lifecycle-required",
+      },
+      { status: 409 },
+    );
   }
 
   const body = await req.json().catch(() => ({}));
