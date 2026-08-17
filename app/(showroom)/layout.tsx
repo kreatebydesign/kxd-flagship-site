@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Outfit } from "next/font/google";
 import Link from "next/link";
 import { buildMetadata } from "@/lib/seo/metadata";
 import "../globals.css";
@@ -16,28 +15,13 @@ export const viewport = {
   themeColor: "#080808",
 };
 
-const cormorant = Cormorant_Garamond({
-  variable: "--font-cormorant",
-  subsets: ["latin"],
-  weight: ["300", "400"],
-  style: ["normal", "italic"],
-  display: "swap",
-});
-
-const outfit = Outfit({
-  variable: "--font-outfit",
-  subsets: ["latin"],
-  weight: ["300", "500", "600"],
-  display: "swap",
-});
-
 export default function ShowroomLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${cormorant.variable} ${outfit.variable}`}>
+    <html lang="en">
       <body className="kxd-showroom-body">
         <header className="kxd-showroom-shell__header">
           <Link href="/" className="kxd-showroom-shell__brand">

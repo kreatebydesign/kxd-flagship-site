@@ -83,6 +83,16 @@
 
   /* ── Nav ── */
   --nav-bg-scrolled: rgba(5, 5, 5, 0.90);
+
+  /*
+   * Brand typography variables (build-safe).
+   * Do not set these via next/font/google — Turbopack production builds on Vercel
+   * can fail resolving @vercel/turbopack-next/internal/font/google/font.
+   * Hierarchy preserved: editorial serif display + system UI sans.
+   */
+  --font-cormorant: Georgia, "Times New Roman", Times, serif;
+  --font-cormorant-ext: Georgia, "Times New Roman", Times, serif;
+  --font-outfit: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 @theme inline {

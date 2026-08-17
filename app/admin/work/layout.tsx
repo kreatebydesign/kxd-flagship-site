@@ -3,7 +3,6 @@
  * Mirrors /admin/operations document chrome so the route has a valid html/body root.
  */
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Outfit } from "next/font/google";
 import { requireStaffAwarePage } from "@/lib/staff/guard";
 import { ThemeBootScript } from "@/components/os/ThemeBootScript";
 import "../../globals.css";
@@ -11,20 +10,6 @@ import "../../../design-system/os/styles/kxd-os.css";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
-
-const cormorant = Cormorant_Garamond({
-  variable: "--font-cormorant",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
-  style: ["normal", "italic"],
-  display: "swap",
-});
-
-const outfit = Outfit({
-  variable: "--font-outfit",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
-});
 
 export const metadata: Metadata = {
   title: "KXD OS · Work Engine",
@@ -44,7 +29,7 @@ export default async function WorkEngineLayout({
       <head>
         <ThemeBootScript />
       </head>
-      <body className={`${cormorant.variable} ${outfit.variable} antialiased`}>
+      <body className="antialiased">
         {children}
       </body>
     </html>

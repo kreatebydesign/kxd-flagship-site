@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Outfit } from "next/font/google";
 import { AnalyticsScripts } from "@/components/seo/AnalyticsScripts";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
@@ -11,35 +10,6 @@ import "../globals.css";
 export const viewport = {
   themeColor: "#080808",
 };
-
-const cormorant = Cormorant_Garamond({
-  variable: "--font-cormorant",
-  subsets: ["latin"],
-  weight: "300",
-  style: "normal",
-  display: "swap",
-  preload: true,
-  adjustFontFallback: true,
-});
-
-const cormorantExtended = Cormorant_Garamond({
-  variable: "--font-cormorant-ext",
-  subsets: ["latin"],
-  weight: ["300", "400"],
-  style: ["normal", "italic"],
-  display: "swap",
-  preload: false,
-  adjustFontFallback: false,
-});
-
-const outfit = Outfit({
-  variable: "--font-outfit",
-  subsets: ["latin"],
-  weight: ["300", "500", "600"],
-  display: "swap",
-  preload: false,
-  adjustFontFallback: true,
-});
 
 export const metadata: Metadata = {
   ...buildMetadata({
@@ -62,7 +32,7 @@ export const metadata: Metadata = {
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="scroll-smooth">
-      <body className={`${cormorant.variable} ${cormorantExtended.variable} ${outfit.variable} antialiased`}>
+      <body className="antialiased">
         <SiteHeader />
         <main className="relative">{children}</main>
         <SiteFooter />
