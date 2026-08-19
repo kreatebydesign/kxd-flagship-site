@@ -3,6 +3,11 @@ import config from "@payload-config";
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { getPartnershipPackage } from "@/lib/partnerships/packages";
+import {
+  isFirstPartyInquirySource,
+} from "@/lib/sales/follow-up-policy";
+import { isInquiryEligibleForPromotion } from "@/lib/sales/promote-helpers";
+import { promoteInquiryToSales } from "@/lib/sales/promote-inbound";
 
 type InquiryBody = {
   name?: string;
@@ -97,6 +102,31 @@ export async function POST(request: Request) {
 
     console.log("✅ Inquiry saved to Payload. ID:", inquiry.id);
 
+    if (
+      isFirstPartyInquirySource(body.source || "project-application") &&
+      isInquiryEligibleForPromotion("new")
+    ) {
+      try {
+        const ingest = await promoteInquiryToSales(Number(inquiry.id));
+        if (ingest.ok) {
+          console.log("🧭 Inquiry ingested into Sales.", {
+            inquiryId: inquiry.id,
+            salesLeadId: ingest.salesLeadId,
+            created: ingest.created,
+            linkedExisting: ingest.linkedExisting ?? false,
+          });
+        } else {
+          console.warn("⚠️ Inquiry Sales ingest skipped:", ingest.message, {
+            inquiryId: inquiry.id,
+            code: ingest.code,
+            candidates: ingest.candidateSalesLeadIds,
+          });
+        }
+      } catch (ingestError) {
+        console.error("❌ Sales ingest failed (inquiry still saved):", ingestError);
+      }
+    }
+
     // ── Send email notification via Resend ──────────────────────────────────
     // Email failures MUST NOT prevent the inquiry from saving.
     try {
@@ -150,7 +180,15 @@ export async function POST(request: Request) {
           text: emailBody,
         });
 
-        console.log("✅ Resend result:", JSON.stringify(result));
+        if (result.error) {
+          console.error("❌ Resend returned an error (inquiry still saved):", {
+            inquiryId: inquiry.id,
+            recipient,
+            error: result.error,
+          });
+        } else {
+          console.log("✅ Resend result:", JSON.stringify(result));
+        }
       }
     } catch (emailError) {
       console.error("❌ Resend email failed (inquiry still saved):", emailError);

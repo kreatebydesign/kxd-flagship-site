@@ -1,7 +1,9 @@
 /**
  * Promote KXD inbound intake records into canonical sales-leads.
- * Intentional operator action only — never automatic on form submit.
+ * First-party /contact inquiries auto-promote after create.
+ * Research Desk and website audits remain operator-promoted.
  * Idempotent: duplicate promotion returns the existing sales opportunity.
+ * Identity collisions: exact email/domain may link; ambiguous cases do not merge.
  */
 import "server-only";
 
@@ -12,6 +14,11 @@ import type {
   PromoteToSalesResult,
 } from "@/lib/acquisition-operations/promote-types";
 import { logSalesActivity } from "./activities";
+import {
+  classifyIdentityCollision,
+  existingSourceInquiryId,
+} from "./identity";
+import { initialResponseDueAt } from "./follow-up-policy";
 import type { SalesDoc } from "./types";
 import {
   INQUIRY_BUDGET_MIDPOINTS,
@@ -101,6 +108,8 @@ function success(params: {
   sourceRecordId: number;
   created: boolean;
   origin: string;
+  linkedExisting?: boolean;
+  collisionVia?: "email" | "domain" | "source";
 }): PromoteToSalesResult {
   const promotedAt = new Date().toISOString();
   return {
@@ -110,6 +119,8 @@ function success(params: {
     sourceRecordId: params.sourceRecordId,
     created: params.created,
     salesLead: params.salesLead,
+    linkedExisting: params.linkedExisting,
+    collisionVia: params.collisionVia,
     provenance: {
       context: "kxd_acquisition",
       sourceRecordType: params.sourceRecordType,
@@ -121,6 +132,114 @@ function success(params: {
       created: params.created,
     },
   };
+}
+
+async function loadSalesLeadsForIdentity(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  payload: any,
+): Promise<{ open: AnyDoc[]; closed: AnyDoc[] }> {
+  const result = await payload.find({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    collection: "sales-leads" as any,
+    limit: 500,
+    depth: 0,
+    overrideAccess: true,
+  });
+  const docs = (result.docs ?? []) as AnyDoc[];
+  return {
+    open: docs.filter((d) => !["won", "lost"].includes(String(d.status))),
+    closed: docs.filter((d) => ["won", "lost"].includes(String(d.status))),
+  };
+}
+
+async function linkInquiryToExistingLead(params: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  payload: any;
+  inquiry: AnyDoc;
+  inquiryId: number;
+  salesLead: SalesDoc;
+  via: "email" | "domain";
+  operatorLabel?: string;
+}): Promise<{ salesLead: SalesDoc; salesLeadId: number }> {
+  const salesLeadId = Number(params.salesLead.id);
+  const existingSource = existingSourceInquiryId(params.salesLead);
+  const leadUpdate: Record<string, unknown> = {};
+  if (!existingSource) leadUpdate.sourceInquiry = params.inquiryId;
+
+  const existingNotes = trimText(params.salesLead.notes, 4000) ?? "";
+  const inboundNote = [
+    `Linked inbound inquiry #${params.inquiryId} (${params.via}).`,
+    trimText(params.inquiry.message, 800),
+  ]
+    .filter(Boolean)
+    .join("\n");
+  leadUpdate.notes = existingNotes
+    ? `${existingNotes}\n\n${inboundNote}`
+    : inboundNote;
+
+  if (
+    String(params.salesLead.nextAction ?? "none") === "none" &&
+    !["won", "lost"].includes(String(params.salesLead.status))
+  ) {
+    leadUpdate.nextAction = "respond-today";
+    leadUpdate.nextFollowUp = initialResponseDueAt(
+      params.inquiry.createdAt ? new Date(String(params.inquiry.createdAt)) : new Date(),
+    ).toISOString();
+  }
+
+  if (Object.keys(leadUpdate).length > 0) {
+    await params.payload.update({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      collection: "sales-leads" as any,
+      id: salesLeadId,
+      data: leadUpdate,
+      overrideAccess: true,
+    });
+  }
+
+  await params.payload.update({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    collection: "inquiries" as any,
+    id: params.inquiryId,
+    data: {
+      promotedSalesLead: salesLeadId,
+      promotedAt: new Date().toISOString(),
+      status: String(params.inquiry.status ?? "new") === "new" ? "reviewed" : params.inquiry.status,
+      kxdOs: {
+        ...(typeof params.inquiry.kxdOs === "object" && params.inquiry.kxdOs
+          ? params.inquiry.kxdOs
+          : {}),
+        leadId: String(salesLeadId),
+      },
+    },
+    overrideAccess: true,
+  });
+
+  try {
+    await logSalesActivity({
+      activityType: "note",
+      title: "Inbound application linked",
+      summary: [
+        `Inquiry #${params.inquiryId} linked to existing opportunity via ${params.via}.`,
+        params.operatorLabel ? `Operator: ${params.operatorLabel}.` : null,
+      ]
+        .filter(Boolean)
+        .join(" "),
+      leadId: salesLeadId,
+    });
+  } catch (err) {
+    console.error("[KXD Sales] Linked inquiry activity log failed:", err);
+  }
+
+  const refreshed = (await params.payload.findByID({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    collection: "sales-leads" as any,
+    id: salesLeadId,
+    depth: 0,
+    overrideAccess: true,
+  })) as SalesDoc;
+
+  return { salesLead: refreshed, salesLeadId };
 }
 
 export async function promoteInquiryToSales(
@@ -160,6 +279,7 @@ export async function promoteInquiryToSales(
       sourceRecordId: inquiryId,
       created: false,
       origin: String(inquiry.source ?? "contact"),
+      collisionVia: "source",
     });
   }
 
@@ -168,6 +288,66 @@ export async function promoteInquiryToSales(
       ok: false,
       message: `Inquiry status "${status}" is not eligible for Sales promotion.`,
       code: "not_eligible",
+    };
+  }
+
+  const identityPool = await loadSalesLeadsForIdentity(payload);
+  const collision = classifyIdentityCollision({
+    email: inquiry.email,
+    website: inquiry.website,
+    company: inquiry.company,
+    openLeads: identityPool.open,
+    closedLeads: identityPool.closed,
+  });
+
+  if (collision.kind === "exact") {
+    const linked = await linkInquiryToExistingLead({
+      payload,
+      inquiry,
+      inquiryId,
+      salesLead: collision.salesLead as SalesDoc,
+      via: collision.via,
+      operatorLabel: options?.operatorLabel,
+    });
+    return success({
+      ...linked,
+      sourceRecordType: "inquiry",
+      sourceRecordId: inquiryId,
+      created: false,
+      linkedExisting: true,
+      collisionVia: collision.via,
+      origin: String(inquiry.source ?? "contact"),
+    });
+  }
+
+  if (collision.kind === "ambiguous") {
+    const ids = collision.candidates.map((c) => c.id);
+    const reviewNote = [
+      "Identity collision — review before promoting.",
+      ...collision.candidates.map((c) => `Sales lead #${c.id} (${c.via}): ${c.reason}`),
+    ].join("\n");
+    try {
+      await payload.update({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        collection: "inquiries" as any,
+        id: inquiryId,
+        data: {
+          nextStep: "Identity collision — review in Sales before promoting.",
+          internalNotes: [trimText(inquiry.internalNotes), reviewNote]
+            .filter(Boolean)
+            .join("\n\n"),
+        },
+        overrideAccess: true,
+      });
+    } catch (err) {
+      console.error("[KXD Sales] Failed to mark inquiry for identity review:", err);
+    }
+    return {
+      ok: false,
+      message:
+        "An existing commercial opportunity may match this inquiry. Review before creating a duplicate.",
+      code: "needs_review",
+      candidateSalesLeadIds: ids,
     };
   }
 
@@ -204,6 +384,9 @@ export async function promoteInquiryToSales(
         notes,
         status: "new",
         nextAction: "respond-today",
+        nextFollowUp: initialResponseDueAt(
+          inquiry.createdAt ? new Date(String(inquiry.createdAt)) : new Date(),
+        ).toISOString(),
         sourceInquiry: inquiryId,
         estimatedValue,
         probability: 25,
@@ -213,28 +396,17 @@ export async function promoteInquiryToSales(
     })) as SalesDoc;
 
     const salesLeadId = Number(created.id);
-    await payload.update({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      collection: "inquiries" as any,
-      id: inquiryId,
-      data: {
-        promotedSalesLead: salesLeadId,
-        promotedAt: new Date().toISOString(),
-        status: status === "new" ? "reviewed" : status,
-        kxdOs: {
-          ...(typeof inquiry.kxdOs === "object" && inquiry.kxdOs ? inquiry.kxdOs : {}),
-          leadId: String(salesLeadId),
-        },
-      },
-      overrideAccess: true,
-    });
-
     try {
       await logSalesActivity({
         activityType: "note",
-        title: "Promoted from Contact Inquiry",
+        title: "Inbound application received",
         summary: [
-          `Inquiry #${inquiryId} promoted to Sales.`,
+          `Inquiry #${inquiryId} entered Sales from ${String(inquiry.source ?? "contact")}.`,
+          trimText(inquiry.company) ? `Company: ${trimText(inquiry.company)}.` : null,
+          trimText(inquiry.website) ? `Website: ${trimText(inquiry.website)}.` : null,
+          inquiry.budget ? `Budget: ${inquiry.budget}.` : null,
+          inquiry.timeline ? `Timeline: ${inquiry.timeline}.` : null,
+          trimText(inquiry.message, 400),
           options?.operatorLabel ? `Operator: ${options.operatorLabel}.` : null,
         ]
           .filter(Boolean)
@@ -243,6 +415,36 @@ export async function promoteInquiryToSales(
       });
     } catch (err) {
       console.error("[KXD Sales] Inquiry promote activity log failed:", err);
+    }
+
+    const provenance = {
+      promotedSalesLead: salesLeadId,
+      promotedAt: new Date().toISOString(),
+      kxdOs: {
+        ...(typeof inquiry.kxdOs === "object" && inquiry.kxdOs ? inquiry.kxdOs : {}),
+        leadId: String(salesLeadId),
+      },
+    };
+    try {
+      await payload.update({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        collection: "inquiries" as any,
+        id: inquiryId,
+        data: {
+          ...provenance,
+          status: status === "new" ? "reviewed" : status,
+        },
+        overrideAccess: true,
+      });
+    } catch (err) {
+      console.error("[KXD Sales] Inquiry reverse-link status update failed; writing provenance only:", err);
+      await payload.update({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        collection: "inquiries" as any,
+        id: inquiryId,
+        data: provenance,
+        overrideAccess: true,
+      });
     }
 
     return success({
@@ -361,6 +563,11 @@ export async function promoteProjectInquiryToSales(
         notes,
         status: "new",
         nextAction: "respond-today",
+        nextFollowUp: initialResponseDueAt(
+          projectInquiry.createdAt
+            ? new Date(String(projectInquiry.createdAt))
+            : new Date(),
+        ).toISOString(),
         sourceProjectInquiry: projectInquiryId,
         estimatedValue,
         probability: 30,
@@ -506,6 +713,9 @@ export async function promoteWebsiteAuditToSales(
         notes,
         status: "new",
         nextAction: "respond-today",
+        nextFollowUp: initialResponseDueAt(
+          audit.createdAt ? new Date(String(audit.createdAt)) : new Date(),
+        ).toISOString(),
         sourceWebsiteAudit: websiteAuditId,
         probability: 25,
       },

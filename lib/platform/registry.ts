@@ -309,7 +309,7 @@ export const PLATFORM_PHASES: PlatformPhaseDefinition[] = [
     title: "Lead Funnel Unification",
     status: "in-progress",
     description:
-      "Partial: Research → Sales (existing) + intentional inbound → sales-leads promotion (inquiries, project-inquiries, website-audits) with durable provenance. Remaining: deeper intake normalization, Growth alignment, Managed Client Lead Operations (separate sibling context).",
+      "Partial: Research → Sales (existing) + first-party /contact inquiry auto-promote into sales-leads with identity collision protection, commercial obligation clocks, and Needs Attention derivation. Remaining: deeper intake normalization, /start-project auto-promote, Managed Client Lead Operations (separate sibling context).",
   },
 ];
 

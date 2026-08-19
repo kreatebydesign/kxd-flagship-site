@@ -24,6 +24,7 @@ export const TODAY_EMPTY = {
 } as const;
 
 export const TODAY_QUIET_EXITS = [
+  { label: "Opportunities", href: "/admin/operations/research" },
   { label: "Work", href: "/admin/work" },
   { label: "Clients", href: "/admin/operations/clients" },
   { label: "Review Inbox", href: "/admin/operations/review-inbox" },

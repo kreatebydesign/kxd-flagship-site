@@ -24,6 +24,7 @@ import {
   normalizeProposalNotification,
   normalizeReportDueNotification,
   normalizeReportReadyNotification,
+  normalizeSalesAttentionNotification,
   normalizeStrategyReminderToNotification,
   sortNotifications,
 } from "./normalize";
@@ -252,6 +253,27 @@ async function collectNotificationItems(): Promise<NotificationItem[]> {
     if (new Date(n.createdAt).getTime() < proposalCutoff) continue;
     if (isVirtualIgnored(n.id, memory)) continue;
     virtual.push(n);
+  }
+
+  try {
+    const { getSalesWorkspace } = await import("@/lib/sales/workspace");
+    const workspace = await getSalesWorkspace();
+    let salesCount = 0;
+    for (const card of workspace.attention) {
+      if (salesCount >= 5) break;
+      const n = normalizeSalesAttentionNotification({
+        id: card.id,
+        companyName: card.companyName,
+        kind: card.attentionKind ?? "",
+        label: card.attentionLabel ?? card.nextActionLabel,
+        createdAt: card.createdAt,
+      });
+      if (!n || isVirtualIgnored(n.id, memory)) continue;
+      virtual.push(n);
+      salesCount += 1;
+    }
+  } catch {
+    /* Sales workspace optional during notification collection */
   }
 
   if (automation?.failedEvents) {

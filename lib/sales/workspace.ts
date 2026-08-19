@@ -7,8 +7,13 @@ import "server-only";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import {
+  ATTENTION_KIND_LABEL,
+  attentionRank,
+  deriveAttentionKind,
+  type AttentionKind,
+} from "./attention";
+import {
   NEXT_ACTION_LABEL,
-  NEXT_ACTION_PRIORITY,
   isNextAction,
   type NextAction,
 } from "./next-action";
@@ -43,10 +48,16 @@ export type SalesOpportunityCard = {
   nextAction: NextAction;
   nextActionLabel: string;
   nextActionNote: string | null;
+  nextFollowUp: string | null;
+  assignedTo: string | null;
+  lostReason: string | null;
   estimatedValue: number | null;
   updatedAt: string;
   createdAt: string;
   researchSubmittedAt: string | null;
+  lastMeaningfulAt: string | null;
+  attentionKind: AttentionKind | null;
+  attentionLabel: string | null;
   ageLabel: string;
 };
 
@@ -87,7 +98,10 @@ function ageLabel(iso: string | null | undefined): string {
   return `${Math.floor(days / 30)} mo old`;
 }
 
-function toCard(lead: SalesDoc): SalesOpportunityCard {
+function toCard(
+  lead: SalesDoc,
+  lastMeaningfulAt: string | null,
+): SalesOpportunityCard {
   const status = String(lead.status ?? "new");
   const sectionId = STATUS_TO_SECTION[status] ?? "new-leads";
   const rawNext = String(lead.nextAction ?? "none");
@@ -114,6 +128,16 @@ function toCard(lead: SalesDoc): SalesOpportunityCard {
           ? "From website audit"
           : null;
 
+  const nextFollowUp = lead.nextFollowUp ? String(lead.nextFollowUp) : null;
+  const createdAt = String(lead.createdAt ?? "");
+  const attentionKind = deriveAttentionKind({
+    status,
+    nextAction,
+    nextFollowUp,
+    createdAt,
+    lastMeaningfulAt: lastMeaningfulAt || createdAt,
+  });
+
   return {
     id: Number(lead.id),
     companyName: String(lead.companyName ?? "Prospect"),
@@ -136,50 +160,67 @@ function toCard(lead: SalesDoc): SalesOpportunityCard {
     nextAction,
     nextActionLabel: NEXT_ACTION_LABEL[nextAction],
     nextActionNote: lead.nextActionNote ? String(lead.nextActionNote) : null,
+    nextFollowUp,
+    assignedTo: lead.assignedTo ? String(lead.assignedTo) : null,
+    lostReason: lead.lostReason ? String(lead.lostReason) : null,
     estimatedValue:
       lead.estimatedValue != null && lead.estimatedValue !== ""
         ? Number(lead.estimatedValue)
         : null,
     updatedAt: String(lead.updatedAt ?? ""),
-    createdAt: String(lead.createdAt ?? ""),
+    createdAt,
     researchSubmittedAt: lead.researchSubmittedAt
       ? String(lead.researchSubmittedAt)
       : null,
-    ageLabel: ageLabel(lead.researchSubmittedAt || lead.createdAt),
+    lastMeaningfulAt: lastMeaningfulAt || createdAt,
+    attentionKind,
+    attentionLabel: attentionKind ? ATTENTION_KIND_LABEL[attentionKind] : null,
+    ageLabel: ageLabel(lead.researchSubmittedAt || createdAt),
   };
 }
 
-function attentionScore(card: SalesOpportunityCard): number {
-  const actionPri = NEXT_ACTION_PRIORITY[card.nextAction] ?? 9;
-  const sectionPri: Record<WorkspaceSectionId, number> = {
-    "needs-response": 1,
-    "new-leads": 2,
-    "proposal-decision": 3,
-    "in-conversation": 4,
-    won: 8,
-    "not-moving": 9,
-  };
-  return actionPri * 10 + (sectionPri[card.sectionId] ?? 5);
+function cardAttentionScore(card: SalesOpportunityCard): number {
+  return attentionRank(card.attentionKind, card.nextAction);
 }
 
 export async function getSalesWorkspace(): Promise<SalesWorkspaceData> {
   const payload = await getPayload({ config });
-  const result = await payload.find({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    collection: "sales-leads" as any,
-    limit: 500,
-    depth: 0,
-    sort: "-updatedAt",
-    overrideAccess: true,
-  });
 
-  const cards = (result.docs as SalesDoc[]).map(toCard);
+  const [leadsResult, activitiesResult] = await Promise.all([
+    payload.find({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      collection: "sales-leads" as any,
+      limit: 500,
+      depth: 0,
+      sort: "-updatedAt",
+      overrideAccess: true,
+    }),
+    payload.find({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      collection: "sales-activities" as any,
+      limit: 500,
+      depth: 0,
+      sort: "-occurredAt",
+      overrideAccess: true,
+    }),
+  ]);
+
+  const lastByLead = new Map<number, string>();
+  for (const activity of activitiesResult.docs as SalesDoc[]) {
+    const leadId = relId(activity.lead);
+    if (!leadId || lastByLead.has(leadId)) continue;
+    if (activity.occurredAt) lastByLead.set(leadId, String(activity.occurredAt));
+  }
+
+  const cards = (leadsResult.docs as SalesDoc[]).map((lead) =>
+    toCard(lead, lastByLead.get(Number(lead.id)) ?? null),
+  );
   const open = cards.filter((c) => c.status !== "won" && c.status !== "lost");
 
   const sections: SalesWorkspaceSection[] = WORKSPACE_SECTIONS.map((section) => {
     const opportunities = cards
       .filter((c) => (section.statuses as readonly string[]).includes(c.status))
-      .sort((a, b) => attentionScore(a) - attentionScore(b));
+      .sort((a, b) => cardAttentionScore(a) - cardAttentionScore(b));
     return {
       id: section.id,
       label: section.label,
@@ -190,7 +231,8 @@ export async function getSalesWorkspace(): Promise<SalesWorkspaceData> {
   });
 
   const attention = [...open]
-    .sort((a, b) => attentionScore(a) - attentionScore(b))
+    .filter((c) => c.attentionKind != null && c.attentionKind !== "scheduled")
+    .sort((a, b) => cardAttentionScore(a) - cardAttentionScore(b))
     .slice(0, 12);
 
   const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
@@ -211,4 +253,11 @@ export async function getSalesWorkspace(): Promise<SalesWorkspaceData> {
     totalValueOpen,
     recentCount,
   };
+}
+
+export function getCommercialAttentionItems(
+  data: SalesWorkspaceData,
+  limit = 5,
+): SalesOpportunityCard[] {
+  return data.attention.slice(0, limit);
 }

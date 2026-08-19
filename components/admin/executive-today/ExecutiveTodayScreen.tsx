@@ -128,6 +128,84 @@ export function ExecutiveTodayScreen({ data }: { data: ExecutiveTodayData }) {
             </section>
           ) : null}
 
+          {data.commercial.items.length > 0 ? (
+            <section
+              className="kxd-exec-today__section kxd-exec-today__enter kxd-exec-today__enter--2"
+              aria-labelledby="today-commercial"
+            >
+              <div className="kxd-exec-today__section-head">
+                <h2 id="today-commercial" className="kxd-exec-today__label">
+                  Commercial
+                </h2>
+                <Link href={data.commercial.href} className="kxd-exec-today__section-link">
+                  Open Pipeline
+                </Link>
+              </div>
+              <ul className="kxd-exec-today__list">
+                {data.commercial.items.map((item) => (
+                  <li key={item.id}>
+                    <Link
+                      href={item.href}
+                      className="kxd-exec-today__row kxd-exec-today__row--notable"
+                    >
+                      <span className="kxd-exec-today__row-title">{item.title}</span>
+                      <span className="kxd-exec-today__row-meta">{item.meta}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
+
+          {data.opportunities.qualified > 0 ||
+          data.opportunities.newOrReviewing > 0 ? (
+            <section
+              className="kxd-exec-today__section kxd-exec-today__enter kxd-exec-today__enter--2"
+              aria-labelledby="today-opportunities"
+            >
+              <div className="kxd-exec-today__section-head">
+                <h2 id="today-opportunities" className="kxd-exec-today__label">
+                  Opportunities
+                </h2>
+                <Link
+                  href={data.opportunities.href}
+                  className="kxd-exec-today__section-link"
+                >
+                  Review Opportunities
+                </Link>
+              </div>
+              <Link
+                href={data.opportunities.href}
+                className="kxd-exec-today__row kxd-exec-today__row--notable"
+              >
+                <span className="kxd-exec-today__row-title">
+                  {data.opportunities.qualified > 0
+                    ? `${data.opportunities.qualified} qualified`
+                    : `${data.opportunities.newOrReviewing} to review`}
+                </span>
+                <span className="kxd-exec-today__row-meta">
+                  {[
+                    data.opportunities.aPlus > 0
+                      ? `${data.opportunities.aPlus} A+`
+                      : null,
+                    data.opportunities.a > 0
+                      ? `${data.opportunities.a} A`
+                      : null,
+                    data.opportunities.b > 0
+                      ? `${data.opportunities.b} B`
+                      : null,
+                    data.opportunities.qualified === 0 &&
+                    data.opportunities.newOrReviewing > 0
+                      ? "New and reviewing research"
+                      : null,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </span>
+              </Link>
+            </section>
+          ) : null}
+
           {/* 4 — Shape of the day (not calendar software) */}
           <section
             className="kxd-exec-today__section kxd-exec-today__section--flow kxd-exec-today__enter kxd-exec-today__enter--3"

@@ -64,7 +64,7 @@ export const ACQUISITION_OPERATIONS_PHASE_1 = {
   id: "acquisition-lead-operations-phase-1",
   implements: [
     "Shared Acquisition & Lead Operations contracts",
-    "KXD inbound → sales-leads intentional promotion (inquiries, project-inquiries, website-audits)",
+    "KXD inbound → sales-leads: first-party /contact auto-promote; project-inquiries and website-audits remain intentional promotion",
     "Durable inbound provenance on sales-leads",
     "Partial Phase 17 Lead Funnel Unification (KXD Acquisition handoffs only)",
   ],

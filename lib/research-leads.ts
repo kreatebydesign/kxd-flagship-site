@@ -14,6 +14,18 @@ export {
   type ResearchIntakeResult,
 } from "./research-leads/intake";
 
+export {
+  OPPORTUNITIES_HREF,
+  compareOpportunitiesForRevenue,
+  emptyOpportunitySummaryCounts,
+  isHistoryOpportunityStatus,
+  loadOpportunityDeskMetrics,
+  loadOpportunitySummaryCounts,
+  resolveOpportunityPrimaryAction,
+  type OpportunityPrimaryAction,
+  type OpportunitySummaryCounts,
+} from "./research-leads/opportunity-presentation";
+
 export const RESEARCH_RESEARCHERS = [
   { value: "Matt", label: "Matt" },
   { value: "Sasha", label: "Sasha" },
@@ -61,13 +73,13 @@ export const RESEARCH_SERVICE_LABEL: Record<string, string> = Object.fromEntries
 );
 
 export const RESEARCH_STATUS_COLOR: Record<string, string> = {
-  new: "#A8B4C8",
-  reviewing: "#E8C468",
-  qualified: "#A8B4C8",
-  rejected: "#d25a5a",
-  contacted: "#C9A962",
-  "closed-won": "#C9A962",
-  "closed-lost": "rgba(255,255,255,0.35)",
+  new: "var(--kxd-os-text-secondary)",
+  reviewing: "var(--kxd-os-warning)",
+  qualified: "var(--kxd-os-text-primary)",
+  rejected: "var(--kxd-os-critical)",
+  contacted: "var(--kxd-os-accent)",
+  "closed-won": "var(--kxd-os-success)",
+  "closed-lost": "var(--kxd-os-text-faint)",
 };
 
 export const RESEARCH_GRADES = [
@@ -102,10 +114,10 @@ export const RESEARCH_REJECT_REASON_LABEL: Record<string, string> = Object.fromE
 );
 
 export const RESEARCH_GRADE_COLOR: Record<string, string> = {
-  "A+": "#6fbf8f",
-  A: "#6fbf8f",
-  B: "#96d2c8",
-  C: "#E8C468",
-  D: "#d25a5a",
-  F: "#d25a5a",
+  "A+": "var(--kxd-os-success)",
+  A: "var(--kxd-os-success)",
+  B: "var(--kxd-os-text-primary)",
+  C: "var(--kxd-os-warning)",
+  D: "var(--kxd-os-critical)",
+  F: "var(--kxd-os-critical)",
 };

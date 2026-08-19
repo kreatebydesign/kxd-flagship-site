@@ -5,9 +5,14 @@
 
 import type { ExecutiveActivityItem } from "@/lib/activity-engine";
 import type { IntelligentRecommendation } from "@/lib/intelligence/briefings/types";
+import type { OpportunitySummaryCounts } from "@/lib/research-leads";
 import type { MorningBriefPageData } from "@/lib/rituals/morning-brief";
 import type { WorkListItem } from "@/lib/work/types";
 import type { ExecutiveTodayBrief } from "./brief/types";
+
+export type ExecutiveTodayOpportunities = OpportunitySummaryCounts & {
+  href: string;
+};
 
 export interface ExecutiveTodayFocusItem {
   id: string;
@@ -32,6 +37,28 @@ export interface ExecutiveTodayUpcomingItem {
   detail: string;
   href: string | null;
   source: "review" | "work" | "calendar";
+}
+
+export type TodayCommercialKind =
+  | "overdue-response"
+  | "overdue"
+  | "respond-today"
+  | "proposal-idle"
+  | "stale"
+  | "due-today"
+  | "scheduled";
+
+export interface TodayCommercialItem {
+  id: string;
+  title: string;
+  meta: string;
+  href: string;
+  kind: TodayCommercialKind;
+}
+
+export interface ExecutiveTodayCommercial {
+  items: TodayCommercialItem[];
+  href: string;
 }
 
 export interface ExecutiveTodayPrimary {
@@ -62,6 +89,10 @@ export interface ExecutiveTodayData {
   activityEmptyMessage: string;
   intelligence: ExecutiveTodayIntelligenceBlock;
   upcoming: ExecutiveTodayUpcomingItem[];
+  /** Thin Sales attention adapter — not a second CRM. */
+  commercial: ExecutiveTodayCommercial;
+  /** Revenue opportunities summary — counts only, not the Research Desk. */
+  opportunities: ExecutiveTodayOpportunities;
   /** Phase 27B — calendar-aware operating brief. */
   brief: ExecutiveTodayBrief | null;
   /** Morning Brief payload retained for deep sections / future expansion. */

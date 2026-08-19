@@ -154,9 +154,9 @@ async function main() {
   });
 
   await check("14–15. sales workspace + contextual actions", () => {
-    assertFileContains("components/admin/sales/PipelineScreen.tsx", "mailto:");
-    assertFileContains("components/admin/sales/PipelineScreen.tsx", "tel:");
-    assertFileContains("components/admin/sales/PipelineScreen.tsx", "View Opportunity");
+    assertFileContains("components/admin/sales/OpportunityCard.tsx", "mailto:");
+    assertFileContains("components/admin/sales/OpportunityCard.tsx", "tel:");
+    assertFileContains("components/admin/sales/OpportunityCard.tsx", "View Opportunity");
     assert.equal(WORKSPACE_SECTIONS.length, 6);
     assert.equal(STATUS_TO_SECTION.new, "new-leads");
     assert.equal(STATUS_TO_SECTION.discovery, "needs-response");

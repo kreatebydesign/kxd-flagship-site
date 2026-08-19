@@ -293,6 +293,40 @@ const SEVERITY_RANK: Record<NotificationSeverity, number> = {
   success: 3,
 };
 
+export function normalizeSalesAttentionNotification(input: {
+  id: number;
+  companyName: string;
+  kind: string;
+  label: string;
+  createdAt: string;
+}): NotificationItem | null {
+  const highValue = new Set([
+    "overdue-response",
+    "overdue",
+    "stale",
+    "respond-today",
+    "proposal-idle",
+  ]);
+  if (!highValue.has(input.kind)) return null;
+  const severity: NotificationSeverity =
+    input.kind === "overdue-response" || input.kind === "overdue"
+      ? "warning"
+      : "info";
+  return {
+    id: `sales-attn-${input.id}-${input.kind}`,
+    virtual: true,
+    source: "sales",
+    title: `${input.label} — ${input.companyName}`,
+    message: "Commercial obligation needs attention in Sales.",
+    severity,
+    module: "Sales",
+    status: "unread",
+    href: `/admin/sales?focus=${input.id}`,
+    createdAt: input.createdAt,
+    actionLabel: "Open",
+  };
+}
+
 export function sortNotifications(items: NotificationItem[]): NotificationItem[] {
   return [...items].sort((a, b) => {
     const sr = SEVERITY_RANK[a.severity] - SEVERITY_RANK[b.severity];

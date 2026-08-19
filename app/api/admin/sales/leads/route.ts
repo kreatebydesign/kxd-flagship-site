@@ -8,9 +8,14 @@ import { requirePayloadAdminApi } from "@/lib/admin/auth";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import { LEAD_STATUSES } from "@/lib/sales/types";
-import { isNextAction } from "@/lib/sales/next-action";
+import { isNextAction, NEXT_ACTION_LABEL, type NextAction } from "@/lib/sales/next-action";
 import { SECTION_LABEL, STATUS_TO_SECTION } from "@/lib/sales/workspace-stages";
 import { logSalesActivity } from "@/lib/sales/activities";
+import { initialResponseDueAt, isLostReason } from "@/lib/sales/follow-up-policy";
+import {
+  shouldLogObligationChange,
+  validateObligationPatch,
+} from "@/lib/sales/obligation";
 
 export const dynamic = "force-dynamic";
 
@@ -126,6 +131,7 @@ export async function POST(req: NextRequest) {
         notes: String(body.notes ?? "").trim() || undefined,
         status: "new",
         nextAction: "respond-today",
+        nextFollowUp: initialResponseDueAt().toISOString(),
       },
       overrideAccess: true,
     });
@@ -170,10 +176,19 @@ export async function PATCH(req: NextRequest) {
     if (body.nextActionNote != null) {
       data.nextActionNote = String(body.nextActionNote).trim() || null;
     }
+    if (body.nextFollowUp !== undefined) {
+      data.nextFollowUp = body.nextFollowUp ? String(body.nextFollowUp) : null;
+    }
+    if (body.lostReason != null) {
+      if (!isLostReason(body.lostReason)) {
+        return NextResponse.json({ success: false, error: "Invalid lost reason." }, { status: 400 });
+      }
+      data.lostReason = body.lostReason;
+    }
 
     if (Object.keys(data).length === 0) {
       return NextResponse.json(
-        { success: false, error: "Provide status and/or nextAction." },
+        { success: false, error: "Provide status, nextAction, or nextFollowUp." },
         { status: 400 },
       );
     }
@@ -187,28 +202,81 @@ export async function PATCH(req: NextRequest) {
       overrideAccess: true,
     });
 
+    const currentNextAction: NextAction = isNextAction(existing.nextAction)
+      ? existing.nextAction
+      : "none";
+    const validated = validateObligationPatch({
+      currentStatus: String(existing.status ?? "new"),
+      currentNextAction,
+      patch: {
+        status: data.status as string | undefined,
+        nextAction: data.nextAction as NextAction | undefined,
+        nextFollowUp:
+          data.nextFollowUp === undefined ? undefined : (data.nextFollowUp as string | null),
+        nextActionNote: data.nextActionNote as string | null | undefined,
+        lostReason: isLostReason(data.lostReason) ? data.lostReason : undefined,
+      },
+    });
+    if (!validated.ok) {
+      return NextResponse.json({ success: false, error: validated.message }, { status: 400 });
+    }
+
+    const write = {
+      ...data,
+      ...validated.data,
+    };
+
     await payload.update({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       collection: "sales-leads" as any,
       id,
-      data,
+      data: write,
       overrideAccess: true,
     });
 
-    if (data.status && String(existing.status) !== String(data.status)) {
-      const section = STATUS_TO_SECTION[String(data.status)] ?? "new-leads";
+    if (write.status && String(existing.status) !== String(write.status)) {
+      const section = STATUS_TO_SECTION[String(write.status)] ?? "new-leads";
       try {
         await logSalesActivity({
-          activityType: data.status === "won" ? "note" : "follow-up",
+          activityType: write.status === "won" ? "note" : "follow-up",
           title:
-            data.status === "won"
+            write.status === "won"
               ? "Opportunity won"
-              : `Stage → ${SECTION_LABEL[section]}`,
+              : write.status === "lost"
+                ? `Opportunity lost${write.lostReason ? ` · ${write.lostReason}` : ""}`
+                : `Stage → ${SECTION_LABEL[section]}`,
           summary: `${String(existing.companyName ?? "Opportunity")} moved to ${SECTION_LABEL[section]}.`,
           leadId: id,
         });
       } catch (err) {
         console.error("[KXD Sales] Stage activity log failed:", err);
+      }
+    } else if (
+      shouldLogObligationChange({
+        prevAction: currentNextAction,
+        nextAction: isNextAction(write.nextAction) ? write.nextAction : currentNextAction,
+        prevFollowUp: existing.nextFollowUp ? String(existing.nextFollowUp) : null,
+        nextFollowUp:
+          write.nextFollowUp != null ? String(write.nextFollowUp) : existing.nextFollowUp
+            ? String(existing.nextFollowUp)
+            : null,
+      })
+    ) {
+      const nextAction = isNextAction(write.nextAction) ? write.nextAction : currentNextAction;
+      try {
+        await logSalesActivity({
+          activityType: "follow-up",
+          title: "Next action updated",
+          summary: [
+            `Next: ${NEXT_ACTION_LABEL[nextAction]}.`,
+            write.nextFollowUp ? `Due ${String(write.nextFollowUp)}.` : null,
+          ]
+            .filter(Boolean)
+            .join(" "),
+          leadId: id,
+        });
+      } catch (err) {
+        console.error("[KXD Sales] Obligation activity log failed:", err);
       }
     }
 

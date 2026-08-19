@@ -103,7 +103,7 @@ async function main() {
     );
   });
 
-  await check("eligibility / no automatic ingest", () => {
+  await check("eligibility gates remain", () => {
     assert.equal(isInquiryEligibleForPromotion("new"), true);
     assert.equal(isInquiryEligibleForPromotion("spam"), false);
     assert.equal(isInquiryEligibleForPromotion("archived"), false);
@@ -113,6 +113,19 @@ async function main() {
     assert.equal(isWebsiteAuditEligibleForPromotion("closed-lost"), false);
     assert.equal(INQUIRY_BUDGET_MIDPOINTS["10k-25k"], 17_500);
     assert.equal(PROJECT_INVESTMENT_MIDPOINTS["50k-100k"], 75_000);
+  });
+
+  await check("first-party /contact auto-promotes; research remains operator-only", () => {
+    assertFileContains("app/api/inquiries/route.ts", "promoteInquiryToSales");
+    assertFileContains("app/api/inquiries/route.ts", "isFirstPartyInquirySource");
+    assertFileDoesNotContain("app/api/inquiries/route.ts", "research-leads");
+    assertFileDoesNotContain("app/api/inquiries/route.ts", "client-inquiries");
+    assertFileDoesNotContain("lib/sales/promote-inbound.ts", "client-inquiries");
+    const researchPromote = readFileSync(
+      path.join(ROOT, "lib/sales/promote-research-lead.ts"),
+      "utf8",
+    );
+    assert.ok(!researchPromote.includes("auto-promote"));
   });
 
   await check("sales provenance schema + unique indexes", () => {
@@ -158,7 +171,7 @@ async function main() {
       "PromoteToSalesButton",
     );
     assertFileContains(
-      "components/admin/sales/PipelineScreen.tsx",
+      "components/admin/sales/OpportunityCard.tsx",
       "From contact inquiry",
     );
   });

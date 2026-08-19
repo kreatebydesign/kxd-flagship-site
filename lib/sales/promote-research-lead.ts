@@ -8,6 +8,7 @@ import { getPayload } from "payload";
 import config from "@payload-config";
 import { resolveResearchContactDisplay } from "@/lib/research-leads/intake";
 import { logSalesActivity } from "./activities";
+import { initialResponseDueAt } from "./follow-up-policy";
 import type { SalesDoc } from "./types";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -146,6 +147,9 @@ export async function promoteResearchLeadToSales(
         notes: research.notes || undefined,
         status: "new",
         nextAction: "respond-today",
+        nextFollowUp: initialResponseDueAt(
+          research.createdAt ? new Date(String(research.createdAt)) : new Date(),
+        ).toISOString(),
         sourceResearchLead: researchLeadId,
         sourcedByJuniorCreator: juniorId ?? undefined,
         sourcedByName: sourcedByName ?? undefined,

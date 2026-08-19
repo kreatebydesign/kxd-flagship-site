@@ -29,6 +29,24 @@ export interface LogActivityInput {
   occurredAt?: string;
 }
 
+export async function getLeadActivities(
+  leadId: number,
+  limit = 50,
+): Promise<SalesDoc[]> {
+  if (!leadId || !Number.isFinite(leadId)) return [];
+  const payload = await getPayload({ config });
+  const result = await payload.find({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    collection: COLLECTION as any,
+    where: { lead: { equals: leadId } },
+    limit,
+    depth: 0,
+    sort: "-occurredAt",
+    overrideAccess: true,
+  });
+  return result.docs as SalesDoc[];
+}
+
 export async function logSalesActivity(input: LogActivityInput): Promise<SalesDoc> {
   const payload = await getPayload({ config });
   const record = await payload.create({

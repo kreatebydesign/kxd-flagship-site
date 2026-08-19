@@ -6,6 +6,8 @@ import "server-only";
  * Does not publish Activity. Does not mutate calendar.
  */
 
+import { getPayload } from "payload";
+import config from "@payload-config";
 import { getExecutiveContext } from "@/lib/executive-context";
 import {
   composeExecutiveIntelligence,
@@ -13,6 +15,12 @@ import {
 } from "@/lib/executive-intelligence";
 import { mapSignalToListItem } from "@/lib/executive-signals";
 import { loadBriefingContext } from "@/lib/intelligence/briefings/builder";
+import {
+  emptyOpportunitySummaryCounts,
+  loadOpportunitySummaryCounts,
+  OPPORTUNITIES_HREF,
+} from "@/lib/research-leads";
+import { getSalesWorkspace } from "@/lib/sales/workspace";
 import { buildExecutiveTodayBrief } from "./brief/load-brief";
 import {
   TODAY_EMPTY,
@@ -25,6 +33,7 @@ import {
   mapWorkToFocusItem,
   type ExecutiveTodayData,
   type ExecutiveTodayUpcomingItem,
+  type TodayCommercialKind,
 } from "./types";
 
 function mapUpcoming(
@@ -79,12 +88,45 @@ export async function loadExecutiveToday(input?: {
   // Single shared briefing load — React cache shares with getExecutiveContext → morning brief.
   const briefingContext = await loadBriefingContext();
 
-  const [ctx, brief] = await Promise.all([
+  const opportunityCountsPromise = (async () => {
+    try {
+      const payload = await getPayload({ config });
+      return await loadOpportunitySummaryCounts(payload);
+    } catch {
+      return emptyOpportunitySummaryCounts();
+    }
+  })();
+
+  const commercialPromise = (async () => {
+    try {
+      const workspace = await getSalesWorkspace();
+      return workspace.attention.slice(0, 5).map((card) => ({
+        id: `sales-${card.id}`,
+        title: card.companyName,
+        meta: [
+          card.attentionLabel ?? card.nextActionLabel,
+          card.contactName && card.contactName !== card.companyName
+            ? card.contactName
+            : null,
+        ]
+          .filter(Boolean)
+          .join(" · "),
+        href: `/admin/sales?focus=${card.id}`,
+        kind: (card.attentionKind ?? "scheduled") as TodayCommercialKind,
+      }));
+    } catch {
+      return [];
+    }
+  })();
+
+  const [ctx, brief, opportunityCounts, commercialItems] = await Promise.all([
     getExecutiveContext(input),
     buildExecutiveTodayBrief({
       reviewWaitingCount: undefined,
       briefingContext,
     }).catch(() => null),
+    opportunityCountsPromise,
+    commercialPromise,
   ]);
 
   const signals = ctx.executiveSignals.map((s) => ({
@@ -161,6 +203,14 @@ export async function loadExecutiveToday(input?: {
       tone: ctx.momentum.tone,
     },
     upcoming: mapUpcoming(ctx, briefWithReviews),
+    commercial: {
+      items: commercialItems,
+      href: "/admin/sales",
+    },
+    opportunities: {
+      ...opportunityCounts,
+      href: OPPORTUNITIES_HREF,
+    },
     brief: briefWithReviews,
     morning: ctx.morning,
     explainability: intelligence.userExplainability,

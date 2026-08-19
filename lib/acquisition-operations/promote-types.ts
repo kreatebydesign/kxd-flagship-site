@@ -14,12 +14,15 @@ export type PromoteToSalesSuccess = {
   created: boolean;
   salesLead: SalesDoc;
   provenance: PromotionProvenance;
+  linkedExisting?: boolean;
+  collisionVia?: "email" | "domain" | "source";
 };
 
 export type PromoteToSalesFailure = {
   ok: false;
   message: string;
-  code?: "not_found" | "conflict" | "not_eligible" | "error";
+  code?: "not_found" | "conflict" | "not_eligible" | "error" | "needs_review";
+  candidateSalesLeadIds?: number[];
 };
 
 export type PromoteToSalesResult = PromoteToSalesSuccess | PromoteToSalesFailure;

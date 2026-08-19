@@ -76,6 +76,8 @@
     "verify:qr-generator-v1": "node --import tsx scripts/verify-qr-generator-v1.ts",
     "verify:revenue-pipeline-foundation": "node --import tsx scripts/verify-revenue-pipeline-foundation.ts",
     "verify:acquisition-operations-phase-1": "node --import tsx scripts/verify-acquisition-operations-phase-1.ts",
+    "verify:inbound-sales-closed-loop-v1": "node --import tsx scripts/verify-inbound-sales-closed-loop-v1.ts",
+    "dry-run:first-party-inquiry-backfill": "KXD_SERVER_ONLY_SHIM=1 tsx --env-file=.env.local --import ./scripts/shims/register-server-only.mjs scripts/dry-run-first-party-inquiry-backfill.ts",
     "verify:managed-client-lead-operations-phase-2": "node --import tsx scripts/verify-managed-client-lead-operations-phase-2.ts",
     "verify:managed-client-form-ingest-phase-3": "node --import tsx scripts/verify-managed-client-form-ingest-phase-3.ts",
     "verify:robin-cole-branding": "node --import tsx scripts/verify-robin-cole-branding.ts",

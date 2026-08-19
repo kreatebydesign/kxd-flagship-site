@@ -50,10 +50,20 @@ export async function POST(req: NextRequest) {
       const status =
         result.code === "not_found"
           ? 404
-          : result.code === "not_eligible" || result.code === "conflict"
+          : result.code === "not_eligible" ||
+              result.code === "conflict" ||
+              result.code === "needs_review"
             ? 409
             : 500;
-      return NextResponse.json({ success: false, error: result.message }, { status });
+      return NextResponse.json(
+        {
+          success: false,
+          error: result.message,
+          code: result.code,
+          candidateSalesLeadIds: result.candidateSalesLeadIds,
+        },
+        { status },
+      );
     }
 
     return NextResponse.json({

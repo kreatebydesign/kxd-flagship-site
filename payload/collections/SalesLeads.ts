@@ -156,6 +156,24 @@ export const SalesLeads: CollectionConfig = {
       admin: { position: "sidebar" },
     },
     {
+      name: "lostReason",
+      type: "select",
+      label: "Lost Reason",
+      options: [
+        { label: "No response", value: "no-response" },
+        { label: "Budget", value: "budget" },
+        { label: "Timing", value: "timing" },
+        { label: "Chose competitor", value: "chose-competitor" },
+        { label: "Not a fit", value: "not-a-fit" },
+        { label: "Project cancelled", value: "project-cancelled" },
+        { label: "Other", value: "other" },
+      ],
+      admin: {
+        position: "sidebar",
+        description: "Required when moving an opportunity to Not Moving / Lost.",
+      },
+    },
+    {
       name: "researchSubmittedAt",
       type: "date",
       label: "Original Research Submitted",

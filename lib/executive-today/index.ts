@@ -11,8 +11,11 @@ export type {
   ExecutiveTodayData,
   ExecutiveTodayFocusItem,
   ExecutiveTodayIntelligenceBlock,
+  ExecutiveTodayOpportunities,
   ExecutiveTodayPrimary,
   ExecutiveTodayUpcomingItem,
+  TodayCommercialItem,
+  TodayCommercialKind,
 } from "./types";
 
 export {
