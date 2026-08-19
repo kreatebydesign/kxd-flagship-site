@@ -145,15 +145,15 @@ export function renderProposalPreviewHtml(proposal: CanonicalProposal): string {
     background: var(--black);
     color: var(--ivory);
     min-height: 72vh;
-    padding: 72px 48px 56px;
+    padding: 48px 48px 56px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
   }
   .cover .doc { font-family: system-ui, sans-serif; letter-spacing: 0.22em; text-transform: uppercase; font-size: 11px; color: #a39e93; }
-  .cover-logo { width: 5.5rem; height: auto; margin: 0 0 1.75rem; display: block; }
-  .cover .rule { width: 42px; height: 1px; background: var(--gold); margin: 18px 0 22px; }
-  .cover h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 500; line-height: 1.15; margin: 0 0 16px; max-width: min(28ch, 100%); overflow-wrap: normal; word-break: normal; }
+  .cover-logo { width: 6.5rem; height: auto; margin: 0 0 1rem; display: block; }
+  .cover .rule { width: 42px; height: 1px; background: var(--gold); margin: 10px 0 22px; }
+  .cover h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 500; line-height: 1.15; margin: 0 0 22px; max-width: min(28ch, 100%); overflow-wrap: normal; word-break: normal; }
   .cover .meta { font-family: system-ui, sans-serif; font-size: 14px; color: #d9d2c5; line-height: 1.7; }
   .wrap { max-width: 820px; margin: 0 auto; padding: 48px 24px 80px; }
   .eyebrow { font-family: system-ui, sans-serif; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
@@ -179,7 +179,7 @@ export function renderProposalPreviewHtml(proposal: CanonicalProposal): string {
 </head>
 <body>
   <header class="cover">
-    ${logo.exists ? `<img class="cover-logo" src="${esc(logo.publicPath)}" alt="${esc(KXD_REPORT_BRAND)}" width="88" height="83" />` : ""}
+    ${logo.exists ? `<img class="cover-logo" src="${esc(logo.publicPath)}" alt="${esc(KXD_REPORT_BRAND)}" width="104" height="98" />` : ""}
     <div class="doc">Proposal</div>
     <div class="rule"></div>
     <h1>${esc(proposal.title)}</h1>

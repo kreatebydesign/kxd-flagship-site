@@ -49,29 +49,29 @@ const colors = KXD_REPORT_COLORS;
 const styles = StyleSheet.create({
   coverPage: {
     backgroundColor: colors.richBlack,
-    paddingTop: 72,
+    paddingTop: 48,
     paddingBottom: 56,
     paddingHorizontal: 52,
-    justifyContent: "center",
+    justifyContent: "flex-start",
   },
-  coverLogo: { width: 88, height: 83, marginBottom: 28 },
+  coverLogo: { width: 104, height: 98, marginBottom: 16 },
   coverDocType: {
     fontSize: 8,
     letterSpacing: 0.6,
     textTransform: "uppercase",
     color: colors.mutedOnBlack,
     fontFamily: PROPOSAL_PDF_SANS,
-    marginBottom: 10,
+    marginBottom: 8,
   },
   coverRule: {
     width: 42,
     height: 1,
     backgroundColor: colors.gold,
-    marginBottom: 16,
+    marginBottom: 18,
   },
   coverTitleBlock: {
     maxWidth: 468,
-    marginBottom: 16,
+    marginBottom: 22,
   },
   coverH1: {
     fontSize: 22,

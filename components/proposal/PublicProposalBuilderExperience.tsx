@@ -164,7 +164,7 @@ export function PublicProposalBuilderExperience({ publicToken }: { publicToken: 
         style={{
           background: "#080808",
           color: "#f7f1e6",
-          padding: "4.5rem 1.5rem 3.5rem",
+          padding: "3rem 1.5rem 3.5rem",
         }}
       >
         <div style={{ maxWidth: 820, margin: "0 auto" }}>
@@ -172,9 +172,9 @@ export function PublicProposalBuilderExperience({ publicToken }: { publicToken: 
           <img
             src="/migrated-assets/brand/kxd-logo-transparent.png"
             alt="Kreate by Design"
-            width={88}
-            height={83}
-            style={{ width: "5.5rem", height: "auto", margin: "0 0 1.75rem", display: "block" }}
+            width={104}
+            height={98}
+            style={{ width: "6.5rem", height: "auto", margin: "0 0 1rem", display: "block" }}
           />
           <p
             style={{
@@ -187,14 +187,14 @@ export function PublicProposalBuilderExperience({ publicToken }: { publicToken: 
           >
             Proposal
           </p>
-          <div style={{ width: 42, height: 1, background: "#c5a65c", margin: "16px 0 20px" }} />
+          <div style={{ width: 42, height: 1, background: "#c5a65c", margin: "10px 0 22px" }} />
           <h1
             style={{
               fontFamily: "Georgia, 'Iowan Old Style', Palatino, serif",
               fontWeight: 500,
               fontSize: "clamp(2rem, 5vw, 3rem)",
               lineHeight: 1.15,
-              margin: "0 0 1rem",
+              margin: "0 0 1.375rem",
             }}
           >
             {p.title}
