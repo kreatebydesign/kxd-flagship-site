@@ -198,5 +198,8 @@ export function assertNoInternalLeakage(canonical: CanonicalProposal): string[] 
   if (INTERNAL_LEAK_PATTERN.test(blob)) {
     issues.push("Internal terminology leaked into canonical snapshot");
   }
+  if (/binding-proposal/i.test(blob)) {
+    issues.push("Internal proposal-mode language leaked into canonical snapshot");
+  }
   return issues;
 }

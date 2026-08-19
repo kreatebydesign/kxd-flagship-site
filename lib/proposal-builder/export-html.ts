@@ -13,8 +13,14 @@ import {
   formatClientFacingMonthlyInvestment,
   formatClientFacingPaymentTiming,
 } from "./client-facing-labels.ts";
+import {
+  formatCoverPreparedForLine,
+  shouldShowRecurringInvestment,
+  distinctScopeOrganizationName,
+} from "./presentation.ts";
 import { KXD_REPORT_COLORS } from "../kxd-report-engine/tokens.ts";
 import { KXD_REPORT_BRAND, KXD_REPORT_SITE } from "../kxd-report-engine/contact.ts";
+import { resolveKxdReportLogoAsset } from "../kxd-report-engine/logos.ts";
 import type { CanonicalProposal } from "./types.ts";
 
 function esc(value: string | null | undefined): string {
@@ -37,22 +43,29 @@ function section(eyebrow: string, title: string, body?: string): string {
 
 export function renderProposalPreviewHtml(proposal: CanonicalProposal): string {
   const c = KXD_REPORT_COLORS;
-  const orgs = proposal.organizations.map((o) => o.name).filter(Boolean).join(" · ");
+  const logo = resolveKxdReportLogoAsset();
+  const preparedForLine = formatCoverPreparedForLine(
+    proposal.primaryOrganization,
+    proposal.organizations,
+  );
   const contactSummary = formatProposalContactSummary(proposal.primaryContact);
   const scopeHtml = proposal.scopeGroups
-    .map((g, i) => {
+    .map((g) => {
       const dels = g.deliverables
-        .map((d) => `<li><strong>${esc(d.title)}</strong>${d.description ? ` — ${esc(d.description)}` : ""}</li>`)
+        .map((d) => `<li><strong>${esc(d.title)}</strong>${d.description ? `: ${esc(d.description)}` : ""}</li>`)
         .join("");
+      const scopeOrg = distinctScopeOrganizationName(
+        g.organizationName,
+        proposal.primaryOrganization,
+      );
       return `
         <section class="block">
-          <div class="eyebrow">Scope ${String(i + 1).padStart(2, "0")}</div>
+          <div class="eyebrow">Included work</div>
           <h2>${esc(g.title)}</h2>
-          ${g.organizationName ? `<p class="meta">${esc(g.organizationName)}</p>` : ""}
+          ${scopeOrg ? `<p class="meta">${esc(scopeOrg)}</p>` : ""}
           ${para(g.overview)}
           ${dels ? `<h3>Deliverables</h3><ul>${dels}</ul>` : ""}
           ${g.estimatedTimeline ? `<p><strong>Timeline:</strong> ${esc(g.estimatedTimeline)}</p>` : ""}
-          ${g.exclusions ? `<p><strong>Exclusions:</strong> ${esc(g.exclusions)}</p>` : ""}
         </section>`;
     })
     .join("");
@@ -138,8 +151,9 @@ export function renderProposalPreviewHtml(proposal: CanonicalProposal): string {
     justify-content: center;
   }
   .cover .doc { font-family: system-ui, sans-serif; letter-spacing: 0.22em; text-transform: uppercase; font-size: 11px; color: #a39e93; }
+  .cover-logo { width: 5.5rem; height: auto; margin: 0 0 1.75rem; display: block; }
   .cover .rule { width: 42px; height: 1px; background: var(--gold); margin: 18px 0 22px; }
-  .cover h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 500; line-height: 1.15; margin: 0 0 16px; max-width: 16ch; }
+  .cover h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 500; line-height: 1.15; margin: 0 0 16px; max-width: min(28ch, 100%); overflow-wrap: normal; word-break: normal; }
   .cover .meta { font-family: system-ui, sans-serif; font-size: 14px; color: #d9d2c5; line-height: 1.7; }
   .wrap { max-width: 820px; margin: 0 auto; padding: 48px 24px 80px; }
   .eyebrow { font-family: system-ui, sans-serif; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
@@ -165,11 +179,12 @@ export function renderProposalPreviewHtml(proposal: CanonicalProposal): string {
 </head>
 <body>
   <header class="cover">
+    ${logo.exists ? `<img class="cover-logo" src="${esc(logo.publicPath)}" alt="${esc(KXD_REPORT_BRAND)}" width="88" height="83" />` : ""}
     <div class="doc">Proposal</div>
     <div class="rule"></div>
     <h1>${esc(proposal.title)}</h1>
     <div class="meta">
-      <div>Prepared for ${esc(proposal.primaryOrganization)}${orgs ? ` · ${esc(orgs)}` : ""}</div>
+      ${preparedForLine ? `<div>${esc(preparedForLine)}</div>` : ""}
       ${contactSummary ? `<div>Primary contact · ${esc(contactSummary)}</div>` : ""}
       <div>Proposal ${esc(proposal.proposalNumber)} · Version ${esc(String(proposal.version))}</div>
       <div>Date ${esc(formatProposalCalendarDate(proposal.proposalDate))} · Expires ${esc(formatProposalCalendarDate(proposal.expirationDate))}</div>
@@ -194,27 +209,28 @@ export function renderProposalPreviewHtml(proposal: CanonicalProposal): string {
         <tbody>${pricingRows || `<tr><td colspan="4">Pricing to be confirmed</td></tr>`}</tbody>
       </table>
       ${creditRows ? `<h3>Credits & adjustments</h3><table><thead><tr><th>Credit</th><th>Type</th><th class="num">Amount</th></tr></thead><tbody>${creditRows}</tbody></table>` : ""}
-      ${scheduleRows ? `<h3>Payment timing</h3><table><thead><tr><th>Item</th><th>When due</th><th class="num">Amount</th></tr></thead><tbody>${scheduleRows}</tbody></table>` : ""}
+      ${scheduleRows ? `<h3>Payment schedule</h3><table><thead><tr><th>Item</th><th>When due</th><th class="num">Amount</th></tr></thead><tbody>${scheduleRows}</tbody></table>` : ""}
       <div class="totals">
         <div><span>One-time investment</span><strong>${esc(formatCents(proposal.totals.oneTimeTotalCents, proposal.currency))}</strong></div>
-        <div><span>Monthly investment</span><strong>${esc(formatClientFacingMonthlyInvestment(proposal.totals.monthlyTotalCents, proposal.currency))}</strong></div>
-        ${proposal.totals.annualTotalCents > 0 ? `<div><span>Annual investment</span><strong>${esc(formatCents(proposal.totals.annualTotalCents, proposal.currency))}</strong></div>` : ""}
+        ${shouldShowRecurringInvestment(proposal.totals.monthlyTotalCents) ? `<div><span>Monthly investment</span><strong>${esc(formatClientFacingMonthlyInvestment(proposal.totals.monthlyTotalCents, proposal.currency))}</strong></div>` : ""}
+        ${shouldShowRecurringInvestment(proposal.totals.quarterlyTotalCents) ? `<div><span>Quarterly investment</span><strong>${esc(formatCents(proposal.totals.quarterlyTotalCents, proposal.currency))}</strong></div>` : ""}
+        ${shouldShowRecurringInvestment(proposal.totals.annualTotalCents) ? `<div><span>Annual investment</span><strong>${esc(formatCents(proposal.totals.annualTotalCents, proposal.currency))}</strong></div>` : ""}
         ${proposal.totals.depositCents > 0 ? `<div><span>Deposit</span><strong>${esc(formatCents(proposal.totals.depositCents, proposal.currency))}</strong></div>` : ""}
       </div>
     </section>
     ${sponsorshipNotes.map((n) => section("Sponsorship", "Sponsorship condition", n)).join("")}
-    ${section("Terms", "Proposal-specific terms", proposal.terms.proposalTerms)}
-    ${section("Payment", "Payment assumptions", proposal.terms.paymentAssumptions)}
-    ${section("Timeline", "Timeline assumptions", proposal.terms.timelineAssumptions)}
-    ${section("Expiration", "Expiration language", proposal.terms.expirationLanguage)}
-    ${section("Changes", "Change-request language", proposal.terms.changeRequestLanguage)}
-    ${section("Intellectual property", "Intellectual property summary", proposal.terms.intellectualPropertySummary)}
-    ${section("Cancellation", "Cancellation summary", proposal.terms.cancellationSummary)}
-    ${section("Responsibilities", "Client responsibilities", proposal.terms.clientResponsibilities)}
-    ${section("Exclusions", "Overall exclusions", proposal.terms.exclusions)}
+    ${section("Terms", "Terms", proposal.terms.proposalTerms)}
+    ${section("Payment", "Payment schedule", proposal.terms.paymentAssumptions)}
+    ${section("Timeline", "Project timeline", proposal.terms.timelineAssumptions)}
+    ${section("Validity", "Proposal validity", proposal.terms.expirationLanguage)}
+    ${section("Changes", "Scope changes", proposal.terms.changeRequestLanguage)}
+    ${section("Intellectual property", "Intellectual property", proposal.terms.intellectualPropertySummary)}
+    ${section("Cancellation", "Cancellation", proposal.terms.cancellationSummary)}
+    ${section("Responsibilities", "What we need from you", proposal.terms.clientResponsibilities)}
+    ${section("Exclusions", "What's not included", proposal.terms.exclusions)}
     <section class="block">
-      <div class="eyebrow">Next steps</div>
-      <h2>Acceptance</h2>
+      <div class="eyebrow">Next step</div>
+      <h2>How to begin</h2>
       ${para(proposal.terms.nextSteps)}
       ${para(proposal.terms.closingNote)}
       <div class="disclosure">

@@ -29,6 +29,11 @@ import { formatProposalContactSummary } from "./document.ts";
 import { buildProposalPdfFilenameExternal } from "./filename.ts";
 import { formatCents } from "./money.ts";
 import {
+  coverOrganizationPresentation,
+  distinctScopeOrganizationName,
+  shouldShowRecurringInvestment,
+} from "./presentation.ts";
+import {
   ensureProposalPdfFonts,
   PROPOSAL_PDF_SANS,
   PROPOSAL_PDF_SERIF,
@@ -49,7 +54,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 52,
     justifyContent: "center",
   },
-  coverLogo: { width: 118, height: 111, marginBottom: 36 },
+  coverLogo: { width: 88, height: 83, marginBottom: 28 },
   coverDocType: {
     fontSize: 8,
     letterSpacing: 0.6,
@@ -279,24 +284,23 @@ function PageFooter({ proposal }: { proposal: CanonicalProposal }) {
 
 function ScopeSection({
   group,
-  index,
+  primaryOrganization,
 }: {
   group: ProposalScopeGroup;
-  index: number;
+  primaryOrganization: string;
 }) {
   const leadDeliverables = group.deliverables.slice(0, 3);
   const restDeliverables = group.deliverables.slice(3);
   const trailingDeliverables = restDeliverables.slice(0, -2);
   const closingDeliverables = restDeliverables.slice(-2);
+  const scopeOrg = distinctScopeOrganizationName(group.organizationName, primaryOrganization);
 
   return (
     <View style={styles.scopeBlock} wrap>
       <View wrap={false} minPresenceAhead={120}>
-        <Text style={styles.eyebrow}>Scope {String(index + 1).padStart(2, "0")}</Text>
+        <Text style={styles.eyebrow}>Included work</Text>
         <Text style={styles.h2}>{group.title}</Text>
-        {group.organizationName ? (
-          <Text style={styles.p}>{group.organizationName}</Text>
-        ) : null}
+        {scopeOrg ? <Text style={styles.p}>{scopeOrg}</Text> : null}
         <Paragraph text={group.overview} />
         {group.deliverables.length > 0 ? (
           <Text style={styles.h3}>Deliverables</Text>
@@ -304,31 +308,25 @@ function ScopeSection({
         {leadDeliverables.map((d) => (
           <Text key={d.id} style={styles.bullet}>
             • {d.title}
-            {d.description ? ` — ${d.description}` : ""}
+            {d.description ? `: ${d.description}` : ""}
           </Text>
         ))}
       </View>
       {trailingDeliverables.map((d) => (
         <Text key={d.id} style={styles.bullet}>
           • {d.title}
-          {d.description ? ` — ${d.description}` : ""}
+          {d.description ? `: ${d.description}` : ""}
         </Text>
       ))}
       <View wrap={false} minPresenceAhead={90}>
         {closingDeliverables.map((d) => (
           <Text key={d.id} style={styles.bullet}>
             • {d.title}
-            {d.description ? ` — ${d.description}` : ""}
+            {d.description ? `: ${d.description}` : ""}
           </Text>
         ))}
         {group.estimatedTimeline ? (
           <Text style={styles.p}>Timeline: {group.estimatedTimeline}</Text>
-        ) : null}
-        {group.exclusions?.trim() ? (
-          <>
-            <Text style={styles.h3}>Exclusions</Text>
-            <Paragraph text={group.exclusions} />
-          </>
         ) : null}
       </View>
     </View>
@@ -342,22 +340,26 @@ function ProposalPdfDocument({
   proposal: CanonicalProposal;
   logoSrc: string | null;
 }) {
-  const orgs = proposal.organizations.map((o) => o.name).filter(Boolean).join(" · ");
+  const { preparedFor, additionalOrganizations } = coverOrganizationPresentation(
+    proposal.primaryOrganization,
+    proposal.organizations,
+  );
+  const additionalOrgs = additionalOrganizations.join(" · ");
   const contactSummary = formatProposalContactSummary(proposal.primaryContact);
   const sponsorshipNotes = proposal.credits
     .map((c) => c.notes?.trim())
     .filter(Boolean) as string[];
 
   const termSections: Array<{ key: keyof CanonicalProposal["terms"]; eyebrow: string; title: string }> = [
-    { key: "proposalTerms", eyebrow: "Terms", title: "Proposal-specific terms" },
-    { key: "paymentAssumptions", eyebrow: "Payment", title: "Payment assumptions" },
-    { key: "timelineAssumptions", eyebrow: "Timeline", title: "Timeline assumptions" },
-    { key: "expirationLanguage", eyebrow: "Expiration", title: "Expiration language" },
-    { key: "changeRequestLanguage", eyebrow: "Changes", title: "Change-request language" },
-    { key: "intellectualPropertySummary", eyebrow: "Intellectual property", title: "Intellectual property summary" },
-    { key: "cancellationSummary", eyebrow: "Cancellation", title: "Cancellation summary" },
-    { key: "clientResponsibilities", eyebrow: "Responsibilities", title: "Client responsibilities" },
-    { key: "exclusions", eyebrow: "Exclusions", title: "Overall exclusions" },
+    { key: "proposalTerms", eyebrow: "Terms", title: "Terms" },
+    { key: "paymentAssumptions", eyebrow: "Payment", title: "Payment schedule" },
+    { key: "timelineAssumptions", eyebrow: "Timeline", title: "Project timeline" },
+    { key: "expirationLanguage", eyebrow: "Validity", title: "Proposal validity" },
+    { key: "changeRequestLanguage", eyebrow: "Changes", title: "Scope changes" },
+    { key: "intellectualPropertySummary", eyebrow: "Intellectual property", title: "Intellectual property" },
+    { key: "cancellationSummary", eyebrow: "Cancellation", title: "Cancellation" },
+    { key: "clientResponsibilities", eyebrow: "Responsibilities", title: "What we need from you" },
+    { key: "exclusions", eyebrow: "Exclusions", title: "What's not included" },
   ];
 
   return (
@@ -379,8 +381,10 @@ function ProposalPdfDocument({
             </Text>
           ))}
         </View>
-        <Text style={styles.coverMeta}>Prepared for {proposal.primaryOrganization}</Text>
-        {orgs ? <Text style={styles.coverMeta}>{orgs}</Text> : null}
+        {preparedFor ? (
+          <Text style={styles.coverMeta}>Prepared for {preparedFor}</Text>
+        ) : null}
+        {additionalOrgs ? <Text style={styles.coverMeta}>{additionalOrgs}</Text> : null}
         {contactSummary ? (
           <Text style={styles.coverMeta}>Primary contact · {contactSummary}</Text>
         ) : null}
@@ -437,8 +441,12 @@ function ProposalPdfDocument({
           </SectionBlock>
         ) : null}
 
-        {proposal.scopeGroups.map((g, index) => (
-          <ScopeSection key={g.id} group={g} index={index} />
+        {proposal.scopeGroups.map((g) => (
+          <ScopeSection
+            key={g.id}
+            group={g}
+            primaryOrganization={proposal.primaryOrganization}
+          />
         ))}
       </Page>
 
@@ -479,15 +487,33 @@ function ProposalPdfDocument({
                 {formatCents(proposal.totals.oneTimeTotalCents, proposal.currency)}
               </Text>
             </View>
-            <View style={styles.totalsRow}>
-              <Text style={styles.totalsLabel}>Monthly investment</Text>
-              <Text style={styles.totalsValue}>
-                {formatClientFacingMonthlyInvestment(
-                  proposal.totals.monthlyTotalCents,
-                  proposal.currency,
-                )}
-              </Text>
-            </View>
+            {shouldShowRecurringInvestment(proposal.totals.monthlyTotalCents) ? (
+              <View style={styles.totalsRow}>
+                <Text style={styles.totalsLabel}>Monthly investment</Text>
+                <Text style={styles.totalsValue}>
+                  {formatClientFacingMonthlyInvestment(
+                    proposal.totals.monthlyTotalCents,
+                    proposal.currency,
+                  )}
+                </Text>
+              </View>
+            ) : null}
+            {shouldShowRecurringInvestment(proposal.totals.quarterlyTotalCents) ? (
+              <View style={styles.totalsRow}>
+                <Text style={styles.totalsLabel}>Quarterly investment</Text>
+                <Text style={styles.totalsValue}>
+                  {formatCents(proposal.totals.quarterlyTotalCents, proposal.currency)}
+                </Text>
+              </View>
+            ) : null}
+            {shouldShowRecurringInvestment(proposal.totals.annualTotalCents) ? (
+              <View style={styles.totalsRow}>
+                <Text style={styles.totalsLabel}>Annual investment</Text>
+                <Text style={styles.totalsValue}>
+                  {formatCents(proposal.totals.annualTotalCents, proposal.currency)}
+                </Text>
+              </View>
+            ) : null}
             {proposal.totals.depositCents > 0 ? (
               <View style={styles.totalsRow}>
                 <Text style={styles.totalsLabel}>Deposit</Text>
@@ -501,7 +527,7 @@ function ProposalPdfDocument({
 
         {proposal.paymentSchedule.length > 0 ? (
           <View style={styles.section} minPresenceAhead={72}>
-            <Text style={styles.h3}>Payment timing</Text>
+            <Text style={styles.h3}>Payment schedule</Text>
             {proposal.paymentSchedule.map((item) => (
               <PriceRow
                 key={item.id}
@@ -534,7 +560,7 @@ function ProposalPdfDocument({
           );
         })}
 
-        <SectionBlock eyebrow="Next steps" title="Acceptance" minPresenceAhead={96}>
+        <SectionBlock eyebrow="Next step" title="How to begin" minPresenceAhead={96}>
           <Paragraph text={proposal.terms.nextSteps} />
           <Paragraph text={proposal.terms.closingNote} />
           <View style={styles.disclosure}>

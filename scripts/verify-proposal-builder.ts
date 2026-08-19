@@ -33,6 +33,15 @@ import {
 } from "../lib/proposal-builder/money.ts";
 import { calculateProposalTotals } from "../lib/proposal-builder/pricing.ts";
 import {
+  formatCoverPreparedForLine,
+  shouldShowRecurringInvestment,
+  distinctScopeOrganizationName,
+} from "../lib/proposal-builder/presentation.ts";
+import {
+  DEFAULT_ACCEPTANCE_DISCLOSURE,
+  DEFAULT_CONTRACT_REQUIRED_DISCLOSURE,
+} from "../lib/proposal-builder/types.ts";
+import {
   createShareLinkRecord,
   findActiveShareLink,
   hashShareToken,
@@ -201,6 +210,34 @@ function main() {
   const h1 = hashShareToken("token-a");
   const h2 = hashShareToken("token-a");
   check("hash deterministic", h1 === h2);
+
+  check("hide recurring when zero", shouldShowRecurringInvestment(0) === false);
+  check("show recurring when present", shouldShowRecurringInvestment(50_000) === true);
+  check(
+    "single org cover is not duplicated",
+    formatCoverPreparedForLine("de Bois Entertainment", [
+      { name: "de Bois Entertainment" },
+    ]) === "Prepared for de Bois Entertainment",
+  );
+  check(
+    "multi org cover keeps distinct names",
+    formatCoverPreparedForLine("Sutherlin Throwdown", [
+      { name: "Sutherlin Throwdown" },
+      { name: "Made for Trades" },
+    ]) === "Prepared for Sutherlin Throwdown · Made for Trades",
+  );
+  check(
+    "scope org omitted when it matches primary",
+    distinctScopeOrganizationName("de Bois Entertainment", "de Bois Entertainment") === null,
+  );
+  check(
+    "acceptance disclosure omits internal proposal modes",
+    !/binding-proposal/i.test(DEFAULT_ACCEPTANCE_DISCLOSURE),
+  );
+  check(
+    "contract-required disclosure omits internal proposal modes",
+    !/binding-proposal/i.test(DEFAULT_CONTRACT_REQUIRED_DISCLOSURE),
+  );
 
   console.log(`\n${passed} passed, ${failed} failed\n`);
   if (failed > 0) process.exit(1);

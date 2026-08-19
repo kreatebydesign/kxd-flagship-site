@@ -106,6 +106,9 @@ for (const file of [
   check(`font present ${file}`, existsSync(path.join(fontDir, file)));
 }
 
+const deBoisCover = splitCoverTitleLines("de Bois Entertainment Website Rebuild");
+check("standard website title stays one cover line", deBoisCover.length === 1);
+
 const coverLines = splitCoverTitleLines(
   "Sutherlin Throwdown + Made for Trades Website & Marketing Partnership",
 );
@@ -237,8 +240,11 @@ const html = renderProposalPreviewHtml(canonical);
 check("html shows Aug 29", html.includes("August 29, 2026"));
 check("html has introduction", html.includes("Intro copy for clients"));
 check("html has current situation", html.includes("Situation copy"));
-check("html has exclusions", html.includes("Paid ads excluded"));
-check("html has payment assumptions", html.includes("Payment assumptions copy"));
+check("html has exclusions", html.includes("Overall exclusions copy."));
+check("html has payment assumptions copy", html.includes("Payment assumptions copy"));
+check("html uses Payment schedule heading", html.includes("<h2>Payment schedule</h2>"));
+check("html omits Payment assumptions heading", !html.includes("<h2>Payment assumptions</h2>"));
+check("html includes official gold logo", html.includes("kxd-logo-transparent.png"));
 check("html maps discount label", html.includes("Partnership adjustment"));
 check("html maps payment timing", html.includes("Due upon proposal acceptance"));
 check("html omits raw discount enum as cell", !html.includes(">$discount<") && !html.includes(">discount</td>"));

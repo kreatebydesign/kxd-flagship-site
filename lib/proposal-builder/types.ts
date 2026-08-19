@@ -393,10 +393,10 @@ export interface CanonicalContractDraft {
 }
 
 export const DEFAULT_ACCEPTANCE_DISCLOSURE =
-  "By accepting this proposal, you authorize Kreate by Design to prepare the final agreement based on the accepted scope, pricing, and options. Acceptance is not a substitute for the signed contract.";
+  "If you approve this proposal, Kreate by Design will prepare the final agreement based on the accepted scope, pricing, and options. Approving this proposal is not a signed contract.";
 
 export const DEFAULT_CONTRACT_REQUIRED_DISCLOSURE =
-  "A separate final agreement must be reviewed and signed before work begins, deposits are collected, or services commence — unless a future binding-proposal mode is explicitly enabled by Kreate by Design.";
+  "Work begins after the final agreement is signed and the initial payment is received.";
 
 export const DEFAULT_OPERATIONAL_DRAFT_NOTICE =
   "Template and operational wording only. Not attorney-approved legal advice. Matt must review all contract language before sharing or signature.";

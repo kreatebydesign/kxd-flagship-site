@@ -14,6 +14,7 @@ import {
 } from "./client-facing-labels.ts";
 import { formatProposalContactSummary } from "./document.ts";
 import { formatCents } from "./money.ts";
+import { formatCoverPreparedForLine, shouldShowRecurringInvestment } from "./presentation.ts";
 import type { CanonicalProposal } from "./types.ts";
 
 export function renderProposalPlainText(proposal: CanonicalProposal): string {
@@ -25,7 +26,7 @@ export function renderProposalPlainText(proposal: CanonicalProposal): string {
   };
 
   push("Proposal", proposal.title);
-  push(`Prepared for ${proposal.primaryOrganization}`);
+  push(formatCoverPreparedForLine(proposal.primaryOrganization, proposal.organizations));
   push(formatProposalContactSummary(proposal.primaryContact));
   push(
     `${proposal.proposalNumber} · Version ${proposal.version}`,
@@ -40,14 +41,15 @@ export function renderProposalPlainText(proposal: CanonicalProposal): string {
   push("Objectives", e.objectives);
   push("Direction", e.recommendedDirection);
   push("Desired Outcomes", e.desiredOutcomes);
-  push("Client-Specific Context", e.clientContext);
+  if (e.clientContext?.trim()) push("Additional context", e.clientContext);
 
-  proposal.scopeGroups.forEach((g, i) => {
-    push(`Scope ${String(i + 1).padStart(2, "0")}`, g.title, g.organizationName, g.overview);
+  proposal.scopeGroups.forEach((g) => {
+    push("Included work", g.title, g.overview);
     push("Deliverables");
-    for (const d of g.deliverables) push(`• ${d.title}`);
+    for (const d of g.deliverables) {
+      push(d.description ? `• ${d.title}: ${d.description}` : `• ${d.title}`);
+    }
     if (g.estimatedTimeline) push(`Timeline: ${g.estimatedTimeline}`);
-    if (g.exclusions?.trim()) push("Exclusions", g.exclusions);
   });
 
   push("Investment", "Pricing");
@@ -72,14 +74,24 @@ export function renderProposalPlainText(proposal: CanonicalProposal): string {
   }
   push(
     `One-time investment ${formatCents(proposal.totals.oneTimeTotalCents, proposal.currency)}`,
-    `Monthly investment ${formatClientFacingMonthlyInvestment(proposal.totals.monthlyTotalCents, proposal.currency)}`,
   );
+  if (shouldShowRecurringInvestment(proposal.totals.monthlyTotalCents)) {
+    push(
+      `Monthly investment ${formatClientFacingMonthlyInvestment(proposal.totals.monthlyTotalCents, proposal.currency)}`,
+    );
+  }
+  if (shouldShowRecurringInvestment(proposal.totals.quarterlyTotalCents)) {
+    push(`Quarterly investment ${formatCents(proposal.totals.quarterlyTotalCents, proposal.currency)}`);
+  }
+  if (shouldShowRecurringInvestment(proposal.totals.annualTotalCents)) {
+    push(`Annual investment ${formatCents(proposal.totals.annualTotalCents, proposal.currency)}`);
+  }
   if (proposal.totals.depositCents > 0) {
     push(`Deposit ${formatCents(proposal.totals.depositCents, proposal.currency)}`);
   }
 
   if (proposal.paymentSchedule.length) {
-    push("Payment timing");
+    push("Payment schedule");
     for (const item of proposal.paymentSchedule) {
       push(
         `${item.label} | ${formatClientFacingPaymentTiming(item.due)} | ${formatCents(item.amountCents, proposal.currency)}`,
@@ -88,19 +100,19 @@ export function renderProposalPlainText(proposal: CanonicalProposal): string {
   }
 
   const terms: Array<[string, string | undefined]> = [
-    ["Proposal-Specific Terms", proposal.terms.proposalTerms],
-    ["Payment Assumptions", proposal.terms.paymentAssumptions],
-    ["Timeline Assumptions", proposal.terms.timelineAssumptions],
-    ["Expiration Language", proposal.terms.expirationLanguage],
-    ["Change-Request Language", proposal.terms.changeRequestLanguage],
-    ["Intellectual Property Summary", proposal.terms.intellectualPropertySummary],
-    ["Cancellation Summary", proposal.terms.cancellationSummary],
-    ["Client Responsibilities", proposal.terms.clientResponsibilities],
-    ["Overall Exclusions", proposal.terms.exclusions],
-    ["Next Steps", proposal.terms.nextSteps],
+    ["Terms", proposal.terms.proposalTerms],
+    ["Payment Schedule", proposal.terms.paymentAssumptions],
+    ["Project Timeline", proposal.terms.timelineAssumptions],
+    ["Proposal Validity", proposal.terms.expirationLanguage],
+    ["Scope Changes", proposal.terms.changeRequestLanguage],
+    ["Intellectual Property", proposal.terms.intellectualPropertySummary],
+    ["Cancellation", proposal.terms.cancellationSummary],
+    ["What We Need From You", proposal.terms.clientResponsibilities],
+    ["What's Not Included", proposal.terms.exclusions],
+    ["Next Step", proposal.terms.nextSteps],
     ["Closing Note", proposal.terms.closingNote],
-    ["Acceptance Disclosure", proposal.disclosures.acceptance],
-    ["Contract Required Disclosure", proposal.disclosures.contractRequired],
+    ["Approval", proposal.disclosures.acceptance],
+    ["Agreement Required", proposal.disclosures.contractRequired],
   ];
   for (const [label, value] of terms) {
     if (value?.trim()) push(label, value);

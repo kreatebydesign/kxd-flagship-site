@@ -55,7 +55,7 @@ export function ensureProposalPdfFonts(): void {
 }
 
 /** Soft line breaks for long cover titles — word boundaries only. */
-export function splitCoverTitleLines(title: string, maxChars = 38): string[] {
+export function splitCoverTitleLines(title: string, maxChars = 44): string[] {
   const cleaned = title.replace(/\s+/g, " ").trim();
   if (!cleaned) return [""];
   if (cleaned.length <= maxChars) return [cleaned];

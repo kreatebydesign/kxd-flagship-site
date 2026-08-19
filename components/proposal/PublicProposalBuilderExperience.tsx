@@ -9,6 +9,11 @@ import {
   formatClientFacingMonthlyInvestment,
 } from "@/lib/proposal-builder/client-facing-labels";
 import { formatCents } from "@/lib/proposal-builder/money";
+import {
+  distinctScopeOrganizationName,
+  formatCoverPreparedForLine,
+  shouldShowRecurringInvestment,
+} from "@/lib/proposal-builder/presentation";
 import type { CanonicalProposal } from "@/lib/proposal-builder/types";
 
 type ViewData = {
@@ -163,6 +168,14 @@ export function PublicProposalBuilderExperience({ publicToken }: { publicToken: 
         }}
       >
         <div style={{ maxWidth: 820, margin: "0 auto" }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/migrated-assets/brand/kxd-logo-transparent.png"
+            alt="Kreate by Design"
+            width={88}
+            height={83}
+            style={{ width: "5.5rem", height: "auto", margin: "0 0 1.75rem", display: "block" }}
+          />
           <p
             style={{
               fontFamily: "system-ui,sans-serif",
@@ -187,7 +200,7 @@ export function PublicProposalBuilderExperience({ publicToken }: { publicToken: 
             {p.title}
           </h1>
           <p style={{ fontFamily: "system-ui,sans-serif", color: "#d9d2c5", lineHeight: 1.7 }}>
-            Prepared for {p.primaryOrganization}
+            {formatCoverPreparedForLine(p.primaryOrganization, p.organizations)}
             {p.primaryContact &&
             [p.primaryContact.name, p.primaryContact.title, p.primaryContact.email, p.primaryContact.phone]
               .map((part) => (typeof part === "string" ? part.trim() : ""))
@@ -250,24 +263,27 @@ export function PublicProposalBuilderExperience({ publicToken }: { publicToken: 
           </section>
         ) : null}
 
-        {p.scopeGroups.map((g, i) => (
+        {p.scopeGroups.map((g) => {
+          const scopeOrg = distinctScopeOrganizationName(g.organizationName, p.primaryOrganization);
+          return (
           <section key={g.id} style={{ marginBottom: "2rem" }}>
-            <p style={eyebrow}>Scope {String(i + 1).padStart(2, "0")}</p>
+            <p style={eyebrow}>Included work</p>
             <h2 style={h2}>{g.title}</h2>
-            {g.organizationName ? <p style={meta}>{g.organizationName}</p> : null}
+            {scopeOrg ? <p style={meta}>{scopeOrg}</p> : null}
             {g.overview ? <p style={body}>{g.overview}</p> : null}
             {g.deliverables.length > 0 ? (
               <ul style={{ lineHeight: 1.6 }}>
                 {g.deliverables.map((d) => (
                   <li key={d.id}>
                     <strong>{d.title}</strong>
-                    {d.description ? ` — ${d.description}` : ""}
+                    {d.description ? `: ${d.description}` : ""}
                   </li>
                 ))}
               </ul>
             ) : null}
           </section>
-        ))}
+          );
+        })}
 
         <section style={{ marginBottom: "2rem" }}>
           <p style={eyebrow}>Investment</p>
@@ -338,12 +354,14 @@ export function PublicProposalBuilderExperience({ publicToken }: { publicToken: 
               <span>One-time total</span>
               <strong>{formatCents(data.totals.oneTimeTotalCents, currency)}</strong>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span>Monthly total</span>
-              <strong>
-                {formatClientFacingMonthlyInvestment(data.totals.monthlyTotalCents, currency)}
-              </strong>
-            </div>
+            {shouldShowRecurringInvestment(data.totals.monthlyTotalCents) ? (
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span>Monthly total</span>
+                <strong>
+                  {formatClientFacingMonthlyInvestment(data.totals.monthlyTotalCents, currency)}
+                </strong>
+              </div>
+            ) : null}
           </div>
           {optionalLines.length > 0 && data.clientCanSelect ? (
             <p style={{ ...meta, marginTop: 10 }}>
@@ -366,7 +384,7 @@ export function PublicProposalBuilderExperience({ publicToken }: { publicToken: 
 
         {mode === "done" || data.accepted ? (
           <section>
-            <h2 style={h2}>Accepted — contract pending</h2>
+            <h2 style={h2}>Accepted. Contract pending.</h2>
             <p style={body}>
               Thank you. Kreate by Design will prepare the final agreement for review. No payment
               has been collected and no contract has been signed through this step.
@@ -399,9 +417,11 @@ export function PublicProposalBuilderExperience({ publicToken }: { publicToken: 
           <section>
             <h2 style={h2}>Accept and proceed to contract</h2>
             <p style={body}>
-              Final one-time: {formatCents(data.totals.oneTimeTotalCents, currency)} · Monthly:{" "}
-              {formatClientFacingMonthlyInvestment(data.totals.monthlyTotalCents, currency)} · Version{" "}
-              {p.version}
+              Final one-time: {formatCents(data.totals.oneTimeTotalCents, currency)}
+              {shouldShowRecurringInvestment(data.totals.monthlyTotalCents)
+                ? ` · Monthly: ${formatClientFacingMonthlyInvestment(data.totals.monthlyTotalCents, currency)}`
+                : ""}{" "}
+              · Version {p.version}
             </p>
             <FormField label="Full legal name" value={acceptForm.name} onChange={(v) => setAcceptForm({ ...acceptForm, name: v })} />
             <FormField label="Title" value={acceptForm.title} onChange={(v) => setAcceptForm({ ...acceptForm, title: v })} />
