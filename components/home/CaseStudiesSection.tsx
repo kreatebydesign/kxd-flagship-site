@@ -64,17 +64,26 @@ export function CaseStudiesSection() {
         </div>
 
         <div
-          className="mt-10 flex items-center justify-between border-t pt-7"
+          className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t pt-7"
           style={{ borderColor: "var(--kxd-border-white)" }}
         >
           <p className="kxd-label">{projectCount} featured projects</p>
-          <Link
-            href="/work"
-            className="kxd-ui-label inline-flex items-center gap-2 text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)]"
-          >
-            View All Work
-            <span aria-hidden>→</span>
-          </Link>
+          <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
+            <Link
+              href="/industries/motorsports"
+              className="kxd-ui-label inline-flex items-center gap-2 text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)]"
+            >
+              Motorsports &amp; automotive work
+              <span aria-hidden>→</span>
+            </Link>
+            <Link
+              href="/work"
+              className="kxd-ui-label inline-flex items-center gap-2 text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)]"
+            >
+              View All Work
+              <span aria-hidden>→</span>
+            </Link>
+          </div>
         </div>
       </div>
     </section>

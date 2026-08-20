@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import { CASE_STUDIES, HIDDEN_PROJECT_SLUGS, PROJECTS, getCaseStudyCapabilityLinks, getRelatedProjects, type CaseStudy, type ShowcaseImage } from "@/lib/projects";
+import { isMotorsportsAutomotiveWork, MOTORSPORTS_WORK_HUB_LINK } from "@/lib/content/motorsports-authority";
 import { ProjectCard } from "@/components/ui/ProjectCard";
 import { StructuredData } from "@/components/seo/StructuredData";
 import { buildMetadata } from "@/lib/seo/metadata";
@@ -387,6 +388,18 @@ export default async function CaseStudyPage({ params }: Props) {
               {cs.year}
             </span>
           </div>
+
+          {isMotorsportsAutomotiveWork(cs.slug) ? (
+            <p className="mb-6">
+              <Link
+                href={MOTORSPORTS_WORK_HUB_LINK.href}
+                className="kxd-ui-label inline-flex items-center gap-2 text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)]"
+              >
+                {MOTORSPORTS_WORK_HUB_LINK.label}
+                <span aria-hidden>→</span>
+              </Link>
+            </p>
+          ) : null}
 
           <h1
             className="kxd-reveal font-serif font-light"

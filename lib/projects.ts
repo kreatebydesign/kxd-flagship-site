@@ -339,18 +339,22 @@ export const CASE_STUDY_RELATED_SLUGS: Record<string, readonly string[]> = {
 /** Capability destinations that deepen proof without inventing scope. */
 export const CASE_STUDY_CAPABILITY_LINKS: Record<string, readonly CapabilityLink[]> = {
   "primal-motorsports": [
+    { label: "Motorsports & Automotive", href: "/industries/motorsports" },
     { label: "Explore Platforms", href: "/platforms" },
     { label: "Enterprise Platforms Engagement", href: "/services/enterprise-platforms" },
   ],
   "cusick-morgan-motorsports": [
+    { label: "Motorsports & Automotive", href: "/industries/motorsports" },
     { label: "Website Experiences", href: "/services/luxury-website-experiences" },
     { label: "Explore Platforms", href: "/platforms" },
   ],
   "autodv8ions": [
+    { label: "Motorsports & Automotive", href: "/industries/motorsports" },
     { label: "Website Experiences", href: "/services/luxury-website-experiences" },
     { label: "Growth Infrastructure", href: "/services/growth-infrastructure" },
   ],
   "on-track-performance": [
+    { label: "Motorsports & Automotive", href: "/industries/motorsports" },
     { label: "Website Experiences", href: "/services/luxury-website-experiences" },
     { label: "View All Work", href: "/work" },
   ],

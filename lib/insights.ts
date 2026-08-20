@@ -289,12 +289,22 @@ export const STATIC_INSIGHTS: InsightDetail[] = [
     publishedAt: "2025-12-10",
     readingTime: 5,
     featured: false,
+    cta: {
+      headline: "See how KXD approaches motorsports digital work",
+      subCopy:
+        "Explore the motorsports and automotive authority page, then review selected case studies.",
+      primaryLabel: "Motorsports & Automotive",
+      primaryHref: "/industries/motorsports",
+      secondaryLabel: "Primal Motorsports",
+      secondaryHref: "/work/primal-motorsports",
+    },
     body: [
       "Motorsports builds loyalty unlike almost any other sector. Drivers, teams, and series accumulate audiences that follow careers, travel to events, and engage with content at a depth that most consumer brands spend decades trying to manufacture. The disconnect is that most motorsports organizations have digital presences designed to hold information rather than grow that loyalty.",
       "The website problem is specific. Most motorsports websites are news repositories with contact pages — built to communicate to people who are already engaged, not designed to bring in new audience, move that audience toward deeper engagement, or capture any of the commercial value of the attention they hold. This shows up in metrics: high direct traffic, low organic discovery, minimal email capture, no meaningful conversion path.",
       "Sponsor value is one of the clearest indicators of digital health. Sponsors increasingly want to see engaged, measurable audiences — not just impressions on a car or a banner at an event. Organizations that can demonstrate digital reach, audience quality, and meaningful engagement command different conversations. Most motorsports organizations can't demonstrate any of this in a form sponsors find credible.",
       "The opportunity is significant precisely because the baseline is low. A motorsports brand that treats its digital presence as seriously as its physical one — that invests in a site experience that converts interest to email, builds content that serves different audience segments, and creates a commercial structure around its digital assets — is operating in effectively uncrowded territory.",
       "The starting point isn't complexity. It's a question: who is our audience, what do they need from us between events, and what would they give us their attention and email address for? Answer that clearly, then build the infrastructure to deliver on it. What follows is usually simpler than organizations expect — and significantly more valuable.",
+      "For how Kreate by Design packages this work publicly, see [Motorsports & Automotive](/industries/motorsports). Related proof includes [Cusick Morgan Motorsports](/work/cusick-morgan-motorsports) and [Website Experiences](/services/luxury-website-experiences).",
     ],
   },
 
@@ -309,12 +319,22 @@ export const STATIC_INSIGHTS: InsightDetail[] = [
     publishedAt: "2026-02-26",
     readingTime: 4,
     featured: false,
+    cta: {
+      headline: "See motorsports digital work from KXD",
+      subCopy:
+        "Review the authority destination, selected case studies, and growth infrastructure when measurement matters.",
+      primaryLabel: "Motorsports & Automotive",
+      primaryHref: "/industries/motorsports",
+      secondaryLabel: "Growth Infrastructure",
+      secondaryHref: "/services/growth-infrastructure",
+    },
     body: [
       "Race seasons create natural content intensity — there are stories, results, and footage that practically generate themselves. But an audience relationship that only exists in-season is fragile. The organizations that build durable digital presence are the ones that have a strategy for between-event periods when there's no obvious content waiting to happen.",
       "The off-season is underrated as a digital opportunity. This is when the most motivated segments of a motorsports audience are in search mode — researching the upcoming season, following driver developments, seeking content that's harder to find than race coverage. Organizations that publish thoughtfully during this window build search authority and direct audience relationships that pay off when the season begins.",
       "Driver content is typically the most engaging asset motorsports organizations have and the least systematically developed. The human story behind the competition — the training, the decision-making, the preparation, the context that makes results meaningful — is the kind of content that builds genuine loyalty rather than passive following. Most organizations leave this almost entirely unmined.",
       "Enrollment and membership infrastructure is the most underleveraged commercial asset in motorsports. The audience is there, the engagement is deep, and the willingness to pay for access and recognition is real. Organizations that have built genuine membership experiences have created predictable, recurring revenue streams that aren't dependent on sponsorship cycles or event attendance.",
       "The digital presence that serves a motorsports organization year-round looks different from the one built to announce events. It has a content strategy that makes sense in July as well as October, an email program that maintains the audience relationship when there's nothing urgent to say, and conversion architecture that captures the commercial value of the attention the sport has already earned.",
+      "See [Motorsports & Automotive](/industries/motorsports) for how this connects to public KXD work such as [Primal Motorsports](/work/primal-motorsports) and [On Track Performance](/work/on-track-performance).",
     ],
   },
 
