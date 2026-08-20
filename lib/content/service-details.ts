@@ -150,7 +150,7 @@ export const STATIC_SERVICE_DETAILS: Record<string, StaticServiceDetail> = {
     headline:
       "Turn attention into structured demand — with measurement you can actually use.",
     summary:
-      "Search visibility, analytics, conversion pathways, and CRM-connected lead structure for businesses that need more than a beautiful site.",
+      "Search visibility, analytics, conversion pathways, and CRM-connected lead structure for businesses that need more than a beautiful site — including GA4, Search Console, and conversion infrastructure when the work requires them.",
     bestFor: [
       "Businesses with traffic or visibility that fails to become qualified inquiry",
       "Teams that cannot clearly see what is working across channels",
@@ -159,10 +159,11 @@ export const STATIC_SERVICE_DETAILS: Record<string, StaticServiceDetail> = {
     ],
     deliverables: [
       "Growth and conversion audit of the current digital path",
-      "SEO and discoverability foundations where they serve the business",
-      "Analytics and measurement structure",
+      "SEO and local discoverability foundations where they serve the business",
+      "GA4, Search Console, and conversion measurement structure",
       "Lead capture and inquiry routing",
       "CRM connection patterns where the engagement requires them",
+      "Google Ads conversion infrastructure when advertising is in scope",
       "Ongoing optimization pathways for retained partnerships",
     ],
     outcomes: [
@@ -203,6 +204,12 @@ export const STATIC_SERVICE_DETAILS: Record<string, StaticServiceDetail> = {
     secondaryCtaHref: "/website-audit",
     faqs: [
       {
+        question:
+          "Can KXD handle the website, SEO, analytics and conversion infrastructure together?",
+        answer:
+          "Yes, when the engagement calls for it. Growth Infrastructure connects the layers that usually fragment across vendors: website conversion paths, SEO and local discoverability where they matter, GA4 and Search Console measurement, lead capture and routing, CRM connection patterns, and Google Ads conversion infrastructure when advertising is part of the system. The advantage is coherence — one connected growth path instead of disconnected tools that never share a clear picture of demand.",
+      },
+      {
         question: "Is this an SEO agency package?",
         answer:
           "No. Search is one component when it matters. Growth Infrastructure is about structured demand: measurement, conversion paths, and lead systems — not generic ranking promises.",
@@ -223,6 +230,8 @@ export const STATIC_SERVICE_DETAILS: Record<string, StaticServiceDetail> = {
       "Lead Systems",
       "Website Analytics",
       "Conversion Pathways",
+      "GA4 Setup",
+      "SEO and Conversion Tracking",
     ],
     proof: [
       {

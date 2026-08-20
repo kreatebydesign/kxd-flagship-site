@@ -2,8 +2,14 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { FinalCtaBand } from "@/components/ui/FinalCtaBand";
+import { StructuredData } from "@/components/seo/StructuredData";
 import { SITE } from "@/lib/site";
 import { buildMetadata } from "@/lib/seo/metadata";
+import {
+  founderPersonSchema,
+  organizationSchema,
+  webPageSchema,
+} from "@/lib/seo/schema";
 
 export const metadata: Metadata = buildMetadata({
   title: "About",
@@ -47,8 +53,19 @@ const PROCESS = [
 ] as const;
 
 export default function AboutPage() {
+  const schema = [
+    organizationSchema(),
+    founderPersonSchema(),
+    webPageSchema({
+      title: "About",
+      description: `${SITE.name} is a founder-led digital studio — websites, growth systems, and operational platforms built with discipline.`,
+      path: "/about",
+    }),
+  ];
+
   return (
     <>
+      <StructuredData data={schema} />
       <section
         style={{
           paddingTop: "calc(var(--nav-height) + var(--section-py))",

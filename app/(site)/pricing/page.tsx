@@ -7,7 +7,7 @@ import { breadcrumbSchema, webPageSchema } from "@/lib/seo/schema";
 export const metadata: Metadata = buildMetadata({
   title: "Partnerships",
   description:
-    "KXD Partnership, KXD Operating Partnership, and KXD Executive Partnership — premium creative and operating relationships with clear monthly capacity and starting investment.",
+    "Ongoing monthly creative and operating partnerships with Kreate by Design — clear capacity, structured execution, and a private client experience. For one-time project builds, see Project Investment.",
   path: "/pricing",
   keywords: [
     "Website Partnership",
@@ -26,7 +26,7 @@ export default function PricingPage() {
     webPageSchema({
       title: "Partnerships",
       description:
-        "Premium creative and operating partnerships with Kreate by Design — clear capacity, organized execution, and a private client experience.",
+        "Ongoing monthly creative and operating partnerships with Kreate by Design. For one-time project builds, see Project Investment.",
       path: "/pricing",
     }),
   ];

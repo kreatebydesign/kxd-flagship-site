@@ -1,5 +1,6 @@
 import { PUBLIC_PROJECTS } from "@/lib/projects";
 import { STATIC_INSIGHTS } from "@/lib/insights";
+import { SITE } from "@/lib/site";
 
 /** Public project detail pages — excludes hidden entries (no polished imagery / portfolio fit). */
 const PUBLIC_WORK_PATHS = PUBLIC_PROJECTS.map((p) => `/work/${p.slug}`);
@@ -26,7 +27,8 @@ export const PUBLIC_SITEMAP_PATHS: string[] = [
   "/terms-and-conditions",
 ];
 
+/** Canonical absolute URL — always uses SITE.url (www by default). */
 export function absolutePublicUrl(path: string): string {
-  const base = process.env.NEXT_PUBLIC_SITE_URL || "https://kreatebydesign.com";
-  return `${base}${path}`;
+  const normalized = path.startsWith("/") ? path : `/${path}`;
+  return `${SITE.url}${normalized}`;
 }

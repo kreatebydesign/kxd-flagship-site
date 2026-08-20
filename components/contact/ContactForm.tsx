@@ -47,6 +47,7 @@ const TIMELINE_OPTIONS = [
 const REFERRAL_OPTIONS = [
   { value: "referral", label: "Referral or word of mouth" },
   { value: "google", label: "Google Search" },
+  { value: "chatgpt-ai-assistant", label: "ChatGPT / AI assistant" },
   { value: "instagram", label: "Instagram" },
   { value: "linkedin", label: "LinkedIn" },
   { value: "portfolio", label: "Saw KXD's portfolio work" },
@@ -109,11 +110,16 @@ export function ContactForm() {
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "Submission failed");
 
-      trackPublicEvent(ANALYTICS_EVENTS.inquirySubmit, {
+      const selfReportedReferral = String(data.get("referral") || "").trim();
+      const eventParams = {
         source: selectedPartnership
           ? "partnership-pricing"
           : "contact",
-      });
+        self_reported_referral: selfReportedReferral || undefined,
+      };
+
+      trackPublicEvent(ANALYTICS_EVENTS.inquirySubmit, eventParams);
+      trackPublicEvent(ANALYTICS_EVENTS.generateLead, eventParams);
 
       setState("success");
       form.reset();

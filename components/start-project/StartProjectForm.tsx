@@ -65,6 +65,7 @@ const ASSET_OPTIONS = [
 const REFERRAL_OPTIONS = [
   { value: "kxd-intelligence", label: "KXD Intelligence (Website Audit)" },
   { value: "google-search", label: "Google Search" },
+  { value: "chatgpt-ai-assistant", label: "ChatGPT / AI assistant" },
   { value: "referral", label: "Referral" },
   { value: "social-media", label: "Social Media" },
   { value: "existing-client", label: "Existing Client" },
@@ -438,10 +439,14 @@ export function StartProjectForm() {
         throw new Error(json.error ?? "Submission failed");
       }
 
-      trackPublicEvent(ANALYTICS_EVENTS.inquirySubmit, {
+      const eventParams = {
         source: payload.inquirySource,
         audit_id: auditId || undefined,
-      });
+        self_reported_referral: payload.referralSource || undefined,
+      };
+
+      trackPublicEvent(ANALYTICS_EVENTS.inquirySubmit, eventParams);
+      trackPublicEvent(ANALYTICS_EVENTS.generateLead, eventParams);
 
       setSubmitState("success");
     } catch (err) {

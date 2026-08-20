@@ -12,7 +12,7 @@ import {
 import { FinalCtaBand } from "@/components/ui/FinalCtaBand";
 import { GoldAtmosphere } from "@/components/ui/surfaces/GoldAtmosphere";
 import { buildMetadata } from "@/lib/seo/metadata";
-import { serviceSchema } from "@/lib/seo/schema";
+import { faqPageSchema, serviceSchema } from "@/lib/seo/schema";
 import { StructuredData } from "@/components/seo/StructuredData";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -229,15 +229,22 @@ export default async function ServiceDetailPage({ params }: Props) {
   const heroSecondaryLabel = service.secondaryCtaLabel;
   const heroSecondaryHref = service.secondaryCtaHref;
 
+  const structured: Record<string, unknown>[] = [
+    serviceSchema({
+      title: service.title,
+      description: service.summary,
+      path: `/services/${service.slug}`,
+    }),
+  ];
+  // FAQ JSON-LD only when the same FAQs render visibly below.
+  if (hasFaqs) {
+    const faqSchema = faqPageSchema(service.faqs);
+    if (faqSchema) structured.push(faqSchema);
+  }
+
   return (
     <>
-      <StructuredData
-        data={serviceSchema({
-          title: service.title,
-          description: service.summary,
-          path: `/services/${service.slug}`,
-        })}
-      />
+      <StructuredData data={structured} />
 
       {/* ── Hero ── */}
       <section

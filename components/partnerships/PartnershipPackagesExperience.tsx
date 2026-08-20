@@ -107,7 +107,14 @@ export function PartnershipPackagesExperience() {
                 maxWidth: "34rem",
               }}
             >
-              {PARTNERSHIP_PAGE_COPY.systemNote}
+              {PARTNERSHIP_PAGE_COPY.projectCrossLink}{" "}
+              <Link
+                href="/investment"
+                style={{ color: "var(--kxd-gold)", textDecoration: "underline" }}
+              >
+                See Project Investment
+              </Link>
+              . {PARTNERSHIP_PAGE_COPY.systemNote}
             </p>
           </div>
         </div>

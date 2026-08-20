@@ -61,6 +61,11 @@ export function isAnalyticsEnabled(): boolean {
 
 export const ANALYTICS_EVENTS = {
   inquirySubmit: "inquiry_submit",
+  /**
+   * GA4 recommended event — fire only after a successful genuine inquiry
+   * (contact / start-project). Kept alongside inquiry_submit for existing reports.
+   */
+  generateLead: "generate_lead",
   discoveryCallRequest: "discovery_call_request",
   platformApplication: "platform_application",
   projectView: "project_view",

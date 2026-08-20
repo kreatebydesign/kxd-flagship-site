@@ -2,6 +2,40 @@ import { SITE } from "@/lib/site";
 import { DEFAULT_OG_IMAGE } from "./site";
 import { absoluteUrl } from "./metadata";
 
+/** Stable public founder facts already shown on /about — do not invent biography fields. */
+export const FOUNDER = {
+  name: "Matt Lunger",
+  jobTitle: "Founder & Creative Director",
+  imagePath: "/migrated-assets/founder/matt-lunger.jpg",
+  aboutPath: "/about",
+} as const;
+
+/** Public capability topics already represented on the marketing site. */
+const ORGANIZATION_KNOWS_ABOUT = [
+  "Premium website design",
+  "Website redesign and rebuilds",
+  "Brand systems and identity",
+  "Growth infrastructure",
+  "SEO and digital discoverability",
+  "Analytics and conversion tracking",
+  "Client portals and operational platforms",
+] as const;
+
+export function founderPersonSchema() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "@id": `${SITE.url}/#founder`,
+    name: FOUNDER.name,
+    jobTitle: FOUNDER.jobTitle,
+    url: absoluteUrl(FOUNDER.aboutPath),
+    image: absoluteUrl(FOUNDER.imagePath),
+    worksFor: {
+      "@id": `${SITE.url}/#organization`,
+    },
+  };
+}
+
 export function organizationSchema(reviews?: {
   authorName: string;
   rating: number;
@@ -20,6 +54,10 @@ export function organizationSchema(reviews?: {
     foundingDate: String(SITE.foundedYear),
     sameAs: Object.values(SITE.social),
     logo: absoluteUrl(DEFAULT_OG_IMAGE),
+    founder: {
+      "@id": `${SITE.url}/#founder`,
+    },
+    knowsAbout: [...ORGANIZATION_KNOWS_ABOUT],
   };
 
   if (reviews?.length) {
@@ -124,6 +162,36 @@ export function reviewSchema(reviews: {
   return organizationSchema(reviews);
 }
 
+/**
+ * FAQPage JSON-LD — only for FAQs that are visibly rendered on the page.
+ * Callers must pass the same question/answer strings shown in the UI.
+ */
+export function faqPageSchema(
+  faqs: Array<{ question: string; answer: string }>,
+): Record<string, unknown> | null {
+  const visible = faqs.filter(
+    (faq) =>
+      typeof faq.question === "string" &&
+      faq.question.trim().length > 0 &&
+      typeof faq.answer === "string" &&
+      faq.answer.trim().length > 0,
+  );
+  if (!visible.length) return null;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: visible.map((faq) => ({
+      "@type": "Question",
+      name: faq.question.trim(),
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: faq.answer.trim(),
+      },
+    })),
+  };
+}
+
 export function blogPostingSchema(input: {
   title: string;
   description: string;
@@ -144,6 +212,9 @@ export function blogPostingSchema(input: {
     author: {
       "@type": "Person",
       name: input.authorName || SITE.name,
+      ...(input.authorName === FOUNDER.name
+        ? { "@id": `${SITE.url}/#founder` }
+        : {}),
     },
     publisher: {
       "@id": `${SITE.url}/#organization`,

@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { FinalCtaBand } from "@/components/ui/FinalCtaBand";
 import { buildMetadata } from "@/lib/seo/metadata";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Investment",
+  title: "Project Investment",
   description:
-    "Investment levels for luxury website experiences, brand systems, growth infrastructure, and enterprise platform work. Every engagement is scoped to the goals and vision of each brand.",
+    "Project investment levels for website builds, brand systems, growth infrastructure, and enterprise platforms. For ongoing monthly partnerships, see KXD Partnerships.",
   path: "/investment",
   keywords: [
     "Premium Website Design Cost",
@@ -124,7 +125,7 @@ export default function InvestmentPage() {
         }}
       >
         <div className="kxd-container" style={{ maxWidth: "54rem" }}>
-          <p className="kxd-eyebrow">Investment</p>
+          <p className="kxd-eyebrow">Project Investment</p>
           <h1
             className="kxd-serif-title mt-5"
             style={{
@@ -136,10 +137,11 @@ export default function InvestmentPage() {
             Built for Brands Ready to Grow.
           </h1>
           <p className="kxd-body mt-6" style={{ maxWidth: "38rem" }}>
+            This page covers project engagements — website builds, redesigns, brand
+            systems, growth infrastructure, and platform work scoped to each business.
             Exceptional brands require more than attractive websites. They require
             intentional systems, thoughtful strategy, and execution capable of
-            supporting long-term growth. Every engagement is built around the unique
-            ambitions of the businesses we partner with.
+            supporting long-term growth.
           </p>
 
           <div
@@ -156,8 +158,15 @@ export default function InvestmentPage() {
                 maxWidth: "34rem",
               }}
             >
-              KXD scopes project work carefully — and offers clear monthly
-              partnership packages for ongoing creative and operating support.
+              Looking for ongoing monthly creative and operating support instead?
+              See{" "}
+              <Link
+                href="/pricing"
+                style={{ color: "var(--kxd-gold)", textDecoration: "underline" }}
+              >
+                KXD Partnerships
+              </Link>
+              .
             </p>
           </div>
         </div>

@@ -11,6 +11,7 @@ import { ServicesSection } from "@/components/home/ServicesSection";
 import { WebsiteAuditorSection } from "@/components/home/WebsiteAuditorSection";
 import { StructuredData } from "@/components/seo/StructuredData";
 import {
+  founderPersonSchema,
   localBusinessSchema,
   organizationSchema,
   websiteSchema,
@@ -19,6 +20,7 @@ import {
 export default function HomePage() {
   const schema = [
     organizationSchema(),
+    founderPersonSchema(),
     localBusinessSchema(),
     websiteSchema(),
   ].filter(Boolean) as Record<string, unknown>[];

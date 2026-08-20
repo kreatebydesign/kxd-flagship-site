@@ -157,12 +157,14 @@ export const PARTNERSHIP_SCOPE_COPY = {
 } as const;
 
 export const PARTNERSHIP_PAGE_COPY = {
-  eyebrow: "Partnerships",
+  eyebrow: "Ongoing Partnerships",
   headline: "Creative and operating partnership for websites that need ongoing care.",
   lead:
-    "Kreate by Design is a premium creative and operating partner for teams that need more than a one-off project. You receive strategy, creative judgment, and reliable execution through an organized monthly relationship — with clear capacity, structured feedback, and a private client experience.",
+    "These are monthly relationships — not one-time project builds. Kreate by Design is a premium creative and operating partner for teams that need more than a finished launch. You receive strategy, creative judgment, and reliable execution through an organized monthly relationship — with clear capacity, structured feedback, and a private client experience.",
+  projectCrossLink:
+    "Need a website rebuild, brand system, or growth buildout scoped as a project?",
   systemNote:
-    "KXD OS supports the relationship. Clients partner with Kreate by Design — not software alone.",
+    "KXD OS supports the ongoing relationship. Clients partner with Kreate by Design — not software alone.",
 } as const;
 
 export function getPartnershipPackage(
