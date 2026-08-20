@@ -15,6 +15,7 @@ import {
   shouldShowRecurringInvestment,
 } from "@/lib/proposal-builder/presentation";
 import type { CanonicalProposal } from "@/lib/proposal-builder/types";
+import { publicBookingUrl } from "@/lib/proposal-builder/booking-url";
 
 type ViewData = {
   accepted: boolean;
@@ -157,6 +158,7 @@ export function PublicProposalBuilderExperience({ publicToken }: { publicToken: 
 
   const p = data.canonical;
   const currency = p.currency || "USD";
+  const bookingHref = publicBookingUrl(data.scheduleCallUrl);
 
   return (
     <main style={{ background: "#f7f1e6", minHeight: "100vh", color: "#0c0c0c" }}>
@@ -476,8 +478,13 @@ export function PublicProposalBuilderExperience({ publicToken }: { publicToken: 
             <button type="button" style={btn} onClick={() => setMode("accept")}>
               Accept proposal
             </button>
-            {data.scheduleCallUrl ? (
-              <a href={data.scheduleCallUrl} target="_blank" rel="noreferrer" style={btnGhost}>
+            {bookingHref ? (
+              <a
+                href={bookingHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={btnGhost}
+              >
                 Schedule a call
               </a>
             ) : null}

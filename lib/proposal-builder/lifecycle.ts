@@ -7,11 +7,22 @@ import type { ContractBuilderStatus, ProposalBuilderStatus } from "./types.ts";
 const PROPOSAL_TRANSITIONS: Record<ProposalBuilderStatus, ProposalBuilderStatus[]> = {
   draft: ["internal-review", "approved-for-sharing", "archived"],
   "internal-review": ["draft", "approved-for-sharing", "archived"],
-  "approved-for-sharing": ["sent", "draft", "archived"],
+  // Link preparation stays here. `sent` is only via explicit Mark as Sent.
+  // Acceptance and change-requests remain valid before the operator marks delivery.
+  "approved-for-sharing": [
+    "sent",
+    "draft",
+    "archived",
+    "revision-requested",
+    "accepted-contract-pending",
+    "declined",
+    "expired",
+    "questions",
+  ],
   sent: ["viewed", "revision-requested", "questions", "expired", "declined", "accepted-contract-pending"],
   viewed: ["revision-requested", "questions", "expired", "declined", "accepted-contract-pending", "sent"],
   questions: ["viewed", "revision-requested", "sent", "draft", "accepted-contract-pending"],
-  "revision-requested": ["draft", "internal-review", "approved-for-sharing", "sent"],
+  "revision-requested": ["draft", "internal-review", "approved-for-sharing"],
   "accepted-contract-pending": ["approved", "archived"],
   approved: ["archived"],
   declined: ["draft", "archived"],
@@ -84,7 +95,6 @@ export function isShareableProposalStatus(status: string): boolean {
     status === "approved-for-sharing" ||
     status === "sent" ||
     status === "viewed" ||
-    status === "questions" ||
-    status === "accepted-contract-pending"
+    status === "questions"
   );
 }

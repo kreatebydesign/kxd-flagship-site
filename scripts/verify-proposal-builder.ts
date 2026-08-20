@@ -184,6 +184,22 @@ function main() {
 
   // Lifecycle allowlists
   check("draft → approved-for-sharing", canTransitionProposal("draft", "approved-for-sharing"));
+  check(
+    "approved-for-sharing → sent (mark as sent)",
+    canTransitionProposal("approved-for-sharing", "sent"),
+  );
+  check(
+    "approved-for-sharing does not auto-path to viewed",
+    !canTransitionProposal("approved-for-sharing", "viewed"),
+  );
+  check(
+    "approved-for-sharing → accepted remains valid",
+    canTransitionProposal("approved-for-sharing", "accepted-contract-pending"),
+  );
+  check(
+    "revision-requested → approved-for-sharing",
+    canTransitionProposal("revision-requested", "approved-for-sharing"),
+  );
   check("sent → accepted-contract-pending", canTransitionProposal("sent", "accepted-contract-pending"));
   check("blocks accepted → sent", !canTransitionProposal("accepted-contract-pending", "sent"));
   check("editable draft", isEditableProposalStatus("draft"));

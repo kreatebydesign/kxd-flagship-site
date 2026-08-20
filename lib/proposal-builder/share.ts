@@ -70,6 +70,28 @@ export function isShareLinkActive(link: ShareLinkRecord | null | undefined): boo
   return true;
 }
 
+/**
+ * V1 and current hashed links resolve by SHA-256 match.
+ * An empty shareLinks array must not invalidate a still-current publicTokenHash.
+ */
+export function isHashedPublicTokenAuthorized(input: {
+  providedToken: string;
+  publicTokenHash?: string | null;
+  revoked?: boolean | null;
+  publicTokenExpiresAt?: string | null;
+  shareLinks?: unknown;
+}): boolean {
+  if (input.revoked) return false;
+  if (input.publicTokenExpiresAt) {
+    const exp = new Date(String(input.publicTokenExpiresAt)).getTime();
+    if (!Number.isNaN(exp) && exp < Date.now()) return false;
+  }
+  if (findActiveShareLink(input.shareLinks, input.providedToken)) return true;
+  const stored = String(input.publicTokenHash ?? "").trim();
+  if (!stored) return false;
+  return stored === hashShareToken(input.providedToken);
+}
+
 /** Legacy plaintext publicToken fallback — hash compare when migrating. */
 export function authorizeLegacyPublicToken(
   storedToken: string | null | undefined,

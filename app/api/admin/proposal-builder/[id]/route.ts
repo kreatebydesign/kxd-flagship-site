@@ -10,6 +10,7 @@ import { normalizeProposalDocument } from "@/lib/proposal-builder/document";
 import {
   getContractForProposal,
   getProposal,
+  operatorShareStateFromProposal,
   previewCanonical,
   saveProposalDraft,
 } from "@/lib/proposal-builder/services";
@@ -45,6 +46,7 @@ export async function GET(
     totals,
     canonical,
     contract,
+    shareState: operatorShareStateFromProposal(proposal),
   });
 }
 

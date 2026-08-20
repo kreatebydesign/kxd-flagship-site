@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ProposalBuilderError } from "@/lib/proposal-builder/errors";
 import { calculateProposalTotals } from "@/lib/proposal-builder/pricing";
+import { publicBookingUrl } from "@/lib/proposal-builder/booking-url";
 import { normalizeProposalDocument } from "@/lib/proposal-builder/document";
 import { renderProposalPdf } from "@/lib/proposal-builder/export-pdf";
 import {
@@ -61,7 +62,7 @@ export async function GET(
     canonical: view.canonical,
     clientCanSelect: doc.options.clientCanSelect,
     options: doc.options,
-    scheduleCallUrl: doc.scheduleCallUrl || null,
+    scheduleCallUrl: publicBookingUrl(doc.scheduleCallUrl),
     totals: view.accepted ? view.canonical.totals : liveTotals,
   });
 }

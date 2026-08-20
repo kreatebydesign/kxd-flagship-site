@@ -22,20 +22,44 @@ import {
   normalizeProposalDocument,
 } from "./document.ts";
 import { ProposalBuilderError } from "./errors.ts";
+import { parseHttpsBookingUrl } from "./booking-url.ts";
 import {
   assertContractTransition,
   assertProposalTransition,
   isEditableProposalStatus,
 } from "./lifecycle.ts";
-import { assertNotProtectedProposal } from "./protection.ts";
-import { legacyPlaintextTokensAllowed } from "./protection.ts";
+import {
+  isProtectedLiveCommercialProposal,
+  legacyPlaintextTokensAllowed,
+  liveDealProtectionReason,
+} from "./protection.ts";
 import { calculateProposalTotals, totalsToLegacyFields } from "./pricing.ts";
 import {
   authorizeLegacyPublicToken,
   createShareLinkRecord,
   findActiveShareLink,
   hashShareToken,
+  isHashedPublicTokenAuthorized,
 } from "./share.ts";
+import {
+  buildOperatorShareState,
+  canConfirmShareApproval,
+  canMarkProposalSent,
+  canPrepareShareLink,
+  canReplaceShareLink,
+  canRewriteShareSnapshot,
+  hasUnrecoverableShareToken,
+  shouldCreateShareToken,
+  isAlreadyMarkedSent,
+  isProposalDeliveryMethod,
+  isTerminalProposalShareStatus,
+  nextStatusOnMarkSent,
+  nextStatusOnPublicView,
+  normalizeManualDelivery,
+  type ManualDeliveryRecord,
+  type OperatorShareState,
+  type ProposalDeliveryMethod,
+} from "./share-workflow.ts";
 import type {
   AcceptanceRecord,
   CanonicalProposal,
@@ -71,6 +95,56 @@ function asShareLinks(raw: unknown): ShareLinkRecord[] {
 
 function asChangeRequests(raw: unknown): ChangeRequestRecord[] {
   return Array.isArray(raw) ? (raw as ChangeRequestRecord[]) : [];
+}
+
+function relationId(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value) && value > 0) return value;
+  if (value && typeof value === "object" && "id" in value) {
+    const id = Number((value as { id: unknown }).id);
+    if (Number.isFinite(id) && id > 0) return id;
+  }
+  return null;
+}
+
+function assertMutableLiveDeal(proposal: AnyDoc, action: string): void {
+  if (isProtectedLiveCommercialProposal(proposal)) {
+    throw new ProposalBuilderError(liveDealProtectionReason(proposal), 403);
+  }
+}
+
+async function assertRelatedRecordExists(
+  collection: "sales-leads" | "clients",
+  id: number,
+  label: string,
+): Promise<void> {
+  const payload = await payloadClient();
+  try {
+    await payload.findByID({
+      collection: collection as "users",
+      id,
+      depth: 0,
+      overrideAccess: true,
+    });
+  } catch {
+    throw new ProposalBuilderError(`Invalid ${label}.`, 400);
+  }
+}
+
+export function operatorShareStateFromProposal(proposal: AnyDoc): OperatorShareState {
+  return buildOperatorShareState({
+    status: String(proposal.status ?? "draft"),
+    shareApprovedAt: proposal.shareApprovedAt ?? null,
+    shareApprovedBy: proposal.shareApprovedBy ?? null,
+    shareSnapshot: proposal.shareSnapshot,
+    shareLinks: proposal.shareLinks,
+    publicTokenHash: proposal.publicTokenHash ?? null,
+    revoked: Boolean(proposal.revoked),
+    sentAt: proposal.sentAt ?? null,
+    firstViewedAt: proposal.firstViewedAt ?? null,
+    lastViewedAt: proposal.lastViewedAt ?? null,
+    manualDelivery: (proposal.manualDelivery as ManualDeliveryRecord | null) ?? null,
+    liveDealProtected: isProtectedLiveCommercialProposal(proposal),
+  });
 }
 
 export async function generateProposalNumberSafe(): Promise<string> {
@@ -162,6 +236,19 @@ export async function createProposal(input: {
   internalOwner?: string;
 }): Promise<AnyDoc> {
   const payload = await payloadClient();
+  if (input.leadId != null) {
+    if (!Number.isFinite(Number(input.leadId)) || Number(input.leadId) <= 0) {
+      throw new ProposalBuilderError("Invalid lead.", 400);
+    }
+    await assertRelatedRecordExists("sales-leads", Number(input.leadId), "lead");
+  }
+  if (input.clientId != null) {
+    if (!Number.isFinite(Number(input.clientId)) || Number(input.clientId) <= 0) {
+      throw new ProposalBuilderError("Invalid client.", 400);
+    }
+    await assertRelatedRecordExists("clients", Number(input.clientId), "client");
+  }
+
   const proposalNumber = await generateProposalNumberSafe();
 
   // Prefer an explicit builder document (Save Draft). Only apply templates when
@@ -195,6 +282,12 @@ export async function createProposal(input: {
   } else if (input.templateKind && !document.templateKind) {
     document = { ...document, templateKind: input.templateKind };
   }
+
+  const booking = parseHttpsBookingUrl(document.scheduleCallUrl);
+  if (!booking.ok) {
+    throw new ProposalBuilderError(booking.error, 400);
+  }
+  document.scheduleCallUrl = booking.url ?? "";
 
   const totals = calculateProposalTotals(document);
   const legacy = totalsToLegacyFields(totals);
@@ -233,6 +326,7 @@ export async function createProposal(input: {
         .join("; "),
       terms: document.terms.proposalTerms,
       internalNotes: document.internal.internalNotes,
+      scheduleCallUrl: document.scheduleCallUrl || null,
     } as never,
     overrideAccess: true,
   });
@@ -256,10 +350,10 @@ export async function saveProposalDraft(
     actor?: string | null;
   },
 ): Promise<AnyDoc> {
-  assertNotProtectedProposal(id, "edit");
   const payload = await payloadClient();
   const existing = await getProposal(id);
   if (!existing) throw new ProposalBuilderError("Proposal not found.", 404);
+  assertMutableLiveDeal(existing, "edit");
   if (!isEditableProposalStatus(String(existing.status))) {
     throw new ProposalBuilderError(
       "Proposal is locked. Create a new draft version before editing.",
@@ -267,7 +361,30 @@ export async function saveProposalDraft(
     );
   }
 
+  if (input.leadId != null) {
+    if (!Number.isFinite(Number(input.leadId)) || Number(input.leadId) <= 0) {
+      throw new ProposalBuilderError("Invalid lead.", 400);
+    }
+    await assertRelatedRecordExists("sales-leads", Number(input.leadId), "lead");
+  }
+  if (input.clientId != null) {
+    if (!Number.isFinite(Number(input.clientId)) || Number(input.clientId) <= 0) {
+      throw new ProposalBuilderError("Invalid client.", 400);
+    }
+    await assertRelatedRecordExists("clients", Number(input.clientId), "client");
+  }
+
+  const booking = parseHttpsBookingUrl(
+    input.scheduleCallUrl !== undefined
+      ? input.scheduleCallUrl
+      : input.document?.scheduleCallUrl,
+  );
+  if (!booking.ok) {
+    throw new ProposalBuilderError(booking.error, 400);
+  }
+
   const document = normalizeProposalDocument(input.document);
+  document.scheduleCallUrl = booking.url ?? "";
   const totals = calculateProposalTotals(document);
   const legacy = totalsToLegacyFields(totals);
   let revisionNumber = Number(existing.revisionNumber ?? 1) || 1;
@@ -310,11 +427,8 @@ export async function saveProposalDraft(
   if (input.proposalDate !== undefined) data.proposalDate = input.proposalDate;
   if (input.expiresAt !== undefined) data.expiresAt = input.expiresAt;
   if (input.internalOwner !== undefined) data.internalOwner = input.internalOwner;
-  if (input.scheduleCallUrl !== undefined) {
-    document.scheduleCallUrl = input.scheduleCallUrl ?? "";
-    data.builderDocument = document;
-    data.scheduleCallUrl = input.scheduleCallUrl;
-  }
+  data.scheduleCallUrl = booking.url;
+  data.builderDocument = document;
 
   return (await payload.update({
     collection: PROPOSALS as "users",
@@ -327,19 +441,25 @@ export async function saveProposalDraft(
 export async function approveProposalForSharing(
   id: number,
   input?: { actor?: string | null; expiresAt?: string | null; notes?: string },
-): Promise<{ proposal: AnyDoc; rawToken: string; shareUrlPath: string }> {
-  assertNotProtectedProposal(id, "approve for sharing");
+): Promise<{ proposal: AnyDoc; snapshotWritten: boolean }> {
   const payload = await payloadClient();
   const existing = await getProposal(id);
   if (!existing) throw new ProposalBuilderError("Proposal not found.", 404);
+  assertMutableLiveDeal(existing, "approve for sharing");
 
   const status = String(existing.status);
-  if (status !== "draft" && status !== "internal-review" && status !== "approved-for-sharing") {
-    if (status === "revision-requested") {
-      assertProposalTransition(status, "draft");
-    } else if (!["sent", "viewed"].includes(status)) {
-      throw new ProposalBuilderError("Proposal cannot be approved for sharing from this status.", 409);
+  if (isTerminalProposalShareStatus(status) || existing.acceptedSnapshot || existing.acceptanceRecord) {
+    throw new ProposalBuilderError("Accepted or terminal proposals cannot be re-shared.", 409);
+  }
+  if (!canConfirmShareApproval(status)) {
+    throw new ProposalBuilderError("Proposal cannot be approved for sharing from this status.", 409);
+  }
+
+  if (!canRewriteShareSnapshot(status)) {
+    if (!existing.shareSnapshot) {
+      throw new ProposalBuilderError("Approve for sharing from a draft before preparing a link.", 409);
     }
+    return { proposal: existing, snapshotWritten: false };
   }
 
   const canonical = buildCanonicalProposal({
@@ -355,12 +475,6 @@ export async function approveProposalForSharing(
   });
 
   const version = Number(existing.revisionNumber ?? 1) || 1;
-  const { record: shareLink, rawToken } = createShareLinkRecord({
-    version,
-    createdBy: input?.actor ?? null,
-    expiresAt: input?.expiresAt ?? existing.expiresAt ?? null,
-  });
-
   const versionHistory = asVersions(existing.versionHistory).map((v) =>
     v.version === version
       ? {
@@ -372,40 +486,147 @@ export async function approveProposalForSharing(
       : v,
   );
 
-  const shareLinks = [
-    ...asShareLinks(existing.shareLinks).map((l) =>
-      l.revokedAt ? l : { ...l, revokedAt: new Date().toISOString() },
-    ),
-    shareLink,
-  ];
-
-  const nextStatus =
-    status === "sent" || status === "viewed" ? status : "approved-for-sharing";
-  if (status !== nextStatus && status !== "approved-for-sharing") {
-    assertProposalTransition(
-      status === "revision-requested" ? "draft" : status,
-      "approved-for-sharing",
-    );
+  if (status !== "approved-for-sharing") {
+    assertProposalTransition(status, "approved-for-sharing");
   }
 
   const proposal = (await payload.update({
     collection: PROPOSALS as "users",
     id,
     data: {
-      status: nextStatus === "approved-for-sharing" ? "approved-for-sharing" : nextStatus,
+      status: "approved-for-sharing",
       shareSnapshot: canonical,
       shareApprovedAt: new Date().toISOString(),
       shareApprovedBy: input?.actor ?? null,
+      versionHistory,
+    } as never,
+    overrideAccess: true,
+  })) as AnyDoc;
+
+  return { proposal, snapshotWritten: true };
+}
+
+export async function prepareProposalShareLink(
+  id: number,
+  input?: { actor?: string | null; expiresAt?: string | null },
+): Promise<{
+  proposal: AnyDoc;
+  created: boolean;
+  rawToken: string | null;
+  shareUrlPath: string | null;
+}> {
+  const payload = await payloadClient();
+  const existing = await getProposal(id);
+  if (!existing) throw new ProposalBuilderError("Proposal not found.", 404);
+  assertMutableLiveDeal(existing, "prepare share link");
+
+  const status = String(existing.status);
+  if (isTerminalProposalShareStatus(status) || existing.acceptedSnapshot || existing.acceptanceRecord) {
+    throw new ProposalBuilderError("Accepted or terminal proposals cannot receive a new share link.", 409);
+  }
+  if (!canPrepareShareLink(status)) {
+    throw new ProposalBuilderError("Approve for sharing before preparing a share link.", 409);
+  }
+  if (!existing.shareSnapshot) {
+    throw new ProposalBuilderError("Approve for sharing before preparing a share link.", 409);
+  }
+
+  if (
+    !shouldCreateShareToken({
+      shareLinks: existing.shareLinks,
+      publicTokenHash: existing.publicTokenHash,
+      revoked: existing.revoked,
+    })
+  ) {
+    return {
+      proposal: existing,
+      created: false,
+      rawToken: null,
+      shareUrlPath: null,
+    };
+  }
+
+  const version = Number(existing.revisionNumber ?? 1) || 1;
+  const { record: shareLink, rawToken } = createShareLinkRecord({
+    version,
+    createdBy: input?.actor ?? null,
+    expiresAt: input?.expiresAt ?? existing.expiresAt ?? null,
+  });
+  const shareLinks = [...asShareLinks(existing.shareLinks), shareLink];
+
+  const proposal = (await payload.update({
+    collection: PROPOSALS as "users",
+    id,
+    data: {
       publicTokenHash: shareLink.tokenHash,
       publicTokenPrefix: shareLink.tokenPrefix,
-      // Raw token is returned once to the operator; only the hash is retained.
       publicToken: null,
       publicTokenExpiresAt: shareLink.expiresAt,
       revoked: false,
       shareLinks,
-      versionHistory,
-      acceptedSnapshot: null,
-      acceptanceRecord: null,
+    } as never,
+    overrideAccess: true,
+  })) as AnyDoc;
+
+  return {
+    proposal,
+    created: true,
+    rawToken,
+    shareUrlPath: `/proposal/${rawToken}`,
+  };
+}
+
+export async function replaceProposalShareLink(
+  id: number,
+  input: { actor?: string | null; expiresAt?: string | null; confirmReplace: boolean },
+): Promise<{ proposal: AnyDoc; rawToken: string; shareUrlPath: string }> {
+  if (input.confirmReplace !== true) {
+    throw new ProposalBuilderError(
+      "Replacing a share link requires explicit confirmation. The previous client URL will stop working.",
+      400,
+    );
+  }
+
+  const payload = await payloadClient();
+  const existing = await getProposal(id);
+  if (!existing) throw new ProposalBuilderError("Proposal not found.", 404);
+  assertMutableLiveDeal(existing, "replace share link");
+
+  const status = String(existing.status);
+  if (isTerminalProposalShareStatus(status) || existing.acceptedSnapshot || existing.acceptanceRecord) {
+    throw new ProposalBuilderError("Accepted or terminal proposals cannot rotate a share link.", 409);
+  }
+  if (!canReplaceShareLink(status)) {
+    throw new ProposalBuilderError("A share link can only be replaced after approval for sharing.", 409);
+  }
+  if (!existing.shareSnapshot) {
+    throw new ProposalBuilderError("Approve for sharing before replacing a share link.", 409);
+  }
+
+  const version = Number(existing.revisionNumber ?? 1) || 1;
+  const now = new Date().toISOString();
+  const { record: shareLink, rawToken } = createShareLinkRecord({
+    version,
+    createdBy: input.actor ?? null,
+    expiresAt: input.expiresAt ?? existing.expiresAt ?? null,
+  });
+  const shareLinks = [
+    ...asShareLinks(existing.shareLinks).map((link) =>
+      link.revokedAt ? link : { ...link, revokedAt: now },
+    ),
+    shareLink,
+  ];
+
+  const proposal = (await payload.update({
+    collection: PROPOSALS as "users",
+    id,
+    data: {
+      publicTokenHash: shareLink.tokenHash,
+      publicTokenPrefix: shareLink.tokenPrefix,
+      publicToken: null,
+      publicTokenExpiresAt: shareLink.expiresAt,
+      revoked: false,
+      shareLinks,
     } as never,
     overrideAccess: true,
   })) as AnyDoc;
@@ -417,20 +638,127 @@ export async function approveProposalForSharing(
   };
 }
 
-export async function markProposalShared(id: number): Promise<AnyDoc> {
+export async function markProposalDelivered(
+  id: number,
+  input: {
+    actor?: string | null;
+    method: ProposalDeliveryMethod;
+    deliveredAt?: string | null;
+    recipient?: string | null;
+    note?: string | null;
+  },
+): Promise<{ proposal: AnyDoc; alreadyMarked: boolean }> {
+  const payload = await payloadClient();
   const existing = await getProposal(id);
   if (!existing) throw new ProposalBuilderError("Proposal not found.", 404);
-  if (String(existing.status) === "approved-for-sharing") {
-    assertProposalTransition("approved-for-sharing", "sent");
-    const payload = await payloadClient();
-    return (await payload.update({
-      collection: PROPOSALS as "users",
-      id,
-      data: { status: "sent", sentAt: new Date().toISOString() } as never,
-      overrideAccess: true,
-    })) as AnyDoc;
+  assertMutableLiveDeal(existing, "mark as sent");
+
+  const status = String(existing.status);
+  if (isTerminalProposalShareStatus(status) || existing.acceptedSnapshot || existing.acceptanceRecord) {
+    throw new ProposalBuilderError("Terminal proposals cannot be marked as sent.", 409);
   }
-  return existing;
+  if (!canMarkProposalSent(status)) {
+    throw new ProposalBuilderError("Prepare a share link before marking the proposal as sent.", 409);
+  }
+  if (
+    !existing.shareSnapshot ||
+    !hasUnrecoverableShareToken({
+      shareLinks: existing.shareLinks,
+      publicTokenHash: existing.publicTokenHash,
+      revoked: existing.revoked,
+    })
+  ) {
+    throw new ProposalBuilderError("Prepare a share link before marking the proposal as sent.", 409);
+  }
+  if (!isProposalDeliveryMethod(input.method)) {
+    throw new ProposalBuilderError("Choose a delivery method.", 400);
+  }
+
+  const existingDelivery = (existing.manualDelivery as ManualDeliveryRecord | null) ?? null;
+  if (
+    isAlreadyMarkedSent({
+      sentAt: existing.sentAt,
+      manualDelivery: existingDelivery,
+    })
+  ) {
+    return { proposal: existing, alreadyMarked: true };
+  }
+
+  const nextStatus = nextStatusOnMarkSent(status);
+  if (nextStatus !== status) {
+    assertProposalTransition(status, nextStatus);
+  }
+
+  const delivery = normalizeManualDelivery({
+    method: input.method,
+    deliveredAt: input.deliveredAt,
+    recipient: input.recipient,
+    note: input.note,
+    recordedBy: input.actor ?? null,
+    proposalId: id,
+  });
+
+  const proposal = (await payload.update({
+    collection: PROPOSALS as "users",
+    id,
+    data: {
+      status: nextStatus,
+      sentAt: delivery.deliveredAt,
+      manualDelivery: delivery,
+    } as never,
+    overrideAccess: true,
+  })) as AnyDoc;
+
+  const leadId = relationId(proposal.lead ?? existing.lead);
+  const clientId = relationId(proposal.client ?? existing.client);
+  try {
+    const existingActivities = await payload.find({
+      collection: "sales-activities" as "users",
+      where: {
+        and: [
+          { proposal: { equals: id } },
+          { activityType: { equals: "proposal-sent" } },
+        ],
+      },
+      limit: 1,
+      overrideAccess: true,
+    });
+    if (existingActivities.docs.length === 0 && leadId) {
+      await payload.create({
+        collection: "sales-activities" as "users",
+        data: {
+          activityType: "proposal-sent",
+          title: `Proposal delivered · ${String(proposal.proposalNumber ?? existing.proposalNumber)}`,
+          summary: [
+            `Method: ${delivery.method}.`,
+            delivery.recipient ? `Recipient: ${delivery.recipient}.` : null,
+            delivery.note ? delivery.note : null,
+            "Operator confirmed manual delivery. No email was sent by KXD OS.",
+          ]
+            .filter(Boolean)
+            .join(" "),
+          lead: leadId,
+          proposal: id,
+          client: clientId ?? undefined,
+          occurredAt: delivery.deliveredAt,
+        } as never,
+        overrideAccess: true,
+      });
+    }
+  } catch {
+    /* activity is best-effort; delivery record remains authoritative */
+  }
+
+  return { proposal, alreadyMarked: false };
+}
+
+/** Local lifecycle simulation compatibility — never emails. */
+export async function markProposalShared(id: number): Promise<AnyDoc> {
+  const result = await markProposalDelivered(id, {
+    method: "other",
+    note: "Compatibility path. Operator must use Mark as Sent for real delivery.",
+  });
+  return result.proposal;
 }
 
 export async function revokeShareLink(
@@ -440,6 +768,10 @@ export async function revokeShareLink(
   const payload = await payloadClient();
   const existing = await getProposal(id);
   if (!existing) throw new ProposalBuilderError("Proposal not found.", 404);
+  assertMutableLiveDeal(existing, "revoke share link");
+  if (isTerminalProposalShareStatus(String(existing.status)) || existing.acceptedSnapshot) {
+    throw new ProposalBuilderError("Accepted or terminal proposals cannot revoke a share link.", 409);
+  }
   const now = new Date().toISOString();
   const shareLinks = asShareLinks(existing.shareLinks).map((l) => {
     if (shareLinkId && l.id !== shareLinkId) return l;
@@ -466,6 +798,7 @@ export async function reopenProposalDraft(
   const payload = await payloadClient();
   const existing = await getProposal(id);
   if (!existing) throw new ProposalBuilderError("Proposal not found.", 404);
+  assertMutableLiveDeal(existing, "reopen draft");
   if (String(existing.status) === "accepted-contract-pending") {
     throw new ProposalBuilderError("Accepted proposals cannot be reopened for edit.", 409);
   }
@@ -526,7 +859,18 @@ async function resolveProposalByToken(rawToken: string): Promise<{
   }
 
   if (!proposal) return null;
-  if (proposal.revoked) return null;
+  if (
+    !isHashedPublicTokenAuthorized({
+      providedToken: rawToken,
+      publicTokenHash: proposal.publicTokenHash,
+      revoked: proposal.revoked,
+      publicTokenExpiresAt: proposal.publicTokenExpiresAt,
+      shareLinks: proposal.shareLinks,
+    }) &&
+    !(legacyPlaintextTokensAllowed() && authorizeLegacyPublicToken(proposal.publicToken, rawToken))
+  ) {
+    return null;
+  }
 
   const shareLink =
     findActiveShareLink(proposal.shareLinks, rawToken) ||
@@ -540,19 +884,16 @@ async function resolveProposalByToken(rawToken: string): Promise<{
           createdAt: String(proposal.createdAt ?? new Date().toISOString()),
           viewCount: Number(proposal.totalViews ?? 0),
         } satisfies ShareLinkRecord)
-      : null);
-
-  if (
-    !shareLink &&
-    !(legacyPlaintextTokensAllowed() && authorizeLegacyPublicToken(proposal.publicToken, rawToken))
-  ) {
-    return null;
-  }
-
-  if (proposal.publicTokenExpiresAt) {
-    const exp = new Date(String(proposal.publicTokenExpiresAt)).getTime();
-    if (!Number.isNaN(exp) && exp < Date.now()) return null;
-  }
+      : proposal.publicTokenHash === hash
+        ? ({
+            id: "hash",
+            tokenHash: hash,
+            tokenPrefix: rawToken.slice(0, 8),
+            version: Number(proposal.revisionNumber ?? 1),
+            createdAt: String(proposal.createdAt ?? new Date().toISOString()),
+            viewCount: Number(proposal.totalViews ?? 0),
+          } satisfies ShareLinkRecord)
+        : null);
 
   const canonical =
     resolveClientFacingProposal(proposal as ProposalSource, { allowLiveDraft: false }) ||
@@ -596,16 +937,14 @@ export async function recordPublicView(rawToken: string): Promise<void> {
   });
 
   const status = String(proposal.status);
-  const nextStatus =
-    status === "sent" || status === "approved-for-sharing" ? "viewed" : status;
+  let statusToWrite = status;
+  const nextStatus = nextStatusOnPublicView(status);
   if (nextStatus !== status) {
     try {
-      assertProposalTransition(
-        status === "approved-for-sharing" ? "sent" : status,
-        "viewed",
-      );
+      assertProposalTransition(status, nextStatus);
+      statusToWrite = nextStatus;
     } catch {
-      /* keep status */
+      statusToWrite = status;
     }
   }
 
@@ -618,13 +957,7 @@ export async function recordPublicView(rawToken: string): Promise<void> {
       lastViewedAt: now,
       viewedAt: proposal.viewedAt ?? now,
       totalViews: Number(proposal.totalViews ?? 0) + 1,
-      status:
-        status === "approved-for-sharing"
-          ? "viewed"
-          : status === "sent"
-            ? "viewed"
-            : status,
-      sentAt: proposal.sentAt ?? (status === "approved-for-sharing" ? now : proposal.sentAt),
+      status: statusToWrite,
     } as never,
     overrideAccess: true,
   });

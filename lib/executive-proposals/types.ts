@@ -1,6 +1,7 @@
 export const EXECUTIVE_PROPOSAL_STATUSES = [
   "draft",
   "internal-review",
+  "approved-for-sharing",
   "sent",
   "viewed",
   "questions",

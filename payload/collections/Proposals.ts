@@ -445,7 +445,11 @@ export const Proposals: CollectionConfig = {
             {
               name: "scheduleCallUrl",
               type: "text",
-              label: "Schedule Call URL",
+              label: "Optional consultation booking link",
+              admin: {
+                description:
+                  "Add a Calendly, Google Calendar, or other booking link if you want the client to schedule a proposal-review call. HTTPS only. Hidden from clients when blank.",
+              },
             },
             {
               name: "relatedContract",
@@ -465,6 +469,16 @@ export const Proposals: CollectionConfig = {
               type: "text",
               label: "Share Approved By",
               admin: { readOnly: true },
+            },
+            {
+              name: "manualDelivery",
+              type: "json",
+              label: "Manual Delivery",
+              admin: {
+                readOnly: true,
+                description:
+                  "Operator-confirmed delivery (method, timestamp, optional recipient/note). Not email send evidence.",
+              },
             },
             {
               name: "acceptedAt",

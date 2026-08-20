@@ -3,6 +3,7 @@ import type { ExecutiveProposalStatus } from "./types";
 export const STATUS_LABELS: Record<string, string> = {
   draft: "Draft",
   "internal-review": "Internal Review",
+  "approved-for-sharing": "Approved for Sharing",
   sent: "Sent",
   viewed: "Viewed",
   questions: "Questions",
@@ -17,6 +18,7 @@ export const STATUS_LABELS: Record<string, string> = {
 export const OPEN_PIPELINE_STATUSES: ExecutiveProposalStatus[] = [
   "draft",
   "internal-review",
+  "approved-for-sharing",
   "sent",
   "viewed",
   "questions",

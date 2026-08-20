@@ -555,6 +555,35 @@ body:has(.kxd-exec-workspace) {
   color: var(--kxd-os-text-secondary);
 }
 
+.kxd-os-share-link {
+  display: block;
+  color: var(--kxd-os-text-primary, #1c1916);
+  background: #fff;
+  border: 1px solid var(--kxd-os-line, #c9bba6);
+  padding: 0.75rem 0.85rem;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  font-weight: 600;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.kxd-os-share-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.kxd-os-share-panel {
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid var(--kxd-os-line, #c4b49a);
+  background: #fff;
+  border-radius: 2px;
+}
+
+
 .kxd-os-meta {
   font-size: 0.75rem;
   line-height: 1.45;

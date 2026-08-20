@@ -179,7 +179,6 @@ export async function simulateLocalProposalSend(input: {
   createdBy?: string | null;
   baseUrl?: string;
 }): Promise<{ preview: LocalDeliveryPreview; publicUrl: string; proposal: AnyDoc }> {
-  assertNotProtectedProposal(input.proposalId, "send or simulate send");
   const payload = await payloadClient();
   const proposal = (await payload.findByID({
     collection: PROPOSALS as never,
@@ -187,27 +186,38 @@ export async function simulateLocalProposalSend(input: {
     depth: 0,
     overrideAccess: true,
   })) as AnyDoc;
+  assertNotProtectedProposal(proposal, "send or simulate send");
 
-  const { approveProposalForSharing, markProposalShared } = await import(
-    "../proposal-builder/services.ts"
-  );
+  const { approveProposalForSharing, prepareProposalShareLink, replaceProposalShareLink, markProposalDelivered } =
+    await import("../proposal-builder/services.ts");
 
   const status = String(proposal.status);
-  let rawToken = "";
-  if (status === "draft" || status === "internal-review" || status === "approved-for-sharing") {
-    const approved = await approveProposalForSharing(input.proposalId, {
+  if (status === "draft" || status === "internal-review" || status === "revision-requested") {
+    await approveProposalForSharing(input.proposalId, {
       notes: "Local lifecycle — approved for simulated send",
       actor: input.createdBy ?? null,
     });
-    rawToken = approved.rawToken;
-  } else {
-    const approved = await approveProposalForSharing(input.proposalId, {
-      notes: "Local lifecycle — re-issue share token for simulated send",
-      actor: input.createdBy ?? null,
-    });
-    rawToken = approved.rawToken;
   }
-  await markProposalShared(input.proposalId);
+
+  const prepared = await prepareProposalShareLink(input.proposalId, {
+    actor: input.createdBy ?? null,
+  });
+  let rawToken = prepared.rawToken ?? "";
+  // Local simulation only: obtain a preview URL. Operator Prepare never rotates.
+  if (!rawToken) {
+    const replaced = await replaceProposalShareLink(input.proposalId, {
+      actor: input.createdBy ?? null,
+      confirmReplace: true,
+    });
+    rawToken = replaced.rawToken;
+  }
+
+  await markProposalDelivered(input.proposalId, {
+    actor: input.createdBy ?? null,
+    method: "other",
+    note: "SIMULATED LOCAL DELIVERY — this message was not emailed.",
+    recipient: input.recipientEmail,
+  });
 
   const refreshed = (await payload.findByID({
     collection: PROPOSALS as never,
