@@ -10,7 +10,10 @@ export const metadata: Metadata = {
 export default function ContractLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="kxd-proposal-body antialiased">
+      <body
+        className="kxd-proposal-body antialiased"
+        style={{ margin: 0, background: "#0a0a0a", minHeight: "100vh" }}
+      >
         {children}
       </body>
     </html>

@@ -24,12 +24,58 @@ export const metadata: Metadata = {
 
 function Unavailable({ title, message }: { title: string; message: string }) {
   return (
-    <main style={{ maxWidth: 720, margin: "0 auto", padding: "3rem 1.25rem" }}>
-      <p style={{ letterSpacing: 0.08, textTransform: "uppercase", fontSize: 12, opacity: 0.65 }}>
-        Agreement
-      </p>
-      <h1 style={{ fontFamily: "Georgia, serif", fontWeight: 500 }}>{title}</h1>
-      <p style={{ lineHeight: 1.55, opacity: 0.85 }}>{message}</p>
+    <main
+      style={{
+        minHeight: "100vh",
+        background: "#0a0a0a",
+        color: "#f4efe6",
+        padding: "2.5rem 1.15rem 3.5rem",
+      }}
+    >
+      <div style={{ maxWidth: 720, margin: "0 auto" }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/migrated-assets/brand/kxd-logo-transparent.png"
+          alt="Kreate by Design"
+          width={96}
+          height={90}
+          style={{ width: "5.25rem", height: "auto", display: "block", marginBottom: "1.25rem" }}
+        />
+        <p
+          style={{
+            letterSpacing: "0.18em",
+            textTransform: "uppercase",
+            fontSize: 11,
+            color: "#c2aa72",
+            fontFamily: "system-ui, sans-serif",
+            margin: "0 0 0.65rem",
+          }}
+        >
+          Agreement
+        </p>
+        <h1
+          style={{
+            fontFamily: "Georgia, 'Iowan Old Style', Palatino, serif",
+            fontWeight: 500,
+            fontSize: "clamp(1.65rem, 4.5vw, 2.15rem)",
+            lineHeight: 1.2,
+            margin: "0 0 0.85rem",
+          }}
+        >
+          {title}
+        </h1>
+        <p
+          style={{
+            lineHeight: 1.65,
+            color: "rgba(244, 239, 230, 0.62)",
+            fontFamily: "system-ui, sans-serif",
+            fontSize: 15,
+            maxWidth: 540,
+          }}
+        >
+          {message}
+        </p>
+      </div>
     </main>
   );
 }
