@@ -19,6 +19,9 @@ export * from "./transitions.ts";
 export * from "./billing-identity.ts";
 export * from "./email-templates.ts";
 export * from "./mock-webhook.ts";
+export * from "./commercial-amendments.ts";
+export * from "./external-obligation-payment.ts";
+export * from "./client-facing-contract.ts";
 export {
   getContractLifecycle,
   ensureLifecycleHydrated,
@@ -34,3 +37,8 @@ export {
   prepareMockStripeDraftsForContract,
   processLifecycleMockPaymentWebhook,
 } from "./services.ts";
+export {
+  regenerateContractDraftFromAccepted,
+  assertMutableContractReadyForSignature,
+} from "./regenerate-contract-draft.ts";
+export { recordObligationExternalPaymentOnContract } from "./record-obligation-external-payment.ts";

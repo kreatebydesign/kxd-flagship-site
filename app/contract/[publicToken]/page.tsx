@@ -9,6 +9,7 @@ import {
 } from "@/lib/proposal-lifecycle/signatures";
 import { hashPublicToken } from "@/lib/proposal-lifecycle/hash";
 import { isSigningLinkExpired } from "@/lib/proposal-lifecycle/token-expiry";
+import { toClientFacingContractBody } from "@/lib/proposal-lifecycle/client-facing-contract";
 import { legacyPlaintextTokensAllowed } from "@/lib/proposal-builder/protection";
 
 export const dynamic = "force-dynamic";
@@ -114,7 +115,7 @@ export default async function PublicContractSigningPage({
     <ContractSigningClient
       publicToken={publicToken}
       title={String(contract.title ?? "Agreement")}
-      body={String(contract.body ?? "")}
+      body={toClientFacingContractBody(String(contract.body ?? ""))}
       consentText={ELECTRONIC_SIGNATURE_CONSENT_TEXT}
       consentVersion={ELECTRONIC_SIGNATURE_CONSENT_VERSION}
       operatorSignedBy={pkg.operatorSignature.legalName}

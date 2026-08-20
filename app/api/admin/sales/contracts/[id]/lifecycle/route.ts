@@ -14,6 +14,7 @@ import {
   voidContract,
 } from "@/lib/proposal-lifecycle/services";
 import { generateAndFileExecutedPackage } from "@/lib/proposal-lifecycle/documents/file";
+import { toClientFacingContractBody } from "@/lib/proposal-lifecycle/client-facing-contract";
 import { getContractLifecycle } from "@/lib/proposal-lifecycle/services";
 import { newLifecycleId } from "@/lib/proposal-lifecycle/hash";
 import {
@@ -165,6 +166,17 @@ export async function POST(
               ? String(body.hostedInvoiceUrl)
               : null,
             operatorNote: body.operatorNote ? String(body.operatorNote) : null,
+            externalPaymentMethod: body.externalPaymentMethod
+              ? (String(body.externalPaymentMethod) as
+                  | "cash-app"
+                  | "check"
+                  | "wire"
+                  | "ach"
+                  | "other")
+              : null,
+            externalReference: body.externalReference
+              ? String(body.externalReference)
+              : null,
           },
         });
         return NextResponse.json({
@@ -174,6 +186,37 @@ export async function POST(
           idempotentReplay: result.idempotentReplay,
           billingProfile: result.billingProfile,
           confirmation: result.confirmation,
+          noStripeMutation: true,
+        });
+      }
+      case "record-obligation-external-payment": {
+        const { recordObligationExternalPaymentOnContract } = await import(
+          "@/lib/proposal-lifecycle/record-obligation-external-payment"
+        );
+        const result = await recordObligationExternalPaymentOnContract({
+          contractId: id,
+          obligationId: String(body.obligationId ?? ""),
+          amountCents: Number(body.amountCents),
+          currency: String(body.currency ?? "USD"),
+          paidAt: String(body.paidAt ?? ""),
+          externalPaymentMethod: String(body.externalPaymentMethod ?? "") as
+            | "cash-app"
+            | "check"
+            | "wire"
+            | "ach"
+            | "other",
+          externalReference: body.externalReference
+            ? String(body.externalReference)
+            : null,
+          operatorNote: body.operatorNote ? String(body.operatorNote) : null,
+          stripeInvoiceId: body.stripeInvoiceId ? String(body.stripeInvoiceId) : null,
+          paidOutsideStripe: body.paidOutsideStripe === true,
+          recordedBy: actor,
+        });
+        return NextResponse.json({
+          ok: true,
+          idempotentReplay: result.idempotentReplay,
+          billingPlan: result.pkg.billingPlan,
           noStripeMutation: true,
         });
       }
@@ -343,7 +386,7 @@ export async function POST(
             proposal?.proposalNumber ?? pkg.structuredPaymentTerms.sourceProposalNumber ?? "",
           ),
           contractTitle: String(contract.title ?? ""),
-          contractBody: String(contract.body ?? ""),
+          contractBody: toClientFacingContractBody(String(contract.body ?? "")),
           canonical: canonical ?? null,
           certificate: pkg.executedCertificate,
           operator: pkg.operatorSignature,

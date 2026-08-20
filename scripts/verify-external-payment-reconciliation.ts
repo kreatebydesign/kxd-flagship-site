@@ -112,6 +112,8 @@ console.log("verify:external-payment-reconciliation");
       currency: "USD",
       paidAt: "2026-08-04",
       operatorNote: "Cashier check",
+      externalPaymentMethod: "check",
+      externalReference: "CHK-1001",
     },
     {
       contractId: 99,
@@ -124,10 +126,56 @@ console.log("verify:external-payment-reconciliation");
   assert.equal(result.ok, true);
   if (result.ok) {
     assert.equal(result.references.source, "manual-non-stripe");
+    assert.equal(result.references.externalPaymentMethod, "check");
     assert.equal(result.references.livemode, null);
     assert.ok(result.references.idempotencyKey?.includes("manual"));
+    assert.ok(result.references.idempotencyKey?.includes("method:check"));
   }
   ok("2. manual non-Stripe payment provenance");
+}
+
+// 2b. Cash App method on manual non-Stripe
+{
+  const result = validateRecordExternalPaymentInput(
+    {
+      source: "manual-non-stripe",
+      amountCents: 31250,
+      currency: "USD",
+      paidAt: "2026-08-20",
+      externalPaymentMethod: "cash-app",
+      externalReference: "ca_note_optional",
+      operatorNote: "HJ deposit installment 1",
+    },
+    {
+      contractId: 42,
+      commercialStatus: "payment-pending",
+      agreementSource: "direct-agreement",
+      obligationCents: 31250,
+      existingReferences: null,
+    },
+  );
+  assert.equal(result.ok, true);
+  if (result.ok) {
+    assert.equal(result.references.externalPaymentMethod, "cash-app");
+    assert.ok(result.references.idempotencyKey?.includes("method:cash-app"));
+  }
+  const missingMethod = validateRecordExternalPaymentInput(
+    {
+      source: "manual-non-stripe",
+      amountCents: 31250,
+      currency: "USD",
+      paidAt: "2026-08-20",
+    },
+    {
+      contractId: 42,
+      commercialStatus: "payment-pending",
+      agreementSource: "direct-agreement",
+      obligationCents: 31250,
+      existingReferences: null,
+    },
+  );
+  assert.equal(missingMethod.ok, false);
+  ok("2b. Cash App external payment method required for manual-non-stripe");
 }
 
 // 3. No Stripe mutation path (static + marker)

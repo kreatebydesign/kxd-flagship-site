@@ -36,10 +36,15 @@ export function buildLocalDeliveryPreview(input: {
     bodyText = scrubTokenFromText(bodyText, extractTokenHint(input.secureUrl));
     if (bodyHtml) bodyHtml = scrubTokenFromText(bodyHtml, extractTokenHint(input.secureUrl));
   }
+  const label =
+    input.kind === "contract-signature-send"
+      ? "CLIENT SIGNING LINK PREPARED — no email sent"
+      : "SIMULATED LOCAL DELIVERY — not sent";
+
   return {
     id: newLifecycleId("delivery"),
     mode: "local-simulated",
-    label: "SIMULATED LOCAL DELIVERY — not sent",
+    label,
     kind: input.kind,
     templateVersion: input.templateVersion ?? null,
     createdAt: new Date().toISOString(),

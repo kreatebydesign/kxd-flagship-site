@@ -27,7 +27,18 @@ export type RecordExternalPaymentInput = {
   receiptUrl?: string | null;
   hostedInvoiceUrl?: string | null;
   operatorNote?: string | null;
+  /** Required for manual-non-stripe (e.g. cash-app). Never store credentials. */
+  externalPaymentMethod?:
+    | "cash-app"
+    | "check"
+    | "wire"
+    | "ach"
+    | "other"
+    | null;
+  externalReference?: string | null;
 };
+
+const MANUAL_EXTERNAL_METHODS = ["cash-app", "check", "wire", "ach", "other"] as const;
 
 const STRIPE_ID_PATTERNS: Record<string, RegExp> = {
   stripeCustomerId: /^cus_[A-Za-z0-9]+$/,
@@ -105,6 +116,8 @@ export function buildExternalPaymentIdempotencyKey(input: {
   stripePaymentIntentId?: string | null;
   stripeChargeId?: string | null;
   stripeInvoiceId?: string | null;
+  externalPaymentMethod?: string | null;
+  externalReference?: string | null;
 }): string {
   const parts: string[] = [`contract:${input.contractId}`, `source:${input.source}`];
   if (input.stripePaymentIntentId) parts.push(`pi:${input.stripePaymentIntentId}`);
@@ -114,6 +127,8 @@ export function buildExternalPaymentIdempotencyKey(input: {
     parts.push(`amt:${input.amountCents}`);
     parts.push(`cur:${normalizeCurrency(input.currency)}`);
     parts.push(`paid:${input.paidAt.slice(0, 10)}`);
+    parts.push(`method:${trimOrNull(input.externalPaymentMethod) || "unspecified"}`);
+    parts.push(`ref:${trimOrNull(input.externalReference) || "noref"}`);
   }
   return `extpay:${parts.join("|")}`;
 }
@@ -302,6 +317,11 @@ export function validateRecordExternalPaymentInput(
       errors.livemode = "Live/test mode applies only to Stripe payments.";
     }
     livemode = null;
+    const method = trimOrNull(input.externalPaymentMethod);
+    if (!method || !(MANUAL_EXTERNAL_METHODS as readonly string[]).includes(method)) {
+      errors.externalPaymentMethod =
+        "Manual non-Stripe payments require an external method (cash-app, check, wire, ach, or other).";
+    }
   }
 
   if (source === "kxd-stripe-lifecycle" && livemode === true) {
@@ -310,6 +330,12 @@ export function validateRecordExternalPaymentInput(
   }
 
   if (Object.keys(errors).length) return { ok: false, errors };
+
+  const externalPaymentMethod =
+    source === "manual-non-stripe"
+      ? (trimOrNull(input.externalPaymentMethod) as DirectAgreementPaymentReferences["externalPaymentMethod"])
+      : null;
+  const externalReference = trimOrNull(input.externalReference);
 
   const idempotencyKey = buildExternalPaymentIdempotencyKey({
     contractId: context.contractId,
@@ -320,6 +346,8 @@ export function validateRecordExternalPaymentInput(
     stripePaymentIntentId,
     stripeChargeId,
     stripeInvoiceId,
+    externalPaymentMethod,
+    externalReference,
   });
 
   const duplicate = findDuplicateStripeObjectConflict(context.existingReferences, {
@@ -376,6 +404,8 @@ export function validateRecordExternalPaymentInput(
     currency,
     paidAt: paidAt!,
     operatorNote,
+    externalPaymentMethod,
+    externalReference,
     source,
     livemode,
     idempotencyKey,

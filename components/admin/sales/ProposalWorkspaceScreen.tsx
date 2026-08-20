@@ -192,6 +192,34 @@ export function ProposalWorkspaceScreen({
   const [contractBody, setContractBody] = useState("");
 
   const totals = useMemo(() => calculateProposalTotals(document), [document]);
+  const contractCommercial = useMemo(() => {
+    if (!contract) return null;
+    const pkg = contract.lifecyclePackage as {
+      structuredPaymentTerms?: {
+        oneTimeTotalCents?: number;
+        monthlyTotalCents?: number;
+      } | null;
+    } | null;
+    const terms = pkg?.structuredPaymentTerms;
+    const oneTimeFromTerms = Number(terms?.oneTimeTotalCents);
+    const monthlyFromTerms = Number(terms?.monthlyTotalCents);
+    const projectDollars = Number(contract.projectAmount);
+    const monthlyDollars = Number(contract.monthlyAmount);
+    return {
+      oneTimeTotalCents:
+        Number.isFinite(oneTimeFromTerms) && oneTimeFromTerms > 0
+          ? oneTimeFromTerms
+          : Number.isFinite(projectDollars) && projectDollars > 0
+            ? Math.round(projectDollars * 100)
+            : 0,
+      monthlyTotalCents:
+        Number.isFinite(monthlyFromTerms) && monthlyFromTerms >= 0
+          ? monthlyFromTerms
+          : Number.isFinite(monthlyDollars) && monthlyDollars >= 0
+            ? Math.round(monthlyDollars * 100)
+            : 0,
+    };
+  }, [contract]);
   const status = String(proposal?.status ?? "draft");
   const editable = mode === "create" || ["draft", "internal-review", "revision-requested"].includes(status);
 
@@ -2088,14 +2116,24 @@ export function ProposalWorkspaceScreen({
                         <button type="button" className="kxd-os-btn kxd-os-btn--ghost" style={{ borderRadius: 2 }} disabled={busy} onClick={() => void transitionContractStatus("approved-for-signature")}>
                           Approve for signature
                         </button>
-                        <button type="button" className="kxd-os-btn kxd-os-btn--ghost" style={{ borderRadius: 2 }} disabled={busy} onClick={() => void transitionContractStatus("sent-for-signature")}>
-                          Mark sent for signature
-                        </button>
+                        {clientId && contract?.id ? (
+                          <Link
+                            href={`/admin/operations/client-command/${clientId}/commercial/agreements/${contract.id}`}
+                            className="kxd-os-btn"
+                            style={{ borderRadius: 2, textDecoration: "none" }}
+                          >
+                            Open commercial signing workflow
+                          </Link>
+                        ) : (
+                          <p className="kxd-os-meta" style={{ alignSelf: "center" }}>
+                            Link a client to open the commercial signing workflow (operator sign → prepare client link).
+                          </p>
+                        )}
                       </div>
                       <p className="kxd-os-meta" style={{ marginTop: "1rem" }}>
-                        Production e-signature provider integration is intentionally deferred. Do not
-                        treat typed names alone as a fully executed contract until the signature
-                        foundation is completed.
+                        Dual e-sign runs in Client Command → Commercial Agreements. This tab only
+                        edits the draft and lifecycle status — it does not send a signing link or
+                        email the client.
                       </p>
                     </>
                   )}
@@ -2112,41 +2150,64 @@ export function ProposalWorkspaceScreen({
                 alignSelf: "start",
               }}
             >
-              <p style={labelStyle}>Price summary</p>
+              <p style={labelStyle}>
+                {tab === "contract" && contract
+                  ? "Contract commercial summary"
+                  : "Proposal price summary"}
+              </p>
               <p className="kxd-os-body" style={{ marginBottom: "0.5rem" }}>
                 {orgsLabel}
               </p>
-              <p className="kxd-os-meta">One-time price</p>
-              <p className="kxd-os-card__title" style={{ marginBottom: "0.75rem" }}>
-                {formatCents(totals.oneTimeTotalCents)}
-              </p>
-              <p className="kxd-os-meta">Monthly price</p>
-              <p className="kxd-os-card__title" style={{ marginBottom: "0.75rem" }}>
-                {formatCents(totals.monthlyTotalCents)}
-              </p>
-              {totals.quarterlyTotalCents > 0 ? (
+              {tab === "contract" && contract && contractCommercial ? (
                 <>
-                  <p className="kxd-os-meta">Quarterly price</p>
+                  <p className="kxd-os-meta">One-time (contract)</p>
                   <p className="kxd-os-card__title" style={{ marginBottom: "0.75rem" }}>
-                    {formatCents(totals.quarterlyTotalCents)}
+                    {formatCents(contractCommercial.oneTimeTotalCents)}
+                  </p>
+                  <p className="kxd-os-meta">Monthly (contract)</p>
+                  <p className="kxd-os-card__title" style={{ marginBottom: "0.75rem" }}>
+                    {formatCents(contractCommercial.monthlyTotalCents)}
+                  </p>
+                  <p className="kxd-os-meta" style={{ marginTop: "0.5rem" }}>
+                    Reflects active contract / post-acceptance amendments. Accepted proposal
+                    snapshot is unchanged.
                   </p>
                 </>
-              ) : null}
-              {totals.annualTotalCents > 0 ? (
+              ) : (
                 <>
-                  <p className="kxd-os-meta">Annual price</p>
+                  <p className="kxd-os-meta">One-time price</p>
                   <p className="kxd-os-card__title" style={{ marginBottom: "0.75rem" }}>
-                    {formatCents(totals.annualTotalCents)}
+                    {formatCents(totals.oneTimeTotalCents)}
+                  </p>
+                  <p className="kxd-os-meta">Monthly price</p>
+                  <p className="kxd-os-card__title" style={{ marginBottom: "0.75rem" }}>
+                    {formatCents(totals.monthlyTotalCents)}
+                  </p>
+                  {totals.quarterlyTotalCents > 0 ? (
+                    <>
+                      <p className="kxd-os-meta">Quarterly price</p>
+                      <p className="kxd-os-card__title" style={{ marginBottom: "0.75rem" }}>
+                        {formatCents(totals.quarterlyTotalCents)}
+                      </p>
+                    </>
+                  ) : null}
+                  {totals.annualTotalCents > 0 ? (
+                    <>
+                      <p className="kxd-os-meta">Annual price</p>
+                      <p className="kxd-os-card__title" style={{ marginBottom: "0.75rem" }}>
+                        {formatCents(totals.annualTotalCents)}
+                      </p>
+                    </>
+                  ) : null}
+                  <p className="kxd-os-meta">Credits & adjustments</p>
+                  <p className="kxd-os-body" style={{ marginBottom: "0.75rem" }}>
+                    One-time −{formatCents(totals.creditOneTimeCents + totals.discountOneTimeCents)}
+                    {totals.creditMonthlyCents
+                      ? ` · Monthly −${formatCents(totals.creditMonthlyCents)}`
+                      : ""}
                   </p>
                 </>
-              ) : null}
-              <p className="kxd-os-meta">Credits & adjustments</p>
-              <p className="kxd-os-body" style={{ marginBottom: "0.75rem" }}>
-                One-time −{formatCents(totals.creditOneTimeCents + totals.discountOneTimeCents)}
-                {totals.creditMonthlyCents
-                  ? ` · Monthly −${formatCents(totals.creditMonthlyCents)}`
-                  : ""}
-              </p>
+              )}
               {dirty ? (
                 <p className="kxd-os-meta" style={{ marginTop: "1rem" }}>
                   Unsaved changes — use Save Draft

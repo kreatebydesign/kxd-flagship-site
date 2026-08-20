@@ -39,8 +39,11 @@ export function buildProposedBillingPlan(input: {
     currency: input.terms.currency,
     trigger: item.trigger,
     dueTerms: item.dueTerms,
+    dueDate: item.dueDate ?? null,
     status: "pending-trigger" as const,
     stripeDraftInvoiceId: null,
+    collectionChannel: null,
+    paymentReceipt: null,
   }));
 
   const recurring =
@@ -89,8 +92,8 @@ export function buildProposedBillingPlan(input: {
 
 function professionalLineLabel(raw: string, index: number, total: number): string {
   const lower = raw.toLowerCase();
-  if (lower.includes("deposit")) {
-    return "Website Design & Development — Initial Deposit";
+  if (lower.includes("deposit installment") || lower.includes("deposit")) {
+    return raw.trim() || "Website Design & Development — Deposit Installment";
   }
   if (lower.includes("progress") || lower.includes("milestone")) {
     return "Website Design & Development — Progress Payment";

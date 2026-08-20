@@ -632,10 +632,10 @@ export function ContractLifecycleActions(props: {
 
       {props.hasOperatorSignature && !props.hasClientSignature ? (
         <section style={card}>
-          <h3 style={h3}>3. Simulate client delivery</h3>
+          <h3 style={h3}>3. Prepare client signing link</h3>
           <p style={help}>
-            <strong>SIMULATED LOCAL DELIVERY</strong> — no real email is sent. Confirm recipient,
-            then generate the secure signing link once.
+            Generates a one-time secure signing URL. <strong>No email is sent.</strong> Copy the
+            link and share it with the client manually (for example by text or email).
           </p>
           <label style={label}>
             Recipient name
@@ -659,7 +659,7 @@ export function ContractLifecycleActions(props: {
               checked={sendForm.confirm}
               onChange={(e) => setSendForm({ ...sendForm, confirm: e.target.checked })}
             />
-            I confirm this is a local/test simulated delivery
+            I understand no email will be sent — I will share the signing link manually
           </label>
           <label style={check}>
             <input
@@ -667,7 +667,7 @@ export function ContractLifecycleActions(props: {
               checked={forceDespiteBillingBlockers}
               onChange={(e) => setForceDespiteBillingBlockers(e.target.checked)}
             />
-            Force send despite unresolved KXD billing identity blockers (local QA only)
+            Force prepare despite unresolved KXD billing identity blockers (local QA only)
           </label>
           <button
             type="button"
@@ -681,11 +681,11 @@ export function ContractLifecycleActions(props: {
               })
             }
           >
-            Simulate send for client signature
+            Prepare client signing link
           </button>
           {signingUrl ? (
             <p style={okStyle}>
-              Secure signing URL (copy now — token not stored in plaintext):{" "}
+              Secure signing URL (copy now — token is not stored in plaintext):{" "}
               <code style={{ wordBreak: "break-all" }}>{signingUrl}</code>
             </p>
           ) : null}

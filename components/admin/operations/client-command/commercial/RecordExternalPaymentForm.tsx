@@ -53,6 +53,10 @@ export function RecordExternalPaymentForm(props: {
   const [source, setSource] = useState<"imported-external-stripe-payment" | "manual-non-stripe">(
     "imported-external-stripe-payment",
   );
+  const [externalPaymentMethod, setExternalPaymentMethod] = useState<
+    "cash-app" | "check" | "wire" | "ach" | "other"
+  >("cash-app");
+  const [externalReference, setExternalReference] = useState("");
   const [amountDollars, setAmountDollars] = useState(
     defaults ? dollarsFromCents(defaults.obligationAmountCents) : "",
   );
@@ -99,6 +103,10 @@ export function RecordExternalPaymentForm(props: {
             receiptUrl: receiptUrl.trim() || null,
             hostedInvoiceUrl: hostedInvoiceUrl.trim() || null,
             operatorNote: operatorNote.trim() || null,
+            externalPaymentMethod:
+              source === "manual-non-stripe" ? externalPaymentMethod : null,
+            externalReference:
+              source === "manual-non-stripe" ? externalReference.trim() || null : null,
           }),
         },
       );
@@ -284,8 +292,47 @@ export function RecordExternalPaymentForm(props: {
               </select>
               <span className="kxd-os-commercial-field__help">
                 Use Stripe when the payment already succeeded in Stripe outside KXD OS.
+                Use Manual for Cash App and other externally received payments.
               </span>
             </label>
+
+            {source === "manual-non-stripe" ? (
+              <>
+                <label className="kxd-os-commercial-field">
+                  <span className="kxd-os-commercial-field__label">
+                    External payment method <em>Required</em>
+                  </span>
+                  <select
+                    className="kxd-os-commercial-control"
+                    value={externalPaymentMethod}
+                    onChange={(e) =>
+                      setExternalPaymentMethod(
+                        e.target.value as "cash-app" | "check" | "wire" | "ach" | "other",
+                      )
+                    }
+                    required
+                  >
+                    <option value="cash-app">Cash App</option>
+                    <option value="check">Check</option>
+                    <option value="wire">Wire</option>
+                    <option value="ach">ACH</option>
+                    <option value="other">Other</option>
+                  </select>
+                </label>
+                <label className="kxd-os-commercial-field">
+                  <span className="kxd-os-commercial-field__label">
+                    External reference <em>Optional</em>
+                  </span>
+                  <input
+                    className="kxd-os-commercial-control"
+                    type="text"
+                    value={externalReference}
+                    onChange={(e) => setExternalReference(e.target.value)}
+                    placeholder="Cash App note / check # — never store credentials"
+                  />
+                </label>
+              </>
+            ) : null}
 
             <label className="kxd-os-commercial-field">
               <span className="kxd-os-commercial-field__label">

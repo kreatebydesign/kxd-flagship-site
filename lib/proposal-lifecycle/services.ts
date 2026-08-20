@@ -32,6 +32,8 @@ import { appendAudit, emptyLifecyclePackage, normalizeLifecyclePackage } from ".
 import { humanProgressionFromStatuses } from "./progression.ts";
 import { buildTypedSignature } from "./signatures.ts";
 import { deriveStructuredPaymentTerms } from "./structured-payment-terms.ts";
+import { toClientFacingContractBody } from "./client-facing-contract.ts";
+import { resolveAppPublicOrigin } from "../app-url.ts";
 import {
   assertContractMutable,
   assertContractTransition,
@@ -116,7 +118,11 @@ export async function ensureLifecycleHydrated(contractId: number): Promise<Contr
       (proposal?.acceptanceRecord as { acceptanceHash?: string } | null)?.acceptanceHash;
     next = {
       ...next,
-      structuredPaymentTerms: deriveStructuredPaymentTerms(canonical, acceptanceHash),
+      structuredPaymentTerms: deriveStructuredPaymentTerms(
+        canonical,
+        acceptanceHash,
+        next.commercialAmendments ?? null,
+      ),
       commercialSource: next.commercialSource ?? "proposal",
     };
   }
@@ -229,7 +235,7 @@ export async function simulateLocalProposalSend(input: {
   if (!rawToken) {
     throw new Error("No public token available after share.");
   }
-  const base = (input.baseUrl ?? "http://localhost:3000").replace(/\/$/, "");
+  const base = resolveAppPublicOrigin(input.baseUrl);
   const publicUrl = `${base}/proposal/${rawToken}`;
   const snapHash = refreshed.shareSnapshot
     ? stableJsonHash(refreshed.shareSnapshot)
@@ -298,6 +304,14 @@ export async function signContractAsOperator(
   }
   if (from === "internal-review") {
     assertContractTransition("internal-review", "approved-for-signature");
+    const { assertMutableContractReadyForSignature } = await import(
+      "./regenerate-contract-draft.ts"
+    );
+    assertMutableContractReadyForSignature({
+      body: String(contract.body ?? ""),
+      legal: contract.legalProvisions,
+      pkg,
+    });
     await payload.update({
       collection: CONTRACTS as never,
       id: contractId,
@@ -310,15 +324,18 @@ export async function signContractAsOperator(
 
   const terms =
     pkg.structuredPaymentTerms ??
-    (canonical ? deriveStructuredPaymentTerms(canonical) : null);
+    (canonical
+      ? deriveStructuredPaymentTerms(canonical, undefined, pkg.commercialAmendments ?? null)
+      : null);
   if (!terms) throw new Error("Structured payment terms required before signature.");
 
   const acceptedHash = proposal?.acceptedSnapshot
     ? stableJsonHash(proposal.acceptedSnapshot)
     : "missing-accepted-snapshot";
+  const clientFacingBody = toClientFacingContractBody(String(contract.body ?? ""));
   const documentHash = computeDocumentHash({
     contractId,
-    contractBody: String(contract.body ?? ""),
+    contractBody: clientFacingBody,
     acceptedSnapshotHash: acceptedHash,
     paymentTermsHash: hashPaymentTerms(terms),
     version: Number(contract.revisionNumber ?? 1) || 1,
@@ -401,7 +418,7 @@ export async function sendContractForClientSignature(input: {
 
   const rawToken = generatePublicToken();
   const tokenHash = hashPublicToken(rawToken);
-  const base = (input.baseUrl ?? "http://localhost:3000").replace(/\/$/, "");
+  const base = resolveAppPublicOrigin(input.baseUrl);
   const secureUrl = `${base}/contract/${rawToken}`;
   const email = buildLifecycleEmail({
     kind: "contract-send",
@@ -415,7 +432,7 @@ export async function sendContractForClientSignature(input: {
     recipientName: input.recipientName,
     recipientEmail: input.recipientEmail,
     subject: email.subject,
-    bodyText: `${email.bodyText}\n\nSIMULATED LOCAL DELIVERY — this message was not emailed.`,
+    bodyText: `${email.bodyText}\n\nSIGNING LINK PREPARED — no email was sent. Share the secure URL with the client manually.`,
     bodyHtml: email.bodyHtml,
     templateVersion: email.templateVersion,
     secureUrl,
@@ -625,7 +642,7 @@ export async function signContractAsClient(
       if (!clientId) {
         throw new Error("Executed package filing requires a client relationship.");
       }
-      let executedBody = String(contract.body ?? "");
+      let executedBody = toClientFacingContractBody(String(contract.body ?? ""));
       if (String(contract.agreementSource) === "direct-agreement") {
         const { parseStoredDirectAgreementTerms } = await import(
           "../direct-agreement/validate.ts"
@@ -635,10 +652,12 @@ export async function signContractAsClient(
         );
         const daTerms = parseStoredDirectAgreementTerms(contract.directAgreementTerms);
         if (daTerms) {
-          executedBody = composeDirectAgreementDocumentBody({
-            body: executedBody,
-            terms: daTerms,
-          });
+          executedBody = toClientFacingContractBody(
+            composeDirectAgreementDocumentBody({
+              body: executedBody,
+              terms: daTerms,
+            }),
+          );
         }
       }
       next = await generateAndFileExecutedPackage({

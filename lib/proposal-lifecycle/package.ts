@@ -38,6 +38,7 @@ export function emptyLifecyclePackage(): ContractLifecyclePackage {
     externalAcceptance: null,
     paymentAuthorization: null,
     paymentReferences: null,
+    commercialAmendments: null,
   };
 }
 

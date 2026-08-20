@@ -1382,6 +1382,26 @@ export async function transitionContract(
   })) as AnyDoc;
   assertContractTransition(String(existing.status), to);
 
+  if (to === "approved-for-signature") {
+    const { normalizeLifecyclePackage } = await import("../proposal-lifecycle/package.ts");
+    const { assertMutableContractReadyForSignature } = await import(
+      "../proposal-lifecycle/regenerate-contract-draft.ts"
+    );
+    const pkg = normalizeLifecyclePackage(existing.lifecyclePackage);
+    try {
+      assertMutableContractReadyForSignature({
+        body: String(existing.body ?? ""),
+        legal: existing.legalProvisions,
+        pkg,
+      });
+    } catch (err) {
+      throw new ProposalBuilderError(
+        err instanceof Error ? err.message : "Contract is not ready for signature approval.",
+        409,
+      );
+    }
+  }
+
   const data: AnyDoc = { status: to };
   if (to === "sent" || to === "sent-for-signature") {
     data.sentAt = new Date().toISOString();

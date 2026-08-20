@@ -102,7 +102,9 @@ export interface ReadinessIssue {
 export interface LocalDeliveryPreview {
   id: string;
   mode: "local-simulated";
-  label: "SIMULATED LOCAL DELIVERY — not sent";
+  label:
+    | "SIMULATED LOCAL DELIVERY — not sent"
+    | "CLIENT SIGNING LINK PREPARED — no email sent";
   kind:
     | "proposal-send"
     | "proposal-reminder"
@@ -169,6 +171,9 @@ export interface StructuredPaymentTerms {
     trigger: string;
     dueTerms: string;
     status: InvoiceObligationStatus;
+    dueDate?: string | null;
+    group?: "initial-deposit" | "remaining" | "other";
+    notes?: string;
   }>;
   recurring: {
     amountCents: Cents;
@@ -177,7 +182,32 @@ export interface StructuredPaymentTerms {
     minimumTermMonths: number | null;
     renewalBehavior: string;
     status: RecurringScheduleStatus;
+    /** Explicit operator confirmation required when pending. */
+    startBillingDate?: string | null;
+    startBillingDateStatus?:
+      | "confirmed"
+      | "pending-confirmation"
+      | "milestone-confirmed"
+      | "not-applicable";
+    serviceTitle?: string | null;
+    includes?: string[];
+    excludes?: string[];
+    rankingDisclaimer?: string | null;
+    commencementNotes?: string | null;
   };
+  /** Ancillary charges (domain, hosting) — never part of oneTimeTotalCents. */
+  ancillaryCharges?: Array<{
+    id: string;
+    kind: string;
+    title: string;
+    amountCents: Cents;
+    cadence: "one-time" | "annual";
+    dueTrigger: string;
+    dueDate?: string | null;
+    termNotes: string;
+    renewalNotes?: string | null;
+    status: InvoiceObligationStatus;
+  }>;
   credits: Array<{ label: string; amountCents: Cents; appliesTo: string }>;
   taxes: { treatment: "unspecified" | "exclusive" | "inclusive" | "exempt"; notes: string };
   billingContactName?: string;
@@ -201,9 +231,19 @@ export interface InvoiceObligation {
   trigger: string;
   dueTerms: string;
   status: InvoiceObligationStatus;
+  /** Optional calendar due date (YYYY-MM-DD) when schedule is date-based. */
+  dueDate?: string | null;
   stripeDraftInvoiceId?: string | null;
   paidAt?: string | null;
   contractSection?: string;
+  /** How funds were collected — never invent Stripe collection. */
+  collectionChannel?:
+    | "stripe-invoice-external-pay"
+    | "manual-external"
+    | "stripe-collected"
+    | null;
+  /** External payment receipt (Cash App, etc.) when paid outside Stripe collection. */
+  paymentReceipt?: import("./external-obligation-payment.ts").ObligationPaymentReceipt | null;
 }
 
 export interface RecurringSchedule {
@@ -353,6 +393,11 @@ export interface ContractLifecyclePackage {
   /** Payment authorization metadata — Stripe IDs / brand / last4 only. */
   paymentAuthorization?: import("../direct-agreement/types.ts").PaymentAuthorizationRecord | null;
   paymentReferences?: import("../direct-agreement/types.ts").DirectAgreementPaymentReferences | null;
+  /**
+   * Post-acceptance commercial amendments applied to this contract only.
+   * Never rewrite proposal.acceptedSnapshot.
+   */
+  commercialAmendments?: import("./commercial-amendments.ts").ContractCommercialAmendments | null;
 }
 
 export interface LifecycleAuditEvent {

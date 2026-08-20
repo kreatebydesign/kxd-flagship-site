@@ -806,7 +806,11 @@ export async function recordExternalPayment(input: {
         title: "Payment already recorded",
         amountLabel: `$${(amountCents / 100).toFixed(2)}`,
         sourceLabel:
-          validated.references.source === "manual-non-stripe" ? "Manual" : "Stripe",
+          validated.references.externalPaymentMethod === "cash-app"
+            ? "Cash App"
+            : validated.references.source === "manual-non-stripe"
+              ? "Manual"
+              : "Stripe",
         commercialStatus: "paid",
         recordedAt: validated.references.importedAt ?? validated.references.linkedAt ?? new Date().toISOString(),
         nextAction: "activate-service",
@@ -905,7 +909,12 @@ export async function recordExternalPayment(input: {
     confirmation: {
       title: "Payment recorded",
       amountLabel: `$${(amountCents / 100).toFixed(2)}`,
-      sourceLabel: references.source === "manual-non-stripe" ? "Manual" : "Stripe",
+      sourceLabel:
+        references.externalPaymentMethod === "cash-app"
+          ? "Cash App"
+          : references.source === "manual-non-stripe"
+            ? "Manual"
+            : "Stripe",
       commercialStatus: "paid",
       recordedAt,
       nextAction: "activate-service",

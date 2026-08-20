@@ -183,6 +183,19 @@ export type DirectAgreementPaymentReferences = {
   /** Calendar/ISO date the external payment completed. */
   paidAt?: string | null;
   operatorNote?: string | null;
+  /**
+   * When source is manual-non-stripe: cash-app | check | wire | ach | other.
+   * Never stores Cash App credentials.
+   */
+  externalPaymentMethod?:
+    | "cash-app"
+    | "check"
+    | "wire"
+    | "ach"
+    | "other"
+    | null;
+  /** Optional external reference (Cash App note, check number, etc.). */
+  externalReference?: string | null;
   source?: PaymentProvenanceSource | null;
   /** true = LIVE Stripe object; false = TEST; null = non-Stripe / unknown. */
   livemode?: boolean | null;
