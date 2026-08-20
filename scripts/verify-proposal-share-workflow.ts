@@ -309,6 +309,23 @@ function main() {
     sourceHas(workspace, /Prepare Share Link/) && sourceLacks(workspace, /Send Proposal/),
   );
   check(
+    "Protected proposals render a locked delivery status card",
+    sourceHas(workspace, /kxd-os-share-locked/) &&
+      sourceHas(workspace, /This live proposal is protected\. Its secure client link remains active/),
+  );
+  check(
+    "Protected proposals hide Approve / Prepare / Replace / Mark as Sent controls",
+    sourceHas(workspace, /shareState\?\.liveDealProtected \? \(/) &&
+      /liveDealProtected \? \([\s\S]*?kxd-os-share-locked[\s\S]*?Download PDF[\s\S]*?\) : \(/.test(
+        readRepo(workspace),
+      ),
+  );
+  check(
+    "Protected proposals do not show the unrecoverable-URL warning",
+    !/liveDealProtected[\s\S]{0,400}cannot be recovered/.test(readRepo(workspace)) &&
+      sourceHas(workspace, /A secure share link is already active\. The original URL cannot be/),
+  );
+  check(
     "Booking link lives in proposal settings, not the share-action row",
     sourceHas(workspace, /Optional consultation booking link/) &&
       sourceHas(

@@ -1767,218 +1767,288 @@ export function ProposalWorkspaceScreen({
 
               {tab === "share" ? (
                 <div>
-                  <p className="kxd-os-body">
-                    Approve internally, prepare a share link, copy or open it, then deliver it
-                    yourself. Preparing a link does not email the client, does not mean the
-                    proposal was delivered, and does not charge, accept, sign, or activate
-                    anything. After you send it manually, mark it as sent.
-                  </p>
                   {shareState?.liveDealProtected ? (
-                    <p role="alert" className="kxd-os-body" style={{ color: "#8b2e2e" }}>
-                      This is a protected live commercial proposal. Operator share, replace, and
-                      mark-as-sent actions are locked.
-                    </p>
-                  ) : null}
-                  <div className="kxd-os-share-actions">
-                    <button
-                      type="button"
-                      className="kxd-os-btn"
-                      style={{ borderRadius: 2 }}
-                      disabled={busy || mode !== "edit" || Boolean(shareState?.liveDealProtected)}
-                      onClick={() => void approveForSharing()}
-                    >
-                      Approve for Sharing
-                    </button>
-                    <button
-                      type="button"
-                      className="kxd-os-btn"
-                      style={{ borderRadius: 2 }}
-                      disabled={busy || mode !== "edit" || Boolean(shareState?.liveDealProtected)}
-                      onClick={() => void prepareShareLink()}
-                    >
-                      Prepare Share Link
-                    </button>
-                    {proposal?.id ? (
-                      <a
-                        className="kxd-os-btn kxd-os-btn--ghost"
-                        style={{ borderRadius: 2 }}
-                        href={`/api/admin/proposal-builder/${proposal.id}/pdf`}
-                      >
-                        Download PDF
-                      </a>
-                    ) : null}
-                  </div>
-                  {shareUrl ? (
-                    <div className="kxd-os-share-panel">
-                      <p className="kxd-os-meta" style={{ marginBottom: 8 }}>
-                        Public proposal URL — shown while this session still has it. Copying or
-                        opening does not rotate the token.
+                    <div className="kxd-os-share-locked">
+                      <p className="kxd-os-share-locked__eyebrow">Proposal delivery</p>
+                      <dl className="kxd-os-share-locked__rows">
+                        <div className="kxd-os-share-locked__row">
+                          <dt>Status</dt>
+                          <dd>
+                            {status
+                              .split("-")
+                              .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+                              .join(" ")}
+                          </dd>
+                        </div>
+                        <div className="kxd-os-share-locked__row">
+                          <dt>Secure link</dt>
+                          <dd>{shareState.hasActiveShareLink ? "Active" : "None on file"}</dd>
+                        </div>
+                        <div className="kxd-os-share-locked__row">
+                          <dt>Protection</dt>
+                          <dd>Locked</dd>
+                        </div>
+                      </dl>
+                      <p className="kxd-os-share-locked__copy">
+                        This live proposal is protected. Its secure client link remains active, and
+                        delivery controls are locked to prevent accidental replacement or
+                        invalidation.
                       </p>
-                      <a
-                        className="kxd-os-share-link"
-                        href={shareUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        {shareUrl}
-                      </a>
+                      {shareState.manualDelivery ? (
+                        <dl className="kxd-os-share-locked__rows kxd-os-share-locked__rows--delivery">
+                          <div className="kxd-os-share-locked__row">
+                            <dt>Delivery method</dt>
+                            <dd>
+                              {DELIVERY_METHODS.find(
+                                (method) => method.value === shareState.manualDelivery?.method,
+                              )?.label ?? shareState.manualDelivery.method}
+                            </dd>
+                          </div>
+                          <div className="kxd-os-share-locked__row">
+                            <dt>Delivered</dt>
+                            <dd>{fmtDate(shareState.manualDelivery.deliveredAt)}</dd>
+                          </div>
+                          {shareState.manualDelivery.recipient ? (
+                            <div className="kxd-os-share-locked__row">
+                              <dt>Recipient</dt>
+                              <dd>{shareState.manualDelivery.recipient}</dd>
+                            </div>
+                          ) : null}
+                          {shareState.manualDelivery.note ? (
+                            <div className="kxd-os-share-locked__row">
+                              <dt>Operator note</dt>
+                              <dd>{shareState.manualDelivery.note}</dd>
+                            </div>
+                          ) : null}
+                        </dl>
+                      ) : null}
+                      {proposal?.id ? (
+                        <div className="kxd-os-share-actions kxd-os-share-actions--compact">
+                          <a
+                            className="kxd-os-btn kxd-os-btn--secondary"
+                            style={{ borderRadius: 2 }}
+                            href={`/api/admin/proposal-builder/${proposal.id}/pdf`}
+                          >
+                            Download PDF
+                          </a>
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : (
+                    <>
+                      <p className="kxd-os-body" style={{ marginBottom: 6 }}>
+                        Approve the proposal, prepare its secure link, deliver it manually, then
+                        record it as sent.
+                      </p>
+                      <p className="kxd-os-meta" style={{ marginBottom: "1rem" }}>
+                        Preparing a link does not email the client or mark the proposal as
+                        delivered.
+                      </p>
                       <div className="kxd-os-share-actions">
                         <button
                           type="button"
-                          className="kxd-os-btn kxd-os-btn--primary"
-                          style={{ borderRadius: 2 }}
-                          onClick={() => void copyShareLink()}
-                        >
-                          Copy Link
-                        </button>
-                        <a
                           className="kxd-os-btn"
                           style={{ borderRadius: 2 }}
-                          href={shareUrl}
-                          target="_blank"
-                          rel="noreferrer"
+                          disabled={busy || mode !== "edit"}
+                          onClick={() => void approveForSharing()}
                         >
-                          Open Proposal
-                        </a>
+                          Approve for Sharing
+                        </button>
+                        <button
+                          type="button"
+                          className="kxd-os-btn"
+                          style={{ borderRadius: 2 }}
+                          disabled={busy || mode !== "edit"}
+                          onClick={() => void prepareShareLink()}
+                        >
+                          Prepare Share Link
+                        </button>
+                        {proposal?.id ? (
+                          <a
+                            className="kxd-os-btn kxd-os-btn--secondary"
+                            style={{ borderRadius: 2 }}
+                            href={`/api/admin/proposal-builder/${proposal.id}/pdf`}
+                          >
+                            Download PDF
+                          </a>
+                        ) : null}
                       </div>
-                      {copyStatus ? (
-                        <p role="status" className="kxd-os-meta">
-                          {copyStatus}
+                      {shareUrl ? (
+                        <div className="kxd-os-share-panel">
+                          <p className="kxd-os-meta" style={{ marginBottom: 8 }}>
+                            Public proposal URL — shown while this session still has it. Copying or
+                            opening does not rotate the token.
+                          </p>
+                          <a
+                            className="kxd-os-share-link"
+                            href={shareUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            {shareUrl}
+                          </a>
+                          <div className="kxd-os-share-actions">
+                            <button
+                              type="button"
+                              className="kxd-os-btn kxd-os-btn--primary"
+                              style={{ borderRadius: 2 }}
+                              onClick={() => void copyShareLink()}
+                            >
+                              Copy Link
+                            </button>
+                            <a
+                              className="kxd-os-btn"
+                              style={{ borderRadius: 2 }}
+                              href={shareUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              Open Proposal
+                            </a>
+                          </div>
+                          {copyStatus ? (
+                            <p role="status" className="kxd-os-meta">
+                              {copyStatus}
+                            </p>
+                          ) : null}
+                        </div>
+                      ) : shareState?.hasActiveShareLink ? (
+                        <div className="kxd-os-share-panel">
+                          <p className="kxd-os-body">
+                            A secure share link is already active. The original URL cannot be
+                            recovered from storage. If you still have it, use that copy. Otherwise
+                            replace the link — that immediately invalidates the previous client URL.
+                          </p>
+                        </div>
+                      ) : null}
+                      {shareState?.hasActiveShareLink ? (
+                        <div className="kxd-os-share-panel">
+                          <p className="kxd-os-body" style={{ marginBottom: 8 }}>
+                            Replace Share Link invalidates the previous client URL immediately. It
+                            does not email anyone or mark the proposal as sent.
+                          </p>
+                          <label
+                            style={{
+                              display: "flex",
+                              gap: 8,
+                              alignItems: "flex-start",
+                              marginBottom: 12,
+                              fontFamily: "system-ui, sans-serif",
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={replaceAcknowledged}
+                              onChange={(e) => setReplaceAcknowledged(e.target.checked)}
+                            />
+                            <span>
+                              I understand replacing the link will invalidate the previous client
+                              URL.
+                            </span>
+                          </label>
+                          <button
+                            type="button"
+                            className="kxd-os-btn kxd-os-btn--danger"
+                            style={{ borderRadius: 2 }}
+                            disabled={busy || !replaceAcknowledged}
+                            onClick={() => void replaceShareLink()}
+                          >
+                            Replace Share Link
+                          </button>
+                        </div>
+                      ) : null}
+                      <div className="kxd-os-share-panel">
+                        <p className="kxd-os-meta" style={{ marginBottom: 8 }}>
+                          Mark as Sent — after you personally deliver the link
+                        </p>
+                        <p className="kxd-os-body" style={{ marginBottom: 12 }}>
+                          Records that you delivered the proposal. Does not send email and does not
+                          rotate the link.
+                        </p>
+                        <Field label="Delivery method">
+                          <select
+                            style={inputStyle}
+                            value={deliveryMethod}
+                            onChange={(e) =>
+                              setDeliveryMethod(
+                                e.target.value as (typeof DELIVERY_METHODS)[number]["value"],
+                              )
+                            }
+                          >
+                            {DELIVERY_METHODS.map((method) => (
+                              <option key={method.value} value={method.value}>
+                                {method.label}
+                              </option>
+                            ))}
+                          </select>
+                        </Field>
+                        <Field label="Delivered date">
+                          <input
+                            type="date"
+                            style={inputStyle}
+                            value={deliveryAt}
+                            onChange={(e) => setDeliveryAt(e.target.value)}
+                          />
+                        </Field>
+                        <Field label="Recipient (optional)">
+                          <input
+                            style={inputStyle}
+                            value={deliveryRecipient}
+                            onChange={(e) => setDeliveryRecipient(e.target.value)}
+                          />
+                        </Field>
+                        <Field label="Operator note (optional)">
+                          <textarea
+                            style={{ ...inputStyle, minHeight: 72 }}
+                            value={deliveryNote}
+                            onChange={(e) => setDeliveryNote(e.target.value)}
+                          />
+                        </Field>
+                        <button
+                          type="button"
+                          className="kxd-os-btn"
+                          style={{ borderRadius: 2 }}
+                          disabled={busy || mode !== "edit"}
+                          onClick={() => void markAsSent()}
+                        >
+                          Mark as Sent
+                        </button>
+                      </div>
+                      <p className="kxd-os-meta">
+                        Status: {status}
+                        {shareState?.shareApprovedAt
+                          ? ` · Approved for sharing: ${fmtDate(shareState.shareApprovedAt)}`
+                          : ""}
+                        {" · "}
+                        Last viewed:{" "}
+                        {fmtDate((proposal?.lastViewedAt ?? shareState?.lastViewedAt) as string)}
+                        {" · "}
+                        Marked sent: {fmtDate((shareState?.sentAt ?? proposal?.sentAt) as string)}
+                        {" · "}
+                        Accepted: {fmtDate(proposal?.acceptedAt as string)}
+                        {" · "}
+                        Change requests:{" "}
+                        {Array.isArray(proposal?.changeRequests)
+                          ? proposal.changeRequests.length
+                          : 0}
+                      </p>
+                      {shareState?.manualDelivery ? (
+                        <p className="kxd-os-meta">
+                          Delivery method: {shareState.manualDelivery.method}
+                          {shareState.manualDelivery.recipient
+                            ? ` · ${shareState.manualDelivery.recipient}`
+                            : ""}
                         </p>
                       ) : null}
-                    </div>
-                  ) : shareState?.hasActiveShareLink ? (
-                    <div className="kxd-os-share-panel">
-                      <p className="kxd-os-body">
-                        A secure share link is already active. The original URL cannot be recovered
-                        from storage. If you still have it, use that copy. Otherwise replace the
-                        link — that immediately invalidates the previous client URL.
-                      </p>
-                    </div>
-                  ) : null}
-                  {shareState?.hasActiveShareLink && !shareState.liveDealProtected ? (
-                    <div className="kxd-os-share-panel">
-                      <p className="kxd-os-body" style={{ marginBottom: 8 }}>
-                        Replace Share Link invalidates the previous client URL immediately. It
-                        does not email anyone or mark the proposal as sent.
-                      </p>
-                      <label
-                        style={{
-                          display: "flex",
-                          gap: 8,
-                          alignItems: "flex-start",
-                          marginBottom: 12,
-                          fontFamily: "system-ui, sans-serif",
-                        }}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={replaceAcknowledged}
-                          onChange={(e) => setReplaceAcknowledged(e.target.checked)}
-                        />
-                        <span>
-                          I understand replacing the link will invalidate the previous client URL.
-                        </span>
-                      </label>
-                      <button
-                        type="button"
-                        className="kxd-os-btn kxd-os-btn--danger"
-                        style={{ borderRadius: 2 }}
-                        disabled={busy || !replaceAcknowledged}
-                        onClick={() => void replaceShareLink()}
-                      >
-                        Replace Share Link
-                      </button>
-                    </div>
-                  ) : null}
-                  <div className="kxd-os-share-panel">
-                    <p className="kxd-os-meta" style={{ marginBottom: 8 }}>
-                      Mark as Sent — after you personally deliver the link
-                    </p>
-                    <p className="kxd-os-body" style={{ marginBottom: 12 }}>
-                      Records that you delivered the proposal. Does not send email and does not
-                      rotate the link.
-                    </p>
-                    <Field label="Delivery method">
-                      <select
-                        style={inputStyle}
-                        value={deliveryMethod}
-                        disabled={Boolean(shareState?.liveDealProtected)}
-                        onChange={(e) =>
-                          setDeliveryMethod(e.target.value as (typeof DELIVERY_METHODS)[number]["value"])
-                        }
-                      >
-                        {DELIVERY_METHODS.map((method) => (
-                          <option key={method.value} value={method.value}>
-                            {method.label}
-                          </option>
-                        ))}
-                      </select>
-                    </Field>
-                    <Field label="Delivered date">
-                      <input
-                        type="date"
-                        style={inputStyle}
-                        value={deliveryAt}
-                        disabled={Boolean(shareState?.liveDealProtected)}
-                        onChange={(e) => setDeliveryAt(e.target.value)}
-                      />
-                    </Field>
-                    <Field label="Recipient (optional)">
-                      <input
-                        style={inputStyle}
-                        value={deliveryRecipient}
-                        disabled={Boolean(shareState?.liveDealProtected)}
-                        onChange={(e) => setDeliveryRecipient(e.target.value)}
-                      />
-                    </Field>
-                    <Field label="Operator note (optional)">
-                      <textarea
-                        style={{ ...inputStyle, minHeight: 72 }}
-                        value={deliveryNote}
-                        disabled={Boolean(shareState?.liveDealProtected)}
-                        onChange={(e) => setDeliveryNote(e.target.value)}
-                      />
-                    </Field>
-                    <button
-                      type="button"
-                      className="kxd-os-btn"
-                      style={{ borderRadius: 2 }}
-                      disabled={busy || mode !== "edit" || Boolean(shareState?.liveDealProtected)}
-                      onClick={() => void markAsSent()}
-                    >
-                      Mark as Sent
-                    </button>
-                  </div>
-                  <p className="kxd-os-meta">
-                    Status: {status}
-                    {shareState?.shareApprovedAt
-                      ? ` · Approved for sharing: ${fmtDate(shareState.shareApprovedAt)}`
-                      : ""}
-                    {" · "}
-                    Last viewed: {fmtDate((proposal?.lastViewedAt ?? shareState?.lastViewedAt) as string)}
-                    {" · "}
-                    Marked sent: {fmtDate((shareState?.sentAt ?? proposal?.sentAt) as string)}
-                    {" · "}
-                    Accepted: {fmtDate(proposal?.acceptedAt as string)}
-                    {" · "}
-                    Change requests:{" "}
-                    {Array.isArray(proposal?.changeRequests) ? proposal.changeRequests.length : 0}
-                  </p>
-                  {shareState?.manualDelivery ? (
-                    <p className="kxd-os-meta">
-                      Delivery method: {shareState.manualDelivery.method}
-                      {shareState.manualDelivery.recipient
-                        ? ` · ${shareState.manualDelivery.recipient}`
-                        : ""}
-                    </p>
-                  ) : null}
+                    </>
+                  )}
                   {Array.isArray(proposal?.changeRequests) && proposal.changeRequests.length > 0 ? (
                     <div style={{ marginTop: "1rem" }}>
                       {proposal.changeRequests.map((req: SalesUiDoc) => (
                         <div key={String(req.id)} style={{ marginBottom: "0.75rem" }}>
                           <p className="kxd-os-meta">
-                            {String(req.name)} · {String(req.email)} · {fmtDate(req.submittedAt as string)}
+                            {String(req.name)} · {String(req.email)} ·{" "}
+                            {fmtDate(req.submittedAt as string)}
                           </p>
                           <p className="kxd-os-body">{String(req.message)}</p>
                         </div>
