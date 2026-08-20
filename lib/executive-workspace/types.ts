@@ -9,6 +9,7 @@ export type ExecutiveWorkspaceId =
   | "work"
   | "training"
   | "rituals"
+  | "opportunities"
   | "sales"
   | "brief"
   | "focus"

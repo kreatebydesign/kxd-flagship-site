@@ -33,6 +33,12 @@ export const EXECUTIVE_WORKSPACES: ExecutiveWorkspaceDefinition[] = [
     description: "Learn to operate KXD OS",
   },
   {
+    id: "opportunities",
+    label: "Opportunities",
+    href: "/admin/operations/research",
+    description: "Qualify and pursue revenue opportunities",
+  },
+  {
     id: "sales",
     label: "Sales",
     href: "/admin/sales",
@@ -131,6 +137,7 @@ export function resolveWorkspaceIdFromPath(pathname: string): ExecutiveWorkspace
   if (pathname.startsWith("/admin/operations/today")) return "today";
   if (pathname.startsWith("/admin/work")) return "work";
   if (pathname.startsWith("/admin/training")) return "training";
+  if (pathname.startsWith("/admin/operations/research")) return "opportunities";
   if (pathname.startsWith("/admin/sales")) return "sales";
   if (pathname.startsWith("/admin/operations/brief")) return "today";
   if (pathname.startsWith("/admin/operations/focus")) return "focus";

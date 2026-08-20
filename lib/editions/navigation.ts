@@ -43,6 +43,7 @@ export const OPERATIONS_NAV_MODULE_MAP: Record<OperationsNavId, KxdModuleId> = {
   growth: "growth",
   reports: "reporting",
   "reporting-ops": "reporting",
+  opportunities: "sales",
   "sales-pipeline": "sales",
   "sales-leads": "sales",
   "sales-proposals": "sales",

@@ -38,6 +38,7 @@ export type OperationsNavId =
   | "client-provisioning"
   | "genesis"
   | "launch-qa"
+  | "opportunities"
   | "sales-pipeline"
   | "sales-leads"
   | "sales-proposals"
@@ -145,6 +146,11 @@ export const NAV_GROUPS: OperationsNavGroup[] = [
         id: "commercial-agreements",
         label: "Commercial Agreements",
         href: "/admin/operations/commercial-agreements",
+      },
+      {
+        id: "opportunities",
+        label: "Opportunities",
+        href: "/admin/operations/research",
       },
       { id: "sales-pipeline", label: "Pipeline", href: "/admin/sales" },
       { id: "sales-leads", label: "Leads", href: "/admin/sales/leads" },
