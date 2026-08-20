@@ -53,8 +53,9 @@ export function detectSecretKeyMode(
 ): StripeKeyMode {
   if (value == null || !String(value).trim()) return "absent";
   const v = String(value).trim();
-  if (v.startsWith("sk_test_")) return "test";
-  if (v.startsWith("sk_live_")) return "live";
+  // Restricted keys (rk_*) are first-class for least-privilege webhook / local verify paths.
+  if (v.startsWith("sk_test_") || v.startsWith("rk_test_")) return "test";
+  if (v.startsWith("sk_live_") || v.startsWith("rk_live_")) return "live";
   return "unknown";
 }
 
@@ -363,7 +364,7 @@ export function buildStripeIntegrationReadiness(
     blockers.push({
       code: "invalid_secret_key_format",
       message:
-        "STRIPE_SECRET_KEY is present but does not match a recognized sk_test_ or sk_live_ prefix.",
+        "STRIPE_SECRET_KEY is present but does not match a recognized sk_test_/sk_live_ or rk_test_/rk_live_ prefix.",
     });
   }
 

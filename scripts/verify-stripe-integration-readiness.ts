@@ -75,6 +75,14 @@ function main() {
     detectSecretKeyMode(STRIPE_TEST_FIXTURES.secretLive) === "live",
   );
   check(
+    "restricted test key format detection",
+    detectSecretKeyMode("rk_test_phase37h_fixture_not_a_real_key") === "test",
+  );
+  check(
+    "restricted live key format detection",
+    detectSecretKeyMode("rk_live_phase37h_fixture_not_a_real_key") === "live",
+  );
+  check(
     "invalid secret format",
     detectSecretKeyMode(STRIPE_TEST_FIXTURES.invalid) === "unknown",
   );

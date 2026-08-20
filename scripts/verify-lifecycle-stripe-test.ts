@@ -38,6 +38,8 @@ check("invoice_create authorized for lifecycle phase", isCommercialStripeOperati
 check("subscription_create still closed", !isCommercialStripeOperationAllowed("subscription_create"));
 check("live fixture key classified live", detectSecretKeyMode(STRIPE_TEST_FIXTURES.secretLive) === "live");
 check("test fixture key classified test", detectSecretKeyMode(STRIPE_TEST_FIXTURES.secretTest) === "test");
+check("restricted live key classified live", detectSecretKeyMode("rk_live_phase37h_fixture_not_a_real_key") === "live");
+check("restricted test key classified test", detectSecretKeyMode("rk_test_phase37h_fixture_not_a_real_key") === "test");
 check("explicit false livemode is safe", normalizeStripeLivemodeFlag(false) === false);
 check("explicit true livemode is unsafe", normalizeStripeLivemodeFlag(true) === true);
 check("missing livemode fails closed as unsafe", normalizeStripeLivemodeFlag(undefined) === true);
