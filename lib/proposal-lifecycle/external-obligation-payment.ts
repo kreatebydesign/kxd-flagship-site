@@ -296,5 +296,7 @@ export function applyObligationExternalPayment(
     reason: `${validated.receipt.externalPaymentMethod}${validated.receipt.externalReference ? ` · ${validated.receipt.externalReference}` : ""}`,
   });
 
+  // Caller should pass contractStatus via applyOnboardingEligibility after save when known.
+  // Pure package update does not invent execution — eligibility stays false until executed.
   return { ok: true, pkg: next, idempotentReplay: false };
 }

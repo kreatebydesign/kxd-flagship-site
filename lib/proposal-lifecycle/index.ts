@@ -42,3 +42,22 @@ export {
   assertMutableContractReadyForSignature,
 } from "./regenerate-contract-draft.ts";
 export { recordObligationExternalPaymentOnContract } from "./record-obligation-external-payment.ts";
+export {
+  recomputeOnboardingEligibility,
+  applyOnboardingEligibility,
+  isContractFullyExecuted,
+  isInitialObligationPaid,
+} from "./onboarding-eligibility.ts";
+export {
+  matchLivePaidInvoiceToPackage,
+  applyVerifiedLiveInvoicePayment,
+  applyPendingVerifiedStripePayments,
+  bindObligationStripeInvoice,
+  contractIdFromLiveInvoiceEvent,
+} from "./live-stripe-reconciliation.ts";
+export type {
+  ObligationStripeBinding,
+  PendingVerifiedStripePayment,
+  LiveInvoicePaidEvent,
+  LiveMatchResult,
+} from "./live-stripe-reconciliation.ts";

@@ -605,6 +605,20 @@ export async function signContractAsClient(
     }
   }
 
+  // Carry deterministic Stripe invoice bindings onto the new billing plan obligations.
+  if (billingPlan && (pkg.obligationStripeBindings?.length ?? 0) > 0) {
+    const byObligation = new Map(
+      (pkg.obligationStripeBindings ?? []).map((b) => [b.obligationId, b.stripeInvoiceId]),
+    );
+    billingPlan = {
+      ...billingPlan,
+      obligations: billingPlan.obligations.map((o) => {
+        const bound = byObligation.get(o.id);
+        return bound ? { ...o, stripeDraftInvoiceId: o.stripeDraftInvoiceId ?? bound } : o;
+      }),
+    };
+  }
+
   let next: ContractLifecyclePackage = {
     ...pkg,
     structuredPaymentTerms: terms,
@@ -626,6 +640,25 @@ export async function signContractAsClient(
     action: "agreement.fully-executed",
     toStatus: "executed",
   });
+
+  // Apply any live Stripe payments verified before execution / billing plan creation.
+  {
+    const { applyPendingVerifiedStripePayments } = await import(
+      "./live-stripe-reconciliation.ts"
+    );
+    const pendingApplied = applyPendingVerifiedStripePayments({
+      pkg: next,
+      contractStatus: "executed",
+    });
+    next = pendingApplied.pkg;
+    if (pendingApplied.appliedCount > 0) {
+      next = appendAudit(next, {
+        actor: "system",
+        action: "stripe.pending-live-payments-applied",
+        reason: `Applied ${pendingApplied.appliedCount} verified live payment(s) after execution.`,
+      });
+    }
+  }
 
   const completionRaw = generatePublicToken();
   next = {
@@ -732,7 +765,7 @@ export async function signContractAsClient(
 export async function simulateVerifiedInitialPayment(
   contractId: number,
 ): Promise<ContractLifecyclePackage> {
-  const { pkg } = await getContractLifecycle(contractId);
+  const { contract, pkg } = await getContractLifecycle(contractId);
   if (!pkg.billingPlan) throw new Error("No billing plan on contract.");
   let workingPlan = pkg.billingPlan;
   // Local/mock path: prepare draft Stripe objects for review even when live
@@ -745,22 +778,26 @@ export async function simulateVerifiedInitialPayment(
   const initial = workingPlan.obligations.find((o) => o.kind === "initial");
   if (!initial) throw new Error("No initial obligation.");
   const plan = applyMockInvoicePaid(workingPlan, initial.id);
-  let next: ContractLifecyclePackage = {
-    ...pkg,
-    billingPlan: plan,
-    onboardingEligible: true,
-    onboardingEligibleAt: new Date().toISOString(),
-  };
+  const { applyOnboardingEligibility } = await import("./onboarding-eligibility.ts");
+  let next: ContractLifecyclePackage = applyOnboardingEligibility(
+    {
+      ...pkg,
+      billingPlan: plan,
+    },
+    String(contract.status),
+  );
   next = appendAudit(next, {
     actor: "stripe-mock-webhook",
     action: "invoice.paid",
     reason: `obligation:${initial.id}`,
   });
-  next = appendAudit(next, {
-    actor: "system",
-    action: "onboarding.eligible",
-    reason: "Initial payment verified — onboarding remains manual.",
-  });
+  if (next.onboardingEligible && !pkg.onboardingEligible) {
+    next = appendAudit(next, {
+      actor: "system",
+      action: "onboarding.eligible",
+      reason: "Executed contract + verified initial obligation payment.",
+    });
+  }
 
   const payload = await payloadClient();
   await payload.update({
@@ -772,11 +809,11 @@ export async function simulateVerifiedInitialPayment(
 
   try {
     const { notifyLifecycleEvent } = await import("./notifications.ts");
-    const { contract } = await getContractLifecycle(contractId);
     await notifyLifecycleEvent({
       title: "Initial payment verified (mock)",
-      summary:
-        "Mock webhook marked the initial obligation paid. Onboarding is eligible but remains manual.",
+      summary: next.onboardingEligible
+        ? "Mock webhook marked the initial obligation paid. Onboarding is eligible but remains manual."
+        : "Mock webhook marked the initial obligation paid. Onboarding remains locked until the contract is fully executed.",
       clientId: asId(contract.client) ?? undefined,
       severity: "success",
       href: `/admin/sales/contracts/${contractId}`,
@@ -982,29 +1019,25 @@ export async function processLifecycleMockPaymentWebhook(
     throw new Error(result.error || "Mock webhook rejected.");
   }
 
-  const initialPaid = result.plan.obligations.some(
-    (o) => o.kind === "initial" && o.status === "paid",
+  const { applyOnboardingEligibility } = await import("./onboarding-eligibility.ts");
+  let next: ContractLifecyclePackage = applyOnboardingEligibility(
+    {
+      ...pkg,
+      billingPlan: result.plan,
+      processedWebhookEventIds: result.processedEventIds,
+    },
+    String(contract.status),
   );
-  let next: ContractLifecyclePackage = {
-    ...pkg,
-    billingPlan: result.plan,
-    processedWebhookEventIds: result.processedEventIds,
-    onboardingEligible: initialPaid ? true : pkg.onboardingEligible,
-    onboardingEligibleAt:
-      initialPaid && !pkg.onboardingEligible
-        ? new Date().toISOString()
-        : pkg.onboardingEligibleAt,
-  };
   next = appendAudit(next, {
     actor: "stripe-mock-webhook",
     action: event.type,
     reason: result.duplicate ? "duplicate" : event.id,
   });
-  if (initialPaid && !pkg.onboardingEligible) {
+  if (next.onboardingEligible && !pkg.onboardingEligible) {
     next = appendAudit(next, {
       actor: "system",
       action: "onboarding.eligible",
-      reason: "Initial payment verified — onboarding remains manual.",
+      reason: "Executed contract + verified initial obligation payment.",
     });
   }
 

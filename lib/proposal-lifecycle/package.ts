@@ -39,6 +39,8 @@ export function emptyLifecyclePackage(): ContractLifecyclePackage {
     paymentAuthorization: null,
     paymentReferences: null,
     commercialAmendments: null,
+    obligationStripeBindings: [],
+    pendingVerifiedStripePayments: [],
   };
 }
 
@@ -58,6 +60,12 @@ export function normalizeLifecyclePackage(raw: unknown): ContractLifecyclePackag
     documentRefs: Array.isArray(obj.documentRefs) ? obj.documentRefs : [],
     processedWebhookEventIds: Array.isArray(obj.processedWebhookEventIds)
       ? obj.processedWebhookEventIds
+      : [],
+    obligationStripeBindings: Array.isArray(obj.obligationStripeBindings)
+      ? obj.obligationStripeBindings
+      : [],
+    pendingVerifiedStripePayments: Array.isArray(obj.pendingVerifiedStripePayments)
+      ? obj.pendingVerifiedStripePayments
       : [],
   };
 }

@@ -217,7 +217,27 @@ export async function POST(
           ok: true,
           idempotentReplay: result.idempotentReplay,
           billingPlan: result.pkg.billingPlan,
+          onboardingEligible: Boolean(result.pkg.onboardingEligible),
           noStripeMutation: true,
+        });
+      }
+      case "link-obligation-stripe-invoice": {
+        const { linkObligationStripeInvoiceOnContract } = await import(
+          "@/lib/proposal-lifecycle/live-stripe-reconciliation-service"
+        );
+        const result = await linkObligationStripeInvoiceOnContract({
+          contractId: id,
+          obligationId: String(body.obligationId ?? ""),
+          stripeInvoiceId: String(body.stripeInvoiceId ?? ""),
+          actor,
+          note: body.note ? String(body.note) : null,
+        });
+        return NextResponse.json({
+          ok: true,
+          obligationStripeBindings: result.pkg.obligationStripeBindings ?? [],
+          noStripeMutation: true,
+          noPaymentChange: true,
+          note: "Bound Stripe invoice id to obligation for deterministic live webhook matching. Does not mark paid.",
         });
       }
       case "activate-direct-agreement-service": {

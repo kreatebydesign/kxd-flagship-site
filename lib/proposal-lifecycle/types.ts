@@ -398,6 +398,16 @@ export interface ContractLifecyclePackage {
    * Never rewrite proposal.acceptedSnapshot.
    */
   commercialAmendments?: import("./commercial-amendments.ts").ContractCommercialAmendments | null;
+  /**
+   * Deterministic Stripe invoice bindings before/alongside billing plan.
+   * Used so live invoices can be matched without fuzzy email/amount matching.
+   */
+  obligationStripeBindings?: import("./live-stripe-reconciliation.ts").ObligationStripeBinding[] | null;
+  /**
+   * Verified live Stripe payments received before billing plan / execution.
+   * Applied onto obligations when the billing plan exists; eligibility still requires execution.
+   */
+  pendingVerifiedStripePayments?: import("./live-stripe-reconciliation.ts").PendingVerifiedStripePayment[] | null;
 }
 
 export interface LifecycleAuditEvent {

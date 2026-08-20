@@ -41,14 +41,25 @@ export async function recordObligationExternalPaymentOnContract(
     );
   }
 
+  const { applyOnboardingEligibility } = await import("./onboarding-eligibility.ts");
+  const { appendAudit } = await import("./package.ts");
+  let next = applyOnboardingEligibility(applied.pkg, String(contract.status ?? ""));
+  if (next.onboardingEligible && !pkg.onboardingEligible) {
+    next = appendAudit(next, {
+      actor: "system",
+      action: "onboarding.eligible",
+      reason: "Executed contract + verified initial obligation payment.",
+    });
+  }
+
   if (!applied.idempotentReplay) {
     await payload.update({
       collection: "contracts" as never,
       id: input.contractId,
-      data: { lifecyclePackage: applied.pkg } as never,
+      data: { lifecyclePackage: next } as never,
       overrideAccess: true,
     });
   }
 
-  return { pkg: applied.pkg, idempotentReplay: applied.idempotentReplay };
+  return { pkg: next, idempotentReplay: applied.idempotentReplay };
 }
