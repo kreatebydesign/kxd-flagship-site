@@ -26,6 +26,23 @@ export {
   type OpportunitySummaryCounts,
 } from "./research-leads/opportunity-presentation";
 
+export {
+  RESEARCH_TRIGGER_TYPES,
+  RESEARCH_RECOMMENDED_CHANNELS,
+  RESEARCH_URGENCIES,
+  RESEARCH_COMMERCIAL_BANDS,
+  RESEARCH_TRIGGER_TYPE_LABEL,
+  RESEARCH_RECOMMENDED_CHANNEL_LABEL,
+  RESEARCH_URGENCY_LABEL,
+  RESEARCH_COMMERCIAL_BAND_LABEL,
+  buildOpportunityIntelligencePromoteSummary,
+  type ResearchTriggerType,
+  type ResearchRecommendedChannel,
+  type ResearchUrgency,
+  type ResearchCommercialBand,
+  type OpportunityIntelligenceSnapshotInput,
+} from "./research-leads/opportunity-intelligence";
+
 export const RESEARCH_RESEARCHERS = [
   { value: "Matt", label: "Matt" },
   { value: "Sasha", label: "Sasha" },

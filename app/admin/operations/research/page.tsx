@@ -1,12 +1,21 @@
 /**
  * /admin/operations/research
- * KXD OS — Lead Research Desk (intake + review; not primary CRM)
+ * KXD OS — Opportunities (Research Desk implementation)
  */
 
 import { getPayload } from "payload";
 import config from "@payload-config";
-import { ResearchDesk, type ResearchLeadRow, type ResearchMetrics } from "@/components/admin/ResearchDesk";
-import { resolveResearchContactDisplay } from "@/lib/research-leads/intake";
+import {
+  ResearchDesk,
+  type ResearchLeadRow,
+  type ResearchMetrics,
+} from "@/components/admin/ResearchDesk";
+import {
+  compareOpportunitiesForRevenue,
+  isHistoryOpportunityStatus,
+  loadOpportunityDeskMetrics,
+  resolveResearchContactDisplay,
+} from "@/lib/research-leads";
 
 export const dynamic = "force-dynamic";
 
@@ -33,6 +42,42 @@ function ageLabel(iso: string): string {
   return `${Math.floor(days / 30)} mo old`;
 }
 
+function mapLead(l: AnyDoc): ResearchLeadRow {
+  const contact = resolveResearchContactDisplay(l);
+  const promotedSalesLeadId = relId(l.promotedSalesLead);
+  return {
+    id: l.id as number,
+    researcherName: String(l.researcherName ?? ""),
+    source: String(l.source ?? "Craigslist"),
+    state: l.state ? String(l.state) : null,
+    city: l.city ? String(l.city) : null,
+    businessName: l.businessName ? String(l.businessName) : null,
+    opportunityUrl: contact.opportunityUrl,
+    contactEmail: contact.contactEmail,
+    contactPhone: contact.contactPhone,
+    leadUrl: l.leadUrl ? String(l.leadUrl) : null,
+    estimatedService: l.estimatedService ? String(l.estimatedService) : null,
+    status: String(l.status ?? "new"),
+    grade: l.grade ? String(l.grade) : null,
+    rejectReason: l.rejectReason ? String(l.rejectReason) : null,
+    qualificationEvidence: l.qualificationEvidence
+      ? String(l.qualificationEvidence)
+      : null,
+    notes: l.notes ? String(l.notes) : null,
+    triggerType: l.triggerType ? String(l.triggerType) : null,
+    eventDate: l.eventDate ? String(l.eventDate) : null,
+    digitalGap: l.digitalGap ? String(l.digitalGap) : null,
+    recommendedChannel: l.recommendedChannel ? String(l.recommendedChannel) : null,
+    urgency: l.urgency ? String(l.urgency) : null,
+    commercialBand: l.commercialBand ? String(l.commercialBand) : null,
+    createdAt: String(l.createdAt ?? ""),
+    updatedAt: l.updatedAt ? String(l.updatedAt) : null,
+    ageLabel: ageLabel(String(l.createdAt ?? "")),
+    promotedSalesLeadId,
+    promotedAt: l.promotedAt ? String(l.promotedAt) : null,
+  };
+}
+
 export default async function ResearchDeskPage({
   searchParams,
 }: {
@@ -43,64 +88,55 @@ export default async function ResearchDeskPage({
   const filterResearcher = params.researcher?.trim() ?? "";
 
   let allLeads: AnyDoc[] = [];
+  let metrics: ResearchMetrics = {
+    total: 0,
+    new: 0,
+    reviewing: 0,
+    qualified: 0,
+    aPlus: 0,
+    a: 0,
+    b: 0,
+    closedWon: 0,
+    promoted: 0,
+    rejected: 0,
+  };
 
   try {
     const payload = await getPayload({ config });
-    const result = await payload.find({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      collection: "research-leads" as any,
-      limit: 500,
-      depth: 0,
-      sort: "-createdAt",
-    });
+    const [result, deskMetrics] = await Promise.all([
+      payload.find({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        collection: "research-leads" as any,
+        limit: 500,
+        depth: 0,
+        sort: "-createdAt",
+      }),
+      loadOpportunityDeskMetrics(payload),
+    ]);
     allLeads = result.docs as AnyDoc[];
+    metrics = deskMetrics;
   } catch {
     allLeads = [];
   }
-
-  const metrics: ResearchMetrics = {
-    total: allLeads.length,
-    new: allLeads.filter((l) => l.status === "new").length,
-    qualified: allLeads.filter((l) => l.status === "qualified").length,
-    closedWon: allLeads.filter((l) => l.status === "closed-won").length,
-    promoted: allLeads.filter((l) => relId(l.promotedSalesLead) != null).length,
-  };
 
   const researchers = Array.from(
     new Set(allLeads.map((l) => String(l.researcherName ?? "").trim()).filter(Boolean)),
   ).sort();
 
   let filtered = allLeads;
-  if (filterStatus) filtered = filtered.filter((l) => l.status === filterStatus);
-  if (filterResearcher) filtered = filtered.filter((l) => l.researcherName === filterResearcher);
+  if (filterStatus) {
+    filtered = filtered.filter((l) => l.status === filterStatus);
+  } else {
+    // Default Opportunities view — history only when intentionally filtered.
+    filtered = filtered.filter((l) => !isHistoryOpportunityStatus(String(l.status ?? "")));
+  }
+  if (filterResearcher) {
+    filtered = filtered.filter((l) => l.researcherName === filterResearcher);
+  }
 
-  const leads: ResearchLeadRow[] = filtered.map((l) => {
-    const contact = resolveResearchContactDisplay(l);
-    const promotedSalesLeadId = relId(l.promotedSalesLead);
-    return {
-      id: l.id as number,
-      researcherName: String(l.researcherName ?? ""),
-      source: String(l.source ?? "Craigslist"),
-      state: l.state ? String(l.state) : null,
-      city: l.city ? String(l.city) : null,
-      businessName: l.businessName ? String(l.businessName) : null,
-      opportunityUrl: contact.opportunityUrl,
-      contactEmail: contact.contactEmail,
-      contactPhone: contact.contactPhone,
-      leadUrl: l.leadUrl ? String(l.leadUrl) : null,
-      estimatedService: l.estimatedService ? String(l.estimatedService) : null,
-      status: String(l.status ?? "new"),
-      grade: l.grade ? String(l.grade) : null,
-      rejectReason: l.rejectReason ? String(l.rejectReason) : null,
-      qualificationEvidence: l.qualificationEvidence
-        ? String(l.qualificationEvidence)
-        : null,
-      createdAt: String(l.createdAt ?? ""),
-      ageLabel: ageLabel(String(l.createdAt ?? "")),
-      promotedSalesLeadId,
-      promotedAt: l.promotedAt ? String(l.promotedAt) : null,
-    };
-  });
+  const leads: ResearchLeadRow[] = filtered
+    .map(mapLead)
+    .sort(compareOpportunitiesForRevenue);
 
   return (
     <ResearchDesk

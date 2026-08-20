@@ -1,21 +1,29 @@
 /**
  * /api/admin/research-leads
  * POST — create research lead
- * PATCH — status / grade / qualification evidence / reject reason
+ * PATCH — status / grade / qualification / reject / Opportunity Intelligence fields
  */
 import { NextRequest, NextResponse } from "next/server";
 import { requirePayloadAdminApi } from "@/lib/admin/auth";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import {
+  RESEARCH_COMMERCIAL_BANDS,
   RESEARCH_GRADES,
+  RESEARCH_RECOMMENDED_CHANNELS,
   RESEARCH_REJECT_REASONS,
   RESEARCH_RESEARCHERS,
   RESEARCH_STATUSES,
+  RESEARCH_TRIGGER_TYPES,
+  RESEARCH_URGENCIES,
   normalizeResearchIntake,
+  type ResearchCommercialBand,
   type ResearchGrade,
+  type ResearchRecommendedChannel,
   type ResearchRejectReason,
   type ResearchStatus,
+  type ResearchTriggerType,
+  type ResearchUrgency,
 } from "@/lib/research-leads";
 
 export const dynamic = "force-dynamic";
@@ -24,6 +32,10 @@ const VALID_STATUSES = new Set(RESEARCH_STATUSES.map((s) => s.value));
 const VALID_RESEARCHERS = new Set(RESEARCH_RESEARCHERS.map((r) => r.value));
 const VALID_GRADES = new Set(RESEARCH_GRADES.map((g) => g.value));
 const VALID_REJECT_REASONS = new Set(RESEARCH_REJECT_REASONS.map((r) => r.value));
+const VALID_TRIGGER_TYPES = new Set(RESEARCH_TRIGGER_TYPES.map((t) => t.value));
+const VALID_CHANNELS = new Set(RESEARCH_RECOMMENDED_CHANNELS.map((c) => c.value));
+const VALID_URGENCIES = new Set(RESEARCH_URGENCIES.map((u) => u.value));
+const VALID_BANDS = new Set(RESEARCH_COMMERCIAL_BANDS.map((b) => b.value));
 
 function parseOptionalGrade(value: unknown): ResearchGrade | null | undefined {
   if (value === undefined) return undefined;
@@ -41,6 +53,38 @@ function parseOptionalRejectReason(value: unknown): ResearchRejectReason | null 
     return value as ResearchRejectReason;
   }
   return undefined;
+}
+
+function parseOptionalSelect<T extends string>(
+  value: unknown,
+  valid: Set<string>,
+): T | null | undefined {
+  if (value === undefined) return undefined;
+  if (value === null || value === "") return null;
+  if (typeof value === "string" && valid.has(value)) return value as T;
+  return undefined;
+}
+
+function parseOptionalEventDate(value: unknown): string | null | undefined {
+  if (value === undefined) return undefined;
+  if (value === null || value === "") return null;
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  // Accept YYYY-MM-DD from day-only inputs
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+    return `${trimmed}T12:00:00.000Z`;
+  }
+  const d = new Date(trimmed);
+  if (Number.isNaN(d.getTime())) return undefined;
+  return d.toISOString();
+}
+
+function parseOptionalDigitalGap(value: unknown): string | null | undefined {
+  if (value === undefined) return undefined;
+  if (value === null) return null;
+  if (typeof value !== "string") return undefined;
+  return value.trim() || null;
 }
 
 export async function POST(req: NextRequest) {
@@ -74,6 +118,51 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: normalized.message }, { status: 400 });
     }
 
+    const triggerType = parseOptionalSelect<ResearchTriggerType>(
+      body.triggerType,
+      VALID_TRIGGER_TYPES,
+    );
+    const eventDate = parseOptionalEventDate(body.eventDate);
+    const digitalGap = parseOptionalDigitalGap(body.digitalGap);
+    const recommendedChannel = parseOptionalSelect<ResearchRecommendedChannel>(
+      body.recommendedChannel,
+      VALID_CHANNELS,
+    );
+    const urgency = parseOptionalSelect<ResearchUrgency>(body.urgency, VALID_URGENCIES);
+    const commercialBand = parseOptionalSelect<ResearchCommercialBand>(
+      body.commercialBand,
+      VALID_BANDS,
+    );
+
+    if (
+      (body.triggerType !== undefined &&
+        body.triggerType !== null &&
+        body.triggerType !== "" &&
+        triggerType === undefined) ||
+      (body.eventDate !== undefined &&
+        body.eventDate !== null &&
+        body.eventDate !== "" &&
+        eventDate === undefined) ||
+      (body.digitalGap !== undefined && digitalGap === undefined) ||
+      (body.recommendedChannel !== undefined &&
+        body.recommendedChannel !== null &&
+        body.recommendedChannel !== "" &&
+        recommendedChannel === undefined) ||
+      (body.urgency !== undefined &&
+        body.urgency !== null &&
+        body.urgency !== "" &&
+        urgency === undefined) ||
+      (body.commercialBand !== undefined &&
+        body.commercialBand !== null &&
+        body.commercialBand !== "" &&
+        commercialBand === undefined)
+    ) {
+      return NextResponse.json(
+        { success: false, error: "One or more Opportunity Intelligence fields are invalid." },
+        { status: 400 },
+      );
+    }
+
     const payload = await getPayload({ config });
     const d = normalized.data;
 
@@ -92,6 +181,12 @@ export async function POST(req: NextRequest) {
     if (d.leadUrl) data.leadUrl = d.leadUrl;
     if (d.estimatedService) data.estimatedService = d.estimatedService;
     if (d.notes) data.notes = d.notes;
+    if (triggerType) data.triggerType = triggerType;
+    if (eventDate) data.eventDate = eventDate;
+    if (digitalGap) data.digitalGap = digitalGap;
+    if (recommendedChannel) data.recommendedChannel = recommendedChannel;
+    if (urgency) data.urgency = urgency;
+    if (commercialBand) data.commercialBand = commercialBand;
 
     const record = await payload.create({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -126,12 +221,30 @@ export async function PATCH(req: NextRequest) {
     const hasGrade = Object.prototype.hasOwnProperty.call(body, "grade");
     const hasEvidence = Object.prototype.hasOwnProperty.call(body, "qualificationEvidence");
     const hasRejectReason = Object.prototype.hasOwnProperty.call(body, "rejectReason");
+    const hasTriggerType = Object.prototype.hasOwnProperty.call(body, "triggerType");
+    const hasEventDate = Object.prototype.hasOwnProperty.call(body, "eventDate");
+    const hasDigitalGap = Object.prototype.hasOwnProperty.call(body, "digitalGap");
+    const hasChannel = Object.prototype.hasOwnProperty.call(body, "recommendedChannel");
+    const hasUrgency = Object.prototype.hasOwnProperty.call(body, "urgency");
+    const hasBand = Object.prototype.hasOwnProperty.call(body, "commercialBand");
 
-    if (!hasStatus && !hasGrade && !hasEvidence && !hasRejectReason) {
+    if (
+      !hasStatus &&
+      !hasGrade &&
+      !hasEvidence &&
+      !hasRejectReason &&
+      !hasTriggerType &&
+      !hasEventDate &&
+      !hasDigitalGap &&
+      !hasChannel &&
+      !hasUrgency &&
+      !hasBand
+    ) {
       return NextResponse.json(
         {
           success: false,
-          error: "Provide status, grade, qualificationEvidence, and/or rejectReason.",
+          error:
+            "Provide status, grade, qualificationEvidence, rejectReason, and/or Opportunity Intelligence fields.",
         },
         { status: 400 },
       );
@@ -188,6 +301,69 @@ export async function PATCH(req: NextRequest) {
         );
       }
       data.rejectReason = reason;
+    }
+
+    if (hasTriggerType) {
+      const triggerType = parseOptionalSelect<ResearchTriggerType>(
+        body.triggerType,
+        VALID_TRIGGER_TYPES,
+      );
+      if (triggerType === undefined) {
+        return NextResponse.json({ success: false, error: "Valid trigger type required." }, { status: 400 });
+      }
+      data.triggerType = triggerType;
+    }
+
+    if (hasEventDate) {
+      const eventDate = parseOptionalEventDate(body.eventDate);
+      if (eventDate === undefined) {
+        return NextResponse.json({ success: false, error: "Valid event date required." }, { status: 400 });
+      }
+      data.eventDate = eventDate;
+    }
+
+    if (hasDigitalGap) {
+      const digitalGap = parseOptionalDigitalGap(body.digitalGap);
+      if (digitalGap === undefined) {
+        return NextResponse.json({ success: false, error: "digitalGap must be text." }, { status: 400 });
+      }
+      data.digitalGap = digitalGap;
+    }
+
+    if (hasChannel) {
+      const recommendedChannel = parseOptionalSelect<ResearchRecommendedChannel>(
+        body.recommendedChannel,
+        VALID_CHANNELS,
+      );
+      if (recommendedChannel === undefined) {
+        return NextResponse.json(
+          { success: false, error: "Valid recommended channel required." },
+          { status: 400 },
+        );
+      }
+      data.recommendedChannel = recommendedChannel;
+    }
+
+    if (hasUrgency) {
+      const urgency = parseOptionalSelect<ResearchUrgency>(body.urgency, VALID_URGENCIES);
+      if (urgency === undefined) {
+        return NextResponse.json({ success: false, error: "Valid urgency required." }, { status: 400 });
+      }
+      data.urgency = urgency;
+    }
+
+    if (hasBand) {
+      const commercialBand = parseOptionalSelect<ResearchCommercialBand>(
+        body.commercialBand,
+        VALID_BANDS,
+      );
+      if (commercialBand === undefined) {
+        return NextResponse.json(
+          { success: false, error: "Valid commercial band required." },
+          { status: 400 },
+        );
+      }
+      data.commercialBand = commercialBand;
     }
 
     const payload = await getPayload({ config });

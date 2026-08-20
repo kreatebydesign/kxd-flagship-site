@@ -120,6 +120,89 @@ export const ResearchLeads: CollectionConfig = {
     },
     { name: "notes", type: "textarea", label: "Notes" },
     {
+      name: "triggerType",
+      type: "select",
+      label: "What Changed",
+      options: [
+        { label: "Expansion", value: "expansion" },
+        { label: "Second location", value: "second-location" },
+        { label: "Reopening", value: "reopening" },
+        { label: "New ownership", value: "new-ownership" },
+        { label: "Acquisition", value: "acquisition" },
+        { label: "Relocation", value: "relocation" },
+        { label: "Renovation", value: "renovation" },
+        { label: "Hiring / growth", value: "hiring" },
+        { label: "Active advertising", value: "advertising" },
+        { label: "Other", value: "other" },
+      ],
+      admin: {
+        description:
+          "Opportunity Intelligence — commercial event that may create digital need. Optional.",
+      },
+    },
+    {
+      name: "eventDate",
+      type: "date",
+      label: "Event Date",
+      admin: {
+        description: "When the commercial event occurred or is expected. Optional.",
+        date: { pickerAppearance: "dayOnly" },
+      },
+    },
+    {
+      name: "digitalGap",
+      type: "textarea",
+      label: "Digital Gap",
+      admin: {
+        description:
+          "Specific evidence of the digital gap that makes this a KXD opportunity. Optional.",
+      },
+    },
+    {
+      name: "recommendedChannel",
+      type: "select",
+      label: "Recommended First Contact",
+      options: [
+        { label: "Call", value: "call" },
+        { label: "Email", value: "email" },
+        { label: "Contact form", value: "form" },
+        { label: "LinkedIn", value: "linkedin" },
+        { label: "Social DM", value: "social-dm" },
+        { label: "Referral", value: "referral" },
+      ],
+      admin: {
+        description: "Advisory only — never auto-contacts. Optional.",
+      },
+    },
+    {
+      name: "urgency",
+      type: "select",
+      label: "Urgency",
+      options: [
+        { label: "High", value: "high" },
+        { label: "Medium", value: "medium" },
+        { label: "Low", value: "low" },
+      ],
+      admin: {
+        description: "How quickly KXD should move. Optional.",
+      },
+    },
+    {
+      name: "commercialBand",
+      type: "select",
+      label: "Commercial Band",
+      options: [
+        { label: "$7,500+", value: "7.5k-plus" },
+        { label: "$2,500–$7,500", value: "2.5-7.5k" },
+        { label: "$750–$2,500", value: "0.75-2.5k" },
+        { label: "Unclear", value: "unclear" },
+      ],
+      admin: {
+        description:
+          "Rough commercial size if this converts — not a quote or proposal. Separate from Grade. Optional.",
+      },
+    },
+    {
       name: "grade",
       type: "select",
       label: "Opportunity Grade",

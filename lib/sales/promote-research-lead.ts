@@ -7,6 +7,7 @@ import "server-only";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import { resolveResearchContactDisplay } from "@/lib/research-leads/intake";
+import { buildOpportunityIntelligencePromoteSummary } from "@/lib/research-leads/opportunity-intelligence";
 import { logSalesActivity } from "./activities";
 import { initialResponseDueAt } from "./follow-up-policy";
 import type { SalesDoc } from "./types";
@@ -177,6 +178,19 @@ export async function promoteResearchLeadToSales(
     });
 
     try {
+      const oiSnapshot = buildOpportunityIntelligencePromoteSummary({
+        grade: research.grade != null ? String(research.grade) : null,
+        triggerType: research.triggerType != null ? String(research.triggerType) : null,
+        eventDate: research.eventDate != null ? String(research.eventDate) : null,
+        digitalGap: research.digitalGap != null ? String(research.digitalGap) : null,
+        urgency: research.urgency != null ? String(research.urgency) : null,
+        commercialBand:
+          research.commercialBand != null ? String(research.commercialBand) : null,
+        recommendedChannel:
+          research.recommendedChannel != null
+            ? String(research.recommendedChannel)
+            : null,
+      });
       await logSalesActivity({
         activityType: "note",
         title: "Promoted from Research",
@@ -184,9 +198,10 @@ export async function promoteResearchLeadToSales(
           `Research lead #${researchLeadId} promoted to Sales.`,
           sourcedByName ? `Sourced by ${sourcedByName}.` : null,
           options?.operatorLabel ? `Operator: ${options.operatorLabel}.` : null,
+          oiSnapshot,
         ]
           .filter(Boolean)
-          .join(" "),
+          .join("\n\n"),
         leadId: salesLeadId,
       });
     } catch (err) {

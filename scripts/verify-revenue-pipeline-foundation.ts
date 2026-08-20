@@ -15,6 +15,7 @@ import {
   classifyLegacyLeadUrl,
   resolveResearchContactDisplay,
 } from "../lib/research-leads/intake";
+import { buildOpportunityIntelligencePromoteSummary } from "../lib/research-leads/opportunity-intelligence";
 import { STATUS_TO_SECTION, WORKSPACE_SECTIONS } from "../lib/sales/workspace-stages";
 import { isNextAction, NEXT_ACTIONS } from "../lib/sales/next-action";
 
@@ -205,6 +206,47 @@ async function main() {
     assert.ok(mig.includes("ADD COLUMN IF NOT EXISTS"));
     assert.ok(!mig.includes('DROP COLUMN IF EXISTS "lead_url"'));
     assert.ok(!mig.includes("UPDATE research_leads SET"));
+  });
+
+  await check("Opportunity Intelligence V1 fields + promote snapshot", () => {
+    assertFileContains("payload/collections/ResearchLeads.ts", "triggerType");
+    assertFileContains("payload/collections/ResearchLeads.ts", "digitalGap");
+    assertFileContains("payload/collections/ResearchLeads.ts", "commercialBand");
+    assertFileContains(
+      "migrations/20260902_research_lead_opportunity_intelligence.ts",
+      "ADD COLUMN IF NOT EXISTS",
+    );
+    assertFileContains("migrations/index.ts", "20260902_research_lead_opportunity_intelligence");
+    assertFileContains("lib/sales/promote-research-lead.ts", "buildOpportunityIntelligencePromoteSummary");
+    assertFileContains("components/admin/ResearchDesk.tsx", "OpportunityIntelligenceEditor");
+    assert.ok(
+      !readFileSync(path.join(ROOT, "payload/collections/SalesLeads.ts"), "utf8").includes(
+        "triggerType",
+      ),
+      "SalesLeads must not gain OI schema fields",
+    );
+
+    const empty = buildOpportunityIntelligencePromoteSummary({});
+    assert.equal(empty, null);
+
+    const partial = buildOpportunityIntelligencePromoteSummary({
+      grade: "A",
+      triggerType: "second-location",
+      digitalGap: "New location is not yet represented online.",
+      urgency: "high",
+      commercialBand: "2.5-7.5k",
+      recommendedChannel: "email",
+      eventDate: null,
+    });
+    assert.ok(partial);
+    assert.ok(partial!.includes("Grade: A"));
+    assert.ok(partial!.includes("Trigger: Second location"));
+    assert.ok(partial!.includes("Digital gap: New location is not yet represented online."));
+    assert.ok(partial!.includes("Urgency: High"));
+    assert.ok(partial!.includes("Commercial potential: $2,500–$7,500"));
+    assert.ok(partial!.includes("Recommended first contact: Email"));
+    assert.ok(!partial!.includes("Event:"));
+    assert.ok(!partial!.includes("null"));
   });
 
   console.log(`\n${checks} checks passed.\n`);
