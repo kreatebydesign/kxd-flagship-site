@@ -34,6 +34,11 @@ const sampleBody = [
   "",
   "AUTO-GENERATED DRAFT — internal review required. Not attorney-approved. Not sent.",
   "",
+  "This draft agreement is prepared from accepted proposal KXD-P-2026-0002 (version 1).",
+  "Post-acceptance commercial amendments are recorded on this contract only and do not rewrite the accepted proposal snapshot.",
+  "",
+  "PARTIES",
+  "Client: Platinum Film Workz by HJ",
   "Website Care & Local Visibility — $250/month beginning at website launch.",
   "Governing Law: State of California. Venue: Los Angeles County.",
 ].join("\n");
@@ -43,6 +48,15 @@ const clientFacing = toClientFacingContractBody(sampleBody);
 check("client-facing strips DRAFT FOR INTERNAL REVIEW", !clientFacing.includes("DRAFT FOR INTERNAL REVIEW"));
 check("client-facing strips operational draft notice", !clientFacing.includes("Template and operational wording only"));
 check("client-facing strips AUTO-GENERATED DRAFT", !clientFacing.includes("AUTO-GENERATED DRAFT"));
+check(
+  "client-facing strips draft provenance line",
+  !clientFacing.includes("This draft agreement is prepared from accepted proposal"),
+);
+check(
+  "client-facing strips post-acceptance provenance line",
+  !clientFacing.includes("Post-acceptance commercial amendments"),
+);
+check("client-facing keeps PARTIES section", clientFacing.includes("PARTIES"));
 check("client-facing keeps commercial care language", clientFacing.includes("$250/month"));
 check("client-facing keeps governing law", clientFacing.includes("California"));
 check("sanitized body has no internal banner", !containsInternalDraftBanner(clientFacing));

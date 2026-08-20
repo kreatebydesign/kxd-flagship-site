@@ -101,6 +101,7 @@ export default async function PublicContractSigningPage({
     collection: "contracts" as never,
     where: { signingTokenHash: { equals: tokenHash } },
     limit: 1,
+    depth: 1,
     overrideAccess: true,
   });
   let contract = found.docs[0] as Record<string, unknown> | undefined;
@@ -161,6 +162,7 @@ export default async function PublicContractSigningPage({
     <ContractSigningClient
       publicToken={publicToken}
       title={String(contract.title ?? "Agreement")}
+      clientName={resolveAgreementClientName(contract)}
       body={toClientFacingContractBody(String(contract.body ?? ""))}
       consentText={ELECTRONIC_SIGNATURE_CONSENT_TEXT}
       consentVersion={ELECTRONIC_SIGNATURE_CONSENT_VERSION}
@@ -168,4 +170,23 @@ export default async function PublicContractSigningPage({
       operatorSignedAt={pkg.operatorSignature.signedAt}
     />
   );
+}
+
+/** Display-only client label — never mutates stored contract fields. */
+function resolveAgreementClientName(contract: Record<string, unknown>): string {
+  const draft = contract.contractDraftSnapshot as
+    | { parties?: { clientName?: string | null } }
+    | null
+    | undefined;
+  const fromDraft = String(draft?.parties?.clientName ?? "").trim();
+  if (fromDraft) return fromDraft;
+
+  const client = contract.client;
+  if (client && typeof client === "object") {
+    const named = String((client as { name?: string | null }).name ?? "").trim();
+    if (named) return named;
+  }
+
+  const bodyMatch = String(contract.body ?? "").match(/^Client:\s*(.+)$/m);
+  return bodyMatch?.[1]?.trim() ?? "";
 }

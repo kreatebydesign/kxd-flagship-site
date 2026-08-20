@@ -1,11 +1,13 @@
 "use client";
 
-import { useId, useState, type CSSProperties, type FormEvent } from "react";
+import { useId, useState, type CSSProperties, type FormEvent, type ReactNode } from "react";
 
 export function ContractSigningClient(props: {
   /** Capability token from the URL — required to POST the signature. */
   publicToken: string;
   title: string;
+  /** Optional client / party name for the agreement header (display only). */
+  clientName?: string;
   body: string;
   consentText: string;
   consentVersion: string;
@@ -32,6 +34,7 @@ export function ContractSigningClient(props: {
   } | null>(null);
 
   const operatorSignedLabel = formatOperatorSignedAt(props.operatorSignedAt);
+  const clientLabel = (props.clientName ?? "").trim();
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -80,8 +83,11 @@ export function ContractSigningClient(props: {
       <main style={page}>
         <div style={container}>
           <BrandHeader />
-          <p style={eyebrow}>Agreement complete</p>
-          <h1 style={h1}>Signed and sealed</h1>
+          <header style={agreementHeader}>
+            <p style={eyebrow}>Agreement complete</p>
+            <h1 style={h1}>Signed and sealed</h1>
+            {clientLabel ? <p style={clientLine}>{clientLabel}</p> : null}
+          </header>
           <p style={lede} role="status">
             Thank you. Your electronic signature has been recorded. Agreement{" "}
             <strong style={strong}>{done.agreementId}</strong>
@@ -128,12 +134,21 @@ export function ContractSigningClient(props: {
     <main style={page}>
       <div style={container}>
         <BrandHeader />
-        <p style={eyebrow}>Electronic signature</p>
-        <h1 style={h1}>{props.title}</h1>
+
+        <header style={agreementHeader}>
+          <p style={eyebrow}>Electronic signature</p>
+          <h1 style={h1}>{props.title}</h1>
+          {clientLabel ? <p style={clientLine}>{clientLabel}</p> : null}
+          <p style={statusPill} role="status">
+            Ready for Signature
+          </p>
+        </header>
+
         <p style={operatorConfirm}>
-          Already signed by KXD: {props.operatorSignedBy}
+          Already signed by KXD · {props.operatorSignedBy}
           {operatorSignedLabel ? ` · ${operatorSignedLabel}` : null}
         </p>
+
         <p style={lede}>
           Signing this agreement creates a binding contract. Review the full terms carefully before
           submitting your typed electronic signature.
@@ -146,9 +161,11 @@ export function ContractSigningClient(props: {
             </h2>
             <p style={scrollHint}>Scroll to review the complete agreement text.</p>
           </div>
-          <pre style={documentBody} tabIndex={0}>
-            {props.body}
-          </pre>
+          <div style={documentScroll} tabIndex={0}>
+            <div style={documentMeasure}>
+              <AgreementDocumentBody text={props.body} />
+            </div>
+          </div>
         </section>
 
         <form
@@ -158,8 +175,11 @@ export function ContractSigningClient(props: {
           aria-describedby={error ? errorId : undefined}
         >
           <h2 id={`${formId}-sign`} style={cardTitle}>
-            Sign as authorized representative
+            Your Signature
           </h2>
+          <p style={cardBody}>
+            Sign as an authorized representative of the named organization.
+          </p>
           <Field id={`${formId}-name`} label="Legal name" value={name} onChange={setName} required />
           <Field id={`${formId}-title`} label="Title" value={title} onChange={setTitle} required />
           <Field
@@ -202,7 +222,7 @@ export function ContractSigningClient(props: {
             />
             <span>I am authorized to sign for the named organization.</span>
           </label>
-          <label style={check}>
+          <label style={checkConsent}>
             <input
               type="checkbox"
               checked={consent}
@@ -225,9 +245,71 @@ export function ContractSigningClient(props: {
   );
 }
 
+/** Presentation-only: preserve exact wording while styling headings and bullets. */
+function AgreementDocumentBody({ text }: { text: string }) {
+  const lines = String(text ?? "").replace(/\r\n/g, "\n").split("\n");
+  const blocks: ReactNode[] = [];
+  let bulletBuffer: string[] = [];
+  let key = 0;
+
+  function flushBullets() {
+    if (!bulletBuffer.length) return;
+    blocks.push(
+      <ul key={`ul-${key++}`} style={bulletList}>
+        {bulletBuffer.map((item, i) => (
+          <li key={`li-${key}-${i}`} style={bulletItem}>
+            {item}
+          </li>
+        ))}
+      </ul>,
+    );
+    bulletBuffer = [];
+  }
+
+  for (const raw of lines) {
+    const line = raw;
+    const trimmed = line.trim();
+    if (!trimmed) {
+      flushBullets();
+      blocks.push(<div key={`sp-${key++}`} style={sectionGap} aria-hidden />);
+      continue;
+    }
+    const bulletMatch = trimmed.match(/^[•\-\*]\s+(.*)$/);
+    if (bulletMatch) {
+      bulletBuffer.push(bulletMatch[1] ?? "");
+      continue;
+    }
+    flushBullets();
+    if (isSectionHeading(trimmed)) {
+      blocks.push(
+        <h3 key={`h-${key++}`} style={sectionHeading}>
+          {trimmed}
+        </h3>,
+      );
+      continue;
+    }
+    blocks.push(
+      <p key={`p-${key++}`} style={paragraph}>
+        {line}
+      </p>,
+    );
+  }
+  flushBullets();
+
+  return <div style={documentInner}>{blocks}</div>;
+}
+
+function isSectionHeading(line: string): boolean {
+  if (line.length < 2 || line.length > 64) return false;
+  if (/[.!?]$/.test(line)) return false;
+  if (line.includes(":")) return false;
+  // ALL-CAPS section labels used in KXD agreement drafts (PARTIES, SCOPE, …).
+  return /^[A-Z0-9][A-Z0-9 &/\-]{0,62}$/.test(line);
+}
+
 function BrandHeader() {
   return (
-    <header style={brandHeader}>
+    <div style={brandHeader}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/migrated-assets/brand/kxd-logo-transparent.png"
@@ -236,8 +318,7 @@ function BrandHeader() {
         height={90}
         style={brandLogo}
       />
-      <div style={brandRule} aria-hidden />
-    </header>
+    </div>
   );
 }
 
@@ -288,11 +369,12 @@ function Field({
 }
 
 const GOLD = "#c2aa72";
-const GOLD_SOFT = "rgba(194, 170, 114, 0.22)";
-const GOLD_BORDER = "rgba(194, 170, 114, 0.32)";
+const GOLD_BORDER = "rgba(194, 170, 114, 0.28)";
 const INK = "#f4efe6";
-const MUTED = "rgba(244, 239, 230, 0.62)";
+const MUTED = "rgba(244, 239, 230, 0.58)";
 const PAGE_BG = "#0a0a0a";
+const DOC_INK = "#2c2824";
+const DOC_MUTED = "#6e675e";
 const SERIF = "Georgia, 'Iowan Old Style', Palatino, 'Times New Roman', serif";
 const SANS = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 
@@ -305,70 +387,88 @@ const page: CSSProperties = {
 
 const container: CSSProperties = {
   width: "100%",
-  maxWidth: 720,
+  maxWidth: 680,
   margin: "0 auto",
 };
 
 const brandHeader: CSSProperties = {
-  marginBottom: "1.75rem",
+  marginBottom: "1.5rem",
 };
 
 const brandLogo: CSSProperties = {
-  width: "5.25rem",
+  width: "4.75rem",
   height: "auto",
   display: "block",
-  marginBottom: "1rem",
 };
 
-const brandRule: CSSProperties = {
-  width: 40,
-  height: 1,
-  background: GOLD,
-  opacity: 0.7,
+const agreementHeader: CSSProperties = {
+  marginBottom: "1.15rem",
+  paddingBottom: "1.15rem",
+  borderBottom: `1px solid ${GOLD_BORDER}`,
 };
 
 const eyebrow: CSSProperties = {
   textTransform: "uppercase",
   letterSpacing: "0.18em",
-  fontSize: 11,
+  fontSize: 10,
   color: GOLD,
   fontFamily: SANS,
   fontWeight: 500,
-  margin: "0 0 0.65rem",
+  margin: "0 0 0.55rem",
 };
 
 const h1: CSSProperties = {
   fontFamily: SERIF,
   fontWeight: 500,
-  fontSize: "clamp(1.65rem, 4.5vw, 2.15rem)",
-  lineHeight: 1.2,
-  margin: "0 0 0.85rem",
+  fontSize: "clamp(1.35rem, 3.6vw, 1.75rem)",
+  lineHeight: 1.25,
+  margin: "0 0 0.45rem",
   color: INK,
   letterSpacing: "-0.01em",
 };
 
+const clientLine: CSSProperties = {
+  fontFamily: SANS,
+  fontSize: 14,
+  color: MUTED,
+  margin: "0 0 0.75rem",
+};
+
+const statusPill: CSSProperties = {
+  display: "inline-block",
+  margin: 0,
+  fontFamily: SANS,
+  fontSize: 10,
+  letterSpacing: "0.14em",
+  textTransform: "uppercase",
+  color: GOLD,
+  border: `1px solid ${GOLD_BORDER}`,
+  padding: "0.35rem 0.65rem",
+  borderRadius: 1,
+  background: "rgba(194, 170, 114, 0.07)",
+};
+
 const operatorConfirm: CSSProperties = {
   fontFamily: SANS,
-  fontSize: 13,
+  fontSize: 12.5,
   lineHeight: 1.5,
   color: MUTED,
   margin: "0 0 1rem",
-  padding: "0.65rem 0.85rem",
+  padding: "0.55rem 0 0.55rem 0.75rem",
   borderLeft: `2px solid ${GOLD_BORDER}`,
-  background: "rgba(194, 170, 114, 0.06)",
 };
 
 const lede: CSSProperties = {
   fontFamily: SANS,
-  fontSize: 15,
-  lineHeight: 1.65,
+  fontSize: 13.5,
+  lineHeight: 1.6,
   color: MUTED,
-  margin: "0 0 1.75rem",
+  margin: "0 0 1.5rem",
 };
 
 const muted: CSSProperties = {
   fontFamily: SANS,
-  fontSize: 14,
+  fontSize: 13.5,
   lineHeight: 1.55,
   color: MUTED,
   margin: "0 0 1.5rem",
@@ -380,85 +480,130 @@ const strong: CSSProperties = {
 };
 
 const documentCard: CSSProperties = {
-  background: "#fbf8f2",
-  color: "#1a1714",
+  background: "#f7f3eb",
+  color: DOC_INK,
   borderRadius: 2,
-  border: "1px solid rgba(255, 255, 255, 0.08)",
-  boxShadow: "0 18px 48px rgba(0, 0, 0, 0.35)",
-  marginBottom: "1.5rem",
+  border: "1px solid rgba(194, 170, 114, 0.22)",
+  boxShadow: "0 10px 28px rgba(0, 0, 0, 0.28)",
+  marginBottom: "1.75rem",
   overflow: "hidden",
 };
 
 const documentHeader: CSSProperties = {
-  padding: "1.15rem 1.35rem 0.85rem",
-  borderBottom: "1px solid rgba(26, 23, 20, 0.08)",
+  padding: "0.95rem 1.25rem 0.75rem",
+  borderBottom: "1px solid rgba(44, 40, 36, 0.08)",
+  background: "#faf7f1",
 };
 
 const documentTitle: CSSProperties = {
   fontFamily: SERIF,
   fontWeight: 500,
-  fontSize: 18,
-  margin: "0 0 0.35rem",
-  color: "#1a1714",
+  fontSize: 15,
+  margin: "0 0 0.25rem",
+  color: DOC_INK,
+  letterSpacing: "0.02em",
 };
 
 const scrollHint: CSSProperties = {
-  fontSize: 12,
-  color: "#7a7166",
+  fontSize: 11.5,
+  color: DOC_MUTED,
   margin: 0,
   fontFamily: SANS,
 };
 
-const documentBody: CSSProperties = {
-  whiteSpace: "pre-wrap",
-  fontFamily: SERIF,
-  fontSize: 14.5,
-  lineHeight: 1.7,
-  color: "#2a2622",
-  maxHeight: "min(58vh, 520px)",
+const documentScroll: CSSProperties = {
+  maxHeight: "min(62vh, 560px)",
   overflow: "auto",
-  margin: 0,
-  padding: "1.25rem 1.35rem 1.5rem",
-  outlineOffset: 2,
   WebkitOverflowScrolling: "touch",
+  outlineOffset: 2,
+};
+
+const documentMeasure: CSSProperties = {
+  padding: "1.15rem 1.25rem 1.5rem",
+};
+
+const documentInner: CSSProperties = {
+  maxWidth: 560,
+  margin: "0 auto",
+};
+
+const sectionHeading: CSSProperties = {
+  fontFamily: SANS,
+  fontSize: 11,
+  fontWeight: 600,
+  letterSpacing: "0.14em",
+  textTransform: "uppercase",
+  color: "#1f1c19",
+  margin: "1.15rem 0 0.45rem",
+  paddingBottom: "0.3rem",
+  borderBottom: "1px solid rgba(44, 40, 36, 0.1)",
+};
+
+const paragraph: CSSProperties = {
+  fontFamily: SERIF,
+  fontSize: 15.5,
+  lineHeight: 1.6,
+  color: DOC_INK,
+  margin: "0 0 0.55rem",
+  whiteSpace: "pre-wrap",
+  overflowWrap: "anywhere",
+};
+
+const sectionGap: CSSProperties = {
+  height: "0.55rem",
+};
+
+const bulletList: CSSProperties = {
+  margin: "0.15rem 0 0.7rem",
+  padding: "0 0 0 1.15rem",
+  listStyleType: "disc",
+};
+
+const bulletItem: CSSProperties = {
+  fontFamily: SERIF,
+  fontSize: 15.5,
+  lineHeight: 1.55,
+  color: DOC_INK,
+  marginBottom: "0.3rem",
+  paddingLeft: "0.15rem",
 };
 
 const signCard: CSSProperties = {
   background: "#121212",
   border: `1px solid ${GOLD_BORDER}`,
   borderRadius: 2,
-  padding: "1.35rem 1.35rem 1.5rem",
+  padding: "1.25rem 1.25rem 1.4rem",
   marginBottom: "1.25rem",
-  boxShadow: "0 12px 36px rgba(0, 0, 0, 0.28)",
+  boxShadow: "0 10px 28px rgba(0, 0, 0, 0.24)",
 };
 
 const cardTitle: CSSProperties = {
   fontFamily: SERIF,
   fontWeight: 500,
-  fontSize: 18,
-  margin: "0 0 1.15rem",
+  fontSize: 17,
+  margin: "0 0 0.35rem",
   color: INK,
 };
 
 const cardBody: CSSProperties = {
   fontFamily: SANS,
-  fontSize: 14,
-  lineHeight: 1.6,
+  fontSize: 12.5,
+  lineHeight: 1.55,
   color: MUTED,
-  margin: "0 0 1rem",
+  margin: "0 0 1.05rem",
 };
 
 const fieldWrap: CSSProperties = {
-  marginBottom: 14,
+  marginBottom: 13,
 };
 
 const fieldLabel: CSSProperties = {
   display: "block",
-  fontSize: 12,
-  letterSpacing: "0.04em",
+  fontSize: 11,
+  letterSpacing: "0.06em",
   textTransform: "uppercase",
   color: MUTED,
-  marginBottom: 6,
+  marginBottom: 5,
   fontFamily: SANS,
   fontWeight: 500,
 };
@@ -466,9 +611,9 @@ const fieldLabel: CSSProperties = {
 const input: CSSProperties = {
   width: "100%",
   boxSizing: "border-box",
-  minHeight: 46,
-  padding: "0.7rem 0.85rem",
-  border: "1px solid rgba(244, 239, 230, 0.16)",
+  minHeight: 44,
+  padding: "0.65rem 0.8rem",
+  border: "1px solid rgba(244, 239, 230, 0.14)",
   borderRadius: 2,
   background: "#0d0d0d",
   color: INK,
@@ -481,18 +626,26 @@ const check: CSSProperties = {
   display: "flex",
   gap: 10,
   alignItems: "flex-start",
-  fontSize: 13.5,
-  lineHeight: 1.5,
-  marginBottom: 12,
+  fontSize: 13,
+  lineHeight: 1.45,
+  marginBottom: 10,
   fontFamily: SANS,
   color: MUTED,
   cursor: "pointer",
 };
 
+const checkConsent: CSSProperties = {
+  ...check,
+  fontSize: 12,
+  lineHeight: 1.5,
+  marginBottom: 14,
+  color: "rgba(244, 239, 230, 0.5)",
+};
+
 const checkbox: CSSProperties = {
-  marginTop: 3,
-  width: 16,
-  height: 16,
+  marginTop: 2,
+  width: 15,
+  height: 15,
   flexShrink: 0,
   accentColor: GOLD,
 };
@@ -500,22 +653,22 @@ const checkbox: CSSProperties = {
 const errorText: CSSProperties = {
   color: "#e8a0a0",
   fontFamily: SANS,
-  fontSize: 14,
+  fontSize: 13.5,
   lineHeight: 1.45,
-  margin: "0.35rem 0 0.85rem",
+  margin: "0.25rem 0 0.85rem",
 };
 
 const btn: CSSProperties = {
-  marginTop: 10,
+  marginTop: 4,
   width: "100%",
   background: GOLD,
   color: "#0a0a0a",
   border: 0,
-  padding: "0.95rem 1.2rem",
+  padding: "0.9rem 1.15rem",
   borderRadius: 2,
   cursor: "pointer",
   fontFamily: SANS,
-  fontSize: 15,
+  fontSize: 14.5,
   fontWeight: 600,
   letterSpacing: "0.02em",
 };
@@ -537,7 +690,7 @@ const downloadList: CSSProperties = {
 const downloadItem: CSSProperties = {
   marginBottom: 8,
   paddingBottom: 8,
-  borderBottom: `1px solid ${GOLD_SOFT}`,
+  borderBottom: "1px solid rgba(194, 170, 114, 0.18)",
 };
 
 const downloadLink: CSSProperties = {

@@ -1,6 +1,6 @@
 /**
  * Client-facing contract body sanitization.
- * Internal draft banners stay in stored/operator views; signing + PDF use this.
+ * Internal draft banners / provenance stay in stored/operator views; signing + PDF use this.
  */
 
 import {
@@ -12,6 +12,8 @@ const INTERNAL_BANNER_PATTERNS: RegExp[] = [
   /^DRAFT FOR INTERNAL REVIEW[^\n]*/gim,
   /^AUTO-GENERATED DRAFT[^\n]*/gim,
   /^Template and operational wording only\.[^\n]*/gim,
+  /^This draft agreement is prepared from accepted proposal[^\n]*/gim,
+  /^Post-acceptance commercial amendments[^\n]*/gim,
 ];
 
 /** Exact known notices that must never appear in client signing / executed PDFs. */
@@ -20,10 +22,11 @@ const EXACT_INTERNAL_NOTICES = [
   DEFAULT_OPERATIONAL_DRAFT_NOTICE,
   "AUTO-GENERATED DRAFT — internal review required. Not attorney-approved. Not sent.",
   "AUTO-GENERATED DRAFT — internal review required. Not sent.",
+  "Post-acceptance commercial amendments are recorded on this contract only and do not rewrite the accepted proposal snapshot.",
 ];
 
 /**
- * Strip internal-only draft banners from agreement text for client-facing surfaces.
+ * Strip internal-only draft banners and provenance from agreement text for client-facing surfaces.
  * Does not remove commercial/legal provisions.
  */
 export function toClientFacingContractBody(body: string | null | undefined): string {
