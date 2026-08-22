@@ -22,11 +22,14 @@ export type ClientHqNavId = ClientHqModuleId;
 export type PortalBriefingNavId = "partnership";
 /** Phase 4 Batch F — multi-account authorized portfolio (not a CES entitlement). */
 export type PortalPortfolioNavId = "portfolio";
+/** Authoritative commercial agreement surface — billingPlan-backed (not a CES entitlement). */
+export type PortalAgreementNavId = "agreement";
 export type PortalNavId =
   | ClientHqNavId
   | CesModuleId
   | PortalBriefingNavId
-  | PortalPortfolioNavId;
+  | PortalPortfolioNavId
+  | PortalAgreementNavId;
 
 export interface ClientHqNavItem {
   id: ClientHqNavId;
@@ -131,24 +134,64 @@ function profileForPortalNav(profile: ResolvedExperienceProfile): ResolvedExperi
   return { ...profile, enabledModules: merged };
 }
 
+function injectCommercialAgreementNav(
+  groups: PortalNavGroup[],
+  commercialNavAvailable: boolean,
+  relabel?: (id: string, label: string) => string,
+): PortalNavGroup[] {
+  if (!commercialNavAvailable) return groups;
+  const label = relabel ? relabel("agreement", "Agreement") : "Agreement";
+  const hasAgreement = groups.some((group) =>
+    group.items.some((item) => item.id === "agreement"),
+  );
+  if (hasAgreement) return groups;
+
+  const workIndex = groups.findIndex((group) => group.label === "Work");
+  if (workIndex >= 0) {
+    const next = [...groups];
+    next[workIndex] = {
+      ...next[workIndex],
+      items: [
+        ...next[workIndex].items,
+        { id: "agreement", label, href: "/portal/agreement" },
+      ],
+    };
+    return next;
+  }
+
+  return [
+    ...groups,
+    {
+      label: "Work",
+      items: [{ id: "agreement", label, href: "/portal/agreement" }],
+    },
+  ];
+}
+
 /** Client HQ nav + CES module items — visibility is entitlement-aware, not flagship. */
 export function getEnabledPortalNavGroups(
   profile?: ResolvedExperienceProfile | null,
   options?: {
     portfolioNavAvailable?: boolean;
     billingNavAvailable?: boolean;
+    commercialNavAvailable?: boolean;
   },
 ): PortalNavGroup[] {
   const portfolioNavAvailable = Boolean(options?.portfolioNavAvailable);
   const billingNavAvailable = Boolean(options?.billingNavAvailable);
+  const commercialNavAvailable = Boolean(options?.commercialNavAvailable);
   const base = getEnabledClientHqNavGroups();
 
   if (!profile) {
-    return base
+    const groups = base
       .map((group) => {
         const portfolioItem: PortalNavItem[] =
           portfolioNavAvailable && group.label === "Headquarters"
             ? [{ id: "portfolio", label: "Portfolio", href: "/portal/portfolio" }]
+            : [];
+        const agreementItem: PortalNavItem[] =
+          commercialNavAvailable && group.label === "Work"
+            ? [{ id: "agreement", label: "Agreement", href: "/portal/agreement" }]
             : [];
         return {
           label: group.label,
@@ -163,10 +206,13 @@ export function getEnabledPortalNavGroups(
                 href,
               })),
             ...portfolioItem,
+            ...agreementItem,
           ],
         };
       })
       .filter((group) => group.items.length > 0);
+
+    return injectCommercialAgreementNav(groups, commercialNavAvailable);
   }
 
   const navProfile = profileForPortalNav(profile);
@@ -175,6 +221,7 @@ export function getEnabledPortalNavGroups(
     profile: navProfile,
     billingNavAvailable,
     portfolioNavAvailable,
+    commercialNavAvailable,
   };
   const useClientLabels = resolvePortalHomeShell(navProfile) === "ces";
   const relabel = (id: string, label: string) =>
@@ -184,7 +231,7 @@ export function getEnabledPortalNavGroups(
     isPortalModuleVisible(item.moduleId, visibilityCtx),
   );
 
-  return base
+  const groups = base
     .map((group) => {
       const cesGroupId = PORTAL_GROUP_TO_CES[group.label];
       const cesForGroup = cesItems
@@ -221,6 +268,17 @@ export function getEnabledPortalNavGroups(
             ]
           : [];
 
+      const agreementItem: PortalNavItem[] =
+        commercialNavAvailable && group.label === "Work"
+          ? [
+              {
+                id: "agreement",
+                label: relabel("agreement", "Agreement"),
+                href: "/portal/agreement",
+              },
+            ]
+          : [];
+
       return {
         label: group.label,
         items: [
@@ -231,6 +289,7 @@ export function getEnabledPortalNavGroups(
           })),
           ...partnershipItem,
           ...portfolioItem,
+          ...agreementItem,
           ...cesForGroup,
         ],
       };
@@ -238,17 +297,23 @@ export function getEnabledPortalNavGroups(
     .map((group) => ({
       ...group,
       items: group.items.filter((item) => {
+        if (item.id === "agreement") return commercialNavAvailable;
         const moduleKey =
           item.id === "partnership" ? "executive-performance" : item.id;
         return isPortalModuleVisible(moduleKey, visibilityCtx);
       }),
     }))
     .filter((group) => group.items.length > 0);
+
+  return injectCommercialAgreementNav(groups, commercialNavAvailable, relabel);
 }
 
 export function resolvePortalNavId(pathname: string): PortalNavId {
   if (pathname === "/portal/portfolio" || pathname.startsWith("/portal/portfolio/")) {
     return "portfolio";
+  }
+  if (pathname === "/portal/agreement" || pathname.startsWith("/portal/agreement/")) {
+    return "agreement";
   }
   if (pathname === "/portal/partnership" || pathname.startsWith("/portal/partnership/")) {
     return "partnership";

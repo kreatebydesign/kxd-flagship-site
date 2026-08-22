@@ -11867,6 +11867,82 @@ label.kxd-ces-mobile-bar__toggle {
   margin-bottom: 0.5rem;
 }
 
+/* ── Portal commercial / Agreement surface ─────────────────────────────── */
+
+.kxd-portal-commercial {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.75rem, 3vw, 2.5rem);
+}
+
+.kxd-portal-commercial__section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.kxd-portal-commercial__eyebrow {
+  margin: 0;
+  color: var(--kxd-os-text-muted, #6b675f);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.kxd-portal-commercial__title {
+  margin: 0;
+  font-size: clamp(1.15rem, 2vw, 1.35rem);
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.kxd-portal-commercial__lead,
+.kxd-portal-commercial__meta {
+  margin: 0;
+  max-width: 42rem;
+  color: var(--kxd-os-text-muted, #6b675f);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.kxd-portal-commercial__facts {
+  display: grid;
+  gap: 0.65rem 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  margin: 0;
+}
+
+.kxd-portal-commercial__fact dt {
+  margin: 0;
+  color: var(--kxd-os-text-muted, #6b675f);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.kxd-portal-commercial__fact dd {
+  margin: 0.15rem 0 0;
+  font-size: 0.95rem;
+}
+
+.kxd-portal-commercial__list {
+  margin: 0;
+  padding-left: 1.15rem;
+  max-width: 42rem;
+  color: var(--kxd-os-text-muted, #6b675f);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.kxd-portal-commercial__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  margin: 0.25rem 0 0;
+}
+
 /* ── Brand Kit guide (reusable CES digital brand guide) ──────────────────── */
 
 .kxd-resources-stack {

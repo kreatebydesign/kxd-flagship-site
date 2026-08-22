@@ -37,8 +37,10 @@ export interface ClientHqShellProps {
   portfolioNavAvailable?: boolean;
   /** Phase 5 Batch 5C — show Billing nav only when active client has eligible Stripe mapping. */
   billingNavAvailable?: boolean;
+  /** Authoritative commercial agreement — billingPlan-backed engagement records. */
+  commercialNavAvailable?: boolean;
   /** Studio operator single-client preview — not a portal-user session. */
-  operatorPreview?: { clientName: string } | null;
+  operatorPreview?: { clientId: number; clientName: string } | null;
   children: ReactNode;
 }
 
@@ -61,12 +63,14 @@ export function ClientHqShell({
   accountSwitcher = null,
   portfolioNavAvailable = false,
   billingNavAvailable = false,
+  commercialNavAvailable = false,
   operatorPreview = null,
   children,
 }: ClientHqShellProps) {
   const navGroups = getEnabledPortalNavGroups(experienceProfile, {
     portfolioNavAvailable,
     billingNavAvailable,
+    commercialNavAvailable,
   });
   const branding = editionBranding;
   const cssVars = experienceProfile
@@ -140,7 +144,10 @@ export function ClientHqShell({
   return (
     <>
       {operatorPreview ? (
-        <OperatorPortalPreviewBanner clientName={operatorPreview.clientName} />
+        <OperatorPortalPreviewBanner
+          clientId={operatorPreview.clientId}
+          clientName={operatorPreview.clientName}
+        />
       ) : null}
       <KxdShell className="kxd-os-shell--app">
       <input

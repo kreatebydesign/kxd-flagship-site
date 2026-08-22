@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { ActiveEngagementSnapshot } from "@/lib/portal/active-engagement";
 
 export function ActiveEngagementCard({
@@ -20,6 +21,9 @@ export function ActiveEngagementCard({
   }
   if (engagement.paymentLabel) {
     facts.push({ label: "Payment", value: engagement.paymentLabel });
+  }
+  if (engagement.totalValueLabel) {
+    facts.push({ label: "Total engagement", value: engagement.totalValueLabel });
   }
   if (engagement.capacityLabel) {
     facts.push({ label: "Monthly capacity", value: engagement.capacityLabel });
@@ -50,6 +54,13 @@ export function ActiveEngagementCard({
       ) : null}
       {engagement.includedSummary ? (
         <p className="kxd-active-engagement__included">{engagement.includedSummary}</p>
+      ) : null}
+      {engagement.agreementHref ? (
+        <p className="kxd-active-engagement__included">
+          <Link href={engagement.agreementHref} className="kxd-os-billing-link">
+            View agreement & billing
+          </Link>
+        </p>
       ) : null}
     </section>
   );

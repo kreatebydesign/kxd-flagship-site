@@ -15,6 +15,7 @@ export function ClientHqAppShell({
   accountSwitcher = null,
   portfolioNavAvailable = false,
   billingNavAvailable = false,
+  commercialNavAvailable = false,
   operatorPreview = null,
 }: {
   children: React.ReactNode;
@@ -24,7 +25,8 @@ export function ClientHqAppShell({
   accountSwitcher?: PortalAccountSwitcherModel | null;
   portfolioNavAvailable?: boolean;
   billingNavAvailable?: boolean;
-  operatorPreview?: { clientName: string } | null;
+  commercialNavAvailable?: boolean;
+  operatorPreview?: { clientId: number; clientName: string } | null;
 }) {
   const pathname = usePathname();
   const activeId = resolvePortalNavId(pathname);
@@ -39,6 +41,7 @@ export function ClientHqAppShell({
       accountSwitcher={operatorPreview ? null : accountSwitcher}
       portfolioNavAvailable={operatorPreview ? false : portfolioNavAvailable}
       billingNavAvailable={billingNavAvailable}
+      commercialNavAvailable={commercialNavAvailable}
       operatorPreview={operatorPreview}
     >
       {children}

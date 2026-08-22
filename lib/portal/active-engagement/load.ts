@@ -12,8 +12,11 @@ import { formatPortalEngagementStatus, formatPortalPaymentLabel } from "./presen
 import type { ActiveEngagementSnapshot } from "./types";
 import {
   resolveEngagementCapacityHours,
-  resolveEngagementPaymentStatus,
 } from "./helpers";
+import { formatCents } from "@/lib/proposal-builder/money";
+import {
+  isBillingPlanInitialObligationPaid,
+} from "@/lib/client-command/commercial/payment-status-display";
 
 type AnyDoc = Record<string, unknown> & { id: number };
 
@@ -32,8 +35,10 @@ function emptySnapshot(): ActiveEngagementSnapshot {
     statusLabel: null,
     periodLabel: null,
     paymentLabel: null,
+    totalValueLabel: null,
     capacityLabel: null,
     includedSummary: null,
+    agreementHref: null,
   };
 }
 
@@ -124,6 +129,7 @@ export async function loadActiveEngagementForClient(
     status: string;
     contractStatus: string;
     paymentStatus: string | null;
+    billingPlan: import("@/lib/proposal-lifecycle/types").ProposedBillingPlan | null;
     serviceStart: string | null;
     serviceEnd: string | null;
     capacityHours: number | null;
@@ -141,9 +147,10 @@ export async function loadActiveEngagementForClient(
     }
 
     const status = commercial || String(doc.status ?? "");
-    const paymentStatus = resolveEngagementPaymentStatus(
-      pkg.paymentReferences?.paymentStatus,
-    );
+    const initialPaid = isBillingPlanInitialObligationPaid(pkg);
+    const paymentStatus = initialPaid
+      ? "paid"
+      : String(pkg.paymentReferences?.paymentStatus ?? "").trim() || null;
 
     candidates.push({
       score: scoreStatus(status) + (paymentStatus === "paid" ? 5 : 0),
@@ -151,6 +158,7 @@ export async function loadActiveEngagementForClient(
       status,
       contractStatus: String(doc.status ?? "").trim(),
       paymentStatus,
+      billingPlan: pkg.billingPlan ?? null,
       serviceStart:
         da?.serviceStartDate ??
         (doc.startDate ? String(doc.startDate).slice(0, 10) : null),
@@ -176,6 +184,15 @@ export async function loadActiveEngagementForClient(
     monthlyServiceCredits,
   });
 
+  const totalValueLabel =
+    top.billingPlan && top.billingPlan.oneTimeTotalCents > 0
+      ? formatCents(top.billingPlan.oneTimeTotalCents)
+      : null;
+  const agreementHref =
+    top.billingPlan && (top.billingPlan.obligations?.length ?? 0) > 0
+      ? "/portal/agreement"
+      : null;
+
   return {
     available: true,
     title: top.title,
@@ -186,8 +203,10 @@ export async function loadActiveEngagementForClient(
     }),
     periodLabel: periodLabel(top.serviceStart, top.serviceEnd),
     paymentLabel: formatPortalPaymentLabel(top.paymentStatus),
+    totalValueLabel,
     capacityLabel:
       capacityHours != null ? `${capacityHours} hours per month` : null,
     includedSummary: summarizeIncluded(top.includedServices),
+    agreementHref,
   };
 }
