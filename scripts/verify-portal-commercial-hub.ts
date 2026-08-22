@@ -121,6 +121,7 @@ async function main() {
   assert(Boolean(executedDoc), "Executed agreement document required.");
   const certDoc = ready.documents.find((d) => d.kindLabel === "Execution certificate");
   assert(Boolean(certDoc), "Execution certificate document required.");
+  if (!executedDoc) throw new Error("Executed agreement document required.");
 
   const wrongClientAccess = await verifyPortalCommercialDocumentAccess({
     documentId: executedDoc.id,
@@ -168,15 +169,18 @@ async function main() {
     },
     hospitality: {
       welcomeEyebrow: cesDefaults.welcomeEyebrow,
-      welcomeGreeting: cesDefaults.welcomeGreeting,
-      welcomeLead: cesDefaults.welcomeLead,
+      reassuranceLine: cesDefaults.reassuranceLine,
+      supportTone: cesDefaults.supportTone,
+      portalSidebarLabel: cesDefaults.portalSidebarLabel,
+      partnerFooterLine: cesDefaults.partnerFooterLine,
+      showPartnerMark: cesDefaults.showKxdPartnerMark,
     },
     terminology: cesDefaults.terminology,
     enabledModules: normalizeCesExperienceModuleList(inferredModules),
     enabledPortalModules: inferredModules,
     reportingCapabilities: [],
-    planKey: null,
-    planStatus: "legacy",
+    presentation: null,
+    cssVars: {},
   };
 
   const nav = getEnabledPortalNavGroups(profile, {
