@@ -118,9 +118,9 @@ async function main() {
   assert(Boolean(ready.agreement.kxdSignerName), "KXD signer required.");
 
   const executedDoc = ready.documents.find((d) => d.kindLabel === "Agreement");
-  assert(executedDoc, "Executed agreement document required.");
+  assert(Boolean(executedDoc), "Executed agreement document required.");
   const certDoc = ready.documents.find((d) => d.kindLabel === "Execution certificate");
-  assert(certDoc, "Execution certificate document required.");
+  assert(Boolean(certDoc), "Execution certificate document required.");
 
   const wrongClientAccess = await verifyPortalCommercialDocumentAccess({
     documentId: executedDoc.id,
