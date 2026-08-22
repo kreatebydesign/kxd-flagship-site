@@ -73,6 +73,8 @@ check(
       paymentLabel: "Paid",
       capacityLabel: null,
       includedSummary: null,
+      totalValueLabel: null,
+      agreementHref: null,
     },
     monthlyRetainerAmount: 0,
     serviceScope: null,
