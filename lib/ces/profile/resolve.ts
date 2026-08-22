@@ -7,6 +7,8 @@ import type { PortalSession } from "@/lib/portal/session";
 import type { ReportingCapabilityId } from "@/lib/reporting/domain/capabilities";
 import { getExecutivePresentation } from "../executive-performance/presentation";
 import type { CesModuleId, ResolvedExperienceProfile } from "../types";
+import { buildDefaultCesProfileData } from "@/lib/client-launch/defaults";
+import { inferPortalModulesForClient } from "./infer-portal-modules";
 import {
   isCesExperienceModuleId,
   isInternalOnlyCapability,
@@ -339,6 +341,51 @@ export async function resolveExperienceProfile(
 
   if (!profileDoc) {
     const onboardingLogo = await loadOnboardingLogo(session.clientId);
+    const inferredModules = await inferPortalModulesForClient(session.clientId);
+    if (inferredModules.length > 0) {
+      const inferredCes = normalizeCesExperienceModuleList(inferredModules);
+      const cesDefaults = buildDefaultCesProfileData({
+        clientName,
+        clientSlug: clientSlug ?? `client-${session.clientId}`,
+        enabledModules:
+          inferredCes.length > 0
+            ? inferredCes
+            : undefined,
+      });
+      const inferredProfile = mergeProfileWithFallback(
+        {
+          source: "profile",
+          identity: {
+            ...identityBase,
+            logoUrl: onboardingLogo,
+          },
+          visual: {
+            primaryColor: cesDefaults.primaryColor,
+            secondaryColor: cesDefaults.secondaryColor,
+            accentColor: cesDefaults.accentColor,
+            surfaceTint: cesDefaults.surfaceTint,
+            borderRadiusPreset: cesDefaults.borderRadiusPreset,
+            motionPreset: cesDefaults.motionPreset,
+          },
+          hospitality: {
+            welcomeEyebrow: cesDefaults.welcomeEyebrow,
+            reassuranceLine: cesDefaults.reassuranceLine,
+            supportTone: cesDefaults.supportTone,
+            portalSidebarLabel: cesDefaults.portalSidebarLabel,
+            partnerFooterLine: cesDefaults.partnerFooterLine,
+            showPartnerMark: cesDefaults.showKxdPartnerMark,
+          },
+          enabledModules: normalizeEnabledModules(cesDefaults.enabledModules),
+          enabledPortalModules: inferredModules,
+          reportingCapabilities: [],
+          presentation: null,
+          terminology: cesDefaults.terminology,
+          cssVars: {},
+        },
+        editionBranding,
+      );
+      return applyClientPlanEntitlements(finalizeProfile(inferredProfile));
+    }
     if (onboardingLogo) {
       fallback.identity.logoUrl = onboardingLogo;
     }

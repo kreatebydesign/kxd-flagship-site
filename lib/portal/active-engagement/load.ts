@@ -8,7 +8,7 @@ import { getPayload } from "payload";
 import config from "@payload-config";
 import { parseStoredDirectAgreementTerms } from "@/lib/direct-agreement/validate";
 import { normalizeLifecyclePackage } from "@/lib/proposal-lifecycle/package";
-import { formatCommercialStatus } from "@/lib/client-command/commercial/map-agreement";
+import { formatPortalEngagementStatus, formatPortalPaymentLabel } from "./presentation";
 import type { ActiveEngagementSnapshot } from "./types";
 import {
   resolveEngagementCapacityHours,
@@ -122,6 +122,7 @@ export async function loadActiveEngagementForClient(
     score: number;
     title: string;
     status: string;
+    contractStatus: string;
     paymentStatus: string | null;
     serviceStart: string | null;
     serviceEnd: string | null;
@@ -148,6 +149,7 @@ export async function loadActiveEngagementForClient(
       score: scoreStatus(status) + (paymentStatus === "paid" ? 5 : 0),
       title: String(doc.title ?? "Engagement").trim() || "Engagement",
       status,
+      contractStatus: String(doc.status ?? "").trim(),
       paymentStatus,
       serviceStart:
         da?.serviceStartDate ??
@@ -177,11 +179,13 @@ export async function loadActiveEngagementForClient(
   return {
     available: true,
     title: top.title,
-    statusLabel: formatCommercialStatus(top.status),
+    statusLabel: formatPortalEngagementStatus({
+      commercialStatus: top.status,
+      contractStatus: top.contractStatus,
+      paymentStatus: top.paymentStatus,
+    }),
     periodLabel: periodLabel(top.serviceStart, top.serviceEnd),
-    paymentLabel: top.paymentStatus
-      ? formatCommercialStatus(top.paymentStatus)
-      : null,
+    paymentLabel: formatPortalPaymentLabel(top.paymentStatus),
     capacityLabel:
       capacityHours != null ? `${capacityHours} hours per month` : null,
     includedSummary: summarizeIncluded(top.includedServices),

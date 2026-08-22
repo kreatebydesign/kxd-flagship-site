@@ -21,6 +21,10 @@ export type ComposePerformanceStoryInput = {
   gscMapped: boolean;
   /** Optional next-move hint from existing Work Performance next moves. */
   nextMoveHint?: string | null;
+  /** Website Review entitled without performance reporting — launch-stage copy. */
+  websiteReviewEntitled?: boolean;
+  /** Project build vs ongoing managed relationship. */
+  engagementLifecycle?: "website-build" | "managed-ongoing" | "unknown";
 };
 
 const TRACKED_KEYS = [
@@ -237,6 +241,27 @@ export function composePerformanceStory(
   const label = periodLabel(input.reportingPeriod);
   const nextHint = input.nextMoveHint?.trim() || null;
   const mapped = input.ga4Mapped || input.gscMapped;
+  const websiteReviewEntitled = Boolean(input.websiteReviewEntitled);
+  const websiteBuild =
+    input.engagementLifecycle === "website-build" ||
+    (websiteReviewEntitled && !input.reportingEntitled);
+
+  if (!input.reportingEntitled && websiteBuild) {
+    return {
+      availability: "launch-stage",
+      tone: "unknown",
+      whatMovedForward: "Your website engagement is active.",
+      whatItMeans:
+        "This workspace is set up for your website project. Milestones, updates, and revision paths will appear here as work progresses.",
+      strongestSignal: null,
+      whatKxdIsWatching:
+        "KXD is advancing the website work included in your agreement.",
+      smartestNextMove:
+        nextHint ??
+        "When you have notes or screenshots to share, open Website Review.",
+      periodLabel: label,
+    };
+  }
 
   if (!input.reportingEntitled) {
     return {

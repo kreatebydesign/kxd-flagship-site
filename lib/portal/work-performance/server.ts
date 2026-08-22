@@ -21,6 +21,11 @@ import {
 import type { PeriodWindow } from "@/lib/reporting/domain/types";
 import { loadClientReportingConnection } from "@/lib/reporting/providers/connection";
 import { loadClientValueCareInput } from "@/lib/portal/client-value/server";
+import { resolvePortalEngagementLifecycle } from "@/lib/portal/client-value/lifecycle";
+import { loadActiveEngagementForClient } from "@/lib/portal/active-engagement";
+import { loadResolvedServiceScope } from "@/lib/service-capabilities/assignments";
+import { getPayload } from "payload";
+import config from "@payload-config";
 import { composeWorkPerformanceModel } from "./compose";
 import {
   dedupeMonthlySummaryItems,
@@ -206,7 +211,8 @@ export async function resolvePortalWorkPerformance(input: {
   );
   const reportingEntitled = reportingCapabilities.length > 0;
 
-  const [deliverableDocs, projectDocs, facts, connection, careInput] = await Promise.all([
+  const [deliverableDocs, projectDocs, facts, connection, careInput, engagement, serviceScope, clientDoc] =
+    await Promise.all([
     getPortalDeliverables(session),
     getPortalProjects(session),
     reportingEntitled
@@ -214,6 +220,16 @@ export async function resolvePortalWorkPerformance(input: {
       : Promise.resolve([]),
     loadClientReportingConnection(session.clientId),
     loadClientValueCareInput(session.clientId),
+    loadActiveEngagementForClient(session.clientId),
+    loadResolvedServiceScope(session.clientId),
+    getPayload({ config }).then((payload) =>
+      payload.findByID({
+        collection: "clients",
+        id: session.clientId,
+        depth: 0,
+        overrideAccess: true,
+      }),
+    ),
   ]);
 
   const scopedConnection =
@@ -258,6 +274,16 @@ export async function resolvePortalWorkPerformance(input: {
       .length,
   });
 
+  const engagementLifecycle = resolvePortalEngagementLifecycle({
+    engagement,
+    monthlyRetainerAmount:
+      typeof (clientDoc as { monthlyRetainerAmount?: number }).monthlyRetainerAmount ===
+      "number"
+        ? (clientDoc as { monthlyRetainerAmount: number }).monthlyRetainerAmount
+        : null,
+    serviceScope,
+  });
+
   return composeWorkPerformanceModel({
     authorizedClientId: session.clientId,
     clientName: session.clientName,
@@ -285,6 +311,8 @@ export async function resolvePortalWorkPerformance(input: {
     ga4Mapped: Boolean(scopedConnection?.ga4PropertyId),
     gscMapped: Boolean(scopedConnection?.searchConsoleSiteUrl),
     careInput,
+    websiteReviewEntitled,
+    engagementLifecycle,
   });
 }
 

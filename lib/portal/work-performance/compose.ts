@@ -48,6 +48,8 @@ export type ComposeWorkPerformanceInput = {
   gscMapped?: boolean;
   /** Allowlisted care input from infrastructure. */
   careInput?: ComposeCareContinuityInput;
+  websiteReviewEntitled?: boolean;
+  engagementLifecycle?: "website-build" | "managed-ongoing" | "unknown";
 };
 
 const METRIC_SPECS: Array<{
@@ -322,6 +324,8 @@ export function composeWorkPerformanceModel(
     gscMapped: Boolean(input.gscMapped),
     nextMoveHint: nextMoves[0]?.lead ?? nextMoves[0]?.title ?? null,
     care: input.careInput ?? {},
+    websiteReviewEntitled: input.websiteReviewEntitled,
+    engagementLifecycle: input.engagementLifecycle,
   });
 
   return {

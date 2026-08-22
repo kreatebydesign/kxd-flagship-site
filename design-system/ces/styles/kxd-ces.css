@@ -11244,6 +11244,34 @@
   opacity: 0.78;
 }
 
+.kxd-operator-portal-preview__actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.kxd-operator-portal-preview__switch-label {
+  display: block;
+}
+
+.kxd-operator-portal-preview__switch-select {
+  font: inherit;
+  font-size: 0.8125rem;
+  padding: 0.35rem 0.55rem;
+  border-radius: 0.35rem;
+  border: 1px solid color-mix(in srgb, #f7f4ef 35%, transparent);
+  background: color-mix(in srgb, #f7f4ef 8%, transparent);
+  color: #f7f4ef;
+  max-width: 12rem;
+}
+
+.kxd-operator-portal-preview__switch-error {
+  margin: 0.25rem 0 0;
+  font-size: 0.75rem;
+  color: #ffd8c8;
+}
+
 .kxd-operator-portal-preview__exit {
   flex-shrink: 0;
   border: 1px solid color-mix(in srgb, #f7f4ef 35%, transparent);
@@ -11569,8 +11597,9 @@ a.kxd-client-home__service:hover {
 
 .kxd-ces-app[data-ces-shell="ces"] .kxd-ces-identity--has-logo .kxd-ces-identity__logo {
   width: 100%;
-  max-width: 11.5rem;
-  max-height: 3.25rem;
+  max-width: 13.5rem;
+  max-height: 4.25rem;
+  min-height: 2.75rem;
 }
 
 .kxd-ces-app[data-ces-shell="ces"] .kxd-os-sidebar__group-label {

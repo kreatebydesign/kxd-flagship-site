@@ -18,6 +18,8 @@ export type ComposeClientValueInput = {
   gscMapped: boolean;
   nextMoveHint?: string | null;
   care: ComposeCareContinuityInput;
+  websiteReviewEntitled?: boolean;
+  engagementLifecycle?: "website-build" | "managed-ongoing" | "unknown";
 };
 
 export function composeClientValueProjection(
@@ -38,6 +40,8 @@ export function composeClientValueProjection(
       ga4Mapped: input.ga4Mapped,
       gscMapped: input.gscMapped,
       nextMoveHint: input.nextMoveHint,
+      websiteReviewEntitled: input.websiteReviewEntitled,
+      engagementLifecycle: input.engagementLifecycle,
     }),
     careContinuity: composeCareContinuity(input.care),
   };

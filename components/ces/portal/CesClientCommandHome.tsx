@@ -3,6 +3,7 @@ import type {
   ClientHomePresentation,
   ClientHomePresentationItem,
 } from "@/lib/ces/modules/home";
+import { PORTAL_CLIENT_LANGUAGE } from "@/lib/ces/copy/portal-language";
 import type { ActiveEngagementSnapshot } from "@/lib/portal/active-engagement";
 import { ActiveEngagementCard } from "./ActiveEngagementCard";
 
@@ -80,7 +81,11 @@ export function CesClientCommandHome({
   const story = home.valueStory;
   const care = home.careContinuity;
   const showCare = Boolean(care?.visible);
-  const showWatchingFallback = Boolean(story) && !showCare;
+  const isLaunchStage = story?.availability === "launch-stage";
+  const isReportingAbsent =
+    story?.availability === "not-entitled" || isLaunchStage;
+  const showWatchingFallback = Boolean(story) && !showCare && !isReportingAbsent;
+  const showWorkSections = showWork && !isLaunchStage;
 
   return (
     <div className="kxd-client-home">
@@ -119,7 +124,21 @@ export function CesClientCommandHome({
         )}
       </section>
 
-      {story ? (
+      {story && isLaunchStage ? (
+        <section
+          className="kxd-client-home__section kxd-client-home__value-story"
+          aria-labelledby="client-launch-stage-title"
+        >
+          <p className="kxd-client-home__eyebrow">Your engagement</p>
+          <h2 id="client-launch-stage-title" className="kxd-client-home__section-title">
+            Website project
+          </h2>
+          <p className="kxd-client-home__lead">{story.whatMovedForward}</p>
+          <p className="kxd-client-home__empty-note">{story.whatItMeans}</p>
+        </section>
+      ) : null}
+
+      {story && !isReportingAbsent ? (
         <section
           className="kxd-client-home__section kxd-client-home__value-story"
           aria-labelledby="client-value-story-title"
@@ -138,7 +157,7 @@ export function CesClientCommandHome({
         </section>
       ) : null}
 
-      {showWork ? (
+      {showWorkSections ? (
         <>
           <HomeListSection
             id="client-accomplishments-title"

@@ -3,9 +3,9 @@
  * Entitlements remain canonical. This file only composes client-facing presentation.
  */
 
-import { clientMetricLabel } from "../copy/portal-language";
-import { clientServiceCapabilityCopy } from "../partnership/service-value";
+import { clientMetricLabel, PORTAL_CLIENT_LANGUAGE } from "../copy/portal-language";
 import { isCesModuleEnabled, type ResolvedExperienceProfile } from "../types";
+import { clientServiceCapabilityCopy } from "../partnership/service-value";
 import type { PartnershipBriefing } from "../partnership/types";
 import type { WorkPerformanceModel } from "@/lib/portal/work-performance";
 import {
@@ -232,7 +232,28 @@ function serviceMentions(services: ClientHomeService[], pattern: RegExp): boolea
   );
 }
 
-function composeWelcomeLead(services: ClientHomeService[]): string {
+function portalModuleList(profile: ResolvedExperienceProfile): PortalModuleId[] {
+  return profile.enabledPortalModules ?? profile.enabledModules;
+}
+
+function profileIsLaunchWebsiteReviewOnly(profile: ResolvedExperienceProfile): boolean {
+  const mods = portalModuleList(profile);
+  return (
+    mods.includes("website-review") &&
+    !mods.includes("executive-performance") &&
+    !mods.includes("analytics") &&
+    !mods.includes("reports")
+  );
+}
+
+function composeWelcomeLead(
+  services: ClientHomeService[],
+  profile?: ResolvedExperienceProfile,
+): string {
+  if (services.length === 0 && profile && profileIsLaunchWebsiteReviewOnly(profile)) {
+    return PORTAL_CLIENT_LANGUAGE.launchLead;
+  }
+
   if (services.length === 0) {
     return "This is your private Kreate by Design partnership space. Ongoing work stays organized here.";
   }
@@ -303,6 +324,7 @@ function composePerformance(
     storyAvailability === "disconnected" ||
     storyAvailability === "new-tracking" ||
     storyAvailability === "not-entitled" ||
+    storyAvailability === "launch-stage" ||
     storyAvailability === "insufficient"
   ) {
     return { visible: false, facts: [], statusNote: null, href };
@@ -426,7 +448,8 @@ export function composeClientHomePresentation(input: {
         "Your partnership",
       greeting,
       lead:
-        profile.terminology["portal.home.lead"]?.trim() || composeWelcomeLead(services),
+        profile.terminology["portal.home.lead"]?.trim() ||
+        composeWelcomeLead(services, profile),
     },
     attention: {
       items: attentionItems,

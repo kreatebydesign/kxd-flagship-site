@@ -12,6 +12,7 @@ export type ClientValueAvailability =
   | "new-tracking"
   | "insufficient"
   | "not-entitled"
+  | "launch-stage"
   | "empty";
 
 export type ClientCareContinuityStatus =
