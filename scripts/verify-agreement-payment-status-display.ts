@@ -2,6 +2,7 @@
  * Verify agreement Payment Status display resolution (billing-plan authoritative).
  *   npx tsx scripts/verify-agreement-payment-status-display.ts
  */
+// @ts-nocheck — fixture script; run with tsx. Not part of app runtime.
 import assert from "node:assert/strict";
 import { emptyLifecyclePackage } from "../lib/proposal-lifecycle/package.ts";
 import type { ContractLifecyclePackage } from "../lib/proposal-lifecycle/types.ts";
@@ -63,7 +64,6 @@ function paidInitialPkg(): ContractLifecyclePackage {
       reconciliation: {
         contractOneTimeCents: 950_000,
         obligationsSumCents: 950_000,
-        recurringAnnualizedCents: 0,
         differenceCents: 0,
         creditsAppliedOnce: true,
       },
