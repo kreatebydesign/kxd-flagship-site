@@ -7,6 +7,10 @@ import type {
   CommercialOverviewSnapshot,
 } from "./types";
 import { commercialAgreementHref } from "./sections";
+import {
+  isAgreementPaymentMarkedPaid,
+  resolveAgreementPaymentStatusLabel,
+} from "./payment-status-display";
 
 export function documentKindLabel(kind: string): CommercialDocumentKindLabel {
   switch (kind) {
@@ -145,7 +149,10 @@ export function buildOverviewFromPrimary(input: {
     if (["draft", "finalized", "sent"].includes(st)) {
       outstanding.push("Acceptance not yet recorded");
     }
-    if (["accepted", "payment-pending"].includes(st)) {
+    if (
+      ["accepted", "payment-pending"].includes(st) &&
+      !(pkg && isAgreementPaymentMarkedPaid(pkg))
+    ) {
       outstanding.push("Payment not yet marked");
     }
     if (st === "paid") {
@@ -165,14 +172,9 @@ export function buildOverviewFromPrimary(input: {
     agreementId: agreement?.id ?? null,
     agreementHref: agreement?.href ?? null,
     statusLabel: agreement?.statusLabel ?? "None",
-    paymentStatusLabel: formatCommercialStatus(
-      refs?.paymentStatus ||
-        (pkg?.commercialStatus === "paid" || pkg?.commercialStatus === "active"
-          ? "paid"
-          : pkg?.commercialStatus === "payment-pending"
-            ? "payment-pending"
-            : "pending"),
-    ),
+    paymentStatusLabel: pkg
+      ? resolveAgreementPaymentStatusLabel(pkg, agreement?.status)
+      : "—",
     invoiceAmountLabel:
       invoiceCents != null && invoiceCents > 0 ? formatCents(invoiceCents as never) : "—",
     termStart: agreement?.serviceStartDate ?? da?.serviceStartDate ?? null,

@@ -13,10 +13,8 @@ import type { ContractLifecyclePackage } from "@/lib/proposal-lifecycle/types";
 import { WorkspaceEmpty } from "@/components/admin/operations/client-workspace/WorkspacePrimitives";
 import { CommercialStatusBadge, statusTone } from "./CommercialStatusBadge";
 import { CommercialLifecyclePanel } from "./CommercialLifecyclePanel";
-import {
-  formatPaymentStatusLabel,
-  splitChecklistItems,
-} from "./presentation";
+import { resolveAgreementPaymentStatusLabel } from "@/lib/client-command/commercial/payment-status-display";
+import { splitChecklistItems } from "./presentation";
 import { canGenerateCourtesyBrandedRestatement } from "@/lib/direct-agreement";
 import { GenerateBrandedRestatementAction } from "./GenerateBrandedRestatementAction";
 
@@ -63,14 +61,7 @@ export function CommercialAgreementDetail(props: {
         ? formatCents(daTerms.oneTimeAmountCents as never)
         : "—";
 
-  const paymentStatusLabel = formatPaymentStatusLabel(
-    pkg.paymentReferences?.paymentStatus ||
-      (status === "paid" || status === "active"
-        ? "paid"
-        : status === "payment-pending"
-          ? "payment-pending"
-          : "pending"),
-  );
+  const paymentStatusLabel = resolveAgreementPaymentStatusLabel(pkg, status);
 
   const termLabel =
     daTerms?.serviceStartDate != null

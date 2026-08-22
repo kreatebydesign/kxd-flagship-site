@@ -20,13 +20,4 @@ export function splitChecklistItems(raw: string | null | undefined): string[] {
   return parts.length > 1 ? parts : [raw.trim()];
 }
 
-export function formatPaymentStatusLabel(status: string | null | undefined): string {
-  if (!status) return "Pending";
-  const map: Record<string, string> = {
-    paid: "Paid",
-    pending: "Pending",
-    "payment-pending": "Pending",
-    linked: "Linked",
-  };
-  return map[status] ?? status.replace(/-/g, " ");
-}
+export { formatPaymentStatusLabel } from "@/lib/client-command/commercial/payment-status-display";
