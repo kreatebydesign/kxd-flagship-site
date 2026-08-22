@@ -142,6 +142,32 @@ check(
   navLabels.some((label) => label.toLowerCase().includes("account") || label === "Settings"),
 );
 
+const navSrc = read("lib/portal/nav.ts");
+check(
+  "portal nav syncs CES modules from enabledPortalModules",
+  navSrc.includes("profileForPortalNav") && navSrc.includes("normalizeCesExperienceModuleList"),
+);
+
+const portalOnlyProfile: ResolvedExperienceProfile = {
+  ...inferredProfile,
+  enabledModules: [],
+  enabledPortalModules: [...inferredModules],
+};
+const portalOnlyNav = getEnabledPortalNavGroups(portalOnlyProfile).flatMap((group) =>
+  group.items.map((item) => item.id),
+);
+check(
+  "portal nav renders website-review when only enabledPortalModules lists it",
+  portalOnlyNav.includes("website-review"),
+);
+
+const resolveSrc = read("lib/ces/profile/resolve.ts");
+check(
+  "operator preview draft merges inferred launch-draft modules",
+  resolveSrc.includes("inferPortalModulesForClient(session.clientId)") &&
+    resolveSrc.includes("...inferredModules"),
+);
+
 const inferSrc = read("lib/ces/profile/infer-portal-modules.ts");
 const linkSrc = read("lib/client-launch-wizard/draft/linked-client.ts");
 check(

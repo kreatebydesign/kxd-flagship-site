@@ -95,7 +95,8 @@ export function isPortalModuleVisible(
     case "ces-opt-in":
       return (
         isCesExperienceModuleId(moduleId) &&
-        isCesModuleEnabled(profile, moduleId)
+        (isCesModuleEnabled(profile, moduleId) ||
+          enabledPortalIds(profile).includes(moduleId))
       );
     case "presentation": {
       const entitled = isCesModuleEnabled(profile, "executive-performance");

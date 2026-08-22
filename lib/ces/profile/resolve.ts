@@ -293,9 +293,14 @@ export async function resolveExperienceProfile(
 
   if (draft) {
     const onboardingLogo = await loadOnboardingLogo(session.clientId);
-    const draftModules = normalizePortalModuleList(draft.modules).filter(
+    const inferredModules = await inferPortalModulesForClient(session.clientId);
+    const draftModules = normalizePortalModuleList([
+      ...normalizePortalModuleList(draft.modules),
+      ...inferredModules,
+    ]).filter(
       (id) => !isInternalOnlyCapability(id) && id !== "advisor",
     );
+    const draftCesModules = normalizeCesExperienceModuleList(draftModules);
     const branding = draft.branding ?? {};
     const draftResolved = mergeProfileWithFallback(
       {
@@ -325,7 +330,9 @@ export async function resolveExperienceProfile(
           partnerFooterLine: CES_DEFAULT_PARTNER_FOOTER,
           showPartnerMark: true,
         },
-        enabledModules: normalizeEnabledModules(draftModules),
+        enabledModules: normalizeEnabledModules(
+          draftCesModules.length > 0 ? draftCesModules : draftModules,
+        ),
         enabledPortalModules: draftModules,
         reportingCapabilities: normalizeReportingCapabilities(
           profileDoc ? (profileDoc as AnyDoc).enabledModules : [],

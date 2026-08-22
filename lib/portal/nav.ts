@@ -5,6 +5,7 @@ import type { CesNavGroupId } from "@/lib/ces/modules/types";
 import {
   CLIENT_HQ_PORTAL_MODULE_IDS,
   getCanonicalCapability,
+  normalizeCesExperienceModuleList,
   type ClientHqPortalModuleId,
   type PortalModuleId,
 } from "@/lib/ces/modules/canonical";
@@ -112,6 +113,24 @@ function navIdForPortalModule(moduleId: PortalModuleId): PortalNavId {
   return moduleId as PortalNavId;
 }
 
+/** CES nav reads enabledModules; keep portal allowlist CES ids in sync for render. */
+function profileForPortalNav(profile: ResolvedExperienceProfile): ResolvedExperienceProfile {
+  const cesFromPortal = normalizeCesExperienceModuleList(
+    profile.enabledPortalModules ?? [],
+  );
+  const merged = normalizeCesExperienceModuleList([
+    ...profile.enabledModules,
+    ...cesFromPortal,
+  ]);
+  if (
+    merged.length === profile.enabledModules.length &&
+    merged.every((id, index) => profile.enabledModules[index] === id)
+  ) {
+    return profile;
+  }
+  return { ...profile, enabledModules: merged };
+}
+
 /** Client HQ nav + CES module items — visibility is entitlement-aware, not flagship. */
 export function getEnabledPortalNavGroups(
   profile?: ResolvedExperienceProfile | null,
@@ -150,16 +169,18 @@ export function getEnabledPortalNavGroups(
       .filter((group) => group.items.length > 0);
   }
 
+  const navProfile = profileForPortalNav(profile);
+
   const visibilityCtx = {
-    profile,
+    profile: navProfile,
     billingNavAvailable,
     portfolioNavAvailable,
   };
-  const useClientLabels = resolvePortalHomeShell(profile) === "ces";
+  const useClientLabels = resolvePortalHomeShell(navProfile) === "ces";
   const relabel = (id: string, label: string) =>
-    useClientLabels ? clientPortalNavLabel(id, profile.terminology, label) : label;
+    useClientLabels ? clientPortalNavLabel(id, navProfile.terminology, label) : label;
 
-  const cesItems = getCesNavItems(profile).filter((item) =>
+  const cesItems = getCesNavItems(navProfile).filter((item) =>
     isPortalModuleVisible(item.moduleId, visibilityCtx),
   );
 
@@ -191,7 +212,7 @@ export function getEnabledPortalNavGroups(
                 id: "partnership",
                 label: relabel(
                   "executive-performance",
-                  profile.terminology["nav.executive-performance"] ??
+                  navProfile.terminology["nav.executive-performance"] ??
                     getCanonicalCapability("executive-performance")?.label ??
                     "Partnership",
                 ),
