@@ -274,13 +274,16 @@ export async function resolvePortalWorkPerformance(input: {
       .length,
   });
 
+  const monthlyRetainerRaw = (clientDoc as { monthlyRetainerAmount?: unknown })
+    .monthlyRetainerAmount;
+  const monthlyRetainerAmount =
+    typeof monthlyRetainerRaw === "number" && Number.isFinite(monthlyRetainerRaw)
+      ? monthlyRetainerRaw
+      : null;
+
   const engagementLifecycle = resolvePortalEngagementLifecycle({
     engagement,
-    monthlyRetainerAmount:
-      typeof (clientDoc as { monthlyRetainerAmount?: number }).monthlyRetainerAmount ===
-      "number"
-        ? (clientDoc as { monthlyRetainerAmount: number }).monthlyRetainerAmount
-        : null,
+    monthlyRetainerAmount,
     serviceScope,
   });
 
