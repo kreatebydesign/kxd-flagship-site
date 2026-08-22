@@ -144,10 +144,7 @@ export function ClientHqShell({
   return (
     <>
       {operatorPreview ? (
-        <OperatorPortalPreviewBanner
-          clientId={operatorPreview.clientId}
-          clientName={operatorPreview.clientName}
-        />
+        <OperatorPortalPreviewBanner clientName={operatorPreview.clientName} />
       ) : null}
       <KxdShell className="kxd-os-shell--app">
       <input
