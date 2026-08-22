@@ -15,6 +15,7 @@ import type {
   LaunchWizardModuleId,
   LaunchWizardModuleSelection,
 } from "@/lib/client-launch-wizard/types";
+import { launchDraftLinkedClientId } from "@/lib/client-launch-wizard/draft/linked-client";
 import { loadResolvedServiceScope } from "@/lib/service-capabilities/assignments";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -40,41 +41,21 @@ function moduleRowsFromDraftPayload(payload: unknown): LaunchWizardModuleSelecti
 async function loadLaunchDraftModuleIds(clientId: number): Promise<PortalModuleId[]> {
   try {
     const payload = await getPayload({ config });
-    let clientSlug: string | null = null;
-    try {
-      const client = (await payload.findByID({
-        collection: "clients",
-        id: clientId,
-        depth: 0,
-        overrideAccess: true,
-      })) as AnyDoc;
-      clientSlug = client.slug ? String(client.slug).trim() : null;
-    } catch {
-      clientSlug = null;
-    }
-
-    const or: Record<string, unknown>[] = [
-      { launchedClient: { equals: clientId } },
-      { "payload.commercialHandoff.sourceClientId": { equals: clientId } },
-    ];
-    if (clientSlug) {
-      or.push({ clientSlug: { equals: clientSlug } });
-    }
-
     const result = await payload.find({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       collection: "client-launch-drafts" as any,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      where: {
-        and: [{ status: { in: ["draft", "ready"] } }, { or }],
-      } as any,
-      limit: 5,
+      where: { status: { in: ["draft", "ready"] } },
+      limit: 50,
       sort: "-updatedAt",
       depth: 0,
       overrideAccess: true,
     });
 
-    for (const doc of result.docs as AnyDoc[]) {
+    const matching = (result.docs as AnyDoc[]).filter(
+      (doc) => launchDraftLinkedClientId(doc) === clientId,
+    );
+
+    for (const doc of matching) {
       const ids = persistableEntitlementIds(moduleRowsFromDraftPayload(doc.payload));
       const normalized = normalizePortalModuleList(ids);
       if (normalized.length > 0) return normalized;
