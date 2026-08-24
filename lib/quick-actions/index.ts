@@ -1,6 +1,7 @@
 export type { QuickAction, QuickActionId, QuickActionCommandMatch } from "./types";
 
 export {
+  PUBLIC_WEBSITE_AUDIT_URL,
   proposalHref,
   executiveNoteHref,
   reportHref,

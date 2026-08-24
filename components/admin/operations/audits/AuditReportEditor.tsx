@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
   ACTION_PLAN_GROUP_LABEL,
@@ -55,7 +55,7 @@ export function AuditReportEditor({
   const [canonical, setCanonical] = useState(initialCanonical);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [busy, setBusy] = useState<string | null>(null);
 
   const [reportTitle, setReportTitle] = useState(initialSource.reportTitle ?? "");
   const [executiveSummary, setExecutiveSummary] = useState(
@@ -101,6 +101,8 @@ export function AuditReportEditor({
 
   const reportStatus = (source.reportStatus || "none") as ReportStatus;
   const locked = reportStatus === "approved" || reportStatus === "archived";
+  const canGenerateReport = Boolean(source.website?.trim());
+  const formLocked = locked || busy !== null;
 
   const automatedFindings = useMemo(
     () => deriveAutomatedFindings(source),
@@ -159,19 +161,20 @@ export function AuditReportEditor({
     return data;
   }
 
-  function run(label: string, fn: () => Promise<void>) {
+  function run(label: string, actionKey: string, fn: () => Promise<void>) {
     setMessage(null);
     setError(null);
-    startTransition(() => {
-      void (async () => {
-        try {
-          await fn();
-          setMessage(label);
-        } catch (err) {
-          setError(err instanceof Error ? err.message : "Something went wrong.");
-        }
-      })();
-    });
+    setBusy(actionKey);
+    void (async () => {
+      try {
+        await fn();
+        setMessage(label);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Something went wrong.");
+      } finally {
+        setBusy(null);
+      }
+    })();
   }
 
   function overrideFor(id: string): FindingOverride {
@@ -309,66 +312,18 @@ export function AuditReportEditor({
       )}
 
       <section className="kxd-audit-report-editor__panel">
-        <h2>Identity</h2>
-        <p className="kxd-os-meta">
-          Contact: {source.name || "—"} · {source.email || "—"}
-        </p>
-        <label className="kxd-audit-report-editor__label">
-          Linked client
-          <select
-            value={clientId}
-            disabled={locked || pending}
-            onChange={(e) => setClientId(e.target.value)}
-          >
-            <option value="">Prospect / no client link</option>
-            {clients.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <div className="kxd-audit-report-editor__row-actions">
-          <button
-            type="button"
-            className="kxd-os-btn kxd-os-btn--ghost"
-            disabled={locked || pending}
-            onClick={() =>
-              run("Client association saved.", async () => {
-                const data = await api(
-                  `/api/admin/website-audits/${auditId}/report/associate-client`,
-                  {
-                    method: "POST",
-                    body: JSON.stringify({
-                      clientId: clientId ? Number(clientId) : null,
-                    }),
-                  },
-                );
-                setSource((prev) => ({
-                  ...prev,
-                  clientId: (data.clientId as number | null) ?? null,
-                  canonicalWebsiteUrl: (data.canonicalWebsiteUrl as string | null) ?? null,
-                }));
-              })
-            }
-          >
-            Save client link
-          </button>
-        </div>
-      </section>
-
-      <section className="kxd-audit-report-editor__panel">
         <h2>Generate narrative</h2>
         <p className="kxd-os-meta">
-          Deterministic draft from stored scores and insights. Does not rerun the auditor.
+          Deterministic draft from stored scores and insights. Does not rerun the auditor. A linked
+          client is optional — prospect audits can generate without a client record.
         </p>
         <div className="kxd-audit-report-editor__row-actions">
           <button
             type="button"
-            className="kxd-os-btn"
-            disabled={locked || pending}
+            className="kxd-os-btn kxd-os-btn--primary"
+            disabled={locked || busy === "generate" || !canGenerateReport}
             onClick={() =>
-              run("Narrative generated.", async () => {
+              run("Narrative generated.", "generate", async () => {
                 const data = await api(
                   `/api/admin/website-audits/${auditId}/report/generate`,
                   {
@@ -393,15 +348,19 @@ export function AuditReportEditor({
               })
             }
           >
-            {reportStatus === "none" ? "Generate report" : "Regenerate narrative"}
+            {busy === "generate"
+              ? "Generating…"
+              : reportStatus === "none"
+                ? "Generate report"
+                : "Regenerate narrative"}
           </button>
           {reportStatus === "approved" || reportStatus === "ready-for-review" ? (
             <button
               type="button"
               className="kxd-os-btn kxd-os-btn--ghost"
-              disabled={pending}
+              disabled={busy === "reopen"}
               onClick={() =>
-                run("Returned to draft.", async () => {
+                run("Returned to draft.", "reopen", async () => {
                   const data = await api(
                     `/api/admin/website-audits/${auditId}/report/reopen`,
                     { method: "POST", body: "{}" },
@@ -417,6 +376,65 @@ export function AuditReportEditor({
             </button>
           ) : null}
         </div>
+        {!canGenerateReport ? (
+          <p className="kxd-os-meta">
+            This audit record is missing a website URL. Add one on the Payload record before
+            generating a report.
+          </p>
+        ) : null}
+      </section>
+
+      <section className="kxd-audit-report-editor__panel">
+        <h2>Identity</h2>
+        <p className="kxd-os-meta">
+          Contact: {source.name || "—"} · {source.email || "—"}
+        </p>
+        <p className="kxd-os-meta">
+          Link an existing client when this audit should roll into a relationship record. Leave as
+          prospect when no client exists yet.
+        </p>
+        <label className="kxd-audit-report-editor__label">
+          Linked client
+          <select
+            value={clientId}
+            disabled={formLocked}
+            onChange={(e) => setClientId(e.target.value)}
+          >
+            <option value="">Prospect / no client link</option>
+            {clients.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <div className="kxd-audit-report-editor__row-actions">
+          <button
+            type="button"
+            className="kxd-os-btn kxd-os-btn--ghost"
+            disabled={formLocked}
+            onClick={() =>
+              run("Client association saved.", "associate-client", async () => {
+                const data = await api(
+                  `/api/admin/website-audits/${auditId}/report/associate-client`,
+                  {
+                    method: "POST",
+                    body: JSON.stringify({
+                      clientId: clientId ? Number(clientId) : null,
+                    }),
+                  },
+                );
+                setSource((prev) => ({
+                  ...prev,
+                  clientId: (data.clientId as number | null) ?? null,
+                  canonicalWebsiteUrl: (data.canonicalWebsiteUrl as string | null) ?? null,
+                }));
+              })
+            }
+          >
+            {busy === "associate-client" ? "Saving…" : "Save client link"}
+          </button>
+        </div>
       </section>
 
       {reportStatus !== "none" ? (
@@ -427,7 +445,7 @@ export function AuditReportEditor({
               Report title
               <input
                 value={reportTitle}
-                disabled={locked || pending}
+                disabled={formLocked}
                 onChange={(e) => setReportTitle(e.target.value)}
               />
             </label>
@@ -436,7 +454,7 @@ export function AuditReportEditor({
               <textarea
                 rows={8}
                 value={executiveSummary}
-                disabled={locked || pending}
+                disabled={formLocked}
                 onChange={(e) => setExecutiveSummary(e.target.value)}
               />
             </label>
@@ -445,7 +463,7 @@ export function AuditReportEditor({
               <textarea
                 rows={5}
                 value={workingWell}
-                disabled={locked || pending}
+                disabled={formLocked}
                 onChange={(e) => setWorkingWell(e.target.value)}
               />
             </label>
@@ -454,7 +472,7 @@ export function AuditReportEditor({
               <textarea
                 rows={5}
                 value={losingOpportunity}
-                disabled={locked || pending}
+                disabled={formLocked}
                 onChange={(e) => setLosingOpportunity(e.target.value)}
               />
             </label>
@@ -463,7 +481,7 @@ export function AuditReportEditor({
               <textarea
                 rows={5}
                 value={recommendedNextSteps}
-                disabled={locked || pending}
+                disabled={formLocked}
                 onChange={(e) => setRecommendedNextSteps(e.target.value)}
               />
             </label>
@@ -472,7 +490,7 @@ export function AuditReportEditor({
               <textarea
                 rows={3}
                 value={closingNote}
-                disabled={locked || pending}
+                disabled={formLocked}
                 onChange={(e) => setClosingNote(e.target.value)}
               />
             </label>
@@ -481,7 +499,7 @@ export function AuditReportEditor({
               <textarea
                 rows={3}
                 value={internalNotes}
-                disabled={locked || pending}
+                disabled={formLocked}
                 onChange={(e) => setInternalNotes(e.target.value)}
               />
             </label>
@@ -495,7 +513,7 @@ export function AuditReportEditor({
                   <input
                     type="checkbox"
                     checked={sectionVisibility[key] !== false}
-                    disabled={locked || pending}
+                    disabled={formLocked}
                     onChange={(e) =>
                       setSectionVisibility((prev) => ({
                         ...prev,
@@ -530,7 +548,7 @@ export function AuditReportEditor({
                     <input
                       type="checkbox"
                       checked={Boolean(o.hidden)}
-                      disabled={locked || pending}
+                      disabled={formLocked}
                       onChange={(e) => patchOverride(finding.id, { hidden: e.target.checked })}
                     />
                     Hide from report
@@ -539,7 +557,7 @@ export function AuditReportEditor({
                     Client-facing explanation
                     <textarea
                       rows={2}
-                      disabled={locked || pending}
+                      disabled={formLocked}
                       value={o.explanation ?? ""}
                       placeholder={finding.detected}
                       onChange={(e) =>
@@ -558,7 +576,7 @@ export function AuditReportEditor({
                   Title
                   <input
                     value={m.title}
-                    disabled={locked || pending}
+                    disabled={formLocked}
                     onChange={(e) =>
                       setManualFindings((prev) =>
                         prev.map((item, i) =>
@@ -573,7 +591,7 @@ export function AuditReportEditor({
                     Category
                     <select
                       value={m.category}
-                      disabled={locked || pending}
+                      disabled={formLocked}
                       onChange={(e) =>
                         setManualFindings((prev) =>
                           prev.map((item, i) =>
@@ -598,7 +616,7 @@ export function AuditReportEditor({
                     Severity
                     <select
                       value={m.severity}
-                      disabled={locked || pending}
+                      disabled={formLocked}
                       onChange={(e) =>
                         setManualFindings((prev) =>
                           prev.map((item, i) =>
@@ -622,7 +640,7 @@ export function AuditReportEditor({
                   <textarea
                     rows={2}
                     value={m.observed}
-                    disabled={locked || pending}
+                    disabled={formLocked}
                     onChange={(e) =>
                       setManualFindings((prev) =>
                         prev.map((item, i) =>
@@ -637,7 +655,7 @@ export function AuditReportEditor({
                   <textarea
                     rows={2}
                     value={m.whyItMatters}
-                    disabled={locked || pending}
+                    disabled={formLocked}
                     onChange={(e) =>
                       setManualFindings((prev) =>
                         prev.map((item, i) =>
@@ -652,7 +670,7 @@ export function AuditReportEditor({
                   <textarea
                     rows={2}
                     value={m.recommendation}
-                    disabled={locked || pending}
+                    disabled={formLocked}
                     onChange={(e) =>
                       setManualFindings((prev) =>
                         prev.map((item, i) =>
@@ -666,7 +684,7 @@ export function AuditReportEditor({
                   <input
                     type="checkbox"
                     checked={Boolean(m.hidden)}
-                    disabled={locked || pending}
+                    disabled={formLocked}
                     onChange={(e) =>
                       setManualFindings((prev) =>
                         prev.map((item, i) =>
@@ -682,7 +700,7 @@ export function AuditReportEditor({
             <button
               type="button"
               className="kxd-os-btn kxd-os-btn--ghost"
-              disabled={locked || pending}
+              disabled={formLocked}
               onClick={addManualFinding}
             >
               Add manual finding
@@ -699,7 +717,7 @@ export function AuditReportEditor({
                   <div className="kxd-audit-report-editor__inline">
                     <select
                       value={item.group}
-                      disabled={locked || pending}
+                      disabled={formLocked}
                       onChange={(e) =>
                         setPlanGroup(item.id, e.target.value as ActionPlanGroup)
                       }
@@ -712,14 +730,14 @@ export function AuditReportEditor({
                     </select>
                     <button
                       type="button"
-                      disabled={locked || pending}
+                      disabled={formLocked}
                       onClick={() => movePlanItem(item.id, -1)}
                     >
                       Up
                     </button>
                     <button
                       type="button"
-                      disabled={locked || pending}
+                      disabled={formLocked}
                       onClick={() => movePlanItem(item.id, 1)}
                     >
                       Down
@@ -728,7 +746,7 @@ export function AuditReportEditor({
                       <input
                         type="checkbox"
                         checked={Boolean(item.hidden)}
-                        disabled={locked || pending}
+                        disabled={formLocked}
                         onChange={() => togglePlanHidden(item.id)}
                       />
                       Hide
@@ -744,9 +762,9 @@ export function AuditReportEditor({
               <button
                 type="button"
                 className="kxd-os-btn"
-                disabled={locked || pending}
+                disabled={formLocked}
                 onClick={() =>
-                  run("Draft saved.", async () => {
+                  run("Draft saved.", "save-draft", async () => {
                     const data = await api(`/api/admin/website-audits/${auditId}/report`, {
                       method: "PATCH",
                       body: JSON.stringify(saveBody),
@@ -763,9 +781,9 @@ export function AuditReportEditor({
               <button
                 type="button"
                 className="kxd-os-btn kxd-os-btn--ghost"
-                disabled={locked || pending}
+                disabled={formLocked}
                 onClick={() =>
-                  run("Marked ready for review.", async () => {
+                  run("Marked ready for review.", "mark-ready", async () => {
                     const data = await api(`/api/admin/website-audits/${auditId}/report`, {
                       method: "PATCH",
                       body: JSON.stringify({ ...saveBody, markReadyForReview: true }),
@@ -782,9 +800,9 @@ export function AuditReportEditor({
               <button
                 type="button"
                 className="kxd-os-btn"
-                disabled={reportStatus === "archived" || pending}
+                disabled={reportStatus === "archived" || busy === "approve"}
                 onClick={() =>
-                  run("Report approved.", async () => {
+                  run("Report approved.", "approve", async () => {
                     if (reportStatus !== "approved") {
                       await api(`/api/admin/website-audits/${auditId}/report`, {
                         method: "PATCH",

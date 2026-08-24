@@ -1,5 +1,8 @@
 /** Route builders for quick actions — single source of truth */
 
+/** Public marketing-site auditor — not the internal Audit Lead Desk. */
+export const PUBLIC_WEBSITE_AUDIT_URL = "https://kreatebydesign.com/website-audit";
+
 export function proposalHref(clientId?: number): string {
   return clientId
     ? `/admin/sales/proposals/new?client=${clientId}`
@@ -34,7 +37,7 @@ export function websiteAuditHref(clientId?: number): string {
   if (clientId) {
     return playbookHref("website-audit", clientId);
   }
-  return "/admin/operations/audits";
+  return PUBLIC_WEBSITE_AUDIT_URL;
 }
 
 export function clientCommandCenterHref(clientId?: number): string {

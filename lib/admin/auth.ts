@@ -35,7 +35,7 @@ export async function getPayloadAdminUser() {
  * Returns the admin user, or a 401 JSON response.
  * Restricted staff roles are deny-by-default against non-allowlisted API paths.
  */
-export async function requirePayloadAdminApi() {
+export async function requirePayloadAdminApi(request?: Request) {
   const user = await getPayloadAdminUser();
   if (!user) {
     return NextResponse.json(
@@ -67,6 +67,7 @@ export async function requirePayloadAdminApi() {
       const { headers: nextHeaders } = await import("next/headers");
       const h = await nextHeaders();
       const pathname =
+        (request ? new URL(request.url).pathname : "") ||
         h.get("x-kxd-pathname") ||
         h.get("next-url") ||
         h.get("x-invoke-path") ||

@@ -627,7 +627,7 @@ async function main() {
     "real recipient name preserved",
   );
 
-  // Regeneration does not touch raw evidence fields conceptually
+  // Raw evidence preservation
   console.log("Raw evidence preservation");
   const afterNarrative = fixtureSource({
     ...prospect,
@@ -641,6 +641,44 @@ async function main() {
   assert(
     afterNarrative.overallScore === prospect.overallScore,
     "raw overall score unchanged by narrative",
+  );
+
+  console.log("Prospect report generation");
+  const prospectNoClient = fixtureSource({
+    reportStatus: "none",
+    clientId: null,
+    client: null,
+    website: "https://tendownbowling.com",
+    overallScore: 75,
+    grade: "C",
+  });
+  assert(prospectNoClient.clientId == null, "prospect fixture has no client id");
+  assert(Boolean(prospectNoClient.website?.trim()), "prospect fixture has audited URL");
+  const prospectNarrative = generateAuditNarrative(prospectNoClient);
+  assert(
+    prospectNarrative.executiveSummary.includes("75"),
+    "prospect narrative uses stored score without client link",
+  );
+  const prospectDraft = buildCanonicalAuditReport({
+    ...prospectNoClient,
+    ...prospectNarrative,
+    reportStatus: "draft",
+    recommendationPlan: buildDefaultActionPlan(prospectNoClient, []),
+  });
+  assert(prospectDraft.clientId == null, "canonical report keeps prospect unlinked");
+  assert(prospectDraft.executiveSummary.length > 0, "prospect canonical report has narrative");
+
+  console.log("Quick action routing");
+  const { PUBLIC_WEBSITE_AUDIT_URL, websiteAuditHref } = await import(
+    "../lib/quick-actions/routes.ts"
+  );
+  assert(
+    websiteAuditHref() === PUBLIC_WEBSITE_AUDIT_URL,
+    "global run-website-audit opens public marketing auditor",
+  );
+  assert(
+    websiteAuditHref(19).includes("playbook=website-audit"),
+    "client-scoped website audit opens playbook context",
   );
 
   console.log(`\nResults: ${passed} passed, ${failed} failed\n`);

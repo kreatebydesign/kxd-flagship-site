@@ -19,7 +19,7 @@ export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const auth = await requirePayloadAdminApi();
+  const auth = await requirePayloadAdminApi(req);
   if (auth instanceof NextResponse) return auth;
 
   const { id } = await params;
