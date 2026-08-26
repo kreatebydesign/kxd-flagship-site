@@ -97,7 +97,14 @@ export default async function PortalAppLayout({ children }: { children: React.Re
         commercialNavAvailable={commercialNavAvailable}
         operatorPreview={
           session.isOperatorPreview
-            ? { clientId: session.clientId, clientName: session.clientName }
+            ? {
+                clientId: session.clientId,
+                clientName: session.clientName,
+                mode:
+                  session.operatorPreview?.mode === "staff-test"
+                    ? "staff-test"
+                    : "preview",
+              }
             : null
         }
       >

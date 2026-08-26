@@ -139,12 +139,15 @@ async function resolveOperatorPreviewSession(): Promise<PortalSession | null> {
     })) as AnyDoc | null;
     if (!client) return null;
     const clientName = String(client.name ?? preview.clientName ?? "Client");
+    const isStaffTest = preview.mode === "staff-test";
     return {
       // Sentinel — never a real portal-users row. Writes must check isOperatorPreview.
       portalUserId: 0,
       clientId: preview.clientId,
       email: preview.adminEmail,
-      displayName: `Operator Preview · ${clientName}`,
+      displayName: isStaffTest
+        ? `KXD Staff Test · ${preview.adminEmail}`
+        : `Operator Preview · ${clientName}`,
       greetingName: "",
       clientName,
       // Skip welcome / MFA enrollment gates for operator preview.
@@ -152,6 +155,7 @@ async function resolveOperatorPreviewSession(): Promise<PortalSession | null> {
       isOperatorPreview: true,
       operatorPreview: {
         ...preview,
+        mode: isStaffTest ? "staff-test" : "preview",
         clientName,
       },
     };
@@ -269,10 +273,50 @@ export async function getPortalSession(): Promise<PortalSession | null> {
 /**
  * Portal session that may mutate client-owned data.
  * Operator preview is read-only and returns null (caller → 401/403).
+ * Staff Test Mode does NOT unlock this general write gate — only Website Review helpers do.
  */
 export async function getPortalWriteSession(): Promise<PortalSession | null> {
   const session = await getPortalSession();
   if (!session || session.isOperatorPreview) return null;
+  return session;
+}
+
+/**
+ * Website Review write gate.
+ * Real portal users always pass. Operator preview is denied unless
+ * explicitly elevated to Staff Test Mode for the same client scope.
+ */
+export function canWriteWebsiteReview(session: PortalSession): boolean {
+  if (!session.isOperatorPreview) return true;
+  return session.operatorPreview?.mode === "staff-test";
+}
+
+/** Actor fields for Website Review requests — never attributes staff test to a client person. */
+export function resolveWebsiteReviewActor(session: PortalSession): {
+  displayName: string;
+  email: string;
+} {
+  if (session.isOperatorPreview && session.operatorPreview?.mode === "staff-test") {
+    const email = session.operatorPreview.adminEmail || session.email;
+    return {
+      displayName: `KXD Staff Test · ${email}`,
+      email,
+    };
+  }
+  return {
+    displayName: session.displayName,
+    email: session.email,
+  };
+}
+
+/**
+ * Session usable for Website Review POST/upload/delete.
+ * Returns null when unauthorized or ordinary read-only operator preview.
+ */
+export async function getPortalWebsiteReviewWriteSession(): Promise<PortalSession | null> {
+  const session = await getPortalSession();
+  if (!session) return null;
+  if (!canWriteWebsiteReview(session)) return null;
   return session;
 }
 
@@ -291,6 +335,8 @@ export function portalPreviewReadOnlyResponse(): NextResponse {
       ok: false,
       success: false,
       error: "Operator preview is read-only. Exit preview to use client actions.",
+      message:
+        "This is a read-only studio preview. Enable Staff Test Mode to submit Website Review feedback, or sign in as a portal user.",
       code: "operator_preview_readonly",
     },
     { status: 403 },

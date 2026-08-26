@@ -40,7 +40,11 @@ export interface ClientHqShellProps {
   /** Authoritative commercial agreement — billingPlan-backed engagement records. */
   commercialNavAvailable?: boolean;
   /** Studio operator single-client preview — not a portal-user session. */
-  operatorPreview?: { clientId: number; clientName: string } | null;
+  operatorPreview?: {
+    clientId: number;
+    clientName: string;
+    mode?: "preview" | "staff-test";
+  } | null;
   children: ReactNode;
 }
 
@@ -144,7 +148,11 @@ export function ClientHqShell({
   return (
     <>
       {operatorPreview ? (
-        <OperatorPortalPreviewBanner clientName={operatorPreview.clientName} />
+        <OperatorPortalPreviewBanner
+          clientId={operatorPreview.clientId}
+          clientName={operatorPreview.clientName}
+          mode={operatorPreview.mode}
+        />
       ) : null}
       <KxdShell className="kxd-os-shell--app">
       <input

@@ -26,7 +26,11 @@ export function ClientHqAppShell({
   portfolioNavAvailable?: boolean;
   billingNavAvailable?: boolean;
   commercialNavAvailable?: boolean;
-  operatorPreview?: { clientId: number; clientName: string } | null;
+  operatorPreview?: {
+    clientId: number;
+    clientName: string;
+    mode?: "preview" | "staff-test";
+  } | null;
 }) {
   const pathname = usePathname();
   const activeId = resolvePortalNavId(pathname);

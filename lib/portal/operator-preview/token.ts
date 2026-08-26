@@ -60,7 +60,11 @@ export function decodeOperatorPortalPreviewSession(
       return null;
     }
     if (new Date(parsed.expiresAt).getTime() < Date.now()) return null;
-    return parsed;
+    const mode = parsed.mode === "staff-test" ? "staff-test" : "preview";
+    return {
+      ...parsed,
+      mode,
+    };
   } catch {
     return null;
   }
@@ -72,9 +76,11 @@ export function buildOperatorPortalPreviewSession(input: {
   clientId: number;
   clientName: string;
   clientSlug: string | null;
+  mode?: OperatorPortalPreviewSession["mode"];
   draftComposition?: OperatorPortalPreviewSession["draftComposition"];
 }): OperatorPortalPreviewSession {
   const startedAt = new Date().toISOString();
+  const mode = input.mode === "staff-test" ? "staff-test" : "preview";
   return {
     kind: "operator-portal-preview",
     adminUserId: input.adminUserId,
@@ -82,6 +88,7 @@ export function buildOperatorPortalPreviewSession(input: {
     clientId: input.clientId,
     clientName: input.clientName,
     clientSlug: input.clientSlug,
+    mode,
     startedAt,
     expiresAt: new Date(Date.now() + PREVIEW_TTL_MS).toISOString(),
     ...(input.draftComposition ? { draftComposition: input.draftComposition } : {}),

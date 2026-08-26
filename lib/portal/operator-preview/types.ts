@@ -18,6 +18,13 @@ export type OperatorPreviewDraftComposition = {
   };
 };
 
+/**
+ * Operator portal session mode.
+ * - `preview` — default read-only studio preview (no portal writes)
+ * - `staff-test` — explicit writable Website Review test for KXD staff only
+ */
+export type OperatorPortalPreviewMode = "preview" | "staff-test";
+
 export type OperatorPortalPreviewSession = {
   /** Authenticated Payload admin (`users`) who started preview. */
   adminUserId: number;
@@ -31,6 +38,11 @@ export type OperatorPortalPreviewSession = {
   expiresAt: string;
   /** Discriminator so cookies cannot be confused with staff preview. */
   kind: "operator-portal-preview";
+  /**
+   * Session capability. Absent/`preview` = read-only.
+   * `staff-test` allows Website Review writes only (not global portal writes).
+   */
+  mode?: OperatorPortalPreviewMode;
   /** Optional unsaved recommendation overlay for operator preview only. */
   draftComposition?: OperatorPreviewDraftComposition;
 };

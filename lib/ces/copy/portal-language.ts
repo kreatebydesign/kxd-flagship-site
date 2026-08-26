@@ -142,8 +142,8 @@ export const PORTAL_CLIENT_LANGUAGE = {
 
   attachmentLabel: "Reference files",
   attachmentHint: "Screenshots, PDFs, or documents — up to 5 files, 10 MB each.",
-  attachmentDropTitle: "Drop files here",
-  attachmentDropLead: "Images, PDFs, and documents welcome",
+  attachmentDropTitle: "Drop files here or browse",
+  attachmentDropLead: "PNG, JPG, PDF · up to 5 files, 10 MB each",
   attachmentTypeError: "That file type isn't supported. Try an image, PDF, or document.",
   attachmentSizeError: "Files must be 10 MB or smaller.",
   attachmentLimitError: "You can attach up to 5 files per revision.",
@@ -195,6 +195,8 @@ export const PORTAL_CLIENT_LANGUAGE = {
   reviewSessionTitleRequired: "Add a short title for this feedback.",
   reviewSessionDetailsRequired: "Add a few details so we know exactly what to change.",
   reviewSessionSaveError: "We couldn't save your feedback just now. Please try again.",
+  reviewSessionPreviewReadOnly:
+    "This is a read-only studio preview. Enable Staff Test Mode from the banner to submit feedback, or sign in as a portal user.",
   reviewSessionUnavailableTitle: "Visual review isn't available yet",
   reviewSessionUnavailableLead:
     "We couldn't open a review session for this link. Your site URL may not be configured yet, or this revision may no longer be available.",

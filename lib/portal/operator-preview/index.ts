@@ -1,4 +1,5 @@
 export type {
+  OperatorPortalPreviewMode,
   OperatorPortalPreviewSession,
   OperatorPreviewDraftComposition,
 } from "./types";

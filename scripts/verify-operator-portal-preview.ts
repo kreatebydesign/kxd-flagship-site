@@ -73,6 +73,12 @@ function main() {
       session.includes("session.isOperatorPreview"),
   );
   check(
+    "Website Review write helper allows staff-test only",
+    session.includes("canWriteWebsiteReview") &&
+      session.includes('mode === "staff-test"') &&
+      session.includes("getPortalWebsiteReviewWriteSession"),
+  );
+  check(
     "preview uses sentinel portalUserId 0 (not a real membership)",
     session.includes("portalUserId: 0"),
   );
@@ -99,6 +105,26 @@ function main() {
     "start publishes non-client-attributed activity",
     start.includes("portal.operator-preview-started") &&
       start.includes("attributedToPortalUser: false"),
+  );
+  check(
+    "start emits explicit switch audit when reminting another client",
+    start.includes("portal.operator-preview-switched") &&
+      start.includes("fromClientId") &&
+      start.includes("toClientId: clientId") &&
+      start.includes("getOperatorPortalPreviewCookieSession"),
+  );
+
+  const reportView = read("app/api/portal/reports/[id]/view/route.ts");
+  check(
+    "report view skips viewCount increment during operator preview",
+    reportView.includes("session.isOperatorPreview") &&
+      reportView.includes("recordPortalReportView"),
+  );
+  check(
+    "report view still records views for real portal users",
+    /if\s*\(\s*!session\.isOperatorPreview\s*\)[\s\S]*recordPortalReportView/.test(
+      reportView,
+    ),
   );
 
   const exitPortal = read("app/api/portal/preview/exit/route.ts");
@@ -143,6 +169,28 @@ function main() {
     "preview banner shows Operator Preview label + Exit Preview",
     banner.includes("Operator Preview ·") && banner.includes("Exit Preview"),
   );
+  check(
+    "preview banner can elevate to Staff Test Mode",
+    banner.includes("Enable Staff Test Mode") &&
+      banner.includes("/api/admin/portal/preview/staff-test") &&
+      banner.includes("Staff Test Mode"),
+  );
+
+  const staffTest = read("app/api/admin/portal/preview/staff-test/route.ts");
+  check(
+    "staff-test route requires studio operator + existing preview cookie",
+    staffTest.includes("isStudioPayloadOperator") &&
+      staffTest.includes("getOperatorPortalPreviewCookieSession") &&
+      staffTest.includes('"staff-test"') &&
+      staffTest.includes("setOperatorPortalPreviewCookie"),
+  );
+
+  const reviewRoute = read("app/api/portal/website-review/route.ts");
+  check(
+    "website-review submit uses staff-test write gate",
+    reviewRoute.includes("canWriteWebsiteReview") &&
+      reviewRoute.includes("resolveWebsiteReviewActor"),
+  );
 
   const shell = read("components/client-hq/ClientHqShell.tsx");
   check(
@@ -168,7 +216,7 @@ function main() {
     requests.includes("getPortalWriteSession"),
   );
 
-  console.log("\n12+ checks passed — operator portal preview verified.\n");
+  console.log("\n16+ checks passed — operator portal preview verified.\n");
 }
 
 main();

@@ -24,6 +24,8 @@ import { decidePortalCesModuleApiAccess } from "@/lib/portal/requests-files-repo
 import {
   getPortalSession,
   portalPreviewReadOnlyResponse,
+  canWriteWebsiteReview,
+  resolveWebsiteReviewActor,
 } from "@/lib/portal/session";
 import { PORTAL_CLIENT_LANGUAGE } from "@/lib/ces/copy/portal-language";
 import { spawnWorkItemFromPortalRequest } from "@/lib/work-items/spawn";
@@ -94,7 +96,7 @@ export async function POST(req: NextRequest) {
       { status: 401 },
     );
   }
-  if (session.isOperatorPreview) {
+  if (!canWriteWebsiteReview(session)) {
     return portalPreviewReadOnlyResponse();
   }
 
@@ -119,6 +121,7 @@ export async function POST(req: NextRequest) {
     const priority = parsePriority(body);
     const requestTitleOverride =
       typeof body.requestTitle === "string" ? body.requestTitle.trim() : "";
+    const actor = resolveWebsiteReviewActor(session);
 
     if (!UPDATE_TYPES.has(updateType)) {
       return NextResponse.json(
@@ -159,8 +162,8 @@ export async function POST(req: NextRequest) {
         client: session.clientId,
         status: "new",
         priority,
-        requestedBy: session.displayName,
-        requestedByEmail: session.email,
+        requestedBy: actor.displayName,
+        requestedByEmail: actor.email,
         experienceModule: WEBSITE_REVIEW_EXPERIENCE_MODULE,
         pageContext: pageContext || undefined,
         reviewContext: reviewContext ?? undefined,
@@ -195,8 +198,8 @@ export async function POST(req: NextRequest) {
       requestId,
       requestTitle,
       clientName: String((clientDoc as Record<string, unknown>).name ?? "Client"),
-      submittedBy: session.displayName,
-      submittedByEmail: session.email,
+      submittedBy: actor.displayName,
+      submittedByEmail: actor.email,
       pageLocation: pageContext ?? null,
       priority,
       notesPreview: details.length > 160 ? `${details.slice(0, 160).trim()}…` : details,

@@ -27,12 +27,15 @@ export interface WebsiteReviewAttachmentZoneProps {
   attachments: WebsiteReviewPendingAttachment[];
   onChange: Dispatch<SetStateAction<WebsiteReviewPendingAttachment[]>>;
   disabled?: boolean;
+  /** Compact presentation for the Website Review inspector. */
+  compact?: boolean;
 }
 
 export function WebsiteReviewAttachmentZone({
   attachments,
   onChange,
   disabled = false,
+  compact = false,
 }: WebsiteReviewAttachmentZoneProps) {
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -211,11 +214,11 @@ export function WebsiteReviewAttachmentZone({
       label={PORTAL_CLIENT_LANGUAGE.attachmentLabel}
       htmlFor={inputId}
       optional
-      hint={PORTAL_CLIENT_LANGUAGE.attachmentHint}
+      hint={compact ? undefined : PORTAL_CLIENT_LANGUAGE.attachmentHint}
       error={zoneError ?? undefined}
     >
       <div
-        className={`kxd-ces-upload${dragActive ? " kxd-ces-upload--active" : ""}${!canAddMore ? " kxd-ces-upload--disabled" : ""}`}
+        className={`kxd-ces-upload${compact ? " kxd-ces-upload--compact" : ""}${dragActive ? " kxd-ces-upload--active" : ""}${!canAddMore ? " kxd-ces-upload--disabled" : ""}`}
         onDragEnter={(e) => {
           e.preventDefault();
           e.stopPropagation();

@@ -20,7 +20,11 @@ import {
   decidePortalCesModuleApiAccess,
   PORTAL_ATTACHMENT_NOT_FOUND_MESSAGE,
 } from "@/lib/portal/requests-files-reports";
-import { getPortalWriteSession } from "@/lib/portal/session";
+import {
+  getPortalWebsiteReviewWriteSession,
+  portalPreviewReadOnlyResponse,
+  getPortalSession,
+} from "@/lib/portal/session";
 
 export const dynamic = "force-dynamic";
 
@@ -73,8 +77,12 @@ function uploadFailureResponse() {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await getPortalWriteSession();
+  const session = await getPortalWebsiteReviewWriteSession();
   if (!session) {
+    const preview = await getPortalSession();
+    if (preview?.isOperatorPreview) {
+      return portalPreviewReadOnlyResponse();
+    }
     return NextResponse.json({ ok: false, message: "Unauthorized." }, { status: 401 });
   }
 
@@ -199,8 +207,12 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  const session = await getPortalWriteSession();
+  const session = await getPortalWebsiteReviewWriteSession();
   if (!session) {
+    const preview = await getPortalSession();
+    if (preview?.isOperatorPreview) {
+      return portalPreviewReadOnlyResponse();
+    }
     return NextResponse.json({ ok: false, message: "Unauthorized." }, { status: 401 });
   }
 
