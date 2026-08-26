@@ -68,7 +68,6 @@ export function ReviewFeedbackPopover({
   mode,
   viewport,
   existingPin,
-  anchorPoint,
   nextPinNumber = 1,
   websiteBaseUrl = null,
   workspacePages = [],
@@ -216,14 +215,6 @@ export function ReviewFeedbackPopover({
     }
   }
 
-  const style =
-    anchorPoint != null
-      ? {
-          left: `clamp(1rem, ${anchorPoint.x * 100}%, calc(100% - 22rem))`,
-          top: `clamp(5rem, ${anchorPoint.y * 100 + 2}%, calc(100% - 24rem))`,
-        }
-      : undefined;
-
   if (mode === "view" && existingPin) {
     const pinPath =
       existingPin.anchor.viewport.pagePath ||
@@ -233,8 +224,7 @@ export function ReviewFeedbackPopover({
     return (
       <div
         ref={panelRef}
-        className="kxd-review-popover"
-        style={style}
+        className="kxd-review-popover kxd-review-popover--view"
         role="dialog"
         aria-labelledby={`${dialogId}-title`}
       >
@@ -251,7 +241,9 @@ export function ReviewFeedbackPopover({
             <span>{pinPath}</span>
           </p>
         </div>
-        <p className="kxd-review-popover__body">{existingPin.summary}</p>
+        <div className="kxd-review-popover__scroll">
+          <p className="kxd-review-popover__body">{existingPin.summary}</p>
+        </div>
         <div className="kxd-review-popover__actions">
           {existingPin.requestId ? (
             <Link
@@ -272,8 +264,7 @@ export function ReviewFeedbackPopover({
   return (
     <div
       ref={panelRef}
-      className="kxd-review-popover"
-      style={style}
+      className="kxd-review-popover kxd-review-popover--create"
       role="dialog"
       aria-labelledby={`${dialogId}-title`}
       onClick={(event) => event.stopPropagation()}
@@ -285,69 +276,69 @@ export function ReviewFeedbackPopover({
         </h2>
       </div>
 
-      <div className="kxd-review-popover__form">
-        <WebsiteReviewPageField
-          compact
-          websiteBaseUrl={websiteBaseUrl}
-          choices={pageChoices}
-          value={pageValue}
-          error={pageError ?? undefined}
-          disabled={submitting}
-          onChange={(next) => {
-            setPageValue(next);
-            setPageError(null);
-          }}
-        />
-
-        <CesField label={PORTAL_CLIENT_LANGUAGE.reviewSessionFieldTitle} htmlFor={`${dialogId}-title-input`}>
-          <input
-            id={`${dialogId}-title-input`}
-            className="kxd-ces-input"
-            value={title}
-            onChange={(event) => setTitle(event.target.value)}
-            placeholder={PORTAL_CLIENT_LANGUAGE.reviewSessionFieldTitlePlaceholder}
+      <div className="kxd-review-popover__scroll">
+        <div className="kxd-review-popover__form">
+          <WebsiteReviewPageField
+            compact
+            websiteBaseUrl={websiteBaseUrl}
+            choices={pageChoices}
+            value={pageValue}
+            error={pageError ?? undefined}
             disabled={submitting}
+            onChange={(next) => {
+              setPageValue(next);
+              setPageError(null);
+            }}
           />
-        </CesField>
 
-        <CesField label={PORTAL_CLIENT_LANGUAGE.reviewSessionFieldDetails} htmlFor={`${dialogId}-details`}>
-          <textarea
-            id={`${dialogId}-details`}
-            className="kxd-ces-input kxd-ces-input--textarea"
-            rows={4}
-            value={details}
-            onChange={(event) => setDetails(event.target.value)}
-            placeholder={PORTAL_CLIENT_LANGUAGE.reviewSessionFieldDetailsPlaceholder}
-            disabled={submitting}
-          />
-        </CesField>
+          <CesField label={PORTAL_CLIENT_LANGUAGE.reviewSessionFieldTitle} htmlFor={`${dialogId}-title-input`}>
+            <input
+              id={`${dialogId}-title-input`}
+              className="kxd-ces-input"
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+              placeholder={PORTAL_CLIENT_LANGUAGE.reviewSessionFieldTitlePlaceholder}
+              disabled={submitting}
+            />
+          </CesField>
 
-        <CesField label={PORTAL_CLIENT_LANGUAGE.attachmentLabel}>
+          <CesField label={PORTAL_CLIENT_LANGUAGE.reviewSessionFieldDetails} htmlFor={`${dialogId}-details`}>
+            <textarea
+              id={`${dialogId}-details`}
+              className="kxd-ces-input kxd-ces-input--textarea kxd-review-popover__details"
+              rows={3}
+              value={details}
+              onChange={(event) => setDetails(event.target.value)}
+              placeholder={PORTAL_CLIENT_LANGUAGE.reviewSessionFieldDetailsPlaceholder}
+              disabled={submitting}
+            />
+          </CesField>
+
           <WebsiteReviewAttachmentZone
             attachments={attachments}
             onChange={setAttachments}
             disabled={submitting}
           />
-        </CesField>
 
-        <CesField label={PORTAL_CLIENT_LANGUAGE.reviewSessionFieldPriority} htmlFor={`${dialogId}-priority`}>
-          <select
-            id={`${dialogId}-priority`}
-            className="kxd-ces-input"
-            value={priority}
-            onChange={(event) => setPriority(event.target.value)}
-            disabled={submitting}
-          >
-            {PRIORITY_OPTIONS.map((option) => (
-              <option key={option.id} value={option.id}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </CesField>
+          <CesField label={PORTAL_CLIENT_LANGUAGE.reviewSessionFieldPriority} htmlFor={`${dialogId}-priority`}>
+            <select
+              id={`${dialogId}-priority`}
+              className="kxd-ces-input"
+              value={priority}
+              onChange={(event) => setPriority(event.target.value)}
+              disabled={submitting}
+            >
+              {PRIORITY_OPTIONS.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </CesField>
+        </div>
+
+        {error ? <p className="kxd-review-popover__error">{error}</p> : null}
       </div>
-
-      {error ? <p className="kxd-review-popover__error">{error}</p> : null}
 
       <div className="kxd-review-popover__actions">
         <button
