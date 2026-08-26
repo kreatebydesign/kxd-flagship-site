@@ -277,7 +277,11 @@ export function ReviewSessionScreen({ bootstrap }: ReviewSessionScreenProps) {
             onSaved={handleSaved}
           />
         ) : null}
-        <ReviewSessionFab mode={mode} onToggle={handleFabToggle} />
+        <ReviewSessionFab
+          mode={mode}
+          onToggle={handleFabToggle}
+          hasSubmittedFeedback={pins.length > 0}
+        />
       </div>
 
       {/* Operator overlay extension point — Phase 12F architecture only */}

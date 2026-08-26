@@ -159,7 +159,11 @@ function finalizeProfile(profile: ResolvedExperienceProfile): ResolvedExperience
     ...experienceProfileToCssVars(profile.visual),
     ...(presentation
       ? {
-          "--kxd-ces-hero-image": `url(${presentation.heroImageSrc})`,
+          ...(presentation.heroImageSrc
+            ? {
+                "--kxd-ces-hero-image": `url(${presentation.heroImageSrc})`,
+              }
+            : {}),
           ...(presentation.actionAccent
             ? {
                 "--kxd-ces-brand": resolveCesBrandColor(presentation.actionAccent),

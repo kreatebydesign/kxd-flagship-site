@@ -18,6 +18,7 @@ import {
 import { CesPage } from "@/components/ces/primitives";
 import { CesPartnershipBriefing } from "@/components/ces/partnership";
 import { CesExecutivePerformanceWorkspace } from "@/components/ces/executive-performance";
+import { CesPresentationHomeHero } from "@/components/ces/presentation/CesPresentationHomeHero";
 import { WorkspaceFocusStrip } from "@/components/portal/WorkspaceFocusStrip";
 import { CesClientCommandHome } from "./CesClientCommandHome";
 
@@ -60,6 +61,10 @@ export function CesPortalHome({
     hasWorkPerformance: Boolean(workPerformance),
   });
   const useExecutive = homeSurface === "executive-performance";
+  const presentation = profile.presentation;
+  const showPresentationHero = Boolean(
+    !useExecutive && presentation?.heroImageSrc?.trim(),
+  );
   const clientHome =
     homeSurface === "client-command" && workPerformance
       ? composeClientHomePresentation({
@@ -82,9 +87,16 @@ export function CesPortalHome({
         flagship ? " kxd-ces-portal-home--flagship" : ""
       }${useExecutive ? " kxd-ces-portal-home--executive" : ""}${
         clientHome ? " kxd-ces-portal-home--command" : ""
-      }`}
+      }${showPresentationHero ? " kxd-ces-portal-home--presented" : ""}`}
     >
       <div>
+        {showPresentationHero && presentation ? (
+          <CesPresentationHomeHero
+            presentation={presentation}
+            logoSrc={profile.identity.logoUrl}
+            logoAlt={profile.identity.logoAlt}
+          />
+        ) : null}
         {clientHome ? (
           <CesClientCommandHome
             home={clientHome}
@@ -93,6 +105,7 @@ export function CesPortalHome({
             engagement={engagement}
             engagementEyebrow={engagementEyebrow}
             engagementTitle={engagementTitle}
+            suppressWelcome={showPresentationHero}
           />
         ) : useExecutive && performance ? (
           <CesExecutivePerformanceWorkspace
@@ -106,6 +119,7 @@ export function CesPortalHome({
             engagement={engagement}
             engagementEyebrow={engagementEyebrow}
             engagementTitle={engagementTitle}
+            suppressHero={showPresentationHero}
           />
         )}
         {!clientHome && personalization && !useExecutive ? (

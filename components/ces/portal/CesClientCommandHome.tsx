@@ -3,7 +3,6 @@ import type {
   ClientHomePresentation,
   ClientHomePresentationItem,
 } from "@/lib/ces/modules/home";
-import { PORTAL_CLIENT_LANGUAGE } from "@/lib/ces/copy/portal-language";
 import type { ActiveEngagementSnapshot } from "@/lib/portal/active-engagement";
 import { ActiveEngagementCard } from "./ActiveEngagementCard";
 
@@ -70,6 +69,7 @@ export function CesClientCommandHome({
   engagement = null,
   engagementEyebrow,
   engagementTitle,
+  suppressWelcome = false,
 }: {
   home: ClientHomePresentation;
   showWork: boolean;
@@ -77,6 +77,8 @@ export function CesClientCommandHome({
   engagement?: ActiveEngagementSnapshot | null;
   engagementEyebrow?: string;
   engagementTitle?: string;
+  /** When a Shared Core presentation hero already introduces the workspace. */
+  suppressWelcome?: boolean;
 }) {
   const story = home.valueStory;
   const care = home.careContinuity;
@@ -89,16 +91,24 @@ export function CesClientCommandHome({
 
   return (
     <div className="kxd-client-home">
-      <header className="kxd-client-home__welcome">
-        <p className="kxd-client-home__eyebrow">{home.welcome.eyebrow}</p>
-        <h1>{home.welcome.greeting}</h1>
-        <p className="kxd-client-home__lead">{home.welcome.lead}</p>
-        {showPartnership ? (
+      {!suppressWelcome ? (
+        <header className="kxd-client-home__welcome">
+          <p className="kxd-client-home__eyebrow">{home.welcome.eyebrow}</p>
+          <h1>{home.welcome.greeting}</h1>
+          <p className="kxd-client-home__lead">{home.welcome.lead}</p>
+          {showPartnership ? (
+            <Link href="/portal/partnership" className="kxd-ces-btn kxd-ces-btn--ghost">
+              View your partnership
+            </Link>
+          ) : null}
+        </header>
+      ) : showPartnership ? (
+        <div className="kxd-client-home__welcome kxd-client-home__welcome--compact">
           <Link href="/portal/partnership" className="kxd-ces-btn kxd-ces-btn--ghost">
             View your partnership
           </Link>
-        ) : null}
-      </header>
+        </div>
+      ) : null}
 
       <ActiveEngagementCard
         engagement={engagement}

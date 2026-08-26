@@ -1030,6 +1030,135 @@
   padding-bottom: clamp(1.5rem, 3vw, 2.25rem);
 }
 
+/* Shared Core presentation hero — reusable cinematic home banner */
+.kxd-ces-present-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 0.35rem;
+  min-height: clamp(14rem, 32vw, 18.5rem);
+  margin: 0 0 clamp(1.25rem, 3vw, 1.75rem);
+  padding: clamp(1.35rem, 3.5vw, 2rem) clamp(1.25rem, 3vw, 1.85rem);
+  color: #f4f0e8;
+  background-color: #050505;
+  background-image: none;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: var(--kxd-ces-exec-hero-focus, 50% 42%);
+  border: 1px solid color-mix(in srgb, #fff 6%, transparent);
+}
+
+.kxd-ces-present-hero--imaged {
+  background-image: var(--kxd-ces-exec-hero-image);
+}
+
+.kxd-ces-present-hero__veil,
+.kxd-ces-present-hero__vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.kxd-ces-present-hero__veil {
+  background:
+    linear-gradient(
+      105deg,
+      rgba(0, 0, 0, 0.92) 0%,
+      rgba(0, 0, 0, 0.72) 28%,
+      rgba(0, 0, 0, 0.38) 52%,
+      rgba(0, 0, 0, 0.12) 72%,
+      transparent 88%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.55) 0%,
+      transparent 42%,
+      rgba(0, 0, 0, 0.45) 100%
+    );
+}
+
+.kxd-ces-present-hero__vignette {
+  box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.45);
+}
+
+.kxd-ces-present-hero__inner {
+  position: relative;
+  z-index: 1;
+  max-width: 34rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.55rem;
+}
+
+.kxd-ces-present-hero__logo {
+  display: block;
+  height: auto;
+  width: auto;
+  max-height: 2.35rem;
+  max-width: min(12rem, 70vw);
+  margin: 0 0 0.35rem;
+  object-fit: contain;
+  object-position: left center;
+  filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.45));
+}
+
+.kxd-ces-present-hero__eyebrow {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--kxd-ces-exec-action, #b8a46a) 88%, #fff);
+}
+
+.kxd-ces-present-hero__title {
+  margin: 0;
+  font-family: var(--kxd-os-font-serif, "Cormorant Garamond", Georgia, serif);
+  font-size: clamp(1.85rem, 4.2vw, 2.65rem);
+  font-weight: 500;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  color: #f7f3eb;
+  text-wrap: balance;
+}
+
+.kxd-ces-present-hero__lead {
+  margin: 0.15rem 0 0;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: color-mix(in srgb, #f7f3eb 82%, transparent);
+  max-width: 32rem;
+}
+
+.kxd-client-home__welcome--compact {
+  margin: 0 0 1rem;
+  padding: 0;
+  border: none;
+  background: none;
+}
+
+@media (max-width: 640px) {
+  .kxd-ces-present-hero {
+    min-height: clamp(16rem, 58vw, 20rem);
+    background-position: var(--kxd-ces-exec-hero-focus, 50% 38%);
+    padding: 1.25rem 1.1rem 1.4rem;
+  }
+
+  .kxd-ces-present-hero__logo {
+    max-height: 1.85rem;
+  }
+
+  .kxd-ces-present-hero__title {
+    font-size: clamp(1.65rem, 7vw, 2.05rem);
+  }
+
+  .kxd-ces-present-hero__lead {
+    font-size: 0.875rem;
+  }
+}
+
 .kxd-ces-portal-home--flagship .kxd-ces-hero__eyebrow,
 .kxd-ces-portal-home--primal .kxd-ces-hero__eyebrow {
   color: var(--kxd-os-accent);
@@ -2860,68 +2989,94 @@
   margin: 0 0 0.5rem;
 }
 
-/* ── Phase 12F patch: Browse / Comment FAB ────────────────────── */
+/* ── Phase 12F patch: Browse / Comment FAB ──────────────────────
+   High-contrast KXD chrome — solid fill + dual ring so the control
+   stays visible over black, white, photo, and video client sites.
+   Never inherits styles from the embedded iframe website.
+*/
 
 .kxd-review-fab {
   position: absolute;
   right: clamp(1rem, 3vw, 1.5rem);
   bottom: clamp(1rem, 3vw, 1.5rem);
   z-index: 40;
-  display: grid;
-  place-items: center;
-  width: 3rem;
-  height: 3rem;
-  padding: 0;
-  border: 1px solid color-mix(in srgb, var(--kxd-ces-accent) 40%, transparent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-sizing: border-box;
+  min-width: 3.25rem; /* 52px */
+  min-height: 3.25rem;
+  height: 3.25rem;
+  padding: 0 1.05rem 0 0.9rem;
+  border: 2px solid #0b0b0b;
   border-radius: 999px;
-  background:
-    radial-gradient(
-      circle at 35% 30%,
-      color-mix(in srgb, var(--kxd-cream) 12%, transparent),
-      transparent 55%
-    ),
-    color-mix(in srgb, var(--kxd-black-base) 82%, transparent);
-  color: var(--kxd-os-text-primary);
+  background: #ffffff;
+  color: #0b0b0b;
+  font-family: var(--kxd-os-font-sans);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1;
   box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--kxd-black-base) 35%, transparent),
-    0 10px 28px color-mix(in srgb, var(--kxd-black-base) 55%, transparent);
+    0 0 0 3px rgba(255, 255, 255, 0.95),
+    0 10px 28px rgba(0, 0, 0, 0.42),
+    0 2px 6px rgba(0, 0, 0, 0.2);
   cursor: pointer;
+  isolation: isolate;
   transition:
     transform 160ms ease,
     border-color 160ms ease,
     box-shadow 160ms ease,
-    background 160ms ease;
+    background 160ms ease,
+    color 160ms ease,
+    padding 160ms ease;
+}
+
+.kxd-review-fab--compact {
+  width: 3.25rem;
+  padding: 0;
 }
 
 .kxd-review-fab:hover {
-  transform: translateY(-1px);
-  border-color: color-mix(in srgb, var(--kxd-ces-accent) 62%, transparent);
+  transform: translateY(-2px);
+  background: #f7f7f5;
+  box-shadow:
+    0 0 0 3px rgba(255, 255, 255, 0.98),
+    0 14px 32px rgba(0, 0, 0, 0.48),
+    0 3px 8px rgba(0, 0, 0, 0.22);
 }
 
 .kxd-review-fab:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--kxd-ces-accent) 55%, transparent);
-  outline-offset: 2px;
+  outline: 3px solid #0b0b0b;
+  outline-offset: 3px;
+  box-shadow:
+    0 0 0 3px #ffffff,
+    0 0 0 6px rgba(11, 11, 11, 0.35),
+    0 10px 28px rgba(0, 0, 0, 0.42);
 }
 
 .kxd-review-fab--active {
-  border-color: color-mix(in srgb, var(--kxd-ces-accent) 72%, transparent);
-  background:
-    radial-gradient(
-      circle at 35% 30%,
-      color-mix(in srgb, var(--kxd-ces-accent) 18%, transparent),
-      transparent 55%
-    ),
-    color-mix(in srgb, var(--kxd-black-base) 88%, transparent);
+  background: #0b0b0b;
+  color: #ffffff;
+  border-color: #ffffff;
   box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--kxd-ces-accent) 28%, transparent),
-    0 12px 32px color-mix(in srgb, var(--kxd-black-base) 60%, transparent);
+    0 0 0 3px #0b0b0b,
+    0 0 0 5px rgba(255, 255, 255, 0.92),
+    0 12px 32px rgba(0, 0, 0, 0.5);
+}
+
+.kxd-review-fab--active:hover {
+  background: #1a1a1a;
+  color: #ffffff;
 }
 
 .kxd-review-fab__icon {
   display: grid;
   place-items: center;
-  width: 1.25rem;
-  height: 1.25rem;
+  flex: 0 0 auto;
+  width: 1.35rem;
+  height: 1.35rem;
 }
 
 .kxd-review-fab__icon svg {
@@ -2929,19 +3084,29 @@
   height: 100%;
 }
 
+.kxd-review-fab__label {
+  display: inline-block;
+  white-space: nowrap;
+  max-width: 11rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .kxd-review-fab__tooltip {
   position: absolute;
-  right: calc(100% + 0.625rem);
+  right: calc(100% + 0.7rem);
   white-space: nowrap;
   font-size: 0.75rem;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.01em;
-  color: var(--kxd-os-text-primary);
-  padding: 0.35rem 0.55rem;
+  color: #0b0b0b;
+  padding: 0.4rem 0.6rem;
   border-radius: var(--kxd-ces-radius, 6px);
-  border: 1px solid color-mix(in srgb, var(--kxd-os-text-faint) 18%, transparent);
-  background: color-mix(in srgb, var(--kxd-black-base) 90%, transparent);
-  backdrop-filter: blur(10px);
+  border: 2px solid #0b0b0b;
+  background: #ffffff;
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.95),
+    0 8px 20px rgba(0, 0, 0, 0.35);
   opacity: 0;
   pointer-events: none;
   transform: translateX(4px);
@@ -2957,9 +3122,19 @@
 }
 
 @media (max-width: 640px) {
-  .kxd-review-fab {
-    width: 2.75rem;
+  .kxd-review-fab,
+  .kxd-review-fab--labeled,
+  .kxd-review-fab--compact {
+    width: 2.75rem; /* 44px touch target */
+    min-width: 2.75rem;
+    min-height: 2.75rem;
     height: 2.75rem;
+    padding: 0;
+    gap: 0;
+  }
+
+  .kxd-review-fab__label {
+    display: none;
   }
 
   .kxd-review-fab__tooltip {
@@ -3311,11 +3486,17 @@
     border-color var(--kxd-ces-motion, 200ms) ease,
     box-shadow var(--kxd-ces-motion, 200ms) ease,
     background var(--kxd-ces-motion, 200ms) ease,
+    color var(--kxd-ces-motion, 200ms) ease,
+    padding var(--kxd-ces-motion, 200ms) ease,
     opacity var(--kxd-ces-motion, 200ms) ease;
 }
 
 .kxd-review-session--comment .kxd-review-fab {
-  transform: scale(1.04);
+  transform: scale(1.03);
+}
+
+.kxd-review-session--comment .kxd-review-fab:hover {
+  transform: translateY(-2px) scale(1.03);
 }
 
 .kxd-ces-upload {

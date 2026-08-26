@@ -20,6 +20,8 @@ export interface CesPartnershipBriefingProps {
   engagement?: ActiveEngagementSnapshot | null;
   engagementEyebrow?: string;
   engagementTitle?: string;
+  /** When a Shared Core presentation hero already introduces the workspace. */
+  suppressHero?: boolean;
 }
 
 export function CesPartnershipBriefing({
@@ -28,22 +30,24 @@ export function CesPartnershipBriefing({
   engagement = null,
   engagementEyebrow,
   engagementTitle,
+  suppressHero = false,
 }: CesPartnershipBriefingProps) {
   const { overview, services, needsAttention, websiteReview, results, recommendation } = briefing;
   const story = getPartnershipStoryTimeline(briefing.clientSlug);
 
   return (
     <div className="kxd-ces-partnership">
-      {/* Hero */}
-      <header className="kxd-ces-partnership__hero">
-        <p className="kxd-ces-partnership__eyebrow">Private Partnership Workspace</p>
-        <h1 className="kxd-ces-partnership__brand">{briefing.clientName}</h1>
-        <p className="kxd-ces-partnership__greeting">{greeting}</p>
-        <p className="kxd-ces-partnership__lead">
-          Everything Kreate by Design is actively delivering, planning, and recommending for{" "}
-          {briefing.clientName}.
-        </p>
-      </header>
+      {!suppressHero ? (
+        <header className="kxd-ces-partnership__hero">
+          <p className="kxd-ces-partnership__eyebrow">Private Partnership Workspace</p>
+          <h1 className="kxd-ces-partnership__brand">{briefing.clientName}</h1>
+          <p className="kxd-ces-partnership__greeting">{greeting}</p>
+          <p className="kxd-ces-partnership__lead">
+            Everything Kreate by Design is actively delivering, planning, and recommending for{" "}
+            {briefing.clientName}.
+          </p>
+        </header>
+      ) : null}
 
       <ActiveEngagementCard
         engagement={engagement}

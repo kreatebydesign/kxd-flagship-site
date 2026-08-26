@@ -6,18 +6,36 @@ import { PORTAL_CLIENT_LANGUAGE } from "@/lib/ces/copy/portal-language";
 export interface ReviewSessionFabProps {
   mode: ReviewSessionMode;
   onToggle: () => void;
+  /** True after at least one feedback item was successfully submitted in this session. */
+  hasSubmittedFeedback?: boolean;
 }
 
-export function ReviewSessionFab({ mode, onToggle }: ReviewSessionFabProps) {
+export function ReviewSessionFab({
+  mode,
+  onToggle,
+  hasSubmittedFeedback = false,
+}: ReviewSessionFabProps) {
   const isComment = mode === "comment";
   const label = isComment
     ? PORTAL_CLIENT_LANGUAGE.reviewSessionFabActiveLabel
     : PORTAL_CLIENT_LANGUAGE.reviewSessionFabLabel;
+  /**
+   * Desktop keeps the “Leave feedback” label until the client successfully
+   * submits their first feedback item. Opening/closing the launcher alone
+   * must not collapse it. Mobile stays icon-only via CSS.
+   */
+  const showLabel = !hasSubmittedFeedback;
 
   return (
     <button
       type="button"
-      className={`kxd-review-fab${isComment ? " kxd-review-fab--active" : ""}`}
+      className={[
+        "kxd-review-fab",
+        isComment ? "kxd-review-fab--active" : "",
+        showLabel ? "kxd-review-fab--labeled" : "kxd-review-fab--compact",
+      ]
+        .filter(Boolean)
+        .join(" ")}
       onClick={onToggle}
       aria-pressed={isComment}
       aria-label={label}
@@ -28,15 +46,19 @@ export function ReviewSessionFab({ mode, onToggle }: ReviewSessionFabProps) {
           <path
             d="M12 4.5c-3.59 0-6.5 2.46-6.5 5.5 0 1.72.9 3.26 2.34 4.28L7.5 18.5l3.1-1.55c.45.08.92.12 1.4.12 3.59 0 6.5-2.46 6.5-5.5S15.59 4.5 12 4.5Z"
             stroke="currentColor"
-            strokeWidth="1.35"
+            strokeWidth="1.6"
             strokeLinejoin="round"
           />
-          <circle cx="9.25" cy="10" r="0.75" fill="currentColor" />
-          <circle cx="12" cy="10" r="0.75" fill="currentColor" />
-          <circle cx="14.75" cy="10" r="0.75" fill="currentColor" />
+          <circle cx="9.25" cy="10" r="0.85" fill="currentColor" />
+          <circle cx="12" cy="10" r="0.85" fill="currentColor" />
+          <circle cx="14.75" cy="10" r="0.85" fill="currentColor" />
         </svg>
       </span>
-      <span className="kxd-review-fab__tooltip">{label}</span>
+      {showLabel ? (
+        <span className="kxd-review-fab__label">{label}</span>
+      ) : (
+        <span className="kxd-review-fab__tooltip">{label}</span>
+      )}
     </button>
   );
 }

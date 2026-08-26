@@ -39,6 +39,31 @@ const PRIMAL_PRESENTATION: ExperiencePresentation = {
   zoneOrder: [...DEFAULT_ZONE_ORDER],
 };
 
+/**
+ * de Bois Entertainment — home presentation only.
+ * enabled:false keeps Executive Performance / briefing modules off;
+ * hero + brand tokens still personalize CES portal home via Shared Core registry.
+ */
+const DE_BOIS_PRESENTATION: ExperiencePresentation = {
+  enabled: false,
+  briefingEnabled: false,
+  executiveReviewEnabled: false,
+  heroImageSrc: "/migrated-assets/projects/de-bois-entertainment-hero.jpg",
+  heroImageAlt: "de Bois Entertainment performing live on stage",
+  heroOverlay: "deep",
+  /* Wide stage line — keep performers centered on mobile crop. */
+  heroFocus: "50% 42%",
+  logoSrc: "/migrated-assets/logos/de-bois-entertainment.png",
+  logoAlt: "de Bois Entertainment",
+  workspaceEyebrow: "DE BOIS ENTERTAINMENT · PRIVATE KXD PARTNERSHIP",
+  workspaceTitle: "Your website. Taking the stage.",
+  introduction:
+    "Review the latest build, leave feedback, and follow the project as we bring the new de Bois experience to life.",
+  /* Restrained warm gold — brand decorative; interactive accent falls back when unsafe. */
+  actionAccent: "#B8A46A",
+  zoneOrder: [...DEFAULT_ZONE_ORDER],
+};
+
 /** Disabled stubs — ready for brand assets + memory. EP appears when enabled. */
 function stubPresentation(input: {
   logoAlt: string;
@@ -75,6 +100,9 @@ const ROBIN_COLE_PRESENTATION: ExperiencePresentation = {
 
 const BY_SLUG: Record<string, ExperiencePresentation> = {
   "primal-motorsports": PRIMAL_PRESENTATION,
+  "de-bois-entertainment": DE_BOIS_PRESENTATION,
+  "debois-entertainment": DE_BOIS_PRESENTATION,
+  "de-bois-entertainment-4bfe00": DE_BOIS_PRESENTATION,
   "robin-cole": ROBIN_COLE_PRESENTATION,
   "robin-for-tracy": ROBIN_COLE_PRESENTATION,
   "robin-cole-for-tracy": ROBIN_COLE_PRESENTATION,
