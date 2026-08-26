@@ -2,6 +2,7 @@ import "server-only";
 
 import { getPayload } from "payload";
 import config from "@payload-config";
+import { pickWebsiteReviewTargetUrl } from "@/lib/ces/modules/website-review/target-url";
 import { resolveClientEntitlements } from "@/lib/client-plans";
 import { loadClientReportingConnection } from "@/lib/reporting/providers/connection";
 import { loadBillingProfileInvoiceMapping } from "@/lib/stripe/invoice-read-service";
@@ -306,7 +307,6 @@ export async function loadOperatorExperienceSnapshot(
 
   const clientName = String(client.name ?? `Client #${clientId}`);
   const clientSlug = client.slug ? String(client.slug) : null;
-  const websiteUrl = client.companyWebsite ? String(client.companyWebsite) : null;
   const primaryContact =
       typeof client.primaryContactName === "string" && client.primaryContactName.trim()
       ? client.primaryContactName.trim()
@@ -314,15 +314,30 @@ export async function loadOperatorExperienceSnapshot(
         ? client.primaryContactEmail.trim()
         : null;
 
-  const profiles = await payload.find({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    collection: "client-experience-profiles" as any,
-    where: { client: { equals: clientId } },
-    limit: 1,
-    depth: 2,
-    overrideAccess: true,
-  });
+  const [profiles, infraResult] = await Promise.all([
+    payload.find({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      collection: "client-experience-profiles" as any,
+      where: { client: { equals: clientId } },
+      limit: 1,
+      depth: 2,
+      overrideAccess: true,
+    }),
+    payload.find({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      collection: "client-infrastructure" as any,
+      where: { client: { equals: clientId } },
+      limit: 1,
+      depth: 0,
+      overrideAccess: true,
+    }),
+  ]);
   const profile = (profiles.docs[0] as AnyDoc | undefined) ?? null;
+  const infraDoc = infraResult.docs[0] as { stagingUrl?: string | null } | undefined;
+  const websiteUrl = pickWebsiteReviewTargetUrl({
+    stagingUrl: infraDoc?.stagingUrl ?? null,
+    companyWebsite: client.companyWebsite ? String(client.companyWebsite) : null,
+  });
   const profileStatus = profile ? asStatus(profile.status) : "none";
   const enabledRaw = Array.isArray(profile?.enabledModules) ? profile.enabledModules : [];
   const selectedPortalModules = normalizePortalModuleList(enabledRaw);

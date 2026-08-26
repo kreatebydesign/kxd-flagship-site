@@ -98,6 +98,7 @@
     "verify:phase4-portal-identity-security": "tsx scripts/verify-phase4-portal-identity-security.ts",
     "verify:experience-feedback": "tsx scripts/verify-experience-feedback.ts",
     "verify:website-review-upload": "tsx scripts/verify-website-review-upload.ts",
+    "verify:website-review-target-url": "tsx scripts/verify-website-review-target-url.ts",
     "verify:website-review-page-location": "tsx scripts/verify-website-review-page-location.ts",
     "verify:website-review-work-detail": "tsx scripts/verify-website-review-work-detail.ts",
     "verify:website-review-linked-work": "tsx scripts/verify-website-review-linked-work.ts",

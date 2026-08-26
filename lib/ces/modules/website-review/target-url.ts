@@ -11,16 +11,16 @@
  *   - Website Workspace open-site links
  *   - Visual Review iframe bootstraps
  *   - Partnership Workspace website actions (via Website Review data)
+ *   - Client Launch / Portal Access / Client Experience readiness diagnostics
  *
  * Setting Preview Website once in Client Infrastructure updates every consumer.
  * Field key remains `stagingUrl` for backward compatibility.
  * Pattern: https://{client}.preview.kreatebydesign.com — data-driven, no per-client code.
+ *
+ * `pickWebsiteReviewTargetUrl` is pure / Payload-safe (CLI + diagnostics).
+ * `resolveWebsiteReviewTargetUrl` loads Shared Core and is server-runtime only.
  */
 
-import "server-only";
-
-import { getPayload } from "payload";
-import config from "@payload-config";
 import { validatePreviewWebsiteUrl } from "@/lib/infrastructure/preview-domain";
 
 function normalizeFallbackUrl(raw: string | null | undefined): string | null {
@@ -29,11 +29,27 @@ function normalizeFallbackUrl(raw: string | null | undefined): string | null {
   return value.replace(/\/$/, "");
 }
 
+/**
+ * Pure Shared Core picker — single precedence for runtime and diagnostics.
+ * Does not mutate or copy stagingUrl into companyWebsite.
+ */
+export function pickWebsiteReviewTargetUrl(input: {
+  stagingUrl?: string | null;
+  companyWebsite?: string | null;
+}): string | null {
+  const preview = validatePreviewWebsiteUrl(input.stagingUrl ?? null);
+  if (preview.ok && preview.url) return preview.url;
+  return normalizeFallbackUrl(input.companyWebsite);
+}
+
 export async function resolveWebsiteReviewTargetUrl(
   clientId: number,
 ): Promise<string | null> {
+  const { getPayload } = await import("payload");
+  const { default: config } = await import("@payload-config");
   const payload = await getPayload({ config });
 
+  let stagingUrl: string | null = null;
   try {
     const infra = await payload.find({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -44,12 +60,12 @@ export async function resolveWebsiteReviewTargetUrl(
       overrideAccess: true,
     });
     const doc = infra.docs[0] as { stagingUrl?: string | null } | undefined;
-    const preview = validatePreviewWebsiteUrl(doc?.stagingUrl ?? null);
-    if (preview.ok && preview.url) return preview.url;
+    stagingUrl = doc?.stagingUrl ?? null;
   } catch {
-    /* fall through to production website */
+    /* fall through — companyWebsite may still resolve */
   }
 
+  let companyWebsite: string | null = null;
   try {
     const client = await payload.findByID({
       collection: "clients",
@@ -57,10 +73,11 @@ export async function resolveWebsiteReviewTargetUrl(
       depth: 0,
       overrideAccess: true,
     });
-    return normalizeFallbackUrl(
-      (client as { companyWebsite?: string | null }).companyWebsite ?? null,
-    );
+    companyWebsite =
+      (client as { companyWebsite?: string | null }).companyWebsite ?? null;
   } catch {
-    return null;
+    companyWebsite = null;
   }
+
+  return pickWebsiteReviewTargetUrl({ stagingUrl, companyWebsite });
 }

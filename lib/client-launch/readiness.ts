@@ -4,6 +4,7 @@
  */
 
 import type { Payload } from "payload";
+import { pickWebsiteReviewTargetUrl } from "@/lib/ces/modules/website-review/target-url";
 import {
   buildLaunchChecklist,
   requiredChecklistComplete,
@@ -191,7 +192,7 @@ export async function loadClientLaunchReadinessInput(
     return null;
   }
 
-  const [profiles, portalUsers] = await Promise.all([
+  const [profiles, portalUsers, infra] = await Promise.all([
     payload.find({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       collection: "client-experience-profiles" as any,
@@ -208,19 +209,31 @@ export async function loadClientLaunchReadinessInput(
       depth: 0,
       overrideAccess: true,
     }),
+    payload.find({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      collection: "client-infrastructure" as any,
+      where: { client: { equals: clientId } },
+      limit: 1,
+      depth: 0,
+      overrideAccess: true,
+    }),
   ]);
 
   const profile = profiles.docs[0] as AnyDoc | undefined;
   const users = portalUsers.docs as AnyDoc[];
   const activeUsers = users.filter((user) => user.active !== false);
   const welcomeCompleted = activeUsers.filter((user) => Boolean(user.welcomeCompletedAt));
+  const infraDoc = infra.docs[0] as { stagingUrl?: string | null } | undefined;
 
   return {
     clientId,
     clientName: String(client.name ?? "Client"),
     clientSlug: client.slug ? String(client.slug) : null,
     clientStatus: client.status ? String(client.status) : null,
-    websiteUrl: client.companyWebsite ? String(client.companyWebsite) : null,
+    websiteUrl: pickWebsiteReviewTargetUrl({
+      stagingUrl: infraDoc?.stagingUrl ?? null,
+      companyWebsite: client.companyWebsite ? String(client.companyWebsite) : null,
+    }),
     portalUserCount: users.length,
     activePortalUserCount: activeUsers.length,
     welcomeCompletedUserCount: welcomeCompleted.length,

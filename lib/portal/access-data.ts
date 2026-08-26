@@ -2,6 +2,7 @@ import "server-only";
 
 import { getPayload } from "payload";
 import config from "@payload-config";
+import { pickWebsiteReviewTargetUrl } from "@/lib/ces/modules/website-review/target-url";
 import {
   evaluatePortalClientReadiness,
   isPrimalProductionCandidate,
@@ -128,7 +129,7 @@ export async function getPortalAccessData(): Promise<PortalAccessData> {
   const isProduction = process.env.NODE_ENV === "production";
   const resendConfigured = isResendConfigured();
 
-  const [usersResult, clientsResult, profilesResult] = await Promise.all([
+  const [usersResult, clientsResult, profilesResult, infraResult] = await Promise.all([
     payload.find({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       collection: "portal-users" as any,
@@ -151,12 +152,29 @@ export async function getPortalAccessData(): Promise<PortalAccessData> {
       depth: 0,
       overrideAccess: true,
     }),
+    payload.find({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      collection: "client-infrastructure" as any,
+      limit: 200,
+      depth: 0,
+      overrideAccess: true,
+    }),
   ]);
 
   const profileByClient = new Map<number, AnyDoc>();
   for (const doc of profilesResult.docs as AnyDoc[]) {
     const clientId = resolveId(doc.client);
     if (clientId != null) profileByClient.set(clientId, doc);
+  }
+
+  const stagingUrlByClient = new Map<number, string | null>();
+  for (const doc of infraResult.docs as AnyDoc[]) {
+    const clientId = resolveId(doc.client);
+    if (clientId == null) continue;
+    stagingUrlByClient.set(
+      clientId,
+      doc.stagingUrl != null ? String(doc.stagingUrl) : null,
+    );
   }
 
   const userCounts = new Map<
@@ -225,7 +243,10 @@ export async function getPortalAccessData(): Promise<PortalAccessData> {
       clientId,
       clientName: String(doc.name ?? "Client"),
       clientSlug: doc.slug ? String(doc.slug) : null,
-      websiteUrl: doc.companyWebsite ? String(doc.companyWebsite) : null,
+      websiteUrl: pickWebsiteReviewTargetUrl({
+        stagingUrl: stagingUrlByClient.get(clientId) ?? null,
+        companyWebsite: doc.companyWebsite ? String(doc.companyWebsite) : null,
+      }),
       portalUserCount: counts.total,
       activePortalUserCount: counts.active,
       cesProfileStatus,
