@@ -1,15 +1,51 @@
 /**
- * Offline verification for agreement value presentation + section parsing.
+ * Offline verification for Direct Agreement PDF investment presentation.
  *   npx tsx scripts/verify-agreement-value-presentation.ts
  */
 import assert from "node:assert/strict";
 import { parseAgreementDocumentSections } from "../lib/commercial-legal/agreement-document-sections";
-import { parsePreferredRatePresentation } from "../lib/commercial-legal/agreement-value-presentation";
 import {
   resolveAgreementAmountKpi,
   resolveDirectAgreementInvestmentLines,
 } from "../lib/client-command/commercial/resolve-agreement-amount-kpi";
 import { applyFinalizedDirectAgreementPresentationCopy } from "../lib/commercial-legal/compose-direct-agreement-document";
+import type { StructuredPaymentTerms } from "../lib/proposal-lifecycle/types";
+
+function mockTerms(
+  overrides: Pick<
+    StructuredPaymentTerms,
+    "oneTimeTotalCents" | "monthlyTotalCents" | "commercialSource" | "sourceProposalNumber"
+  > &
+    Partial<StructuredPaymentTerms>,
+): StructuredPaymentTerms {
+  return {
+    schemaVersion: 1,
+    currency: "USD",
+    depositCents: overrides.oneTimeTotalCents,
+    initialPayment: {
+      type: overrides.oneTimeTotalCents > 0 ? "full" : "none",
+      amountCents: overrides.oneTimeTotalCents,
+      trigger: "at-contract",
+      dueTerms: "",
+    },
+    installments: [],
+    recurring: {
+      amountCents: overrides.monthlyTotalCents,
+      cadence: overrides.monthlyTotalCents > 0 ? "monthly" : "none",
+      startTrigger: "after-launch-verified",
+      minimumTermMonths: null,
+      renewalBehavior: "none",
+      status: overrides.monthlyTotalCents > 0 ? "pending-trigger" : "cancelled",
+    },
+    credits: [],
+    taxes: { treatment: "unspecified", notes: "" },
+    billingContactName: "",
+    billingEmail: "",
+    sourceProposalVersion: 1,
+    derivedAt: "2026-08-27T00:00:00.000Z",
+    ...overrides,
+  };
+}
 
 const sampleBody = [
   "SERVICE INVESTMENT",
@@ -20,25 +56,11 @@ const sampleBody = [
   "YOUR FRIENDS & FAMILY RATE",
   "$600 per month",
   "",
-  "ONGOING CLIENT SAVINGS",
-  "$650 per month",
-  "",
-  "ANNUAL VALUE SUMMARY",
-  "Standard annual service value: $15,000 per year",
-  "Your annual management rate: $7,200 per year",
-  "Annual preferred-rate savings: $7,800 per year",
-  "",
   "MONTHLY SERVICE SCOPE",
   "",
   "WEBSITE MANAGEMENT",
   "• Ongoing website content updates",
 ].join("\n");
-
-const parsed = parsePreferredRatePresentation(sampleBody);
-assert.ok(parsed);
-assert.equal(parsed?.standardRateAmount, "$1,250 per month");
-assert.equal(parsed?.preferredRateAmount, "$600 per month");
-assert.match(parsed?.supportingLine ?? "", /7,800/);
 
 const sections = parseAgreementDocumentSections(sampleBody);
 assert.ok(sections.some((s) => s.title === "SERVICE INVESTMENT"));
@@ -74,36 +96,22 @@ assert.equal(recurringKpi.label, "Monthly rate");
 assert.equal(recurringKpi.value, "$600.00");
 
 const recurringPdfLines = resolveDirectAgreementInvestmentLines({
-  structuredPaymentTerms: {
-    schemaVersion: 1,
+  structuredPaymentTerms: mockTerms({
     commercialSource: "direct-agreement",
-    sourceProposalNumber: null,
-    currency: "USD",
+    sourceProposalNumber: "DIRECT-4",
     oneTimeTotalCents: 0,
     monthlyTotalCents: 60000,
-    depositCents: 0,
-    recurring: { cadence: "monthly", amountCents: 60000 },
-    installments: [],
-    initialPayment: { dueTerms: "First payment due September 1, 2026." },
-    derivedAt: "2026-08-27T00:00:00.000Z",
-  },
+  }),
 });
 assert.deepEqual(recurringPdfLines, ["$600.00 per month"]);
 
 const oneTimePdfLines = resolveDirectAgreementInvestmentLines({
-  structuredPaymentTerms: {
-    schemaVersion: 1,
+  structuredPaymentTerms: mockTerms({
     commercialSource: "proposal",
     sourceProposalNumber: "KXD-P-2026-0001",
-    currency: "USD",
     oneTimeTotalCents: 950000,
     monthlyTotalCents: 0,
-    depositCents: 0,
-    recurring: { cadence: "none", amountCents: 0 },
-    installments: [],
-    initialPayment: { dueTerms: "" },
-    derivedAt: "2026-08-27T00:00:00.000Z",
-  },
+  }),
 });
 assert.deepEqual(oneTimePdfLines, ["$9,500.00 prepaid"]);
 

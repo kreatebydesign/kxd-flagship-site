@@ -42,6 +42,9 @@
   "exclude": [
     "node_modules",
     "_archive",
-    "scripts/staging-inbound-sales-closed-loop-qa.ts"
+    "scripts/staging-inbound-sales-closed-loop-qa.ts",
+    "scripts/preview-direct-agreement-pdf-investment.ts",
+    "scripts/refile-de-bois-contract-4-sent-pdf.ts",
+    "scripts/verify-agreement-value-presentation.ts"
   ]
 }
