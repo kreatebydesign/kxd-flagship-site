@@ -11,6 +11,13 @@ import { hashPublicToken } from "@/lib/proposal-lifecycle/hash";
 import { isSigningLinkExpired } from "@/lib/proposal-lifecycle/token-expiry";
 import { toClientFacingContractBody } from "@/lib/proposal-lifecycle/client-facing-contract";
 import { legacyPlaintextTokensAllowed } from "@/lib/proposal-builder/protection";
+import { parseStoredDirectAgreementTerms } from "@/lib/direct-agreement/validate";
+import {
+  assertDirectAgreementSigningBindingCurrent,
+  DIRECT_AGREEMENT_STALE_SIGNING_MESSAGE,
+  isDirectAgreementSource,
+  resolveDirectAgreementClientFacingBody,
+} from "@/lib/direct-agreement/signing-integrity";
 
 export const dynamic = "force-dynamic";
 
@@ -80,6 +87,24 @@ function Unavailable({ title, message }: { title: string; message: string }) {
   );
 }
 
+function resolveSigningBody(
+  contract: Record<string, unknown>,
+  pkg: ReturnType<typeof normalizeLifecyclePackage>,
+): string {
+  const agreementSource = contract.agreementSource ? String(contract.agreementSource) : null;
+  if (isDirectAgreementSource(agreementSource, pkg)) {
+    const daTerms = parseStoredDirectAgreementTerms(contract.directAgreementTerms);
+    if (daTerms) {
+      return resolveDirectAgreementClientFacingBody({
+        body: String(contract.body ?? ""),
+        terms: daTerms,
+        commercialStatus: pkg.commercialStatus,
+      });
+    }
+  }
+  return toClientFacingContractBody(String(contract.body ?? ""));
+}
+
 export default async function PublicContractSigningPage({
   params,
 }: {
@@ -133,6 +158,14 @@ export default async function PublicContractSigningPage({
       />
     );
   }
+  if (pkg.externalAcceptance) {
+    return (
+      <Unavailable
+        title="Already accepted"
+        message="This agreement was accepted outside KXD electronic signing. Contact Kreate by Design if you need assistance."
+      />
+    );
+  }
   if (pkg.signingTokenRevokedAt || pkg.clientSignature) {
     return (
       <Unavailable
@@ -158,12 +191,44 @@ export default async function PublicContractSigningPage({
     );
   }
 
+  const agreementSource = contract.agreementSource ? String(contract.agreementSource) : null;
+  if (isDirectAgreementSource(agreementSource, pkg)) {
+    const daTerms = parseStoredDirectAgreementTerms(contract.directAgreementTerms);
+    const terms = pkg.structuredPaymentTerms;
+    if (!daTerms || !terms) {
+      return (
+        <Unavailable
+          title="Agreement unavailable"
+          message="This agreement is not ready for electronic signature. Contact Kreate by Design."
+        />
+      );
+    }
+    try {
+      assertDirectAgreementSigningBindingCurrent({
+        pkg,
+        operatorDocumentHash: pkg.operatorSignature.documentHash,
+        contractId: Number(contract.id),
+        rawContractBody: String(contract.body ?? ""),
+        terms,
+        daTerms,
+        revisionNumber: Number(contract.revisionNumber ?? 1) || 1,
+        commercialStatus: pkg.commercialStatus,
+      });
+    } catch (err) {
+      const message =
+        err instanceof Error && err.message === DIRECT_AGREEMENT_STALE_SIGNING_MESSAGE
+          ? err.message
+          : "This agreement has been updated since the signing link was prepared. Ask Kreate by Design for a fresh link.";
+      return <Unavailable title="Agreement updated" message={message} />;
+    }
+  }
+
   return (
     <ContractSigningClient
       publicToken={publicToken}
       title={String(contract.title ?? "Agreement")}
       clientName={resolveAgreementClientName(contract)}
-      body={toClientFacingContractBody(String(contract.body ?? ""))}
+      body={resolveSigningBody(contract, pkg)}
       consentText={ELECTRONIC_SIGNATURE_CONSENT_TEXT}
       consentVersion={ELECTRONIC_SIGNATURE_CONSENT_VERSION}
       operatorSignedBy={pkg.operatorSignature.legalName}

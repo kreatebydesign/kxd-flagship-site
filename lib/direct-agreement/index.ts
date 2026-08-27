@@ -66,3 +66,16 @@ export {
   STANDARD_CANCELLATION_TERMINATION_AND_REFUNDS,
   STANDARD_RENEWAL_BEHAVIOR,
 } from "@/lib/commercial-legal";
+export {
+  assertDirectAgreementSigningBindingCurrent,
+  blockersForDirectAgreementSigningSend,
+  blockersForSigningSend,
+  computeDirectAgreementSigningDocumentHash,
+  DIRECT_AGREEMENT_STALE_SIGNING_MESSAGE,
+  invalidateDirectAgreementSigningOnNewSentDocument,
+  isDirectAgreementSource,
+  resolveDirectAgreementClientFacingBody,
+  resolveDirectAgreementCommercialStatusAfterExecution,
+  resolveLatestDirectAgreementDocumentRef,
+  resolveSigningDocumentHashForContract,
+} from "./signing-integrity";

@@ -368,6 +368,13 @@ export interface ContractLifecyclePackage {
     version: number;
     generatedAt: string;
   }>;
+  /** Direct Agreement e-sign binding to latest filed sent PDF at operator-sign time. */
+  directAgreementSigningBinding?: {
+    documentId: number;
+    documentVersion: number;
+    documentContentHash: string;
+    boundAt: string;
+  } | null;
   /** Deduped mock webhook event IDs. */
   processedWebhookEventIds?: string[];
   voidReason?: string | null;

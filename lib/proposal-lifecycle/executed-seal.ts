@@ -68,7 +68,9 @@ export function invalidateSignaturesOnMaterialEdit(
     executedCertificate: null,
     signingTokenHash: null,
     signingTokenPrefix: null,
+    signingTokenExpiresAt: null,
     signingTokenRevokedAt: new Date().toISOString(),
+    directAgreementSigningBinding: null,
     billingPlan: null,
   };
 }

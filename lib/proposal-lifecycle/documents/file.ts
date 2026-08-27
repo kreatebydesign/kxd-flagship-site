@@ -27,6 +27,10 @@ import {
 } from "./pdfs.tsx";
 import { applyFinalizedDirectAgreementPresentationCopy } from "../../commercial-legal/compose-direct-agreement-document.ts";
 import {
+  invalidateDirectAgreementSigningOnNewSentDocument,
+  resolveLatestDirectAgreementDocumentRef,
+} from "../../direct-agreement/signing-integrity.ts";
+import {
   getCommercialDocumentStorageAdapter,
   getDefaultCommercialDocumentStorageAdapter,
   type CommercialDocumentStorageProvider,
@@ -191,6 +195,8 @@ export async function generateAndFileDirectAgreementSentSnapshot(input: {
   });
 
   const priorSent = (input.pkg.documentRefs ?? []).filter((d) => d.kind === "direct-agreement");
+  const previousLatest = resolveLatestDirectAgreementDocumentRef(input.pkg);
+  const previousLatestHash = previousLatest?.contentHash ?? null;
   const lineageParentId = priorSent.length ? priorSent[priorSent.length - 1]!.id : null;
   const version = priorSent.length + 1;
   const now = new Date().toISOString();
@@ -216,6 +222,11 @@ export async function generateAndFileDirectAgreementSentSnapshot(input: {
   });
 
   let next = normalizeLifecyclePackage(input.pkg);
+  next = invalidateDirectAgreementSigningOnNewSentDocument(
+    next,
+    previousLatestHash,
+    rendered.contentHash,
+  );
   next = {
     ...next,
     documentRefs: mergeDocumentRefs(next, [

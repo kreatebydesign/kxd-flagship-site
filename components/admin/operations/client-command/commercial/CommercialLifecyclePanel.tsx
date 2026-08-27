@@ -47,6 +47,12 @@ export function CommercialLifecyclePanel(props: {
     props.commercialStatus === "payment-pending" ||
     props.commercialStatus === "paid";
 
+  const awaitingDirectExecution =
+    props.agreementSource === "direct-agreement" &&
+    !props.hasClientSignature &&
+    !props.hasExternalAcceptance &&
+    (props.commercialStatus === "finalized" || props.commercialStatus === "sent");
+
   return (
     <div className="kxd-os-commercial-lifecycle-panel">
       <StartClientLaunchButton
@@ -112,7 +118,9 @@ export function CommercialLifecyclePanel(props: {
         title="Lifecycle controls"
         summary={
           needsAction
-            ? "Finalize, accept, authorize, activate"
+            ? awaitingDirectExecution
+              ? "Electronic execution available"
+              : "Finalize, accept, authorize, activate"
             : "Advanced operator controls"
         }
         defaultOpen={props.defaultLifecycleOpen ?? needsAction}

@@ -8,7 +8,15 @@ import config from "@payload-config";
 import { buildCanonicalProposal } from "../proposal-builder/canonicalize.ts";
 import { normalizeProposalDocument } from "../proposal-builder/document.ts";
 import type { CanonicalProposal } from "../proposal-builder/types.ts";
-import { assessBillingReadiness, hasBlockers, blockersForSend } from "./billing-readiness.ts";
+import { assessBillingReadiness, hasBlockers } from "./billing-readiness.ts";
+import {
+  assertDirectAgreementSigningBindingCurrent,
+  blockersForSigningSend,
+  isDirectAgreementSource,
+  resolveDirectAgreementClientFacingBody,
+  resolveDirectAgreementCommercialStatusAfterExecution,
+  resolveSigningDocumentHashForContract,
+} from "../direct-agreement/signing-integrity.ts";
 import { buildProposedBillingPlan } from "./billing-plan.ts";
 import { buildLocalDeliveryPreview } from "./delivery-preview.ts";
 import { buildLifecycleEmail } from "./email-templates.ts";
@@ -332,13 +340,36 @@ export async function signContractAsOperator(
   const acceptedHash = proposal?.acceptedSnapshot
     ? stableJsonHash(proposal.acceptedSnapshot)
     : "missing-accepted-snapshot";
-  const clientFacingBody = toClientFacingContractBody(String(contract.body ?? ""));
-  const documentHash = computeDocumentHash({
+
+  const agreementSource = contract.agreementSource
+    ? String(contract.agreementSource)
+    : null;
+  let daTerms: import("../direct-agreement/types.ts").DirectAgreementTerms | null = null;
+  if (isDirectAgreementSource(agreementSource, pkg)) {
+    const { parseStoredDirectAgreementTerms } = await import(
+      "../direct-agreement/validate.ts"
+    );
+    daTerms = parseStoredDirectAgreementTerms(contract.directAgreementTerms);
+    if (!daTerms) {
+      throw new Error("Direct Agreement terms are missing or invalid.");
+    }
+    if (pkg.commercialStatus !== "finalized" && pkg.commercialStatus !== "sent") {
+      throw new Error(
+        "Direct Agreement must be finalized before KXD operator signing.",
+      );
+    }
+  }
+
+  const { documentHash, binding } = resolveSigningDocumentHashForContract({
+    agreementSource,
     contractId,
-    contractBody: clientFacingBody,
+    rawContractBody: String(contract.body ?? ""),
     acceptedSnapshotHash: acceptedHash,
     paymentTermsHash: hashPaymentTerms(terms),
     version: Number(contract.revisionNumber ?? 1) || 1,
+    pkg,
+    daTerms,
+    commercialStatus: pkg.commercialStatus,
   });
 
   const signature = buildTypedSignature({
@@ -351,6 +382,7 @@ export async function signContractAsOperator(
     ...pkg,
     structuredPaymentTerms: terms,
     operatorSignature: signature,
+    directAgreementSigningBinding: binding,
   };
   next = appendAudit(next, {
     actor: input.actor ?? input.email,
@@ -406,7 +438,34 @@ export async function sendContractForClientSignature(input: {
   if (!hydrated.operatorSignature) {
     throw new Error("KXD operator signature is required before sending.");
   }
-  const sendBlockers = blockersForSend(hydrated.billingReadinessIssues ?? []);
+
+  const agreementSource = contract.agreementSource
+    ? String(contract.agreementSource)
+    : null;
+  if (isDirectAgreementSource(agreementSource, hydrated)) {
+    const { parseStoredDirectAgreementTerms } = await import(
+      "../direct-agreement/validate.ts"
+    );
+    const daTerms = parseStoredDirectAgreementTerms(contract.directAgreementTerms);
+    if (!daTerms || !hydrated.structuredPaymentTerms) {
+      throw new Error("Direct Agreement terms are required before preparing a signing link.");
+    }
+    assertDirectAgreementSigningBindingCurrent({
+      pkg: hydrated,
+      operatorDocumentHash: hydrated.operatorSignature.documentHash,
+      contractId: input.contractId,
+      rawContractBody: String(contract.body ?? ""),
+      terms: hydrated.structuredPaymentTerms,
+      daTerms,
+      revisionNumber: Number(contract.revisionNumber ?? 1) || 1,
+      commercialStatus: hydrated.commercialStatus,
+    });
+  }
+
+  const sendBlockers = blockersForSigningSend(hydrated.billingReadinessIssues ?? [], {
+    agreementSource,
+    commercialSource: hydrated.commercialSource ?? null,
+  });
   if (sendBlockers.length && !input.forceDespiteBillingBlockers) {
     throw new Error(
       `Contract send blocked: ${sendBlockers.map((b) => b.code).join(", ")}`,
@@ -516,6 +575,9 @@ export async function signContractAsClient(
   if (["voided", "superseded", "expired", "declined"].includes(String(contract.status))) {
     throw new Error("Agreement is no longer available for signature.");
   }
+  if (pkg.externalAcceptance) {
+    throw new Error("This agreement was accepted outside KXD OS electronic signing.");
+  }
   if (pkg.signingTokenRevokedAt) throw new Error("Signing link has been revoked.");
   if (pkg.signingTokenExpiresAt && Date.parse(pkg.signingTokenExpiresAt) < Date.now()) {
     throw new Error("Signing link has expired.");
@@ -526,8 +588,16 @@ export async function signContractAsClient(
   if (pkg.clientSignature && pkg.executedCertificate) {
     return { contract, pkg, alreadySigned: true };
   }
+  if (!input.reviewedConfirmed) {
+    throw new Error("Review confirmation is required before signing.");
+  }
+
   const operatorSignature = pkg.operatorSignature;
   if (!operatorSignature) throw new Error("Agreement is not ready for client signature.");
+
+  const agreementSource = contract.agreementSource
+    ? String(contract.agreementSource)
+    : null;
 
   const status = String(contract.status);
   if (!["sent-for-signature", "sent", "viewed", "partially-signed"].includes(status)) {
@@ -538,6 +608,31 @@ export async function signContractAsClient(
     ...pkg,
     clientViewedAt: pkg.clientViewedAt ?? new Date().toISOString(),
   };
+
+  const { canonical } = await getContractLifecycle(contract.id);
+  const terms =
+    pkg.structuredPaymentTerms ??
+    (canonical ? deriveStructuredPaymentTerms(canonical) : null);
+
+  if (isDirectAgreementSource(agreementSource, pkg)) {
+    const { parseStoredDirectAgreementTerms } = await import(
+      "../direct-agreement/validate.ts"
+    );
+    const daTerms = parseStoredDirectAgreementTerms(contract.directAgreementTerms);
+    if (!daTerms || !terms) {
+      throw new Error("Direct Agreement terms are required before client signature.");
+    }
+    assertDirectAgreementSigningBindingCurrent({
+      pkg,
+      operatorDocumentHash: operatorSignature.documentHash,
+      contractId: contract.id,
+      rawContractBody: String(contract.body ?? ""),
+      terms,
+      daTerms,
+      revisionNumber: Number(contract.revisionNumber ?? 1) || 1,
+      commercialStatus: pkg.commercialStatus,
+    });
+  }
 
   const clientSig = buildTypedSignature({
     legalName: input.name,
@@ -575,10 +670,6 @@ export async function signContractAsClient(
   });
 
   // Billing plan preparation (blocked until readiness cleared — still created for review)
-  const { canonical } = await getContractLifecycle(contract.id);
-  const terms =
-    pkg.structuredPaymentTerms ??
-    (canonical ? deriveStructuredPaymentTerms(canonical) : null);
   const issues = assessBillingReadiness({
     canonical,
     terms,
@@ -676,21 +767,17 @@ export async function signContractAsClient(
         throw new Error("Executed package filing requires a client relationship.");
       }
       let executedBody = toClientFacingContractBody(String(contract.body ?? ""));
-      if (String(contract.agreementSource) === "direct-agreement") {
+      if (isDirectAgreementSource(agreementSource, pkg)) {
         const { parseStoredDirectAgreementTerms } = await import(
           "../direct-agreement/validate.ts"
         );
-        const { composeDirectAgreementDocumentBody } = await import(
-          "../commercial-legal/compose-direct-agreement-document.ts"
-        );
         const daTerms = parseStoredDirectAgreementTerms(contract.directAgreementTerms);
         if (daTerms) {
-          executedBody = toClientFacingContractBody(
-            composeDirectAgreementDocumentBody({
-              body: executedBody,
-              terms: daTerms,
-            }),
-          );
+          executedBody = resolveDirectAgreementClientFacingBody({
+            body: String(contract.body ?? ""),
+            terms: daTerms,
+            commercialStatus: pkg.commercialStatus,
+          });
         }
       }
       next = await generateAndFileExecutedPackage({
@@ -709,7 +796,9 @@ export async function signContractAsClient(
       });
       next = {
         ...next,
-        commercialStatus: next.commercialStatus ?? "accepted",
+        commercialStatus: isDirectAgreementSource(agreementSource, next)
+          ? resolveDirectAgreementCommercialStatusAfterExecution(next.commercialStatus)
+          : (next.commercialStatus ?? "accepted"),
       };
     } catch (err) {
       next = appendAudit(next, {

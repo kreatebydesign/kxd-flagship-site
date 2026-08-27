@@ -27,6 +27,7 @@ export function emptyLifecyclePackage(): ContractLifecyclePackage {
     onboardingEligible: false,
     onboardingEligibleAt: null,
     documentRefs: [],
+    directAgreementSigningBinding: null,
     processedWebhookEventIds: [],
     voidReason: null,
     supersededByContractId: null,

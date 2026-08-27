@@ -334,7 +334,11 @@ export function CommercialAgreementDetail(props: {
             <section className="kxd-os-commercial-panel-card">
               <h3>Acceptance</h3>
               <p className="kxd-os-commercial-muted">
-                No acceptance recorded yet. Use Lifecycle controls to record external acceptance.
+                No acceptance recorded yet. Use Lifecycle controls below to sign as KXD and prepare
+                a secure client signing link for electronic execution.
+              </p>
+              <p className="kxd-os-commercial-muted">
+                Record external acceptance only if the client accepted outside KXD OS.
               </p>
             </section>
           )}

@@ -86,6 +86,12 @@ export function ContractLifecycleActions(props: {
     paymentStatus: "paid",
   });
   const isDirect = props.agreementSource === "direct-agreement";
+  const isDirectFinalized = isDirect && props.commercialStatus === "finalized";
+  const awaitingDirectExecution =
+    isDirect &&
+    !props.hasClientSignature &&
+    !props.hasExternalAcceptance &&
+    (props.commercialStatus === "finalized" || props.commercialStatus === "sent");
 
   async function run(action: string, payload: Record<string, unknown>) {
     setBusy(true);
@@ -147,14 +153,18 @@ export function ContractLifecycleActions(props: {
             separate events.
           </p>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <button
-              type="button"
-              style={btn}
-              disabled={busy}
-              onClick={() => void run("finalize-direct-agreement", {})}
-            >
-              Finalize & file sent PDF
-            </button>
+            {!isDirectFinalized ? (
+              <button
+                type="button"
+                style={btn}
+                disabled={busy}
+                onClick={() => void run("finalize-direct-agreement", {})}
+              >
+                Finalize & file sent PDF
+              </button>
+            ) : (
+              <p style={okStyle}>Finalization complete — sent agreement PDF is on file.</p>
+            )}
             <button
               type="button"
               style={btnGhost}
@@ -185,12 +195,25 @@ export function ContractLifecycleActions(props: {
         </section>
       ) : null}
 
+      {awaitingDirectExecution ? (
+        <section style={card}>
+          <h3 style={h3}>Electronic execution</h3>
+          <p style={help}>
+            Generates a secure KXD-hosted link for the client to review and electronically sign. No
+            email is sent automatically — copy and share the link manually after Step 2.
+          </p>
+        </section>
+      ) : null}
+
       {isDirect && !props.hasClientSignature && !props.hasExternalAcceptance ? (
         <section style={card}>
-          <h3 style={h3}>Record External Acceptance</h3>
+          <h3 style={h3}>
+            {awaitingDirectExecution ? "Fallback: record external acceptance" : "Record External Acceptance"}
+          </h3>
           <p style={help}>
-            Externally recorded acceptance is <strong>not</strong> an electronic signature. Do not
-            invent signature images, IP addresses, or fake signer authentication.
+            {awaitingDirectExecution
+              ? "Use only when the client accepted this agreement outside KXD OS. This is not electronic signing."
+              : "Externally recorded acceptance is not an electronic signature. Do not invent signature images, IP addresses, or fake signer authentication."}
           </p>
           <label style={label}>
             Accepted by
@@ -495,10 +518,13 @@ export function ContractLifecycleActions(props: {
       ) : null}
 
       <section style={card}>
-        <h3 style={h3}>1. Resolve billing readiness (local fixture)</h3>
+        <h3 style={h3}>
+          {isDirect ? "Invoice & billing readiness" : "1. Resolve billing readiness (local fixture)"}
+        </h3>
         <p style={help}>
-          Sets reviewed client billing fields and optional local KXD invoice fixture values. Does not
-          invent production legal facts.
+          {isDirect
+            ? "Required before invoicing and payment collection — not required to prepare a client signing link."
+            : "Sets reviewed client billing fields and optional local KXD invoice fixture values. Does not invent production legal facts."}
         </p>
         <label style={label}>
           Client legal name
@@ -551,7 +577,9 @@ export function ContractLifecycleActions(props: {
 
       {!props.hasOperatorSignature ? (
         <section style={card}>
-          <h3 style={h3}>2. Sign as Kreate by Design</h3>
+          <h3 style={h3}>
+            {awaitingDirectExecution ? "Step 1 — Sign as Kreate by Design" : "2. Sign as Kreate by Design"}
+          </h3>
           <p style={help}>
             Typed electronic signature — acknowledgment with consent, not biometric identity
             verification.
@@ -632,7 +660,11 @@ export function ContractLifecycleActions(props: {
 
       {props.hasOperatorSignature && !props.hasClientSignature ? (
         <section style={card}>
-          <h3 style={h3}>3. Prepare client signing link</h3>
+          <h3 style={h3}>
+            {awaitingDirectExecution
+              ? "Step 2 — Prepare client signing link"
+              : "3. Prepare client signing link"}
+          </h3>
           <p style={help}>
             Generates a one-time secure signing URL. <strong>No email is sent.</strong> Copy the
             link and share it with the client manually (for example by text or email).
@@ -661,14 +693,16 @@ export function ContractLifecycleActions(props: {
             />
             I understand no email will be sent — I will share the signing link manually
           </label>
-          <label style={check}>
-            <input
-              type="checkbox"
-              checked={forceDespiteBillingBlockers}
-              onChange={(e) => setForceDespiteBillingBlockers(e.target.checked)}
-            />
-            Force prepare despite unresolved KXD billing identity blockers (local QA only)
-          </label>
+          {!isDirect ? (
+            <label style={check}>
+              <input
+                type="checkbox"
+                checked={forceDespiteBillingBlockers}
+                onChange={(e) => setForceDespiteBillingBlockers(e.target.checked)}
+              />
+              Force prepare despite unresolved KXD billing identity blockers (local QA only)
+            </label>
+          ) : null}
           <button
             type="button"
             style={btn}

@@ -399,6 +399,11 @@ export async function recordExternalAcceptance(input: {
     executedCertificate: certificate,
     commercialStatus: "accepted",
     commercialSource: "direct-agreement",
+    signingTokenHash: null,
+    signingTokenPrefix: null,
+    signingTokenExpiresAt: null,
+    signingTokenRevokedAt: recordedAt,
+    directAgreementSigningBinding: null,
   };
   pkg = appendAudit(pkg, {
     actor: input.actor,
