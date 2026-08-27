@@ -15,6 +15,7 @@ import { CommercialLifecyclePanel } from "./CommercialLifecyclePanel";
 import { resolveAgreementPaymentStatusLabel } from "@/lib/client-command/commercial/payment-status-display";
 import { splitChecklistItems } from "./presentation";
 import { resolveAgreementAmountKpi } from "@/lib/client-command/commercial/resolve-agreement-amount-kpi";
+import { resolvePrimaryAgreementDocumentRef } from "@/lib/client-command/commercial/resolve-document-refs";
 import { canGenerateCourtesyBrandedRestatement } from "@/lib/direct-agreement";
 import { GenerateBrandedRestatementAction } from "./GenerateBrandedRestatementAction";
 
@@ -49,10 +50,7 @@ export function CommercialAgreementDetail(props: {
   const statusLabel = formatCommercialStatus(status);
   const terms = pkg.structuredPaymentTerms;
   const docs = pkg.documentRefs ?? [];
-  const primaryDoc =
-    docs.find((d) => d.kind === "executed-contract") ??
-    docs.find((d) => d.kind === "direct-agreement") ??
-    docs[0];
+  const primaryDoc = resolvePrimaryAgreementDocumentRef(docs);
 
   const commercialAmountKpi = resolveAgreementAmountKpi({
     daTerms,

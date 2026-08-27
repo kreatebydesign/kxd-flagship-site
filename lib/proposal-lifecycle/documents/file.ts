@@ -31,6 +31,9 @@ import {
   getDefaultCommercialDocumentStorageAdapter,
   type CommercialDocumentStorageProvider,
 } from "./storage/index.ts";
+import {
+  resolveLatestDocumentRef,
+} from "../../client-command/commercial/resolve-document-refs.ts";
 
 export { verifyCommercialDocumentIntegrity } from "./integrity.ts";
 
@@ -289,8 +292,8 @@ export async function generateAndFileCourtesyBrandedRestatement(input: {
   });
 
   const refs = input.pkg.documentRefs ?? [];
-  const executed = [...refs].reverse().find((d) => d.kind === "executed-contract");
-  const sent = [...refs].reverse().find((d) => d.kind === "direct-agreement");
+  const executed = resolveLatestDocumentRef(refs, "executed-contract");
+  const sent = resolveLatestDocumentRef(refs, "direct-agreement");
   const lineageParentId = executed?.id ?? sent?.id ?? null;
   const agreementVersions = refs
     .filter((d) => d.kind === "direct-agreement" || d.kind === "executed-contract")
