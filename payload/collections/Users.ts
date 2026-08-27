@@ -14,7 +14,15 @@ export const Users: CollectionConfig = {
     group: PAYLOAD_GROUPS.system,
     description: "KXD team access for Payload admin and future KXD OS integrations.",
   },
-  auth: true,
+  auth: {
+    /**
+     * Operator OS sessions often span multi-step commercial workflows
+     * (sign → prepare link). Payload's 2h default expired mid-flow and
+     * caused false "Unauthorized" on later steps while the open page still
+     * showed prior success. Authorization rules are unchanged.
+     */
+    tokenExpiration: 60 * 60 * 8,
+  },
   access: {
     /**
      * Panel entry for the auth collection — any authenticated `users` session.

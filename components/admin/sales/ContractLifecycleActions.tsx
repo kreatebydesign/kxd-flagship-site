@@ -1,7 +1,15 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState, type CSSProperties, type FormEvent } from "react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useRef, useState, type CSSProperties, type FormEvent } from "react";
+import {
+  adminFetchInit,
+  adminLoginHrefWithReturn,
+  adminSessionExpiredMessage,
+  bringAdminStatusMessageIntoView,
+  isAdminUnauthorizedResponse,
+} from "@/lib/admin/client-action-feedback";
 
 type Blocker = { code: string; message: string };
 
@@ -25,11 +33,14 @@ export function ContractLifecycleActions(props: {
   suppressAuthorizationForm?: boolean;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [sessionExpired, setSessionExpired] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [signingUrl, setSigningUrl] = useState<string | null>(null);
   const [deliveryPreview, setDeliveryPreview] = useState<string | null>(null);
+  const feedbackRef = useRef<HTMLDivElement | null>(null);
 
   const [signForm, setSignForm] = useState({
     legalName: "",
@@ -96,14 +107,21 @@ export function ContractLifecycleActions(props: {
   async function run(action: string, payload: Record<string, unknown>) {
     setBusy(true);
     setError(null);
+    setSessionExpired(false);
     setMessage(null);
     try {
-      const res = await fetch(`/api/admin/sales/contracts/${props.contractId}/lifecycle`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action, ...payload }),
-      });
-      const data = (await res.json()) as Record<string, unknown>;
+      const res = await fetch(
+        `/api/admin/sales/contracts/${props.contractId}/lifecycle`,
+        adminFetchInit({
+          method: "POST",
+          body: JSON.stringify({ action, ...payload }),
+        }),
+      );
+      const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+      if (isAdminUnauthorizedResponse(res.status, data)) {
+        setSessionExpired(true);
+        throw new Error(adminSessionExpiredMessage());
+      }
       if (!res.ok || !data.ok) {
         throw new Error(String(data.error ?? "Action failed."));
       }
@@ -126,6 +144,11 @@ export function ContractLifecycleActions(props: {
     }
   }
 
+  useEffect(() => {
+    if (!error && !message) return;
+    bringAdminStatusMessageIntoView(feedbackRef.current);
+  }, [error, message]);
+
   function onSign(e: FormEvent) {
     e.preventDefault();
     void run("sign-operator", signForm);
@@ -133,15 +156,35 @@ export function ContractLifecycleActions(props: {
 
   return (
     <div style={{ display: "grid", gap: "1.25rem" }}>
-      {error ? (
-        <p role="alert" style={errStyle}>
-          {error}
-        </p>
-      ) : null}
-      {message ? (
-        <p role="status" style={okStyle}>
-          {message}
-        </p>
+      {error || message ? (
+        <div
+          ref={feedbackRef}
+          tabIndex={-1}
+          style={{ outline: "none" }}
+          aria-live={error ? "assertive" : "polite"}
+        >
+          {error ? (
+            <p role="alert" style={errStyle}>
+              {error}
+              {sessionExpired ? (
+                <>
+                  {" "}
+                  <Link
+                    href={adminLoginHrefWithReturn(pathname)}
+                    style={{ color: "inherit", textDecoration: "underline", fontWeight: 600 }}
+                  >
+                    Sign in again
+                  </Link>
+                </>
+              ) : null}
+            </p>
+          ) : null}
+          {message ? (
+            <p role="status" style={okStyle}>
+              {message}
+            </p>
+          ) : null}
+        </div>
       ) : null}
 
       {isDirect ? (
