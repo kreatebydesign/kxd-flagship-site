@@ -145,6 +145,9 @@ export interface CommercialOverviewSnapshot {
   agreementHref: string | null;
   statusLabel: string;
   paymentStatusLabel: string;
+  /** KPI label for agreement commercial amount (Invoice amount vs Monthly rate). */
+  commercialAmountLabel: string;
+  /** KPI value for agreement commercial amount. */
   invoiceAmountLabel: string;
   termStart: string | null;
   termEnd: string | null;

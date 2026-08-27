@@ -374,6 +374,7 @@ export function emptyCommercialWorkspace(clientId: number): ClientCommercialWork
       agreementHref: null,
       statusLabel: "None",
       paymentStatusLabel: "—",
+      commercialAmountLabel: "Invoice amount",
       invoiceAmountLabel: "—",
       termStart: null,
       termEnd: null,

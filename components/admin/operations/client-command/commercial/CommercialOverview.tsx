@@ -28,7 +28,7 @@ export function CommercialOverview({ data }: { data: ClientWorkspaceBundle }) {
             <CommercialStatusBadge label={o.statusLabel} tone={statusTone(o.statusLabel)} />
           }
         />
-        <OverviewKpi label="Invoice amount" value={o.invoiceAmountLabel} emphasize />
+        <OverviewKpi label={o.commercialAmountLabel} value={o.invoiceAmountLabel} emphasize />
         <OverviewKpi label="Payment status" value={o.paymentStatusLabel} />
         <OverviewKpi
           label="Service term"

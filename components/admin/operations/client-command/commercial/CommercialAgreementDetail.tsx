@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { fmtWorkspaceDate } from "@/lib/executive-client-workspace/theme";
-import { formatCents } from "@/lib/proposal-builder/money";
 import {
   documentKindLabel,
   formatCommercialStatus,
@@ -15,6 +14,7 @@ import { CommercialStatusBadge, statusTone } from "./CommercialStatusBadge";
 import { CommercialLifecyclePanel } from "./CommercialLifecyclePanel";
 import { resolveAgreementPaymentStatusLabel } from "@/lib/client-command/commercial/payment-status-display";
 import { splitChecklistItems } from "./presentation";
+import { resolveAgreementAmountKpi } from "@/lib/client-command/commercial/resolve-agreement-amount-kpi";
 import { canGenerateCourtesyBrandedRestatement } from "@/lib/direct-agreement";
 import { GenerateBrandedRestatementAction } from "./GenerateBrandedRestatementAction";
 
@@ -54,12 +54,10 @@ export function CommercialAgreementDetail(props: {
     docs.find((d) => d.kind === "direct-agreement") ??
     docs[0];
 
-  const invoiceAmount =
-    terms != null
-      ? formatCents(terms.oneTimeTotalCents, terms.currency)
-      : daTerms
-        ? formatCents(daTerms.oneTimeAmountCents as never)
-        : "—";
+  const commercialAmountKpi = resolveAgreementAmountKpi({
+    daTerms,
+    structuredPaymentTerms: terms,
+  });
 
   const paymentStatusLabel = resolveAgreementPaymentStatusLabel(pkg, status);
 
@@ -109,7 +107,7 @@ export function CommercialAgreementDetail(props: {
           label="Status"
           valueNode={<CommercialStatusBadge label={statusLabel} tone={statusTone(statusLabel)} />}
         />
-        <Kpi label="Invoice amount" value={invoiceAmount} emphasize />
+        <Kpi label={commercialAmountKpi.label} value={commercialAmountKpi.value} emphasize />
         <Kpi label="Payment status" value={paymentStatusLabel} />
         <Kpi label="Service term" value={termLabel} />
         <Kpi label="Included hours" value={hoursLabel} />

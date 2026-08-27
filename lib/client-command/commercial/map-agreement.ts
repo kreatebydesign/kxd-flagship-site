@@ -11,6 +11,7 @@ import {
   isAgreementPaymentMarkedPaid,
   resolveAgreementPaymentStatusLabel,
 } from "./payment-status-display";
+import { resolveAgreementAmountKpi } from "./resolve-agreement-amount-kpi";
 
 export function documentKindLabel(kind: string): CommercialDocumentKindLabel {
   switch (kind) {
@@ -162,10 +163,10 @@ export function buildOverviewFromPrimary(input: {
     outstanding.push("No agreement on file");
   }
 
-  const invoiceCents =
-    agreement?.projectAmountCents ??
-    pkg?.structuredPaymentTerms?.oneTimeTotalCents ??
-    null;
+  const commercialAmountKpi = resolveAgreementAmountKpi({
+    daTerms: da,
+    structuredPaymentTerms: pkg?.structuredPaymentTerms ?? null,
+  });
 
   return {
     agreementTitle: agreement?.title ?? null,
@@ -175,8 +176,8 @@ export function buildOverviewFromPrimary(input: {
     paymentStatusLabel: pkg
       ? resolveAgreementPaymentStatusLabel(pkg, agreement?.status)
       : "—",
-    invoiceAmountLabel:
-      invoiceCents != null && invoiceCents > 0 ? formatCents(invoiceCents as never) : "—",
+    commercialAmountLabel: commercialAmountKpi.label,
+    invoiceAmountLabel: commercialAmountKpi.value,
     termStart: agreement?.serviceStartDate ?? da?.serviceStartDate ?? null,
     termEnd: agreement?.serviceEndDate ?? da?.serviceEndDate ?? null,
     hoursIncludedLabel: hours != null ? `${hours} per month` : "—",
