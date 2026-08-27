@@ -4,7 +4,8 @@
 
 import React from "react";
 import { Document, Image, Page, Text, View, StyleSheet, pdf } from "@react-pdf/renderer";
-import { STANDARD_CANCELLATION_TERMINATION_AND_REFUNDS_TITLE } from "../../commercial-legal/standard-cancellation-refunds.ts";
+import { parseAgreementDocumentSections } from "../../commercial-legal/agreement-document-sections.ts";
+import { resolveDirectAgreementInvestmentLines } from "../../client-command/commercial/resolve-agreement-amount-kpi.ts";
 import { KXD_REPORT_BRAND, kxdReportContactLine } from "../../kxd-report-engine/contact.ts";
 import { resolveKxdReportLogoAsset } from "../../kxd-report-engine/logos.ts";
 import { formatProposalCalendarDate } from "../../proposal-builder/calendar-date.ts";
@@ -112,68 +113,55 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: "#e6e0d4",
   },
+  summaryRate: {
+    fontFamily: PROPOSAL_PDF_SERIF,
+    fontSize: 13,
+    marginBottom: 4,
+  },
+  summaryRatePreferred: {
+    fontFamily: PROPOSAL_PDF_SERIF,
+    fontSize: 14,
+    marginBottom: 4,
+    color: "#1f1c19",
+  },
+  summaryRateLabel: {
+    fontSize: 8,
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
+    color: "#8a7a5c",
+    marginBottom: 4,
+  },
+  summarySupporting: {
+    fontSize: 9,
+    color: "#6e675e",
+    marginTop: 4,
+  },
 });
 
-const DIRECT_AGREEMENT_BODY_SECTION_TITLES = [
-  STANDARD_CANCELLATION_TERMINATION_AND_REFUNDS_TITLE,
-  "Intellectual property",
-  "Portfolio use",
-  "Client responsibilities",
-  "Overage / pre-approval",
-  "Payment terms",
-  "Renewal",
-  "Scope",
-  "Included services",
-  "Exclusions",
-] as const;
-
-function isDirectAgreementBodySectionTitle(line: string): boolean {
-  const normalized = line.trim().toLowerCase();
-  if (!normalized) return false;
-  return DIRECT_AGREEMENT_BODY_SECTION_TITLES.some(
-    (title) => title.toLowerCase() === normalized,
-  );
-}
-
-/** Split composed Direct Agreement body into titled sections and readable paragraphs. */
+/** @deprecated Use parseAgreementDocumentSections — retained for existing imports. */
 export function parseDirectAgreementBodySections(
   body: string,
 ): Array<{ title: string; paragraphs: string[] }> {
-  const lines = String(body ?? "").replace(/\r\n/g, "\n").split("\n");
-  const sections: Array<{ title: string; paragraphs: string[] }> = [];
-  let title = "Scope";
-  let paragraphs: string[] = [];
-  let buffer: string[] = [];
+  return parseAgreementDocumentSections(body);
+}
 
-  const flushParagraph = () => {
-    const text = buffer.join(" ").replace(/\s+/g, " ").trim();
-    if (text) paragraphs.push(text);
-    buffer = [];
-  };
+function DirectAgreementInvestmentSummary(props: {
+  terms: StructuredPaymentTerms;
+}) {
+  const lines = resolveDirectAgreementInvestmentLines({
+    structuredPaymentTerms: props.terms,
+  });
 
-  const flushSection = () => {
-    flushParagraph();
-    if (paragraphs.length > 0) {
-      sections.push({ title, paragraphs });
-    }
-    paragraphs = [];
-  };
-
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (isDirectAgreementBodySectionTitle(trimmed)) {
-      flushSection();
-      title = trimmed;
-      continue;
-    }
-    if (!trimmed) {
-      flushParagraph();
-      continue;
-    }
-    buffer.push(trimmed);
-  }
-  flushSection();
-  return sections;
+  return (
+    <>
+      <Text style={styles.h2}>Investment</Text>
+      {lines.map((line) => (
+        <Text key={line} style={styles.p}>
+          {line}
+        </Text>
+      ))}
+    </>
+  );
 }
 
 function Footer({ label }: { label: string }) {
@@ -249,6 +237,7 @@ export async function renderDirectAgreementSentPdf(input: {
   terms: StructuredPaymentTerms;
   termsVersion: number;
   statusLabel: string;
+  commercialStatus?: string | null;
   clientName?: string | null;
   serviceStartDate?: string | null;
   serviceEndDate?: string | null;
@@ -274,14 +263,16 @@ export async function renderDirectAgreementSentPdf(input: {
       : startLabel && startLabel !== "—"
         ? startLabel
         : null;
-  const showMonthly = t.monthlyTotalCents > 0 && t.recurring.cadence !== "none";
-  const sections = parseDirectAgreementBodySections(input.body);
+  const sections = parseAgreementDocumentSections(input.body);
   const bodySections =
     sections.length > 0
       ? sections
       : [{ title: "Scope", paragraphs: ["Agreement body on file."] }];
   void input.statusLabel;
   void input.termsVersion;
+  const isFinalizedSnapshot = ["finalized", "sent", "accepted"].includes(
+    String(input.commercialStatus ?? "").trim().toLowerCase(),
+  );
 
   const doc = (
     <Document
@@ -325,16 +316,7 @@ export async function renderDirectAgreementSentPdf(input: {
               <Text style={styles.p}>{periodLabel}</Text>
             </>
           ) : null}
-          <Text style={styles.h2}>Investment</Text>
-          <Text style={styles.p}>
-            {formatCents(t.oneTimeTotalCents, t.currency)}
-            {t.oneTimeTotalCents > 0 && !showMonthly ? " prepaid" : ""}
-          </Text>
-          {showMonthly ? (
-            <Text style={styles.p}>
-              {formatCents(t.monthlyTotalCents, t.currency)} per month
-            </Text>
-          ) : null}
+          <DirectAgreementInvestmentSummary terms={t} />
           {t.initialPayment.dueTerms ? (
             <Text style={styles.p}>{t.initialPayment.dueTerms}</Text>
           ) : null}
@@ -358,8 +340,9 @@ export async function renderDirectAgreementSentPdf(input: {
 
         <View style={styles.notice}>
           <Text>
-            This agreement is provided for review. It is not executed until the client’s acceptance
-            is confirmed.
+            {isFinalizedSnapshot
+              ? "This finalized agreement snapshot is provided for review and execution. Finalization does not itself collect payment; invoices and charges follow the billing schedule below."
+              : "This agreement is provided for review. It is not executed until the client’s acceptance is confirmed."}
           </Text>
         </View>
         <Text style={styles.footer} fixed>
@@ -412,8 +395,7 @@ export async function renderDirectAgreementCourtesyRestatementPdf(input: {
       : startLabel && startLabel !== "—"
         ? startLabel
         : null;
-  const showMonthly = t.monthlyTotalCents > 0 && t.recurring.cadence !== "none";
-  const sections = parseDirectAgreementBodySections(input.body);
+  const sections = parseAgreementDocumentSections(input.body);
   const bodySections =
     sections.length > 0
       ? sections
@@ -468,16 +450,7 @@ export async function renderDirectAgreementCourtesyRestatementPdf(input: {
               <Text style={styles.p}>{periodLabel}</Text>
             </>
           ) : null}
-          <Text style={styles.h2}>Investment</Text>
-          <Text style={styles.p}>
-            {formatCents(t.oneTimeTotalCents, t.currency)}
-            {t.oneTimeTotalCents > 0 && !showMonthly ? " prepaid" : ""}
-          </Text>
-          {showMonthly ? (
-            <Text style={styles.p}>
-              {formatCents(t.monthlyTotalCents, t.currency)} per month
-            </Text>
-          ) : null}
+          <DirectAgreementInvestmentSummary terms={t} />
           <Text style={styles.p}>
             Prepaid amount collected:{" "}
             {formatCents(input.collectedAmountCents, t.currency)}

@@ -45,3 +45,31 @@ export function composeDirectAgreementDocumentBody(input: {
 
   return blocks.join("\n\n").trim();
 }
+
+const FINALIZED_PRESENTATION_COPY: Array<{ pattern: RegExp; replacement: string }> = [
+  {
+    pattern:
+      /No invoice, charge, or payment collection is initiated by this draft record alone\.?/gi,
+    replacement:
+      "Finalization or execution of this agreement does not itself constitute payment collection; invoices and charges occur according to the billing schedule stated in this agreement.",
+  },
+];
+
+/**
+ * Render-time copy adjustments for finalized Direct Agreement PDFs.
+ * Does not mutate stored contract records.
+ */
+export function applyFinalizedDirectAgreementPresentationCopy(
+  body: string,
+  commercialStatus: string | null | undefined,
+): string {
+  const status = String(commercialStatus ?? "").trim().toLowerCase();
+  if (status !== "finalized" && status !== "sent" && status !== "accepted") {
+    return body;
+  }
+  let next = body;
+  for (const { pattern, replacement } of FINALIZED_PRESENTATION_COPY) {
+    next = next.replace(pattern, replacement);
+  }
+  return next;
+}

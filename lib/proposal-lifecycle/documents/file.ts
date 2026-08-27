@@ -25,6 +25,7 @@ import {
   renderExecutedContractPdf,
   renderExternalAcceptanceExecutedPdf,
 } from "./pdfs.tsx";
+import { applyFinalizedDirectAgreementPresentationCopy } from "../../commercial-legal/compose-direct-agreement-document.ts";
 import {
   getCommercialDocumentStorageAdapter,
   getDefaultCommercialDocumentStorageAdapter,
@@ -168,13 +169,19 @@ export async function generateAndFileDirectAgreementSentSnapshot(input: {
     }
   }
 
+  const presentationBody = applyFinalizedDirectAgreementPresentationCopy(
+    input.contractBody,
+    input.pkg.commercialStatus,
+  );
+
   const rendered = await renderDirectAgreementSentPdf({
     title: input.contractTitle,
-    body: input.contractBody,
+    body: presentationBody,
     contractId: input.contractId,
     terms: input.terms,
     termsVersion: input.termsVersion,
     statusLabel: "For review",
+    commercialStatus: input.pkg.commercialStatus ?? null,
     clientName: clientName || null,
     serviceStartDate: input.serviceStartDate ?? null,
     serviceEndDate: input.serviceEndDate ?? null,
