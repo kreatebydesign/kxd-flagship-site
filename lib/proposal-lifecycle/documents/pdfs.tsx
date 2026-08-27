@@ -5,6 +5,7 @@
 import React from "react";
 import { Document, Image, Page, Text, View, StyleSheet, pdf } from "@react-pdf/renderer";
 import { parseAgreementDocumentSections } from "../../commercial-legal/agreement-document-sections.ts";
+import { resolveDirectAgreementPaymentSummaryCopy } from "../../commercial-legal/compose-direct-agreement-document.ts";
 import { resolveDirectAgreementInvestmentLines } from "../../client-command/commercial/resolve-agreement-amount-kpi.ts";
 import { KXD_REPORT_BRAND, kxdReportContactLine } from "../../kxd-report-engine/contact.ts";
 import { resolveKxdReportLogoAsset } from "../../kxd-report-engine/logos.ts";
@@ -273,6 +274,10 @@ export async function renderDirectAgreementSentPdf(input: {
   const isFinalizedSnapshot = ["finalized", "sent", "accepted"].includes(
     String(input.commercialStatus ?? "").trim().toLowerCase(),
   );
+  const paymentSummaryCopy = resolveDirectAgreementPaymentSummaryCopy(
+    t.initialPayment.dueTerms,
+    input.commercialStatus,
+  );
 
   const doc = (
     <Document
@@ -317,8 +322,8 @@ export async function renderDirectAgreementSentPdf(input: {
             </>
           ) : null}
           <DirectAgreementInvestmentSummary terms={t} />
-          {t.initialPayment.dueTerms ? (
-            <Text style={styles.p}>{t.initialPayment.dueTerms}</Text>
+          {paymentSummaryCopy ? (
+            <Text style={styles.p}>{paymentSummaryCopy}</Text>
           ) : null}
         </View>
 

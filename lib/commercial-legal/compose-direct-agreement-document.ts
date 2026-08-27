@@ -73,3 +73,11 @@ export function applyFinalizedDirectAgreementPresentationCopy(
   }
   return next;
 }
+
+/** Page-1 payment summary copy — same finalized transforms as the agreement body. */
+export function resolveDirectAgreementPaymentSummaryCopy(
+  dueTerms: string | null | undefined,
+  commercialStatus: string | null | undefined,
+): string {
+  return applyFinalizedDirectAgreementPresentationCopy(String(dueTerms ?? "").trim(), commercialStatus);
+}

@@ -8,7 +8,7 @@ import {
   resolveAgreementAmountKpi,
   resolveDirectAgreementInvestmentLines,
 } from "../lib/client-command/commercial/resolve-agreement-amount-kpi";
-import { applyFinalizedDirectAgreementPresentationCopy } from "../lib/commercial-legal/compose-direct-agreement-document";
+import { applyFinalizedDirectAgreementPresentationCopy, resolveDirectAgreementPaymentSummaryCopy } from "../lib/commercial-legal/compose-direct-agreement-document";
 import type { StructuredPaymentTerms } from "../lib/proposal-lifecycle/types";
 
 function mockTerms(
@@ -121,5 +121,11 @@ const sanitized = applyFinalizedDirectAgreementPresentationCopy(
 );
 assert.match(sanitized, /does not itself constitute payment collection/);
 assert.doesNotMatch(sanitized, /draft record/i);
+
+const draftDueTerms =
+  "First payment: $600.00 due September 1, 2026. No invoice, charge, or payment collection is initiated by this draft record alone.";
+const sanitizedDueTerms = resolveDirectAgreementPaymentSummaryCopy(draftDueTerms, "finalized");
+assert.match(sanitizedDueTerms, /does not itself constitute payment collection/);
+assert.doesNotMatch(sanitizedDueTerms, /draft record/i);
 
 console.log("verify-agreement-value-presentation: OK");
