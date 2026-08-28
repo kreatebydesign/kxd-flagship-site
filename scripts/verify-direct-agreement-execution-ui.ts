@@ -102,7 +102,7 @@ assert.match(lifecycleSrc, /Step 2 — Prepare client signing link/);
 assert.match(lifecycleSrc, /directExecution!\.stateLabel/);
 assert.doesNotMatch(
   lifecycleSrc,
-  /awaitingDirectExecution \? \(\s*<section[\s\S]{0,120}<h3[\s\S]{0,80}Electronic execution[\s\S]{0,200}<\/section>\s*\) : null,\s*\{isDirect && !props\.hasClientSignature/s,
+  /awaitingDirectExecution \? \(\s*<section[\s\S]{0,120}<h3[\s\S]{0,80}Electronic execution[\s\S]{0,200}<\/section>\s*\) : null,\s*\{isDirect && !props\.hasClientSignature/,
 );
 
 console.log("verify-direct-agreement-execution-ui: OK");
