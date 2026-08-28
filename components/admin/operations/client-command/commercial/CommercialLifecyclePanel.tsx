@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { DirectAgreementExecutionPresentation } from "@/lib/admin/direct-agreement-execution-state";
 import { ContractLifecycleActions } from "@/components/admin/sales/ContractLifecycleActions";
 import { CommercialDisclosure } from "./CommercialDisclosure";
 import { StartClientLaunchButton } from "./StartClientLaunchButton";
@@ -35,6 +36,8 @@ export function CommercialLifecyclePanel(props: {
   externalAcceptanceSummary: string | null;
   authorizationSummary: AuthSummary | null;
   defaultLifecycleOpen?: boolean;
+  directExecution?: DirectAgreementExecutionPresentation | null;
+  signingTokenPrefix?: string | null;
 }) {
   const hasAuth = Boolean(props.authorizationSummary);
   const [editingAuth, setEditingAuth] = useState(!hasAuth);
@@ -154,6 +157,8 @@ export function CommercialLifecyclePanel(props: {
             externalAcceptanceSummary={props.externalAcceptanceSummary}
             suppressAcceptanceSummary
             suppressAuthorizationForm={hasAuth && !editingAuth}
+            directExecution={props.directExecution ?? null}
+            signingTokenPrefix={props.signingTokenPrefix ?? null}
           />
         </div>
       </CommercialDisclosure>

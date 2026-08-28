@@ -17,6 +17,10 @@ import { splitChecklistItems } from "./presentation";
 import { resolveAgreementAmountKpi } from "@/lib/client-command/commercial/resolve-agreement-amount-kpi";
 import { resolvePrimaryAgreementDocumentRef } from "@/lib/client-command/commercial/resolve-document-refs";
 import { canGenerateCourtesyBrandedRestatement } from "@/lib/direct-agreement";
+import {
+  resolveDirectAgreementExecutionPresentation,
+  resolveDirectAgreementSigningIntegrityMessage,
+} from "@/lib/admin/direct-agreement-execution-state";
 import { GenerateBrandedRestatementAction } from "./GenerateBrandedRestatementAction";
 
 export function CommercialAgreementDetail(props: {
@@ -74,6 +78,12 @@ export function CommercialAgreementDetail(props: {
   const serviceItems = splitChecklistItems(daTerms?.includedServices);
   const exclusionItems = splitChecklistItems(daTerms?.exclusions);
   const auth = pkg.paymentAuthorization;
+  const directExecution = resolveDirectAgreementExecutionPresentation({
+    agreementSource,
+    commercialStatus: pkg.commercialStatus ?? null,
+    pkg,
+    signingIntegrityMessage: resolveDirectAgreementSigningIntegrityMessage(pkg),
+  });
 
   return (
     <div className="kxd-os-commercial-detail">
@@ -380,6 +390,8 @@ export function CommercialAgreementDetail(props: {
                     }
                   : null
               }
+              directExecution={directExecution}
+              signingTokenPrefix={pkg.signingTokenPrefix ?? null}
             />
           </div>
         </aside>

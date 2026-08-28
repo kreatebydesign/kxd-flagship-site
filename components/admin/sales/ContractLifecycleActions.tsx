@@ -10,6 +10,8 @@ import {
   bringAdminStatusMessageIntoView,
   isAdminUnauthorizedResponse,
 } from "@/lib/admin/client-action-feedback";
+import type { DirectAgreementExecutionPresentation } from "@/lib/admin/direct-agreement-execution-state";
+import { fmtWorkspaceDate } from "@/lib/executive-client-workspace/theme";
 
 type Blocker = { code: string; message: string };
 
@@ -31,6 +33,8 @@ export function ContractLifecycleActions(props: {
   suppressAcceptanceSummary?: boolean;
   /** Hide authorization edit form while parent shows a read-only summary. */
   suppressAuthorizationForm?: boolean;
+  directExecution?: DirectAgreementExecutionPresentation | null;
+  signingTokenPrefix?: string | null;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -103,6 +107,14 @@ export function ContractLifecycleActions(props: {
     !props.hasClientSignature &&
     !props.hasExternalAcceptance &&
     (props.commercialStatus === "finalized" || props.commercialStatus === "sent");
+  const directExecution = props.directExecution ?? null;
+  const useDirectExecutionShell = Boolean(directExecution?.showElectronicExecution);
+  const showDirectStep1Form =
+    directExecution?.state === "awaiting-operator-signature" ||
+    (directExecution?.state === "unavailable" && Boolean(directExecution.unavailableReason));
+  const showDirectStep2 =
+    directExecution?.state === "operator-signed-ready-for-link" ||
+    directExecution?.state === "signing-link-prepared";
 
   async function run(action: string, payload: Record<string, unknown>) {
     setBusy(true);
@@ -238,7 +250,188 @@ export function ContractLifecycleActions(props: {
         </section>
       ) : null}
 
-      {awaitingDirectExecution ? (
+      {useDirectExecutionShell ? (
+        <section style={card}>
+          <h3 style={h3}>Electronic execution</h3>
+          <p style={executionStateStyle} role="status">
+            {directExecution!.stateLabel}
+          </p>
+          <p style={help}>
+            Generates a secure KXD-hosted link for the client to review and electronically sign. No
+            email is sent automatically — copy and share the link manually after Step 2.
+          </p>
+          {directExecution!.unavailableReason ? (
+            <p role="alert" style={errStyle}>
+              {directExecution!.unavailableReason}
+            </p>
+          ) : null}
+
+          {showDirectStep1Form ? (
+            <>
+              <h4 style={stepHeading}>Step 1 — Sign as Kreate by Design</h4>
+              <p style={help}>
+                Typed electronic signature — acknowledgment with consent, not biometric identity
+                verification.
+              </p>
+              <form onSubmit={onSign}>
+                <label style={label}>
+                  Legal name
+                  <input
+                    required
+                    style={input}
+                    value={signForm.legalName}
+                    onChange={(e) => setSignForm({ ...signForm, legalName: e.target.value })}
+                  />
+                </label>
+                <label style={label}>
+                  Title
+                  <input
+                    style={input}
+                    value={signForm.title}
+                    onChange={(e) => setSignForm({ ...signForm, title: e.target.value })}
+                  />
+                </label>
+                <label style={label}>
+                  Entity
+                  <input
+                    style={input}
+                    value={signForm.entityName}
+                    onChange={(e) => setSignForm({ ...signForm, entityName: e.target.value })}
+                  />
+                </label>
+                <label style={label}>
+                  Email
+                  <input
+                    required
+                    type="email"
+                    style={input}
+                    value={signForm.email}
+                    onChange={(e) => setSignForm({ ...signForm, email: e.target.value })}
+                  />
+                </label>
+                <label style={label}>
+                  Type your legal name
+                  <input
+                    required
+                    style={input}
+                    value={signForm.typedAcknowledgment}
+                    onChange={(e) =>
+                      setSignForm({ ...signForm, typedAcknowledgment: e.target.value })
+                    }
+                  />
+                </label>
+                <label style={check}>
+                  <input
+                    type="checkbox"
+                    checked={signForm.authorityConfirmed}
+                    onChange={(e) =>
+                      setSignForm({ ...signForm, authorityConfirmed: e.target.checked })
+                    }
+                  />
+                  I am authorized to sign for Kreate by Design
+                </label>
+                <label style={check}>
+                  <input
+                    type="checkbox"
+                    checked={signForm.electronicRecordsConsent}
+                    onChange={(e) =>
+                      setSignForm({ ...signForm, electronicRecordsConsent: e.target.checked })
+                    }
+                  />
+                  I consent to electronic records and signatures
+                </label>
+                <button type="submit" style={btn} disabled={busy}>
+                  {directExecution!.state === "unavailable"
+                    ? "Re-sign agreement (operator)"
+                    : "Sign agreement (operator)"}
+                </button>
+              </form>
+            </>
+          ) : directExecution!.operatorSignatureSummary ? (
+            <div style={{ marginBottom: 16 }}>
+              <p style={okStyle}>✓ Step 1 — Signed as Kreate by Design</p>
+              <p style={help}>
+                {directExecution!.operatorSignatureSummary.legalName} /{" "}
+                {directExecution!.operatorSignatureSummary.entityName}
+                <br />
+                Signed {fmtWorkspaceDate(directExecution!.operatorSignatureSummary.signedAt)}
+              </p>
+            </div>
+          ) : null}
+
+          {showDirectStep2 ? (
+            <>
+              <h4 style={stepHeading}>Step 2 — Prepare client signing link</h4>
+              <p style={help}>
+                Generates a one-time secure signing URL. <strong>No email is sent.</strong> Copy the
+                link and share it with the client manually (for example by text or email).
+              </p>
+              <label style={label}>
+                Recipient name
+                <input
+                  style={input}
+                  value={sendForm.recipientName}
+                  onChange={(e) => setSendForm({ ...sendForm, recipientName: e.target.value })}
+                />
+              </label>
+              <label style={label}>
+                Recipient email
+                <input
+                  style={input}
+                  value={sendForm.recipientEmail}
+                  onChange={(e) => setSendForm({ ...sendForm, recipientEmail: e.target.value })}
+                />
+              </label>
+              <label style={check}>
+                <input
+                  type="checkbox"
+                  checked={sendForm.confirm}
+                  onChange={(e) => setSendForm({ ...sendForm, confirm: e.target.checked })}
+                />
+                I understand no email will be sent — I will share the signing link manually
+              </label>
+              <button
+                type="button"
+                style={btn}
+                disabled={busy || !sendForm.confirm}
+                onClick={() =>
+                  void run("send-for-client-signature", {
+                    recipientName: sendForm.recipientName,
+                    recipientEmail: sendForm.recipientEmail,
+                    forceDespiteBillingBlockers: false,
+                  })
+                }
+              >
+                Prepare client signing link
+              </button>
+              {signingUrl ? (
+                <p style={okStyle}>
+                  Secure signing URL (copy now — token is not stored in plaintext):{" "}
+                  <code style={{ wordBreak: "break-all" }}>{signingUrl}</code>
+                </p>
+              ) : null}
+              {directExecution!.signingLinkActive && props.signingTokenPrefix ? (
+                <p style={help}>
+                  An active signing link is on file (prefix{" "}
+                  <code>{props.signingTokenPrefix}</code>). Use Prepare again to generate a fresh
+                  copyable URL — prior tokens are not stored in plaintext.
+                </p>
+              ) : null}
+            </>
+          ) : null}
+
+          {directExecution!.state === "client-signed" ? (
+            <p style={okStyle}>Client electronic signature is on file. Execution is complete.</p>
+          ) : null}
+          {directExecution!.state === "external-acceptance" ? (
+            <p style={help}>
+              External acceptance was recorded — electronic signing is no longer the primary path.
+            </p>
+          ) : null}
+        </section>
+      ) : null}
+
+      {awaitingDirectExecution && !useDirectExecutionShell ? (
         <section style={card}>
           <h3 style={h3}>Electronic execution</h3>
           <p style={help}>
@@ -618,7 +811,7 @@ export function ContractLifecycleActions(props: {
         </button>
       </section>
 
-      {!props.hasOperatorSignature ? (
+      {!useDirectExecutionShell && !props.hasOperatorSignature ? (
         <section style={card}>
           <h3 style={h3}>
             {awaitingDirectExecution ? "Step 1 — Sign as Kreate by Design" : "2. Sign as Kreate by Design"}
@@ -701,7 +894,7 @@ export function ContractLifecycleActions(props: {
         </section>
       ) : null}
 
-      {props.hasOperatorSignature && !props.hasClientSignature ? (
+      {!useDirectExecutionShell && props.hasOperatorSignature && !props.hasClientSignature ? (
         <section style={card}>
           <h3 style={h3}>
             {awaitingDirectExecution
@@ -933,6 +1126,18 @@ const card: CSSProperties = {
   borderRadius: 2,
 };
 const h3: CSSProperties = { margin: "0 0 0.5rem", fontSize: "1rem", fontWeight: 500 };
+const stepHeading: CSSProperties = {
+  margin: "1rem 0 0.5rem",
+  fontSize: "0.95rem",
+  fontWeight: 500,
+};
+const executionStateStyle: CSSProperties = {
+  color: "#c5a65c",
+  fontSize: 13,
+  letterSpacing: "0.04em",
+  margin: "0 0 12px",
+  fontWeight: 600,
+};
 const help: CSSProperties = { opacity: 0.75, fontSize: 13, marginBottom: 12, lineHeight: 1.45 };
 const label: CSSProperties = { display: "block", marginBottom: 10, fontSize: 13 };
 const check: CSSProperties = {
