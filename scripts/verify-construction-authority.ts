@@ -80,8 +80,8 @@ for (const slug of CONSTRUCTION_WORK_SLUGS) {
 
 check(
   "Dialed In Electric not in selected work",
-  !CONSTRUCTION_WORK_SLUGS.includes("dialed-in-electric" as never) &&
-    !CONSTRUCTION_SELECTED_WORK.some((w) => w.slug === "dialed-in-electric"),
+  !(CONSTRUCTION_WORK_SLUGS as readonly string[]).includes("dialed-in-electric") &&
+    !CONSTRUCTION_SELECTED_WORK.some((w) => (w.slug as string) === "dialed-in-electric"),
 );
 
 const faqSchema = faqPageSchema([...CONSTRUCTION_FAQS]);
