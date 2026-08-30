@@ -2892,6 +2892,32 @@
   transform: translateX(-50%) translateY(0);
 }
 
+/* Operator pin replay — brief highlight on stored marker */
+@keyframes kxd-review-pin-replay-pulse {
+  0%,
+  100% {
+    transform: scale(1.08);
+    box-shadow:
+      0 0 0 2px color-mix(in srgb, var(--kxd-ces-accent) 45%, transparent),
+      0 8px 22px color-mix(in srgb, var(--kxd-black-base) 60%, transparent);
+  }
+  50% {
+    transform: scale(1.22);
+    box-shadow:
+      0 0 0 10px color-mix(in srgb, var(--kxd-ces-accent) 18%, transparent),
+      0 10px 28px color-mix(in srgb, var(--kxd-black-base) 55%, transparent);
+  }
+}
+
+.kxd-review-overlay--replay-pulse .kxd-review-pin--active .kxd-review-pin__mark {
+  animation: kxd-review-pin-replay-pulse 0.85s ease-in-out 3;
+}
+
+.kxd-review-overlay--replay .kxd-review-pin--active .kxd-review-pin__tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
 /* Premium movable Website Review inspector */
 .kxd-review-popover {
   --kxd-review-brass: #c4a574;

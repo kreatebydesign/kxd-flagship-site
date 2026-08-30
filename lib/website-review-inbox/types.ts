@@ -59,6 +59,11 @@ export interface ReviewWorkspaceLocation {
   visualAnchor?: string | null;
   /** How page context was captured: manual | review-url | visual-review. */
   source?: string | null;
+  /**
+   * Operator-only pin replay route when a visual reviewAnchor exists.
+   * Null when metadata-only (no stored coordinates).
+   */
+  pinReplayHref?: string | null;
 }
 
 export interface ReviewWorkEngineLink {

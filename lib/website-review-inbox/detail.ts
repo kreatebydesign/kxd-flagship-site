@@ -13,6 +13,7 @@ import {
   formatVisualAnchorSummary,
 } from "@/lib/work/website-review-context-helpers";
 import { inspectLinkedWorkForReview } from "./linked-work";
+import { hasReplayablePin, reviewPinReplayHref } from "./pin-replay";
 import type {
   ReviewWorkspaceAttachment,
   ReviewWorkspaceDetail,
@@ -76,6 +77,10 @@ function buildLocation(doc: AnyDoc): ReviewWorkspaceLocation {
       ? reviewContext.markerNumber
       : null;
 
+  const id = typeof doc.id === "number" ? doc.id : Number(doc.id);
+  const canReplay =
+    Number.isFinite(id) && id > 0 && hasReplayablePin(reviewContext);
+
   return {
     pageLabel: resolved.pageLabel,
     section: reviewContext.section ?? null,
@@ -85,6 +90,7 @@ function buildLocation(doc: AnyDoc): ReviewWorkspaceLocation {
     markerNumber,
     visualAnchor: formatVisualAnchorSummary(reviewContext.reviewAnchor ?? null),
     source: reviewContext.source ? String(reviewContext.source) : null,
+    pinReplayHref: canReplay ? reviewPinReplayHref(id) : null,
   };
 }
 

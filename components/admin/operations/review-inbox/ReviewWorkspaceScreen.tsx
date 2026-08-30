@@ -504,6 +504,14 @@ export function ReviewWorkspaceScreen({ review: initialReview }: ReviewWorkspace
                 >
                   Open client workspace
                 </Link>
+                {review.location.pinReplayHref ? (
+                  <Link
+                    href={review.location.pinReplayHref}
+                    className="kxd-os-btn kxd-os-btn--secondary kxd-os-review-workspace__action-btn"
+                  >
+                    View pin on website
+                  </Link>
+                ) : null}
                 {websiteOpenUrl ? (
                   <a
                     href={websiteOpenUrl}

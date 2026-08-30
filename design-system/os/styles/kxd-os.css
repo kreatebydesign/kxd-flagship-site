@@ -7874,6 +7874,79 @@ a.kxd-os-platform-subsystem-card__title:hover {
   color: var(--kxd-os-text-muted);
 }
 
+/* Operator pin replay (Review Inbox → View pin on website) */
+.kxd-os-pin-replay {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--kxd-os-bg-canvas);
+}
+
+.kxd-os-pin-replay__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.25rem;
+  padding: 0.85rem clamp(1rem, 3vw, 1.5rem);
+  border-bottom: 1px solid color-mix(in srgb, var(--kxd-os-text-faint) 14%, transparent);
+  background: var(--kxd-os-bg-elevated, var(--kxd-os-bg-canvas));
+}
+
+.kxd-os-pin-replay__bar-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.kxd-os-pin-replay__back {
+  font-size: 0.8125rem;
+  color: var(--kxd-os-text-muted);
+  text-decoration: none;
+}
+
+.kxd-os-pin-replay__back:hover {
+  color: var(--kxd-os-text-primary);
+}
+
+.kxd-os-pin-replay__client {
+  margin: 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-faint);
+}
+
+.kxd-os-pin-replay__title {
+  margin: 0;
+  font-family: var(--kxd-os-font-serif, "Cormorant Garamond", serif);
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--kxd-os-text-primary);
+  line-height: 1.25;
+}
+
+.kxd-os-pin-replay__title-sep {
+  margin: 0 0.4rem;
+  color: var(--kxd-os-text-faint);
+}
+
+.kxd-os-pin-replay__note {
+  margin: 0;
+  padding: 0.45rem clamp(1rem, 3vw, 1.5rem);
+  font-size: 0.8125rem;
+  color: var(--kxd-os-text-muted);
+  border-bottom: 1px solid color-mix(in srgb, var(--kxd-os-text-faint) 10%, transparent);
+  background: color-mix(in srgb, var(--kxd-ces-accent, #c4a574) 6%, transparent);
+}
+
+.kxd-os-pin-replay__stage {
+  flex: 1;
+  min-height: 0;
+}
+
+
 .kxd-os-review-workspace__work-engine {
   margin-top: 1.25rem;
   padding-top: 1.25rem;
