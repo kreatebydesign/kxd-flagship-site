@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FinalCtaBand } from "@/components/ui/FinalCtaBand";
+import { GoldAtmosphere } from "@/components/ui/surfaces/GoldAtmosphere";
 import { StructuredData } from "@/components/seo/StructuredData";
 import {
   HOSPITALITY_CAPABILITIES,
-  HOSPITALITY_CONNECTED_SYSTEM,
-  HOSPITALITY_ENGAGEMENT,
   HOSPITALITY_FAQS,
   HOSPITALITY_INSIGHT_LINKS,
   HOSPITALITY_PAGE,
-  HOSPITALITY_REQUIREMENTS,
+  HOSPITALITY_PHILOSOPHY,
   HOSPITALITY_SELECTED_WORK,
 } from "@/lib/content/hospitality-authority";
 import { PROJECTS } from "@/lib/projects";
@@ -31,12 +30,13 @@ function workImage(slug: string): string | null {
   return PROJECTS.find((p) => p.slug === slug)?.image ?? null;
 }
 
+const featuredWork = HOSPITALITY_SELECTED_WORK.find((w) => w.featured)!;
+const supportingWork = HOSPITALITY_SELECTED_WORK.filter((w) => !w.featured);
+
 export default function HospitalityIndustryPage() {
   const faqSchema = faqPageSchema([...HOSPITALITY_FAQS]);
   const schema = [
-    breadcrumbSchema([
-      { name: "Hospitality", path: HOSPITALITY_PAGE.path },
-    ]),
+    breadcrumbSchema([{ name: "Hospitality", path: HOSPITALITY_PAGE.path }]),
     webPageSchema({
       title: HOSPITALITY_PAGE.title,
       description: HOSPITALITY_PAGE.description,
@@ -45,40 +45,75 @@ export default function HospitalityIndustryPage() {
     ...(faqSchema ? [faqSchema] : []),
   ];
 
+  const heroImage = workImage(featuredWork.slug);
+
   return (
     <>
       <StructuredData data={schema} />
 
-      {/* Hero */}
+      {/* ── Cinematic hero ─────────────────────────────────────────── */}
       <section
+        className="relative overflow-hidden"
         style={{
-          paddingTop: "calc(var(--nav-height) + var(--section-py))",
-          paddingBottom: "var(--section-py)",
+          minHeight: "min(88vh, 52rem)",
           background: "var(--kxd-black-pure)",
-          borderBottom: "1px solid var(--kxd-border-white)",
         }}
       >
-        <div className="kxd-container" style={{ maxWidth: "58rem" }}>
-          <p className="kxd-eyebrow">{HOSPITALITY_PAGE.eyebrow}</p>
-          <h1
-            className="kxd-serif-title mt-5"
+        {heroImage ? (
+          <div
+            aria-hidden
+            className="absolute inset-0"
             style={{
-              fontSize: "clamp(2.5rem, 5.2vw, 3.75rem)",
-              lineHeight: 1.06,
-              maxWidth: "18ch",
+              backgroundImage: `url(${heroImage})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              opacity: 0.28,
+              transform: "scale(1.04)",
+            }}
+          />
+        ) : null}
+        <div
+          aria-hidden
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(105deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.72) 42%, rgba(0,0,0,0.45) 100%)",
+          }}
+        />
+        <GoldAtmosphere position="center" intensity="hero" />
+
+        <div
+          className="kxd-container relative z-10 flex flex-col justify-end"
+          style={{
+            minHeight: "min(88vh, 52rem)",
+            paddingTop: "calc(var(--nav-height) + 4rem)",
+            paddingBottom: "clamp(3.5rem, 8vw, 5.5rem)",
+          }}
+        >
+          <p className="kxd-eyebrow kxd-reveal">{HOSPITALITY_PAGE.eyebrow}</p>
+          <h1
+            className="kxd-serif-title kxd-reveal kxd-reveal-delay-1 mt-6"
+            style={{
+              fontSize: "clamp(2.75rem, 6.5vw, 4.75rem)",
+              lineHeight: 1.02,
+              maxWidth: "14ch",
+              letterSpacing: "-0.02em",
             }}
           >
             {HOSPITALITY_PAGE.headline}
           </h1>
-          <p className="kxd-body mt-7" style={{ maxWidth: "38rem", lineHeight: 1.8 }}>
+          <p
+            className="kxd-body kxd-reveal kxd-reveal-delay-2 mt-8"
+            style={{ maxWidth: "32rem", lineHeight: 1.75, color: "var(--kxd-cream-muted)" }}
+          >
             {HOSPITALITY_PAGE.lead}
           </p>
-          <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
+          <div className="kxd-reveal kxd-reveal-delay-3 mt-12 flex flex-wrap items-center gap-x-10 gap-y-4">
             <Link href={HOSPITALITY_PAGE.primaryCta.href} className="kxd-btn-primary">
               {HOSPITALITY_PAGE.primaryCta.label}
             </Link>
             <Link
-              href={HOSPITALITY_PAGE.secondaryCta.href}
+              href="#selected-work"
               className="group inline-flex items-center gap-2 font-sans font-medium uppercase"
               style={{
                 fontSize: "0.6875rem",
@@ -87,7 +122,7 @@ export default function HospitalityIndustryPage() {
               }}
             >
               <span className="transition-colors duration-200 group-hover:text-[var(--kxd-cream)]">
-                {HOSPITALITY_PAGE.secondaryCta.label}
+                Selected work
               </span>
               <span
                 aria-hidden
@@ -101,59 +136,230 @@ export default function HospitalityIndustryPage() {
         </div>
       </section>
 
-      {/* Requirements */}
+      {/* ── Selected work — visual centerpiece ─────────────────────── */}
       <section
-        className="kxd-section"
-        style={{ background: "var(--kxd-black-base)" }}
+        id="selected-work"
+        className="relative"
+        style={{ background: "var(--kxd-black-pure)" }}
       >
-        <div className="kxd-container" style={{ maxWidth: "62rem" }}>
-          <p className="kxd-eyebrow">{HOSPITALITY_REQUIREMENTS.eyebrow}</p>
-          <h2
-            className="kxd-serif-title mt-5"
-            style={{ fontSize: "clamp(1.75rem, 3.2vw, 2.5rem)", maxWidth: "22ch" }}
-          >
-            {HOSPITALITY_REQUIREMENTS.title}
-          </h2>
-          <p className="kxd-body mt-6" style={{ maxWidth: "40rem", lineHeight: 1.8 }}>
-            {HOSPITALITY_REQUIREMENTS.lead}
-          </p>
-          <div className="mt-14 grid gap-px md:grid-cols-2 lg:grid-cols-3">
-            {HOSPITALITY_REQUIREMENTS.points.map((point) => (
-              <article
-                key={point.title}
-                className="border p-8"
+        <div className="kxd-container" style={{ paddingTop: "clamp(3rem, 6vw, 5rem)" }}>
+          <div className="mb-10 flex flex-col gap-3 lg:mb-14 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="kxd-eyebrow">Selected work</p>
+              <h2
+                className="kxd-serif-title mt-4"
+                style={{ fontSize: "clamp(1.85rem, 3.5vw, 2.75rem)", maxWidth: "16ch" }}
+              >
+                Restaurants, venues, and dining brands.
+              </h2>
+            </div>
+            <Link
+              href="/work"
+              className="kxd-ui-label inline-flex items-center gap-2 self-start text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)] lg:self-auto"
+            >
+              All work
+              <span aria-hidden>→</span>
+            </Link>
+          </div>
+        </div>
+
+        {/* Featured — full bleed cinematic */}
+        <Link
+          href={`/work/${featuredWork.slug}`}
+          className="group relative block overflow-hidden border-y"
+          style={{
+            borderColor: "var(--kxd-border-white)",
+            minHeight: "min(72vh, 40rem)",
+          }}
+        >
+          {workImage(featuredWork.slug) ? (
+            <div
+              aria-hidden
+              className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+              style={{
+                backgroundImage: `url(${workImage(featuredWork.slug)})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }}
+            />
+          ) : null}
+          <div
+            aria-hidden
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.35) 48%, rgba(0,0,0,0.2) 100%)",
+            }}
+          />
+          <div className="relative z-10 flex h-full min-h-[min(72vh,40rem)] flex-col justify-end p-8 lg:p-14">
+            <p className="kxd-eyebrow">{featuredWork.industry}</p>
+            <h3
+              className="mt-4 font-serif font-light"
+              style={{
+                fontSize: "clamp(2rem, 4.5vw, 3.25rem)",
+                lineHeight: 1.08,
+                color: "var(--kxd-cream)",
+                maxWidth: "16ch",
+              }}
+            >
+              {featuredWork.title}
+            </h3>
+            <p
+              className="mt-5 font-sans font-light"
+              style={{
+                fontSize: "1.0625rem",
+                lineHeight: 1.7,
+                color: "var(--kxd-cream-muted)",
+                maxWidth: "34rem",
+              }}
+            >
+              {featuredWork.summary}
+            </p>
+            <p
+              className="mt-8 inline-flex items-center gap-2 font-sans font-medium uppercase"
+              style={{
+                fontSize: "0.6875rem",
+                letterSpacing: "var(--tracking-button)",
+                color: "var(--kxd-cream-muted)",
+              }}
+            >
+              <span className="transition-colors group-hover:text-[var(--kxd-cream)]">
+                View case study
+              </span>
+              <span
+                aria-hidden
+                className="transition-transform duration-300 group-hover:translate-x-1"
+                style={{ color: "var(--kxd-gold)" }}
+              >
+                →
+              </span>
+            </p>
+          </div>
+        </Link>
+
+        {/* Supporting — asymmetric mosaic */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-12">
+          {supportingWork.map((item, index) => {
+            const image = workImage(item.slug);
+            const wide = index === 0;
+            return (
+              <Link
+                key={item.slug}
+                href={`/work/${item.slug}`}
+                className={`group relative block overflow-hidden border-b md:border-r ${
+                  wide ? "lg:col-span-7" : "lg:col-span-5"
+                }`}
                 style={{
                   borderColor: "var(--kxd-border-white)",
-                  background: "rgba(255,255,255,0.015)",
+                  minHeight: wide ? "min(56vh, 32rem)" : "min(48vh, 28rem)",
                 }}
               >
-                <h3
-                  className="font-serif font-light"
+                {image ? (
+                  <div
+                    aria-hidden
+                    className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+                    style={{
+                      backgroundImage: `url(${image})`,
+                      backgroundSize: "cover",
+                      backgroundPosition: "center top",
+                      opacity: 0.55,
+                    }}
+                  />
+                ) : null}
+                <div
+                  aria-hidden
+                  className="absolute inset-0"
                   style={{
-                    fontSize: "1.125rem",
-                    lineHeight: 1.35,
-                    color: "var(--kxd-cream)",
+                    background:
+                      "linear-gradient(to top, rgba(0,0,0,0.94) 0%, rgba(0,0,0,0.5) 55%, rgba(0,0,0,0.28) 100%)",
                   }}
-                >
-                  {point.title}
-                </h3>
-                <p
-                  className="mt-4 font-sans font-light"
-                  style={{
-                    fontSize: "0.9375rem",
-                    lineHeight: 1.75,
-                    color: "var(--kxd-cream-muted)",
-                  }}
-                >
-                  {point.body}
-                </p>
-              </article>
+                />
+                <div className="relative z-10 flex h-full min-h-[inherit] flex-col justify-end p-8 lg:p-10">
+                  <p className="kxd-eyebrow">{item.industry}</p>
+                  <h3
+                    className="mt-3 font-serif font-light"
+                    style={{
+                      fontSize: wide
+                        ? "clamp(1.65rem, 3vw, 2.35rem)"
+                        : "clamp(1.45rem, 2.5vw, 2rem)",
+                      lineHeight: 1.12,
+                      color: "var(--kxd-cream)",
+                    }}
+                  >
+                    {item.title}
+                  </h3>
+                  <p
+                    className="mt-4 font-sans font-light"
+                    style={{
+                      fontSize: "0.9375rem",
+                      lineHeight: 1.65,
+                      color: "var(--kxd-cream-muted)",
+                      maxWidth: "28rem",
+                    }}
+                  >
+                    {item.summary}
+                  </p>
+                  <p
+                    className="mt-6 inline-flex items-center gap-2 font-sans font-medium uppercase"
+                    style={{
+                      fontSize: "0.6875rem",
+                      letterSpacing: "var(--tracking-button)",
+                      color: "var(--kxd-cream-muted)",
+                    }}
+                  >
+                    <span className="transition-colors group-hover:text-[var(--kxd-cream)]">
+                      View case study
+                    </span>
+                    <span aria-hidden style={{ color: "var(--kxd-gold)" }}>
+                      →
+                    </span>
+                  </p>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ── Philosophy ─────────────────────────────────────────────── */}
+      <section
+        className="kxd-section border-t"
+        style={{
+          background: "var(--kxd-black-base)",
+          borderColor: "var(--kxd-border-white)",
+        }}
+      >
+        <div className="kxd-container" style={{ maxWidth: "44rem" }}>
+          <p className="kxd-eyebrow">{HOSPITALITY_PHILOSOPHY.eyebrow}</p>
+          <h2
+            className="kxd-serif-title mt-5"
+            style={{
+              fontSize: "clamp(2rem, 4vw, 3rem)",
+              lineHeight: 1.12,
+              maxWidth: "16ch",
+            }}
+          >
+            {HOSPITALITY_PHILOSOPHY.title}
+          </h2>
+          <div className="mt-10 space-y-6">
+            {HOSPITALITY_PHILOSOPHY.body.map((paragraph) => (
+              <p
+                key={paragraph}
+                className="font-sans font-light"
+                style={{
+                  fontSize: "clamp(1.0625rem, 1.6vw, 1.1875rem)",
+                  lineHeight: 1.8,
+                  color: "var(--kxd-cream-muted)",
+                }}
+              >
+                {paragraph}
+              </p>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Capability map */}
+      {/* ── Capabilities — editorial, not a map ───────────────────── */}
       <section
         className="kxd-section border-t"
         style={{
@@ -161,36 +367,38 @@ export default function HospitalityIndustryPage() {
           borderColor: "var(--kxd-border-white)",
         }}
       >
-        <div className="kxd-container" style={{ maxWidth: "62rem" }}>
-          <p className="kxd-eyebrow">Capability map</p>
+        <div className="kxd-container" style={{ maxWidth: "58rem" }}>
+          <p className="kxd-eyebrow">Engagements</p>
           <h2
             className="kxd-serif-title mt-5"
-            style={{ fontSize: "clamp(1.75rem, 3.2vw, 2.5rem)", maxWidth: "20ch" }}
+            style={{ fontSize: "clamp(1.75rem, 3.2vw, 2.5rem)", maxWidth: "14ch" }}
           >
-            Two connected layers. Scoped to the engagement.
+            Built around the experience.
           </h2>
-          <div className="mt-14 space-y-0">
+
+          <div className="mt-16">
             {HOSPITALITY_CAPABILITIES.map((capability, index) => (
               <article
                 key={capability.href}
-                className="grid gap-6 py-12 lg:grid-cols-[10rem_1fr] lg:gap-12"
+                className="grid gap-6 py-12 lg:grid-cols-[11rem_1fr] lg:gap-16"
                 style={{
                   borderTop:
                     index === 0
-                      ? "1px solid var(--kxd-border-gold)"
+                      ? "1px solid color-mix(in srgb, var(--kxd-gold) 45%, transparent)"
                       : "1px solid var(--kxd-border-white)",
                 }}
               >
-                <p className="kxd-eyebrow" style={{ marginTop: "0.35rem" }}>
+                <p className="kxd-eyebrow" style={{ marginTop: "0.4rem" }}>
                   {capability.eyebrow}
                 </p>
                 <div>
                   <h3
                     className="font-serif font-light"
                     style={{
-                      fontSize: "clamp(1.35rem, 2.4vw, 1.75rem)",
+                      fontSize: "clamp(1.35rem, 2.4vw, 1.85rem)",
                       lineHeight: 1.25,
                       color: "var(--kxd-cream)",
+                      maxWidth: "22ch",
                     }}
                   >
                     {capability.title}
@@ -201,31 +409,18 @@ export default function HospitalityIndustryPage() {
                       fontSize: "1rem",
                       lineHeight: 1.8,
                       color: "var(--kxd-cream-muted)",
-                      maxWidth: "40rem",
+                      maxWidth: "38rem",
                     }}
                   >
                     {capability.body}
                   </p>
-                  <p
-                    className="mt-4 font-sans"
-                    style={{
-                      fontSize: "0.8125rem",
-                      lineHeight: 1.65,
-                      color: "rgba(191,183,170,0.55)",
-                      maxWidth: "40rem",
-                    }}
+                  <Link
+                    href={capability.href}
+                    className="kxd-ui-label mt-7 inline-flex items-center gap-2 text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)]"
                   >
-                    {capability.proofNote}
-                  </p>
-                  <div className="mt-6 flex flex-wrap gap-x-8 gap-y-3">
-                    <Link
-                      href={capability.href}
-                      className="kxd-ui-label inline-flex items-center gap-2 text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)]"
-                    >
-                      {capability.linkLabel}
-                      <span aria-hidden>→</span>
-                    </Link>
-                  </div>
+                    {capability.linkLabel}
+                    <span aria-hidden>→</span>
+                  </Link>
                 </div>
               </article>
             ))}
@@ -233,7 +428,7 @@ export default function HospitalityIndustryPage() {
         </div>
       </section>
 
-      {/* Selected work */}
+      {/* ── Insights ───────────────────────────────────────────────── */}
       <section
         className="kxd-section border-t"
         style={{
@@ -241,270 +436,40 @@ export default function HospitalityIndustryPage() {
           borderColor: "var(--kxd-border-white)",
         }}
       >
-        <div className="kxd-container">
-          <div className="mb-12 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <p className="kxd-eyebrow">Selected work</p>
-              <h2
-                className="kxd-serif-title mt-4"
-                style={{ fontSize: "clamp(1.75rem, 3.2vw, 2.5rem)" }}
-              >
-                Evidence from the room.
-              </h2>
-            </div>
-            <p className="kxd-body-sm lg:text-right" style={{ maxWidth: "26rem" }}>
-              Public hospitality case studies only. No invented metrics or guest-count claims.
-            </p>
-          </div>
-
-          <div className="grid gap-px md:grid-cols-2">
-            {HOSPITALITY_SELECTED_WORK.map((item) => {
-              const image = workImage(item.slug);
-              return (
-                <Link
-                  key={item.slug}
-                  href={`/work/${item.slug}`}
-                  className="group relative block overflow-hidden border"
-                  style={{
-                    borderColor: "var(--kxd-border-white)",
-                    background: "var(--kxd-black-pure)",
-                    minHeight: "22rem",
-                  }}
-                >
-                  {image ? (
-                    <div
-                      aria-hidden
-                      className="absolute inset-0 opacity-35 transition-opacity duration-500 group-hover:opacity-45"
-                      style={{
-                        backgroundImage: `url(${image})`,
-                        backgroundSize: "cover",
-                        backgroundPosition: "center top",
-                      }}
-                    />
-                  ) : null}
-                  <div
-                    aria-hidden
-                    className="absolute inset-0"
-                    style={{
-                      background:
-                        "linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.55) 45%, rgba(0,0,0,0.25) 100%)",
-                    }}
-                  />
-                  <div className="relative z-10 flex h-full flex-col justify-end p-8 lg:p-10">
-                    <p className="kxd-eyebrow">{item.industry}</p>
-                    <h3
-                      className="mt-3 font-serif font-light"
-                      style={{
-                        fontSize: "clamp(1.5rem, 2.5vw, 2rem)",
-                        lineHeight: 1.15,
-                        color: "var(--kxd-cream)",
-                      }}
-                    >
-                      {item.title}
-                    </h3>
-                    <p
-                      className="mt-4 font-sans font-light"
-                      style={{
-                        fontSize: "0.9375rem",
-                        lineHeight: 1.7,
-                        color: "var(--kxd-cream-muted)",
-                        maxWidth: "34rem",
-                      }}
-                    >
-                      {item.summary}
-                    </p>
-                    <ul className="mt-5 flex flex-wrap gap-x-4 gap-y-2">
-                      {item.emphasis.map((chip) => (
-                        <li
-                          key={chip}
-                          className="kxd-label"
-                          style={{ color: "rgba(197,166,92,0.75)" }}
-                        >
-                          {chip}
-                        </li>
-                      ))}
-                    </ul>
-                    <p
-                      className="mt-6 inline-flex items-center gap-2 font-sans font-medium uppercase"
-                      style={{
-                        fontSize: "0.6875rem",
-                        letterSpacing: "var(--tracking-button)",
-                        color: "var(--kxd-cream-muted)",
-                      }}
-                    >
-                      <span className="transition-colors group-hover:text-[var(--kxd-cream)]">
-                        View case study
-                      </span>
-                      <span aria-hidden style={{ color: "var(--kxd-gold)" }}>
-                        →
-                      </span>
-                    </p>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Connected system */}
-      <section
-        className="kxd-section border-t"
-        style={{
-          background: "var(--kxd-black-pure)",
-          borderColor: "var(--kxd-border-white)",
-        }}
-      >
-        <div className="kxd-container" style={{ maxWidth: "58rem" }}>
-          <p className="kxd-eyebrow">{HOSPITALITY_CONNECTED_SYSTEM.eyebrow}</p>
+        <div className="kxd-container" style={{ maxWidth: "48rem" }}>
+          <p className="kxd-eyebrow">Journal</p>
           <h2
             className="kxd-serif-title mt-5"
-            style={{ fontSize: "clamp(1.75rem, 3.2vw, 2.5rem)", maxWidth: "22ch" }}
+            style={{ fontSize: "clamp(1.5rem, 2.8vw, 2.15rem)" }}
           >
-            {HOSPITALITY_CONNECTED_SYSTEM.title}
+            Further reading.
           </h2>
-          <p className="kxd-body mt-6" style={{ maxWidth: "40rem", lineHeight: 1.8 }}>
-            {HOSPITALITY_CONNECTED_SYSTEM.lead}
-          </p>
-          <ol className="mt-12 space-y-0">
-            {HOSPITALITY_CONNECTED_SYSTEM.steps.map((step, index) => (
-              <li
-                key={step.label}
-                className="grid gap-3 border-t py-6 sm:grid-cols-[12rem_1fr] sm:gap-8"
-                style={{ borderColor: "var(--kxd-border-white)" }}
-              >
-                <p
-                  className="font-sans font-medium uppercase"
-                  style={{
-                    fontSize: "0.6875rem",
-                    letterSpacing: "0.16em",
-                    color: "var(--kxd-gold)",
-                  }}
-                >
-                  <span style={{ opacity: 0.45 }}>{String(index + 1).padStart(2, "0")} · </span>
-                  {step.label}
-                </p>
-                <p
-                  className="font-sans font-light"
-                  style={{
-                    fontSize: "0.9375rem",
-                    lineHeight: 1.7,
-                    color: "var(--kxd-cream-muted)",
-                  }}
-                >
-                  {step.detail}
-                </p>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
-
-      {/* Engagement */}
-      <section
-        className="kxd-section border-t"
-        style={{
-          background: "var(--kxd-black-base)",
-          borderColor: "var(--kxd-border-white)",
-        }}
-      >
-        <div className="kxd-container" style={{ maxWidth: "62rem" }}>
-          <p className="kxd-eyebrow">{HOSPITALITY_ENGAGEMENT.eyebrow}</p>
-          <h2
-            className="kxd-serif-title mt-5"
-            style={{ fontSize: "clamp(1.75rem, 3.2vw, 2.5rem)" }}
-          >
-            {HOSPITALITY_ENGAGEMENT.title}
-          </h2>
-          <p className="kxd-body mt-6" style={{ maxWidth: "40rem", lineHeight: 1.8 }}>
-            {HOSPITALITY_ENGAGEMENT.lead}
-          </p>
-          <div className="mt-14 grid gap-10 md:grid-cols-2 lg:grid-cols-4">
-            {HOSPITALITY_ENGAGEMENT.steps.map((step) => (
-              <article key={step.number}>
-                <p className="kxd-eyebrow">{step.number}</p>
-                <h3
-                  className="mt-4 font-serif font-light"
-                  style={{
-                    fontSize: "1.25rem",
-                    color: "var(--kxd-cream)",
-                  }}
-                >
-                  {step.title}
-                </h3>
-                <p
-                  className="mt-4 font-sans font-light"
-                  style={{
-                    fontSize: "0.875rem",
-                    lineHeight: 1.75,
-                    color: "var(--kxd-cream-muted)",
-                  }}
-                >
-                  {step.body}
-                </p>
-              </article>
-            ))}
-          </div>
-          <p
-            className="mt-12 font-sans font-light"
-            style={{
-              fontSize: "0.9375rem",
-              color: "var(--kxd-cream-muted)",
-            }}
-          >
-            {HOSPITALITY_ENGAGEMENT.investmentNote}{" "}
-            <Link
-              href={HOSPITALITY_ENGAGEMENT.investmentHref}
-              className="underline decoration-[rgba(197,166,92,0.45)] underline-offset-4 transition hover:text-[var(--kxd-cream)]"
-            >
-              {HOSPITALITY_ENGAGEMENT.investmentLabel}
-            </Link>
-            {" · "}
-            <Link
-              href={HOSPITALITY_ENGAGEMENT.partnershipsHref}
-              className="underline decoration-[rgba(197,166,92,0.45)] underline-offset-4 transition hover:text-[var(--kxd-cream)]"
-            >
-              {HOSPITALITY_ENGAGEMENT.partnershipsLabel}
-            </Link>
-          </p>
-        </div>
-      </section>
-
-      {/* Insights bridge */}
-      <section
-        className="kxd-section border-t"
-        style={{
-          background: "var(--kxd-black-pure)",
-          borderColor: "var(--kxd-border-white)",
-        }}
-      >
-        <div className="kxd-container" style={{ maxWidth: "54rem" }}>
-          <p className="kxd-eyebrow">Further reading</p>
-          <h2
-            className="kxd-serif-title mt-5"
-            style={{ fontSize: "clamp(1.5rem, 2.8vw, 2rem)" }}
-          >
-            Hospitality strategy notes.
-          </h2>
-          <ul className="mt-10 space-y-0">
+          <ul className="mt-12 space-y-0">
             {HOSPITALITY_INSIGHT_LINKS.map((insight) => (
               <li
                 key={insight.slug}
-                className="border-t py-6"
+                className="border-t py-7"
                 style={{ borderColor: "var(--kxd-border-white)" }}
               >
                 <Link
                   href={`/insights/${insight.slug}`}
-                  className="group inline-flex items-center gap-3 font-serif font-light"
-                  style={{
-                    fontSize: "1.125rem",
-                    color: "var(--kxd-cream)",
-                  }}
+                  className="group flex items-baseline justify-between gap-6"
                 >
-                  <span className="transition-colors group-hover:text-[var(--kxd-gold)]">
+                  <span
+                    className="font-serif font-light transition-colors group-hover:text-[var(--kxd-gold)]"
+                    style={{
+                      fontSize: "clamp(1.125rem, 2vw, 1.35rem)",
+                      lineHeight: 1.35,
+                      color: "var(--kxd-cream)",
+                    }}
+                  >
                     {insight.title}
                   </span>
-                  <span aria-hidden style={{ color: "var(--kxd-gold)" }}>
+                  <span
+                    aria-hidden
+                    className="shrink-0 transition-transform duration-300 group-hover:translate-x-1"
+                    style={{ color: "var(--kxd-gold)" }}
+                  >
                     →
                   </span>
                 </Link>
@@ -514,7 +479,7 @@ export default function HospitalityIndustryPage() {
         </div>
       </section>
 
-      {/* FAQs */}
+      {/* ── FAQ ────────────────────────────────────────────────────── */}
       <section
         className="kxd-section border-t"
         style={{
@@ -522,11 +487,11 @@ export default function HospitalityIndustryPage() {
           borderColor: "var(--kxd-border-white)",
         }}
       >
-        <div className="kxd-container" style={{ maxWidth: "54rem" }}>
-          <p className="kxd-eyebrow">Common questions</p>
+        <div className="kxd-container" style={{ maxWidth: "48rem" }}>
+          <p className="kxd-eyebrow">Questions</p>
           <h2
             className="kxd-serif-title mt-5"
-            style={{ fontSize: "clamp(1.75rem, 3.2vw, 2.35rem)" }}
+            style={{ fontSize: "clamp(1.5rem, 2.8vw, 2.15rem)", maxWidth: "16ch" }}
           >
             Straight answers.
           </h2>
@@ -540,9 +505,10 @@ export default function HospitalityIndustryPage() {
                 <dt
                   className="font-serif font-light"
                   style={{
-                    fontSize: "clamp(1rem, 1.4vw, 1.125rem)",
+                    fontSize: "clamp(1.0625rem, 1.5vw, 1.1875rem)",
                     lineHeight: 1.35,
                     color: "var(--kxd-cream)",
+                    maxWidth: "36rem",
                   }}
                 >
                   {faq.question}
@@ -550,9 +516,10 @@ export default function HospitalityIndustryPage() {
                 <dd
                   className="mt-4 font-sans font-light"
                   style={{
-                    fontSize: "clamp(0.875rem, 1.15vw, 1rem)",
-                    lineHeight: 1.82,
+                    fontSize: "clamp(0.9375rem, 1.2vw, 1rem)",
+                    lineHeight: 1.8,
                     color: "var(--kxd-cream-muted)",
+                    maxWidth: "38rem",
                   }}
                 >
                   {faq.answer}
@@ -564,8 +531,8 @@ export default function HospitalityIndustryPage() {
       </section>
 
       <FinalCtaBand
-        headline="Ready to talk about the work?"
-        subCopy="Start a project conversation, review investment levels, or run a website audit if you want a clearer diagnosis first."
+        headline="Begin a hospitality project."
+        subCopy="Selective engagements for restaurants, venues, and dining brands that want digital presence at the same standard as the room."
         primaryLabel="Start a Project"
         primaryHref="/start-project"
         secondaryLabel="Website Audit"
