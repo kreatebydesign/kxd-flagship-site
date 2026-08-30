@@ -225,15 +225,6 @@ export default function HospitalityIndustryPage() {
                       {capability.linkLabel}
                       <span aria-hidden>→</span>
                     </Link>
-                    {"secondaryHref" in capability && capability.secondaryHref ? (
-                      <Link
-                        href={capability.secondaryHref}
-                        className="kxd-ui-label inline-flex items-center gap-2 text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)]"
-                      >
-                        {capability.secondaryLinkLabel}
-                        <span aria-hidden>→</span>
-                      </Link>
-                    ) : null}
                   </div>
                 </div>
               </article>
