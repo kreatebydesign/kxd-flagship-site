@@ -25,6 +25,7 @@ export const PUBLIC_SITEMAP_PATHS: string[] = [
   "/platforms",
   "/industries/motorsports",
   "/industries/hospitality",
+  "/industries/construction",
   "/privacy-policy",
   "/terms-and-conditions",
 ];

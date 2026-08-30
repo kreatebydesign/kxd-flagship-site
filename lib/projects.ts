@@ -359,10 +359,11 @@ export const CASE_STUDY_CAPABILITY_LINKS: Record<string, readonly CapabilityLink
     { label: "View All Work", href: "/work" },
   ],
   "martinsen-construction": [
+    { label: "Construction & Trades", href: "/industries/construction" },
     { label: "Website Experiences", href: "/services/luxury-website-experiences" },
-    { label: "Growth Infrastructure", href: "/services/growth-infrastructure" },
   ],
   "e-davis-enterprises": [
+    { label: "Construction & Trades", href: "/industries/construction" },
     { label: "Website Experiences", href: "/services/luxury-website-experiences" },
     { label: "Growth Infrastructure", href: "/services/growth-infrastructure" },
     { label: "Explore Platforms", href: "/platforms" },

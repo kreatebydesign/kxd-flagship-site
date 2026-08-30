@@ -84,6 +84,13 @@ export function CaseStudiesSection() {
               <span aria-hidden>→</span>
             </Link>
             <Link
+              href="/industries/construction"
+              className="kxd-ui-label inline-flex items-center gap-2 text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)]"
+            >
+              Construction &amp; trades work
+              <span aria-hidden>→</span>
+            </Link>
+            <Link
               href="/work"
               className="kxd-ui-label inline-flex items-center gap-2 text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)]"
             >
