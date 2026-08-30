@@ -8,6 +8,7 @@ import { blogPostingSchema, breadcrumbSchema } from "@/lib/seo/schema";
 import {
   STATIC_INSIGHTS,
   INSIGHT_CATEGORIES,
+  JOURNAL_AUTHOR,
   getInsightBySlug,
   getRelatedInsights,
   formatInsightDate,
@@ -71,7 +72,7 @@ async function getArticle(slug: string): Promise<InsightDetail | null> {
         author:
           doc.author && typeof doc.author === "object" && "name" in doc.author
             ? String((doc.author as { name: string }).name)
-            : "Matt Kreate",
+            : JOURNAL_AUTHOR,
         publishedAt: doc.publishedAt
           ? new Date(doc.publishedAt as string).toISOString().split("T")[0]
           : new Date().toISOString().split("T")[0],

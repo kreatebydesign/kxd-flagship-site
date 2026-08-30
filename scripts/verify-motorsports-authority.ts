@@ -94,8 +94,8 @@ check("year-round insight links hub", Boolean(yearInsight?.body.some((p) => p.in
 check("fail digitally CTA to hub", failInsight?.cta?.primaryHref === MOTORSPORTS_HUB_PATH);
 check("year-round CTA to hub", yearInsight?.cta?.primaryHref === MOTORSPORTS_HUB_PATH);
 check(
-  "insights preserve Matt Kreate author display",
-  failInsight?.author === "Matt Kreate" && yearInsight?.author === "Matt Kreate",
+  "insights preserve Matt Lunger author display",
+  failInsight?.author === "Matt Lunger" && yearInsight?.author === "Matt Lunger",
 );
 
 const workPage = read("app/(site)/work/[slug]/page.tsx");
