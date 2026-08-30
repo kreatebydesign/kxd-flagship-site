@@ -77,6 +77,13 @@ export function CaseStudiesSection() {
               <span aria-hidden>→</span>
             </Link>
             <Link
+              href="/industries/hospitality"
+              className="kxd-ui-label inline-flex items-center gap-2 text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)]"
+            >
+              Hospitality work
+              <span aria-hidden>→</span>
+            </Link>
+            <Link
               href="/work"
               className="kxd-ui-label inline-flex items-center gap-2 text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)]"
             >

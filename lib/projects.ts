@@ -368,13 +368,16 @@ export const CASE_STUDY_CAPABILITY_LINKS: Record<string, readonly CapabilityLink
     { label: "Explore Platforms", href: "/platforms" },
   ],
   "spur-restaurant": [
+    { label: "Hospitality", href: "/industries/hospitality" },
     { label: "Website Experiences", href: "/services/luxury-website-experiences" },
   ],
   "plate-the-umpqua": [
+    { label: "Hospitality", href: "/industries/hospitality" },
     { label: "Website Experiences", href: "/services/luxury-website-experiences" },
     { label: "Brand Systems", href: "/services/brand-systems-identity" },
   ],
   "sbe-hyde-lounge": [
+    { label: "Hospitality", href: "/industries/hospitality" },
     { label: "Website Experiences", href: "/services/luxury-website-experiences" },
   ],
   "golden-state-warriors": [
@@ -385,6 +388,7 @@ export const CASE_STUDY_CAPABILITY_LINKS: Record<string, readonly CapabilityLink
     { label: "Brand Systems", href: "/services/brand-systems-identity" },
   ],
   "la-cocina": [
+    { label: "Hospitality", href: "/industries/hospitality" },
     { label: "Website Experiences", href: "/services/luxury-website-experiences" },
   ],
 };

@@ -247,12 +247,22 @@ export const STATIC_INSIGHTS: InsightDetail[] = [
     publishedAt: "2026-01-07",
     readingTime: 5,
     featured: false,
+    cta: {
+      headline: "See how KXD approaches hospitality digital work",
+      subCopy:
+        "Explore the hospitality authority page, then review selected restaurant and venue case studies.",
+      primaryLabel: "Hospitality",
+      primaryHref: "/industries/hospitality",
+      secondaryLabel: "Plate the Umpqua",
+      secondaryHref: "/work/plate-the-umpqua",
+    },
     body: [
       "Independent hospitality has a genuine competitive advantage over chains: specificity. A boutique lodge, a regional culinary destination, a locally owned resort — these brands can offer something no Marriott can match: a particular place, with a particular character, in a particular moment of someone's life. The problem is that most independent properties communicate this advantage about as effectively as their chain competitors communicate the opposite.",
       "Search is where the gap is most visible. Chain brands have teams, budgets, and decades of accumulated domain authority. Independent properties are competing with a single website, often built on a template, often not updated in two years, often optimized for what the owner wanted to say rather than what their ideal guest is searching for. The gap in resources is real — but it's not the whole story.",
       "The conversion problem is often more fixable than the discovery problem. A guest who arrives on your website has already expressed interest. What happens next — whether they book, leave, or stay and explore — is entirely within your control. Most independent hospitality websites lose potential guests at this stage to friction, clarity issues, or a mismatch between the impression created in discovery and the reality of the booking experience.",
       "The most effective independent hospitality brands have figured out something chains structurally cannot do: tell a true, specific, vivid story about place. Content that makes someone feel what it would be like to be there — the morning light, the particular character of the local food, the quality of the silence — is not something you can create from a brand standards manual.",
       "Digital infrastructure for independent hospitality isn't about matching chain resources. It's about maximizing the advantage you already have: authenticity, specificity, and the ability to create a genuine narrative that makes the right guest feel found. The question isn't how to compete with chains. It's how to attract the guests who are specifically looking for what you offer, and make sure they find you.",
+      "For how Kreate by Design packages this work publicly, see [Hospitality](/industries/hospitality). Related proof includes [Spur Restaurant & Bar](/work/spur-restaurant) and [Website Experiences](/services/luxury-website-experiences).",
     ],
   },
 
@@ -267,12 +277,22 @@ export const STATIC_INSIGHTS: InsightDetail[] = [
     publishedAt: "2026-03-01",
     readingTime: 4,
     featured: false,
+    cta: {
+      headline: "See hospitality digital work from KXD",
+      subCopy:
+        "Review the hospitality destination, selected case studies, and website experiences when presence is the starting point.",
+      primaryLabel: "Hospitality",
+      primaryHref: "/industries/hospitality",
+      secondaryLabel: "Website Experiences",
+      secondaryHref: "/services/luxury-website-experiences",
+    },
     body: [
       "There's a moment in every hospitality decision when abstract interest becomes genuine anticipation. Someone finds your property, decides they want to go, and then lives with that anticipation for days or weeks before they arrive. What you do with that window — or don't do — significantly influences the quality of the experience they have.",
       "The confirmation email is almost universally underutilized. It arrives at peak anticipation, from someone who has just made a financial and emotional commitment to your property. Most confirmation emails are transactional receipts dressed in brand colors. The best ones are the beginning of a conversation — welcoming, specific, and already making the guest feel like they made the right choice.",
       "Pre-arrival communication is an opportunity most properties treat as a logistical necessity: parking instructions, check-in procedures, access codes. These are necessary — but they're not the ceiling. The moments between booking and arrival are an opportunity to build context, share what makes the property special, create anticipation for specific elements of the experience, and handle logistical questions before they become friction.",
       "Digital infrastructure that supports the pre-arrival journey requires design. Not just emails that look good — but a system that knows who a guest is, what they've booked, what their profile suggests about what they care about, and how to communicate in a way that feels personal. This is not complicated technology. But it requires deliberate architecture.",
       "The payoff for investing in the pre-arrival experience compounds. Guests who arrive already having had a positive interaction with your brand are warmer, more forgiving of minor friction, and more likely to engage positively with staff. They've already told themselves the story of a good experience. Your job on arrival is simply not to contradict it.",
+      "See [Hospitality](/industries/hospitality) for how this connects to public KXD work such as [Plate the Umpqua](/work/plate-the-umpqua) and [La Cocina](/work/la-cocina).",
     ],
   },
 

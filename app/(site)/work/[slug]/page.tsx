@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import { CASE_STUDIES, HIDDEN_PROJECT_SLUGS, PROJECTS, getCaseStudyCapabilityLinks, getRelatedProjects, type CaseStudy, type ShowcaseImage } from "@/lib/projects";
+import { isHospitalityWork, HOSPITALITY_WORK_HUB_LINK } from "@/lib/content/hospitality-authority";
 import { isMotorsportsAutomotiveWork, MOTORSPORTS_WORK_HUB_LINK } from "@/lib/content/motorsports-authority";
 import { ProjectCard } from "@/components/ui/ProjectCard";
 import { StructuredData } from "@/components/seo/StructuredData";
@@ -396,6 +397,18 @@ export default async function CaseStudyPage({ params }: Props) {
                 className="kxd-ui-label inline-flex items-center gap-2 text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)]"
               >
                 {MOTORSPORTS_WORK_HUB_LINK.label}
+                <span aria-hidden>→</span>
+              </Link>
+            </p>
+          ) : null}
+
+          {isHospitalityWork(cs.slug) ? (
+            <p className="mb-6">
+              <Link
+                href={HOSPITALITY_WORK_HUB_LINK.href}
+                className="kxd-ui-label inline-flex items-center gap-2 text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)]"
+              >
+                {HOSPITALITY_WORK_HUB_LINK.label}
                 <span aria-hidden>→</span>
               </Link>
             </p>

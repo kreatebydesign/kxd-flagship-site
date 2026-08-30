@@ -24,6 +24,7 @@ export const PUBLIC_SITEMAP_PATHS: string[] = [
   ...STATIC_INSIGHTS.map((a) => `/insights/${a.slug}`),
   "/platforms",
   "/industries/motorsports",
+  "/industries/hospitality",
   "/privacy-policy",
   "/terms-and-conditions",
 ];
