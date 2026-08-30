@@ -39,14 +39,14 @@ export type StaticServiceDetail = {
 export const STATIC_SERVICE_DETAILS: Record<string, StaticServiceDetail> = {
   "luxury-website-experiences": {
     slug: "luxury-website-experiences",
-    title: "Luxury Website Experiences",
+    title: "Premium Website Design & Redesign",
     category: "luxury-websites",
     categoryLabel: "Presence",
     eyebrow: "Website Experiences",
     headline:
       "When the website no longer represents the business, rebuild it to hold weight again.",
     summary:
-      "Website experiences and redesigns for established businesses — clearer positioning, stronger customer journeys, and inquiry paths that match the standard of the work.",
+      "Premium website design and redesign for established businesses — clearer positioning, stronger customer journeys, and inquiry paths that match the standard of the work.",
     bestFor: [
       "Businesses whose website feels outdated or interchangeable",
       "Teams whose online presence weakens trust before the first conversation",
@@ -115,6 +115,7 @@ export const STATIC_SERVICE_DETAILS: Record<string, StaticServiceDetail> = {
       },
     ],
     keywords: [
+      "Premium Website Design",
       "Website Redesign",
       "Luxury Website Design",
       "Premium Website Rebuild",
@@ -143,14 +144,14 @@ export const STATIC_SERVICE_DETAILS: Record<string, StaticServiceDetail> = {
 
   "growth-infrastructure": {
     slug: "growth-infrastructure",
-    title: "Growth Infrastructure",
+    title: "SEO, Analytics & Conversion Infrastructure",
     category: "growth-infrastructure",
     categoryLabel: "Growth",
     eyebrow: "Growth Infrastructure",
     headline:
       "Turn attention into structured demand — with measurement you can actually use.",
     summary:
-      "Search visibility, analytics, conversion pathways, and CRM-connected lead structure for businesses that need more than a beautiful site — including GA4, Search Console, and conversion infrastructure when the work requires them.",
+      "SEO foundations, GA4 analytics, conversion pathways, and CRM-connected lead systems for businesses that need structured demand — not just a beautiful website.",
     bestFor: [
       "Businesses with traffic or visibility that fails to become qualified inquiry",
       "Teams that cannot clearly see what is working across channels",
@@ -227,6 +228,7 @@ export const STATIC_SERVICE_DETAILS: Record<string, StaticServiceDetail> = {
     ],
     keywords: [
       "Growth Infrastructure",
+      "SEO Foundations",
       "Lead Systems",
       "Website Analytics",
       "Conversion Pathways",

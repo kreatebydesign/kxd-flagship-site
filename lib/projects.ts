@@ -340,18 +340,18 @@ export const CASE_STUDY_RELATED_SLUGS: Record<string, readonly string[]> = {
 export const CASE_STUDY_CAPABILITY_LINKS: Record<string, readonly CapabilityLink[]> = {
   "primal-motorsports": [
     { label: "Motorsports & Automotive", href: "/industries/motorsports" },
-    { label: "Explore Platforms", href: "/platforms" },
+    { label: "Website Experiences", href: "/services/luxury-website-experiences" },
     { label: "Enterprise Platforms Engagement", href: "/services/enterprise-platforms" },
   ],
   "cusick-morgan-motorsports": [
     { label: "Motorsports & Automotive", href: "/industries/motorsports" },
     { label: "Website Experiences", href: "/services/luxury-website-experiences" },
-    { label: "Explore Platforms", href: "/platforms" },
+    { label: "Brand Systems", href: "/services/brand-systems-identity" },
   ],
   "autodv8ions": [
     { label: "Motorsports & Automotive", href: "/industries/motorsports" },
     { label: "Website Experiences", href: "/services/luxury-website-experiences" },
-    { label: "Growth Infrastructure", href: "/services/growth-infrastructure" },
+    { label: "Brand Systems", href: "/services/brand-systems-identity" },
   ],
   "on-track-performance": [
     { label: "Motorsports & Automotive", href: "/industries/motorsports" },
@@ -363,8 +363,29 @@ export const CASE_STUDY_CAPABILITY_LINKS: Record<string, readonly CapabilityLink
     { label: "Growth Infrastructure", href: "/services/growth-infrastructure" },
   ],
   "e-davis-enterprises": [
+    { label: "Website Experiences", href: "/services/luxury-website-experiences" },
     { label: "Growth Infrastructure", href: "/services/growth-infrastructure" },
     { label: "Explore Platforms", href: "/platforms" },
+  ],
+  "spur-restaurant": [
+    { label: "Website Experiences", href: "/services/luxury-website-experiences" },
+  ],
+  "plate-the-umpqua": [
+    { label: "Website Experiences", href: "/services/luxury-website-experiences" },
+    { label: "Brand Systems", href: "/services/brand-systems-identity" },
+  ],
+  "sbe-hyde-lounge": [
+    { label: "Website Experiences", href: "/services/luxury-website-experiences" },
+  ],
+  "golden-state-warriors": [
+    { label: "Brand Systems", href: "/services/brand-systems-identity" },
+  ],
+  "hair-mafia": [
+    { label: "Website Experiences", href: "/services/luxury-website-experiences" },
+    { label: "Brand Systems", href: "/services/brand-systems-identity" },
+  ],
+  "la-cocina": [
+    { label: "Website Experiences", href: "/services/luxury-website-experiences" },
   ],
 };
 
