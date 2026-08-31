@@ -13,6 +13,7 @@ import { getPortalSession } from "@/lib/portal/session";
 import { resolvePortalWorkspacePersonalization } from "@/lib/portal/workspace-personalization/server";
 import { resolvePortalWorkPerformance } from "@/lib/portal/work-performance/server";
 import { loadActiveEngagementForClient } from "@/lib/portal/active-engagement";
+import { resolvePortalWebsiteEditorUrl } from "@/lib/portal/website-editor";
 
 export const dynamic = "force-dynamic";
 
@@ -35,7 +36,7 @@ export default async function PortalOverviewPage() {
 
   if (home.shell === "ces") {
     const websiteReview = await getWebsiteReviewLanding(session, profile);
-    const [workPerformance, connected, engagement] = await Promise.all([
+    const [workPerformance, connected, engagement, websiteEditorUrl] = await Promise.all([
       resolvePortalWorkPerformance({
         session,
         experienceProfile: profile,
@@ -43,6 +44,7 @@ export default async function PortalOverviewPage() {
       }),
       getConnectedWorkspaceData(session, profile, websiteReview),
       loadActiveEngagementForClient(session.clientId),
+      resolvePortalWebsiteEditorUrl(session.clientId),
     ]);
     const briefing = await composePartnershipBriefing({
       session,
@@ -69,6 +71,7 @@ export default async function PortalOverviewPage() {
         workPerformance={workPerformance}
         homeComposition={home}
         engagement={engagement}
+        websiteEditorUrl={websiteEditorUrl}
       />
     );
   }

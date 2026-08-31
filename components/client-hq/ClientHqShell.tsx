@@ -39,6 +39,8 @@ export interface ClientHqShellProps {
   billingNavAvailable?: boolean;
   /** Authoritative commercial agreement — billingPlan-backed engagement records. */
   commercialNavAvailable?: boolean;
+  /** Optional external website editor doorway — client-infrastructure.websiteEditorUrl. */
+  websiteEditorUrl?: string | null;
   /** Studio operator single-client preview — not a portal-user session. */
   operatorPreview?: {
     clientId: number;
@@ -68,6 +70,7 @@ export function ClientHqShell({
   portfolioNavAvailable = false,
   billingNavAvailable = false,
   commercialNavAvailable = false,
+  websiteEditorUrl = null,
   operatorPreview = null,
   children,
 }: ClientHqShellProps) {
@@ -75,6 +78,7 @@ export function ClientHqShell({
     portfolioNavAvailable,
     billingNavAvailable,
     commercialNavAvailable,
+    websiteEditorUrl,
   });
   const branding = editionBranding;
   const cssVars = experienceProfile
@@ -238,17 +242,30 @@ export function ClientHqShell({
                 ) : null}
                 <ul className="kxd-os-sidebar__list">
                   {group.items.map((item) => {
-                    const isActive = item.id === activeId;
+                    const isActive = !item.external && item.id === activeId;
+                    const className = `kxd-os-sidebar__link${isActive ? " kxd-os-sidebar__link--active" : ""}`;
                     return (
                       <li key={item.id}>
-                        <Link
-                          href={item.href}
-                          className={`kxd-os-sidebar__link${isActive ? " kxd-os-sidebar__link--active" : ""}`}
-                          aria-current={isActive ? "page" : undefined}
-                          onClick={() => setNavOpen(false)}
-                        >
-                          {item.label}
-                        </Link>
+                        {item.external ? (
+                          <a
+                            href={item.href}
+                            className={className}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={() => setNavOpen(false)}
+                          >
+                            {item.label}
+                          </a>
+                        ) : (
+                          <Link
+                            href={item.href}
+                            className={className}
+                            aria-current={isActive ? "page" : undefined}
+                            onClick={() => setNavOpen(false)}
+                          >
+                            {item.label}
+                          </Link>
+                        )}
                       </li>
                     );
                   })}

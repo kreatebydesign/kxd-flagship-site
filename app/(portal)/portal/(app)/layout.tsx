@@ -7,6 +7,7 @@ import { resolvePortalHomeShell } from "@/lib/ces/modules/home";
 import { resolvePortalAccountContext } from "@/lib/portal/account-context";
 import { resolvePortalBillingNavAvailable } from "@/lib/portal/billing/load";
 import { resolvePortalCommercialNavAvailable } from "@/lib/portal/commercial";
+import { resolvePortalWebsiteEditorUrl } from "@/lib/portal/website-editor";
 import { getPortalEditionBranding } from "@/lib/portal/nav";
 import { getPortalSession } from "@/lib/portal/session";
 import { needsPortalWelcome } from "@/lib/portal/welcome";
@@ -66,7 +67,7 @@ export default async function PortalAppLayout({ children }: { children: React.Re
     }
   }
 
-  const [experienceProfile, editionBranding, accountContext, billingNavAvailable, commercialNavAvailable] =
+  const [experienceProfile, editionBranding, accountContext, billingNavAvailable, commercialNavAvailable, websiteEditorUrl] =
     await Promise.all([
       resolveExperienceProfile(session),
       Promise.resolve(getPortalEditionBranding()),
@@ -75,6 +76,7 @@ export default async function PortalAppLayout({ children }: { children: React.Re
         : resolvePortalAccountContext(session),
       resolvePortalBillingNavAvailable(session),
       resolvePortalCommercialNavAvailable(session.clientId),
+      resolvePortalWebsiteEditorUrl(session.clientId),
     ]);
 
   return (
@@ -95,6 +97,7 @@ export default async function PortalAppLayout({ children }: { children: React.Re
         }
         billingNavAvailable={billingNavAvailable}
         commercialNavAvailable={commercialNavAvailable}
+        websiteEditorUrl={websiteEditorUrl}
         operatorPreview={
           session.isOperatorPreview
             ? {

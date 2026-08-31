@@ -71,6 +71,7 @@ import * as migration_20260830_managed_client_lead_operations from './20260830_m
 import * as migration_20260831_sales_closed_loop_v1 from './20260831_sales_closed_loop_v1';
 import * as migration_20260901_proposal_manual_delivery from './20260901_proposal_manual_delivery';
 import * as migration_20260902_research_lead_opportunity_intelligence from './20260902_research_lead_opportunity_intelligence';
+import * as migration_20260903_client_infrastructure_website_editor_url from './20260903_client_infrastructure_website_editor_url';
 import * as migration_20260712_phase29c_reporting_provider_connections from './20260712_phase29c_reporting_provider_connections';
 import * as migration_20260713_phase31c_reporting_facts from './20260713_phase31c_reporting_facts';
 import * as migration_20260713_phase32b_google_ads_customer_fields from './20260713_phase32b_google_ads_customer_fields';
@@ -684,5 +685,11 @@ export const migrations = [
     up: migration_20260902_research_lead_opportunity_intelligence.up,
     down: migration_20260902_research_lead_opportunity_intelligence.down,
     name: '20260902_research_lead_opportunity_intelligence',
+  },
+  {
+    // Client portal website editor doorway URL on client-infrastructure.
+    up: migration_20260903_client_infrastructure_website_editor_url.up,
+    down: migration_20260903_client_infrastructure_website_editor_url.down,
+    name: '20260903_client_infrastructure_website_editor_url',
   },
 ];

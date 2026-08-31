@@ -24,12 +24,15 @@ export type PortalBriefingNavId = "partnership";
 export type PortalPortfolioNavId = "portfolio";
 /** Authoritative commercial agreement surface — billingPlan-backed (not a CES entitlement). */
 export type PortalAgreementNavId = "agreement";
+/** External website editor doorway — configured per client infrastructure. */
+export type PortalWebsiteEditorNavId = "website-editor";
 export type PortalNavId =
   | ClientHqNavId
   | CesModuleId
   | PortalBriefingNavId
   | PortalPortfolioNavId
-  | PortalAgreementNavId;
+  | PortalAgreementNavId
+  | PortalWebsiteEditorNavId;
 
 export interface ClientHqNavItem {
   id: ClientHqNavId;
@@ -47,6 +50,7 @@ export interface PortalNavItem {
   id: PortalNavId;
   label: string;
   href: string;
+  external?: boolean;
 }
 
 export interface PortalNavGroup {
@@ -168,6 +172,54 @@ function injectCommercialAgreementNav(
   ];
 }
 
+function injectWebsiteEditorNav(
+  groups: PortalNavGroup[],
+  websiteEditorUrl?: string | null,
+): PortalNavGroup[] {
+  const url = websiteEditorUrl?.trim();
+  if (!url) return groups;
+
+  const hasEditor = groups.some((group) =>
+    group.items.some((item) => item.id === "website-editor"),
+  );
+  if (hasEditor) return groups;
+
+  const item: PortalNavItem = {
+    id: "website-editor",
+    label: "Website Editor ↗",
+    href: url,
+    external: true,
+  };
+
+  const workIndex = groups.findIndex((group) => group.label === "Work");
+  if (workIndex >= 0) {
+    const next = [...groups];
+    next[workIndex] = {
+      ...next[workIndex],
+      items: [item, ...next[workIndex].items],
+    };
+    return next;
+  }
+
+  const hqIndex = groups.findIndex((group) => group.label === "Headquarters");
+  if (hqIndex >= 0) {
+    const next = [...groups];
+    next[hqIndex] = {
+      ...next[hqIndex],
+      items: [...next[hqIndex].items, item],
+    };
+    return next;
+  }
+
+  return [
+    ...groups,
+    {
+      label: "Work",
+      items: [item],
+    },
+  ];
+}
+
 /** Client HQ nav + CES module items — visibility is entitlement-aware, not flagship. */
 export function getEnabledPortalNavGroups(
   profile?: ResolvedExperienceProfile | null,
@@ -175,11 +227,13 @@ export function getEnabledPortalNavGroups(
     portfolioNavAvailable?: boolean;
     billingNavAvailable?: boolean;
     commercialNavAvailable?: boolean;
+    websiteEditorUrl?: string | null;
   },
 ): PortalNavGroup[] {
   const portfolioNavAvailable = Boolean(options?.portfolioNavAvailable);
   const billingNavAvailable = Boolean(options?.billingNavAvailable);
   const commercialNavAvailable = Boolean(options?.commercialNavAvailable);
+  const websiteEditorUrl = options?.websiteEditorUrl ?? null;
   const base = getEnabledClientHqNavGroups();
 
   if (!profile) {
@@ -212,7 +266,10 @@ export function getEnabledPortalNavGroups(
       })
       .filter((group) => group.items.length > 0);
 
-    return injectCommercialAgreementNav(groups, commercialNavAvailable);
+    return injectWebsiteEditorNav(
+      injectCommercialAgreementNav(groups, commercialNavAvailable),
+      websiteEditorUrl,
+    );
   }
 
   const navProfile = profileForPortalNav(profile);
@@ -305,7 +362,10 @@ export function getEnabledPortalNavGroups(
     }))
     .filter((group) => group.items.length > 0);
 
-  return injectCommercialAgreementNav(groups, commercialNavAvailable, relabel);
+  return injectWebsiteEditorNav(
+    injectCommercialAgreementNav(groups, commercialNavAvailable, relabel),
+    websiteEditorUrl,
+  );
 }
 
 export function resolvePortalNavId(pathname: string): PortalNavId {

@@ -21,6 +21,7 @@ import { CesExecutivePerformanceWorkspace } from "@/components/ces/executive-per
 import { CesPresentationHomeHero } from "@/components/ces/presentation/CesPresentationHomeHero";
 import { WorkspaceFocusStrip } from "@/components/portal/WorkspaceFocusStrip";
 import { CesClientCommandHome } from "./CesClientCommandHome";
+import { WebsiteEditorPortalAction } from "@/components/portal/WebsiteEditorPortalAction";
 
 export interface CesPortalHomeProps {
   greeting: string;
@@ -40,6 +41,8 @@ export interface CesPortalHomeProps {
   businessImpact?: ClientHomeBusinessImpact | null;
   /** Reusable Active Engagement summary from commercial records. */
   engagement?: ActiveEngagementSnapshot | null;
+  /** Optional external website editor doorway. */
+  websiteEditorUrl?: string | null;
 }
 
 export function CesPortalHome({
@@ -53,6 +56,7 @@ export function CesPortalHome({
   homeComposition,
   businessImpact = null,
   engagement = null,
+  websiteEditorUrl = null,
 }: CesPortalHomeProps) {
   const flagship = isCesFlagshipPortal(profile);
   const homeSurface = resolveCesHomeSurface({
@@ -90,6 +94,7 @@ export function CesPortalHome({
       }${showPresentationHero ? " kxd-ces-portal-home--presented" : ""}`}
     >
       <div>
+        {websiteEditorUrl ? <WebsiteEditorPortalAction url={websiteEditorUrl} /> : null}
         {showPresentationHero && presentation ? (
           <CesPresentationHomeHero
             presentation={presentation}

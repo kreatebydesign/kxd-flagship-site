@@ -16,6 +16,7 @@ export function ClientHqAppShell({
   portfolioNavAvailable = false,
   billingNavAvailable = false,
   commercialNavAvailable = false,
+  websiteEditorUrl = null,
   operatorPreview = null,
 }: {
   children: React.ReactNode;
@@ -26,6 +27,7 @@ export function ClientHqAppShell({
   portfolioNavAvailable?: boolean;
   billingNavAvailable?: boolean;
   commercialNavAvailable?: boolean;
+  websiteEditorUrl?: string | null;
   operatorPreview?: {
     clientId: number;
     clientName: string;
@@ -46,6 +48,7 @@ export function ClientHqAppShell({
       portfolioNavAvailable={operatorPreview ? false : portfolioNavAvailable}
       billingNavAvailable={billingNavAvailable}
       commercialNavAvailable={commercialNavAvailable}
+      websiteEditorUrl={websiteEditorUrl}
       operatorPreview={operatorPreview}
     >
       {children}

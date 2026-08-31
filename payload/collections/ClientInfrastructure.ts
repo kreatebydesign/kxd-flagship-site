@@ -184,6 +184,23 @@ export const ClientInfrastructure: CollectionConfig = {
                 return checked.ok ? true : checked.message;
               },
             },
+            {
+              name: "websiteEditorUrl",
+              type: "text",
+              label: "Website Editor URL",
+              admin: {
+                description:
+                  "Optional https URL for the client's private website editor. When set, the client portal shows an Open Website Editor action.",
+              },
+              hooks: {
+                beforeValidate: [trimStagingUrlHook],
+              },
+              validate: (value: unknown) => {
+                if (value == null || value === "") return true;
+                const checked = validatePreviewWebsiteUrl(String(value));
+                return checked.ok ? true : checked.message;
+              },
+            },
             { name: "githubRepo", type: "text", label: "GitHub Repository" },
             { name: "vercelProject", type: "text", label: "Vercel Project" },
             { name: "vercelTeam", type: "text", label: "Vercel Team" },
