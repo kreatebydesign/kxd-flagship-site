@@ -15,6 +15,7 @@ import {
   formatCoverPreparedForLine,
   shouldShowRecurringInvestment,
 } from "@/lib/proposal-builder/presentation";
+import { formatProposalContactSummary } from "@/lib/proposal-builder/document";
 import type { CanonicalProposal } from "@/lib/proposal-builder/types";
 import { publicBookingUrl } from "@/lib/proposal-builder/booking-url";
 
@@ -204,22 +205,10 @@ export function PublicProposalBuilderExperience({ publicToken }: { publicToken: 
           </h1>
           <p style={{ fontFamily: "system-ui,sans-serif", color: "#d9d2c5", lineHeight: 1.7 }}>
             {formatCoverPreparedForLine(p.primaryOrganization, p.organizations)}
-            {p.primaryContact &&
-            [p.primaryContact.name, p.primaryContact.title, p.primaryContact.email, p.primaryContact.phone]
-              .map((part) => (typeof part === "string" ? part.trim() : ""))
-              .filter(Boolean).length > 0 ? (
+            {formatProposalContactSummary(p.primaryContact) ? (
               <>
                 <br />
-                Primary contact ·{" "}
-                {[
-                  p.primaryContact.name,
-                  p.primaryContact.title,
-                  p.primaryContact.email,
-                  p.primaryContact.phone,
-                ]
-                  .map((part) => (typeof part === "string" ? part.trim() : ""))
-                  .filter(Boolean)
-                  .join(" · ")}
+                Primary contact · {formatProposalContactSummary(p.primaryContact)}
               </>
             ) : null}
             <br />
@@ -293,7 +282,7 @@ export function PublicProposalBuilderExperience({ publicToken }: { publicToken: 
         {p.executive.clientContext ? (
           <section style={{ marginBottom: "2rem" }}>
             <p style={eyebrow}>Context</p>
-            <h2 style={h2}>Client-specific context</h2>
+            <h2 style={h2}>Project context</h2>
             <p style={body}>{p.executive.clientContext}</p>
           </section>
         ) : null}
@@ -467,6 +456,12 @@ export function PublicProposalBuilderExperience({ publicToken }: { publicToken: 
           ) : null,
         )}
 
+        {p.terms.closingNote?.trim() ? (
+          <section style={{ marginBottom: "2rem" }}>
+            <p style={body}>{p.terms.closingNote}</p>
+          </section>
+        ) : null}
+
         <section
           style={{
             marginBottom: "2rem",
@@ -477,7 +472,6 @@ export function PublicProposalBuilderExperience({ publicToken }: { publicToken: 
         >
           <p style={eyebrow}>Proposal acceptance</p>
           <p style={body}>{p.disclosures.acceptance}</p>
-          <p style={body}>{p.disclosures.contractRequired}</p>
         </section>
 
         {mode === "done" || data.accepted ? (

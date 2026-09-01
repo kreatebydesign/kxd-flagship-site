@@ -65,7 +65,6 @@ export function renderProposalPreviewHtml(proposal: CanonicalProposal): string {
           ${scopeOrg ? `<p class="meta">${esc(scopeOrg)}</p>` : ""}
           ${para(g.overview)}
           ${dels ? `<h3>Deliverables</h3><ul>${dels}</ul>` : ""}
-          ${g.estimatedTimeline ? `<p><strong>Timeline:</strong> ${esc(g.estimatedTimeline)}</p>` : ""}
         </section>`;
     })
     .join("");
@@ -192,14 +191,13 @@ export function renderProposalPreviewHtml(proposal: CanonicalProposal): string {
     </div>
   </header>
   <main class="wrap">
-    ${contactSummary ? `<section class="block"><div class="eyebrow">Contact</div><h2>Primary contact</h2><p>${esc(contactSummary)}</p></section>` : ""}
     ${section("Introduction", "A clear path forward", proposal.executive.clientFacingIntro)}
     ${section("Executive summary", "Where this begins", proposal.executive.executiveSummary)}
     ${section("Situation", "Current situation", proposal.executive.currentSituation)}
     ${section("Objectives", "What success requires", proposal.executive.objectives)}
     ${section("Direction", "Recommended path", proposal.executive.recommendedDirection)}
     ${section("Outcomes", "Desired outcomes", proposal.executive.desiredOutcomes)}
-    ${section("Context", "Client-specific context", proposal.executive.clientContext)}
+    ${section("Context", "Project context", proposal.executive.clientContext)}
     ${scopeHtml}
     <section class="block">
       <div class="eyebrow">Investment</div>
@@ -233,10 +231,7 @@ export function renderProposalPreviewHtml(proposal: CanonicalProposal): string {
       <h2>How to begin</h2>
       ${para(proposal.terms.nextSteps)}
       ${para(proposal.terms.closingNote)}
-      <div class="disclosure">
-        <p>${esc(proposal.disclosures.acceptance)}</p>
-        <p>${esc(proposal.disclosures.contractRequired)}</p>
-      </div>
+      ${proposal.disclosures.acceptance ? `<div class="disclosure"><p>${esc(proposal.disclosures.acceptance)}</p></div>` : ""}
     </section>
     <div class="footer">${esc(KXD_REPORT_BRAND)} · ${esc(KXD_REPORT_SITE)} · Version ${esc(String(proposal.version))}</div>
   </main>

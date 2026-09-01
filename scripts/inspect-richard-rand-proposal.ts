@@ -59,6 +59,9 @@ const REQUIRED_SNIPPETS = [
   "September 22-25, 2026",
   "Direct Agreement",
   "does not replace the formal agreement",
+  "defines the scope, investment, schedule, and responsibilities",
+  "prepare the formal Direct Agreement",
+  "Proposal acceptance authorizes Kreate by Design to prepare the formal Direct Agreement",
   "cannot be guaranteed",
   "Review the proposed scope, investment, schedule, and terms",
   "Discovery and archival-material collection will then be scheduled",
@@ -84,6 +87,21 @@ const INTERNAL_LANGUAGE = [
   "record id",
   "admin/",
   "localhost",
+  "client type:",
+  "no company name or mailing address",
+  "does not charge the client",
+  "create or mark an invoice",
+  "activate the project",
+  "phase 1 inside the september",
+  "phase 2 inside the september",
+  "phases 2-3 inside the september",
+  "phases 3-4 inside the september",
+];
+
+const FORBIDDEN_CLIENT_LABELS = [
+  "Individual",
+  "Client type",
+  "Primary contact\nRichard Rand\nIndividual",
 ];
 
 function hasFlag(flag: string): boolean {
@@ -113,8 +131,19 @@ function applyEnvFile(relativePath: string): boolean {
 }
 
 function loadProductionEnv(): void {
+  applyEnvFile(".env.preview.local");
+  const previewUri =
+    process.env.DATABASE_URI?.trim() ||
+    process.env.DATABASE_URL?.trim() ||
+    process.env.POSTGRES_URL?.trim() ||
+    "";
   applyEnvFile(".env.vercel.local");
   applyEnvFile(".env.production.local");
+  if (previewUri && /ep-mute-king/i.test(previewUri)) {
+    process.env.DATABASE_URI = previewUri;
+    process.env.DATABASE_URL = previewUri;
+    process.env.POSTGRES_URL = previewUri;
+  }
   delete process.env.VERCEL;
   delete process.env.VERCEL_ENV;
   delete process.env.MEDIA_BLOB_READ_WRITE_TOKEN;
@@ -167,6 +196,10 @@ function assertNoInternalLanguage(corpus: string): void {
   if (hits.length) {
     throw new Error(`Client-facing exports contain internal language: ${hits.join(" | ")}`);
   }
+  const labelHits = FORBIDDEN_CLIENT_LABELS.filter((term) => corpus.includes(term));
+  if (labelHits.length) {
+    throw new Error(`Client-facing exports contain CRM labels: ${labelHits.join(" | ")}`);
+  }
 }
 
 async function fetchBuilderApiResponse(token: string): Promise<Record<string, unknown>> {
@@ -199,7 +232,10 @@ async function runInspectRichardRandProposal() {
     process.env.DATABASE_URL?.trim() ||
     ""
   ).replace(/^["']|["']$/g, "");
-  if (!/neon\.tech/i.test(uri)) throw new Error("Requires Neon production DATABASE_URI");
+  if (!/neon\.tech/i.test(uri)) throw new Error("Requires Neon DATABASE_URI");
+  if (/ep-twilight-math/i.test(uri)) {
+    throw new Error("Refusing production database — use isolated preview branch for polish QA");
+  }
   process.env.DATABASE_URI = uri;
   process.env.DATABASE_URL = uri;
   process.env.POSTGRES_URL = uri;

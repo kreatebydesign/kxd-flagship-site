@@ -49,7 +49,6 @@ export function renderProposalPlainText(proposal: CanonicalProposal): string {
     for (const d of g.deliverables) {
       push(d.description ? `• ${d.title}: ${d.description}` : `• ${d.title}`);
     }
-    if (g.estimatedTimeline) push(`Timeline: ${g.estimatedTimeline}`);
   });
 
   push("Investment", "Pricing");
@@ -112,7 +111,6 @@ export function renderProposalPlainText(proposal: CanonicalProposal): string {
     ["Next Step", proposal.terms.nextSteps],
     ["Closing Note", proposal.terms.closingNote],
     ["Approval", proposal.disclosures.acceptance],
-    ["Agreement Required", proposal.disclosures.contractRequired],
   ];
   for (const [label, value] of terms) {
     if (value?.trim()) push(label, value);
