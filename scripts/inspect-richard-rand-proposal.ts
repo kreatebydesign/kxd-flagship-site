@@ -65,6 +65,9 @@ const REQUIRED_SNIPPETS = [
   "cannot be guaranteed",
   "Review the proposed scope, investment, schedule, and terms",
   "Discovery and archival-material collection will then be scheduled",
+  "up to six priority property or development feature stories",
+  "up to 50 client-supplied",
+  "written scope adjustment or separate post-launch engagement",
 ];
 
 const CROSS_CONTAMINATION = [
@@ -101,6 +104,7 @@ const INTERNAL_LANGUAGE = [
 const FORBIDDEN_CLIENT_LABELS = [
   "Individual",
   "Client type",
+  "Primary contact",
   "Primary contact\nRichard Rand\nIndividual",
 ];
 

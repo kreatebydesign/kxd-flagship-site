@@ -216,6 +216,24 @@ const styles = StyleSheet.create({
   scopeBlock: { marginBottom: 10 },
 });
 
+/** Group list items so trailing pages do not end with one to three orphaned bullets. */
+function chunkListItems<T>(items: T[], minChunkSize: number): T[][] {
+  if (items.length === 0) return [];
+  if (items.length <= minChunkSize) return [items];
+  const chunks: T[][] = [];
+  let index = 0;
+  while (index < items.length) {
+    const remaining = items.length - index;
+    if (remaining <= minChunkSize + 2) {
+      chunks.push(items.slice(index));
+      break;
+    }
+    chunks.push(items.slice(index, index + minChunkSize));
+    index += minChunkSize;
+  }
+  return chunks;
+}
+
 function PriceRow({
   left,
   middle,
@@ -268,6 +286,100 @@ function SectionBlock({
   );
 }
 
+function DeliverableBullet({
+  title,
+  description,
+}: {
+  title: string;
+  description?: string | null;
+}) {
+  return (
+    <Text style={styles.bullet}>
+      • {title}
+      {description ? `: ${description}` : ""}
+    </Text>
+  );
+}
+
+function TimelineTermsSection({ text }: { text: string }) {
+  const lines = text
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const estimatedLine = lines.find((line) => /^Estimated completion:/i.test(line));
+  const phaseLines = lines.filter((line) => /^Phase \d+/i.test(line));
+  const introLines = lines.filter(
+    (line) => line !== estimatedLine && !/^Phase \d+/i.test(line),
+  );
+  const leadPhase = phaseLines[0];
+  const restPhases = phaseLines.slice(1);
+  const restPhaseChunks = chunkListItems(restPhases, 2);
+
+  return (
+    <View style={styles.section} wrap>
+      <View wrap={false} minPresenceAhead={112}>
+        <Text style={styles.eyebrow}>Timeline</Text>
+        <Text style={styles.h2}>Project timeline</Text>
+        {introLines.map((line) => (
+          <Paragraph key={line.slice(0, 32)} text={line} />
+        ))}
+        {estimatedLine ? <Paragraph text={estimatedLine} /> : null}
+        {leadPhase ? <Paragraph text={leadPhase} /> : null}
+      </View>
+      {restPhaseChunks.map((chunk, index) => (
+        <View key={`timeline-phases-${index}`} wrap={false} minPresenceAhead={64}>
+          {chunk.map((line) => (
+            <Paragraph key={line.slice(0, 32)} text={line} />
+          ))}
+        </View>
+      ))}
+    </View>
+  );
+}
+
+function NextStepsSection({
+  nextSteps,
+  closingNote,
+  acceptance,
+}: {
+  nextSteps?: string | null;
+  closingNote?: string | null;
+  acceptance?: string | null;
+}) {
+  const steps = (nextSteps ?? "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const leadSteps = steps.slice(0, 2);
+  const restSteps = steps.slice(2);
+  const restStepChunks = chunkListItems(restSteps, 2);
+
+  return (
+    <View style={styles.section} wrap>
+      <View wrap={false} minPresenceAhead={104}>
+        <Text style={styles.eyebrow}>Next step</Text>
+        <Text style={styles.h2}>How to begin</Text>
+        {leadSteps.map((step) => (
+          <Paragraph key={step.slice(0, 24)} text={step} />
+        ))}
+      </View>
+      {restStepChunks.map((chunk, index) => (
+        <View key={`next-steps-${index}`} wrap={false} minPresenceAhead={72}>
+          {chunk.map((step) => (
+            <Paragraph key={step.slice(0, 24)} text={step} />
+          ))}
+        </View>
+      ))}
+      {closingNote?.trim() ? <Paragraph text={closingNote} /> : null}
+      {acceptance?.trim() ? (
+        <View style={styles.disclosure}>
+          <Text style={styles.p}>{acceptance}</Text>
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
 function PageFooter({ proposal }: { proposal: CanonicalProposal }) {
   return (
     <View style={styles.footer} fixed>
@@ -288,43 +400,34 @@ function ScopeSection({
   group: ProposalScopeGroup;
   primaryOrganization: string;
 }) {
-  const leadDeliverables = group.deliverables.slice(0, 3);
-  const restDeliverables = group.deliverables.slice(3);
-  const trailingDeliverables = restDeliverables.slice(0, -2);
-  const closingDeliverables = restDeliverables.slice(-2);
   const scopeOrg = distinctScopeOrganizationName(group.organizationName, primaryOrganization);
+  const deliverables = group.deliverables;
+  const isLargeGroup = deliverables.length >= 12;
+  const headerLeadCount = isLargeGroup ? 6 : 1;
+  const leadDeliverables = deliverables.slice(0, headerLeadCount);
+  const restDeliverables = deliverables.slice(headerLeadCount);
+  const deliverableChunkSize = isLargeGroup ? 7 : 4;
+  const restChunks = chunkListItems(restDeliverables, deliverableChunkSize);
 
   return (
     <View style={styles.scopeBlock} wrap>
-      <View wrap minPresenceAhead={64}>
+      <View wrap={false} minPresenceAhead={isLargeGroup ? 240 : 120}>
         <Text style={styles.eyebrow}>Included work</Text>
         <Text style={styles.h2}>{group.title}</Text>
         {scopeOrg ? <Text style={styles.p}>{scopeOrg}</Text> : null}
         <Paragraph text={group.overview} />
-        {group.deliverables.length > 0 ? (
-          <Text style={styles.h3}>Deliverables</Text>
-        ) : null}
+        {deliverables.length > 0 ? <Text style={styles.h3}>Deliverables</Text> : null}
         {leadDeliverables.map((d) => (
-          <Text key={d.id} style={styles.bullet}>
-            • {d.title}
-            {d.description ? `: ${d.description}` : ""}
-          </Text>
+          <DeliverableBullet key={d.id} title={d.title} description={d.description} />
         ))}
       </View>
-      {trailingDeliverables.map((d) => (
-        <Text key={d.id} style={styles.bullet}>
-          • {d.title}
-          {d.description ? `: ${d.description}` : ""}
-        </Text>
+      {restChunks.map((chunk, index) => (
+        <View key={`${group.id}-deliverables-${index}`} wrap={false} minPresenceAhead={88}>
+          {chunk.map((d) => (
+            <DeliverableBullet key={d.id} title={d.title} description={d.description} />
+          ))}
+        </View>
       ))}
-      <View wrap minPresenceAhead={48}>
-        {closingDeliverables.map((d) => (
-          <Text key={d.id} style={styles.bullet}>
-            • {d.title}
-            {d.description ? `: ${d.description}` : ""}
-          </Text>
-        ))}
-      </View>
     </View>
   );
 }
@@ -349,7 +452,6 @@ function ProposalPdfDocument({
   const termSections: Array<{ key: keyof CanonicalProposal["terms"]; eyebrow: string; title: string }> = [
     { key: "proposalTerms", eyebrow: "Terms", title: "Terms" },
     { key: "paymentAssumptions", eyebrow: "Payment", title: "Payment schedule" },
-    { key: "timelineAssumptions", eyebrow: "Timeline", title: "Project timeline" },
     { key: "expirationLanguage", eyebrow: "Validity", title: "Proposal validity" },
     { key: "changeRequestLanguage", eyebrow: "Changes", title: "Scope changes" },
     { key: "intellectualPropertySummary", eyebrow: "Intellectual property", title: "Intellectual property" },
@@ -381,9 +483,7 @@ function ProposalPdfDocument({
           <Text style={styles.coverMeta}>Prepared for {preparedFor}</Text>
         ) : null}
         {additionalOrgs ? <Text style={styles.coverMeta}>{additionalOrgs}</Text> : null}
-        {contactSummary ? (
-          <Text style={styles.coverMeta}>Primary contact · {contactSummary}</Text>
-        ) : null}
+        {contactSummary ? <Text style={styles.coverMeta}>{contactSummary}</Text> : null}
         <Text style={styles.coverMeta}>
           {proposal.proposalNumber} · Version {proposal.version}
         </Text>
@@ -548,15 +648,15 @@ function ProposalPdfDocument({
           );
         })}
 
-        <SectionBlock eyebrow="Next step" title="How to begin" minPresenceAhead={56}>
-          <Paragraph text={proposal.terms.nextSteps} />
-          <Paragraph text={proposal.terms.closingNote} />
-          {proposal.disclosures.acceptance ? (
-            <View style={styles.disclosure}>
-              <Text style={styles.p}>{proposal.disclosures.acceptance}</Text>
-            </View>
-          ) : null}
-        </SectionBlock>
+        {proposal.terms.timelineAssumptions?.trim() ? (
+          <TimelineTermsSection text={proposal.terms.timelineAssumptions} />
+        ) : null}
+
+        <NextStepsSection
+          nextSteps={proposal.terms.nextSteps}
+          closingNote={proposal.terms.closingNote}
+          acceptance={proposal.disclosures.acceptance}
+        />
       </Page>
     </Document>
   );
