@@ -184,7 +184,7 @@ export function renderProposalPreviewHtml(proposal: CanonicalProposal): string {
     <h1>${esc(proposal.title)}</h1>
     <div class="meta">
       ${preparedForLine ? `<div>${esc(preparedForLine)}</div>` : ""}
-      ${contactSummary ? `<div>Primary contact · ${esc(contactSummary)}</div>` : ""}
+      ${contactSummary ? `<div>${esc(contactSummary)}</div>` : ""}
       <div>Proposal ${esc(proposal.proposalNumber)} · Version ${esc(String(proposal.version))}</div>
       <div>Date ${esc(formatProposalCalendarDate(proposal.proposalDate))} · Expires ${esc(formatProposalCalendarDate(proposal.expirationDate))}</div>
       <div>Prepared by ${esc(proposal.preparedBy)}</div>

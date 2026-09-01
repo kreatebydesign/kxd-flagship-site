@@ -208,7 +208,7 @@ export function PublicProposalBuilderExperience({ publicToken }: { publicToken: 
             {formatProposalContactSummary(p.primaryContact) ? (
               <>
                 <br />
-                Primary contact · {formatProposalContactSummary(p.primaryContact)}
+                {formatProposalContactSummary(p.primaryContact)}
               </>
             ) : null}
             <br />

@@ -352,7 +352,7 @@ export function buildDocument(): ProposalDocument {
         organizationName: CLIENT_NAME,
         title: "Initial release deliverables",
         overview:
-          "The initial release will include the core archive experience below. It does not promise an unlimited number of project stories, photographs, documents, or archive entries. Final first-release architecture will be established during discovery based on available source material.",
+          "The initial release will establish the core archive experience and include up to six priority property or development feature stories and up to 50 client-supplied archival media items. Final story selection and media placement will be established during discovery based on historical significance, available documentation, image quality, and the approved narrative structure.\n\nAdditional project stories, archive entries, extensive media processing, or continued content population beyond the defined initial release may be completed through a written scope adjustment or separate post-launch engagement.",
         deliverables: deliverables([
           "Editorial homepage",
           "Richard Rand biography",
@@ -361,7 +361,8 @@ export function buildDocument(): ProposalDocument {
           "Hawaii chapter",
           "Australia chapter",
           "California chapter",
-          "Selected priority property/project stories",
+          "Up to six priority property or development feature stories",
+          "Up to 50 client-supplied photographs, documents, plans, clippings, or other archival media items prepared and placed in the initial release",
           "Historical media and document presentation",
           "Contact or inquiry pathway",
           "Analytics and technical search foundation",
@@ -451,7 +452,7 @@ export function buildDocument(): ProposalDocument {
         "Estimated completion: September 22-25, 2026.\n\nProject process:\nPhase 1 - Discovery and Archive Mapping. Confirm the chronology, professional name, priority stories, projects, available evidence, photographs, and historical materials.\nPhase 2 - Narrative and Experience Direction. Develop the editorial structure, visual direction, page hierarchy, and initial narrative.\nPhase 3 - Design and Development. Create the responsive experience, core chapters, priority project stories, archive presentation, and search foundation.\nPhase 4 - Review, Refinement, and Launch. Complete up to two consolidated revision rounds, verify factual corrections, connect the domain, and launch the approved platform.\n\nThe schedule assumes prompt proposal approval, Direct Agreement signature, initial payment, timely delivery of historical materials, timely factual clarification, consolidated feedback, and no major scope expansion after approval.",
       expirationLanguage: "This proposal is valid through September 8, 2026.",
       changeRequestLanguage:
-        "The project includes up to two consolidated revision rounds. Major changes after direction approval, new functionality, additional chapters, or substantial additional project stories may require a written scope adjustment.",
+        "The project includes up to two consolidated revision rounds. Additional project stories, archive entries, extensive media processing, or continued content population beyond the defined initial release may be completed through a written scope adjustment or separate post-launch engagement. Major changes after direction approval, new functionality, additional chapters, or substantial scope expansion may require a written scope adjustment.",
       clientResponsibilities:
         "Richard will be responsible for providing his exact professional name; participating in discovery interviews; supplying photographs, documents, plans, clippings, and correspondence; identifying priority projects and properties; correcting or approving names, dates, ownership information, entities, and project descriptions; providing supporting information for significant historical claims; and returning one consolidated set of feedback during each review round.",
       exclusions:
