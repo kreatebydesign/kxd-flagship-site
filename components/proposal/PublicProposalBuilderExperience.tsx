@@ -7,6 +7,7 @@ import {
   formatClientFacingCreditType,
   formatClientFacingLineAmount,
   formatClientFacingMonthlyInvestment,
+  formatClientFacingPaymentTiming,
 } from "@/lib/proposal-builder/client-facing-labels";
 import { formatCents } from "@/lib/proposal-builder/money";
 import {
@@ -241,11 +242,27 @@ export function PublicProposalBuilderExperience({ publicToken }: { publicToken: 
           </p>
         ) : null}
 
+        {p.executive.clientFacingIntro ? (
+          <section style={{ marginBottom: "2rem" }}>
+            <p style={eyebrow}>Introduction</p>
+            <h2 style={h2}>A clear path forward</h2>
+            <p style={body}>{p.executive.clientFacingIntro}</p>
+          </section>
+        ) : null}
+
         {p.executive.executiveSummary ? (
           <section style={{ marginBottom: "2rem" }}>
             <p style={eyebrow}>Executive summary</p>
             <h2 style={h2}>Where this begins</h2>
             <p style={body}>{p.executive.executiveSummary}</p>
+          </section>
+        ) : null}
+
+        {p.executive.currentSituation ? (
+          <section style={{ marginBottom: "2rem" }}>
+            <p style={eyebrow}>Situation</p>
+            <h2 style={h2}>Current situation</h2>
+            <p style={body}>{p.executive.currentSituation}</p>
           </section>
         ) : null}
 
@@ -262,6 +279,22 @@ export function PublicProposalBuilderExperience({ publicToken }: { publicToken: 
             <p style={eyebrow}>Direction</p>
             <h2 style={h2}>Recommended path</h2>
             <p style={body}>{p.executive.recommendedDirection}</p>
+          </section>
+        ) : null}
+
+        {p.executive.desiredOutcomes ? (
+          <section style={{ marginBottom: "2rem" }}>
+            <p style={eyebrow}>Outcomes</p>
+            <h2 style={h2}>Desired outcomes</h2>
+            <p style={body}>{p.executive.desiredOutcomes}</p>
+          </section>
+        ) : null}
+
+        {p.executive.clientContext ? (
+          <section style={{ marginBottom: "2rem" }}>
+            <p style={eyebrow}>Context</p>
+            <h2 style={h2}>Client-specific context</h2>
+            <p style={body}>{p.executive.clientContext}</p>
           </section>
         ) : null}
 
@@ -357,11 +390,23 @@ export function PublicProposalBuilderExperience({ publicToken }: { publicToken: 
               <strong>{formatCents(data.totals.oneTimeTotalCents, currency)}</strong>
             </div>
             {shouldShowRecurringInvestment(data.totals.monthlyTotalCents) ? (
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
                 <span>Monthly total</span>
                 <strong>
                   {formatClientFacingMonthlyInvestment(data.totals.monthlyTotalCents, currency)}
                 </strong>
+              </div>
+            ) : null}
+            {shouldShowRecurringInvestment(data.totals.quarterlyTotalCents) ? (
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                <span>Quarterly total</span>
+                <strong>{formatCents(data.totals.quarterlyTotalCents, currency)}</strong>
+              </div>
+            ) : null}
+            {shouldShowRecurringInvestment(data.totals.annualTotalCents) ? (
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span>Annual platform total</span>
+                <strong>{formatCents(data.totals.annualTotalCents, currency)}</strong>
               </div>
             ) : null}
           </div>
@@ -372,6 +417,56 @@ export function PublicProposalBuilderExperience({ publicToken }: { publicToken: 
           ) : null}
         </section>
 
+        {p.paymentSchedule.length > 0 ? (
+          <section style={{ marginBottom: "2rem" }}>
+            <p style={eyebrow}>Payment</p>
+            <h2 style={h2}>Payment schedule</h2>
+            <div style={{ overflowX: "auto" }}>
+              <table
+                style={{
+                  width: "100%",
+                  borderCollapse: "collapse",
+                  fontFamily: "system-ui,sans-serif",
+                  fontSize: 14,
+                }}
+              >
+                <tbody>
+                  {p.paymentSchedule.map((item) => (
+                    <tr key={item.id}>
+                      <td style={td}>{item.label}</td>
+                      <td style={td}>{formatClientFacingPaymentTiming(item.due)}</td>
+                      <td style={{ ...td, textAlign: "right" }}>
+                        {formatCents(item.amountCents, currency)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        ) : null}
+
+        {(
+          [
+            ["Terms", "Terms", p.terms.proposalTerms],
+            ["Payment", "Payment assumptions", p.terms.paymentAssumptions],
+            ["Timeline", "Project timeline", p.terms.timelineAssumptions],
+            ["Validity", "Proposal validity", p.terms.expirationLanguage],
+            ["Changes", "Scope changes", p.terms.changeRequestLanguage],
+            ["Responsibilities", "What we need from you", p.terms.clientResponsibilities],
+            ["Exclusions", "What's not included", p.terms.exclusions],
+            ["Next step", "How to begin", p.terms.nextSteps],
+          ] as const
+        ).map(([label, title, text]) =>
+          text?.trim() ? (
+            <section key={label} style={{ marginBottom: "2rem" }}>
+              <p style={eyebrow}>{label}</p>
+              <h2 style={h2}>{title}</h2>
+              <p style={body}>{text}</p>
+            </section>
+          ) : null,
+        )}
+
         <section
           style={{
             marginBottom: "2rem",
@@ -380,6 +475,7 @@ export function PublicProposalBuilderExperience({ publicToken }: { publicToken: 
             borderLeft: "2px solid #c5a65c",
           }}
         >
+          <p style={eyebrow}>Proposal acceptance</p>
           <p style={body}>{p.disclosures.acceptance}</p>
           <p style={body}>{p.disclosures.contractRequired}</p>
         </section>
