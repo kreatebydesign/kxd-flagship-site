@@ -215,7 +215,7 @@ export function buildDocument(): ProposalDocument {
         name: CLIENT_NAME,
         email: CONTACT_EMAIL,
         phone: normalizePhoneForStorage(CONTACT_PHONE),
-        title: "Individual",
+        title: "",
         isPrimary: true,
         organizationId: orgId,
       },
@@ -234,7 +234,7 @@ export function buildDocument(): ProposalDocument {
       desiredOutcomes:
         "A production Personal Heritage & Digital Archive that establishes Richard Rand as the central public source of record for his life and work. An editorial first release with geographic chapters, selected priority stories, historical media presentation, a contact pathway, analytics, and a responsible search foundation. A structure that can continue to grow as materials, corrections, and additional stories become available.",
       clientContext:
-        "Client type: Individual / Personal Heritage. Project: Richard Rand Personal Heritage & Digital Archive. No company name or mailing address is recorded for this engagement. Completion is estimated for September 22-25, 2026, contingent on prompt project approval, initial payment, delivery of source materials, factual clarification, and consolidated feedback.",
+        "Richard Rand's Personal Heritage & Digital Archive will be developed as a focused first release, with completion estimated for September 22–25, 2026. The schedule is contingent on prompt approval, initial payment, delivery of source materials, factual clarification, and consolidated feedback.",
     },
     scopeGroups: [
       {
@@ -252,7 +252,6 @@ export function buildDocument(): ProposalDocument {
           "Source and documentation checklist for significant claims",
           "Initial archive inventory and content prioritization",
         ]),
-        estimatedTimeline: "Phase 1 inside the September 22-25, 2026 completion window",
         clientResponsibilities:
           "Participate in discovery interviews, identify priority projects and properties, and supply available source materials.",
         kxdResponsibilities:
@@ -278,7 +277,6 @@ export function buildDocument(): ProposalDocument {
           "Historical captions and contextual introductions",
           "Review and correction of dates, names, entities, and claims with Richard",
         ]),
-        estimatedTimeline: "Phase 2 inside the September 22-25, 2026 completion window",
         assumptions:
           "Unsupported ownership, rights, partnership, or development claims will not be published as fact.",
         sortOrder: 2,
@@ -302,7 +300,6 @@ export function buildDocument(): ProposalDocument {
           "Responsive desktop, tablet, and mobile design",
           "No off-the-shelf template",
         ]),
-        estimatedTimeline: "Phases 2-3 inside the September 22-25, 2026 completion window",
         sortOrder: 3,
         inclusion: "included",
       },
@@ -323,7 +320,6 @@ export function buildDocument(): ProposalDocument {
           "Domain and launch configuration",
           "Production deployment",
         ]),
-        estimatedTimeline: "Phases 3-4 inside the September 22-25, 2026 completion window",
         sortOrder: 4,
         inclusion: "included",
       },
@@ -345,7 +341,6 @@ export function buildDocument(): ProposalDocument {
           "Internal linking around Richard's name, projects, entities, and locations",
           "Social-sharing metadata",
         ]),
-        estimatedTimeline: "Phases 3-4 inside the September 22-25, 2026 completion window",
         assumptions:
           "KXD will establish the technical and content foundation. Rankings, placement, indexing speed, and result timing are not guaranteed.",
         sortOrder: 5,
@@ -374,7 +369,6 @@ export function buildDocument(): ProposalDocument {
           "Google Search Console submission readiness",
           "Thirty-day post-launch defect warranty",
         ]),
-        estimatedTimeline: "Through production launch inside the September 22-25, 2026 window",
         sortOrder: 6,
         inclusion: "included",
       },
@@ -450,7 +444,7 @@ export function buildDocument(): ProposalDocument {
     },
     terms: {
       proposalTerms:
-        "This proposal covers the initial Personal Heritage & Digital Archive engagement for Richard Rand. By accepting this proposal, Richard Rand authorizes Kreate by Design to prepare the final Direct Agreement based on the scope, investment, schedule, and terms presented here. Proposal acceptance does not replace the formal agreement. Work begins only after the Direct Agreement is signed and the required initial payment is received. Proposal acceptance does not initiate payment or project activation.",
+        "This proposal defines the scope, investment, schedule, and responsibilities for the initial Personal Heritage & Digital Archive engagement. Acceptance authorizes Kreate by Design to prepare the formal Direct Agreement for Richard Rand's review and signature. The project begins after the agreement is signed and the required initial payment is received.",
       paymentAssumptions:
         "One-time project investment: $6,450. Payment schedule: 50% ($3,225) due upon Direct Agreement signature; 25% ($1,612.50) due upon approval of the design and narrative direction; 25% ($1,612.50) due before production launch and domain connection. Proposal acceptance itself does not initiate these charges.\n\nAnnual platform costs begin at launch and renew yearly unless canceled before renewal: KXD managed hosting $299 annually; standard .com registration or renewal $15 annually; total standard annual platform cost $314 annually. The $15 domain fee assumes a standard available .com domain. Premium, brokered, or aftermarket domains are not included.",
       timelineAssumptions:
@@ -465,11 +459,10 @@ export function buildDocument(): ProposalDocument {
       nextSteps:
         "1. Review the proposed scope, investment, schedule, and terms.\n2. Accept the proposal when ready to move forward.\n3. Kreate by Design will prepare the formal Direct Agreement for review and signature.\n4. The project will begin once the Direct Agreement is signed and the initial payment is received.\n5. Discovery and archival-material collection will then be scheduled.",
       closingNote:
-        "Acceptance authorizes Kreate by Design to prepare the Direct Agreement only. It does not charge the client, create or mark an invoice as paid, activate the project, replace the formal agreement, or serve as the final legal signature.",
+        "Proposal acceptance authorizes Kreate by Design to prepare the formal Direct Agreement. The engagement begins after the agreement is signed and the initial payment is received.",
       acceptanceDisclosure:
         "By accepting this proposal, Richard Rand authorizes Kreate by Design to prepare the final Direct Agreement based on the scope, investment, schedule, and terms presented here. Proposal acceptance does not replace the formal agreement. Work begins only after the Direct Agreement is signed and the required initial payment is received.",
-      contractRequiredDisclosure:
-        "Work begins only after the Direct Agreement is signed and the required initial payment is received. Proposal acceptance does not initiate payment or project activation.",
+      contractRequiredDisclosure: "",
     },
     internal: {
       internalNotes:

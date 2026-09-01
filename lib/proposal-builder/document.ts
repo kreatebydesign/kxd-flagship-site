@@ -31,12 +31,30 @@ function normalizeContact(raw: Partial<ProposalContact> & { id?: string; name?: 
   };
 }
 
+/** CRM / classification labels that must not appear on client-facing proposal surfaces. */
+const INTERNAL_CONTACT_TITLES = new Set([
+  "individual",
+  "personal heritage",
+  "individual / personal heritage",
+]);
+
+/** Omit internal CRM classification from client-facing contact presentation. */
+export function clientFacingContactTitle(title?: string | null): string | undefined {
+  const trimmed = title?.trim();
+  if (!trimmed) return undefined;
+  const lower = trimmed.toLowerCase();
+  if (INTERNAL_CONTACT_TITLES.has(lower)) return undefined;
+  if (/^client type:/i.test(trimmed)) return undefined;
+  return trimmed;
+}
+
 /** Client-facing summary line for cover / PDF / preview contact blocks. */
 export function formatProposalContactSummary(
   contact: ProposalContact | null | undefined,
 ): string {
   if (!contact) return "";
-  return [contact.name, contact.title, contact.email, contact.phone]
+  const title = clientFacingContactTitle(contact.title);
+  return [contact.name, title, contact.email, contact.phone]
     .map((part) => (typeof part === "string" ? part.trim() : ""))
     .filter(Boolean)
     .join(" · ");

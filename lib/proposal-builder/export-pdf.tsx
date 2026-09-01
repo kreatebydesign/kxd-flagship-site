@@ -89,9 +89,9 @@ const styles = StyleSheet.create({
     lineHeight: 1.45,
   },
   page: {
-    paddingTop: 46,
-    paddingBottom: 56,
-    paddingHorizontal: 48,
+    paddingTop: 40,
+    paddingBottom: 48,
+    paddingHorizontal: 44,
     fontSize: 10,
     fontFamily: PROPOSAL_PDF_SANS,
     color: colors.ink,
@@ -212,8 +212,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
-  section: { marginBottom: 14 },
-  scopeBlock: { marginBottom: 16 },
+  section: { marginBottom: 10 },
+  scopeBlock: { marginBottom: 10 },
 });
 
 function PriceRow({
@@ -252,16 +252,15 @@ function SectionBlock({
   eyebrow,
   title,
   children,
-  minPresenceAhead = 110,
+  minPresenceAhead = 48,
 }: {
   eyebrow: string;
   title: string;
   children: React.ReactNode;
   minPresenceAhead?: number;
 }) {
-  // Keep heading with the start of its body so section titles never orphan alone.
   return (
-    <View style={styles.section} wrap={false} minPresenceAhead={minPresenceAhead}>
+    <View style={styles.section} wrap minPresenceAhead={minPresenceAhead}>
       <Text style={styles.eyebrow}>{eyebrow}</Text>
       <Text style={styles.h2}>{title}</Text>
       {children}
@@ -297,7 +296,7 @@ function ScopeSection({
 
   return (
     <View style={styles.scopeBlock} wrap>
-      <View wrap={false} minPresenceAhead={120}>
+      <View wrap minPresenceAhead={64}>
         <Text style={styles.eyebrow}>Included work</Text>
         <Text style={styles.h2}>{group.title}</Text>
         {scopeOrg ? <Text style={styles.p}>{scopeOrg}</Text> : null}
@@ -318,16 +317,13 @@ function ScopeSection({
           {d.description ? `: ${d.description}` : ""}
         </Text>
       ))}
-      <View wrap={false} minPresenceAhead={90}>
+      <View wrap minPresenceAhead={48}>
         {closingDeliverables.map((d) => (
           <Text key={d.id} style={styles.bullet}>
             • {d.title}
             {d.description ? `: ${d.description}` : ""}
           </Text>
         ))}
-        {group.estimatedTimeline ? (
-          <Text style={styles.p}>Timeline: {group.estimatedTimeline}</Text>
-        ) : null}
       </View>
     </View>
   );
@@ -400,11 +396,6 @@ function ProposalPdfDocument({
 
       <Page size="LETTER" style={styles.page} wrap>
         <PageFooter proposal={proposal} />
-        {contactSummary ? (
-          <SectionBlock eyebrow="Contact" title="Primary contact" minPresenceAhead={48}>
-            <Text style={styles.p}>{contactSummary}</Text>
-          </SectionBlock>
-        ) : null}
         {proposal.executive.clientFacingIntro ? (
           <SectionBlock eyebrow="Introduction" title="A clear path forward">
             <Paragraph text={proposal.executive.clientFacingIntro} />
@@ -436,7 +427,7 @@ function ProposalPdfDocument({
           </SectionBlock>
         ) : null}
         {proposal.executive.clientContext ? (
-          <SectionBlock eyebrow="Context" title="Client-specific context">
+          <SectionBlock eyebrow="Context" title="Project context">
             <Paragraph text={proposal.executive.clientContext} />
           </SectionBlock>
         ) : null}
@@ -452,7 +443,7 @@ function ProposalPdfDocument({
 
       <Page size="LETTER" style={styles.page} wrap>
         <PageFooter proposal={proposal} />
-        <View style={styles.section} minPresenceAhead={80}>
+        <View style={styles.section} minPresenceAhead={64}>
           <Text style={styles.eyebrow}>Investment</Text>
           <Text style={styles.h2}>Pricing</Text>
           <PriceRow left="Item" middle="Billing" right="Amount" header />
@@ -546,10 +537,7 @@ function ProposalPdfDocument({
             ))}
           </SectionBlock>
         ) : null}
-      </Page>
 
-      <Page size="LETTER" style={styles.page} wrap>
-        <PageFooter proposal={proposal} />
         {termSections.map(({ key, eyebrow, title }) => {
           const text = proposal.terms[key];
           if (!text?.trim()) return null;
@@ -560,13 +548,14 @@ function ProposalPdfDocument({
           );
         })}
 
-        <SectionBlock eyebrow="Next step" title="How to begin" minPresenceAhead={96}>
+        <SectionBlock eyebrow="Next step" title="How to begin" minPresenceAhead={56}>
           <Paragraph text={proposal.terms.nextSteps} />
           <Paragraph text={proposal.terms.closingNote} />
-          <View style={styles.disclosure}>
-            <Text style={styles.p}>{proposal.disclosures.acceptance}</Text>
-            <Text style={styles.p}>{proposal.disclosures.contractRequired}</Text>
-          </View>
+          {proposal.disclosures.acceptance ? (
+            <View style={styles.disclosure}>
+              <Text style={styles.p}>{proposal.disclosures.acceptance}</Text>
+            </View>
+          ) : null}
         </SectionBlock>
       </Page>
     </Document>
