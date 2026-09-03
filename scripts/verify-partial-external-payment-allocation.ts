@@ -17,6 +17,9 @@ import {
   previewRecurringDueOccurrence,
   resolveMonthlyDueDate,
   countMissingAncillaryObligations,
+  toClientFacingObligationPresentation,
+  upsertOperatorRecurringServiceDefinition,
+  slugifyServiceKey,
 } from "../lib/proposal-lifecycle/ensure-payable-surfaces";
 import {
   obligationAmountPaidCents,
@@ -314,53 +317,112 @@ for (const payment of payments) {
   ok("7b. ancillary hosting visible after Commercial-style hydrate; second pass adds zero");
 
   plan = ensureRecurringDueOccurrenceOnPlan(plan, {
-    sourceKey: "recurring:care-social:2026-09",
-    label: "Website Care + Social Media Management — Sep 2026",
+    sourceKey: "recurring:website-growth-management:2026-09",
+    label: "Website Growth & Management — Sep 2026",
     amountCents: 32_500,
     dueDate: "2026-09-01",
-    serviceTitle: "Website Care + Social Media Management",
+    serviceTitle: "Website Growth & Management",
+    serviceDescription:
+      "Ongoing website management, updates, SEO, search indexing and visibility, performance optimization, and management of Instagram and Facebook.",
+    internalNotes:
+      "Original $250 monthly website service expanded to $325 effective September 1, 2026 with Instagram and Facebook management added.",
+    billingCadence: "monthly",
+    billDay: 1,
+    serviceEffectiveDate: "2026-09-01",
+    serviceDefinitionKey: "website-growth-management",
   });
   plan = ensureRecurringDueOccurrenceOnPlan(plan, {
-    sourceKey: "recurring:care-social:2026-09",
-    label: "Website Care + Social Media Management — Sep 2026",
+    sourceKey: "recurring:website-growth-management:2026-09",
+    label: "Website Growth & Management — Sep 2026",
     amountCents: 32_500,
     dueDate: "2026-09-01",
   });
   const recurring = plan.obligations.filter(
-    (o) => o.sourceKey === "recurring:care-social:2026-09",
+    (o) => o.sourceKey === "recurring:website-growth-management:2026-09",
   );
   assert.equal(recurring.length, 1);
   assert.equal(recurring[0]!.amountCents, 32_500);
-  ok("8. $325 recurring due occurrence registered once (historical $250 preserved elsewhere)");
+  assert.equal(recurring[0]!.serviceTitle, "Website Growth & Management");
+  assert.match(
+    String(recurring[0]!.serviceDescription),
+    /Instagram and Facebook/,
+  );
+  assert.match(String(recurring[0]!.internalNotes), /Original \$250/);
+  ok("8. $325 Website Growth & Management due occurrence registered once with description + internal notes");
+
+  const clientFacing = toClientFacingObligationPresentation(recurring[0]!);
+  assert.equal(clientFacing.serviceDescription?.includes("Instagram"), true);
+  assert.equal("internalNotes" in clientFacing, false);
+  assert.equal(
+    JSON.stringify(clientFacing).includes("Original $250"),
+    false,
+  );
+  ok("8a. client-facing mapper exposes description and never internal notes");
+
+  // Accepted $250 legal recurring terms remain untouched by operator occurrence.
+  assert.equal(pkg.structuredPaymentTerms?.recurring.amountCents, 25_000);
+  ok("8a2. accepted $250 recurring terms unchanged by $325 occurrence fixture");
 
   const dueDate = resolveMonthlyDueDate("2026-09", 1);
   assert.equal(dueDate, "2026-09-01");
   const sourceKey = buildRecurringOccurrenceSourceKey(
-    "Website Care + Social Media Management",
+    "Website Growth & Management",
     "2026-09",
   );
+  assert.equal(sourceKey, "recurring:website-growth-management:2026-09");
   const previewDup = previewRecurringDueOccurrence(plan, {
-    sourceKey: "recurring:care-social:2026-09",
+    sourceKey: "recurring:website-growth-management:2026-09",
     label: "dup",
     amountCents: 32_500,
     dueDate,
+    serviceDescription: "should not matter for dup",
+    internalNotes: "should not matter for dup",
   });
   assert.equal(previewDup.wouldCreate, false);
   const previewNew = previewRecurringDueOccurrence(plan, {
-    sourceKey,
-    label: "Website Care + Social Media Management — 2026-09",
+    sourceKey: buildRecurringOccurrenceSourceKey(
+      "Website Growth & Management",
+      "2026-10",
+    ),
+    label: "Website Growth & Management — 2026-10",
     amountCents: 32_500,
-    dueDate,
+    dueDate: resolveMonthlyDueDate("2026-10", 1),
+    serviceDescription:
+      "Ongoing website management, updates, SEO, search indexing and visibility, performance optimization, and management of Instagram and Facebook.",
+    internalNotes:
+      "Original $250 monthly website service expanded to $325 effective September 1, 2026 with Instagram and Facebook management added.",
   });
-  // Different source key slug still distinct from care-social fixture key unless equal
-  assert.equal(typeof previewNew.wouldCreate, "boolean");
-  ok("8b. recurring preview reports duplicate vs new period correctly");
-  pkg = { ...pkg, billingPlan: plan };
+  assert.equal(previewNew.wouldCreate, true);
+  assert.match(String(previewNew.serviceDescription), /SEO/);
+  assert.match(String(previewNew.internalNotes), /\$325/);
+  ok("8b. recurring preview reports duplicate vs new period; description/notes survive preview");
+
+  const serviceDefs = upsertOperatorRecurringServiceDefinition([], {
+    serviceKey: slugifyServiceKey("Website Growth & Management"),
+    title: "Website Growth & Management",
+    description:
+      "Ongoing website management, updates, SEO, search indexing and visibility, performance optimization, and management of Instagram and Facebook.",
+    amountCents: 32_500,
+    currency: "USD",
+    cadence: "monthly",
+    billDay: 1,
+    effectiveDate: "2026-09-01",
+    active: true,
+    updatedAt: "2026-09-03T00:00:00.000Z",
+    internalNotes:
+      "Original $250 monthly website service expanded to $325 effective September 1, 2026 with Instagram and Facebook management added.",
+  });
+  assert.equal(serviceDefs.length, 1);
+  assert.equal(serviceDefs[0]!.amountCents, 32_500);
+  assert.match(String(serviceDefs[0]!.description), /Instagram/);
+  ok("8c. operator recurring service definition upsert preserves semantics for later periods");
+
+  pkg = { ...pkg, billingPlan: plan, operatorRecurringServices: serviceDefs };
   const nonProjectDue = plan.obligations
     .filter((o) => o.kind === "addon" || o.kind === "recurring-period")
     .reduce((sum, o) => sum + obligationRemainingCents(o), 0);
   assert.equal(nonProjectDue, 62_499);
-  ok("9. non-project currently due = $624.99 (hosting + Sep care/social)");
+  ok("9. non-project currently due = $624.99 (hosting + Sep growth/management)");
 
   const combined =
     sumProjectObligationRemainingCents(plan.obligations) + nonProjectDue;

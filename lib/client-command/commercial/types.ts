@@ -146,6 +146,10 @@ export interface CommercialInvoiceRow {
   source: "obligation" | "payment-reference" | "workspace-invoice";
   canRecordPayment: boolean;
   paymentHistory: CommercialPaymentEventRow[];
+  /** Client-facing recurring service includes text (optional). */
+  serviceDescription: string | null;
+  /** Operator-only. Never for portal/invoice presentation. */
+  internalNotes: string | null;
 }
 
 export interface CommercialReceiptRow {
@@ -223,7 +227,13 @@ export interface CommercialRecurringServiceTarget {
   href: string;
   /** True when amount/title differ from accepted structured terms (operator commercial service). */
   isOperatorDefined: boolean;
+  /** True when loaded from persisted operatorRecurringServices (reuse without retyping). */
+  isPersistedDefinition: boolean;
   sourceLabel: string;
+  /** Client-facing includes description. Optional. */
+  serviceDescription: string | null;
+  /** Operator-only notes. Optional. */
+  internalNotes: string | null;
 }
 
 export interface ClientCommercialWorkspaceSnapshot {

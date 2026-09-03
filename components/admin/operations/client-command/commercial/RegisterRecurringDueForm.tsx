@@ -45,6 +45,8 @@ export function RegisterRecurringDueForm(props: {
     amountCents: number;
     dueDate: string;
     existingObligationId: string | null;
+    serviceDescription: string | null;
+    internalNotes: string | null;
   } | null>(null);
 
   const [agreementId, setAgreementId] = useState(String(agreementIds[0] ?? ""));
@@ -56,7 +58,17 @@ export function RegisterRecurringDueForm(props: {
     null;
 
   const [serviceTitle, setServiceTitle] = useState(
-    selectedService?.isOperatorDefined ? "" : selectedService?.serviceTitle ?? "",
+    selectedService && !selectedService.isOperatorDefined
+      ? selectedService.serviceTitle
+      : selectedService?.isPersistedDefinition
+        ? selectedService.serviceTitle
+        : "",
+  );
+  const [serviceDescription, setServiceDescription] = useState(
+    selectedService?.serviceDescription ?? "",
+  );
+  const [internalNotes, setInternalNotes] = useState(
+    selectedService?.internalNotes ?? "",
   );
   const [amountDollars, setAmountDollars] = useState(
     selectedService && selectedService.amountCents > 0
@@ -77,14 +89,18 @@ export function RegisterRecurringDueForm(props: {
   function applyService(next: CommercialRecurringServiceTarget | null) {
     if (!next) return;
     setServiceKey(next.serviceKey);
-    if (next.isOperatorDefined) {
+    if (next.isOperatorDefined && !next.isPersistedDefinition) {
       setServiceTitle("");
+      setServiceDescription("");
+      setInternalNotes("");
       setAmountDollars("");
       setCadence("monthly");
       setBillDay("1");
       setEffectiveDate("");
     } else {
       setServiceTitle(next.serviceTitle);
+      setServiceDescription(next.serviceDescription ?? "");
+      setInternalNotes(next.internalNotes ?? "");
       setAmountDollars(
         next.amountCents > 0 ? dollarsFromCents(next.amountCents) : "",
       );
@@ -95,11 +111,32 @@ export function RegisterRecurringDueForm(props: {
     setPreview(null);
   }
 
+  function occurrencePayload() {
+    if (!selectedService) return null;
+    return {
+      serviceKey:
+        selectedService.isOperatorDefined && !selectedService.isPersistedDefinition
+          ? serviceTitle || selectedService.serviceKey
+          : selectedService.serviceKey,
+      serviceTitle,
+      serviceDescription: serviceDescription.trim() || null,
+      internalNotes: internalNotes.trim() || null,
+      amountCents: Math.round(Number(amountDollars) * 100),
+      currency: selectedService.currency,
+      cadence,
+      billDay: Number(billDay),
+      periodYearMonth: period,
+      effectiveDate: effectiveDate || null,
+    };
+  }
+
   async function runPreview() {
     if (!selectedService) {
       setError("Select a recurring service.");
       return;
     }
+    const payload = occurrencePayload();
+    if (!payload) return;
     setBusy(true);
     setError(null);
     try {
@@ -110,16 +147,7 @@ export function RegisterRecurringDueForm(props: {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             action: "preview-recurring-due-occurrence",
-            serviceKey: selectedService.isOperatorDefined
-              ? serviceTitle || selectedService.serviceKey
-              : selectedService.serviceKey,
-            serviceTitle,
-            amountCents: Math.round(Number(amountDollars) * 100),
-            currency: selectedService.currency,
-            cadence,
-            billDay: Number(billDay),
-            periodYearMonth: period,
-            effectiveDate: effectiveDate || null,
+            ...payload,
           }),
         },
       );
@@ -149,6 +177,8 @@ export function RegisterRecurringDueForm(props: {
       setError("This period is already registered.");
       return;
     }
+    const payload = occurrencePayload();
+    if (!payload) return;
     setBusy(true);
     setError(null);
     try {
@@ -159,16 +189,7 @@ export function RegisterRecurringDueForm(props: {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             action: "ensure-recurring-due-occurrence",
-            serviceKey: selectedService.isOperatorDefined
-              ? serviceTitle || selectedService.serviceKey
-              : selectedService.serviceKey,
-            serviceTitle,
-            amountCents: Math.round(Number(amountDollars) * 100),
-            currency: selectedService.currency,
-            cadence,
-            billDay: Number(billDay),
-            periodYearMonth: period,
-            effectiveDate: effectiveDate || null,
+            ...payload,
             label: preview.label,
             dueDate: preview.dueDate,
             sourceKey: preview.sourceKey,
@@ -224,7 +245,7 @@ export function RegisterRecurringDueForm(props: {
             <h3>Register recurring due occurrence</h3>
             <p>
               Preview before commit. Duplicate periods are blocked. No Stripe subscription is
-              created.
+              created. Service description is client-facing; internal notes stay operator-only.
             </p>
           </header>
 
@@ -271,8 +292,8 @@ export function RegisterRecurringDueForm(props: {
               >
                 {servicesForAgreement.map((s) => (
                   <option key={s.serviceKey} value={s.serviceKey}>
-                    {s.isOperatorDefined
-                      ? "Operator-defined current service…"
+                    {s.isOperatorDefined && !s.isPersistedDefinition
+                      ? "New operator-defined service…"
                       : `${s.serviceTitle} · $${(s.amountCents / 100).toFixed(2)}/${s.cadence === "monthly" ? "mo" : s.cadence}`}
                   </option>
                 ))}
@@ -281,104 +302,158 @@ export function RegisterRecurringDueForm(props: {
                 <span className="kxd-os-commercial-field__help">{selectedService.sourceLabel}</span>
               ) : null}
             </label>
-
-            <label className="kxd-os-commercial-field">
-              <span className="kxd-os-commercial-field__label">
-                Service title <em>Required</em>
-              </span>
-              <input
-                className="kxd-os-commercial-control"
-                value={serviceTitle}
-                onChange={(e) => {
-                  setServiceTitle(e.target.value);
-                  setPreview(null);
-                }}
-                required
-              />
-            </label>
-
-            <label className="kxd-os-commercial-field">
-              <span className="kxd-os-commercial-field__label">
-                Amount (USD) <em>Required</em>
-              </span>
-              <input
-                className="kxd-os-commercial-control"
-                type="number"
-                min="0.01"
-                step="0.01"
-                value={amountDollars}
-                onChange={(e) => {
-                  setAmountDollars(e.target.value);
-                  setPreview(null);
-                }}
-                required
-              />
-            </label>
-
-            <label className="kxd-os-commercial-field">
-              <span className="kxd-os-commercial-field__label">
-                Cadence <em>Required</em>
-              </span>
-              <select
-                className="kxd-os-commercial-control"
-                value={cadence}
-                onChange={(e) => {
-                  setCadence(e.target.value as typeof cadence);
-                  setPreview(null);
-                }}
-              >
-                <option value="monthly">Monthly</option>
-                <option value="quarterly">Quarterly</option>
-                <option value="annual">Annual</option>
-              </select>
-            </label>
-
-            <label className="kxd-os-commercial-field">
-              <span className="kxd-os-commercial-field__label">
-                Billing day <em>Required</em>
-              </span>
-              <input
-                className="kxd-os-commercial-control"
-                type="number"
-                min={1}
-                max={28}
-                value={billDay}
-                onChange={(e) => {
-                  setBillDay(e.target.value);
-                  setPreview(null);
-                }}
-                required
-              />
-            </label>
-
-            <label className="kxd-os-commercial-field">
-              <span className="kxd-os-commercial-field__label">
-                Period (YYYY-MM) <em>Required</em>
-              </span>
-              <input
-                className="kxd-os-commercial-control"
-                type="month"
-                value={period}
-                onChange={(e) => {
-                  setPeriod(e.target.value);
-                  setPreview(null);
-                }}
-                required
-              />
-            </label>
-
-            <label className="kxd-os-commercial-field">
-              <span className="kxd-os-commercial-field__label">
-                Effective / start date <em>Optional</em>
-              </span>
-              <input
-                className="kxd-os-commercial-control"
-                type="date"
-                value={effectiveDate}
-                onChange={(e) => setEffectiveDate(e.target.value)}
-              />
-            </label>
           </div>
+
+          <fieldset className="kxd-os-commercial-form-section">
+            <legend>Service</legend>
+            <div className="kxd-os-commercial-record-payment__grid">
+              <label className="kxd-os-commercial-field kxd-os-commercial-field--full">
+                <span className="kxd-os-commercial-field__label">
+                  Service title <em>Required</em>
+                </span>
+                <input
+                  className="kxd-os-commercial-control"
+                  value={serviceTitle}
+                  onChange={(e) => {
+                    setServiceTitle(e.target.value);
+                    setPreview(null);
+                  }}
+                  required
+                />
+              </label>
+
+              <label className="kxd-os-commercial-field kxd-os-commercial-field--full">
+                <span className="kxd-os-commercial-field__label">
+                  Service description <em>Optional</em>
+                </span>
+                <textarea
+                  className="kxd-os-commercial-control kxd-os-commercial-control--textarea"
+                  rows={3}
+                  value={serviceDescription}
+                  onChange={(e) => {
+                    setServiceDescription(e.target.value);
+                    setPreview(null);
+                  }}
+                  placeholder="What this recurring service includes (client-facing)."
+                />
+                <span className="kxd-os-commercial-field__help">
+                  Visible on the Commercial Workspace obligation and available for future
+                  invoice, receipt, and portal presentation.
+                </span>
+              </label>
+
+              <label className="kxd-os-commercial-field">
+                <span className="kxd-os-commercial-field__label">
+                  Amount (USD) <em>Required</em>
+                </span>
+                <input
+                  className="kxd-os-commercial-control"
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  value={amountDollars}
+                  onChange={(e) => {
+                    setAmountDollars(e.target.value);
+                    setPreview(null);
+                  }}
+                  required
+                />
+              </label>
+
+              <label className="kxd-os-commercial-field">
+                <span className="kxd-os-commercial-field__label">
+                  Cadence <em>Required</em>
+                </span>
+                <select
+                  className="kxd-os-commercial-control"
+                  value={cadence}
+                  onChange={(e) => {
+                    setCadence(e.target.value as typeof cadence);
+                    setPreview(null);
+                  }}
+                >
+                  <option value="monthly">Monthly</option>
+                  <option value="quarterly">Quarterly</option>
+                  <option value="annual">Annual</option>
+                </select>
+              </label>
+
+              <label className="kxd-os-commercial-field">
+                <span className="kxd-os-commercial-field__label">
+                  Billing day <em>Required</em>
+                </span>
+                <input
+                  className="kxd-os-commercial-control"
+                  type="number"
+                  min={1}
+                  max={28}
+                  value={billDay}
+                  onChange={(e) => {
+                    setBillDay(e.target.value);
+                    setPreview(null);
+                  }}
+                  required
+                />
+              </label>
+
+              <label className="kxd-os-commercial-field">
+                <span className="kxd-os-commercial-field__label">
+                  Effective / start date <em>Optional</em>
+                </span>
+                <input
+                  className="kxd-os-commercial-control"
+                  type="date"
+                  value={effectiveDate}
+                  onChange={(e) => setEffectiveDate(e.target.value)}
+                />
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset className="kxd-os-commercial-form-section">
+            <legend>Billing occurrence</legend>
+            <div className="kxd-os-commercial-record-payment__grid">
+              <label className="kxd-os-commercial-field">
+                <span className="kxd-os-commercial-field__label">
+                  Period (YYYY-MM) <em>Required</em>
+                </span>
+                <input
+                  className="kxd-os-commercial-control"
+                  type="month"
+                  value={period}
+                  onChange={(e) => {
+                    setPeriod(e.target.value);
+                    setPreview(null);
+                  }}
+                  required
+                />
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset className="kxd-os-commercial-form-section kxd-os-commercial-form-section--internal">
+            <legend>Internal</legend>
+            <div className="kxd-os-commercial-record-payment__grid">
+              <label className="kxd-os-commercial-field kxd-os-commercial-field--full">
+                <span className="kxd-os-commercial-field__label">
+                  Internal notes <em>Operator only</em>
+                </span>
+                <textarea
+                  className="kxd-os-commercial-control kxd-os-commercial-control--textarea"
+                  rows={3}
+                  value={internalNotes}
+                  onChange={(e) => {
+                    setInternalNotes(e.target.value);
+                    setPreview(null);
+                  }}
+                  placeholder="Operator context — never shown on client invoices, receipts, or portal."
+                />
+                <span className="kxd-os-commercial-field__help">
+                  Never intended for client invoice, receipt, or portal display.
+                </span>
+              </label>
+            </div>
+          </fieldset>
 
           <div className="kxd-os-commercial-allocation-preview" aria-live="polite">
             <h4>Occurrence preview</h4>
@@ -391,6 +466,12 @@ export function RegisterRecurringDueForm(props: {
                   Amount ${(preview.amountCents / 100).toFixed(2)} · Due {preview.dueDate} (
                   {periodLabel(period)})
                 </li>
+                {preview.serviceDescription ? (
+                  <li>Includes: {preview.serviceDescription}</li>
+                ) : null}
+                {preview.internalNotes ? (
+                  <li>Internal: {preview.internalNotes}</li>
+                ) : null}
                 <li>Key {preview.sourceKey}</li>
                 <li>
                   {preview.wouldCreate

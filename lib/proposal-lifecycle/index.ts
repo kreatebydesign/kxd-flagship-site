@@ -63,6 +63,14 @@ export {
   resolveMonthlyDueDate,
   previewRecurringDueOccurrence,
   countMissingAncillaryObligations,
+  upsertOperatorRecurringServiceDefinition,
+  toClientFacingObligationPresentation,
+  slugifyServiceKey,
+} from "./ensure-payable-surfaces.ts";
+export type {
+  OperatorRecurringServiceDefinition,
+  RecurringDueOccurrenceInput,
+  ClientFacingObligationPresentation,
 } from "./ensure-payable-surfaces.ts";
 export {
   recomputeOnboardingEligibility,

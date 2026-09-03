@@ -75,6 +75,22 @@ export function CommercialInvoices({ data }: { data: ClientWorkspaceBundle }) {
                       : "—"}
                   {row.stripeInvoiceId ? ` · ${row.stripeInvoiceId}` : ""}
                 </p>
+                {row.serviceDescription ? (
+                  <p className="kxd-os-commercial-card__description">
+                    <span className="kxd-os-commercial-card__description-label">
+                      Service description
+                    </span>
+                    {row.serviceDescription}
+                  </p>
+                ) : null}
+                {row.internalNotes ? (
+                  <p className="kxd-os-commercial-card__internal-notes">
+                    <span className="kxd-os-commercial-card__description-label">
+                      Internal notes
+                    </span>
+                    {row.internalNotes}
+                  </p>
+                ) : null}
                 {row.paymentHistory?.length ? (
                   <div className="kxd-os-commercial-payment-history">
                     <p className="kxd-os-commercial-payment-history__label">Payment history</p>

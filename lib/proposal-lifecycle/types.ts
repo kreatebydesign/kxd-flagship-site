@@ -258,6 +258,28 @@ export interface InvoiceObligation {
   paymentReceipt?: import("./external-obligation-payment.ts").ObligationPaymentReceipt | null;
   /** Stable source key for ancillary/recurring projections (dedupe). */
   sourceKey?: string | null;
+  /**
+   * Recurring service title snapshot for this payable occurrence.
+   * Optional — existing obligations without it remain valid.
+   */
+  serviceTitle?: string | null;
+  /**
+   * Client-facing description of what the recurring service includes.
+   * Safe for invoice / receipt / portal presentation.
+   */
+  serviceDescription?: string | null;
+  /**
+   * Operator-only notes. Never expose in client/portal mappers.
+   */
+  internalNotes?: string | null;
+  /** Billing cadence snapshot for recurring occurrences. */
+  billingCadence?: "monthly" | "quarterly" | "annual" | null;
+  /** Bill day snapshot (1–28) for recurring occurrences. */
+  billDay?: number | null;
+  /** Service effective / start date snapshot (YYYY-MM-DD). */
+  serviceEffectiveDate?: string | null;
+  /** Stable service definition key without period (for reuse). */
+  serviceDefinitionKey?: string | null;
 }
 
 export interface RecurringSchedule {
@@ -429,6 +451,11 @@ export interface ContractLifecyclePackage {
    * Applied onto obligations when the billing plan exists; eligibility still requires execution.
    */
   pendingVerifiedStripePayments?: import("./live-stripe-reconciliation.ts").PendingVerifiedStripePayment[] | null;
+  /**
+   * Operator-registered recurring service definitions (not legal amendments).
+   * Reused when registering subsequent due occurrences. Additive JSON only.
+   */
+  operatorRecurringServices?: import("./ensure-payable-surfaces.ts").OperatorRecurringServiceDefinition[] | null;
 }
 
 export interface LifecycleAuditEvent {

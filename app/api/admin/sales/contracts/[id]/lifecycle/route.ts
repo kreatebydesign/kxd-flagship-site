@@ -366,6 +366,17 @@ export async function POST(
           amountCents,
           dueDate,
           serviceTitle,
+          serviceDescription: body.serviceDescription
+            ? String(body.serviceDescription)
+            : null,
+          internalNotes: body.internalNotes ? String(body.internalNotes) : null,
+          billingCadence:
+            body.cadence === "quarterly" || body.cadence === "annual"
+              ? body.cadence
+              : "monthly",
+          billDay,
+          serviceEffectiveDate: body.effectiveDate ? String(body.effectiveDate) : null,
+          serviceDefinitionKey: serviceKey,
         });
         return NextResponse.json({
           ok: true,
@@ -422,6 +433,10 @@ export async function POST(
         const label =
           String(body.label ?? "").trim() ||
           `${serviceTitle} — ${periodYearMonth}`;
+        const cadence =
+          body.cadence === "quarterly" || body.cadence === "annual"
+            ? body.cadence
+            : "monthly";
         const result = await ensureRecurringDueOccurrenceOnContract({
           contractId: id,
           actor,
@@ -432,6 +447,14 @@ export async function POST(
             currency: body.currency ? String(body.currency) : "USD",
             dueDate,
             serviceTitle,
+            serviceDescription: body.serviceDescription
+              ? String(body.serviceDescription)
+              : null,
+            internalNotes: body.internalNotes ? String(body.internalNotes) : null,
+            billingCadence: cadence,
+            billDay,
+            serviceEffectiveDate: body.effectiveDate ? String(body.effectiveDate) : null,
+            serviceDefinitionKey: serviceKey,
             recordedBy: actor,
           },
         });
@@ -439,6 +462,7 @@ export async function POST(
           ok: true,
           created: result.created,
           billingPlan: result.pkg.billingPlan,
+          operatorRecurringServices: result.pkg.operatorRecurringServices ?? [],
           sourceKey,
           dueDate,
           noStripeMutation: true,

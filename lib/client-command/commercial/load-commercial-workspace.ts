@@ -243,6 +243,9 @@ export async function loadClientCommercialWorkspace(input: {
         const serviceTitle =
           termsRecurring?.serviceTitle?.trim() ||
           "Recurring client service";
+        const includes = (termsRecurring?.includes ?? [])
+          .map((item) => String(item).trim())
+          .filter(Boolean);
         recurringServiceTargets.push({
           agreementId: contractId,
           agreementTitle: title,
@@ -255,13 +258,38 @@ export async function loadClientCommercialWorkspace(input: {
           effectiveDate: termsRecurring?.startBillingDate ?? da?.serviceStartDate ?? null,
           href: commercialAgreementHref(clientId, contractId),
           isOperatorDefined: false,
+          isPersistedDefinition: false,
           sourceLabel: "Accepted commercial terms",
+          serviceDescription: includes.length ? includes.join("; ") : null,
+          internalNotes: null,
         });
       }
 
-      // Always offer an operator-defined current commercial service row so
-      // amended rates (e.g. $325 care/social) can be registered without rewriting
-      // historically accepted legal terms.
+      // Reuse previously registered operator service definitions (title/amount/description)
+      // so subsequent periods do not require retyping.
+      for (const def of pkg.operatorRecurringServices ?? []) {
+        if (def.active === false) continue;
+        recurringServiceTargets.push({
+          agreementId: contractId,
+          agreementTitle: title,
+          currency: def.currency || pkg.billingPlan.currency || "USD",
+          serviceKey: def.serviceKey,
+          serviceTitle: def.title,
+          amountCents: def.amountCents,
+          cadence: def.cadence,
+          billDay: def.billDay,
+          effectiveDate: def.effectiveDate ?? null,
+          href: commercialAgreementHref(clientId, contractId),
+          isOperatorDefined: true,
+          isPersistedDefinition: true,
+          sourceLabel: "Saved operator recurring service (does not rewrite accepted legal terms)",
+          serviceDescription: def.description ?? null,
+          internalNotes: def.internalNotes ?? null,
+        });
+      }
+
+      // Always offer a blank operator-defined row so amended rates (e.g. $325)
+      // can be registered without rewriting historically accepted legal terms.
       recurringServiceTargets.push({
         agreementId: contractId,
         agreementTitle: title,
@@ -274,7 +302,10 @@ export async function loadClientCommercialWorkspace(input: {
         effectiveDate: null,
         href: commercialAgreementHref(clientId, contractId),
         isOperatorDefined: true,
-        sourceLabel: "Operator-defined (does not rewrite accepted legal terms)",
+        isPersistedDefinition: false,
+        sourceLabel: "New operator-defined service (does not rewrite accepted legal terms)",
+        serviceDescription: null,
+        internalNotes: null,
       });
     }
 
@@ -431,6 +462,8 @@ export async function loadClientCommercialWorkspace(input: {
         source: "obligation",
         canRecordPayment: isObligationOpenForExternalPayment(ob),
         paymentHistory: history,
+        serviceDescription: ob.serviceDescription?.trim() || null,
+        internalNotes: ob.internalNotes?.trim() || null,
       });
     }
 
@@ -458,6 +491,8 @@ export async function loadClientCommercialWorkspace(input: {
         source: "payment-reference",
         canRecordPayment: false,
         paymentHistory: [],
+        serviceDescription: null,
+        internalNotes: null,
       });
     }
 
@@ -525,6 +560,8 @@ export async function loadClientCommercialWorkspace(input: {
       source: "workspace-invoice",
       canRecordPayment: false,
       paymentHistory: [],
+      serviceDescription: null,
+      internalNotes: null,
     });
   }
 

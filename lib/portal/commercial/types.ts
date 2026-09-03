@@ -18,6 +18,8 @@ export type PortalCommercialObligationRow = {
   dueDateLabel: string | null;
   /** Client-safe receipt link (Stripe-hosted URL only — never exposed as an ID). */
   receiptHref: string | null;
+  /** Client-facing includes text. Never includes operator internal notes. */
+  serviceDescription: string | null;
 };
 
 export type PortalCommercialCollaboration = {

@@ -15,7 +15,10 @@ import {
 import {
   ensurePayableSurfacesOnPlan,
   ensureRecurringDueOccurrenceOnPlan,
+  upsertOperatorRecurringServiceDefinition,
+  slugifyServiceKey,
   type RecurringDueOccurrenceInput,
+  type OperatorRecurringServiceDefinition,
 } from "./ensure-payable-surfaces.ts";
 import { normalizeLifecyclePackage, appendAudit } from "./package.ts";
 import type { ContractLifecyclePackage } from "./types.ts";
@@ -160,6 +163,8 @@ export async function ensureRecurringDueOccurrenceOnContract(input: {
   contractId: number;
   actor: string;
   occurrence: RecurringDueOccurrenceInput;
+  /** When true (default), upsert operator recurring service definition for reuse. */
+  persistServiceDefinition?: boolean;
 }): Promise<{ pkg: ContractLifecyclePackage; created: boolean }> {
   const { payload, pkg } = await loadContractPackage(input.contractId);
   if (!pkg.billingPlan) {
@@ -177,6 +182,33 @@ export async function ensureRecurringDueOccurrenceOnContract(input: {
     ...pkg,
     billingPlan: nextPlan,
   };
+
+  if (input.persistServiceDefinition !== false) {
+    const title = (input.occurrence.serviceTitle || input.occurrence.label).trim();
+    const serviceKey =
+      input.occurrence.serviceDefinitionKey?.trim() || slugifyServiceKey(title);
+    const definition: OperatorRecurringServiceDefinition = {
+      serviceKey,
+      title,
+      description: input.occurrence.serviceDescription ?? null,
+      amountCents: input.occurrence.amountCents,
+      currency: input.occurrence.currency ?? nextPlan.currency,
+      cadence: input.occurrence.billingCadence ?? "monthly",
+      billDay: input.occurrence.billDay ?? 1,
+      effectiveDate: input.occurrence.serviceEffectiveDate ?? null,
+      active: true,
+      updatedAt: new Date().toISOString(),
+      internalNotes: input.occurrence.internalNotes ?? null,
+    };
+    next = {
+      ...next,
+      operatorRecurringServices: upsertOperatorRecurringServiceDefinition(
+        next.operatorRecurringServices,
+        definition,
+      ),
+    };
+  }
+
   next = appendAudit(next, {
     actor: input.actor,
     action: "billing.recurring-due-registered",

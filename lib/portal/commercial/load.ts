@@ -188,6 +188,8 @@ function buildPaymentSchedule(
       statusLabel: formatPortalObligationStatusLabel(ob.status),
       dueDateLabel: ob.dueDate ? formatPortalCommercialDate(ob.dueDate) : null,
       receiptHref,
+      /** Client-facing includes text only — never internalNotes. */
+      serviceDescription: ob.serviceDescription?.trim() || null,
     };
   });
 

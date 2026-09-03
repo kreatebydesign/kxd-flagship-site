@@ -174,6 +174,9 @@ export function PortalAgreementScreen({ view }: { view: PortalCommercialReady })
                 </div>
                 <p className="kxd-os-billing-card__amount">{row.amountLabel}</p>
               </div>
+              {row.serviceDescription ? (
+                <p className="kxd-os-billing-card__description">{row.serviceDescription}</p>
+              ) : null}
               {row.dueDateLabel || row.receiptHref ? (
                 <dl className="kxd-os-billing-card__meta">
                   {row.dueDateLabel ? (
