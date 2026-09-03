@@ -4,6 +4,7 @@
  */
 
 import type { ContractLifecyclePackage } from "@/lib/proposal-lifecycle/types";
+import { billingPlanBlocksAgreementLevelSettlement } from "@/lib/proposal-lifecycle/external-obligation-payment";
 import type {
   DirectAgreementPaymentReferences,
   DirectAgreementTerms,
@@ -29,16 +30,28 @@ export type RecordExternalPaymentInput = {
   operatorNote?: string | null;
   /** Required for manual-non-stripe (e.g. cash-app). Never store credentials. */
   externalPaymentMethod?:
+    | "stripe"
     | "cash-app"
-    | "check"
-    | "wire"
+    | "zelle"
     | "ach"
+    | "check"
+    | "cash"
     | "other"
+    | "wire"
     | null;
   externalReference?: string | null;
 };
 
-const MANUAL_EXTERNAL_METHODS = ["cash-app", "check", "wire", "ach", "other"] as const;
+const MANUAL_EXTERNAL_METHODS = [
+  "stripe",
+  "cash-app",
+  "zelle",
+  "ach",
+  "check",
+  "cash",
+  "other",
+  "wire",
+] as const;
 
 const STRIPE_ID_PATTERNS: Record<string, RegExp> = {
   stripeCustomerId: /^cus_[A-Za-z0-9]+$/,
@@ -198,6 +211,8 @@ export function validateRecordExternalPaymentInput(
     agreementSource: string | null | undefined;
     obligationCents: number | null;
     existingReferences: DirectAgreementPaymentReferences | null | undefined;
+    /** When present with multiple open installments, block agreement-level settlement. */
+    billingPlan?: import("@/lib/proposal-lifecycle/types").ProposedBillingPlan | null;
   },
 ):
   | {
@@ -214,6 +229,16 @@ export function validateRecordExternalPaymentInput(
       ok: false,
       errors: {
         card: err instanceof Error ? err.message : "Sensitive card data is not allowed.",
+      },
+    };
+  }
+
+  if (billingPlanBlocksAgreementLevelSettlement(context.billingPlan)) {
+    return {
+      ok: false,
+      errors: {
+        billingPlan:
+          "This agreement has multiple billing-plan obligations. Record payment against specific obligations (Commercial → Invoices → Record Payment) instead of marking the entire agreement paid.",
       },
     };
   }
@@ -320,7 +345,7 @@ export function validateRecordExternalPaymentInput(
     const method = trimOrNull(input.externalPaymentMethod);
     if (!method || !(MANUAL_EXTERNAL_METHODS as readonly string[]).includes(method)) {
       errors.externalPaymentMethod =
-        "Manual non-Stripe payments require an external method (cash-app, check, wire, ach, or other).";
+        "Manual non-Stripe payments require an external method (cash-app, zelle, ach, check, cash, wire, or other).";
     }
   }
 

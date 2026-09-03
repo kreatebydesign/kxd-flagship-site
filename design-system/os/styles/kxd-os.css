@@ -21932,6 +21932,75 @@ select.kxd-os-commercial-control {
   font-weight: 550;
 }
 
+
+.kxd-os-commercial-dl--balances {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem 0.85rem;
+  margin: 0.55rem 0 0.35rem;
+}
+
+.kxd-os-commercial-dl--balances dt {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-faint);
+}
+
+.kxd-os-commercial-dl--balances dd {
+  margin: 0.15rem 0 0;
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--kxd-os-text-primary);
+}
+
+.kxd-os-commercial-payment-history {
+  margin-top: 0.65rem;
+}
+
+.kxd-os-commercial-payment-history__label {
+  margin: 0 0 0.25rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-faint);
+}
+
+.kxd-os-commercial-payment-history ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: var(--kxd-os-text-secondary);
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.kxd-os-commercial-allocation-preview {
+  margin: 0.75rem 0;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--kxd-os-border-divider);
+  border-radius: var(--kxd-os-radius-md);
+  background: var(--kxd-os-bg-surface);
+}
+
+.kxd-os-commercial-allocation-preview h4 {
+  margin: 0 0 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-faint);
+}
+
+.kxd-os-commercial-allocation-preview ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: var(--kxd-os-text-primary);
+}
+
 .kxd-os-commercial-confirm {
   padding: 1.25rem 1.35rem;
   border: 2px solid #1f7a3a;

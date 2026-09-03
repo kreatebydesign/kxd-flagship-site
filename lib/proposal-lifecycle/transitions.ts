@@ -35,14 +35,15 @@ const BILLING_PLAN_TRANSITIONS: Record<BillingPlanStatus, BillingPlanStatus[]> =
 };
 
 const OBLIGATION_TRANSITIONS: Record<InvoiceObligationStatus, InvoiceObligationStatus[]> = {
-  "pending-trigger": ["draft-ready", "paid", "void"],
-  "draft-ready": ["under-review", "approved", "sent", "paid", "void"],
-  "under-review": ["approved", "draft-ready", "paid", "void"],
-  approved: ["sent", "paid", "void"],
-  sent: ["viewed", "paid", "overdue", "void", "uncollectible"],
-  viewed: ["paid", "overdue", "void", "uncollectible"],
+  "pending-trigger": ["draft-ready", "partially-paid", "paid", "void"],
+  "draft-ready": ["under-review", "approved", "sent", "partially-paid", "paid", "void"],
+  "under-review": ["approved", "draft-ready", "partially-paid", "paid", "void"],
+  approved: ["sent", "partially-paid", "paid", "void"],
+  sent: ["viewed", "partially-paid", "paid", "overdue", "void", "uncollectible"],
+  viewed: ["partially-paid", "paid", "overdue", "void", "uncollectible"],
+  "partially-paid": ["paid", "overdue", "void", "uncollectible"],
   paid: [],
-  overdue: ["paid", "void", "uncollectible"],
+  overdue: ["partially-paid", "paid", "void", "uncollectible"],
   void: [],
   uncollectible: [],
 };

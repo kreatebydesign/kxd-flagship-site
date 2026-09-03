@@ -12,6 +12,11 @@ import {
   resolveAgreementPaymentStatusLabel,
 } from "./payment-status-display";
 import { resolveAgreementAmountKpi } from "./resolve-agreement-amount-kpi";
+import {
+  obligationAmountPaidCents,
+  sumOpenObligationRemainingCents,
+  sumProjectObligationRemainingCents,
+} from "@/lib/proposal-lifecycle/obligation-balances";
 
 export function documentKindLabel(kind: string): CommercialDocumentKindLabel {
   switch (kind) {
@@ -141,7 +146,6 @@ export function buildOverviewFromPrimary(input: {
   const pkg = input.pkg;
   const da = input.daTerms;
   const auth = pkg?.paymentAuthorization;
-  const refs = pkg?.paymentReferences;
   const hours = da?.capacityHoursPerMonth ?? null;
 
   const outstanding: string[] = [];
@@ -159,6 +163,12 @@ export function buildOverviewFromPrimary(input: {
     if (st === "paid") {
       outstanding.push("Service not yet activated");
     }
+    const openRemaining = pkg?.billingPlan?.obligations
+      ? sumOpenObligationRemainingCents(pkg.billingPlan.obligations)
+      : 0;
+    if (openRemaining > 0) {
+      outstanding.push(`${formatCents(openRemaining as never)} currently due / remaining`);
+    }
   } else {
     outstanding.push("No agreement on file");
   }
@@ -167,6 +177,24 @@ export function buildOverviewFromPrimary(input: {
     daTerms: da,
     structuredPaymentTerms: pkg?.structuredPaymentTerms ?? null,
   });
+
+  const obligations = pkg?.billingPlan?.obligations ?? [];
+  const projectCents =
+    agreement?.projectAmountCents ??
+    da?.oneTimeAmountCents ??
+    pkg?.structuredPaymentTerms?.oneTimeTotalCents ??
+    null;
+  const monthlyCents =
+    agreement?.monthlyAmountCents ??
+    da?.monthlyAmountCents ??
+    pkg?.structuredPaymentTerms?.monthlyTotalCents ??
+    null;
+  const paidToDate = obligations.reduce(
+    (sum, obligation) => sum + obligationAmountPaidCents(obligation),
+    0,
+  );
+  const dueNow = sumOpenObligationRemainingCents(obligations);
+  const remainingProject = sumProjectObligationRemainingCents(obligations);
 
   return {
     agreementTitle: agreement?.title ?? null,
@@ -178,6 +206,18 @@ export function buildOverviewFromPrimary(input: {
       : "—",
     commercialAmountLabel: commercialAmountKpi.label,
     invoiceAmountLabel: commercialAmountKpi.value,
+    projectContractedLabel:
+      projectCents != null && projectCents > 0
+        ? formatCents(projectCents as never)
+        : "—",
+    recurringMrrLabel:
+      monthlyCents != null && monthlyCents > 0
+        ? `${formatCents(monthlyCents as never)}/mo`
+        : "—",
+    dueNowLabel: dueNow > 0 ? formatCents(dueNow as never) : "$0.00",
+    paidToDateLabel: paidToDate > 0 ? formatCents(paidToDate as never) : "$0.00",
+    remainingProjectLabel:
+      remainingProject > 0 ? formatCents(remainingProject as never) : "$0.00",
     termStart: agreement?.serviceStartDate ?? da?.serviceStartDate ?? null,
     termEnd: agreement?.serviceEndDate ?? da?.serviceEndDate ?? null,
     hoursIncludedLabel: hours != null ? `${hours} per month` : "—",

@@ -784,6 +784,7 @@ export async function recordExternalPayment(input: {
     agreementSource: contract.agreementSource ? String(contract.agreementSource) : null,
     obligationCents,
     existingReferences: pkg.paymentReferences,
+    billingPlan: pkg.billingPlan,
   });
 
   if (!validated.ok) {

@@ -193,6 +193,65 @@ export async function POST(
         const { recordObligationExternalPaymentOnContract } = await import(
           "@/lib/proposal-lifecycle/record-obligation-external-payment"
         );
+        // Prefer allocation when allocations or fifo mode provided; else single obligation.
+        if (
+          body.allocationMode === "fifo" ||
+          (Array.isArray(body.allocations) && body.allocations.length > 0) ||
+          !body.obligationId
+        ) {
+          const { recordAllocatedExternalPaymentOnContract } = await import(
+            "@/lib/proposal-lifecycle/record-obligation-external-payment"
+          );
+          const result = await recordAllocatedExternalPaymentOnContract({
+            contractId: id,
+            amountCents: Number(body.amountCents),
+            currency: String(body.currency ?? "USD"),
+            paidAt: String(body.paidAt ?? ""),
+            externalPaymentMethod: String(body.externalPaymentMethod ?? "") as
+              | "stripe"
+              | "cash-app"
+              | "zelle"
+              | "ach"
+              | "check"
+              | "cash"
+              | "other"
+              | "wire",
+            externalReference: body.externalReference
+              ? String(body.externalReference)
+              : null,
+            operatorNote: body.operatorNote ? String(body.operatorNote) : null,
+            stripeInvoiceId: body.stripeInvoiceId ? String(body.stripeInvoiceId) : null,
+            paidOutsideStripe: body.paidOutsideStripe === true,
+            recordedBy: actor,
+            allocationMode:
+              body.allocationMode === "explicit"
+                ? "explicit"
+                : body.allocations
+                  ? "explicit"
+                  : "fifo",
+            allocations: Array.isArray(body.allocations)
+              ? (body.allocations as Array<{ obligationId: string; amountCents: number }>)
+              : body.obligationId
+                ? [
+                    {
+                      obligationId: String(body.obligationId),
+                      amountCents: Number(body.amountCents),
+                    },
+                  ]
+                : undefined,
+            clientIdempotencyKey: body.clientIdempotencyKey
+              ? String(body.clientIdempotencyKey)
+              : null,
+          });
+          return NextResponse.json({
+            ok: true,
+            idempotentReplay: result.idempotentReplay,
+            billingPlan: result.pkg.billingPlan,
+            allocationPreview: result.preview,
+            onboardingEligible: Boolean(result.pkg.onboardingEligible),
+            noStripeMutation: true,
+          });
+        }
         const result = await recordObligationExternalPaymentOnContract({
           contractId: id,
           obligationId: String(body.obligationId ?? ""),
@@ -200,11 +259,14 @@ export async function POST(
           currency: String(body.currency ?? "USD"),
           paidAt: String(body.paidAt ?? ""),
           externalPaymentMethod: String(body.externalPaymentMethod ?? "") as
+            | "stripe"
             | "cash-app"
-            | "check"
-            | "wire"
+            | "zelle"
             | "ach"
-            | "other",
+            | "check"
+            | "cash"
+            | "other"
+            | "wire",
           externalReference: body.externalReference
             ? String(body.externalReference)
             : null,
@@ -219,6 +281,168 @@ export async function POST(
           billingPlan: result.pkg.billingPlan,
           onboardingEligible: Boolean(result.pkg.onboardingEligible),
           noStripeMutation: true,
+        });
+      }
+      case "preview-obligation-payment-allocation": {
+        const { previewExternalPaymentAllocation } = await import(
+          "@/lib/proposal-lifecycle/external-obligation-payment"
+        );
+        const { getContractLifecycle } = await import("@/lib/proposal-lifecycle/services");
+        const lifecycle = await getContractLifecycle(id);
+        const plan = lifecycle.pkg.billingPlan;
+        if (!plan) {
+          return NextResponse.json(
+            { ok: false, error: "Billing plan is required." },
+            { status: 400 },
+          );
+        }
+        const preview = previewExternalPaymentAllocation(plan, {
+          amountCents: Number(body.amountCents),
+          allocationMode: body.allocationMode === "explicit" ? "explicit" : "fifo",
+          allocations: Array.isArray(body.allocations)
+            ? (body.allocations as Array<{ obligationId: string; amountCents: number }>)
+            : undefined,
+        });
+        if ("ok" in preview && preview.ok === false) {
+          return NextResponse.json(
+            { ok: false, error: Object.values(preview.errors).join("; "), errors: preview.errors },
+            { status: 400 },
+          );
+        }
+        return NextResponse.json({ ok: true, preview, noStripeMutation: true });
+      }
+      case "preview-recurring-due-occurrence": {
+        const {
+          buildRecurringOccurrenceSourceKey,
+          previewRecurringDueOccurrence,
+          resolveMonthlyDueDate,
+        } = await import("@/lib/proposal-lifecycle/ensure-payable-surfaces");
+        const { getContractLifecycle } = await import("@/lib/proposal-lifecycle/services");
+        const lifecycle = await getContractLifecycle(id);
+        const plan = lifecycle.pkg.billingPlan;
+        if (!plan) {
+          return NextResponse.json(
+            { ok: false, error: "Billing plan is required." },
+            { status: 400 },
+          );
+        }
+        const amountCents = Number(body.amountCents);
+        if (!Number.isFinite(amountCents) || amountCents <= 0) {
+          return NextResponse.json(
+            { ok: false, error: "Amount must be a positive number of cents." },
+            { status: 400 },
+          );
+        }
+        const serviceTitle = String(body.serviceTitle ?? "").trim();
+        if (!serviceTitle) {
+          return NextResponse.json(
+            { ok: false, error: "Service title is required." },
+            { status: 400 },
+          );
+        }
+        const periodYearMonth = String(body.periodYearMonth ?? "").trim();
+        const billDay = Number(body.billDay ?? 1);
+        let dueDate = body.dueDate ? String(body.dueDate) : "";
+        try {
+          if (!dueDate) {
+            dueDate = resolveMonthlyDueDate(periodYearMonth, billDay);
+          }
+        } catch (err) {
+          return NextResponse.json(
+            { ok: false, error: err instanceof Error ? err.message : "Invalid period." },
+            { status: 400 },
+          );
+        }
+        const serviceKey = String(body.serviceKey ?? serviceTitle);
+        const sourceKey =
+          String(body.sourceKey ?? "").trim() ||
+          buildRecurringOccurrenceSourceKey(serviceKey, periodYearMonth);
+        const label =
+          String(body.label ?? "").trim() ||
+          `${serviceTitle} — ${periodYearMonth}`;
+        const preview = previewRecurringDueOccurrence(plan, {
+          sourceKey,
+          label,
+          amountCents,
+          dueDate,
+          serviceTitle,
+        });
+        return NextResponse.json({
+          ok: true,
+          preview: {
+            ...preview,
+            cadence: body.cadence ?? "monthly",
+            billDay,
+            periodYearMonth,
+            effectiveDate: body.effectiveDate ? String(body.effectiveDate) : null,
+            noStripeSubscription: true,
+          },
+          noStripeMutation: true,
+        });
+      }
+      case "ensure-recurring-due-occurrence": {
+        const {
+          buildRecurringOccurrenceSourceKey,
+          resolveMonthlyDueDate,
+        } = await import("@/lib/proposal-lifecycle/ensure-payable-surfaces");
+        const { ensureRecurringDueOccurrenceOnContract } = await import(
+          "@/lib/proposal-lifecycle/record-obligation-external-payment"
+        );
+        const amountCents = Number(body.amountCents);
+        if (!Number.isFinite(amountCents) || amountCents <= 0) {
+          return NextResponse.json(
+            { ok: false, error: "Amount must be a positive number of cents." },
+            { status: 400 },
+          );
+        }
+        const serviceTitle = String(body.serviceTitle ?? "").trim();
+        if (!serviceTitle) {
+          return NextResponse.json(
+            { ok: false, error: "Service title is required." },
+            { status: 400 },
+          );
+        }
+        const periodYearMonth = String(body.periodYearMonth ?? "").trim();
+        const billDay = Number(body.billDay ?? 1);
+        let dueDate = body.dueDate ? String(body.dueDate) : "";
+        try {
+          if (!dueDate) {
+            dueDate = resolveMonthlyDueDate(periodYearMonth, billDay);
+          }
+        } catch (err) {
+          return NextResponse.json(
+            { ok: false, error: err instanceof Error ? err.message : "Invalid period." },
+            { status: 400 },
+          );
+        }
+        const serviceKey = String(body.serviceKey ?? serviceTitle);
+        const sourceKey =
+          String(body.sourceKey ?? "").trim() ||
+          buildRecurringOccurrenceSourceKey(serviceKey, periodYearMonth);
+        const label =
+          String(body.label ?? "").trim() ||
+          `${serviceTitle} — ${periodYearMonth}`;
+        const result = await ensureRecurringDueOccurrenceOnContract({
+          contractId: id,
+          actor,
+          occurrence: {
+            sourceKey,
+            label,
+            amountCents,
+            currency: body.currency ? String(body.currency) : "USD",
+            dueDate,
+            serviceTitle,
+            recordedBy: actor,
+          },
+        });
+        return NextResponse.json({
+          ok: true,
+          created: result.created,
+          billingPlan: result.pkg.billingPlan,
+          sourceKey,
+          dueDate,
+          noStripeMutation: true,
+          noStripeSubscription: true,
         });
       }
       case "link-obligation-stripe-invoice": {

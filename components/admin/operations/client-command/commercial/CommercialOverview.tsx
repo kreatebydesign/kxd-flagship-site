@@ -29,6 +29,11 @@ export function CommercialOverview({ data }: { data: ClientWorkspaceBundle }) {
           }
         />
         <OverviewKpi label={o.commercialAmountLabel} value={o.invoiceAmountLabel} emphasize />
+        <OverviewKpi label="Project contracted" value={o.projectContractedLabel ?? "—"} />
+        <OverviewKpi label="Recurring MRR" value={o.recurringMrrLabel ?? "—"} />
+        <OverviewKpi label="Due now" value={o.dueNowLabel ?? "$0.00"} />
+        <OverviewKpi label="Paid to date" value={o.paidToDateLabel ?? "$0.00"} />
+        <OverviewKpi label="Remaining project" value={o.remainingProjectLabel ?? "$0.00"} />
         <OverviewKpi label="Payment status" value={o.paymentStatusLabel} />
         <OverviewKpi
           label="Service term"

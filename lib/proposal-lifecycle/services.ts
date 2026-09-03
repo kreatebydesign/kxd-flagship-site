@@ -18,10 +18,10 @@ import {
   resolveSigningDocumentHashForContract,
 } from "../direct-agreement/signing-integrity.ts";
 import { buildProposedBillingPlan } from "./billing-plan.ts";
+import { ensurePayableSurfacesOnPlan } from "./ensure-payable-surfaces.ts";
 import { buildLocalDeliveryPreview } from "./delivery-preview.ts";
 import { buildLifecycleEmail } from "./email-templates.ts";
 import {
-  computeDocumentHash,
   hashPaymentTerms,
   invalidateSignaturesOnMaterialEdit,
   sealExecutedAgreement,
@@ -173,6 +173,16 @@ export async function ensureLifecycleHydrated(contractId: number): Promise<Contr
     operatorSigned: Boolean(next.operatorSignature),
   });
   next = { ...next, billingReadinessIssues: issues };
+
+  if (next.billingPlan) {
+    const withPayables = ensurePayableSurfacesOnPlan(
+      next.billingPlan,
+      next.structuredPaymentTerms,
+    );
+    if (withPayables.obligations.length !== next.billingPlan.obligations.length) {
+      next = { ...next, billingPlan: withPayables };
+    }
+  }
 
   if (JSON.stringify(next) !== JSON.stringify(pkg)) {
     const payload = await payloadClient();

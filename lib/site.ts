@@ -1,3 +1,22 @@
+/**
+ * Public marketing site constants.
+ * SITE.url must always be a valid absolute URL — redacted env placeholders
+ * like `[SENSITIVE]` must never reach `new URL()` during build/runtime.
+ */
+
+function resolvePublicSiteUrl(): string {
+  const fallback = "https://www.kreatebydesign.com";
+  const raw = String(process.env.NEXT_PUBLIC_SITE_URL ?? "").trim();
+  if (!raw || /^\[SENSITIVE\]$/i.test(raw)) return fallback;
+  try {
+    const parsed = new URL(raw.includes("://") ? raw : `https://${raw}`);
+    if (!parsed.hostname || parsed.hostname === "[SENSITIVE]") return fallback;
+    return parsed.origin;
+  } catch {
+    return fallback;
+  }
+}
+
 export const SITE = {
   name: "Kreate by Design",
   shortName: "KXD",
@@ -5,7 +24,7 @@ export const SITE = {
     "Premium websites, growth infrastructure, and operational systems.",
   description:
     "Kreate by Design builds premium websites, growth infrastructure, and operational platforms for ambitious businesses across the United States. Studio based in Los Angeles, California.",
-  url: process.env.NEXT_PUBLIC_SITE_URL || "https://www.kreatebydesign.com",
+  url: resolvePublicSiteUrl(),
   locale: "en_US",
   email: "matt@kreatebydesign.com",
   phone: "",

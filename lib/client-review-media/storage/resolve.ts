@@ -10,8 +10,12 @@ import { vercelBlobClientReviewStorageAdapter } from "./vercel-blob";
  * - Vercel OIDC (`VERCEL_OIDC_TOKEN` / runtime OIDC) + `BLOB_STORE_ID`
  */
 export function isVercelBlobStorageConfigured(): boolean {
-  if (process.env.BLOB_READ_WRITE_TOKEN?.trim()) return true;
-  if (process.env.BLOB_STORE_ID?.trim()) return true;
+  const token = process.env.BLOB_READ_WRITE_TOKEN?.trim();
+  if (token && !/^\[SENSITIVE\]$/i.test(token) && /^vercel_blob_rw_/i.test(token)) {
+    return true;
+  }
+  const storeId = process.env.BLOB_STORE_ID?.trim();
+  if (storeId && !/^\[SENSITIVE\]$/i.test(storeId)) return true;
   return false;
 }
 

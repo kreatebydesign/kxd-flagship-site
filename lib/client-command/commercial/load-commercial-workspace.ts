@@ -20,20 +20,32 @@ import {
   mapWorkspaceTimelineToCommercial,
   mergeCommercialTimeline,
 } from "./commercial-timeline";
+import {
+  isEligibleForExternalPaymentRecording,
+  obligationAmountCents,
+} from "@/lib/direct-agreement/external-payment";
+import { billingPlanBlocksAgreementLevelSettlement } from "@/lib/proposal-lifecycle/external-obligation-payment";
+import { ensurePayableSurfacesOnPlan } from "@/lib/proposal-lifecycle/ensure-payable-surfaces";
+import { ensurePayableSurfacesOnContract } from "@/lib/proposal-lifecycle/record-obligation-external-payment";
+import {
+  formatObligationStatusLabel,
+  isObligationOpenForExternalPayment,
+  obligationAmountPaidCents,
+  obligationRemainingCents,
+  sumOpenObligationRemainingCents,
+} from "@/lib/proposal-lifecycle/obligation-balances";
 import type {
   ClientCommercialWorkspaceSnapshot,
   CommercialAuthorizationRow,
   CommercialDocumentRow,
   CommercialExternalPaymentEligibleAgreement,
   CommercialInvoiceRow,
+  CommercialObligationPaymentTarget,
   CommercialPaymentRow,
   CommercialReceiptRow,
+  CommercialRecurringServiceTarget,
 } from "./types";
 import { commercialAgreementHref } from "./sections";
-import {
-  isEligibleForExternalPaymentRecording,
-  obligationAmountCents,
-} from "@/lib/direct-agreement/external-payment";
 
 type AnyDoc = Record<string, unknown> & { id: number };
 
@@ -147,9 +159,6 @@ export async function loadClientCommercialWorkspace(input: {
   });
 
   const primaryDoc = pickPrimaryContract(contracts);
-  const primaryPkg = primaryDoc
-    ? normalizeLifecyclePackage(primaryDoc.lifecyclePackage)
-    : null;
   const primaryDa = primaryDoc
     ? parseStoredDirectAgreementTerms(primaryDoc.directAgreementTerms)
     : null;
@@ -161,10 +170,31 @@ export async function loadClientCommercialWorkspace(input: {
   const invoices: CommercialInvoiceRow[] = [];
   const receipts: CommercialReceiptRow[] = [];
   const externalPaymentEligibleAgreements: CommercialExternalPaymentEligibleAgreement[] = [];
+  const obligationPaymentTargets: CommercialObligationPaymentTarget[] = [];
+  const recurringServiceTargets: CommercialRecurringServiceTarget[] = [];
   const auditTimeline = [];
 
   for (const doc of contracts) {
-    const pkg = normalizeLifecyclePackage(doc.lifecyclePackage) as ContractLifecyclePackage;
+    // Materialize ancillary payables from accepted terms (idempotent; no Stripe).
+    // Prefer this over display-only hydrate so obligation IDs remain durable.
+    let pkg = normalizeLifecyclePackage(doc.lifecyclePackage) as ContractLifecyclePackage;
+    if (pkg.billingPlan) {
+      try {
+        const materialized = await ensurePayableSurfacesOnContract({
+          contractId: Number(doc.id),
+          actor: "system:commercial-workspace",
+        });
+        pkg = materialized.pkg;
+      } catch {
+        const plan = pkg.billingPlan;
+        if (plan) {
+          pkg = {
+            ...pkg,
+            billingPlan: ensurePayableSurfacesOnPlan(plan, pkg.structuredPaymentTerms),
+          };
+        }
+      }
+    }
     const title = String(doc.title ?? `Agreement ${doc.id}`);
     const contractId = Number(doc.id);
     const terms = pkg.structuredPaymentTerms;
@@ -176,6 +206,77 @@ export async function loadClientCommercialWorkspace(input: {
       null;
     const amountLabel =
       amountCents != null && amountCents > 0 ? formatCents(amountCents as never) : "—";
+
+    const openObligations = (pkg.billingPlan?.obligations ?? []).filter((ob) =>
+      isObligationOpenForExternalPayment(ob),
+    );
+    if (openObligations.length > 0) {
+      obligationPaymentTargets.push({
+        agreementId: contractId,
+        agreementTitle: title,
+        currency: pkg.billingPlan?.currency ?? da?.currency ?? "USD",
+        openObligationCount: openObligations.length,
+        openRemainingCents: sumOpenObligationRemainingCents(pkg.billingPlan?.obligations ?? []),
+        href: commercialAgreementHref(clientId, contractId),
+      });
+    }
+
+    if (pkg.billingPlan) {
+      const termsRecurring = pkg.structuredPaymentTerms?.recurring;
+      const planRecurring = pkg.billingPlan.recurring;
+      const amountCents =
+        (termsRecurring?.amountCents && termsRecurring.amountCents > 0
+          ? termsRecurring.amountCents
+          : null) ??
+        (planRecurring?.amountCents && planRecurring.amountCents > 0
+          ? planRecurring.amountCents
+          : null) ??
+        (da?.monthlyAmountCents && da.monthlyAmountCents > 0 ? da.monthlyAmountCents : null);
+
+      if (amountCents && amountCents > 0) {
+        const cadence =
+          termsRecurring?.cadence === "quarterly" || termsRecurring?.cadence === "annual"
+            ? termsRecurring.cadence
+            : planRecurring?.cadence === "quarterly" || planRecurring?.cadence === "annual"
+              ? planRecurring.cadence
+              : "monthly";
+        const serviceTitle =
+          termsRecurring?.serviceTitle?.trim() ||
+          "Recurring client service";
+        recurringServiceTargets.push({
+          agreementId: contractId,
+          agreementTitle: title,
+          currency: pkg.billingPlan.currency ?? "USD",
+          serviceKey: serviceTitle,
+          serviceTitle,
+          amountCents,
+          cadence,
+          billDay: 1,
+          effectiveDate: termsRecurring?.startBillingDate ?? da?.serviceStartDate ?? null,
+          href: commercialAgreementHref(clientId, contractId),
+          isOperatorDefined: false,
+          sourceLabel: "Accepted commercial terms",
+        });
+      }
+
+      // Always offer an operator-defined current commercial service row so
+      // amended rates (e.g. $325 care/social) can be registered without rewriting
+      // historically accepted legal terms.
+      recurringServiceTargets.push({
+        agreementId: contractId,
+        agreementTitle: title,
+        currency: pkg.billingPlan.currency ?? "USD",
+        serviceKey: "current-commercial-service",
+        serviceTitle: "Current commercial recurring service",
+        amountCents: 0,
+        cadence: "monthly",
+        billDay: 1,
+        effectiveDate: null,
+        href: commercialAgreementHref(clientId, contractId),
+        isOperatorDefined: true,
+        sourceLabel: "Operator-defined (does not rewrite accepted legal terms)",
+      });
+    }
 
     if (
       String(doc.agreementSource ?? "") === "direct-agreement" &&
@@ -197,6 +298,10 @@ export async function loadClientCommercialWorkspace(input: {
           obligationAmountCents: obligation,
           currency: da?.currency ?? "USD",
           href: commercialAgreementHref(clientId, contractId),
+          blocksAgreementLevelSettlement: billingPlanBlocksAgreementLevelSettlement(
+            pkg.billingPlan,
+          ),
+          openObligationCount: openObligations.length,
         });
       }
     }
@@ -256,17 +361,76 @@ export async function loadClientCommercialWorkspace(input: {
     }
 
     for (const ob of pkg.billingPlan?.obligations ?? []) {
+      const paidCents = obligationAmountPaidCents(ob);
+      const remainingCents = obligationRemainingCents(ob);
+      const history =
+        ob.paymentEvents?.map((event) => ({
+          id: event.id,
+          paymentGroupId: event.paymentGroupId,
+          amountLabel: formatCents(event.amountCents as never),
+          paidAt: event.paidAt,
+          method: event.externalPaymentMethod,
+          externalReference: event.externalReference ?? null,
+          operatorNote: event.operatorNote ?? null,
+          obligationLabel: ob.label,
+        })) ?? [];
+
+      // Surface obligation payment events in Payments section.
+      for (const event of ob.paymentEvents ?? []) {
+        payments.push({
+          id: `obl-pay-${contractId}-${event.id}`,
+          agreementId: contractId,
+          agreementTitle: title,
+          amountLabel: formatCents(event.amountCents as never),
+          paymentStatus: remainingCents <= 0 && paidCents > 0 ? "paid" : "partial",
+          stripeCustomerId: null,
+          stripeInvoiceId: event.stripeInvoiceId ?? null,
+          stripePaymentIntentId: null,
+          stripeChargeId: null,
+          receiptUrl: null,
+          hostedInvoiceUrl: null,
+          cardBrand: null,
+          cardLast4: null,
+          linkedAt: event.recordedAt,
+          source: "manual-non-stripe",
+          livemode: null,
+          paidAt: event.paidAt,
+          operatorNote:
+            [
+              ob.label,
+              event.externalPaymentMethod,
+              event.externalReference ? `ref ${event.externalReference}` : null,
+              event.operatorNote,
+            ]
+              .filter(Boolean)
+              .join(" · ") || null,
+          idempotencyKey: event.idempotencyKey,
+        });
+      }
+
       invoices.push({
         id: `ob-${contractId}-${ob.id}`,
-        title: ob.trigger || `Obligation · ${title}`,
+        title: ob.label || ob.trigger || `Obligation · ${title}`,
         amountLabel: formatCents(ob.amountCents as never),
+        amountPaidLabel: formatCents(paidCents as never),
+        remainingLabel: formatCents(remainingCents as never),
+        amountCents: ob.amountCents,
+        amountPaidCents: paidCents,
+        remainingCents,
         status: ob.status,
-        date: ob.paidAt ?? null,
+        statusLabel: formatObligationStatusLabel(ob.status),
+        date: ob.paidAt ?? ob.dueDate ?? null,
+        dueDate: ob.dueDate ?? null,
+        triggerLabel: ob.trigger || ob.dueTerms || null,
         agreementId: contractId,
         agreementTitle: title,
+        obligationId: ob.id,
+        kind: ob.kind,
         stripeInvoiceId: ob.stripeDraftInvoiceId ?? null,
         hostedInvoiceUrl: null,
         source: "obligation",
+        canRecordPayment: isObligationOpenForExternalPayment(ob),
+        paymentHistory: history,
       });
     }
 
@@ -275,13 +439,25 @@ export async function loadClientCommercialWorkspace(input: {
         id: `inv-ref-${contractId}`,
         title: `Invoice · ${title}`,
         amountLabel,
+        amountPaidLabel: "—",
+        remainingLabel: "—",
+        amountCents: amountCents ?? 0,
+        amountPaidCents: 0,
+        remainingCents: 0,
         status: String(pkg.paymentReferences.paymentStatus ?? "linked"),
+        statusLabel: String(pkg.paymentReferences.paymentStatus ?? "linked"),
         date: pkg.paymentReferences.linkedAt ?? null,
+        dueDate: null,
+        triggerLabel: null,
         agreementId: contractId,
         agreementTitle: title,
+        obligationId: null,
+        kind: null,
         stripeInvoiceId: pkg.paymentReferences.stripeInvoiceId ?? null,
         hostedInvoiceUrl: pkg.paymentReferences.hostedInvoiceUrl ?? null,
         source: "payment-reference",
+        canRecordPayment: false,
+        paymentHistory: [],
       });
     }
 
@@ -306,6 +482,22 @@ export async function loadClientCommercialWorkspace(input: {
       });
     }
 
+    // Receipts from obligation payment events
+    for (const ob of pkg.billingPlan?.obligations ?? []) {
+      for (const event of ob.paymentEvents ?? []) {
+        receipts.push({
+          id: `rcpt-obl-${contractId}-${event.id}`,
+          title: `Payment · ${ob.label}`,
+          amountLabel: formatCents(event.amountCents as never),
+          date: event.paidAt,
+          agreementId: contractId,
+          agreementTitle: title,
+          receiptUrl: null,
+          stripeChargeId: null,
+        });
+      }
+    }
+
     auditTimeline.push(...mapAuditEventsToCommercial(clientId, contractId, pkg.auditEvents));
   }
 
@@ -314,13 +506,25 @@ export async function loadClientCommercialWorkspace(input: {
       id: `ws-inv-${inv.source}-${inv.id}`,
       title: inv.title,
       amountLabel: inv.amount != null ? formatCents(Math.round(inv.amount * 100) as never) : "—",
+      amountPaidLabel: "—",
+      remainingLabel: "—",
+      amountCents: inv.amount != null ? Math.round(inv.amount * 100) : 0,
+      amountPaidCents: 0,
+      remainingCents: 0,
       status: inv.status,
+      statusLabel: inv.status,
       date: inv.date,
+      dueDate: null,
+      triggerLabel: null,
       agreementId: null,
       agreementTitle: null,
+      obligationId: null,
+      kind: null,
       stripeInvoiceId: null,
       hostedInvoiceUrl: null,
       source: "workspace-invoice",
+      canRecordPayment: false,
+      paymentHistory: [],
     });
   }
 
@@ -331,10 +535,25 @@ export async function loadClientCommercialWorkspace(input: {
 
   const documentKinds = [...new Set(documents.map((d) => d.kindLabel))];
 
+  // Prefer hydrated primary package for overview financial labels.
+  const primaryHydrated = primaryDoc
+    ? (() => {
+        const raw = normalizeLifecyclePackage(primaryDoc.lifecyclePackage);
+        if (!raw.billingPlan) return raw;
+        return {
+          ...raw,
+          billingPlan: ensurePayableSurfacesOnPlan(
+            raw.billingPlan,
+            raw.structuredPaymentTerms,
+          ),
+        };
+      })()
+    : null;
+
   const overview = buildOverviewFromPrimary({
     clientId,
     agreement: primaryAgreement,
-    pkg: primaryPkg,
+    pkg: primaryHydrated,
     daTerms: primaryDa,
     documentKinds,
     lastActivityLabel: timeline[0]
@@ -362,6 +581,8 @@ export async function loadClientCommercialWorkspace(input: {
     timeline,
     primaryAgreementId: primaryAgreement?.id ?? null,
     externalPaymentEligibleAgreements,
+    obligationPaymentTargets,
+    recurringServiceTargets,
   };
 }
 
@@ -376,6 +597,11 @@ export function emptyCommercialWorkspace(clientId: number): ClientCommercialWork
       paymentStatusLabel: "—",
       commercialAmountLabel: "Invoice amount",
       invoiceAmountLabel: "—",
+      projectContractedLabel: "—",
+      recurringMrrLabel: "—",
+      dueNowLabel: "$0.00",
+      paidToDateLabel: "$0.00",
+      remainingProjectLabel: "$0.00",
       termStart: null,
       termEnd: null,
       hoursIncludedLabel: "—",
@@ -396,6 +622,8 @@ export function emptyCommercialWorkspace(clientId: number): ClientCommercialWork
     timeline: [],
     primaryAgreementId: null,
     externalPaymentEligibleAgreements: [],
+    obligationPaymentTargets: [],
+    recurringServiceTargets: [],
   };
 }
 

@@ -8,6 +8,7 @@ import type { ProposedBillingPlan, ReadinessIssue } from "./types.ts";
 import { newLifecycleId } from "./hash.ts";
 import { reconcileInstallments } from "./structured-payment-terms.ts";
 import { blockersForStripePrep } from "./billing-readiness.ts";
+import { ensurePayableSurfacesOnPlan } from "./ensure-payable-surfaces.ts";
 
 export function buildProposedBillingPlan(input: {
   contractId: number;
@@ -42,8 +43,11 @@ export function buildProposedBillingPlan(input: {
     dueDate: item.dueDate ?? null,
     status: "pending-trigger" as const,
     stripeDraftInvoiceId: null,
+    amountPaidCents: 0,
+    paymentEvents: [],
     collectionChannel: null,
     paymentReceipt: null,
+    sourceKey: item.id ? `installment:${item.id}` : null,
   }));
 
   const recurring =
@@ -61,7 +65,7 @@ export function buildProposedBillingPlan(input: {
       : null;
 
   const now = new Date().toISOString();
-  return {
+  const basePlan: ProposedBillingPlan = {
     schemaVersion: 1,
     id: newLifecycleId("bplan"),
     status,
@@ -88,6 +92,8 @@ export function buildProposedBillingPlan(input: {
     approvedAt: null,
     mockStripe: { customerId: null, draftInvoiceIds: [], inactiveScheduleId: null },
   };
+
+  return ensurePayableSurfacesOnPlan(basePlan, input.terms);
 }
 
 function professionalLineLabel(raw: string, index: number, total: number): string {

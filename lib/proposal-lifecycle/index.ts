@@ -41,7 +41,29 @@ export {
   regenerateContractDraftFromAccepted,
   assertMutableContractReadyForSignature,
 } from "./regenerate-contract-draft.ts";
-export { recordObligationExternalPaymentOnContract } from "./record-obligation-external-payment.ts";
+export {
+  recordObligationExternalPaymentOnContract,
+  recordAllocatedExternalPaymentOnContract,
+  ensureRecurringDueOccurrenceOnContract,
+  ensurePayableSurfacesOnContract,
+  ensurePayableSurfacesOnPlan,
+} from "./record-obligation-external-payment.ts";
+export {
+  obligationAmountPaidCents,
+  obligationRemainingCents,
+  planFifoAllocation,
+  formatObligationStatusLabel,
+  sumProjectObligationRemainingCents,
+  sumOpenObligationRemainingCents,
+} from "./obligation-balances.ts";
+export {
+  ensureAncillaryObligationsOnPlan,
+  ensureRecurringDueOccurrenceOnPlan,
+  buildRecurringOccurrenceSourceKey,
+  resolveMonthlyDueDate,
+  previewRecurringDueOccurrence,
+  countMissingAncillaryObligations,
+} from "./ensure-payable-surfaces.ts";
 export {
   recomputeOnboardingEligibility,
   applyOnboardingEligibility,

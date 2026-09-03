@@ -69,6 +69,7 @@ export const INVOICE_OBLIGATION_STATUSES = [
   "approved",
   "sent",
   "viewed",
+  "partially-paid",
   "paid",
   "overdue",
   "void",
@@ -236,14 +237,27 @@ export interface InvoiceObligation {
   stripeDraftInvoiceId?: string | null;
   paidAt?: string | null;
   contractSection?: string;
+  /**
+   * Cached sum of applied payment events. Prefer paymentEvents when present.
+   * Never invent collection — operator or verified Stripe reconciliation only.
+   */
+  amountPaidCents?: Cents;
+  /** Append-only external/Stripe payment history for this obligation. */
+  paymentEvents?: import("./external-obligation-payment.ts").ObligationPaymentEvent[];
   /** How funds were collected — never invent Stripe collection. */
   collectionChannel?:
     | "stripe-invoice-external-pay"
     | "manual-external"
     | "stripe-collected"
+    | "mixed-external"
     | null;
-  /** External payment receipt (Cash App, etc.) when paid outside Stripe collection. */
+  /**
+   * Legacy single receipt when fully paid outside Stripe.
+   * Prefer paymentEvents for history; kept for backward compatibility.
+   */
   paymentReceipt?: import("./external-obligation-payment.ts").ObligationPaymentReceipt | null;
+  /** Stable source key for ancillary/recurring projections (dedupe). */
+  sourceKey?: string | null;
 }
 
 export interface RecurringSchedule {

@@ -90,6 +90,9 @@ export interface CommercialExternalPaymentEligibleAgreement {
   obligationAmountCents: number;
   currency: string;
   href: string;
+  /** When true, agreement-level settlement is blocked — use obligation Record Payment. */
+  blocksAgreementLevelSettlement: boolean;
+  openObligationCount: number;
 }
 
 export interface CommercialAuthorizationRow {
@@ -106,17 +109,43 @@ export interface CommercialAuthorizationRow {
   cardLast4: string | null;
 }
 
+export interface CommercialPaymentEventRow {
+  id: string;
+  paymentGroupId: string;
+  amountLabel: string;
+  paidAt: string;
+  method: string;
+  externalReference: string | null;
+  operatorNote: string | null;
+  obligationLabel: string;
+}
+
 export interface CommercialInvoiceRow {
   id: string;
   title: string;
+  /** Original obligation amount display. */
   amountLabel: string;
+  /** Amount already applied. */
+  amountPaidLabel: string;
+  /** Remaining balance display. */
+  remainingLabel: string;
+  amountCents: number;
+  amountPaidCents: number;
+  remainingCents: number;
   status: string;
+  statusLabel: string;
   date: string | null;
+  dueDate: string | null;
+  triggerLabel: string | null;
   agreementId: number | null;
   agreementTitle: string | null;
+  obligationId: string | null;
+  kind: string | null;
   stripeInvoiceId: string | null;
   hostedInvoiceUrl: string | null;
   source: "obligation" | "payment-reference" | "workspace-invoice";
+  canRecordPayment: boolean;
+  paymentHistory: CommercialPaymentEventRow[];
 }
 
 export interface CommercialReceiptRow {
@@ -149,6 +178,16 @@ export interface CommercialOverviewSnapshot {
   commercialAmountLabel: string;
   /** KPI value for agreement commercial amount. */
   invoiceAmountLabel: string;
+  /** Project / one-time contracted amount (not annualized LTV). */
+  projectContractedLabel: string;
+  /** Recurring monthly rate (MRR) — not currently due. */
+  recurringMrrLabel: string;
+  /** Sum of open obligation remaining balances (due / collectible now). */
+  dueNowLabel: string;
+  /** Sum already paid across obligations. */
+  paidToDateLabel: string;
+  /** Remaining project installment balance only. */
+  remainingProjectLabel: string;
   termStart: string | null;
   termEnd: string | null;
   hoursIncludedLabel: string;
@@ -159,6 +198,32 @@ export interface CommercialOverviewSnapshot {
   lastActivityLabel: string | null;
   outstandingItems: string[];
   documentKindsPresent: CommercialDocumentKindLabel[];
+}
+
+export interface CommercialObligationPaymentTarget {
+  agreementId: number;
+  agreementTitle: string;
+  currency: string;
+  openObligationCount: number;
+  openRemainingCents: number;
+  href: string;
+}
+
+/** Recurring service templates available for registering a due period occurrence. */
+export interface CommercialRecurringServiceTarget {
+  agreementId: number;
+  agreementTitle: string;
+  currency: string;
+  serviceKey: string;
+  serviceTitle: string;
+  amountCents: number;
+  cadence: "monthly" | "quarterly" | "annual";
+  billDay: number;
+  effectiveDate: string | null;
+  href: string;
+  /** True when amount/title differ from accepted structured terms (operator commercial service). */
+  isOperatorDefined: boolean;
+  sourceLabel: string;
 }
 
 export interface ClientCommercialWorkspaceSnapshot {
@@ -173,4 +238,7 @@ export interface ClientCommercialWorkspaceSnapshot {
   timeline: CommercialTimelineRow[];
   primaryAgreementId: number | null;
   externalPaymentEligibleAgreements: CommercialExternalPaymentEligibleAgreement[];
+  /** Agreements with open billing-plan obligations eligible for obligation-level Record Payment. */
+  obligationPaymentTargets: CommercialObligationPaymentTarget[];
+  recurringServiceTargets: CommercialRecurringServiceTarget[];
 }

@@ -35,12 +35,17 @@ export function isVercelRuntime(): boolean {
 
 export function privateBlobReadWriteToken(): string | undefined {
   const token = process.env[PRIVATE_BLOB_TOKEN_ENV]?.trim();
-  return token || undefined;
+  if (!token || /^\[SENSITIVE\]$/i.test(token)) return undefined;
+  if (!BLOB_TOKEN_RE.test(token)) return undefined;
+  return token;
 }
 
 export function payloadMediaBlobToken(): string | undefined {
   const token = process.env[MEDIA_BLOB_TOKEN_ENV]?.trim();
-  return token || undefined;
+  if (!token || /^\[SENSITIVE\]$/i.test(token)) return undefined;
+  // Reject placeholders / truncated pulls that would enable the adapter with a bad token.
+  if (!BLOB_TOKEN_RE.test(token)) return undefined;
+  return token;
 }
 
 export function shouldEnablePayloadMediaBlobStorage(): boolean {

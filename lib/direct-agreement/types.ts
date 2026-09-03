@@ -184,15 +184,18 @@ export type DirectAgreementPaymentReferences = {
   paidAt?: string | null;
   operatorNote?: string | null;
   /**
-   * When source is manual-non-stripe: cash-app | check | wire | ach | other.
-   * Never stores Cash App credentials.
+   * When source is manual-non-stripe: supported external rails.
+   * Never stores card numbers or Cash App credentials.
    */
   externalPaymentMethod?:
+    | "stripe"
     | "cash-app"
-    | "check"
-    | "wire"
+    | "zelle"
     | "ach"
+    | "check"
+    | "cash"
     | "other"
+    | "wire"
     | null;
   /** Optional external reference (Cash App note, check number, etc.). */
   externalReference?: string | null;

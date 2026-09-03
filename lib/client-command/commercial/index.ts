@@ -5,9 +5,11 @@ export type {
   CommercialDocumentRow,
   CommercialExternalPaymentEligibleAgreement,
   CommercialInvoiceRow,
+  CommercialObligationPaymentTarget,
   CommercialOverviewSnapshot,
   CommercialPaymentRow,
   CommercialReceiptRow,
+  CommercialRecurringServiceTarget,
   CommercialSectionId,
   CommercialTimelineRow,
 } from "./types";

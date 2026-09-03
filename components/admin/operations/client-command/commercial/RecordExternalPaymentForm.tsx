@@ -54,7 +54,7 @@ export function RecordExternalPaymentForm(props: {
     "imported-external-stripe-payment",
   );
   const [externalPaymentMethod, setExternalPaymentMethod] = useState<
-    "cash-app" | "check" | "wire" | "ach" | "other"
+    "cash-app" | "zelle" | "ach" | "check" | "cash" | "wire" | "other"
   >("cash-app");
   const [externalReference, setExternalReference] = useState("");
   const [amountDollars, setAmountDollars] = useState(
@@ -71,6 +71,8 @@ export function RecordExternalPaymentForm(props: {
   const [hostedInvoiceUrl, setHostedInvoiceUrl] = useState("");
   const [operatorNote, setOperatorNote] = useState("");
 
+  const blockedAgreementLevel = Boolean(selected?.blocksAgreementLevelSettlement);
+
   if (!props.eligibleAgreements.length && !confirmation) {
     return null;
   }
@@ -78,6 +80,12 @@ export function RecordExternalPaymentForm(props: {
   async function submit() {
     if (!selected) {
       setError("Select an eligible Direct Agreement.");
+      return;
+    }
+    if (selected.blocksAgreementLevelSettlement) {
+      setError(
+        "This agreement has multiple billing-plan obligations. Use Commercial → Invoices → Record Payment to apply funds to specific obligations instead of marking the entire agreement paid.",
+      );
       return;
     }
     setBusy(true);
@@ -209,7 +217,8 @@ export function RecordExternalPaymentForm(props: {
             <h3>Record external payment</h3>
             <p>
               Reconcile an already-completed Stripe or manual payment into this client&apos;s
-              Direct Agreement. This does not charge a card or create Stripe objects.
+              Direct Agreement. This does not charge a card or create Stripe objects. For
+              installment plans, use Invoices → Record Payment instead.
             </p>
           </div>
           <button
@@ -307,15 +316,24 @@ export function RecordExternalPaymentForm(props: {
                     value={externalPaymentMethod}
                     onChange={(e) =>
                       setExternalPaymentMethod(
-                        e.target.value as "cash-app" | "check" | "wire" | "ach" | "other",
+                        e.target.value as
+                          | "cash-app"
+                          | "zelle"
+                          | "ach"
+                          | "check"
+                          | "cash"
+                          | "wire"
+                          | "other",
                       )
                     }
                     required
                   >
                     <option value="cash-app">Cash App</option>
-                    <option value="check">Check</option>
-                    <option value="wire">Wire</option>
+                    <option value="zelle">Zelle</option>
                     <option value="ach">ACH</option>
+                    <option value="check">Check</option>
+                    <option value="cash">Cash</option>
+                    <option value="wire">Wire</option>
                     <option value="other">Other</option>
                   </select>
                 </label>
@@ -501,8 +519,19 @@ export function RecordExternalPaymentForm(props: {
             </p>
           ) : null}
 
+          {blockedAgreementLevel ? (
+            <p className="kxd-os-commercial-record-payment__error" role="status">
+              Agreement-level settlement is blocked for this installment billing plan. Open
+              Commercial → Invoices and use Record Payment to allocate against obligations.
+            </p>
+          ) : null}
+
           <div className="kxd-os-commercial-record-payment__actions">
-            <button type="submit" className="kxd-os-btn kxd-os-btn--primary" disabled={busy}>
+            <button
+              type="submit"
+              className="kxd-os-btn kxd-os-btn--primary"
+              disabled={busy || blockedAgreementLevel}
+            >
               {busy ? "Recording…" : "Record payment"}
             </button>
             <button
