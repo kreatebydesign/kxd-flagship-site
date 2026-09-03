@@ -77,12 +77,19 @@ export function formatObligationStatusLabel(status: string): string {
 /**
  * Earliest-first FIFO across open obligations.
  * Sort: dueDate ascending (nulls last), then existing array order.
+ * When allowedObligationIds is provided, only those obligations may receive funds.
  */
 export function planFifoAllocation(
   obligations: InvoiceObligation[],
   amountCents: number,
+  options?: { allowedObligationIds?: string[] },
 ): Array<{ obligationId: string; amountCents: number; label: string }> {
   if (!Number.isFinite(amountCents) || amountCents <= 0) return [];
+
+  const allowed =
+    options?.allowedObligationIds && options.allowedObligationIds.length > 0
+      ? new Set(options.allowedObligationIds.map(String))
+      : null;
 
   const indexed = obligations.map((obligation, index) => ({ obligation, index }));
   indexed.sort((a, b) => {
@@ -97,6 +104,7 @@ export function planFifoAllocation(
 
   for (const { obligation } of indexed) {
     if (remaining <= 0) break;
+    if (allowed && !allowed.has(obligation.id)) continue;
     if (!isObligationOpenForExternalPayment(obligation)) continue;
     const open = obligationRemainingCents(obligation);
     if (open <= 0) continue;

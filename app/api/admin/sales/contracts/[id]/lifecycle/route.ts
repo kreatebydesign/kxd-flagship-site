@@ -239,6 +239,9 @@ export async function POST(
                     },
                   ]
                 : undefined,
+            allowedObligationIds: Array.isArray(body.allowedObligationIds)
+              ? (body.allowedObligationIds as string[]).map(String)
+              : undefined,
             clientIdempotencyKey: body.clientIdempotencyKey
               ? String(body.clientIdempotencyKey)
               : null,
@@ -301,6 +304,9 @@ export async function POST(
           allocationMode: body.allocationMode === "explicit" ? "explicit" : "fifo",
           allocations: Array.isArray(body.allocations)
             ? (body.allocations as Array<{ obligationId: string; amountCents: number }>)
+            : undefined,
+          allowedObligationIds: Array.isArray(body.allowedObligationIds)
+            ? (body.allowedObligationIds as string[]).map(String)
             : undefined,
         });
         if ("ok" in preview && preview.ok === false) {

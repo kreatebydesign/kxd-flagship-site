@@ -7,6 +7,8 @@ import type {
   CommercialObligationPaymentTarget,
 } from "@/lib/client-command/commercial/types";
 
+type ApplicationMode = "fifo" | "single" | "selected";
+
 type AllocationPreviewLeg = {
   obligationId: string;
   label: string;
@@ -52,6 +54,31 @@ function initialAmount(
   return defaults ? dollarsFromCents(Math.min(defaults.openRemainingCents, 35000)) : "";
 }
 
+function buildPreviewBody(input: {
+  amountCents: number;
+  allocationMode: ApplicationMode;
+  obligationId: string;
+  selectedObligationIds: string[];
+}): { ok: true; body: Record<string, unknown> } | { ok: false; error: string } {
+  const body: Record<string, unknown> = {
+    action: "preview-obligation-payment-allocation",
+    amountCents: input.amountCents,
+    allocationMode: "fifo",
+  };
+  if (input.allocationMode === "single") {
+    if (!input.obligationId) return { ok: false, error: "Select an obligation." };
+    body.allocationMode = "explicit";
+    body.allocations = [{ obligationId: input.obligationId, amountCents: input.amountCents }];
+  } else if (input.allocationMode === "selected") {
+    if (!input.selectedObligationIds.length) {
+      return { ok: false, error: "Select at least one obligation." };
+    }
+    body.allocationMode = "fifo";
+    body.allowedObligationIds = input.selectedObligationIds;
+  }
+  return { ok: true, body };
+}
+
 export function RecordObligationPaymentForm(props: {
   clientId: number;
   targets: CommercialObligationPaymentTarget[];
@@ -83,10 +110,11 @@ export function RecordObligationPaymentForm(props: {
       row.canRecordPayment,
   );
 
-  const [allocationMode, setAllocationMode] = useState<"fifo" | "single">(
+  const [allocationMode, setAllocationMode] = useState<ApplicationMode>(
     props.initialObligationId ? "single" : "fifo",
   );
   const [obligationId, setObligationId] = useState(props.initialObligationId ?? "");
+  const [selectedObligationIds, setSelectedObligationIds] = useState<string[]>([]);
   const [amountDollars, setAmountDollars] = useState(
     initialAmount(props.invoices, props.targets, props.initialObligationId),
   );
@@ -103,22 +131,25 @@ export function RecordObligationPaymentForm(props: {
     void (async () => {
       const amountCents = Math.round(Number(amountDollars) * 100);
       if (!Number.isFinite(amountCents) || amountCents <= 0) return;
+      const built = buildPreviewBody({
+        amountCents,
+        allocationMode,
+        obligationId,
+        selectedObligationIds,
+      });
+      if (!built.ok) {
+        setPreview(null);
+        setPreviewError(built.error);
+        return;
+      }
       setPreviewBusy(true);
       try {
-        const body: Record<string, unknown> = {
-          action: "preview-obligation-payment-allocation",
-          amountCents,
-          allocationMode: allocationMode === "single" ? "explicit" : "fifo",
-        };
-        if (allocationMode === "single" && obligationId) {
-          body.allocations = [{ obligationId, amountCents }];
-        }
         const res = await fetch(
           `/api/admin/sales/contracts/${selected.agreementId}/lifecycle`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body),
+            body: JSON.stringify(built.body),
           },
         );
         if (cancelled) return;
@@ -152,8 +183,9 @@ export function RecordObligationPaymentForm(props: {
 
   async function refreshPreview(next: {
     amountDollars: string;
-    allocationMode: "fifo" | "single";
+    allocationMode: ApplicationMode;
     obligationId: string;
+    selectedObligationIds: string[];
     agreementId: number;
   }) {
     const amountCents = Math.round(Number(next.amountDollars) * 100);
@@ -162,21 +194,23 @@ export function RecordObligationPaymentForm(props: {
       setPreviewError(null);
       return;
     }
+    const built = buildPreviewBody({
+      amountCents,
+      allocationMode: next.allocationMode,
+      obligationId: next.obligationId,
+      selectedObligationIds: next.selectedObligationIds,
+    });
+    if (!built.ok) {
+      setPreview(null);
+      setPreviewError(built.error);
+      return;
+    }
     setPreviewBusy(true);
     try {
-      const body: Record<string, unknown> = {
-        action: "preview-obligation-payment-allocation",
-        amountCents,
-        allocationMode: "fifo",
-      };
-      if (next.allocationMode === "single" && next.obligationId) {
-        body.allocationMode = "explicit";
-        body.allocations = [{ obligationId: next.obligationId, amountCents }];
-      }
       const res = await fetch(`/api/admin/sales/contracts/${next.agreementId}/lifecycle`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: JSON.stringify(built.body),
       });
       const data = (await res.json()) as {
         ok?: boolean;
@@ -207,6 +241,14 @@ export function RecordObligationPaymentForm(props: {
       setError("Select an agreement.");
       return;
     }
+    if (!preview || preview.unallocatedCents > 0) {
+      setError("Preview a complete allocation before recording.");
+      return;
+    }
+    if (allocationMode === "selected" && selectedObligationIds.length === 0) {
+      setError("Select at least one obligation.");
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
@@ -226,8 +268,10 @@ export function RecordObligationPaymentForm(props: {
         body.obligationId = obligationId;
       } else if (allocationMode === "fifo") {
         body.allocationMode = "fifo";
-      } else if (preview?.legs?.length) {
+      } else if (allocationMode === "selected") {
+        // One payment transaction; legs from preview (FIFO within selected set only).
         body.allocationMode = "explicit";
+        body.allowedObligationIds = selectedObligationIds;
         body.allocations = preview.legs.map((leg) => ({
           obligationId: leg.obligationId,
           amountCents: leg.amountCents,
@@ -256,6 +300,28 @@ export function RecordObligationPaymentForm(props: {
     }
   }
 
+  function toggleSelected(obligationIdValue: string) {
+    setSelectedObligationIds((prev) => {
+      const next = prev.includes(obligationIdValue)
+        ? prev.filter((id) => id !== obligationIdValue)
+        : [...prev, obligationIdValue];
+      if (selected) {
+        void refreshPreview({
+          amountDollars,
+          allocationMode: "selected",
+          obligationId,
+          selectedObligationIds: next,
+          agreementId: selected.agreementId,
+        });
+      }
+      return next;
+    });
+  }
+
+  const selectedRemainingCents = openInvoices
+    .filter((row) => row.obligationId && selectedObligationIds.includes(row.obligationId))
+    .reduce((sum, row) => sum + row.remainingCents, 0);
+
   return (
     <div className="kxd-os-commercial-record-payment">
       {!open ? (
@@ -263,8 +329,8 @@ export function RecordObligationPaymentForm(props: {
           <div>
             <h3>Record payment</h3>
             <p>
-              Apply an already-received external payment to open obligations. Supports partial
-              amounts and FIFO allocation. Does not charge Stripe.
+              Apply an already-received external payment to open obligations. Supports FIFO,
+              single obligation, or selected obligations. Does not charge Stripe.
             </p>
           </div>
           <button
@@ -277,6 +343,7 @@ export function RecordObligationPaymentForm(props: {
                   amountDollars,
                   allocationMode,
                   obligationId,
+                  selectedObligationIds,
                   agreementId: selected.agreementId,
                 });
               }
@@ -297,7 +364,8 @@ export function RecordObligationPaymentForm(props: {
             <h3>Record Payment</h3>
             <p>
               Reconciliation only. Review the allocation preview before submitting. No Stripe
-              charge or invoice will be created.
+              charge or invoice will be created. One payment stays one transaction even when it
+              covers multiple obligations.
             </p>
           </header>
 
@@ -313,6 +381,7 @@ export function RecordObligationPaymentForm(props: {
                   const nextId = e.target.value;
                   setAgreementId(nextId);
                   setObligationId("");
+                  setSelectedObligationIds([]);
                   setAllocationMode("fifo");
                   const next = props.targets.find((t) => String(t.agreementId) === nextId);
                   if (next) {
@@ -320,6 +389,7 @@ export function RecordObligationPaymentForm(props: {
                       amountDollars,
                       allocationMode: "fifo",
                       obligationId: "",
+                      selectedObligationIds: [],
                       agreementId: next.agreementId,
                     });
                   }
@@ -343,13 +413,14 @@ export function RecordObligationPaymentForm(props: {
                 className="kxd-os-commercial-control"
                 value={allocationMode}
                 onChange={(e) => {
-                  const mode = e.target.value as "fifo" | "single";
+                  const mode = e.target.value as ApplicationMode;
                   setAllocationMode(mode);
                   if (selected) {
                     void refreshPreview({
                       amountDollars,
                       allocationMode: mode,
                       obligationId,
+                      selectedObligationIds,
                       agreementId: selected.agreementId,
                     });
                   }
@@ -357,6 +428,7 @@ export function RecordObligationPaymentForm(props: {
               >
                 <option value="fifo">FIFO across earliest open obligations</option>
                 <option value="single">Single obligation</option>
+                <option value="selected">Selected obligations</option>
               </select>
             </label>
 
@@ -381,6 +453,7 @@ export function RecordObligationPaymentForm(props: {
                         amountDollars: nextAmount,
                         allocationMode: "single",
                         obligationId: nextObl,
+                        selectedObligationIds,
                         agreementId: selected.agreementId,
                       });
                     }
@@ -414,6 +487,7 @@ export function RecordObligationPaymentForm(props: {
                       amountDollars,
                       allocationMode,
                       obligationId,
+                      selectedObligationIds,
                       agreementId: selected.agreementId,
                     });
                   }
@@ -470,6 +544,46 @@ export function RecordObligationPaymentForm(props: {
             </label>
           </div>
 
+          {allocationMode === "selected" ? (
+            <fieldset className="kxd-os-commercial-obligation-select">
+              <legend>Selected obligations</legend>
+              <p className="kxd-os-commercial-field__help">
+                Payment allocates FIFO only within the checked set. Unselected obligations are
+                never touched.
+              </p>
+              <ul className="kxd-os-commercial-obligation-select__list">
+                {openInvoices.map((row) => {
+                  const id = row.obligationId ?? "";
+                  if (!id) return null;
+                  const checked = selectedObligationIds.includes(id);
+                  return (
+                    <li key={row.id}>
+                      <label className="kxd-os-commercial-obligation-select__row">
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => toggleSelected(id)}
+                        />
+                        <span className="kxd-os-commercial-obligation-select__copy">
+                          <strong>{row.title}</strong>
+                          <span>
+                            Original {row.amountLabel} · Paid {row.amountPaidLabel} · Remaining{" "}
+                            {row.remainingLabel}
+                          </span>
+                        </span>
+                      </label>
+                    </li>
+                  );
+                })}
+              </ul>
+              {selectedObligationIds.length > 0 ? (
+                <p className="kxd-os-commercial-muted">
+                  Selected remaining capacity ${(selectedRemainingCents / 100).toFixed(2)}
+                </p>
+              ) : null}
+            </fieldset>
+          ) : null}
+
           <label className="kxd-os-commercial-field">
             <span className="kxd-os-commercial-field__label">
               Internal note <em>Optional</em>
@@ -491,17 +605,26 @@ export function RecordObligationPaymentForm(props: {
               <p className="kxd-os-commercial-record-payment__error">{previewError}</p>
             ) : null}
             {preview ? (
-              <ul>
-                {preview.legs.map((leg) => (
-                  <li key={leg.obligationId}>
-                    <strong>{leg.label}</strong>
-                    {" · "}
-                    apply ${(leg.amountCents / 100).toFixed(2)}
-                    {" · "}
-                    remaining after ${(leg.remainingAfterCents / 100).toFixed(2)}
-                  </li>
-                ))}
-              </ul>
+              <>
+                <ul>
+                  {preview.legs.map((leg) => (
+                    <li key={leg.obligationId}>
+                      <strong>{leg.label}</strong>
+                      {" · "}
+                      apply ${(leg.amountCents / 100).toFixed(2)}
+                      {" · "}
+                      remaining after ${(leg.remainingAfterCents / 100).toFixed(2)}
+                    </li>
+                  ))}
+                </ul>
+                <p className="kxd-os-commercial-muted">
+                  Total allocated $
+                  {((preview.totalAmountCents - preview.unallocatedCents) / 100).toFixed(2)}
+                  {preview.unallocatedCents > 0
+                    ? ` · Unallocated $${(preview.unallocatedCents / 100).toFixed(2)}`
+                    : " · Unallocated $0.00"}
+                </p>
+              </>
             ) : (
               <p className="kxd-os-commercial-muted">
                 Enter an amount and leave the field to preview where funds apply.
@@ -521,6 +644,7 @@ export function RecordObligationPaymentForm(props: {
                     amountDollars,
                     allocationMode,
                     obligationId,
+                    selectedObligationIds,
                     agreementId: selected.agreementId,
                   })
                 }
@@ -540,7 +664,12 @@ export function RecordObligationPaymentForm(props: {
             <button
               type="submit"
               className="kxd-os-btn kxd-os-btn--primary"
-              disabled={busy || !preview || (preview?.unallocatedCents ?? 0) > 0}
+              disabled={
+                busy ||
+                !preview ||
+                (preview?.unallocatedCents ?? 0) > 0 ||
+                (allocationMode === "selected" && selectedObligationIds.length === 0)
+              }
             >
               {busy ? "Recording…" : `Record ${methodLabel(method)} payment`}
             </button>

@@ -22040,6 +22040,66 @@ select.kxd-os-commercial-control {
   background: var(--kxd-os-bg-surface);
 }
 
+.kxd-os-commercial-obligation-select {
+  margin: 0 0 0.85rem;
+  padding: 0.85rem 0 0;
+  border: 0;
+  border-top: 1px solid var(--kxd-os-border-subtle, rgba(0, 0, 0, 0.08));
+}
+
+.kxd-os-commercial-obligation-select legend {
+  padding: 0;
+  margin: 0 0 0.35rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-faint);
+}
+
+.kxd-os-commercial-obligation-select__list {
+  list-style: none;
+  margin: 0.55rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.kxd-os-commercial-obligation-select__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  margin: 0;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--kxd-os-border-divider);
+  border-radius: var(--kxd-os-radius-sm);
+  background: var(--kxd-os-bg-surface);
+  cursor: pointer;
+}
+
+.kxd-os-commercial-obligation-select__row input {
+  margin-top: 0.2rem;
+}
+
+.kxd-os-commercial-obligation-select__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.kxd-os-commercial-obligation-select__copy strong {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--kxd-os-text-primary);
+}
+
+.kxd-os-commercial-obligation-select__copy span {
+  font-size: 0.8125rem;
+  color: var(--kxd-os-text-secondary);
+}
+
 .kxd-os-commercial-allocation-preview h4 {
   margin: 0 0 0.45rem;
   font-size: 0.72rem;

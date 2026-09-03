@@ -444,4 +444,144 @@ for (const payment of payments) {
   ok("12. payment history preserved as append-only events");
 }
 
+{
+  // Selected-obligations mode: historical Cash App payments must not spill into
+  // domain / hosting / recurring when those sit between website installment due dates.
+  const termsWithDomain = {
+    ...(makePkg(makePlan(website)).structuredPaymentTerms as StructuredPaymentTerms),
+    ancillaryCharges: [
+      {
+        id: "pfw-domain-com",
+        kind: "domain" as const,
+        title: ".com domain registration",
+        amountCents: 1_019,
+        cadence: "one-time" as const,
+        dueTrigger: "at-launch",
+        dueDate: "2026-08-05",
+        termNotes: "Fixture domain",
+        status: "pending-trigger" as const,
+      },
+      {
+        id: "pfw-hosting-y1",
+        kind: "managed-hosting" as const,
+        title: "KXD Managed Website Hosting (Annual)",
+        amountCents: 29_999,
+        cadence: "annual" as const,
+        dueTrigger: "at-launch",
+        dueDate: "2026-09-01",
+        termNotes: "Fixture annual hosting",
+        status: "pending-trigger" as const,
+      },
+    ],
+  };
+  let selectedPlan = ensureAncillaryObligationsOnPlan(makePlan(website), termsWithDomain);
+  selectedPlan = ensureRecurringDueOccurrenceOnPlan(selectedPlan, {
+    sourceKey: "recurring:website-growth-management:2026-09",
+    label: "Website Growth & Management — Sep 2026",
+    amountCents: 32_500,
+    dueDate: "2026-09-01",
+    serviceTitle: "Website Growth & Management",
+  });
+
+  const globalFifoFirst = planFifoAllocation(selectedPlan.obligations, 35_000);
+  assert.ok(
+    globalFifoFirst.some((leg) => leg.obligationId.includes("domain") || leg.label.includes("domain")),
+    "sanity: unconstrained FIFO would touch domain between website installments",
+  );
+
+  const websiteIds = selectedPlan.obligations
+    .filter((o) => o.kind === "initial" || o.kind === "milestone" || o.kind === "final")
+    .map((o) => o.id);
+  assert.equal(websiteIds.length, 6);
+
+  let selectedPkg: ContractLifecyclePackage = {
+    ...makePkg(selectedPlan),
+    structuredPaymentTerms: termsWithDomain,
+    billingPlan: selectedPlan,
+  };
+
+  const selectedPayments = [
+    { paidAt: "2026-08-21", amountCents: 35_000, ref: "sel-ca-350-a" },
+    { paidAt: "2026-08-21", amountCents: 55_000, ref: "sel-ca-550-b" },
+    { paidAt: "2026-08-24", amountCents: 35_000, ref: "sel-ca-350-c" },
+    { paidAt: "2026-08-27", amountCents: 30_000, ref: "sel-ca-300-d" },
+  ] as const;
+
+  const paymentGroupIds = new Set<string>();
+  for (const payment of selectedPayments) {
+    const preview = previewExternalPaymentAllocation(selectedPkg.billingPlan!, {
+      amountCents: payment.amountCents,
+      allocationMode: "fifo",
+      allowedObligationIds: websiteIds,
+    });
+    assert.ok(!("ok" in preview && preview.ok === false), "selected preview must succeed");
+    const allocPreview = preview as Exclude<typeof preview, { ok: false }>;
+    assert.equal(allocPreview.unallocatedCents, 0);
+    for (const leg of allocPreview.legs) {
+      assert.ok(websiteIds.includes(leg.obligationId), "leg must stay inside selected set");
+    }
+
+    const applied = applyAllocatedExternalPayment(selectedPkg, {
+      contractId: 9001,
+      amountCents: payment.amountCents,
+      currency: "USD",
+      paidAt: payment.paidAt,
+      externalPaymentMethod: "cash-app",
+      externalReference: payment.ref,
+      operatorNote: "Selected website project obligations only",
+      recordedBy: "fixture-operator",
+      paidOutsideStripe: true,
+      allocationMode: "fifo",
+      allowedObligationIds: websiteIds,
+    });
+    assert.equal(applied.ok, true);
+    if (!applied.ok) throw new Error("selected apply failed");
+    selectedPkg = applied.pkg;
+    for (const obligation of selectedPkg.billingPlan!.obligations) {
+      for (const event of obligation.paymentEvents ?? []) {
+        if (event.externalReference === payment.ref) {
+          paymentGroupIds.add(event.paymentGroupId);
+        }
+      }
+    }
+  }
+
+  assert.equal(paymentGroupIds.size, 4, "four real payment transactions");
+
+  const websitePaid = selectedPkg.billingPlan!.obligations
+    .filter((o) => o.kind === "initial" || o.kind === "milestone" || o.kind === "final")
+    .reduce((sum, o) => sum + obligationAmountPaidCents(o), 0);
+  const websiteRemaining = sumProjectObligationRemainingCents(
+    selectedPkg.billingPlan!.obligations,
+  );
+  assert.equal(websitePaid, 155_000);
+  assert.equal(websiteRemaining, 95_000);
+
+  const domain = selectedPkg.billingPlan!.obligations.find(
+    (o) => o.sourceKey === "ancillary:pfw-domain-com",
+  );
+  const hosting = selectedPkg.billingPlan!.obligations.find(
+    (o) => o.sourceKey === "ancillary:pfw-hosting-y1",
+  );
+  const growth = selectedPkg.billingPlan!.obligations.find(
+    (o) => o.sourceKey === "recurring:website-growth-management:2026-09",
+  );
+  assert.equal(obligationRemainingCents(domain!), 1_019);
+  assert.equal(obligationAmountPaidCents(domain!), 0);
+  assert.equal(obligationRemainingCents(hosting!), 29_999);
+  assert.equal(obligationAmountPaidCents(hosting!), 0);
+  assert.equal(obligationRemainingCents(growth!), 32_500);
+  assert.equal(obligationAmountPaidCents(growth!), 0);
+
+  const combinedSelected =
+    websiteRemaining +
+    obligationRemainingCents(domain!) +
+    obligationRemainingCents(hosting!) +
+    obligationRemainingCents(growth!);
+  assert.equal(combinedSelected, 158_518);
+  ok(
+    "13. selected obligations: 4 Cash App txs → website $1,550 paid / $950 rem; domain/hosting/growth untouched; combined due $1,585.18",
+  );
+}
+
 console.log(`\nverify:partial-external-payment-allocation passed (${passed} checks)`);

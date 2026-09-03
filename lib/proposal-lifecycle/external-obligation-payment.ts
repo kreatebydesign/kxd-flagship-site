@@ -105,6 +105,11 @@ export type RecordAllocatedExternalPaymentInput = {
    */
   allocations?: AllocationLegInput[];
   allocationMode?: "explicit" | "fifo";
+  /**
+   * When allocationMode is fifo, restrict FIFO to these obligation IDs only.
+   * Prevents spill into unselected obligations (e.g. ancillary / recurring).
+   */
+  allowedObligationIds?: string[];
   /** Optional client-supplied idempotency key (still namespaced). */
   clientIdempotencyKey?: string | null;
 };
@@ -210,6 +215,8 @@ export function previewExternalPaymentAllocation(
     amountCents: number;
     allocationMode?: "explicit" | "fifo";
     allocations?: AllocationLegInput[];
+    /** Restrict FIFO planning to these obligation IDs (selected-obligations mode). */
+    allowedObligationIds?: string[];
   },
 ): AllocationPreview | { ok: false; errors: FieldErrors } {
   const amountCents = Number(input.amountCents);
@@ -219,9 +226,20 @@ export function previewExternalPaymentAllocation(
 
   const mode = input.allocationMode ?? (input.allocations?.length ? "explicit" : "fifo");
   let legs: AllocationLegInput[] = [];
+  const allowedIds = (input.allowedObligationIds ?? [])
+    .map((id) => String(id).trim())
+    .filter(Boolean);
 
   if (mode === "fifo") {
-    legs = planFifoAllocation(plan.obligations, amountCents).map((leg) => ({
+    if (input.allowedObligationIds && allowedIds.length === 0) {
+      return {
+        ok: false,
+        errors: { allocations: "Select at least one obligation for this payment." },
+      };
+    }
+    legs = planFifoAllocation(plan.obligations, amountCents, {
+      allowedObligationIds: allowedIds.length ? allowedIds : undefined,
+    }).map((leg) => ({
       obligationId: leg.obligationId,
       amountCents: leg.amountCents,
     }));
@@ -230,6 +248,19 @@ export function previewExternalPaymentAllocation(
       obligationId: String(leg.obligationId),
       amountCents: Number(leg.amountCents),
     }));
+    if (allowedIds.length) {
+      const allowed = new Set(allowedIds);
+      for (const leg of legs) {
+        if (!allowed.has(leg.obligationId)) {
+          return {
+            ok: false,
+            errors: {
+              allocations: "Allocation includes an obligation outside the selected set.",
+            },
+          };
+        }
+      }
+    }
   }
 
   if (!legs.length) {
@@ -660,6 +691,7 @@ export function applyAllocatedExternalPayment(
     amountCents,
     allocationMode: input.allocationMode,
     allocations: input.allocations,
+    allowedObligationIds: input.allowedObligationIds,
   });
   if ("ok" in preview && preview.ok === false) return preview;
   const allocationPreview = preview as AllocationPreview;
