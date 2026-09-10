@@ -31,7 +31,10 @@ import { formatCents } from "./money.ts";
 import {
   coverOrganizationPresentation,
   distinctScopeOrganizationName,
+  proseKindForTermsKey,
   shouldShowRecurringInvestment,
+  structureProposalProse,
+  type ProposalProseBlock,
 } from "./presentation.ts";
 import {
   ensureProposalPdfFonts,
@@ -129,9 +132,15 @@ const styles = StyleSheet.create({
     fontSize: 10,
   },
   bullet: {
-    marginBottom: 4,
-    paddingLeft: 8,
+    marginBottom: 6,
+    paddingLeft: 10,
     lineHeight: 1.5,
+    fontFamily: PROPOSAL_PDF_SANS,
+    fontSize: 10,
+  },
+  listIntro: {
+    marginBottom: 6,
+    lineHeight: 1.55,
     fontFamily: PROPOSAL_PDF_SANS,
     fontSize: 10,
   },
@@ -266,6 +275,46 @@ function Paragraph({ text }: { text?: string | null }) {
   return <Text style={styles.p}>{text}</Text>;
 }
 
+function ProseBullet({ text, marker = "•" }: { text: string; marker?: string }) {
+  return (
+    <Text style={styles.bullet}>
+      {marker} {text}
+    </Text>
+  );
+}
+
+function StructuredProse({ blocks }: { blocks: ProposalProseBlock[] }) {
+  return (
+    <>
+      {blocks.map((block, index) => {
+        if (block.type === "paragraph") {
+          return <Text key={`p-${index}`} style={styles.listIntro}>{block.text}</Text>;
+        }
+        if (block.type === "numbered") {
+          return (
+            <View key={`ol-${index}`}>
+              {block.items.map((item, itemIndex) => (
+                <ProseBullet
+                  key={`ol-${index}-${itemIndex}`}
+                  marker={`${itemIndex + 1}.`}
+                  text={item}
+                />
+              ))}
+            </View>
+          );
+        }
+        return (
+          <View key={`ul-${index}`}>
+            {block.items.map((item, itemIndex) => (
+              <ProseBullet key={`ul-${index}-${itemIndex}`} text={item} />
+            ))}
+          </View>
+        );
+      })}
+    </>
+  );
+}
+
 function SectionBlock({
   eyebrow,
   title,
@@ -346,27 +395,49 @@ function NextStepsSection({
   closingNote?: string | null;
   acceptance?: string | null;
 }) {
-  const steps = (nextSteps ?? "")
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean);
-  const leadSteps = steps.slice(0, 2);
-  const restSteps = steps.slice(2);
-  const restStepChunks = chunkListItems(restSteps, 2);
+  const blocks = structureProposalProse(nextSteps, proseKindForTermsKey("nextSteps"));
+  const rows: Array<{ key: string; node: React.ReactNode }> = [];
+  blocks.forEach((block, blockIndex) => {
+    if (block.type === "paragraph") {
+      rows.push({
+        key: `p-${blockIndex}`,
+        node: <Text style={styles.listIntro}>{block.text}</Text>,
+      });
+      return;
+    }
+    if (block.type === "numbered") {
+      block.items.forEach((item, itemIndex) => {
+        rows.push({
+          key: `n-${blockIndex}-${itemIndex}`,
+          node: <ProseBullet marker={`${itemIndex + 1}.`} text={item} />,
+        });
+      });
+      return;
+    }
+    block.items.forEach((item, itemIndex) => {
+      rows.push({
+        key: `b-${blockIndex}-${itemIndex}`,
+        node: <ProseBullet text={item} />,
+      });
+    });
+  });
+
+  const leadRows = rows.slice(0, 2);
+  const restChunks = chunkListItems(rows.slice(2), 2);
 
   return (
     <View style={styles.section} wrap>
       <View wrap={false} minPresenceAhead={104}>
         <Text style={styles.eyebrow}>Next step</Text>
         <Text style={styles.h2}>How to begin</Text>
-        {leadSteps.map((step) => (
-          <Paragraph key={step.slice(0, 24)} text={step} />
+        {leadRows.map((row) => (
+          <View key={row.key}>{row.node}</View>
         ))}
       </View>
-      {restStepChunks.map((chunk, index) => (
+      {restChunks.map((chunk, index) => (
         <View key={`next-steps-${index}`} wrap={false} minPresenceAhead={72}>
-          {chunk.map((step) => (
-            <Paragraph key={step.slice(0, 24)} text={step} />
+          {chunk.map((row) => (
+            <View key={row.key}>{row.node}</View>
           ))}
         </View>
       ))}
@@ -643,7 +714,9 @@ function ProposalPdfDocument({
           if (!text?.trim()) return null;
           return (
             <SectionBlock key={key} eyebrow={eyebrow} title={title}>
-              <Paragraph text={text} />
+              <StructuredProse
+                blocks={structureProposalProse(text, proseKindForTermsKey(key))}
+              />
             </SectionBlock>
           );
         })}

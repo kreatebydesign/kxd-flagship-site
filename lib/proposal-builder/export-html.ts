@@ -17,6 +17,9 @@ import {
   formatCoverPreparedForLine,
   shouldShowRecurringInvestment,
   distinctScopeOrganizationName,
+  proseKindForTermsKey,
+  structureProposalProse,
+  type ProposalProseBlock,
 } from "./presentation.ts";
 import { KXD_REPORT_COLORS } from "../kxd-report-engine/tokens.ts";
 import { KXD_REPORT_BRAND, KXD_REPORT_SITE } from "../kxd-report-engine/contact.ts";
@@ -36,9 +39,30 @@ function para(text?: string): string {
   return `<p>${esc(text).replace(/\n/g, "<br/>")}</p>`;
 }
 
-function section(eyebrow: string, title: string, body?: string): string {
+function renderProseBlocks(blocks: ProposalProseBlock[]): string {
+  return blocks
+    .map((block) => {
+      if (block.type === "paragraph") {
+        return `<p>${esc(block.text)}</p>`;
+      }
+      if (block.type === "numbered") {
+        const items = block.items.map((item) => `<li>${esc(item)}</li>`).join("");
+        return `<ol class="prose-list">${items}</ol>`;
+      }
+      const items = block.items.map((item) => `<li>${esc(item)}</li>`).join("");
+      return `<ul class="prose-list">${items}</ul>`;
+    })
+    .join("");
+}
+
+function section(
+  eyebrow: string,
+  title: string,
+  body?: string,
+  kind: "narrative" | "list" | "steps" = "narrative",
+): string {
   if (!body?.trim()) return "";
-  return `<section class="block"><div class="eyebrow">${esc(eyebrow)}</div><h2>${esc(title)}</h2>${para(body)}</section>`;
+  return `<section class="block"><div class="eyebrow">${esc(eyebrow)}</div><h2>${esc(title)}</h2>${renderProseBlocks(structureProposalProse(body, kind))}</section>`;
 }
 
 export function renderProposalPreviewHtml(proposal: CanonicalProposal): string {
@@ -161,7 +185,9 @@ export function renderProposalPreviewHtml(proposal: CanonicalProposal): string {
   p { line-height: 1.65; font-size: 1.05rem; }
   .block { padding: 28px 0; border-bottom: 1px solid var(--line); }
   .block:last-child { border-bottom: 0; }
-  ul { padding-left: 1.15rem; line-height: 1.6; }
+  ul { padding-left: 1.15rem; line-height: 1.6; margin: 0 0 0.85rem; }
+  ol.prose-list, ul.prose-list { padding-left: 1.2rem; line-height: 1.55; margin: 0 0 0.95rem; }
+  ol.prose-list li, ul.prose-list li { margin: 0 0 0.55rem; padding-left: 0.15rem; }
   table { width: 100%; border-collapse: collapse; font-family: system-ui, sans-serif; font-size: 14px; }
   th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
   th { color: var(--muted); font-weight: 500; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
@@ -224,12 +250,22 @@ export function renderProposalPreviewHtml(proposal: CanonicalProposal): string {
     ${section("Changes", "Scope changes", proposal.terms.changeRequestLanguage)}
     ${section("Intellectual property", "Intellectual property", proposal.terms.intellectualPropertySummary)}
     ${section("Cancellation", "Cancellation", proposal.terms.cancellationSummary)}
-    ${section("Responsibilities", "What we need from you", proposal.terms.clientResponsibilities)}
-    ${section("Exclusions", "What's not included", proposal.terms.exclusions)}
+    ${section(
+      "Responsibilities",
+      "What we need from you",
+      proposal.terms.clientResponsibilities,
+      proseKindForTermsKey("clientResponsibilities"),
+    )}
+    ${section(
+      "Exclusions",
+      "What's not included",
+      proposal.terms.exclusions,
+      proseKindForTermsKey("exclusions"),
+    )}
     <section class="block">
       <div class="eyebrow">Next step</div>
       <h2>How to begin</h2>
-      ${para(proposal.terms.nextSteps)}
+      ${renderProseBlocks(structureProposalProse(proposal.terms.nextSteps, proseKindForTermsKey("nextSteps")))}
       ${para(proposal.terms.closingNote)}
       ${proposal.disclosures.acceptance ? `<div class="disclosure"><p>${esc(proposal.disclosures.acceptance)}</p></div>` : ""}
     </section>

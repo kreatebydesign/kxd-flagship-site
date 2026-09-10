@@ -14,7 +14,7 @@ import {
 } from "./client-facing-labels.ts";
 import { formatProposalContactSummary } from "./document.ts";
 import { formatCents } from "./money.ts";
-import { formatCoverPreparedForLine, shouldShowRecurringInvestment } from "./presentation.ts";
+import { formatCoverPreparedForLine, shouldShowRecurringInvestment, proseKindForTermsKey, structureProposalProse } from "./presentation.ts";
 import type { CanonicalProposal } from "./types.ts";
 
 export function renderProposalPlainText(proposal: CanonicalProposal): string {
@@ -22,6 +22,19 @@ export function renderProposalPlainText(proposal: CanonicalProposal): string {
   const push = (...parts: Array<string | null | undefined>) => {
     for (const part of parts) {
       if (part?.trim()) lines.push(part.trim());
+    }
+  };
+  const pushStructured = (label: string, value: string | undefined, key: string) => {
+    if (!value?.trim()) return;
+    push(label);
+    for (const block of structureProposalProse(value, proseKindForTermsKey(key))) {
+      if (block.type === "paragraph") {
+        push(block.text);
+      } else if (block.type === "numbered") {
+        block.items.forEach((item, index) => push(`${index + 1}. ${item}`));
+      } else {
+        block.items.forEach((item) => push(`• ${item}`));
+      }
     }
   };
 
@@ -98,22 +111,24 @@ export function renderProposalPlainText(proposal: CanonicalProposal): string {
     }
   }
 
-  const terms: Array<[string, string | undefined]> = [
-    ["Terms", proposal.terms.proposalTerms],
-    ["Payment Schedule", proposal.terms.paymentAssumptions],
-    ["Project Timeline", proposal.terms.timelineAssumptions],
-    ["Proposal Validity", proposal.terms.expirationLanguage],
-    ["Scope Changes", proposal.terms.changeRequestLanguage],
-    ["Intellectual Property", proposal.terms.intellectualPropertySummary],
-    ["Cancellation", proposal.terms.cancellationSummary],
-    ["What We Need From You", proposal.terms.clientResponsibilities],
-    ["What's Not Included", proposal.terms.exclusions],
-    ["Next Step", proposal.terms.nextSteps],
-    ["Closing Note", proposal.terms.closingNote],
-    ["Approval", proposal.disclosures.acceptance],
+  const terms: Array<[string, string, string | undefined]> = [
+    ["Terms", "proposalTerms", proposal.terms.proposalTerms],
+    ["Payment Schedule", "paymentAssumptions", proposal.terms.paymentAssumptions],
+    ["Project Timeline", "timelineAssumptions", proposal.terms.timelineAssumptions],
+    ["Proposal Validity", "expirationLanguage", proposal.terms.expirationLanguage],
+    ["Scope Changes", "changeRequestLanguage", proposal.terms.changeRequestLanguage],
+    ["Intellectual Property", "intellectualPropertySummary", proposal.terms.intellectualPropertySummary],
+    ["Cancellation", "cancellationSummary", proposal.terms.cancellationSummary],
+    ["What We Need From You", "clientResponsibilities", proposal.terms.clientResponsibilities],
+    ["What's Not Included", "exclusions", proposal.terms.exclusions],
+    ["Next Step", "nextSteps", proposal.terms.nextSteps],
+    ["Closing Note", "closingNote", proposal.terms.closingNote],
   ];
-  for (const [label, value] of terms) {
-    if (value?.trim()) push(label, value);
+  for (const [label, key, value] of terms) {
+    pushStructured(label, value, key);
+  }
+  if (proposal.disclosures.acceptance?.trim()) {
+    push("Approval", proposal.disclosures.acceptance);
   }
 
   return lines.join("\n");

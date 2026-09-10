@@ -5,6 +5,13 @@
 
 import type { ProposalOrganization } from "./types.ts";
 
+export {
+  proseKindForTermsKey,
+  structureProposalProse,
+  type ProposalProseBlock,
+  type ProposalProseKind,
+} from "./structured-prose.ts";
+
 function comparableLabel(value: string | null | undefined): string {
   return String(value ?? "")
     .trim()

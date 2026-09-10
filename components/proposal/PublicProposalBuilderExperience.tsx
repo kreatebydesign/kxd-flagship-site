@@ -13,7 +13,10 @@ import { formatCents } from "@/lib/proposal-builder/money";
 import {
   distinctScopeOrganizationName,
   formatCoverPreparedForLine,
+  proseKindForTermsKey,
   shouldShowRecurringInvestment,
+  structureProposalProse,
+  type ProposalProseBlock,
 } from "@/lib/proposal-builder/presentation";
 import { formatProposalContactSummary } from "@/lib/proposal-builder/document";
 import type { CanonicalProposal } from "@/lib/proposal-builder/types";
@@ -437,21 +440,28 @@ export function PublicProposalBuilderExperience({ publicToken }: { publicToken: 
 
         {(
           [
-            ["Terms", "Terms", p.terms.proposalTerms],
-            ["Payment", "Payment assumptions", p.terms.paymentAssumptions],
-            ["Timeline", "Project timeline", p.terms.timelineAssumptions],
-            ["Validity", "Proposal validity", p.terms.expirationLanguage],
-            ["Changes", "Scope changes", p.terms.changeRequestLanguage],
-            ["Responsibilities", "What we need from you", p.terms.clientResponsibilities],
-            ["Exclusions", "What's not included", p.terms.exclusions],
-            ["Next step", "How to begin", p.terms.nextSteps],
+            ["Terms", "Terms", "proposalTerms", p.terms.proposalTerms],
+            ["Payment", "Payment assumptions", "paymentAssumptions", p.terms.paymentAssumptions],
+            ["Timeline", "Project timeline", "timelineAssumptions", p.terms.timelineAssumptions],
+            ["Validity", "Proposal validity", "expirationLanguage", p.terms.expirationLanguage],
+            ["Changes", "Scope changes", "changeRequestLanguage", p.terms.changeRequestLanguage],
+            [
+              "Responsibilities",
+              "What we need from you",
+              "clientResponsibilities",
+              p.terms.clientResponsibilities,
+            ],
+            ["Exclusions", "What's not included", "exclusions", p.terms.exclusions],
+            ["Next step", "How to begin", "nextSteps", p.terms.nextSteps],
           ] as const
-        ).map(([label, title, text]) =>
+        ).map(([label, title, key, text]) =>
           text?.trim() ? (
             <section key={label} style={{ marginBottom: "2rem" }}>
               <p style={eyebrow}>{label}</p>
               <h2 style={h2}>{title}</h2>
-              <p style={body}>{text}</p>
+              <StructuredProseBlocks
+                blocks={structureProposalProse(text, proseKindForTermsKey(key))}
+              />
             </section>
           ) : null,
         )}
@@ -602,6 +612,42 @@ function FormField({
   );
 }
 
+function StructuredProseBlocks({ blocks }: { blocks: ProposalProseBlock[] }) {
+  return (
+    <>
+      {blocks.map((block, index) => {
+        if (block.type === "paragraph") {
+          return (
+            <p key={`p-${index}`} style={{ ...body, margin: "0 0 0.85rem" }}>
+              {block.text}
+            </p>
+          );
+        }
+        if (block.type === "numbered") {
+          return (
+            <ol key={`ol-${index}`} style={structuredList}>
+              {block.items.map((item, itemIndex) => (
+                <li key={`ol-${index}-${itemIndex}`} style={structuredListItem}>
+                  {item}
+                </li>
+              ))}
+            </ol>
+          );
+        }
+        return (
+          <ul key={`ul-${index}`} style={structuredList}>
+            {block.items.map((item, itemIndex) => (
+              <li key={`ul-${index}-${itemIndex}`} style={structuredListItem}>
+                {item}
+              </li>
+            ))}
+          </ul>
+        );
+      })}
+    </>
+  );
+}
+
 const eyebrow: CSSProperties = {
   fontFamily: "system-ui,sans-serif",
   fontSize: 11,
@@ -618,6 +664,16 @@ const h2: CSSProperties = {
   margin: "0 0 12px",
 };
 const body: CSSProperties = { lineHeight: 1.65, fontSize: "1.05rem" };
+const structuredList: CSSProperties = {
+  margin: "0 0 0.95rem",
+  paddingLeft: "1.2rem",
+  lineHeight: 1.55,
+  fontSize: "1.05rem",
+};
+const structuredListItem: CSSProperties = {
+  marginBottom: "0.55rem",
+  paddingLeft: "0.15rem",
+};
 const meta: CSSProperties = { fontFamily: "system-ui,sans-serif", color: "#6f6a62" };
 const td: CSSProperties = {
   padding: "10px 8px",
