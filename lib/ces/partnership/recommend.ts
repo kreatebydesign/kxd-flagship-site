@@ -13,6 +13,13 @@ export interface RecommendInput {
   hasActiveReviews: boolean;
   results: PartnershipResults | null;
   websiteUrl: string | null;
+  /**
+   * When true, open Website Review records no longer mean “launch is blocked.”
+   * Used for post-launch clients (e.g. Primal) so growth language wins.
+   */
+  postLaunchActive?: boolean;
+  postLaunchHeadline?: string | null;
+  postLaunchRationale?: string | null;
 }
 
 export function decideClientRecommendation(input: RecommendInput): PartnershipRecommendation {
@@ -27,6 +34,17 @@ export function decideClientRecommendation(input: RecommendInput): PartnershipRe
       evidenceLabels: [
         awaiting ? `Waiting on: ${awaiting.title}` : "A revision is waiting for your input",
       ],
+    };
+  }
+
+  if (input.postLaunchActive) {
+    return {
+      headline:
+        input.postLaunchHeadline?.trim() || "Focus moves to measurable growth",
+      rationale:
+        input.postLaunchRationale?.trim() ||
+        "The production website is live and verified. Next priorities are qualified traffic, search visibility, and advertising efficiency.",
+      evidenceLabels: ["Production live", "Post-launch verification complete"],
     };
   }
 

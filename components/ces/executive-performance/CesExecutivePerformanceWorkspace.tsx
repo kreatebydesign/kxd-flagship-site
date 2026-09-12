@@ -21,9 +21,15 @@ export interface CesExecutivePerformanceWorkspaceProps {
   websiteReview: WebsiteReviewLandingData;
 }
 
-function connectionLabel(state: string): string {
+function connectionLabel(state: string, summary?: string | null): string {
   if (state === "connected") return "Connected";
-  if (state === "awaiting-signal") return "Waiting";
+  if (state === "awaiting-signal") {
+    if (summary?.toLowerCase().includes("baseline")) return "Baseline";
+    return "Waiting";
+  }
+  if (summary?.toLowerCase().includes("measurement active")) return "Active";
+  if (summary?.toLowerCase().includes("performance reviewed")) return "Reviewed";
+  if (summary?.toLowerCase().includes("leadership report")) return "In report";
   return "Not yet";
 }
 
@@ -256,9 +262,21 @@ export function CesExecutivePerformanceWorkspace({
             </h2>
           </div>
           <div className="kxd-ces-exec__reporting-provenance">
+            {provenance.baselineLabel ? (
+              <p className="kxd-ces-exec__provenance-row">
+                <span className="kxd-ces-exec__provenance-key">Baseline</span>
+                <span className="kxd-ces-exec__provenance-value">
+                  {provenance.baselineLabel}
+                </span>
+              </p>
+            ) : null}
             <p className="kxd-ces-exec__provenance-row">
-              <span className="kxd-ces-exec__provenance-key">Period</span>
-              <span className="kxd-ces-exec__provenance-value">{periodLabel}</span>
+              <span className="kxd-ces-exec__provenance-key">
+                {provenance.monthlyPeriodLabel ? "Monthly facts" : "Period"}
+              </span>
+              <span className="kxd-ces-exec__provenance-value">
+                {provenance.monthlyPeriodLabel ?? periodLabel}
+              </span>
             </p>
             {dataThroughLabel ? (
               <p className="kxd-ces-exec__provenance-row">
@@ -296,6 +314,37 @@ export function CesExecutivePerformanceWorkspace({
             ) : null}
           </div>
         </div>
+        <div className="kxd-ces-exec__primary-leads" aria-label="Primary leads">
+          <p className="kxd-ces-exec__subhead">Primary leads</p>
+          <dl className="kxd-ces-exec__metric-grid kxd-ces-exec__metric-grid--leads">
+            {(
+              [
+                performance.primaryLeads.websiteFormLeads,
+                performance.primaryLeads.paidQualifiedCallLeads,
+                performance.primaryLeads.totalPrimaryLeads,
+              ] as const
+            ).map((lead) => (
+              <div
+                key={lead.key}
+                className={[
+                  "kxd-ces-exec__metric",
+                  lead.available ? "" : "kxd-ces-exec__metric--unavailable",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+              >
+                <dt>{lead.label}</dt>
+                <dd>{lead.value}</dd>
+                {lead.deltaLabel ? (
+                  <p className="kxd-ces-exec__metric-delta">{lead.deltaLabel}</p>
+                ) : null}
+              </div>
+            ))}
+          </dl>
+          <p className="kxd-ces-exec__provenance-note">
+            {performance.primaryLeads.excludedNote}
+          </p>
+        </div>
         <ul className="kxd-ces-exec__status-row">
           {performance.performancePanels.map((panel) => {
             const narrative = executivePanelNarrative(panel, periodLabel);
@@ -319,7 +368,7 @@ export function CesExecutivePerformanceWorkspace({
                   <span
                     className={`kxd-ces-exec__status-state kxd-ces-exec__status-state--${panel.state}`}
                   >
-                    {connectionLabel(panel.state)}
+                    {connectionLabel(panel.state, panel.summary)}
                   </span>
                 </div>
                 {hasLiveMetrics ? (

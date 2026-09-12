@@ -148,3 +148,38 @@ export function memoryToEvolutionItems(clientSlug: string | null | undefined): A
     maturity: item.status === "active" ? ("available-now" as const) : item.priority ? ("next" as const) : ("future" as const),
   }));
 }
+
+/**
+ * Recently completed deliveries with dates — for portal progress strips.
+ * Prefer dated `delivery` / completed `results` items; fall back to dated milestones.
+ */
+export function memoryToRecentCompleted(clientSlug: string | null | undefined): Array<{
+  id: string;
+  label: string;
+  detail: string | null;
+  at: string | null;
+}> | null {
+  const lens = getExecutiveMemoryLens(clientSlug);
+  if (!lens || lens.items.length === 0) return null;
+
+  const dated = lens.items.filter(
+    (item) =>
+      item.occurredAt &&
+      item.status === "completed" &&
+      (item.kind === "delivery" ||
+        item.briefingSection === "results" ||
+        item.kind === "milestone" ||
+        item.kind === "launch"),
+  );
+  if (dated.length === 0) return null;
+
+  return [...dated]
+    .sort((a, b) => String(b.occurredAt).localeCompare(String(a.occurredAt)))
+    .slice(0, 7)
+    .map((item) => ({
+      id: item.id,
+      label: item.label,
+      detail: item.statement,
+      at: item.occurredAt,
+    }));
+}

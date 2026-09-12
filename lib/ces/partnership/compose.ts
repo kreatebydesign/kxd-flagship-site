@@ -21,6 +21,11 @@ import { getPartnershipMilestones } from "./milestones";
 import { loadPartnershipResults } from "./outcomes";
 import { decideClientRecommendation } from "./recommend";
 import { composePartnershipServiceSummary } from "./service-value";
+import {
+  isPrimalPostLaunchClient,
+  PRIMAL_POST_LAUNCH_OPERATING,
+} from "@/lib/ces/profile/primal-post-launch";
+import { memoryToRecentCompleted } from "@/lib/executive-memory";
 import type {
   PartnershipBriefing,
   PartnershipDeliveredItem,
@@ -254,12 +259,20 @@ export async function composePartnershipBriefing(input: {
     (r) => r.status === "awaiting-your-input",
   );
   const hasActiveReviews = websiteReview.activeReviews.length > 0;
+  const postLaunchActive = isPrimalPostLaunchClient(slug);
   const recommendation = decideClientRecommendation({
     websiteReview,
     hasAwaitingClient,
     hasActiveReviews,
     results,
     websiteUrl: websiteReview.websiteUrl,
+    postLaunchActive,
+    postLaunchHeadline: postLaunchActive
+      ? PRIMAL_POST_LAUNCH_OPERATING.recommendationHeadline
+      : null,
+    postLaunchRationale: postLaunchActive
+      ? PRIMAL_POST_LAUNCH_OPERATING.recommendationRationale
+      : null,
   });
 
   const websiteSnapshot = buildWebsiteReviewSnapshot(websiteReview);
@@ -277,22 +290,47 @@ export async function composePartnershipBriefing(input: {
   const activeWork = connected.currentWork.find((item) => item.group === "in-progress");
   const latestProgress = connected.recentActivity[0];
   const primaryService = services.items[0];
+  const memoryRecent = postLaunchActive ? memoryToRecentCompleted(slug) : null;
   const overview = {
     relationshipStatus: "Your KXD workspace is available",
-    currentPhase: serviceScope.relationshipLabel ?? "No phase is recorded yet",
-    currentFocus:
-      activeWork?.title ?? primaryService?.value ?? "No current focus is recorded",
-    lastMajorMilestone: latestProgress?.label ?? "No milestone is recorded yet",
-    nextMilestone:
-      attentionAction ??
-      (hasActiveReviews
-        ? "Complete the current website review"
-        : "KXD will continue managing the current partnership work"),
+    currentPhase: postLaunchActive
+      ? PRIMAL_POST_LAUNCH_OPERATING.currentPhase
+      : (serviceScope.relationshipLabel ?? "No phase is recorded yet"),
+    currentFocus: postLaunchActive
+      ? PRIMAL_POST_LAUNCH_OPERATING.currentPriority
+      : (activeWork?.title ?? primaryService?.value ?? "No current focus is recorded"),
+    lastMajorMilestone: postLaunchActive
+      ? (memoryRecent?.[0]?.label ??
+        latestProgress?.label ??
+        PRIMAL_POST_LAUNCH_OPERATING.recentWin)
+      : (latestProgress?.label ?? "No milestone is recorded yet"),
+    nextMilestone: postLaunchActive
+      ? (attentionAction ?? PRIMAL_POST_LAUNCH_OPERATING.watching)
+      : (attentionAction ??
+        (hasActiveReviews
+          ? "Complete the current website review"
+          : "KXD will continue managing the current partnership work")),
     recommendationLine: recommendation.headline,
   };
 
   // Connected workspace activity is already client-filtered upstream.
   const safeConnected = connected;
+  const recentProgress = (() => {
+    const base = buildProgress(safeConnected, websiteReview, results?.periodLabel ?? null);
+    if (!memoryRecent || memoryRecent.length === 0) return base;
+    const fromMemory: PartnershipProgressItem[] = memoryRecent.map((item) => ({
+      id: item.id,
+      label: item.label,
+      detail: item.detail ?? undefined,
+      at: item.at,
+    }));
+    const seen = new Set(fromMemory.map((item) => item.label.toLowerCase()));
+    const merged = [
+      ...fromMemory,
+      ...base.filter((item) => !seen.has(item.label.toLowerCase())),
+    ];
+    return merged.slice(0, 8);
+  })();
 
   return {
     clientSlug: slug,
@@ -307,17 +345,23 @@ export async function composePartnershipBriefing(input: {
       services,
     }),
     currentState: {
-      initiative: activeWork?.title ?? primaryService?.label ?? "No current initiative is recorded",
-      websiteStage: websiteReview.websiteUrl
-        ? "Website on file"
-        : "Website details are being confirmed",
+      initiative: postLaunchActive
+        ? PRIMAL_POST_LAUNCH_OPERATING.currentPriority
+        : (activeWork?.title ?? primaryService?.label ?? "No current initiative is recorded"),
+      websiteStage: postLaunchActive
+        ? `Website ${PRIMAL_POST_LAUNCH_OPERATING.websiteStatus} · Production ${PRIMAL_POST_LAUNCH_OPERATING.productionStatus}`
+        : websiteReview.websiteUrl
+          ? "Website on file"
+          : "Website details are being confirmed",
       reviewState: websiteSnapshot.statusLabel,
       outstandingClientAction: attentionAction,
-      outstandingKxdAction: hasActiveReviews
-        ? "Advancing the open website revisions with care"
-        : primaryService
-          ? primaryService.value
-          : "No KXD action is recorded right now",
+      outstandingKxdAction: postLaunchActive
+        ? "Monitoring search, Ads efficiency, and qualified lead performance"
+        : hasActiveReviews
+          ? "Advancing the open website revisions with care"
+          : primaryService
+            ? primaryService.value
+            : "No KXD action is recorded right now",
       partnershipHealth: hasAwaitingClient
         ? "Moving forward with one item waiting on you"
         : "No current action is required",
@@ -328,7 +372,7 @@ export async function composePartnershipBriefing(input: {
       emptyMessage: "No current action is required.",
     },
     websiteReview: websiteSnapshot,
-    recentProgress: buildProgress(safeConnected, websiteReview, results?.periodLabel ?? null),
+    recentProgress,
     results,
     recommendation,
     futureModules: getBoardFutureModules([

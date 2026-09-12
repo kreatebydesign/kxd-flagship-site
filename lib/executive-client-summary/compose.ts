@@ -226,36 +226,48 @@ export function composeExecutiveClientBriefing(
 
   /* Board-ready next steps — short and conversational. */
   const recommendedNextSteps: string[] = [];
-  if (awaitingClient.some((item) => item.id === "awaiting-website-revisions") || awaitingClient[0]) {
+  const operatingPhase = lens.items.find((item) => item.id === "operating-phase");
+  const launch = lens.items.find((i) => i.id === "story-launch" || i.kind === "launch");
+  const launchComplete =
+    launch?.status === "completed" ||
+    lens.items.some((item) => item.id === "milestone-website-launched" && item.status === "completed");
+
+  if (awaitingClient.some((item) => item.owner === "client") && !launchComplete) {
     recommendedNextSteps.push("Finish remaining website revisions.");
   }
-  if (lens.items.some((item) => item.id === "story-launch" || item.kind === "launch")) {
+  if (!launchComplete && lens.items.some((item) => item.id === "story-launch" || item.kind === "launch")) {
     recommendedNextSteps.push("Launch the new website.");
   }
-  if (lens.items.some((item) => item.id === "google-ads")) {
-    recommendedNextSteps.push("Continue Google Ads management.");
-  }
-  if (
-    lens.items.some(
-      (item) =>
-        item.id === "reporting" ||
-        item.id === "ga4-prepared" ||
-        item.id === "search-console-connected" ||
-        item.id === "opportunity-exec-reporting",
-    )
-  ) {
-    recommendedNextSteps.push("Continue improving reporting.");
+  if (launchComplete) {
+    recommendedNextSteps.push("Review the Leadership Report baseline.");
+    recommendedNextSteps.push("Protect Racing School and Radical search visibility.");
+    recommendedNextSteps.push("Continue Google Ads efficiency work.");
+    recommendedNextSteps.push("Measure qualified lead performance.");
+  } else {
+    if (lens.items.some((item) => item.id === "google-ads")) {
+      recommendedNextSteps.push("Continue Google Ads management.");
+    }
+    if (
+      lens.items.some(
+        (item) =>
+          item.id === "reporting" ||
+          item.id === "ga4-prepared" ||
+          item.id === "search-console-connected" ||
+          item.id === "opportunity-exec-reporting",
+      )
+    ) {
+      recommendedNextSteps.push("Continue improving reporting.");
+    }
   }
   if (recommendedNextSteps.length === 0) {
     recommendedNextSteps.push("Keep refining what already serves the brand.");
   }
 
-  const launch = lens.items.find((i) => i.id === "story-launch" || i.kind === "launch");
-
   const phase =
-    launch?.status === "planned"
+    operatingPhase?.label ??
+    (launch?.status === "planned"
       ? "Launch preparation"
-      : relationship?.label ?? "Active partnership";
+      : relationship?.label ?? "Active partnership");
 
   const storyBeats = lens.items.filter(
     (i) => i.presentation?.storyBeatId && i.evidenceStrength !== "insufficient",
@@ -358,11 +370,17 @@ export function composeExecutiveClientBriefing(
     relationshipAtAGlance: {
       phase,
       focus:
-        currentWork[0]?.label ??
-        awaitingClient[0]?.label ??
-        "Partnership clarity",
-      nextMilestone: launch ? lineFor(launch) : "Continue measured progress",
-      health: "Steady and focused",
+        operatingPhase
+          ? "Increase qualified traffic and lead performance"
+          : currentWork[0]?.label ??
+            awaitingClient[0]?.label ??
+            "Partnership clarity",
+      nextMilestone: launchComplete
+        ? "Monitor search, Ads efficiency, and qualified leads"
+        : launch
+          ? lineFor(launch)
+          : "Continue measured progress",
+      health: launchComplete ? "Live and verified" : "Steady and focused",
     },
     chapters,
     built,

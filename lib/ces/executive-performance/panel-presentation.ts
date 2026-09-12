@@ -6,21 +6,21 @@
 import type { ExecutivePerformancePanel } from "./types";
 
 const PANEL_TITLES: Record<string, string> = {
-  website: "Website",
-  search: "Search",
-  ads: "Google Ads",
-  momentum: "Momentum",
+  website: "Website traffic",
+  search: "Search visibility",
+  ads: "Paid acquisition",
+  momentum: "Movement",
 };
 
 const ENABLEMENT_SUPPORT: Record<string, string> = {
-  website: "Once website analytics is connected, activity will appear here.",
-  search: "Once Search Console is connected, activity will appear here.",
-  ads: "Once advertising reporting is ready, activity will appear here.",
+  website: "Once website analytics is connected, traffic will appear here.",
+  search: "Once Search Console is connected, search visibility will appear here.",
+  ads: "Once advertising reporting is ready, paid acquisition will appear here.",
   momentum: "A fuller view appears once trustworthy signals are active.",
 };
 
 const CONNECTED_CARE: Record<string, string> = {
-  website: "From your connected reporting — never estimated.",
+  website: "From connected website analytics — never estimated.",
   search: "From Search Console for this period — never estimated.",
   ads: "From entitled advertising reporting — never estimated.",
   momentum: "Drawn from the entitled reporting picture overall.",

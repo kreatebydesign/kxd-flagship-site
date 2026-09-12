@@ -151,6 +151,12 @@ export type ExecutiveProgressBeat = {
 export type ExecutiveReportingProvenance = {
   /** Requested reporting window label (e.g. "July 2026"). */
   periodLabel: string;
+  /**
+   * Optional Primal (or similar) distinction:
+   * documented post-launch baseline vs last complete monthly facts window.
+   */
+  baselineLabel?: string | null;
+  monthlyPeriodLabel?: string | null;
   /** Human provider names present in loaded facts (e.g. "Search Console"). */
   providerLabels: string[];
   factCount: number;
@@ -178,6 +184,23 @@ export type ExecutiveReportingProvenance = {
   confirmedLeadsDetail: string;
 };
 
+/** Headline primary leads — never Ads/GA4 aggregate conversions. */
+export type ExecutivePrimaryLeadMetric = {
+  key: string;
+  label: string;
+  value: string;
+  deltaLabel: string | null;
+  definition: string;
+  available: boolean;
+};
+
+export type ExecutivePrimaryLeadsOverview = {
+  websiteFormLeads: ExecutivePrimaryLeadMetric;
+  paidQualifiedCallLeads: ExecutivePrimaryLeadMetric;
+  totalPrimaryLeads: ExecutivePrimaryLeadMetric;
+  excludedNote: string;
+};
+
 export type ExecutivePerformanceBriefing = {
   clientId: number;
   clientName: string;
@@ -195,6 +218,8 @@ export type ExecutivePerformanceBriefing = {
     href: string;
   } | null;
   performancePanels: ExecutivePerformancePanel[];
+  /** Headline lead story — forms + qualified calls; never double-counted. */
+  primaryLeads: ExecutivePrimaryLeadsOverview;
   /** Reporting window + provider source (facts-backed). */
   reportingProvenance: ExecutiveReportingProvenance;
   /** Primary progress items (5–7). */

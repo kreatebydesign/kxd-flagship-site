@@ -32,10 +32,18 @@ import {
   splitPartnershipPriority,
 } from "./partnership-value";
 import { getExecutivePresentation } from "./presentation";
+import { resolvePrimaryLeadBreakdown } from "@/lib/reporting/leads/primary-leads";
+import { fmtReportNumber } from "@/lib/reporting/performance-format";
+import {
+  isPrimalPostLaunchClient,
+  PRIMAL_POST_LAUNCH_OPERATING,
+} from "@/lib/ces/profile/primal-post-launch";
 import type {
   ExecutiveImpactItem,
   ExecutivePerformanceBriefing,
   ExecutivePerformancePanel,
+  ExecutivePrimaryLeadMetric,
+  ExecutivePrimaryLeadsOverview,
   ExecutiveReportingProvenance,
   PerformanceConnectionState,
 } from "./types";
@@ -114,7 +122,7 @@ function buildReportingProvenance(input: {
     notes.push("Facts synced for this period — no measurable activity recorded yet.");
   }
   notes.push(
-    "GA4 lead actions, Google Ads conversions, and confirmed leads are separate measurements.",
+    "Website form leads, qualified call leads, Ads aggregate conversions, and confirmed leads are separate measurements.",
   );
   notes.push(confirmed.detail);
 
@@ -133,9 +141,9 @@ const PANEL_CAPABILITIES: Array<{
   domainLabel: string;
   capability: ReportingCapabilityId;
 }> = [
-  { id: "website", title: "Website", domainLabel: "Website", capability: "website-analytics" },
-  { id: "search", title: "Search", domainLabel: "Search", capability: "seo" },
-  { id: "ads", title: "Google Ads", domainLabel: "Marketing", capability: "google-ads" },
+  { id: "website", title: "Website traffic", domainLabel: "Traffic", capability: "website-analytics" },
+  { id: "search", title: "Search visibility", domainLabel: "Visibility", capability: "seo" },
+  { id: "ads", title: "Paid acquisition", domainLabel: "Paid", capability: "google-ads" },
 ];
 
 function momentumLabel(state: string): string | null {
@@ -173,6 +181,39 @@ function panelSummary(
   if (domainState === "improving" || domainState === "healthy") return "Looking healthy";
   if (domainState === "attention" || domainState === "critical") return "Worth a closer look";
   return "Still coming into focus";
+}
+
+function formatPrimaryLeadMetric(
+  metric: ReturnType<typeof resolvePrimaryLeadBreakdown>["websiteFormLeads"],
+): ExecutivePrimaryLeadMetric {
+  const deltaLabel =
+    metric.available && metric.delta != null
+      ? metric.delta === 0
+        ? "Unchanged vs prior period"
+        : `${metric.delta > 0 ? "+" : ""}${fmtReportNumber(metric.delta)} vs prior period`
+      : null;
+  return {
+    key: metric.key,
+    label: metric.label,
+    value: metric.available && metric.value != null ? fmtReportNumber(metric.value) : "—",
+    deltaLabel,
+    definition: metric.definition,
+    available: metric.available,
+  };
+}
+
+function buildPrimaryLeadsOverview(
+  facts: Parameters<typeof resolvePrimaryLeadBreakdown>[0]["facts"],
+  period: Parameters<typeof resolvePrimaryLeadBreakdown>[0]["period"],
+): ExecutivePrimaryLeadsOverview {
+  const breakdown = resolvePrimaryLeadBreakdown({ facts, period });
+  return {
+    websiteFormLeads: formatPrimaryLeadMetric(breakdown.websiteFormLeads),
+    paidQualifiedCallLeads: formatPrimaryLeadMetric(breakdown.paidQualifiedCallLeads),
+    totalPrimaryLeads: formatPrimaryLeadMetric(breakdown.totalPrimaryLeads),
+    excludedNote:
+      "Primary leads never include Ads form conversions or GA4/Ads aggregate conversions — those can double-count the same website form.",
+  };
 }
 
 function buildWorkingSignals(input: {
@@ -248,6 +289,20 @@ export async function composeExecutivePerformance(input: {
     zeroActivity,
   });
 
+  const postLaunchEarly = isPrimalPostLaunchClient(slug);
+  if (postLaunchEarly) {
+    const monthlyLabel = period.label ?? `${period.start} – ${period.end}`;
+    reportingProvenance.baselineLabel = `September 11, 2026 post-launch baseline established`;
+    reportingProvenance.monthlyPeriodLabel = `Last complete monthly facts window: ${monthlyLabel}`;
+    reportingProvenance.periodLabel = `September baseline established · monthly window ${monthlyLabel}`;
+    reportingProvenance.statusNote = [
+      reportingProvenance.statusNote,
+      "September is not treated as a complete month. Live monthly figures use the last completed calendar month until current-month facts sync.",
+      "Verified organic/Ads baselines for leadership are in the Leadership Report.",
+    ]
+      .filter(Boolean)
+      .join(" ");
+  }
 
   const performancePanels: ExecutivePerformancePanel[] = PANEL_CAPABILITIES.map((panel) => {
     const capabilityEnabled = enabledSet.has(panel.capability);
@@ -317,7 +372,7 @@ export async function composeExecutivePerformance(input: {
 
   performancePanels.push({
     id: "momentum",
-    title: "Momentum",
+    title: "Movement",
     domainLabel: "Overall",
     state: momentumConnection,
     summary:
@@ -329,11 +384,19 @@ export async function composeExecutivePerformance(input: {
     metrics: [],
   });
 
-  const primaryAction = input.briefing.needsAttention.href
-    ? { label: "Review the website", href: input.briefing.needsAttention.href }
-    : input.websiteReview.websiteUrl
-      ? { label: "Review the website", href: "/portal/website-review/session/new" }
-      : { label: "Open Website Review", href: "/portal/website-review" };
+  const primaryLeads = buildPrimaryLeadsOverview(facts, period);
+
+  const postLaunch = isPrimalPostLaunchClient(slug);
+  const primaryAction = postLaunch
+    ? {
+        label: PRIMAL_POST_LAUNCH_OPERATING.primaryActionLabel,
+        href: PRIMAL_POST_LAUNCH_OPERATING.primaryActionHref,
+      }
+    : input.briefing.needsAttention.href
+      ? { label: "Review the website", href: input.briefing.needsAttention.href }
+      : input.websiteReview.websiteUrl
+        ? { label: "Review the website", href: "/portal/website-review/session/new" }
+        : { label: "Open Website Review", href: "/portal/website-review" };
 
   const reviewCount =
     input.websiteReview.activeReviews.length + input.websiteReview.completedReviews.length;
@@ -350,7 +413,7 @@ export async function composeExecutivePerformance(input: {
       complete: beat.complete,
     }));
 
-  const recentImprovements = input.briefing.recentProgress.slice(0, 3).map((item) => ({
+  const recentImprovements = input.briefing.recentProgress.slice(0, 6).map((item) => ({
     id: item.id,
     label: item.label,
     detail: item.detail ?? null,
@@ -369,9 +432,14 @@ export async function composeExecutivePerformance(input: {
     }));
 
   const wr = input.briefing.websiteReview;
-  const secondaryAction = input.websiteReview.websiteUrl
-    ? { label: "Leave written notes", href: "/portal/website-review/request" }
-    : { label: "Leave written notes", href: "/portal/website-review/request" };
+  const secondaryAction = postLaunch
+    ? {
+        label: PRIMAL_POST_LAUNCH_OPERATING.secondaryActionLabel,
+        href: PRIMAL_POST_LAUNCH_OPERATING.secondaryActionHref,
+      }
+    : input.websiteReview.websiteUrl
+      ? { label: "Leave written notes", href: "/portal/website-review/request" }
+      : { label: "Leave written notes", href: "/portal/website-review/request" };
 
   const billing = input.briefing.billingPreview;
   const account = {
@@ -384,6 +452,39 @@ export async function composeExecutivePerformance(input: {
       : "You're not alone in this — whenever something needs attention, your KXD partner is close.",
   };
 
+  const performancePanelsAdjusted = performancePanels.map((panel) => {
+    if (!postLaunch) return panel;
+    if (panel.id === "momentum" && panel.state === "awaiting-signal") {
+      return {
+        ...panel,
+        summary: PRIMAL_POST_LAUNCH_OPERATING.momentumLabel,
+        detail: PRIMAL_POST_LAUNCH_OPERATING.momentumDetail,
+      };
+    }
+    if (panel.id === "website" && panel.state === "not-connected") {
+      return {
+        ...panel,
+        summary: "Measurement active",
+        detail: PRIMAL_POST_LAUNCH_OPERATING.websitePanelNote,
+      };
+    }
+    if (panel.id === "ads" && panel.state === "not-connected") {
+      return {
+        ...panel,
+        summary: "Performance reviewed",
+        detail: PRIMAL_POST_LAUNCH_OPERATING.adsPanelNote,
+      };
+    }
+    if (panel.id === "search" && panel.state === "awaiting-signal") {
+      return {
+        ...panel,
+        summary: "Baseline established",
+        detail: PRIMAL_POST_LAUNCH_OPERATING.searchPanelFallback,
+      };
+    }
+    return panel;
+  });
+
   return {
     clientId,
     clientName: input.profile.identity.clientName,
@@ -392,6 +493,9 @@ export async function composeExecutivePerformance(input: {
       ...presentation,
       logoSrc: input.profile.identity.logoUrl ?? presentation.logoSrc,
       logoAlt: input.profile.identity.logoAlt || presentation.logoAlt,
+      introduction: postLaunch
+        ? "Website live. Production verified. Measurement active. Focus: growth."
+        : presentation.introduction,
     },
     greeting: input.greeting,
     summary: {
@@ -408,7 +512,8 @@ export async function composeExecutivePerformance(input: {
     },
     recommendation: input.briefing.recommendation,
     primaryAction,
-    performancePanels,
+    performancePanels: performancePanelsAdjusted,
+    primaryLeads,
     reportingProvenance,
     partnershipPrimary,
     partnershipSecondary,
@@ -419,15 +524,23 @@ export async function composeExecutivePerformance(input: {
     }),
     recentImprovements,
     collaboration: {
-      statusLabel: wr.statusLabel,
-      explanation: wr.nextStep,
+      statusLabel: postLaunch
+        ? "Website live · Production verified"
+        : wr.statusLabel,
+      explanation: postLaunch
+        ? "Launch is complete. Website Review remains available for future notes — it is no longer blocking production."
+        : wr.nextStep,
       primaryAction,
       secondaryAction,
       recentActivity: latestReviews,
     },
     evolution: getExecutiveEvolution(slug),
     account,
-    momentumLabel: momentumHasSignal ? momentumLabel(momentumState) : null,
+    momentumLabel: postLaunch
+      ? PRIMAL_POST_LAUNCH_OPERATING.momentumLabel
+      : momentumHasSignal
+        ? momentumLabel(momentumState)
+        : null,
     composedAt: bundle.composedAt,
   };
 }

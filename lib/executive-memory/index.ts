@@ -27,5 +27,6 @@ export {
   memoryToEvolutionItems,
   memoryToMilestones,
   memoryToPartnershipItems,
+  memoryToRecentCompleted,
   memoryToStoryBeats,
 } from "./compose";

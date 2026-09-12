@@ -30,24 +30,28 @@ type MetricSpec = {
 /** Ordered preference lists per panel — only keys present in facts are shown. */
 const METRICS_BY_PANEL: Record<string, MetricSpec[]> = {
   search: [
-    { key: "clicks", label: "Clicks", format: "count" },
-    { key: "impressions", label: "Impressions", format: "count" },
-    { key: "ctr", label: "CTR", format: "percent" },
+    { key: "clicks", label: "Organic clicks", format: "count" },
+    { key: "impressions", label: "Search impressions", format: "count" },
+    { key: "ctr", label: "Click rate", format: "percent" },
     { key: "average_position", label: "Avg. position", format: "position" },
   ],
   website: [
-    { key: "sessions", label: "Sessions", format: "count" },
     { key: "visitors", label: "Users", format: "count" },
+    { key: "sessions", label: "Sessions", format: "count" },
+    { key: "generate_lead", label: "Website form leads", format: "count" },
     { key: "pageviews", label: "Pageviews", format: "count" },
-    { key: "generate_lead", label: "GA4 lead actions", format: "count" },
-    { key: "conversions", label: "GA4 conversions", format: "count" },
+    /* Aggregate key events — never treated as primary leads. */
+    { key: "conversions", label: "Other key events", format: "count" },
   ],
   ads: [
-    { key: "ad_spend", label: "Spend", format: "currency" },
-    { key: "clicks", label: "Clicks", format: "count" },
-    { key: "conversions", label: "Ads conversions", format: "count" },
+    { key: "ad_spend", label: "Ad spend", format: "currency" },
+    { key: "clicks", label: "Ad clicks", format: "count" },
+    { key: "qualified_leads", label: "Qualified call leads", format: "count" },
+    { key: "impressions", label: "Ad impressions", format: "count" },
+    /* Aggregate Ads conversions — not primary leads (may include form duplicates). */
+    { key: "conversions", label: "All Ads conversions", format: "count" },
     /* Canonical cost_per_lead only — never divide spend/conversions here. */
-    { key: "cost_per_lead", label: "Cost / conversion", format: "currency" },
+    { key: "cost_per_lead", label: "Cost / Ads conversion", format: "currency" },
   ],
 };
 

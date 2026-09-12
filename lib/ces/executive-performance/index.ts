@@ -15,6 +15,8 @@ export type {
   ExecutivePerformanceBriefing,
   ExecutivePerformancePanel,
   ExecutivePerformanceSectionId,
+  ExecutivePrimaryLeadMetric,
+  ExecutivePrimaryLeadsOverview,
   ExecutiveProgressBeat,
   ExecutiveReportingProvenance,
   ExecutiveSummaryFacts,

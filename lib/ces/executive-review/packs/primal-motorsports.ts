@@ -19,14 +19,14 @@ export const PRIMAL_EXECUTIVE_REVIEW_PACK: ExecutiveReviewPack = {
     brand: "Primal Motorsports",
     headline: "Executive Review",
     lead:
-      "We've built the core pieces together. Now we finish the new website, keep a close eye on search and ads, and grow with a clear view of what's next.",
+      "The new website is live. Production is verified. Search and Ads measurement are operating. The work ahead is qualified traffic, visibility, and clear leadership reporting.",
     contextLine:
       "This page covers three things: your public website, this private workspace, and future systems that stay a separate conversation until you're ready.",
     glance: {
-      phase: "Launch readiness",
-      focus: "Final revisions",
-      next: "Website launch",
-      updated: "July 2026",
+      phase: "Growth & Optimization",
+      focus: "Qualified traffic and lead performance",
+      next: "Search, Ads efficiency, and lead quality",
+      updated: "September 2026",
     },
   },
   timeline: [
@@ -35,7 +35,8 @@ export const PRIMAL_EXECUTIVE_REVIEW_PACK: ExecutiveReviewPack = {
     { id: "rebuild", label: "Website rebuild" },
     { id: "workspace", label: "Workspace development" },
     { id: "marketing", label: "Marketing & reporting" },
-    { id: "today", label: "Today", current: true },
+    { id: "launch", label: "Website launch" },
+    { id: "today", label: "Growth & optimization", current: true },
     { id: "future", label: "Future growth" },
   ],
   journey: {
@@ -76,8 +77,8 @@ export const PRIMAL_EXECUTIVE_REVIEW_PACK: ExecutiveReviewPack = {
         "Think of this as the conversation we'd have in a room together — what we've built, what's still in progress, and what comes next.",
       paragraphs: [
         "When we started under current ownership, the job was straightforward: rebuild the website, run ads and search carefully, and give you a private place to work with us.",
-        "That work is largely in place. Right now we're finishing final website revisions with Adam and the team so the new site can go live cleanly.",
-        "You can open this anytime. We'll keep it current as things move.",
+        "That work is now live. The production website launched September 9, 2026, and post-launch verification completed September 11.",
+        "You can open this anytime. The Leadership Report holds the current verified baseline and the 30 / 60 / 90-day plan.",
       ],
       takeaway:
         "The hard build work is done. Right now we're getting the new site ready to launch — and this page stays with you as we go.",

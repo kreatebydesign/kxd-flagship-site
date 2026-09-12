@@ -85,8 +85,9 @@ export const PRIMAL_LEADERSHIP_REPORT: LeadershipReportDocument = {
 
   historicalBaselineNote: [
     "KXD was not provided a complete historical reporting package covering analytics, conversions, lead quality, and revenue attribution when the project began.",
-    "As part of the current audit, KXD recovered the available historical Google Search Console data from Primal's previous primalracing.com property.",
-    "That information gives useful context around historical organic search visibility, but it is not a complete old-versus-new business-performance baseline.",
+    "As part of the current audit, KXD recovered available historical Google Search Console data from Primal's previous primalracing.com property for May 11, 2025 – December 31, 2025.",
+    "That window recorded approximately 7,347 organic clicks, 278,196 impressions, a 2.64% CTR, and a weighted average position near 12.3.",
+    "Those figures establish historical search equity — especially around Racing School and Radical purchase-intent queries. They are not a complete old-versus-new business-performance baseline, and they are not directly comparable to the shorter recent Search Console window without normalizing periods and domain context.",
   ],
 
   searchEquityIntro: [
