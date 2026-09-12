@@ -1,6 +1,6 @@
 /**
  * Proposal PDF from canonical snapshot — @react-pdf/renderer.
- * Complete client-facing export; no internal fields or raw enum codes.
+ * Premium editorial client-facing export; no internal fields or raw enum codes.
  */
 
 import React from "react";
@@ -16,35 +16,30 @@ import {
 import { KXD_REPORT_COLORS } from "../kxd-report-engine/tokens.ts";
 import { resolveKxdReportLogoAsset } from "../kxd-report-engine/logos.ts";
 import { KXD_REPORT_BRAND } from "../kxd-report-engine/contact.ts";
-import { formatProposalCalendarDate } from "./calendar-date.ts";
 import {
-  formatClientFacingBilling,
   formatClientFacingCreditAmount,
   formatClientFacingCreditType,
-  formatClientFacingLineAmount,
-  formatClientFacingMonthlyInvestment,
-  formatClientFacingPaymentTiming,
 } from "./client-facing-labels.ts";
-import { formatProposalContactSummary } from "./document.ts";
 import { buildProposalPdfFilenameExternal } from "./filename.ts";
-import { formatCents } from "./money.ts";
 import {
-  coverOrganizationPresentation,
-  distinctScopeOrganizationName,
+  composeClosingPresentation,
+  composeCoverPresentation,
+  composeInvestmentPresentation,
+  composeOpeningSections,
+  composeScopeWorkstream,
+  composeTermsSectionPlan,
   proseKindForTermsKey,
-  shouldShowRecurringInvestment,
   structureProposalProse,
   type ProposalProseBlock,
+  type ScopeWorkstreamPresentation,
 } from "./presentation.ts";
 import {
   ensureProposalPdfFonts,
   PROPOSAL_PDF_SANS,
   PROPOSAL_PDF_SERIF,
-  splitCoverTitleLines,
 } from "./pdf-fonts.ts";
-import type { CanonicalProposal, ProposalScopeGroup } from "./types.ts";
+import type { CanonicalProposal } from "./types.ts";
 
-// Register embedded TTFs before StyleSheet resolution so space metrics are correct.
 ensureProposalPdfFonts();
 
 const colors = KXD_REPORT_COLORS;
@@ -52,168 +47,334 @@ const colors = KXD_REPORT_COLORS;
 const styles = StyleSheet.create({
   coverPage: {
     backgroundColor: colors.richBlack,
-    paddingTop: 48,
+    paddingTop: 56,
     paddingBottom: 56,
-    paddingHorizontal: 52,
-    justifyContent: "flex-start",
+    paddingHorizontal: 56,
+    flexDirection: "column",
+    justifyContent: "space-between",
   },
-  coverLogo: { width: 104, height: 98, marginBottom: 16 },
+  coverTop: {
+    flexGrow: 0,
+  },
+  coverBottom: {
+    flexGrow: 0,
+    marginTop: 48,
+  },
+  coverLogo: { width: 92, height: 87, marginBottom: 36 },
   coverDocType: {
-    fontSize: 8,
-    letterSpacing: 0.6,
+    fontSize: 9,
+    letterSpacing: 2.4,
     textTransform: "uppercase",
     color: colors.mutedOnBlack,
     fontFamily: PROPOSAL_PDF_SANS,
-    marginBottom: 8,
+    marginBottom: 14,
   },
   coverRule: {
-    width: 42,
+    width: 48,
     height: 1,
     backgroundColor: colors.gold,
-    marginBottom: 18,
+    marginBottom: 36,
   },
-  coverTitleBlock: {
-    maxWidth: 468,
-    marginBottom: 22,
-  },
-  coverH1: {
-    fontSize: 22,
+  coverOrg: {
+    fontSize: 28,
     fontFamily: PROPOSAL_PDF_SERIF,
     fontWeight: 700,
     color: colors.ivoryOnBlack,
-    lineHeight: 1.3,
-    marginBottom: 2,
+    lineHeight: 1.18,
+    marginBottom: 4,
+    maxWidth: 320,
   },
-  coverMeta: {
-    fontSize: 9.5,
+  coverJoiner: {
+    fontSize: 14,
+    fontFamily: PROPOSAL_PDF_SANS,
+    color: colors.gold,
+    letterSpacing: 1.2,
+    marginVertical: 10,
+  },
+  coverEngagement: {
+    fontSize: 12,
+    fontFamily: PROPOSAL_PDF_SANS,
+    color: colors.mutedOnBlack,
+    letterSpacing: 0.4,
+    marginTop: 28,
+    maxWidth: 300,
+    lineHeight: 1.5,
+  },
+  coverPreparedLabel: {
+    fontSize: 8,
+    letterSpacing: 1.6,
+    textTransform: "uppercase",
     color: colors.mutedOnBlack,
     fontFamily: PROPOSAL_PDF_SANS,
-    marginBottom: 5,
+    marginBottom: 6,
+  },
+  coverPreparedName: {
+    fontSize: 13,
+    fontFamily: PROPOSAL_PDF_SERIF,
+    color: colors.ivoryOnBlack,
+    marginBottom: 4,
+  },
+  coverPreparedDetail: {
+    fontSize: 9.5,
+    fontFamily: PROPOSAL_PDF_SANS,
+    color: colors.mutedOnBlack,
+    marginBottom: 18,
     lineHeight: 1.45,
   },
+  coverMeta: {
+    fontSize: 9,
+    color: colors.mutedOnBlack,
+    fontFamily: PROPOSAL_PDF_SANS,
+    marginBottom: 4,
+    lineHeight: 1.45,
+  },
+  coverStudio: {
+    marginTop: 18,
+    fontSize: 11,
+    fontFamily: PROPOSAL_PDF_SERIF,
+    color: colors.ivoryOnBlack,
+  },
   page: {
-    paddingTop: 40,
-    paddingBottom: 48,
-    paddingHorizontal: 44,
+    paddingTop: 46,
+    paddingBottom: 52,
+    paddingHorizontal: 52,
     fontSize: 10,
     fontFamily: PROPOSAL_PDF_SANS,
     color: colors.ink,
     backgroundColor: colors.paper,
   },
   eyebrow: {
-    fontSize: 7.5,
-    letterSpacing: 0.45,
+    fontSize: 8,
+    letterSpacing: 1.8,
     textTransform: "uppercase",
     color: colors.muted,
-    marginBottom: 5,
+    marginBottom: 7,
     fontFamily: PROPOSAL_PDF_SANS,
   },
   h2: {
-    fontSize: 13,
+    fontSize: 17,
     fontFamily: PROPOSAL_PDF_SERIF,
     fontWeight: 700,
-    marginBottom: 8,
-    marginTop: 2,
-    lineHeight: 1.35,
+    marginBottom: 12,
+    marginTop: 0,
+    lineHeight: 1.25,
+    maxWidth: 420,
   },
   h3: {
     fontSize: 8.5,
-    marginBottom: 6,
-    marginTop: 10,
+    marginBottom: 8,
+    marginTop: 4,
     fontFamily: PROPOSAL_PDF_SANS,
-    letterSpacing: 0.35,
+    letterSpacing: 1.2,
     textTransform: "uppercase",
     color: colors.goldMuted,
   },
   p: {
+    marginBottom: 10,
+    lineHeight: 1.58,
+    fontFamily: PROPOSAL_PDF_SANS,
+    fontSize: 10.25,
+    maxWidth: 468,
+  },
+  pSupporting: {
+    marginBottom: 9,
+    lineHeight: 1.55,
+    fontFamily: PROPOSAL_PDF_SANS,
+    fontSize: 10,
+    color: colors.ink,
+    maxWidth: 468,
+  },
+  bulletRow: {
+    flexDirection: "row",
     marginBottom: 8,
-    lineHeight: 1.55,
-    fontFamily: PROPOSAL_PDF_SANS,
+    paddingRight: 12,
+    maxWidth: 480,
+  },
+  bulletMark: {
+    width: 14,
     fontSize: 10,
-  },
-  bullet: {
-    marginBottom: 6,
-    paddingLeft: 10,
-    lineHeight: 1.5,
+    color: colors.goldMuted,
     fontFamily: PROPOSAL_PDF_SANS,
+  },
+  bulletBody: {
+    flex: 1,
     fontSize: 10,
-  },
-  listIntro: {
-    marginBottom: 6,
-    lineHeight: 1.55,
+    lineHeight: 1.48,
     fontFamily: PROPOSAL_PDF_SANS,
-    fontSize: 10,
   },
-  row: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    borderBottomWidth: 1,
-    borderBottomColor: colors.line,
-    paddingVertical: 7,
-  },
-  // Fixed column Views prevent flex from compressing space glyph widths.
-  cell: {
-    width: 268,
-    paddingRight: 10,
-  },
-  cellType: {
-    width: 140,
-    paddingRight: 8,
-  },
-  cellRight: {
-    width: 100,
-  },
-  cellText: {
-    fontFamily: PROPOSAL_PDF_SANS,
-    fontSize: 9,
-    lineHeight: 1.4,
-  },
-  cellTextRight: {
-    fontFamily: PROPOSAL_PDF_SANS,
-    fontSize: 9,
-    lineHeight: 1.4,
-    textAlign: "right",
-  },
-  cellTextStrong: {
+  bulletTitle: {
     fontFamily: PROPOSAL_PDF_SANS,
     fontWeight: 700,
+    fontSize: 10,
+    lineHeight: 1.42,
+  },
+  section: {
+    marginBottom: 22,
+  },
+  sectionLead: {
+    marginBottom: 26,
+  },
+  scopeBlock: {
+    marginBottom: 26,
+    paddingTop: 6,
+  },
+  scopeIndex: {
     fontSize: 9,
-    lineHeight: 1.4,
+    letterSpacing: 2,
+    color: colors.goldMuted,
+    fontFamily: PROPOSAL_PDF_SANS,
+    marginBottom: 8,
   },
-  totalsBox: {
-    marginTop: 12,
-    padding: 10,
-    backgroundColor: colors.panel,
-    borderWidth: 1,
-    borderColor: colors.line,
-  },
-  totalsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+  scopeTitle: {
+    fontSize: 20,
+    fontFamily: PROPOSAL_PDF_SERIF,
+    fontWeight: 700,
     marginBottom: 4,
+    lineHeight: 1.2,
   },
-  totalsLabel: {
+  scopeSubtitle: {
+    fontSize: 10,
     fontFamily: PROPOSAL_PDF_SANS,
-    fontSize: 9,
-    lineHeight: 1.4,
+    letterSpacing: 1.1,
+    textTransform: "uppercase",
+    color: colors.muted,
+    marginBottom: 12,
   },
-  totalsValue: {
-    fontFamily: PROPOSAL_PDF_SANS,
-    fontWeight: 700,
-    fontSize: 9,
-    lineHeight: 1.4,
+  scopeRule: {
+    width: 36,
+    height: 1,
+    backgroundColor: colors.gold,
+    marginBottom: 12,
   },
-  disclosure: {
-    marginTop: 12,
-    padding: 10,
+  investmentHero: {
+    marginTop: 6,
+    marginBottom: 18,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
     backgroundColor: colors.panel,
     borderLeftWidth: 2,
     borderLeftColor: colors.gold,
   },
+  investmentHeroEyebrow: {
+    fontSize: 8,
+    letterSpacing: 1.6,
+    textTransform: "uppercase",
+    color: colors.muted,
+    fontFamily: PROPOSAL_PDF_SANS,
+    marginBottom: 8,
+  },
+  investmentHeroAmount: {
+    fontSize: 28,
+    fontFamily: PROPOSAL_PDF_SERIF,
+    fontWeight: 700,
+    color: colors.ink,
+    marginBottom: 6,
+  },
+  investmentHeroCaption: {
+    fontSize: 10,
+    fontFamily: PROPOSAL_PDF_SANS,
+    color: colors.muted,
+    marginBottom: 4,
+    lineHeight: 1.45,
+  },
+  investmentPayment: {
+    fontSize: 11,
+    fontFamily: PROPOSAL_PDF_SANS,
+    fontWeight: 700,
+    color: colors.ink,
+    marginTop: 6,
+  },
+  investmentSubhead: {
+    fontSize: 8.5,
+    letterSpacing: 1.4,
+    textTransform: "uppercase",
+    color: colors.goldMuted,
+    fontFamily: PROPOSAL_PDF_SANS,
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  investmentRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    paddingVertical: 7,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.line,
+  },
+  investmentRowTitle: {
+    width: 340,
+    fontSize: 10,
+    fontFamily: PROPOSAL_PDF_SANS,
+    lineHeight: 1.4,
+    paddingRight: 12,
+  },
+  investmentRowAmount: {
+    width: 110,
+    fontSize: 10,
+    fontFamily: PROPOSAL_PDF_SANS,
+    fontWeight: 700,
+    textAlign: "right",
+    lineHeight: 1.4,
+  },
+  investmentNote: {
+    marginTop: 8,
+    fontSize: 10,
+    fontFamily: PROPOSAL_PDF_SANS,
+    color: colors.muted,
+  },
+  editorialRow: {
+    flexDirection: "row",
+    gap: 18,
+    marginBottom: 8,
+  },
+  editorialCol: {
+    width: "48%",
+  },
+  disclosure: {
+    marginTop: 14,
+    padding: 12,
+    backgroundColor: colors.paper,
+    borderLeftWidth: 2,
+    borderLeftColor: colors.gold,
+  },
+  closingPage: {
+    paddingTop: 52,
+    paddingBottom: 56,
+    paddingHorizontal: 52,
+    fontSize: 10,
+    fontFamily: PROPOSAL_PDF_SANS,
+    color: colors.ink,
+    backgroundColor: colors.paper,
+  },
+  closingShell: {
+    flexGrow: 1,
+    paddingTop: 36,
+    paddingBottom: 28,
+    paddingHorizontal: 22,
+    backgroundColor: colors.panel,
+    justifyContent: "space-between",
+    minHeight: 620,
+  },
+  closingTop: {
+    maxWidth: 420,
+  },
+  closingAcceptCue: {
+    marginTop: 22,
+    fontSize: 13,
+    fontFamily: PROPOSAL_PDF_SERIF,
+    fontWeight: 700,
+    color: colors.ink,
+  },
+  closingStudio: {
+    marginTop: 28,
+    fontSize: 14,
+    fontFamily: PROPOSAL_PDF_SERIF,
+    color: colors.ink,
+  },
   footer: {
     position: "absolute",
-    left: 48,
-    right: 48,
+    left: 52,
+    right: 52,
     bottom: 28,
     fontSize: 8,
     fontFamily: PROPOSAL_PDF_SANS,
@@ -221,11 +382,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
-  section: { marginBottom: 10 },
-  scopeBlock: { marginBottom: 10 },
 });
 
-/** Group list items so trailing pages do not end with one to three orphaned bullets. */
 function chunkListItems<T>(items: T[], minChunkSize: number): T[][] {
   if (items.length === 0) return [];
   if (items.length <= minChunkSize) return [items];
@@ -243,43 +401,23 @@ function chunkListItems<T>(items: T[], minChunkSize: number): T[][] {
   return chunks;
 }
 
-function PriceRow({
-  left,
-  middle,
-  right,
-  header = false,
+function Paragraph({
+  text,
+  supporting = false,
 }: {
-  left: string;
-  middle: string;
-  right: string;
-  header?: boolean;
+  text?: string | null;
+  supporting?: boolean;
 }) {
-  const textStyle = header ? styles.cellTextStrong : styles.cellText;
-  return (
-    <View style={styles.row} wrap={false}>
-      <View style={styles.cell}>
-        <Text style={textStyle}>{left}</Text>
-      </View>
-      <View style={styles.cellType}>
-        <Text style={textStyle}>{middle}</Text>
-      </View>
-      <View style={styles.cellRight}>
-        <Text style={header ? styles.cellTextStrong : styles.cellTextRight}>{right}</Text>
-      </View>
-    </View>
-  );
-}
-
-function Paragraph({ text }: { text?: string | null }) {
   if (!text?.trim()) return null;
-  return <Text style={styles.p}>{text}</Text>;
+  return <Text style={supporting ? styles.pSupporting : styles.p}>{text}</Text>;
 }
 
 function ProseBullet({ text, marker = "•" }: { text: string; marker?: string }) {
   return (
-    <Text style={styles.bullet}>
-      {marker} {text}
-    </Text>
+    <View style={styles.bulletRow} wrap={false}>
+      <Text style={styles.bulletMark}>{marker}</Text>
+      <Text style={styles.bulletBody}>{text}</Text>
+    </View>
   );
 }
 
@@ -288,7 +426,7 @@ function StructuredProse({ blocks }: { blocks: ProposalProseBlock[] }) {
     <>
       {blocks.map((block, index) => {
         if (block.type === "paragraph") {
-          return <Text key={`p-${index}`} style={styles.listIntro}>{block.text}</Text>;
+          return <Paragraph key={`p-${index}`} text={block.text} />;
         }
         if (block.type === "numbered") {
           return (
@@ -315,190 +453,277 @@ function StructuredProse({ blocks }: { blocks: ProposalProseBlock[] }) {
   );
 }
 
-function SectionBlock({
-  eyebrow,
-  title,
-  children,
-  minPresenceAhead = 48,
-}: {
-  eyebrow: string;
-  title: string;
-  children: React.ReactNode;
-  minPresenceAhead?: number;
-}) {
-  return (
-    <View style={styles.section} wrap minPresenceAhead={minPresenceAhead}>
-      <Text style={styles.eyebrow}>{eyebrow}</Text>
-      <Text style={styles.h2}>{title}</Text>
-      {children}
-    </View>
-  );
-}
-
-function DeliverableBullet({
-  title,
-  description,
-}: {
-  title: string;
-  description?: string | null;
-}) {
-  return (
-    <Text style={styles.bullet}>
-      • {title}
-      {description ? `: ${description}` : ""}
-    </Text>
-  );
-}
-
-function TimelineTermsSection({ text }: { text: string }) {
-  const lines = text
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean);
-  const estimatedLine = lines.find((line) => /^Estimated completion:/i.test(line));
-  const phaseLines = lines.filter((line) => /^Phase \d+/i.test(line));
-  const introLines = lines.filter(
-    (line) => line !== estimatedLine && !/^Phase \d+/i.test(line),
-  );
-  const leadPhase = phaseLines[0];
-  const restPhases = phaseLines.slice(1);
-  const restPhaseChunks = chunkListItems(restPhases, 2);
-
-  return (
-    <View style={styles.section} wrap>
-      <View wrap={false} minPresenceAhead={112}>
-        <Text style={styles.eyebrow}>Timeline</Text>
-        <Text style={styles.h2}>Project timeline</Text>
-        {introLines.map((line) => (
-          <Paragraph key={line.slice(0, 32)} text={line} />
-        ))}
-        {estimatedLine ? <Paragraph text={estimatedLine} /> : null}
-        {leadPhase ? <Paragraph text={leadPhase} /> : null}
-      </View>
-      {restPhaseChunks.map((chunk, index) => (
-        <View key={`timeline-phases-${index}`} wrap={false} minPresenceAhead={64}>
-          {chunk.map((line) => (
-            <Paragraph key={line.slice(0, 32)} text={line} />
-          ))}
-        </View>
-      ))}
-    </View>
-  );
-}
-
-function NextStepsSection({
-  nextSteps,
-  closingNote,
-  acceptance,
-}: {
-  nextSteps?: string | null;
-  closingNote?: string | null;
-  acceptance?: string | null;
-}) {
-  const blocks = structureProposalProse(nextSteps, proseKindForTermsKey("nextSteps"));
-  const rows: Array<{ key: string; node: React.ReactNode }> = [];
-  blocks.forEach((block, blockIndex) => {
-    if (block.type === "paragraph") {
-      rows.push({
-        key: `p-${blockIndex}`,
-        node: <Text style={styles.listIntro}>{block.text}</Text>,
-      });
-      return;
-    }
-    if (block.type === "numbered") {
-      block.items.forEach((item, itemIndex) => {
-        rows.push({
-          key: `n-${blockIndex}-${itemIndex}`,
-          node: <ProseBullet marker={`${itemIndex + 1}.`} text={item} />,
-        });
-      });
-      return;
-    }
-    block.items.forEach((item, itemIndex) => {
-      rows.push({
-        key: `b-${blockIndex}-${itemIndex}`,
-        node: <ProseBullet text={item} />,
-      });
-    });
-  });
-
-  const leadRows = rows.slice(0, 2);
-  const restChunks = chunkListItems(rows.slice(2), 2);
-
-  return (
-    <View style={styles.section} wrap>
-      <View wrap={false} minPresenceAhead={104}>
-        <Text style={styles.eyebrow}>Next step</Text>
-        <Text style={styles.h2}>How to begin</Text>
-        {leadRows.map((row) => (
-          <View key={row.key}>{row.node}</View>
-        ))}
-      </View>
-      {restChunks.map((chunk, index) => (
-        <View key={`next-steps-${index}`} wrap={false} minPresenceAhead={72}>
-          {chunk.map((row) => (
-            <View key={row.key}>{row.node}</View>
-          ))}
-        </View>
-      ))}
-      {closingNote?.trim() ? <Paragraph text={closingNote} /> : null}
-      {acceptance?.trim() ? (
-        <View style={styles.disclosure}>
-          <Text style={styles.p}>{acceptance}</Text>
-        </View>
-      ) : null}
-    </View>
-  );
-}
-
 function PageFooter({ proposal }: { proposal: CanonicalProposal }) {
   return (
     <View style={styles.footer} fixed>
       <Text>
         {KXD_REPORT_BRAND} · {proposal.proposalNumber} · v{proposal.version}
       </Text>
-      <Text
-        render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`}
-      />
+      <Text render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} />
     </View>
   );
 }
 
-function ScopeSection({
-  group,
-  primaryOrganization,
+function OpeningSectionView({
+  eyebrow,
+  title,
+  paragraphs,
+  emphasis,
 }: {
-  group: ProposalScopeGroup;
-  primaryOrganization: string;
+  eyebrow: string;
+  title: string;
+  paragraphs: string[];
+  emphasis?: "lead" | "supporting";
 }) {
-  const scopeOrg = distinctScopeOrganizationName(group.organizationName, primaryOrganization);
-  const deliverables = group.deliverables;
-  const isLargeGroup = deliverables.length >= 12;
-  const headerLeadCount = isLargeGroup ? 6 : 1;
-  const leadDeliverables = deliverables.slice(0, headerLeadCount);
-  const restDeliverables = deliverables.slice(headerLeadCount);
-  const deliverableChunkSize = isLargeGroup ? 7 : 4;
-  const restChunks = chunkListItems(restDeliverables, deliverableChunkSize);
+  return (
+    <View
+      style={emphasis === "lead" ? styles.sectionLead : styles.section}
+      wrap
+      minPresenceAhead={72}
+    >
+      <Text style={styles.eyebrow}>{eyebrow}</Text>
+      <Text style={styles.h2}>{title}</Text>
+      {paragraphs.map((paragraph) => (
+        <Paragraph
+          key={paragraph.slice(0, 40)}
+          text={paragraph}
+          supporting={emphasis === "supporting"}
+        />
+      ))}
+    </View>
+  );
+}
+
+function ScopeSection({ workstream }: { workstream: ScopeWorkstreamPresentation }) {
+  const deliverables = workstream.deliverables;
+  const leadCount = deliverables.length >= 10 ? 5 : Math.min(4, deliverables.length);
+  const lead = deliverables.slice(0, leadCount);
+  const restChunks = chunkListItems(deliverables.slice(leadCount), 5);
 
   return (
     <View style={styles.scopeBlock} wrap>
-      <View wrap={false} minPresenceAhead={isLargeGroup ? 240 : 120}>
-        <Text style={styles.eyebrow}>Included work</Text>
-        <Text style={styles.h2}>{group.title}</Text>
-        {scopeOrg ? <Text style={styles.p}>{scopeOrg}</Text> : null}
-        <Paragraph text={group.overview} />
+      <View wrap={false} minPresenceAhead={150}>
+        <Text style={styles.scopeIndex}>{workstream.indexLabel}</Text>
+        <Text style={styles.scopeTitle}>{workstream.title}</Text>
+        {workstream.subtitle ? (
+          <Text style={styles.scopeSubtitle}>{workstream.subtitle}</Text>
+        ) : null}
+        <View style={styles.scopeRule} />
+        <Paragraph text={workstream.overview} />
         {deliverables.length > 0 ? <Text style={styles.h3}>Deliverables</Text> : null}
-        {leadDeliverables.map((d) => (
-          <DeliverableBullet key={d.id} title={d.title} description={d.description} />
+        {lead.map((item) => (
+          <View key={item.id} style={styles.bulletRow} wrap={false}>
+            <Text style={styles.bulletMark}>•</Text>
+            <Text style={styles.bulletBody}>
+              <Text style={styles.bulletTitle}>{item.title}</Text>
+              {item.description ? ` — ${item.description}` : ""}
+            </Text>
+          </View>
         ))}
       </View>
       {restChunks.map((chunk, index) => (
-        <View key={`${group.id}-deliverables-${index}`} wrap={false} minPresenceAhead={88}>
-          {chunk.map((d) => (
-            <DeliverableBullet key={d.id} title={d.title} description={d.description} />
+        <View key={`scope-rest-${index}`} wrap={false} minPresenceAhead={96}>
+          {chunk.map((item) => (
+            <View key={item.id} style={styles.bulletRow} wrap={false}>
+              <Text style={styles.bulletMark}>•</Text>
+              <Text style={styles.bulletBody}>
+                <Text style={styles.bulletTitle}>{item.title}</Text>
+                {item.description ? ` — ${item.description}` : ""}
+              </Text>
+            </View>
           ))}
         </View>
       ))}
+    </View>
+  );
+}
+
+function InvestmentSection({ proposal }: { proposal: CanonicalProposal }) {
+  const investment = composeInvestmentPresentation(proposal);
+  return (
+    <View style={styles.section} wrap minPresenceAhead={160}>
+      <Text style={styles.eyebrow}>{investment.eyebrow}</Text>
+      <Text style={styles.h2}>{investment.title}</Text>
+
+      <View style={styles.investmentHero} wrap={false}>
+        <Text style={styles.investmentHeroEyebrow}>{investment.heroEyebrow}</Text>
+        <Text style={styles.investmentHeroAmount}>{investment.heroAmount}</Text>
+        <Text style={styles.investmentHeroCaption}>Total project investment</Text>
+        {investment.paymentSummary ? (
+          <Text style={styles.investmentPayment}>{investment.paymentSummary}</Text>
+        ) : null}
+      </View>
+
+      {investment.annualLines.length > 0 ? (
+        <View wrap={false} minPresenceAhead={88}>
+          <Text style={styles.investmentSubhead}>Annual hosting</Text>
+          {investment.annualLines.map((line) => (
+            <View key={line.id} style={styles.investmentRow}>
+              <Text style={styles.investmentRowTitle}>{line.title}</Text>
+              <Text style={styles.investmentRowAmount}>{line.amountLabel}</Text>
+            </View>
+          ))}
+          {investment.annualTotalLabel ? (
+            <Text style={styles.investmentNote}>{investment.annualTotalLabel}</Text>
+          ) : null}
+        </View>
+      ) : null}
+
+      {investment.monthlyLines.length > 0 ? (
+        <View wrap={false} minPresenceAhead={72}>
+          <Text style={styles.investmentSubhead}>Monthly</Text>
+          {investment.monthlyLines.map((line) => (
+            <View key={line.id} style={styles.investmentRow}>
+              <Text style={styles.investmentRowTitle}>{line.title}</Text>
+              <Text style={styles.investmentRowAmount}>{line.amountLabel}</Text>
+            </View>
+          ))}
+        </View>
+      ) : investment.monthlyNoneLabel ? (
+        <View wrap={false} minPresenceAhead={48}>
+          <Text style={styles.investmentSubhead}>Monthly management</Text>
+          <Text style={styles.investmentNote}>{investment.monthlyNoneLabel}</Text>
+        </View>
+      ) : null}
+
+      {investment.quarterlyLines.length > 0 ? (
+        <View wrap={false} minPresenceAhead={72}>
+          <Text style={styles.investmentSubhead}>Quarterly</Text>
+          {investment.quarterlyLines.map((line) => (
+            <View key={line.id} style={styles.investmentRow}>
+              <Text style={styles.investmentRowTitle}>{line.title}</Text>
+              <Text style={styles.investmentRowAmount}>{line.amountLabel}</Text>
+            </View>
+          ))}
+        </View>
+      ) : null}
+
+      {investment.creditLines.length > 0 ? (
+        <View wrap={false} minPresenceAhead={72}>
+          <Text style={styles.investmentSubhead}>Credits & adjustments</Text>
+          {proposal.credits.map((credit) => (
+            <View key={credit.id} style={styles.investmentRow}>
+              <Text style={styles.investmentRowTitle}>
+                {credit.label} · {formatClientFacingCreditType(credit.kind)}
+              </Text>
+              <Text style={styles.investmentRowAmount}>
+                {formatClientFacingCreditAmount(credit, proposal.currency)}
+              </Text>
+            </View>
+          ))}
+        </View>
+      ) : null}
+
+      {investment.showDetailedSchedule ? (
+        <View wrap={false} minPresenceAhead={88}>
+          <Text style={styles.investmentSubhead}>Payment schedule</Text>
+          {investment.scheduleRows.map((row) => (
+            <View key={row.id} style={styles.investmentRow}>
+              <Text style={styles.investmentRowTitle}>
+                {row.label}
+                {"\n"}
+                <Text style={{ color: colors.muted, fontWeight: 400 }}>{row.timing}</Text>
+              </Text>
+              <Text style={styles.investmentRowAmount}>{row.amount}</Text>
+            </View>
+          ))}
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+function TermsSectionView({
+  sectionKey,
+  eyebrow,
+  title,
+  text,
+  layout,
+}: {
+  sectionKey: string;
+  eyebrow: string;
+  title: string;
+  text: string;
+  layout?: "stack" | "editorial";
+}) {
+  const blocks = structureProposalProse(
+    text,
+    proseKindForTermsKey(
+      sectionKey as
+        | "clientResponsibilities"
+        | "exclusions"
+        | "nextSteps"
+        | "proposalTerms"
+        | "paymentAssumptions"
+        | "timelineAssumptions"
+        | "expirationLanguage"
+        | "changeRequestLanguage",
+    ),
+  );
+
+  if (layout === "editorial") {
+    const bulletBlocks = blocks.filter((block) => block.type !== "paragraph");
+    const paragraphs = blocks.filter((block) => block.type === "paragraph");
+    if (bulletBlocks.length >= 1) {
+      const items = bulletBlocks.flatMap((block) =>
+        block.type === "paragraph" ? [] : block.items,
+      );
+      const midpoint = Math.ceil(items.length / 2);
+      const left = items.slice(0, midpoint);
+      const right = items.slice(midpoint);
+      return (
+        <View style={styles.section} wrap minPresenceAhead={96}>
+          <Text style={styles.eyebrow}>{eyebrow}</Text>
+          <Text style={styles.h2}>{title}</Text>
+          {paragraphs.map((block, index) =>
+            block.type === "paragraph" ? (
+              <Paragraph key={`tp-${index}`} text={block.text} supporting />
+            ) : null,
+          )}
+          <View style={styles.editorialRow}>
+            <View style={styles.editorialCol}>
+              {left.map((item) => (
+                <ProseBullet key={`l-${item.slice(0, 24)}`} text={item} />
+              ))}
+            </View>
+            <View style={styles.editorialCol}>
+              {right.map((item) => (
+                <ProseBullet key={`r-${item.slice(0, 24)}`} text={item} />
+              ))}
+            </View>
+          </View>
+        </View>
+      );
+    }
+  }
+
+  return (
+    <View style={styles.section} wrap minPresenceAhead={88}>
+      <Text style={styles.eyebrow}>{eyebrow}</Text>
+      <Text style={styles.h2}>{title}</Text>
+      <StructuredProse blocks={blocks} />
+    </View>
+  );
+}
+
+function ClosingSection({ proposal }: { proposal: CanonicalProposal }) {
+  const closing = composeClosingPresentation(proposal);
+  const blocks = structureProposalProse(closing.nextSteps, "steps");
+  return (
+    <View style={styles.closingShell}>
+      <View style={styles.closingTop}>
+        <Text style={styles.eyebrow}>{closing.eyebrow}</Text>
+        <Text style={styles.h2}>{closing.title}</Text>
+        <Text style={styles.closingAcceptCue}>Accept this proposal</Text>
+        <StructuredProse blocks={blocks} />
+        {closing.closingNote ? <Paragraph text={closing.closingNote} /> : null}
+        {closing.acceptance ? (
+          <View style={styles.disclosure}>
+            <Text style={styles.pSupporting}>{closing.acceptance}</Text>
+          </View>
+        ) : null}
+      </View>
+      <Text style={styles.closingStudio}>{KXD_REPORT_BRAND}</Text>
     </View>
   );
 }
@@ -510,26 +735,15 @@ function ProposalPdfDocument({
   proposal: CanonicalProposal;
   logoSrc: string | null;
 }) {
-  const { preparedFor, additionalOrganizations } = coverOrganizationPresentation(
-    proposal.primaryOrganization,
-    proposal.organizations,
+  const cover = composeCoverPresentation(proposal);
+  const opening = composeOpeningSections(proposal);
+  const workstreams = proposal.scopeGroups.map((group, index) =>
+    composeScopeWorkstream(group, index, proposal.scopeGroups.length),
   );
-  const additionalOrgs = additionalOrganizations.join(" · ");
-  const contactSummary = formatProposalContactSummary(proposal.primaryContact);
+  const terms = composeTermsSectionPlan(proposal);
   const sponsorshipNotes = proposal.credits
-    .map((c) => c.notes?.trim())
+    .map((credit) => credit.notes?.trim())
     .filter(Boolean) as string[];
-
-  const termSections: Array<{ key: keyof CanonicalProposal["terms"]; eyebrow: string; title: string }> = [
-    { key: "proposalTerms", eyebrow: "Terms", title: "Terms" },
-    { key: "paymentAssumptions", eyebrow: "Payment", title: "Payment schedule" },
-    { key: "expirationLanguage", eyebrow: "Validity", title: "Proposal validity" },
-    { key: "changeRequestLanguage", eyebrow: "Changes", title: "Scope changes" },
-    { key: "intellectualPropertySummary", eyebrow: "Intellectual property", title: "Intellectual property" },
-    { key: "cancellationSummary", eyebrow: "Cancellation", title: "Cancellation" },
-    { key: "clientResponsibilities", eyebrow: "Responsibilities", title: "What we need from you" },
-    { key: "exclusions", eyebrow: "Exclusions", title: "What's not included" },
-  ];
 
   return (
     <Document
@@ -538,198 +752,81 @@ function ProposalPdfDocument({
       subject={`Proposal ${proposal.proposalNumber}`}
     >
       <Page size="LETTER" style={styles.coverPage}>
-        {/* react-pdf Image has no alt prop; decorative cover mark */}
-        {/* eslint-disable-next-line jsx-a11y/alt-text */}
-        {logoSrc ? <Image src={logoSrc} style={styles.coverLogo} /> : null}
-        <Text style={styles.coverDocType}>Proposal</Text>
-        <View style={styles.coverRule} />
-        <View style={styles.coverTitleBlock}>
-          {splitCoverTitleLines(proposal.title).map((line, index) => (
-            <Text key={`${index}-${line}`} style={styles.coverH1}>
+        <View style={styles.coverTop}>
+          {/* eslint-disable-next-line jsx-a11y/alt-text */}
+          {logoSrc ? <Image src={logoSrc} style={styles.coverLogo} /> : null}
+          <Text style={styles.coverDocType}>{cover.docType}</Text>
+          <View style={styles.coverRule} />
+          {cover.organizationLines.map((line, index) => (
+            <React.Fragment key={`${index}-${line}`}>
+              {index > 0 && cover.organizationJoiner ? (
+                <Text style={styles.coverJoiner}>{cover.organizationJoiner}</Text>
+              ) : null}
+              <Text style={styles.coverOrg}>{line}</Text>
+            </React.Fragment>
+          ))}
+          <Text style={styles.coverEngagement}>{cover.engagementTitle}</Text>
+        </View>
+        <View style={styles.coverBottom}>
+          {cover.preparedForName ? (
+            <>
+              <Text style={styles.coverPreparedLabel}>Prepared for</Text>
+              <Text style={styles.coverPreparedName}>{cover.preparedForName}</Text>
+            </>
+          ) : null}
+          {cover.preparedForDetail ? (
+            <Text style={styles.coverPreparedDetail}>{cover.preparedForDetail}</Text>
+          ) : null}
+          {cover.metaLines.map((line) => (
+            <Text key={line} style={styles.coverMeta}>
               {line}
             </Text>
           ))}
+          <Text style={styles.coverStudio}>{cover.studioLine}</Text>
         </View>
-        {preparedFor ? (
-          <Text style={styles.coverMeta}>Prepared for {preparedFor}</Text>
-        ) : null}
-        {additionalOrgs ? <Text style={styles.coverMeta}>{additionalOrgs}</Text> : null}
-        {contactSummary ? <Text style={styles.coverMeta}>{contactSummary}</Text> : null}
-        <Text style={styles.coverMeta}>
-          {proposal.proposalNumber} · Version {proposal.version}
-        </Text>
-        <Text style={styles.coverMeta}>
-          {formatProposalCalendarDate(proposal.proposalDate)} · Expires{" "}
-          {formatProposalCalendarDate(proposal.expirationDate)}
-        </Text>
-        <Text style={styles.coverMeta}>Prepared by {proposal.preparedBy}</Text>
       </Page>
 
       <Page size="LETTER" style={styles.page} wrap>
         <PageFooter proposal={proposal} />
-        {proposal.executive.clientFacingIntro ? (
-          <SectionBlock eyebrow="Introduction" title="A clear path forward">
-            <Paragraph text={proposal.executive.clientFacingIntro} />
-          </SectionBlock>
-        ) : null}
-        {proposal.executive.executiveSummary ? (
-          <SectionBlock eyebrow="Executive summary" title="Where this begins">
-            <Paragraph text={proposal.executive.executiveSummary} />
-          </SectionBlock>
-        ) : null}
-        {proposal.executive.currentSituation ? (
-          <SectionBlock eyebrow="Situation" title="Current situation">
-            <Paragraph text={proposal.executive.currentSituation} />
-          </SectionBlock>
-        ) : null}
-        {proposal.executive.objectives ? (
-          <SectionBlock eyebrow="Objectives" title="What success requires">
-            <Paragraph text={proposal.executive.objectives} />
-          </SectionBlock>
-        ) : null}
-        {proposal.executive.recommendedDirection ? (
-          <SectionBlock eyebrow="Direction" title="Recommended path">
-            <Paragraph text={proposal.executive.recommendedDirection} />
-          </SectionBlock>
-        ) : null}
-        {proposal.executive.desiredOutcomes ? (
-          <SectionBlock eyebrow="Outcomes" title="Desired outcomes">
-            <Paragraph text={proposal.executive.desiredOutcomes} />
-          </SectionBlock>
-        ) : null}
-        {proposal.executive.clientContext ? (
-          <SectionBlock eyebrow="Context" title="Project context">
-            <Paragraph text={proposal.executive.clientContext} />
-          </SectionBlock>
-        ) : null}
-
-        {proposal.scopeGroups.map((g) => (
-          <ScopeSection
-            key={g.id}
-            group={g}
-            primaryOrganization={proposal.primaryOrganization}
+        {opening.map((section) => (
+          <OpeningSectionView
+            key={section.id}
+            eyebrow={section.eyebrow}
+            title={section.title}
+            paragraphs={section.paragraphs}
+            emphasis={section.emphasis}
           />
+        ))}
+        {workstreams.map((workstream) => (
+          <ScopeSection key={`${workstream.indexLabel}-${workstream.title}`} workstream={workstream} />
         ))}
       </Page>
 
       <Page size="LETTER" style={styles.page} wrap>
         <PageFooter proposal={proposal} />
-        <View style={styles.section} minPresenceAhead={64}>
-          <Text style={styles.eyebrow}>Investment</Text>
-          <Text style={styles.h2}>Pricing</Text>
-          <PriceRow left="Item" middle="Billing" right="Amount" header />
-          {proposal.pricingLines.map((line) => (
-            <PriceRow
-              key={line.id}
-              left={line.title}
-              middle={
-                line.inclusion === "optional" || line.isAddon
-                  ? "Optional"
-                  : formatClientFacingBilling(line.cadence)
-              }
-              right={formatClientFacingLineAmount(
-                line.unitPriceCents * (line.quantity || 1),
-                line.cadence,
-                proposal.currency,
-              )}
-            />
-          ))}
-          {proposal.credits.map((credit) => (
-            <PriceRow
-              key={credit.id}
-              left={credit.label}
-              middle={formatClientFacingCreditType(credit.kind)}
-              right={formatClientFacingCreditAmount(credit, proposal.currency)}
-            />
-          ))}
-          <View style={styles.totalsBox}>
-            <View style={styles.totalsRow}>
-              <Text style={styles.totalsLabel}>One-time investment</Text>
-              <Text style={styles.totalsValue}>
-                {formatCents(proposal.totals.oneTimeTotalCents, proposal.currency)}
-              </Text>
-            </View>
-            {shouldShowRecurringInvestment(proposal.totals.monthlyTotalCents) ? (
-              <View style={styles.totalsRow}>
-                <Text style={styles.totalsLabel}>Monthly investment</Text>
-                <Text style={styles.totalsValue}>
-                  {formatClientFacingMonthlyInvestment(
-                    proposal.totals.monthlyTotalCents,
-                    proposal.currency,
-                  )}
-                </Text>
-              </View>
-            ) : null}
-            {shouldShowRecurringInvestment(proposal.totals.quarterlyTotalCents) ? (
-              <View style={styles.totalsRow}>
-                <Text style={styles.totalsLabel}>Quarterly investment</Text>
-                <Text style={styles.totalsValue}>
-                  {formatCents(proposal.totals.quarterlyTotalCents, proposal.currency)}
-                </Text>
-              </View>
-            ) : null}
-            {shouldShowRecurringInvestment(proposal.totals.annualTotalCents) ? (
-              <View style={styles.totalsRow}>
-                <Text style={styles.totalsLabel}>Annual investment</Text>
-                <Text style={styles.totalsValue}>
-                  {formatCents(proposal.totals.annualTotalCents, proposal.currency)}
-                </Text>
-              </View>
-            ) : null}
-            {proposal.totals.depositCents > 0 ? (
-              <View style={styles.totalsRow}>
-                <Text style={styles.totalsLabel}>Deposit</Text>
-                <Text style={styles.totalsValue}>
-                  {formatCents(proposal.totals.depositCents, proposal.currency)}
-                </Text>
-              </View>
-            ) : null}
+        <InvestmentSection proposal={proposal} />
+        {sponsorshipNotes.map((note) => (
+          <View key={note.slice(0, 24)} style={styles.section} minPresenceAhead={72}>
+            <Text style={styles.eyebrow}>Sponsorship</Text>
+            <Text style={styles.h2}>Sponsorship condition</Text>
+            <Paragraph text={note} />
           </View>
-        </View>
+        ))}
+        {terms.map((section) => (
+          <TermsSectionView
+            key={section.key}
+            sectionKey={section.key}
+            eyebrow={section.eyebrow}
+            title={section.title}
+            text={section.text}
+            layout={section.layout}
+          />
+        ))}
+      </Page>
 
-        {proposal.paymentSchedule.length > 0 ? (
-          <View style={styles.section} minPresenceAhead={72}>
-            <Text style={styles.h3}>Payment schedule</Text>
-            {proposal.paymentSchedule.map((item) => (
-              <PriceRow
-                key={item.id}
-                left={item.label}
-                middle={formatClientFacingPaymentTiming(item.due)}
-                right={formatCents(item.amountCents, proposal.currency)}
-              />
-            ))}
-          </View>
-        ) : null}
-
-        {sponsorshipNotes.length > 0 ? (
-          <SectionBlock eyebrow="Sponsorship" title="Sponsorship condition">
-            {sponsorshipNotes.map((note) => (
-              <Paragraph key={note.slice(0, 24)} text={note} />
-            ))}
-          </SectionBlock>
-        ) : null}
-
-        {termSections.map(({ key, eyebrow, title }) => {
-          const text = proposal.terms[key];
-          if (!text?.trim()) return null;
-          return (
-            <SectionBlock key={key} eyebrow={eyebrow} title={title}>
-              <StructuredProse
-                blocks={structureProposalProse(text, proseKindForTermsKey(key))}
-              />
-            </SectionBlock>
-          );
-        })}
-
-        {proposal.terms.timelineAssumptions?.trim() ? (
-          <TimelineTermsSection text={proposal.terms.timelineAssumptions} />
-        ) : null}
-
-        <NextStepsSection
-          nextSteps={proposal.terms.nextSteps}
-          closingNote={proposal.terms.closingNote}
-          acceptance={proposal.disclosures.acceptance}
-        />
+      <Page size="LETTER" style={styles.closingPage}>
+        <PageFooter proposal={proposal} />
+        <ClosingSection proposal={proposal} />
       </Page>
     </Document>
   );
@@ -738,7 +835,7 @@ function ProposalPdfDocument({
 export async function renderProposalPdf(
   proposal: CanonicalProposal,
 ): Promise<{ buffer: Buffer; filename: string }> {
-  ensureProposalPdfFonts(); // idempotent; also called at module load
+  ensureProposalPdfFonts();
   const logo = resolveKxdReportLogoAsset();
   const instance = pdf(
     <ProposalPdfDocument

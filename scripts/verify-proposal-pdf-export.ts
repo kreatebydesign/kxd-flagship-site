@@ -242,7 +242,7 @@ check("html has introduction", html.includes("Intro copy for clients"));
 check("html has current situation", html.includes("Situation copy"));
 check("html has exclusions", html.includes("Overall exclusions copy."));
 check("html has payment assumptions copy", html.includes("Payment assumptions copy"));
-check("html uses Payment schedule heading", html.includes("<h2>Payment schedule</h2>"));
+check("html uses Payment conditions heading", html.includes("<h2>Payment conditions</h2>"));
 check("html omits Payment assumptions heading", !html.includes("<h2>Payment assumptions</h2>"));
 check("html includes official gold logo", html.includes("kxd-logo-transparent.png"));
 check("html maps discount label", html.includes("Partnership adjustment"));
@@ -250,6 +250,8 @@ check("html maps payment timing", html.includes("Due upon proposal acceptance"))
 check("html omits raw discount enum as cell", !html.includes(">$discount<") && !html.includes(">discount</td>"));
 check("html omits internal notes", !html.includes("SECRET INTERNAL NOTES"));
 check("html has sponsorship condition", html.includes("Official sponsor recognition"));
+check("html has Opportunity opening", html.includes("Opportunity") || html.includes("What this engagement is for"));
+check("html investment hero label", html.includes("Total project investment"));
 
 const { buffer, filename } = await renderProposalPdf(canonical);
 check("pdf buffer non-empty", buffer.length > 1000);
