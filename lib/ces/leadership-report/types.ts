@@ -32,8 +32,8 @@ export type LeadershipStatusItem = {
 
 export type LeadershipRemediationItem = {
   id: string;
-  found: string;
-  fixed: string;
+  /** Completed post-launch verification / optimization item. */
+  completed: string;
 };
 
 export type LeadershipKeywordExample = {
@@ -139,6 +139,8 @@ export type LeadershipReportDocument = {
     postLaunchLeadNote: string;
     clarifiers: string[];
   };
+  /** Post-launch verification framing — completed work, not a defect list. */
+  remediationsIntro: string;
   remediations: LeadershipRemediationItem[];
   remediationsClose: string;
   platformCompleted: {

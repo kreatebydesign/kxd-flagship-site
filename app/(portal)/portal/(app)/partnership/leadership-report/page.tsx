@@ -12,9 +12,9 @@ import { getPortalSession } from "@/lib/portal/session";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Leadership Report",
+  title: "Primal Motorsports | Digital Performance & Growth Report",
   description:
-    "Primal Motorsports Digital Performance & Growth Report — post-launch baseline.",
+    "Primal Motorsports Digital Performance & Growth Report — post-launch baseline prepared by Kreate by Design.",
 };
 
 /**

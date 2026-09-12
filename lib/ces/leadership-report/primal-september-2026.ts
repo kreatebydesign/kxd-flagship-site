@@ -31,8 +31,8 @@ export const PRIMAL_LEADERSHIP_REPORT: LeadershipReportDocument = {
     "The new Primal Motorsports website launched on September 9 and has completed its post-launch technical review.",
     "The site is live and working across Primal's primary commercial paths, including Racing Schools, Driving Programs, Racing, Radical inventory, Service, Parts, and Contact.",
     "Google Search Console is active. GA4 is receiving production traffic. Lead tracking is working. Google Ads is recording website leads and calls.",
-    "The post-launch audit also identified several cleanup items. Those items were corrected and the production site was re-tested.",
-    "The rebuild phase is now behind us.",
+    "Following production launch, KXD completed a full technical verification pass and closed several production optimization items across search, lead handling, page performance, and commercial routes.",
+    "With the production platform now live and verified, the focus moves to measurable growth.",
     "The next phase is improving qualified traffic, search visibility, advertising efficiency, and lead volume — with September 11 serving as the documented baseline.",
   ],
 
@@ -77,7 +77,7 @@ export const PRIMAL_LEADERSHIP_REPORT: LeadershipReportDocument = {
     },
     {
       id: "remediation",
-      label: "Post-Launch Remediation",
+      label: "Post-Launch Verification",
       status: "complete",
       statusLabel: "Complete",
     },
@@ -91,7 +91,7 @@ export const PRIMAL_LEADERSHIP_REPORT: LeadershipReportDocument = {
 
   searchEquityIntro: [
     "Primal entered the transition with established organic search equity around its brand, Radical vehicles, and racing-school demand.",
-    "KXD's responsibility was not to throw that away. It was to preserve that value while rebuilding the website around Primal's current business — and creating stronger control over content, conversion paths, and measurement.",
+    "The work through the rebuild was to preserve that value while rebuilding the website around Primal's current business — and creating stronger control over content, conversion paths, and measurement.",
   ],
 
   historicalQueries: [
@@ -262,47 +262,43 @@ export const PRIMAL_LEADERSHIP_REPORT: LeadershipReportDocument = {
     ],
   },
 
+  remediationsIntro:
+    "Following production launch, KXD completed a full technical verification pass across search, lead handling, page performance, and commercial routes.",
+
   remediations: [
     {
       id: "redirects",
-      found:
-        "Several historical Primal URLs still known by Google were returning 404s — including /sr1, /sr3, /2-day-advanced-racing-school, /2-day-performance, and a historical SR1 inventory URL.",
-      fixed:
-        "Permanent redirects now route those URLs to their correct current Racing School and Radical destinations.",
+      completed:
+        "Historical Primal URLs were permanently redirected into their correct current Racing School and Radical destinations.",
     },
     {
       id: "titles",
-      found: 'Some SEO page titles repeated "Primal Motorsports."',
-      fixed: "Title architecture was corrected and verified live.",
+      completed:
+        "Search page titles were standardized and verified across production.",
     },
     {
       id: "local-business",
-      found: "LocalBusiness structured data was missing public phone and postal information.",
-      fixed: "Completed and verified.",
+      completed:
+        "Primal's public phone and postal information were completed within LocalBusiness structured data.",
     },
     {
       id: "paid-landing",
-      found:
-        "The paid Racing School landing page could compete with Primal's organic pages in Google's index.",
-      fixed:
-        "The paid landing page is now noindex/follow while Ads functionality remains intact.",
+      completed:
+        "The paid Racing School landing page was separated from organic indexing while preserving Google Ads functionality.",
     },
     {
       id: "lead-persist",
-      found:
-        "Service and Parts inquiries needed stronger handling if email notification failed.",
-      fixed:
-        "Leads now persist first, and notification status is recorded separately.",
+      completed:
+        "Service and Parts lead handling was strengthened so accepted inquiries persist even if an email notification fails.",
     },
     {
       id: "image",
-      found: "A major SR3 image source was approximately 4.49 MB.",
-      fixed:
-        "Reduced to approximately 444 KB while preserving 4000×2370 dimensions.",
+      completed:
+        "A major SR3 image asset was reduced from approximately 4.49 MB to approximately 444 KB while preserving its original 4000×2370 dimensions.",
     },
   ],
 
-  remediationsClose: "Final post-launch production status: Verified",
+  remediationsClose: "Final post-launch production status: VERIFIED",
 
   platformCompleted: {
     intro:

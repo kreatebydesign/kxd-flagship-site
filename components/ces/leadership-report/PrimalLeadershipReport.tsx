@@ -441,24 +441,11 @@ export function PrimalLeadershipReport({
         <section className="kxd-lead-report__section" aria-labelledby="lr-fixed">
           <p className="kxd-lead-report__section-label">Post-launch</p>
           <h2 id="lr-fixed" className="kxd-lead-report__heading">
-            What we found / what we fixed
+            Post-Launch Verification &amp; Optimization
           </h2>
-          <div className="kxd-lead-report__remediation">
-            {report.remediations.map((item) => (
-              <div key={item.id} className="kxd-lead-report__remediation-item">
-                <div>
-                  <p className="kxd-lead-report__remediation-kicker">Found</p>
-                  <p className="kxd-lead-report__prose">{item.found}</p>
-                </div>
-                <div>
-                  <p className="kxd-lead-report__remediation-kicker kxd-lead-report__remediation-kicker--fixed">
-                    Fixed
-                  </p>
-                  <p className="kxd-lead-report__prose">{item.fixed}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+          <p className="kxd-lead-report__prose">{report.remediationsIntro}</p>
+          <p className="kxd-lead-report__panel-title">Completed after launch</p>
+          <BulletList items={report.remediations.map((item) => item.completed)} />
           <p className="kxd-lead-report__final">{report.remediationsClose}</p>
         </section>
 
