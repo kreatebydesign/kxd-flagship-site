@@ -372,8 +372,10 @@ function main() {
     },
   });
   // Force totals onto canonical for composition helpers that read proposal.totals
-  terryCanonical.totals = terryTotals;
-  terryCanonical.depositCents = 250000;
+  terryCanonical.totals = {
+    ...terryTotals,
+    depositCents: 250000,
+  };
 
   const cover = composeCoverPresentation(terryCanonical);
   check("cover lists both organizations", cover.organizationLines.length === 2);
