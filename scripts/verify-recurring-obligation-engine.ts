@@ -94,7 +94,7 @@ function pkgWith(
   return {
     ...emptyLifecyclePackage(),
     billingPlan: plan,
-    commercialStatus: "executed",
+    commercialStatus: "accepted",
     ...extras,
   };
 }

@@ -10,6 +10,7 @@ import { buildPlatinumFilmWorkzCommercialAmendments } from "../lib/proposal-life
 import { previewRecurringObligationsThroughDate } from "../lib/proposal-lifecycle/ensure-recurring-obligations";
 import { resolveRecurringAuthority } from "../lib/proposal-lifecycle/recurring-authority";
 import type {
+  ContractLifecyclePackage,
   InvoiceObligation,
   ProposedBillingPlan,
 } from "../lib/proposal-lifecycle/types";
@@ -66,33 +67,33 @@ const existingSep: InvoiceObligation = {
 };
 
 const plan = makePlan([existingSep]);
-const pkg = {
+const pkg: ContractLifecyclePackage = {
   ...emptyLifecyclePackage(),
   billingPlan: plan,
   commercialAmendments: amendments,
   commercialStatus: "accepted",
   structuredPaymentTerms: {
-    schemaVersion: 1 as const,
+    schemaVersion: 1,
     currency: "USD",
     oneTimeTotalCents: 250_000,
     monthlyTotalCents: 25_000,
     depositCents: 125_000,
     initialPayment: {
-      type: "deposit" as const,
+      type: "deposit",
       amountCents: 31_250,
-      trigger: "on-date" as const,
+      trigger: "on-date",
       dueTerms: "Due",
     },
     installments: [],
     recurring: {
       amountCents: 25_000,
-      cadence: "monthly" as const,
+      cadence: "monthly",
       startTrigger: "website-launch",
       minimumTermMonths: null,
       renewalBehavior: "Month-to-month beginning at website launch",
-      status: "pending-trigger" as const,
+      status: "pending-trigger",
       startBillingDate: null,
-      startBillingDateStatus: "milestone-confirmed" as const,
+      startBillingDateStatus: "milestone-confirmed",
       serviceTitle: "Website Care & Local Visibility",
       includes: [],
       excludes: [],
@@ -100,8 +101,8 @@ const pkg = {
       commencementNotes: null,
     },
     credits: [],
-    taxes: { treatment: "unspecified" as const, notes: "" },
-    commercialSource: "proposal" as const,
+    taxes: { treatment: "unspecified", notes: "" },
+    commercialSource: "proposal",
     sourceProposalNumber: "KXD-P-PLATINUM",
     sourceProposalVersion: 1,
     derivedAt: "2026-08-20T00:00:00.000Z",
@@ -112,7 +113,7 @@ const pkg = {
       title: "Website Growth & Management",
       amountCents: 32_500,
       currency: "USD",
-      cadence: "monthly" as const,
+      cadence: "monthly",
       billDay: 1,
       effectiveDate: "2026-09-01",
       active: true,
