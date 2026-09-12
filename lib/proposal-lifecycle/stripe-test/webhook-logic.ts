@@ -6,6 +6,8 @@
 import { LIFECYCLE_STRIPE_METADATA } from "../../stripe/lifecycle-test-billing-auth.ts";
 import type { ProposedBillingPlan } from "../types.ts";
 import { assertObligationTransition } from "../transitions.ts";
+import { applyStripeCollectedPaymentEvidence } from "../stripe-collected-payment-evidence.ts";
+import { obligationIsPaid } from "../obligation-balances.ts";
 import type { LifecycleStripeTestState } from "./invoice-logic.ts";
 
 export type LifecycleStripeWebhookEvent = {
@@ -171,14 +173,25 @@ export function processLifecycleStripeTestWebhookEvent(input: {
   }
 
   let nextPlan = plan;
-  if (obligation.status !== "paid") {
+  if (!obligationIsPaid(obligation)) {
     assertObligationTransition(obligation.status, "paid");
     const now = new Date().toISOString();
+    const invoiceId = String(obj.id || stripeTest.invoiceId || "");
+    const result = applyStripeCollectedPaymentEvidence(obligation, {
+      amountCents: amountPaid || obligation.amountCents,
+      currency: currency || obligation.currency || "USD",
+      paidAt: now,
+      stripeInvoiceId: invoiceId || `in_test_${obligation.id}`,
+      recordedBy: "stripe-test-webhook",
+      recordedAt: now,
+      idempotencyKey: `stripe-test:${event.id}`,
+      operatorNote: "Verified Stripe TEST invoice payment",
+    });
     nextPlan = {
       ...plan,
       updatedAt: now,
       obligations: plan.obligations.map((o) =>
-        o.id === obligationId ? { ...o, status: "paid" as const, paidAt: now } : o,
+        o.id === obligationId ? result.obligation : o,
       ),
     };
   }
@@ -202,7 +215,7 @@ export function processLifecycleStripeTestWebhookEvent(input: {
 
   return {
     ok: true,
-    duplicate: alreadyEligible && obligation.status === "paid",
+    duplicate: alreadyEligible && obligationIsPaid(obligation),
     plan: nextPlan,
     stripeTest: nextStripe,
     onboardingEligible: true,
