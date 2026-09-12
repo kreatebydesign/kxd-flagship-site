@@ -192,8 +192,10 @@
   font-size: clamp(1.35rem, 2.4vw, 1.75rem);
   font-weight: 500;
   letter-spacing: -0.02em;
-  line-height: 1.15;
+  line-height: 1.2;
   color: var(--kxd-lr-ink);
+  word-spacing: normal;
+  text-wrap: pretty;
 }
 
 .kxd-lead-report__prose {
@@ -602,6 +604,10 @@
 }
 
 @media print {
+  @page {
+    margin: 0.6in;
+  }
+
   .kxd-lead-report {
     max-width: none;
     background: #fff;
@@ -622,17 +628,24 @@
     display: none !important;
   }
 
-  /* Hide portal chrome when printing this document */
+  /* Hide portal / operator chrome when printing this document */
   body:has(.kxd-lead-report) .kxd-os-sidebar,
   body:has(.kxd-lead-report) .kxd-os-topbar,
-  body:has(.kxd-lead-report) .kxd-ces-sidebar {
+  body:has(.kxd-lead-report) .kxd-ces-sidebar,
+  body:has(.kxd-lead-report) .kxd-operator-portal-preview,
+  body:has(.kxd-lead-report) .kxd-operator-preview-client-switch,
+  body:has(.kxd-lead-report) [data-kxd-operator-preview],
+  body:has(.kxd-lead-report) .kxd-os-sidebar__foot,
+  body:has(.kxd-lead-report) .kxd-ces-shell__foot {
     display: none !important;
   }
 
   body:has(.kxd-lead-report) .kxd-os-shell--app,
-  body:has(.kxd-lead-report) .kxd-os-main {
+  body:has(.kxd-lead-report) .kxd-os-main,
+  body:has(.kxd-lead-report) .kxd-os-content {
     display: block !important;
     width: 100% !important;
+    max-width: none !important;
     margin: 0 !important;
     padding: 0 !important;
   }
@@ -647,17 +660,34 @@
     background: linear-gradient(180deg, rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.78));
   }
 
+  /* Absolute fallback — never print operator preview chrome with this document */
+  .kxd-operator-portal-preview {
+    display: none !important;
+  }
+
   .kxd-lead-report__score,
   .kxd-lead-report__metric,
   .kxd-lead-report__panel,
   .kxd-lead-report__pair-card,
   .kxd-lead-report__column,
   .kxd-lead-report__plan-phase,
-  .kxd-lead-report__remediation-item {
+  .kxd-lead-report__final,
+  .kxd-lead-report__scorecard,
+  .kxd-lead-report__metrics {
     break-inside: avoid;
   }
 
   .kxd-lead-report__section {
-    break-inside: avoid-page;
+    break-inside: auto;
+  }
+
+  .kxd-lead-report__heading,
+  .kxd-lead-report__section-label {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  .kxd-lead-report__footer {
+    break-before: avoid;
   }
 }

@@ -76,7 +76,41 @@ check(
 check("ga4 property", report.measurement.ga4PropertyId === "549908814");
 check("status items count", report.statusItems.length === 9);
 check("remediations count", report.remediations.length === 6);
+check(
+  "remediations use completed-work framing",
+  report.remediations.every((item) => typeof item.completed === "string" && item.completed.length > 20),
+);
+check(
+  "remediations intro present",
+  report.remediationsIntro.toLowerCase().includes("verification"),
+);
+check(
+  "remediations close verified",
+  report.remediationsClose.includes("VERIFIED"),
+);
+check(
+  "no found/fixed defect framing keys",
+  report.remediations.every((item) => !("found" in item) && !("fixed" in item)),
+);
 check("plan phases", report.plan.length === 3);
+check(
+  "executive summary moves to growth",
+  report.executiveSummary.some((p) => p.includes("focus moves to measurable growth")),
+);
+check(
+  "no rebuild-behind-us phrasing",
+  !report.executiveSummary.some((p) => p.includes("rebuild phase is now behind")),
+);
+check(
+  "historical equity preserved",
+  report.historicalQueries.length >= 5 &&
+    report.historicalBaselineNote.some((p) => p.toLowerCase().includes("not provided")),
+);
+check(
+  "driver portal future only",
+  report.futureDirection.some((p) => p.toLowerCase().includes("future")) &&
+    report.futureDirection.some((p) => p.toLowerCase().includes("not claimed as delivered")),
+);
 
 const banned = [
   "digital ecosystem",
