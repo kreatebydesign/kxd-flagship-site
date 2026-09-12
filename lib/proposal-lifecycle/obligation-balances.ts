@@ -1,6 +1,15 @@
 /**
  * Obligation balance helpers — paid / remaining / display status.
  * Pure functions; no Stripe; no DB.
+ *
+ * Canonical paid-amount precedence (Batch A):
+ * 1. Sum of paymentEvents when any events exist (events are authoritative)
+ * 2. Positive persisted amountPaidCents
+ * 3. status === "paid" → full obligation amount (legacy / provider compatibility)
+ * 4. Valid paymentReceipt.amountCents > 0
+ * 5. Else 0
+ *
+ * Default amountPaidCents: 0 must NEVER erase stronger paid evidence.
  */
 
 import type { InvoiceObligation, InvoiceObligationStatus } from "./types.ts";
@@ -8,32 +17,74 @@ import type { ObligationPaymentEvent } from "./external-obligation-payment.ts";
 
 const TERMINAL_CLOSED = new Set<InvoiceObligationStatus>(["void", "uncollectible"]);
 
+function asNonNegativeIntCents(value: unknown): number {
+  const n = Number(value);
+  if (!Number.isFinite(n) || !Number.isInteger(n) || n < 0) return 0;
+  return n;
+}
+
+function capPaidToObligation(paidCents: number, obligationAmountCents: number): number {
+  const amount = asNonNegativeIntCents(obligationAmountCents);
+  const paid = asNonNegativeIntCents(paidCents);
+  return Math.min(paid, amount);
+}
+
 export function sumPaymentEventsCents(
   events: ObligationPaymentEvent[] | null | undefined,
 ): number {
   if (!events?.length) return 0;
-  return events.reduce((sum, event) => sum + (Number(event.amountCents) || 0), 0);
+  let sum = 0;
+  for (const event of events) {
+    sum += asNonNegativeIntCents(event.amountCents);
+  }
+  return sum;
 }
 
-/** Authoritative amount already applied to an obligation. */
+/**
+ * Authoritative amount already applied to an obligation.
+ * Integer cents only. Never exceeds obligation.amountCents.
+ */
 export function obligationAmountPaidCents(obligation: InvoiceObligation): number {
-  const fromEvents = sumPaymentEventsCents(obligation.paymentEvents);
-  if (fromEvents > 0) return fromEvents;
-  if (typeof obligation.amountPaidCents === "number" && obligation.amountPaidCents >= 0) {
-    return obligation.amountPaidCents;
+  const amount = asNonNegativeIntCents(obligation.amountCents);
+  const events = obligation.paymentEvents;
+
+  // Events present → events are the ledger (even when sum is 0 after a wipe).
+  if (Array.isArray(events) && events.length > 0) {
+    return capPaidToObligation(sumPaymentEventsCents(events), amount);
   }
+
+  // Positive cached paid amount only — never treat default 0 as conclusive.
+  const cached = obligation.amountPaidCents;
+  if (typeof cached === "number" && Number.isInteger(cached) && cached > 0) {
+    return capPaidToObligation(cached, amount);
+  }
+
+  // Legacy / provider: fully paid status without events or positive cache.
   if (obligation.status === "paid") {
-    return obligation.amountCents;
+    return amount;
   }
-  if (obligation.paymentReceipt?.amountCents) {
-    return obligation.paymentReceipt.amountCents;
+
+  const receiptPaid = obligation.paymentReceipt?.amountCents;
+  if (typeof receiptPaid === "number" && Number.isInteger(receiptPaid) && receiptPaid > 0) {
+    return capPaidToObligation(receiptPaid, amount);
   }
+
   return 0;
 }
 
 export function obligationRemainingCents(obligation: InvoiceObligation): number {
   if (TERMINAL_CLOSED.has(obligation.status)) return 0;
-  return Math.max(0, obligation.amountCents - obligationAmountPaidCents(obligation));
+  const amount = asNonNegativeIntCents(obligation.amountCents);
+  return Math.max(0, amount - obligationAmountPaidCents(obligation));
+}
+
+/** True when the obligation is fully settled. */
+export function obligationIsPaid(obligation: InvoiceObligation): boolean {
+  if (TERMINAL_CLOSED.has(obligation.status)) return false;
+  const amount = asNonNegativeIntCents(obligation.amountCents);
+  const paid = obligationAmountPaidCents(obligation);
+  if (amount === 0) return obligation.status === "paid" || paid === 0;
+  return paid >= amount;
 }
 
 export function isObligationOpenForExternalPayment(obligation: InvoiceObligation): boolean {
@@ -49,7 +100,7 @@ export function deriveObligationPaymentStatus(
 ): InvoiceObligationStatus {
   if (TERMINAL_CLOSED.has(obligation.status)) return obligation.status;
   const paid = obligationAmountPaidCents(obligation);
-  const remaining = Math.max(0, obligation.amountCents - paid);
+  const remaining = Math.max(0, asNonNegativeIntCents(obligation.amountCents) - paid);
   if (paid <= 0) {
     return obligation.status === "partially-paid" ? "pending-trigger" : obligation.status;
   }
@@ -120,6 +171,14 @@ export function planFifoAllocation(
   return allocations;
 }
 
+export function sumObligationAmountCents(obligations: InvoiceObligation[]): number {
+  return obligations.reduce((sum, o) => sum + asNonNegativeIntCents(o.amountCents), 0);
+}
+
+export function sumObligationPaidCents(obligations: InvoiceObligation[]): number {
+  return obligations.reduce((sum, o) => sum + obligationAmountPaidCents(o), 0);
+}
+
 export function sumProjectObligationRemainingCents(
   obligations: InvoiceObligation[],
 ): number {
@@ -130,4 +189,16 @@ export function sumProjectObligationRemainingCents(
 
 export function sumOpenObligationRemainingCents(obligations: InvoiceObligation[]): number {
   return obligations.reduce((sum, o) => sum + obligationRemainingCents(o), 0);
+}
+
+/** Aggregate account totals — always satisfies total = paid + remaining for open ledger rows. */
+export function aggregateObligationBalances(obligations: InvoiceObligation[]): {
+  totalCents: number;
+  paidCents: number;
+  remainingCents: number;
+} {
+  const totalCents = sumObligationAmountCents(obligations);
+  const paidCents = sumObligationPaidCents(obligations);
+  const remainingCents = sumOpenObligationRemainingCents(obligations);
+  return { totalCents, paidCents, remainingCents };
 }

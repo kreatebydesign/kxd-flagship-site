@@ -1,4 +1,5 @@
 import type { ContractLifecyclePackage } from "@/lib/proposal-lifecycle/types";
+import { obligationIsPaid } from "@/lib/proposal-lifecycle/obligation-balances";
 
 export const AGREEMENT_PAYMENT_AWAITING_EXECUTION_LABEL =
   "Payment received — awaiting contract execution";
@@ -25,7 +26,7 @@ function findInitialObligationId(pkg: ContractLifecyclePackage): string | null {
 /** Billing-plan initial obligation is the authoritative paid signal when present. */
 export function isBillingPlanInitialObligationPaid(pkg: ContractLifecyclePackage): boolean {
   const initial = pkg.billingPlan?.obligations?.find((o) => o.kind === "initial");
-  return Boolean(initial && initial.status === "paid");
+  return Boolean(initial && obligationIsPaid(initial));
 }
 
 export function hasPendingVerifiedInitialPayment(pkg: ContractLifecyclePackage): boolean {

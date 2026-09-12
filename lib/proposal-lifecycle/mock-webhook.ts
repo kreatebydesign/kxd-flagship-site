@@ -5,6 +5,8 @@
 
 import { assertObligationTransition } from "./transitions.ts";
 import type { ProposedBillingPlan } from "./types.ts";
+import { applyStripeCollectedPaymentEvidence } from "./stripe-collected-payment-evidence.ts";
+import { obligationIsPaid } from "./obligation-balances.ts";
 
 export type MockWebhookEventType =
   | "invoice.paid"
@@ -104,7 +106,7 @@ export function processMockWebhookEvent(input: {
     if (event.currency && event.currency !== obligation.currency) {
       return { ok: false, error: "Currency mismatch on payment event.", processedEventIds };
     }
-    if (obligation.status === "paid") {
+    if (obligationIsPaid(obligation)) {
       return {
         ok: true,
         duplicate: true,
@@ -113,13 +115,22 @@ export function processMockWebhookEvent(input: {
       };
     }
     assertObligationTransition(obligation.status, "paid");
+    const invoiceId = `in_mock_${event.id}`;
+    const result = applyStripeCollectedPaymentEvidence(obligation, {
+      amountCents: event.amountCents ?? obligation.amountCents,
+      currency: event.currency ?? obligation.currency,
+      paidAt: event.receivedAt,
+      stripeInvoiceId: invoiceId,
+      recordedBy: "mock-webhook",
+      recordedAt: event.receivedAt,
+      idempotencyKey: `mock-webhook:${event.id}`,
+      operatorNote: "Mock invoice.paid",
+    });
     const next: ProposedBillingPlan = {
       ...plan,
       updatedAt: new Date().toISOString(),
       obligations: plan.obligations.map((o) =>
-        o.id === obligation.id
-          ? { ...o, status: "paid" as const, paidAt: event.receivedAt }
-          : o,
+        o.id === obligation.id ? result.obligation : o,
       ),
     };
     return {

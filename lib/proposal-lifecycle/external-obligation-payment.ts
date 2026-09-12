@@ -687,6 +687,59 @@ export function applyAllocatedExternalPayment(
 
   if (Object.keys(errors).length) return { ok: false, errors };
 
+  const mode = input.allocationMode ?? (input.allocations?.length ? "explicit" : "fifo");
+
+  // Explicit allocations: check idempotency before open-balance preview so full-settlement
+  // retries remain safe when no remaining balance is left to allocate.
+  if (mode === "explicit" && (input.allocations?.length ?? 0) > 0) {
+    const explicitLegs = (input.allocations ?? []).map((leg) => ({
+      obligationId: String(leg.obligationId),
+      amountCents: Number(leg.amountCents),
+    }));
+    const earlyFingerprint = allocationFingerprint(explicitLegs);
+    const earlyKey = buildAllocatedExternalPaymentIdempotencyKey({
+      contractId: input.contractId,
+      amountCents,
+      currency,
+      paidAt: paidAt!,
+      externalPaymentMethod: input.externalPaymentMethod,
+      externalReference: input.externalReference,
+      clientIdempotencyKey: input.clientIdempotencyKey,
+      allocationFingerprint: earlyFingerprint,
+    });
+    if (findExistingIdempotency(plan, earlyKey)) {
+      const preview = previewExternalPaymentAllocation(plan, {
+        amountCents,
+        allocationMode: "explicit",
+        allocations: explicitLegs,
+        allowedObligationIds: input.allowedObligationIds,
+      });
+      const safePreview: AllocationPreview =
+        "ok" in preview && preview.ok === false
+          ? {
+              totalAmountCents: amountCents,
+              unallocatedCents: 0,
+              legs: explicitLegs.map((leg) => {
+                const obligation = plan.obligations.find((item) => item.id === leg.obligationId);
+                return {
+                  obligationId: leg.obligationId,
+                  label: obligation?.label ?? leg.obligationId,
+                  amountCents: leg.amountCents,
+                  remainingBeforeCents: 0,
+                  remainingAfterCents: 0,
+                };
+              }),
+            }
+          : (preview as AllocationPreview);
+      return {
+        ok: true,
+        pkg,
+        idempotentReplay: true,
+        preview: safePreview,
+      };
+    }
+  }
+
   const preview = previewExternalPaymentAllocation(plan, {
     amountCents,
     allocationMode: input.allocationMode,

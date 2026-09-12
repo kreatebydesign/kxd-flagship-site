@@ -4,6 +4,7 @@
  */
 
 import type { ContractLifecyclePackage } from "./types.ts";
+import { obligationIsPaid } from "./obligation-balances.ts";
 
 export function isContractFullyExecuted(
   contractStatus: string | null | undefined,
@@ -16,7 +17,7 @@ export function isContractFullyExecuted(
 
 export function isInitialObligationPaid(pkg: ContractLifecyclePackage): boolean {
   const initial = pkg.billingPlan?.obligations?.find((o) => o.kind === "initial");
-  return Boolean(initial && initial.status === "paid");
+  return Boolean(initial && obligationIsPaid(initial));
 }
 
 /**

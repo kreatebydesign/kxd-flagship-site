@@ -7,6 +7,8 @@ import { appendAudit } from "./package.ts";
 import { applyOnboardingEligibility } from "./onboarding-eligibility.ts";
 import type { ContractLifecyclePackage, InvoiceObligation } from "./types.ts";
 import { assertObligationTransition } from "./transitions.ts";
+import { applyStripeCollectedPaymentEvidence } from "./stripe-collected-payment-evidence.ts";
+import { obligationIsPaid } from "./obligation-balances.ts";
 import { LIFECYCLE_STRIPE_METADATA } from "../stripe/lifecycle-test-billing-auth.ts";
 
 export type ObligationStripeBinding = {
@@ -287,7 +289,7 @@ export function applyVerifiedLiveInvoicePayment(input: {
     (p) => p.stripeEventId === eventId || p.stripeInvoiceId === match.stripeInvoiceId,
   );
   const obl = findObligation(pkg, match.obligationId);
-  if (obl?.status === "paid") {
+  if (obl && obligationIsPaid(obl)) {
     pkg = {
       ...pkg,
       processedWebhookEventIds: markProcessed(processed),
@@ -350,30 +352,42 @@ export function applyVerifiedLiveInvoicePayment(input: {
   }
 
   const now = new Date().toISOString();
+  const idempotencyKey = `stripe-live:${eventId}`;
+  let appliedEvidence = false;
+  let duplicateEvidence = false;
   const nextObligations = pkg.billingPlan.obligations.map((o) => {
     if (o.id !== match.obligationId) return o;
-    return {
-      ...o,
-      status: "paid" as const,
+    const result = applyStripeCollectedPaymentEvidence(o, {
+      amountCents: match.amountCents,
+      currency: match.currency,
       paidAt: match.paidAt,
-      stripeDraftInvoiceId: match.stripeInvoiceId,
-      collectionChannel: "stripe-collected" as const,
-      paymentReceipt: {
-        status: "paid" as const,
-        amountCents: match.amountCents,
-        currency: match.currency,
-        paidAt: match.paidAt,
-        externalPaymentMethod: "other" as const,
-        externalReference: match.stripeInvoiceId,
-        operatorNote: `Verified live Stripe invoice (${match.matchedBy})`,
-        recordedBy: "stripe-live-webhook",
-        recordedAt: now,
-        stripeInvoiceId: match.stripeInvoiceId,
-        collectionChannel: "stripe-collected" as const,
-        idempotencyKey: `stripe-live:${eventId}`,
-      },
-    };
+      stripeInvoiceId: match.stripeInvoiceId,
+      recordedBy: "stripe-live-webhook",
+      recordedAt: now,
+      idempotencyKey,
+      operatorNote: `Verified live Stripe invoice (${match.matchedBy})`,
+    });
+    appliedEvidence = result.applied;
+    duplicateEvidence = result.duplicate;
+    return result.obligation;
   });
+
+  if (!appliedEvidence) {
+    pkg = {
+      ...pkg,
+      processedWebhookEventIds: markProcessed(processed),
+      pendingVerifiedStripePayments: (pkg.pendingVerifiedStripePayments ?? []).filter(
+        (p) => p.stripeInvoiceId !== match.stripeInvoiceId,
+      ),
+    };
+    pkg = applyOnboardingEligibility(pkg, input.contractStatus);
+    return {
+      pkg,
+      duplicate: duplicateEvidence,
+      appliedToObligation: false,
+      pending: false,
+    };
+  }
 
   pkg = {
     ...pkg,

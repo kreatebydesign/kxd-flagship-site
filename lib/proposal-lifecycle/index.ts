@@ -51,11 +51,17 @@ export {
 export {
   obligationAmountPaidCents,
   obligationRemainingCents,
+  obligationIsPaid,
   planFifoAllocation,
   formatObligationStatusLabel,
   sumProjectObligationRemainingCents,
   sumOpenObligationRemainingCents,
+  sumObligationAmountCents,
+  sumObligationPaidCents,
+  aggregateObligationBalances,
+  deriveObligationPaymentStatus,
 } from "./obligation-balances.ts";
+export { applyStripeCollectedPaymentEvidence } from "./stripe-collected-payment-evidence.ts";
 export {
   ensureAncillaryObligationsOnPlan,
   ensureRecurringDueOccurrenceOnPlan,

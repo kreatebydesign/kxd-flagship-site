@@ -6,6 +6,7 @@
 import { createHash } from "crypto";
 import type { ProposedBillingPlan } from "./types.ts";
 import { attachMockStripeDrafts } from "./billing-plan.ts";
+import { applyStripeCollectedPaymentEvidence } from "./stripe-collected-payment-evidence.ts";
 
 export type MockStripeDraftBundle = {
   customerId: string;
@@ -73,10 +74,20 @@ export function applyMockInvoicePaid(
   return {
     ...plan,
     updatedAt: now,
-    obligations: plan.obligations.map((o) =>
-      o.id === obligationId
-        ? { ...o, status: "paid", paidAt: now }
-        : o,
-    ),
+    obligations: plan.obligations.map((o) => {
+      if (o.id !== obligationId) return o;
+      const invoiceId =
+        o.stripeDraftInvoiceId || mockId("in", `${plan.contractId}:${o.id}:paid`);
+      return applyStripeCollectedPaymentEvidence(o, {
+        amountCents: o.amountCents,
+        currency: o.currency,
+        paidAt: now,
+        stripeInvoiceId: invoiceId,
+        recordedBy: "mock-stripe-billing",
+        recordedAt: now,
+        idempotencyKey: `mock-paid:${plan.contractId}:${o.id}:${invoiceId}`,
+        operatorNote: "Mock Stripe invoice paid",
+      }).obligation;
+    }),
   };
 }

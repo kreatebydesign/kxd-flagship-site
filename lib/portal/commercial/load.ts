@@ -20,6 +20,10 @@ import {
   isBillingPlanInitialObligationPaid,
 } from "@/lib/client-command/commercial/payment-status-display";
 import {
+  aggregateObligationBalances,
+  deriveObligationPaymentStatus,
+} from "@/lib/proposal-lifecycle/obligation-balances";
+import {
   mapClientSafeCommercialDocument,
   portalCommercialDocumentDownloadHref,
 } from "./client-safe-documents";
@@ -178,14 +182,14 @@ function buildPaymentSchedule(
 ) {
   const schedule = obligations.map((ob) => {
     let receiptHref = resolveObligationReceiptHref(ob);
-    if (!receiptHref && ob.kind === "initial" && ob.status === "paid") {
+    if (!receiptHref && ob.kind === "initial" && deriveObligationPaymentStatus(ob) === "paid") {
       receiptHref = resolveInitialObligationReceiptFromPkg(pkg);
     }
     return {
       id: ob.id,
       label: obligationLabel(ob),
       amountLabel: formatCents(ob.amountCents),
-      statusLabel: formatPortalObligationStatusLabel(ob.status),
+      statusLabel: formatPortalObligationStatusLabel(deriveObligationPaymentStatus(ob)),
       dueDateLabel: ob.dueDate ? formatPortalCommercialDate(ob.dueDate) : null,
       receiptHref,
       /** Client-facing includes text only — never internalNotes. */
@@ -193,11 +197,7 @@ function buildPaymentSchedule(
     };
   });
 
-  const totalCents = obligations.reduce((sum, ob) => sum + ob.amountCents, 0);
-  const paidCents = obligations
-    .filter((ob) => ob.status === "paid")
-    .reduce((sum, ob) => sum + ob.amountCents, 0);
-  const remainingCents = Math.max(0, totalCents - paidCents);
+  const { totalCents, paidCents, remainingCents } = aggregateObligationBalances(obligations);
 
   return {
     totalLabel: formatCents(totalCents),
