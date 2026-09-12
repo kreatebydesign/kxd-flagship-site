@@ -21,6 +21,13 @@ export type InsightDetail = InsightPreview & {
   body: string[]; // paragraphs for static content; "## " prefix = section heading; [label](/path) = links
   payloadContent?: unknown; // Lexical JSON when sourced from CMS
   keywords?: string[];
+  /** Optional search title when visible H1 should stay more editorial */
+  seoTitle?: string;
+  seoDescription?: string;
+  /** Enhanced KXD Journal feature template — legacy articles remain "standard" */
+  format?: "standard" | "feature";
+  heroImage?: string;
+  aboutTopics?: string[];
   cta?: {
     headline: string;
     subCopy: string;
@@ -53,6 +60,47 @@ export const JOURNAL_AUTHOR = "Matt Lunger" as const;
 
 export const STATIC_INSIGHTS: InsightDetail[] = [
 
+  // ── Journal Feature — Plate the Umpqua ─────────────────────────────────────
+
+  {
+    slug: "building-plate-the-umpqua-with-chef-martin",
+    title:
+      "I Thought I Was Building Martin a Website. We Ended Up Building Plate OS.",
+    excerpt:
+      "What started as a private dining website turned into something much bigger. Here’s how Martin and I built the site, the admin, the business logic and eventually an operating system around the way Plate the Umpqua actually works.",
+    seoTitle: "How We Built Plate OS for Plate the Umpqua",
+    seoDescription:
+      "Inside the Plate the Umpqua build with Chef Martin Condon: private dining website, custom Plate OS admin, Welcome Home partner gifting, Square checkout, and the infrastructure under the site.",
+    category: "operational-systems",
+    categoryLabel: "Operational Systems",
+    author: JOURNAL_AUTHOR,
+    publishedAt: "2026-09-12",
+    readingTime: 16,
+    featured: true,
+    format: "feature",
+    heroImage: "/journal/plate-the-umpqua/hero.webp",
+    aboutTopics: [
+      "Plate the Umpqua",
+      "private dining website development",
+      "hospitality website development",
+      "custom hospitality admin systems",
+      "business operations software",
+    ],
+    keywords: [
+      "Plate the Umpqua",
+      "Plate OS",
+      "private dining website development",
+      "private chef website design",
+      "hospitality website development",
+      "custom hospitality admin systems",
+      "business operations software",
+      "Welcome Home Private Dining",
+      "Partner Concierge",
+      "Chef Martin Condon",
+    ],
+    body: [],
+  },
+
   // ── Luxury Web Design ──────────────────────────────────────────────────────
 
   {
@@ -65,7 +113,7 @@ export const STATIC_INSIGHTS: InsightDetail[] = [
     author: JOURNAL_AUTHOR,
     publishedAt: "2026-08-15",
     readingTime: 11,
-    featured: true,
+    featured: false,
     keywords: [
       "When to Redesign a Website",
       "Signs Your Website Needs a Redesign",
@@ -453,6 +501,10 @@ export function getInsightBySlug(slug: string): InsightDetail | undefined {
   return STATIC_INSIGHTS.find((a) => a.slug === slug);
 }
 
+export function isJournalFeature(article: InsightDetail | null | undefined): boolean {
+  return article?.format === "feature";
+}
+
 export function getRelatedInsights(
   slug: string,
   category: string,
@@ -465,6 +517,19 @@ export function getRelatedInsights(
 
 export function formatInsightDate(iso: string): string {
   try {
+    // Date-only strings (YYYY-MM-DD) must not be parsed as UTC midnight,
+    // which shifts the calendar day behind in US timezones.
+    const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+    if (dateOnly) {
+      const year = Number(dateOnly[1]);
+      const month = Number(dateOnly[2]);
+      const day = Number(dateOnly[3]);
+      return new Date(year, month - 1, day).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    }
     return new Date(iso).toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",

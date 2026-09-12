@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import Image from "next/image";
 import { buildMetadata } from "@/lib/seo/metadata";
 import { INSIGHT_CATEGORIES, STATIC_INSIGHTS, type InsightPreview } from "@/lib/insights";
 import { InsightsGrid } from "@/components/insights/InsightsGrid";
 import { StructuredData } from "@/components/seo/StructuredData";
 import { breadcrumbSchema, itemListSchema } from "@/lib/seo/schema";
+import { getJournalFeatureBySlug } from "@/lib/insights/features";
 
 export const metadata: Metadata = buildMetadata({
   title: "KXD Journal",
   description:
-    "Perspectives on digital experiences, operational systems, brand strategy, hospitality growth, and motorsports innovation — from the studio behind KXD.",
+    "Insights, builds, systems, and ideas from inside Kreate by Design — technical deep dives, client collaborations, and founder notes on how digital work actually gets made.",
   path: "/insights",
   noIndex: false,
 });
@@ -87,6 +90,11 @@ async function getInsights(): Promise<InsightPreview[]> {
 
 export default async function InsightsPage() {
   const articles = await getInsights();
+  const featuredFeature =
+    getJournalFeatureBySlug("building-plate-the-umpqua-with-chef-martin") ?? null;
+  const gridArticles = featuredFeature
+    ? articles.filter((a) => a.slug !== featuredFeature.slug)
+    : articles;
 
   const schema = [
     breadcrumbSchema([{ name: "Insights", path: "/insights" }]),
@@ -120,7 +128,7 @@ export default async function InsightsPage() {
                 style={{
                   fontSize: "clamp(2.5rem, 5vw, 4rem)",
                   lineHeight: 1.04,
-                  maxWidth: "26rem",
+                  maxWidth: "28rem",
                 }}
               >
                 Thinking in public.
@@ -129,9 +137,9 @@ export default async function InsightsPage() {
                 className="kxd-body mt-6"
                 style={{ maxWidth: "42rem", lineHeight: 1.8 }}
               >
-                Perspectives on digital experiences, operational systems, brand
-                strategy, hospitality growth, and motorsports innovation — from
-                the studio behind KXD.
+                Insights, builds, systems, and ideas from inside Kreate by Design —
+                technical deep dives, client collaborations, and notes on how the
+                work actually gets made.
               </p>
             </div>
 
@@ -179,13 +187,89 @@ export default async function InsightsPage() {
         </div>
       </section>
 
+      {featuredFeature ? (
+        <section
+          style={{
+            background: "var(--kxd-black-base)",
+            borderBottom: "1px solid var(--kxd-border-white)",
+            padding: "clamp(2.5rem, 5vw, 3.75rem) 0",
+          }}
+        >
+          <div className="kxd-container">
+            <p className="kxd-eyebrow" style={{ marginBottom: "1.25rem" }}>
+              Featured Journal Story
+            </p>
+            <Link
+              href={`/insights/${featuredFeature.slug}`}
+              className="group grid gap-0 overflow-hidden lg:grid-cols-[1.05fr_0.95fr]"
+              style={{
+                textDecoration: "none",
+                border: "1px solid var(--kxd-border-white)",
+                background: "var(--kxd-black-elevated)",
+              }}
+            >
+              <div style={{ position: "relative", minHeight: "16rem" }}>
+                <Image
+                  src={featuredFeature.heroImage.src}
+                  alt={featuredFeature.heroImage.alt}
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 55vw"
+                  style={{ objectFit: "cover" }}
+                  priority
+                />
+              </div>
+              <div style={{ padding: "clamp(1.5rem, 3vw, 2.5rem)" }}>
+                <p
+                  className="kxd-label"
+                  style={{ color: "var(--kxd-gold)", marginBottom: "0.85rem" }}
+                >
+                  {featuredFeature.editorialLabel} · {featuredFeature.subjectLabel}
+                </p>
+                <h2
+                  className="font-serif font-light"
+                  style={{
+                    fontSize: "clamp(1.35rem, 2.4vw, 1.85rem)",
+                    lineHeight: 1.15,
+                    color: "var(--kxd-cream)",
+                    maxWidth: "22ch",
+                  }}
+                >
+                  {featuredFeature.title}
+                </h2>
+                <p
+                  className="mt-4 font-sans font-light"
+                  style={{
+                    fontSize: "0.9375rem",
+                    lineHeight: 1.7,
+                    color: "var(--kxd-cream-muted)",
+                    maxWidth: "36rem",
+                  }}
+                >
+                  {featuredFeature.excerpt}
+                </p>
+                <p
+                  className="mt-6 font-sans uppercase"
+                  style={{
+                    fontSize: "0.625rem",
+                    letterSpacing: "0.12em",
+                    color: "var(--kxd-gold)",
+                  }}
+                >
+                  Read the build story →
+                </p>
+              </div>
+            </Link>
+          </div>
+        </section>
+      ) : null}
+
       {/* ── Article Grid ─────────────────────────────────────────────────────── */}
       <section
         className="kxd-section"
         style={{ background: "var(--kxd-black-base)" }}
       >
         <div className="kxd-container">
-          <InsightsGrid articles={articles} categories={INSIGHT_CATEGORIES} />
+          <InsightsGrid articles={gridArticles} categories={INSIGHT_CATEGORIES} />
         </div>
       </section>
 

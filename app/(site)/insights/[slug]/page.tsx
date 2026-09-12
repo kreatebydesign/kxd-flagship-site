@@ -12,9 +12,12 @@ import {
   getInsightBySlug,
   getRelatedInsights,
   formatInsightDate,
+  isJournalFeature,
   type InsightDetail,
   type InsightPreview,
 } from "@/lib/insights";
+import { getJournalFeatureBySlug } from "@/lib/insights/features";
+import { JournalFeatureArticleView } from "@/components/insights/journal";
 
 // ── Static generation ─────────────────────────────────────────────────────────
 
@@ -45,7 +48,13 @@ export async function generateStaticParams() {
 // ── Data fetching ──────────────────────────────────────────────────────────────
 
 async function getArticle(slug: string): Promise<InsightDetail | null> {
-  // Try Payload first
+  // Static Journal features win for known feature slugs (authoritative copy).
+  const staticArticle = getInsightBySlug(slug);
+  if (staticArticle?.format === "feature") {
+    return staticArticle;
+  }
+
+  // Try Payload first for CMS articles
   try {
     const { getPayload } = await import("payload");
     const config = (await import("@payload-config")).default;
@@ -86,7 +95,7 @@ async function getArticle(slug: string): Promise<InsightDetail | null> {
     // Fall through to static
   }
 
-  return getInsightBySlug(slug) ?? null;
+  return staticArticle ?? null;
 }
 
 // ── Metadata ──────────────────────────────────────────────────────────────────
@@ -98,6 +107,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const article = await getArticle(slug);
+  const feature = getJournalFeatureBySlug(slug);
 
   if (!article) {
     return buildMetadata({
@@ -108,12 +118,14 @@ export async function generateMetadata({
   }
 
   return buildMetadata({
-    title: article.title,
-    description: article.excerpt,
+    title: feature?.seoTitle || article.seoTitle || article.title,
+    description:
+      feature?.seoDescription || article.seoDescription || article.excerpt,
     path: `/insights/${article.slug}`,
     type: "article",
     publishedTime: article.publishedAt,
-    keywords: article.keywords,
+    keywords: feature?.keywords || article.keywords,
+    ogImage: feature?.ogImage || article.heroImage,
   });
 }
 
@@ -136,12 +148,14 @@ function renderInlineText(text: string) {
 
   return parts.map((part, i) => {
     if (typeof part === "string") return <span key={i}>{part}</span>;
+    const external = part.href.startsWith("http");
     return (
       <Link
         key={i}
         href={part.href}
         className="underline decoration-[rgba(197,166,92,0.45)] underline-offset-[0.22em] transition-colors hover:text-[var(--kxd-cream)] hover:decoration-[var(--kxd-gold)]"
         style={{ color: "var(--kxd-cream)" }}
+        {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
       >
         {part.label}
       </Link>
@@ -156,7 +170,6 @@ function ArticleBody({
   body: string[];
   payloadContent?: unknown;
 }) {
-  // Static content (string paragraphs / optional "## " headings)
   if (body.length > 0) {
     return (
       <div className="space-y-6">
@@ -197,7 +210,6 @@ function ArticleBody({
     );
   }
 
-  // Payload Lexical JSON — basic paragraph extraction
   if (payloadContent && typeof payloadContent === "object") {
     try {
       const lexical = payloadContent as {
@@ -255,8 +267,6 @@ function ArticleBody({
   return null;
 }
 
-// ── Related article card ──────────────────────────────────────────────────────
-
 function RelatedCard({ article }: { article: InsightPreview }) {
   return (
     <Link
@@ -309,9 +319,31 @@ function RelatedCard({ article }: { article: InsightPreview }) {
   );
 }
 
-// ── JSON-LD ────────────────────────────────────────────────────────────────────
+function ArticleJsonLd({
+  article,
+  aboutTopics,
+  image,
+}: {
+  article: InsightDetail;
+  aboutTopics?: string[];
+  image?: string;
+}) {
+  const posting = blogPostingSchema({
+    title: article.seoTitle || article.title,
+    description: article.seoDescription || article.excerpt,
+    path: `/insights/${article.slug}`,
+    publishedAt: article.publishedAt,
+    authorName: article.author,
+    image,
+  }) as Record<string, unknown>;
 
-function ArticleJsonLd({ article }: { article: InsightDetail }) {
+  if (aboutTopics?.length) {
+    posting.about = aboutTopics.map((name) => ({
+      "@type": "Thing",
+      name,
+    }));
+  }
+
   return (
     <StructuredData
       data={[
@@ -319,19 +351,11 @@ function ArticleJsonLd({ article }: { article: InsightDetail }) {
           { name: "Insights", path: "/insights" },
           { name: article.title, path: `/insights/${article.slug}` },
         ]),
-        blogPostingSchema({
-          title: article.title,
-          description: article.excerpt,
-          path: `/insights/${article.slug}`,
-          publishedAt: article.publishedAt,
-          authorName: article.author,
-        }),
+        posting,
       ]}
     />
   );
 }
-
-// ── Page ──────────────────────────────────────────────────────────────────────
 
 export default async function InsightDetailPage({
   params,
@@ -343,14 +367,77 @@ export default async function InsightDetailPage({
 
   if (!article) notFound();
 
+  const feature = getJournalFeatureBySlug(slug);
   const related = getRelatedInsights(article.slug, article.category, 3);
   const publishedDate = formatInsightDate(article.publishedAt);
 
+  if (isJournalFeature(article) && feature) {
+    return (
+      <>
+        <ArticleJsonLd
+          article={article}
+          aboutTopics={feature.aboutTopics}
+          image={feature.ogImage || feature.heroImage.src}
+        />
+        <JournalFeatureArticleView article={feature} />
+        {related.length > 0 && (
+          <section
+            style={{
+              background: "var(--kxd-black-pure)",
+              padding: "clamp(3rem, 6vw, 4.5rem) 0",
+              borderBottom: "1px solid var(--kxd-border-white)",
+            }}
+          >
+            <div className="kxd-container">
+              <div className="mb-10 flex items-end justify-between gap-6">
+                <div>
+                  <p className="kxd-eyebrow">Continue in the Journal</p>
+                  <h2
+                    className="mt-3 font-serif font-light"
+                    style={{
+                      fontSize: "clamp(1.25rem, 2vw, 1.625rem)",
+                      color: "var(--kxd-cream)",
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    Related reading
+                  </h2>
+                </div>
+                <Link
+                  href="/insights"
+                  className="hidden font-sans font-medium uppercase transition-colors hover:text-[var(--kxd-cream)] sm:block"
+                  style={{
+                    fontSize: "0.6875rem",
+                    letterSpacing: "var(--tracking-button)",
+                    color: "var(--kxd-cream-muted)",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  All Articles →
+                </Link>
+              </div>
+              <div
+                className="grid gap-px sm:grid-cols-2 lg:grid-cols-3"
+                style={{
+                  background: "var(--kxd-border-white)",
+                  border: "1px solid var(--kxd-border-white)",
+                }}
+              >
+                {related.map((r) => (
+                  <RelatedCard key={r.slug} article={r} />
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+      </>
+    );
+  }
+
   return (
     <>
-      <ArticleJsonLd article={article} />
+      <ArticleJsonLd article={article} aboutTopics={article.aboutTopics} image={article.heroImage} />
 
-      {/* ── Article Hero ────────────────────────────────────────────────────── */}
       <section
         style={{
           paddingTop: "calc(var(--nav-height) + var(--section-py))",
@@ -360,17 +447,17 @@ export default async function InsightDetailPage({
         }}
       >
         <div className="kxd-container" style={{ maxWidth: "52rem" }}>
-          {/* Back link */}
           <Link
             href="/insights"
             className="kxd-label mb-8 inline-flex items-center gap-2 transition-opacity hover:opacity-70"
             style={{ color: "var(--kxd-cream-muted)", display: "flex" }}
           >
-            <span aria-hidden style={{ color: "var(--kxd-gold)" }}>←</span>
+            <span aria-hidden style={{ color: "var(--kxd-gold)" }}>
+              ←
+            </span>
             KXD Journal
           </Link>
 
-          {/* Category + Reading time */}
           <div className="mt-2 flex flex-wrap items-center gap-3">
             <p
               className="kxd-label inline-block"
@@ -385,13 +472,16 @@ export default async function InsightDetailPage({
             </p>
             <span
               className="font-sans"
-              style={{ fontSize: "0.5625rem", color: "rgba(255,255,255,0.25)", letterSpacing: "0.08em" }}
+              style={{
+                fontSize: "0.5625rem",
+                color: "rgba(255,255,255,0.25)",
+                letterSpacing: "0.08em",
+              }}
             >
               {article.readingTime} min read
             </span>
           </div>
 
-          {/* Headline */}
           <h1
             className="kxd-serif-title mt-6"
             style={{
@@ -403,7 +493,6 @@ export default async function InsightDetailPage({
             {article.title}
           </h1>
 
-          {/* Excerpt */}
           <p
             className="mt-6 font-serif font-light italic"
             style={{
@@ -416,12 +505,10 @@ export default async function InsightDetailPage({
             {article.excerpt}
           </p>
 
-          {/* Author + date */}
           <div
             className="mt-8 flex items-center gap-4 border-t pt-6"
             style={{ borderColor: "var(--kxd-border-white)", maxWidth: "42rem" }}
           >
-            {/* Author initials avatar */}
             <div
               className="flex h-9 w-9 shrink-0 items-center justify-center font-sans text-[0.5625rem] font-medium uppercase"
               style={{
@@ -450,7 +537,11 @@ export default async function InsightDetailPage({
               </p>
               <p
                 className="mt-0.5 font-sans"
-                style={{ fontSize: "0.625rem", letterSpacing: "0.06em", color: "rgba(255,255,255,0.3)" }}
+                style={{
+                  fontSize: "0.625rem",
+                  letterSpacing: "0.06em",
+                  color: "rgba(255,255,255,0.3)",
+                }}
               >
                 {publishedDate}
               </p>
@@ -459,7 +550,6 @@ export default async function InsightDetailPage({
         </div>
       </section>
 
-      {/* ── Article Body ─────────────────────────────────────────────────────── */}
       <section
         style={{
           background: "var(--kxd-black-base)",
@@ -468,7 +558,6 @@ export default async function InsightDetailPage({
         }}
       >
         <div className="kxd-container" style={{ maxWidth: "46rem" }}>
-          {/* Ornamental rule */}
           <div
             aria-hidden
             style={{
@@ -482,7 +571,6 @@ export default async function InsightDetailPage({
 
           <ArticleBody body={article.body} payloadContent={article.payloadContent} />
 
-          {/* End ornament */}
           <div
             aria-hidden
             style={{
@@ -494,7 +582,6 @@ export default async function InsightDetailPage({
             }}
           />
 
-          {/* Byline close */}
           <p
             className="mt-6 font-sans"
             style={{
@@ -508,7 +595,6 @@ export default async function InsightDetailPage({
         </div>
       </section>
 
-      {/* ── Related Articles ──────────────────────────────────────────────────── */}
       {related.length > 0 && (
         <section
           style={{
@@ -518,7 +604,7 @@ export default async function InsightDetailPage({
           }}
         >
           <div className="kxd-container">
-            <div className="flex items-end justify-between gap-6 mb-10">
+            <div className="mb-10 flex items-end justify-between gap-6">
               <div>
                 <p className="kxd-eyebrow">Related Reading</p>
                 <h2
@@ -546,7 +632,8 @@ export default async function InsightDetailPage({
               </Link>
             </div>
 
-            <div className="grid gap-px sm:grid-cols-2 lg:grid-cols-3"
+            <div
+              className="grid gap-px sm:grid-cols-2 lg:grid-cols-3"
               style={{
                 background: "var(--kxd-border-white)",
                 border: "1px solid var(--kxd-border-white)",
@@ -560,11 +647,8 @@ export default async function InsightDetailPage({
         </section>
       )}
 
-      {/* ── Final CTA ─────────────────────────────────────────────────────────── */}
       <FinalCtaBand
-        headline={
-          article.cta?.headline ?? "Ready to Build Something Exceptional?"
-        }
+        headline={article.cta?.headline ?? "Ready to Build Something Exceptional?"}
         subCopy={
           article.cta?.subCopy ??
           "KXD partners with ambitious businesses to create digital experiences, operational systems, and brands built to endure."
