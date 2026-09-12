@@ -244,6 +244,116 @@ export function buildPlatinumFilmWorkzCommercialAmendments(input?: {
   };
 }
 
+/** Effective date of Platinum Growth supersession of Care (commercial authority). */
+export const PLATINUM_GROWTH_EFFECTIVE_DATE = "2026-09-01";
+export const PLATINUM_GROWTH_AMOUNT_CENTS = 32_500 as Cents;
+export const PLATINUM_GROWTH_TITLE = "Website Growth & Management";
+export const PLATINUM_CARE_TITLE = "Website Care & Local Visibility";
+export const PLATINUM_CARE_AMOUNT_CENTS = 25_000 as Cents;
+
+export const PLATINUM_GROWTH_EXCLUSIONS_CLARIFICATION = [
+  "For clarity: ongoing SEO, website hosting fees, domain registration fees, and ongoing website maintenance are excluded from the $2,500 one-time website project scope except where separately selected and expressly included elsewhere in this Agreement.",
+  "The Client previously selected Website Care & Local Visibility ($250/month beginning at website launch).",
+  "Effective September 1, 2026, that recurring service is superseded by Website Growth & Management ($325/month), which remains separate from the $2,500 website project total.",
+  "KXD Managed Website Hosting ($299.99/year) and first-year .com domain registration ($10.19) remain separately selected charges under this Agreement and are not contradicted by the project-level exclusions above.",
+].join(" ");
+
+export const WEBSITE_GROWTH_MANAGEMENT_INCLUDES = [
+  ...WEBSITE_CARE_LOCAL_VISIBILITY_INCLUDES,
+  "Management of Instagram and Facebook",
+] as const;
+
+export const WEBSITE_GROWTH_MANAGEMENT_EXCLUDES = WEBSITE_CARE_LOCAL_VISIBILITY_EXCLUDES.filter(
+  (item) => item !== "Social media management",
+);
+
+export function isPlatinumGrowthRecurringAmendmentPresent(
+  amendments: ContractCommercialAmendments | null | undefined,
+): boolean {
+  const recurring = amendments?.recurringService;
+  if (!recurring) return false;
+  return (
+    recurring.title === PLATINUM_GROWTH_TITLE &&
+    Number(recurring.amountCents) === Number(PLATINUM_GROWTH_AMOUNT_CENTS) &&
+    recurring.cadence === "monthly" &&
+    recurring.startBillingDate === PLATINUM_GROWTH_EFFECTIVE_DATE &&
+    recurring.startBillingDateStatus === "confirmed"
+  );
+}
+
+/** Authoritative Growth recurring term effective 2026-09-01 (supersedes Care $250). */
+export function buildPlatinumGrowthRecurringServiceAmendment(): RecurringServiceAmendment {
+  return {
+    title: PLATINUM_GROWTH_TITLE,
+    amountCents: PLATINUM_GROWTH_AMOUNT_CENTS,
+    cadence: "monthly",
+    includes: [...WEBSITE_GROWTH_MANAGEMENT_INCLUDES],
+    excludes: [...WEBSITE_GROWTH_MANAGEMENT_EXCLUDES],
+    rankingDisclaimer: WEBSITE_CARE_RANKING_DISCLAIMER,
+    startTrigger: "on-date",
+    startBillingDate: PLATINUM_GROWTH_EFFECTIVE_DATE,
+    startBillingDateStatus: "confirmed",
+    commencementNotes: [
+      "Effective September 1, 2026, Website Growth & Management ($325/month) supersedes the prior Website Care & Local Visibility ($250/month) recurring term.",
+      "The prior $250/month Care term remains historically recorded as previously agreed and is not erased.",
+      "This $325/month service is separate from the $2,500 website project price.",
+      "Recurring billing continues according to the monthly-service termination and cancellation provisions in this Agreement.",
+    ].join(" "),
+  };
+}
+
+/**
+ * Patch an existing Platinum commercialAmendments record so Growth $325 becomes
+ * the authoritative recurringService from 2026-09-01, without rebuilding schedule
+ * or ancillaries and without touching acceptedSnapshot.
+ */
+export function supersedePlatinumRecurringWithGrowth(
+  existing: ContractCommercialAmendments,
+  input?: { recordedBy?: string | null; recordedAt?: string },
+): {
+  amendments: ContractCommercialAmendments;
+  status: "applied" | "already-present";
+  priorRecurringTitle: string | null;
+  priorRecurringAmountCents: number | null;
+} {
+  if (isPlatinumGrowthRecurringAmendmentPresent(existing)) {
+    return {
+      amendments: existing,
+      status: "already-present",
+      priorRecurringTitle: existing.recurringService?.title ?? null,
+      priorRecurringAmountCents: existing.recurringService?.amountCents ?? null,
+    };
+  }
+
+  const prior = existing.recurringService ?? null;
+  const growth = buildPlatinumGrowthRecurringServiceAmendment();
+  const priorTitle = prior?.title ?? null;
+  const priorAmount = prior?.amountCents ?? null;
+
+  const reason = [
+    existing.reason?.trim() || "Platinum commercial amendments.",
+    `Supersession effective ${PLATINUM_GROWTH_EFFECTIVE_DATE}: ${PLATINUM_GROWTH_TITLE} ($${(Number(PLATINUM_GROWTH_AMOUNT_CENTS) / 100).toFixed(2)}/month) replaces prior recurring authority${
+      priorTitle
+        ? ` (${priorTitle}${priorAmount != null ? ` $${(Number(priorAmount) / 100).toFixed(2)}/month` : ""})`
+        : ""
+    }. Historical Care agreement preserved; accepted proposal snapshot unchanged.`,
+  ].join(" ");
+
+  return {
+    amendments: {
+      ...existing,
+      recordedAt: input?.recordedAt ?? new Date().toISOString(),
+      recordedBy: input?.recordedBy ?? existing.recordedBy ?? null,
+      reason,
+      recurringService: growth,
+      exclusionsClarification: PLATINUM_GROWTH_EXCLUSIONS_CLARIFICATION,
+    },
+    status: "applied",
+    priorRecurringTitle: priorTitle,
+    priorRecurringAmountCents: priorAmount,
+  };
+}
+
 export const DE_BOIS_PAYMENT_SCHEDULE_NARRATIVE = [
   "PRICING & PAYMENT SCHEDULE",
   "",
