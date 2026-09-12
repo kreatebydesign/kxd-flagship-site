@@ -52,12 +52,12 @@ export type CaseStudy = {
 //   2. Cusick Morgan Motorsports
 //   3. AutoDV8ions
 //   4. Martinsen Construction
+//   5. Plate the Umpqua (hospitality systems / Plate OS)
 //
 // Secondary (Further Work):
-//   5. E. Davis Enterprises
-//   6. On Track Performance
-//   7. Spur Restaurant & Bar
-//   8. Plate the Umpqua
+//   6. E. Davis Enterprises
+//   7. On Track Performance
+//   8. Spur Restaurant & Bar
 //   9. SBE / Hyde Lounge
 //  10. Golden State Warriors
 //  11. Hair Mafia Salon
@@ -134,11 +134,27 @@ export const PROJECTS: ProjectItem[] = [
     tier: "primary",
     imagePosition: "top center",
   },
+  {
+    // 5 — Primary systems proof (hospitality + Plate OS)
+    slug: "plate-the-umpqua",
+    title: "Plate the Umpqua",
+    industry: "Hospitality",
+    service: "Enterprise Platforms & Operational Systems",
+    outcome:
+      "Hospitality website and Plate OS — public experience plus the operational system behind it.",
+    description:
+      "Premium private-dining presence with Plate OS: inquiry workflows, menus, Partner Concierge, and business systems under the brand.",
+    image: "/migrated-assets/case-studies/plate-the-umpqua/hero.webp",
+    logo: "/migrated-assets/logos/plate-the-umpqua.svg",
+    year: "2025",
+    tier: "primary",
+    imagePosition: "top center",
+  },
 
   // ── SECONDARY — Further Work ──────────────────────────────────────────────
 
   {
-    // 5
+    // 6
     slug: "e-davis-enterprises",
     title: "E. Davis Enterprises",
     industry: "Energy / Trades",
@@ -153,7 +169,7 @@ export const PROJECTS: ProjectItem[] = [
     imagePosition: "top center",
   },
   {
-    // 6
+    // 7
     slug: "on-track-performance",
     title: "On Track Performance",
     industry: "Motorsports",
@@ -168,7 +184,7 @@ export const PROJECTS: ProjectItem[] = [
     imagePosition: "center",
   },
   {
-    // 7
+    // 8
     slug: "spur-restaurant",
     title: "Spur Restaurant & Bar",
     industry: "Hospitality",
@@ -178,21 +194,6 @@ export const PROJECTS: ProjectItem[] = [
       "Premium web design for a restaurant and bar built on local reputation.",
     image: "/migrated-assets/case-studies/spur-restaurant/hero.webp",
     year: "2026",
-    tier: "secondary",
-    imagePosition: "top center",
-  },
-  {
-    // 8
-    slug: "plate-the-umpqua",
-    title: "Plate the Umpqua",
-    industry: "Hospitality",
-    service: "Luxury Website Experiences",
-    outcome: "Hospitality brought online with the same care as the dining room.",
-    description:
-      "A refined digital foundation for a regional hospitality brand building its reputation.",
-    image: "/migrated-assets/case-studies/plate-the-umpqua/hero.webp",
-    logo: "/migrated-assets/logos/plate-the-umpqua.svg",
-    year: "2025",
     tier: "secondary",
     imagePosition: "top center",
   },
@@ -302,6 +303,25 @@ export const SECONDARY_PROJECTS = PUBLIC_PROJECTS.filter((p) => p.tier === "seco
 
 export type CapabilityLink = { label: string; href: string };
 
+/** Optional Journal deep-dive — commercial summary stays on /work; editorial depth lives on /insights. */
+export type CaseStudyJournalLink = {
+  href: string;
+  label: string;
+  note: string;
+};
+
+export const CASE_STUDY_JOURNAL_LINKS: Record<string, CaseStudyJournalLink> = {
+  "plate-the-umpqua": {
+    href: "/insights/building-plate-the-umpqua-with-chef-martin",
+    label: "How we built Plate OS",
+    note: "Read the Journal feature on the hospitality website, Plate OS, Partner Concierge, and the systems underneath the public experience.",
+  },
+};
+
+export function getCaseStudyJournalLink(slug: string): CaseStudyJournalLink | undefined {
+  return CASE_STUDY_JOURNAL_LINKS[slug];
+}
+
 /** Contextual related-work discovery — acquisition-aligned, public projects only. */
 export const CASE_STUDY_RELATED_SLUGS: Record<string, readonly string[]> = {
   "primal-motorsports": [
@@ -327,12 +347,17 @@ export const CASE_STUDY_RELATED_SLUGS: Record<string, readonly string[]> = {
   "martinsen-construction": [
     "e-davis-enterprises",
     "primal-motorsports",
-    "autodv8ions",
+    "plate-the-umpqua",
   ],
   "e-davis-enterprises": [
     "martinsen-construction",
     "primal-motorsports",
-    "on-track-performance",
+    "plate-the-umpqua",
+  ],
+  "plate-the-umpqua": [
+    "primal-motorsports",
+    "spur-restaurant",
+    "la-cocina",
   ],
 };
 
@@ -375,7 +400,8 @@ export const CASE_STUDY_CAPABILITY_LINKS: Record<string, readonly CapabilityLink
   "plate-the-umpqua": [
     { label: "Hospitality", href: "/industries/hospitality" },
     { label: "Website Experiences", href: "/services/luxury-website-experiences" },
-    { label: "Brand Systems", href: "/services/brand-systems-identity" },
+    { label: "Enterprise Platforms Engagement", href: "/services/enterprise-platforms" },
+    { label: "Explore Platforms", href: "/platforms" },
   ],
   "sbe-hyde-lounge": [
     { label: "Hospitality", href: "/industries/hospitality" },
@@ -538,32 +564,40 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     slug: "plate-the-umpqua",
     title: "Plate the Umpqua",
     industry: "Hospitality",
-    scope: ["Luxury Website Experiences", "Brand Systems & Identity"],
-    tagline: "Elevating private hospitality through intentional digital experiences.",
+    scope: [
+      "Enterprise Platforms & Operational Systems",
+      "Luxury Website Experiences",
+      "Brand Systems & Identity",
+    ],
+    tagline:
+      "Hospitality website and Plate OS — the public experience and the operating system behind private dining.",
     url: "https://platetheumpqua.com",
     status: "Live",
     year: "2025",
     image: "/migrated-assets/case-studies/plate-the-umpqua/hero.webp",
     logo: "/migrated-assets/logos/plate-the-umpqua.svg",
     context:
-      "Plate the Umpqua is the kind of hospitality experience that earns its reputation through the room, not the marketing. Guest loyalty was built through care, craft, and attention to detail that most dining experiences don't attempt. The brand had something genuine — it needed a digital presence that could carry it.",
+      "Plate the Umpqua is a private-dining hospitality brand built on craft, care, and evenings that live or die in the room. The brand needed more than a brochure site. Guests needed a refined digital introduction. The business needed operational infrastructure for inquiries, menus, events, partner gifting, and payment — without turning hospitality into software theater.",
     challenge:
-      "First impressions happen before arrival. For most prospective guests, the website is the experience before the experience — and it was underselling everything the brand had earned. The gap between what a guest found online and what they encountered in the room was creating the wrong expectation before they'd even made a reservation.",
+      "First impressions happen before arrival, and the public presence was underselling the standard guests experience in the room. At the same time, day-to-day operations — inquiries, follow-up, menus, invoices, partner programs — could not stay duct-taped across inbox threads and disconnected tools as the business grew.",
     strategy:
-      "The approach was precise: treat the website as the opening chapter of the hospitality experience — not a listing, not a booking page, but an invitation. Warmth first. Specificity second. The tone, layout, and content hierarchy were all built to replicate the feeling of being welcomed — before the guest arrives. Every section earns its place by adding to the story. Nothing is decorative without purpose.",
+      "Build the public hospitality experience and the operator system together. The website becomes the opening chapter of the evening. Plate OS becomes the authenticated layer for clients, inquiries, culinary workflows, Partner Concierge, and invoices — so the guest experience stays calm while the business runs on a coherent foundation.",
     execution: [
-      "Brand-aligned web presence — a refined digital introduction that matches the hospitality standard guests experience in the room.",
-      "Inquiry and reservation pathways — clear, low-friction flows that convert interest into bookings without disrupting the brand experience.",
-      "Editorial storytelling — content structure that communicates the brand's character, regional identity, and genuine craft.",
+      "Premium hospitality website — editorial public presence for experiences, packages, concierge, and inquiry without template restaurant language.",
+      "Plate OS — authenticated operator environment for today-board visibility, clients, inquiries, events, and culinary work.",
+      "Inquiry and workflow infrastructure — form submissions become working records with notification, classification, and follow-up structure.",
+      "Menu and experience management — recipes and menus with guest review links that keep kitchen detail private.",
+      "Partner Concierge / Welcome Home — prepaid professional gifting with trusted package rules, certificates, and Square-hosted payment connected to Plate invoices.",
+      "Business systems under the brand — shared offer truth across pages, checkout, schema, and measurement without exposing private admin surfaces.",
     ],
     qualitativeOutcomes: [
-      "Digital presence that carries the same standard as the in-person experience",
-      "Refined first impression that sets the right expectation before arrival",
-      "Inquiry experience that feels aligned with the brand's hospitality ethos",
-      "Foundation that grows with the brand's reputation and reach",
+      "Public hospitality presence that matches the standard of the room",
+      "Plate OS as the operator side for inquiries, menus, events, and invoices",
+      "Partner Concierge pathways that keep purchase software and dinner hospitality in the right places",
+      "A digital foundation shaped around how the business actually runs — not a theme with a contact form",
     ],
     whyItWorked:
-      "Hospitality is about making people feel something before they've decided anything. The site does that now. It doesn't try to list every offering or justify every choice — it makes you want to be there. That's the standard the brand sets in the room. The digital experience had to match it. No more gap between the promise and the introduction.",
+      "The website and the operating system grew up together. Guests get a calm hospitality introduction. Operators get records, workflows, and tools that match private dining. That is the difference between a redesign and a system.",
     showcaseImages: [
       {
         src: "/migrated-assets/case-studies/plate-the-umpqua/hero.webp",

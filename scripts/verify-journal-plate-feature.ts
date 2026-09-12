@@ -44,4 +44,15 @@ assert.ok(
   "at least one featured insight",
 );
 
+assert.equal(insight?.cta?.primaryHref, "/industries/hospitality");
+assert.equal(insight?.cta?.secondaryHref, "/work/plate-the-umpqua");
+
+const featureJson = JSON.stringify(feature?.blocks ?? []);
+assert.ok(featureJson.includes("/work/plate-the-umpqua"), "feature links Plate work page");
+assert.ok(featureJson.includes("/platforms"), "feature links platforms");
+assert.ok(
+  featureJson.includes("/services/enterprise-platforms"),
+  "feature links enterprise platforms service",
+);
+
 console.log("verify-journal-plate-feature: OK");

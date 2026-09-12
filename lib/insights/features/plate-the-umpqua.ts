@@ -505,7 +505,7 @@ const reviewUrl = \`\${siteOrigin()}/menu-review/\${token}\``,
         "None of that makes a pretty homepage screenshot.",
         "All of it is why the homepage can stay calm.",
         "If a site looks simple, that doesn’t mean the build was simple. Sometimes it means a lot of complexity got handled underneath so the guest never has to think about it.",
-        "This is the same pattern that shows up across [hospitality work](/industries/hospitality), [luxury website experiences](/services/luxury-website-experiences), and broader [platforms](/platforms) thinking at KXD. More on that in related Journal pieces like [when a business has outgrown its tools](/insights/when-your-business-has-outgrown-its-tools) and [what disconnected tools are costing you](/insights/what-disconnected-tools-are-costing-you).",
+        "This is the same pattern that shows up across [hospitality work](/industries/hospitality), [luxury website experiences](/services/luxury-website-experiences), [enterprise platforms](/services/enterprise-platforms), and broader [platforms](/platforms) thinking at KXD. More on that in related Journal pieces like [when a business has outgrown its tools](/insights/when-your-business-has-outgrown-its-tools) and [what disconnected tools are costing you](/insights/what-disconnected-tools-are-costing-you).",
       ],
     },
     {

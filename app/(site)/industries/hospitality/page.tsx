@@ -414,13 +414,24 @@ export default function HospitalityIndustryPage() {
                   >
                     {capability.body}
                   </p>
-                  <Link
-                    href={capability.href}
-                    className="kxd-ui-label mt-7 inline-flex items-center gap-2 text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)]"
-                  >
-                    {capability.linkLabel}
-                    <span aria-hidden>→</span>
-                  </Link>
+                  <div className="mt-7 flex flex-wrap items-center gap-x-8 gap-y-3">
+                    <Link
+                      href={capability.href}
+                      className="kxd-ui-label inline-flex items-center gap-2 text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)]"
+                    >
+                      {capability.linkLabel}
+                      <span aria-hidden>→</span>
+                    </Link>
+                    {"secondaryHref" in capability && capability.secondaryHref ? (
+                      <Link
+                        href={capability.secondaryHref}
+                        className="kxd-ui-label inline-flex items-center gap-2 text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)]"
+                      >
+                        {capability.secondaryLinkLabel}
+                        <span aria-hidden>→</span>
+                      </Link>
+                    ) : null}
+                  </div>
                 </div>
               </article>
             ))}

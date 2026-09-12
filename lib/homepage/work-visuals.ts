@@ -73,10 +73,10 @@ export const SYSTEMS_MOMENTUM_VISUALS: WorkVisual[] = [
   },
 ];
 
-/** Homepage proof mix: systems/motorsports + automotive/motorsports + contractor/service */
+/** Homepage proof mix: systems/motorsports + systems hospitality (Primal stays featured) */
 export const HOMEPAGE_CASE_STUDY_SLUGS = {
   featured: "primal-motorsports",
-  secondary: ["cusick-morgan-motorsports", "martinsen-construction"] as const,
+  secondary: ["cusick-morgan-motorsports", "plate-the-umpqua"] as const,
 };
 
 export const PROCESS_EXECUTION_VISUAL: WorkVisual = {

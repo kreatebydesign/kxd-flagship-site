@@ -1,10 +1,10 @@
 /** Lightweight mega-menu data for SiteHeader — avoids bundling lib/projects.ts client-side. */
 
-/** Discovery priority: systems/motorsports + automotive/motorsports + contractor/service */
+/** Discovery priority: systems/motorsports + motorsports + hospitality systems + contractor */
 export const HEADER_MEGA_WORK = [
   { slug: "primal-motorsports", title: "Primal Motorsports" },
   { slug: "cusick-morgan-motorsports", title: "Cusick Morgan Motorsports" },
-  { slug: "autodv8ions", title: "AutoDV8ions" },
+  { slug: "plate-the-umpqua", title: "Plate the Umpqua" },
   { slug: "martinsen-construction", title: "Martinsen Construction" },
 ] as const;
 
