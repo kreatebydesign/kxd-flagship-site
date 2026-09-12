@@ -40,6 +40,11 @@ export type ComposeAnalyticsVisibilityInput = {
   searchConsoleConfigured: boolean;
   publishedReports: AnalyticsVisibilityReportItem[];
   loadError?: string | null;
+  /** Period-scoped client-inquiries form count — independent of GA4/Ads entitlement. */
+  websiteFormInquiries?: {
+    available: boolean;
+    count: number | null;
+  } | null;
 };
 
 function buildSources(input: {
@@ -116,6 +121,7 @@ function buildLeads(
   baseConversionCount: number | null,
   baseConversionLabel: string,
   baseStatusNote: string | null,
+  websiteFormInquiries?: ComposeAnalyticsVisibilityInput["websiteFormInquiries"],
 ): AnalyticsVisibilityLeads {
   const label = periodLabel(period);
   const empty = {
@@ -124,11 +130,28 @@ function buildLeads(
     generateLeadCount: null as number | null,
     generateLeadLabel: "Tracked inquiry actions",
     formSubmissionCount: null as number | null,
-    formSubmissionLabel: "Form submissions",
+    formSubmissionLabel: "Website form leads",
     confirmedLeadCount: null as number | null,
     confirmedLeadLabel: "Confirmed lead tracking not connected",
     salesPipelineAvailable: false as const,
   };
+
+  /* Real client-inquiries form counts are never blocked by GA4/Ads entitlement. */
+  if (
+    websiteFormInquiries?.available &&
+    websiteFormInquiries.count != null &&
+    Number.isFinite(websiteFormInquiries.count)
+  ) {
+    return {
+      availability: "ready",
+      periodLabel: label,
+      ...empty,
+      formSubmissionCount: Math.round(websiteFormInquiries.count),
+      formSubmissionLabel: "Website form leads",
+      statusNote:
+        "Website form leads are counted from client-inquiries (channel=form) for this period. GA4 generate_lead and Ads conversions are excluded. Confirmed sales remain separate.",
+    };
+  }
 
   if (!entitled) {
     return {
@@ -243,6 +266,7 @@ export function composeAnalyticsVisibilityModel(
     },
     reportingFacts: input.reportingFacts,
     reportingEntitled: input.reportingEntitled,
+    websiteFormInquiries: input.websiteFormInquiries ?? null,
     analyticsFreshnessNote: input.analyticsFreshnessNote ?? null,
     nextMoveCandidates: [],
   });
@@ -278,6 +302,7 @@ export function composeAnalyticsVisibilityModel(
     work.leads.conversionCount,
     work.leads.conversionLabel,
     work.leads.statusNote,
+    input.websiteFormInquiries ?? null,
   );
 
   const reports = buildReports(input.publishedReports);

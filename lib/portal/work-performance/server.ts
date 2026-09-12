@@ -20,6 +20,7 @@ import {
 } from "@/lib/reporting/persistence";
 import type { PeriodWindow } from "@/lib/reporting/domain/types";
 import { loadClientReportingConnection } from "@/lib/reporting/providers/connection";
+import { countWebsiteFormInquiries } from "@/lib/reporting/leads/website-form-inquiries";
 import { loadClientValueCareInput } from "@/lib/portal/client-value/server";
 import { resolvePortalEngagementLifecycle } from "@/lib/portal/client-value/lifecycle";
 import { loadActiveEngagementForClient } from "@/lib/portal/active-engagement";
@@ -287,6 +288,15 @@ export async function resolvePortalWorkPerformance(input: {
     serviceScope,
   });
 
+  const clientSlug = experienceProfile.identity.clientSlug?.trim() || null;
+  const websiteFormInquiries = clientSlug
+    ? await countWebsiteFormInquiries({
+        clientId: session.clientId,
+        clientKey: clientSlug,
+        period: reportingPeriod,
+      })
+    : null;
+
   return composeWorkPerformanceModel({
     authorizedClientId: session.clientId,
     clientName: session.clientName,
@@ -309,6 +319,12 @@ export async function resolvePortalWorkPerformance(input: {
     },
     reportingFacts: facts,
     reportingEntitled,
+    websiteFormInquiries: websiteFormInquiries
+      ? {
+          available: websiteFormInquiries.available,
+          count: websiteFormInquiries.count,
+        }
+      : null,
     analyticsFreshnessNote: freshnessNote,
     nextMoveCandidates: nextMoves,
     ga4Mapped: Boolean(scopedConnection?.ga4PropertyId),

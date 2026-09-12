@@ -41,6 +41,14 @@ export type ComposeWorkPerformanceInput = {
   };
   reportingFacts: ReportingFact[];
   reportingEntitled: boolean;
+  /**
+   * Period-scoped website form inquiry count from client-inquiries.
+   * Independent of GA4/Ads entitlements — never generate_lead or Ads conversions.
+   */
+  websiteFormInquiries?: {
+    available: boolean;
+    count: number | null;
+  } | null;
   analyticsFreshnessNote?: string | null;
   nextMoveCandidates: WorkPerformanceNextMove[];
   /** Connection mapping flags — never property IDs. */
@@ -158,8 +166,27 @@ function buildLeads(
   facts: ReportingFact[],
   entitled: boolean,
   period: PeriodWindow,
+  websiteFormInquiries?: ComposeWorkPerformanceInput["websiteFormInquiries"],
 ): WorkPerformanceLeads {
   const label = periodLabel(period);
+
+  /* Prefer real client-inquiries form counts — never blocked by GA4/Ads entitlement. */
+  if (
+    websiteFormInquiries?.available &&
+    websiteFormInquiries.count != null &&
+    Number.isFinite(websiteFormInquiries.count)
+  ) {
+    return {
+      availability: "ready",
+      periodLabel: label,
+      conversionCount: Math.round(websiteFormInquiries.count),
+      conversionLabel: "Website form leads",
+      statusNote:
+        "Counted from website form inquiries for this period (client-inquiries, channel=form). Not Google Ads conversions or GA4 generate_lead events. Confirmed sales remain separate.",
+      salesPipelineAvailable: false,
+    };
+  }
+
   if (!entitled) {
     return {
       availability: "not-entitled",
@@ -303,7 +330,12 @@ export function composeWorkPerformanceModel(
     input.reportingPeriod,
     input.analyticsFreshnessNote ?? null,
   );
-  const leads = buildLeads(input.reportingFacts, input.reportingEntitled, input.reportingPeriod);
+  const leads = buildLeads(
+    input.reportingFacts,
+    input.reportingEntitled,
+    input.reportingPeriod,
+    input.websiteFormInquiries,
+  );
   const wins = deriveVerifiedWins(input.reportingFacts);
 
   const nextMoves = input.nextMoveCandidates

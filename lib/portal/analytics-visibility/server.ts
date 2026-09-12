@@ -17,6 +17,7 @@ import {
   summarizeReportingFactProvenance,
 } from "@/lib/reporting/persistence";
 import { loadClientReportingConnection } from "@/lib/reporting/providers/connection";
+import { countWebsiteFormInquiries } from "@/lib/reporting/leads/website-form-inquiries";
 import { composeAnalyticsVisibilityModel } from "./compose";
 import type { AnalyticsVisibilityModel, AnalyticsVisibilityReportItem } from "./types";
 
@@ -121,6 +122,15 @@ export async function resolvePortalAnalyticsVisibility(input: {
     publishedReports = [];
   }
 
+  const clientSlug = experienceProfile.identity.clientSlug?.trim() || null;
+  const websiteFormInquiries = clientSlug
+    ? await countWebsiteFormInquiries({
+        clientId: session.clientId,
+        clientKey: clientSlug,
+        period: reportingPeriod,
+      }).catch(() => null)
+    : null;
+
   return composeAnalyticsVisibilityModel({
     authorizedClientId: session.clientId,
     clientName: session.clientName,
@@ -134,5 +144,11 @@ export async function resolvePortalAnalyticsVisibility(input: {
     searchConsoleConfigured,
     publishedReports,
     loadError,
+    websiteFormInquiries: websiteFormInquiries
+      ? {
+          available: websiteFormInquiries.available,
+          count: websiteFormInquiries.count,
+        }
+      : null,
   });
 }

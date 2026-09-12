@@ -11,7 +11,7 @@ import { getPayload } from "payload";
 import config from "@payload-config";
 import { CLIENT_INQUIRIES_COLLECTION } from "@/lib/managed-client-leads/collection";
 import { ledgerScopeWhere } from "@/lib/managed-client-leads/isolation";
-import { previousPeriodWindow } from "@/lib/reporting/providers/period";
+import { previousPeriodWindow, toProviderDate } from "@/lib/reporting/providers/period";
 import type { PeriodWindow } from "@/lib/reporting/domain/types";
 
 export type WebsiteFormInquiryCount = {
@@ -27,11 +27,16 @@ export type WebsiteFormInquiryCount = {
   unavailableReason: string | null;
 };
 
-function dayBounds(period: PeriodWindow): { startIso: string; endExclusiveIso: string } {
+/**
+ * PeriodWindow.start/end are full ISO timestamps from createMonthPeriod.
+ * Never append another time suffix — that produced invalid dates and zero matches.
+ */
+function dayBounds(period: PeriodWindow): { startIso: string; endIso: string } {
+  const startDay = toProviderDate(period.start);
+  const endDay = toProviderDate(period.end);
   return {
-    startIso: `${period.start}T00:00:00.000Z`,
-    // Payload less_than exclusive end-of-day → next day 00:00
-    endExclusiveIso: `${period.end}T23:59:59.999Z`,
+    startIso: `${startDay}T00:00:00.000Z`,
+    endIso: `${endDay}T23:59:59.999Z`,
   };
 }
 
@@ -42,11 +47,11 @@ async function countFormInquiries(input: {
 }): Promise<number | null> {
   try {
     const payload = await getPayload({ config });
-    const { startIso, endExclusiveIso } = dayBounds(input.period);
+    const { startIso, endIso } = dayBounds(input.period);
     const result = await payload.find({
       collection: CLIENT_INQUIRIES_COLLECTION,
       depth: 0,
-      limit: 0,
+      limit: 1,
       pagination: true,
       overrideAccess: true,
       where: {
@@ -54,7 +59,7 @@ async function countFormInquiries(input: {
           ledgerScopeWhere(input.clientId, input.clientKey),
           { channel: { equals: "form" } },
           { receivedAt: { greater_than_equal: startIso } },
-          { receivedAt: { less_than_equal: endExclusiveIso } },
+          { receivedAt: { less_than_equal: endIso } },
         ],
       },
     });
@@ -68,6 +73,7 @@ async function countFormInquiries(input: {
  * Count website form submissions from client-inquiries for a reporting period.
  * Returns available=false when the ledger cannot be read — never fabricates.
  * A verified zero for the period is available=true with count=0.
+ * Does not require GA4/Ads reporting entitlements.
  */
 export async function countWebsiteFormInquiries(input: {
   clientId: number;

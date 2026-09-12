@@ -24,7 +24,7 @@ export const PRIMAL_POST_LAUNCH_OPERATING = {
   recentWin: "New production website launched",
   recommendationHeadline: "Focus moves to measurable growth",
   recommendationRationale:
-    "The production website is live and verified. Search Console is connected for the monthly window. GA4 measurement exists, but portal Website Analytics is not synced yet. Ads performance has been reviewed, but portal Ads reporting is not connected yet. Confirmed website form leads appear from inquiry records when period-ready. Next focus: qualified traffic, search visibility, and advertising efficiency — with September 11 as the documented baseline.",
+    "The production website is live and verified. Search Console is connected, website lead capture is measurable, Ads performance has been reviewed, and the growth measurement baseline is established.",
   /**
    * Executive Home “Recent progress” — curated milestones only.
    * Never raw Website Review revision titles.
