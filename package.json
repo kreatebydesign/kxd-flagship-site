@@ -111,6 +111,7 @@
     "verify:external-payment": "tsx scripts/verify-external-payment-reconciliation.ts",
     "verify:partial-external-payment": "tsx scripts/verify-partial-external-payment-allocation.ts",
     "verify:commercial-ledger-authority": "tsx scripts/verify-commercial-ledger-authority.ts",
+    "verify:recurring-obligation-engine": "tsx scripts/verify-recurring-obligation-engine.ts",
     "verify:account-statement-compose": "tsx scripts/verify-account-statement-compose.ts",
     "verify:portal-date-hydration": "tsx scripts/verify-portal-date-hydration.ts",
     "verify:staff-experience": "tsx scripts/verify-staff-experience.ts",

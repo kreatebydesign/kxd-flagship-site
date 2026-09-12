@@ -475,6 +475,82 @@ export async function POST(
           noStripeSubscription: true,
         });
       }
+      case "preview-recurring-obligations-through-date": {
+        const { getContractLifecycle } = await import("@/lib/proposal-lifecycle/services");
+        const { previewRecurringObligationsThroughDate } = await import(
+          "@/lib/proposal-lifecycle/ensure-recurring-obligations"
+        );
+        const lifecycle = await getContractLifecycle(id);
+        const throughDate =
+          String(body.throughDate ?? "").trim() ||
+          new Date().toISOString().slice(0, 10);
+        try {
+          const preview = previewRecurringObligationsThroughDate(
+            lifecycle.pkg,
+            throughDate,
+          );
+          return NextResponse.json({
+            ok: true,
+            preview: {
+              throughDate: preview.throughDate,
+              servicesEvaluated: preview.servicesEvaluated,
+              created: preview.created,
+              alreadyPresent: preview.alreadyPresent,
+              skipped: preview.skipped,
+              conflicts: preview.conflicts,
+              warnings: preview.warnings,
+              createdCount: preview.createdCount,
+            },
+            noStripeMutation: true,
+            noStripeSubscription: true,
+            dryRun: true,
+          });
+        } catch (err) {
+          return NextResponse.json(
+            { ok: false, error: err instanceof Error ? err.message : "Preview failed." },
+            { status: 400 },
+          );
+        }
+      }
+      case "ensure-recurring-obligations-through-date": {
+        const { ensureRecurringObligationsThroughDateOnContract } = await import(
+          "@/lib/proposal-lifecycle/ensure-recurring-obligations"
+        );
+        const throughDate =
+          String(body.throughDate ?? "").trim() ||
+          new Date().toISOString().slice(0, 10);
+        const dryRun = body.dryRun === true;
+        try {
+          const result = await ensureRecurringObligationsThroughDateOnContract({
+            contractId: id,
+            throughDate,
+            actor,
+            dryRun,
+          });
+          return NextResponse.json({
+            ok: true,
+            throughDate: result.throughDate,
+            servicesEvaluated: result.servicesEvaluated,
+            created: result.created,
+            alreadyPresent: result.alreadyPresent,
+            skipped: result.skipped,
+            conflicts: result.conflicts,
+            warnings: result.warnings,
+            createdCount: result.createdCount,
+            persisted: result.persisted,
+            billingPlan: result.pkg.billingPlan,
+            noStripeMutation: true,
+            noStripeSubscription: true,
+            noPaymentChange: true,
+            noInvoiceCreated: true,
+          });
+        } catch (err) {
+          return NextResponse.json(
+            { ok: false, error: err instanceof Error ? err.message : "Ensure failed." },
+            { status: 400 },
+          );
+        }
+      }
       case "link-obligation-stripe-invoice": {
         const { linkObligationStripeInvoiceOnContract } = await import(
           "@/lib/proposal-lifecycle/live-stripe-reconciliation-service"

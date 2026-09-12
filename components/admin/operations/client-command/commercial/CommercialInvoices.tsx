@@ -8,6 +8,7 @@ import { WorkspaceEmpty } from "@/components/admin/operations/client-workspace/W
 import { CommercialStatusBadge, statusTone } from "./CommercialStatusBadge";
 import { RecordObligationPaymentForm } from "./RecordObligationPaymentForm";
 import { RegisterRecurringDueForm } from "./RegisterRecurringDueForm";
+import { EnsureRecurringThroughDateForm } from "./EnsureRecurringThroughDateForm";
 
 export function CommercialInvoices({ data }: { data: ClientWorkspaceBundle }) {
   const rows = data.commercial.invoices;
@@ -37,6 +38,10 @@ export function CommercialInvoices({ data }: { data: ClientWorkspaceBundle }) {
       />
 
       <RegisterRecurringDueForm clientId={data.clientId} targets={recurringTargets} />
+      <EnsureRecurringThroughDateForm
+        clientId={data.clientId}
+        targets={recurringTargets}
+      />
 
       {!rows.length ? (
         <WorkspaceEmpty message="No invoices linked for this client." />

@@ -79,6 +79,26 @@ export type {
   ClientFacingObligationPresentation,
 } from "./ensure-payable-surfaces.ts";
 export {
+  resolveRecurringAuthority,
+  evaluateRecurringActivation,
+  periodYearMonthsForService,
+  listYearMonthsInclusive,
+} from "./recurring-authority.ts";
+export type {
+  ResolvedRecurringService,
+  RecurringAuthorityConflict,
+  ResolveRecurringAuthorityResult,
+} from "./recurring-authority.ts";
+export {
+  ensureRecurringObligationsThroughDateOnPlan,
+  previewRecurringObligationsThroughDate,
+  ensureRecurringObligationsThroughDateOnContract,
+} from "./ensure-recurring-obligations.ts";
+export type {
+  EnsureRecurringObligationsResult,
+  RecurringPeriodPlanItem,
+} from "./ensure-recurring-obligations.ts";
+export {
   recomputeOnboardingEligibility,
   applyOnboardingEligibility,
   isContractFullyExecuted,
