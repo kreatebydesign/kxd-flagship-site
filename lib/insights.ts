@@ -99,6 +99,15 @@ export const STATIC_INSIGHTS: InsightDetail[] = [
       "Chef Martin Condon",
     ],
     body: [],
+    cta: {
+      headline: "Building more than a hospitality website?",
+      subCopy:
+        "See how KXD packages hospitality presence and operational systems — then review the Plate case study for the commercial summary.",
+      primaryLabel: "Explore Hospitality Work",
+      primaryHref: "/industries/hospitality",
+      secondaryLabel: "View Plate Case Study",
+      secondaryHref: "/work/plate-the-umpqua",
+    },
   },
 
   // ── Luxury Web Design ──────────────────────────────────────────────────────

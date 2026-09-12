@@ -39,7 +39,7 @@ export function CaseStudiesSection() {
             style={{ maxWidth: "24rem" }}
           >
             Premium presence, growth infrastructure, and operational systems —
-            shown through motorsports, automotive, and service-business work.
+            shown through motorsports, hospitality systems, and service-business work.
           </p>
         </div>
 

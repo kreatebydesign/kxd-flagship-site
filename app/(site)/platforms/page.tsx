@@ -131,8 +131,8 @@ const FEATURED_WORK = [
     title: "Plate the Umpqua",
     category: "Hospitality OS",
     description:
-      "Brand and digital platform for a culinary destination rooted in Pacific Northwest provenance — designed to elevate the guest experience from first discovery to reservation.",
-    outcome: "A hospitality identity built to anchor a growing regional experience.",
+      "Public hospitality experience plus Plate OS — inquiry workflows, menus, Partner Concierge, and operational infrastructure behind the brand.",
+    outcome: "Website and operating system shaped around how private dining actually runs.",
   },
 ] as const;
 

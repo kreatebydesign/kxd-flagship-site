@@ -346,6 +346,11 @@ export const STATIC_SERVICE_DETAILS: Record<string, StaticServiceDetail> = {
         note: "Website, member portal, and operations layer as one digital foundation.",
       },
       {
+        slug: "plate-the-umpqua",
+        title: "Plate the Umpqua",
+        note: "Hospitality website and Plate OS — inquiries, menus, Partner Concierge, and operator workflows.",
+      },
+      {
         slug: "e-davis-enterprises",
         title: "E. Davis Enterprises",
         note: "Service-business CRM workflows, payments, and analytics beyond the website.",

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPayload } from "payload";
 import config from "@payload-config";
-import { CASE_STUDIES, HIDDEN_PROJECT_SLUGS, PROJECTS, getCaseStudyCapabilityLinks, getRelatedProjects, type CaseStudy, type ShowcaseImage } from "@/lib/projects";
+import { CASE_STUDIES, HIDDEN_PROJECT_SLUGS, PROJECTS, getCaseStudyCapabilityLinks, getCaseStudyJournalLink, getRelatedProjects, type CaseStudy, type ShowcaseImage } from "@/lib/projects";
 import { isHospitalityWork, HOSPITALITY_WORK_HUB_LINK } from "@/lib/content/hospitality-authority";
 import { isMotorsportsAutomotiveWork, MOTORSPORTS_WORK_HUB_LINK } from "@/lib/content/motorsports-authority";
 import { isConstructionWork, CONSTRUCTION_WORK_HUB_LINK } from "@/lib/content/construction-authority";
@@ -81,7 +81,16 @@ function payloadToCaseStudy(doc: Record<string, unknown>): CaseStudy {
 
 // ── Data fetching ─────────────────────────────────────────────────────────────
 
+/**
+ * Static marketing case studies are authoritative for acquisition positioning
+ * (mirrors lib/content/service-details for services). Payload remains a fallback
+ * for CMS-only projects that are not yet represented in CASE_STUDIES.
+ */
 async function fetchCaseStudy(slug: string): Promise<CaseStudy | null> {
+  if (CASE_STUDIES[slug]) {
+    return CASE_STUDIES[slug];
+  }
+
   try {
     const payload = await getPayload({ config });
     const { docs } = await payload.find({
@@ -102,9 +111,9 @@ async function fetchCaseStudy(slug: string): Promise<CaseStudy | null> {
       }
     }
   } catch {
-    // fall through to static
+    // fall through
   }
-  return CASE_STUDIES[slug] ?? null;
+  return null;
 }
 
 async function getAllSlugs(): Promise<string[]> {
@@ -265,6 +274,7 @@ export default async function CaseStudyPage({ params }: Props) {
 
   const related = getRelatedProjects(slug, 3);
   const capabilityLinks = getCaseStudyCapabilityLinks(slug);
+  const journalLink = getCaseStudyJournalLink(slug);
   const projectMeta = PROJECTS.find((p) => p.slug === slug);
   const caseStudyImage = projectMeta?.image ?? cs.image;
 
@@ -1027,6 +1037,52 @@ export default async function CaseStudyPage({ params }: Props) {
           </div>
         </section>
       )}
+
+      {/* ══════════════════════════════════════════
+          JOURNAL DEEP DIVE — when a feature article exists
+          ══════════════════════════════════════════ */}
+      {journalLink ? (
+        <section
+          className="kxd-section"
+          style={{
+            background: "var(--kxd-black-base)",
+            borderTop: "1px solid var(--kxd-border-white)",
+          }}
+        >
+          <div className="kxd-container" style={{ maxWidth: "42rem" }}>
+            <p className="kxd-eyebrow">KXD Journal</p>
+            <h2
+              className="kxd-serif-title mt-5"
+              style={{ fontSize: "clamp(1.5rem, 2.75vw, 2rem)", maxWidth: "22ch" }}
+            >
+              {journalLink.label}
+            </h2>
+            <p className="kxd-body mt-5" style={{ lineHeight: 1.8 }}>
+              {journalLink.note}
+            </p>
+            <Link
+              href={journalLink.href}
+              className="group mt-8 inline-flex items-center gap-2.5 font-sans font-medium uppercase"
+              style={{
+                fontSize: "0.6875rem",
+                letterSpacing: "var(--tracking-button)",
+                color: "var(--kxd-cream-muted)",
+              }}
+            >
+              <span className="transition-colors duration-200 group-hover:text-[var(--kxd-cream)]">
+                Read how the platform was built
+              </span>
+              <span
+                aria-hidden
+                className="inline-block transition-transform duration-300 group-hover:translate-x-1"
+                style={{ color: "var(--kxd-gold)" }}
+              >
+                →
+              </span>
+            </Link>
+          </div>
+        </section>
+      ) : null}
 
       {/* ══════════════════════════════════════════
           10 — RELATED WORK
