@@ -330,13 +330,14 @@ export function resolveRecurringAuthority(
     // Existing recurring-period obligations that disagree with legal amount/title.
     for (const obl of pkg.billingPlan?.obligations ?? []) {
       if (obl.kind !== "recurring-period") continue;
-      const oblKey =
+      const rawOblKey =
         trimOrNull(obl.serviceDefinitionKey) ||
-        (obl.serviceTitle ? slugifyServiceKey(obl.serviceTitle) : null) ||
+        trimOrNull(obl.serviceTitle) ||
         (obl.sourceKey?.startsWith("recurring:")
           ? obl.sourceKey.split(":")[1] ?? null
           : null);
-      if (!oblKey) continue;
+      if (!rawOblKey) continue;
+      const oblKey = slugifyServiceKey(rawOblKey);
       if (oblKey === legal.serviceKey) {
         if (obl.amountCents !== legal.amountCents) {
           conflicts.push({
