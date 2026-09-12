@@ -665,9 +665,7 @@ function TermsSectionView({
     const bulletBlocks = blocks.filter((block) => block.type !== "paragraph");
     const paragraphs = blocks.filter((block) => block.type === "paragraph");
     if (bulletBlocks.length >= 1) {
-      const items = bulletBlocks.flatMap((block) =>
-        block.type === "paragraph" ? [] : block.items,
-      );
+      const items = bulletBlocks.flatMap((block) => block.items);
       const midpoint = Math.ceil(items.length / 2);
       const left = items.slice(0, midpoint);
       const right = items.slice(midpoint);
@@ -675,11 +673,9 @@ function TermsSectionView({
         <View style={styles.section} wrap minPresenceAhead={96}>
           <Text style={styles.eyebrow}>{eyebrow}</Text>
           <Text style={styles.h2}>{title}</Text>
-          {paragraphs.map((block, index) =>
-            block.type === "paragraph" ? (
-              <Paragraph key={`tp-${index}`} text={block.text} supporting />
-            ) : null,
-          )}
+          {paragraphs.map((block, index) => (
+            <Paragraph key={`tp-${index}`} text={block.text} supporting />
+          ))}
           <View style={styles.editorialRow}>
             <View style={styles.editorialCol}>
               {left.map((item) => (
