@@ -38,6 +38,7 @@ import {
 } from "./robin-cole";
 import { resolveMediaAssetUrl } from "@/lib/client-command/experience/media-url";
 import { generatePayloadMediaFileUrl } from "@/lib/media/payload-storage";
+import { parseOperatingStateConfig } from "@/lib/ces/operating-state";
 
 type AnyDoc = Record<string, unknown>;
 
@@ -265,6 +266,7 @@ export async function resolveExperienceProfile(
           enabledModules: [],
           enabledPortalModules: [],
           reportingCapabilities: [],
+          operatingState: null,
           presentation: null,
           terminology: {},
           cssVars: experienceProfileToCssVars(fallbackVisual),
@@ -341,6 +343,9 @@ export async function resolveExperienceProfile(
         reportingCapabilities: normalizeReportingCapabilities(
           profileDoc ? (profileDoc as AnyDoc).enabledModules : [],
         ),
+        operatingState: parseOperatingStateConfig(
+          profileDoc ? (profileDoc as AnyDoc).operatingState : null,
+        ),
         presentation: null,
         terminology: {},
         cssVars: {},
@@ -389,6 +394,7 @@ export async function resolveExperienceProfile(
           enabledModules: normalizeEnabledModules(cesDefaults.enabledModules),
           enabledPortalModules: inferredModules,
           reportingCapabilities: [],
+          operatingState: null,
           presentation: null,
           terminology: cesDefaults.terminology,
           cssVars: {},
@@ -455,6 +461,7 @@ export async function resolveExperienceProfile(
       enabledModules: normalizeEnabledModules(enabledRaw),
       enabledPortalModules: normalizeEnabledPortalModules(enabledRaw),
       reportingCapabilities: normalizeReportingCapabilities(enabledRaw),
+      operatingState: parseOperatingStateConfig(profileDoc.operatingState),
       presentation: null,
       terminology: parseTerminology(profileDoc.terminology),
       cssVars: {},

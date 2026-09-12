@@ -1,6 +1,7 @@
 /**
  * Compose client-safe partnership briefing for portal overview.
  * Reuses Website Review + Connected Workspace loaders — no parallel intelligence stack.
+ * Operating phase / priority / watching come from shared Client Operating State.
  */
 
 import "server-only";
@@ -22,9 +23,10 @@ import { loadPartnershipResults } from "./outcomes";
 import { decideClientRecommendation } from "./recommend";
 import { composePartnershipServiceSummary } from "./service-value";
 import {
-  isPrimalPostLaunchClient,
-  PRIMAL_POST_LAUNCH_OPERATING,
-} from "@/lib/ces/profile/primal-post-launch";
+  resolveClientOperatingState,
+  resolveOperatingStateConfigForClient,
+} from "@/lib/ces/operating-state";
+import { loadOperatingInfrastructureSignals } from "@/lib/ces/operating-state/load-infrastructure";
 import { memoryToRecentCompleted } from "@/lib/executive-memory";
 import type {
   PartnershipBriefing,
@@ -248,18 +250,37 @@ export async function composePartnershipBriefing(input: {
   const slug = profile.identity.clientSlug;
   const clientName = profile.identity.clientName || session.clientName || "Partnership";
 
-  const [results, counts, serviceScope] = await Promise.all([
+  const [results, counts, serviceScope, infrastructure] = await Promise.all([
     loadPartnershipResults(session.clientId),
     loadSupportCounts(session.clientId),
     loadResolvedServiceScope(session.clientId),
+    loadOperatingInfrastructureSignals(session.clientId),
   ]);
   const services = composePartnershipServiceSummary(serviceScope);
+
+  const operatingConfig = resolveOperatingStateConfigForClient({
+    clientSlug: slug,
+    persisted: profile.operatingState,
+  });
+  const operating = resolveClientOperatingState({
+    config: operatingConfig,
+    infrastructure,
+    evidence: {
+      seoEntitled: profile.reportingCapabilities.includes("seo"),
+      websiteAnalyticsEntitled:
+        profile.reportingCapabilities.includes("website-analytics"),
+      googleAdsEntitled: profile.reportingCapabilities.includes("google-ads"),
+      searchFactsPresent: false,
+      websiteFactsPresent: false,
+      adsFactsPresent: false,
+    },
+  });
+  const postLaunchActive = operating.postLaunchMode;
 
   const hasAwaitingClient = websiteReview.activeReviews.some(
     (r) => r.status === "awaiting-your-input",
   );
   const hasActiveReviews = websiteReview.activeReviews.length > 0;
-  const postLaunchActive = isPrimalPostLaunchClient(slug);
   const recommendation = decideClientRecommendation({
     websiteReview,
     hasAwaitingClient,
@@ -267,12 +288,8 @@ export async function composePartnershipBriefing(input: {
     results,
     websiteUrl: websiteReview.websiteUrl,
     postLaunchActive,
-    postLaunchHeadline: postLaunchActive
-      ? PRIMAL_POST_LAUNCH_OPERATING.recommendationHeadline
-      : null,
-    postLaunchRationale: postLaunchActive
-      ? PRIMAL_POST_LAUNCH_OPERATING.recommendationRationale
-      : null,
+    postLaunchHeadline: operating.content.recommendationHeadline ?? null,
+    postLaunchRationale: operating.content.recommendationRationale ?? null,
   });
 
   const websiteSnapshot = buildWebsiteReviewSnapshot(websiteReview);
@@ -290,22 +307,23 @@ export async function composePartnershipBriefing(input: {
   const activeWork = connected.currentWork.find((item) => item.group === "in-progress");
   const latestProgress = connected.recentActivity[0];
   const primaryService = services.items[0];
-  const memoryRecent = postLaunchActive ? memoryToRecentCompleted(slug) : null;
+  const memoryRecent = postLaunchActive && slug ? memoryToRecentCompleted(slug) : null;
   const overview = {
     relationshipStatus: "Your KXD workspace is available",
-    currentPhase: postLaunchActive
-      ? PRIMAL_POST_LAUNCH_OPERATING.currentPhase
+    currentPhase: operating.phase
+      ? operating.phase
       : (serviceScope.relationshipLabel ?? "No phase is recorded yet"),
-    currentFocus: postLaunchActive
-      ? PRIMAL_POST_LAUNCH_OPERATING.currentPriority
+    currentFocus: operating.currentPriority
+      ? operating.currentPriority
       : (activeWork?.title ?? primaryService?.value ?? "No current focus is recorded"),
     lastMajorMilestone: postLaunchActive
       ? (memoryRecent?.[0]?.label ??
         latestProgress?.label ??
-        PRIMAL_POST_LAUNCH_OPERATING.recentWin)
+        operating.recentWin ??
+        "No milestone is recorded yet")
       : (latestProgress?.label ?? "No milestone is recorded yet"),
-    nextMilestone: postLaunchActive
-      ? (attentionAction ?? PRIMAL_POST_LAUNCH_OPERATING.watching)
+    nextMilestone: operating.watching
+      ? (attentionAction ?? operating.watching)
       : (attentionAction ??
         (hasActiveReviews
           ? "Complete the current website review"
@@ -316,12 +334,13 @@ export async function composePartnershipBriefing(input: {
   // Connected workspace activity is already client-filtered upstream.
   const safeConnected = connected;
   const recentProgress = (() => {
-    if (postLaunchActive) {
-      return PRIMAL_POST_LAUNCH_OPERATING.recentProgress.map((item) => ({
+    const curated = operating.content.recentProgress;
+    if (curated && curated.length > 0) {
+      return curated.map((item) => ({
         id: item.id,
         label: item.label,
-        detail: item.detail,
-        at: item.at,
+        detail: item.detail ?? undefined,
+        at: item.at ?? null,
       }));
     }
     const base = buildProgress(safeConnected, websiteReview, results?.periodLabel ?? null);
@@ -353,18 +372,20 @@ export async function composePartnershipBriefing(input: {
       services,
     }),
     currentState: {
-      initiative: postLaunchActive
-        ? PRIMAL_POST_LAUNCH_OPERATING.currentPriority
+      initiative: operating.currentPriority
+        ? operating.currentPriority
         : (activeWork?.title ?? primaryService?.label ?? "No current initiative is recorded"),
-      websiteStage: postLaunchActive
-        ? `Website ${PRIMAL_POST_LAUNCH_OPERATING.websiteStatus} · Production ${PRIMAL_POST_LAUNCH_OPERATING.productionStatus}`
+      websiteStage: operating.postLaunchMode
+        ? operating.website.websiteStageLine
         : websiteReview.websiteUrl
           ? "Website on file"
-          : "Website details are being confirmed",
+          : operating.website.isLive
+            ? operating.website.websiteStageLine
+            : "Website details are being confirmed",
       reviewState: websiteSnapshot.statusLabel,
       outstandingClientAction: attentionAction,
-      outstandingKxdAction: postLaunchActive
-        ? "Monitoring search visibility and advertising efficiency against the September baseline"
+      outstandingKxdAction: operating.content.outstandingKxdAction
+        ? operating.content.outstandingKxdAction
         : hasActiveReviews
           ? "Advancing the open website revisions with care"
           : primaryService

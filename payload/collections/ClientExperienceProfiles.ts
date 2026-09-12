@@ -202,6 +202,17 @@ export const ClientExperienceProfiles: CollectionConfig = {
               },
             },
             {
+              name: "operatingState",
+              type: "json",
+              label: "Client Operating State",
+              admin: {
+                description:
+                  "Shared portal operating intent (phase, priority, watching, post-launch mode, baseline, optional authored content). " +
+                  "Business intent only — do not store ReportingFacts or entitlement truth here. " +
+                  "Website live/production derive from Client Infrastructure when possible.",
+              },
+            },
+            {
               name: "terminology",
               type: "json",
               label: "Terminology Overrides",

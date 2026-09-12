@@ -72,6 +72,7 @@ import * as migration_20260831_sales_closed_loop_v1 from './20260831_sales_close
 import * as migration_20260901_proposal_manual_delivery from './20260901_proposal_manual_delivery';
 import * as migration_20260902_research_lead_opportunity_intelligence from './20260902_research_lead_opportunity_intelligence';
 import * as migration_20260903_client_infrastructure_website_editor_url from './20260903_client_infrastructure_website_editor_url';
+import * as migration_20260912_ces_client_operating_state from './20260912_ces_client_operating_state';
 import * as migration_20260712_phase29c_reporting_provider_connections from './20260712_phase29c_reporting_provider_connections';
 import * as migration_20260713_phase31c_reporting_facts from './20260713_phase31c_reporting_facts';
 import * as migration_20260713_phase32b_google_ads_customer_fields from './20260713_phase32b_google_ads_customer_fields';
@@ -691,5 +692,12 @@ export const migrations = [
     up: migration_20260903_client_infrastructure_website_editor_url.up,
     down: migration_20260903_client_infrastructure_website_editor_url.down,
     name: '20260903_client_infrastructure_website_editor_url',
+  },
+  {
+    // Shared Client Operating State JSON on CES experience profiles.
+    // Additive only. Null-safe for existing clients. No Production data mutation.
+    up: migration_20260912_ces_client_operating_state.up,
+    down: migration_20260912_ces_client_operating_state.down,
+    name: '20260912_ces_client_operating_state',
   },
 ];

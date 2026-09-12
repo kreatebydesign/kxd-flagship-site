@@ -2,6 +2,7 @@
 
 import type { ReportingCapabilityId } from "@/lib/reporting/domain/capabilities";
 import type { ExperiencePresentation } from "./executive-performance/types";
+import type { ClientOperatingStateConfig } from "./operating-state/types";
 import type {
   CesExperienceModuleId,
   PortalModuleId,
@@ -68,6 +69,11 @@ export interface ResolvedExperienceProfile {
    * Sourced from experience profile JSON — gates Executive Performance panels.
    */
   reportingCapabilities: ReportingCapabilityId[];
+  /**
+   * Operator-authored Client Operating State (business intent).
+   * Null/undefined when unset — compose uses safe fallbacks + optional content packs.
+   */
+  operatingState?: ClientOperatingStateConfig | null;
   /** Presentation theme for Executive Performance (null → classic partnership briefing). */
   presentation: ExperiencePresentation | null;
   terminology: Record<string, string>;

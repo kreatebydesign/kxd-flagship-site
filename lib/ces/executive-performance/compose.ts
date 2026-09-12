@@ -31,14 +31,20 @@ import {
   getExecutivePartnershipValue,
   splitPartnershipPriority,
 } from "./partnership-value";
-import { getExecutivePresentation } from "./presentation";
+import {
+  isExecutivePerformanceEligible,
+  resolveExecutivePresentationForProfile,
+} from "./eligibility";
 import { resolvePrimaryLeadBreakdown } from "@/lib/reporting/leads/primary-leads";
 import { countWebsiteFormInquiries } from "@/lib/reporting/leads/website-form-inquiries";
 import { fmtReportNumber } from "@/lib/reporting/performance-format";
 import {
-  isPrimalPostLaunchClient,
-  PRIMAL_POST_LAUNCH_OPERATING,
-} from "@/lib/ces/profile/primal-post-launch";
+  resolveClientOperatingState,
+  resolveOperatingStateConfigForClient,
+  toPerformanceConnectionState,
+  type ResolvedClientOperatingState,
+} from "@/lib/ces/operating-state";
+import { loadOperatingInfrastructureSignals } from "@/lib/ces/operating-state/load-infrastructure";
 import type {
   ExecutiveImpactItem,
   ExecutivePerformanceBriefing,
@@ -248,6 +254,33 @@ function buildWorkingSignals(input: {
   return items.slice(0, 3);
 }
 
+function applyOperatingPanelOverlay(
+  panel: ExecutivePerformancePanel,
+  operating: ResolvedClientOperatingState,
+): ExecutivePerformancePanel {
+  if (panel.state === "connected") return panel;
+
+  const capability =
+    panel.id === "website"
+      ? operating.capabilities.website
+      : panel.id === "search"
+        ? operating.capabilities.search
+        : panel.id === "ads"
+          ? operating.capabilities.ads
+          : panel.id === "momentum"
+            ? operating.capabilities.momentum
+            : null;
+  if (!capability) return panel;
+  if (!capability.summary && !capability.detail) return panel;
+
+  return {
+    ...panel,
+    state: toPerformanceConnectionState(capability.state),
+    summary: capability.summary || panel.summary,
+    detail: capability.detail ?? panel.detail,
+  };
+}
+
 export async function composeExecutivePerformance(input: {
   profile: ResolvedExperienceProfile;
   briefing: PartnershipBriefing;
@@ -268,7 +301,8 @@ export async function composeExecutivePerformance(input: {
   } | null;
 }): Promise<ExecutivePerformanceBriefing | null> {
   const slug = input.profile.identity.clientSlug;
-  const presentation = getExecutivePresentation(slug);
+  if (!isExecutivePerformanceEligible(input.profile)) return null;
+  const presentation = resolveExecutivePresentationForProfile(input.profile);
   if (!presentation?.enabled) return null;
 
   const clientId = input.profile.identity.clientId;
@@ -279,7 +313,10 @@ export async function composeExecutivePerformance(input: {
     getReportingCapabilityIds(input.profile.reportingCapabilities);
 
   // Portal compose never calls Google — Shared Core ReportingFacts only.
-  const facts = await loadReportingFacts({ clientId, period });
+  const [facts, infrastructure] = await Promise.all([
+    loadReportingFacts({ clientId, period }),
+    loadOperatingInfrastructureSignals(clientId),
+  ]);
   const factProvenance = summarizeReportingFactProvenance(facts);
   const zeroActivity =
     facts.length > 0 && facts.every((f) => Number(f.value) === 0);
@@ -296,6 +333,29 @@ export async function composeExecutivePerformance(input: {
   const domainHealth = new Map(bundle.health.domains.map((d) => [d.domain, d.state]));
   const hasAnyFact = bundle.snapshot.facts.length > 0;
   const hasAnyReportingCapability = enabledCapabilities.length > 0;
+
+  const searchDomainFacts = factsForDomain(bundle.snapshot, "search");
+  const websiteDomainFacts = factsForDomain(bundle.snapshot, "website");
+  const adsDomainFacts = factsForDomain(bundle.snapshot, "marketing");
+
+  const operatingConfig = resolveOperatingStateConfigForClient({
+    clientSlug: slug,
+    persisted: input.profile.operatingState,
+  });
+  const operating = resolveClientOperatingState({
+    config: operatingConfig,
+    infrastructure,
+    evidence: {
+      seoEntitled: enabledSet.has("seo"),
+      websiteAnalyticsEntitled: enabledSet.has("website-analytics"),
+      googleAdsEntitled: enabledSet.has("google-ads"),
+      searchFactsPresent: searchDomainFacts.length > 0,
+      websiteFactsPresent: websiteDomainFacts.length > 0,
+      adsFactsPresent: adsDomainFacts.length > 0,
+    },
+  });
+  const postLaunch = operating.postLaunchMode;
+
   const reportingProvenance = buildReportingProvenance({
     periodLabel: period.label ?? `${period.start} – ${period.end}`,
     periodEnd: period.end,
@@ -309,13 +369,18 @@ export async function composeExecutivePerformance(input: {
     zeroActivity,
   });
 
-  const postLaunchEarly = isPrimalPostLaunchClient(slug);
-  if (postLaunchEarly) {
+  if (postLaunch && operating.baselineEstablished) {
     const monthlyLabel = period.label ?? `${period.start} – ${period.end}`;
-    reportingProvenance.baselineLabel = `September 11, 2026 post-launch baseline`;
+    const baselineLabel =
+      operating.baselineLabel ??
+      (operating.baselineDate
+        ? `${operating.baselineDate} post-launch baseline established`
+        : "Post-launch baseline established");
+    reportingProvenance.baselineLabel = baselineLabel;
     reportingProvenance.monthlyPeriodLabel = `Monthly window · ${monthlyLabel}`;
     reportingProvenance.periodLabel = monthlyLabel;
-    reportingProvenance.statusNote = PRIMAL_POST_LAUNCH_OPERATING.homePerformanceNote;
+    reportingProvenance.statusNote =
+      operating.content.homePerformanceNote ?? reportingProvenance.statusNote;
   }
 
   const performancePanels: ExecutivePerformancePanel[] = PANEL_CAPABILITIES.map((panel) => {
@@ -430,17 +495,17 @@ export async function composeExecutivePerformance(input: {
       : null,
   );
 
-  const postLaunch = isPrimalPostLaunchClient(slug);
-  const primaryAction = postLaunch
-    ? {
-        label: PRIMAL_POST_LAUNCH_OPERATING.primaryActionLabel,
-        href: PRIMAL_POST_LAUNCH_OPERATING.primaryActionHref,
-      }
-    : input.briefing.needsAttention.href
-      ? { label: "Review the website", href: input.briefing.needsAttention.href }
-      : input.websiteReview.websiteUrl
-        ? { label: "Review the website", href: "/portal/website-review/session/new" }
-        : { label: "Open Website Review", href: "/portal/website-review" };
+  const primaryAction =
+    operating.content.primaryActionLabel && operating.content.primaryActionHref
+      ? {
+          label: operating.content.primaryActionLabel,
+          href: operating.content.primaryActionHref,
+        }
+      : input.briefing.needsAttention.href
+        ? { label: "Review the website", href: input.briefing.needsAttention.href }
+        : input.websiteReview.websiteUrl
+          ? { label: "Review the website", href: "/portal/website-review/session/new" }
+          : { label: "Open Website Review", href: "/portal/website-review" };
 
   const reviewCount =
     input.websiteReview.activeReviews.length + input.websiteReview.completedReviews.length;
@@ -457,19 +522,20 @@ export async function composeExecutivePerformance(input: {
       complete: beat.complete,
     }));
 
-  const recentImprovements = postLaunch
-    ? PRIMAL_POST_LAUNCH_OPERATING.recentProgress.map((item) => ({
-        id: item.id,
-        label: item.label,
-        detail: item.detail ?? null,
-        at: item.at,
-      }))
-    : input.briefing.recentProgress.slice(0, 6).map((item) => ({
-        id: item.id,
-        label: item.label,
-        detail: item.detail ?? null,
-        at: item.at,
-      }));
+  const recentImprovements =
+    operating.content.recentProgress && operating.content.recentProgress.length > 0
+      ? operating.content.recentProgress.map((item) => ({
+          id: item.id,
+          label: item.label,
+          detail: item.detail ?? null,
+          at: item.at ?? null,
+        }))
+      : input.briefing.recentProgress.slice(0, 6).map((item) => ({
+          id: item.id,
+          label: item.label,
+          detail: item.detail ?? null,
+          at: item.at,
+        }));
 
   /** Executive Home collaboration rail — curated milestones for post-launch. */
   const NOISY_REVIEW_TITLE =
@@ -499,13 +565,12 @@ export async function composeExecutivePerformance(input: {
           }));
 
   const wr = input.briefing.websiteReview;
-  const secondaryAction = postLaunch
-    ? {
-        label: PRIMAL_POST_LAUNCH_OPERATING.secondaryActionLabel,
-        href: PRIMAL_POST_LAUNCH_OPERATING.secondaryActionHref,
-      }
-    : input.websiteReview.websiteUrl
-      ? { label: "Leave written notes", href: "/portal/website-review/request" }
+  const secondaryAction =
+    operating.content.secondaryActionLabel && operating.content.secondaryActionHref
+      ? {
+          label: operating.content.secondaryActionLabel,
+          href: operating.content.secondaryActionHref,
+        }
       : { label: "Leave written notes", href: "/portal/website-review/request" };
 
   const billing = input.briefing.billingPreview;
@@ -519,38 +584,9 @@ export async function composeExecutivePerformance(input: {
       : "You're not alone in this — whenever something needs attention, your KXD partner is close.",
   };
 
-  const performancePanelsAdjusted = performancePanels.map((panel) => {
-    if (!postLaunch) return panel;
-    if (panel.id === "momentum" && panel.state === "awaiting-signal") {
-      return {
-        ...panel,
-        summary: PRIMAL_POST_LAUNCH_OPERATING.momentumLabel,
-        detail: PRIMAL_POST_LAUNCH_OPERATING.momentumDetail,
-      };
-    }
-    if (panel.id === "website" && panel.state === "not-connected") {
-      return {
-        ...panel,
-        summary: "Measurement active",
-        detail: PRIMAL_POST_LAUNCH_OPERATING.websitePanelNote,
-      };
-    }
-    if (panel.id === "ads" && panel.state === "not-connected") {
-      return {
-        ...panel,
-        summary: "Performance reviewed",
-        detail: PRIMAL_POST_LAUNCH_OPERATING.adsPanelNote,
-      };
-    }
-    if (panel.id === "search" && panel.state === "awaiting-signal") {
-      return {
-        ...panel,
-        summary: "Baseline established",
-        detail: PRIMAL_POST_LAUNCH_OPERATING.searchPanelFallback,
-      };
-    }
-    return panel;
-  });
+  const performancePanelsAdjusted = performancePanels.map((panel) =>
+    applyOperatingPanelOverlay(panel, operating),
+  );
 
   return {
     clientId,
@@ -560,9 +596,7 @@ export async function composeExecutivePerformance(input: {
       ...presentation,
       logoSrc: input.profile.identity.logoUrl ?? presentation.logoSrc,
       logoAlt: input.profile.identity.logoAlt || presentation.logoAlt,
-      introduction: postLaunch
-        ? "Website live. Production verified. Measurement active. Focus: growth."
-        : presentation.introduction,
+      introduction: operating.content.introduction ?? presentation.introduction,
     },
     greeting: input.greeting,
     summary: {
@@ -577,16 +611,22 @@ export async function composeExecutivePerformance(input: {
         recent: "Recent win",
       },
     },
-    recommendation: postLaunch
-      ? {
-          headline: PRIMAL_POST_LAUNCH_OPERATING.recommendationHeadline,
-          rationale: PRIMAL_POST_LAUNCH_OPERATING.recommendationRationale,
-          evidenceLabels:
-            input.briefing.recommendation.evidenceLabels.length > 0
-              ? input.briefing.recommendation.evidenceLabels
-              : ["Production live", "Post-launch verification complete"],
-        }
-      : input.briefing.recommendation,
+    recommendation:
+      postLaunch &&
+      (operating.content.recommendationHeadline || operating.content.recommendationRationale)
+        ? {
+            headline:
+              operating.content.recommendationHeadline ??
+              input.briefing.recommendation.headline,
+            rationale:
+              operating.content.recommendationRationale ??
+              input.briefing.recommendation.rationale,
+            evidenceLabels:
+              input.briefing.recommendation.evidenceLabels.length > 0
+                ? input.briefing.recommendation.evidenceLabels
+                : ["Production live", "Post-launch verification complete"],
+          }
+        : input.briefing.recommendation,
     primaryAction,
     performancePanels: performancePanelsAdjusted,
     primaryLeads,
@@ -600,20 +640,16 @@ export async function composeExecutivePerformance(input: {
     }),
     recentImprovements,
     collaboration: {
-      statusLabel: postLaunch
-        ? "Website live · Production verified"
-        : wr.statusLabel,
-      explanation: postLaunch
-        ? "Launch is complete. Website Review remains available for future notes — it is no longer blocking production."
-        : wr.nextStep,
+      statusLabel: operating.content.collaborationStatusLabel ?? wr.statusLabel,
+      explanation: operating.content.collaborationExplanation ?? wr.nextStep,
       primaryAction,
       secondaryAction,
       recentActivity: latestReviews,
     },
     evolution: getExecutiveEvolution(slug),
     account,
-    momentumLabel: postLaunch
-      ? PRIMAL_POST_LAUNCH_OPERATING.momentumLabel
+    momentumLabel: operating.content.momentumLabel
+      ? operating.content.momentumLabel
       : momentumHasSignal
         ? momentumLabel(momentumState)
         : null,

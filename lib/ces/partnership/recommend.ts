@@ -15,7 +15,7 @@ export interface RecommendInput {
   websiteUrl: string | null;
   /**
    * When true, open Website Review records no longer mean “launch is blocked.”
-   * Used for post-launch clients (e.g. Primal) so growth language wins.
+   * Driven by shared Client Operating State mode=post-launch.
    */
   postLaunchActive?: boolean;
   postLaunchHeadline?: string | null;

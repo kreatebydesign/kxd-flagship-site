@@ -1,7 +1,10 @@
 /**
  * Phase 31A / 32A — Client presentation themes for Executive Performance.
  * Shared Core registry — brand assets, color tokens, and copy. Not entitlements.
- * Enable a client by setting `enabled: true` and completing brand assets — no component forks.
+ *
+ * Brand registry is optional CONTENT. Executive Performance eligibility is
+ * entitlement-first via isExecutivePerformanceEligible / resolveExecutivePresentationForProfile.
+ * Enable brand assets here; do not use this registry as the sole structural gate.
  */
 
 import type { ExperiencePresentation } from "./types";

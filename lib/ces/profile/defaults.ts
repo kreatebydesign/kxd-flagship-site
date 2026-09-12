@@ -87,6 +87,7 @@ export function mergeProfileWithFallback(
     enabledModules: partial.enabledModules ?? [],
     enabledPortalModules: partial.enabledPortalModules ?? [],
     reportingCapabilities: partial.reportingCapabilities ?? [],
+    operatingState: partial.operatingState ?? null,
     presentation: partial.presentation ?? null,
     terminology: partial.terminology ?? {},
     cssVars: partial.cssVars ?? {},

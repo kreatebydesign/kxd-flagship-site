@@ -33,6 +33,12 @@ export {
 } from "./presentation";
 
 export {
+  buildDefaultExecutivePresentation,
+  isExecutivePerformanceEligible,
+  resolveExecutivePresentationForProfile,
+} from "./eligibility";
+
+export {
   getExecutivePartnershipValue,
   splitPartnershipPriority,
 } from "./partnership-value";

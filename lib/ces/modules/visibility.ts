@@ -10,6 +10,7 @@ import { isModuleEnabledForEdition } from "@/lib/editions/modules";
 import { getEditionById } from "@/lib/editions/registry";
 import { isExecutiveClientBriefingAvailable } from "@/lib/executive-client-summary/availability";
 import { isCesModuleEnabled, type ResolvedExperienceProfile } from "../types";
+import { isExecutivePerformanceEligible } from "../executive-performance/eligibility";
 import { isExecutivePerformanceAvailable } from "../executive-performance/presentation";
 import {
   getCanonicalCapability,
@@ -99,14 +100,16 @@ export function isPortalModuleVisible(
           enabledPortalIds(profile).includes(moduleId))
       );
     case "presentation": {
-      const entitled = isCesModuleEnabled(profile, "executive-performance");
-      const presentationOn = isExecutivePerformanceAvailable(
-        profile.identity.clientSlug,
-      );
+      // Entitlement-first. Registry enablement remains a legacy compatibility path.
+      if (isExecutivePerformanceEligible(profile)) return true;
       const briefingOn = isExecutiveClientBriefingAvailable(
         profile.identity.clientSlug,
       );
-      return entitled || presentationOn || briefingOn;
+      // Briefing-only clients (memory + briefingEnabled) without EP module.
+      return (
+        briefingOn ||
+        isExecutivePerformanceAvailable(profile.identity.clientSlug)
+      );
     }
     case "hq-default":
       return hqDefaultVisible(profile, moduleId);

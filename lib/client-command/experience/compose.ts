@@ -128,6 +128,7 @@ export function composeOperatorExperienceProfile(
     enabledModules: normalizeCesExperienceModuleList(gated.ces),
     enabledPortalModules: gated.portal,
     reportingCapabilities: normalizeReportingCapabilityList(gated.reporting),
+    operatingState: null,
     presentation: null,
     terminology: input.terminology ?? {},
     cssVars: {},

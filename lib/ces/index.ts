@@ -27,6 +27,11 @@ export {
 } from "./executive-performance";
 
 export {
+  isExecutivePerformanceEligible,
+  resolveExecutivePresentationForProfile,
+} from "./executive-performance/eligibility";
+
+export {
   CES_DEFAULT_PARTNER_FOOTER,
   CES_DEFAULT_REASSURANCE,
   CES_DEFAULT_WELCOME_EYEBROW,
