@@ -33,11 +33,30 @@ export const PRIMAL_POST_LAUNCH_OPERATING = {
   momentumDetail:
     "September 11, 2026 is the documented post-launch baseline. The first full post-launch period is being measured — not yet treated as a finished trend.",
   websitePanelNote:
-    "Website is live and verified. GA4 property 549908814 is receiving production activity. Live Website panel sync stays off until website-analytics entitlement and provider sync are verified. Detailed baseline: Leadership Report.",
+    "Production traffic is being measured. Live portal traffic figures appear after Website Analytics sync is verified — reviewed baseline is in the Leadership Report.",
   adsPanelNote:
-    "Google Ads performance has been reviewed for August 12 – September 10, 2026 and is producing tracked primary conversions. Live Ads panel sync stays off until google-ads entitlement and provider sync are verified. Detailed baseline: Leadership Report.",
+    "Paid performance has been reviewed. Live Ads figures appear after Google Ads sync is verified — reviewed baseline is in the Leadership Report.",
   searchPanelFallback:
-    "Search foundation is active. Live Search Console figures appear here when ReportingFacts exist for the selected monthly window. September 11 verified baseline: Leadership Report.",
+    "Search foundation is active. Live Search Console figures appear for the selected monthly window when facts are synced.",
+  /** Short Home Performance reading — methodology stays in Leadership Report. */
+  homePerformanceNote:
+    "Search is connected for the monthly window. Website traffic and Ads stay on reviewed baselines until live sync is verified. Full methodology: Leadership Report.",
+  websiteHealth: {
+    serviceValue: "Active",
+    serviceDetail: "Production website live and managed with KXD",
+    speedValue: "Verified at launch",
+    speedDetail:
+      "Technical verification completed with the September 2026 production launch. Continuous monitoring continues — no separate PageSpeed score is published here.",
+    searchFoundationValue: "Implemented",
+    searchFoundationDetail:
+      "Search foundation verified at launch (metadata, sitemap, robots, structured data, redirects).",
+    activityValueWhenConfigured: "Connected",
+    activityValueWhenPending: "Measurement active",
+    activityDetailWhenPending:
+      "GA4 is receiving production activity. Live portal sync remains separate until Website Analytics is verified.",
+    releaseValue: "September 2026 production launch",
+    releaseDetail: `Launched ${PRIMAL_WEBSITE_LAUNCH_DATE} · post-launch baseline ${PRIMAL_POST_LAUNCH_BASELINE_DATE}`,
+  },
 } as const;
 
 export function isPrimalPostLaunchClient(

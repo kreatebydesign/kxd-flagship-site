@@ -4,6 +4,10 @@ import { getPayload } from "payload";
 import config from "@payload-config";
 import { calculateOnboardingReadiness } from "@/lib/client-onboarding";
 import { getPortalClientTasks } from "@/lib/client-tasks";
+import {
+  isPrimalPostLaunchClient,
+  PRIMAL_POST_LAUNCH_OPERATING,
+} from "@/lib/ces/profile/primal-post-launch";
 import { loadClientReportingConnection } from "@/lib/reporting/providers/connection";
 import { requirePortalSession, type PortalSession } from "./session";
 import type {
@@ -511,14 +515,58 @@ export async function getPortalWebsiteHealth(
 
   const knownIssues = latestAudit?.opportunities ?? [];
   const sourceNotes: string[] = [];
-  if (!ga4Configured) {
-    sourceNotes.push("Verified website activity measurement is not connected yet.");
+  const clientSlug = typeof client?.slug === "string" ? client.slug : null;
+  const postLaunch = isPrimalPostLaunchClient(clientSlug);
+  const health = PRIMAL_POST_LAUNCH_OPERATING.websiteHealth;
+
+  if (postLaunch) {
+    for (const signal of signals) {
+      if (signal.id === "hosting" && signal.value === "Details pending") {
+        signal.value = health.serviceValue;
+        signal.status = "ok";
+        signal.detail = health.serviceDetail;
+      }
+      if (signal.id === "performance" && signal.value === "Awaiting audit") {
+        signal.value = health.speedValue;
+        signal.status = "ok";
+        signal.detail = health.speedDetail;
+      }
+      if (signal.id === "seo" && signal.value === "Awaiting audit") {
+        signal.value = health.searchFoundationValue;
+        signal.status = "ok";
+        signal.detail = health.searchFoundationDetail;
+      }
+      if (signal.id === "analytics") {
+        if (ga4Configured) {
+          signal.value = health.activityValueWhenConfigured;
+          signal.status = "ok";
+          signal.detail = "KXD can measure website visits and activity";
+        } else {
+          signal.value = health.activityValueWhenPending;
+          signal.status = "ok";
+          signal.detail = health.activityDetailWhenPending;
+        }
+      }
+      if (signal.id === "deployment" && signal.value === "No release recorded") {
+        signal.value = health.releaseValue;
+        signal.status = "ok";
+        signal.detail = health.releaseDetail;
+      }
+    }
+  } else {
+    if (!ga4Configured) {
+      sourceNotes.push("Verified website activity measurement is not connected yet.");
+    }
+    if (!searchConsoleConfigured) {
+      sourceNotes.push("Verified search visibility measurement is not connected yet.");
+    }
+    if (!latestAudit) {
+      sourceNotes.push("KXD has not published a website audit for this business yet.");
+    }
   }
-  if (!searchConsoleConfigured) {
-    sourceNotes.push("Verified search visibility measurement is not connected yet.");
-  }
-  if (!latestAudit) {
-    sourceNotes.push("KXD has not published a website audit for this business yet.");
+
+  if (postLaunch && !searchConsoleConfigured) {
+    sourceNotes.push("Search Console connection is still being confirmed for this workspace.");
   }
 
   return {

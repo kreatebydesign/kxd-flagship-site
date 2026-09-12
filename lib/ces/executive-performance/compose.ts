@@ -292,16 +292,10 @@ export async function composeExecutivePerformance(input: {
   const postLaunchEarly = isPrimalPostLaunchClient(slug);
   if (postLaunchEarly) {
     const monthlyLabel = period.label ?? `${period.start} – ${period.end}`;
-    reportingProvenance.baselineLabel = `September 11, 2026 post-launch baseline established`;
-    reportingProvenance.monthlyPeriodLabel = `Last complete monthly facts window: ${monthlyLabel}`;
-    reportingProvenance.periodLabel = `September baseline established · monthly window ${monthlyLabel}`;
-    reportingProvenance.statusNote = [
-      reportingProvenance.statusNote,
-      "September is not treated as a complete month. Live monthly figures use the last completed calendar month until current-month facts sync.",
-      "Verified organic/Ads baselines for leadership are in the Leadership Report.",
-    ]
-      .filter(Boolean)
-      .join(" ");
+    reportingProvenance.baselineLabel = `September 11, 2026 post-launch baseline`;
+    reportingProvenance.monthlyPeriodLabel = `Monthly window · ${monthlyLabel}`;
+    reportingProvenance.periodLabel = monthlyLabel;
+    reportingProvenance.statusNote = PRIMAL_POST_LAUNCH_OPERATING.homePerformanceNote;
   }
 
   const performancePanels: ExecutivePerformancePanel[] = PANEL_CAPABILITIES.map((panel) => {
@@ -420,16 +414,40 @@ export async function composeExecutivePerformance(input: {
     at: item.at,
   }));
 
-  const latestReviews = [
-    ...input.websiteReview.activeReviews,
-    ...input.websiteReview.completedReviews,
-  ]
+  /** Executive Home: prefer meaningful completed work — not raw revision-note noise. */
+  const NOISY_REVIEW_TITLE =
+    /^(remove text|content update|update inventory|fine for right now\.?)$/i;
+  const completedMeaningful = input.websiteReview.completedReviews
+    .filter((r) => !NOISY_REVIEW_TITLE.test(String(r.title ?? "").trim()))
     .slice(0, 3)
     .map((r) => ({
       id: r.id,
       label: r.title,
       at: r.updatedAt || r.submittedAt || null,
     }));
+  const latestReviews = postLaunch
+    ? recentImprovements.length > 0
+      ? recentImprovements.slice(0, 3).map((item) => ({
+          id: item.id,
+          label: item.label,
+          at: item.at,
+        }))
+      : [
+          {
+            id: "post-launch-release",
+            label: PRIMAL_POST_LAUNCH_OPERATING.recentWin,
+            at: null,
+          },
+        ]
+    : completedMeaningful.length > 0
+      ? completedMeaningful
+      : [...input.websiteReview.activeReviews, ...input.websiteReview.completedReviews]
+          .slice(0, 3)
+          .map((r) => ({
+            id: r.id,
+            label: r.title,
+            at: r.updatedAt || r.submittedAt || null,
+          }));
 
   const wr = input.briefing.websiteReview;
   const secondaryAction = postLaunch

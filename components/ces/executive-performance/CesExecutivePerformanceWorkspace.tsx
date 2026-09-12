@@ -272,46 +272,56 @@ export function CesExecutivePerformanceWorkspace({
             ) : null}
             <p className="kxd-ces-exec__provenance-row">
               <span className="kxd-ces-exec__provenance-key">
-                {provenance.monthlyPeriodLabel ? "Monthly facts" : "Period"}
+                {provenance.monthlyPeriodLabel ? "Monthly window" : "Period"}
               </span>
               <span className="kxd-ces-exec__provenance-value">
                 {provenance.monthlyPeriodLabel ?? periodLabel}
               </span>
             </p>
-            {dataThroughLabel ? (
-              <p className="kxd-ces-exec__provenance-row">
-                <span className="kxd-ces-exec__provenance-key">Data through</span>
-                <span className="kxd-ces-exec__provenance-value">{dataThroughLabel}</span>
-              </p>
-            ) : null}
-            {provenance.freshnessLabel ? (
-              <p className="kxd-ces-exec__provenance-row">
-                <span className="kxd-ces-exec__provenance-key">Freshness</span>
-                <span className="kxd-ces-exec__provenance-value kxd-ces-exec__provenance-value--intel">
-                  {provenance.freshnessLabel}
-                  {lastSyncLabel ? ` · last sync ${lastSyncLabel}` : ""}
-                </span>
-              </p>
-            ) : null}
             {provenance.providerLabels.length > 0 ? (
               <p className="kxd-ces-exec__provenance-row">
-                <span className="kxd-ces-exec__provenance-key">Source</span>
+                <span className="kxd-ces-exec__provenance-key">Connected</span>
                 <span className="kxd-ces-exec__provenance-value kxd-ces-exec__provenance-value--intel">
                   {provenance.providerLabels.join(", ")}
                 </span>
               </p>
             ) : null}
-            <p className="kxd-ces-exec__provenance-row">
-              <span className="kxd-ces-exec__provenance-key">Confirmed leads</span>
-              <span className="kxd-ces-exec__provenance-value">
-                {provenance.confirmedLeadsLabel}
-              </span>
-            </p>
             {provenance.statusNote ? (
               <p className="kxd-ces-exec__provenance-note">
                 {provenance.statusNote}
               </p>
             ) : null}
+            <details className="kxd-ces-exec__disclosure kxd-ces-exec__disclosure--provenance">
+              <summary>About these figures</summary>
+              <div className="kxd-ces-exec__provenance-details">
+                {dataThroughLabel ? (
+                  <p className="kxd-ces-exec__provenance-row">
+                    <span className="kxd-ces-exec__provenance-key">Data through</span>
+                    <span className="kxd-ces-exec__provenance-value">{dataThroughLabel}</span>
+                  </p>
+                ) : null}
+                {provenance.freshnessLabel ? (
+                  <p className="kxd-ces-exec__provenance-row">
+                    <span className="kxd-ces-exec__provenance-key">Freshness</span>
+                    <span className="kxd-ces-exec__provenance-value kxd-ces-exec__provenance-value--intel">
+                      {provenance.freshnessLabel}
+                      {lastSyncLabel ? ` · last sync ${lastSyncLabel}` : ""}
+                    </span>
+                  </p>
+                ) : null}
+                <p className="kxd-ces-exec__provenance-row">
+                  <span className="kxd-ces-exec__provenance-key">Confirmed leads</span>
+                  <span className="kxd-ces-exec__provenance-value">
+                    {provenance.confirmedLeadsLabel}
+                  </span>
+                </p>
+                {provenance.confirmedLeadsDetail ? (
+                  <p className="kxd-ces-exec__provenance-note">
+                    {provenance.confirmedLeadsDetail}
+                  </p>
+                ) : null}
+              </div>
+            </details>
           </div>
         </div>
         <div className="kxd-ces-exec__primary-leads" aria-label="Primary leads">
@@ -341,9 +351,12 @@ export function CesExecutivePerformanceWorkspace({
               </div>
             ))}
           </dl>
-          <p className="kxd-ces-exec__provenance-note">
-            {performance.primaryLeads.excludedNote}
-          </p>
+          <details className="kxd-ces-exec__disclosure">
+            <summary>How primary leads are counted</summary>
+            <p className="kxd-ces-exec__provenance-note">
+              {performance.primaryLeads.excludedNote}
+            </p>
+          </details>
         </div>
         <ul className="kxd-ces-exec__status-row">
           {performance.performancePanels.map((panel) => {
@@ -579,7 +592,7 @@ export function CesExecutivePerformanceWorkspace({
         </div>
         {performance.collaboration.recentActivity.length > 0 ? (
           <div className="kxd-ces-exec__collab-side">
-            <p className="kxd-ces-exec__subhead">Recent refinements</p>
+          <p className="kxd-ces-exec__subhead">Recent progress</p>
             <ul className="kxd-ces-exec__compact-list">
               {performance.collaboration.recentActivity.map((item) => (
                 <li key={item.id}>
