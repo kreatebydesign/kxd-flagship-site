@@ -53,11 +53,28 @@ export default async function PortalOverviewPage() {
       connected,
     });
     const greeting = await composePortalGreeting(session);
+    /**
+     * Home Executive Performance must consume the same website-form inquiry
+     * resolution already proven on Performance (Work Performance leads).
+     * Do not invent a second counting path here.
+     */
+    const websiteFormInquiriesFromPerformance =
+      workPerformance.leads.availability === "ready" &&
+      workPerformance.leads.conversionLabel === "Website form leads" &&
+      workPerformance.leads.conversionCount != null
+        ? {
+            available: true as const,
+            count: workPerformance.leads.conversionCount,
+            definition:
+              "Count of client-inquiries with channel=form in the selected period. Excludes calls, Ads conversions, and GA4 generate_lead.",
+          }
+        : null;
     const performance = await composeExecutivePerformance({
       profile,
       briefing,
       websiteReview,
       greeting,
+      websiteFormInquiries: websiteFormInquiriesFromPerformance,
     });
     return (
       <CesPortalHome

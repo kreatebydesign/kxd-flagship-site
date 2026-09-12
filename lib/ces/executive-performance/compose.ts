@@ -254,6 +254,18 @@ export async function composeExecutivePerformance(input: {
   websiteReview: WebsiteReviewLandingData;
   greeting: string;
   reportingCapabilities?: readonly ReportingCapabilityId[];
+  /**
+   * Optional pre-resolved website-form inquiry count (same shared adapter).
+   * Home passes the Work Performance result so EP does not diverge from the
+   * Performance surface that already resolved August form leads correctly.
+   */
+  websiteFormInquiries?: {
+    available: boolean;
+    count: number | null;
+    previousCount?: number | null;
+    delta?: number | null;
+    definition?: string;
+  } | null;
 }): Promise<ExecutivePerformanceBriefing | null> {
   const slug = input.profile.identity.clientSlug;
   const presentation = getExecutivePresentation(slug);
@@ -387,13 +399,23 @@ export async function composeExecutivePerformance(input: {
   });
 
   const formInquiryCount =
-    slug != null && slug.trim()
-      ? await countWebsiteFormInquiries({
-          clientId,
-          clientKey: slug.trim(),
-          period,
-        })
-      : null;
+    input.websiteFormInquiries != null
+      ? {
+          available: input.websiteFormInquiries.available,
+          count: input.websiteFormInquiries.count,
+          previousCount: input.websiteFormInquiries.previousCount ?? null,
+          delta: input.websiteFormInquiries.delta ?? null,
+          definition:
+            input.websiteFormInquiries.definition ??
+            "Count of client-inquiries with channel=form in the selected period. Excludes calls, Ads conversions, and GA4 generate_lead.",
+        }
+      : slug != null && slug.trim()
+        ? await countWebsiteFormInquiries({
+            clientId,
+            clientKey: slug.trim(),
+            period,
+          })
+        : null;
   const primaryLeads = buildPrimaryLeadsOverview(
     facts,
     period,
@@ -555,7 +577,16 @@ export async function composeExecutivePerformance(input: {
         recent: "Recent win",
       },
     },
-    recommendation: input.briefing.recommendation,
+    recommendation: postLaunch
+      ? {
+          headline: PRIMAL_POST_LAUNCH_OPERATING.recommendationHeadline,
+          rationale: PRIMAL_POST_LAUNCH_OPERATING.recommendationRationale,
+          evidenceLabels:
+            input.briefing.recommendation.evidenceLabels.length > 0
+              ? input.briefing.recommendation.evidenceLabels
+              : ["Production live", "Post-launch verification complete"],
+        }
+      : input.briefing.recommendation,
     primaryAction,
     performancePanels: performancePanelsAdjusted,
     primaryLeads,

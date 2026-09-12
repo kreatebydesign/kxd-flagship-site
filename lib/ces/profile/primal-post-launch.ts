@@ -24,7 +24,7 @@ export const PRIMAL_POST_LAUNCH_OPERATING = {
   recentWin: "New production website launched",
   recommendationHeadline: "Focus moves to measurable growth",
   recommendationRationale:
-    "The production website is live and verified. Search Console is connected, website lead capture is measurable, Ads performance has been reviewed, and the growth measurement baseline is established.",
+    "The production website is live and verified. Search visibility is connected, website lead capture is measurable, and paid acquisition has been reviewed. The focus now is qualified traffic, search visibility, and advertising efficiency, with September 11 as the documented baseline.",
   /**
    * Executive Home “Recent progress” — curated milestones only.
    * Never raw Website Review revision titles.
