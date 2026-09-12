@@ -57,3 +57,4 @@ storage/branded-monthly-reports/
 
 # KXD Connect local dogfood activation (operator-owned; never commit)
 .connect/
+report-output/
