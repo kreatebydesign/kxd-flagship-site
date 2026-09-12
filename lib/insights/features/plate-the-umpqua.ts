@@ -34,7 +34,7 @@ export const PLATE_THE_UMPQUA_FEATURE: JournalFeatureArticle = {
     src: "/journal/plate-the-umpqua/hero.webp",
     alt: "Plate the Umpqua private dining hospitality experience",
   },
-  ogImage: "/journal/plate-the-umpqua/homepage-full.webp",
+  ogImage: "/journal/plate-the-umpqua/og-card.jpg",
   aboutTopics: [
     "Plate the Umpqua",
     "private dining website development",
