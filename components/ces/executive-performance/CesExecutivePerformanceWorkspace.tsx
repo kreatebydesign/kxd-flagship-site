@@ -278,35 +278,35 @@ export function CesExecutivePerformanceWorkspace({
                 {provenance.monthlyPeriodLabel ?? periodLabel}
               </span>
             </p>
+            {provenance.freshnessLabel ? (
+              <p className="kxd-ces-exec__provenance-row">
+                <span className="kxd-ces-exec__provenance-key">Freshness</span>
+                <span className="kxd-ces-exec__provenance-value kxd-ces-exec__provenance-value--intel">
+                  {provenance.freshnessLabel}
+                  {lastSyncLabel ? ` · last sync ${lastSyncLabel}` : ""}
+                </span>
+              </p>
+            ) : null}
             {provenance.providerLabels.length > 0 ? (
               <p className="kxd-ces-exec__provenance-row">
-                <span className="kxd-ces-exec__provenance-key">Connected</span>
+                <span className="kxd-ces-exec__provenance-key">Source</span>
                 <span className="kxd-ces-exec__provenance-value kxd-ces-exec__provenance-value--intel">
                   {provenance.providerLabels.join(", ")}
                 </span>
               </p>
             ) : null}
-            {provenance.statusNote ? (
-              <p className="kxd-ces-exec__provenance-note">
-                {provenance.statusNote}
-              </p>
-            ) : null}
             <details className="kxd-ces-exec__disclosure kxd-ces-exec__disclosure--provenance">
               <summary>About these figures</summary>
               <div className="kxd-ces-exec__provenance-details">
+                {provenance.statusNote ? (
+                  <p className="kxd-ces-exec__provenance-note">
+                    {provenance.statusNote}
+                  </p>
+                ) : null}
                 {dataThroughLabel ? (
                   <p className="kxd-ces-exec__provenance-row">
                     <span className="kxd-ces-exec__provenance-key">Data through</span>
                     <span className="kxd-ces-exec__provenance-value">{dataThroughLabel}</span>
-                  </p>
-                ) : null}
-                {provenance.freshnessLabel ? (
-                  <p className="kxd-ces-exec__provenance-row">
-                    <span className="kxd-ces-exec__provenance-key">Freshness</span>
-                    <span className="kxd-ces-exec__provenance-value kxd-ces-exec__provenance-value--intel">
-                      {provenance.freshnessLabel}
-                      {lastSyncLabel ? ` · last sync ${lastSyncLabel}` : ""}
-                    </span>
                   </p>
                 ) : null}
                 <p className="kxd-ces-exec__provenance-row">
@@ -320,6 +320,11 @@ export function CesExecutivePerformanceWorkspace({
                     {provenance.confirmedLeadsDetail}
                   </p>
                 ) : null}
+                <p className="kxd-ces-exec__provenance-note">
+                  Website form leads count client-inquiries (channel=form) for the
+                  period. GA4 generate_lead, Ads form conversions, and aggregate
+                  conversions are excluded so the same inquiry is never double-counted.
+                </p>
               </div>
             </details>
           </div>

@@ -38,7 +38,7 @@ const METRICS_BY_PANEL: Record<string, MetricSpec[]> = {
   website: [
     { key: "visitors", label: "Users", format: "count" },
     { key: "sessions", label: "Sessions", format: "count" },
-    { key: "generate_lead", label: "Website form leads", format: "count" },
+    { key: "generate_lead", label: "GA4 lead actions", format: "count" },
     { key: "pageviews", label: "Pageviews", format: "count" },
     /* Aggregate key events — never treated as primary leads. */
     { key: "conversions", label: "Other key events", format: "count" },

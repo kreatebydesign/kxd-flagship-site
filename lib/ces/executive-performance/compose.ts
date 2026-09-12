@@ -33,6 +33,7 @@ import {
 } from "./partnership-value";
 import { getExecutivePresentation } from "./presentation";
 import { resolvePrimaryLeadBreakdown } from "@/lib/reporting/leads/primary-leads";
+import { countWebsiteFormInquiries } from "@/lib/reporting/leads/website-form-inquiries";
 import { fmtReportNumber } from "@/lib/reporting/performance-format";
 import {
   isPrimalPostLaunchClient,
@@ -205,14 +206,21 @@ function formatPrimaryLeadMetric(
 function buildPrimaryLeadsOverview(
   facts: Parameters<typeof resolvePrimaryLeadBreakdown>[0]["facts"],
   period: Parameters<typeof resolvePrimaryLeadBreakdown>[0]["period"],
+  websiteFormInquiries?: Parameters<
+    typeof resolvePrimaryLeadBreakdown
+  >[0]["websiteFormInquiries"],
 ): ExecutivePrimaryLeadsOverview {
-  const breakdown = resolvePrimaryLeadBreakdown({ facts, period });
+  const breakdown = resolvePrimaryLeadBreakdown({
+    facts,
+    period,
+    websiteFormInquiries,
+  });
   return {
     websiteFormLeads: formatPrimaryLeadMetric(breakdown.websiteFormLeads),
     paidQualifiedCallLeads: formatPrimaryLeadMetric(breakdown.paidQualifiedCallLeads),
     totalPrimaryLeads: formatPrimaryLeadMetric(breakdown.totalPrimaryLeads),
     excludedNote:
-      "Primary leads never include Ads form conversions or GA4/Ads aggregate conversions — those can double-count the same website form.",
+      "Primary leads use client-inquiries (channel=form) and Ads phone-call leads when present. GA4 generate_lead, Ads form conversions, and aggregate conversions are excluded to prevent double counting.",
   };
 }
 
@@ -378,7 +386,27 @@ export async function composeExecutivePerformance(input: {
     metrics: [],
   });
 
-  const primaryLeads = buildPrimaryLeadsOverview(facts, period);
+  const formInquiryCount =
+    slug != null && slug.trim()
+      ? await countWebsiteFormInquiries({
+          clientId,
+          clientKey: slug.trim(),
+          period,
+        })
+      : null;
+  const primaryLeads = buildPrimaryLeadsOverview(
+    facts,
+    period,
+    formInquiryCount
+      ? {
+          available: formInquiryCount.available,
+          count: formInquiryCount.count,
+          previousCount: formInquiryCount.previousCount,
+          delta: formInquiryCount.delta,
+          definition: formInquiryCount.definition,
+        }
+      : null,
+  );
 
   const postLaunch = isPrimalPostLaunchClient(slug);
   const primaryAction = postLaunch
@@ -407,14 +435,21 @@ export async function composeExecutivePerformance(input: {
       complete: beat.complete,
     }));
 
-  const recentImprovements = input.briefing.recentProgress.slice(0, 6).map((item) => ({
-    id: item.id,
-    label: item.label,
-    detail: item.detail ?? null,
-    at: item.at,
-  }));
+  const recentImprovements = postLaunch
+    ? PRIMAL_POST_LAUNCH_OPERATING.recentProgress.map((item) => ({
+        id: item.id,
+        label: item.label,
+        detail: item.detail ?? null,
+        at: item.at,
+      }))
+    : input.briefing.recentProgress.slice(0, 6).map((item) => ({
+        id: item.id,
+        label: item.label,
+        detail: item.detail ?? null,
+        at: item.at,
+      }));
 
-  /** Executive Home: prefer meaningful completed work — not raw revision-note noise. */
+  /** Executive Home collaboration rail — curated milestones for post-launch. */
   const NOISY_REVIEW_TITLE =
     /^(remove text|content update|update inventory|fine for right now\.?)$/i;
   const completedMeaningful = input.websiteReview.completedReviews
@@ -426,19 +461,11 @@ export async function composeExecutivePerformance(input: {
       at: r.updatedAt || r.submittedAt || null,
     }));
   const latestReviews = postLaunch
-    ? recentImprovements.length > 0
-      ? recentImprovements.slice(0, 3).map((item) => ({
-          id: item.id,
-          label: item.label,
-          at: item.at,
-        }))
-      : [
-          {
-            id: "post-launch-release",
-            label: PRIMAL_POST_LAUNCH_OPERATING.recentWin,
-            at: null,
-          },
-        ]
+    ? recentImprovements.slice(0, 4).map((item) => ({
+        id: item.id,
+        label: item.label,
+        at: item.at,
+      }))
     : completedMeaningful.length > 0
       ? completedMeaningful
       : [...input.websiteReview.activeReviews, ...input.websiteReview.completedReviews]

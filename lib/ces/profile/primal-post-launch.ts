@@ -24,7 +24,37 @@ export const PRIMAL_POST_LAUNCH_OPERATING = {
   recentWin: "New production website launched",
   recommendationHeadline: "Focus moves to measurable growth",
   recommendationRationale:
-    "The production website is live and verified. Search, Ads, and lead measurement are in place. The next work is qualified traffic, search visibility, and advertising efficiency — with September 11 as the documented baseline.",
+    "The production website is live and verified. Search Console is connected for the monthly window. GA4 measurement exists, but portal Website Analytics is not synced yet. Ads performance has been reviewed, but portal Ads reporting is not connected yet. Confirmed website form leads appear from inquiry records when period-ready. Next focus: qualified traffic, search visibility, and advertising efficiency — with September 11 as the documented baseline.",
+  /**
+   * Executive Home “Recent progress” — curated milestones only.
+   * Never raw Website Review revision titles.
+   */
+  recentProgress: [
+    {
+      id: "primal-production-launch",
+      label: "Production website launched",
+      detail: "New production site live",
+      at: `${PRIMAL_WEBSITE_LAUNCH_DATE}T12:00:00.000Z`,
+    },
+    {
+      id: "primal-post-launch-verification",
+      label: "Post-launch verification completed",
+      detail: "Production verification and baseline documented",
+      at: `${PRIMAL_POST_LAUNCH_BASELINE_DATE}T12:00:00.000Z`,
+    },
+    {
+      id: "primal-search-foundation",
+      label: "Search foundation implemented",
+      detail: "Metadata, sitemap, robots, structured data, redirects",
+      at: `${PRIMAL_POST_LAUNCH_BASELINE_DATE}T12:00:00.000Z`,
+    },
+    {
+      id: "primal-measurement-baseline",
+      label: "Measurement baseline established",
+      detail: "September 11 documented post-launch baseline",
+      at: `${PRIMAL_POST_LAUNCH_BASELINE_DATE}T12:00:00.000Z`,
+    },
+  ],
   primaryActionLabel: "Open Leadership Report",
   primaryActionHref: "/portal/partnership/leadership-report",
   secondaryActionLabel: "Open executive briefing",
@@ -38,9 +68,12 @@ export const PRIMAL_POST_LAUNCH_OPERATING = {
     "Paid performance has been reviewed. Live Ads figures appear after Google Ads sync is verified — reviewed baseline is in the Leadership Report.",
   searchPanelFallback:
     "Search foundation is active. Live Search Console figures appear for the selected monthly window when facts are synced.",
-  /** Short Home Performance reading — methodology stays in Leadership Report. */
+  /**
+   * Connection-state line for Performance disclosure — not the main scan strip.
+   * Attribution / double-counting detail stays under About these figures.
+   */
   homePerformanceNote:
-    "Search is connected for the monthly window. Website traffic and Ads stay on reviewed baselines until live sync is verified. Full methodology: Leadership Report.",
+    "Search Console connected. GA4 measured but portal traffic not synced. Ads reviewed but portal Ads not connected. Form leads from inquiry records when period-ready.",
   websiteHealth: {
     serviceValue: "Active",
     serviceDetail: "Production website live and managed with KXD",

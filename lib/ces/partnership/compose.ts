@@ -316,6 +316,14 @@ export async function composePartnershipBriefing(input: {
   // Connected workspace activity is already client-filtered upstream.
   const safeConnected = connected;
   const recentProgress = (() => {
+    if (postLaunchActive) {
+      return PRIMAL_POST_LAUNCH_OPERATING.recentProgress.map((item) => ({
+        id: item.id,
+        label: item.label,
+        detail: item.detail,
+        at: item.at,
+      }));
+    }
     const base = buildProgress(safeConnected, websiteReview, results?.periodLabel ?? null);
     if (!memoryRecent || memoryRecent.length === 0) return base;
     const fromMemory: PartnershipProgressItem[] = memoryRecent.map((item) => ({
@@ -356,7 +364,7 @@ export async function composePartnershipBriefing(input: {
       reviewState: websiteSnapshot.statusLabel,
       outstandingClientAction: attentionAction,
       outstandingKxdAction: postLaunchActive
-        ? "Monitoring search, Ads efficiency, and qualified lead performance"
+        ? "Monitoring search visibility and advertising efficiency against the September baseline"
         : hasActiveReviews
           ? "Advancing the open website revisions with care"
           : primaryService
