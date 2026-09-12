@@ -42,6 +42,7 @@ export function emptyLifecyclePackage(): ContractLifecyclePackage {
     commercialAmendments: null,
     obligationStripeBindings: [],
     pendingVerifiedStripePayments: [],
+    commercialMaterialization: null,
   };
 }
 

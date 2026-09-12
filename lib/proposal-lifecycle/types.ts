@@ -456,6 +456,11 @@ export interface ContractLifecyclePackage {
    * Reused when registering subsequent due occurrences. Additive JSON only.
    */
   operatorRecurringServices?: import("./ensure-payable-surfaces.ts").OperatorRecurringServiceDefinition[] | null;
+  /**
+   * Post-acceptance materialization projections (onboarding packs, portal readiness).
+   * Additive JSON only — never rewrites accepted legal terms.
+   */
+  commercialMaterialization?: import("./post-acceptance-materialization.ts").CommercialMaterializationState | null;
 }
 
 export interface LifecycleAuditEvent {

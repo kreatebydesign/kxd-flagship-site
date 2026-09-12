@@ -551,6 +551,45 @@ export async function POST(
           );
         }
       }
+      case "ensure-post-acceptance-materialization": {
+        const { ensurePostAcceptanceMaterializationOnContract } = await import(
+          "@/lib/proposal-lifecycle/post-acceptance-materialization"
+        );
+        const dryRun = body.dryRun === true;
+        try {
+          const result = await ensurePostAcceptanceMaterializationOnContract({
+            contractId: id,
+            actor,
+            dryRun,
+          });
+          return NextResponse.json({
+            ok: true,
+            dryRun,
+            persisted: result.persisted,
+            areas: result.areas,
+            conflicts: result.conflicts,
+            warnings: result.warnings,
+            createdCounts: result.createdCounts,
+            materialization: result.materialization,
+            clientId: result.clientId,
+            contractStatus: result.contractStatus,
+            onboardingEligible: result.pkg.onboardingEligible,
+            billingPlanObligationCount: result.pkg.billingPlan?.obligations?.length ?? 0,
+            noStripeMutation: true,
+            noPaymentChange: true,
+            noInvoiceCreated: true,
+            noPortalInvitation: true,
+          });
+        } catch (err) {
+          return NextResponse.json(
+            {
+              ok: false,
+              error: err instanceof Error ? err.message : "Materialization failed.",
+            },
+            { status: 400 },
+          );
+        }
+      }
       case "link-obligation-stripe-invoice": {
         const { linkObligationStripeInvoiceOnContract } = await import(
           "@/lib/proposal-lifecycle/live-stripe-reconciliation-service"
