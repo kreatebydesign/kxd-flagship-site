@@ -193,7 +193,6 @@ async function main() {
     octoberEligiblePreview: {
       createdCount: octPreview.createdCount,
       created: octPreview.created.map((o) => ({
-        label: o.label,
         amountCents: o.amountCents,
         sourceKey: o.sourceKey,
         serviceTitle: o.serviceTitle,
