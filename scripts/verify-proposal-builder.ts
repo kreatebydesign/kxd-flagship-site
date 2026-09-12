@@ -36,7 +36,13 @@ import {
   formatCoverPreparedForLine,
   shouldShowRecurringInvestment,
   distinctScopeOrganizationName,
+  composeCoverPresentation,
+  composeInvestmentPresentation,
+  composeOpeningSections,
+  softenClientFacingDepositLanguage,
+  isFullUpfrontProposal,
 } from "../lib/proposal-builder/presentation.ts";
+import { renderProposalPlainText } from "../lib/proposal-builder/export-plaintext.ts";
 import {
   DEFAULT_ACCEPTANCE_DISCLOSURE,
   DEFAULT_CONTRACT_REQUIRED_DISCLOSURE,
@@ -69,6 +75,18 @@ function main() {
   check("addCents precise", addCents(10, 20, 30) === 60);
   check("percentOfCents 10% of 10000", percentOfCents(10000, 10) === 1000);
   check("formatCents", formatCents(12345) === "$123.45");
+  check(
+    "full upfront softener removes deposit wording",
+    !/\bdeposit\b/i.test(
+      softenClientFacingDepositLanguage("the deposit is received", true),
+    ),
+  );
+  check(
+    "partial payment keeps deposit wording",
+    /\bdeposit\b/i.test(
+      softenClientFacingDepositLanguage("the deposit is received", false),
+    ),
+  );
 
   // Template clone isolation
   const tmpl = buildTemplateDocument("combined-project-retainer");
@@ -254,6 +272,140 @@ function main() {
     "contract-required disclosure omits internal proposal modes",
     !/binding-proposal/i.test(DEFAULT_CONTRACT_REQUIRED_DISCLOSURE),
   );
+
+  // Editorial composition (display-only)
+  const terryDoc = emptyProposalDocument({
+    organizations: [
+      { id: "org_a", name: "Made for Trades" },
+      { id: "org_b", name: "Sutherlin Throwdown" },
+    ],
+    contacts: [
+      {
+        id: "c1",
+        name: "Terry Brock",
+        email: "terry@sutherlinthrowdown.org",
+        phone: "(541) 733-5164",
+        isPrimary: true,
+        organizationId: "org_b",
+      },
+    ],
+    executive: {
+      clientFacingIntro:
+        "Rebuild Made for Trades and Sutherlin Throwdown as one combined engagement for $2,500 total, paid in full upfront.",
+      executiveSummary:
+        "Rebuild Made for Trades and Sutherlin Throwdown as one combined engagement for $2,500 total, paid in full upfront.",
+      currentSituation: "Both websites need clearer pathways and stronger mobile usability.",
+      objectives: "Deliver two distinct websites under one coordinated project.",
+      recommendedDirection: "Coordinate both rebuilds while keeping identities separate.",
+      desiredOutcomes: "Two dependable websites with clear next steps.",
+      clientContext: "The $2,500 one-time investment covers both rebuilds together.",
+    },
+    pricingLines: [
+      {
+        id: "one",
+        title: "Two-Website Rebuild Engagement — Made for Trades + Sutherlin Throwdown",
+        cadence: "one-time",
+        quantity: 1,
+        unitPriceCents: 250000,
+        inclusion: "included",
+        sortOrder: 1,
+      },
+      {
+        id: "host_a",
+        title: "KXD Managed Hosting — Made for Trades",
+        cadence: "annual",
+        quantity: 1,
+        unitPriceCents: 29900,
+        inclusion: "included",
+        sortOrder: 2,
+      },
+      {
+        id: "host_b",
+        title: "KXD Managed Hosting — Sutherlin Throwdown",
+        cadence: "annual",
+        quantity: 1,
+        unitPriceCents: 29900,
+        inclusion: "included",
+        sortOrder: 3,
+      },
+    ],
+    depositCents: 250000,
+    paymentSchedule: [
+      {
+        id: "pay1",
+        label: "Paid in full upfront",
+        amountCents: 250000,
+        due: "at-acceptance",
+        sortOrder: 1,
+      },
+    ],
+    terms: {
+      timelineAssumptions:
+        "Work begins after the final agreement is signed, the deposit is received, and content access is provided.",
+      paymentAssumptions: "The $2,500 project investment is paid in full upfront.",
+      proposalTerms: "Combined engagement terms.",
+      nextSteps: "Accept this proposal to authorize preparation of the final agreement.",
+      expirationLanguage: "Valid through September 26, 2026.",
+      changeRequestLanguage: "Changes require written approval.",
+      clientResponsibilities: "Provide content and access.",
+      exclusions: "Paid media spend is excluded.",
+      cancellationSummary: "Cancellation is handled in the final agreement.",
+      intellectualPropertySummary: "Client owns approved deliverables after payment.",
+      closingNote: "Prepared with care by Kreate by Design.",
+      acceptanceDisclosure: DEFAULT_ACCEPTANCE_DISCLOSURE,
+      contractRequiredDisclosure: DEFAULT_CONTRACT_REQUIRED_DISCLOSURE,
+      operationalDraftNotice: "Draft only.",
+    },
+  });
+  const terryTotals = calculateProposalTotals(terryDoc);
+  const terryCanonical = buildCanonicalProposal({
+    id: 7,
+    proposalNumber: "KXD-P-2026-0007",
+    title: "Made for Trades + Sutherlin Throwdown Two-Website Rebuild Engagement",
+    status: "approved-for-sharing",
+    proposalDate: "2026-09-12T12:00:00.000Z",
+    expiresAt: "2026-09-26T12:00:00.000Z",
+    revisionNumber: 1,
+    builderDocument: {
+      ...terryDoc,
+      // ensure totals path uses calculated values via canonicalize
+    },
+  });
+  // Force totals onto canonical for composition helpers that read proposal.totals
+  terryCanonical.totals = terryTotals;
+  terryCanonical.depositCents = 250000;
+
+  const cover = composeCoverPresentation(terryCanonical);
+  check("cover lists both organizations", cover.organizationLines.length === 2);
+  check(
+    "cover engagement strips org names",
+    /two-website rebuild engagement/i.test(cover.engagementTitle),
+  );
+  const opening = composeOpeningSections(terryCanonical);
+  check("opening collapses redundant executive summary", opening.length <= 4);
+  check(
+    "opening does not repeat identical summary as separate section",
+    opening.filter((section) => /executive summary/i.test(section.eyebrow)).length === 0,
+  );
+  const investment = composeInvestmentPresentation(terryCanonical);
+  check("investment is full upfront", investment.isFullUpfront === true);
+  check("investment hides duplicate schedule", investment.showDetailedSchedule === false);
+  check("investment payment summary is upfront", /paid in full upfront/i.test(String(investment.paymentSummary)));
+  check("investment shows monthly none", investment.monthlyNoneLabel === "None required");
+  check("isFullUpfront helper", isFullUpfrontProposal(terryCanonical) === true);
+  check(
+    "deposit language softened for full upfront",
+    !/deposit/i.test(
+      softenClientFacingDepositLanguage(
+        "after the final agreement is signed, the deposit is received",
+        true,
+      ),
+    ),
+  );
+  const plain = renderProposalPlainText(terryCanonical);
+  check("plaintext has no deposit for full-upfront terry", !/\bdeposit\b/i.test(plain));
+  check("plaintext keeps $2,500", plain.includes("$2,500.00") || plain.includes("$2,500"));
+  check("plaintext keeps $299 hosting", plain.includes("$299.00/year") || plain.includes("$299"));
 
   console.log(`\n${passed} passed, ${failed} failed\n`);
   if (failed > 0) process.exit(1);

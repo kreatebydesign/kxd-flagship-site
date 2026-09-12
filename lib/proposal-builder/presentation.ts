@@ -12,6 +12,22 @@ export {
   type ProposalProseKind,
 } from "./structured-prose.ts";
 
+export {
+  composeClosingPresentation,
+  composeCoverPresentation,
+  composeInvestmentPresentation,
+  composeOpeningSections,
+  composeScopeWorkstream,
+  composeTermsSectionPlan,
+  isFullUpfrontProposal,
+  softenClientFacingDepositLanguage,
+  type CoverComposition,
+  type InvestmentComposition,
+  type OpeningSection,
+  type ScopeWorkstreamPresentation,
+  type TermsSectionPlan,
+} from "./client-composition.ts";
+
 function comparableLabel(value: string | null | undefined): string {
   return String(value ?? "")
     .trim()

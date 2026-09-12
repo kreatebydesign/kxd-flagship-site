@@ -2,25 +2,25 @@
 
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import {
-  formatClientFacingBilling,
-  formatClientFacingCreditAmount,
-  formatClientFacingCreditType,
-  formatClientFacingLineAmount,
-  formatClientFacingMonthlyInvestment,
-  formatClientFacingPaymentTiming,
-} from "@/lib/proposal-builder/client-facing-labels";
-import { formatCents } from "@/lib/proposal-builder/money";
-import {
-  distinctScopeOrganizationName,
-  formatCoverPreparedForLine,
+  composeClosingPresentation,
+  composeCoverPresentation,
+  composeInvestmentPresentation,
+  composeOpeningSections,
+  composeScopeWorkstream,
+  composeTermsSectionPlan,
   proseKindForTermsKey,
   shouldShowRecurringInvestment,
   structureProposalProse,
   type ProposalProseBlock,
 } from "@/lib/proposal-builder/presentation";
-import { formatProposalContactSummary } from "@/lib/proposal-builder/document";
 import type { CanonicalProposal } from "@/lib/proposal-builder/types";
 import { publicBookingUrl } from "@/lib/proposal-builder/booking-url";
+import { formatCents } from "@/lib/proposal-builder/money";
+import {
+  formatClientFacingCreditAmount,
+  formatClientFacingCreditType,
+  formatClientFacingMonthlyInvestment,
+} from "@/lib/proposal-builder/client-facing-labels";
 
 type ViewData = {
   accepted: boolean;
@@ -164,6 +164,14 @@ export function PublicProposalBuilderExperience({ publicToken }: { publicToken: 
   const p = data.canonical;
   const currency = p.currency || "USD";
   const bookingHref = publicBookingUrl(data.scheduleCallUrl);
+  const cover = composeCoverPresentation(p);
+  const opening = composeOpeningSections(p);
+  const investment = composeInvestmentPresentation(p);
+  const terms = composeTermsSectionPlan(p);
+  const closing = composeClosingPresentation(p);
+  const workstreams = p.scopeGroups.map((group, index) =>
+    composeScopeWorkstream(group, index, p.scopeGroups.length),
+  );
 
   return (
     <main style={{ background: "#f7f1e6", minHeight: "100vh", color: "#0c0c0c" }}>
@@ -171,58 +179,115 @@ export function PublicProposalBuilderExperience({ publicToken }: { publicToken: 
         style={{
           background: "#080808",
           color: "#f7f1e6",
-          padding: "3rem 1.5rem 3.5rem",
+          padding: "clamp(2.75rem, 6vw, 4.5rem) clamp(1.25rem, 4vw, 2rem) clamp(3rem, 7vw, 5rem)",
         }}
       >
-        <div style={{ maxWidth: 820, margin: "0 auto" }}>
+        <div style={{ maxWidth: 880, margin: "0 auto" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/migrated-assets/brand/kxd-logo-transparent.png"
             alt="Kreate by Design"
             width={104}
             height={98}
-            style={{ width: "6.5rem", height: "auto", margin: "0 0 1rem", display: "block" }}
+            style={{ width: "5.75rem", height: "auto", margin: "0 0 2rem", display: "block" }}
           />
           <p
             style={{
               fontFamily: "system-ui,sans-serif",
-              letterSpacing: "0.22em",
+              letterSpacing: "0.28em",
               textTransform: "uppercase",
               fontSize: 11,
               color: "#a39e93",
+              marginBottom: 14,
             }}
           >
-            Proposal
+            {cover.docType}
           </p>
-          <div style={{ width: 42, height: 1, background: "#c5a65c", margin: "10px 0 22px" }} />
-          <h1
+          <div style={{ width: 48, height: 1, background: "#c5a65c", margin: "0 0 2rem" }} />
+          {cover.organizationLines.map((line, index) => (
+            <div key={`${index}-${line}`}>
+              {index > 0 && cover.organizationJoiner ? (
+                <p
+                  style={{
+                    fontFamily: "system-ui,sans-serif",
+                    color: "#c5a65c",
+                    letterSpacing: "0.18em",
+                    margin: "0.85rem 0",
+                    fontSize: 14,
+                  }}
+                >
+                  {cover.organizationJoiner}
+                </p>
+              ) : null}
+              <h1
+                style={{
+                  fontFamily: "Georgia, 'Iowan Old Style', Palatino, serif",
+                  fontWeight: 500,
+                  fontSize: "clamp(2.1rem, 5vw, 3.15rem)",
+                  lineHeight: 1.12,
+                  margin: 0,
+                  maxWidth: "16ch",
+                }}
+              >
+                {line}
+              </h1>
+            </div>
+          ))}
+          <p
             style={{
-              fontFamily: "Georgia, 'Iowan Old Style', Palatino, serif",
-              fontWeight: 500,
-              fontSize: "clamp(2rem, 5vw, 3rem)",
-              lineHeight: 1.15,
-              margin: "0 0 1.375rem",
+              fontFamily: "system-ui,sans-serif",
+              color: "#a39e93",
+              marginTop: "1.75rem",
+              marginBottom: "2.25rem",
+              maxWidth: 420,
+              lineHeight: 1.55,
+              fontSize: 15,
             }}
           >
-            {p.title}
-          </h1>
-          <p style={{ fontFamily: "system-ui,sans-serif", color: "#d9d2c5", lineHeight: 1.7 }}>
-            {formatCoverPreparedForLine(p.primaryOrganization, p.organizations)}
-            {formatProposalContactSummary(p.primaryContact) ? (
-              <>
-                <br />
-                {formatProposalContactSummary(p.primaryContact)}
-              </>
-            ) : null}
-            <br />
-            {p.proposalNumber} · Version {p.version}
-            <br />
-            Prepared by Kreate by Design
+            {cover.engagementTitle}
           </p>
+          {cover.preparedForName ? (
+            <>
+              <p
+                style={{
+                  fontFamily: "system-ui,sans-serif",
+                  letterSpacing: "0.18em",
+                  textTransform: "uppercase",
+                  fontSize: 11,
+                  color: "#a39e93",
+                  marginBottom: 6,
+                }}
+              >
+                Prepared for
+              </p>
+              <p
+                style={{
+                  fontFamily: "Georgia, 'Iowan Old Style', Palatino, serif",
+                  fontSize: 20,
+                  margin: "0 0 0.35rem",
+                }}
+              >
+                {cover.preparedForName}
+              </p>
+            </>
+          ) : null}
+          {cover.preparedForDetail ? (
+            <p style={{ fontFamily: "system-ui,sans-serif", color: "#d9d2c5", marginBottom: "1.5rem" }}>
+              {cover.preparedForDetail}
+            </p>
+          ) : null}
+          <div style={{ fontFamily: "system-ui,sans-serif", color: "#a39e93", lineHeight: 1.7, fontSize: 14 }}>
+            {cover.metaLines.map((line) => (
+              <div key={line}>{line}</div>
+            ))}
+            <div style={{ marginTop: 18, color: "#f7f1e6", fontFamily: "Georgia, serif", fontSize: 16 }}>
+              {cover.studioLine}
+            </div>
+          </div>
         </div>
       </header>
 
-      <div style={{ maxWidth: 820, margin: "0 auto", padding: "2.5rem 1.25rem 5rem" }}>
+      <div style={{ maxWidth: 880, margin: "0 auto", padding: "clamp(2.5rem, 5vw, 4rem) 1.25rem 5rem" }}>
         {message ? (
           <p role="status" style={{ marginBottom: "1.25rem", color: "#2f6b4f" }}>
             {message}
@@ -234,174 +299,264 @@ export function PublicProposalBuilderExperience({ publicToken }: { publicToken: 
           </p>
         ) : null}
 
-        {p.executive.clientFacingIntro ? (
-          <section style={{ marginBottom: "2rem" }}>
-            <p style={eyebrow}>Introduction</p>
-            <h2 style={h2}>A clear path forward</h2>
-            <p style={body}>{p.executive.clientFacingIntro}</p>
-          </section>
-        ) : null}
-
-        {p.executive.executiveSummary ? (
-          <section style={{ marginBottom: "2rem" }}>
-            <p style={eyebrow}>Executive summary</p>
-            <h2 style={h2}>Where this begins</h2>
-            <p style={body}>{p.executive.executiveSummary}</p>
-          </section>
-        ) : null}
-
-        {p.executive.currentSituation ? (
-          <section style={{ marginBottom: "2rem" }}>
-            <p style={eyebrow}>Situation</p>
-            <h2 style={h2}>Current situation</h2>
-            <p style={body}>{p.executive.currentSituation}</p>
-          </section>
-        ) : null}
-
-        {p.executive.objectives ? (
-          <section style={{ marginBottom: "2rem" }}>
-            <p style={eyebrow}>Objectives</p>
-            <h2 style={h2}>What success requires</h2>
-            <p style={body}>{p.executive.objectives}</p>
-          </section>
-        ) : null}
-
-        {p.executive.recommendedDirection ? (
-          <section style={{ marginBottom: "2rem" }}>
-            <p style={eyebrow}>Direction</p>
-            <h2 style={h2}>Recommended path</h2>
-            <p style={body}>{p.executive.recommendedDirection}</p>
-          </section>
-        ) : null}
-
-        {p.executive.desiredOutcomes ? (
-          <section style={{ marginBottom: "2rem" }}>
-            <p style={eyebrow}>Outcomes</p>
-            <h2 style={h2}>Desired outcomes</h2>
-            <p style={body}>{p.executive.desiredOutcomes}</p>
-          </section>
-        ) : null}
-
-        {p.executive.clientContext ? (
-          <section style={{ marginBottom: "2rem" }}>
-            <p style={eyebrow}>Context</p>
-            <h2 style={h2}>Project context</h2>
-            <p style={body}>{p.executive.clientContext}</p>
-          </section>
-        ) : null}
-
-        {p.scopeGroups.map((g) => {
-          const scopeOrg = distinctScopeOrganizationName(g.organizationName, p.primaryOrganization);
-          return (
-          <section key={g.id} style={{ marginBottom: "2rem" }}>
-            <p style={eyebrow}>Included work</p>
-            <h2 style={h2}>{g.title}</h2>
-            {scopeOrg ? <p style={meta}>{scopeOrg}</p> : null}
-            {g.overview ? <p style={body}>{g.overview}</p> : null}
-            {g.deliverables.length > 0 ? (
-              <ul style={{ lineHeight: 1.6 }}>
-                {g.deliverables.map((d) => (
-                  <li key={d.id}>
-                    <strong>{d.title}</strong>
-                    {d.description ? `: ${d.description}` : ""}
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-          </section>
-          );
-        })}
-
-        <section style={{ marginBottom: "2rem" }}>
-          <p style={eyebrow}>Investment</p>
-          <h2 style={h2}>Pricing</h2>
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "system-ui,sans-serif", fontSize: 14 }}>
-              <tbody>
-                {p.pricingLines.map((line) => (
-                  <tr key={line.id}>
-                    <td style={td}>
-                      {data.clientCanSelect && (line.inclusion === "optional" || line.isAddon) ? (
-                        <label style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                          <input
-                            type="checkbox"
-                            disabled={data.accepted}
-                            checked={selectedLineIds.includes(line.id)}
-                            onChange={(e) => {
-                              setSelectedLineIds((prev) =>
-                                e.target.checked
-                                  ? [...prev, line.id]
-                                  : prev.filter((id) => id !== line.id),
-                              );
-                            }}
-                          />
-                          {line.title}
-                        </label>
-                      ) : (
-                        line.title
-                      )}
-                    </td>
-                    <td style={td}>
-                      {line.inclusion === "optional" || line.isAddon
-                        ? "Optional"
-                        : formatClientFacingBilling(line.cadence)}
-                    </td>
-                    <td style={{ ...td, textAlign: "right" }}>
-                      {formatClientFacingLineAmount(
-                        line.unitPriceCents * (line.quantity || 1),
-                        line.cadence,
-                        currency,
-                      )}
-                    </td>
-                  </tr>
-                ))}
-                {p.credits.map((c) => (
-                  <tr key={c.id}>
-                    <td style={td}>{c.label}</td>
-                    <td style={td}>{formatClientFacingCreditType(c.kind)}</td>
-                    <td style={{ ...td, textAlign: "right" }}>
-                      {formatClientFacingCreditAmount(c, currency)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div
+        {opening.map((section) => (
+          <section
+            key={section.id}
             style={{
-              marginTop: 16,
-              padding: 16,
-              background: "#f3ebe0",
-              border: "1px solid #e2d8c8",
-              borderRadius: 2,
-              fontFamily: "system-ui,sans-serif",
+              marginBottom: section.emphasis === "lead" ? "3rem" : "2.25rem",
+              maxWidth: section.emphasis === "supporting" ? 640 : 720,
             }}
           >
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-              <span>One-time total</span>
-              <strong>{formatCents(data.totals.oneTimeTotalCents, currency)}</strong>
-            </div>
-            {shouldShowRecurringInvestment(data.totals.monthlyTotalCents) ? (
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                <span>Monthly total</span>
-                <strong>
-                  {formatClientFacingMonthlyInvestment(data.totals.monthlyTotalCents, currency)}
-                </strong>
-              </div>
+            <p style={eyebrow}>{section.eyebrow}</p>
+            <h2 style={h2}>{section.title}</h2>
+            {section.paragraphs.map((paragraph) => (
+              <p key={paragraph.slice(0, 48)} style={{ ...body, marginBottom: "1rem" }}>
+                {paragraph}
+              </p>
+            ))}
+          </section>
+        ))}
+
+        {workstreams.map((workstream) => (
+          <section
+            key={`${workstream.indexLabel}-${workstream.title}`}
+            style={{
+              marginBottom: "3.25rem",
+              paddingTop: "0.5rem",
+              borderTop: "1px solid #e2d8c8",
+            }}
+          >
+            <p style={{ ...eyebrow, color: "#9a8244", letterSpacing: "0.22em" }}>
+              {workstream.indexLabel}
+            </p>
+            <h2 style={{ ...h2, fontSize: "clamp(1.7rem, 3vw, 2.1rem)", marginBottom: 6 }}>
+              {workstream.title}
+            </h2>
+            {workstream.subtitle ? (
+              <p
+                style={{
+                  fontFamily: "system-ui,sans-serif",
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                  fontSize: 12,
+                  color: "#6f6a62",
+                  marginBottom: 14,
+                }}
+              >
+                {workstream.subtitle}
+              </p>
             ) : null}
-            {shouldShowRecurringInvestment(data.totals.quarterlyTotalCents) ? (
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                <span>Quarterly total</span>
-                <strong>{formatCents(data.totals.quarterlyTotalCents, currency)}</strong>
-              </div>
+            <div style={{ width: 36, height: 1, background: "#c5a65c", marginBottom: 16 }} />
+            {workstream.overview ? <p style={{ ...body, marginBottom: "1.25rem" }}>{workstream.overview}</p> : null}
+            {workstream.deliverables.length > 0 ? (
+              <>
+                <p style={{ ...eyebrow, color: "#9a8244" }}>Deliverables</p>
+                <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                  {workstream.deliverables.map((item) => (
+                    <li
+                      key={item.id}
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "14px 1fr",
+                        gap: 10,
+                        marginBottom: 14,
+                        lineHeight: 1.55,
+                        maxWidth: 640,
+                      }}
+                    >
+                      <span style={{ color: "#9a8244" }}>•</span>
+                      <span>
+                        <strong style={{ fontWeight: 600 }}>{item.title}</strong>
+                        {item.description ? ` — ${item.description}` : ""}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </>
             ) : null}
-            {shouldShowRecurringInvestment(data.totals.annualTotalCents) ? (
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span>Annual platform total</span>
-                <strong>{formatCents(data.totals.annualTotalCents, currency)}</strong>
-              </div>
+          </section>
+        ))}
+
+        <section
+          style={{
+            marginBottom: "3rem",
+            paddingTop: "1rem",
+            borderTop: "1px solid #e2d8c8",
+          }}
+        >
+          <p style={eyebrow}>{investment.eyebrow}</p>
+          <h2 style={h2}>{investment.title}</h2>
+          <div
+            style={{
+              background: "#f3ebe0",
+              borderLeft: "2px solid #c5a65c",
+              padding: "1.35rem 1.25rem",
+              marginBottom: "1.5rem",
+            }}
+          >
+            <p style={{ ...eyebrow, marginBottom: 10 }}>{investment.heroEyebrow}</p>
+            <p
+              style={{
+                fontFamily: "Georgia, 'Iowan Old Style', Palatino, serif",
+                fontSize: "clamp(2rem, 4vw, 2.6rem)",
+                margin: "0 0 0.35rem",
+                lineHeight: 1.1,
+              }}
+            >
+              {investment.heroAmount}
+            </p>
+            <p style={{ ...meta, marginBottom: 8 }}>Total project investment</p>
+            {investment.paymentSummary ? (
+              <p style={{ fontFamily: "system-ui,sans-serif", fontWeight: 600, margin: 0 }}>
+                {investment.paymentSummary}
+              </p>
             ) : null}
           </div>
+
+          {investment.annualLines.length > 0 ? (
+            <div style={{ marginBottom: "1.5rem" }}>
+              <p style={{ ...eyebrow, color: "#9a8244" }}>Annual hosting</p>
+              {investment.annualLines.map((line) => (
+                <div
+                  key={line.id}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: 16,
+                    padding: "0.7rem 0",
+                    borderBottom: "1px solid #e2d8c8",
+                    fontFamily: "system-ui,sans-serif",
+                  }}
+                >
+                  <span>{line.title}</span>
+                  <strong>{line.amountLabel}</strong>
+                </div>
+              ))}
+              {investment.annualTotalLabel ? (
+                <p style={{ ...meta, marginTop: 10 }}>{investment.annualTotalLabel}</p>
+              ) : null}
+            </div>
+          ) : null}
+
+          {investment.monthlyLines.length > 0 ? (
+            <div style={{ marginBottom: "1.5rem" }}>
+              <p style={{ ...eyebrow, color: "#9a8244" }}>Monthly</p>
+              {investment.monthlyLines.map((line) => (
+                <div
+                  key={line.id}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: 16,
+                    padding: "0.7rem 0",
+                    borderBottom: "1px solid #e2d8c8",
+                    fontFamily: "system-ui,sans-serif",
+                  }}
+                >
+                  <span>
+                    {data.clientCanSelect && line.optional ? (
+                      <label style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                        <input
+                          type="checkbox"
+                          disabled={data.accepted}
+                          checked={selectedLineIds.includes(line.id)}
+                          onChange={(e) => {
+                            setSelectedLineIds((prev) =>
+                              e.target.checked
+                                ? [...prev, line.id]
+                                : prev.filter((id) => id !== line.id),
+                            );
+                          }}
+                        />
+                        {line.title}
+                      </label>
+                    ) : (
+                      line.title
+                    )}
+                  </span>
+                  <strong>{line.amountLabel}</strong>
+                </div>
+              ))}
+            </div>
+          ) : investment.monthlyNoneLabel ? (
+            <div style={{ marginBottom: "1.5rem" }}>
+              <p style={{ ...eyebrow, color: "#9a8244" }}>Monthly management</p>
+              <p style={meta}>{investment.monthlyNoneLabel}</p>
+            </div>
+          ) : null}
+
+          {investment.quarterlyLines.length > 0 ? (
+            <div style={{ marginBottom: "1.5rem" }}>
+              <p style={{ ...eyebrow, color: "#9a8244" }}>Quarterly</p>
+              {investment.quarterlyLines.map((line) => (
+                <div
+                  key={line.id}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: 16,
+                    padding: "0.7rem 0",
+                    borderBottom: "1px solid #e2d8c8",
+                    fontFamily: "system-ui,sans-serif",
+                  }}
+                >
+                  <span>{line.title}</span>
+                  <strong>{line.amountLabel}</strong>
+                </div>
+              ))}
+            </div>
+          ) : null}
+
+          {p.credits.length > 0 ? (
+            <div style={{ marginBottom: "1.5rem" }}>
+              <p style={{ ...eyebrow, color: "#9a8244" }}>Credits & adjustments</p>
+              {p.credits.map((credit) => (
+                <div
+                  key={credit.id}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: 16,
+                    padding: "0.7rem 0",
+                    borderBottom: "1px solid #e2d8c8",
+                    fontFamily: "system-ui,sans-serif",
+                  }}
+                >
+                  <span>
+                    {credit.label} · {formatClientFacingCreditType(credit.kind)}
+                  </span>
+                  <strong>{formatClientFacingCreditAmount(credit, currency)}</strong>
+                </div>
+              ))}
+            </div>
+          ) : null}
+
+          {investment.showDetailedSchedule ? (
+            <div style={{ marginBottom: "1rem" }}>
+              <p style={{ ...eyebrow, color: "#9a8244" }}>Payment schedule</p>
+              {investment.scheduleRows.map((row) => (
+                <div
+                  key={row.id}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: 16,
+                    padding: "0.7rem 0",
+                    borderBottom: "1px solid #e2d8c8",
+                    fontFamily: "system-ui,sans-serif",
+                  }}
+                >
+                  <span>
+                    {row.label}
+                    <br />
+                    <span style={{ color: "#6f6a62" }}>{row.timing}</span>
+                  </span>
+                  <strong>{row.amount}</strong>
+                </div>
+              ))}
+            </div>
+          ) : null}
+
           {optionalLines.length > 0 && data.clientCanSelect ? (
             <p style={{ ...meta, marginTop: 10 }}>
               Optional items selected before acceptance update the final accepted total.
@@ -409,79 +564,77 @@ export function PublicProposalBuilderExperience({ publicToken }: { publicToken: 
           ) : null}
         </section>
 
-        {p.paymentSchedule.length > 0 ? (
-          <section style={{ marginBottom: "2rem" }}>
-            <p style={eyebrow}>Payment</p>
-            <h2 style={h2}>Payment schedule</h2>
-            <div style={{ overflowX: "auto" }}>
-              <table
-                style={{
-                  width: "100%",
-                  borderCollapse: "collapse",
-                  fontFamily: "system-ui,sans-serif",
-                  fontSize: 14,
-                }}
-              >
-                <tbody>
-                  {p.paymentSchedule.map((item) => (
-                    <tr key={item.id}>
-                      <td style={td}>{item.label}</td>
-                      <td style={td}>{formatClientFacingPaymentTiming(item.due)}</td>
-                      <td style={{ ...td, textAlign: "right" }}>
-                        {formatCents(item.amountCents, currency)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+        {terms.map((section) => (
+          <section
+            key={section.key}
+            style={{
+              marginBottom: "2.5rem",
+              maxWidth: section.layout === "editorial" ? 880 : 720,
+            }}
+          >
+            <p style={eyebrow}>{section.eyebrow}</p>
+            <h2 style={h2}>{section.title}</h2>
+            <StructuredProseBlocks
+              blocks={structureProposalProse(
+                section.text,
+                proseKindForTermsKey(
+                  section.key as
+                    | "clientResponsibilities"
+                    | "exclusions"
+                    | "nextSteps"
+                    | "proposalTerms"
+                    | "paymentAssumptions"
+                    | "timelineAssumptions"
+                    | "expirationLanguage"
+                    | "changeRequestLanguage",
+                ),
+              )}
+              editorial={section.layout === "editorial"}
+            />
           </section>
-        ) : null}
-
-        {(
-          [
-            ["Terms", "Terms", "proposalTerms", p.terms.proposalTerms],
-            ["Payment", "Payment assumptions", "paymentAssumptions", p.terms.paymentAssumptions],
-            ["Timeline", "Project timeline", "timelineAssumptions", p.terms.timelineAssumptions],
-            ["Validity", "Proposal validity", "expirationLanguage", p.terms.expirationLanguage],
-            ["Changes", "Scope changes", "changeRequestLanguage", p.terms.changeRequestLanguage],
-            [
-              "Responsibilities",
-              "What we need from you",
-              "clientResponsibilities",
-              p.terms.clientResponsibilities,
-            ],
-            ["Exclusions", "What's not included", "exclusions", p.terms.exclusions],
-            ["Next step", "How to begin", "nextSteps", p.terms.nextSteps],
-          ] as const
-        ).map(([label, title, key, text]) =>
-          text?.trim() ? (
-            <section key={label} style={{ marginBottom: "2rem" }}>
-              <p style={eyebrow}>{label}</p>
-              <h2 style={h2}>{title}</h2>
-              <StructuredProseBlocks
-                blocks={structureProposalProse(text, proseKindForTermsKey(key))}
-              />
-            </section>
-          ) : null,
-        )}
-
-        {p.terms.closingNote?.trim() ? (
-          <section style={{ marginBottom: "2rem" }}>
-            <p style={body}>{p.terms.closingNote}</p>
-          </section>
-        ) : null}
+        ))}
 
         <section
           style={{
-            marginBottom: "2rem",
-            padding: 16,
+            marginBottom: "2.5rem",
+            padding: "clamp(1.5rem, 4vw, 2.25rem)",
             background: "#f3ebe0",
-            borderLeft: "2px solid #c5a65c",
+            minHeight: 280,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
           }}
         >
-          <p style={eyebrow}>Proposal acceptance</p>
-          <p style={body}>{p.disclosures.acceptance}</p>
+          <div>
+            <p style={eyebrow}>{closing.eyebrow}</p>
+            <h2 style={h2}>{closing.title}</h2>
+            <StructuredProseBlocks
+              blocks={structureProposalProse(closing.nextSteps, proseKindForTermsKey("nextSteps"))}
+            />
+            {closing.closingNote ? <p style={body}>{closing.closingNote}</p> : null}
+            {closing.acceptance ? (
+              <div
+                style={{
+                  marginTop: 16,
+                  padding: 14,
+                  background: "#fffdf8",
+                  borderLeft: "2px solid #c5a65c",
+                }}
+              >
+                <p style={{ ...eyebrow, marginBottom: 8 }}>Proposal acceptance</p>
+                <p style={{ ...body, fontSize: "0.98rem", margin: 0 }}>{closing.acceptance}</p>
+              </div>
+            ) : null}
+          </div>
+          <p
+            style={{
+              marginTop: 28,
+              fontFamily: "Georgia, 'Iowan Old Style', Palatino, serif",
+              fontSize: 18,
+            }}
+          >
+            Kreate by Design
+          </p>
         </section>
 
         {mode === "done" || data.accepted ? (
@@ -612,7 +765,56 @@ function FormField({
   );
 }
 
-function StructuredProseBlocks({ blocks }: { blocks: ProposalProseBlock[] }) {
+function StructuredProseBlocks({
+  blocks,
+  editorial = false,
+}: {
+  blocks: ProposalProseBlock[];
+  editorial?: boolean;
+}) {
+  if (editorial) {
+    const paragraphs = blocks.filter((block) => block.type === "paragraph");
+    const items = blocks.flatMap((block) => (block.type === "paragraph" ? [] : block.items));
+    if (items.length >= 4) {
+      const midpoint = Math.ceil(items.length / 2);
+      const left = items.slice(0, midpoint);
+      const right = items.slice(midpoint);
+      return (
+        <>
+          {paragraphs.map((block, index) =>
+            block.type === "paragraph" ? (
+              <p key={`p-${index}`} style={{ ...body, margin: "0 0 0.85rem" }}>
+                {block.text}
+              </p>
+            ) : null,
+          )}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+              gap: "1rem 2rem",
+            }}
+          >
+            <ul style={structuredList}>
+              {left.map((item, index) => (
+                <li key={`l-${index}`} style={structuredListItem}>
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <ul style={structuredList}>
+              {right.map((item, index) => (
+                <li key={`r-${index}`} style={structuredListItem}>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </>
+      );
+    }
+  }
+
   return (
     <>
       {blocks.map((block, index) => {
