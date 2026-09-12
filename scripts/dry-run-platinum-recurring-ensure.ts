@@ -70,7 +70,7 @@ const pkg = {
   ...emptyLifecyclePackage(),
   billingPlan: plan,
   commercialAmendments: amendments,
-  commercialStatus: "executed" as const,
+  commercialStatus: "accepted",
   structuredPaymentTerms: {
     schemaVersion: 1 as const,
     currency: "USD",
