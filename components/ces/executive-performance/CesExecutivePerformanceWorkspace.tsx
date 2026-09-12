@@ -10,6 +10,10 @@ import {
   type ExecutivePerformanceBriefing,
   type ExecutiveWorkspaceZoneId,
 } from "@/lib/ces/executive-performance";
+import {
+  isPrimalLeadershipReportClient,
+  PRIMAL_LEADERSHIP_REPORT_HREF,
+} from "@/lib/ces/leadership-report";
 import { CesWorkspaceSignature } from "./CesWorkspaceSignature";
 
 export interface CesExecutivePerformanceWorkspaceProps {
@@ -292,6 +296,37 @@ export function CesExecutivePerformanceWorkspace({
             ) : null}
           </div>
         </div>
+        <div className="kxd-ces-exec__primary-leads" aria-label="Primary leads">
+          <p className="kxd-ces-exec__subhead">Primary leads</p>
+          <dl className="kxd-ces-exec__metric-grid kxd-ces-exec__metric-grid--leads">
+            {(
+              [
+                performance.primaryLeads.websiteFormLeads,
+                performance.primaryLeads.paidQualifiedCallLeads,
+                performance.primaryLeads.totalPrimaryLeads,
+              ] as const
+            ).map((lead) => (
+              <div
+                key={lead.key}
+                className={[
+                  "kxd-ces-exec__metric",
+                  lead.available ? "" : "kxd-ces-exec__metric--unavailable",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+              >
+                <dt>{lead.label}</dt>
+                <dd>{lead.value}</dd>
+                {lead.deltaLabel ? (
+                  <p className="kxd-ces-exec__metric-delta">{lead.deltaLabel}</p>
+                ) : null}
+              </div>
+            ))}
+          </dl>
+          <p className="kxd-ces-exec__provenance-note">
+            {performance.primaryLeads.excludedNote}
+          </p>
+        </div>
         <ul className="kxd-ces-exec__status-row">
           {performance.performancePanels.map((panel) => {
             const narrative = executivePanelNarrative(panel, periodLabel);
@@ -354,6 +389,14 @@ export function CesExecutivePerformanceWorkspace({
         {performance.presentation.briefingEnabled ? (
           <Link href="/portal/partnership" className="kxd-ces-exec__section-link">
             Open executive briefing
+          </Link>
+        ) : null}
+        {isPrimalLeadershipReportClient(performance.clientSlug) ? (
+          <Link
+            href={PRIMAL_LEADERSHIP_REPORT_HREF}
+            className="kxd-ces-exec__section-link"
+          >
+            Open Leadership Report
           </Link>
         ) : null}
         {performance.presentation.executiveReviewEnabled ? (
