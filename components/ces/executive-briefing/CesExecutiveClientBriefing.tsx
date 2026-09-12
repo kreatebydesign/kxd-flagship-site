@@ -5,6 +5,10 @@ import type {
   ExecutiveClientBriefingUnavailable,
 } from "@/lib/executive-client-summary";
 import { getExecutivePresentation } from "@/lib/ces/executive-performance/presentation";
+import {
+  isPrimalLeadershipReportClient,
+  PRIMAL_LEADERSHIP_REPORT_HREF,
+} from "@/lib/ces/leadership-report";
 
 export type CesExecutiveClientBriefingProps = {
   briefing: ExecutiveClientBriefing | ExecutiveClientBriefingUnavailable;
@@ -56,6 +60,7 @@ export function CesExecutiveClientBriefing({ briefing }: CesExecutiveClientBrief
   const showExecutiveReview = Boolean(
     getExecutivePresentation(briefing.clientSlug)?.executiveReviewEnabled,
   );
+  const showLeadershipReport = isPrimalLeadershipReportClient(briefing.clientSlug);
 
   return (
     <article className="kxd-ces-briefing">
@@ -163,6 +168,14 @@ export function CesExecutiveClientBriefing({ briefing }: CesExecutiveClientBrief
           <Link href="/portal/website-review" className="kxd-ces-btn kxd-ces-btn--primary">
             Continue Website Review
           </Link>
+          {showLeadershipReport ? (
+            <Link
+              href={PRIMAL_LEADERSHIP_REPORT_HREF}
+              className="kxd-ces-btn kxd-ces-btn--ghost"
+            >
+              Leadership Report
+            </Link>
+          ) : null}
           {showExecutiveReview ? (
             <Link href="/portal/executive-review" className="kxd-ces-btn kxd-ces-btn--ghost">
               Open Executive Review
