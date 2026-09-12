@@ -99,6 +99,16 @@ export type {
   RecurringPeriodPlanItem,
 } from "./ensure-recurring-obligations.ts";
 export {
+  ensurePostAcceptanceMaterializationOnPackage,
+  ensurePostAcceptanceMaterializationOnContract,
+} from "./post-acceptance-materialization.ts";
+export type {
+  CommercialMaterializationState,
+  PostAcceptanceMaterializationResult,
+  MaterializationAreaResult,
+  OnboardingRequirement,
+} from "./post-acceptance-materialization.ts";
+export {
   recomputeOnboardingEligibility,
   applyOnboardingEligibility,
   isContractFullyExecuted,

@@ -9,11 +9,23 @@ import { CommercialStatusBadge, statusTone } from "./CommercialStatusBadge";
 import { RecordObligationPaymentForm } from "./RecordObligationPaymentForm";
 import { RegisterRecurringDueForm } from "./RegisterRecurringDueForm";
 import { EnsureRecurringThroughDateForm } from "./EnsureRecurringThroughDateForm";
+import { EnsureCommercialMaterializationForm } from "./EnsureCommercialMaterializationForm";
 
 export function CommercialInvoices({ data }: { data: ClientWorkspaceBundle }) {
   const rows = data.commercial.invoices;
   const targets = data.commercial.obligationPaymentTargets ?? [];
   const recurringTargets = data.commercial.recurringServiceTargets ?? [];
+  const agreementIds = [
+    ...new Set(
+      [
+        ...targets.map((t) => t.agreementId),
+        ...recurringTargets.map((t) => t.agreementId),
+        ...rows
+          .map((r) => r.agreementId)
+          .filter((id): id is number => typeof id === "number" && Number.isFinite(id)),
+      ].filter((id): id is number => typeof id === "number" && Number.isFinite(id)),
+    ),
+  ];
   const [recordFor, setRecordFor] = useState<{
     obligationId: string;
     agreementId: number;
@@ -41,6 +53,10 @@ export function CommercialInvoices({ data }: { data: ClientWorkspaceBundle }) {
       <EnsureRecurringThroughDateForm
         clientId={data.clientId}
         targets={recurringTargets}
+      />
+      <EnsureCommercialMaterializationForm
+        clientId={data.clientId}
+        agreementIds={agreementIds}
       />
 
       {!rows.length ? (
