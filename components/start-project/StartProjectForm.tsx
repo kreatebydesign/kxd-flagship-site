@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type ChangeEvent } from "react";
 import { useSearchParams } from "next/navigation";
+import { getBrowserAcquisitionEnvelope } from "@/lib/analytics/ai-referral";
 import { ANALYTICS_EVENTS } from "@/lib/analytics/config";
 import { trackPublicEvent } from "@/lib/analytics/track";
 
@@ -424,6 +425,7 @@ export function StartProjectForm() {
       referralSource: data.referralSource || (fromIntelligence ? "kxd-intelligence" : ""),
       inquirySource: fromIntelligence ? "kxd-intelligence" : "start-project",
       auditId: auditId || undefined,
+      acquisition: getBrowserAcquisitionEnvelope(),
     };
 
     try {

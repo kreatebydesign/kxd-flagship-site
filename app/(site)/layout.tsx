@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AcquisitionSessionCapture } from "@/components/analytics/AcquisitionSessionCapture";
 import { AnalyticsScripts } from "@/components/seo/AnalyticsScripts";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
@@ -36,6 +37,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
         <SiteHeader />
         <main className="relative">{children}</main>
         <SiteFooter />
+        <AcquisitionSessionCapture />
         <AnalyticsScripts />
       </body>
     </html>

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import { Resend } from "resend";
+import { parseAcquisitionEnvelope } from "@/lib/analytics/acquisition";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -33,6 +34,7 @@ export async function POST(request: Request) {
     referralSource,
     inquirySource,
     auditId,
+    acquisition,
   } = body;
 
   if (!companyName || !contactName || !email) {
@@ -41,6 +43,18 @@ export async function POST(request: Request) {
       { status: 422 },
     );
   }
+
+  const parsedAcquisition = parseAcquisitionEnvelope(acquisition);
+  if (!parsedAcquisition.ok) {
+    return NextResponse.json(
+      { error: parsedAcquisition.error },
+      { status: 400 },
+    );
+  }
+
+  const selfReportedReferral = referralSource
+    ? String(referralSource).trim().slice(0, 200)
+    : undefined;
 
   const sourceLabel =
     String(inquirySource || referralSource || "") === "kxd-intelligence" ||
@@ -51,7 +65,7 @@ export async function POST(request: Request) {
 
   const notesWithAttribution = (() => {
     const base = notes ? String(notes) : "";
-    const referral = referralSource ? String(referralSource) : "";
+    const referral = selfReportedReferral ?? "";
     const audit = auditId ? String(auditId) : "";
     if (!referral && !audit) return base || undefined;
     const meta = [
@@ -91,6 +105,8 @@ export async function POST(request: Request) {
             ? String(assetsAvailable)
             : undefined,
         notes: notesWithAttribution,
+        referralSource: selfReportedReferral,
+        acquisition: parsedAcquisition.value,
         status: "new",
         submittedAt: new Date().toISOString(),
       },

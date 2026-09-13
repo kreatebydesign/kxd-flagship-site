@@ -1,6 +1,7 @@
 import type { CollectionConfig } from "payload";
 import { isAuthenticated, publicCreate } from "../access/index.ts";
 import { PAYLOAD_GROUPS } from "../admin/groups.ts";
+import { acquisitionField } from "../fields/acquisition.ts";
 
 export const ProjectInquiries: CollectionConfig = {
   slug: "project-inquiries",
@@ -120,6 +121,22 @@ export const ProjectInquiries: CollectionConfig = {
               type: "textarea",
               label: "Additional Notes",
             },
+          ],
+        },
+        {
+          label: "Acquisition",
+          fields: [
+            {
+              name: "referralSource",
+              type: "text",
+              label: "Self-Reported Referral",
+              maxLength: 200,
+              admin: {
+                description:
+                  "What the prospect selected on the form. Independent of measured acquisition evidence.",
+              },
+            },
+            acquisitionField(),
           ],
         },
       ],

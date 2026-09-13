@@ -20,6 +20,7 @@
     "verify:hospitality-authority": "node --import tsx scripts/verify-hospitality-authority.ts",
     "verify:journal-plate-feature": "node --import tsx scripts/verify-journal-plate-feature.ts",
     "verify:commercial-search-footholds": "node --import tsx scripts/verify-commercial-search-footholds.ts",
+    "verify:kxd-acquisition-persistence": "node --import tsx scripts/verify-kxd-acquisition-persistence.ts",
     "seed:services": "tsx scripts/seed-services.ts",
     "seed:projects": "tsx scripts/seed-projects.ts",
     "seed:clients": "tsx scripts/seed-clients.ts",

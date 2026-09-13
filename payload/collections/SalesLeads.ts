@@ -48,8 +48,12 @@ export const SalesLeads: CollectionConfig = {
     {
       name: "source",
       type: "text",
-      label: "Source",
-      admin: { position: "sidebar" },
+      label: "Operational Source",
+      admin: {
+        position: "sidebar",
+        description:
+          "Intake/operator classification. Measured acquisition remains on the linked source inquiry.",
+      },
     },
     {
       name: "assignedTo",

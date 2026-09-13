@@ -3,112 +3,92 @@
  * Does not overwrite GA4 source/medium — used only as custom event parameters.
  */
 
-export type AiReferralClass =
-  | "chatgpt"
-  | "perplexity"
-  | "claude"
-  | "gemini"
-  | "copilot"
-  | "other-ai";
+import {
+  ACQUISITION_VERSION,
+  classifyAiReferralSource,
+  sanitizeAcquisitionTouch,
+  type AcquisitionEnvelopeInput,
+  type AcquisitionTouch,
+  type AiReferralClass,
+} from "./acquisition";
+
+export { classifyAiReferralSource };
+export type { AiReferralClass };
 
 export type AcquisitionContext = {
   landing_path?: string;
   captured_utm_source?: string;
   captured_utm_medium?: string;
   captured_utm_campaign?: string;
+  captured_utm_term?: string;
+  captured_utm_content?: string;
   referrer_host?: string;
+  gclid?: string;
+  gbraid?: string;
+  wbraid?: string;
   ai_referral_class?: AiReferralClass;
+  acquisition_channel?: string;
+  acquisition_source?: string;
+  acquisition_medium?: string;
 };
 
-const SESSION_KEY = "kxd_acq_ctx_v1";
+const SESSION_KEY = "kxd_acq_ctx_v2";
+const LEGACY_SESSION_KEY = "kxd_acq_ctx_v1";
+
+type StoredAcquisition = {
+  version: typeof ACQUISITION_VERSION;
+  firstTouch?: AcquisitionTouch;
+};
 
 function hostFromUrl(value: string | null | undefined): string {
   if (!value) return "";
   try {
     return new URL(value).hostname.toLowerCase();
   } catch {
-    return value.toLowerCase().replace(/^https?:\/\//, "").split("/")[0] ?? "";
+    return (
+      value
+        .toLowerCase()
+        .replace(/^https?:\/\//, "")
+        .split("/")[0] ?? ""
+    );
   }
 }
 
-/**
- * Classify known AI discovery sources only.
- * Ordinary Bing/Google search traffic is never labeled as AI.
- */
-export function classifyAiReferralSource(input: {
-  utmSource?: string | null;
-  referrerHost?: string | null;
-}): AiReferralClass | null {
-  const utm = (input.utmSource || "").trim().toLowerCase();
-  const host = (input.referrerHost || "").trim().toLowerCase();
-  const haystack = `${utm} ${host}`.trim();
-  if (!haystack) return null;
-
-  if (
-    utm === "chatgpt.com" ||
-    utm === "chatgpt" ||
-    host === "chatgpt.com" ||
-    host.endsWith(".chatgpt.com") ||
-    host === "chat.openai.com"
-  ) {
-    return "chatgpt";
-  }
-
-  if (utm.includes("perplexity") || host.includes("perplexity")) {
-    return "perplexity";
-  }
-
-  if (
-    utm.includes("claude") ||
-    host === "claude.ai" ||
-    host.endsWith(".claude.ai") ||
-    host.includes("anthropic.com")
-  ) {
-    return "claude";
-  }
-
-  if (
-    utm.includes("gemini") ||
-    host === "gemini.google.com" ||
-    host.endsWith(".gemini.google.com") ||
-    host === "bard.google.com"
-  ) {
-    return "gemini";
-  }
-
-  if (
-    utm.includes("copilot") ||
-    host === "copilot.microsoft.com" ||
-    host.endsWith(".copilot.microsoft.com")
-  ) {
-    return "copilot";
-  }
-
-  if (
-    host.includes("you.com") ||
-    host.includes("phind.com") ||
-    utm === "you.com" ||
-    utm === "phind"
-  ) {
-    return "other-ai";
-  }
-
-  return null;
-}
-
-function readStoredContext(): AcquisitionContext {
-  if (typeof window === "undefined") return {};
+function readStoredContext(): StoredAcquisition | null {
+  if (typeof window === "undefined") return null;
   try {
     const raw = window.sessionStorage.getItem(SESSION_KEY);
-    if (!raw) return {};
-    const parsed = JSON.parse(raw) as AcquisitionContext;
-    return parsed && typeof parsed === "object" ? parsed : {};
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as StoredAcquisition;
+    const firstTouch = sanitizeAcquisitionTouch(parsed?.firstTouch);
+    if (parsed?.version !== ACQUISITION_VERSION || !firstTouch) return null;
+    return { version: ACQUISITION_VERSION, firstTouch };
   } catch {
-    return {};
+    return null;
   }
 }
 
-function writeStoredContext(ctx: AcquisitionContext): void {
+function readLegacyContext(): AcquisitionTouch | undefined {
+  if (typeof window === "undefined") return undefined;
+  try {
+    const raw = window.sessionStorage.getItem(LEGACY_SESSION_KEY);
+    if (!raw) return undefined;
+    const legacy = JSON.parse(raw) as AcquisitionContext;
+    const referrerHost = legacy.referrer_host?.trim();
+    return sanitizeAcquisitionTouch({
+      capturedAt: new Date().toISOString(),
+      landingPath: legacy.landing_path,
+      referrer: referrerHost ? `https://${referrerHost}` : undefined,
+      utmSource: legacy.captured_utm_source,
+      utmMedium: legacy.captured_utm_medium,
+      utmCampaign: legacy.captured_utm_campaign,
+    });
+  } catch {
+    return undefined;
+  }
+}
+
+function writeStoredContext(ctx: StoredAcquisition): void {
   if (typeof window === "undefined") return;
   try {
     window.sessionStorage.setItem(SESSION_KEY, JSON.stringify(ctx));
@@ -117,54 +97,75 @@ function writeStoredContext(ctx: AcquisitionContext): void {
   }
 }
 
+function currentBrowserTouch(): AcquisitionTouch | undefined {
+  if (typeof window === "undefined") return undefined;
+  const params = new URLSearchParams(window.location.search);
+  return sanitizeAcquisitionTouch({
+    capturedAt: new Date().toISOString(),
+    landingPath: window.location.pathname,
+    referrer: document.referrer || undefined,
+    utmSource: params.get("utm_source"),
+    utmMedium: params.get("utm_medium"),
+    utmCampaign: params.get("utm_campaign"),
+    utmTerm: params.get("utm_term"),
+    utmContent: params.get("utm_content"),
+    gclid: params.get("gclid"),
+    gbraid: params.get("gbraid"),
+    wbraid: params.get("wbraid"),
+  });
+}
+
 /**
- * Capture landing UTMs / referrer once per session.
- * Later navigations keep the first non-empty values; fresh URL UTMs still win.
- * Does not mutate GA4 automatic source/medium.
+ * Capture the first observable marketing-site touch once per browser session.
+ * Existing v1 session evidence is retained through the v2 transition.
  */
-export function getBrowserAcquisitionContext(): AcquisitionContext {
-  if (typeof window === "undefined") return {};
+export function captureBrowserAcquisitionContext():
+  | AcquisitionTouch
+  | undefined {
+  if (typeof window === "undefined") return undefined;
 
   const stored = readStoredContext();
-  const params = new URLSearchParams(window.location.search);
-  const utmSource = params.get("utm_source") || stored.captured_utm_source || "";
-  const utmMedium = params.get("utm_medium") || stored.captured_utm_medium || "";
-  const utmCampaign =
-    params.get("utm_campaign") || stored.captured_utm_campaign || "";
+  if (stored?.firstTouch) return stored.firstTouch;
 
-  let referrerHost = stored.referrer_host || "";
-  if (!referrerHost && document.referrer) {
-    referrerHost = hostFromUrl(document.referrer);
-    // Ignore self-referrals on the marketing site.
-    if (
-      referrerHost === "kreatebydesign.com" ||
-      referrerHost === "www.kreatebydesign.com"
-    ) {
-      referrerHost = "";
-    }
-  }
+  const firstTouch = readLegacyContext() || currentBrowserTouch();
+  if (!firstTouch) return undefined;
 
-  const landingPath =
-    stored.landing_path ||
-    `${window.location.pathname}${window.location.search}` ||
-    undefined;
+  writeStoredContext({ version: ACQUISITION_VERSION, firstTouch });
+  return firstTouch;
+}
 
-  const aiClass = classifyAiReferralSource({
-    utmSource,
-    referrerHost,
-  });
-
-  const next: AcquisitionContext = {
-    landing_path: landingPath,
-    captured_utm_source: utmSource || undefined,
-    captured_utm_medium: utmMedium || undefined,
-    captured_utm_campaign: utmCampaign || undefined,
-    referrer_host: referrerHost || undefined,
-    ai_referral_class: aiClass || undefined,
+/**
+ * Produce the bounded first-touch + current submission context sent to KXD.
+ * The server validates all fields and recomputes derived classification.
+ */
+export function getBrowserAcquisitionEnvelope(): AcquisitionEnvelopeInput {
+  return {
+    version: ACQUISITION_VERSION,
+    firstTouch: captureBrowserAcquisitionContext(),
+    submissionTouch: currentBrowserTouch(),
   };
+}
 
-  writeStoredContext(next);
-  return next;
+/** Backward-compatible flattened first-touch context for existing GA4 events. */
+export function getBrowserAcquisitionContext(): AcquisitionContext {
+  const touch = captureBrowserAcquisitionContext();
+  if (!touch) return {};
+  return {
+    landing_path: touch.landingPath,
+    captured_utm_source: touch.utmSource,
+    captured_utm_medium: touch.utmMedium,
+    captured_utm_campaign: touch.utmCampaign,
+    captured_utm_term: touch.utmTerm,
+    captured_utm_content: touch.utmContent,
+    referrer_host: hostFromUrl(touch.referrer),
+    gclid: touch.gclid,
+    gbraid: touch.gbraid,
+    wbraid: touch.wbraid,
+    ai_referral_class: touch.aiReferralClass,
+    acquisition_channel: touch.channel,
+    acquisition_source: touch.source,
+    acquisition_medium: touch.medium,
+  };
 }
 
 /** Flatten acquisition context into GA4 custom event params (omit empties). */
@@ -173,12 +174,26 @@ export function acquisitionContextToEventParams(
 ): Record<string, string> {
   const out: Record<string, string> = {};
   if (ctx.landing_path) out.landing_path = ctx.landing_path;
-  if (ctx.captured_utm_source) out.captured_utm_source = ctx.captured_utm_source;
-  if (ctx.captured_utm_medium) out.captured_utm_medium = ctx.captured_utm_medium;
+  if (ctx.captured_utm_source)
+    out.captured_utm_source = ctx.captured_utm_source;
+  if (ctx.captured_utm_medium)
+    out.captured_utm_medium = ctx.captured_utm_medium;
   if (ctx.captured_utm_campaign) {
     out.captured_utm_campaign = ctx.captured_utm_campaign;
   }
+  if (ctx.captured_utm_term) out.captured_utm_term = ctx.captured_utm_term;
+  if (ctx.captured_utm_content) {
+    out.captured_utm_content = ctx.captured_utm_content;
+  }
   if (ctx.referrer_host) out.referrer_host = ctx.referrer_host;
+  if (ctx.gclid) out.gclid = ctx.gclid;
+  if (ctx.gbraid) out.gbraid = ctx.gbraid;
+  if (ctx.wbraid) out.wbraid = ctx.wbraid;
   if (ctx.ai_referral_class) out.ai_referral_class = ctx.ai_referral_class;
+  if (ctx.acquisition_channel) {
+    out.acquisition_channel = ctx.acquisition_channel;
+  }
+  if (ctx.acquisition_source) out.acquisition_source = ctx.acquisition_source;
+  if (ctx.acquisition_medium) out.acquisition_medium = ctx.acquisition_medium;
   return out;
 }

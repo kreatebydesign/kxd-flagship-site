@@ -72,6 +72,7 @@ import * as migration_20260831_sales_closed_loop_v1 from './20260831_sales_close
 import * as migration_20260901_proposal_manual_delivery from './20260901_proposal_manual_delivery';
 import * as migration_20260902_research_lead_opportunity_intelligence from './20260902_research_lead_opportunity_intelligence';
 import * as migration_20260903_client_infrastructure_website_editor_url from './20260903_client_infrastructure_website_editor_url';
+import * as migration_20260912_kxd_acquisition_persistence from './20260912_kxd_acquisition_persistence';
 import * as migration_20260712_phase29c_reporting_provider_connections from './20260712_phase29c_reporting_provider_connections';
 import * as migration_20260713_phase31c_reporting_facts from './20260713_phase31c_reporting_facts';
 import * as migration_20260713_phase32b_google_ads_customer_fields from './20260713_phase32b_google_ads_customer_fields';
@@ -691,5 +692,12 @@ export const migrations = [
     up: migration_20260903_client_infrastructure_website_editor_url.up,
     down: migration_20260903_client_infrastructure_website_editor_url.down,
     name: '20260903_client_infrastructure_website_editor_url',
+  },
+  {
+    // KXD first-party acquisition evidence on website intake records.
+    // Additive, nullable, and intentionally not backfilled.
+    up: migration_20260912_kxd_acquisition_persistence.up,
+    down: migration_20260912_kxd_acquisition_persistence.down,
+    name: '20260912_kxd_acquisition_persistence',
   },
 ];
