@@ -2,6 +2,7 @@ import { getPayload } from "payload";
 import config from "@payload-config";
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
+import { parseAcquisitionEnvelope } from "@/lib/analytics/acquisition";
 import { getPartnershipPackage } from "@/lib/partnerships/packages";
 import {
   isFirstPartyInquirySource,
@@ -22,6 +23,7 @@ type InquiryBody = {
   referral?: string;
   source?: string;
   partnershipPackage?: string;
+  acquisition?: unknown;
 };
 
 const DEPLOY_VERSION = "v4-partnership-package-2026-07-21";
@@ -50,6 +52,20 @@ export async function POST(request: Request) {
         { status: 400 },
       );
     }
+
+    const acquisition = parseAcquisitionEnvelope(body.acquisition);
+    if (!acquisition.ok) {
+      return NextResponse.json(
+        { error: acquisition.error },
+        { status: 400 },
+      );
+    }
+
+    const submittedSource =
+      typeof body.source === "string"
+        ? body.source.trim().slice(0, 120)
+        : "";
+    const operationalSource = submittedSource || "project-application";
 
     const partnershipPackage = PARTNERSHIP_PACKAGE_VALUES.has(
       String(body.partnershipPackage || ""),
@@ -93,9 +109,10 @@ export async function POST(request: Request) {
           | "exploring"
           | undefined,
         message: body.message.trim(),
-        source: body.source || "project-application",
+        source: operationalSource,
         referral: body.referral?.trim().slice(0, 200) || undefined,
         partnershipPackage,
+        acquisition: acquisition.value,
         status: "new",
       } as never,
     });
@@ -103,7 +120,7 @@ export async function POST(request: Request) {
     console.log("✅ Inquiry saved to Payload. ID:", inquiry.id);
 
     if (
-      isFirstPartyInquirySource(body.source || "project-application") &&
+      isFirstPartyInquirySource(operationalSource) &&
       isInquiryEligibleForPromotion("new")
     ) {
       try {
@@ -155,7 +172,7 @@ export async function POST(request: Request) {
           `Website:       ${body.website?.trim() || "Not provided"}`,
           `Inquiry Type:  ${inquiryType}`,
           `Partnership:   ${partnershipLabel || "Not specified"}`,
-          `Source:        ${body.source || "project-application"}`,
+          `Source:        ${operationalSource}`,
           `Investment:    ${body.budget || "Not specified"}`,
           `Timeline:      ${body.timeline || "Not specified"}`,
           `Referral:      ${body.referral || "Not specified"}`,

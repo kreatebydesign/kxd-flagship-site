@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { getBrowserAcquisitionEnvelope } from "@/lib/analytics/ai-referral";
 import { ANALYTICS_EVENTS } from "@/lib/analytics/config";
 import { trackPublicEvent } from "@/lib/analytics/track";
 import { SITE } from "@/lib/site";
@@ -104,6 +105,7 @@ export function ContactForm() {
             ? "partnership-pricing"
             : "project-application",
           partnershipPackage: selectedPartnership?.id || undefined,
+          acquisition: getBrowserAcquisitionEnvelope(),
         }),
       });
 

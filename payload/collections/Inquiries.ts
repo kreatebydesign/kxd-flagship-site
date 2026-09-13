@@ -1,6 +1,7 @@
 import type { CollectionConfig } from "payload";
 import { isAuthenticated, publicCreate } from "../access/index.ts";
 import { PAYLOAD_GROUPS } from "../admin/groups.ts";
+import { acquisitionField } from "../fields/acquisition.ts";
 
 export const Inquiries: CollectionConfig = {
   slug: "inquiries",
@@ -133,6 +134,10 @@ export const Inquiries: CollectionConfig = {
               },
             },
           ],
+        },
+        {
+          label: "Acquisition",
+          fields: [acquisitionField()],
         },
         {
           label: "KXD Workflow",
