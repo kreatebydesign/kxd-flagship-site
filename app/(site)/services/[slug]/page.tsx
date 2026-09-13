@@ -773,10 +773,17 @@ export default async function ServiceDetailPage({ params }: Props) {
                 <span aria-hidden>→</span>
               </Link>
               <Link
-                href="/work/primal-motorsports"
+                href="/work/plate-the-umpqua"
                 className="kxd-ui-label inline-flex items-center gap-2 text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)]"
               >
-                View Primal Motorsports
+                View Plate OS Case Study
+                <span aria-hidden>→</span>
+              </Link>
+              <Link
+                href="/insights/building-plate-the-umpqua-with-chef-martin"
+                className="kxd-ui-label inline-flex items-center gap-2 text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)]"
+              >
+                Read the Plate OS Journal
                 <span aria-hidden>→</span>
               </Link>
             </div>

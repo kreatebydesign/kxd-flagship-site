@@ -39,14 +39,14 @@ export type StaticServiceDetail = {
 export const STATIC_SERVICE_DETAILS: Record<string, StaticServiceDetail> = {
   "luxury-website-experiences": {
     slug: "luxury-website-experiences",
-    title: "Premium Website Design & Redesign",
+    title: "Premium Website Design & Development",
     category: "luxury-websites",
     categoryLabel: "Presence",
     eyebrow: "Website Experiences",
     headline:
-      "When the website no longer represents the business, rebuild it to hold weight again.",
+      "Premium websites, designed and developed to hold weight.",
     summary:
-      "Premium website design and redesign for established businesses — clearer positioning, stronger customer journeys, and inquiry paths that match the standard of the work.",
+      "Premium website design, development, and serious rebuilds for established businesses — backed by responsive performance, search foundations, and measurement.",
     bestFor: [
       "Businesses whose website feels outdated or interchangeable",
       "Teams whose online presence weakens trust before the first conversation",
@@ -258,14 +258,14 @@ export const STATIC_SERVICE_DETAILS: Record<string, StaticServiceDetail> = {
 
   "enterprise-platforms": {
     slug: "enterprise-platforms",
-    title: "Enterprise Platforms & Operational Systems",
+    title: "Custom Business Platforms & Operational Systems",
     category: "enterprise-systems",
     categoryLabel: "Systems",
     eyebrow: "Enterprise Platforms",
     headline:
-      "When the website is not enough, we build the systems the business runs on.",
+      "Custom platforms built around how the business actually operates.",
     summary:
-      "Selective platform engagements — client portals, dashboards, CRM workflows, and operational infrastructure designed around how your organization actually works.",
+      "KXD builds custom business platforms, client and customer experiences, workflow infrastructure, and connected tools around how an organization operates.",
     bestFor: [
       "Organizations stuck between disconnected tools and repetitive manual work",
       "Teams that need client or member portals with real operational value",

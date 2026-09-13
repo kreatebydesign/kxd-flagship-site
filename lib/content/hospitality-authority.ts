@@ -21,9 +21,9 @@ export function isHospitalityWork(slug: string): slug is HospitalityWorkSlug {
 
 export const HOSPITALITY_PAGE = {
   path: HOSPITALITY_HUB_PATH,
-  title: "Hospitality Website Design & Digital Work",
+  title: "Hospitality Website Design & Operational Systems",
   description:
-    "Premium hospitality websites and operational systems for restaurants, venues, and dining brands — public experience plus infrastructure when the business requires it.",
+    "Premium hospitality websites and operational systems for restaurants, venues, and dining brands — from public experience to business infrastructure.",
   keywords: [
     "Hospitality Website Design",
     "Restaurant Website Design",
@@ -34,7 +34,7 @@ export const HOSPITALITY_PAGE = {
   eyebrow: "Hospitality",
   headline: "The experience starts before they arrive.",
   lead:
-    "Premium websites and brand experiences for restaurants, venues, and hospitality brands — with operational infrastructure when the project requires more than a public site.",
+    "KXD designs and develops premium websites for restaurants, venues, and hospitality brands — with custom operational systems when the business requires more than a public-facing experience.",
   primaryCta: { label: "Start a Project", href: "/start-project" },
   secondaryCta: { label: "View the Work", href: "/work" },
 } as const;
