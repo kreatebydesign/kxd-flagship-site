@@ -6,6 +6,11 @@ import type {
   CommercialInvoiceRow,
   CommercialObligationPaymentTarget,
 } from "@/lib/client-command/commercial/types";
+import {
+  amountAfterApplicationModeChange,
+  amountAfterObligationSelection,
+  initialRecordPaymentAmountDollars,
+} from "@/lib/client-command/commercial/record-payment-amount";
 
 type ApplicationMode = "fifo" | "single" | "selected";
 
@@ -22,10 +27,6 @@ type AllocationPreview = {
   unallocatedCents: number;
   legs: AllocationPreviewLeg[];
 };
-
-function dollarsFromCents(cents: number): string {
-  return (cents / 100).toFixed(2);
-}
 
 function methodLabel(method: string): string {
   const map: Record<string, string> = {
@@ -46,12 +47,13 @@ function initialAmount(
   targets: CommercialObligationPaymentTarget[],
   initialObligationId?: string | null,
 ): string {
-  if (initialObligationId) {
-    const row = invoices.find((i) => i.obligationId === initialObligationId);
-    if (row) return dollarsFromCents(row.remainingCents);
-  }
-  const defaults = targets[0];
-  return defaults ? dollarsFromCents(Math.min(defaults.openRemainingCents, 35000)) : "";
+  const row = initialObligationId
+    ? invoices.find((i) => i.obligationId === initialObligationId)
+    : undefined;
+  return initialRecordPaymentAmountDollars({
+    initialObligationRemainingCents: row?.remainingCents ?? null,
+    defaultOpenRemainingCents: targets[0]?.openRemainingCents ?? null,
+  });
 }
 
 function buildPreviewBody(input: {
@@ -117,6 +119,17 @@ export function RecordObligationPaymentForm(props: {
   const [selectedObligationIds, setSelectedObligationIds] = useState<string[]>([]);
   const [amountDollars, setAmountDollars] = useState(
     initialAmount(props.invoices, props.targets, props.initialObligationId),
+  );
+  const [obligationRemainingHelp, setObligationRemainingHelp] = useState<string | null>(
+    (() => {
+      if (!props.initialObligationId) return null;
+      const row = props.invoices.find((i) => i.obligationId === props.initialObligationId);
+      if (!row) return null;
+      return amountAfterObligationSelection({
+        currentAmountDollars: "",
+        selectedRemainingCents: row.remainingCents,
+      }).remainingHelp;
+    })(),
   );
   const [paidAt, setPaidAt] = useState(new Date().toISOString().slice(0, 10));
   const [method, setMethod] = useState<
@@ -415,9 +428,11 @@ export function RecordObligationPaymentForm(props: {
                 onChange={(e) => {
                   const mode = e.target.value as ApplicationMode;
                   setAllocationMode(mode);
+                  const preserved = amountAfterApplicationModeChange(amountDollars);
+                  if (preserved !== amountDollars) setAmountDollars(preserved);
                   if (selected) {
                     void refreshPreview({
-                      amountDollars,
+                      amountDollars: preserved,
                       allocationMode: mode,
                       obligationId,
                       selectedObligationIds,
@@ -444,13 +459,15 @@ export function RecordObligationPaymentForm(props: {
                     const nextObl = e.target.value;
                     setObligationId(nextObl);
                     const row = openInvoices.find((i) => i.obligationId === nextObl);
-                    const nextAmount = row
-                      ? dollarsFromCents(row.remainingCents)
-                      : amountDollars;
-                    if (row) setAmountDollars(nextAmount);
+                    const next = amountAfterObligationSelection({
+                      currentAmountDollars: amountDollars,
+                      selectedRemainingCents: row?.remainingCents ?? null,
+                    });
+                    // Never overwrite operator amount with obligation remaining.
+                    setObligationRemainingHelp(next.remainingHelp);
                     if (selected) {
                       void refreshPreview({
-                        amountDollars: nextAmount,
+                        amountDollars: next.amountDollars,
                         allocationMode: "single",
                         obligationId: nextObl,
                         selectedObligationIds,
@@ -467,6 +484,11 @@ export function RecordObligationPaymentForm(props: {
                     </option>
                   ))}
                 </select>
+                {obligationRemainingHelp ? (
+                  <span className="kxd-os-commercial-field__help">
+                    {obligationRemainingHelp}. Amount stays as entered.
+                  </span>
+                ) : null}
               </label>
             ) : null}
 
