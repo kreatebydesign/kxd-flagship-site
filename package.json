@@ -115,6 +115,7 @@
     "verify:direct-agreement-restatement": "tsx scripts/verify-direct-agreement-restatement.ts",
     "verify:external-payment": "tsx scripts/verify-external-payment-reconciliation.ts",
     "verify:partial-external-payment": "tsx scripts/verify-partial-external-payment-allocation.ts",
+    "verify:record-payment-amount-integrity": "tsx scripts/verify-record-payment-amount-integrity.ts",
     "verify:commercial-ledger-authority": "tsx scripts/verify-commercial-ledger-authority.ts",
     "verify:recurring-obligation-engine": "tsx scripts/verify-recurring-obligation-engine.ts",
     "verify:post-acceptance-materialization": "tsx scripts/verify-post-acceptance-materialization.ts",
