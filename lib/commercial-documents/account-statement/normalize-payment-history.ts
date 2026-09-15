@@ -54,19 +54,32 @@ function isProjectKind(kind: InvoiceObligation["kind"]): boolean {
 function defaultLabelForEvents(
   events: Array<{ obligation: InvoiceObligation; event: ObligationPaymentEvent }>,
 ): string {
+  if (events.length === 1) {
+    const obligation = events[0]!.obligation;
+    return (
+      obligation.label?.trim() ||
+      obligation.serviceTitle?.trim() ||
+      "Account payment"
+    );
+  }
+  const labels = [
+    ...new Set(
+      events.map(
+        (item) =>
+          item.obligation.label?.trim() ||
+          item.obligation.serviceTitle?.trim() ||
+          "",
+      ),
+    ),
+  ].filter(Boolean);
+  if (labels.length === 1) return labels[0]!;
+  if (labels.length > 1 && labels.length <= 3) return labels.join("; ");
+
   const kinds = new Set(events.map((item) => item.obligation.kind));
   const allProject = [...kinds].every((kind) =>
     isProjectKind(kind as InvoiceObligation["kind"]),
   );
   if (allProject) return "Website Design & Development";
-  if (events.length === 1) {
-    const obligation = events[0]!.obligation;
-    return (
-      obligation.serviceTitle?.trim() ||
-      obligation.label.replace(/\s—\s\d{4}-\d{2}$/, "").trim() ||
-      obligation.label
-    );
-  }
   return "Account payment";
 }
 

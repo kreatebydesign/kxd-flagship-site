@@ -319,6 +319,9 @@ export async function loadClientWorkspaceBundle(
     clientId,
     timelineEvents,
     workspaceInvoices: invoices,
+    clientName: String(client.name ?? row.name ?? ""),
+    clientSlug: client.slug ? String(client.slug) : null,
+    contactName: partialBundle.header.primaryContact,
   });
 
   return {

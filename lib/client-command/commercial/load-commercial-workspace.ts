@@ -44,8 +44,10 @@ import type {
   CommercialPaymentRow,
   CommercialReceiptRow,
   CommercialRecurringServiceTarget,
+  CommercialStatementSnapshot,
 } from "./types";
 import { commercialAgreementHref } from "./sections";
+import { buildLiveAccountStatement } from "./build-account-statement";
 
 type AnyDoc = Record<string, unknown> & { id: number };
 
@@ -134,6 +136,9 @@ export async function loadClientCommercialWorkspace(input: {
   clientId: number;
   timelineEvents: WorkspaceTimelineEvent[];
   workspaceInvoices: WorkspaceInvoiceRow[];
+  clientName?: string | null;
+  clientSlug?: string | null;
+  contactName?: string | null;
 }): Promise<ClientCommercialWorkspaceSnapshot> {
   const { clientId } = input;
   const [contracts, documents] = await Promise.all([
@@ -606,6 +611,68 @@ export async function loadClientCommercialWorkspace(input: {
     overview.agreementHref = commercialAgreementHref(clientId, overview.agreementId);
   }
 
+  const statementView = buildLiveAccountStatement({
+    clientId,
+    clientName: input.clientName?.trim() || overview.agreementTitle || `Client ${clientId}`,
+    clientSlug: input.clientSlug ?? null,
+    contactName: input.contactName ?? null,
+    primaryAgreementId: primaryAgreement?.id ?? null,
+    contracts: contracts.map((doc) => ({
+      id: Number(doc.id),
+      title: String(doc.title ?? `Agreement ${doc.id}`),
+      lifecyclePackage: doc.lifecyclePackage,
+    })),
+  });
+
+  const statement: CommercialStatementSnapshot = {
+    statementDate: statementView.statementDate,
+    clientName: statementView.document.clientName,
+    contactName: statementView.document.contactName ?? null,
+    agreementTitle: statementView.agreementTitle,
+    currency: statementView.document.currency,
+    summary: {
+      originalProjectLabel: statementView.document.summary.originalProjectLabel,
+      originalProjectValue: formatCents(
+        statementView.document.summary.originalProjectCents as never,
+      ),
+      accountPaymentsReceivedLabel:
+        statementView.document.summary.accountPaymentsReceivedLabel,
+      accountPaymentsReceivedValue: formatCents(
+        statementView.document.summary.accountPaymentsReceivedCents as never,
+      ),
+      projectBalanceLabel: statementView.document.summary.projectBalanceLabel,
+      projectBalanceValue: formatCents(
+        statementView.document.summary.projectBalanceCents as never,
+      ),
+      currentChargesLabel: statementView.document.summary.currentChargesLabel,
+      currentChargesValue: formatCents(
+        statementView.document.summary.currentChargesCents as never,
+      ),
+      totalOutstandingLabel: statementView.document.summary.totalOutstandingLabel,
+      totalOutstandingValue: formatCents(
+        statementView.document.summary.totalOutstandingCents as never,
+      ),
+    },
+    openBalances: statementView.document.openBalances.items.map((item) => ({
+      id: item.id,
+      description: item.description,
+      originalLabel: formatCents(item.originalCents as never),
+      paidLabel: formatCents(item.paidCents as never),
+      remainingLabel: formatCents(item.remainingCents as never),
+      dueDate: item.dueDate ?? null,
+      statusLabel: item.statusLabel,
+    })),
+    payments: statementView.document.paymentHistory.payments.map((payment) => ({
+      id: payment.id,
+      paidOn: payment.paidOn,
+      label: payment.label,
+      detail: payment.detail ?? null,
+      amountLabel: formatCents(payment.amountCents as never),
+    })),
+    totalOutstandingCents: statementView.document.summary.totalOutstandingCents,
+    pdfHref: `/api/admin/clients/${clientId}/commercial/account-statement/pdf`,
+  };
+
   return {
     clientId,
     overview,
@@ -616,6 +683,7 @@ export async function loadClientCommercialWorkspace(input: {
     invoices,
     receipts,
     timeline,
+    statement,
     primaryAgreementId: primaryAgreement?.id ?? null,
     externalPaymentEligibleAgreements,
     obligationPaymentTargets,
@@ -657,6 +725,7 @@ export function emptyCommercialWorkspace(clientId: number): ClientCommercialWork
     invoices: [],
     receipts: [],
     timeline: [],
+    statement: null,
     primaryAgreementId: null,
     externalPaymentEligibleAgreements: [],
     obligationPaymentTargets: [],

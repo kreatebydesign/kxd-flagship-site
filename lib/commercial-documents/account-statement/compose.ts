@@ -10,6 +10,8 @@
 import { formatCents, type Cents } from "@/lib/proposal-builder/money";
 import {
   aggregateObligationBalances,
+  formatObligationStatusLabel,
+  obligationAmountPaidCents,
   obligationRemainingCents,
   sumObligationAmountCents,
   sumObligationPaidCents,
@@ -22,6 +24,7 @@ import type {
   AccountStatementClosingNote,
   AccountStatementDocument,
   AccountStatementMoneyLine,
+  AccountStatementOpenBalance,
   AccountStatementPayment,
   AccountStatementServiceCharge,
 } from "./types";
@@ -43,6 +46,8 @@ export type ComposeAccountStatementInput = {
   id: string;
   clientName: string;
   clientSlug?: string | null;
+  contactName?: string | null;
+  agreementTitle?: string | null;
   /** Point-in-time as-of date (YYYY-MM-DD). Snapshot semantics. */
   statementDate: string;
   obligations: InvoiceObligation[];
@@ -208,6 +213,27 @@ export function composeAccountStatement(
     0,
   );
 
+  const openBalanceItems: AccountStatementOpenBalance[] = obligations
+    .filter((obligation) => obligationRemainingCents(obligation) > 0)
+    .map((obligation) => {
+      const paidCents = obligationAmountPaidCents(obligation);
+      const remainingCents = obligationRemainingCents(obligation);
+      return {
+        id: obligation.id,
+        description: obligation.label,
+        originalCents: obligation.amountCents as Cents,
+        paidCents: paidCents as Cents,
+        remainingCents: remainingCents as Cents,
+        dueDate: obligation.dueDate ?? null,
+        statusLabel: formatObligationStatusLabel(
+          paidCents > 0 && remainingCents > 0
+            ? "partially-paid"
+            : obligation.status,
+        ),
+        kind: obligation.kind,
+      };
+    });
+
   const totalOutstandingCents = ledgerAgg.remainingCents;
 
   const finalLines: AccountStatementMoneyLine[] = [];
@@ -247,6 +273,8 @@ export function composeAccountStatement(
     title: input.title ?? "Account Statement",
     clientName: input.clientName,
     clientSlug: input.clientSlug ?? null,
+    contactName: input.contactName?.trim() || null,
+    agreementTitle: input.agreementTitle?.trim() || null,
     statementDate: input.statementDate,
     currency,
     summary: {
@@ -261,6 +289,14 @@ export function composeAccountStatement(
       currentChargesCents: currentChargesCents as Cents,
       totalOutstandingLabel: "Total Currently Outstanding",
       totalOutstandingCents: totalOutstandingCents as Cents,
+      accountPaymentsReceivedLabel: "Total Payments Received",
+      accountPaymentsReceivedCents: paymentsReceivedAllCents as Cents,
+    },
+    openBalances: {
+      sectionTitle: "Open Balances",
+      items: openBalanceItems,
+      totalRemainingLabel: "Current total outstanding",
+      totalRemainingCents: totalOutstandingCents as Cents,
     },
     paymentHistory: {
       sectionTitle: "Payment History",

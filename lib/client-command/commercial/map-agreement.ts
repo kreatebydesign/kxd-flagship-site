@@ -28,6 +28,8 @@ export function documentKindLabel(kind: string): CommercialDocumentKindLabel {
       return "Invoice";
     case "receipt":
       return "Receipt";
+    case "account-statement":
+      return "Account statement";
     case "authorization-evidence":
       return "Authorization evidence";
     case "billing-summary":
