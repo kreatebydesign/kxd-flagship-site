@@ -40,6 +40,7 @@ export const CommercialDocuments: CollectionConfig = {
         { label: "Package Manifest", value: "package-manifest" },
         { label: "Invoice (future PDF)", value: "invoice" },
         { label: "Receipt (future PDF)", value: "receipt" },
+        { label: "Account Statement", value: "account-statement" },
         { label: "Authorization Evidence", value: "authorization-evidence" },
       ],
     },

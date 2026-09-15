@@ -14,6 +14,7 @@ import { CommercialAgreements } from "./CommercialAgreements";
 import { CommercialInvoices } from "./CommercialInvoices";
 import { CommercialPayments } from "./CommercialPayments";
 import { CommercialReceipts } from "./CommercialReceipts";
+import { CommercialStatements } from "./CommercialStatements";
 import { CommercialAuthorizations } from "./CommercialAuthorizations";
 import { CommercialDocuments } from "./CommercialDocuments";
 import { CommercialTimeline } from "./CommercialTimeline";
@@ -77,6 +78,8 @@ function renderSection(section: CommercialSectionId, data: ClientWorkspaceBundle
       return <CommercialPayments data={data} />;
     case "receipts":
       return <CommercialReceipts data={data} />;
+    case "statements":
+      return <CommercialStatements data={data} />;
     case "authorizations":
       return <CommercialAuthorizations data={data} />;
     case "documents":

@@ -339,7 +339,19 @@ function AccountStatementPdfDocument(props: {
           <View style={styles.metaCol}>
             <Text style={styles.metaLabel}>Prepared for</Text>
             <Text style={styles.metaValue}>{doc.clientName}</Text>
-            <Text style={styles.metaLabel}>As of</Text>
+            {doc.contactName ? (
+              <>
+                <Text style={styles.metaLabel}>Contact</Text>
+                <Text style={styles.metaValue}>{doc.contactName}</Text>
+              </>
+            ) : null}
+            {doc.agreementTitle ? (
+              <>
+                <Text style={styles.metaLabel}>Agreement</Text>
+                <Text style={styles.metaValue}>{doc.agreementTitle}</Text>
+              </>
+            ) : null}
+            <Text style={styles.metaLabel}>Statement date</Text>
             <Text style={styles.metaValue}>{statementDateLabel}</Text>
           </View>
         </View>
@@ -374,10 +386,10 @@ function AccountStatementPdfDocument(props: {
           </View>
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>
-              {doc.summary.paymentsReceivedLabel}
+              {doc.summary.accountPaymentsReceivedLabel}
             </Text>
             <Text style={styles.summaryValue}>
-              {money(doc.summary.paymentsReceivedCents, currency)}
+              {money(doc.summary.accountPaymentsReceivedCents, currency)}
             </Text>
           </View>
           <View style={styles.summaryRow}>
@@ -400,6 +412,48 @@ function AccountStatementPdfDocument(props: {
 
         <View style={styles.section}>
           <View style={styles.sectionHead}>
+            <Text style={styles.sectionEyebrow}>Open</Text>
+            <Text style={styles.sectionTitle}>
+              {doc.openBalances.sectionTitle}
+            </Text>
+          </View>
+          {doc.openBalances.items.length === 0 ? (
+            <Text style={styles.noteText}>No open balances.</Text>
+          ) : (
+            doc.openBalances.items.map((item) => (
+              <View key={item.id} style={styles.serviceItem}>
+                <View style={styles.serviceHead}>
+                  <Text style={styles.serviceTitle}>{item.description}</Text>
+                  <Text style={styles.serviceAmount}>
+                    {money(item.remainingCents, currency)}
+                  </Text>
+                </View>
+                <Text style={styles.servicePeriod}>
+                  {item.statusLabel}
+                  {item.dueDate
+                    ? ` · Due ${formatProposalCalendarDate(item.dueDate)}`
+                    : ""}
+                </Text>
+                <Text style={styles.serviceDesc}>
+                  Original {money(item.originalCents, currency)} · Paid{" "}
+                  {money(item.paidCents, currency)} · Remaining{" "}
+                  {money(item.remainingCents, currency)}
+                </Text>
+              </View>
+            ))
+          )}
+          <View style={styles.tallyRow}>
+            <Text style={styles.tallyEmphLabel}>
+              {doc.openBalances.totalRemainingLabel}
+            </Text>
+            <Text style={styles.tallyEmphValue}>
+              {money(doc.openBalances.totalRemainingCents, currency)}
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <View style={styles.sectionHead}>
             <Text style={styles.sectionEyebrow}>Recorded</Text>
             <Text style={styles.sectionTitle}>
               {doc.paymentHistory.sectionTitle}
@@ -410,7 +464,10 @@ function AccountStatementPdfDocument(props: {
               <Text style={styles.payDate}>
                 {formatProposalCalendarDate(payment.paidOn)}
               </Text>
-              <Text style={styles.payLabel}>{payment.label}</Text>
+              <Text style={styles.payLabel}>
+                {payment.label}
+                {payment.detail ? ` · ${payment.detail}` : ""}
+              </Text>
               <Text style={styles.payAmount}>
                 {money(payment.amountCents, currency)}
               </Text>

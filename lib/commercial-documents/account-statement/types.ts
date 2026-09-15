@@ -32,6 +32,17 @@ export type AccountStatementServiceCharge = {
   description?: string | null;
 };
 
+export type AccountStatementOpenBalance = {
+  id: string;
+  description: string;
+  originalCents: Cents;
+  paidCents: Cents;
+  remainingCents: Cents;
+  dueDate?: string | null;
+  statusLabel: string;
+  kind?: string | null;
+};
+
 export type AccountStatementClosingNote = {
   id: string;
   body: string;
@@ -48,6 +59,10 @@ export type AccountStatementDocument = {
   title: string;
   clientName: string;
   clientSlug?: string | null;
+  /** Primary contact when available — display only. */
+  contactName?: string | null;
+  /** Optional commercial relationship / agreement title. */
+  agreementTitle?: string | null;
   /** ISO calendar date YYYY-MM-DD — as-of date for this snapshot */
   statementDate: string;
   currency: "USD";
@@ -62,6 +77,15 @@ export type AccountStatementDocument = {
     currentChargesCents: Cents;
     totalOutstandingLabel: string;
     totalOutstandingCents: Cents;
+    /** All-account payments received (project + service + addon). */
+    accountPaymentsReceivedLabel: string;
+    accountPaymentsReceivedCents: Cents;
+  };
+  openBalances: {
+    sectionTitle: string;
+    items: AccountStatementOpenBalance[];
+    totalRemainingLabel: string;
+    totalRemainingCents: Cents;
   };
   paymentHistory: {
     sectionTitle: string;

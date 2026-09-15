@@ -10,6 +10,7 @@ export const COMMERCIAL_SECTIONS = [
   "invoices",
   "payments",
   "receipts",
+  "statements",
   "authorizations",
   "documents",
   "timeline",
@@ -22,6 +23,7 @@ export type CommercialDocumentKindLabel =
   | "Proposal"
   | "Invoice"
   | "Receipt"
+  | "Account statement"
   | "Authorization evidence"
   | "Billing summary"
   | "Execution certificate"
@@ -236,6 +238,48 @@ export interface CommercialRecurringServiceTarget {
   internalNotes: string | null;
 }
 
+export interface CommercialStatementOpenBalanceRow {
+  id: string;
+  description: string;
+  originalLabel: string;
+  paidLabel: string;
+  remainingLabel: string;
+  dueDate: string | null;
+  statusLabel: string;
+}
+
+export interface CommercialStatementPaymentRow {
+  id: string;
+  paidOn: string;
+  label: string;
+  detail: string | null;
+  amountLabel: string;
+}
+
+export interface CommercialStatementSnapshot {
+  statementDate: string;
+  clientName: string;
+  contactName: string | null;
+  agreementTitle: string | null;
+  currency: "USD";
+  summary: {
+    originalProjectLabel: string;
+    originalProjectValue: string;
+    accountPaymentsReceivedLabel: string;
+    accountPaymentsReceivedValue: string;
+    projectBalanceLabel: string;
+    projectBalanceValue: string;
+    currentChargesLabel: string;
+    currentChargesValue: string;
+    totalOutstandingLabel: string;
+    totalOutstandingValue: string;
+  };
+  openBalances: CommercialStatementOpenBalanceRow[];
+  payments: CommercialStatementPaymentRow[];
+  totalOutstandingCents: number;
+  pdfHref: string;
+}
+
 export interface ClientCommercialWorkspaceSnapshot {
   clientId: number;
   overview: CommercialOverviewSnapshot;
@@ -246,6 +290,8 @@ export interface ClientCommercialWorkspaceSnapshot {
   invoices: CommercialInvoiceRow[];
   receipts: CommercialReceiptRow[];
   timeline: CommercialTimelineRow[];
+  /** Live current account statement derived from ledger obligations. */
+  statement: CommercialStatementSnapshot | null;
   primaryAgreementId: number | null;
   externalPaymentEligibleAgreements: CommercialExternalPaymentEligibleAgreement[];
   /** Agreements with open billing-plan obligations eligible for obligation-level Record Payment. */

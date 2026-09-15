@@ -9,6 +9,7 @@ export type {
   AccountStatementClosingNote,
   AccountStatementDocument,
   AccountStatementMoneyLine,
+  AccountStatementOpenBalance,
   AccountStatementPayment,
   AccountStatementServiceCharge,
 } from "./types";

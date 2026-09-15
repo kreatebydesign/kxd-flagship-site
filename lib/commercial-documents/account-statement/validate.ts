@@ -74,6 +74,43 @@ export function validateAccountStatement(
     );
   }
 
+  const openBalances = doc.openBalances;
+  if (!openBalances) {
+    issues.push("Open balances section is required.");
+  } else {
+    const openSum = addCents(...openBalances.items.map((item) => item.remainingCents));
+    if (openSum !== openBalances.totalRemainingCents) {
+      issues.push(
+        `Open balances total ${openBalances.totalRemainingCents} ≠ sum of remaining ${openSum}`,
+      );
+    }
+    if (openBalances.totalRemainingCents !== summary.totalOutstandingCents) {
+      issues.push(
+        `Open balances total ${openBalances.totalRemainingCents} ≠ summary outstanding ${summary.totalOutstandingCents}`,
+      );
+    }
+    for (const item of openBalances.items) {
+      const expectedRemaining = item.originalCents - item.paidCents;
+      if (item.remainingCents !== expectedRemaining) {
+        issues.push(
+          `Open balance ${item.id} remaining ${item.remainingCents} ≠ original ${item.originalCents} − paid ${item.paidCents}`,
+        );
+      }
+      if (item.remainingCents <= 0) {
+        issues.push(`Open balance ${item.id} must have remaining > 0.`);
+      }
+    }
+  }
+
+  if (
+    summary.accountPaymentsReceivedCents != null &&
+    summary.accountPaymentsReceivedCents !== paymentHistory.totalReceivedCents
+  ) {
+    issues.push(
+      `Account payments ${summary.accountPaymentsReceivedCents} ≠ history total ${paymentHistory.totalReceivedCents}`,
+    );
+  }
+
   return issues;
 }
 

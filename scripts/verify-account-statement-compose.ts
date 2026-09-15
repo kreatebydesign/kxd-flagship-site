@@ -267,6 +267,12 @@ check("G. Platinum-shaped regression totals + open invoice", () => {
   assert.equal(document.summary.projectBalanceCents, 60_000);
   assert.equal(document.summary.currentChargesCents, 63_518);
   assert.equal(document.summary.totalOutstandingCents, 123_518);
+  assert.equal(document.openBalances.totalRemainingCents, 123_518);
+  assert.equal(
+    document.openBalances.items.reduce((sum, item) => sum + item.remainingCents, 0),
+    123_518,
+  );
+  assert.equal(document.summary.accountPaymentsReceivedCents, 190_000);
   assert.match(
     document.currentCharges.existingInvoiceNote ?? "",
     /ZQI8LPUG-0002/,
@@ -341,6 +347,48 @@ check("I. statement never uses open invoice existence as paid evidence", () => {
     JSON.stringify(withOpen.document),
     banned,
   );
+});
+
+check("J. open balances remaining sum equals outstanding", () => {
+  const obligations = [
+    obl({
+      id: "final-open",
+      kind: "final",
+      label: "Final Payment",
+      amountCents: 62_500,
+      status: "partially-paid",
+      paymentEvents: [
+        event({
+          id: "pe1",
+          paymentGroupId: "g1",
+          amountCents: 32_500,
+          paidAt: "2026-09-14T00:00:00.000Z",
+        }),
+      ],
+    }),
+    obl({
+      id: "host",
+      kind: "addon",
+      label: "Hosting",
+      amountCents: 29_999,
+      status: "pending-trigger",
+    }),
+  ];
+  const { document } = composeAccountStatement({
+    id: "t-j",
+    clientName: "Test",
+    statementDate: "2026-09-15",
+    obligations,
+  });
+  assert.equal(document.openBalances.items.length, 2);
+  assert.equal(document.openBalances.items[0]!.paidCents, 32_500);
+  assert.equal(document.openBalances.items[0]!.remainingCents, 30_000);
+  assert.equal(document.openBalances.totalRemainingCents, 59_999);
+  assert.equal(
+    document.openBalances.totalRemainingCents,
+    document.summary.totalOutstandingCents,
+  );
+  assert.equal(validateAccountStatement(document).length, 0);
 });
 
 console.log(`\n${passed} checks passed`);

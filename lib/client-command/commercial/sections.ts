@@ -10,6 +10,7 @@ export const COMMERCIAL_SECTION_LABELS: Record<CommercialSectionId, string> = {
   invoices: "Invoices",
   payments: "Payments",
   receipts: "Receipts",
+  statements: "Statements",
   authorizations: "Authorizations",
   documents: "Documents",
   timeline: "Timeline",
