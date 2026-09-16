@@ -649,6 +649,13 @@ export async function loadClientCommercialWorkspace(input: {
       currentChargesValue: formatCents(
         statementView.document.summary.currentChargesCents as never,
       ),
+      currentChargeLines: statementView.document.summary.currentChargeLines.map(
+        (line) => ({
+          id: line.id,
+          label: line.label,
+          amountLabel: formatCents(line.amountCents as never),
+        }),
+      ),
       totalOutstandingLabel: statementView.document.summary.totalOutstandingLabel,
       totalOutstandingValue: formatCents(
         statementView.document.summary.totalOutstandingCents as never,

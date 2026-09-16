@@ -84,8 +84,19 @@ export type AccountStatementDocument = {
     paymentsReceivedCents: Cents;
     projectBalanceLabel: string;
     projectBalanceCents: Cents;
+    /**
+     * Legacy single-label aggregate for currently-due non-project charges.
+     * Prefer `currentChargeLines` for client-facing presentation.
+     * When one charge exists, this matches that charge’s label.
+     */
     currentChargesLabel: string;
     currentChargesCents: Cents;
+    /**
+     * Explanatory currently-due non-project charge lines.
+     * Sum MUST equal `currentChargesCents`. Never invents new balances —
+     * same obligation remainings already counted in openBalances / finalPosition.
+     */
+    currentChargeLines: AccountStatementMoneyLine[];
     totalOutstandingLabel: string;
     totalOutstandingCents: Cents;
     /** All-account payments received (project + service + addon). */

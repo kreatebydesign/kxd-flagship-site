@@ -273,6 +273,8 @@ export interface CommercialStatementSnapshot {
     projectBalanceValue: string;
     currentChargesLabel: string;
     currentChargesValue: string;
+    /** Explicit currently-due service lines from the canonical statement. */
+    currentChargeLines: Array<{ id: string; label: string; amountLabel: string }>;
     totalOutstandingLabel: string;
     totalOutstandingValue: string;
   };

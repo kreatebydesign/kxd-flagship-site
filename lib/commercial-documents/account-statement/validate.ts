@@ -52,6 +52,24 @@ export function validateAccountStatement(
     );
   }
 
+  const chargeLines = summary.currentChargeLines ?? [];
+  const chargeLinesSum = addCents(...chargeLines.map((line) => line.amountCents));
+  if (chargeLinesSum !== summary.currentChargesCents) {
+    issues.push(
+      `Summary currentChargeLines ${chargeLinesSum} ≠ currentChargesCents ${summary.currentChargesCents}`,
+    );
+  }
+  if (chargeLines.length !== currentCharges.items.length) {
+    issues.push(
+      `Summary currentChargeLines count ${chargeLines.length} ≠ currentCharges.items ${currentCharges.items.length}`,
+    );
+  }
+  for (const line of chargeLines) {
+    if (!line.label.trim() || /infrastructure|miscellaneous|ancillary|other charges/i.test(line.label)) {
+      issues.push(`Vague or empty current charge label: ${line.label || "(empty)"}`);
+    }
+  }
+
   const finalSum = addCents(...finalPosition.lines.map((l) => l.amountCents));
   if (finalSum !== finalPosition.totalCents) {
     issues.push(

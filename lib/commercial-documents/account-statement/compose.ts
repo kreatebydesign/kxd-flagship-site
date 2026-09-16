@@ -132,12 +132,53 @@ function periodLabelFor(obligation: InvoiceObligation): string {
   return "Current";
 }
 
-function serviceTitleFor(obligation: InvoiceObligation): string {
-  return (
-    obligation.serviceTitle?.trim() ||
-    obligation.label.replace(/\s—\s.*$/, "").trim() ||
-    obligation.label
+/**
+ * Client-facing label for a currently-due non-project charge.
+ * Prefer the obligation label (already commercial copy) over stripped titles.
+ */
+export function clientFacingServiceChargeLabel(
+  obligation: InvoiceObligation,
+): string {
+  const label = obligation.label?.trim() || "";
+  if (label) return label;
+  const serviceTitle = obligation.serviceTitle?.trim() || "";
+  if (serviceTitle) return serviceTitle;
+  return "Current service charge";
+}
+
+/**
+ * Build Final Account Position lines from currently-due obligations.
+ * Project remainings roll into one project-balance line; services stay explicit.
+ */
+export function buildFinalAccountPositionLines(
+  currentlyDueOpen: InvoiceObligation[],
+  projectBalanceLabel: string,
+): AccountStatementMoneyLine[] {
+  const lines: AccountStatementMoneyLine[] = [];
+  const projectDue = currentlyDueOpen.filter(isProjectObligation);
+  const projectDueCents = projectDue.reduce(
+    (sum, obligation) => sum + obligationRemainingCents(obligation),
+    0,
   );
+  if (projectDueCents > 0) {
+    lines.push({
+      id: "final-project-balance",
+      label: projectBalanceLabel,
+      amountCents: projectDueCents as Cents,
+    });
+  }
+  for (const obligation of currentlyDueOpen.filter(
+    (item) => !isProjectObligation(item),
+  )) {
+    const remaining = obligationRemainingCents(obligation);
+    if (remaining <= 0) continue;
+    lines.push({
+      id: `final-${obligation.id}`,
+      label: clientFacingServiceChargeLabel(obligation),
+      amountCents: remaining as Cents,
+    });
+  }
+  return lines;
 }
 
 function buildOpenInvoiceNote(
@@ -254,7 +295,7 @@ export function composeAccountStatement(
     .filter((obligation) => obligationRemainingCents(obligation) > 0)
     .map((obligation) => ({
       id: obligation.id,
-      title: serviceTitleFor(obligation),
+      title: clientFacingServiceChargeLabel(obligation),
       periodLabel: periodLabelFor(obligation),
       amountCents: obligationRemainingCents(obligation) as Cents,
       description: obligation.serviceDescription?.trim() || null,
@@ -264,6 +305,19 @@ export function composeAccountStatement(
     (sum, item) => sum + item.amountCents,
     0,
   );
+  const currentChargeLines: AccountStatementMoneyLine[] = currentChargeItems.map(
+    (item) => ({
+      id: `summary-charge-${item.id}`,
+      label: item.title,
+      amountCents: item.amountCents,
+    }),
+  );
+  const currentChargesLabel =
+    currentChargeLines.length === 1
+      ? currentChargeLines[0]!.label
+      : currentChargeLines.length === 0
+        ? "Current service charges"
+        : "Current service charges";
 
   const openWithRemaining = obligations.filter(
     (obligation) => obligationRemainingCents(obligation) > 0,
@@ -287,13 +341,11 @@ export function composeAccountStatement(
 
   const totalOutstandingCents = sumCurrentlyOutstandingCents(obligations, asOfDate);
 
-  const finalLines: AccountStatementMoneyLine[] = currentlyDueOpen.map((obligation) => ({
-    id: `final-${obligation.id}`,
-    label: isProjectObligation(obligation)
-      ? obligation.label
-      : serviceTitleFor(obligation),
-    amountCents: obligationRemainingCents(obligation) as Cents,
-  }));
+  const projectBalanceLabel = "Website Project Balance";
+  const finalLines = buildFinalAccountPositionLines(
+    currentlyDueOpen,
+    projectBalanceLabel,
+  );
 
   const closingNotes: AccountStatementClosingNote[] = [...(input.closingNotes ?? [])];
   if (openInvoice && openInvoiceAmountDueCents != null && openInvoiceAmountDueCents > 0) {
@@ -332,11 +384,12 @@ export function composeAccountStatement(
       originalProjectCents: projectTotalCents as Cents,
       paymentsReceivedLabel: "Website Project Payments Received",
       paymentsReceivedCents: projectPaidCents as Cents,
-      projectBalanceLabel: "Website Project Balance",
+      projectBalanceLabel,
       projectBalanceCents: projectRemainingCents as Cents,
-      currentChargesLabel: "Current Service / Infrastructure Charges",
+      currentChargesLabel,
       currentChargesCents: currentChargesCents as Cents,
-      totalOutstandingLabel: "Total Currently Outstanding",
+      currentChargeLines,
+      totalOutstandingLabel: "Total Currently Due",
       totalOutstandingCents: totalOutstandingCents as Cents,
       accountPaymentsReceivedLabel: "Total Payments Received",
       accountPaymentsReceivedCents: paymentsReceivedAllCents as Cents,
@@ -344,7 +397,7 @@ export function composeAccountStatement(
     openBalances: {
       sectionTitle: "Currently Due",
       items: openBalanceItems,
-      totalRemainingLabel: "Total currently outstanding",
+      totalRemainingLabel: "Total currently due",
       totalRemainingCents: totalOutstandingCents as Cents,
       upcomingSectionTitle: "Upcoming / Not Yet Due",
       upcomingItems: upcomingBalanceItems,
@@ -358,16 +411,16 @@ export function composeAccountStatement(
       remainingCents: projectRemainingCents as Cents,
     },
     currentCharges: {
-      sectionTitle: "Current Services & Infrastructure",
+      sectionTitle: "Current Services",
       items: currentChargeItems,
-      subtotalLabel: "Current service / infrastructure charges",
+      subtotalLabel: "Current service charges",
       subtotalCents: currentChargesCents as Cents,
       existingInvoiceNote: invoiceNote,
     },
     finalPosition: {
       sectionTitle: "Final Account Position",
       lines: finalLines,
-      totalLabel: "Total Currently Outstanding",
+      totalLabel: "Total Currently Due",
       totalCents: totalOutstandingCents as Cents,
     },
     closingNotes,
