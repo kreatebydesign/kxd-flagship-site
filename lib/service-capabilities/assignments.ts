@@ -50,6 +50,8 @@ export function mapServiceAssignmentDoc(doc: AnyDoc): ClientServiceAssignmentRec
     endedAt: asIso(doc.endedAt),
     relatedContractId: relId(doc.relatedContract),
     note: typeof doc.note === "string" && doc.note.trim() ? doc.note.trim() : null,
+    // Legacy rows omit the field — treat as true so existing CES behavior holds.
+    drivesExperience: doc.drivesExperience === false ? false : true,
   };
 }
 
@@ -101,6 +103,8 @@ export async function activateClientService(input: {
   source?: ServiceAssignmentSource;
   note?: string | null;
   relatedContractId?: number | null;
+  /** Default true for manual/experience paths; bridge sets false. */
+  drivesExperience?: boolean;
 }): Promise<ClientServiceAssignmentRecord> {
   const def = getServiceCapability(input.capabilityId);
   if (!def) throw new Error("Unknown service capability.");
@@ -125,6 +129,8 @@ export async function activateClientService(input: {
     input.source ??
     mappedCurrent?.source ??
     (def.kind === "add-on" ? "add-on" : "legacy-manual");
+  const nextDrivesExperience =
+    input.drivesExperience ?? mappedCurrent?.drivesExperience ?? true;
   const plan = planServiceActivation({
     active: mappedCurrent,
     nextSource,
@@ -138,6 +144,7 @@ export async function activateClientService(input: {
       data: {
         note: input.note ?? current?.note ?? null,
         relatedContract: input.relatedContractId ?? relId(current?.relatedContract),
+        drivesExperience: nextDrivesExperience,
       },
       overrideAccess: true,
     })) as AnyDoc;
@@ -165,6 +172,7 @@ export async function activateClientService(input: {
       effectiveAt: new Date().toISOString(),
       note: input.note ?? null,
       relatedContract: input.relatedContractId ?? undefined,
+      drivesExperience: nextDrivesExperience,
     },
     overrideAccess: true,
   })) as AnyDoc;

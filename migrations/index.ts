@@ -109,6 +109,7 @@ import * as migration_20260807_junior_creator_timer_safety from './20260807_juni
 import * as migration_20260823_client_site_events from './20260823_client_site_events';
 import * as migration_20260824_csi_v1b_sale_commission from './20260824_csi_v1b_sale_commission';
 import * as migration_20260825_client_service_assignments from './20260825_client_service_assignments';
+import * as migration_20260916_mission01_capability_bridge from './20260916_mission01_capability_bridge';
 
 export const migrations = [
   {
@@ -699,5 +700,11 @@ export const migrations = [
     up: migration_20260912_kxd_acquisition_persistence.up,
     down: migration_20260912_kxd_acquisition_persistence.down,
     name: '20260912_kxd_acquisition_persistence',
+  },
+  {
+    // Mission 01: media_vault capability + drives_experience on assignments.
+    up: migration_20260916_mission01_capability_bridge.up,
+    down: migration_20260916_mission01_capability_bridge.down,
+    name: '20260916_mission01_capability_bridge',
   },
 ];

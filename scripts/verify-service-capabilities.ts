@@ -227,6 +227,7 @@ const withAds = resolveServiceScope({
       endedAt: null,
       relatedContractId: null,
       note: null,
+      drivesExperience: true,
     } satisfies ClientServiceAssignmentRecord,
   ],
 });
@@ -244,6 +245,7 @@ const expired = resolveServiceScope({
       endedAt: "2025-01-01T00:00:00.000Z",
       relatedContractId: null,
       note: null,
+      drivesExperience: true,
     },
   ],
 });
@@ -298,6 +300,12 @@ check(
     read("migrations/20260825_client_service_assignments.ts").includes("CREATE TABLE IF NOT EXISTS"),
 );
 check(
+  "mission-01 capability bridge migration registered",
+  read("migrations/index.ts").includes("20260916_mission01_capability_bridge") &&
+    read("migrations/20260916_mission01_capability_bridge.ts").includes("media_vault") &&
+    read("migrations/20260916_mission01_capability_bridge.ts").includes("drives_experience"),
+);
+check(
   "collection preserves history by refusing deletes",
   read("payload/collections/ClientServiceAssignments.ts").includes("delete: () => false") &&
     read("payload/collections/ClientServiceAssignments.ts").includes("beforeDelete"),
@@ -327,6 +335,7 @@ const legacyRow = {
   endedAt: null,
   relatedContractId: null,
   note: null,
+  drivesExperience: true,
 };
 check(
   "legacy-manual can exist without a contract reference",

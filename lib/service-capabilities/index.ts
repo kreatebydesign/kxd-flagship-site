@@ -25,3 +25,13 @@ export {
 } from "./resolve";
 export { recommendFromCapabilities } from "./recommend-from-capabilities";
 export { GROWTH_INFRASTRUCTURE_SHOWROOM_SCOPE } from "./fixtures";
+export {
+  proposeCapabilitiesFromEngagement,
+  buildBridgeAssignmentNote,
+  ENGAGEMENT_BRIDGE_NOTE_PREFIX,
+} from "./propose-from-engagement";
+export type {
+  EngagementCapabilityProposal,
+  ProposedCapabilityMapping,
+  CapabilityMappingConfidence,
+} from "./propose-from-engagement";

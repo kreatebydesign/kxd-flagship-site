@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { PortalPreviewQuickAction } from "./PortalPreviewQuickAction";
+import { EngagementCapabilityBridge } from "./EngagementCapabilityBridge";
 import type {
   ExperienceDependency,
   ExperienceDiscoverKind,
@@ -504,6 +505,14 @@ export function ClientExperienceComposer({
           {notice}
         </p>
       ) : null}
+
+      <EngagementCapabilityBridge
+        clientId={clientId}
+        onApplied={(nextScope) => {
+          setScope(nextScope);
+          void generate({ preserveFeedback: true });
+        }}
+      />
 
       <h3 className="kxd-ces-exp__h">Active services</h3>
       <ul className="kxd-ces-exp__modules">

@@ -10,11 +10,15 @@ import {
   contractedValueFromContract,
   shouldIncludeRevenueEventInLifetimeValue,
 } from "./contract-value";
+import {
+  monthlyDollarsFromRetainer,
+  relClientId,
+  resolveClientRecurringCommercialTruth,
+} from "./recurring-commercial-truth";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDoc = Record<string, any>;
 
-const ACTIVE_RETAINER_STATUSES = new Set(["current", "active", "upcoming"]);
 const ACTIVE_CLIENT_STATUSES = new Set(["active"]);
 
 function proposalAmounts(doc: AnyDoc): { oneTime: number; recurring: number } {
@@ -30,12 +34,21 @@ function proposalAmounts(doc: AnyDoc): { oneTime: number; recurring: number } {
   return { oneTime, recurring };
 }
 
+/** @deprecated Prefer monthlyDollarsFromRetainer — retained for call-site compatibility. */
 function monthlyFromRetainer(doc: AnyDoc): number {
-  const amount = Number(doc.monthlyAmount ?? 0);
-  const cadence = String(doc.billingCadence ?? "monthly");
-  if (cadence === "quarterly") return amount / 3;
-  if (cadence === "annual") return amount / 12;
-  return amount;
+  return monthlyDollarsFromRetainer(doc);
+}
+
+function groupDocsByClientId(docs: AnyDoc[]): Map<number, AnyDoc[]> {
+  const map = new Map<number, AnyDoc[]>();
+  for (const doc of docs) {
+    const clientId = relClientId(doc.client);
+    if (clientId == null) continue;
+    const list = map.get(clientId) ?? [];
+    list.push(doc);
+    map.set(clientId, list);
+  }
+  return map;
 }
 
 export async function buildExecutiveFinancialMetrics(
@@ -87,29 +100,48 @@ export async function buildExecutiveFinancialMetrics(
   const revenueByClient = new Map<number, { clientName: string; mrr: number; total: number }>();
   const revenueByServiceType = new Map<string, number>();
 
-  for (const retainer of retainers) {
-    const status = String(retainer.billingStatus ?? "");
-    if (!ACTIVE_RETAINER_STATUSES.has(status)) continue;
-    const monthly = monthlyFromRetainer(retainer);
-    if (monthly <= 0) continue;
-    activeRetainers += 1;
-    mrr += monthly;
-
-    const clientId = relId(retainer.client);
-    if (clientId) {
-      const clientName =
-        typeof retainer.client === "object" && retainer.client !== null
-          ? String((retainer.client as AnyDoc).name ?? "Client")
-          : "Client";
-      const existing = revenueByClient.get(clientId) ?? {
-        clientName,
-        mrr: 0,
-        total: 0,
-      };
-      existing.mrr += monthly;
-      existing.total += monthly * 12;
-      revenueByClient.set(clientId, existing);
+  const retainersByClient = groupDocsByClientId(retainers);
+  const contractsByClient = groupDocsByClientId(contracts);
+  const clientNameById = new Map<number, string>();
+  for (const client of clients) {
+    const id = Number(client.id);
+    if (Number.isFinite(id)) {
+      clientNameById.set(id, String(client.name ?? "Client"));
     }
+  }
+  for (const retainer of retainers) {
+    const clientId = relId(retainer.client);
+    if (!clientId || clientNameById.has(clientId)) continue;
+    if (typeof retainer.client === "object" && retainer.client !== null) {
+      clientNameById.set(clientId, String((retainer.client as AnyDoc).name ?? "Client"));
+    }
+  }
+
+  const allClientIds = new Set<number>([
+    ...retainersByClient.keys(),
+    ...contractsByClient.keys(),
+  ]);
+
+  for (const clientId of allClientIds) {
+    const truth = resolveClientRecurringCommercialTruth({
+      clientId,
+      retainerDocs: retainersByClient.get(clientId) ?? [],
+      contractPackages: (contractsByClient.get(clientId) ?? []).map(
+        (doc) => doc.lifecyclePackage,
+      ),
+    });
+    const monthly = truth.portfolioMrrDollars;
+    if (monthly <= 0) continue;
+    activeRetainers += Math.max(truth.activeServiceCount, truth.retainerMonthlyDollars > 0 ? 1 : 0);
+    mrr += monthly;
+    const existing = revenueByClient.get(clientId) ?? {
+      clientName: clientNameById.get(clientId) ?? "Client",
+      mrr: 0,
+      total: 0,
+    };
+    existing.mrr += monthly;
+    existing.total += monthly * 12;
+    revenueByClient.set(clientId, existing);
   }
 
   let oneTimeProjectRevenue = 0;
@@ -298,12 +330,20 @@ export async function buildClientFinancialMetrics(
   const now = Date.now();
   const renewalWindow = now + 60 * 24 * 60 * 60 * 1000;
 
-  for (const retainer of retainersR.docs as AnyDoc[]) {
-    const status = String(retainer.billingStatus ?? "");
-    if (ACTIVE_RETAINER_STATUSES.has(status)) {
-      mrr += monthlyFromRetainer(retainer);
-      activeRetainers += 1;
-    }
+  const retainerDocs = retainersR.docs as AnyDoc[];
+  const contractDocs = contractsR.docs as AnyDoc[];
+  const truth = resolveClientRecurringCommercialTruth({
+    clientId,
+    retainerDocs,
+    contractPackages: contractDocs.map((doc) => doc.lifecyclePackage),
+  });
+  mrr = truth.portfolioMrrDollars;
+  activeRetainers = Math.max(
+    truth.activeServiceCount,
+    truth.retainerMonthlyDollars > 0 ? 1 : 0,
+  );
+
+  for (const retainer of retainerDocs) {
     if (retainer.renewalDate) {
       const renewal = new Date(String(retainer.renewalDate)).getTime();
       if (renewal < now) renewalStatus = "overdue";

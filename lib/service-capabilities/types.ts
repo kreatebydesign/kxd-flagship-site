@@ -12,11 +12,12 @@ export const SERVICE_CAPABILITY_IDS = [
   "google_ads_management",
   "active_growth_campaign",
   "performance_component",
+  "media_vault",
 ] as const;
 
 export type ServiceCapabilityId = (typeof SERVICE_CAPABILITY_IDS)[number];
 
-export type ServiceCapabilityKind = "included" | "add-on" | "performance";
+export type ServiceCapabilityKind = "included" | "add-on" | "performance" | "resource";
 
 export type ServiceAssignmentSource = "agreement" | "legacy-manual" | "included" | "add-on";
 
@@ -43,6 +44,11 @@ export type ClientServiceAssignmentRecord = {
   endedAt: string | null;
   relatedContractId: number | null;
   note: string | null;
+  /**
+   * When false, assignment is commercial scope only and must not grant portal
+   * modules. Missing/undefined treated as true for legacy rows.
+   */
+  drivesExperience: boolean;
 };
 
 export type ResolvedServiceScope = {

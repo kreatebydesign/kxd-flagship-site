@@ -105,6 +105,16 @@ export const SERVICE_CAPABILITY_CATALOG: readonly ServiceCapabilityDefinition[] 
     grantsReporting: [],
     affectsExperience: false,
   },
+  {
+    id: "media_vault",
+    label: "KXD Media Vault",
+    summary:
+      "Private media storage resource entitlement (capacity/commercial scope). Does not grant portal modules until a Media Vault portal surface exists.",
+    kind: "resource",
+    grantsModules: [],
+    grantsReporting: [],
+    affectsExperience: false,
+  },
 ];
 
 const BY_ID = new Map(SERVICE_CAPABILITY_CATALOG.map((entry) => [entry.id, entry]));
