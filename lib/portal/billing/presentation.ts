@@ -189,8 +189,11 @@ function projectPaymentRow(
   if (detail) {
     const parts = detail.split(" · ").map((part) => part.trim()).filter(Boolean);
     methodLabel = parts[0] || null;
-    const rest = parts.slice(1).join(" · ");
-    referenceDetail = rest || null;
+    const rest = parts.slice(1).join(" · ").trim();
+    /* Defense in depth: never surface raw Stripe object ids in portal history. */
+    if (rest && !/^Ref\s+(in|pi|ch|cs|txn|py)_[A-Za-z0-9]+$/i.test(rest)) {
+      referenceDetail = rest;
+    }
   }
 
   return {

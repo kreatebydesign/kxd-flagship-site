@@ -36,6 +36,7 @@ import {
   ROBIN_COLE_LOGO_SRC,
   ROBIN_COLE_SIDEBAR_LOGO_SRC,
 } from "./robin-cole";
+import { resolveLogoOnDarkTreatment } from "./logo-contrast";
 import { resolveMediaAssetUrl } from "@/lib/client-command/experience/media-url";
 import { generatePayloadMediaFileUrl } from "@/lib/media/payload-storage";
 
@@ -155,6 +156,11 @@ function finalizeProfile(profile: ResolvedExperienceProfile): ResolvedExperience
   }
   /* Re-apply after presentation merge so Robin still wins when registry is empty. */
   ensureRobinColeBrand(profile);
+  profile.identity.logoOnDarkTreatment = resolveLogoOnDarkTreatment({
+    clientSlug: profile.identity.clientSlug,
+    clientName: profile.identity.clientName,
+    configured: profile.identity.logoOnDarkTreatment ?? null,
+  });
   profile.cssVars = {
     ...experienceProfileToCssVars(profile.visual),
     ...(presentation
@@ -247,6 +253,10 @@ export async function resolveExperienceProfile(
     logoUrl: null as string | null,
     logoAlt: clientName,
     websiteUrl,
+    logoOnDarkTreatment: resolveLogoOnDarkTreatment({
+      clientSlug,
+      clientName,
+    }),
   };
 
   const draft = session.isOperatorPreview

@@ -29,6 +29,9 @@ export interface ExperienceHospitality {
   showPartnerMark: boolean;
 }
 
+/** How the client logo rests on dark portal chrome (presentation only). */
+export type LogoOnDarkTreatment = "default" | "light-panel";
+
 export interface ExperienceIdentity {
   clientId: number;
   clientName: string;
@@ -36,6 +39,11 @@ export interface ExperienceIdentity {
   logoUrl: string | null;
   logoAlt: string;
   websiteUrl: string | null;
+  /**
+   * Dark sidebar contrast strategy for the brand mark.
+   * `light-panel` places a calm light surface behind dark wordmarks.
+   */
+  logoOnDarkTreatment?: LogoOnDarkTreatment;
 }
 
 export interface ExperienceVisual {

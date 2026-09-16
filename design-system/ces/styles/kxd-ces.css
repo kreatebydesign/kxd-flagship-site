@@ -3490,6 +3490,17 @@
   opacity: 0.98;
 }
 
+/* Dark wordmarks on dark sidebar: calm light resting surface (no invert). */
+.kxd-ces-identity--logo-light-panel .kxd-ces-identity__logo {
+  box-sizing: border-box;
+  width: fit-content;
+  max-width: 100%;
+  padding: 0.55rem 0.7rem;
+  border-radius: 0.55rem;
+  background: color-mix(in srgb, #ffffff 94%, var(--kxd-ces-brand, #e8e4dc) 6%);
+  box-shadow: 0 0 0 1px color-mix(in srgb, #ffffff 18%, transparent);
+}
+
 .kxd-ces-identity__name {
   font-family: var(--kxd-os-font-serif);
   font-size: 1.05rem;

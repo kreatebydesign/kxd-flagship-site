@@ -173,6 +173,11 @@ check("de Bois-shaped currently due + paid to date + upcoming", () => {
   assert.match(view.upcomingItems[0]!.dueLabel ?? "", /launch/i);
   assert.equal(view.paymentHistory.length, 3);
   assert.equal(view.statementPdfHref, "/api/portal/billing/account-statement/pdf");
+  for (const row of view.paymentHistory) {
+    assert.doesNotMatch(row.label, /Final Payment/i);
+    assert.match(row.label, /Website Design & Development — Project Payment/);
+    assert.equal(row.detail, null);
+  }
 
   const payload = JSON.stringify(view);
   for (const forbidden of PORTAL_LEDGER_FORBIDDEN_PAYLOAD_KEYS) {
@@ -281,6 +286,93 @@ check("Platinum statement projection stays statement-parity", () => {
     // retained for ledger parity; not rendered in portal summary UI
     view.paidToDateLabel,
   );
+  for (const row of view.paymentHistory) {
+    assert.doesNotMatch(row.label, /;\s*/);
+    assert.doesNotMatch(row.label, /Final Payment/i);
+    assert.equal(row.detail?.includes("in_") ?? false, false);
+  }
+  const finalOpen = view.currentlyDue.find((row) =>
+    /Final/i.test(row.description),
+  );
+  assert.ok(finalOpen);
+  assert.match(finalOpen!.statusLabel ?? "", /Partially Paid/i);
+  assert.equal(finalOpen!.remainingLabel, "$600.00");
+});
+
+check("multi-obligation Sep payment never implies Final Payment was made", () => {
+  const obligations: InvoiceObligation[] = [
+    obl({
+      id: "progress",
+      kind: "milestone",
+      label: "Website Design & Development — Progress Payment",
+      amountCents: 1500_00,
+      status: "paid",
+      amountPaidCents: 1500_00,
+      paymentEvents: [
+        event({
+          id: "sep-a",
+          paymentGroupId: "sep-2500",
+          amountCents: 1500_00,
+          paidAt: "2026-09-10T00:00:00.000Z",
+        }),
+      ],
+    }),
+    obl({
+      id: "final",
+      kind: "final",
+      label: "Website Design & Development — Final Payment",
+      amountCents: 3000_00,
+      status: "partially-paid",
+      amountPaidCents: 1000_00,
+      paymentEvents: [
+        event({
+          id: "sep-b",
+          paymentGroupId: "sep-2500",
+          amountCents: 1000_00,
+          paidAt: "2026-09-10T00:00:00.000Z",
+        }),
+      ],
+    }),
+    obl({
+      id: "vault",
+      kind: "addon",
+      label: "KXD Media Vault — 250 GB",
+      amountCents: 300_00,
+      status: "sent",
+      dueDate: "2026-09-01",
+    }),
+  ];
+
+  const composed = composeAccountStatement({
+    id: "multi-alloc",
+    clientName: "de Bois",
+    statementDate: "2026-09-15",
+    obligations,
+  });
+  const view = projectPortalLedgerBillingView({
+    document: composed.document,
+    clientLabel: "de Bois",
+  });
+  assert.equal(view.kind, "ready");
+  if (view.kind !== "ready") return;
+
+  assert.equal(view.paymentHistory.length, 1);
+  assert.equal(view.paymentHistory[0]!.amountLabel, "$2,500.00");
+  assert.equal(
+    view.paymentHistory[0]!.label,
+    "Website Design & Development — Project Payment",
+  );
+  assert.doesNotMatch(view.paymentHistory[0]!.label, /Final Payment/i);
+  assert.equal(view.currentlyDueLabel, "$2,300.00");
+
+  const finalRow = view.currentlyDue.find((row) =>
+    /Final Payment/i.test(row.description),
+  );
+  assert.ok(finalRow);
+  assert.equal(finalRow!.originalLabel, "$3,000.00");
+  assert.equal(finalRow!.paidLabel, "$1,000.00");
+  assert.equal(finalRow!.remainingLabel, "$2,000.00");
+  assert.equal(finalRow!.statusLabel, "Partially Paid");
 });
 
 check("portal UI omits paid-to-date and muddy status badges", () => {

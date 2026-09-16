@@ -148,6 +148,10 @@ export function ClientHqShell({
   const logoCarriesName = Boolean(
     clientLogo && labelsMatch(clientLogoAlt, displayName),
   );
+  const logoOnDarkTreatment =
+    experienceProfile?.identity.logoOnDarkTreatment ?? "default";
+  const logoNeedsLightPanel =
+    Boolean(clientLogo) && logoOnDarkTreatment === "light-panel";
 
   return (
     <>
@@ -206,7 +210,7 @@ export function ClientHqShell({
           <div
             className={`kxd-ces-identity${clientLogo ? " kxd-ces-identity--has-logo" : ""}${
               logoCarriesName ? " kxd-ces-identity--logo-wordmark" : ""
-            }`}
+            }${logoNeedsLightPanel ? " kxd-ces-identity--logo-light-panel" : ""}`}
           >
             {clientLogo ? (
               // eslint-disable-next-line @next/next/no-img-element
