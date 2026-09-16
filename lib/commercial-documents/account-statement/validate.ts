@@ -64,16 +64,8 @@ export function validateAccountStatement(
     );
   }
 
-  const expectedOutstanding = addCents(
-    summary.projectBalanceCents,
-    summary.currentChargesCents,
-  );
-  if (summary.totalOutstandingCents !== expectedOutstanding) {
-    issues.push(
-      `Outstanding ${summary.totalOutstandingCents} ≠ balance ${summary.projectBalanceCents} + charges ${summary.currentChargesCents}`,
-    );
-  }
-
+  // Currently outstanding is currently-due remaining only — not contractual
+  // project remaining + every future service charge.
   const openBalances = doc.openBalances;
   if (!openBalances) {
     issues.push("Open balances section is required.");
@@ -98,6 +90,21 @@ export function validateAccountStatement(
       }
       if (item.remainingCents <= 0) {
         issues.push(`Open balance ${item.id} must have remaining > 0.`);
+      }
+    }
+    const upcoming = openBalances.upcomingItems ?? [];
+    for (const item of upcoming) {
+      const expectedRemaining = item.originalCents - item.paidCents;
+      if (item.remainingCents !== expectedRemaining) {
+        issues.push(
+          `Upcoming balance ${item.id} remaining ${item.remainingCents} ≠ original ${item.originalCents} − paid ${item.paidCents}`,
+        );
+      }
+      if (item.remainingCents <= 0) {
+        issues.push(`Upcoming balance ${item.id} must have remaining > 0.`);
+      }
+      if (openBalances.items.some((current) => current.id === item.id)) {
+        issues.push(`Balance ${item.id} cannot be both currently due and upcoming.`);
       }
     }
   }

@@ -11,8 +11,11 @@ import { formatCents, type Cents } from "@/lib/proposal-builder/money";
 import {
   aggregateObligationBalances,
   formatObligationStatusLabel,
+  isLaunchGatedObligationTrigger,
+  isObligationCurrentlyOutstanding,
   obligationAmountPaidCents,
   obligationRemainingCents,
+  sumCurrentlyOutstandingCents,
   sumObligationAmountCents,
   sumObligationPaidCents,
   sumOpenObligationRemainingCents,
@@ -161,6 +164,37 @@ function buildPaymentDetail(
   return parts.length ? parts.join(" · ") : null;
 }
 
+function upcomingTimingNote(obligation: InvoiceObligation): string {
+  if (isLaunchGatedObligationTrigger(obligation.trigger)) {
+    return "Due at website launch";
+  }
+  if (obligation.dueDate) {
+    return `Due ${obligation.dueDate.slice(0, 10)}`;
+  }
+  return "Not yet due";
+}
+
+function toOpenBalanceRow(
+  obligation: InvoiceObligation,
+  options?: { timingNote?: string | null },
+): AccountStatementOpenBalance {
+  const paidCents = obligationAmountPaidCents(obligation);
+  const remainingCents = obligationRemainingCents(obligation);
+  return {
+    id: obligation.id,
+    description: obligation.label,
+    originalCents: obligation.amountCents as Cents,
+    paidCents: paidCents as Cents,
+    remainingCents: remainingCents as Cents,
+    dueDate: obligation.dueDate ?? null,
+    statusLabel: formatObligationStatusLabel(
+      paidCents > 0 && remainingCents > 0 ? "partially-paid" : obligation.status,
+    ),
+    kind: obligation.kind,
+    timingNote: options?.timingNote ?? null,
+  };
+}
+
 /**
  * Transform ledger obligations (+ optional open-invoice context)
  * into the existing AccountStatementDocument model.
@@ -170,6 +204,7 @@ export function composeAccountStatement(
 ): ComposeAccountStatementResult {
   const currency = input.currency ?? "USD";
   const obligations = input.obligations ?? [];
+  const asOfDate = input.statementDate;
   const projectObligations = obligations.filter(isProjectObligation);
   const serviceObligations = obligations.filter((o) => !isProjectObligation(o));
 
@@ -198,7 +233,10 @@ export function composeAccountStatement(
     0,
   );
 
-  const currentChargeItems: AccountStatementServiceCharge[] = serviceObligations
+  const currentlyDueServices = serviceObligations.filter((obligation) =>
+    isObligationCurrentlyOutstanding(obligation, asOfDate),
+  );
+  const currentChargeItems: AccountStatementServiceCharge[] = currentlyDueServices
     .filter((obligation) => obligationRemainingCents(obligation) > 0)
     .map((obligation) => ({
       id: obligation.id,
@@ -213,44 +251,32 @@ export function composeAccountStatement(
     0,
   );
 
-  const openBalanceItems: AccountStatementOpenBalance[] = obligations
-    .filter((obligation) => obligationRemainingCents(obligation) > 0)
-    .map((obligation) => {
-      const paidCents = obligationAmountPaidCents(obligation);
-      const remainingCents = obligationRemainingCents(obligation);
-      return {
-        id: obligation.id,
-        description: obligation.label,
-        originalCents: obligation.amountCents as Cents,
-        paidCents: paidCents as Cents,
-        remainingCents: remainingCents as Cents,
-        dueDate: obligation.dueDate ?? null,
-        statusLabel: formatObligationStatusLabel(
-          paidCents > 0 && remainingCents > 0
-            ? "partially-paid"
-            : obligation.status,
-        ),
-        kind: obligation.kind,
-      };
-    });
+  const openWithRemaining = obligations.filter(
+    (obligation) => obligationRemainingCents(obligation) > 0,
+  );
+  const currentlyDueOpen = openWithRemaining.filter((obligation) =>
+    isObligationCurrentlyOutstanding(obligation, asOfDate),
+  );
+  const upcomingOpen = openWithRemaining.filter(
+    (obligation) => !isObligationCurrentlyOutstanding(obligation, asOfDate),
+  );
 
-  const totalOutstandingCents = ledgerAgg.remainingCents;
+  const openBalanceItems = currentlyDueOpen.map((obligation) =>
+    toOpenBalanceRow(obligation),
+  );
+  const upcomingBalanceItems = upcomingOpen.map((obligation) =>
+    toOpenBalanceRow(obligation, { timingNote: upcomingTimingNote(obligation) }),
+  );
 
-  const finalLines: AccountStatementMoneyLine[] = [];
-  if (projectRemainingCents > 0) {
-    finalLines.push({
-      id: "final-project-remaining",
-      label: `${input.projectLabel ?? "Website Design & Development"} Remaining`,
-      amountCents: projectRemainingCents as Cents,
-    });
-  }
-  for (const item of currentChargeItems) {
-    finalLines.push({
-      id: `final-${item.id}`,
-      label: item.title,
-      amountCents: item.amountCents,
-    });
-  }
+  const totalOutstandingCents = sumCurrentlyOutstandingCents(obligations, asOfDate);
+
+  const finalLines: AccountStatementMoneyLine[] = currentlyDueOpen.map((obligation) => ({
+    id: `final-${obligation.id}`,
+    label: isProjectObligation(obligation)
+      ? obligation.label
+      : serviceTitleFor(obligation),
+    amountCents: obligationRemainingCents(obligation) as Cents,
+  }));
 
   const closingNotes: AccountStatementClosingNote[] = [...(input.closingNotes ?? [])];
   if (openInvoice && openInvoiceAmountDueCents != null && openInvoiceAmountDueCents > 0) {
@@ -293,10 +319,12 @@ export function composeAccountStatement(
       accountPaymentsReceivedCents: paymentsReceivedAllCents as Cents,
     },
     openBalances: {
-      sectionTitle: "Open Balances",
+      sectionTitle: "Currently Due",
       items: openBalanceItems,
-      totalRemainingLabel: "Current total outstanding",
+      totalRemainingLabel: "Total currently outstanding",
       totalRemainingCents: totalOutstandingCents as Cents,
+      upcomingSectionTitle: "Upcoming / Not Yet Due",
+      upcomingItems: upcomingBalanceItems,
     },
     paymentHistory: {
       sectionTitle: "Payment History",
@@ -316,7 +344,7 @@ export function composeAccountStatement(
     finalPosition: {
       sectionTitle: "Final Account Position",
       lines: finalLines,
-      totalLabel: "Total Outstanding",
+      totalLabel: "Total Currently Outstanding",
       totalCents: totalOutstandingCents as Cents,
     },
     closingNotes,

@@ -60,6 +60,9 @@ export {
   sumObligationPaidCents,
   aggregateObligationBalances,
   deriveObligationPaymentStatus,
+  isLaunchGatedObligationTrigger,
+  isObligationCurrentlyOutstanding,
+  sumCurrentlyOutstandingCents,
 } from "./obligation-balances.ts";
 export { applyStripeCollectedPaymentEvidence } from "./stripe-collected-payment-evidence.ts";
 export {

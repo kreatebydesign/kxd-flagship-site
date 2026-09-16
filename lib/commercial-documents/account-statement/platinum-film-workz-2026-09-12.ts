@@ -5,9 +5,10 @@
  * (read-only regression shape). No production values are hard-coded
  * into reusable compose logic.
  *
- * Verified as-of 2026-09-12:
- *   Total $3,135.18 · Paid $1,900.00 · Outstanding $1,235.18
- *   Open Stripe invoice ZQI8LPUG-0002 $635.18 (UNPAID)
+ * Verified as-of 2026-09-12 (contractual remaining includes launch-gated hosting):
+ *   Total $3,135.18 · Paid $1,900.00 · Contractual remaining $1,235.18
+ *   Currently outstanding excludes launch-gated hosting ($299.99) → $935.19
+ *   Open Stripe invoice ZQI8LPUG-0002 $635.18 (UNPAID) — invoice context only
  */
 
 import type { InvoiceObligation } from "@/lib/proposal-lifecycle/types";
@@ -198,6 +199,7 @@ export function buildPlatinumFilmWorkzLedgerObligations(): InvoiceObligation[] {
       label: "KXD Managed Website Hosting",
       amountCents: 29_999,
       status: "pending-trigger",
+      trigger: "website-launch",
       billingCadence: "annual",
       serviceTitle: "KXD Managed Website Hosting",
       stripeDraftInvoiceId: "in_1UBhgZH7v7C2pv8kAggKGDP0",
@@ -208,6 +210,7 @@ export function buildPlatinumFilmWorkzLedgerObligations(): InvoiceObligation[] {
       label: ".com Domain Registration",
       amountCents: 1_019,
       status: "pending-trigger",
+      dueDate: "2026-08-20",
       billingCadence: "annual",
       serviceTitle: ".com Domain Registration",
       stripeDraftInvoiceId: "in_1UBhgZH7v7C2pv8kAggKGDP0",

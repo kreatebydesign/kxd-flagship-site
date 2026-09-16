@@ -41,6 +41,8 @@ export type AccountStatementOpenBalance = {
   dueDate?: string | null;
   statusLabel: string;
   kind?: string | null;
+  /** Present for upcoming / not-yet-due rows. */
+  timingNote?: string | null;
 };
 
 export type AccountStatementClosingNote = {
@@ -83,9 +85,13 @@ export type AccountStatementDocument = {
   };
   openBalances: {
     sectionTitle: string;
+    /** Currently due / payable open balances (drives total outstanding). */
     items: AccountStatementOpenBalance[];
     totalRemainingLabel: string;
     totalRemainingCents: Cents;
+    /** Contractual remaining that is not yet currently due. */
+    upcomingSectionTitle: string;
+    upcomingItems: AccountStatementOpenBalance[];
   };
   paymentHistory: {
     sectionTitle: string;

@@ -82,10 +82,10 @@ export function CommercialStatements({ data }: { data: ClientWorkspaceBundle }) 
         </div>
       </div>
 
-      <section className="kxd-os-commercial-card-list" aria-label="Open balances">
-        <h3 className="kxd-os-commercial-card__title">Open balances</h3>
+      <section className="kxd-os-commercial-card-list" aria-label="Currently due">
+        <h3 className="kxd-os-commercial-card__title">Currently due</h3>
         {!statement.openBalances.length ? (
-          <WorkspaceEmpty message="No open balances. Account is current." />
+          <WorkspaceEmpty message="Nothing currently due. Account is current." />
         ) : (
           statement.openBalances.map((row) => (
             <article key={row.id} className="kxd-os-commercial-card">
@@ -112,13 +112,55 @@ export function CommercialStatements({ data }: { data: ClientWorkspaceBundle }) 
                   </div>
                 </dl>
                 <p className="kxd-os-commercial-card__meta">
-                  {row.dueDate ? `Due ${fmtWorkspaceDate(row.dueDate)}` : "No due date"}
+                  {row.dueDate ? `Due ${fmtWorkspaceDate(row.dueDate)}` : "Due now"}
                 </p>
               </div>
             </article>
           ))
         )}
       </section>
+
+      {statement.upcomingBalances.length > 0 ? (
+        <section
+          className="kxd-os-commercial-card-list"
+          aria-label="Upcoming not yet due"
+        >
+          <h3 className="kxd-os-commercial-card__title">Upcoming / not yet due</h3>
+          {statement.upcomingBalances.map((row) => (
+            <article key={row.id} className="kxd-os-commercial-card">
+              <div className="kxd-os-commercial-card__main">
+                <div className="kxd-os-commercial-card__title-row">
+                  <h4 className="kxd-os-commercial-card__title">{row.description}</h4>
+                  <CommercialStatusBadge
+                    label={row.statusLabel}
+                    tone={statusTone(row.statusLabel)}
+                  />
+                </div>
+                <dl className="kxd-os-commercial-dl kxd-os-commercial-dl--balances">
+                  <div>
+                    <dt>Original</dt>
+                    <dd>{row.originalLabel}</dd>
+                  </div>
+                  <div>
+                    <dt>Paid</dt>
+                    <dd>{row.paidLabel}</dd>
+                  </div>
+                  <div>
+                    <dt>Remaining</dt>
+                    <dd>{row.remainingLabel}</dd>
+                  </div>
+                </dl>
+                <p className="kxd-os-commercial-card__meta">
+                  {row.timingNote ||
+                    (row.dueDate
+                      ? `Due ${fmtWorkspaceDate(row.dueDate)}`
+                      : "Not yet due")}
+                </p>
+              </div>
+            </article>
+          ))}
+        </section>
+      ) : null}
 
       <section className="kxd-os-commercial-card-list" aria-label="Payment history">
         <h3 className="kxd-os-commercial-card__title">Payment history</h3>
