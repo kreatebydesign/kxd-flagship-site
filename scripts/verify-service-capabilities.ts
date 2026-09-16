@@ -306,6 +306,15 @@ check(
     read("migrations/20260916_mission01_capability_bridge.ts").includes("drives_experience"),
 );
 check(
+  "legacy baseline authority reuses legacy-manual source without schema invent",
+  read("lib/service-capabilities/apply-legacy-baseline.ts").includes('source: "legacy-manual"') &&
+    read("lib/service-capabilities/apply-legacy-baseline.ts").includes("drivesExperience: false") &&
+    read("lib/service-capabilities/legacy-baseline.ts").includes("LEGACY_BASELINE_NOTE_PREFIX") &&
+    read("app/api/admin/clients/[clientId]/engagement-capabilities/route.ts").includes(
+      "apply-legacy-baseline",
+    ),
+);
+check(
   "collection preserves history by refusing deletes",
   read("payload/collections/ClientServiceAssignments.ts").includes("delete: () => false") &&
     read("payload/collections/ClientServiceAssignments.ts").includes("beforeDelete"),

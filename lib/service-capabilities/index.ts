@@ -35,3 +35,8 @@ export type {
   ProposedCapabilityMapping,
   CapabilityMappingConfidence,
 } from "./propose-from-engagement";
+export {
+  buildLegacyBaselineNote,
+  isLegacyBaselineNote,
+  LEGACY_BASELINE_NOTE_PREFIX,
+} from "./legacy-baseline";
