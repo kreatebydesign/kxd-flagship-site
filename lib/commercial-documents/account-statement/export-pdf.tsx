@@ -1,8 +1,15 @@
 /**
  * Account Statement PDF — @react-pdf/renderer.
- * Reuses KXD report tokens, official gold monogram, and proposal PDF fonts.
  *
- * Single-page editorial financial statement (not spreadsheet / Stripe receipt).
+ * Canonical KXD client-facing Account Statement renderer.
+ * One design system for every client; only ledger data changes.
+ *
+ * Pagination rules (system-wide):
+ * - never orphan a section heading or section total
+ * - keep individual obligation / payment rows intact
+ * - keep Final Account Position (lines + total) together
+ * - never emit a mostly-blank trailing page from footer overflow
+ * - legitimate multi-page statements remain intentional and branded
  */
 
 import React from "react";
@@ -32,21 +39,38 @@ ensureProposalPdfFonts();
 
 const colors = KXD_REPORT_COLORS;
 
+/**
+ * Footer is absolutely positioned. Keep bottom padding just large enough to
+ * clear the footer band — excess padding is a common cause of blank trailing
+ * pages when content already fills the letter sheet.
+ */
+const PAGE_PADDING_BOTTOM = 26;
+
 const styles = StyleSheet.create({
   page: {
     backgroundColor: colors.paper,
     color: colors.ink,
     fontFamily: PROPOSAL_PDF_SANS,
     fontSize: 9,
-    paddingTop: 28,
-    paddingBottom: 36,
+    paddingTop: 26,
+    paddingBottom: PAGE_PADDING_BOTTOM,
     paddingHorizontal: 42,
+  },
+  continuedBanner: {
+    position: "absolute",
+    top: 10,
+    left: 42,
+    right: 42,
+    fontSize: 6.5,
+    letterSpacing: 0.35,
+    textTransform: "uppercase",
+    color: colors.muted,
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    marginBottom: 10,
+    marginBottom: 8,
   },
   brandCol: { maxWidth: 190 },
   logo: { width: 38, height: 36, marginBottom: 4 },
@@ -80,14 +104,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-end",
-    marginBottom: 8,
+    marginBottom: 6,
   },
   heroLeft: { flex: 1, paddingRight: 18 },
   goldRule: {
     width: 28,
     height: 1,
     backgroundColor: colors.gold,
-    marginBottom: 6,
+    marginBottom: 5,
   },
   title: {
     fontFamily: PROPOSAL_PDF_SERIF,
@@ -119,8 +143,8 @@ const styles = StyleSheet.create({
     color: colors.richBlack,
   },
   summaryBlock: {
-    marginBottom: 8,
-    paddingBottom: 6,
+    marginBottom: 6,
+    paddingBottom: 5,
     borderBottomWidth: 1,
     borderBottomColor: colors.line,
   },
@@ -128,7 +152,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 2.5,
+    marginBottom: 2,
   },
   summaryLabel: {
     flex: 1,
@@ -141,11 +165,12 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: colors.ink,
   },
-  section: { marginBottom: 8 },
+  section: { marginBottom: 6 },
+  sectionLast: { marginBottom: 0 },
   sectionHead: {
     flexDirection: "row",
     alignItems: "baseline",
-    marginBottom: 4,
+    marginBottom: 3,
   },
   sectionEyebrow: {
     fontSize: 6.5,
@@ -199,7 +224,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: colors.richBlack,
   },
-  serviceItem: { marginBottom: 4.5 },
+  serviceItem: { marginBottom: 3.5 },
   serviceHead: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -241,15 +266,15 @@ const styles = StyleSheet.create({
   },
   finalShell: {
     backgroundColor: colors.ivory,
-    paddingTop: 7,
-    paddingBottom: 7,
+    paddingTop: 6,
+    paddingBottom: 6,
     paddingHorizontal: 9,
-    marginBottom: 5,
+    marginBottom: 0,
   },
   finalRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 2.5,
+    marginBottom: 2,
   },
   finalLabel: {
     flex: 1,
@@ -292,12 +317,13 @@ const styles = StyleSheet.create({
     color: colors.muted,
     lineHeight: 1.35,
     marginBottom: 3,
+    marginTop: 4,
   },
   footer: {
     position: "absolute",
     left: 42,
     right: 42,
-    bottom: 18,
+    bottom: 14,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -309,10 +335,73 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     color: colors.goldMuted,
   },
+  footerPage: {
+    position: "absolute",
+    left: 42,
+    right: 42,
+    bottom: 4,
+    textAlign: "center",
+    fontSize: 6,
+    letterSpacing: 0.3,
+    color: colors.muted,
+  },
 });
 
 function money(cents: number, currency: string): string {
   return formatCents(cents, currency);
+}
+
+function SectionHeading(props: {
+  eyebrow: string;
+  title: string;
+  /** Keep heading + enough following content from orphaning. */
+  minPresenceAhead?: number;
+}): React.ReactElement {
+  return (
+    <View
+      style={styles.sectionHead}
+      wrap={false}
+      minPresenceAhead={props.minPresenceAhead ?? 48}
+    >
+      <Text style={styles.sectionEyebrow}>{props.eyebrow}</Text>
+      <Text style={styles.sectionTitle}>{props.title}</Text>
+    </View>
+  );
+}
+
+function OpenBalanceRow(props: {
+  item: AccountStatementDocument["openBalances"]["items"][number];
+  currency: string;
+  upcoming?: boolean;
+}): React.ReactElement {
+  const { item, currency, upcoming } = props;
+  return (
+    <View style={styles.serviceItem} wrap={false} minPresenceAhead={42}>
+      <View style={styles.serviceHead}>
+        <Text style={styles.serviceTitle}>{item.description}</Text>
+        <Text style={styles.serviceAmount}>
+          {money(item.remainingCents, currency)}
+        </Text>
+      </View>
+      <Text style={styles.servicePeriod}>
+        {upcoming
+          ? item.timingNote ||
+            (item.dueDate
+              ? `Due ${formatProposalCalendarDate(item.dueDate)}`
+              : "Not yet due")
+          : `${item.statusLabel}${
+              item.dueDate
+                ? ` · Due ${formatProposalCalendarDate(item.dueDate)}`
+                : " · Due now"
+            }`}
+      </Text>
+      <Text style={styles.serviceDesc}>
+        Original {money(item.originalCents, currency)} · Paid{" "}
+        {money(item.paidCents, currency)} · Remaining{" "}
+        {money(item.remainingCents, currency)}
+      </Text>
+    </View>
+  );
 }
 
 function AccountStatementPdfDocument(props: {
@@ -322,6 +411,11 @@ function AccountStatementPdfDocument(props: {
   const { doc, logoSrc } = props;
   const currency = doc.currency;
   const statementDateLabel = formatProposalCalendarDate(doc.statementDate);
+  const hasUpcoming = (doc.openBalances.upcomingItems?.length ?? 0) > 0;
+  const hasCurrentCharges =
+    doc.currentCharges.items.length > 0 ||
+    Boolean(doc.currentCharges.existingInvoiceNote);
+  const continuedLabel = `${doc.clientName} · Account Statement · Continued`;
 
   return (
     <Document
@@ -330,8 +424,16 @@ function AccountStatementPdfDocument(props: {
       subject={`Account statement for ${doc.clientName}`}
       creator={KXD_REPORT_BRAND}
     >
-      <Page size="LETTER" style={styles.page}>
-        <View style={styles.header}>
+      <Page size="LETTER" style={styles.page} wrap>
+        <Text
+          style={styles.continuedBanner}
+          fixed
+          render={({ pageNumber }) =>
+            pageNumber > 1 ? continuedLabel : " "
+          }
+        />
+
+        <View style={styles.header} wrap={false}>
           <View style={styles.brandCol}>
             {logoSrc ? <Image src={logoSrc} style={styles.logo} /> : null}
             <Text style={styles.brandName}>{KXD_REPORT_BRAND}</Text>
@@ -352,7 +454,7 @@ function AccountStatementPdfDocument(props: {
           </View>
         </View>
 
-        <View style={styles.hero}>
+        <View style={styles.hero} wrap={false}>
           <View style={styles.heroLeft}>
             <View style={styles.goldRule} />
             <Text style={styles.title}>{doc.title}</Text>
@@ -371,7 +473,7 @@ function AccountStatementPdfDocument(props: {
           </View>
         </View>
 
-        <View style={styles.summaryBlock}>
+        <View style={styles.summaryBlock} wrap={false}>
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>
               {doc.summary.originalProjectLabel}
@@ -406,39 +508,22 @@ function AccountStatementPdfDocument(props: {
           </View>
         </View>
 
-        <View style={styles.section}>
-          <View style={styles.sectionHead}>
-            <Text style={styles.sectionEyebrow}>Due</Text>
-            <Text style={styles.sectionTitle}>
-              {doc.openBalances.sectionTitle}
-            </Text>
-          </View>
+        <View style={styles.section} wrap>
+          <SectionHeading
+            eyebrow="Due"
+            title={doc.openBalances.sectionTitle}
+            minPresenceAhead={72}
+          />
           {doc.openBalances.items.length === 0 ? (
-            <Text style={styles.noteText}>Nothing currently due.</Text>
+            <Text style={styles.noteText} wrap={false}>
+              Nothing currently due.
+            </Text>
           ) : (
             doc.openBalances.items.map((item) => (
-              <View key={item.id} style={styles.serviceItem}>
-                <View style={styles.serviceHead}>
-                  <Text style={styles.serviceTitle}>{item.description}</Text>
-                  <Text style={styles.serviceAmount}>
-                    {money(item.remainingCents, currency)}
-                  </Text>
-                </View>
-                <Text style={styles.servicePeriod}>
-                  {item.statusLabel}
-                  {item.dueDate
-                    ? ` · Due ${formatProposalCalendarDate(item.dueDate)}`
-                    : " · Due now"}
-                </Text>
-                <Text style={styles.serviceDesc}>
-                  Original {money(item.originalCents, currency)} · Paid{" "}
-                  {money(item.paidCents, currency)} · Remaining{" "}
-                  {money(item.remainingCents, currency)}
-                </Text>
-              </View>
+              <OpenBalanceRow key={item.id} item={item} currency={currency} />
             ))
           )}
-          <View style={styles.tallyRow}>
+          <View style={styles.tallyRow} wrap={false} minPresenceAhead={28}>
             <Text style={styles.tallyEmphLabel}>
               {doc.openBalances.totalRemainingLabel}
             </Text>
@@ -448,47 +533,37 @@ function AccountStatementPdfDocument(props: {
           </View>
         </View>
 
-        {(doc.openBalances.upcomingItems?.length ?? 0) > 0 ? (
-          <View style={styles.section}>
-            <View style={styles.sectionHead}>
-              <Text style={styles.sectionEyebrow}>Upcoming</Text>
-              <Text style={styles.sectionTitle}>
-                {doc.openBalances.upcomingSectionTitle}
-              </Text>
-            </View>
+        {hasUpcoming ? (
+          <View style={styles.section} wrap>
+            <SectionHeading
+              eyebrow="Upcoming"
+              title={doc.openBalances.upcomingSectionTitle}
+              minPresenceAhead={72}
+            />
             {doc.openBalances.upcomingItems.map((item) => (
-              <View key={item.id} style={styles.serviceItem}>
-                <View style={styles.serviceHead}>
-                  <Text style={styles.serviceTitle}>{item.description}</Text>
-                  <Text style={styles.serviceAmount}>
-                    {money(item.remainingCents, currency)}
-                  </Text>
-                </View>
-                <Text style={styles.servicePeriod}>
-                  {item.timingNote ||
-                    (item.dueDate
-                      ? `Due ${formatProposalCalendarDate(item.dueDate)}`
-                      : "Not yet due")}
-                </Text>
-                <Text style={styles.serviceDesc}>
-                  Original {money(item.originalCents, currency)} · Paid{" "}
-                  {money(item.paidCents, currency)} · Remaining{" "}
-                  {money(item.remainingCents, currency)}
-                </Text>
-              </View>
+              <OpenBalanceRow
+                key={item.id}
+                item={item}
+                currency={currency}
+                upcoming
+              />
             ))}
           </View>
         ) : null}
 
-        <View style={styles.section}>
-          <View style={styles.sectionHead}>
-            <Text style={styles.sectionEyebrow}>Recorded</Text>
-            <Text style={styles.sectionTitle}>
-              {doc.paymentHistory.sectionTitle}
-            </Text>
-          </View>
+        <View style={styles.section} wrap>
+          <SectionHeading
+            eyebrow="Recorded"
+            title={doc.paymentHistory.sectionTitle}
+            minPresenceAhead={72}
+          />
           {doc.paymentHistory.payments.map((payment) => (
-            <View key={payment.id} style={styles.payRow}>
+            <View
+              key={payment.id}
+              style={styles.payRow}
+              wrap={false}
+              minPresenceAhead={28}
+            >
               <Text style={styles.payDate}>
                 {formatProposalCalendarDate(payment.paidOn)}
               </Text>
@@ -501,61 +576,74 @@ function AccountStatementPdfDocument(props: {
               </Text>
             </View>
           ))}
-          <View style={styles.tallyRow}>
-            <Text style={styles.tallyEmphLabel}>
-              {doc.paymentHistory.totalReceivedLabel}
-            </Text>
-            <Text style={styles.tallyEmphValue}>
-              {money(doc.paymentHistory.totalReceivedCents, currency)}
-            </Text>
-          </View>
-          <View style={styles.tallyRow}>
-            <Text style={styles.tallyLabel}>
-              {doc.paymentHistory.remainingLabel}
-            </Text>
-            <Text style={styles.tallyValue}>
-              {money(doc.paymentHistory.remainingCents, currency)}
-            </Text>
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <View style={styles.sectionHead}>
-            <Text style={styles.sectionEyebrow}>Services</Text>
-            <Text style={styles.sectionTitle}>
-              {doc.currentCharges.sectionTitle}
-            </Text>
-          </View>
-          {doc.currentCharges.items.map((item) => (
-            <View key={item.id} style={styles.serviceItem}>
-              <View style={styles.serviceHead}>
-                <Text style={styles.serviceTitle}>{item.title}</Text>
-                <Text style={styles.serviceAmount}>
-                  {money(item.amountCents, currency)}
-                </Text>
-              </View>
-              <Text style={styles.servicePeriod}>{item.periodLabel}</Text>
-              {item.description ? (
-                <Text style={styles.serviceDesc}>{item.description}</Text>
-              ) : null}
+          <View wrap={false} minPresenceAhead={40}>
+            <View style={styles.tallyRow}>
+              <Text style={styles.tallyEmphLabel}>
+                {doc.paymentHistory.totalReceivedLabel}
+              </Text>
+              <Text style={styles.tallyEmphValue}>
+                {money(doc.paymentHistory.totalReceivedCents, currency)}
+              </Text>
             </View>
-          ))}
-          <View style={styles.tallyRow}>
-            <Text style={styles.tallyEmphLabel}>
-              {doc.currentCharges.subtotalLabel}
-            </Text>
-            <Text style={styles.tallyEmphValue}>
-              {money(doc.currentCharges.subtotalCents, currency)}
-            </Text>
+            <View style={styles.tallyRow}>
+              <Text style={styles.tallyLabel}>
+                {doc.paymentHistory.remainingLabel}
+              </Text>
+              <Text style={styles.tallyValue}>
+                {money(doc.paymentHistory.remainingCents, currency)}
+              </Text>
+            </View>
           </View>
-          {doc.currentCharges.existingInvoiceNote ? (
-            <Text style={styles.invoiceNote}>
-              {doc.currentCharges.existingInvoiceNote}
-            </Text>
-          ) : null}
         </View>
 
-        <View style={styles.section}>
+        {hasCurrentCharges ? (
+          <View style={styles.section} wrap>
+            <SectionHeading
+              eyebrow="Services"
+              title={doc.currentCharges.sectionTitle}
+              minPresenceAhead={72}
+            />
+            {doc.currentCharges.items.map((item) => (
+              <View
+                key={item.id}
+                style={styles.serviceItem}
+                wrap={false}
+                minPresenceAhead={40}
+              >
+                <View style={styles.serviceHead}>
+                  <Text style={styles.serviceTitle}>{item.title}</Text>
+                  <Text style={styles.serviceAmount}>
+                    {money(item.amountCents, currency)}
+                  </Text>
+                </View>
+                <Text style={styles.servicePeriod}>{item.periodLabel}</Text>
+                {item.description ? (
+                  <Text style={styles.serviceDesc}>{item.description}</Text>
+                ) : null}
+              </View>
+            ))}
+            <View style={styles.tallyRow} wrap={false} minPresenceAhead={28}>
+              <Text style={styles.tallyEmphLabel}>
+                {doc.currentCharges.subtotalLabel}
+              </Text>
+              <Text style={styles.tallyEmphValue}>
+                {money(doc.currentCharges.subtotalCents, currency)}
+              </Text>
+            </View>
+            {doc.currentCharges.existingInvoiceNote ? (
+              <Text style={styles.invoiceNote} wrap={false}>
+                {doc.currentCharges.existingInvoiceNote}
+              </Text>
+            ) : null}
+          </View>
+        ) : null}
+
+        {/*
+          Keep heading + Final Account Position shell together.
+          Do NOT set a large minPresenceAhead here — that forces an otherwise
+          fitting block onto a nearly empty trailing page.
+        */}
+        <View style={styles.sectionLast} wrap={false}>
           <View style={styles.sectionHead}>
             <Text style={styles.sectionEyebrow}>Position</Text>
             <Text style={styles.sectionTitle}>
@@ -592,6 +680,13 @@ function AccountStatementPdfDocument(props: {
           <Text style={styles.footerText}>{kxdReportContactLine()}</Text>
           <Text style={styles.footerMark}>Private · Client account</Text>
         </View>
+        <Text
+          style={styles.footerPage}
+          fixed
+          render={({ pageNumber, totalPages }) =>
+            totalPages > 1 ? `Page ${pageNumber} of ${totalPages}` : " "
+          }
+        />
       </Page>
     </Document>
   );
