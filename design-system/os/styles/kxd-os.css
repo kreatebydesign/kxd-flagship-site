@@ -2437,6 +2437,161 @@ body:has(.kxd-exec-workspace) {
   }
 }
 
+/* Portal Billing Center — ledger-first Account Billing */
+.kxd-os-billing--ledger {
+  max-width: 52rem;
+}
+
+.kxd-os-billing-summary {
+  display: grid;
+  gap: var(--kxd-os-space-5);
+  padding: var(--kxd-os-space-5);
+  border: 1px solid var(--kxd-os-border-subtle);
+  border-radius: 0.5rem;
+  background: var(--kxd-os-bg-surface);
+}
+
+.kxd-os-billing-summary__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--kxd-os-space-5);
+}
+
+.kxd-os-billing-summary__metric {
+  display: grid;
+  gap: var(--kxd-os-space-1);
+  min-width: 0;
+}
+
+.kxd-os-billing-summary__metric--primary {
+  padding-right: var(--kxd-os-space-3);
+}
+
+.kxd-os-billing-summary__value {
+  margin: 0;
+  font-family: var(--kxd-os-font-sans);
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: var(--kxd-os-text-primary);
+  line-height: 1.15;
+}
+
+.kxd-os-billing-summary__value--text {
+  font-size: 1.0625rem;
+  letter-spacing: -0.01em;
+  font-weight: 500;
+}
+
+.kxd-os-billing-summary__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--kxd-os-space-3);
+}
+
+.kxd-os-billing-history {
+  overflow-x: auto;
+  border: 1px solid var(--kxd-os-border-subtle);
+  border-radius: 0.5rem;
+  background: var(--kxd-os-bg-surface);
+}
+
+.kxd-os-billing-history__table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 32rem;
+}
+
+.kxd-os-billing-history__table th,
+.kxd-os-billing-history__table td {
+  padding: 0.85rem 1rem;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--kxd-os-border-subtle);
+}
+
+.kxd-os-billing-history__table th {
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-secondary);
+  font-weight: 500;
+}
+
+.kxd-os-billing-history__table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.kxd-os-billing-history__label {
+  display: block;
+  color: var(--kxd-os-text-primary);
+}
+
+.kxd-os-billing-history__detail {
+  display: block;
+  margin-top: 0.2rem;
+}
+
+.kxd-os-billing-history__amount {
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.kxd-os-billing-statements {
+  display: grid;
+  gap: var(--kxd-os-space-4);
+  max-width: 36rem;
+}
+
+.kxd-os-billing-overview-slot {
+  margin-top: 1.5rem;
+  max-width: 28rem;
+}
+
+.kxd-os-billing-overview-card {
+  display: grid;
+  gap: var(--kxd-os-space-4);
+}
+
+.kxd-os-billing-overview-card__headline {
+  margin: 0;
+  font-family: var(--kxd-os-font-sans);
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: var(--kxd-os-text-primary);
+  line-height: 1.1;
+}
+
+.kxd-os-billing-overview-card__sub {
+  margin: 0;
+  color: var(--kxd-os-text-secondary);
+  font-size: 0.9375rem;
+}
+
+.kxd-os-billing-overview-card__support,
+.kxd-os-billing-overview-card__upcoming {
+  margin: 0;
+}
+
+.kxd-os-billing-overview-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--kxd-os-space-3);
+}
+
+@media (max-width: 720px) {
+  .kxd-os-billing-summary__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .kxd-os-billing-summary__metric--primary {
+    padding-right: 0;
+    padding-bottom: var(--kxd-os-space-3);
+    border-bottom: 1px solid var(--kxd-os-border-subtle);
+  }
+}
+
 .kxd-os-ops-kpi-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

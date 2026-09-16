@@ -120,6 +120,7 @@
     "verify:recurring-obligation-engine": "tsx scripts/verify-recurring-obligation-engine.ts",
     "verify:post-acceptance-materialization": "tsx scripts/verify-post-acceptance-materialization.ts",
     "verify:account-statement-compose": "tsx scripts/verify-account-statement-compose.ts",
+    "verify:portal-billing-center": "tsx scripts/verify-portal-billing-center.ts",
     "verify:portal-date-hydration": "tsx scripts/verify-portal-date-hydration.ts",
     "verify:staff-experience": "tsx scripts/verify-staff-experience.ts",
     "verify:review-inbox-bulk-complete": "tsx scripts/verify-review-inbox-bulk-complete.ts",

@@ -1,9 +1,11 @@
 /**
- * Phase 5 Batch 5C — Pure projection from Batch 5B DTO → portal Billing view.
- * No network. No secrets. No Stripe objects.
+ * Pure projection: Account Statement → portal Billing Center view.
+ * No network. No secrets. No Stripe objects. No portal payment-collection capability.
  */
 
-import { formatCents } from "@/lib/proposal-builder/money";
+import type { KxdBadgeVariant } from "@/components/os/KxdBadge";
+import type { AccountStatementDocument } from "@/lib/commercial-documents/account-statement";
+import { formatCents, type Cents } from "@/lib/proposal-builder/money";
 import { fmtPortalDate } from "@/lib/portal/format";
 import type {
   InvoiceReadListResult,
@@ -12,7 +14,14 @@ import type {
 } from "@/lib/stripe/invoice-read-types";
 import { INVOICE_READ_DTO_ALLOWLIST } from "@/lib/stripe/invoice-read-types";
 import { presentInvoiceStatus } from "./status";
-import type { PortalBillingInvoiceRow, PortalBillingView } from "./types";
+import type {
+  PortalBillingInvoiceRow,
+  PortalBillingOverviewCardModel,
+  PortalBillingView,
+  PortalLedgerBalanceRow,
+  PortalLedgerBillingView,
+  PortalLedgerPaymentRow,
+} from "./types";
 
 const UNAVAILABLE_COPY: Record<
   InvoiceReadUnavailableCode,
@@ -99,18 +108,15 @@ const UNAVAILABLE_COPY: Record<
   },
   invoice_not_found: {
     title: "Invoice unavailable",
-    description:
-      "That invoice is not available for this account.",
+    description: "That invoice is not available for this account.",
   },
   cross_customer_denied: {
     title: "Invoice unavailable",
-    description:
-      "That invoice is not available for this account.",
+    description: "That invoice is not available for this account.",
   },
   invalid_invoice_id: {
     title: "Invoice unavailable",
-    description:
-      "That invoice is not available for this account.",
+    description: "That invoice is not available for this account.",
   },
   unexpected_failure: {
     title: "Billing is temporarily unavailable",
@@ -126,8 +132,163 @@ function safeHttpsUrl(value: string | null | undefined): string | null {
   return trimmed;
 }
 
-function moneyLabel(amount: number, currency: string): string {
-  return formatCents(amount, currency || "usd");
+function moneyLabel(amount: number, currency = "USD"): string {
+  return formatCents(amount as Cents, currency);
+}
+
+function statusBadgeVariant(statusLabel: string): KxdBadgeVariant {
+  switch (statusLabel) {
+    case "Past Due":
+      return "critical";
+    case "Partially Paid":
+      return "warning";
+    case "Upcoming":
+      return "pending";
+    case "Due":
+      return "status";
+    default:
+      return "default";
+  }
+}
+
+function projectBalanceRow(
+  item: AccountStatementDocument["openBalances"]["items"][number],
+  currency: string,
+  bucket: "current" | "upcoming",
+): PortalLedgerBalanceRow {
+  const dueLabel =
+    bucket === "upcoming"
+      ? item.timingNote?.trim() ||
+        (item.dueDate ? `Due ${fmtPortalDate(item.dueDate)}` : "Not yet due")
+      : item.dueDate
+        ? `Due ${fmtPortalDate(item.dueDate)}`
+        : "Due now";
+
+  return {
+    key: item.id,
+    description: item.description,
+    originalLabel: moneyLabel(item.originalCents, currency),
+    paidLabel: moneyLabel(item.paidCents, currency),
+    remainingLabel: moneyLabel(item.remainingCents, currency),
+    dueLabel,
+    statusLabel: item.statusLabel,
+    statusBadgeVariant: statusBadgeVariant(item.statusLabel),
+    timingNote: item.timingNote?.trim() || null,
+  };
+}
+
+function projectPaymentRow(
+  payment: AccountStatementDocument["paymentHistory"]["payments"][number],
+  currency: string,
+): PortalLedgerPaymentRow {
+  const detail = payment.detail?.trim() || null;
+  let methodLabel: string | null = null;
+  let referenceDetail: string | null = null;
+  if (detail) {
+    const parts = detail.split(" · ").map((part) => part.trim()).filter(Boolean);
+    methodLabel = parts[0] || null;
+    const rest = parts.slice(1).join(" · ");
+    referenceDetail = rest || null;
+  }
+
+  return {
+    key: payment.id,
+    paidOnLabel: fmtPortalDate(payment.paidOn),
+    label: payment.label,
+    methodLabel,
+    detail: referenceDetail,
+    amountLabel: moneyLabel(payment.amountCents, currency),
+  };
+}
+
+export function projectPortalLedgerBillingView(input: {
+  document: AccountStatementDocument;
+  clientLabel: string;
+}): PortalLedgerBillingView {
+  const { document, clientLabel } = input;
+  const currency = document.currency || "USD";
+  const outstandingCents = document.summary.totalOutstandingCents;
+  const paidCents = document.summary.accountPaymentsReceivedCents;
+  const upcomingCount = document.openBalances.upcomingItems.length;
+  const isCurrent = outstandingCents <= 0;
+
+  const upcomingSummaryLabel =
+    upcomingCount === 0
+      ? "None scheduled"
+      : upcomingCount === 1
+        ? "1 upcoming charge"
+        : `${upcomingCount} upcoming charges`;
+
+  return {
+    kind: "ready",
+    clientLabel,
+    statementDateLabel: fmtPortalDate(document.statementDate),
+    accountStatus: isCurrent ? "current" : "outstanding",
+    accountStatusLabel: isCurrent ? "You're current" : "Outstanding balance",
+    currentlyDueLabel: moneyLabel(outstandingCents, currency),
+    paidToDateLabel: moneyLabel(paidCents, currency),
+    upcomingCount,
+    upcomingSummaryLabel,
+    summary: {
+      currentlyDue: {
+        label: "Currently due",
+        value: moneyLabel(outstandingCents, currency),
+      },
+      paidToDate: {
+        label: "Paid to date",
+        value: moneyLabel(paidCents, currency),
+      },
+      upcoming: {
+        label: "Upcoming",
+        value: upcomingSummaryLabel,
+      },
+    },
+    currentlyDue: document.openBalances.items.map((item) =>
+      projectBalanceRow(item, currency, "current"),
+    ),
+    upcomingItems: document.openBalances.upcomingItems.map((item) =>
+      projectBalanceRow(item, currency, "upcoming"),
+    ),
+    paymentHistory: document.paymentHistory.payments.map((payment) =>
+      projectPaymentRow(payment, currency),
+    ),
+    statementPdfHref: "/api/portal/billing/account-statement/pdf",
+  };
+}
+
+export function projectPortalBillingOverviewCard(
+  ledger: PortalLedgerBillingView,
+): PortalBillingOverviewCardModel | null {
+  if (ledger.kind !== "ready") return null;
+
+  if (ledger.accountStatus === "current") {
+    return {
+      accountStatus: "current",
+      headline: "You're current",
+      amountLabel: null,
+      supportingLabel:
+        ledger.paymentHistory.length > 0
+          ? `${ledger.paidToDateLabel} paid to date`
+          : "No balance currently due",
+      upcomingNote:
+        ledger.upcomingCount > 0
+          ? "Upcoming charges are available in Billing"
+          : null,
+      billingHref: "/portal/invoices",
+    };
+  }
+
+  return {
+    accountStatus: "outstanding",
+    headline: "Account balance",
+    amountLabel: ledger.currentlyDueLabel,
+    supportingLabel: `${ledger.paidToDateLabel} paid to date`,
+    upcomingNote:
+      ledger.upcomingCount > 0
+        ? "Upcoming charges are listed separately in Billing"
+        : null,
+    billingHref: "/portal/invoices",
+  };
 }
 
 export function projectInvoiceRow(
@@ -169,6 +330,40 @@ export function portalBillingDtoAllowlist(): readonly string[] {
   return INVOICE_READ_DTO_ALLOWLIST;
 }
 
+/** Keys allowed on a ready ledger Billing Center projection. */
+export const PORTAL_LEDGER_BILLING_READY_KEYS = [
+  "kind",
+  "clientLabel",
+  "statementDateLabel",
+  "accountStatus",
+  "accountStatusLabel",
+  "currentlyDueLabel",
+  "paidToDateLabel",
+  "upcomingCount",
+  "upcomingSummaryLabel",
+  "summary",
+  "currentlyDue",
+  "upcomingItems",
+  "paymentHistory",
+  "statementPdfHref",
+] as const;
+
+export const PORTAL_LEDGER_FORBIDDEN_PAYLOAD_KEYS = [
+  "internalNotes",
+  "operatorNote",
+  "recordedBy",
+  "idempotencyKey",
+  "paymentGroupId",
+  "stripeCustomerId",
+  "stripeInvoiceId",
+  "lifecyclePackage",
+  "storageKey",
+  "contentHash",
+  "clientId",
+  "contractId",
+  "obligationId",
+] as const;
+
 export function projectPortalBillingView(
   result: InvoiceReadListResult,
   clientLabel: string,
@@ -188,9 +383,9 @@ export function projectPortalBillingView(
     return {
       kind: "empty",
       clientLabel,
-      title: "No invoices yet",
+      title: "No issued invoices yet",
       description:
-        "When invoices are issued for this account, they will appear here. You can pay open invoices securely through Stripe.",
+        "When Stripe invoices are issued for this account, they will appear here for reference.",
     };
   }
 
@@ -200,7 +395,7 @@ export function projectPortalBillingView(
     invoices: result.invoices.map(projectInvoiceRow),
     hasMore: result.hasMore,
     paginationNote: result.hasMore
-      ? "Showing the most recent invoices. Additional history may be available through Stripe."
+      ? "Showing the most recent issued invoices."
       : null,
   };
 }

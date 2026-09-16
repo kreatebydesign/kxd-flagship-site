@@ -7,6 +7,7 @@ export { DeliverablesScreen } from "./DeliverablesScreen";
 export { RequestsScreen } from "./RequestsScreen";
 export { AssetsScreen } from "./AssetsScreen";
 export { InvoicesScreen } from "./InvoicesScreen";
+export { AccountBalanceCard } from "./AccountBalanceCard";
 export { MeetingsScreen } from "./MeetingsScreen";
 export { WebsiteHealthScreen } from "./WebsiteHealthScreen";
 export { ResourcesScreen } from "./ResourcesScreen";

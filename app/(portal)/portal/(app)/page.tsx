@@ -3,7 +3,7 @@ import { CesPortalHome } from "@/components/ces/portal";
 import { OverviewScreen } from "@/components/client-hq";
 import { composeExecutivePerformance } from "@/lib/ces/executive-performance/compose";
 import { composePartnershipBriefing } from "@/lib/ces/partnership/compose";
-import { resolvePortalHomeComposition } from "@/lib/ces/modules/home";
+import { resolvePortalHomeComposition, isHomeZoneVisible } from "@/lib/ces/modules/home";
 import { resolveExperienceProfile } from "@/lib/ces/server";
 import { getWebsiteReviewLanding } from "@/lib/ces/modules/website-review/data";
 import { getConnectedWorkspaceData } from "@/lib/portal/connected-workspace";
@@ -14,6 +14,10 @@ import { resolvePortalWorkspacePersonalization } from "@/lib/portal/workspace-pe
 import { resolvePortalWorkPerformance } from "@/lib/portal/work-performance/server";
 import { loadActiveEngagementForClient } from "@/lib/portal/active-engagement";
 import { resolvePortalWebsiteEditorUrl } from "@/lib/portal/website-editor";
+import {
+  loadPortalBillingOverviewCardForSession,
+  resolvePortalBillingNavAvailable,
+} from "@/lib/portal/billing/load";
 
 export const dynamic = "force-dynamic";
 
@@ -21,9 +25,11 @@ export default async function PortalOverviewPage() {
   const session = await getPortalSession();
   if (!session) redirect("/portal/login");
 
-  const [data, profile] = await Promise.all([
+  const [data, profile, billingNavAvailable, billingOverview] = await Promise.all([
     getPortalOverview(session),
     resolveExperienceProfile(session),
+    resolvePortalBillingNavAvailable(session),
+    loadPortalBillingOverviewCardForSession(session),
   ]);
 
   // Personalization + work/performance resolve only after session authorization.
@@ -32,7 +38,15 @@ export default async function PortalOverviewPage() {
     experienceProfile: profile,
   });
 
-  const home = resolvePortalHomeComposition({ profile });
+  const home = resolvePortalHomeComposition({
+    profile,
+    billingNavAvailable,
+  });
+
+  const showBillingCard =
+    billingNavAvailable &&
+    isHomeZoneVisible(home, "billing") &&
+    billingOverview != null;
 
   if (home.shell === "ces") {
     const websiteReview = await getWebsiteReviewLanding(session, profile);
@@ -89,6 +103,7 @@ export default async function PortalOverviewPage() {
         homeComposition={home}
         engagement={engagement}
         websiteEditorUrl={websiteEditorUrl}
+        billingOverview={showBillingCard ? billingOverview : null}
       />
     );
   }
@@ -105,6 +120,8 @@ export default async function PortalOverviewPage() {
       data={data}
       personalization={personalization}
       workPerformance={workPerformance}
+      billingOverview={showBillingCard ? billingOverview : null}
     />
   );
 }
+

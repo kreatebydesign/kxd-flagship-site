@@ -12,6 +12,7 @@ export const CLIENT_SAFE_COMMERCIAL_DOCUMENT_KINDS = new Set([
   "accepted-proposal",
   "billing-summary",
   "receipt",
+  "account-statement",
 ]);
 
 export function isClientSafeCommercialDocumentKind(kind: string): boolean {

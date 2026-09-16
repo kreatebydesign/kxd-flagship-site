@@ -503,9 +503,9 @@ async function main() {
 
   // 26–28. Portal + Batch 5B/5A isolation
   check(
-    "portal Billing page composition unchanged (session → loadPortalBillingForSession)",
+    "portal Billing page composition remains session-scoped (Billing Center loader)",
     portalPage.includes("getPortalSession") &&
-      portalPage.includes("loadPortalBillingForSession"),
+      portalPage.includes("loadPortalBillingCenterForSession"),
   );
   check(
     "portal screen still has no staff permission imports",

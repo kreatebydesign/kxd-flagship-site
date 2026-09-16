@@ -124,9 +124,10 @@ function main() {
       page.includes('redirect("/portal/login")'),
   );
   check(
-    "route uses Batch 5B composition via loadPortalBillingForSession",
-    page.includes("loadPortalBillingForSession") &&
-      load.includes("listPortalSessionInvoices"),
+    "route uses Billing Center composition via loadPortalBillingCenterForSession",
+    page.includes("loadPortalBillingCenterForSession") &&
+      load.includes("listPortalSessionInvoices") &&
+      load.includes("loadPortalLedgerBillingForSession"),
   );
   check(
     "loader is server-only and uses session.clientId indirectly via 5B",
@@ -380,9 +381,10 @@ function main() {
   );
   check(
     "screen uses allowlisted presentation props only",
-    screen.includes("view.kind") &&
+    screen.includes("ledger.kind") &&
       screen.includes("View invoice") &&
-      screen.includes("Pay securely through Stripe"),
+      !screen.includes("Pay securely through Stripe") &&
+      !/Pay Balance/i.test(screen),
   );
   check(
     "external links use noopener noreferrer",
