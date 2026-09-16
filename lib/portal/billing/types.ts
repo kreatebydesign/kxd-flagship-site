@@ -5,7 +5,6 @@
 
 import type { InvoiceReadUnavailableCode } from "@/lib/stripe/invoice-read-types";
 import type { PortalInvoiceBadgeVariant } from "./status";
-import type { KxdBadgeVariant } from "@/components/os/KxdBadge";
 
 export type PortalBillingInvoiceRow = {
   /** Stable React key — not shown as primary client-facing content. */
@@ -59,9 +58,12 @@ export type PortalLedgerBalanceRow = {
   originalLabel: string;
   paidLabel: string;
   remainingLabel: string;
+  /** True when paid amount is greater than zero — omit $0 paid noise in UI. */
+  showPaidDetail: boolean;
   dueLabel: string | null;
   statusLabel: string;
-  statusBadgeVariant: KxdBadgeVariant;
+  /** Portal status tone — not admin badge chrome. */
+  statusTone: "due" | "partial" | "upcoming" | "past-due" | "neutral";
   timingNote: string | null;
 };
 
@@ -91,12 +93,15 @@ export type PortalLedgerBillingView =
       accountStatus: "current" | "outstanding";
       accountStatusLabel: "You're current" | "Outstanding balance";
       currentlyDueLabel: string;
+      /**
+       * Retained for statement/history parity checks — not shown in portal
+       * billing summary or home card (presentation policy).
+       */
       paidToDateLabel: string;
       upcomingCount: number;
       upcomingSummaryLabel: string | null;
       summary: {
-        currentlyDue: PortalLedgerSummaryMetric;
-        paidToDate: PortalLedgerSummaryMetric;
+        currentBalance: PortalLedgerSummaryMetric;
         upcoming: PortalLedgerSummaryMetric;
       };
       currentlyDue: PortalLedgerBalanceRow[];
@@ -126,9 +131,10 @@ export type PortalBillingCenterView = {
 /** Compact overview card model — derived from a ready ledger view only. */
 export type PortalBillingOverviewCardModel = {
   accountStatus: "current" | "outstanding";
-  headline: string;
-  amountLabel: string | null;
-  supportingLabel: string;
+  /** Always the current balance amount, including $0.00. */
+  amountLabel: string;
+  /** "Currently due" or "You're current". */
+  statusLine: string;
   upcomingNote: string | null;
   billingHref: "/portal/invoices";
 };

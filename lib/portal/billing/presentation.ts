@@ -3,7 +3,6 @@
  * No network. No secrets. No Stripe objects. No portal payment-collection capability.
  */
 
-import type { KxdBadgeVariant } from "@/components/os/KxdBadge";
 import type { AccountStatementDocument } from "@/lib/commercial-documents/account-statement";
 import { formatCents, type Cents } from "@/lib/proposal-builder/money";
 import { fmtPortalDate } from "@/lib/portal/format";
@@ -136,18 +135,20 @@ function moneyLabel(amount: number, currency = "USD"): string {
   return formatCents(amount as Cents, currency);
 }
 
-function statusBadgeVariant(statusLabel: string): KxdBadgeVariant {
+function statusTone(
+  statusLabel: string,
+): PortalLedgerBalanceRow["statusTone"] {
   switch (statusLabel) {
     case "Past Due":
-      return "critical";
+      return "past-due";
     case "Partially Paid":
-      return "warning";
+      return "partial";
     case "Upcoming":
-      return "pending";
+      return "upcoming";
     case "Due":
-      return "status";
+      return "due";
     default:
-      return "default";
+      return "neutral";
   }
 }
 
@@ -170,9 +171,10 @@ function projectBalanceRow(
     originalLabel: moneyLabel(item.originalCents, currency),
     paidLabel: moneyLabel(item.paidCents, currency),
     remainingLabel: moneyLabel(item.remainingCents, currency),
+    showPaidDetail: item.paidCents > 0,
     dueLabel,
     statusLabel: item.statusLabel,
-    statusBadgeVariant: statusBadgeVariant(item.statusLabel),
+    statusTone: statusTone(item.statusLabel),
     timingNote: item.timingNote?.trim() || null,
   };
 }
@@ -230,13 +232,9 @@ export function projectPortalLedgerBillingView(input: {
     upcomingCount,
     upcomingSummaryLabel,
     summary: {
-      currentlyDue: {
-        label: "Currently due",
+      currentBalance: {
+        label: "Current balance",
         value: moneyLabel(outstandingCents, currency),
-      },
-      paidToDate: {
-        label: "Paid to date",
-        value: moneyLabel(paidCents, currency),
       },
       upcoming: {
         label: "Upcoming",
@@ -261,31 +259,16 @@ export function projectPortalBillingOverviewCard(
 ): PortalBillingOverviewCardModel | null {
   if (ledger.kind !== "ready") return null;
 
-  if (ledger.accountStatus === "current") {
-    return {
-      accountStatus: "current",
-      headline: "You're current",
-      amountLabel: null,
-      supportingLabel:
-        ledger.paymentHistory.length > 0
-          ? `${ledger.paidToDateLabel} paid to date`
-          : "No balance currently due",
-      upcomingNote:
-        ledger.upcomingCount > 0
-          ? "Upcoming charges are available in Billing"
-          : null,
-      billingHref: "/portal/invoices",
-    };
-  }
-
   return {
-    accountStatus: "outstanding",
-    headline: "Account balance",
+    accountStatus: ledger.accountStatus,
     amountLabel: ledger.currentlyDueLabel,
-    supportingLabel: `${ledger.paidToDateLabel} paid to date`,
+    statusLine:
+      ledger.accountStatus === "current" ? "You're current" : "Currently due",
     upcomingNote:
       ledger.upcomingCount > 0
-        ? "Upcoming charges are listed separately in Billing"
+        ? ledger.accountStatus === "current"
+          ? "Upcoming charges are available in Billing"
+          : null
         : null,
     billingHref: "/portal/invoices",
   };
