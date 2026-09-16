@@ -383,5 +383,42 @@ export const Clients: CollectionConfig = {
           "Presentation/grouping label only (e.g. a multi-business partnership name). Not a contract FK, not a multi-client relation, and does not merge clients, CES, or commercial scope.",
       },
     },
+
+    // ── Mission 003B — Commercial classification (does not alter pricing) ────
+    {
+      name: "commercialCategories",
+      type: "json",
+      label: "Commercial Categories",
+      admin: {
+        description:
+          'JSON string array of commercial relationship categories, e.g. ["active_recurring","performance"]. Multi-select concepts — not a CRM status. Does not invent revenue.',
+      },
+    },
+    {
+      name: "pricingClassification",
+      type: "select",
+      label: "Pricing Classification",
+      options: [
+        { label: "Standard", value: "standard" },
+        { label: "Custom", value: "custom" },
+        { label: "Legacy", value: "legacy" },
+        { label: "Grandfathered", value: "grandfathered" },
+        { label: "Friends & Family", value: "friends_family" },
+      ],
+      admin: {
+        position: "sidebar",
+        description:
+          "Metadata only — does NOT alter contract/retainer amounts. Use only with operator authority or clear evidence.",
+      },
+    },
+    {
+      name: "commercialReviewReason",
+      type: "textarea",
+      label: "Commercial Review Reason",
+      admin: {
+        description:
+          "Why this relationship needs operator commercial review. Internal only. Does not create revenue.",
+      },
+    },
   ],
 };

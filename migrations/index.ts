@@ -110,6 +110,7 @@ import * as migration_20260823_client_site_events from './20260823_client_site_e
 import * as migration_20260824_csi_v1b_sale_commission from './20260824_csi_v1b_sale_commission';
 import * as migration_20260825_client_service_assignments from './20260825_client_service_assignments';
 import * as migration_20260916_mission01_capability_bridge from './20260916_mission01_capability_bridge';
+import * as migration_20260916_mission03b_commercial_foundation from './20260916_mission03b_commercial_foundation';
 
 export const migrations = [
   {
@@ -706,5 +707,12 @@ export const migrations = [
     up: migration_20260916_mission01_capability_bridge.up,
     down: migration_20260916_mission01_capability_bridge.down,
     name: '20260916_mission01_capability_bridge',
+  },
+  {
+    // Mission 003B: commercial classification + hosting renewal/auto-charge readiness
+    // + sales-activity commercial memory types. Additive only — no amount invention.
+    up: migration_20260916_mission03b_commercial_foundation.up,
+    down: migration_20260916_mission03b_commercial_foundation.down,
+    name: '20260916_mission03b_commercial_foundation',
   },
 ];

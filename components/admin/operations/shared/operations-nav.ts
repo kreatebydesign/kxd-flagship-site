@@ -29,6 +29,7 @@ export type OperationsNavId =
   | "review-inbox"
   | "upgrade-requests"
   | "commercial-agreements"
+  | "money-moves"
   | "portal-access"
   | "client-success"
   | "growth"
@@ -142,6 +143,11 @@ export const NAV_GROUPS: OperationsNavGroup[] = [
     label: "Business",
     items: [
       { id: "accounts", label: "Accounts", href: "/admin/operations/accounts" },
+      {
+        id: "money-moves",
+        label: "Money Moves",
+        href: "/admin/operations/money-moves",
+      },
       {
         id: "commercial-agreements",
         label: "Commercial Agreements",
