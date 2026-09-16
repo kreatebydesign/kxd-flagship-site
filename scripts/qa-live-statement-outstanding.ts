@@ -102,13 +102,27 @@ async function main() {
   const deDoc = report("de Bois Entertainment", 19, deBois.obligations);
   const ptDoc = report("Platinum Film Workz", 18, platinum.obligations);
 
-  if (deDoc.summary.totalOutstandingCents !== 230_000) {
+  if (deDoc.summary.totalOutstandingCents !== 200_000) {
     throw new Error(
-      `de Bois outstanding expected 230000 got ${deDoc.summary.totalOutstandingCents}`,
+      `de Bois outstanding expected 200000 got ${deDoc.summary.totalOutstandingCents}`,
     );
   }
   if (deDoc.summary.projectBalanceCents !== 200_000) {
     throw new Error(`de Bois project remaining expected 200000`);
+  }
+  const vaultUpcoming = deDoc.openBalances.upcomingItems.find((i) =>
+    /media vault/i.test(i.description),
+  );
+  if (!vaultUpcoming || vaultUpcoming.remainingCents !== 30_000) {
+    throw new Error("de Bois Media Vault should be upcoming $300");
+  }
+  if ((vaultUpcoming.dueDate ?? "").slice(0, 10) !== "2026-09-22") {
+    throw new Error(
+      `de Bois Media Vault dueDate expected 2026-09-22 got ${vaultUpcoming.dueDate}`,
+    );
+  }
+  if (deDoc.openBalances.items.some((i) => /media vault/i.test(i.description))) {
+    throw new Error("de Bois Media Vault must not be currently due before Sep 22");
   }
   if (
     deDoc.openBalances.upcomingItems.some((i) => /hosting/i.test(i.description)) ===
