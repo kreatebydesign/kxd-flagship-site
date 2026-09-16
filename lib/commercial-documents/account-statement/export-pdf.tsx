@@ -498,14 +498,16 @@ function AccountStatementPdfDocument(props: {
               {money(doc.summary.projectBalanceCents, currency)}
             </Text>
           </View>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>
-              {doc.summary.currentChargesLabel}
-            </Text>
-            <Text style={styles.summaryValue}>
-              {money(doc.summary.currentChargesCents, currency)}
-            </Text>
-          </View>
+          {doc.summary.currentChargeLines.length > 0
+            ? doc.summary.currentChargeLines.map((line) => (
+                <View key={line.id} style={styles.summaryRow}>
+                  <Text style={styles.summaryLabel}>{line.label}</Text>
+                  <Text style={styles.summaryValue}>
+                    {money(line.amountCents, currency)}
+                  </Text>
+                </View>
+              ))
+            : null}
         </View>
 
         <View style={styles.section} wrap>

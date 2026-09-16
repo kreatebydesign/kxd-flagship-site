@@ -67,6 +67,14 @@ function report(name: string, clientId: number, obligations: InvoiceObligation[]
         projectPaid: document.summary.paymentsReceivedCents,
         projectRemaining: document.summary.projectBalanceCents,
         currentCharges: document.summary.currentChargesCents,
+        currentChargeLines: document.summary.currentChargeLines.map((line) => ({
+          label: line.label,
+          amountCents: line.amountCents,
+        })),
+        finalLines: document.finalPosition.lines.map((line) => ({
+          label: line.label,
+          amountCents: line.amountCents,
+        })),
         currentlyOutstanding: document.summary.totalOutstandingCents,
         contractualRemaining: ledger.remainingCents,
         currentlyDue: document.openBalances.items.map((i) => ({

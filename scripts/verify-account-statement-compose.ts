@@ -756,6 +756,27 @@ check("L. client-facing status labels + account-level statement header", () => {
   assert.equal(document.documentKindLabel, "Statement type");
   assert.equal(document.documentKindValue, "Account Statement");
   assert.equal(document.agreementTitle, null);
+  assert.equal(document.summary.totalOutstandingLabel, "Total Currently Due");
+  assert.equal(document.summary.currentChargeLines.length, 1);
+  assert.equal(
+    document.summary.currentChargeLines[0]!.label,
+    "KXD Media Vault — 250 GB",
+  );
+  assert.equal(document.summary.currentChargesLabel, "KXD Media Vault — 250 GB");
+  assert.doesNotMatch(
+    JSON.stringify(document.summary),
+    /Infrastructure Charges|Other Charges|Miscellaneous|Ancillary/i,
+  );
+  assert.equal(document.finalPosition.lines.length, 2);
+  assert.equal(document.finalPosition.lines[0]!.label, "Website Project Balance");
+  assert.equal(document.finalPosition.lines[0]!.amountCents, 200_000);
+  assert.equal(
+    document.finalPosition.lines[1]!.label,
+    "KXD Media Vault — 250 GB",
+  );
+  assert.equal(document.finalPosition.lines[1]!.amountCents, 30_000);
+  assert.equal(document.finalPosition.totalLabel, "Total Currently Due");
+  assert.equal(document.finalPosition.totalCents, 230_000);
 
   const vault = document.openBalances.items.find((i) => i.id === "vault");
   const final = document.openBalances.items.find((i) => i.id === "final");
@@ -769,6 +790,90 @@ check("L. client-facing status labels + account-level statement header", () => {
   assert.equal(host!.timingNote, "Due at website launch");
   assert.doesNotMatch(JSON.stringify(document.openBalances), /Pending Trigger/i);
   assert.doesNotMatch(JSON.stringify(document), /Digital Management & Growth Partnership/);
+  assert.equal(validateAccountStatement(document).length, 0);
+});
+
+check("M. multi-service currently-due summary uses explicit service names", () => {
+  const { document } = composeAccountStatement({
+    id: "t-m",
+    clientName: "Multi Service Client",
+    statementDate: "2026-09-16",
+    obligations: [
+      obl({
+        id: "final",
+        kind: "final",
+        label: "Website Design & Development — Final Payment",
+        amountCents: 200_000,
+        status: "sent",
+        dueDate: "2026-09-01",
+      }),
+      obl({
+        id: "vault",
+        kind: "addon",
+        label: "KXD Media Vault — 250 GB",
+        amountCents: 30_000,
+        status: "sent",
+        dueDate: "2026-09-01",
+        serviceTitle: "KXD Media Vault — 250 GB",
+      }),
+      obl({
+        id: "domain",
+        kind: "addon",
+        label: ".com Domain Registration",
+        amountCents: 1_500,
+        status: "sent",
+        dueDate: "2026-09-01",
+        serviceTitle: ".com Domain Registration",
+      }),
+      obl({
+        id: "mgmt",
+        kind: "recurring-period",
+        label: "Website Growth & Management — 2026-09",
+        amountCents: 60_000,
+        status: "sent",
+        dueDate: "2026-09-01",
+        billingCadence: "monthly",
+        serviceTitle: "Website Growth & Management",
+      }),
+      obl({
+        id: "host",
+        kind: "addon",
+        label: "KXD Managed Website Hosting",
+        amountCents: 29_900,
+        status: "pending-trigger",
+        trigger: "website-launch",
+        billingCadence: "annual",
+      }),
+    ],
+  });
+
+  assert.equal(document.summary.totalOutstandingCents, 291_500);
+  assert.equal(document.summary.projectBalanceCents, 200_000);
+  assert.equal(document.summary.currentChargesCents, 91_500);
+  assert.equal(document.summary.currentChargeLines.length, 3);
+  assert.deepEqual(
+    document.summary.currentChargeLines.map((line) => line.label).sort(),
+    [
+      ".com Domain Registration",
+      "KXD Media Vault — 250 GB",
+      "Website Growth & Management — 2026-09",
+    ].sort(),
+  );
+  assert.equal(
+    document.summary.currentChargeLines.reduce((sum, line) => sum + line.amountCents, 0),
+    document.summary.currentChargesCents,
+  );
+  assert.equal(
+    document.finalPosition.lines.reduce((sum, line) => sum + line.amountCents, 0),
+    document.finalPosition.totalCents,
+  );
+  assert.equal(document.finalPosition.lines[0]!.label, "Website Project Balance");
+  assert.equal(document.openBalances.upcomingItems.length, 1);
+  assert.equal(document.openBalances.upcomingItems[0]!.id, "host");
+  assert.doesNotMatch(
+    JSON.stringify(document),
+    /Current Service \/ Infrastructure|Other Charges|Miscellaneous|Ancillary|pending-trigger|paymentEvent/i,
+  );
   assert.equal(validateAccountStatement(document).length, 0);
 });
 

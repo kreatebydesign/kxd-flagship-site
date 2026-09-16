@@ -201,9 +201,16 @@ function buildLongSyntheticDoc(): AccountStatementDocument {
       paymentsReceivedCents: paymentsReceived as never,
       projectBalanceLabel: "Website Project Balance",
       projectBalanceCents: projectBalance as never,
-      currentChargesLabel: "Current Service / Infrastructure Charges",
+      currentChargesLabel: "KXD Media Vault — 250 GB",
       currentChargesCents: currentCharge as never,
-      totalOutstandingLabel: "Total Currently Outstanding",
+      currentChargeLines: [
+        {
+          id: "summary-charge-svc-1",
+          label: "KXD Media Vault — 250 GB",
+          amountCents: currentCharge as never,
+        },
+      ],
+      totalOutstandingLabel: "Total Currently Due",
       totalOutstandingCents: dueTotal as never,
       accountPaymentsReceivedLabel: "Total Payments Received",
       accountPaymentsReceivedCents: paymentsReceived as never,
@@ -211,7 +218,7 @@ function buildLongSyntheticDoc(): AccountStatementDocument {
     openBalances: {
       sectionTitle: "Currently Due",
       items: dueItems,
-      totalRemainingLabel: "Total currently outstanding",
+      totalRemainingLabel: "Total currently due",
       totalRemainingCents: dueTotal as never,
       upcomingSectionTitle: "Upcoming / Not Yet Due",
       upcomingItems: [
@@ -237,17 +244,17 @@ function buildLongSyntheticDoc(): AccountStatementDocument {
       remainingCents: projectBalance as never,
     },
     currentCharges: {
-      sectionTitle: "Current Services & Infrastructure",
+      sectionTitle: "Current Services",
       items: [
         {
           id: "svc-1",
-          title: "Current Infrastructure",
-          periodLabel: "Current",
+          title: "KXD Media Vault — 250 GB",
+          periodLabel: "Annual",
           amountCents: currentCharge as never,
           description: null,
         },
       ],
-      subtotalLabel: "Current service / infrastructure charges",
+      subtotalLabel: "Current service charges",
       subtotalCents: currentCharge as never,
       existingInvoiceNote: null,
     },
@@ -258,7 +265,7 @@ function buildLongSyntheticDoc(): AccountStatementDocument {
         label: d.description,
         amountCents: d.remainingCents,
       })),
-      totalLabel: "Total Currently Outstanding",
+      totalLabel: "Total Currently Due",
       totalCents: dueTotal as never,
     },
     closingNotes: [],

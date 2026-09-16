@@ -1,8 +1,12 @@
 /**
  * KXD OS — Account Statement commercial document.
  *
- * Path: ledger obligations → composeAccountStatement → AccountStatementDocument → PDF.
- * Admin / portal / automation can share the same composer entry point.
+ * Canonical client-facing Account Statement for every KXD client.
+ * Path: ledger obligations → composeAccountStatement → AccountStatementDocument
+ * → Admin Statements UI / Portal Billing projection / PDF renderer.
+ *
+ * Do not create client-specific statement templates or parallel PDF renderers.
+ * Extend this composer + document model instead.
  */
 
 export type {
@@ -22,6 +26,8 @@ export {
 export {
   composeAccountStatement,
   clientFacingOpenBalanceStatusLabel,
+  clientFacingServiceChargeLabel,
+  buildFinalAccountPositionLines,
   type AccountStatementLedgerTotals,
   type ComposeAccountStatementInput,
   type ComposeAccountStatementResult,
