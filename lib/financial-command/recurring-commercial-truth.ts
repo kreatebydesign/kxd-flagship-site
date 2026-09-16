@@ -88,7 +88,10 @@ export function listContractRecurringServices(
   for (const row of authority.services) {
     if (row.activationStatus === "conflict") continue;
     if (!row.active && row.activationStatus !== "pending-trigger") continue;
-    if (row.amountCents > 0 && row.active) services.push(row);
+    // Include active services and pending-trigger services (not counted in MRR sums).
+    if (row.amountCents > 0 && (row.active || row.activationStatus === "pending-trigger")) {
+      services.push(row);
+    }
   }
 
   // Distinct active operator services not already represented (resource add-ons).
@@ -222,7 +225,8 @@ export function resolveClientRecurringCommercialTruth(input: {
       contractMonthlyDollars: 0,
       source: "retainer-legacy",
       activeServiceCount: 0,
-      services: [],
+      // Preserve pending-trigger contract services alongside legacy retainer MRR.
+      services,
       conflicts,
       warnings: [
         ...warnings,
@@ -237,9 +241,11 @@ export function resolveClientRecurringCommercialTruth(input: {
     commercialMonthlyDollars: 0,
     retainerMonthlyDollars: 0,
     contractMonthlyDollars: 0,
-    source: "none",
+    source: services.some((s) => s.activationStatus === "pending-trigger")
+      ? "contract-authority"
+      : "none",
     activeServiceCount: 0,
-    services: [],
+    services,
     conflicts,
     warnings,
   };

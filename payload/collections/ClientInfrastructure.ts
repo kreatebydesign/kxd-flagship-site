@@ -436,6 +436,71 @@ export const ClientInfrastructure: CollectionConfig = {
               admin: { date: { pickerAppearance: "dayOnly" } },
             },
             {
+              name: "hostingAnnualAmountCents",
+              type: "number",
+              label: "Hosting Annual Amount (¢)",
+              admin: {
+                description:
+                  "Authoritative annual hosting amount in cents. Leave empty when authority is missing — never invent $299.",
+              },
+            },
+            {
+              name: "hostingServiceStartDate",
+              type: "date",
+              label: "Hosting Service Start",
+              admin: {
+                date: { pickerAppearance: "dayOnly" },
+                description: "Service/start signal — distinct from billing due and renewal.",
+              },
+            },
+            {
+              name: "hostingBillingDueDate",
+              type: "date",
+              label: "Hosting Billing Due",
+              admin: {
+                date: { pickerAppearance: "dayOnly" },
+                description: "When the hosting charge is due — distinct from service start.",
+              },
+            },
+            {
+              name: "hostingAutoChargeMode",
+              type: "select",
+              label: "Hosting Auto-Charge Mode",
+              defaultValue: "unknown",
+              options: [
+                { label: "Unknown / Unconfigured", value: "unknown" },
+                { label: "Manual Renewal", value: "manual" },
+                { label: "Invoice Renewal", value: "invoice" },
+                { label: "Authorized Automatic", value: "authorized_auto" },
+              ],
+              admin: {
+                description:
+                  "Never silently enroll. Prior card use ≠ auto-charge authorization. No Stripe charging in this field.",
+              },
+            },
+            {
+              name: "hostingRenewalLifecycle",
+              type: "select",
+              label: "Hosting Renewal Lifecycle",
+              defaultValue: "unknown",
+              options: [
+                { label: "Unknown", value: "unknown" },
+                { label: "Upcoming", value: "upcoming" },
+                { label: "30-Day Notice Due", value: "notice_due" },
+                { label: "Notice Sent", value: "notice_sent" },
+                { label: "Renewal Scheduled", value: "renewal_scheduled" },
+                { label: "Charge / Invoice Due", value: "charge_due" },
+                { label: "Paid", value: "paid" },
+                { label: "Next Renewal", value: "next_renewal" },
+              ],
+            },
+            {
+              name: "renewalNoticeSentAt",
+              type: "date",
+              label: "Renewal Notice Sent At",
+              admin: { date: { pickerAppearance: "dayAndTime" } },
+            },
+            {
               name: "lastReviewedAt",
               type: "date",
               label: "Last Reviewed",
