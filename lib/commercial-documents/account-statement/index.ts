@@ -21,6 +21,7 @@ export {
 
 export {
   composeAccountStatement,
+  clientFacingOpenBalanceStatusLabel,
   type AccountStatementLedgerTotals,
   type ComposeAccountStatementInput,
   type ComposeAccountStatementResult,

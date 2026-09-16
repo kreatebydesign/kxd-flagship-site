@@ -10,7 +10,6 @@
 import { formatCents, type Cents } from "@/lib/proposal-builder/money";
 import {
   aggregateObligationBalances,
-  formatObligationStatusLabel,
   isLaunchGatedObligationTrigger,
   isObligationCurrentlyOutstanding,
   obligationAmountPaidCents,
@@ -174,9 +173,26 @@ function upcomingTimingNote(obligation: InvoiceObligation): string {
   return "Not yet due";
 }
 
+/**
+ * Client-facing balance status for Account Statements.
+ * Describes the statement classification — never exposes internal lifecycle
+ * labels like "Pending Trigger" on rows already classified as currently due.
+ */
+export function clientFacingOpenBalanceStatusLabel(
+  obligation: InvoiceObligation,
+  bucket: "current" | "upcoming",
+): string {
+  if (bucket === "upcoming") return "Upcoming";
+  if (obligation.status === "overdue") return "Past Due";
+  const paidCents = obligationAmountPaidCents(obligation);
+  const remainingCents = obligationRemainingCents(obligation);
+  if (paidCents > 0 && remainingCents > 0) return "Partially Paid";
+  return "Due";
+}
+
 function toOpenBalanceRow(
   obligation: InvoiceObligation,
-  options?: { timingNote?: string | null },
+  options: { bucket: "current" | "upcoming"; timingNote?: string | null },
 ): AccountStatementOpenBalance {
   const paidCents = obligationAmountPaidCents(obligation);
   const remainingCents = obligationRemainingCents(obligation);
@@ -187,11 +203,9 @@ function toOpenBalanceRow(
     paidCents: paidCents as Cents,
     remainingCents: remainingCents as Cents,
     dueDate: obligation.dueDate ?? null,
-    statusLabel: formatObligationStatusLabel(
-      paidCents > 0 && remainingCents > 0 ? "partially-paid" : obligation.status,
-    ),
+    statusLabel: clientFacingOpenBalanceStatusLabel(obligation, options.bucket),
     kind: obligation.kind,
-    timingNote: options?.timingNote ?? null,
+    timingNote: options.timingNote ?? null,
   };
 }
 
@@ -262,10 +276,13 @@ export function composeAccountStatement(
   );
 
   const openBalanceItems = currentlyDueOpen.map((obligation) =>
-    toOpenBalanceRow(obligation),
+    toOpenBalanceRow(obligation, { bucket: "current" }),
   );
   const upcomingBalanceItems = upcomingOpen.map((obligation) =>
-    toOpenBalanceRow(obligation, { timingNote: upcomingTimingNote(obligation) }),
+    toOpenBalanceRow(obligation, {
+      bucket: "upcoming",
+      timingNote: upcomingTimingNote(obligation),
+    }),
   );
 
   const totalOutstandingCents = sumCurrentlyOutstandingCents(obligations, asOfDate);
@@ -300,7 +317,13 @@ export function composeAccountStatement(
     clientName: input.clientName,
     clientSlug: input.clientSlug ?? null,
     contactName: input.contactName?.trim() || null,
-    agreementTitle: input.agreementTitle?.trim() || null,
+    /**
+     * Account-level statements span all commercial activity for the client.
+     * Never imply the document belongs to a single agreement title.
+     */
+    documentKindLabel: "Statement type",
+    documentKindValue: "Account Statement",
+    agreementTitle: null,
     statementDate: input.statementDate,
     currency,
     summary: {

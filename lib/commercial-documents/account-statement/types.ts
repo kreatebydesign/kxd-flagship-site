@@ -63,7 +63,16 @@ export type AccountStatementDocument = {
   clientSlug?: string | null;
   /** Primary contact when available — display only. */
   contactName?: string | null;
-  /** Optional commercial relationship / agreement title. */
+  /**
+   * Account-level document descriptor (UI/PDF header).
+   * Prefer this over implying the statement belongs to one agreement.
+   */
+  documentKindLabel: string;
+  documentKindValue: string;
+  /**
+   * @deprecated Account-level statements leave this null.
+   * Retained optional for backward-compatible readers.
+   */
   agreementTitle?: string | null;
   /** ISO calendar date YYYY-MM-DD — as-of date for this snapshot */
   statementDate: string;

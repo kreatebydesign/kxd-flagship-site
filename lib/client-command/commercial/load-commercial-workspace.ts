@@ -628,7 +628,8 @@ export async function loadClientCommercialWorkspace(input: {
     statementDate: statementView.statementDate,
     clientName: statementView.document.clientName,
     contactName: statementView.document.contactName ?? null,
-    agreementTitle: statementView.agreementTitle,
+    documentKindLabel: statementView.document.documentKindLabel,
+    documentKindValue: statementView.document.documentKindValue,
     currency: statementView.document.currency,
     summary: {
       originalProjectLabel: statementView.document.summary.originalProjectLabel,

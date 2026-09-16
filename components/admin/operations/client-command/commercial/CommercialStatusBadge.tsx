@@ -14,6 +14,8 @@ export function CommercialStatusBadge({
 
 export function statusTone(status: string): "neutral" | "positive" | "warning" | "muted" {
   const s = status.toLowerCase();
+  if (/(^due$|past due)/.test(s)) return "warning";
+  if (/upcoming|not yet due/.test(s)) return "muted";
   if (/(active|paid|accepted|executed|signed)/.test(s) && !/partial/.test(s)) return "positive";
   if (/(pending|sent|finalized|draft|awaiting|partial)/.test(s)) return "warning";
   if (/(cancelled|void|none)/.test(s)) return "muted";
