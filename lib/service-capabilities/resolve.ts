@@ -62,19 +62,18 @@ export function resolveServiceScope(input: {
   const now = input.now ?? Date.now();
   const assignments = input.assignments.filter((row) => isServiceCapabilityId(row.capabilityId));
   const active = assignments.filter((row) => isActiveAssignment(row, now));
-  const experienceActive = active.filter((row) => {
-    const def = getServiceCapability(row.capabilityId);
-    return Boolean(def?.affectsExperience);
-  });
 
   const grantedModules: PortalModuleId[] = [];
   const grantedReporting: ReportingCapabilityId[] = [];
   const activeCapabilityIds: ServiceCapabilityId[] = [];
 
-  for (const row of experienceActive) {
+  for (const row of active) {
     const def = getServiceCapability(row.capabilityId);
     if (!def) continue;
     activeCapabilityIds.push(def.id);
+    // Commercial scope assignments may intentionally not drive portal modules.
+    if (row.drivesExperience === false) continue;
+    if (!def.affectsExperience) continue;
     for (const id of def.grantsModules) {
       if (isPortalModuleId(id) && id !== "advisor") grantedModules.push(id);
     }

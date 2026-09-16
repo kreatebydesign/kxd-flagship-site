@@ -125,7 +125,7 @@ export const NAV_GROUPS: OperationsNavGroup[] = [
       },
       {
         id: "client-provisioning",
-        label: "Provisioning",
+        label: "Provisioning (quarantined)",
         href: "/admin/operations/client-provisioning",
       },
       { id: "strategy", label: "Strategy Vault", href: "/admin/operations/strategy" },

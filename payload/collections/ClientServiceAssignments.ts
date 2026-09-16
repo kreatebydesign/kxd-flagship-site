@@ -121,6 +121,16 @@ export const ClientServiceAssignments: CollectionConfig = {
       },
     },
     {
+      name: "drivesExperience",
+      type: "checkbox",
+      label: "Drives portal experience",
+      defaultValue: true,
+      admin: {
+        description:
+          "When unchecked, this assignment is commercial scope only and must not grant portal modules. Engagement→capability bridge materialization sets this off so portal access does not change unexpectedly.",
+      },
+    },
+    {
       name: "note",
       type: "textarea",
       label: "Internal note",

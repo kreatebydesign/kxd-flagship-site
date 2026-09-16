@@ -46,6 +46,7 @@ export const GROWTH_INFRASTRUCTURE_SHOWROOM_SCOPE: {
       endedAt: null,
       relatedContractId: null,
       note: null,
+      drivesExperience: true,
     })),
     {
       id: 90,
@@ -57,6 +58,7 @@ export const GROWTH_INFRASTRUCTURE_SHOWROOM_SCOPE: {
       endedAt: null,
       relatedContractId: null,
       note: "Commercial performance obligation only.",
+      drivesExperience: false,
     },
     {
       id: 91,
@@ -68,6 +70,7 @@ export const GROWTH_INFRASTRUCTURE_SHOWROOM_SCOPE: {
       endedAt: "2025-12-01T00:00:00.000Z",
       relatedContractId: null,
       note: "Historical add-on. Must not grant future entitlement.",
+      drivesExperience: true,
     },
   ],
 };
