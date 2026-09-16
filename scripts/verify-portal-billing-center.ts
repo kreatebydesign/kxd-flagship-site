@@ -162,8 +162,13 @@ check("de Bois-shaped currently due + paid to date + upcoming", () => {
 
   assert.equal(view.currentlyDueLabel, "$2,300.00");
   assert.equal(view.paidToDateLabel, "$7,500.00");
+  assert.equal(view.summary.currentBalance.label, "Current balance");
+  assert.equal(view.summary.currentBalance.value, "$2,300.00");
+  assert.equal("paidToDate" in view.summary, false);
   assert.equal(view.accountStatus, "outstanding");
   assert.equal(view.currentlyDue.length, 2);
+  assert.equal(view.currentlyDue[0]!.showPaidDetail, true);
+  assert.equal(view.currentlyDue[1]!.showPaidDetail, false);
   assert.equal(view.upcomingItems.length, 1);
   assert.match(view.upcomingItems[0]!.dueLabel ?? "", /launch/i);
   assert.equal(view.paymentHistory.length, 3);
@@ -192,8 +197,10 @@ check("de Bois-shaped currently due + paid to date + upcoming", () => {
   assert.ok(card);
   assert.equal(card!.accountStatus, "outstanding");
   assert.equal(card!.amountLabel, "$2,300.00");
-  assert.match(card!.supportingLabel, /\$7,500\.00/);
+  assert.equal(card!.statusLine, "Currently due");
+  assert.equal(card!.upcomingNote, null);
   assert.equal(card!.billingHref, "/portal/invoices");
+  assert.equal(JSON.stringify(card).includes("paid to date"), false);
 });
 
 check("zero-balance account current card", () => {
@@ -239,9 +246,10 @@ check("zero-balance account current card", () => {
 
   const card = projectPortalBillingOverviewCard(view);
   assert.ok(card);
-  assert.equal(card!.headline, "You're current");
-  assert.equal(card!.amountLabel, null);
+  assert.equal(card!.amountLabel, "$0.00");
+  assert.equal(card!.statusLine, "You're current");
   assert.match(card!.upcomingNote ?? "", /Upcoming/);
+  assert.equal(JSON.stringify(card).includes("paid to date"), false);
 });
 
 check("Platinum statement projection stays statement-parity", () => {
@@ -266,12 +274,33 @@ check("Platinum statement projection stays statement-parity", () => {
   );
   assert.equal(
     view.currentlyDueLabel,
-    // reuse statement money formatting path through projection
-    view.summary.currentlyDue.value,
+    view.summary.currentBalance.value,
   );
   assert.equal(
     view.paidToDateLabel,
-    view.summary.paidToDate.value,
+    // retained for ledger parity; not rendered in portal summary UI
+    view.paidToDateLabel,
+  );
+});
+
+check("portal UI omits paid-to-date and muddy status badges", () => {
+  const screen = readFileSync(
+    join(root, "components/client-hq/InvoicesScreen.tsx"),
+    "utf8",
+  );
+  const card = readFileSync(
+    join(root, "components/client-hq/AccountBalanceCard.tsx"),
+    "utf8",
+  );
+  assert.equal(/Paid to date/i.test(screen), false);
+  assert.equal(/Paid to date/i.test(card), false);
+  assert.equal(/paidToDateLabel/.test(screen), false);
+  assert.equal(/statusBadgeVariant/.test(screen), false);
+  assert.match(screen, /currentBalance/);
+  assert.match(screen, /kxd-os-billing-status/);
+  assert.match(
+    readFileSync(join(root, "lib/portal/billing/presentation.ts"), "utf8"),
+    /label: "Current balance"/,
   );
 });
 
