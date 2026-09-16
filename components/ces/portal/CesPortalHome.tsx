@@ -22,6 +22,8 @@ import { CesPresentationHomeHero } from "@/components/ces/presentation/CesPresen
 import { WorkspaceFocusStrip } from "@/components/portal/WorkspaceFocusStrip";
 import { CesClientCommandHome } from "./CesClientCommandHome";
 import { WebsiteEditorPortalAction } from "@/components/portal/WebsiteEditorPortalAction";
+import { AccountBalanceCard } from "@/components/client-hq/AccountBalanceCard";
+import type { PortalBillingOverviewCardModel } from "@/lib/portal/billing";
 
 export interface CesPortalHomeProps {
   greeting: string;
@@ -43,6 +45,8 @@ export interface CesPortalHomeProps {
   engagement?: ActiveEngagementSnapshot | null;
   /** Optional external website editor doorway. */
   websiteEditorUrl?: string | null;
+  /** Compact Account / Billing overview card when billing zone is visible. */
+  billingOverview?: PortalBillingOverviewCardModel | null;
 }
 
 export function CesPortalHome({
@@ -57,6 +61,7 @@ export function CesPortalHome({
   businessImpact = null,
   engagement = null,
   websiteEditorUrl = null,
+  billingOverview = null,
 }: CesPortalHomeProps) {
   const flagship = isCesFlagshipPortal(profile);
   const homeSurface = resolveCesHomeSurface({
@@ -129,6 +134,11 @@ export function CesPortalHome({
         )}
         {!clientHome && personalization && !useExecutive ? (
           <WorkspaceFocusStrip personalization={personalization} />
+        ) : null}
+        {billingOverview && isHomeZoneVisible(homeComposition, "billing") ? (
+          <div className="kxd-os-billing-overview-slot">
+            <AccountBalanceCard model={billingOverview} />
+          </div>
         ) : null}
       </div>
     </CesPage>

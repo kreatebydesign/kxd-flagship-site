@@ -7,10 +7,12 @@ import {
   ClientHqQuickActions,
   ClientHqTimelineFeed,
 } from "./shared";
+import { AccountBalanceCard } from "./AccountBalanceCard";
 import type { PortalOverviewData } from "@/lib/portal/types";
 import type { WorkspacePersonalizationModel } from "@/lib/portal/workspace-personalization";
 import { formatWorkspaceWelcomeTitle } from "@/lib/portal/workspace-personalization";
 import type { WorkPerformanceModel } from "@/lib/portal/work-performance";
+import type { PortalBillingOverviewCardModel } from "@/lib/portal/billing";
 import { fmtPortalDate } from "@/lib/portal/format";
 
 export interface OverviewScreenProps {
@@ -18,6 +20,7 @@ export interface OverviewScreenProps {
   data: PortalOverviewData;
   personalization: WorkspacePersonalizationModel;
   workPerformance?: WorkPerformanceModel | null;
+  billingOverview?: PortalBillingOverviewCardModel | null;
 }
 
 /** Legacy Client HQ overview — personalized welcome and monthly work/performance. */
@@ -26,6 +29,7 @@ export function OverviewScreen({
   data,
   personalization,
   workPerformance = null,
+  billingOverview = null,
 }: OverviewScreenProps) {
   const title = formatWorkspaceWelcomeTitle(personalization, displayName);
   const emptyRequests =
@@ -85,6 +89,12 @@ export function OverviewScreen({
         ) : (
           <WorkspaceFocusStrip personalization={personalization} />
         )}
+
+        {billingOverview ? (
+          <div className="kxd-os-billing-overview-slot">
+            <AccountBalanceCard model={billingOverview} />
+          </div>
+        ) : null}
 
         <KxdSection label="What to do next">
           <ClientHqQuickActions actions={quickActions} />
