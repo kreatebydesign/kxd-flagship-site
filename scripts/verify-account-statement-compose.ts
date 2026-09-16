@@ -33,6 +33,9 @@ function event(partial: {
   paymentGroupId: string;
   amountCents: number;
   paidAt?: string;
+  externalPaymentMethod?: ObligationPaymentEvent["externalPaymentMethod"];
+  externalReference?: string | null;
+  stripeInvoiceId?: string | null;
 }): ObligationPaymentEvent {
   return {
     id: partial.id,
@@ -40,9 +43,11 @@ function event(partial: {
     amountCents: partial.amountCents,
     currency: "USD",
     paidAt: partial.paidAt ?? "2026-09-01T00:00:00.000Z",
-    externalPaymentMethod: "zelle",
+    externalPaymentMethod: partial.externalPaymentMethod ?? "zelle",
+    externalReference: partial.externalReference ?? null,
     recordedBy: "test",
     recordedAt: partial.paidAt ?? "2026-09-01T00:00:00.000Z",
+    stripeInvoiceId: partial.stripeInvoiceId ?? null,
     collectionChannel: "manual-external",
     idempotencyKey: `test:${partial.id}`,
   };
@@ -240,7 +245,116 @@ check("E. one real payment allocated across multiple obligations groups as one r
   });
   assert.equal(document.paymentHistory.payments.length, 1);
   assert.equal(document.paymentHistory.payments[0]!.amountCents, 50_000);
+  assert.equal(
+    document.paymentHistory.payments[0]!.label,
+    "Website Design & Development — Project Payment",
+  );
+  assert.doesNotMatch(
+    document.paymentHistory.payments[0]!.label,
+    /A;\s*B|B;\s*A/,
+  );
   assert.equal(ledger.paidCents, 50_000);
+});
+
+check("E2. multi-obligation allocation never concatenates staged titles", () => {
+  const obligations = [
+    obl({
+      id: "progress",
+      kind: "milestone",
+      label: "Website Design & Development — Progress Payment",
+      amountCents: 150_000,
+      status: "paid",
+      amountPaidCents: 150_000,
+      paymentEvents: [
+        event({
+          id: "e-progress",
+          paymentGroupId: "sep-pay",
+          amountCents: 150_000,
+          paidAt: "2026-09-10T12:00:00.000Z",
+          externalPaymentMethod: "stripe",
+          stripeInvoiceId: "in_1FakeStripeObjectId",
+          externalReference: "in_1FakeStripeObjectId",
+        }),
+      ],
+    }),
+    obl({
+      id: "final",
+      kind: "final",
+      label: "Website Design & Development — Final Payment",
+      amountCents: 300_000,
+      status: "partially-paid",
+      amountPaidCents: 100_000,
+      paymentEvents: [
+        event({
+          id: "e-final",
+          paymentGroupId: "sep-pay",
+          amountCents: 100_000,
+          paidAt: "2026-09-10T12:00:00.000Z",
+          externalPaymentMethod: "stripe",
+          stripeInvoiceId: "in_1FakeStripeObjectId",
+          externalReference: "in_1FakeStripeObjectId",
+        }),
+      ],
+    }),
+  ];
+  const grouped = normalizeObligationPaymentHistory(obligations);
+  assert.equal(grouped.length, 1);
+  assert.equal(grouped[0]!.amountCents, 250_000);
+  assert.equal(
+    grouped[0]!.label,
+    "Website Design & Development — Project Payment",
+  );
+  assert.equal(grouped[0]!.reference, null);
+  assert.doesNotMatch(grouped[0]!.label, /Final Payment/i);
+  assert.doesNotMatch(grouped[0]!.label, /Progress Payment.*Final Payment/i);
+
+  const { document } = composeAccountStatement({
+    id: "t-e2",
+    clientName: "de Bois Entertainment",
+    statementDate: "2026-09-15",
+    obligations,
+  });
+  assert.equal(document.paymentHistory.payments.length, 1);
+  assert.equal(
+    document.paymentHistory.payments[0]!.label,
+    "Website Design & Development — Project Payment",
+  );
+  assert.equal(document.paymentHistory.payments[0]!.detail, "Stripe");
+  assert.doesNotMatch(
+    JSON.stringify(document.paymentHistory),
+    /in_1FakeStripeObjectId/,
+  );
+  const finalOpen = document.openBalances.items.find((item) => item.id === "final");
+  assert.ok(finalOpen);
+  assert.equal(finalOpen!.remainingCents, 200_000);
+  assert.equal(finalOpen!.statusLabel, "Partially Paid");
+});
+
+check("E3. partial single-leg Final Payment uses neutral project label", () => {
+  const obligations = [
+    obl({
+      id: "final",
+      kind: "final",
+      label: "Website Design & Development — Final Payment",
+      amountCents: 300_000,
+      status: "partially-paid",
+      paymentEvents: [
+        event({
+          id: "partial",
+          paymentGroupId: "g-partial",
+          amountCents: 100_000,
+          paidAt: "2026-09-10T12:00:00.000Z",
+        }),
+      ],
+    }),
+  ];
+  const grouped = normalizeObligationPaymentHistory(obligations);
+  assert.equal(grouped.length, 1);
+  assert.equal(
+    grouped[0]!.label,
+    "Website Design & Development — Project Payment",
+  );
+  assert.doesNotMatch(grouped[0]!.label, /Final Payment/i);
 });
 
 check("F. aggregate statement totals reconcile with canonical ledger helpers", () => {

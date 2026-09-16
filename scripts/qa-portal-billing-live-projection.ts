@@ -89,6 +89,13 @@ async function main() {
             note: item.dueLabel,
           })),
           paymentCount: view.paymentHistory.length,
+          paymentHistory: view.paymentHistory.map((item) => ({
+            paidOn: item.paidOnLabel,
+            label: item.label,
+            method: item.methodLabel,
+            detail: item.detail,
+            amount: item.amountLabel,
+          })),
           card,
           payBalancePresent: JSON.stringify(view).includes("Pay Balance"),
         },

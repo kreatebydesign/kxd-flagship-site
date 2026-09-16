@@ -29,7 +29,11 @@ export {
 } from "./compose";
 
 export {
+  clientFacingPaymentLabel,
+  clientFacingPaymentReference,
+  isClientFacingPaymentReference,
   normalizeObligationPaymentHistory,
+  projectServiceFamily,
   type NormalizedStatementPayment,
 } from "./normalize-payment-history";
 

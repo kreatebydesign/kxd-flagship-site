@@ -1,10 +1,8 @@
 /**
- * Normalize obligation payment evidence into client-safe statement payments.
+ * Client-facing payment history labels from obligation allocation legs.
  *
- * Groups multiple allocation legs that share a paymentGroupId into one
- * client-facing payment row. Reusable by future receipt composition.
- *
- * Never exposes internal notes, idempotency keys, or DB internals.
+ * Groups multi-leg payments into one row. Never invents payment evidence.
+ * Never exposes operator notes, idempotency keys, or Stripe object IDs.
  */
 
 import type { InvoiceObligation } from "@/lib/proposal-lifecycle/types";
@@ -51,35 +49,94 @@ function isProjectKind(kind: InvoiceObligation["kind"]): boolean {
   return kind === "initial" || kind === "milestone" || kind === "final";
 }
 
-function defaultLabelForEvents(
+const STAGE_SUFFIX_RE =
+  /\s+[—–-]\s+(Deposit|Progress Payment|Final Payment|Initial Payment|Milestone(?:\s+\d+)?|Final)\s*$/i;
+const BARE_STAGE_RE =
+  /^(Deposit|Progress Payment|Final Payment|Initial Payment|Initial|Milestone(?:\s+\d+)?|Final)$/i;
+
+/** Stripe / provider object ids are reconciliation evidence — not client copy. */
+const PROVIDER_OBJECT_ID_RE =
+  /^(in|pi|ch|cs|txn|py|seti|pm|cus|acct|price|prod)_[A-Za-z0-9]+$/;
+
+export function isClientFacingPaymentReference(
+  value: string | null | undefined,
+): boolean {
+  const raw = String(value ?? "").trim();
+  if (!raw) return false;
+  if (PROVIDER_OBJECT_ID_RE.test(raw)) return false;
+  return true;
+}
+
+export function clientFacingPaymentReference(
+  value: string | null | undefined,
+): string | null {
+  const raw = String(value ?? "").trim();
+  if (!isClientFacingPaymentReference(raw)) return null;
+  return raw;
+}
+
+/**
+ * Parent service/project name for a staged obligation label.
+ * "Website Design & Development — Final Payment" → "Website Design & Development"
+ */
+export function projectServiceFamily(obligation: InvoiceObligation): string {
+  const label = obligation.label?.trim() || "";
+  const staged = label.match(/^(.*?)\s+[—–-]\s+/);
+  if (staged?.[1]?.trim()) return staged[1].trim();
+  if (BARE_STAGE_RE.test(label) && isProjectKind(obligation.kind)) {
+    return "Website Design & Development";
+  }
+  return (
+    obligation.serviceTitle?.trim() ||
+    label ||
+    "Account payment"
+  );
+}
+
+function isStagedProjectLabel(label: string): boolean {
+  const trimmed = label.trim();
+  return STAGE_SUFFIX_RE.test(trimmed) || BARE_STAGE_RE.test(trimmed);
+}
+
+/**
+ * Client-facing payment description.
+ *
+ * Rules:
+ * - Single full-stage allocation may keep the obligation label.
+ * - Partial allocation to a staged label (e.g. Final Payment) uses a neutral
+ *   "Project Payment" description — never implies the stage was completed.
+ * - Multi-obligation allocations never concatenate obligation titles.
+ */
+export function clientFacingPaymentLabel(
   events: Array<{ obligation: InvoiceObligation; event: ObligationPaymentEvent }>,
 ): string {
   if (events.length === 1) {
-    const obligation = events[0]!.obligation;
+    const { obligation, event } = events[0]!;
+    const label = obligation.label?.trim() || "";
+    if (
+      isStagedProjectLabel(label) &&
+      event.amountCents < obligation.amountCents
+    ) {
+      return `${projectServiceFamily(obligation)} — Project Payment`;
+    }
     return (
-      obligation.label?.trim() ||
+      label ||
       obligation.serviceTitle?.trim() ||
       "Account payment"
     );
   }
-  const labels = [
-    ...new Set(
-      events.map(
-        (item) =>
-          item.obligation.label?.trim() ||
-          item.obligation.serviceTitle?.trim() ||
-          "",
-      ),
-    ),
-  ].filter(Boolean);
-  if (labels.length === 1) return labels[0]!;
-  if (labels.length > 1 && labels.length <= 3) return labels.join("; ");
 
-  const kinds = new Set(events.map((item) => item.obligation.kind));
-  const allProject = [...kinds].every((kind) =>
-    isProjectKind(kind as InvoiceObligation["kind"]),
-  );
-  if (allProject) return "Website Design & Development";
+  const families = [
+    ...new Set(events.map((item) => projectServiceFamily(item.obligation))),
+  ].filter(Boolean);
+  const allProject = events.every((item) => isProjectKind(item.obligation.kind));
+
+  if (families.length === 1) {
+    return `${families[0]} — Project Payment`;
+  }
+  if (allProject) {
+    return "Website Design & Development — Project Payment";
+  }
   return "Account payment";
 }
 
@@ -155,16 +212,20 @@ export function normalizeObligationPaymentHistory(
       methodLabel(groupLegs[0]?.event.externalPaymentMethod) ?? null;
     const reference =
       groupLegs
-        .map((leg) => leg.event.externalReference || leg.event.stripeInvoiceId)
-        .find((value) => Boolean(value && String(value).trim())) ?? null;
+        .map((leg) =>
+          clientFacingPaymentReference(
+            leg.event.externalReference || leg.event.stripeInvoiceId,
+          ),
+        )
+        .find((value) => Boolean(value)) ?? null;
 
     payments.push({
       id: groupId.startsWith("solo:") ? groupLegs[0]!.event.id : groupId,
       paidOn,
       amountCents,
-      label: defaultLabelForEvents(groupLegs),
+      label: clientFacingPaymentLabel(groupLegs),
       method,
-      reference: reference ? String(reference) : null,
+      reference,
       obligationIds: [...new Set(groupLegs.map((leg) => leg.obligation.id))],
     });
   }
