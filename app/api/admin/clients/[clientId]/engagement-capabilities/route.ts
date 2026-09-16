@@ -13,6 +13,7 @@ import {
   applyEngagementCapabilityMapping,
   loadEngagementCapabilityProposal,
 } from "@/lib/service-capabilities/apply-engagement-mapping";
+import { applyLegacyBaselineCapabilities } from "@/lib/service-capabilities/apply-legacy-baseline";
 import { loadResolvedServiceScope } from "@/lib/service-capabilities/assignments";
 import { isServiceCapabilityId } from "@/lib/service-capabilities/catalog";
 import type { ServiceCapabilityId } from "@/lib/service-capabilities/types";
@@ -71,17 +72,25 @@ export async function POST(
       clientId?: unknown;
       action?: unknown;
       capabilityIds?: unknown;
+      reason?: unknown;
     };
     const identityError = rejectBodyClientIdMismatch(clientId, body);
     if (identityError) {
       return NextResponse.json({ ok: false, message: identityError }, { status: 400 });
     }
-    if (String(body.action ?? "") !== "apply") {
+    const action = String(body.action ?? "");
+    if (action !== "apply" && action !== "apply-legacy-baseline") {
       return NextResponse.json({ ok: false, message: "Unknown action." }, { status: 400 });
     }
     if (!Array.isArray(body.capabilityIds) || body.capabilityIds.length === 0) {
       return NextResponse.json(
-        { ok: false, message: "Select at least one proposed capability." },
+        {
+          ok: false,
+          message:
+            action === "apply-legacy-baseline"
+              ? "Select at least one capability for legacy baseline."
+              : "Select at least one proposed capability.",
+        },
         { status: 400 },
       );
     }
@@ -96,12 +105,44 @@ export async function POST(
       capabilityIds.push(raw);
     }
 
+    const actor =
+      typeof auth === "object" && auth && "email" in auth
+        ? String((auth as { email?: string }).email ?? "operator")
+        : "operator";
+
+    if (action === "apply-legacy-baseline") {
+      const reason = typeof body.reason === "string" ? body.reason.trim() : "";
+      if (!reason) {
+        return NextResponse.json(
+          {
+            ok: false,
+            message:
+              "Legacy baseline requires an explicit operator reason (not fabricated contract evidence).",
+          },
+          { status: 400 },
+        );
+      }
+      const result = await applyLegacyBaselineCapabilities({
+        clientId,
+        capabilityIds,
+        actor,
+        reason,
+      });
+      const scope = await loadResolvedServiceScope(clientId);
+      return NextResponse.json({
+        ok: true,
+        result,
+        scope,
+        mutatesEconomics: false,
+        mutatesPortal: false,
+        provenance: "legacy-baseline",
+      });
+    }
+
     const result = await applyEngagementCapabilityMapping({
       clientId,
       capabilityIds,
-      actor: typeof auth === "object" && auth && "email" in auth
-        ? String((auth as { email?: string }).email ?? "operator")
-        : "operator",
+      actor,
     });
     const scope = await loadResolvedServiceScope(clientId);
     return NextResponse.json({
@@ -110,6 +151,7 @@ export async function POST(
       scope,
       mutatesEconomics: false,
       mutatesPortal: false,
+      provenance: "engagement-bridge",
     });
   } catch (err) {
     console.error("[KXD] Engagement capability mapping failed:", err);

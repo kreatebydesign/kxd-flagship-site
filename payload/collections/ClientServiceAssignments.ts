@@ -81,10 +81,17 @@ export const ClientServiceAssignments: CollectionConfig = {
       defaultValue: "legacy-manual",
       options: [
         { label: "Agreement", value: "agreement" },
-        { label: "Legacy manual", value: "legacy-manual" },
+        {
+          label: "Legacy baseline (operator)",
+          value: "legacy-manual",
+        },
         { label: "Included", value: "included" },
         { label: "Add-on", value: "add-on" },
       ],
+      admin: {
+        description:
+          "legacy-manual means operator-authorized baseline scope for pre-contract relationships — not inferred signed commercial evidence.",
+      },
     },
     {
       name: "status",
