@@ -1,10 +1,11 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
 import { KxdShell } from "@/components/os";
 import { ExecutiveWorkspaceShell } from "@/components/admin/executive-workspace";
 import { NotificationCenter } from "@/components/admin/operations/notifications";
 import { QuickActionBar } from "@/components/admin/operations/quick-actions";
 import { OperationsSidebarNav } from "./OperationsSidebarNav";
+import { OperationsRouteProgress } from "./OperationsRouteProgress";
+import { OperatorNavLink } from "./OperatorNavLink";
 import {
   type OperationsNavGroup,
   type OperationsNavId,
@@ -61,6 +62,7 @@ export function OperationsShell({
 
   return (
     <KxdShell className="kxd-os-shell--app">
+      <OperationsRouteProgress />
       <ExecutiveWorkspaceShell clientId={clientId}>
         <div className="kxd-os-app">
           <aside className="kxd-os-sidebar" aria-label="KXD OS">
@@ -74,24 +76,24 @@ export function OperationsShell({
               ) : null}
               {isStaff ? (
                 <nav className="kxd-os-sidebar__rituals" aria-label="Staff shortcuts">
-                  <Link href="/admin/operations/staff" className="kxd-os-sidebar__ritual-link">
+                  <OperatorNavLink href="/admin/operations/staff" className="kxd-os-sidebar__ritual-link">
                     Home
-                  </Link>
-                  <Link href="/admin/training" className="kxd-os-sidebar__ritual-link">
+                  </OperatorNavLink>
+                  <OperatorNavLink href="/admin/training" className="kxd-os-sidebar__ritual-link">
                     Training
-                  </Link>
+                  </OperatorNavLink>
                 </nav>
               ) : (
                 <nav className="kxd-os-sidebar__rituals" aria-label="Daily rituals">
-                  <Link href="/admin/operations/today" className="kxd-os-sidebar__ritual-link">
+                  <OperatorNavLink href="/admin/operations/today" className="kxd-os-sidebar__ritual-link">
                     Today
-                  </Link>
-                  <Link href="/admin/operations/focus" className="kxd-os-sidebar__ritual-link">
+                  </OperatorNavLink>
+                  <OperatorNavLink href="/admin/operations/focus" className="kxd-os-sidebar__ritual-link">
                     Focus
-                  </Link>
-                  <Link href="/admin/operations/review" className="kxd-os-sidebar__ritual-link">
+                  </OperatorNavLink>
+                  <OperatorNavLink href="/admin/operations/review" className="kxd-os-sidebar__ritual-link">
                     Review
-                  </Link>
+                  </OperatorNavLink>
                 </nav>
               )}
               <div className="kxd-os-sidebar__actions">
@@ -99,9 +101,9 @@ export function OperationsShell({
                 {isStaff ? <StaffSignOutButton /> : null}
               </div>
               {!isStaff ? (
-                <Link href="/admin" className="kxd-os-sidebar__cms">
+                <OperatorNavLink href="/admin" className="kxd-os-sidebar__cms">
                   Payload
-                </Link>
+                </OperatorNavLink>
               ) : null}
             </div>
           </aside>

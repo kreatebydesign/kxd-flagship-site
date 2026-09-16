@@ -1,4 +1,7 @@
-import Link from "next/link";
+"use client";
+
+import { useCallback, useEffect, useState } from "react";
+import { OperatorNavLink } from "@/components/admin/operations/shared/OperatorNavLink";
 import {
   EXECUTIVE_STATUS_LABEL,
   fmtExecutiveMoney,
@@ -8,11 +11,26 @@ import type { ClientWorkspaceBundle } from "@/lib/client-command/workspace-types
 import {
   COMMAND_WORKSPACE_TABS,
   commandWorkspaceHref,
+  resolveWorkspaceTab,
   type CommandWorkspaceTabId,
 } from "@/lib/client-command/tabs";
 import type { CommercialSectionId } from "@/lib/client-command/commercial/types";
+import { resolveCommercialSection } from "@/lib/client-command/commercial/sections";
 import { CommandWorkspaceTabPanel } from "./CommandWorkspaceTabPanel";
 import { PortalPreviewQuickAction } from "./PortalPreviewQuickAction";
+
+function readWorkspaceLocation(href: string): {
+  tab: CommandWorkspaceTabId;
+  commercialSection: CommercialSectionId;
+} {
+  const url = new URL(href, "https://kxd.local");
+  const resolved = resolveWorkspaceTab(url.searchParams.get("tab") ?? undefined);
+  const commercialSection =
+    resolved.tab === "commercial"
+      ? resolveCommercialSection(url.searchParams.get("section") ?? resolved.commercialSection)
+      : "overview";
+  return { tab: resolved.tab, commercialSection };
+}
 
 export function ClientCommandWorkspace({
   data,
@@ -24,6 +42,39 @@ export function ClientCommandWorkspace({
   commercialSection?: CommercialSectionId;
 }) {
   const { header } = data;
+  const [tab, setTab] = useState(activeTab);
+  const [section, setSection] = useState(commercialSection);
+
+  useEffect(() => {
+    setTab(activeTab);
+    setSection(commercialSection);
+  }, [activeTab, commercialSection]);
+
+  useEffect(() => {
+    const onPop = () => {
+      const next = readWorkspaceLocation(window.location.href);
+      setTab(next.tab);
+      setSection(next.commercialSection);
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  const softNavigate = useCallback(
+    (href: string) => {
+      const url = new URL(href, window.location.href);
+      if (url.pathname !== `/admin/operations/client-command/${data.clientId}`) {
+        return false;
+      }
+      const next = readWorkspaceLocation(url.pathname + url.search);
+      window.history.replaceState(window.history.state, "", url.pathname + url.search);
+      setTab(next.tab);
+      setSection(next.commercialSection);
+      return true;
+    },
+    [data.clientId],
+  );
+
   const statusLabel = header.relationshipStatus
     ? EXECUTIVE_STATUS_LABEL[header.relationshipStatus as keyof typeof EXECUTIVE_STATUS_LABEL] ??
       header.relationshipStatus.replace(/-/g, " ")
@@ -33,9 +84,9 @@ export function ClientCommandWorkspace({
     <div className="kxd-os-command-workspace">
       <header className="kxd-os-command-workspace__header">
         <div className="kxd-os-command-workspace__header-main">
-          <Link href="/admin/operations/client-command" className="kxd-os-command-workspace__back">
+          <OperatorNavLink href="/admin/operations/client-command" className="kxd-os-command-workspace__back">
             ← All clients
-          </Link>
+          </OperatorNavLink>
 
           <div className="kxd-os-command-workspace__identity">
             {header.logoUrl ? (
@@ -109,7 +160,7 @@ export function ClientCommandWorkspace({
                   label={action.label}
                 />
               ) : (
-                <Link
+                <OperatorNavLink
                   key={action.id}
                   href={action.href}
                   className="kxd-os-command-workspace__action"
@@ -117,7 +168,7 @@ export function ClientCommandWorkspace({
                   rel={action.external ? "noreferrer" : undefined}
                 >
                   {action.label}
-                </Link>
+                </OperatorNavLink>
               ),
             )}
           </div>
@@ -126,39 +177,41 @@ export function ClientCommandWorkspace({
 
       <div className="kxd-os-command-workspace__body">
         <nav className="kxd-os-command-workspace__nav" aria-label="Client workspace">
-          {COMMAND_WORKSPACE_TABS.map((tab) => {
+          {COMMAND_WORKSPACE_TABS.map((item) => {
             const badge =
-              tab.id === "emails" && data.communications.needsReplyCount > 0
+              item.id === "emails" && data.communications.needsReplyCount > 0
                 ? data.communications.needsReplyCount
-                : tab.id === "work" && data.workBoard && data.workBoard.stats.openCount > 0
+                : item.id === "work" && data.workBoard && data.workBoard.stats.openCount > 0
                   ? data.workBoard.stats.openCount
-                : tab.id === "actions" && data.actions.openCount > 0
+                : item.id === "actions" && data.actions.openCount > 0
                   ? data.actions.openCount
-                  : tab.id === "commercial" && data.proposals.pendingFollowUpCount > 0
+                  : item.id === "commercial" && data.proposals.pendingFollowUpCount > 0
                     ? data.proposals.pendingFollowUpCount
                     : null;
             return (
-              <Link
-                key={tab.id}
-                href={commandWorkspaceHref(data.clientId, tab.id)}
+              <OperatorNavLink
+                key={item.id}
+                href={commandWorkspaceHref(data.clientId, item.id)}
                 className={`kxd-os-command-workspace__nav-item${
-                  activeTab === tab.id ? " kxd-os-command-workspace__nav-item--active" : ""
+                  tab === item.id ? " kxd-os-command-workspace__nav-item--active" : ""
                 }`}
+                onSoftNavigate={softNavigate}
               >
-                {tab.label}
+                {item.label}
                 {badge != null ? (
                   <span className="kxd-os-command-workspace__nav-badge">{badge}</span>
                 ) : null}
-              </Link>
+              </OperatorNavLink>
             );
           })}
         </nav>
 
         <main className="kxd-os-command-workspace__content">
           <CommandWorkspaceTabPanel
-            tab={activeTab}
+            tab={tab}
             data={data}
-            commercialSection={commercialSection}
+            commercialSection={section}
+            onSoftNavigate={softNavigate}
           />
         </main>
       </div>

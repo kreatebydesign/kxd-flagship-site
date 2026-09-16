@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import {
@@ -46,7 +47,7 @@ export interface ClientWorkspaceData {
   phase3RelationshipUnavailable: boolean;
 }
 
-export async function fetchClientWorkspace(clientId: number): Promise<ClientWorkspaceData | null> {
+async function fetchClientWorkspaceUncached(clientId: number): Promise<ClientWorkspaceData | null> {
   const payload = await getPayload({ config });
 
   let client: AnyDoc;
@@ -191,3 +192,6 @@ export async function fetchClientWorkspace(clientId: number): Promise<ClientWork
     phase3RelationshipUnavailable,
   };
 }
+
+export const fetchClientWorkspace = cache(fetchClientWorkspaceUncached);
+

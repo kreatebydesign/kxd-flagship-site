@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
@@ -19,7 +20,7 @@ import {
  * for `portal-users`. Only `users` collection sessions are accepted here —
  * portal sessions never grant operator APIs.
  */
-export async function getPayloadAdminUser() {
+export const getPayloadAdminUser = cache(async function getPayloadAdminUser() {
   const headersList = await headers();
   const payload = await getPayload({ config });
   const { user } = await payload.auth({ headers: headersList });
@@ -28,7 +29,7 @@ export async function getPayloadAdminUser() {
   if (!isPayloadAdmin(user)) return null;
   if (user.collection && user.collection !== "users") return null;
   return user;
-}
+});
 
 /**
  * Gate internal admin API routes — requires authenticated Payload `users` session.

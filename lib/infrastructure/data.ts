@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import {
@@ -310,7 +311,7 @@ export async function getUpcomingRenewals(limit = 12): Promise<InfraDoc[]> {
   return buildHostingRenewalWatchlist(records, limit);
 }
 
-export async function getClientInfrastructure(
+export const getClientInfrastructure = cache(async function getClientInfrastructure(
   clientId: number,
 ): Promise<ClientInfrastructureDetail | null> {
   const payload = await getPayload({ config });
@@ -415,7 +416,7 @@ export async function getClientInfrastructure(
     monthlyCost,
     annualCost,
   };
-}
+});
 
 export async function getInfrastructureDashboard(): Promise<InfrastructureDashboardData> {
   const { records, costs, events, clients, retainers } = await fetchAllInfrastructure();
