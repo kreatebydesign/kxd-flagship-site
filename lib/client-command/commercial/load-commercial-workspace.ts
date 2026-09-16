@@ -661,7 +661,20 @@ export async function loadClientCommercialWorkspace(input: {
       remainingLabel: formatCents(item.remainingCents as never),
       dueDate: item.dueDate ?? null,
       statusLabel: item.statusLabel,
+      timingNote: item.timingNote ?? null,
     })),
+    upcomingBalances: (statementView.document.openBalances.upcomingItems ?? []).map(
+      (item) => ({
+        id: item.id,
+        description: item.description,
+        originalLabel: formatCents(item.originalCents as never),
+        paidLabel: formatCents(item.paidCents as never),
+        remainingLabel: formatCents(item.remainingCents as never),
+        dueDate: item.dueDate ?? null,
+        statusLabel: item.statusLabel,
+        timingNote: item.timingNote ?? null,
+      }),
+    ),
     payments: statementView.document.paymentHistory.payments.map((payment) => ({
       id: payment.id,
       paidOn: payment.paidOn,

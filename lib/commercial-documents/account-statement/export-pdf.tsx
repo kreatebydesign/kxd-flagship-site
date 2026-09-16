@@ -412,13 +412,13 @@ function AccountStatementPdfDocument(props: {
 
         <View style={styles.section}>
           <View style={styles.sectionHead}>
-            <Text style={styles.sectionEyebrow}>Open</Text>
+            <Text style={styles.sectionEyebrow}>Due</Text>
             <Text style={styles.sectionTitle}>
               {doc.openBalances.sectionTitle}
             </Text>
           </View>
           {doc.openBalances.items.length === 0 ? (
-            <Text style={styles.noteText}>No open balances.</Text>
+            <Text style={styles.noteText}>Nothing currently due.</Text>
           ) : (
             doc.openBalances.items.map((item) => (
               <View key={item.id} style={styles.serviceItem}>
@@ -432,7 +432,7 @@ function AccountStatementPdfDocument(props: {
                   {item.statusLabel}
                   {item.dueDate
                     ? ` · Due ${formatProposalCalendarDate(item.dueDate)}`
-                    : ""}
+                    : " · Due now"}
                 </Text>
                 <Text style={styles.serviceDesc}>
                   Original {money(item.originalCents, currency)} · Paid{" "}
@@ -451,6 +451,38 @@ function AccountStatementPdfDocument(props: {
             </Text>
           </View>
         </View>
+
+        {(doc.openBalances.upcomingItems?.length ?? 0) > 0 ? (
+          <View style={styles.section}>
+            <View style={styles.sectionHead}>
+              <Text style={styles.sectionEyebrow}>Upcoming</Text>
+              <Text style={styles.sectionTitle}>
+                {doc.openBalances.upcomingSectionTitle}
+              </Text>
+            </View>
+            {doc.openBalances.upcomingItems.map((item) => (
+              <View key={item.id} style={styles.serviceItem}>
+                <View style={styles.serviceHead}>
+                  <Text style={styles.serviceTitle}>{item.description}</Text>
+                  <Text style={styles.serviceAmount}>
+                    {money(item.remainingCents, currency)}
+                  </Text>
+                </View>
+                <Text style={styles.servicePeriod}>
+                  {item.timingNote ||
+                    (item.dueDate
+                      ? `Due ${formatProposalCalendarDate(item.dueDate)}`
+                      : "Not yet due")}
+                </Text>
+                <Text style={styles.serviceDesc}>
+                  Original {money(item.originalCents, currency)} · Paid{" "}
+                  {money(item.paidCents, currency)} · Remaining{" "}
+                  {money(item.remainingCents, currency)}
+                </Text>
+              </View>
+            ))}
+          </View>
+        ) : null}
 
         <View style={styles.section}>
           <View style={styles.sectionHead}>

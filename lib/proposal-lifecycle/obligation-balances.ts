@@ -191,6 +191,90 @@ export function sumOpenObligationRemainingCents(obligations: InvoiceObligation[]
   return obligations.reduce((sum, o) => sum + obligationRemainingCents(o), 0);
 }
 
+/**
+ * Launch / milestone commencement triggers that mean the obligation is
+ * contractually present but not yet currently due until the trigger fires
+ * (or the obligation advances past pending-trigger via issuance/payment).
+ */
+const LAUNCH_GATED_TRIGGERS = new Set([
+  "website-launch",
+  "after-launch-verified",
+  "launch-verified",
+  "after-launch",
+]);
+
+export function isLaunchGatedObligationTrigger(trigger: string | null | undefined): boolean {
+  const normalized = String(trigger ?? "")
+    .trim()
+    .toLowerCase();
+  return LAUNCH_GATED_TRIGGERS.has(normalized);
+}
+
+function normalizeAsOfDate(asOfDate: string): string {
+  const raw = String(asOfDate || "").trim().slice(0, 10);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+  const parsed = Date.parse(asOfDate);
+  if (!Number.isNaN(parsed)) return new Date(parsed).toISOString().slice(0, 10);
+  return new Date().toISOString().slice(0, 10);
+}
+
+/**
+ * Whether an open remaining balance is *currently* outstanding / payable
+ * as of a statement date — distinct from contractual remaining.
+ *
+ * Rules (system-wide, not client-specific):
+ * - No remaining / terminal closed → not outstanding
+ * - partially-paid / overdue / issued(sent|viewed|approved|under-review|draft-ready)
+ *   → currently outstanding (collection already in motion)
+ * - Launch-gated trigger still at pending-trigger → not yet due
+ * - Calendar dueDate → currently due when asOf >= dueDate; else upcoming
+ * - No dueDate, not launch-gated → currently due (e.g. project progress / activated now)
+ */
+export function isObligationCurrentlyOutstanding(
+  obligation: InvoiceObligation,
+  asOfDate: string,
+): boolean {
+  if (obligationRemainingCents(obligation) <= 0) return false;
+  if (TERMINAL_CLOSED.has(obligation.status)) return false;
+
+  const status = obligation.status;
+  if (
+    status === "partially-paid" ||
+    status === "overdue" ||
+    status === "sent" ||
+    status === "viewed" ||
+    status === "approved" ||
+    status === "under-review" ||
+    status === "draft-ready"
+  ) {
+    return true;
+  }
+
+  // pending-trigger (and any other early open status with remaining)
+  if (status === "pending-trigger" && isLaunchGatedObligationTrigger(obligation.trigger)) {
+    return false;
+  }
+
+  const dueDate = obligation.dueDate?.trim().slice(0, 10) || null;
+  if (dueDate && /^\d{4}-\d{2}-\d{2}$/.test(dueDate)) {
+    return dueDate <= normalizeAsOfDate(asOfDate);
+  }
+
+  // Immediate / activated without a conventional due date — include.
+  // Launch-gated cases without dueDate already returned false above.
+  return true;
+}
+
+export function sumCurrentlyOutstandingCents(
+  obligations: InvoiceObligation[],
+  asOfDate: string,
+): number {
+  return obligations.reduce((sum, obligation) => {
+    if (!isObligationCurrentlyOutstanding(obligation, asOfDate)) return sum;
+    return sum + obligationRemainingCents(obligation);
+  }, 0);
+}
+
 /** Aggregate account totals — always satisfies total = paid + remaining for open ledger rows. */
 export function aggregateObligationBalances(obligations: InvoiceObligation[]): {
   totalCents: number;

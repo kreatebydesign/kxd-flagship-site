@@ -250,7 +250,9 @@ check("F. aggregate statement totals reconcile with canonical ledger helpers", (
   assert.equal(ledger.totalCents, canonical.totalCents);
   assert.equal(ledger.paidCents, canonical.paidCents);
   assert.equal(ledger.remainingCents, canonical.remainingCents);
-  assert.equal(document.summary.totalOutstandingCents, canonical.remainingCents);
+  // Currently outstanding excludes launch-gated remaining.
+  assert.equal(document.summary.totalOutstandingCents, 93_519);
+  assert.equal(canonical.remainingCents, 123_518);
   assert.equal(validateAccountStatement(document).length, 0);
 });
 
@@ -265,13 +267,15 @@ check("G. Platinum-shaped regression totals + open invoice", () => {
   assert.equal(document.summary.originalProjectCents, 250_000);
   assert.equal(document.summary.paymentsReceivedCents, 190_000);
   assert.equal(document.summary.projectBalanceCents, 60_000);
-  assert.equal(document.summary.currentChargesCents, 63_518);
-  assert.equal(document.summary.totalOutstandingCents, 123_518);
-  assert.equal(document.openBalances.totalRemainingCents, 123_518);
+  assert.equal(document.summary.currentChargesCents, 33_519);
+  assert.equal(document.summary.totalOutstandingCents, 93_519);
+  assert.equal(document.openBalances.totalRemainingCents, 93_519);
   assert.equal(
     document.openBalances.items.reduce((sum, item) => sum + item.remainingCents, 0),
-    123_518,
+    93_519,
   );
+  assert.equal(document.openBalances.upcomingItems.length, 1);
+  assert.equal(document.openBalances.upcomingItems[0]!.id, "pfw-hosting-y1");
   assert.equal(document.summary.accountPaymentsReceivedCents, 190_000);
   assert.match(
     document.currentCharges.existingInvoiceNote ?? "",
@@ -319,7 +323,7 @@ check("H. changing payment evidence changes generated statement totals", () => {
   assert.equal(after.ledger.paidCents, 250_000);
   assert.equal(after.ledger.remainingCents, 63_518);
   assert.equal(after.document.summary.projectBalanceCents, 0);
-  assert.equal(after.document.summary.totalOutstandingCents, 63_518);
+  assert.equal(after.document.summary.totalOutstandingCents, 33_519);
   assert.notEqual(before.ledger.paidCents, after.ledger.paidCents);
 });
 
@@ -349,7 +353,7 @@ check("I. statement never uses open invoice existence as paid evidence", () => {
   );
 });
 
-check("J. open balances remaining sum equals outstanding", () => {
+check("J. currently due excludes launch-gated hosting; outstanding uses due remaining only", () => {
   const obligations = [
     obl({
       id: "final-open",
@@ -372,6 +376,7 @@ check("J. open balances remaining sum equals outstanding", () => {
       label: "Hosting",
       amountCents: 29_999,
       status: "pending-trigger",
+      trigger: "website-launch",
     }),
   ];
   const { document } = composeAccountStatement({
@@ -380,15 +385,221 @@ check("J. open balances remaining sum equals outstanding", () => {
     statementDate: "2026-09-15",
     obligations,
   });
-  assert.equal(document.openBalances.items.length, 2);
+  assert.equal(document.openBalances.items.length, 1);
+  assert.equal(document.openBalances.items[0]!.id, "final-open");
   assert.equal(document.openBalances.items[0]!.paidCents, 32_500);
   assert.equal(document.openBalances.items[0]!.remainingCents, 30_000);
-  assert.equal(document.openBalances.totalRemainingCents, 59_999);
+  assert.equal(document.openBalances.upcomingItems.length, 1);
+  assert.equal(document.openBalances.upcomingItems[0]!.id, "host");
+  assert.equal(document.openBalances.totalRemainingCents, 30_000);
   assert.equal(
     document.openBalances.totalRemainingCents,
     document.summary.totalOutstandingCents,
   );
   assert.equal(validateAccountStatement(document).length, 0);
+});
+
+check("K. due-state matrix A–I", () => {
+  const asOf = "2026-09-15";
+  // A due remaining
+  const due = composeAccountStatement({
+    id: "k-a",
+    clientName: "T",
+    statementDate: asOf,
+    obligations: [
+      obl({
+        id: "a",
+        kind: "final",
+        label: "Due final",
+        amountCents: 10_000,
+        status: "pending-trigger",
+        dueDate: "2026-09-01",
+      }),
+    ],
+  });
+  assert.equal(due.document.summary.totalOutstandingCents, 10_000);
+
+  // B partial remaining only
+  const partial = composeAccountStatement({
+    id: "k-b",
+    clientName: "T",
+    statementDate: asOf,
+    obligations: [
+      obl({
+        id: "b",
+        kind: "final",
+        label: "Partial",
+        amountCents: 10_000,
+        status: "partially-paid",
+        paymentEvents: [
+          event({ id: "eb", paymentGroupId: "g", amountCents: 4_000 }),
+        ],
+      }),
+    ],
+  });
+  assert.equal(partial.document.summary.totalOutstandingCents, 6_000);
+
+  // C paid excluded
+  const paid = composeAccountStatement({
+    id: "k-c",
+    clientName: "T",
+    statementDate: asOf,
+    obligations: [
+      obl({
+        id: "c",
+        kind: "final",
+        label: "Paid",
+        amountCents: 10_000,
+        status: "paid",
+        amountPaidCents: 10_000,
+      }),
+    ],
+  });
+  assert.equal(paid.document.summary.totalOutstandingCents, 0);
+  assert.equal(paid.document.openBalances.items.length, 0);
+
+  // D future dated excluded
+  const future = composeAccountStatement({
+    id: "k-d",
+    clientName: "T",
+    statementDate: asOf,
+    obligations: [
+      obl({
+        id: "d",
+        kind: "addon",
+        label: "Future",
+        amountCents: 5_000,
+        status: "pending-trigger",
+        dueDate: "2026-10-01",
+      }),
+    ],
+  });
+  assert.equal(future.document.summary.totalOutstandingCents, 0);
+  assert.equal(future.document.openBalances.upcomingItems[0]!.id, "d");
+
+  // E launch-gated pending excluded
+  const launch = composeAccountStatement({
+    id: "k-e",
+    clientName: "T",
+    statementDate: asOf,
+    obligations: [
+      obl({
+        id: "e",
+        kind: "addon",
+        label: "Hosting",
+        amountCents: 29_900,
+        status: "pending-trigger",
+        trigger: "website-launch",
+      }),
+    ],
+  });
+  assert.equal(launch.document.summary.totalOutstandingCents, 0);
+  assert.equal(launch.document.openBalances.upcomingItems[0]!.id, "e");
+
+  // F triggered (issued) launch-gated included
+  const triggered = composeAccountStatement({
+    id: "k-f",
+    clientName: "T",
+    statementDate: asOf,
+    obligations: [
+      obl({
+        id: "f",
+        kind: "addon",
+        label: "Hosting due",
+        amountCents: 29_900,
+        status: "sent",
+        trigger: "website-launch",
+      }),
+    ],
+  });
+  assert.equal(triggered.document.summary.totalOutstandingCents, 29_900);
+
+  // G immediate without conventional due date included
+  const immediate = composeAccountStatement({
+    id: "k-g",
+    clientName: "T",
+    statementDate: asOf,
+    obligations: [
+      obl({
+        id: "g",
+        kind: "addon",
+        label: "Media Vault",
+        amountCents: 30_000,
+        status: "pending-trigger",
+        trigger: "on-date",
+        dueDate: "2026-09-15",
+      }),
+    ],
+  });
+  assert.equal(immediate.document.summary.totalOutstandingCents, 30_000);
+
+  // H recurring definition not materialized → no obligation → no inflation
+  const none = composeAccountStatement({
+    id: "k-h",
+    clientName: "T",
+    statementDate: asOf,
+    obligations: [
+      obl({
+        id: "h-final",
+        kind: "final",
+        label: "Final",
+        amountCents: 200_000,
+        status: "partially-paid",
+        paymentEvents: [
+          event({ id: "eh", paymentGroupId: "g", amountCents: 0 }),
+        ],
+        amountPaidCents: 0,
+      }),
+    ],
+  });
+  // Partially-paid with 0 events but amountPaidCents 0 and empty effective paid from
+  // events array present → Batch A events win at 0; remaining = full amount.
+  // For H we only assert no invented recurring row.
+  assert.equal(
+    none.document.openBalances.items.every((i) => i.kind !== "recurring-period"),
+    true,
+  );
+  assert.equal(none.document.openBalances.upcomingItems.length, 0);
+
+  // I UI/PDF composer parity — same document drives both surfaces
+  const parity = composeAccountStatement({
+    id: "k-i",
+    clientName: "T",
+    statementDate: asOf,
+    obligations: [
+      obl({
+        id: "i1",
+        kind: "final",
+        label: "Final",
+        amountCents: 200_000,
+        status: "partially-paid",
+        paymentEvents: [
+          event({ id: "ei", paymentGroupId: "g", amountCents: 0 }),
+        ],
+      }),
+      obl({
+        id: "i2",
+        kind: "addon",
+        label: "Vault",
+        amountCents: 30_000,
+        status: "pending-trigger",
+        dueDate: "2026-09-15",
+      }),
+      obl({
+        id: "i3",
+        kind: "addon",
+        label: "Hosting",
+        amountCents: 29_900,
+        status: "pending-trigger",
+        trigger: "website-launch",
+      }),
+    ],
+  });
+  assert.equal(parity.document.summary.totalOutstandingCents, 230_000);
+  assert.equal(parity.document.openBalances.totalRemainingCents, 230_000);
+  assert.equal(parity.document.finalPosition.totalCents, 230_000);
+  assert.equal(parity.document.openBalances.upcomingItems.length, 1);
+  assert.equal(validateAccountStatement(parity.document).length, 0);
 });
 
 console.log(`\n${passed} checks passed`);

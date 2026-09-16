@@ -246,6 +246,7 @@ export interface CommercialStatementOpenBalanceRow {
   remainingLabel: string;
   dueDate: string | null;
   statusLabel: string;
+  timingNote?: string | null;
 }
 
 export interface CommercialStatementPaymentRow {
@@ -275,6 +276,7 @@ export interface CommercialStatementSnapshot {
     totalOutstandingValue: string;
   };
   openBalances: CommercialStatementOpenBalanceRow[];
+  upcomingBalances: CommercialStatementOpenBalanceRow[];
   payments: CommercialStatementPaymentRow[];
   totalOutstandingCents: number;
   pdfHref: string;
