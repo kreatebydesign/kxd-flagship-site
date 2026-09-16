@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { OperatorNavLink } from "@/components/admin/operations/shared/OperatorNavLink";
 import type { ClientWorkspaceBundle } from "@/lib/client-command/workspace-types";
 import {
   COMMERCIAL_SECTIONS,
@@ -22,9 +22,11 @@ import { CommercialTimeline } from "./CommercialTimeline";
 export function CommercialWorkspace({
   data,
   section,
+  onSoftNavigate,
 }: {
   data: ClientWorkspaceBundle;
   section: CommercialSectionId;
+  onSoftNavigate?: (href: string) => boolean;
 }) {
   return (
     <div className="kxd-os-commercial">
@@ -37,25 +39,26 @@ export function CommercialWorkspace({
             organized around this client.
           </p>
         </div>
-        <Link
+        <OperatorNavLink
           href={`/admin/operations/client-command/${data.clientId}/direct-agreement/new`}
           className="kxd-os-btn"
         >
           Create Direct Agreement
-        </Link>
+        </OperatorNavLink>
       </header>
 
       <nav className="kxd-os-commercial__sections" aria-label="Commercial sections">
         {COMMERCIAL_SECTIONS.map((id) => (
-          <Link
+          <OperatorNavLink
             key={id}
             href={commercialWorkspaceHref(data.clientId, id)}
             className={`kxd-os-commercial__section-link${
               section === id ? " kxd-os-commercial__section-link--active" : ""
             }`}
+            onSoftNavigate={onSoftNavigate}
           >
             {COMMERCIAL_SECTION_LABELS[id]}
-          </Link>
+          </OperatorNavLink>
         ))}
       </nav>
 

@@ -138,13 +138,12 @@ async function fetchDocs(
 export async function loadClientWorkspaceBundle(
   clientId: number,
 ): Promise<ClientWorkspaceBundle | null> {
-  const commandCenter = await loadClientCommandCenter(clientId);
-  if (!commandCenter) return null;
-
-  const workspace = await fetchClientWorkspace(clientId);
-  if (!workspace) return null;
+  const commandCenterPromise = loadClientCommandCenter(clientId);
+  const workspacePromise = fetchClientWorkspace(clientId);
 
   const [
+    commandCenter,
+    workspace,
     timelineEvents,
     requests,
     projects,
@@ -157,7 +156,17 @@ export async function loadClientWorkspaceBundle(
     infrastructure,
     communications,
     siteIntelligence,
+    creativeAssets,
+    brandKits,
+    dismissedCounts,
+    fastCompletions48h,
+    proposalsSnapshot,
+    contracts,
+    financial,
+    workBoard,
   ] = await Promise.all([
+    commandCenterPromise,
+    workspacePromise,
     loadClientActivityTimeline(clientId),
     fetchDocs("client-requests", clientId, "-createdAt", 80),
     fetchDocs("client-projects", clientId, "-updatedAt", 50),
@@ -170,7 +179,18 @@ export async function loadClientWorkspaceBundle(
     getClientInfrastructure(clientId),
     loadClientCommunications(clientId),
     loadClientSiteIntelligence(clientId),
+    fetchDocs("creative-assets", clientId),
+    fetchDocs("brand-kits", clientId),
+    loadDismissedMemoryReferenceCounts(clientId),
+    countCompletedActionsWithinHours(clientId, 48),
+    loadClientProposalsSnapshot(clientId),
+    loadClientContractsSnapshot(clientId),
+    loadClientFinancialSnapshot(clientId),
+    getClientWorkBoard(clientId),
   ]);
+
+  if (!commandCenter) return null;
+  if (!workspace) return null;
 
   const client = workspace.client;
   const clientKey = String(client.slug ?? "").trim();
@@ -180,8 +200,6 @@ export async function loadClientWorkspaceBundle(
   });
 
   const invoices = buildInvoices(clientId, proposalDocs, retainers);
-  const creativeAssets = await fetchDocs("creative-assets", clientId);
-  const brandKits = await fetchDocs("brand-kits", clientId);
   const filesMerged = buildFiles(creativeAssets, brandKits);
 
   const infraRecord = infrastructure?.record;
@@ -284,11 +302,6 @@ export async function loadClientWorkspaceBundle(
     },
   };
 
-  const [dismissedCounts, fastCompletions48h] = await Promise.all([
-    loadDismissedMemoryReferenceCounts(clientId),
-    countCompletedActionsWithinHours(clientId, 48),
-  ]);
-
   const memory = loadClientMemoryFromBundle(partialBundle, {
     dismissedCounts,
     fastCompletions48h,
@@ -296,33 +309,25 @@ export async function loadClientWorkspaceBundle(
 
   await syncIntelligenceActions(clientId, memory);
 
-  const actions = await loadClientActions(clientId);
-  const proposalsSnapshot = await loadClientProposalsSnapshot(clientId);
-  const proposalIntelligence = buildProposalIntelligence(clientId, proposalsSnapshot);
-  const contracts = await loadClientContractsSnapshot(clientId);
-  const conversionIntelligence = buildConversionIntelligence(
-    clientId,
-    contracts,
-    proposalsSnapshot,
-  );
-  const financial = await loadClientFinancialSnapshot(clientId);
-  const financialIntelligence = buildFinancialIntelligence(
-    clientId,
-    financial,
-    financial.billingProfile,
-    proposalsSnapshot,
-  );
-
-  const workBoard = await getClientWorkBoard(clientId);
-
-  const commercial = await loadClientCommercialWorkspace({
-    clientId,
-    timelineEvents,
-    workspaceInvoices: invoices,
-    clientName: String(client.name ?? row.name ?? ""),
-    clientSlug: client.slug ? String(client.slug) : null,
-    contactName: partialBundle.header.primaryContact,
-  });
+  const [actions, proposalIntelligence, conversionIntelligence, financialIntelligence, commercial] =
+    await Promise.all([
+      loadClientActions(clientId),
+      Promise.resolve(buildProposalIntelligence(clientId, proposalsSnapshot)),
+      Promise.resolve(
+        buildConversionIntelligence(clientId, contracts, proposalsSnapshot),
+      ),
+      Promise.resolve(
+        buildFinancialIntelligence(clientId, financial, financial.billingProfile, proposalsSnapshot),
+      ),
+      loadClientCommercialWorkspace({
+        clientId,
+        timelineEvents,
+        workspaceInvoices: invoices,
+        clientName: String(client.name ?? row.name ?? ""),
+        clientSlug: client.slug ? String(client.slug) : null,
+        contactName: partialBundle.header.primaryContact,
+      }),
+    ]);
 
   return {
     ...partialBundle,

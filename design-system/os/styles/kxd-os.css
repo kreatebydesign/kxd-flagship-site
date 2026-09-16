@@ -303,6 +303,85 @@ body:has(.kxd-exec-workspace) {
   background: var(--kxd-os-bg-muted);
 }
 
+.kxd-os-sidebar__link:active,
+.kxd-os-sidebar__link:has(.kxd-os-nav-ack),
+.kxd-os-sidebar__ritual-link:active,
+.kxd-os-sidebar__ritual-link:has(.kxd-os-nav-ack) {
+  color: var(--kxd-os-text-primary);
+  background: var(--kxd-os-bg-selected);
+}
+
+.kxd-os-sidebar__link:has(.kxd-os-nav-ack),
+.kxd-os-command-hub__row:has(.kxd-os-nav-ack),
+.kxd-os-command-workspace__nav-item:has(.kxd-os-nav-ack),
+.kxd-os-commercial__section-link:has(.kxd-os-nav-ack) {
+  pointer-events: none;
+}
+
+.kxd-os-nav-ack {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+
+.kxd-os-route-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 80;
+  pointer-events: none;
+  opacity: 0;
+  background: transparent;
+}
+
+body:has(.kxd-os-nav-ack) .kxd-os-route-progress {
+  opacity: 1;
+}
+
+.kxd-os-route-progress__bar {
+  height: 100%;
+  width: 40%;
+  background: var(--kxd-os-text-primary);
+  transform-origin: left center;
+  animation: kxd-os-route-progress-glide 0.9s var(--kxd-os-ease-glide, ease) infinite;
+}
+
+@keyframes kxd-os-route-progress-glide {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(320%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kxd-os-route-progress__bar {
+    animation: none;
+    width: 100%;
+    opacity: 0.45;
+  }
+}
+
+.kxd-os-route-loading {
+  min-height: 40vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--kxd-os-space-8, 2rem);
+}
+
+.kxd-os-route-loading__line {
+  margin: 0;
+  font-size: 0.875rem;
+  letter-spacing: 0.04em;
+  color: var(--kxd-os-text-muted);
+}
+
 .kxd-os-sidebar__link--active {
   color: var(--kxd-os-text-primary);
   font-weight: 600;
@@ -5251,6 +5330,11 @@ button.kxd-os-command-workspace__action:disabled {
 
 .kxd-os-command-workspace__nav-item:hover {
   color: var(--kxd-os-text-secondary);
+  background: var(--kxd-os-bg-muted);
+}
+
+.kxd-os-command-workspace__nav-item:active {
+  color: var(--kxd-os-text-primary);
   background: var(--kxd-os-bg-muted);
 }
 

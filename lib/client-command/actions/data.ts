@@ -323,10 +323,17 @@ export async function syncIntelligenceActions(
   let created = 0;
   let skipped = 0;
 
-  for (const action of memory.nextBestActions) {
+  const payload = await getPayload({ config });
+  const lookups = await Promise.all(
+    memory.nextBestActions.map((action) =>
+      findActionByMemoryReference(clientId, `intel:${action.id}`, payload),
+    ),
+  );
+
+  for (let i = 0; i < memory.nextBestActions.length; i++) {
+    const action = memory.nextBestActions[i];
     const memoryReference = `intel:${action.id}`;
-    const existing = await findActionByMemoryReference(clientId, memoryReference);
-    if (existing) {
+    if (lookups[i]) {
       skipped++;
       continue;
     }

@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import { loadHealthContext } from "@/lib/client-health/health-engine";
@@ -107,7 +108,7 @@ async function findAll(
   }
 }
 
-export async function loadIntelligenceContext(): Promise<IntelligenceContext> {
+async function loadIntelligenceContextUncached(): Promise<IntelligenceContext> {
   const [
     clients,
     retainers,
@@ -187,6 +188,9 @@ export async function loadIntelligenceContext(): Promise<IntelligenceContext> {
     healthCtx,
   };
 }
+
+/** Request-memoized. Full studio scan stays live; do not reuse across requests. */
+export const loadIntelligenceContext = cache(loadIntelligenceContextUncached);
 
 export function activeRetainers(ctx: IntelligenceContext): IntelligenceDoc[] {
   return ctx.retainers.filter((r) =>

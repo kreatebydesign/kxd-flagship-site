@@ -7,18 +7,23 @@ import {
   resolveClientId,
   type AnyDoc,
 } from "@/lib/executive-client-profile";
-import { calculateClientHealth } from "@/lib/client-health/health-engine";
-import { loadIntelligenceContext } from "@/lib/intelligence/context";
+import { calculateClientHealth, loadHealthContext } from "@/lib/client-health/health-engine";
 import type { CommandHubClientRow } from "./workspace-types";
 import { commandWorkspaceHref } from "./tabs";
 
 export async function loadClientCommandHub(query?: string): Promise<CommandHubClientRow[]> {
   const payload = await getPayload({ config });
-  const ctx = await loadIntelligenceContext();
 
-  const [clientsR, profilesR] = await Promise.allSettled([
-    payload.find({ collection: "clients", limit: 300, depth: 0, sort: "name" }),
-    payload.find({ collection: "executive-client-profiles", limit: 300, depth: 0 }),
+  const [healthCtx, clientsR, profilesR] = await Promise.all([
+    loadHealthContext(),
+    payload.find({ collection: "clients", limit: 300, depth: 0, sort: "name" }).then(
+      (value) => ({ status: "fulfilled" as const, value }),
+      (reason) => ({ status: "rejected" as const, reason }),
+    ),
+    payload.find({ collection: "executive-client-profiles", limit: 300, depth: 0 }).then(
+      (value) => ({ status: "fulfilled" as const, value }),
+      (reason) => ({ status: "rejected" as const, reason }),
+    ),
   ]);
 
   const clients = clientsR.status === "fulfilled" ? (clientsR.value.docs as AnyDoc[]) : [];
@@ -38,7 +43,7 @@ export async function loadClientCommandHub(query?: string): Promise<CommandHubCl
       const cid = client.id as number;
       const profile = profileByClientId.get(cid);
       const row = mergeClientWithExecutiveProfile(client, profile);
-      const health = calculateClientHealth(cid, ctx.healthCtx);
+      const health = calculateClientHealth(cid, healthCtx);
 
       return {
         clientId: cid,

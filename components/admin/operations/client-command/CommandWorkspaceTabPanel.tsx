@@ -35,10 +35,12 @@ export function CommandWorkspaceTabPanel({
   tab,
   data,
   commercialSection = "overview",
+  onSoftNavigate,
 }: {
   tab: CommandWorkspaceTabId;
   data: ClientWorkspaceBundle;
   commercialSection?: CommercialSectionId;
+  onSoftNavigate?: (href: string) => boolean;
 }) {
   switch (tab) {
     case "overview":
@@ -52,7 +54,7 @@ export function CommandWorkspaceTabPanel({
     case "requests":
       return <RequestsPanel data={data} />;
     case "commercial":
-      return <CommercialWorkspace data={data} section={commercialSection} />;
+      return <CommercialWorkspace data={data} section={commercialSection} onSoftNavigate={onSoftNavigate} />;
     case "files":
       return <FilesPanel data={data} />;
     case "inventory":

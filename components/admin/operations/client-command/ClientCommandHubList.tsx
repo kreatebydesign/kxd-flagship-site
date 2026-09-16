@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
+import { OperatorNavLink } from "@/components/admin/operations/shared/OperatorNavLink";
 import type { CommandHubClientRow } from "@/lib/client-command/workspace-types";
 
 export function ClientCommandHubList({
@@ -53,7 +53,7 @@ export function ClientCommandHubList({
         <ul className="kxd-os-command-hub__list">
           {filtered.map((row) => (
             <li key={row.clientId}>
-              <Link href={row.href} className="kxd-os-command-hub__row">
+              <OperatorNavLink href={row.href} className="kxd-os-command-hub__row">
                 <div className="kxd-os-command-hub__row-main">
                   <div className="kxd-os-command-hub__identity">
                     <span className="kxd-os-command-hub__name">{row.name}</span>
@@ -78,7 +78,7 @@ export function ClientCommandHubList({
                   ) : null}
                   <span className="kxd-os-command-hub__stat">{row.status}</span>
                 </div>
-              </Link>
+              </OperatorNavLink>
             </li>
           ))}
         </ul>

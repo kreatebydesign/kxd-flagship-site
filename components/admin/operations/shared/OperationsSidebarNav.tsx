@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { OperatorNavLink } from "./OperatorNavLink";
 import { useEffect, useState } from "react";
 import type { OperationsNavGroup, OperationsNavId } from "./operations-nav";
 
@@ -46,7 +46,7 @@ export function OperationsSidebarNav({ navGroups, activeId }: OperationsSidebarN
 
               return (
                 <li key={item.id}>
-                  <Link
+                  <OperatorNavLink
                     href={item.href}
                     className={`kxd-os-sidebar__link${isActive ? " kxd-os-sidebar__link--active" : ""}`}
                     aria-current={isActive ? "page" : undefined}
@@ -57,7 +57,7 @@ export function OperationsSidebarNav({ navGroups, activeId }: OperationsSidebarN
                         {badgeCount > 99 ? "99+" : badgeCount}
                       </span>
                     ) : null}
-                  </Link>
+                  </OperatorNavLink>
                 </li>
               );
             })}
