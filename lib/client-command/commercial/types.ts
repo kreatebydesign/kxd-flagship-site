@@ -261,7 +261,8 @@ export interface CommercialStatementSnapshot {
   statementDate: string;
   clientName: string;
   contactName: string | null;
-  agreementTitle: string | null;
+  documentKindLabel: string;
+  documentKindValue: string;
   currency: "USD";
   summary: {
     originalProjectLabel: string;

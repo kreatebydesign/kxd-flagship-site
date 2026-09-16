@@ -38,7 +38,10 @@ export type LiveAccountStatementView = {
   document: ComposeAccountStatementResult["document"];
   ledger: ComposeAccountStatementResult["ledger"];
   primaryAgreementId: number | null;
+  /** @deprecated Account-level statements do not attribute to one agreement. */
   agreementTitle: string | null;
+  documentKindLabel: string;
+  documentKindValue: string;
   openBalanceCount: number;
   paymentCount: number;
 };
@@ -93,7 +96,6 @@ export function buildLiveAccountStatement(
     clientName: input.clientName,
     clientSlug: input.clientSlug ?? null,
     contactName: input.contactName ?? null,
-    agreementTitle: primaryAgreement?.title ?? null,
     statementDate,
     obligations,
     projectLabel: "Website Design & Development",
@@ -105,7 +107,9 @@ export function buildLiveAccountStatement(
     document: composed.document,
     ledger: composed.ledger,
     primaryAgreementId: primaryAgreement?.id ?? null,
-    agreementTitle: primaryAgreement?.title ?? null,
+    agreementTitle: null,
+    documentKindLabel: composed.document.documentKindLabel,
+    documentKindValue: composed.document.documentKindValue,
     openBalanceCount: composed.document.openBalances.items.length,
     paymentCount: composed.document.paymentHistory.payments.length,
   };

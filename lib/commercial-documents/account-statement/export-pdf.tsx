@@ -345,12 +345,8 @@ function AccountStatementPdfDocument(props: {
                 <Text style={styles.metaValue}>{doc.contactName}</Text>
               </>
             ) : null}
-            {doc.agreementTitle ? (
-              <>
-                <Text style={styles.metaLabel}>Agreement</Text>
-                <Text style={styles.metaValue}>{doc.agreementTitle}</Text>
-              </>
-            ) : null}
+            <Text style={styles.metaLabel}>{doc.documentKindLabel}</Text>
+            <Text style={styles.metaValue}>{doc.documentKindValue}</Text>
             <Text style={styles.metaLabel}>Statement date</Text>
             <Text style={styles.metaValue}>{statementDateLabel}</Text>
           </View>

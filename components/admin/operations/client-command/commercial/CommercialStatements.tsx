@@ -48,9 +48,11 @@ export function CommercialStatements({ data }: { data: ClientWorkspaceBundle }) 
           </p>
         </div>
         <div className="kxd-os-commercial-summary-card">
-          <p className="kxd-os-commercial-summary-card__label">Agreement</p>
+          <p className="kxd-os-commercial-summary-card__label">
+            {statement.documentKindLabel}
+          </p>
           <p className="kxd-os-commercial-summary-card__value">
-            {statement.agreementTitle || "—"}
+            {statement.documentKindValue}
           </p>
         </div>
       </header>

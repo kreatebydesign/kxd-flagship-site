@@ -602,4 +602,60 @@ check("K. due-state matrix A–I", () => {
   assert.equal(validateAccountStatement(parity.document).length, 0);
 });
 
+check("L. client-facing status labels + account-level statement header", () => {
+  const { document } = composeAccountStatement({
+    id: "t-l",
+    clientName: "de Bois Entertainment",
+    agreementTitle: "KXD Digital Management & Growth Partnership",
+    statementDate: "2026-09-15",
+    obligations: [
+      obl({
+        id: "final",
+        kind: "final",
+        label: "Website Design & Development — Final Payment",
+        amountCents: 300_000,
+        status: "partially-paid",
+        paymentEvents: [
+          event({ id: "pe", paymentGroupId: "g", amountCents: 100_000 }),
+        ],
+      }),
+      obl({
+        id: "vault",
+        kind: "addon",
+        label: "KXD Media Vault — 250 GB",
+        amountCents: 30_000,
+        status: "pending-trigger",
+        dueDate: "2026-09-15",
+      }),
+      obl({
+        id: "host",
+        kind: "addon",
+        label: "KXD Managed Website Hosting",
+        amountCents: 29_900,
+        status: "pending-trigger",
+        trigger: "website-launch",
+      }),
+    ],
+  });
+
+  assert.equal(document.summary.totalOutstandingCents, 230_000);
+  assert.equal(document.documentKindLabel, "Statement type");
+  assert.equal(document.documentKindValue, "Account Statement");
+  assert.equal(document.agreementTitle, null);
+
+  const vault = document.openBalances.items.find((i) => i.id === "vault");
+  const final = document.openBalances.items.find((i) => i.id === "final");
+  const host = document.openBalances.upcomingItems.find((i) => i.id === "host");
+  assert.ok(vault);
+  assert.ok(final);
+  assert.ok(host);
+  assert.equal(vault!.statusLabel, "Due");
+  assert.equal(final!.statusLabel, "Partially Paid");
+  assert.equal(host!.statusLabel, "Upcoming");
+  assert.equal(host!.timingNote, "Due at website launch");
+  assert.doesNotMatch(JSON.stringify(document.openBalances), /Pending Trigger/i);
+  assert.doesNotMatch(JSON.stringify(document), /Digital Management & Growth Partnership/);
+  assert.equal(validateAccountStatement(document).length, 0);
+});
+
 console.log(`\n${passed} checks passed`);
