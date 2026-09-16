@@ -27,80 +27,118 @@ function ExternalBillingLink({
   );
 }
 
-function BalanceRow({ row }: { row: PortalLedgerBalanceRow }) {
+function StatusMark({
+  label,
+  tone,
+}: {
+  label: string;
+  tone: PortalLedgerBalanceRow["statusTone"];
+}) {
   return (
-    <li className="kxd-os-billing-card">
+    <span className={`kxd-os-billing-status kxd-os-billing-status--${tone}`}>
+      {label}
+    </span>
+  );
+}
+
+function CurrentlyDueRow({ row }: { row: PortalLedgerBalanceRow }) {
+  return (
+    <li className="kxd-os-billing-card kxd-os-billing-card--due">
       <div className="kxd-os-billing-card__main">
         <div className="kxd-os-billing-card__identity">
-          <p className="kxd-os-card__title">{row.description}</p>
-          <KxdBadge
-            variant={row.statusBadgeVariant}
-            className="kxd-os-billing-card__status"
-          >
-            {row.statusLabel}
-          </KxdBadge>
+          <p className="kxd-os-billing-card__title">{row.description}</p>
+          {row.statusLabel === "Partially Paid" ||
+          row.statusLabel === "Past Due" ? (
+            <StatusMark label={row.statusLabel} tone={row.statusTone} />
+          ) : null}
         </div>
         <p
           className="kxd-os-billing-card__amount"
-          aria-label={`Remaining ${row.remainingLabel}`}
+          aria-label={`${row.remainingLabel} due`}
         >
-          {row.remainingLabel}
+          <span className="kxd-os-billing-card__amount-value">
+            {row.remainingLabel}
+          </span>
+          <span className="kxd-os-billing-card__amount-suffix">due</span>
         </p>
       </div>
-      <dl className="kxd-os-billing-card__meta">
-        <div>
-          <dt>Original</dt>
-          <dd>{row.originalLabel}</dd>
-        </div>
-        <div>
-          <dt>Paid</dt>
-          <dd>{row.paidLabel}</dd>
-        </div>
-        <div>
-          <dt>Remaining</dt>
-          <dd>{row.remainingLabel}</dd>
-        </div>
-        {row.dueLabel ? (
-          <div>
-            <dt>Timing</dt>
-            <dd>{row.dueLabel}</dd>
-          </div>
+      <p className="kxd-os-billing-card__detail">
+        {row.showPaidDetail ? (
+          <>
+            <span>Original {row.originalLabel}</span>
+            <span aria-hidden="true"> · </span>
+            <span>Paid {row.paidLabel}</span>
+          </>
         ) : null}
-      </dl>
+        {row.showPaidDetail && row.dueLabel ? (
+          <span aria-hidden="true"> · </span>
+        ) : null}
+        {row.dueLabel ? <span>{row.dueLabel}</span> : null}
+      </p>
     </li>
   );
 }
 
-function LedgerReady({ ledger }: { ledger: Extract<PortalLedgerBillingView, { kind: "ready" }> }) {
+function UpcomingRow({ row }: { row: PortalLedgerBalanceRow }) {
+  return (
+    <li className="kxd-os-billing-card kxd-os-billing-card--upcoming">
+      <div className="kxd-os-billing-card__main">
+        <div className="kxd-os-billing-card__identity">
+          <p className="kxd-os-billing-card__title">{row.description}</p>
+          <StatusMark label="Upcoming" tone="upcoming" />
+        </div>
+        <p
+          className="kxd-os-billing-card__amount kxd-os-billing-card__amount--quiet"
+          aria-label={row.remainingLabel}
+        >
+          {row.remainingLabel}
+        </p>
+      </div>
+      {row.dueLabel ? (
+        <p className="kxd-os-billing-card__detail">{row.dueLabel}</p>
+      ) : null}
+    </li>
+  );
+}
+
+function LedgerReady({
+  ledger,
+}: {
+  ledger: Extract<PortalLedgerBillingView, { kind: "ready" }>;
+}) {
   return (
     <div className="kxd-os-billing kxd-os-billing--ledger">
       <p className="kxd-os-meta kxd-os-billing__account">
-        Account billing for {ledger.clientLabel} · as of {ledger.statementDateLabel}
+        {ledger.clientLabel} · as of {ledger.statementDateLabel}
       </p>
 
-      <section className="kxd-os-billing-summary" aria-label="Billing overview">
-        <div className="kxd-os-billing-summary__grid">
-          <div className="kxd-os-billing-summary__metric kxd-os-billing-summary__metric--primary">
-            <p className="kxd-os-metric__label">{ledger.summary.currentlyDue.label}</p>
-            <p className="kxd-os-billing-summary__value">{ledger.summary.currentlyDue.value}</p>
-            <p className="kxd-os-meta">{ledger.accountStatusLabel}</p>
-          </div>
-          <div className="kxd-os-billing-summary__metric">
-            <p className="kxd-os-metric__label">{ledger.summary.paidToDate.label}</p>
-            <p className="kxd-os-billing-summary__value">{ledger.summary.paidToDate.value}</p>
-          </div>
-          <div className="kxd-os-billing-summary__metric">
+      <section className="kxd-os-billing-summary" aria-label="Account overview">
+        <p className="kxd-os-eyebrow">Account overview</p>
+
+        <div className="kxd-os-billing-summary__balance">
+          <p className="kxd-os-metric__label">{ledger.summary.currentBalance.label}</p>
+          <p className="kxd-os-billing-summary__value">
+            {ledger.summary.currentBalance.value}
+          </p>
+          <p className="kxd-os-billing-summary__status">
+            {ledger.accountStatus === "current"
+              ? "You're current"
+              : "Amount currently due"}
+          </p>
+        </div>
+
+        <div className="kxd-os-billing-summary__secondary">
+          <div className="kxd-os-billing-summary__upcoming">
             <p className="kxd-os-metric__label">{ledger.summary.upcoming.label}</p>
-            <p className="kxd-os-billing-summary__value kxd-os-billing-summary__value--text">
+            <p className="kxd-os-billing-summary__upcoming-value">
               {ledger.summary.upcoming.value}
             </p>
           </div>
-        </div>
-
-        <div className="kxd-os-billing-summary__actions">
-          <a className="kxd-os-btn" href={ledger.statementPdfHref}>
-            Download Statement
-          </a>
+          <div className="kxd-os-billing-summary__actions">
+            <a className="kxd-os-btn" href={ledger.statementPdfHref}>
+              Download Statement
+            </a>
+          </div>
         </div>
       </section>
 
@@ -113,7 +151,7 @@ function LedgerReady({ ledger }: { ledger: Extract<PortalLedgerBillingView, { ki
         ) : (
           <ul className="kxd-os-billing-list">
             {ledger.currentlyDue.map((row) => (
-              <BalanceRow key={row.key} row={row} />
+              <CurrentlyDueRow key={row.key} row={row} />
             ))}
           </ul>
         )}
@@ -121,9 +159,12 @@ function LedgerReady({ ledger }: { ledger: Extract<PortalLedgerBillingView, { ki
 
       {ledger.upcomingItems.length > 0 ? (
         <KxdSection label="Upcoming">
+          <p className="kxd-os-meta kxd-os-billing__section-note">
+            These charges are not currently due.
+          </p>
           <ul className="kxd-os-billing-list">
             {ledger.upcomingItems.map((row) => (
-              <BalanceRow key={row.key} row={row} />
+              <UpcomingRow key={row.key} row={row} />
             ))}
           </ul>
         </KxdSection>
@@ -204,7 +245,7 @@ function IssuedInvoicesSection({ invoices }: { invoices: PortalBillingView }) {
           <li key={invoice.key} className="kxd-os-billing-card">
             <div className="kxd-os-billing-card__main">
               <div className="kxd-os-billing-card__identity">
-                <p className="kxd-os-card__title">{invoice.displayNumber}</p>
+                <p className="kxd-os-billing-card__title">{invoice.displayNumber}</p>
                 <KxdBadge
                   variant={invoice.badgeVariant}
                   className="kxd-os-billing-card__status"
@@ -276,7 +317,7 @@ export function InvoicesScreen({ view }: { view: PortalBillingCenterView }) {
     ledger.kind === "ready"
       ? ledger.accountStatus === "current"
         ? "Your account is current. Review payment history and download your statement anytime."
-        : "A clear view of what is currently due, upcoming, and paid — from your KXD account ledger."
+        : "See what is currently due, what is coming next, and download your statement."
       : ledger.kind === "empty"
         ? "Account balances and payment history will appear here when your commercial agreements are active."
         : "Account billing for your active workspace.";
