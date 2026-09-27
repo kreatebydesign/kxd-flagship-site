@@ -1,14 +1,17 @@
 "use client";
 
-export function LeadershipReportPrintButton() {
+export function LeadershipReportPrintButton({
+  documentTitle = "Primal Motorsports | Digital Performance & Growth Report",
+}: {
+  documentTitle?: string;
+}) {
   return (
     <button
       type="button"
       className="kxd-lead-report__print"
       onClick={() => {
         const previousTitle = document.title;
-        document.title =
-          "Primal Motorsports | Digital Performance & Growth Report";
+        document.title = documentTitle;
         const restore = () => {
           document.title = previousTitle;
           window.removeEventListener("afterprint", restore);

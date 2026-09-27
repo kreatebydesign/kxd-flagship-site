@@ -1,5 +1,9 @@
 import { redirect } from "next/navigation";
 import { ReportsScreen } from "@/components/client-hq";
+import {
+  isPrimalLeadershipReportClient,
+  listCuratedPrimalLeadershipReportItems,
+} from "@/lib/ces/leadership-report";
 import { resolveExperienceProfile } from "@/lib/ces/server";
 import { isBatchGClientHqSurfaceAvailable } from "@/lib/portal/requests-files-reports";
 import { getPortalReports } from "@/lib/reporting/engine";
@@ -23,12 +27,18 @@ export default async function PortalReportsPage({
   const params = await searchParams;
   const reports = await getPortalReports(session.clientId);
   const filterYear = params.year ? Number(params.year) : undefined;
+  const curatedLeadershipReports = isPrimalLeadershipReportClient(
+    profile.identity.clientSlug,
+  )
+    ? listCuratedPrimalLeadershipReportItems()
+    : [];
 
   return (
     <ReportsScreen
       reports={reports}
       filterYear={filterYear}
       clientName={session.clientName}
+      curatedLeadershipReports={curatedLeadershipReports}
     />
   );
 }

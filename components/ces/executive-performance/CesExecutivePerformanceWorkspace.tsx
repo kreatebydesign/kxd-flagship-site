@@ -11,8 +11,8 @@ import {
   type ExecutiveWorkspaceZoneId,
 } from "@/lib/ces/executive-performance";
 import {
+  getLatestPrimalLeadershipReportHref,
   isPrimalLeadershipReportClient,
-  PRIMAL_LEADERSHIP_REPORT_HREF,
 } from "@/lib/ces/leadership-report";
 import { CesWorkspaceSignature } from "./CesWorkspaceSignature";
 
@@ -429,10 +429,10 @@ export function CesExecutivePerformanceWorkspace({
         ) : null}
         {isPrimalLeadershipReportClient(performance.clientSlug) ? (
           <Link
-            href={PRIMAL_LEADERSHIP_REPORT_HREF}
+            href={getLatestPrimalLeadershipReportHref()}
             className="kxd-ces-exec__section-link"
           >
-            Open Leadership Report
+            Open Leadership Performance Update
           </Link>
         ) : null}
         {performance.presentation.executiveReviewEnabled ? (

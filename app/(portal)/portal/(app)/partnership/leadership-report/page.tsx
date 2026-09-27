@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
-import { PrimalLeadershipReport } from "@/components/ces/leadership-report";
+import {
+  PrimalLeadershipProgressReport,
+  PrimalLeadershipReport,
+} from "@/components/ces/leadership-report";
 import { isCesModuleEnabled } from "@/lib/ces";
 import {
   canAccessPrimalLeadershipReport,
-  getPrimalLeadershipReportForClient,
+  getPrimalLeadershipReportEntryForClient,
 } from "@/lib/ces/leadership-report";
 import { resolveExperienceProfile } from "@/lib/ces/server";
 import { getPortalSession } from "@/lib/portal/session";
@@ -12,16 +15,21 @@ import { getPortalSession } from "@/lib/portal/session";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Primal Motorsports | Digital Performance & Growth Report",
+  title: "Primal Motorsports | Digital Performance & Growth Update",
   description:
-    "Primal Motorsports Digital Performance & Growth Report — post-launch baseline prepared by Kreate by Design.",
+    "Primal Motorsports Digital Performance & Growth Update — leadership performance review prepared by Kreate by Design.",
 };
 
 /**
  * Primal Client Experience → Partnership (Performance) → Leadership Report
  * Authorized Primal portal users and KXD operator preview only.
+ * Default: latest published report. Archive via ?id=
  */
-export default async function PortalLeadershipReportPage() {
+export default async function PortalLeadershipReportPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ id?: string }>;
+}) {
   const session = await getPortalSession();
   if (!session) redirect("/portal/login");
 
@@ -38,8 +46,20 @@ export default async function PortalLeadershipReportPage() {
     notFound();
   }
 
-  const report = getPrimalLeadershipReportForClient(profile.identity.clientSlug);
-  if (!report) notFound();
+  const params = await searchParams;
+  const entry = getPrimalLeadershipReportEntryForClient(
+    profile.identity.clientSlug,
+    params.id,
+  );
+  if (!entry) notFound();
 
-  return <PrimalLeadershipReport report={report} />;
+  if (entry.kind === "progress-update" && entry.progress) {
+    return <PrimalLeadershipProgressReport report={entry.progress} />;
+  }
+
+  if (entry.kind === "baseline" && entry.baseline) {
+    return <PrimalLeadershipReport report={entry.baseline} />;
+  }
+
+  notFound();
 }
