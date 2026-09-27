@@ -2,6 +2,7 @@ import Link from "next/link";
 import { KxdEmptyState, KxdPage } from "@/components/os";
 import { ClientHqPageHero } from "./ClientHqPageHero";
 import { monthLabel } from "@/lib/reporting/templates";
+import type { CuratedLeadershipReportListItem } from "@/lib/ces/leadership-report";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ReportDoc = Record<string, any>;
@@ -10,23 +11,40 @@ export function ReportsScreen({
   reports,
   filterYear,
   clientName,
+  curatedLeadershipReports = [],
 }: {
   reports: ReportDoc[];
   filterYear?: number;
   clientName: string;
+  curatedLeadershipReports?: CuratedLeadershipReportListItem[];
 }) {
   const filtered = filterYear
     ? reports.filter((r) => Number(r.reportingYear) === filterYear)
     : reports;
 
-  const years = [...new Set(reports.map((r) => Number(r.reportingYear)))].sort((a, b) => b - a);
+  const curated = filterYear
+    ? curatedLeadershipReports.filter((r) =>
+        r.reportDateIso.startsWith(String(filterYear)),
+      )
+    : curatedLeadershipReports;
+
+  const years = [
+    ...new Set([
+      ...reports.map((r) => Number(r.reportingYear)),
+      ...curatedLeadershipReports
+        .map((r) => Number(r.reportDateIso.slice(0, 4)))
+        .filter((y) => Number.isFinite(y)),
+    ]),
+  ].sort((a, b) => b - a);
+
+  const empty = curated.length === 0 && filtered.length === 0;
 
   return (
     <KxdPage className="kxd-os-page--ops">
       <ClientHqPageHero
-        eyebrow="Intelligence"
+        eyebrow="Results"
         title="Reports"
-        lead={`Monthly executive reports for ${clientName} — prepared by KXD and published to this account only.`}
+        lead={`Executive and leadership reports for ${clientName} — prepared by KXD and published to this account only.`}
       />
 
       <p className="kxd-os-eyebrow" style={{ marginBottom: "1rem" }}>
@@ -49,13 +67,30 @@ export function ReportsScreen({
         </nav>
       ) : null}
 
-      {filtered.length === 0 ? (
+      {empty ? (
         <KxdEmptyState
           title="No reports published yet"
           description="Your monthly executive reports will appear here once KXD publishes them for this account."
         />
       ) : (
         <div className="kxd-os-card-list" role="list" aria-label={`Published reports for ${clientName}`}>
+          {curated.map((r) => (
+            <Link
+              key={`leadership-${r.id}`}
+              href={r.href}
+              className="kxd-os-card kxd-os-card--link"
+              style={{ display: "block", marginBottom: "0.65rem", textDecoration: "none" }}
+              role="listitem"
+            >
+              <p className="kxd-os-card__title">{r.title}</p>
+              <p className="kxd-os-meta" style={{ marginTop: "0.35rem" }}>
+                {r.typeLabel} · {r.periodLabel}
+              </p>
+              <p className="kxd-os-body" style={{ marginTop: "0.5rem" }}>
+                {r.summary}
+              </p>
+            </Link>
+          ))}
           {filtered.map((r) => (
             <Link
               key={r.id as number}

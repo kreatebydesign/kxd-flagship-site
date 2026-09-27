@@ -5,6 +5,11 @@
 import "server-only";
 
 import type { ResolvedExperienceProfile } from "@/lib/ces";
+import {
+  isPrimalLeadershipReportClient,
+  listCuratedPrimalLeadershipReportItems,
+} from "@/lib/ces/leadership-report";
+import { resolvePrimalAnalyticsPeriod } from "@/lib/ces/leadership-report/primal-reporting-period";
 import { getReportingCapabilityIds } from "@/lib/ces/partnership/capabilities";
 import type { PortalSession } from "@/lib/portal/session";
 import {
@@ -66,7 +71,14 @@ export async function resolvePortalAnalyticsVisibility(input: {
     );
   }
 
-  const reportingPeriod = defaultWorkPerformancePeriod();
+  const isPrimal = isPrimalLeadershipReportClient(
+    experienceProfile.identity.clientSlug,
+  );
+  const primalPeriod = isPrimal
+    ? await resolvePrimalAnalyticsPeriod({ clientId: session.clientId })
+    : null;
+  const reportingPeriod =
+    primalPeriod?.period ?? defaultWorkPerformancePeriod();
   const reportingCapabilities = getReportingCapabilityIds(
     experienceProfile.reportingCapabilities,
   );
@@ -102,16 +114,30 @@ export async function resolvePortalAnalyticsVisibility(input: {
     }
 
     facts = loadedFacts.filter((fact) => fact.clientId === session.clientId);
-    publishedReports = mapPublishedReports(
+    const cmsReports = mapPublishedReports(
       reports as unknown as Array<Record<string, unknown>>,
       session.clientId,
     );
+    const leadershipReports: AnalyticsVisibilityReportItem[] = isPrimal
+      ? listCuratedPrimalLeadershipReportItems().map((item, index) => ({
+          id: -(index + 1),
+          title: item.title,
+          periodLabel: `${item.typeLabel} · ${item.periodLabel}`,
+          href: item.href,
+        }))
+      : [];
+    publishedReports = [...leadershipReports, ...cmsReports];
 
     if (facts.length > 0) {
       const provenance = summarizeReportingFactProvenance(facts);
       freshnessNote = provenance.fetchedAt
         ? `Facts refreshed ${provenance.fetchedAt.slice(0, 10)}`
         : null;
+    }
+    if (primalPeriod) {
+      freshnessNote = freshnessNote
+        ? `${primalPeriod.leadershipUpdateLabel}. ${freshnessNote}`
+        : primalPeriod.leadershipUpdateLabel;
     }
   } catch (error) {
     loadError =
