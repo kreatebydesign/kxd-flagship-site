@@ -1,0 +1,7 @@
+.worktrees
+.qa-leadership-sept-update
+.qa-*
+**/.next/cache
+*.pdf
+*.png
+.git
