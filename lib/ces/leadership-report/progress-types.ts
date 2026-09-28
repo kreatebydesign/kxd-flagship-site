@@ -129,6 +129,33 @@ export type LeadershipProgressReportDocument = {
     performanceNotes: string[];
     measurementNotes: string[];
     optimizationNotes: string[];
+    /**
+     * Period-separated conversion context so current-window verified Search
+     * performance is not misread as lifetime Ads results. Periods are not additive.
+     */
+    conversionContext: {
+      current: {
+        eyebrow: string;
+        valueDisplay: string;
+        label: string;
+        periodLabel: string;
+      };
+      priorVerified: {
+        eyebrow: string;
+        valueDisplay: string;
+        label: string;
+        periodLabel: string;
+        detail: string;
+      };
+      historical: {
+        eyebrow: string;
+        valueDisplay: string;
+        label: string;
+        periodLabel: string;
+        detail: string;
+      };
+      disclosure: string;
+    };
   };
 
   conversionOptimization: {

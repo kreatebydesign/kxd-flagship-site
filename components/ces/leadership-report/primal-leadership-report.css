@@ -220,6 +220,72 @@
   text-wrap: pretty;
 }
 
+/* Conversion context — current window primary; historical supporting only */
+.kxd-lead-report__conversion-context {
+  display: grid;
+  grid-template-columns: 1.12fr 1fr 1fr;
+  gap: 0.75rem;
+  margin: 0.15rem 0 0.35rem;
+}
+
+.kxd-lead-report__conversion-context-card {
+  border: 1px solid var(--kxd-lr-line);
+  border-radius: 3px;
+  padding: 0.95rem 1rem 1.05rem;
+  background: var(--kxd-lr-panel);
+  display: flex;
+  flex-direction: column;
+  gap: 0.28rem;
+  min-width: 0;
+}
+
+.kxd-lead-report__conversion-context-card--current {
+  border-color: color-mix(in srgb, var(--kxd-lr-accent) 42%, var(--kxd-lr-line));
+  background: color-mix(in srgb, var(--kxd-lr-accent) 8%, var(--kxd-lr-panel));
+}
+
+.kxd-lead-report__conversion-context-card--supporting {
+  opacity: 0.92;
+}
+
+.kxd-lead-report__conversion-context-eyebrow {
+  margin: 0;
+  font-size: 0.62rem;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--kxd-lr-muted);
+}
+
+.kxd-lead-report__conversion-context-value {
+  margin: 0.15rem 0 0;
+  font-size: 1.65rem;
+  line-height: 1.1;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--kxd-lr-ink);
+}
+
+.kxd-lead-report__conversion-context-card--supporting
+  .kxd-lead-report__conversion-context-value {
+  font-size: 1.35rem;
+  color: color-mix(in srgb, var(--kxd-lr-ink) 82%, var(--kxd-lr-muted));
+}
+
+.kxd-lead-report__conversion-context-label {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.35;
+  color: var(--kxd-lr-ink);
+}
+
+.kxd-lead-report__conversion-context-period,
+.kxd-lead-report__conversion-context-detail {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--kxd-lr-muted);
+}
+
 .kxd-lead-report__badge {
   display: inline-block;
   margin: 0 0 0.35rem;
@@ -701,6 +767,10 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .kxd-lead-report__conversion-context {
+    grid-template-columns: 1fr;
+  }
+
   .kxd-lead-report__split,
   .kxd-lead-report__columns,
   .kxd-lead-report__remediation-item,
@@ -713,7 +783,8 @@
   .kxd-lead-report__scorecard,
   .kxd-lead-report__scorecard--progress,
   .kxd-lead-report__metrics,
-  .kxd-lead-report__pair {
+  .kxd-lead-report__pair,
+  .kxd-lead-report__conversion-context {
     grid-template-columns: 1fr;
   }
 
@@ -830,7 +901,9 @@
   .kxd-lead-report__hero-callout,
   .kxd-lead-report__pair,
   .kxd-lead-report__work-highlights,
-  .kxd-lead-report__work-highlight {
+  .kxd-lead-report__work-highlight,
+  .kxd-lead-report__conversion-context,
+  .kxd-lead-report__conversion-context-card {
     break-inside: avoid;
     page-break-inside: avoid;
   }
