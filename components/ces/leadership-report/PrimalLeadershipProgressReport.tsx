@@ -4,6 +4,7 @@ import type { LeadershipProgressReportDocument } from "@/lib/ces/leadership-repo
 import { listPrimalLeadershipReports } from "@/lib/ces/leadership-report";
 import { LeadershipReportPrintButton } from "./LeadershipReportPrintButton";
 import "./primal-leadership-report.css";
+import "./primal-leadership-progress-print.css";
 
 function Prose({ paragraphs }: { paragraphs: string[] }) {
   return (
