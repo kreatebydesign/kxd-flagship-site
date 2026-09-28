@@ -448,15 +448,24 @@ export function PrimalLeadershipProgressReport({
             Leadership reports on file
           </h2>
           <ul className="kxd-lead-report__list">
-            {archive.map((entry) => (
-              <li key={entry.id}>
-                <Link href={entry.href} className="kxd-lead-report__archive-link">
-                  {entry.archivePeriodLabel}
-                </Link>
-                {" — "}
-                {entry.archiveTypeLabel}
-              </li>
-            ))}
+            {archive.map((entry) => {
+              const periodIncludesType = entry.archivePeriodLabel
+                .toLowerCase()
+                .includes(entry.archiveTypeLabel.toLowerCase());
+              return (
+                <li key={entry.id}>
+                  <Link href={entry.href} className="kxd-lead-report__archive-link">
+                    {entry.archivePeriodLabel}
+                  </Link>
+                  {periodIncludesType ? null : (
+                    <>
+                      {" — "}
+                      {entry.archiveTypeLabel}
+                    </>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </section>
 
