@@ -271,18 +271,16 @@ export const PRIMAL_LEADERSHIP_PROGRESS_UPDATE: LeadershipProgressReportDocument
 
   conversionOptimization: {
     intro: [
-      "The paid Racing School landing page had been displaying an expired September 10–11 availability window.",
-      "That is a conversion-critical issue on a paid demand surface. It was corrected after verification.",
+      "The paid Racing School landing page had been displaying an expired September 10–11 availability window — a conversion-critical issue that was identified and corrected.",
     ],
     availabilityLabel: "Current verified availability",
     availabilityValue: "October 21–22, 2026",
     completed: [
       "Stale September dates were removed from production.",
-      "The landing page now pulls school availability from the shared MotorsportReg event source instead of a manually hardcoded date.",
-      "Preferred-date options, form presence, and CTA behavior were verified after the change.",
+      "The landing page now pulls school availability from the shared MotorsportReg event source.",
+      "Preferred-date options, form presence, and CTA behavior were verified after the update.",
     ],
     verification: [
-      "Production verification confirmed current dates visible, preferred-date options current, form present, and CTA working.",
       "Lead measurement remained intact and was verified after the update.",
     ],
   },
@@ -316,15 +314,12 @@ export const PRIMAL_LEADERSHIP_PROGRESS_UPDATE: LeadershipProgressReportDocument
   },
 
   nextThirtyDays: [
-    "Protect top Atlanta and racing-school organic positions",
-    "Recover and improve broad “racing school” visibility",
-    "Expand non-branded racing-school demand",
-    "Continue Search query cleanup and negative-keyword discipline",
-    "Improve qualified CPA without discarding converting broad-match demand",
-    "Monitor landing-page conversion behavior against current availability",
-    "Connect lead quality back to source and program where data permits",
-    "Continue local Search and Maps optimization",
-    "Scale only where evidence supports it",
+    "Protect Atlanta and high-intent racing-school organic positions",
+    "Recover broader “racing school” visibility",
+    "Continue Google Ads search-term cleanup and negative-keyword discipline",
+    "Improve qualified CPA while protecting converting demand",
+    "Monitor landing-page conversion behavior and connect lead quality to source/program where measurable",
+    "Continue local Search/Maps optimization and expand qualified non-branded racing-school demand",
   ],
 
   measurementCommitment: [

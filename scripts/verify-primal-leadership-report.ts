@@ -247,6 +247,17 @@ check(
     line.toLowerCase().includes("lead measurement remained intact"),
   ),
 );
+check(
+  "cro verification is concise",
+  report.conversionOptimization.verification.length === 1,
+);
+check("next thirty days is executive length", report.nextThirtyDays.length === 6);
+check(
+  "archive period for current report avoids type duplication in label pair",
+  PRIMAL_LEADERSHIP_PROGRESS_UPDATE.archivePeriodLabel
+    .toLowerCase()
+    .includes(PRIMAL_LEADERSHIP_PROGRESS_UPDATE.archiveTypeLabel.toLowerCase()),
+);
 
 // Baseline immutability spot-checks (historical wording may retain launch language)
 check("baseline still mentions September 9", baseline.executiveSummary.some((p) => p.includes("September 9")));
