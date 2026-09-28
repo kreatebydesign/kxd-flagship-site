@@ -159,6 +159,52 @@ check(
   ),
 );
 check(
+  "ads context current value",
+  report.googleAds.conversionContext.current.valueDisplay === "5",
+);
+check(
+  "ads context current label",
+  report.googleAds.conversionContext.current.label === "Verified Search conversions",
+);
+check(
+  "ads context prior verified value",
+  report.googleAds.conversionContext.priorVerified.valueDisplay === "6",
+);
+check(
+  "ads context prior verified period",
+  report.googleAds.conversionContext.priorVerified.periodLabel.includes("Aug 12") &&
+    report.googleAds.conversionContext.priorVerified.periodLabel.includes("Sep 10"),
+);
+check(
+  "ads context prior verified detail",
+  report.googleAds.conversionContext.priorVerified.detail.includes("5 website leads") &&
+    report.googleAds.conversionContext.priorVerified.detail.includes("1 direct call"),
+);
+check(
+  "ads context historical value",
+  report.googleAds.conversionContext.historical.valueDisplay === "29",
+);
+check(
+  "ads context historical period",
+  report.googleAds.conversionContext.historical.periodLabel.includes("Mar 31") &&
+    report.googleAds.conversionContext.historical.periodLabel.includes("Jul 20"),
+);
+check(
+  "ads context historical detail",
+  report.googleAds.conversionContext.historical.detail.includes("16 Search") &&
+    report.googleAds.conversionContext.historical.detail.includes("13 Demand Gen"),
+);
+check(
+  "ads context disclosure not verified leads",
+  report.googleAds.conversionContext.disclosure.includes(
+    "should not be interpreted as 29 independently verified customer leads",
+  ),
+);
+check(
+  "ads context disclosure not additive",
+  report.googleAds.conversionContext.disclosure.toLowerCase().includes("must not be added together"),
+);
+check(
   "availability october",
   report.conversionOptimization.availabilityValue === "October 21–22, 2026",
 );
@@ -240,6 +286,12 @@ check(
 check(
   "progress does not claim ads cpa improvement vs prior report",
   !progressBlob.includes("lower cpa than") && !progressBlob.includes("cpa improved"),
+);
+check(
+  "ads context does not claim cumulative total",
+  !progressBlob.includes("40 total") &&
+    !progressBlob.includes("40 conversions") &&
+    !progressBlob.includes("29 verified leads"),
 );
 check(
   "cro verification uses business language",

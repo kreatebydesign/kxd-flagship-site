@@ -343,7 +343,9 @@ export function PrimalLeadershipProgressReport({
               </p>
             </div>
             <div className="kxd-lead-report__metric">
-              <p className="kxd-lead-report__metric-label">Conversions</p>
+              <p className="kxd-lead-report__metric-label">
+                Verified Search conversions
+              </p>
               <p className="kxd-lead-report__metric-value">
                 {report.googleAds.conversionsDisplay}
               </p>
@@ -361,6 +363,65 @@ export function PrimalLeadershipProgressReport({
               </p>
             </div>
           </div>
+
+          <p className="kxd-lead-report__panel-title">Conversion context by period</p>
+          <div
+            className="kxd-lead-report__conversion-context"
+            aria-label="Google Ads conversion context by reporting period"
+          >
+            <div className="kxd-lead-report__conversion-context-card kxd-lead-report__conversion-context-card--current">
+              <p className="kxd-lead-report__conversion-context-eyebrow">
+                {report.googleAds.conversionContext.current.eyebrow}
+              </p>
+              <p className="kxd-lead-report__conversion-context-value">
+                {report.googleAds.conversionContext.current.valueDisplay}
+              </p>
+              <p className="kxd-lead-report__conversion-context-label">
+                {report.googleAds.conversionContext.current.label}
+              </p>
+              <p className="kxd-lead-report__conversion-context-period">
+                {report.googleAds.conversionContext.current.periodLabel}
+              </p>
+            </div>
+            <div className="kxd-lead-report__conversion-context-card kxd-lead-report__conversion-context-card--supporting">
+              <p className="kxd-lead-report__conversion-context-eyebrow">
+                {report.googleAds.conversionContext.priorVerified.eyebrow}
+              </p>
+              <p className="kxd-lead-report__conversion-context-value">
+                {report.googleAds.conversionContext.priorVerified.valueDisplay}
+              </p>
+              <p className="kxd-lead-report__conversion-context-label">
+                {report.googleAds.conversionContext.priorVerified.label}
+              </p>
+              <p className="kxd-lead-report__conversion-context-period">
+                {report.googleAds.conversionContext.priorVerified.periodLabel}
+              </p>
+              <p className="kxd-lead-report__conversion-context-detail">
+                {report.googleAds.conversionContext.priorVerified.detail}
+              </p>
+            </div>
+            <div className="kxd-lead-report__conversion-context-card kxd-lead-report__conversion-context-card--supporting">
+              <p className="kxd-lead-report__conversion-context-eyebrow">
+                {report.googleAds.conversionContext.historical.eyebrow}
+              </p>
+              <p className="kxd-lead-report__conversion-context-value">
+                {report.googleAds.conversionContext.historical.valueDisplay}
+              </p>
+              <p className="kxd-lead-report__conversion-context-label">
+                {report.googleAds.conversionContext.historical.label}
+              </p>
+              <p className="kxd-lead-report__conversion-context-period">
+                {report.googleAds.conversionContext.historical.periodLabel}
+              </p>
+              <p className="kxd-lead-report__conversion-context-detail">
+                {report.googleAds.conversionContext.historical.detail}
+              </p>
+            </div>
+          </div>
+          <p className="kxd-lead-report__note">
+            {report.googleAds.conversionContext.disclosure}
+          </p>
+
           <p className="kxd-lead-report__panel-title">Conversion distribution</p>
           <BulletList items={report.googleAds.conversionDistribution} />
           <div className="kxd-lead-report__columns">

@@ -267,6 +267,30 @@ export const PRIMAL_LEADERSHIP_PROGRESS_UPDATE: LeadershipProgressReportDocument
       "Budget allocation is being managed based on measured intent.",
       "Landing-page availability and offer alignment were corrected so paid traffic meets current open registration dates.",
     ],
+    conversionContext: {
+      current: {
+        eyebrow: "Current verified Search window",
+        valueDisplay: "5",
+        label: "Verified Search conversions",
+        periodLabel: "Latest verified Search reporting window",
+      },
+      priorVerified: {
+        eyebrow: "Prior verified period",
+        valueDisplay: "6",
+        label: "Primary conversions",
+        periodLabel: "Aug 12 – Sep 10, 2026",
+        detail: "5 website leads · 1 direct call",
+      },
+      historical: {
+        eyebrow: "Historical Ads context",
+        valueDisplay: "29",
+        label: "Google Ads conversions recorded",
+        periodLabel: "Mar 31 – Jul 20, 2026",
+        detail: "16 Search · 13 Demand Gen",
+      },
+      disclosure:
+        "Historical Google Ads conversions are platform-reported conversion actions from the earlier measurement period and are shown for context. They should not be interpreted as 29 independently verified customer leads. These periods use different measurement definitions and must not be added together.",
+    },
   },
 
   conversionOptimization: {
