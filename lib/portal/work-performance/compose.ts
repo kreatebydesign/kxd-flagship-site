@@ -67,20 +67,29 @@ const METRIC_SPECS: Array<{
 }> = [
   { key: "sessions", label: "Website visits", domain: "website" },
   { key: "visitors", label: "People who visited", domain: "website" },
+  { key: "pageviews", label: "Pages viewed", domain: "website" },
   { key: "clicks", label: "Visits from Google Search", domain: "search" },
   {
     key: "impressions",
     label: "Times seen in Google Search",
     domain: "search",
   },
-  { key: "conversions", label: "Tracked website actions", domain: "website" },
   { key: "ctr", label: "Search result click rate", domain: "search" },
+  {
+    key: "average_position",
+    label: "Typical Google Search position",
+    domain: "search",
+  },
+  { key: "conversions", label: "Tracked website actions", domain: "website" },
 ];
 
 function formatMetricValue(fact: ReportingFact): string {
   if (!Number.isFinite(fact.value)) return "—";
   if (fact.metricKey === "ctr" || fact.unit === "percent") {
     return `${fact.value.toFixed(1)}%`;
+  }
+  if (fact.metricKey === "average_position" || fact.unit === "position") {
+    return fact.value.toFixed(1);
   }
   return String(Math.round(fact.value));
 }
@@ -182,7 +191,7 @@ function buildLeads(
       conversionCount: Math.round(websiteFormInquiries.count),
       conversionLabel: "Website form leads",
       statusNote:
-        "Counted from website form inquiries for this period (client-inquiries, channel=form). Not Google Ads conversions or GA4 generate_lead events. Confirmed sales remain separate.",
+        "Counted from website form inquiries for this period. Not advertising conversions or other tracked website actions. Confirmed sales remain separate.",
       salesPipelineAvailable: false,
     };
   }

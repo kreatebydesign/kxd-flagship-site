@@ -8,6 +8,7 @@ export * from "./period";
 export * from "./scope";
 export * from "./metrics";
 export * from "./sanitize";
+export * from "./work-summary";
 export * from "./snapshot";
 export * from "./compose";
 export * from "./filename";

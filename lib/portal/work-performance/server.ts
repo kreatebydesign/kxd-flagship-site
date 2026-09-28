@@ -266,9 +266,15 @@ export async function resolvePortalWorkPerformance(input: {
   const requestsEntitled =
     websiteReviewEntitled || isClientHqModuleEnabled("requests");
 
+  const deliverableAwaitingClient = mapActiveDeliverables(docs).filter(
+    (item) => item.owner === "client",
+  ).length;
+  const awaitingClientCount =
+    reviewBundle.awaitingClientCount + deliverableAwaitingClient;
+
   const nextMoves = buildWorkPerformanceNextMoves({
     profile: experienceProfile,
-    awaitingClientCount: reviewBundle.awaitingClientCount,
+    awaitingClientCount,
     activeReviewCount: reviewBundle.inProgressCount,
     hasAnalytics: reportingEntitled && facts.length > 0,
     completedThisMonth: projectMonthlySummaryForPeriod(completed, reportingPeriod)
@@ -308,14 +314,17 @@ export async function resolvePortalWorkPerformance(input: {
     activeItems: active,
     updateRequests: {
       entitled: requestsEntitled,
-      openCount: reviewBundle.openCount,
-      awaitingClientCount: reviewBundle.awaitingClientCount,
+      openCount: reviewBundle.openCount + deliverableAwaitingClient,
+      awaitingClientCount,
       inProgressCount: reviewBundle.inProgressCount,
       completedThisMonthCount: reviewBundle.completedThisMonthCount,
-      priority: reviewBundle.active.slice(0, 4),
-      primaryActionHref: websiteReviewEntitled
-        ? "/portal/website-review"
-        : "/portal/requests",
+      priority: active.filter((item) => item.owner === "client").slice(0, 4),
+      primaryActionHref:
+        deliverableAwaitingClient > 0
+          ? "/portal/deliverables"
+          : websiteReviewEntitled
+            ? "/portal/website-review"
+            : "/portal/requests",
     },
     reportingFacts: facts,
     reportingEntitled,

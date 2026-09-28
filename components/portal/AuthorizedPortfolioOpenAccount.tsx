@@ -80,7 +80,7 @@ export function AuthorizedPortfolioOpenAccount({
             : `Switch to ${clientName} and open workspace`
         }
       >
-        {pending ? "Opening…" : isActive ? "Open workspace" : "Switch & open"}
+        {pending ? "Opening…" : isActive ? "Open business" : "Open business"}
       </button>
       {error ? (
         <p className="kxd-portal-portfolio__error" role="alert">

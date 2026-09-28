@@ -17,5 +17,10 @@ export default async function PortalDeliverablesPage() {
   }
 
   const deliverables = await getPortalDeliverables(session);
-  return <DeliverablesScreen deliverables={deliverables} />;
+  return (
+    <DeliverablesScreen
+      deliverables={deliverables}
+      clientName={session.clientName}
+    />
+  );
 }

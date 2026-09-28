@@ -292,7 +292,7 @@ check(
 );
 check(
   "session keeps preview audit displayName but empty greetingName",
-  sessionSrc.includes('displayName: `Operator Preview · ${clientName}`') &&
+  sessionSrc.includes("`Operator Preview · ${clientName}`") &&
     sessionSrc.includes('greetingName: ""') &&
     greetingSrc.includes("resolvePortalGreetingName"),
 );
@@ -399,11 +399,15 @@ check(
 
 const nav = getEnabledPortalNavGroups(profile);
 const labels = nav.flatMap((group) => group.items.map((item) => `${item.id}:${item.label}`));
+const primaryLabels = (nav[0]?.items ?? []).map((item) => `${item.id}:${item.label}`);
 check(
   "CES nav uses client-safe labels without renaming module ids",
-  labels.includes("overview:Home") &&
+  labels.includes("overview:Overview") &&
     labels.includes("website-review:Website feedback") &&
     labels.includes("analytics:Performance") &&
+    primaryLabels.includes("overview:Overview") &&
+    primaryLabels.includes("analytics:Performance") &&
+    !primaryLabels.some((entry) => entry.startsWith("website-review:")) &&
     clientPortalNavLabel("website-health", {}, "Website Health") === "Website status" &&
     clientPortalNavLabel("assets", {}, "Files") === "Documents" &&
     clientPortalNavLabel("settings", {}, "Settings") === "Account" &&

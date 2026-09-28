@@ -138,6 +138,10 @@ export type AuthorizedSiteRollup = {
   activeWork: number;
   awaitingClient: number;
   analyticsAvailability: WorkPerformanceAvailability;
+  /** Closed reporting month label when facts exist (e.g. "August 2026"). */
+  reportingPeriodLabel: string | null;
+  /** Up to a few real metric signals — never invented scores or rankings. */
+  performanceSignals: Array<{ label: string; valueLabel: string }>;
   primaryWinTitle: string | null;
 };
 

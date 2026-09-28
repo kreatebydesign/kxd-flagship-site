@@ -4,16 +4,17 @@ import type { AuthorizedPortfolioModel } from "@/lib/portal/authorized-portfolio
 import { ClientHqPageHero } from "./ClientHqPageHero";
 
 export function PortfolioScreen({ model }: { model: AuthorizedPortfolioModel }) {
+  const count = model.overview.totals?.siteCount ?? model.sites.length;
   const lead =
     model.availability === "ready"
-      ? `A calm summary across ${model.overview.totals?.siteCount ?? model.sites.length} authorized accounts. Active context remains ${model.activeClientName}.`
+      ? `How your ${count} businesses are doing — work, reporting, and anything waiting on you. Open a business to go deeper.`
       : model.emptyState.lead;
 
   return (
     <KxdPage className="kxd-os-page--ops">
       <ClientHqPageHero
-        eyebrow="Headquarters"
-        title="Portfolio"
+        eyebrow="All Businesses"
+        title="Your business portfolio"
         lead={lead}
         presence
       />

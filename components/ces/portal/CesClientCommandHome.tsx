@@ -116,19 +116,41 @@ export function CesClientCommandHome({
         title={engagementTitle}
       />
 
+      <nav className="kxd-client-home__quick-nav" aria-label="Primary destinations">
+        <Link href="/portal/analytics" className="kxd-ces-btn kxd-ces-btn--ghost">
+          Performance
+        </Link>
+        <Link href="/portal/deliverables" className="kxd-ces-btn kxd-ces-btn--ghost">
+          KXD Work
+        </Link>
+        <Link href="/portal/reports" className="kxd-ces-btn kxd-ces-btn--ghost">
+          Reports
+        </Link>
+      </nav>
+
       <section className="kxd-client-home__attention" aria-labelledby="client-attention-title">
-        <p className="kxd-client-home__eyebrow">Needs your attention</p>
+        <p className="kxd-client-home__eyebrow">Waiting on you</p>
         <h2 id="client-attention-title" className="kxd-client-home__section-title">
           {home.attention.items.length > 0
-            ? "Where your input helps"
+            ? "Action needed from you"
             : home.attention.allClearTitle}
         </h2>
         {home.attention.items.length > 0 ? (
-          <ul className="kxd-client-home__list">
-            {home.attention.items.map((item) => (
-              <HomeItem key={item.id} item={item} />
-            ))}
-          </ul>
+          <>
+            <p className="kxd-client-home__empty-note">
+              These items need a simple step from your side before KXD can continue.
+            </p>
+            <ul className="kxd-client-home__list">
+              {home.attention.items.map((item) => (
+                <HomeItem key={item.id} item={item} />
+              ))}
+            </ul>
+            <p className="kxd-os-meta" style={{ marginTop: "0.75rem" }}>
+              <Link href="/portal/deliverables" className="kxd-os-link-quiet">
+                See all KXD Work
+              </Link>
+            </p>
+          </>
         ) : (
           <p className="kxd-client-home__empty-note">{home.attention.allClearLead}</p>
         )}

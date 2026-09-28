@@ -12821,3 +12821,23 @@ a.kxd-brand-kit__asset:hover .kxd-brand-kit__asset-action {
     max-width: 100%;
   }
 }
+
+/* —— Client home quick destinations —— */
+.kxd-client-home__quick-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin: 0 0 1.75rem;
+}
+
+@media (max-width: 640px) {
+  .kxd-client-home__quick-nav {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .kxd-client-home__quick-nav .kxd-ces-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

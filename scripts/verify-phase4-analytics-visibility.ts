@@ -347,9 +347,10 @@ function main() {
     "workspace covers sources, performance, leads, reports, retry",
     workspace.includes("About these results") &&
       workspace.includes("model.sources.map") &&
-      workspace.includes("Website performance") &&
-      workspace.includes("Leads and conversions") &&
-      workspace.includes("Retry") &&
+      workspace.includes("Website activity") &&
+      workspace.includes("Search visibility") &&
+      workspace.includes("Tracked actions") &&
+      workspace.includes("Try again") &&
       !workspace.includes("data-workspace-client"),
   );
 

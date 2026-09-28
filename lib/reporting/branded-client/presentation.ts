@@ -10,6 +10,31 @@ type AnyDoc = Record<string, any>;
 
 export const GOOGLE_ADS_AUDIT_REPAIR_KIND = "google-ads-audit-repair";
 
+const MONTH_NAMES = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+] as const;
+
+export function reportMonthLabelFromParts(
+  year: number | null | undefined,
+  month: number | null | undefined,
+): string | null {
+  const y = Number(year);
+  const m = Number(month);
+  if (!Number.isFinite(y) || !Number.isFinite(m) || m < 1 || m > 12) return null;
+  return `${MONTH_NAMES[m - 1]} ${y}`;
+}
+
 export function reportKindFromDoc(doc: AnyDoc): string | null {
   const provenance = doc.dataProvenance;
   if (!provenance || typeof provenance !== "object") return null;
@@ -17,9 +42,22 @@ export function reportKindFromDoc(doc: AnyDoc): string | null {
   return typeof kind === "string" ? kind : null;
 }
 
+function provenanceString(
+  provenance: Record<string, unknown> | null,
+  key: string,
+): string | null {
+  if (!provenance) return null;
+  const value = provenance[key];
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
 export function presentationForReportDoc(doc: AnyDoc): BrandedReportPresentation {
   const kind = reportKindFromDoc(doc);
   const title = typeof doc.title === "string" ? doc.title.trim() : "";
+  const provenance =
+    doc.dataProvenance && typeof doc.dataProvenance === "object"
+      ? (doc.dataProvenance as Record<string, unknown>)
+      : null;
 
   if (kind === GOOGLE_ADS_AUDIT_REPAIR_KIND) {
     return {
@@ -51,18 +89,52 @@ export function presentationForReportDoc(doc: AnyDoc): BrandedReportPresentation
     };
   }
 
+  const reportMonthLabel =
+    provenanceString(provenance, "reportMonth") ??
+    reportMonthLabelFromParts(doc.reportingYear, doc.reportingMonth);
+
+  const googlePerformancePeriodLabel =
+    provenanceString(provenance, "googlePerformancePeriod") ??
+    provenanceString(provenance, "analyticsPeriodLabel");
+
+  const missingWebsiteAnalyticsNote = provenanceString(
+    provenance,
+    "missingWebsiteAnalyticsNote",
+  );
+
+  const includedCaps = Array.isArray(doc.includedCapabilities)
+    ? doc.includedCapabilities.map(String)
+    : [];
+  const hideAds = !includedCaps.includes("google-ads");
+
   return {
     kind: "monthly",
-    documentTitle: title || "Monthly Performance Report",
-    coverTitle: "Monthly Performance Report",
-    coverEyebrow: "Monthly performance report",
-    hideDataFreshnessPanel: false,
-    hideOutOfScope: false,
+    documentTitle:
+      title ||
+      (reportMonthLabel ? `${reportMonthLabel} Monthly Report` : "Monthly Performance Report"),
+    coverTitle: reportMonthLabel || "Monthly Performance Report",
+    coverEyebrow: "Kreate by Design",
+    coverSubtitle: "Monthly Report",
+    reportMonthLabel: reportMonthLabel ?? undefined,
+    googlePerformancePeriodLabel,
+    missingWebsiteAnalyticsNote,
+    performanceSnapshotLead: googlePerformancePeriodLabel
+      ? `Google performance — ${googlePerformancePeriodLabel}`
+      : reportMonthLabel
+        ? `Performance for ${reportMonthLabel}`
+        : undefined,
+    hideDataFreshnessPanel: true,
+    hideOutOfScope: true,
     hideWorkCompletedList: false,
-    hideNarrativeProvenance: false,
+    hideNarrativeProvenance: true,
     useAuditTheme: false,
-    hiddenNarrativeKeys: [],
-    sectionTitles: {},
+    hiddenNarrativeKeys: hideAds ? ["googleAds"] : [],
+    sectionTitles: {
+      workCompleted: "KXD work this month",
+      augustPriorities: "What's next",
+      websitePerformance: "Website performance",
+      organicSearch: "Google Search performance",
+    },
   };
 }
 

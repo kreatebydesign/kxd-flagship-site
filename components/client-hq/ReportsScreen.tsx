@@ -42,13 +42,13 @@ export function ReportsScreen({
   return (
     <KxdPage className="kxd-os-page--ops">
       <ClientHqPageHero
-        eyebrow="Results"
-        title="Reports"
-        lead={`Executive and leadership reports for ${clientName} — prepared by KXD and published to this account only.`}
+        eyebrow="Reports"
+        title="Monthly reports"
+        lead={`Prepared by KXD for ${clientName}. Each published report stays private to this business.`}
       />
 
-      <p className="kxd-os-eyebrow" style={{ marginBottom: "1rem" }}>
-        {clientName}
+      <p className="kxd-os-meta" style={{ marginBottom: "1.25rem" }}>
+        Viewing reports for <strong>{clientName}</strong>
       </p>
 
       {years.length > 1 ? (
@@ -69,8 +69,8 @@ export function ReportsScreen({
 
       {empty ? (
         <KxdEmptyState
-          title="No reports published yet"
-          description="Your monthly executive reports will appear here once KXD publishes them for this account."
+          title="Monthly reports will appear here"
+          description="As KXD finalizes each month’s report for this business, it will be published to this secure space. Nothing is missing from your login — the first report simply has not been published yet."
         />
       ) : (
         <div className="kxd-os-card-list" role="list" aria-label={`Published reports for ${clientName}`}>
@@ -115,11 +115,11 @@ export function ReportsScreen({
 
       <p style={{ marginTop: "1.5rem" }}>
         <Link href="/portal/analytics" className="kxd-os-link-quiet">
-          Website performance &amp; leads
+          View Google performance
         </Link>
         {" · "}
-        <Link href="/portal/website-health" className="kxd-os-link-quiet">
-          Website health
+        <Link href="/portal/deliverables" className="kxd-os-link-quiet">
+          View KXD Work
         </Link>
       </p>
     </KxdPage>

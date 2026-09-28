@@ -42,7 +42,11 @@ export function formatMetricNumber(
       maximumFractionDigits: value >= 100 ? 0 : 2,
     }).format(value);
   }
-  if (unit === "percent" || unit === "ctr") {
+  // `percent` = already 0–100 (e.g. GSC CTR after normalize). `ctr` = 0–1 ratio.
+  if (unit === "percent") {
+    return `${(Math.round(value * 10) / 10).toFixed(1)}%`;
+  }
+  if (unit === "ctr") {
     return `${(Math.round(value * 1000) / 10).toFixed(1)}%`;
   }
   if (unit === "position") {

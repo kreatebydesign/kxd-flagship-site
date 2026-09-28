@@ -60,13 +60,13 @@ export function BrandedReportsOverview({
   return (
     <section
       className="kxd-os-section"
-      aria-labelledby="branded-july-reports-heading"
+      aria-labelledby="branded-reports-heading"
       style={{ marginTop: "2rem" }}
     >
       <div className="kxd-os-ops-section-head">
         <div>
-          <p className="kxd-os-eyebrow">July 2026 · Approval-first</p>
-          <h2 id="branded-july-reports-heading" className="kxd-os-h2">
+          <p className="kxd-os-eyebrow">{period.label} · Approval-first</p>
+          <h2 id="branded-reports-heading" className="kxd-os-h2">
             Branded client reports
           </h2>
           <p className="kxd-os-lead">
@@ -93,7 +93,9 @@ export function BrandedReportsOverview({
       </div>
 
       {rows.length === 0 ? (
-        <p className="kxd-os-muted">No clients found in this environment.</p>
+        <p className="kxd-os-muted">
+          No clients found. Add clients in Portfolio before generating reports.
+        </p>
       ) : (
         <div className="kxd-os-table-wrap" style={{ overflowX: "auto" }}>
           <table className="kxd-os-table">
@@ -156,7 +158,7 @@ export function BrandedReportsOverview({
                         disabled={pending || row.action === "blocked"}
                         onClick={() => generate(row.clientId)}
                       >
-                        Generate July draft
+                        Generate {period.label} draft
                       </button>
                     )}
                   </td>

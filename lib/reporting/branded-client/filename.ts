@@ -18,9 +18,11 @@ export function resolveBrandedReportPdfFilename(snapshot: BrandedReportSnapshot)
   if (snapshot.presentation?.kind === GOOGLE_ADS_AUDIT_REPAIR_KIND) {
     return PRIMAL_AUDIT_PDF_FILENAME;
   }
+  const periodLabel =
+    snapshot.presentation?.reportMonthLabel?.trim() || snapshot.period.label;
   return buildBrandedReportPdfFilename({
     clientName: snapshot.clientName,
-    periodLabel: snapshot.period.label,
+    periodLabel,
     version: snapshot.version,
   });
 }

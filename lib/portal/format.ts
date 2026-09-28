@@ -2,13 +2,37 @@ import { KXD_BUSINESS_TIMEZONE } from "@/lib/platform/timezone";
 import { clientStatusLabel } from "@/lib/ces/copy/portal-language";
 
 /**
- * Portal display dates must be hydration-stable: explicit locale + business
- * timezone so SSR (UTC host) and the browser (local TZ) render identical text.
+ * Portal display dates must be hydration-stable: explicit locale + timezone
+ * so SSR and the browser render identical text.
+ *
+ * Calendar dates stored as YYYY-MM-DD or UTC midnight are shown as that
+ * calendar day (UTC), so a completedDate of 2026-09-28 never shifts to Sep 27
+ * in Pacific.
  */
 export function fmtPortalDate(iso: string | null | undefined): string {
   if (!iso) return "—";
   try {
-    return new Date(iso).toLocaleDateString("en-US", {
+    const trimmed = iso.trim();
+    const dayOnly = /^(\d{4})-(\d{2})-(\d{2})/.exec(trimmed);
+    const isCalendarDay =
+      Boolean(dayOnly) &&
+      (trimmed.length === 10 || /T00:00:00(\.\d+)?Z$/i.test(trimmed));
+    if (dayOnly && isCalendarDay) {
+      const utc = new Date(
+        Date.UTC(
+          Number(dayOnly[1]),
+          Number(dayOnly[2]) - 1,
+          Number(dayOnly[3]),
+        ),
+      );
+      return utc.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        timeZone: "UTC",
+      });
+    }
+    return new Date(trimmed).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
       year: "numeric",

@@ -188,7 +188,12 @@ export function ClientHqShell({
             {quietWorkspaceLabel ? (
               <p className="kxd-ces-mobile-bar__workspace">{quietWorkspaceLabel}</p>
             ) : null}
-            {accountSwitcher ? <AccountSwitcher model={accountSwitcher} /> : null}
+            {accountSwitcher ? (
+              <AccountSwitcher
+                model={accountSwitcher}
+                portfolioAvailable={portfolioNavAvailable}
+              />
+            ) : null}
           </div>
           <label
             htmlFor={`${navId}-toggle`}
@@ -229,7 +234,12 @@ export function ClientHqShell({
             {cesShell === "ces" ? (
               <p className="kxd-ces-identity__partner">Private KXD partnership</p>
             ) : null}
-            {accountSwitcher ? <AccountSwitcher model={accountSwitcher} /> : null}
+            {accountSwitcher ? (
+              <AccountSwitcher
+                model={accountSwitcher}
+                portfolioAvailable={portfolioNavAvailable}
+              />
+            ) : null}
             <div className="kxd-ces-identity__rule" aria-hidden="true" />
           </div>
 

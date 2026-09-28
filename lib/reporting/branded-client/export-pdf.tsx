@@ -24,6 +24,11 @@ import { REPORT_SCOPE_LABEL, type BrandedReportSnapshot } from "./types";
 import { resolveBrandedReportPdfFilename } from "./filename";
 import { assertNoSecretLeak, stripInternalNotesFromSnapshot } from "./sanitize";
 import { renderAuditDeliverablePdf } from "./export-audit-deliverable-pdf";
+import { isNarrativeHidden, narrativeTitleForSnapshot } from "./presentation";
+import {
+  groupClientFacingWorkItems,
+  toClientFacingWorkItem,
+} from "./work-summary";
 
 const colors = KXD_REPORT_COLORS;
 
@@ -129,6 +134,33 @@ const styles = StyleSheet.create({
     fontSize: 7.5,
     color: colors.muted,
   },
+  metricCompare: {
+    fontSize: 7,
+    color: colors.muted,
+    marginTop: 2,
+    fontFamily: "Helvetica",
+  },
+  workGroupLabel: {
+    fontSize: 8,
+    letterSpacing: 1.2,
+    textTransform: "uppercase",
+    color: colors.goldMuted,
+    marginTop: 8,
+    marginBottom: 4,
+    fontFamily: "Helvetica",
+  },
+  workTitle: {
+    fontSize: 10,
+    color: colors.ink,
+    fontFamily: "Helvetica",
+    marginBottom: 1,
+  },
+  workSummary: {
+    fontSize: 9,
+    color: colors.muted,
+    marginBottom: 6,
+    lineHeight: 1.4,
+  },
   panel: {
     borderWidth: 1,
     borderColor: colors.line,
@@ -191,29 +223,72 @@ function BrandedMonthlyReportDocument({
   snapshot: BrandedReportSnapshot;
   logoSrc: string | null;
 }) {
+  const presentation = snapshot.presentation;
   const scopeLabels = snapshot.scope.includedCapabilities
     .map((id) => REPORT_SCOPE_LABEL[id])
     .join(" · ");
-  const includedWork = snapshot.workCompleted.filter((w) => w.included && w.clientVisible);
+  const includedWork = snapshot.workCompleted
+    .filter((w) => w.included && w.clientVisible)
+    .map(toClientFacingWorkItem);
+  const workGroups = groupClientFacingWorkItems(includedWork);
+  const pageLabel =
+    presentation?.reportMonthLabel ||
+    presentation?.coverTitle ||
+    snapshot.period.label;
+  const showDataSources = presentation?.hideDataFreshnessPanel !== true;
+  const showOutOfScope =
+    presentation?.hideOutOfScope !== true &&
+    snapshot.outOfScopeOpportunities.length > 0;
+  const showWorkList = presentation?.hideWorkCompletedList !== true;
   let section = 1;
+
+  const narrativeOrder = [
+    "websitePerformance",
+    "organicSearch",
+    "googleAds",
+    "workCompleted",
+    "improvementsAndWins",
+    "issuesOrRisks",
+    "recommendations",
+    "augustPriorities",
+  ] as const;
 
   return (
     <Document
-      title={`${KXD_REPORT_BRAND} Monthly Performance Report — ${snapshot.clientName}`}
+      title={`${KXD_REPORT_BRAND} ${
+        presentation?.documentTitle || "Monthly Performance Report"
+      } — ${snapshot.clientName}`}
       author={KXD_REPORT_BRAND}
-      subject={`Monthly Performance Report ${snapshot.period.label}`}
+      subject={
+        presentation?.reportMonthLabel
+          ? `${presentation.reportMonthLabel} Monthly Report`
+          : `Monthly Performance Report ${snapshot.period.label}`
+      }
     >
       <Page size="LETTER" style={styles.coverPage}>
         {/* eslint-disable-next-line jsx-a11y/alt-text -- @react-pdf/renderer Image has no alt prop */}
         {logoSrc ? <Image src={logoSrc} style={styles.coverLogo} /> : null}
         <Text style={styles.coverDocType}>{KXD_REPORT_BRAND}</Text>
         <View style={styles.coverRule} />
-        <Text style={styles.coverH1}>Monthly Performance Report</Text>
+        <Text style={styles.coverH1}>
+          {presentation?.coverTitle || "Monthly Performance Report"}
+        </Text>
+        {presentation?.coverSubtitle ? (
+          <Text style={styles.coverDocType}>{presentation.coverSubtitle}</Text>
+        ) : null}
         <CoverMeta label="Client" value={snapshot.clientName} />
-        <CoverMeta label="Period" value={snapshot.period.label} />
-        <CoverMeta label="Timezone" value={snapshot.period.timezone} />
+        {presentation?.reportMonthLabel ? (
+          <CoverMeta label="Report month" value={presentation.reportMonthLabel} />
+        ) : (
+          <CoverMeta label="Period" value={snapshot.period.label} />
+        )}
+        {presentation?.googlePerformancePeriodLabel ? (
+          <CoverMeta
+            label="Google performance"
+            value={presentation.googlePerformancePeriodLabel}
+          />
+        ) : null}
         <CoverMeta label="Services" value={scopeLabels || "Base website management"} />
-        <CoverMeta label="Generated" value={snapshot.generatedAt.slice(0, 10)} />
         <CoverMeta label="Designation" value="Confidential · Client-facing" />
       </Page>
 
@@ -227,79 +302,117 @@ function BrandedMonthlyReportDocument({
 
         <Section index={section++} title="Performance snapshot">
           <Text style={styles.muted}>
-            Only entitled and available channels are shown. Comparison labels and
-            freshness are preserved for each metric.
+            {presentation?.performanceSnapshotLead ||
+              "Only entitled and available channels are shown."}
           </Text>
           <View style={styles.metricGrid}>
             {snapshot.metrics.length === 0 ? (
               <Text style={styles.para}>No entitled metrics available for this period.</Text>
             ) : (
-              snapshot.metrics.map((m) => (
-                <View key={m.key} style={styles.metricCard} wrap={false}>
-                  <Text style={styles.metricLabel}>{m.label}</Text>
-                  <Text style={styles.metricValue}>{m.displayValue}</Text>
-                  <Text style={styles.muted}>
-                    {m.percentChangeLabel} · {m.source} · {m.completeness}
-                  </Text>
-                  {m.note ? <Text style={styles.muted}>{m.note}</Text> : null}
-                </View>
-              ))
+              snapshot.metrics.map((m) => {
+                const unavailable =
+                  m.value == null ||
+                  m.completeness === "unavailable" ||
+                  m.provenance === "missing";
+                return (
+                  <View key={m.key} style={styles.metricCard} wrap={false}>
+                    <Text style={styles.metricLabel}>{m.label}</Text>
+                    <Text style={styles.metricValue}>{m.displayValue}</Text>
+                    {unavailable ? (
+                      <Text style={styles.muted}>
+                        {m.note || "Not available for this period"}
+                      </Text>
+                    ) : (
+                      <>
+                        <Text style={styles.muted}>{m.source}</Text>
+                        {m.percentChangeLabel &&
+                        m.percentChangeLabel !== "Comparison unavailable" ? (
+                          <Text style={styles.metricCompare}>{m.percentChangeLabel}</Text>
+                        ) : null}
+                      </>
+                    )}
+                  </View>
+                );
+              })
             )}
           </View>
         </Section>
 
-        <Section index={section++} title="Data sources">
-          {snapshot.dataSources.map((s) => (
-            <Text key={s.providerId} style={styles.para}>
-              {s.label}: {s.includedInReport ? "Included" : "Not included"};{" "}
-              {s.connected ? "Connected" : "Not connected"}. {s.statusNote}
-            </Text>
-          ))}
-        </Section>
-
-        <PageFooter clientName={snapshot.clientName} pageLabel={snapshot.period.label} />
-      </Page>
-
-      <Page size="LETTER" style={styles.page}>
-        <Section index={section++} title="Website performance">
-          <Text style={styles.para}>{snapshot.narratives.websitePerformance.body}</Text>
-        </Section>
-        <Section index={section++} title="Organic search performance">
-          <Text style={styles.para}>{snapshot.narratives.organicSearch.body}</Text>
-        </Section>
-        <Section index={section++} title="Google Ads performance">
-          <Text style={styles.para}>{snapshot.narratives.googleAds.body}</Text>
-        </Section>
-        <Section index={section++} title="Work completed by KXD">
-          {includedWork.length > 0 ? (
-            includedWork.map((w) => (
-              <Text key={w.id} style={styles.para}>
-                • {w.title}
-                {w.completedAt ? ` (${w.completedAt.slice(0, 10)})` : ""}
-                {w.summary ? ` — ${w.summary}` : ""}
+        {showDataSources ? (
+          <Section index={section++} title="Data sources">
+            {snapshot.dataSources.map((s) => (
+              <Text key={s.providerId} style={styles.para}>
+                {s.label}: {s.includedInReport ? "Included" : "Not included"};{" "}
+                {s.connected ? "Connected" : "Not connected"}. {s.statusNote}
               </Text>
-            ))
-          ) : (
-            <Text style={styles.para}>{snapshot.narratives.workCompleted.body}</Text>
-          )}
-        </Section>
-        <PageFooter clientName={snapshot.clientName} pageLabel={snapshot.period.label} />
+            ))}
+          </Section>
+        ) : null}
+
+        <PageFooter clientName={snapshot.clientName} pageLabel={pageLabel} />
       </Page>
 
       <Page size="LETTER" style={styles.page}>
-        <Section index={section++} title="Improvements and wins">
-          <Text style={styles.para}>{snapshot.narratives.improvementsAndWins.body}</Text>
-        </Section>
-        <Section index={section++} title="Issues or risks">
-          <Text style={styles.para}>{snapshot.narratives.issuesOrRisks.body}</Text>
-        </Section>
-        <Section index={section++} title="Recommendations">
-          <Text style={styles.para}>{snapshot.narratives.recommendations.body}</Text>
-        </Section>
-        <Section index={section++} title="August priorities">
-          <Text style={styles.para}>{snapshot.narratives.augustPriorities.body}</Text>
-        </Section>
-        {snapshot.outOfScopeOpportunities.length > 0 ? (
+        {narrativeOrder
+          .filter((key) => !isNarrativeHidden(snapshot, key))
+          .filter((key) => {
+            if (key === "workCompleted" && showWorkList && includedWork.length > 0) {
+              return false;
+            }
+            const body = snapshot.narratives[key]?.body?.trim() ?? "";
+            return body.length > 0;
+          })
+          .map((key) => (
+            <Section
+              key={key}
+              index={section++}
+              title={narrativeTitleForSnapshot(snapshot, key)}
+            >
+              <Text style={styles.para}>{snapshot.narratives[key].body}</Text>
+            </Section>
+          ))}
+
+        {showWorkList && includedWork.length > 0 ? (
+          <Section
+            index={section++}
+            title={
+              presentation?.sectionTitles?.workCompleted ?? "KXD work this month"
+            }
+          >
+            {workGroups.map((group) => (
+              <View key={group.status}>
+                <Text style={styles.workGroupLabel}>{group.label}</Text>
+                {group.items.map((w) => (
+                  <View key={w.id} wrap={false}>
+                    <Text style={styles.workTitle}>
+                      {w.title}
+                      {w.completedAt && group.status === "complete"
+                        ? ` (${w.completedAt.slice(0, 10)})`
+                        : ""}
+                    </Text>
+                    {w.summary ? (
+                      <Text style={styles.workSummary}>{w.summary}</Text>
+                    ) : null}
+                  </View>
+                ))}
+              </View>
+            ))}
+          </Section>
+        ) : null}
+
+        <PageFooter clientName={snapshot.clientName} pageLabel={pageLabel} />
+      </Page>
+
+      <Page size="LETTER" style={styles.page}>
+        {!isNarrativeHidden(snapshot, "closing") ? (
+          <Section index={section++} title={narrativeTitleForSnapshot(snapshot, "closing")}>
+            <Text style={styles.para}>{snapshot.narratives.closing.body}</Text>
+            <Text style={styles.muted}>
+              {KXD_REPORT_BRAND} · {KXD_REPORT_CONTACT_EMAIL}
+            </Text>
+          </Section>
+        ) : null}
+        {showOutOfScope ? (
           <Section index={section++} title="Optional upgrades (not included)">
             <View style={styles.panel}>
               {snapshot.outOfScopeOpportunities.map((o) => (
@@ -310,13 +423,7 @@ function BrandedMonthlyReportDocument({
             </View>
           </Section>
         ) : null}
-        <Section index={section++} title="Closing">
-          <Text style={styles.para}>{snapshot.narratives.closing.body}</Text>
-          <Text style={styles.muted}>
-            {KXD_REPORT_BRAND} · {KXD_REPORT_CONTACT_EMAIL}
-          </Text>
-        </Section>
-        <PageFooter clientName={snapshot.clientName} pageLabel={snapshot.period.label} />
+        <PageFooter clientName={snapshot.clientName} pageLabel={pageLabel} />
       </Page>
     </Document>
   );

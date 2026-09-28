@@ -13,6 +13,7 @@ import { REPORT_SCOPE_LABEL } from "./types";
 import type { BrandedReportSnapshot } from "./types";
 import { escapeHtml, stripInternalNotesFromSnapshot } from "./sanitize";
 import { isNarrativeHidden, narrativeTitleForSnapshot } from "./presentation";
+import { groupClientFacingWorkItems, toClientFacingWorkItem } from "./work-summary";
 
 function renderMetricCard(
   snapshot: BrandedReportSnapshot,
@@ -43,15 +44,25 @@ export function buildBrandedReportHtml(
   const documentTitle = presentation?.documentTitle ?? "Monthly Performance Report";
   const coverTitle = presentation?.coverTitle ?? "Monthly Performance Report";
   const coverEyebrow = presentation?.coverEyebrow ?? KXD_REPORT_BRAND;
+  const coverSubtitle = presentation?.coverSubtitle ?? null;
+  const reportMonthLabel = presentation?.reportMonthLabel ?? null;
+  const googlePerformancePeriodLabel =
+    presentation?.googlePerformancePeriodLabel ?? null;
   const scopeLabels = clientFacing.scope.includedCapabilities
     .map((id) => REPORT_SCOPE_LABEL[id])
     .join(" · ");
 
   const metricsHtml = clientFacing.metrics
     .map((m) => {
+      const unavailable =
+        m.completeness === "unavailable" ||
+        m.provenance === "missing" ||
+        m.value == null;
       const meta = auditTheme
         ? `${escapeHtml(m.source)}${m.note ? ` · ${escapeHtml(m.note)}` : ""}`
-        : `${escapeHtml(m.percentChangeLabel)} · ${escapeHtml(m.source)} · ${escapeHtml(m.completeness)}`;
+        : unavailable
+          ? escapeHtml(m.note || "Not available for this period")
+          : `${escapeHtml(m.percentChangeLabel)} · ${escapeHtml(m.source)}`;
       return `<div class="metric">
         <div class="metric-label">${escapeHtml(m.label)}</div>
         <div class="metric-value">${escapeHtml(m.displayValue)}</div>
@@ -68,14 +79,26 @@ export function buildBrandedReportHtml(
     })
     .join("\n");
 
-  const workHtml = clientFacing.workCompleted
+  const workItems = clientFacing.workCompleted
     .filter((w) => w.included && w.clientVisible)
-    .map(
-      (w) =>
-        `<li><strong>${escapeHtml(w.title)}</strong>${
-          w.summary ? ` — ${escapeHtml(w.summary)}` : ""
-        }</li>`,
-    )
+    .map(toClientFacingWorkItem);
+  const workGroups = groupClientFacingWorkItems(workItems);
+  const workHtml = workGroups
+    .map((group) => {
+      const items = group.items
+        .map((w) => {
+          const when =
+            w.completedAt && group.status === "complete"
+              ? ` <span class="work-date">(${escapeHtml(w.completedAt.slice(0, 10))})</span>`
+              : "";
+          const summary = w.summary
+            ? `<div class="work-summary">${escapeHtml(w.summary)}</div>`
+            : "";
+          return `<li class="work-item work-item--${escapeHtml(String(group.status))}"><strong>${escapeHtml(w.title)}</strong>${when}${summary}</li>`;
+        })
+        .join("\n");
+      return `<div class="work-group"><h3 class="work-group-label">${escapeHtml(group.label)}</h3><ul>${items}</ul></div>`;
+    })
     .join("\n");
 
   const outOfScopeHtml = presentation?.hideOutOfScope
@@ -134,8 +157,11 @@ export function buildBrandedReportHtml(
     presentation?.hideWorkCompletedList === true
       ? ""
       : `<section class="section">
-      <h2>Work completed</h2>
-      <ul>${workHtml || "<li>No client-visible completed work included.</li>"}</ul>
+      <h2>${escapeHtml(presentation?.sectionTitles?.workCompleted ?? "KXD work this month")}</h2>
+      ${
+        workHtml ||
+        "<p>No client-visible work items were included for this report.</p>"
+      }
     </section>`;
 
   const bodyBg = auditTheme ? c.richBlack : c.paper;
@@ -200,10 +226,24 @@ export function buildBrandedReportHtml(
     font-family: ${KXD_REPORT_TYPE.display};
     font-weight: 500;
     font-size: clamp(1.8rem, 4vw, 2.6rem);
-    margin: 0 0 0.75rem;
+    margin: 0 0 0.35rem;
     max-width: ${auditTheme ? "22ch" : "18ch"};
   }
+  .cover-subtitle {
+    font-family: ${KXD_REPORT_TYPE.body};
+    font-size: 1rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: ${c.mutedOnBlack};
+    margin: 0 0 1.1rem;
+  }
   .cover-meta { color: ${c.mutedOnBlack}; font-size: 0.92rem; margin: 0.25rem 0; }
+  .cover-period-note {
+    color: ${c.mutedOnBlack};
+    font-size: 0.86rem;
+    margin: 0.85rem 0 0;
+    max-width: 36ch;
+  }
   .wrap {
     max-width: 52rem;
     margin: 0 auto;
@@ -272,7 +312,28 @@ export function buildBrandedReportHtml(
     margin: 1rem 0;
     color: var(--ink);
   }
-  .panel li, .panel p, .panel strong { color: var(--ink); }
+  .work-group { margin: 1rem 0 1.35rem; }
+  .work-group-label {
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: ${auditTheme ? c.gold : c.goldMuted};
+    margin: 0 0 0.45rem;
+    font-weight: 600;
+  }
+  .work-group ul {
+    margin: 0;
+    padding-left: 1.1rem;
+  }
+  .work-item { margin: 0.45rem 0; }
+  .work-item--waiting-on-client strong { color: var(--ink); }
+  .work-summary {
+    color: var(--muted);
+    font-size: 0.92rem;
+    margin-top: 0.2rem;
+    max-width: 62ch;
+  }
+  .work-date { color: var(--muted); font-weight: 400; }
   .internal { border-color: #c45; background: #fff5f5; }
   footer {
     margin-top: 3rem;
@@ -296,9 +357,21 @@ export function buildBrandedReportHtml(
     <div class="cover-eyebrow">${escapeHtml(coverEyebrow)}</div>
     <div class="cover-rule"></div>
     <h1>${escapeHtml(coverTitle)}</h1>
+    ${
+      coverSubtitle
+        ? `<p class="cover-subtitle">${escapeHtml(coverSubtitle)}</p>`
+        : ""
+    }
     <p class="cover-meta">${escapeHtml(clientFacing.clientName)}</p>
-    <p class="cover-meta">${escapeHtml(clientFacing.period.label)}</p>
-    <p class="cover-meta">Timezone: ${escapeHtml(clientFacing.period.timezone)}</p>
+    ${
+      googlePerformancePeriodLabel &&
+      reportMonthLabel &&
+      googlePerformancePeriodLabel !== reportMonthLabel
+        ? `<p class="cover-period-note">Google performance in this report: ${escapeHtml(googlePerformancePeriodLabel)}</p>`
+        : !reportMonthLabel
+          ? `<p class="cover-meta">${escapeHtml(clientFacing.period.label)}</p>`
+          : ""
+    }
     <p class="cover-meta">Confidential · Client-facing</p>
     ${
       auditTheme

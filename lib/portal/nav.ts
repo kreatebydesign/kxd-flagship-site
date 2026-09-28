@@ -14,7 +14,11 @@ import type { ResolvedExperienceProfile } from "@/lib/ces";
 import { getEditionBranding, getEditionNavigation } from "@/lib/editions";
 import { isPortalNavEnabled } from "@/lib/editions/navigation";
 import { isClientHqModuleEnabled, type ClientHqModuleId } from "./modules";
-import { clientPortalNavLabel } from "@/lib/ces/copy/client-nav-labels";
+import {
+  CES_PRIMARY_PORTAL_NAV_IDS,
+  clientPortalNavGroupLabel,
+  clientPortalNavLabel,
+} from "@/lib/ces/copy/client-nav-labels";
 import { resolvePortalHomeShell } from "@/lib/ces/modules/home";
 
 export type ClientHqNavId = ClientHqModuleId;
@@ -239,10 +243,16 @@ export function getEnabledPortalNavGroups(
   if (!profile) {
     const groups = base
       .map((group) => {
-        const portfolioItem: PortalNavItem[] =
-          portfolioNavAvailable && group.label === "Headquarters"
-            ? [{ id: "portfolio", label: "Portfolio", href: "/portal/portfolio" }]
-            : [];
+      const portfolioItem: PortalNavItem[] =
+        portfolioNavAvailable && group.label === "Headquarters"
+          ? [
+              {
+                id: "portfolio",
+                label: "All Businesses",
+                href: "/portal/portfolio",
+              },
+            ]
+          : [];
         const agreementItem: PortalNavItem[] =
           commercialNavAvailable && group.label === "Work"
             ? [{ id: "agreement", label: "Agreement", href: "/portal/agreement" }]
@@ -302,11 +312,6 @@ export function getEnabledPortalNavGroups(
           href: item.href,
         }));
 
-      const portfolioItem: PortalNavItem[] =
-        portfolioNavAvailable && group.label === "Headquarters"
-          ? [{ id: "portfolio", label: "Portfolio", href: "/portal/portfolio" }]
-          : [];
-
       const partnershipItem: PortalNavItem[] =
         group.label === "Headquarters" &&
         isPortalModuleVisible("executive-performance", visibilityCtx) &&
@@ -345,7 +350,6 @@ export function getEnabledPortalNavGroups(
             href,
           })),
           ...partnershipItem,
-          ...portfolioItem,
           ...agreementItem,
           ...cesForGroup,
         ],
@@ -362,10 +366,77 @@ export function getEnabledPortalNavGroups(
     }))
     .filter((group) => group.items.length > 0);
 
-  return injectWebsiteEditorNav(
+  const withCommercial = injectWebsiteEditorNav(
     injectCommercialAgreementNav(groups, commercialNavAvailable, relabel),
     websiteEditorUrl,
   );
+
+  // CES Client Command shell: calm four-destination primary nav.
+  // All Businesses lives in the account switcher (not a synthetic client).
+  if (useClientLabels) {
+    return simplifyPrimaryPortalNav(withCommercial, relabel);
+  }
+
+  return withCommercial;
+}
+
+/**
+ * Collapse entitled nav into Overview · Performance · KXD Work · Reports.
+ * Other entitled destinations remain available under More / Account.
+ * Does not invent entitlements — only reorders already-visible items.
+ * All Businesses stays in the account switcher (not a synthetic client).
+ */
+function simplifyPrimaryPortalNav(
+  groups: PortalNavGroup[],
+  relabel: (id: string, label: string) => string,
+): PortalNavGroup[] {
+  const flat = groups.flatMap((group) => group.items);
+  const byId = new Map<string, PortalNavItem>();
+  for (const item of flat) {
+    if (!byId.has(item.id)) byId.set(item.id, item);
+  }
+
+  const primaryIds = new Set<string>(CES_PRIMARY_PORTAL_NAV_IDS);
+  const accountIds = new Set(["settings", "invoices", "agreement", "team"]);
+
+  const primary: PortalNavItem[] = [];
+  for (const id of CES_PRIMARY_PORTAL_NAV_IDS) {
+    const item = byId.get(id);
+    if (!item) continue;
+    primary.push({
+      ...item,
+      label: relabel(id, item.label),
+    });
+  }
+
+  const more: PortalNavItem[] = [];
+  const account: PortalNavItem[] = [];
+  for (const item of byId.values()) {
+    if (primaryIds.has(item.id)) continue;
+    // Portfolio lives in the account switcher for multi-business clients.
+    if (item.id === "portfolio") continue;
+    const labeled = {
+      ...item,
+      label: relabel(item.id, item.label),
+    };
+    if (accountIds.has(item.id)) {
+      account.push(labeled);
+    } else {
+      more.push(labeled);
+    }
+  }
+
+  const out: PortalNavGroup[] = [];
+  if (primary.length > 0) {
+    out.push({ label: clientPortalNavGroupLabel("Headquarters"), items: primary });
+  }
+  if (more.length > 0) {
+    out.push({ label: clientPortalNavGroupLabel("Library"), items: more });
+  }
+  if (account.length > 0) {
+    out.push({ label: clientPortalNavGroupLabel("Account"), items: account });
+  }
+  return out.length > 0 ? out : groups;
 }
 
 export function resolvePortalNavId(pathname: string): PortalNavId {

@@ -149,7 +149,7 @@ function buildLeads(
       formSubmissionCount: Math.round(websiteFormInquiries.count),
       formSubmissionLabel: "Website form leads",
       statusNote:
-        "Website form leads are counted from client-inquiries (channel=form) for this period. GA4 generate_lead and Ads conversions are excluded. Confirmed sales remain separate.",
+        "Website form leads are counted from form inquiries received for this period. Other tracked website actions and advertising conversions are kept separate. Confirmed sales remain separate.",
     };
   }
 

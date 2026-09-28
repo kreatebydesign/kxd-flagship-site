@@ -100,6 +100,22 @@ export function july2026ControlledPeriod(
   });
 }
 
+/** Current calendar month in the reporting timezone (default operator TZ). */
+export function currentCalendarMonthPeriod(
+  timezone?: string | null,
+  now: Date = new Date(),
+): BrandedReportPeriod {
+  const tz = (timezone && timezone.trim()) || DEFAULT_REPORTING_TIMEZONE;
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: tz,
+    year: "numeric",
+    month: "numeric",
+  }).formatToParts(now);
+  const year = Number(parts.find((p) => p.type === "year")?.value);
+  const month = Number(parts.find((p) => p.type === "month")?.value);
+  return createBrandedReportPeriod({ year, month, timezone: tz });
+}
+
 /** Prior comparison window of equal length immediately before the period. */
 export function comparisonPeriodFor(
   period: BrandedReportPeriod,

@@ -25,20 +25,21 @@ import {
   presentationForReportDoc,
   reportKindFromDoc,
 } from "./presentation";
-import { july2026ControlledPeriod, createBrandedReportPeriod } from "./period";
+import { comparisonPeriodFor, currentCalendarMonthPeriod, createBrandedReportPeriod } from "./period";
 import { resolveReportScope, scopeIncludes, isReportScopeCapability } from "./scope";
 import { buildBrandedMetric, freshnessFromSyncAt } from "./metrics";
-import { comparisonPeriodFor } from "./period";
 import {
   assertSnapshotImmutable,
   fingerprintBrandedSnapshot,
 } from "./snapshot";
 import { sanitizeReportText } from "./sanitize";
+import { toClientFacingWorkItem } from "./work-summary";
 import {
   BRANDED_REPORT_APPROVAL_STATUSES,
   type BrandedReportApprovalStatus,
   type BrandedReportArchiveEntry,
   type BrandedReportOverviewRow,
+  type BrandedReportPeriod,
   type BrandedReportSnapshot,
   type BrandedMetric,
   type CompletedWorkItem,
@@ -249,7 +250,7 @@ async function buildDataSources(
 
 async function metricsFromFacts(
   clientId: number,
-  period: ReturnType<typeof july2026ControlledPeriod>,
+  period: BrandedReportPeriod,
   scopeCaps: ReportScopeCapability[],
 ): Promise<BrandedMetric[]> {
   const comparison = comparisonPeriodFor(period);
@@ -273,51 +274,89 @@ async function metricsFromFacts(
     facts.find((f) => f.metricKey === metricKey || f.metricKey.endsWith(`.${metricKey}`));
 
   if (scopeCaps.includes("base-website")) {
-    const users = pick("users") ?? pick("activeUsers") ?? pick("sessions");
-    if (users) {
+    const pushGa4 = (
+      metricKey: string,
+      label: string,
+      unit = "count",
+    ) => {
+      const fact = pick(metricKey);
+      if (!fact) return;
+      // Never surface generate_lead / conversions as branded monthly metrics —
+      // periods and meanings are easy to misread in client-facing reports.
+      if (
+        metricKey === "generate_lead" ||
+        metricKey === "conversions" ||
+        metricKey.endsWith(".generate_lead") ||
+        metricKey.endsWith(".conversions")
+      ) {
+        return;
+      }
       metrics.push(
         buildBrandedMetric({
-          key: `ga4.${users.metricKey}`,
-          label: users.metricKey.includes("session") ? "Sessions" : "Website users",
-          value: users.value,
-          unit: users.unit || "count",
+          key: `ga4.${metricKey}`,
+          label,
+          value: fact.value,
+          unit: fact.unit || unit,
           periodStart: period.start,
           periodEnd: period.end,
           comparisonStart: comparison.start,
           comparisonEnd: comparison.end,
-          previousValue: users.previousValue ?? null,
+          previousValue: fact.previousValue ?? null,
           source: "GA4",
-          lastSuccessfulSyncAt: users.source.fetchedAt,
-          freshness: freshnessFromSyncAt(users.source.fetchedAt),
+          lastSuccessfulSyncAt: fact.source.fetchedAt,
+          freshness: freshnessFromSyncAt(fact.source.fetchedAt),
           completeness: "complete",
           provenance: "verified",
         }),
       );
+    };
+
+    pushGa4("sessions", "Sessions");
+    if (pick("users") || pick("visitors")) {
+      pushGa4(pick("users") ? "users" : "visitors", "Website visitors");
+    } else {
+      pushGa4("activeUsers", "Website visitors");
+    }
+    if (pick("pageviews")) {
+      pushGa4("pageviews", "Pageviews");
+    } else {
+      pushGa4("screenPageViews", "Pageviews");
     }
   }
 
   if (scopeCaps.includes("seo")) {
-    const clicks = pick("clicks");
-    if (clicks && String(clicks.source.providerId).includes("search")) {
+    const pushGsc = (
+      metricKey: string,
+      label: string,
+      unit: string,
+    ) => {
+      const fact = pick(metricKey);
+      if (!fact) return;
+      if (!String(fact.source.providerId).includes("search")) return;
       metrics.push(
         buildBrandedMetric({
-          key: "gsc.clicks",
-          label: "Organic search clicks",
-          value: clicks.value,
-          unit: "count",
+          key: `gsc.${metricKey}`,
+          label,
+          value: fact.value,
+          unit: fact.unit || unit,
           periodStart: period.start,
           periodEnd: period.end,
           comparisonStart: comparison.start,
           comparisonEnd: comparison.end,
-          previousValue: clicks.previousValue ?? null,
+          previousValue: fact.previousValue ?? null,
           source: "Google Search Console",
-          lastSuccessfulSyncAt: clicks.source.fetchedAt,
-          freshness: freshnessFromSyncAt(clicks.source.fetchedAt),
+          lastSuccessfulSyncAt: fact.source.fetchedAt,
+          freshness: freshnessFromSyncAt(fact.source.fetchedAt),
           completeness: "complete",
           provenance: "verified",
         }),
       );
-    }
+    };
+
+    pushGsc("clicks", "Organic search clicks", "count");
+    pushGsc("impressions", "Search impressions", "count");
+    pushGsc("ctr", "Search click-through rate", "ctr");
+    pushGsc("average_position", "Average search position", "position");
   }
 
   if (scopeCaps.includes("google-ads")) {
@@ -350,15 +389,18 @@ async function metricsFromFacts(
 function workItemsFromDoc(doc: AnyDoc): CompletedWorkItem[] {
   const selected = Array.isArray(doc.selectedWorkItems) ? doc.selectedWorkItems : [];
   if (selected.length > 0) {
-    return selected.map((item: AnyDoc, idx: number) => ({
-      id: String(item.id ?? `work-${idx}`),
-      title: sanitizeReportText(item.title ?? "Completed work", 300),
-      summary: sanitizeReportText(item.summary ?? "", 800),
-      completedAt: item.completedAt ? String(item.completedAt) : null,
-      source: String(item.source ?? "activity"),
-      clientVisible: item.clientVisible !== false,
-      included: item.included !== false,
-    }));
+    return selected.map((item: AnyDoc, idx: number) =>
+      toClientFacingWorkItem({
+        id: String(item.id ?? `work-${idx}`),
+        title: sanitizeReportText(item.title ?? "Completed work", 300),
+        summary: sanitizeReportText(item.summary ?? "", 800),
+        completedAt: item.completedAt ? String(item.completedAt) : null,
+        source: String(item.source ?? "activity"),
+        clientVisible: item.clientVisible !== false,
+        included: item.included !== false,
+        status: item.status ?? null,
+      }),
+    );
   }
   return [];
 }
@@ -386,7 +428,7 @@ export async function composeSnapshotForReportDoc(
           reportingMonth: Number(doc.reportingMonth) || null,
           timezone,
         })
-      : july2026ControlledPeriod(timezone);
+      : currentCalendarMonthPeriod(timezone);
 
   const storedCaps = Array.isArray(doc.includedCapabilities)
     ? doc.includedCapabilities.filter(isReportScopeCapability)
@@ -452,9 +494,17 @@ export async function composeSnapshotForReportDoc(
       workCompleted: doc.workCompleted ? String(doc.workCompleted) : undefined,
       improvementsAndWins: doc.improvementsMade ? String(doc.improvementsMade) : undefined,
       issuesOrRisks: doc.issuesOrRisks ? String(doc.issuesOrRisks) : undefined,
-      recommendations: typeof doc.recommendations === "string"
-        ? doc.recommendations
-        : undefined,
+      recommendations: (() => {
+        if (typeof doc.recommendations === "string") return doc.recommendations;
+        if (
+          doc.recommendations &&
+          typeof doc.recommendations === "object" &&
+          typeof (doc.recommendations as { text?: unknown }).text === "string"
+        ) {
+          return String((doc.recommendations as { text: string }).text);
+        }
+        return undefined;
+      })(),
       augustPriorities: doc.augustPriorities ? String(doc.augustPriorities) : undefined,
       closing: doc.closingNote ? String(doc.closingNote) : undefined,
     },
@@ -649,7 +699,10 @@ export async function saveBrandedReportDraft(
     if (patch[key] != null) data[key] = sanitizeReportText(patch[key]);
   }
   if (patch.recommendations != null) {
-    data.recommendations = sanitizeReportText(patch.recommendations);
+    // MonthlyReports.recommendations is a JSON field — store a structured value.
+    data.recommendations = {
+      text: sanitizeReportText(patch.recommendations),
+    };
   }
   if (patch.selectedWorkItems) data.selectedWorkItems = patch.selectedWorkItems;
   if (patch.operatorCapabilities) {
@@ -943,7 +996,7 @@ export async function listBrandedReportArchive(
   });
 }
 
-export async function getBrandedReportingOverview(period = july2026ControlledPeriod()): Promise<{
+export async function getBrandedReportingOverview(period = currentCalendarMonthPeriod()): Promise<{
   period: typeof period;
   rows: BrandedReportOverviewRow[];
 }> {

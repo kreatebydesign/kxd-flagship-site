@@ -1,18 +1,21 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import type { PortalAccountSwitcherModel } from "@/lib/portal/account-context-types";
 
 type Props = {
   model: PortalAccountSwitcherModel;
+  /** When true, show All Businesses as a portfolio navigation option (not a client switch). */
+  portfolioAvailable?: boolean;
 };
 
 /**
  * Premium account switcher — renders only when the server provides a multi-account model.
  * Selection posts to the authenticated switch route; never authorizes from the browser.
  */
-export function AccountSwitcher({ model }: Props) {
+export function AccountSwitcher({ model, portfolioAvailable = false }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const listId = useId();
@@ -27,6 +30,10 @@ export function AccountSwitcher({ model }: Props) {
   const active =
     model.accounts.find((a) => a.clientId === model.activeClientId) ??
     model.accounts[0];
+  const onAllBusinesses = Boolean(
+    pathname === "/portal/portfolio" || pathname?.startsWith("/portal/portfolio/"),
+  );
+  const showAllBusinessesOption = portfolioAvailable && model.accounts.length >= 2;
 
   useEffect(() => {
     if (!open) return;
@@ -150,9 +157,11 @@ export function AccountSwitcher({ model }: Props) {
         }}
       >
         <span className="kxd-ces-account-switcher__label" aria-hidden="true">
-          Account
+          {onAllBusinesses ? "Viewing" : "Business"}
         </span>
-        <span className="kxd-ces-account-switcher__active">{active.clientName}</span>
+        <span className="kxd-ces-account-switcher__active">
+          {onAllBusinesses ? "All Businesses" : active.clientName}
+        </span>
         <span className="kxd-ces-account-switcher__chevron" aria-hidden="true">
           {open ? "▴" : "▾"}
         </span>
@@ -163,7 +172,7 @@ export function AccountSwitcher({ model }: Props) {
           id={listId}
           className="kxd-ces-account-switcher__list"
           role="listbox"
-          aria-label="Switch account"
+          aria-label="Switch business"
           onKeyDown={(event) => {
             if (event.key === "Escape") {
               event.preventDefault();
@@ -186,8 +195,30 @@ export function AccountSwitcher({ model }: Props) {
             }
           }}
         >
+          {showAllBusinessesOption ? (
+            <li role="presentation">
+              <Link
+                href="/portal/portfolio"
+                role="option"
+                aria-selected={onAllBusinesses}
+                className={`kxd-ces-account-switcher__option${
+                  onAllBusinesses ? " kxd-ces-account-switcher__option--active" : ""
+                }`}
+                onClick={() => setOpen(false)}
+              >
+                <span className="kxd-ces-account-switcher__option-name">
+                  All Businesses
+                </span>
+                {onAllBusinesses ? (
+                  <span className="kxd-ces-account-switcher__option-meta">Current</span>
+                ) : (
+                  <span className="kxd-ces-account-switcher__option-meta">Summary</span>
+                )}
+              </Link>
+            </li>
+          ) : null}
           {model.accounts.map((account, index) => {
-            const selected = account.clientId === model.activeClientId;
+            const selected = !onAllBusinesses && account.clientId === model.activeClientId;
             return (
               <li key={account.clientId} role="presentation">
                 <button

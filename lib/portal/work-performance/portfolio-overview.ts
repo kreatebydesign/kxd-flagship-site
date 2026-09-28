@@ -9,6 +9,29 @@ import type {
   WorkPerformanceModel,
 } from "./types";
 
+const PORTFOLIO_SIGNAL_KEYS = [
+  "sessions",
+  "visitors",
+  "clicks",
+  "impressions",
+  "pageviews",
+] as const;
+
+function pickPerformanceSignals(
+  model: WorkPerformanceModel,
+): AuthorizedSiteRollup["performanceSignals"] {
+  if (model.analytics.availability !== "ready") return [];
+  const byKey = new Map(model.analytics.metrics.map((m) => [m.key, m]));
+  const signals: AuthorizedSiteRollup["performanceSignals"] = [];
+  for (const key of PORTFOLIO_SIGNAL_KEYS) {
+    const metric = byKey.get(key);
+    if (!metric) continue;
+    signals.push({ label: metric.label, valueLabel: metric.valueLabel });
+    if (signals.length >= 3) break;
+  }
+  return signals;
+}
+
 export function toAuthorizedSiteRollup(model: WorkPerformanceModel): AuthorizedSiteRollup {
   return {
     clientId: model.clientId,
@@ -18,6 +41,11 @@ export function toAuthorizedSiteRollup(model: WorkPerformanceModel): AuthorizedS
     activeWork: model.currentlyInProgress.length,
     awaitingClient: model.updateRequests.awaitingClientCount,
     analyticsAvailability: model.analytics.availability,
+    reportingPeriodLabel:
+      model.analytics.availability === "ready" && model.reportingMonthLabel
+        ? model.reportingMonthLabel
+        : null,
+    performanceSignals: pickPerformanceSignals(model),
     primaryWinTitle: model.wins[0]?.title ?? null,
   };
 }

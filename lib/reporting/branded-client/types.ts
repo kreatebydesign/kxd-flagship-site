@@ -102,6 +102,14 @@ export type CompletedWorkItem = {
   source: string;
   clientVisible: boolean;
   included: boolean;
+  /** Optional client-facing status for hierarchy (Waiting on you / In progress / Completed). */
+  status?:
+    | "complete"
+    | "in-progress"
+    | "waiting-on-client"
+    | "blocked"
+    | "not-started"
+    | null;
 };
 
 export type ReportNarrativeSection = {
@@ -145,6 +153,20 @@ export type BrandedReportPresentation = {
   documentTitle: string;
   coverTitle: string;
   coverEyebrow?: string;
+  /** Cover subtitle under the report-month title (e.g. "Monthly Report"). */
+  coverSubtitle?: string;
+  /**
+   * Calendar month the report represents (e.g. "September 2026").
+   * Distinct from `period` when Google data uses the prior completed month.
+   */
+  reportMonthLabel?: string;
+  /**
+   * Google / analytics data window when distinct from report month
+   * (e.g. "August 2026").
+   */
+  googlePerformancePeriodLabel?: string | null;
+  /** Client-facing explanation when website analytics are missing for the Google period. */
+  missingWebsiteAnalyticsNote?: string | null;
   performanceSnapshotLead?: string;
   hideDataFreshnessPanel?: boolean;
   hideOutOfScope?: boolean;

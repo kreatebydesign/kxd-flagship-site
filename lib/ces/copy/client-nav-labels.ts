@@ -4,7 +4,7 @@
  */
 
 export const CES_CLIENT_NAV_LABELS: Record<string, string> = {
-  overview: "Home",
+  overview: "Overview",
   partnership: "Your partnership",
   "executive-performance": "Your partnership",
   "executive-review": "Monthly review",
@@ -15,7 +15,7 @@ export const CES_CLIENT_NAV_LABELS: Record<string, string> = {
   analytics: "Performance",
   reports: "Reports",
   inventory: "Inventory",
-  deliverables: "Completed work",
+  deliverables: "KXD Work",
   projects: "Projects",
   assets: "Documents",
   resources: "Resources",
@@ -24,14 +24,22 @@ export const CES_CLIENT_NAV_LABELS: Record<string, string> = {
   team: "Team",
   settings: "Account",
   advisor: "Advisor",
-  portfolio: "Portfolio",
+  portfolio: "All Businesses",
 };
+
+/** Primary client destinations — presentation order for the calm multi-business shell. */
+export const CES_PRIMARY_PORTAL_NAV_IDS = [
+  "overview",
+  "analytics",
+  "deliverables",
+  "reports",
+] as const;
 
 export const CES_CLIENT_NAV_GROUP_LABELS: Record<string, string> = {
   Headquarters: "",
-  Work: "Your work",
-  Library: "Documents",
-  Intelligence: "Results",
+  Work: "",
+  Library: "More",
+  Intelligence: "",
   Account: "Account",
 };
 

@@ -8,6 +8,7 @@ import { comparisonPeriodFor } from "./period";
 import { buildBrandedMetric, freshnessFromSyncAt } from "./metrics";
 import { buildOutOfScopeOpportunities, scopeIncludes } from "./scope";
 import { sanitizeReportText, stripClientFacingOperatorLeaks } from "./sanitize";
+import { toClientFacingWorkItem } from "./work-summary";
 import type { BrandedReportPresentation } from "./types";
 import { withFingerprint } from "./snapshot";
 import type {
@@ -101,16 +102,52 @@ function defaultExecutiveSummary(input: ComposeBrandedReportInput): string {
 }
 
 function defaultWorkNarrative(items: CompletedWorkItem[]): string {
-  const selected = items.filter((w) => w.included && w.clientVisible);
+  const selected = items.filter((w) => w.included && w.clientVisible).map(toClientFacingWorkItem);
   if (selected.length === 0) {
     return "No client-visible completed work items were included for this reporting period.";
   }
   return selected
     .map((w) => {
       const when = w.completedAt ? ` (${w.completedAt.slice(0, 10)})` : "";
-      return `• ${sanitizeReportText(w.title, 200)}${when}${w.summary ? ` — ${sanitizeReportText(w.summary, 400)}` : ""}`;
+      const status =
+        w.status === "waiting-on-client"
+          ? "Waiting on you"
+          : w.status === "in-progress"
+            ? "In progress"
+            : w.status === "complete"
+              ? "Completed"
+              : null;
+      const prefix = status ? `${status}: ` : "";
+      return `• ${prefix}${sanitizeReportText(w.title, 200)}${when}${
+        w.summary ? ` — ${sanitizeReportText(w.summary, 280)}` : ""
+      }`;
     })
     .join("\n");
+}
+
+function missingWebsiteAnalyticsCopy(input: ComposeBrandedReportInput): {
+  displayValue: string;
+  note: string;
+} {
+  const googleLabel =
+    input.presentation?.googlePerformancePeriodLabel?.trim() || input.period.label;
+  const custom = input.presentation?.missingWebsiteAnalyticsNote?.trim();
+  if (custom) {
+    // Prefer a short tile value; keep the full custom sentence as the note.
+    const beganMatch = custom.match(/tracking began\s+([A-Za-z]+\s+\d{1,2}(?:,?\s+\d{4})?)/i);
+    const short = beganMatch
+      ? `Tracking began ${beganMatch[1].replace(/,/g, "").trim()}`
+      : /not available for\s+([A-Za-z]+)/i.test(custom)
+        ? `Not available for ${custom.match(/not available for\s+([A-Za-z]+)/i)?.[1] ?? "this period"}`
+        : /not available/i.test(custom)
+          ? `Not available for ${googleLabel.replace(/\s+\d{4}$/, "").trim() || googleLabel}`
+          : "Not available";
+    return { displayValue: short, note: custom };
+  }
+  return {
+    displayValue: `Not available for ${googleLabel}`,
+    note: `Website analytics are not available for ${googleLabel}. This does not mean zero traffic.`,
+  };
 }
 
 export function composeBrandedReportSnapshot(
@@ -125,14 +162,18 @@ export function composeBrandedReportSnapshot(
   const metrics: BrandedMetric[] = [...(input.verifiedMetrics ?? [])];
 
   // Ensure entitled-but-missing channels appear as honest unavailable metrics.
+  // Never invent zeros — value stays null when GA4 facts are absent for the period.
   if (hasBase) {
-    const hasUsers = metrics.some((m) => m.key === "ga4.users");
-    if (!hasUsers) {
+    const hasVerifiedGa4 = metrics.some(
+      (m) => m.key.startsWith("ga4.") && m.provenance === "verified" && m.value != null,
+    );
+    if (!hasVerifiedGa4) {
       const ga4 = input.dataSources.find((d) => d.providerId === "ga4");
+      const missingCopy = missingWebsiteAnalyticsCopy(input);
       metrics.push(
         buildBrandedMetric({
           key: "ga4.users",
-          label: "Website users",
+          label: "Website analytics",
           value: null,
           unit: "count",
           periodStart: input.period.start,
@@ -142,9 +183,10 @@ export function composeBrandedReportSnapshot(
           source: "GA4",
           lastSuccessfulSyncAt: ga4?.lastSuccessfulSyncAt ?? null,
           freshness: freshnessFromSyncAt(ga4?.lastSuccessfulSyncAt),
-          completeness: ga4?.entitled && !ga4.connected ? "unavailable" : "unavailable",
+          completeness: "unavailable",
           provenance: "missing",
-          note: ga4?.statusNote ?? "GA4 data is not available for this period.",
+          displayValue: missingCopy.displayValue,
+          note: missingCopy.note,
         }),
       );
     }
@@ -264,11 +306,13 @@ export function composeBrandedReportSnapshot(
     scope: input.scope,
     dataSources: input.dataSources,
     metrics,
-    workCompleted: input.workItems.map((w) => ({
-      ...w,
-      title: sanitizeReportText(w.title, 300),
-      summary: sanitizeReportText(w.summary, 800),
-    })),
+    workCompleted: input.workItems
+      .map(toClientFacingWorkItem)
+      .map((w) => ({
+        ...w,
+        title: sanitizeReportText(w.title, 300),
+        summary: sanitizeReportText(w.summary, 280),
+      })),
     narratives: {
       executiveSummary: narrative(
         "executiveSummary",
