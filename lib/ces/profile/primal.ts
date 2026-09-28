@@ -19,11 +19,10 @@ export const PRIMAL_EXPERIENCE_PROFILE = {
   supportTone: "direct" as const,
   portalSidebarLabel: "Partnership workspace",
   /**
-   * Intended Primal portal allowlist = these CES modules only.
-   * HQ surfaces (analytics, reports, projects, deliverables, requests,
-   * website-health, assets, resources, team, meetings, advisor) stay off
-   * until Phase 3 explicitly enables them after confirming client-facing value.
-   * Do not inject HQ modules via slug-based portal switching.
+   * Primal portal allowlist.
+   * Results surfaces (analytics + reports) are enabled so leadership reports
+   * and verified performance periods remain client-accessible.
+   * Do not inject unrelated HQ modules via slug-based portal switching.
    */
   enabledModules: [
     "website-review",
@@ -32,12 +31,16 @@ export const PRIMAL_EXPERIENCE_PROFILE = {
     "executive-review",
     "inventory",
   ] as const,
+  /** Results → Performance / Reports (portal HQ modules, not CES experience modules). */
+  enabledPortalModules: ["analytics", "reports"] as const,
   showKxdPartnerMark: true,
   partnerFooterLine: "Powered by KXD OS",
   terminology: {
     "nav.executive-review": "Executive Review",
     "nav.website-review": "Website Review",
     "nav.website-workspace": "Website Workspace",
+    "nav.analytics": "Performance",
+    "nav.reports": "Reports",
     "nav.inventory": "Inventory",
     "website-workspace.landing.eyebrow": "Website",
     "website-workspace.landing.title": "Website Workspace",
@@ -53,14 +56,14 @@ export const PRIMAL_EXPERIENCE_PROFILE = {
     "portal.home.workspaceLabel": "Primal Workspace",
     "portal.home.eyebrow": "Primal Workspace",
     "portal.home.lead":
-      "Production website live. Measurement active. Focus: growth and optimization.",
+      "Measurement active. Focus: protect high-intent racing-school visibility and improve qualified acquisition.",
     "portal.home.launch.eyebrow": "Where things stand",
-    "portal.home.launch.title": "Post-launch priorities",
+    "portal.home.launch.title": "Current priorities",
     "portal.home.launch.lead":
-      "The website is live and verified. Start with the Leadership Report, then watch search, Ads efficiency, and qualified leads.",
+      "Start with the Leadership Performance Update, then watch Atlanta / racing-school visibility, Ads efficiency, and qualified leads.",
     "portal.home.launch.leadActive":
-      "Keep momentum going — review the Leadership Report, monitor performance, and use Website Review only when you have a future site note.",
-    "portal.home.launch.step1": "Open the Leadership Report.",
+      "Keep momentum going — review the Leadership Performance Update, monitor performance, and use Website Review only when you have a future site note.",
+    "portal.home.launch.step1": "Open the Leadership Performance Update.",
     "portal.home.launch.step2": "Review current search and Ads priorities.",
     "portal.home.launch.step3": "Watch qualified lead performance.",
     "portal.home.launch.step4": "Use Website Review for future site notes when needed.",

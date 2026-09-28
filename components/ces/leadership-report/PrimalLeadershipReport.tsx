@@ -40,7 +40,7 @@ export function PrimalLeadershipReport({
         <Link href="/portal/partnership" className="kxd-lead-report__back">
           ← Partnership
         </Link>
-        <LeadershipReportPrintButton />
+        <LeadershipReportPrintButton documentTitle="Primal Motorsports | Digital Performance & Growth Report · September 11, 2026 Baseline" />
       </div>
 
       <header className="kxd-lead-report__cover">

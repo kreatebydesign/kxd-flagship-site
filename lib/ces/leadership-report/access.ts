@@ -3,8 +3,16 @@
  */
 
 import { PRIMAL_CLIENT_SLUG } from "@/lib/ces/profile/primal";
-import { PRIMAL_LEADERSHIP_REPORT } from "./primal-september-2026";
 import type { LeadershipReportDocument } from "./types";
+import type { LeadershipProgressReportDocument } from "./progress-types";
+import {
+  getLatestPrimalLeadershipReportEntry,
+  getPrimalLeadershipReportEntryById,
+  listPrimalLeadershipReports,
+  PRIMAL_LEADERSHIP_REPORT_HREF,
+  resolvePrimalLeadershipReportEntry,
+  type PrimalLeadershipReportEntry,
+} from "./registry";
 
 const ALLOWED_SLUGS = new Set([PRIMAL_CLIENT_SLUG, "primal"]);
 
@@ -29,12 +37,36 @@ export function canAccessPrimalLeadershipReport(input: {
   );
 }
 
+/** @deprecated Prefer resolve entry helpers — retained for baseline-only callers. */
 export function getPrimalLeadershipReportForClient(
   clientSlug: string | null | undefined,
 ): LeadershipReportDocument | null {
   if (!isPrimalLeadershipReportClient(clientSlug)) return null;
-  return PRIMAL_LEADERSHIP_REPORT;
+  const baseline = listPrimalLeadershipReports().find((r) => r.kind === "baseline");
+  return baseline?.baseline ?? null;
 }
 
-export const PRIMAL_LEADERSHIP_REPORT_HREF =
-  "/portal/partnership/leadership-report";
+export function getPrimalLeadershipReportEntryForClient(
+  clientSlug: string | null | undefined,
+  reportId?: string | null,
+): PrimalLeadershipReportEntry | null {
+  if (!isPrimalLeadershipReportClient(clientSlug)) return null;
+  return resolvePrimalLeadershipReportEntry(reportId);
+}
+
+export function getLatestPrimalProgressReportForClient(
+  clientSlug: string | null | undefined,
+): LeadershipProgressReportDocument | null {
+  if (!isPrimalLeadershipReportClient(clientSlug)) return null;
+  return getLatestPrimalLeadershipReportEntry().progress ?? null;
+}
+
+export function getPrimalLeadershipReportEntryByIdForClient(
+  clientSlug: string | null | undefined,
+  reportId: string,
+): PrimalLeadershipReportEntry | null {
+  if (!isPrimalLeadershipReportClient(clientSlug)) return null;
+  return getPrimalLeadershipReportEntryById(reportId);
+}
+
+export { PRIMAL_LEADERSHIP_REPORT_HREF };

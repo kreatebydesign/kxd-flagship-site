@@ -39,6 +39,7 @@ import {
   isPrimalPostLaunchClient,
   PRIMAL_POST_LAUNCH_OPERATING,
 } from "@/lib/ces/profile/primal-post-launch";
+import { resolvePrimalAnalyticsPeriod } from "@/lib/ces/leadership-report/primal-reporting-period";
 import type {
   ExecutiveImpactItem,
   ExecutivePerformanceBriefing,
@@ -272,7 +273,12 @@ export async function composeExecutivePerformance(input: {
   if (!presentation?.enabled) return null;
 
   const clientId = input.profile.identity.clientId;
-  const period = defaultExecutiveReportingPeriod(new Date());
+  const postLaunchEarly = isPrimalPostLaunchClient(slug);
+  const primalPeriod = postLaunchEarly
+    ? await resolvePrimalAnalyticsPeriod({ clientId })
+    : null;
+  const period =
+    primalPeriod?.period ?? defaultExecutiveReportingPeriod(new Date());
 
   const enabledCapabilities =
     input.reportingCapabilities ??
@@ -309,12 +315,10 @@ export async function composeExecutivePerformance(input: {
     zeroActivity,
   });
 
-  const postLaunchEarly = isPrimalPostLaunchClient(slug);
-  if (postLaunchEarly) {
-    const monthlyLabel = period.label ?? `${period.start} – ${period.end}`;
-    reportingProvenance.baselineLabel = `September 11, 2026 post-launch baseline`;
-    reportingProvenance.monthlyPeriodLabel = `Monthly window · ${monthlyLabel}`;
-    reportingProvenance.periodLabel = monthlyLabel;
+  if (postLaunchEarly && primalPeriod) {
+    reportingProvenance.baselineLabel = primalPeriod.leadershipUpdateLabel;
+    reportingProvenance.monthlyPeriodLabel = primalPeriod.monthlyWindowNote;
+    reportingProvenance.periodLabel = primalPeriod.leadershipUpdateLabel;
     reportingProvenance.statusNote = PRIMAL_POST_LAUNCH_OPERATING.homePerformanceNote;
   }
 

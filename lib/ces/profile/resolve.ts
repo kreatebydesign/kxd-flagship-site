@@ -123,6 +123,30 @@ function ensurePrimalExecutiveReview(profile: ResolvedExperienceProfile): void {
   }
 }
 
+/**
+ * Ensure Results surfaces (Performance + Reports) for Primal so leadership
+ * reports remain reachable without inventing a second reporting product.
+ */
+function ensurePrimalResultsSurfaces(profile: ResolvedExperienceProfile): void {
+  if (profile.identity.clientSlug !== PRIMAL_CLIENT_SLUG) return;
+  if (!profile.enabledModules.includes("executive-performance")) return;
+
+  const portal = new Set(profile.enabledPortalModules ?? []);
+  for (const id of PRIMAL_EXPERIENCE_PROFILE.enabledPortalModules) {
+    portal.add(id);
+  }
+  profile.enabledPortalModules = normalizePortalModuleList([...portal]);
+
+  if (!profile.terminology["nav.analytics"]) {
+    profile.terminology["nav.analytics"] =
+      PRIMAL_EXPERIENCE_PROFILE.terminology["nav.analytics"];
+  }
+  if (!profile.terminology["nav.reports"]) {
+    profile.terminology["nav.reports"] =
+      PRIMAL_EXPERIENCE_PROFILE.terminology["nav.reports"];
+  }
+}
+
 /** Ensure Robin Cole campaign lockup is used instead of the compact app icon. */
 function ensureRobinColeBrand(profile: ResolvedExperienceProfile): void {
   if (
@@ -145,6 +169,7 @@ function finalizeProfile(profile: ResolvedExperienceProfile): ResolvedExperience
   ensurePrimalExecutiveReview(profile);
   ensureRobinColeBrand(profile);
   syncEnabledPortalModules(profile);
+  ensurePrimalResultsSurfaces(profile);
   const presentation = getExecutivePresentation(profile.identity.clientSlug);
   profile.presentation = presentation;
   /* Presentation Registry supplies brand mark when no CMS/onboarding logo exists. */
