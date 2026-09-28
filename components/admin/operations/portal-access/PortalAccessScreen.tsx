@@ -357,6 +357,7 @@ function PortalAccessScreenInner({ data: initialData }: PortalAccessScreenProps)
           clients={initialData.clients}
           identitySchemaAvailable={initialData.identitySchemaAvailable}
           resendConfigured={initialData.resendConfigured}
+          clientFilter={clientFilter}
         />
 
         {createSuccess ? (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   OpsCard,
   OpsEmpty,
@@ -15,12 +15,24 @@ import {
 
 type MembershipDraft = { clientId: string; role: PortalMembershipRole };
 
+function invitationMatchesClient(invitation: PortalInvitationRow, clientId: number): boolean {
+  return invitation.memberships.some((membership) => membership.clientId === clientId);
+}
+
 export function PortalAccessInvitationsPanel(props: {
   initialInvitations: PortalInvitationRow[];
   clients: PortalAccessClientReadiness[];
   identitySchemaAvailable: boolean;
   resendConfigured: boolean;
+  /** Same client filter as Portal Users / Client Readiness (`all` = unfiltered). */
+  clientFilter?: number | "all";
 }) {
+  const clientFilter = props.clientFilter ?? "all";
+  const defaultClientId =
+    typeof clientFilter === "number" && Number.isFinite(clientFilter) && clientFilter > 0
+      ? String(clientFilter)
+      : "";
+
   const [invitations, setInvitations] = useState(props.initialInvitations);
   const [showCompose, setShowCompose] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -32,8 +44,41 @@ export function PortalAccessInvitationsPanel(props: {
     welcomeNote: "",
     allowExistingUserExpansion: false,
     sendNow: true,
-    memberships: [{ clientId: "", role: "client-member" as PortalMembershipRole }],
+    memberships: [
+      { clientId: defaultClientId, role: "client-member" as PortalMembershipRole },
+    ],
   });
+
+  const visibleInvitations = useMemo(() => {
+    if (clientFilter === "all") return invitations;
+    return invitations.filter((invitation) =>
+      invitationMatchesClient(invitation, clientFilter),
+    );
+  }, [clientFilter, invitations]);
+
+  // Keep compose default client aligned with the Portal Access client filter.
+  useEffect(() => {
+    if (showCompose) return;
+    setForm((prev) => ({
+      ...prev,
+      memberships: prev.memberships.map((row, index) =>
+        index === 0 ? { ...row, clientId: defaultClientId } : row,
+      ),
+    }));
+  }, [defaultClientId, showCompose]);
+
+  function blankComposeForm() {
+    return {
+      displayName: "",
+      email: "",
+      welcomeNote: "",
+      allowExistingUserExpansion: false,
+      sendNow: true,
+      memberships: [
+        { clientId: defaultClientId, role: "client-member" as PortalMembershipRole },
+      ],
+    };
+  }
 
   function upsertInvitation(row: PortalInvitationRow) {
     setInvitations((prev) => {
@@ -79,14 +124,7 @@ export function PortalAccessInvitationsPanel(props: {
       }
       upsertInvitation(body.invitation);
       setShowCompose(false);
-      setForm({
-        displayName: "",
-        email: "",
-        welcomeNote: "",
-        allowExistingUserExpansion: false,
-        sendNow: true,
-        memberships: [{ clientId: "", role: "client-member" }],
-      });
+      setForm(blankComposeForm());
       let msg = form.sendNow
         ? body.emailSent
           ? "Invitation sent."
@@ -170,14 +208,27 @@ export function PortalAccessInvitationsPanel(props: {
   return (
     <section className="kxd-os-ops-section">
       <div className="kxd-os-portal-access__toolbar">
-        <OpsSectionHead label="Invitations" count={invitations.length} />
+        <OpsSectionHead label="Invitations" count={visibleInvitations.length} />
         <div className="kxd-os-portal-access__toolbar-actions">
           <button
             type="button"
             className="kxd-os-btn kxd-os-btn--primary"
             disabled={!props.identitySchemaAvailable}
             onClick={() => {
-              setShowCompose((v) => !v);
+              setShowCompose((open) => {
+                const next = !open;
+                if (next) {
+                  setForm((prev) => ({
+                    ...prev,
+                    memberships: prev.memberships.map((row, index) =>
+                      index === 0
+                        ? { ...row, clientId: row.clientId || defaultClientId }
+                        : row,
+                    ),
+                  }));
+                }
+                return next;
+              });
               setError(null);
             }}
           >
@@ -329,11 +380,17 @@ export function PortalAccessInvitationsPanel(props: {
         </OpsCard>
       ) : null}
 
-      {invitations.length === 0 ? (
-        <OpsEmpty message="No invitations yet. Invite is the primary path for new portal access." />
+      {visibleInvitations.length === 0 ? (
+        <OpsEmpty
+          message={
+            clientFilter === "all"
+              ? "No invitations yet. Invite is the primary path for new portal access."
+              : "No invitations for this client yet. Invite is the primary path for new portal access."
+          }
+        />
       ) : (
         <OpsCard className="kxd-os-portal-access__table">
-          {invitations.map((inv) => (
+          {visibleInvitations.map((inv) => (
             <div key={inv.id} className="kxd-os-portal-access__row" style={{ display: "grid", gap: 8 }}>
               <div>
                 <strong>{inv.displayName ?? inv.email}</strong>
