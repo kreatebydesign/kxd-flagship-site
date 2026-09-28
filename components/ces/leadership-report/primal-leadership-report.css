@@ -804,12 +804,14 @@
     margin: 0.55in 0.6in;
   }
 
-  html,
-  body {
+  /* Baseline / non-progress reports keep the light print sheet.
+     Progress updates use primal-leadership-progress-print.css (dark executive). */
+  html:has(.kxd-lead-report:not(.kxd-lead-report--progress)),
+  body:has(.kxd-lead-report:not(.kxd-lead-report--progress)) {
     background: #fff !important;
   }
 
-  .kxd-lead-report {
+  .kxd-lead-report:not(.kxd-lead-report--progress) {
     max-width: none;
     background: #fff;
     color: #1a1a1a;
@@ -854,7 +856,7 @@
     padding: 0 !important;
   }
 
-  .kxd-lead-report__cover {
+  .kxd-lead-report:not(.kxd-lead-report--progress) .kxd-lead-report__cover {
     margin: 0 0 0.85rem;
     min-height: 7.5rem;
     break-inside: avoid;
@@ -863,26 +865,26 @@
     page-break-after: always;
   }
 
-  .kxd-lead-report__cover-media {
+  .kxd-lead-report:not(.kxd-lead-report--progress) .kxd-lead-report__cover-media {
     display: none !important;
   }
 
-  .kxd-lead-report__cover-inner {
+  .kxd-lead-report:not(.kxd-lead-report--progress) .kxd-lead-report__cover-inner {
     position: relative;
     padding: 1.35rem 1.5rem 1.5rem;
     background: #111;
     color: #f7f3eb;
   }
 
-  .kxd-lead-report__cover .kxd-lead-report__period {
+  .kxd-lead-report:not(.kxd-lead-report--progress) .kxd-lead-report__cover .kxd-lead-report__period {
     color: color-mix(in srgb, var(--kxd-lr-accent) 80%, #f0d8d0);
   }
 
-  .kxd-lead-report__cover .kxd-lead-report__data-through,
-  .kxd-lead-report__cover .kxd-lead-report__support,
-  .kxd-lead-report__cover .kxd-lead-report__eyebrow,
-  .kxd-lead-report__cover .kxd-lead-report__client,
-  .kxd-lead-report__cover .kxd-lead-report__title {
+  .kxd-lead-report:not(.kxd-lead-report--progress) .kxd-lead-report__cover .kxd-lead-report__data-through,
+  .kxd-lead-report:not(.kxd-lead-report--progress) .kxd-lead-report__cover .kxd-lead-report__support,
+  .kxd-lead-report:not(.kxd-lead-report--progress) .kxd-lead-report__cover .kxd-lead-report__eyebrow,
+  .kxd-lead-report:not(.kxd-lead-report--progress) .kxd-lead-report__cover .kxd-lead-report__client,
+  .kxd-lead-report:not(.kxd-lead-report--progress) .kxd-lead-report__cover .kxd-lead-report__title {
     color: inherit;
   }
 
@@ -936,9 +938,11 @@
     gap: 0.65rem;
   }
 
-  /* Mid-document section starts only — keep composition dense */
-  .kxd-lead-report__section[aria-labelledby="lr-organic"],
-  .kxd-lead-report__section[aria-labelledby="lr-ads"] {
+  /* Mid-document section starts only — keep composition dense (baseline) */
+  .kxd-lead-report:not(.kxd-lead-report--progress)
+    .kxd-lead-report__section[aria-labelledby="lr-organic"],
+  .kxd-lead-report:not(.kxd-lead-report--progress)
+    .kxd-lead-report__section[aria-labelledby="lr-ads"] {
     break-before: page;
     page-break-before: always;
   }
