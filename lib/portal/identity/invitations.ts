@@ -390,13 +390,14 @@ export type AcceptInvitationResult =
   | {
       ok: true;
       portalUserId: number;
-      mode: "create-user" | "expand-memberships";
+      mode: "create-user" | "expand-memberships" | "claim-preprovisioned-user";
       requiresSecurityEnrollment: boolean;
     }
   | { ok: false; publicMessage: string };
 
 /**
- * Atomic-ish accept: create/expand then mark accepted. Fail-closed on errors.
+ * Atomic-ish accept: create / expand / claim-preprovisioned then mark accepted.
+ * Fail-closed on errors. Claim path never mutates memberships.
  */
 export async function acceptPortalInvitation(input: {
   rawToken: string;
@@ -432,7 +433,7 @@ export async function acceptPortalInvitation(input: {
   const existingUser = existingDoc
     ? {
         id: Number(existingDoc.id),
-        email,
+        email: normalizePortalEmail(String(existingDoc.email ?? email)),
         active: existingDoc.active !== false,
       }
     : null;
@@ -476,7 +477,8 @@ export async function acceptPortalInvitation(input: {
   }
 
   let portalUserId: number;
-  let mode: "create-user" | "expand-memberships";
+  let mode: "create-user" | "expand-memberships" | "claim-preprovisioned-user";
+  let claimedUserActivated = false;
 
   try {
     if (plan.mode === "create-user") {
@@ -514,6 +516,22 @@ export async function acceptPortalInvitation(input: {
         clientId: primary.clientId,
         payload,
       });
+    } else if (plan.mode === "claim-preprovisioned-user") {
+      mode = "claim-preprovisioned-user";
+      portalUserId = plan.portalUserId;
+      // Password + activation first; memberships are intentionally untouched.
+      await payload.update({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        collection: "portal-users" as any,
+        id: portalUserId,
+        data: {
+          password: input.password,
+          active: true,
+          termsAcceptedAt: new Date().toISOString(),
+        },
+        overrideAccess: true,
+      });
+      claimedUserActivated = true;
     } else {
       mode = "expand-memberships";
       portalUserId = plan.portalUserId;
@@ -553,11 +571,32 @@ export async function acceptPortalInvitation(input: {
     });
   } catch (err) {
     console.error("[KXD Portal] invitation accept failed:", err);
+    if (claimedUserActivated && plan.mode === "claim-preprovisioned-user") {
+      // Best-effort compensation: do not leave a half-claimed active account.
+      try {
+        await payload.update({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          collection: "portal-users" as any,
+          id: plan.portalUserId,
+          data: { active: false },
+          overrideAccess: true,
+        });
+      } catch (compensateErr) {
+        console.error(
+          "[KXD Portal] claim compensation failed (active=false):",
+          compensateErr,
+        );
+      }
+    }
     await appendPortalSecurityEvent({
       type: "invitation.failed",
       actorKind: "system",
       summary: "Invitation accept failed closed",
-      metadata: { invitationId: Number(inv.id) },
+      metadata: {
+        invitationId: Number(inv.id),
+        mode: plan.mode,
+        compensatedClaimDeactivate: claimedUserActivated,
+      },
     });
     return { ok: false, publicMessage: INVITATION_PUBLIC_ERROR };
   }

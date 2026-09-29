@@ -222,7 +222,34 @@ function main() {
     existingUser: { id: 1, email: "person@example.com", active: false },
     existingMemberships: [],
   });
-  check("inactive user refused", inactivePlan.mode === "refuse");
+  check("inactive user without memberships refused", inactivePlan.mode === "refuse");
+
+  const claimPlan = planInvitationAcceptance({
+    invitation: {
+      ...invBase,
+      allowExistingUserExpansion: false,
+      memberships: [
+        { clientId: 5, role: "client-owner" },
+        { clientId: 9, role: "client-owner" },
+      ],
+    },
+    existingUser: { id: 1, email: "person@example.com", active: false },
+    existingMemberships: [
+      { clientId: 5, role: "client-owner", status: "active" },
+      { clientId: 9, role: "client-owner", status: "active" },
+      { clientId: 14, role: "client-owner", status: "active" },
+    ],
+  });
+  check(
+    "pre-provisioned inactive claim allowed",
+    claimPlan.mode === "claim-preprovisioned-user",
+  );
+  if (claimPlan.mode === "claim-preprovisioned-user") {
+    check(
+      "claim preserves extra memberships",
+      claimPlan.preservedClientIds.join(",") === "5,9,14",
+    );
+  }
 
   const noExpand = planInvitationAcceptance({
     invitation: { ...invBase, allowExistingUserExpansion: false },

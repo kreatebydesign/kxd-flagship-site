@@ -10,6 +10,7 @@ import {
 } from "./crypto";
 import {
   isPortalMembershipRole,
+  PORTAL_MEMBERSHIP_ROLE_RANK,
   type PortalMembershipRole,
 } from "./roles";
 
@@ -126,17 +127,101 @@ export type AcceptPlan =
       blockedElevations: InvitationMembershipDraft[];
     }
   | {
+      /** Inactive user whose invitation memberships are already safely provisioned. */
+      mode: "claim-preprovisioned-user";
+      portalUserId: number;
+      preservedClientIds: number[];
+    }
+  | {
       mode: "refuse";
       reason:
         | "inactive-user"
         | "expansion-not-allowed"
         | "no-memberships"
-        | "nothing-to-add";
+        | "nothing-to-add"
+        | "email-mismatch"
+        | "claim-membership-missing"
+        | "claim-membership-inactive"
+        | "claim-role-elevation";
     };
+
+/**
+ * True when the existing membership already satisfies the invitation role
+ * without requiring a silent elevation.
+ */
+export function membershipRoleSatisfiesInvitation(input: {
+  existingRole: PortalMembershipRole;
+  invitedRole: PortalMembershipRole;
+}): boolean {
+  return (
+    PORTAL_MEMBERSHIP_ROLE_RANK[input.existingRole] >=
+    PORTAL_MEMBERSHIP_ROLE_RANK[input.invitedRole]
+  );
+}
+
+/**
+ * Evaluate whether an inactive user may claim a matching invitation.
+ * Pure helper — additional legitimate memberships are allowed and preserved.
+ */
+export function planPreprovisionedUserClaim(input: {
+  invitationMemberships: InvitationMembershipDraft[];
+  existingUser: PortalUserLike;
+  existingMemberships: ExistingMembershipLike[];
+  invitationEmail: string;
+}): Extract<AcceptPlan, { mode: "claim-preprovisioned-user" | "refuse" }> {
+  const invitationEmail = normalizePortalEmail(input.invitationEmail);
+  const userEmail = normalizePortalEmail(input.existingUser.email);
+  if (!invitationEmail || !userEmail || invitationEmail !== userEmail) {
+    return { mode: "refuse", reason: "email-mismatch" };
+  }
+
+  const required = dedupeInvitationMemberships(input.invitationMemberships);
+  if (required.length === 0) {
+    return { mode: "refuse", reason: "no-memberships" };
+  }
+
+  const existingByClient = new Map(
+    input.existingMemberships.map((m) => [m.clientId, m]),
+  );
+
+  for (const row of required) {
+    const existing = existingByClient.get(row.clientId);
+    if (!existing) {
+      return { mode: "refuse", reason: "claim-membership-missing" };
+    }
+    if (existing.status !== "active") {
+      return { mode: "refuse", reason: "claim-membership-inactive" };
+    }
+    if (
+      !membershipRoleSatisfiesInvitation({
+        existingRole: existing.role,
+        invitedRole: row.role,
+      })
+    ) {
+      return { mode: "refuse", reason: "claim-role-elevation" };
+    }
+  }
+
+  const preservedClientIds = input.existingMemberships
+    .filter((m) => m.status === "active")
+    .map((m) => m.clientId)
+    .sort((a, b) => a - b);
+
+  return {
+    mode: "claim-preprovisioned-user",
+    portalUserId: input.existingUser.id,
+    preservedClientIds,
+  };
+}
 
 /**
  * Plan acceptance given invitation + optional existing portal user.
  * Never silently elevates an existing membership role.
+ *
+ * Supports:
+ * - create-user (no existing account)
+ * - expand-memberships (active user + allowExistingUserExpansion)
+ * - claim-preprovisioned-user (inactive user whose required memberships already exist)
  */
 export function planInvitationAcceptance(input: {
   invitation: InvitationRecordLike;
@@ -153,8 +238,25 @@ export function planInvitationAcceptance(input: {
     return { mode: "create-user", email, memberships };
   }
 
+  if (normalizePortalEmail(input.existingUser.email) !== email) {
+    return { mode: "refuse", reason: "email-mismatch" };
+  }
+
   if (!input.existingUser.active) {
-    return { mode: "refuse", reason: "inactive-user" };
+    const claim = planPreprovisionedUserClaim({
+      invitationMemberships: memberships,
+      existingUser: input.existingUser,
+      existingMemberships: input.existingMemberships,
+      invitationEmail: email,
+    });
+    if (claim.mode === "claim-preprovisioned-user") {
+      return claim;
+    }
+    // Preserve prior refuse semantics for inactive users who cannot claim.
+    if (claim.reason === "claim-membership-missing" || claim.reason === "no-memberships") {
+      return { mode: "refuse", reason: "inactive-user" };
+    }
+    return claim;
   }
 
   if (!input.invitation.allowExistingUserExpansion) {

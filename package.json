@@ -103,6 +103,7 @@
     "verify:phase4-requests-files-reports": "tsx scripts/verify-phase4-requests-files-reports.ts",
     "verify:phase4-multi-client-portal-completion": "tsx scripts/verify-phase4-multi-client-portal-completion.ts",
     "verify:phase4-portal-identity-security": "tsx scripts/verify-phase4-portal-identity-security.ts",
+    "verify:portal-invitation-preprovisioned-claim": "tsx scripts/verify-portal-invitation-preprovisioned-claim.ts",
     "verify:experience-feedback": "tsx scripts/verify-experience-feedback.ts",
     "verify:website-review-upload": "tsx scripts/verify-website-review-upload.ts",
     "verify:website-review-target-url": "tsx scripts/verify-website-review-target-url.ts",
@@ -247,6 +248,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.7",
+    "playwright": "^1.63.0",
     "tailwindcss": "^4",
     "tsx": "^4.22.4",
     "typescript": "^5"
