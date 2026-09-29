@@ -12,7 +12,6 @@
 
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { chromium } from "playwright";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import {
@@ -479,32 +478,47 @@ async function main() {
     });
   }
 
-  // Screenshots
+  // Optional local screenshots — Playwright is a local QA dependency, not production.
   if (APPLY) {
-    const browser = await chromium.launch({ headless: true });
-    const page = await browser.newPage({ viewport: { width: 1440, height: 1600 } });
-    for (const spec of SPECS) {
-      const htmlPath = join(OUT_DIR, `${spec.slug}-sept-2026-draft-preview.html`);
-      await page.goto(`file://${htmlPath}`, { waitUntil: "networkidle" });
-      await page.screenshot({
-        path: join(OUT_DIR, `${spec.slug}-cover-1440.png`),
-        clip: { x: 0, y: 0, width: 1440, height: 900 },
-      });
-      await page.screenshot({
-        path: join(OUT_DIR, `${spec.slug}-full-1440.png`),
-        fullPage: true,
-      });
+    try {
+      // Avoid a static import so production typecheck does not require Playwright.
+      const playwright = (await Function(
+        'return import("playwright")',
+      )()) as { chromium: { launch: (opts: { headless: boolean }) => Promise<{
+        newPage: (opts: { viewport: { width: number; height: number } }) => Promise<{
+          goto: (url: string, opts: { waitUntil: string }) => Promise<unknown>;
+          screenshot: (opts: Record<string, unknown>) => Promise<unknown>;
+          setViewportSize: (size: { width: number; height: number }) => Promise<unknown>;
+        }>;
+        close: () => Promise<unknown>;
+      }> } };
+      const browser = await playwright.chromium.launch({ headless: true });
+      const page = await browser.newPage({ viewport: { width: 1440, height: 1600 } });
+      for (const spec of SPECS) {
+        const htmlPath = join(OUT_DIR, `${spec.slug}-sept-2026-draft-preview.html`);
+        await page.goto(`file://${htmlPath}`, { waitUntil: "networkidle" });
+        await page.screenshot({
+          path: join(OUT_DIR, `${spec.slug}-cover-1440.png`),
+          clip: { x: 0, y: 0, width: 1440, height: 900 },
+        });
+        await page.screenshot({
+          path: join(OUT_DIR, `${spec.slug}-full-1440.png`),
+          fullPage: true,
+        });
+      }
+      await page.setViewportSize({ width: 390, height: 844 });
+      for (const spec of SPECS) {
+        const htmlPath = join(OUT_DIR, `${spec.slug}-sept-2026-draft-preview.html`);
+        await page.goto(`file://${htmlPath}`, { waitUntil: "networkidle" });
+        await page.screenshot({
+          path: join(OUT_DIR, `${spec.slug}-cover-390.png`),
+          clip: { x: 0, y: 0, width: 390, height: 700 },
+        });
+      }
+      await browser.close();
+    } catch {
+      console.log("· Playwright not available — HTML previews written; screenshots skipped.");
     }
-    await page.setViewportSize({ width: 390, height: 844 });
-    for (const spec of SPECS) {
-      const htmlPath = join(OUT_DIR, `${spec.slug}-sept-2026-draft-preview.html`);
-      await page.goto(`file://${htmlPath}`, { waitUntil: "networkidle" });
-      await page.screenshot({
-        path: join(OUT_DIR, `${spec.slug}-cover-390.png`),
-        clip: { x: 0, y: 0, width: 390, height: 700 },
-      });
-    }
-    await browser.close();
   }
 
   // Ensure no duplicate Sept reports
