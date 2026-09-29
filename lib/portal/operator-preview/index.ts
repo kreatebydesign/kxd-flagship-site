@@ -15,3 +15,4 @@ export {
   getOperatorPortalPreviewCookieSession,
   setOperatorPortalPreviewCookie,
 } from "./cookie";
+export { switchOperatorPortalPreviewClient } from "./switch-client";

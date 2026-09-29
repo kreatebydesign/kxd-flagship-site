@@ -31,6 +31,9 @@ export async function POST(
     return NextResponse.json({ success: false, error: "Not found." }, { status: 404 });
   }
 
-  await recordPortalReportView(reportId);
+  // Operator preview must not inflate client-facing view counts.
+  if (!session.isOperatorPreview) {
+    await recordPortalReportView(reportId);
+  }
   return NextResponse.json({ success: true });
 }

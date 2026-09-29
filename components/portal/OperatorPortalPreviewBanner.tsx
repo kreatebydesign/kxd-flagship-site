@@ -6,21 +6,28 @@ export function OperatorPortalPreviewBanner({
   clientId,
   clientName,
   mode = "preview",
+  asPortalUserDisplayName = null,
 }: {
   clientId: number;
   clientName: string;
   mode?: "preview" | "staff-test";
+  asPortalUserDisplayName?: string | null;
 }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const isStaffTest = mode === "staff-test";
+  const subjectName = asPortalUserDisplayName?.trim() || null;
 
   async function exitPreview() {
     const res = await fetch("/api/portal/preview/exit", { method: "POST" });
     const data = (await res.json().catch(() => ({}))) as {
       redirectTo?: string;
     };
-    window.location.href = data.redirectTo || "/admin/operations/client-command";
+    window.location.href =
+      data.redirectTo ||
+      (subjectName
+        ? "/admin/operations/portal-access"
+        : "/admin/operations/client-command");
   }
 
   async function toggleStaffTest(enabled: boolean) {
@@ -49,6 +56,14 @@ export function OperatorPortalPreviewBanner({
     }
   }
 
+  const title = isStaffTest
+    ? subjectName
+      ? `Staff Test Mode — Viewing portal as ${subjectName}`
+      : `Staff Test Mode · ${clientName}`
+    : subjectName
+      ? `Operator Preview — Viewing portal as ${subjectName}`
+      : `Operator Preview · ${clientName}`;
+
   return (
     <div
       className={`kxd-operator-portal-preview${isStaffTest ? " kxd-operator-portal-preview--staff-test" : ""}`}
@@ -57,15 +72,14 @@ export function OperatorPortalPreviewBanner({
     >
       <div className="kxd-operator-portal-preview__copy">
         <p className="kxd-operator-portal-preview__eyebrow">KXD OS</p>
-        <p className="kxd-operator-portal-preview__title">
-          {isStaffTest
-            ? `Staff Test Mode · ${clientName}`
-            : `Operator Preview · ${clientName}`}
-        </p>
+        <p className="kxd-operator-portal-preview__title">{title}</p>
         <p className="kxd-operator-portal-preview__note">
           {isStaffTest
             ? "Writable Website Review testing. Submissions are attributed to KXD staff — not a client login."
-            : "Read-only studio preview. Not a client login."}
+            : subjectName
+              ? `Read-only studio preview of ${subjectName}'s authorized portal. Not a client login.`
+              : "Read-only studio preview. Not a client login."}
+          {subjectName ? ` Active account: ${clientName}.` : ""}
         </p>
         {error ? (
           <p className="kxd-operator-portal-preview__switch-error">{error}</p>

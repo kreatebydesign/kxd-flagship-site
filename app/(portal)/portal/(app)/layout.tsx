@@ -67,11 +67,17 @@ export default async function PortalAppLayout({ children }: { children: React.Re
     }
   }
 
+  const membershipScopedPreview = Boolean(
+    session.isOperatorPreview &&
+      session.operatorPreview?.asPortalUserId &&
+      session.operatorPreview.asPortalUserId > 0,
+  );
+
   const [experienceProfile, editionBranding, accountContext, billingNavAvailable, commercialNavAvailable, websiteEditorUrl] =
     await Promise.all([
       resolveExperienceProfile(session),
       Promise.resolve(getPortalEditionBranding()),
-      session.isOperatorPreview
+      session.isOperatorPreview && !membershipScopedPreview
         ? Promise.resolve(null)
         : resolvePortalAccountContext(session),
       resolvePortalBillingNavAvailable(session),
@@ -107,6 +113,9 @@ export default async function PortalAppLayout({ children }: { children: React.Re
                   session.operatorPreview?.mode === "staff-test"
                     ? "staff-test"
                     : "preview",
+                asPortalUserDisplayName:
+                  session.operatorPreview?.asPortalUserDisplayName ?? null,
+                membershipScoped: membershipScopedPreview,
               }
             : null
         }

@@ -85,6 +85,8 @@ export async function POST(request: Request) {
     clientName: prior.clientName,
     clientSlug: prior.clientSlug,
     mode,
+    asPortalUserId: prior.asPortalUserId,
+    asPortalUserDisplayName: prior.asPortalUserDisplayName,
     draftComposition: prior.draftComposition,
   });
 

@@ -55,7 +55,7 @@ export function buildWorkspaceQuickActions(
     },
     {
       id: "preview-portal",
-      label: "Preview Portal",
+      label: "Preview Client Portal",
       href: `/portal`,
       action: "portal-preview-start",
     },

@@ -140,14 +140,41 @@ async function resolveOperatorPreviewSession(): Promise<PortalSession | null> {
     if (!client) return null;
     const clientName = String(client.name ?? preview.clientName ?? "Client");
     const isStaffTest = preview.mode === "staff-test";
+
+    // Membership-scoped preview: use the subject's id for membership resolution only.
+    // Never creates a real portal login; writes still blocked by isOperatorPreview.
+    let portalUserId = 0;
+    const asPortalUserId = preview.asPortalUserId;
+    if (
+      typeof asPortalUserId === "number" &&
+      Number.isFinite(asPortalUserId) &&
+      asPortalUserId > 0
+    ) {
+      try {
+        const subject = (await payload.findByID({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          collection: "portal-users" as any,
+          id: asPortalUserId,
+          depth: 0,
+          overrideAccess: true,
+        })) as AnyDoc | null;
+        if (!subject) return null;
+        portalUserId = asPortalUserId;
+      } catch {
+        return null;
+      }
+    }
+
+    const asName = preview.asPortalUserDisplayName?.trim();
     return {
-      // Sentinel — never a real portal-users row. Writes must check isOperatorPreview.
-      portalUserId: 0,
+      portalUserId,
       clientId: preview.clientId,
       email: preview.adminEmail,
       displayName: isStaffTest
         ? `KXD Staff Test · ${preview.adminEmail}`
-        : `Operator Preview · ${clientName}`,
+        : asName
+          ? `Operator Preview · ${asName}`
+          : `Operator Preview · ${clientName}`,
       greetingName: "",
       clientName,
       // Skip welcome / MFA enrollment gates for operator preview.

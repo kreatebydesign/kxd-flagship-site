@@ -35,7 +35,9 @@ export async function POST(request: Request) {
   }
 
   if (preview) {
-    if (
+    if (preview.asPortalUserId) {
+      returnTo = "/admin/operations/portal-access";
+    } else if (
       Number.isFinite(preview.clientId) &&
       preview.clientId > 0
     ) {

@@ -19,6 +19,7 @@ import {
   type PortalMembershipRole,
 } from "@/lib/portal/identity/roles";
 import { PortalAccessInvitationsPanel } from "./PortalAccessInvitationsPanel";
+import { PortalAccessPreviewButton } from "./PortalAccessPreviewButton";
 
 function issueClass(level: PortalReadinessIssue["level"]): string {
   if (level === "blocker") return "kxd-os-portal-access__issue--blocker";
@@ -693,6 +694,9 @@ function PortalAccessScreenInner({ data: initialData }: PortalAccessScreenProps)
                         label={user.active ? "Active" : "Inactive"}
                         variant={user.active ? "success" : "default"}
                       />
+                      {user.memberships.some((m) => m.status === "active") ? (
+                        <PortalAccessPreviewButton portalUserId={user.id} />
+                      ) : null}
                       <button
                         type="button"
                         className="kxd-os-btn kxd-os-btn--secondary kxd-os-portal-access__toggle"

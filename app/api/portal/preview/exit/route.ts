@@ -40,7 +40,9 @@ export async function POST() {
 
   await clearOperatorPortalPreviewCookie();
 
-  const redirectTo = `/admin/operations/client-command/${preview.clientId}`;
+  const redirectTo = preview.asPortalUserId
+    ? "/admin/operations/portal-access"
+    : `/admin/operations/client-command/${preview.clientId}`;
 
   try {
     await publishActivity({

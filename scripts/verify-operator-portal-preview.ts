@@ -44,6 +44,28 @@ function main() {
         decoded.clientSlug === "otp-carts",
     ),
   );
+
+  const membershipToken = buildOperatorPortalPreviewSession({
+    adminUserId: 7,
+    adminEmail: "matt@kreatebydesign.com",
+    clientId: 5,
+    clientName: "Cusick Morgan Motorsports",
+    clientSlug: "cusick-morgan-motorsports",
+    asPortalUserId: 13,
+    asPortalUserDisplayName: "Don Cusick",
+  });
+  const membershipDecoded = decodeOperatorPortalPreviewSession(
+    encodeOperatorPortalPreviewSession(membershipToken),
+  );
+  check(
+    "membership-scoped preview token preserves asPortalUserId",
+    Boolean(
+      membershipDecoded &&
+        membershipDecoded.asPortalUserId === 13 &&
+        membershipDecoded.asPortalUserDisplayName === "Don Cusick",
+    ),
+  );
+
   const [body] = encoded.split(".");
   check(
     "preview token rejects tampered signature",
@@ -79,8 +101,14 @@ function main() {
       session.includes("getPortalWebsiteReviewWriteSession"),
   );
   check(
-    "preview uses sentinel portalUserId 0 (not a real membership)",
-    session.includes("portalUserId: 0"),
+    "single-client preview uses sentinel portalUserId 0",
+    session.includes("let portalUserId = 0") || session.includes("portalUserId = 0"),
+  );
+  check(
+    "membership-scoped preview resolves subject portalUserId without activating",
+    session.includes("asPortalUserId") &&
+      session.includes("portal-users") &&
+      !session.includes("active: true"),
   );
 
   const middleware = read("middleware.ts");
@@ -113,6 +141,13 @@ function main() {
       start.includes("toClientId: clientId") &&
       start.includes("getOperatorPortalPreviewCookieSession"),
   );
+  check(
+    "start supports membership-scoped preview via portalUserId",
+    start.includes("portalUserId") &&
+      start.includes("listPortalMembershipsForUser") &&
+      start.includes("asPortalUserId") &&
+      start.includes("does not activate"),
+  );
 
   const reportView = read("app/api/portal/reports/[id]/view/route.ts");
   check(
@@ -133,11 +168,17 @@ function main() {
     exitPortal.includes("getPayloadAdminUser") &&
       exitPortal.includes("Number(admin.id) !== preview.adminUserId"),
   );
+  check(
+    "portal exit returns to Portal Access for membership-scoped preview",
+    exitPortal.includes("asPortalUserId") &&
+      exitPortal.includes("/admin/operations/portal-access"),
+  );
 
   const actions = read("lib/client-command/workspace-actions.ts");
   check(
-    "Client Command exposes Preview Portal + Manage Portal Access",
+    "Client Command exposes Preview Client Portal + Manage Portal Access",
     actions.includes('id: "preview-portal"') &&
+      actions.includes("Preview Client Portal") &&
       actions.includes('action: "portal-preview-start"') &&
       actions.includes('id: "manage-portal-access"') &&
       !actions.includes('id: "open-portal"'),
@@ -152,6 +193,15 @@ function main() {
       workspace.includes('action === "portal-preview-start"'),
   );
 
+  const portalAccess = read(
+    "components/admin/operations/portal-access/PortalAccessScreen.tsx",
+  );
+  check(
+    "Portal Access exposes Preview Client Portal for users with memberships",
+    portalAccess.includes("PortalAccessPreviewButton") &&
+      portalAccess.includes("portalUserId={user.id}"),
+  );
+
   const layout = read("app/(portal)/portal/(app)/layout.tsx");
   check(
     "portal layout skips MFA/welcome for operator preview",
@@ -159,15 +209,20 @@ function main() {
       layout.includes("operatorPreview="),
   );
   check(
-    "portal layout disables account switcher in preview",
-    layout.includes("session.isOperatorPreview") &&
+    "portal layout enables account context for membership-scoped preview",
+    layout.includes("membershipScopedPreview") &&
       layout.includes("resolvePortalAccountContext"),
   );
 
   const banner = read("components/portal/OperatorPortalPreviewBanner.tsx");
   check(
     "preview banner shows Operator Preview label + Exit Preview",
-    banner.includes("Operator Preview ·") && banner.includes("Exit Preview"),
+    banner.includes("Operator Preview") && banner.includes("Exit Preview"),
+  );
+  check(
+    "preview banner names membership-scoped subject",
+    banner.includes("Viewing portal as") &&
+      banner.includes("asPortalUserDisplayName"),
   );
   check(
     "preview banner can elevate to Staff Test Mode",
@@ -183,6 +238,11 @@ function main() {
       staffTest.includes("getOperatorPortalPreviewCookieSession") &&
       staffTest.includes('"staff-test"') &&
       staffTest.includes("setOperatorPortalPreviewCookie"),
+  );
+  check(
+    "staff-test preserves membership-scoped subject",
+    staffTest.includes("asPortalUserId: prior.asPortalUserId") &&
+      staffTest.includes("asPortalUserDisplayName: prior.asPortalUserDisplayName"),
   );
 
   const reviewRoute = read("app/api/portal/website-review/route.ts");
@@ -206,8 +266,14 @@ function main() {
 
   const switchRoute = read("app/api/portal/account/switch/route.ts");
   check(
-    "account switch uses write session (preview cannot switch clients)",
-    switchRoute.includes("getPortalWriteSession"),
+    "account switch allows membership-scoped preview cookie remint without user mutation",
+    switchRoute.includes("switchOperatorPortalPreviewClient") &&
+      switchRoute.includes("asPortalUserId"),
+  );
+  check(
+    "account switch still uses write session for real portal users",
+    switchRoute.includes("getPortalWriteSession") &&
+      switchRoute.includes("switchPortalActiveClient"),
   );
 
   const requests = read("app/api/portal/requests/route.ts");
@@ -216,7 +282,14 @@ function main() {
     requests.includes("getPortalWriteSession"),
   );
 
-  console.log("\n16+ checks passed — operator portal preview verified.\n");
+  const switchHelper = read("lib/portal/operator-preview/switch-client.ts");
+  check(
+    "preview switch helper never syncs portal-user lastActive",
+    switchHelper.includes("setOperatorPortalPreviewCookie") &&
+      !switchHelper.includes("syncPortalUserLegacyClientAndPreference"),
+  );
+
+  console.log("\noperator portal preview checks passed.\n");
 }
 
 main();

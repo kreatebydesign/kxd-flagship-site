@@ -41,11 +41,13 @@ export interface ClientHqShellProps {
   commercialNavAvailable?: boolean;
   /** Optional external website editor doorway — client-infrastructure.websiteEditorUrl. */
   websiteEditorUrl?: string | null;
-  /** Studio operator single-client preview — not a portal-user session. */
+  /** Studio operator portal preview — not a portal-user login. */
   operatorPreview?: {
     clientId: number;
     clientName: string;
     mode?: "preview" | "staff-test";
+    asPortalUserDisplayName?: string | null;
+    membershipScoped?: boolean;
   } | null;
   children: ReactNode;
 }
@@ -160,6 +162,7 @@ export function ClientHqShell({
           clientId={operatorPreview.clientId}
           clientName={operatorPreview.clientName}
           mode={operatorPreview.mode}
+          asPortalUserDisplayName={operatorPreview.asPortalUserDisplayName}
         />
       ) : null}
       <KxdShell className="kxd-os-shell--app">
@@ -188,7 +191,12 @@ export function ClientHqShell({
             {quietWorkspaceLabel ? (
               <p className="kxd-ces-mobile-bar__workspace">{quietWorkspaceLabel}</p>
             ) : null}
-            {accountSwitcher ? <AccountSwitcher model={accountSwitcher} /> : null}
+            {accountSwitcher ? (
+              <AccountSwitcher
+                model={accountSwitcher}
+                portfolioAvailable={portfolioNavAvailable}
+              />
+            ) : null}
           </div>
           <label
             htmlFor={`${navId}-toggle`}
@@ -229,7 +237,12 @@ export function ClientHqShell({
             {cesShell === "ces" ? (
               <p className="kxd-ces-identity__partner">Private KXD partnership</p>
             ) : null}
-            {accountSwitcher ? <AccountSwitcher model={accountSwitcher} /> : null}
+            {accountSwitcher ? (
+              <AccountSwitcher
+                model={accountSwitcher}
+                portfolioAvailable={portfolioNavAvailable}
+              />
+            ) : null}
             <div className="kxd-ces-identity__rule" aria-hidden="true" />
           </div>
 

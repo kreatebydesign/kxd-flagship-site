@@ -32,10 +32,15 @@ export function ClientHqAppShell({
     clientId: number;
     clientName: string;
     mode?: "preview" | "staff-test";
+    asPortalUserDisplayName?: string | null;
+    membershipScoped?: boolean;
   } | null;
 }) {
   const pathname = usePathname();
   const activeId = resolvePortalNavId(pathname);
+  const allowPreviewSwitcher = Boolean(
+    operatorPreview?.membershipScoped && accountSwitcher,
+  );
 
   return (
     <ClientHqShell
@@ -44,8 +49,12 @@ export function ClientHqAppShell({
       companyName={companyName}
       editionBranding={editionBranding}
       experienceProfile={experienceProfile}
-      accountSwitcher={operatorPreview ? null : accountSwitcher}
-      portfolioNavAvailable={operatorPreview ? false : portfolioNavAvailable}
+      accountSwitcher={
+        operatorPreview && !allowPreviewSwitcher ? null : accountSwitcher
+      }
+      portfolioNavAvailable={
+        operatorPreview && !allowPreviewSwitcher ? false : portfolioNavAvailable
+      }
       billingNavAvailable={billingNavAvailable}
       commercialNavAvailable={commercialNavAvailable}
       websiteEditorUrl={websiteEditorUrl}

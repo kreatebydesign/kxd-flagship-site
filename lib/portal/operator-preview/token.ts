@@ -61,9 +61,22 @@ export function decodeOperatorPortalPreviewSession(
     }
     if (new Date(parsed.expiresAt).getTime() < Date.now()) return null;
     const mode = parsed.mode === "staff-test" ? "staff-test" : "preview";
+    const asPortalUserId =
+      typeof parsed.asPortalUserId === "number" &&
+      Number.isFinite(parsed.asPortalUserId) &&
+      parsed.asPortalUserId > 0
+        ? parsed.asPortalUserId
+        : undefined;
+    const asPortalUserDisplayName =
+      typeof parsed.asPortalUserDisplayName === "string" &&
+      parsed.asPortalUserDisplayName.trim()
+        ? parsed.asPortalUserDisplayName.trim()
+        : undefined;
     return {
       ...parsed,
       mode,
+      ...(asPortalUserId != null ? { asPortalUserId } : {}),
+      ...(asPortalUserDisplayName ? { asPortalUserDisplayName } : {}),
     };
   } catch {
     return null;
@@ -77,10 +90,23 @@ export function buildOperatorPortalPreviewSession(input: {
   clientName: string;
   clientSlug: string | null;
   mode?: OperatorPortalPreviewSession["mode"];
+  asPortalUserId?: number;
+  asPortalUserDisplayName?: string;
   draftComposition?: OperatorPortalPreviewSession["draftComposition"];
 }): OperatorPortalPreviewSession {
   const startedAt = new Date().toISOString();
   const mode = input.mode === "staff-test" ? "staff-test" : "preview";
+  const asPortalUserId =
+    typeof input.asPortalUserId === "number" &&
+    Number.isFinite(input.asPortalUserId) &&
+    input.asPortalUserId > 0
+      ? input.asPortalUserId
+      : undefined;
+  const asPortalUserDisplayName =
+    typeof input.asPortalUserDisplayName === "string" &&
+    input.asPortalUserDisplayName.trim()
+      ? input.asPortalUserDisplayName.trim()
+      : undefined;
   return {
     kind: "operator-portal-preview",
     adminUserId: input.adminUserId,
@@ -91,6 +117,8 @@ export function buildOperatorPortalPreviewSession(input: {
     mode,
     startedAt,
     expiresAt: new Date(Date.now() + PREVIEW_TTL_MS).toISOString(),
+    ...(asPortalUserId != null ? { asPortalUserId } : {}),
+    ...(asPortalUserDisplayName ? { asPortalUserDisplayName } : {}),
     ...(input.draftComposition ? { draftComposition: input.draftComposition } : {}),
   };
 }

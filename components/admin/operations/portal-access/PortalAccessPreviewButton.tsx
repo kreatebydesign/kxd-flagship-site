@@ -2,17 +2,18 @@
 
 import { useState } from "react";
 
-export function PortalPreviewQuickAction({
-  clientId,
+/**
+ * Portal Access — start membership-scoped operator portal preview for a user.
+ * Does not activate the user or claim invitations.
+ */
+export function PortalAccessPreviewButton({
+  portalUserId,
   label = "Preview Client Portal",
-  draftComposition,
+  disabled = false,
 }: {
-  clientId: number;
+  portalUserId: number;
   label?: string;
-  draftComposition?: {
-    modules: string[];
-    branding?: Record<string, string | undefined>;
-  };
+  disabled?: boolean;
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -24,10 +25,7 @@ export function PortalPreviewQuickAction({
       const res = await fetch("/api/admin/portal/preview/start", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          clientId,
-          ...(draftComposition ? { draftComposition } : {}),
-        }),
+        body: JSON.stringify({ portalUserId }),
       });
       const data = (await res.json().catch(() => ({}))) as {
         success?: boolean;
@@ -45,20 +43,20 @@ export function PortalPreviewQuickAction({
   }
 
   return (
-    <div className="kxd-os-command-workspace__action-wrap">
+    <span className="kxd-os-portal-access__preview-wrap">
       <button
         type="button"
-        className="kxd-os-command-workspace__action"
-        disabled={loading}
+        className="kxd-os-btn kxd-os-btn--secondary kxd-os-portal-access__toggle"
+        disabled={disabled || loading}
         onClick={() => void startPreview()}
       >
         {loading ? "Opening…" : label}
       </button>
       {error ? (
-        <p className="kxd-os-command-workspace__action-error" role="alert">
+        <span className="kxd-os-portal-access__preview-error" role="alert">
           {error}
-        </p>
+        </span>
       ) : null}
-    </div>
+    </span>
   );
 }

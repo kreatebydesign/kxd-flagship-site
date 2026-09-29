@@ -1,6 +1,9 @@
 /**
  * POST /api/portal/account/switch
  * Server-validated active-account switch. Never trusts browser identity.
+ *
+ * Real portal users: persist lastActive preference.
+ * Membership-scoped operator preview: remint preview cookie only (no user mutation).
  */
 import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
@@ -9,7 +12,13 @@ import {
   switchPortalActiveClient,
 } from "@/lib/portal/memberships";
 import { membershipUnavailableResponseBody } from "@/lib/portal/membership-schema";
-import { getPortalWriteSession } from "@/lib/portal/session";
+import { switchOperatorPortalPreviewClient } from "@/lib/portal/operator-preview";
+import {
+  getPortalSession,
+  getPortalWriteSession,
+} from "@/lib/portal/session";
+import { getPayloadAdminUser } from "@/lib/admin/auth";
+import { isStudioPayloadOperator } from "../../../../../payload/access/index";
 
 export const dynamic = "force-dynamic";
 
@@ -67,9 +76,6 @@ function isTrustedPortalMutation(req: NextRequest): boolean {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await getPortalWriteSession();
-  if (!session) return unauthorized();
-
   if (!isTrustedPortalMutation(req)) {
     return NextResponse.json(
       { ok: false, error: "Invalid request origin." },
@@ -92,9 +98,61 @@ export async function POST(req: NextRequest) {
     return denied();
   }
 
+  const session = await getPortalSession();
+  if (!session) return unauthorized();
+
+  // Membership-scoped operator preview: cookie-only switch (no portal-user writes).
+  if (
+    session.isOperatorPreview &&
+    session.operatorPreview?.asPortalUserId &&
+    session.operatorPreview.asPortalUserId > 0
+  ) {
+    const admin = await getPayloadAdminUser();
+    if (!admin || !isStudioPayloadOperator(admin)) return unauthorized();
+    const adminUserId = Number(admin.id);
+    if (!Number.isFinite(adminUserId) || adminUserId <= 0) return unauthorized();
+
+    try {
+      const resolved = await switchOperatorPortalPreviewClient({
+        adminUserId,
+        targetClientId,
+      });
+      const redirectTo = safePortalReturnTo(body.returnTo);
+      revalidatePath("/portal", "layout");
+      revalidatePath(redirectTo);
+      return NextResponse.json({
+        ok: true,
+        clientId: resolved.clientId,
+        clientName: resolved.clientName,
+        redirectTo,
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "";
+      if (
+        message === "OPERATOR_PREVIEW_SWITCH_DENIED" ||
+        message === "OPERATOR_PREVIEW_SWITCH_UNAVAILABLE" ||
+        message === "OPERATOR_PREVIEW_OPERATOR_MISMATCH" ||
+        message === "OPERATOR_PREVIEW_REQUIRED"
+      ) {
+        return denied();
+      }
+      console.error("[KXD Portal] operator preview account switch failed:", err);
+      return NextResponse.json(
+        { ok: false, error: "Unable to switch accounts." },
+        { status: 500 },
+      );
+    }
+  }
+
+  // Single-client operator preview cannot switch.
+  if (session.isOperatorPreview) return unauthorized();
+
+  const writeSession = await getPortalWriteSession();
+  if (!writeSession) return unauthorized();
+
   try {
     const resolved = await switchPortalActiveClient({
-      portalUserId: session.portalUserId,
+      portalUserId: writeSession.portalUserId,
       targetClientId,
     });
 

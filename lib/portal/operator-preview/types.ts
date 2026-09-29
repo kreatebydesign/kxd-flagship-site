@@ -1,6 +1,10 @@
 /**
- * Operator Portal Preview — studio operator views a single client portal
- * without a portal-user membership or client credentials.
+ * Operator Portal Preview — studio operator views a client portal
+ * without client credentials, activation, or invitation claim.
+ *
+ * Scopes:
+ * - Single-client (Client Command): `clientId` only
+ * - Membership-scoped (Portal Access): `asPortalUserId` + active memberships
  */
 
 export type OperatorPreviewDraftComposition = {
@@ -43,6 +47,14 @@ export type OperatorPortalPreviewSession = {
    * `staff-test` allows Website Review writes only (not global portal writes).
    */
   mode?: OperatorPortalPreviewMode;
+  /**
+   * Optional membership-scoped preview subject (portal-users id).
+   * When set, account switcher/portfolio resolve from that user's active
+   * memberships. Never activates the user or creates a real portal login.
+   */
+  asPortalUserId?: number;
+  /** Display name for the membership-scoped subject (banner only). */
+  asPortalUserDisplayName?: string;
   /** Optional unsaved recommendation overlay for operator preview only. */
   draftComposition?: OperatorPreviewDraftComposition;
 };
