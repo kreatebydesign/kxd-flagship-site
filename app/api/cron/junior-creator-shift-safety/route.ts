@@ -4,6 +4,10 @@
  * GET|POST /api/cron/junior-creator-shift-safety
  * Auth: Authorization: Bearer $CRON_SECRET (fail closed).
  *
+ * Schedule: every 15 minutes (vercel.json cron for this path). Live shifts stay
+ * current via client heartbeat → lastActivityAt; this route only recovers
+ * abandoned sessions. Cleanup after a threshold is due can lag up to 15 minutes.
+ *
  * Idempotent: concurrent runs lock rows and no-op already-stopped shifts.
  */
 import { NextRequest, NextResponse } from "next/server";
