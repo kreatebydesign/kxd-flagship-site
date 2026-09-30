@@ -75,6 +75,14 @@ check("shell + CSS wire light-panel without global invert", () => {
     join(root, "components/client-hq/ClientHqShell.tsx"),
     "utf8",
   );
+  const identity = readFileSync(
+    join(root, "components/portal/ClientWorkspaceIdentity.tsx"),
+    "utf8",
+  );
+  const identityResolve = readFileSync(
+    join(root, "lib/portal/workspace-identity.ts"),
+    "utf8",
+  );
   const css = readFileSync(
     join(root, "design-system/ces/styles/kxd-ces.css"),
     "utf8",
@@ -83,8 +91,9 @@ check("shell + CSS wire light-panel without global invert", () => {
     join(root, "lib/ces/profile/resolve.ts"),
     "utf8",
   );
-  assert.match(shell, /logo-light-panel/);
-  assert.match(shell, /logoOnDarkTreatment/);
+  assert.match(shell, /ClientWorkspaceIdentity/);
+  assert.match(identity, /logo-light-panel/);
+  assert.match(identityResolve, /logoOnDarkTreatment/);
   assert.match(css, /kxd-ces-identity--logo-light-panel/);
   assert.equal(/filter:\s*invert/i.test(css), false);
   assert.match(resolve, /resolveLogoOnDarkTreatment/);

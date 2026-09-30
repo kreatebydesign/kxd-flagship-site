@@ -167,10 +167,11 @@ function main() {
   const migrationFile = read("migrations/20260728_phase4_portal_client_memberships.ts");
 
   check(
-    "switch route requires write session (preview cannot switch)",
+    "switch route gates writes; single-client preview cannot switch",
     switchRoute.includes("getPortalWriteSession") &&
-      switchRoute.includes("session.portalUserId") &&
-      !switchRoute.includes("getPortalSession"),
+      switchRoute.includes("writeSession.portalUserId") &&
+      switchRoute.includes("session.isOperatorPreview") &&
+      switchRoute.includes("Single-client operator preview cannot switch"),
   );
   check(
     "switch route rejects unauthorized client generically",
@@ -192,7 +193,8 @@ function main() {
   );
   check(
     "browser identity fields are not authoritative",
-    !switchRoute.includes("body.portalUserId") && switchRoute.includes("session.portalUserId"),
+    !switchRoute.includes("body.portalUserId") &&
+      switchRoute.includes("writeSession.portalUserId"),
   );
 
   check(

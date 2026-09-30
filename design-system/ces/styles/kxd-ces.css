@@ -3471,6 +3471,26 @@
 
 /* ── Phase 12G: Luxury experience pass ──────────────────────── */
 
+/* Identity stack — logo/name/workspace + account switcher (shared ClientWorkspaceIdentity) */
+.kxd-ces-identity-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0.35rem var(--kxd-os-space-3) 0;
+}
+
+.kxd-ces-identity-stack .kxd-ces-identity {
+  padding: 0;
+}
+
+.kxd-ces-identity-stack .kxd-ces-account-switcher {
+  margin-top: 0.55rem;
+}
+
+.kxd-ces-identity-stack .kxd-ces-identity__rule {
+  margin-top: 0.85rem;
+}
+
 .kxd-ces-identity {
   display: flex;
   flex-direction: column;
@@ -3556,9 +3576,9 @@
   row-gap: 0.1rem;
   width: 100%;
   padding: 0.45rem 0.55rem;
-  border: 1px solid color-mix(in srgb, var(--kxd-os-border-divider) 85%, transparent);
+  border: 1px solid color-mix(in srgb, var(--kxd-ces-brand, var(--kxd-os-border-divider)) 28%, var(--kxd-os-border-divider));
   border-radius: var(--kxd-os-radius-sm);
-  background: transparent;
+  background: color-mix(in srgb, var(--kxd-ces-brand, transparent) 6%, transparent);
   color: inherit;
   text-align: left;
   cursor: pointer;
@@ -3648,7 +3668,14 @@
 
 .kxd-ces-account-switcher__option--active {
   color: var(--kxd-os-text-primary);
-  background: color-mix(in srgb, var(--kxd-os-bg-muted) 80%, transparent);
+  background: color-mix(in srgb, var(--kxd-ces-brand, var(--kxd-os-bg-muted)) 14%, var(--kxd-os-bg-muted));
+  box-shadow: inset 2px 0 0 var(--kxd-ces-brand, var(--kxd-os-text-faint));
+  font-weight: 600;
+}
+
+.kxd-ces-account-switcher__option--active .kxd-ces-account-switcher__option-meta {
+  color: var(--kxd-ces-brand, var(--kxd-os-text-faint));
+  font-weight: 600;
 }
 
 .kxd-ces-account-switcher__option-name {

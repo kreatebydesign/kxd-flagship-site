@@ -9,6 +9,7 @@ import type { EditionBranding } from "@/lib/editions";
 import { editionBrandingCssVars } from "@/lib/editions";
 import { ClientNotificationsCenter } from "@/components/ces/notifications";
 import { AccountSwitcher } from "@/components/portal/AccountSwitcher";
+import { ClientWorkspaceIdentity } from "@/components/portal/ClientWorkspaceIdentity";
 import type { PortalAccountSwitcherModel } from "@/lib/portal/account-context-types";
 import { ClientHqLogoutButton } from "./ClientHqLogoutButton";
 import { PortalFeedbackControl } from "./PortalFeedbackControl";
@@ -18,11 +19,9 @@ import {
   getEnabledPortalNavGroups,
   type PortalNavId,
 } from "@/lib/portal/nav";
-import {
-  clientPortalNavGroupLabel,
-  isGenericWorkspaceSidebarLabel,
-} from "@/lib/ces/copy/client-nav-labels";
+import { clientPortalNavGroupLabel } from "@/lib/ces/copy/client-nav-labels";
 import { resolvePortalHomeShell } from "@/lib/ces/modules/home";
+import { resolveClientWorkspaceIdentity } from "@/lib/portal/workspace-identity";
 
 export interface ClientHqShellProps {
   activeId: PortalNavId;
@@ -50,10 +49,6 @@ export interface ClientHqShellProps {
     membershipScoped?: boolean;
   } | null;
   children: ReactNode;
-}
-
-function labelsMatch(a: string, b: string): boolean {
-  return a.trim().toLowerCase() === b.trim().toLowerCase();
 }
 
 function isPortalOverviewPath(pathname: string | undefined): boolean {
@@ -113,18 +108,11 @@ export function ClientHqShell({
     return () => window.removeEventListener("keydown", onKey);
   }, [navOpen]);
 
-  const displayName =
-    experienceProfile?.identity.clientName ?? companyName ?? "Your partnership";
-  const sidebarLabel =
-    experienceProfile?.hospitality.portalSidebarLabel ??
-    branding?.portal.sidebarLabel ??
-    "";
-  const quietWorkspaceLabel =
-    sidebarLabel &&
-    !labelsMatch(sidebarLabel, displayName) &&
-    !isGenericWorkspaceSidebarLabel(sidebarLabel)
-      ? sidebarLabel
-      : null;
+  const workspaceIdentity = resolveClientWorkspaceIdentity(
+    experienceProfile,
+    companyName,
+  );
+  const displayName = workspaceIdentity.clientName;
   const cesShell = resolvePortalHomeShell(experienceProfile);
   const reassuranceLine = experienceProfile?.hospitality.reassuranceLine;
   const partnerLine = experienceProfile?.hospitality.partnerFooterLine;
@@ -139,21 +127,6 @@ export function ClientHqShell({
   const showPartnerMark =
     (experienceProfile?.hospitality.showPartnerMark ?? true) &&
     !workspaceSignaturePresent;
-  const clientLogo =
-    experienceProfile?.identity.logoUrl ??
-    experienceProfile?.presentation?.logoSrc ??
-    null;
-  const clientLogoAlt =
-    experienceProfile?.identity.logoAlt ??
-    experienceProfile?.presentation?.logoAlt ??
-    displayName;
-  const logoCarriesName = Boolean(
-    clientLogo && labelsMatch(clientLogoAlt, displayName),
-  );
-  const logoOnDarkTreatment =
-    experienceProfile?.identity.logoOnDarkTreatment ?? "default";
-  const logoNeedsLightPanel =
-    Boolean(clientLogo) && logoOnDarkTreatment === "light-panel";
 
   return (
     <>
@@ -187,10 +160,7 @@ export function ClientHqShell({
       >
         <div className="kxd-ces-mobile-bar">
           <div className="kxd-ces-mobile-bar__identity">
-            <p className="kxd-ces-mobile-bar__name">{displayName}</p>
-            {quietWorkspaceLabel ? (
-              <p className="kxd-ces-mobile-bar__workspace">{quietWorkspaceLabel}</p>
-            ) : null}
+            <ClientWorkspaceIdentity identity={workspaceIdentity} compact />
             {accountSwitcher ? (
               <AccountSwitcher
                 model={accountSwitcher}
@@ -215,28 +185,8 @@ export function ClientHqShell({
           aria-label={displayName}
           aria-hidden={mobileNavMode ? !navOpen : undefined}
         >
-          <div
-            className={`kxd-ces-identity${clientLogo ? " kxd-ces-identity--has-logo" : ""}${
-              logoCarriesName ? " kxd-ces-identity--logo-wordmark" : ""
-            }${logoNeedsLightPanel ? " kxd-ces-identity--logo-light-panel" : ""}`}
-          >
-            {clientLogo ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={clientLogo}
-                alt={clientLogoAlt}
-                className="kxd-ces-identity__logo"
-              />
-            ) : null}
-            {logoCarriesName ? null : (
-              <p className="kxd-ces-identity__name">{displayName}</p>
-            )}
-            {quietWorkspaceLabel ? (
-              <p className="kxd-ces-identity__workspace">{quietWorkspaceLabel}</p>
-            ) : null}
-            {cesShell === "ces" ? (
-              <p className="kxd-ces-identity__partner">Private KXD partnership</p>
-            ) : null}
+          <div className="kxd-ces-identity-stack">
+            <ClientWorkspaceIdentity identity={workspaceIdentity} />
             {accountSwitcher ? (
               <AccountSwitcher
                 model={accountSwitcher}
@@ -306,7 +256,8 @@ export function ClientHqShell({
                   partnerLine
                 ) : (
                   <>
-                    <KxdLogo height={12} /> · {partnerLine ?? sidebarLabel}
+                    <KxdLogo height={12} /> ·{" "}
+                    {partnerLine ?? branding?.portal.sidebarLabel ?? "KXD OS"}
                   </>
                 )}
               </p>

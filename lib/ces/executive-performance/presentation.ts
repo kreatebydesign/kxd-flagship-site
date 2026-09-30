@@ -64,10 +64,13 @@ const DE_BOIS_PRESENTATION: ExperiencePresentation = {
   zoneOrder: [...DEFAULT_ZONE_ORDER],
 };
 
-/** Disabled stubs — ready for brand assets + memory. EP appears when enabled. */
+/** Disabled stubs — brand mark + workspace label personalize CES; EP appears when enabled. */
 function stubPresentation(input: {
   logoAlt: string;
   heroImageAlt: string;
+  logoSrc?: string | null;
+  workspaceEyebrow?: string;
+  actionAccent?: string;
 }): ExperiencePresentation {
   return {
     enabled: false,
@@ -76,11 +79,12 @@ function stubPresentation(input: {
     heroImageSrc: "",
     heroImageAlt: input.heroImageAlt,
     heroOverlay: "graphite",
-    logoSrc: null,
+    logoSrc: input.logoSrc ?? null,
     logoAlt: input.logoAlt,
-    workspaceEyebrow: "Private Partnership Workspace",
+    workspaceEyebrow: input.workspaceEyebrow ?? "Private KXD Workspace",
     workspaceTitle: "Executive Performance",
     introduction: "Where things stand — and what deserves attention next.",
+    ...(input.actionAccent ? { actionAccent: input.actionAccent } : {}),
     zoneOrder: [...DEFAULT_ZONE_ORDER],
   };
 }
@@ -109,10 +113,24 @@ const BY_SLUG: Record<string, ExperiencePresentation> = {
   "cusick-morgan-motorsports": stubPresentation({
     logoAlt: "Cusick Morgan Motorsports",
     heroImageAlt: "Cusick Morgan Motorsports",
+    logoSrc: "/migrated-assets/logos/cusick-morgan.svg",
+    actionAccent: "#C9A962",
   }),
   otp: stubPresentation({
     logoAlt: "On Track Performance",
     heroImageAlt: "On Track Performance",
+    logoSrc: "/migrated-assets/logos/otp.svg",
+    actionAccent: "#C9A962",
+  }),
+  "otp-carts": stubPresentation({
+    logoAlt: "OTP Carts",
+    heroImageAlt: "OTP Carts",
+    actionAccent: "#C9A962",
+  }),
+  "2475-townsgate": stubPresentation({
+    logoAlt: "2475 Townsgate",
+    heroImageAlt: "2475 Townsgate",
+    actionAccent: "#C9A962",
   }),
   "plate-the-umpqua": stubPresentation({
     logoAlt: "Plate The Umpqua",
