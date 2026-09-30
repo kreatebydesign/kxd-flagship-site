@@ -226,9 +226,19 @@ function ok(label: string) {
   }
   const vercel = read("vercel.json");
   assert.match(vercel, /junior-creator-shift-safety/);
+  // Neon compute: 15m failsafe (not */5) so scale-to-zero can engage between runs.
+  // Live shifts remain covered by client heartbeat; abandoned cleanup ≤ 15m lag.
+  assert.match(
+    vercel,
+    /"path":\s*"\/api\/cron\/junior-creator-shift-safety"[\s\S]*?"schedule":\s*"\*\/15 \* \* \* \*"/,
+  );
+  assert.doesNotMatch(
+    vercel,
+    /"path":\s*"\/api\/cron\/junior-creator-shift-safety"[\s\S]*?"schedule":\s*"\*\/5 \* \* \* \*"/,
+  );
   const migIndex = read("migrations/index.ts");
   assert.match(migIndex, /20260807_junior_creator_timer_safety/);
-  ok("timer safety files + cron + migration registered");
+  ok("timer safety files + cron (*/15) + migration registered");
 }
 
 console.log("\nAll junior timer safety checks passed.");
