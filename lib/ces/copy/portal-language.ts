@@ -97,7 +97,7 @@ export const PORTAL_CLIENT_LANGUAGE = {
     "Review the site, leave precise feedback, and follow every revision with clarity.",
   reviewCtaPrimary: "Start a revision",
   reviewCtaVisual: "Review Website",
-  reviewCtaSecondary: "Open Review Site",
+  reviewCtaSecondary: "Open website",
   reviewActiveSection: "Active revisions",
   reviewCompletedSection: "Completed History",
   reviewEmptyTitle: "No updates yet",

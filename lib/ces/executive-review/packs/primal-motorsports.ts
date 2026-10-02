@@ -81,7 +81,7 @@ export const PRIMAL_EXECUTIVE_REVIEW_PACK: ExecutiveReviewPack = {
         "You can open this anytime. The Leadership Report holds the current verified baseline and the 30 / 60 / 90-day plan.",
       ],
       takeaway:
-        "The hard build work is done. Right now we're getting the new site ready to launch — and this page stays with you as we go.",
+        "The hard build work is done. The website is live — and this page stays with you as growth continues.",
     },
     {
       id: "foundation",
@@ -95,21 +95,21 @@ export const PRIMAL_EXECUTIVE_REVIEW_PACK: ExecutiveReviewPack = {
         "Everything below is real delivery. If something is still getting connected, we say so.",
       ],
       takeaway:
-        "Website, ads, search, and this workspace are working as one system — ready for launch.",
+        "Website, ads, search, and this workspace are working as one system — live and ready for growth.",
     },
     {
       id: "platform",
       railLabel: "Platform",
       eyebrow: "The website",
-      title: "How the website is changing",
+      title: "How the website serves the brand",
       lead:
-        "Today's live site still carries the brand. The new site is built and on staging — waiting on final revisions before launch.",
+        "The rebuilt Primal Motorsports website is live. Customers now enter through clearer paths into schools, race programs, inventory, and service.",
       paragraphs: [
-        "We're not throwing away what works. The current site has carried the brand and Radical sales. The rebuild keeps that energy and makes it easier for people to find schools, race programs, inventory, and service.",
-        "Primal 2.0 is complete on staging. Launch happens after your final notes — we are not calling it live yet.",
+        "We're not throwing away what worked. The previous site carried the brand and Radical sales. The rebuild keeps that energy and makes it easier for people to find schools, race programs, inventory, and service.",
+        "Primal 2.0 launched September 9, 2026. Post-launch verification completed September 11. Ongoing notes and refinements continue through Website Review.",
       ],
       takeaway:
-        "The live site is carrying you today. The new site is ready on staging. Launch comes after final revisions.",
+        "The new website is live. Ongoing refinements continue through your private workspace — without losing momentum.",
     },
     {
       id: "demand",
@@ -136,7 +136,7 @@ export const PRIMAL_EXECUTIVE_REVIEW_PACK: ExecutiveReviewPack = {
         "Each tool below does a different job. Open any of them when you need it — they're live today.",
       ],
       takeaway:
-        "You already have the tools you need for launch and day-to-day work with us. They're built and ready to use.",
+        "You already have the tools you need for day-to-day work with us. They're live and ready to use.",
     },
     {
       id: "impact",
@@ -146,11 +146,11 @@ export const PRIMAL_EXECUTIVE_REVIEW_PACK: ExecutiveReviewPack = {
       lead:
         "The website and marketing work support three parts of the business — without claiming results we can't prove yet.",
       paragraphs: [
-        "Schools, race programs, and Radical inventory each have clearer paths on the new site. Search and ads are already showing interest in schools and inventory.",
-        "We can't yet connect every click to every sale inside this workspace. That comes later. The near-term unlock is launching the new site.",
+        "Schools, race programs, and Radical inventory each have clearer paths on the live site. Search and ads are already showing interest in schools and inventory.",
+        "We can't yet connect every click to every sale inside this workspace. That comes later. The near-term focus is qualified traffic, visibility, and clear leadership reporting.",
       ],
       takeaway:
-        "Schools, race programs, and inventory are set up to work better once the new site launches. Deeper tracking comes after that.",
+        "Schools, race programs, and inventory are set up to work better on the live site. Deeper tracking continues to mature.",
     },
     {
       id: "roadmap",
@@ -158,12 +158,12 @@ export const PRIMAL_EXECUTIVE_REVIEW_PACK: ExecutiveReviewPack = {
       eyebrow: "Looking ahead",
       title: "What we're finishing — and what can come later",
       lead:
-        "First we finish launch. Then we deepen reporting. Bigger systems like Primal OS stay a separate conversation.",
+        "First we deepen performance and reporting. Bigger systems like Primal OS stay a separate conversation.",
       paragraphs: [
         "Now, Next, and Later keep things honest. Nothing in Later is part of what you're getting today. Nothing in Now is called done until it is.",
       ],
       takeaway:
-        "Right now: finish launch. Next: clearer reporting in this workspace. Later: lead follow-through and Primal OS — when you're ready to talk about it.",
+        "Right now: protect visibility and improve qualified acquisition. Next: clearer reporting in this workspace. Later: lead follow-through and Primal OS — when you're ready to talk about it.",
     },
     {
       id: "vision",
@@ -184,7 +184,7 @@ export const PRIMAL_EXECUTIVE_REVIEW_PACK: ExecutiveReviewPack = {
       id: "website",
       number: "01",
       title: "New website rebuilt for the brand",
-      body: "The new site is built on staging and being refined for launch.",
+      body: "The rebuilt Primal Motorsports website is live — with clearer paths into schools, race programs, inventory, and service.",
       status: "built",
     },
     {
@@ -227,9 +227,9 @@ export const PRIMAL_EXECUTIVE_REVIEW_PACK: ExecutiveReviewPack = {
     {
       id: "live-home",
       src: `${ASSET}/live-homepage.png`,
-      alt: "Current live Primal Motorsports homepage",
-      caption: "How customers enter the brand today",
-      label: "Today",
+      alt: "Previous Primal Motorsports homepage before the rebuild launch",
+      caption: "How customers entered the brand before the rebuild",
+      label: "Before",
       status: "built",
     },
     {
@@ -237,15 +237,15 @@ export const PRIMAL_EXECUTIVE_REVIEW_PACK: ExecutiveReviewPack = {
       src: `${ASSET}/rebuild-homepage.png`,
       alt: "Primal 2.0 homepage with clearer paths into schools, racing, inventory, and service",
       caption: "Clearer paths into schools, race programs, inventory, and service",
-      label: "Primal 2.0",
-      status: "in-progress",
+      label: "Live",
+      status: "built",
     },
     {
       id: "live-inventory",
       src: `${ASSET}/live-inventory.png`,
       alt: "Current live inventory listing page for Radical vehicles",
-      caption: "Radical inventory as it lives on the current site",
-      label: "Today",
+      caption: "Radical inventory as customers browse it today",
+      label: "Before",
       status: "built",
     },
     {
@@ -253,47 +253,47 @@ export const PRIMAL_EXECUTIVE_REVIEW_PACK: ExecutiveReviewPack = {
       src: `${ASSET}/rebuild-inventory.png`,
       alt: "Primal 2.0 inventory presentation for Radical vehicles",
       caption: "A cleaner way to browse Radical vehicles for sale",
-      label: "Primal 2.0",
-      status: "in-progress",
+      label: "Live",
+      status: "built",
     },
     {
       id: "rebuild-mega",
       src: `${ASSET}/rebuild-inventory-mega-menu.png`,
       alt: "Primal 2.0 inventory navigation menu",
       caption: "Easier navigation into inventory",
-      label: "Primal 2.0",
-      status: "in-progress",
+      label: "Live",
+      status: "built",
     },
     {
       id: "live-schools",
       src: `${ASSET}/live-driving-schools.png`,
       alt: "Current live driving schools page",
-      caption: "Driving schools as customers see them today",
-      label: "Today",
+      caption: "Driving schools as customers saw them previously",
+      label: "Before",
       status: "built",
     },
     {
       id: "rebuild-schools",
       src: `${ASSET}/rebuild-driving-schools.png`,
       alt: "Primal 2.0 driving schools page",
-      caption: "A clearer path into schools on the new site",
-      label: "Primal 2.0",
-      status: "in-progress",
+      caption: "A clearer path into schools on the live site",
+      label: "Live",
+      status: "built",
     },
     {
       id: "rebuild-service",
       src: `${ASSET}/rebuild-service.png`,
       alt: "Primal 2.0 service page",
       caption: "Service presented with a calmer path for customers",
-      label: "Primal 2.0",
-      status: "in-progress",
+      label: "Live",
+      status: "built",
     },
     {
       id: "live-car",
       src: `${ASSET}/live-car-details.png`,
       alt: "Current live vehicle detail page for a Radical car",
-      caption: "Vehicle detail on the live site today",
-      label: "Today",
+      caption: "Vehicle detail on the previous live presentation",
+      label: "Before",
       status: "built",
     },
   ],
@@ -492,15 +492,15 @@ export const PRIMAL_EXECUTIVE_REVIEW_PACK: ExecutiveReviewPack = {
     {
       id: "inventory",
       title: "Radical inventory",
-      body: "Easier vehicle discovery and inquiry — live today, cleaner on the new site.",
+      body: "Easier vehicle discovery and inquiry — cleaner presentation on the live site.",
     },
   ],
   ongoingWork: {
     title: "Currently working on",
-    body: "This partnership stays active every month. Here's what KXD continues to handle alongside the launch work.",
+    body: "This partnership stays active every month. Here's what KXD continues to handle alongside growth work.",
     status: "in-progress",
     items: [
-      { id: "website", label: "Website improvements and launch readiness" },
+      { id: "website", label: "Website refinements and ongoing support" },
       { id: "ads", label: "Google Ads management" },
       { id: "search", label: "Search visibility" },
       { id: "reporting", label: "Executive reporting" },
@@ -514,15 +514,15 @@ export const PRIMAL_EXECUTIVE_REVIEW_PACK: ExecutiveReviewPack = {
       title: "Now",
       items: [
         {
-          id: "revisions",
-          title: "Finish website revisions",
-          body: "Adam and the team wrap final notes so we can launch without rework.",
+          id: "protect-visibility",
+          title: "Protect high-intent visibility",
+          body: "Keep Atlanta / racing-school search and Ads presence strong where intent is highest.",
           status: "in-progress",
         },
         {
-          id: "launch",
-          title: "Launch the new website",
-          body: "Move Primal 2.0 from staging to live once revisions are complete.",
+          id: "qualified-acquisition",
+          title: "Improve qualified acquisition",
+          body: "Tighten efficiency and lead quality without spending harder than the business needs.",
           status: "in-progress",
         },
         {

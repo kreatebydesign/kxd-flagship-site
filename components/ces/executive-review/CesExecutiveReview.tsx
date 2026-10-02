@@ -254,13 +254,13 @@ export function CesExecutiveReview({ pack }: CesExecutiveReviewProps) {
             </dl>
             <ul className="kxd-ces-review__legend" aria-label="Status legend">
               <li>
-                <StatusTag status="built" /> Built
+                <StatusTag status="built" />
               </li>
               <li>
-                <StatusTag status="in-progress" /> In Progress
+                <StatusTag status="in-progress" />
               </li>
               <li>
-                <StatusTag status="future" /> Future
+                <StatusTag status="future" />
               </li>
             </ul>
             <p className="kxd-ces-review__period">{pack.periodLabel}</p>
