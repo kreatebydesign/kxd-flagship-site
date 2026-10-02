@@ -5990,51 +5990,70 @@
 }
 
 .kxd-ces-exec__signature {
-  margin-top: 0.85rem;
+  margin-top: 1.15rem;
+  margin-bottom: 0;
+  padding-top: 0;
 }
 
 .kxd-ces-exec__signature-rule {
   height: 1px;
-  margin: 0 auto 0.95rem;
-  max-width: 7rem;
-  background: color-mix(in srgb, var(--kxd-os-text-faint) 28%, transparent);
+  margin: 0 auto 0.7rem;
+  max-width: 3.75rem;
+  background: color-mix(in srgb, var(--kxd-os-text-faint) 34%, transparent);
 }
 
 .kxd-ces-exec__signature-inner {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.6rem;
+  gap: 0.7rem;
 }
 
 .kxd-ces-exec__signature-mark {
-  width: 1.4rem;
+  width: 3.75rem;
   height: auto;
-  object-fit: contain;
-  opacity: 0.42;
+  display: block;
   flex-shrink: 0;
+  border-radius: 2px;
+  opacity: 1;
 }
 
 .kxd-ces-exec__signature-copy {
   display: flex;
   flex-direction: column;
-  gap: 0.04rem;
+  align-items: flex-start;
+  gap: 0.12rem;
+  min-width: 0;
 }
 
 .kxd-ces-exec__signature-line {
   margin: 0;
-  font-size: 0.52rem;
-  letter-spacing: 0.14em;
+  font-family: var(--kxd-os-font-sans);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--kxd-os-text-muted) 92%, var(--kxd-os-text-primary));
+  line-height: 1.2;
+  color: var(--kxd-os-text-faint);
+}
+
+.kxd-ces-exec__signature-name {
+  margin: 0;
+  font-family: var(--kxd-os-font-sans);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+  color: var(--kxd-os-text-secondary);
 }
 
 .kxd-ces-exec__signature-line--quiet {
-  letter-spacing: 0.01em;
+  /* Legacy dual-line quiet treatment — retained for any residual markup. */
+  letter-spacing: -0.01em;
   text-transform: none;
-  font-size: 0.72rem;
-  font-family: var(--kxd-os-font-serif, Georgia, "Times New Roman", serif);
-  color: color-mix(in srgb, var(--kxd-os-text-faint) 88%, var(--kxd-os-text-muted));
+  font-size: 0.75rem;
+  font-family: var(--kxd-os-font-sans);
+  color: var(--kxd-os-text-faint);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -6144,14 +6163,22 @@
     grid-template-columns: 1fr;
   }
 
+  .kxd-ces-exec__signature {
+    margin-top: 1rem;
+  }
+
   .kxd-ces-exec__signature-inner {
-    flex-direction: column;
-    text-align: center;
-    gap: 0.35rem;
+    flex-direction: row;
+    text-align: left;
+    gap: 0.6rem;
+  }
+
+  .kxd-ces-exec__signature-mark {
+    width: 3.35rem;
   }
 
   .kxd-ces-exec__signature-copy {
-    align-items: center;
+    align-items: flex-start;
   }
 }
 
@@ -11228,14 +11255,31 @@
   font-weight: 600 !important;
 }
 
-/* Phase 1 elevation — quiet growth + signature labels */
-.kxd-ces-app .kxd-ces-exec__growth-maturity,
-.kxd-ces-app .kxd-ces-exec__signature-line {
+/* Phase 1 elevation — quiet growth labels (signature has its own hierarchy) */
+.kxd-ces-app .kxd-ces-exec__growth-maturity {
   font-size: 0.6875rem !important;
   font-weight: 600 !important;
   letter-spacing: -0.01em !important;
   text-transform: none !important;
   color: var(--kxd-os-text-faint) !important;
+}
+
+.kxd-ces-app .kxd-ces-exec__signature-line {
+  font-family: var(--kxd-os-font-sans) !important;
+  font-size: 0.625rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  color: var(--kxd-os-text-faint) !important;
+}
+
+.kxd-ces-app .kxd-ces-exec__signature-name {
+  font-family: var(--kxd-os-font-sans) !important;
+  font-size: 0.8125rem !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.015em !important;
+  text-transform: none !important;
+  color: var(--kxd-os-text-secondary) !important;
 }
 
 .kxd-ces-app .kxd-ces-exec__signature-line--quiet {

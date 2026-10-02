@@ -4,4 +4,7 @@
 **/.next/cache
 *.pdf
 *.png
+# Canonical KXD brand marks must ship (CLI excludes *.png above).
+!public/migrated-assets/brand/kxd-logo-transparent.png
+!public/migrated-assets/brand/kxd-og-image.png
 .git

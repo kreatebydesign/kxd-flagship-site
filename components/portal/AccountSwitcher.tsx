@@ -6,13 +6,18 @@ import type { PortalAccountSwitcherModel } from "@/lib/portal/account-context-ty
 
 type Props = {
   model: PortalAccountSwitcherModel;
+  /**
+   * Accepted for ClientHqShell caller contract. Portfolio navigation behavior is
+   * intentionally not expanded in this build-unblock ship.
+   */
+  portfolioAvailable?: boolean;
 };
 
 /**
  * Premium account switcher — renders only when the server provides a multi-account model.
  * Selection posts to the authenticated switch route; never authorizes from the browser.
  */
-export function AccountSwitcher({ model }: Props) {
+export function AccountSwitcher({ model, portfolioAvailable: _portfolioAvailable = false }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const listId = useId();
