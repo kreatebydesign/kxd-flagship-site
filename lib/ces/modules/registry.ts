@@ -9,6 +9,7 @@ function requestPath(href: string): string {
   if (href === "/portal/website-review") return "/portal/website-review/request";
   if (href === "/portal/website-workspace") return "/portal/website-workspace";
   if (href === "/portal/inventory") return "/portal/inventory/new";
+  if (href === "/portal/calendar") return "/portal/calendar/new";
   return href;
 }
 
@@ -21,6 +22,9 @@ function detailPath(href: string): (id: string) => string {
   }
   if (href === "/portal/inventory") {
     return (id) => `/portal/inventory/${id}`;
+  }
+  if (href === "/portal/calendar") {
+    return (id) => `/portal/calendar/${id}`;
   }
   return () => href;
 }

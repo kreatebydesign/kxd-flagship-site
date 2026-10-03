@@ -27,6 +27,7 @@ import { ClientInfrastructure } from "./payload/collections/ClientInfrastructure
 import { ClientExperienceProfiles } from "./payload/collections/ClientExperienceProfiles.ts";
 import { ClientLaunchDrafts } from "./payload/collections/ClientLaunchDrafts.ts";
 import { ClientInventoryVehicles } from "./payload/collections/ClientInventoryVehicles.ts";
+import { ClientCalendarEvents } from "./payload/collections/ClientCalendarEvents.ts";
 import { ClientOnboarding } from "./payload/collections/ClientOnboarding.ts";
 import { ClientTimelineEvents } from "./payload/collections/ClientTimelineEvents.ts";
 import { ClientProjects } from "./payload/collections/ClientProjects.ts";
@@ -245,6 +246,7 @@ export default buildConfig({
     ClientExperienceProfiles,
     ClientLaunchDrafts,
     ClientInventoryVehicles,
+    ClientCalendarEvents,
     ClientTimelineEvents,
     ExecutiveTimelineEvents,
     ExecutiveActivityReads,

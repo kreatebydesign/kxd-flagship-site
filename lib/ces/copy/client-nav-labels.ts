@@ -16,6 +16,7 @@ export const CES_CLIENT_NAV_LABELS: Record<string, string> = {
   analytics: "Performance",
   reports: "Reports",
   inventory: "Inventory",
+  calendar: "Calendar",
   deliverables: "KXD Work",
   projects: "Projects",
   assets: "Documents",
@@ -35,6 +36,7 @@ export const CES_CLIENT_NAV_LABELS: Record<string, string> = {
 export const CES_PRIMARY_PORTAL_NAV_IDS = [
   "overview",
   "leads",
+  "calendar",
   "analytics",
   "reports",
 ] as const;

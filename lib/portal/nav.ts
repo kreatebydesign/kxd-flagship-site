@@ -404,7 +404,7 @@ function simplifyPrimaryPortalNav(
     if (!byId.has(item.id)) byId.set(item.id, item);
   }
 
-  const operateIds = ["overview", "leads"] as const;
+  const operateIds = ["overview", "leads", "calendar"] as const;
   const resultsIds = [...CES_RESULTS_PORTAL_NAV_IDS];
   const claimedIds = new Set<string>([...CES_PRIMARY_PORTAL_NAV_IDS]);
   const accountIds = new Set(["settings", "invoices", "agreement", "team"]);

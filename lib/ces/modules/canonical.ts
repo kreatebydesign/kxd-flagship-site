@@ -74,6 +74,7 @@ export const CES_EXPERIENCE_MODULE_IDS = [
   "executive-review",
   "inventory",
   "leads",
+  "calendar",
 ] as const;
 
 export type CesExperienceModuleId = (typeof CES_EXPERIENCE_MODULE_IDS)[number];
@@ -221,6 +222,21 @@ const PORTAL_DEFS: CanonicalCapabilityDefinition[] = [
       href: "/portal/leads",
       activation: "ces-opt-in",
       vocabularyNamespace: "leads",
+      cesRegistry: true,
+    },
+  },
+  {
+    key: "calendar",
+    label: "Calendar",
+    kind: "portal",
+    internalOnly: false,
+    editionModule: "client-hq",
+    portal: {
+      navGroup: "headquarters",
+      navOrder: 2.5,
+      href: "/portal/calendar",
+      activation: "ces-opt-in",
+      vocabularyNamespace: "calendar",
       cesRegistry: true,
     },
   },
@@ -469,12 +485,6 @@ const INTERNAL_AND_FUTURE_DEFS: CanonicalCapabilityDefinition[] = [
   {
     key: "communications",
     label: "Communications",
-    kind: "future",
-    internalOnly: false,
-  },
-  {
-    key: "calendar",
-    label: "Calendar",
     kind: "future",
     internalOnly: false,
   },

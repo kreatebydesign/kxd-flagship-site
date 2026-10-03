@@ -17,8 +17,8 @@ import type { ClientPlanDefinition, ClientPlanKey, EntitlementModuleKey } from "
 const PLAN_PORTAL_EXTENSIONS: Record<ClientPlanKey, EntitlementModuleKey[]> = {
   starter: [],
   growth: ["website-workspace"],
-  premium: ["website-workspace", "inventory", "executive-review"],
-  enterprise: ["website-workspace", "inventory", "executive-review"],
+  premium: ["website-workspace", "inventory", "executive-review", "calendar"],
+  enterprise: ["website-workspace", "inventory", "executive-review", "calendar"],
   custom: [],
 };
 
