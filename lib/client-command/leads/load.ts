@@ -253,16 +253,19 @@ async function loadInquiryActivity(
 
   try {
     const payload = await getPayload({ config });
+    // Activity Engine stores sourceType/sourceId inside metadata JSON — there is
+    // no top-level sourceType column on executive-timeline-events. Query by
+    // client + managed-client inquiry event prefix, then match inquiryKey.
     const result = await payload.find({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       collection: "executive-timeline-events" as any,
       depth: 0,
-      limit: 25,
+      limit: 50,
       sort: "-occurredAt",
       where: {
         and: [
           { client: { equals: tenant.clientId } },
-          { sourceType: { equals: "client-inquiry" } },
+          { eventType: { like: "managed-client.inquiry.%" } },
         ],
       },
       overrideAccess: true,
@@ -270,19 +273,28 @@ async function loadInquiryActivity(
 
     for (const doc of result.docs) {
       const row = doc as unknown as AnyDoc;
-      const sourceId = String(row.sourceId ?? "");
       const meta = (row.metadata ?? {}) as AnyDoc;
       const metaKey = meta.inquiryKey ? String(meta.inquiryKey) : "";
+      const sourceType = meta.sourceType ? String(meta.sourceType) : "";
+      const sourceId = String(meta.sourceId ?? row.sourceId ?? "");
+      if (sourceType && sourceType !== "client-inquiry") continue;
       const matches =
         metaKey === inquiry.inquiryKey ||
         sourceId === String(inquiry.id) ||
         sourceId.startsWith(`${inquiry.id}:`);
       if (!matches) continue;
+      // Skip raw "received" timeline twin — we already synthesize a calm
+      // "Lead received" row from inquiry.receivedAt above.
+      if (String(row.eventType ?? "") === "managed-client.inquiry.received") continue;
       items.push({
         id: `evt-${row.id}`,
         title: String(row.title ?? "Update"),
         summary: row.summary ? String(row.summary) : null,
-        occurredAt: row.occurredAt ? String(row.occurredAt) : row.eventDate ? String(row.eventDate) : null,
+        occurredAt: row.occurredAt
+          ? String(row.occurredAt)
+          : row.eventDate
+            ? String(row.eventDate)
+            : null,
         eventType: row.eventType ? String(row.eventType) : null,
       });
     }

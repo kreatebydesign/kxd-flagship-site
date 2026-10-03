@@ -24,6 +24,31 @@ function Fact({ label, value }: { label: string; value: string | null | undefine
   );
 }
 
+function formatSourceMedium(inquiry: ClientInquiryRecord): string | null {
+  const source = inquiry.utmSource?.trim();
+  const medium = inquiry.utmMedium?.trim();
+  if (source && medium) return `${source} / ${medium}`;
+  if (source) return source;
+  if (medium) return medium;
+  const legacy = inquiry.sourceMedium?.trim();
+  return legacy || null;
+}
+
+function hasAttributionFacts(inquiry: ClientInquiryRecord): boolean {
+  return Boolean(
+    inquiry.landingPage?.trim() ||
+      inquiry.campaign?.trim() ||
+      inquiry.utmCampaign?.trim() ||
+      inquiry.utmSource?.trim() ||
+      inquiry.utmMedium?.trim() ||
+      inquiry.utmContent?.trim() ||
+      inquiry.utmTerm?.trim() ||
+      inquiry.sourceMedium?.trim() ||
+      inquiry.gclid?.trim() ||
+      inquiry.keyword?.trim(),
+  );
+}
+
 export function LeadDetailScreen({
   clientName,
   inquiry,
@@ -112,6 +137,25 @@ export function LeadDetailScreen({
         <LeadLifecycleActions inquiry={inquiry} owners={owners} canManage={canManage} />
       </section>
 
+      <details className="kxd-client-disclosure" open>
+        <summary>Attribution</summary>
+        {hasAttributionFacts(inquiry) ? (
+          <dl className="kxd-lead-fact-grid">
+            <Fact label="Originating page" value={inquiry.landingPage} />
+            <Fact label="Source / medium" value={formatSourceMedium(inquiry)} />
+            <Fact label="Campaign" value={inquiry.utmCampaign || inquiry.campaign} />
+            <Fact label="UTM content" value={inquiry.utmContent} />
+            <Fact label="UTM term" value={inquiry.utmTerm} />
+            <Fact label="Keyword" value={inquiry.keyword} />
+            <Fact label="Google click ID" value={inquiry.gclid} />
+          </dl>
+        ) : (
+          <p className="kxd-lead-muted kxd-lead-attribution-empty">
+            No attribution was captured with this inquiry.
+          </p>
+        )}
+      </details>
+
       <details className="kxd-client-disclosure">
         <summary>Lead intelligence</summary>
         <dl className="kxd-lead-fact-grid">
@@ -127,10 +171,6 @@ export function LeadDetailScreen({
                 : null
             }
           />
-          <Fact label="Landing page" value={inquiry.landingPage} />
-          <Fact label="Campaign" value={inquiry.utmCampaign || inquiry.campaign} />
-          <Fact label="Source / medium" value={inquiry.utmSource || inquiry.sourceMedium} />
-          <Fact label="Keyword" value={inquiry.keyword} />
           <Fact label="Operational" value={labelizeLeadField(inquiry.operationalStatus)} />
           <Fact label="Disposition" value={labelizeLeadField(inquiry.disposition)} />
           <Fact label="Qualification" value={labelizeLeadField(inquiry.qualificationState)} />

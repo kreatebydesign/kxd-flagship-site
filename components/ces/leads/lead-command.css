@@ -302,6 +302,13 @@
   color: var(--kxd-os-text-faint);
 }
 
+.kxd-lead-attribution-empty {
+  margin: 0.75rem 0 0;
+  padding: 0.75rem 0.875rem;
+  border-radius: calc(var(--kxd-ces-radius, 8px) - 2px);
+  background: color-mix(in srgb, var(--kxd-os-border-subtle) 35%, transparent);
+}
+
 .kxd-lead-error {
   font-size: 0.8125rem;
   color: #b4542a;
