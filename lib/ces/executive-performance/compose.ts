@@ -565,7 +565,7 @@ export async function composeExecutivePerformance(input: {
       logoSrc: input.profile.identity.logoUrl ?? presentation.logoSrc,
       logoAlt: input.profile.identity.logoAlt || presentation.logoAlt,
       introduction: postLaunch
-        ? "Website live. Production verified. Measurement active. Focus: growth."
+        ? "Website live · Production verified · Measurement active"
         : presentation.introduction,
     },
     greeting: input.greeting,

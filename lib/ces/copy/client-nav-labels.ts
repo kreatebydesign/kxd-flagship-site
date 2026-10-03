@@ -28,19 +28,25 @@ export const CES_CLIENT_NAV_LABELS: Record<string, string> = {
   portfolio: "All Businesses",
 };
 
-/** Primary client destinations — presentation order for the calm multi-business shell. */
+/**
+ * Primary operating destinations — Overview + Leads lead; results follow.
+ * Remaining entitled modules stay under Partnership / Account groupings.
+ */
 export const CES_PRIMARY_PORTAL_NAV_IDS = [
   "overview",
+  "leads",
   "analytics",
-  "deliverables",
   "reports",
 ] as const;
 
+/** Results destinations shown after the operating pair. */
+export const CES_RESULTS_PORTAL_NAV_IDS = ["analytics", "reports"] as const;
+
 export const CES_CLIENT_NAV_GROUP_LABELS: Record<string, string> = {
-  Headquarters: "",
-  Work: "",
-  Library: "More",
-  Intelligence: "",
+  Headquarters: "Operate",
+  Work: "Partnership",
+  Library: "Partnership",
+  Intelligence: "Results",
   Account: "Account",
 };
 

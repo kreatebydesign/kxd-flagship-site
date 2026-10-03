@@ -16,6 +16,7 @@ import { isPortalNavEnabled } from "@/lib/editions/navigation";
 import { isClientHqModuleEnabled, type ClientHqModuleId } from "./modules";
 import {
   CES_PRIMARY_PORTAL_NAV_IDS,
+  CES_RESULTS_PORTAL_NAV_IDS,
   clientPortalNavGroupLabel,
   clientPortalNavLabel,
 } from "@/lib/ces/copy/client-nav-labels";
@@ -381,9 +382,9 @@ export function getEnabledPortalNavGroups(
 }
 
 /**
- * Collapse entitled nav into Overview · Performance · KXD Work · Reports.
- * Other entitled destinations remain available under More / Account.
- * Does not invent entitlements — only reorders already-visible items.
+ * Collapse entitled nav into Operate · Results · Partnership · Account.
+ * Overview + Leads lead; Performance + Reports follow; remaining entitled
+ * destinations stay under Partnership / Account. Does not invent entitlements.
  * All Businesses stays in the account switcher (not a synthetic client).
  */
 function simplifyPrimaryPortalNav(
@@ -396,42 +397,43 @@ function simplifyPrimaryPortalNav(
     if (!byId.has(item.id)) byId.set(item.id, item);
   }
 
-  const primaryIds = new Set<string>(CES_PRIMARY_PORTAL_NAV_IDS);
+  const operateIds = ["overview", "leads"] as const;
+  const resultsIds = [...CES_RESULTS_PORTAL_NAV_IDS];
+  const claimedIds = new Set<string>([...CES_PRIMARY_PORTAL_NAV_IDS]);
   const accountIds = new Set(["settings", "invoices", "agreement", "team"]);
 
-  const primary: PortalNavItem[] = [];
-  for (const id of CES_PRIMARY_PORTAL_NAV_IDS) {
-    const item = byId.get(id);
-    if (!item) continue;
-    primary.push({
-      ...item,
-      label: relabel(id, item.label),
-    });
-  }
+  const pick = (ids: readonly string[]): PortalNavItem[] => {
+    const out: PortalNavItem[] = [];
+    for (const id of ids) {
+      const item = byId.get(id);
+      if (!item) continue;
+      out.push({ ...item, label: relabel(id, item.label) });
+    }
+    return out;
+  };
 
-  const more: PortalNavItem[] = [];
+  const operate = pick(operateIds);
+  const results = pick(resultsIds);
+
+  const partnership: PortalNavItem[] = [];
   const account: PortalNavItem[] = [];
   for (const item of byId.values()) {
-    if (primaryIds.has(item.id)) continue;
-    // Portfolio lives in the account switcher for multi-business clients.
+    if (claimedIds.has(item.id)) continue;
     if (item.id === "portfolio") continue;
-    const labeled = {
-      ...item,
-      label: relabel(item.id, item.label),
-    };
-    if (accountIds.has(item.id)) {
-      account.push(labeled);
-    } else {
-      more.push(labeled);
-    }
+    const labeled = { ...item, label: relabel(item.id, item.label) };
+    if (accountIds.has(item.id)) account.push(labeled);
+    else partnership.push(labeled);
   }
 
   const out: PortalNavGroup[] = [];
-  if (primary.length > 0) {
-    out.push({ label: clientPortalNavGroupLabel("Headquarters"), items: primary });
+  if (operate.length > 0) {
+    out.push({ label: clientPortalNavGroupLabel("Headquarters"), items: operate });
   }
-  if (more.length > 0) {
-    out.push({ label: clientPortalNavGroupLabel("Library"), items: more });
+  if (results.length > 0) {
+    out.push({ label: "Results", items: results });
+  }
+  if (partnership.length > 0) {
+    out.push({ label: clientPortalNavGroupLabel("Library"), items: partnership });
   }
   if (account.length > 0) {
     out.push({ label: clientPortalNavGroupLabel("Account"), items: account });
