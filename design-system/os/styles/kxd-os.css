@@ -21270,8 +21270,12 @@ html[data-theme="dark"] .kxd-os-theme-pref__option.is-active {
 
 /* ── Batch E: Analytics visibility ───────────────────────────────────────── */
 
-.kxd-analytics-vis {
-  min-width: 0;
+.kxd-analytics-vis .kxd-ws-perf__section {
+  padding-top: 0.35rem;
+}
+
+.kxd-analytics-vis .kxd-ces-empty {
+  min-height: 0;
 }
 
 .kxd-analytics-vis .kxd-os-section__label {

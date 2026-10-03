@@ -81,7 +81,7 @@ function buildSources(input: {
       state: ga4State,
       detail:
         ga4State === "configured"
-          ? "Measurement is connected for this business"
+          ? "GA4 property is mapped. Closed-period website activity appears here only after facts are stored for that month."
           : ga4State === "not-entitled"
             ? "Website measurement is not part of the active partnership"
             : "Website measurement is not connected yet",

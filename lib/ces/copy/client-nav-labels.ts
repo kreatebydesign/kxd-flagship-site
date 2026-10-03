@@ -10,6 +10,7 @@ export const CES_CLIENT_NAV_LABELS: Record<string, string> = {
   "executive-review": "Monthly review",
   "website-review": "Website feedback",
   "website-workspace": "Website updates",
+  leads: "Leads",
   requests: "Requests",
   "website-health": "Website status",
   analytics: "Performance",
@@ -27,21 +28,43 @@ export const CES_CLIENT_NAV_LABELS: Record<string, string> = {
   portfolio: "All Businesses",
 };
 
-/** Primary client destinations — presentation order for the calm multi-business shell. */
+/**
+ * Primary operating destinations — Overview + Leads lead; results follow.
+ * Remaining entitled modules stay under Partnership / Account groupings.
+ */
 export const CES_PRIMARY_PORTAL_NAV_IDS = [
   "overview",
+  "leads",
   "analytics",
-  "deliverables",
   "reports",
 ] as const;
 
+/** Results destinations shown after the operating pair. */
+export const CES_RESULTS_PORTAL_NAV_IDS = ["analytics", "reports"] as const;
+
 export const CES_CLIENT_NAV_GROUP_LABELS: Record<string, string> = {
-  Headquarters: "",
-  Work: "",
-  Library: "More",
-  Intelligence: "",
+  Headquarters: "Operate",
+  Work: "Website",
+  Library: "Website",
+  Intelligence: "Results",
   Account: "Account",
 };
+
+/** Destinations that belong with website operations rather than relationship history. */
+export const CES_WEBSITE_PORTAL_NAV_IDS = [
+  "website-review",
+  "website-workspace",
+  "website-health",
+  "inventory",
+  "website-editor",
+] as const;
+
+/** Historical relationship surfaces — remain routable, not primary Primal nav. */
+export const CES_PRIMAL_ARCHIVE_NAV_IDS = [
+  "partnership",
+  "executive-performance",
+  "executive-review",
+] as const;
 
 export function clientPortalNavLabel(
   id: string,

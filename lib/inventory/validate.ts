@@ -5,6 +5,7 @@ import {
   type InventoryVehicleInput,
 } from "./types";
 import { normalizeInventorySlug, suggestInventorySlug } from "./slug";
+import { normalizeReferencedMedia } from "./referenced-media";
 
 export type InventoryValidationIssue = {
   field: string;
@@ -123,5 +124,9 @@ export function normalizeInventoryInput(
     galleryImageIds: (input.galleryImageIds ?? []).filter((id) =>
       Number.isFinite(id),
     ),
+    referencedMedia:
+      input.referencedMedia === undefined
+        ? input.referencedMedia
+        : normalizeReferencedMedia(input.referencedMedia),
   };
 }

@@ -2,6 +2,10 @@
  * Phase 34B — Client Inventory Platform types (client-safe).
  */
 
+import type { InventoryReferencedMedia } from "./referenced-media";
+
+export type { InventoryReferencedImage, InventoryReferencedMedia } from "./referenced-media";
+
 export const INVENTORY_CONDITIONS = ["new", "used"] as const;
 export type InventoryCondition = (typeof INVENTORY_CONDITIONS)[number];
 
@@ -26,7 +30,7 @@ export const PUBLIC_LISTABLE_STATUSES = ["available", "pending", "coming_soon"] 
 export type PublicListableStatus = (typeof PUBLIC_LISTABLE_STATUSES)[number];
 
 export type InventoryMediaRef = {
-  id: number;
+  id: number | null;
   url: string;
   alt: string;
 };
@@ -71,6 +75,8 @@ export type InventoryVehicleRecord = {
   highlights: InventoryHighlightRow[];
   primaryImage: InventoryMediaRef | null;
   gallery: InventoryMediaRef[];
+  /** Durable public source URLs when KXD does not own the files. */
+  referencedMedia: InventoryReferencedMedia | null;
   sortOrder: number;
   publishedAt: string | null;
   soldAt: string | null;
@@ -143,6 +149,7 @@ export type InventoryVehicleInput = {
   highlights?: string[];
   primaryImageId?: number | null;
   galleryImageIds?: number[];
+  referencedMedia?: InventoryReferencedMedia | null;
   sortOrder?: number;
   externalUrl?: string | null;
 };

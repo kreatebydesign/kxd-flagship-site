@@ -21,7 +21,17 @@ export const PRIMAL_MOTORSPORTS_LEAD_POLICY: ManagedClientLeadPolicy = {
   supportsSaleConfirmation: true,
   commissionOnConfirmedSale: false,
   commissionAmountCents: null,
-  portalModuleEnabled: false,
+  /** Primal Phase 1 Lead Command (Build 1) — Client Command portal lead inbox active. */
+  portalModuleEnabled: true,
   /** Phase 3 — racing-school form success may signed-ingest into client-inquiries. */
   autoIngestFromWebsiteForm: true,
+  /**
+   * Primal sales owners for Lead Command assignment.
+   * Add authorized Primal emails here to enable without rewriting Lead Command.
+   * Excludes KXD/studio/QA identities by allowlist — not by deleting accounts.
+   */
+  assignablePortalOwnerEmails: [
+    "tyler.edwards@primalmotorsports.com",
+    "jb.layman@primalmotorsports.com",
+  ],
 };

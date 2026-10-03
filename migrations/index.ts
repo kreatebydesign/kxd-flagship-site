@@ -111,6 +111,8 @@ import * as migration_20260824_csi_v1b_sale_commission from './20260824_csi_v1b_
 import * as migration_20260825_client_service_assignments from './20260825_client_service_assignments';
 import * as migration_20260916_mission01_capability_bridge from './20260916_mission01_capability_bridge';
 import * as migration_20260916_mission03b_commercial_foundation from './20260916_mission03b_commercial_foundation';
+import * as migration_20261002_primal_phase1_lead_command_foundation from './20261002_primal_phase1_lead_command_foundation';
+import * as migration_20261003_client_inventory_referenced_media from './20261003_client_inventory_referenced_media';
 
 export const migrations = [
   {
@@ -714,5 +716,20 @@ export const migrations = [
     up: migration_20260916_mission03b_commercial_foundation.up,
     down: migration_20260916_mission03b_commercial_foundation.down,
     name: '20260916_mission03b_commercial_foundation',
+  },
+  {
+    // Primal Phase 1 Lead Command foundation — client-locations collection +
+    // additive client-inquiries fields (follow-up, UTM/gclid/keyword, lost
+    // reason, won revenue/program, location, assigned portal owner).
+    // Additive only. Local apply until production migration is authorized.
+    up: migration_20261002_primal_phase1_lead_command_foundation.up,
+    down: migration_20261002_primal_phase1_lead_command_foundation.down,
+    name: '20261002_primal_phase1_lead_command_foundation',
+  },
+  {
+    // Primal inventory: reuse durable public source photography without Blob copies.
+    up: migration_20261003_client_inventory_referenced_media.up,
+    down: migration_20261003_client_inventory_referenced_media.down,
+    name: '20261003_client_inventory_referenced_media',
   },
 ];

@@ -191,6 +191,14 @@ export async function ingestManagedClientFormWebhook(input: {
     destinationInbox: normalized.data.destinationInbox,
     campaign: normalized.data.campaign,
     sourceMedium: normalized.data.sourceMedium,
+    programInterest: normalized.data.programInterest,
+    utmSource: normalized.data.utmSource,
+    utmMedium: normalized.data.utmMedium,
+    utmCampaign: normalized.data.utmCampaign,
+    utmContent: normalized.data.utmContent,
+    utmTerm: normalized.data.utmTerm,
+    gclid: normalized.data.gclid,
+    keyword: normalized.data.keyword,
   });
 
   if (!result.ok) {

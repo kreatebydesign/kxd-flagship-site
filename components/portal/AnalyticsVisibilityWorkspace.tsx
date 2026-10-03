@@ -13,7 +13,7 @@ function Section({ label, children }: { label: string; children: ReactNode }) {
 }
 
 function Empty({ title, lead }: { title: string; lead: string }) {
-  return <CesEmptyState title={title} lead={lead} />;
+  return <CesEmptyState title={title} lead={lead} variant="editorial" />;
 }
 
 function sourceStateLabel(state: string): string {
@@ -112,7 +112,7 @@ export function AnalyticsVisibilityWorkspace({ model }: { model: AnalyticsVisibi
             }
             lead={
               showMissingGa4Note
-                ? "Google Search performance is available below. Website analytics activity was not available for this closed reporting period — that is not the same as zero traffic. If tracking was installed later, meaningful website analytics will accumulate after that date."
+                ? "Search visibility for this closed month is below. Website activity for the same closed window was not stored in KXD reporting — that is not the same as zero traffic, and it does not mean measurement is disconnected today."
                 : (analytics.statusNote ?? model.emptyStates.analytics.lead)
             }
           />

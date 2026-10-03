@@ -189,6 +189,7 @@ export async function createInventoryVehicle(
       highlights: (normalized.highlights ?? []).map((text) => ({ text })),
       primaryImage: normalized.primaryImageId ?? undefined,
       gallery: (normalized.galleryImageIds ?? []).map((image) => ({ image })),
+      referencedMedia: normalized.referencedMedia ?? null,
       sortOrder: normalized.sortOrder ?? 0,
       externalUrl: normalized.externalUrl ?? undefined,
       sourceSystem: source?.sourceSystem,
@@ -356,7 +357,15 @@ export async function updateInventoryVehicle(
       input.data.primaryImageId !== undefined
         ? input.data.primaryImageId
         : (existing.primaryImage?.id ?? null),
-    galleryImageIds: input.data.galleryImageIds ?? existing.gallery.map((image) => image.id),
+    galleryImageIds:
+      input.data.galleryImageIds ??
+      existing.gallery
+        .map((image) => image.id)
+        .filter((id): id is number => id != null && Number.isFinite(id)),
+    referencedMedia:
+      input.data.referencedMedia !== undefined
+        ? input.data.referencedMedia
+        : existing.referencedMedia,
     sortOrder: input.data.sortOrder !== undefined ? input.data.sortOrder : existing.sortOrder,
     externalUrl:
       input.data.externalUrl !== undefined ? input.data.externalUrl : existing.externalUrl,
@@ -407,6 +416,7 @@ export async function updateInventoryVehicle(
       highlights: (normalized.highlights ?? []).map((text) => ({ text })),
       primaryImage: normalized.primaryImageId ?? null,
       gallery: (normalized.galleryImageIds ?? []).map((image) => ({ image })),
+      referencedMedia: normalized.referencedMedia ?? null,
       sortOrder: normalized.sortOrder ?? 0,
       externalUrl: normalized.externalUrl ?? null,
       ...(stamps.publishedAt !== undefined ? { publishedAt: stamps.publishedAt } : {}),
@@ -498,7 +508,10 @@ export async function duplicateInventoryVehicle(
       })),
       highlights: existing.highlights.map((row) => row.text),
       primaryImageId: existing.primaryImage?.id ?? null,
-      galleryImageIds: existing.gallery.map((image) => image.id),
+      galleryImageIds: existing.gallery
+        .map((image) => image.id)
+        .filter((id): id is number => id != null && Number.isFinite(id)),
+      referencedMedia: existing.referencedMedia,
       sortOrder: existing.sortOrder + 1,
       externalUrl: existing.externalUrl,
     },

@@ -18,6 +18,8 @@ import {
   loadPortalBillingOverviewCardForSession,
   resolvePortalBillingNavAvailable,
 } from "@/lib/portal/billing/load";
+import { isLeadCommandEnabled } from "@/lib/client-command/leads/access";
+import { loadLeadAttentionOverview } from "@/lib/client-command/leads/overview";
 
 export const dynamic = "force-dynamic";
 
@@ -67,6 +69,11 @@ export default async function PortalOverviewPage() {
       connected,
     });
     const greeting = await composePortalGreeting(session);
+    const leadAttention = isLeadCommandEnabled(profile)
+      ? await loadLeadAttentionOverview({ session, profile, canManage: false }).then((r) =>
+          r.ok ? r.counts : null,
+        )
+      : null;
     /**
      * Home Executive Performance must consume the same website-form inquiry
      * resolution already proven on Performance (Work Performance leads).
@@ -104,6 +111,7 @@ export default async function PortalOverviewPage() {
         engagement={engagement}
         websiteEditorUrl={websiteEditorUrl}
         billingOverview={showBillingCard ? billingOverview : null}
+        leadAttention={leadAttention}
       />
     );
   }

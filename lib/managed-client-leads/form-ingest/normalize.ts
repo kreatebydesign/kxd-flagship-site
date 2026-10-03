@@ -18,6 +18,15 @@ export type NormalizedMciFormIngest = {
   destinationInbox: string | null;
   campaign: string | null;
   sourceMedium: string | null;
+  /** Primal Phase 1 Lead Command foundation (Build 1, additive — optional). */
+  programInterest: string | null;
+  utmSource: string | null;
+  utmMedium: string | null;
+  utmCampaign: string | null;
+  utmContent: string | null;
+  utmTerm: string | null;
+  gclid: string | null;
+  keyword: string | null;
 };
 
 export type NormalizeMciFormIngestResult =
@@ -137,6 +146,14 @@ export function normalizeMciFormIngestPayload(input: {
       destinationInbox: boundText(root.destinationInbox, 200),
       campaign: boundText(root.campaign, 200),
       sourceMedium: boundText(root.sourceMedium, 120),
+      programInterest: boundText(root.programInterest, 200),
+      utmSource: boundText(root.utmSource, 120),
+      utmMedium: boundText(root.utmMedium, 120),
+      utmCampaign: boundText(root.utmCampaign, 200),
+      utmContent: boundText(root.utmContent, 200),
+      utmTerm: boundText(root.utmTerm, 200),
+      gclid: boundText(root.gclid, 200),
+      keyword: boundText(root.keyword, 200),
     },
   };
 }

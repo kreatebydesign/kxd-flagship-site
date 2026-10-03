@@ -58,3 +58,9 @@ storage/branded-monthly-reports/
 # KXD Connect local dogfood activation (operator-owned; never commit)
 .connect/
 report-output/
+
+# Local Build 1 QA credentials (never commit)
+.qa-build1-creds.tmp
+.qa-primal-phase1-build1/
+scripts/_tmp-seed-*
+scripts/_tmp-payload-*

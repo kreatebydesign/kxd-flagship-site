@@ -61,6 +61,14 @@ export type ManagedClientLeadPolicy = {
    * GA4 / Ads / CSI evidence must never flip this on by themselves.
    */
   autoIngestFromWebsiteForm: boolean;
+  /**
+   * Optional allowlist of portal-user emails eligible as Lead Command owners.
+   * When set, only active members whose email matches (case-insensitive) appear
+   * in the assignable-owner list. When omitted, membership + manage capability
+   * rules apply with studio/QA identity filtering.
+   * Configuration only — never hardcode founder identities in shared loaders.
+   */
+  assignablePortalOwnerEmails?: readonly string[];
 };
 
 /** Populated by policy registration modules — empty until policies load. */
