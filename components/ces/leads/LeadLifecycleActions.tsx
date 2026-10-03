@@ -79,201 +79,210 @@ export function LeadLifecycleActions({
   if (!canManage) {
     return (
       <p className="kxd-lead-muted">
-        Lead actions are available to authorized workspace members. Studio
-        operator preview can act when signed in as a Studio Operator.
+        Lead actions are available to authorized workspace members.
       </p>
     );
   }
 
   return (
     <div className="kxd-lead-actions">
-      <div className="kxd-lead-actions__row">
-        <label className="kxd-lead-filters__label" htmlFor="lead-stage-select">
-          Stage
-        </label>
-        <select
-          id="lead-stage-select"
-          className="kxd-lead-filters__select"
-          disabled={pending}
-          value={stage}
-          onChange={(e) => setStage(e.target.value as typeof stage)}
-        >
-          {SELECTABLE_LEAD_STAGES.map((s) => (
-            <option key={s} value={s}>
-              {leadPresentationStageLabel(s)}
-            </option>
-          ))}
-        </select>
-        <button
-          type="button"
-          className="kxd-ces-btn kxd-ces-btn--ghost"
-          disabled={pending || stage === currentStage}
-          onClick={() => send({ type: "stage", stage })}
-        >
-          Move to {leadPresentationStageLabel(stage)}
-        </button>
-      </div>
-
-      <div className="kxd-lead-actions__row">
-        <label className="kxd-lead-filters__label" htmlFor="lead-owner-select">
-          Owner
-        </label>
-        <select
-          id="lead-owner-select"
-          className="kxd-lead-filters__select"
-          disabled={pending}
-          defaultValue={inquiry.assignedPortalOwnerId ?? "unassigned"}
-          onChange={(e) =>
-            send({
-              type: "assign",
-              portalOwnerId: e.target.value === "unassigned" ? null : Number(e.target.value),
-            })
-          }
-        >
-          <option value="unassigned">Unassigned</option>
-          {owners.map((owner) => (
-            <option key={owner.portalUserId} value={owner.portalUserId}>
-              {owner.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="kxd-lead-actions__row">
-        <label className="kxd-lead-filters__label" htmlFor="lead-follow-up">
-          Next follow-up
-        </label>
-        <input
-          id="lead-follow-up"
-          className="kxd-lead-filters__input"
-          type="date"
-          disabled={pending}
-          value={followUp}
-          onChange={(e) => setFollowUp(e.target.value)}
-        />
-        <button
-          type="button"
-          className="kxd-ces-btn kxd-ces-btn--ghost"
-          disabled={pending}
-          onClick={() =>
-            send({
-              type: "follow-up",
-              nextFollowUpAt: followUp ? new Date(`${followUp}T09:00:00`).toISOString() : null,
-            })
-          }
-        >
-          Save follow-up
-        </button>
-      </div>
-
-      <div className="kxd-lead-actions__row">
-        <label className="kxd-lead-filters__label" htmlFor="lead-note">
-          Note
-        </label>
-      </div>
-      <textarea
-        id="lead-note"
-        className="kxd-lead-filters__input"
-        rows={3}
-        disabled={pending}
-        value={note}
-        onChange={(e) => setNote(e.target.value)}
-        placeholder="Capture the next touch, promise, or blocker…"
-      />
-      <div className="kxd-lead-actions__row">
-        <button
-          type="button"
-          className="kxd-ces-btn kxd-ces-btn--ghost"
-          disabled={pending}
-          onClick={() => send({ type: "note", note })}
-        >
-          Save note
-        </button>
-      </div>
-
-      {!isClosed ? (
-        <div className="kxd-lead-actions__row">
-          <button
-            type="button"
-            className="kxd-ces-btn kxd-ces-btn--ghost"
-            disabled={pending || currentStage === "QUALIFIED"}
-            onClick={() => send({ type: "qualify" })}
-          >
-            Mark qualified
-          </button>
-        </div>
-      ) : null}
-
-      <details>
-        <summary>Mark won</summary>
-        <div className="kxd-lead-actions__inline">
-          <label className="kxd-lead-filters__field">
-            <span className="kxd-lead-filters__label">Revenue ($)</span>
-            <input
-              className="kxd-lead-filters__input"
-              type="number"
-              min="0"
-              step="0.01"
-              disabled={pending}
-              value={wonRevenue}
-              onChange={(e) => setWonRevenue(e.target.value)}
-            />
+      <div className="kxd-lead-actions__primary">
+        <div className="kxd-lead-actions__field">
+          <label className="kxd-lead-filters__label" htmlFor="lead-stage-select">
+            Stage
           </label>
-          <label className="kxd-lead-filters__field">
-            <span className="kxd-lead-filters__label">Program</span>
-            <input
-              className="kxd-lead-filters__input"
-              type="text"
-              disabled={pending}
-              value={bookedProgram}
-              onChange={(e) => setBookedProgram(e.target.value)}
-            />
-          </label>
-          <button
-            type="button"
-            className="kxd-ces-btn kxd-ces-btn--primary"
-            disabled={pending}
-            onClick={() =>
-              send({
-                type: "won",
-                wonRevenueCents: wonRevenue ? Math.round(Number(wonRevenue) * 100) : null,
-                bookedProgram: bookedProgram.trim() || null,
-              })
-            }
-          >
-            Confirm won
-          </button>
-        </div>
-      </details>
-
-      <details>
-        <summary>Mark lost</summary>
-        <div className="kxd-lead-actions__inline">
-          <label className="kxd-lead-filters__field">
-            <span className="kxd-lead-filters__label">Reason</span>
+          <div className="kxd-lead-actions__control-row">
             <select
+              id="lead-stage-select"
               className="kxd-lead-filters__select"
               disabled={pending}
-              value={lostReason}
-              onChange={(e) => setLostReason(e.target.value as LostReason)}
+              value={stage}
+              onChange={(e) => setStage(e.target.value as typeof stage)}
             >
-              {LOST_REASONS.map((reason) => (
-                <option key={reason} value={reason}>
-                  {lostReasonLabel(reason)}
+              {SELECTABLE_LEAD_STAGES.map((s) => (
+                <option key={s} value={s}>
+                  {leadPresentationStageLabel(s)}
                 </option>
               ))}
             </select>
+            <button
+              type="button"
+              className="kxd-ces-btn kxd-ces-btn--primary"
+              disabled={pending || stage === currentStage}
+              onClick={() => send({ type: "stage", stage })}
+            >
+              Update stage
+            </button>
+          </div>
+        </div>
+
+        <div className="kxd-lead-actions__field">
+          <label className="kxd-lead-filters__label" htmlFor="lead-owner-select">
+            Owner
           </label>
+          <select
+            id="lead-owner-select"
+            className="kxd-lead-filters__select"
+            disabled={pending}
+            defaultValue={inquiry.assignedPortalOwnerId ?? "unassigned"}
+            onChange={(e) =>
+              send({
+                type: "assign",
+                portalOwnerId: e.target.value === "unassigned" ? null : Number(e.target.value),
+              })
+            }
+          >
+            <option value="unassigned">Unassigned</option>
+            {owners.map((owner) => (
+              <option key={owner.portalUserId} value={owner.portalUserId}>
+                {owner.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="kxd-lead-actions__field">
+          <label className="kxd-lead-filters__label" htmlFor="lead-follow-up">
+            Next follow-up
+          </label>
+          <div className="kxd-lead-actions__control-row">
+            <input
+              id="lead-follow-up"
+              className="kxd-lead-filters__input"
+              type="date"
+              disabled={pending}
+              value={followUp}
+              onChange={(e) => setFollowUp(e.target.value)}
+            />
+            <button
+              type="button"
+              className="kxd-ces-btn kxd-ces-btn--ghost"
+              disabled={pending}
+              onClick={() =>
+                send({
+                  type: "follow-up",
+                  nextFollowUpAt: followUp ? new Date(`${followUp}T09:00:00`).toISOString() : null,
+                })
+              }
+            >
+              Save follow-up
+            </button>
+          </div>
+        </div>
+
+        <div className="kxd-lead-actions__field kxd-lead-actions__field--note">
+          <label className="kxd-lead-filters__label" htmlFor="lead-note">
+            Note
+          </label>
+          <textarea
+            id="lead-note"
+            className="kxd-lead-filters__input kxd-lead-filters__textarea"
+            rows={3}
+            disabled={pending}
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder="Capture the next touch, promise, or blocker…"
+          />
           <button
             type="button"
             className="kxd-ces-btn kxd-ces-btn--ghost"
             disabled={pending}
-            onClick={() => send({ type: "lost", lostReason })}
+            onClick={() => send({ type: "note", note })}
           >
-            Confirm lost
+            Save note
           </button>
         </div>
-      </details>
+
+        {!isClosed ? (
+          <div className="kxd-lead-actions__qualify">
+            <button
+              type="button"
+              className="kxd-ces-btn kxd-ces-btn--ghost"
+              disabled={pending || currentStage === "QUALIFIED"}
+              onClick={() => send({ type: "qualify" })}
+            >
+              Mark qualified
+            </button>
+          </div>
+        ) : null}
+      </div>
+
+      <div className="kxd-lead-actions__terminal">
+        <details className="kxd-lead-terminal">
+          <summary>Mark won</summary>
+          <div className="kxd-lead-terminal__form">
+            <label className="kxd-lead-filters__field">
+              <span className="kxd-lead-filters__label">Revenue ($)</span>
+              <input
+                className="kxd-lead-filters__input"
+                type="number"
+                min="0"
+                step="0.01"
+                disabled={pending}
+                value={wonRevenue}
+                onChange={(e) => setWonRevenue(e.target.value)}
+              />
+            </label>
+            <label className="kxd-lead-filters__field">
+              <span className="kxd-lead-filters__label">Program</span>
+              <input
+                className="kxd-lead-filters__input"
+                type="text"
+                disabled={pending}
+                value={bookedProgram}
+                onChange={(e) => setBookedProgram(e.target.value)}
+              />
+            </label>
+            <div className="kxd-lead-terminal__cta">
+              <button
+                type="button"
+                className="kxd-ces-btn kxd-ces-btn--primary"
+                disabled={pending}
+                onClick={() =>
+                  send({
+                    type: "won",
+                    wonRevenueCents: wonRevenue ? Math.round(Number(wonRevenue) * 100) : null,
+                    bookedProgram: bookedProgram.trim() || null,
+                  })
+                }
+              >
+                Confirm won
+              </button>
+            </div>
+          </div>
+        </details>
+
+        <details className="kxd-lead-terminal">
+          <summary>Mark lost</summary>
+          <div className="kxd-lead-terminal__form">
+            <label className="kxd-lead-filters__field">
+              <span className="kxd-lead-filters__label">Reason</span>
+              <select
+                className="kxd-lead-filters__select"
+                disabled={pending}
+                value={lostReason}
+                onChange={(e) => setLostReason(e.target.value as LostReason)}
+              >
+                {LOST_REASONS.map((reason) => (
+                  <option key={reason} value={reason}>
+                    {lostReasonLabel(reason)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div className="kxd-lead-terminal__cta">
+              <button
+                type="button"
+                className="kxd-ces-btn kxd-ces-btn--ghost"
+                disabled={pending}
+                onClick={() => send({ type: "lost", lostReason })}
+              >
+                Confirm lost
+              </button>
+            </div>
+          </div>
+        </details>
+      </div>
 
       {error ? (
         <p className="kxd-lead-error" role="alert">

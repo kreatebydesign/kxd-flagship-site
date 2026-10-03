@@ -13,10 +13,10 @@ const PANEL_TITLES: Record<string, string> = {
 };
 
 const ENABLEMENT_SUPPORT: Record<string, string> = {
-  website: "Once website analytics is connected, traffic will appear here.",
-  search: "Once Search Console is connected, search visibility will appear here.",
-  ads: "Once advertising reporting is ready, paid acquisition will appear here.",
-  momentum: "A fuller view appears once trustworthy signals are active.",
+  website: "Website analytics is not connected for this period.",
+  search: "Search Console is not connected for this period.",
+  ads: "Paid advertising reporting is not active for this period.",
+  momentum: "Movement signals are not available for this period.",
 };
 
 const CONNECTED_CARE: Record<string, string> = {
@@ -36,15 +36,15 @@ export function executivePanelNarrative(
 ): { lead: string; support: string | null } {
   if (panel.state === "not-connected") {
     return {
-      lead: "Available when this part of the partnership is in place.",
-      support: ENABLEMENT_SUPPORT[panel.id] ?? null,
+      lead: "Not connected",
+      support: ENABLEMENT_SUPPORT[panel.id] ?? "This signal is not active.",
     };
   }
 
   if (panel.state === "awaiting-signal") {
     return {
-      lead: panel.summary?.trim() || "Waiting on the first trustworthy signal.",
-      support: "Nothing is estimated here — observed activity appears when it is ready.",
+      lead: panel.summary?.trim() || "No signal yet",
+      support: "Observed activity appears when trustworthy data is ready — nothing is estimated.",
     };
   }
 

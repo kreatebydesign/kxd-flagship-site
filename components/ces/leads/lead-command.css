@@ -1,5 +1,5 @@
 /**
- * Client Command — Lead Command (Primal Phase 1, Build 1).
+ * Client Command — Lead Command (Primal Phase 1, Build 1 + premium elevation).
  * Built on existing CES tokens (--kxd-ces-accent, --kxd-ces-brand, kxd-os-*
  * text/border variables) and .kxd-ces-status pill system. No new color system.
  */
@@ -21,6 +21,7 @@
   flex-direction: column;
   gap: 0.3rem;
   min-width: 9.5rem;
+  flex: 1 1 10rem;
 }
 
 .kxd-lead-filters__field--grow {
@@ -33,10 +34,13 @@
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--kxd-os-text-faint);
+  line-height: 1.2;
+  min-height: 1rem;
 }
 
 .kxd-lead-filters__input,
-.kxd-lead-filters__select {
+.kxd-lead-filters__select,
+.kxd-lead-filters__textarea {
   font: inherit;
   font-size: 0.875rem;
   padding: 0.5rem 0.625rem;
@@ -44,6 +48,14 @@
   border: 1px solid var(--kxd-os-border-subtle);
   background: var(--kxd-os-surface, #fff);
   color: var(--kxd-os-text-primary);
+  min-height: 2.5rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.kxd-lead-filters__textarea {
+  min-height: 5rem;
+  resize: vertical;
 }
 
 .kxd-lead-filters__pill {
@@ -97,6 +109,11 @@
   transform: translateY(-1px);
 }
 
+.kxd-lead-row:focus-visible {
+  outline: 2px solid var(--kxd-ces-accent);
+  outline-offset: 2px;
+}
+
 .kxd-lead-row--attention {
   border-color: color-mix(in srgb, var(--kxd-ces-accent) 35%, transparent);
 }
@@ -126,6 +143,7 @@
   font-weight: 500;
   margin: 0;
   color: var(--kxd-os-text-primary);
+  overflow-wrap: anywhere;
 }
 
 .kxd-lead-row__interest {
@@ -142,6 +160,7 @@
   font-size: 0.75rem;
   color: var(--kxd-os-text-faint);
   margin: 0;
+  overflow-wrap: anywhere;
 }
 
 .kxd-lead-row__side {
@@ -176,7 +195,7 @@
   border: 1px solid var(--kxd-os-border-subtle);
   background: color-mix(in srgb, var(--kxd-ces-accent) 4%, transparent);
   padding: 1.5rem 1.5rem 1.25rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
 }
 
 .kxd-lead-summary__top {
@@ -193,19 +212,47 @@
   color: var(--kxd-os-text-faint);
 }
 
+.kxd-lead-summary__when-abs {
+  color: color-mix(in srgb, var(--kxd-os-text-faint) 80%, transparent);
+}
+
 .kxd-lead-summary__title {
   font-family: var(--kxd-os-font-serif, "Cormorant Garamond", serif);
-  font-size: 1.75rem;
+  font-size: clamp(1.5rem, 2.4vw, 1.85rem);
   font-weight: 500;
   letter-spacing: -0.01em;
-  margin: 0 0 0.5rem;
+  margin: 0 0 0.4rem;
   color: var(--kxd-os-text-primary);
+  overflow-wrap: anywhere;
 }
 
 .kxd-lead-summary__interest {
   font-size: 0.9375rem;
   color: var(--kxd-os-text-muted);
-  margin: 0 0 1rem;
+  margin: 0 0 0.85rem;
+  max-width: 62ch;
+}
+
+.kxd-lead-summary__next {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin: 0 0 1.1rem;
+  padding: 0.65rem 0.8rem;
+  border-radius: calc(var(--kxd-ces-radius, 8px) - 2px);
+  background: color-mix(in srgb, var(--kxd-ces-accent) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--kxd-ces-accent) 18%, transparent);
+  font-size: 0.875rem;
+  color: var(--kxd-os-text-primary);
+}
+
+.kxd-lead-summary__next-label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--kxd-ces-accent) 90%, #b4542a);
 }
 
 .kxd-lead-summary__grid {
@@ -228,6 +275,7 @@
   font-size: 0.9375rem;
   color: var(--kxd-os-text-primary);
   margin: 0;
+  overflow-wrap: anywhere;
 }
 
 .kxd-lead-panel {
@@ -235,6 +283,11 @@
   border: 1px solid var(--kxd-os-border-subtle);
   padding: 1.25rem 1.5rem;
   margin-bottom: 1.25rem;
+}
+
+.kxd-lead-panel--actions {
+  border-color: color-mix(in srgb, var(--kxd-ces-accent) 28%, var(--kxd-os-border-subtle));
+  background: color-mix(in srgb, var(--kxd-ces-accent) 3%, transparent);
 }
 
 .kxd-lead-panel__head {
@@ -258,31 +311,112 @@
 .kxd-lead-actions {
   display: flex;
   flex-direction: column;
+  gap: 1.25rem;
+}
+
+.kxd-lead-actions__primary {
+  display: flex;
+  flex-direction: column;
   gap: 1rem;
 }
 
-.kxd-lead-actions__row {
+.kxd-lead-actions__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.kxd-lead-actions__control-row {
   display: flex;
   flex-wrap: wrap;
   gap: 0.625rem;
   align-items: center;
 }
 
-.kxd-lead-actions__inline {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  flex-wrap: wrap;
+.kxd-lead-actions__control-row .kxd-lead-filters__select,
+.kxd-lead-actions__control-row .kxd-lead-filters__input {
+  flex: 1 1 12rem;
+  width: auto;
+  min-width: 10rem;
 }
 
+.kxd-lead-actions__control-row .kxd-ces-btn {
+  flex: 0 0 auto;
+  min-height: 2.5rem;
+}
+
+.kxd-lead-actions__field--note .kxd-ces-btn {
+  align-self: flex-start;
+  margin-top: 0.35rem;
+}
+
+.kxd-lead-actions__qualify {
+  padding-top: 0.25rem;
+}
+
+.kxd-lead-actions__terminal {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--kxd-os-border-subtle);
+}
+
+.kxd-lead-terminal {
+  border: 1px solid var(--kxd-os-border-subtle);
+  border-radius: calc(var(--kxd-ces-radius, 8px) - 1px);
+  padding: 0.75rem 0.9rem;
+  background: color-mix(in srgb, var(--kxd-os-surface, #fff) 92%, transparent);
+}
+
+.kxd-lead-terminal > summary {
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--kxd-os-text-muted);
+  list-style: none;
+}
+
+.kxd-lead-terminal > summary::-webkit-details-marker {
+  display: none;
+}
+
+.kxd-lead-terminal[open] > summary {
+  margin-bottom: 0.85rem;
+  color: var(--kxd-os-text-primary);
+}
+
+.kxd-lead-terminal__form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+.kxd-lead-terminal__cta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  flex: 0 0 auto;
+  min-width: 9.5rem;
+}
+
+.kxd-lead-terminal__cta .kxd-ces-btn {
+  min-height: 2.5rem;
+  width: 100%;
+}
+
+.kxd-lead-attr,
 .kxd-lead-fact-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
   gap: 1rem;
-  margin: 0.75rem 0 0;
+  margin: 0.25rem 0 0;
 }
 
-.kxd-lead-fact-grid dt {
+.kxd-lead-fact dt,
+.kxd-lead-fact-grid dt,
+.kxd-lead-attr dt {
   font-size: 0.6875rem;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -291,10 +425,51 @@
   margin-bottom: 0.2rem;
 }
 
-.kxd-lead-fact-grid dd {
+.kxd-lead-fact dd,
+.kxd-lead-fact-grid dd,
+.kxd-lead-attr dd {
   font-size: 0.875rem;
   color: var(--kxd-os-text-primary);
   margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.kxd-lead-fact--em dd {
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+.kxd-lead-fact--full {
+  grid-column: 1 / -1;
+}
+
+.kxd-lead-url {
+  display: block;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--kxd-os-text-muted);
+  overflow-wrap: anywhere;
+  word-break: break-all;
+  max-width: 100%;
+}
+
+.kxd-lead-audit {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--kxd-os-border-subtle);
+}
+
+.kxd-lead-audit > summary {
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--kxd-os-text-faint);
+  list-style: none;
+}
+
+.kxd-lead-audit > summary::-webkit-details-marker {
+  display: none;
 }
 
 .kxd-lead-muted {
@@ -303,8 +478,8 @@
 }
 
 .kxd-lead-attribution-empty {
-  margin: 0.75rem 0 0;
-  padding: 0.75rem 0.875rem;
+  margin: 0.25rem 0 0;
+  padding: 0.85rem 0.95rem;
   border-radius: calc(var(--kxd-ces-radius, 8px) - 2px);
   background: color-mix(in srgb, var(--kxd-os-border-subtle) 35%, transparent);
 }
@@ -330,5 +505,43 @@
     flex-direction: row;
     justify-content: space-between;
     width: 100%;
+  }
+
+  .kxd-lead-row__interest {
+    white-space: normal;
+    max-width: none;
+  }
+
+  .kxd-lead-actions__control-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .kxd-lead-actions__control-row .kxd-lead-filters__select,
+  .kxd-lead-actions__control-row .kxd-lead-filters__input,
+  .kxd-lead-actions__control-row .kxd-ces-btn {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .kxd-lead-terminal__form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .kxd-lead-terminal__cta,
+  .kxd-lead-filters__field {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .kxd-lead-terminal__cta .kxd-ces-btn {
+    width: 100%;
+  }
+
+  .kxd-lead-summary,
+  .kxd-lead-panel {
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
 }

@@ -1,7 +1,8 @@
 /**
  * Client Command — assignable lead owners (Primal Phase 1, Build 1).
  * Sourced from portal-client-memberships for the tenant client. Never
- * hardcodes a founder/staff identity — owners are real, active portal members.
+ * hardcodes a founder/staff identity — owners are real, active portal members
+ * filtered by policy manage rules and optional email allowlist.
  */
 
 import "server-only";
@@ -10,24 +11,22 @@ import { getPayload } from "payload";
 import config from "@payload-config";
 import { MEMBERSHIP_COLLECTION } from "@/lib/portal/membership-schema";
 import type { ManagedClientLeadPolicy } from "@/lib/acquisition-operations/policy";
+import { isAssignableLeadOwnerCandidate } from "./owner-eligibility";
 import { resolveLeadOwnerLabel } from "./presentation";
 import type { LeadOwnerOption } from "./types";
+
+export {
+  isAssignableLeadOwnerCandidate,
+  isQaOrTestOwnerIdentity,
+  isStudioOrAgencyEmail,
+} from "./owner-eligibility";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDoc = Record<string, any>;
 
-function hasManageCapability(
-  role: string | undefined,
-  canManageMembers: boolean | undefined,
-  policy: ManagedClientLeadPolicy,
-): boolean {
-  if (policy.portalModuleEnabled) return true;
-  return role === "client-owner" || role === "client-admin" || canManageMembers === true;
-}
-
 /**
  * List active portal members for the tenant client who may be assigned a
- * lead (manage capability, per the same policy used for write access).
+ * lead (manage capability + policy owner filters).
  */
 export async function listAssignableLeadOwners(input: {
   clientId: number;
@@ -52,11 +51,11 @@ export async function listAssignableLeadOwners(input: {
 
     const options: LeadOwnerOption[] = [];
     for (const doc of result.docs as AnyDoc[]) {
-      const role: string = doc.role === "client-owner" || doc.role === "client-admin"
-        ? doc.role
-        : "client-member";
+      const role: string =
+        doc.role === "client-owner" || doc.role === "client-admin"
+          ? doc.role
+          : "client-member";
       const canManageMembers = doc.canManageMembers === true;
-      if (!hasManageCapability(role, canManageMembers, input.policy)) continue;
 
       const portalUser = doc.portalUser;
       const portalUserId =
@@ -67,13 +66,25 @@ export async function listAssignableLeadOwners(input: {
             : null;
       if (!portalUserId || !Number.isFinite(portalUserId)) continue;
 
-      const label =
-        typeof portalUser === "object" && portalUser !== null
-          ? resolveLeadOwnerLabel(
-              (portalUser as AnyDoc).displayName,
-              (portalUser as AnyDoc).email,
-            )
-          : null;
+      if (typeof portalUser !== "object" || portalUser === null) continue;
+      const email = String((portalUser as AnyDoc).email ?? "").trim();
+      const displayName = (portalUser as AnyDoc).displayName as string | null | undefined;
+      const active = (portalUser as AnyDoc).active;
+
+      if (
+        !isAssignableLeadOwnerCandidate({
+          email,
+          displayName,
+          active,
+          role,
+          canManageMembers,
+          policy: input.policy,
+        })
+      ) {
+        continue;
+      }
+
+      const label = resolveLeadOwnerLabel(displayName, email);
       if (!label) continue;
 
       options.push({

@@ -40,10 +40,10 @@ export function evolutionMaturityLabel(
 ): string {
   switch (maturity) {
     case "available-now":
-      return "Ready when you are";
+      return "Active";
     case "next":
-      return "Natural next step";
+      return "Recommended next";
     default:
-      return "On the horizon";
+      return "Future opportunity";
   }
 }

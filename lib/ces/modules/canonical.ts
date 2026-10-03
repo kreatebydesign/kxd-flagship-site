@@ -142,7 +142,7 @@ const PORTAL_DEFS: CanonicalCapabilityDefinition[] = [
     editionModule: "client-hq",
     portal: {
       navGroup: "headquarters",
-      navOrder: 2,
+      navOrder: 3,
       href: "/portal/portfolio",
       activation: "portfolio",
     },
@@ -156,7 +156,7 @@ const PORTAL_DEFS: CanonicalCapabilityDefinition[] = [
     aliases: ["partnership"],
     portal: {
       navGroup: "headquarters",
-      navOrder: 3,
+      navOrder: 4,
       href: "/portal/partnership",
       activation: "presentation",
       vocabularyNamespace: "executive-performance",
@@ -171,7 +171,7 @@ const PORTAL_DEFS: CanonicalCapabilityDefinition[] = [
     editionModule: "client-hq",
     portal: {
       navGroup: "headquarters",
-      navOrder: 4,
+      navOrder: 5,
       href: "/portal/executive-review",
       activation: "ces-opt-in",
       vocabularyNamespace: "executive-review",
@@ -216,8 +216,8 @@ const PORTAL_DEFS: CanonicalCapabilityDefinition[] = [
     internalOnly: false,
     editionModule: "client-hq",
     portal: {
-      navGroup: "work",
-      navOrder: 7,
+      navGroup: "headquarters",
+      navOrder: 2,
       href: "/portal/leads",
       activation: "ces-opt-in",
       vocabularyNamespace: "leads",

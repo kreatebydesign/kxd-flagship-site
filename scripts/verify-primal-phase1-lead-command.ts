@@ -23,11 +23,16 @@ import {
   applyLeadPresentationStage,
   SELECTABLE_LEAD_STAGES,
 } from "../lib/client-command/leads/apply-stage.ts";
+import {
+  isAssignableLeadOwnerCandidate,
+  isQaOrTestOwnerIdentity,
+  isStudioOrAgencyEmail,
+} from "../lib/client-command/leads/owner-eligibility.ts";
 import { summarizeLeadAttentionCounts, summarizeLeadAttentionHeadline } from "../lib/client-command/leads/overview.ts";
 import { isCrossClientLeak } from "../lib/managed-client-leads/isolation.ts";
 import { getManagedClientLeadPolicy } from "../lib/acquisition-operations/policy.ts";
 import "../lib/acquisition-operations/policies/register.ts";
-import { CES_EXPERIENCE_MODULE_IDS } from "../lib/ces/modules/canonical.ts";
+import { CES_EXPERIENCE_MODULE_IDS, getCanonicalCapability } from "../lib/ces/modules/canonical.ts";
 import { PRIMAL_EXPERIENCE_PROFILE } from "../lib/ces/profile/primal.ts";
 import type { ClientInquiryRecord } from "../lib/managed-client-leads/types.ts";
 import type { LeadPresentationStage } from "../lib/client-command/leads/types.ts";
@@ -36,13 +41,13 @@ const root = process.cwd();
 let passed = 0;
 let failed = 0;
 
-function check(label: string, pass: boolean): void {
+function check(label: string, pass: boolean, detail?: string): void {
   if (pass) {
     passed += 1;
     console.log(`  ✔ ${label}`);
   } else {
     failed += 1;
-    console.error(`  ✘ ${label}`);
+    console.error(`  ✘ ${label}${detail ? ` — ${detail}` : ""}`);
   }
 }
 
@@ -377,13 +382,200 @@ check(
     PRIMAL_EXPERIENCE_PROFILE.terminology["nav.leads"].length > 0,
 );
 
+// ── 5b. Owner eligibility (premium elevation — production leak fix) ───────
+
+check(
+  "Primal policy uses assignablePortalOwnerEmails allowlist (Tyler + JB)",
+  Array.isArray(primalPolicy?.assignablePortalOwnerEmails) &&
+    primalPolicy!.assignablePortalOwnerEmails!.length === 2 &&
+    primalPolicy!.assignablePortalOwnerEmails!.includes("tyler.edwards@primalmotorsports.com") &&
+    primalPolicy!.assignablePortalOwnerEmails!.includes("jb.layman@primalmotorsports.com"),
+);
+
+check(
+  "Studio / agency emails are rejected as lead owners",
+  isStudioOrAgencyEmail("matt@kreatebydesign.com") &&
+    isStudioOrAgencyEmail("ops@kxd.local") &&
+    !isStudioOrAgencyEmail("tyler.edwards@primalmotorsports.com"),
+);
+
+check(
+  "QA / test / inventory identities are rejected as lead owners",
+  isQaOrTestOwnerIdentity({ email: "qa@example.com", displayName: "Inventory QA 34B" }) &&
+    isQaOrTestOwnerIdentity({ email: "matt+qa@primalmotorsports.com", displayName: "Matt (Test)" }) &&
+    !isQaOrTestOwnerIdentity({
+      email: "tyler.edwards@primalmotorsports.com",
+      displayName: "Tyler",
+    }),
+);
+
+const primalOwnerPolicy = primalPolicy!;
+check(
+  "Tyler is assignable under Primal policy",
+  isAssignableLeadOwnerCandidate({
+    email: "tyler.edwards@primalmotorsports.com",
+    displayName: "Tyler",
+    active: true,
+    role: "client-member",
+    policy: primalOwnerPolicy,
+  }),
+);
+check(
+  "JB Layman is assignable under Primal policy",
+  isAssignableLeadOwnerCandidate({
+    email: "jb.layman@primalmotorsports.com",
+    displayName: "JB Layman",
+    active: true,
+    role: "client-owner",
+    policy: primalOwnerPolicy,
+  }),
+);
+check(
+  "Matt · Primal Motorsports (KXD) is not assignable",
+  !isAssignableLeadOwnerCandidate({
+    email: "matt@kreatebydesign.com",
+    displayName: "Matt · Primal Motorsports",
+    active: true,
+    role: "client-owner",
+    policy: primalOwnerPolicy,
+  }),
+);
+check(
+  "Adam (non-allowlisted Primal email) is not assignable",
+  !isAssignableLeadOwnerCandidate({
+    email: "adam@primalmotorsports.com",
+    displayName: "Adam",
+    active: true,
+    role: "client-member",
+    policy: primalOwnerPolicy,
+  }),
+);
+check(
+  "Inactive allowlisted member is not assignable",
+  !isAssignableLeadOwnerCandidate({
+    email: "tyler.edwards@primalmotorsports.com",
+    displayName: "Tyler",
+    active: false,
+    role: "client-member",
+    policy: primalOwnerPolicy,
+  }),
+);
+
+/**
+ * Regression guard for the production owner leak: this is the real Primal
+ * portal-client-memberships roster (client 1) as observed in production, where
+ * the selector wrongly offered Matt Primal / Inventory QA / Adam / Matt / Matt
+ * Test. Filtering it must leave exactly Tyler and JB Layman.
+ */
+const PRIMAL_PRODUCTION_ROSTER = [
+  { email: "matt.primal@kxd.local", displayName: "Matt · Primal Motorsports", active: true },
+  { email: "tyler.edwards@primalmotorsports.com", displayName: "Tyler", active: true },
+  { email: "matt@kreatebydesign.com", displayName: "Matt", active: true },
+  { email: "inventory.qa.34b@kxd.local", displayName: "Inventory QA 34B", active: true },
+  { email: "adam.boatman@primalmotorsports.com", displayName: "Adam", active: false },
+  { email: "matt.primal@kxd.local.com", displayName: "Matt (Test)", active: true },
+  { email: "jb.layman@primalmotorsports.com", displayName: "JB Layman", active: true },
+] as const;
+
+const primalSelectableOwners = PRIMAL_PRODUCTION_ROSTER.filter((member) =>
+  isAssignableLeadOwnerCandidate({
+    email: member.email,
+    displayName: member.displayName,
+    active: member.active,
+    // Every real Primal membership is client-member / canManageMembers=false.
+    role: "client-member",
+    canManageMembers: false,
+    policy: primalOwnerPolicy,
+  }),
+).map((member) => member.displayName);
+
+check(
+  "Primal production roster resolves to exactly Tyler + JB Layman",
+  primalSelectableOwners.length === 2 &&
+    primalSelectableOwners.includes("Tyler") &&
+    primalSelectableOwners.includes("JB Layman"),
+  `resolved: ${primalSelectableOwners.join(", ") || "(none)"}`,
+);
+
+check(
+  "Primal owner selector excludes every studio / QA / inactive identity",
+  !primalSelectableOwners.some((name) =>
+    ["Matt · Primal Motorsports", "Matt", "Inventory QA 34B", "Adam", "Matt (Test)"].includes(
+      name,
+    ),
+  ),
+);
+
+/**
+ * Other clients must be unaffected: with no allowlist configured, a real
+ * elevated member of a different tenant stays assignable.
+ */
+const otpOwnerPolicy = getManagedClientLeadPolicy("otp-carts");
+check(
+  "Clients without an owner allowlist keep existing eligibility behaviour",
+  otpOwnerPolicy != null &&
+    otpOwnerPolicy.assignablePortalOwnerEmails === undefined &&
+    isAssignableLeadOwnerCandidate({
+      email: "owner@otpcarts.com",
+      displayName: "OTP Owner",
+      active: true,
+      role: "client-owner",
+      canManageMembers: true,
+      policy: otpOwnerPolicy,
+    }),
+);
+
+const leadsCapability = getCanonicalCapability("leads");
+check(
+  "Leads nav sits in headquarters (operational, not buried in website work)",
+  leadsCapability?.portal?.navGroup === "headquarters" &&
+    leadsCapability?.portal?.navOrder === 2,
+);
+
+const execWorkspaceSrc = read(
+  "components/ces/executive-performance/CesExecutivePerformanceWorkspace.tsx",
+);
+check(
+  "Executive Overview surfaces real leadAttention operational strip",
+  execWorkspaceSrc.includes("leadAttention") &&
+    execWorkspaceSrc.includes("OperationalAttentionStrip") &&
+    execWorkspaceSrc.includes("Open leads"),
+);
+
+const signatureSrc = read(
+  "components/ces/executive-performance/CesWorkspaceSignature.tsx",
+);
+check(
+  "Workspace signature carries a single KXD credit (no Designed/Managed duplicate)",
+  signatureSrc.includes("Managed by Kreate by Design") &&
+    !/Designed by Kreate by Design/i.test(signatureSrc) &&
+    (signatureSrc.match(/Managed by Kreate by Design/g) ?? []).length === 1 &&
+    !/Designed by/i.test(signatureSrc),
+);
+
+const wonLostSrc = read("components/ces/leads/LeadLifecycleActions.tsx");
+check(
+  "Won/Lost terminal forms use aligned label/control/CTA rhythm",
+  wonLostSrc.includes("kxd-lead-terminal__form") &&
+    wonLostSrc.includes("kxd-lead-terminal__cta") &&
+    wonLostSrc.includes("Confirm won") &&
+    wonLostSrc.includes("Confirm lost"),
+);
+
 // ── 6. System of record + architecture guards ─────────────────────────────
 
 const ownersSrc = read("lib/client-command/leads/owners.ts");
+const ownerEligibilitySrc = read("lib/client-command/leads/owner-eligibility.ts");
 check(
-  "Owners never hardcode a founder/staff email identity — sourced from memberships only",
+  "Owners never hardcode a founder/staff email identity — sourced from memberships + policy filters",
   ownersSrc.includes("MEMBERSHIP_COLLECTION") &&
-    !/@kreatebydesign|@kxd\.|jb@|justin@/i.test(ownersSrc),
+    ownerEligibilitySrc.includes("assignablePortalOwnerEmails") &&
+    ownerEligibilitySrc.includes("isStudioOrAgencyEmail") &&
+    ownerEligibilitySrc.includes("isQaOrTestOwnerIdentity") &&
+    !/[a-z0-9._%+-]+@kreatebydesign\.com/i.test(ownersSrc) &&
+    !/[a-z0-9._%+-]+@kreatebydesign\.com/i.test(ownerEligibilitySrc) &&
+    !/\bjb@|\bjustin@|\bmatt@/i.test(ownersSrc) &&
+    !/\bjb@|\bjustin@|\bmatt@/i.test(ownerEligibilitySrc),
 );
 
 const accessSrc = read("lib/client-command/leads/access.ts");

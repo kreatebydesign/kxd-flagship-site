@@ -14,23 +14,27 @@ import {
   getLatestPrimalLeadershipReportHref,
   isPrimalLeadershipReportClient,
 } from "@/lib/ces/leadership-report";
+import type { LeadAttentionCounts } from "@/lib/client-command/leads/types";
+import { summarizeLeadAttentionHeadline } from "@/lib/client-command/leads/overview";
 import { CesWorkspaceSignature } from "./CesWorkspaceSignature";
 
 export interface CesExecutivePerformanceWorkspaceProps {
   performance: ExecutivePerformanceBriefing;
   websiteReview: WebsiteReviewLandingData;
+  /** Real Lead Command attention counts when Leads is enabled — never invented. */
+  leadAttention?: LeadAttentionCounts | null;
 }
 
 function connectionLabel(state: string, summary?: string | null): string {
   if (state === "connected") return "Connected";
   if (state === "awaiting-signal") {
     if (summary?.toLowerCase().includes("baseline")) return "Baseline";
-    return "Waiting";
+    return "No signal yet";
   }
   if (summary?.toLowerCase().includes("measurement active")) return "Active";
   if (summary?.toLowerCase().includes("performance reviewed")) return "Reviewed";
   if (summary?.toLowerCase().includes("leadership report")) return "In report";
-  return "Not yet";
+  return "Not connected";
 }
 
 /** Desktop row packing — presentation only; preserves zone content & order. */
@@ -154,6 +158,7 @@ function ZoneTitle({
 export function CesExecutivePerformanceWorkspace({
   performance,
   websiteReview,
+  leadAttention = null,
 }: CesExecutivePerformanceWorkspaceProps) {
   const { presentation } = performance;
   const zones = getExecutiveZoneOrder(presentation);
@@ -421,25 +426,28 @@ export function CesExecutivePerformanceWorkspace({
           eyebrow="Partnership"
           title="Partnership Progress"
           id="exec-progress-heading"
+          lead="Evidence of work delivered — milestones first."
         />
-        {performance.presentation.briefingEnabled ? (
-          <Link href="/portal/partnership" className="kxd-ces-exec__section-link">
-            Open executive briefing
-          </Link>
-        ) : null}
-        {isPrimalLeadershipReportClient(performance.clientSlug) ? (
-          <Link
-            href={getLatestPrimalLeadershipReportHref()}
-            className="kxd-ces-exec__section-link"
-          >
-            Open Leadership Performance Update
-          </Link>
-        ) : null}
-        {performance.presentation.executiveReviewEnabled ? (
-          <Link href="/portal/executive-review" className="kxd-ces-exec__section-link">
-            Open Executive Review
-          </Link>
-        ) : null}
+        <div className="kxd-ces-exec__destinations" aria-label="Leadership destinations">
+          {isPrimalLeadershipReportClient(performance.clientSlug) ? (
+            <Link
+              href={getLatestPrimalLeadershipReportHref()}
+              className="kxd-ces-exec__section-link"
+            >
+              Leadership Performance Update
+            </Link>
+          ) : null}
+          {performance.presentation.briefingEnabled ? (
+            <Link href="/portal/partnership" className="kxd-ces-exec__section-link kxd-ces-exec__section-link--quiet">
+              Partnership briefing
+            </Link>
+          ) : null}
+          {performance.presentation.executiveReviewEnabled ? (
+            <Link href="/portal/executive-review" className="kxd-ces-exec__section-link kxd-ces-exec__section-link--quiet">
+              Monthly Executive Review
+            </Link>
+          ) : null}
+        </div>
         <div className="kxd-ces-exec__progress-stage">
           {performance.progressBeats.length > 0 ? (
             <div className="kxd-ces-exec__progress-journey">
@@ -617,14 +625,15 @@ export function CesExecutivePerformanceWorkspace({
         aria-labelledby="exec-growth-heading"
       >
         <ZoneTitle
-          eyebrow="When you're ready"
+          eyebrow="Opportunities"
           eyebrowTone="signal"
           title="Growth"
           id="exec-growth-heading"
+          lead="Possibilities for later — not committed work."
         />
         {performance.presentation.executiveReviewEnabled ? (
           <Link href="/portal/executive-review" className="kxd-ces-exec__section-link">
-            Open Executive Review
+            Review the monthly leadership pack
           </Link>
         ) : null}
         <ul className="kxd-ces-exec__growth">
@@ -689,6 +698,7 @@ export function CesExecutivePerformanceWorkspace({
       <header
         className={[
           "kxd-ces-exec__hero",
+          "kxd-ces-exec__hero--compact",
           `kxd-ces-exec__hero--${presentation.heroOverlay}`,
           hasHeroImage ? "kxd-ces-exec__hero--imaged" : "kxd-ces-exec__hero--fallback",
         ].join(" ")}
@@ -708,6 +718,13 @@ export function CesExecutivePerformanceWorkspace({
         </div>
       </header>
 
+      {leadAttention ? (
+        <OperationalAttentionStrip
+          attention={leadAttention}
+          leadsHref="/portal/leads"
+        />
+      ) : null}
+
       <div className="kxd-ces-exec__zones">
         {rows.map((row) =>
           row.length > 1 ? (
@@ -725,5 +742,64 @@ export function CesExecutivePerformanceWorkspace({
 
       <CesWorkspaceSignature />
     </div>
+  );
+}
+
+function OperationalAttentionStrip({
+  attention,
+  leadsHref,
+}: {
+  attention: LeadAttentionCounts;
+  leadsHref: string;
+}) {
+  const tiles = [
+    { key: "new", label: "New", value: attention.newUntouched },
+    { key: "unassigned", label: "Unassigned", value: attention.unassigned },
+    { key: "due", label: "Follow-up due", value: attention.followUpDue },
+    { key: "overdue", label: "Overdue", value: attention.followUpOverdue },
+  ] as const;
+  const hasPressure =
+    attention.newUntouched > 0 ||
+    attention.unassigned > 0 ||
+    attention.followUpDue > 0 ||
+    attention.followUpOverdue > 0;
+
+  return (
+    <section
+      className={`kxd-ces-exec__ops${hasPressure ? " kxd-ces-exec__ops--attention" : ""}`}
+      aria-labelledby="exec-ops-heading"
+    >
+      <div className="kxd-ces-exec__ops-head">
+        <div>
+          <p className="kxd-ces-exec__section-eyebrow kxd-ces-exec__section-eyebrow--action">
+            Operations
+          </p>
+          <h2 id="exec-ops-heading" className="kxd-ces-exec__heading">
+            Lead attention
+          </h2>
+          <p className="kxd-ces-exec__ops-lede">
+            {summarizeLeadAttentionHeadline(attention)}
+          </p>
+        </div>
+        <Link href={leadsHref} className="kxd-ces-btn kxd-ces-btn--primary">
+          Open leads
+        </Link>
+      </div>
+      <ul className="kxd-ces-exec__ops-grid" aria-label="Lead attention counts">
+        {tiles.map((tile) => (
+          <li
+            key={tile.key}
+            className={
+              tile.value > 0
+                ? "kxd-ces-exec__ops-tile kxd-ces-exec__ops-tile--hot"
+                : "kxd-ces-exec__ops-tile"
+            }
+          >
+            <span className="kxd-ces-exec__ops-value">{tile.value}</span>
+            <span className="kxd-ces-exec__ops-label">{tile.label}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }

@@ -126,6 +126,7 @@ export function CesPortalHome({
           <CesExecutivePerformanceWorkspace
             performance={performance}
             websiteReview={websiteReview}
+            leadAttention={leadAttention}
           />
         ) : (
           <CesPartnershipBriefing

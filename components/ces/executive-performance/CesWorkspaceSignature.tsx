@@ -18,9 +18,8 @@ export function CesWorkspaceSignature() {
           height={26}
         />
         <div className="kxd-ces-exec__signature-copy">
-          <p className="kxd-ces-exec__signature-line">Managed by Kreate by Design</p>
-          <p className="kxd-ces-exec__signature-line kxd-ces-exec__signature-line--quiet">
-            Designed by Kreate by Design
+          <p className="kxd-ces-exec__signature-line">
+            Client Command · Managed by Kreate by Design
           </p>
         </div>
       </div>
