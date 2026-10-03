@@ -562,6 +562,19 @@ check(
     wonLostSrc.includes("Confirm lost"),
 );
 
+const lifecycleRouteSrc = read("app/api/portal/leads/[id]/lifecycle/route.ts");
+check(
+  "Won revenue rejects negative / non-finite amounts at portal parse boundary",
+  lifecycleRouteSrc.includes("wonRevenueCents < 0") &&
+    lifecycleRouteSrc.includes("Number.isFinite(wonRevenueCents)"),
+);
+
+check(
+  "applyLeadCommandAction rejects negative won revenue with a safe message",
+  updateSrc.includes("Revenue must be a non-negative amount") &&
+    updateSrc.includes("wonRevenueCents < 0"),
+);
+
 // ── 6. System of record + architecture guards ─────────────────────────────
 
 const ownersSrc = read("lib/client-command/leads/owners.ts");

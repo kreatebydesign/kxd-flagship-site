@@ -69,10 +69,17 @@ function parseAction(body: Record<string, unknown>): LeadCommandAction | null {
     case "won": {
       const revenueRaw = body.wonRevenueCents;
       const programRaw = body.bookedProgram;
+      const wonRevenueCents =
+        revenueRaw == null || revenueRaw === "" ? null : Number(revenueRaw);
+      if (
+        wonRevenueCents != null &&
+        (!Number.isFinite(wonRevenueCents) || wonRevenueCents < 0)
+      ) {
+        return null;
+      }
       return {
         type: "won",
-        wonRevenueCents:
-          revenueRaw == null || revenueRaw === "" ? null : Number(revenueRaw),
+        wonRevenueCents,
         bookedProgram:
           programRaw == null || programRaw === "" ? null : String(programRaw),
       };

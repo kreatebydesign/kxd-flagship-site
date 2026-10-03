@@ -71,6 +71,18 @@ export async function applyLeadCommandAction(input: {
   actorId: number;
   action: LeadCommandAction;
 }): Promise<UpdateClientInquiryLifecycleResult> {
+  if (
+    input.action.type === "won" &&
+    input.action.wonRevenueCents != null &&
+    (!Number.isFinite(input.action.wonRevenueCents) || input.action.wonRevenueCents < 0)
+  ) {
+    return {
+      ok: false,
+      code: "error",
+      message: "Revenue must be a non-negative amount.",
+    };
+  }
+
   const patch = buildPatchForAction(input.action);
   return updateClientInquiryLifecycle({
     inquiryId: input.inquiryId,

@@ -234,10 +234,17 @@ export function LeadLifecycleActions({
               />
             </label>
             <div className="kxd-lead-terminal__cta">
+              <span className="kxd-lead-filters__label" aria-hidden="true">
+                &nbsp;
+              </span>
               <button
                 type="button"
                 className="kxd-ces-btn kxd-ces-btn--primary"
-                disabled={pending}
+                disabled={
+                  pending ||
+                  (wonRevenue.trim() !== "" &&
+                    (!Number.isFinite(Number(wonRevenue)) || Number(wonRevenue) < 0))
+                }
                 onClick={() =>
                   send({
                     type: "won",
