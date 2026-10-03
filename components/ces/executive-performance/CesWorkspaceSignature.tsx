@@ -19,7 +19,7 @@ export function CesWorkspaceSignature() {
         />
         <div className="kxd-ces-exec__signature-copy">
           <p className="kxd-ces-exec__signature-line">
-            Client Command · Managed by Kreate by Design
+            Client Dashboard · Managed by Kreate by Design
           </p>
         </div>
       </div>

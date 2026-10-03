@@ -553,6 +553,23 @@ check(
     !/Designed by/i.test(signatureSrc),
 );
 
+check(
+  "Workspace signature uses Client Dashboard (not Client Command)",
+  signatureSrc.includes("Client Dashboard · Managed by Kreate by Design") &&
+    !signatureSrc.includes("Client Command"),
+);
+
+const presentationSrc = read(
+  "lib/ces/executive-performance/presentation.ts",
+);
+check(
+  "Primal presentation names the client-facing product Client Dashboard",
+  presentationSrc.includes('workspaceTitle: "Client Dashboard"') &&
+    !presentationSrc.includes('workspaceTitle: "Command Center"') &&
+    !presentationSrc.includes('workspaceEyebrow: "Client Command"') &&
+    !presentationSrc.includes('workspaceEyebrow: "Primal Command"'),
+);
+
 const wonLostSrc = read("components/ces/leads/LeadLifecycleActions.tsx");
 check(
   "Won/Lost terminal forms use aligned label/control/CTA rhythm",

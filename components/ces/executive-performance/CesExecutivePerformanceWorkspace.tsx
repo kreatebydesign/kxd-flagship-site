@@ -21,7 +21,7 @@ import { CesWorkspaceSignature } from "./CesWorkspaceSignature";
 export interface CesExecutivePerformanceWorkspaceProps {
   performance: ExecutivePerformanceBriefing;
   websiteReview: WebsiteReviewLandingData;
-  /** Real Lead Command attention counts when Leads is enabled — never invented. */
+  /** Real lead attention counts when Leads is enabled — never invented. */
   leadAttention?: LeadAttentionCounts | null;
 }
 
@@ -707,9 +707,13 @@ export function CesExecutivePerformanceWorkspace({
         <div className="kxd-ces-exec__hero-veil" aria-hidden="true" />
         <div className="kxd-ces-exec__hero-vignette" aria-hidden="true" />
         <div className="kxd-ces-exec__hero-inner">
-          <p className="kxd-ces-exec__eyebrow">{presentation.workspaceEyebrow}</p>
+          {presentation.workspaceEyebrow.trim() ? (
+            <p className="kxd-ces-exec__eyebrow">{presentation.workspaceEyebrow}</p>
+          ) : null}
           <h1 className="kxd-ces-exec__brand">{performance.clientName}</h1>
-          <p className="kxd-ces-exec__workspace-title">{presentation.workspaceTitle}</p>
+          {presentation.workspaceTitle.trim() ? (
+            <p className="kxd-ces-exec__workspace-title">{presentation.workspaceTitle}</p>
+          ) : null}
           <p className="kxd-ces-exec__greeting">{performance.greeting}</p>
           <p className="kxd-ces-exec__intro">{presentation.introduction}</p>
           {freshnessHeroLabel ? (

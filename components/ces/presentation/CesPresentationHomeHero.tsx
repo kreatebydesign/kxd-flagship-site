@@ -44,9 +44,15 @@ export function CesPresentationHomeHero({
             alt={markAlt}
           />
         ) : null}
-        <p className="kxd-ces-present-hero__eyebrow">{presentation.workspaceEyebrow}</p>
-        <h1 className="kxd-ces-present-hero__title">{presentation.workspaceTitle}</h1>
-        <p className="kxd-ces-present-hero__lead">{presentation.introduction}</p>
+        {presentation.workspaceEyebrow.trim() ? (
+          <p className="kxd-ces-present-hero__eyebrow">{presentation.workspaceEyebrow}</p>
+        ) : null}
+        {presentation.workspaceTitle.trim() ? (
+          <h1 className="kxd-ces-present-hero__title">{presentation.workspaceTitle}</h1>
+        ) : null}
+        {presentation.introduction.trim() ? (
+          <p className="kxd-ces-present-hero__lead">{presentation.introduction}</p>
+        ) : null}
       </div>
     </header>
   );

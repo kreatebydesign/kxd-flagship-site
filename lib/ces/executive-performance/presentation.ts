@@ -31,8 +31,9 @@ const PRIMAL_PRESENTATION: ExperiencePresentation = {
   heroFocus: "54% 58%",
   logoSrc: "/migrated-assets/logos/primal.svg",
   logoAlt: "Primal Motorsports",
-  workspaceEyebrow: "Client Command",
-  workspaceTitle: "Command Center",
+  /* Brand (clientName) leads; product name sits quietly beneath — no Command language. */
+  workspaceEyebrow: "",
+  workspaceTitle: "Client Dashboard",
   introduction: "What needs attention, how you’re performing, and where to go next.",
   actionAccent: "#A83424",
   intelligenceAccent: "#3A6EA5",
