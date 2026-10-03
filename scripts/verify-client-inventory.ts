@@ -14,6 +14,10 @@ import type { InventoryVehicleRecord } from "../lib/inventory/types";
 import { PRIMAL_EXPERIENCE_PROFILE } from "../lib/ces/profile/primal";
 import { resolveMediaPath, toAbsoluteMediaUrl } from "../lib/inventory/media";
 import { normalizeInventorySourceIdentity } from "../lib/inventory/source";
+import {
+  mapPrimalWebsiteListingStatus,
+  mapPrimalWebsiteVehicle,
+} from "../lib/inventory/primal-website-source";
 
 const root = process.cwd();
 
@@ -228,6 +232,10 @@ function main() {
   check("sold is not public-listable", !isPublicListableStatus("sold"));
   check("hidden is not public-listable", !isPublicListableStatus("hidden"));
 
+  if (!/^https?:\/\//i.test(String(process.env.NEXT_PUBLIC_SITE_URL || "").trim())) {
+    process.env.NEXT_PUBLIC_SITE_URL = "https://portal.kreatebydesign.com";
+  }
+
   const pub = toPublicInventoryVehicle(fixture({}));
   check("public mapper returns vehicle for available", Boolean(pub));
   check("public mapper omits VIN", pub != null && !("vin" in pub));
@@ -265,6 +273,61 @@ function main() {
       toAbsoluteMediaUrl("https://abc123xyz.public.blob.vercel-storage.com/car.png") ===
         "https://abc123xyz.public.blob.vercel-storage.com/car.png",
   );
+
+  const primalSource = read("lib/inventory/primal-website-source.ts");
+  check(
+    "Primal website inventory uses canonical source identity",
+    primalSource.includes('export const PRIMAL_WEBSITE_SOURCE_SYSTEM = "primal-website"') &&
+      read("scripts/import-primal-website-inventory.ts").includes(
+        "upsertInventoryVehicleFromSource",
+      ),
+  );
+  check(
+    "Primal website import does not write VIN when source has none",
+    primalSource.includes("vin: null") && primalSource.includes("mileage: null"),
+  );
+
+  check(
+    "live available maps to available",
+    mapPrimalWebsiteListingStatus({ listingStatus: "live", status: "available" }) ===
+      "available",
+  );
+  check(
+    "paused preparing-for-sale maps to coming_soon",
+    mapPrimalWebsiteListingStatus({ listingStatus: "paused", status: "in_service" }) ===
+      "coming_soon",
+  );
+  check(
+    "coming_soon listing maps to coming_soon",
+    mapPrimalWebsiteListingStatus({ listingStatus: "coming_soon", status: "reserved" }) ===
+      "coming_soon",
+  );
+  const mapped = mapPrimalWebsiteVehicle({
+    vehicle: {
+      id: "veh_sr3_new_01",
+      model: "SR3",
+      variant: "Radical SR3 XXR 1500",
+      condition: "new",
+      status: "available",
+      listingStatus: "live",
+      year: 2025,
+      chassisNumber: "1758",
+      askingPriceCents: 15950000,
+      spec: "Chassis #1758",
+      positioning: "Listed through Primal.",
+      summary: "New SR3",
+      exteriorColor: "Stealth black",
+      engine: "1500cc",
+      displacement: "1500cc",
+      highlights: ["HALO"],
+      mediaRefs: [],
+      publicPath: "/inventory/veh_sr3_new_01",
+    },
+  });
+  check("mapped chassis becomes stockNumber", mapped?.data.stockNumber === "1758");
+  check("mapped cents become dollars", mapped?.data.price === 159500);
+  check("mapped slug is source id", mapped?.data.slug === "veh-sr3-new-01");
+  check("mapped VIN stays empty", mapped?.data.vin == null);
 
   console.log("\nPhase 34B verification passed.\n");
 }

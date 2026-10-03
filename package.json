@@ -162,6 +162,7 @@
     "verify:payload-media-storage": "tsx scripts/verify-payload-media-storage.ts",
     "verify:client-upgrade-requests": "tsx scripts/verify-client-upgrade-requests.ts",
     "verify:client-inventory": "tsx scripts/verify-client-inventory.ts",
+    "import:primal-website-inventory": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/import-primal-website-inventory.ts",
     "verify:client-experience-doctrine": "tsx scripts/verify-client-experience-doctrine.ts",
     "verify:luxury-ces-foundation": "tsx scripts/verify-luxury-ces-foundation.ts",
     "verify:scheduling": "tsx scripts/verify-scheduling-domain.ts",

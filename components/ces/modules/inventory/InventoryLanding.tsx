@@ -328,7 +328,15 @@ export function InventoryLanding({ profile, vehicles: initial }: Props) {
                         <h3>
                           <Link href={`/portal/inventory/${vehicle.id}`}>{vehicle.title}</Link>
                         </h3>
-                        <p className="kxd-inv-card__meta">{formatInventoryIdentity(vehicle)}</p>
+                        <p className="kxd-inv-card__meta">
+                          {formatInventoryIdentity(vehicle)}
+                          {vehicle.stockNumber
+                            ? ` · Chassis ${vehicle.stockNumber}`
+                            : ""}
+                          {vehicle.updatedAt
+                            ? ` · Updated ${fmtPortalDate(vehicle.updatedAt)}`
+                            : ""}
+                        </p>
                       </div>
                       <span className={`kxd-ces-status kxd-ces-status--${tone}`}>
                         {inventoryStatusLabel(vehicle.listingStatus)}
