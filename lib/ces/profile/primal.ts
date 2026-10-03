@@ -31,6 +31,7 @@ export const PRIMAL_EXPERIENCE_PROFILE = {
     "executive-review",
     "inventory",
     "leads",
+    "calendar",
   ] as const,
   /** Results → Performance / Reports (portal HQ modules, not CES experience modules). */
   enabledPortalModules: ["analytics", "reports"] as const,
@@ -44,6 +45,7 @@ export const PRIMAL_EXPERIENCE_PROFILE = {
     "nav.reports": "Reports",
     "nav.inventory": "Inventory",
     "nav.leads": "Leads",
+    "nav.calendar": "Calendar",
     "website-workspace.landing.eyebrow": "Website",
     "website-workspace.landing.title": "Website Workspace",
     "website-workspace.landing.lead":

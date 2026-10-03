@@ -113,6 +113,7 @@ import * as migration_20260916_mission01_capability_bridge from './20260916_miss
 import * as migration_20260916_mission03b_commercial_foundation from './20260916_mission03b_commercial_foundation';
 import * as migration_20261002_primal_phase1_lead_command_foundation from './20261002_primal_phase1_lead_command_foundation';
 import * as migration_20261003_client_inventory_referenced_media from './20261003_client_inventory_referenced_media';
+import * as migration_20261003_client_calendar_events from './20261003_client_calendar_events';
 
 export const migrations = [
   {
@@ -731,5 +732,10 @@ export const migrations = [
     up: migration_20261003_client_inventory_referenced_media.up,
     down: migration_20261003_client_inventory_referenced_media.down,
     name: '20261003_client_inventory_referenced_media',
+  },
+  {
+    up: migration_20261003_client_calendar_events.up,
+    down: migration_20261003_client_calendar_events.down,
+    name: '20261003_client_calendar_events',
   },
 ];

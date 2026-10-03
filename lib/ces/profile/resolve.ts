@@ -138,6 +138,17 @@ function ensurePrimalLeadCommand(profile: ResolvedExperienceProfile): void {
   }
 }
 
+function ensurePrimalCalendar(profile: ResolvedExperienceProfile): void {
+  if (profile.identity.clientSlug !== PRIMAL_CLIENT_SLUG) return;
+  if (!profile.enabledModules.includes("website-review")) return;
+  if (!profile.enabledModules.includes("calendar")) {
+    profile.enabledModules = [...profile.enabledModules, "calendar"];
+  }
+  if (!profile.terminology["nav.calendar"]) {
+    profile.terminology["nav.calendar"] = PRIMAL_EXPERIENCE_PROFILE.terminology["nav.calendar"];
+  }
+}
+
 /**
  * Ensure Results surfaces (Performance + Reports) for Primal so leadership
  * reports remain reachable without inventing a second reporting product.
@@ -183,6 +194,7 @@ function finalizeProfile(profile: ResolvedExperienceProfile): ResolvedExperience
   ensurePrimalWebsiteWorkspace(profile);
   ensurePrimalExecutiveReview(profile);
   ensurePrimalLeadCommand(profile);
+  ensurePrimalCalendar(profile);
   ensureRobinColeBrand(profile);
   syncEnabledPortalModules(profile);
   ensurePrimalResultsSurfaces(profile);
