@@ -401,6 +401,12 @@
   min-width: 9.5rem;
 }
 
+.kxd-lead-terminal__cta .kxd-lead-filters__label {
+  /* Desktop spacer so the CTA baseline matches labeled inputs */
+  line-height: 1.2;
+  min-height: 1rem;
+}
+
 .kxd-lead-terminal__cta .kxd-ces-btn {
   min-height: 2.5rem;
   width: 100%;
@@ -533,6 +539,10 @@
   .kxd-lead-filters__field {
     width: 100%;
     min-width: 0;
+  }
+
+  .kxd-lead-terminal__cta .kxd-lead-filters__label {
+    display: none;
   }
 
   .kxd-lead-terminal__cta .kxd-ces-btn {
