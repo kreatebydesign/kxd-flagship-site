@@ -29,12 +29,17 @@ function connectionLabel(state: string, summary?: string | null): string {
   if (state === "connected") return "Connected";
   if (state === "awaiting-signal") {
     if (summary?.toLowerCase().includes("baseline")) return "Baseline";
-    return "No signal yet";
+    if (summary?.toLowerCase().includes("configured")) return "Configured";
+    if (summary?.toLowerCase().includes("not in this view")) return "Pending";
+    if (summary?.toLowerCase().includes("current month")) return "Current";
+    return "Pending";
   }
   if (summary?.toLowerCase().includes("measurement active")) return "Active";
   if (summary?.toLowerCase().includes("performance reviewed")) return "Reviewed";
   if (summary?.toLowerCase().includes("leadership report")) return "In report";
-  return "Not connected";
+  if (summary?.toLowerCase().includes("not in this")) return "Pending";
+  if (summary?.toLowerCase().includes("not currently")) return "Pending";
+  return "Pending";
 }
 
 function clampCopy(text: string, maxChars = 280): string {

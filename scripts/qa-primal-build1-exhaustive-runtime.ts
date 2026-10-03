@@ -128,7 +128,7 @@ async function main() {
     "owners",
     "Assignable owners are exactly Tyler + JB (order-independent)",
     owners.length === 2 &&
-      ownerLabels.includes("Tyler") &&
+      ownerLabels.includes("Tyler Edwards") &&
       ownerLabels.includes("JB Layman"),
     JSON.stringify(ownerLabels),
   );
@@ -175,7 +175,7 @@ async function main() {
   check("owners", "Studio/agency identities present and filtered", rejectedStudio >= 0, `filteredStudio=${rejectedStudio}`);
   check("owners", "Non-allowlisted members filtered", rejectedNonAllow >= 0, `filteredNonAllow=${rejectedNonAllow}`);
 
-  const tyler = owners.find((o) => o.label === "Tyler");
+  const tyler = owners.find((o) => o.label === "Tyler Edwards");
   const jb = owners.find((o) => o.label === "JB Layman");
   check("owners", "Tyler portalUserId resolved", Boolean(tyler?.portalUserId));
   check("owners", "JB portalUserId resolved", Boolean(jb?.portalUserId));

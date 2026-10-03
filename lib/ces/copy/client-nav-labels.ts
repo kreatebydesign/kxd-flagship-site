@@ -44,11 +44,27 @@ export const CES_RESULTS_PORTAL_NAV_IDS = ["analytics", "reports"] as const;
 
 export const CES_CLIENT_NAV_GROUP_LABELS: Record<string, string> = {
   Headquarters: "Operate",
-  Work: "Partnership",
-  Library: "Partnership",
+  Work: "Website",
+  Library: "Website",
   Intelligence: "Results",
   Account: "Account",
 };
+
+/** Destinations that belong with website operations rather than relationship history. */
+export const CES_WEBSITE_PORTAL_NAV_IDS = [
+  "website-review",
+  "website-workspace",
+  "website-health",
+  "inventory",
+  "website-editor",
+] as const;
+
+/** Historical relationship surfaces — remain routable, not primary Primal nav. */
+export const CES_PRIMAL_ARCHIVE_NAV_IDS = [
+  "partnership",
+  "executive-performance",
+  "executive-review",
+] as const;
 
 export function clientPortalNavLabel(
   id: string,

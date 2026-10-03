@@ -92,8 +92,8 @@ check(
     "baseline",
 );
 check(
-  "curated reports list both",
-  listCuratedPrimalLeadershipReportItems().length === 2,
+  "curated reports list leadership plus historical review",
+  listCuratedPrimalLeadershipReportItems().length === 3,
 );
 check(
   "curated baseline type neutral",

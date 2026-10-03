@@ -405,7 +405,7 @@ check(
     isQaOrTestOwnerIdentity({ email: "matt+qa@primalmotorsports.com", displayName: "Matt (Test)" }) &&
     !isQaOrTestOwnerIdentity({
       email: "tyler.edwards@primalmotorsports.com",
-      displayName: "Tyler",
+      displayName: "Tyler Edwards",
     }),
 );
 
@@ -414,7 +414,7 @@ check(
   "Tyler is assignable under Primal policy",
   isAssignableLeadOwnerCandidate({
     email: "tyler.edwards@primalmotorsports.com",
-    displayName: "Tyler",
+    displayName: "Tyler Edwards",
     active: true,
     role: "client-member",
     policy: primalOwnerPolicy,
@@ -454,7 +454,7 @@ check(
   "Inactive allowlisted member is not assignable",
   !isAssignableLeadOwnerCandidate({
     email: "tyler.edwards@primalmotorsports.com",
-    displayName: "Tyler",
+    displayName: "Tyler Edwards",
     active: false,
     role: "client-member",
     policy: primalOwnerPolicy,
@@ -469,7 +469,7 @@ check(
  */
 const PRIMAL_PRODUCTION_ROSTER = [
   { email: "matt.primal@kxd.local", displayName: "Matt · Primal Motorsports", active: true },
-  { email: "tyler.edwards@primalmotorsports.com", displayName: "Tyler", active: true },
+  { email: "tyler.edwards@primalmotorsports.com", displayName: "Tyler Edwards", active: true },
   { email: "matt@kreatebydesign.com", displayName: "Matt", active: true },
   { email: "inventory.qa.34b@kxd.local", displayName: "Inventory QA 34B", active: true },
   { email: "adam.boatman@primalmotorsports.com", displayName: "Adam", active: false },
@@ -492,7 +492,7 @@ const primalSelectableOwners = PRIMAL_PRODUCTION_ROSTER.filter((member) =>
 check(
   "Primal production roster resolves to exactly Tyler + JB Layman",
   primalSelectableOwners.length === 2 &&
-    primalSelectableOwners.includes("Tyler") &&
+    primalSelectableOwners.includes("Tyler Edwards") &&
     primalSelectableOwners.includes("JB Layman"),
   `resolved: ${primalSelectableOwners.join(", ") || "(none)"}`,
 );

@@ -16,7 +16,9 @@ import { isPortalNavEnabled } from "@/lib/editions/navigation";
 import { isClientHqModuleEnabled, type ClientHqModuleId } from "./modules";
 import {
   CES_PRIMARY_PORTAL_NAV_IDS,
+  CES_PRIMAL_ARCHIVE_NAV_IDS,
   CES_RESULTS_PORTAL_NAV_IDS,
+  CES_WEBSITE_PORTAL_NAV_IDS,
   clientPortalNavGroupLabel,
   clientPortalNavLabel,
 } from "@/lib/ces/copy/client-nav-labels";
@@ -375,21 +377,26 @@ export function getEnabledPortalNavGroups(
   // CES Client Command shell: calm four-destination primary nav.
   // All Businesses lives in the account switcher (not a synthetic client).
   if (useClientLabels) {
-    return simplifyPrimaryPortalNav(withCommercial, relabel);
+    return simplifyPrimaryPortalNav(
+      withCommercial,
+      relabel,
+      navProfile.identity.clientSlug,
+    );
   }
 
   return withCommercial;
 }
 
 /**
- * Collapse entitled nav into Operate · Results · Partnership · Account.
+ * Collapse entitled nav into Operate · Results · Website · Account.
  * Overview + Leads lead; Performance + Reports follow; remaining entitled
- * destinations stay under Partnership / Account. Does not invent entitlements.
+ * destinations stay under Website / Account. Does not invent entitlements.
  * All Businesses stays in the account switcher (not a synthetic client).
  */
 function simplifyPrimaryPortalNav(
   groups: PortalNavGroup[],
   relabel: (id: string, label: string) => string,
+  clientSlug?: string | null,
 ): PortalNavGroup[] {
   const flat = groups.flatMap((group) => group.items);
   const byId = new Map<string, PortalNavItem>();
@@ -401,6 +408,10 @@ function simplifyPrimaryPortalNav(
   const resultsIds = [...CES_RESULTS_PORTAL_NAV_IDS];
   const claimedIds = new Set<string>([...CES_PRIMARY_PORTAL_NAV_IDS]);
   const accountIds = new Set(["settings", "invoices", "agreement", "team"]);
+  const archiveIds = new Set<string>(
+    clientSlug === "primal-motorsports" ? CES_PRIMAL_ARCHIVE_NAV_IDS : [],
+  );
+  const websiteIds = new Set<string>(CES_WEBSITE_PORTAL_NAV_IDS);
 
   const pick = (ids: readonly string[]): PortalNavItem[] => {
     const out: PortalNavItem[] = [];
@@ -415,14 +426,17 @@ function simplifyPrimaryPortalNav(
   const operate = pick(operateIds);
   const results = pick(resultsIds);
 
-  const partnership: PortalNavItem[] = [];
+  const website: PortalNavItem[] = [];
   const account: PortalNavItem[] = [];
+  const management: PortalNavItem[] = [];
   for (const item of byId.values()) {
     if (claimedIds.has(item.id)) continue;
     if (item.id === "portfolio") continue;
+    if (archiveIds.has(item.id)) continue;
     const labeled = { ...item, label: relabel(item.id, item.label) };
     if (accountIds.has(item.id)) account.push(labeled);
-    else partnership.push(labeled);
+    else if (websiteIds.has(item.id)) website.push(labeled);
+    else management.push(labeled);
   }
 
   const out: PortalNavGroup[] = [];
@@ -432,8 +446,11 @@ function simplifyPrimaryPortalNav(
   if (results.length > 0) {
     out.push({ label: "Results", items: results });
   }
-  if (partnership.length > 0) {
-    out.push({ label: clientPortalNavGroupLabel("Library"), items: partnership });
+  if (website.length > 0) {
+    out.push({ label: "Website", items: website });
+  }
+  if (management.length > 0) {
+    out.push({ label: "Management", items: management });
   }
   if (account.length > 0) {
     out.push({ label: clientPortalNavGroupLabel("Account"), items: account });

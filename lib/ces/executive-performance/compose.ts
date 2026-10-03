@@ -14,13 +14,16 @@ import type { WebsiteReviewLandingData } from "@/lib/ces/modules/website-review/
 import { getReportingCapabilityIds } from "@/lib/ces/partnership/capabilities";
 import type { ReportingCapabilityId } from "@/lib/reporting/domain/capabilities";
 import { composeReportingIntelligence } from "@/lib/reporting/compose/intelligence";
-import { factsForDomain } from "@/lib/reporting/domain/snapshot";
+import { composeMetricSnapshot, factsForDomain } from "@/lib/reporting/domain/snapshot";
+import { shiftPeriod } from "@/lib/reporting/domain/period";
 import type { BusinessDomain } from "@/lib/reporting/domain/types";
 import { defaultExecutiveReportingPeriod } from "@/lib/reporting/ingest/period";
 import {
   loadReportingFacts,
   summarizeReportingFactProvenance,
 } from "@/lib/reporting/persistence";
+import { loadClientReportingConnection } from "@/lib/reporting/providers/connection";
+import { currentCalendarMonthPeriod } from "@/lib/portal/work-performance/period";
 import {
   confirmedLeadsUnavailable,
   resolveProviderFreshnessPresentation,
@@ -168,18 +171,24 @@ function momentumLabel(state: string): string | null {
 function panelState(
   capabilityEnabled: boolean,
   hasDomainSignal: boolean,
+  sourceConfigured = false,
 ): PerformanceConnectionState {
-  if (!capabilityEnabled) return "not-connected";
-  if (!hasDomainSignal) return "awaiting-signal";
-  return "connected";
+  if (hasDomainSignal) return "connected";
+  if (capabilityEnabled || sourceConfigured) return "awaiting-signal";
+  return "not-connected";
 }
 
 function panelSummary(
   state: PerformanceConnectionState,
   domainState: string | undefined,
+  configuredWithoutPeriod = false,
 ): string {
-  if (state === "not-connected") return "";
-  if (state === "awaiting-signal") return "Waiting on the first trustworthy signal";
+  if (state === "not-connected") return "Not currently in this dashboard";
+  if (state === "awaiting-signal") {
+    return configuredWithoutPeriod
+      ? "Configured — this closed period has no verified activity yet"
+      : "Waiting on the first trustworthy signal";
+  }
   if (domainState === "improving" || domainState === "healthy") return "Looking healthy";
   if (domainState === "attention" || domainState === "critical") return "Worth a closer look";
   return "Still coming into focus";
@@ -285,17 +294,55 @@ export async function composeExecutivePerformance(input: {
     getReportingCapabilityIds(input.profile.reportingCapabilities);
 
   // Portal compose never calls Google — Shared Core ReportingFacts only.
-  const facts = await loadReportingFacts({ clientId, period });
+  const priorPeriod = shiftPeriod(period, -1);
+  const currentMonth = currentCalendarMonthPeriod();
+  const [facts, priorFacts, currentMonthFacts, connection] = await Promise.all([
+    loadReportingFacts({ clientId, period }),
+    loadReportingFacts({ clientId, period: priorPeriod }),
+    loadReportingFacts({ clientId, period: currentMonth }),
+    loadClientReportingConnection(clientId),
+  ]);
   const factProvenance = summarizeReportingFactProvenance(facts);
   const zeroActivity =
     facts.length > 0 && facts.every((f) => Number(f.value) === 0);
+  const ga4Configured = Boolean(connection?.ga4PropertyId);
+  const adsMapped = Boolean(connection?.googleAdsCustomerId);
+  const composedAt = new Date().toISOString();
+  const currentSnapshot = composeMetricSnapshot({
+    clientId,
+    period,
+    facts,
+    enabledCapabilities,
+    composedAt,
+  });
+  const priorSnapshot =
+    priorFacts.length > 0
+      ? composeMetricSnapshot({
+          clientId,
+          period: priorPeriod,
+          facts: priorFacts,
+          enabledCapabilities,
+          composedAt,
+        })
+      : null;
+  const currentMonthSnapshot =
+    currentMonthFacts.length > 0
+      ? composeMetricSnapshot({
+          clientId,
+          period: currentMonth,
+          facts: currentMonthFacts,
+          enabledCapabilities,
+          composedAt,
+        })
+      : null;
 
   const bundle = composeReportingIntelligence({
     clientId,
     period,
     facts,
     enabledCapabilities,
-    composedAt: new Date().toISOString(),
+    composedAt,
+    history: priorSnapshot ? [currentSnapshot, priorSnapshot] : [currentSnapshot],
   });
 
   const enabledSet = new Set(enabledCapabilities);
@@ -333,12 +380,30 @@ export async function composeExecutivePerformance(input: {
     ) as BusinessDomain;
     /* Connected only when THIS domain has persisted facts — never from sibling providers. */
     const domainFacts = factsForDomain(bundle.snapshot, domainKey);
-    const hasDomainSignal =
-      capabilityEnabled &&
+    const hasClosedPeriodSignal =
       domainFacts.length > 0 &&
       domainHealth.get(domainKey) !== undefined &&
       domainHealth.get(domainKey) !== "unknown";
-    const state = panelState(capabilityEnabled, Boolean(hasDomainSignal));
+    const currentDomainMetrics =
+      panel.id === "website" && currentMonthSnapshot
+        ? buildExecutivePanelMetrics(panel.id, currentMonthSnapshot)
+        : [];
+    const useCurrentWebsite =
+      panel.id === "website" &&
+      !hasClosedPeriodSignal &&
+      currentDomainMetrics.length > 0;
+    const sourceConfigured =
+      panel.id === "website"
+        ? ga4Configured
+        : panel.id === "ads"
+          ? adsMapped
+          : false;
+    const hasDomainSignal = hasClosedPeriodSignal || useCurrentWebsite;
+    const state = panelState(
+      capabilityEnabled,
+      Boolean(hasDomainSignal),
+      sourceConfigured,
+    );
     const freshnessBlocksInsight = [
       "stale",
       "sync_failed",
@@ -356,7 +421,9 @@ export async function composeExecutivePerformance(input: {
         : [];
     const metrics =
       state === "connected"
-        ? buildExecutivePanelMetrics(panel.id, bundle.snapshot)
+        ? useCurrentWebsite
+          ? currentDomainMetrics
+          : buildExecutivePanelMetrics(panel.id, bundle.snapshot)
         : [];
 
     return {
@@ -366,7 +433,9 @@ export async function composeExecutivePerformance(input: {
       state,
       summary: freshnessBlocksInsight
         ? "Waiting on current provider data"
-        : panelSummary(state, domainHealth.get(domainKey)),
+        : useCurrentWebsite
+          ? `Current month · ${currentMonth.label ?? "in progress"}`
+          : panelSummary(state, domainHealth.get(domainKey), sourceConfigured && !hasDomainSignal),
       detail:
         freshnessBlocksInsight
           ? reportingProvenance.freshnessLabel
@@ -532,18 +601,19 @@ export async function composeExecutivePerformance(input: {
         detail: PRIMAL_POST_LAUNCH_OPERATING.momentumDetail,
       };
     }
-    if (panel.id === "website" && panel.state === "not-connected") {
+    if (panel.id === "website" && panel.state !== "connected") {
       return {
         ...panel,
-        summary: "Measurement active",
+        summary: "Measurement configured",
         detail: PRIMAL_POST_LAUNCH_OPERATING.websitePanelNote,
       };
     }
-    if (panel.id === "ads" && panel.state === "not-connected") {
+    if (panel.id === "ads" && panel.state !== "connected") {
       return {
         ...panel,
-        summary: "Performance reviewed",
-        detail: PRIMAL_POST_LAUNCH_OPERATING.adsPanelNote,
+        summary: "Not in this view yet",
+        detail:
+          "Paid Search review lives in the Leadership Performance Update. Live Ads metrics are not currently surfaced in this dashboard.",
       };
     }
     if (panel.id === "search" && panel.state === "awaiting-signal") {

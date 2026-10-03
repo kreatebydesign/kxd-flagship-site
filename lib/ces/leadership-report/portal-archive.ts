@@ -17,7 +17,7 @@ export type CuratedLeadershipReportListItem = {
 };
 
 export function listCuratedPrimalLeadershipReportItems(): CuratedLeadershipReportListItem[] {
-  return listPrimalLeadershipReports().map((entry) => ({
+  const leadership = listPrimalLeadershipReports().map((entry) => ({
     kind: "leadership" as const,
     id: entry.id,
     title: entry.title,
@@ -27,4 +27,18 @@ export function listCuratedPrimalLeadershipReportItems(): CuratedLeadershipRepor
     href: entry.href,
     reportDateIso: entry.reportDateIso,
   }));
+  return [
+    ...leadership,
+    {
+      kind: "leadership",
+      id: "primal-executive-review-archive",
+      title: "Executive Review — historical briefing",
+      periodLabel: "Through July 20, 2026",
+      typeLabel: "Historical review",
+      summary:
+        "Earlier executive briefing from the Adam-era partnership presentation. Preserved as archive — not a daily operating destination.",
+      href: "/portal/executive-review",
+      reportDateIso: "2026-07-20",
+    },
+  ];
 }
