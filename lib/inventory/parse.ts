@@ -1,7 +1,9 @@
 import { resolveMediaPath } from "./media";
+import { normalizeReferencedMedia } from "./referenced-media";
 import type {
   InventoryCondition,
   InventoryListingStatus,
+  InventoryMediaRef,
   InventoryPriceDisplayMode,
   InventoryVehicleRecord,
 } from "./types";
@@ -92,7 +94,8 @@ export function parseInventoryVehicleDoc(raw: unknown): InventoryVehicleRecord |
         .filter((row): row is NonNullable<typeof row> => Boolean(row))
     : [];
 
-  const gallery = Array.isArray(doc.gallery)
+  const ownedPrimary = mediaRef(doc.primaryImage);
+  const ownedGallery = Array.isArray(doc.gallery)
     ? doc.gallery
         .map((row) => {
           const item = asDoc(row);
@@ -101,6 +104,15 @@ export function parseInventoryVehicleDoc(raw: unknown): InventoryVehicleRecord |
         })
         .filter((row): row is NonNullable<typeof row> => Boolean(row))
     : [];
+  const referencedMedia = normalizeReferencedMedia(doc.referencedMedia);
+  const referencedPrimary: InventoryMediaRef | null = referencedMedia.primary
+    ? { id: null, url: referencedMedia.primary.url, alt: referencedMedia.primary.alt }
+    : null;
+  const referencedGallery: InventoryMediaRef[] = referencedMedia.gallery.map((image) => ({
+    id: null,
+    url: image.url,
+    alt: image.alt,
+  }));
 
   return {
     id,
@@ -138,8 +150,10 @@ export function parseInventoryVehicleDoc(raw: unknown): InventoryVehicleRecord |
     description: doc.description ? String(doc.description).trim() : null,
     specifications,
     highlights,
-    primaryImage: mediaRef(doc.primaryImage),
-    gallery,
+    primaryImage: ownedPrimary ?? referencedPrimary,
+    gallery: ownedGallery.length ? ownedGallery : referencedGallery,
+    referencedMedia:
+      referencedMedia.primary || referencedMedia.gallery.length ? referencedMedia : null,
     sortOrder: Number.isFinite(Number(doc.sortOrder)) ? Number(doc.sortOrder) : 0,
     publishedAt: doc.publishedAt ? String(doc.publishedAt) : null,
     soldAt: doc.soldAt ? String(doc.soldAt) : null,

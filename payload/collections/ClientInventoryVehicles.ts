@@ -234,6 +234,16 @@ export const ClientInventoryVehicles: CollectionConfig = {
       admin: { position: "sidebar" },
     },
     {
+      name: "referencedMedia",
+      type: "json",
+      label: "Referenced source media",
+      admin: {
+        description:
+          "Durable public source image URLs when KXD does not own the files. Owned Payload media still takes precedence.",
+        position: "sidebar",
+      },
+    },
+    {
       name: "sourceSystem",
       type: "text",
       index: true,

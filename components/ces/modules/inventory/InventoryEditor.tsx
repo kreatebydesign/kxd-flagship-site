@@ -27,7 +27,7 @@ type Props = {
   initialPreview?: PublicInventoryVehicle | null;
 };
 
-type GalleryItem = { id: number; url: string; alt: string };
+type GalleryItem = { id: number | null; url: string; alt: string };
 
 type FormState = {
   title: string;
@@ -123,7 +123,18 @@ function toPayload(form: FormState): InventoryVehicleInput {
     sortOrder: Number(form.sortOrder || 0),
     externalUrl: form.externalUrl || null,
     primaryImageId: form.primaryImageId,
-    galleryImageIds: form.gallery.map((image) => image.id),
+    galleryImageIds: form.gallery
+      .map((image) => image.id)
+      .filter((id): id is number => id != null && Number.isFinite(id)),
+    referencedMedia: {
+      primary:
+        form.primaryImageId == null && form.primaryImageUrl
+          ? { url: form.primaryImageUrl, alt: form.title || "Vehicle photo" }
+          : null,
+      gallery: form.gallery
+        .filter((image) => image.id == null)
+        .map((image) => ({ url: image.url, alt: image.alt })),
+    },
     highlights: form.highlightsText
       .split("\n")
       .map((line) => line.trim())
@@ -364,19 +375,17 @@ export function InventoryEditor({ mode, initial, initialPreview }: Props) {
     }
   }
 
-  function removeGalleryImage(id: number) {
+  function removeGalleryImage(index: number) {
     setSaved(false);
     setForm((prev) => ({
       ...prev,
-      gallery: prev.gallery.filter((image) => image.id !== id),
+      gallery: prev.gallery.filter((_, i) => i !== index),
     }));
   }
 
-  function moveGalleryImage(id: number, direction: -1 | 1) {
+  function moveGalleryImage(index: number, direction: -1 | 1) {
     setSaved(false);
     setForm((prev) => {
-      const index = prev.gallery.findIndex((image) => image.id === id);
-      if (index < 0) return prev;
       const nextIndex = index + direction;
       if (nextIndex < 0 || nextIndex >= prev.gallery.length) return prev;
       const gallery = [...prev.gallery];
@@ -835,7 +844,7 @@ export function InventoryEditor({ mode, initial, initialPreview }: Props) {
               {galleryOpen && form.gallery.length > 0 ? (
                 <ul className="kxd-inv-gallery">
                   {form.gallery.map((image, index) => (
-                    <li key={image.id} className="kxd-inv-gallery__item">
+                    <li key={`${image.url}-${index}`} className="kxd-inv-gallery__item">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={image.url} alt={image.alt} />
                       <div className="kxd-inv-gallery__controls">
@@ -843,7 +852,7 @@ export function InventoryEditor({ mode, initial, initialPreview }: Props) {
                           type="button"
                           aria-label="Move earlier"
                           disabled={index === 0}
-                          onClick={() => moveGalleryImage(image.id, -1)}
+                          onClick={() => moveGalleryImage(index, -1)}
                         >
                           ←
                         </button>
@@ -851,14 +860,14 @@ export function InventoryEditor({ mode, initial, initialPreview }: Props) {
                           type="button"
                           aria-label="Move later"
                           disabled={index === form.gallery.length - 1}
-                          onClick={() => moveGalleryImage(image.id, 1)}
+                          onClick={() => moveGalleryImage(index, 1)}
                         >
                           →
                         </button>
                         <button
                           type="button"
                           aria-label="Remove image"
-                          onClick={() => removeGalleryImage(image.id)}
+                          onClick={() => removeGalleryImage(index)}
                         >
                           ×
                         </button>

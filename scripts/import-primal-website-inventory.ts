@@ -21,7 +21,6 @@ import {
   PRIMAL_WEBSITE_SOURCE_SYSTEM,
   mapPrimalWebsiteVehicle,
   parsePrimalWebsiteInventoryHtml,
-  primalWebsiteImageUrl,
 } from "../lib/inventory/primal-website-source";
 import {
   listInventoryForClient,
@@ -29,8 +28,8 @@ import {
   updateInventoryVehicle,
   upsertInventoryVehicleFromSource,
 } from "../lib/inventory/server";
-import { requireDurablePayloadMedia } from "../lib/media/payload-storage";
 import type { InventoryListingStatus, InventoryVehicleInput } from "../lib/inventory/types";
+import { sql } from "drizzle-orm";
 
 const APPLY = process.argv.includes("--apply");
 const REMOVE_TEST = process.argv.includes("--remove-test-listing");
@@ -50,40 +49,6 @@ async function fetchListingHtml(): Promise<string> {
   });
   if (!res.ok) fail(`Could not fetch live inventory (${res.status}).`);
   return res.text();
-}
-
-async function downloadImage(
-  src: string,
-): Promise<{ buffer: Buffer; mimetype: string; name: string } | null> {
-  const url = primalWebsiteImageUrl(src);
-  const res = await fetch(url, {
-    headers: { "user-agent": "Mozilla/5.0 (compatible; KXD-Inventory-Import/1.0)" },
-    cache: "no-store",
-  });
-  if (!res.ok) return null;
-  const contentType = res.headers.get("content-type") ?? "";
-  if (!contentType.startsWith("image/")) return null;
-  const buffer = Buffer.from(await res.arrayBuffer());
-  if (buffer.length < 100) return null;
-  const ext = contentType.includes("png")
-    ? "png"
-    : contentType.includes("webp")
-      ? "webp"
-      : "jpg";
-  const base =
-    src
-      .split("/")
-      .filter(Boolean)
-      .slice(-2)
-      .join("-")
-      .replace(/[^a-zA-Z0-9._-]+/g, "-")
-      .replace(/^-+|-+$/g, "")
-      .slice(0, 80) || "vehicle";
-  return {
-    buffer,
-    mimetype: contentType.split(";")[0] ?? "image/jpeg",
-    name: `${base}.${ext}`,
-  };
 }
 
 function mappedStatus(data: InventoryVehicleInput): InventoryListingStatus {
@@ -134,16 +99,21 @@ async function main() {
       listingStatus: row.data.listingStatus,
       price: row.data.price,
       priceDisplayMode: row.data.priceDisplayMode,
-      stockNumber: row.data.stockNumber,
-      vin: row.data.vin,
-      mileage: row.data.mileage,
-      media: row.vehicle.mediaRefs.length,
-      slug: row.data.slug,
+          stockNumber: row.data.stockNumber,
+          vin: row.data.vin,
+          mileage: row.data.mileage,
+          media: row.vehicle.mediaRefs.length,
+          referencedPrimary: row.data.referencedMedia?.primary?.url ?? null,
+          slug: row.data.slug,
       externalUrl: row.data.externalUrl,
     });
   }
 
   const payload = await getPayload({ config });
+  const drizzle = payload.db.drizzle as { execute: (query: unknown) => Promise<unknown> };
+  await drizzle.execute(
+    sql`ALTER TABLE "client_inventory_vehicles" ADD COLUMN IF NOT EXISTS "referenced_media" jsonb`,
+  );
   const clients = await payload.find({
     collection: "clients",
     where: { slug: { equals: PRIMAL_CLIENT_SLUG } },
@@ -207,45 +177,9 @@ async function main() {
     }
   }
 
-  const storage = requireDurablePayloadMedia();
-  if (!storage.ok) {
-    console.warn(`Media uploads skipped: ${storage.error}`);
-  }
-
   let created = 0;
   let updated = 0;
   for (const row of mapped) {
-    const prior = bySource.get(row.sourceExternalId);
-    const mediaIds: number[] = [];
-    if (storage.ok && !prior?.primaryImage) {
-      for (const media of row.vehicle.mediaRefs) {
-        const file = await downloadImage(media.src);
-        if (!file) {
-          console.warn(`Media skipped (not fetched): ${media.src}`);
-          continue;
-        }
-        const uploaded = await payload.create({
-          collection: "media",
-          data: { alt: media.alt || row.data.title },
-          file: {
-            data: file.buffer,
-            mimetype: file.mimetype,
-            name: file.name,
-            size: file.buffer.length,
-          },
-          overrideAccess: true,
-        });
-        const id = Number((uploaded as { id?: number }).id);
-        if (Number.isFinite(id)) mediaIds.push(id);
-      }
-    }
-
-    const primary =
-      mediaIds[0] ??
-      (row.vehicle.mediaRefs.findIndex((m) => m.isPrimary) >= 0
-        ? mediaIds[row.vehicle.mediaRefs.findIndex((m) => m.isPrimary)]
-        : mediaIds[0]);
-
     const result = await upsertInventoryVehicleFromSource(payload, {
       clientId,
       actor: "inventory-import:primal-website",
@@ -253,15 +187,7 @@ async function main() {
         sourceSystem: row.sourceSystem,
         sourceExternalId: row.sourceExternalId,
       },
-      data: {
-        ...row.data,
-        ...(mediaIds.length
-          ? {
-              primaryImageId: primary ?? null,
-              galleryImageIds: mediaIds.slice(1),
-            }
-          : {}),
-      },
+      data: row.data,
     });
     if (!result.ok) fail(`${row.sourceExternalId}: ${result.message}`);
     if (result.action === "created") created += 1;

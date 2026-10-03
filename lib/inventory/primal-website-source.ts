@@ -5,6 +5,9 @@
 
 import { normalizeInventorySlug } from "./slug";
 import { normalizeInventorySourceIdentity } from "./source";
+import {
+  isReusablePrimalWebsiteMediaUrl,
+} from "./referenced-media";
 import type {
   InventoryCondition,
   InventoryListingStatus,
@@ -213,6 +216,25 @@ export function mapPrimalWebsiteVehicle(input: {
     status: input.vehicle.status,
   });
 
+  const media = input.vehicle.mediaRefs
+    .map((ref) => {
+      const url = primalWebsiteImageUrl(ref.src, origin);
+      if (!isReusablePrimalWebsiteMediaUrl(url)) return null;
+      return {
+        url,
+        alt: ref.alt || variant,
+        isPrimary: ref.isPrimary,
+      };
+    })
+    .filter((row): row is { url: string; alt: string; isPrimary: boolean } => Boolean(row));
+  const primary = media.find((row) => row.isPrimary) ?? media[0] ?? null;
+  const referencedMedia = {
+    primary: primary ? { url: primary.url, alt: primary.alt } : null,
+    gallery: media
+      .filter((row) => row.url !== primary?.url)
+      .map((row) => ({ url: row.url, alt: row.alt })),
+  };
+
   return {
     sourceSystem: source.sourceSystem,
     sourceExternalId: source.sourceExternalId,
@@ -237,6 +259,7 @@ export function mapPrimalWebsiteVehicle(input: {
       highlights: input.vehicle.highlights,
       sortOrder: 0,
       externalUrl: `${origin}${publicPath.startsWith("/") ? publicPath : `/${publicPath}`}`,
+      referencedMedia,
     },
   };
 }

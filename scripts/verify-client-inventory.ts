@@ -54,6 +54,7 @@ function fixture(partial: Partial<InventoryVehicleRecord>): InventoryVehicleReco
     highlights: [{ text: "Fresh service" }],
     primaryImage: { id: 1, url: "/media/car.jpg", alt: "Car" },
     gallery: [],
+    referencedMedia: null,
     sortOrder: 1,
     publishedAt: "2026-07-14T00:00:00.000Z",
     soldAt: null,
@@ -148,6 +149,15 @@ function main() {
       collection.includes('name: "sourceExternalId"') &&
       sourceMigration.includes("client_inventory_vehicles_source_identity_uidx") &&
       migrationsIndex.includes("20260809_client_inventory_source_identity"),
+  );
+  check(
+    "referenced source media is additive json, not a second media system",
+    collection.includes('name: "referencedMedia"') &&
+      collection.includes('type: "json"') &&
+      migrationsIndex.includes("20261003_client_inventory_referenced_media") &&
+      read("lib/inventory/referenced-media.ts").includes(
+        "isReusablePrimalWebsiteMediaUrl",
+      ),
   );
   check(
     "source import is idempotent and review-first",
@@ -320,7 +330,13 @@ function main() {
       engine: "1500cc",
       displacement: "1500cc",
       highlights: ["HALO"],
-      mediaRefs: [],
+      mediaRefs: [
+        {
+          src: "/images/primal/inventory/1758/P1133054-2.jpg",
+          alt: "SR3 XXR 1500",
+          isPrimary: true,
+        },
+      ],
       publicPath: "/inventory/veh_sr3_new_01",
     },
   });
@@ -328,6 +344,11 @@ function main() {
   check("mapped cents become dollars", mapped?.data.price === 159500);
   check("mapped slug is source id", mapped?.data.slug === "veh-sr3-new-01");
   check("mapped VIN stays empty", mapped?.data.vin == null);
+  check(
+    "mapped media reuses primal public URL",
+    mapped?.data.referencedMedia?.primary?.url ===
+      "https://www.primalmotorsports.com/images/primal/inventory/1758/P1133054-2.jpg",
+  );
 
   console.log("\nPhase 34B verification passed.\n");
 }
