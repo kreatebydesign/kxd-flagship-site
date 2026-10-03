@@ -4,6 +4,8 @@ import type {
   ClientHomePresentationItem,
 } from "@/lib/ces/modules/home";
 import type { ActiveEngagementSnapshot } from "@/lib/portal/active-engagement";
+import type { LeadAttentionCounts } from "@/lib/client-command/leads/types";
+import { summarizeLeadAttentionHeadline } from "@/lib/client-command/leads/overview";
 import { ActiveEngagementCard } from "./ActiveEngagementCard";
 
 function HomeItem({ item }: { item: ClientHomePresentationItem }) {
@@ -70,6 +72,7 @@ export function CesClientCommandHome({
   engagementEyebrow,
   engagementTitle,
   suppressWelcome = false,
+  leadAttention = null,
 }: {
   home: ClientHomePresentation;
   showWork: boolean;
@@ -79,6 +82,8 @@ export function CesClientCommandHome({
   engagementTitle?: string;
   /** When a Shared Core presentation hero already introduces the workspace. */
   suppressWelcome?: boolean;
+  /** Primal Phase 1 Lead Command (Build 1) — real counts only, omitted when leads is disabled. */
+  leadAttention?: LeadAttentionCounts | null;
 }) {
   const story = home.valueStory;
   const care = home.careContinuity;
@@ -126,7 +131,33 @@ export function CesClientCommandHome({
         <Link href="/portal/reports" className="kxd-ces-btn kxd-ces-btn--ghost">
           Reports
         </Link>
+        {leadAttention ? (
+          <Link href="/portal/leads" className="kxd-ces-btn kxd-ces-btn--ghost">
+            Leads
+          </Link>
+        ) : null}
       </nav>
+
+      {leadAttention &&
+      (leadAttention.newUntouched > 0 ||
+        leadAttention.unassigned > 0 ||
+        leadAttention.followUpDue > 0 ||
+        leadAttention.followUpOverdue > 0) ? (
+        <section
+          className="kxd-client-home__lead-attention"
+          aria-labelledby="client-lead-attention-title"
+        >
+          <div className="kxd-client-home__lead-attention-copy">
+            <p className="kxd-client-home__eyebrow">Leads</p>
+            <h2 id="client-lead-attention-title" className="kxd-client-home__section-title">
+              {summarizeLeadAttentionHeadline(leadAttention)}
+            </h2>
+          </div>
+          <Link href="/portal/leads" className="kxd-ces-btn kxd-ces-btn--primary">
+            Open leads
+          </Link>
+        </section>
+      ) : null}
 
       <section className="kxd-client-home__attention" aria-labelledby="client-attention-title">
         <p className="kxd-client-home__eyebrow">Waiting on you</p>

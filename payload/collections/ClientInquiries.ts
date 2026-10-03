@@ -331,5 +331,127 @@ export const ClientInquiries: CollectionConfig = {
         description: "Brief operational notes. Relationship history stays in Activity Engine.",
       },
     },
+    // ── Primal Phase 1 Lead Command foundation (Build 1, additive) ──────────
+    {
+      name: "nextFollowUpAt",
+      type: "date",
+      label: "Next Follow-up At",
+      index: true,
+      admin: {
+        date: { pickerAppearance: "dayAndTime" },
+        position: "sidebar",
+        description: "Operator/portal-set next touch date. Drives follow-up attention only.",
+      },
+    },
+    {
+      name: "programInterest",
+      type: "text",
+      label: "Program Interest",
+      admin: {
+        description: "Free-text program/offering the contact asked about.",
+      },
+    },
+    {
+      name: "utmSource",
+      type: "text",
+      label: "UTM Source",
+      admin: { position: "sidebar" },
+    },
+    {
+      name: "utmMedium",
+      type: "text",
+      label: "UTM Medium",
+      admin: { position: "sidebar" },
+    },
+    {
+      name: "utmCampaign",
+      type: "text",
+      label: "UTM Campaign",
+      admin: { position: "sidebar" },
+    },
+    {
+      name: "utmContent",
+      type: "text",
+      label: "UTM Content",
+      admin: { position: "sidebar" },
+    },
+    {
+      name: "utmTerm",
+      type: "text",
+      label: "UTM Term",
+      admin: { position: "sidebar" },
+    },
+    {
+      name: "gclid",
+      type: "text",
+      label: "Google Click ID",
+      admin: {
+        position: "sidebar",
+        description: "Evidence only — never proof of receipt or sale.",
+      },
+    },
+    {
+      name: "keyword",
+      type: "text",
+      label: "Keyword",
+      admin: { position: "sidebar" },
+    },
+    {
+      name: "lostReason",
+      type: "select",
+      label: "Lost Reason",
+      options: [
+        { label: "Not interested", value: "not_interested" },
+        { label: "Budget", value: "budget" },
+        { label: "Timing", value: "timing" },
+        { label: "Competitor", value: "competitor" },
+        { label: "No response", value: "no_response" },
+        { label: "Wrong fit", value: "wrong_fit" },
+        { label: "Other", value: "other" },
+      ],
+      admin: {
+        position: "sidebar",
+        description: "Structured reason captured on outcome = lost. Free-text detail stays in Outcome Note.",
+      },
+    },
+    {
+      name: "wonRevenueCents",
+      type: "number",
+      label: "Won Revenue (cents)",
+      admin: {
+        position: "sidebar",
+        description: "Operator-authorized evidence only on outcome = won. Does not create commission.",
+      },
+    },
+    {
+      name: "bookedProgram",
+      type: "text",
+      label: "Booked Program",
+      admin: {
+        description: "Free-text program booked, captured on outcome = won.",
+      },
+    },
+    {
+      name: "location",
+      type: "relationship",
+      relationTo: "client-locations",
+      label: "Location",
+      admin: {
+        position: "sidebar",
+        description: "Optional structural location this inquiry is associated with.",
+      },
+    },
+    {
+      name: "assignedPortalOwner",
+      type: "relationship",
+      relationTo: "portal-users",
+      label: "Assigned Portal Owner",
+      index: true,
+      admin: {
+        position: "sidebar",
+        description:
+          "Client Command portal-member owner (distinct from Assigned Owner, which is a Payload/staff user).",
+      },
+    },
   ],
 };

@@ -21,6 +21,7 @@
     "verify:journal-plate-feature": "node --import tsx scripts/verify-journal-plate-feature.ts",
     "verify:commercial-search-footholds": "node --import tsx scripts/verify-commercial-search-footholds.ts",
     "verify:kxd-acquisition-persistence": "node --import tsx scripts/verify-kxd-acquisition-persistence.ts",
+    "verify:primal-phase1-lead-command": "node --import tsx scripts/verify-primal-phase1-lead-command.ts",
     "seed:services": "tsx scripts/seed-services.ts",
     "seed:projects": "tsx scripts/seed-projects.ts",
     "seed:clients": "tsx scripts/seed-clients.ts",

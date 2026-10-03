@@ -34,6 +34,16 @@ export type Disposition =
   | "spam"
   | "other";
 
+/** Primal Phase 1 Lead Command foundation — structured lost reason (Build 1). */
+export type LostReason =
+  | "not_interested"
+  | "budget"
+  | "timing"
+  | "competitor"
+  | "no_response"
+  | "wrong_fit"
+  | "other";
+
 export type ClientInquiryRecord = {
   id: number;
   inquiryKey: string;
@@ -68,6 +78,22 @@ export type ClientInquiryRecord = {
   reconciliationState: ReconciliationState;
   googleConversionObserved: boolean;
   operatorNotes: string | null;
+  // ── Primal Phase 1 Lead Command foundation (Build 1, additive) ──────────
+  nextFollowUpAt: string | null;
+  programInterest: string | null;
+  utmSource: string | null;
+  utmMedium: string | null;
+  utmCampaign: string | null;
+  utmContent: string | null;
+  utmTerm: string | null;
+  gclid: string | null;
+  keyword: string | null;
+  lostReason: LostReason | null;
+  wonRevenueCents: number | null;
+  bookedProgram: string | null;
+  locationId: number | null;
+  /** Client Command portal-member owner — distinct from assignedOwnerId (Payload users). */
+  assignedPortalOwnerId: number | null;
 };
 
 export type ReceiveClientInquiryInput = {
@@ -90,6 +116,15 @@ export type ReceiveClientInquiryInput = {
   inquiryKey?: string;
   operatorNotes?: string | null;
   actorUserId?: number | null;
+  // ── Primal Phase 1 Lead Command foundation (Build 1, additive) ──────────
+  programInterest?: string | null;
+  utmSource?: string | null;
+  utmMedium?: string | null;
+  utmCampaign?: string | null;
+  utmContent?: string | null;
+  utmTerm?: string | null;
+  gclid?: string | null;
+  keyword?: string | null;
 };
 
 export type ClientLeadLedgerSnapshot = {

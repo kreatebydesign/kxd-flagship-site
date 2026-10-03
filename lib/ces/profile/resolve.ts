@@ -124,6 +124,21 @@ function ensurePrimalExecutiveReview(profile: ResolvedExperienceProfile): void {
 }
 
 /**
+ * Primal Phase 1 Lead Command (Build 1) — ensure the `leads` entitlement for
+ * Primal without requiring a reseed, mirroring ensurePrimalExecutiveReview.
+ */
+function ensurePrimalLeadCommand(profile: ResolvedExperienceProfile): void {
+  if (profile.identity.clientSlug !== PRIMAL_CLIENT_SLUG) return;
+  if (!profile.enabledModules.includes("website-review")) return;
+  if (!profile.enabledModules.includes("leads")) {
+    profile.enabledModules = [...profile.enabledModules, "leads"];
+  }
+  if (!profile.terminology["nav.leads"]) {
+    profile.terminology["nav.leads"] = PRIMAL_EXPERIENCE_PROFILE.terminology["nav.leads"];
+  }
+}
+
+/**
  * Ensure Results surfaces (Performance + Reports) for Primal so leadership
  * reports remain reachable without inventing a second reporting product.
  */
@@ -167,6 +182,7 @@ function ensureRobinColeBrand(profile: ResolvedExperienceProfile): void {
 function finalizeProfile(profile: ResolvedExperienceProfile): ResolvedExperienceProfile {
   ensurePrimalWebsiteWorkspace(profile);
   ensurePrimalExecutiveReview(profile);
+  ensurePrimalLeadCommand(profile);
   ensureRobinColeBrand(profile);
   syncEnabledPortalModules(profile);
   ensurePrimalResultsSurfaces(profile);

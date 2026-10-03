@@ -21,7 +21,8 @@ export const PRIMAL_MOTORSPORTS_LEAD_POLICY: ManagedClientLeadPolicy = {
   supportsSaleConfirmation: true,
   commissionOnConfirmedSale: false,
   commissionAmountCents: null,
-  portalModuleEnabled: false,
+  /** Primal Phase 1 Lead Command (Build 1) — Client Command portal lead inbox active. */
+  portalModuleEnabled: true,
   /** Phase 3 — racing-school form success may signed-ingest into client-inquiries. */
   autoIngestFromWebsiteForm: true,
 };

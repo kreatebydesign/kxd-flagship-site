@@ -13,6 +13,7 @@ import type {
   ClientInquiryRecord,
   Disposition,
   LeadQuality,
+  LostReason,
   ReconciliationState,
 } from "./types";
 
@@ -71,5 +72,22 @@ export function mapDocToRecord(doc: Record<string, unknown>): ClientInquiryRecor
     ) as ReconciliationState,
     googleConversionObserved: Boolean(doc.googleConversionObserved),
     operatorNotes: doc.operatorNotes ? String(doc.operatorNotes) : null,
+    nextFollowUpAt: doc.nextFollowUpAt ? String(doc.nextFollowUpAt) : null,
+    programInterest: doc.programInterest ? String(doc.programInterest) : null,
+    utmSource: doc.utmSource ? String(doc.utmSource) : null,
+    utmMedium: doc.utmMedium ? String(doc.utmMedium) : null,
+    utmCampaign: doc.utmCampaign ? String(doc.utmCampaign) : null,
+    utmContent: doc.utmContent ? String(doc.utmContent) : null,
+    utmTerm: doc.utmTerm ? String(doc.utmTerm) : null,
+    gclid: doc.gclid ? String(doc.gclid) : null,
+    keyword: doc.keyword ? String(doc.keyword) : null,
+    lostReason: doc.lostReason ? (String(doc.lostReason) as LostReason) : null,
+    wonRevenueCents:
+      doc.wonRevenueCents != null && doc.wonRevenueCents !== ""
+        ? Number(doc.wonRevenueCents)
+        : null,
+    bookedProgram: doc.bookedProgram ? String(doc.bookedProgram) : null,
+    locationId: relId(doc.location),
+    assignedPortalOwnerId: relId(doc.assignedPortalOwner),
   };
 }

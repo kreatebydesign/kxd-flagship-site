@@ -73,6 +73,7 @@ export const CES_EXPERIENCE_MODULE_IDS = [
   "executive-performance",
   "executive-review",
   "inventory",
+  "leads",
 ] as const;
 
 export type CesExperienceModuleId = (typeof CES_EXPERIENCE_MODULE_IDS)[number];
@@ -205,6 +206,21 @@ const PORTAL_DEFS: CanonicalCapabilityDefinition[] = [
       href: "/portal/website-workspace",
       activation: "ces-opt-in",
       vocabularyNamespace: "website-workspace",
+      cesRegistry: true,
+    },
+  },
+  {
+    key: "leads",
+    label: "Leads",
+    kind: "portal",
+    internalOnly: false,
+    editionModule: "client-hq",
+    portal: {
+      navGroup: "work",
+      navOrder: 7,
+      href: "/portal/leads",
+      activation: "ces-opt-in",
+      vocabularyNamespace: "leads",
       cesRegistry: true,
     },
   },

@@ -10,6 +10,7 @@ export const CES_CLIENT_NAV_LABELS: Record<string, string> = {
   "executive-review": "Monthly review",
   "website-review": "Website feedback",
   "website-workspace": "Website updates",
+  leads: "Leads",
   requests: "Requests",
   "website-health": "Website status",
   analytics: "Performance",

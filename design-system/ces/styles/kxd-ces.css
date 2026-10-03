@@ -12841,3 +12841,31 @@ a.kxd-brand-kit__asset:hover .kxd-brand-kit__asset-action {
     justify-content: center;
   }
 }
+
+/* —— Lead Command home attention strip (Primal Phase 1, Build 1) —— */
+/* Restrained — real counts only. Reuses existing accent tokens, no new color system. */
+.kxd-client-home__lead-attention {
+  border-radius: var(--kxd-ces-radius, 8px);
+  border: 1px solid color-mix(in srgb, var(--kxd-ces-accent) 30%, transparent);
+  background: color-mix(in srgb, var(--kxd-ces-accent) 6%, transparent);
+  padding: 1rem 1.25rem;
+  margin: 0 0 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.kxd-client-home__lead-attention-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+@media (max-width: 640px) {
+  .kxd-client-home__lead-attention {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

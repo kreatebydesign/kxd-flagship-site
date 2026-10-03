@@ -24,6 +24,7 @@ import { CesClientCommandHome } from "./CesClientCommandHome";
 import { WebsiteEditorPortalAction } from "@/components/portal/WebsiteEditorPortalAction";
 import { AccountBalanceCard } from "@/components/client-hq/AccountBalanceCard";
 import type { PortalBillingOverviewCardModel } from "@/lib/portal/billing";
+import type { LeadAttentionCounts } from "@/lib/client-command/leads/types";
 
 export interface CesPortalHomeProps {
   greeting: string;
@@ -47,6 +48,8 @@ export interface CesPortalHomeProps {
   websiteEditorUrl?: string | null;
   /** Compact Account / Billing overview card when billing zone is visible. */
   billingOverview?: PortalBillingOverviewCardModel | null;
+  /** Primal Phase 1 Lead Command (Build 1) — real counts only, omitted when leads is disabled. */
+  leadAttention?: LeadAttentionCounts | null;
 }
 
 export function CesPortalHome({
@@ -62,6 +65,7 @@ export function CesPortalHome({
   engagement = null,
   websiteEditorUrl = null,
   billingOverview = null,
+  leadAttention = null,
 }: CesPortalHomeProps) {
   const flagship = isCesFlagshipPortal(profile);
   const homeSurface = resolveCesHomeSurface({
@@ -116,6 +120,7 @@ export function CesPortalHome({
             engagementEyebrow={engagementEyebrow}
             engagementTitle={engagementTitle}
             suppressWelcome={showPresentationHero}
+            leadAttention={leadAttention}
           />
         ) : useExecutive && performance ? (
           <CesExecutivePerformanceWorkspace
