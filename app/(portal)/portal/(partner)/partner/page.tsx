@@ -18,90 +18,113 @@ export default async function PartnerHomePage() {
     snapshot.approvedEarningsCents === 0 &&
     snapshot.paidEarningsCents === 0;
   const paidLabel = formatPartnerCents(snapshot.paidEarningsCents);
+  const approvedLabel = formatPartnerCents(snapshot.approvedEarningsCents);
+
+  const path = [
+    {
+      label: "Introduction",
+      value: String(snapshot.submittedLeads),
+      empty: snapshot.submittedLeads === 0,
+    },
+    {
+      label: "Qualified",
+      value: String(snapshot.qualifiedLeads),
+      empty: snapshot.qualifiedLeads === 0,
+    },
+    {
+      label: "Discovery",
+      value: String(snapshot.bookedCalls),
+      empty: snapshot.bookedCalls === 0,
+    },
+    {
+      label: "Client won",
+      value: String(snapshot.wonClients),
+      empty: snapshot.wonClients === 0,
+    },
+    {
+      label: "Paid",
+      value: paidLabel,
+      empty: snapshot.paidEarningsCents === 0,
+    },
+  ];
 
   return (
     <div className="kxd-partner-page kxd-partner-page--home">
-      <header className="kxd-partner-arrival">
-        <p className="kxd-partner-network">KXD Network · Private access</p>
-        <h1 className="kxd-partner-arrival__title">Welcome, {firstName}.</h1>
-        <p className="kxd-partner-arrival__lead">
-          You bring the right introduction. KXD qualifies, discovers, and closes.
-        </p>
-        <Link className="kxd-partner-btn" href="/portal/partner/submit-lead">
-          {early ? "Bring your first introduction" : "Bring an introduction"}
-        </Link>
-      </header>
+      <div className="kxd-partner-home-stage">
+        <header className="kxd-partner-arrival">
+          <p className="kxd-partner-network">KXD Network · Private access</p>
+          <h1 className="kxd-partner-arrival__title">Welcome, {firstName}.</h1>
+          <p className="kxd-partner-arrival__lead">
+            You bring the right introduction. KXD qualifies, discovers, and closes.
+          </p>
+          <Link className="kxd-partner-btn" href="/portal/partner/submit-lead">
+            {early ? "Bring your first introduction" : "Bring an introduction"}
+          </Link>
+        </header>
 
-      <section aria-label="Operating path">
-        <ol className="kxd-partner-course">
-          <li className={snapshot.submittedLeads === 0 ? "is-empty" : undefined}>
-            <span className="kxd-partner-course__label">Introduction</span>
-            <span className="kxd-partner-course__value">{snapshot.submittedLeads}</span>
-            <span className="kxd-partner-course__to" aria-hidden="true">
-              →
-            </span>
+        <aside className="kxd-partner-record" aria-label="Member record">
+          <p className="kxd-partner-record__kicker">Member record</p>
+          <p className="kxd-partner-record__paid-label">Paid</p>
+          <p className="kxd-partner-record__paid">{paidLabel}</p>
+          {early ? (
+            <p className="kxd-partner-record__status">
+              Nothing is paid until KXD closes work you sourced. The path is
+              introduction, qualification, discovery, a won client, then
+              approval.
+            </p>
+          ) : (
+            <p className="kxd-partner-record__status">
+              Approved {approvedLabel}
+            </p>
+          )}
+
+          <ol className="kxd-partner-record__path" aria-label="Operating path">
+            {path.map((step, index) => (
+              <li
+                key={step.label}
+                className={step.empty ? "is-empty" : undefined}
+              >
+                <span className="kxd-partner-record__path-index">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <span className="kxd-partner-record__path-copy">
+                  <span className="kxd-partner-record__path-name">{step.label}</span>
+                </span>
+                <span className="kxd-partner-record__path-value">{step.value}</span>
+              </li>
+            ))}
+          </ol>
+        </aside>
+      </div>
+
+      <section className="kxd-partner-brief" aria-labelledby="kxd-standard-heading">
+        <div className="kxd-partner-brief__statement">
+          <p className="kxd-partner-brief__kicker" id="kxd-standard-heading">
+            KXD standard
+          </p>
+          <p className="kxd-partner-brief__lead">
+            Bring a decision-maker, a live moment, and a business that actually
+            needs this work. Judgment over volume.
+          </p>
+        </div>
+        <ol className="kxd-partner-brief__criteria">
+          <li>
+            <span className="kxd-partner-brief__num">01</span>
+            A reachable owner or decision-maker
           </li>
-          <li className={snapshot.qualifiedLeads === 0 ? "is-empty" : undefined}>
-            <span className="kxd-partner-course__label">Qualified</span>
-            <span className="kxd-partner-course__value">{snapshot.qualifiedLeads}</span>
-            <span className="kxd-partner-course__to" aria-hidden="true">
-              →
-            </span>
+          <li>
+            <span className="kxd-partner-brief__num">02</span>
+            A visible gap between the brand and the digital presence
           </li>
-          <li className={snapshot.bookedCalls === 0 ? "is-empty" : undefined}>
-            <span className="kxd-partner-course__label">Discovery</span>
-            <span className="kxd-partner-course__value">{snapshot.bookedCalls}</span>
-            <span className="kxd-partner-course__to" aria-hidden="true">
-              →
-            </span>
+          <li>
+            <span className="kxd-partner-brief__num">03</span>
+            A clear reason this matters now
           </li>
-          <li className={snapshot.wonClients === 0 ? "is-empty" : undefined}>
-            <span className="kxd-partner-course__label">Client won</span>
-            <span className="kxd-partner-course__value">{snapshot.wonClients}</span>
-            <span className="kxd-partner-course__to" aria-hidden="true">
-              →
-            </span>
-          </li>
-          <li className={snapshot.paidEarningsCents === 0 ? "is-empty" : undefined}>
-            <span className="kxd-partner-course__label">Paid</span>
-            <span className="kxd-partner-course__value">{paidLabel}</span>
+          <li>
+            <span className="kxd-partner-brief__num">04</span>
+            Openness to a short discovery with KXD
           </li>
         </ol>
-      </section>
-
-      <section className="kxd-partner-honor" aria-label="Earnings">
-        <h2 className="kxd-partner-section__title">Earnings</h2>
-        {early ? (
-          <>
-            <p className="kxd-partner-paid__value">{paidLabel}</p>
-            <p className="kxd-partner-paid__note">
-              Nothing is paid until KXD closes work you sourced. An introduction
-              becomes earnings only after qualification, discovery, a won client,
-              and KXD approval.
-            </p>
-          </>
-        ) : (
-          <div className="kxd-partner-paid">
-            <p className="kxd-partner-paid__value">{paidLabel}</p>
-            <p className="kxd-partner-paid__note">
-              Approved {formatPartnerCents(snapshot.approvedEarningsCents)}
-            </p>
-          </div>
-        )}
-      </section>
-
-      <section className="kxd-partner-section kxd-partner-section--later">
-        <h2 className="kxd-partner-section__title">KXD standard</h2>
-        <p className="kxd-partner-section__text kxd-partner-section__text--emphasis">
-          Bring a decision-maker, a live moment, and a business that actually
-          needs this work. Judgment over volume.
-        </p>
-        <ul className="kxd-partner-fit__list">
-          <li>A reachable owner or decision-maker</li>
-          <li>A visible gap between the brand and the digital presence</li>
-          <li>A clear reason this matters now</li>
-          <li>Openness to a short discovery with KXD</li>
-        </ul>
       </section>
     </div>
   );

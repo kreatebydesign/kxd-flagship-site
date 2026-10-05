@@ -76,54 +76,87 @@ function shell(inner: string, active: string): string {
 </html>`;
 }
 
-function courseHtml(input: {
+function recordHtml(input: {
   introductions: number;
   qualified: number;
   discovery: number;
   won: number;
   paid: string;
+  approved?: string;
+  early: boolean;
 }): string {
-  const step = (label: string, value: string | number, empty: boolean, last = false) =>
-    `<li class="${empty ? "is-empty" : ""}"><span class="kxd-partner-course__label">${label}</span><span class="kxd-partner-course__value">${value}</span>${last ? "" : '<span class="kxd-partner-course__to" aria-hidden="true">→</span>'}</li>`;
-  return `<ol class="kxd-partner-course">
-    ${step("Introduction", input.introductions, input.introductions === 0)}
-    ${step("Qualified", input.qualified, input.qualified === 0)}
-    ${step("Discovery", input.discovery, input.discovery === 0)}
-    ${step("Client won", input.won, input.won === 0)}
-    ${step("Paid", input.paid, input.paid === "$0", true)}
-  </ol>`;
+  const steps = [
+    ["Introduction", input.introductions, input.introductions === 0],
+    ["Qualified", input.qualified, input.qualified === 0],
+    ["Discovery", input.discovery, input.discovery === 0],
+    ["Client won", input.won, input.won === 0],
+    ["Paid", input.paid, input.paid === "$0"],
+  ] as const;
+  const path = steps
+    .map(
+      ([label, value, empty], index) =>
+        `<li class="${empty ? "is-empty" : ""}"><span class="kxd-partner-record__path-index">${String(index + 1).padStart(2, "0")}</span><span class="kxd-partner-record__path-copy"><span class="kxd-partner-record__path-name">${label}</span></span><span class="kxd-partner-record__path-value">${value}</span></li>`,
+    )
+    .join("");
+  const status = input.early
+    ? `<p class="kxd-partner-record__status">Nothing is paid until KXD closes work you sourced. The path is introduction, qualification, discovery, a won client, then approval.</p>`
+    : `<p class="kxd-partner-record__status">Approved ${input.approved ?? "$0"}</p>`;
+  return `<aside class="kxd-partner-record" aria-label="Member record">
+    <p class="kxd-partner-record__kicker">Member record</p>
+    <p class="kxd-partner-record__paid-label">Paid</p>
+    <p class="kxd-partner-record__paid">${input.paid}</p>
+    ${status}
+    <ol class="kxd-partner-record__path">${path}</ol>
+  </aside>`;
+}
+
+function homeBody(opts: {
+  early: boolean;
+  introductions: number;
+  qualified: number;
+  discovery: number;
+  won: number;
+  paid: string;
+  approved?: string;
+}): string {
+  const cta = opts.early ? "Bring your first introduction" : "Bring an introduction";
+  return `
+    <div class="kxd-partner-page kxd-partner-page--home">
+      <div class="kxd-partner-home-stage">
+        <header class="kxd-partner-arrival">
+          <p class="kxd-partner-network">KXD Network · Private access</p>
+          <h1 class="kxd-partner-arrival__title">Welcome, Kyle.</h1>
+          <p class="kxd-partner-arrival__lead">You bring the right introduction. KXD qualifies, discovers, and closes.</p>
+          <a class="kxd-partner-btn" href="/portal/partner/submit-lead">${cta}</a>
+        </header>
+        ${recordHtml({ ...opts })}
+      </div>
+      <section class="kxd-partner-brief">
+        <div class="kxd-partner-brief__statement">
+          <p class="kxd-partner-brief__kicker">KXD standard</p>
+          <p class="kxd-partner-brief__lead">Bring a decision-maker, a live moment, and a business that actually needs this work. Judgment over volume.</p>
+        </div>
+        <ol class="kxd-partner-brief__criteria">
+          <li><span class="kxd-partner-brief__num">01</span>A reachable owner or decision-maker</li>
+          <li><span class="kxd-partner-brief__num">02</span>A visible gap between the brand and the digital presence</li>
+          <li><span class="kxd-partner-brief__num">03</span>A clear reason this matters now</li>
+          <li><span class="kxd-partner-brief__num">04</span>Openness to a short discovery with KXD</li>
+        </ol>
+      </section>
+    </div>
+  `;
 }
 
 function homeEmptyHtml(): string {
   return shell(
-    `
-    <div class="kxd-partner-page kxd-partner-page--home">
-      <header class="kxd-partner-arrival">
-        <p class="kxd-partner-network">KXD Network · Private access</p>
-        <h1 class="kxd-partner-arrival__title">Welcome, Kyle.</h1>
-        <p class="kxd-partner-arrival__lead">You bring the right introduction. KXD qualifies, discovers, and closes.</p>
-        <a class="kxd-partner-btn" href="/portal/partner/submit-lead">Bring your first introduction</a>
-      </header>
-      <section aria-label="Operating path">
-        ${courseHtml({ introductions: 0, qualified: 0, discovery: 0, won: 0, paid: "$0" })}
-      </section>
-      <section class="kxd-partner-honor" aria-label="Earnings">
-        <h2 class="kxd-partner-section__title">Earnings</h2>
-        <p class="kxd-partner-paid__value">$0</p>
-        <p class="kxd-partner-paid__note">Nothing is paid until KXD closes work you sourced. An introduction becomes earnings only after qualification, discovery, a won client, and KXD approval.</p>
-      </section>
-      <section class="kxd-partner-section kxd-partner-section--later">
-        <h2 class="kxd-partner-section__title">KXD standard</h2>
-        <p class="kxd-partner-section__text kxd-partner-section__text--emphasis">Bring a decision-maker, a live moment, and a business that actually needs this work. Judgment over volume.</p>
-        <ul class="kxd-partner-fit__list">
-          <li>A reachable owner or decision-maker</li>
-          <li>A visible gap between the brand and the digital presence</li>
-          <li>A clear reason this matters now</li>
-          <li>Openness to a short discovery with KXD</li>
-        </ul>
-      </section>
-    </div>
-    `,
+    homeBody({
+      early: true,
+      introductions: 0,
+      qualified: 0,
+      discovery: 0,
+      won: 0,
+      paid: "$0",
+    }),
     "home",
   );
 }
@@ -137,36 +170,10 @@ function homeActiveHtml(input: {
   approved: string;
 }): string {
   return shell(
-    `
-    <div class="kxd-partner-page kxd-partner-page--home">
-      <header class="kxd-partner-arrival">
-        <p class="kxd-partner-network">KXD Network · Private access</p>
-        <h1 class="kxd-partner-arrival__title">Welcome, Kyle.</h1>
-        <p class="kxd-partner-arrival__lead">You bring the right introduction. KXD qualifies, discovers, and closes.</p>
-        <a class="kxd-partner-btn" href="/portal/partner/submit-lead">Bring an introduction</a>
-      </header>
-      <section aria-label="Operating path">
-        ${courseHtml(input)}
-      </section>
-      <section class="kxd-partner-honor" aria-label="Earnings">
-        <h2 class="kxd-partner-section__title">Earnings</h2>
-        <div class="kxd-partner-paid">
-          <p class="kxd-partner-paid__value">${input.paid}</p>
-          <p class="kxd-partner-paid__note">Approved ${input.approved}</p>
-        </div>
-      </section>
-      <section class="kxd-partner-section kxd-partner-section--later">
-        <h2 class="kxd-partner-section__title">KXD standard</h2>
-        <p class="kxd-partner-section__text kxd-partner-section__text--emphasis">Bring a decision-maker, a live moment, and a business that actually needs this work. Judgment over volume.</p>
-        <ul class="kxd-partner-fit__list">
-          <li>A reachable owner or decision-maker</li>
-          <li>A visible gap between the brand and the digital presence</li>
-          <li>A clear reason this matters now</li>
-          <li>Openness to a short discovery with KXD</li>
-        </ul>
-      </section>
-    </div>
-    `,
+    homeBody({
+      early: false,
+      ...input,
+    }),
     "home",
   );
 }
