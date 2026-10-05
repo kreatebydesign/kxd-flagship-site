@@ -18,6 +18,7 @@ export async function GET() {
     ok: true,
     available: result.available,
     reason: "reason" in result ? result.reason : null,
+    timezone: result.timezone,
     slots: result.slots,
   });
 }

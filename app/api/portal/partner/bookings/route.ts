@@ -77,5 +77,6 @@ export async function POST(req: NextRequest) {
     mode: result.mode,
     bookingId: result.bookingId,
     reason: "reason" in result ? result.reason : null,
+    reused: "reused" in result ? Boolean(result.reused) : false,
   });
 }

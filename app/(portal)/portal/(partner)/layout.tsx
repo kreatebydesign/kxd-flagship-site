@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { PartnerAppShell } from "@/components/partner";
 import { getPartnerSession } from "@/lib/portal/partner/access";
@@ -26,12 +25,8 @@ export default async function PartnerPortalLayout({
   const partnerSession = await getPartnerSession();
   if (!partnerSession) redirect("/portal/login");
 
-  const headerStore = await headers();
-  const pathname = headerStore.get("x-kxd-pathname") || "/portal/partner";
-
   return (
     <PartnerAppShell
-      pathname={pathname}
       partnerName={partnerSession.displayName}
       operatorPreview={
         partnerSession.isOperatorPreview

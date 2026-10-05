@@ -7,5 +7,6 @@ export { PartnerPlaybookNav } from "./PartnerPlaybookNav";
 export {
   partnerDisplayBusinessName,
   isLocalQaBusinessName,
+  formatPartnerBookingReferralLabel,
   partnerLeadNextAction,
 } from "./leadPresentation";

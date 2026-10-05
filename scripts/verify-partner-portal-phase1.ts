@@ -332,6 +332,14 @@ async function main() {
       "lib/portal/partner/calendar-booking.ts",
       "requestPartnerBookingChange",
     );
+    assertFileContains(
+      "lib/portal/partner/calendar-booking.ts",
+      "findExistingPartnerSlotBooking",
+    );
+    assertFileContains(
+      "lib/portal/partner/calendar-booking.ts",
+      "before Google Calendar write",
+    );
     assertFileDoesNotContain(
       "app/api/portal/partner/bookings/route.ts",
       "refresh_token",

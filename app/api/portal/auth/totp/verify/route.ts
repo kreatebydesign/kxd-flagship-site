@@ -9,7 +9,7 @@ import {
   clearPendingMfaCookie,
   readPendingMfaPortalUserId,
 } from "@/lib/portal/identity/pending-mfa";
-import { createPortalSession } from "@/lib/portal/session";
+import { createPortalSession, getPortalSession } from "@/lib/portal/session";
 import { assertPortalMutatingOrigin } from "@/lib/portal/identity/origin";
 import {
   assertPortalRateLimit,
@@ -89,5 +89,9 @@ export async function POST(req: NextRequest) {
     summary: "Password login completed with MFA",
   });
 
-  return NextResponse.json({ ok: true });
+  const session = await getPortalSession();
+  const redirectTo =
+    session?.accessMode === "partner" ? "/portal/partner" : "/portal";
+
+  return NextResponse.json({ ok: true, redirectTo });
 }

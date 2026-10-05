@@ -46,6 +46,49 @@ export const DEFAULT_PARTNER_COMMISSION_POLICY: Omit<PartnerCommissionPolicy, "i
   performanceBonusWindowDays: 90,
 };
 
+export function formatPartnerRateBps(bps: number): string {
+  if (!Number.isFinite(bps) || bps < 0) return "0%";
+  const pct = bps / 100;
+  return Number.isInteger(pct) ? `${pct}%` : `${pct.toFixed(1)}%`;
+}
+
+function formatPolicyDollars(cents: number): string {
+  const amount = Math.round(cents) / 100;
+  return amount.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: amount % 1 === 0 ? 0 : 2,
+  });
+}
+
+export function partnerFacingCommissionExplanations(
+  policy: PartnerCommissionPolicy,
+): { title: string; body: string }[] {
+  const items: { title: string; body: string }[] = [
+    {
+      title: "Project commission",
+      body: `${formatPartnerRateBps(policy.projectRateBps)} of collected eligible project revenue you sourced.`,
+    },
+    {
+      title: "Recurring bonus",
+      body: `${formatPartnerRateBps(policy.monthlyRateBps)} of paid eligible recurring revenue (${policy.eligibleRecurringServices.join(", ")}) for the first ${policy.monthlyBonusMonths} paid months.`,
+    },
+  ];
+  if (policy.retentionKickerEnabled) {
+    items.push({
+      title: "Retention kicker",
+      body: `${formatPartnerRateBps(policy.retentionKickerRateBps)} when the sourced client stays active through month ${policy.retentionKickerMonth}.`,
+    });
+  }
+  if (policy.performanceBonusEnabled) {
+    items.push({
+      title: "Performance bonus",
+      body: `${formatPolicyDollars(policy.performanceBonusAmountCents)} when you source ${policy.performanceBonusProjectCount} paid projects within ${policy.performanceBonusWindowDays} days. Paid after KXD approves.`,
+    });
+  }
+  return items;
+}
+
 export function amountFromRateBps(
   eligibleCollectedCents: number,
   rateBps: number,

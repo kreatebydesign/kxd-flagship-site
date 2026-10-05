@@ -37,7 +37,6 @@ export default async function PartnerLeadsPage() {
       <span className="kxd-partner-hairline" aria-hidden="true" />
       <p className="kxd-partner-lead">
         Every introduction you own — status, movement, and the next useful step.
-        Internal notes and financials stay with KXD.
       </p>
 
       {leads.length === 0 ? (

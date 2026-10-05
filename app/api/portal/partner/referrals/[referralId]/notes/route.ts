@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { gatePartnerApiSession } from "@/lib/portal/partner/access";
-import { addPartnerReferralNote, listPartnerReferralNotes } from "@/lib/portal/partner/notes";
+import {
+  addPartnerReferralNote,
+  assertPartnerOwnsReferral,
+  listPartnerReferralNotes,
+} from "@/lib/portal/partner/notes";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +19,14 @@ export async function GET(
   const referralId = Number(raw);
   if (!Number.isFinite(referralId) || referralId <= 0) {
     return NextResponse.json({ ok: false, message: "Invalid referral." }, { status: 400 });
+  }
+
+  const owned = await assertPartnerOwnsReferral({
+    partnerId: gated.partnerId,
+    referralId,
+  });
+  if (!owned) {
+    return NextResponse.json({ ok: false, message: "Referral not found." }, { status: 404 });
   }
 
   const notes = await listPartnerReferralNotes({

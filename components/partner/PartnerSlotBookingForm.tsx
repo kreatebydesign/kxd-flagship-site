@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { PartnerBookingForm } from "./PartnerBookingForm";
 
 type Slot = { start: string; end: string; timezone: string };
+type ReferralOption = { id: number; label: string };
 
 function formatSlot(slot: Slot): string {
   try {
@@ -22,15 +23,28 @@ function formatSlot(slot: Slot): string {
   }
 }
 
+function confirmationMessage(mode: string | undefined, slot: Slot): string {
+  if (mode === "request") {
+    return "Booking request sent. KXD will confirm the time shortly.";
+  }
+  return `Discovery booked for ${formatSlot(slot)} (${slot.timezone}) on the KXD calendar.`;
+}
+
+function TimesTimezone({ timezone }: { timezone: string | null }) {
+  if (!timezone) return null;
+  return <span className="kxd-partner-slots__tz">{timezone}</span>;
+}
+
 export function PartnerSlotBookingForm({
   referralId,
   referralOptions,
 }: {
   referralId?: number;
-  referralOptions?: Array<{ id: number; businessName: string }>;
+  referralOptions?: ReferralOption[];
 }) {
   const router = useRouter();
   const [slots, setSlots] = useState<Slot[]>([]);
+  const [calendarTimezone, setCalendarTimezone] = useState<string | null>(null);
   const [calendarAvailable, setCalendarAvailable] = useState<boolean | null>(null);
   const [selectedReferralId, setSelectedReferralId] = useState<number | "">(
     referralId ?? "",
@@ -49,14 +63,20 @@ export function PartnerSlotBookingForm({
         const data = (await res.json()) as {
           ok?: boolean;
           available?: boolean;
+          timezone?: string | null;
           slots?: Slot[];
         };
         if (cancelled) return;
+        const nextSlots = data.slots ?? [];
         setCalendarAvailable(Boolean(data.available));
-        setSlots(data.slots ?? []);
+        setCalendarTimezone(
+          data.timezone?.trim() || nextSlots[0]?.timezone || null,
+        );
+        setSlots(nextSlots);
       } catch {
         if (!cancelled) {
           setCalendarAvailable(false);
+          setCalendarTimezone(null);
           setSlots([]);
         }
       }
@@ -66,6 +86,30 @@ export function PartnerSlotBookingForm({
     };
   }, []);
 
+  const referralSelect =
+    !referralId && referralOptions?.length ? (
+      <div className="kxd-partner-field kxd-partner-field--priority">
+        <label htmlFor={calendarAvailable === false ? "fallback-referral" : "referral"}>
+          Referral
+        </label>
+        <select
+          id={calendarAvailable === false ? "fallback-referral" : "referral"}
+          required={calendarAvailable !== false}
+          value={selectedReferralId}
+          onChange={(e) =>
+            setSelectedReferralId(e.target.value ? Number(e.target.value) : "")
+          }
+        >
+          <option value="">Select a referral</option>
+          {referralOptions.map((opt) => (
+            <option key={opt.id} value={opt.id}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+      </div>
+    ) : null;
+
   if (calendarAvailable === false) {
     return (
       <div>
@@ -73,24 +117,8 @@ export function PartnerSlotBookingForm({
           Live calendar slots are unavailable right now. Share the best windows
           and KXD will take it from here.
         </p>
-        {!referralId && referralOptions?.length ? (
-          <div className="kxd-partner-field kxd-partner-field--priority" style={{ marginBottom: "1rem" }}>
-            <label htmlFor="fallback-referral">Referral</label>
-            <select
-              id="fallback-referral"
-              value={selectedReferralId}
-              onChange={(e) =>
-                setSelectedReferralId(e.target.value ? Number(e.target.value) : "")
-              }
-            >
-              <option value="">Select a referral</option>
-              {referralOptions.map((opt) => (
-                <option key={opt.id} value={opt.id}>
-                  {opt.businessName}
-                </option>
-              ))}
-            </select>
-          </div>
+        {referralSelect ? (
+          <div style={{ marginBottom: "1rem" }}>{referralSelect}</div>
         ) : null}
         <PartnerBookingForm
           defaultReferralId={
@@ -105,8 +133,13 @@ export function PartnerSlotBookingForm({
     return <p className="kxd-partner-message">Checking available times…</p>;
   }
 
+  const orderedSlots = [...slots].sort((a, b) => a.start.localeCompare(b.start));
+  const timezone = calendarTimezone || orderedSlots[0]?.timezone || null;
+  const chosenSlot = orderedSlots.find((s) => s.start === selectedSlot);
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (ok || busy) return;
     setBusy(true);
     setError(null);
     setOk(null);
@@ -141,11 +174,7 @@ export function PartnerSlotBookingForm({
         setError(data.message || "Could not book this slot.");
         return;
       }
-      setOk(
-        data.mode === "request"
-          ? "Received. KXD will confirm the discovery session shortly."
-          : "Discovery session confirmed on the KXD calendar.",
-      );
+      setOk(confirmationMessage(data.mode, slot));
       router.refresh();
     } catch {
       setError("Could not book this slot.");
@@ -156,50 +185,42 @@ export function PartnerSlotBookingForm({
 
   return (
     <form className="kxd-partner-form" onSubmit={onSubmit}>
-      {!referralId && referralOptions?.length ? (
-        <div className="kxd-partner-field kxd-partner-field--priority">
-          <label htmlFor="referral">Referral *</label>
-          <p className="kxd-partner-field__help">
-            Associate this session with a specific introduction.
-          </p>
-          <select
-            id="referral"
-            required
-            value={selectedReferralId}
-            onChange={(e) =>
-              setSelectedReferralId(e.target.value ? Number(e.target.value) : "")
-            }
-          >
-            <option value="">Select a referral</option>
-            {referralOptions.map((opt) => (
-              <option key={opt.id} value={opt.id}>
-                {opt.businessName}
-              </option>
-            ))}
-          </select>
-        </div>
-      ) : null}
+      {referralSelect}
 
       <div className="kxd-partner-field kxd-partner-field--priority">
-        <label htmlFor="slot">Available 30-minute slots *</label>
-        {slots.length === 0 ? (
+        {orderedSlots.length === 0 ? (
           <p className="kxd-partner-message">
-            No open slots in the next two weeks. Use a booking request instead.
+            No open slots in the next two weeks
+            {timezone ? ` (${timezone})` : ""}. Use a booking request instead.
           </p>
         ) : (
-          <select
-            id="slot"
-            required
-            value={selectedSlot}
-            onChange={(e) => setSelectedSlot(e.target.value)}
-          >
-            <option value="">Select a time</option>
-            {slots.map((slot) => (
-              <option key={slot.start} value={slot.start}>
-                {formatSlot(slot)}
-              </option>
+          <fieldset className="kxd-partner-slots">
+            <legend>
+              Available times
+              {timezone ? (
+                <>
+                  <span aria-hidden="true"> · </span>
+                  <TimesTimezone timezone={timezone} />
+                </>
+              ) : null}
+            </legend>
+            {orderedSlots.map((slot) => (
+              <label key={slot.start} className="kxd-partner-slot">
+                <input
+                  type="radio"
+                  name="slot"
+                  required
+                  value={slot.start}
+                  checked={selectedSlot === slot.start}
+                  onChange={() => {
+                    setSelectedSlot(slot.start);
+                    setOk(null);
+                  }}
+                />
+                <span className="kxd-partner-slot__time">{formatSlot(slot)}</span>
+              </label>
             ))}
-          </select>
+          </fieldset>
         )}
       </div>
 
@@ -216,15 +237,20 @@ export function PartnerSlotBookingForm({
       {error ? (
         <p className="kxd-partner-message kxd-partner-message--error">{error}</p>
       ) : null}
+      {!ok && chosenSlot ? (
+        <p className="kxd-partner-message">Selected: {formatSlot(chosenSlot)}</p>
+      ) : null}
       {ok ? <p className="kxd-partner-message kxd-partner-message--ok">{ok}</p> : null}
 
-      <button
-        className="kxd-partner-btn kxd-partner-btn--cta"
-        type="submit"
-        disabled={busy || slots.length === 0}
-      >
-        {busy ? "Booking…" : "Confirm discovery session"}
-      </button>
+      {!ok ? (
+        <button
+          className="kxd-partner-btn"
+          type="submit"
+          disabled={busy || orderedSlots.length === 0}
+        >
+          {busy ? "Booking…" : "Confirm discovery"}
+        </button>
+      ) : null}
     </form>
   );
 }

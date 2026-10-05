@@ -21,9 +21,30 @@ export function PortalLoginForm() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  function redirectAfterLogin() {
-    const redirect = searchParams.get("redirect") || "/portal";
-    router.push(redirect);
+  function redirectAfterLogin(data?: { redirectTo?: string; accessMode?: string }) {
+    const requested = searchParams.get("redirect");
+    const partner = data?.accessMode === "partner" || data?.redirectTo === "/portal/partner";
+    if (partner) {
+      const next =
+        requested && requested.startsWith("/portal/partner") && !requested.startsWith("//")
+          ? requested
+          : "/portal/partner";
+      router.push(next);
+      router.refresh();
+      return;
+    }
+    if (
+      requested &&
+      requested.startsWith("/portal") &&
+      !requested.startsWith("/portal/partner") &&
+      !requested.startsWith("//") &&
+      !requested.includes("://")
+    ) {
+      router.push(requested);
+      router.refresh();
+      return;
+    }
+    router.push("/portal");
     router.refresh();
   }
 
@@ -47,7 +68,7 @@ export function PortalLoginForm() {
           setError(data.message || PORTAL_CLIENT_LANGUAGE.authLoginErrorGeneric);
           return;
         }
-        redirectAfterLogin();
+        redirectAfterLogin(data);
         return;
       }
 
@@ -65,7 +86,7 @@ export function PortalLoginForm() {
         setMfaStep(true);
         return;
       }
-      redirectAfterLogin();
+      redirectAfterLogin(data);
     } catch {
       setError(PORTAL_CLIENT_LANGUAGE.authLoginErrorGeneric);
     } finally {

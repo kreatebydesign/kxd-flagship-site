@@ -6,14 +6,6 @@ import { loadPartnerHomeSnapshot } from "@/lib/portal/partner/referrals";
 
 export const dynamic = "force-dynamic";
 
-const PATH = [
-  "Find fit",
-  "Open conversation",
-  "Submit lead",
-  "Book KXD in",
-  "Earn",
-] as const;
-
 export default async function PartnerHomePage() {
   const session = await getPartnerSession();
   if (!session) redirect("/portal/login");
@@ -29,37 +21,17 @@ export default async function PartnerHomePage() {
   return (
     <div className="kxd-partner-page">
       <header className="kxd-partner-hero">
-        <p className="kxd-partner-eyebrow">Private partner room</p>
         <h1 className="kxd-partner-title">Welcome, {firstName}.</h1>
-        <span className="kxd-partner-hairline" aria-hidden="true" />
         <p className="kxd-partner-lead">
-          You are here because the introductions you make matter. Find the right
-          businesses, open the door, and let KXD take the close.
+          Track your introductions and keep the next opportunity moving.
         </p>
-        <p className="kxd-partner-hero__aside">
-          This room is yours alone — no client data, no internal notes, no noise.
-        </p>
-
-        <div className="kxd-partner-path" aria-label="Your path">
-          {PATH.map((step, index) => (
-            <span key={step} className="kxd-partner-path__step">
-              {index > 0 ? <span className="kxd-partner-path__sep" aria-hidden="true" /> : null}
-              <span className="kxd-partner-path__num">{index + 1}</span>
-              {step}
-            </span>
-          ))}
-        </div>
       </header>
 
       <section className="kxd-partner-board" aria-label="Focus">
         <div className="kxd-partner-cta">
-          <p className="kxd-partner-cta__label">Your next move</p>
           <h2 className="kxd-partner-cta__title">{snapshot.nextAction.label}</h2>
           <p className="kxd-partner-cta__hint">{snapshot.nextAction.hint}</p>
-          <Link
-            className="kxd-partner-btn kxd-partner-btn--cta"
-            href={snapshot.nextAction.href}
-          >
+          <Link className="kxd-partner-btn" href={snapshot.nextAction.href}>
             {snapshot.nextAction.label}
           </Link>
         </div>
@@ -103,7 +75,7 @@ export default async function PartnerHomePage() {
         </ol>
       </section>
 
-      <section className="kxd-partner-section">
+      <section className="kxd-partner-section kxd-partner-section--later">
         <div className="kxd-partner-fit">
           <h2 className="kxd-partner-section__title">What a strong lead looks like</h2>
           <div className="kxd-partner-fit__grid">

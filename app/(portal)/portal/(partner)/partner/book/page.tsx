@@ -1,6 +1,9 @@
 import { redirect } from "next/navigation";
 import { PartnerSlotBookingForm } from "@/components/partner";
-import { partnerDisplayBusinessName } from "@/components/partner/leadPresentation";
+import {
+  formatPartnerBookingReferralLabel,
+  partnerDisplayBusinessName,
+} from "@/components/partner/leadPresentation";
 import { getPartnerSession } from "@/lib/portal/partner/access";
 import { listPartnerReferrals } from "@/lib/portal/partner/referrals";
 
@@ -18,36 +21,44 @@ export default async function PartnerBookPage({
   const raw = Array.isArray(params.referral) ? params.referral[0] : params.referral;
   const referralId = raw ? Number(raw) : undefined;
   const leads = await listPartnerReferrals(session.partnerId);
-  const referralOptions = leads.map((l) => ({
+  const labeled = leads.map((l) => ({
     id: l.id,
-    businessName: partnerDisplayBusinessName(l.businessName),
+    label: formatPartnerBookingReferralLabel({
+      id: l.id,
+      businessName: partnerDisplayBusinessName(l.businessName),
+      contactName: l.contactName,
+      submittedAt: l.submittedAt,
+    }),
   }));
+  const labelCounts = new Map<string, number>();
+  for (const item of labeled) {
+    labelCounts.set(item.label, (labelCounts.get(item.label) ?? 0) + 1);
+  }
+  const referralOptions = labeled.map((item) =>
+    (labelCounts.get(item.label) ?? 0) > 1
+      ? { id: item.id, label: `${item.label} · #${item.id}` }
+      : item,
+  );
   const selected =
     referralId && Number.isFinite(referralId) && referralId > 0
-      ? leads.find((l) => l.id === referralId)
+      ? referralOptions.find((l) => l.id === referralId)
       : undefined;
 
   return (
     <div className="kxd-partner-page kxd-partner-page--narrow">
-      <p className="kxd-partner-eyebrow">Private discovery</p>
       <h1 className="kxd-partner-title">Book KXD in</h1>
-      <span className="kxd-partner-hairline" aria-hidden="true" />
       <p className="kxd-partner-lead">
-        Reserve a 30-minute discovery session with Matt / KXD for a specific
-        introduction. You open the door — we run the call.
+        Reserve a 30-minute discovery for a specific introduction. You open the
+        door — KXD runs the call.
       </p>
       {selected ? (
-        <p className="kxd-partner-note" style={{ marginTop: "1rem" }}>
-          Booking for{" "}
-          <strong style={{ color: "var(--kxd-partner-ivory)" }}>
-            {partnerDisplayBusinessName(selected.businessName)}
-          </strong>
-          .
+        <p className="kxd-partner-book-context">
+          Booking for <strong>{selected.label}</strong>.
         </p>
       ) : null}
 
       <div className="kxd-partner-book-panel">
-        <h2 className="kxd-partner-book-panel__title">Request the session</h2>
+        <h2 className="kxd-partner-book-panel__title">Choose a time</h2>
         <PartnerSlotBookingForm
           referralId={
             referralId && Number.isFinite(referralId) && referralId > 0

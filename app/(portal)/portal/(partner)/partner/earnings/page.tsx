@@ -5,6 +5,10 @@ import {
 } from "@/components/partner/leadPresentation";
 import { getPartnerSession } from "@/lib/portal/partner/access";
 import {
+  loadPartnerCommissionPolicy,
+  partnerFacingCommissionExplanations,
+} from "@/lib/portal/partner/commission";
+import {
   formatPartnerCents,
   loadPartnerEarningsSummary,
 } from "@/lib/portal/partner/earnings";
@@ -16,29 +20,18 @@ export default async function PartnerEarningsPage() {
   if (!session) redirect("/portal/login");
 
   const summary = await loadPartnerEarningsSummary(session.partnerId);
-
-  const path = [
-    {
-      title: "Project commission",
-      body: "10% of collected eligible project revenue you sourced.",
-      amount: summary.projectCommissionsCents,
-    },
-    {
-      title: "Recurring bonus",
-      body: "10% of paid eligible recurring revenue for the first three months.",
-      amount: summary.monthlyBonusesCents,
-    },
-    {
-      title: "Retention kicker",
-      body: "Retention kicker when the client stays active through month four.",
-      amount: summary.retentionKickersCents,
-    },
-    {
-      title: "Performance bonus",
-      body: "Occasional bonus when volume warrants — always operator approved.",
-      amount: summary.performanceBonusesCents,
-    },
-  ] as const;
+  const policy = await loadPartnerCommissionPolicy();
+  const explanations = partnerFacingCommissionExplanations(policy);
+  const amounts: Record<string, number> = {
+    "Project commission": summary.projectCommissionsCents,
+    "Recurring bonus": summary.monthlyBonusesCents,
+    "Retention kicker": summary.retentionKickersCents,
+    "Performance bonus": summary.performanceBonusesCents,
+  };
+  const path = explanations.map((step) => ({
+    ...step,
+    amount: amounts[step.title] ?? 0,
+  }));
 
   return (
     <div className="kxd-partner-page">
@@ -46,8 +39,7 @@ export default async function PartnerEarningsPage() {
       <h1 className="kxd-partner-title">My earnings</h1>
       <span className="kxd-partner-hairline" aria-hidden="true" />
       <p className="kxd-partner-lead">
-        Commissions appear here after KXD approves them. You can see what you
-        earned — not how the internal math was run.
+        Track your approved commissions, paid earnings, and referral bonuses.
       </p>
 
       <section className="kxd-partner-paid kxd-partner-paid--hero" aria-label="Paid to date">

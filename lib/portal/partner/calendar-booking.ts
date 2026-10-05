@@ -58,8 +58,8 @@ export async function listPartnerDiscoverySlots(input?: {
   daysAhead?: number;
   limit?: number;
 }): Promise<
-  | { ok: true; available: true; slots: Array<{ start: string; end: string; timezone: string }> }
-  | { ok: true; available: false; reason: string; slots: [] }
+  | { ok: true; available: true; timezone: string; slots: Array<{ start: string; end: string; timezone: string }> }
+  | { ok: true; available: false; reason: string; timezone: null; slots: [] }
   | { ok: false; message: string }
 > {
   const connection = getPartnerCalendarConnectionSafe();
@@ -68,6 +68,7 @@ export async function listPartnerDiscoverySlots(input?: {
       ok: true,
       available: false,
       reason: connection.reason ?? "calendar_unavailable",
+      timezone: null,
       slots: [],
     };
   }
@@ -88,13 +89,16 @@ export async function listPartnerDiscoverySlots(input?: {
       stepMinutes: 30,
     });
 
+    const calendarTimezone = result.summary.timeZone || timezone;
+
     return {
       ok: true,
       available: true,
+      timezone: calendarTimezone,
       slots: result.candidates.map((slot) => ({
         start: slot.start,
         end: slot.end,
-        timezone: result.summary.timeZone || timezone,
+        timezone: calendarTimezone,
       })),
     };
   } catch (err) {
@@ -103,6 +107,7 @@ export async function listPartnerDiscoverySlots(input?: {
       ok: true,
       available: false,
       reason: "calendar_unavailable",
+      timezone: null,
       slots: [],
     };
   }
@@ -177,13 +182,66 @@ export async function listPartnerBookingsSafe(input: {
   return items;
 }
 
+/**
+ * Exact-slot idempotency for one partner + referral + start/end.
+ * Retries return the existing record and must not create another calendar event.
+ * Different slots for the same referral remain allowed.
+ */
+async function findExistingPartnerSlotBooking(input: {
+  partnerId: number;
+  referralId: number;
+  slotStart: string;
+  slotEnd: string;
+}): Promise<AnyDoc | null> {
+  const payload = await getPayload({ config });
+  const result = await payload.find({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    collection: "partner-booking-requests" as any,
+    where: {
+      and: [
+        { sourcedByPartner: { equals: input.partnerId } },
+        { relatedPartnerReferral: { equals: input.referralId } },
+        { slotStart: { equals: input.slotStart } },
+        { slotEnd: { equals: input.slotEnd } },
+      ],
+    },
+    limit: 1,
+    depth: 0,
+    sort: "-createdAt",
+    overrideAccess: true,
+  });
+  return (result.docs[0] as AnyDoc | undefined) ?? null;
+}
+
+function existingSlotBookingResult(
+  doc: AnyDoc,
+):
+  | { ok: true; mode: "calendar_slot"; bookingId: number; reused: true }
+  | { ok: true; mode: "request"; bookingId: number; reason: string; reused: true } {
+  const bookingId = Number(doc.id);
+  const mode =
+    String(doc.bookingMode ?? "request") === "calendar_slot"
+      ? "calendar_slot"
+      : "request";
+  if (mode === "calendar_slot") {
+    return { ok: true, mode: "calendar_slot", bookingId, reused: true };
+  }
+  return {
+    ok: true,
+    mode: "request",
+    bookingId,
+    reason: "existing_booking",
+    reused: true,
+  };
+}
+
 export async function bookPartnerDiscoverySlot(input: {
   partnerId: number;
   partnerName: string;
   data: PartnerSlotBookingInput;
 }): Promise<
-  | { ok: true; mode: "calendar_slot"; bookingId: number }
-  | { ok: true; mode: "request"; bookingId: number; reason: string }
+  | { ok: true; mode: "calendar_slot"; bookingId: number; reused?: boolean }
+  | { ok: true; mode: "request"; bookingId: number; reason: string; reused?: boolean }
   | { ok: false; message: string }
 > {
   const referral = await assertPartnerOwnsReferral({
@@ -192,8 +250,27 @@ export async function bookPartnerDiscoverySlot(input: {
   });
   if (!referral) return { ok: false, message: "Referral not found." };
 
+  const existing = await findExistingPartnerSlotBooking({
+    partnerId: input.partnerId,
+    referralId: input.data.relatedPartnerReferralId,
+    slotStart: input.data.slotStart,
+    slotEnd: input.data.slotEnd,
+  });
+  if (existing) {
+    return existingSlotBookingResult(existing);
+  }
+
   const connection = getPartnerCalendarConnectionSafe();
   if (!connection.available) {
+    // Re-check before create to absorb concurrent retries for the same slot.
+    const raced = await findExistingPartnerSlotBooking({
+      partnerId: input.partnerId,
+      referralId: input.data.relatedPartnerReferralId,
+      slotStart: input.data.slotStart,
+      slotEnd: input.data.slotEnd,
+    });
+    if (raced) return existingSlotBookingResult(raced);
+
     const payload = await getPayload({ config });
     const created = await payload.create({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -236,6 +313,16 @@ export async function bookPartnerDiscoverySlot(input: {
   }
 
   try {
+    // Idempotency gate before Google Calendar write — retries must never
+    // create a second event for the same partner + referral + exact slot.
+    const beforeWrite = await findExistingPartnerSlotBooking({
+      partnerId: input.partnerId,
+      referralId: input.data.relatedPartnerReferralId,
+      slotStart: input.data.slotStart,
+      slotEnd: input.data.slotEnd,
+    });
+    if (beforeWrite) return existingSlotBookingResult(beforeWrite);
+
     const calendarId = await resolveTargetCalendarId(null);
     const timezone =
       input.data.timezone.trim() || (await resolveGoogleCalendarTimezone());
@@ -337,6 +424,16 @@ export async function bookPartnerDiscoverySlot(input: {
   } catch (err) {
     console.error("[KXD Partner] Calendar booking failed:", err);
     const reason = isGoogleCalendarError(err) ? err.code : "calendar_write_failed";
+
+    // If a concurrent request already persisted this exact slot, reuse it.
+    const afterFail = await findExistingPartnerSlotBooking({
+      partnerId: input.partnerId,
+      referralId: input.data.relatedPartnerReferralId,
+      slotStart: input.data.slotStart,
+      slotEnd: input.data.slotEnd,
+    });
+    if (afterFail) return existingSlotBookingResult(afterFail);
+
     const payload = await getPayload({ config });
     const created = await payload.create({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

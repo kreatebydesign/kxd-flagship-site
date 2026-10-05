@@ -25,7 +25,7 @@ function partnerCss(): string {
   );
   // Pull only the gold token block from OS for the partner room.
   const goldVars = os.match(/--kxd-os-gold[\s\S]*?--kxd-os-gold-hover:[^;]+;/)?.[0] ?? "";
-  return `:root {\n${goldVars}\n  --kxd-os-font-sans: "Avenir Next", "Segoe UI", sans-serif;\n}\n${partner}`;
+  return `:root {\n${goldVars}\n  --kxd-os-font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", sans-serif;\n}\n${partner}`;
 }
 
 function shell(inner: string, active: string): string {
@@ -56,7 +56,9 @@ function shell(inner: string, active: string): string {
     <div class="kxd-partner-shell">
       <aside class="kxd-partner-sidebar">
         <div class="kxd-partner-brand">
-          <span class="kxd-partner-brand__mark">Kreate by Design</span>
+          <div class="kxd-partner-brand__logo">
+            <img class="kxd-partner-brand__logo-img" src="${path.join(ROOT, "public/migrated-assets/brand/kxd-logo-transparent.png")}" alt="KXD" width="218" height="205" />
+          </div>
           <p class="kxd-partner-brand__name">Partner room</p>
           <p class="kxd-partner-brand__room">Kyle Whelchel</p>
         </div>
@@ -74,25 +76,14 @@ function homeHtml(): string {
     `
     <div class="kxd-partner-page">
       <header class="kxd-partner-hero">
-        <p class="kxd-partner-eyebrow">Private partner room</p>
         <h1 class="kxd-partner-title">Welcome, Kyle.</h1>
-        <span class="kxd-partner-hairline" aria-hidden="true"></span>
-        <p class="kxd-partner-lead">You are here because the introductions you make matter. Find the right businesses, open the door, and let KXD take the close.</p>
-        <p class="kxd-partner-hero__aside">This room is yours alone — no client data, no internal notes, no noise.</p>
-        <div class="kxd-partner-path" aria-label="Your path">
-          <span class="kxd-partner-path__step"><span class="kxd-partner-path__num">1</span>Find fit</span>
-          <span class="kxd-partner-path__step"><span class="kxd-partner-path__sep" aria-hidden="true"></span><span class="kxd-partner-path__num">2</span>Open conversation</span>
-          <span class="kxd-partner-path__step"><span class="kxd-partner-path__sep" aria-hidden="true"></span><span class="kxd-partner-path__num">3</span>Submit lead</span>
-          <span class="kxd-partner-path__step"><span class="kxd-partner-path__sep" aria-hidden="true"></span><span class="kxd-partner-path__num">4</span>Book KXD in</span>
-          <span class="kxd-partner-path__step"><span class="kxd-partner-path__sep" aria-hidden="true"></span><span class="kxd-partner-path__num">5</span>Earn</span>
-        </div>
+        <p class="kxd-partner-lead">Track your introductions and keep the next opportunity moving.</p>
       </header>
       <section class="kxd-partner-board" aria-label="Focus">
         <div class="kxd-partner-cta">
-          <p class="kxd-partner-cta__label">Your next move</p>
-          <h2 class="kxd-partner-cta__title">Review the playbook</h2>
-          <p class="kxd-partner-cta__hint">Start with fit, then open one strong conversation.</p>
-          <a class="kxd-partner-btn kxd-partner-btn--cta" href="/portal/partner/playbook">Review the playbook</a>
+          <h2 class="kxd-partner-cta__title">Submit lead</h2>
+          <p class="kxd-partner-cta__hint">Keep the pipeline moving with the next strong introduction.</p>
+          <a class="kxd-partner-btn" href="/portal/partner/submit-lead">Submit lead</a>
         </div>
         <div class="kxd-partner-paid">
           <p class="kxd-partner-paid__label">Paid earnings</p>
@@ -102,7 +93,6 @@ function homeHtml(): string {
       </section>
       <section class="kxd-partner-section">
         <h2 class="kxd-partner-section__title">Progress</h2>
-        <p class="kxd-partner-empty">Your board starts empty on purpose. The first strong introduction changes the picture.</p>
         <ol class="kxd-partner-pipe" aria-label="Pipeline">
           <li class="is-empty"><span class="kxd-partner-pipe__value">0</span><span class="kxd-partner-pipe__label">Leads submitted</span></li>
           <li class="is-empty"><span class="kxd-partner-pipe__value">0</span><span class="kxd-partner-pipe__label">Qualified opportunities</span></li>
@@ -110,7 +100,7 @@ function homeHtml(): string {
           <li class="is-empty"><span class="kxd-partner-pipe__value">0</span><span class="kxd-partner-pipe__label">Won clients</span></li>
         </ol>
       </section>
-      <section class="kxd-partner-section">
+      <section class="kxd-partner-section kxd-partner-section--later">
         <div class="kxd-partner-fit">
           <h2 class="kxd-partner-section__title">What a strong lead looks like</h2>
           <div class="kxd-partner-fit__grid">
@@ -189,7 +179,7 @@ function leadsHtml(): string {
       <p class="kxd-partner-eyebrow">Your pipeline</p>
       <h1 class="kxd-partner-title">My leads</h1>
       <span class="kxd-partner-hairline" aria-hidden="true"></span>
-      <p class="kxd-partner-lead">Every introduction you own — status, movement, and the next useful step. Internal notes and financials stay with KXD.</p>
+      <p class="kxd-partner-lead">Every introduction you own — status, movement, and the next useful step.</p>
       <div class="kxd-partner-list">
         <article class="kxd-partner-card">
           <h2 class="kxd-partner-card__title">Harbor Peak Design Co</h2>
@@ -247,7 +237,7 @@ function earningsHtml(): string {
       <p class="kxd-partner-eyebrow">Approved only</p>
       <h1 class="kxd-partner-title">My earnings</h1>
       <span class="kxd-partner-hairline" aria-hidden="true"></span>
-      <p class="kxd-partner-lead">Commissions appear here after KXD approves them. You can see what you earned — not how the internal math was run.</p>
+      <p class="kxd-partner-lead">Track your approved commissions, paid earnings, and referral bonuses.</p>
       <section class="kxd-partner-paid kxd-partner-paid--hero" aria-label="Paid to date">
         <p class="kxd-partner-paid__label">Paid to date</p>
         <p class="kxd-partner-paid__value">$0</p>
@@ -257,9 +247,9 @@ function earningsHtml(): string {
         <h2 class="kxd-partner-section__title">How earnings work</h2>
         <ol class="kxd-partner-earn-path">
           <li><span class="kxd-partner-earn-path__num">01</span><div class="kxd-partner-earn-path__copy"><strong>Project commission</strong><p>10% of collected eligible project revenue you sourced.</p></div><span class="kxd-partner-earn-path__amount">$0</span></li>
-          <li><span class="kxd-partner-earn-path__num">02</span><div class="kxd-partner-earn-path__copy"><strong>Recurring bonus</strong><p>10% of paid eligible recurring revenue for the first three months.</p></div><span class="kxd-partner-earn-path__amount">$0</span></li>
-          <li><span class="kxd-partner-earn-path__num">03</span><div class="kxd-partner-earn-path__copy"><strong>Retention kicker</strong><p>Retention kicker when the client stays active through month four.</p></div><span class="kxd-partner-earn-path__amount">$0</span></li>
-          <li><span class="kxd-partner-earn-path__num">04</span><div class="kxd-partner-earn-path__copy"><strong>Performance bonus</strong><p>Occasional bonus when volume warrants — always operator approved.</p></div><span class="kxd-partner-earn-path__amount">$0</span></li>
+          <li><span class="kxd-partner-earn-path__num">02</span><div class="kxd-partner-earn-path__copy"><strong>Recurring bonus</strong><p>10% of paid eligible recurring revenue (Website Care, Website Management, SEO &amp; Growth) for the first 3 paid months.</p></div><span class="kxd-partner-earn-path__amount">$0</span></li>
+          <li><span class="kxd-partner-earn-path__num">03</span><div class="kxd-partner-earn-path__copy"><strong>Retention kicker</strong><p>10% when the sourced client stays active through month 4.</p></div><span class="kxd-partner-earn-path__amount">$0</span></li>
+          <li><span class="kxd-partner-earn-path__num">04</span><div class="kxd-partner-earn-path__copy"><strong>Performance bonus</strong><p>$250 when you source 3 paid projects within 90 days. Paid after KXD approves.</p></div><span class="kxd-partner-earn-path__amount">$0</span></li>
         </ol>
       </section>
       <section class="kxd-partner-section">
@@ -276,16 +266,20 @@ function bookHtml(): string {
   return shell(
     `
     <div class="kxd-partner-page kxd-partner-page--narrow">
-      <p class="kxd-partner-eyebrow">Private discovery</p>
       <h1 class="kxd-partner-title">Book KXD in</h1>
-      <span class="kxd-partner-hairline" aria-hidden="true"></span>
-      <p class="kxd-partner-lead">Reserve a 30-minute discovery session with Matt / KXD for a specific introduction. You open the door — we run the call.</p>
+      <p class="kxd-partner-lead">Reserve a 30-minute discovery for a specific introduction. You open the door — KXD runs the call.</p>
       <div class="kxd-partner-book-panel">
-        <h2 class="kxd-partner-book-panel__title">Request the session</h2>
+        <h2 class="kxd-partner-book-panel__title">Choose a time</h2>
         <form class="kxd-partner-form">
-          <div class="kxd-partner-field"><label>Related introduction</label><input value="Harbor Peak Design Co" /></div>
-          <div class="kxd-partner-field"><label>Preferred window</label><input value="Tue morning" /></div>
-          <button class="kxd-partner-btn" type="button">Request booking</button>
+          <div class="kxd-partner-field"><label>Referral</label><select><option>Harbor Peak Design Co — Jane Reyes — Oct 2</option><option>Harbor Peak Design Co — Marcus Cole — Oct 4</option></select></div>
+          <fieldset class="kxd-partner-slots">
+            <legend>Available times · <span class="kxd-partner-slots__tz">America/Los_Angeles</span></legend>
+            <label class="kxd-partner-slot"><input type="radio" name="slot" checked /><span class="kxd-partner-slot__time">Tue, Oct 7, 10:00 AM</span></label>
+            <label class="kxd-partner-slot"><input type="radio" name="slot" /><span class="kxd-partner-slot__time">Tue, Oct 7, 10:30 AM</span></label>
+            <label class="kxd-partner-slot"><input type="radio" name="slot" /><span class="kxd-partner-slot__time">Wed, Oct 8, 2:00 PM</span></label>
+          </fieldset>
+          <div class="kxd-partner-field"><label>Notes</label><textarea placeholder="Anything KXD should know before the call"></textarea></div>
+          <button class="kxd-partner-btn" type="button">Confirm discovery</button>
         </form>
       </div>
       <div class="kxd-partner-book-after">

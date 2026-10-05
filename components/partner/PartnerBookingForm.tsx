@@ -17,6 +17,7 @@ export function PartnerBookingForm({
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (ok || busy) return;
     setBusy(true);
     setError(null);
     setOk(null);
@@ -35,7 +36,7 @@ export function PartnerBookingForm({
         setError(data.message || "Could not submit this request.");
         return;
       }
-      setOk("Received. KXD will take it from here and confirm the session.");
+      setOk("Booking request sent. KXD will confirm the time shortly.");
       setPreferredTimes("");
       setNotes("");
       router.refresh();
@@ -75,9 +76,11 @@ export function PartnerBookingForm({
       </div>
       {error ? <p className="kxd-partner-message kxd-partner-message--error">{error}</p> : null}
       {ok ? <p className="kxd-partner-message kxd-partner-message--ok">{ok}</p> : null}
-      <button className="kxd-partner-btn kxd-partner-btn--cta" type="submit" disabled={busy}>
-        {busy ? "Sending…" : "Request discovery session"}
-      </button>
+      {!ok ? (
+        <button className="kxd-partner-btn" type="submit" disabled={busy}>
+          {busy ? "Sending…" : "Request discovery session"}
+        </button>
+      ) : null}
     </form>
   );
 }

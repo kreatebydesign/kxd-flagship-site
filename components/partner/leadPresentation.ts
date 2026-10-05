@@ -19,6 +19,28 @@ export function isLocalQaBusinessName(name: string): boolean {
   );
 }
 
+function shortSubmittedDate(iso: string): string | null {
+  const value = iso.trim();
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+/** Partner-safe booking dropdown label. Own referrals only; no notes or pricing. */
+export function formatPartnerBookingReferralLabel(input: {
+  id: number;
+  businessName: string;
+  contactName: string;
+  submittedAt: string;
+}): string {
+  const business = partnerDisplayBusinessName(input.businessName).trim() || "Introduction";
+  const contact = input.contactName.trim() || "Contact";
+  const submitted = shortSubmittedDate(input.submittedAt);
+  const reference = submitted || `#${input.id}`;
+  return `${business} — ${contact} — ${reference}`;
+}
+
 export function partnerLeadNextAction(state: PartnerVisibilityState): {
   label: string;
   href: string | null;
