@@ -3,6 +3,10 @@ import { redirect } from "next/navigation";
 import { PortalLoginForm } from "@/components/portal/PortalLoginForm";
 import { PortalAuthShell } from "@/components/portal/PortalAuthShell";
 import { PORTAL_CLIENT_LANGUAGE } from "@/lib/ces/copy/portal-language";
+import {
+  isPartnerLoginRedirect,
+  PARTNER_NETWORK_LOGIN,
+} from "@/lib/portal/partner/login-intent";
 import { getPortalSession } from "@/lib/portal/session";
 
 function safePortalRedirect(
@@ -28,9 +32,9 @@ export default async function PortalLoginPage({
 }: {
   searchParams: Promise<{ redirect?: string | string[] }>;
 }) {
+  const params = await searchParams;
   const session = await getPortalSession();
   if (session) {
-    const params = await searchParams;
     redirect(
       safePortalRedirect(
         params.redirect,
@@ -39,10 +43,21 @@ export default async function PortalLoginPage({
     );
   }
 
+  const partnerEntry = isPartnerLoginRedirect(params.redirect);
+
   return (
     <PortalAuthShell
-      title={PORTAL_CLIENT_LANGUAGE.authLoginTitle}
-      lead={PORTAL_CLIENT_LANGUAGE.authLoginLead}
+      variant={partnerEntry ? "partner" : "client"}
+      title={
+        partnerEntry
+          ? PARTNER_NETWORK_LOGIN.title
+          : PORTAL_CLIENT_LANGUAGE.authLoginTitle
+      }
+      lead={
+        partnerEntry
+          ? PARTNER_NETWORK_LOGIN.lead
+          : PORTAL_CLIENT_LANGUAGE.authLoginLead
+      }
     >
       <Suspense fallback={null}>
         <PortalLoginForm />

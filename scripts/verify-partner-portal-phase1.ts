@@ -12,6 +12,7 @@ import {
   PARTNER_COMPENSATION,
   PARTNER_PLAYBOOK_SECTIONS,
 } from "../lib/portal/partner/playbook";
+import { isPartnerLoginRedirect } from "../lib/portal/partner/login-intent";
 import { PARTNER_VISIBILITY_STATES } from "../lib/portal/partner/types";
 
 const ROOT = process.cwd();
@@ -385,6 +386,48 @@ async function main() {
     assertFileContains(
       "app/api/admin/partner/policy/route.ts",
       "requirePayloadAdminApi",
+    );
+  });
+
+  await check("partner login variant is gated by safe /portal/partner redirect", () => {
+    assert.equal(isPartnerLoginRedirect("/portal/partner"), true);
+    assert.equal(isPartnerLoginRedirect("/portal/partner/leads"), true);
+    assert.equal(isPartnerLoginRedirect("/portal"), false);
+    assert.equal(isPartnerLoginRedirect("/portal/login"), false);
+    assert.equal(isPartnerLoginRedirect("//evil.example"), false);
+    assert.equal(isPartnerLoginRedirect("https://example.com/portal/partner"), false);
+    assert.equal(isPartnerLoginRedirect(undefined), false);
+    assertFileContains(
+      "lib/portal/partner/login-intent.ts",
+      "Sign in to your partner room.",
+    );
+    assertFileContains(
+      "app/(portal)/portal/(auth)/login/page.tsx",
+      "isPartnerLoginRedirect",
+    );
+    assertFileContains(
+      "app/(portal)/portal/(auth)/login/page.tsx",
+      'variant={partnerEntry ? "partner" : "client"}',
+    );
+    assertFileContains(
+      "lib/ces/copy/portal-language.ts",
+      'authLoginEyebrow: "Your workspace"',
+    );
+    assertFileContains(
+      "lib/ces/copy/portal-language.ts",
+      "Review your site, share feedback, and follow every revision",
+    );
+    assertFileDoesNotContain(
+      "lib/ces/copy/portal-language.ts",
+      "Sign in to your partner room.",
+    );
+    assertFileContains(
+      "components/portal/PortalLoginForm.tsx",
+      'requested.startsWith("/portal/partner")',
+    );
+    assertFileContains(
+      "app/api/portal/auth/login/route.ts",
+      "createPortalSession",
     );
   });
 

@@ -4319,6 +4319,118 @@
   border: 1px solid color-mix(in srgb, var(--kxd-os-critical) 22%, transparent);
 }
 
+/* KXD Network partner sign-in — gated by /portal/partner redirect only */
+.kxd-portal-auth--partner {
+  background: #f3eee6;
+  color: #1c1914;
+}
+
+.kxd-portal-auth--partner .kxd-portal-auth__card {
+  max-width: 27rem;
+  padding: clamp(2rem, 5vw, 2.85rem);
+  border: 1px solid rgba(28, 25, 20, 0.12);
+  border-radius: 3px;
+  background: #fbf7f0;
+  box-shadow: none;
+}
+
+.kxd-portal-auth--partner .kxd-portal-auth__head {
+  align-items: flex-start;
+  gap: 0.7rem;
+  margin-bottom: 1.5rem;
+}
+
+.kxd-portal-auth--partner .kxd-portal-auth__mark {
+  width: 1.85rem;
+  height: auto;
+  display: block;
+}
+
+.kxd-portal-auth--partner .kxd-portal-auth__eyebrow {
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: #8a8478;
+}
+
+.kxd-portal-auth--partner .kxd-portal-auth__title {
+  font-weight: 500;
+  letter-spacing: -0.032em;
+  color: #1c1914;
+}
+
+.kxd-portal-auth--partner .kxd-portal-auth__lead {
+  max-width: 38ch;
+  color: #5c574e;
+}
+
+.kxd-portal-auth--partner .kxd-portal-auth__label {
+  font-weight: 500;
+  color: #1c1914;
+}
+
+.kxd-portal-auth--partner .kxd-portal-auth__input {
+  min-height: 2.75rem;
+  border: 1px solid rgba(28, 25, 20, 0.2);
+  border-radius: 3px;
+  background: #fffcf7;
+  color: #1c1914;
+  font-size: 1rem;
+  box-shadow: none;
+}
+
+.kxd-portal-auth--partner .kxd-portal-auth__input:focus {
+  border-color: #1c1914;
+  box-shadow: none;
+}
+
+.kxd-portal-auth--partner .kxd-portal-auth__submit {
+  min-height: 2.5rem;
+  border-radius: 3px;
+  background: var(--kxd-os-gold, #c2aa72);
+  color: #141210;
+  font-weight: 500;
+}
+
+.kxd-portal-auth--partner .kxd-portal-auth__submit:hover:not(:disabled) {
+  background: var(--kxd-os-gold-hover, #d0b984);
+}
+
+.kxd-portal-auth--partner .kxd-portal-auth__submit:focus-visible {
+  outline: 2px solid #1c1914;
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+.kxd-portal-auth--partner .kxd-portal-auth__submit--secondary {
+  margin-top: 0.15rem;
+  background: transparent;
+  color: #1c1914;
+  border: 1px solid rgba(28, 25, 20, 0.2);
+}
+
+.kxd-portal-auth--partner .kxd-portal-auth__submit--secondary:hover:not(:disabled) {
+  background: transparent;
+  border-color: #1c1914;
+}
+
+.kxd-portal-auth--partner .kxd-portal-auth__footer-link {
+  color: #5c574e;
+}
+
+.kxd-portal-auth--partner .kxd-portal-auth__footer-link a {
+  color: #1c1914;
+}
+
+.kxd-portal-auth--partner .kxd-portal-auth__footer-link a:hover {
+  color: #1c1914;
+}
+
+.kxd-portal-auth--partner .kxd-portal-auth__notice--error {
+  color: #8a3a32;
+  background: transparent;
+  border: 1px solid rgba(138, 58, 50, 0.28);
+}
+
 .kxd-portal-auth__state {
   display: flex;
   flex-direction: column;

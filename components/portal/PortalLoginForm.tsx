@@ -8,10 +8,12 @@ import {
   type PublicKeyCredentialRequestOptionsJSON,
 } from "@simplewebauthn/browser";
 import { PORTAL_CLIENT_LANGUAGE } from "@/lib/ces/copy/portal-language";
+import { isPartnerLoginRedirect } from "@/lib/portal/partner/login-intent";
 
 export function PortalLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const partnerEntry = isPartnerLoginRedirect(searchParams.get("redirect"));
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mfaCode, setMfaCode] = useState("");
@@ -175,8 +177,17 @@ export function PortalLoginForm() {
           <button
             type="button"
             disabled={loading || !email}
-            className="kxd-portal-auth__submit"
-            style={{ marginTop: 8, background: "transparent", color: "inherit", border: "1px solid currentColor" }}
+            className="kxd-portal-auth__submit kxd-portal-auth__submit--secondary"
+            style={
+              partnerEntry
+                ? undefined
+                : {
+                    marginTop: 8,
+                    background: "transparent",
+                    color: "inherit",
+                    border: "1px solid currentColor",
+                  }
+            }
             onClick={() => void handlePasskey()}
           >
             Continue with a passkey
