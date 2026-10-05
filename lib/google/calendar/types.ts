@@ -124,6 +124,10 @@ export interface CreateCalendarEventInput {
   end: string;
   timezone: string;
   attendees?: Array<{ email: string }>;
+  /** When true, request a Google Meet conference on create. */
+  createGoogleMeet?: boolean;
+  /** Send invitations to attendees when present. */
+  sendUpdates?: "all" | "externalOnly" | "none";
 }
 
 /**
@@ -135,6 +139,7 @@ export interface CreatedCalendarEvent {
   etag: string | null;
   calendarId: string;
   createdAt: string;
+  meetLink: string | null;
 }
 
 /**

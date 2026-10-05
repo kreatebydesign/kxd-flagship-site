@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { AuthenticationError, type CollectionSlug, getPayload } from "payload";
 import config from "@payload-config";
 import { createPortalSession } from "@/lib/portal/session";
+import { findActivePartnerProfileForUser } from "@/lib/portal/partner/profile";
 import { getMfaSettings } from "@/lib/portal/identity/mfa-store";
 import { setPendingMfaCookie } from "@/lib/portal/identity/pending-mfa";
 import {
@@ -75,7 +76,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const portalUser = result.user as { id: number; active?: boolean };
+    const portalUser = result.user as {
+      id: number;
+      active?: boolean;
+      accessMode?: string;
+    };
     if (portalUser.active === false) {
       return NextResponse.json(
         {
@@ -88,6 +93,23 @@ export async function POST(req: NextRequest) {
     }
 
     const portalUserId = result.user.id as number;
+    const accessMode =
+      String(portalUser.accessMode ?? "client") === "partner" ? "partner" : "client";
+    if (accessMode === "partner") {
+      const partner = await findActivePartnerProfileForUser(portalUserId);
+      if (!partner) {
+        return NextResponse.json(
+          {
+            ok: false,
+            message:
+              "This partner account isn't active yet. Please reach out to KXD for help.",
+          },
+          { status: 403 },
+        );
+      }
+    }
+    const redirectTo = accessMode === "partner" ? "/portal/partner" : "/portal";
+
     const mfa = await getMfaSettings(portalUserId);
     if (mfa.totpEnabled) {
       await setPendingMfaCookie(portalUserId);
@@ -97,7 +119,12 @@ export async function POST(req: NextRequest) {
         actorPortalUserId: portalUserId,
         summary: "Password verified — MFA required",
       });
-      return NextResponse.json({ ok: true, mfaRequired: true });
+      return NextResponse.json({
+        ok: true,
+        mfaRequired: true,
+        accessMode,
+        redirectTo,
+      });
     }
 
     await createPortalSession(portalUserId);
@@ -108,7 +135,12 @@ export async function POST(req: NextRequest) {
       summary: "Password login succeeded",
     });
 
-    return NextResponse.json({ ok: true, mfaRequired: false });
+    return NextResponse.json({
+      ok: true,
+      mfaRequired: false,
+      accessMode,
+      redirectTo,
+    });
   } catch (err) {
     console.error("[KXD Portal] Login failed:", err);
 

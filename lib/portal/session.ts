@@ -13,6 +13,8 @@ import {
   listPortalMembershipsForUser,
   resolveAuthorizedActiveClient,
 } from "./memberships";
+import { findActivePartnerProfileForUser } from "./partner/profile";
+import type { PortalAccessMode } from "./partner/types";
 import { getOperatorPortalPreviewCookieSession } from "./operator-preview/cookie";
 import type { OperatorPortalPreviewSession } from "./operator-preview/types";
 import { resolvePortalGreetingName } from "./greeting";
@@ -21,7 +23,15 @@ const SESSION_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
 
 export type PortalSession = {
   portalUserId: number;
+  /**
+   * Client CES authority. `0` for partner sessions — never grants client data access.
+   * Always re-check `accessMode === "client"` and `clientId > 0` before CES loads.
+   */
   clientId: number;
+  /** client = Client HQ / CES. partner = Partner Portal only. Always set by getPortalSession. */
+  accessMode?: PortalAccessMode;
+  /** Active kxd-partner-profiles id when accessMode is partner. Always set by getPortalSession. */
+  partnerId?: number | null;
   email: string;
   displayName: string;
   /**
@@ -104,10 +114,37 @@ function asPortalUserSession(input: {
 }): PortalSession {
   return {
     ...input,
+    accessMode: "client",
+    partnerId: null,
     greetingName: resolvePortalGreetingName({
       displayName: input.displayName,
       isOperatorPreview: false,
     }),
+    isOperatorPreview: false,
+    operatorPreview: null,
+  };
+}
+
+function asPartnerPortalSession(input: {
+  portalUserId: number;
+  partnerId: number;
+  email: string;
+  displayName: string;
+  welcomeCompletedAt: string | null;
+}): PortalSession {
+  return {
+    portalUserId: input.portalUserId,
+    clientId: 0,
+    accessMode: "partner",
+    partnerId: input.partnerId,
+    email: input.email,
+    displayName: input.displayName,
+    greetingName: resolvePortalGreetingName({
+      displayName: input.displayName,
+      isOperatorPreview: false,
+    }),
+    clientName: "Kreate by Design",
+    welcomeCompletedAt: input.welcomeCompletedAt,
     isOperatorPreview: false,
     operatorPreview: null,
   };
@@ -144,6 +181,8 @@ async function resolveOperatorPreviewSession(): Promise<PortalSession | null> {
       // Sentinel — never a real portal-users row. Writes must check isOperatorPreview.
       portalUserId: 0,
       clientId: preview.clientId,
+      accessMode: "client",
+      partnerId: null,
       email: preview.adminEmail,
       displayName: isStaffTest
         ? `KXD Staff Test · ${preview.adminEmail}`
@@ -212,6 +251,30 @@ export async function getPortalSession(): Promise<PortalSession | null> {
 
     if (user.active === false) return null;
 
+    const accessMode: PortalAccessMode =
+      String(user.accessMode ?? "client") === "partner" ? "partner" : "client";
+
+    const memberships = await listPortalMembershipsForUser(portalUserId, {
+      payload,
+    });
+    const activeMemberships = memberships.filter((m) => m.status === "active");
+
+    if (accessMode === "partner") {
+      // Fail closed: partner identity cannot also hold active client memberships.
+      if (activeMemberships.length > 0) return null;
+      const partner = await findActivePartnerProfileForUser(portalUserId);
+      if (!partner) return null;
+      return asPartnerPortalSession({
+        portalUserId,
+        partnerId: partner.id,
+        email: String(user.email ?? ""),
+        displayName: String(user.displayName ?? partner.displayName),
+        welcomeCompletedAt: user.welcomeCompletedAt
+          ? String(user.welcomeCompletedAt)
+          : new Date(0).toISOString(),
+      });
+    }
+
     const legacy = resolveLegacyClient(user);
     const lastActiveRaw = user.lastActiveClientId;
     const lastActiveClientId =
@@ -220,11 +283,6 @@ export async function getPortalSession(): Promise<PortalSession | null> {
         : typeof lastActiveRaw === "string" && lastActiveRaw.trim()
           ? Number(lastActiveRaw)
           : null;
-
-    const memberships = await listPortalMembershipsForUser(portalUserId, {
-      payload,
-    });
-    const activeMemberships = memberships.filter((m) => m.status === "active");
 
     // Memberships exist but none active → fail closed (do not use unauthorized legacy).
     if (memberships.length > 0 && activeMemberships.length === 0) {
@@ -328,6 +386,22 @@ export async function requirePortalSession(): Promise<PortalSession> {
   return session;
 }
 
+/**
+ * Fail-closed 403 for Partner sessions (and non-client sessions) hitting CES APIs.
+ * Never proceed to client loaders or writes.
+ */
+export function portalPartnerNoCesResponse(): NextResponse {
+  return NextResponse.json(
+    {
+      ok: false,
+      success: false,
+      error: "Forbidden.",
+      code: "PORTAL_PARTNER_NO_CES",
+    },
+    { status: 403 },
+  );
+}
+
 /** JSON 403 helper for mutating portal APIs under operator preview. */
 export function portalPreviewReadOnlyResponse(): NextResponse {
   return NextResponse.json(
@@ -356,6 +430,10 @@ export async function gatePortalApiSession(options?: {
       { ok: false, success: false, error: "Unauthorized." },
       { status: 401 },
     );
+  }
+  // Partner sessions cannot use client portal APIs.
+  if (session.accessMode === "partner" || session.clientId <= 0) {
+    return portalPartnerNoCesResponse();
   }
   if (options?.write && session.isOperatorPreview) {
     return portalPreviewReadOnlyResponse();

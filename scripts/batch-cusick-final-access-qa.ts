@@ -183,6 +183,7 @@ async function main() {
       data: {
         email: BILLY_EMAIL,
         displayName: BILLY_NAME,
+        accessMode: "client",
         client: CMM,
         lastActiveClientId: CMM,
         active: false,

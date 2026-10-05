@@ -8,10 +8,12 @@ import {
   type PublicKeyCredentialRequestOptionsJSON,
 } from "@simplewebauthn/browser";
 import { PORTAL_CLIENT_LANGUAGE } from "@/lib/ces/copy/portal-language";
+import { isPartnerLoginRedirect } from "@/lib/portal/partner/login-intent";
 
 export function PortalLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const partnerEntry = isPartnerLoginRedirect(searchParams.get("redirect"));
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mfaCode, setMfaCode] = useState("");
@@ -21,9 +23,30 @@ export function PortalLoginForm() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  function redirectAfterLogin() {
-    const redirect = searchParams.get("redirect") || "/portal";
-    router.push(redirect);
+  function redirectAfterLogin(data?: { redirectTo?: string; accessMode?: string }) {
+    const requested = searchParams.get("redirect");
+    const partner = data?.accessMode === "partner" || data?.redirectTo === "/portal/partner";
+    if (partner) {
+      const next =
+        requested && requested.startsWith("/portal/partner") && !requested.startsWith("//")
+          ? requested
+          : "/portal/partner";
+      router.push(next);
+      router.refresh();
+      return;
+    }
+    if (
+      requested &&
+      requested.startsWith("/portal") &&
+      !requested.startsWith("/portal/partner") &&
+      !requested.startsWith("//") &&
+      !requested.includes("://")
+    ) {
+      router.push(requested);
+      router.refresh();
+      return;
+    }
+    router.push("/portal");
     router.refresh();
   }
 
@@ -47,7 +70,7 @@ export function PortalLoginForm() {
           setError(data.message || PORTAL_CLIENT_LANGUAGE.authLoginErrorGeneric);
           return;
         }
-        redirectAfterLogin();
+        redirectAfterLogin(data);
         return;
       }
 
@@ -65,7 +88,7 @@ export function PortalLoginForm() {
         setMfaStep(true);
         return;
       }
-      redirectAfterLogin();
+      redirectAfterLogin(data);
     } catch {
       setError(PORTAL_CLIENT_LANGUAGE.authLoginErrorGeneric);
     } finally {
@@ -154,8 +177,17 @@ export function PortalLoginForm() {
           <button
             type="button"
             disabled={loading || !email}
-            className="kxd-portal-auth__submit"
-            style={{ marginTop: 8, background: "transparent", color: "inherit", border: "1px solid currentColor" }}
+            className="kxd-portal-auth__submit kxd-portal-auth__submit--secondary"
+            style={
+              partnerEntry
+                ? undefined
+                : {
+                    marginTop: 8,
+                    background: "transparent",
+                    color: "inherit",
+                    border: "1px solid currentColor",
+                  }
+            }
             onClick={() => void handlePasskey()}
           >
             Continue with a passkey

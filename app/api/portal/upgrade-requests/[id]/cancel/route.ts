@@ -2,7 +2,10 @@
  * POST /api/portal/upgrade-requests/[id]/cancel
  */
 import { NextRequest, NextResponse } from "next/server";
-import { getPortalWriteSession } from "@/lib/portal/session";
+import {
+  getPortalWriteSession,
+  portalPartnerNoCesResponse,
+} from "@/lib/portal/session";
 import {
   cancelClientUpgradeRequest,
   UpgradeRequestError,
@@ -26,6 +29,9 @@ export async function POST(
       { ok: false, message: "Unauthorized." },
       { status: 401 },
     );
+  }
+  if (session.accessMode === "partner" || session.clientId <= 0) {
+    return portalPartnerNoCesResponse();
   }
 
   const { id: raw } = await context.params;

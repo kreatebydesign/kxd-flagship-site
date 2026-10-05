@@ -76,6 +76,9 @@ export function PipelineScreen({
               <Link href="/admin/operations/research" className="kxd-os-btn kxd-os-btn--ghost">
                 Research Desk
               </Link>
+              <Link href="/admin/sales/partners" className="kxd-os-btn kxd-os-btn--ghost">
+                Partners
+              </Link>
               <Link href="/admin/sales/leads" className="kxd-os-btn kxd-os-btn--ghost">
                 All leads
               </Link>

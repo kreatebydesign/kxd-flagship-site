@@ -280,6 +280,11 @@ async function applyClientPlanEntitlements(
 export async function resolveExperienceProfile(
   session: PortalSession,
 ): Promise<ResolvedExperienceProfile> {
+  // Fail closed — partners never receive CES / client experience profiles.
+  if (session.accessMode === "partner" || session.clientId <= 0) {
+    throw new Error("PORTAL_PARTNER_NO_CES");
+  }
+
   const editionBranding = getEditionBranding();
   const payload = await getPayload({ config });
 

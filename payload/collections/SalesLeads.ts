@@ -121,12 +121,37 @@ export const SalesLeads: CollectionConfig = {
       },
     },
     {
+      name: "sourcePartnerReferral",
+      type: "relationship",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      relationTo: "partner-referrals" as any,
+      label: "Source Partner Referral",
+      unique: true,
+      admin: {
+        position: "sidebar",
+        description: "Original Partner Portal referral intake record.",
+        readOnly: true,
+      },
+    },
+    {
+      name: "sourcedByPartner",
+      type: "relationship",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      relationTo: "kxd-partner-profiles" as any,
+      label: "Sourced By (Partner)",
+      admin: {
+        position: "sidebar",
+        description: "Partner attribution — survives promote → conversation → won.",
+        readOnly: true,
+      },
+    },
+    {
       name: "sourcedByName",
       type: "text",
       label: "Sourced By Name",
       admin: {
         position: "sidebar",
-        description: "Denormalized researcher name for operator display.",
+        description: "Denormalized researcher/partner name for operator display.",
         readOnly: true,
       },
     },

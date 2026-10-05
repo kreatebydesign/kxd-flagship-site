@@ -28,6 +28,7 @@ interface GoogleEventResource {
   id?: string;
   etag?: string;
   htmlLink?: string;
+  hangoutLink?: string;
   created?: string;
   updated?: string;
   status?: string;
@@ -39,6 +40,9 @@ interface GoogleEventResource {
   start?: { dateTime?: string; date?: string; timeZone?: string };
   end?: { dateTime?: string; date?: string; timeZone?: string };
   organizer?: { email?: string; displayName?: string };
+  conferenceData?: {
+    entryPoints?: Array<{ entryPointType?: string; uri?: string }>;
+  };
 }
 
 interface GoogleEventsListResponse {
@@ -407,11 +411,28 @@ export async function createCalendarEvent(
     body.attendees = attendees;
   }
 
-  const created = await calendarApiJson<GoogleEventResource>(
-    `/calendars/${encodeCalendarPathId(calendarId)}/events`,
-    body,
-    { method: "POST", timeoutMs: 20_000 },
-  );
+  if (input.createGoogleMeet) {
+    body.conferenceData = {
+      createRequest: {
+        requestId: `kxd-meet-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
+        conferenceSolutionKey: { type: "hangoutsMeet" },
+      },
+    };
+  }
+
+  const sendUpdates = input.sendUpdates ?? (attendees.length > 0 ? "all" : "none");
+  const query = new URLSearchParams();
+  if (input.createGoogleMeet) query.set("conferenceDataVersion", "1");
+  if (sendUpdates !== "none") query.set("sendUpdates", sendUpdates);
+  const qs = query.toString();
+  const path = `/calendars/${encodeCalendarPathId(calendarId)}/events${
+    qs ? `?${qs}` : ""
+  }`;
+
+  const created = await calendarApiJson<GoogleEventResource>(path, body, {
+    method: "POST",
+    timeoutMs: 20_000,
+  });
 
   const googleEventId =
     typeof created.id === "string" ? created.id.trim() : "";
@@ -422,6 +443,18 @@ export async function createCalendarEvent(
       { details: { calendarId } },
     );
   }
+
+  const meetFromEntry =
+    created.conferenceData?.entryPoints?.find(
+      (e) => e.entryPointType === "video" && e.uri,
+    )?.uri ?? null;
+  const meetLink =
+    (typeof created.hangoutLink === "string" && created.hangoutLink.trim()
+      ? created.hangoutLink.trim()
+      : null) ||
+    (typeof meetFromEntry === "string" && meetFromEntry.trim()
+      ? meetFromEntry.trim()
+      : null);
 
   return {
     googleEventId,
@@ -438,5 +471,6 @@ export async function createCalendarEvent(
       typeof created.created === "string" && created.created.trim()
         ? created.created.trim()
         : new Date().toISOString(),
+    meetLink,
   };
 }

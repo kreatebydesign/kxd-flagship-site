@@ -23,8 +23,12 @@ import "../../../../design-system/ces/styles/kxd-ces.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   const session = await getPortalSession();
-  const clientName = session?.clientName?.trim();
-  const profile = session ? await resolveExperienceProfile(session) : null;
+  // Partners never mount Client HQ / CES — avoid PORTAL_PARTNER_NO_CES in metadata.
+  if (!session || session.accessMode === "partner" || session.clientId <= 0) {
+    return { title: "Your partnership" };
+  }
+  const clientName = session.clientName?.trim();
+  const profile = await resolveExperienceProfile(session);
   const logoUrl = profile?.identity.logoUrl?.trim() || null;
   const robin = isRobinColeClient({
     clientSlug: profile?.identity.clientSlug,
@@ -55,6 +59,11 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function PortalAppLayout({ children }: { children: React.ReactNode }) {
   const session = await getPortalSession();
   if (!session) redirect("/portal/login");
+
+  // Partner sessions never mount Client HQ / CES.
+  if (session.accessMode === "partner" || session.clientId <= 0) {
+    redirect(session.accessMode === "partner" ? "/portal/partner" : "/portal/login");
+  }
 
   // Operator preview skips client MFA enrollment and welcome rituals.
   if (!session.isOperatorPreview) {
