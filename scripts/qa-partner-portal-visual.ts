@@ -76,7 +76,7 @@ function shell(inner: string, active: string): string {
 </html>`;
 }
 
-function recordHtml(input: {
+function folioPlate(input: {
   introductions: number;
   qualified: number;
   discovery: number;
@@ -84,30 +84,49 @@ function recordHtml(input: {
   paid: string;
   approved?: string;
   early: boolean;
+  hint: string;
 }): string {
   const steps = [
-    ["Introduction", input.introductions, input.introductions === 0],
-    ["Qualified", input.qualified, input.qualified === 0],
-    ["Discovery", input.discovery, input.discovery === 0],
-    ["Client won", input.won, input.won === 0],
-    ["Paid", input.paid, input.paid === "$0"],
-  ] as const;
-  const path = steps
+    { label: "Introduction", value: String(input.introductions), empty: input.introductions === 0 },
+    { label: "Qualified", value: String(input.qualified), empty: input.qualified === 0 },
+    { label: "Discovery", value: String(input.discovery), empty: input.discovery === 0 },
+    { label: "Client won", value: String(input.won), empty: input.won === 0 },
+    { label: "Paid", value: input.paid, empty: input.paid === "$0" },
+  ];
+  const rest = steps
     .map(
-      ([label, value, empty], index) =>
-        `<li class="${empty ? "is-empty" : ""}"><span class="kxd-partner-record__path-index">${String(index + 1).padStart(2, "0")}</span><span class="kxd-partner-record__path-copy"><span class="kxd-partner-record__path-name">${label}</span></span><span class="kxd-partner-record__path-value">${value}</span></li>`,
+      (step) =>
+        `<li class="${step.empty ? "is-empty" : ""}"><span>${step.label}</span><span>${step.value}</span></li>`,
     )
     .join("");
   const status = input.early
-    ? `<p class="kxd-partner-record__status">Nothing is paid until KXD closes work you sourced. The path is introduction, qualification, discovery, a won client, then approval.</p>`
-    : `<p class="kxd-partner-record__status">Approved ${input.approved ?? "$0"}</p>`;
-  return `<aside class="kxd-partner-record" aria-label="Member record">
-    <p class="kxd-partner-record__kicker">Member record</p>
-    <p class="kxd-partner-record__paid-label">Paid</p>
-    <p class="kxd-partner-record__paid">${input.paid}</p>
+    ? `<p class="kxd-partner-folio__status">Nothing is paid until KXD closes work you sourced. Start with a qualified introduction.</p>`
+    : `<p class="kxd-partner-folio__status">Approved ${input.approved ?? "$0"}</p>`;
+  return `<aside class="kxd-partner-folio__plate" aria-label="Member record">
+    <p class="kxd-partner-folio__paid-label">Paid to date</p>
+    <p class="kxd-partner-folio__paid">${input.paid}</p>
     ${status}
-    <ol class="kxd-partner-record__path">${path}</ol>
+    <div class="kxd-partner-folio__chapter">
+      <p class="kxd-partner-folio__chapter-kicker">Next</p>
+      <p class="kxd-partner-folio__chapter-name">${input.hint}</p>
+    </div>
+    <ol class="kxd-partner-folio__rest">${rest}</ol>
   </aside>`;
+}
+
+function homeNextAction(early: boolean): { label: string; href: string; hint: string } {
+  if (early) {
+    return {
+      label: "Review the playbook",
+      href: "/portal/partner/playbook",
+      hint: "Start with the field guide, then submit your first introduction.",
+    };
+  }
+  return {
+    label: "Submit another lead",
+    href: "/portal/partner/submit-lead",
+    hint: "Keep the pipeline moving with the next strong introduction.",
+  };
 }
 
 function homeBody(opts: {
@@ -119,17 +138,17 @@ function homeBody(opts: {
   paid: string;
   approved?: string;
 }): string {
-  const cta = opts.early ? "Bring your first introduction" : "Bring an introduction";
+  const action = homeNextAction(opts.early);
   return `
     <div class="kxd-partner-page kxd-partner-page--home">
-      <div class="kxd-partner-home-stage">
-        <header class="kxd-partner-arrival">
+      <div class="kxd-partner-folio">
+        <header class="kxd-partner-folio__leaf">
           <p class="kxd-partner-network">KXD Network · Private access</p>
           <h1 class="kxd-partner-arrival__title">Welcome, Kyle.</h1>
           <p class="kxd-partner-arrival__lead">You bring the right introduction. KXD qualifies, discovers, and closes.</p>
-          <a class="kxd-partner-btn" href="/portal/partner/submit-lead">${cta}</a>
+          <a class="kxd-partner-btn" href="${action.href}">${action.label}</a>
         </header>
-        ${recordHtml({ ...opts })}
+        ${folioPlate({ ...opts, hint: action.hint })}
       </div>
       <section class="kxd-partner-brief">
         <div class="kxd-partner-brief__statement">

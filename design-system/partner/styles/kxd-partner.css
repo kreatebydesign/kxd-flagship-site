@@ -69,11 +69,11 @@
 .kxd-partner-brand__logo {
   display: flex;
   align-items: flex-start;
-  margin: 0 0 0.85rem;
+  margin: 0 0 0.55rem;
 }
 
 .kxd-partner-brand__logo-img {
-  width: 1.85rem;
+  width: 1.6rem;
   height: auto;
   max-width: 100%;
   display: block;
@@ -169,113 +169,140 @@
   max-width: 52rem;
 }
 
+.kxd-partner-main:has(> .kxd-partner-page--home) {
+  padding: 0;
+}
+
 .kxd-partner-page--home {
-  max-width: 72rem;
-  min-height: calc(100vh - 8rem);
+  max-width: none;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  gap: 3.25rem;
+  gap: 0;
+  animation: kxd-partner-folio-enter 240ms var(--kxd-partner-ease) both;
 }
 
-.kxd-partner-home-stage {
+.kxd-partner-folio {
   display: grid;
-  grid-template-columns: minmax(18rem, 0.88fr) minmax(22rem, 1.12fr);
-  gap: 3rem 4.25rem;
-  align-items: start;
+  grid-template-columns: minmax(16.5rem, 0.9fr) minmax(22rem, 1.1fr);
+  min-height: 0;
+  align-items: stretch;
 }
 
-.kxd-partner-page--home .kxd-partner-arrival {
-  max-width: 28rem;
-  padding-top: 0.35rem;
+.kxd-partner-folio__leaf {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  min-width: 0;
+  max-width: none;
+  padding: clamp(1.85rem, 5.5vh, 2.85rem) clamp(1.6rem, 4.5vw, 4rem)
+    clamp(1.75rem, 4vh, 2.5rem);
 }
 
-.kxd-partner-record {
-  padding: 1.75rem 1.85rem 1.6rem;
+.kxd-partner-folio__leaf .kxd-partner-network {
+  margin-bottom: 1.1rem;
+}
+
+.kxd-partner-folio__leaf .kxd-partner-arrival__title {
+  font-size: clamp(1.7rem, 2.8vw, 2.15rem);
+}
+
+.kxd-partner-folio__leaf .kxd-partner-arrival__lead {
+  max-width: 22rem;
+}
+
+.kxd-partner-folio__leaf .kxd-partner-btn {
+  margin-top: 1.35rem;
+  align-self: flex-start;
+}
+
+.kxd-partner-folio__plate {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: clamp(1.85rem, 5.5vh, 2.85rem) clamp(1.6rem, 4.2vw, 3.5rem)
+    clamp(1.75rem, 4vh, 2.65rem);
   background: #161513;
   color: #f3eee6;
   border-radius: 0;
 }
 
-.kxd-partner-record__kicker,
-.kxd-partner-record__paid-label {
+.kxd-partner-folio__paid-label,
+.kxd-partner-folio__chapter-kicker {
   margin: 0;
   font-size: 0.6875rem;
   font-weight: 500;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(243, 238, 230, 0.48);
+  color: rgba(243, 238, 230, 0.42);
 }
 
-.kxd-partner-record__paid-label {
-  margin-top: 1.15rem;
-}
-
-.kxd-partner-record__paid {
-  margin: 0.2rem 0 0;
-  font-size: clamp(2.15rem, 4vw, 2.85rem);
+.kxd-partner-folio__paid {
+  margin: 0.35rem 0 0;
+  font-size: clamp(2.85rem, 6vw, 4.35rem);
   font-weight: 500;
-  letter-spacing: -0.045em;
-  line-height: 1.02;
+  letter-spacing: -0.052em;
+  line-height: 0.96;
   font-variant-numeric: tabular-nums;
   color: #f3eee6;
+  overflow-wrap: anywhere;
 }
 
-.kxd-partner-record__status {
-  margin: 0.55rem 0 0;
-  max-width: 28rem;
+.kxd-partner-folio__status {
+  margin: 0.7rem 0 0;
+  max-width: 22rem;
   font-size: 0.875rem;
   line-height: 1.5;
-  color: rgba(243, 238, 230, 0.62);
+  color: rgba(243, 238, 230, 0.58);
 }
 
-.kxd-partner-record__path {
-  margin: 1.65rem 0 0;
-  padding: 0;
-  list-style: none;
+.kxd-partner-folio__chapter {
+  margin-top: 1.85rem;
 }
 
-.kxd-partner-record__path li {
-  display: grid;
-  grid-template-columns: 1.7rem minmax(0, 1fr) auto;
-  gap: 0.75rem;
-  align-items: baseline;
-  padding: 0.78rem 0;
-  border-top: 1px solid rgba(243, 238, 230, 0.12);
-}
-
-.kxd-partner-record__path-index {
-  font-size: 0.6875rem;
-  letter-spacing: 0.06em;
-  font-variant-numeric: tabular-nums;
-  color: rgba(243, 238, 230, 0.4);
-}
-
-.kxd-partner-record__path-name {
-  font-size: 0.9375rem;
-  letter-spacing: -0.018em;
-  color: rgba(243, 238, 230, 0.78);
-}
-
-.kxd-partner-record__path-value {
-  font-size: 0.9375rem;
+.kxd-partner-folio__chapter-name {
+  margin: 0.45rem 0 0;
+  max-width: 22rem;
+  font-size: 1.12rem;
   font-weight: 500;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.022em;
+  line-height: 1.4;
   color: #f3eee6;
 }
 
-.kxd-partner-record__path li.is-empty .kxd-partner-record__path-name,
-.kxd-partner-record__path li.is-empty .kxd-partner-record__path-value {
-  color: rgba(243, 238, 230, 0.38);
-  font-weight: 400;
+.kxd-partner-folio__rest {
+  margin: 1.85rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.kxd-partner-folio__rest li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: baseline;
+  margin: 0;
+  padding: 0;
+  border: none;
+  font-size: 0.875rem;
+  letter-spacing: -0.012em;
+  color: rgba(243, 238, 230, 0.48);
+  font-variant-numeric: tabular-nums;
+}
+
+.kxd-partner-folio__rest li.is-empty {
+  color: rgba(243, 238, 230, 0.32);
 }
 
 .kxd-partner-brief {
   display: grid;
   grid-template-columns: minmax(16rem, 22rem) minmax(0, 1fr);
   gap: 1.75rem 4rem;
-  padding-top: 2.15rem;
+  padding: 2.35rem clamp(1.6rem, 4.5vw, 4rem) clamp(3rem, 7vw, 5rem);
   border-top: 1px solid var(--kxd-partner-rule);
   align-items: start;
 }
@@ -336,6 +363,25 @@
   }
   to {
     opacity: 1;
+  }
+}
+
+@keyframes kxd-partner-folio-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kxd-partner-page,
+  .kxd-partner-page--home {
+    animation: none;
+    transform: none;
   }
 }
 
@@ -1565,7 +1611,7 @@ a.kxd-partner-card:hover {
   }
 
   .kxd-partner-brand__logo-img {
-    width: 1.7rem;
+    width: 1.45rem;
   }
 
   .kxd-partner-nav {
@@ -1577,22 +1623,27 @@ a.kxd-partner-card:hover {
   .kxd-partner-page--home {
     min-height: 0;
     justify-content: flex-start;
-    gap: 2.15rem;
+    gap: 0;
   }
 
-  .kxd-partner-home-stage,
+  .kxd-partner-folio,
   .kxd-partner-brief {
     grid-template-columns: 1fr;
-    gap: 1.75rem;
+    min-height: 0;
   }
 
-  .kxd-partner-page--home .kxd-partner-arrival {
-    max-width: none;
-    padding-top: 0;
+  .kxd-partner-folio__leaf {
+    justify-content: flex-start;
+    padding: 1.65rem 1.2rem 1.4rem;
   }
 
-  .kxd-partner-record {
-    padding: 1.45rem 1.25rem 1.35rem;
+  .kxd-partner-folio__plate {
+    padding: 1.75rem 1.2rem 1.85rem;
+  }
+
+  .kxd-partner-brief {
+    gap: 1.5rem;
+    padding: 1.85rem 1.2rem 2.5rem;
   }
 
   .kxd-partner-stats,
