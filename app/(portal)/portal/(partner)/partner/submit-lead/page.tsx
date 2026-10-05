@@ -10,12 +10,11 @@ export default async function PartnerSubmitLeadPage() {
 
   return (
     <div className="kxd-partner-page kxd-partner-page--narrow">
-      <p className="kxd-partner-eyebrow">Handoff</p>
-      <h1 className="kxd-partner-title">Submit a lead</h1>
-      <span className="kxd-partner-hairline" aria-hidden="true" />
+      <p className="kxd-partner-network">KXD Network</p>
+      <h1 className="kxd-partner-title">Bring an introduction</h1>
       <p className="kxd-partner-lead">
-        Give KXD a clean introduction — business, opportunity, and how to reach
-        the decision maker. Quality beats volume.
+        One clean handoff: the business, the opportunity, and how to reach the
+        person who can decide. Quality is the standard.
       </p>
       <PartnerLeadForm />
     </div>

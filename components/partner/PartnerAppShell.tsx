@@ -8,8 +8,8 @@ const NAV = [
   { href: "/portal/partner", label: "Home" },
   { href: "/portal/partner/playbook", label: "Playbook" },
   { href: "/portal/partner/submit-lead", label: "Submit lead" },
-  { href: "/portal/partner/leads", label: "My leads" },
-  { href: "/portal/partner/earnings", label: "My earnings" },
+  { href: "/portal/partner/leads", label: "Introductions" },
+  { href: "/portal/partner/earnings", label: "Earnings" },
   { href: "/portal/partner/book", label: "Book KXD in" },
 ] as const;
 
@@ -45,8 +45,9 @@ export function PartnerAppShell({
                 imageClassName="kxd-partner-brand__logo-img"
               />
             </div>
-            <p className="kxd-partner-brand__name">Partner room</p>
+            <p className="kxd-partner-brand__name">KXD Network</p>
             <p className="kxd-partner-brand__room">{partnerName}</p>
+            <p className="kxd-partner-brand__tag">Private access</p>
           </div>
           <nav className="kxd-partner-nav" aria-label="Partner">
             {NAV.map((item) => {

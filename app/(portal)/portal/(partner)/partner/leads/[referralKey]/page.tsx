@@ -55,14 +55,13 @@ export default async function PartnerLeadDetailPage({
 
   return (
     <div className="kxd-partner-page kxd-partner-page--narrow">
-      <p className="kxd-partner-eyebrow">Deal journal</p>
+      <p className="kxd-partner-network">KXD Network</p>
       <h1 className="kxd-partner-title">
         {name}
         {isLocalQaBusinessName(detail.businessName) ? (
           <span className="kxd-partner-local-tag">Local QA</span>
         ) : null}
       </h1>
-      <span className="kxd-partner-hairline" aria-hidden="true" />
       <p className="kxd-partner-lead">
         {detail.contactName}
         {detail.industry ? ` · ${detail.industry}` : ""}
@@ -84,7 +83,7 @@ export default async function PartnerLeadDetailPage({
           Book KXD in
         </Link>
         <Link className="kxd-partner-btn kxd-partner-btn--ghost" href="/portal/partner/leads">
-          Back to my leads
+          Back to introductions
         </Link>
       </div>
 

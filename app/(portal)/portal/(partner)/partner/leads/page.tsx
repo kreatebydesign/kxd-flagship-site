@@ -32,11 +32,11 @@ export default async function PartnerLeadsPage() {
 
   return (
     <div className="kxd-partner-page">
-      <p className="kxd-partner-eyebrow">Your pipeline</p>
-      <h1 className="kxd-partner-title">My leads</h1>
-      <span className="kxd-partner-hairline" aria-hidden="true" />
+      <p className="kxd-partner-network">KXD Network</p>
+      <h1 className="kxd-partner-title">Introductions</h1>
       <p className="kxd-partner-lead">
-        Every introduction you own — status, movement, and the next useful step.
+        Your record. Status, movement, and the next useful step — nothing you
+        do not own.
       </p>
 
       {leads.length === 0 ? (

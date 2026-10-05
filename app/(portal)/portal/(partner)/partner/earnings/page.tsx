@@ -35,11 +35,10 @@ export default async function PartnerEarningsPage() {
 
   return (
     <div className="kxd-partner-page">
-      <p className="kxd-partner-eyebrow">Approved only</p>
-      <h1 className="kxd-partner-title">My earnings</h1>
-      <span className="kxd-partner-hairline" aria-hidden="true" />
+      <p className="kxd-partner-network">KXD Network</p>
+      <h1 className="kxd-partner-title">Earnings</h1>
       <p className="kxd-partner-lead">
-        Track your approved commissions, paid earnings, and referral bonuses.
+        Approved and paid only. Nothing appears here until KXD clears it.
       </p>
 
       <section className="kxd-partner-paid kxd-partner-paid--hero" aria-label="Paid to date">

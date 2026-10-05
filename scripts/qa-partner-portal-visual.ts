@@ -33,8 +33,8 @@ function shell(inner: string, active: string): string {
     ["Home", "/portal/partner", "home"],
     ["Playbook", "/portal/partner/playbook", "playbook"],
     ["Submit lead", "/portal/partner/submit-lead", "submit"],
-    ["My leads", "/portal/partner/leads", "leads"],
-    ["My earnings", "/portal/partner/earnings", "earnings"],
+    ["Introductions", "/portal/partner/leads", "leads"],
+    ["Earnings", "/portal/partner/earnings", "earnings"],
     ["Book KXD in", "/portal/partner/book", "book"],
   ]
     .map(
@@ -59,8 +59,9 @@ function shell(inner: string, active: string): string {
           <div class="kxd-partner-brand__logo">
             <img class="kxd-partner-brand__logo-img" src="${path.join(ROOT, "public/migrated-assets/brand/kxd-logo-transparent.png")}" alt="KXD" width="218" height="205" />
           </div>
-          <p class="kxd-partner-brand__name">Partner room</p>
+          <p class="kxd-partner-brand__name">KXD Network</p>
           <p class="kxd-partner-brand__room">Kyle Whelchel</p>
+          <p class="kxd-partner-brand__tag">Private access</p>
         </div>
         <nav class="kxd-partner-nav" aria-label="Partner">${nav}</nav>
       </aside>
@@ -75,43 +76,86 @@ function homeHtml(): string {
   return shell(
     `
     <div class="kxd-partner-page">
-      <header class="kxd-partner-hero">
-        <h1 class="kxd-partner-title">Welcome, Kyle.</h1>
-        <p class="kxd-partner-lead">Track your introductions and keep the next opportunity moving.</p>
+      <header class="kxd-partner-arrival">
+        <p class="kxd-partner-network">Private access · KXD Network</p>
+        <h1 class="kxd-partner-arrival__title">You are inside KXD, Kyle.</h1>
+        <p class="kxd-partner-arrival__lead">This is invitation-only. The introductions you bring are held to the same standard as the work KXD delivers.</p>
+        <p class="kxd-partner-arrival__expect">Access is earned by judgment. Bring the right opportunity. KXD takes the close — and the work — at the highest level.</p>
+        <a class="kxd-partner-btn" href="/portal/partner/submit-lead">Bring an introduction</a>
       </header>
-      <section class="kxd-partner-board" aria-label="Focus">
+      <section class="kxd-partner-section">
+        <h2 class="kxd-partner-section__title">Your next move</h2>
         <div class="kxd-partner-cta">
-          <h2 class="kxd-partner-cta__title">Submit lead</h2>
-          <p class="kxd-partner-cta__hint">Keep the pipeline moving with the next strong introduction.</p>
-          <a class="kxd-partner-btn" href="/portal/partner/submit-lead">Submit lead</a>
-        </div>
-        <div class="kxd-partner-paid">
-          <p class="kxd-partner-paid__label">Paid earnings</p>
-          <p class="kxd-partner-paid__value">$0</p>
-          <p class="kxd-partner-paid__note">Approved $0</p>
+          <h3 class="kxd-partner-cta__title">Bring an introduction</h3>
+          <p class="kxd-partner-cta__hint">A real decision-maker, live timing, and a reason this belongs at KXD.</p>
         </div>
       </section>
       <section class="kxd-partner-section">
-        <h2 class="kxd-partner-section__title">Progress</h2>
-        <ol class="kxd-partner-pipe" aria-label="Pipeline">
-          <li class="is-empty"><span class="kxd-partner-pipe__value">0</span><span class="kxd-partner-pipe__label">Leads submitted</span></li>
-          <li class="is-empty"><span class="kxd-partner-pipe__value">0</span><span class="kxd-partner-pipe__label">Qualified opportunities</span></li>
-          <li class="is-empty"><span class="kxd-partner-pipe__value">0</span><span class="kxd-partner-pipe__label">Discovery calls booked</span></li>
-          <li class="is-empty"><span class="kxd-partner-pipe__value">0</span><span class="kxd-partner-pipe__label">Won clients</span></li>
+        <h2 class="kxd-partner-section__title">Your position</h2>
+        <p class="kxd-partner-empty">No record yet. The first right-fit introduction is how this ledger begins.</p>
+        <ol class="kxd-partner-pipe">
+          <li class="is-empty"><span class="kxd-partner-pipe__value">0</span><span class="kxd-partner-pipe__label">Introductions</span></li>
+          <li class="is-empty"><span class="kxd-partner-pipe__value">0</span><span class="kxd-partner-pipe__label">Qualified</span></li>
+          <li class="is-empty"><span class="kxd-partner-pipe__value">0</span><span class="kxd-partner-pipe__label">Discovery booked</span></li>
+          <li class="is-empty"><span class="kxd-partner-pipe__value">0</span><span class="kxd-partner-pipe__label">Clients won</span></li>
         </ol>
       </section>
+      <section class="kxd-partner-section">
+        <h2 class="kxd-partner-section__title">What you are building</h2>
+        <p class="kxd-partner-section__text">Nothing is approved or paid yet — that is honest. Earnings appear only when KXD closes work you sourced. Consistent, high-judgment introductions can open larger opportunity inside KXD. This is not a job offer. It is a record of contribution.</p>
+      </section>
       <section class="kxd-partner-section kxd-partner-section--later">
-        <div class="kxd-partner-fit">
-          <h2 class="kxd-partner-section__title">What a strong lead looks like</h2>
-          <div class="kxd-partner-fit__grid">
-            <p class="kxd-partner-section__text">Not every conversation belongs here. Send introductions where the business is real, the timing is live, and a decision maker will take the call.</p>
-            <ul class="kxd-partner-fit__list">
-              <li>Owner or decision maker is reachable</li>
-              <li>Visible gap between the brand and the digital presence</li>
-              <li>A clear reason this matters now</li>
-              <li>Open to a short discovery with KXD</li>
-            </ul>
+        <h2 class="kxd-partner-section__title">The KXD standard</h2>
+        <p class="kxd-partner-section__text kxd-partner-section__text--emphasis">Bring people who can decide, moments that are live, and businesses that actually need this work. Volume is not the test. Judgment is. KXD will do the rest at the level this house is known for.</p>
+        <ul class="kxd-partner-fit__list">
+          <li>A reachable owner or decision-maker</li>
+          <li>A visible gap between the brand and the digital presence</li>
+          <li>A clear reason this matters now</li>
+          <li>Openness to a short discovery with KXD</li>
+        </ul>
+      </section>
+    </div>
+    `,
+    "home",
+  );
+}
+
+function homeEarnedHtml(): string {
+  return shell(
+    `
+    <div class="kxd-partner-page">
+      <header class="kxd-partner-arrival">
+        <p class="kxd-partner-network">Private access · KXD Network</p>
+        <h1 class="kxd-partner-arrival__title">You are inside KXD, Kyle.</h1>
+        <p class="kxd-partner-arrival__lead">This is invitation-only. The introductions you bring are held to the same standard as the work KXD delivers.</p>
+        <p class="kxd-partner-arrival__expect">Access is earned by judgment. Bring the right opportunity. KXD takes the close — and the work — at the highest level.</p>
+        <a class="kxd-partner-btn" href="/portal/partner/submit-lead">Submit another lead</a>
+      </header>
+      <section class="kxd-partner-section">
+        <h2 class="kxd-partner-section__title">Your next move</h2>
+        <div class="kxd-partner-cta">
+          <h3 class="kxd-partner-cta__title">Submit another lead</h3>
+          <p class="kxd-partner-cta__hint">Keep the record moving with the next strong introduction.</p>
+        </div>
+      </section>
+      <section class="kxd-partner-section">
+        <h2 class="kxd-partner-section__title">Your position</h2>
+        <ol class="kxd-partner-pipe">
+          <li><span class="kxd-partner-pipe__value">3</span><span class="kxd-partner-pipe__label">Introductions</span></li>
+          <li><span class="kxd-partner-pipe__value">3</span><span class="kxd-partner-pipe__label">Qualified</span></li>
+          <li><span class="kxd-partner-pipe__value">3</span><span class="kxd-partner-pipe__label">Discovery booked</span></li>
+          <li class="is-empty"><span class="kxd-partner-pipe__value">0</span><span class="kxd-partner-pipe__label">Clients won</span></li>
+        </ol>
+      </section>
+      <section class="kxd-partner-section">
+        <h2 class="kxd-partner-section__title">What you are building</h2>
+        <div class="kxd-partner-building">
+          <div class="kxd-partner-paid">
+            <p class="kxd-partner-paid__label">Paid</p>
+            <p class="kxd-partner-paid__value">$4,500</p>
+            <p class="kxd-partner-paid__note">Approved $4,500</p>
           </div>
+          <p class="kxd-partner-section__text">3 active introductions in motion. Consistent results can open larger KXD opportunity — earned, never promised as employment.</p>
         </div>
       </section>
     </div>
@@ -138,10 +182,9 @@ function playbookHtml(): string {
   return shell(
     `
     <div class="kxd-partner-page kxd-partner-page--narrow">
-      <p class="kxd-partner-eyebrow">Field guide</p>
-      <h1 class="kxd-partner-title">Partner playbook</h1>
-      <span class="kxd-partner-hairline" aria-hidden="true"></span>
-      <p class="kxd-partner-lead">A calm in-app guide for finding fit, opening conversations, and handing opportunities to KXD with precision.</p>
+      <p class="kxd-partner-network">KXD Network</p>
+      <h1 class="kxd-partner-title">The playbook</h1>
+      <p class="kxd-partner-lead">How this house works. Find fit, open the door, hand off cleanly. KXD closes the work.</p>
       <div class="kxd-partner-playbook">${sections}</div>
     </div>
     `,
@@ -153,10 +196,9 @@ function submitHtml(): string {
   return shell(
     `
     <div class="kxd-partner-page kxd-partner-page--narrow">
-      <p class="kxd-partner-eyebrow">Handoff</p>
-      <h1 class="kxd-partner-title">Submit a lead</h1>
-      <span class="kxd-partner-hairline" aria-hidden="true"></span>
-      <p class="kxd-partner-lead">Give KXD a clean introduction — business, opportunity, and how to reach the decision maker. Quality beats volume.</p>
+      <p class="kxd-partner-network">KXD Network</p>
+      <h1 class="kxd-partner-title">Bring an introduction</h1>
+      <p class="kxd-partner-lead">One clean handoff: the business, the opportunity, and how to reach the person who can decide.</p>
       <form class="kxd-partner-form">
         <div class="kxd-partner-field"><label>Business name *</label><input value="" /></div>
         <div class="kxd-partner-field"><label>Contact name *</label><input value="" /></div>
@@ -176,10 +218,9 @@ function leadsHtml(): string {
   return shell(
     `
     <div class="kxd-partner-page">
-      <p class="kxd-partner-eyebrow">Your pipeline</p>
-      <h1 class="kxd-partner-title">My leads</h1>
-      <span class="kxd-partner-hairline" aria-hidden="true"></span>
-      <p class="kxd-partner-lead">Every introduction you own — status, movement, and the next useful step.</p>
+      <p class="kxd-partner-network">KXD Network</p>
+      <h1 class="kxd-partner-title">Introductions</h1>
+      <p class="kxd-partner-lead">Your record. Status, movement, and the next useful step.</p>
       <div class="kxd-partner-list">
         <article class="kxd-partner-card">
           <h2 class="kxd-partner-card__title">Harbor Peak Design Co</h2>
@@ -234,8 +275,8 @@ function earningsHtml(): string {
   return shell(
     `
     <div class="kxd-partner-page">
-      <p class="kxd-partner-eyebrow">Approved only</p>
-      <h1 class="kxd-partner-title">My earnings</h1>
+      <p class="kxd-partner-network">KXD Network</p>
+      <h1 class="kxd-partner-title">Earnings</h1>
       <span class="kxd-partner-hairline" aria-hidden="true"></span>
       <p class="kxd-partner-lead">Track your approved commissions, paid earnings, and referral bonuses.</p>
       <section class="kxd-partner-paid kxd-partner-paid--hero" aria-label="Paid to date">
@@ -302,6 +343,7 @@ async function main() {
 
   const pages = [
     { id: "home", html: homeHtml() },
+    { id: "home-earned", html: homeEarnedHtml() },
     { id: "playbook", html: playbookHtml() },
     { id: "submit-lead", html: submitHtml() },
     { id: "leads", html: leadsHtml() },

@@ -46,10 +46,11 @@ export default async function PartnerBookPage({
 
   return (
     <div className="kxd-partner-page kxd-partner-page--narrow">
+      <p className="kxd-partner-network">KXD Network</p>
       <h1 className="kxd-partner-title">Book KXD in</h1>
       <p className="kxd-partner-lead">
-        Reserve a 30-minute discovery for a specific introduction. You open the
-        door — KXD runs the call.
+        You open the door. KXD runs the call. Reserve discovery for one
+        specific introduction.
       </p>
       {selected ? (
         <p className="kxd-partner-book-context">

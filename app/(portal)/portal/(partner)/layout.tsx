@@ -7,7 +7,7 @@ import "../../../../design-system/os/styles/kxd-os.css";
 import "../../../../design-system/partner/styles/kxd-partner.css";
 
 export const metadata: Metadata = {
-  title: "KXD Partner",
+  title: "KXD Network",
 };
 
 export default async function PartnerPortalLayout({

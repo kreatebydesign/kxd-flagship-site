@@ -59,12 +59,11 @@ export default async function PartnerPlaybookPage() {
 
   return (
     <div className="kxd-partner-page">
-      <p className="kxd-partner-eyebrow">Field guide</p>
-      <h1 className="kxd-partner-title">Partner playbook</h1>
-      <span className="kxd-partner-hairline" aria-hidden="true" />
+      <p className="kxd-partner-network">KXD Network</p>
+      <h1 className="kxd-partner-title">The playbook</h1>
       <p className="kxd-partner-lead">
-        Eight chapters. Find fit, open the door, hand off cleanly, and earn when
-        KXD closes the work.
+        How this house works. Find fit, open the door, hand off cleanly. KXD
+        closes the work.
       </p>
 
       <div className="kxd-partner-playbook-layout">
