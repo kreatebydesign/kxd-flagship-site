@@ -20,11 +20,11 @@ export const PortalUsers: CollectionConfig = {
   },
   admin: {
     useAsTitle: "email",
-    defaultColumns: ["email", "displayName", "client", "active", "updatedAt"],
+    defaultColumns: ["email", "displayName", "accessMode", "client", "active", "updatedAt"],
     group: PAYLOAD_GROUPS.kxdOs,
     description:
-      "Client portal login accounts. Legacy singular Client remains during Phase 4 transition; " +
-      "authorized multi-client access uses portal-client-memberships. " +
+      "Portal login accounts for client workspaces and approved KXD partners. " +
+      "accessMode=client uses Client memberships; accessMode=partner requires an active kxd-partner-profiles row and never resolves client CES. " +
       "Preferred workflow: KXD OS → Portal Access (/admin/operations/portal-access). " +
       "Password is required on create (8+ chars). Clients can reset via /portal/forgot-password. " +
       "LocalAPI / custom portal auth is the sign-in path — portal-users must never mutate their own client link or memberships via REST. " +
@@ -62,16 +62,42 @@ export const PortalUsers: CollectionConfig = {
       },
     },
     {
+      name: "accessMode",
+      type: "select",
+      required: true,
+      defaultValue: "client",
+      label: "Access mode",
+      options: [
+        { label: "Client workspace", value: "client" },
+        { label: "KXD Partner", value: "partner" },
+      ],
+      admin: {
+        position: "sidebar",
+        description:
+          "Client = membership-scoped CES. Partner = Partner Portal only. " +
+          "Never combine active partner profile with active client memberships on one user.",
+      },
+    },
+    {
       name: "client",
       type: "relationship",
       relationTo: "clients",
-      required: true,
+      required: false,
       label: "Client (legacy primary)",
       admin: {
         description:
+          "Required for accessMode=client. Leave empty for partners. " +
           "Legacy singular client retained for Phase 4 compatibility and backfill. " +
           "Authorization for multi-client access uses portal-client-memberships. " +
           "Keep aligned with the default membership during transition.",
+        condition: (_, siblingData) => siblingData?.accessMode !== "partner",
+      },
+      validate: (value: unknown, options: { siblingData?: Record<string, unknown> }) => {
+        if (options.siblingData?.accessMode === "partner") return true;
+        if (value == null || value === "") {
+          return "Client is required for client workspace access.";
+        }
+        return true;
       },
     },
     {

@@ -26,6 +26,10 @@ export const dynamic = "force-dynamic";
 export default async function PortalOverviewPage() {
   const session = await getPortalSession();
   if (!session) redirect("/portal/login");
+  // Partner sessions belong in the Partner Portal — never Client HQ.
+  if (session.accessMode === "partner" || session.clientId <= 0) {
+    redirect(session.accessMode === "partner" ? "/portal/partner" : "/portal/login");
+  }
 
   const [data, profile, billingNavAvailable, billingOverview] = await Promise.all([
     getPortalOverview(session),

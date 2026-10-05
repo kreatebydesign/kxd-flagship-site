@@ -5,11 +5,21 @@ import { PortalAuthShell } from "@/components/portal/PortalAuthShell";
 import { PORTAL_CLIENT_LANGUAGE } from "@/lib/ces/copy/portal-language";
 import { getPortalSession } from "@/lib/portal/session";
 
-function safePortalRedirect(raw: string | string[] | undefined): string {
+function safePortalRedirect(
+  raw: string | string[] | undefined,
+  accessMode: "client" | "partner",
+): string {
+  const fallback = accessMode === "partner" ? "/portal/partner" : "/portal";
   const value = Array.isArray(raw) ? raw[0] : raw;
-  if (!value || !value.startsWith("/portal")) return "/portal";
-  if (value.startsWith("//") || value.includes("://")) return "/portal";
-  if (value.startsWith("/portal/login")) return "/portal";
+  if (!value || !value.startsWith("/portal")) return fallback;
+  if (value.startsWith("//") || value.includes("://")) return fallback;
+  if (value.startsWith("/portal/login")) return fallback;
+  if (accessMode === "partner" && !value.startsWith("/portal/partner")) {
+    return "/portal/partner";
+  }
+  if (accessMode === "client" && value.startsWith("/portal/partner")) {
+    return "/portal";
+  }
   return value;
 }
 
@@ -21,7 +31,12 @@ export default async function PortalLoginPage({
   const session = await getPortalSession();
   if (session) {
     const params = await searchParams;
-    redirect(safePortalRedirect(params.redirect));
+    redirect(
+      safePortalRedirect(
+        params.redirect,
+        session.accessMode === "partner" ? "partner" : "client",
+      ),
+    );
   }
 
   return (

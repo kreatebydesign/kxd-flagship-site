@@ -114,6 +114,8 @@ import * as migration_20260916_mission03b_commercial_foundation from './20260916
 import * as migration_20261002_primal_phase1_lead_command_foundation from './20261002_primal_phase1_lead_command_foundation';
 import * as migration_20261003_client_inventory_referenced_media from './20261003_client_inventory_referenced_media';
 import * as migration_20261003_client_calendar_events from './20261003_client_calendar_events';
+import * as migration_20261004_partner_portal_phase1 from './20261004_partner_portal_phase1';
+import * as migration_20261005_partner_portal_phase1_1 from './20261005_partner_portal_phase1_1';
 
 export const migrations = [
   {
@@ -737,5 +739,20 @@ export const migrations = [
     up: migration_20261003_client_calendar_events.up,
     down: migration_20261003_client_calendar_events.down,
     name: '20261003_client_calendar_events',
+  },
+  {
+    // Partner Portal Phase 1 — partner access mode, referrals, earnings, booking.
+    // Additive only. Does not mutate CES, client entitlements, or client-inquiries.
+    // Local apply until production migration is authorized.
+    up: migration_20261004_partner_portal_phase1.up,
+    down: migration_20261004_partner_portal_phase1.down,
+    name: '20261004_partner_portal_phase1',
+  },
+  {
+    // Partner Portal Phase 1.1 — notes, earnings ledger, calendar bookings, policy.
+    // Additive only. Local apply until production migration is authorized.
+    up: migration_20261005_partner_portal_phase1_1.up,
+    down: migration_20261005_partner_portal_phase1_1.down,
+    name: '20261005_partner_portal_phase1_1',
   },
 ];

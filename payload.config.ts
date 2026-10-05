@@ -89,6 +89,12 @@ import { PlaybookRuns } from "./payload/collections/PlaybookRuns.ts";
 import { ClientSuccessPlans } from "./payload/collections/ClientSuccessPlans.ts";
 import { SuccessCheckIns } from "./payload/collections/SuccessCheckIns.ts";
 import { Partners } from "./payload/collections/Partners.ts";
+import { KxdPartnerProfiles } from "./payload/collections/KxdPartnerProfiles.ts";
+import { PartnerReferrals } from "./payload/collections/PartnerReferrals.ts";
+import { PartnerReferralNotes } from "./payload/collections/PartnerReferralNotes.ts";
+import { PartnerEarnings } from "./payload/collections/PartnerEarnings.ts";
+import { PartnerCommissionPolicies } from "./payload/collections/PartnerCommissionPolicies.ts";
+import { PartnerBookingRequests } from "./payload/collections/PartnerBookingRequests.ts";
 import { PortalUsers } from "./payload/collections/PortalUsers.ts";
 import { PortalClientMemberships } from "./payload/collections/PortalClientMemberships.ts";
 import { PortalInvitations } from "./payload/collections/PortalInvitations.ts";
@@ -217,6 +223,9 @@ export default buildConfig({
     WebsiteAudits,
     WebsiteAuditAttempts,
     ResearchLeads,
+    PartnerReferrals,
+    PartnerReferralNotes,
+    PartnerBookingRequests,
     // ── KXD OS ───────────────────────────────────────────────────────────────
     Clients,
     ClientContacts,
@@ -301,6 +310,9 @@ export default buildConfig({
     Media,
     Users,
     PortalUsers,
+    KxdPartnerProfiles,
+    PartnerEarnings,
+    PartnerCommissionPolicies,
     PortalClientMemberships,
     PortalInvitations,
     PortalInvitationMemberships,
