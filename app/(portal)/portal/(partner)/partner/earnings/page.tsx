@@ -35,7 +35,7 @@ export default async function PartnerEarningsPage() {
 
   return (
     <div className="kxd-partner-page">
-      <p className="kxd-partner-network">KXD Network</p>
+      <p className="kxd-partner-network">KXD Network · Private access</p>
       <h1 className="kxd-partner-title">Earnings</h1>
       <p className="kxd-partner-lead">
         Approved and paid only. Nothing appears here until KXD clears it.

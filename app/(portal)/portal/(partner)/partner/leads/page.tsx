@@ -32,11 +32,10 @@ export default async function PartnerLeadsPage() {
 
   return (
     <div className="kxd-partner-page">
-      <p className="kxd-partner-network">KXD Network</p>
+      <p className="kxd-partner-network">KXD Network · Private access</p>
       <h1 className="kxd-partner-title">Introductions</h1>
       <p className="kxd-partner-lead">
-        Your record. Status, movement, and the next useful step — nothing you
-        do not own.
+        Status, movement, and the next useful step — nothing you do not own.
       </p>
 
       {leads.length === 0 ? (

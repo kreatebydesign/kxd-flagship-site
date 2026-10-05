@@ -46,7 +46,7 @@ export default async function PartnerBookPage({
 
   return (
     <div className="kxd-partner-page kxd-partner-page--narrow">
-      <p className="kxd-partner-network">KXD Network</p>
+      <p className="kxd-partner-network">KXD Network · Private access</p>
       <h1 className="kxd-partner-title">Book KXD in</h1>
       <p className="kxd-partner-lead">
         You open the door. KXD runs the call. Reserve discovery for one

@@ -55,7 +55,7 @@ export default async function PartnerLeadDetailPage({
 
   return (
     <div className="kxd-partner-page kxd-partner-page--narrow">
-      <p className="kxd-partner-network">KXD Network</p>
+      <p className="kxd-partner-network">KXD Network · Private access</p>
       <h1 className="kxd-partner-title">
         {name}
         {isLocalQaBusinessName(detail.businessName) ? (
@@ -70,7 +70,7 @@ export default async function PartnerLeadDetailPage({
       <div className="kxd-partner-status-block">
         <span className="kxd-partner-pill">{detail.visibilityLabel}</span>
         <p className="kxd-partner-section__text">{detail.visibilityMeaning}</p>
-        <p className="kxd-partner-card__next" style={{ marginTop: "0.75rem" }}>
+        <p className="kxd-partner-card__next">
           <strong>{next.label}</strong> — {next.hint}
         </p>
       </div>

@@ -51,7 +51,7 @@ export function PartnerNoteForm({ referralId }: { referralId: number }) {
       {error ? (
         <p className="kxd-partner-message kxd-partner-message--error">{error}</p>
       ) : null}
-      <button className="kxd-partner-btn" type="submit" disabled={busy}>
+      <button className="kxd-partner-btn kxd-partner-btn--ghost" type="submit" disabled={busy}>
         {busy ? "Saving…" : "Add note"}
       </button>
     </form>
