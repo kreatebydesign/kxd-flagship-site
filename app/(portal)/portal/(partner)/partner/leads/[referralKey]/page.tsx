@@ -76,13 +76,22 @@ export default async function PartnerLeadDetailPage({
       </div>
 
       <div className="kxd-partner-actions-inline">
+        {next.href ? (
+          <Link
+            className="kxd-partner-btn"
+            href={
+              next.href === "/portal/partner/book"
+                ? `/portal/partner/book?referral=${detail.id}`
+                : next.href
+            }
+          >
+            {next.label}
+          </Link>
+        ) : null}
         <Link
-          className="kxd-partner-btn"
-          href={`/portal/partner/book?referral=${detail.id}`}
+          className="kxd-partner-btn kxd-partner-btn--ghost"
+          href="/portal/partner/leads"
         >
-          Book KXD in
-        </Link>
-        <Link className="kxd-partner-btn kxd-partner-btn--ghost" href="/portal/partner/leads">
           Back to introductions
         </Link>
       </div>
@@ -158,7 +167,7 @@ export default async function PartnerLeadDetailPage({
       <section className="kxd-partner-section">
         <h2 className="kxd-partner-section__title">Your notes</h2>
         <p className="kxd-partner-section__text">
-          Your follow-up timeline. KXD internal notes never appear here.
+          Only notes you add appear here.
         </p>
         {detail.initialPartnerNotes ? (
           <div className="kxd-partner-timeline__item" style={{ marginTop: "1rem" }}>

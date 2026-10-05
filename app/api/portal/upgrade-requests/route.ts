@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   getPortalSession,
+  portalPartnerNoCesResponse,
   portalPreviewReadOnlyResponse,
 } from "@/lib/portal/session";
 import { resolveClientEntitlements } from "@/lib/client-plans";
@@ -27,6 +28,9 @@ function unauthorized() {
 export async function GET() {
   const session = await getPortalSession();
   if (!session) return unauthorized();
+  if (session.accessMode === "partner" || session.clientId <= 0) {
+    return portalPartnerNoCesResponse();
+  }
 
   try {
     const [requests, capabilities, entitlements] = await Promise.all([
@@ -52,6 +56,9 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   const session = await getPortalSession();
   if (!session) return unauthorized();
+  if (session.accessMode === "partner" || session.clientId <= 0) {
+    return portalPartnerNoCesResponse();
+  }
   if (session.isOperatorPreview) {
     return portalPreviewReadOnlyResponse();
   }

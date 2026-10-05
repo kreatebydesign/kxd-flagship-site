@@ -386,6 +386,22 @@ export async function requirePortalSession(): Promise<PortalSession> {
   return session;
 }
 
+/**
+ * Fail-closed 403 for Partner sessions (and non-client sessions) hitting CES APIs.
+ * Never proceed to client loaders or writes.
+ */
+export function portalPartnerNoCesResponse(): NextResponse {
+  return NextResponse.json(
+    {
+      ok: false,
+      success: false,
+      error: "Forbidden.",
+      code: "PORTAL_PARTNER_NO_CES",
+    },
+    { status: 403 },
+  );
+}
+
 /** JSON 403 helper for mutating portal APIs under operator preview. */
 export function portalPreviewReadOnlyResponse(): NextResponse {
   return NextResponse.json(
@@ -417,10 +433,7 @@ export async function gatePortalApiSession(options?: {
   }
   // Partner sessions cannot use client portal APIs.
   if (session.accessMode === "partner" || session.clientId <= 0) {
-    return NextResponse.json(
-      { ok: false, success: false, error: "Forbidden." },
-      { status: 403 },
-    );
+    return portalPartnerNoCesResponse();
   }
   if (options?.write && session.isOperatorPreview) {
     return portalPreviewReadOnlyResponse();

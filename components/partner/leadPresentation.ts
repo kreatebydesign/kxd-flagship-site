@@ -76,13 +76,13 @@ export function partnerLeadNextAction(state: PartnerVisibilityState): {
       return {
         label: "View earnings",
         href: "/portal/partner/earnings",
-        hint: "Approved commissions for this introduction appear in My earnings.",
+        hint: "Approved commissions for this introduction appear in Earnings.",
       };
     case "not_moving_forward":
       return {
-        label: "Submit another lead",
+        label: "Submit another introduction",
         href: "/portal/partner/submit-lead",
-        hint: "This one closed. Keep the pipeline moving with the next fit.",
+        hint: "This one closed. Bring the next qualified introduction.",
       };
     default:
       return {

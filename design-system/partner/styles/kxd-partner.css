@@ -801,6 +801,14 @@
   font-size: 0.9375rem;
 }
 
+.kxd-partner-empty-path {
+  max-width: 32rem;
+}
+
+.kxd-partner-empty-path .kxd-partner-btn {
+  margin-top: 0.25rem;
+}
+
 .kxd-partner-playbook-layout {
   display: grid;
   grid-template-columns: 11.25rem minmax(0, 1fr);

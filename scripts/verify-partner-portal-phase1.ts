@@ -431,6 +431,42 @@ async function main() {
     );
   });
 
+  await check("partner hitting CES upgrade APIs fail closed 403", () => {
+    assertFileContains(
+      "lib/portal/session.ts",
+      'code: "PORTAL_PARTNER_NO_CES"',
+    );
+    assertFileContains(
+      "lib/portal/session.ts",
+      "export function portalPartnerNoCesResponse",
+    );
+    assertFileContains(
+      "lib/portal/session.ts",
+      "return portalPartnerNoCesResponse()",
+    );
+    assertFileContains(
+      "app/api/portal/upgrade-requests/route.ts",
+      "portalPartnerNoCesResponse",
+    );
+    assertFileContains(
+      "app/api/portal/upgrade-requests/[id]/cancel/route.ts",
+      "portalPartnerNoCesResponse",
+    );
+    const upgrade = read("app/api/portal/upgrade-requests/route.ts");
+    const partnerGate = upgrade.indexOf("portalPartnerNoCesResponse()");
+    const listCall = upgrade.indexOf("listClientUpgradeRequests(");
+    const createCall = upgrade.indexOf("createClientUpgradeRequest(");
+    assert.ok(partnerGate >= 0, "upgrade-requests must return partner no-CES 403");
+    assert.ok(
+      partnerGate < listCall,
+      "partner 403 must run before CES upgrade list",
+    );
+    assert.ok(
+      partnerGate < createCall,
+      "partner 403 must run before CES upgrade write",
+    );
+  });
+
   await check("no CES module registration for partner portal", () => {
     assertFileDoesNotContain("lib/ces/modules/canonical.ts", "partner-portal");
     assertFileDoesNotContain("lib/ces/modules/registry.ts", "/portal/partner");

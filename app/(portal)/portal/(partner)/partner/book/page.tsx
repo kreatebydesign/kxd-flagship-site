@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { PartnerSlotBookingForm } from "@/components/partner";
 import {
@@ -52,32 +53,45 @@ export default async function PartnerBookPage({
         You open the door. KXD runs the call. Reserve discovery for one
         specific introduction.
       </p>
-      {selected ? (
-        <p className="kxd-partner-book-context">
-          Booking for <strong>{selected.label}</strong>.
-        </p>
-      ) : null}
+      {referralOptions.length === 0 ? (
+        <div className="kxd-partner-empty-path">
+          <p className="kxd-partner-empty">
+            Discovery is reserved for a specific introduction. Submit one first.
+          </p>
+          <Link className="kxd-partner-btn" href="/portal/partner/submit-lead">
+            Submit an introduction
+          </Link>
+        </div>
+      ) : (
+        <>
+          {selected ? (
+            <p className="kxd-partner-book-context">
+              Booking for <strong>{selected.label}</strong>.
+            </p>
+          ) : null}
 
-      <div className="kxd-partner-book-panel">
-        <h2 className="kxd-partner-book-panel__title">Choose a time</h2>
-        <PartnerSlotBookingForm
-          referralId={
-            referralId && Number.isFinite(referralId) && referralId > 0
-              ? referralId
-              : undefined
-          }
-          referralOptions={referralOptions}
-        />
-      </div>
+          <div className="kxd-partner-book-panel">
+            <h2 className="kxd-partner-book-panel__title">Choose a time</h2>
+            <PartnerSlotBookingForm
+              referralId={
+                referralId && Number.isFinite(referralId) && referralId > 0
+                  ? referralId
+                  : undefined
+              }
+              referralOptions={referralOptions}
+            />
+          </div>
 
-      <div className="kxd-partner-book-after">
-        <h2 className="kxd-partner-section__title">What happens next</h2>
-        <ol>
-          <li>You choose the referral and preferred window.</li>
-          <li>KXD confirms the discovery on the studio calendar.</li>
-          <li>You stay attributed — the close stays with KXD.</li>
-        </ol>
-      </div>
+          <div className="kxd-partner-book-after">
+            <h2 className="kxd-partner-section__title">What happens next</h2>
+            <ol>
+              <li>You choose the introduction and a preferred window.</li>
+              <li>KXD confirms discovery on the studio calendar.</li>
+              <li>You stay attributed — the close stays with KXD.</li>
+            </ol>
+          </div>
+        </>
+      )}
     </div>
   );
 }

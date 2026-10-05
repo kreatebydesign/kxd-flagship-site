@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 type FieldKey =
@@ -112,66 +113,40 @@ const EMPTY = Object.fromEntries(
   SECTIONS.flatMap((s) => s.fields.map((f) => [f.key, ""])),
 ) as Record<FieldKey, string>;
 
-function sectionComplete(
-  section: (typeof SECTIONS)[number],
-  values: Record<FieldKey, string>,
-  decisionMakerConfirmed: boolean,
-): boolean {
-  const requiredOk = section.fields
-    .filter((f) => f.required)
-    .every((f) => values[f.key].trim().length > 0);
-  if (section.id === "handoff") return requiredOk; // decision maker checked at submit
-  if (section.id === "opportunity") {
-    return (
-      values.whatTheyWantMoreOf.trim().length > 0 ||
-      values.visibleProblemOpportunity.trim().length > 0 ||
-      values.whyNow.trim().length > 0
-    );
-  }
-  void decisionMakerConfirmed;
-  return requiredOk;
-}
-
 export function PartnerLeadForm() {
   const router = useRouter();
   const [values, setValues] = useState(EMPTY);
   const [decisionMakerConfirmed, setDecisionMakerConfirmed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [ok, setOk] = useState<string | null>(null);
-
-  const progress = useMemo(
-    () =>
-      SECTIONS.map((section) => ({
-        id: section.id,
-        title: section.title,
-        done: sectionComplete(section, values, decisionMakerConfirmed),
-      })),
-    [values, decisionMakerConfirmed],
-  );
+  const [submittedId, setSubmittedId] = useState<number | null>(null);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     setError(null);
-    setOk(null);
+    setSubmittedId(null);
     try {
       const res = await fetch("/api/portal/partner/referrals", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...values, decisionMakerConfirmed }),
       });
-      const data = (await res.json()) as { ok?: boolean; message?: string };
+      const data = (await res.json()) as {
+        ok?: boolean;
+        message?: string;
+        referralId?: number;
+      };
       if (!res.ok || !data.ok) {
-        setError(data.message || "Could not submit this lead.");
+        setError(data.message || "Could not submit this introduction.");
         return;
       }
-      setOk("Lead submitted. KXD will review it from here.");
       setValues(EMPTY);
       setDecisionMakerConfirmed(false);
+      setSubmittedId(Number(data.referralId) || null);
       router.refresh();
     } catch {
-      setError("Could not submit this lead.");
+      setError("Could not submit this introduction.");
     } finally {
       setBusy(false);
     }
@@ -179,23 +154,6 @@ export function PartnerLeadForm() {
 
   return (
     <form className="kxd-partner-form" onSubmit={onSubmit}>
-      <div className="kxd-partner-form-progress" aria-label="Form progress">
-        {progress.map((step, index) => (
-          <span
-            key={step.id}
-            className="kxd-partner-form-progress__step"
-            data-done={step.done ? "true" : "false"}
-            data-active={
-              !step.done && progress.slice(0, index).every((s) => s.done)
-                ? "true"
-                : "false"
-            }
-          >
-            {index + 1}. {step.title}
-          </span>
-        ))}
-      </div>
-
       {SECTIONS.map((section) => (
         <section key={section.id} className="kxd-partner-form-section">
           <h2 className="kxd-partner-form-section__title">{section.title}</h2>
@@ -249,14 +207,19 @@ export function PartnerLeadForm() {
 
       <div className="kxd-partner-submit-moment">
         <p>
-          When you submit, KXD reviews the introduction, owns the close, and keeps
-          internal notes private. You stay attributed to the referral.
+          When you submit, KXD reviews the introduction and owns the close. You
+          stay attributed.
         </p>
         {error ? (
           <p className="kxd-partner-message kxd-partner-message--error">{error}</p>
         ) : null}
-        {ok ? (
-          <p className="kxd-partner-message kxd-partner-message--ok">{ok}</p>
+        {submittedId ? (
+          <p className="kxd-partner-message kxd-partner-message--ok">
+            Introduction submitted. KXD will review it from here.{" "}
+            <Link href={`/portal/partner/leads/${submittedId}`}>
+              Open this introduction
+            </Link>
+          </p>
         ) : null}
         <button className="kxd-partner-btn kxd-partner-btn--cta" type="submit" disabled={busy}>
           {busy ? "Submitting…" : "Submit introduction"}

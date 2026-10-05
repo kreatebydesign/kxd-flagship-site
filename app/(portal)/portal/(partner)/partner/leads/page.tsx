@@ -35,23 +35,23 @@ export default async function PartnerLeadsPage() {
       <p className="kxd-partner-network">KXD Network · Private access</p>
       <h1 className="kxd-partner-title">Introductions</h1>
       <p className="kxd-partner-lead">
-        Status, movement, and the next useful step — nothing you do not own.
+        Your introductions, as they stand. Open one to add a note or book discovery.
       </p>
 
       {leads.length === 0 ? (
-        <p className="kxd-partner-empty">
-          No introductions yet. When a conversation is real, submit it and this
-          pipeline becomes your record.
-        </p>
+        <div className="kxd-partner-empty-path">
+          <p className="kxd-partner-empty">
+            No introductions yet. When a conversation is real, submit it here.
+          </p>
+          <Link className="kxd-partner-btn" href="/portal/partner/submit-lead">
+            Submit an introduction
+          </Link>
+        </div>
       ) : (
         <div className="kxd-partner-list">
           {leads.map((lead) => {
             const next = partnerLeadNextAction(lead.visibilityState);
             const name = partnerDisplayBusinessName(lead.businessName);
-            const bookHref =
-              next.href === "/portal/partner/book"
-                ? `/portal/partner/book?referral=${lead.id}`
-                : next.href;
             return (
               <article key={lead.id} className="kxd-partner-card">
                 <Link
@@ -82,27 +82,12 @@ export default async function PartnerLeadsPage() {
                     <span className="kxd-partner-card__meta">
                       Next call · {formatWhen(lead.nextCallAt)}
                     </span>
-                  ) : (
-                    <span className="kxd-partner-card__meta">
-                      Latest · {lead.visibilityLabel}
-                    </span>
-                  )}
+                  ) : null}
                 </div>
                 <p className="kxd-partner-card__next">
-                  {bookHref ? (
-                    <Link href={bookHref}>
-                      <strong>{next.label}</strong>
-                      {" — "}
-                      {next.hint}
-                    </Link>
-                  ) : (
-                    <>
-                      <strong>{next.label}</strong>
-                      {" — "}
-                      {next.hint}{" "}
-                      <Link href={`/portal/partner/leads/${lead.id}`}>Open</Link>
-                    </>
-                  )}
+                  <strong>{next.label}</strong>
+                  {" — "}
+                  {next.hint}
                 </p>
               </article>
             );

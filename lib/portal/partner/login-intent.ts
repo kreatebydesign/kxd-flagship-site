@@ -6,7 +6,7 @@ export const PARTNER_NETWORK_LOGIN = {
   eyebrow: "KXD Network · Private access",
   title: "Sign in to your partner room.",
   lead:
-    "Bring the right introductions. KXD handles the work. Your progress and earnings live here.",
+    "You bring the introduction. KXD qualifies, discovers, and closes.",
 } as const;
 
 /** Safe partner return-to used to gate the login variant. */
