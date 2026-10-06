@@ -449,10 +449,15 @@ async function main() {
     assert.equal(networkRootRedirectPath("/", "www.kreatebydesign.com"), null);
     assert.equal(networkRootRedirectPath("/portal/login", NETWORK_HOST), null);
     assert.equal(networkRootRedirectPath("/portal/partner", NETWORK_HOST), null);
-    assertFileContains("middleware.ts", "networkRootRedirectPath");
+    assertFileContains("middleware.ts", "networkRootResponseKind");
+    assertFileContains("middleware.ts", "networkShareCrawlerHtml");
     assertFileContains(
       "middleware.ts",
       'if (pathname === "/" && isPortalHost(request))',
+    );
+    assertFileContains(
+      "app/(portal)/portal/(auth)/login/page.tsx",
+      "host !== NETWORK_HOST",
     );
   });
 
