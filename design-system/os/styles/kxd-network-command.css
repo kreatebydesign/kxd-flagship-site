@@ -1,0 +1,447 @@
+/**
+ * KXD Network Command — owner surface on /admin/sales/partners.
+ * Ivory field, one charcoal record. Not the Partner member rail.
+ */
+
+.kxd-nc {
+  --kxd-nc-canvas: #f3eee6;
+  --kxd-nc-ink: #1c1914;
+  --kxd-nc-muted: #5c574e;
+  --kxd-nc-faint: #8a8478;
+  --kxd-nc-rule: rgba(28, 25, 20, 0.12);
+  --kxd-nc-record: #161513;
+  --kxd-nc-record-ink: #f3eee6;
+  --kxd-nc-gold: var(--kxd-os-gold, #c2aa72);
+  --kxd-nc-gold-hover: var(--kxd-os-gold-hover, #d0b984);
+  --kxd-nc-radius: 3px;
+
+  min-height: 100vh;
+  color: var(--kxd-nc-ink);
+  background: var(--kxd-nc-canvas);
+  font-family: var(
+    --kxd-os-font-sans,
+    -apple-system,
+    BlinkMacSystemFont,
+    "SF Pro Text",
+    "SF Pro Display",
+    "Segoe UI",
+    sans-serif
+  );
+  -webkit-font-smoothing: antialiased;
+}
+
+.kxd-nc a {
+  color: inherit;
+}
+
+.kxd-nc__frame {
+  width: min(72rem, calc(100% - 2.5rem));
+  margin: 0 auto;
+  padding: 1.75rem 0 4.5rem;
+}
+
+.kxd-nc__mast {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--kxd-nc-rule);
+}
+
+.kxd-nc__brand {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.85rem;
+}
+
+.kxd-nc__brand img {
+  width: 1.55rem;
+  height: auto;
+  display: block;
+}
+
+.kxd-nc__kicker {
+  margin: 0;
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--kxd-nc-faint);
+  font-weight: 500;
+}
+
+.kxd-nc__title {
+  margin: 0.2rem 0 0;
+  font-size: 1.65rem;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.kxd-nc__crumb {
+  font-size: 0.8125rem;
+  color: var(--kxd-nc-muted);
+  text-decoration: none;
+}
+
+.kxd-nc__crumb:hover {
+  color: var(--kxd-nc-ink);
+}
+
+.kxd-nc__decision {
+  padding: 1.85rem 0 1.6rem;
+}
+
+.kxd-nc__decision-kicker {
+  margin: 0;
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--kxd-nc-faint);
+  font-weight: 500;
+}
+
+.kxd-nc__decision-title {
+  margin: 0.55rem 0 0;
+  max-width: 38rem;
+  font-size: clamp(1.35rem, 2.4vw, 1.85rem);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.25;
+}
+
+.kxd-nc__decision-body {
+  margin: 0.65rem 0 0;
+  max-width: 36rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--kxd-nc-muted);
+}
+
+.kxd-nc__btn {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 1.15rem;
+  padding: 0.7rem 1.05rem;
+  border: 0;
+  border-radius: var(--kxd-nc-radius);
+  background: var(--kxd-nc-gold);
+  color: #111110;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 550;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.kxd-nc__btn:hover {
+  background: var(--kxd-nc-gold-hover);
+}
+
+.kxd-nc__btn--ghost {
+  margin-top: 0;
+  padding: 0.35rem 0;
+  background: transparent;
+  color: var(--kxd-nc-ink);
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.kxd-nc__btn--ghost:hover {
+  background: transparent;
+}
+
+.kxd-nc__btn--quiet {
+  background: transparent;
+  color: var(--kxd-nc-muted);
+  border: 1px solid var(--kxd-nc-rule);
+}
+
+.kxd-nc__spread {
+  display: grid;
+  grid-template-columns: minmax(16rem, 0.85fr) minmax(22rem, 1.15fr);
+  gap: 0;
+  align-items: stretch;
+  border-top: 1px solid var(--kxd-nc-rule);
+}
+
+.kxd-nc__roster {
+  padding: 1.6rem 1.75rem 1.6rem 0;
+}
+
+.kxd-nc__roster-label,
+.kxd-nc__chapter-label {
+  margin: 0 0 0.85rem;
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--kxd-nc-faint);
+  font-weight: 500;
+}
+
+.kxd-nc__roster-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0;
+}
+
+.kxd-nc__roster-list a {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.85rem 0;
+  border-top: 1px solid var(--kxd-nc-rule);
+  text-decoration: none;
+}
+
+.kxd-nc__roster-list li:first-child a {
+  border-top: 0;
+  padding-top: 0.2rem;
+}
+
+.kxd-nc__roster-list a.is-current {
+  color: var(--kxd-nc-ink);
+}
+
+.kxd-nc__roster-name {
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.kxd-nc__roster-meta {
+  font-size: 0.8125rem;
+  color: var(--kxd-nc-muted);
+  line-height: 1.4;
+}
+
+.kxd-nc__record {
+  background: var(--kxd-nc-record);
+  color: var(--kxd-nc-record-ink);
+  padding: clamp(1.6rem, 4vh, 2.4rem) clamp(1.4rem, 3.5vw, 2.4rem);
+}
+
+.kxd-nc__record-kicker {
+  margin: 0;
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(243, 238, 230, 0.42);
+  font-weight: 500;
+}
+
+.kxd-nc__record-name {
+  margin: 0.4rem 0 0;
+  font-size: clamp(1.7rem, 3vw, 2.25rem);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+}
+
+.kxd-nc__record-signal {
+  margin: 0.7rem 0 0;
+  max-width: 28rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: rgba(243, 238, 230, 0.72);
+}
+
+.kxd-nc__paid-label {
+  margin: 1.7rem 0 0;
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(243, 238, 230, 0.42);
+}
+
+.kxd-nc__paid {
+  margin: 0.3rem 0 0;
+  font-size: clamp(2.4rem, 5vw, 3.6rem);
+  font-weight: 500;
+  letter-spacing: -0.05em;
+  line-height: 0.96;
+  font-variant-numeric: tabular-nums;
+}
+
+.kxd-nc__approved {
+  margin: 0.55rem 0 0;
+  font-size: 0.875rem;
+  color: rgba(243, 238, 230, 0.55);
+  font-variant-numeric: tabular-nums;
+}
+
+.kxd-nc__path {
+  margin: 1.7rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.kxd-nc__path li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.875rem;
+  color: rgba(243, 238, 230, 0.5);
+  font-variant-numeric: tabular-nums;
+}
+
+.kxd-nc__path li.is-current {
+  color: var(--kxd-nc-record-ink);
+}
+
+.kxd-nc__bonus,
+.kxd-nc__potential {
+  margin: 1.35rem 0 0;
+  max-width: 28rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: rgba(243, 238, 230, 0.62);
+}
+
+.kxd-nc__chapters {
+  display: grid;
+  gap: 2.25rem;
+  padding: 2.25rem 0 0;
+  border-top: 1px solid var(--kxd-nc-rule);
+  margin-top: 0;
+}
+
+.kxd-nc__intro {
+  display: grid;
+  gap: 0;
+}
+
+.kxd-nc__intro article {
+  padding: 1rem 0;
+  border-top: 1px solid var(--kxd-nc-rule);
+}
+
+.kxd-nc__intro article:first-of-type {
+  border-top: 0;
+  padding-top: 0.15rem;
+}
+
+.kxd-nc__intro h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.kxd-nc__intro p {
+  margin: 0.35rem 0 0;
+  font-size: 0.875rem;
+  color: var(--kxd-nc-muted);
+  line-height: 1.45;
+}
+
+.kxd-nc__select {
+  display: block;
+  margin-top: 0.65rem;
+  max-width: 18rem;
+  font: inherit;
+  padding: 0.4rem 0.5rem;
+  color: var(--kxd-nc-ink);
+  background: transparent;
+  border: 1px solid var(--kxd-nc-rule);
+  border-radius: var(--kxd-nc-radius);
+}
+
+.kxd-nc__ledger-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.65rem 1rem;
+  padding: 0.85rem 0;
+  border-top: 1px solid var(--kxd-nc-rule);
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.kxd-nc__ledger-row:first-of-type {
+  border-top: 0;
+}
+
+.kxd-nc__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem 0.85rem;
+  align-items: center;
+}
+
+.kxd-nc__form {
+  display: grid;
+  gap: 0.65rem;
+  max-width: 24rem;
+  margin-top: 1rem;
+}
+
+.kxd-nc__form input,
+.kxd-nc__form select,
+.kxd-nc__form textarea {
+  font: inherit;
+  padding: 0.5rem 0.55rem;
+  color: var(--kxd-nc-ink);
+  background: transparent;
+  border: 1px solid var(--kxd-nc-rule);
+  border-radius: var(--kxd-nc-radius);
+}
+
+.kxd-nc__form label,
+.kxd-nc__notice,
+.kxd-nc__empty,
+.kxd-nc__calendar {
+  font-size: 0.875rem;
+  color: var(--kxd-nc-muted);
+  line-height: 1.45;
+}
+
+.kxd-nc__notice {
+  margin: 0 0 1rem;
+  color: var(--kxd-nc-ink);
+}
+
+.kxd-nc__inactive {
+  margin-top: 1.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--kxd-nc-rule);
+}
+
+@media (max-width: 860px) {
+  .kxd-nc__frame {
+    width: calc(100% - 1.5rem);
+    padding-top: 1.25rem;
+  }
+
+  .kxd-nc__mast {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .kxd-nc__spread {
+    grid-template-columns: 1fr;
+  }
+
+  .kxd-nc__roster {
+    order: 2;
+    padding: 1.5rem 0;
+  }
+
+  .kxd-nc__record {
+    order: 1;
+  }
+
+  .kxd-nc__chapters {
+    order: 3;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kxd-nc__btn {
+    transition: none;
+  }
+}

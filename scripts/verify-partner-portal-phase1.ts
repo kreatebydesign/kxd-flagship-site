@@ -145,6 +145,7 @@ async function main() {
       "app/api/portal/partner/discovery-slots/route.ts",
       "app/api/portal/partner/bookings/route.ts",
       "app/admin/sales/partners/page.tsx",
+      "components/admin/sales/NetworkCommandDesk.tsx",
       "app/api/admin/partner/referrals/route.ts",
       "app/api/admin/partner/earnings/route.ts",
       "app/api/admin/partner/policy/route.ts",
@@ -387,7 +388,7 @@ async function main() {
     );
     assertFileContains(
       "app/admin/sales/partners/page.tsx",
-      "Partner desk",
+      "loadNetworkCommandWorkspace",
     );
     assertFileContains(
       "app/api/admin/partner/policy/route.ts",
@@ -500,6 +501,26 @@ async function main() {
   await check("no CES module registration for partner portal", () => {
     assertFileDoesNotContain("lib/ces/modules/canonical.ts", "partner-portal");
     assertFileDoesNotContain("lib/ces/modules/registry.ts", "/portal/partner");
+  });
+
+  await check("network command stays on admin sales partners, not a second system", () => {
+    assertFileContains(
+      "lib/portal/partner/referrals.ts",
+      "countPartnerPathMetrics",
+    );
+    assertFileContains(
+      "lib/portal/partner/operator.ts",
+      "loadNetworkCommandWorkspace",
+    );
+    assertFileContains(
+      "app/admin/sales/partners/page.tsx",
+      "NetworkCommandDesk",
+    );
+    assertFileDoesNotContain(
+      "app/(portal)/portal/(partner)/partner/page.tsx",
+      "deriveNetworkCommand",
+    );
+    assertFileDoesNotContain("payload/collections/KxdPartnerProfiles.ts", "hireStatus");
   });
 
   console.log(`\n${checks} checks passed.\n`);
