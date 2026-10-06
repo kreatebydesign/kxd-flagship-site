@@ -10,7 +10,9 @@ import { chromium } from "playwright";
 import { deriveNetworkCommand } from "../lib/portal/partner/network-command";
 
 const ROOT = process.cwd();
-const OUT = path.join(ROOT, ".qa-partner-portal-visual");
+const OUT = process.env.NETWORK_COMMAND_QA_OUT
+  ? path.resolve(ROOT, process.env.NETWORK_COMMAND_QA_OUT)
+  : path.join(ROOT, ".qa-partner-portal-visual");
 const PAGES = path.join(OUT, "pages");
 const SHOTS = path.join(OUT, "screenshots", "network-command");
 const LOGO = path.join(ROOT, "public/migrated-assets/brand/kxd-logo-transparent.png");
@@ -251,6 +253,19 @@ function pageHtml(input: {
     )
     .join("");
 
+  const ledger = (selected?.earnings ?? [])
+    .map(
+      (row) => `<div class="kxd-nc__ledger-row">
+        <p class="kxd-nc__ledger-line">
+          <span class="kxd-nc__ledger-name">${row.relatedBusinessName}</span>
+          <span class="kxd-nc__ledger-meta">Project commission · ${usd(row.amountCents)} · ${
+            row.paymentStatus === "pending_approval" ? "Pending review" : "Approved"
+          }</span>
+        </p>
+      </div>`,
+    )
+    .join("");
+
   const record = selected
     ? `<article class="kxd-nc__record" aria-label="Partner record">
         <p class="kxd-nc__record-kicker">${signalLabel(selected.signal)}</p>
@@ -320,6 +335,45 @@ function pageHtml(input: {
               : `<p class="kxd-nc__empty">No introductions on this record.</p>`
           }
         </section>
+        <section>
+          <p class="kxd-nc__chapter-label">Ledger</p>
+          ${
+            ledger ||
+            `<p class="kxd-nc__empty">No ledger entries on this record.</p>`
+          }
+          <details class="kxd-nc__disclose">
+            <summary>Create ledger entry</summary>
+            <div class="kxd-nc__form">
+              <label class="kxd-nc__field"><span>Partner</span><select><option>${selected?.displayName ?? "Choose a partner"}</option></select></label>
+              <label class="kxd-nc__field"><span>Related business</span><input value="" /></label>
+              <label class="kxd-nc__field"><span>Related introduction</span><select><option>None</option>${(selected?.referrals ?? []).map((row) => `<option>${row.businessName} · ${row.contactName}</option>`).join("")}</select></label>
+              <label class="kxd-nc__field"><span>Entry type</span><select><option>Project commission</option></select></label>
+              <label class="kxd-nc__field"><span>Amount in cents</span><input value="" /></label>
+              <label class="kxd-nc__field"><span>Eligible amount collected, in cents</span><input value="" /></label>
+              <label class="kxd-nc__field"><span>Rate in basis points <span class="kxd-nc__hint">· 10%</span></span><input value="1000" /></label>
+              <button type="button" class="kxd-nc__btn kxd-nc__btn--quiet">Add entry</button>
+            </div>
+          </details>
+        </section>
+        <section>
+          <p class="kxd-nc__chapter-label">Bookings</p>
+          <p class="kxd-nc__tool-copy">Calendar is in request mode. Connect Google Calendar to offer live booking slots.</p>
+          <p class="kxd-nc__empty">No bookings on this record.</p>
+        </section>
+        <section>
+          <p class="kxd-nc__chapter-label">Commission policy</p>
+          <p class="kxd-nc__policy-sentence">10% project commission · 10% recurring for months 1–3 · month-4 retention kicker · $250 performance bonus.</p>
+          <details class="kxd-nc__disclose">
+            <summary>Edit policy</summary>
+            <div class="kxd-nc__form">
+              <label class="kxd-nc__field"><span>Project rate in basis points <span class="kxd-nc__hint">· 10%</span></span><input type="number" value="1000" /></label>
+              <label class="kxd-nc__field"><span>Monthly rate in basis points <span class="kxd-nc__hint">· 10%</span></span><input type="number" value="1000" /></label>
+              <label class="kxd-nc__field"><span>Eligible recurring services</span><textarea>Website Care</textarea></label>
+              <label class="kxd-nc__field"><span>Performance bonus in cents <span class="kxd-nc__hint">· $250</span></span><input type="number" value="25000" /></label>
+              <button type="button" class="kxd-nc__btn kxd-nc__btn--quiet">Save policy</button>
+            </div>
+          </details>
+        </section>
       </div>
     </div>
   </div>
@@ -361,6 +415,17 @@ async function main() {
         path: path.join(SHOTS, `${page.id}-${viewport.name}.png`),
         fullPage: true,
       });
+      if (page.id === "network-active") {
+        await tab.locator("details").evaluateAll((nodes) => {
+          for (const node of nodes) {
+            if (node instanceof HTMLDetailsElement) node.open = true;
+          }
+        });
+        await tab.screenshot({
+          path: path.join(SHOTS, `${page.id}-tools-${viewport.name}.png`),
+          fullPage: true,
+        });
+      }
       await context.close();
     }
   }

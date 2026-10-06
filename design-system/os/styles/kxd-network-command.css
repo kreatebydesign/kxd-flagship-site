@@ -304,10 +304,18 @@
 
 .kxd-nc__chapters {
   display: grid;
-  gap: 2.25rem;
-  padding: 2.25rem 0 0;
+  gap: 2.75rem;
+  padding: 2.75rem 0 0;
   border-top: 1px solid var(--kxd-nc-rule);
   margin-top: 0;
+  color: var(--kxd-nc-muted);
+}
+
+.kxd-nc__chapter-label {
+  margin-bottom: 0.65rem;
+  font-size: 0.625rem;
+  letter-spacing: 0.14em;
+  color: var(--kxd-nc-faint);
 }
 
 .kxd-nc__intro {
@@ -327,7 +335,8 @@
 
 .kxd-nc__intro h3 {
   margin: 0;
-  font-size: 1.05rem;
+  color: var(--kxd-nc-ink);
+  font-size: 1rem;
   font-weight: 500;
   letter-spacing: -0.02em;
 }
@@ -351,19 +360,79 @@
   border-radius: var(--kxd-nc-radius);
 }
 
-.kxd-nc__ledger-row {
+.kxd-nc__ledger-row,
+.kxd-nc__tool-row {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  gap: 0.65rem 1rem;
+  gap: 0.45rem 1rem;
   padding: 0.85rem 0;
   border-top: 1px solid var(--kxd-nc-rule);
-  font-size: 0.9rem;
   font-variant-numeric: tabular-nums;
 }
 
-.kxd-nc__ledger-row:first-of-type {
+.kxd-nc__ledger-row:first-of-type,
+.kxd-nc__tool-row:first-of-type {
   border-top: 0;
+}
+
+.kxd-nc__ledger-line {
+  margin: 0;
+  display: grid;
+  gap: 0.15rem;
+}
+
+.kxd-nc__ledger-name {
+  color: var(--kxd-nc-ink);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.kxd-nc__ledger-meta,
+.kxd-nc__tool-note,
+.kxd-nc__tool-copy,
+.kxd-nc__policy-sentence {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--kxd-nc-muted);
+}
+
+.kxd-nc__policy-sentence {
+  max-width: 40rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.kxd-nc__tool-copy {
+  margin-bottom: 0.85rem;
+}
+
+.kxd-nc__tool-note {
+  width: 100%;
+}
+
+.kxd-nc__disclose {
+  margin-top: 1.15rem;
+}
+
+.kxd-nc__disclose > summary {
+  width: fit-content;
+  color: var(--kxd-nc-muted);
+  font-size: 0.875rem;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+  list-style: none;
+}
+
+.kxd-nc__disclose > summary::-webkit-details-marker {
+  display: none;
+}
+
+.kxd-nc__disclose[open] > summary {
+  margin-bottom: 0.15rem;
 }
 
 .kxd-nc__actions {
@@ -391,10 +460,29 @@
   border-radius: var(--kxd-nc-radius);
 }
 
-.kxd-nc__form label,
+.kxd-nc__field {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--kxd-nc-muted);
+}
+
+.kxd-nc__hint {
+  color: var(--kxd-nc-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.kxd-nc__form input:focus,
+.kxd-nc__form select:focus,
+.kxd-nc__form textarea:focus,
+.kxd-nc__select:focus {
+  outline: 1px solid var(--kxd-nc-ink);
+  outline-offset: 2px;
+}
+
 .kxd-nc__notice,
-.kxd-nc__empty,
-.kxd-nc__calendar {
+.kxd-nc__empty {
   font-size: 0.875rem;
   color: var(--kxd-nc-muted);
   line-height: 1.45;

@@ -4,7 +4,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { KxdLogo } from "@/components/ui/KxdLogo";
-import { PARTNER_VISIBILITY_STATES } from "@/lib/portal/partner/types";
+import {
+  PARTNER_EARNING_TYPE_LABELS,
+  PARTNER_VISIBILITY_LABELS,
+  PARTNER_VISIBILITY_STATES,
+  type PartnerEarningType,
+  type PartnerVisibilityState,
+} from "@/lib/portal/partner/types";
 import type {
   NetworkCommandAction,
   NetworkCommandPartnerRecord,
@@ -42,6 +48,70 @@ function formatWhen(iso: string | null | undefined): string {
     day: "numeric",
     year: "numeric",
   }).format(new Date(ms));
+}
+
+function formatRateBps(bps: number): string {
+  if (!Number.isFinite(bps) || bps < 0) return "0%";
+  const percent = bps / 100;
+  return Number.isInteger(percent) ? `${percent}%` : `${percent.toFixed(1)}%`;
+}
+
+function policySentence(policy: PolicyState): string {
+  const months = policy.monthlyBonusMonths;
+  const monthSpan = months <= 1 ? "month 1" : `months 1–${months}`;
+  const parts = [
+    `${formatRateBps(policy.projectRateBps)} project commission`,
+    `${formatRateBps(policy.monthlyRateBps)} recurring for ${monthSpan}`,
+  ];
+  if (policy.retentionKickerEnabled) {
+    parts.push(`month-${policy.retentionKickerMonth} retention kicker`);
+  }
+  parts.push(`${formatCents(policy.performanceBonusAmountCents)} performance bonus`);
+  return `${parts.join(" · ")}.`;
+}
+
+function earningTypeLabel(value: string): string {
+  if (value in PARTNER_EARNING_TYPE_LABELS) {
+    return PARTNER_EARNING_TYPE_LABELS[value as PartnerEarningType];
+  }
+  return value.replaceAll("_", " ");
+}
+
+function paymentStatusLabel(value: string): string {
+  if (value === "pending_approval") return "Pending review";
+  if (value === "approved") return "Approved";
+  if (value === "paid") return "Paid";
+  if (value === "void") return "Void";
+  return value.replaceAll("_", " ");
+}
+
+function visibilityLabel(state: string): string {
+  if (state in PARTNER_VISIBILITY_LABELS) {
+    return PARTNER_VISIBILITY_LABELS[state as PartnerVisibilityState];
+  }
+  return state.replaceAll("_", " ");
+}
+
+function bookingModeLabel(mode: string): string {
+  if (mode === "calendar_slot") return "Live slot";
+  if (mode === "request") return "Request";
+  return mode.replaceAll("_", " ");
+}
+
+function bookingStatusLabel(status: string): string {
+  if (status === "confirmed" || status === "scheduled") return "Confirmed";
+  if (status === "reschedule_requested") return "Reschedule requested";
+  if (status === "cancel_requested") return "Cancel requested";
+  if (status === "closed") return "Closed";
+  if (status === "submitted") return "Submitted";
+  return status.replaceAll("_", " ");
+}
+
+function centsReading(raw: string): string | null {
+  if (!raw.trim()) return null;
+  const amount = Number(raw);
+  if (!Number.isFinite(amount)) return null;
+  return formatCents(amount);
 }
 
 function signalLabel(signal: NetworkCommandPartnerRecord["signal"]): string {
@@ -106,18 +176,35 @@ export function NetworkCommandDesk({
     rateBps: "1000",
     eligibleCollectedCents: "",
   });
+  const [ledgerSelectionId, setLedgerSelectionId] = useState(selectedPartnerId);
+  if (ledgerSelectionId !== selectedPartnerId) {
+    setLedgerSelectionId(selectedPartnerId);
+    setEarningForm((current) => ({
+      ...current,
+      partnerId: selectedPartnerId ? String(selectedPartnerId) : "",
+      relatedPartnerReferralId: "",
+    }));
+  }
+
+  const partners = useMemo(
+    () => [...workspace.activePartners, ...workspace.inactivePartners],
+    [workspace],
+  );
 
   const selected = useMemo(() => {
-    const all = [...workspace.activePartners, ...workspace.inactivePartners];
     if (selectedPartnerId) {
-      return all.find((row) => row.id === selectedPartnerId) ?? null;
+      return partners.find((row) => row.id === selectedPartnerId) ?? null;
     }
     return (
-      all.find((row) => row.id === workspace.networkDecision.partnerId) ??
+      partners.find((row) => row.id === workspace.networkDecision.partnerId) ??
       workspace.activePartners[0] ??
       null
     );
-  }, [workspace, selectedPartnerId]);
+  }, [partners, selectedPartnerId, workspace]);
+
+  const ledgerPartner =
+    partners.find((row) => String(row.id) === earningForm.partnerId) ?? null;
+  const ledgerIntroductions = ledgerPartner?.referrals ?? [];
 
   const decision = workspace.networkDecision;
 
@@ -173,7 +260,7 @@ export function NetworkCommandDesk({
       setMessage(data.error || "Earning create failed.");
       return;
     }
-    setMessage(`Earning #${data.id} created (pending review).`);
+    setMessage("Ledger entry created. Pending review.");
     router.refresh();
   }
 
@@ -192,7 +279,7 @@ export function NetworkCommandDesk({
       setMessage(data.error || "Earning update failed.");
       return;
     }
-    setMessage(`Earning #${earningId} marked ${status}.`);
+    setMessage(`Ledger entry marked ${paymentStatusLabel(status).toLowerCase()}.`);
     router.refresh();
   }
 
@@ -241,13 +328,6 @@ export function NetworkCommandDesk({
                 : "Open the record"}
             </Link>
           ) : null}
-          <p className="kxd-nc__calendar" style={{ marginTop: "1.1rem" }}>
-            {calendar.writeEnabled
-              ? "KXD Google Calendar is connected for partner discovery booking."
-              : `Calendar booking stays on request mode. Missing: ${
-                  calendar.missingEnv.join(", ") || "refresh token / credentials"
-                }.`}
-          </p>
         </section>
 
         <div className="kxd-nc__spread">
@@ -372,11 +452,8 @@ export function NetworkCommandDesk({
                     </h3>
                     <p>
                       {row.contactName}
-                      {` · ${row.visibilityState.replaceAll("_", " ")}`}
-                      {row.promotedSalesLeadId
-                        ? ` · Sales #${row.promotedSalesLeadId}`
-                        : ""}
-                      {` · ${formatWhen(row.createdAt)}`}
+                      {` · ${visibilityLabel(row.visibilityState)}`}
+                      {row.createdAt ? ` · ${formatWhen(row.createdAt)}` : ""}
                     </p>
                     {row.internalNotes ? <p>{row.internalNotes}</p> : null}
                     <label>
@@ -388,7 +465,7 @@ export function NetworkCommandDesk({
                       >
                         {PARTNER_VISIBILITY_STATES.map((state) => (
                           <option key={state} value={state}>
-                            {state.replaceAll("_", " ")}
+                            {PARTNER_VISIBILITY_LABELS[state]}
                           </option>
                         ))}
                       </select>
@@ -415,11 +492,17 @@ export function NetworkCommandDesk({
             <p className="kxd-nc__chapter-label">Ledger</p>
             {(selected?.earnings ?? []).map((row) => (
               <div key={row.id} className="kxd-nc__ledger-row">
-                <span>
-                  #{row.id} · {row.relatedBusinessName} ·{" "}
-                  {row.earningType.replaceAll("_", " ")} · {formatCents(row.amountCents)}{" "}
-                  · {row.paymentStatus.replaceAll("_", " ")}
-                </span>
+                <p className="kxd-nc__ledger-line">
+                  <span className="kxd-nc__ledger-name">
+                    {row.relatedBusinessName || earningTypeLabel(row.earningType)}
+                  </span>
+                  <span className="kxd-nc__ledger-meta">
+                    {row.relatedBusinessName
+                      ? `${earningTypeLabel(row.earningType)} · `
+                      : ""}
+                    {formatCents(row.amountCents)} · {paymentStatusLabel(row.paymentStatus)}
+                  </span>
+                </p>
                 <span className="kxd-nc__actions">
                   {row.paymentStatus === "pending_approval" ? (
                     <button
@@ -451,89 +534,176 @@ export function NetworkCommandDesk({
                 </span>
               </div>
             ))}
-            {selected && selected.earnings.length === 0 ? (
+            {(selected?.earnings.length ?? 0) === 0 ? (
               <p className="kxd-nc__empty">No ledger entries on this record.</p>
             ) : null}
 
-            <div className="kxd-nc__form">
-              <input
-                placeholder="Partner profile id"
-                value={earningForm.partnerId}
-                onChange={(e) =>
-                  setEarningForm((s) => ({ ...s, partnerId: e.target.value }))
-                }
-              />
-              <input
-                placeholder="Related business"
-                value={earningForm.relatedBusinessName}
-                onChange={(e) =>
-                  setEarningForm((s) => ({
-                    ...s,
-                    relatedBusinessName: e.target.value,
-                  }))
-                }
-              />
-              <input
-                placeholder="Referral id (optional)"
-                value={earningForm.relatedPartnerReferralId}
-                onChange={(e) =>
-                  setEarningForm((s) => ({
-                    ...s,
-                    relatedPartnerReferralId: e.target.value,
-                  }))
-                }
-              />
-              <select
-                value={earningForm.earningType}
-                onChange={(e) =>
-                  setEarningForm((s) => ({ ...s, earningType: e.target.value }))
-                }
-              >
-                <option value="project_commission">Project commission</option>
-                <option value="monthly_bonus">Monthly bonus</option>
-                <option value="retention_kicker">Retention kicker</option>
-                <option value="performance_bonus">Performance bonus</option>
-                <option value="adjustment">Adjustment</option>
-              </select>
-              <input
-                placeholder="Amount cents"
-                value={earningForm.amountCents}
-                onChange={(e) =>
-                  setEarningForm((s) => ({ ...s, amountCents: e.target.value }))
-                }
-              />
-              <input
-                placeholder="Eligible collected cents"
-                value={earningForm.eligibleCollectedCents}
-                onChange={(e) =>
-                  setEarningForm((s) => ({
-                    ...s,
-                    eligibleCollectedCents: e.target.value,
-                  }))
-                }
-              />
-              <input
-                placeholder="Rate bps"
-                value={earningForm.rateBps}
-                onChange={(e) =>
-                  setEarningForm((s) => ({ ...s, rateBps: e.target.value }))
-                }
-              />
-              <button type="button" className="kxd-nc__btn kxd-nc__btn--quiet" onClick={createEarning}>
-                Create ledger entry
-              </button>
-            </div>
+            <details className="kxd-nc__disclose">
+              <summary>Create ledger entry</summary>
+              <div className="kxd-nc__form">
+                <label className="kxd-nc__field">
+                  <span>Partner</span>
+                  <select
+                    value={earningForm.partnerId}
+                    onChange={(e) =>
+                      setEarningForm((s) => ({
+                        ...s,
+                        partnerId: e.target.value,
+                        relatedPartnerReferralId: "",
+                      }))
+                    }
+                  >
+                    <option value="">Choose a partner</option>
+                    {partners.map((row) => (
+                      <option key={row.id} value={String(row.id)}>
+                        {row.displayName}
+                        {row.status === "inactive" ? " · Inactive" : ""}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="kxd-nc__field">
+                  <span>Related business</span>
+                  <input
+                    value={earningForm.relatedBusinessName}
+                    onChange={(e) =>
+                      setEarningForm((s) => ({
+                        ...s,
+                        relatedBusinessName: e.target.value,
+                      }))
+                    }
+                  />
+                </label>
+                <label className="kxd-nc__field">
+                  <span>Related introduction</span>
+                  <select
+                    value={earningForm.relatedPartnerReferralId}
+                    onChange={(e) =>
+                      setEarningForm((s) => ({
+                        ...s,
+                        relatedPartnerReferralId: e.target.value,
+                      }))
+                    }
+                  >
+                    <option value="">None</option>
+                    {ledgerIntroductions.map((row) => (
+                      <option key={row.id} value={String(row.id)}>
+                        {row.businessName} · {row.contactName}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="kxd-nc__field">
+                  <span>Entry type</span>
+                  <select
+                    value={earningForm.earningType}
+                    onChange={(e) =>
+                      setEarningForm((s) => ({ ...s, earningType: e.target.value }))
+                    }
+                  >
+                    {(
+                      Object.entries(PARTNER_EARNING_TYPE_LABELS) as Array<
+                        [PartnerEarningType, string]
+                      >
+                    ).map(([value, label]) => (
+                      <option key={value} value={value}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="kxd-nc__field">
+                  <span>
+                    Amount in cents
+                    {centsReading(earningForm.amountCents) ? (
+                      <span className="kxd-nc__hint">
+                        {" "}
+                        · {centsReading(earningForm.amountCents)}
+                      </span>
+                    ) : null}
+                  </span>
+                  <input
+                    inputMode="numeric"
+                    value={earningForm.amountCents}
+                    onChange={(e) =>
+                      setEarningForm((s) => ({ ...s, amountCents: e.target.value }))
+                    }
+                  />
+                </label>
+                <label className="kxd-nc__field">
+                  <span>
+                    Eligible amount collected, in cents
+                    {centsReading(earningForm.eligibleCollectedCents) ? (
+                      <span className="kxd-nc__hint">
+                        {" "}
+                        · {centsReading(earningForm.eligibleCollectedCents)}
+                      </span>
+                    ) : null}
+                  </span>
+                  <input
+                    inputMode="numeric"
+                    value={earningForm.eligibleCollectedCents}
+                    onChange={(e) =>
+                      setEarningForm((s) => ({
+                        ...s,
+                        eligibleCollectedCents: e.target.value,
+                      }))
+                    }
+                  />
+                </label>
+                <label className="kxd-nc__field">
+                  <span>
+                    Rate in basis points
+                    {earningForm.rateBps.trim() &&
+                    Number.isFinite(Number(earningForm.rateBps)) ? (
+                      <span className="kxd-nc__hint">
+                        {" "}
+                        · {formatRateBps(Number(earningForm.rateBps))}
+                      </span>
+                    ) : null}
+                  </span>
+                  <input
+                    inputMode="numeric"
+                    value={earningForm.rateBps}
+                    onChange={(e) =>
+                      setEarningForm((s) => ({ ...s, rateBps: e.target.value }))
+                    }
+                  />
+                </label>
+                <button
+                  type="button"
+                  className="kxd-nc__btn kxd-nc__btn--quiet"
+                  onClick={createEarning}
+                >
+                  Add entry
+                </button>
+              </div>
+            </details>
           </section>
 
           <section>
             <p className="kxd-nc__chapter-label">Bookings</p>
+            <p className="kxd-nc__tool-copy">
+              {calendar.writeEnabled
+                ? "KXD Google Calendar is connected for partner discovery booking."
+                : "Calendar is in request mode. Connect Google Calendar to offer live booking slots."}
+            </p>
             {selected && selected.bookings.length > 0 ? (
               selected.bookings.map((row) => (
-                <p key={row.id} className="kxd-nc__empty">
-                  #{row.id} · {row.bookingMode.replaceAll("_", " ")} ·{" "}
-                  {row.status.replaceAll("_", " ")}
-                  {row.slotStart ? ` · ${formatWhen(row.slotStart)}` : ""}
-                </p>
+                <div key={row.id} className="kxd-nc__tool-row">
+                  <p className="kxd-nc__ledger-line">
+                    <span className="kxd-nc__ledger-name">
+                      {bookingModeLabel(row.bookingMode)}
+                    </span>
+                    <span className="kxd-nc__ledger-meta">
+                      {bookingStatusLabel(row.status)}
+                      {row.slotStart ? ` · ${formatWhen(row.slotStart)}` : ""}
+                    </span>
+                  </p>
+                  {row.preferredTimes ? (
+                    <p className="kxd-nc__tool-note">{row.preferredTimes}</p>
+                  ) : null}
+                </div>
               ))
             ) : (
               <p className="kxd-nc__empty">No bookings on this record.</p>
@@ -542,62 +712,88 @@ export function NetworkCommandDesk({
 
           <section>
             <p className="kxd-nc__chapter-label">Commission policy</p>
-            <div className="kxd-nc__form">
-              <label>
-                Project rate bps
-                <input
-                  type="number"
-                  value={policyState.projectRateBps}
-                  onChange={(e) =>
-                    setPolicyState((s) => ({
-                      ...s,
-                      projectRateBps: Number(e.target.value),
-                    }))
-                  }
-                />
-              </label>
-              <label>
-                Monthly rate bps
-                <input
-                  type="number"
-                  value={policyState.monthlyRateBps}
-                  onChange={(e) =>
-                    setPolicyState((s) => ({
-                      ...s,
-                      monthlyRateBps: Number(e.target.value),
-                    }))
-                  }
-                />
-              </label>
-              <label>
-                Eligible recurring services
-                <textarea
-                  value={policyState.eligibleRecurringServices}
-                  onChange={(e) =>
-                    setPolicyState((s) => ({
-                      ...s,
-                      eligibleRecurringServices: e.target.value,
-                    }))
-                  }
-                />
-              </label>
-              <label>
-                Performance bonus cents
-                <input
-                  type="number"
-                  value={policyState.performanceBonusAmountCents}
-                  onChange={(e) =>
-                    setPolicyState((s) => ({
-                      ...s,
-                      performanceBonusAmountCents: Number(e.target.value),
-                    }))
-                  }
-                />
-              </label>
-              <button type="button" className="kxd-nc__btn kxd-nc__btn--quiet" onClick={savePolicy}>
-                Save policy
-              </button>
-            </div>
+            <p className="kxd-nc__policy-sentence">{policySentence(policyState)}</p>
+            <details className="kxd-nc__disclose">
+              <summary>Edit policy</summary>
+              <div className="kxd-nc__form">
+                <label className="kxd-nc__field">
+                  <span>
+                    Project rate in basis points
+                    <span className="kxd-nc__hint">
+                      {" "}
+                      · {formatRateBps(policyState.projectRateBps)}
+                    </span>
+                  </span>
+                  <input
+                    type="number"
+                    value={policyState.projectRateBps}
+                    onChange={(e) =>
+                      setPolicyState((s) => ({
+                        ...s,
+                        projectRateBps: Number(e.target.value),
+                      }))
+                    }
+                  />
+                </label>
+                <label className="kxd-nc__field">
+                  <span>
+                    Monthly rate in basis points
+                    <span className="kxd-nc__hint">
+                      {" "}
+                      · {formatRateBps(policyState.monthlyRateBps)}
+                    </span>
+                  </span>
+                  <input
+                    type="number"
+                    value={policyState.monthlyRateBps}
+                    onChange={(e) =>
+                      setPolicyState((s) => ({
+                        ...s,
+                        monthlyRateBps: Number(e.target.value),
+                      }))
+                    }
+                  />
+                </label>
+                <label className="kxd-nc__field">
+                  <span>Eligible recurring services</span>
+                  <textarea
+                    value={policyState.eligibleRecurringServices}
+                    onChange={(e) =>
+                      setPolicyState((s) => ({
+                        ...s,
+                        eligibleRecurringServices: e.target.value,
+                      }))
+                    }
+                  />
+                </label>
+                <label className="kxd-nc__field">
+                  <span>
+                    Performance bonus in cents
+                    <span className="kxd-nc__hint">
+                      {" "}
+                      · {formatCents(policyState.performanceBonusAmountCents)}
+                    </span>
+                  </span>
+                  <input
+                    type="number"
+                    value={policyState.performanceBonusAmountCents}
+                    onChange={(e) =>
+                      setPolicyState((s) => ({
+                        ...s,
+                        performanceBonusAmountCents: Number(e.target.value),
+                      }))
+                    }
+                  />
+                </label>
+                <button
+                  type="button"
+                  className="kxd-nc__btn kxd-nc__btn--quiet"
+                  onClick={savePolicy}
+                >
+                  Save policy
+                </button>
+              </div>
+            </details>
           </section>
         </div>
       </div>
