@@ -27,6 +27,7 @@
     "seed:clients": "tsx scripts/seed-clients.ts",
     "verify:partner-portal-phase1": "node --import tsx scripts/verify-partner-portal-phase1.ts",
     "verify:partner-portal-production-migrate": "node --import tsx scripts/verify-partner-portal-production-migrate.ts",
+    "verify:inventory-media-production-migrate": "node --import tsx scripts/verify-inventory-media-production-migrate.ts",
     "seed:executive-profiles": "tsx scripts/seed-executive-client-profiles.ts",
     "seed:primal-experience": "tsx scripts/seed-primal-experience-profile.ts",
     "seed:portal-user": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/seed-portal-user.ts",
