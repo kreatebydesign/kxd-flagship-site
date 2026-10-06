@@ -11,6 +11,7 @@ import {
   PORTAL_SESSION_COOKIE,
   PORTAL_HOST,
 } from "@/lib/portal/constants";
+import { networkRootRedirectPath } from "@/lib/portal/network-root";
 import { JUNIOR_CREATOR_SESSION_COOKIE } from "@/lib/junior-creators/constants";
 import {
   isAuthorizedCronBearer,
@@ -63,6 +64,14 @@ export function middleware(request: NextRequest) {
     response.headers.set("x-kxd-pathname", pathname);
     return response;
   };
+
+  const networkRoot = networkRootRedirectPath(
+    pathname,
+    request.headers.get("host"),
+  );
+  if (networkRoot) {
+    return redirectWithPath(new URL(networkRoot, request.url));
+  }
 
   if (pathname === "/" && isPortalHost(request)) {
     return redirectWithPath(new URL("/portal/login", request.url));
