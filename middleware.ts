@@ -11,7 +11,11 @@ import {
   PORTAL_SESSION_COOKIE,
   PORTAL_HOST,
 } from "@/lib/portal/constants";
-import { networkRootRedirectPath } from "@/lib/portal/network-root";
+import {
+  networkRootRedirectPath,
+  networkRootResponseKind,
+  networkShareCrawlerHtml,
+} from "@/lib/portal/network-root";
 import { JUNIOR_CREATOR_SESSION_COOKIE } from "@/lib/junior-creators/constants";
 import {
   isAuthorizedCronBearer,
@@ -65,12 +69,25 @@ export function middleware(request: NextRequest) {
     return response;
   };
 
-  const networkRoot = networkRootRedirectPath(
+  const networkRootKind = networkRootResponseKind(
     pathname,
     request.headers.get("host"),
+    request.headers.get("user-agent"),
   );
-  if (networkRoot) {
-    return redirectWithPath(new URL(networkRoot, request.url));
+  if (networkRootKind === "share") {
+    return new NextResponse(networkShareCrawlerHtml(), {
+      status: 200,
+      headers: {
+        "content-type": "text/html; charset=utf-8",
+        "cache-control": "public, max-age=300",
+        "x-kxd-pathname": pathname,
+      },
+    });
+  }
+  if (networkRootKind === "redirect") {
+    return redirectWithPath(
+      new URL(networkRootRedirectPath(pathname, request.headers.get("host"))!, request.url),
+    );
   }
 
   if (pathname === "/" && isPortalHost(request)) {
