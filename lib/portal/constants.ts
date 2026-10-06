@@ -2,6 +2,7 @@ export const PORTAL_SESSION_COOKIE = "kxd-portal-session";
 /** HMAC cookie for studio-operator single-client portal preview (not a portal-user session). */
 export const OPERATOR_PORTAL_PREVIEW_COOKIE = "kxd-operator-portal-preview";
 export const PORTAL_HOST = "portal.kreatebydesign.com";
+export const NETWORK_HOST = "network.kreatebydesign.com";
 
 /** Edge-safe shape check — does not verify HMAC (server session resolver does). */
 export function isWellFormedOperatorPortalPreviewCookie(

@@ -13,6 +13,12 @@ import {
   PARTNER_PLAYBOOK_SECTIONS,
 } from "../lib/portal/partner/playbook";
 import { isPartnerLoginRedirect } from "../lib/portal/partner/login-intent";
+import {
+  NETWORK_HOST,
+  NETWORK_ROOT_LOGIN_PATH,
+  networkRootRedirectPath,
+} from "../lib/portal/network-root";
+import { PORTAL_HOST } from "../lib/portal/constants";
 import { PARTNER_VISIBILITY_STATES } from "../lib/portal/partner/types";
 
 const ROOT = process.cwd();
@@ -428,6 +434,25 @@ async function main() {
     assertFileContains(
       "app/api/portal/auth/login/route.ts",
       "createPortalSession",
+    );
+  });
+
+  await check("network.kreatebydesign.com / redirects to partner login only", () => {
+    assert.equal(NETWORK_HOST, "network.kreatebydesign.com");
+    assert.equal(
+      networkRootRedirectPath("/", NETWORK_HOST),
+      "/portal/login?redirect=/portal/partner",
+    );
+    assert.equal(networkRootRedirectPath("/", `${NETWORK_HOST}:443`), NETWORK_ROOT_LOGIN_PATH);
+    assert.equal(networkRootRedirectPath("/", PORTAL_HOST), null);
+    assert.equal(networkRootRedirectPath("/", "kreatebydesign.com"), null);
+    assert.equal(networkRootRedirectPath("/", "www.kreatebydesign.com"), null);
+    assert.equal(networkRootRedirectPath("/portal/login", NETWORK_HOST), null);
+    assert.equal(networkRootRedirectPath("/portal/partner", NETWORK_HOST), null);
+    assertFileContains("middleware.ts", "networkRootRedirectPath");
+    assertFileContains(
+      "middleware.ts",
+      'if (pathname === "/" && isPortalHost(request))',
     );
   });
 
