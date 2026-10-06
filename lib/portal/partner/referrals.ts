@@ -20,6 +20,10 @@ import {
   PARTNER_VISIBILITY_MEANINGS,
   PARTNER_VISIBILITY_STATES,
 } from "./types";
+import {
+  countPartnerPathMetrics,
+  PARTNER_OPEN_BOOKING_STATUSES,
+} from "./path-metrics";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDoc = Record<string, any>;
@@ -466,7 +470,7 @@ export async function loadPartnerHomeSnapshot(
       where: {
         and: [
           { sourcedByPartner: { equals: partnerId } },
-          { status: { in: ["submitted", "scheduled", "confirmed"] } },
+          { status: { in: [...PARTNER_OPEN_BOOKING_STATUSES] } },
         ],
       },
       limit: 0,
@@ -477,35 +481,23 @@ export async function loadPartnerHomeSnapshot(
   ]);
 
   const docs = referrals.docs as AnyDoc[];
-  const submittedLeads = docs.length;
-  const qualifiedLeads = docs.filter((d) =>
-    ["qualified", "discovery_booked", "proposal_in_motion", "won"].includes(
-      String(d.partnerVisibilityState),
-    ),
-  ).length;
-  const bookedFromLeads = docs.filter((d) =>
-    ["discovery_booked", "proposal_in_motion", "won"].includes(
-      String(d.partnerVisibilityState),
-    ),
-  ).length;
-  const wonClients = docs.filter(
-    (d) => String(d.partnerVisibilityState) === "won",
-  ).length;
-
-  const bookedCalls = Math.max(bookedFromLeads, bookings.totalDocs);
+  const path = countPartnerPathMetrics({
+    visibilityStates: docs.map((d) => String(d.partnerVisibilityState ?? "")),
+    openBookingCount: bookings.totalDocs,
+  });
 
   return {
-    submittedLeads,
-    qualifiedLeads,
-    bookedCalls,
-    wonClients,
+    submittedLeads: path.submittedLeads,
+    qualifiedLeads: path.qualifiedLeads,
+    bookedCalls: path.bookedCalls,
+    wonClients: path.wonClients,
     approvedEarningsCents:
       earningsSummary.approvedOutstandingCents + earningsSummary.paidToDateCents,
     paidEarningsCents: earningsSummary.paidToDateCents,
     nextAction: resolveNextAction({
-      submittedLeads,
-      qualifiedLeads,
-      bookedCalls,
+      submittedLeads: path.submittedLeads,
+      qualifiedLeads: path.qualifiedLeads,
+      bookedCalls: path.bookedCalls,
     }),
   };
 }

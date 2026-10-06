@@ -26,6 +26,7 @@
     "seed:projects": "tsx scripts/seed-projects.ts",
     "seed:clients": "tsx scripts/seed-clients.ts",
     "verify:partner-portal-phase1": "node --import tsx scripts/verify-partner-portal-phase1.ts",
+    "verify:network-command-phase2": "node --import tsx scripts/verify-network-command-phase2.ts",
     "verify:network-root-redirect": "node --import tsx scripts/verify-network-root-redirect.ts",
     "verify:partner-portal-production-migrate": "node --import tsx scripts/verify-partner-portal-production-migrate.ts",
     "verify:inventory-media-production-migrate": "node --import tsx scripts/verify-inventory-media-production-migrate.ts",
