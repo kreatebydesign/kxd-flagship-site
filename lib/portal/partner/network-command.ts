@@ -66,8 +66,14 @@ export type NetworkCommandActivity = {
 export type NetworkCommandProfileInput = {
   id: number;
   displayName: string;
-  status: "active" | "inactive";
+  status: "active" | "invited" | "inactive";
   notes: string | null;
+  email?: string | null;
+  rosterState?: "active" | "invited" | "expired" | "revoked" | "inactive";
+  invitationId?: number | null;
+  invitationExpiresAt?: string | null;
+  canResendInvitation?: boolean;
+  canRevokeInvitation?: boolean;
 };
 
 export type NetworkCommandReferralInput = {
@@ -134,7 +140,13 @@ export type NetworkCommandPolicyInput = {
 export type NetworkCommandPartnerRecord = {
   id: number;
   displayName: string;
-  status: "active" | "inactive";
+  status: "active" | "invited" | "inactive";
+  rosterState: "active" | "invited" | "expired" | "revoked" | "inactive";
+  email: string | null;
+  invitationId: number | null;
+  invitationExpiresAt: string | null;
+  canResendInvitation: boolean;
+  canRevokeInvitation: boolean;
   notes: string | null;
   submittedLeads: number;
   qualifiedLeads: number;
@@ -167,6 +179,7 @@ export type NetworkCommandPartnerRecord = {
 export type NetworkCommandWorkspace = {
   generatedAt: string;
   activePartners: NetworkCommandPartnerRecord[];
+  invitedPartners: NetworkCommandPartnerRecord[];
   inactivePartners: NetworkCommandPartnerRecord[];
   networkDecision: NetworkCommandAction;
 };
@@ -628,6 +641,12 @@ function derivePartnerRecord(input: {
     id: input.profile.id,
     displayName: input.profile.displayName,
     status: input.profile.status,
+    rosterState: input.profile.rosterState ?? input.profile.status,
+    email: input.profile.email ?? null,
+    invitationId: input.profile.invitationId ?? null,
+    invitationExpiresAt: input.profile.invitationExpiresAt ?? null,
+    canResendInvitation: input.profile.canResendInvitation === true,
+    canRevokeInvitation: input.profile.canRevokeInvitation === true,
     notes: input.profile.notes,
     submittedLeads: path.submittedLeads,
     qualifiedLeads: path.qualifiedLeads,
@@ -694,12 +713,18 @@ export function deriveNetworkCommand(
     )
     .sort((a, b) => a.displayName.localeCompare(b.displayName));
 
-  const activePartners = records.filter((row) => row.status === "active");
-  const inactivePartners = records.filter((row) => row.status === "inactive");
+  const activePartners = records.filter((row) => row.rosterState === "active");
+  const invitedPartners = records.filter(
+    (row) => row.rosterState === "invited" || row.rosterState === "expired",
+  );
+  const inactivePartners = records.filter(
+    (row) => row.rosterState === "inactive" || row.rosterState === "revoked",
+  );
 
   return {
     generatedAt: now.toISOString(),
     activePartners,
+    invitedPartners,
     inactivePartners,
     networkDecision: pickNetworkDecision(activePartners),
   };
@@ -709,7 +734,11 @@ export function selectNetworkCommandPartner(
   workspace: NetworkCommandWorkspace,
   partnerId: number | null,
 ): NetworkCommandPartnerRecord | null {
-  const all = [...workspace.activePartners, ...workspace.inactivePartners];
+  const all = [
+    ...workspace.activePartners,
+    ...workspace.invitedPartners,
+    ...workspace.inactivePartners,
+  ];
   if (partnerId && all.some((row) => row.id === partnerId)) {
     return all.find((row) => row.id === partnerId) ?? null;
   }
@@ -718,5 +747,10 @@ export function selectNetworkCommandPartner(
       all.find((row) => row.id === workspace.networkDecision.partnerId) ?? null
     );
   }
-  return workspace.activePartners[0] ?? workspace.inactivePartners[0] ?? null;
+  return (
+    workspace.activePartners[0] ??
+    workspace.invitedPartners[0] ??
+    workspace.inactivePartners[0] ??
+    null
+  );
 }

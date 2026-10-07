@@ -45,10 +45,18 @@ export async function findActivePartnerProfileForUser(
   const linkedUserId = relId(doc.portalUser);
   if (!Number.isFinite(id) || linkedUserId !== portalUserId) return null;
 
+  const statusRaw = String(doc.status ?? "inactive");
+  const status: PartnerProfileRecord["status"] =
+    statusRaw === "active"
+      ? "active"
+      : statusRaw === "invited"
+        ? "invited"
+        : "inactive";
+
   return {
     id,
     portalUserId,
     displayName: String(doc.displayName ?? "").trim() || "Partner",
-    status: doc.status === "inactive" ? "inactive" : "active",
+    status,
   };
 }

@@ -323,6 +323,28 @@ async function main() {
     assert.equal(quiet.networkDecision.partnerId, 2);
   });
 
+  await check("invited partners are listed separately and never drive the decision", () => {
+    const withInvite = workspace({
+      profiles: [
+        partnerA(),
+        partnerB(),
+        {
+          id: 3,
+          displayName: "Invited C",
+          status: "invited",
+          notes: null,
+          rosterState: "invited",
+          invitationId: 30,
+          canResendInvitation: true,
+          canRevokeInvitation: true,
+        },
+      ],
+    });
+    assert.equal(withInvite.invitedPartners.map((p) => p.id).join(","), "3");
+    assert.equal(withInvite.activePartners.length, 2);
+    assert.equal(withInvite.networkDecision.partnerId, 2);
+  });
+
   await check("no hire / score / rank vocabulary in the model", () => {
     const blob = JSON.stringify(derived);
     assert.doesNotMatch(blob, /hiring score|hire score|ai score|rank/i);

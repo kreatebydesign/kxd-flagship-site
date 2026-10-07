@@ -52,7 +52,7 @@ export type PartnerProfileRecord = {
   id: number;
   portalUserId: number;
   displayName: string;
-  status: "active" | "inactive";
+  status: "active" | "invited" | "inactive";
 };
 
 export type PartnerReferralSubmitInput = {

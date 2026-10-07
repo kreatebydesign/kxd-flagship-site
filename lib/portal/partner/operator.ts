@@ -156,11 +156,17 @@ async function findAllCollection(collection: string, sort = "-createdAt"): Promi
   return docs;
 }
 
+function mapProfileStatus(raw: unknown): NetworkCommandProfileInput["status"] {
+  if (raw === "active") return "active";
+  if (raw === "invited") return "invited";
+  return "inactive";
+}
+
 function mapProfile(doc: AnyDoc): NetworkCommandProfileInput {
   return {
     id: Number(doc.id),
     displayName: String(doc.displayName ?? "").trim() || "Partner",
-    status: doc.status === "inactive" ? "inactive" : "active",
+    status: mapProfileStatus(doc.status),
     notes: doc.notes ? String(doc.notes) : null,
   };
 }
@@ -267,8 +273,27 @@ export async function loadNetworkCommandWorkspace(): Promise<NetworkCommandWorks
     profiles.map((doc) => Number(doc.id)).filter((id) => Number.isFinite(id)),
   );
 
+  const { listPartnerInvitationsByProfileIds } = await import("./invitations");
+  const invitations = await listPartnerInvitationsByProfileIds([...partnerIds]);
+
+  const profileInputs = profiles
+    .map(mapProfile)
+    .filter((row) => row.id > 0)
+    .map((row) => {
+      const invite = invitations.get(row.id);
+      return {
+        ...row,
+        email: invite?.email ?? null,
+        rosterState: invite?.rosterState ?? (row.status === "active" ? "active" : row.status === "invited" ? "invited" : "inactive"),
+        invitationId: invite?.id ?? null,
+        invitationExpiresAt: invite?.expiresAt ?? null,
+        canResendInvitation: invite?.canResend === true,
+        canRevokeInvitation: invite?.canRevoke === true,
+      } satisfies NetworkCommandProfileInput;
+    });
+
   return deriveNetworkCommand({
-    profiles: profiles.map(mapProfile).filter((row) => row.id > 0),
+    profiles: profileInputs,
     referrals: referrals.map(mapReferral).filter((row) => partnerIds.has(row.partnerId)),
     bookings: bookings.map(mapBooking).filter((row) => partnerIds.has(row.partnerId)),
     notes: notes.map(mapNote).filter((row) => partnerIds.has(row.partnerId)),
