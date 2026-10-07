@@ -8,13 +8,13 @@ import {
   assertPortalRateLimit,
   clientIpFromRequest,
 } from "@/lib/portal/identity/rate-limit";
-import { assertPortalMutatingOrigin } from "@/lib/portal/identity/origin";
+import { assertPartnerActivationOrigin } from "@/lib/portal/partner/activation-origin";
 import { createPortalSession } from "@/lib/portal/session";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
-  const originCheck = assertPortalMutatingOrigin(req);
+  const originCheck = assertPartnerActivationOrigin(req);
   if (!originCheck.ok) {
     return NextResponse.json(
       { ok: false, message: originCheck.message },

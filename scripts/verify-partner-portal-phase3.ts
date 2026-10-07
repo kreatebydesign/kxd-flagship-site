@@ -256,6 +256,18 @@ async function main() {
       "components/admin/sales/NetworkCommandDesk.tsx",
       "Invite partner",
     );
+    assertFileContains(
+      "app/api/portal/partner/activate/accept/route.ts",
+      "assertPartnerActivationOrigin",
+    );
+    assertFileContains(
+      "app/api/portal/partner/activate/preview/route.ts",
+      "assertPartnerActivationOrigin",
+    );
+    assertFileDoesNotContain(
+      "app/api/portal/partner/activate/accept/route.ts",
+      "assertPortalMutatingOrigin",
+    );
   });
 
   await check("invited partners stay out of active session path", () => {
