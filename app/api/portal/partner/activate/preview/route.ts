@@ -9,10 +9,19 @@ import {
   assertPortalRateLimit,
   clientIpFromRequest,
 } from "@/lib/portal/identity/rate-limit";
+import { assertPartnerActivationOrigin } from "@/lib/portal/partner/activation-origin";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
+  const originCheck = assertPartnerActivationOrigin(req);
+  if (!originCheck.ok) {
+    return NextResponse.json(
+      { ok: false, message: originCheck.message },
+      { status: originCheck.status },
+    );
+  }
+
   const rate = assertPortalRateLimit({
     bucket: "portal-partner-activate",
     identity: clientIpFromRequest(req),
