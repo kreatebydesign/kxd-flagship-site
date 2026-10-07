@@ -47,6 +47,8 @@ function partnerA(): NetworkCommandProfileInput {
     id: 1,
     displayName: "Partner A",
     status: "active",
+    portalUserActive: true,
+    rosterState: "active",
     notes: null,
   };
 }
@@ -56,6 +58,8 @@ function partnerB(): NetworkCommandProfileInput {
     id: 2,
     displayName: "Partner B",
     status: "active",
+    portalUserActive: true,
+    rosterState: "active",
     notes: "Selective operator note.",
   };
 }
@@ -315,7 +319,12 @@ async function main() {
   await check("inactive partner is not in the network decision", () => {
     const quiet = workspace({
       profiles: [
-        { ...partnerA(), status: "inactive" },
+        {
+          ...partnerA(),
+          status: "inactive",
+          portalUserActive: false,
+          rosterState: "inactive",
+        },
         partnerB(),
       ],
     });

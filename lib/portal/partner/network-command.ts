@@ -9,6 +9,7 @@ import {
   isQualifiedPartnerVisibility,
   partnerConversionRate,
 } from "./path-metrics";
+import { derivePartnerRosterState } from "./invitation-rules";
 import {
   PARTNER_VISIBILITY_LABELS,
   type PartnerVisibilityState,
@@ -68,6 +69,8 @@ export type NetworkCommandProfileInput = {
   displayName: string;
   status: "active" | "invited" | "inactive";
   notes: string | null;
+  /** Portal-users.active — required true for Active roster classification. */
+  portalUserActive?: boolean | null;
   email?: string | null;
   rosterState?: "active" | "invited" | "expired" | "revoked" | "inactive";
   invitationId?: number | null;
@@ -641,7 +644,12 @@ function derivePartnerRecord(input: {
     id: input.profile.id,
     displayName: input.profile.displayName,
     status: input.profile.status,
-    rosterState: input.profile.rosterState ?? input.profile.status,
+    rosterState:
+      input.profile.rosterState ??
+      derivePartnerRosterState({
+        profileStatus: input.profile.status,
+        portalUserActive: input.profile.portalUserActive,
+      }),
     email: input.profile.email ?? null,
     invitationId: input.profile.invitationId ?? null,
     invitationExpiresAt: input.profile.invitationExpiresAt ?? null,

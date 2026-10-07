@@ -72,8 +72,22 @@ function pageHtml(input: {
     profiles: empty
       ? []
       : [
-          { id: 1, displayName: "Partner A", status: "active", notes: null },
-          { id: 2, displayName: "Partner B", status: "active", notes: null },
+          {
+            id: 1,
+            displayName: "Partner A",
+            status: "active",
+            portalUserActive: true,
+            rosterState: "active",
+            notes: null,
+          },
+          {
+            id: 2,
+            displayName: "Partner B",
+            status: "active",
+            portalUserActive: true,
+            rosterState: "active",
+            notes: null,
+          },
         ],
     referrals: empty
       ? []

@@ -88,17 +88,24 @@ export function isAcceptablePartnerInvitationStatus(
 }
 
 /**
- * Derive owner-facing roster state from profile + invitation.
- * Active partners (including Kyle) stay "active" regardless of invitation history.
+ * Derive owner-facing roster state from profile + portal user + invitation.
+ * Active roster requires an active partner profile AND an active portal user.
+ * Invitation history alone cannot place a deactivated partner in Active.
  */
 export function derivePartnerRosterState(input: {
   profileStatus: string;
+  /** Required true for Active roster. Missing/false never counts as active. */
+  portalUserActive?: boolean | null;
   invitationStatus?: string | null;
   invitationExpiresAt?: string | Date | null;
   nowMs?: number;
 }): PartnerRosterState {
   const now = input.nowMs ?? Date.now();
-  if (input.profileStatus === "active") return "active";
+  const portalUserActive = input.portalUserActive === true;
+
+  if (input.profileStatus === "active" && portalUserActive) {
+    return "active";
+  }
 
   if (input.profileStatus === "invited") {
     if (input.invitationStatus === "revoked") return "revoked";
@@ -108,15 +115,12 @@ export function derivePartnerRosterState(input: {
     ) {
       return "expired";
     }
-    if (input.invitationStatus === "accepted") return "active";
+    // Accepted + still "invited" profile is inconsistent; never treat as Active.
+    if (input.invitationStatus === "accepted") return "inactive";
     return "invited";
   }
 
-  if (input.profileStatus === "inactive") {
-    if (input.invitationStatus === "revoked") return "revoked";
-    return "inactive";
-  }
-
+  if (input.invitationStatus === "revoked") return "revoked";
   return "inactive";
 }
 
