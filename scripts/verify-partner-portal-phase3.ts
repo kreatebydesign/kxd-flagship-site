@@ -133,6 +133,7 @@ async function main() {
     assert.equal(
       derivePartnerRosterState({
         profileStatus: "active",
+        portalUserActive: true,
         invitationStatus: "accepted",
       }),
       "active",
@@ -140,9 +141,26 @@ async function main() {
     assert.equal(
       derivePartnerRosterState({
         profileStatus: "active",
+        portalUserActive: true,
         invitationStatus: "revoked",
       }),
       "active",
+    );
+    assert.equal(
+      derivePartnerRosterState({
+        profileStatus: "active",
+        portalUserActive: false,
+        invitationStatus: "accepted",
+      }),
+      "inactive",
+    );
+    assert.equal(
+      derivePartnerRosterState({
+        profileStatus: "inactive",
+        portalUserActive: false,
+        invitationStatus: "accepted",
+      }),
+      "inactive",
     );
     assert.equal(
       derivePartnerRosterState({
@@ -312,6 +330,7 @@ async function main() {
       id: 1,
       displayName: "Kyle",
       status: "active",
+      portalUserActive: true,
       notes: null,
       rosterState: "active",
     };

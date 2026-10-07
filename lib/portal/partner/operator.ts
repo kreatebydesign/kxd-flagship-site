@@ -16,6 +16,7 @@ import {
   type NetworkCommandSalesLeadInput,
   type NetworkCommandWorkspace,
 } from "./network-command";
+import { derivePartnerRosterState } from "./invitation-rules";
 import { PARTNER_VISIBILITY_STATES, type PartnerVisibilityState } from "./types";
 import {
   createPartnerEarningEntry,
@@ -162,13 +163,39 @@ function mapProfileStatus(raw: unknown): NetworkCommandProfileInput["status"] {
   return "inactive";
 }
 
-function mapProfile(doc: AnyDoc): NetworkCommandProfileInput {
+function mapProfile(doc: AnyDoc): NetworkCommandProfileInput & {
+  portalUserId: number | null;
+} {
   return {
     id: Number(doc.id),
     displayName: String(doc.displayName ?? "").trim() || "Partner",
     status: mapProfileStatus(doc.status),
     notes: doc.notes ? String(doc.notes) : null,
+    portalUserId: relId(doc.portalUser),
   };
+}
+
+async function loadPortalUserActiveByIds(
+  portalUserIds: number[],
+): Promise<Map<number, boolean>> {
+  const map = new Map<number, boolean>();
+  if (portalUserIds.length === 0) return map;
+  const payload = await getPayload({ config });
+  const result = await payload.find({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    collection: "portal-users" as any,
+    where: { id: { in: portalUserIds } },
+    limit: Math.max(portalUserIds.length, 1),
+    depth: 0,
+    overrideAccess: true,
+  });
+  for (const raw of result.docs) {
+    const doc = raw as AnyDoc;
+    const id = Number(doc.id);
+    if (!Number.isFinite(id)) continue;
+    map.set(id, doc.active === true);
+  }
+  return map;
 }
 
 function mapReferral(doc: AnyDoc): NetworkCommandReferralInput {
@@ -276,21 +303,44 @@ export async function loadNetworkCommandWorkspace(): Promise<NetworkCommandWorks
   const { listPartnerInvitationsByProfileIds } = await import("./invitations");
   const invitations = await listPartnerInvitationsByProfileIds([...partnerIds]);
 
-  const profileInputs = profiles
+  const mappedProfiles = profiles
     .map(mapProfile)
-    .filter((row) => row.id > 0)
-    .map((row) => {
-      const invite = invitations.get(row.id);
-      return {
-        ...row,
-        email: invite?.email ?? null,
-        rosterState: invite?.rosterState ?? (row.status === "active" ? "active" : row.status === "invited" ? "invited" : "inactive"),
-        invitationId: invite?.id ?? null,
-        invitationExpiresAt: invite?.expiresAt ?? null,
-        canResendInvitation: invite?.canResend === true,
-        canRevokeInvitation: invite?.canRevoke === true,
-      } satisfies NetworkCommandProfileInput;
+    .filter((row) => row.id > 0);
+  const portalUserIds = [
+    ...new Set(
+      mappedProfiles
+        .map((row) => row.portalUserId)
+        .filter((id): id is number => typeof id === "number" && id > 0),
+    ),
+  ];
+  const portalUserActiveById = await loadPortalUserActiveByIds(portalUserIds);
+
+  const profileInputs = mappedProfiles.map((row) => {
+    const invite = invitations.get(row.id);
+    const portalUserActive =
+      row.portalUserId != null
+        ? portalUserActiveById.get(row.portalUserId) === true
+        : false;
+    const rosterState = derivePartnerRosterState({
+      profileStatus: row.status,
+      portalUserActive,
+      invitationStatus: invite?.status ?? null,
+      invitationExpiresAt: invite?.expiresAt ?? null,
     });
+    return {
+      id: row.id,
+      displayName: row.displayName,
+      status: row.status,
+      notes: row.notes,
+      portalUserActive,
+      email: invite?.email ?? null,
+      rosterState,
+      invitationId: invite?.id ?? null,
+      invitationExpiresAt: invite?.expiresAt ?? null,
+      canResendInvitation: invite?.canResend === true,
+      canRevokeInvitation: invite?.canRevoke === true,
+    } satisfies NetworkCommandProfileInput;
+  });
 
   return deriveNetworkCommand({
     profiles: profileInputs,
