@@ -6,9 +6,11 @@
 export type RateLimitBucket =
   | "portal-login"
   | "portal-activate"
+  | "portal-partner-activate"
   | "portal-webauthn"
   | "portal-totp"
-  | "admin-invite-send";
+  | "admin-invite-send"
+  | "admin-partner-invite";
 
 type Entry = { timestamps: number[] };
 
@@ -17,9 +19,11 @@ const store = new Map<string, Entry>();
 const DEFAULTS: Record<RateLimitBucket, { limit: number; windowMs: number }> = {
   "portal-login": { limit: 20, windowMs: 15 * 60 * 1000 },
   "portal-activate": { limit: 30, windowMs: 60 * 60 * 1000 },
+  "portal-partner-activate": { limit: 20, windowMs: 60 * 60 * 1000 },
   "portal-webauthn": { limit: 40, windowMs: 15 * 60 * 1000 },
   "portal-totp": { limit: 20, windowMs: 15 * 60 * 1000 },
   "admin-invite-send": { limit: 60, windowMs: 60 * 60 * 1000 },
+  "admin-partner-invite": { limit: 30, windowMs: 60 * 60 * 1000 },
 };
 
 function keyFor(bucket: RateLimitBucket, identity: string): string {

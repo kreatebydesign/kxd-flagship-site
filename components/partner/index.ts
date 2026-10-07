@@ -1,4 +1,5 @@
 export { PartnerAppShell } from "./PartnerAppShell";
+export { PartnerActivateForm } from "./PartnerActivateForm";
 export { PartnerLeadForm } from "./PartnerLeadForm";
 export { PartnerBookingForm } from "./PartnerBookingForm";
 export { PartnerNoteForm } from "./PartnerNoteForm";

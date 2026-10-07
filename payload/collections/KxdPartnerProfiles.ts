@@ -54,9 +54,15 @@ export const KxdPartnerProfiles: CollectionConfig = {
       defaultValue: "active",
       options: [
         { label: "Active", value: "active" },
+        { label: "Invited", value: "invited" },
         { label: "Inactive", value: "inactive" },
       ],
-      admin: { position: "sidebar" },
+      admin: {
+        position: "sidebar",
+        description:
+          "Active = full Partner Portal. Invited = awaiting private invitation acceptance. " +
+          "Inactive = no portal access. Invited partners cannot reach Partner Home until accepted.",
+      },
     },
     {
       name: "notes",

@@ -88,6 +88,45 @@
   color: var(--kxd-nc-ink);
 }
 
+.kxd-nc__invite {
+  margin: 0 0 0.5rem;
+  padding: 1.35rem 0 0;
+  border-top: 1px solid rgba(28, 25, 20, 0.12);
+}
+
+.kxd-nc__invite-grid {
+  display: grid;
+  gap: 0.85rem;
+  margin: 0.85rem 0 0.25rem;
+  max-width: 36rem;
+}
+
+.kxd-nc__invite-grid label {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.kxd-nc__invite-grid span {
+  font-size: 0.75rem;
+  color: var(--kxd-nc-faint, #8a8478);
+}
+
+.kxd-nc__invite-grid input,
+.kxd-nc__invite-grid textarea {
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid rgba(28, 25, 20, 0.2);
+  border-radius: 3px;
+  background: #fbf7f0;
+  color: var(--kxd-nc-ink, #1c1914);
+  font: inherit;
+  font-size: 0.9375rem;
+}
+
+.kxd-nc__invite-note {
+  grid-column: 1 / -1;
+}
+
 .kxd-nc__decision {
   padding: 1.85rem 0 1.6rem;
 }

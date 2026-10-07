@@ -116,6 +116,7 @@ import * as migration_20261003_client_inventory_referenced_media from './2026100
 import * as migration_20261003_client_calendar_events from './20261003_client_calendar_events';
 import * as migration_20261004_partner_portal_phase1 from './20261004_partner_portal_phase1';
 import * as migration_20261005_partner_portal_phase1_1 from './20261005_partner_portal_phase1_1';
+import * as migration_20261007_partner_portal_phase3_invitations from './20261007_partner_portal_phase3_invitations';
 
 export const migrations = [
   {
@@ -754,5 +755,12 @@ export const migrations = [
     up: migration_20261005_partner_portal_phase1_1.up,
     down: migration_20261005_partner_portal_phase1_1.down,
     name: '20261005_partner_portal_phase1_1',
+  },
+  {
+    // Partner Portal Phase 3 — private partner invitations + invited profile status.
+    // Additive only. Local apply until production migration is authorized.
+    up: migration_20261007_partner_portal_phase3_invitations.up,
+    down: migration_20261007_partner_portal_phase3_invitations.down,
+    name: '20261007_partner_portal_phase3_invitations',
   },
 ];

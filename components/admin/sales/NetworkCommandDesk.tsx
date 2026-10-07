@@ -177,6 +177,14 @@ export function NetworkCommandDesk({
     eligibleCollectedCents: "",
   });
   const [ledgerSelectionId, setLedgerSelectionId] = useState(selectedPartnerId);
+  const [inviteForm, setInviteForm] = useState({
+    displayName: "",
+    email: "",
+    personalNote: "",
+  });
+  const [inviteBusy, setInviteBusy] = useState(false);
+  const [oneTimeLink, setOneTimeLink] = useState<string | null>(null);
+
   if (ledgerSelectionId !== selectedPartnerId) {
     setLedgerSelectionId(selectedPartnerId);
     setEarningForm((current) => ({
@@ -187,7 +195,11 @@ export function NetworkCommandDesk({
   }
 
   const partners = useMemo(
-    () => [...workspace.activePartners, ...workspace.inactivePartners],
+    () => [
+      ...workspace.activePartners,
+      ...workspace.invitedPartners,
+      ...workspace.inactivePartners,
+    ],
     [workspace],
   );
 
@@ -264,6 +276,95 @@ export function NetworkCommandDesk({
     router.refresh();
   }
 
+  async function invitePartner() {
+    setMessage(null);
+    setOneTimeLink(null);
+    setInviteBusy(true);
+    try {
+      const res = await fetch("/api/admin/partner/invitations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(inviteForm),
+      });
+      const data = (await res.json()) as {
+        ok?: boolean;
+        error?: string;
+        emailSent?: boolean;
+        oneTimeActivateUrl?: string | null;
+        invitation?: { partnerProfileId?: number };
+      };
+      if (!res.ok || !data.ok) {
+        setMessage(data.error || "Invitation failed.");
+        return;
+      }
+      setInviteForm({ displayName: "", email: "", personalNote: "" });
+      if (data.oneTimeActivateUrl) {
+        setOneTimeLink(data.oneTimeActivateUrl);
+        setMessage(
+          "Invitation created. Email was not delivered — copy this one-time link now. It will not be shown again.",
+        );
+      } else {
+        setMessage(
+          data.emailSent
+            ? "Invitation sent."
+            : "Invitation created.",
+        );
+      }
+      if (data.invitation?.partnerProfileId) {
+        router.push(
+          `/admin/sales/partners?partner=${data.invitation.partnerProfileId}`,
+        );
+      }
+      router.refresh();
+    } finally {
+      setInviteBusy(false);
+    }
+  }
+
+  async function resendInvitation(invitationId: number) {
+    setMessage(null);
+    setOneTimeLink(null);
+    const res = await fetch(
+      `/api/admin/partner/invitations/${invitationId}/resend`,
+      { method: "POST" },
+    );
+    const data = (await res.json()) as {
+      ok?: boolean;
+      error?: string;
+      emailSent?: boolean;
+      oneTimeActivateUrl?: string | null;
+    };
+    if (!res.ok || !data.ok) {
+      setMessage(data.error || "Resend failed.");
+      return;
+    }
+    if (data.oneTimeActivateUrl) {
+      setOneTimeLink(data.oneTimeActivateUrl);
+      setMessage(
+        "Invitation resent. Email was not delivered — copy this one-time link now. It will not be shown again.",
+      );
+    } else {
+      setMessage(data.emailSent ? "Invitation resent." : "Invitation updated.");
+    }
+    router.refresh();
+  }
+
+  async function revokeInvitation(invitationId: number) {
+    setMessage(null);
+    setOneTimeLink(null);
+    const res = await fetch(
+      `/api/admin/partner/invitations/${invitationId}/revoke`,
+      { method: "POST" },
+    );
+    const data = (await res.json()) as { ok?: boolean; error?: string };
+    if (!res.ok || !data.ok) {
+      setMessage(data.error || "Revoke failed.");
+      return;
+    }
+    setMessage("Invitation revoked.");
+    router.refresh();
+  }
+
   async function transitionEarning(
     earningId: number,
     status: "approved" | "paid" | "void",
@@ -308,6 +409,89 @@ export function NetworkCommandDesk({
         </header>
 
         {message ? <p className="kxd-nc__notice">{message}</p> : null}
+        {oneTimeLink ? (
+          <div className="kxd-nc__notice" role="status">
+            <p style={{ margin: "0 0 0.5rem" }}>One-time activate link (copy now):</p>
+            <code
+              style={{
+                display: "block",
+                wordBreak: "break-all",
+                fontSize: "0.8125rem",
+              }}
+            >
+              {oneTimeLink}
+            </code>
+            <button
+              type="button"
+              className="kxd-nc__btn kxd-nc__btn--ghost"
+              style={{ marginTop: "0.75rem" }}
+              onClick={() => {
+                void navigator.clipboard?.writeText(oneTimeLink);
+                setMessage("Link copied. It will not be shown after you leave this page.");
+              }}
+            >
+              Copy link
+            </button>
+          </div>
+        ) : null}
+
+        <section className="kxd-nc__invite" aria-label="Invite partner">
+          <p className="kxd-nc__roster-label">Invite partner</p>
+          <div className="kxd-nc__invite-grid">
+            <label>
+              <span>Display name</span>
+              <input
+                value={inviteForm.displayName}
+                onChange={(e) =>
+                  setInviteForm((current) => ({
+                    ...current,
+                    displayName: e.target.value,
+                  }))
+                }
+                autoComplete="off"
+              />
+            </label>
+            <label>
+              <span>Email</span>
+              <input
+                type="email"
+                value={inviteForm.email}
+                onChange={(e) =>
+                  setInviteForm((current) => ({
+                    ...current,
+                    email: e.target.value,
+                  }))
+                }
+                autoComplete="off"
+              />
+            </label>
+            <label className="kxd-nc__invite-note">
+              <span>Personal note (optional)</span>
+              <textarea
+                rows={2}
+                value={inviteForm.personalNote}
+                onChange={(e) =>
+                  setInviteForm((current) => ({
+                    ...current,
+                    personalNote: e.target.value,
+                  }))
+                }
+              />
+            </label>
+          </div>
+          <button
+            type="button"
+            className="kxd-nc__btn"
+            disabled={
+              inviteBusy ||
+              !inviteForm.displayName.trim() ||
+              !inviteForm.email.trim()
+            }
+            onClick={() => void invitePartner()}
+          >
+            {inviteBusy ? "Sending…" : "Invite partner"}
+          </button>
+        </section>
 
         <section className="kxd-nc__decision">
           <p className="kxd-nc__decision-kicker">Decision</p>
@@ -355,15 +539,41 @@ export function NetworkCommandDesk({
                 ))}
               </ul>
             )}
+            {workspace.invitedPartners.length > 0 ? (
+              <div className="kxd-nc__inactive">
+                <p className="kxd-nc__roster-label">Invitations</p>
+                <ul className="kxd-nc__roster-list">
+                  {workspace.invitedPartners.map((row) => (
+                    <li key={row.id}>
+                      <Link
+                        href={`/admin/sales/partners?partner=${row.id}`}
+                        className={selected?.id === row.id ? "is-current" : undefined}
+                      >
+                        <span className="kxd-nc__roster-name">{row.displayName}</span>
+                        <span className="kxd-nc__roster-meta">
+                          {row.rosterState === "expired" ? "Expired" : "Invited"}
+                          {row.email ? ` · ${row.email}` : ""}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
             {workspace.inactivePartners.length > 0 ? (
               <div className="kxd-nc__inactive">
                 <p className="kxd-nc__roster-label">Inactive</p>
                 <ul className="kxd-nc__roster-list">
                   {workspace.inactivePartners.map((row) => (
                     <li key={row.id}>
-                      <Link href={`/admin/sales/partners?partner=${row.id}`}>
+                      <Link
+                        href={`/admin/sales/partners?partner=${row.id}`}
+                        className={selected?.id === row.id ? "is-current" : undefined}
+                      >
                         <span className="kxd-nc__roster-name">{row.displayName}</span>
-                        <span className="kxd-nc__roster-meta">Inactive</span>
+                        <span className="kxd-nc__roster-meta">
+                          {row.rosterState === "revoked" ? "Revoked" : "Inactive"}
+                        </span>
                       </Link>
                     </li>
                   ))}
@@ -374,56 +584,106 @@ export function NetworkCommandDesk({
 
           {selected ? (
             <article className="kxd-nc__record" aria-label="Partner record">
-              <p className="kxd-nc__record-kicker">{signalLabel(selected.signal)}</p>
-              <h2 className="kxd-nc__record-name">{selected.displayName}</h2>
-              <p className="kxd-nc__record-signal">{selected.signalExplanation}</p>
-              <p className="kxd-nc__paid-label">Paid to date</p>
-              <p className="kxd-nc__paid">{formatCents(selected.paidEarningsCents)}</p>
-              <p className="kxd-nc__approved">
-                Approved {formatCents(selected.approvedEarningsCents)}
-                {selected.pendingApprovalCents > 0
-                  ? ` · ${formatCents(selected.pendingApprovalCents)} pending review`
-                  : ""}
+              <p className="kxd-nc__record-kicker">
+                {selected.rosterState === "active"
+                  ? signalLabel(selected.signal)
+                  : selected.rosterState === "invited"
+                    ? "Invited"
+                    : selected.rosterState === "expired"
+                      ? "Expired"
+                      : selected.rosterState === "revoked"
+                        ? "Revoked"
+                        : "Inactive"}
               </p>
-              <ol className="kxd-nc__path">
-                {(
-                  [
-                    ["introductions", "Introductions submitted", selected.submittedLeads],
-                    [
-                      "qualified",
-                      "Qualified",
-                      selected.qualifiedLeads,
-                      rateText(selected.qualifiedRate),
-                    ],
-                    [
-                      "discovery",
-                      "Discovery booked",
-                      selected.bookedCalls,
-                      rateText(selected.discoveryRate),
-                    ],
-                    [
-                      "won",
-                      "Clients won",
-                      selected.wonClients,
-                      rateText(selected.wonRate),
-                    ],
-                    ["paid", "Paid", formatCents(selected.paidEarningsCents)],
-                  ] as Array<[string, string, string | number, string | null | undefined]>
-                ).map(([key, label, value, rate]) => (
-                  <li key={key} className={pathKey === key ? "is-current" : undefined}>
-                    <span>{label}</span>
-                    <span>
-                      {value}
-                      {rate ? ` · ${rate}` : ""}
-                    </span>
-                  </li>
-                ))}
-              </ol>
-              {selected.bonusProgress ? (
-                <p className="kxd-nc__bonus">{selected.bonusProgress.sentence}</p>
+              <h2 className="kxd-nc__record-name">{selected.displayName}</h2>
+              <p className="kxd-nc__record-signal">
+                {selected.rosterState === "active"
+                  ? selected.signalExplanation
+                  : selected.rosterState === "invited"
+                    ? "Private invitation sent. Partner room opens after they activate."
+                    : selected.rosterState === "expired"
+                      ? "Invitation expired. Resend to issue a new private link."
+                      : selected.rosterState === "revoked"
+                        ? "Invitation revoked. No partner access."
+                        : "No portal access."}
+              </p>
+              {selected.email ? (
+                <p className="kxd-nc__approved">{selected.email}</p>
               ) : null}
-              {selected.highPotential ? (
-                <p className="kxd-nc__potential">{selected.highPotential.sentence}</p>
+              {selected.invitationId &&
+              (selected.canResendInvitation || selected.canRevokeInvitation) ? (
+                <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", marginTop: "1rem" }}>
+                  {selected.canResendInvitation ? (
+                    <button
+                      type="button"
+                      className="kxd-nc__btn"
+                      onClick={() => void resendInvitation(selected.invitationId!)}
+                    >
+                      Resend invitation
+                    </button>
+                  ) : null}
+                  {selected.canRevokeInvitation ? (
+                    <button
+                      type="button"
+                      className="kxd-nc__btn kxd-nc__btn--ghost"
+                      onClick={() => void revokeInvitation(selected.invitationId!)}
+                    >
+                      Revoke invitation
+                    </button>
+                  ) : null}
+                </div>
+              ) : null}
+              {selected.rosterState === "active" ? (
+                <>
+                  <p className="kxd-nc__paid-label">Paid to date</p>
+                  <p className="kxd-nc__paid">{formatCents(selected.paidEarningsCents)}</p>
+                  <p className="kxd-nc__approved">
+                    Approved {formatCents(selected.approvedEarningsCents)}
+                    {selected.pendingApprovalCents > 0
+                      ? ` · ${formatCents(selected.pendingApprovalCents)} pending review`
+                      : ""}
+                  </p>
+                  <ol className="kxd-nc__path">
+                    {(
+                      [
+                        ["introductions", "Introductions submitted", selected.submittedLeads],
+                        [
+                          "qualified",
+                          "Qualified",
+                          selected.qualifiedLeads,
+                          rateText(selected.qualifiedRate),
+                        ],
+                        [
+                          "discovery",
+                          "Discovery booked",
+                          selected.bookedCalls,
+                          rateText(selected.discoveryRate),
+                        ],
+                        [
+                          "won",
+                          "Clients won",
+                          selected.wonClients,
+                          rateText(selected.wonRate),
+                        ],
+                        ["paid", "Paid", formatCents(selected.paidEarningsCents)],
+                      ] as Array<[string, string, string | number, string | null | undefined]>
+                    ).map(([key, label, value, rate]) => (
+                      <li key={key} className={pathKey === key ? "is-current" : undefined}>
+                        <span>{label}</span>
+                        <span>
+                          {value}
+                          {rate ? ` · ${rate}` : ""}
+                        </span>
+                      </li>
+                    ))}
+                  </ol>
+                  {selected.bonusProgress ? (
+                    <p className="kxd-nc__bonus">{selected.bonusProgress.sentence}</p>
+                  ) : null}
+                  {selected.highPotential ? (
+                    <p className="kxd-nc__potential">{selected.highPotential.sentence}</p>
+                  ) : null}
+                </>
               ) : null}
               {selected.notes ? (
                 <p className="kxd-nc__bonus">Internal note. {selected.notes}</p>
