@@ -6,6 +6,10 @@ import path from "node:path";
 import { applySourceOwnedFields, defaultFieldAuthority, displayTitle } from "../lib/calendar/authority.ts";
 import { parseMotorsportRegCalendarXml, mapMotorsportRegType } from "../lib/calendar/motorsportreg.ts";
 import { toPublicCalendarEvent } from "../lib/calendar/parse.ts";
+import {
+  isMotorsportRegRegistrationUrl,
+  resolvePublicRegistrationHref,
+} from "../lib/calendar/motorsportreg.ts";
 import { validateCalendarInput } from "../lib/calendar/validate.ts";
 import type { CalendarEventRecord } from "../lib/calendar/types.ts";
 import { PRIMAL_EXPERIENCE_PROFILE } from "../lib/ces/profile/primal.ts";
@@ -105,10 +109,53 @@ function main() {
   const publicEvent = toPublicCalendarEvent(existing);
   check("public projection omits unpublished", toPublicCalendarEvent({ ...existing, listedOnWebsite: false }) === null);
   check(
-    "public projection keeps MSR register id",
-    Boolean(publicEvent?.registrationHref?.includes(existing.sourceExternalId!)),
+    "MSR public registrationHref uses authoritative MotorsportReg sourceUrl",
+    publicEvent?.registrationHref === existing.sourceUrl,
+  );
+  check(
+    "MSR public registrationHref is never native /register checkout",
+    !String(publicEvent?.registrationHref ?? "").startsWith("/register"),
   );
   check("cancelled events are not public", toPublicCalendarEvent({ ...existing, status: "cancelled" }) === null);
+
+  check(
+    "valid MSR URL validator accepts motorsportreg.com",
+    isMotorsportRegRegistrationUrl(existing.sourceUrl),
+  );
+  check(
+    "invalid relative native checkout is rejected as MSR registration URL",
+    !isMotorsportRegRegistrationUrl(`/register?eventId=${existing.sourceExternalId}`),
+  );
+  check(
+    "missing MSR sourceUrl yields null registrationHref (no invented checkout)",
+    resolvePublicRegistrationHref({
+      sourceSystem: "motorsportreg",
+      sourceUrl: null,
+    }) === null,
+  );
+  check(
+    "foreign host is rejected for MSR registrationHref",
+    resolvePublicRegistrationHref({
+      sourceSystem: "motorsportreg",
+      sourceUrl: "https://evil.example/register",
+    }) === null,
+  );
+  check(
+    "editorial title override does not change MSR registration URL",
+    toPublicCalendarEvent({ ...existing, titleOverride: "Edited school name" })?.registrationHref ===
+      existing.sourceUrl,
+  );
+
+  const manualCustom = fixture({
+    sourceSystem: "manual",
+    sourceExternalId: null,
+    sourceUrl: "https://www.primalmotorsports.com/schools",
+    fieldAuthority: defaultFieldAuthority("manual"),
+  });
+  check(
+    "manual/custom events keep configured sourceUrl as registrationHref",
+    toPublicCalendarEvent(manualCustom)?.registrationHref === manualCustom.sourceUrl,
+  );
 
   const issues = validateCalendarInput({ sourceTitle: "", startsOn: "bad" });
   check("validation requires name and date", issues.length >= 2);

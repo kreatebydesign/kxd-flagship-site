@@ -1,4 +1,5 @@
 import { displayTitle } from "./authority";
+import { resolvePublicRegistrationHref } from "./motorsportreg";
 import type {
   CalendarActivityEntry,
   CalendarEventRecord,
@@ -118,10 +119,10 @@ export function toPublicCalendarEvent(event: CalendarEventRecord): PublicCalenda
   if (event.status === "cancelled") return null;
 
   const sourceId = event.sourceExternalId;
-  const registrationHref =
-    event.sourceSystem === "motorsportreg" && sourceId
-      ? `/register?eventId=${encodeURIComponent(sourceId)}`
-      : event.sourceUrl;
+  const registrationHref = resolvePublicRegistrationHref({
+    sourceSystem: event.sourceSystem,
+    sourceUrl: event.sourceUrl,
+  });
 
   return {
     id: sourceId || event.eventKey,
