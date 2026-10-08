@@ -15,6 +15,11 @@ import type {
   NetworkCommandPartnerRecord,
   NetworkCommandWorkspace,
 } from "@/lib/portal/partner/network-command";
+import type {
+  OwnerNetworkProfileFields,
+  OwnerNetworkShowcaseFields,
+} from "@/lib/portal/partner/network-directory-rules";
+import { NetworkDirectoryOwnerPanel } from "@/components/admin/sales/NetworkDirectoryOwnerPanel";
 
 type PolicyState = {
   projectRateBps: number;
@@ -190,11 +195,15 @@ function rateForEarningType(
 export function NetworkCommandDesk({
   workspace,
   selectedPartnerId,
+  networkProfile = null,
+  networkShowcase = [],
   policy,
   calendar,
 }: {
   workspace: NetworkCommandWorkspace;
   selectedPartnerId: number | null;
+  networkProfile?: OwnerNetworkProfileFields | null;
+  networkShowcase?: OwnerNetworkShowcaseFields[];
   policy: PolicyState;
   calendar: {
     configured: boolean;
@@ -840,6 +849,17 @@ export function NetworkCommandDesk({
             </article>
           )}
         </div>
+
+        <NetworkDirectoryOwnerPanel
+          selectedPartnerId={selectedPartnerId}
+          selectedPartnerName={selected?.displayName ?? null}
+          partnerOptions={partners.map((row) => ({
+            id: row.id,
+            displayName: row.displayName,
+          }))}
+          initialProfile={networkProfile}
+          initialShowcase={networkShowcase}
+        />
 
         <div className="kxd-nc__chapters">
           <section className="kxd-nc__chapter">

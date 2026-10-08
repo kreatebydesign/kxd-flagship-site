@@ -6,6 +6,7 @@ import { KxdLogo } from "@/components/ui/KxdLogo";
 
 const NAV = [
   { href: "/portal/partner", label: "Home" },
+  { href: "/portal/partner/network", label: "The Network" },
   { href: "/portal/partner/playbook", label: "Private Brief" },
   { href: "/portal/partner/submit-lead", label: "Bring an introduction" },
   { href: "/portal/partner/leads", label: "Introductions" },

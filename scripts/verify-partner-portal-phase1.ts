@@ -132,6 +132,7 @@ async function main() {
   await check("partner routes and APIs exist", () => {
     const routes = [
       "app/(portal)/portal/(partner)/partner/page.tsx",
+      "app/(portal)/portal/(partner)/partner/network/page.tsx",
       "app/(portal)/portal/(partner)/partner/playbook/page.tsx",
       "app/(portal)/portal/(partner)/partner/submit-lead/page.tsx",
       "app/(portal)/portal/(partner)/partner/leads/page.tsx",

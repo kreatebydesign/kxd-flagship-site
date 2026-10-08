@@ -27,6 +27,7 @@
     "seed:clients": "tsx scripts/seed-clients.ts",
     "verify:partner-portal-phase1": "node --import tsx scripts/verify-partner-portal-phase1.ts",
     "verify:partner-portal-phase3": "node --import tsx scripts/verify-partner-portal-phase3.ts",
+    "verify:partner-portal-phase4": "node --import tsx scripts/verify-partner-portal-phase4.ts",
     "verify:partner-portal-phase3-activation-origin": "node --import tsx scripts/verify-partner-portal-phase3-activation-origin.ts",
     "verify:partner-portal-phase3-e2e": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/run-partner-portal-phase3-e2e.ts",
     "verify:network-command-phase2": "node --import tsx scripts/verify-network-command-phase2.ts",
