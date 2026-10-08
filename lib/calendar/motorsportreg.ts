@@ -82,3 +82,39 @@ export function mapMotorsportRegType(raw: string | null): "school" | "race" | "o
   if (value.includes("race") || value.includes("track")) return "race";
   return "other";
 }
+
+const MOTORSPORTREG_HOST = /(^|\.)motorsportreg\.com$/i;
+
+/**
+ * True when a URL is a customer-actionable MotorsportReg http(s) destination.
+ * Rejects relative native checkout paths and non-MSR hosts.
+ */
+export function isMotorsportRegRegistrationUrl(
+  value: string | null | undefined,
+): value is string {
+  if (!value?.trim()) return false;
+  try {
+    const parsed = new URL(value.trim());
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return false;
+    return MOTORSPORTREG_HOST.test(parsed.hostname);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Public registration link for calendar projection.
+ * MSR-sourced paid events must use the authoritative MotorsportReg URL when present.
+ * Never invent native `/register?eventId=` checkout for MSR events (not production-ready).
+ * Manual/custom events keep their configured sourceUrl unchanged.
+ */
+export function resolvePublicRegistrationHref(input: {
+  sourceSystem: string;
+  sourceUrl: string | null | undefined;
+}): string | null {
+  if (input.sourceSystem === "motorsportreg") {
+    return isMotorsportRegRegistrationUrl(input.sourceUrl) ? input.sourceUrl.trim() : null;
+  }
+  const url = typeof input.sourceUrl === "string" ? input.sourceUrl.trim() : "";
+  return url || null;
+}
