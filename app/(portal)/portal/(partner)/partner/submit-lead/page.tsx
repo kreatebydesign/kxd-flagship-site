@@ -16,7 +16,7 @@ export default async function PartnerSubmitLeadPage() {
         One clean handoff: the business, the opportunity, and how to reach the
         person who can decide.
       </p>
-      <PartnerLeadForm />
+      <PartnerLeadForm partnerId={session.partnerId} />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { PartnerMemberRecord } from "@/components/partner/PartnerMemberRecord";
 import { getPartnerSession } from "@/lib/portal/partner/access";
 import { formatPartnerCents } from "@/lib/portal/partner/earnings";
 import { loadPartnerHomeSnapshot } from "@/lib/portal/partner/referrals";
@@ -20,74 +21,33 @@ export default async function PartnerHomePage() {
   const paidLabel = formatPartnerCents(snapshot.paidEarningsCents);
   const approvedLabel = formatPartnerCents(snapshot.approvedEarningsCents);
 
-  const path = [
-    {
-      label: "Introduction",
-      value: String(snapshot.submittedLeads),
-      empty: snapshot.submittedLeads === 0,
-    },
-    {
-      label: "Qualified",
-      value: String(snapshot.qualifiedLeads),
-      empty: snapshot.qualifiedLeads === 0,
-    },
-    {
-      label: "Discovery",
-      value: String(snapshot.bookedCalls),
-      empty: snapshot.bookedCalls === 0,
-    },
-    {
-      label: "Client won",
-      value: String(snapshot.wonClients),
-      empty: snapshot.wonClients === 0,
-    },
-    {
-      label: "Paid",
-      value: paidLabel,
-      empty: snapshot.paidEarningsCents === 0,
-    },
-  ];
-
   return (
     <div className="kxd-partner-page kxd-partner-page--home">
       <div className="kxd-partner-folio">
         <header className="kxd-partner-folio__leaf">
           <p className="kxd-partner-network">KXD Network · Private access</p>
+          <span className="kxd-partner-folio__echo" aria-hidden />
           <h1 className="kxd-partner-arrival__title">Welcome, {firstName}.</h1>
           <p className="kxd-partner-arrival__lead">
-            You bring the right introduction. KXD qualifies, discovers, and closes.
+            You bring the introduction. KXD qualifies, discovers, and closes.
           </p>
           <Link className="kxd-partner-btn" href={snapshot.nextAction.href}>
             {snapshot.nextAction.label}
           </Link>
         </header>
 
-        <aside className="kxd-partner-folio__plate" aria-label="Member record">
-          <p className="kxd-partner-folio__paid-label">Paid to date</p>
-          <p className="kxd-partner-folio__paid">{paidLabel}</p>
-          {early ? (
-            <p className="kxd-partner-folio__status">
-              Nothing is paid until KXD closes work you sourced. Start with a
-              qualified introduction.
-            </p>
-          ) : (
-            <p className="kxd-partner-folio__status">Approved {approvedLabel}</p>
-          )}
-
-          <div className="kxd-partner-folio__chapter">
-            <p className="kxd-partner-folio__chapter-kicker">Next</p>
-            <p className="kxd-partner-folio__chapter-name">{snapshot.nextAction.hint}</p>
-          </div>
-
-          <ol className="kxd-partner-folio__rest" aria-label="Operating path">
-            {path.map((step) => (
-              <li key={step.label} className={step.empty ? "is-empty" : undefined}>
-                <span>{step.label}</span>
-                <span>{step.value}</span>
-              </li>
-            ))}
-          </ol>
-        </aside>
+        <PartnerMemberRecord
+          partnerId={session.partnerId}
+          paidLabel={paidLabel}
+          paidEarningsCents={snapshot.paidEarningsCents}
+          approvedLabel={approvedLabel}
+          early={early}
+          nextHint={snapshot.nextAction.hint}
+          submittedLeads={snapshot.submittedLeads}
+          qualifiedLeads={snapshot.qualifiedLeads}
+          bookedCalls={snapshot.bookedCalls}
+          wonClients={snapshot.wonClients}
+        />
       </div>
 
       <section className="kxd-partner-brief" aria-labelledby="kxd-standard-heading">

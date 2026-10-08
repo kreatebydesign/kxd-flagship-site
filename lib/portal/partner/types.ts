@@ -136,7 +136,9 @@ export type PartnerEarningListItem = {
   paymentStatusLabel: string;
   relevantMonth: string | null;
   paidAt: string | null;
+  approvedAt: string | null;
   relatedReferralId: number | null;
+  relatedSalesLeadId: number | null;
 };
 
 export type PartnerHomeSnapshot = {

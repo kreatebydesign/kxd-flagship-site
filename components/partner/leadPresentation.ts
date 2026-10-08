@@ -80,7 +80,7 @@ export function partnerLeadNextAction(state: PartnerVisibilityState): {
       };
     case "not_moving_forward":
       return {
-        label: "Submit another introduction",
+        label: "Bring another introduction",
         href: "/portal/partner/submit-lead",
         hint: "This one closed. Bring the next qualified introduction.",
       };

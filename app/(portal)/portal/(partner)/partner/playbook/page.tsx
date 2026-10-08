@@ -60,7 +60,7 @@ export default async function PartnerPlaybookPage() {
   return (
     <div className="kxd-partner-page kxd-partner-page--playbook">
       <p className="kxd-partner-network">KXD Network · Private access</p>
-      <h1 className="kxd-partner-title">Playbook</h1>
+      <h1 className="kxd-partner-title">Private Brief</h1>
       <p className="kxd-partner-lead">
         Find fit, open the door, hand off cleanly. KXD closes the work.
       </p>

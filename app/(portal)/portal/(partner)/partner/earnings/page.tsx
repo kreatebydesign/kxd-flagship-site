@@ -3,7 +3,12 @@ import {
   isLocalQaBusinessName,
   partnerDisplayBusinessName,
 } from "@/components/partner/leadPresentation";
+import { PartnerPaidCountUp } from "@/components/partner/PartnerPaidCountUp";
 import { getPartnerSession } from "@/lib/portal/partner/access";
+import {
+  computePartnerPerformanceBonusProgress,
+  partnerFacingBonusProgressSentence,
+} from "@/lib/portal/partner/bonus-progress";
 import {
   loadPartnerCommissionPolicy,
   partnerFacingCommissionExplanations,
@@ -33,6 +38,21 @@ export default async function PartnerEarningsPage() {
     amount: amounts[step.title] ?? 0,
   }));
 
+  const bonusProgress = computePartnerPerformanceBonusProgress(
+    summary.approvedEntries,
+    policy,
+  );
+  const bonusSentence = bonusProgress
+    ? partnerFacingBonusProgressSentence(bonusProgress, formatPartnerCents)
+    : null;
+
+  const paidEntries = summary.approvedEntries.filter(
+    (entry) => entry.paymentStatus === "paid",
+  );
+  const approvedOnly = summary.approvedEntries.filter(
+    (entry) => entry.paymentStatus === "approved",
+  );
+
   return (
     <div className="kxd-partner-page">
       <p className="kxd-partner-network">KXD Network · Private access</p>
@@ -43,13 +63,23 @@ export default async function PartnerEarningsPage() {
 
       <section className="kxd-partner-paid kxd-partner-paid--hero" aria-label="Paid to date">
         <p className="kxd-partner-paid__label">Paid to date</p>
-        <p className="kxd-partner-paid__value">
-          {formatPartnerCents(summary.paidToDateCents)}
-        </p>
+        <PartnerPaidCountUp
+          partnerId={session.partnerId}
+          paidToDateCents={summary.paidToDateCents}
+        />
         <p className="kxd-partner-paid__note">
           Approved outstanding {formatPartnerCents(summary.approvedOutstandingCents)}
         </p>
       </section>
+
+      {bonusSentence ? (
+        <section
+          className="kxd-partner-bonus"
+          aria-label="Performance bonus progress"
+        >
+          <p className="kxd-partner-bonus__copy">{bonusSentence}</p>
+        </section>
+      ) : null}
 
       <section className="kxd-partner-section">
         <h2 className="kxd-partner-section__title">How earnings work</h2>
@@ -72,15 +102,53 @@ export default async function PartnerEarningsPage() {
       </section>
 
       <section className="kxd-partner-section">
-        <h2 className="kxd-partner-section__title">Entries</h2>
-        {summary.approvedEntries.length === 0 ? (
+        <h2 className="kxd-partner-section__title">Paid</h2>
+        {paidEntries.length === 0 ? (
           <p className="kxd-partner-empty">
-            Nothing approved yet. When a sourced project or retainer pays and KXD
-            clears the commission, it lands here.
+            No paid entries yet. When KXD clears a commission and marks it paid,
+            it appears here as a receipt.
           </p>
         ) : (
+          <div className="kxd-partner-list kxd-partner-list--receipts">
+            {paidEntries.map((entry) => {
+              const business = partnerDisplayBusinessName(entry.relatedBusinessName);
+              return (
+                <article key={entry.id} className="kxd-partner-receipt">
+                  <div className="kxd-partner-receipt__main">
+                    <h2 className="kxd-partner-receipt__business">
+                      {business}
+                      {isLocalQaBusinessName(entry.relatedBusinessName) ? (
+                        <span className="kxd-partner-local-tag">Local QA</span>
+                      ) : null}
+                    </h2>
+                    <p className="kxd-partner-receipt__type">
+                      {entry.earningTypeLabel}
+                    </p>
+                    <p className="kxd-partner-receipt__date">
+                      {entry.paidAt
+                        ? new Date(entry.paidAt).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })
+                        : "Paid"}
+                    </p>
+                  </div>
+                  <p className="kxd-partner-receipt__amount">
+                    {formatPartnerCents(entry.amountCents)}
+                  </p>
+                </article>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      {approvedOnly.length > 0 ? (
+        <section className="kxd-partner-section">
+          <h2 className="kxd-partner-section__title">Approved</h2>
           <div className="kxd-partner-list kxd-partner-list--entries">
-            {summary.approvedEntries.map((entry) => {
+            {approvedOnly.map((entry) => {
               const business = partnerDisplayBusinessName(entry.relatedBusinessName);
               return (
                 <article key={entry.id} className="kxd-partner-entry">
@@ -94,31 +162,20 @@ export default async function PartnerEarningsPage() {
                     <p className="kxd-partner-entry__meta">
                       {entry.earningTypeLabel}
                       {entry.relevantMonth ? ` · ${entry.relevantMonth}` : ""}
-                      {entry.paidAt
-                        ? ` · Paid ${new Date(entry.paidAt).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })}`
-                        : ""}
                     </p>
                   </div>
                   <p className="kxd-partner-entry__amount">
                     {formatPartnerCents(entry.amountCents)}
                   </p>
-                  <span
-                    className={`kxd-partner-pill${
-                      entry.paymentStatus === "paid" ? "" : " kxd-partner-pill--muted"
-                    }`}
-                  >
+                  <span className="kxd-partner-pill kxd-partner-pill--muted">
                     {entry.paymentStatusLabel}
                   </span>
                 </article>
               );
             })}
           </div>
-        )}
-      </section>
+        </section>
+      ) : null}
     </div>
   );
 }

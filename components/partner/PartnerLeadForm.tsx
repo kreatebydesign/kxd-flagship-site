@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { partnerIntroAckStorageKey } from "@/lib/portal/partner/member-browser-state";
 
 type FieldKey =
   | "businessName"
@@ -113,19 +113,21 @@ const EMPTY = Object.fromEntries(
   SECTIONS.flatMap((s) => s.fields.map((f) => [f.key, ""])),
 ) as Record<FieldKey, string>;
 
-export function PartnerLeadForm() {
+type PartnerLeadFormProps = {
+  partnerId: number;
+};
+
+export function PartnerLeadForm({ partnerId }: PartnerLeadFormProps) {
   const router = useRouter();
   const [values, setValues] = useState(EMPTY);
   const [decisionMakerConfirmed, setDecisionMakerConfirmed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [submittedId, setSubmittedId] = useState<number | null>(null);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     setError(null);
-    setSubmittedId(null);
     try {
       const res = await fetch("/api/portal/partner/referrals", {
         method: "POST",
@@ -141,9 +143,14 @@ export function PartnerLeadForm() {
         setError(data.message || "Could not submit this introduction.");
         return;
       }
-      setValues(EMPTY);
-      setDecisionMakerConfirmed(false);
-      setSubmittedId(Number(data.referralId) || null);
+      try {
+        if (Number.isFinite(partnerId) && partnerId > 0) {
+          sessionStorage.setItem(partnerIntroAckStorageKey(partnerId), "1");
+        }
+      } catch {
+        /* private mode — still route home */
+      }
+      router.replace("/portal/partner");
       router.refresh();
     } catch {
       setError("Could not submit this introduction.");
@@ -212,14 +219,6 @@ export function PartnerLeadForm() {
         </p>
         {error ? (
           <p className="kxd-partner-message kxd-partner-message--error">{error}</p>
-        ) : null}
-        {submittedId ? (
-          <p className="kxd-partner-message kxd-partner-message--ok">
-            Introduction submitted. KXD will review it from here.{" "}
-            <Link href={`/portal/partner/leads/${submittedId}`}>
-              Open this introduction
-            </Link>
-          </p>
         ) : null}
         <button className="kxd-partner-btn kxd-partner-btn--cta" type="submit" disabled={busy}>
           {busy ? "Submitting…" : "Submit introduction"}
