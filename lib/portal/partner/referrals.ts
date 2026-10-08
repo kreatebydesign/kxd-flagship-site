@@ -424,27 +424,27 @@ function resolveNextAction(input: {
 }): PartnerHomeSnapshot["nextAction"] {
   if (input.submittedLeads === 0) {
     return {
-      label: "Review the playbook",
+      label: "Open the Private Brief",
       href: "/portal/partner/playbook",
-      hint: "Start with the field guide, then submit your first introduction.",
+      hint: "Read the Private Brief, then bring your first introduction.",
     };
   }
   if (input.qualifiedLeads > 0 && input.bookedCalls === 0) {
     return {
       label: "Book KXD in",
       href: "/portal/partner/book",
-      hint: "A qualified opportunity is ready for a discovery call.",
+      hint: "A qualified introduction is ready for a discovery call.",
     };
   }
   if (input.submittedLeads > 0) {
     return {
-      label: "Submit another lead",
+      label: "Bring another introduction",
       href: "/portal/partner/submit-lead",
-      hint: "Keep the pipeline moving with the next strong introduction.",
+      hint: "Keep the record moving with the next strong introduction.",
     };
   }
   return {
-    label: "Open my leads",
+    label: "Open introductions",
     href: "/portal/partner/leads",
     hint: "Review where each introduction stands.",
   };

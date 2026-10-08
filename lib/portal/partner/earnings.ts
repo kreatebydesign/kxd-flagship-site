@@ -4,6 +4,9 @@ import { getPayload } from "payload";
 import config from "@payload-config";
 import type { PartnerEarningListItem, PartnerEarningType } from "./types";
 import { PARTNER_EARNING_TYPE_LABELS } from "./types";
+import { formatPartnerCents } from "./format-cents";
+
+export { formatPartnerCents };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDoc = Record<string, any>;
@@ -34,7 +37,19 @@ function mapSafeEntry(row: AnyDoc): PartnerEarningListItem | null {
   const relatedReferralId =
     typeof row.relatedPartnerReferral === "number"
       ? row.relatedPartnerReferral
-      : null;
+      : typeof row.relatedPartnerReferral === "object" &&
+          row.relatedPartnerReferral &&
+          "id" in row.relatedPartnerReferral
+        ? Number(row.relatedPartnerReferral.id)
+        : null;
+  const relatedSalesLeadId =
+    typeof row.relatedSalesLead === "number"
+      ? row.relatedSalesLead
+      : typeof row.relatedSalesLead === "object" &&
+          row.relatedSalesLead &&
+          "id" in row.relatedSalesLead
+        ? Number(row.relatedSalesLead.id)
+        : null;
   return {
     id: Number(row.id),
     earningType,
@@ -45,7 +60,15 @@ function mapSafeEntry(row: AnyDoc): PartnerEarningListItem | null {
     paymentStatusLabel: status === "paid" ? "Paid" : "Approved",
     relevantMonth: row.relevantMonth ? String(row.relevantMonth) : null,
     paidAt: row.paidAt ? String(row.paidAt) : null,
-    relatedReferralId,
+    approvedAt: row.approvedAt ? String(row.approvedAt) : null,
+    relatedReferralId:
+      relatedReferralId != null && Number.isFinite(relatedReferralId)
+        ? relatedReferralId
+        : null,
+    relatedSalesLeadId:
+      relatedSalesLeadId != null && Number.isFinite(relatedSalesLeadId)
+        ? relatedSalesLeadId
+        : null,
   };
 }
 
@@ -131,13 +154,4 @@ export async function listPartnerEarningsForReferral(input: {
   return (result.docs as AnyDoc[])
     .map(mapSafeEntry)
     .filter((row): row is PartnerEarningListItem => row != null);
-}
-
-export function formatPartnerCents(cents: number): string {
-  const dollars = cents / 100;
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: cents % 100 === 0 ? 0 : 2,
-  }).format(dollars);
 }

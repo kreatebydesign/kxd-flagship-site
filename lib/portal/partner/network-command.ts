@@ -9,6 +9,7 @@ import {
   isQualifiedPartnerVisibility,
   partnerConversionRate,
 } from "./path-metrics";
+import { computePartnerPerformanceBonusProgress } from "./bonus-progress";
 import { derivePartnerRosterState } from "./invitation-rules";
 import {
   PARTNER_VISIBILITY_LABELS,
@@ -228,16 +229,6 @@ function formatUsd(cents: number): string {
   }).format(dollars);
 }
 
-function projectCommissionKey(row: NetworkCommandEarningInput): string {
-  if (row.relatedReferralId) return `r:${row.relatedReferralId}`;
-  if (row.relatedSalesLeadId) return `s:${row.relatedSalesLeadId}`;
-  return `b:${row.relatedBusinessName.trim().toLowerCase()}`;
-}
-
-function earningWindowAt(row: NetworkCommandEarningInput): number | null {
-  return relTimeMs(row.paidAt) ?? relTimeMs(row.approvedAt);
-}
-
 function isClosedSalesStatus(status: string): boolean {
   return status === "won" || status === "lost";
 }
@@ -299,40 +290,19 @@ function bonusProgressFor(
   policy: NetworkCommandPolicyInput,
   nowMs: number,
 ): NetworkCommandPartnerRecord["bonusProgress"] {
-  if (!policy.performanceBonusEnabled) return null;
-  const windowMs = policy.performanceBonusWindowDays * 24 * HOUR_MS;
-  const windowStart = nowMs - windowMs;
-
-  const keys = new Set<string>();
-  for (const row of earnings) {
-    if (row.earningType !== "project_commission") continue;
-    if (row.paymentStatus !== "approved" && row.paymentStatus !== "paid") continue;
-    const at = earningWindowAt(row);
-    if (at == null || at < windowStart) continue;
-    keys.add(projectCommissionKey(row));
-  }
-
-  const alreadyOnLedger = earnings.some((row) => {
-    if (row.earningType !== "performance_bonus") return false;
-    if (row.paymentStatus === "void") return false;
-    const at = earningWindowAt(row) ?? relTimeMs(row.createdAt);
-    return at != null && at >= windowStart;
-  });
-
-  const count = keys.size;
-  if (count === 0 && !alreadyOnLedger) return null;
-  const required = policy.performanceBonusProjectCount;
-  const amount = formatUsd(policy.performanceBonusAmountCents);
-  const sentence = alreadyOnLedger
-    ? `A performance bonus is already on the ledger for this ${policy.performanceBonusWindowDays}-day window.`
-    : `${count} of ${required} approved project commissions in the last ${policy.performanceBonusWindowDays} days. The bonus is ${amount} and is still a ledger entry you approve.`;
+  const progress = computePartnerPerformanceBonusProgress(earnings, policy, nowMs);
+  if (!progress) return null;
+  const amount = formatUsd(progress.amountCents);
+  const sentence = progress.alreadyOnLedger
+    ? `A performance bonus is already on the ledger for this ${progress.windowDays}-day window.`
+    : `${progress.count} of ${progress.required} approved project commissions in the last ${progress.windowDays} days. The bonus is ${amount} and is still a ledger entry you approve.`;
 
   return {
-    count,
-    required,
-    windowDays: policy.performanceBonusWindowDays,
-    amountCents: policy.performanceBonusAmountCents,
-    alreadyOnLedger,
+    count: progress.count,
+    required: progress.required,
+    windowDays: progress.windowDays,
+    amountCents: progress.amountCents,
+    alreadyOnLedger: progress.alreadyOnLedger,
     sentence,
   };
 }
