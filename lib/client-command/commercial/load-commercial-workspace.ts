@@ -660,12 +660,19 @@ export async function loadClientCommercialWorkspace(input: {
       totalOutstandingValue: formatCents(
         statementView.document.summary.totalOutstandingCents as never,
       ),
+      accountCreditsAppliedLabel:
+        statementView.document.summary.accountCreditsAppliedLabel ??
+        "Account Credits Applied",
+      accountCreditsAppliedValue: formatCents(
+        (statementView.document.summary.accountCreditsAppliedCents ?? 0) as never,
+      ),
     },
     openBalances: statementView.document.openBalances.items.map((item) => ({
       id: item.id,
       description: item.description,
       originalLabel: formatCents(item.originalCents as never),
       paidLabel: formatCents(item.paidCents as never),
+      creditedLabel: formatCents((item.creditedCents ?? 0) as never),
       remainingLabel: formatCents(item.remainingCents as never),
       dueDate: item.dueDate ?? null,
       statusLabel: item.statusLabel,
@@ -677,6 +684,7 @@ export async function loadClientCommercialWorkspace(input: {
         description: item.description,
         originalLabel: formatCents(item.originalCents as never),
         paidLabel: formatCents(item.paidCents as never),
+        creditedLabel: formatCents((item.creditedCents ?? 0) as never),
         remainingLabel: formatCents(item.remainingCents as never),
         dueDate: item.dueDate ?? null,
         statusLabel: item.statusLabel,
@@ -689,6 +697,14 @@ export async function loadClientCommercialWorkspace(input: {
       label: payment.label,
       detail: payment.detail ?? null,
       amountLabel: formatCents(payment.amountCents as never),
+    })),
+    credits: (statementView.document.creditHistory?.credits ?? []).map((credit) => ({
+      id: credit.id,
+      creditedOn: credit.creditedOn,
+      label: credit.label,
+      detail: credit.detail ?? null,
+      amountLabel: formatCents(credit.amountCents as never),
+      sourceType: credit.sourceType ?? null,
     })),
     totalOutstandingCents: statementView.document.summary.totalOutstandingCents,
     pdfHref: `/api/admin/clients/${clientId}/commercial/account-statement/pdf`,

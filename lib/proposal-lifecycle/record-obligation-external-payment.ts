@@ -6,6 +6,12 @@
 import { getPayload } from "payload";
 import config from "@payload-config";
 import {
+  applyAccountCredit,
+  previewAccountCreditAllocation,
+  type AccountCreditAllocationPreview,
+  type RecordAccountCreditInput,
+} from "./account-credit.ts";
+import {
   applyAllocatedExternalPayment,
   applyObligationExternalPayment,
   type RecordAllocatedExternalPaymentInput,
@@ -157,6 +163,58 @@ export async function recordAllocatedExternalPaymentOnContract(
     idempotentReplay: applied.idempotentReplay,
     preview: applied.preview,
   };
+}
+
+export async function recordAccountCreditOnContract(
+  input: RecordAccountCreditInput,
+): Promise<{
+  pkg: ContractLifecyclePackage;
+  idempotentReplay: boolean;
+  preview: AccountCreditAllocationPreview;
+  creditGroupId: string;
+}> {
+  const { payload, contract, pkg } = await loadContractPackage(input.contractId);
+  if (!pkg.billingPlan) {
+    throw new Error(
+      "Billing plan is not prepared yet. Prepare the billing plan before recording account credits.",
+    );
+  }
+
+  const applied = applyAccountCredit(pkg, input);
+  if (!applied.ok) {
+    throw new Error(
+      Object.entries(applied.errors)
+        .map(([k, v]) => `${k}: ${v}`)
+        .join("; "),
+    );
+  }
+
+  const sealed = await persistPackage(
+    payload,
+    input.contractId,
+    String(contract.status ?? ""),
+    pkg,
+    applied.pkg,
+    applied.idempotentReplay,
+  );
+  return {
+    pkg: sealed,
+    idempotentReplay: applied.idempotentReplay,
+    preview: applied.preview,
+    creditGroupId: applied.creditGroupId,
+  };
+}
+
+export function previewAccountCreditAllocationOnPlan(
+  plan: NonNullable<ContractLifecyclePackage["billingPlan"]>,
+  input: {
+    amountCents: number;
+    allocationMode?: "fifo" | "explicit";
+    allocations?: Array<{ obligationId: string; amountCents: number }>;
+    allowedObligationIds?: string[];
+  },
+) {
+  return previewAccountCreditAllocation(plan, input);
 }
 
 export async function ensureRecurringDueOccurrenceOnContract(input: {

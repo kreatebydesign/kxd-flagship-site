@@ -37,12 +37,24 @@ export type AccountStatementOpenBalance = {
   description: string;
   originalCents: Cents;
   paidCents: Cents;
+  /** Non-cash account credits applied to this obligation. */
+  creditedCents?: Cents;
   remainingCents: Cents;
   dueDate?: string | null;
   statusLabel: string;
   kind?: string | null;
   /** Present for upcoming / not-yet-due rows. */
   timingNote?: string | null;
+};
+
+export type AccountStatementCredit = {
+  id: string;
+  /** ISO calendar date YYYY-MM-DD */
+  creditedOn: string;
+  amountCents: Cents;
+  label: string;
+  detail?: string | null;
+  sourceType?: string | null;
 };
 
 export type AccountStatementClosingNote = {
@@ -102,6 +114,9 @@ export type AccountStatementDocument = {
     /** All-account payments received (project + service + addon). */
     accountPaymentsReceivedLabel: string;
     accountPaymentsReceivedCents: Cents;
+    /** Non-cash account credits applied (project overage, referral, etc.). */
+    accountCreditsAppliedLabel?: string;
+    accountCreditsAppliedCents?: Cents;
   };
   openBalances: {
     sectionTitle: string;
@@ -120,6 +135,12 @@ export type AccountStatementDocument = {
     totalReceivedCents: Cents;
     remainingLabel: string;
     remainingCents: Cents;
+  };
+  creditHistory?: {
+    sectionTitle: string;
+    credits: AccountStatementCredit[];
+    totalCreditsLabel: string;
+    totalCreditsCents: Cents;
   };
   currentCharges: {
     sectionTitle: string;

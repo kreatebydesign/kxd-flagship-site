@@ -44,12 +44,27 @@ export {
 export {
   recordObligationExternalPaymentOnContract,
   recordAllocatedExternalPaymentOnContract,
+  recordAccountCreditOnContract,
   ensureRecurringDueOccurrenceOnContract,
   ensurePayableSurfacesOnContract,
   ensurePayableSurfacesOnPlan,
 } from "./record-obligation-external-payment.ts";
 export {
+  applyAccountCredit,
+  previewAccountCreditAllocation,
+  normalizeAccountCreditHistory,
+  ACCOUNT_CREDIT_SOURCE_TYPES,
+  sourceTypeLabel,
+} from "./account-credit.ts";
+export type {
+  AccountCreditSourceType,
+  ObligationCreditEvent,
+  RecordAccountCreditInput,
+  AccountCreditAllocationPreview,
+} from "./account-credit.ts";
+export {
   obligationAmountPaidCents,
+  obligationAmountCreditedCents,
   obligationRemainingCents,
   obligationIsPaid,
   planFifoAllocation,
@@ -58,6 +73,7 @@ export {
   sumOpenObligationRemainingCents,
   sumObligationAmountCents,
   sumObligationPaidCents,
+  sumObligationCreditedCents,
   aggregateObligationBalances,
   deriveObligationPaymentStatus,
   isLaunchGatedObligationTrigger,

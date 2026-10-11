@@ -7,6 +7,7 @@ import type { ClientWorkspaceBundle } from "@/lib/client-command/workspace-types
 import { WorkspaceEmpty } from "@/components/admin/operations/client-workspace/WorkspacePrimitives";
 import { CommercialStatusBadge, statusTone } from "./CommercialStatusBadge";
 import { RecordObligationPaymentForm } from "./RecordObligationPaymentForm";
+import { RecordAccountCreditForm } from "./RecordAccountCreditForm";
 import { RegisterRecurringDueForm } from "./RegisterRecurringDueForm";
 import { EnsureRecurringThroughDateForm } from "./EnsureRecurringThroughDateForm";
 import { EnsureCommercialMaterializationForm } from "./EnsureCommercialMaterializationForm";
@@ -36,6 +37,7 @@ export function CommercialInvoices({ data }: { data: ClientWorkspaceBundle }) {
       <p className="kxd-os-commercial-lead">
         Billing obligations with original amount, paid, and remaining balance. Record external
         payments here — including partial Cash App payments — without creating Stripe charges.
+        Record account credits separately when balance should fall without cash received.
         Register recurring due periods without creating Stripe subscriptions.
       </p>
 
@@ -48,6 +50,8 @@ export function CommercialInvoices({ data }: { data: ClientWorkspaceBundle }) {
         initialAgreementId={recordFor?.agreementId}
         onClose={recordFor ? () => setRecordFor(null) : undefined}
       />
+
+      <RecordAccountCreditForm clientId={data.clientId} targets={targets} invoices={rows} />
 
       <RegisterRecurringDueForm clientId={data.clientId} targets={recurringTargets} />
       <EnsureRecurringThroughDateForm

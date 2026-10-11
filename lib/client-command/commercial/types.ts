@@ -243,6 +243,7 @@ export interface CommercialStatementOpenBalanceRow {
   description: string;
   originalLabel: string;
   paidLabel: string;
+  creditedLabel?: string | null;
   remainingLabel: string;
   dueDate: string | null;
   statusLabel: string;
@@ -257,6 +258,15 @@ export interface CommercialStatementPaymentRow {
   amountLabel: string;
 }
 
+export interface CommercialStatementCreditRow {
+  id: string;
+  creditedOn: string;
+  label: string;
+  detail: string | null;
+  amountLabel: string;
+  sourceType: string | null;
+}
+
 export interface CommercialStatementSnapshot {
   statementDate: string;
   clientName: string;
@@ -269,6 +279,8 @@ export interface CommercialStatementSnapshot {
     originalProjectValue: string;
     accountPaymentsReceivedLabel: string;
     accountPaymentsReceivedValue: string;
+    accountCreditsAppliedLabel?: string;
+    accountCreditsAppliedValue?: string;
     projectBalanceLabel: string;
     projectBalanceValue: string;
     currentChargesLabel: string;
@@ -281,6 +293,7 @@ export interface CommercialStatementSnapshot {
   openBalances: CommercialStatementOpenBalanceRow[];
   upcomingBalances: CommercialStatementOpenBalanceRow[];
   payments: CommercialStatementPaymentRow[];
+  credits: CommercialStatementCreditRow[];
   totalOutstandingCents: number;
   pdfHref: string;
 }

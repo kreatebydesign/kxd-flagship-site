@@ -199,10 +199,17 @@ export function normalizeObligationPaymentHistory(
 
   const payments: NormalizedStatementPayment[] = [];
   for (const [groupId, groupLegs] of groups) {
-    const amountCents = groupLegs.reduce(
+    const allocatedCents = groupLegs.reduce(
       (sum, leg) => sum + (Number(leg.event.amountCents) || 0),
       0,
     );
+    const grossFromEvents = groupLegs
+      .map((leg) => Number(leg.event.paymentGroupGrossCents))
+      .find((value) => Number.isInteger(value) && value > 0);
+    const amountCents =
+      typeof grossFromEvents === "number" && grossFromEvents >= allocatedCents
+        ? grossFromEvents
+        : allocatedCents;
     const dates = groupLegs
       .map((leg) => toCalendarDate(leg.event.paidAt))
       .filter(Boolean)
