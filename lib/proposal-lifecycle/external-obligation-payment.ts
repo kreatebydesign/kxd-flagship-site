@@ -14,10 +14,16 @@ import { assertObligationTransition } from "./transitions.ts";
 import { assertNoSensitiveCardFields } from "../direct-agreement/validate.ts";
 import {
   isObligationOpenForExternalPayment,
+  obligationAmountCreditedCents,
   obligationAmountPaidCents,
   obligationRemainingCents,
   planFifoAllocation,
 } from "./obligation-balances.ts";
+import {
+  applyAccountCredit,
+  type AccountCreditSourceType,
+  type RecordAccountCreditInput,
+} from "./account-credit.ts";
 
 /** Supported methods — includes legacy `wire` for stored values. */
 export const EXTERNAL_PAYMENT_METHODS = [
@@ -54,6 +60,12 @@ export type ObligationPaymentEvent = {
   stripeInvoiceId?: string | null;
   collectionChannel: ObligationCollectionChannel;
   idempotencyKey: string;
+  /**
+   * Gross cash received for this payment group when an overage portion
+   * became an account credit. Statement history uses this so one Cash App
+   * transaction (e.g. $400) appears once even when only $300 hit obligations.
+   */
+  paymentGroupGrossCents?: number | null;
 };
 
 /** Legacy single-receipt shape kept for fully-paid obligations and older data. */
@@ -90,6 +102,17 @@ export type AllocationLegInput = {
   amountCents: number;
 };
 
+export type OverageAsAccountCreditInput = {
+  sourceType: AccountCreditSourceType;
+  label: string;
+  reason: string;
+  note?: string | null;
+  /** Defaults to FIFO across remaining open obligations after cash legs. */
+  allocationMode?: "fifo" | "explicit";
+  allocations?: AllocationLegInput[];
+  allowedObligationIds?: string[];
+};
+
 export type RecordAllocatedExternalPaymentInput = {
   amountCents: number;
   currency?: string;
@@ -98,6 +121,12 @@ export type RecordAllocatedExternalPaymentInput = {
   externalReference?: string | null;
   operatorNote?: string | null;
   stripeInvoiceId?: string | null;
+  /**
+   * When the cash payment exceeds obligation allocations, record the
+   * unallocated remainder as an audited account credit (project overage).
+   * Preserves one real external-payment transaction at the gross amount.
+   */
+  overageAsAccountCredit?: OverageAsAccountCreditInput | null;
   recordedBy: string;
   paidOutsideStripe?: boolean;
   /**
@@ -339,14 +368,16 @@ function applyEventToObligation(
 ): InvoiceObligation {
   const events = [...(obligation.paymentEvents ?? []), event];
   const paid = obligationAmountPaidCents(obligation) + event.amountCents;
-  const status = paid >= obligation.amountCents ? "paid" : "partially-paid";
+  const credited = obligationAmountCreditedCents(obligation);
+  const remaining = Math.max(0, obligation.amountCents - paid - credited);
+  const status = remaining <= 0 ? "paid" : "partially-paid";
   if (obligation.status !== status) {
     assertObligationTransition(obligation.status, status);
   }
 
   const receipt: ObligationPaymentReceipt = {
-    status: status === "paid" ? "paid" : "partial",
-    amountCents: status === "paid" ? obligation.amountCents : paid,
+    status: paid >= obligation.amountCents ? "paid" : "partial",
+    amountCents: Math.min(paid, obligation.amountCents),
     currency: event.currency,
     paidAt: event.paidAt,
     externalPaymentMethod: event.externalPaymentMethod,
@@ -748,12 +779,35 @@ export function applyAllocatedExternalPayment(
   });
   if ("ok" in preview && preview.ok === false) return preview;
   const allocationPreview = preview as AllocationPreview;
+  const overageCredit = input.overageAsAccountCredit ?? null;
 
-  if (allocationPreview.unallocatedCents > 0) {
+  if (allocationPreview.unallocatedCents > 0 && !overageCredit) {
     return {
       ok: false,
       errors: {
         amountCents: `Payment leaves $${(allocationPreview.unallocatedCents / 100).toFixed(2)} unallocated. Reduce the amount or add more open obligations.`,
+      },
+    };
+  }
+
+  if (allocationPreview.unallocatedCents > 0 && overageCredit) {
+    if (overageCredit.sourceType !== "project-overage") {
+      return {
+        ok: false,
+        errors: {
+          overageAsAccountCredit:
+            "Unallocated external payment remainder may only become a project-overage account credit.",
+        },
+      };
+    }
+  }
+
+  if (allocationPreview.unallocatedCents <= 0 && overageCredit) {
+    return {
+      ok: false,
+      errors: {
+        overageAsAccountCredit:
+          "Overage account credit requires an unallocated payment remainder.",
       },
     };
   }
@@ -787,7 +841,10 @@ export function applyAllocatedExternalPayment(
   // Also reject duplicate external reference+date+amount+method across payment groups when ref present.
   const ref = trimOrNull(input.externalReference);
   if (ref) {
-    const groupTotals = new Map<string, { paidAt: string; method: string; total: number }>();
+    const groupTotals = new Map<
+      string,
+      { paidAt: string; method: string; total: number; gross: number }
+    >();
     for (const obligation of plan.obligations) {
       for (const event of obligation.paymentEvents ?? []) {
         if (!event.externalReference || event.externalReference !== ref) continue;
@@ -795,16 +852,23 @@ export function applyAllocatedExternalPayment(
           paidAt: event.paidAt.slice(0, 10),
           method: event.externalPaymentMethod,
           total: 0,
+          gross: 0,
         };
         existing.total += event.amountCents;
+        existing.gross = Math.max(
+          existing.gross,
+          Number(event.paymentGroupGrossCents) || existing.total,
+        );
         groupTotals.set(event.paymentGroupId, existing);
       }
     }
     for (const group of groupTotals.values()) {
+      const matchedAmount =
+        group.gross === amountCents || group.total === amountCents;
       if (
         group.paidAt === paidAt!.slice(0, 10) &&
         group.method === input.externalPaymentMethod &&
-        group.total === amountCents
+        matchedAmount
       ) {
         return {
           ok: false,
@@ -820,6 +884,8 @@ export function applyAllocatedExternalPayment(
   const channel = collectionChannelFor(input);
   const recordedAt = new Date().toISOString();
   const paymentGroupId = newLifecycleId("paygrp");
+  const grossCents =
+    overageCredit && allocationPreview.unallocatedCents > 0 ? amountCents : null;
 
   let nextObligations = plan.obligations;
   for (const leg of allocationPreview.legs) {
@@ -837,6 +903,7 @@ export function applyAllocatedExternalPayment(
       stripeInvoiceId,
       collectionChannel: channel,
       idempotencyKey,
+      paymentGroupGrossCents: grossCents,
     };
     nextObligations = nextObligations.map((obligation) =>
       obligation.id === leg.obligationId ? applyEventToObligation(obligation, event) : obligation,
@@ -854,8 +921,36 @@ export function applyAllocatedExternalPayment(
   next = appendAudit(next, {
     actor: recordedBy!,
     action: "obligation.external-payment-allocated",
-    reason: `${input.externalPaymentMethod}${ref ? ` · ${ref}` : ""} · $${(amountCents / 100).toFixed(2)} across ${allocationPreview.legs.length} obligation(s)`,
+    reason: `${input.externalPaymentMethod}${ref ? ` · ${ref}` : ""} · $${(amountCents / 100).toFixed(2)} across ${allocationPreview.legs.length} obligation(s)${
+      overageCredit
+        ? ` · $${(allocationPreview.unallocatedCents / 100).toFixed(2)} project-overage credit`
+        : ""
+    }`,
   });
+
+  if (overageCredit && allocationPreview.unallocatedCents > 0) {
+    const creditInput: RecordAccountCreditInput = {
+      contractId: input.contractId,
+      amountCents: allocationPreview.unallocatedCents,
+      currency,
+      creditedAt: paidAt!,
+      sourceType: overageCredit.sourceType,
+      label: overageCredit.label,
+      reason: overageCredit.reason,
+      note: overageCredit.note ?? null,
+      recordedBy: recordedBy!,
+      allocationMode: overageCredit.allocationMode ?? "fifo",
+      allocations: overageCredit.allocations,
+      allowedObligationIds: overageCredit.allowedObligationIds,
+      sourcePaymentGroupId: paymentGroupId,
+      clientIdempotencyKey: input.clientIdempotencyKey
+        ? `${input.clientIdempotencyKey}:overage-credit`
+        : `overage:${idempotencyKey}`,
+    };
+    const credited = applyAccountCredit(next, creditInput);
+    if (!credited.ok) return credited;
+    next = credited.pkg;
+  }
 
   return { ok: true, pkg: next, idempotentReplay: false, preview: allocationPreview };
 }

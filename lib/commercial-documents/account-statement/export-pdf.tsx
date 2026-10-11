@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   brandCol: { maxWidth: 190 },
-  logo: { width: 38, height: 36, marginBottom: 4 },
+  logo: { width: 34, height: 32, marginBottom: 3 },
   brandName: {
     fontSize: 7,
     letterSpacing: 0.6,
@@ -165,12 +165,12 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: colors.ink,
   },
-  section: { marginBottom: 6 },
+  section: { marginBottom: 5 },
   sectionLast: { marginBottom: 0 },
   sectionHead: {
     flexDirection: "row",
     alignItems: "baseline",
-    marginBottom: 3,
+    marginBottom: 2,
   },
   sectionEyebrow: {
     fontSize: 6.5,
@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "baseline",
-    paddingVertical: 2.5,
+    paddingVertical: 1.75,
     borderBottomWidth: 1,
     borderBottomColor: colors.line,
   },
@@ -224,7 +224,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: colors.richBlack,
   },
-  serviceItem: { marginBottom: 3.5 },
+  serviceItem: { marginBottom: 2.5 },
   serviceHead: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -376,7 +376,7 @@ function OpenBalanceRow(props: {
 }): React.ReactElement {
   const { item, currency, upcoming } = props;
   return (
-    <View style={styles.serviceItem} wrap={false} minPresenceAhead={42}>
+    <View style={styles.serviceItem} wrap={false} minPresenceAhead={34}>
       <View style={styles.serviceHead}>
         <Text style={styles.serviceTitle}>{item.description}</Text>
         <Text style={styles.serviceAmount}>
@@ -397,8 +397,11 @@ function OpenBalanceRow(props: {
       </Text>
       <Text style={styles.serviceDesc}>
         Original {money(item.originalCents, currency)} · Paid{" "}
-        {money(item.paidCents, currency)} · Remaining{" "}
-        {money(item.remainingCents, currency)}
+        {money(item.paidCents, currency)}
+        {(item.creditedCents ?? 0) > 0
+          ? ` · Credited ${money(item.creditedCents as number, currency)}`
+          : ""}{" "}
+        · Remaining {money(item.remainingCents, currency)}
       </Text>
     </View>
   );
@@ -412,8 +415,19 @@ function AccountStatementPdfDocument(props: {
   const currency = doc.currency;
   const statementDateLabel = formatProposalCalendarDate(doc.statementDate);
   const hasUpcoming = (doc.openBalances.upcomingItems?.length ?? 0) > 0;
+  /**
+   * Current Services duplicates Currently Due remainings for most accounts.
+   * Keep the section only when it adds invoice context or non-duplicative rows
+   * so classic one-page statements stay on a single letter sheet.
+   */
+  const currentChargesAreDuplicate = doc.currentCharges.items.every((item) =>
+    doc.openBalances.items.some(
+      (balance) =>
+        balance.id === item.id && balance.remainingCents === item.amountCents,
+    ),
+  );
   const hasCurrentCharges =
-    doc.currentCharges.items.length > 0 ||
+    (doc.currentCharges.items.length > 0 && !currentChargesAreDuplicate) ||
     Boolean(doc.currentCharges.existingInvoiceNote);
   const continuedLabel = `${doc.clientName} · Account Statement · Continued`;
 
@@ -597,6 +611,40 @@ function AccountStatementPdfDocument(props: {
             </View>
           </View>
         </View>
+
+        {(doc.creditHistory?.credits.length ?? 0) > 0 ? (
+          <View style={styles.section} wrap={false}>
+            <SectionHeading
+              eyebrow="Adjustments"
+              title={doc.creditHistory!.sectionTitle}
+              minPresenceAhead={40}
+            />
+            {doc.creditHistory!.credits.map((credit) => (
+              <View
+                key={credit.id}
+                style={styles.payRow}
+                wrap={false}
+                minPresenceAhead={18}
+              >
+                <Text style={styles.payDate}>
+                  {formatProposalCalendarDate(credit.creditedOn)}
+                </Text>
+                <Text style={styles.payLabel}>{credit.label}</Text>
+                <Text style={styles.payAmount}>
+                  −{money(credit.amountCents, currency)}
+                </Text>
+              </View>
+            ))}
+            <View style={styles.tallyRow} wrap={false} minPresenceAhead={18}>
+              <Text style={styles.tallyEmphLabel}>
+                {doc.creditHistory!.totalCreditsLabel}
+              </Text>
+              <Text style={styles.tallyEmphValue}>
+                −{money(doc.creditHistory!.totalCreditsCents, currency)}
+              </Text>
+            </View>
+          </View>
+        ) : null}
 
         {hasCurrentCharges ? (
           <View style={styles.section} wrap>

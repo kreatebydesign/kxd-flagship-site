@@ -109,6 +109,10 @@ export function CommercialStatements({ data }: { data: ClientWorkspaceBundle }) 
                     <dd>{row.paidLabel}</dd>
                   </div>
                   <div>
+                    <dt>Credited</dt>
+                    <dd>{row.creditedLabel ?? "$0.00"}</dd>
+                  </div>
+                  <div>
                     <dt>Remaining</dt>
                     <dd>{row.remainingLabel}</dd>
                   </div>
@@ -179,6 +183,29 @@ export function CommercialStatements({ data }: { data: ClientWorkspaceBundle }) 
                 <p className="kxd-os-commercial-card__meta">
                   {fmtWorkspaceDate(payment.paidOn)}
                   {payment.detail ? ` · ${payment.detail}` : ""}
+                </p>
+              </div>
+            </article>
+          ))
+        )}
+      </section>
+
+      <section className="kxd-os-commercial-card-list" aria-label="Account credits">
+        <h3 className="kxd-os-commercial-card__title">Account credits</h3>
+        {!statement.credits.length ? (
+          <WorkspaceEmpty message="No account credits on this ledger yet." />
+        ) : (
+          statement.credits.map((credit) => (
+            <article key={credit.id} className="kxd-os-commercial-card">
+              <div className="kxd-os-commercial-card__main">
+                <div className="kxd-os-commercial-card__title-row">
+                  <h4 className="kxd-os-commercial-card__title">{credit.label}</h4>
+                  <p className="kxd-os-commercial-kpi__value">−{credit.amountLabel}</p>
+                </div>
+                <p className="kxd-os-commercial-card__meta">
+                  {fmtWorkspaceDate(credit.creditedOn)}
+                  {credit.detail ? ` · ${credit.detail}` : ""}
+                  {credit.sourceType ? ` · ${credit.sourceType}` : ""}
                 </p>
               </div>
             </article>

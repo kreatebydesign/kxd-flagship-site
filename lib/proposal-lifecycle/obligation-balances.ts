@@ -9,11 +9,16 @@
  * 4. Valid paymentReceipt.amountCents > 0
  * 5. Else 0
  *
+ * Remaining = original − cash paid − account credits.
+ * Credits never increase cash-paid totals.
+ *
  * Default amountPaidCents: 0 must NEVER erase stronger paid evidence.
  */
 
 import type { InvoiceObligation, InvoiceObligationStatus } from "./types.ts";
 import type { ObligationPaymentEvent } from "./external-obligation-payment.ts";
+import type { ObligationCreditEvent } from "./account-credit.ts";
+// type-only import — avoids runtime cycle with account-credit helpers
 
 const TERMINAL_CLOSED = new Set<InvoiceObligationStatus>(["void", "uncollectible"]);
 
@@ -60,7 +65,17 @@ export function obligationAmountPaidCents(obligation: InvoiceObligation): number
   }
 
   // Legacy / provider: fully paid status without events or positive cache.
+  // Do not treat credit-settled "paid" as cash when creditEvents exist.
   if (obligation.status === "paid") {
+    const credited = sumCreditEventsCents(obligation.creditEvents);
+    if (credited > 0 && (!events || events.length === 0) && !(typeof cached === "number" && cached > 0)) {
+      // status paid via credits alone — cash paid is 0 unless receipt proves cash.
+      const receiptPaid = obligation.paymentReceipt?.amountCents;
+      if (typeof receiptPaid === "number" && Number.isInteger(receiptPaid) && receiptPaid > 0) {
+        return capPaidToObligation(receiptPaid, amount);
+      }
+      return 0;
+    }
     return amount;
   }
 
@@ -72,19 +87,42 @@ export function obligationAmountPaidCents(obligation: InvoiceObligation): number
   return 0;
 }
 
+export function sumCreditEventsCents(
+  events: ObligationCreditEvent[] | null | undefined,
+): number {
+  if (!events?.length) return 0;
+  let sum = 0;
+  for (const event of events) {
+    sum += asNonNegativeIntCents(event.amountCents);
+  }
+  return sum;
+}
+
+/**
+ * Authoritative account credits applied to an obligation (non-cash).
+ * Integer cents only. Never exceeds obligation.amountCents.
+ */
+export function obligationAmountCreditedCents(obligation: InvoiceObligation): number {
+  const amount = asNonNegativeIntCents(obligation.amountCents);
+  return capPaidToObligation(sumCreditEventsCents(obligation.creditEvents), amount);
+}
+
 export function obligationRemainingCents(obligation: InvoiceObligation): number {
   if (TERMINAL_CLOSED.has(obligation.status)) return 0;
   const amount = asNonNegativeIntCents(obligation.amountCents);
-  return Math.max(0, amount - obligationAmountPaidCents(obligation));
+  const settled =
+    obligationAmountPaidCents(obligation) + obligationAmountCreditedCents(obligation);
+  return Math.max(0, amount - settled);
 }
 
-/** True when the obligation is fully settled. */
+/** True when the obligation is fully settled (cash + credits). */
 export function obligationIsPaid(obligation: InvoiceObligation): boolean {
   if (TERMINAL_CLOSED.has(obligation.status)) return false;
   const amount = asNonNegativeIntCents(obligation.amountCents);
-  const paid = obligationAmountPaidCents(obligation);
-  if (amount === 0) return obligation.status === "paid" || paid === 0;
-  return paid >= amount;
+  const settled =
+    obligationAmountPaidCents(obligation) + obligationAmountCreditedCents(obligation);
+  if (amount === 0) return obligation.status === "paid" || settled === 0;
+  return settled >= amount;
 }
 
 export function isObligationOpenForExternalPayment(obligation: InvoiceObligation): boolean {
@@ -100,8 +138,12 @@ export function deriveObligationPaymentStatus(
 ): InvoiceObligationStatus {
   if (TERMINAL_CLOSED.has(obligation.status)) return obligation.status;
   const paid = obligationAmountPaidCents(obligation);
-  const remaining = Math.max(0, asNonNegativeIntCents(obligation.amountCents) - paid);
-  if (paid <= 0) {
+  const credited = obligationAmountCreditedCents(obligation);
+  const remaining = Math.max(
+    0,
+    asNonNegativeIntCents(obligation.amountCents) - paid - credited,
+  );
+  if (paid <= 0 && credited <= 0) {
     return obligation.status === "partially-paid" ? "pending-trigger" : obligation.status;
   }
   if (remaining <= 0) return "paid";
@@ -177,6 +219,10 @@ export function sumObligationAmountCents(obligations: InvoiceObligation[]): numb
 
 export function sumObligationPaidCents(obligations: InvoiceObligation[]): number {
   return obligations.reduce((sum, o) => sum + obligationAmountPaidCents(o), 0);
+}
+
+export function sumObligationCreditedCents(obligations: InvoiceObligation[]): number {
+  return obligations.reduce((sum, o) => sum + obligationAmountCreditedCents(o), 0);
 }
 
 export function sumProjectObligationRemainingCents(

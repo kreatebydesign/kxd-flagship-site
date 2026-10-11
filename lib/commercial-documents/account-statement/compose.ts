@@ -9,9 +9,14 @@
 
 import { formatCents, type Cents } from "@/lib/proposal-builder/money";
 import {
+  normalizeAccountCreditHistory,
+  sourceTypeLabel,
+} from "@/lib/proposal-lifecycle/account-credit";
+import {
   aggregateObligationBalances,
   isLaunchGatedObligationTrigger,
   isObligationCurrentlyOutstanding,
+  obligationAmountCreditedCents,
   obligationAmountPaidCents,
   obligationRemainingCents,
   sumCurrentlyOutstandingCents,
@@ -24,6 +29,7 @@ import type { InvoiceObligation } from "@/lib/proposal-lifecycle/types";
 import { normalizeObligationPaymentHistory } from "./normalize-payment-history";
 import type {
   AccountStatementClosingNote,
+  AccountStatementCredit,
   AccountStatementDocument,
   AccountStatementMoneyLine,
   AccountStatementOpenBalance,
@@ -226,8 +232,9 @@ export function clientFacingOpenBalanceStatusLabel(
   if (bucket === "upcoming") return "Upcoming";
   if (obligation.status === "overdue") return "Past Due";
   const paidCents = obligationAmountPaidCents(obligation);
+  const creditedCents = obligationAmountCreditedCents(obligation);
   const remainingCents = obligationRemainingCents(obligation);
-  if (paidCents > 0 && remainingCents > 0) return "Partially Paid";
+  if ((paidCents > 0 || creditedCents > 0) && remainingCents > 0) return "Partially Paid";
   return "Due";
 }
 
@@ -236,12 +243,14 @@ function toOpenBalanceRow(
   options: { bucket: "current" | "upcoming"; timingNote?: string | null },
 ): AccountStatementOpenBalance {
   const paidCents = obligationAmountPaidCents(obligation);
+  const creditedCents = obligationAmountCreditedCents(obligation);
   const remainingCents = obligationRemainingCents(obligation);
   return {
     id: obligation.id,
     description: obligation.label,
     originalCents: obligation.amountCents as Cents,
     paidCents: paidCents as Cents,
+    creditedCents: creditedCents as Cents,
     remainingCents: remainingCents as Cents,
     dueDate: obligation.dueDate ?? null,
     statusLabel: clientFacingOpenBalanceStatusLabel(obligation, options.bucket),
@@ -268,6 +277,11 @@ export function composeAccountStatement(
   const projectPaidCents = sumObligationPaidCents(projectObligations);
   const projectRemainingCents = sumProjectObligationRemainingCents(obligations);
   const openServiceChargesCents = sumOpenObligationRemainingCents(serviceObligations);
+  const accountCredits = normalizeAccountCreditHistory(obligations);
+  const accountCreditsAppliedCents = accountCredits.reduce(
+    (sum, credit) => sum + credit.amountCents,
+    0,
+  );
 
   const openInvoice = input.openInvoice ?? null;
   const openInvoiceAmountDueCents =
@@ -287,6 +301,27 @@ export function composeAccountStatement(
     (sum, row) => sum + row.amountCents,
     0,
   );
+  const creditRows: AccountStatementCredit[] = accountCredits.map((credit) => {
+    const sourceLabel = sourceTypeLabel(credit.sourceType);
+    // Keep statement details compact — full notes live in the operator ledger UI.
+    const detailParts = [sourceLabel, credit.reason]
+      .map((part) => String(part || "").trim())
+      .filter(Boolean)
+      .filter(
+        (part, index, all) =>
+          all.findIndex((candidate) => candidate.toLowerCase() === part.toLowerCase()) ===
+          index,
+      )
+      .filter((part) => part.toLowerCase() !== credit.label.trim().toLowerCase());
+    return {
+      id: credit.id,
+      creditedOn: credit.creditedOn,
+      amountCents: credit.amountCents as Cents,
+      label: credit.label,
+      detail: detailParts.length ? detailParts.join(" · ") : null,
+      sourceType: credit.sourceType,
+    };
+  });
 
   const currentlyDueServices = serviceObligations.filter((obligation) =>
     isObligationCurrentlyOutstanding(obligation, asOfDate),
@@ -393,6 +428,8 @@ export function composeAccountStatement(
       totalOutstandingCents: totalOutstandingCents as Cents,
       accountPaymentsReceivedLabel: "Total Payments Received",
       accountPaymentsReceivedCents: paymentsReceivedAllCents as Cents,
+      accountCreditsAppliedLabel: "Account Credits Applied",
+      accountCreditsAppliedCents: accountCreditsAppliedCents as Cents,
     },
     openBalances: {
       sectionTitle: "Currently Due",
@@ -409,6 +446,12 @@ export function composeAccountStatement(
       totalReceivedCents: paymentsReceivedAllCents as Cents,
       remainingLabel: "Website project remaining",
       remainingCents: projectRemainingCents as Cents,
+    },
+    creditHistory: {
+      sectionTitle: "Account Credits",
+      credits: creditRows,
+      totalCreditsLabel: "Total Account Credits",
+      totalCreditsCents: accountCreditsAppliedCents as Cents,
     },
     currentCharges: {
       sectionTitle: "Current Services",

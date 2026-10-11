@@ -245,6 +245,47 @@ export async function POST(
             clientIdempotencyKey: body.clientIdempotencyKey
               ? String(body.clientIdempotencyKey)
               : null,
+            overageAsAccountCredit:
+              body.overageAsAccountCredit &&
+              typeof body.overageAsAccountCredit === "object"
+                ? {
+                    sourceType: String(
+                      (body.overageAsAccountCredit as { sourceType?: string }).sourceType ??
+                        "project-overage",
+                    ) as "project-overage" | "referral-credit",
+                    label: String(
+                      (body.overageAsAccountCredit as { label?: string }).label ?? "",
+                    ),
+                    reason: String(
+                      (body.overageAsAccountCredit as { reason?: string }).reason ?? "",
+                    ),
+                    note: (body.overageAsAccountCredit as { note?: string | null }).note
+                      ? String((body.overageAsAccountCredit as { note?: string }).note)
+                      : null,
+                    allocationMode:
+                      (body.overageAsAccountCredit as { allocationMode?: string })
+                        .allocationMode === "explicit"
+                        ? ("explicit" as const)
+                        : ("fifo" as const),
+                    allocations: Array.isArray(
+                      (body.overageAsAccountCredit as { allocations?: unknown }).allocations,
+                    )
+                      ? ((body.overageAsAccountCredit as { allocations: Array<{
+                          obligationId: string;
+                          amountCents: number;
+                        }> }).allocations)
+                      : undefined,
+                    allowedObligationIds: Array.isArray(
+                      (body.overageAsAccountCredit as { allowedObligationIds?: unknown })
+                        .allowedObligationIds,
+                    )
+                      ? (
+                          (body.overageAsAccountCredit as { allowedObligationIds: string[] })
+                            .allowedObligationIds
+                        ).map(String)
+                      : undefined,
+                  }
+                : null,
           });
           return NextResponse.json({
             ok: true,
@@ -316,6 +357,75 @@ export async function POST(
           );
         }
         return NextResponse.json({ ok: true, preview, noStripeMutation: true });
+      }
+      case "preview-account-credit-allocation": {
+        const { previewAccountCreditAllocation } = await import(
+          "@/lib/proposal-lifecycle/account-credit"
+        );
+        const { getContractLifecycle } = await import("@/lib/proposal-lifecycle/services");
+        const lifecycle = await getContractLifecycle(id);
+        const plan = lifecycle.pkg.billingPlan;
+        if (!plan) {
+          return NextResponse.json(
+            { ok: false, error: "Billing plan is required." },
+            { status: 400 },
+          );
+        }
+        const preview = previewAccountCreditAllocation(plan, {
+          amountCents: Number(body.amountCents),
+          allocationMode: body.allocationMode === "explicit" ? "explicit" : "fifo",
+          allocations: Array.isArray(body.allocations)
+            ? (body.allocations as Array<{ obligationId: string; amountCents: number }>)
+            : undefined,
+          allowedObligationIds: Array.isArray(body.allowedObligationIds)
+            ? (body.allowedObligationIds as string[]).map(String)
+            : undefined,
+        });
+        if ("ok" in preview && preview.ok === false) {
+          return NextResponse.json(
+            { ok: false, error: Object.values(preview.errors).join("; "), errors: preview.errors },
+            { status: 400 },
+          );
+        }
+        return NextResponse.json({ ok: true, preview, noStripeMutation: true });
+      }
+      case "record-account-credit": {
+        const { recordAccountCreditOnContract } = await import(
+          "@/lib/proposal-lifecycle/record-obligation-external-payment"
+        );
+        const result = await recordAccountCreditOnContract({
+          contractId: id,
+          amountCents: Number(body.amountCents),
+          currency: String(body.currency ?? "USD"),
+          creditedAt: String(body.creditedAt ?? ""),
+          sourceType: String(body.sourceType ?? "") as "project-overage" | "referral-credit",
+          label: String(body.label ?? ""),
+          reason: String(body.reason ?? ""),
+          note: body.note ? String(body.note) : null,
+          recordedBy: actor,
+          allocationMode: body.allocationMode === "explicit" ? "explicit" : "fifo",
+          allocations: Array.isArray(body.allocations)
+            ? (body.allocations as Array<{ obligationId: string; amountCents: number }>)
+            : undefined,
+          allowedObligationIds: Array.isArray(body.allowedObligationIds)
+            ? (body.allowedObligationIds as string[]).map(String)
+            : undefined,
+          sourcePaymentGroupId: body.sourcePaymentGroupId
+            ? String(body.sourcePaymentGroupId)
+            : null,
+          clientIdempotencyKey: body.clientIdempotencyKey
+            ? String(body.clientIdempotencyKey)
+            : null,
+        });
+        return NextResponse.json({
+          ok: true,
+          idempotentReplay: result.idempotentReplay,
+          billingPlan: result.pkg.billingPlan,
+          allocationPreview: result.preview,
+          creditGroupId: result.creditGroupId,
+          noStripeMutation: true,
+          noCashReceived: true,
+        });
       }
       case "preview-recurring-due-occurrence": {
         const {

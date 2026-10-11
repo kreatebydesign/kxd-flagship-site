@@ -244,6 +244,12 @@ export interface InvoiceObligation {
   amountPaidCents?: Cents;
   /** Append-only external/Stripe payment history for this obligation. */
   paymentEvents?: import("./external-obligation-payment.ts").ObligationPaymentEvent[];
+  /**
+   * Append-only audited account credits applied to this obligation.
+   * Non-cash balance reductions (project overage, referral, etc.).
+   * Never counted as cash received.
+   */
+  creditEvents?: import("./account-credit.ts").ObligationCreditEvent[];
   /** How funds were collected — never invent Stripe collection. */
   collectionChannel?:
     | "stripe-invoice-external-pay"

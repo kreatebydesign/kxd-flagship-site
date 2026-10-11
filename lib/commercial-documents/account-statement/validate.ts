@@ -12,11 +12,18 @@ export function validateAccountStatement(
   const issues: string[] = [];
   const { summary, paymentHistory, currentCharges, finalPosition } = doc;
 
+  // Project balance = original − project cash. Account credits applied to
+  // service obligations do not change this identity; credits on project rows
+  // are reflected via remaining helpers already used for projectBalanceCents.
   const expectedProjectBalance = summary.originalProjectCents - summary.paymentsReceivedCents;
   if (summary.projectBalanceCents !== expectedProjectBalance) {
-    issues.push(
-      `Project balance ${summary.projectBalanceCents} ≠ original ${summary.originalProjectCents} − payments ${summary.paymentsReceivedCents}`,
-    );
+    // Allow project credits that reduced remaining below cash-only identity.
+    const projectCreditGap = expectedProjectBalance - summary.projectBalanceCents;
+    if (projectCreditGap < 0 || projectCreditGap > (summary.accountCreditsAppliedCents ?? 0)) {
+      issues.push(
+        `Project balance ${summary.projectBalanceCents} ≠ original ${summary.originalProjectCents} − payments ${summary.paymentsReceivedCents}`,
+      );
+    }
   }
 
   const paymentsSum = addCents(
@@ -100,10 +107,11 @@ export function validateAccountStatement(
       );
     }
     for (const item of openBalances.items) {
-      const expectedRemaining = item.originalCents - item.paidCents;
+      const credited = item.creditedCents ?? 0;
+      const expectedRemaining = item.originalCents - item.paidCents - credited;
       if (item.remainingCents !== expectedRemaining) {
         issues.push(
-          `Open balance ${item.id} remaining ${item.remainingCents} ≠ original ${item.originalCents} − paid ${item.paidCents}`,
+          `Open balance ${item.id} remaining ${item.remainingCents} ≠ original ${item.originalCents} − paid ${item.paidCents} − credited ${credited}`,
         );
       }
       if (item.remainingCents <= 0) {
@@ -112,10 +120,11 @@ export function validateAccountStatement(
     }
     const upcoming = openBalances.upcomingItems ?? [];
     for (const item of upcoming) {
-      const expectedRemaining = item.originalCents - item.paidCents;
+      const credited = item.creditedCents ?? 0;
+      const expectedRemaining = item.originalCents - item.paidCents - credited;
       if (item.remainingCents !== expectedRemaining) {
         issues.push(
-          `Upcoming balance ${item.id} remaining ${item.remainingCents} ≠ original ${item.originalCents} − paid ${item.paidCents}`,
+          `Upcoming balance ${item.id} remaining ${item.remainingCents} ≠ original ${item.originalCents} − paid ${item.paidCents} − credited ${credited}`,
         );
       }
       if (item.remainingCents <= 0) {
@@ -134,6 +143,24 @@ export function validateAccountStatement(
     issues.push(
       `Account payments ${summary.accountPaymentsReceivedCents} ≠ history total ${paymentHistory.totalReceivedCents}`,
     );
+  }
+
+  const creditHistory = doc.creditHistory;
+  if (creditHistory) {
+    const creditsSum = addCents(...creditHistory.credits.map((c) => c.amountCents));
+    if (creditsSum !== creditHistory.totalCreditsCents) {
+      issues.push(
+        `Credit history total ${creditHistory.totalCreditsCents} ≠ sum of credits ${creditsSum}`,
+      );
+    }
+    if (
+      summary.accountCreditsAppliedCents != null &&
+      summary.accountCreditsAppliedCents !== creditHistory.totalCreditsCents
+    ) {
+      issues.push(
+        `Summary account credits ${summary.accountCreditsAppliedCents} ≠ history total ${creditHistory.totalCreditsCents}`,
+      );
+    }
   }
 
   return issues;
