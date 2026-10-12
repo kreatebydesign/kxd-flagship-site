@@ -3,7 +3,8 @@ import { PORTAL_CLIENT_LANGUAGE } from "@/lib/ces/copy/portal-language";
 import { PARTNER_NETWORK_LOGIN } from "@/lib/portal/partner/login-intent";
 
 export interface PortalAuthShellProps {
-  title: string;
+  /** Optional when children render the page title (e.g. partner activate states). */
+  title?: string;
   lead?: string;
   children: React.ReactNode;
   /** Presentation only. Default client login is unchanged. */
@@ -42,7 +43,7 @@ export function PortalAuthShell({
               : PORTAL_CLIENT_LANGUAGE.authLoginEyebrow}
           </p>
         </header>
-        <h1 className="kxd-portal-auth__title">{title}</h1>
+        {title ? <h1 className="kxd-portal-auth__title">{title}</h1> : null}
         {lead ? <p className="kxd-portal-auth__lead">{lead}</p> : null}
         <div className="kxd-portal-auth__body">{children}</div>
       </div>
