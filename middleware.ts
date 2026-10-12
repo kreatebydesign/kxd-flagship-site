@@ -29,6 +29,7 @@ const PORTAL_PUBLIC_PATHS = [
   // Invitation activation must be reachable without a session.
   // Query tokens live on searchParams; matching uses pathname only.
   "/portal/activate",
+  "/portal/partner/activate",
 ];
 
 const JUNIOR_PUBLIC_PATHS = [
