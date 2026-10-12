@@ -35,11 +35,13 @@ function req(origin: string | null, extras?: Record<string, string>): Request {
 async function main() {
   console.log("\nverify-partner-portal-phase3-activation-origin\n");
 
+  const prodEnv: NodeJS.ProcessEnv = {
+    NODE_ENV: "production",
+    VERCEL_ENV: "production",
+  };
+
   await check("production allowlist is only the canonical Network origin", () => {
-    const allowed = resolvePartnerActivationAllowedOrigins({
-      NODE_ENV: "production",
-      VERCEL_ENV: "production",
-    });
+    const allowed = resolvePartnerActivationAllowedOrigins(prodEnv);
     assert.deepEqual([...allowed], [PARTNER_ACTIVATION_PRODUCTION_ORIGIN]);
     assert.equal(PARTNER_ACTIVATION_PRODUCTION_ORIGIN, "https://network.kreatebydesign.com");
   });
@@ -47,7 +49,7 @@ async function main() {
   await check("https://network.kreatebydesign.com is accepted in production", () => {
     const result = assertPartnerActivationOrigin(
       req("https://network.kreatebydesign.com"),
-      { NODE_ENV: "production", VERCEL_ENV: "production" },
+      prodEnv,
     );
     assert.equal(result.ok, true);
     if (result.ok) {
@@ -56,9 +58,7 @@ async function main() {
   });
 
   await check("https://evil.example is rejected in production", () => {
-    const result = assertPartnerActivationOrigin(req("https://evil.example"), {
-      NODE_ENV: "production",
-    });
+    const result = assertPartnerActivationOrigin(req("https://evil.example"), prodEnv);
     assert.equal(result.ok, false);
     if (!result.ok) {
       assert.equal(result.status, 403);
@@ -69,30 +69,66 @@ async function main() {
   await check("portal.kreatebydesign.com is rejected for partner activation in production", () => {
     const result = assertPartnerActivationOrigin(
       req("https://portal.kreatebydesign.com"),
-      { NODE_ENV: "production" },
+      prodEnv,
     );
     assert.equal(result.ok, false);
   });
 
-  await check("missing Origin is rejected in production", () => {
-    const result = assertPartnerActivationOrigin(req(null), {
-      NODE_ENV: "production",
-    });
+  await check("missing Origin without same-site evidence is rejected", () => {
+    const result = assertPartnerActivationOrigin(
+      req(null, { host: "network.kreatebydesign.com" }),
+      prodEnv,
+    );
     assert.equal(result.ok, false);
     if (!result.ok) assert.equal(result.message, PARTNER_ACTIVATION_ORIGIN_ERROR);
   });
 
+  await check("missing Origin + Network Host + Sec-Fetch-Site same-origin is accepted", () => {
+    const result = assertPartnerActivationOrigin(
+      req(null, {
+        host: "network.kreatebydesign.com",
+        "sec-fetch-site": "same-origin",
+        "sec-fetch-mode": "cors",
+      }),
+      prodEnv,
+    );
+    assert.equal(result.ok, true);
+    if (result.ok) {
+      assert.equal(result.origin, "https://network.kreatebydesign.com");
+    }
+  });
+
+  await check("missing Origin + Network Host + activate Referer is accepted", () => {
+    const result = assertPartnerActivationOrigin(
+      req(null, {
+        host: "network.kreatebydesign.com",
+        referer: "https://network.kreatebydesign.com/portal/partner/activate?token=abc",
+      }),
+      prodEnv,
+    );
+    assert.equal(result.ok, true);
+  });
+
+  await check("missing Origin + evil Host is rejected even with Sec-Fetch-Site", () => {
+    const result = assertPartnerActivationOrigin(
+      req(null, {
+        host: "evil.example",
+        "sec-fetch-site": "same-origin",
+      }),
+      prodEnv,
+    );
+    assert.equal(result.ok, false);
+  });
+
   await check("malformed Origin is rejected in production", () => {
-    const result = assertPartnerActivationOrigin(req("not-a-valid-origin"), {
-      NODE_ENV: "production",
-    });
+    const result = assertPartnerActivationOrigin(req("not-a-valid-origin"), prodEnv);
     assert.equal(result.ok, false);
   });
 
   await check("Origin with path is rejected (no reflection / loose parse)", () => {
     const result = assertPartnerActivationOrigin(
       req("https://network.kreatebydesign.com/portal/partner/activate"),
-      { NODE_ENV: "production" },
+      prodEnv,
     );
     assert.equal(result.ok, false);
   });
@@ -101,28 +137,28 @@ async function main() {
     assert.equal(
       assertPartnerActivationOrigin(
         req("https://network.kreatebydesign.com.evil.example"),
-        { NODE_ENV: "production" },
+        prodEnv,
       ).ok,
       false,
     );
     assert.equal(
       assertPartnerActivationOrigin(
         req("https://evil-network.kreatebydesign.com"),
-        { NODE_ENV: "production" },
+        prodEnv,
       ).ok,
       false,
     );
   });
 
-  await check("Host/Referer alone cannot bypass missing Origin in production", () => {
-    const result = assertPartnerActivationOrigin(
-      req(null, {
-        host: "network.kreatebydesign.com",
-        referer: "https://network.kreatebydesign.com/portal/partner/activate",
-      }),
-      { NODE_ENV: "production" },
-    );
-    assert.equal(result.ok, false);
+  await check("local next start (NODE_ENV=production, no Vercel) still allows loopback", () => {
+    const allowed = resolvePartnerActivationAllowedOrigins({
+      NODE_ENV: "production",
+    });
+    assert.ok(allowed.includes("http://127.0.0.1:3015"));
+    const result = assertPartnerActivationOrigin(req("http://127.0.0.1:3015"), {
+      NODE_ENV: "production",
+    });
+    assert.equal(result.ok, true);
   });
 
   await check("non-production still allows localhost", () => {
@@ -131,6 +167,7 @@ async function main() {
     });
     assert.ok(allowed.includes("http://localhost:3000"));
     assert.ok(allowed.includes("http://127.0.0.1:3000"));
+    assert.ok(allowed.includes("http://127.0.0.1:3015"));
     const result = assertPartnerActivationOrigin(req("http://localhost:3000"), {
       NODE_ENV: "development",
     });
@@ -150,7 +187,6 @@ async function main() {
     assert.ok(preview.includes("assertPartnerActivationOrigin"));
     assert.ok(!accept.includes("assertPortalMutatingOrigin"));
     assert.ok(!preview.includes("assertPortalMutatingOrigin"));
-    // Origin check runs before token consumption on accept (call sites, not imports).
     const originCallIdx = accept.indexOf("assertPartnerActivationOrigin(req)");
     const acceptCallIdx = accept.indexOf("await acceptPartnerInvitation(");
     assert.ok(originCallIdx >= 0 && acceptCallIdx > originCallIdx);

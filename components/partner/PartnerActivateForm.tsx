@@ -3,6 +3,10 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
+/** Matches server public copy — keep client bundle free of invitation crypto. */
+const INVITE_UNAVAILABLE =
+  "This invitation link is invalid or no longer available.";
+
 export function PartnerActivateForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -23,7 +27,7 @@ export function PartnerActivateForm() {
     let cancelled = false;
     async function load() {
       if (!token) {
-        setError("This invitation link is invalid or no longer available.");
+        setError(INVITE_UNAVAILABLE);
         setLoading(false);
         return;
       }
@@ -40,9 +44,7 @@ export function PartnerActivateForm() {
           displayName?: string | null;
         };
         if (!res.ok || !data.ok) {
-          throw new Error(
-            data.message ?? "This invitation link is invalid or no longer available.",
-          );
+          throw new Error(data.message ?? INVITE_UNAVAILABLE);
         }
         if (cancelled) return;
         setPreview({
@@ -52,11 +54,7 @@ export function PartnerActivateForm() {
         setDisplayName(data.displayName ?? "");
       } catch (err) {
         if (!cancelled) {
-          setError(
-            err instanceof Error
-              ? err.message
-              : "This invitation link is invalid or no longer available.",
-          );
+          setError(err instanceof Error ? err.message : INVITE_UNAVAILABLE);
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -96,17 +94,11 @@ export function PartnerActivateForm() {
         redirectTo?: string;
       };
       if (!res.ok || !data.ok) {
-        throw new Error(
-          data.message ?? "This invitation link is invalid or no longer available.",
-        );
+        throw new Error(data.message ?? INVITE_UNAVAILABLE);
       }
       router.replace(data.redirectTo || "/portal/partner");
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "This invitation link is invalid or no longer available.",
-      );
+      setError(err instanceof Error ? err.message : INVITE_UNAVAILABLE);
       setSubmitting(false);
     }
   }
@@ -116,76 +108,114 @@ export function PartnerActivateForm() {
   }
 
   if (error && !preview) {
+    const originBlocked = /invalid request origin/i.test(error);
     return (
-      <p className="kxd-portal-auth__notice kxd-portal-auth__notice--error" role="alert">
-        {error}
-      </p>
+      <div className="kxd-portal-auth__state" role="alert">
+        <h1 className="kxd-portal-auth__title">
+          {originBlocked
+            ? "Open this invitation in your browser."
+            : "This invitation is no longer available."}
+        </h1>
+        <p className="kxd-portal-auth__lead">
+          {originBlocked
+            ? "Open the activation link directly in Safari, Chrome, or another full browser window, then create your password. In-app email browsers can block activation."
+            : "It may have expired, been used, or been withdrawn. Contact your KXD point of contact for a new invitation."}
+        </p>
+      </div>
     );
   }
 
   return (
-    <form className="kxd-portal-auth__form" onSubmit={handleSubmit}>
-      {preview ? (
-        <p className="kxd-portal-auth__lead" style={{ marginBottom: "1.25rem" }}>
-          Access for {preview.emailMasked}
-          {preview.displayName ? ` · ${preview.displayName}` : ""}
+    <>
+      <h1 className="kxd-portal-auth__title">Create your password</h1>
+      {preview?.displayName ? (
+        <p className="kxd-portal-auth__lead">
+          Private access for {preview.displayName}
+          {preview.emailMasked ? ` · ${preview.emailMasked}` : ""}
         </p>
-      ) : null}
-      {error ? (
-        <p className="kxd-portal-auth__notice kxd-portal-auth__notice--error" role="alert">
-          {error}
+      ) : preview?.emailMasked ? (
+        <p className="kxd-portal-auth__lead">
+          Private access for {preview.emailMasked}
         </p>
-      ) : null}
-      <div className="kxd-portal-auth__field">
-        <label className="kxd-portal-auth__label" htmlFor="partner-activate-name">
-          Display name
-        </label>
-        <input
-          id="partner-activate-name"
-          className="kxd-portal-auth__input"
-          value={displayName}
-          onChange={(e) => setDisplayName(e.target.value)}
-          autoComplete="name"
-          required
-        />
-      </div>
-      <div className="kxd-portal-auth__field">
-        <label className="kxd-portal-auth__label" htmlFor="partner-activate-password">
-          Password
-        </label>
-        <input
-          id="partner-activate-password"
-          type="password"
-          className="kxd-portal-auth__input"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          autoComplete="new-password"
-          required
-          minLength={8}
-        />
-      </div>
-      <div className="kxd-portal-auth__field">
-        <label className="kxd-portal-auth__label" htmlFor="partner-activate-confirm">
-          Confirm password
-        </label>
-        <input
-          id="partner-activate-confirm"
-          type="password"
-          className="kxd-portal-auth__input"
-          value={confirm}
-          onChange={(e) => setConfirm(e.target.value)}
-          autoComplete="new-password"
-          required
-          minLength={8}
-        />
-      </div>
-      <button
-        type="submit"
-        className="kxd-portal-auth__submit"
-        disabled={submitting}
+      ) : (
+        <p className="kxd-portal-auth__lead">
+          Set a password to activate your KXD Network partner room.
+        </p>
+      )}
+      <form
+        className="kxd-portal-auth__form"
+        onSubmit={handleSubmit}
+        aria-label="Create your password"
       >
-        {submitting ? "Activating…" : "Activate private access"}
-      </button>
-    </form>
+        {error ? (
+          <p
+            className="kxd-portal-auth__notice kxd-portal-auth__notice--error"
+            role="alert"
+          >
+            {error}
+          </p>
+        ) : null}
+        <div className="kxd-portal-auth__field">
+          <label className="kxd-portal-auth__label" htmlFor="partner-activate-name">
+            Display name
+          </label>
+          <input
+            id="partner-activate-name"
+            className="kxd-portal-auth__input"
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            autoComplete="name"
+            required
+          />
+        </div>
+        <div className="kxd-portal-auth__field">
+          <label
+            className="kxd-portal-auth__label"
+            htmlFor="partner-activate-password"
+          >
+            Password
+          </label>
+          <input
+            id="partner-activate-password"
+            type="password"
+            className="kxd-portal-auth__input"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="new-password"
+            required
+            minLength={8}
+          />
+          <p className="kxd-portal-auth__hint">At least 8 characters.</p>
+        </div>
+        <div className="kxd-portal-auth__field">
+          <label
+            className="kxd-portal-auth__label"
+            htmlFor="partner-activate-confirm"
+          >
+            Confirm password
+          </label>
+          <input
+            id="partner-activate-confirm"
+            type="password"
+            className="kxd-portal-auth__input"
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            autoComplete="new-password"
+            required
+            minLength={8}
+          />
+        </div>
+        <button
+          type="submit"
+          className="kxd-portal-auth__submit"
+          disabled={submitting}
+        >
+          {submitting ? "Activating…" : "Activate private access"}
+        </button>
+        <p className="kxd-portal-auth__trust">
+          This invitation is personal and can be used once.
+        </p>
+      </form>
+    </>
   );
 }
