@@ -35,6 +35,7 @@
     "verify:network-command-roster-active": "node --import tsx scripts/verify-network-command-roster-active.ts",
     "verify:network-root-redirect": "node --import tsx scripts/verify-network-root-redirect.ts",
     "verify:partner-portal-production-migrate": "node --import tsx scripts/verify-partner-portal-production-migrate.ts",
+    "verify:partner-phase4-production-migrate": "node --import tsx scripts/verify-partner-phase4-production-migrate.ts",
     "verify:inventory-media-production-migrate": "node --import tsx scripts/verify-inventory-media-production-migrate.ts",
     "seed:executive-profiles": "tsx scripts/seed-executive-client-profiles.ts",
     "seed:primal-experience": "tsx scripts/seed-primal-experience-profile.ts",
