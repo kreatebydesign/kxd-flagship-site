@@ -90,6 +90,7 @@ import { ClientSuccessPlans } from "./payload/collections/ClientSuccessPlans.ts"
 import { SuccessCheckIns } from "./payload/collections/SuccessCheckIns.ts";
 import { Partners } from "./payload/collections/Partners.ts";
 import { KxdPartnerProfiles } from "./payload/collections/KxdPartnerProfiles.ts";
+import { KxdNetworkShowcase } from "./payload/collections/KxdNetworkShowcase.ts";
 import { KxdPartnerInvitations } from "./payload/collections/KxdPartnerInvitations.ts";
 import { PartnerReferrals } from "./payload/collections/PartnerReferrals.ts";
 import { PartnerReferralNotes } from "./payload/collections/PartnerReferralNotes.ts";
@@ -312,6 +313,7 @@ export default buildConfig({
     Users,
     PortalUsers,
     KxdPartnerProfiles,
+    KxdNetworkShowcase,
     KxdPartnerInvitations,
     PartnerEarnings,
     PartnerCommissionPolicies,

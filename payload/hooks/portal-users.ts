@@ -44,3 +44,56 @@ export const requirePortalUserPasswordOnCreateHook: CollectionBeforeChangeHook =
     ],
   });
 };
+
+/**
+ * Partner accounts must not be activated from Portal Users admin.
+ * Invite creates inactive partners; acceptance sets Active with the chosen password.
+ */
+export const enforcePartnerInviteActivationHook: CollectionBeforeChangeHook = ({
+  data,
+  operation,
+  originalDoc,
+}) => {
+  if (!data) return data;
+
+  const next = data as AnyDoc;
+  const prior = (originalDoc as AnyDoc | undefined) ?? undefined;
+  const accessMode = String(next.accessMode ?? prior?.accessMode ?? "client");
+  if (accessMode !== "partner") return data;
+
+  if (operation === "create" && next.active === true) {
+    throw new ValidationError({
+      collection: "portal-users",
+      errors: [
+        {
+          path: "active",
+          message:
+            "Partner accounts must start inactive. Use Network Command → Invite partner. " +
+            "Do not create active partners from Portal Users.",
+        },
+      ],
+    });
+  }
+
+  if (operation === "update") {
+    const becomingActive = next.active === true && prior?.active !== true;
+    if (becomingActive) {
+      const password = next.password;
+      if (typeof password !== "string" || password.trim().length < 8) {
+        throw new ValidationError({
+          collection: "portal-users",
+          errors: [
+            {
+              path: "active",
+              message:
+                "Activate partners only through the private invitation link " +
+                "(Create your password). Do not set Active on partner Portal Users directly.",
+            },
+          ],
+        });
+      }
+    }
+  }
+
+  return data;
+};

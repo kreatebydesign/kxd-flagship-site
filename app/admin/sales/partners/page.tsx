@@ -3,6 +3,10 @@ import {
   operatorGetPolicy,
 } from "@/lib/portal/partner/operator";
 import { selectNetworkCommandPartner } from "@/lib/portal/partner/network-command";
+import {
+  loadOwnerNetworkProfile,
+  loadOwnerNetworkShowcaseList,
+} from "@/lib/portal/partner/network-directory";
 import { getGoogleCalendarConnectionStatus } from "@/lib/google/calendar";
 import { NetworkCommandDesk } from "@/components/admin/sales/NetworkCommandDesk";
 import "@/design-system/os/styles/kxd-network-command.css";
@@ -19,17 +23,23 @@ export default async function PartnerOperatorPage({
     ? Number(params.partner)
     : null;
 
-  const [workspace, policy] = await Promise.all([
+  const [workspace, policy, showcase] = await Promise.all([
     loadNetworkCommandWorkspace(),
     operatorGetPolicy(),
+    loadOwnerNetworkShowcaseList(),
   ]);
   const calendar = getGoogleCalendarConnectionStatus();
   const selected = selectNetworkCommandPartner(workspace, requestedId);
+  const networkProfile = selected
+    ? await loadOwnerNetworkProfile(selected.id)
+    : null;
 
   return (
     <NetworkCommandDesk
       workspace={workspace}
       selectedPartnerId={selected?.id ?? null}
+      networkProfile={networkProfile}
+      networkShowcase={showcase}
       policy={{
         projectRateBps: policy.projectRateBps,
         monthlyRateBps: policy.monthlyRateBps,

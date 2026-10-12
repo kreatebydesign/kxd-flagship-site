@@ -5,6 +5,7 @@ import {
 } from "../access/index.ts";
 import { PAYLOAD_GROUPS } from "../admin/groups.ts";
 import {
+  enforcePartnerInviteActivationHook,
   normalizePortalUserEmailHook,
   requirePortalUserPasswordOnCreateHook,
 } from "../hooks/portal-users.ts";
@@ -16,7 +17,10 @@ export const PortalUsers: CollectionConfig = {
   lockDocuments: false,
   hooks: {
     beforeValidate: [normalizePortalUserEmailHook],
-    beforeChange: [requirePortalUserPasswordOnCreateHook],
+    beforeChange: [
+      requirePortalUserPasswordOnCreateHook,
+      enforcePartnerInviteActivationHook,
+    ],
   },
   admin: {
     useAsTitle: "email",
@@ -25,7 +29,8 @@ export const PortalUsers: CollectionConfig = {
     description:
       "Portal login accounts for client workspaces and approved KXD partners. " +
       "accessMode=client uses Client memberships; accessMode=partner requires an active kxd-partner-profiles row and never resolves client CES. " +
-      "Preferred workflow: KXD OS → Portal Access (/admin/operations/portal-access). " +
+      "Clients: preferred workflow is KXD OS → Portal Access (/admin/operations/portal-access). " +
+      "Partners: use Network Command → Invite partner only. Do not create or activate partner accounts here. " +
       "Password is required on create (8+ chars). Clients can reset via /portal/forgot-password. " +
       "LocalAPI / custom portal auth is the sign-in path — portal-users must never mutate their own client link or memberships via REST. " +
       "Local dev seed: npm run seed:portal-user -- --email user@example.com --password 'TempPass123!' --client primal-motorsports --display-name Adam",
@@ -74,7 +79,8 @@ export const PortalUsers: CollectionConfig = {
       admin: {
         position: "sidebar",
         description:
-          "Client = membership-scoped CES. Partner = Partner Portal only. " +
+          "Client = membership-scoped CES. Partner = Partner Portal only — create via " +
+          "Network Command → Invite partner (not Portal Users). " +
           "Never combine active partner profile with active client memberships on one user.",
       },
     },

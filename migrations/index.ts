@@ -117,6 +117,7 @@ import * as migration_20261003_client_calendar_events from './20261003_client_ca
 import * as migration_20261004_partner_portal_phase1 from './20261004_partner_portal_phase1';
 import * as migration_20261005_partner_portal_phase1_1 from './20261005_partner_portal_phase1_1';
 import * as migration_20261007_partner_portal_phase3_invitations from './20261007_partner_portal_phase3_invitations';
+import * as migration_20261008_partner_portal_phase4_network_directory from './20261008_partner_portal_phase4_network_directory';
 
 export const migrations = [
   {
@@ -762,5 +763,12 @@ export const migrations = [
     up: migration_20261007_partner_portal_phase3_invitations.up,
     down: migration_20261007_partner_portal_phase3_invitations.down,
     name: '20261007_partner_portal_phase3_invitations',
+  },
+  {
+    // Partner Portal Phase 4 — Network directory profiles + selected work showcase.
+    // Additive only. Local apply until production migration is authorized.
+    up: migration_20261008_partner_portal_phase4_network_directory.up,
+    down: migration_20261008_partner_portal_phase4_network_directory.down,
+    name: '20261008_partner_portal_phase4_network_directory',
   },
 ];
