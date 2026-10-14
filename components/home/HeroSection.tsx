@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { TrackedLink } from "@/components/analytics/TrackedLink";
 import { HeroWorkReel } from "./HeroWorkReel";
 import { HeroCursorGlowLazy } from "./HeroCursorGlowLazy";
 
@@ -129,19 +130,40 @@ export function HeroSection() {
               }}
             >
               Premium websites, growth infrastructure, and operational systems
-              for established businesses ready to grow with intention.
+              for established businesses ready to grow with intention.{" "}
+              <Link
+                href="/services/luxury-website-experiences"
+                className="text-[var(--kxd-cream-soft)] underline decoration-[var(--kxd-border-gold)] underline-offset-[0.2em] transition hover:text-[var(--kxd-cream)]"
+              >
+                Luxury website experiences
+              </Link>{" "}
+              and{" "}
+              <Link
+                href="/investment"
+                className="text-[var(--kxd-cream-soft)] underline decoration-[var(--kxd-border-gold)] underline-offset-[0.2em] transition hover:text-[var(--kxd-cream)]"
+              >
+                project investment
+              </Link>{" "}
+              are published for teams evaluating fit.
             </p>
 
             <div
               className="kxd-reveal kxd-reveal-delay-3 flex flex-wrap items-center gap-x-10 gap-y-5"
               style={{ marginTop: "clamp(3rem, 5vw, 4.5rem)" }}
             >
-              <Link href="/start-project" className="kxd-btn-primary">
+              <TrackedLink
+                href="/start-project"
+                className="kxd-btn-primary"
+                ctaLocation="hero_primary"
+                linkText="Start a Project"
+              >
                 Start a Project
-              </Link>
-              <Link
+              </TrackedLink>
+              <TrackedLink
                 href="/work"
                 className="group inline-flex items-center gap-2.5 font-sans font-medium uppercase"
+                ctaLocation="hero_secondary"
+                linkText="View Selected Work"
                 style={{
                   fontSize: "0.6875rem",
                   letterSpacing: "var(--tracking-button)",
@@ -160,7 +182,7 @@ export function HeroSection() {
                 >
                   →
                 </span>
-              </Link>
+              </TrackedLink>
             </div>
           </div>
         </div>

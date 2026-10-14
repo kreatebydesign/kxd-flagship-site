@@ -396,6 +396,7 @@ export const CASE_STUDY_CAPABILITY_LINKS: Record<string, readonly CapabilityLink
   "spur-restaurant": [
     { label: "Hospitality", href: "/industries/hospitality" },
     { label: "Website Experiences", href: "/services/luxury-website-experiences" },
+    { label: "Project Investment", href: "/investment" },
   ],
   "plate-the-umpqua": [
     { label: "Hospitality", href: "/industries/hospitality" },

@@ -33,6 +33,11 @@ const nextConfig: NextConfig = {
         destination: "/contact",
         permanent: true,
       },
+      {
+        source: "/work/spur",
+        destination: "/work/spur-restaurant",
+        permanent: true,
+      },
     ];
   },
   serverExternalPackages: [

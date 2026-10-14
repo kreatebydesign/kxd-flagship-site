@@ -1,6 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import {
+  getContactInvestmentRanges,
+  resolveContactBudgetContext,
+} from "@/lib/inquiries/investment-range-options";
 import { useSearchParams } from "next/navigation";
 import { getBrowserAcquisitionEnvelope } from "@/lib/analytics/ai-referral";
 import { ANALYTICS_EVENTS } from "@/lib/analytics/config";
@@ -28,14 +32,6 @@ const PARTNERSHIP_OPTIONS = [
     value: pkg.id,
     label: pkg.name,
   })),
-] as const;
-
-const INVESTMENT_RANGES = [
-  { value: "under-5k", label: "Under $5,000" },
-  { value: "5k-10k", label: "$5,000 – $10,000" },
-  { value: "10k-25k", label: "$10,000 – $25,000" },
-  { value: "25k-50k", label: "$25,000 – $50,000" },
-  { value: "50k-plus", label: "$50,000+" },
 ] as const;
 
 const TIMELINE_OPTIONS = [
@@ -67,6 +63,22 @@ export function ContactForm() {
   const [projectType, setProjectType] = useState(
     initialPartnership ? "ongoing-partnership" : "",
   );
+  const [investmentRange, setInvestmentRange] = useState("");
+
+  const budgetContext = useMemo(
+    () => resolveContactBudgetContext(projectType || "general"),
+    [projectType],
+  );
+  const investmentRanges = useMemo(
+    () => getContactInvestmentRanges(budgetContext),
+    [budgetContext],
+  );
+
+  const validInvestmentRange =
+    investmentRange &&
+    investmentRanges.some((o) => o.value === investmentRange)
+      ? investmentRange
+      : "";
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -262,7 +274,10 @@ export function ContactForm() {
             required={!partnershipInterest}
             className="kxd-field kxd-field-select"
             value={projectType}
-            onChange={(e) => setProjectType(e.target.value)}
+            onChange={(e) => {
+              setProjectType(e.target.value);
+              setInvestmentRange("");
+            }}
           >
             <option value="">Select type</option>
             {PROJECT_TYPES.map((o) => (
@@ -275,14 +290,25 @@ export function ContactForm() {
       </div>
 
       <div className="mt-5 grid gap-5 sm:grid-cols-2">
-        <SelectField label="Estimated Investment Range" name="investmentRange">
-          <option value="">Select range</option>
-          {INVESTMENT_RANGES.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </SelectField>
+        <div>
+          <label className="kxd-label mb-2 block" htmlFor="investmentRange">
+            Estimated Investment Range
+          </label>
+          <select
+            id="investmentRange"
+            name="investmentRange"
+            className="kxd-field kxd-field-select"
+            value={validInvestmentRange}
+            onChange={(e) => setInvestmentRange(e.target.value)}
+          >
+            <option value="">Select range</option>
+            {investmentRanges.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        </div>
         <SelectField label="Estimated Timeline" name="timeline">
           <option value="">Select timeline</option>
           {TIMELINE_OPTIONS.map((o) => (

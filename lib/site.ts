@@ -77,9 +77,12 @@ export const SERVICE_OPTIONS = [
   },
 ] as const;
 
+export { getContactInvestmentRanges as getBudgetOptionsForContext } from "@/lib/inquiries/investment-range-options";
+
+/** Default contact-form bands when project type is not yet selected. */
 export const BUDGET_OPTIONS = [
-  { label: "Under $5,000", value: "under-5k" },
-  { label: "$5,000 – $10,000", value: "5k-10k" },
+  { label: "$4,500 – $5,000 (brand identity)", value: "under-5k" },
+  { label: "$7,500 – $10,000 (website projects)", value: "5k-10k" },
   { label: "$10,000 – $25,000", value: "10k-25k" },
   { label: "$25,000+", value: "25k-plus" },
 ] as const;

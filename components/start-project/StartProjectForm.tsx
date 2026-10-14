@@ -1,6 +1,10 @@
 "use client";
 
-import { useEffect, useState, type ChangeEvent } from "react";
+import { useEffect, useMemo, useState, type ChangeEvent } from "react";
+import {
+  getStartProjectInvestmentRanges,
+  resolveStartProjectBudgetContext,
+} from "@/lib/inquiries/investment-range-options";
 import { useSearchParams } from "next/navigation";
 import { getBrowserAcquisitionEnvelope } from "@/lib/analytics/ai-referral";
 import { ANALYTICS_EVENTS } from "@/lib/analytics/config";
@@ -33,16 +37,6 @@ const DECISION_MAKER_OPTIONS = [
   { value: "yes", label: "Yes, I am the primary decision maker" },
   { value: "team", label: "I am part of the decision-making team" },
   { value: "no", label: "No, I am gathering information" },
-];
-
-const INVESTMENT_OPTIONS = [
-  { value: "under-5k", label: "Under $5,000" },
-  { value: "5k-10k", label: "$5,000 – $10,000" },
-  { value: "10k-25k", label: "$10,000 – $25,000" },
-  { value: "25k-50k", label: "$25,000 – $50,000" },
-  { value: "50k-100k", label: "$50,000 – $100,000" },
-  { value: "100k-plus", label: "$100,000+" },
-  { value: "not-determined", label: "Not yet determined" },
 ];
 
 const TIMELINE_OPTIONS = [
@@ -315,6 +309,21 @@ export function StartProjectForm() {
   const [fromIntelligence, setFromIntelligence] = useState(false);
   const [auditId, setAuditId] = useState("");
 
+  const budgetContext = useMemo(
+    () => resolveStartProjectBudgetContext(data.servicesInterested),
+    [data.servicesInterested],
+  );
+  const investmentOptions = useMemo(
+    () => getStartProjectInvestmentRanges(budgetContext),
+    [budgetContext],
+  );
+
+  const effectiveInvestmentRange = investmentOptions.some(
+    (o) => o.value === data.investmentRange,
+  )
+    ? data.investmentRange
+    : "";
+
   useEffect(() => {
     if (intelligencePrefillApplied) return;
 
@@ -365,6 +374,9 @@ export function StartProjectForm() {
         ? arr.filter((v) => v !== value)
         : [...arr, value];
 
+      if (key === "servicesInterested") {
+        return { ...prev, servicesInterested: next, investmentRange: "" };
+      }
       return { ...prev, [key]: next };
     });
     setValidationError("");
@@ -421,6 +433,7 @@ export function StartProjectForm() {
 
     const payload = {
       ...data,
+      investmentRange: effectiveInvestmentRange,
       notes,
       referralSource: data.referralSource || (fromIntelligence ? "kxd-intelligence" : ""),
       inquirySource: fromIntelligence ? "kxd-intelligence" : "start-project",
@@ -705,12 +718,12 @@ export function StartProjectForm() {
 
         {step === 4 && (
           <div className="space-y-2">
-            {INVESTMENT_OPTIONS.map((opt) => (
+            {investmentOptions.map((opt) => (
               <RadioOption
                 key={opt.value}
                 label={opt.label}
                 value={opt.value}
-                selected={data.investmentRange === opt.value}
+                selected={effectiveInvestmentRange === opt.value}
                 onSelect={(v) => patch({ investmentRange: v })}
               />
             ))}

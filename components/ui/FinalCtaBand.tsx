@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { TrackedLink } from "@/components/analytics/TrackedLink";
 
 type FinalCtaBandProps = {
   showEmail?: boolean;
@@ -8,6 +8,8 @@ type FinalCtaBandProps = {
   secondaryLabel?: string;
   headline?: string;
   subCopy?: string;
+  /** GA4 cta_location prefix (primary → _primary, secondary → _secondary). */
+  analyticsCtaLocation?: string;
 };
 
 export function FinalCtaBand({
@@ -17,6 +19,7 @@ export function FinalCtaBand({
   secondaryLabel = "View Services",
   headline = "Ready to Build Something Exceptional?",
   subCopy = "KXD partners with brands that value clarity, execution, and experiences designed to last.",
+  analyticsCtaLocation = "final_cta_band",
 }: FinalCtaBandProps) {
   return (
     <section className="kxd-final-cta relative overflow-hidden">
@@ -67,10 +70,15 @@ export function FinalCtaBand({
             </p>
 
             <div className="mt-12 flex flex-col items-center gap-5 sm:flex-row sm:justify-center">
-              <Link href={primaryHref} className="kxd-btn-primary">
+              <TrackedLink
+                href={primaryHref}
+                className="kxd-btn-primary"
+                ctaLocation={`${analyticsCtaLocation}_primary`}
+                linkText={primaryLabel}
+              >
                 {primaryLabel}
-              </Link>
-              <Link
+              </TrackedLink>
+              <TrackedLink
                 href={secondaryHref}
                 className="group inline-flex items-center gap-2.5 font-sans font-medium uppercase"
                 style={{
@@ -78,6 +86,8 @@ export function FinalCtaBand({
                   letterSpacing: "var(--tracking-button)",
                   color: "var(--kxd-cream-muted)",
                 }}
+                ctaLocation={`${analyticsCtaLocation}_secondary`}
+                linkText={secondaryLabel}
               >
                 <span className="transition-colors duration-200 group-hover:text-[var(--kxd-cream)]">
                   {secondaryLabel}
@@ -89,7 +99,7 @@ export function FinalCtaBand({
                 >
                   →
                 </span>
-              </Link>
+              </TrackedLink>
             </div>
 
             <div
