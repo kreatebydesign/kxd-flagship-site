@@ -9,8 +9,12 @@ import { isMotorsportsAutomotiveWork, MOTORSPORTS_WORK_HUB_LINK } from "@/lib/co
 import { isConstructionWork, CONSTRUCTION_WORK_HUB_LINK } from "@/lib/content/construction-authority";
 import { ProjectCard } from "@/components/ui/ProjectCard";
 import { StructuredData } from "@/components/seo/StructuredData";
+import { getCaseStudySeoOverride } from "@/lib/seo/case-study-metadata";
 import { buildMetadata } from "@/lib/seo/metadata";
 import { breadcrumbSchema, caseStudySchema } from "@/lib/seo/schema";
+import { PublicPageEvent } from "@/components/analytics/PublicPageEvent";
+import { TrackedLink } from "@/components/analytics/TrackedLink";
+import { ANALYTICS_EVENTS } from "@/lib/analytics/config";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -163,9 +167,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const cs = CASE_STUDIES[slug];
 
   if (cs) {
+    const seo = getCaseStudySeoOverride(cs.slug);
+    const projectListing = PROJECTS.find((p) => p.slug === cs.slug);
     return buildMetadata({
-      title: cs.title,
-      description: cs.tagline,
+      title: seo?.title ?? cs.title,
+      description:
+        seo?.description ??
+        projectListing?.description ??
+        cs.tagline,
       path: `/work/${cs.slug}`,
       keywords: [cs.industry, ...cs.scope, "KXD Case Study"],
       ogImage: project?.image ?? cs.image ?? undefined,
@@ -304,6 +313,10 @@ export default async function CaseStudyPage({ params }: Props) {
 
   return (
     <>
+      <PublicPageEvent
+        eventName={ANALYTICS_EVENTS.caseStudyView}
+        params={{ case_study_slug: cs.slug, page_path: `/work/${cs.slug}` }}
+      />
       <StructuredData data={schema} />
 
       {/* ══════════════════════════════════════════
@@ -1182,9 +1195,14 @@ export default async function CaseStudyPage({ params }: Props) {
             </p>
 
             <div className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-4">
-              <Link href="/start-project" className="kxd-btn-primary">
+              <TrackedLink
+                href="/start-project"
+                className="kxd-btn-primary"
+                ctaLocation="case_study_final_primary"
+                linkText="Start a Project"
+              >
                 Start a Project
-              </Link>
+              </TrackedLink>
               <Link
                 href="/work"
                 className="group inline-flex items-center gap-2.5 font-sans font-medium uppercase"

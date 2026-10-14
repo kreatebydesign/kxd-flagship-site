@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { TrackedLink } from "@/components/analytics/TrackedLink";
 import type { ProjectItem } from "@/lib/projects";
 import { cn } from "@/lib/utils";
 
@@ -27,7 +27,6 @@ export function ProjectCard({
   project,
   featured,
   className,
-  index = 0,
   priority = false,
 }: ProjectCardProps) {
   const imageSrc = project.image ?? KXD_FALLBACK;
@@ -44,12 +43,14 @@ export function ProjectCard({
       className={cn("kxd-case-card group", className)}
       id={project.slug}
     >
-      <Link
+      <TrackedLink
         href={`/work/${project.slug}`}
         className={cn(
           "kxd-case-card__image-wrap relative block overflow-hidden",
           imageAspect,
         )}
+        ctaLocation="work_card"
+        linkText={project.title}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -85,7 +86,7 @@ export function ProjectCard({
             {project.outcome}
           </p>
         </div>
-      </Link>
+      </TrackedLink>
 
       <div
         className="flex items-center justify-between px-5 py-4"
@@ -105,13 +106,15 @@ export function ProjectCard({
           <p className="kxd-label mt-1.5">{project.year}</p>
         </div>
 
-        <Link
+        <TrackedLink
           href={`/work/${project.slug}`}
           className="kxd-ui-label flex h-8 w-8 shrink-0 items-center justify-center border border-[var(--kxd-border-gold)] text-[var(--kxd-gold)] transition hover:bg-[rgba(197,166,92,0.10)]"
           aria-label={`View ${project.title} case study`}
+          ctaLocation="work_card_arrow"
+          linkText={project.title}
         >
           →
-        </Link>
+        </TrackedLink>
       </div>
     </article>
   );

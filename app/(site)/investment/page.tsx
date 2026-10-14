@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PublicPageEvent } from "@/components/analytics/PublicPageEvent";
 import { FinalCtaBand } from "@/components/ui/FinalCtaBand";
+import { ANALYTICS_EVENTS } from "@/lib/analytics/config";
 import { buildMetadata } from "@/lib/seo/metadata";
 
 export const metadata: Metadata = buildMetadata({
@@ -116,6 +118,10 @@ const PARTNERSHIP_FIT = {
 export default function InvestmentPage() {
   return (
     <>
+      <PublicPageEvent
+        eventName={ANALYTICS_EVENTS.pricingView}
+        params={{ page_path: "/investment" }}
+      />
       <section
         style={{
           paddingTop: "calc(var(--nav-height) + var(--section-py))",
@@ -139,9 +145,16 @@ export default function InvestmentPage() {
           <p className="kxd-body mt-6" style={{ maxWidth: "38rem" }}>
             This page covers project engagements — website builds, redesigns, brand
             systems, growth infrastructure, and platform work scoped to each business.
-            Exceptional brands require more than attractive websites. They require
-            intentional systems, thoughtful strategy, and execution capable of
-            supporting long-term growth.
+            Website projects are detailed in{" "}
+            <Link
+              href="/services/luxury-website-experiences"
+              className="text-[var(--kxd-cream-soft)] underline decoration-[var(--kxd-border-gold)] underline-offset-[0.2em] transition hover:text-[var(--kxd-cream)]"
+            >
+              Luxury Website Experiences
+            </Link>
+            . Exceptional brands require more than attractive websites — intentional
+            systems, thoughtful strategy, and execution capable of supporting
+            long-term growth.
           </p>
 
           <div
@@ -469,6 +482,7 @@ export default function InvestmentPage() {
         subCopy="KXD partners with a limited number of businesses each year to create exceptional digital experiences, operational systems, and growth infrastructure built with intention."
         secondaryHref="/work"
         secondaryLabel="Explore Our Work"
+        analyticsCtaLocation="investment_page"
       />
     </>
   );

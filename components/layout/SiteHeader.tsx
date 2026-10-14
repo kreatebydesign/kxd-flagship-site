@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { TrackedLink } from "@/components/analytics/TrackedLink";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { HEADER_MEGA_SERVICES, HEADER_MEGA_WORK } from "@/lib/header-nav";
@@ -117,9 +118,14 @@ export function SiteHeader() {
 
           {/* Desktop CTA — right-anchored */}
           <div className="hidden items-center justify-end lg:flex">
-            <Link href="/contact" className="kxd-nav-cta">
+            <TrackedLink
+              href="/contact"
+              className="kxd-nav-cta"
+              ctaLocation="header_desktop"
+              linkText="Book a Call"
+            >
               Book a Call
-            </Link>
+            </TrackedLink>
           </div>
 
           {/* Mobile hamburger — override grid center col to be right-aligned on mobile */}
@@ -282,13 +288,15 @@ export function SiteHeader() {
 
           <div className="mt-10 h-px w-12 bg-[var(--kxd-border-gold)]" />
 
-          <Link
+          <TrackedLink
             href="/contact"
             className="kxd-btn-primary kxd-ui-label mt-8 w-fit"
+            ctaLocation="header_mobile"
+            linkText="Book a Call"
             onClick={() => setMobileOpen(false)}
           >
             Book a Call
-          </Link>
+          </TrackedLink>
           <Link
             href="/work"
             className="kxd-ui-label mt-5 inline-flex items-center gap-1.5 text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)]"

@@ -14,6 +14,9 @@ import { GoldAtmosphere } from "@/components/ui/surfaces/GoldAtmosphere";
 import { buildMetadata } from "@/lib/seo/metadata";
 import { faqPageSchema, serviceSchema } from "@/lib/seo/schema";
 import { StructuredData } from "@/components/seo/StructuredData";
+import { PublicPageEvent } from "@/components/analytics/PublicPageEvent";
+import { TrackedLink } from "@/components/analytics/TrackedLink";
+import { ANALYTICS_EVENTS } from "@/lib/analytics/config";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -244,6 +247,13 @@ export default async function ServiceDetailPage({ params }: Props) {
 
   return (
     <>
+      <PublicPageEvent
+        eventName={ANALYTICS_EVENTS.serviceView}
+        params={{
+          service_slug: service.slug,
+          page_path: `/services/${service.slug}`,
+        }}
+      />
       <StructuredData data={structured} />
 
       {/* ── Hero ── */}
@@ -300,9 +310,14 @@ export default async function ServiceDetailPage({ params }: Props) {
             </p>
 
             <div className="mt-10 flex flex-wrap items-center gap-4">
-              <Link href={service.ctaHref} className="kxd-btn-primary">
+              <TrackedLink
+                href={service.ctaHref}
+                className="kxd-btn-primary"
+                ctaLocation="service_hero_primary"
+                linkText={service.ctaLabel}
+              >
                 {service.ctaLabel}
-              </Link>
+              </TrackedLink>
               {heroSecondaryLabel && heroSecondaryHref && (
                 <Link
                   href={heroSecondaryHref}
@@ -799,6 +814,7 @@ export default async function ServiceDetailPage({ params }: Props) {
         secondaryLabel={service.secondaryCtaLabel || "All Services"}
         headline={`Begin Your ${service.title} Engagement.`}
         subCopy="KXD partners with a limited number of businesses at a time. Every engagement starts with a clear conversation."
+        analyticsCtaLocation={`service_${service.slug}`}
       />
     </>
   );
