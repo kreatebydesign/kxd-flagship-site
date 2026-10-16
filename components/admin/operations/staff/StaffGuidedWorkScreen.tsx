@@ -11,7 +11,10 @@ import {
   OpsStatusBadge,
 } from "@/components/admin/operations/shared/OpsBriefing";
 import { KxdButton, KxdPage, type KxdBadgeVariant } from "@/components/os";
+import { assignedApproverLine, resolveAssignedApproverName } from "@/lib/staff/approval-presentation";
 import type { StaffGuidedWorkData } from "@/lib/staff/types";
+import { WORK_STATUS_LABELS } from "@/lib/work/constants";
+import type { WorkStatus } from "@/lib/work/types";
 import { StaffAskHelpControl } from "./StaffAskHelpControl";
 
 function statusVariant(status: string): KxdBadgeVariant {
@@ -20,6 +23,19 @@ function statusVariant(status: string): KxdBadgeVariant {
   if (status === "completed") return "success";
   if (status === "in-progress") return "warning";
   return "status";
+}
+
+function displayStatus(status: string): string {
+  const key = status as WorkStatus;
+  return WORK_STATUS_LABELS[key] ?? status;
+}
+
+function formatDue(dueDate: string | null): string | null {
+  if (!dueDate) return null;
+  const key = dueDate.slice(0, 10);
+  const date = new Date(`${key}T12:00:00`);
+  if (Number.isNaN(date.getTime())) return key;
+  return date.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
 }
 
 export interface StaffGuidedWorkScreenProps {
@@ -49,6 +65,11 @@ export function StaffGuidedWorkScreen({
   );
 
   const mutationsDisabled = readOnly || !canAct;
+  const dueLabel = formatDue(data.dueDate);
+  const approverName = resolveAssignedApproverName({
+    requiresApproval: data.requiresMattApproval,
+  });
+  const approverLine = assignedApproverLine(approverName);
 
   function toggleChecklist(id: string) {
     if (mutationsDisabled) return;
@@ -121,105 +142,128 @@ export function StaffGuidedWorkScreen({
     }
   }
 
+  const heroLead =
+    data.summary?.trim() ||
+    (data.description
+      ? "Open the instructions below, then use the checklist when you are ready to finish."
+      : data.whyItMatters);
+
   return (
     <OperationsShell activeId="staff" variant="staff">
-      <KxdPage className="kxd-os-page--ops kxd-os-page--staff">
-        <OperationsPageHero
-          eyebrow="Guided work"
-          title={data.title}
-          lead={data.summary ?? data.whyItMatters}
-        />
+      <KxdPage className="kxd-os-page--ops kxd-os-page--staff kxd-os-page--staff-guided-work">
+        <div className="kxd-os-staff-guided__header">
+          <OperationsPageHero eyebrow="Assigned task" title={data.title} lead={heroLead} />
 
-        <p className="kxd-os-meta" style={{ marginBottom: "1rem" }}>
-          <Link href={data.hrefMyWork} className="kxd-os-link-quiet">
-            My work
-          </Link>
-          <span className="kxd-os-meta"> · </span>
-          <Link href={data.hrefBack} className="kxd-os-link-quiet">
-            Staff home
-          </Link>
-        </p>
+          <p className="kxd-os-staff-guided__crumb">
+            <Link href={data.hrefMyWork} className="kxd-os-link-quiet">
+              My work
+            </Link>
+            <span aria-hidden="true"> · </span>
+            <Link href={data.hrefBack} className="kxd-os-link-quiet">
+              Staff home
+            </Link>
+          </p>
 
-        <div className="kxd-os-ops-briefing-grid" style={{ display: "grid", gap: "1.5rem" }}>
-          <OpsCard className="kxd-os-ops-card-padding">
-            <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", alignItems: "center" }}>
-              <OpsStatusBadge label={data.status} variant={statusVariant(data.status)} />
-              {data.priority ? (
-                <OpsStatusBadge label={data.priority} variant="warning" />
-              ) : null}
-              {data.clientLabel ? (
-                <span className="kxd-os-meta">Client: {data.clientLabel}</span>
-              ) : null}
-              {data.dueDate ? (
-                <span className="kxd-os-meta">Due {data.dueDate.slice(0, 10)}</span>
-              ) : null}
+          <div className="kxd-os-staff-guided__meta-bar">
+            <OpsStatusBadge label={displayStatus(data.status)} variant={statusVariant(data.status)} />
+            {data.priority ? (
+              <OpsStatusBadge label={data.priority} variant="warning" />
+            ) : null}
+            {data.clientLabel ? (
+              <span className="kxd-os-staff-guided__meta-item">Client · {data.clientLabel}</span>
+            ) : null}
+            {dueLabel ? (
+              <span className="kxd-os-staff-guided__meta-item">Due · {dueLabel}</span>
+            ) : (
+              <span className="kxd-os-meta kxd-os-staff-guided__meta-item">No due date</span>
+            )}
+          </div>
+
+          {data.requiresMattApproval ? (
+            <div className="kxd-os-staff-guided__approval" role="note">
+              <p className="kxd-os-staff-guided__approval-title">Studio approval required</p>
+              <p className="kxd-os-meta">
+                Prepare your work, then use <strong>Prepare for Review</strong>. Do not send, publish,
+                or change access, billing, or client commitments without approval.
+              </p>
+              {approverLine ? <p className="kxd-os-meta">{approverLine}</p> : null}
             </div>
+          ) : (
+            <p className="kxd-os-meta kxd-os-staff-guided__independent">
+              You may complete this task when the checklist is honestly done — stay inside your
+              permission boundary.
+            </p>
+          )}
+        </div>
 
+        <div className="kxd-os-staff-guided__layout">
+          <div className="kxd-os-staff-guided__main">
             {data.description ? (
-              <section style={{ marginTop: "1.5rem" }}>
+              <OpsCard className="kxd-os-ops-card-padding kxd-os-staff-guided__section">
                 <OpsSectionHead label="Instructions" />
-                <p className="kxd-os-staff-my-work__prose">{data.description}</p>
-              </section>
+                <p className="kxd-os-staff-my-work__prose kxd-os-staff-guided__instructions">
+                  {data.description}
+                </p>
+              </OpsCard>
             ) : null}
 
             {data.notes ? (
-              <section style={{ marginTop: "1.5rem" }}>
+              <OpsCard className="kxd-os-ops-card-padding kxd-os-staff-guided__section">
                 <OpsSectionHead label="Notes" />
                 <pre className="kxd-os-staff-my-work__notes">{data.notes}</pre>
-              </section>
+              </OpsCard>
             ) : null}
 
-            <section style={{ marginTop: "1.5rem" }}>
-              <OpsSectionHead label="Why it matters" />
-              <p>{data.whyItMatters}</p>
-            </section>
-
-            <section style={{ marginTop: "1.5rem" }}>
-              <OpsSectionHead label="What KXD knows" />
-              <ul style={{ paddingLeft: "1.1rem" }}>
-                {data.whatKxdKnows.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </section>
-
-            <section style={{ marginTop: "1.5rem" }}>
-              <OpsSectionHead label="What to produce" />
-              <ul style={{ paddingLeft: "1.1rem" }}>
-                {data.whatToProduce.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </section>
-
-            <section style={{ marginTop: "1.5rem" }}>
-              <OpsSectionHead label="Steps" />
-              {data.steps.map((step) => (
-                <div key={step.title} style={{ marginTop: "0.75rem" }}>
-                  <p className="kxd-os-card__title">{step.title}</p>
-                  <p className="kxd-os-meta">{step.detail}</p>
-                </div>
-              ))}
-            </section>
-
-            {data.examples.length > 0 ? (
-              <section style={{ marginTop: "1.5rem" }}>
-                <OpsSectionHead label="Examples" />
-                <ul style={{ paddingLeft: "1.1rem" }}>
-                  {data.examples.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              </section>
-            ) : null}
-
-            <section style={{ marginTop: "1.5rem" }}>
+            <OpsCard className="kxd-os-ops-card-padding kxd-os-staff-guided__section">
               <OpsSectionHead label="Permission boundary" />
-              <p>{data.permissionBoundary}</p>
-            </section>
+              <p className="kxd-os-staff-guided__boundary">{data.permissionBoundary}</p>
+            </OpsCard>
+
+            <details className="kxd-os-staff-guided__details">
+              <summary className="kxd-os-staff-guided__details-summary">Work guidance</summary>
+              <div className="kxd-os-staff-guided__details-body">
+                <section>
+                  <h3 className="kxd-os-section__label">What to produce</h3>
+                  <ul className="kxd-os-staff-guided__bullets">
+                    {data.whatToProduce.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                </section>
+                <section>
+                  <h3 className="kxd-os-section__label">Steps</h3>
+                  <ol className="kxd-os-staff-guided__steps">
+                    {data.steps.map((step) => (
+                      <li key={step.title}>
+                        <span className="kxd-os-staff-guided__step-title">{step.title}</span>
+                        <span className="kxd-os-meta">{step.detail}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </section>
+                {data.examples.length > 0 ? (
+                  <section>
+                    <h3 className="kxd-os-section__label">Examples</h3>
+                    <ul className="kxd-os-staff-guided__bullets">
+                      {data.examples.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  </section>
+                ) : null}
+                <section>
+                  <h3 className="kxd-os-section__label">Context on file</h3>
+                  <ul className="kxd-os-staff-guided__bullets">
+                    {data.whatKxdKnows.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                </section>
+              </div>
+            </details>
 
             {data.activityHistory.length > 0 ? (
-              <section style={{ marginTop: "1.5rem" }}>
+              <OpsCard className="kxd-os-ops-card-padding kxd-os-staff-guided__section">
                 <OpsSectionHead label="Activity" />
                 <ul className="kxd-os-staff-my-work__activity">
                   {data.activityHistory.map((entry, index) => (
@@ -228,95 +272,91 @@ export function StaffGuidedWorkScreen({
                         {entry.at.slice(0, 16).replace("T", " ")}
                         {entry.actor ? ` · ${entry.actor}` : ""}
                       </span>
-                      <p>{entry.action}{entry.detail ? ` — ${entry.detail}` : ""}</p>
+                      <p>
+                        {entry.action}
+                        {entry.detail ? ` — ${entry.detail}` : ""}
+                      </p>
                     </li>
                   ))}
                 </ul>
-              </section>
+              </OpsCard>
             ) : null}
-          </OpsCard>
+          </div>
 
-          <OpsCard className="kxd-os-ops-card-padding">
-            <OpsSectionHead label="Completion checklist" />
-            <ul style={{ listStyle: "none", padding: 0, marginTop: "0.75rem" }}>
-              {data.checklist.map((item) => (
-                <li key={item.id} style={{ marginBottom: "0.75rem" }}>
-                  <label style={{ display: "flex", gap: "0.65rem", alignItems: "flex-start" }}>
-                    <input
-                      type="checkbox"
-                      checked={Boolean(checked[item.id])}
-                      disabled={mutationsDisabled}
-                      onChange={() => toggleChecklist(item.id)}
-                    />
-                    <span>
-                      {item.label}
-                      {item.required ? (
-                        <span className="kxd-os-meta"> Required</span>
-                      ) : null}
-                    </span>
-                  </label>
-                </li>
-              ))}
-            </ul>
+          <aside className="kxd-os-staff-guided__aside">
+            <OpsCard className="kxd-os-ops-card-padding kxd-os-staff-guided__checklist-card">
+              <OpsSectionHead label="Completion checklist" />
+              <ul className="kxd-os-staff-guided__checklist">
+                {data.checklist.map((item) => (
+                  <li key={item.id}>
+                    <label className="kxd-os-staff-guided__check-label">
+                      <input
+                        type="checkbox"
+                        checked={Boolean(checked[item.id])}
+                        disabled={mutationsDisabled}
+                        onChange={() => toggleChecklist(item.id)}
+                      />
+                      <span>
+                        {item.label}
+                        {item.required ? (
+                          <span className="kxd-os-meta"> Required</span>
+                        ) : null}
+                      </span>
+                    </label>
+                  </li>
+                ))}
+              </ul>
 
-            {message ? <p className="kxd-os-meta" style={{ marginTop: "1rem" }}>{message}</p> : null}
-            {error ? (
-              <p className="kxd-os-meta" style={{ marginTop: "1rem", color: "var(--kxd-os-critical)" }}>
-                {error}
-              </p>
-            ) : null}
-
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: "0.75rem",
-                marginTop: "1.25rem",
-              }}
-            >
-              <KxdButton
-                type="button"
-                variant="secondary"
-                loading={busy === "check"}
-                disabled={mutationsDisabled}
-                onClick={handleCheck}
-              >
-                Check my work
-              </KxdButton>
-
-              {data.requiresMattApproval ? (
-                <KxdButton
-                  type="button"
-                  variant="primary"
-                  loading={busy === "review"}
-                  disabled={mutationsDisabled || !requiredComplete}
-                  onClick={handleSubmitReview}
-                >
-                  Prepare for Review
-                </KxdButton>
+              {message ? <p className="kxd-os-meta kxd-os-staff-guided__feedback">{message}</p> : null}
+              {error ? (
+                <p className="kxd-os-meta kxd-os-staff-guided__feedback kxd-os-staff-guided__feedback--error">
+                  {error}
+                </p>
               ) : null}
 
-              {data.canCompleteIndependently && canAct ? (
+              <div className="kxd-os-staff-guided__actions">
                 <KxdButton
                   type="button"
-                  variant="primary"
-                  loading={busy === "complete"}
-                  disabled={mutationsDisabled || !requiredComplete}
-                  onClick={handleComplete}
+                  variant="secondary"
+                  loading={busy === "check"}
+                  disabled={mutationsDisabled}
+                  onClick={handleCheck}
                 >
-                  Complete
+                  Check my work
                 </KxdButton>
+
+                {data.requiresMattApproval ? (
+                  <KxdButton
+                    type="button"
+                    variant="primary"
+                    loading={busy === "review"}
+                    disabled={mutationsDisabled || !requiredComplete}
+                    onClick={handleSubmitReview}
+                  >
+                    Prepare for Review
+                  </KxdButton>
+                ) : null}
+
+                {data.canCompleteIndependently && canAct ? (
+                  <KxdButton
+                    type="button"
+                    variant="primary"
+                    loading={busy === "complete"}
+                    disabled={mutationsDisabled || !requiredComplete}
+                    onClick={handleComplete}
+                  >
+                    Complete
+                  </KxdButton>
+                ) : null}
+              </div>
+
+              {readOnly ? (
+                <p className="kxd-os-meta kxd-os-staff-guided__preview-note">
+                  Preview mode — changes are disabled.
+                </p>
               ) : null}
-            </div>
+            </OpsCard>
 
-            {readOnly ? (
-              <p className="kxd-os-meta" style={{ marginTop: "1rem" }}>
-                Preview mode — changes are disabled.
-              </p>
-            ) : null}
-          </OpsCard>
-
-          <div style={{ marginTop: "1.5rem" }}>
             <StaffAskHelpControl
               pagePath={`/admin/operations/staff/work/${data.workId}`}
               workId={data.workId}
@@ -329,7 +369,7 @@ export function StaffGuidedWorkScreen({
               contextKind="guided-work"
               contextLabel={data.title}
             />
-          </div>
+          </aside>
         </div>
       </KxdPage>
     </OperationsShell>
