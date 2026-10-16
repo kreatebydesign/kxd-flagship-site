@@ -493,13 +493,20 @@ export function StaffOversightScreen({ data }: StaffOversightScreenProps) {
                   />
                 </label>
               </div>
-              <label className="kxd-os-meta" style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-                <input
-                  type="checkbox"
-                  checked={requiresApproval}
-                  onChange={(e) => setRequiresApproval(e.target.checked)}
-                />
-                Requires approval
+              <label className="kxd-os-meta kxd-os-staff-oversight__approval-field">
+                <span className="kxd-os-staff-oversight__approval-row">
+                  <input
+                    type="checkbox"
+                    checked={requiresApproval}
+                    onChange={(e) => setRequiresApproval(e.target.checked)}
+                  />
+                  Requires studio approval
+                </span>
+                <span className="kxd-os-meta">
+                  Assignee must use Prepare for Review; you approve before anything external or
+                  sensitive ships. Also applies when priority is critical or the work matches
+                  sensitive operations keywords.
+                </span>
               </label>
               <KxdButton
                 type="button"

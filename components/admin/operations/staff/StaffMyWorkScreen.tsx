@@ -8,14 +8,19 @@ import { OperationsShell } from "@/components/admin/operations/shared/Operations
 import {
   OpsCard,
   OpsKpiStrip,
+  OpsListRow,
   OpsSectionHead,
   OpsStatusBadge,
 } from "@/components/admin/operations/shared/OpsBriefing";
 import { KxdButton, KxdPage, type KxdBadgeVariant } from "@/components/os";
+import {
+  staffMyWorkGroupLabel,
+  type StaffMyWorkBoardColumnId,
+} from "@/lib/staff/my-work-board";
+import { requiresMattApproval } from "@/lib/staff/prioritize";
 import type { StaffMyWorkData } from "@/lib/staff/types";
-import type { StaffMyWorkBoardColumnId } from "@/lib/staff/my-work-board";
 import { WORK_PRIORITY_LABELS, WORK_STATUS_LABELS } from "@/lib/work/constants";
-import type { WorkListItem, WorkStatus } from "@/lib/work/types";
+import type { WorkListItem, WorkPriority, WorkStatus } from "@/lib/work/types";
 
 function statusVariant(status: WorkStatus): KxdBadgeVariant {
   if (status === "blocked") return "critical";
@@ -36,7 +41,116 @@ function staffStatusLabel(status: WorkStatus): string {
   return WORK_STATUS_LABELS[status] ?? status;
 }
 
-function WorkCard({
+function priorityClass(priority: WorkPriority): string {
+  return `kxd-os-staff-my-work__priority kxd-os-staff-my-work__priority--${priority}`;
+}
+
+function formatDueLabel(dueDate: string): string {
+  const key = dueDate.slice(0, 10);
+  const date = new Date(`${key}T12:00:00`);
+  if (Number.isNaN(date.getTime())) return `Due ${key}`;
+  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
+function isOverdue(item: WorkListItem): boolean {
+  return Boolean(
+    item.dueDate &&
+      item.status !== "completed" &&
+      item.status !== "archived" &&
+      item.dueDate.slice(0, 10) < new Date().toISOString().slice(0, 10),
+  );
+}
+
+function projectLabel(item: WorkListItem): { text: string; kind: "client" | "internal" } {
+  const meta = staffMyWorkGroupLabel(item);
+  return { text: meta.label, kind: meta.kind };
+}
+
+function StatusActions({
+  item,
+  busy,
+  onStatusChange,
+  compact,
+}: {
+  item: WorkListItem;
+  busy: number | null;
+  onStatusChange: (workId: number, status: WorkStatus, note?: string) => Promise<void>;
+  compact?: boolean;
+}) {
+  if (item.status === "review" || item.status === "completed") return null;
+
+  const actionClass = compact
+    ? "kxd-os-staff-my-work__row-actions"
+    : "kxd-os-staff-my-work__card-actions";
+
+  return (
+    <div className={actionClass}>
+      {(item.status === "new" || item.status === "planned") && (
+        <KxdButton
+          type="button"
+          size="sm"
+          variant="ghost"
+          disabled={busy === item.id}
+          onClick={(e) => {
+            e.preventDefault();
+            onStatusChange(item.id, "in-progress");
+          }}
+        >
+          Start
+        </KxdButton>
+      )}
+      {item.status === "blocked" && (
+        <KxdButton
+          type="button"
+          size="sm"
+          variant="ghost"
+          disabled={busy === item.id}
+          onClick={(e) => {
+            e.preventDefault();
+            onStatusChange(item.id, "in-progress");
+          }}
+        >
+          Resume
+        </KxdButton>
+      )}
+      {(item.status === "new" ||
+        item.status === "planned" ||
+        item.status === "in-progress" ||
+        item.status === "waiting-on-client" ||
+        item.status === "waiting-on-kxd") && (
+        <KxdButton
+          type="button"
+          size="sm"
+          variant="ghost"
+          disabled={busy === item.id}
+          onClick={(e) => {
+            e.preventDefault();
+            const note = window.prompt("What is blocking this work?");
+            if (note?.trim()) onStatusChange(item.id, "blocked", note.trim());
+          }}
+        >
+          Blocked
+        </KxdButton>
+      )}
+      {item.status === "in-progress" && (
+        <KxdButton
+          type="button"
+          size="sm"
+          variant="ghost"
+          disabled={busy === item.id}
+          onClick={(e) => {
+            e.preventDefault();
+            onStatusChange(item.id, "review");
+          }}
+        >
+          In Review
+        </KxdButton>
+      )}
+    </div>
+  );
+}
+
+function WorkBoardCard({
   item,
   onStatusChange,
   busy,
@@ -45,14 +159,28 @@ function WorkCard({
   onStatusChange: (workId: number, status: WorkStatus, note?: string) => Promise<void>;
   busy: number | null;
 }) {
-  const overdue =
-    item.dueDate &&
-    item.status !== "completed" &&
-    item.status !== "archived" &&
-    item.dueDate.slice(0, 10) < new Date().toISOString().slice(0, 10);
+  const overdue = isOverdue(item);
+  const project = projectLabel(item);
+  const approval = requiresMattApproval(item);
 
   return (
-    <article className="kxd-os-staff-my-work__card">
+    <article
+      className={`kxd-os-staff-my-work__card${
+        item.status === "completed" ? " kxd-os-staff-my-work__card--completed" : ""
+      }`}
+    >
+      <div className="kxd-os-staff-my-work__card-top">
+        <span
+          className={priorityClass(item.priority)}
+          title={WORK_PRIORITY_LABELS[item.priority]}
+          aria-label={`Priority: ${WORK_PRIORITY_LABELS[item.priority]}`}
+        />
+        <span
+          className={`kxd-os-staff-my-work__project kxd-os-staff-my-work__project--${project.kind}`}
+        >
+          {project.text}
+        </span>
+      </div>
       <Link href={item.href} className="kxd-os-staff-my-work__card-link">
         <p className="kxd-os-staff-my-work__card-title">{item.title}</p>
         {item.summary ? (
@@ -61,69 +189,108 @@ function WorkCard({
       </Link>
       <div className="kxd-os-staff-my-work__card-meta">
         <OpsStatusBadge label={staffStatusLabel(item.status)} variant={statusVariant(item.status)} />
-        <span className="kxd-os-meta">{WORK_PRIORITY_LABELS[item.priority]}</span>
+        {approval ? (
+          <OpsStatusBadge label="Approval required" variant="pending" />
+        ) : null}
         {item.dueDate ? (
-          <span className={`kxd-os-meta${overdue ? " kxd-os-staff-my-work__overdue" : ""}`}>
-            Due {item.dueDate.slice(0, 10)}
+          <span
+            className={`kxd-os-staff-my-work__due${
+              overdue ? " kxd-os-staff-my-work__due--overdue" : ""
+            }`}
+          >
+            {formatDueLabel(item.dueDate)}
           </span>
         ) : null}
       </div>
-      {item.status !== "review" && item.status !== "completed" ? (
-        <div className="kxd-os-staff-my-work__card-actions">
-          {(item.status === "new" || item.status === "planned") && (
-            <KxdButton
-              type="button"
-              size="sm"
-              variant="ghost"
-              disabled={busy === item.id}
-              onClick={() => onStatusChange(item.id, "in-progress")}
+      <StatusActions item={item} busy={busy} onStatusChange={onStatusChange} />
+    </article>
+  );
+}
+
+function WorkListRowItem({
+  item,
+  onStatusChange,
+  busy,
+}: {
+  item: WorkListItem;
+  onStatusChange: (workId: number, status: WorkStatus, note?: string) => Promise<void>;
+  busy: number | null;
+}) {
+  const overdue = isOverdue(item);
+  const project = projectLabel(item);
+  const approval = requiresMattApproval(item);
+  const completed = item.status === "completed";
+
+  return (
+    <div
+      className={`kxd-os-staff-my-work__list-row${
+        completed ? " kxd-os-staff-my-work__list-row--completed" : ""
+      }`}
+    >
+      <OpsListRow href={item.href} className="kxd-os-staff-my-work__list-row-link">
+        <div className="kxd-os-ops-list-row__main">
+          <div className="kxd-os-staff-my-work__list-title-row">
+            <span
+              className={priorityClass(item.priority)}
+              title={WORK_PRIORITY_LABELS[item.priority]}
+              aria-hidden="true"
+            />
+            <p className="kxd-os-staff-my-work__list-title">{item.title}</p>
+          </div>
+          <p className="kxd-os-ops-list-row__meta kxd-os-staff-my-work__list-sub">
+            <span
+              className={`kxd-os-staff-my-work__project kxd-os-staff-my-work__project--${project.kind}`}
             >
-              Start
-            </KxdButton>
-          )}
-          {item.status === "blocked" && (
-            <KxdButton
-              type="button"
-              size="sm"
-              variant="ghost"
-              disabled={busy === item.id}
-              onClick={() => onStatusChange(item.id, "in-progress")}
+              {project.text}
+            </span>
+            {item.summary ? <span className="kxd-os-staff-my-work__list-summary">{item.summary}</span> : null}
+          </p>
+        </div>
+        <div className="kxd-os-ops-list-row__aside kxd-os-staff-my-work__list-aside">
+          <OpsStatusBadge label={staffStatusLabel(item.status)} variant={statusVariant(item.status)} />
+          {approval ? (
+            <OpsStatusBadge label="Approval" variant="pending" />
+          ) : null}
+          {item.dueDate ? (
+            <span
+              className={`kxd-os-staff-my-work__due${
+                overdue ? " kxd-os-staff-my-work__due--overdue" : ""
+              }`}
             >
-              Resume
-            </KxdButton>
-          )}
-          {(item.status === "new" ||
-            item.status === "planned" ||
-            item.status === "in-progress" ||
-            item.status === "waiting-on-client" ||
-            item.status === "waiting-on-kxd") && (
-            <KxdButton
-              type="button"
-              size="sm"
-              variant="ghost"
-              disabled={busy === item.id}
-              onClick={() => {
-                const note = window.prompt("What is blocking this work?");
-                if (note?.trim()) onStatusChange(item.id, "blocked", note.trim());
-              }}
-            >
-              Blocked
-            </KxdButton>
-          )}
-          {item.status === "in-progress" && (
-            <KxdButton
-              type="button"
-              size="sm"
-              variant="ghost"
-              disabled={busy === item.id}
-              onClick={() => onStatusChange(item.id, "review")}
-            >
-              In Review
-            </KxdButton>
+              {formatDueLabel(item.dueDate)}
+            </span>
+          ) : (
+            <span className="kxd-os-meta kxd-os-staff-my-work__due kxd-os-staff-my-work__due--none">
+              No due date
+            </span>
           )}
         </div>
+      </OpsListRow>
+      {!completed ? (
+        <StatusActions item={item} busy={busy} onStatusChange={onStatusChange} compact />
       ) : null}
-    </article>
+    </div>
+  );
+}
+
+function BoardColumnHeader({
+  columnId,
+  label,
+  count,
+}: {
+  columnId: StaffMyWorkBoardColumnId;
+  label: string;
+  count: number;
+}) {
+  return (
+    <header
+      className={`kxd-os-staff-my-work__column-head kxd-os-staff-my-work__column-head--${columnId}`}
+    >
+      <h2 className="kxd-os-staff-my-work__column-title">{label}</h2>
+      <span className="kxd-os-staff-my-work__column-count" aria-label={`${count} tasks`}>
+        {count}
+      </span>
+    </header>
   );
 }
 
@@ -169,7 +336,7 @@ export function StaffMyWorkScreen({ initialData, includeCompleted }: StaffMyWork
       { label: "Open", value: String(data.counts.open) },
       { label: "To Do", value: String(data.counts.todo) },
       { label: "In progress", value: String(data.counts.inProgress) },
-      { label: "Blocked", value: String(data.counts.blocked) },
+      { label: "Blocked", value: String(data.counts.blocked), alert: data.counts.blocked > 0 },
       { label: "In review", value: String(data.counts.inReview) },
     ],
     [data.counts],
@@ -181,10 +348,10 @@ export function StaffMyWorkScreen({ initialData, includeCompleted }: StaffMyWork
         <OperationsPageHero
           eyebrow="My work"
           title="Assigned tasks"
-          lead="Work assigned to you — grouped by client or internal project. Status changes follow your approval boundary."
+          lead="Work assigned to you — list or board by status. Sensitive items show when studio approval is required before completion."
         />
 
-        <p className="kxd-os-meta" style={{ marginBottom: "1rem" }}>
+        <p className="kxd-os-staff-my-work__crumb">
           <Link href="/admin/operations/staff" className="kxd-os-link-quiet">
             Staff home
           </Link>
@@ -221,7 +388,7 @@ export function StaffMyWorkScreen({ initialData, includeCompleted }: StaffMyWork
               Board
             </button>
           </div>
-          <Link href={completedToggleHref} className="kxd-os-link-quiet kxd-os-meta">
+          <Link href={completedToggleHref} className="kxd-os-link-quiet kxd-os-staff-my-work__completed-toggle">
             {includeCompleted ? "Hide completed" : `Show completed (${data.counts.completed})`}
           </Link>
         </div>
@@ -241,14 +408,22 @@ export function StaffMyWorkScreen({ initialData, includeCompleted }: StaffMyWork
             {data.columns.map((col) => {
               const items = data.board[col.id as StaffMyWorkBoardColumnId];
               return (
-                <section key={col.id} className="kxd-os-staff-my-work__column" aria-label={col.label}>
-                  <OpsSectionHead label={col.label} count={items.length} />
+                <section
+                  key={col.id}
+                  className={`kxd-os-staff-my-work__column kxd-os-staff-my-work__column--${col.id}`}
+                  aria-label={col.label}
+                >
+                  <BoardColumnHeader
+                    columnId={col.id as StaffMyWorkBoardColumnId}
+                    label={col.label}
+                    count={items.length}
+                  />
                   <div className="kxd-os-staff-my-work__column-body">
                     {items.length === 0 ? (
-                      <p className="kxd-os-meta">—</p>
+                      <p className="kxd-os-meta kxd-os-staff-my-work__column-empty">No tasks</p>
                     ) : (
                       items.map((item) => (
-                        <WorkCard
+                        <WorkBoardCard
                           key={item.id}
                           item={item}
                           busy={busyId}
@@ -268,7 +443,7 @@ export function StaffMyWorkScreen({ initialData, includeCompleted }: StaffMyWork
                 <OpsSectionHead label={group.label} count={group.items.length} />
                 <OpsCard className="kxd-os-staff-my-work__group-card">
                   {group.items.map((item) => (
-                    <WorkCard
+                    <WorkListRowItem
                       key={item.id}
                       item={item}
                       busy={busyId}
