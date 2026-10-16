@@ -22,6 +22,7 @@ import {
 } from "./permissions";
 import type { StaffCapability } from "./types";
 import { getStaffPreviewSession } from "./preview";
+import { staffMayAccessClient } from "./client-assignments";
 
 export async function resolveRequestPathname(
   fallback = STAFF_HOME_PATH,
@@ -161,6 +162,67 @@ export async function denyUnlessStaffAssignedWork(
         success: false,
         ok: false,
         error: "Staff permission denied for this work item.",
+      },
+      { status: 403 },
+    );
+  }
+  const clientOk = await staffMayAccessClient(actor, work.clientId);
+  if (!clientOk) {
+    return NextResponse.json(
+      {
+        success: false,
+        ok: false,
+        error: "Staff permission denied: client not in assigned scope.",
+      },
+      { status: 403 },
+    );
+  }
+  return null;
+}
+
+/**
+ * Restricted staff with assigned-client scope may only touch client-requests
+ * for clients they are assigned to.
+ */
+export async function denyUnlessStaffClientRequest(
+  user: object,
+  requestId: number,
+): Promise<NextResponse | null> {
+  const actor = staffActorFromUser(user);
+  if (!actor || !isRestrictedStaff(actor)) return null;
+
+  const { getPayload } = await import("payload");
+  const config = (await import("@payload-config")).default;
+  const payload = await getPayload({ config });
+
+  let clientId: number | null = null;
+  try {
+    const doc = await payload.findByID({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      collection: "client-requests" as any,
+      id: requestId,
+      depth: 0,
+      overrideAccess: true,
+    });
+    const raw = (doc as { client?: unknown }).client;
+    if (typeof raw === "number") clientId = raw;
+    else if (raw && typeof raw === "object" && "id" in raw) {
+      clientId = Number((raw as { id: unknown }).id) || null;
+    }
+  } catch {
+    return NextResponse.json(
+      { success: false, ok: false, error: "Request not found." },
+      { status: 404 },
+    );
+  }
+
+  const allowed = await staffMayAccessClient(actor, clientId);
+  if (!allowed) {
+    return NextResponse.json(
+      {
+        success: false,
+        ok: false,
+        error: "Staff permission denied: client not in assigned scope.",
       },
       { status: 403 },
     );

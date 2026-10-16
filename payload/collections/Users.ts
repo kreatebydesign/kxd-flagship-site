@@ -68,13 +68,17 @@ export const Users: CollectionConfig = {
       type: "select",
       defaultValue: "none",
       options: [
-        { label: "None (full operator when admin)", value: "none" },
+        { label: "None (no staff home — admin operators only)", value: "none" },
         { label: "Operations Coordinator (HR/Admin Assistant)", value: "operations_coordinator" },
         {
           label: "Executive Operations Coordinator",
           value: "executive_operations_coordinator",
         },
         { label: "Operations Manager", value: "operations_manager" },
+        {
+          label: "Business Development & Digital Specialist",
+          value: "business_development_specialist",
+        },
       ],
       admin: {
         position: "sidebar",

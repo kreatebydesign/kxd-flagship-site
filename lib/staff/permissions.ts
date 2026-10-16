@@ -30,6 +30,21 @@ const FULL_ADMIN_CAPABILITIES: readonly StaffCapability[] = [
   "admin.full-operations",
 ] as const;
 
+/** Business Development & Digital — client-scoped; no billing or company financials. */
+const BUSINESS_DEVELOPMENT_SPECIALIST_CAPABILITIES: readonly StaffCapability[] = [
+  "staff.home",
+  "staff.assigned-work.read",
+  "staff.assigned-work.update",
+  "staff.draft.prepare",
+  "staff.draft.submit-for-approval",
+  "staff.notes.internal",
+  "staff.inbox.triage",
+  "staff.training",
+  "staff.help.request",
+  "staff.guidance",
+  "staff.client-context.limited",
+] as const;
+
 /** Initial authority for operations_coordinator (Heather path). */
 const OPERATIONS_COORDINATOR_CAPABILITIES: readonly StaffCapability[] = [
   "staff.home",
@@ -81,6 +96,8 @@ export const STAFF_ALLOWED_API_PREFIXES: readonly string[] = [
   "/api/admin/training/progress",
   "/api/admin/training/intelligence",
   "/api/admin/scheduling/proposals", // suggest only; approve blocked in service
+  "/api/admin/review-inbox",
+  "/api/admin/client-requests",
 ] as const;
 
 /**
@@ -97,6 +114,9 @@ export function normalizeStaffRole(value: unknown): StaffRoleId {
     return "executive_operations_coordinator";
   }
   if (value === "operations_manager") return "operations_manager";
+  if (value === "business_development_specialist") {
+    return "business_development_specialist";
+  }
   return "none";
 }
 
@@ -108,6 +128,8 @@ export function staffRoleTitle(role: StaffRoleId): string {
       return "Executive Operations Coordinator";
     case "operations_manager":
       return "KXD Operations Manager";
+    case "business_development_specialist":
+      return "Business Development & Digital Specialist";
     default:
       return "Studio teammate";
   }
@@ -129,10 +151,11 @@ export function isFounderOrAdmin(actor: StaffActor): boolean {
   return Boolean(email && founders.has(email));
 }
 
-/** Restricted staff = editor (or similar) with an active staffRole, not admin. */
+/** Restricted staff = any non-admin internal user (deny-by-default KXD OS). */
 export function isRestrictedStaff(actor: StaffActor): boolean {
   if (isFounderOrAdmin(actor)) return false;
-  return actor.staffRole !== "none";
+  if (actor.role === "admin") return false;
+  return true;
 }
 
 export function resolveStaffCapabilities(
@@ -140,6 +163,9 @@ export function resolveStaffCapabilities(
 ): ReadonlySet<StaffCapability> {
   if (isFounderOrAdmin(actor)) {
     return new Set(FULL_ADMIN_CAPABILITIES);
+  }
+  if (actor.staffRole === "business_development_specialist") {
+    return new Set(BUSINESS_DEVELOPMENT_SPECIALIST_CAPABILITIES);
   }
   if (
     actor.staffRole === "operations_coordinator" ||
@@ -150,7 +176,7 @@ export function resolveStaffCapabilities(
     // until Matt elevates via role policies.
     return new Set(OPERATIONS_COORDINATOR_CAPABILITIES);
   }
-  // Authenticated editor without staffRole — no staff home privileges yet.
+  // Editor without staffRole — restricted shell, no capabilities until role assigned.
   return new Set();
 }
 

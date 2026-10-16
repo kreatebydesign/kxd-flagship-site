@@ -143,6 +143,24 @@ assert.equal(isRestrictedStaffPayloadUser(heatherPayloadUser as never), true);
 assert.equal(isStudioPayloadOperator(heatherPayloadUser as never), false);
 assert.equal(isStudioPayloadOperator(mattPayloadUser as never), true);
 assert.equal(canEnterPayloadAdminPanel(mattPayloadUser as never), true);
+
+const editorNoStaffRole = {
+  id: 99,
+  collection: "users" as const,
+  role: "editor",
+  staffRole: "none",
+};
+assert.equal(isRestrictedStaffPayloadUser(editorNoStaffRole as never), true);
+assert.equal(isStudioPayloadOperator(editorNoStaffRole as never), false);
+const editorActor = staffActorFromUser({
+  id: 99,
+  email: "unset@kreatebydesign.com",
+  role: "editor",
+  staffRole: "none",
+});
+assert.ok(editorActor);
+assert.equal(isRestrictedStaff(editorActor), true);
+assert.equal(actorHasStaffCapability(editorActor, "staff.home"), false);
 assert.equal(isPayloadAdmin({ collection: "portal-users" } as never), false);
 assert.equal(canEnterPayloadAdminPanel({ collection: "portal-users" } as never), false);
 

@@ -7,6 +7,7 @@ export type StaffRoleId =
   | "operations_coordinator"
   | "executive_operations_coordinator"
   | "operations_manager"
+  | "business_development_specialist"
   | "none";
 
 /** Deny-by-default capability grants for restricted staff. */

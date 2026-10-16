@@ -17,17 +17,6 @@ export function isPayloadAdmin(
 }
 
 /**
- * Restricted staff roles that must never enter Payload collection/global
- * administration or REST/Local API (except via server services with
- * `overrideAccess: true`).
- */
-const RESTRICTED_STAFF_ROLES = new Set([
-  "operations_coordinator",
-  "executive_operations_coordinator",
-  "operations_manager",
-]);
-
-/**
  * Pure Payload-user check — mirrors lib/staff `isRestrictedStaff` without
  * importing server-only modules (safe in collection access + verify scripts).
  * Admin Payload role always retains studio operator access.
@@ -38,18 +27,20 @@ export function isRestrictedStaffPayloadUser(
   if (!isPayloadAdmin(user)) return false;
   const role = Reflect.get(user as object, "role");
   if (role === "admin") return false;
-  const staffRole = Reflect.get(user as object, "staffRole");
-  return typeof staffRole === "string" && RESTRICTED_STAFF_ROLES.has(staffRole);
+  return true;
 }
 
 /**
  * Studio operators who may use Payload Admin collection/global data APIs.
  * Portal JWTs and restricted staff are denied.
+ * Only Payload `admin` role — editors must use KXD OS staff surfaces.
  */
 export function isStudioPayloadOperator(
   user: PayloadRequest["user"],
 ): boolean {
-  return isPayloadAdmin(user) && !isRestrictedStaffPayloadUser(user);
+  if (!isPayloadAdmin(user)) return false;
+  const role = Reflect.get(user as object, "role");
+  return role === "admin";
 }
 
 /**

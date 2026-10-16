@@ -4,6 +4,7 @@ export {
   requireStaffCapabilityApi,
   requireAdminOversightApi,
   denyUnlessStaffAssignedWork,
+  denyUnlessStaffClientRequest,
   getStaffActorOrNull,
   staffCanUseFullNav,
 } from "./guard";
