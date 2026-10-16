@@ -37,7 +37,7 @@ function readTags(doc: AnyDoc): string[] {
     .filter(Boolean);
 }
 
-function toWorkListItem(doc: AnyDoc, fallbackClientName = "Internal"): WorkListItem {
+export function toWorkListItem(doc: AnyDoc, fallbackClientName = "Internal"): WorkListItem {
   const clientId = relId(doc.client);
   const assignedToId = relId(doc.assignedTo);
   const assignedTo =

@@ -18,6 +18,7 @@ export {
   staffLandingPathForUser,
 } from "./load";
 export { loadStaffOversight } from "./oversight";
+export { loadStaffMyWork } from "./my-work";
 export {
   STAFF_HOME_PATH,
   STAFF_WELCOME_PATH,

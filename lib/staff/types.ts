@@ -3,6 +3,9 @@
  * Heather is the first learner; the model is reusable for every future teammate.
  */
 
+import type { WorkActivityEntry, WorkListItem } from "@/lib/work/types";
+import type { StaffMyWorkBoardColumnId } from "./my-work-board";
+
 export type StaffRoleId =
   | "operations_coordinator"
   | "executive_operations_coordinator"
@@ -199,10 +202,37 @@ export interface StaffTodayData {
   };
 }
 
+export interface StaffMyWorkData {
+  items: WorkListItem[];
+  openItems: WorkListItem[];
+  completedItems: WorkListItem[];
+  board: Record<StaffMyWorkBoardColumnId, WorkListItem[]>;
+  groups: {
+    key: string;
+    label: string;
+    kind: "client" | "internal";
+    items: WorkListItem[];
+  }[];
+  columns: { id: StaffMyWorkBoardColumnId; label: string }[];
+  counts: {
+    open: number;
+    completed: number;
+    todo: number;
+    inProgress: number;
+    blocked: number;
+    inReview: number;
+  };
+  includeCompleted: boolean;
+  generatedAt: string;
+}
+
 export interface StaffGuidedWorkData {
   workId: number;
   title: string;
   summary: string | null;
+  description: string | null;
+  notes: string | null;
+  activityHistory: WorkActivityEntry[];
   status: string;
   priority: string | null;
   dueDate: string | null;
@@ -217,6 +247,7 @@ export interface StaffGuidedWorkData {
   canCompleteIndependently: boolean;
   requiresMattApproval: boolean;
   hrefBack: string;
+  hrefMyWork: string;
   helpRequests: StaffHelpRequestView[];
 }
 

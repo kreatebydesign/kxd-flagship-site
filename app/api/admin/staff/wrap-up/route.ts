@@ -31,7 +31,7 @@ export async function POST(request: Request) {
   }
 
   const dateKey = toLocalDateKey();
-  const assigned = await getAssignedWorkForStaff(gated.actor.userId);
+  const assigned = await getAssignedWorkForStaff(gated.actor);
   const wrapUp = buildStaffWrapUp({ assigned });
   const saved = await saveStaffWrapUpNote({
     staffUserId: gated.actor.userId,
