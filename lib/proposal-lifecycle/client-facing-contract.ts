@@ -14,6 +14,7 @@ const INTERNAL_BANNER_PATTERNS: RegExp[] = [
   /^Template and operational wording only\.[^\n]*/gim,
   /^This draft agreement is prepared from accepted proposal[^\n]*/gim,
   /^Post-acceptance commercial amendments[^\n]*/gim,
+  /^Proposal [^\n]*accepted snapshot controls commercial intent[^\n]*/gim,
 ];
 
 /** Exact known notices that must never appear in client signing / executed PDFs. */
@@ -23,6 +24,11 @@ const EXACT_INTERNAL_NOTICES = [
   "AUTO-GENERATED DRAFT — internal review required. Not attorney-approved. Not sent.",
   "AUTO-GENERATED DRAFT — internal review required. Not sent.",
   "Post-acceptance commercial amendments are recorded on this contract only and do not rewrite the accepted proposal snapshot.",
+];
+
+/** Legacy proposal-reference lines from pre-correction agreement drafts. */
+const LEGACY_INTERNAL_PROPOSAL_REF_PATTERNS: RegExp[] = [
+  /accepted snapshot controls commercial intent for this draft\.?/gi,
 ];
 
 /**
@@ -35,6 +41,9 @@ export function toClientFacingContractBody(body: string | null | undefined): str
     text = text.split(notice).join("");
   }
   for (const pattern of INTERNAL_BANNER_PATTERNS) {
+    text = text.replace(pattern, "");
+  }
+  for (const pattern of LEGACY_INTERNAL_PROPOSAL_REF_PATTERNS) {
     text = text.replace(pattern, "");
   }
   // Collapse leading blank lines created by banner removal.

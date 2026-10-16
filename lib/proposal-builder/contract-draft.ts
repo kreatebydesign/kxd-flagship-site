@@ -26,6 +26,12 @@ import {
   STANDARD_WARRANTIES_DISCLAIMERS,
 } from "../commercial-legal/standard-contract-provisions.ts";
 import type { ContractCommercialAmendments } from "../proposal-lifecycle/commercial-amendments.ts";
+import { getKxdInvoiceConfig } from "../proposal-lifecycle/billing-identity.ts";
+import {
+  CLIENT_FACING_PROPOSAL_REFERENCE,
+  DEFAULT_PROJECT_TAX_DISCLOSURE,
+  formatLegalProvisionsForAgreementBody,
+} from "./format-contract-legal-body.ts";
 import { formatCents } from "./money.ts";
 import {
   DEFAULT_LEGAL_DRAFT_NOTICE,
@@ -56,6 +62,46 @@ function buildLegalProvisions(): ContractLegalProvisions {
     electronicSignatures: STANDARD_ELECTRONIC_SIGNATURES,
     counterparts: STANDARD_COUNTERPARTS,
   };
+}
+
+function resolveInitialPaymentCents(
+  accepted: CanonicalProposal,
+  scheduleItems: Array<PaymentScheduleItem & { notes?: string }>,
+): number {
+  if (accepted.totals.dueAtContractCents > 0) {
+    return accepted.totals.dueAtContractCents;
+  }
+  return scheduleItems
+    .filter((item) => item.due === "at-contract")
+    .reduce((sum, item) => sum + item.amountCents, 0);
+}
+
+function formatDefaultPaymentDetailBlock(
+  accepted: CanonicalProposal,
+  scheduleItems: Array<PaymentScheduleItem & { notes?: string }>,
+  currency: string,
+  paymentScheduleSummary: string,
+): string[] {
+  const initialCents = resolveInitialPaymentCents(accepted, scheduleItems);
+  const lines = [
+    "",
+    "PROJECT PAYMENT SCHEDULE",
+    `Total project investment: ${formatCents(accepted.totals.oneTimeTotalCents, currency)}`,
+  ];
+  if (initialCents > 0) {
+    lines.push(
+      `Initial payment due upon execution of this Agreement: ${formatCents(initialCents, currency)}`,
+    );
+  }
+  if (scheduleItems.length > 0) {
+    lines.push("Installments:");
+    for (const item of scheduleItems) {
+      lines.push(`• ${formatScheduleLine(item, currency)}`);
+    }
+  } else {
+    lines.push(`Payment schedule: ${paymentScheduleSummary}`);
+  }
+  return lines;
 }
 
 function formatScheduleLine(
@@ -238,16 +284,33 @@ export function mapAcceptedProposalToContractDraft(
           ? "KXD may begin project work after receipt of the first deposit installment."
           : null,
       ].filter((line): line is string => Boolean(line))
-    : [
-        "",
-        "PROJECT PAYMENT SCHEDULE",
-        `Deposit: ${formatCents(accepted.totals.depositCents, accepted.currency)}`,
-        `Payment schedule: ${paymentScheduleSummary}`,
-      ];
+    : formatDefaultPaymentDetailBlock(
+        accepted,
+        scheduleItems,
+        accepted.currency,
+        paymentScheduleSummary,
+      );
 
   const proposalReference =
     amendments?.proposalReferenceNote?.trim() ||
-    `Proposal ${accepted.proposalNumber}, version ${accepted.version}, accepted snapshot controls commercial intent for this draft.`;
+    CLIENT_FACING_PROPOSAL_REFERENCE(accepted.proposalNumber, accepted.version);
+
+  const timelineAssumptions = accepted.terms.timelineAssumptions?.trim() || "";
+  const phaseTimeline = accepted.scopeGroups
+    .map((g) => g.estimatedTimeline)
+    .filter(Boolean)
+    .join(" · ");
+  const scheduleBody = [timelineAssumptions, phaseTimeline].filter(Boolean).join("\n\n");
+
+  const kxdInvoice = getKxdInvoiceConfig();
+  const providerLegalEntity =
+    kxdInvoice.legalEntity.state === "reviewed" && kxdInvoice.legalEntity.value
+      ? String(kxdInvoice.legalEntity.value)
+      : "Kreate by Design";
+  const providerAddress =
+    kxdInvoice.mailingAddress.state === "reviewed" && kxdInvoice.mailingAddress.value
+      ? String(kxdInvoice.mailingAddress.value)
+      : null;
 
   const body = [
     DEFAULT_LEGAL_DRAFT_NOTICE,
@@ -261,7 +324,9 @@ export function mapAcceptedProposalToContractDraft(
     `Client: ${accepted.primaryOrganization}`,
     orgs.length ? `Organizations/brands: ${orgs.join(", ")}` : null,
     contactLine ? `Primary contact: ${contactLine}` : null,
-    "Provider: Kreate by Design",
+    "Client mailing address: To be confirmed for billing and notices.",
+    `Provider: ${providerLegalEntity}`,
+    providerAddress ? `Provider mailing address: ${providerAddress}` : "Provider mailing address: To be confirmed on invoices.",
     "",
     "SCOPE",
     scopeSummary || "As accepted in the proposal snapshot.",
@@ -270,8 +335,7 @@ export function mapAcceptedProposalToContractDraft(
     deliverables.length ? deliverables.map((d) => `• ${d}`).join("\n") : "As accepted.",
     "",
     "SCHEDULE",
-    accepted.scopeGroups.map((g) => g.estimatedTimeline).filter(Boolean).join(" · ") ||
-      "To be confirmed in the final agreement.",
+    scheduleBody || "To be confirmed in the final agreement.",
     "",
     "PRICING",
     pricingSummary,
@@ -279,6 +343,9 @@ export function mapAcceptedProposalToContractDraft(
     ...paymentDetailBlock,
     ...formatAncillaryChargesSection(amendments, accepted.currency),
     ...formatRecurringSection(amendments, accepted.totals.monthlyTotalCents, accepted.currency),
+    "",
+    "TAXES",
+    DEFAULT_PROJECT_TAX_DISCLOSURE,
     "",
     "RESPONSIBILITIES & EXCLUSIONS",
     accepted.terms.clientResponsibilities || "As stated in the accepted proposal.",
@@ -294,11 +361,7 @@ export function mapAcceptedProposalToContractDraft(
     "",
     "PROPOSAL REFERENCE",
     proposalReference,
-    "",
-    "LEGAL PROVISIONS",
-    ...Object.entries(legal)
-      .filter(([k]) => k !== "draftNotice")
-      .map(([k, v]) => `${k}: ${v}`),
+    ...formatLegalProvisionsForAgreementBody(legal),
   ]
     .filter((line) => line != null)
     .join("\n");
@@ -327,9 +390,7 @@ export function mapAcceptedProposalToContractDraft(
     },
     scopeSummary: scopeSummary || "As accepted in the proposal.",
     deliverables,
-    scheduleSummary:
-      accepted.scopeGroups.map((g) => g.estimatedTimeline).filter(Boolean).join(" · ") ||
-      "To be confirmed",
+    scheduleSummary: scheduleBody || "To be confirmed",
     pricingSummary,
     recurringSummary:
       monthlyForSummary > 0

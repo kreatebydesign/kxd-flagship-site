@@ -62,7 +62,7 @@ export const GOVERNING_LAW_PENDING_CONFIGURATION =
   "Governing law and venue will be confirmed by Kreate by Design before this agreement is approved for signature.";
 
 export const STANDARD_ENTIRE_AGREEMENT =
-  "This Agreement, including its exhibits and the accepted proposal snapshot referenced for commercial scope and pricing, is the entire agreement between the parties and supersedes prior discussions and drafts on the same subject. If a conflict exists between this Agreement and a proposal narrative, this signed Agreement controls legal terms, and the accepted commercial snapshot controls accepted scope, pricing, and selected options.";
+  "This Agreement, including its exhibits and the accepted Proposal referenced in the Proposal Reference section, is the entire agreement between the parties and supersedes prior discussions and drafts on the same subject. If a conflict exists between this Agreement and a proposal narrative, this signed Agreement controls legal terms, and the accepted Proposal controls accepted scope, pricing, and selected options.";
 
 export const STANDARD_AMENDMENTS =
   "Amendments must be in writing and agreed by both parties. Email or other written electronic confirmation may satisfy this requirement when both parties clearly agree to the specific change.";
