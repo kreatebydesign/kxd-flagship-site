@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requirePayloadAdminApi } from "@/lib/admin/auth";
+import { denyUnlessStaffBulkClientRequests } from "@/lib/staff/bulk-client-request-auth";
 import { normalizeBulkCompleteIds } from "@/lib/website-review-inbox/bulk-eligibility";
 import { reconcileLinkedWorkForCompletedReviews } from "@/lib/website-review-inbox/linked-work";
 
@@ -38,6 +39,12 @@ export async function POST(req: Request) {
       { status: 400 },
     );
   }
+
+  const bulkAuthDenied = await denyUnlessStaffBulkClientRequests(
+    auth,
+    normalized.ids,
+  );
+  if (bulkAuthDenied) return bulkAuthDenied;
 
   const dryRun = body.dryRun !== false;
   if (!dryRun && body.confirm !== true) {

@@ -39,6 +39,7 @@ import { ClientReviewMedia } from "./payload/collections/ClientReviewMedia.ts";
 import { ClientTasks } from "./payload/collections/ClientTasks.ts";
 import { Work } from "./payload/collections/Work.ts";
 import { WorkScheduleLinks } from "./payload/collections/WorkScheduleLinks.ts";
+import { StaffClientAssignments } from "./payload/collections/StaffClientAssignments.ts";
 import { StaffResponsibilities } from "./payload/collections/StaffResponsibilities.ts";
 import { StaffDayWrapups } from "./payload/collections/StaffDayWrapups.ts";
 import { StaffHelpRequests } from "./payload/collections/StaffHelpRequests.ts";
@@ -249,6 +250,7 @@ export default buildConfig({
     Work,
     WorkScheduleLinks,
     StaffResponsibilities,
+    StaffClientAssignments,
     StaffDayWrapups,
     StaffHelpRequests,
     GenesisSessions,

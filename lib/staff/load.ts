@@ -14,6 +14,10 @@ import {
 } from "./permissions";
 import { materializeResponsibilitiesForUser } from "./responsibilities";
 import {
+  actorUsesAssignedClientScope,
+  listActiveAssignedClientIds,
+} from "./client-assignments";
+import {
   listHelpRequestsForStaff,
   type StaffHelpRequestRecord,
 } from "./help-requests";
@@ -64,6 +68,7 @@ function greetingFor(name: string): string {
 
 export async function getAssignedWorkForStaff(
   userId: number,
+  options?: { assignedClientIds?: number[] | null },
 ): Promise<WorkListItem[]> {
   const workspace = await getWorkEngineWorkspace();
   const all = [
@@ -73,10 +78,16 @@ export async function getAssignedWorkForStaff(
     ...workspace.recentWork.slice(0, 40),
     ...workspace.completedToday,
   ];
+  const clientScope = options?.assignedClientIds;
   const seen = new Set<number>();
   const assigned: WorkListItem[] = [];
   for (const item of all) {
     if (item.assignedToId !== userId) continue;
+    if (clientScope != null) {
+      if (item.clientId != null && !clientScope.includes(item.clientId)) {
+        continue;
+      }
+    }
     if (seen.has(item.id)) continue;
     seen.add(item.id);
     assigned.push(item);
@@ -123,7 +134,12 @@ export async function loadStaffToday(
   }
 
   const training = await getTrainingDashboard(user);
-  const assigned = await getAssignedWorkForStaff(actor.userId);
+  const assignedClientIds = actorUsesAssignedClientScope(actor)
+    ? await listActiveAssignedClientIds(actor.userId)
+    : null;
+  const assigned = await getAssignedWorkForStaff(actor.userId, {
+    assignedClientIds,
+  });
   const {
     plan,
     primaryAction,
@@ -183,7 +199,12 @@ export async function loadStaffToday(
 export async function loadStaffWrapUp(user: AnyUser): Promise<StaffWrapUpData> {
   const actor = staffActorFromUser(user);
   if (!actor) throw new Error("Unable to resolve staff actor.");
-  const assigned = await getAssignedWorkForStaff(actor.userId);
+  const assignedClientIds = actorUsesAssignedClientScope(actor)
+    ? await listActiveAssignedClientIds(actor.userId)
+    : null;
+  const assigned = await getAssignedWorkForStaff(actor.userId, {
+    assignedClientIds,
+  });
   const dateKey = toLocalDateKey();
   let savedNote: string | null = null;
   try {
@@ -210,6 +231,12 @@ export async function loadStaffGuidedWork(
 
   if (isRestrictedStaff(actor) && work.assignedToId !== actor.userId) {
     return null;
+  }
+  if (actorUsesAssignedClientScope(actor) && work.clientId != null) {
+    const allowed = await (
+      await import("./client-assignments")
+    ).staffMayAccessClient(actor, work.clientId);
+    if (!allowed) return null;
   }
 
   const mattApproval = requiresMattApproval(work) || isWaitingOnMatt(work);

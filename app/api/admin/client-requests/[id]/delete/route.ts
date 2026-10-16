@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requirePayloadAdminApi } from "@/lib/admin/auth";
+import { denyUnlessStaffClientRequest } from "@/lib/staff/guard";
 import { deleteWebsiteReviewRevision } from "@/lib/website-review-inbox/delete";
 
 export const dynamic = "force-dynamic";
@@ -16,6 +17,9 @@ export async function POST(
   if (!Number.isFinite(requestId)) {
     return NextResponse.json({ ok: false, error: "Invalid revision id." }, { status: 400 });
   }
+
+  const scopeDenied = await denyUnlessStaffClientRequest(auth, requestId);
+  if (scopeDenied) return scopeDenied;
 
   const body = (await req.json().catch(() => ({}))) as { confirm?: boolean };
   if (body.confirm !== true) {

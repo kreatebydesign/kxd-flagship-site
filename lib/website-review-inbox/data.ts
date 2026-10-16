@@ -138,13 +138,31 @@ function mapDocToItem(doc: AnyDoc, attachmentCount: number): ReviewInboxItem {
   };
 }
 
-export async function getReviewInbox(): Promise<ReviewInboxData> {
+export async function getReviewInbox(options?: {
+  /** When set, only include requests for these client ids (staff assignment scope). */
+  clientIds?: number[] | null;
+}): Promise<ReviewInboxData> {
   const payload = await getPayload({ config });
+
+  const clientIds = options?.clientIds;
+  const clientFilter =
+    clientIds != null
+      ? clientIds.length === 0
+        ? { client: { equals: -1 } }
+        : clientIds.length === 1
+          ? { client: { equals: clientIds[0] } }
+          : { client: { in: clientIds } }
+      : null;
 
   const result = await payload.find({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     collection: "client-requests" as any,
-    where: { experienceModule: { in: [...REVIEW_INBOX_MODULES] } },
+    where: {
+      and: [
+        { experienceModule: { in: [...REVIEW_INBOX_MODULES] } },
+        ...(clientFilter ? [clientFilter] : []),
+      ],
+    },
     sort: "-createdAt",
     limit: 100,
     depth: 1,
@@ -165,18 +183,32 @@ export async function getReviewInbox(): Promise<ReviewInboxData> {
   return { items, newCount, activeCount };
 }
 
-export async function getReviewInboxSummary(): Promise<{ newCount: number; activeCount: number }> {
+export async function getReviewInboxSummary(options?: {
+  clientIds?: number[] | null;
+}): Promise<{ newCount: number; activeCount: number }> {
   const payload = await getPayload({ config });
+
+  const clientIds = options?.clientIds;
+  const clientFilter =
+    clientIds != null
+      ? clientIds.length === 0
+        ? { client: { equals: -1 } }
+        : clientIds.length === 1
+          ? { client: { equals: clientIds[0] } }
+          : { client: { in: clientIds } }
+      : null;
+
+  const baseAnd = [
+    { experienceModule: { in: [...REVIEW_INBOX_MODULES] } },
+    ...(clientFilter ? [clientFilter] : []),
+  ];
 
   const [newResult, activeResult] = await Promise.all([
     payload.count({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       collection: "client-requests" as any,
       where: {
-        and: [
-          { experienceModule: { in: [...REVIEW_INBOX_MODULES] } },
-          { status: { equals: "new" } },
-        ],
+        and: [...baseAnd, { status: { equals: "new" } }],
       },
       overrideAccess: true,
     }),
@@ -185,7 +217,7 @@ export async function getReviewInboxSummary(): Promise<{ newCount: number; activ
       collection: "client-requests" as any,
       where: {
         and: [
-          { experienceModule: { in: [...REVIEW_INBOX_MODULES] } },
+          ...baseAnd,
           { status: { in: REVIEW_INBOX_OPEN_STATUSES } },
         ],
       },

@@ -118,6 +118,7 @@ import * as migration_20261004_partner_portal_phase1 from './20261004_partner_po
 import * as migration_20261005_partner_portal_phase1_1 from './20261005_partner_portal_phase1_1';
 import * as migration_20261007_partner_portal_phase3_invitations from './20261007_partner_portal_phase3_invitations';
 import * as migration_20261008_partner_portal_phase4_network_directory from './20261008_partner_portal_phase4_network_directory';
+import * as migration_20261016_staff_client_assignments from './20261016_staff_client_assignments';
 
 export const migrations = [
   {
@@ -770,5 +771,11 @@ export const migrations = [
     up: migration_20261008_partner_portal_phase4_network_directory.up,
     down: migration_20261008_partner_portal_phase4_network_directory.down,
     name: '20261008_partner_portal_phase4_network_directory',
+  },
+  {
+    // Staff client assignments + business_development_specialist enum value.
+    up: migration_20261016_staff_client_assignments.up,
+    down: migration_20261016_staff_client_assignments.down,
+    name: '20261016_staff_client_assignments',
   },
 ];

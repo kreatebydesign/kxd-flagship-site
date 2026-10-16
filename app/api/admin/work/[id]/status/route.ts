@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { requirePayloadAdminApi } from "@/lib/admin/auth";
 import { denyUnlessStaffAssignedWork } from "@/lib/staff/guard";
-import { transitionWorkItem } from "@/lib/work/services";
+import { staffActorFromUser } from "@/lib/staff/actor";
+import { assertRestrictedStaffWorkStatusTransition } from "@/lib/staff/work-status-policy";
+import { getWorkItem, transitionWorkItem } from "@/lib/work/services";
 import type { WorkStatus } from "@/lib/work/types";
 
 export const dynamic = "force-dynamic";
@@ -26,6 +28,21 @@ export async function POST(
   const status = body.status as WorkStatus | undefined;
   if (!status) {
     return NextResponse.json({ ok: false, error: "status is required." }, { status: 400 });
+  }
+
+  const actor = staffActorFromUser(auth);
+  const workBefore = await getWorkItem(workId);
+  if (!workBefore) {
+    return NextResponse.json({ ok: false, error: "Work not found." }, { status: 404 });
+  }
+  if (actor) {
+    try {
+      assertRestrictedStaffWorkStatusTransition(actor, workBefore, status);
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Staff permission denied.";
+      return NextResponse.json({ ok: false, error: message }, { status: 403 });
+    }
   }
 
   try {

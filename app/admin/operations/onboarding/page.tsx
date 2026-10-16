@@ -51,12 +51,29 @@ function fmtDate(iso: string | null | undefined): string {
 }
 
 export default async function OnboardingDashboardPage() {
+  const { requireStaffAwarePage } = await import("@/lib/staff/guard");
+  const { reviewInboxClientScopeForUser } = await import(
+    "@/lib/staff/page-data-scope"
+  );
+  const user = await requireStaffAwarePage("/admin/operations/onboarding");
+  const scopedClientIds = await reviewInboxClientScopeForUser(user);
+
   const payload = await getPayload({ config });
+
+  const onboardingWhere =
+    scopedClientIds !== undefined
+      ? scopedClientIds.length === 0
+        ? { client: { equals: -1 } }
+        : scopedClientIds.length === 1
+          ? { client: { equals: scopedClientIds[0] } }
+          : { client: { in: scopedClientIds } }
+      : undefined;
 
   const onboardingsR = await Promise.allSettled([
     payload.find({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       collection: "client-onboarding" as any,
+      where: onboardingWhere,
       limit: 200,
       depth: 1,
       sort: "-updatedAt",

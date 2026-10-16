@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requirePayloadAdminApi } from "@/lib/admin/auth";
+import { denyUnlessStaffClientRequest } from "@/lib/staff/guard";
 import { updateReviewRequestStatus } from "@/lib/website-review-inbox/data";
 import { isReviewInboxStatus } from "@/lib/website-review-inbox/status";
 
@@ -17,6 +18,9 @@ export async function POST(
   if (!Number.isFinite(requestId)) {
     return NextResponse.json({ ok: false, error: "Invalid request id." }, { status: 400 });
   }
+
+  const scopeDenied = await denyUnlessStaffClientRequest(auth, requestId);
+  if (scopeDenied) return scopeDenied;
 
   const body = (await req.json()) as {
     status?: string;

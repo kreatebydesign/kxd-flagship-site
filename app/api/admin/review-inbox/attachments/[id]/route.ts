@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 import { requirePayloadAdminApi } from "@/lib/admin/auth";
+import {
+  denyUnlessStaffClientReviewMedia,
+  staffReviewMediaNotFoundResponse,
+} from "@/lib/staff/client-review-media-auth";
 import { streamClientReviewAttachment } from "@/lib/website-review-inbox/serve-attachment";
 
 export const dynamic = "force-dynamic";
@@ -14,8 +18,11 @@ export async function GET(
   const { id: idParam } = await params;
   const mediaId = Number.parseInt(idParam, 10);
   if (!Number.isFinite(mediaId)) {
-    return NextResponse.json({ ok: false, message: "Not found." }, { status: 404 });
+    return staffReviewMediaNotFoundResponse();
   }
+
+  const scopeDenied = await denyUnlessStaffClientReviewMedia(auth, mediaId);
+  if (scopeDenied) return scopeDenied;
 
   try {
     const file = await streamClientReviewAttachment(mediaId);
