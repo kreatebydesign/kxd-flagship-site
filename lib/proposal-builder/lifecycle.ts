@@ -35,12 +35,13 @@ const CONTRACT_TRANSITIONS: Record<ContractBuilderStatus, ContractBuilderStatus[
   draft: ["internal-review", "voided", "superseded"],
   "internal-review": ["draft", "approved-for-signature", "voided"],
   // Operator may sign before client delivery → partially-signed, then send.
-  "approved-for-signature": ["sent-for-signature", "sent", "partially-signed", "voided"],
+  "approved-for-signature": ["draft", "sent-for-signature", "sent", "partially-signed", "voided"],
   sent: ["viewed", "partially-signed", "signed", "executed", "declined", "expired", "voided"],
   "sent-for-signature": ["viewed", "partially-signed", "signed", "executed", "declined", "expired", "voided"],
   viewed: ["partially-signed", "signed", "executed", "declined", "expired", "voided"],
   // After KXD signs, contract may be sent for client signature or sealed when both signed.
   "partially-signed": [
+    "draft",
     "sent-for-signature",
     "sent",
     "executed",

@@ -750,6 +750,41 @@ export async function POST(
           noCertificateGenerated: true,
         });
       }
+      case "correct-from-accepted": {
+        if (body.confirmed !== true) {
+          throw new Error(
+            "Set confirmed:true to correct agreement text from the accepted proposal (invalidates operator signature).",
+          );
+        }
+        const { correctContractAgreementFromAccepted } = await import(
+          "@/lib/proposal-lifecycle/regenerate-contract-draft"
+        );
+        const result = await correctContractAgreementFromAccepted({
+          contractId: id,
+          actor,
+          dryRun: body.dryRun === true,
+          requireProposalNumber: body.requireProposalNumber
+            ? String(body.requireProposalNumber)
+            : undefined,
+          requireClientNameIncludes: body.requireClientNameIncludes
+            ? String(body.requireClientNameIncludes)
+            : undefined,
+        });
+        return NextResponse.json({
+          ok: true,
+          dryRun: result.dryRun,
+          contractId: result.contractId,
+          proposalId: result.proposalId,
+          contractStatus: result.contractStatus,
+          signaturesInvalidated: result.signaturesInvalidated,
+          previousOperatorDocumentHash: result.previousOperatorDocumentHash,
+          newClientFacingDocumentHash: result.newClientFacingDocumentHash,
+          scheduleOk: result.scheduleOk,
+          acceptedOneTimeTotalCents: result.acceptedOneTimeTotalCents,
+          signatureReadiness: result.signatureReadiness,
+          bodyPreview: result.bodyPreview,
+        });
+      }
       case "sign-operator": {
         const result = await signContractAsOperator(id, {
           legalName: String(body.legalName ?? ""),

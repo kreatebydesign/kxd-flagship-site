@@ -17,9 +17,13 @@ import {
   reconcileAmendedSchedule,
   type ContractCommercialAmendments,
 } from "./commercial-amendments.ts";
+import { assertContractTransition } from "../proposal-builder/lifecycle.ts";
+import { toClientFacingContractBody } from "./client-facing-contract.ts";
+import { computeDocumentHash, hashPaymentTerms, invalidateSignaturesOnMaterialEdit } from "./executed-seal.ts";
+import { stableJsonHash } from "./hash.ts";
 import { appendAudit, normalizeLifecyclePackage } from "./package.ts";
 import { deriveStructuredPaymentTerms, reconcileInstallments } from "./structured-payment-terms.ts";
-import type { ContractLifecyclePackage } from "./types.ts";
+import type { ContractLifecyclePackage, TypedSignatureEvidence } from "./types.ts";
 
 type AnyDoc = Record<string, unknown> & { id: number };
 
@@ -27,6 +31,14 @@ const CONTRACTS = "contracts";
 const PROPOSALS = "proposals";
 
 const MUTABLE_CONTRACT_STATUSES = new Set(["draft", "internal-review"]);
+
+/** Correct agreement text without voiding the contract record or mutating acceptedSnapshot. */
+const CORRECTABLE_CONTRACT_STATUSES = new Set([
+  "draft",
+  "internal-review",
+  "approved-for-signature",
+  "partially-signed",
+]);
 
 async function payloadClient() {
   return getPayload({ config });
@@ -259,4 +271,189 @@ export function assertMutableContractReadyForSignature(input: {
   });
 
   void recurringStartPending;
+}
+
+export type CorrectContractAgreementResult = RegenerateContractDraftResult & {
+  previousOperatorDocumentHash: string | null;
+  newClientFacingDocumentHash: string | null;
+  signaturesInvalidated: boolean;
+};
+
+/**
+ * Regenerate agreement body from accepted proposal, invalidate stale signatures, reset to draft.
+ * Preserves contract id, proposal acceptedSnapshot, acceptanceRecord, and lifecycle audit trail.
+ */
+export async function correctContractAgreementFromAccepted(input: {
+  contractId: number;
+  actor?: string | null;
+  dryRun?: boolean;
+  requireProposalNumber?: string;
+  requireClientNameIncludes?: string;
+}): Promise<CorrectContractAgreementResult> {
+  const payload = await payloadClient();
+  const contract = (await payload.findByID({
+    collection: CONTRACTS as never,
+    id: input.contractId,
+    depth: 1,
+    overrideAccess: true,
+  })) as AnyDoc;
+
+  const contractStatus = String(contract.status ?? "");
+  if (!CORRECTABLE_CONTRACT_STATUSES.has(contractStatus)) {
+    throw new Error(
+      `Contract status "${contractStatus}" cannot be corrected in place (allowed: ${[...CORRECTABLE_CONTRACT_STATUSES].join(", ")}).`,
+    );
+  }
+
+  const proposalId = asId(contract.proposal);
+  if (!proposalId) {
+    throw new Error("Contract has no related proposal — cannot correct from accepted snapshot.");
+  }
+
+  const proposal = (await payload.findByID({
+    collection: PROPOSALS as never,
+    id: proposalId,
+    depth: 0,
+    overrideAccess: true,
+  })) as AnyDoc;
+
+  const proposalNumber = String(proposal.proposalNumber ?? "");
+  if (input.requireProposalNumber && proposalNumber !== input.requireProposalNumber) {
+    throw new Error(
+      `Proposal number mismatch: expected ${input.requireProposalNumber}, got ${proposalNumber}`,
+    );
+  }
+
+  const accepted = proposal.acceptedSnapshot as CanonicalProposal | null | undefined;
+  if (!accepted || typeof accepted !== "object") {
+    throw new Error("Proposal has no acceptedSnapshot — refuse to correct.");
+  }
+
+  const clientName =
+    typeof proposal.client === "object" && proposal.client
+      ? String((proposal.client as { name?: string }).name ?? "")
+      : String(accepted.primaryOrganization ?? "");
+  if (
+    input.requireClientNameIncludes &&
+    !clientName.toLowerCase().includes(input.requireClientNameIncludes.toLowerCase())
+  ) {
+    throw new Error(
+      `Client name safety check failed: expected to include "${input.requireClientNameIncludes}", got "${clientName}"`,
+    );
+  }
+
+  let pkg = normalizeLifecyclePackage(contract.lifecyclePackage);
+  if (pkg.clientSignature) {
+    throw new Error("Client signature is on file — cannot correct agreement text in place.");
+  }
+
+  const priorOperator = pkg.operatorSignature as TypedSignatureEvidence | null;
+  const amendments = isContractCommercialAmendments(pkg.commercialAmendments)
+    ? pkg.commercialAmendments
+    : null;
+
+  const draft = mapAcceptedProposalToContractDraft(accepted, { amendments });
+  const acceptanceHash =
+    (proposal.acceptanceRecord as { acceptanceHash?: string } | null)?.acceptanceHash ??
+    stableJsonHash(accepted);
+  const terms = deriveStructuredPaymentTerms(accepted, acceptanceHash, amendments);
+  const installmentRecon = reconcileInstallments(terms);
+  if (!installmentRecon.ok) {
+    throw new Error(
+      `Installment sum ${installmentRecon.sumCents} != one-time total ${terms.oneTimeTotalCents}`,
+    );
+  }
+
+  const recurringStartPending =
+    terms.recurring.startBillingDateStatus === "pending-confirmation" &&
+    terms.monthlyTotalCents > 0;
+
+  const signatureReadiness = assessContractSignatureReadiness({
+    legal: draft.legal,
+    body: draft.body,
+    jurisdiction: readLegalJurisdictionConfig(),
+    recurringStartPending,
+  });
+
+  const clientFacingBody = toClientFacingContractBody(draft.body);
+  const newDocumentHash = computeDocumentHash({
+    contractId: input.contractId,
+    contractBody: clientFacingBody,
+    acceptedSnapshotHash: acceptanceHash,
+    paymentTermsHash: hashPaymentTerms(terms),
+    version: Number(contract.revisionNumber ?? 1) || 1,
+  });
+
+  const base: CorrectContractAgreementResult = {
+    proposalId,
+    contractId: input.contractId,
+    contractStatus,
+    proposalStatus: String(proposal.status ?? ""),
+    acceptedOneTimeTotalCents: accepted.totals.oneTimeTotalCents,
+    scheduleSumCents: installmentRecon.sumCents,
+    scheduleOk: installmentRecon.ok,
+    monthlyTotalCents: terms.monthlyTotalCents,
+    recurringStartPending,
+    signatureReadiness,
+    dryRun: Boolean(input.dryRun),
+    bodyPreview: clientFacingBody.slice(0, 2000),
+    amendmentsReason: amendments?.reason ?? null,
+    previousOperatorDocumentHash: priorOperator?.documentHash ?? null,
+    newClientFacingDocumentHash: newDocumentHash,
+    signaturesInvalidated: Boolean(priorOperator),
+  };
+
+  if (input.dryRun) {
+    return base;
+  }
+
+  if (contractStatus !== "draft") {
+    assertContractTransition(contractStatus, "draft");
+  }
+
+  pkg = invalidateSignaturesOnMaterialEdit(pkg);
+  pkg = {
+    ...pkg,
+    commercialAmendments: amendments,
+    structuredPaymentTerms: terms,
+    commercialSource: "proposal",
+    billingPlan: null,
+  };
+  pkg = appendAudit(pkg, {
+    actor: input.actor ?? "operator",
+    action: "contract.corrected-from-accepted",
+    fromStatus: contractStatus,
+    toStatus: "draft",
+    reason: priorOperator
+      ? `Agreement text corrected from accepted proposal. Prior operator signature invalidated (documentHash ${priorOperator.documentHash}).`
+      : "Agreement text corrected from accepted proposal.",
+    sourceVersion: 1,
+  });
+
+  const monthlyDollars = terms.monthlyTotalCents / 100;
+  const projectDollars = accepted.totals.oneTimeTotalCents / 100;
+
+  await payload.update({
+    collection: CONTRACTS as never,
+    id: input.contractId,
+    data: {
+      title: draft.title,
+      publicTitle: draft.title,
+      body: draft.body,
+      terms: draft.legal.draftNotice,
+      executiveNotes:
+        "Agreement corrected from accepted proposal — operator re-signature required before client send.",
+      monthlyAmount: monthlyDollars,
+      projectAmount: projectDollars,
+      contractDraftSnapshot: draft,
+      legalProvisions: draft.legal,
+      lifecyclePackage: pkg,
+      status: "draft",
+      signedAt: null,
+      sentAt: null,
+    } as never,
+    overrideAccess: true,
+  });
+
+  return { ...base, dryRun: false, contractStatus: "draft" };
 }

@@ -39,6 +39,7 @@ export {
 } from "./services.ts";
 export {
   regenerateContractDraftFromAccepted,
+  correctContractAgreementFromAccepted,
   assertMutableContractReadyForSignature,
 } from "./regenerate-contract-draft.ts";
 export {
