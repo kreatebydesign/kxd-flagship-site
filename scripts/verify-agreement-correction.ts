@@ -115,7 +115,9 @@ const canonical = buildCanonicalProposal(
 
 const accepted = { ...canonical, status: "accepted-contract-pending" as const };
 const draft = mapAcceptedProposalToContractDraft(accepted);
+const draftRethwill = mapAcceptedProposalToContractDraft(accepted, { contractId: 6 });
 const clientFacing = toClientFacingContractBody(draft.body);
+const clientFacingRethwill = toClientFacingContractBody(draftRethwill.body);
 
 console.log("\nAgreement correction verification\n");
 
@@ -141,6 +143,22 @@ check("legal section uses human heading", clientFacing.includes("TERM AND TERMIN
 check("no camelCase legal keys in body", !clientFacing.includes("termAndTermination:"));
 check("tax disclosure present", clientFacing.includes("TAXES"));
 check("sanitized body has no internal banner", !containsInternalDraftBanner(clientFacing));
+
+check(
+  "contract #6 parties use reviewed LLC and Roseburg address",
+  clientFacingRethwill.includes("Kreate by Design LLC")
+    && clientFacingRethwill.includes("1445 SE Pine St, Roseburg, OR 97470")
+    && clientFacingRethwill.includes("Authorized signer: Kurt V. Rethwill"),
+);
+check(
+  "contract #6 parties omit address placeholders",
+  !clientFacingRethwill.includes("To be confirmed for billing")
+    && !clientFacingRethwill.includes("To be confirmed on invoices"),
+);
+check(
+  "contract #6 parties exclude Portland registered agent address",
+  !clientFacingRethwill.includes("5441 S Macadam"),
+);
 
 const terms = deriveStructuredPaymentTerms(accepted, "test-hash", null);
 check(

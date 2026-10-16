@@ -114,7 +114,9 @@ async function main() {
   })) as { docs: Array<Record<string, unknown>> };
   const accepted = proposal.docs[0]?.acceptedSnapshot as CanonicalProposal | undefined;
   const fullClientFacing = accepted
-    ? toClientFacingContractBody(mapAcceptedProposalToContractDraft(accepted).body)
+    ? toClientFacingContractBody(
+        mapAcceptedProposalToContractDraft(accepted, { contractId: CONTRACT_ID }).body,
+      )
     : toClientFacingContractBody(result.bodyPreview);
   const clientFacing = fullClientFacing;
 
@@ -153,7 +155,20 @@ async function main() {
       taxesSection: clientFacing.includes("TAXES"),
       clientAddressPlaceholder: clientFacing.includes("Client mailing address: To be confirmed"),
       providerAddressPlaceholder: clientFacing.includes("To be confirmed on invoices"),
+      rethwillPartiesBlock:
+        clientFacing.includes("Kreate by Design LLC") &&
+        clientFacing.includes("1445 SE Pine St, Roseburg, OR 97470") &&
+        clientFacing.includes("9454 Wilshire Blvd, Suite 313, Beverly Hills, CA 90212") &&
+        clientFacing.includes("Authorized signer: Kurt V. Rethwill") &&
+        clientFacing.includes("rethwillchiro@hotmail.com"),
+      noPortlandRegisteredAgent: !clientFacing.includes("5441 S Macadam"),
     },
+    partiesSectionExcerpt: (() => {
+      const start = clientFacing.indexOf("PARTIES");
+      if (start < 0) return "";
+      const end = clientFacing.indexOf("\n\nSCOPE", start);
+      return clientFacing.slice(start, end > start ? end : start + 800);
+    })(),
     bodyPreviewLength: clientFacing.length,
     bodyPreviewExcerpt: clientFacing.slice(0, 3200),
   };

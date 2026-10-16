@@ -28,6 +28,11 @@ import {
 import type { ContractCommercialAmendments } from "../proposal-lifecycle/commercial-amendments.ts";
 import { getKxdInvoiceConfig } from "../proposal-lifecycle/billing-identity.ts";
 import {
+  formatReviewedPartiesSectionLines,
+  getContractPartiesOverride,
+  type ReviewedContractPartiesOverride,
+} from "../proposal-lifecycle/contract-parties-override.ts";
+import {
   CLIENT_FACING_PROPOSAL_REFERENCE,
   DEFAULT_PROJECT_TAX_DISCLOSURE,
   formatLegalProvisionsForAgreementBody,
@@ -187,6 +192,9 @@ function formatAncillaryChargesSection(
 
 export type MapContractDraftOptions = {
   amendments?: ContractCommercialAmendments | null;
+  /** When set, applies reviewed parties block for this contract id only. */
+  contractId?: number;
+  partiesOverride?: ReviewedContractPartiesOverride | null;
 };
 
 export function mapAcceptedProposalToContractDraft(
@@ -194,6 +202,9 @@ export function mapAcceptedProposalToContractDraft(
   options?: MapContractDraftOptions,
 ): CanonicalContractDraft {
   const amendments = options?.amendments ?? null;
+  const partiesOverride =
+    options?.partiesOverride ??
+    (options?.contractId != null ? getContractPartiesOverride(options.contractId) : null);
   const orgs = accepted.organizations.map((o) => o.name).filter(Boolean);
   const deliverables = accepted.scopeGroups.flatMap((g) =>
     g.deliverables.map((d) => `${g.title}: ${d.title}`),
@@ -312,6 +323,22 @@ export function mapAcceptedProposalToContractDraft(
       ? String(kxdInvoice.mailingAddress.value)
       : null;
 
+  const defaultPartiesLines = [
+    "PARTIES",
+    `Client: ${accepted.primaryOrganization}`,
+    orgs.length ? `Organizations/brands: ${orgs.join(", ")}` : null,
+    contactLine ? `Primary contact: ${contactLine}` : null,
+    "Client mailing address: To be confirmed for billing and notices.",
+    `Provider: ${providerLegalEntity}`,
+    providerAddress
+      ? `Provider mailing address: ${providerAddress}`
+      : "Provider mailing address: To be confirmed on invoices.",
+  ].filter((line): line is string => Boolean(line));
+
+  const partiesSectionLines = partiesOverride
+    ? formatReviewedPartiesSectionLines(partiesOverride)
+    : defaultPartiesLines;
+
   const body = [
     DEFAULT_LEGAL_DRAFT_NOTICE,
     "",
@@ -320,13 +347,7 @@ export function mapAcceptedProposalToContractDraft(
       ? "Post-acceptance commercial amendments are recorded on this contract only and do not rewrite the accepted proposal snapshot."
       : null,
     "",
-    "PARTIES",
-    `Client: ${accepted.primaryOrganization}`,
-    orgs.length ? `Organizations/brands: ${orgs.join(", ")}` : null,
-    contactLine ? `Primary contact: ${contactLine}` : null,
-    "Client mailing address: To be confirmed for billing and notices.",
-    `Provider: ${providerLegalEntity}`,
-    providerAddress ? `Provider mailing address: ${providerAddress}` : "Provider mailing address: To be confirmed on invoices.",
+    ...partiesSectionLines,
     "",
     "SCOPE",
     scopeSummary || "As accepted in the proposal snapshot.",
@@ -379,15 +400,23 @@ export function mapAcceptedProposalToContractDraft(
     proposalVersion: accepted.version,
     title: `Agreement — ${accepted.title}`,
     status: "draft",
-    parties: {
-      clientName: accepted.primaryOrganization,
-      organizations: orgs,
-      kxdName: "Kreate by Design",
-      ...(contactName ? { primaryContactName: contactName } : {}),
-      ...(contactTitle ? { primaryContactTitle: contactTitle } : {}),
-      ...(contactEmail ? { primaryContactEmail: contactEmail } : {}),
-      ...(contactPhone ? { primaryContactPhone: contactPhone } : {}),
-    },
+    parties: partiesOverride
+      ? {
+          clientName: partiesOverride.clientLegalName,
+          organizations: orgs,
+          kxdName: partiesOverride.providerLegalName,
+          primaryContactName: partiesOverride.authorizedSignerName,
+          primaryContactEmail: partiesOverride.clientEmail,
+        }
+      : {
+          clientName: accepted.primaryOrganization,
+          organizations: orgs,
+          kxdName: "Kreate by Design",
+          ...(contactName ? { primaryContactName: contactName } : {}),
+          ...(contactTitle ? { primaryContactTitle: contactTitle } : {}),
+          ...(contactEmail ? { primaryContactEmail: contactEmail } : {}),
+          ...(contactPhone ? { primaryContactPhone: contactPhone } : {}),
+        },
     scopeSummary: scopeSummary || "As accepted in the proposal.",
     deliverables,
     scheduleSummary: scheduleBody || "To be confirmed",

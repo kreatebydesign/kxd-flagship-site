@@ -166,7 +166,7 @@ export async function regenerateContractDraftFromAccepted(input: {
     }
   }
 
-  const draft = mapAcceptedProposalToContractDraft(accepted, { amendments });
+  const draft = mapAcceptedProposalToContractDraft(accepted, { amendments, contractId });
   const acceptanceHash =
     (proposal.acceptanceRecord as { acceptanceHash?: string } | null)?.acceptanceHash;
   const terms = deriveStructuredPaymentTerms(accepted, acceptanceHash, amendments);
@@ -352,7 +352,10 @@ export async function correctContractAgreementFromAccepted(input: {
     ? pkg.commercialAmendments
     : null;
 
-  const draft = mapAcceptedProposalToContractDraft(accepted, { amendments });
+  const draft = mapAcceptedProposalToContractDraft(accepted, {
+    amendments,
+    contractId: input.contractId,
+  });
   const acceptanceHash =
     (proposal.acceptanceRecord as { acceptanceHash?: string } | null)?.acceptanceHash ??
     stableJsonHash(accepted);
