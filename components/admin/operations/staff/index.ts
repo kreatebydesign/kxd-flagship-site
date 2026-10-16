@@ -7,6 +7,9 @@ export type { StaffGuidancePanelProps } from "./StaffGuidancePanel";
 export { StaffGuidedWorkScreen } from "./StaffGuidedWorkScreen";
 export type { StaffGuidedWorkScreenProps } from "./StaffGuidedWorkScreen";
 
+export { StaffMyWorkScreen } from "./StaffMyWorkScreen";
+export type { StaffMyWorkScreenProps } from "./StaffMyWorkScreen";
+
 export { StaffHomeScreen } from "./StaffHomeScreen";
 export type { StaffHomeScreenProps } from "./StaffHomeScreen";
 

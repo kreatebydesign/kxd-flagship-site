@@ -24,11 +24,12 @@ export async function POST(
   const denied = await denyUnlessStaffAssignedWork(auth, workId);
   if (denied) return denied;
 
-  const body = (await req.json()) as { status?: string };
+  const body = (await req.json()) as { status?: string; note?: string };
   const status = body.status as WorkStatus | undefined;
   if (!status) {
     return NextResponse.json({ ok: false, error: "status is required." }, { status: 400 });
   }
+  const note = body.note?.trim();
 
   const actor = staffActorFromUser(auth);
   const workBefore = await getWorkItem(workId);
@@ -46,11 +47,27 @@ export async function POST(
   }
 
   try {
-    const work = await transitionWorkItem(
-      workId,
-      status,
-      typeof auth.email === "string" ? auth.email : undefined,
-    );
+    const actorEmail = typeof auth.email === "string" ? auth.email : undefined;
+    if (note && status === "blocked") {
+      const stamp = new Date().toISOString().slice(0, 16).replace("T", " ");
+      const blockNote = `[Blocked ${stamp}]\n${note}`;
+      const merged = workBefore.notes
+        ? `${workBefore.notes}\n\n${blockNote}`
+        : blockNote;
+      const { updateWorkItem } = await import("@/lib/work/services");
+      await updateWorkItem({
+        workId,
+        status,
+        notes: merged,
+        actorEmail,
+      });
+      const work = await getWorkItem(workId);
+      if (!work) {
+        return NextResponse.json({ ok: false, error: "Work not found." }, { status: 404 });
+      }
+      return NextResponse.json({ ok: true, work, status: work.status });
+    }
+    const work = await transitionWorkItem(workId, status, actorEmail);
     return NextResponse.json({ ok: true, work, status: work.status });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Could not update work status.";

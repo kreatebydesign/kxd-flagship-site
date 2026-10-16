@@ -43,7 +43,7 @@ export async function loadStaffOversight(): Promise<StaffOversightData> {
     const displayName = memberActor.displayName;
     const staffRole = memberActor.staffRole;
 
-    const assigned = await getAssignedWorkForStaff(userId);
+    const assigned = await getAssignedWorkForStaff(memberActor);
     const open = assigned.filter(
       (w) => w.status !== "completed" && w.status !== "archived",
     );

@@ -1,7 +1,8 @@
 import "server-only";
 
 import { getTrainingStaffSummary } from "@/lib/training/summary";
-import { getWorkEngineWorkspace, getWorkItem } from "@/lib/work/services";
+import { getWorkItem } from "@/lib/work/services";
+import { listWorkAssignedToStaffActor } from "@/lib/work/staff-assigned";
 import type { WorkListItem } from "@/lib/work/types";
 import { staffActorFromUser, describeStaffActor } from "./actor";
 import { buildStaffPlan } from "./plan";
@@ -13,15 +14,13 @@ import {
   staffRoleTitle,
 } from "./permissions";
 import { materializeResponsibilitiesForUser } from "./responsibilities";
-import {
-  actorUsesAssignedClientScope,
-  listActiveAssignedClientIds,
-} from "./client-assignments";
+import { actorUsesAssignedClientScope } from "./client-assignments";
 import {
   listHelpRequestsForStaff,
   type StaffHelpRequestRecord,
 } from "./help-requests";
 import type {
+  StaffActor,
   StaffGuidedWorkData,
   StaffHelpRequestView,
   StaffTodayData,
@@ -67,32 +66,9 @@ function greetingFor(name: string): string {
 }
 
 export async function getAssignedWorkForStaff(
-  userId: number,
-  options?: { assignedClientIds?: number[] | null },
+  actor: StaffActor,
 ): Promise<WorkListItem[]> {
-  const workspace = await getWorkEngineWorkspace();
-  const all = [
-    ...workspace.currentWork,
-    ...workspace.queue,
-    ...workspace.upcoming,
-    ...workspace.recentWork.slice(0, 40),
-    ...workspace.completedToday,
-  ];
-  const clientScope = options?.assignedClientIds;
-  const seen = new Set<number>();
-  const assigned: WorkListItem[] = [];
-  for (const item of all) {
-    if (item.assignedToId !== userId) continue;
-    if (clientScope != null) {
-      if (item.clientId != null && !clientScope.includes(item.clientId)) {
-        continue;
-      }
-    }
-    if (seen.has(item.id)) continue;
-    seen.add(item.id);
-    assigned.push(item);
-  }
-  return assigned;
+  return listWorkAssignedToStaffActor(actor, { includeCompleted: false });
 }
 
 export async function loadStaffToday(
@@ -135,12 +111,7 @@ export async function loadStaffToday(
 
   const trainingUser = actingUser ?? user;
   const training = await getTrainingStaffSummary(trainingUser);
-  const assignedClientIds = actorUsesAssignedClientScope(actor)
-    ? await listActiveAssignedClientIds(actor.userId)
-    : null;
-  const assigned = await getAssignedWorkForStaff(actor.userId, {
-    assignedClientIds,
-  });
+  const assigned = await getAssignedWorkForStaff(actor);
   const {
     plan,
     primaryAction,
@@ -200,12 +171,7 @@ export async function loadStaffToday(
 export async function loadStaffWrapUp(user: AnyUser): Promise<StaffWrapUpData> {
   const actor = staffActorFromUser(user);
   if (!actor) throw new Error("Unable to resolve staff actor.");
-  const assignedClientIds = actorUsesAssignedClientScope(actor)
-    ? await listActiveAssignedClientIds(actor.userId)
-    : null;
-  const assigned = await getAssignedWorkForStaff(actor.userId, {
-    assignedClientIds,
-  });
+  const assigned = await getAssignedWorkForStaff(actor);
   const dateKey = toLocalDateKey();
   let savedNote: string | null = null;
   try {
@@ -257,6 +223,9 @@ export async function loadStaffGuidedWork(
     workId: work.id,
     title: work.title,
     summary: work.summary,
+    description: work.description,
+    notes: work.notes,
+    activityHistory: work.activityHistory ?? [],
     status: work.status,
     priority: work.priority,
     dueDate: work.dueDate,
@@ -322,6 +291,7 @@ export async function loadStaffGuidedWork(
     canCompleteIndependently: !mattApproval,
     requiresMattApproval: mattApproval,
     hrefBack: STAFF_HOME_PATH,
+    hrefMyWork: "/admin/operations/staff/my-work",
     helpRequests,
   };
 }

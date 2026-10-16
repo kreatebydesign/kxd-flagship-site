@@ -22816,3 +22816,146 @@ select.kxd-os-commercial-control {
   flex-wrap: wrap;
   gap: 0.65rem;
 }
+
+/* Staff My Work — list & board (Work Engine assigned tasks) */
+.kxd-os-page--staff-my-work .kxd-os-staff-my-work__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1.25rem 0 1rem;
+}
+
+.kxd-os-staff-my-work__view-toggle {
+  display: inline-flex;
+  border: 1px solid var(--kxd-os-border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.kxd-os-staff-my-work__view-btn {
+  font: inherit;
+  font-size: 0.8125rem;
+  padding: 0.45rem 0.85rem;
+  background: transparent;
+  border: none;
+  color: var(--kxd-os-text-muted);
+  cursor: pointer;
+}
+
+.kxd-os-staff-my-work__view-btn--active {
+  background: color-mix(in srgb, var(--kxd-os-gold, #b8974a) 12%, var(--kxd-os-surface));
+  color: var(--kxd-os-text);
+}
+
+.kxd-os-staff-my-work__board {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+
+@media (max-width: 1100px) {
+  .kxd-os-staff-my-work__board {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .kxd-os-staff-my-work__board {
+    grid-template-columns: 1fr;
+  }
+}
+
+.kxd-os-staff-my-work__column-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-top: 0.5rem;
+}
+
+.kxd-os-staff-my-work__list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.kxd-os-staff-my-work__group-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 0.75rem;
+}
+
+.kxd-os-staff-my-work__card {
+  padding: 0.85rem;
+  border: 1px solid var(--kxd-os-border);
+  border-radius: 2px;
+  background: var(--kxd-os-surface);
+}
+
+.kxd-os-staff-my-work__card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.kxd-os-staff-my-work__card-title {
+  font-weight: 500;
+  margin: 0 0 0.35rem;
+}
+
+.kxd-os-staff-my-work__card-summary {
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.kxd-os-staff-my-work__card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 0.65rem;
+}
+
+.kxd-os-staff-my-work__card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.65rem;
+}
+
+.kxd-os-staff-my-work__overdue {
+  color: var(--kxd-os-critical);
+}
+
+.kxd-os-staff-my-work__error {
+  color: var(--kxd-os-critical);
+  margin-bottom: 1rem;
+}
+
+.kxd-os-staff-my-work__notes {
+  font: inherit;
+  font-size: 0.875rem;
+  white-space: pre-wrap;
+  margin: 0;
+  padding: 0.75rem;
+  background: color-mix(in srgb, var(--kxd-os-text-muted) 4%, var(--kxd-os-surface));
+  border-radius: 2px;
+}
+
+.kxd-os-staff-my-work__activity {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.kxd-os-staff-my-work__prose {
+  white-space: pre-wrap;
+}

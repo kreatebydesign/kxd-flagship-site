@@ -14,6 +14,7 @@ import {
 } from "@/components/admin/operations/shared/OpsBriefing";
 import { KxdButton, KxdIntelligenceBadge, KxdIntelligenceMark, KxdPage } from "@/components/os";
 import type { StaffOversightData } from "@/lib/staff/types";
+import { workViewHref } from "@/lib/work/planning/client";
 
 type HelpRequestRowData = StaffOversightData["helpRequests"][number];
 
@@ -372,7 +373,15 @@ export function StaffOversightScreen({ data }: StaffOversightScreenProps) {
                         ]}
                       />
                     </div>
-                    <div style={{ marginTop: "0.75rem" }}>
+                    <div
+                      style={{
+                        marginTop: "0.75rem",
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: "0.65rem",
+                        alignItems: "center",
+                      }}
+                    >
                       <KxdButton
                         type="button"
                         variant="ghost"
@@ -382,6 +391,18 @@ export function StaffOversightScreen({ data }: StaffOversightScreenProps) {
                       >
                         View daily plan
                       </KxdButton>
+                      <Link
+                        href={workViewHref("all", { assignedToId: member.userId })}
+                        className="kxd-os-link-quiet kxd-os-meta"
+                      >
+                        Assigned work
+                      </Link>
+                      <Link
+                        href={workViewHref("review", { assignedToId: member.userId })}
+                        className="kxd-os-link-quiet kxd-os-meta"
+                      >
+                        In review
+                      </Link>
                     </div>
                   </div>
                 </div>

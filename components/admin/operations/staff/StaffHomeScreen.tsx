@@ -199,6 +199,12 @@ function StaffHomeBody({
           lead={`${data.morning.dateLabel}. ${data.morning.summary}`}
         />
 
+        <p className="kxd-os-meta" style={{ marginBottom: "1.25rem" }}>
+          <Link href="/admin/operations/staff/my-work" className="kxd-os-link-quiet">
+            Open My work — list and board
+          </Link>
+        </p>
+
         <div className="kxd-os-staff-plan-grid">
           <div>
             <OpsCard>

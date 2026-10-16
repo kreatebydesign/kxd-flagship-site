@@ -131,8 +131,12 @@ export function StaffGuidedWorkScreen({
         />
 
         <p className="kxd-os-meta" style={{ marginBottom: "1rem" }}>
+          <Link href={data.hrefMyWork} className="kxd-os-link-quiet">
+            My work
+          </Link>
+          <span className="kxd-os-meta"> · </span>
           <Link href={data.hrefBack} className="kxd-os-link-quiet">
-            Back to staff home
+            Staff home
           </Link>
         </p>
 
@@ -150,6 +154,20 @@ export function StaffGuidedWorkScreen({
                 <span className="kxd-os-meta">Due {data.dueDate.slice(0, 10)}</span>
               ) : null}
             </div>
+
+            {data.description ? (
+              <section style={{ marginTop: "1.5rem" }}>
+                <OpsSectionHead label="Instructions" />
+                <p className="kxd-os-staff-my-work__prose">{data.description}</p>
+              </section>
+            ) : null}
+
+            {data.notes ? (
+              <section style={{ marginTop: "1.5rem" }}>
+                <OpsSectionHead label="Notes" />
+                <pre className="kxd-os-staff-my-work__notes">{data.notes}</pre>
+              </section>
+            ) : null}
 
             <section style={{ marginTop: "1.5rem" }}>
               <OpsSectionHead label="Why it matters" />
@@ -199,6 +217,23 @@ export function StaffGuidedWorkScreen({
               <OpsSectionHead label="Permission boundary" />
               <p>{data.permissionBoundary}</p>
             </section>
+
+            {data.activityHistory.length > 0 ? (
+              <section style={{ marginTop: "1.5rem" }}>
+                <OpsSectionHead label="Activity" />
+                <ul className="kxd-os-staff-my-work__activity">
+                  {data.activityHistory.map((entry, index) => (
+                    <li key={`${entry.at}-${index}`}>
+                      <span className="kxd-os-meta">
+                        {entry.at.slice(0, 16).replace("T", " ")}
+                        {entry.actor ? ` · ${entry.actor}` : ""}
+                      </span>
+                      <p>{entry.action}{entry.detail ? ` — ${entry.detail}` : ""}</p>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
           </OpsCard>
 
           <OpsCard className="kxd-os-ops-card-padding">

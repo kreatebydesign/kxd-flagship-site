@@ -141,6 +141,7 @@
     "verify:staff-client-access": "tsx scripts/verify-staff-client-access.ts",
     "verify:staff-bulk-review-auth": "tsx scripts/verify-staff-bulk-review-auth.ts",
     "verify:staff-review-attachment-auth": "tsx scripts/verify-staff-review-attachment-auth.ts",
+    "verify:staff-my-work": "tsx scripts/verify-staff-my-work.ts",
     "verify:training-read-path": "tsx scripts/verify-training-read-path.ts",
     "verify:training-role-access": "tsx scripts/verify-training-role-access.ts",
     "measure:training-load": "tsx scripts/measure-training-load.ts",
