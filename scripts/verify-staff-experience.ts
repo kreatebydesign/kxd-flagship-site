@@ -294,14 +294,10 @@ assert.equal(classifyActionableBand(dueToday, now), 3);
 assert.equal(isWaitingOnMatt(waiting), true);
 
 const trainingEmpty = {
-  learnerKey: "heather@kreatebydesign.com",
-  learnerLabel: "Heather",
-  canManage: false,
   overallPercent: 0,
   completedLessons: 0,
   totalLessons: 15,
   currentPathSlug: "executive-ops-foundation",
-  paths: [],
   continueLesson: {
     pathSlug: "executive-ops-foundation",
     pathTitle: "Executive Ops Foundation",
@@ -317,16 +313,12 @@ const trainingEmpty = {
     audience: "staff",
   },
   recommendedLesson: null,
-  recentLessons: [],
   growthTrack: {
     roleTitle: "Executive Operations Coordinator",
     roleSummary: "test",
     expandingInto: [],
     notIncluded: [],
   },
-  experienceTitle: "Operations Experience",
-  experienceLede: "test",
-  generatedAt: new Date().toISOString(),
 } as const;
 
 const planWithWork = buildStaffPlan({

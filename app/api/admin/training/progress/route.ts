@@ -4,6 +4,7 @@ import {
   completeTrainingLesson,
   updateTrainingChecklist,
 } from "@/lib/training";
+import { assertTrainingLessonAccess } from "@/lib/training/role-access";
 
 export const dynamic = "force-dynamic";
 
@@ -32,6 +33,10 @@ export async function POST(req: Request) {
       { success: false, error: "pathSlug and lessonSlug are required." },
       { status: 400 },
     );
+  }
+
+  if (!assertTrainingLessonAccess(auth, pathSlug, lessonSlug)) {
+    return NextResponse.json({ success: false, error: "Forbidden." }, { status: 403 });
   }
 
   if (body.action === "complete") {

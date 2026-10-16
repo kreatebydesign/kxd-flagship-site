@@ -178,6 +178,17 @@ export interface OperationsGrowthTrack {
   notIncluded: string[];
 }
 
+/** Staff Home / plan — no full path grid or catalog sync. */
+export interface TrainingStaffSummary {
+  overallPercent: number;
+  completedLessons: number;
+  totalLessons: number;
+  currentPathSlug: string | null;
+  continueLesson: TrainingLessonView | null;
+  recommendedLesson: TrainingLessonView | null;
+  growthTrack: OperationsGrowthTrack;
+}
+
 export interface TrainingDashboardData {
   learnerKey: string;
   learnerLabel: string;

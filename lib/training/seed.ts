@@ -194,12 +194,10 @@ export async function seedTrainingCatalog(
   return { pathsCreated, pathsUpdated, lessonsCreated, lessonsUpdated, pathsArchived };
 }
 
-/** Always sync catalog so progress refs and CMS stay aligned with Operations Experience. */
-export async function ensureTrainingSeeded(payloadInstance?: Payload): Promise<void> {
-  const payload = payloadInstance ?? (await getPayload({ config }));
-  try {
-    await seedTrainingCatalog(payload);
-  } catch {
-    // Collections may not be migrated yet — catalog fallback still works.
-  }
+/**
+ * Runtime page loads must not sync the catalog (writes on every request).
+ * Use POST /api/admin/training/seed or `npm run seed:training` after catalog changes.
+ */
+export async function ensureTrainingSeeded(_payloadInstance?: Payload): Promise<void> {
+  /* intentional no-op */
 }

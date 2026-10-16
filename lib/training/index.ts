@@ -16,6 +16,7 @@ export type {
   OperationsGrowthTrack,
   TrainingChecklistItem,
   TrainingDashboardData,
+  TrainingStaffSummary,
   TrainingImage,
   TrainingIntelligencePrompt,
   TrainingLessonContent,
@@ -64,3 +65,15 @@ export {
   getTrainingPath,
   updateTrainingChecklist,
 } from "./services";
+export { getTrainingStaffSummary } from "./summary";
+export {
+  assertTrainingLessonAccess,
+  assertTrainingPathAccess,
+  filterCatalogForUser,
+  primaryTrainingPathSlugForRole,
+  resolveStaffRoleForTraining,
+  BDS_FOUNDATION_SLUG,
+  EXECUTIVE_OPS_FOUNDATION_SLUG,
+} from "./role-access";
+export { resolveGrowthTrackForStaffRole, BUSINESS_DEVELOPMENT_SPECIALIST_TRACK } from "./growth-tracks";
+export { readPublishedCatalog } from "./curriculum";
