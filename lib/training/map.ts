@@ -111,8 +111,18 @@ export function pickContinueLesson(paths: TrainingPathView[]): TrainingLessonVie
   return null;
 }
 
-export function pickRecommendedLesson(paths: TrainingPathView[]): TrainingLessonView | null {
-  for (const path of [...paths].sort((a, b) => a.sortOrder - b.sortOrder)) {
+export function pickRecommendedLesson(
+  paths: TrainingPathView[],
+  primaryPathSlug?: string | null,
+): TrainingLessonView | null {
+  const ordered = [...paths].sort((a, b) => {
+    if (primaryPathSlug) {
+      if (a.slug === primaryPathSlug) return -1;
+      if (b.slug === primaryPathSlug) return 1;
+    }
+    return a.sortOrder - b.sortOrder;
+  });
+  for (const path of ordered) {
     if (path.status !== "published") continue;
     for (const lesson of path.lessons) {
       if (lesson.status !== "published") continue;

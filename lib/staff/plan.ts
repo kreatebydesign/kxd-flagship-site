@@ -4,7 +4,7 @@
  */
 
 import type { WorkListItem } from "@/lib/work/types";
-import type { TrainingDashboardData } from "@/lib/training/types";
+import type { TrainingStaffSummary } from "@/lib/training/types";
 import {
   isDueToday,
   isPlannedForToday,
@@ -184,7 +184,7 @@ function toWorkPlanItem(
 export function buildStaffPlan(input: {
   actor: StaffActor;
   assigned: WorkListItem[];
-  training: TrainingDashboardData;
+  training: TrainingStaffSummary;
   now?: Date;
 }): {
   plan: StaffPlanItem[];

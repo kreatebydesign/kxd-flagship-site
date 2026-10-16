@@ -1,10 +1,9 @@
 import "server-only";
 
-import { getPayload } from "payload";
-import config from "@payload-config";
 import { processOperationalFlow } from "@/lib/operational-flow";
-import { TRAINING_CATALOG, getCatalogLesson, getCatalogPath } from "./catalog";
-import { EXECUTIVE_OPS_COORDINATOR_TRACK } from "./growth-track";
+import { getCatalogLesson, getCatalogPath } from "./catalog";
+import { readPublishedCatalog } from "./curriculum";
+import { resolveGrowthTrackForStaffRole } from "./growth-tracks";
 import {
   buildProgressMap,
   pickContinueLesson,
@@ -19,7 +18,13 @@ import {
   learnerLabelFromUser,
 } from "./permissions";
 import { listProgressForLearner, upsertLessonProgress } from "./progress";
-import { ensureTrainingSeeded } from "./seed";
+import {
+  assertTrainingLessonAccess,
+  assertTrainingPathAccess,
+  filterCatalogForUser,
+  primaryTrainingPathSlugForRole,
+  resolveStaffRoleForTraining,
+} from "./role-access";
 import type {
   OperationalPracticeSpec,
   TrainingDashboardData,
@@ -27,7 +32,6 @@ import type {
   TrainingLessonContent,
   TrainingLessonDefinition,
   TrainingLessonView,
-  TrainingPathDefinition,
   TrainingPathView,
   TrainingWalkthroughStep,
 } from "./types";
@@ -45,21 +49,16 @@ function emptyOperations(): TrainingLessonContent["operations"] {
   };
 }
 
-/** Curriculum is catalog-led. Payload sync keeps progress refs aligned. */
-async function loadCurriculum(): Promise<TrainingPathDefinition[]> {
-  try {
-    const payload = await getPayload({ config });
-    await ensureTrainingSeeded(payload);
-  } catch {
-    /* catalog still works */
-  }
-  return TRAINING_CATALOG.filter((path) => path.status !== "archived");
+function resolvePathDefinition(pathSlug: string) {
+  return readPublishedCatalog().find((row) => row.slug === pathSlug) ?? getCatalogPath(pathSlug);
 }
 
 export async function getTrainingDashboard(user: AnyUser): Promise<TrainingDashboardData> {
   const permissions = getTrainingPermissions(user);
   const learnerKey = learnerKeyFromUser(user);
-  const curriculum = await loadCurriculum();
+  const staffRole = resolveStaffRoleForTraining(user);
+  const primaryPathSlug = primaryTrainingPathSlugForRole(staffRole);
+  const curriculum = filterCatalogForUser(readPublishedCatalog(), user);
   const progressRows = await listProgressForLearner(learnerKey);
   const progressMap = buildProgressMap(progressRows);
 
@@ -71,15 +70,27 @@ export async function getTrainingDashboard(user: AnyUser): Promise<TrainingDashb
   const publishedLessons = paths.flatMap((path) =>
     path.lessons.filter((lesson) => lesson.status === "published"),
   );
-  const completedLessons = publishedLessons.filter((l) => l.progress?.status === "completed").length;
+  const completedLessons = publishedLessons.filter(
+    (l) => l.progress?.status === "completed",
+  ).length;
   const totalLessons = publishedLessons.length;
   const overallPercent =
     totalLessons === 0 ? 0 : Math.round((completedLessons / totalLessons) * 100);
 
   const continueLesson = pickContinueLesson(paths);
-  const recommendedLesson = pickRecommendedLesson(paths);
+  const recommendedLesson = pickRecommendedLesson(paths, primaryPathSlug);
   const currentPathSlug =
-    continueLesson?.pathSlug ?? recommendedLesson?.pathSlug ?? paths[0]?.slug ?? null;
+    continueLesson?.pathSlug ??
+    recommendedLesson?.pathSlug ??
+    primaryPathSlug ??
+    paths[0]?.slug ??
+    null;
+
+  const growthTrack = resolveGrowthTrackForStaffRole(staffRole);
+  const experienceTitle =
+    staffRole === "business_development_specialist"
+      ? "KXD Business Development Experience"
+      : "KXD Operations Experience";
 
   return {
     learnerKey,
@@ -93,8 +104,8 @@ export async function getTrainingDashboard(user: AnyUser): Promise<TrainingDashb
     continueLesson,
     recommendedLesson,
     recentLessons: pickRecentLessons(paths),
-    growthTrack: EXECUTIVE_OPS_COORDINATOR_TRACK,
-    experienceTitle: "KXD Operations Experience",
+    growthTrack,
+    experienceTitle,
     experienceLede:
       "Learn to operate Kreate by Design through KXD OS — judgment beside automation, never instead of it.",
     generatedAt: new Date().toISOString(),
@@ -105,8 +116,8 @@ export async function getTrainingPath(
   pathSlug: string,
   user: AnyUser,
 ): Promise<TrainingPathView | null> {
-  const path =
-    (await loadCurriculum()).find((row) => row.slug === pathSlug) ?? getCatalogPath(pathSlug);
+  if (!assertTrainingPathAccess(user, pathSlug)) return null;
+  const path = resolvePathDefinition(pathSlug);
   if (!path) return null;
   const progressMap = buildProgressMap(await listProgressForLearner(learnerKeyFromUser(user)));
   return toPathView(path, progressMap);
@@ -117,8 +128,8 @@ export async function getTrainingLesson(
   lessonSlug: string,
   user: AnyUser,
 ): Promise<TrainingLessonView | null> {
-  const path =
-    (await loadCurriculum()).find((row) => row.slug === pathSlug) ?? getCatalogPath(pathSlug);
+  if (!assertTrainingLessonAccess(user, pathSlug, lessonSlug)) return null;
+  const path = resolvePathDefinition(pathSlug);
   if (!path) return null;
   const lesson =
     path.lessons.find((row) => row.slug === lessonSlug) ?? getCatalogLesson(pathSlug, lessonSlug);
@@ -156,6 +167,9 @@ export async function completeTrainingLesson(input: {
 }): Promise<TrainingLessonView | null> {
   const permissions = getTrainingPermissions(input.user);
   if (!permissions.canComplete) return null;
+  if (!assertTrainingLessonAccess(input.user, input.pathSlug, input.lessonSlug)) {
+    return null;
+  }
 
   const learnerKey = learnerKeyFromUser(input.user);
   await upsertLessonProgress({
@@ -187,6 +201,9 @@ export async function updateTrainingChecklist(input: {
 }): Promise<TrainingLessonView | null> {
   const permissions = getTrainingPermissions(input.user);
   if (!permissions.canTrackProgress) return null;
+  if (!assertTrainingLessonAccess(input.user, input.pathSlug, input.lessonSlug)) {
+    return null;
+  }
 
   const learnerKey = learnerKeyFromUser(input.user);
   const total = Math.max(1, input.checklistTotal);

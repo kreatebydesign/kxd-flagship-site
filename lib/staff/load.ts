@@ -1,6 +1,6 @@
 import "server-only";
 
-import { getTrainingDashboard } from "@/lib/training/services";
+import { getTrainingStaffSummary } from "@/lib/training/summary";
 import { getWorkEngineWorkspace, getWorkItem } from "@/lib/work/services";
 import type { WorkListItem } from "@/lib/work/types";
 import { staffActorFromUser, describeStaffActor } from "./actor";
@@ -133,7 +133,8 @@ export async function loadStaffToday(
     }
   }
 
-  const training = await getTrainingDashboard(user);
+  const trainingUser = actingUser ?? user;
+  const training = await getTrainingStaffSummary(trainingUser);
   const assignedClientIds = actorUsesAssignedClientScope(actor)
     ? await listActiveAssignedClientIds(actor.userId)
     : null;
