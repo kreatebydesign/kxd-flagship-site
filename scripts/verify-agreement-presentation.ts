@@ -56,6 +56,15 @@ assert.match(
 );
 ok("HTML shell references approved logo and shared document CSS");
 
+const agreementCss = readFileSync(
+  join(root, "design-system/agreement/kxd-agreement-document.css"),
+  "utf8",
+);
+assert.match(agreementCss, /html\[data-theme="dark"\].*kxd-agreement-doc-card/);
+assert.match(agreementCss, /color-scheme:\s*light/);
+assert.match(agreementCss, /kxd-agreement-doc-island/);
+ok("Agreement CSS isolates ivory document from OS dark theme");
+
 const sig = {
   legalName: "Matt Lunger",
   title: "Principal",

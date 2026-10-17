@@ -25,7 +25,7 @@ export function CommercialAgreementReviewSection(props: {
         </div>
       </div>
       <div
-        className="kxd-os-agreement-review__doc kxd-agreement-doc-card"
+        className="kxd-os-agreement-review__doc kxd-agreement-doc-card kxd-agreement-doc-island"
         tabIndex={0}
         role="document"
         aria-label="Agreement text"

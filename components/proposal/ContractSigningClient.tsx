@@ -154,7 +154,10 @@ export function ContractSigningClient(props: {
           submitting your typed electronic signature.
         </p>
 
-        <section className="kxd-agreement-doc-card" aria-labelledby={`${formId}-agreement`}>
+        <section
+          className="kxd-agreement-doc-card kxd-agreement-doc-island"
+          aria-labelledby={`${formId}-agreement`}
+        >
           <div className="kxd-agreement-doc-card__header">
             <h2 id={`${formId}-agreement`} className="kxd-agreement-doc-card__title">
               Agreement

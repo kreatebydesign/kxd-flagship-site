@@ -1,13 +1,63 @@
-/* KXD branded agreement document — signing, operator review, print */
+/* KXD branded agreement document — signing, operator review, print
+ * Always ivory + charcoal ink. Isolated from html[data-theme="dark"] OS chrome. */
 
-.kxd-agreement-doc {
+.kxd-agreement-doc-island,
+.kxd-agreement-doc-card {
   --kxd-agreement-surface: #f7f3eb;
   --kxd-agreement-surface-raised: #faf7f1;
   --kxd-agreement-ink: #2c2824;
   --kxd-agreement-ink-muted: #5c564f;
   --kxd-agreement-gold: #c2aa72;
   --kxd-agreement-gold-rule: rgba(194, 170, 114, 0.35);
-  color: var(--kxd-agreement-ink);
+  color-scheme: light;
+  isolation: isolate;
+}
+
+.kxd-agreement-doc-card {
+  background-color: var(--kxd-agreement-surface) !important;
+  color: var(--kxd-agreement-ink) !important;
+  border-radius: 2px;
+  border: 1px solid rgba(194, 170, 114, 0.28);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+  margin-bottom: 1.75rem;
+  overflow: hidden;
+}
+
+.kxd-agreement-doc-card__header {
+  padding: 0.95rem 1.25rem 0.75rem;
+  border-bottom: 1px solid rgba(44, 40, 36, 0.08);
+  background-color: var(--kxd-agreement-surface-raised) !important;
+  color: var(--kxd-agreement-ink) !important;
+}
+
+.kxd-agreement-doc-card__title {
+  font-family: Georgia, "Iowan Old Style", Palatino, serif;
+  font-weight: 500;
+  font-size: 0.95rem;
+  margin: 0 0 0.25rem;
+  letter-spacing: 0.02em;
+  color: var(--kxd-agreement-ink) !important;
+}
+
+.kxd-agreement-doc-card__hint {
+  font-family: system-ui, sans-serif;
+  font-size: 0.72rem;
+  color: var(--kxd-agreement-ink-muted) !important;
+  margin: 0;
+}
+
+.kxd-agreement-doc-card__scroll {
+  max-height: min(62vh, 560px);
+  overflow: auto;
+  padding: 1.15rem 1.35rem 1.5rem;
+  -webkit-overflow-scrolling: touch;
+  outline-offset: 2px;
+  background-color: var(--kxd-agreement-surface) !important;
+  color: var(--kxd-agreement-ink) !important;
+}
+
+.kxd-agreement-doc {
+  color: var(--kxd-agreement-ink) !important;
   font-family: Georgia, "Iowan Old Style", Palatino, serif;
   font-size: 0.97rem;
   line-height: 1.62;
@@ -40,7 +90,7 @@
   font-weight: 600;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--kxd-agreement-gold);
+  color: var(--kxd-agreement-gold) !important;
 }
 
 .kxd-agreement-doc__body {
@@ -50,12 +100,12 @@
 
 .kxd-agreement-doc__section {
   margin: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
   font-size: 0.68rem;
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #1f1c19;
+  color: #1f1c19 !important;
   margin-top: 1.35rem;
   margin-bottom: 0.45rem;
   padding-bottom: 0.32rem;
@@ -72,74 +122,64 @@
   font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 0.04em;
-  color: var(--kxd-agreement-ink-muted);
+  color: var(--kxd-agreement-ink-muted) !important;
 }
 
 .kxd-agreement-doc__paragraph {
   margin: 0 0 0.55rem;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+  color: var(--kxd-agreement-ink) !important;
 }
 
 .kxd-agreement-doc__list {
   margin: 0.2rem 0 0.75rem;
   padding: 0 0 0 1.2rem;
   list-style-type: disc;
+  color: var(--kxd-agreement-ink) !important;
 }
 
 .kxd-agreement-doc__list li {
   margin-bottom: 0.32rem;
   padding-left: 0.1rem;
+  color: var(--kxd-agreement-ink) !important;
 }
 
 .kxd-agreement-doc__gap {
   height: 0.55rem;
 }
 
-/* Signing page — document card on dark field */
-.kxd-agreement-doc-card {
-  background: var(--kxd-agreement-surface);
-  color: var(--kxd-agreement-ink);
-  border-radius: 2px;
-  border: 1px solid rgba(194, 170, 114, 0.28);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
-  margin-bottom: 1.75rem;
-  overflow: hidden;
-}
-
-.kxd-agreement-doc-card__header {
-  padding: 0.95rem 1.25rem 0.75rem;
-  border-bottom: 1px solid rgba(44, 40, 36, 0.08);
-  background: var(--kxd-agreement-surface-raised);
-}
-
-.kxd-agreement-doc-card__title {
-  font-family: Georgia, "Iowan Old Style", Palatino, serif;
-  font-weight: 500;
-  font-size: 0.95rem;
-  margin: 0 0 0.25rem;
-  letter-spacing: 0.02em;
-}
-
-.kxd-agreement-doc-card__hint {
-  font-family: system-ui, sans-serif;
-  font-size: 0.72rem;
-  color: var(--kxd-agreement-ink-muted);
-  margin: 0;
-}
-
-.kxd-agreement-doc-card__scroll {
-  max-height: min(62vh, 560px);
-  overflow: auto;
-  padding: 1.15rem 1.35rem 1.5rem;
-  -webkit-overflow-scrolling: touch;
-  outline-offset: 2px;
-}
-
-/* Operator workspace — nested in OS panel */
-.kxd-agreement-review__doc .kxd-agreement-doc-card__scroll {
+/* Operator workspace — nested in OS panel (dark theme must not bleed in) */
+.kxd-os-agreement-review__doc .kxd-agreement-doc-card__scroll {
   max-height: min(68vh, 640px);
-  padding: 1.15rem 1.35rem 1.5rem;
+}
+
+html[data-theme="dark"] .kxd-agreement-doc-island,
+html[data-theme="dark"] .kxd-agreement-doc-card,
+html[data-theme="dark"] .kxd-agreement-doc-card__scroll,
+html[data-theme="dark"] .kxd-agreement-doc-card__header,
+html[data-theme="dark"] .kxd-agreement-doc {
+  color-scheme: light;
+}
+
+html[data-theme="dark"] .kxd-agreement-doc-card,
+html[data-theme="dark"] .kxd-agreement-doc-card__scroll {
+  background-color: #f7f3eb !important;
+  color: #2c2824 !important;
+}
+
+html[data-theme="dark"] .kxd-agreement-doc-card__header {
+  background-color: #faf7f1 !important;
+}
+
+html[data-theme="dark"] .kxd-agreement-doc__paragraph,
+html[data-theme="dark"] .kxd-agreement-doc__list,
+html[data-theme="dark"] .kxd-agreement-doc__list li {
+  color: #2c2824 !important;
+}
+
+html[data-theme="dark"] .kxd-os-shell .kxd-agreement-doc__section {
+  color: #1f1c19 !important;
 }
 
 @media print {
