@@ -9,15 +9,14 @@ import {
 } from "@/lib/proposal-lifecycle/signatures";
 import { hashPublicToken } from "@/lib/proposal-lifecycle/hash";
 import { isSigningLinkExpired } from "@/lib/proposal-lifecycle/token-expiry";
-import { toClientFacingContractBody } from "@/lib/proposal-lifecycle/client-facing-contract";
 import { legacyPlaintextTokensAllowed } from "@/lib/proposal-builder/protection";
-import { parseStoredDirectAgreementTerms } from "@/lib/direct-agreement/validate";
 import {
   assertDirectAgreementSigningBindingCurrent,
   DIRECT_AGREEMENT_STALE_SIGNING_MESSAGE,
   isDirectAgreementSource,
-  resolveDirectAgreementClientFacingBody,
 } from "@/lib/direct-agreement/signing-integrity";
+import { resolveClientFacingAgreementBody } from "@/lib/proposal-lifecycle/resolve-client-facing-agreement-body";
+import { parseStoredDirectAgreementTerms } from "@/lib/direct-agreement/validate";
 
 export const dynamic = "force-dynamic";
 
@@ -85,24 +84,6 @@ function Unavailable({ title, message }: { title: string; message: string }) {
       </div>
     </main>
   );
-}
-
-function resolveSigningBody(
-  contract: Record<string, unknown>,
-  pkg: ReturnType<typeof normalizeLifecyclePackage>,
-): string {
-  const agreementSource = contract.agreementSource ? String(contract.agreementSource) : null;
-  if (isDirectAgreementSource(agreementSource, pkg)) {
-    const daTerms = parseStoredDirectAgreementTerms(contract.directAgreementTerms);
-    if (daTerms) {
-      return resolveDirectAgreementClientFacingBody({
-        body: String(contract.body ?? ""),
-        terms: daTerms,
-        commercialStatus: pkg.commercialStatus,
-      });
-    }
-  }
-  return toClientFacingContractBody(String(contract.body ?? ""));
 }
 
 export default async function PublicContractSigningPage({
@@ -228,7 +209,14 @@ export default async function PublicContractSigningPage({
       publicToken={publicToken}
       title={String(contract.title ?? "Agreement")}
       clientName={resolveAgreementClientName(contract)}
-      body={resolveSigningBody(contract, pkg)}
+      body={resolveClientFacingAgreementBody(
+        {
+          body: String(contract.body ?? ""),
+          agreementSource: contract.agreementSource ? String(contract.agreementSource) : null,
+          directAgreementTerms: contract.directAgreementTerms,
+        },
+        pkg,
+      )}
       consentText={ELECTRONIC_SIGNATURE_CONSENT_TEXT}
       consentVersion={ELECTRONIC_SIGNATURE_CONSENT_VERSION}
       operatorSignedBy={pkg.operatorSignature.legalName}

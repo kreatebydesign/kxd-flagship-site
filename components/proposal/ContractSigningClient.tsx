@@ -1,6 +1,7 @@
 "use client";
 
-import { useId, useState, type CSSProperties, type FormEvent, type ReactNode } from "react";
+import { useId, useState, type CSSProperties, type FormEvent } from "react";
+import { AgreementDocumentBody } from "@/components/agreement/AgreementDocumentBody";
 
 export function ContractSigningClient(props: {
   /** Capability token from the URL — required to POST the signature. */
@@ -245,68 +246,6 @@ export function ContractSigningClient(props: {
   );
 }
 
-/** Presentation-only: preserve exact wording while styling headings and bullets. */
-function AgreementDocumentBody({ text }: { text: string }) {
-  const lines = String(text ?? "").replace(/\r\n/g, "\n").split("\n");
-  const blocks: ReactNode[] = [];
-  let bulletBuffer: string[] = [];
-  let key = 0;
-
-  function flushBullets() {
-    if (!bulletBuffer.length) return;
-    blocks.push(
-      <ul key={`ul-${key++}`} style={bulletList}>
-        {bulletBuffer.map((item, i) => (
-          <li key={`li-${key}-${i}`} style={bulletItem}>
-            {item}
-          </li>
-        ))}
-      </ul>,
-    );
-    bulletBuffer = [];
-  }
-
-  for (const raw of lines) {
-    const line = raw;
-    const trimmed = line.trim();
-    if (!trimmed) {
-      flushBullets();
-      blocks.push(<div key={`sp-${key++}`} style={sectionGap} aria-hidden />);
-      continue;
-    }
-    const bulletMatch = trimmed.match(/^[•\-\*]\s+(.*)$/);
-    if (bulletMatch) {
-      bulletBuffer.push(bulletMatch[1] ?? "");
-      continue;
-    }
-    flushBullets();
-    if (isSectionHeading(trimmed)) {
-      blocks.push(
-        <h3 key={`h-${key++}`} style={sectionHeading}>
-          {trimmed}
-        </h3>,
-      );
-      continue;
-    }
-    blocks.push(
-      <p key={`p-${key++}`} style={paragraph}>
-        {line}
-      </p>,
-    );
-  }
-  flushBullets();
-
-  return <div style={documentInner}>{blocks}</div>;
-}
-
-function isSectionHeading(line: string): boolean {
-  if (line.length < 2 || line.length > 64) return false;
-  if (/[.!?]$/.test(line)) return false;
-  if (line.includes(":")) return false;
-  // ALL-CAPS section labels used in KXD agreement drafts (PARTIES, SCOPE, …).
-  return /^[A-Z0-9][A-Z0-9 &/\-]{0,62}$/.test(line);
-}
-
 function BrandHeader() {
   return (
     <div style={brandHeader}>
@@ -520,52 +459,6 @@ const documentScroll: CSSProperties = {
 
 const documentMeasure: CSSProperties = {
   padding: "1.15rem 1.25rem 1.5rem",
-};
-
-const documentInner: CSSProperties = {
-  maxWidth: 560,
-  margin: "0 auto",
-};
-
-const sectionHeading: CSSProperties = {
-  fontFamily: SANS,
-  fontSize: 11,
-  fontWeight: 600,
-  letterSpacing: "0.14em",
-  textTransform: "uppercase",
-  color: "#1f1c19",
-  margin: "1.15rem 0 0.45rem",
-  paddingBottom: "0.3rem",
-  borderBottom: "1px solid rgba(44, 40, 36, 0.1)",
-};
-
-const paragraph: CSSProperties = {
-  fontFamily: SERIF,
-  fontSize: 15.5,
-  lineHeight: 1.6,
-  color: DOC_INK,
-  margin: "0 0 0.55rem",
-  whiteSpace: "pre-wrap",
-  overflowWrap: "anywhere",
-};
-
-const sectionGap: CSSProperties = {
-  height: "0.55rem",
-};
-
-const bulletList: CSSProperties = {
-  margin: "0.15rem 0 0.7rem",
-  padding: "0 0 0 1.15rem",
-  listStyleType: "disc",
-};
-
-const bulletItem: CSSProperties = {
-  fontFamily: SERIF,
-  fontSize: 15.5,
-  lineHeight: 1.55,
-  color: DOC_INK,
-  marginBottom: "0.3rem",
-  paddingLeft: "0.15rem",
 };
 
 const signCard: CSSProperties = {

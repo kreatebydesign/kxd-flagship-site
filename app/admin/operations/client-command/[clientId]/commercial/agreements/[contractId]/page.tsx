@@ -8,6 +8,7 @@ import {
 import { parseStoredDirectAgreementTerms } from "@/lib/direct-agreement/validate";
 import { getPayload } from "payload";
 import config from "@payload-config";
+import { resolveClientFacingAgreementBody } from "@/lib/proposal-lifecycle/resolve-client-facing-agreement-body";
 
 export const dynamic = "force-dynamic";
 
@@ -57,6 +58,14 @@ export default async function ClientCommercialAgreementPage({
     .filter((i) => i.severity === "blocker")
     .map((b) => ({ code: b.code, message: b.message }));
   const daTerms = parseStoredDirectAgreementTerms(contract.directAgreementTerms);
+  const clientFacingAgreementBody = resolveClientFacingAgreementBody(
+    {
+      body: contract.body ? String(contract.body) : "",
+      agreementSource: contract.agreementSource ? String(contract.agreementSource) : null,
+      directAgreementTerms: contract.directAgreementTerms,
+    },
+    pkg,
+  );
   const acceptance = proposal?.acceptanceRecord as
     | { name?: string; email?: string }
     | null
@@ -83,6 +92,7 @@ export default async function ClientCommercialAgreementPage({
             canonical?.primaryContact?.email ??
             "",
         )}
+        clientFacingAgreementBody={clientFacingAgreementBody}
       />
     </OperationsShell>
   );
