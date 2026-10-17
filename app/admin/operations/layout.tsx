@@ -7,6 +7,7 @@ import type { Metadata } from "next";
 import { ThemeBootScript } from "@/components/os/ThemeBootScript";
 import "../../globals.css";
 import "../../../design-system/os/styles/kxd-os.css";
+import "../../../design-system/agreement/kxd-agreement-document.css";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
