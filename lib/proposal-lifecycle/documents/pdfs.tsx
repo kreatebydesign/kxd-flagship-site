@@ -5,6 +5,12 @@
 import React from "react";
 import { Document, Image, Page, Text, View, StyleSheet, pdf } from "@react-pdf/renderer";
 import { parseAgreementDocumentSections } from "../../commercial-legal/agreement-document-sections.ts";
+import {
+  AgreementPdfBodyFromText,
+  AgreementPdfBrandHeader,
+  AgreementPdfSignatureBlock,
+  agreementPdfStyles,
+} from "../../agreement-presentation/pdf-document.tsx";
 import { resolveDirectAgreementPaymentSummaryCopy } from "../../commercial-legal/compose-direct-agreement-document.ts";
 import { resolveDirectAgreementInvestmentLines } from "../../client-command/commercial/resolve-agreement-amount-kpi.ts";
 import { KXD_REPORT_BRAND, kxdReportContactLine } from "../../kxd-report-engine/contact.ts";
@@ -185,43 +191,34 @@ export async function renderExecutedContractPdf(input: {
   omitProposalLabel?: boolean;
 }): Promise<{ buffer: Buffer; contentHash: string }> {
   const doc = (
-    <Document>
-      <Page size="LETTER" style={styles.page}>
-        <Text style={styles.eyebrow}>Fully executed agreement</Text>
-        <View style={styles.rule} />
-        <Text style={styles.h1}>{input.title}</Text>
+    <Document title={input.title} author={KXD_REPORT_BRAND}>
+      <Page size="LETTER" style={agreementPdfStyles.page}>
+        <AgreementPdfBrandHeader eyebrow="Fully executed agreement" />
+        <Text style={agreementPdfStyles.h1}>{input.title}</Text>
         {input.omitProposalLabel ? (
-          <Text style={styles.meta}>Direct Agreement (no proposal)</Text>
+          <Text style={agreementPdfStyles.meta}>Direct Agreement (no proposal)</Text>
         ) : (
-          <Text style={styles.meta}>Proposal {input.proposalNumber}</Text>
+          <Text style={agreementPdfStyles.meta}>Proposal {input.proposalNumber}</Text>
         )}
-        <Text style={styles.meta}>Agreement ID AGR-{input.contractId}-1</Text>
-        <Text style={styles.meta}>Document hash {input.documentHash.slice(0, 16)}…</Text>
-        <Text style={styles.meta}>Sealed {input.sealedAt}</Text>
-        <Text style={styles.h2}>Agreement</Text>
-        <Text style={styles.p}>{input.body || "Agreement body on file."}</Text>
-        <Text style={styles.h2}>Kreate by Design signature</Text>
-        <Text style={styles.p}>
-          {input.operator.legalName}, {input.operator.title} · {input.operator.entityName}
+        <Text style={agreementPdfStyles.meta}>Agreement ID AGR-{input.contractId}-1</Text>
+        <Text style={agreementPdfStyles.meta}>
+          Document hash {input.documentHash.slice(0, 16)}…
         </Text>
-        <Text style={styles.meta}>
-          Typed acknowledgment: {input.operator.typedAcknowledgment} · {input.operator.signedAt}
-        </Text>
-        <Text style={styles.h2}>Client signature</Text>
-        <Text style={styles.p}>
-          {input.client.legalName}, {input.client.title} · {input.client.entityName}
-        </Text>
-        <Text style={styles.meta}>
-          Typed acknowledgment: {input.client.typedAcknowledgment} · {input.client.signedAt}
-        </Text>
-        <View style={styles.notice}>
+        <Text style={agreementPdfStyles.meta}>Sealed {input.sealedAt}</Text>
+        <AgreementPdfBodyFromText body={input.body || "Agreement body on file."} />
+        <AgreementPdfSignatureBlock title="Kreate by Design signature" signature={input.operator} />
+        <AgreementPdfSignatureBlock title="Client signature" signature={input.client} />
+        <View style={agreementPdfStyles.notice}>
           <Text>
             This document records typed electronic signatures with consent version{" "}
             {input.operator.consentDisclosureVersion}. It does not claim biometric or government-ID
             verification.
           </Text>
         </View>
-        <Footer label="Executed agreement" />
+        <Text style={agreementPdfStyles.footer} fixed>
+          Executed agreement · Typed electronic signatures are acknowledgments, not biometric
+          identity verification.
+        </Text>
       </Page>
     </Document>
   );

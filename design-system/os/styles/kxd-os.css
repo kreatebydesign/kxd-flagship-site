@@ -22072,6 +22072,32 @@ html[data-theme="dark"] .kxd-os-theme-pref__option.is-active {
   font-size: 0.88rem;
 }
 
+.kxd-os-commercial-detail__header-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.65rem;
+}
+
+.kxd-os-agreement-review__header {
+  margin-bottom: 0.85rem;
+}
+
+.kxd-os-agreement-review__lead {
+  margin: 0.35rem 0 0;
+  max-width: 42rem;
+  line-height: 1.5;
+}
+
+.kxd-os-agreement-review__lead strong {
+  font-weight: 550;
+  color: var(--kxd-os-text-secondary);
+}
+
+.kxd-os-agreement-review__doc.kxd-agreement-doc-card {
+  margin-top: 0.25rem;
+}
+
 .kxd-os-commercial-detail__grid {
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(17.5rem, 0.9fr);

@@ -1,6 +1,8 @@
 "use client";
 
-import { useId, useState, type CSSProperties, type FormEvent, type ReactNode } from "react";
+import { useId, useState, type CSSProperties, type FormEvent } from "react";
+import { AgreementDocumentBody } from "@/components/agreement/AgreementDocumentBody";
+import { KxdAgreementDocument } from "@/components/agreement/KxdAgreementDocument";
 
 export function ContractSigningClient(props: {
   /** Capability token from the URL — required to POST the signature. */
@@ -133,8 +135,6 @@ export function ContractSigningClient(props: {
   return (
     <main style={page}>
       <div style={container}>
-        <BrandHeader />
-
         <header style={agreementHeader}>
           <p style={eyebrow}>Electronic signature</p>
           <h1 style={h1}>{props.title}</h1>
@@ -154,17 +154,19 @@ export function ContractSigningClient(props: {
           submitting your typed electronic signature.
         </p>
 
-        <section style={documentCard} aria-labelledby={`${formId}-agreement`}>
-          <div style={documentHeader}>
-            <h2 id={`${formId}-agreement`} style={documentTitle}>
+        <section className="kxd-agreement-doc-card" aria-labelledby={`${formId}-agreement`}>
+          <div className="kxd-agreement-doc-card__header">
+            <h2 id={`${formId}-agreement`} className="kxd-agreement-doc-card__title">
               Agreement
             </h2>
-            <p style={scrollHint}>Scroll to review the complete agreement text.</p>
+            <p className="kxd-agreement-doc-card__hint">
+              Scroll to review the complete agreement text.
+            </p>
           </div>
-          <div style={documentScroll} tabIndex={0}>
-            <div style={documentMeasure}>
+          <div className="kxd-agreement-doc-card__scroll" tabIndex={0}>
+            <KxdAgreementDocument eyebrow="Service agreement">
               <AgreementDocumentBody text={props.body} />
-            </div>
+            </KxdAgreementDocument>
           </div>
         </section>
 
@@ -245,68 +247,6 @@ export function ContractSigningClient(props: {
   );
 }
 
-/** Presentation-only: preserve exact wording while styling headings and bullets. */
-function AgreementDocumentBody({ text }: { text: string }) {
-  const lines = String(text ?? "").replace(/\r\n/g, "\n").split("\n");
-  const blocks: ReactNode[] = [];
-  let bulletBuffer: string[] = [];
-  let key = 0;
-
-  function flushBullets() {
-    if (!bulletBuffer.length) return;
-    blocks.push(
-      <ul key={`ul-${key++}`} style={bulletList}>
-        {bulletBuffer.map((item, i) => (
-          <li key={`li-${key}-${i}`} style={bulletItem}>
-            {item}
-          </li>
-        ))}
-      </ul>,
-    );
-    bulletBuffer = [];
-  }
-
-  for (const raw of lines) {
-    const line = raw;
-    const trimmed = line.trim();
-    if (!trimmed) {
-      flushBullets();
-      blocks.push(<div key={`sp-${key++}`} style={sectionGap} aria-hidden />);
-      continue;
-    }
-    const bulletMatch = trimmed.match(/^[•\-\*]\s+(.*)$/);
-    if (bulletMatch) {
-      bulletBuffer.push(bulletMatch[1] ?? "");
-      continue;
-    }
-    flushBullets();
-    if (isSectionHeading(trimmed)) {
-      blocks.push(
-        <h3 key={`h-${key++}`} style={sectionHeading}>
-          {trimmed}
-        </h3>,
-      );
-      continue;
-    }
-    blocks.push(
-      <p key={`p-${key++}`} style={paragraph}>
-        {line}
-      </p>,
-    );
-  }
-  flushBullets();
-
-  return <div style={documentInner}>{blocks}</div>;
-}
-
-function isSectionHeading(line: string): boolean {
-  if (line.length < 2 || line.length > 64) return false;
-  if (/[.!?]$/.test(line)) return false;
-  if (line.includes(":")) return false;
-  // ALL-CAPS section labels used in KXD agreement drafts (PARTIES, SCOPE, …).
-  return /^[A-Z0-9][A-Z0-9 &/\-]{0,62}$/.test(line);
-}
-
 function BrandHeader() {
   return (
     <div style={brandHeader}>
@@ -373,8 +313,6 @@ const GOLD_BORDER = "rgba(194, 170, 114, 0.28)";
 const INK = "#f4efe6";
 const MUTED = "rgba(244, 239, 230, 0.58)";
 const PAGE_BG = "#0a0a0a";
-const DOC_INK = "#2c2824";
-const DOC_MUTED = "#6e675e";
 const SERIF = "Georgia, 'Iowan Old Style', Palatino, 'Times New Roman', serif";
 const SANS = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 
@@ -477,95 +415,6 @@ const muted: CSSProperties = {
 const strong: CSSProperties = {
   color: INK,
   fontWeight: 600,
-};
-
-const documentCard: CSSProperties = {
-  background: "#f7f3eb",
-  color: DOC_INK,
-  borderRadius: 2,
-  border: "1px solid rgba(194, 170, 114, 0.22)",
-  boxShadow: "0 10px 28px rgba(0, 0, 0, 0.28)",
-  marginBottom: "1.75rem",
-  overflow: "hidden",
-};
-
-const documentHeader: CSSProperties = {
-  padding: "0.95rem 1.25rem 0.75rem",
-  borderBottom: "1px solid rgba(44, 40, 36, 0.08)",
-  background: "#faf7f1",
-};
-
-const documentTitle: CSSProperties = {
-  fontFamily: SERIF,
-  fontWeight: 500,
-  fontSize: 15,
-  margin: "0 0 0.25rem",
-  color: DOC_INK,
-  letterSpacing: "0.02em",
-};
-
-const scrollHint: CSSProperties = {
-  fontSize: 11.5,
-  color: DOC_MUTED,
-  margin: 0,
-  fontFamily: SANS,
-};
-
-const documentScroll: CSSProperties = {
-  maxHeight: "min(62vh, 560px)",
-  overflow: "auto",
-  WebkitOverflowScrolling: "touch",
-  outlineOffset: 2,
-};
-
-const documentMeasure: CSSProperties = {
-  padding: "1.15rem 1.25rem 1.5rem",
-};
-
-const documentInner: CSSProperties = {
-  maxWidth: 560,
-  margin: "0 auto",
-};
-
-const sectionHeading: CSSProperties = {
-  fontFamily: SANS,
-  fontSize: 11,
-  fontWeight: 600,
-  letterSpacing: "0.14em",
-  textTransform: "uppercase",
-  color: "#1f1c19",
-  margin: "1.15rem 0 0.45rem",
-  paddingBottom: "0.3rem",
-  borderBottom: "1px solid rgba(44, 40, 36, 0.1)",
-};
-
-const paragraph: CSSProperties = {
-  fontFamily: SERIF,
-  fontSize: 15.5,
-  lineHeight: 1.6,
-  color: DOC_INK,
-  margin: "0 0 0.55rem",
-  whiteSpace: "pre-wrap",
-  overflowWrap: "anywhere",
-};
-
-const sectionGap: CSSProperties = {
-  height: "0.55rem",
-};
-
-const bulletList: CSSProperties = {
-  margin: "0.15rem 0 0.7rem",
-  padding: "0 0 0 1.15rem",
-  listStyleType: "disc",
-};
-
-const bulletItem: CSSProperties = {
-  fontFamily: SERIF,
-  fontSize: 15.5,
-  lineHeight: 1.55,
-  color: DOC_INK,
-  marginBottom: "0.3rem",
-  paddingLeft: "0.15rem",
 };
 
 const signCard: CSSProperties = {

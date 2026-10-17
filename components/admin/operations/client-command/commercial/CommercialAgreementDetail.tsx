@@ -22,6 +22,7 @@ import {
   resolveDirectAgreementSigningIntegrityMessage,
 } from "@/lib/admin/direct-agreement-execution-state";
 import { GenerateBrandedRestatementAction } from "./GenerateBrandedRestatementAction";
+import { CommercialAgreementReviewSection } from "./CommercialAgreementReviewSection";
 
 export function CommercialAgreementDetail(props: {
   clientId: number;
@@ -35,6 +36,7 @@ export function CommercialAgreementDetail(props: {
   blockers: Array<{ code: string; message: string }>;
   defaultRecipientName: string;
   defaultRecipientEmail: string;
+  clientFacingAgreementBody: string;
 }) {
   const {
     clientId,
@@ -48,7 +50,10 @@ export function CommercialAgreementDetail(props: {
     blockers,
     defaultRecipientName,
     defaultRecipientEmail,
+    clientFacingAgreementBody,
   } = props;
+
+  const hasAgreementReview = clientFacingAgreementBody.trim().length > 0;
 
   const status = pkg.commercialStatus || contractStatus;
   const statusLabel = formatCommercialStatus(status);
@@ -106,7 +111,14 @@ export function CommercialAgreementDetail(props: {
             {agreementSource === "direct-agreement" ? "Direct Agreement" : "From proposal"}
           </p>
         </div>
-        <CommercialStatusBadge label={statusLabel} tone={statusTone(statusLabel)} />
+        <div className="kxd-os-commercial-detail__header-actions">
+          <CommercialStatusBadge label={statusLabel} tone={statusTone(statusLabel)} />
+          {hasAgreementReview ? (
+            <a href="#review-agreement" className="kxd-os-btn kxd-os-btn--primary">
+              Review Agreement
+            </a>
+          ) : null}
+        </div>
       </header>
 
       <div className="kxd-os-commercial-kpi-grid">
@@ -123,6 +135,13 @@ export function CommercialAgreementDetail(props: {
 
       <div className="kxd-os-commercial-detail__grid">
         <div className="kxd-os-commercial-detail__main">
+          {hasAgreementReview ? (
+            <CommercialAgreementReviewSection
+              title={title}
+              clientFacingBody={clientFacingAgreementBody}
+            />
+          ) : null}
+
           {daTerms ? (
             <div className="kxd-os-commercial-stack">
               <section className="kxd-os-commercial-panel-card">
@@ -184,12 +203,12 @@ export function CommercialAgreementDetail(props: {
                 </p>
               </section>
             </div>
-          ) : (
+          ) : !hasAgreementReview ? (
             <section className="kxd-os-commercial-panel-card">
               <h3>Agreement terms</h3>
-              <WorkspaceEmpty message="Structured Direct Agreement terms are not on this record. Proposal-linked agreements use the proposal lifecycle package." />
+              <WorkspaceEmpty message="No agreement text is available on this record yet." />
             </section>
-          )}
+          ) : null}
 
           <section className="kxd-os-commercial-panel-card" id="documents">
             <h3>Documents</h3>

@@ -128,6 +128,8 @@
     "verify:stripe-no-raw-card": "tsx scripts/verify-stripe-no-raw-card-data.ts",
     "verify:direct-agreement": "tsx scripts/verify-direct-agreement-workflow.ts",
     "verify:direct-agreement-restatement": "tsx scripts/verify-direct-agreement-restatement.ts",
+    "verify:agreement-operator-preview": "tsx scripts/verify-agreement-operator-preview.ts",
+    "verify:agreement-presentation": "tsx scripts/verify-agreement-presentation.ts",
     "verify:external-payment": "tsx scripts/verify-external-payment-reconciliation.ts",
     "verify:partial-external-payment": "tsx scripts/verify-partial-external-payment-allocation.ts",
     "verify:record-payment-amount-integrity": "tsx scripts/verify-record-payment-amount-integrity.ts",
