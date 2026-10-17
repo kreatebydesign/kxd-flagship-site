@@ -2,6 +2,7 @@
 
 import { useId, useState, type CSSProperties, type FormEvent } from "react";
 import { AgreementDocumentBody } from "@/components/agreement/AgreementDocumentBody";
+import { KxdAgreementDocument } from "@/components/agreement/KxdAgreementDocument";
 
 export function ContractSigningClient(props: {
   /** Capability token from the URL — required to POST the signature. */
@@ -134,8 +135,6 @@ export function ContractSigningClient(props: {
   return (
     <main style={page}>
       <div style={container}>
-        <BrandHeader />
-
         <header style={agreementHeader}>
           <p style={eyebrow}>Electronic signature</p>
           <h1 style={h1}>{props.title}</h1>
@@ -155,17 +154,19 @@ export function ContractSigningClient(props: {
           submitting your typed electronic signature.
         </p>
 
-        <section style={documentCard} aria-labelledby={`${formId}-agreement`}>
-          <div style={documentHeader}>
-            <h2 id={`${formId}-agreement`} style={documentTitle}>
+        <section className="kxd-agreement-doc-card" aria-labelledby={`${formId}-agreement`}>
+          <div className="kxd-agreement-doc-card__header">
+            <h2 id={`${formId}-agreement`} className="kxd-agreement-doc-card__title">
               Agreement
             </h2>
-            <p style={scrollHint}>Scroll to review the complete agreement text.</p>
+            <p className="kxd-agreement-doc-card__hint">
+              Scroll to review the complete agreement text.
+            </p>
           </div>
-          <div style={documentScroll} tabIndex={0}>
-            <div style={documentMeasure}>
+          <div className="kxd-agreement-doc-card__scroll" tabIndex={0}>
+            <KxdAgreementDocument eyebrow="Service agreement">
               <AgreementDocumentBody text={props.body} />
-            </div>
+            </KxdAgreementDocument>
           </div>
         </section>
 
@@ -312,8 +313,6 @@ const GOLD_BORDER = "rgba(194, 170, 114, 0.28)";
 const INK = "#f4efe6";
 const MUTED = "rgba(244, 239, 230, 0.58)";
 const PAGE_BG = "#0a0a0a";
-const DOC_INK = "#2c2824";
-const DOC_MUTED = "#6e675e";
 const SERIF = "Georgia, 'Iowan Old Style', Palatino, 'Times New Roman', serif";
 const SANS = "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
 
@@ -416,49 +415,6 @@ const muted: CSSProperties = {
 const strong: CSSProperties = {
   color: INK,
   fontWeight: 600,
-};
-
-const documentCard: CSSProperties = {
-  background: "#f7f3eb",
-  color: DOC_INK,
-  borderRadius: 2,
-  border: "1px solid rgba(194, 170, 114, 0.22)",
-  boxShadow: "0 10px 28px rgba(0, 0, 0, 0.28)",
-  marginBottom: "1.75rem",
-  overflow: "hidden",
-};
-
-const documentHeader: CSSProperties = {
-  padding: "0.95rem 1.25rem 0.75rem",
-  borderBottom: "1px solid rgba(44, 40, 36, 0.08)",
-  background: "#faf7f1",
-};
-
-const documentTitle: CSSProperties = {
-  fontFamily: SERIF,
-  fontWeight: 500,
-  fontSize: 15,
-  margin: "0 0 0.25rem",
-  color: DOC_INK,
-  letterSpacing: "0.02em",
-};
-
-const scrollHint: CSSProperties = {
-  fontSize: 11.5,
-  color: DOC_MUTED,
-  margin: 0,
-  fontFamily: SANS,
-};
-
-const documentScroll: CSSProperties = {
-  maxHeight: "min(62vh, 560px)",
-  overflow: "auto",
-  WebkitOverflowScrolling: "touch",
-  outlineOffset: 2,
-};
-
-const documentMeasure: CSSProperties = {
-  padding: "1.15rem 1.25rem 1.5rem",
 };
 
 const signCard: CSSProperties = {

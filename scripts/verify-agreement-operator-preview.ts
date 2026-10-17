@@ -8,6 +8,7 @@ import { join } from "node:path";
 import { toClientFacingContractBody } from "../lib/proposal-lifecycle/client-facing-contract.ts";
 import { resolveClientFacingAgreementBody } from "../lib/proposal-lifecycle/resolve-client-facing-agreement-body.ts";
 import { isSectionHeading } from "../components/agreement/AgreementDocumentBody.tsx";
+import { KXD_AGREEMENT_LOGO_PUBLIC_PATH } from "../lib/agreement-presentation/tokens.ts";
 
 const root = process.cwd();
 
@@ -59,9 +60,14 @@ const review = read(
   "components/admin/operations/client-command/commercial/CommercialAgreementReviewSection.tsx",
 );
 assert.match(review, /AgreementDocumentBody/);
-assert.match(review, /variant="workspace"/);
+assert.match(review, /KxdAgreementDocument/);
+assert.match(review, /kxd-agreement-document\.css/);
 assert.doesNotMatch(review, /signingToken/);
-ok("Review section renders full document without signing metadata");
+ok("Review section renders branded document without signing metadata");
+
+assert.match(read("components/agreement/KxdAgreementDocument.tsx"), /KXD_AGREEMENT_LOGO_PUBLIC_PATH/);
+assert.match(read("lib/agreement-presentation/tokens.ts"), /migrated-assets\/brand\/kxd-logo-transparent/);
+ok("Branded shell uses approved KXD logo path");
 
 const signing = read("app/contract/[publicToken]/page.tsx");
 assert.match(signing, /resolveClientFacingAgreementBody/);

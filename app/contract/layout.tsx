@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "../globals.css";
 import "../../design-system/os/styles/kxd-os.css";
+import "../../design-system/agreement/kxd-agreement-document.css";
 
 export const metadata: Metadata = {
   title: "KXD Agreement",

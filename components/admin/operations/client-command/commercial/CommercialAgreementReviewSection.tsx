@@ -1,4 +1,6 @@
+import "@/design-system/agreement/kxd-agreement-document.css";
 import { AgreementDocumentBody } from "@/components/agreement/AgreementDocumentBody";
+import { KxdAgreementDocument } from "@/components/agreement/KxdAgreementDocument";
 
 export function CommercialAgreementReviewSection(props: {
   title: string;
@@ -22,9 +24,16 @@ export function CommercialAgreementReviewSection(props: {
           </p>
         </div>
       </div>
-      <div className="kxd-os-agreement-review__doc" tabIndex={0} role="document" aria-label="Agreement text">
-        <div className="kxd-os-agreement-review__scroll">
-          <AgreementDocumentBody text={body} variant="workspace" />
+      <div
+        className="kxd-os-agreement-review__doc kxd-agreement-doc-card"
+        tabIndex={0}
+        role="document"
+        aria-label="Agreement text"
+      >
+        <div className="kxd-agreement-doc-card__scroll">
+          <KxdAgreementDocument variant="workspace" eyebrow="Service agreement">
+            <AgreementDocumentBody text={body} variant="workspace" />
+          </KxdAgreementDocument>
         </div>
       </div>
     </section>
