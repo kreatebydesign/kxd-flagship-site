@@ -30,7 +30,6 @@ import { getStaffPreviewSession } from "./preview";
 import { buildStaffWrapUp, loadSavedWrapUpNote } from "./wrap-up";
 import {
   isWaitingOnMatt,
-  requiresMattApproval,
   todayDateLabel,
   toLocalDateKey,
 } from "./prioritize";
