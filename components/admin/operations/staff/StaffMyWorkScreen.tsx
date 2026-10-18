@@ -17,8 +17,9 @@ import {
   staffMyWorkGroupLabel,
   type StaffMyWorkBoardColumnId,
 } from "@/lib/staff/my-work-board";
-import { requiresMattApproval } from "@/lib/staff/prioritize";
+import { workRequiresOperatorApproval } from "@/lib/staff/work-approval";
 import type { StaffMyWorkData } from "@/lib/staff/types";
+import type { WorkApprovalViewer } from "@/lib/staff/work-approval";
 import { WORK_PRIORITY_LABELS, WORK_STATUS_LABELS } from "@/lib/work/constants";
 import type { WorkListItem, WorkPriority, WorkStatus } from "@/lib/work/types";
 
@@ -69,14 +70,17 @@ function projectLabel(item: WorkListItem): { text: string; kind: "client" | "int
 function StatusActions({
   item,
   busy,
+  viewer,
   onStatusChange,
   compact,
 }: {
   item: WorkListItem;
   busy: number | null;
+  viewer: WorkApprovalViewer;
   onStatusChange: (workId: number, status: WorkStatus, note?: string) => Promise<void>;
   compact?: boolean;
 }) {
+  const needsApproval = workRequiresOperatorApproval(item, viewer);
   if (item.status === "review" || item.status === "completed") return null;
 
   const actionClass = compact
@@ -125,11 +129,12 @@ function StatusActions({
           disabled={busy === item.id}
           onClick={(e) => {
             e.preventDefault();
-            const note = window.prompt("What is blocking this work?");
-            if (note?.trim()) onStatusChange(item.id, "blocked", note.trim());
+            const note = window.prompt("What is blocking this work? (required)");
+            if (!note?.trim()) return;
+            onStatusChange(item.id, "blocked", note.trim());
           }}
         >
-          Blocked
+          Mark blocked
         </KxdButton>
       )}
       {item.status === "in-progress" && (
@@ -143,7 +148,7 @@ function StatusActions({
             onStatusChange(item.id, "review");
           }}
         >
-          In Review
+          {needsApproval ? "Submit for review" : "In review"}
         </KxdButton>
       )}
     </div>
@@ -152,16 +157,18 @@ function StatusActions({
 
 function WorkBoardCard({
   item,
+  viewer,
   onStatusChange,
   busy,
 }: {
   item: WorkListItem;
+  viewer: WorkApprovalViewer;
   onStatusChange: (workId: number, status: WorkStatus, note?: string) => Promise<void>;
   busy: number | null;
 }) {
   const overdue = isOverdue(item);
   const project = projectLabel(item);
-  const approval = requiresMattApproval(item);
+  const approval = workRequiresOperatorApproval(item, viewer);
 
   return (
     <article
@@ -186,6 +193,11 @@ function WorkBoardCard({
         {item.summary ? (
           <p className="kxd-os-meta kxd-os-staff-my-work__card-summary">{item.summary}</p>
         ) : null}
+        {item.acceptanceCriteria ? (
+          <p className="kxd-os-meta kxd-os-staff-my-work__card-criteria">
+            Done when: {item.acceptanceCriteria}
+          </p>
+        ) : null}
       </Link>
       <div className="kxd-os-staff-my-work__card-meta">
         <OpsStatusBadge label={staffStatusLabel(item.status)} variant={statusVariant(item.status)} />
@@ -202,23 +214,30 @@ function WorkBoardCard({
           </span>
         ) : null}
       </div>
-      <StatusActions item={item} busy={busy} onStatusChange={onStatusChange} />
+      <StatusActions
+        item={item}
+        viewer={viewer}
+        busy={busy}
+        onStatusChange={onStatusChange}
+      />
     </article>
   );
 }
 
 function WorkListRowItem({
   item,
+  viewer,
   onStatusChange,
   busy,
 }: {
   item: WorkListItem;
+  viewer: WorkApprovalViewer;
   onStatusChange: (workId: number, status: WorkStatus, note?: string) => Promise<void>;
   busy: number | null;
 }) {
   const overdue = isOverdue(item);
   const project = projectLabel(item);
-  const approval = requiresMattApproval(item);
+  const approval = workRequiresOperatorApproval(item, viewer);
   const completed = item.status === "completed";
 
   return (
@@ -267,7 +286,13 @@ function WorkListRowItem({
         </div>
       </OpsListRow>
       {!completed ? (
-        <StatusActions item={item} busy={busy} onStatusChange={onStatusChange} compact />
+        <StatusActions
+          item={item}
+          viewer={viewer}
+          busy={busy}
+          onStatusChange={onStatusChange}
+          compact
+        />
       ) : null}
     </div>
   );
@@ -313,7 +338,26 @@ export function StaffMyWorkScreen({ initialData, includeCompleted }: StaffMyWork
   async function changeStatus(workId: number, status: WorkStatus, note?: string) {
     setBusyId(workId);
     setError(null);
+    const item = data.items.find((row) => row.id === workId);
     try {
+      if (
+        status === "review" &&
+        item &&
+        workRequiresOperatorApproval(item, data.viewer)
+      ) {
+        const res = await fetch(`/api/admin/staff/work/${workId}/submit-review`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({}),
+        });
+        const payload = (await res.json()) as { success?: boolean; error?: string };
+        if (!res.ok || payload.success === false) {
+          throw new Error(payload.error ?? "Could not submit for review.");
+        }
+        router.refresh();
+        return;
+      }
+
       const res = await fetch(`/api/admin/work/${workId}/status`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -426,6 +470,7 @@ export function StaffMyWorkScreen({ initialData, includeCompleted }: StaffMyWork
                         <WorkBoardCard
                           key={item.id}
                           item={item}
+                          viewer={data.viewer}
                           busy={busyId}
                           onStatusChange={changeStatus}
                         />
@@ -446,6 +491,7 @@ export function StaffMyWorkScreen({ initialData, includeCompleted }: StaffMyWork
                     <WorkListRowItem
                       key={item.id}
                       item={item}
+                      viewer={data.viewer}
                       busy={busyId}
                       onStatusChange={changeStatus}
                     />

@@ -299,6 +299,15 @@ export const Work: CollectionConfig = {
               },
             },
             {
+              name: "acceptanceCriteria",
+              type: "textarea",
+              label: "Acceptance criteria",
+              admin: {
+                description:
+                  "What done looks like — checklist-style expectations for staff execution.",
+              },
+            },
+            {
               name: "notes",
               type: "textarea",
               label: "Notes",

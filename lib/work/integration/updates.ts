@@ -24,6 +24,9 @@ function buildFieldPatch(input: UpdateWorkInput): AnyDoc {
   if (input.description !== undefined) {
     patch.description = input.description?.trim() || null;
   }
+  if (input.acceptanceCriteria !== undefined) {
+    patch.acceptanceCriteria = input.acceptanceCriteria?.trim() || null;
+  }
   if (input.notes !== undefined) patch.notes = input.notes?.trim() || null;
   if (input.priority) patch.priority = input.priority;
   if (input.category) patch.category = input.category;

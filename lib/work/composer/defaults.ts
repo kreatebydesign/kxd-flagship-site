@@ -23,6 +23,7 @@ export function createEmptyComposerDraft(
     workId: null,
     title: "",
     description: "",
+    acceptanceCriteria: "",
     clientId: null,
     project: "",
     dueDate: "",
@@ -73,6 +74,10 @@ export function applyComposerPrefill(
     workId: mode === "edit" ? workId : null,
     title: options.title?.trim() ? options.title : draft.title,
     description: options.description?.trim() ? options.description : draft.description,
+    acceptanceCriteria:
+      options.acceptanceCriteria?.trim()
+        ? options.acceptanceCriteria
+        : draft.acceptanceCriteria,
     clientId: options.clientId !== undefined ? options.clientId : draft.clientId,
     project: options.project?.trim() ? options.project : draft.project,
     dueDate: options.dueDate ?? draft.dueDate,
@@ -108,6 +113,7 @@ export function shouldExpandComposerMoreDetails(draft: WorkComposerDraft): boole
   if (draft.mode !== "edit") return false;
   return (
     Boolean(draft.project.trim()) ||
+    Boolean(draft.acceptanceCriteria.trim()) ||
     Boolean(draft.tags.trim()) ||
     Boolean(draft.timeBudgetPresetId) ||
     Boolean(draft.plannedForDate) ||

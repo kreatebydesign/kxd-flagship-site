@@ -38,6 +38,7 @@ export async function loadStaffMyWork(
   };
 
   return {
+    viewer: { userId: actor.userId, staffRole: actor.staffRole },
     items: displayItems,
     openItems,
     completedItems,

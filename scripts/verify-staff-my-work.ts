@@ -19,6 +19,7 @@ function mockWork(partial: Partial<WorkListItem> & { id: number; status: WorkLis
     title: partial.title ?? "Task",
     summary: null,
     description: null,
+    acceptanceCriteria: null,
     notes: null,
     source: "manual",
     sourceId: null,

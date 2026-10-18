@@ -15,6 +15,7 @@ export function openWorkComposerForEdit(work: WorkListItem): void {
     workId: work.id,
     title: work.title,
     description: work.description ?? "",
+    acceptanceCriteria: work.acceptanceCriteria ?? "",
     clientId: work.clientId,
     project: work.internalProject ?? "",
     dueDate: dateInputValue(work.dueDate),

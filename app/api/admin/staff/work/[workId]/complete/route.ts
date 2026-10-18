@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireStaffCapabilityApi } from "@/lib/staff/guard";
 import { getWorkItem, completeWorkItem } from "@/lib/work/services";
 import { isRestrictedStaff } from "@/lib/staff/permissions";
+import { assigneeRoleRequiresOperatorCompletion } from "@/lib/staff/work-status-policy";
 import { publishActivity } from "@/lib/activity-engine/publish";
 
 export const dynamic = "force-dynamic";
@@ -40,9 +41,24 @@ export async function POST(request: Request, context: RouteContext) {
     );
   }
 
-  // Sensitive categories still require approval — force review instead of complete.
+  if (
+    isRestrictedStaff(gated.actor) &&
+    assigneeRoleRequiresOperatorCompletion(gated.actor.staffRole) &&
+    work.assignedToId === gated.actor.userId
+  ) {
+    return NextResponse.json(
+      {
+        success: false,
+        error:
+          "This item requires operator approval. Use Submit for Review instead of Complete.",
+      },
+      { status: 403 },
+    );
+  }
+
   const needsMatt =
     work.priority === "critical" ||
+    work.tags.some((t) => /requires-approval|needs-matt/i.test(t)) ||
     /invoice|billing|payment|agreement|entitlement/i.test(
       `${work.title} ${work.summary ?? ""}`,
     );

@@ -30,6 +30,7 @@ export default async function WorkDetailPage({
 
   const user = await requireStaffAwarePage(`/admin/work/${workId}`);
   const actor = staffActorFromUser(user);
+  const canOperatorReview = Boolean(actor && !isRestrictedStaff(actor));
 
   const work = await getWorkItem(workId);
   if (!work) notFound();
@@ -52,6 +53,7 @@ export default async function WorkDetailPage({
   return (
     <WorkDetailClient
       initialWork={work}
+      canOperatorReview={canOperatorReview}
       websiteReviewContext={websiteReviewContext}
       calendarEventHtmlLink={
         scheduleLink?.link.googleEventHtmlLink ?? null

@@ -119,6 +119,7 @@ function mockWork(
     clientName: "Client",
     summary: "Summary",
     description: null,
+    acceptanceCriteria: null,
     notes: null,
     source: "manual",
     sourceId: null,
@@ -165,6 +166,10 @@ const openWork = mockWork({
   category: "operations",
 });
 assertRestrictedStaffWorkStatusTransition(tyler!, openWork, "review");
+
+assert.throws(() => {
+  assertRestrictedStaffWorkStatusTransition(tyler!, openWork, "completed");
+});
 
 assert.throws(() => {
   assertRestrictedStaffWorkStatusTransition(tyler!, openWork, "archived");

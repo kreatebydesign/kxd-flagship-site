@@ -200,9 +200,18 @@ export function StaffGuidedWorkScreen({
           <div className="kxd-os-staff-guided__main">
             {data.description ? (
               <OpsCard className="kxd-os-ops-card-padding kxd-os-staff-guided__section">
-                <OpsSectionHead label="Instructions" />
+                <OpsSectionHead label="Brief" />
                 <p className="kxd-os-staff-my-work__prose kxd-os-staff-guided__instructions">
                   {data.description}
+                </p>
+              </OpsCard>
+            ) : null}
+
+            {data.acceptanceCriteria ? (
+              <OpsCard className="kxd-os-ops-card-padding kxd-os-staff-guided__section">
+                <OpsSectionHead label="Acceptance criteria" />
+                <p className="kxd-os-staff-my-work__prose kxd-os-staff-guided__instructions">
+                  {data.acceptanceCriteria}
                 </p>
               </OpsCard>
             ) : null}
