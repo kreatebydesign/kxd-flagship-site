@@ -35,6 +35,7 @@ function baseWork(overrides: Partial<WorkListItem> = {}): WorkListItem {
     title: "Test",
     summary: null,
     description: null,
+    acceptanceCriteria: null,
     notes: null,
     source: "manual",
     sourceId: null,

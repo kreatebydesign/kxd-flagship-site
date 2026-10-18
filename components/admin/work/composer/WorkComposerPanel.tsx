@@ -73,6 +73,7 @@ export function WorkComposerPanel({
   const [options, setOptions] = useState<WorkComposerOptionsPayload | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirmation, setConfirmation] = useState<string | null>(null);
   const [optionsLoaded, setOptionsLoaded] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [suggestions] = useState<ComposerSuggestion[]>([]);
@@ -202,20 +203,41 @@ export function WorkComposerPanel({
       return;
     }
 
+    const assigneeId = draft.assignedToId;
+    const assignee = assigneeId ? users.find((u) => u.id === assigneeId) : null;
+    const assigningStaff =
+      assigneeId != null && assigneeId !== (options?.currentUser?.id ?? seedUser?.id);
+    if (assigningStaff) {
+      if (!draft.clientId) {
+        setError("Select a client when assigning work to staff.");
+        return;
+      }
+      if (!draft.dueDate) {
+        setError("Due date is required when assigning work to staff.");
+        return;
+      }
+      if (!draft.acceptanceCriteria.trim() && !draft.description.trim()) {
+        setError("Add a brief or acceptance criteria so staff knows what done looks like.");
+        return;
+      }
+    }
+
     const estimatedEffort = resolveTimeBudgetHours(draft);
     setBusy(true);
     setError(null);
+    setConfirmation(null);
 
     const payload = {
       title,
       description: draft.description.trim() || null,
+      acceptanceCriteria: draft.acceptanceCriteria.trim() || null,
       clientId: draft.clientId,
       project: draft.project.trim() || null,
       dueDate: draft.dueDate || null,
       startDate: draft.startDate || null,
       plannedForDate: draft.plannedForDate || null,
       priority: draft.priority,
-      status: draft.status,
+      status: assigningStaff ? "planned" : draft.status,
       assignedToId: draft.assignedToId,
       estimatedEffort,
       tags: parseComposerTags(draft.tags),
@@ -252,12 +274,24 @@ export function WorkComposerPanel({
       if (isEdit) {
         emitWorkComposerUpdated(data.work);
         onUpdated?.(data.work);
-      } else {
-        emitWorkComposerCreated(data.work);
-        onCreated?.(data.work);
+        close();
+        resetDraft(null, options?.currentUser ?? seedUser);
+        return;
       }
-      close();
-      resetDraft(null, options?.currentUser ?? seedUser);
+      emitWorkComposerCreated(data.work);
+      onCreated?.(data.work);
+      const assigneeLabel = assignee?.displayName || assignee?.email;
+      setConfirmation(
+        assigneeLabel
+          ? `Assigned to ${assigneeLabel}. They will see this in My Work.`
+          : "Work created.",
+      );
+      setBusy(false);
+      window.setTimeout(() => {
+        close();
+        resetDraft(null, options?.currentUser ?? seedUser);
+        setConfirmation(null);
+      }, 1400);
     } catch {
       setError(draft.mode === "edit" ? "Could not save work." : "Could not create work.");
       setBusy(false);
@@ -344,16 +378,28 @@ export function WorkComposerPanel({
             </label>
 
             <label className="kxd-os-work-composer__primary-field">
-              <span className="kxd-os-work-composer__primary-label">Description</span>
+              <span className="kxd-os-work-composer__primary-label">Brief</span>
               <textarea
                 ref={descriptionRef}
                 className="kxd-os-work-composer__description"
-                placeholder="Add context if it helps"
+                placeholder="What should be done — context and instructions"
                 value={draft.description}
                 onChange={(e) => patch("description", e.target.value)}
                 onKeyDown={onDescriptionKeyDown}
                 rows={3}
-                aria-label="Description"
+                aria-label="Work brief"
+              />
+            </label>
+
+            <label className="kxd-os-work-composer__primary-field">
+              <span className="kxd-os-work-composer__primary-label">Acceptance criteria</span>
+              <textarea
+                className="kxd-os-work-composer__description"
+                placeholder="What done looks like — measurable checklist for staff"
+                value={draft.acceptanceCriteria}
+                onChange={(e) => patch("acceptanceCriteria", e.target.value)}
+                rows={3}
+                aria-label="Acceptance criteria"
               />
             </label>
 
@@ -567,6 +613,11 @@ export function WorkComposerPanel({
               ) : null}
             </div>
 
+            {confirmation ? (
+              <p className="kxd-os-work-composer__confirmation" role="status">
+                {confirmation}
+              </p>
+            ) : null}
             {error ? <p className="kxd-os-work-composer__error">{error}</p> : null}
           </div>
 

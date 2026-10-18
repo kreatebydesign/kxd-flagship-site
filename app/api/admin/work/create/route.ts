@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requirePayloadAdminApi } from "@/lib/admin/auth";
+import { mergeApprovalTagsForAssignee } from "@/lib/staff/work-assignee";
 import { createWork, assignWorkNumber } from "@/lib/work/server";
 import type { WorkCategory, WorkPriority, WorkSource, WorkStatus } from "@/lib/work/types";
 
@@ -40,6 +41,11 @@ export async function POST(req: Request) {
   }
 
   const clientId = optionalNumber(body.clientId) ?? null;
+  const assignedToId = optionalNumber(body.assignedToId);
+  let tags = parseTags(body.tags) ?? [];
+  if (assignedToId) {
+    tags = await mergeApprovalTagsForAssignee(assignedToId, tags);
+  }
 
   try {
     const result = await createWork({
@@ -47,6 +53,7 @@ export async function POST(req: Request) {
       title,
       summary: optionalString(body.summary),
       description: optionalString(body.description),
+      acceptanceCriteria: optionalString(body.acceptanceCriteria),
       notes: optionalString(body.notes),
       source: body.source ? (String(body.source) as WorkSource) : "manual",
       sourceId: optionalString(body.sourceId),
@@ -56,9 +63,9 @@ export async function POST(req: Request) {
       clientVisible: body.clientVisible === true,
       timelineEnabled: body.timelineEnabled !== false,
       createdBy: typeof auth.email === "string" ? auth.email : undefined,
-      assignedToId: optionalNumber(body.assignedToId),
+      assignedToId,
       internalProject: optionalString(body.project ?? body.internalProject),
-      tags: parseTags(body.tags),
+      tags,
       estimatedEffort: optionalNumber(body.estimatedEffort),
       dueDate: optionalString(body.dueDate),
       startDate: optionalString(body.startDate),

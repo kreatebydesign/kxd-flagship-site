@@ -17,6 +17,8 @@ export interface WorkComposerOpenOptions {
   title?: string;
   /** Prefill description */
   description?: string;
+  /** Prefill acceptance criteria */
+  acceptanceCriteria?: string;
   /** Prefill client */
   clientId?: number | null;
   /** Prefill project label (maps to internalProject today) */
@@ -61,6 +63,7 @@ export interface WorkComposerUserOption {
   id: number;
   email: string;
   displayName: string | null;
+  staffRole?: string | null;
 }
 
 export interface WorkComposerOptionsPayload {
@@ -76,6 +79,7 @@ export interface WorkComposerDraft {
   workId: number | null;
   title: string;
   description: string;
+  acceptanceCriteria: string;
   clientId: number | null;
   project: string;
   dueDate: string;

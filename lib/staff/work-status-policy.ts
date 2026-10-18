@@ -16,12 +16,29 @@ const RESTRICTED_STAFF_ALLOWED_TARGETS: ReadonlySet<WorkStatus> = new Set([
   "review",
 ]);
 
+/** BDS assignees must never self-complete — operator approval only. */
+export function assigneeRoleRequiresOperatorCompletion(
+  staffRole: StaffActor["staffRole"],
+): boolean {
+  return staffRole === "business_development_specialist";
+}
+
 export function assertRestrictedStaffWorkStatusTransition(
   actor: StaffActor,
   work: WorkListItem,
   nextStatus: WorkStatus,
 ): void {
   if (!isRestrictedStaff(actor)) return;
+
+  if (
+    nextStatus === "completed" &&
+    assigneeRoleRequiresOperatorCompletion(actor.staffRole) &&
+    work.assignedToId === actor.userId
+  ) {
+    throw new Error(
+      "Staff permission denied: submit for review — operator must approve before completion.",
+    );
+  }
 
   if (nextStatus === "archived") {
     throw new Error(

@@ -123,6 +123,7 @@ export interface UpdateWorkInput {
   title?: string;
   summary?: string | null;
   description?: string | null;
+  acceptanceCriteria?: string | null;
   notes?: string | null;
   category?: WorkCategory;
   clientId?: number | null;

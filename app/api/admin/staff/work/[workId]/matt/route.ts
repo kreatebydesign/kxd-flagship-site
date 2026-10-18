@@ -31,12 +31,16 @@ export async function POST(request: Request, context: RouteContext) {
 
   const body = (await request.json().catch(() => ({}))) as { note?: string };
   const note = body.note?.trim();
+  if (!note) {
+    return NextResponse.json(
+      { success: false, error: "A revision note is required when returning work." },
+      { status: 400 },
+    );
+  }
   const tags = Array.from(
     new Set([...work.tags.filter((t) => t !== "requires-approval"), "returned-by-matt"]),
   );
-  const notes = note
-    ? `${work.notes ? `${work.notes}\n\n` : ""}[Returned by Matt]\n${note}`
-    : `${work.notes ? `${work.notes}\n\n` : ""}[Returned by Matt]`;
+  const notes = `${work.notes ? `${work.notes}\n\n` : ""}[Returned by Matt]\n${note}`;
 
   await updateWorkItem({
     workId,
@@ -44,6 +48,13 @@ export async function POST(request: Request, context: RouteContext) {
     tags,
     notes,
     actorEmail: gated.actor.email,
+  });
+
+  const { appendWorkActivityEntry } = await import("@/lib/work/activity");
+  await appendWorkActivityEntry(workId, {
+    actor: gated.actor.email,
+    action: "returned",
+    detail: note,
   });
 
   void request;

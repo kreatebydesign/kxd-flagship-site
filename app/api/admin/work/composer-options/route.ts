@@ -40,11 +40,17 @@ export async function GET() {
     }));
 
     const users = usersRes.docs.map((doc) => {
-      const row = doc as { id: number; email?: string; displayName?: string | null };
+      const row = doc as {
+        id: number;
+        email?: string;
+        displayName?: string | null;
+        staffRole?: string | null;
+      };
       return {
         id: Number(row.id),
         email: String(row.email ?? ""),
         displayName: row.displayName ? String(row.displayName) : null,
+        staffRole: row.staffRole ? String(row.staffRole) : null,
       };
     });
 

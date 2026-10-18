@@ -226,6 +226,7 @@ function mockWork(partial: Partial<WorkListItem> & { id: number; title: string }
     clientName: "Internal",
     summary: "Known summary",
     description: null,
+    acceptanceCriteria: null,
     notes: null,
     source: "manual",
     sourceId: null,

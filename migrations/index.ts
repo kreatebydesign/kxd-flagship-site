@@ -119,6 +119,7 @@ import * as migration_20261005_partner_portal_phase1_1 from './20261005_partner_
 import * as migration_20261007_partner_portal_phase3_invitations from './20261007_partner_portal_phase3_invitations';
 import * as migration_20261008_partner_portal_phase4_network_directory from './20261008_partner_portal_phase4_network_directory';
 import * as migration_20261016_staff_client_assignments from './20261016_staff_client_assignments';
+import * as migration_20261018_work_acceptance_criteria from './20261018_work_acceptance_criteria';
 
 export const migrations = [
   {
@@ -777,5 +778,11 @@ export const migrations = [
     up: migration_20261016_staff_client_assignments.up,
     down: migration_20261016_staff_client_assignments.down,
     name: '20261016_staff_client_assignments',
+  },
+  {
+    // Work Management R1 — acceptance criteria on work (nullable).
+    up: migration_20261018_work_acceptance_criteria.up,
+    down: migration_20261018_work_acceptance_criteria.down,
+    name: '20261018_work_acceptance_criteria',
   },
 ];

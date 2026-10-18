@@ -203,6 +203,7 @@ export interface StaffTodayData {
 }
 
 export interface StaffMyWorkData {
+  viewer: Pick<StaffActor, "userId" | "staffRole">;
   items: WorkListItem[];
   openItems: WorkListItem[];
   completedItems: WorkListItem[];
@@ -231,6 +232,7 @@ export interface StaffGuidedWorkData {
   title: string;
   summary: string | null;
   description: string | null;
+  acceptanceCriteria: string | null;
   notes: string | null;
   activityHistory: WorkActivityEntry[];
   status: string;

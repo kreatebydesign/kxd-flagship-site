@@ -40,6 +40,7 @@ export async function updateWorkItem(input: UpdateWorkItemInput): Promise<WorkLi
     title: patch.title,
     summary: patch.summary,
     description: patch.description,
+    acceptanceCriteria: patch.acceptanceCriteria,
     notes: patch.notes,
     status: patch.status,
     priority: patch.priority,

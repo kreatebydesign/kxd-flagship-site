@@ -40,6 +40,7 @@ import {
 } from "@/lib/scheduling/workspace";
 import { getWorkStatusActions } from "@/lib/work/transitions";
 import type { WorkListItem, WorkStatus } from "@/lib/work/types";
+import { WorkOperatorReviewPanel } from "@/components/admin/work/WorkOperatorReviewPanel";
 import type { WebsiteReviewWorkContext } from "@/lib/work/website-review-context-types";
 
 function formatDateTime(iso: string | null): string | null {
@@ -98,8 +99,10 @@ export function WorkDetailClient({
   calendarRecoveryState = null,
   calendarExternalChangeClass = null,
   calendarLastSyncAt = null,
+  canOperatorReview = false,
 }: {
   initialWork: WorkListItem;
+  canOperatorReview?: boolean;
   currentUser?: WorkComposerUserOption | null;
   websiteReviewContext?: WebsiteReviewWorkContext | null;
   calendarEventHtmlLink?: string | null;
@@ -331,15 +334,33 @@ export function WorkDetailClient({
                   </p>
                 ) : null}
               </div>
-            ) : work.description ? (
-              <p className="kxd-os-work-detail__description">{work.description}</p>
-            ) : work.summary ? (
-              <p className="kxd-os-work-detail__description">{work.summary}</p>
             ) : (
-              <p className="kxd-os-work-detail__description kxd-os-work-detail__description--empty">
-                No description.
-              </p>
+              <>
+                {work.description ? (
+                  <p className="kxd-os-work-detail__description">{work.description}</p>
+                ) : work.summary ? (
+                  <p className="kxd-os-work-detail__description">{work.summary}</p>
+                ) : (
+                  <p className="kxd-os-work-detail__description kxd-os-work-detail__description--empty">
+                    No brief on file.
+                  </p>
+                )}
+                {work.acceptanceCriteria ? (
+                  <div className="kxd-os-work-detail__acceptance">
+                    <p className="kxd-os-work-engine__eyebrow">Acceptance criteria</p>
+                    <p className="kxd-os-work-detail__description">{work.acceptanceCriteria}</p>
+                  </div>
+                ) : null}
+              </>
             )}
+
+            {canOperatorReview && work.status === "review" ? (
+              <WorkOperatorReviewPanel
+                workId={work.id}
+                assigneeLabel={work.assignedTo}
+                onWorkUpdated={setWork}
+              />
+            ) : null}
 
             <div className="kxd-os-work-detail__actions" aria-label="Work actions">
               {websiteReviewContext ? (

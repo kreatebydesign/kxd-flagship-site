@@ -49,6 +49,7 @@ export interface WorkListItem {
   title: string;
   summary: string | null;
   description: string | null;
+  acceptanceCriteria: string | null;
   notes: string | null;
   source: WorkSource;
   sourceId: string | null;
@@ -132,6 +133,7 @@ export interface CreateWorkInput {
   title: string;
   summary?: string;
   description?: string;
+  acceptanceCriteria?: string;
   notes?: string;
   source?: WorkSource;
   sourceId?: string;
@@ -157,6 +159,7 @@ export interface UpdateWorkItemInput {
   title?: string;
   summary?: string | null;
   description?: string | null;
+  acceptanceCriteria?: string | null;
   notes?: string | null;
   status?: WorkStatus;
   priority?: WorkPriority;

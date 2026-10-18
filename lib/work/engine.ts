@@ -72,6 +72,9 @@ export function toWorkListItem(
     title: String(doc.title ?? "Work"),
     summary: doc.summary ? String(doc.summary) : null,
     description: doc.description ? String(doc.description) : null,
+    acceptanceCriteria: doc.acceptanceCriteria
+      ? String(doc.acceptanceCriteria)
+      : null,
     notes: doc.notes ? String(doc.notes) : null,
     source: doc.source as WorkListItem["source"],
     sourceId: doc.sourceId ? String(doc.sourceId) : null,

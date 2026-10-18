@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdminOversightApi } from "@/lib/staff/guard";
+import { mergeApprovalTagsForAssignee } from "@/lib/staff/work-assignee";
 import { createWorkItem, updateWorkItem, getWorkItem } from "@/lib/work/services";
 import type { WorkPriority } from "@/lib/work/types";
 
@@ -17,11 +18,15 @@ export async function POST(request: Request) {
   const body = (await request.json()) as {
     workId?: number;
     staffUserId?: number;
+    clientId?: number | null;
     title?: string;
     summary?: string;
+    description?: string;
+    acceptanceCriteria?: string;
     expectedOutcome?: string;
     priority?: WorkPriority;
     dueDate?: string | null;
+    startDate?: string | null;
     plannedForDate?: string | null;
     requiresApproval?: boolean;
     estimatedEffort?: number | null;
@@ -35,8 +40,8 @@ export async function POST(request: Request) {
     );
   }
 
-  const tags: string[] = [];
-  if (body.requiresApproval) tags.push("requires-approval");
+  const manualTags: string[] = [];
+  if (body.requiresApproval) manualTags.push("requires-approval");
 
   if (body.workId) {
     const existing = await getWorkItem(body.workId);
@@ -46,11 +51,14 @@ export async function POST(request: Request) {
         { status: 404 },
       );
     }
-    const nextTags = Array.from(
-      new Set([
-        ...existing.tags.filter((t) => t !== "requires-approval"),
-        ...tags,
-      ]),
+    const nextTags = await mergeApprovalTagsForAssignee(
+      staffUserId,
+      Array.from(
+        new Set([
+          ...existing.tags.filter((t) => t !== "requires-approval"),
+          ...manualTags,
+        ]),
+      ),
     );
     const notes =
       body.expectedOutcome?.trim()
@@ -60,11 +68,15 @@ export async function POST(request: Request) {
     const work = await updateWorkItem({
       workId: body.workId,
       assignedToId: staffUserId,
+      clientId: body.clientId === undefined ? undefined : body.clientId,
       title: body.title?.trim() || undefined,
       summary: body.summary?.trim() ?? undefined,
+      description: body.description?.trim() ?? undefined,
+      acceptanceCriteria: body.acceptanceCriteria?.trim() ?? undefined,
       notes,
       priority: body.priority,
       dueDate: body.dueDate,
+      startDate: body.startDate ?? undefined,
       plannedForDate: body.plannedForDate,
       estimatedEffort: body.estimatedEffort ?? undefined,
       tags: nextTags,
@@ -81,15 +93,21 @@ export async function POST(request: Request) {
     );
   }
 
+  const tags = await mergeApprovalTagsForAssignee(staffUserId, manualTags);
+
   const work = await createWorkItem({
     title: body.title.trim(),
     summary: body.summary?.trim() || body.expectedOutcome?.trim(),
+    description: body.description?.trim() || undefined,
+    acceptanceCriteria: body.acceptanceCriteria?.trim() || undefined,
     notes: body.expectedOutcome?.trim()
       ? `[Expected outcome]\n${body.expectedOutcome.trim()}`
       : undefined,
+    clientId: body.clientId ?? undefined,
     assignedToId: staffUserId,
     priority: body.priority ?? "normal",
     dueDate: body.dueDate ?? undefined,
+    startDate: body.startDate ?? undefined,
     plannedForDate: body.plannedForDate ?? undefined,
     estimatedEffort: body.estimatedEffort ?? undefined,
     category: "operations",

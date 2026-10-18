@@ -60,6 +60,9 @@ export function toWorkListItem(doc: AnyDoc, fallbackClientName = "Internal"): Wo
     title: String(doc.title ?? "Work"),
     summary: doc.summary ? String(doc.summary) : null,
     description: doc.description ? String(doc.description) : null,
+    acceptanceCriteria: doc.acceptanceCriteria
+      ? String(doc.acceptanceCriteria)
+      : null,
     notes: doc.notes ? String(doc.notes) : null,
     source: doc.source as WorkListItem["source"],
     sourceId: doc.sourceId ? String(doc.sourceId) : null,
@@ -132,6 +135,7 @@ export async function createWork(input: CreateWorkInput): Promise<{ ok: true; wo
       title: input.title.trim(),
       summary: input.summary?.trim() || undefined,
       description: input.description?.trim() || undefined,
+      acceptanceCriteria: input.acceptanceCriteria?.trim() || undefined,
       notes: input.notes?.trim() || undefined,
       source: input.source ?? "manual",
       sourceId: input.sourceId?.trim() || undefined,

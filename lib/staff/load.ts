@@ -30,10 +30,10 @@ import { getStaffPreviewSession } from "./preview";
 import { buildStaffWrapUp, loadSavedWrapUpNote } from "./wrap-up";
 import {
   isWaitingOnMatt,
-  requiresMattApproval,
   todayDateLabel,
   toLocalDateKey,
 } from "./prioritize";
+import { workRequiresOperatorApproval } from "./work-approval";
 import { STAFF_GUIDANCE_PROMPTS } from "./guidance";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -206,7 +206,8 @@ export async function loadStaffGuidedWork(
     if (!allowed) return null;
   }
 
-  const mattApproval = requiresMattApproval(work) || isWaitingOnMatt(work);
+  const mattApproval =
+    workRequiresOperatorApproval(work, actor) || isWaitingOnMatt(work);
 
   let helpRequests: StaffHelpRequestView[] = [];
   try {
@@ -224,6 +225,7 @@ export async function loadStaffGuidedWork(
     title: work.title,
     summary: work.summary,
     description: work.description,
+    acceptanceCriteria: work.acceptanceCriteria,
     notes: work.notes,
     activityHistory: work.activityHistory ?? [],
     status: work.status,
