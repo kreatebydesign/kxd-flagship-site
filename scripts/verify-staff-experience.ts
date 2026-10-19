@@ -95,6 +95,19 @@ assert.equal(isStaffAllowedPagePath("/admin/collections/users", heather), false)
 assert.equal(isStaffAllowedPagePath("/admin/globals/site-settings", heather), false);
 assert.equal(isStaffAllowedPagePath("/admin/sales", heather), false);
 
+const tylerBds = staffActorFromUser({
+  id: 3,
+  email: "tyler@kreatebydesign.com",
+  displayName: "Tyler",
+  role: "editor",
+  staffRole: "business_development_specialist",
+  staffOnboardingCompletedAt: "2026-07-01T00:00:00.000Z",
+});
+assert.ok(tylerBds);
+assert.equal(isStaffAllowedPagePath("/admin/operations/today", tylerBds), false);
+assert.equal(isStaffAllowedPagePath("/admin/connect", tylerBds), false);
+assert.equal(isStaffAllowedPagePath("/admin/operations/staff/my-work", tylerBds), true);
+
 // Phase 3 Batch D — relationship surfaces remain denied for restricted staff
 assert.equal(isStaffAllowedPagePath("/admin/operations/events", heather), false);
 assert.equal(isStaffAllowedPagePath("/admin/operations/events/new", heather), false);

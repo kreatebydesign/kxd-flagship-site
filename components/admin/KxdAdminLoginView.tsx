@@ -2,6 +2,9 @@ import type { AdminViewServerProps } from "payload";
 import { redirect } from "next/navigation";
 import { getSafeRedirect } from "payload/shared";
 import { OPERATIONS_HOME_PATH } from "@/lib/admin/constants";
+import { staffActorFromUser } from "@/lib/staff/actor";
+import { staffLandingPathForUser } from "@/lib/staff/load";
+import { isRestrictedStaff } from "@/lib/staff/permissions";
 import { PayloadLogo } from "./PayloadLogo";
 import { KxdAdminLoginForm } from "./KxdAdminLoginForm";
 
@@ -40,6 +43,15 @@ export function KxdAdminLoginView({
   });
 
   if (user) {
+    const actor = staffActorFromUser(user);
+    if (actor && isRestrictedStaff(actor)) {
+      redirect(
+        getSafeRedirect({
+          fallbackTo: staffLandingPathForUser(user),
+          redirectTo: redirectParam ?? staffLandingPathForUser(user),
+        }),
+      );
+    }
     redirect(redirectUrl);
   }
 

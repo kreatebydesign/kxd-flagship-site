@@ -7,6 +7,11 @@ import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
 
 import { OPERATIONS_HOME_PATH } from "@/lib/admin/constants";
+import { staffActorFromUser } from "@/lib/staff/actor";
+import {
+  isRestrictedStaff,
+  staffLandingPathForActor,
+} from "@/lib/staff/permissions";
 
 type LoginSearchParams = {
   redirect?: string | string[];
@@ -124,7 +129,20 @@ export function KxdAdminLoginForm({
         }
 
         setUser(json as Parameters<typeof setUser>[0]);
-        router.replace(redirectTo);
+
+        const actor = staffActorFromUser(
+          json.user && typeof json.user === "object" ? json.user : null,
+        );
+        const staffRedirectParam = readRedirectParam(searchParams);
+        const destination =
+          actor && isRestrictedStaff(actor)
+            ? getSafeRedirect({
+                fallbackTo: staffLandingPathForActor(actor),
+                redirectTo: staffRedirectParam ?? staffLandingPathForActor(actor),
+              })
+            : redirectTo;
+
+        router.replace(destination);
         router.refresh();
       } catch {
         setError("Unable to enter right now. Please try again.");
@@ -133,7 +151,16 @@ export function KxdAdminLoginForm({
         setLoading(false);
       }
     },
-    [email, password, loading, loginAction, redirectTo, router, setUser],
+    [
+      email,
+      password,
+      loading,
+      loginAction,
+      redirectTo,
+      router,
+      searchParams,
+      setUser,
+    ],
   );
 
   return (

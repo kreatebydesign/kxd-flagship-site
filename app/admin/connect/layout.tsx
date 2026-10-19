@@ -22,6 +22,9 @@ export default async function ConnectLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const { requireStaffAwarePage } = await import("@/lib/staff/guard");
+  await requireStaffAwarePage("/admin/connect");
+
   return (
     <html lang="en" suppressHydrationWarning data-theme="dark">
       <head>
