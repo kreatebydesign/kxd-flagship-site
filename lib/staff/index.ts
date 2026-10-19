@@ -8,6 +8,17 @@ export {
   getStaffActorOrNull,
   staffCanUseFullNav,
 } from "./guard";
+export {
+  denyUnlessOperatorBulkClientActions,
+  denyUnlessOperatorClientAccess,
+  isCurrentSessionDeniedClientData,
+  requireOperatorClientPageAccess,
+} from "./operator-client-access";
+export {
+  evaluateBulkClientActionAuthorization,
+  type BulkActionClientBinding,
+} from "./bulk-client-action-access";
+export { restrictedStaffBlocksClientData } from "./client-scope";
 export { redirectRestrictedStaffFromPayloadAdmin } from "./payload-admin-redirect";
 export {
   loadStaffToday,

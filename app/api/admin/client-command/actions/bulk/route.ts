@@ -6,6 +6,7 @@ import type {
   ClientActionPriority,
   ClientActionStatus,
 } from "@/lib/client-command/actions/types";
+import { denyUnlessOperatorBulkClientActions } from "@/lib/staff/operator-client-access";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +23,9 @@ export async function PATCH(req: Request) {
         { status: 400 },
       );
     }
+
+    const bulkDenied = await denyUnlessOperatorBulkClientActions(auth, body.ids);
+    if (bulkDenied) return bulkDenied;
 
     const updated = await bulkUpdateClientActions({
       ids: body.ids,

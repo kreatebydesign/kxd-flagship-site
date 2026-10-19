@@ -24,6 +24,11 @@ export default async function ClientCommandWorkspacePage({ params, searchParams 
   const clientId = Number(clientIdParam);
   if (!Number.isFinite(clientId)) notFound();
 
+  const { requireOperatorClientPageAccess } = await import(
+    "@/lib/staff/operator-client-access"
+  );
+  await requireOperatorClientPageAccess(clientId);
+
   if (isLegacyCommercialTabId(tabParam)) {
     redirect(commercialWorkspaceHref(clientId, resolveWorkspaceTab(tabParam).commercialSection));
   }

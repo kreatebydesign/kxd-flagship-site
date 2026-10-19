@@ -4,6 +4,7 @@ import { getPayload } from "payload";
 import config from "@payload-config";
 import { publishClientActivity } from "@/lib/client-command/activity/publish";
 import { loadClientWorkspaceBundle } from "@/lib/client-command/workspace-data";
+import { denyUnlessOperatorClientAccess } from "@/lib/staff/operator-client-access";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +19,9 @@ export async function POST(req: Request) {
     if (!clientId) {
       return NextResponse.json({ success: false, error: "clientId required." }, { status: 400 });
     }
+
+    const clientDenied = await denyUnlessOperatorClientAccess(auth, clientId);
+    if (clientDenied) return clientDenied;
 
     const bundle = await loadClientWorkspaceBundle(clientId);
     if (!bundle) {

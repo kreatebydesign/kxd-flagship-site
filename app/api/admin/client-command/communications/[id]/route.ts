@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { requirePayloadAdminApi } from "@/lib/admin/auth";
-import { updateClientCommunication } from "@/lib/client-command/communications/data";
+import {
+  resolveClientIdForClientCommunication,
+  updateClientCommunication,
+} from "@/lib/client-command/communications/data";
+import { denyUnlessOperatorClientAccess } from "@/lib/staff/operator-client-access";
 import type {
   ClientCommunicationPriority,
   ClientCommunicationStatus,
@@ -27,6 +31,13 @@ export async function PATCH(
   if (!communicationId) {
     return NextResponse.json({ success: false, error: "Invalid id." }, { status: 400 });
   }
+
+  const commClientId = await resolveClientIdForClientCommunication(communicationId);
+  if (!commClientId) {
+    return NextResponse.json({ success: false, error: "Not found." }, { status: 404 });
+  }
+  const clientDenied = await denyUnlessOperatorClientAccess(auth, commClientId);
+  if (clientDenied) return clientDenied;
 
   try {
     const body = (await req.json()) as PatchBody;

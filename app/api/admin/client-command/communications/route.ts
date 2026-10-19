@@ -8,6 +8,7 @@ import type {
   ClientCommunicationType,
   CreateClientCommunicationInput,
 } from "@/lib/client-command/communications/types";
+import { denyUnlessOperatorClientAccess } from "@/lib/staff/operator-client-access";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +25,9 @@ export async function POST(req: Request) {
         { status: 400 },
       );
     }
+
+    const clientDenied = await denyUnlessOperatorClientAccess(auth, body.clientId);
+    if (clientDenied) return clientDenied;
 
     const doc = await createClientCommunication({
       clientId: body.clientId,

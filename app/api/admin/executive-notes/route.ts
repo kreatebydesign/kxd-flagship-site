@@ -3,12 +3,23 @@ import { requirePayloadAdminApi } from "@/lib/admin/auth";
 import { createExecutiveNote } from "@/lib/executive-notes/engine";
 import { searchExecutiveNotes } from "@/lib/executive-notes/search";
 import type { CreateExecutiveNoteInput } from "@/lib/executive-notes/types";
+import { denyUnlessOperatorClientAccess } from "@/lib/staff/operator-client-access";
+import { staffActorFromUser } from "@/lib/staff/actor";
+import { isRestrictedStaff } from "@/lib/staff/permissions";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
   const auth = await requirePayloadAdminApi();
   if (auth instanceof NextResponse) return auth;
+
+  const actor = staffActorFromUser(auth);
+  if (actor && isRestrictedStaff(actor)) {
+    return NextResponse.json(
+      { success: false, error: "Staff permission denied for this API." },
+      { status: 403 },
+    );
+  }
 
   const { searchParams } = new URL(req.url);
   const q = searchParams.get("q") ?? undefined;
@@ -30,6 +41,10 @@ export async function POST(req: Request) {
     if (!body.clientId || !body.title?.trim()) {
       return NextResponse.json({ success: false, error: "Client and title required." }, { status: 400 });
     }
+
+    const clientDenied = await denyUnlessOperatorClientAccess(auth, body.clientId);
+    if (clientDenied) return clientDenied;
+
     const note = await createExecutiveNote(body);
     return NextResponse.json({ success: true, noteId: note.id });
   } catch (err) {

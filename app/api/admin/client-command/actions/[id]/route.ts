@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { requirePayloadAdminApi } from "@/lib/admin/auth";
-import { updateClientAction } from "@/lib/client-command/actions/data";
+import {
+  resolveClientIdForClientAction,
+  updateClientAction,
+} from "@/lib/client-command/actions/data";
+import { denyUnlessOperatorClientAccess } from "@/lib/staff/operator-client-access";
 import type {
   ClientActionPriority,
   ClientActionStatus,
@@ -25,6 +29,13 @@ export async function PATCH(
         { status: 400 },
       );
     }
+
+    const actionClientId = await resolveClientIdForClientAction(actionId);
+    if (!actionClientId) {
+      return NextResponse.json({ success: false, error: "Action not found." }, { status: 404 });
+    }
+    const clientDenied = await denyUnlessOperatorClientAccess(auth, actionClientId);
+    if (clientDenied) return clientDenied;
 
     const body = (await req.json()) as UpdateClientActionInput;
     const doc = await updateClientAction(actionId, {

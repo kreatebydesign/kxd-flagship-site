@@ -12,6 +12,12 @@ import type { CommandHubClientRow } from "./workspace-types";
 import { commandWorkspaceHref } from "./tabs";
 
 export async function loadClientCommandHub(query?: string): Promise<CommandHubClientRow[]> {
+  const { getStaffActorOrNull } = await import("@/lib/staff/guard");
+  const { resolveStaffClientScope } = await import("@/lib/staff/client-assignments");
+  const actor = await getStaffActorOrNull();
+  const assignedScope =
+    actor != null ? await resolveStaffClientScope(actor) : null;
+
   const payload = await getPayload({ config });
 
   const [healthCtx, clientsR, profilesR] = await Promise.all([
@@ -38,7 +44,12 @@ export async function loadClientCommandHub(query?: string): Promise<CommandHubCl
 
   const q = query?.trim().toLowerCase() ?? "";
 
-  const rows: CommandHubClientRow[] = clients
+  const scopedClients =
+    assignedScope === null
+      ? clients
+      : clients.filter((client) => assignedScope.includes(client.id as number));
+
+  const rows: CommandHubClientRow[] = scopedClients
     .map((client) => {
       const cid = client.id as number;
       const profile = profileByClientId.get(cid);

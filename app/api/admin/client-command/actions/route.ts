@@ -11,6 +11,7 @@ import type {
   ClientActionType,
   CreateClientActionInput,
 } from "@/lib/client-command/actions/types";
+import { denyUnlessOperatorClientAccess } from "@/lib/staff/operator-client-access";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +27,9 @@ export async function GET(req: Request) {
       { status: 400 },
     );
   }
+
+  const clientDenied = await denyUnlessOperatorClientAccess(auth, clientId);
+  if (clientDenied) return clientDenied;
 
   const snapshot = await loadClientActions(clientId);
   return NextResponse.json({ success: true, snapshot });
@@ -44,6 +48,9 @@ export async function POST(req: Request) {
         { status: 400 },
       );
     }
+
+    const clientDenied = await denyUnlessOperatorClientAccess(auth, body.clientId);
+    if (clientDenied) return clientDenied;
 
     const doc = await createClientAction({
       clientId: body.clientId,

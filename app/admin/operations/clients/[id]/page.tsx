@@ -24,6 +24,11 @@ export default async function ExecutiveClientWorkspacePage({
   const clientId = Number(id);
   if (!Number.isFinite(clientId)) notFound();
 
+  const { requireOperatorClientPageAccess } = await import(
+    "@/lib/staff/operator-client-access"
+  );
+  await requireOperatorClientPageAccess(clientId);
+
   const activeTab = isWorkspaceTabId(tabParam) ? tabParam : "overview";
   const data = await fetchClientWorkspace(clientId);
   if (!data) notFound();
