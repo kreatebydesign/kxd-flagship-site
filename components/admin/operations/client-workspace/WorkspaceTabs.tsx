@@ -106,6 +106,22 @@ export function OverviewTab({ data }: { data: ClientWorkspaceData }) {
         )}
       </WorkspaceChapter>
 
+      {data.staffClientNotes.length > 0 ? (
+        <WorkspaceChapter title="Staff notes & questions">
+          <ul className="kxd-os-workspace-meta-stack" style={{ listStyle: "none", padding: 0, margin: 0 }}>
+            {data.staffClientNotes.map((note) => (
+              <li key={note.id} style={{ marginBottom: "1rem" }}>
+                <p className="kxd-os-workspace-chapter__aside">
+                  {note.kind === "question" ? "Question" : "Note"} · {note.authorDisplayName} ·{" "}
+                  {fmtWorkspaceDate(note.createdAt)}
+                </p>
+                <WorkspaceFormattedText text={note.body} />
+              </li>
+            ))}
+          </ul>
+        </WorkspaceChapter>
+      ) : null}
+
       <WorkspaceChapter title="Strategic notes">
         <WorkspaceExecutiveNotes
           text={

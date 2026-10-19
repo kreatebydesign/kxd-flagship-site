@@ -161,6 +161,7 @@ export async function createStaffHelpRequest(input: {
   question: string;
   pagePath: string;
   workId?: number | null;
+  clientId?: number | null;
 }): Promise<
   | { ok: true; request: StaffHelpRequestRecord; duplicate: false }
   | { ok: true; request: StaffHelpRequestRecord; duplicate: true }
@@ -180,7 +181,7 @@ export async function createStaffHelpRequest(input: {
   }
 
   const workId = input.workId ?? null;
-  let clientId: number | null = null;
+  let clientId: number | null = input.clientId ?? null;
   let work = null as Awaited<ReturnType<typeof getWorkItem>>;
 
   if (workId != null) {
@@ -196,6 +197,16 @@ export async function createStaffHelpRequest(input: {
       };
     }
     clientId = work.clientId;
+  } else if (clientId != null) {
+    const { staffMayAccessClient } = await import("./client-assignments");
+    const allowed = await staffMayAccessClient(input.actor, clientId);
+    if (!allowed) {
+      return {
+        ok: false,
+        error: "Staff permission denied: client not in assigned scope.",
+        status: 403,
+      };
+    }
   }
 
   const duplicate = await findRecentDuplicateHelp({

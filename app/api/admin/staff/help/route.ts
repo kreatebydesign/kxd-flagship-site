@@ -35,6 +35,7 @@ export async function POST(request: Request) {
     question?: string;
     pagePath?: string;
     workId?: number | null;
+    clientId?: number | null;
   };
 
   const result = await createStaffHelpRequest({
@@ -45,6 +46,7 @@ export async function POST(request: Request) {
         ? body.pagePath
         : "/admin/operations/staff",
     workId: typeof body.workId === "number" ? body.workId : null,
+    clientId: typeof body.clientId === "number" ? body.clientId : null,
   });
 
   if (!result.ok) {
