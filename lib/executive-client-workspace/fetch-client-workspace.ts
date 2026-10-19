@@ -48,6 +48,13 @@ export interface ClientWorkspaceData {
 }
 
 async function fetchClientWorkspaceUncached(clientId: number): Promise<ClientWorkspaceData | null> {
+  const { isCurrentSessionDeniedClientData } = await import(
+    "@/lib/staff/operator-client-access"
+  );
+  if (await isCurrentSessionDeniedClientData(clientId)) {
+    return null;
+  }
+
   const payload = await getPayload({ config });
 
   let client: AnyDoc;

@@ -108,6 +108,30 @@ export async function loadClientCommunications(
   return buildCommunicationsSnapshot(result.docs as ClientCommunicationDoc[]);
 }
 
+export async function resolveClientIdForClientCommunication(
+  communicationId: number,
+): Promise<number | null> {
+  if (!Number.isFinite(communicationId) || communicationId <= 0) return null;
+  const payload = await getPayload({ config });
+  try {
+    const doc = (await payload.findByID({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      collection: COLLECTION as any,
+      id: communicationId,
+      depth: 0,
+      overrideAccess: true,
+    })) as ClientCommunicationDoc;
+    const raw = doc.client;
+    if (typeof raw === "number") return raw;
+    if (raw && typeof raw === "object" && "id" in raw) {
+      return Number((raw as { id: unknown }).id) || null;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 export async function createClientCommunication(
   input: CreateClientCommunicationInput,
 ): Promise<ClientCommunicationDoc> {

@@ -16,3 +16,13 @@ export function actorUsesAssignedClientScope(actor: StaffActor): boolean {
   if (!isRestrictedStaff(actor)) return false;
   return staffRoleRequiresAssignedClientScope(actor.staffRole);
 }
+
+/** Pure check for tests and policy — assignment-scoped roles need explicit client access. */
+export function restrictedStaffBlocksClientData(
+  actor: StaffActor,
+  mayAccessClient: boolean,
+): boolean {
+  if (!isRestrictedStaff(actor)) return false;
+  if (!actorUsesAssignedClientScope(actor)) return false;
+  return !mayAccessClient;
+}

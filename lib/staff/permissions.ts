@@ -75,8 +75,6 @@ export const STAFF_ALLOWED_PAGE_PREFIXES: readonly string[] = [
   "/admin/operations/staff",
   "/admin/operations/settings",
   "/admin/operations/review-inbox",
-  "/admin/operations/upgrade-requests",
-  "/admin/operations/onboarding",
   "/admin/operations/clients/launch",
   "/admin/training",
   "/admin/work/", // assigned work detail only — further filtered in loader
@@ -217,6 +215,14 @@ export function isStaffAllowedPagePath(
   if (pathname === "/admin/operations" || pathname === "/admin/operations/") {
     return false; // redirected to staff home
   }
+
+  if (
+    pathname === "/admin/operations/onboarding" ||
+    pathname.startsWith("/admin/operations/onboarding/")
+  ) {
+    return actorHasStaffCapability(actor, "staff.onboarding.assist");
+  }
+
   return STAFF_ALLOWED_PAGE_PREFIXES.some(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`) || pathname.startsWith(prefix),
   );

@@ -138,6 +138,13 @@ async function fetchDocs(
 export async function loadClientWorkspaceBundle(
   clientId: number,
 ): Promise<ClientWorkspaceBundle | null> {
+  const { isCurrentSessionDeniedClientData } = await import(
+    "@/lib/staff/operator-client-access"
+  );
+  if (await isCurrentSessionDeniedClientData(clientId)) {
+    return null;
+  }
+
   const commandCenterPromise = loadClientCommandCenter(clientId);
   const workspacePromise = fetchClientWorkspace(clientId);
 

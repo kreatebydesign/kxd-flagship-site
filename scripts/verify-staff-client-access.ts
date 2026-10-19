@@ -7,6 +7,7 @@ import {
   actorHasStaffCapability,
   isRestrictedStaff,
   isStaffAllowedApiPath,
+  isStaffAllowedPagePath,
   normalizeStaffRole,
   staffRoleTitle,
 } from "../lib/staff/permissions";
@@ -94,6 +95,26 @@ assert.equal(
 );
 assert.equal(
   isStaffAllowedApiPath("/api/admin/client-requests/12/status", tyler!),
+  true,
+);
+assert.equal(
+  isStaffAllowedApiPath("/api/admin/client-command/activity", tyler!),
+  false,
+);
+assert.equal(
+  isStaffAllowedPagePath("/admin/operations/client-command/22", tyler!),
+  false,
+);
+assert.equal(
+  isStaffAllowedPagePath("/admin/operations/upgrade-requests", tyler!),
+  false,
+);
+assert.equal(
+  isStaffAllowedPagePath("/admin/operations/onboarding", tyler!),
+  false,
+);
+assert.equal(
+  isStaffAllowedPagePath("/admin/operations/onboarding", heather!),
   true,
 );
 

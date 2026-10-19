@@ -128,6 +128,59 @@ export async function loadClientActions(clientId: number): Promise<WorkspaceActi
   return buildActionsSnapshot(result.docs as ClientActionDoc[]);
 }
 
+export async function resolveClientIdForClientAction(
+  actionId: number,
+): Promise<number | null> {
+  if (!Number.isFinite(actionId) || actionId <= 0) return null;
+  const payload = await getPayload({ config });
+  try {
+    const doc = (await payload.findByID({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      collection: COLLECTION as any,
+      id: actionId,
+      depth: 0,
+      overrideAccess: true,
+    })) as ClientActionDoc;
+    return relId(doc.client);
+  } catch {
+    return null;
+  }
+}
+
+export type ClientActionClientBinding = {
+  actionId: number;
+  clientId: number;
+};
+
+/** Resolve every action id before bulk mutation — fail if any row is missing. */
+export async function resolveClientIdsForClientActions(
+  actionIds: readonly number[],
+): Promise<
+  | { ok: true; bindings: ClientActionClientBinding[] }
+  | { ok: false; missingActionIds: number[] }
+> {
+  const bindings: ClientActionClientBinding[] = [];
+  const missingActionIds: number[] = [];
+
+  for (const actionId of actionIds) {
+    if (!Number.isFinite(actionId) || actionId <= 0) {
+      missingActionIds.push(actionId);
+      continue;
+    }
+    const clientId = await resolveClientIdForClientAction(actionId);
+    if (clientId == null) {
+      missingActionIds.push(actionId);
+    } else {
+      bindings.push({ actionId, clientId });
+    }
+  }
+
+  if (missingActionIds.length > 0) {
+    return { ok: false, missingActionIds };
+  }
+  return { ok: true, bindings };
+}
+
 export async function loadDismissedMemoryReferences(clientId: number): Promise<Set<string>> {
   const counts = await loadDismissedMemoryReferenceCounts(clientId);
   return new Set(counts.keys());

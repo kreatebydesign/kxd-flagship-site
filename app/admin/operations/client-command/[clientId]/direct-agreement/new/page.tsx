@@ -17,6 +17,11 @@ export default async function CreateDirectAgreementPage({
   const clientId = Number((await params).clientId);
   if (!clientId) notFound();
 
+  const { requireOperatorClientPageAccess } = await import(
+    "@/lib/staff/operator-client-access"
+  );
+  await requireOperatorClientPageAccess(clientId);
+
   const payload = await getPayload({ config });
   let client: { id: number; name?: string } | null = null;
   try {

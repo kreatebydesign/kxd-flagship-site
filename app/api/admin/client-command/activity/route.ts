@@ -4,6 +4,7 @@ import { getPayload } from "payload";
 import config from "@payload-config";
 import { publishClientActivity } from "@/lib/client-command/activity/publish";
 import { createExecutiveNote } from "@/lib/executive-notes/engine";
+import { denyUnlessOperatorClientAccess } from "@/lib/staff/operator-client-access";
 
 export const dynamic = "force-dynamic";
 
@@ -47,6 +48,9 @@ export async function POST(req: Request) {
         { status: 400 },
       );
     }
+
+    const clientDenied = await denyUnlessOperatorClientAccess(auth, body.clientId);
+    if (clientDenied) return clientDenied;
 
     if (body.action === "timeline-event") {
       if (!body.title?.trim()) {

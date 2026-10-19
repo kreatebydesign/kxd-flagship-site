@@ -85,8 +85,16 @@ export async function requirePayloadAdminApi(request?: Request) {
         );
       }
     }
-  } catch {
-    /* fail open only if staff modules fail to load — auth still required */
+  } catch (err) {
+    console.error("[KXD Admin Auth] Staff permission evaluation failed:", err);
+    return NextResponse.json(
+      {
+        success: false,
+        ok: false,
+        error: "Staff permission evaluation failed.",
+      },
+      { status: 403 },
+    );
   }
 
   return user;

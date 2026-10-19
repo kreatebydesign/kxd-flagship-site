@@ -22,6 +22,11 @@ export default async function ClientCommercialAgreementPage({
   const contractId = Number(contractIdParam);
   if (!clientId || !contractId) notFound();
 
+  const { requireOperatorClientPageAccess } = await import(
+    "@/lib/staff/operator-client-access"
+  );
+  await requireOperatorClientPageAccess(clientId);
+
   let pkg;
   let contract;
   let proposal;
