@@ -23,6 +23,11 @@ const STAFF_NAV_GROUPS: OperationsNavGroup[] = [
     items: [
       { id: "staff", label: "Staff home", href: "/admin/operations/staff" },
       { id: "staff-my-work", label: "My work", href: "/admin/operations/staff/my-work" },
+      {
+        id: "staff-my-clients",
+        label: "My clients",
+        href: "/admin/operations/staff/my-clients",
+      },
       { id: "training", label: "Training", href: "/admin/training" },
       { id: "settings", label: "Settings", href: "/admin/operations/settings" },
     ],

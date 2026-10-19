@@ -203,6 +203,10 @@ function StaffHomeBody({
           <Link href="/admin/operations/staff/my-work" className="kxd-os-link-quiet">
             Open My work — list and board
           </Link>
+          {" · "}
+          <Link href="/admin/operations/staff/my-clients" className="kxd-os-link-quiet">
+            My clients
+          </Link>
         </p>
 
         <div className="kxd-os-staff-plan-grid">

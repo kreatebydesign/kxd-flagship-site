@@ -14,6 +14,7 @@ export interface StaffAskHelpControlProps {
   pagePath: string;
   workId?: number | null;
   workTitle?: string | null;
+  clientId?: number | null;
   clientLabel?: string | null;
   canAct: boolean;
   isPreview?: boolean;
@@ -76,6 +77,7 @@ export function StaffAskHelpControl({
   pagePath,
   workId = null,
   workTitle = null,
+  clientId = null,
   clientLabel = null,
   canAct,
   isPreview = false,
@@ -181,7 +183,7 @@ export function StaffAskHelpControl({
       const res = await fetch("/api/admin/staff/help", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question, pagePath, workId }),
+        body: JSON.stringify({ question, pagePath, workId, clientId }),
       });
       const payload = (await res.json()) as {
         success?: boolean;

@@ -31,6 +31,21 @@ export {
 export { loadStaffOversight } from "./oversight";
 export { loadStaffMyWork } from "./my-work";
 export {
+  loadStaffMyClients,
+  loadStaffClientWorkspace,
+  STAFF_MY_CLIENTS_PATH,
+} from "./client-context/load";
+export type {
+  StaffMyClientsData,
+  StaffMyClientListItem,
+  StaffClientWorkspaceData,
+} from "./client-context/load";
+export {
+  validateStaffClientNoteInput,
+  staffMayCreateClientNote,
+  staffMayReadClientNotesForClient,
+} from "./client-notes/policy";
+export {
   STAFF_HOME_PATH,
   STAFF_WELCOME_PATH,
   STAFF_OVERSIGHT_PATH,

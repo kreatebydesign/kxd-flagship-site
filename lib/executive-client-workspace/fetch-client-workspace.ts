@@ -23,6 +23,8 @@ import {
   type WorkspaceRelationshipEvent,
 } from "./relationship-types";
 import { isPhase3SchemaUnavailableError } from "./phase3-schema";
+import type { StaffClientNoteRecord } from "@/lib/staff/client-notes/types";
+import { listStaffClientNotesForClient } from "@/lib/staff/client-notes/data";
 
 export interface ClientWorkspaceData {
   client: AnyDoc;
@@ -45,6 +47,8 @@ export interface ClientWorkspaceData {
    * Empty arrays alone are not enough — schema may be unavailable.
    */
   phase3RelationshipUnavailable: boolean;
+  /** Phase 2A — internal notes from assigned staff (My Clients). */
+  staffClientNotes: StaffClientNoteRecord[];
 }
 
 async function fetchClientWorkspaceUncached(clientId: number): Promise<ClientWorkspaceData | null> {
@@ -181,6 +185,13 @@ async function fetchClientWorkspaceUncached(clientId: number): Promise<ClientWor
     (eventsR.status === "rejected" &&
       isPhase3SchemaUnavailableError(eventsR.reason));
 
+  let staffClientNotes: StaffClientNoteRecord[] = [];
+  try {
+    staffClientNotes = await listStaffClientNotesForClient(clientId, { limit: 40 });
+  } catch {
+    staffClientNotes = [];
+  }
+
   return {
     client,
     profile,
@@ -197,6 +208,7 @@ async function fetchClientWorkspaceUncached(clientId: number): Promise<ClientWor
       ? buildRelationshipIntelligenceSummary([], [])
       : relationshipSummary,
     phase3RelationshipUnavailable,
+    staffClientNotes,
   };
 }
 

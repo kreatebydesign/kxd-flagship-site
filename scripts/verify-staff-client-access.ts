@@ -106,6 +106,18 @@ assert.equal(
   false,
 );
 assert.equal(
+  isStaffAllowedPagePath("/admin/operations/staff/my-clients", tyler!),
+  true,
+);
+assert.equal(
+  isStaffAllowedPagePath("/admin/operations/staff/my-clients/22", tyler!),
+  true,
+);
+assert.equal(
+  isStaffAllowedApiPath("/api/admin/staff/client-notes?clientId=22", tyler!),
+  true,
+);
+assert.equal(
   isStaffAllowedPagePath("/admin/operations/upgrade-requests", tyler!),
   false,
 );
