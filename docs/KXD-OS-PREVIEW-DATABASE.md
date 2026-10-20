@@ -68,6 +68,16 @@ Then redeploy affected Preview deployments.
 
 On Vercel Preview, `payload.config.ts` refuses the production Neon endpoint if `KXD_NEON_PREVIEW_ENDPOINT_ID` is set and the resolved host does not match the preview endpoint.
 
+## Canonical Preview hostname (auth)
+
+Use **one hostname** for the whole QA session:
+
+`https://kxd-flagship-site-git-feature-staff-time-b1-foundation-kxd.vercel.app`
+
+Vercel also serves each build at a **deployment-specific** URL (e.g. `kxd-flagship-site-qlsums4r0-kxd.vercel.app`). The Payload `payload-token` cookie is **host-scoped**. Logging in on the branch alias and then opening a deployment-specific URL (or production) in another tab looks like “logged out” and shows `/admin/login` again — including on Staff Oversight. This is not a Staff Oversight permission bug.
+
+After login, navigate with **in-app links** (e.g. Tools → Staff Oversight) on the same tab/host.
+
 ## Staff Time B1 preview QA
 
 Dedicated users (preview DB only, `@kxd-preview-qa.local`):
