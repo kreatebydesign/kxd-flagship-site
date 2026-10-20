@@ -10,6 +10,7 @@ import {
   getExecutiveFocus,
   getExecutiveWaiting,
 } from "@/lib/executive-context";
+import { listRestrictedStaffUserIds } from "@/lib/staff/restricted-staff-users";
 import { getWorkPool } from "../engine";
 import { getWorkEngineWorkspace } from "../services";
 import type { WorkListItem, WorkWorkspaceData } from "../types";
@@ -66,17 +67,21 @@ export async function loadWorkViewContextHints(): Promise<WorkViewContextHints> 
 export async function getWorkView(
   input: GetWorkViewInput = {},
 ): Promise<WorkViewResult> {
-  const [pool, contextHints] = await Promise.all([
+  const [pool, contextHints, staffIds] = await Promise.all([
     input.pool ? Promise.resolve(input.pool) : getWorkPool(),
     input.contextHints
       ? Promise.resolve(input.contextHints)
       : loadWorkViewContextHints(),
+    input.restrictedStaffUserIds
+      ? Promise.resolve(input.restrictedStaffUserIds)
+      : listRestrictedStaffUserIds(),
   ]);
 
   return composeWorkView({
     ...input,
     pool,
     contextHints,
+    restrictedStaffUserIds: staffIds,
   });
 }
 
@@ -102,6 +107,7 @@ export async function loadWorkPlanningPage(
     ...input,
     pool,
     contextHints,
+    restrictedStaffUserIds: options.restrictedStaffUserIds,
   });
 
   return { view, options, workspace, pool, contextHints };

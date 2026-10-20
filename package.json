@@ -150,6 +150,7 @@
     "verify:staff-sales-phase1": "tsx scripts/verify-staff-sales-phase1.ts",
     "verify:staff-client-command-notes": "tsx scripts/verify-staff-client-command-notes.ts",
     "verify:work-management-r1": "tsx scripts/verify-work-management-r1.ts",
+    "verify:staff-work-operator-visibility-v1.3": "tsx scripts/verify-staff-work-operator-visibility-v1_3.ts",
     "verify:training-read-path": "tsx scripts/verify-training-read-path.ts",
     "verify:training-role-access": "tsx scripts/verify-training-role-access.ts",
     "measure:training-load": "tsx scripts/measure-training-load.ts",

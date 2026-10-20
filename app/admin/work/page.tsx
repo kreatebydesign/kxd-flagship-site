@@ -19,6 +19,7 @@ import {
   type WorkDueRange,
   type WorkViewFilters,
 } from "@/lib/work/planning";
+import type { WorkAssigneeScope } from "@/lib/work/planning/types";
 import type { WorkPriority, WorkStatus } from "@/lib/work/types";
 
 export const dynamic = "force-dynamic";
@@ -34,6 +35,10 @@ function parseFilters(params: Record<string, string | undefined>): WorkViewFilte
       assignedRaw && /^\d+$/.test(assignedRaw) ? Number(assignedRaw) : null,
     dueRange: (params.due as WorkDueRange | undefined) ?? "any",
     tag: params.tag?.trim() || null,
+    assigneeScope:
+      params.assignee === "staff" || params.assignee === "unassigned"
+        ? (params.assignee as WorkAssigneeScope)
+        : null,
   };
 }
 

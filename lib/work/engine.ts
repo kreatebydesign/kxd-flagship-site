@@ -9,6 +9,8 @@ import type { ClientWorkData, WorkListItem, WorkWorkspaceData } from "./types";
 import { resolveAssigneeLabel } from "./display";
 import { emptyClientWork, groupClientWork } from "./client-work";
 import { readActivityHistory } from "./activity";
+import { restrictedStaffUserIdSet } from "@/lib/staff/restricted-staff-users";
+import { enrichWorkListItemFromDoc } from "./list-enrichment";
 import {
   filterCompletedToday,
   filterOpenWork,
@@ -134,8 +136,16 @@ async function loadWorkDocs(limit = 500): Promise<AnyDoc[]> {
 }
 
 async function loadWorkPoolUncached(): Promise<WorkListItem[]> {
-  const [ctx, docs] = await Promise.all([loadIntelligenceContext(), loadWorkDocs()]);
-  return docs.map((doc) => toWorkListItem(doc, ctx));
+  const [ctx, docs, staffIds] = await Promise.all([
+    loadIntelligenceContext(),
+    loadWorkDocs(),
+    restrictedStaffUserIdSet(),
+  ]);
+  return docs.map((doc) =>
+    enrichWorkListItemFromDoc(toWorkListItem(doc, ctx), doc, {
+      restrictedStaffUserIds: staffIds,
+    }),
+  );
 }
 
 /**

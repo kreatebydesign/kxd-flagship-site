@@ -5,6 +5,7 @@ import config from "@payload-config";
 import { WORK_COLLECTION } from "@/lib/work/constants";
 import { appendWorkActivityEntry } from "@/lib/work/activity";
 import { getWorkItem } from "@/lib/work/services";
+import { deliverableSummaryFromWorkDoc } from "@/lib/work/list-enrichment";
 import { readRawWorkMetadata } from "./work-guided-metadata";
 import {
   applyDeliverableToggles,
@@ -199,11 +200,5 @@ export function deliverableSummaryFromDoc(
   doc: AnyDoc,
   assigneeUserId: number | null,
 ): ReturnType<typeof summarizeDeliverableProgress> | null {
-  const metadata = readRawWorkMetadata(doc);
-  const definition = parseDeliverablesDefinition(metadata);
-  if (!definition?.items.length) return null;
-  const progress =
-    assigneeUserId != null ? parseDeliverableProgress(metadata, assigneeUserId) : null;
-  const views = mergeDeliverableViews(definition, progress);
-  return summarizeDeliverableProgress(views);
+  return deliverableSummaryFromWorkDoc(doc, assigneeUserId);
 }

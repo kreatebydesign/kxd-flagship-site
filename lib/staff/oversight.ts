@@ -14,6 +14,8 @@ import {
   listOpenHelpRequestsForOversight,
 } from "./help-requests";
 import { isWaitingOnMatt } from "./prioritize";
+import { isWorkSubmittedForReview } from "@/lib/work/list-enrichment";
+import { isWorkOverdue } from "@/lib/work/views";
 import type { StaffOversightData } from "./types";
 
 /**
@@ -31,6 +33,7 @@ export async function loadStaffOversight(): Promise<StaffOversightData> {
 
   const members: StaffOversightData["members"] = [];
   const draftsAwaitingApproval: StaffOversightData["draftsAwaitingApproval"] = [];
+  const draftsSeen = new Set<number>();
 
   for (const doc of result.docs) {
     const memberActor = staffActorFromUser(doc);
@@ -48,15 +51,22 @@ export async function loadStaffOversight(): Promise<StaffOversightData> {
       (w) => w.status !== "completed" && w.status !== "archived",
     );
     const waitingOnMatt = open.filter((w) => isWaitingOnMatt(w));
+    const submittedForReview = open.filter((w) => isWorkSubmittedForReview(w));
     const blocked = open.filter((w) => w.status === "blocked");
+    const overdue = open.filter((w) => isWorkOverdue(w));
     const recentCompleted = assigned.filter((w) => w.status === "completed");
 
-    for (const draft of waitingOnMatt) {
+    for (const draft of submittedForReview) {
+      if (draftsSeen.has(draft.id)) continue;
+      draftsSeen.add(draft.id);
       draftsAwaitingApproval.push({
         workId: draft.id,
         title: draft.title,
         assigneeLabel: displayName,
         href: `/admin/work/${draft.id}`,
+        priority: draft.priority,
+        dueDate: draft.dueDate,
+        deliverableProgress: draft.deliverableProgress ?? null,
       });
     }
 
@@ -96,9 +106,11 @@ export async function loadStaffOversight(): Promise<StaffOversightData> {
       onboardingCompleted,
       assignedOpenCount: open.length,
       waitingOnMattCount: waitingOnMatt.length,
+      submittedForReviewCount: submittedForReview.length,
       helpRequestedCount,
       recentCompletedCount: recentCompleted.length,
       blockedCount: blocked.length,
+      overdueCount: overdue.length,
       startHereLabel,
       planActionableCount,
     });

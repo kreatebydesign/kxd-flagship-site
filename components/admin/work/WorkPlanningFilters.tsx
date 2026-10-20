@@ -132,7 +132,29 @@ export function WorkPlanningFilters({
           </label>
 
           <label className="kxd-os-work-engine__filter-field">
-            <span className="kxd-os-work-engine__filter-label">Assigned</span>
+            <span className="kxd-os-work-engine__filter-label">Assignee scope</span>
+            <select
+              value={filters.assigneeScope ?? "any"}
+              onChange={(e) =>
+                patchFilters({
+                  assigneeScope:
+                    e.target.value === "any"
+                      ? null
+                      : (e.target.value as WorkViewFilters["assigneeScope"]),
+                })
+              }
+              className="kxd-os-work-engine__select"
+            >
+              {options.assigneeScopes.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="kxd-os-work-engine__filter-field">
+            <span className="kxd-os-work-engine__filter-label">Assigned to</span>
             <select
               value={
                 filters.assignedToId != null ? String(filters.assignedToId) : ""

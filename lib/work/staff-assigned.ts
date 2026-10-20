@@ -9,7 +9,8 @@ import {
 import type { StaffActor } from "@/lib/staff/types";
 import { isRestrictedStaff } from "@/lib/staff/permissions";
 import { WORK_COLLECTION } from "./constants";
-import { deliverableSummaryFromDoc } from "@/lib/staff/work-deliverables-service";
+import { restrictedStaffUserIdSet } from "@/lib/staff/restricted-staff-users";
+import { enrichWorkListItemFromDoc } from "./list-enrichment";
 import { toWorkListItem } from "./runner";
 import type { WorkListItem, WorkStatus } from "./types";
 
@@ -78,6 +79,7 @@ export async function listWorkAssignedToStaffActor(
   }
 
   const payload = await getPayload({ config });
+  const staffIds = await restrictedStaffUserIdSet();
   const result = await payload.find({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     collection: WORK_COLLECTION as any,
@@ -92,14 +94,13 @@ export async function listWorkAssignedToStaffActor(
   });
 
   return result.docs
-    .map((doc) => {
-      const work = toWorkListItem(doc as Record<string, unknown>);
-      const summary = deliverableSummaryFromDoc(
+    .map((doc) =>
+      enrichWorkListItemFromDoc(
+        toWorkListItem(doc as Record<string, unknown>),
         doc as Record<string, unknown>,
-        work.assignedToId,
-      );
-      return summary ? { ...work, deliverableProgress: summary } : work;
-    })
+        { restrictedStaffUserIds: staffIds },
+      ),
+    )
     .filter((work) => work.assignedToId === actor.userId)
     .map(withStaffHref);
 }

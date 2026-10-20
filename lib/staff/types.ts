@@ -297,9 +297,12 @@ export interface StaffOversightMember {
   onboardingCompleted: boolean;
   assignedOpenCount: number;
   waitingOnMattCount: number;
+  /** Work in `review` status — submitted for founder approval. */
+  submittedForReviewCount: number;
   helpRequestedCount: number;
   recentCompletedCount: number;
   blockedCount: number;
+  overdueCount: number;
   startHereLabel: string | null;
   planActionableCount: number;
 }
@@ -311,6 +314,15 @@ export interface StaffOversightData {
     title: string;
     assigneeLabel: string;
     href: string;
+    priority: import("@/lib/work/types").WorkPriority;
+    dueDate: string | null;
+    deliverableProgress: {
+      total: number;
+      completed: number;
+      requiredTotal: number;
+      requiredCompleted: number;
+      allRequiredComplete: boolean;
+    } | null;
   }>;
   helpRequests: Array<{
     id: string;

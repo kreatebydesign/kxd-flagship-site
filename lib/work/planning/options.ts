@@ -10,6 +10,7 @@ import {
   WORK_STATUSES,
   WORK_STATUS_LABELS,
 } from "../constants";
+import { listRestrictedStaffUserIds } from "@/lib/staff/restricted-staff-users";
 import { getWorkPool } from "../engine";
 import type { WorkFilterOptions } from "./types";
 import {
@@ -20,7 +21,10 @@ import {
 } from "./types";
 
 export async function getWorkFilterOptions(): Promise<WorkFilterOptions> {
-  const pool = await getWorkPool();
+  const [pool, restrictedStaffUserIds] = await Promise.all([
+    getWorkPool(),
+    listRestrictedStaffUserIds(),
+  ]);
 
   const clients = new Map<string, string>();
   const assignees = new Map<string, string>();
@@ -56,6 +60,12 @@ export async function getWorkFilterOptions(): Promise<WorkFilterOptions> {
     assignees: [...assignees.entries()]
       .map(([value, label]) => ({ value, label }))
       .sort((a, b) => a.label.localeCompare(b.label)),
+    assigneeScopes: [
+      { value: "any", label: "Any assignee" },
+      { value: "staff", label: "Assigned to staff" },
+      { value: "unassigned", label: "Unassigned" },
+    ],
+    restrictedStaffUserIds,
     tags: [...tags.entries()]
       .map(([value, label]) => ({ value, label }))
       .sort((a, b) => a.label.localeCompare(b.label)),
