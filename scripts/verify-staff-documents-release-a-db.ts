@@ -48,7 +48,7 @@ function staffActor(user: {
     email: user.email,
     displayName: user.displayName ?? user.email,
     role: user.role,
-    staffRole: user.staffRole as import("@/lib/staff/types").StaffRole,
+    staffRole: user.staffRole as import("@/lib/staff/types").StaffRoleId,
     onboardingCompletedAt: "2026-01-01T00:00:00.000Z",
   };
 }
@@ -57,34 +57,28 @@ const RELEASE_A_MIGRATION_NAME = "20261020_staff_documents_release_a";
 
 async function ensureReleaseAMigration(
   db: NonNullable<ReturnType<typeof import("../lib/connect/db.ts").getConnectPostgresExecutor>>,
-  payloadDb: { execute: (q: unknown) => Promise<unknown> },
 ): Promise<void> {
   const { sql } = await import("@payloadcms/db-postgres");
   const { asRowList } = await import("../lib/connect/db.ts");
 
+  for (const table of [
+    "staff_document_templates",
+    "staff_documents",
+    "staff_document_files",
+  ]) {
+    assert.equal(
+      await tableExists(db, sql, table),
+      true,
+      `missing table ${table} — apply migration ${RELEASE_A_MIGRATION_NAME} first`,
+    );
+  }
+
   const existing = await db.execute(sql`
     SELECT name FROM payload_migrations WHERE name = ${RELEASE_A_MIGRATION_NAME} LIMIT 1
   `);
-  const registered =
-    asRowList<{ name: string }>(existing as { rows?: { name: string }[] }).length > 0;
-
-  if (await tableExists(db, sql, "staff_document_templates")) {
-    if (registered) return;
-    const batchResult = await db.execute(sql`
-      SELECT COALESCE(MAX(batch), 0) + 1 AS next FROM payload_migrations
-    `);
-    const batch = Number(
-      asRowList<{ next: number }>(batchResult as { rows?: { next: number }[] })[0]?.next ?? 1,
-    );
-    await db.execute(sql`
-      INSERT INTO payload_migrations (name, batch, updated_at, created_at)
-      VALUES (${RELEASE_A_MIGRATION_NAME}, ${batch}, now(), now())
-    `);
+  if (asRowList<{ name: string }>(existing as { rows?: { name: string }[] }).length > 0) {
     return;
   }
-
-  const { up } = await import("../migrations/20261020_staff_documents_release_a.ts");
-  await up({ db: payloadDb as never });
 
   const batchResult = await db.execute(sql`
     SELECT COALESCE(MAX(batch), 0) + 1 AS next FROM payload_migrations
@@ -178,15 +172,7 @@ async function main(): Promise<void> {
   const db = getConnectPostgresExecutor(payload);
   assert.ok(db, "Postgres executor required");
 
-  await ensureReleaseAMigration(db, payload.db as never);
-
-  for (const table of [
-    "staff_document_templates",
-    "staff_documents",
-    "staff_document_files",
-  ]) {
-    assert.equal(await tableExists(db, sql, table), true, `missing table ${table}`);
-  }
+  await ensureReleaseAMigration(db);
 
   const contractsBeforeN = await countContracts(db);
   const commercialBeforeN = await countCommercialDocuments(db);

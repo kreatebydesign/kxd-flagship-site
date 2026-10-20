@@ -45,7 +45,7 @@ async function main() {
   const body = "[CONCURRENCY TEST] Nonbinding sample policy body.";
   const contentHash = hashStaffDocumentBody(body);
 
-  const template = await payload.create({
+  const template = (await payload.create({
     collection: "staff-document-templates" as never,
     data: {
       title: "[TEST] Concurrency policy",
@@ -58,7 +58,7 @@ async function main() {
       legalEntityName: "Kreate by Design LLC",
     } as never,
     overrideAccess: true,
-  });
+  })) as { id: number };
 
   const doc = await payload.create({
     collection: "staff-documents" as never,
