@@ -37,6 +37,11 @@ function buildStaffNavGroups(showSalesDevelopmentNav: boolean): OperationsNavGro
   }
   items.push(
     {
+      id: "staff-time",
+      label: "Time clock",
+      href: "/admin/operations/staff/time",
+    },
+    {
       id: "staff-documents",
       label: "My documents",
       href: "/admin/operations/staff/documents",

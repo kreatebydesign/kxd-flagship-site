@@ -80,6 +80,8 @@ import { CreativeCampaigns } from "./payload/collections/CreativeCampaigns.ts";
 import { FlyerRequests } from "./payload/collections/FlyerRequests.ts";
 import { JuniorCreatorUsers } from "./payload/collections/JuniorCreatorUsers.ts";
 import { JuniorCreatorShifts } from "./payload/collections/JuniorCreatorShifts.ts";
+import { StaffTimeShifts } from "./payload/collections/StaffTimeShifts.ts";
+import { StaffTimePunchEvents } from "./payload/collections/StaffTimePunchEvents.ts";
 import { JuniorCreatorTasks } from "./payload/collections/JuniorCreatorTasks.ts";
 import { Inquiries } from "./payload/collections/Inquiries.ts";
 import { Insights } from "./payload/collections/Insights.ts";
@@ -377,6 +379,8 @@ export default buildConfig({
     JuniorCreatorUsers,
     JuniorCreatorShifts,
     JuniorCreatorTasks,
+    StaffTimeShifts,
+    StaffTimePunchEvents,
   ],
   editor: lexicalEditor(),
   i18n: {

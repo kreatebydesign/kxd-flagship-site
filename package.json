@@ -148,6 +148,8 @@
     "verify:staff-my-work": "tsx scripts/verify-staff-my-work.ts",
     "verify:staff-my-clients": "tsx scripts/verify-staff-my-clients.ts",
     "verify:staff-sales-phase1": "tsx scripts/verify-staff-sales-phase1.ts",
+    "verify:staff-time-foundation": "tsx scripts/verify-staff-time-foundation.ts",
+    "verify:staff-time-concurrency": "KXD_SERVER_ONLY_SHIM=1 node --import ./scripts/shims/register-server-only.mjs --import tsx --env-file=.env.local scripts/verify-staff-time-concurrency.ts",
     "verify:staff-client-command-notes": "tsx scripts/verify-staff-client-command-notes.ts",
     "verify:work-management-r1": "tsx scripts/verify-work-management-r1.ts",
     "verify:staff-work-operator-visibility-v1.3": "tsx scripts/verify-staff-work-operator-visibility-v1_3.ts",

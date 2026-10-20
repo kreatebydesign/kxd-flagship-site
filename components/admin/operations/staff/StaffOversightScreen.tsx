@@ -747,6 +747,33 @@ export function StaffOversightScreen({ data }: StaffOversightScreenProps) {
           </OpsCard>
         </section>
 
+        <section style={{ marginTop: "1.5rem" }} aria-label="Active time clock">
+          <OpsSectionHead
+            label="On the clock"
+            count={data.activeTimeShifts.length}
+          />
+          <OpsCard>
+            {data.activeTimeShifts.length === 0 ? (
+              <p className="kxd-os-meta">No staff are on the clock right now.</p>
+            ) : (
+              data.activeTimeShifts.map((row) => (
+                <div key={row.shiftId} className="kxd-os-ops-list-row">
+                  <div className="kxd-os-ops-list-row__main">
+                    <p className="kxd-os-ops-list-row__title">{row.staffLabel}</p>
+                    <p className="kxd-os-meta">
+                      {row.workIntentCategory} · {Math.floor(row.elapsedMinutes / 60)}h{" "}
+                      {row.elapsedMinutes % 60}m elapsed
+                    </p>
+                    <p className="kxd-os-meta">
+                      Started {new Date(row.startedAt).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+              ))
+            )}
+          </OpsCard>
+        </section>
+
         <section style={{ marginTop: "1.5rem" }} aria-label="End-of-day notes">
           <OpsSectionHead label="End-of-day notes" count={data.wrapUps.length} />
           <OpsCard>

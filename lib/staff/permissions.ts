@@ -33,6 +33,9 @@ const FULL_ADMIN_CAPABILITIES: readonly StaffCapability[] = [
   "admin.oversight",
   "admin.preview-staff",
   "admin.full-operations",
+  "staff.time.clock",
+  "staff.time.read.self",
+  "admin.time.oversight.read",
 ] as const;
 
 /** Business Development & Digital — client-scoped; no billing or company financials. */
@@ -53,6 +56,8 @@ const BUSINESS_DEVELOPMENT_SPECIALIST_CAPABILITIES: readonly StaffCapability[] =
   "staff.documents.sign",
   "staff.sales.read",
   "staff.sales.manage",
+  "staff.time.clock",
+  "staff.time.read.self",
 ] as const;
 
 /** Initial authority for operations_coordinator (Heather path). */
@@ -74,6 +79,8 @@ const OPERATIONS_COORDINATOR_CAPABILITIES: readonly StaffCapability[] = [
   "staff.documents.read",
   "staff.documents.acknowledge",
   "staff.documents.sign",
+  "staff.time.clock",
+  "staff.time.read.self",
 ] as const;
 
 /**
