@@ -34,6 +34,7 @@
     "verify:network-command-phase2": "node --import tsx scripts/verify-network-command-phase2.ts",
     "verify:network-command-roster-active": "node --import tsx scripts/verify-network-command-roster-active.ts",
     "verify:network-root-redirect": "node --import tsx scripts/verify-network-root-redirect.ts",
+    "verify:kxd-os-admin-share": "node --import tsx scripts/verify-kxd-os-admin-share.ts",
     "verify:partner-portal-production-migrate": "node --import tsx scripts/verify-partner-portal-production-migrate.ts",
     "verify:partner-phase4-production-migrate": "node --import tsx scripts/verify-partner-phase4-production-migrate.ts",
     "verify:inventory-media-production-migrate": "node --import tsx scripts/verify-inventory-media-production-migrate.ts",

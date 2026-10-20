@@ -140,6 +140,12 @@ import { Testimonials } from "./payload/collections/Testimonials.ts";
 import { Users } from "./payload/collections/Users.ts";
 import { WebsiteAudits } from "./payload/collections/WebsiteAudits.ts";
 import { WebsiteAuditAttempts } from "./payload/collections/WebsiteAuditAttempts.ts";
+import {
+  KXD_OS_FAVICON_ICONS,
+  KXD_OS_SHARE,
+  kxdOsShareImageAbsoluteUrl,
+} from "./lib/admin/kxd-os-share.ts";
+import { SITE } from "./lib/site.ts";
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -189,14 +195,39 @@ if (
   );
 }
 
+const kxdOsShareImage = kxdOsShareImageAbsoluteUrl();
+
 export default buildConfig({
+  serverURL: SITE.url,
   admin: {
     user: Users.slug,
     theme: "dark",
     meta: {
-      title: "KXD",
-      titleSuffix: " · Kreate by Design",
-      description: "Content management for Kreate by Design.",
+      title: "KXD OS",
+      titleSuffix: " | Kreate by Design",
+      description: KXD_OS_SHARE.description,
+      defaultOGImageType: "off",
+      icons: KXD_OS_FAVICON_ICONS,
+      openGraph: {
+        type: "website",
+        siteName: KXD_OS_SHARE.siteName,
+        title: KXD_OS_SHARE.title,
+        description: KXD_OS_SHARE.description,
+        images: [
+          {
+            url: kxdOsShareImage,
+            width: 1200,
+            height: 630,
+            alt: KXD_OS_SHARE.title,
+          },
+        ],
+      },
+      twitter: {
+        card: KXD_OS_SHARE.twitterCard,
+        title: KXD_OS_SHARE.title,
+        description: KXD_OS_SHARE.description,
+        images: [kxdOsShareImage],
+      },
     },
     importMap: {
       baseDir: path.resolve(dirname),
