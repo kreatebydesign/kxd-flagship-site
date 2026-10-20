@@ -20,6 +20,7 @@ import {
   WorkspaceStatRow,
 } from "./WorkspacePrimitives";
 import { RelationshipIntelligencePanel } from "./RelationshipIntelligencePanel";
+import { StaffClientNotesSection } from "@/components/admin/operations/client-command/StaffClientNotesSection";
 
 function statusLabelFromClient(client: ClientWorkspaceData["client"]): string {
   const s = client.relationshipStatus as string;
@@ -501,13 +502,27 @@ export function RoadmapTab({ data }: { data: ClientWorkspaceData }) {
 }
 
 export function NotesTab({ data }: { data: ClientWorkspaceData }) {
-  const { profile, client } = data;
+  const { profile, client, row } = data;
   const strategic = (profile?.strategicNotes as string) || (client.notes as string);
   const summary = profile?.executiveSummary as string;
+  const clientLabel = String(row.name ?? client.name ?? "Client");
+  const clientId = Number(client.id);
 
   return (
     <div className="kxd-os-workspace-dossier">
-      <WorkspaceChapter title="Strategic notes">
+      <StaffClientNotesSection notes={data.staffClientNotes} clientLabel={clientLabel} />
+
+      <WorkspaceChapter title="Profile strategic notes">
+        <p className="kxd-os-meta" style={{ marginBottom: "0.75rem" }}>
+          Strategy Vault collection notes live in{" "}
+          <Link
+            href={`/admin/operations/client-command/${clientId}?tab=notes`}
+            className="kxd-os-link-quiet"
+          >
+            Client Command → Notes
+          </Link>
+          .
+        </p>
         <WorkspaceProse>
           {strategic ||
             "Long-form strategic notes live in the executive profile. This is the executive memory layer."}
