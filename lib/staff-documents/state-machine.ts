@@ -92,6 +92,12 @@ export function statusAllowedForSigningMode(
   );
 }
 
+const IMMUTABLE_EVIDENCE_FIELDS = [
+  "acknowledgment",
+  "employeeSignature",
+  "operatorSignature",
+] as const;
+
 export function assertImmutableStaffDocumentPatch(
   existing: Record<string, unknown>,
   patch: Record<string, unknown>,
@@ -103,6 +109,16 @@ export function assertImmutableStaffDocumentPatch(
     if (prior !== undefined && next !== undefined && prior !== next) {
       throw new Error(
         `Staff document field "${field}" is immutable after assignment.`,
+      );
+    }
+  }
+
+  for (const field of IMMUTABLE_EVIDENCE_FIELDS) {
+    if (!(field in patch)) continue;
+    const prior = existing[field];
+    if (prior !== undefined && prior !== null) {
+      throw new Error(
+        `Staff document field "${field}" is immutable after it is recorded.`,
       );
     }
   }

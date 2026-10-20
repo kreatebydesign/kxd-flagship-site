@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { assertImmutableStaffDocumentPatch } from "../../lib/staff-documents/state-machine.ts";
 import {
   staffHrDocumentDenyMutation,
   staffHrDocumentReadAccess,
@@ -22,6 +23,18 @@ export const StaffDocuments: CollectionConfig = {
     create: staffHrDocumentDenyMutation,
     update: staffHrDocumentDenyMutation,
     delete: staffHrDocumentDenyMutation,
+  },
+  hooks: {
+    beforeChange: [
+      ({ data, originalDoc, operation }) => {
+        if (operation === "update" && originalDoc) {
+          assertImmutableStaffDocumentPatch(
+            originalDoc as Record<string, unknown>,
+            data as Record<string, unknown>,
+          );
+        }
+      },
+    ],
   },
   fields: [
     {

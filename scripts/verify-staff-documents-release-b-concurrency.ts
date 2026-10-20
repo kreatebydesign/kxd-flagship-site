@@ -15,6 +15,15 @@ if (!enabled) {
 }
 
 async function main() {
+  const dbUrl =
+    process.env.STAFF_DOC_DISPOSABLE_DATABASE_URL?.trim() ||
+    process.env.DATABASE_URL?.trim() ||
+    process.env.DATABASE_URI?.trim();
+  if (dbUrl) {
+    process.env.DATABASE_URL = dbUrl;
+    process.env.DATABASE_URI = dbUrl;
+  }
+
   const { getPayload } = await import("payload");
   const config = (await import("@payload-config")).default;
   const { claimStaffDocumentEmployeeSignature } = await import(
@@ -38,6 +47,7 @@ async function main() {
     process.exit(1);
   }
 
+  let staffUserId = 0;
   const users = await payload.find({
     collection: "users",
     where: { staffRole: { not_equals: "none" } },
@@ -45,9 +55,22 @@ async function main() {
     overrideAccess: true,
   });
   const staffUser = users.docs[0] as { id: number } | undefined;
-  if (!staffUser?.id) {
-    console.error("No staff user found for concurrency test.");
-    process.exit(1);
+  if (staffUser?.id) {
+    staffUserId = Number(staffUser.id);
+  } else {
+    const created = (await payload.create({
+      collection: "users",
+      data: {
+        email: `concurrency-b-${Date.now()}@kxd-validation.invalid`,
+        password: "ValidationPass123!",
+        displayName: "Concurrency B Staff",
+        role: "editor",
+        staffRole: "operations_coordinator",
+        staffOnboardingCompletedAt: new Date().toISOString(),
+      } as never,
+      overrideAccess: true,
+    })) as { id: number };
+    staffUserId = Number(created.id);
   }
 
   const body = "[CONCURRENCY TEST B] Nonbinding agreement body.";
@@ -56,7 +79,7 @@ async function main() {
   const doc = await payload.create({
     collection: "staff-documents" as never,
     data: {
-      staffUser: staffUser.id,
+      staffUser: staffUserId,
       templateVersion: 1,
       templateContentHash: contentHash,
       title: "[TEST] Concurrency agreement",
@@ -70,7 +93,6 @@ async function main() {
   });
 
   const documentId = Number((doc as { id: number }).id);
-  const staffUserId = Number(staffUser.id);
 
   const employeeSig = buildStaffSignatureEvidence({
     legalName: "Concurrency Tester",
@@ -143,6 +165,9 @@ async function main() {
   assert.equal(finResults.filter((r) => r.kind === "already_executed").length, 3);
 
   await db.execute(sql`DELETE FROM staff_documents WHERE id = ${documentId}`);
+  if (!staffUser?.id) {
+    await db.execute(sql`DELETE FROM users WHERE id = ${staffUserId}`);
+  }
 
   console.log("  ✓ staff documents release B concurrency checks passed\n");
 }

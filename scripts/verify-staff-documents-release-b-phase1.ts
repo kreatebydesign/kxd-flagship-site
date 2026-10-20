@@ -75,6 +75,12 @@ assert.throws(() =>
     { bodySnapshot: "b" },
   ),
 );
+assert.throws(() =>
+  assertImmutableStaffDocumentPatch(
+    { acknowledgment: { hash: "a" } },
+    { acknowledgment: { hash: "b" } },
+  ),
+);
 
 const body = "Agreement body v1";
 const docHash = hashStaffDocumentBody(body);
