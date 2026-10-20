@@ -238,6 +238,13 @@
     "verify:proposal-builder": "tsx scripts/verify-proposal-builder.ts",
     "verify:proposal-share-workflow": "tsx scripts/verify-proposal-share-workflow.ts",
     "verify:lifecycle-stripe-test": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/verify-lifecycle-stripe-test.ts",
+    "verify:staff-documents": "tsx scripts/verify-staff-documents.ts",
+    "verify:staff-documents-page-access": "tsx scripts/verify-staff-documents-page-access.ts",
+    "verify:staff-documents-release-b-phase1": "tsx scripts/verify-staff-documents-release-b-phase1.ts",
+    "verify:staff-documents-payload-access": "tsx scripts/verify-staff-documents-payload-access.ts",
+    "verify:staff-documents-release-b-migration": "tsx scripts/verify-staff-documents-release-b-migration.ts",
+    "verify:staff-documents-release-b-concurrency": "KXD_SERVER_ONLY_SHIM=1 node --import ./scripts/shims/register-server-only.mjs --import tsx scripts/verify-staff-documents-release-b-concurrency.ts",
+    "verify:staff-documents-release-b-gate": "KXD_SERVER_ONLY_SHIM=1 node --import ./scripts/shims/register-server-only.mjs --import tsx scripts/verify-staff-documents-release-b-gate.ts",
     "repair:junior-shift-credit": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/reset-junior-shift-credit.ts",
     "repair:junior-shift-credit:apply": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/reset-junior-shift-credit.ts --apply"
   },

@@ -31,7 +31,9 @@ export type StaffCapability =
   | "staff.billing.verify"
   | "staff.documents.read"
   | "staff.documents.acknowledge"
+  | "staff.documents.sign"
   | "admin.staff-documents.manage"
+  | "admin.staff-documents.countersign"
   | "admin.oversight"
   | "admin.preview-staff"
   | "admin.full-operations";

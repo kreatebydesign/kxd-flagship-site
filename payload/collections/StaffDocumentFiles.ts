@@ -1,5 +1,8 @@
 import type { CollectionConfig } from "payload";
-import { isAuthenticated } from "../access/index.ts";
+import {
+  staffHrDocumentDenyMutation,
+  staffHrDocumentReadAccess,
+} from "../access/staff-hr-documents.ts";
 import { PAYLOAD_GROUPS } from "../admin/groups.ts";
 
 export const StaffDocumentFiles: CollectionConfig = {
@@ -11,13 +14,14 @@ export const StaffDocumentFiles: CollectionConfig = {
     useAsTitle: "title",
     defaultColumns: ["title", "kind", "staffDocument", "staffUser", "createdAt"],
     group: PAYLOAD_GROUPS.kxdOs,
-    description: "Private staff document PDFs — download via authorized API routes only.",
+    description:
+      "Private staff document PDFs — download via authorized KXD OS API routes only (read-only in Admin).",
   },
   access: {
-    read: isAuthenticated,
-    create: isAuthenticated,
-    update: isAuthenticated,
-    delete: isAuthenticated,
+    read: staffHrDocumentReadAccess,
+    create: staffHrDocumentDenyMutation,
+    update: staffHrDocumentDenyMutation,
+    delete: staffHrDocumentDenyMutation,
   },
   fields: [
     { name: "title", type: "text", required: true },
@@ -28,6 +32,7 @@ export const StaffDocumentFiles: CollectionConfig = {
       options: [
         { label: "Policy PDF", value: "policy-pdf" },
         { label: "Acknowledgment record", value: "acknowledgment-record" },
+        { label: "Executed agreement", value: "executed-agreement" },
       ],
     },
     {
