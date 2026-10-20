@@ -163,6 +163,21 @@ async function main(): Promise<void> {
   assert.equal(ack.detail.status, "acknowledged");
   console.log("  ✓ Release A acknowledgment regression");
 
+  const { id: draftTpl } = await createStaffDocumentTemplate({
+    actor: adminActor,
+    title: `[TEST draft] ${runTag}`,
+    body: NONBINDING_BODY,
+    kind: "employment-agreement",
+  });
+  await assert.rejects(() =>
+    assignStaffDocumentFromTemplate({
+      actor: adminActor,
+      templateId: draftTpl,
+      staffUserId: Number(staffUser.id),
+    }),
+  );
+  console.log("  ✓ draft template cannot be assigned without approval");
+
   const { id: agrTpl } = await createStaffDocumentTemplate({
     actor: adminActor,
     title: `[TEST agreement] ${runTag}`,
@@ -207,14 +222,40 @@ async function main(): Promise<void> {
   assert.ok(countersigned.detail.executedAgreementFileId);
   console.log("  ✓ operator countersign → executed + PDF filed");
 
-  const file = await readStaffDocumentFileBytes({
+  const employeeFile = await readStaffDocumentFileBytes({
     actor: employeeActor,
     fileId: countersigned.detail.executedAgreementFileId!,
     staffDocumentId: agrDocId,
   });
-  assert.ok(file.buffer.byteLength > 500);
-  const storedHash = hashStaffDocumentPdfBytes(file.buffer);
+  assert.ok(employeeFile.buffer.byteLength > 500);
+  const storedHash = hashStaffDocumentPdfBytes(employeeFile.buffer);
   assert.ok(storedHash.length === 64);
+
+  const operatorFile = await readStaffDocumentFileBytes({
+    actor: adminActor,
+    fileId: countersigned.detail.executedAgreementFileId!,
+    staffDocumentId: agrDocId,
+  });
+  assert.equal(operatorFile.buffer.compare(employeeFile.buffer), 0);
+  console.log("  ✓ employee and operator retrieve identical executed PDF bytes");
+
+  let countersignDenied = false;
+  try {
+    await countersignStaffDocumentAsOperator({
+      actor: employeeActor,
+      documentId: agrDocId,
+      legalName: "Phase2 Staff",
+      title: "Staff",
+      entityName: "Phase2 Staff",
+      typedAcknowledgment: "Phase2 Staff",
+      authorityConfirmed: true,
+      electronicRecordsConsent: true,
+    });
+  } catch {
+    countersignDenied = true;
+  }
+  assert.equal(countersignDenied, true);
+  console.log("  ✓ unauthorized operator countersign denied");
 
   const row = await getStaffDocumentDetail({ actor: employeeActor, documentId: agrDocId });
   assert.ok(row?.employeeSignature);
@@ -254,7 +295,7 @@ async function main(): Promise<void> {
     await db.execute(sql`DELETE FROM staff_document_files WHERE staff_document_id = ${documentId}`);
     await db.execute(sql`DELETE FROM staff_documents WHERE id = ${documentId}`);
   }
-  for (const templateId of [policyTpl, agrTpl]) {
+  for (const templateId of [policyTpl, draftTpl, agrTpl]) {
     await db.execute(sql`DELETE FROM staff_document_templates WHERE id = ${templateId}`);
   }
   for (const userId of [staffUser.id, adminUser.id]) {

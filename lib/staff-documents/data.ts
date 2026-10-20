@@ -132,14 +132,6 @@ async function fileStaffDocumentPdf(input: {
   title: string;
   buffer: Buffer;
 }): Promise<number> {
-  if (input.kind === "acknowledgment-record" || input.kind === "executed-agreement") {
-    const existingByKind = await findFileByKind({
-      staffDocumentId: input.staffDocumentId,
-      kind: input.kind,
-    });
-    if (existingByKind) return existingByKind;
-  }
-
   const contentHash = hashStaffDocumentPdfBytes(input.buffer);
   const existing = await findFileByHash({
     staffDocumentId: input.staffDocumentId,
@@ -147,6 +139,54 @@ async function fileStaffDocumentPdf(input: {
     contentHash,
   });
   if (existing) return existing;
+
+  if (input.kind === "acknowledgment-record") {
+    const existingByKind = await findFileByKind({
+      staffDocumentId: input.staffDocumentId,
+      kind: input.kind,
+    });
+    if (existingByKind) return existingByKind;
+  }
+
+  if (input.kind === "executed-agreement") {
+    const existingByKind = await findFileByKind({
+      staffDocumentId: input.staffDocumentId,
+      kind: input.kind,
+    });
+    if (existingByKind) {
+      const payload = await getPayload({ config });
+      const fileRec = (await payload.findByID({
+        collection: FILES as never,
+        id: existingByKind,
+        depth: 0,
+        overrideAccess: true,
+      })) as AnyDoc;
+      if (String(fileRec.contentHash ?? "") === contentHash) {
+        return existingByKind;
+      }
+      const adapter = getDefaultStaffDocumentStorageAdapter();
+      const storageKey = `${input.staffDocumentId}/${input.kind}-${contentHash.slice(0, 16)}.pdf`;
+      const uploaded = await adapter.upload({
+        key: storageKey,
+        buffer: input.buffer,
+        mimeType: "application/pdf",
+      });
+      await payload.update({
+        collection: FILES as never,
+        id: existingByKind,
+        data: {
+          title: input.title,
+          contentHash,
+          storageKey: uploaded.key,
+          storageProvider: uploaded.provider,
+          mimeType: "application/pdf",
+          byteLength: input.buffer.byteLength,
+        } as never,
+        overrideAccess: true,
+      });
+      return existingByKind;
+    }
+  }
 
   const adapter = getDefaultStaffDocumentStorageAdapter();
   const storageKey = `${input.staffDocumentId}/${input.kind}-${contentHash.slice(0, 16)}.pdf`;
