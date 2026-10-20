@@ -122,6 +122,7 @@ import * as migration_20261016_staff_client_assignments from './20261016_staff_c
 import * as migration_20261018_work_acceptance_criteria from './20261018_work_acceptance_criteria';
 import * as migration_20261019_phase2a_staff_client_notes from './20261019_phase2a_staff_client_notes';
 import * as migration_20261020_staff_documents_release_a from './20261020_staff_documents_release_a';
+import * as migration_20261021_staff_documents_release_b_phase1 from './20261021_staff_documents_release_b_phase1';
 
 export const migrations = [
   {
@@ -798,5 +799,11 @@ export const migrations = [
     up: migration_20261020_staff_documents_release_a.up,
     down: migration_20261020_staff_documents_release_a.down,
     name: '20261020_staff_documents_release_a',
+  },
+  {
+    // Release B Phase 1 — signing modes, dual-signature evidence, execution states.
+    up: migration_20261021_staff_documents_release_b_phase1.up,
+    down: migration_20261021_staff_documents_release_b_phase1.down,
+    name: '20261021_staff_documents_release_b_phase1',
   },
 ];

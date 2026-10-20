@@ -1,8 +1,18 @@
 import type { StaffActor } from "@/lib/staff/types";
-import { isRestrictedStaff, isFounderOrAdmin } from "@/lib/staff/permissions";
+import {
+  actorHasStaffCapability,
+  isRestrictedStaff,
+  isFounderOrAdmin,
+} from "@/lib/staff/permissions";
 
 export function staffMayManageDocuments(actor: StaffActor): boolean {
   return isFounderOrAdmin(actor) || actor.role === "admin";
+}
+
+/** Founder/admin only — employer countersignature (Release B). */
+export function staffMayCountersignDocuments(actor: StaffActor): boolean {
+  if (!staffMayManageDocuments(actor)) return false;
+  return actorHasStaffCapability(actor, "admin.staff-documents.countersign");
 }
 
 export function staffDocumentStaffPath(documentId: number): string {

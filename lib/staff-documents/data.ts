@@ -18,10 +18,11 @@ import { verifyStaffDocumentIntegrity } from "./integrity.ts";
 import { claimStaffDocumentAcknowledgment } from "./acknowledge-claim.ts";
 import { getDefaultStaffDocumentStorageAdapter } from "./storage/resolve.ts";
 import {
-  assertReleaseAStaffDocumentKind,
   assertTemplateApprovedForAssignment,
   assertStaffDocumentAcknowledgeable,
+  parseStaffDocumentKind,
   parseTemplateStatus,
+  resolveSigningModeForTemplate,
 } from "./validate.ts";
 import {
   staffDocumentStaffPath,
@@ -37,8 +38,10 @@ import type {
   StaffDocumentFileKind,
   StaffDocumentListItem,
   StaffDocumentKind,
+  StaffDocumentSigningMode,
   StaffDocumentStatus,
   StaffDocumentTemplateStatus,
+  StaffSignatureEvidence,
 } from "./types.ts";
 import { STAFF_DOCUMENT_DEFAULT_LEGAL_ENTITY } from "./types.ts";
 
@@ -125,7 +128,7 @@ async function fileStaffDocumentPdf(input: {
   title: string;
   buffer: Buffer;
 }): Promise<number> {
-  if (input.kind === "acknowledgment-record") {
+  if (input.kind === "acknowledgment-record" || input.kind === "executed-agreement") {
     const existingByKind = await findFileByKind({
       staffDocumentId: input.staffDocumentId,
       kind: input.kind,
@@ -168,17 +171,24 @@ async function fileStaffDocumentPdf(input: {
   return Number(created.id);
 }
 
+function parseSigningMode(doc: AnyDoc): StaffDocumentSigningMode {
+  const raw = String(doc.signingMode ?? "acknowledgment");
+  return raw === "dual-signature" ? "dual-signature" : "acknowledgment";
+}
+
 function mapListItem(doc: AnyDoc): StaffDocumentListItem {
   const id = Number(doc.id);
   return {
     id,
     title: String(doc.title ?? "Policy"),
     kind: String(doc.kind) as StaffDocumentKind,
+    signingMode: parseSigningMode(doc),
     status: String(doc.status) as StaffDocumentStatus,
     templateVersion: Number(doc.templateVersion ?? 1),
     templateContentHash: String(doc.templateContentHash ?? ""),
     assignedAt: String(doc.createdAt ?? new Date().toISOString()),
     acknowledgedAt: doc.acknowledgedAt ? String(doc.acknowledgedAt) : null,
+    executedAt: doc.executedAt ? String(doc.executedAt) : null,
     href: staffDocumentStaffPath(id),
   };
 }
@@ -259,17 +269,21 @@ export async function getStaffDocumentDetail(input: {
 
   let policyFileId: number | null = null;
   let acknowledgmentFileId: number | null = null;
+  let executedAgreementFileId: number | null = null;
   for (const f of files.docs as AnyDoc[]) {
     if (f.kind === "policy-pdf") policyFileId = Number(f.id);
     if (f.kind === "acknowledgment-record") acknowledgmentFileId = Number(f.id);
+    if (f.kind === "executed-agreement") executedAgreementFileId = Number(f.id);
   }
 
   const status = String(doc.status) as StaffDocumentStatus;
+  const signingMode = parseSigningMode(doc);
 
   return {
     id: Number(doc.id),
     title: String(doc.title ?? ""),
     kind: String(doc.kind) as StaffDocumentKind,
+    signingMode,
     status,
     bodySnapshot: String(doc.bodySnapshot ?? ""),
     templateVersion: Number(doc.templateVersion ?? 1),
@@ -277,10 +291,18 @@ export async function getStaffDocumentDetail(input: {
     legalEntityName: String(doc.legalEntityName ?? STAFF_DOCUMENT_DEFAULT_LEGAL_ENTITY),
     assignedAt: String(doc.createdAt ?? new Date().toISOString()),
     acknowledgedAt: doc.acknowledgedAt ? String(doc.acknowledgedAt) : null,
+    executedAt: doc.executedAt ? String(doc.executedAt) : null,
+    expiresAt: doc.expiresAt ? String(doc.expiresAt) : null,
     acknowledgment: (doc.acknowledgment as StaffAcknowledgmentEvidence | null) ?? null,
+    employeeSignature: (doc.employeeSignature as StaffSignatureEvidence | null) ?? null,
+    operatorSignature: (doc.operatorSignature as StaffSignatureEvidence | null) ?? null,
     policyFileId,
     acknowledgmentFileId,
-    canAcknowledge: status === "assigned" && staffUserId === input.actor.userId,
+    executedAgreementFileId,
+    canAcknowledge:
+      signingMode === "acknowledgment" &&
+      status === "assigned" &&
+      staffUserId === input.actor.userId,
   };
 }
 
@@ -434,13 +456,18 @@ export async function createStaffDocumentTemplate(input: {
   title: string;
   body: string;
   kind?: string;
+  signingMode?: string;
   legalEntityName?: string;
   useSample?: boolean;
 }): Promise<{ id: number }> {
   if (!staffMayManageDocuments(input.actor)) {
     throw new Error("Operator permission required to manage staff document templates.");
   }
-  const kind = assertReleaseAStaffDocumentKind(input.kind ?? "policy-acknowledgment");
+  const kind = parseStaffDocumentKind(input.kind ?? "policy-acknowledgment");
+  const signingMode = resolveSigningModeForTemplate({
+    kind,
+    signingMode: input.signingMode ?? null,
+  });
   const title = input.useSample
     ? SAMPLE_NONBINDING_POLICY_TITLE
     : String(input.title ?? "").trim();
@@ -457,6 +484,7 @@ export async function createStaffDocumentTemplate(input: {
       slug: `policy-${Date.now()}`,
       version: 1,
       kind,
+      signingMode,
       status: "draft",
       body,
       legalEntityName: input.legalEntityName?.trim() || STAFF_DOCUMENT_DEFAULT_LEGAL_ENTITY,
@@ -503,6 +531,7 @@ export async function assignStaffDocumentFromTemplate(input: {
   actor: StaffActor;
   templateId: number;
   staffUserId: number;
+  expiresAt?: string | null;
 }): Promise<{ documentId: number }> {
   if (!staffMayManageDocuments(input.actor)) {
     throw new Error("Operator permission required to assign staff documents.");
@@ -521,7 +550,11 @@ export async function assignStaffDocumentFromTemplate(input: {
 
   const status = parseTemplateStatus(template.status);
   assertTemplateApprovedForAssignment(status);
-  const kind = assertReleaseAStaffDocumentKind(String(template.kind ?? "policy-acknowledgment"));
+  const kind = parseStaffDocumentKind(String(template.kind ?? "policy-acknowledgment"));
+  const signingMode = resolveSigningModeForTemplate({
+    kind,
+    signingMode: template.signingMode ?? null,
+  });
   const body = String(template.body ?? "").trim();
   const contentHash = hashStaffDocumentBody(body);
   const legalEntityName = String(template.legalEntityName ?? STAFF_DOCUMENT_DEFAULT_LEGAL_ENTITY);
@@ -535,9 +568,11 @@ export async function assignStaffDocumentFromTemplate(input: {
       templateContentHash: contentHash,
       title: String(template.title ?? "Policy"),
       kind,
+      signingMode,
       status: "assigned",
       bodySnapshot: body,
       legalEntityName,
+      expiresAt: input.expiresAt ?? null,
       auditEvents: appendAudit(undefined, {
         actor: input.actor.email,
         action: "operator.assigned",
@@ -600,6 +635,7 @@ export async function listStaffDocumentTemplatesForOperator(): Promise<
     title: string;
     version: number;
     kind: StaffDocumentKind;
+    signingMode: StaffDocumentSigningMode;
     status: StaffDocumentTemplateStatus;
     contentHash: string;
   }>
@@ -617,9 +653,12 @@ export async function listStaffDocumentTemplatesForOperator(): Promise<
     title: String(doc.title ?? ""),
     version: Number(doc.version ?? 1),
     kind: String(doc.kind) as StaffDocumentKind,
+    signingMode: parseSigningMode(doc),
     status: parseTemplateStatus(doc.status),
     contentHash: String(doc.contentHash ?? ""),
   }));
 }
+
+export { fileStaffDocumentPdf };
 
 export { staffDocumentsListPath };

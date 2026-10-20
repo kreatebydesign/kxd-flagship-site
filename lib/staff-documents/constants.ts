@@ -27,3 +27,8 @@ export const STAFF_ACKNOWLEDGMENT_CONSENT_VERSION = "kxd-staff-ack-consent-2026-
 
 export const STAFF_ACKNOWLEDGMENT_CONSENT_TEXT =
   "I agree to use electronic records for this policy acknowledgment in KXD OS. I confirm I read the assigned policy version shown above. I understand this acknowledgment is recorded with a timestamp and document version hash for audit purposes.";
+
+export const STAFF_AGREEMENT_ESIGN_CONSENT_VERSION = "kxd-staff-agreement-esign-2026-10-21";
+
+export const STAFF_AGREEMENT_ESIGN_CONSENT_TEXT =
+  "I agree to use electronic records and electronic signatures for this staff agreement in KXD OS. I understand that typing my legal name is intended to serve as my electronic signature. I confirm I reviewed the document version identified by its content hash and that I am authorized to sign for the named party. This record supports internal audit and operations; it does not by itself establish legal compliance.";

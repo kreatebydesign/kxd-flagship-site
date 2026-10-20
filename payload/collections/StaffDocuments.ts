@@ -1,5 +1,8 @@
 import type { CollectionConfig } from "payload";
-import { isAuthenticated } from "../access/index.ts";
+import {
+  staffHrDocumentDenyMutation,
+  staffHrDocumentReadAccess,
+} from "../access/staff-hr-documents.ts";
 import { PAYLOAD_GROUPS } from "../admin/groups.ts";
 
 export const StaffDocuments: CollectionConfig = {
@@ -9,16 +12,16 @@ export const StaffDocuments: CollectionConfig = {
   lockDocuments: false,
   admin: {
     useAsTitle: "title",
-    defaultColumns: ["title", "staffUser", "status", "kind", "createdAt"],
+    defaultColumns: ["title", "staffUser", "status", "kind", "signingMode", "createdAt"],
     group: PAYLOAD_GROUPS.kxdOs,
     description:
-      "Assigned staff policy acknowledgments. Access via KXD OS staff surfaces only.",
+      "Assigned staff policies and agreements. Mutations via KXD OS staff surfaces only (read-only in Admin).",
   },
   access: {
-    read: isAuthenticated,
-    create: isAuthenticated,
-    update: isAuthenticated,
-    delete: isAuthenticated,
+    read: staffHrDocumentReadAccess,
+    create: staffHrDocumentDenyMutation,
+    update: staffHrDocumentDenyMutation,
+    delete: staffHrDocumentDenyMutation,
   },
   fields: [
     {
@@ -43,7 +46,24 @@ export const StaffDocuments: CollectionConfig = {
       type: "select",
       required: true,
       defaultValue: "policy-acknowledgment",
-      options: [{ label: "Policy acknowledgment", value: "policy-acknowledgment" }],
+      options: [
+        { label: "Policy acknowledgment", value: "policy-acknowledgment" },
+        { label: "Staff policy", value: "staff-policy" },
+        { label: "Employment agreement", value: "employment-agreement" },
+        { label: "Confidentiality / NDA", value: "confidentiality-nda" },
+        { label: "IP assignment", value: "ip-assignment" },
+      ],
+      admin: { position: "sidebar" },
+    },
+    {
+      name: "signingMode",
+      type: "select",
+      required: true,
+      defaultValue: "acknowledgment",
+      options: [
+        { label: "Acknowledgment", value: "acknowledgment" },
+        { label: "Dual signature", value: "dual-signature" },
+      ],
       admin: { position: "sidebar" },
     },
     {
@@ -54,7 +74,12 @@ export const StaffDocuments: CollectionConfig = {
       options: [
         { label: "Assigned", value: "assigned" },
         { label: "Acknowledged", value: "acknowledged" },
+        { label: "Awaiting operator signature", value: "awaiting-operator-signature" },
+        { label: "Executing (finalizing PDF)", value: "executing" },
+        { label: "Executed", value: "executed" },
+        { label: "Declined", value: "declined" },
         { label: "Revoked", value: "revoked" },
+        { label: "Expired", value: "expired" },
       ],
       admin: { position: "sidebar" },
     },
@@ -72,9 +97,26 @@ export const StaffDocuments: CollectionConfig = {
       admin: { description: "Immutable snapshot at assignment time." },
     },
     {
+      name: "expiresAt",
+      type: "date",
+      admin: { date: { pickerAppearance: "dayAndTime" }, position: "sidebar" },
+    },
+    {
       name: "acknowledgment",
       type: "json",
       label: "Acknowledgment evidence",
+      admin: { readOnly: true },
+    },
+    {
+      name: "employeeSignature",
+      type: "json",
+      label: "Employee signature evidence",
+      admin: { readOnly: true },
+    },
+    {
+      name: "operatorSignature",
+      type: "json",
+      label: "Operator signature evidence",
       admin: { readOnly: true },
     },
     {
@@ -82,6 +124,17 @@ export const StaffDocuments: CollectionConfig = {
       type: "date",
       admin: { date: { pickerAppearance: "dayAndTime" }, position: "sidebar" },
     },
+    {
+      name: "executedAt",
+      type: "date",
+      admin: { date: { pickerAppearance: "dayAndTime" }, position: "sidebar" },
+    },
+    {
+      name: "declinedAt",
+      type: "date",
+      admin: { date: { pickerAppearance: "dayAndTime" }, position: "sidebar" },
+    },
+    { name: "declineReason", type: "text", admin: { readOnly: true } },
     {
       name: "auditEvents",
       type: "json",

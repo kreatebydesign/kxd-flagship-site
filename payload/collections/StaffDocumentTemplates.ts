@@ -1,5 +1,8 @@
 import type { CollectionConfig } from "payload";
-import { isAuthenticated } from "../access/index.ts";
+import {
+  staffHrDocumentDenyMutation,
+  staffHrDocumentReadAccess,
+} from "../access/staff-hr-documents.ts";
 import { PAYLOAD_GROUPS } from "../admin/groups.ts";
 
 export const StaffDocumentTemplates: CollectionConfig = {
@@ -12,16 +15,16 @@ export const StaffDocumentTemplates: CollectionConfig = {
   lockDocuments: false,
   admin: {
     useAsTitle: "title",
-    defaultColumns: ["title", "kind", "status", "version", "updatedAt"],
+    defaultColumns: ["title", "kind", "signingMode", "status", "version", "updatedAt"],
     group: PAYLOAD_GROUPS.kxdOs,
     description:
-      "HR/staff policy templates — Release A: policy-acknowledgment only. KXD OS operator workspace.",
+      "HR/staff templates — KXD OS operator workspace (read-only in Admin; mutations via KXD OS).",
   },
   access: {
-    read: isAuthenticated,
-    create: isAuthenticated,
-    update: isAuthenticated,
-    delete: isAuthenticated,
+    read: staffHrDocumentReadAccess,
+    create: staffHrDocumentDenyMutation,
+    update: staffHrDocumentDenyMutation,
+    delete: staffHrDocumentDenyMutation,
   },
   fields: [
     { name: "title", type: "text", required: true },
@@ -32,7 +35,24 @@ export const StaffDocumentTemplates: CollectionConfig = {
       type: "select",
       required: true,
       defaultValue: "policy-acknowledgment",
-      options: [{ label: "Policy acknowledgment", value: "policy-acknowledgment" }],
+      options: [
+        { label: "Policy acknowledgment", value: "policy-acknowledgment" },
+        { label: "Staff policy", value: "staff-policy" },
+        { label: "Employment agreement", value: "employment-agreement" },
+        { label: "Confidentiality / NDA", value: "confidentiality-nda" },
+        { label: "IP assignment", value: "ip-assignment" },
+      ],
+      admin: { position: "sidebar" },
+    },
+    {
+      name: "signingMode",
+      type: "select",
+      required: true,
+      defaultValue: "acknowledgment",
+      options: [
+        { label: "Acknowledgment", value: "acknowledgment" },
+        { label: "Dual signature", value: "dual-signature" },
+      ],
       admin: { position: "sidebar" },
     },
     {

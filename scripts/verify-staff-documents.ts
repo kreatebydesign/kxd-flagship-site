@@ -7,7 +7,7 @@ import { buildStaffAcknowledgment } from "../lib/staff-documents/acknowledgment.
 import { hashStaffDocumentBody, hashStaffDocumentPdfBytes } from "../lib/staff-documents/hash.ts";
 import { verifyStaffDocumentIntegrity } from "../lib/staff-documents/integrity.ts";
 import {
-  assertReleaseAStaffDocumentKind,
+  parseStaffDocumentKind,
   assertStaffDocumentAcknowledgeable,
   assertTemplateApprovedForAssignment,
 } from "../lib/staff-documents/validate.ts";
@@ -21,9 +21,8 @@ import type { StaffActor } from "../lib/staff/types";
 
 console.log("\nverify:staff-documents\n");
 
-assert.throws(() => assertReleaseAStaffDocumentKind("employment-agreement"));
-assert.throws(() => assertReleaseAStaffDocumentKind("confidentiality-nda"));
-assert.equal(assertReleaseAStaffDocumentKind("policy-acknowledgment"), "policy-acknowledgment");
+assert.equal(parseStaffDocumentKind("policy-acknowledgment"), "policy-acknowledgment");
+assert.equal(parseStaffDocumentKind("employment-agreement"), "employment-agreement");
 
 assert.throws(() => assertTemplateApprovedForAssignment("draft"));
 
