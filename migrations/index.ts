@@ -123,6 +123,7 @@ import * as migration_20261018_work_acceptance_criteria from './20261018_work_ac
 import * as migration_20261019_phase2a_staff_client_notes from './20261019_phase2a_staff_client_notes';
 import * as migration_20261020_staff_documents_release_a from './20261020_staff_documents_release_a';
 import * as migration_20261021_staff_documents_release_b_phase1 from './20261021_staff_documents_release_b_phase1';
+import * as migration_20261022_staff_sales_development_phase1 from './20261022_staff_sales_development_phase1';
 
 export const migrations = [
   {
@@ -805,5 +806,11 @@ export const migrations = [
     up: migration_20261021_staff_documents_release_b_phase1.up,
     down: migration_20261021_staff_documents_release_b_phase1.down,
     name: '20261021_staff_documents_release_b_phase1',
+  },
+  {
+    // Staff Sales Development Phase 1 — staff attribution on sales-leads.
+    up: migration_20261022_staff_sales_development_phase1.up,
+    down: migration_20261022_staff_sales_development_phase1.down,
+    name: '20261022_staff_sales_development_phase1',
   },
 ];

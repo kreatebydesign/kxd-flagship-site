@@ -51,6 +51,8 @@ const BUSINESS_DEVELOPMENT_SPECIALIST_CAPABILITIES: readonly StaffCapability[] =
   "staff.documents.read",
   "staff.documents.acknowledge",
   "staff.documents.sign",
+  "staff.sales.read",
+  "staff.sales.manage",
 ] as const;
 
 /** Initial authority for operations_coordinator (Heather path). */
