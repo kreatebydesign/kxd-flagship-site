@@ -4,6 +4,8 @@ import { getWorkItem, completeWorkItem } from "@/lib/work/services";
 import { isRestrictedStaff } from "@/lib/staff/permissions";
 import { assigneeRoleRequiresOperatorCompletion } from "@/lib/staff/work-status-policy";
 import { publishActivity } from "@/lib/activity-engine/publish";
+import { workRequiresOperatorApproval } from "@/lib/staff/work-approval";
+import { assertStaffGuidedChecklistReadyForSubmit } from "@/lib/staff/work-execution-service";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -71,6 +73,19 @@ export async function POST(request: Request, context: RouteContext) {
           "This item requires approval. Use Prepare for Review instead of Complete.",
       },
       { status: 403 },
+    );
+  }
+
+  const requiresMattApproval = workRequiresOperatorApproval(work, gated.actor);
+  const checklistGate = await assertStaffGuidedChecklistReadyForSubmit(
+    workId,
+    gated.actor,
+    requiresMattApproval,
+  );
+  if (!checklistGate.ok) {
+    return NextResponse.json(
+      { success: false, error: checklistGate.error },
+      { status: 400 },
     );
   }
 

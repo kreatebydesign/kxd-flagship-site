@@ -23426,6 +23426,67 @@ select.kxd-os-commercial-control {
   margin: 0.85rem 0 0;
 }
 
+.kxd-os-staff-guided__studio-hint {
+  margin: 0.5rem 0 0;
+}
+
+.kxd-os-staff-guided__studio-notes {
+  margin: 0;
+}
+
+.kxd-os-staff-guided__progress-lead {
+  margin: 0 0 0.65rem;
+}
+
+.kxd-os-staff-guided__progress-input {
+  width: 100%;
+  min-height: 7.5rem;
+  padding: 0.65rem 0.75rem;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  border: 1px solid var(--kxd-os-border);
+  border-radius: 3px;
+  background: var(--kxd-os-surface);
+  color: inherit;
+  resize: vertical;
+}
+
+.kxd-os-staff-guided__progress-input:focus {
+  outline: 2px solid var(--kxd-os-focus-ring, var(--kxd-os-border));
+  outline-offset: 1px;
+}
+
+.kxd-os-staff-guided__progress-input:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.kxd-os-staff-guided__progress-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+  margin-top: 0.75rem;
+}
+
+.kxd-os-staff-guided__save-hint--ok {
+  color: var(--kxd-os-success, #2d6a4f);
+}
+
+.kxd-os-staff-guided__save-hint--error,
+.kxd-os-staff-guided__checklist-hint--error {
+  color: var(--kxd-os-critical);
+}
+
+.kxd-os-staff-guided__checklist-hint {
+  margin: 0.5rem 0 0;
+}
+
+.kxd-os-staff-guided__checklist-hint--ok {
+  color: var(--kxd-os-success, #2d6a4f);
+}
+
 .kxd-os-staff-oversight__approval-field {
   display: grid;
   gap: 0.35rem;

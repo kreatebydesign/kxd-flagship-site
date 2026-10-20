@@ -3,6 +3,11 @@ import { requireStaffCapabilityApi } from "@/lib/staff/guard";
 import { getWorkItem, transitionWorkItem } from "@/lib/work/services";
 import { isRestrictedStaff } from "@/lib/staff/permissions";
 import { publishActivity } from "@/lib/activity-engine/publish";
+import { workRequiresOperatorApproval } from "@/lib/staff/work-approval";
+import {
+  appendStaffSubmittedForReviewActivity,
+  assertStaffGuidedChecklistReadyForSubmit,
+} from "@/lib/staff/work-execution-service";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -39,6 +44,25 @@ export async function POST(request: Request, context: RouteContext) {
       { status: 403 },
     );
   }
+
+  const requiresMattApproval = workRequiresOperatorApproval(work, gated.actor);
+  const checklistGate = await assertStaffGuidedChecklistReadyForSubmit(
+    workId,
+    gated.actor,
+    requiresMattApproval,
+  );
+  if (!checklistGate.ok) {
+    return NextResponse.json(
+      { success: false, error: checklistGate.error },
+      { status: 400 },
+    );
+  }
+
+  await appendStaffSubmittedForReviewActivity(
+    workId,
+    gated.actor,
+    requiresMattApproval,
+  );
 
   await transitionWorkItem(workId, "review", gated.actor.email);
 
