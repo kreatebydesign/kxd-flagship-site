@@ -109,5 +109,12 @@ const workspaceTabs = readFileSync(
   "utf8",
 );
 assert.match(workspaceTabs, /Staff notes & questions/);
+assert.match(workspaceTabs, /StaffClientNotesSection/);
+
+const workspaceTabNav = readFileSync(
+  join(root, "components/admin/operations/client-workspace/WorkspaceTabNav.tsx"),
+  "utf8",
+);
+assert.match(workspaceTabNav, /client-command\/\$\{clientId\}\?tab=notes/);
 
 console.log("✓ All staff My Clients checks passed.\n");
