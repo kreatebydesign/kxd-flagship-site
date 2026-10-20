@@ -2,33 +2,32 @@ import { redirect } from "next/navigation";
 import { StaffDocumentDetailScreen } from "@/components/admin/operations/staff/StaffDocumentDetailScreen";
 import { staffActorFromUser } from "@/lib/staff/actor";
 import { getStaffPreviewSession } from "@/lib/staff/preview";
-import {
-  actorHasStaffCapability,
-  isRestrictedStaff,
-  requireStaffAwarePage,
-  STAFF_HOME_PATH,
-} from "@/lib/staff";
+import { actorHasStaffCapability, requireStaffAwarePage } from "@/lib/staff";
 import { getStaffDocumentDetail } from "@/lib/staff-documents/data";
+import { resolveStaffDocumentsListPageAccess } from "@/lib/staff-documents/page-access";
 
 export const dynamic = "force-dynamic";
+
+const LIST_PATH = "/admin/operations/staff/documents";
 
 type PageProps = { params: Promise<{ documentId: string }> };
 
 export default async function StaffDocumentDetailPage({ params }: PageProps) {
-  const user = await requireStaffAwarePage("/admin/operations/staff/documents");
+  const user = await requireStaffAwarePage(LIST_PATH);
   const actor = staffActorFromUser(user);
-  if (!actor || !isRestrictedStaff(actor)) {
-    redirect("/admin/operations/today");
+  const access = resolveStaffDocumentsListPageAccess(actor);
+  if (access.kind === "redirect") {
+    redirect(access.href);
   }
-  if (!actorHasStaffCapability(actor, "staff.documents.read")) {
-    redirect(STAFF_HOME_PATH);
+  if (!actor) {
+    redirect(LIST_PATH);
   }
 
   const documentId = Number((await params).documentId);
-  if (!documentId) redirect("/admin/operations/staff/documents");
+  if (!documentId) redirect(LIST_PATH);
 
   const detail = await getStaffDocumentDetail({ actor, documentId });
-  if (!detail) redirect("/admin/operations/staff/documents");
+  if (!detail) redirect(LIST_PATH);
 
   const preview = await getStaffPreviewSession();
   const canAcknowledge =
