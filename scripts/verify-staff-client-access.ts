@@ -113,6 +113,12 @@ assert.equal(
   isStaffAllowedPagePath("/admin/operations/staff/my-clients/22", tyler!),
   true,
 );
+assert.equal(actorHasStaffCapability(tyler!, "staff.sales.read"), true);
+assert.equal(
+  isStaffAllowedApiPath("/api/admin/staff/sales/leads", tyler!),
+  true,
+);
+assert.equal(isStaffAllowedApiPath("/api/admin/sales/leads", tyler!), false);
 assert.equal(
   isStaffAllowedApiPath("/api/admin/staff/client-notes?clientId=22", tyler!),
   true,

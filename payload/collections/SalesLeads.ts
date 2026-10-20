@@ -110,6 +110,29 @@ export const SalesLeads: CollectionConfig = {
       },
     },
     {
+      name: "sourcedByStaffUser",
+      type: "relationship",
+      relationTo: "users",
+      label: "Sourced By (Staff)",
+      admin: {
+        position: "sidebar",
+        description:
+          "Internal staff who originated this prospect (Staff Sales Development).",
+        readOnly: true,
+      },
+    },
+    {
+      name: "assignedStaffUser",
+      type: "relationship",
+      relationTo: "users",
+      label: "Assigned Staff (Sales)",
+      admin: {
+        position: "sidebar",
+        description:
+          "Operator-assigned staff owner for follow-up. Does not grant partner commission.",
+      },
+    },
+    {
       name: "sourcedByJuniorCreator",
       type: "relationship",
       relationTo: "junior-creator-users",
