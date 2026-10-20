@@ -12,32 +12,40 @@ import {
 } from "./operations-nav";
 import { getEditionOperationsNavGroups } from "@/lib/editions/navigation";
 import { StaffSignOutButton } from "@/components/admin/operations/staff/StaffSignOutButton";
+import { useStaffNavContext } from "@/components/admin/operations/staff/StaffNavContext";
 
 /**
  * Restricted-staff chrome — Portfolio, Relationship Events, and Timeline stay out.
  * Page allowlists in `lib/staff/permissions.ts` enforce the same boundary on direct URLs.
  */
-const STAFF_NAV_GROUPS: OperationsNavGroup[] = [
-  {
-    label: "My work",
-    items: [
-      { id: "staff", label: "Staff home", href: "/admin/operations/staff" },
-      { id: "staff-my-work", label: "My work", href: "/admin/operations/staff/my-work" },
-      {
-        id: "staff-my-clients",
-        label: "My clients",
-        href: "/admin/operations/staff/my-clients",
-      },
-      {
-        id: "staff-documents",
-        label: "My documents",
-        href: "/admin/operations/staff/documents",
-      },
-      { id: "training", label: "Training", href: "/admin/training" },
-      { id: "settings", label: "Settings", href: "/admin/operations/settings" },
-    ],
-  },
-];
+function buildStaffNavGroups(showSalesDevelopmentNav: boolean): OperationsNavGroup[] {
+  const items: OperationsNavGroup["items"] = [
+    { id: "staff", label: "Staff home", href: "/admin/operations/staff" },
+    { id: "staff-my-work", label: "My work", href: "/admin/operations/staff/my-work" },
+    {
+      id: "staff-my-clients",
+      label: "My clients",
+      href: "/admin/operations/staff/my-clients",
+    },
+  ];
+  if (showSalesDevelopmentNav) {
+    items.push({
+      id: "staff-sales",
+      label: "Sales development",
+      href: "/admin/operations/staff/sales",
+    });
+  }
+  items.push(
+    {
+      id: "staff-documents",
+      label: "My documents",
+      href: "/admin/operations/staff/documents",
+    },
+    { id: "training", label: "Training", href: "/admin/training" },
+    { id: "settings", label: "Settings", href: "/admin/operations/settings" },
+  );
+  return [{ label: "My work", items }];
+}
 
 export interface OperationsShellProps {
   activeId: OperationsNavId;
@@ -67,8 +75,11 @@ export function OperationsShell({
   variant = "full",
   showQuickActions = true,
 }: OperationsShellProps) {
+  const { showSalesDevelopmentNav } = useStaffNavContext();
   const navGroups =
-    variant === "staff" ? STAFF_NAV_GROUPS : getEditionOperationsNavGroups();
+    variant === "staff"
+      ? buildStaffNavGroups(showSalesDevelopmentNav)
+      : getEditionOperationsNavGroups();
   const isStaff = variant === "staff";
 
   return (

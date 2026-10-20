@@ -32,6 +32,8 @@ export type StaffCapability =
   | "staff.documents.read"
   | "staff.documents.acknowledge"
   | "staff.documents.sign"
+  | "staff.sales.read"
+  | "staff.sales.manage"
   | "admin.staff-documents.manage"
   | "admin.staff-documents.countersign"
   | "admin.oversight"
