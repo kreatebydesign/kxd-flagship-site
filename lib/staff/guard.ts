@@ -46,11 +46,12 @@ export async function requireStaffAwarePage(returnPath?: string) {
   if (!actor) return user;
 
   const rawPath = await resolveRequestPathname("");
-  const pathname = rawPath || "";
+  // Pages pass the canonical path for login redirect; reuse it when middleware
+  // headers are missing in nested RSC (observed on some production requests).
+  const pathname = rawPath || returnPath || "";
   const landing = staffLandingPathForActor(actor);
 
   if (isRestrictedStaff(actor)) {
-    // Fail closed when pathname cannot be resolved.
     if (!pathname) {
       redirect(landing);
     }

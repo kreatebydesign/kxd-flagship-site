@@ -24,7 +24,9 @@ export default async function OperationsLayout({
   children: React.ReactNode;
 }) {
   const { requireStaffAwarePage } = await import("@/lib/staff/guard");
-  await requireStaffAwarePage();
+  const { headers } = await import("next/headers");
+  const pathname = (await headers()).get("x-kxd-pathname")?.trim() || "";
+  await requireStaffAwarePage(pathname || "/admin/operations");
 
   return (
     <html lang="en" suppressHydrationWarning>

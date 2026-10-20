@@ -13,6 +13,10 @@ import {
 } from "../lib/staff-documents/validate.ts";
 import { assertStaffDocumentRowAccess, staffMayManageDocuments } from "../lib/staff-documents/access.ts";
 import { resolveAcknowledgmentClaimAfterUpdate } from "../lib/staff-documents/acknowledge-claim-outcomes.ts";
+import {
+  resolveStaffDocumentsListPageAccess,
+  resolveStaffDocumentsOversightPageAccess,
+} from "../lib/staff-documents/page-access.ts";
 import type { StaffActor } from "../lib/staff/types";
 
 console.log("\nverify:staff-documents\n");
@@ -104,5 +108,18 @@ assert.equal(
   }),
   "not_found",
 );
+
+const mattAdmin: StaffActor = {
+  ...staffActor,
+  userId: 1,
+  email: "matt@kreatebydesign.com",
+  role: "admin",
+  staffRole: "none",
+};
+const mattList = resolveStaffDocumentsListPageAccess(mattAdmin);
+assert.equal(mattList.kind, "redirect");
+assert.equal(resolveStaffDocumentsListPageAccess(staffActor).kind, "render");
+assert.equal(resolveStaffDocumentsOversightPageAccess(mattAdmin).kind, "render");
+assert.equal(resolveStaffDocumentsOversightPageAccess(staffActor).kind, "redirect");
 
 console.log("  ✓ staff documents release A checks passed\n");
