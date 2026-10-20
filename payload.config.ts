@@ -176,6 +176,22 @@ console.log("[KXD] Payload DB config loaded", {
   VERCEL: Boolean(process.env.VERCEL),
 });
 
+const previewEndpointId =
+  process.env.KXD_NEON_PREVIEW_ENDPOINT_ID?.trim() || "";
+const productionNeonEndpointMarker = "ep-twilight-math";
+if (process.env.VERCEL_ENV === "preview" && databaseUri) {
+  if (dbHost.includes(productionNeonEndpointMarker)) {
+    throw new Error(
+      "[KXD] Preview deployment resolved production Neon host. Use preview-kxd-os branch env (see docs/KXD-OS-PREVIEW-DATABASE.md).",
+    );
+  }
+  if (previewEndpointId && !dbHost.includes(previewEndpointId)) {
+    throw new Error(
+      `[KXD] Preview DATABASE target host does not match KXD_NEON_PREVIEW_ENDPOINT_ID (${previewEndpointId}). Refusing to start.`,
+    );
+  }
+}
+
 /** Dev-only fallback — never allowed on deployed production runtime. */
 const PAYLOAD_DEV_SECRET_FALLBACK = "kxd-dev-secret-change-in-production";
 const payloadSecret = process.env.PAYLOAD_SECRET?.trim() || "";

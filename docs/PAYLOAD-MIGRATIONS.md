@@ -41,6 +41,8 @@ Do not re-enable `prodMigrations` in `payload.config.ts` (removed to avoid Verce
 Payload prefers `DATABASE_URI`, then `DATABASE_URL` (see `payload.config.ts`).
 If neither is set, it falls back to SQLite (`PAYLOAD_SQLITE_PATH` or `file:./.payload/kxd.sqlite`).
 
+Preview deployments use the isolated Neon branch `preview-kxd-os` (see `docs/KXD-OS-PREVIEW-DATABASE.md`). Never apply migrations to production Neon from a Preview URL.
+
 Before any apply:
 
 ```bash
