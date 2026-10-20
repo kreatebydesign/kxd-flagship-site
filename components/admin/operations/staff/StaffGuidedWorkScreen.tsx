@@ -12,6 +12,7 @@ import {
 } from "@/components/admin/operations/shared/OpsBriefing";
 import { KxdButton, KxdPage, type KxdBadgeVariant } from "@/components/os";
 import { assignedApproverLine, resolveAssignedApproverName } from "@/lib/staff/approval-presentation";
+import type { StaffDeliverableView } from "@/lib/staff/work-deliverables";
 import type { StaffGuidedWorkData } from "@/lib/staff/types";
 import { WORK_STATUS_LABELS } from "@/lib/work/constants";
 import type { WorkStatus } from "@/lib/work/types";
@@ -43,7 +44,11 @@ function formatActivityLabel(action: string): string {
     case "staff-progress-saved":
       return "Progress saved";
     case "staff-checklist-updated":
-      return "Checklist updated";
+      return "Confirmation updated";
+    case "staff-deliverables-updated":
+      return "Deliverables updated";
+    case "assignment-deliverables-updated":
+      return "Assignment deliverables updated";
     case "staff-submitted-for-review":
       return "Submitted for review";
     case "status-changed":
@@ -59,6 +64,7 @@ function formatActivityLabel(action: string): string {
 
 type ProgressSaveState = "idle" | "saving" | "saved" | "error";
 type ChecklistSaveState = "idle" | "saving" | "saved" | "error";
+type DeliverableSaveState = "idle" | "saving" | "saved" | "error";
 
 export interface StaffGuidedWorkScreenProps {
   data: StaffGuidedWorkData;
@@ -89,14 +95,36 @@ export function StaffGuidedWorkScreen({
   const checklistDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const savedChecklistRef = useRef(JSON.stringify(data.checklistChecked));
 
+  const [deliverables, setDeliverables] = useState<StaffDeliverableView[]>(() => [
+    ...data.deliverables,
+  ]);
+  const [deliverableSaveState, setDeliverableSaveState] =
+    useState<DeliverableSaveState>("idle");
+  const [deliverableSaveError, setDeliverableSaveError] = useState<string | null>(null);
+  const deliverableDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const savedDeliverablesRef = useRef(JSON.stringify(data.deliverables));
+
   const [busy, setBusy] = useState<"check" | "review" | "complete" | "progress" | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const requiredComplete = useMemo(
+  const confirmationsComplete = useMemo(
     () => data.checklist.filter((item) => item.required).every((item) => checked[item.id]),
     [checked, data.checklist],
   );
+
+  const deliverablesComplete = useMemo(() => {
+    if (deliverables.length === 0) return true;
+    return deliverables.filter((d) => d.required).every((d) => d.completed);
+  }, [deliverables]);
+
+  const requiredComplete = confirmationsComplete && deliverablesComplete;
+
+  const deliverableProgressLabel = useMemo(() => {
+    if (deliverables.length === 0) return null;
+    const completed = deliverables.filter((d) => d.completed).length;
+    return `${completed} of ${deliverables.length} deliverables`;
+  }, [deliverables]);
 
   const mutationsDisabled = readOnly || !canAct;
   const dueLabel = formatDue(data.dueDate);
@@ -122,11 +150,21 @@ export function StaffGuidedWorkScreen({
   useEffect(() => {
     return () => {
       if (checklistDebounceRef.current) clearTimeout(checklistDebounceRef.current);
+      if (deliverableDebounceRef.current) clearTimeout(deliverableDebounceRef.current);
     };
   }, []);
 
+  useEffect(() => {
+    setDeliverables([...data.deliverables]);
+    savedDeliverablesRef.current = JSON.stringify(data.deliverables);
+  }, [data.deliverables]);
+
   const persistExecution = useCallback(
-    async (body: { staffProgress?: string | null; checklist?: Record<string, boolean> }) => {
+    async (body: {
+      staffProgress?: string | null;
+      checklist?: Record<string, boolean>;
+      deliverables?: Record<string, boolean>;
+    }) => {
       const res = await fetch(`/api/admin/staff/work/${data.workId}/execution`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -137,6 +175,7 @@ export function StaffGuidedWorkScreen({
         error?: string;
         staffProgress?: string | null;
         checklist?: Record<string, boolean>;
+        deliverables?: StaffDeliverableView[];
       };
       if (!res.ok || payload.success === false) {
         throw new Error(payload.error ?? "Could not save.");
@@ -149,6 +188,10 @@ export function StaffGuidedWorkScreen({
       if (payload.checklist) {
         setChecked(payload.checklist);
         savedChecklistRef.current = JSON.stringify(payload.checklist);
+      }
+      if (payload.deliverables) {
+        setDeliverables(payload.deliverables);
+        savedDeliverablesRef.current = JSON.stringify(payload.deliverables);
       }
       return payload;
     },
@@ -204,6 +247,46 @@ export function StaffGuidedWorkScreen({
     });
   }
 
+  const saveDeliverableToggle = useCallback(
+    async (id: string, nextCompleted: boolean) => {
+      if (mutationsDisabled) return;
+      setDeliverableSaveState("saving");
+      setDeliverableSaveError(null);
+      try {
+        await persistExecution({ deliverables: { [id]: nextCompleted } });
+        setDeliverableSaveState("saved");
+      } catch (err) {
+        setDeliverableSaveState("error");
+        setDeliverableSaveError(
+          err instanceof Error ? err.message : "Could not save deliverable.",
+        );
+      }
+    },
+    [mutationsDisabled, persistExecution],
+  );
+
+  function toggleDeliverable(id: string) {
+    if (mutationsDisabled) return;
+    setDeliverables((prev) => {
+      const next = prev.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              completed: !item.completed,
+              completedAt: !item.completed ? new Date().toISOString() : null,
+            }
+          : item,
+      );
+      const target = next.find((item) => item.id === id);
+      if (!target) return prev;
+      if (deliverableDebounceRef.current) clearTimeout(deliverableDebounceRef.current);
+      deliverableDebounceRef.current = setTimeout(() => {
+        void saveDeliverableToggle(id, target.completed);
+      }, 350);
+      return next;
+    });
+  }
+
   async function flushBeforeSubmit() {
     if (progressDirty) {
       await persistExecution({ staffProgress });
@@ -213,6 +296,13 @@ export function StaffGuidedWorkScreen({
     if (serialized !== savedChecklistRef.current) {
       await persistExecution({ checklist: checked });
       setChecklistSaveState("saved");
+    }
+    if (JSON.stringify(deliverables) !== savedDeliverablesRef.current) {
+      const toggles = Object.fromEntries(
+        deliverables.map((item) => [item.id, item.completed]),
+      );
+      await persistExecution({ deliverables: toggles });
+      setDeliverableSaveState("saved");
     }
   }
 
@@ -311,6 +401,11 @@ export function StaffGuidedWorkScreen({
             {data.priority ? (
               <OpsStatusBadge label={data.priority} variant="warning" />
             ) : null}
+            {deliverableProgressLabel ? (
+              <span className="kxd-os-staff-guided__meta-item kxd-os-staff-guided__meta-item--progress">
+                {deliverableProgressLabel}
+              </span>
+            ) : null}
             {data.clientLabel ? (
               <span className="kxd-os-staff-guided__meta-item">Client · {data.clientLabel}</span>
             ) : null}
@@ -340,21 +435,86 @@ export function StaffGuidedWorkScreen({
 
         <div className="kxd-os-staff-guided__layout">
           <div className="kxd-os-staff-guided__main">
-            {data.description ? (
+            {(data.summary || data.instructionBlocks.length > 0) ? (
               <OpsCard className="kxd-os-ops-card-padding kxd-os-staff-guided__section">
-                <OpsSectionHead label="Brief" />
-                <p className="kxd-os-staff-my-work__prose kxd-os-staff-guided__instructions">
-                  {data.description}
-                </p>
+                <OpsSectionHead label="Assignment overview" />
+                {data.summary ? (
+                  <p className="kxd-os-staff-guided__overview-summary">{data.summary}</p>
+                ) : null}
+                {data.instructionBlocks.length > 0 ? (
+                  <div className="kxd-os-staff-guided__instruction-blocks">
+                    {data.instructionBlocks.map((block) => (
+                      <p key={block} className="kxd-os-staff-my-work__prose kxd-os-staff-guided__instructions">
+                        {block}
+                      </p>
+                    ))}
+                  </div>
+                ) : null}
               </OpsCard>
             ) : null}
 
-            {data.acceptanceCriteria ? (
+            {deliverables.length > 0 ? (
               <OpsCard className="kxd-os-ops-card-padding kxd-os-staff-guided__section">
-                <OpsSectionHead label="Acceptance criteria" />
-                <p className="kxd-os-staff-my-work__prose kxd-os-staff-guided__instructions">
-                  {data.acceptanceCriteria}
+                <OpsSectionHead label="Deliverables" />
+                <p className="kxd-os-meta kxd-os-staff-guided__deliverables-count">
+                  {deliverableProgressLabel}
                 </p>
+                <p className="kxd-os-meta kxd-os-staff-guided__deliverables-lead">
+                  Check off each step when it is honestly complete. Required items must be done
+                  before you submit for review.
+                </p>
+                <ul className="kxd-os-staff-guided__deliverables">
+                  {deliverables.map((item, index) => (
+                    <li
+                      key={item.id}
+                      className={
+                        item.completed
+                          ? "kxd-os-staff-guided__deliverable kxd-os-staff-guided__deliverable--done"
+                          : "kxd-os-staff-guided__deliverable"
+                      }
+                    >
+                      <label className="kxd-os-staff-guided__deliverable-label">
+                        <input
+                          type="checkbox"
+                          checked={item.completed}
+                          disabled={mutationsDisabled}
+                          onChange={() => toggleDeliverable(item.id)}
+                        />
+                        <span className="kxd-os-staff-guided__deliverable-body">
+                          <span className="kxd-os-staff-guided__deliverable-title">
+                            <span className="kxd-os-staff-guided__deliverable-index">
+                              {index + 1}.
+                            </span>
+                            {item.title}
+                            {item.required ? (
+                              <span className="kxd-os-meta"> Required</span>
+                            ) : (
+                              <span className="kxd-os-meta"> Optional</span>
+                            )}
+                          </span>
+                          {item.instructions ? (
+                            <span className="kxd-os-meta kxd-os-staff-guided__deliverable-instructions">
+                              {item.instructions}
+                            </span>
+                          ) : null}
+                        </span>
+                      </label>
+                    </li>
+                  ))}
+                </ul>
+                {deliverableSaveState === "saving" ? (
+                  <p className="kxd-os-meta kxd-os-staff-guided__checklist-hint">Saving progress…</p>
+                ) : null}
+                {deliverableSaveState === "saved" ? (
+                  <p className="kxd-os-meta kxd-os-staff-guided__checklist-hint kxd-os-staff-guided__checklist-hint--ok">
+                    Progress saved
+                  </p>
+                ) : null}
+                {deliverableSaveState === "error" && deliverableSaveError ? (
+                  <p className="kxd-os-meta kxd-os-staff-guided__checklist-hint kxd-os-staff-guided__checklist-hint--error">
+                    {deliverableSaveError}
+                  </p>
+                ) : null}
               </OpsCard>
             ) : null}
 
@@ -485,7 +645,11 @@ export function StaffGuidedWorkScreen({
 
           <aside className="kxd-os-staff-guided__aside">
             <OpsCard className="kxd-os-ops-card-padding kxd-os-staff-guided__checklist-card">
-              <OpsSectionHead label="Completion checklist" />
+              <OpsSectionHead label="Submit confirmation" />
+              <p className="kxd-os-meta kxd-os-staff-guided__confirmation-lead">
+                Compliance checks before you complete or submit — not the assignment steps
+                themselves.
+              </p>
               <ul className="kxd-os-staff-guided__checklist">
                 {data.checklist.map((item) => (
                   <li key={item.id}>

@@ -16,12 +16,24 @@ import {
   STAFF_GUIDED_CHECKLIST_IDS,
   type StaffGuidedChecklistId,
 } from "./guided-checklist";
+import type { StaffDeliverableView } from "./work-deliverables";
 import type { StaffActor } from "./types";
 import {
   mergeStaffProgressNotes,
   splitWorkNotes,
   staffProgressPreview,
 } from "./work-execution-notes";
+import {
+  allRequiredDeliverablesComplete,
+  applyDeliverableToggles,
+  buildDeliverableProgressPatch,
+  formatDeliverableActivityDetail,
+  mergeDeliverableViews,
+  parseDeliverablesDefinition,
+  parseDeliverableProgress,
+  sanitizeDeliverableTogglePayload,
+} from "./work-deliverables";
+import { loadWorkDeliverableViews, saveStaffDeliverableToggles } from "./work-deliverables-service";
 import {
   buildStaffGuidedExecutionPatch,
   checklistStatesEqual,
@@ -35,14 +47,17 @@ type AnyDoc = Record<string, any>;
 export interface StaffWorkExecutionSaveInput {
   staffProgress?: string | null;
   checklist?: Record<string, unknown> | null;
+  deliverables?: Record<string, unknown> | null;
 }
 
 export interface StaffWorkExecutionSaveResult {
   studioNotes: string | null;
   staffProgress: string | null;
   checklist: Record<StaffGuidedChecklistId, boolean>;
+  deliverables: StaffDeliverableView[];
   progressSaved: boolean;
   checklistSaved: boolean;
+  deliverablesSaved: boolean;
 }
 
 export async function loadStaffGuidedChecklistChecked(
@@ -106,6 +121,17 @@ export async function saveStaffWorkExecution(
 
   let checklistSaved = false;
   let nextChecked = priorChecked;
+  let deliverablesSaved = false;
+  let deliverableViews = await loadWorkDeliverableViews(workId, actor.userId);
+  let deliverableToggles: Record<string, boolean> | null = null;
+
+  if (input.deliverables !== undefined && input.deliverables !== null) {
+    const definition = parseDeliverablesDefinition(readRawWorkMetadata(doc as AnyDoc));
+    const sanitized = sanitizeDeliverableTogglePayload(definition, input.deliverables);
+    if ("error" in sanitized) throw new Error(sanitized.error);
+    deliverableToggles = sanitized.toggles;
+    deliverablesSaved = true;
+  }
 
   if (input.checklist !== undefined && input.checklist !== null) {
     if (!isValidChecklistPayload(input.checklist)) {
@@ -119,8 +145,18 @@ export async function saveStaffWorkExecution(
   }
 
   const patch: AnyDoc = {};
+  const needsMetadataReload = progressSaved || checklistSaved || deliverableToggles != null;
 
-  if (progressSaved || checklistSaved) {
+  if (deliverablesSaved && deliverableToggles != null && !progressSaved && !checklistSaved) {
+    const actorLabel = actor.email || actor.displayName || null;
+    const result = await saveStaffDeliverableToggles(
+      workId,
+      actor.userId,
+      input.deliverables as Record<string, unknown>,
+      actorLabel,
+    );
+    deliverableViews = result.deliverables;
+  } else if (needsMetadataReload) {
     const latest = await payload.findByID({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       collection: WORK_COLLECTION as any,
@@ -134,19 +170,46 @@ export async function saveStaffWorkExecution(
       (latest as AnyDoc).notes != null && String((latest as AnyDoc).notes).trim()
         ? String((latest as AnyDoc).notes)
         : null;
-    const latestMetadata = readRawWorkMetadata(latest as AnyDoc);
+    let latestMetadata = readRawWorkMetadata(latest as AnyDoc);
 
     if (progressSaved) {
       patch.notes = mergeStaffProgressNotes(latestNotes, input.staffProgress);
       nextNotes = patch.notes as string | null;
     }
 
+    if (deliverableToggles != null) {
+      const definition = parseDeliverablesDefinition(latestMetadata);
+      const prior = parseDeliverableProgress(latestMetadata, actor.userId);
+      const nowIso = new Date().toISOString();
+      const completed = applyDeliverableToggles(
+        definition!,
+        prior,
+        deliverableToggles,
+        nowIso,
+      );
+      latestMetadata = buildDeliverableProgressPatch(
+        latestMetadata,
+        actor.userId,
+        completed,
+      );
+      deliverableViews = mergeDeliverableViews(definition, {
+        v: 1,
+        assigneeUserId: actor.userId,
+        completed,
+        updatedAt: nowIso,
+      });
+    }
+
     if (checklistSaved) {
-      patch.metadata = buildStaffGuidedExecutionPatch(
+      latestMetadata = buildStaffGuidedExecutionPatch(
         latestMetadata,
         actor.userId,
         nextChecked,
       );
+    }
+
+    if (checklistSaved || deliverableToggles != null) {
+      patch.metadata = latestMetadata;
     }
   }
 
@@ -188,6 +251,18 @@ export async function saveStaffWorkExecution(
     );
   }
 
+  if (deliverablesSaved && deliverableToggles != null && (progressSaved || checklistSaved)) {
+    await appendWorkActivityEntry(
+      workId,
+      {
+        actor: actorLabel,
+        action: "staff-deliverables-updated",
+        detail: formatDeliverableActivityDetail(deliverableViews),
+      },
+      payload,
+    );
+  }
+
   const { studioNotes, staffProgress } = splitWorkNotes(
     progressSaved ? nextNotes : docNotes,
   );
@@ -196,8 +271,10 @@ export async function saveStaffWorkExecution(
     studioNotes: studioNotes ?? priorStudio,
     staffProgress,
     checklist: nextChecked,
+    deliverables: deliverableViews,
     progressSaved,
     checklistSaved,
+    deliverablesSaved,
   };
 }
 
@@ -215,9 +292,18 @@ export async function assertStaffGuidedChecklistReadyForSubmit(
   if (!allRequiredChecklistItemsChecked(items, checked)) {
     return {
       ok: false,
-      error: "Complete every required checklist item before submitting for review.",
+      error: "Complete every required confirmation before submitting for review.",
     };
   }
+
+  const deliverables = await loadWorkDeliverableViews(workId, actor.userId);
+  if (deliverables.length > 0 && !allRequiredDeliverablesComplete(deliverables)) {
+    return {
+      ok: false,
+      error: "Complete every required assignment deliverable before submitting for review.",
+    };
+  }
+
   return { ok: true, checked };
 }
 
@@ -236,8 +322,14 @@ export async function appendStaffSubmittedForReviewActivity(
   );
   const { staffProgress } = splitWorkNotes(work.notes);
   const checklistLine = formatChecklistActivityDetail(items, checked);
+  const deliverableViews = await loadWorkDeliverableViews(workId, actor.userId);
+  const deliverableLine =
+    deliverableViews.length > 0
+      ? formatDeliverableActivityDetail(deliverableViews)
+      : null;
   const progressLine = staffProgressPreview(staffProgress);
   const detail = [
+    deliverableLine,
     checklistLine,
     progressLine ? `Progress: ${progressLine}` : null,
   ]

@@ -9,6 +9,7 @@ import {
 import type { StaffActor } from "@/lib/staff/types";
 import { isRestrictedStaff } from "@/lib/staff/permissions";
 import { WORK_COLLECTION } from "./constants";
+import { deliverableSummaryFromDoc } from "@/lib/staff/work-deliverables-service";
 import { toWorkListItem } from "./runner";
 import type { WorkListItem, WorkStatus } from "./types";
 
@@ -91,7 +92,14 @@ export async function listWorkAssignedToStaffActor(
   });
 
   return result.docs
-    .map((doc) => toWorkListItem(doc as Record<string, unknown>))
+    .map((doc) => {
+      const work = toWorkListItem(doc as Record<string, unknown>);
+      const summary = deliverableSummaryFromDoc(
+        doc as Record<string, unknown>,
+        work.assignedToId,
+      );
+      return summary ? { ...work, deliverableProgress: summary } : work;
+    })
     .filter((work) => work.assignedToId === actor.userId)
     .map(withStaffHref);
 }

@@ -23519,3 +23519,170 @@ select.kxd-os-commercial-control {
 .kxd-os-staff-my-work__prose {
   white-space: pre-wrap;
 }
+
+/* Staff guided work — assignment deliverables (V1.2) */
+.kxd-os-staff-guided__overview-summary {
+  margin: 0 0 0.75rem;
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+.kxd-os-staff-guided__instruction-blocks {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.kxd-os-staff-guided__meta-item--progress {
+  font-variant-numeric: tabular-nums;
+}
+
+.kxd-os-staff-guided__deliverables-lead,
+.kxd-os-staff-guided__confirmation-lead,
+.kxd-os-staff-guided__deliverables-count {
+  margin: 0 0 0.75rem;
+}
+
+.kxd-os-staff-guided__deliverables {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.kxd-os-staff-guided__deliverable {
+  border: 1px solid color-mix(in srgb, var(--kxd-os-border) 80%, transparent);
+  border-radius: 4px;
+  padding: 0.65rem 0.75rem;
+}
+
+.kxd-os-staff-guided__deliverable--done {
+  background: color-mix(in srgb, var(--kxd-os-success, #2d6a4f) 6%, var(--kxd-os-surface));
+}
+
+.kxd-os-staff-guided__deliverable-label {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+  cursor: pointer;
+}
+
+.kxd-os-staff-guided__deliverable-body {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.kxd-os-staff-guided__deliverable-title {
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.kxd-os-staff-guided__deliverable-index {
+  margin-right: 0.35rem;
+  color: var(--kxd-os-text-muted);
+}
+
+.kxd-os-staff-my-work__card-deliverables,
+.kxd-os-staff-my-work__list-deliverables {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Work Engine — assignment deliverables editor */
+.kxd-os-work-deliverables-editor {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.kxd-os-work-deliverables-editor__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.kxd-os-work-deliverables-editor__row {
+  border: 1px solid var(--kxd-os-border);
+  border-radius: 4px;
+  padding: 0.65rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.kxd-os-work-deliverables-editor__row-top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.kxd-os-work-deliverables-editor__index {
+  font-variant-numeric: tabular-nums;
+  color: var(--kxd-os-text-muted);
+  min-width: 1.25rem;
+}
+
+.kxd-os-work-deliverables-editor__title {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.kxd-os-work-deliverables-editor__instructions {
+  width: 100%;
+  min-height: 3rem;
+}
+
+.kxd-os-work-deliverables-editor__row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.kxd-os-work-deliverables-editor__action {
+  font: inherit;
+  font-size: 0.8125rem;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--kxd-os-accent);
+  cursor: pointer;
+}
+
+.kxd-os-work-deliverables-editor__action--danger {
+  color: var(--kxd-os-critical, #9b2226);
+}
+
+.kxd-os-work-deliverables-editor__add {
+  font: inherit;
+  font-size: 0.875rem;
+  align-self: flex-start;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--kxd-os-border);
+  border-radius: 4px;
+  background: var(--kxd-os-surface);
+  cursor: pointer;
+}
+
+.kxd-os-work-deliverables-oversight__summary {
+  margin-bottom: 1rem;
+}
+
+.kxd-os-work-deliverables-oversight__staff-list {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.kxd-os-work-deliverables-oversight__staff-item--done {
+  color: var(--kxd-os-success, #2d6a4f);
+}
+
+.kxd-os-work-deliverables-oversight__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}

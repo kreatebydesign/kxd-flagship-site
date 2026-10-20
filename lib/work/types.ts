@@ -1,5 +1,7 @@
 /** Phase 14B + 20A — Work Engine domain types */
 
+import type { StaffDeliverableProgressSummary } from "@/lib/staff/work-deliverables";
+
 export type WorkStatus =
   | "new"
   | "planned"
@@ -87,6 +89,8 @@ export interface WorkListItem {
   clientSuccessHref: string | null;
   /** Append-only internal activity — populated on detail loads. */
   activityHistory: WorkActivityEntry[];
+  /** Structured assignment deliverables — populated on staff-assigned loads when defined. */
+  deliverableProgress?: StaffDeliverableProgressSummary | null;
 }
 
 export interface ClientWorkData {

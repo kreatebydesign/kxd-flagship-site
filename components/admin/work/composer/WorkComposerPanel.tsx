@@ -43,6 +43,13 @@ import type {
   WorkComposerUserOption,
 } from "@/lib/work/composer";
 import type { WorkListItem, WorkPriority, WorkStatus } from "@/lib/work/types";
+import {
+  WorkAssignmentDeliverablesEditor,
+  deliverableDraftFromApi,
+  emptyDeliverableRow,
+  serializeDeliverableDraft,
+  type DeliverableDraftRow,
+} from "@/components/admin/work/WorkAssignmentDeliverablesEditor";
 
 type WorkComposerPanelProps = {
   currentUser?: WorkComposerUserOption | null;
@@ -77,6 +84,7 @@ export function WorkComposerPanel({
   const [optionsLoaded, setOptionsLoaded] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [suggestions] = useState<ComposerSuggestion[]>([]);
+  const [deliverableRows, setDeliverableRows] = useState<DeliverableDraftRow[]>([]);
 
   const resetDraft = useCallback(
     (prefill?: WorkComposerOpenOptions | null, user?: WorkComposerUserOption | null) => {
@@ -87,6 +95,7 @@ export function WorkComposerPanel({
       setDraft(next);
       setMoreOpen(shouldExpandComposerMoreDetails(next));
       setError(null);
+      setDeliverableRows([]);
     },
     [options?.today, seedUser?.id],
   );
@@ -174,6 +183,34 @@ export function WorkComposerPanel({
   }, [open, optionsLoaded, seedUser?.id]);
 
   useEffect(() => {
+    if (!open || draft.mode !== "edit" || !draft.workId) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetch(`/api/admin/work/${draft.workId}/deliverables`);
+        const data = (await res.json()) as {
+          ok?: boolean;
+          items?: Array<{
+            id: string;
+            title: string;
+            instructions?: string | null;
+            required: boolean;
+          }>;
+        };
+        if (cancelled || !res.ok || !data.ok) return;
+        setDeliverableRows(
+          data.items?.length ? deliverableDraftFromApi(data.items) : [],
+        );
+      } catch {
+        /* optional */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [open, draft.mode, draft.workId]);
+
+  useEffect(() => {
     if (!open) return;
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") {
@@ -227,6 +264,11 @@ export function WorkComposerPanel({
     setError(null);
     setConfirmation(null);
 
+    const assignmentDeliverables =
+      assigneeId && deliverableRows.some((row) => row.title.trim())
+        ? serializeDeliverableDraft(deliverableRows)
+        : undefined;
+
     const payload = {
       title,
       description: draft.description.trim() || null,
@@ -242,6 +284,7 @@ export function WorkComposerPanel({
       estimatedEffort,
       tags: parseComposerTags(draft.tags),
       source: "manual" as const,
+      assignmentDeliverables,
     };
 
     try {
@@ -544,6 +587,21 @@ export function WorkComposerPanel({
                         ))}
                       </select>
                     </label>
+
+                    {draft.assignedToId ? (
+                      <div className="kxd-os-work-composer__field kxd-os-work-composer__field--wide">
+                        <WorkAssignmentDeliverablesEditor
+                          rows={
+                            deliverableRows.length
+                              ? deliverableRows
+                              : [emptyDeliverableRow()]
+                          }
+                          onChange={setDeliverableRows}
+                          disabled={busy}
+                          compact
+                        />
+                      </div>
+                    ) : null}
 
                     <label className="kxd-os-work-composer__field">
                       <span>Time budget</span>

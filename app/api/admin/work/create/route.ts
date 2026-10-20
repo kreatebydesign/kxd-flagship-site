@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requirePayloadAdminApi } from "@/lib/admin/auth";
 import { mergeApprovalTagsForAssignee } from "@/lib/staff/work-assignee";
+import { saveWorkAssignmentDeliverables } from "@/lib/staff/work-deliverables-service";
 import { createWork, assignWorkNumber } from "@/lib/work/server";
 import type { WorkCategory, WorkPriority, WorkSource, WorkStatus } from "@/lib/work/types";
 
@@ -73,6 +74,14 @@ export async function POST(req: Request) {
     });
 
     const workNumber = await assignWorkNumber(result.work.id);
+
+    if (Array.isArray(body.assignmentDeliverables) && body.assignmentDeliverables.length > 0) {
+      await saveWorkAssignmentDeliverables(
+        result.work.id,
+        body.assignmentDeliverables,
+        typeof auth.email === "string" ? auth.email : null,
+      );
+    }
 
     return NextResponse.json({ ok: true, work: result.work, workNumber });
   } catch (err) {
