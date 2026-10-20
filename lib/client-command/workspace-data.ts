@@ -24,6 +24,7 @@ import { getClientWorkBoard } from "@/lib/client-tasks/engine";
 import { loadClientCommandCenter } from "./engine";
 import { buildWorkspaceQuickActions } from "./workspace-actions";
 import { loadClientCommercialWorkspace } from "./commercial/load-commercial-workspace";
+import { listStaffClientNotesForClient } from "@/lib/staff/client-notes/data";
 import { loadClientSiteIntelligence } from "@/lib/client-site-intelligence/load";
 import { loadClientLeadLedger } from "@/lib/managed-client-leads/load";
 import type {
@@ -171,6 +172,7 @@ export async function loadClientWorkspaceBundle(
     contracts,
     financial,
     workBoard,
+    staffClientNotes,
   ] = await Promise.all([
     commandCenterPromise,
     workspacePromise,
@@ -194,6 +196,7 @@ export async function loadClientWorkspaceBundle(
     loadClientContractsSnapshot(clientId),
     loadClientFinancialSnapshot(clientId),
     getClientWorkBoard(clientId),
+    listStaffClientNotesForClient(clientId, { limit: 50 }),
   ]);
 
   if (!commandCenter) return null;
@@ -348,5 +351,6 @@ export async function loadClientWorkspaceBundle(
     financialIntelligence,
     commercial,
     workBoard,
+    staffClientNotes,
   };
 }

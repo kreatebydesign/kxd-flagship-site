@@ -3,7 +3,7 @@ import { fmtExecutiveMoney } from "@/lib/executive-client-profile";
 import { fmtFinancialMoney } from "@/lib/financial-command/client";
 import { fmtWorkspaceDate } from "@/lib/executive-client-workspace/theme";
 import type { ClientWorkspaceBundle } from "@/lib/client-command/workspace-types";
-import type { CommandWorkspaceTabId } from "@/lib/client-command/tabs";
+import { commandWorkspaceHref, type CommandWorkspaceTabId } from "@/lib/client-command/tabs";
 import type { CommercialSectionId } from "@/lib/client-command/commercial/types";
 import { commercialWorkspaceHref } from "@/lib/client-command/commercial/sections";
 import {
@@ -26,6 +26,7 @@ import { ClientPlansAccessPanel } from "./ClientPlansAccessPanel";
 import { ClientExperiencePanel } from "./ClientExperiencePanel";
 import { ClientUpgradeRequestsPanel } from "./ClientUpgradeRequestsPanel";
 import { CommercialWorkspace } from "./commercial/CommercialWorkspace";
+import { StaffClientNotesSection } from "./StaffClientNotesSection";
 
 function statusLabel(status: string): string {
   return status.replace(/-/g, " ");
@@ -119,6 +120,19 @@ function OverviewPanel({ data }: { data: ClientWorkspaceBundle }) {
           Intelligence urgency {data.memory.scores.urgencyScore}/100 —{" "}
           <Link href={`/admin/operations/client-command/${data.clientId}?tab=intelligence`} className="kxd-os-link-quiet">
             open Intelligence →
+          </Link>
+        </p>
+      ) : null}
+
+      {data.staffClientNotes.length > 0 ? (
+        <p className="kxd-os-meta kxd-os-staff-client-notes__overview-hint" role="status">
+          {data.staffClientNotes.length} staff note
+          {data.staffClientNotes.length === 1 ? "" : "s"} from assigned teammates —{" "}
+          <Link
+            href={`${commandWorkspaceHref(data.clientId, "notes")}#staff-notes`}
+            className="kxd-os-link-quiet"
+          >
+            View in Notes →
           </Link>
         </p>
       ) : null}
@@ -556,34 +570,43 @@ function MeetingsPanel({ data }: { data: ClientWorkspaceBundle }) {
 
 function NotesPanel({ data }: { data: ClientWorkspaceBundle }) {
   const notes = data.noteDocs;
-
-  if (notes.length === 0) {
-    return (
-      <WorkspaceChapter title="Notes">
-        <WorkspaceEmpty message="Internal executive notes are private to KXD OS." />
-        <Link
-          href={`/admin/collections/executive-notes/create?client=${data.clientId}`}
-          className="kxd-os-link-quiet kxd-os-workspace-inline-link"
-        >
-          Add note →
-        </Link>
-      </WorkspaceChapter>
-    );
-  }
+  const clientLabel = data.header.companyName;
 
   return (
-    <WorkspaceChapter title="Notes">
-      <ul className="kxd-os-workspace-list">
-        {notes.map((n) => (
-          <li key={n.id} className="kxd-os-workspace-list__item">
-            <Link href={`/admin/collections/executive-notes/${n.id}`} className="kxd-os-link-quiet">
-              {String(n.title ?? "Note")} · {String(n.noteType ?? "note")}
-              {n.pinned ? " · pinned" : ""}
+    <div className="kxd-os-workspace-dossier">
+      <StaffClientNotesSection
+        notes={data.staffClientNotes}
+        clientLabel={clientLabel}
+      />
+
+      <WorkspaceChapter title="Executive notes">
+        <p className="kxd-os-meta" style={{ marginBottom: notes.length ? "1rem" : 0 }}>
+          Strategy Vault and institutional memory — separate from staff notes above.
+        </p>
+        {notes.length === 0 ? (
+          <>
+            <WorkspaceEmpty message="Internal executive notes are private to KXD OS." />
+            <Link
+              href={`/admin/collections/executive-notes/create?client=${data.clientId}`}
+              className="kxd-os-link-quiet kxd-os-workspace-inline-link"
+            >
+              Add executive note →
             </Link>
-          </li>
-        ))}
-      </ul>
-    </WorkspaceChapter>
+          </>
+        ) : (
+          <ul className="kxd-os-workspace-list">
+            {notes.map((n) => (
+              <li key={n.id} className="kxd-os-workspace-list__item">
+                <Link href={`/admin/collections/executive-notes/${n.id}`} className="kxd-os-link-quiet">
+                  {String(n.title ?? "Note")} · {String(n.noteType ?? "note")}
+                  {n.pinned ? " · pinned" : ""}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </WorkspaceChapter>
+    </div>
   );
 }
 

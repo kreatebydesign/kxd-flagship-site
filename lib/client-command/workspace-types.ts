@@ -20,6 +20,7 @@ import type { ClientMemorySnapshot } from "./memory/types";
 import type { ClientCommercialWorkspaceSnapshot } from "./commercial/types";
 import type { ClientSiteIntelligenceSnapshot } from "@/lib/client-site-intelligence/load";
 import type { ClientLeadLedgerSnapshot } from "@/lib/managed-client-leads/types";
+import type { StaffClientNoteRecord } from "@/lib/staff/client-notes/types";
 
 export interface CommandHubClientRow {
   clientId: number;
@@ -139,6 +140,8 @@ export interface ClientWorkspaceBundle extends ClientCommandCenterData {
   workBoard: ClientWorkBoardData | null;
   workspaceQuickActions: CommandWorkspaceQuickAction[];
   analytics: WorkspaceAnalyticsSnapshot;
+  /** Phase 2A — staff My Clients notes (operator-only in Client Command). */
+  staffClientNotes: StaffClientNoteRecord[];
   header: {
     companyName: string;
     logoUrl: string | null;
@@ -170,4 +173,5 @@ export type ClientWorkspaceMemoryInput = Omit<
   | "siteIntelligence"
   | "leadOperations"
   | "workBoard"
+  | "staffClientNotes"
 >;
