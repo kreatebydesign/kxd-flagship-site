@@ -6,6 +6,8 @@ import { sha256Hex } from "@/lib/proposal-lifecycle/hash";
 import type { StaffActor } from "@/lib/staff/types";
 import { buildStaffAcknowledgment } from "./acknowledgment.ts";
 import {
+  SAMPLE_NONBINDING_AGREEMENT_BODY,
+  SAMPLE_NONBINDING_AGREEMENT_TITLE,
   SAMPLE_NONBINDING_POLICY_BODY,
   SAMPLE_NONBINDING_POLICY_TITLE,
 } from "./constants.ts";
@@ -28,8 +30,10 @@ import {
   staffDocumentStaffPath,
   staffDocumentsListPath,
   assertStaffDocumentRowAccess,
+  staffMayCountersignDocuments,
   staffMayManageDocuments,
 } from "./access.ts";
+import { staffDocumentAttentionLabel } from "./display.ts";
 import type {
   StaffAcknowledgmentEvidence,
   StaffDocumentAttentionItem,
@@ -128,14 +132,6 @@ async function fileStaffDocumentPdf(input: {
   title: string;
   buffer: Buffer;
 }): Promise<number> {
-  if (input.kind === "acknowledgment-record" || input.kind === "executed-agreement") {
-    const existingByKind = await findFileByKind({
-      staffDocumentId: input.staffDocumentId,
-      kind: input.kind,
-    });
-    if (existingByKind) return existingByKind;
-  }
-
   const contentHash = hashStaffDocumentPdfBytes(input.buffer);
   const existing = await findFileByHash({
     staffDocumentId: input.staffDocumentId,
@@ -143,6 +139,54 @@ async function fileStaffDocumentPdf(input: {
     contentHash,
   });
   if (existing) return existing;
+
+  if (input.kind === "acknowledgment-record") {
+    const existingByKind = await findFileByKind({
+      staffDocumentId: input.staffDocumentId,
+      kind: input.kind,
+    });
+    if (existingByKind) return existingByKind;
+  }
+
+  if (input.kind === "executed-agreement") {
+    const existingByKind = await findFileByKind({
+      staffDocumentId: input.staffDocumentId,
+      kind: input.kind,
+    });
+    if (existingByKind) {
+      const payload = await getPayload({ config });
+      const fileRec = (await payload.findByID({
+        collection: FILES as never,
+        id: existingByKind,
+        depth: 0,
+        overrideAccess: true,
+      })) as AnyDoc;
+      if (String(fileRec.contentHash ?? "") === contentHash) {
+        return existingByKind;
+      }
+      const adapter = getDefaultStaffDocumentStorageAdapter();
+      const storageKey = `${input.staffDocumentId}/${input.kind}-${contentHash.slice(0, 16)}.pdf`;
+      const uploaded = await adapter.upload({
+        key: storageKey,
+        buffer: input.buffer,
+        mimeType: "application/pdf",
+      });
+      await payload.update({
+        collection: FILES as never,
+        id: existingByKind,
+        data: {
+          title: input.title,
+          contentHash,
+          storageKey: uploaded.key,
+          storageProvider: uploaded.provider,
+          mimeType: "application/pdf",
+          byteLength: input.buffer.byteLength,
+        } as never,
+        overrideAccess: true,
+      });
+      return existingByKind;
+    }
+  }
 
   const adapter = getDefaultStaffDocumentStorageAdapter();
   const storageKey = `${input.staffDocumentId}/${input.kind}-${contentHash.slice(0, 16)}.pdf`;
@@ -230,17 +274,25 @@ export async function listPendingStaffDocumentAttention(
     depth: 0,
     overrideAccess: true,
   });
-  return (result.docs as AnyDoc[]).map((doc) => ({
-    id: Number(doc.id),
-    title: String(doc.title ?? "Policy"),
-    href: staffDocumentStaffPath(Number(doc.id)),
-    assignedAt: String(doc.createdAt ?? new Date().toISOString()),
-  }));
+  return (result.docs as AnyDoc[]).map((doc) => {
+    const signingMode = parseSigningMode(doc);
+    const kind = String(doc.kind) as StaffDocumentKind;
+    return {
+      id: Number(doc.id),
+      title: String(doc.title ?? "Policy"),
+      href: staffDocumentStaffPath(Number(doc.id)),
+      assignedAt: String(doc.createdAt ?? new Date().toISOString()),
+      kind,
+      signingMode,
+      actionLabel: staffDocumentAttentionLabel({ signingMode }),
+    };
+  });
 }
 
 export async function getStaffDocumentDetail(input: {
   actor: StaffActor;
   documentId: number;
+  operatorView?: boolean;
 }): Promise<StaffDocumentDetail | null> {
   const payload = await getPayload({ config });
   let doc: AnyDoc;
@@ -257,7 +309,14 @@ export async function getStaffDocumentDetail(input: {
 
   const staffUserId = relId(doc.staffUser);
   if (staffUserId == null) return null;
-  assertStaffDocumentRowAccess(input.actor, staffUserId);
+  const operatorView = Boolean(input.operatorView);
+  if (operatorView) {
+    if (!staffMayManageDocuments(input.actor)) {
+      throw new Error("Staff permission denied: operator document view.");
+    }
+  } else {
+    assertStaffDocumentRowAccess(input.actor, staffUserId);
+  }
 
   const files = await payload.find({
     collection: FILES as never,
@@ -299,10 +358,36 @@ export async function getStaffDocumentDetail(input: {
     policyFileId,
     acknowledgmentFileId,
     executedAgreementFileId,
+    staffUserId,
     canAcknowledge:
+      !operatorView &&
       signingMode === "acknowledgment" &&
       status === "assigned" &&
       staffUserId === input.actor.userId,
+    canSign:
+      !operatorView &&
+      signingMode === "dual-signature" &&
+      status === "assigned" &&
+      staffUserId === input.actor.userId,
+    canDecline:
+      !operatorView &&
+      signingMode === "dual-signature" &&
+      status === "assigned" &&
+      staffUserId === input.actor.userId,
+    canCountersign:
+      operatorView &&
+      staffMayCountersignDocuments(input.actor) &&
+      status === "awaiting-operator-signature",
+    canRevoke:
+      operatorView &&
+      staffMayManageDocuments(input.actor) &&
+      (status === "assigned" ||
+        status === "awaiting-operator-signature" ||
+        status === "executing"),
+    canRetryExecution:
+      operatorView &&
+      staffMayManageDocuments(input.actor) &&
+      status === "executing",
   };
 }
 
@@ -468,12 +553,20 @@ export async function createStaffDocumentTemplate(input: {
     kind,
     signingMode: input.signingMode ?? null,
   });
-  const title = input.useSample
+  const useSamplePolicy =
+    Boolean(input.useSample) &&
+    (kind === "policy-acknowledgment" || kind === "staff-policy");
+  const useSampleAgreement = Boolean(input.useSample) && !useSamplePolicy;
+  const title = useSamplePolicy
     ? SAMPLE_NONBINDING_POLICY_TITLE
-    : String(input.title ?? "").trim();
-  const body = input.useSample
+    : useSampleAgreement
+      ? SAMPLE_NONBINDING_AGREEMENT_TITLE
+      : String(input.title ?? "").trim();
+  const body = useSamplePolicy
     ? SAMPLE_NONBINDING_POLICY_BODY
-    : String(input.body ?? "").trim();
+    : useSampleAgreement
+      ? SAMPLE_NONBINDING_AGREEMENT_BODY
+      : String(input.body ?? "").trim();
   if (!title || !body) throw new Error("Title and body are required.");
 
   const payload = await getPayload({ config });
@@ -662,3 +755,12 @@ export async function listStaffDocumentTemplatesForOperator(): Promise<
 export { fileStaffDocumentPdf };
 
 export { staffDocumentsListPath };
+
+export {
+  signStaffDocumentAsEmployee,
+  declineStaffDocumentAsEmployee,
+  countersignStaffDocumentAsOperator,
+  retryStaffDocumentExecution,
+  revokeStaffDocumentAsOperator,
+  listStaffDocumentsAwaitingCountersignature,
+} from "./signing-actions.ts";

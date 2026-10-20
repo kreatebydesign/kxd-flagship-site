@@ -11,31 +11,26 @@ import {
   OpsStatusBadge,
 } from "@/components/admin/operations/shared/OpsBriefing";
 import { KxdPage } from "@/components/os";
+import {
+  staffDocumentKindLabel,
+  staffDocumentStatusBadge,
+} from "@/lib/staff-documents/display";
 import type { StaffDocumentListItem } from "@/lib/staff-documents/types";
 
-function statusBadge(status: StaffDocumentListItem["status"]) {
-  switch (status) {
-    case "assigned":
-      return { label: "Acknowledgment required", variant: "warning" as const };
-    case "acknowledged":
-      return { label: "Acknowledged", variant: "success" as const };
-    case "revoked":
-      return { label: "Revoked", variant: "default" as const };
-    default:
-      return { label: status, variant: "default" as const };
-  }
+function needsAttention(doc: StaffDocumentListItem): boolean {
+  return doc.status === "assigned";
 }
 
 export function StaffDocumentsScreen(props: { documents: StaffDocumentListItem[] }) {
-  const pending = props.documents.filter((d) => d.status === "assigned");
+  const pending = props.documents.filter(needsAttention);
 
   return (
     <OperationsShell activeId="staff-documents" variant="staff">
       <KxdPage className="kxd-os-page--ops kxd-os-page--staff">
         <OperationsPageHero
           eyebrow="My documents"
-          title="Policies and acknowledgments"
-          lead="Assigned internal policies. Download the PDF and acknowledge when you have read the full document."
+          title="Policies and agreements"
+          lead="Assigned internal policies and employment documents. Review each assignment in full before acknowledging or signing."
         />
 
         {pending.length > 0 ? (
@@ -43,7 +38,10 @@ export function StaffDocumentsScreen(props: { documents: StaffDocumentListItem[]
             <OpsSectionHead label="Needs your attention" count={pending.length} />
             <OpsCard>
               {pending.map((doc) => {
-                const badge = statusBadge(doc.status);
+                const badge = staffDocumentStatusBadge({
+                  status: doc.status,
+                  signingMode: doc.signingMode,
+                });
                 return (
                   <OpsListRow key={doc.id} href={doc.href}>
                     <div className="kxd-os-ops-list-row__main">
@@ -51,7 +49,10 @@ export function StaffDocumentsScreen(props: { documents: StaffDocumentListItem[]
                         <p className="kxd-os-ops-list-row__title">{doc.title}</p>
                         <OpsStatusBadge label={badge.label} variant={badge.variant} />
                       </div>
-                      <p className="kxd-os-meta">Assigned {new Date(doc.assignedAt).toLocaleString()}</p>
+                      <p className="kxd-os-meta">
+                        {staffDocumentKindLabel(doc.kind)} · Assigned{" "}
+                        {new Date(doc.assignedAt).toLocaleString()}
+                      </p>
                     </div>
                   </OpsListRow>
                 );
@@ -66,7 +67,10 @@ export function StaffDocumentsScreen(props: { documents: StaffDocumentListItem[]
             <OpsEmpty message="No documents assigned yet." />
           ) : (
             props.documents.map((doc) => {
-              const badge = statusBadge(doc.status);
+              const badge = staffDocumentStatusBadge({
+                status: doc.status,
+                signingMode: doc.signingMode,
+              });
               return (
                 <OpsListRow key={doc.id} href={doc.href}>
                   <div className="kxd-os-ops-list-row__main">
@@ -75,9 +79,12 @@ export function StaffDocumentsScreen(props: { documents: StaffDocumentListItem[]
                       <OpsStatusBadge label={badge.label} variant={badge.variant} />
                     </div>
                     <p className="kxd-os-meta">
-                      Version {doc.templateVersion}
+                      {staffDocumentKindLabel(doc.kind)} · Version {doc.templateVersion}
                       {doc.acknowledgedAt
                         ? ` · Acknowledged ${new Date(doc.acknowledgedAt).toLocaleString()}`
+                        : ""}
+                      {doc.executedAt
+                        ? ` · Executed ${new Date(doc.executedAt).toLocaleString()}`
                         : ""}
                     </p>
                   </div>

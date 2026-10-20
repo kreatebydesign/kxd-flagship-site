@@ -9696,6 +9696,36 @@ a.kxd-os-platform-subsystem-card__title:hover {
   gap: var(--kxd-os-space-5);
 }
 
+/* Staff documents — operator oversight (Release B Phase 2) */
+.kxd-os-page--staff-documents-operator .kxd-os-staff-docs-operator__section {
+  margin-bottom: var(--kxd-os-space-6);
+}
+
+.kxd-os-page--staff-documents-operator .kxd-os-staff-docs-operator__field {
+  display: block;
+  max-width: 28rem;
+  margin-top: var(--kxd-os-space-3);
+}
+
+.kxd-os-page--staff-documents-operator .kxd-os-staff-docs-operator__template-list {
+  margin: var(--kxd-os-space-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.kxd-os-page--staff-documents-operator .kxd-os-staff-docs-operator__template-list li {
+  margin-bottom: var(--kxd-os-space-2);
+  color: var(--kxd-os-text-secondary);
+}
+
+.kxd-os-page--staff-documents-operator .kxd-os-meta {
+  color: var(--kxd-os-text-secondary);
+}
+
+.kxd-os-page--staff-documents-operator .kxd-os-staff-docs-operator__detail-card {
+  margin-top: var(--kxd-os-space-5);
+}
+
 /* ── KXD Intelligence product identity ───────────────────────────────── */
 
 .kxd-os-intel-mark {

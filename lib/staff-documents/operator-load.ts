@@ -5,6 +5,7 @@ import config from "@payload-config";
 import {
   listStaffDocumentTemplatesForOperator,
   listStaffDocumentsForOperator,
+  listStaffDocumentsAwaitingCountersignature,
 } from "./data.ts";
 
 export async function loadStaffDocumentsOperatorWorkspace() {
@@ -27,10 +28,11 @@ export async function loadStaffDocumentsOperatorWorkspace() {
     };
   });
 
-  const [templates, assignments] = await Promise.all([
+  const [templates, assignments, countersignQueue] = await Promise.all([
     listStaffDocumentTemplatesForOperator(),
     listStaffDocumentsForOperator(),
+    listStaffDocumentsAwaitingCountersignature(),
   ]);
 
-  return { templates, assignments, staffUsers };
+  return { templates, assignments, countersignQueue, staffUsers };
 }

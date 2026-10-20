@@ -19,6 +19,7 @@ export default async function StaffDocumentsOversightPage() {
   let data: Awaited<ReturnType<typeof loadStaffDocumentsOperatorWorkspace>> = {
     templates: [],
     assignments: [],
+    countersignQueue: [],
     staffUsers: [],
   };
   try {
@@ -31,6 +32,7 @@ export default async function StaffDocumentsOversightPage() {
     <StaffDocumentsOperatorScreen
       templates={data.templates}
       assignments={data.assignments}
+      countersignQueue={data.countersignQueue}
       staffUsers={data.staffUsers}
     />
   );

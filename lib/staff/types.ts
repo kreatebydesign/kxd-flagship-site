@@ -183,6 +183,9 @@ export interface StaffDocumentAttentionItem {
   title: string;
   href: string;
   assignedAt: string;
+  kind: import("@/lib/staff-documents/types").StaffDocumentKind;
+  signingMode: import("@/lib/staff-documents/types").StaffDocumentSigningMode;
+  actionLabel: string;
 }
 
 export interface StaffTodayData {
