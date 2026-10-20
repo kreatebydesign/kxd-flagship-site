@@ -222,10 +222,10 @@ function StaffHomeBody({
                   <div className="kxd-os-ops-list-row__main">
                     <div className="kxd-os-ops-list-row__head">
                       <p className="kxd-os-ops-list-row__title">{doc.title}</p>
-                      <OpsStatusBadge label="Acknowledgment required" variant="warning" />
+                      <OpsStatusBadge label={doc.actionLabel} variant="warning" />
                     </div>
                     <p className="kxd-os-meta">
-                      Policy assigned {new Date(doc.assignedAt).toLocaleString()}
+                      Assigned {new Date(doc.assignedAt).toLocaleString()}
                     </p>
                   </div>
                 </OpsListRow>

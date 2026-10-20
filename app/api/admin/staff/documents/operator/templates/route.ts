@@ -26,6 +26,7 @@ export async function POST(request: Request) {
     title?: string;
     body?: string;
     useSample?: boolean;
+    kind?: string;
     legalEntityName?: string;
   };
 
@@ -34,6 +35,7 @@ export async function POST(request: Request) {
       actor: gated.actor,
       title: String(body.title ?? ""),
       body: String(body.body ?? ""),
+      kind: body.kind,
       useSample: Boolean(body.useSample),
       legalEntityName: body.legalEntityName,
     });

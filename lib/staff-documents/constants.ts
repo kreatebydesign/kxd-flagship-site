@@ -32,3 +32,23 @@ export const STAFF_AGREEMENT_ESIGN_CONSENT_VERSION = "kxd-staff-agreement-esign-
 
 export const STAFF_AGREEMENT_ESIGN_CONSENT_TEXT =
   "I agree to use electronic records and electronic signatures for this staff agreement in KXD OS. I understand that typing my legal name is intended to serve as my electronic signature. I confirm I reviewed the document version identified by its content hash and that I am authorized to sign for the named party. This record supports internal audit and operations; it does not by itself establish legal compliance.";
+
+export const SAMPLE_NONBINDING_AGREEMENT_TITLE =
+  "[SAMPLE — NONBINDING] Staff Agreement (Test Only — Dual Signature)";
+
+export const SAMPLE_NONBINDING_AGREEMENT_BODY = `SAMPLE AGREEMENT — NOT ENFORCEABLE
+
+This text exists only for testing KXD OS staff agreement signing flows in development.
+
+Parties (test labels only)
+Employee: assigned teammate in KXD OS.
+Employer: Kreate by Design LLC — confirm exact registered legal name before production use.
+
+Purpose
+This sample describes a fictional mutual understanding for workflow testing. It is not an employment agreement, NDA, or IP assignment.
+
+Signatures (test)
+Employee signs first in KXD OS. An authorized KXD representative countersigns second. An executed PDF is generated for audit.
+
+Effective
+This sample has no legal effect. Replace with counsel-approved agreement text before production assignment.`;

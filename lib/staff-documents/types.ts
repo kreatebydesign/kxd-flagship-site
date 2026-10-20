@@ -138,6 +138,9 @@ export interface StaffDocumentAttentionItem {
   title: string;
   href: string;
   assignedAt: string;
+  kind: StaffDocumentKind;
+  signingMode: StaffDocumentSigningMode;
+  actionLabel: string;
 }
 
 export interface StaffDocumentDetail {
@@ -160,5 +163,11 @@ export interface StaffDocumentDetail {
   policyFileId: number | null;
   acknowledgmentFileId: number | null;
   executedAgreementFileId: number | null;
+  staffUserId: number;
   canAcknowledge: boolean;
+  canSign: boolean;
+  canDecline: boolean;
+  canCountersign: boolean;
+  canRevoke: boolean;
+  canRetryExecution: boolean;
 }
