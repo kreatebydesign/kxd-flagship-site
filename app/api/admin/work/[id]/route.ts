@@ -8,6 +8,8 @@ import {
   buildStaffAwareWorkUpdatePatch,
 } from "@/lib/staff/work-field-policy";
 import { mergeApprovalTagsForAssignee } from "@/lib/staff/work-assignee";
+import { saveStaffWorkExecution } from "@/lib/staff/work-execution-service";
+import { workRequiresOperatorApproval } from "@/lib/staff/work-approval";
 import { getWorkItem, updateWorkItem } from "@/lib/work/services";
 import type { WorkCategory, WorkPriority, WorkStatus } from "@/lib/work/types";
 
@@ -84,11 +86,14 @@ export async function PATCH(
   try {
     if (actor && isRestrictedStaff(actor)) {
       const staffPatch = buildStaffAwareWorkUpdatePatch(actor, workBefore, body);
-      const work = await updateWorkItem({
-        workId,
-        notes: staffPatch.notes,
-        actorEmail: typeof auth.email === "string" ? auth.email : undefined,
+      const requiresMattApproval = workRequiresOperatorApproval(workBefore, actor);
+      await saveStaffWorkExecution(workId, actor, workBefore, requiresMattApproval, {
+        staffProgress: staffPatch.notes ?? null,
       });
+      const work = await getWorkItem(workId);
+      if (!work) {
+        return NextResponse.json({ ok: false, error: "Work not found." }, { status: 404 });
+      }
       return NextResponse.json({ ok: true, work });
     }
 

@@ -1,6 +1,9 @@
 import "server-only";
 
 import { getTrainingStaffSummary } from "@/lib/training/summary";
+import { buildStaffGuidedChecklistItems } from "./guided-checklist";
+import { loadStaffGuidedChecklistChecked } from "./work-execution-service";
+import { splitWorkNotes } from "./work-execution-notes";
 import { getWorkItem } from "@/lib/work/services";
 import { listWorkAssignedToStaffActor } from "@/lib/work/staff-assigned";
 import type { WorkListItem } from "@/lib/work/types";
@@ -222,6 +225,21 @@ export async function loadStaffGuidedWork(
   const mattApproval =
     workRequiresOperatorApproval(work, actor) || isWaitingOnMatt(work);
 
+  const { studioNotes, staffProgress } = splitWorkNotes(work.notes);
+  const checklistItems = buildStaffGuidedChecklistItems(mattApproval);
+  let checklistChecked: Record<string, boolean> = {};
+  try {
+    checklistChecked = await loadStaffGuidedChecklistChecked(
+      work.id,
+      actor.userId,
+      mattApproval,
+    );
+  } catch {
+    checklistChecked = Object.fromEntries(
+      checklistItems.map((item) => [item.id, false]),
+    );
+  }
+
   let helpRequests: StaffHelpRequestView[] = [];
   try {
     const records = await listHelpRequestsForStaff(actor.userId, {
@@ -239,7 +257,9 @@ export async function loadStaffGuidedWork(
     summary: work.summary,
     description: work.description,
     acceptanceCriteria: work.acceptanceCriteria,
-    notes: work.notes,
+    studioNotes,
+    staffProgressNotes: staffProgress,
+    checklistChecked,
     activityHistory: work.activityHistory ?? [],
     status: work.status,
     priority: work.priority,
@@ -291,18 +311,7 @@ export async function loadStaffGuidedWork(
     permissionBoundary: mattApproval
       ? "You may prepare. An authorized approver must decide before anything leaves the studio or changes access, money, or public content."
       : "You may complete this assigned item. Do not change plans, entitlements, permissions, or send external messages.",
-    checklist: [
-      { id: "understood", label: "I understand what was requested", required: true },
-      { id: "no-invention", label: "I did not invent client facts, prices, or dates", required: true },
-      { id: "boundary", label: "I stayed inside my permission boundary", required: true },
-      {
-        id: "matt",
-        label: mattApproval
-          ? "Ready for review"
-          : "I confirmed completion intentionally",
-        required: true,
-      },
-    ],
+    checklist: checklistItems,
     canCompleteIndependently: !mattApproval,
     requiresMattApproval: mattApproval,
     hrefBack: STAFF_HOME_PATH,

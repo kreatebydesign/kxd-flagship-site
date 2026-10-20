@@ -43,10 +43,19 @@ export interface WorkRelationshipRecord {
 }
 
 /** Stored in Work.metadata — no collection migration required. */
+/** Guided-work checklist — stored on Work.metadata.staffGuidedExecution (no migration). */
+export interface StaffGuidedExecutionMetadata {
+  v: 1;
+  assigneeUserId: number;
+  checked: Record<string, boolean>;
+  updatedAt: string;
+}
+
 export interface WorkIntegrationMetadata {
   workNumber?: string;
   relationships?: WorkRelationshipRecord[];
   integrationVersion?: number;
+  staffGuidedExecution?: StaffGuidedExecutionMetadata;
 }
 
 export type WorkLifecycleEvent =

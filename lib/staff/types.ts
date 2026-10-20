@@ -251,7 +251,12 @@ export interface StaffGuidedWorkData {
   summary: string | null;
   description: string | null;
   acceptanceCriteria: string | null;
-  notes: string | null;
+  /** Operator / studio notes — read-only for staff. */
+  studioNotes: string | null;
+  /** Staff-owned progress section (persisted after [Staff progress] marker). */
+  staffProgressNotes: string | null;
+  /** Persisted checklist state for the current assignee. */
+  checklistChecked: Record<string, boolean>;
   activityHistory: WorkActivityEntry[];
   status: string;
   priority: string | null;

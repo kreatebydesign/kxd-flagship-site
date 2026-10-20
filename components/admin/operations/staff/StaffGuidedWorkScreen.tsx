@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { OperationsPageHero } from "@/components/admin/operations/shared/OperationsPageHero";
 import { OperationsShell } from "@/components/admin/operations/shared/OperationsShell";
 import {
@@ -38,6 +38,28 @@ function formatDue(dueDate: string | null): string | null {
   return date.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
 }
 
+function formatActivityLabel(action: string): string {
+  switch (action) {
+    case "staff-progress-saved":
+      return "Progress saved";
+    case "staff-checklist-updated":
+      return "Checklist updated";
+    case "staff-submitted-for-review":
+      return "Submitted for review";
+    case "status-changed":
+      return "Status changed";
+    case "returned":
+      return "Returned for revision";
+    case "updated":
+      return "Updated";
+    default:
+      return action;
+  }
+}
+
+type ProgressSaveState = "idle" | "saving" | "saved" | "error";
+type ChecklistSaveState = "idle" | "saving" | "saved" | "error";
+
 export interface StaffGuidedWorkScreenProps {
   data: StaffGuidedWorkData;
   readOnly?: boolean;
@@ -52,10 +74,22 @@ export function StaffGuidedWorkScreen({
   onCheck,
 }: StaffGuidedWorkScreenProps) {
   const router = useRouter();
-  const [checked, setChecked] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(data.checklist.map((item) => [item.id, false])),
+  const [staffProgress, setStaffProgress] = useState(data.staffProgressNotes ?? "");
+  const [progressSaveState, setProgressSaveState] = useState<ProgressSaveState>("idle");
+  const [progressSaveError, setProgressSaveError] = useState<string | null>(null);
+  const [savedProgressSnapshot, setSavedProgressSnapshot] = useState(
+    data.staffProgressNotes ?? "",
   );
-  const [busy, setBusy] = useState<"check" | "review" | "complete" | null>(null);
+
+  const [checked, setChecked] = useState<Record<string, boolean>>(() => ({
+    ...data.checklistChecked,
+  }));
+  const [checklistSaveState, setChecklistSaveState] = useState<ChecklistSaveState>("idle");
+  const [checklistSaveError, setChecklistSaveError] = useState<string | null>(null);
+  const checklistDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const savedChecklistRef = useRef(JSON.stringify(data.checklistChecked));
+
+  const [busy, setBusy] = useState<"check" | "review" | "complete" | "progress" | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -71,9 +105,115 @@ export function StaffGuidedWorkScreen({
   });
   const approverLine = assignedApproverLine(approverName);
 
+  const progressDirty = staffProgress !== savedProgressSnapshot;
+
+  useEffect(() => {
+    if (progressSaveState !== "saved") return;
+    const timer = setTimeout(() => setProgressSaveState("idle"), 3000);
+    return () => clearTimeout(timer);
+  }, [progressSaveState]);
+
+  useEffect(() => {
+    if (checklistSaveState !== "saved") return;
+    const timer = setTimeout(() => setChecklistSaveState("idle"), 2500);
+    return () => clearTimeout(timer);
+  }, [checklistSaveState]);
+
+  useEffect(() => {
+    return () => {
+      if (checklistDebounceRef.current) clearTimeout(checklistDebounceRef.current);
+    };
+  }, []);
+
+  const persistExecution = useCallback(
+    async (body: { staffProgress?: string | null; checklist?: Record<string, boolean> }) => {
+      const res = await fetch(`/api/admin/staff/work/${data.workId}/execution`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const payload = (await res.json()) as {
+        success?: boolean;
+        error?: string;
+        staffProgress?: string | null;
+        checklist?: Record<string, boolean>;
+      };
+      if (!res.ok || payload.success === false) {
+        throw new Error(payload.error ?? "Could not save.");
+      }
+      if (payload.staffProgress !== undefined) {
+        const next = payload.staffProgress ?? "";
+        setStaffProgress(next);
+        setSavedProgressSnapshot(next);
+      }
+      if (payload.checklist) {
+        setChecked(payload.checklist);
+        savedChecklistRef.current = JSON.stringify(payload.checklist);
+      }
+      return payload;
+    },
+    [data.workId],
+  );
+
+  const saveProgress = useCallback(async () => {
+    if (mutationsDisabled) return;
+    setBusy("progress");
+    setProgressSaveState("saving");
+    setProgressSaveError(null);
+    try {
+      await persistExecution({ staffProgress });
+      setProgressSaveState("saved");
+    } catch (err) {
+      setProgressSaveState("error");
+      setProgressSaveError(err instanceof Error ? err.message : "Could not save progress.");
+    } finally {
+      setBusy(null);
+    }
+  }, [mutationsDisabled, persistExecution, staffProgress]);
+
+  const saveChecklist = useCallback(
+    async (nextChecked: Record<string, boolean>) => {
+      if (mutationsDisabled) return;
+      const serialized = JSON.stringify(nextChecked);
+      if (serialized === savedChecklistRef.current) return;
+
+      setChecklistSaveState("saving");
+      setChecklistSaveError(null);
+      try {
+        await persistExecution({ checklist: nextChecked });
+        setChecklistSaveState("saved");
+      } catch (err) {
+        setChecklistSaveState("error");
+        setChecklistSaveError(
+          err instanceof Error ? err.message : "Could not save checklist.",
+        );
+      }
+    },
+    [mutationsDisabled, persistExecution],
+  );
+
   function toggleChecklist(id: string) {
     if (mutationsDisabled) return;
-    setChecked((prev) => ({ ...prev, [id]: !prev[id] }));
+    setChecked((prev) => {
+      const next = { ...prev, [id]: !prev[id] };
+      if (checklistDebounceRef.current) clearTimeout(checklistDebounceRef.current);
+      checklistDebounceRef.current = setTimeout(() => {
+        void saveChecklist(next);
+      }, 400);
+      return next;
+    });
+  }
+
+  async function flushBeforeSubmit() {
+    if (progressDirty) {
+      await persistExecution({ staffProgress });
+      setProgressSaveState("saved");
+    }
+    const serialized = JSON.stringify(checked);
+    if (serialized !== savedChecklistRef.current) {
+      await persistExecution({ checklist: checked });
+      setChecklistSaveState("saved");
+    }
   }
 
   async function handleCheck() {
@@ -99,10 +239,11 @@ export function StaffGuidedWorkScreen({
     setError(null);
     setMessage(null);
     try {
+      await flushBeforeSubmit();
       const res = await fetch(`/api/admin/staff/work/${data.workId}/submit-review`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ checklist: checked }),
+        body: JSON.stringify({}),
       });
       const payload = (await res.json()) as { success?: boolean; error?: string };
       if (!res.ok || payload.success === false) {
@@ -123,10 +264,11 @@ export function StaffGuidedWorkScreen({
     setError(null);
     setMessage(null);
     try {
+      await flushBeforeSubmit();
       const res = await fetch(`/api/admin/staff/work/${data.workId}/complete`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ checklist: checked }),
+        body: JSON.stringify({}),
       });
       const payload = (await res.json()) as { success?: boolean; error?: string };
       if (!res.ok || payload.success === false) {
@@ -216,12 +358,61 @@ export function StaffGuidedWorkScreen({
               </OpsCard>
             ) : null}
 
-            {data.notes ? (
+            {data.studioNotes ? (
               <OpsCard className="kxd-os-ops-card-padding kxd-os-staff-guided__section">
-                <OpsSectionHead label="Notes" />
-                <pre className="kxd-os-staff-my-work__notes">{data.notes}</pre>
+                <OpsSectionHead label="Studio notes" />
+                <pre className="kxd-os-staff-my-work__notes kxd-os-staff-guided__studio-notes">
+                  {data.studioNotes}
+                </pre>
+                <p className="kxd-os-meta kxd-os-staff-guided__studio-hint">
+                  From the studio — read only. Add your updates under Your progress.
+                </p>
               </OpsCard>
             ) : null}
+
+            <OpsCard className="kxd-os-ops-card-padding kxd-os-staff-guided__section">
+              <OpsSectionHead label="Your progress" />
+              <p className="kxd-os-meta kxd-os-staff-guided__progress-lead">
+                Document setup steps, facts gathered, and what is ready for review. Saved separately
+                from the assignment brief.
+              </p>
+              <textarea
+                className="kxd-os-staff-guided__progress-input"
+                rows={6}
+                value={staffProgress}
+                disabled={mutationsDisabled}
+                placeholder="What you completed, what is verified, and what still needs Matt…"
+                onChange={(e) => {
+                  setStaffProgress(e.target.value);
+                  if (progressSaveState === "saved") setProgressSaveState("idle");
+                }}
+              />
+              <div className="kxd-os-staff-guided__progress-actions">
+                <KxdButton
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  loading={busy === "progress"}
+                  disabled={mutationsDisabled || !progressDirty}
+                  onClick={() => void saveProgress()}
+                >
+                  Save progress
+                </KxdButton>
+                {progressSaveState === "saving" ? (
+                  <span className="kxd-os-meta kxd-os-staff-guided__save-hint">Saving…</span>
+                ) : null}
+                {progressSaveState === "saved" ? (
+                  <span className="kxd-os-meta kxd-os-staff-guided__save-hint kxd-os-staff-guided__save-hint--ok">
+                    Saved
+                  </span>
+                ) : null}
+                {progressSaveState === "error" && progressSaveError ? (
+                  <span className="kxd-os-meta kxd-os-staff-guided__save-hint kxd-os-staff-guided__save-hint--error">
+                    {progressSaveError}
+                  </span>
+                ) : null}
+              </div>
+            </OpsCard>
 
             <OpsCard className="kxd-os-ops-card-padding kxd-os-staff-guided__section">
               <OpsSectionHead label="Permission boundary" />
@@ -282,7 +473,7 @@ export function StaffGuidedWorkScreen({
                         {entry.actor ? ` · ${entry.actor}` : ""}
                       </span>
                       <p>
-                        {entry.action}
+                        {formatActivityLabel(entry.action)}
                         {entry.detail ? ` — ${entry.detail}` : ""}
                       </p>
                     </li>
@@ -315,6 +506,20 @@ export function StaffGuidedWorkScreen({
                   </li>
                 ))}
               </ul>
+
+              {checklistSaveState === "saving" ? (
+                <p className="kxd-os-meta kxd-os-staff-guided__checklist-hint">Saving checklist…</p>
+              ) : null}
+              {checklistSaveState === "saved" ? (
+                <p className="kxd-os-meta kxd-os-staff-guided__checklist-hint kxd-os-staff-guided__checklist-hint--ok">
+                  Checklist saved
+                </p>
+              ) : null}
+              {checklistSaveState === "error" && checklistSaveError ? (
+                <p className="kxd-os-meta kxd-os-staff-guided__checklist-hint kxd-os-staff-guided__checklist-hint--error">
+                  {checklistSaveError}
+                </p>
+              ) : null}
 
               {message ? <p className="kxd-os-meta kxd-os-staff-guided__feedback">{message}</p> : null}
               {error ? (
