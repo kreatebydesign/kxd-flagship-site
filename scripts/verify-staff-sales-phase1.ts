@@ -21,6 +21,11 @@ import {
   rejectForbiddenStaffLeadPatchKeys,
   STAFF_SALES_OPERATOR_ONLY_STATUSES,
 } from "../lib/staff/sales/policy";
+import {
+  isAuthenticated,
+  isRestrictedStaffPayloadUser,
+  isStudioPayloadOperator,
+} from "../payload/access/index.ts";
 
 const root = path.resolve(import.meta.dirname, "..");
 
@@ -141,10 +146,44 @@ assert.doesNotMatch(
   /OPERATIONS_COORDINATOR_CAPABILITIES[\s\S]*staff\.sales\.read/,
 );
 
-assert.match(read("app/api/admin/sales/leads/route.ts"), /requirePayloadAdminApi/);
+assert.match(read("app/admin/sales/layout.tsx"), /requireStaffAwarePage/);
 assert.match(
   read("app/api/admin/staff/sales/leads/route.ts"),
   /requireStaffCapabilityApi\("staff\.sales/,
 );
+
+const salesLeadsCollection = read("payload/collections/SalesLeads.ts");
+assert.match(salesLeadsCollection, /read:\s*isAuthenticated/);
+assert.match(salesLeadsCollection, /create:\s*isAuthenticated/);
+assert.match(salesLeadsCollection, /update:\s*isAuthenticated/);
+assert.match(salesLeadsCollection, /delete:\s*isAuthenticated/);
+
+const tylerPayload = {
+  id: tyler!.userId,
+  collection: "users" as const,
+  role: "editor",
+  staffRole: "business_development_specialist",
+};
+const mattPayload = {
+  id: 1,
+  collection: "users" as const,
+  role: "admin",
+  staffRole: "none",
+};
+
+assert.equal(isRestrictedStaffPayloadUser(tylerPayload as never), true);
+assert.equal(isStudioPayloadOperator(tylerPayload as never), false);
+assert.equal(isStudioPayloadOperator(mattPayload as never), true);
+assert.equal(
+  isAuthenticated({ req: { user: tylerPayload } } as never),
+  false,
+);
+assert.equal(
+  isAuthenticated({ req: { user: mattPayload } } as never),
+  true,
+);
+
+const usersCollection = read("payload/collections/Users.ts");
+assert.match(usersCollection, /update:\s*\(\{\s*req:\s*\{\s*user\s*\}\s*\}\)\s*=>\s*isStudioPayloadOperator\(user\)/);
 
 console.log("Staff Sales Phase 1 verification passed.\n");
