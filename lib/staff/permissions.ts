@@ -25,6 +25,9 @@ const FULL_ADMIN_CAPABILITIES: readonly StaffCapability[] = [
   "staff.client-context.limited",
   "staff.onboarding.assist",
   "staff.billing.verify",
+  "staff.documents.read",
+  "staff.documents.acknowledge",
+  "admin.staff-documents.manage",
   "admin.oversight",
   "admin.preview-staff",
   "admin.full-operations",
@@ -43,6 +46,8 @@ const BUSINESS_DEVELOPMENT_SPECIALIST_CAPABILITIES: readonly StaffCapability[] =
   "staff.help.request",
   "staff.guidance",
   "staff.client-context.limited",
+  "staff.documents.read",
+  "staff.documents.acknowledge",
 ] as const;
 
 /** Initial authority for operations_coordinator (Heather path). */
@@ -61,6 +66,8 @@ const OPERATIONS_COORDINATOR_CAPABILITIES: readonly StaffCapability[] = [
   "staff.client-context.limited",
   "staff.onboarding.assist",
   "staff.billing.verify",
+  "staff.documents.read",
+  "staff.documents.acknowledge",
 ] as const;
 
 /**

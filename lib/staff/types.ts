@@ -29,6 +29,9 @@ export type StaffCapability =
   | "staff.client-context.limited"
   | "staff.onboarding.assist"
   | "staff.billing.verify"
+  | "staff.documents.read"
+  | "staff.documents.acknowledge"
+  | "admin.staff-documents.manage"
   | "admin.oversight"
   | "admin.preview-staff"
   | "admin.full-operations";
@@ -173,6 +176,13 @@ export interface StaffHelpRequestView {
   href: string | null;
 }
 
+export interface StaffDocumentAttentionItem {
+  id: number;
+  title: string;
+  href: string;
+  assignedAt: string;
+}
+
 export interface StaffTodayData {
   actor: StaffActor;
   greeting: string;
@@ -189,6 +199,7 @@ export interface StaffTodayData {
   wrapUpHref: string;
   guidancePrompts: StaffGuidancePrompt[];
   helpRequests: StaffHelpRequestView[];
+  documentAttention: StaffDocumentAttentionItem[];
   emptyState: {
     title: string;
     body: string;

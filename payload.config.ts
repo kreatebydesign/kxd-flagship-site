@@ -44,6 +44,9 @@ import { StaffClientNotes } from "./payload/collections/StaffClientNotes.ts";
 import { StaffResponsibilities } from "./payload/collections/StaffResponsibilities.ts";
 import { StaffDayWrapups } from "./payload/collections/StaffDayWrapups.ts";
 import { StaffHelpRequests } from "./payload/collections/StaffHelpRequests.ts";
+import { StaffDocumentTemplates } from "./payload/collections/StaffDocumentTemplates.ts";
+import { StaffDocuments } from "./payload/collections/StaffDocuments.ts";
+import { StaffDocumentFiles } from "./payload/collections/StaffDocumentFiles.ts";
 import { ProposalActivity } from "./payload/collections/ProposalActivity.ts";
 import { ProposalConversions } from "./payload/collections/ProposalConversions.ts";
 import { ContractTemplates } from "./payload/collections/ContractTemplates.ts";
@@ -255,6 +258,9 @@ export default buildConfig({
     StaffClientNotes,
     StaffDayWrapups,
     StaffHelpRequests,
+    StaffDocumentTemplates,
+    StaffDocuments,
+    StaffDocumentFiles,
     GenesisSessions,
     WebsiteQAChecks,
     ClientOnboarding,

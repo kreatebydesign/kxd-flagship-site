@@ -121,6 +121,7 @@ import * as migration_20261008_partner_portal_phase4_network_directory from './2
 import * as migration_20261016_staff_client_assignments from './20261016_staff_client_assignments';
 import * as migration_20261018_work_acceptance_criteria from './20261018_work_acceptance_criteria';
 import * as migration_20261019_phase2a_staff_client_notes from './20261019_phase2a_staff_client_notes';
+import * as migration_20261020_staff_documents_release_a from './20261020_staff_documents_release_a';
 
 export const migrations = [
   {
@@ -791,5 +792,11 @@ export const migrations = [
     up: migration_20261019_phase2a_staff_client_notes.up,
     down: migration_20261019_phase2a_staff_client_notes.down,
     name: '20261019_phase2a_staff_client_notes',
+  },
+  {
+    // Release A — staff document templates, assignments, private files.
+    up: migration_20261020_staff_documents_release_a.up,
+    down: migration_20261020_staff_documents_release_a.down,
+    name: '20261020_staff_documents_release_a',
   },
 ];
