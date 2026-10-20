@@ -91,6 +91,10 @@ export interface WorkListItem {
   activityHistory: WorkActivityEntry[];
   /** Structured assignment deliverables — populated on staff-assigned loads when defined. */
   deliverableProgress?: StaffDeliverableProgressSummary | null;
+  /** Assigned to a restricted internal staff user (operator list). */
+  hasStaffAssignment?: boolean;
+  /** Heuristic: work needs founder approval before completion (tags, priority, category). */
+  requiresOperatorApproval?: boolean;
 }
 
 export interface ClientWorkData {

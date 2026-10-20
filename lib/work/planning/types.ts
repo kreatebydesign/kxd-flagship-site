@@ -27,11 +27,14 @@ export type WorkSortId =
 
 export type WorkDueRange = "any" | "overdue" | "today" | "week" | "later" | "none";
 
+export type WorkAssigneeScope = "any" | "staff" | "unassigned";
+
 export interface WorkViewFilters {
   clientId?: number | null;
   status?: WorkStatus | null;
   priority?: WorkPriority | null;
   assignedToId?: number | null;
+  assigneeScope?: WorkAssigneeScope | null;
   dueRange?: WorkDueRange | null;
   tag?: string | null;
 }
@@ -79,10 +82,13 @@ export interface WorkFilterOptions {
   statuses: WorkFilterOption[];
   priorities: WorkFilterOption[];
   assignees: WorkFilterOption[];
+  assigneeScopes: WorkFilterOption[];
   tags: WorkFilterOption[];
   dueRanges: WorkFilterOption[];
   sorts: WorkFilterOption[];
   views: WorkFilterOption[];
+  /** Restricted staff user ids — used for assignee scope filtering. */
+  restrictedStaffUserIds: number[];
 }
 
 export interface GetWorkViewInput {
@@ -92,6 +98,7 @@ export interface GetWorkViewInput {
   /** Preloaded pool — avoids duplicate Payload reads. */
   pool?: WorkListItem[];
   contextHints?: WorkViewContextHints;
+  restrictedStaffUserIds?: number[];
   now?: Date;
 }
 

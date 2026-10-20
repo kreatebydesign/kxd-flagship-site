@@ -12,6 +12,7 @@ import {
 } from "@/components/admin/operations/shared/OpsBriefing";
 import { KxdButton, KxdPage, type KxdBadgeVariant } from "@/components/os";
 import { assignedApproverLine, resolveAssignedApproverName } from "@/lib/staff/approval-presentation";
+import { formatStaffWorkActivityLabel } from "@/lib/staff/work-activity-labels";
 import type { StaffDeliverableView } from "@/lib/staff/work-deliverables";
 import type { StaffGuidedWorkData } from "@/lib/staff/types";
 import { WORK_STATUS_LABELS } from "@/lib/work/constants";
@@ -37,29 +38,6 @@ function formatDue(dueDate: string | null): string | null {
   const date = new Date(`${key}T12:00:00`);
   if (Number.isNaN(date.getTime())) return key;
   return date.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
-}
-
-function formatActivityLabel(action: string): string {
-  switch (action) {
-    case "staff-progress-saved":
-      return "Progress saved";
-    case "staff-checklist-updated":
-      return "Confirmation updated";
-    case "staff-deliverables-updated":
-      return "Deliverables updated";
-    case "assignment-deliverables-updated":
-      return "Assignment deliverables updated";
-    case "staff-submitted-for-review":
-      return "Submitted for review";
-    case "status-changed":
-      return "Status changed";
-    case "returned":
-      return "Returned for revision";
-    case "updated":
-      return "Updated";
-    default:
-      return action;
-  }
 }
 
 type ProgressSaveState = "idle" | "saving" | "saved" | "error";
@@ -633,7 +611,7 @@ export function StaffGuidedWorkScreen({
                         {entry.actor ? ` · ${entry.actor}` : ""}
                       </span>
                       <p>
-                        {formatActivityLabel(entry.action)}
+                        {formatStaffWorkActivityLabel(entry.action)}
                         {entry.detail ? ` — ${entry.detail}` : ""}
                       </p>
                     </li>

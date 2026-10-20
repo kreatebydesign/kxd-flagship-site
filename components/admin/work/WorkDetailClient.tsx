@@ -39,6 +39,8 @@ import {
   humanSyncHealth,
 } from "@/lib/scheduling/workspace";
 import { getWorkStatusActions } from "@/lib/work/transitions";
+import { formatStaffWorkActivityLabel } from "@/lib/staff/work-activity-labels";
+import { splitWorkNotes } from "@/lib/staff/work-execution-notes";
 import type { WorkListItem, WorkStatus } from "@/lib/work/types";
 import { WorkOperatorReviewPanel } from "@/components/admin/work/WorkOperatorReviewPanel";
 import { WorkAssignmentDeliverablesOversight } from "@/components/admin/work/WorkAssignmentDeliverablesOversight";
@@ -59,13 +61,10 @@ function formatDateTime(iso: string | null): string | null {
   }
 }
 
-function formatActivityLabel(action: string): string {
-  const map: Record<string, string> = {
-    created: "Created",
-    updated: "Updated",
-    "status-changed": "Status changed",
-  };
-  return map[action] ?? action.replace(/-/g, " ");
+function lastSubmittedForReviewDetail(work: WorkListItem): string | null {
+  const history = [...(work.activityHistory ?? [])].reverse();
+  const entry = history.find((row) => row.action === "staff-submitted-for-review");
+  return entry?.detail?.trim() || null;
 }
 
 function MetaRow({ label, value }: { label: string; value: React.ReactNode }) {
@@ -115,6 +114,14 @@ export function WorkDetailClient({
   calendarLastSyncAt?: string | null;
 }) {
   const [work, setWork] = useState(initialWork);
+  const { studioNotes, staffProgress } = useMemo(
+    () => splitWorkNotes(work.notes),
+    [work.notes],
+  );
+  const reviewSubmissionDetail = useMemo(
+    () => (work.status === "review" ? lastSubmittedForReviewDetail(work) : null),
+    [work],
+  );
   const [busyAction, setBusyAction] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [syncStatus, setSyncStatus] = useState(calendarSyncStatus);
@@ -356,11 +363,27 @@ export function WorkDetailClient({
             )}
 
             {canOperatorReview && work.status === "review" ? (
-              <WorkOperatorReviewPanel
-                workId={work.id}
-                assigneeLabel={work.assignedTo}
-                onWorkUpdated={setWork}
-              />
+              <div className="kxd-os-work-detail__review-wrap">
+                {work.deliverableProgress && work.deliverableProgress.total > 0 ? (
+                  <p className="kxd-os-meta kxd-os-work-detail__review-context">
+                    Deliverables · {work.deliverableProgress.completed} of{" "}
+                    {work.deliverableProgress.total} complete
+                    {work.deliverableProgress.allRequiredComplete
+                      ? " · all required done"
+                      : ""}
+                  </p>
+                ) : null}
+                {reviewSubmissionDetail ? (
+                  <p className="kxd-os-meta kxd-os-work-detail__review-context">
+                    Submission note: {reviewSubmissionDetail}
+                  </p>
+                ) : null}
+                <WorkOperatorReviewPanel
+                  workId={work.id}
+                  assigneeLabel={work.assignedTo}
+                  onWorkUpdated={setWork}
+                />
+              </div>
             ) : null}
 
             {!hasReviewContext && work.assignedToId ? (
@@ -578,15 +601,28 @@ export function WorkDetailClient({
                 Internal Notes
               </h2>
               <p className="kxd-os-work-detail__hint">
-                Internal only — not visible to the client. Edit via the Work composer.
+                Internal only — not visible to the client. Studio notes edit via the Work
+                composer; staff progress is saved from guided work.
               </p>
-              {work.notes ? (
-                <div className="kxd-os-work-detail__prose">
-                  <p>{work.notes}</p>
+              {studioNotes ? (
+                <div className="kxd-os-work-detail__notes-block">
+                  <p className="kxd-os-work-engine__eyebrow">Studio notes</p>
+                  <div className="kxd-os-work-detail__prose">
+                    <p>{studioNotes}</p>
+                  </div>
                 </div>
-              ) : (
+              ) : null}
+              {staffProgress ? (
+                <div className="kxd-os-work-detail__notes-block">
+                  <p className="kxd-os-work-engine__eyebrow">Staff progress</p>
+                  <div className="kxd-os-work-detail__prose kxd-os-work-detail__prose--staff">
+                    <p>{staffProgress}</p>
+                  </div>
+                </div>
+              ) : null}
+              {!studioNotes && !staffProgress ? (
                 <p className="kxd-os-work-detail__fallback">No internal notes yet.</p>
-              )}
+              ) : null}
             </section>
 
             {(work.status === "completed" || work.completedAt) && (
@@ -634,7 +670,7 @@ export function WorkDetailClient({
                       className="kxd-os-work-detail__timeline-item"
                     >
                       <p className="kxd-os-work-detail__timeline-event">
-                        {formatActivityLabel(entry.action)}
+                        {formatStaffWorkActivityLabel(entry.action)}
                       </p>
                       <p className="kxd-os-work-detail__timeline-meta">
                         <time dateTime={entry.at}>

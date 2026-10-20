@@ -14,9 +14,113 @@ import {
 } from "@/components/admin/operations/shared/OpsBriefing";
 import { KxdButton, KxdIntelligenceBadge, KxdIntelligenceMark, KxdPage } from "@/components/os";
 import type { StaffOversightData } from "@/lib/staff/types";
+import { WORK_PRIORITY_LABELS } from "@/lib/work/constants";
 import { workViewHref } from "@/lib/work/planning/client";
 
 type HelpRequestRowData = StaffOversightData["helpRequests"][number];
+type DraftRowData = StaffOversightData["draftsAwaitingApproval"][number];
+
+function formatOversightDue(dueDate: string | null): string {
+  if (!dueDate) return "No due date";
+  const key = dueDate.slice(0, 10);
+  const date = new Date(`${key}T12:00:00`);
+  if (Number.isNaN(date.getTime())) return key;
+  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
+function DraftAwaitingApprovalRow({
+  draft,
+  onError,
+  onDone,
+}: {
+  draft: DraftRowData;
+  onError: (message: string) => void;
+  onDone: () => void;
+}) {
+  const [returnNote, setReturnNote] = useState("");
+  const [busy, setBusy] = useState<"approve" | "return" | null>(null);
+
+  async function mattAction(mode: "return" | "approve") {
+    if (mode === "return" && !returnNote.trim()) {
+      onError("Add a revision note so staff knows what to change.");
+      return;
+    }
+    setBusy(mode);
+    try {
+      const res = await fetch(`/api/admin/staff/work/${draft.workId}/matt`, {
+        method: mode === "return" ? "POST" : "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: mode === "return" ? JSON.stringify({ note: returnNote.trim() }) : undefined,
+      });
+      const payload = (await res.json()) as { success?: boolean; error?: string };
+      if (!res.ok || payload.success === false) {
+        throw new Error(payload.error ?? "Could not update work.");
+      }
+      setReturnNote("");
+      onDone();
+    } catch (err) {
+      onError(err instanceof Error ? err.message : "Could not update work.");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  const deliverableMeta =
+    draft.deliverableProgress && draft.deliverableProgress.total > 0
+      ? `Deliverables ${draft.deliverableProgress.completed}/${draft.deliverableProgress.total}`
+      : null;
+
+  return (
+    <div className="kxd-os-ops-list-row kxd-os-staff-oversight__draft-row">
+      <div className="kxd-os-ops-list-row__main">
+        <OpsListRow href={draft.href}>
+          <div>
+            <p className="kxd-os-ops-list-row__title">{draft.title}</p>
+            <p className="kxd-os-meta">
+              Prepared by {draft.assigneeLabel}
+              {" · "}
+              {WORK_PRIORITY_LABELS[draft.priority]}
+              {" · "}
+              Due {formatOversightDue(draft.dueDate)}
+              {deliverableMeta ? ` · ${deliverableMeta}` : ""}
+            </p>
+          </div>
+        </OpsListRow>
+        <label className="kxd-os-meta kxd-os-staff-oversight__return-field">
+          <span>Revision note (required to return)</span>
+          <textarea
+            className="kxd-os-input"
+            rows={2}
+            value={returnNote}
+            onChange={(e) => setReturnNote(e.target.value)}
+            placeholder="What should change before this can be approved?"
+          />
+        </label>
+        <div className="kxd-os-staff-oversight__draft-actions">
+          <KxdButton
+            type="button"
+            size="sm"
+            loading={busy === "approve"}
+            disabled={busy != null}
+            onClick={() => void mattAction("approve")}
+          >
+            Approve
+          </KxdButton>
+          <KxdButton
+            type="button"
+            size="sm"
+            variant="ghost"
+            loading={busy === "return"}
+            disabled={busy != null}
+            onClick={() => void mattAction("return")}
+          >
+            Return
+          </KxdButton>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function HelpRequestRow({
   request,
@@ -181,6 +285,7 @@ export function StaffOversightScreen({ data }: StaffOversightScreenProps) {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [assigning, setAssigning] = useState(false);
+  const [lastAssignedWorkId, setLastAssignedWorkId] = useState<number | null>(null);
   const [savingResponsibility, setSavingResponsibility] = useState(false);
 
   const firstMemberId = data.members[0]?.userId ?? "";
@@ -260,6 +365,7 @@ export function StaffOversightScreen({ data }: StaffOversightScreenProps) {
       if (!res.ok || payload.success === false) {
         throw new Error(payload.error ?? "Could not assign work.");
       }
+      if (payload.workId) setLastAssignedWorkId(payload.workId);
       setMessage(`Assigned work #${payload.workId}. Daily plan will include it on next load.`);
       setTitle("");
       setSummary("");
@@ -301,26 +407,6 @@ export function StaffOversightScreen({ data }: StaffOversightScreenProps) {
     }
   }
 
-  async function mattAction(workId: number, mode: "return" | "approve") {
-    setError(null);
-    setMessage(null);
-    try {
-      const res = await fetch(`/api/admin/staff/work/${workId}/matt`, {
-        method: mode === "return" ? "POST" : "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: mode === "return" ? JSON.stringify({ note: "Please revise and resubmit." }) : undefined,
-      });
-      const payload = (await res.json()) as { success?: boolean; error?: string };
-      if (!res.ok || payload.success === false) {
-        throw new Error(payload.error ?? "Could not update work.");
-      }
-      setMessage(mode === "return" ? "Returned to staff for correction." : "Approved and completed.");
-      router.refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not update work.");
-    }
-  }
-
   return (
     <OperationsShell activeId="staff">
       <KxdPage className="kxd-os-page--ops kxd-os-page--staff">
@@ -338,6 +424,17 @@ export function StaffOversightScreen({ data }: StaffOversightScreenProps) {
         {message ? (
           <p className="kxd-os-meta" style={{ marginBottom: "1rem" }}>
             {message}
+            {lastAssignedWorkId ? (
+              <>
+                {" "}
+                <Link
+                  href={`/admin/work/${lastAssignedWorkId}`}
+                  className="kxd-os-link-quiet"
+                >
+                  Add deliverables
+                </Link>
+              </>
+            ) : null}
           </p>
         ) : null}
 
@@ -367,8 +464,10 @@ export function StaffOversightScreen({ data }: StaffOversightScreenProps) {
                       <OpsKpiStrip
                         items={[
                           { label: "Open", value: String(member.assignedOpenCount) },
-                          { label: "Plan", value: String(member.planActionableCount) },
-                          { label: "Waiting", value: String(member.waitingOnMattCount) },
+                          { label: "Overdue", value: String(member.overdueCount) },
+                          { label: "Blocked", value: String(member.blockedCount) },
+                          { label: "In review", value: String(member.submittedForReviewCount) },
+                          { label: "Help", value: String(member.helpRequestedCount) },
                           { label: "Training", value: `${member.trainingPercent}%` },
                         ]}
                       />
@@ -402,6 +501,12 @@ export function StaffOversightScreen({ data }: StaffOversightScreenProps) {
                         className="kxd-os-link-quiet kxd-os-meta"
                       >
                         In review
+                      </Link>
+                      <Link
+                        href={workViewHref("waiting-on-kxd", { assignedToId: member.userId })}
+                        className="kxd-os-link-quiet kxd-os-meta"
+                      >
+                        Waiting on KXD
                       </Link>
                     </div>
                   </div>
@@ -600,34 +705,25 @@ export function StaffOversightScreen({ data }: StaffOversightScreenProps) {
           </OpsCard>
         </section>
 
-        <section style={{ marginTop: "1.5rem" }} aria-label="Drafts awaiting approval">
+        <section style={{ marginTop: "1.5rem" }} aria-label="Submitted for review">
           <OpsSectionHead
-            label="Drafts awaiting Matt"
+            label="Submitted for review"
             count={data.draftsAwaitingApproval.length}
           />
           <OpsCard>
             {data.draftsAwaitingApproval.length === 0 ? (
-              <p className="kxd-os-meta">No drafts waiting on Matt right now.</p>
+              <p className="kxd-os-meta">No work submitted for your review right now.</p>
             ) : (
               data.draftsAwaitingApproval.map((draft) => (
-                <div key={draft.workId} className="kxd-os-ops-list-row">
-                  <div className="kxd-os-ops-list-row__main">
-                    <OpsListRow href={draft.href}>
-                      <div>
-                        <p className="kxd-os-ops-list-row__title">{draft.title}</p>
-                        <p className="kxd-os-meta">Prepared by {draft.assigneeLabel}</p>
-                      </div>
-                    </OpsListRow>
-                    <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
-                      <KxdButton type="button" size="sm" variant="ghost" onClick={() => mattAction(draft.workId, "approve")}>
-                        Approve
-                      </KxdButton>
-                      <KxdButton type="button" size="sm" variant="ghost" onClick={() => mattAction(draft.workId, "return")}>
-                        Return
-                      </KxdButton>
-                    </div>
-                  </div>
-                </div>
+                <DraftAwaitingApprovalRow
+                  key={draft.workId}
+                  draft={draft}
+                  onError={setError}
+                  onDone={() => {
+                    setMessage("Work updated.");
+                    router.refresh();
+                  }}
+                />
               ))
             )}
           </OpsCard>

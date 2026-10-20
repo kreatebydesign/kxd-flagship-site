@@ -12,6 +12,8 @@ import type {
 } from "./types";
 import { resolveAssigneeLabel } from "./display";
 import { readActivityHistory } from "./activity";
+import { restrictedStaffUserIdSet } from "@/lib/staff/restricted-staff-users";
+import { enrichWorkListItemFromDoc } from "./list-enrichment";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDoc = Record<string, any>;
@@ -250,7 +252,11 @@ export async function getWorkById(workId: number): Promise<WorkListItem | null> 
       overrideAccess: true,
     });
     if (!doc) return null;
-    return toWorkListItem(doc as AnyDoc);
+    const staffIds = await restrictedStaffUserIdSet();
+    const item = toWorkListItem(doc as AnyDoc);
+    return enrichWorkListItemFromDoc(item, doc as AnyDoc, {
+      restrictedStaffUserIds: staffIds,
+    });
   } catch {
     return null;
   }

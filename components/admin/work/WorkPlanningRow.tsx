@@ -23,6 +23,7 @@ import {
   formatWorkStateAge,
 } from "@/lib/work/display";
 import { dateKeyEquals, toLocalDateKey } from "@/lib/work/planning/client";
+import { isWorkOverdue } from "@/lib/work/views";
 import { getWorkStatusActions } from "@/lib/work/transitions";
 import type { WorkListItem, WorkStatus } from "@/lib/work/types";
 
@@ -46,6 +47,11 @@ export function WorkPlanningRow({
   const age = formatWorkStateAge(item);
   const budget = formatTimeBudgetHours(item.estimatedEffort);
   const plannedToday = dateKeyEquals(item.plannedForDate);
+  const overdue = isWorkOverdue(item);
+  const deliverableLine =
+    item.deliverableProgress && item.deliverableProgress.total > 0
+      ? `Deliverables ${item.deliverableProgress.completed}/${item.deliverableProgress.total}`
+      : null;
 
   const openDetail = useCallback(() => {
     router.push(item.adminHref);
@@ -145,7 +151,24 @@ export function WorkPlanningRow({
         aria-label={`Open ${item.title}`}
       >
         <div className="kxd-os-work-engine__link">
-          <span className="kxd-os-work-engine__item-title">{item.title}</span>
+          <span className="kxd-os-work-engine__item-title-row">
+            <span className="kxd-os-work-engine__item-title">{item.title}</span>
+            {item.hasStaffAssignment ? (
+              <span className="kxd-os-work-engine__staff-chip">Staff</span>
+            ) : null}
+            {item.status === "review" ? (
+              <span className="kxd-os-work-engine__review-chip">In review</span>
+            ) : null}
+            {item.requiresOperatorApproval && item.status !== "review" ? (
+              <span className="kxd-os-work-engine__approval-chip">Approval</span>
+            ) : null}
+            {overdue ? (
+              <span className="kxd-os-work-engine__overdue-chip">Overdue</span>
+            ) : null}
+          </span>
+          {deliverableLine ? (
+            <span className="kxd-os-work-engine__item-deliverables">{deliverableLine}</span>
+          ) : null}
           <span className="kxd-os-work-engine__item-meta">
             <span className="kxd-os-work-engine__client-inline">
               {item.clientName}

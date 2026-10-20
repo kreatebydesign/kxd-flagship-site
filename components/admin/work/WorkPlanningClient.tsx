@@ -50,6 +50,7 @@ function parseFiltersFromMemory(raw: Record<string, unknown>): WorkViewFilters {
           : null,
     dueRange: (raw.dueRange as WorkViewFilters["dueRange"]) ?? "any",
     tag: typeof raw.tag === "string" ? raw.tag : null,
+    assigneeScope: (raw.assigneeScope as WorkViewFilters["assigneeScope"]) ?? null,
   };
 }
 
@@ -92,7 +93,9 @@ export function WorkPlanningClient({
       initialView.filters.priority ||
       initialView.filters.assignedToId != null ||
       (initialView.filters.dueRange && initialView.filters.dueRange !== "any") ||
-      initialView.filters.tag;
+      initialView.filters.tag ||
+      (initialView.filters.assigneeScope &&
+        initialView.filters.assigneeScope !== "any");
 
     if (!hasUrlFilters) {
       setFilters((prev) => ({ ...prev, ...remembered }));
@@ -111,8 +114,9 @@ export function WorkPlanningClient({
         sort,
         filters,
         contextHints,
+        restrictedStaffUserIds: options.restrictedStaffUserIds,
       }),
-    [pool, viewId, sort, filters, contextHints],
+    [pool, viewId, sort, filters, contextHints, options.restrictedStaffUserIds],
   );
 
   const syncUrlAndMemory = useCallback(

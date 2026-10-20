@@ -98,6 +98,7 @@ export function applyWorkFilters(
   items: WorkListItem[],
   filters: WorkViewFilters = {},
   now = new Date(),
+  restrictedStaffUserIds?: ReadonlySet<number>,
 ): WorkListItem[] {
   let next = items;
 
@@ -112,6 +113,17 @@ export function applyWorkFilters(
   }
   if (filters.assignedToId != null) {
     next = next.filter((item) => item.assignedToId === filters.assignedToId);
+  }
+  if (filters.assigneeScope && filters.assigneeScope !== "any") {
+    const staffSet = restrictedStaffUserIds ?? new Set<number>();
+    if (filters.assigneeScope === "staff") {
+      next = next.filter(
+        (item) =>
+          item.assignedToId != null && staffSet.has(item.assignedToId),
+      );
+    } else if (filters.assigneeScope === "unassigned") {
+      next = next.filter((item) => item.assignedToId == null);
+    }
   }
   if (filters.tag) {
     const tag = filters.tag.toLowerCase();
@@ -316,8 +328,11 @@ export function composeWorkView(input: GetWorkViewInput & { pool: WorkListItem[]
   const sort = parseWorkSortId(input.sort);
   const filters = input.filters ?? {};
   const hints = input.contextHints ?? EMPTY_HINTS;
+  const staffSet = input.restrictedStaffUserIds
+    ? new Set(input.restrictedStaffUserIds)
+    : undefined;
 
-  const filtered = applyWorkFilters(input.pool, filters, now);
+  const filtered = applyWorkFilters(input.pool, filters, now, staffSet);
   const selected = selectWorkViewItems(filtered, view, hints, now);
   const items = sortWorkViewItems(selected, sort, hints, now);
   const groups = view === "today" ? groupTodayWork(items, hints, now) : null;
@@ -329,7 +344,11 @@ export function composeWorkView(input: GetWorkViewInput & { pool: WorkListItem[]
     items,
     groups,
     emptyMessage: WORK_VIEW_EMPTY[view],
-    counts: countWorkViews(applyWorkFilters(input.pool, filters, now), hints, now),
+    counts: countWorkViews(
+      applyWorkFilters(input.pool, filters, now, staffSet),
+      hints,
+      now,
+    ),
     generatedAt: now.toISOString(),
   };
 }
@@ -356,6 +375,9 @@ export function workViewHref(
     params.set("due", filters.dueRange);
   }
   if (filters.tag) params.set("tag", filters.tag);
+  if (filters.assigneeScope && filters.assigneeScope !== "any") {
+    params.set("assignee", filters.assigneeScope);
+  }
   const qs = params.toString();
   return qs ? `/admin/work?${qs}` : "/admin/work";
 }
