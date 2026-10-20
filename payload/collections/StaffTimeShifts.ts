@@ -58,9 +58,20 @@ export const StaffTimeShifts: CollectionConfig = {
         if (nextEntries.length < originalEntries.length) {
           throw new Error("staff time auditEvents are append-only.");
         }
-        const prefixOk = originalEntries.every(
-          (entry, index) => JSON.stringify(entry) === JSON.stringify(nextEntries[index]),
-        );
+        const prefixOk = originalEntries.every((entry, index) => {
+          const next = nextEntries[index];
+          if (!next || typeof entry !== "object" || typeof next !== "object") {
+            return false;
+          }
+          const a = entry as AnyDoc;
+          const b = next as AnyDoc;
+          return (
+            String(a.id ?? "") === String(b.id ?? "") &&
+            String(a.at ?? "") === String(b.at ?? "") &&
+            String(a.action ?? "") === String(b.action ?? "") &&
+            Number(a.actorUserId ?? 0) === Number(b.actorUserId ?? 0)
+          );
+        });
         if (!prefixOk) {
           throw new Error("staff time auditEvents are append-only.");
         }

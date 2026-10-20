@@ -19,7 +19,18 @@ import {
   lockStaffTimeShiftForUpdate,
   lockStaffUserOpenShiftSlot,
   withStaffTimeTransaction,
+  type StaffTimeTxReq,
 } from "./transaction";
+
+function isActiveShiftConflict(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  const message = error.message.toLowerCase();
+  return (
+    message.includes("active_shift_exists") ||
+    message.includes("staff_time_shifts_one_active_per_user") ||
+    message.includes("duplicate key")
+  );
+}
 
 export const STAFF_TIME_SHIFTS_COLLECTION = "staff-time-shifts" as const;
 export const STAFF_TIME_PUNCHES_COLLECTION = "staff-time-punch-events" as const;
@@ -98,8 +109,9 @@ async function findIdempotentPunch(
 
 export async function findActiveStaffShift(
   staffUserId: number,
+  req?: StaffTimeTxReq,
 ): Promise<StaffTimeShiftView | null> {
-  const payload = await getPayload({ config });
+  const payload = req?.payload ?? (await getPayload({ config }));
   const result = await payload.find({
     collection: STAFF_TIME_SHIFTS_COLLECTION as any,
     where: {
@@ -111,6 +123,7 @@ export async function findActiveStaffShift(
     limit: 1,
     depth: 0,
     overrideAccess: true,
+    req,
   });
   const doc = result.docs[0] as AnyDoc | undefined;
   if (!doc) return null;
@@ -135,7 +148,11 @@ export async function startStaffShift(input: {
       input.actor.userId,
       idempotencyKey,
     );
-    if (existingPunch?.shift) {
+    if (
+      existingPunch &&
+      String(existingPunch.eventType) === "shift_start" &&
+      existingPunch.shift
+    ) {
       const shiftId = Number(
         typeof existingPunch.shift === "object"
           ? existingPunch.shift.id
@@ -160,7 +177,7 @@ export async function startStaffShift(input: {
     return await withStaffTimeTransaction(payload, async (txReq) => {
       await lockStaffUserOpenShiftSlot(txReq, input.actor.userId);
 
-      const active = await findActiveStaffShift(input.actor.userId);
+      const active = await findActiveStaffShift(input.actor.userId, txReq);
       if (active) {
         throw new Error("ACTIVE_SHIFT_EXISTS");
       }
@@ -172,46 +189,53 @@ export async function startStaffShift(input: {
         detail: { workIntent: input.workIntent },
       });
 
-      const shift = (await payload.create({
-        collection: STAFF_TIME_SHIFTS_COLLECTION as any,
-        data: {
-          staffUser: input.actor.userId,
-          status: "active",
-          startedAt: nowIso,
-          workTimezone: input.workTimezone,
-          localDateKey,
-          workIntentCategory: input.workIntent.category,
-          workIntentWorkId: input.workIntent.workId ?? undefined,
-          workIntentClientId: input.workIntent.clientId ?? undefined,
-          workIntentNote: input.workIntent.note ?? undefined,
-          payPeriodId: payPeriodId ?? undefined,
-          auditEvents: audit,
-        },
-        depth: 0,
-        overrideAccess: true,
-        req: txReq,
-      })) as AnyDoc;
+      try {
+        const shift = (await payload.create({
+          collection: STAFF_TIME_SHIFTS_COLLECTION as any,
+          data: {
+            staffUser: input.actor.userId,
+            status: "active",
+            startedAt: nowIso,
+            workTimezone: input.workTimezone,
+            localDateKey,
+            workIntentCategory: input.workIntent.category,
+            workIntentWorkId: input.workIntent.workId ?? undefined,
+            workIntentClientId: input.workIntent.clientId ?? undefined,
+            workIntentNote: input.workIntent.note ?? undefined,
+            payPeriodId: payPeriodId ?? undefined,
+            auditEvents: audit,
+          },
+          depth: 0,
+          overrideAccess: true,
+          req: txReq,
+        })) as AnyDoc;
 
-      await payload.create({
-        collection: STAFF_TIME_PUNCHES_COLLECTION as any,
-        data: {
-          shift: shift.id,
-          staffUser: input.actor.userId,
-          eventType: "shift_start",
-          recordedAt: nowIso,
-          actorUser: input.actor.userId,
-          idempotencyKey: idempotencyKey ?? undefined,
-          payload: { workIntent: input.workIntent },
-        },
-        depth: 0,
-        overrideAccess: true,
-        req: txReq,
-      });
+        await payload.create({
+          collection: STAFF_TIME_PUNCHES_COLLECTION as any,
+          data: {
+            shift: shift.id,
+            staffUser: input.actor.userId,
+            eventType: "shift_start",
+            recordedAt: nowIso,
+            actorUser: input.actor.userId,
+            idempotencyKey: idempotencyKey ?? undefined,
+            payload: { workIntent: input.workIntent },
+          },
+          depth: 0,
+          overrideAccess: true,
+          req: txReq,
+        });
 
-      return mapShift(shift, now);
+        return mapShift(shift, now);
+      } catch (error) {
+        if (isActiveShiftConflict(error)) {
+          throw new Error("ACTIVE_SHIFT_EXISTS");
+        }
+        throw error;
+      }
     });
   } catch (error) {
-    if (error instanceof Error && error.message.includes("staff_time_shifts_one_active_per_user")) {
+    if (isActiveShiftConflict(error)) {
       throw new Error("ACTIVE_SHIFT_EXISTS");
     }
     throw error;
@@ -231,7 +255,11 @@ export async function endStaffShift(input: {
       input.actor.userId,
       idempotencyKey,
     );
-    if (existingPunch?.shift) {
+    if (
+      existingPunch &&
+      String(existingPunch.eventType) === "shift_end" &&
+      existingPunch.shift
+    ) {
       const shiftId = Number(
         typeof existingPunch.shift === "object"
           ? existingPunch.shift.id
@@ -250,17 +278,17 @@ export async function endStaffShift(input: {
   const now = new Date();
   const nowIso = now.toISOString();
 
-  return withStaffTimeTransaction(payload, async (txReq) => {
-    const active = await findActiveStaffShift(input.actor.userId);
-    if (!active) {
-      throw new Error("NO_ACTIVE_SHIFT");
-    }
+  const activeOutsideTx = await findActiveStaffShift(input.actor.userId);
+  if (!activeOutsideTx) {
+    throw new Error("NO_ACTIVE_SHIFT");
+  }
 
-    await lockStaffTimeShiftForUpdate(txReq, active.id);
+  return withStaffTimeTransaction(payload, async (txReq) => {
+    await lockStaffTimeShiftForUpdate(txReq, activeOutsideTx.id);
 
     const doc = (await payload.findByID({
       collection: STAFF_TIME_SHIFTS_COLLECTION as any,
-      id: active.id,
+      id: activeOutsideTx.id,
       depth: 0,
       overrideAccess: true,
       req: txReq,
@@ -278,7 +306,7 @@ export async function endStaffShift(input: {
 
     const updated = (await payload.update({
       collection: STAFF_TIME_SHIFTS_COLLECTION as any,
-      id: active.id,
+      id: activeOutsideTx.id,
       data: {
         status: "completed",
         endedAt: nowIso,
@@ -292,7 +320,7 @@ export async function endStaffShift(input: {
     await payload.create({
       collection: STAFF_TIME_PUNCHES_COLLECTION as any,
       data: {
-        shift: active.id,
+        shift: activeOutsideTx.id,
         staffUser: input.actor.userId,
         eventType: "shift_end",
         recordedAt: nowIso,
