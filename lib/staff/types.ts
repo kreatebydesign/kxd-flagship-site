@@ -3,6 +3,7 @@
  * Heather is the first learner; the model is reusable for every future teammate.
  */
 
+import type { StaffDeliverableView } from "@/lib/staff/work-deliverables";
 import type { WorkActivityEntry, WorkListItem } from "@/lib/work/types";
 import type { StaffMyWorkBoardColumnId } from "./my-work-board";
 
@@ -257,6 +258,16 @@ export interface StaffGuidedWorkData {
   staffProgressNotes: string | null;
   /** Persisted checklist state for the current assignee. */
   checklistChecked: Record<string, boolean>;
+  /** Operator-defined deliverables with assignee completion state. */
+  deliverables: StaffDeliverableView[];
+  deliverableProgress: {
+    total: number;
+    completed: number;
+    requiredTotal: number;
+    requiredCompleted: number;
+    allRequiredComplete: boolean;
+  };
+  instructionBlocks: string[];
   activityHistory: WorkActivityEntry[];
   status: string;
   priority: string | null;

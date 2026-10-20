@@ -193,9 +193,9 @@ function WorkBoardCard({
         {item.summary ? (
           <p className="kxd-os-meta kxd-os-staff-my-work__card-summary">{item.summary}</p>
         ) : null}
-        {item.acceptanceCriteria ? (
-          <p className="kxd-os-meta kxd-os-staff-my-work__card-criteria">
-            Done when: {item.acceptanceCriteria}
+        {item.deliverableProgress ? (
+          <p className="kxd-os-meta kxd-os-staff-my-work__card-deliverables">
+            Deliverables · {item.deliverableProgress.completed} of {item.deliverableProgress.total}
           </p>
         ) : null}
       </Link>
@@ -263,6 +263,11 @@ function WorkListRowItem({
               {project.text}
             </span>
             {item.summary ? <span className="kxd-os-staff-my-work__list-summary">{item.summary}</span> : null}
+            {item.deliverableProgress ? (
+              <span className="kxd-os-staff-my-work__list-deliverables">
+                · {item.deliverableProgress.completed}/{item.deliverableProgress.total} deliverables
+              </span>
+            ) : null}
           </p>
         </div>
         <div className="kxd-os-ops-list-row__aside kxd-os-staff-my-work__list-aside">

@@ -41,6 +41,7 @@ import {
 import { getWorkStatusActions } from "@/lib/work/transitions";
 import type { WorkListItem, WorkStatus } from "@/lib/work/types";
 import { WorkOperatorReviewPanel } from "@/components/admin/work/WorkOperatorReviewPanel";
+import { WorkAssignmentDeliverablesOversight } from "@/components/admin/work/WorkAssignmentDeliverablesOversight";
 import type { WebsiteReviewWorkContext } from "@/lib/work/website-review-context-types";
 
 function formatDateTime(iso: string | null): string | null {
@@ -359,6 +360,13 @@ export function WorkDetailClient({
                 workId={work.id}
                 assigneeLabel={work.assignedTo}
                 onWorkUpdated={setWork}
+              />
+            ) : null}
+
+            {!hasReviewContext && work.assignedToId ? (
+              <WorkAssignmentDeliverablesOversight
+                workId={work.id}
+                canEdit={canOperatorReview}
               />
             ) : null}
 

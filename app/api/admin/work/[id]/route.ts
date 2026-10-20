@@ -9,6 +9,7 @@ import {
 } from "@/lib/staff/work-field-policy";
 import { mergeApprovalTagsForAssignee } from "@/lib/staff/work-assignee";
 import { saveStaffWorkExecution } from "@/lib/staff/work-execution-service";
+import { saveWorkAssignmentDeliverables } from "@/lib/staff/work-deliverables-service";
 import { workRequiresOperatorApproval } from "@/lib/staff/work-approval";
 import { getWorkItem, updateWorkItem } from "@/lib/work/services";
 import type { WorkCategory, WorkPriority, WorkStatus } from "@/lib/work/types";
@@ -128,6 +129,14 @@ export async function PATCH(
       plannedForDate: optionalString(body.plannedForDate),
       actorEmail: typeof auth.email === "string" ? auth.email : undefined,
     });
+
+    if (Array.isArray(body.assignmentDeliverables)) {
+      await saveWorkAssignmentDeliverables(
+        workId,
+        body.assignmentDeliverables,
+        typeof auth.email === "string" ? auth.email : null,
+      );
+    }
 
     return NextResponse.json({ ok: true, work });
   } catch (err) {

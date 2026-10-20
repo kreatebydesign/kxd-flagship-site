@@ -56,6 +56,23 @@ export interface WorkIntegrationMetadata {
   relationships?: WorkRelationshipRecord[];
   integrationVersion?: number;
   staffGuidedExecution?: StaffGuidedExecutionMetadata;
+  staffAssignmentDeliverables?: {
+    v: 1;
+    items: Array<{
+      id: string;
+      title: string;
+      instructions?: string | null;
+      required: boolean;
+    }>;
+    updatedAt: string;
+    updatedBy?: string | null;
+  };
+  staffDeliverableProgress?: {
+    v: 1;
+    assigneeUserId: number;
+    completed: Record<string, { completedAt: string }>;
+    updatedAt: string;
+  };
 }
 
 export type WorkLifecycleEvent =

@@ -11,6 +11,7 @@ import {
   saveStaffWorkExecution,
 } from "@/lib/staff/work-execution-service";
 import { splitWorkNotes } from "@/lib/staff/work-execution-notes";
+import { loadWorkDeliverableViews } from "@/lib/staff/work-deliverables-service";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -44,11 +45,16 @@ export async function PATCH(request: Request, context: RouteContext) {
   const body = (await request.json().catch(() => ({}))) as {
     staffProgress?: string | null;
     checklist?: Record<string, unknown> | null;
+    deliverables?: Record<string, unknown> | null;
   };
 
-  if (body.staffProgress === undefined && body.checklist === undefined) {
+  if (
+    body.staffProgress === undefined &&
+    body.checklist === undefined &&
+    body.deliverables === undefined
+  ) {
     return NextResponse.json(
-      { success: false, error: "Provide staffProgress or checklist to save." },
+      { success: false, error: "Provide staffProgress, checklist, or deliverables to save." },
       { status: 400 },
     );
   }
@@ -64,6 +70,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       {
         staffProgress: body.staffProgress,
         checklist: body.checklist,
+        deliverables: body.deliverables,
       },
     );
 
@@ -72,8 +79,10 @@ export async function PATCH(request: Request, context: RouteContext) {
       studioNotes: result.studioNotes,
       staffProgress: result.staffProgress,
       checklist: result.checklist,
+      deliverables: result.deliverables,
       progressSaved: result.progressSaved,
       checklistSaved: result.checklistSaved,
+      deliverablesSaved: result.deliverablesSaved,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Could not save execution state.";
@@ -113,11 +122,13 @@ export async function GET(_request: Request, context: RouteContext) {
     gated.actor.userId,
     requiresMattApproval,
   );
+  const deliverables = await loadWorkDeliverableViews(workId, gated.actor.userId);
 
   return NextResponse.json({
     success: true,
     studioNotes,
     staffProgress,
     checklist,
+    deliverables,
   });
 }

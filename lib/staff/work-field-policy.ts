@@ -28,6 +28,8 @@ const FORBIDDEN_BODY_KEYS = new Set([
   "timelineEnabled",
   "source",
   "sourceId",
+  "assignmentDeliverables",
+  "items",
 ]);
 
 const ALLOWED_BODY_KEYS = new Set(["notes"]);

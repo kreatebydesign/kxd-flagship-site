@@ -4,6 +4,8 @@ import { getTrainingStaffSummary } from "@/lib/training/summary";
 import { buildStaffGuidedChecklistItems } from "./guided-checklist";
 import { loadStaffGuidedChecklistChecked } from "./work-execution-service";
 import { splitWorkNotes } from "./work-execution-notes";
+import { formatInstructionBlocks, summarizeDeliverableProgress } from "./work-deliverables";
+import { loadWorkDeliverableViews } from "./work-deliverables-service";
 import { getWorkItem } from "@/lib/work/services";
 import { listWorkAssignedToStaffActor } from "@/lib/work/staff-assigned";
 import type { WorkListItem } from "@/lib/work/types";
@@ -251,6 +253,18 @@ export async function loadStaffGuidedWork(
     helpRequests = [];
   }
 
+  let deliverables: Awaited<ReturnType<typeof loadWorkDeliverableViews>> = [];
+  try {
+    deliverables = await loadWorkDeliverableViews(work.id, actor.userId);
+  } catch {
+    deliverables = [];
+  }
+  const deliverableProgress = summarizeDeliverableProgress(deliverables);
+  const instructionSource = [work.description, work.acceptanceCriteria]
+    .filter((s) => s?.trim())
+    .join("\n\n");
+  const instructionBlocks = formatInstructionBlocks(instructionSource);
+
   return {
     workId: work.id,
     title: work.title,
@@ -260,6 +274,9 @@ export async function loadStaffGuidedWork(
     studioNotes,
     staffProgressNotes: staffProgress,
     checklistChecked,
+    deliverables,
+    deliverableProgress,
+    instructionBlocks,
     activityHistory: work.activityHistory ?? [],
     status: work.status,
     priority: work.priority,
