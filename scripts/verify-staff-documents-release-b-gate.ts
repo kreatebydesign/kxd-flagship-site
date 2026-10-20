@@ -219,10 +219,13 @@ async function main(): Promise<void> {
   assert.equal(defaultSigningModeForKind("employment-agreement"), "dual-signature");
   assert.equal(defaultSigningModeForKind("staff-policy"), "acknowledgment");
 
-  const kinds = [
-    { kind: "employment-agreement", signingMode: "dual-signature" as const },
-    { kind: "confidentiality-nda", signingMode: "dual-signature" as const },
-    { kind: "ip-assignment", signingMode: "dual-signature" as const },
+  const kinds: Array<{
+    kind: import("../lib/staff-documents/types.ts").StaffDocumentKind;
+    signingMode: import("../lib/staff-documents/types.ts").StaffDocumentSigningMode;
+  }> = [
+    { kind: "employment-agreement", signingMode: "dual-signature" },
+    { kind: "confidentiality-nda", signingMode: "dual-signature" },
+    { kind: "ip-assignment", signingMode: "dual-signature" },
   ];
 
   const templateIds: number[] = [];
