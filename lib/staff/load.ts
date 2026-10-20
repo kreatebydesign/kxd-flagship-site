@@ -131,6 +131,18 @@ export async function loadStaffToday(
     helpRequests = [];
   }
 
+  let documentAttention: StaffTodayData["documentAttention"] = [];
+  if (actorHasStaffCapability(actor, "staff.documents.read")) {
+    try {
+      const { listPendingStaffDocumentAttention } = await import(
+        "@/lib/staff-documents/data"
+      );
+      documentAttention = await listPendingStaffDocumentAttention(actor.userId);
+    } catch {
+      documentAttention = [];
+    }
+  }
+
   const isPreview = Boolean(preview);
   const { roleTitle } = describeStaffActor(actor);
   const firstName = actor.displayName.split(" ")[0] || actor.displayName;
@@ -155,6 +167,7 @@ export async function loadStaffToday(
     wrapUpHref: "/admin/operations/staff/wrap-up",
     guidancePrompts: STAFF_GUIDANCE_PROMPTS,
     helpRequests,
+    documentAttention,
     emptyState,
     permissions: {
       canAct: !isPreview && isRestrictedStaff(actor)

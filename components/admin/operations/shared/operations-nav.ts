@@ -55,6 +55,7 @@ export type OperationsNavId =
   | "settings"
   | "training"
   | "staff"
+  | "staff-documents"
   | "staff-my-work"
   | "staff-my-clients"
   | "qr-generator";

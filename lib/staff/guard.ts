@@ -133,6 +133,42 @@ export async function requireStaffCapabilityApi(capability: StaffCapability) {
   return { user: auth, actor };
 }
 
+/** Read-only staff API gate — allows operator preview of staff surfaces. */
+export async function requireStaffCapabilityReadApi(capability: StaffCapability) {
+  const auth = await requirePayloadAdminApi();
+  if (auth instanceof NextResponse) return auth;
+  const actor = staffActorFromUser(auth);
+  if (!actor) {
+    return NextResponse.json(
+      { success: false, error: "Unauthorized." },
+      { status: 401 },
+    );
+  }
+
+  const pathname = await resolveRequestPathname("/api/admin/staff");
+  if (!isStaffAllowedApiPath(pathname, actor) && isRestrictedStaff(actor)) {
+    return NextResponse.json(
+      { success: false, error: "Staff permission denied for this API." },
+      { status: 403 },
+    );
+  }
+
+  try {
+    assertStaffCapability(actor, capability);
+  } catch (error) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : "Permission denied.",
+      },
+      { status: 403 },
+    );
+  }
+
+  const preview = await getStaffPreviewSession();
+  return { user: auth, actor, preview };
+}
+
 export async function requireAdminOversightApi() {
   return requireStaffCapabilityApi("admin.oversight");
 }

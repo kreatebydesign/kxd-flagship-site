@@ -672,6 +672,10 @@ export function StaffOversightScreen({ data }: StaffOversightScreenProps) {
         </section>
 
         <p className="kxd-os-meta" style={{ marginTop: "1.5rem" }}>
+          <Link href="/admin/operations/staff/oversight/documents" className="kxd-os-link-quiet">
+            Staff documents
+          </Link>
+          {" · "}
           <Link href="/admin/operations/staff" className="kxd-os-link-quiet">
             Open staff home
           </Link>

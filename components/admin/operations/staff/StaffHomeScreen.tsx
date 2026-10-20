@@ -207,7 +207,32 @@ function StaffHomeBody({
           <Link href="/admin/operations/staff/my-clients" className="kxd-os-link-quiet">
             My clients
           </Link>
+          {" · "}
+          <Link href="/admin/operations/staff/documents" className="kxd-os-link-quiet">
+            My documents
+          </Link>
         </p>
+
+        {data.documentAttention.length > 0 ? (
+          <section style={{ marginBottom: "1.5rem" }} aria-label="Needs your attention">
+            <OpsSectionHead label="Needs your attention" count={data.documentAttention.length} />
+            <OpsCard>
+              {data.documentAttention.map((doc) => (
+                <OpsListRow key={doc.id} href={doc.href}>
+                  <div className="kxd-os-ops-list-row__main">
+                    <div className="kxd-os-ops-list-row__head">
+                      <p className="kxd-os-ops-list-row__title">{doc.title}</p>
+                      <OpsStatusBadge label="Acknowledgment required" variant="warning" />
+                    </div>
+                    <p className="kxd-os-meta">
+                      Policy assigned {new Date(doc.assignedAt).toLocaleString()}
+                    </p>
+                  </div>
+                </OpsListRow>
+              ))}
+            </OpsCard>
+          </section>
+        ) : null}
 
         <div className="kxd-os-staff-plan-grid">
           <div>

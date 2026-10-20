@@ -2,6 +2,7 @@ export { staffActorFromUser, describeStaffActor } from "./actor";
 export {
   requireStaffAwarePage,
   requireStaffCapabilityApi,
+  requireStaffCapabilityReadApi,
   requireAdminOversightApi,
   denyUnlessStaffAssignedWork,
   denyUnlessStaffClientRequest,
