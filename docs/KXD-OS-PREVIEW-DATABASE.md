@@ -67,3 +67,14 @@ Then redeploy affected Preview deployments.
 ## Runtime guard
 
 On Vercel Preview, `payload.config.ts` refuses the production Neon endpoint if `KXD_NEON_PREVIEW_ENDPOINT_ID` is set and the resolved host does not match the preview endpoint.
+
+## Staff Time B1 preview QA
+
+Dedicated users (preview DB only, `@kxd-preview-qa.local`):
+
+1. `KXD_CONFIRM_PREVIEW_DB_WRITE=1` + preview `DATABASE_URI` → `npm run seed:preview-staff-time-qa`
+2. Credentials written locally to `/tmp/kxd-preview-qa-credentials.json` (mode `0600`) — **never commit or paste in chat**
+3. `npm run verify:preview-staff-time-qa` — service-layer QA on preview-kxd-os (shift lifecycle, oversight, scope)
+4. Manual UI: sign in at Preview `/admin/login` with QA BDS / operator emails from the credentials file; complete Staff Time and Oversight walkthrough
+
+Do not use real employee passwords on preview when the branch contains production data snapshots.
