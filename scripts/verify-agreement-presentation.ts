@@ -93,7 +93,12 @@ const pdf = await renderExecutedContractPdf({
   contractId: 6,
   documentHash: "93303c2c3bb03546e370b2460d621914bfc78bacd3b36df18bb0eef0b8daa784",
   operator: sig,
-  client: { ...sig, legalName: "Kurt V. Rethwill", actorRole: "client" },
+  client: {
+    ...sig,
+    legalName: "Kurt V. Rethwill",
+    typedAcknowledgment: "Kurt V. Rethwill",
+    actorRole: "client",
+  },
   sealedAt: "2026-10-17T00:00:00.000Z",
 });
 

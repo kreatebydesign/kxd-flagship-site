@@ -20,7 +20,7 @@ ensureProposalPdfFonts();
 export const agreementPdfStyles = StyleSheet.create({
   page: {
     paddingTop: 52,
-    paddingBottom: 72,
+    paddingBottom: 96,
     paddingHorizontal: 52,
     fontFamily: PROPOSAL_PDF_SANS,
     fontSize: 10,
@@ -123,7 +123,7 @@ export const agreementPdfStyles = StyleSheet.create({
     fontSize: 9,
     lineHeight: 1.4,
     borderWidth: 1,
-    borderColor: "rgba(194, 170, 114, 0.25)",
+    borderColor: "#d4c4a0",
   },
   /** @deprecated Prefer AgreementPdfPageFooter */
   footer: {
