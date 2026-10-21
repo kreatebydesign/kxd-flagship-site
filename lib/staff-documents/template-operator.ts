@@ -118,6 +118,18 @@ async function loadTemplateRow(templateId: number): Promise<AnyDoc> {
   })) as AnyDoc;
 }
 
+async function retireTemplateIfApproved(templateId: number): Promise<void> {
+  const payload = await getPayload({ config });
+  const row = await loadTemplateRow(templateId);
+  if (parseTemplateStatus(row.status) !== "approved-for-use") return;
+  await payload.update({
+    collection: TEMPLATES as never,
+    id: templateId,
+    data: { status: "retired" } as never,
+    overrideAccess: true,
+  });
+}
+
 async function retireOtherApprovedInFamily(input: {
   familyKey: string;
   exceptTemplateId: number;
@@ -136,12 +148,7 @@ async function retireOtherApprovedInFamily(input: {
     overrideAccess: true,
   });
   for (const row of found.docs as AnyDoc[]) {
-    await payload.update({
-      collection: TEMPLATES as never,
-      id: Number(row.id),
-      data: { status: "retired" } as never,
-      overrideAccess: true,
-    });
+    await retireTemplateIfApproved(Number(row.id));
   }
 }
 
@@ -240,6 +247,14 @@ export async function createStaffDocumentTemplateNewVersion(input: {
   const version = Number(parent.version ?? 1) + 1;
   const body = String(parent.body ?? "");
   const payload = await getPayload({ config });
+  if (!parent.familyKey && !parent.family_key) {
+    await payload.update({
+      collection: TEMPLATES as never,
+      id: input.templateId,
+      data: { familyKey } as never,
+      overrideAccess: true,
+    });
+  }
   const kind = parseStaffDocumentKind(String(parent.kind ?? "policy-acknowledgment"));
   const signingMode = resolveSigningModeForTemplate({
     kind,
@@ -318,10 +333,23 @@ export async function transitionStaffDocumentTemplateStatus(input: {
       data: data as never,
       overrideAccess: true,
     });
+    const familyKey = templateFamilyKey(doc);
+    if (!doc.familyKey && !doc.family_key) {
+      await payload.update({
+        collection: TEMPLATES as never,
+        id: input.templateId,
+        data: { familyKey } as never,
+        overrideAccess: true,
+      });
+    }
     await retireOtherApprovedInFamily({
-      familyKey: templateFamilyKey(doc),
+      familyKey,
       exceptTemplateId: input.templateId,
     });
+    const supersededId = relId(doc.supersedesTemplate ?? doc.supersedes_template_id);
+    if (supersededId) {
+      await retireTemplateIfApproved(supersededId);
+    }
     return;
   }
 

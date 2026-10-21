@@ -91,8 +91,6 @@ async function main(): Promise<void> {
   const { renderStaffDocumentTemplatePreviewPdf } = await import(
     "../lib/staff-documents/export-pdf.tsx"
   );
-  const { hashStaffDocumentBody } = await import("../lib/staff-documents/hash.ts");
-
   const adminActor = {
     userId: 1,
     email: `operator-${runTag}@kreatebydesign.com`,
@@ -184,6 +182,53 @@ async function main(): Promise<void> {
     staffUserId: Number(staffUser.id),
   });
   assert.ok(documentId > 0);
+
+  const assignedBeforeV2 = await payload.findByID({
+    collection: "staff-documents" as never,
+    id: documentId,
+    depth: 0,
+    overrideAccess: true,
+  });
+  const snapshotHash = String(
+    (assignedBeforeV2 as { templateContentHash?: string }).templateContentHash ?? "",
+  );
+  assert.equal(snapshotHash, hashBefore);
+
+  await updateStaffDocumentTemplateDraft({
+    actor: adminActor,
+    templateId: v2Id,
+    body: `Version 2 body for ${runTag}.`,
+  });
+  await transitionStaffDocumentTemplateStatus({
+    actor: adminActor,
+    templateId: v2Id,
+    status: "legal-review",
+  });
+  await transitionStaffDocumentTemplateStatus({
+    actor: adminActor,
+    templateId: v2Id,
+    status: "approved-for-use",
+  });
+
+  const v1After = await getStaffDocumentTemplateForOperator(templateId);
+  const v2After = await getStaffDocumentTemplateForOperator(v2Id);
+  assert.ok(v1After);
+  assert.ok(v2After);
+  assert.equal(v1After.status, "retired");
+  assert.equal(v2After.status, "approved-for-use");
+  assert.equal(v2After.assignable, true);
+
+  const assignedAfterV2 = await payload.findByID({
+    collection: "staff-documents" as never,
+    id: documentId,
+    depth: 0,
+    overrideAccess: true,
+  });
+  assert.equal(
+    String((assignedAfterV2 as { templateContentHash?: string }).templateContentHash ?? ""),
+    snapshotHash,
+  );
+  assert.equal(Number((assignedAfterV2 as { template?: number }).template ?? 0), templateId);
 
   const { id: sampleId } = await createStaffDocumentTemplate({
     actor: adminActor,
