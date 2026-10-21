@@ -82,8 +82,9 @@ export async function getPayloadAdminUserFromRequest(request: Request) {
  * Restricted staff roles are deny-by-default against non-allowlisted API paths.
  */
 export async function requirePayloadAdminApi(request?: Request) {
-  // Mutations must use the same session resolution as GET handlers (next/headers).
-  const user = await getPayloadAdminUser();
+  const user = request
+    ? await getPayloadAdminUserFromRequest(request)
+    : await getPayloadAdminUser();
   if (!user) {
     return NextResponse.json(
       { success: false, ok: false, error: "Unauthorized." },

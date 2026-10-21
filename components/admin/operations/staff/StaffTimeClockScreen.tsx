@@ -70,8 +70,8 @@ export function StaffTimeClockScreen({ initial }: { initial: StaffTimeClockPageD
 
   const refresh = useCallback(async () => {
     const [currentRes, historyRes] = await Promise.all([
-      fetch("/api/admin/staff/time/shift/current"),
-      fetch("/api/admin/staff/time/shift/history?limit=20"),
+      fetch("/api/admin/staff/time/shift/current", { credentials: "same-origin" }),
+      fetch("/api/admin/staff/time/shift/history?limit=20", { credentials: "same-origin" }),
     ]);
     const currentJson = (await currentRes.json()) as {
       success?: boolean;
@@ -99,6 +99,7 @@ export function StaffTimeClockScreen({ initial }: { initial: StaffTimeClockPageD
 
       const res = await fetch("/api/admin/staff/time/shift/start", {
         method: "POST",
+        credentials: "same-origin",
         headers: {
           "Content-Type": "application/json",
           "Idempotency-Key": `start-${Date.now()}`,
@@ -123,6 +124,7 @@ export function StaffTimeClockScreen({ initial }: { initial: StaffTimeClockPageD
     try {
       const res = await fetch("/api/admin/staff/time/shift/end", {
         method: "POST",
+        credentials: "same-origin",
         headers: {
           "Idempotency-Key": `end-${Date.now()}`,
         },
@@ -141,7 +143,7 @@ export function StaffTimeClockScreen({ initial }: { initial: StaffTimeClockPageD
 
   return (
     <OperationsShell activeId="staff-time" variant="staff">
-      <KxdPage>
+      <KxdPage className="kxd-os-page--ops kxd-os-page--staff kxd-os-page--staff-time">
         <OperationsPageHero
           eyebrow="Staff"
           title="Time clock"
@@ -149,146 +151,174 @@ export function StaffTimeClockScreen({ initial }: { initial: StaffTimeClockPageD
         />
 
         {error ? (
-          <OpsCard>
-            <p className="kxd-os-meta" style={{ color: "var(--kxd-os-critical)" }}>{error}</p>
-          </OpsCard>
+          <div className="kxd-os-staff-time__error" role="alert">
+            <p className="kxd-os-staff-time__error-title">Could not save your punch</p>
+            <p className="kxd-os-meta">{error}</p>
+          </div>
         ) : null}
 
-        <OpsCard>
+        <section className="kxd-os-staff-time__section" aria-label="Current shift">
           <OpsSectionHead label="Current shift" />
-          {active ? (
-            <div>
-              <div className="kxd-os-ops-list-row__head" style={{ marginBottom: "0.75rem" }}>
-                <OpsStatusBadge label="On the clock" variant="success" />
-                <p className="kxd-os-meta">Elapsed {elapsedLabel}</p>
-              </div>
-              <p className="kxd-os-ops-list-row__title">
-                {staffWorkIntentLabel(active.workIntent.category)}
-              </p>
-              <p className="kxd-os-meta">
-                Started {formatStamp(active.startedAt, data.workTimezone)} ({data.workTimezone})
-              </p>
-              <div style={{ marginTop: "1rem" }}>
-                <KxdButton
-                  type="button"
-                  variant="primary"
-                  disabled={busy !== null}
-                  onClick={() => void endShift()}
-                >
-                  {busy === "end" ? "Ending…" : "End shift"}
-                </KxdButton>
-              </div>
-            </div>
-          ) : (
-            <div>
-              <p className="kxd-os-meta" style={{ marginBottom: "1rem" }}>
-                Choose what you are working on, then start your shift.
-              </p>
-              <label className="kxd-os-field">
-                <span className="kxd-os-field__label">Work intent</span>
-                <select
-                  className="kxd-os-field__input"
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value as StaffWorkIntentCategory)}
-                >
-                  {INTENT_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
-              </label>
-
-              {category === "assigned_kxd_work" ? (
-                <label className="kxd-os-field" style={{ marginTop: "0.75rem" }}>
-                  <span className="kxd-os-field__label">Work item ID</span>
-                  <input
-                    className="kxd-os-field__input"
-                    inputMode="numeric"
-                    value={workId}
-                    onChange={(e) => setWorkId(e.target.value)}
-                    placeholder="e.g. 42"
-                  />
-                </label>
-              ) : null}
-
-              {category === "client_project" ? (
-                <label className="kxd-os-field" style={{ marginTop: "0.75rem" }}>
-                  <span className="kxd-os-field__label">Client ID</span>
-                  <input
-                    className="kxd-os-field__input"
-                    inputMode="numeric"
-                    value={clientId}
-                    onChange={(e) => setClientId(e.target.value)}
-                    placeholder="Assigned client"
-                  />
-                </label>
-              ) : null}
-
-              {category === "other_authorized" ? (
-                <label className="kxd-os-field" style={{ marginTop: "0.75rem" }}>
-                  <span className="kxd-os-field__label">Brief note</span>
-                  <textarea
-                    className="kxd-os-field__input"
-                    rows={2}
-                    value={note}
-                    onChange={(e) => setNote(e.target.value)}
-                  />
-                </label>
-              ) : null}
-
-              <div style={{ marginTop: "1rem" }}>
-                <KxdButton
-                  type="button"
-                  variant="primary"
-                  disabled={busy !== null}
-                  onClick={() => void startShift()}
-                >
-                  {busy === "start" ? "Starting…" : "Start shift"}
-                </KxdButton>
-              </div>
-            </div>
-          )}
-        </OpsCard>
-
-        <OpsCard>
-          <OpsSectionHead label="Pay calendar" />
-          <p className="kxd-os-meta">
-            {data.payroll.nextPeriodLabel
-              ? `Current pay period: ${data.payroll.nextPeriodLabel}`
-              : "Pay periods load after payroll configuration is applied."}
-          </p>
-          <p className="kxd-os-meta">
-            {data.payroll.nextPayday
-              ? `Next payday: ${data.payroll.nextPayday}`
-              : "Next payday pending schedule."}
-          </p>
-          <p className="kxd-os-meta">
-            Scheduling guidance: {data.payroll.weeklyHoursLimit} hours per workweek — not a wage cap.
-          </p>
-        </OpsCard>
-
-        <OpsCard>
-          <OpsSectionHead label="Recent shifts" />
-          {data.history.length === 0 ? (
-            <OpsEmpty message="No completed shifts yet." />
-          ) : (
-            data.history.map((row) => (
-              <OpsListRow key={row.id}>
-                <div>
-                  <p className="kxd-os-ops-list-row__title">
-                    {staffWorkIntentLabel(row.workIntent.category)}
-                  </p>
-                  <p className="kxd-os-meta">
-                    {formatStamp(row.startedAt, row.workTimezone)}
-                    {row.endedAt
-                      ? ` → ${formatStamp(row.endedAt, row.workTimezone)}`
-                      : ""}
-                    {row.elapsedMinutes != null ? ` · ${formatMinutes(row.elapsedMinutes)}` : ""}
-                  </p>
+          <OpsCard>
+            {active ? (
+              <div className="kxd-os-staff-time__active">
+                <div className="kxd-os-staff-time__active-head">
+                  <OpsStatusBadge label="On the clock" variant="success" />
+                  <p className="kxd-os-staff-time__elapsed">Elapsed {elapsedLabel}</p>
                 </div>
-              </OpsListRow>
-            ))
-          )}
-        </OpsCard>
+                <p className="kxd-os-ops-list-row__title">
+                  {staffWorkIntentLabel(active.workIntent.category)}
+                </p>
+                <p className="kxd-os-meta">
+                  Started {formatStamp(active.startedAt, data.workTimezone)} ({data.workTimezone})
+                </p>
+                <div className="kxd-os-staff-time__actions">
+                  <KxdButton
+                    type="button"
+                    variant="primary"
+                    disabled={busy !== null}
+                    onClick={() => void endShift()}
+                  >
+                    {busy === "end" ? "Ending…" : "End shift"}
+                  </KxdButton>
+                </div>
+              </div>
+            ) : (
+              <div className="kxd-os-staff-time__start">
+                <p className="kxd-os-staff-time__intro">
+                  Choose what you are working on, then start your shift.
+                </p>
+                <div className="kxd-os-staff-time__form">
+                  <label className="kxd-os-field">
+                    <span className="kxd-os-label">Work intent</span>
+                    <select
+                      className="kxd-os-select"
+                      value={category}
+                      onChange={(e) => setCategory(e.target.value as StaffWorkIntentCategory)}
+                    >
+                      {INTENT_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
+                    </select>
+                  </label>
+
+                  {category === "assigned_kxd_work" ? (
+                    <label className="kxd-os-field">
+                      <span className="kxd-os-label">Work item ID</span>
+                      <input
+                        className="kxd-os-input"
+                        inputMode="numeric"
+                        value={workId}
+                        onChange={(e) => setWorkId(e.target.value)}
+                        placeholder="e.g. 42"
+                      />
+                    </label>
+                  ) : null}
+
+                  {category === "client_project" ? (
+                    <label className="kxd-os-field">
+                      <span className="kxd-os-label">Client ID</span>
+                      <input
+                        className="kxd-os-input"
+                        inputMode="numeric"
+                        value={clientId}
+                        onChange={(e) => setClientId(e.target.value)}
+                        placeholder="Assigned client"
+                      />
+                    </label>
+                  ) : null}
+
+                  {category === "other_authorized" ? (
+                    <label className="kxd-os-field">
+                      <span className="kxd-os-label">Brief note</span>
+                      <textarea
+                        className="kxd-os-textarea"
+                        rows={3}
+                        value={note}
+                        onChange={(e) => setNote(e.target.value)}
+                        placeholder="Describe the authorized work (required for audit)."
+                      />
+                    </label>
+                  ) : null}
+                </div>
+                <div className="kxd-os-staff-time__actions">
+                  <KxdButton
+                    type="button"
+                    variant="primary"
+                    disabled={busy !== null}
+                    onClick={() => void startShift()}
+                  >
+                    {busy === "start" ? "Starting…" : "Start shift"}
+                  </KxdButton>
+                </div>
+              </div>
+            )}
+          </OpsCard>
+        </section>
+
+        <section className="kxd-os-staff-time__section" aria-label="Pay calendar">
+          <OpsSectionHead label="Pay calendar" />
+          <OpsCard>
+            <dl className="kxd-os-staff-time__pay-facts">
+              <div>
+                <dt className="kxd-os-label">Current pay period</dt>
+                <dd className="kxd-os-staff-time__pay-value">
+                  {data.payroll.nextPeriodLabel ?? "Pending payroll configuration"}
+                </dd>
+              </div>
+              <div>
+                <dt className="kxd-os-label">Next payday</dt>
+                <dd className="kxd-os-staff-time__pay-value">
+                  {data.payroll.nextPayday ?? "Schedule pending"}
+                </dd>
+              </div>
+              <div>
+                <dt className="kxd-os-label">Scheduling guidance</dt>
+                <dd className="kxd-os-meta">
+                  {data.payroll.weeklyHoursLimit} hours per workweek — not a wage cap.
+                </dd>
+              </div>
+            </dl>
+          </OpsCard>
+        </section>
+
+        <section className="kxd-os-staff-time__section" aria-label="Recent shifts">
+          <OpsSectionHead
+            label="Recent shifts"
+            count={data.history.length > 0 ? data.history.length : undefined}
+          />
+          <OpsCard>
+            {data.history.length === 0 ? (
+              <OpsEmpty message="No completed shifts yet. When you end a shift, it appears here with start time, end time, and duration." />
+            ) : (
+              <div className="kxd-os-staff-time__history">
+                {data.history.map((row) => (
+                  <OpsListRow key={row.id}>
+                    <div className="kxd-os-ops-list-row__main">
+                      <div className="kxd-os-ops-list-row__head">
+                        <p className="kxd-os-ops-list-row__title">
+                          {staffWorkIntentLabel(row.workIntent.category)}
+                        </p>
+                        {row.elapsedMinutes != null ? (
+                          <OpsStatusBadge
+                            label={formatMinutes(row.elapsedMinutes)}
+                            variant="status"
+                          />
+                        ) : null}
+                      </div>
+                      <p className="kxd-os-meta">
+                        {formatStamp(row.startedAt, row.workTimezone)}
+                        {row.endedAt
+                          ? ` → ${formatStamp(row.endedAt, row.workTimezone)}`
+                          : ""}
+                      </p>
+                    </div>
+                  </OpsListRow>
+                ))}
+              </div>
+            )}
+          </OpsCard>
+        </section>
       </KxdPage>
     </OperationsShell>
   );
