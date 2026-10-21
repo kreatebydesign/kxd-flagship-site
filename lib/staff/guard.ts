@@ -89,8 +89,11 @@ export async function requireStaffAwarePage(returnPath?: string) {
   return user;
 }
 
-export async function requireStaffCapabilityApi(capability: StaffCapability) {
-  const auth = await requirePayloadAdminApi();
+export async function requireStaffCapabilityApi(
+  capability: StaffCapability,
+  request?: Request,
+) {
+  const auth = await requirePayloadAdminApi(request);
   if (auth instanceof NextResponse) return auth;
   const actor = staffActorFromUser(auth);
   if (!actor) {

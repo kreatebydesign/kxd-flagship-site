@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
-  const gated = await requireStaffCapabilityApi("staff.time.clock");
+  const gated = await requireStaffCapabilityApi("staff.time.clock", request);
   if (gated instanceof NextResponse) return gated;
 
   try {

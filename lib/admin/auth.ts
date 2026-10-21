@@ -4,6 +4,7 @@ import { cache } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
+import type { PayloadRequest } from "payload";
 import { getPayload } from "payload";
 import config from "@payload-config";
 
@@ -20,16 +21,26 @@ import {
  * for `portal-users`. Only `users` collection sessions are accepted here —
  * portal sessions never grant operator APIs.
  */
-export const getPayloadAdminUser = cache(async function getPayloadAdminUser() {
-  const headersList = await headers();
-  const payload = await getPayload({ config });
-  const { user } = await payload.auth({ headers: headersList });
-
+function normalizePayloadAdminUser(user: PayloadRequest["user"]) {
   if (!user) return null;
   if (!isPayloadAdmin(user)) return null;
   if (user.collection && user.collection !== "users") return null;
   return user;
+}
+
+export const getPayloadAdminUser = cache(async function getPayloadAdminUser() {
+  const headersList = await headers();
+  const payload = await getPayload({ config });
+  const { user } = await payload.auth({ headers: headersList });
+  return normalizePayloadAdminUser(user);
 });
+
+/** Route handlers: prefer inbound Request headers (reliable for POST mutations). */
+export async function getPayloadAdminUserFromRequest(request: Request) {
+  const payload = await getPayload({ config });
+  const { user } = await payload.auth({ headers: request.headers });
+  return normalizePayloadAdminUser(user);
+}
 
 /**
  * Gate internal admin API routes — requires authenticated Payload `users` session.
@@ -37,7 +48,9 @@ export const getPayloadAdminUser = cache(async function getPayloadAdminUser() {
  * Restricted staff roles are deny-by-default against non-allowlisted API paths.
  */
 export async function requirePayloadAdminApi(request?: Request) {
-  const user = await getPayloadAdminUser();
+  const user = request
+    ? await getPayloadAdminUserFromRequest(request)
+    : await getPayloadAdminUser();
   if (!user) {
     return NextResponse.json(
       { success: false, ok: false, error: "Unauthorized." },
