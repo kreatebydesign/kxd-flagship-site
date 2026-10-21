@@ -12,6 +12,14 @@ export const STAFF_DOCUMENT_KINDS_RELEASE_B = [
   "staff-policy",
 ] as const;
 
+/** Real employee agreements — operator template editor defaults. */
+export const STAFF_DOCUMENT_OPERATOR_TEMPLATE_KINDS = [
+  "confidentiality-nda",
+  "ip-assignment",
+  "staff-policy",
+  "employment-agreement",
+] as const;
+
 export const STAFF_DOCUMENT_KINDS = [
   ...STAFF_DOCUMENT_KINDS_RELEASE_A,
   ...STAFF_DOCUMENT_KINDS_RELEASE_B,
@@ -141,6 +149,34 @@ export interface StaffDocumentAttentionItem {
   kind: StaffDocumentKind;
   signingMode: StaffDocumentSigningMode;
   actionLabel: string;
+}
+
+export interface StaffDocumentTemplateOperatorListItem {
+  id: number;
+  title: string;
+  version: number;
+  kind: StaffDocumentKind;
+  signingMode: StaffDocumentSigningMode;
+  status: StaffDocumentTemplateStatus;
+  contentHash: string;
+  isSample: boolean;
+  familyKey: string | null;
+  createdBy: string | null;
+  createdAt: string;
+  updatedAt: string;
+  approvedAt: string | null;
+  approvedBy: string | null;
+  assignable: boolean;
+}
+
+export interface StaffDocumentTemplateOperatorDetail extends StaffDocumentTemplateOperatorListItem {
+  body: string;
+  legalEntityName: string;
+  legalReviewSubmittedAt: string | null;
+  legalReviewSubmittedBy: string | null;
+  supersedesTemplateId: number | null;
+  editable: boolean;
+  qaProvenance: boolean;
 }
 
 export interface StaffDocumentDetail {

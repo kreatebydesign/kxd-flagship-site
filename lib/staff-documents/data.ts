@@ -26,6 +26,11 @@ import {
   parseTemplateStatus,
   resolveSigningModeForTemplate,
 } from "./validate.ts";
+import { assertStaffTemplateMayAssign } from "./template-provenance.ts";
+import {
+  transitionStaffDocumentTemplateStatus,
+  listStaffDocumentTemplatesForOperator as listStaffDocumentTemplatesForOperatorImpl,
+} from "./template-operator.ts";
 import {
   staffDocumentStaffPath,
   staffDocumentsListPath,
@@ -569,12 +574,15 @@ export async function createStaffDocumentTemplate(input: {
       : String(input.body ?? "").trim();
   if (!title || !body) throw new Error("Title and body are required.");
 
+  const familyKey = `fk-${sha256Hex(`${Date.now()}-${Math.random()}`).slice(0, 16)}`;
+  const isSample = Boolean(input.useSample) || useSamplePolicy || useSampleAgreement;
+
   const payload = await getPayload({ config });
   const created = (await payload.create({
     collection: TEMPLATES as never,
     data: {
       title,
-      slug: `policy-${Date.now()}`,
+      slug: `${familyKey}-v1`,
       version: 1,
       kind,
       signingMode,
@@ -582,6 +590,9 @@ export async function createStaffDocumentTemplate(input: {
       body,
       legalEntityName: input.legalEntityName?.trim() || STAFF_DOCUMENT_DEFAULT_LEGAL_ENTITY,
       contentHash: hashStaffDocumentBody(body),
+      familyKey,
+      createdBy: input.actor.email,
+      isSample,
     } as never,
     overrideAccess: true,
   })) as { id: number };
@@ -593,31 +604,7 @@ export async function updateStaffDocumentTemplateStatus(input: {
   templateId: number;
   status: StaffDocumentTemplateStatus;
 }): Promise<void> {
-  if (!staffMayManageDocuments(input.actor)) {
-    throw new Error("Operator permission required.");
-  }
-  const payload = await getPayload({ config });
-  const doc = (await payload.findByID({
-    collection: TEMPLATES as never,
-    id: input.templateId,
-    depth: 0,
-    overrideAccess: true,
-  })) as AnyDoc;
-
-  const nextStatus = input.status;
-  const data: AnyDoc = { status: nextStatus };
-  if (nextStatus === "approved-for-use") {
-    data.approvedAt = new Date().toISOString();
-    data.approvedBy = input.actor.email;
-    data.contentHash = hashStaffDocumentBody(String(doc.body ?? ""));
-  }
-
-  await payload.update({
-    collection: TEMPLATES as never,
-    id: input.templateId,
-    data: data as never,
-    overrideAccess: true,
-  });
+  await transitionStaffDocumentTemplateStatus(input);
 }
 
 export async function assignStaffDocumentFromTemplate(input: {
@@ -643,6 +630,11 @@ export async function assignStaffDocumentFromTemplate(input: {
 
   const status = parseTemplateStatus(template.status);
   assertTemplateApprovedForAssignment(status);
+  assertStaffTemplateMayAssign({
+    isSample: template.isSample ?? template.is_sample,
+    title: template.title,
+    body: template.body,
+  });
   const kind = parseStaffDocumentKind(String(template.kind ?? "policy-acknowledgment"));
   const signingMode = resolveSigningModeForTemplate({
     kind,
@@ -723,33 +715,9 @@ export async function listStaffDocumentsForOperator(): Promise<
 }
 
 export async function listStaffDocumentTemplatesForOperator(): Promise<
-  Array<{
-    id: number;
-    title: string;
-    version: number;
-    kind: StaffDocumentKind;
-    signingMode: StaffDocumentSigningMode;
-    status: StaffDocumentTemplateStatus;
-    contentHash: string;
-  }>
+  ReturnType<typeof listStaffDocumentTemplatesForOperatorImpl>
 > {
-  const payload = await getPayload({ config });
-  const result = await payload.find({
-    collection: TEMPLATES as never,
-    sort: "-updatedAt",
-    limit: 50,
-    depth: 0,
-    overrideAccess: true,
-  });
-  return (result.docs as AnyDoc[]).map((doc) => ({
-    id: Number(doc.id),
-    title: String(doc.title ?? ""),
-    version: Number(doc.version ?? 1),
-    kind: String(doc.kind) as StaffDocumentKind,
-    signingMode: parseSigningMode(doc),
-    status: parseTemplateStatus(doc.status),
-    contentHash: String(doc.contentHash ?? ""),
-  }));
+  return listStaffDocumentTemplatesForOperatorImpl();
 }
 
 export { fileStaffDocumentPdf };

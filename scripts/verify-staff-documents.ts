@@ -11,6 +11,13 @@ import {
   assertStaffDocumentAcknowledgeable,
   assertTemplateApprovedForAssignment,
 } from "../lib/staff-documents/validate.ts";
+import {
+  assertStaffTemplateMayApproveForUse,
+  assertStaffTemplateMayAssign,
+  resolveStaffTemplateQaProvenance,
+} from "../lib/staff-documents/template-provenance.ts";
+import { assertStaffTemplateStatusTransition } from "../lib/staff-documents/template-lifecycle.ts";
+import { SAMPLE_NONBINDING_POLICY_TITLE } from "../lib/staff-documents/constants.ts";
 import { assertStaffDocumentRowAccess, staffMayManageDocuments } from "../lib/staff-documents/access.ts";
 import { resolveAcknowledgmentClaimAfterUpdate } from "../lib/staff-documents/acknowledge-claim-outcomes.ts";
 import {
@@ -120,5 +127,28 @@ assert.equal(mattList.kind, "redirect");
 assert.equal(resolveStaffDocumentsListPageAccess(staffActor).kind, "render");
 assert.equal(resolveStaffDocumentsOversightPageAccess(mattAdmin).kind, "render");
 assert.equal(resolveStaffDocumentsOversightPageAccess(staffActor).kind, "redirect");
+
+assert.equal(
+  resolveStaffTemplateQaProvenance({ isSample: true, title: "Real title", body: "Body" }),
+  true,
+);
+assert.throws(() =>
+  assertStaffTemplateMayApproveForUse({
+    title: SAMPLE_NONBINDING_POLICY_TITLE,
+    body: "x",
+  }),
+);
+assert.throws(() =>
+  assertStaffTemplateMayAssign({
+    title: "Employment Agreement",
+    body: "SAMPLE text inside",
+  }),
+);
+assert.throws(() =>
+  assertStaffTemplateStatusTransition({ from: "draft", to: "approved-for-use" }),
+);
+assert.doesNotThrow(() =>
+  assertStaffTemplateStatusTransition({ from: "draft", to: "legal-review" }),
+);
 
 console.log("  ✓ staff documents release A checks passed\n");

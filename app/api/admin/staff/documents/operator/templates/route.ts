@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { requireStaffCapabilityApi } from "@/lib/staff/guard";
+import { createStaffDocumentTemplate } from "@/lib/staff-documents/data";
 import {
-  createStaffDocumentTemplate,
+  createRealStaffDocumentTemplate,
   listStaffDocumentTemplatesForOperator,
-  updateStaffDocumentTemplateStatus,
-} from "@/lib/staff-documents/data";
+  transitionStaffDocumentTemplateStatus,
+} from "@/lib/staff-documents/template-operator";
 import type { StaffDocumentTemplateStatus } from "@/lib/staff-documents/types";
 
 export const dynamic = "force-dynamic";
@@ -31,14 +32,22 @@ export async function POST(request: Request) {
   };
 
   try {
-    const created = await createStaffDocumentTemplate({
-      actor: gated.actor,
-      title: String(body.title ?? ""),
-      body: String(body.body ?? ""),
-      kind: body.kind,
-      useSample: Boolean(body.useSample),
-      legalEntityName: body.legalEntityName,
-    });
+    const created = body.useSample
+      ? await createStaffDocumentTemplate({
+          actor: gated.actor,
+          title: String(body.title ?? ""),
+          body: String(body.body ?? ""),
+          kind: body.kind,
+          useSample: true,
+          legalEntityName: body.legalEntityName,
+        })
+      : await createRealStaffDocumentTemplate({
+          actor: gated.actor,
+          title: String(body.title ?? ""),
+          body: String(body.body ?? ""),
+          kind: body.kind ?? "confidentiality-nda",
+          legalEntityName: body.legalEntityName,
+        });
     return NextResponse.json({ success: true, id: created.id });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unable to create template.";
@@ -60,7 +69,7 @@ export async function PATCH(request: Request) {
   }
 
   try {
-    await updateStaffDocumentTemplateStatus({
+    await transitionStaffDocumentTemplateStatus({
       actor: gated.actor,
       templateId,
       status: body.status ?? "draft",

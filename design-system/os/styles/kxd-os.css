@@ -9842,6 +9842,27 @@ a.kxd-os-platform-subsystem-card__title:hover {
   margin-top: var(--kxd-os-space-5);
 }
 
+.kxd-os-staff-docs-template-meta {
+  display: grid;
+  gap: var(--kxd-os-space-3);
+  margin: 0;
+}
+
+.kxd-os-staff-docs-template-meta dt {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-secondary);
+}
+
+.kxd-os-staff-docs-template-meta dd {
+  margin: 0.15rem 0 0;
+  font-size: 0.875rem;
+  color: var(--kxd-os-text-primary);
+  word-break: break-word;
+}
+
 /* ── KXD Intelligence product identity ───────────────────────────────── */
 
 .kxd-os-intel-mark {
