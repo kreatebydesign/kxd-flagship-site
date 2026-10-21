@@ -34,36 +34,43 @@ function normalizePayloadAdminUser(user: PayloadRequest["user"]) {
  */
 async function payloadAuthHeaders(inbound?: HeadersInit): Promise<Headers> {
   const merged = new Headers(inbound);
+  const headersList = await headers();
+  headersList.forEach((value, key) => {
+    if (key.toLowerCase() === "cookie") return;
+    if (!merged.has(key)) merged.set(key, value);
+  });
+
   const cookieStore = await cookies();
   const fromStore = cookieStore
     .getAll()
     .map((entry) => `${entry.name}=${entry.value}`)
     .join("; ");
-  if (fromStore) {
-    const existing = merged.get("cookie");
-    merged.set("cookie", existing ? `${existing}; ${fromStore}` : fromStore);
-  }
-  if (!merged.get("cookie")) {
-    const headersList = await headers();
-    const fromHeaders = headersList.get("cookie");
-    if (fromHeaders) merged.set("cookie", fromHeaders);
+  const fromHeaders = headersList.get("cookie");
+  const cookieParts = [merged.get("cookie"), fromHeaders, fromStore].filter(Boolean);
+  if (cookieParts.length > 0) {
+    merged.set("cookie", cookieParts.join("; "));
   }
   return merged;
 }
 
-export const getPayloadAdminUser = cache(async function getPayloadAdminUser() {
-  const headersList = await payloadAuthHeaders(await headers());
+async function resolvePayloadAdminUserFromHeaders(
+  inbound?: HeadersInit,
+): Promise<ReturnType<typeof normalizePayloadAdminUser>> {
+  const headersList = await payloadAuthHeaders(inbound);
   const payload = await getPayload({ config });
   const { user } = await payload.auth({ headers: headersList });
   return normalizePayloadAdminUser(user);
+}
+
+export const getPayloadAdminUser = cache(async function getPayloadAdminUser() {
+  return resolvePayloadAdminUserFromHeaders(await headers());
 });
 
 /** Route handlers: inbound Request + explicit cookie merge for POST mutations. */
 export async function getPayloadAdminUserFromRequest(request: Request) {
-  const headersList = await payloadAuthHeaders(request.headers);
-  const payload = await getPayload({ config });
-  const { user } = await payload.auth({ headers: headersList });
-  return normalizePayloadAdminUser(user);
+  const fromRequest = await resolvePayloadAdminUserFromHeaders(request.headers);
+  if (fromRequest) return fromRequest;
+  return getPayloadAdminUser();
 }
 
 /**
@@ -72,9 +79,8 @@ export async function getPayloadAdminUserFromRequest(request: Request) {
  * Restricted staff roles are deny-by-default against non-allowlisted API paths.
  */
 export async function requirePayloadAdminApi(request?: Request) {
-  const user = request
-    ? await getPayloadAdminUserFromRequest(request)
-    : await getPayloadAdminUser();
+  // Mutations must use the same session resolution as GET handlers (next/headers).
+  const user = await getPayloadAdminUser();
   if (!user) {
     return NextResponse.json(
       { success: false, ok: false, error: "Unauthorized." },
