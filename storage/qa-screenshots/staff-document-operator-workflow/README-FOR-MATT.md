@@ -10,4 +10,11 @@ After logging in as founder/admin on **portal** (or local dev):
 
 Capture PNG screenshots of steps 1–3 for PR evidence. PDF preview files can be generated with **Download PDF preview** on the template editor.
 
+## PR #93 integration QA (2026-10-21)
+
+- Disposable Neon branch: `staff-doc-operator-pr93-ephemeral` (`br-quiet-moon-af5chjn1`)
+- Integration scripts passed on that branch (operator workflow + Release B gate + phase2)
+- Vercel preview: `https://kxd-flagship-site-git-feat-staff-document-operator-workflow-kxd.vercel.app`
+- Authenticated UI workflow screenshots require Matt/founder login — see `preview-login-auth-required.png`
+
 Do not assign real documents to Tyler until Matt explicitly approves content and assignment.
