@@ -5,6 +5,10 @@
 import React from "react";
 import { Document, Text, View, pdf } from "@react-pdf/renderer";
 import {
+  AgreementPdfEvidencePanel,
+  AgreementPdfEvidenceRow,
+} from "@/lib/agreement-presentation/pdf-evidence.tsx";
+import {
   AgreementPdfBodyFromText,
   AgreementPdfBrandHeader,
   AgreementPdfLetterPage,
@@ -165,29 +169,32 @@ export async function renderStaffExecutedAgreementPdf(input: {
             title="Kreate by Design — authorized representative"
             signature={staffSignatureForPdf(input.operatorSignature)}
           />
-          <View style={agreementPdfStyles.notice}>
-            <Text style={agreementPdfStyles.p}>
-              Employee signature hash: {input.employeeSignature.signatureHash}
-            </Text>
-            <Text style={agreementPdfStyles.p}>
-              Operator signature hash: {input.operatorSignature.signatureHash}
-            </Text>
-            <Text style={agreementPdfStyles.p}>
-              Operator binding prior hash:{" "}
-              {input.operatorSignature.priorSignatureHash ?? "—"}
-            </Text>
+          <AgreementPdfEvidencePanel title="Signature integrity record">
+            <AgreementPdfEvidenceRow
+              label="Employee signature hash"
+              value={input.employeeSignature.signatureHash}
+            />
+            <AgreementPdfEvidenceRow
+              label="Operator signature hash"
+              value={input.operatorSignature.signatureHash}
+            />
+            <AgreementPdfEvidenceRow
+              label="Operator binding prior hash"
+              value={input.operatorSignature.priorSignatureHash ?? "—"}
+            />
             <Text style={agreementPdfStyles.meta}>
               Consent version {input.employeeSignature.consentDisclosureVersion}. Typed
               electronic signatures are acknowledgments, not biometric identity verification.
             </Text>
-          </View>
+          </AgreementPdfEvidencePanel>
           {auditLines.length > 0 ? (
-            <View style={agreementPdfStyles.notice}>
-              <Text style={agreementPdfStyles.signatureTitle}>Execution audit trail</Text>
+            <AgreementPdfEvidencePanel title="Execution audit trail">
               {auditLines.map((line, i) => (
-                <Text key={`audit-${i}`} style={agreementPdfStyles.meta}>{line}</Text>
+                <Text key={`audit-${i}`} style={agreementPdfStyles.evidenceValue}>
+                  {line}
+                </Text>
               ))}
-            </View>
+            </AgreementPdfEvidencePanel>
           ) : null}
         </View>
       </AgreementPdfLetterPage>

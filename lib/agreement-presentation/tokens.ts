@@ -21,3 +21,19 @@ export const KXD_AGREEMENT_FONTS = {
   sans: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
   serif: "Georgia, 'Iowan Old Style', Palatino, serif",
 } as const;
+
+/**
+ * Solid colors for @react-pdf only. PDF engines often mis-render rgba() as teal/red hues;
+ * use these hex values for borders, rules, and panels (matches KXD Classic gold + neutral ink).
+ */
+export const KXD_AGREEMENT_PDF_COLORS = {
+  gold: "#c2aa72",
+  goldMuted: "#8a7a5c",
+  goldRule: "#c2aa72",
+  goldBorder: "#d4c4a0",
+  /** Full-width footer / signature separators */
+  goldHairline: "#c2aa72",
+  /** Section underlines — warm neutral (avoid cool gray that PDF engines tint teal) */
+  inkHairline: "#d9cdb8",
+  noticeBorder: "#d4c4a0",
+} as const;
