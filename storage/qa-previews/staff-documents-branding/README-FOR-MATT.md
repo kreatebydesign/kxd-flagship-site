@@ -1,5 +1,7 @@
 # PR #92 — Staff document branding visual QA (Matt)
 
+**Updated:** 2026-10-21 — gold/neutral PDF divider fix + commercial client identity fixture correction.
+
 **Do not assign these samples to staff. Synthetic / nonbinding content only.**
 
 ## PDFs (open in Preview or Acrobat)
