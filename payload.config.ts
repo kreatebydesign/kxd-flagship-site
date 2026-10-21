@@ -147,6 +147,7 @@ import {
   KXD_OS_SHARE,
   kxdOsShareImageAbsoluteUrl,
 } from "./lib/admin/kxd-os-share.ts";
+import { resolvePayloadCsrfOrigins } from "./lib/payload/csrf-origins.ts";
 import { SITE } from "./lib/site.ts";
 
 const filename = fileURLToPath(import.meta.url);
@@ -217,6 +218,7 @@ const kxdOsShareImage = kxdOsShareImageAbsoluteUrl();
 
 export default buildConfig({
   serverURL: SITE.url,
+  csrf: resolvePayloadCsrfOrigins(),
   admin: {
     user: Users.slug,
     theme: "dark",

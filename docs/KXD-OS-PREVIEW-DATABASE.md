@@ -68,6 +68,10 @@ Then redeploy affected Preview deployments.
 
 On Vercel Preview, `payload.config.ts` refuses the production Neon endpoint if `KXD_NEON_PREVIEW_ENDPOINT_ID` is set and the resolved host does not match the preview endpoint.
 
+## Payload CSRF / cookie auth on Preview
+
+Browser **POST** requests include an `Origin` header. Payload only accepts cookie JWTs when `Origin` is in the `csrf` allowlist (`lib/payload/csrf-origins.ts`, includes `VERCEL_BRANCH_URL` and `VERCEL_URL`). If Preview hosts are missing, staff Time Clock **Start shift** returns `401 Unauthorized` while GET routes (current shift, history) may still return `200`.
+
 ## Canonical Preview hostname (auth)
 
 Use **one hostname** for the whole QA session:

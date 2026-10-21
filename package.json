@@ -150,6 +150,7 @@
     "verify:staff-sales-phase1": "tsx scripts/verify-staff-sales-phase1.ts",
     "verify:staff-time-foundation": "tsx scripts/verify-staff-time-foundation.ts",
     "verify:staff-time-authorization": "tsx scripts/verify-staff-time-authorization.ts",
+    "verify:payload-preview-csrf": "tsx scripts/verify-payload-preview-csrf.ts",
     "verify:staff-time-bootstrap-idempotency": "KXD_SERVER_ONLY_SHIM=1 node --import ./scripts/shims/register-server-only.mjs --import tsx --env-file=.env.local scripts/verify-staff-time-bootstrap-idempotency.ts",
     "verify:staff-time-scope": "KXD_SERVER_ONLY_SHIM=1 node --import ./scripts/shims/register-server-only.mjs --import tsx --env-file=.env.local scripts/verify-staff-time-scope.ts",
     "verify:staff-time-concurrency": "KXD_SERVER_ONLY_SHIM=1 node --import ./scripts/shims/register-server-only.mjs --import tsx --env-file=.env.local scripts/verify-staff-time-concurrency.ts",
