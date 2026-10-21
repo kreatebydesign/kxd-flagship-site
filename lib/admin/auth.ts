@@ -1,7 +1,7 @@
 import "server-only";
 
 import { cache } from "react";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
 import type { PayloadRequest } from "payload";
@@ -28,17 +28,41 @@ function normalizePayloadAdminUser(user: PayloadRequest["user"]) {
   return user;
 }
 
+/**
+ * Payload session resolution needs a `Cookie` header. On some App Router POST
+ * handlers `request.headers` omits cookies; merge `cookies()` + `headers()`.
+ */
+async function payloadAuthHeaders(inbound?: HeadersInit): Promise<Headers> {
+  const merged = new Headers(inbound);
+  const cookieStore = await cookies();
+  const fromStore = cookieStore
+    .getAll()
+    .map((entry) => `${entry.name}=${entry.value}`)
+    .join("; ");
+  if (fromStore) {
+    const existing = merged.get("cookie");
+    merged.set("cookie", existing ? `${existing}; ${fromStore}` : fromStore);
+  }
+  if (!merged.get("cookie")) {
+    const headersList = await headers();
+    const fromHeaders = headersList.get("cookie");
+    if (fromHeaders) merged.set("cookie", fromHeaders);
+  }
+  return merged;
+}
+
 export const getPayloadAdminUser = cache(async function getPayloadAdminUser() {
-  const headersList = await headers();
+  const headersList = await payloadAuthHeaders(await headers());
   const payload = await getPayload({ config });
   const { user } = await payload.auth({ headers: headersList });
   return normalizePayloadAdminUser(user);
 });
 
-/** Route handlers: prefer inbound Request headers (reliable for POST mutations). */
+/** Route handlers: inbound Request + explicit cookie merge for POST mutations. */
 export async function getPayloadAdminUserFromRequest(request: Request) {
+  const headersList = await payloadAuthHeaders(request.headers);
   const payload = await getPayload({ config });
-  const { user } = await payload.auth({ headers: request.headers });
+  const { user } = await payload.auth({ headers: headersList });
   return normalizePayloadAdminUser(user);
 }
 
