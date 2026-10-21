@@ -46,7 +46,10 @@ async function payloadAuthHeaders(inbound?: HeadersInit): Promise<Headers> {
     .map((entry) => `${entry.name}=${entry.value}`)
     .join("; ");
   const fromHeaders = headersList.get("cookie");
-  const cookieParts = [merged.get("cookie"), fromHeaders, fromStore].filter(Boolean);
+  const forwarded = headersList.get("x-kxd-forwarded-cookie");
+  const cookieParts = [merged.get("cookie"), fromHeaders, forwarded, fromStore].filter(
+    Boolean,
+  );
   if (cookieParts.length > 0) {
     merged.set("cookie", cookieParts.join("; "));
   }
