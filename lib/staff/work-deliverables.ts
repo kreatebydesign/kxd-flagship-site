@@ -5,6 +5,7 @@
 
 export const STAFF_ASSIGNMENT_DELIVERABLES_KEY = "staffAssignmentDeliverables";
 export const STAFF_DELIVERABLE_PROGRESS_KEY = "staffDeliverableProgress";
+export const STAFF_ACCEPTANCE_CRITERIA_PROGRESS_KEY = "staffAcceptanceCriteriaProgress";
 
 const MAX_DELIVERABLES = 40;
 const MAX_TITLE_LEN = 200;
@@ -310,4 +311,69 @@ export function formatInstructionBlocks(text: string | null | undefined): string
   const byParagraph = normalized.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean);
   if (byParagraph.length > 1) return byParagraph;
   return normalized.split("\n").map((line) => line.trim()).filter(Boolean);
+}
+
+/** Parse Work.acceptanceCriteria markdown checklist into stable checklist items. */
+export function parseAcceptanceCriteriaDefinition(
+  acceptanceCriteria: string | null | undefined,
+): StaffAssignmentDeliverablesDefinition | null {
+  if (!acceptanceCriteria?.trim()) return null;
+  const items: StaffAssignmentDeliverableDef[] = [];
+  for (const line of acceptanceCriteria.replace(/\r\n/g, "\n").split("\n")) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    const checkbox = /^- \[[\sxX]\]\s*(.+)$/.exec(trimmed);
+    const numbered = /^\d+\.\s+(.+)$/.exec(trimmed);
+    const title = checkbox?.[1]?.trim() || numbered?.[1]?.trim();
+    if (!title) continue;
+    items.push({
+      id: `ac-${items.length}`,
+      title,
+      instructions: null,
+      required: true,
+    });
+  }
+  if (items.length === 0) return null;
+  return {
+    v: 1,
+    items,
+    updatedAt: new Date().toISOString(),
+    updatedBy: null,
+  };
+}
+
+export function parseAcceptanceCriteriaProgress(
+  metadata: Record<string, unknown> | null | undefined,
+  assigneeUserId: number,
+): StaffDeliverableProgressState | null {
+  if (!metadata) return null;
+  const block = metadata[STAFF_ACCEPTANCE_CRITERIA_PROGRESS_KEY];
+  if (!block || typeof block !== "object" || Array.isArray(block)) return null;
+  const state = block as StaffDeliverableProgressState;
+  if (state.v !== 1 || state.assigneeUserId !== assigneeUserId) return null;
+  if (!state.completed || typeof state.completed !== "object") return null;
+  return state;
+}
+
+export function buildAcceptanceCriteriaProgressPatch(
+  metadata: Record<string, unknown>,
+  assigneeUserId: number,
+  completed: Record<string, StaffDeliverableCompletionRecord>,
+): Record<string, unknown> {
+  return {
+    ...metadata,
+    [STAFF_ACCEPTANCE_CRITERIA_PROGRESS_KEY]: {
+      v: 1,
+      assigneeUserId,
+      completed,
+      updatedAt: new Date().toISOString(),
+    },
+  };
+}
+
+export function mergeAcceptanceCriteriaViews(
+  definition: StaffAssignmentDeliverablesDefinition | null,
+  progress: StaffDeliverableProgressState | null,
+): StaffDeliverableView[] {
+  return mergeDeliverableViews(definition, progress);
 }

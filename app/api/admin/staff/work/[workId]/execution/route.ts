@@ -11,7 +11,10 @@ import {
   saveStaffWorkExecution,
 } from "@/lib/staff/work-execution-service";
 import { splitWorkNotes } from "@/lib/staff/work-execution-notes";
-import { loadWorkDeliverableViews } from "@/lib/staff/work-deliverables-service";
+import {
+  loadWorkAcceptanceCriteriaViews,
+  loadWorkDeliverableViews,
+} from "@/lib/staff/work-deliverables-service";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -46,15 +49,20 @@ export async function PATCH(request: Request, context: RouteContext) {
     staffProgress?: string | null;
     checklist?: Record<string, unknown> | null;
     deliverables?: Record<string, unknown> | null;
+    acceptanceCriteria?: Record<string, unknown> | null;
   };
 
   if (
     body.staffProgress === undefined &&
     body.checklist === undefined &&
-    body.deliverables === undefined
+    body.deliverables === undefined &&
+    body.acceptanceCriteria === undefined
   ) {
     return NextResponse.json(
-      { success: false, error: "Provide staffProgress, checklist, or deliverables to save." },
+      {
+        success: false,
+        error: "Provide staffProgress, checklist, deliverables, or acceptanceCriteria to save.",
+      },
       { status: 400 },
     );
   }
@@ -71,6 +79,7 @@ export async function PATCH(request: Request, context: RouteContext) {
         staffProgress: body.staffProgress,
         checklist: body.checklist,
         deliverables: body.deliverables,
+        acceptanceCriteria: body.acceptanceCriteria,
       },
     );
 
@@ -80,9 +89,11 @@ export async function PATCH(request: Request, context: RouteContext) {
       staffProgress: result.staffProgress,
       checklist: result.checklist,
       deliverables: result.deliverables,
+      acceptanceCriteria: result.acceptanceCriteria,
       progressSaved: result.progressSaved,
       checklistSaved: result.checklistSaved,
       deliverablesSaved: result.deliverablesSaved,
+      acceptanceCriteriaSaved: result.acceptanceCriteriaSaved,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Could not save execution state.";
@@ -123,6 +134,11 @@ export async function GET(_request: Request, context: RouteContext) {
     requiresMattApproval,
   );
   const deliverables = await loadWorkDeliverableViews(workId, gated.actor.userId);
+  const acceptanceCriteria = await loadWorkAcceptanceCriteriaViews(
+    workId,
+    gated.actor.userId,
+    work.acceptanceCriteria,
+  );
 
   return NextResponse.json({
     success: true,
@@ -130,5 +146,6 @@ export async function GET(_request: Request, context: RouteContext) {
     staffProgress,
     checklist,
     deliverables,
+    acceptanceCriteria,
   });
 }

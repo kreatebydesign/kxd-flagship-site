@@ -10,11 +10,19 @@ import {
   listStaffShiftHistory,
 } from "./shifts";
 import type { StaffTimeHistoryItem, StaffTimeShiftView } from "./types";
+import {
+  listStaffTimeEligibleClients,
+  listStaffTimeEligibleWork,
+  type StaffTimeEligibleClientOption,
+  type StaffTimeEligibleWorkOption,
+} from "./eligible-assignments";
 
 export type StaffTimeClockPageData = {
   workTimezone: string;
   activeShift: StaffTimeShiftView | null;
   history: StaffTimeHistoryItem[];
+  eligibleWork: StaffTimeEligibleWorkOption[];
+  eligibleClients: StaffTimeEligibleClientOption[];
   payroll: {
     nextPayday: string | null;
     nextPeriodLabel: string | null;
@@ -28,16 +36,20 @@ export async function loadStaffTimeClockPage(
 ): Promise<StaffTimeClockPageData> {
   const payload = await getPayload({ config });
   const workTimezone = await resolveRequestTimezone();
-  const [activeShift, history, payroll] = await Promise.all([
+  const [activeShift, history, payroll, eligibleWork, eligibleClients] = await Promise.all([
     findActiveStaffShift(actor.userId),
     listStaffShiftHistory(actor.userId, 20),
     loadUpcomingPaydaySummary(payload),
+    listStaffTimeEligibleWork(actor),
+    listStaffTimeEligibleClients(actor),
   ]);
 
   return {
     workTimezone,
     activeShift,
     history,
+    eligibleWork,
+    eligibleClients,
     payroll,
     viewer: {
       userId: actor.userId,

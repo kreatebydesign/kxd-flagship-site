@@ -6,6 +6,7 @@ import config from "@payload-config";
 import type { StaffActor } from "@/lib/staff/types";
 import { denyUnlessStaffAssignedWork } from "@/lib/staff/guard";
 import { staffMayAccessClient } from "@/lib/staff/client-assignments";
+import { getWorkItem } from "@/lib/work/services";
 import { ensureStaffPayrollFoundation, resolvePayPeriodIdForDateKey } from "@/lib/staff-pay/bootstrap";
 import { appendShiftAuditEvent, readShiftAuditEvents } from "./audit";
 import { minutesBetween, toDateKeyInTimezone } from "./dates";
@@ -85,6 +86,30 @@ async function assertWorkIntentAllowed(
   }
 }
 
+/** Derive client from assigned work; validate client scope for internal vs client work. */
+export async function resolveStaffWorkIntentForShift(
+  actor: StaffActor,
+  intent: StaffWorkIntentInput,
+): Promise<StaffWorkIntentInput> {
+  if (intent.category !== "assigned_kxd_work" || !intent.workId) {
+    return intent;
+  }
+  const work = await getWorkItem(intent.workId);
+  if (!work) {
+    throw new Error("WORK_INTENT_WORK_NOT_FOUND");
+  }
+  if (work.clientId != null) {
+    const allowed = await staffMayAccessClient(actor, work.clientId);
+    if (!allowed) {
+      throw new Error("WORK_INTENT_CLIENT_NOT_ALLOWED");
+    }
+  }
+  return {
+    ...intent,
+    clientId: work.clientId ?? null,
+  };
+}
+
 async function findIdempotentPunch(
   payload: Awaited<ReturnType<typeof getPayload>>,
   staffUserId: number,
@@ -140,6 +165,7 @@ export async function startStaffShift(input: {
   const payload = await getPayload({ config });
   await ensureStaffPayrollFoundation(payload);
   await assertWorkIntentAllowed(input.actor, input.workIntent, input.user);
+  const workIntent = await resolveStaffWorkIntentForShift(input.actor, input.workIntent);
 
   const idempotencyKey = input.idempotencyKey?.trim() || null;
   if (idempotencyKey) {
@@ -186,7 +212,7 @@ export async function startStaffShift(input: {
         at: nowIso,
         actorUserId: input.actor.userId,
         action: "shift_started",
-        detail: { workIntent: input.workIntent },
+        detail: { workIntent },
       });
 
       try {
@@ -198,10 +224,10 @@ export async function startStaffShift(input: {
             startedAt: nowIso,
             workTimezone: input.workTimezone,
             localDateKey,
-            workIntentCategory: input.workIntent.category,
-            workIntentWorkId: input.workIntent.workId ?? undefined,
-            workIntentClientId: input.workIntent.clientId ?? undefined,
-            workIntentNote: input.workIntent.note ?? undefined,
+            workIntentCategory: workIntent.category,
+            workIntentWorkId: workIntent.workId ?? undefined,
+            workIntentClientId: workIntent.clientId ?? undefined,
+            workIntentNote: workIntent.note ?? undefined,
             payPeriodId: payPeriodId ?? undefined,
             auditEvents: audit,
           },
@@ -219,7 +245,7 @@ export async function startStaffShift(input: {
             recordedAt: nowIso,
             actorUser: input.actor.userId,
             idempotencyKey: idempotencyKey ?? undefined,
-            payload: { workIntent: input.workIntent },
+            payload: { workIntent },
           },
           depth: 0,
           overrideAccess: true,

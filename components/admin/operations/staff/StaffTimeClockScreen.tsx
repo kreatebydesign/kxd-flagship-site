@@ -13,7 +13,7 @@ import {
 import { KxdButton, KxdPage } from "@/components/os";
 import type { StaffTimeClockPageData } from "@/lib/staff-time/load";
 import type { StaffWorkIntentCategory } from "@/lib/staff-time/types";
-import { staffWorkIntentLabel } from "@/lib/staff-time/intent";
+import { staffWorkIntentDetail, staffWorkIntentLabel } from "@/lib/staff-time/intent";
 
 function formatMinutes(total: number): string {
   const h = Math.floor(total / 60);
@@ -36,22 +36,40 @@ function formatStamp(iso: string, timeZone: string): string {
 
 const INTENT_OPTIONS: { value: StaffWorkIntentCategory; label: string }[] = [
   { value: "assigned_kxd_work", label: "Assigned KXD work" },
-  { value: "client_project", label: "Client project" },
+  { value: "client_project", label: "Client project (general)" },
   { value: "meeting", label: "Meeting" },
   { value: "training", label: "Training" },
   { value: "internal_operations", label: "Internal operations" },
   { value: "other_authorized", label: "Other authorized work" },
 ];
 
+function defaultCategory(data: StaffTimeClockPageData): StaffWorkIntentCategory {
+  if (data.eligibleWork.length > 0) return "assigned_kxd_work";
+  return "internal_operations";
+}
+
 export function StaffTimeClockScreen({ initial }: { initial: StaffTimeClockPageData }) {
   const [data, setData] = useState(initial);
-  const [category, setCategory] = useState<StaffWorkIntentCategory>("internal_operations");
-  const [workId, setWorkId] = useState("");
-  const [clientId, setClientId] = useState("");
+  const [category, setCategory] = useState<StaffWorkIntentCategory>(() => defaultCategory(initial));
+  const [selectedWorkId, setSelectedWorkId] = useState(() =>
+    initial.eligibleWork[0] ? String(initial.eligibleWork[0].workId) : "",
+  );
+  const [selectedClientId, setSelectedClientId] = useState(() =>
+    initial.eligibleClients[0] ? String(initial.eligibleClients[0].clientId) : "",
+  );
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState<"start" | "end" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [nowMs, setNowMs] = useState(() => Date.now());
+
+  const workById = useMemo(
+    () => new Map(data.eligibleWork.map((item) => [item.workId, item])),
+    [data.eligibleWork],
+  );
+  const clientById = useMemo(
+    () => new Map(data.eligibleClients.map((item) => [item.clientId, item])),
+    [data.eligibleClients],
+  );
 
   const active = data.activeShift;
 
@@ -67,6 +85,18 @@ export function StaffTimeClockScreen({ initial }: { initial: StaffTimeClockPageD
     const minutes = Math.max(0, Math.floor((nowMs - start) / 60_000));
     return formatMinutes(minutes);
   }, [active, nowMs]);
+
+  const activeIntentDetail = useMemo(() => {
+    if (!active) return null;
+    const work =
+      active.workIntent.workId != null ? workById.get(active.workIntent.workId) : undefined;
+    const client =
+      active.workIntent.clientId != null ? clientById.get(active.workIntent.clientId) : undefined;
+    return staffWorkIntentDetail(active.workIntent, {
+      workTitle: work?.title,
+      clientLabel: client?.label ?? work?.clientLabel,
+    });
+  }, [active, workById, clientById]);
 
   const refresh = useCallback(async () => {
     const [currentRes, historyRes] = await Promise.all([
@@ -88,13 +118,26 @@ export function StaffTimeClockScreen({ initial }: { initial: StaffTimeClockPageD
     }));
   }, []);
 
+  const canStartAssignedWork =
+    category !== "assigned_kxd_work" || (selectedWorkId !== "" && workById.has(Number(selectedWorkId)));
+  const canStartClientProject =
+    category !== "client_project" ||
+    (selectedClientId !== "" && clientById.has(Number(selectedClientId)));
+  const canStartOther =
+    category !== "other_authorized" || note.trim().length > 0;
+  const canStart = canStartAssignedWork && canStartClientProject && canStartOther;
+
   async function startShift() {
     setError(null);
     setBusy("start");
     try {
       const workIntent: Record<string, unknown> = { category };
-      if (category === "assigned_kxd_work") workIntent.workId = Number(workId);
-      if (category === "client_project") workIntent.clientId = Number(clientId);
+      if (category === "assigned_kxd_work") {
+        workIntent.workId = Number(selectedWorkId);
+      }
+      if (category === "client_project") {
+        workIntent.clientId = Number(selectedClientId);
+      }
       if (category === "other_authorized") workIntent.note = note.trim();
 
       const res = await fetch("/api/admin/staff/time/shift/start", {
@@ -141,6 +184,9 @@ export function StaffTimeClockScreen({ initial }: { initial: StaffTimeClockPageD
     }
   }
 
+  const selectedWork =
+    selectedWorkId !== "" ? workById.get(Number(selectedWorkId)) : undefined;
+
   return (
     <OperationsShell activeId="staff-time" variant="staff">
       <KxdPage className="kxd-os-page--ops kxd-os-page--staff kxd-os-page--staff-time">
@@ -169,6 +215,9 @@ export function StaffTimeClockScreen({ initial }: { initial: StaffTimeClockPageD
                 <p className="kxd-os-ops-list-row__title">
                   {staffWorkIntentLabel(active.workIntent.category)}
                 </p>
+                {activeIntentDetail ? (
+                  <p className="kxd-os-meta kxd-os-staff-time__intent-detail">{activeIntentDetail}</p>
+                ) : null}
                 <p className="kxd-os-meta">
                   Started {formatStamp(active.startedAt, data.workTimezone)} ({data.workTimezone})
                 </p>
@@ -204,27 +253,57 @@ export function StaffTimeClockScreen({ initial }: { initial: StaffTimeClockPageD
 
                   {category === "assigned_kxd_work" ? (
                     <label className="kxd-os-field">
-                      <span className="kxd-os-label">Work item ID</span>
-                      <input
-                        className="kxd-os-input"
-                        inputMode="numeric"
-                        value={workId}
-                        onChange={(e) => setWorkId(e.target.value)}
-                        placeholder="e.g. 42"
-                      />
+                      <span className="kxd-os-label">Assigned work</span>
+                      {data.eligibleWork.length === 0 ? (
+                        <p className="kxd-os-meta">
+                          No open assignments on your board. Use Internal operations or ask Matt for
+                          help.
+                        </p>
+                      ) : (
+                        <select
+                          className="kxd-os-select"
+                          value={selectedWorkId}
+                          onChange={(e) => setSelectedWorkId(e.target.value)}
+                        >
+                          {data.eligibleWork.map((item) => (
+                            <option key={item.workId} value={String(item.workId)}>
+                              {item.clientLabel
+                                ? `${item.title} · ${item.clientLabel}`
+                                : `${item.title} · Internal`}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                      {selectedWork ? (
+                        <p className="kxd-os-meta kxd-os-staff-time__derived-client">
+                          {selectedWork.clientLabel
+                            ? `Client · ${selectedWork.clientLabel} (from assignment)`
+                            : "Internal KXD work — no client on this assignment."}
+                        </p>
+                      ) : null}
                     </label>
                   ) : null}
 
                   {category === "client_project" ? (
                     <label className="kxd-os-field">
-                      <span className="kxd-os-label">Client ID</span>
-                      <input
-                        className="kxd-os-input"
-                        inputMode="numeric"
-                        value={clientId}
-                        onChange={(e) => setClientId(e.target.value)}
-                        placeholder="Assigned client"
-                      />
+                      <span className="kxd-os-label">Assigned client</span>
+                      {data.eligibleClients.length === 0 ? (
+                        <p className="kxd-os-meta">
+                          No client assignments on file. Use Assigned KXD work or Internal operations.
+                        </p>
+                      ) : (
+                        <select
+                          className="kxd-os-select"
+                          value={selectedClientId}
+                          onChange={(e) => setSelectedClientId(e.target.value)}
+                        >
+                          {data.eligibleClients.map((item) => (
+                            <option key={item.clientId} value={String(item.clientId)}>
+                              {item.label}
+                            </option>
+                          ))}
+                        </select>
+                      )}
                     </label>
                   ) : null}
 
@@ -245,7 +324,7 @@ export function StaffTimeClockScreen({ initial }: { initial: StaffTimeClockPageD
                   <KxdButton
                     type="button"
                     variant="primary"
-                    disabled={busy !== null}
+                    disabled={busy !== null || !canStart}
                     onClick={() => void startShift()}
                   >
                     {busy === "start" ? "Starting…" : "Start shift"}

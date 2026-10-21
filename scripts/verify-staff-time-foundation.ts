@@ -3,7 +3,11 @@
  *   npx tsx scripts/verify-staff-time-foundation.ts
  */
 import assert from "node:assert/strict";
-import { parseStaffWorkIntent, staffWorkIntentLabel } from "../lib/staff-time/intent.ts";
+import {
+  parseStaffWorkIntent,
+  staffWorkIntentDetail,
+  staffWorkIntentLabel,
+} from "../lib/staff-time/intent.ts";
 import { STAFF_PAYROLL_DEFAULTS } from "../lib/staff-pay/constants.ts";
 import { TYLER_OCTOBER_2026_STAGING_REFERENCE } from "../lib/staff-time/historical/tyler-october-2026-staging.ts";
 
@@ -25,6 +29,14 @@ assert.equal(
 );
 
 assert.equal(staffWorkIntentLabel("internal_operations"), "Internal operations");
+
+assert.equal(
+  staffWorkIntentDetail(
+    { category: "assigned_kxd_work", workId: 46, clientId: null, note: null },
+    { workTitle: "Remote Work Setup — Home Mac" },
+  ),
+  "Remote Work Setup — Home Mac",
+);
 
 assert.equal(STAFF_PAYROLL_DEFAULTS.tylerHourlyRateCents, 2000);
 assert.equal(STAFF_PAYROLL_DEFAULTS.firstShortPeriod.payday, "2026-10-30");

@@ -3,9 +3,12 @@ import "server-only";
 import { getTrainingStaffSummary } from "@/lib/training/summary";
 import { buildStaffGuidedChecklistItems } from "./guided-checklist";
 import { loadStaffGuidedChecklistChecked } from "./work-execution-service";
-import { splitWorkNotes } from "./work-execution-notes";
-import { formatInstructionBlocks, summarizeDeliverableProgress } from "./work-deliverables";
-import { loadWorkDeliverableViews } from "./work-deliverables-service";
+import { parseStudioNotesAndOutcome, resolveGuidedWorkBrief } from "./guided-work-content";
+import { summarizeDeliverableProgress } from "./work-deliverables";
+import {
+  loadWorkAcceptanceCriteriaViews,
+  loadWorkDeliverableViews,
+} from "./work-deliverables-service";
 import { getWorkItem } from "@/lib/work/services";
 import { listWorkAssignedToStaffActor } from "@/lib/work/staff-assigned";
 import type { WorkListItem } from "@/lib/work/types";
@@ -227,7 +230,11 @@ export async function loadStaffGuidedWork(
   const mattApproval =
     workRequiresOperatorApproval(work, actor) || isWaitingOnMatt(work);
 
-  const { studioNotes, staffProgress } = splitWorkNotes(work.notes);
+  const {
+    studioNotes,
+    staffProgress,
+    expectedOutcomeFromNotes,
+  } = parseStudioNotesAndOutcome(work.notes);
   const checklistItems = buildStaffGuidedChecklistItems(mattApproval);
   let checklistChecked: Record<string, boolean> = {};
   try {
@@ -260,10 +267,23 @@ export async function loadStaffGuidedWork(
     deliverables = [];
   }
   const deliverableProgress = summarizeDeliverableProgress(deliverables);
-  const instructionSource = [work.description, work.acceptanceCriteria]
-    .filter((s) => s?.trim())
-    .join("\n\n");
-  const instructionBlocks = formatInstructionBlocks(instructionSource);
+  let acceptanceCriteriaItems: Awaited<ReturnType<typeof loadWorkAcceptanceCriteriaViews>> = [];
+  try {
+    acceptanceCriteriaItems = await loadWorkAcceptanceCriteriaViews(
+      work.id,
+      actor.userId,
+      work.acceptanceCriteria,
+    );
+  } catch {
+    acceptanceCriteriaItems = [];
+  }
+  const acceptanceCriteriaProgress = summarizeDeliverableProgress(acceptanceCriteriaItems);
+  const brief = resolveGuidedWorkBrief({
+    summary: work.summary,
+    description: work.description,
+    expectedOutcomeFromNotes,
+    hasStructuredDeliverables: deliverables.length > 0,
+  });
 
   return {
     workId: work.id,
@@ -271,12 +291,15 @@ export async function loadStaffGuidedWork(
     summary: work.summary,
     description: work.description,
     acceptanceCriteria: work.acceptanceCriteria,
+    expectedOutcome: brief.expectedOutcome,
     studioNotes,
     staffProgressNotes: staffProgress,
     checklistChecked,
     deliverables,
     deliverableProgress,
-    instructionBlocks,
+    acceptanceCriteriaItems,
+    acceptanceCriteriaProgress,
+    instructionBlocks: brief.instructionBlocks,
     activityHistory: work.activityHistory ?? [],
     status: work.status,
     priority: work.priority,

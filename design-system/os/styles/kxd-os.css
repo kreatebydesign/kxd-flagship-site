@@ -9720,6 +9720,11 @@ a.kxd-os-platform-subsystem-card__title:hover {
   color: var(--kxd-os-text-primary);
 }
 
+.kxd-os-staff-time__derived-client,
+.kxd-os-staff-time__intent-detail {
+  margin: 0.35rem 0 0;
+}
+
 .kxd-os-staff-time__intro {
   margin: 0 0 var(--kxd-os-space-5);
   max-width: 42rem;
@@ -23738,11 +23743,28 @@ select.kxd-os-commercial-control {
   margin: 0 0 0.75rem;
   font-size: 1.05rem;
   line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.kxd-os-staff-guided__expected-outcome {
+  margin: 0.35rem 0 0;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+
+.kxd-os-staff-guided__instructions-section {
+  margin-top: 1.15rem;
 }
 
 .kxd-os-staff-guided__instruction-blocks {
   display: grid;
   gap: 0.65rem;
+}
+
+.kxd-os-staff-guided__deliverable-instructions {
+  display: block;
+  margin-top: 0.25rem;
+  white-space: pre-wrap;
 }
 
 .kxd-os-staff-guided__meta-item--progress {

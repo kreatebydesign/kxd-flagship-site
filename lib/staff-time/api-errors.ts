@@ -16,6 +16,8 @@ export function staffTimeErrorResponse(error: unknown): { status: number; messag
     case "WORK_INTENT_CLIENT_ID_REQUIRED":
     case "WORK_INTENT_NOTE_REQUIRED":
       return { status: 400, message: "Work intent is required to start a shift." };
+    case "WORK_INTENT_WORK_NOT_FOUND":
+      return { status: 404, message: "Selected work assignment was not found." };
     case "WORK_INTENT_WORK_NOT_ALLOWED":
     case "WORK_INTENT_CLIENT_NOT_ALLOWED":
       return { status: 403, message: "Work intent is outside your assigned scope." };
