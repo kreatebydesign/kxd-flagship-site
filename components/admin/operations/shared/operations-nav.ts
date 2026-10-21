@@ -59,6 +59,7 @@ export type OperationsNavId =
   | "staff-my-work"
   | "staff-my-clients"
   | "staff-sales"
+  | "staff-time"
   | "qr-generator";
 
 export type OperationsNavItem = {

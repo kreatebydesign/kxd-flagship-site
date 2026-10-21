@@ -1,9 +1,10 @@
 import "server-only";
 
 import { cache } from "react";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
+import type { PayloadRequest } from "payload";
 import { getPayload } from "payload";
 import config from "@payload-config";
 
@@ -20,16 +21,60 @@ import {
  * for `portal-users`. Only `users` collection sessions are accepted here —
  * portal sessions never grant operator APIs.
  */
-export const getPayloadAdminUser = cache(async function getPayloadAdminUser() {
-  const headersList = await headers();
-  const payload = await getPayload({ config });
-  const { user } = await payload.auth({ headers: headersList });
-
+function normalizePayloadAdminUser(user: PayloadRequest["user"]) {
   if (!user) return null;
   if (!isPayloadAdmin(user)) return null;
   if (user.collection && user.collection !== "users") return null;
   return user;
+}
+
+/**
+ * Payload session resolution needs a `Cookie` header. On some App Router POST
+ * handlers `request.headers` omits cookies; merge `cookies()` + `headers()`.
+ */
+async function payloadAuthHeaders(inbound?: HeadersInit): Promise<Headers> {
+  const merged = new Headers(inbound);
+  const headersList = await headers();
+  headersList.forEach((value, key) => {
+    if (key.toLowerCase() === "cookie") return;
+    if (!merged.has(key)) merged.set(key, value);
+  });
+
+  const cookieStore = await cookies();
+  const fromStore = cookieStore
+    .getAll()
+    .map((entry) => `${entry.name}=${entry.value}`)
+    .join("; ");
+  const fromHeaders = headersList.get("cookie");
+  const forwarded = headersList.get("x-kxd-forwarded-cookie");
+  const cookieParts = [merged.get("cookie"), fromHeaders, forwarded, fromStore].filter(
+    Boolean,
+  );
+  if (cookieParts.length > 0) {
+    merged.set("cookie", cookieParts.join("; "));
+  }
+  return merged;
+}
+
+async function resolvePayloadAdminUserFromHeaders(
+  inbound?: HeadersInit,
+): Promise<ReturnType<typeof normalizePayloadAdminUser>> {
+  const headersList = await payloadAuthHeaders(inbound);
+  const payload = await getPayload({ config });
+  const { user } = await payload.auth({ headers: headersList });
+  return normalizePayloadAdminUser(user);
+}
+
+export const getPayloadAdminUser = cache(async function getPayloadAdminUser() {
+  return resolvePayloadAdminUserFromHeaders(await headers());
 });
+
+/** Route handlers: inbound Request + explicit cookie merge for POST mutations. */
+export async function getPayloadAdminUserFromRequest(request: Request) {
+  const fromRequest = await resolvePayloadAdminUserFromHeaders(request.headers);
+  if (fromRequest) return fromRequest;
+  return getPayloadAdminUser();
+}
 
 /**
  * Gate internal admin API routes — requires authenticated Payload `users` session.
@@ -37,6 +82,7 @@ export const getPayloadAdminUser = cache(async function getPayloadAdminUser() {
  * Restricted staff roles are deny-by-default against non-allowlisted API paths.
  */
 export async function requirePayloadAdminApi(request?: Request) {
+  // Mutations must use the same session resolution as GET handlers (next/headers).
   const user = await getPayloadAdminUser();
   if (!user) {
     return NextResponse.json(

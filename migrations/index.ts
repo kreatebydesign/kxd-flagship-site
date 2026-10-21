@@ -124,6 +124,7 @@ import * as migration_20261019_phase2a_staff_client_notes from './20261019_phase
 import * as migration_20261020_staff_documents_release_a from './20261020_staff_documents_release_a';
 import * as migration_20261021_staff_documents_release_b_phase1 from './20261021_staff_documents_release_b_phase1';
 import * as migration_20261022_staff_sales_development_phase1 from './20261022_staff_sales_development_phase1';
+import * as migration_20261023_staff_time_b1_foundation from './20261023_staff_time_b1_foundation';
 
 export const migrations = [
   {
@@ -812,5 +813,11 @@ export const migrations = [
     up: migration_20261022_staff_sales_development_phase1.up,
     down: migration_20261022_staff_sales_development_phase1.down,
     name: '20261022_staff_sales_development_phase1',
+  },
+  {
+    // V1.4 B1 — staff time punch ledger, shifts, payroll schedule foundation.
+    up: migration_20261023_staff_time_b1_foundation.up,
+    down: migration_20261023_staff_time_b1_foundation.down,
+    name: '20261023_staff_time_b1_foundation',
   },
 ];

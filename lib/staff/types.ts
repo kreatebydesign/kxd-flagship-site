@@ -35,6 +35,9 @@ export type StaffCapability =
   | "staff.documents.sign"
   | "staff.sales.read"
   | "staff.sales.manage"
+  | "staff.time.clock"
+  | "staff.time.read.self"
+  | "admin.time.oversight.read"
   | "admin.staff-documents.manage"
   | "admin.staff-documents.countersign"
   | "admin.oversight"
@@ -353,6 +356,14 @@ export interface StaffOversightData {
     dateKey: string;
     noteForMatt: string | null;
     createdAt: string;
+  }>;
+  activeTimeShifts: Array<{
+    shiftId: number;
+    staffUserId: number;
+    staffLabel: string;
+    startedAt: string;
+    workIntentCategory: string;
+    elapsedMinutes: number;
   }>;
 }
 

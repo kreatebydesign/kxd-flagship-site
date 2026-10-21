@@ -53,6 +53,14 @@ export function middleware(request: NextRequest) {
   const nextWithPath = () => {
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set("x-kxd-pathname", pathname);
+    // App Router POST handlers can lose Cookie on next/headers(); forward from middleware.
+    const forwardedCookies = request.cookies
+      .getAll()
+      .map((cookie) => `${cookie.name}=${cookie.value}`)
+      .join("; ");
+    if (forwardedCookies) {
+      requestHeaders.set("x-kxd-forwarded-cookie", forwardedCookies);
+    }
     return NextResponse.next({
       request: { headers: requestHeaders },
     });

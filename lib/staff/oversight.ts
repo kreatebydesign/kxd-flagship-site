@@ -17,6 +17,9 @@ import { isWaitingOnMatt } from "./prioritize";
 import { isWorkSubmittedForReview } from "@/lib/work/list-enrichment";
 import { isWorkOverdue } from "@/lib/work/views";
 import type { StaffOversightData } from "./types";
+import { loadStaffTimeOversightActiveShifts } from "@/lib/staff-time/shifts";
+import { staffWorkIntentLabel } from "@/lib/staff-time/intent";
+import type { StaffWorkIntentCategory } from "@/lib/staff-time/types";
 
 /**
  * Administrator-only staff oversight composition.
@@ -169,11 +172,29 @@ export async function loadStaffOversight(): Promise<StaffOversightData> {
     wrapUps = [];
   }
 
+  let activeTimeShifts: StaffOversightData["activeTimeShifts"] = [];
+  try {
+    const active = await loadStaffTimeOversightActiveShifts();
+    activeTimeShifts = active.map((row) => ({
+      shiftId: row.shiftId,
+      staffUserId: row.staffUserId,
+      staffLabel: row.staffLabel,
+      startedAt: row.startedAt,
+      workIntentCategory: staffWorkIntentLabel(
+        row.workIntentCategory as StaffWorkIntentCategory,
+      ),
+      elapsedMinutes: row.elapsedMinutes,
+    }));
+  } catch {
+    activeTimeShifts = [];
+  }
+
   return {
     members,
     draftsAwaitingApproval,
     helpRequests,
     responsibilities,
     wrapUps,
+    activeTimeShifts,
   };
 }
