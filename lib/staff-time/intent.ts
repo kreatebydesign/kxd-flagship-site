@@ -57,6 +57,25 @@ export function parseStaffWorkIntent(body: unknown): StaffWorkIntentInput {
   };
 }
 
+export function staffWorkIntentDetail(
+  intent: StaffWorkIntentInput,
+  context?: {
+    workTitle?: string | null;
+    clientLabel?: string | null;
+  },
+): string | null {
+  if (intent.category === "assigned_kxd_work") {
+    if (context?.workTitle?.trim()) return context.workTitle.trim();
+    if (intent.workId) return `Work #${intent.workId}`;
+  }
+  if (intent.category === "client_project") {
+    if (context?.clientLabel?.trim()) return context.clientLabel.trim();
+    if (intent.clientId) return `Client #${intent.clientId}`;
+  }
+  if (intent.note?.trim()) return intent.note.trim();
+  return null;
+}
+
 export function staffWorkIntentLabel(category: StaffWorkIntentCategory): string {
   switch (category) {
     case "assigned_kxd_work":

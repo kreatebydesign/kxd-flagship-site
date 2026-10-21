@@ -24,12 +24,21 @@ import {
   isRestrictedStaffPayloadUser,
 } from "../payload/access/index.ts";
 import {
+  parseStudioNotesAndOutcome,
+  resolveGuidedWorkBrief,
+  splitLegacySummaryBody,
+} from "../lib/staff/guided-work-content.ts";
+import {
   allRequiredDeliverablesComplete,
   applyDeliverableToggles,
+  buildAcceptanceCriteriaProgressPatch,
   buildDeliverableProgressPatch,
   buildDeliverablesDefinitionPatch,
   formatInstructionBlocks,
+  mergeAcceptanceCriteriaViews,
   mergeDeliverableViews,
+  parseAcceptanceCriteriaDefinition,
+  parseAcceptanceCriteriaProgress,
   parseDeliverablesDefinition,
   parseDeliverableProgress,
   pruneDeliverableCompletionsForDefinition,
@@ -151,6 +160,48 @@ assert.equal(allRequiredDeliverablesComplete(views), true);
 const blocks = formatInstructionBlocks("Line one\nLine two\n\nSecond paragraph");
 assert.equal(blocks.length, 2);
 
+const multilineSteps = formatInstructionBlocks("Before you start:\n- item A\n- item B");
+assert.ok(multilineSteps.length >= 3);
+
+const legacySummary =
+  "Set up your home Mac for remote studio work.\n1. Install Tailscale\n2. Enable Screen Sharing";
+const legacySplit = splitLegacySummaryBody(legacySummary, true);
+assert.match(legacySplit.lead ?? "", /Set up your home Mac/);
+assert.equal(legacySplit.tailForInstructions, null);
+
+const legacyBrief = resolveGuidedWorkBrief({
+  summary: legacySummary,
+  description: null,
+  expectedOutcomeFromNotes: "You can securely reach studio systems from home.",
+  hasStructuredDeliverables: true,
+});
+assert.equal(legacyBrief.expectedOutcome, "You can securely reach studio systems from home.");
+assert.ok(legacyBrief.instructionBlocks.some((b) => /Set up your home Mac/.test(b)));
+
+const notesParsed = parseStudioNotesAndOutcome(
+  "[Expected outcome]\nSecure remote access verified.\n\n[Staff progress]\nStarted install.",
+);
+assert.equal(notesParsed.expectedOutcomeFromNotes, "Secure remote access verified.");
+assert.match(notesParsed.staffProgress ?? "", /Started install/);
+
+const acDef = parseAcceptanceCriteriaDefinition(
+  "- [ ] Hostname recorded in studio inventory\n- [x] Tailscale connected",
+);
+assert.equal(acDef?.items.length, 2);
+assert.equal(acDef?.items[0]?.id, "ac-0");
+
+const acCompleted = applyDeliverableToggles(
+  acDef!,
+  null,
+  { "ac-0": true },
+  "2026-03-01T00:00:00.000Z",
+);
+const acMeta = buildAcceptanceCriteriaProgressPatch({}, 3, acCompleted);
+const acProgress = parseAcceptanceCriteriaProgress(acMeta, 3);
+const acViews = mergeAcceptanceCriteriaViews(acDef, acProgress);
+assert.equal(acViews[0]?.completed, true);
+assert.equal(allRequiredDeliverablesComplete(acViews), false);
+
 const deliverablesRoute = readFileSync(
   join(root, "app/api/admin/work/[id]/deliverables/route.ts"),
   "utf8",
@@ -216,6 +267,25 @@ assert.equal("removed" in pruned, false);
 
 const workExecution = readFileSync(join(root, "lib/staff/work-execution-service.ts"), "utf8");
 assert.match(workExecution, /buildDeliverableProgressPatch/);
+assert.match(workExecution, /buildAcceptanceCriteriaProgressPatch/);
 assert.match(workExecution, /buildStaffGuidedExecutionPatch/);
+
+const guidedScreen = readFileSync(
+  join(root, "components/admin/operations/staff/StaffGuidedWorkScreen.tsx"),
+  "utf8",
+);
+assert.match(guidedScreen, /Expected outcome/);
+assert.match(guidedScreen, /Acceptance criteria/);
+assert.doesNotMatch(guidedScreen, /Assignment overview/);
+
+assert.match(executionRoute, /acceptanceCriteria/);
+
+const timeClockScreen = readFileSync(
+  join(root, "components/admin/operations/staff/StaffTimeClockScreen.tsx"),
+  "utf8",
+);
+assert.match(timeClockScreen, /Assigned work/);
+assert.doesNotMatch(timeClockScreen, /Work item ID/);
+assert.match(timeClockScreen, /eligibleWork/);
 
 console.log("✓ Staff work progress checks passed.\n");

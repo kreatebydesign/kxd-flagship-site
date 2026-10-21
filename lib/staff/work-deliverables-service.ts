@@ -9,10 +9,14 @@ import { deliverableSummaryFromWorkDoc } from "@/lib/work/list-enrichment";
 import { readRawWorkMetadata } from "./work-guided-metadata";
 import {
   applyDeliverableToggles,
+  buildAcceptanceCriteriaProgressPatch,
   buildDeliverableProgressPatch,
   buildDeliverablesDefinitionPatch,
   formatDeliverableActivityDetail,
+  mergeAcceptanceCriteriaViews,
   mergeDeliverableViews,
+  parseAcceptanceCriteriaDefinition,
+  parseAcceptanceCriteriaProgress,
   parseDeliverablesDefinition,
   parseDeliverableProgress,
   pruneDeliverableCompletionsForDefinition,
@@ -57,6 +61,77 @@ export async function loadWorkDeliverableViews(
   const definition = parseDeliverablesDefinition(metadata);
   const progress = parseDeliverableProgress(metadata, assigneeUserId);
   return mergeDeliverableViews(definition, progress);
+}
+
+export async function loadWorkAcceptanceCriteriaViews(
+  workId: number,
+  assigneeUserId: number,
+  acceptanceCriteria: string | null | undefined,
+): Promise<StaffDeliverableView[]> {
+  const definition = parseAcceptanceCriteriaDefinition(acceptanceCriteria);
+  if (!definition) return [];
+  const doc = await loadWorkDoc(workId);
+  if (!doc) return mergeAcceptanceCriteriaViews(definition, null);
+  const metadata = readRawWorkMetadata(doc);
+  const progress = parseAcceptanceCriteriaProgress(metadata, assigneeUserId);
+  return mergeAcceptanceCriteriaViews(definition, progress);
+}
+
+export async function saveStaffAcceptanceCriteriaToggles(
+  workId: number,
+  assigneeUserId: number,
+  acceptanceCriteria: string | null | undefined,
+  togglesInput: Record<string, unknown>,
+  actorLabel: string | null,
+): Promise<{ acceptanceCriteria: StaffDeliverableView[] }> {
+  const definition = parseAcceptanceCriteriaDefinition(acceptanceCriteria);
+  if (!definition) throw new Error("This assignment has no acceptance criteria checklist.");
+
+  const work = await getWorkItem(workId);
+  if (!work) throw new Error("Work item not found.");
+  if (work.assignedToId !== assigneeUserId) {
+    throw new Error("Not assigned to this work item.");
+  }
+
+  const sanitized = sanitizeDeliverableTogglePayload(definition, togglesInput);
+  if ("error" in sanitized) throw new Error(sanitized.error);
+
+  const payload = await getPayload({ config });
+  const nowIso = new Date().toISOString();
+  const doc = await loadWorkDoc(workId);
+  if (!doc) throw new Error("Work item not found.");
+  const metadata = readRawWorkMetadata(doc);
+  const prior = parseAcceptanceCriteriaProgress(metadata, assigneeUserId);
+  const completed = applyDeliverableToggles(definition, prior, sanitized.toggles, nowIso);
+  const nextMetadata = buildAcceptanceCriteriaProgressPatch(metadata, assigneeUserId, completed);
+
+  await payload.update({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    collection: WORK_COLLECTION as any,
+    id: workId,
+    data: { metadata: nextMetadata },
+    depth: 0,
+    overrideAccess: true,
+  });
+
+  const views = mergeAcceptanceCriteriaViews(definition, {
+    v: 1,
+    assigneeUserId,
+    completed,
+    updatedAt: nowIso,
+  });
+
+  await appendWorkActivityEntry(
+    workId,
+    {
+      actor: actorLabel,
+      action: "staff-acceptance-criteria-updated",
+      detail: formatDeliverableActivityDetail(views),
+    },
+    payload,
+  );
+
+  return { acceptanceCriteria: views };
 }
 
 export async function saveWorkAssignmentDeliverables(

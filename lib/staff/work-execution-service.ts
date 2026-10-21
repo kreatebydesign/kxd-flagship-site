@@ -26,14 +26,23 @@ import {
 import {
   allRequiredDeliverablesComplete,
   applyDeliverableToggles,
+  buildAcceptanceCriteriaProgressPatch,
   buildDeliverableProgressPatch,
   formatDeliverableActivityDetail,
+  mergeAcceptanceCriteriaViews,
   mergeDeliverableViews,
+  parseAcceptanceCriteriaDefinition,
+  parseAcceptanceCriteriaProgress,
   parseDeliverablesDefinition,
   parseDeliverableProgress,
   sanitizeDeliverableTogglePayload,
 } from "./work-deliverables";
-import { loadWorkDeliverableViews, saveStaffDeliverableToggles } from "./work-deliverables-service";
+import {
+  loadWorkAcceptanceCriteriaViews,
+  loadWorkDeliverableViews,
+  saveStaffAcceptanceCriteriaToggles,
+  saveStaffDeliverableToggles,
+} from "./work-deliverables-service";
 import {
   buildStaffGuidedExecutionPatch,
   checklistStatesEqual,
@@ -48,6 +57,7 @@ export interface StaffWorkExecutionSaveInput {
   staffProgress?: string | null;
   checklist?: Record<string, unknown> | null;
   deliverables?: Record<string, unknown> | null;
+  acceptanceCriteria?: Record<string, unknown> | null;
 }
 
 export interface StaffWorkExecutionSaveResult {
@@ -55,9 +65,11 @@ export interface StaffWorkExecutionSaveResult {
   staffProgress: string | null;
   checklist: Record<StaffGuidedChecklistId, boolean>;
   deliverables: StaffDeliverableView[];
+  acceptanceCriteria: StaffDeliverableView[];
   progressSaved: boolean;
   checklistSaved: boolean;
   deliverablesSaved: boolean;
+  acceptanceCriteriaSaved: boolean;
 }
 
 export async function loadStaffGuidedChecklistChecked(
@@ -124,6 +136,21 @@ export async function saveStaffWorkExecution(
   let deliverablesSaved = false;
   let deliverableViews = await loadWorkDeliverableViews(workId, actor.userId);
   let deliverableToggles: Record<string, boolean> | null = null;
+  let acceptanceCriteriaSaved = false;
+  let acceptanceCriteriaViews = await loadWorkAcceptanceCriteriaViews(
+    workId,
+    actor.userId,
+    work.acceptanceCriteria,
+  );
+  let acceptanceCriteriaToggles: Record<string, boolean> | null = null;
+
+  if (input.acceptanceCriteria !== undefined && input.acceptanceCriteria !== null) {
+    const definition = parseAcceptanceCriteriaDefinition(work.acceptanceCriteria);
+    const sanitized = sanitizeDeliverableTogglePayload(definition, input.acceptanceCriteria);
+    if ("error" in sanitized) throw new Error(sanitized.error);
+    acceptanceCriteriaToggles = sanitized.toggles;
+    acceptanceCriteriaSaved = true;
+  }
 
   if (input.deliverables !== undefined && input.deliverables !== null) {
     const definition = parseDeliverablesDefinition(readRawWorkMetadata(doc as AnyDoc));
@@ -145,9 +172,26 @@ export async function saveStaffWorkExecution(
   }
 
   const patch: AnyDoc = {};
-  const needsMetadataReload = progressSaved || checklistSaved || deliverableToggles != null;
+  const needsMetadataReload =
+    progressSaved || checklistSaved || deliverableToggles != null || acceptanceCriteriaToggles != null;
 
-  if (deliverablesSaved && deliverableToggles != null && !progressSaved && !checklistSaved) {
+  if (
+    acceptanceCriteriaSaved &&
+    acceptanceCriteriaToggles != null &&
+    !progressSaved &&
+    !checklistSaved &&
+    !deliverablesSaved
+  ) {
+    const actorLabel = actor.email || actor.displayName || null;
+    const result = await saveStaffAcceptanceCriteriaToggles(
+      workId,
+      actor.userId,
+      work.acceptanceCriteria,
+      input.acceptanceCriteria as Record<string, unknown>,
+      actorLabel,
+    );
+    acceptanceCriteriaViews = result.acceptanceCriteria;
+  } else if (deliverablesSaved && deliverableToggles != null && !progressSaved && !checklistSaved) {
     const actorLabel = actor.email || actor.displayName || null;
     const result = await saveStaffDeliverableToggles(
       workId,
@@ -200,6 +244,29 @@ export async function saveStaffWorkExecution(
       });
     }
 
+    if (acceptanceCriteriaToggles != null) {
+      const definition = parseAcceptanceCriteriaDefinition(work.acceptanceCriteria);
+      const prior = parseAcceptanceCriteriaProgress(latestMetadata, actor.userId);
+      const nowIso = new Date().toISOString();
+      const completed = applyDeliverableToggles(
+        definition!,
+        prior,
+        acceptanceCriteriaToggles,
+        nowIso,
+      );
+      latestMetadata = buildAcceptanceCriteriaProgressPatch(
+        latestMetadata,
+        actor.userId,
+        completed,
+      );
+      acceptanceCriteriaViews = mergeAcceptanceCriteriaViews(definition, {
+        v: 1,
+        assigneeUserId: actor.userId,
+        completed,
+        updatedAt: nowIso,
+      });
+    }
+
     if (checklistSaved) {
       latestMetadata = buildStaffGuidedExecutionPatch(
         latestMetadata,
@@ -208,7 +275,7 @@ export async function saveStaffWorkExecution(
       );
     }
 
-    if (checklistSaved || deliverableToggles != null) {
+    if (checklistSaved || deliverableToggles != null || acceptanceCriteriaToggles != null) {
       patch.metadata = latestMetadata;
     }
   }
@@ -272,9 +339,11 @@ export async function saveStaffWorkExecution(
     staffProgress,
     checklist: nextChecked,
     deliverables: deliverableViews,
+    acceptanceCriteria: acceptanceCriteriaViews,
     progressSaved,
     checklistSaved,
     deliverablesSaved,
+    acceptanceCriteriaSaved,
   };
 }
 
@@ -301,6 +370,20 @@ export async function assertStaffGuidedChecklistReadyForSubmit(
     return {
       ok: false,
       error: "Complete every required assignment deliverable before submitting for review.",
+    };
+  }
+
+  const work = await getWorkItem(workId);
+  const acceptanceCriteria = work
+    ? await loadWorkAcceptanceCriteriaViews(workId, actor.userId, work.acceptanceCriteria)
+    : [];
+  if (
+    acceptanceCriteria.length > 0 &&
+    !allRequiredDeliverablesComplete(acceptanceCriteria)
+  ) {
+    return {
+      ok: false,
+      error: "Complete every required acceptance criterion before submitting for review.",
     };
   }
 

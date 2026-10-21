@@ -136,6 +136,17 @@ async function runBdsFlow(
   await page.reload({ waitUntil: "networkidle" });
   await screenshot(page, `${viewportLabel}-time-clock-initial`);
 
+  const intentSelect = page.locator(".kxd-os-staff-time__form select").first();
+  const assignedWorkSelect = page.locator(
+    '.kxd-os-staff-time__form select:has(option[value]:not([value=""]))',
+  );
+  const hasAssignedWork =
+    (await assignedWorkSelect.count()) > 1 &&
+    (await intentSelect.inputValue()) === "assigned_kxd_work";
+  if (!hasAssignedWork) {
+    await intentSelect.selectOption("internal_operations");
+  }
+  await screenshot(page, `${viewportLabel}-time-clock-assignment-form`);
   const startBtn = page.getByRole("button", { name: /^start shift$/i });
   await startBtn.click();
   const punchError = page.locator(".kxd-os-staff-time__error");

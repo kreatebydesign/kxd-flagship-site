@@ -43,6 +43,7 @@ function formatDue(dueDate: string | null): string | null {
 type ProgressSaveState = "idle" | "saving" | "saved" | "error";
 type ChecklistSaveState = "idle" | "saving" | "saved" | "error";
 type DeliverableSaveState = "idle" | "saving" | "saved" | "error";
+type AcceptanceCriteriaSaveState = "idle" | "saving" | "saved" | "error";
 
 export interface StaffGuidedWorkScreenProps {
   data: StaffGuidedWorkData;
@@ -82,6 +83,17 @@ export function StaffGuidedWorkScreen({
   const deliverableDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const savedDeliverablesRef = useRef(JSON.stringify(data.deliverables));
 
+  const [acceptanceCriteriaItems, setAcceptanceCriteriaItems] = useState<StaffDeliverableView[]>(
+    () => [...data.acceptanceCriteriaItems],
+  );
+  const [acceptanceCriteriaSaveState, setAcceptanceCriteriaSaveState] =
+    useState<AcceptanceCriteriaSaveState>("idle");
+  const [acceptanceCriteriaSaveError, setAcceptanceCriteriaSaveError] = useState<string | null>(
+    null,
+  );
+  const acceptanceCriteriaDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const savedAcceptanceCriteriaRef = useRef(JSON.stringify(data.acceptanceCriteriaItems));
+
   const [busy, setBusy] = useState<"check" | "review" | "complete" | "progress" | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -96,13 +108,25 @@ export function StaffGuidedWorkScreen({
     return deliverables.filter((d) => d.required).every((d) => d.completed);
   }, [deliverables]);
 
-  const requiredComplete = confirmationsComplete && deliverablesComplete;
+  const acceptanceCriteriaComplete = useMemo(() => {
+    if (acceptanceCriteriaItems.length === 0) return true;
+    return acceptanceCriteriaItems.filter((item) => item.required).every((item) => item.completed);
+  }, [acceptanceCriteriaItems]);
+
+  const requiredComplete =
+    confirmationsComplete && deliverablesComplete && acceptanceCriteriaComplete;
 
   const deliverableProgressLabel = useMemo(() => {
     if (deliverables.length === 0) return null;
     const completed = deliverables.filter((d) => d.completed).length;
     return `${completed} of ${deliverables.length} deliverables`;
   }, [deliverables]);
+
+  const acceptanceCriteriaProgressLabel = useMemo(() => {
+    if (acceptanceCriteriaItems.length === 0) return null;
+    const completed = acceptanceCriteriaItems.filter((item) => item.completed).length;
+    return `${completed} of ${acceptanceCriteriaItems.length} acceptance criteria`;
+  }, [acceptanceCriteriaItems]);
 
   const mutationsDisabled = readOnly || !canAct;
   const dueLabel = formatDue(data.dueDate);
@@ -129,6 +153,7 @@ export function StaffGuidedWorkScreen({
     return () => {
       if (checklistDebounceRef.current) clearTimeout(checklistDebounceRef.current);
       if (deliverableDebounceRef.current) clearTimeout(deliverableDebounceRef.current);
+      if (acceptanceCriteriaDebounceRef.current) clearTimeout(acceptanceCriteriaDebounceRef.current);
     };
   }, []);
 
@@ -137,11 +162,17 @@ export function StaffGuidedWorkScreen({
     savedDeliverablesRef.current = JSON.stringify(data.deliverables);
   }, [data.deliverables]);
 
+  useEffect(() => {
+    setAcceptanceCriteriaItems([...data.acceptanceCriteriaItems]);
+    savedAcceptanceCriteriaRef.current = JSON.stringify(data.acceptanceCriteriaItems);
+  }, [data.acceptanceCriteriaItems]);
+
   const persistExecution = useCallback(
     async (body: {
       staffProgress?: string | null;
       checklist?: Record<string, boolean>;
       deliverables?: Record<string, boolean>;
+      acceptanceCriteria?: Record<string, boolean>;
     }) => {
       const res = await fetch(`/api/admin/staff/work/${data.workId}/execution`, {
         method: "PATCH",
@@ -154,6 +185,7 @@ export function StaffGuidedWorkScreen({
         staffProgress?: string | null;
         checklist?: Record<string, boolean>;
         deliverables?: StaffDeliverableView[];
+        acceptanceCriteria?: StaffDeliverableView[];
       };
       if (!res.ok || payload.success === false) {
         throw new Error(payload.error ?? "Could not save.");
@@ -170,6 +202,10 @@ export function StaffGuidedWorkScreen({
       if (payload.deliverables) {
         setDeliverables(payload.deliverables);
         savedDeliverablesRef.current = JSON.stringify(payload.deliverables);
+      }
+      if (payload.acceptanceCriteria) {
+        setAcceptanceCriteriaItems(payload.acceptanceCriteria);
+        savedAcceptanceCriteriaRef.current = JSON.stringify(payload.acceptanceCriteria);
       }
       return payload;
     },
@@ -243,6 +279,46 @@ export function StaffGuidedWorkScreen({
     [mutationsDisabled, persistExecution],
   );
 
+  const saveAcceptanceCriteriaToggle = useCallback(
+    async (id: string, nextCompleted: boolean) => {
+      if (mutationsDisabled) return;
+      setAcceptanceCriteriaSaveState("saving");
+      setAcceptanceCriteriaSaveError(null);
+      try {
+        await persistExecution({ acceptanceCriteria: { [id]: nextCompleted } });
+        setAcceptanceCriteriaSaveState("saved");
+      } catch (err) {
+        setAcceptanceCriteriaSaveState("error");
+        setAcceptanceCriteriaSaveError(
+          err instanceof Error ? err.message : "Could not save acceptance criterion.",
+        );
+      }
+    },
+    [mutationsDisabled, persistExecution],
+  );
+
+  function toggleAcceptanceCriterion(id: string) {
+    if (mutationsDisabled) return;
+    setAcceptanceCriteriaItems((prev) => {
+      const next = prev.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              completed: !item.completed,
+              completedAt: !item.completed ? new Date().toISOString() : null,
+            }
+          : item,
+      );
+      const target = next.find((item) => item.id === id);
+      if (!target) return prev;
+      if (acceptanceCriteriaDebounceRef.current) clearTimeout(acceptanceCriteriaDebounceRef.current);
+      acceptanceCriteriaDebounceRef.current = setTimeout(() => {
+        void saveAcceptanceCriteriaToggle(id, target.completed);
+      }, 350);
+      return next;
+    });
+  }
+
   function toggleDeliverable(id: string) {
     if (mutationsDisabled) return;
     setDeliverables((prev) => {
@@ -281,6 +357,13 @@ export function StaffGuidedWorkScreen({
       );
       await persistExecution({ deliverables: toggles });
       setDeliverableSaveState("saved");
+    }
+    if (JSON.stringify(acceptanceCriteriaItems) !== savedAcceptanceCriteriaRef.current) {
+      const toggles = Object.fromEntries(
+        acceptanceCriteriaItems.map((item) => [item.id, item.completed]),
+      );
+      await persistExecution({ acceptanceCriteria: toggles });
+      setAcceptanceCriteriaSaveState("saved");
     }
   }
 
@@ -353,10 +436,14 @@ export function StaffGuidedWorkScreen({
   }
 
   const heroLead =
-    data.summary?.trim() ||
+    data.expectedOutcome?.trim() ||
+    data.instructionBlocks[0]?.trim() ||
     (data.description
       ? "Open the instructions below, then use the checklist when you are ready to finish."
       : data.whyItMatters);
+
+  const hasBriefSections =
+    Boolean(data.expectedOutcome?.trim()) || data.instructionBlocks.length > 0;
 
   return (
     <OperationsShell activeId="staff" variant="staff">
@@ -413,19 +500,35 @@ export function StaffGuidedWorkScreen({
 
         <div className="kxd-os-staff-guided__layout">
           <div className="kxd-os-staff-guided__main">
-            {(data.summary || data.instructionBlocks.length > 0) ? (
+            {hasBriefSections ? (
               <OpsCard className="kxd-os-ops-card-padding kxd-os-staff-guided__section">
-                <OpsSectionHead label="Assignment overview" />
-                {data.summary ? (
-                  <p className="kxd-os-staff-guided__overview-summary">{data.summary}</p>
+                {data.expectedOutcome ? (
+                  <>
+                    <OpsSectionHead label="Expected outcome" />
+                    <p className="kxd-os-staff-my-work__prose kxd-os-staff-guided__expected-outcome">
+                      {data.expectedOutcome}
+                    </p>
+                  </>
                 ) : null}
                 {data.instructionBlocks.length > 0 ? (
-                  <div className="kxd-os-staff-guided__instruction-blocks">
-                    {data.instructionBlocks.map((block) => (
-                      <p key={block} className="kxd-os-staff-my-work__prose kxd-os-staff-guided__instructions">
-                        {block}
-                      </p>
-                    ))}
+                  <div
+                    className={
+                      data.expectedOutcome
+                        ? "kxd-os-staff-guided__instructions-section"
+                        : undefined
+                    }
+                  >
+                    <OpsSectionHead label="Instructions" />
+                    <div className="kxd-os-staff-guided__instruction-blocks">
+                      {data.instructionBlocks.map((block) => (
+                        <p
+                          key={block}
+                          className="kxd-os-staff-my-work__prose kxd-os-staff-guided__instructions"
+                        >
+                          {block}
+                        </p>
+                      ))}
+                    </div>
                   </div>
                 ) : null}
               </OpsCard>
@@ -491,6 +594,66 @@ export function StaffGuidedWorkScreen({
                 {deliverableSaveState === "error" && deliverableSaveError ? (
                   <p className="kxd-os-meta kxd-os-staff-guided__checklist-hint kxd-os-staff-guided__checklist-hint--error">
                     {deliverableSaveError}
+                  </p>
+                ) : null}
+              </OpsCard>
+            ) : null}
+
+            {acceptanceCriteriaItems.length > 0 ? (
+              <OpsCard className="kxd-os-ops-card-padding kxd-os-staff-guided__section">
+                <OpsSectionHead label="Acceptance criteria" />
+                <p className="kxd-os-meta kxd-os-staff-guided__deliverables-count">
+                  {acceptanceCriteriaProgressLabel}
+                </p>
+                <p className="kxd-os-meta kxd-os-staff-guided__deliverables-lead">
+                  Check off each criterion when it is honestly met. Required items must be done before
+                  you submit for review.
+                </p>
+                <ul className="kxd-os-staff-guided__deliverables">
+                  {acceptanceCriteriaItems.map((item, index) => (
+                    <li
+                      key={item.id}
+                      className={
+                        item.completed
+                          ? "kxd-os-staff-guided__deliverable kxd-os-staff-guided__deliverable--done"
+                          : "kxd-os-staff-guided__deliverable"
+                      }
+                    >
+                      <label className="kxd-os-staff-guided__deliverable-label">
+                        <input
+                          type="checkbox"
+                          checked={item.completed}
+                          disabled={mutationsDisabled}
+                          onChange={() => toggleAcceptanceCriterion(item.id)}
+                        />
+                        <span className="kxd-os-staff-guided__deliverable-body">
+                          <span className="kxd-os-staff-guided__deliverable-title">
+                            <span className="kxd-os-staff-guided__deliverable-index">
+                              {index + 1}.
+                            </span>
+                            {item.title}
+                            {item.required ? (
+                              <span className="kxd-os-meta"> Required</span>
+                            ) : (
+                              <span className="kxd-os-meta"> Optional</span>
+                            )}
+                          </span>
+                        </span>
+                      </label>
+                    </li>
+                  ))}
+                </ul>
+                {acceptanceCriteriaSaveState === "saving" ? (
+                  <p className="kxd-os-meta kxd-os-staff-guided__checklist-hint">Saving progress…</p>
+                ) : null}
+                {acceptanceCriteriaSaveState === "saved" ? (
+                  <p className="kxd-os-meta kxd-os-staff-guided__checklist-hint kxd-os-staff-guided__checklist-hint--ok">
+                    Progress saved
+                  </p>
+                ) : null}
+                {acceptanceCriteriaSaveState === "error" && acceptanceCriteriaSaveError ? (
+                  <p className="kxd-os-meta kxd-os-staff-guided__checklist-hint kxd-os-staff-guided__checklist-hint--error">
+                    {acceptanceCriteriaSaveError}
                   </p>
                 ) : null}
               </OpsCard>

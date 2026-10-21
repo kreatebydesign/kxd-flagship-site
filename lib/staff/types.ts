@@ -255,6 +255,8 @@ export interface StaffGuidedWorkData {
   summary: string | null;
   description: string | null;
   acceptanceCriteria: string | null;
+  /** Expected outcome / intent — from summary or studio notes marker. */
+  expectedOutcome: string | null;
   /** Operator / studio notes — read-only for staff. */
   studioNotes: string | null;
   /** Staff-owned progress section (persisted after [Staff progress] marker). */
@@ -264,6 +266,15 @@ export interface StaffGuidedWorkData {
   /** Operator-defined deliverables with assignee completion state. */
   deliverables: StaffDeliverableView[];
   deliverableProgress: {
+    total: number;
+    completed: number;
+    requiredTotal: number;
+    requiredCompleted: number;
+    allRequiredComplete: boolean;
+  };
+  /** Parsed from Work.acceptanceCriteria — interactive checklist, not prose. */
+  acceptanceCriteriaItems: import("./work-deliverables").StaffDeliverableView[];
+  acceptanceCriteriaProgress: {
     total: number;
     completed: number;
     requiredTotal: number;
