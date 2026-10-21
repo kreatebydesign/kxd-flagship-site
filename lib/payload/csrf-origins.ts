@@ -5,6 +5,7 @@
  * POST fetch from the browser). Preview Vercel hosts must be included alongside SITE.url.
  */
 import { SITE } from "../site.ts";
+import { NETWORK_HOST, PORTAL_HOST } from "../portal/constants.ts";
 
 function addOrigin(set: Set<string>, raw: string | undefined | null): void {
   const trimmed = String(raw ?? "").trim();
@@ -32,6 +33,10 @@ export function resolvePayloadCsrfOrigins(): string[] {
 
   addOrigin(origins, process.env.VERCEL_URL);
   addOrigin(origins, process.env.VERCEL_BRANCH_URL);
+
+  addOrigin(origins, process.env.PORTAL_PUBLIC_URL);
+  addOrigin(origins, `https://${PORTAL_HOST}`);
+  addOrigin(origins, `https://${NETWORK_HOST}`);
 
   origins.add("http://localhost:3000");
   origins.add("http://127.0.0.1:3000");

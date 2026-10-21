@@ -70,7 +70,9 @@ On Vercel Preview, `payload.config.ts` refuses the production Neon endpoint if `
 
 ## Payload CSRF / cookie auth on Preview
 
-Browser **POST** requests include an `Origin` header. Payload only accepts cookie JWTs when `Origin` is in the `csrf` allowlist (`lib/payload/csrf-origins.ts`, includes `VERCEL_BRANCH_URL` and `VERCEL_URL`). If Preview hosts are missing, staff Time Clock **Start shift** returns `401 Unauthorized` while GET routes (current shift, history) may still return `200`.
+Browser **POST** requests include an `Origin` header. Payload only accepts cookie JWTs when `Origin` is in the `csrf` allowlist (`lib/payload/csrf-origins.ts`, includes `SITE.url`, `PORTAL_HOST`, `VERCEL_BRANCH_URL`, and `VERCEL_URL`). If the active hostname is missing, staff Time Clock **Start shift** returns `401 Unauthorized` while the page shell (SSR) may still render.
+
+Production staff often sign in on `https://portal.kreatebydesign.com`; that origin must be allowlisted alongside `https://www.kreatebydesign.com`.
 
 ## Canonical Preview hostname (auth)
 
