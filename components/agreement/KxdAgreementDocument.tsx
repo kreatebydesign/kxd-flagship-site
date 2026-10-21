@@ -7,8 +7,19 @@ export function KxdAgreementDocument(props: {
   showLogo?: boolean;
   eyebrow?: string;
   mastheadExtra?: ReactNode;
+  /** Quiet footer line matching PDF letter presentation. */
+  showDocumentFooter?: boolean;
+  documentFooterLabel?: string;
 }) {
-  const { children, variant = "signing", showLogo = true, eyebrow, mastheadExtra } = props;
+  const {
+    children,
+    variant = "signing",
+    showLogo = true,
+    eyebrow,
+    mastheadExtra,
+    showDocumentFooter = false,
+    documentFooterLabel = "Internal document · Private",
+  } = props;
   const rootClass =
     variant === "workspace"
       ? "kxd-agreement-doc kxd-agreement-doc--workspace"
@@ -33,6 +44,12 @@ export function KxdAgreementDocument(props: {
         </header>
       )}
       <div className="kxd-agreement-doc__body">{children}</div>
+      {showDocumentFooter ? (
+        <footer className="kxd-agreement-doc__doc-footer" aria-label="Document footer">
+          <span>{documentFooterLabel}</span>
+          <span className="kxd-agreement-doc__doc-footer-mark">Kreate by Design</span>
+        </footer>
+      ) : null}
     </div>
   );
 }

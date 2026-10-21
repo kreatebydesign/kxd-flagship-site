@@ -98,6 +98,26 @@
   margin: 0 auto;
 }
 
+.kxd-agreement-doc__doc-footer {
+  margin-top: 1.75rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--kxd-agreement-gold-rule);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+  color: var(--kxd-agreement-ink-muted);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+.kxd-agreement-doc__doc-footer-mark {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--kxd-agreement-gold);
+}
+
 .kxd-agreement-doc__section {
   margin: 0;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;

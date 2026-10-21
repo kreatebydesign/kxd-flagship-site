@@ -9,6 +9,7 @@ import { parseAgreementBodyBlocks } from "../lib/agreement-presentation/parse-bo
 import { KXD_AGREEMENT_LOGO_PUBLIC_PATH } from "../lib/agreement-presentation/tokens.ts";
 import { resolveKxdReportLogoAsset } from "../lib/kxd-report-engine/logos.ts";
 import { renderExecutedContractPdf } from "../lib/proposal-lifecycle/documents/pdfs.tsx";
+import { buildTypedSignature } from "../lib/proposal-lifecycle/signatures.ts";
 
 const root = process.cwd();
 let passed = 0;
@@ -65,7 +66,10 @@ assert.match(agreementCss, /color-scheme:\s*light/);
 assert.match(agreementCss, /kxd-agreement-doc-island/);
 ok("Agreement CSS isolates ivory document from OS dark theme");
 
-const sig = {
+const documentHash =
+  "93303c2c3bb03546e370b2460d621914bfc78bacd3b36df18bb0eef0b8daa784";
+
+const operator = buildTypedSignature({
   legalName: "Matt Lunger",
   title: "Principal",
   entityName: "Kreate by Design LLC",
@@ -73,13 +77,27 @@ const sig = {
   typedAcknowledgment: "Matt Lunger",
   authorityConfirmed: true,
   electronicRecordsConsent: true,
-  consentDisclosureVersion: "v1",
-  consentText: "consent",
-  signedAt: "2026-10-17T00:00:00.000Z",
-  actorRole: "kxd-operator" as const,
-  documentHash: "abc",
-  signatureHash: "def",
-};
+  actorRole: "kxd-operator",
+  documentHash,
+});
+
+const client = buildTypedSignature({
+  legalName: "Kurt V. Rethwill",
+  title: "Authorized signatory",
+  entityName: "Rethwill Chiropractic",
+  email: "presentation-fixture@example.com",
+  typedAcknowledgment: "Kurt V. Rethwill",
+  authorityConfirmed: true,
+  electronicRecordsConsent: true,
+  actorRole: "client",
+  documentHash,
+});
+
+assert.equal(client.entityName, "Rethwill Chiropractic");
+assert.notEqual(client.entityName, operator.entityName);
+assert.notEqual(client.email, operator.email);
+assert.equal(client.actorRole, "client");
+ok("Client vs operator signature fixtures use distinct party identities");
 
 const deliverableLines = Array.from(
   { length: 80 },
@@ -91,9 +109,9 @@ const pdf = await renderExecutedContractPdf({
   body: longBody,
   proposalNumber: "KXD-P-2026-0008",
   contractId: 6,
-  documentHash: "93303c2c3bb03546e370b2460d621914bfc78bacd3b36df18bb0eef0b8daa784",
-  operator: sig,
-  client: { ...sig, legalName: "Kurt V. Rethwill", actorRole: "client" },
+  documentHash,
+  operator,
+  client,
   sealedAt: "2026-10-17T00:00:00.000Z",
 });
 

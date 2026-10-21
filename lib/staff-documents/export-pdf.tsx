@@ -3,14 +3,20 @@
  */
 
 import React from "react";
-import { Document, Page, Text, View, pdf } from "@react-pdf/renderer";
+import { Document, Text, View, pdf } from "@react-pdf/renderer";
+import {
+  AgreementPdfEvidencePanel,
+  AgreementPdfEvidenceRow,
+} from "@/lib/agreement-presentation/pdf-evidence.tsx";
 import {
   AgreementPdfBodyFromText,
   AgreementPdfBrandHeader,
+  AgreementPdfLetterPage,
   AgreementPdfSignatureBlock,
   agreementPdfStyles,
 } from "@/lib/agreement-presentation/pdf-document.tsx";
 import { ensureProposalPdfFonts } from "@/lib/proposal-builder/pdf-fonts.ts";
+import { KXD_REPORT_BRAND } from "@/lib/kxd-report-engine/contact.ts";
 import type {
   StaffAcknowledgmentEvidence,
   StaffDocumentAuditEvent,
@@ -27,20 +33,22 @@ export async function renderStaffPolicyPdf(input: {
   templateVersion: number;
   contentHash: string;
 }): Promise<Buffer> {
+  const continued = `${input.title} · Staff policy`;
   const doc = (
-    <Document>
-      <Page size="LETTER" style={agreementPdfStyles.page}>
+    <Document title={input.title} author={KXD_REPORT_BRAND}>
+      <AgreementPdfLetterPage
+        footerLabel="Internal staff policy · Private"
+        continuedLabel={`${continued} · Continued`}
+        showContactInFooter
+      >
         <AgreementPdfBrandHeader eyebrow="Staff policy" />
         <Text style={agreementPdfStyles.h1}>{input.title}</Text>
         <Text style={agreementPdfStyles.meta}>
           {input.legalEntityName} · Version {input.templateVersion}
         </Text>
-        <Text style={agreementPdfStyles.meta}>Document hash: {input.contentHash.slice(0, 16)}…</Text>
+        <Text style={agreementPdfStyles.meta}>Document hash: {input.contentHash}</Text>
         <AgreementPdfBodyFromText body={input.body} />
-        <Text style={agreementPdfStyles.footer} fixed>
-          Kreate by Design — internal staff policy document
-        </Text>
-      </Page>
+      </AgreementPdfLetterPage>
     </Document>
   );
   const instance = pdf(doc);
@@ -57,8 +65,12 @@ export async function renderStaffAcknowledgmentRecordPdf(input: {
 }): Promise<Buffer> {
   const ack = input.acknowledgment;
   const doc = (
-    <Document>
-      <Page size="LETTER" style={agreementPdfStyles.page}>
+    <Document title={`${input.title} — Acknowledgment`} author={KXD_REPORT_BRAND}>
+      <AgreementPdfLetterPage
+        footerLabel="Policy acknowledgment record · Electronic"
+        continuedLabel={`${input.title} · Acknowledgment record`}
+        showContactInFooter
+      >
         <AgreementPdfBrandHeader eyebrow="Acknowledgment record" />
         <Text style={agreementPdfStyles.h1}>Policy acknowledgment</Text>
         <Text style={agreementPdfStyles.meta}>Policy: {input.title}</Text>
@@ -68,9 +80,13 @@ export async function renderStaffAcknowledgmentRecordPdf(input: {
         <Text style={agreementPdfStyles.meta}>
           Policy document hash: {input.contentHash}
         </Text>
-        <View style={agreementPdfStyles.signatureBlock}>
+        <View style={agreementPdfStyles.signatureBlock} wrap={false}>
           <Text style={agreementPdfStyles.signatureTitle}>Acknowledged by</Text>
-          <Text style={agreementPdfStyles.p}>{ack.legalName}</Text>
+          <View style={agreementPdfStyles.signatureRule} />
+          <Text style={agreementPdfStyles.signatureTypedName}>
+            {ack.typedAcknowledgment || ack.legalName}
+          </Text>
+          <Text style={agreementPdfStyles.meta}>{ack.legalName}</Text>
           <Text style={agreementPdfStyles.meta}>{ack.email}</Text>
           <Text style={agreementPdfStyles.meta}>Recorded {ack.acknowledgedAt}</Text>
           <Text style={agreementPdfStyles.meta}>
@@ -83,10 +99,7 @@ export async function renderStaffAcknowledgmentRecordPdf(input: {
             Consent version: {ack.consentDisclosureVersion}
           </Text>
         </View>
-        <Text style={agreementPdfStyles.footer} fixed>
-          Kreate by Design — acknowledgment record (electronic)
-        </Text>
-      </Page>
+      </AgreementPdfLetterPage>
     </Document>
   );
   const instance = pdf(doc);
@@ -131,51 +144,60 @@ export async function renderStaffExecutedAgreementPdf(input: {
   );
 
   const doc = (
-    <Document>
-      <Page size="LETTER" style={agreementPdfStyles.page}>
+    <Document title={`${input.title} — Executed`} author={KXD_REPORT_BRAND}>
+      <AgreementPdfLetterPage
+        footerLabel="Executed staff agreement · Immutable record"
+        continuedLabel={`${input.title} · Continued`}
+        showContactInFooter
+      >
         <AgreementPdfBrandHeader eyebrow="Fully executed staff agreement" />
         <Text style={agreementPdfStyles.h1}>{input.title}</Text>
         <Text style={agreementPdfStyles.meta}>
           {input.legalEntityName} · {input.kind} · Version {input.templateVersion}
         </Text>
-        <Text style={agreementPdfStyles.meta}>Document content hash: {input.contentHash}</Text>
+        <Text style={agreementPdfStyles.meta}>
+          Document content hash: {input.contentHash}
+        </Text>
         <Text style={agreementPdfStyles.meta}>Executed {input.executedAt}</Text>
         <AgreementPdfBodyFromText body={input.body} />
-        <AgreementPdfSignatureBlock
-          title="Employee signature"
-          signature={staffSignatureForPdf(input.employeeSignature)}
-        />
-        <AgreementPdfSignatureBlock
-          title="Kreate by Design — authorized representative"
-          signature={staffSignatureForPdf(input.operatorSignature)}
-        />
-        <View style={agreementPdfStyles.notice}>
-          <Text style={agreementPdfStyles.p}>
-            Employee signature hash: {input.employeeSignature.signatureHash}
-          </Text>
-          <Text style={agreementPdfStyles.p}>
-            Operator signature hash: {input.operatorSignature.signatureHash}
-          </Text>
-          <Text style={agreementPdfStyles.p}>
-            Operator binding prior hash: {input.operatorSignature.priorSignatureHash ?? "—"}
-          </Text>
-          <Text style={agreementPdfStyles.meta}>
-            Consent version {input.employeeSignature.consentDisclosureVersion}. Typed electronic
-            signatures are acknowledgments, not biometric identity verification.
-          </Text>
+        <View break>
+          <AgreementPdfSignatureBlock
+            title="Employee signature"
+            signature={staffSignatureForPdf(input.employeeSignature)}
+          />
+          <AgreementPdfSignatureBlock
+            title="Kreate by Design — authorized representative"
+            signature={staffSignatureForPdf(input.operatorSignature)}
+          />
+          <AgreementPdfEvidencePanel title="Signature integrity record">
+            <AgreementPdfEvidenceRow
+              label="Employee signature hash"
+              value={input.employeeSignature.signatureHash}
+            />
+            <AgreementPdfEvidenceRow
+              label="Operator signature hash"
+              value={input.operatorSignature.signatureHash}
+            />
+            <AgreementPdfEvidenceRow
+              label="Operator binding prior hash"
+              value={input.operatorSignature.priorSignatureHash ?? "—"}
+            />
+            <Text style={agreementPdfStyles.meta}>
+              Consent version {input.employeeSignature.consentDisclosureVersion}. Typed
+              electronic signatures are acknowledgments, not biometric identity verification.
+            </Text>
+          </AgreementPdfEvidencePanel>
+          {auditLines.length > 0 ? (
+            <AgreementPdfEvidencePanel title="Execution audit trail">
+              {auditLines.map((line, i) => (
+                <Text key={`audit-${i}`} style={agreementPdfStyles.evidenceValue}>
+                  {line}
+                </Text>
+              ))}
+            </AgreementPdfEvidencePanel>
+          ) : null}
         </View>
-        {auditLines.length > 0 ? (
-          <View style={agreementPdfStyles.notice}>
-            <Text style={agreementPdfStyles.signatureTitle}>Execution audit trail</Text>
-            {auditLines.map((line, i) => (
-              <Text key={`audit-${i}`} style={agreementPdfStyles.meta}>{line}</Text>
-            ))}
-          </View>
-        ) : null}
-        <Text style={agreementPdfStyles.footer} fixed>
-          Kreate by Design — executed staff agreement (immutable record)
-        </Text>
-      </Page>
+      </AgreementPdfLetterPage>
     </Document>
   );
   const instance = pdf(doc);

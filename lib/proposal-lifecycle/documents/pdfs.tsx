@@ -8,6 +8,7 @@ import { parseAgreementDocumentSections } from "../../commercial-legal/agreement
 import {
   AgreementPdfBodyFromText,
   AgreementPdfBrandHeader,
+  AgreementPdfLetterPage,
   AgreementPdfSignatureBlock,
   agreementPdfStyles,
 } from "../../agreement-presentation/pdf-document.tsx";
@@ -192,7 +193,11 @@ export async function renderExecutedContractPdf(input: {
 }): Promise<{ buffer: Buffer; contentHash: string }> {
   const doc = (
     <Document title={input.title} author={KXD_REPORT_BRAND}>
-      <Page size="LETTER" style={agreementPdfStyles.page}>
+      <AgreementPdfLetterPage
+        footerLabel="Executed agreement · Typed electronic signatures are acknowledgments, not biometric identity verification."
+        continuedLabel={`${input.title} · Continued`}
+        showContactInFooter
+      >
         <AgreementPdfBrandHeader eyebrow="Fully executed agreement" />
         <Text style={agreementPdfStyles.h1}>{input.title}</Text>
         {input.omitProposalLabel ? (
@@ -206,20 +211,18 @@ export async function renderExecutedContractPdf(input: {
         </Text>
         <Text style={agreementPdfStyles.meta}>Sealed {input.sealedAt}</Text>
         <AgreementPdfBodyFromText body={input.body || "Agreement body on file."} />
-        <AgreementPdfSignatureBlock title="Kreate by Design signature" signature={input.operator} />
-        <AgreementPdfSignatureBlock title="Client signature" signature={input.client} />
-        <View style={agreementPdfStyles.notice}>
-          <Text>
-            This document records typed electronic signatures with consent version{" "}
-            {input.operator.consentDisclosureVersion}. It does not claim biometric or government-ID
-            verification.
-          </Text>
+        <View break>
+          <AgreementPdfSignatureBlock title="Kreate by Design signature" signature={input.operator} />
+          <AgreementPdfSignatureBlock title="Client signature" signature={input.client} />
+          <View style={agreementPdfStyles.notice}>
+            <Text>
+              This document records typed electronic signatures with consent version{" "}
+              {input.operator.consentDisclosureVersion}. It does not claim biometric or government-ID
+              verification.
+            </Text>
+          </View>
         </View>
-        <Text style={agreementPdfStyles.footer} fixed>
-          Executed agreement · Typed electronic signatures are acknowledgments, not biometric
-          identity verification.
-        </Text>
-      </Page>
+      </AgreementPdfLetterPage>
     </Document>
   );
   const instance = pdf(doc);

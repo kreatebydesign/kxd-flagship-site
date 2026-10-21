@@ -130,7 +130,12 @@ export function StaffDocumentOperatorDetailScreen(props: {
         ) : null}
 
         <div className="kxd-agreement-doc-island">
-          <KxdAgreementDocument variant="signing" eyebrow="Employee-signed agreement">
+          <KxdAgreementDocument
+            variant="signing"
+            eyebrow="Employee-signed agreement"
+            showDocumentFooter
+            documentFooterLabel="Countersignature review · Employee-signed copy"
+          >
             <AgreementDocumentBody text={props.document.bodySnapshot} variant="signing" />
           </KxdAgreementDocument>
         </div>
