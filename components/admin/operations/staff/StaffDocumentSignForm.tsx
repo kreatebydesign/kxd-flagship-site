@@ -87,7 +87,12 @@ export function StaffDocumentSignForm(props: {
 
   return (
     <div className="kxd-agreement-doc-island">
-      <KxdAgreementDocument variant="signing" eyebrow={staffDocumentKindLabel(props.document.kind)}>
+      <KxdAgreementDocument
+        variant="signing"
+        eyebrow={staffDocumentKindLabel(props.document.kind)}
+        showDocumentFooter
+        documentFooterLabel="Staff agreement · Review in full before signing"
+      >
         <h1 className="kxd-agreement-doc__title" style={{ fontFamily: "Georgia, serif" }}>
           {props.document.title}
         </h1>

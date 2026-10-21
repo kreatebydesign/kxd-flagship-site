@@ -131,6 +131,8 @@
     "verify:direct-agreement-restatement": "tsx scripts/verify-direct-agreement-restatement.ts",
     "verify:agreement-operator-preview": "tsx scripts/verify-agreement-operator-preview.ts",
     "verify:agreement-presentation": "tsx scripts/verify-agreement-presentation.ts",
+    "verify:staff-document-branding": "tsx scripts/verify-staff-document-branding.ts",
+    "render:staff-document-branding-previews": "tsx scripts/render-staff-document-branding-previews.ts",
     "verify:external-payment": "tsx scripts/verify-external-payment-reconciliation.ts",
     "verify:partial-external-payment": "tsx scripts/verify-partial-external-payment-allocation.ts",
     "verify:record-payment-amount-integrity": "tsx scripts/verify-record-payment-amount-integrity.ts",

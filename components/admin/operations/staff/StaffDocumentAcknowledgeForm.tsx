@@ -62,7 +62,12 @@ export function StaffDocumentAcknowledgeForm(props: {
 
   return (
     <div className="kxd-agreement-doc-island">
-      <KxdAgreementDocument variant="signing" eyebrow="Staff policy">
+      <KxdAgreementDocument
+        variant="signing"
+        eyebrow="Staff policy"
+        showDocumentFooter
+        documentFooterLabel="Staff policy · Review in full before acknowledging"
+      >
         <h1 className="kxd-agreement-doc__title" style={{ fontFamily: "Georgia, serif" }}>
           {props.document.title}
         </h1>
