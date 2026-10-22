@@ -36,6 +36,7 @@ const FULL_ADMIN_CAPABILITIES: readonly StaffCapability[] = [
   "staff.time.clock",
   "staff.time.read.self",
   "admin.time.oversight.read",
+  "admin.time.correct",
 ] as const;
 
 /** Business Development & Digital — client-scoped; no billing or company financials. */

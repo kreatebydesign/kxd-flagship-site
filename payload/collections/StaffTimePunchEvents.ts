@@ -2,7 +2,8 @@
  * KXD OS V1.4 — Append-only staff time punch ledger.
  */
 import type { CollectionConfig } from "payload";
-import { isPayloadAdminUser, isStudioPayloadOperator } from "../access/index.ts";
+import { isStudioPayloadOperator } from "../access/index.ts";
+import { assertStaffTimeShiftInTransaction } from "../../lib/staff-time/correction-bypass.ts";
 import { PAYLOAD_GROUPS } from "../admin/groups.ts";
 
 export const StaffTimePunchEvents: CollectionConfig = {
@@ -19,15 +20,18 @@ export const StaffTimePunchEvents: CollectionConfig = {
   access: {
     admin: ({ req: { user } }) => isStudioPayloadOperator(user),
     read: ({ req: { user } }) => isStudioPayloadOperator(user),
-    create: isPayloadAdminUser,
+    create: () => false,
     update: () => false,
     delete: () => false,
   },
   hooks: {
     beforeChange: [
-      ({ operation }) => {
+      async ({ operation, req }) => {
         if (operation === "update") {
           throw new Error("Staff time punch events are immutable.");
+        }
+        if (operation === "create") {
+          await assertStaffTimeShiftInTransaction(req);
         }
       },
     ],
