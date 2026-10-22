@@ -24,8 +24,13 @@ export default async function StaffOversightPage() {
 
   const data = await loadStaffOversight();
   const canCorrectStaffTime = actorHasStaffCapability(actor, "admin.time.correct");
+  const canReviewPayroll = actorHasStaffCapability(actor, "admin.payroll.review");
 
   return (
-    <StaffOversightScreen data={data} canCorrectStaffTime={canCorrectStaffTime} />
+    <StaffOversightScreen
+      data={data}
+      canCorrectStaffTime={canCorrectStaffTime}
+      canReviewPayroll={canReviewPayroll}
+    />
   );
 }

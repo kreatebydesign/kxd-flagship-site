@@ -154,6 +154,8 @@
     "verify:staff-time-authorization": "tsx scripts/verify-staff-time-authorization.ts",
     "verify:staff-time-operator-corrections": "KXD_SERVER_ONLY_SHIM=1 node --import ./scripts/shims/register-server-only.mjs --import tsx scripts/verify-staff-time-operator-corrections.ts",
     "verify:staff-time-shift-guards": "KXD_SERVER_ONLY_SHIM=1 node --import ./scripts/shims/register-server-only.mjs --import tsx scripts/verify-staff-time-shift-guards.ts",
+    "verify:staff-pay-period-review": "KXD_SERVER_ONLY_SHIM=1 node --import ./scripts/shims/register-server-only.mjs --import tsx scripts/verify-staff-pay-period-review.ts",
+    "verify:staff-pay-workweek-pacific": "tsx scripts/verify-staff-pay-workweek-pacific.ts",
     "verify:payload-preview-csrf": "tsx scripts/verify-payload-preview-csrf.ts",
     "verify:payload-staff-csrf-origins": "tsx scripts/verify-payload-staff-csrf-origins.ts",
     "verify:staff-time-post-auth-headers": "tsx scripts/verify-staff-time-post-auth-headers.ts",
