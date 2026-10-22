@@ -221,6 +221,21 @@ From `lib/platform/registry.ts`:
 
 ---
 
+## V1 Staff Operations (Edition 1)
+
+Tracked IDs for Tyler payroll readiness and operator data integrity. **Production completion** requires Matt review, deploy, and operator verification — not implied by merge alone.
+
+| ID | Title | Status | Verification |
+|----|-------|--------|----------------|
+| V1-STAFF-001 | Employment agreement execution (signatures) | ⏳ Operational — unsigned assignment in prod | Operator workflow (documents) |
+| V1-STAFF-002 | Historical hour backfill (Oct 15–20) | ⏳ Blocked on operator entry — **not** automated in this repo | Manual / operator after V1-STAFF-003 |
+| V1-STAFF-003 | Operator time correction & historical shift entry | 🟡 **PR ready** — symbol + transaction-gated correction bypass; Payload shift/punch collections deny direct create/update; hooks enforce append-only audit | `verify:staff-time-shift-guards`, `verify:staff-time-operator-corrections`, `verify:staff-time-authorization`, `npm run build` (pending Matt merge) |
+| V1-STAFF-004 | Pay period export | ⏳ Not started | — |
+
+**V1-STAFF-003 notes (2026-10-21):** Production shift #1 shows `shift_start_corrected` in audit history, but no shipped correction API existed before this work — the Payload `StaffTimeShifts` hook blocked boundary edits with “Use correction workflow.” This implementation adds the audited operator path (preserve punches + append audit/`correction_note`), overlap checks, and pay-period resolution. Does **not** modify existing production shift rows without an explicit operator correction call.
+
+---
+
 ## Documentation Map
 
 | Document | Purpose |

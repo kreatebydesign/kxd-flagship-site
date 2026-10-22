@@ -38,6 +38,7 @@ export type StaffCapability =
   | "staff.time.clock"
   | "staff.time.read.self"
   | "admin.time.oversight.read"
+  | "admin.time.correct"
   | "admin.staff-documents.manage"
   | "admin.staff-documents.countersign"
   | "admin.oversight"

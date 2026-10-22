@@ -14,6 +14,7 @@ import {
 } from "@/components/admin/operations/shared/OpsBriefing";
 import { KxdButton, KxdIntelligenceBadge, KxdIntelligenceMark, KxdPage } from "@/components/os";
 import type { StaffOversightData } from "@/lib/staff/types";
+import { StaffTimeOperatorCorrectionsCard } from "./StaffTimeOperatorCorrectionsCard";
 import { WORK_PRIORITY_LABELS } from "@/lib/work/constants";
 import { workViewHref } from "@/lib/work/planning/client";
 
@@ -277,9 +278,13 @@ function HelpRequestRow({
 
 export interface StaffOversightScreenProps {
   data: StaffOversightData;
+  canCorrectStaffTime?: boolean;
 }
 
-export function StaffOversightScreen({ data }: StaffOversightScreenProps) {
+export function StaffOversightScreen({
+  data,
+  canCorrectStaffTime = false,
+}: StaffOversightScreenProps) {
   const router = useRouter();
   const [previewingId, setPreviewingId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -773,6 +778,15 @@ export function StaffOversightScreen({ data }: StaffOversightScreenProps) {
             )}
           </OpsCard>
         </section>
+
+        {canCorrectStaffTime ? (
+          <StaffTimeOperatorCorrectionsCard
+            members={data.members}
+            onMessage={setMessage}
+            onError={setError}
+            onDone={() => router.refresh()}
+          />
+        ) : null}
 
         <section style={{ marginTop: "1.5rem" }} aria-label="End-of-day notes">
           <OpsSectionHead label="End-of-day notes" count={data.wrapUps.length} />

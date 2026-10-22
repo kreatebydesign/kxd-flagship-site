@@ -32,8 +32,10 @@ function getAdapterSessions(payload: Payload): Record<string, DrizzleSession> {
   return adapter.sessions as Record<string, DrizzleSession>;
 }
 
+export { withStaffTimeOperatorCorrectionContext } from "./correction-bypass";
+
 export async function createStaffTimeRequest(payload: Payload): Promise<StaffTimeTxReq> {
-  return { payload } as StaffTimeTxReq;
+  return { payload, context: {} } as StaffTimeTxReq;
 }
 
 export async function beginStaffTimeTransaction(req: StaffTimeTxReq): Promise<boolean> {
@@ -116,6 +118,9 @@ export async function withStaffTimeTransaction<T>(
 ): Promise<T> {
   const req = await createStaffTimeRequest(payload);
   const owns = await beginStaffTimeTransaction(req);
+  if (!req.transactionID) {
+    throw new Error("Failed to begin staff time transaction.");
+  }
   try {
     const result = await fn(req);
     await commitStaffTimeTransaction(req, owns);

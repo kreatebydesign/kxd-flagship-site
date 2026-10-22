@@ -48,6 +48,8 @@ assert.ok(heatherCaps.has("staff.time.clock"));
 assert.ok(!heatherCaps.has("admin.time.oversight.read"));
 
 assert.ok(mattCaps.has("admin.time.oversight.read"));
+assert.ok(mattCaps.has("admin.time.correct"));
+assert.ok(!tylerCaps.has("admin.time.correct"));
 assert.ok(actorHasStaffCapability(matt, "staff.time.clock"));
 
 assert.ok(

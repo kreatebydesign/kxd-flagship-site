@@ -2,21 +2,20 @@
  * KXD OS V1.4 — Staff time shift sessions (authoritative via punch ledger).
  */
 import type { CollectionConfig } from "payload";
-import { isPayloadAdminUser, isStudioPayloadOperator } from "../access/index.ts";
+import { isStudioPayloadOperator } from "../access/index.ts";
 import { PAYLOAD_GROUPS } from "../admin/groups.ts";
+import {
+  assertNoForgedStaffTimeCorrectionContext,
+  assertStaffTimeShiftInTransaction,
+  isStaffTimeOperatorCorrectionAuthorized,
+} from "../../lib/staff-time/correction-bypass.ts";
+import {
+  validateStaffTimeShiftCreate,
+  validateStaffTimeShiftUpdate,
+} from "../../lib/staff-time/shift-mutation-guard.ts";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDoc = Record<string, any>;
-
-const IMMUTABLE_AFTER_COMPLETE = [
-  "startedAt",
-  "staffUser",
-  "workTimezone",
-  "localDateKey",
-  "workIntentCategory",
-  "workIntentWorkId",
-  "workIntentClientId",
-] as const;
 
 export const StaffTimeShifts: CollectionConfig = {
   slug: "staff-time-shifts",
@@ -28,53 +27,36 @@ export const StaffTimeShifts: CollectionConfig = {
     defaultColumns: ["staffUser", "status", "startedAt", "endedAt"],
     group: PAYLOAD_GROUPS.kxdOs,
     description:
-      "Internal staff shift sessions. Mutations occur via Staff Time Clock APIs.",
+      "Read-only in Payload Admin. Mutations occur via Staff Time Clock and operator correction APIs.",
   },
   access: {
     admin: ({ req: { user } }) => isStudioPayloadOperator(user),
     read: ({ req: { user } }) => isStudioPayloadOperator(user),
-    create: isPayloadAdminUser,
-    update: isPayloadAdminUser,
+    create: () => false,
+    update: () => false,
     delete: () => false,
   },
   hooks: {
     beforeChange: [
-      ({ data, operation, originalDoc }) => {
-        if (operation !== "update" || !originalDoc) return data;
-        const status = String(originalDoc.status ?? "");
-        if (status === "completed" || status === "voided") {
-          for (const field of IMMUTABLE_AFTER_COMPLETE) {
-            if (field in data && data[field] !== originalDoc[field]) {
-              throw new Error(
-                `Completed staff shifts cannot change ${field}. Use correction workflow.`,
-              );
-            }
-          }
+      async ({ data, operation, originalDoc, req }) => {
+        await assertNoForgedStaffTimeCorrectionContext(req);
+        const operatorBypass = await isStaffTimeOperatorCorrectionAuthorized(req);
+
+        if (operation === "create") {
+          await assertStaffTimeShiftInTransaction(req);
+          validateStaffTimeShiftCreate(data as AnyDoc, operatorBypass);
+          return data;
         }
-        const originalAudit = originalDoc.auditEvents;
-        const nextAudit = data.auditEvents ?? originalAudit;
-        const originalEntries = Array.isArray(originalAudit) ? originalAudit : [];
-        const nextEntries = Array.isArray(nextAudit) ? nextAudit : [];
-        if (nextEntries.length < originalEntries.length) {
-          throw new Error("staff time auditEvents are append-only.");
+
+        if (operation === "update" && originalDoc) {
+          await assertStaffTimeShiftInTransaction(req);
+          validateStaffTimeShiftUpdate({
+            data: data as AnyDoc,
+            originalDoc: originalDoc as AnyDoc,
+            operatorBypass,
+          });
         }
-        const prefixOk = originalEntries.every((entry, index) => {
-          const next = nextEntries[index];
-          if (!next || typeof entry !== "object" || typeof next !== "object") {
-            return false;
-          }
-          const a = entry as AnyDoc;
-          const b = next as AnyDoc;
-          return (
-            String(a.id ?? "") === String(b.id ?? "") &&
-            String(a.at ?? "") === String(b.at ?? "") &&
-            String(a.action ?? "") === String(b.action ?? "") &&
-            Number(a.actorUserId ?? 0) === Number(b.actorUserId ?? 0)
-          );
-        });
-        if (!prefixOk) {
-          throw new Error("staff time auditEvents are append-only.");
-        }
+
         return data;
       },
     ],
