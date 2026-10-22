@@ -26,6 +26,49 @@ import type { TypedSignatureEvidence } from "@/lib/proposal-lifecycle/types.ts";
 
 ensureProposalPdfFonts();
 
+function staffTemplatePreviewEyebrow(kind: string, signingMode: string): string {
+  if (signingMode === "dual-signature") return "Staff agreement";
+  if (kind === "staff-policy") return "Information security policy";
+  return "Staff policy";
+}
+
+export async function renderStaffDocumentTemplatePreviewPdf(input: {
+  title: string;
+  body: string;
+  legalEntityName: string;
+  templateVersion: number;
+  contentHash: string;
+  kind: string;
+  signingMode: string;
+}): Promise<Buffer> {
+  const eyebrow = staffTemplatePreviewEyebrow(input.kind, input.signingMode);
+  const footer =
+    input.signingMode === "dual-signature"
+      ? "Staff agreement preview · Not executed"
+      : "Staff policy preview · Not executed";
+  const continued = `${input.title} · Preview`;
+  const doc = (
+    <Document title={`${input.title} (Preview)`} author={KXD_REPORT_BRAND}>
+      <AgreementPdfLetterPage
+        footerLabel={footer}
+        continuedLabel={`${continued} · Continued`}
+        showContactInFooter
+      >
+        <AgreementPdfBrandHeader eyebrow={eyebrow} />
+        <Text style={agreementPdfStyles.h1}>{input.title}</Text>
+        <Text style={agreementPdfStyles.meta}>
+          {input.legalEntityName} · Version {input.templateVersion}
+        </Text>
+        <Text style={agreementPdfStyles.meta}>Preview only · Document hash: {input.contentHash}</Text>
+        <AgreementPdfBodyFromText body={input.body} />
+      </AgreementPdfLetterPage>
+    </Document>
+  );
+  const instance = pdf(doc);
+  const blob = await instance.toBlob();
+  return Buffer.from(await blob.arrayBuffer());
+}
+
 export async function renderStaffPolicyPdf(input: {
   title: string;
   body: string;

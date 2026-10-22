@@ -266,6 +266,7 @@
     "verify:staff-documents-release-b-concurrency": "KXD_SERVER_ONLY_SHIM=1 node --import ./scripts/shims/register-server-only.mjs --import tsx scripts/verify-staff-documents-release-b-concurrency.ts",
     "verify:staff-documents-release-b-gate": "KXD_SERVER_ONLY_SHIM=1 node --import ./scripts/shims/register-server-only.mjs --import tsx scripts/verify-staff-documents-release-b-gate.ts",
     "verify:staff-documents-release-b-phase2": "KXD_SERVER_ONLY_SHIM=1 node --import ./scripts/shims/register-server-only.mjs --import tsx scripts/verify-staff-documents-release-b-phase2.ts",
+    "verify:staff-documents-operator-workflow": "KXD_SERVER_ONLY_SHIM=1 node --import ./scripts/shims/register-server-only.mjs --import tsx scripts/verify-staff-documents-operator-workflow.ts",
     "repair:junior-shift-credit": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/reset-junior-shift-credit.ts",
     "repair:junior-shift-credit:apply": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/reset-junior-shift-credit.ts --apply"
   },

@@ -26,6 +26,39 @@ export function staffDocumentKindLabel(kind: StaffDocumentKind): string {
   }
 }
 
+/** Operator-facing labels for real employee document templates. */
+export function staffDocumentKindOperatorLabel(kind: StaffDocumentKind): string {
+  switch (kind) {
+    case "confidentiality-nda":
+      return "Confidentiality and Non-Disclosure Agreement";
+    case "ip-assignment":
+      return "Intellectual Property and Work Product Agreement";
+    case "staff-policy":
+      return "Information Security and Client Data Policy";
+    case "employment-agreement":
+      return "Employment Agreement";
+    default:
+      return staffDocumentKindLabel(kind);
+  }
+}
+
+export function staffDocumentTemplateStatusLabel(
+  status: import("./types.ts").StaffDocumentTemplateStatus,
+): string {
+  switch (status) {
+    case "draft":
+      return "Draft";
+    case "legal-review":
+      return "Legal review";
+    case "approved-for-use":
+      return "Approved for use";
+    case "retired":
+      return "Retired";
+    default:
+      return status;
+  }
+}
+
 export function staffDocumentStatusBadge(input: {
   status: StaffDocumentStatus;
   signingMode: StaffDocumentSigningMode;
@@ -70,4 +103,34 @@ export function staffDocumentAttentionLabel(input: {
   return input.signingMode === "dual-signature"
     ? "Signature required"
     : "Acknowledgment required";
+}
+
+export function staffDocumentAssignmentNextAction(input: {
+  status: StaffDocumentStatus;
+  signingMode: StaffDocumentSigningMode;
+}): string {
+  if (input.signingMode === "acknowledgment") {
+    if (input.status === "assigned") return "Employee acknowledgment required";
+    if (input.status === "acknowledged") return "Complete";
+    if (input.status === "revoked") return "Revoked";
+    return staffDocumentStatusBadge(input).label;
+  }
+  switch (input.status) {
+    case "assigned":
+      return "Employee signature required";
+    case "awaiting-operator-signature":
+      return "KXD countersignature required";
+    case "executing":
+      return "Finalizing execution";
+    case "executed":
+      return "Executed — download available";
+    case "declined":
+      return "Declined by employee";
+    case "revoked":
+      return "Revoked";
+    case "expired":
+      return "Expired";
+    default:
+      return staffDocumentStatusBadge(input).label;
+  }
 }

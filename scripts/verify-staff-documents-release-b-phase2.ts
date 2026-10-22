@@ -7,6 +7,8 @@
  */
 import assert from "node:assert/strict";
 
+process.env.STAFF_DOC_QA_ASSIGNMENT = "1";
+
 const enabled = process.env.STAFF_DOC_RELEASE_B_PHASE2 === "1";
 if (!enabled) {
   console.log(

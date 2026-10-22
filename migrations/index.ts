@@ -125,6 +125,7 @@ import * as migration_20261020_staff_documents_release_a from './20261020_staff_
 import * as migration_20261021_staff_documents_release_b_phase1 from './20261021_staff_documents_release_b_phase1';
 import * as migration_20261022_staff_sales_development_phase1 from './20261022_staff_sales_development_phase1';
 import * as migration_20261023_staff_time_b1_foundation from './20261023_staff_time_b1_foundation';
+import * as migration_20261024_staff_document_template_operator_workflow from './20261024_staff_document_template_operator_workflow';
 
 export const migrations = [
   {
@@ -819,5 +820,11 @@ export const migrations = [
     up: migration_20261023_staff_time_b1_foundation.up,
     down: migration_20261023_staff_time_b1_foundation.down,
     name: '20261023_staff_time_b1_foundation',
+  },
+  {
+    // Staff document template operator workflow — provenance, versioning, legal review.
+    up: migration_20261024_staff_document_template_operator_workflow.up,
+    down: migration_20261024_staff_document_template_operator_workflow.down,
+    name: '20261024_staff_document_template_operator_workflow',
   },
 ];

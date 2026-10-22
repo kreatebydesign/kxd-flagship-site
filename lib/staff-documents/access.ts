@@ -31,6 +31,14 @@ export function operatorStaffDocumentPath(documentId: number): string {
   return `/admin/operations/staff/oversight/documents/${documentId}`;
 }
 
+export function operatorStaffDocumentTemplatePath(templateId: number): string {
+  return `/admin/operations/staff/oversight/documents/templates/${templateId}`;
+}
+
+export function operatorStaffDocumentTemplateNewPath(): string {
+  return `/admin/operations/staff/oversight/documents/templates/new`;
+}
+
 /** Restricted staff may only access their own document rows. */
 export function assertStaffDocumentRowAccess(
   actor: StaffActor,

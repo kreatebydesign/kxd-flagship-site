@@ -90,5 +90,41 @@ export const StaffDocumentTemplates: CollectionConfig = {
       admin: { date: { pickerAppearance: "dayAndTime" }, position: "sidebar" },
     },
     { name: "approvedBy", type: "text", admin: { position: "sidebar" } },
+    {
+      name: "isSample",
+      type: "checkbox",
+      label: "QA sample (non-assignable in production)",
+      defaultValue: false,
+      admin: { position: "sidebar" },
+    },
+    {
+      name: "familyKey",
+      type: "text",
+      label: "Template family key",
+      index: true,
+      admin: { readOnly: true, position: "sidebar" },
+    },
+    {
+      name: "createdBy",
+      type: "text",
+      label: "Created by",
+      admin: { readOnly: true, position: "sidebar" },
+    },
+    {
+      name: "legalReviewSubmittedAt",
+      type: "date",
+      admin: { date: { pickerAppearance: "dayAndTime" }, position: "sidebar" },
+    },
+    {
+      name: "legalReviewSubmittedBy",
+      type: "text",
+      admin: { position: "sidebar" },
+    },
+    {
+      name: "supersedesTemplate",
+      type: "relationship",
+      relationTo: "staff-document-templates",
+      admin: { position: "sidebar" },
+    },
   ],
 };

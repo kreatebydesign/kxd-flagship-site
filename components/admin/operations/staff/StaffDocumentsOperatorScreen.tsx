@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { OperationsPageHero } from "@/components/admin/operations/shared/OperationsPageHero";
 import { OperationsShell } from "@/components/admin/operations/shared/OperationsShell";
 import {
@@ -12,22 +12,22 @@ import {
   OpsStatusBadge,
 } from "@/components/admin/operations/shared/OpsBriefing";
 import { KxdButton, KxdPage } from "@/components/os";
-import { operatorStaffDocumentPath } from "@/lib/staff-documents/access";
 import {
+  operatorStaffDocumentPath,
+  operatorStaffDocumentTemplateNewPath,
+  operatorStaffDocumentTemplatePath,
+} from "@/lib/staff-documents/access";
+import {
+  staffDocumentAssignmentNextAction,
   staffDocumentKindLabel,
+  staffDocumentKindOperatorLabel,
   staffDocumentStatusBadge,
+  staffDocumentTemplateStatusLabel,
 } from "@/lib/staff-documents/display";
-import type { StaffDocumentListItem, StaffDocumentTemplateStatus } from "@/lib/staff-documents/types";
-
-type TemplateRow = {
-  id: number;
-  title: string;
-  version: number;
-  kind: StaffDocumentListItem["kind"];
-  signingMode: StaffDocumentListItem["signingMode"];
-  status: StaffDocumentTemplateStatus;
-  contentHash: string;
-};
+import type {
+  StaffDocumentListItem,
+  StaffDocumentTemplateOperatorListItem,
+} from "@/lib/staff-documents/types";
 
 type AssignmentRow = StaffDocumentListItem & {
   staffUserId: number;
@@ -35,16 +35,18 @@ type AssignmentRow = StaffDocumentListItem & {
 };
 
 export function StaffDocumentsOperatorScreen(props: {
-  templates: TemplateRow[];
+  templates: StaffDocumentTemplateOperatorListItem[];
   assignments: AssignmentRow[];
   countersignQueue: AssignmentRow[];
   staffUsers: Array<{ id: number; label: string }>;
 }) {
   const router = useRouter();
-  const [staffUserId, setStaffUserId] = useState(props.staffUsers[0]?.id ?? 0);
-  const [templateId, setTemplateId] = useState(
-    props.templates.find((t) => t.status === "approved-for-use")?.id ?? 0,
+  const assignableTemplates = useMemo(
+    () => props.templates.filter((t) => t.assignable),
+    [props.templates],
   );
+  const [staffUserId, setStaffUserId] = useState(props.staffUsers[0]?.id ?? 0);
+  const [templateId, setTemplateId] = useState(assignableTemplates[0]?.id ?? 0);
   const [sampleKind, setSampleKind] = useState<"policy-acknowledgment" | "employment-agreement">(
     "policy-acknowledgment",
   );
@@ -62,13 +64,6 @@ export function StaffDocumentsOperatorScreen(props: {
       });
       const data = (await res.json()) as { success?: boolean; error?: string; id?: number };
       if (!res.ok || !data.success) throw new Error(data.error ?? "Failed.");
-      if (data.id) {
-        await fetch("/api/admin/staff/documents/operator/templates", {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ templateId: data.id, status: "approved-for-use" }),
-        });
-      }
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed.");
@@ -102,7 +97,7 @@ export function StaffDocumentsOperatorScreen(props: {
         <OperationsPageHero
           eyebrow="Staff oversight"
           title="Staff documents"
-          lead="Approve templates, assign policies and agreements, and countersign employee-signed documents. Use nonbinding samples for testing only."
+          lead="Create and approve real employee templates, assign counsel-reviewed documents, and countersign completed agreements. QA samples remain separate from assignable templates."
         />
 
         {error ? (
@@ -145,10 +140,48 @@ export function StaffDocumentsOperatorScreen(props: {
         </section>
 
         <section className="kxd-os-staff-docs-operator__section" aria-label="Templates">
-          <OpsSectionHead label="Templates" count={props.templates.length} />
+          <OpsSectionHead label="Document templates" count={props.templates.length} />
           <OpsCard className="kxd-os-ops-card-padding">
+            <Link
+              href={operatorStaffDocumentTemplateNewPath()}
+              className="kxd-os-btn kxd-os-btn--primary"
+            >
+              New real template
+            </Link>
+            <ul className="kxd-os-staff-docs-operator__template-list">
+              {props.templates.map((t) => (
+                <li key={t.id}>
+                  <Link
+                    href={operatorStaffDocumentTemplatePath(t.id)}
+                    className="kxd-os-link-quiet"
+                  >
+                    {t.title}
+                  </Link>
+                  <span className="kxd-os-meta">
+                    {" "}
+                    · {staffDocumentKindOperatorLabel(t.kind)} · v{t.version} ·{" "}
+                    {staffDocumentTemplateStatusLabel(t.status)}
+                    {t.isSample ? " · QA sample" : ""}
+                    {t.assignable ? " · Assignable" : ""}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </OpsCard>
+        </section>
+
+        <section
+          className="kxd-os-staff-docs-operator__section"
+          aria-label="QA samples"
+        >
+          <OpsSectionHead label="QA samples (non-assignable)" />
+          <OpsCard className="kxd-os-ops-card-padding">
+            <p className="kxd-os-meta" style={{ marginBottom: "0.75rem" }}>
+              Samples stay in draft for flow testing. They cannot be approved for production use or
+              assigned to staff.
+            </p>
             <label className="kxd-os-field" style={{ display: "block", maxWidth: "20rem" }}>
-              <span className="kxd-os-field__label">Sample template type (test)</span>
+              <span className="kxd-os-field__label">Sample template type</span>
               <select
                 className="kxd-os-input"
                 value={sampleKind}
@@ -167,62 +200,60 @@ export function StaffDocumentsOperatorScreen(props: {
               disabled={busy === "sample"}
               onClick={() => void createSampleTemplate()}
             >
-              Create sample nonbinding template
+              Create sample template (draft)
             </KxdButton>
-            <ul className="kxd-os-staff-docs-operator__template-list">
-              {props.templates.map((t) => (
-                <li key={t.id}>
-                  <span className="kxd-os-meta">
-                    {t.title} · {staffDocumentKindLabel(t.kind)} · v{t.version} · {t.status}
-                  </span>
-                </li>
-              ))}
-            </ul>
           </OpsCard>
         </section>
 
         <section className="kxd-os-staff-docs-operator__section" aria-label="Assign document">
           <OpsSectionHead label="Assign to employee" />
           <OpsCard className="kxd-os-ops-card-padding">
-            <label className="kxd-os-field kxd-os-staff-docs-operator__field">
-              <span className="kxd-os-field__label">Staff user</span>
-              <select
-                className="kxd-os-input"
-                value={staffUserId}
-                onChange={(e) => setStaffUserId(Number(e.target.value))}
-              >
-                {props.staffUsers.map((u) => (
-                  <option key={u.id} value={u.id}>
-                    {u.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="kxd-os-field kxd-os-staff-docs-operator__field">
-              <span className="kxd-os-field__label">Approved template</span>
-              <select
-                className="kxd-os-input"
-                value={templateId}
-                onChange={(e) => setTemplateId(Number(e.target.value))}
-              >
-                {props.templates
-                  .filter((t) => t.status === "approved-for-use")
-                  .map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.title} ({staffDocumentKindLabel(t.kind)})
-                    </option>
-                  ))}
-              </select>
-            </label>
-            <KxdButton
-              type="button"
-              variant="primary"
-              style={{ marginTop: "1rem" }}
-              disabled={busy === "assign" || !templateId || !staffUserId}
-              onClick={() => void assignDocument()}
-            >
-              Assign document
-            </KxdButton>
+            {assignableTemplates.length === 0 ? (
+              <p className="kxd-os-meta">
+                No approved assignable templates yet. Complete legal review and approval on a real
+                template first.
+              </p>
+            ) : (
+              <>
+                <label className="kxd-os-field kxd-os-staff-docs-operator__field">
+                  <span className="kxd-os-field__label">Staff user</span>
+                  <select
+                    className="kxd-os-input"
+                    value={staffUserId}
+                    onChange={(e) => setStaffUserId(Number(e.target.value))}
+                  >
+                    {props.staffUsers.map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {u.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="kxd-os-field kxd-os-staff-docs-operator__field">
+                  <span className="kxd-os-field__label">Approved template</span>
+                  <select
+                    className="kxd-os-input"
+                    value={templateId}
+                    onChange={(e) => setTemplateId(Number(e.target.value))}
+                  >
+                    {assignableTemplates.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.title} ({staffDocumentKindOperatorLabel(t.kind)})
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <KxdButton
+                  type="button"
+                  variant="primary"
+                  style={{ marginTop: "1rem" }}
+                  disabled={busy === "assign" || !templateId || !staffUserId}
+                  onClick={() => void assignDocument()}
+                >
+                  Assign document
+                </KxdButton>
+              </>
+            )}
           </OpsCard>
         </section>
 
@@ -231,6 +262,10 @@ export function StaffDocumentsOperatorScreen(props: {
           <OpsCard>
             {props.assignments.map((row) => {
               const badge = staffDocumentStatusBadge({
+                status: row.status,
+                signingMode: row.signingMode,
+              });
+              const nextAction = staffDocumentAssignmentNextAction({
                 status: row.status,
                 signingMode: row.signingMode,
               });
@@ -245,7 +280,7 @@ export function StaffDocumentsOperatorScreen(props: {
                     <OpsStatusBadge label={badge.label} variant={badge.variant} />
                   </div>
                   <p className="kxd-os-meta">
-                    {row.staffLabel} · {staffDocumentKindLabel(row.kind)}
+                    {row.staffLabel} · {staffDocumentKindLabel(row.kind)} · {nextAction}
                   </p>
                 </div>
               );
