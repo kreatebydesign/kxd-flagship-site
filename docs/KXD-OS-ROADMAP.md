@@ -229,10 +229,10 @@ Tracked IDs for Tyler payroll readiness and operator data integrity. **Productio
 |----|-------|--------|----------------|
 | V1-STAFF-001 | Employment agreement execution (signatures) | ⏳ Operational — unsigned assignment in prod | Operator workflow (documents) |
 | V1-STAFF-002 | Historical hour backfill (Oct 15–20) | ⏳ Blocked on operator entry — **not** automated in this repo | Manual / operator after V1-STAFF-003 |
-| V1-STAFF-003 | Operator time correction & historical shift entry | 🟡 **PR ready** — symbol + transaction-gated correction bypass; Payload shift/punch collections deny direct create/update; hooks enforce append-only audit | `verify:staff-time-shift-guards`, `verify:staff-time-operator-corrections`, `verify:staff-time-authorization`, `npm run build` (pending Matt merge) |
+| V1-STAFF-003 | Operator time correction & historical shift entry | ✅ **Production** (2026-10-22) — squash merge `8f11205c` via PR #96; Vercel prod deployment `7p2wFEAKTbGEgtQhVf75Ez7royrr` | `verify:staff-time-shift-guards`, `verify:staff-time-operator-corrections`, production UI smoke (`scripts/verify-v1-staff-003-production-ui.ts`), Neon read-only Tyler ledger unchanged (2 shifts, 4 punches) |
 | V1-STAFF-004 | Pay period export | ⏳ Not started | — |
 
-**V1-STAFF-003 notes (2026-10-21):** Production shift #1 shows `shift_start_corrected` in audit history, but no shipped correction API existed before this work — the Payload `StaffTimeShifts` hook blocked boundary edits with “Use correction workflow.” This implementation adds the audited operator path (preserve punches + append audit/`correction_note`), overlap checks, and pay-period resolution. Does **not** modify existing production shift rows without an explicit operator correction call.
+**V1-STAFF-003 notes:** Shipped operator APIs (`POST /api/admin/staff/time/operator/historical-shift`, `POST .../shifts/[id]/correct`), capability `admin.time.correct`, oversight UI “Time corrections,” symbol + transaction-gated Payload bypass, and append-only audit enforcement. **Release evidence (2026-10-22):** `www.kreatebydesign.com` oversight shows Operator time corrections + On the clock; operator APIs return 401 unauthenticated; authorized session returns 200 on oversight active API. Tyler (`staff_user_id=3`) ledger after deploy: shift ids **1–2** only, **4** punch events — no new shifts or backfill in this release.
 
 ---
 
