@@ -122,6 +122,20 @@ async function main(): Promise<void> {
   await updateStaffDocumentTemplateDraft({
     actor: adminActor,
     templateId,
+    body: "PENDING_BODY_LOAD",
+  });
+  await assert.rejects(() =>
+    transitionStaffDocumentTemplateStatus({
+      actor: adminActor,
+      templateId,
+      status: "legal-review",
+    }),
+    /incomplete|placeholder/i,
+  );
+
+  await updateStaffDocumentTemplateDraft({
+    actor: adminActor,
+    templateId,
     body: `Updated body for ${runTag}.`,
   });
 

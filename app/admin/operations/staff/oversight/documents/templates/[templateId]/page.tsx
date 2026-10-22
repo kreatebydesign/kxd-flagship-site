@@ -23,5 +23,11 @@ export default async function StaffDocumentTemplateEditPage(props: PageProps) {
     redirect("/admin/operations/staff/oversight/documents");
   }
 
-  return <StaffDocumentTemplateEditorScreen mode="edit" template={template} />;
+  return (
+    <StaffDocumentTemplateEditorScreen
+      key={`${template.id}-${template.updatedAt}-${template.status}`}
+      mode="edit"
+      template={template}
+    />
+  );
 }

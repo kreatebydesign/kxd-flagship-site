@@ -47,6 +47,7 @@
     "scripts/refile-de-bois-contract-4-sent-pdf.ts",
     "scripts/verify-agreement-value-presentation.ts",
     "scripts/export-primal-leadership-progress-pdf.ts",
-    "scripts/batch-cusick-sept-2026-report-polish.ts"
+    "scripts/batch-cusick-sept-2026-report-polish.ts",
+    "storage/staff-documents-preview/**"
   ]
 }
