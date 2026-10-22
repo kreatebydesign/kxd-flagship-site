@@ -8,6 +8,7 @@ import type { StaffActor } from "@/lib/staff/types";
 import { assertStaffCapability } from "@/lib/staff/permissions";
 import { staffActorFromUser } from "@/lib/staff/actor";
 import { ensureStaffPayrollFoundation } from "./bootstrap";
+import { STAFF_PAYROLL_DEFAULTS } from "./constants";
 import { preliminaryGrossCentsForMinutes } from "./money";
 import type {
   PayPeriodEmployeeSummary,
@@ -23,6 +24,7 @@ import {
   allocateShiftMinutesByWorkweek,
   dateKeysBetween,
   evaluateWorkweekOvertimeWarnings,
+  STAFF_PAYROLL_WORKWEEK_TIMEZONE,
   workweekStartsTouchingPeriod,
 } from "./workweek";
 import {
@@ -349,11 +351,14 @@ export async function loadStaffPayPeriodReview(
   const periodEnd = String(periodRow.period_end).slice(0, 10);
 
   const configResult = await db.execute(
-    sql`SELECT weekly_hours_limit FROM staff_payroll_config WHERE id = 1 LIMIT 1`,
+    sql`SELECT weekly_hours_limit, timezone FROM staff_payroll_config WHERE id = 1 LIMIT 1`,
   );
-  const weeklyHoursLimit = Number(
-    (configResult as { rows?: { weekly_hours_limit?: number }[] }).rows?.[0]
-      ?.weekly_hours_limit ?? 40,
+  const configRow = (configResult as {
+    rows?: { weekly_hours_limit?: number; timezone?: string }[];
+  }).rows?.[0];
+  const weeklyHoursLimit = Number(configRow?.weekly_hours_limit ?? 40);
+  const payrollTimezone = String(
+    configRow?.timezone ?? STAFF_PAYROLL_DEFAULTS.timezone ?? STAFF_PAYROLL_WORKWEEK_TIMEZONE,
   );
 
   const staffUsers = await payload.find({
@@ -382,7 +387,11 @@ export async function loadStaffPayPeriodReview(
   );
   const periodShiftRows = uniqueShifts((shiftsResult as { rows?: ShiftRow[] }).rows ?? []);
 
-  const workweekStarts = workweekStartsTouchingPeriod(periodStart, periodEnd);
+  const workweekStarts = workweekStartsTouchingPeriod(
+    periodStart,
+    periodEnd,
+    payrollTimezone,
+  );
   const otWindowStart = workweekStarts[0] ?? periodStart;
   const otWindowEnd = periodEnd;
 
@@ -535,7 +544,7 @@ export async function loadStaffPayPeriodReview(
       : periodStart;
     const todayKey = new Date().toISOString().slice(0, 10);
     const missingOrUnverifiedDateKeys: string[] = [];
-    for (const key of dateKeysBetween(coverageStart, periodEnd)) {
+    for (const key of dateKeysBetween(coverageStart, periodEnd, payrollTimezone)) {
       if (key > todayKey) continue;
       if (!datesWithMinutes.has(key)) {
         missingOrUnverifiedDateKeys.push(key);
@@ -560,6 +569,7 @@ export async function loadStaffPayPeriodReview(
       const allocations = allocateShiftMinutesByWorkweek(
         String(shift.started_at),
         String(shift.ended_at),
+        payrollTimezone,
       );
       for (const [weekStart, minutes] of allocations) {
         minutesByWorkweek.set(weekStart, (minutesByWorkweek.get(weekStart) ?? 0) + minutes);
@@ -570,6 +580,7 @@ export async function loadStaffPayPeriodReview(
       weeklyHoursLimit,
       workweekStarts,
       minutesByWorkweek,
+      timeZone: payrollTimezone,
     }).filter((w) => w.exceedsLimit);
 
     if (workweekOvertimeWarnings.length > 0) {

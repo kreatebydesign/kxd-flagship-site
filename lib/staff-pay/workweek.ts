@@ -1,57 +1,126 @@
-import { minutesBetween } from "@/lib/staff-time/dates";
+import { minutesBetween, toDateKeyInTimezone } from "@/lib/staff-time/dates";
+import { STAFF_PAYROLL_DEFAULTS } from "./constants";
 
-/** Monday-start workweek key (YYYY-MM-DD of Monday) for a civil date in UTC parsing. */
-export function mondayWorkweekStartKey(dateKey: string): string {
-  const d = new Date(`${dateKey}T12:00:00Z`);
-  const day = d.getUTCDay();
-  const offset = day === 0 ? -6 : 1 - day;
-  d.setUTCDate(d.getUTCDate() + offset);
-  return d.toISOString().slice(0, 10);
+export const STAFF_PAYROLL_WORKWEEK_TIMEZONE = STAFF_PAYROLL_DEFAULTS.timezone;
+
+const WEEKDAY_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
+
+function weekdayIndexInTimezone(date: Date, timeZone: string): number {
+  const label = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    weekday: "short",
+  }).format(date);
+  const index = WEEKDAY_SHORT.indexOf(label as (typeof WEEKDAY_SHORT)[number]);
+  return index >= 0 ? index : 0;
 }
 
-export function dateKeysBetween(start: string, end: string): string[] {
+/** Reference instant on a civil date in the given timezone (stable for payroll math). */
+export function dateKeyToReferenceInstant(dateKey: string, timeZone: string): Date {
+  const [year, month, day] = dateKey.split("-").map(Number);
+  const probe = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
+  for (let hour = -18; hour <= 18; hour++) {
+    const candidate = new Date(probe.getTime() + hour * 3600_000);
+    if (toDateKeyInTimezone(candidate, timeZone) === dateKey) {
+      return candidate;
+    }
+  }
+  return probe;
+}
+
+export function addDateKeysInTimezone(
+  dateKey: string,
+  deltaDays: number,
+  timeZone: string,
+): string {
+  if (deltaDays === 0) return dateKey;
+  let current = dateKey;
+  const step = deltaDays > 0 ? 1 : -1;
+  for (let i = 0; i < Math.abs(deltaDays); i++) {
+    let probe = dateKeyToReferenceInstant(current, timeZone);
+    probe = new Date(probe.getTime() + step * 20 * 3600_000);
+    while (toDateKeyInTimezone(probe, timeZone) === current) {
+      probe = new Date(probe.getTime() + step * 3600_000);
+    }
+    current = toDateKeyInTimezone(probe, timeZone);
+  }
+  return current;
+}
+
+/** Monday-start workweek key (YYYY-MM-DD Monday) in the payroll timezone. */
+export function mondayWorkweekStartKey(
+  dateKey: string,
+  timeZone: string = STAFF_PAYROLL_WORKWEEK_TIMEZONE,
+): string {
+  const ref = dateKeyToReferenceInstant(dateKey, timeZone);
+  const dow = weekdayIndexInTimezone(ref, timeZone);
+  const daysFromMonday = dow === 0 ? 6 : dow - 1;
+  return addDateKeysInTimezone(dateKey, -daysFromMonday, timeZone);
+}
+
+export function dateKeysBetween(
+  start: string,
+  end: string,
+  timeZone: string = STAFF_PAYROLL_WORKWEEK_TIMEZONE,
+): string[] {
   const keys: string[] = [];
-  const cursor = new Date(`${start}T12:00:00Z`);
-  const endDate = new Date(`${end}T12:00:00Z`);
-  while (cursor <= endDate) {
-    keys.push(cursor.toISOString().slice(0, 10));
-    cursor.setUTCDate(cursor.getUTCDate() + 1);
+  let cursor = start;
+  while (cursor <= end) {
+    keys.push(cursor);
+    cursor = addDateKeysInTimezone(cursor, 1, timeZone);
   }
   return keys;
 }
 
-/** Workweek Monday keys that overlap a pay-period date range (plus adjacent weeks for boundary shifts). */
-export function workweekStartsTouchingPeriod(periodStart: string, periodEnd: string): string[] {
+/** Workweek Monday keys overlapping a pay period (plus adjacent weeks for boundary shifts). */
+export function workweekStartsTouchingPeriod(
+  periodStart: string,
+  periodEnd: string,
+  timeZone: string = STAFF_PAYROLL_WORKWEEK_TIMEZONE,
+): string[] {
   const keys = new Set<string>();
-  for (const day of dateKeysBetween(periodStart, periodEnd)) {
-    keys.add(mondayWorkweekStartKey(day));
+  for (const day of dateKeysBetween(periodStart, periodEnd, timeZone)) {
+    keys.add(mondayWorkweekStartKey(day, timeZone));
   }
-  const before = new Date(`${periodStart}T12:00:00Z`);
-  before.setUTCDate(before.getUTCDate() - 7);
-  keys.add(mondayWorkweekStartKey(before.toISOString().slice(0, 10)));
-  const after = new Date(`${periodEnd}T12:00:00Z`);
-  after.setUTCDate(after.getUTCDate() + 7);
-  keys.add(mondayWorkweekStartKey(after.toISOString().slice(0, 10)));
+  keys.add(addDateKeysInTimezone(periodStart, -7, timeZone));
+  keys.add(mondayWorkweekStartKey(addDateKeysInTimezone(periodStart, -7, timeZone), timeZone));
+  keys.add(addDateKeysInTimezone(periodEnd, 7, timeZone));
+  keys.add(mondayWorkweekStartKey(addDateKeysInTimezone(periodEnd, 7, timeZone), timeZone));
   return [...keys].sort();
 }
 
-function addDaysUtc(dateKey: string, days: number): string {
-  const d = new Date(`${dateKey}T12:00:00Z`);
-  d.setUTCDate(d.getUTCDate() + days);
-  return d.toISOString().slice(0, 10);
+/** End of workweek (Sunday civil date) for a Monday-start key. */
+export function workweekEndKey(
+  mondayStart: string,
+  timeZone: string = STAFF_PAYROLL_WORKWEEK_TIMEZONE,
+): string {
+  return addDateKeysInTimezone(mondayStart, 6, timeZone);
 }
 
-/** End of workweek (Sunday) for a Monday-start key. */
-export function workweekEndKey(mondayStart: string): string {
-  return addDaysUtc(mondayStart, 6);
+function startOfCivilDayInstant(dateKey: string, timeZone: string): Date {
+  let probe = dateKeyToReferenceInstant(dateKey, timeZone);
+  probe = new Date(probe.getTime() - 20 * 3600_000);
+  while (toDateKeyInTimezone(probe, timeZone) !== dateKey) {
+    probe = new Date(probe.getTime() + 3600_000);
+  }
+  while (toDateKeyInTimezone(new Date(probe.getTime() - 60_000), timeZone) === dateKey) {
+    probe = new Date(probe.getTime() - 60_000);
+  }
+  return probe;
+}
+
+/** Instant when the next Monday-start workweek begins (exclusive end of the current workweek). */
+function workweekEndExclusiveInstant(mondayStart: string, timeZone: string): Date {
+  const nextMondayKey = addDateKeysInTimezone(mondayStart, 7, timeZone);
+  return startOfCivilDayInstant(nextMondayKey, timeZone);
 }
 
 /**
- * Split shift minutes across Monday–Sunday workweeks (UTC civil boundaries on date keys).
+ * Split shift minutes across Monday–Sunday workweeks in the payroll timezone.
  */
 export function allocateShiftMinutesByWorkweek(
   startedAt: string,
   endedAt: string,
+  timeZone: string = STAFF_PAYROLL_WORKWEEK_TIMEZONE,
 ): Map<string, number> {
   const start = new Date(startedAt);
   const end = new Date(endedAt);
@@ -62,15 +131,18 @@ export function allocateShiftMinutesByWorkweek(
   const allocations = new Map<string, number>();
   let cursor = start;
   while (cursor < end) {
-    const dateKey = cursor.toISOString().slice(0, 10);
-    const weekStart = mondayWorkweekStartKey(dateKey);
-    const weekEnd = new Date(`${workweekEndKey(weekStart)}T23:59:59.999Z`);
-    const sliceEnd = end < weekEnd ? end : weekEnd;
-    const minutes = minutesBetween(cursor, sliceEnd);
+    const dateKey = toDateKeyInTimezone(cursor, timeZone);
+    const weekStart = mondayWorkweekStartKey(dateKey, timeZone);
+    const weekEndExclusive = workweekEndExclusiveInstant(weekStart, timeZone);
+    const sliceEndExclusive = end < weekEndExclusive ? end : weekEndExclusive;
+    const minutes = minutesBetween(cursor, sliceEndExclusive);
     if (minutes > 0) {
       allocations.set(weekStart, (allocations.get(weekStart) ?? 0) + minutes);
     }
-    cursor = new Date(sliceEnd.getTime() + 1);
+    if (sliceEndExclusive.getTime() >= end.getTime()) {
+      break;
+    }
+    cursor = sliceEndExclusive;
   }
   return allocations;
 }
@@ -87,16 +159,20 @@ export function evaluateWorkweekOvertimeWarnings(input: {
   weeklyHoursLimit: number;
   workweekStarts: string[];
   minutesByWorkweek: Map<string, number>;
+  timeZone?: string;
 }): WorkweekOvertimeWarning[] {
+  const timeZone = input.timeZone ?? STAFF_PAYROLL_WORKWEEK_TIMEZONE;
   const limitMinutes = Math.round(input.weeklyHoursLimit * 60);
-  return input.workweekStarts.map((workweekStart) => {
-    const totalMinutes = input.minutesByWorkweek.get(workweekStart) ?? 0;
-    return {
-      workweekStart,
-      workweekEnd: workweekEndKey(workweekStart),
-      totalMinutes,
-      weeklyLimitMinutes: limitMinutes,
-      exceedsLimit: totalMinutes > limitMinutes,
-    };
-  }).filter((row) => row.totalMinutes > 0);
+  return input.workweekStarts
+    .map((workweekStart) => {
+      const totalMinutes = input.minutesByWorkweek.get(workweekStart) ?? 0;
+      return {
+        workweekStart,
+        workweekEnd: workweekEndKey(workweekStart, timeZone),
+        totalMinutes,
+        weeklyLimitMinutes: limitMinutes,
+        exceedsLimit: totalMinutes > limitMinutes,
+      };
+    })
+    .filter((row) => row.totalMinutes > 0);
 }
