@@ -126,6 +126,7 @@ import * as migration_20261021_staff_documents_release_b_phase1 from './20261021
 import * as migration_20261022_staff_sales_development_phase1 from './20261022_staff_sales_development_phase1';
 import * as migration_20261023_staff_time_b1_foundation from './20261023_staff_time_b1_foundation';
 import * as migration_20261024_staff_document_template_operator_workflow from './20261024_staff_document_template_operator_workflow';
+import * as migration_20261025_staff_pay_period_reviews from './20261025_staff_pay_period_reviews';
 
 export const migrations = [
   {
@@ -826,5 +827,11 @@ export const migrations = [
     up: migration_20261024_staff_document_template_operator_workflow.up,
     down: migration_20261024_staff_document_template_operator_workflow.down,
     name: '20261024_staff_document_template_operator_workflow',
+  },
+  {
+    // V1-STAFF-004 — pay period review workflow (not payroll execution).
+    up: migration_20261025_staff_pay_period_reviews.up,
+    down: migration_20261025_staff_pay_period_reviews.down,
+    name: '20261025_staff_pay_period_reviews',
   },
 ];

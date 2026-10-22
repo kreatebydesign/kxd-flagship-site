@@ -15,6 +15,7 @@ import {
 import { KxdButton, KxdIntelligenceBadge, KxdIntelligenceMark, KxdPage } from "@/components/os";
 import type { StaffOversightData } from "@/lib/staff/types";
 import { StaffTimeOperatorCorrectionsCard } from "./StaffTimeOperatorCorrectionsCard";
+import { StaffPayPeriodReviewCard } from "./StaffPayPeriodReviewCard";
 import { WORK_PRIORITY_LABELS } from "@/lib/work/constants";
 import { workViewHref } from "@/lib/work/planning/client";
 
@@ -279,11 +280,13 @@ function HelpRequestRow({
 export interface StaffOversightScreenProps {
   data: StaffOversightData;
   canCorrectStaffTime?: boolean;
+  canReviewPayroll?: boolean;
 }
 
 export function StaffOversightScreen({
   data,
   canCorrectStaffTime = false,
+  canReviewPayroll = false,
 }: StaffOversightScreenProps) {
   const router = useRouter();
   const [previewingId, setPreviewingId] = useState<number | null>(null);
@@ -786,6 +789,10 @@ export function StaffOversightScreen({
             onError={setError}
             onDone={() => router.refresh()}
           />
+        ) : null}
+
+        {canReviewPayroll ? (
+          <StaffPayPeriodReviewCard onMessage={setMessage} onError={setError} />
         ) : null}
 
         <section style={{ marginTop: "1.5rem" }} aria-label="End-of-day notes">
