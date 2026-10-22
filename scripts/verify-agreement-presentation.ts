@@ -64,6 +64,7 @@ const agreementCss = readFileSync(
 assert.match(agreementCss, /html\[data-theme="dark"\].*kxd-agreement-doc-card/);
 assert.match(agreementCss, /color-scheme:\s*light/);
 assert.match(agreementCss, /kxd-agreement-doc-island/);
+assert.match(agreementCss, /\.kxd-agreement-doc__title/);
 ok("Agreement CSS isolates ivory document from OS dark theme");
 
 const documentHash =
