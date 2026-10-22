@@ -72,12 +72,34 @@ export function resolveStaffTemplateQaProvenance(
   return false;
 }
 
+/** Operator draft placeholder before full agreement text is loaded (e.g. Tyler template #2). */
+export const STAFF_DOCUMENT_TEMPLATE_BODY_PLACEHOLDER = "PENDING_BODY_LOAD";
+
+export function staffDocumentTemplateBodyIsIncomplete(body: string | null | undefined): boolean {
+  const trimmed = String(body ?? "").trim();
+  if (!trimmed) return true;
+  if (trimmed === STAFF_DOCUMENT_TEMPLATE_BODY_PLACEHOLDER) return true;
+  if (trimmed.includes(STAFF_DOCUMENT_TEMPLATE_BODY_PLACEHOLDER)) return true;
+  return false;
+}
+
+export function assertStaffTemplateBodyReadyForLegalReview(input: {
+  body?: string | null;
+}): void {
+  if (staffDocumentTemplateBodyIsIncomplete(input.body)) {
+    throw new Error(
+      "Template body is incomplete or still a placeholder. Save the full agreement text before submitting for legal review.",
+    );
+  }
+}
+
 export function assertStaffTemplateMayEnterLegalReview(input: StaffTemplateProvenanceInput): void {
   if (resolveStaffTemplateQaProvenance(input)) {
     throw new Error(
       "QA sample templates cannot be submitted for legal review. Create a real template without sample markers.",
     );
   }
+  assertStaffTemplateBodyReadyForLegalReview({ body: input.body });
 }
 
 export function assertStaffTemplateMayApproveForUse(input: StaffTemplateProvenanceInput): void {

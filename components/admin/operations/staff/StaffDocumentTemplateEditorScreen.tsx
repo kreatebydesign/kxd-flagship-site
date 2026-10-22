@@ -1,13 +1,14 @@
 "use client";
 
+import "@/design-system/agreement/kxd-agreement-document.css";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { AgreementDocumentBody } from "@/components/agreement/AgreementDocumentBody";
 import { KxdAgreementDocument } from "@/components/agreement/KxdAgreementDocument";
 import { OperationsPageHero } from "@/components/admin/operations/shared/OperationsPageHero";
 import { OperationsShell } from "@/components/admin/operations/shared/OperationsShell";
-import { OpsCard, OpsSectionHead, OpsStatusBadge } from "@/components/admin/operations/shared/OpsBriefing";
+import { OpsCard, OpsStatusBadge } from "@/components/admin/operations/shared/OpsBriefing";
 import { KxdButton, KxdPage } from "@/components/os";
 import {
   operatorStaffDocumentTemplateNewPath,
@@ -17,6 +18,7 @@ import {
   staffDocumentKindOperatorLabel,
   staffDocumentTemplateStatusLabel,
 } from "@/lib/staff-documents/display";
+import { staffDocumentTemplateBodyIsIncomplete } from "@/lib/staff-documents/template-provenance";
 import {
   STAFF_DOCUMENT_DEFAULT_LEGAL_ENTITY,
   STAFF_DOCUMENT_OPERATOR_TEMPLATE_KINDS,
@@ -29,6 +31,46 @@ function previewEyebrow(kind: StaffDocumentKind, signingMode: string): string {
   if (signingMode === "dual-signature") return "Staff agreement";
   if (kind === "staff-policy") return "Information security policy";
   return "Staff policy";
+}
+
+type DraftSnapshot = {
+  title: string;
+  body: string;
+  kind: StaffDocumentKind;
+  legalEntityName: string;
+};
+
+function snapshotFromTemplate(
+  template: StaffDocumentTemplateOperatorDetail | undefined,
+): DraftSnapshot {
+  return {
+    title: template?.title ?? "",
+    body: template?.body ?? "",
+    kind: template?.kind ?? "confidentiality-nda",
+    legalEntityName: template?.legalEntityName ?? STAFF_DOCUMENT_DEFAULT_LEGAL_ENTITY,
+  };
+}
+
+function formatSavedAt(iso: string | undefined): string | null {
+  if (!iso) return null;
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+function snapshotsEqual(a: DraftSnapshot, b: DraftSnapshot): boolean {
+  return (
+    a.title === b.title &&
+    a.body === b.body &&
+    a.kind === b.kind &&
+    a.legalEntityName === b.legalEntityName
+  );
 }
 
 export function StaffDocumentTemplateEditorScreen(props: {
@@ -45,17 +87,13 @@ export function StaffDocumentTemplateEditorScreen(props: {
   const [legalEntityName, setLegalEntityName] = useState(
     initial?.legalEntityName ?? STAFF_DOCUMENT_DEFAULT_LEGAL_ENTITY,
   );
+  const [savedBaseline, setSavedBaseline] = useState<DraftSnapshot>(() =>
+    snapshotFromTemplate(initial),
+  );
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(true);
-
-  useEffect(() => {
-    if (!initial) return;
-    setTitle(initial.title);
-    setBody(initial.body);
-    setKind(initial.kind);
-    setLegalEntityName(initial.legalEntityName);
-  }, [initial]);
+  const [saveFlash, setSaveFlash] = useState(false);
 
   const signingMode = useMemo(() => {
     if (
@@ -71,9 +109,31 @@ export function StaffDocumentTemplateEditorScreen(props: {
   const editable = props.mode === "create" || Boolean(initial?.editable);
   const status = initial?.status ?? "draft";
 
+  const currentSnapshot = useMemo(
+    (): DraftSnapshot => ({ title, body, kind, legalEntityName }),
+    [title, body, kind, legalEntityName],
+  );
+
+  const isDirty = props.mode === "create" || !snapshotsEqual(currentSnapshot, savedBaseline);
+  const bodyIncomplete = staffDocumentTemplateBodyIsIncomplete(body);
+  const displayTitle =
+    title.trim() ||
+    (props.mode === "create" ? "New document template" : "Untitled template");
+
+  const lastSavedLabel = useMemo(() => {
+    if (props.mode === "create") {
+      return isDirty ? "Not saved yet" : null;
+    }
+    if (isDirty) return "Unsaved changes";
+    if (saveFlash) return "Draft saved";
+    const at = formatSavedAt(initial?.updatedAt);
+    return at ? `Saved ${at}` : "Draft saved";
+  }, [props.mode, isDirty, saveFlash, initial?.updatedAt]);
+
   async function saveDraft() {
     setBusy("save");
     setError(null);
+    setSaveFlash(false);
     try {
       if (props.mode === "create") {
         const res = await fetch("/api/admin/staff/documents/operator/templates", {
@@ -97,6 +157,8 @@ export function StaffDocumentTemplateEditorScreen(props: {
       );
       const data = (await res.json()) as { success?: boolean; error?: string };
       if (!res.ok || !data.success) throw new Error(data.error ?? "Failed.");
+      setSavedBaseline(currentSnapshot);
+      setSaveFlash(true);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Save failed.");
@@ -107,6 +169,14 @@ export function StaffDocumentTemplateEditorScreen(props: {
 
   async function transitionStatus(next: StaffDocumentTemplateStatus) {
     if (!initial) return;
+    if (next === "legal-review" && (isDirty || bodyIncomplete)) {
+      setError(
+        isDirty
+          ? "Save draft before submitting for legal review."
+          : "Replace the placeholder body with the full agreement text, then save draft.",
+      );
+      return;
+    }
     setBusy(next);
     setError(null);
     try {
@@ -194,12 +264,27 @@ export function StaffDocumentTemplateEditorScreen(props: {
           ? "default"
           : "default";
 
+  const showWorkflow = Boolean(initial && !initial.qaProvenance);
+  const canSubmitLegalReview =
+    showWorkflow &&
+    status === "draft" &&
+    editable &&
+    !isDirty &&
+    !bodyIncomplete &&
+    !busy;
+
+  const saveStateClass = isDirty
+    ? "kxd-os-staff-docs-template-editor__save-state kxd-os-staff-docs-template-editor__save-state--dirty"
+    : saveFlash
+      ? "kxd-os-staff-docs-template-editor__save-state kxd-os-staff-docs-template-editor__save-state--ok"
+      : "kxd-os-staff-docs-template-editor__save-state";
+
   return (
     <OperationsShell activeId="staff" variant="full">
       <KxdPage className="kxd-os-page--ops kxd-os-page--staff-documents-operator">
         <OperationsPageHero
           eyebrow="Staff oversight"
-          title={props.mode === "create" ? "New document template" : initial?.title ?? "Template"}
+          title="Document template"
           lead="Draft counsel-approved employee documents. Submit for legal review before approval. Approved templates are immutable — create a new version to change content."
         />
 
@@ -209,105 +294,52 @@ export function StaffDocumentTemplateEditorScreen(props: {
           </p>
         ) : null}
 
-        {initial ? (
-          <OpsCard className="kxd-os-ops-card-padding kxd-os-staff-docs-operator__detail-card">
-            <div className="kxd-os-ops-list-row__head" style={{ marginBottom: "0.75rem" }}>
-              <OpsStatusBadge
-                label={staffDocumentTemplateStatusLabel(status)}
-                variant={statusVariant}
-              />
-              <span className="kxd-os-meta">
-                v{initial.version} · {staffDocumentKindOperatorLabel(initial.kind)}
-              </span>
-            </div>
-            <dl className="kxd-os-staff-docs-template-meta">
-              <div>
-                <dt>Content hash</dt>
-                <dd className="kxd-os-meta">{initial.contentHash}</dd>
-              </div>
-              {initial.createdBy ? (
-                <div>
-                  <dt>Created by</dt>
-                  <dd>{initial.createdBy}</dd>
-                </div>
-              ) : null}
-              {initial.legalReviewSubmittedAt ? (
-                <div>
-                  <dt>Legal review submitted</dt>
-                  <dd>
-                    {initial.legalReviewSubmittedAt}
-                    {initial.legalReviewSubmittedBy
-                      ? ` · ${initial.legalReviewSubmittedBy}`
-                      : ""}
-                  </dd>
-                </div>
-              ) : null}
-              {initial.approvedAt ? (
-                <div>
-                  <dt>Approved</dt>
-                  <dd>
-                    {initial.approvedAt}
+        <div className="kxd-os-staff-docs-template-editor">
+          <header className="kxd-os-staff-docs-template-editor__doc-header">
+            <div>
+              <h2 className="kxd-os-staff-docs-template-editor__doc-title">{displayTitle}</h2>
+              <div className="kxd-os-staff-docs-template-editor__doc-meta">
+                <OpsStatusBadge
+                  label={staffDocumentTemplateStatusLabel(status)}
+                  variant={statusVariant}
+                />
+                <span className="kxd-os-staff-docs-template-editor__doc-meta-item">
+                  {staffDocumentKindOperatorLabel(kind)}
+                </span>
+                <span className="kxd-os-staff-docs-template-editor__doc-meta-item">
+                  Version {initial?.version ?? 1}
+                </span>
+                <span
+                  className="kxd-os-staff-docs-template-editor__doc-meta-item kxd-os-staff-docs-template-editor__doc-meta-item--entity"
+                >
+                  {legalEntityName}
+                </span>
+                {status === "legal-review" && initial?.legalReviewSubmittedAt ? (
+                  <span className="kxd-os-staff-docs-template-editor__doc-meta-item">
+                    In review since {formatSavedAt(initial.legalReviewSubmittedAt)}
+                  </span>
+                ) : null}
+                {status === "approved-for-use" && initial?.approvedAt ? (
+                  <span className="kxd-os-staff-docs-template-editor__doc-meta-item">
+                    Approved {formatSavedAt(initial.approvedAt)}
                     {initial.approvedBy ? ` · ${initial.approvedBy}` : ""}
-                  </dd>
-                </div>
-              ) : null}
-            </dl>
-          </OpsCard>
-        ) : null}
+                  </span>
+                ) : null}
+              </div>
+            </div>
+          </header>
 
-        <section className="kxd-os-staff-docs-operator__section" aria-label="Template fields">
-          <OpsSectionHead label="Template content" />
-          <OpsCard className="kxd-os-ops-card-padding">
-            <label className="kxd-os-field kxd-os-staff-docs-operator__field">
-              <span className="kxd-os-field__label">Document type</span>
-              <select
-                className="kxd-os-input"
-                value={kind}
-                disabled={!editable}
-                onChange={(e) => setKind(e.target.value as StaffDocumentKind)}
-              >
-                {STAFF_DOCUMENT_OPERATOR_TEMPLATE_KINDS.map((k) => (
-                  <option key={k} value={k}>
-                    {staffDocumentKindOperatorLabel(k)}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="kxd-os-field kxd-os-staff-docs-operator__field">
-              <span className="kxd-os-field__label">Title</span>
-              <input
-                className="kxd-os-input"
-                value={title}
-                disabled={!editable}
-                onChange={(e) => setTitle(e.target.value)}
-              />
-            </label>
-            <label className="kxd-os-field kxd-os-staff-docs-operator__field">
-              <span className="kxd-os-field__label">Legal entity</span>
-              <input
-                className="kxd-os-input"
-                value={legalEntityName}
-                disabled={!editable}
-                onChange={(e) => setLegalEntityName(e.target.value)}
-              />
-            </label>
-            <label className="kxd-os-field" style={{ display: "block", marginTop: "1rem" }}>
-              <span className="kxd-os-field__label">Document body</span>
-              <textarea
-                className="kxd-os-input"
-                rows={16}
-                style={{ width: "100%", maxWidth: "48rem", fontFamily: "inherit" }}
-                value={body}
-                disabled={!editable}
-                onChange={(e) => setBody(e.target.value)}
-              />
-            </label>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", marginTop: "1rem" }}>
+          <div className="kxd-os-staff-docs-template-editor__workflow-bar" aria-label="Document actions">
+            <p className={saveStateClass} role="status" aria-live="polite">
+              {lastSavedLabel ?? (props.mode === "edit" ? "Draft" : "")}
+              {bodyIncomplete && editable ? " · Body incomplete" : null}
+            </p>
+            <div className="kxd-os-staff-docs-template-editor__actions">
               {editable ? (
                 <KxdButton
                   type="button"
                   variant="primary"
-                  disabled={busy === "save"}
+                  disabled={busy === "save" || !isDirty}
                   onClick={() => void saveDraft()}
                 >
                   Save draft
@@ -324,104 +356,205 @@ export function StaffDocumentTemplateEditorScreen(props: {
               <KxdButton
                 type="button"
                 variant="secondary"
-                disabled={Boolean(busy) || !title || !body}
+                disabled={Boolean(busy) || !title.trim() || bodyIncomplete}
                 onClick={() => void downloadPreviewPdf()}
               >
-                Download PDF preview
+                Download PDF
               </KxdButton>
-            </div>
-          </OpsCard>
-        </section>
 
-        {showPreview && title && body ? (
-          <section className="kxd-os-staff-docs-operator__section" aria-label="Preview">
-            <OpsSectionHead label="KXD Classic preview" />
-            <div className="kxd-agreement-doc-island">
-              <KxdAgreementDocument
-                variant="workspace"
-                eyebrow={previewEyebrow(kind, signingMode)}
-                showDocumentFooter
-                documentFooterLabel="Template preview · Not executed"
-              >
-                <h1 className="kxd-agreement-doc__title">{title}</h1>
-                <p className="kxd-os-meta" style={{ marginBottom: "1rem" }}>
-                  {legalEntityName} · Version {initial?.version ?? 1}
-                </p>
-                <AgreementDocumentBody text={body} variant="workspace" />
-              </KxdAgreementDocument>
-            </div>
-          </section>
-        ) : null}
-
-        {initial && !initial.qaProvenance ? (
-          <section className="kxd-os-staff-docs-operator__section" aria-label="Workflow">
-            <OpsSectionHead label="Review workflow" />
-            <OpsCard className="kxd-os-ops-card-padding">
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
-                {status === "draft" ? (
-                  <KxdButton
-                    type="button"
-                    variant="primary"
-                    disabled={Boolean(busy)}
-                    onClick={() => void transitionStatus("legal-review")}
-                  >
-                    Submit for legal review
-                  </KxdButton>
-                ) : null}
-                {status === "legal-review" ? (
-                  <>
-                    <KxdButton
-                      type="button"
-                      variant="primary"
-                      disabled={Boolean(busy)}
-                      onClick={() => void transitionStatus("approved-for-use")}
-                    >
-                      Approve for use
-                    </KxdButton>
+              {showWorkflow ? (
+                <>
+                  <span className="kxd-os-staff-docs-template-editor__actions-divider" aria-hidden />
+                  {status === "draft" ? (
                     <KxdButton
                       type="button"
                       variant="secondary"
-                      disabled={Boolean(busy)}
-                      onClick={() => void transitionStatus("draft")}
+                      disabled={!canSubmitLegalReview}
+                      onClick={() => void transitionStatus("legal-review")}
                     >
-                      Return to draft
+                      Submit for legal review
                     </KxdButton>
-                  </>
-                ) : null}
-                {status === "approved-for-use" ? (
-                  <>
-                    <KxdButton
-                      type="button"
-                      variant="secondary"
-                      disabled={Boolean(busy)}
-                      onClick={() => void createNewVersion()}
-                    >
-                      Create new draft version
-                    </KxdButton>
+                  ) : null}
+                  {status === "legal-review" ? (
+                    <>
+                      <KxdButton
+                        type="button"
+                        variant="primary"
+                        disabled={Boolean(busy)}
+                        onClick={() => void transitionStatus("approved-for-use")}
+                      >
+                        Approve for use
+                      </KxdButton>
+                      <KxdButton
+                        type="button"
+                        variant="secondary"
+                        disabled={Boolean(busy)}
+                        onClick={() => void transitionStatus("draft")}
+                      >
+                        Return to draft
+                      </KxdButton>
+                    </>
+                  ) : null}
+                  {status === "approved-for-use" ? (
+                    <>
+                      <KxdButton
+                        type="button"
+                        variant="secondary"
+                        disabled={Boolean(busy)}
+                        onClick={() => void createNewVersion()}
+                      >
+                        New draft version
+                      </KxdButton>
+                      <KxdButton
+                        type="button"
+                        variant="secondary"
+                        disabled={Boolean(busy)}
+                        onClick={() => void transitionStatus("retired")}
+                      >
+                        Retire template
+                      </KxdButton>
+                    </>
+                  ) : null}
+                  {status === "draft" || status === "legal-review" ? (
                     <KxdButton
                       type="button"
                       variant="secondary"
                       disabled={Boolean(busy)}
                       onClick={() => void transitionStatus("retired")}
                     >
-                      Retire template
+                      Retire
                     </KxdButton>
-                  </>
-                ) : null}
-                {status === "draft" || status === "legal-review" ? (
-                  <KxdButton
-                    type="button"
-                    variant="secondary"
-                    disabled={Boolean(busy)}
-                    onClick={() => void transitionStatus("retired")}
+                  ) : null}
+                </>
+              ) : null}
+            </div>
+          </div>
+
+          {status === "draft" && bodyIncomplete && editable ? (
+            <p className="kxd-os-staff-docs-template-editor__hint" role="note">
+              The agreement body must contain the full legal text before legal review. Placeholder
+              content cannot be submitted.
+            </p>
+          ) : null}
+
+          <div className="kxd-os-staff-docs-template-editor__grid">
+            <OpsCard className="kxd-os-ops-card-padding" aria-label="Template content">
+              <h3 className="kxd-os-staff-docs-template-editor__panel-title">Edit document</h3>
+              <div className="kxd-os-staff-docs-template-editor__fields-grid">
+                <label
+                  className="kxd-os-field kxd-os-staff-docs-template-editor__field kxd-os-staff-docs-template-editor__field--kind"
+                >
+                  <span className="kxd-os-field__label">Document type</span>
+                  <select
+                    className="kxd-os-input"
+                    value={kind}
+                    disabled={!editable}
+                    onChange={(e) => setKind(e.target.value as StaffDocumentKind)}
                   >
-                    Retire draft
-                  </KxdButton>
-                ) : null}
+                    {STAFF_DOCUMENT_OPERATOR_TEMPLATE_KINDS.map((k) => (
+                      <option key={k} value={k}>
+                        {staffDocumentKindOperatorLabel(k)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="kxd-os-field kxd-os-staff-docs-template-editor__field">
+                  <span className="kxd-os-field__label">Title</span>
+                  <input
+                    className="kxd-os-input"
+                    value={title}
+                    disabled={!editable}
+                    onChange={(e) => setTitle(e.target.value)}
+                  />
+                </label>
+                <label className="kxd-os-field kxd-os-staff-docs-template-editor__field">
+                  <span className="kxd-os-field__label">Legal entity</span>
+                  <input
+                    className="kxd-os-input"
+                    value={legalEntityName}
+                    disabled={!editable}
+                    onChange={(e) => setLegalEntityName(e.target.value)}
+                  />
+                </label>
               </div>
+              <label className="kxd-os-staff-docs-template-editor__body-label">
+                <span className="kxd-os-field__label">Agreement body</span>
+                <textarea
+                  className="kxd-os-input kxd-os-staff-docs-template-editor__body"
+                  value={body}
+                  disabled={!editable}
+                  spellCheck={false}
+                  onChange={(e) => setBody(e.target.value)}
+                />
+              </label>
+
+              {initial ? (
+                <details className="kxd-os-staff-docs-template-editor__audit">
+                  <summary>Record details</summary>
+                  <dl className="kxd-os-staff-docs-template-meta">
+                    <div>
+                      <dt>Content hash</dt>
+                      <dd className="kxd-os-meta">{initial.contentHash || "—"}</dd>
+                    </div>
+                    {initial.createdBy ? (
+                      <div>
+                        <dt>Created by</dt>
+                        <dd>{initial.createdBy}</dd>
+                      </div>
+                    ) : null}
+                    {initial.legalReviewSubmittedAt ? (
+                      <div>
+                        <dt>Legal review submitted</dt>
+                        <dd>
+                          {initial.legalReviewSubmittedAt}
+                          {initial.legalReviewSubmittedBy
+                            ? ` · ${initial.legalReviewSubmittedBy}`
+                            : ""}
+                        </dd>
+                      </div>
+                    ) : null}
+                  </dl>
+                </details>
+              ) : null}
             </OpsCard>
-          </section>
-        ) : null}
+
+            {showPreview && title.trim() && body ? (
+              <div
+                className="kxd-os-staff-docs-template-editor__preview-sticky"
+                aria-label="KXD Classic preview"
+              >
+                <h3 className="kxd-os-staff-docs-template-editor__panel-title">KXD Classic preview</h3>
+                <div
+                  className="kxd-os-staff-docs-template-editor__preview-doc kxd-agreement-doc-card kxd-agreement-doc-island"
+                  tabIndex={0}
+                  role="document"
+                  aria-label="Agreement preview"
+                >
+                  <div className="kxd-agreement-doc-card__header">
+                    <p className="kxd-agreement-doc-card__title">Document preview</p>
+                    <p className="kxd-agreement-doc-card__hint">
+                      Not executed · Ivory surface matches PDF
+                    </p>
+                  </div>
+                  <div className="kxd-agreement-doc-card__scroll">
+                    <KxdAgreementDocument
+                      variant="workspace"
+                      eyebrow={previewEyebrow(kind, signingMode)}
+                      showDocumentFooter
+                      documentFooterLabel="Template preview · Not executed"
+                    >
+                      <h1 className="kxd-agreement-doc__title">{title}</h1>
+                      <p className="kxd-agreement-doc__meta-line">
+                        {legalEntityName} · Version {initial?.version ?? 1}
+                      </p>
+                      <AgreementDocumentBody text={body} variant="workspace" />
+                    </KxdAgreementDocument>
+                  </div>
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </div>
 
         <p className="kxd-os-meta" style={{ marginTop: "1.25rem" }}>
           <Link href={operatorStaffDocumentsPath()} className="kxd-os-link-quiet">
