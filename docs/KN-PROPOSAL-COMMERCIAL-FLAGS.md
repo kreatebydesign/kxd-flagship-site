@@ -17,9 +17,9 @@
 
 3. **Responsive interaction expectations (Option B)** — Deliverables reference “approved interaction demonstrations” without defining which templates include motion, carousels, or filter UI beyond Find Your Filter (excluded). Clarify in agreement if IT expects parity with legacy behaviors.
 
-4. **Code repository and staging (Option B)** — Internal notes still flag unresolved staging URL/hosting and repository access model. Proposal language requires **IT approval of handoff format** but does not specify who hosts staging, access controls, or retention after handoff.
+4. **Code repository and staging (Option B)** — Client copy now ties staging URL, repository structure, and handoff mechanics to the **signed agreement** and IT kickoff confirmation. **Matt decision:** who hosts private staging, credential model, and post-handoff retention.
 
-5. **IT handoff support duration** — “Rolling handoffs” and phased packages are described; hours of synchronous IT support, office hours, or post-handoff defect clarification are not bounded.
+5. **IT handoff support duration** — Rolling milestone handoffs are described; **Matt decision:** whether the agreement should cap synchronous IT walkthroughs or async-only support after each drop.
 
 6. **K&N feedback and approval windows** — Change-request language includes consolidated feedback and review windows per stage, but **calendar day counts** for each gate are not numerically specified in the proposal (only roadmap target dates).
 

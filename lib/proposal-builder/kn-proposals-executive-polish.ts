@@ -10,7 +10,7 @@ const EXCLUSIONS =
   "CMS or production CMS integration, Magento or other platform integration, back-end development, production testing, production deployment, hosting, Find Your Filter, and third-party fees unless explicitly listed in the signed agreement.";
 
 const ENTERPRISE_ASSUMPTIONS =
-  "Approximately 38 pages are organized into reusable template families; the definitive template-family inventory and acceptance criteria will be confirmed during discovery and documented in the final agreement. Find Your Filter is excluded.";
+  "Approximately 38 pages are organized into reusable template families. The signed agreement establishes program scope boundaries before kickoff; discovery then finalizes the detailed template-family inventory and acceptance criteria within those boundaries, with written approval and change control. Find Your Filter is excluded.";
 
 const ENTERPRISE_EXCLUSIONS =
   "Production CMS/Magento integration, back-end development, production testing, deployment, hosting, and Find Your Filter.";
@@ -35,16 +35,16 @@ function roadmapPhaseDescription(parts: {
 const ROADMAP_BY_PHASE_TITLE: Record<string, string> = {
   "Roadmap Phase 1": roadmapPhaseDescription({
     kxd:
-      "Discovery, template-family architecture for the ~38-page program, and two distinct creative directions.",
+      "Discovery within signed scope boundaries, template-family architecture for the ~38-page program, and two distinct creative directions.",
     kn: "Stakeholders, content, brand assets, and consolidated feedback through the designated project owner.",
     it: "Optional technical input on handoff and integration constraints.",
-    gate: "Both creative directions presented and reviewed.",
+    gate: "Both creative directions presented; draft template-family inventory for discovery review.",
   }),
   "Roadmap Phase 2": roadmapPhaseDescription({
     kxd: "Refine the selected direction and prepare the direction approval package.",
     kn: "Select one direction and approve in writing.",
-    it: "Review direction pack and template-family plan.",
-    gate: "Creative direction approved.",
+    it: "Review direction pack and proposed template-family inventory.",
+    gate: "Creative direction approved; template-family inventory confirmed within agreed scope boundaries.",
   }),
   "Roadmap Phase 3": roadmapPhaseDescription({
     kxd:
@@ -104,11 +104,18 @@ function patchScopeGroups(doc: ProposalDocument): ProposalDocument {
 }
 
 function patchSharedTerms(doc: ProposalDocument): ProposalDocument {
+  const t = doc.terms;
   return {
     ...doc,
     terms: {
-      ...doc.terms,
+      ...t,
       exclusions: EXCLUSIONS,
+      contractRequiredDisclosure:
+        "The signed agreement establishes scope boundaries, responsibilities, and payment terms before kickoff. Billable work begins after the agreement is signed and the kickoff payment is received.",
+      timelineAssumptions:
+        "The signed agreement establishes scope boundaries before kickoff. Discovery finalizes the detailed template-family inventory and acceptance criteria within those boundaries, with written approval and change control as described in the agreement. The delivery roadmap in this proposal is the phase schedule after kickoff. Dates assume timely kickoff, K&N content and brand assets, consolidated feedback from K&N's designated project owner, and approvals within agreed review windows. If kickoff or approvals shift, dates will be re-baselined in writing. K&N IT owns production integration, testing, and deployment; this schedule does not represent a production launch date.",
+      changeRequestLanguage:
+        "Each major approval stage includes up to two consolidated revision rounds, submitted by K&N's designated project owner within the review window for that stage. Feedback must be consolidated; fragmented or conflicting direction may reset the review clock. Additions or changes outside the agreed template-family inventory, approved scope boundaries, substantial redesigns beyond agreed revisions, additional pages, new functionality, or new template families require written change approval and may adjust investment and schedule.",
     },
   };
 }
@@ -178,18 +185,42 @@ export function patchKnProposalExecutivePolish(
         return {
           ...group,
           overview:
-            "Interactive front-end reference and organized source for K&N IT to implement; not production CMS/Magento integration, production testing, deployment, or hosting.",
+            "Interactive front-end reference and organized source for K&N IT to implement. Staging access, repository structure, and handoff mechanics are defined in the signed agreement and confirmed with IT at kickoff—not production CMS/Magento integration, production testing, deployment, or hosting.",
           deliverables: group.deliverables.map((item) => {
-            if (item.title.includes("staging environment")) {
-              return {
-                ...item,
-                title: item.title.replace(
-                  "private staging environment for review",
-                  "private staging URL for review",
-                ),
-              };
+            switch (item.sortOrder) {
+              case 2:
+                return {
+                  ...item,
+                  title:
+                    "Complete ~38-page creative scope expressed as reusable page templates and components within agreed scope boundaries",
+                };
+              case 3:
+                return {
+                  ...item,
+                  title:
+                    "Proposed Next.js/React interactive front-end reference (stack and repository format subject to K&N IT approval; not CMS/Magento integration)",
+                };
+              case 4:
+                return {
+                  ...item,
+                  title:
+                    "Responsive behavior and in-scope interaction demonstrations for agreed templates (documented in specifications; not production CMS features)",
+                };
+              case 5:
+                return {
+                  ...item,
+                  title:
+                    "Organized source repository, documentation, and private non-production staging URL for review (access model per agreement)",
+                };
+              case 6:
+                return {
+                  ...item,
+                  title:
+                    "Rolling repository handoffs at roadmap milestones; K&N IT approves technical handoff format before the first code drop",
+                };
+              default:
+                return item;
             }
-            return item;
           }),
         };
       }

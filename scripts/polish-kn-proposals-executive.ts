@@ -28,6 +28,14 @@ import { calculateProposalTotals, totalsToLegacyFields } from "../lib/proposal-b
 const CONFIRM = "kn-proposals-11-12";
 const LEAD_ID = 24;
 const CACHE_DIR = resolve(process.cwd(), ".cache");
+const MATT_DELIVERABLE_DIR = resolve(
+  process.cwd(),
+  "deliverables/kn-proposals-for-matt-approval",
+);
+const MATT_FINAL_PDF_NAMES: Record<11 | 12, string> = {
+  11: "KXD-P-2026-0009-KN-Option-A-Enterprise-UX-UI-FINAL.pdf",
+  12: "KXD-P-2026-0010-KN-Option-B-Interactive-Code-First-FINAL.pdf",
+};
 
 const FORBIDDEN_CLIENT = [
   "internal — not for client",
@@ -46,12 +54,13 @@ function assertForbiddenClientCopy(text: string): void {
 }
 
 async function exportArtifacts(
-  id: number,
+  id: 11 | 12,
   proposalNumber: string,
   normalized: ReturnType<typeof normalizeProposalDocument>,
   before: Record<string, unknown>,
 ): Promise<void> {
   mkdirSync(CACHE_DIR, { recursive: true });
+  mkdirSync(MATT_DELIVERABLE_DIR, { recursive: true });
   const canonical = buildCanonicalProposal({
     id,
     proposalNumber,
@@ -72,10 +81,25 @@ async function exportArtifacts(
   const htmlPath = resolve(CACHE_DIR, `kn-proposal-${id}-polished-preview.html`);
   writeFileSync(htmlPath, html, "utf8");
 
+  const { resolveKxdReportLogoAsset } = await import("../lib/kxd-report-engine/logos.ts");
+  const logo = resolveKxdReportLogoAsset();
+
   const { renderProposalPdf } = await import("../lib/proposal-builder/export-pdf.tsx");
   const { buffer, filename } = await renderProposalPdf(canonical);
   const pdfPath = resolve(CACHE_DIR, filename);
   writeFileSync(pdfPath, buffer);
+
+  const mattPdfPath = resolve(MATT_DELIVERABLE_DIR, MATT_FINAL_PDF_NAMES[id]);
+  writeFileSync(mattPdfPath, buffer);
+  const mattHtmlPath = resolve(
+    MATT_DELIVERABLE_DIR,
+    MATT_FINAL_PDF_NAMES[id].replace(/\.pdf$/i, ".html"),
+  );
+  const htmlForMatt = html.replace(
+    'src="/migrated-assets/brand/kxd-logo-transparent.png"',
+    'src="../../public/migrated-assets/brand/kxd-logo-transparent.png"',
+  );
+  writeFileSync(mattHtmlPath, htmlForMatt, "utf8");
 
   console.log(
     JSON.stringify({
@@ -83,8 +107,12 @@ async function exportArtifacts(
       proposalNumber,
       htmlPath,
       pdfPath,
+      mattPdfPath,
+      mattHtmlPath,
       htmlChars: html.length,
       pdfBytes: buffer.length,
+      kxdLogoPresent: logo.exists,
+      kxdLogoPath: logo.absolutePath,
     }),
   );
 }
