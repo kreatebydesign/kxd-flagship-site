@@ -73,6 +73,7 @@ assert.equal(
 const opsLayout = read("app/admin/operations/layout.tsx");
 assert.match(opsLayout, /trustedLayoutReturnPath/);
 assert.match(opsLayout, /requirePayloadAdminPage/);
+assert.match(opsLayout, /resolveRequestPathname/);
 assert.doesNotMatch(opsLayout, /requireStaffAwarePage\(pathname \|\| "\/admin\/operations"\)/);
 
 const staffLayout = read("app/admin/operations/staff/layout.tsx");

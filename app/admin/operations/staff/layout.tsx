@@ -12,8 +12,8 @@ export default async function StaffOperationsLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { headers } = await import("next/headers");
-  const pathname = (await headers()).get("x-kxd-pathname")?.trim() || "";
+  const { resolveRequestPathname } = await import("@/lib/staff/guard");
+  const pathname = (await resolveRequestPathname("")).trim();
   const returnPath = trustedLayoutReturnPath(
     pathname,
     STAFF_LAYOUT_FALLBACK,

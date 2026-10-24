@@ -27,9 +27,10 @@ export default async function OperationsLayout({
   children: React.ReactNode;
 }) {
   const { requirePayloadAdminPage } = await import("@/lib/admin/auth");
-  const { requireStaffAwarePage } = await import("@/lib/staff/guard");
-  const { headers } = await import("next/headers");
-  const pathname = (await headers()).get("x-kxd-pathname")?.trim() || "";
+  const { requireStaffAwarePage, resolveRequestPathname } = await import(
+    "@/lib/staff/guard"
+  );
+  const pathname = (await resolveRequestPathname("")).trim();
   if (!pathname) {
     // Nested RSC layout runs may omit middleware pathname headers. Child layouts
     // and pages enforce staff allowlists with canonical paths — auth only here.

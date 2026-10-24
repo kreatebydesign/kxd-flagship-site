@@ -23,6 +23,7 @@ import {
 import type { StaffCapability } from "./types";
 import { getStaffPreviewSession } from "./preview";
 import { staffMayAccessClient } from "./client-assignments";
+import { resolveStaffAwarePathname } from "./aware-pathname";
 
 export async function resolveRequestPathname(
   fallback = STAFF_HOME_PATH,
@@ -46,9 +47,7 @@ export async function requireStaffAwarePage(returnPath?: string) {
   if (!actor) return user;
 
   const rawPath = await resolveRequestPathname("");
-  // Pages pass the canonical path for login redirect; reuse it when middleware
-  // headers are missing in nested RSC (observed on some production requests).
-  const pathname = rawPath || returnPath || "";
+  const pathname = resolveStaffAwarePathname(rawPath, returnPath);
   const landing = staffLandingPathForActor(actor);
 
   if (isRestrictedStaff(actor)) {
