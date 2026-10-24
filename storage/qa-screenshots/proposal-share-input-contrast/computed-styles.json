@@ -1,0 +1,132 @@
+{
+  "dark": [
+    {
+      "selector": ".mark-sent-select",
+      "color": "rgb(245, 245, 247)",
+      "backgroundColor": "rgb(58, 58, 60)",
+      "opacity": "1",
+      "webkitTextFill": "rgb(245, 245, 247)",
+      "placeholder": "n/a",
+      "ratio": 10.423018387399242
+    },
+    {
+      "selector": ".mark-sent-date",
+      "color": "rgb(245, 245, 247)",
+      "backgroundColor": "rgb(58, 58, 60)",
+      "opacity": "1",
+      "webkitTextFill": "rgb(245, 245, 247)",
+      "placeholder": "n/a",
+      "ratio": 10.423018387399242
+    },
+    {
+      "selector": ".mark-sent-recipient",
+      "color": "rgb(245, 245, 247)",
+      "backgroundColor": "rgb(58, 58, 60)",
+      "opacity": "1",
+      "webkitTextFill": "rgb(245, 245, 247)",
+      "placeholder": "rgb(142, 142, 147)",
+      "ratio": 10.423018387399242
+    },
+    {
+      "selector": ".mark-sent-note",
+      "color": "rgb(245, 245, 247)",
+      "backgroundColor": "rgb(58, 58, 60)",
+      "opacity": "1",
+      "webkitTextFill": "rgb(245, 245, 247)",
+      "placeholder": "rgb(142, 142, 147)",
+      "ratio": 10.423018387399242
+    },
+    {
+      "selector": ".identity-field",
+      "color": "rgb(245, 245, 247)",
+      "backgroundColor": "rgb(58, 58, 60)",
+      "opacity": "1",
+      "webkitTextFill": "rgb(245, 245, 247)",
+      "placeholder": "n/a",
+      "ratio": 10.423018387399242
+    },
+    {
+      "selector": ".identity-field-disabled",
+      "color": "rgb(245, 245, 247)",
+      "backgroundColor": "rgb(58, 58, 60)",
+      "opacity": "1",
+      "webkitTextFill": "rgb(245, 245, 247)",
+      "placeholder": "n/a",
+      "ratio": 10.423018387399242
+    },
+    {
+      "selector": ".public-url",
+      "color": "rgb(245, 245, 247)",
+      "backgroundColor": "rgb(58, 58, 60)",
+      "opacity": "1",
+      "webkitTextFill": "rgb(245, 245, 247)",
+      "placeholder": "n/a",
+      "ratio": 10.423018387399242
+    }
+  ],
+  "light": [
+    {
+      "selector": ".mark-sent-select",
+      "color": "rgb(29, 29, 31)",
+      "backgroundColor": "rgb(250, 250, 252)",
+      "opacity": "1",
+      "webkitTextFill": "rgb(29, 29, 31)",
+      "placeholder": "n/a",
+      "ratio": 16.14450884918439
+    },
+    {
+      "selector": ".mark-sent-date",
+      "color": "rgb(29, 29, 31)",
+      "backgroundColor": "rgb(250, 250, 252)",
+      "opacity": "1",
+      "webkitTextFill": "rgb(29, 29, 31)",
+      "placeholder": "n/a",
+      "ratio": 16.14450884918439
+    },
+    {
+      "selector": ".mark-sent-recipient",
+      "color": "rgb(29, 29, 31)",
+      "backgroundColor": "rgb(250, 250, 252)",
+      "opacity": "1",
+      "webkitTextFill": "rgb(29, 29, 31)",
+      "placeholder": "rgb(134, 134, 139)",
+      "ratio": 16.14450884918439
+    },
+    {
+      "selector": ".mark-sent-note",
+      "color": "rgb(29, 29, 31)",
+      "backgroundColor": "rgb(250, 250, 252)",
+      "opacity": "1",
+      "webkitTextFill": "rgb(29, 29, 31)",
+      "placeholder": "rgb(134, 134, 139)",
+      "ratio": 16.14450884918439
+    },
+    {
+      "selector": ".identity-field",
+      "color": "rgb(29, 29, 31)",
+      "backgroundColor": "rgb(250, 250, 252)",
+      "opacity": "1",
+      "webkitTextFill": "rgb(29, 29, 31)",
+      "placeholder": "n/a",
+      "ratio": 16.14450884918439
+    },
+    {
+      "selector": ".identity-field-disabled",
+      "color": "rgb(29, 29, 31)",
+      "backgroundColor": "rgb(250, 250, 252)",
+      "opacity": "1",
+      "webkitTextFill": "rgb(29, 29, 31)",
+      "placeholder": "n/a",
+      "ratio": 16.14450884918439
+    },
+    {
+      "selector": ".public-url",
+      "color": "rgb(29, 29, 31)",
+      "backgroundColor": "rgb(250, 250, 252)",
+      "opacity": "1",
+      "webkitTextFill": "rgb(29, 29, 31)",
+      "placeholder": "n/a",
+      "ratio": 16.14450884918439
+    }
+  ]
+}

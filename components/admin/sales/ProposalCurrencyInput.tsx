@@ -9,13 +9,6 @@ import {
 
 const defaultStyle: CSSProperties = {
   width: "100%",
-  border: "1px solid var(--kxd-os-border-default)",
-  background: "var(--kxd-os-bg-elevated)",
-  color: "var(--kxd-os-text-primary)",
-  borderRadius: "var(--kxd-os-radius-sm)",
-  padding: "0.625rem 0.875rem",
-  font: "inherit",
-  lineHeight: 1.5,
 };
 
 /**
@@ -29,6 +22,7 @@ export function ProposalCurrencyInput({
   disabled,
   id,
   style,
+  className,
   "aria-label": ariaLabel,
 }: {
   cents: number;
@@ -36,6 +30,7 @@ export function ProposalCurrencyInput({
   disabled?: boolean;
   id?: string;
   style?: CSSProperties;
+  className?: string;
   "aria-label"?: string;
 }) {
   const [focused, setFocused] = useState(false);
@@ -61,6 +56,7 @@ export function ProposalCurrencyInput({
       spellCheck={false}
       disabled={disabled}
       aria-label={ariaLabel}
+      className={["kxd-os-input", className].filter(Boolean).join(" ")}
       style={{ ...defaultStyle, ...style }}
       value={focused ? draft : formatCents(cents)}
       onFocus={() => {

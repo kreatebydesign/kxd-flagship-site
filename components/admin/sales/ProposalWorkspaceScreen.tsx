@@ -75,16 +75,10 @@ const TEMPLATE_OPTIONS: Array<{ value: ProposalTemplateKind | ""; label: string 
   { value: "custom-professional-services", label: "Custom professional services" },
 ];
 
-const inputStyle: CSSProperties = {
-  width: "100%",
-  border: "1px solid var(--kxd-os-border-default)",
-  background: "var(--kxd-os-bg-elevated)",
-  color: "var(--kxd-os-text-primary)",
-  borderRadius: "var(--kxd-os-radius-sm)",
-  padding: "0.625rem 0.875rem",
-  font: "inherit",
-  lineHeight: 1.5,
-};
+/** OS form primitives — no inline paper/background (breaks dark-mode contrast). */
+const fieldInputClass = "kxd-os-input";
+const fieldSelectClass = "kxd-os-input kxd-os-select";
+const fieldTextareaClass = "kxd-os-input kxd-os-textarea";
 
 const labelStyle: CSSProperties = {
   display: "block",
@@ -838,7 +832,7 @@ export function ProposalWorkspaceScreen({
                   {mode === "create" ? (
                     <Field label="Template">
                       <select
-                        style={inputStyle}
+                        className={fieldSelectClass}
                         value={templateKind}
                         onChange={(e) => applyTemplate(e.target.value as ProposalTemplateKind | "")}
                       >
@@ -852,7 +846,7 @@ export function ProposalWorkspaceScreen({
                   ) : null}
                   <Field label="Proposal title">
                     <input
-                      style={inputStyle}
+                      className={fieldInputClass}
                       value={title}
                       disabled={!editable && mode === "edit"}
                       onChange={(e) => {
@@ -887,7 +881,7 @@ export function ProposalWorkspaceScreen({
                         </button>
                       </div>
                       <select
-                        style={inputStyle}
+                        className={fieldSelectClass}
                         value={leadId}
                         disabled={!editable && mode === "edit"}
                         aria-label="Primary prospect / lead"
@@ -926,7 +920,7 @@ export function ProposalWorkspaceScreen({
                     </div>
                     <Field label="Existing client (optional)">
                       <select
-                        style={inputStyle}
+                        className={fieldSelectClass}
                         value={clientId}
                         disabled={!editable && mode === "edit"}
                         onChange={(e) => {
@@ -967,7 +961,7 @@ export function ProposalWorkspaceScreen({
                           <input
                             id="prospect-org-name"
                             type="text"
-                            style={inputStyle}
+                            className={fieldInputClass}
                             value={prospectForm.companyName}
                             onChange={(e) =>
                               setProspectForm((f) => ({ ...f, companyName: e.target.value }))
@@ -979,7 +973,7 @@ export function ProposalWorkspaceScreen({
                           <input
                             id="prospect-contact-name"
                             type="text"
-                            style={inputStyle}
+                            className={fieldInputClass}
                             value={prospectForm.contactName}
                             onChange={(e) =>
                               setProspectForm((f) => ({ ...f, contactName: e.target.value }))
@@ -992,7 +986,7 @@ export function ProposalWorkspaceScreen({
                           <input
                             id="prospect-email"
                             type="email"
-                            style={inputStyle}
+                            className={fieldInputClass}
                             value={prospectForm.email}
                             onChange={(e) =>
                               setProspectForm((f) => ({ ...f, email: e.target.value }))
@@ -1005,7 +999,7 @@ export function ProposalWorkspaceScreen({
                             id="prospect-phone"
                             type="tel"
                             inputMode="tel"
-                            style={inputStyle}
+                            className={fieldInputClass}
                             value={prospectForm.phone}
                             onChange={(e) =>
                               setProspectForm((f) => ({
@@ -1021,7 +1015,7 @@ export function ProposalWorkspaceScreen({
                         <input
                           id="prospect-website"
                           type="url"
-                          style={inputStyle}
+                          className={fieldInputClass}
                           value={prospectForm.website}
                           onChange={(e) =>
                             setProspectForm((f) => ({ ...f, website: e.target.value }))
@@ -1032,7 +1026,8 @@ export function ProposalWorkspaceScreen({
                       <Field label="Internal notes (optional — never shared)" htmlFor="prospect-notes">
                         <textarea
                           id="prospect-notes"
-                          style={{ ...inputStyle, minHeight: 70 }}
+                          className={fieldTextareaClass}
+                          style={{ minHeight: 70 }}
                           value={prospectForm.notes}
                           onChange={(e) =>
                             setProspectForm((f) => ({ ...f, notes: e.target.value }))
@@ -1054,7 +1049,8 @@ export function ProposalWorkspaceScreen({
                   <Field label="Organizations / brands (one per line: Name | Brand)" htmlFor="proposal-orgs">
                     <textarea
                       id="proposal-orgs"
-                      style={{ ...inputStyle, minHeight: 90 }}
+                      className={fieldTextareaClass}
+                      style={{ minHeight: 90 }}
                       disabled={!editable && mode === "edit"}
                       value={document.organizations
                         .map((o) => (o.brand ? `${o.name} | ${o.brand}` : o.name))
@@ -1112,7 +1108,7 @@ export function ProposalWorkspaceScreen({
                           <input
                             id="proposal-primary-name"
                             type="text"
-                            style={inputStyle}
+                            className={fieldInputClass}
                             disabled={!editable && mode === "edit"}
                             value={existing?.name ?? ""}
                             onChange={(e) => patchPrimary({ name: e.target.value })}
@@ -1124,7 +1120,7 @@ export function ProposalWorkspaceScreen({
                           <input
                             id="proposal-primary-title"
                             type="text"
-                            style={inputStyle}
+                            className={fieldInputClass}
                             disabled={!editable && mode === "edit"}
                             value={existing?.title ?? ""}
                             onChange={(e) => patchPrimary({ title: e.target.value })}
@@ -1135,7 +1131,7 @@ export function ProposalWorkspaceScreen({
                           <input
                             id="proposal-primary-email"
                             type="email"
-                            style={inputStyle}
+                            className={fieldInputClass}
                             disabled={!editable && mode === "edit"}
                             value={existing?.email ?? ""}
                             onChange={(e) => patchPrimary({ email: e.target.value })}
@@ -1147,7 +1143,7 @@ export function ProposalWorkspaceScreen({
                             id="proposal-primary-phone"
                             type="tel"
                             inputMode="tel"
-                            style={inputStyle}
+                            className={fieldInputClass}
                             disabled={!editable && mode === "edit"}
                             value={existing?.phone ?? ""}
                             onChange={(e) =>
@@ -1163,7 +1159,7 @@ export function ProposalWorkspaceScreen({
                     <Field label="Proposal date">
                       <input
                         type="date"
-                        style={inputStyle}
+                        className={fieldInputClass}
                         value={proposalDate}
                         disabled={!editable && mode === "edit"}
                         onChange={(e) => {
@@ -1175,7 +1171,7 @@ export function ProposalWorkspaceScreen({
                     <Field label="Expiration date">
                       <input
                         type="date"
-                        style={inputStyle}
+                        className={fieldInputClass}
                         value={expiresAt}
                         disabled={!editable && mode === "edit"}
                         onChange={(e) => {
@@ -1186,7 +1182,7 @@ export function ProposalWorkspaceScreen({
                     </Field>
                     <Field label="Internal owner">
                       <input
-                        style={inputStyle}
+                        className={fieldInputClass}
                         value={internalOwner}
                         disabled={!editable && mode === "edit"}
                         onChange={(e) => {
@@ -1198,7 +1194,8 @@ export function ProposalWorkspaceScreen({
                   </div>
                   <Field label="Internal notes (never shared)">
                     <textarea
-                      style={{ ...inputStyle, minHeight: 90 }}
+                      className={fieldTextareaClass}
+                      style={{ minHeight: 90 }}
                       disabled={!editable && mode === "edit"}
                       value={document.internal.internalNotes ?? ""}
                       onChange={(e) =>
@@ -1211,7 +1208,8 @@ export function ProposalWorkspaceScreen({
                   </Field>
                   <Field label="Client-facing introduction">
                     <textarea
-                      style={{ ...inputStyle, minHeight: 90 }}
+                      className={fieldTextareaClass}
+                      style={{ minHeight: 90 }}
                       disabled={!editable && mode === "edit"}
                       value={document.executive.clientFacingIntro ?? ""}
                       onChange={(e) =>
@@ -1229,7 +1227,7 @@ export function ProposalWorkspaceScreen({
                     <Field label="Optional consultation booking link" htmlFor="booking-url">
                       <input
                         id="booking-url"
-                        style={inputStyle}
+                        className={fieldInputClass}
                         disabled={!editable && mode === "edit"}
                         placeholder="https://"
                         value={document.scheduleCallUrl ?? ""}
@@ -1263,7 +1261,8 @@ export function ProposalWorkspaceScreen({
                   ).map(([key, label]) => (
                     <Field key={key} label={label}>
                       <textarea
-                        style={{ ...inputStyle, minHeight: 100 }}
+                        className={fieldTextareaClass}
+                        style={{ minHeight: 100 }}
                         disabled={!editable && mode === "edit"}
                         value={document.executive[key] ?? ""}
                         onChange={(e) =>
@@ -1304,7 +1303,7 @@ export function ProposalWorkspaceScreen({
                     >
                       <Field label={`Scope group ${index + 1} title`}>
                         <input
-                          style={inputStyle}
+                          className={fieldInputClass}
                           disabled={!editable && mode === "edit"}
                           value={group.title}
                           onChange={(e) => {
@@ -1316,7 +1315,7 @@ export function ProposalWorkspaceScreen({
                       </Field>
                       <Field label="Organization / brand label">
                         <input
-                          style={inputStyle}
+                          className={fieldInputClass}
                           disabled={!editable && mode === "edit"}
                           value={group.organizationName ?? ""}
                           onChange={(e) => {
@@ -1328,7 +1327,8 @@ export function ProposalWorkspaceScreen({
                       </Field>
                       <Field label="Overview">
                         <textarea
-                          style={{ ...inputStyle, minHeight: 80 }}
+                          className={fieldTextareaClass}
+                          style={{ minHeight: 80 }}
                           disabled={!editable && mode === "edit"}
                           value={group.overview ?? ""}
                           onChange={(e) => {
@@ -1340,7 +1340,8 @@ export function ProposalWorkspaceScreen({
                       </Field>
                       <Field label="Deliverables (one per line)">
                         <textarea
-                          style={{ ...inputStyle, minHeight: 100 }}
+                          className={fieldTextareaClass}
+                        style={{ minHeight: 100 }}
                           disabled={!editable && mode === "edit"}
                           value={group.deliverables.map((d) => d.title).join("\n")}
                           onChange={(e) => {
@@ -1358,7 +1359,7 @@ export function ProposalWorkspaceScreen({
                       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
                         <Field label="Timeline">
                           <input
-                            style={inputStyle}
+                            className={fieldInputClass}
                             disabled={!editable && mode === "edit"}
                             value={group.estimatedTimeline ?? ""}
                             onChange={(e) => {
@@ -1370,7 +1371,7 @@ export function ProposalWorkspaceScreen({
                         </Field>
                         <Field label="Scope type">
                           <select
-                            style={inputStyle}
+                            className={fieldSelectClass}
                             disabled={!editable && mode === "edit"}
                             value={group.inclusion}
                             onChange={(e) => {
@@ -1390,7 +1391,8 @@ export function ProposalWorkspaceScreen({
                       </div>
                       <Field label="Exclusions">
                         <textarea
-                          style={{ ...inputStyle, minHeight: 70 }}
+                          className={fieldTextareaClass}
+                          style={{ minHeight: 70 }}
                           disabled={!editable && mode === "edit"}
                           value={group.exclusions ?? ""}
                           onChange={(e) => {
@@ -1451,7 +1453,7 @@ export function ProposalWorkspaceScreen({
                     >
                       <Field label="Item">
                         <input
-                          style={inputStyle}
+                          className={fieldInputClass}
                           disabled={!editable && mode === "edit"}
                           value={line.title}
                           onChange={(e) => {
@@ -1463,7 +1465,7 @@ export function ProposalWorkspaceScreen({
                       </Field>
                       <Field label="Billing">
                         <select
-                          style={inputStyle}
+                          className={fieldSelectClass}
                           disabled={!editable && mode === "edit"}
                           value={line.cadence}
                           onChange={(e) => {
@@ -1485,7 +1487,7 @@ export function ProposalWorkspaceScreen({
                         <input
                           type="text"
                           inputMode="decimal"
-                          style={inputStyle}
+                          className={fieldInputClass}
                           disabled={!editable && mode === "edit"}
                           value={String(line.quantity)}
                           onChange={(e) => {
@@ -1514,7 +1516,7 @@ export function ProposalWorkspaceScreen({
                       </Field>
                       <Field label="Pricing Type">
                         <select
-                          style={inputStyle}
+                          className={fieldSelectClass}
                           disabled={!editable && mode === "edit"}
                           value={line.inclusion}
                           onChange={(e) => {
@@ -1547,7 +1549,7 @@ export function ProposalWorkspaceScreen({
                     >
                       <Field label="Credit / adjustment">
                         <input
-                          style={inputStyle}
+                          className={fieldInputClass}
                           disabled={!editable && mode === "edit"}
                           value={credit.label}
                           onChange={(e) => {
@@ -1559,7 +1561,7 @@ export function ProposalWorkspaceScreen({
                       </Field>
                       <Field label="Credit type">
                         <select
-                          style={inputStyle}
+                          className={fieldSelectClass}
                           disabled={!editable && mode === "edit"}
                           value={credit.kind}
                           onChange={(e) => {
@@ -1580,7 +1582,7 @@ export function ProposalWorkspaceScreen({
                       </Field>
                       <Field label="Applies to">
                         <select
-                          style={inputStyle}
+                          className={fieldSelectClass}
                           disabled={!editable && mode === "edit"}
                           value={credit.appliesTo}
                           onChange={(e) => {
@@ -1674,7 +1676,7 @@ export function ProposalWorkspaceScreen({
                       >
                         <Field label="Label">
                           <input
-                            style={inputStyle}
+                            className={fieldInputClass}
                             disabled={!editable && mode === "edit"}
                             value={item.label}
                             onChange={(e) => {
@@ -1686,7 +1688,7 @@ export function ProposalWorkspaceScreen({
                         </Field>
                         <Field label="When due">
                           <select
-                            style={inputStyle}
+                            className={fieldSelectClass}
                             disabled={!editable && mode === "edit"}
                             value={item.due}
                             onChange={(e) => {
@@ -1722,7 +1724,7 @@ export function ProposalWorkspaceScreen({
                   </div>
                   <Field label="Allow client to choose optional items before accepting">
                     <select
-                      style={inputStyle}
+                      className={fieldSelectClass}
                       disabled={!editable && mode === "edit"}
                       value={document.options.clientCanSelect ? "yes" : "no"}
                       onChange={(e) =>
@@ -1742,7 +1744,8 @@ export function ProposalWorkspaceScreen({
                   </Field>
                   <Field label="Internal pricing notes (never shared)">
                     <textarea
-                      style={{ ...inputStyle, minHeight: 70 }}
+                      className={fieldTextareaClass}
+                          style={{ minHeight: 70 }}
                       disabled={!editable && mode === "edit"}
                       value={document.internal.marginNotes ?? ""}
                       onChange={(e) =>
@@ -1777,7 +1780,8 @@ export function ProposalWorkspaceScreen({
                   ).map(([key, label]) => (
                     <Field key={key} label={label}>
                       <textarea
-                        style={{ ...inputStyle, minHeight: 80 }}
+                        className={fieldTextareaClass}
+                          style={{ minHeight: 80 }}
                         disabled={!editable && mode === "edit"}
                         value={document.terms[key] ?? ""}
                         onChange={(e) =>
@@ -1989,7 +1993,7 @@ export function ProposalWorkspaceScreen({
                         </p>
                         <Field label="Delivery method">
                           <select
-                            style={inputStyle}
+                            className={fieldSelectClass}
                             value={deliveryMethod}
                             onChange={(e) =>
                               setDeliveryMethod(
@@ -2007,21 +2011,22 @@ export function ProposalWorkspaceScreen({
                         <Field label="Delivered date">
                           <input
                             type="date"
-                            style={inputStyle}
+                            className={fieldInputClass}
                             value={deliveryAt}
                             onChange={(e) => setDeliveryAt(e.target.value)}
                           />
                         </Field>
                         <Field label="Recipient (optional)">
                           <input
-                            style={inputStyle}
+                            className={fieldInputClass}
                             value={deliveryRecipient}
                             onChange={(e) => setDeliveryRecipient(e.target.value)}
                           />
                         </Field>
                         <Field label="Operator note (optional)">
                           <textarea
-                            style={{ ...inputStyle, minHeight: 72 }}
+                            className={fieldTextareaClass}
+                            style={{ minHeight: 72 }}
                             value={deliveryNote}
                             onChange={(e) => setDeliveryNote(e.target.value)}
                           />
@@ -2095,7 +2100,8 @@ export function ProposalWorkspaceScreen({
                       </p>
                       <Field label="Contract body">
                         <textarea
-                          style={{ ...inputStyle, minHeight: 320, fontFamily: "ui-monospace, monospace" }}
+                          className={fieldTextareaClass}
+                          style={{ minHeight: 320, fontFamily: "ui-monospace, monospace" }}
                           value={contractBody}
                           onChange={(e) => setContractBody(e.target.value)}
                         />
