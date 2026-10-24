@@ -249,6 +249,7 @@ Tracked IDs for Tyler payroll readiness and operator data integrity. **Productio
 | `KXD-OS-ARCHITECTURE.md` | Systems, folders, pipeline |
 | `KXD-OS-PHILOSOPHY.md` | Vision and principles |
 | `KXD-OS-ROADMAP.md` | This document — build progress |
+| `KXD-OS-SECURITY-REGISTER.md` | Security incidents, severity, evidence, rotation plans (no secrets) |
 | `KXD-OS-PRODUCT-ROADMAP.md` | 5–10 year product eras |
 | `KXD-OS-CONSTITUTION.md` | KXD Experience Constitution v2.0 — sole permanent experience law |
 | `PHASE-2-EXPERIENCE-REFINEMENT.md` | Experience Refinement Phase 2 (Batch A complete) |
