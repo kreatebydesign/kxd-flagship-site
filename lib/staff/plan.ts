@@ -30,6 +30,7 @@ import {
   toLocalDateKey,
   type StaffPriorityBand,
 } from "./prioritize";
+import { staffAssignmentScheduleDisplay } from "./assignment-schedule";
 
 function workHref(workId: number): string {
   return `/admin/operations/staff/work/${workId}`;
@@ -53,12 +54,11 @@ function clientOrCategory(work: WorkListItem): string {
   return work.category.replace(/-/g, " ");
 }
 
-function dueState(work: WorkListItem, now = new Date()): string {
-  if (isWorkOverdue(work, now)) return "Overdue";
-  if (isDueToday(work, now)) return "Due today";
-  if (isPlannedForToday(work, now)) return "Planned today";
-  if (work.dueDate) return `Due ${work.dueDate.slice(0, 10)}`;
-  return "No due date";
+function planScheduleLabel(work: WorkListItem, now = new Date()): string {
+  const schedule = staffAssignmentScheduleDisplay(work, now);
+  return schedule.secondary
+    ? `${schedule.primary} · ${schedule.secondary}`
+    : schedule.primary;
 }
 
 function resolvePlanState(
@@ -154,7 +154,7 @@ function toWorkPlanItem(
       ? "A prepared packet ready for review — not a final external action."
       : "A clear update or completion within your authority.",
     estimatedMinutes: estimateMinutes(work),
-    dueState: dueState(work, now),
+    dueState: planScheduleLabel(work, now),
     currentStatus: work.status,
     planState,
     canAct: !waiting && work.status !== "blocked",
@@ -175,7 +175,7 @@ function toWorkPlanItem(
     evidence: [
       band != null ? `Priority: ${bandLabel(band)}` : "Awaiting Approval",
       `Status: ${work.status}`,
-      dueState(work, now),
+      planScheduleLabel(work, now),
       `Plan state: ${planStateLabel(planState)}`,
     ],
   };

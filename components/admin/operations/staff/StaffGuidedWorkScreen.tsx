@@ -32,13 +32,6 @@ function displayStatus(status: string): string {
   return WORK_STATUS_LABELS[key] ?? status;
 }
 
-function formatDue(dueDate: string | null): string | null {
-  if (!dueDate) return null;
-  const key = dueDate.slice(0, 10);
-  const date = new Date(`${key}T12:00:00`);
-  if (Number.isNaN(date.getTime())) return key;
-  return date.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
-}
 
 type ProgressSaveState = "idle" | "saving" | "saved" | "error";
 type ChecklistSaveState = "idle" | "saving" | "saved" | "error";
@@ -129,7 +122,6 @@ export function StaffGuidedWorkScreen({
   }, [acceptanceCriteriaItems]);
 
   const mutationsDisabled = readOnly || !canAct;
-  const dueLabel = formatDue(data.dueDate);
   const approverName = resolveAssignedApproverName({
     requiresApproval: data.requiresMattApproval,
   });
@@ -474,11 +466,16 @@ export function StaffGuidedWorkScreen({
             {data.clientLabel ? (
               <span className="kxd-os-staff-guided__meta-item">Client · {data.clientLabel}</span>
             ) : null}
-            {dueLabel ? (
-              <span className="kxd-os-staff-guided__meta-item">Due · {dueLabel}</span>
-            ) : (
-              <span className="kxd-os-meta kxd-os-staff-guided__meta-item">No due date</span>
-            )}
+            <span
+              className={`kxd-os-staff-guided__meta-item${
+                data.schedulePrimary === "Overdue" ? " kxd-os-staff-my-work__due--overdue" : ""
+              }`}
+            >
+              {data.schedulePrimary}
+            </span>
+            {data.scheduleSecondary ? (
+              <span className="kxd-os-meta kxd-os-staff-guided__meta-item">{data.scheduleSecondary}</span>
+            ) : null}
           </div>
 
           {data.requiresMattApproval ? (

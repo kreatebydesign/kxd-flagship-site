@@ -16,7 +16,8 @@ import {
 import { isWaitingOnMatt } from "./prioritize";
 import { isWorkSubmittedForReview } from "@/lib/work/list-enrichment";
 import { isWorkOverdue } from "@/lib/work/views";
-import type { StaffOversightData } from "./types";
+import type { StaffOversightData, StaffOversightOpenAssignment } from "./types";
+import { staffAssignmentScheduleDisplay } from "./assignment-schedule";
 import { loadStaffTimeOversightActiveShifts } from "@/lib/staff-time/shifts";
 import { staffWorkIntentLabel } from "@/lib/staff-time/intent";
 import type { StaffWorkIntentCategory } from "@/lib/staff-time/types";
@@ -37,6 +38,8 @@ export async function loadStaffOversight(): Promise<StaffOversightData> {
   const members: StaffOversightData["members"] = [];
   const draftsAwaitingApproval: StaffOversightData["draftsAwaitingApproval"] = [];
   const draftsSeen = new Set<number>();
+  const openAssignments: StaffOversightOpenAssignment[] = [];
+  const openAssignmentsSeen = new Set<number>();
 
   for (const doc of result.docs) {
     const memberActor = staffActorFromUser(doc);
@@ -70,6 +73,29 @@ export async function loadStaffOversight(): Promise<StaffOversightData> {
         priority: draft.priority,
         dueDate: draft.dueDate,
         deliverableProgress: draft.deliverableProgress ?? null,
+      });
+    }
+
+    for (const item of open) {
+      if (openAssignmentsSeen.has(item.id)) continue;
+      openAssignmentsSeen.add(item.id);
+      const schedule = staffAssignmentScheduleDisplay(item);
+      const clientLabel =
+        item.clientName && item.clientName !== "Internal"
+          ? item.clientName
+          : item.internalProject?.trim() || "Internal";
+      openAssignments.push({
+        workId: item.id,
+        title: item.title,
+        assigneeLabel: displayName,
+        assigneeUserId: userId,
+        clientLabel,
+        status: item.status,
+        schedulePrimary: schedule.primary,
+        scheduleSecondary: schedule.secondary,
+        isOverdue: schedule.isOverdue,
+        href: `/admin/work/${item.id}`,
+        staffHref: item.href,
       });
     }
 
@@ -189,8 +215,22 @@ export async function loadStaffOversight(): Promise<StaffOversightData> {
     activeTimeShifts = [];
   }
 
+  openAssignments.sort((a, b) => {
+    if (a.isOverdue !== b.isOverdue) return a.isOverdue ? -1 : 1;
+    const statusOrder = (s: string) => {
+      if (s === "review") return 0;
+      if (s === "blocked") return 1;
+      if (s === "in-progress") return 2;
+      return 3;
+    };
+    const sd = statusOrder(a.status) - statusOrder(b.status);
+    if (sd !== 0) return sd;
+    return a.title.localeCompare(b.title);
+  });
+
   return {
     members,
+    openAssignments: openAssignments.slice(0, 40),
     draftsAwaitingApproval,
     helpRequests,
     responsibilities,

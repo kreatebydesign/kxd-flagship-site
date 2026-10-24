@@ -17,6 +17,7 @@ import {
   staffMyWorkGroupLabel,
   type StaffMyWorkBoardColumnId,
 } from "@/lib/staff/my-work-board";
+import { staffAssignmentScheduleDisplay } from "@/lib/staff/assignment-schedule";
 import { workRequiresOperatorApproval } from "@/lib/staff/work-approval";
 import type { StaffMyWorkData } from "@/lib/staff/types";
 import type { WorkApprovalViewer } from "@/lib/staff/work-approval";
@@ -46,20 +47,8 @@ function priorityClass(priority: WorkPriority): string {
   return `kxd-os-staff-my-work__priority kxd-os-staff-my-work__priority--${priority}`;
 }
 
-function formatDueLabel(dueDate: string): string {
-  const key = dueDate.slice(0, 10);
-  const date = new Date(`${key}T12:00:00`);
-  if (Number.isNaN(date.getTime())) return `Due ${key}`;
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
-}
-
-function isOverdue(item: WorkListItem): boolean {
-  return Boolean(
-    item.dueDate &&
-      item.status !== "completed" &&
-      item.status !== "archived" &&
-      item.dueDate.slice(0, 10) < new Date().toISOString().slice(0, 10),
-  );
+function scheduleForItem(item: WorkListItem) {
+  return staffAssignmentScheduleDisplay(item);
 }
 
 function projectLabel(item: WorkListItem): { text: string; kind: "client" | "internal" } {
@@ -166,7 +155,7 @@ function WorkBoardCard({
   onStatusChange: (workId: number, status: WorkStatus, note?: string) => Promise<void>;
   busy: number | null;
 }) {
-  const overdue = isOverdue(item);
+  const schedule = scheduleForItem(item);
   const project = projectLabel(item);
   const approval = workRequiresOperatorApproval(item, viewer);
 
@@ -204,13 +193,16 @@ function WorkBoardCard({
         {approval ? (
           <OpsStatusBadge label="Approval required" variant="pending" />
         ) : null}
-        {item.dueDate ? (
-          <span
-            className={`kxd-os-staff-my-work__due${
-              overdue ? " kxd-os-staff-my-work__due--overdue" : ""
-            }`}
-          >
-            {formatDueLabel(item.dueDate)}
+        <span
+          className={`kxd-os-staff-my-work__due${
+            schedule.isOverdue ? " kxd-os-staff-my-work__due--overdue" : ""
+          }${!item.dueDate && !item.plannedForDate ? " kxd-os-staff-my-work__due--none" : ""}`}
+        >
+          {schedule.primary}
+        </span>
+        {schedule.secondary ? (
+          <span className="kxd-os-meta kxd-os-staff-my-work__due kxd-os-staff-my-work__due--planned">
+            {schedule.secondary}
           </span>
         ) : null}
       </div>
@@ -235,7 +227,7 @@ function WorkListRowItem({
   onStatusChange: (workId: number, status: WorkStatus, note?: string) => Promise<void>;
   busy: number | null;
 }) {
-  const overdue = isOverdue(item);
+  const schedule = scheduleForItem(item);
   const project = projectLabel(item);
   const approval = workRequiresOperatorApproval(item, viewer);
   const completed = item.status === "completed";
@@ -275,19 +267,18 @@ function WorkListRowItem({
           {approval ? (
             <OpsStatusBadge label="Approval" variant="pending" />
           ) : null}
-          {item.dueDate ? (
-            <span
-              className={`kxd-os-staff-my-work__due${
-                overdue ? " kxd-os-staff-my-work__due--overdue" : ""
-              }`}
-            >
-              {formatDueLabel(item.dueDate)}
+          <span
+            className={`kxd-os-staff-my-work__due${
+              schedule.isOverdue ? " kxd-os-staff-my-work__due--overdue" : ""
+            }${!item.dueDate && !item.plannedForDate ? " kxd-os-staff-my-work__due--none" : ""}`}
+          >
+            {schedule.primary}
+          </span>
+          {schedule.secondary ? (
+            <span className="kxd-os-meta kxd-os-staff-my-work__due kxd-os-staff-my-work__due--planned">
+              {schedule.secondary}
             </span>
-          ) : (
-            <span className="kxd-os-meta kxd-os-staff-my-work__due kxd-os-staff-my-work__due--none">
-              No due date
-            </span>
-          )}
+          ) : null}
         </div>
       </OpsListRow>
       {!completed ? (

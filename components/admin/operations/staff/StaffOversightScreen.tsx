@@ -16,7 +16,7 @@ import { KxdButton, KxdIntelligenceBadge, KxdIntelligenceMark, KxdPage } from "@
 import type { StaffOversightData } from "@/lib/staff/types";
 import { StaffTimeOperatorCorrectionsCard } from "./StaffTimeOperatorCorrectionsCard";
 import { StaffPayPeriodReviewCard } from "./StaffPayPeriodReviewCard";
-import { WORK_PRIORITY_LABELS } from "@/lib/work/constants";
+import { WORK_PRIORITY_LABELS, WORK_STATUS_LABELS } from "@/lib/work/constants";
 import { workViewHref } from "@/lib/work/planning/client";
 
 type HelpRequestRowData = StaffOversightData["helpRequests"][number];
@@ -707,6 +707,44 @@ export function StaffOversightScreen({
                       {row.requiresApproval ? " · approval required" : ""}
                     </p>
                   </div>
+                </div>
+              ))
+            )}
+          </OpsCard>
+        </section>
+
+        <section style={{ marginTop: "1.5rem" }} aria-label="Open assignments">
+          <OpsSectionHead label="Open assignments" count={data.openAssignments.length} />
+          <OpsCard>
+            {data.openAssignments.length === 0 ? (
+              <p className="kxd-os-meta">No open assigned work across the team.</p>
+            ) : (
+              data.openAssignments.map((row) => (
+                <div key={row.workId} className="kxd-os-ops-list-row">
+                  <OpsListRow href={row.href}>
+                    <div className="kxd-os-ops-list-row__main">
+                      <p className="kxd-os-ops-list-row__title">{row.title}</p>
+                      <p className="kxd-os-meta">
+                        {row.assigneeLabel}
+                        {" · "}
+                        {row.clientLabel}
+                        {" · "}
+                        {WORK_STATUS_LABELS[row.status] ?? row.status}
+                        {" · "}
+                        <span
+                          className={
+                            row.isOverdue ? "kxd-os-staff-my-work__due--overdue" : undefined
+                          }
+                        >
+                          {row.schedulePrimary}
+                        </span>
+                        {row.scheduleSecondary ? ` · ${row.scheduleSecondary}` : ""}
+                      </p>
+                    </div>
+                  </OpsListRow>
+                  <Link href={row.staffHref} className="kxd-os-link-quiet kxd-os-meta">
+                    Staff view
+                  </Link>
                 </div>
               ))
             )}
