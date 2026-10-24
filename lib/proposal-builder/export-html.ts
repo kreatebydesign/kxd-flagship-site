@@ -92,10 +92,13 @@ export function renderProposalPreviewHtml(proposal: CanonicalProposal): string {
   const scopeHtml = workstreams
     .map((workstream) => {
       const dels = workstream.deliverables
-        .map(
-          (item) =>
-            `<li><strong>${esc(item.title)}</strong>${item.description ? ` — ${esc(item.description)}` : ""}</li>`,
-        )
+        .map((item) => {
+          const detail = item.description?.trim();
+          const detailHtml = detail
+            ? `<div class="deliverable-detail">${esc(detail).replace(/\n/g, "<br>")}</div>`
+            : "";
+          return `<li><strong>${esc(item.title)}</strong>${detailHtml}</li>`;
+        })
         .join("");
       return `
         <section class="block scope">
@@ -252,6 +255,7 @@ export function renderProposalPreviewHtml(proposal: CanonicalProposal): string {
   ul.deliverables, ol.prose-list, ul.prose-list { padding-left: 0; list-style: none; line-height: 1.55; margin: 0 0 0.95rem; }
   ul.deliverables li, ol.prose-list li, ul.prose-list li { margin: 0 0 0.85rem; padding-left: 1.1rem; position: relative; max-width: 64ch; }
   ul.deliverables li::before, ul.prose-list li::before { content: "•"; position: absolute; left: 0; color: var(--gold-muted); }
+  .deliverable-detail { margin-top: 0.35rem; font-size: 0.92em; line-height: 1.5; color: var(--muted); max-width: 62ch; }
   ol.prose-list { counter-reset: step; }
   ol.prose-list li { counter-increment: step; }
   ol.prose-list li::before { content: counter(step) "."; position: absolute; left: 0; color: var(--gold-muted); font-family: system-ui, sans-serif; font-size: 0.9em; }
