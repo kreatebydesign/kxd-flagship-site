@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <title>Staff Documents UX Fixture</title>
+  <style>
+    body { margin: 0; background: #121110; font-family: system-ui, sans-serif; padding: 1rem 0 2rem; }
+    /* KXD branded agreement document — signing, operator review, print
+ * Always ivory + charcoal ink. Isolated from html[data-theme="dark"] OS chrome. */
+
+.kxd-agreement-doc-island,
+.kxd-agreement-doc-card {
+  --kxd-agreement-surface: #f7f3eb;
+  --kxd-agreement-surface-raised: #faf7f1;
+  --kxd-agreement-ink: #2c2824;
+  --kxd-agreement-ink-muted: #5c564f;
+  --kxd-agreement-gold: #c2aa72;
+  --kxd-agreement-gold-rule: rgba(194, 170, 114, 0.35);
+  color-scheme: light;
+  isolation: isolate;
+}
+
+/* Island used without card wrapper — still needs ivory surface on dark OS chrome */
+.kxd-agreement-doc-island:not(.kxd-agreement-doc-card) {
+  background-color: var(--kxd-agreement-surface) !important;
+  color: var(--kxd-agreement-ink) !important;
+  border-radius: 2px;
+  border: 1px solid rgba(194, 170, 114, 0.28);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+  padding: 1.15rem 1.35rem 1.5rem;
+  overflow: auto;
+  max-height: min(62vh, 560px);
+  -webkit-overflow-scrolling: touch;
+}
+
+.kxd-agreement-doc-card {
+  background-color: var(--kxd-agreement-surface) !important;
+  color: var(--kxd-agreement-ink) !important;
+  border-radius: 2px;
+  border: 1px solid rgba(194, 170, 114, 0.28);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+  margin-bottom: 1.75rem;
+  overflow: hidden;
+}
+
+.kxd-agreement-doc-card__header {
+  padding: 0.95rem 1.25rem 0.75rem;
+  border-bottom: 1px solid rgba(44, 40, 36, 0.08);
+  background-color: var(--kxd-agreement-surface-raised) !important;
+  color: var(--kxd-agreement-ink) !important;
+}
+
+.kxd-agreement-doc-card__title {
+  font-family: Georgia, "Iowan Old Style", Palatino, serif;
+  font-weight: 500;
+  font-size: 0.95rem;
+  margin: 0 0 0.25rem;
+  letter-spacing: 0.02em;
+  color: var(--kxd-agreement-ink) !important;
+}
+
+.kxd-agreement-doc-card__hint {
+  font-family: system-ui, sans-serif;
+  font-size: 0.72rem;
+  color: var(--kxd-agreement-ink-muted) !important;
+  margin: 0;
+}
+
+.kxd-agreement-doc-card__scroll {
+  max-height: min(62vh, 560px);
+  overflow: auto;
+  padding: 1.15rem 1.35rem 1.5rem;
+  -webkit-overflow-scrolling: touch;
+  outline-offset: 2px;
+  background-color: var(--kxd-agreement-surface) !important;
+  color: var(--kxd-agreement-ink) !important;
+}
+
+.kxd-agreement-doc {
+  color: var(--kxd-agreement-ink) !important;
+  font-family: Georgia, "Iowan Old Style", Palatino, serif;
+  font-size: 0.97rem;
+  line-height: 1.62;
+}
+
+.kxd-agreement-doc--workspace {
+  font-size: 0.97rem;
+}
+
+.kxd-agreement-doc__masthead {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--kxd-agreement-gold-rule);
+}
+
+.kxd-agreement-doc__logo {
+  width: 4.5rem;
+  height: auto;
+  display: block;
+}
+
+.kxd-agreement-doc__eyebrow {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--kxd-agreement-gold) !important;
+}
+
+.kxd-agreement-doc__body {
+  max-width: 36rem;
+  margin: 0 auto;
+}
+
+.kxd-agreement-doc__title {
+  margin: 0 0 0.65rem;
+  font-family: Georgia, "Iowan Old Style", Palatino, serif;
+  font-weight: 500;
+  font-size: clamp(1.3rem, 2.4vw, 1.62rem);
+  line-height: 1.28;
+  letter-spacing: 0.01em;
+  color: var(--kxd-agreement-ink) !important;
+}
+
+.kxd-agreement-doc__meta-line {
+  margin: 0 0 1rem;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--kxd-agreement-ink-muted) !important;
+}
+
+.kxd-agreement-doc__doc-footer {
+  margin-top: 1.75rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--kxd-agreement-gold-rule);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+  color: var(--kxd-agreement-ink-muted);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+.kxd-agreement-doc__doc-footer-mark {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--kxd-agreement-gold);
+}
+
+.kxd-agreement-doc__section {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #1f1c19 !important;
+  margin-top: 1.35rem;
+  margin-bottom: 0.45rem;
+  padding-bottom: 0.32rem;
+  border-bottom: 1px solid rgba(44, 40, 36, 0.1);
+}
+
+.kxd-agreement-doc__section:first-child {
+  margin-top: 0;
+}
+
+.kxd-agreement-doc__subheading {
+  margin: 0.85rem 0 0.35rem;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--kxd-agreement-ink-muted) !important;
+}
+
+.kxd-agreement-doc__paragraph {
+  margin: 0 0 0.55rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--kxd-agreement-ink) !important;
+}
+
+.kxd-agreement-doc__list {
+  margin: 0.2rem 0 0.75rem;
+  padding: 0 0 0 1.2rem;
+  list-style-type: disc;
+  color: var(--kxd-agreement-ink) !important;
+}
+
+.kxd-agreement-doc__list li {
+  margin-bottom: 0.32rem;
+  padding-left: 0.1rem;
+  color: var(--kxd-agreement-ink) !important;
+}
+
+.kxd-agreement-doc__gap {
+  height: 0.55rem;
+}
+
+/* Operator workspace — nested in OS panel (dark theme must not bleed in) */
+.kxd-os-agreement-review__doc .kxd-agreement-doc-card__scroll {
+  max-height: min(68vh, 640px);
+}
+
+html[data-theme="dark"] .kxd-agreement-doc-island,
+html[data-theme="dark"] .kxd-agreement-doc-card,
+html[data-theme="dark"] .kxd-agreement-doc-card__scroll,
+html[data-theme="dark"] .kxd-agreement-doc-card__header,
+html[data-theme="dark"] .kxd-agreement-doc {
+  color-scheme: light;
+}
+
+html[data-theme="dark"] .kxd-agreement-doc-card,
+html[data-theme="dark"] .kxd-agreement-doc-card__scroll,
+html[data-theme="dark"] .kxd-agreement-doc-island:not(.kxd-agreement-doc-card) {
+  background-color: #f7f3eb !important;
+  color: #2c2824 !important;
+}
+
+html[data-theme="dark"] .kxd-agreement-doc__title {
+  color: #2c2824 !important;
+}
+
+html[data-theme="dark"] .kxd-agreement-doc-card__header {
+  background-color: #faf7f1 !important;
+}
+
+html[data-theme="dark"] .kxd-agreement-doc__paragraph,
+html[data-theme="dark"] .kxd-agreement-doc__list,
+html[data-theme="dark"] .kxd-agreement-doc__list li {
+  color: #2c2824 !important;
+}
+
+html[data-theme="dark"] .kxd-os-shell .kxd-agreement-doc__section {
+  color: #1f1c19 !important;
+}
+
+@media print {
+  .kxd-agreement-doc-card__scroll {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .kxd-agreement-doc__section {
+    break-after: avoid;
+  }
+
+  .kxd-agreement-doc__paragraph,
+  .kxd-agreement-doc__list {
+    break-inside: avoid;
+  }
+}
+
+@media (max-width: 640px) {
+  .kxd-agreement-doc-card__scroll {
+    max-height: min(58vh, 520px);
+    padding: 1rem 1.1rem 1.25rem;
+  }
+}
+
+/* Staff employee portal — card scroll island (avoids full-width ivory slab) */
+.kxd-staff-doc-review__card.kxd-agreement-doc-island {
+  padding: 0;
+  max-height: none;
+  overflow: visible;
+  background: transparent !important;
+  border: none;
+  box-shadow: none;
+}
+
+.kxd-staff-doc-review .kxd-agreement-doc-card {
+  max-width: 40rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.kxd-staff-doc-review .kxd-agreement-doc-card__scroll {
+  max-height: min(75vh, 780px);
+}
+
+.kxd-staff-doc-review .kxd-agreement-doc__body {
+  max-width: 34rem;
+}
+
+@media (max-width: 640px) {
+  .kxd-staff-doc-review .kxd-agreement-doc-card__scroll {
+    max-height: min(68vh, 640px);
+  }
+}
+
+    /* Staff employee documents — list and signing workflow (ops staff chrome) */
+
+.kxd-staff-doc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.kxd-staff-doc-list__item {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.kxd-staff-doc-list__item:last-child {
+  border-bottom: none;
+}
+
+.kxd-staff-doc-list__link {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.85rem 1rem;
+  padding: 0.72rem 0.95rem;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 2px;
+  transition: background-color 0.12s ease;
+}
+
+.kxd-staff-doc-list__link:hover,
+.kxd-staff-doc-list__link:focus-visible {
+  background-color: rgba(255, 255, 255, 0.04);
+  outline: none;
+}
+
+.kxd-staff-doc-list__item--attention .kxd-staff-doc-list__link {
+  padding-top: 0.85rem;
+  padding-bottom: 0.85rem;
+}
+
+.kxd-staff-doc-list__main {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.kxd-staff-doc-list__title {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+}
+
+.kxd-staff-doc-list__meta {
+  margin: 0.28rem 0 0;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: var(--kxd-os-text-muted, rgba(255, 255, 255, 0.55));
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.45rem;
+}
+
+.kxd-staff-doc-list__aside {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.45rem;
+  flex-shrink: 0;
+}
+
+.kxd-staff-doc-list__cta {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--kxd-os-gold, #c2aa72);
+}
+
+.kxd-staff-doc-detail {
+  max-width: 44rem;
+  margin: 0 auto;
+}
+
+.kxd-staff-doc-detail__panel {
+  margin-top: 1.15rem;
+}
+
+.kxd-staff-doc-steps {
+  list-style: none;
+  margin: 0 0 0.85rem;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-muted, rgba(255, 255, 255, 0.55));
+}
+
+.kxd-staff-doc-steps__item--current {
+  color: var(--kxd-os-text, rgba(255, 255, 255, 0.92));
+  font-weight: 600;
+}
+
+.kxd-staff-doc-sign-fieldset {
+  border: none;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.kxd-staff-doc-sign-fieldset legend {
+  padding: 0;
+}
+
+.kxd-staff-doc-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  margin-top: 0.75rem;
+  cursor: pointer;
+}
+
+.kxd-staff-doc-consent input {
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .kxd-staff-doc-list__link {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .kxd-staff-doc-list__aside {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+}
+
+  </style>
+</head>
+<body>
+  <div class="kxd-staff-doc-detail">
+    
+    <section aria-label="Needs your attention" style="max-width:44rem;margin:0 auto 1rem;">
+      <p style="color:rgba(255,255,255,.55);font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;">Needs your attention · 1</p>
+      <div style="background:#1a1917;border:1px solid rgba(255,255,255,.08);border-radius:2px;">
+        <ul class="kxd-staff-doc-list">
+          <li class="kxd-staff-doc-list__item kxd-staff-doc-list__item--attention">
+            <a class="kxd-staff-doc-list__link" href="#">
+              <div class="kxd-staff-doc-list__main">
+                <p class="kxd-staff-doc-list__title" style="color:#f5f2eb;">[SAMPLE — NONBINDING] Staff Agreement (Test Only — Dual Signature)</p>
+                <p class="kxd-staff-doc-list__meta">
+                  <span>Employment agreement</span><span aria-hidden="true">·</span><span>Version 3</span><span aria-hidden="true">·</span><span>Assigned Oct 20, 2026</span>
+                </p>
+              </div>
+              <div class="kxd-staff-doc-list__aside">
+                <span style="font-size:.68rem;color:#c2aa72;">Signature required</span>
+                <span class="kxd-staff-doc-list__cta">Review & sign</span>
+              </div>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </section>
+    <link rel="preload" as="image" href="/migrated-assets/brand/kxd-logo-transparent.png"/><section class="kxd-staff-doc-review" aria-labelledby="staff-doc-review-heading"><div class="kxd-agreement-doc-card kxd-agreement-doc-island kxd-staff-doc-review__card" tabindex="0" role="document" aria-label="[SAMPLE — NONBINDING] Staff Agreement (Test Only — Dual Signature) — full text"><div class="kxd-agreement-doc-card__header"><h2 id="staff-doc-review-heading" class="kxd-agreement-doc-card__title">Review document</h2><p class="kxd-agreement-doc-card__hint">Scroll to read the complete document before signing or acknowledging.</p></div><div class="kxd-agreement-doc-card__scroll"><div class="kxd-agreement-doc"><header class="kxd-agreement-doc__masthead"><img src="/migrated-assets/brand/kxd-logo-transparent.png" alt="Kreate by Design" width="72" height="68" class="kxd-agreement-doc__logo"/><p class="kxd-agreement-doc__eyebrow">Employment agreement</p></header><div class="kxd-agreement-doc__body"><h1 class="kxd-agreement-doc__title">[SAMPLE — NONBINDING] Staff Agreement (Test Only — Dual Signature)</h1><p class="kxd-agreement-doc__meta-line">Kreate by Design LLC · Version 3 · Assigned Oct 20, 2026</p><p class="kxd-agreement-doc__paragraph">SAMPLE AGREEMENT — NOT ENFORCEABLE</p><div class="kxd-agreement-doc__gap" aria-hidden="true"></div><p class="kxd-agreement-doc__paragraph">This text exists only for testing KXD OS staff agreement signing flows in development.</p><div class="kxd-agreement-doc__gap" aria-hidden="true"></div><p class="kxd-agreement-doc__paragraph">Parties (test labels only)</p><p class="kxd-agreement-doc__paragraph">Employee: assigned teammate in KXD OS.</p><p class="kxd-agreement-doc__paragraph">Employer: Kreate by Design LLC — confirm exact registered legal name before production use.</p><div class="kxd-agreement-doc__gap" aria-hidden="true"></div><p class="kxd-agreement-doc__paragraph">Purpose</p><p class="kxd-agreement-doc__paragraph">This sample describes a fictional mutual understanding for workflow testing. It is not an employment agreement, NDA, or IP assignment.</p><div class="kxd-agreement-doc__gap" aria-hidden="true"></div><p class="kxd-agreement-doc__paragraph">Signatures (test)</p><p class="kxd-agreement-doc__paragraph">Employee signs first in KXD OS. An authorized KXD representative countersigns second. An executed PDF is generated for audit.</p><div class="kxd-agreement-doc__gap" aria-hidden="true"></div><p class="kxd-agreement-doc__paragraph">Effective</p><p class="kxd-agreement-doc__paragraph">This sample has no legal effect. Replace with counsel-approved agreement text before production assignment.</p></div><footer class="kxd-agreement-doc__doc-footer" aria-label="Document footer"><span>Staff agreement · Review in full before signing</span><span class="kxd-agreement-doc__doc-footer-mark">Kreate by Design</span></footer></div></div></div></section>
+    
+    <form class="kxd-os-card kxd-os-ops-card-padding kxd-staff-doc-detail__panel" style="max-width:44rem;margin:1rem auto;background:#1a1917;border:1px solid rgba(255,255,255,.08);padding:1rem;border-radius:2px;">
+      <ol class="kxd-staff-doc-steps" aria-label="Signing steps">
+        <li class="kxd-staff-doc-steps__item">1. Review agreement</li>
+        <li class="kxd-staff-doc-steps__item kxd-staff-doc-steps__item--current">2. Complete signature</li>
+      </ol>
+      <fieldset class="kxd-staff-doc-sign-fieldset">
+        <legend class="kxd-os-card__title" style="color:#f5f2eb;font-size:.95rem;">Electronic signature</legend>
+        <label class="kxd-staff-doc-consent" for="fixture-authority">
+          <input id="fixture-authority" type="checkbox" />
+          <span class="kxd-os-meta" style="color:rgba(255,255,255,.65);">I am authorized to sign for the named party.</span>
+        </label>
+        <label class="kxd-staff-doc-consent" for="fixture-consent">
+          <input id="fixture-consent" type="checkbox" />
+          <span class="kxd-os-meta" style="color:rgba(255,255,255,.65);">I agree to electronic records and signatures.</span>
+        </label>
+      </fieldset>
+    </form>
+  </div>
+  <img src="/migrated-assets/brand/kxd-logo-transparent.png" alt="" style="display:none" data-qa-logo-path />
+</body>
+</html>
