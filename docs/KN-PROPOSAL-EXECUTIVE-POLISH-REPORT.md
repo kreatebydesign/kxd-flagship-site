@@ -54,8 +54,11 @@ See [KN-PROPOSAL-COMMERCIAL-FLAGS.md](./KN-PROPOSAL-COMMERCIAL-FLAGS.md).
 | Payment math 40/30/30 | Asserted in polish script (unchanged cents) |
 | Internal notes leakage | `assertNoInternalLeakage` on canonical export |
 | Forbidden internal phrases in HTML | Script asserts before write |
+| Dry-run HTML/PDF export (local, production DB read) | **Pass** — `.cache/kn-proposal-{11,12}-polished-preview.html`, `.cache/KXD-Proposal-kxd-p-2026-0009-2026-10-23.pdf` (~95KB), `.cache/KXD-Proposal-kxd-p-2026-0010-2026-10-23.pdf` (~96KB) |
+| Regression `verify-kn-proposals-executive-polish.ts` | **6/6 pass** (payment math, leakage, Option A IP) |
 | Production operator preview UI (authenticated) | **Not verified** — no operator session in agent environment |
 | Production PDF after code deploy | Re-export after merge/deploy of PDF/HTML changes |
+| Production `builderDocument` content | **Not applied** — run `CONFIRM_POLISH=kn-proposals-11-12` only after Matt approves copy |
 | Send / share / invoice / agreement | **Not executed** — awaiting your approval |
 
 ### Commands
