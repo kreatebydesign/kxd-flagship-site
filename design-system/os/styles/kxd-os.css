@@ -772,27 +772,41 @@ body:has(.kxd-os-nav-ack) .kxd-os-route-progress {
 }
 
 /* Proposal builder workspace — theme-safe fields (all editor tabs) */
-.kxd-proposal-workspace input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not(
-    [type="submit"]
-  ),
-.kxd-proposal-workspace select,
-.kxd-proposal-workspace textarea {
+.kxd-os-shell .kxd-proposal-workspace .kxd-os-input,
+.kxd-os-shell .kxd-proposal-workspace .kxd-os-textarea,
+.kxd-os-shell .kxd-proposal-workspace .kxd-os-select,
+.kxd-os-shell .kxd-proposal-workspace input:not([type="checkbox"]):not([type="radio"]):not(
+    [type="button"]
+  ):not([type="submit"]),
+.kxd-os-shell .kxd-proposal-workspace select,
+.kxd-os-shell .kxd-proposal-workspace textarea {
   color: var(--kxd-os-text-primary);
+  -webkit-text-fill-color: var(--kxd-os-text-primary);
+  background-color: var(--kxd-os-bg-elevated);
+  border: 1px solid var(--kxd-os-border-default);
   caret-color: var(--kxd-os-accent);
+  color-scheme: light dark;
 }
 
-.kxd-proposal-workspace input::placeholder,
-.kxd-proposal-workspace textarea::placeholder {
+.kxd-os-shell .kxd-proposal-workspace .kxd-os-input::placeholder,
+.kxd-os-shell .kxd-proposal-workspace .kxd-os-textarea::placeholder,
+.kxd-os-shell .kxd-proposal-workspace input::placeholder,
+.kxd-os-shell .kxd-proposal-workspace textarea::placeholder {
   color: var(--kxd-os-text-faint);
+  -webkit-text-fill-color: var(--kxd-os-text-faint);
   opacity: 1;
 }
 
-.kxd-proposal-workspace input:not([type="checkbox"]):not([type="radio"]):disabled,
-.kxd-proposal-workspace select:disabled,
-.kxd-proposal-workspace textarea:disabled {
+.kxd-os-shell .kxd-proposal-workspace .kxd-os-input:disabled,
+.kxd-os-shell .kxd-proposal-workspace .kxd-os-textarea:disabled,
+.kxd-os-shell .kxd-proposal-workspace .kxd-os-select:disabled,
+.kxd-os-shell .kxd-proposal-workspace input:not([type="checkbox"]):not([type="radio"]):disabled,
+.kxd-os-shell .kxd-proposal-workspace select:disabled,
+.kxd-os-shell .kxd-proposal-workspace textarea:disabled {
   opacity: 1;
   color: var(--kxd-os-text-secondary);
-  background: var(--kxd-os-bg-muted);
+  -webkit-text-fill-color: var(--kxd-os-text-secondary);
+  background-color: var(--kxd-os-bg-muted);
   border-color: var(--kxd-os-border-divider);
   cursor: not-allowed;
 }
@@ -21702,6 +21716,27 @@ html[data-theme="dark"] {
   --kxd-os-intel-input-bg: #0c182b;
   --kxd-os-intel-depth: inset 0 1px 0 rgba(255, 255, 255, 0.05);
   --kxd-os-intel-workspace-shadow: -12px 0 40px rgba(8, 14, 24, 0.45);
+
+  /* Legacy proposal-builder inline fallbacks — must not resolve to light paper in dark mode */
+  --kxd-os-paper: var(--kxd-os-bg-elevated);
+  --kxd-os-line: var(--kxd-os-border-default);
+  --kxd-os-muted: var(--kxd-os-text-faint);
+  --kxd-os-panel: var(--kxd-os-bg-surface);
+}
+
+/* Beat legacy inline paper backgrounds on proposal fields (dark mode only) */
+html[data-theme="dark"] .kxd-os-shell .kxd-proposal-workspace .kxd-os-input,
+html[data-theme="dark"] .kxd-os-shell .kxd-proposal-workspace .kxd-os-textarea,
+html[data-theme="dark"] .kxd-os-shell .kxd-proposal-workspace .kxd-os-select,
+html[data-theme="dark"] .kxd-os-shell .kxd-proposal-workspace input:not([type="checkbox"]):not(
+    [type="radio"]
+  ),
+html[data-theme="dark"] .kxd-os-shell .kxd-proposal-workspace select,
+html[data-theme="dark"] .kxd-os-shell .kxd-proposal-workspace textarea {
+  background-color: var(--kxd-os-bg-elevated) !important;
+  color: var(--kxd-os-text-primary) !important;
+  -webkit-text-fill-color: var(--kxd-os-text-primary) !important;
+  border-color: var(--kxd-os-border-default) !important;
 }
 
 html[data-theme="dark"] body,

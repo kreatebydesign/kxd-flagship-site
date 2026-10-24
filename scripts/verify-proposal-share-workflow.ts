@@ -316,10 +316,15 @@ function main() {
       !/\.kxd-os-share-link[\s\S]{0,120}background:\s*#fff/.test(osCss),
   );
   check(
-    "Proposal workspace fields use semantic OS tokens",
+    "Proposal workspace fields use kxd-os-input primitives (no inline paper)",
     sourceHas(workspace, /kxd-proposal-workspace/) &&
-      sourceHas(workspace, /var\(--kxd-os-bg-elevated\)/) &&
-      sourceHas(workspace, /var\(--kxd-os-text-primary\)/),
+      sourceHas(workspace, /fieldInputClass = "kxd-os-input"/) &&
+      sourceLacks(workspace, /kxd-os-paper/),
+  );
+  check(
+    "Dark mode overrides legacy inline paper on proposal fields",
+    sourceHas(osCss, /html\[data-theme="dark"\] \.kxd-os-shell \.kxd-proposal-workspace \.kxd-os-input/) &&
+      sourceHas(osCss, /-webkit-text-fill-color/),
   );
   check(
     "Protected proposals render a locked delivery status card",
