@@ -1,0 +1,262 @@
+{
+  "id": 11,
+  "proposalNumber": "KXD-P-2026-0009",
+  "title": "K&N Global Filtration — Enterprise UX/UI Design",
+  "status": "internal-review",
+  "investment": 39500,
+  "lead": 24,
+  "updatedAt": "2026-10-23T23:47:36.052Z",
+  "revisionNumber": 1,
+  "versionHistory": [
+    {
+      "notes": "Initial internal draft with delivery roadmap (K&N enterprise opportunity)",
+      "version": 1,
+      "createdAt": "2026-10-23T22:43:44.474Z",
+      "createdBy": "upsert-kn-enterprise-opportunity.ts"
+    },
+    {
+      "notes": "Promoted to Neon production from local kxd_audit_report_review (refined drafts). Local IDs 22 / 18 / 19 were not copied.",
+      "version": 2,
+      "createdAt": "2026-10-23T23:47:36.049Z",
+      "createdBy": "promote-kn-enterprise-to-production.ts"
+    }
+  ],
+  "builderDocument": {
+    "terms": {
+      "nextSteps": "Review this proposal with marketing, IT, and finance stakeholders. When ready, accept the proposal so Kreate by Design can prepare the final agreement for signature.",
+      "exclusions": "CMS integration, Magento or other platform integration, production deployment, back-end implementation, hosting, Find Your Filter, and third-party fees unless explicitly listed in the signed agreement.",
+      "closingNote": "",
+      "proposalTerms": "This proposal defines the creative engagement, delivery roadmap, investment, and payment schedule for the selected option. Accepting this proposal authorizes Kreate by Design to prepare a final agreement for signature. Acceptance is not a signed contract and does not begin billable work until the agreement is executed and kickoff payment is received.",
+      "expirationLanguage": "This proposal is valid through November 6, 2026. After that date, scope, schedule, and investment may be revised.",
+      "paymentAssumptions": "Investment is billed in three installments: 40% at contract execution and kickoff, 30% upon approved creative direction and delivery of agreed primary templates, and 30% upon delivery of final agreed creative assets, source materials, documentation, and completion of the contractual review process. Amounts are shown in the payment schedule and align to the total project investment.",
+      "cancellationSummary": "Cancellation and pause terms will be defined in the final agreement, including treatment of work in progress and payments due for completed phases.",
+      "timelineAssumptions": "The delivery roadmap in this proposal is the authoritative phase schedule. Dates assume timely kickoff, K&N content and brand assets, consolidated feedback from K&N's designated project owner, and approvals within agreed review windows. If kickoff or approvals shift, dates will be re-baselined in writing. K&N IT owns production integration, testing, and deployment; this schedule does not represent a production launch date.",
+      "acceptanceDisclosure": "If you approve this proposal, Kreate by Design will prepare the final agreement based on the accepted scope, pricing, and options. Approving this proposal is not a signed contract.",
+      "changeRequestLanguage": "Each major approval stage includes up to two consolidated revision rounds, submitted by K&N's designated project owner within the review window for that stage. Feedback must be consolidated; fragmented or conflicting direction may reset the review clock. Changes to approved scope, substantial redesigns beyond agreed revisions, additional pages, new functionality, or new template families require written change approval and may adjust investment and schedule.",
+      "clientResponsibilities": "K&N will provide approved copy, product information, and brand assets; designate a single project owner to consolidate feedback; meet agreed review windows; and confirm with K&N IT the approved editable-source and handoff format (including Figma or code repository standards). K&N IT owns CMS integration, production development, testing, deployment, and launch.",
+      "operationalDraftNotice": "Template and operational wording only. Not attorney-approved legal advice. Matt must review all contract language before sharing or signature.",
+      "contractRequiredDisclosure": "Work begins after the final agreement is signed and the kickoff payment is received.",
+      "intellectualPropertySummary": "Upon full payment, K&N receives ownership of paid custom deliverables created specifically for this engagement (designs, documentation, and Option B reference source artifacts identified in the agreement), subject to third-party license terms for embedded fonts, stock, or software. Kreate by Design retains ownership of its pre-existing frameworks, reusable utilities, internal tools, and background intellectual property; K&N receives a license to use those elements only as embedded in the delivered work. Third-party components remain subject to their respective licenses. If K&N's formal SOW or procurement terms require different ownership or work-for-hire language, those terms must be reviewed and agreed in the final contract before signature."
+    },
+    "credits": [],
+    "options": {
+      "mode": "recommended-package",
+      "packages": [],
+      "clientCanSelect": false
+    },
+    "contacts": [
+      {
+        "id": "contact_d11fa2f0e3b8",
+        "name": "Cameron Fidel",
+        "email": "cameron.fidel@knfilters.com",
+        "isPrimary": true,
+        "organizationId": "org_8041e51ffa06"
+      }
+    ],
+    "currency": "USD",
+    "internal": {
+      "marginNotes": "Working pricing — Matt approval before share.",
+      "internalNotes": "INTERNAL — NOT FOR CLIENT DELIVERY.\nWorking prices ($39,500 / $49,500) require Matt approval before Approve for Sharing.\nFigma/workflow for Option A and editable-source format for both options require K&N IT sign-off; KXD delivery workflow not yet verified for unconditional Figma commitment.\nOption B: Next.js/React reference only — no Magento, CMS integration, production deployment, or back-end scope unless separately contracted.\nIP summary in proposal is operational; reconcile with K&N formal SOW and legal before signature.\nUnresolved: priority template page list, exact staging URL/hosting for Option B private review, staffing plan.\n\n",
+      "internalOwner": "Matt Lunger"
+    },
+    "executive": {
+      "objectives": "Establish an approved creative direction, deliver the in-scope template families and design system, and hand off organized specifications and assets so K&N IT can implement with confidence.",
+      "clientContext": "",
+      "desiredOutcomes": "Marketing and IT share one approved design system, a complete in-scope page library on paper, and phased handoffs that allow parallel IT implementation without waiting for every page to be finished.",
+      "currentSituation": "The program requires enterprise-grade creative clarity, template reuse, and credible technical storytelling, with internal IT owning the production path after handoff.",
+      "executiveSummary": "Kreate by Design will lead enterprise UX/UI design for approximately 38 pages organized into reusable template families: two creative directions, a responsive design system, technical graphics, and phased developer handoff through December 2026. This engagement delivers design intelligence and specifications; it does not include CMS integration or production launch.",
+      "clientFacingIntro": "K&N Global Filtration is modernizing its enterprise web presence with a disciplined template architecture, strong UX/UI, and clear separation between creative delivery and production integration. K&N IT will integrate, build, test, and deploy in your production environment. K&N IT may begin work from approved homepage and priority template handoffs while creative production continues on remaining pages.",
+      "recommendedDirection": "Option A delivers editable design-source files and developer specifications in a format agreed with K&N IT. Figma is K&N's stated preference; Kreate by Design will confirm a delivery workflow with IT before any final tool commitment."
+    },
+    "taxRateBps": 0,
+    "scopeGroups": [
+      {
+        "id": "scope_312b1162e772",
+        "title": "Enterprise creative scope",
+        "overview": "Creative and UX/UI work for the enterprise redesign. Production integration, CMS build, testing, deployment, and launch are K&N IT responsibilities.",
+        "inclusion": "included",
+        "sortOrder": 1,
+        "exclusions": "Production CMS work, Magento integration, hosting, and Find Your Filter.",
+        "assumptions": "Page inventory within the ~38-page program will be confirmed during discovery. Find Your Filter is excluded.",
+        "deliverables": [
+          {
+            "id": "del_4ec3131dcf78",
+            "title": "Enterprise information architecture across ~38 pages using approved reusable template families",
+            "sortOrder": 1
+          },
+          {
+            "id": "del_4add2e743d5d",
+            "title": "Two distinct creative directions with structured review cycles",
+            "sortOrder": 2
+          },
+          {
+            "id": "del_c33f7c79619f",
+            "title": "Responsive UX/UI and an approved design system for template families",
+            "sortOrder": 3
+          },
+          {
+            "id": "del_4fc2fe0f301f",
+            "title": "Custom technical graphics and visualizations for product and filtration storytelling",
+            "sortOrder": 4
+          },
+          {
+            "id": "del_0e8882a72890",
+            "title": "Phased developer specifications, organized assets, and IT handoff support (K&N IT implements)",
+            "sortOrder": 5
+          },
+          {
+            "id": "del_0ed76f942a5d",
+            "title": "Find Your Filter excluded from this engagement",
+            "sortOrder": 6
+          }
+        ],
+        "organizationId": "org_8041e51ffa06",
+        "organizationName": "K&N Global Filtration",
+        "estimatedTimeline": "Aligned to the delivery roadmap; creative handoff targeted by end of December 2026.",
+        "kxdResponsibilities": "Creative direction, design system, specifications, and phased handoffs as described for the selected option.",
+        "clientResponsibilities": "Approved copy, product information, brand assets, and consolidated feedback through the designated project owner."
+      },
+      {
+        "id": "scope_8ed962ab50e9",
+        "title": "Delivery roadmap (November–December 2026)",
+        "overview": "Six roadmap phases below. Phases 3 and 4 run in parallel so K&N IT can implement approved homepage and priority template families while KXD continues remaining-page creative work and rolling handoffs. Dates are targets contingent on timely kickoff, materials, consolidated feedback, and approvals. KXD does not control K&N production launch, CMS integration, or deployment.",
+        "inclusion": "included",
+        "sortOrder": 2,
+        "deliverables": [
+          {
+            "id": "del_ff48d2326868",
+            "title": "Roadmap Phase 1 — Discovery and two creative directions (Nov 2–13)",
+            "sortOrder": 1,
+            "description": "KXD: discovery, ~38-page template-family architecture, two distinct creative directions. K&N: stakeholders, content, brand assets, consolidated feedback. IT: optional technical input. Gate: both directions presented and reviewed."
+          },
+          {
+            "id": "del_93dbc2ce52cf",
+            "title": "Roadmap Phase 2 — Direction approval (Nov 16–20)",
+            "sortOrder": 2,
+            "description": "KXD: refine selected direction and approval package. K&N: select direction and approve in writing. IT: direction pack and template plan. Gate: creative direction approved."
+          },
+          {
+            "id": "del_63e86efb81da",
+            "title": "Roadmap Phase 3 — Homepage, priority templates, design system, initial handoff (Nov 20–Dec 4, parallel)",
+            "sortOrder": 3,
+            "description": "KXD: homepage, priority templates, responsive system, first developer handoff. K&N: review within agreed windows. IT: begin implementation from approved homepage/templates. Gate: primary templates approved for IT."
+          },
+          {
+            "id": "del_eaf15cccad11",
+            "title": "Roadmap Phase 4 — Remaining pages, interactions, graphics, rolling handoffs (Nov 23–Dec 18, parallel)",
+            "sortOrder": 4,
+            "description": "KXD: remaining template-family pages, interactions, technical graphics, rolling handoffs. K&N: rolling content and batch approvals. IT: receive approved packages as released. Gate: in-scope template families approved (Find Your Filter excluded)."
+          },
+          {
+            "id": "del_107b604040dd",
+            "title": "Roadmap Phase 5 — Creative scope review (Dec 18)",
+            "sortOrder": 5,
+            "description": "KXD: consolidated scope review. K&N: executive review and punch-list. IT: alignment on integration queue. Gate: scope review accepted."
+          },
+          {
+            "id": "del_f4a309c13f33",
+            "title": "Roadmap Phase 6 — Final revisions and handoff (Dec 21–31)",
+            "sortOrder": 6,
+            "description": "KXD: agreed revisions, final assets, documentation, final handoff. K&N: consolidated revision feedback. IT: final source and documentation. Gate: creative handoff acknowledged (not production launch)."
+          }
+        ],
+        "organizationId": "org_8041e51ffa06",
+        "organizationName": "K&N Global Filtration",
+        "estimatedTimeline": "Creative handoff targeted by end of December 2026."
+      },
+      {
+        "id": "scope_d595b965ffb0",
+        "title": "Option A — UX/UI design and editable design-source handoff",
+        "overview": "Design-source files and specifications for K&N IT to implement.",
+        "inclusion": "included",
+        "sortOrder": 3,
+        "deliverables": [
+          {
+            "id": "del_ab05271e2d15",
+            "title": "Two presented creative directions; one approved direction carried through production design",
+            "sortOrder": 1
+          },
+          {
+            "id": "del_c61a647bb07c",
+            "title": "Approved UX/UI system: typography, color, layout, and component patterns for template families",
+            "sortOrder": 2
+          },
+          {
+            "id": "del_cf22c8c60150",
+            "title": "Responsive layouts and states for in-scope template families (~38 pages)",
+            "sortOrder": 3
+          },
+          {
+            "id": "del_78e29c2bfe42",
+            "title": "Reusable design components documented for IT implementation",
+            "sortOrder": 4
+          },
+          {
+            "id": "del_e7d87a057549",
+            "title": "Editable design-source files in a format agreed with K&N IT (Figma is K&N's preferred format; KXD will confirm a workable delivery workflow with IT before final commitment)",
+            "sortOrder": 5
+          },
+          {
+            "id": "del_85c0922300bf",
+            "title": "Developer specifications, asset organization, and phased handoff packages aligned to the delivery roadmap",
+            "sortOrder": 6
+          }
+        ],
+        "organizationId": "org_8041e51ffa06",
+        "organizationName": "K&N Global Filtration",
+        "estimatedTimeline": "Aligned to the delivery roadmap."
+      }
+    ],
+    "depositCents": 1580000,
+    "pricingLines": [
+      {
+        "id": "line_af50d9c646cd",
+        "title": "Enterprise UX/UI design (Option A)",
+        "cadence": "one-time",
+        "quantity": 1,
+        "inclusion": "included",
+        "sortOrder": 1,
+        "description": "One-time project investment for the selected option.",
+        "scopeGroupId": "scope_312b1162e772",
+        "organizationId": "org_8041e51ffa06",
+        "unitPriceCents": 3950000
+      }
+    ],
+    "templateKind": "website-design-development",
+    "organizations": [
+      {
+        "id": "org_8041e51ffa06",
+        "name": "K&N Global Filtration",
+        "brand": "K&N Global Filtration"
+      }
+    ],
+    "schemaVersion": 1,
+    "paymentSchedule": [
+      {
+        "id": "pay_963667aafaac",
+        "due": "at-contract",
+        "label": "Upon contract execution and project kickoff (40%)",
+        "sortOrder": 1,
+        "amountCents": 1580000
+      },
+      {
+        "id": "pay_497135d81675",
+        "due": "milestone",
+        "label": "Upon approved creative direction and delivery of agreed primary templates (30%)",
+        "sortOrder": 2,
+        "amountCents": 1185000,
+        "milestoneLabel": "Creative direction and primary templates approved"
+      },
+      {
+        "id": "pay_ade9695ac8a1",
+        "due": "remaining",
+        "label": "Upon delivery of final agreed creative assets, source materials, documentation, and completion of the contractual review process (30%)",
+        "sortOrder": 3,
+        "amountCents": 1185000,
+        "milestoneLabel": "Final creative handoff complete"
+      }
+    ],
+    "scheduleCallUrl": ""
+  },
+  "shareSnapshot": null
+}

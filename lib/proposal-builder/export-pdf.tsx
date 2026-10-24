@@ -208,6 +208,13 @@ const styles = StyleSheet.create({
     fontSize: 10,
     lineHeight: 1.42,
   },
+  bulletDescription: {
+    fontFamily: PROPOSAL_PDF_SANS,
+    fontSize: 9,
+    lineHeight: 1.45,
+    color: colors.muted,
+    marginTop: 3,
+  },
   section: {
     marginBottom: 22,
   },
@@ -494,6 +501,25 @@ function OpeningSectionView({
   );
 }
 
+function ScopeDeliverableRow({
+  title,
+  description,
+}: {
+  title: string;
+  description?: string | null;
+}) {
+  const hasDetail = Boolean(description?.trim());
+  return (
+    <View style={styles.bulletRow} wrap={hasDetail} minPresenceAhead={hasDetail ? 48 : 24}>
+      <Text style={styles.bulletMark}>•</Text>
+      <View style={{ flex: 1 }}>
+        <Text style={styles.bulletTitle}>{title}</Text>
+        {hasDetail ? <Text style={styles.bulletDescription}>{description}</Text> : null}
+      </View>
+    </View>
+  );
+}
+
 function ScopeSection({ workstream }: { workstream: ScopeWorkstreamPresentation }) {
   const deliverables = workstream.deliverables;
   const leadCount = deliverables.length >= 10 ? 5 : Math.min(4, deliverables.length);
@@ -512,25 +538,21 @@ function ScopeSection({ workstream }: { workstream: ScopeWorkstreamPresentation 
         <Paragraph text={workstream.overview} />
         {deliverables.length > 0 ? <Text style={styles.h3}>Deliverables</Text> : null}
         {lead.map((item) => (
-          <View key={item.id} style={styles.bulletRow} wrap={false}>
-            <Text style={styles.bulletMark}>•</Text>
-            <Text style={styles.bulletBody}>
-              <Text style={styles.bulletTitle}>{item.title}</Text>
-              {item.description ? ` — ${item.description}` : ""}
-            </Text>
-          </View>
+          <ScopeDeliverableRow
+            key={item.id}
+            title={item.title}
+            description={item.description}
+          />
         ))}
       </View>
       {restChunks.map((chunk, index) => (
-        <View key={`scope-rest-${index}`} wrap={false} minPresenceAhead={96}>
+        <View key={`scope-rest-${index}`} wrap minPresenceAhead={96}>
           {chunk.map((item) => (
-            <View key={item.id} style={styles.bulletRow} wrap={false}>
-              <Text style={styles.bulletMark}>•</Text>
-              <Text style={styles.bulletBody}>
-                <Text style={styles.bulletTitle}>{item.title}</Text>
-                {item.description ? ` — ${item.description}` : ""}
-              </Text>
-            </View>
+            <ScopeDeliverableRow
+              key={item.id}
+              title={item.title}
+              description={item.description}
+            />
           ))}
         </View>
       ))}
@@ -621,8 +643,12 @@ function InvestmentSection({ proposal }: { proposal: CanonicalProposal }) {
             <View key={row.id} style={styles.investmentRow}>
               <Text style={styles.investmentRowTitle}>
                 {row.label}
-                {"\n"}
-                <Text style={{ color: colors.muted, fontWeight: 400 }}>{row.timing}</Text>
+                {row.timing ? (
+                  <>
+                    {"\n"}
+                    <Text style={{ color: colors.muted, fontWeight: 400 }}>{row.timing}</Text>
+                  </>
+                ) : null}
               </Text>
               <Text style={styles.investmentRowAmount}>{row.amount}</Text>
             </View>
@@ -666,6 +692,22 @@ function TermsSectionView({
     const paragraphs = blocks.filter((block) => block.type === "paragraph");
     if (bulletBlocks.length >= 1) {
       const items = bulletBlocks.flatMap((block) => block.items);
+      const useSingleColumn =
+        sectionKey === "clientResponsibilities" || items.length <= 4;
+      if (useSingleColumn) {
+        return (
+          <View style={styles.section} wrap minPresenceAhead={96}>
+            <Text style={styles.eyebrow}>{eyebrow}</Text>
+            <Text style={styles.h2}>{title}</Text>
+            {paragraphs.map((block, index) => (
+              <Paragraph key={`tp-${index}`} text={block.text} supporting />
+            ))}
+            {items.map((item) => (
+              <ProseBullet key={`s-${item.slice(0, 32)}`} text={item} />
+            ))}
+          </View>
+        );
+      }
       const midpoint = Math.ceil(items.length / 2);
       const left = items.slice(0, midpoint);
       const right = items.slice(midpoint);
