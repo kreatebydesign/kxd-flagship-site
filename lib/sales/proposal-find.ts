@@ -26,12 +26,13 @@ export async function findProposalByIdForOperator(
   if (!Number.isFinite(id) || id <= 0) return null;
 
   try {
-    return (await payload.findByID({
+    const doc = await payload.findByID({
       collection: PROPOSALS_COLLECTION,
       id,
       depth,
       overrideAccess: true,
-    })) as Record<string, unknown>;
+    });
+    return doc as unknown as Record<string, unknown>;
   } catch (error) {
     if (isPayloadNotFoundError(error)) return null;
     const message = error instanceof Error ? error.message : String(error);

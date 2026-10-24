@@ -3,8 +3,8 @@ import Link from "next/link";
 import { OperationsShell } from "@/components/admin/operations/shared/OperationsShell";
 import { KxdPage, KxdSection } from "@/components/os";
 import { OperationsPageHero } from "@/components/admin/operations/shared/OperationsPageHero";
-import { renderProposalPreviewHtml } from "@/lib/proposal-builder/export-html";
-import { getProposal, previewCanonical } from "@/lib/proposal-builder/services";
+import { requirePayloadAdminPage } from "@/lib/admin/auth";
+import { getProposal } from "@/lib/proposal-builder/services";
 
 export const dynamic = "force-dynamic";
 
@@ -15,11 +15,11 @@ export default async function ProposalPreviewPage({
 }) {
   const id = Number((await params).id);
   if (!id) notFound();
+
+  await requirePayloadAdminPage(`/admin/sales/proposals/${id}/preview`);
+
   const proposal = await getProposal(id);
   if (!proposal) notFound();
-
-  const canonical = previewCanonical(proposal);
-  const html = renderProposalPreviewHtml(canonical);
 
   return (
     <OperationsShell activeId="sales-proposals">
@@ -40,7 +40,7 @@ export default async function ProposalPreviewPage({
           </div>
           <iframe
             title="Proposal preview"
-            srcDoc={html}
+            src={`/api/admin/proposal-builder/${id}/preview`}
             style={{
               width: "100%",
               minHeight: "80vh",
