@@ -10,10 +10,13 @@ Do not treat checklist items as complete without evidence in this file or linked
 | Field | Value |
 |-------|--------|
 | **Severity** | High (restricted staff could be blocked from documents; interim auth-only layout risk on founder pages) |
-| **Status** | **Remediated on branch** `feat/staff-documents-v1-finish` @ `7e0acb78` — **awaiting Matt merge/deploy approval** |
-| **PR** | https://github.com/kreatebydesign/kxd-flagship-site/pull/110 |
+| **Status** | **Production deployed** (2026-10-24) — merge `5cc44a28` (PR #110); premium UX follow-up PR #111 (`e6923139`) on prod `dpl_7e4MaYfgTo5gF6RntQwRSSyscE5a` |
+| **PR** | https://github.com/kreatebydesign/kxd-flagship-site/pull/110 (merged); https://github.com/kreatebydesign/kxd-flagship-site/pull/111 (merged, presentation only) |
 | **Owner** | Engineering |
-| **Evidence** | `verify:staff-documents-security-gate`, `verify:operations-layout-return-path`, `verify:staff-documents-page-access`, `npm run build` |
+| **Production deployment** | Vercel `dpl_7e4MaYfgTo5gF6RntQwRSSyscE5a` — **READY**; aliases include `www.kreatebydesign.com`, `portal.kreatebydesign.com` |
+| **Post-deploy probes (unauthenticated, 2026-10-24)** | `GET /admin/operations/staff/documents` **307** → login; `GET /migrated-assets/brand/kxd-logo-transparent.png` **200**; `GET /api/db-health` **401** |
+| **Authenticated smoke (Tyler documents UI)** | **UNVERIFIED** — no authorized session in release automation (2026-10-24) |
+| **Evidence** | `verify:staff-documents-security-gate`, `verify:operations-layout-return-path`, `verify:staff-documents-page-access`, `verify:staff-documents`, `npm run build` |
 | **Fix summary** | `(studio)/layout.tsx` fail-closed founder ops; `/staff` subtree unchanged; `resolveStaffAwarePathname` canonical path precedence; parent `operations/layout.tsx` auth-only |
 
 ---
