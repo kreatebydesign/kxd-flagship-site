@@ -3,15 +3,13 @@
 import Link from "next/link";
 import { OperationsPageHero } from "@/components/admin/operations/shared/OperationsPageHero";
 import { OperationsShell } from "@/components/admin/operations/shared/OperationsShell";
-import {
-  OpsCard,
-  OpsEmpty,
-  OpsListRow,
-  OpsSectionHead,
-  OpsStatusBadge,
-} from "@/components/admin/operations/shared/OpsBriefing";
+import { OpsCard, OpsEmpty, OpsSectionHead, OpsStatusBadge } from "@/components/admin/operations/shared/OpsBriefing";
 import { KxdPage } from "@/components/os";
+import "@/design-system/os/styles/kxd-staff-documents.css";
 import {
+  formatStaffDocumentListDate,
+  staffDocumentAssignmentNextAction,
+  staffDocumentEmployeeReviewAction,
   staffDocumentKindLabel,
   staffDocumentStatusBadge,
 } from "@/lib/staff-documents/display";
@@ -21,8 +19,72 @@ function needsAttention(doc: StaffDocumentListItem): boolean {
   return doc.status === "assigned";
 }
 
+function StaffDocumentListRow(props: {
+  doc: StaffDocumentListItem;
+  emphasizeAction?: boolean;
+}) {
+  const { doc, emphasizeAction } = props;
+  const badge = staffDocumentStatusBadge({
+    status: doc.status,
+    signingMode: doc.signingMode,
+  });
+  const reviewAction = staffDocumentEmployeeReviewAction({
+    status: doc.status,
+    signingMode: doc.signingMode,
+  });
+  const statusLine = emphasizeAction
+    ? badge.label
+    : staffDocumentAssignmentNextAction({
+        status: doc.status,
+        signingMode: doc.signingMode,
+      });
+
+  return (
+    <li
+      className={
+        emphasizeAction
+          ? "kxd-staff-doc-list__item kxd-staff-doc-list__item--attention"
+          : "kxd-staff-doc-list__item"
+      }
+    >
+      <Link href={doc.href} className="kxd-staff-doc-list__link">
+        <div className="kxd-staff-doc-list__main">
+          <p className="kxd-staff-doc-list__title">{doc.title}</p>
+          <p className="kxd-staff-doc-list__meta">
+            <span>{staffDocumentKindLabel(doc.kind)}</span>
+            <span aria-hidden="true">·</span>
+            <span>Version {doc.templateVersion}</span>
+            <span aria-hidden="true">·</span>
+            <span>Assigned {formatStaffDocumentListDate(doc.assignedAt)}</span>
+            {!emphasizeAction && doc.acknowledgedAt ? (
+              <>
+                <span aria-hidden="true">·</span>
+                <span>Acknowledged {formatStaffDocumentListDate(doc.acknowledgedAt)}</span>
+              </>
+            ) : null}
+            {!emphasizeAction && doc.executedAt ? (
+              <>
+                <span aria-hidden="true">·</span>
+                <span>Executed {formatStaffDocumentListDate(doc.executedAt)}</span>
+              </>
+            ) : null}
+          </p>
+        </div>
+        <div className="kxd-staff-doc-list__aside">
+          <OpsStatusBadge label={statusLine} variant={badge.variant} />
+          {emphasizeAction && reviewAction ? (
+            <span className="kxd-staff-doc-list__cta">{reviewAction}</span>
+          ) : null}
+        </div>
+      </Link>
+    </li>
+  );
+}
+
 export function StaffDocumentsScreen(props: { documents: StaffDocumentListItem[] }) {
   const pending = props.documents.filter(needsAttention);
+  const pendingIds = new Set(pending.map((doc) => doc.id));
+  const onFile = props.documents.filter((doc) => !pendingIds.has(doc.id));
 
   return (
     <OperationsShell activeId="staff-documents" variant="staff">
@@ -30,67 +92,37 @@ export function StaffDocumentsScreen(props: { documents: StaffDocumentListItem[]
         <OperationsPageHero
           eyebrow="My documents"
           title="Policies and agreements"
-          lead="Assigned internal policies and employment documents. Review each assignment in full before acknowledging or signing."
+          lead="Assigned internal policies and employment documents. Open each item to review the full text before acknowledging or signing."
         />
 
         {pending.length > 0 ? (
-          <section style={{ marginBottom: "1.5rem" }} aria-label="Needs your attention">
+          <section style={{ marginBottom: "1.35rem" }} aria-label="Needs your attention">
             <OpsSectionHead label="Needs your attention" count={pending.length} />
             <OpsCard>
-              {pending.map((doc) => {
-                const badge = staffDocumentStatusBadge({
-                  status: doc.status,
-                  signingMode: doc.signingMode,
-                });
-                return (
-                  <OpsListRow key={doc.id} href={doc.href}>
-                    <div className="kxd-os-ops-list-row__main">
-                      <div className="kxd-os-ops-list-row__head">
-                        <p className="kxd-os-ops-list-row__title">{doc.title}</p>
-                        <OpsStatusBadge label={badge.label} variant={badge.variant} />
-                      </div>
-                      <p className="kxd-os-meta">
-                        {staffDocumentKindLabel(doc.kind)} · Assigned{" "}
-                        {new Date(doc.assignedAt).toLocaleString()}
-                      </p>
-                    </div>
-                  </OpsListRow>
-                );
-              })}
+              <ul className="kxd-staff-doc-list">
+                {pending.map((doc) => (
+                  <StaffDocumentListRow key={doc.id} doc={doc} emphasizeAction />
+                ))}
+              </ul>
             </OpsCard>
           </section>
         ) : null}
 
-        <OpsSectionHead label="All documents" count={props.documents.length} />
+        <OpsSectionHead
+          label={pending.length > 0 ? "On file" : "All documents"}
+          count={onFile.length}
+        />
         <OpsCard>
           {props.documents.length === 0 ? (
             <OpsEmpty message="No documents assigned yet." />
+          ) : onFile.length === 0 ? (
+            <OpsEmpty message="No completed documents yet — finish the items above first." />
           ) : (
-            props.documents.map((doc) => {
-              const badge = staffDocumentStatusBadge({
-                status: doc.status,
-                signingMode: doc.signingMode,
-              });
-              return (
-                <OpsListRow key={doc.id} href={doc.href}>
-                  <div className="kxd-os-ops-list-row__main">
-                    <div className="kxd-os-ops-list-row__head">
-                      <p className="kxd-os-ops-list-row__title">{doc.title}</p>
-                      <OpsStatusBadge label={badge.label} variant={badge.variant} />
-                    </div>
-                    <p className="kxd-os-meta">
-                      {staffDocumentKindLabel(doc.kind)} · Version {doc.templateVersion}
-                      {doc.acknowledgedAt
-                        ? ` · Acknowledged ${new Date(doc.acknowledgedAt).toLocaleString()}`
-                        : ""}
-                      {doc.executedAt
-                        ? ` · Executed ${new Date(doc.executedAt).toLocaleString()}`
-                        : ""}
-                    </p>
-                  </div>
-                </OpsListRow>
-              );
-            })
+            <ul className="kxd-staff-doc-list">
+              {onFile.map((doc) => (
+                <StaffDocumentListRow key={doc.id} doc={doc} />
+              ))}
+            </ul>
           )}
         </OpsCard>
 

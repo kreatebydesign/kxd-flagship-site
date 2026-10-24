@@ -260,3 +260,33 @@ html[data-theme="dark"] .kxd-os-shell .kxd-agreement-doc__section {
     padding: 1rem 1.1rem 1.25rem;
   }
 }
+
+/* Staff employee portal — card scroll island (avoids full-width ivory slab) */
+.kxd-staff-doc-review__card.kxd-agreement-doc-island {
+  padding: 0;
+  max-height: none;
+  overflow: visible;
+  background: transparent !important;
+  border: none;
+  box-shadow: none;
+}
+
+.kxd-staff-doc-review .kxd-agreement-doc-card {
+  max-width: 40rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.kxd-staff-doc-review .kxd-agreement-doc-card__scroll {
+  max-height: min(75vh, 780px);
+}
+
+.kxd-staff-doc-review .kxd-agreement-doc__body {
+  max-width: 34rem;
+}
+
+@media (max-width: 640px) {
+  .kxd-staff-doc-review .kxd-agreement-doc-card__scroll {
+    max-height: min(68vh, 640px);
+  }
+}

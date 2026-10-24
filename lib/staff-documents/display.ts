@@ -105,6 +105,19 @@ export function staffDocumentAttentionLabel(input: {
     : "Acknowledgment required";
 }
 
+/** Primary CTA on the employee list when action is required. */
+export function staffDocumentEmployeeReviewAction(input: {
+  status: StaffDocumentStatus;
+  signingMode: StaffDocumentSigningMode;
+}): string | null {
+  if (input.status !== "assigned") return null;
+  return input.signingMode === "acknowledgment" ? "Review & acknowledge" : "Review & sign";
+}
+
+export function formatStaffDocumentListDate(iso: string): string {
+  return new Date(iso).toLocaleDateString(undefined, { dateStyle: "medium" });
+}
+
 export function staffDocumentAssignmentNextAction(input: {
   status: StaffDocumentStatus;
   signingMode: StaffDocumentSigningMode;

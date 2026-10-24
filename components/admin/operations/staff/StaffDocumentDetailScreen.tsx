@@ -5,7 +5,7 @@ import { OperationsPageHero } from "@/components/admin/operations/shared/Operati
 import { OperationsShell } from "@/components/admin/operations/shared/OperationsShell";
 import { KxdPage } from "@/components/os";
 import type { StaffDocumentDetail } from "@/lib/staff-documents/types";
-import { staffDocumentKindLabel } from "@/lib/staff-documents/display";
+import { formatStaffDocumentListDate, staffDocumentKindLabel } from "@/lib/staff-documents/display";
 import { StaffDocumentAcknowledgeForm } from "./StaffDocumentAcknowledgeForm";
 import { StaffDocumentSignForm } from "./StaffDocumentSignForm";
 
@@ -14,13 +14,15 @@ export function StaffDocumentDetailScreen(props: {
   canAcknowledge: boolean;
 }) {
   const isAgreement = props.document.signingMode === "dual-signature";
+  const assignedLine = `Assigned ${formatStaffDocumentListDate(props.document.assignedAt)}`;
+  const lead = `${staffDocumentKindLabel(props.document.kind)} · Version ${props.document.templateVersion} · ${assignedLine}`;
   return (
     <OperationsShell activeId="staff-documents" variant="staff">
       <KxdPage className="kxd-os-page--ops kxd-os-page--staff">
         <OperationsPageHero
-          eyebrow={isAgreement ? staffDocumentKindLabel(props.document.kind) : "My documents"}
+          eyebrow={isAgreement ? "Agreement" : "Policy"}
           title={props.document.title}
-          lead={`${props.document.legalEntityName} · Version ${props.document.templateVersion}`}
+          lead={`${props.document.legalEntityName} · ${lead}`}
         />
         {isAgreement ? (
           <StaffDocumentSignForm
