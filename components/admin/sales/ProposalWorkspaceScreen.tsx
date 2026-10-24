@@ -77,11 +77,13 @@ const TEMPLATE_OPTIONS: Array<{ value: ProposalTemplateKind | ""; label: string 
 
 const inputStyle: CSSProperties = {
   width: "100%",
-  border: "1px solid var(--kxd-os-line, #e2d8c8)",
-  background: "var(--kxd-os-paper, #fffdf8)",
-  borderRadius: 2,
-  padding: "0.65rem 0.75rem",
+  border: "1px solid var(--kxd-os-border-default)",
+  background: "var(--kxd-os-bg-elevated)",
+  color: "var(--kxd-os-text-primary)",
+  borderRadius: "var(--kxd-os-radius-sm)",
+  padding: "0.625rem 0.875rem",
   font: "inherit",
+  lineHeight: 1.5,
 };
 
 const labelStyle: CSSProperties = {
@@ -89,7 +91,7 @@ const labelStyle: CSSProperties = {
   fontSize: 12,
   letterSpacing: "0.08em",
   textTransform: "uppercase",
-  color: "var(--kxd-os-muted, #6f6a62)",
+  color: "var(--kxd-os-text-faint)",
   marginBottom: 6,
 };
 
@@ -106,7 +108,7 @@ function Field({
   // interfere with Space / activation behavior for nested interactive content.
   return (
     <div style={{ display: "block", marginBottom: "1rem" }}>
-      <label htmlFor={htmlFor} style={labelStyle}>
+      <label htmlFor={htmlFor} className="kxd-proposal-field-label" style={labelStyle}>
         {label}
       </label>
       {children}
@@ -828,7 +830,7 @@ export function ProposalWorkspaceScreen({
               gridTemplateColumns: "minmax(0, 1fr) 220px",
               gap: "1.5rem",
             }}
-            className="proposal-builder-grid"
+            className="proposal-builder-grid kxd-proposal-workspace"
           >
             <div>
               {tab === "identity" ? (
@@ -947,9 +949,9 @@ export function ProposalWorkspaceScreen({
                       style={{
                         marginBottom: "1.25rem",
                         padding: "1rem",
-                        border: "1px solid var(--kxd-os-line, #e2d8c8)",
-                        borderRadius: 2,
-                        background: "var(--kxd-os-panel, #f3ebe0)",
+                        border: "1px solid var(--kxd-os-border-default)",
+                        borderRadius: "var(--kxd-os-radius-sm)",
+                        background: "var(--kxd-os-bg-surface)",
                       }}
                     >
                       <p className="kxd-os-meta" style={{ marginTop: 0, marginBottom: "0.85rem" }}>
@@ -1935,7 +1937,7 @@ export function ProposalWorkspaceScreen({
                             </a>
                           </div>
                           {copyStatus ? (
-                            <p role="status" className="kxd-os-meta">
+                            <p role="status" className="kxd-os-share-copy-status">
                               {copyStatus}
                             </p>
                           ) : null}
@@ -1955,15 +1957,7 @@ export function ProposalWorkspaceScreen({
                             Replace Share Link invalidates the previous client URL immediately. It
                             does not email anyone or mark the proposal as sent.
                           </p>
-                          <label
-                            style={{
-                              display: "flex",
-                              gap: 8,
-                              alignItems: "flex-start",
-                              marginBottom: 12,
-                              fontFamily: "system-ui, sans-serif",
-                            }}
-                          >
+                          <label className="kxd-os-check" style={{ marginBottom: 12 }}>
                             <input
                               type="checkbox"
                               checked={replaceAcknowledged}

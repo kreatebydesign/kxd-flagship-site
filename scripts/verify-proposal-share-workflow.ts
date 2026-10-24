@@ -308,6 +308,19 @@ function main() {
     "Operator UI renamed Send Proposal → Prepare Share Link",
     sourceHas(workspace, /Prepare Share Link/) && sourceLacks(workspace, /Send Proposal/),
   );
+  const osCss = readRepo("design-system/os/styles/kxd-os.css");
+  check(
+    "Share URL + panels use theme-safe surfaces (dark mode contrast)",
+    sourceHas(osCss, /\.kxd-os-share-link[\s\S]*var\(--kxd-os-bg-elevated\)/) &&
+      sourceHas(osCss, /\.kxd-os-share-panel[\s\S]*var\(--kxd-os-bg-surface\)/) &&
+      !/\.kxd-os-share-link[\s\S]{0,120}background:\s*#fff/.test(osCss),
+  );
+  check(
+    "Proposal workspace fields use semantic OS tokens",
+    sourceHas(workspace, /kxd-proposal-workspace/) &&
+      sourceHas(workspace, /var\(--kxd-os-bg-elevated\)/) &&
+      sourceHas(workspace, /var\(--kxd-os-text-primary\)/),
+  );
   check(
     "Protected proposals render a locked delivery status card",
     sourceHas(workspace, /kxd-os-share-locked/) &&

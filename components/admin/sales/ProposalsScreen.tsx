@@ -107,14 +107,8 @@ export function ProposalsScreen({ proposals }: { proposals: SalesUiDoc[] }) {
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
                   placeholder="Number, title, contact…"
-                  style={{
-                    width: "100%",
-                    marginTop: 4,
-                    border: "1px solid var(--kxd-os-line, #e2d8c8)",
-                    borderRadius: 2,
-                    padding: "0.55rem 0.7rem",
-                    background: "var(--kxd-os-paper, #fffdf8)",
-                  }}
+                  className="kxd-os-input"
+                  style={{ width: "100%", marginTop: 4 }}
                 />
               </label>
               <label style={{ flex: "0 1 160px" }}>
@@ -122,14 +116,8 @@ export function ProposalsScreen({ proposals }: { proposals: SalesUiDoc[] }) {
                 <select
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
-                  style={{
-                    width: "100%",
-                    marginTop: 4,
-                    border: "1px solid var(--kxd-os-line, #e2d8c8)",
-                    borderRadius: 2,
-                    padding: "0.55rem 0.7rem",
-                    background: "var(--kxd-os-paper, #fffdf8)",
-                  }}
+                  className="kxd-os-input kxd-os-select"
+                  style={{ width: "100%", marginTop: 4 }}
                 >
                   <option value="">All</option>
                   {statuses.map((s) => (
@@ -145,14 +133,8 @@ export function ProposalsScreen({ proposals }: { proposals: SalesUiDoc[] }) {
                   value={party}
                   onChange={(e) => setParty(e.target.value)}
                   placeholder="Filter by party"
-                  style={{
-                    width: "100%",
-                    marginTop: 4,
-                    border: "1px solid var(--kxd-os-line, #e2d8c8)",
-                    borderRadius: 2,
-                    padding: "0.55rem 0.7rem",
-                    background: "var(--kxd-os-paper, #fffdf8)",
-                  }}
+                  className="kxd-os-input"
+                  style={{ width: "100%", marginTop: 4 }}
                 />
               </label>
             </div>
