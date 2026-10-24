@@ -35,6 +35,11 @@ import {
 } from "./protection.ts";
 import { calculateProposalTotals, totalsToLegacyFields } from "./pricing.ts";
 import {
+  assertLeadSiblingAcceptanceAllowed,
+  getLeadAcceptanceEligibilityForProposal,
+  withLeadProposalAcceptanceTransaction,
+} from "./lead-mutual-acceptance.ts";
+import {
   authorizeLegacyPublicToken,
   createShareLinkRecord,
   findActiveShareLink,
@@ -912,6 +917,21 @@ export async function getPublicProposalByToken(rawToken: string): Promise<{
   };
 }
 
+export async function getPublicProposalAcceptanceEligibility(rawToken: string) {
+  const resolved = await resolveProposalByToken(rawToken);
+  if (!resolved) return null;
+  const payload = await payloadClient();
+  const proposalId = Number(resolved.proposal.id);
+  const leadId = relationId(resolved.proposal.lead);
+  const accepted = Boolean(resolved.proposal.acceptedSnapshot);
+  const eligibility = await getLeadAcceptanceEligibilityForProposal(payload, {
+    proposalId,
+    leadId,
+    alreadyAccepted: accepted,
+  });
+  return eligibility;
+}
+
 export async function recordPublicView(rawToken: string): Promise<void> {
   const resolved = await resolveProposalByToken(rawToken);
   if (!resolved) return;
@@ -1132,6 +1152,18 @@ export async function acceptProposal(
   };
 
   const payload = await payloadClient();
+  const leadId = relationId(resolved.proposal.lead);
+  const proposalId = Number(resolved.proposal.id);
+
+  const completeAcceptance = async (): Promise<{
+    proposal: AnyDoc;
+    contractId: number;
+    acceptance: AcceptanceRecord;
+    alreadyAccepted: boolean;
+  }> => {
+    if (leadId) {
+      await assertLeadSiblingAcceptanceAllowed(payload, leadId, proposalId);
+    }
 
   // Idempotent contract creation
   let contractId: number | null = null;
@@ -1286,6 +1318,12 @@ export async function acceptProposal(
   }
 
   return { proposal, contractId: contractId!, acceptance, alreadyAccepted: false };
+  };
+
+  if (leadId) {
+    return await withLeadProposalAcceptanceTransaction(payload, leadId, completeAcceptance);
+  }
+  return await completeAcceptance();
 }
 
 export async function getContractForProposal(proposalId: number): Promise<AnyDoc | null> {

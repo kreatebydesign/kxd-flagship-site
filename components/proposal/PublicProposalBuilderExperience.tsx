@@ -28,6 +28,12 @@ type ViewData = {
   clientCanSelect: boolean;
   scheduleCallUrl: string | null;
   totals: CanonicalProposal["totals"];
+  acceptanceEligibility?: {
+    canAccept: boolean;
+    reason: string | null;
+    acceptedSiblingProposalId: number | null;
+    acceptedSiblingProposalNumber: string | null;
+  };
 };
 
 export function PublicProposalBuilderExperience({ publicToken }: { publicToken: string }) {
@@ -721,14 +727,37 @@ export function PublicProposalBuilderExperience({ publicToken }: { publicToken: 
             </div>
           </section>
         ) : (
-          <section style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <section>
+            {data.acceptanceEligibility?.canAccept === false &&
+            data.acceptanceEligibility.reason &&
+            !data.accepted ? (
+              <div
+                style={{
+                  marginBottom: 16,
+                  padding: "14px 16px",
+                  background: "#fffdf8",
+                  borderLeft: "2px solid #c5a65c",
+                }}
+              >
+                <p style={{ ...eyebrow, marginBottom: 8 }}>Acceptance unavailable</p>
+                <p style={{ ...body, fontSize: "0.98rem", margin: 0 }}>
+                  {data.acceptanceEligibility.reason}
+                </p>
+              </div>
+            ) : null}
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <a href={`/api/proposal/${publicToken}/builder?download=pdf`} style={btn}>
               Download PDF
             </a>
             <button type="button" style={btnGhost} onClick={() => setMode("changes")}>
               Request changes
             </button>
-            <button type="button" style={btn} onClick={() => setMode("accept")}>
+            <button
+              type="button"
+              style={btn}
+              disabled={data.acceptanceEligibility?.canAccept === false}
+              onClick={() => setMode("accept")}
+            >
               Accept proposal
             </button>
             {bookingHref ? (
@@ -741,6 +770,7 @@ export function PublicProposalBuilderExperience({ publicToken }: { publicToken: 
                 Schedule a call
               </a>
             ) : null}
+            </div>
           </section>
         )}
       </div>
