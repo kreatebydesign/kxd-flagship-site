@@ -42,4 +42,11 @@ assert.match(dbTarget, /isProductionMain/);
 const middleware = read("middleware.ts");
 assert.match(middleware, /"\/api\/db-health"/);
 
+const previewPage = read("app/admin/sales/proposals/[id]/preview/page.tsx");
+assert.match(
+  previewPage,
+  /src=\{`\/api\/admin\/proposal-builder\/\$\{id\}\/preview`\}/,
+);
+assert.doesNotMatch(previewPage, /srcDoc=\{html\}/);
+
 console.log("verify:proposal-find-errors: OK\n");

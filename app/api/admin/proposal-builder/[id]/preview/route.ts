@@ -6,10 +6,10 @@ import { getProposal, previewCanonical } from "@/lib/proposal-builder/services";
 export const dynamic = "force-dynamic";
 
 export async function GET(
-  _req: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const auth = await requirePayloadAdminApi();
+  const auth = await requirePayloadAdminApi(request);
   if (auth instanceof NextResponse) return auth;
 
   const id = Number((await params).id);
