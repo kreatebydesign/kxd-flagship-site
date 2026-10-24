@@ -1,35 +1,42 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { Client } from "pg";
 import { requirePayloadAdminApi } from "@/lib/admin/auth";
+import {
+  classifyNeonDatabaseHost,
+  resolvePayloadDatabaseHostname,
+} from "@/lib/admin/database-target";
+import { isStudioPayloadOperator } from "@/payload/access/index.ts";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
-export async function GET() {
-  const auth = await requirePayloadAdminApi();
+export async function GET(request: NextRequest) {
+  const auth = await requirePayloadAdminApi(request);
   if (auth instanceof NextResponse) return auth;
+
+  if (!isStudioPayloadOperator(auth)) {
+    return NextResponse.json(
+      { success: false, ok: false, error: "Studio operator access required." },
+      { status: 403 },
+    );
+  }
 
   const rawUri =
     process.env.DATABASE_URI?.trim() || process.env.DATABASE_URL?.trim();
+  const host = resolvePayloadDatabaseHostname();
+  const classification = classifyNeonDatabaseHost(host);
 
   if (!rawUri) {
     return NextResponse.json({
       hasDatabaseUri: false,
       host: null,
+      isProductionMain: false,
+      isPreviewBranch: false,
       connected: false,
       now: null,
       error: "DATABASE_URI and DATABASE_URL are both unset",
     });
-  }
-
-  // Extract host only — never expose credentials or full URL.
-  let host: string | null = null;
-  try {
-    const url = new URL(rawUri);
-    host = url.hostname;
-  } catch {
-    host = "(unparseable)";
   }
 
   const client = new Client({
@@ -46,7 +53,9 @@ export async function GET() {
 
     return NextResponse.json({
       hasDatabaseUri: true,
-      host,
+      host: classification.host,
+      isProductionMain: classification.isProductionMain,
+      isPreviewBranch: classification.isPreviewBranch,
       connected: true,
       now,
       error: null,
@@ -56,7 +65,9 @@ export async function GET() {
 
     return NextResponse.json({
       hasDatabaseUri: true,
-      host,
+      host: classification.host,
+      isProductionMain: classification.isProductionMain,
+      isPreviewBranch: classification.isPreviewBranch,
       connected: false,
       now: null,
       error: err instanceof Error ? err.message : String(err),

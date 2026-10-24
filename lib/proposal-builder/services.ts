@@ -69,6 +69,7 @@ import type {
   ProposalVersionRecord,
   ShareLinkRecord,
 } from "./types.ts";
+import { findProposalByIdForOperator } from "../sales/proposal-find.ts";
 import {
   DEFAULT_ACCEPTANCE_DISCLOSURE,
   DEFAULT_CONTRACT_REQUIRED_DISCLOSURE,
@@ -212,16 +213,8 @@ export async function listProposals(opts?: {
 
 export async function getProposal(id: number): Promise<AnyDoc | null> {
   const payload = await payloadClient();
-  try {
-    return (await payload.findByID({
-      collection: PROPOSALS as "users",
-      id,
-      depth: 2,
-      overrideAccess: true,
-    })) as AnyDoc;
-  } catch {
-    return null;
-  }
+  const doc = await findProposalByIdForOperator(payload, id, 2);
+  return doc as AnyDoc | null;
 }
 
 export async function createProposal(input: {
