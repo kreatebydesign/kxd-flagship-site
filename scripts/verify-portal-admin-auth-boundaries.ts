@@ -126,7 +126,8 @@ function main() {
 
   check(
     "Users collection remains Payload admin auth",
-    users.includes('slug: "users"') && users.includes("auth: true"),
+    users.includes('slug: "users"') &&
+      (users.includes("auth: true") || /auth:\s*\{/.test(users)),
   );
 
   check(

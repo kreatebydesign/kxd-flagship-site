@@ -432,6 +432,38 @@ export async function processLifecycleStripeTestWebhook(input: {
     reason: input.event.id,
   });
   await savePkg(payload, input.contractId, next);
+
+  if (
+    result.ok &&
+    !result.duplicate &&
+    input.event.type === "invoice.paid"
+  ) {
+    try {
+      const { emitLifecycleOperatorHandoff } = await import("../operator-handoff.ts");
+      const title = String(contract.title ?? "Contract");
+      await emitLifecycleOperatorHandoff({
+        flowKind: "invoice.paid",
+        entityId: input.contractId,
+        clientId,
+        title: `Stripe test payment received — ${title}`,
+        summary: result.onboardingEligible
+          ? "Test-mode invoice paid. Onboarding is eligible but remains manual."
+          : "Test-mode invoice paid. Review billing and onboarding gates in the contract workspace.",
+        severity: "success",
+        href: `/admin/sales/contracts/${input.contractId}`,
+        metadata: {
+          kind: "invoice.paid.stripe-test",
+          contractId: input.contractId,
+          stripeEventId: input.event.id,
+          livemode: false,
+          onboardingEligible: Boolean(result.onboardingEligible),
+        },
+      });
+    } catch {
+      /* best-effort */
+    }
+  }
+
   return { pkg: next, result };
 }
 

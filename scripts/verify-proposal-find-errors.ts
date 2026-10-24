@@ -59,4 +59,19 @@ assert.match(previewHtml, /renderProposalPreviewHtml/);
 const previewApi = read("app/api/admin/proposal-builder/[id]/preview/route.ts");
 assert.match(previewApi, /getProposalPreviewHtmlForOperator/);
 
+const operatorHandoff = read("lib/proposal-lifecycle/operator-handoff.ts");
+assert.match(operatorHandoff, /emitLifecycleOperatorHandoff/);
+assert.match(operatorHandoff, /processOperationalFlow/);
+assert.match(operatorHandoff, /notifyLifecycleEvent/);
+
+const acceptServices = read("lib/proposal-builder/services.ts");
+assert.match(acceptServices, /emitLifecycleOperatorHandoff/);
+assert.match(acceptServices, /flowKind: "proposal\.accepted"/);
+
+const stripeTestSvc = read("lib/proposal-lifecycle/stripe-test/service.ts");
+assert.match(stripeTestSvc, /emitLifecycleOperatorHandoff/);
+
+const liveRecon = read("lib/proposal-lifecycle/live-stripe-reconciliation-service.ts");
+assert.match(liveRecon, /emitLifecycleOperatorHandoff/);
+
 console.log("verify:proposal-find-errors: OK\n");
