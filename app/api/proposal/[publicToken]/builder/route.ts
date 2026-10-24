@@ -11,6 +11,7 @@ import { normalizeProposalDocument } from "@/lib/proposal-builder/document";
 import { renderProposalPdf } from "@/lib/proposal-builder/export-pdf";
 import {
   acceptProposal,
+  getPublicProposalAcceptanceEligibility,
   getPublicProposalByToken,
   recordPublicView,
   submitChangeRequest,
@@ -56,6 +57,8 @@ export async function GET(
     selectedPackageKeys: view.canonical.selectedPackageKeys,
   });
 
+  const acceptanceEligibility = await getPublicProposalAcceptanceEligibility(publicToken);
+
   return NextResponse.json({
     success: true,
     accepted: view.accepted,
@@ -64,6 +67,12 @@ export async function GET(
     options: doc.options,
     scheduleCallUrl: publicBookingUrl(doc.scheduleCallUrl),
     totals: view.accepted ? view.canonical.totals : liveTotals,
+    acceptanceEligibility: acceptanceEligibility ?? {
+      canAccept: !view.accepted,
+      reason: null,
+      acceptedSiblingProposalId: null,
+      acceptedSiblingProposalNumber: null,
+    },
   });
 }
 
