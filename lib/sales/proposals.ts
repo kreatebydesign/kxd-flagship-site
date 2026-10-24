@@ -3,6 +3,7 @@ import "server-only";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import type { OptionalService, ProposalSectionBlock, SalesDoc } from "./types";
+import { findProposalByIdForOperator } from "./proposal-find";
 
 const PROPOSALS = "proposals";
 const SECTIONS = "proposal-sections";
@@ -48,18 +49,8 @@ export async function getProposalsList(limit = 100): Promise<SalesDoc[]> {
 
 export async function getProposalById(id: number): Promise<SalesDoc | null> {
   const payload = await getPayload({ config });
-  try {
-    const doc = await payload.findByID({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      collection: PROPOSALS as any,
-      id,
-      depth: 2,
-      overrideAccess: true,
-    });
-    return doc as SalesDoc;
-  } catch {
-    return null;
-  }
+  const doc = await findProposalByIdForOperator(payload, id, 2);
+  return doc as SalesDoc | null;
 }
 
 export async function getSectionTemplates(): Promise<SalesDoc[]> {

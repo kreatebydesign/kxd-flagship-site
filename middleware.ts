@@ -121,6 +121,16 @@ export function middleware(request: NextRequest) {
     return nextWithPath();
   }
 
+  if (pathname === "/api/db-health") {
+    if (!hasPayloadAuthCookie(request)) {
+      return jsonWithPath(
+        { success: false, ok: false, error: "Unauthorized." },
+        { status: 401 },
+      );
+    }
+    return nextWithPath();
+  }
+
   if (pathname.startsWith("/api/admin/")) {
     const authHeader = request.headers.get("authorization");
     // Cron bearer is scoped ONLY to reporting ingest — never the whole admin API.
@@ -227,6 +237,7 @@ export const config = {
     "/admin/training",
     "/admin/training/:path*",
     "/api/admin/:path*",
+    "/api/db-health",
     "/api/cron/:path*",
     "/portal/:path*",
     "/junior-creators/:path*",
