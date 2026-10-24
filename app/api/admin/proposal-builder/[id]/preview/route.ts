@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePayloadAdminApi } from "@/lib/admin/auth";
-import { renderProposalPreviewHtml } from "@/lib/proposal-builder/export-html";
-import { getProposal, previewCanonical } from "@/lib/proposal-builder/services";
+import { getProposalPreviewHtmlForOperator } from "@/lib/proposal-builder/preview-html";
 
 export const dynamic = "force-dynamic";
 
@@ -13,17 +12,16 @@ export async function GET(
   if (auth instanceof NextResponse) return auth;
 
   const id = Number((await params).id);
-  const proposal = await getProposal(id);
-  if (!proposal) {
+  const html = await getProposalPreviewHtmlForOperator(id);
+  if (!html) {
     return NextResponse.json({ success: false, error: "Not found." }, { status: 404 });
   }
 
-  const canonical = previewCanonical(proposal);
-  const html = renderProposalPreviewHtml(canonical);
   return new NextResponse(html, {
     headers: {
       "Content-Type": "text/html; charset=utf-8",
       "Cache-Control": "no-store",
+      "X-Frame-Options": "SAMEORIGIN",
     },
   });
 }

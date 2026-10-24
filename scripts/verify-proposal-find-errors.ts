@@ -43,10 +43,20 @@ const middleware = read("middleware.ts");
 assert.match(middleware, /"\/api\/db-health"/);
 
 const previewPage = read("app/admin/sales/proposals/[id]/preview/page.tsx");
-assert.match(
+assert.match(previewPage, /srcDoc=\{html\}/);
+assert.match(previewPage, /getProposalPreviewHtmlForOperator/);
+assert.doesNotMatch(
   previewPage,
   /src=\{`\/api\/admin\/proposal-builder\/\$\{id\}\/preview`\}/,
 );
-assert.doesNotMatch(previewPage, /srcDoc=\{html\}/);
+assert.doesNotMatch(previewPage, /import\s*\{[^}]*OperationsShell/);
+assert.match(previewPage, /export const runtime = "nodejs"/);
+
+const previewHtml = read("lib/proposal-builder/preview-html.ts");
+assert.match(previewHtml, /getProposalPreviewHtmlForOperator/);
+assert.match(previewHtml, /renderProposalPreviewHtml/);
+
+const previewApi = read("app/api/admin/proposal-builder/[id]/preview/route.ts");
+assert.match(previewApi, /getProposalPreviewHtmlForOperator/);
 
 console.log("verify:proposal-find-errors: OK\n");
