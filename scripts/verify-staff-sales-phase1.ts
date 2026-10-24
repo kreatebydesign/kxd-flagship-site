@@ -147,6 +147,11 @@ assert.doesNotMatch(
 );
 
 assert.match(read("app/admin/sales/layout.tsx"), /requireStaffAwarePage/);
+assert.match(read("app/admin/sales/layout.tsx"), /x-kxd-pathname/);
+assert.doesNotMatch(
+  read("app/admin/sales/layout.tsx"),
+  /requireStaffAwarePage\("\/admin\/sales"\)/,
+);
 assert.match(
   read("app/api/admin/staff/sales/leads/route.ts"),
   /requireStaffCapabilityApi\("staff\.sales/,
