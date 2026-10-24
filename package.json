@@ -161,6 +161,8 @@
     "verify:payload-staff-csrf-origins": "tsx scripts/verify-payload-staff-csrf-origins.ts",
     "verify:staff-time-post-auth-headers": "tsx scripts/verify-staff-time-post-auth-headers.ts",
     "verify:staff-time-playwright-qa": "tsx scripts/verify-preview-staff-time-playwright-qa.ts",
+    "verify:staff-documents-premium-ux-playwright-qa": "tsx scripts/verify-staff-documents-premium-ux-playwright-qa.ts",
+    "render:staff-documents-premium-ux-fixtures": "tsx scripts/render-staff-documents-premium-ux-fixture-screenshots.tsx",
     "seed:local-staff-time-browser-qa": "tsx scripts/seed-local-staff-time-browser-qa.ts",
     "verify:staff-time-bootstrap-idempotency": "KXD_SERVER_ONLY_SHIM=1 node --import ./scripts/shims/register-server-only.mjs --import tsx --env-file=.env.local scripts/verify-staff-time-bootstrap-idempotency.ts",
     "verify:staff-time-scope": "KXD_SERVER_ONLY_SHIM=1 node --import ./scripts/shims/register-server-only.mjs --import tsx --env-file=.env.local scripts/verify-staff-time-scope.ts",

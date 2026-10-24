@@ -3,6 +3,8 @@
  *   npx tsx scripts/verify-staff-documents.ts
  */
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { buildStaffAcknowledgment } from "../lib/staff-documents/acknowledgment.ts";
 import { hashStaffDocumentBody, hashStaffDocumentPdfBytes } from "../lib/staff-documents/hash.ts";
 import { verifyStaffDocumentIntegrity } from "../lib/staff-documents/integrity.ts";
@@ -24,6 +26,9 @@ import {
   resolveStaffDocumentsListPageAccess,
   resolveStaffDocumentsOversightPageAccess,
 } from "../lib/staff-documents/page-access.ts";
+import {
+  staffDocumentEmployeeReviewAction,
+} from "../lib/staff-documents/display.ts";
 import type { StaffActor } from "../lib/staff/types";
 
 console.log("\nverify:staff-documents\n");
@@ -150,5 +155,42 @@ assert.throws(() =>
 assert.doesNotThrow(() =>
   assertStaffTemplateStatusTransition({ from: "draft", to: "legal-review" }),
 );
+
+assert.equal(
+  staffDocumentEmployeeReviewAction({ status: "assigned", signingMode: "dual-signature" }),
+  "Review & sign",
+);
+assert.equal(
+  staffDocumentEmployeeReviewAction({ status: "assigned", signingMode: "acknowledgment" }),
+  "Review & acknowledge",
+);
+assert.equal(
+  staffDocumentEmployeeReviewAction({ status: "executed", signingMode: "dual-signature" }),
+  null,
+);
+
+const root = process.cwd();
+const listScreen = readFileSync(
+  join(root, "components/admin/operations/staff/StaffDocumentsScreen.tsx"),
+  "utf8",
+);
+assert.match(listScreen, /kxd-staff-doc-list/);
+assert.match(listScreen, /On file/);
+assert.ok(!listScreen.includes('label="All documents"'));
+
+const reviewPane = readFileSync(
+  join(root, "components/admin/operations/staff/StaffDocumentReviewPane.tsx"),
+  "utf8",
+);
+assert.match(reviewPane, /kxd-agreement-doc-card__scroll/);
+assert.match(reviewPane, /KxdAgreementDocument/);
+
+const signForm = readFileSync(
+  join(root, "components/admin/operations/staff/StaffDocumentSignForm.tsx"),
+  "utf8",
+);
+assert.match(signForm, /useState\(false\)/);
+assert.match(signForm, /StaffDocumentReviewPane/);
+assert.ok(!signForm.includes('className="kxd-agreement-doc-island"'));
 
 console.log("  ✓ staff documents release A checks passed\n");

@@ -1,0 +1,142 @@
+/* Staff employee documents — list and signing workflow (ops staff chrome) */
+
+.kxd-staff-doc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.kxd-staff-doc-list__item {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.kxd-staff-doc-list__item:last-child {
+  border-bottom: none;
+}
+
+.kxd-staff-doc-list__link {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.85rem 1rem;
+  padding: 0.72rem 0.95rem;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 2px;
+  transition: background-color 0.12s ease;
+}
+
+.kxd-staff-doc-list__link:hover,
+.kxd-staff-doc-list__link:focus-visible {
+  background-color: rgba(255, 255, 255, 0.04);
+  outline: none;
+}
+
+.kxd-staff-doc-list__item--attention .kxd-staff-doc-list__link {
+  padding-top: 0.85rem;
+  padding-bottom: 0.85rem;
+}
+
+.kxd-staff-doc-list__main {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.kxd-staff-doc-list__title {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+}
+
+.kxd-staff-doc-list__meta {
+  margin: 0.28rem 0 0;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: var(--kxd-os-text-muted, rgba(255, 255, 255, 0.55));
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.45rem;
+}
+
+.kxd-staff-doc-list__aside {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.45rem;
+  flex-shrink: 0;
+}
+
+.kxd-staff-doc-list__cta {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--kxd-os-gold, #c2aa72);
+}
+
+.kxd-staff-doc-detail {
+  max-width: 44rem;
+  margin: 0 auto;
+}
+
+.kxd-staff-doc-detail__panel {
+  margin-top: 1.15rem;
+}
+
+.kxd-staff-doc-steps {
+  list-style: none;
+  margin: 0 0 0.85rem;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-muted, rgba(255, 255, 255, 0.55));
+}
+
+.kxd-staff-doc-steps__item--current {
+  color: var(--kxd-os-text, rgba(255, 255, 255, 0.92));
+  font-weight: 600;
+}
+
+.kxd-staff-doc-sign-fieldset {
+  border: none;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.kxd-staff-doc-sign-fieldset legend {
+  padding: 0;
+}
+
+.kxd-staff-doc-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  margin-top: 0.75rem;
+  cursor: pointer;
+}
+
+.kxd-staff-doc-consent input {
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .kxd-staff-doc-list__link {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .kxd-staff-doc-list__aside {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+}

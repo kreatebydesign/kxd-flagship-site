@@ -1,11 +1,11 @@
 "use client";
 
 import { useId, useState, type FormEvent } from "react";
-import { AgreementDocumentBody } from "@/components/agreement/AgreementDocumentBody";
-import { KxdAgreementDocument } from "@/components/agreement/KxdAgreementDocument";
+import "@/design-system/os/styles/kxd-staff-documents.css";
 import { STAFF_AGREEMENT_ESIGN_CONSENT_TEXT } from "@/lib/staff-documents/constants";
 import { staffDocumentKindLabel } from "@/lib/staff-documents/display";
 import type { StaffDocumentDetail } from "@/lib/staff-documents/types";
+import { StaffDocumentReviewPane } from "./StaffDocumentReviewPane";
 
 export function StaffDocumentSignForm(props: {
   document: StaffDocumentDetail;
@@ -13,6 +13,8 @@ export function StaffDocumentSignForm(props: {
   canDecline: boolean;
 }) {
   const formId = useId();
+  const authorityId = useId();
+  const consentId = useId();
   const [legalName, setLegalName] = useState("");
   const [title, setTitle] = useState("");
   const [entityName, setEntityName] = useState("");
@@ -25,6 +27,16 @@ export function StaffDocumentSignForm(props: {
   const awaitingKxd = props.document.status === "awaiting-operator-signature";
   const executed = props.document.status === "executed";
   const declined = props.document.status === "declined";
+
+  const metaLine = [
+    props.document.legalEntityName,
+    `Version ${props.document.templateVersion}`,
+    props.document.expiresAt
+      ? `Expires ${new Date(props.document.expiresAt).toLocaleDateString(undefined, { dateStyle: "medium" })}`
+      : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   async function onSign(e: FormEvent) {
     e.preventDefault();
@@ -86,43 +98,39 @@ export function StaffDocumentSignForm(props: {
       : null;
 
   return (
-    <div className="kxd-agreement-doc-island">
-      <KxdAgreementDocument
-        variant="signing"
+    <div className="kxd-staff-doc-detail">
+      <StaffDocumentReviewPane
         eyebrow={staffDocumentKindLabel(props.document.kind)}
-        showDocumentFooter
-        documentFooterLabel="Staff agreement · Review in full before signing"
-      >
-        <h1 className="kxd-agreement-doc__title" style={{ fontFamily: "Georgia, serif" }}>
-          {props.document.title}
-        </h1>
-        <p className="kxd-os-meta" style={{ marginBottom: "1rem" }}>
-          {props.document.legalEntityName} · Version {props.document.templateVersion}
-          {props.document.expiresAt
-            ? ` · Expires ${new Date(props.document.expiresAt).toLocaleString()}`
-            : ""}
-        </p>
-        <AgreementDocumentBody text={props.document.bodySnapshot} variant="signing" />
-      </KxdAgreementDocument>
+        title={props.document.title}
+        metaLine={metaLine}
+        bodySnapshot={props.document.bodySnapshot}
+        footerLabel="Staff agreement · Review in full before signing"
+        scrollHint="Scroll through the complete agreement. Signing controls appear below when you are ready."
+      />
 
-      <div className="kxd-os-card kxd-os-ops-card-padding" style={{ marginTop: "1.25rem" }}>
-        <p className="kxd-os-card__title">Downloads</p>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", marginTop: "0.75rem" }}>
-          {policyDownload ? (
-            <a href={policyDownload} className="kxd-os-btn kxd-os-btn--secondary">
-              Download agreement PDF
-            </a>
-          ) : null}
-          {executedDownload ? (
-            <a href={executedDownload} className="kxd-os-btn kxd-os-btn--primary">
-              Download executed agreement
-            </a>
-          ) : null}
+      {(policyDownload || executedDownload) && (
+        <div className="kxd-os-card kxd-os-ops-card-padding kxd-staff-doc-detail__panel">
+          <p className="kxd-os-card__title">Downloads</p>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", marginTop: "0.75rem" }}>
+            {policyDownload ? (
+              <a href={policyDownload} className="kxd-os-btn kxd-os-btn--secondary">
+                Download agreement PDF
+              </a>
+            ) : null}
+            {executedDownload ? (
+              <a href={executedDownload} className="kxd-os-btn kxd-os-btn--primary">
+                Download executed agreement
+              </a>
+            ) : null}
+          </div>
         </div>
-      </div>
+      )}
 
       {executed ? (
-        <div className="kxd-os-card kxd-os-ops-card-padding" style={{ marginTop: "1.25rem" }} role="status">
+        <div
+          className="kxd-os-card kxd-os-ops-card-padding kxd-staff-doc-detail__panel"
+          role="status"
+        >
           <p className="kxd-os-card__title">Fully executed</p>
           <p className="kxd-os-meta" style={{ marginTop: "0.5rem" }}>
             Executed{" "}
@@ -132,7 +140,10 @@ export function StaffDocumentSignForm(props: {
           </p>
         </div>
       ) : awaitingKxd ? (
-        <div className="kxd-os-card kxd-os-ops-card-padding" style={{ marginTop: "1.25rem" }} role="status">
+        <div
+          className="kxd-os-card kxd-os-ops-card-padding kxd-staff-doc-detail__panel"
+          role="status"
+        >
           <p className="kxd-os-card__title">Awaiting KXD signature</p>
           <p className="kxd-os-meta" style={{ marginTop: "0.5rem" }}>
             Your signature is recorded. An authorized KXD representative will countersign to complete
@@ -140,7 +151,10 @@ export function StaffDocumentSignForm(props: {
           </p>
         </div>
       ) : declined ? (
-        <div className="kxd-os-card kxd-os-ops-card-padding" style={{ marginTop: "1.25rem" }} role="status">
+        <div
+          className="kxd-os-card kxd-os-ops-card-padding kxd-staff-doc-detail__panel"
+          role="status"
+        >
           <p className="kxd-os-card__title">Declined</p>
           <p className="kxd-os-meta" style={{ marginTop: "0.5rem" }}>
             You declined this agreement assignment.
@@ -150,70 +164,86 @@ export function StaffDocumentSignForm(props: {
         <form
           id={formId}
           onSubmit={onSign}
-          className="kxd-os-card kxd-os-ops-card-padding"
-          style={{ marginTop: "1.25rem" }}
+          className="kxd-os-card kxd-os-ops-card-padding kxd-staff-doc-detail__panel"
+          aria-labelledby={`${formId}-legend`}
         >
-          <p className="kxd-os-card__title">Electronic signature</p>
-          <p className="kxd-os-meta" style={{ marginTop: "0.5rem" }}>
-            {STAFF_AGREEMENT_ESIGN_CONSENT_TEXT}
-          </p>
-          <label className="kxd-os-field" style={{ marginTop: "1rem", display: "block" }}>
-            <span className="kxd-os-field__label">Legal name</span>
-            <input
-              className="kxd-os-input"
-              value={legalName}
-              onChange={(e) => setLegalName(e.target.value)}
-              required
-              autoComplete="name"
-            />
-          </label>
-          <label className="kxd-os-field" style={{ marginTop: "0.75rem", display: "block" }}>
-            <span className="kxd-os-field__label">Title / role</span>
-            <input
-              className="kxd-os-input"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-            />
-          </label>
-          <label className="kxd-os-field" style={{ marginTop: "0.75rem", display: "block" }}>
-            <span className="kxd-os-field__label">Signing entity (your legal name or employer)</span>
-            <input
-              className="kxd-os-input"
-              value={entityName}
-              onChange={(e) => setEntityName(e.target.value)}
-              required
-            />
-          </label>
-          <label className="kxd-os-field" style={{ marginTop: "0.75rem", display: "block" }}>
-            <span className="kxd-os-field__label">Type your legal name to sign</span>
-            <input
-              className="kxd-os-input"
-              value={typed}
-              onChange={(e) => setTyped(e.target.value)}
-              required
-            />
-          </label>
-          <label style={{ display: "flex", gap: "0.5rem", marginTop: "0.75rem" }}>
-            <input
-              type="checkbox"
-              checked={authority}
-              onChange={(e) => setAuthority(e.target.checked)}
-              required
-            />
-            <span className="kxd-os-meta">I am authorized to sign for the named party.</span>
-          </label>
-          <label style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
-            <input
-              type="checkbox"
-              checked={consent}
-              onChange={(e) => setConsent(e.target.checked)}
-              required
-            />
-            <span className="kxd-os-meta">I agree to electronic records and signatures.</span>
-          </label>
+          <ol className="kxd-staff-doc-steps" aria-label="Signing steps">
+            <li className="kxd-staff-doc-steps__item">1. Review agreement</li>
+            <li className="kxd-staff-doc-steps__item kxd-staff-doc-steps__item--current">
+              2. Complete signature
+            </li>
+          </ol>
+          <fieldset className="kxd-staff-doc-sign-fieldset">
+            <legend id={`${formId}-legend`} className="kxd-os-card__title">
+              Electronic signature
+            </legend>
+            <p className="kxd-os-meta" style={{ marginTop: "0.5rem" }}>
+              {STAFF_AGREEMENT_ESIGN_CONSENT_TEXT}
+            </p>
+            <label className="kxd-os-field" style={{ marginTop: "1rem", display: "block" }}>
+              <span className="kxd-os-field__label">Legal name</span>
+              <input
+                className="kxd-os-input"
+                value={legalName}
+                onChange={(e) => setLegalName(e.target.value)}
+                required
+                autoComplete="name"
+              />
+            </label>
+            <label className="kxd-os-field" style={{ marginTop: "0.75rem", display: "block" }}>
+              <span className="kxd-os-field__label">Title / role</span>
+              <input
+                className="kxd-os-input"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+              />
+            </label>
+            <label className="kxd-os-field" style={{ marginTop: "0.75rem", display: "block" }}>
+              <span className="kxd-os-field__label">Signing entity (your legal name or employer)</span>
+              <input
+                className="kxd-os-input"
+                value={entityName}
+                onChange={(e) => setEntityName(e.target.value)}
+                required
+              />
+            </label>
+            <label className="kxd-os-field" style={{ marginTop: "0.75rem", display: "block" }}>
+              <span className="kxd-os-field__label">Type your legal name to sign</span>
+              <input
+                className="kxd-os-input"
+                value={typed}
+                onChange={(e) => setTyped(e.target.value)}
+                required
+              />
+            </label>
+            <label className="kxd-staff-doc-consent" htmlFor={authorityId}>
+              <input
+                id={authorityId}
+                type="checkbox"
+                checked={authority}
+                onChange={(e) => setAuthority(e.target.checked)}
+                required
+              />
+              <span className="kxd-os-meta">I am authorized to sign for the named party.</span>
+            </label>
+            <label className="kxd-staff-doc-consent" htmlFor={consentId}>
+              <input
+                id={consentId}
+                type="checkbox"
+                checked={consent}
+                onChange={(e) => setConsent(e.target.checked)}
+                required
+              />
+              <span className="kxd-os-meta">I agree to electronic records and signatures.</span>
+            </label>
+          </fieldset>
           {error ? (
-            <p className="kxd-os-meta" style={{ color: "var(--kxd-os-critical)", marginTop: "0.75rem" }}>
+            <p
+              className="kxd-os-meta"
+              style={{ color: "var(--kxd-os-critical)", marginTop: "0.75rem" }}
+              role="alert"
+            >
               {error}
             </p>
           ) : null}
@@ -234,7 +264,7 @@ export function StaffDocumentSignForm(props: {
           </div>
         </form>
       ) : (
-        <p className="kxd-os-meta" style={{ marginTop: "1rem" }}>
+        <p className="kxd-os-meta kxd-staff-doc-detail__panel">
           This agreement is not available for signature in its current state.
         </p>
       )}
