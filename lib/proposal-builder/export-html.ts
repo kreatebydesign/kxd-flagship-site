@@ -140,7 +140,7 @@ export function renderProposalPreviewHtml(proposal: CanonicalProposal): string {
     ? investment.scheduleRows
         .map(
           (row) =>
-            `<div class="invest-row"><span>${esc(row.label)}<br/><span class="muted">${esc(row.timing)}</span></span><strong>${esc(row.amount)}</strong></div>`,
+            `<div class="invest-row"><span>${esc(row.label)}${row.timing ? `<br/><span class="muted">${esc(row.timing)}</span>` : ""}</span><strong>${esc(row.amount)}</strong></div>`,
         )
         .join("")
     : "";

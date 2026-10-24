@@ -643,8 +643,12 @@ function InvestmentSection({ proposal }: { proposal: CanonicalProposal }) {
             <View key={row.id} style={styles.investmentRow}>
               <Text style={styles.investmentRowTitle}>
                 {row.label}
-                {"\n"}
-                <Text style={{ color: colors.muted, fontWeight: 400 }}>{row.timing}</Text>
+                {row.timing ? (
+                  <>
+                    {"\n"}
+                    <Text style={{ color: colors.muted, fontWeight: 400 }}>{row.timing}</Text>
+                  </>
+                ) : null}
               </Text>
               <Text style={styles.investmentRowAmount}>{row.amount}</Text>
             </View>
@@ -688,6 +692,22 @@ function TermsSectionView({
     const paragraphs = blocks.filter((block) => block.type === "paragraph");
     if (bulletBlocks.length >= 1) {
       const items = bulletBlocks.flatMap((block) => block.items);
+      const useSingleColumn =
+        sectionKey === "clientResponsibilities" || items.length <= 4;
+      if (useSingleColumn) {
+        return (
+          <View style={styles.section} wrap minPresenceAhead={96}>
+            <Text style={styles.eyebrow}>{eyebrow}</Text>
+            <Text style={styles.h2}>{title}</Text>
+            {paragraphs.map((block, index) => (
+              <Paragraph key={`tp-${index}`} text={block.text} supporting />
+            ))}
+            {items.map((item) => (
+              <ProseBullet key={`s-${item.slice(0, 32)}`} text={item} />
+            ))}
+          </View>
+        );
+      }
       const midpoint = Math.ceil(items.length / 2);
       const left = items.slice(0, midpoint);
       const right = items.slice(midpoint);

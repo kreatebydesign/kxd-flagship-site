@@ -74,10 +74,23 @@ const ROADMAP_BY_PHASE_TITLE: Record<string, string> = {
   }),
 };
 
+function simplifyRoadmapDeliverableTitle(title: string): string {
+  const match = title.match(
+    /^Roadmap Phase (\d+)\s*[—–-]\s*(.+?)\s*\(([^)]+)\)\s*$/,
+  );
+  if (!match) return title.replace(/^Roadmap\s+/i, "");
+  const [, phase, summary, dates] = match;
+  return `Phase ${phase} (${dates}) — ${summary.trim()}`;
+}
+
 function patchRoadmapDeliverable(item: ProposalDeliverable): ProposalDeliverable {
-  const key = Object.keys(ROADMAP_BY_PHASE_TITLE).find((prefix) => item.title.startsWith(prefix));
-  if (!key) return item;
-  return { ...item, description: ROADMAP_BY_PHASE_TITLE[key] };
+  const phaseNum = item.title.match(/(?:Roadmap )?Phase (\d+)/i)?.[1];
+  const phaseKey = phaseNum ? `Roadmap Phase ${phaseNum}` : null;
+  const title = simplifyRoadmapDeliverableTitle(item.title);
+  if (phaseKey && ROADMAP_BY_PHASE_TITLE[phaseKey]) {
+    return { ...item, title, description: ROADMAP_BY_PHASE_TITLE[phaseKey] };
+  }
+  return { ...item, title };
 }
 
 function patchScopeGroups(doc: ProposalDocument): ProposalDocument {
@@ -116,6 +129,8 @@ function patchSharedTerms(doc: ProposalDocument): ProposalDocument {
         "The signed agreement establishes scope boundaries before kickoff. Discovery finalizes the detailed template-family inventory and acceptance criteria within those boundaries, with written approval and change control as described in the agreement. The delivery roadmap in this proposal is the phase schedule after kickoff. Dates assume timely kickoff, K&N content and brand assets, consolidated feedback from K&N's designated project owner, and approvals within agreed review windows. If kickoff or approvals shift, dates will be re-baselined in writing. K&N IT owns production integration, testing, and deployment; this schedule does not represent a production launch date.",
       changeRequestLanguage:
         "Each major approval stage includes up to two consolidated revision rounds, submitted by K&N's designated project owner within the review window for that stage. Feedback must be consolidated; fragmented or conflicting direction may reset the review clock. Additions or changes outside the agreed template-family inventory, approved scope boundaries, substantial redesigns beyond agreed revisions, additional pages, new functionality, or new template families require written change approval and may adjust investment and schedule.",
+      clientResponsibilities:
+        "K&N will provide approved copy, product information, and brand assets.\n- Designate a single project owner to consolidate feedback.\n- Meet agreed review windows.\n- Confirm with K&N IT the approved editable-source and handoff format (including Figma or code repository standards).\n- K&N IT owns CMS integration, production development, testing, deployment, and launch.",
     },
   };
 }

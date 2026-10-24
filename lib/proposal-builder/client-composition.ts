@@ -28,6 +28,16 @@ function initialPaymentDisplayLabel(
     : "Deposit";
 }
 
+/** Keep percentage attached to the description (avoids orphaned “(30%)” lines in PDF wraps). */
+function formatPaymentScheduleRowLabel(rawLabel: string): string {
+  const label = cleanText(rawLabel);
+  const match = label.match(/^(.+?)\s*\((\d+%)\)\s*$/);
+  if (!match) return label;
+  const description = cleanText(match[1]);
+  const pct = match[2];
+  return `${pct} — ${description}`;
+}
+
 export type CoverComposition = {
   docType: string;
   organizationLines: string[];
@@ -174,10 +184,12 @@ export function composeCoverPresentation(proposal: CanonicalProposal): CoverComp
     proposal.title,
     uniqueOrgs.length ? uniqueOrgs : [proposal.primaryOrganization],
   );
+  const engagementOverrides: Record<string, string> = {
+    "KXD-P-2026-0010": "Interactive Design & Code-First Delivery",
+  };
   const engagementTitle =
-    engagementFromTitle ||
-    cleanText(proposal.title) ||
-    "Engagement";
+    engagementOverrides[proposal.proposalNumber] ??
+    (engagementFromTitle || cleanText(proposal.title) || "Engagement");
 
   const contactName = cleanText(proposal.primaryContact?.name);
   const rawTitle = cleanText(proposal.primaryContact?.title);
@@ -432,12 +444,16 @@ export function composeInvestmentPresentation(proposal: CanonicalProposal): Inve
       optional: false,
     })),
     showDetailedSchedule,
-    scheduleRows: proposal.paymentSchedule.map((item) => ({
-      id: item.id,
-      label: item.label,
-      timing: formatClientFacingPaymentTiming(item.due),
-      amount: formatCents(item.amountCents, currency),
-    })),
+    scheduleRows: proposal.paymentSchedule.map((item) => {
+      const label = formatPaymentScheduleRowLabel(item.label);
+      const hasPct = /\d+%\s—/.test(label);
+      return {
+        id: item.id,
+        label,
+        timing: hasPct ? "" : formatClientFacingPaymentTiming(item.due),
+        amount: formatCents(item.amountCents, currency),
+      };
+    }),
     isFullUpfront,
   };
 }
@@ -516,6 +532,9 @@ export function composeTermsSectionPlan(proposal: CanonicalProposal): TermsSecti
       !investment.showDetailedSchedule &&
       investment.paymentSummary
     ) {
+      continue;
+    }
+    if (entry.key === "paymentAssumptions" && investment.showDetailedSchedule) {
       continue;
     }
 

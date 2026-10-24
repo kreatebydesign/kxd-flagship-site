@@ -241,8 +241,11 @@ check("html shows Aug 29", html.includes("August 29, 2026"));
 check("html has introduction", html.includes("Intro copy for clients"));
 check("html has current situation", html.includes("Situation copy"));
 check("html has exclusions", html.includes("Overall exclusions copy."));
-check("html has payment assumptions copy", html.includes("Payment assumptions copy"));
-check("html uses Payment conditions heading", html.includes("<h2>Payment conditions</h2>"));
+check(
+  "html hides duplicate payment conditions when detailed schedule shown",
+  !html.includes("Payment assumptions copy") && !html.includes("<h2>Payment conditions</h2>"),
+);
+check("html shows itemized payment schedule", html.includes("Payment schedule"));
 check("html omits Payment assumptions heading", !html.includes("<h2>Payment assumptions</h2>"));
 check("html includes official gold logo", html.includes("kxd-logo-transparent.png"));
 check("html maps discount label", html.includes("Partnership adjustment"));

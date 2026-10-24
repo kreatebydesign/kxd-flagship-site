@@ -117,11 +117,7 @@ async function exportArtifacts(
   );
 }
 
-async function polishOne(
-  payload: Awaited<ReturnType<typeof getPayload>>,
-  id: 11 | 12,
-  apply: boolean,
-): Promise<void> {
+async function polishOne(payload: Awaited<ReturnType<typeof import("payload").getPayload>>, id: 11 | 12, apply: boolean): Promise<void> {
   const proposalNumber = KN_PROPOSAL_NUMBERS[id];
   const before = (await payload.findByID({
     collection: "proposals" as never,
