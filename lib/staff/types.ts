@@ -288,6 +288,9 @@ export interface StaffGuidedWorkData {
   status: string;
   priority: string | null;
   dueDate: string | null;
+  plannedForDate: string | null;
+  schedulePrimary: string;
+  scheduleSecondary: string | null;
   clientLabel: string | null;
   whyItMatters: string;
   whatKxdKnows: string[];
@@ -323,8 +326,23 @@ export interface StaffOversightMember {
   planActionableCount: number;
 }
 
+export interface StaffOversightOpenAssignment {
+  workId: number;
+  title: string;
+  assigneeLabel: string;
+  assigneeUserId: number;
+  clientLabel: string;
+  status: import("@/lib/work/types").WorkStatus;
+  schedulePrimary: string;
+  scheduleSecondary: string | null;
+  isOverdue: boolean;
+  href: string;
+  staffHref: string;
+}
+
 export interface StaffOversightData {
   members: StaffOversightMember[];
+  openAssignments: StaffOversightOpenAssignment[];
   draftsAwaitingApproval: Array<{
     workId: number;
     title: string;

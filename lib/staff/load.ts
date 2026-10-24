@@ -43,6 +43,7 @@ import {
 } from "./prioritize";
 import { workRequiresOperatorApproval } from "./work-approval";
 import { STAFF_GUIDANCE_PROMPTS } from "./guidance";
+import { staffAssignmentScheduleDisplay } from "./assignment-schedule";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyUser = Record<string, any>;
@@ -285,6 +286,8 @@ export async function loadStaffGuidedWork(
     hasStructuredDeliverables: deliverables.length > 0,
   });
 
+  const schedule = staffAssignmentScheduleDisplay(work);
+
   return {
     workId: work.id,
     title: work.title,
@@ -304,6 +307,9 @@ export async function loadStaffGuidedWork(
     status: work.status,
     priority: work.priority,
     dueDate: work.dueDate,
+    plannedForDate: work.plannedForDate,
+    schedulePrimary: schedule.primary,
+    scheduleSecondary: schedule.secondary,
     clientLabel: work.clientName ?? null,
     whyItMatters:
       "Assigned work moves the studio forward when completed carefully and within your authority.",
@@ -311,7 +317,8 @@ export async function loadStaffGuidedWork(
       work.summary ? `Summary on file: ${work.summary}` : "No summary stored yet.",
       work.clientName ? `Related client: ${work.clientName}` : "No client linked.",
       `Current status: ${work.status}`,
-      work.dueDate ? `Due ${work.dueDate.slice(0, 10)}` : "No due date set.",
+      schedule.primary,
+      ...(schedule.secondary ? [`Also ${schedule.secondary}`] : []),
     ],
     whatToProduce: [
       "A clear internal update or draft",
