@@ -251,6 +251,8 @@
     "verify:executive-panel-metrics": "tsx scripts/verify-executive-panel-metrics.ts",
     "verify:runtime-contract": "tsx scripts/verify-runtime-contract.ts",
     "verify:sales-layout-return-path": "tsx scripts/verify-sales-layout-return-path.ts",
+    "verify:operations-layout-return-path": "tsx scripts/verify-operations-layout-return-path.ts",
+    "verify:staff-documents-security-gate": "tsx scripts/verify-staff-documents-security-gate.ts",
     "verify:proposal-find-errors": "tsx scripts/verify-proposal-find-errors.ts",
     "verify:sales-pipeline": "tsx scripts/verify-sales-pipeline.ts",
     "verify:availability": "tsx scripts/verify-availability.ts",

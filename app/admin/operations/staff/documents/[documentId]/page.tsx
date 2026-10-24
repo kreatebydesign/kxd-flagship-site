@@ -13,7 +13,13 @@ const LIST_PATH = "/admin/operations/staff/documents";
 type PageProps = { params: Promise<{ documentId: string }> };
 
 export default async function StaffDocumentDetailPage({ params }: PageProps) {
-  const user = await requireStaffAwarePage(LIST_PATH);
+  const documentId = Number((await params).documentId);
+  const detailPath =
+    Number.isFinite(documentId) && documentId > 0
+      ? `/admin/operations/staff/documents/${documentId}`
+      : LIST_PATH;
+
+  const user = await requireStaffAwarePage(detailPath);
   const actor = staffActorFromUser(user);
   const access = resolveStaffDocumentsListPageAccess(actor);
   if (access.kind === "redirect") {
@@ -23,7 +29,6 @@ export default async function StaffDocumentDetailPage({ params }: PageProps) {
     redirect(LIST_PATH);
   }
 
-  const documentId = Number((await params).documentId);
   if (!documentId) redirect(LIST_PATH);
 
   const detail = await getStaffDocumentDetail({ actor, documentId });

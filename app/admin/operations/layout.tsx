@@ -2,6 +2,10 @@
  * Standalone layout for /admin/operations.
  * Loads KXD global CSS + fonts outside any route group so CSS variables
  * and typography are available without Payload admin CSS interference.
+ *
+ * Auth only here — route groups enforce staff vs founder access:
+ * - `(studio)/layout.tsx` — founder / full operations
+ * - `staff/layout.tsx` — restricted staff shell
  */
 import type { Metadata } from "next";
 import { ThemeBootScript } from "@/components/os/ThemeBootScript";
@@ -18,15 +22,15 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+const OPERATIONS_LAYOUT_FALLBACK = "/admin/operations";
+
 export default async function OperationsLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { requireStaffAwarePage } = await import("@/lib/staff/guard");
-  const { headers } = await import("next/headers");
-  const pathname = (await headers()).get("x-kxd-pathname")?.trim() || "";
-  await requireStaffAwarePage(pathname || "/admin/operations");
+  const { requirePayloadAdminPage } = await import("@/lib/admin/auth");
+  await requirePayloadAdminPage(OPERATIONS_LAYOUT_FALLBACK);
 
   return (
     <html lang="en" suppressHydrationWarning>

@@ -7,6 +7,7 @@ import {
   resolveStaffDocumentsListPageAccess,
   resolveStaffDocumentsOversightPageAccess,
 } from "../lib/staff-documents/page-access.ts";
+import { isStaffAllowedPagePath } from "../lib/staff/permissions.ts";
 import type { StaffActor } from "../lib/staff/types";
 
 const tyler: StaffActor = {
@@ -39,6 +40,25 @@ const coordinator: StaffActor = {
 console.log("\nverify:staff-documents-page-access\n");
 
 assert.equal(resolveStaffDocumentsListPageAccess(tyler).kind, "render");
+assert.equal(
+  isStaffAllowedPagePath("/admin/operations/staff/documents", tyler),
+  true,
+);
+assert.equal(
+  isStaffAllowedPagePath("/admin/operations/staff/documents/12", tyler),
+  true,
+);
+assert.equal(
+  isStaffAllowedPagePath("/admin/operations/staff/oversight/documents", tyler),
+  true,
+);
+assert.equal(
+  isStaffAllowedPagePath("/admin/operations/today", tyler),
+  false,
+);
+
+const coordinatorList = resolveStaffDocumentsListPageAccess(coordinator);
+assert.equal(coordinatorList.kind, "render");
 
 const mattList = resolveStaffDocumentsListPageAccess(matt);
 assert.equal(mattList.kind, "redirect");
