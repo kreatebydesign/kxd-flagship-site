@@ -2,9 +2,12 @@
  * Standalone layout for /admin/operations.
  * Loads KXD global CSS + fonts outside any route group so CSS variables
  * and typography are available without Payload admin CSS interference.
+ *
+ * Auth only here — route groups enforce staff vs founder access:
+ * - `(studio)/layout.tsx` — founder / full operations
+ * - `staff/layout.tsx` — restricted staff shell
  */
 import type { Metadata } from "next";
-import { trustedLayoutReturnPath } from "@/lib/admin/trusted-layout-return-path";
 import { ThemeBootScript } from "@/components/os/ThemeBootScript";
 import "../../globals.css";
 import "../../../design-system/os/styles/kxd-os.css";
@@ -27,22 +30,7 @@ export default async function OperationsLayout({
   children: React.ReactNode;
 }) {
   const { requirePayloadAdminPage } = await import("@/lib/admin/auth");
-  const { requireStaffAwarePage, resolveRequestPathname } = await import(
-    "@/lib/staff/guard"
-  );
-  const pathname = (await resolveRequestPathname("")).trim();
-  if (!pathname) {
-    // Nested RSC layout runs may omit middleware pathname headers. Child layouts
-    // and pages enforce staff allowlists with canonical paths — auth only here.
-    await requirePayloadAdminPage(OPERATIONS_LAYOUT_FALLBACK);
-  } else {
-    const returnPath = trustedLayoutReturnPath(
-      pathname,
-      OPERATIONS_LAYOUT_FALLBACK,
-      "/admin/operations",
-    );
-    await requireStaffAwarePage(returnPath);
-  }
+  await requirePayloadAdminPage(OPERATIONS_LAYOUT_FALLBACK);
 
   return (
     <html lang="en" suppressHydrationWarning>

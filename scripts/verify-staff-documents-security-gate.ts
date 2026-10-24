@@ -14,6 +14,7 @@ import { assertStaffDocumentRowAccess } from "../lib/staff-documents/access.ts";
 import { trustedLayoutReturnPath } from "../lib/admin/trusted-layout-return-path.ts";
 import { resolveStaffAwarePathname } from "../lib/staff/aware-pathname.ts";
 import { isStaffAllowedPagePath } from "../lib/staff/permissions.ts";
+import { resolveStudioOperationsGuardPath } from "../lib/staff/studio-operations-path.ts";
 import type { StaffActor } from "../lib/staff/types";
 
 const root = path.resolve(import.meta.dirname, "..");
@@ -78,8 +79,25 @@ const middleware = read("middleware.ts");
 assert.match(middleware, /requestHeaders\.set\("x-kxd-pathname", pathname\)/);
 
 const opsLayout = read("app/admin/operations/layout.tsx");
-assert.match(opsLayout, /resolveRequestPathname/);
 assert.match(opsLayout, /requirePayloadAdminPage/);
+assert.doesNotMatch(opsLayout, /requireStaffAwarePage/);
+
+const studioLayout = read("app/admin/operations/(studio)/layout.tsx");
+assert.match(studioLayout, /requireStaffAwarePage/);
+assert.match(studioLayout, /resolveStudioOperationsGuardPath/);
+
+// SEC-001 — studio fail-closed when pathname headers missing
+assert.equal(
+  isStaffAllowedPagePath(resolveStudioOperationsGuardPath(""), tyler),
+  false,
+);
+assert.equal(
+  isStaffAllowedPagePath(
+    resolveStudioOperationsGuardPath("/admin/operations/money-moves"),
+    tyler,
+  ),
+  false,
+);
 
 const guard = read("lib/staff/guard.ts");
 const awarePath = read("lib/staff/aware-pathname.ts");
