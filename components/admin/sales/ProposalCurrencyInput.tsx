@@ -9,11 +9,13 @@ import {
 
 const defaultStyle: CSSProperties = {
   width: "100%",
-  border: "1px solid var(--kxd-os-line, #e2d8c8)",
-  background: "var(--kxd-os-paper, #fffdf8)",
-  borderRadius: 2,
-  padding: "0.65rem 0.75rem",
+  border: "1px solid var(--kxd-os-border-default)",
+  background: "var(--kxd-os-bg-elevated)",
+  color: "var(--kxd-os-text-primary)",
+  borderRadius: "var(--kxd-os-radius-sm)",
+  padding: "0.625rem 0.875rem",
   font: "inherit",
+  lineHeight: 1.5,
 };
 
 /**
