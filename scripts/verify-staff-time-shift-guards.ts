@@ -123,7 +123,37 @@ const authorizedReq = withStaffTimeOperatorCorrectionContext({
 
 assert.equal(await isStaffTimeOperatorCorrectionAuthorized(authorizedReq), true);
 
-const symbolOnlyReq = {
+/** Mirrors Payload `createLocalReq` → `getRequestContext` (symbol-only context is dropped). */
+function simulatePayloadCreateLocalReqContextMerge(
+  req: import("payload").PayloadRequest,
+): void {
+  const incomingContext = {};
+  if (req.context) {
+    if (
+      Object.keys(req.context).length === 0 &&
+      req.context.constructor === Object
+    ) {
+      req.context = incomingContext;
+    } else {
+      req.context = { ...req.context, ...incomingContext };
+    }
+  } else {
+    req.context = incomingContext;
+  }
+}
+
+const payloadMergedReq = withStaffTimeOperatorCorrectionContext({
+  transactionID: 99,
+  context: {},
+} as import("payload").PayloadRequest);
+simulatePayloadCreateLocalReqContextMerge(payloadMergedReq);
+assert.equal(
+  await isStaffTimeOperatorCorrectionAuthorized(payloadMergedReq),
+  true,
+  "req-level bypass must survive Payload local API context merge",
+);
+
+const contextOnlyReq = {
   transactionID: 1,
   context: withStaffTimeOperatorCorrectionContext({
     transactionID: 1,
@@ -131,6 +161,10 @@ const symbolOnlyReq = {
   } as import("payload").PayloadRequest).context,
 } as import("payload").PayloadRequest;
 
-assert.equal(await isStaffTimeOperatorCorrectionAuthorized(symbolOnlyReq), true);
+assert.equal(
+  await isStaffTimeOperatorCorrectionAuthorized(contextOnlyReq),
+  true,
+  "context-only marker remains valid when not passed through createLocalReq",
+);
 
 console.log("verify-staff-time-shift-guards: OK");

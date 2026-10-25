@@ -154,6 +154,7 @@
     "verify:staff-time-foundation": "tsx scripts/verify-staff-time-foundation.ts",
     "verify:staff-time-authorization": "tsx scripts/verify-staff-time-authorization.ts",
     "verify:staff-time-operator-corrections": "KXD_SERVER_ONLY_SHIM=1 node --import ./scripts/shims/register-server-only.mjs --import tsx scripts/verify-staff-time-operator-corrections.ts",
+    "verify:staff-time-operator-correction-local": "KXD_SERVER_ONLY_SHIM=1 node --import ./scripts/shims/register-server-only.mjs --import tsx --env-file=.env.local scripts/verify-staff-time-operator-correction-local.ts",
     "verify:staff-time-shift-guards": "KXD_SERVER_ONLY_SHIM=1 node --import ./scripts/shims/register-server-only.mjs --import tsx scripts/verify-staff-time-shift-guards.ts",
     "verify:staff-pay-period-review": "KXD_SERVER_ONLY_SHIM=1 node --import ./scripts/shims/register-server-only.mjs --import tsx scripts/verify-staff-pay-period-review.ts",
     "verify:staff-pay-workweek-pacific": "tsx scripts/verify-staff-pay-workweek-pacific.ts",

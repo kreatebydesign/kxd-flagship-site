@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { AgreementInlineText } from "@/components/agreement/AgreementInlineText";
 import { parseAgreementBodyBlocks } from "@/lib/agreement-presentation/parse-body-blocks";
 import { isAgreementDocumentSectionHeading } from "@/lib/commercial-legal/agreement-document-sections";
 
@@ -13,12 +14,23 @@ export function AgreementDocumentBody({
   const blocks = parseAgreementBodyBlocks(text);
   const nodes: ReactNode[] = [];
   let key = 0;
+  const bodyClass =
+    variant === "signing"
+      ? "kxd-agreement-doc__body-flow kxd-agreement-doc__body-flow--signing"
+      : "kxd-agreement-doc__body-flow";
 
   for (const block of blocks) {
     switch (block.type) {
       case "section":
         nodes.push(
-          <h3 key={`s-${key++}`} className="kxd-agreement-doc__section">
+          <h3
+            key={`s-${key++}`}
+            className={
+              block.article
+                ? "kxd-agreement-doc__section kxd-agreement-doc__section--article"
+                : "kxd-agreement-doc__section"
+            }
+          >
             {block.title}
           </h3>,
         );
@@ -26,14 +38,14 @@ export function AgreementDocumentBody({
       case "subheading":
         nodes.push(
           <h4 key={`sh-${key++}`} className="kxd-agreement-doc__subheading">
-            {block.text}
+            <AgreementInlineText text={block.text} />
           </h4>,
         );
         break;
       case "paragraph":
         nodes.push(
           <p key={`p-${key++}`} className="kxd-agreement-doc__paragraph">
-            {block.text}
+            <AgreementInlineText text={block.text} />
           </p>,
         );
         break;
@@ -41,7 +53,9 @@ export function AgreementDocumentBody({
         nodes.push(
           <ul key={`ul-${key++}`} className="kxd-agreement-doc__list">
             {block.items.map((item, i) => (
-              <li key={`li-${key}-${i}`}>{item}</li>
+              <li key={`li-${key}-${i}`}>
+                <AgreementInlineText text={item} />
+              </li>
             ))}
           </ul>,
         );
@@ -54,8 +68,7 @@ export function AgreementDocumentBody({
     }
   }
 
-  void variant;
-  return <>{nodes}</>;
+  return <div className={bodyClass}>{nodes}</div>;
 }
 
 /** @deprecated Use isAgreementDocumentSectionHeading from agreement-document-sections. */

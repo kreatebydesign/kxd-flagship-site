@@ -72,8 +72,8 @@
 .kxd-agreement-doc {
   color: var(--kxd-agreement-ink) !important;
   font-family: Georgia, "Iowan Old Style", Palatino, serif;
-  font-size: 0.97rem;
-  line-height: 1.62;
+  font-size: 0.9rem;
+  line-height: 1.68;
 }
 
 .kxd-agreement-doc--workspace {
@@ -163,6 +163,14 @@
   border-bottom: 1px solid rgba(44, 40, 36, 0.1);
 }
 
+.kxd-agreement-doc__section--article {
+  font-size: 0.74rem;
+  letter-spacing: 0.06em;
+  text-transform: none;
+  margin-top: 1.5rem;
+  margin-bottom: 0.55rem;
+}
+
 .kxd-agreement-doc__section:first-child {
   margin-top: 0;
 }
@@ -177,10 +185,23 @@
 }
 
 .kxd-agreement-doc__paragraph {
-  margin: 0 0 0.55rem;
+  margin: 0 0 0.72rem;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   color: var(--kxd-agreement-ink) !important;
+}
+
+.kxd-agreement-doc__strong {
+  font-weight: 600;
+  color: inherit;
+}
+
+.kxd-agreement-doc__body-flow {
+  max-width: 42rem;
+}
+
+.kxd-agreement-doc__body-flow--signing {
+  max-width: 40rem;
 }
 
 .kxd-agreement-doc__list {
@@ -197,7 +218,23 @@
 }
 
 .kxd-agreement-doc__gap {
-  height: 0.55rem;
+  height: 0.65rem;
+}
+
+@media (max-width: 640px) {
+  .kxd-agreement-doc-card__scroll {
+    padding: 1rem 1rem 1.25rem;
+  }
+
+  .kxd-agreement-doc {
+    font-size: 0.875rem;
+    line-height: 1.66;
+  }
+
+  .kxd-agreement-doc__body-flow,
+  .kxd-agreement-doc__body-flow--signing {
+    max-width: none;
+  }
 }
 
 /* Operator workspace — nested in OS panel (dark theme must not bleed in) */

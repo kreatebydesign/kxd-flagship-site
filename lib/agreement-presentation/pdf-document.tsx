@@ -3,7 +3,8 @@
  */
 
 import React from "react";
-import { Image, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
+import { Image, Page, Text, View, StyleSheet, type Styles } from "@react-pdf/renderer";
+import { parseAgreementInlineEmphasis } from "./inline-emphasis.ts";
 import { parseAgreementBodyBlocks } from "./parse-body-blocks.ts";
 import { KXD_AGREEMENT_COLORS, KXD_AGREEMENT_PDF_COLORS } from "./tokens.ts";
 import {
@@ -71,6 +72,14 @@ export const agreementPdfStyles = StyleSheet.create({
     color: KXD_AGREEMENT_COLORS.headingInk,
     marginBottom: 4,
   },
+  articleSectionTitle: {
+    fontFamily: PROPOSAL_PDF_SANS,
+    fontSize: 9,
+    fontWeight: 600,
+    letterSpacing: 0.35,
+    color: KXD_AGREEMENT_COLORS.headingInk,
+    marginBottom: 4,
+  },
   sectionRule: {
     height: 1,
     backgroundColor: KXD_AGREEMENT_PDF_COLORS.inkHairline,
@@ -86,9 +95,9 @@ export const agreementPdfStyles = StyleSheet.create({
   },
   p: {
     fontFamily: PROPOSAL_PDF_SERIF,
-    fontSize: 10.5,
-    lineHeight: 1.5,
-    marginBottom: 5,
+    fontSize: 10,
+    lineHeight: 1.55,
+    marginBottom: 7,
     color: KXD_AGREEMENT_COLORS.ink,
   },
   bulletRow: {
@@ -309,6 +318,28 @@ export function AgreementPdfLetterPage(props: {
   );
 }
 
+type PdfTextStyle = Styles[string];
+
+function AgreementPdfInlineText(props: {
+  text: string;
+  style: PdfTextStyle;
+  strongStyle?: PdfTextStyle;
+}) {
+  const spans = parseAgreementInlineEmphasis(props.text);
+  const strongStyle: PdfTextStyle = props.strongStyle ?? { fontWeight: 600 };
+  return (
+    <Text style={props.style}>
+      {spans.map((span, index) =>
+        span.kind === "strong" ? (
+          <Text key={index} style={strongStyle}>{span.text}</Text>
+        ) : (
+          <Text key={index}>{span.text}</Text>
+        ),
+      )}
+    </Text>
+  );
+}
+
 export function AgreementPdfBodyFromText({ body }: { body: string }) {
   const blocks = parseAgreementBodyBlocks(body);
   return (
@@ -319,21 +350,30 @@ export function AgreementPdfBodyFromText({ body }: { body: string }) {
           case "section":
             return (
               <View key={key} style={agreementPdfStyles.sectionWrap} minPresenceAhead={20}>
-                <Text style={agreementPdfStyles.sectionTitle}>{block.title}</Text>
+                <Text
+                  style={
+                    block.article
+                      ? agreementPdfStyles.articleSectionTitle
+                      : agreementPdfStyles.sectionTitle
+                  }
+                >
+                  {block.title}
+                </Text>
                 <View style={agreementPdfStyles.sectionRule} />
               </View>
             );
           case "subheading":
             return (
-              <Text key={key} style={agreementPdfStyles.subheading}>
-                {block.text}
-              </Text>
+              <AgreementPdfInlineText
+                key={key}
+                text={block.text}
+                style={agreementPdfStyles.subheading}
+                strongStyle={agreementPdfStyles.subheading}
+              />
             );
           case "paragraph":
             return (
-              <Text key={key} style={agreementPdfStyles.p}>
-                {block.text}
-              </Text>
+              <AgreementPdfInlineText key={key} text={block.text} style={agreementPdfStyles.p} />
             );
           case "bullets":
             return (
@@ -341,13 +381,18 @@ export function AgreementPdfBodyFromText({ body }: { body: string }) {
                 {block.items.map((item, i) => (
                   <View key={`${key}-${i}`} style={agreementPdfStyles.bulletRow}>
                     <Text style={agreementPdfStyles.bulletMark}>•</Text>
-                    <Text style={agreementPdfStyles.bulletText}>{item}</Text>
+                    <View style={{ flex: 1 }}>
+                      <AgreementPdfInlineText
+                        text={item}
+                        style={agreementPdfStyles.bulletText}
+                      />
+                    </View>
                   </View>
                 ))}
               </View>
             );
           case "gap":
-            return <View key={key} style={{ height: 4 }} />;
+            return <View key={key} style={{ height: 6 }} />;
           default:
             return null;
         }

@@ -5,6 +5,7 @@
 import assert from "node:assert/strict";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { parseAgreementInlineEmphasis } from "../lib/agreement-presentation/inline-emphasis.ts";
 import { parseAgreementBodyBlocks } from "../lib/agreement-presentation/parse-body-blocks.ts";
 import { KXD_AGREEMENT_LOGO_PUBLIC_PATH } from "../lib/agreement-presentation/tokens.ts";
 import { resolveKxdReportLogoAsset } from "../lib/kxd-report-engine/logos.ts";
@@ -45,6 +46,33 @@ const blocks = parseAgreementBodyBlocks(sampleBody);
 assert.ok(blocks.some((b) => b.type === "section" && b.title === "PARTIES"));
 assert.ok(blocks.some((b) => b.type === "bullets"));
 ok("Body block parser preserves sections and deliverable bullets");
+
+const staffMarkdown = `### ARTICLE 3 — COMPENSATION
+
+**3.1 Hourly rate.** Company will pay **$20.00 per hour** for compensable work time.
+
+**3.6 Referral commission.**
+
+- The referral is documented in KXD OS; and
+- Staff Member personally originated the opportunity.
+
+**(a) Rate.** Subject to this Section, Staff Member may earn a commission.`;
+
+const staffBlocks = parseAgreementBodyBlocks(staffMarkdown);
+const article = staffBlocks.find((b) => b.type === "section");
+assert.ok(article && article.type === "section" && article.title.includes("ARTICLE 3"));
+assert.equal(article.type === "section" ? article.article : false, true);
+assert.ok(staffBlocks.some((b) => b.type === "subheading"));
+assert.ok(staffBlocks.some((b) => b.type === "bullets"));
+const paragraphBlock = staffBlocks.find((b) => b.type === "paragraph");
+assert.ok(paragraphBlock && paragraphBlock.type === "paragraph");
+assert.ok(paragraphBlock.text.includes("**"), "stored body preserves markdown markers");
+const rendered = parseAgreementInlineEmphasis(
+  paragraphBlock.text,
+).map((s) => s.text).join("");
+assert.ok(rendered.includes("$20.00 per hour"));
+assert.ok(!rendered.includes("**"));
+ok("Staff employment markdown maps to article sections, subheadings, bullets, and inline bold");
 
 const detail = readFileSync(
   join(root, "components/agreement/KxdAgreementDocument.tsx"),
