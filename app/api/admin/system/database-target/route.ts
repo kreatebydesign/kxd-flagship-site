@@ -9,19 +9,26 @@ import {
   classifyNeonDatabaseHost,
   resolvePayloadDatabaseHostname,
 } from "@/lib/admin/database-target";
+import { resolveNodeRuntimeSecurityFields } from "@/lib/admin/node-runtime-security";
 import { isStudioPayloadOperator } from "@/payload/access/index.ts";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+
+const NO_STORE = { "Cache-Control": "no-store" } as const;
+
+function jsonResponse(body: unknown, status = 200) {
+  return NextResponse.json(body, { status, headers: NO_STORE });
+}
 
 export async function GET(request: NextRequest) {
   const auth = await requirePayloadAdminApi(request);
   if (auth instanceof NextResponse) return auth;
 
   if (!isStudioPayloadOperator(auth)) {
-    return NextResponse.json(
+    return jsonResponse(
       { success: false, error: "Studio operator access required." },
-      { status: 403 },
+      403,
     );
   }
 
@@ -54,7 +61,10 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return NextResponse.json({
+  const { nodeRuntimeVersion, nodeRuntimeMeetsCve2026111497Minimum } =
+    resolveNodeRuntimeSecurityFields();
+
+  return jsonResponse({
     success: true,
     host: classification.host,
     isProductionMain: classification.isProductionMain,
@@ -62,5 +72,7 @@ export async function GET(request: NextRequest) {
     vercelEnv: process.env.VERCEL_ENV ?? null,
     knProposalIdsPresent,
     knProbeError,
+    nodeRuntimeVersion,
+    nodeRuntimeMeetsCve2026111497Minimum,
   });
 }
