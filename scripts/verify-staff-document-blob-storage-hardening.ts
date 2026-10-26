@@ -5,6 +5,12 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
+import { hashStaffDocumentPdfBytes } from "../lib/staff-documents/hash.ts";
+import {
+  STAFF_PDF_BLOB_REPAIR_MANIFEST,
+  TARGET_FILE_IDS,
+} from "./lib/staff-pdf-blob-repair-manifest.ts";
+import { getStaffDocumentsLocalRoot } from "../lib/staff-documents/storage/local.ts";
 
 const root = path.resolve(import.meta.dirname, "..");
 
@@ -33,11 +39,36 @@ const dataTs = read("lib/staff-documents/data.ts");
 assert.match(dataTs, /getStaffDocumentStorageAdapter\(provider\)/);
 
 const repairScript = read("scripts/repair-staff-policy-blob-pdfs.ts");
-assert.match(repairScript, /TARGET_FILE_IDS = \[3, 4\]/);
+assert.match(repairScript, /TARGET_FILE_IDS/);
+assert.match(repairScript, /staff-pdf-blob-repair-manifest/);
+const manifestSrc = read("scripts/lib/staff-pdf-blob-repair-manifest.ts");
+assert.match(manifestSrc, /TARGET_FILE_IDS = \[2, 3, 4\]/);
 assert.match(repairScript, /KXD_CONFIRM_PRODUCTION_STAFF_BLOB_REPAIR/);
 assert.match(repairScript, /sanitizeBlobCredentialsInEnv/);
 assert.match(repairScript, /uploadCommercialDocumentBlobRepair/);
 assert.doesNotMatch(repairScript, /collection:\s*"staff-documents"/);
+
+assert.deepEqual([...TARGET_FILE_IDS], [2, 3, 4]);
+assert.equal(STAFF_PDF_BLOB_REPAIR_MANIFEST.length, 3);
+
+const localRoot = getStaffDocumentsLocalRoot();
+for (const row of STAFF_PDF_BLOB_REPAIR_MANIFEST) {
+  assert.equal(row.fileId, Number(row.storageKey.split("/")[0]));
+  const abs = path.join(localRoot, row.storageKey);
+  if (!fs.existsSync(abs)) {
+    console.log(
+      `  (skip local bytes check: ${row.storageKey} not in workspace — required before APPLY)`,
+    );
+    continue;
+  }
+  const buffer = fs.readFileSync(abs);
+  const hash = hashStaffDocumentPdfBytes(buffer);
+  assert.equal(
+    hash,
+    row.contentHash,
+    `frozen hash mismatch for file #${row.fileId}`,
+  );
+}
 
 const prevToken = process.env.BLOB_READ_WRITE_TOKEN;
 const prevStore = process.env.BLOB_STORE_ID;

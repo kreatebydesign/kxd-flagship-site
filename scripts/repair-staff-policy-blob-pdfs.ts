@@ -1,8 +1,8 @@
 /**
- * Repair staff policy PDFs recorded as `local` but required on Vercel Blob in production.
+ * Repair staff document PDFs recorded as `local` but required on Vercel Blob in production.
  *
- * Targets staff-document-files rows #3 and #4 only (Tyler policy assignments).
- * Uploads exact bytes from workspace `storage/staff-documents/` after SHA-256 verification.
+ * Targets staff-document-files rows #2, #3, and #4 (Tyler employment agreement + policies).
+ * Uploads exact bytes from workspace `storage/staff-documents/` after content-hash verification.
  * Does not mutate staff-documents rows, snapshots, acknowledgments, or signatures.
  *
  * Dry-run (default):
@@ -33,12 +33,15 @@ import {
   formatDbTarget,
   resolveDbTarget,
 } from "./lib/payload-db-target.ts";
+import {
+  STAFF_PDF_BLOB_REPAIR_MANIFEST,
+  TARGET_FILE_IDS,
+  type StaffPdfBlobRepairFileId,
+} from "./lib/staff-pdf-blob-repair-manifest.ts";
 
 const APPLY = process.env.APPLY === "1";
 const CONFIRM_ENV = "KXD_CONFIRM_PRODUCTION_STAFF_BLOB_REPAIR";
 const CONFIRM_VALUE = "STAFF_POLICY_BLOB_REPAIR_PRODUCTION";
-const TARGET_FILE_IDS = [3, 4] as const;
-const EMPLOYMENT_FILE_ID = 2;
 const EXPECTED_NEON_HOST_FRAGMENT = "neon.tech";
 const FILES = "staff-document-files";
 
@@ -224,69 +227,6 @@ async function probeBlobAccessibility(input: {
   }
 }
 
-async function inspectEmploymentAgreementFile(
-  payload: Awaited<ReturnType<(typeof import("payload"))["getPayload"]>>,
-): Promise<void> {
-  console.log("\n── Read-only: employment agreement file record #2 ──");
-  const file = (await payload.findByID({
-    collection: FILES as never,
-    id: EMPLOYMENT_FILE_ID,
-    depth: 0,
-    overrideAccess: true,
-  })) as AnyDoc;
-
-  const staffDocumentId = relId(file.staffDocument);
-  const provider = String(file.storageProvider ?? file.storage_provider ?? "local");
-  const storageKey = String(file.storageKey ?? "");
-  const contentHash = String(file.contentHash ?? "");
-
-  console.log(
-    [
-      `fileId=${EMPLOYMENT_FILE_ID}`,
-      `staffDocumentId=${staffDocumentId}`,
-      `kind=${file.kind}`,
-      `provider=${provider}`,
-      `storageKey=${storageKey}`,
-      `contentHash=${contentHash}`,
-    ].join(" "),
-  );
-
-  let localOk = false;
-  try {
-    readVerifiedLocalBytes({
-      storageKey,
-      contentHash,
-      label: "file#2",
-    });
-    localOk = true;
-    console.log("  local workspace copy: present, hash matches DB");
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.log(`  local workspace copy: ${message}`);
-  }
-
-  if (provider === "vercel-blob") {
-    const probe = await probeBlobAccessibility({
-      storageKey,
-      contentHash,
-      label: "file#2",
-    });
-    console.log(`  production blob: ${probe.detail}`);
-    console.log(
-      `  production Vercel runtime likely: ${probe.accessible ? "accessible" : "NOT accessible until repair or re-upload"}`,
-    );
-  } else {
-    console.log(
-      "  production Vercel runtime: NOT accessible (storage_provider=local; blob has no object for this key).",
-    );
-    if (localOk) {
-      console.log(
-        "  note: bytes exist only on disk used during assignment; production app cannot serve this PDF.",
-      );
-    }
-  }
-}
-
 async function repairOneFile(input: {
   payload: Awaited<ReturnType<(typeof import("payload"))["getPayload"]>>;
   fileId: number;
@@ -298,8 +238,13 @@ async function repairOneFile(input: {
     overrideAccess: true,
   })) as AnyDoc;
 
-  if (!TARGET_FILE_IDS.includes(input.fileId as 3 | 4)) {
+  if (!TARGET_FILE_IDS.includes(input.fileId as StaffPdfBlobRepairFileId)) {
     throw new Error(`Refusing unexpected file id ${input.fileId}`);
+  }
+
+  const manifest = STAFF_PDF_BLOB_REPAIR_MANIFEST.find((r) => r.fileId === input.fileId);
+  if (!manifest) {
+    throw new Error(`Missing manifest entry for file #${input.fileId}`);
   }
 
   const staffDocumentId = relId(file.staffDocument);
@@ -308,6 +253,12 @@ async function repairOneFile(input: {
   const storageKey = String(file.storageKey ?? "");
   const contentHash = String(file.contentHash ?? "");
   const byteLength = Number(file.byteLength ?? 0);
+
+  if (storageKey !== manifest.storageKey || contentHash !== manifest.contentHash) {
+    throw new Error(
+      `File #${input.fileId}: production record drift (storageKey or contentHash differs from repair manifest). Aborting.`,
+    );
+  }
 
   console.log(`\n── File #${input.fileId} (staff-document ${staffDocumentId}) ──`);
   console.log(
@@ -386,7 +337,7 @@ async function main(): Promise<void> {
   assertProductionRepairAuthorized();
   assertExpectedBlobStore();
 
-  console.log("Staff policy PDF blob repair");
+  console.log("Staff document PDF blob repair (files #2, #3, #4)");
   console.log(`Mode: ${APPLY ? "APPLY" : "DRY-RUN"}`);
   console.log(`Target file records: ${TARGET_FILE_IDS.join(", ")}`);
 
@@ -397,8 +348,6 @@ async function main(): Promise<void> {
   for (const fileId of TARGET_FILE_IDS) {
     await repairOneFile({ payload, fileId });
   }
-
-  await inspectEmploymentAgreementFile(payload);
 
   console.log("\nDone.");
   if (!APPLY) {
