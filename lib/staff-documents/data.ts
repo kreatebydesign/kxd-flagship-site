@@ -18,7 +18,11 @@ import {
 import { hashStaffDocumentBody, hashStaffDocumentPdfBytes } from "./hash.ts";
 import { verifyStaffDocumentIntegrity } from "./integrity.ts";
 import { claimStaffDocumentAcknowledgment } from "./acknowledge-claim.ts";
-import { getDefaultStaffDocumentStorageAdapter } from "./storage/resolve.ts";
+import {
+  getDefaultStaffDocumentStorageAdapter,
+  getStaffDocumentStorageAdapter,
+} from "./storage/resolve.ts";
+import type { StaffDocumentStorageProvider } from "./storage/types.ts";
 import {
   assertTemplateApprovedForAssignment,
   assertStaffDocumentAcknowledgeable,
@@ -419,7 +423,10 @@ export async function readStaffDocumentFileBytes(input: {
   }
   assertStaffDocumentRowAccess(input.actor, staffUserId);
 
-  const adapter = getDefaultStaffDocumentStorageAdapter();
+  const provider = String(
+    file.storageProvider ?? file.storage_provider ?? "local",
+  ) as StaffDocumentStorageProvider;
+  const adapter = getStaffDocumentStorageAdapter(provider);
   const opened = await adapter.open(String(file.storageKey));
   const integrity = verifyStaffDocumentIntegrity({
     buffer: opened.body,

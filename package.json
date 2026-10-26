@@ -282,7 +282,10 @@
     "verify:staff-documents-operator-workflow": "KXD_SERVER_ONLY_SHIM=1 node --import ./scripts/shims/register-server-only.mjs --import tsx scripts/verify-staff-documents-operator-workflow.ts",
     "verify:staff-template-editor-ui": "KXD_SERVER_ONLY_SHIM=1 node --import ./scripts/shims/register-server-only.mjs --import tsx scripts/verify-staff-template-editor-ui.ts",
     "repair:junior-shift-credit": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/reset-junior-shift-credit.ts",
-    "repair:junior-shift-credit:apply": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/reset-junior-shift-credit.ts --apply"
+    "repair:junior-shift-credit:apply": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/reset-junior-shift-credit.ts --apply",
+    "repair:staff-policy-blob-pdfs": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/repair-staff-policy-blob-pdfs.ts",
+    "repair:staff-policy-blob-pdfs:apply": "KXD_SERVER_ONLY_SHIM=1 APPLY=1 KXD_CONFIRM_PRODUCTION_STAFF_BLOB_REPAIR=STAFF_POLICY_BLOB_REPAIR_PRODUCTION tsx --import ./scripts/shims/register-server-only.mjs scripts/repair-staff-policy-blob-pdfs.ts",
+    "verify:staff-document-blob-storage-hardening": "tsx scripts/verify-staff-document-blob-storage-hardening.ts"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "^3.84.1",

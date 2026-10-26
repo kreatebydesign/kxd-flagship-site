@@ -14,6 +14,16 @@ export function getDefaultStaffDocumentStorageAdapter(): StaffDocumentStorageAda
   return localStaffDocumentStorageAdapter;
 }
 
+/** Open or write using the provider recorded on the staff_document_files row. */
+export function getStaffDocumentStorageAdapter(
+  provider: StaffDocumentStorageProvider,
+): StaffDocumentStorageAdapter {
+  if (provider === "vercel-blob") {
+    return wrapCommercialAdapterAsStaff();
+  }
+  return localStaffDocumentStorageAdapter;
+}
+
 function wrapCommercialAdapterAsStaff(): StaffDocumentStorageAdapter {
   const blob = vercelBlobCommercialDocumentStorageAdapter;
   return {
