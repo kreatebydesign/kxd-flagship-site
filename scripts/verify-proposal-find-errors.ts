@@ -38,6 +38,7 @@ assert.match(dbHealth, /resolvePayloadDatabaseHostname/);
 const dbTarget = read("app/api/admin/system/database-target/route.ts");
 assert.match(dbTarget, /knProposalIdsPresent/);
 assert.match(dbTarget, /isProductionMain/);
+assert.match(dbTarget, /nodeRuntimeMeetsCve2026111497Minimum/);
 
 const middleware = read("middleware.ts");
 assert.match(middleware, /"\/api\/db-health"/);
