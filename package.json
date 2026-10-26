@@ -272,6 +272,7 @@
     "verify:lifecycle-stripe-test": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/verify-lifecycle-stripe-test.ts",
     "verify:staff-documents": "tsx scripts/verify-staff-documents.ts",
     "verify:staff-documents-page-access": "tsx scripts/verify-staff-documents-page-access.ts",
+    "verify:staff-documents-operator-redirect": "tsx scripts/verify-staff-documents-operator-redirect.ts",
     "verify:staff-documents-release-b-phase1": "tsx scripts/verify-staff-documents-release-b-phase1.ts",
     "verify:staff-documents-payload-access": "tsx scripts/verify-staff-documents-payload-access.ts",
     "verify:staff-documents-release-b-migration": "tsx scripts/verify-staff-documents-release-b-migration.ts",

@@ -8,6 +8,8 @@
  * - `staff/layout.tsx` — restricted staff shell
  */
 import type { Metadata } from "next";
+import { headers } from "next/headers";
+import { trustedLayoutReturnPath } from "@/lib/admin/trusted-layout-return-path";
 import { ThemeBootScript } from "@/components/os/ThemeBootScript";
 import "../../globals.css";
 import "../../../design-system/os/styles/kxd-os.css";
@@ -29,8 +31,15 @@ export default async function OperationsLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const headerList = await headers();
+  const pathname = headerList.get("x-kxd-pathname")?.trim() ?? "";
+  const returnPath = trustedLayoutReturnPath(
+    pathname,
+    OPERATIONS_LAYOUT_FALLBACK,
+    "/admin/operations",
+  );
   const { requirePayloadAdminPage } = await import("@/lib/admin/auth");
-  await requirePayloadAdminPage(OPERATIONS_LAYOUT_FALLBACK);
+  await requirePayloadAdminPage(returnPath);
 
   return (
     <html lang="en" suppressHydrationWarning>
