@@ -50,7 +50,14 @@ assert.equal(
 );
 assert.equal(
   isStaffAllowedPagePath("/admin/operations/staff/oversight/documents", tyler),
-  true,
+  false,
+);
+assert.equal(
+  isStaffAllowedPagePath(
+    "/admin/operations/staff/oversight/documents/templates/4",
+    tyler,
+  ),
+  false,
 );
 assert.equal(
   isStaffAllowedPagePath("/admin/operations/today", tyler),

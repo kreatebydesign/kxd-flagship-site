@@ -117,7 +117,6 @@ export async function requirePayloadAdminApi(request?: Request) {
       const pathname =
         (request ? new URL(request.url).pathname : "") ||
         h.get("x-kxd-pathname") ||
-        h.get("next-url") ||
         h.get("x-invoke-path") ||
         "";
       // Fail closed when pathname cannot be resolved for restricted staff.

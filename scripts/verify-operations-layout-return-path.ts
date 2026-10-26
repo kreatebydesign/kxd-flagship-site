@@ -47,6 +47,22 @@ assert.equal(
   ),
   "/admin/operations/staff/documents/42",
 );
+assert.equal(
+  trustedLayoutReturnPath(
+    "/admin/operations/staff/oversight/documents/templates/4",
+    "/admin/operations/staff",
+    "/admin/operations/staff",
+  ),
+  "/admin/operations/staff/oversight/documents/templates/4",
+);
+assert.equal(
+  trustedLayoutReturnPath(
+    "/admin/operations/staff/oversight/documents/templates/new",
+    "/admin/operations/staff",
+    "/admin/operations/staff",
+  ),
+  "/admin/operations/staff/oversight/documents/templates/new",
+);
 assert.equal(trustedLayoutReturnPath("", fallback, "/admin/operations"), fallback);
 assert.equal(
   trustedLayoutReturnPath("//evil.example/phish", fallback, "/admin/operations"),
@@ -79,6 +95,8 @@ assert.equal(
 
 const opsLayout = read("app/admin/operations/layout.tsx");
 assert.match(opsLayout, /requirePayloadAdminPage/);
+assert.match(opsLayout, /x-kxd-pathname/);
+assert.match(opsLayout, /trustedLayoutReturnPath/);
 assert.doesNotMatch(opsLayout, /requireStaffAwarePage/);
 
 const studioLayout = read("app/admin/operations/(studio)/layout.tsx");

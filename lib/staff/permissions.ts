@@ -93,6 +93,10 @@ const OPERATIONS_COORDINATOR_CAPABILITIES: readonly StaffCapability[] = [
  * - `/admin/operations/clients` portfolio/workspace (except `clients/launch`)
  * Hidden navigation is not access control — `requireStaffAwarePage` enforces this.
  */
+/** Operator document management — not covered by the generic /staff allowlist. */
+export const STAFF_DOCUMENTS_OPERATOR_PAGE_PREFIX =
+  "/admin/operations/staff/oversight/documents";
+
 export const STAFF_ALLOWED_PAGE_PREFIXES: readonly string[] = [
   "/admin/operations/staff",
   "/admin/operations/settings",
@@ -243,6 +247,14 @@ export function isStaffAllowedPagePath(
     pathname.startsWith("/admin/operations/onboarding/")
   ) {
     return actorHasStaffCapability(actor, "staff.onboarding.assist");
+  }
+
+  if (
+    pathname === STAFF_DOCUMENTS_OPERATOR_PAGE_PREFIX ||
+    pathname.startsWith(`${STAFF_DOCUMENTS_OPERATOR_PAGE_PREFIX}/`)
+  ) {
+    if (isRestrictedStaff(actor)) return false;
+    return actorHasStaffCapability(actor, "admin.staff-documents.manage");
   }
 
   return STAFF_ALLOWED_PAGE_PREFIXES.some(

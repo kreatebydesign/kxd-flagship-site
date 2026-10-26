@@ -4,7 +4,7 @@ import {
   isRestrictedStaff,
 } from "@/lib/staff/permissions";
 import type { StaffActor } from "@/lib/staff/types";
-import { operatorStaffDocumentsPath } from "./access.ts";
+import { operatorStaffDocumentsPath, staffMayManageDocuments } from "./access.ts";
 
 export type StaffDocumentsPageAccess =
   | { kind: "render" }
@@ -28,11 +28,11 @@ export function resolveStaffDocumentsListPageAccess(
     return { kind: "render" };
   }
 
-  if (actorHasStaffCapability(actor, "admin.staff-documents.manage")) {
+  if (staffMayManageDocuments(actor)) {
     return { kind: "redirect", href: operatorStaffDocumentsPath() };
   }
 
-  return { kind: "redirect", href: "/admin/operations/today" };
+  return { kind: "redirect", href: STAFF_HOME_PATH };
 }
 
 /**
@@ -49,7 +49,7 @@ export function resolveStaffDocumentsOversightPageAccess(
     return { kind: "redirect", href: STAFF_HOME_PATH };
   }
 
-  if (!actorHasStaffCapability(actor, "admin.staff-documents.manage")) {
+  if (!staffMayManageDocuments(actor)) {
     return { kind: "redirect", href: STAFF_HOME_PATH };
   }
 

@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { StaffDocumentTemplateEditorScreen } from "@/components/admin/operations/staff/StaffDocumentTemplateEditorScreen";
 import { requireStaffAwarePage, staffActorFromUser } from "@/lib/staff";
 import { getStaffDocumentTemplateForOperator } from "@/lib/staff-documents/template-operator";
@@ -10,6 +10,8 @@ type PageProps = { params: Promise<{ templateId: string }> };
 
 export default async function StaffDocumentTemplateEditPage(props: PageProps) {
   const templateId = Number((await props.params).templateId);
+  if (!Number.isFinite(templateId) || templateId <= 0) notFound();
+
   const path = `/admin/operations/staff/oversight/documents/templates/${templateId}`;
   const user = await requireStaffAwarePage(path);
   const actor = staffActorFromUser(user);

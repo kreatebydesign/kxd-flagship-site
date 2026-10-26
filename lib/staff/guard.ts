@@ -29,12 +29,9 @@ export async function resolveRequestPathname(
   fallback = STAFF_HOME_PATH,
 ): Promise<string> {
   const h = await headers();
-  return (
-    h.get("x-kxd-pathname") ||
-    h.get("next-url") ||
-    h.get("x-invoke-path") ||
-    fallback
-  );
+  // Use only middleware-provided pathname — `next-url` can reflect a prior
+  // client navigation (e.g. Today) during nested RSC layout runs.
+  return h.get("x-kxd-pathname") || h.get("x-invoke-path") || fallback;
 }
 
 /**

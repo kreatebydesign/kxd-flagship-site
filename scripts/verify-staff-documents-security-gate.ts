@@ -132,11 +132,10 @@ assert.equal(
   true,
 );
 
-// Staff prefix allowlist permits /staff/oversight URLs; document oversight pages
-// must still fail closed in page-access (second layer).
+// Operator document URLs are denied at the staff allowlist (first layer).
 assert.equal(
   isStaffAllowedPagePath("/admin/operations/staff/oversight/documents", tyler),
-  true,
+  false,
 );
 
 // ── 3. Document page access matrix (oversight / list) ──────────────────────
