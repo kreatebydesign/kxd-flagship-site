@@ -127,6 +127,7 @@ import * as migration_20261022_staff_sales_development_phase1 from './20261022_s
 import * as migration_20261023_staff_time_b1_foundation from './20261023_staff_time_b1_foundation';
 import * as migration_20261024_staff_document_template_operator_workflow from './20261024_staff_document_template_operator_workflow';
 import * as migration_20261025_staff_pay_period_reviews from './20261025_staff_pay_period_reviews';
+import * as migration_20261027_platform_economics_snapshots from './20261027_platform_economics_snapshots';
 
 export const migrations = [
   {
@@ -833,5 +834,11 @@ export const migrations = [
     up: migration_20261025_staff_pay_period_reviews.up,
     down: migration_20261025_staff_pay_period_reviews.down,
     name: '20261025_staff_pay_period_reviews',
+  },
+  {
+    // Platform Economics V1 — founder-only valuation snapshots.
+    up: migration_20261027_platform_economics_snapshots.up,
+    down: migration_20261027_platform_economics_snapshots.down,
+    name: '20261027_platform_economics_snapshots',
   },
 ];
