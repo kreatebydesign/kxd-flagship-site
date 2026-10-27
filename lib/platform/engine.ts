@@ -51,6 +51,33 @@ function buildRoadmap(phases: PlatformPhaseDefinition[]) {
   };
 }
 
+function safeCollectPlatformEngineeringHealth(): PlatformDashboardData["health"] {
+  try {
+    return collectPlatformEngineeringHealth();
+  } catch (err) {
+    console.error("[KXD Platform] Engineering health metrics failed:", err);
+    return {
+      payloadCollections: 0,
+      adminRoutes: 0,
+      portalRoutes: 0,
+      salesRoutes: 0,
+      payloadHooks: 0,
+      automationModules: 0,
+      automationModulesConnected: 0,
+      portalModules: 0,
+      portalModulesProduction: 0,
+      sharedCoreSubsystems: PLATFORM_SUBSYSTEMS.filter((s) => s.owner === "shared-core")
+        .length,
+      agencySubsystems: PLATFORM_SUBSYSTEMS.filter((s) => s.owner === "agency-edition")
+        .length,
+      platformSubsystems: PLATFORM_SUBSYSTEMS.filter((s) => s.owner === "platform-owner")
+        .length,
+      kxdEditionModules: 0,
+      libPlatformModules: PLATFORM_SUBSYSTEMS.length,
+    };
+  }
+}
+
 export async function getPlatformDashboardData(): Promise<PlatformDashboardData> {
   const sharedCore = groupByOwner("shared-core");
   const agencyEdition = groupByOwner("agency-edition");
@@ -79,7 +106,7 @@ export async function getPlatformDashboardData(): Promise<PlatformDashboardData>
     },
     phases: PLATFORM_PHASES,
     roadmap: buildRoadmap(PLATFORM_PHASES),
-    health: collectPlatformEngineeringHealth(),
+    health: safeCollectPlatformEngineeringHealth(),
     principles: PLATFORM_PRINCIPLES,
   };
 }

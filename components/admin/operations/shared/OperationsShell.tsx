@@ -1,3 +1,5 @@
+"use client";
+
 import type { ReactNode } from "react";
 import { KxdShell } from "@/components/os";
 import { ExecutiveWorkspaceShell } from "@/components/admin/executive-workspace";
