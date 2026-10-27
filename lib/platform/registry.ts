@@ -77,7 +77,7 @@ export const PLATFORM_PHASES: PlatformPhaseDefinition[] = [
     number: "11D",
     title: "Platform Progress Dashboard",
     status: "completed",
-    description: "Internal engineering cockpit — platform completion, subsystem maturity, roadmap, and health metrics.",
+    description: "Internal platform progress view — completion, subsystem maturity, roadmap, and health metrics.",
     completedAt: "2026-07-06",
   },
   {

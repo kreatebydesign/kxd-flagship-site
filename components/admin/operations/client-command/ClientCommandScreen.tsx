@@ -72,7 +72,7 @@ export function ClientCommandScreen({ data }: { data: ClientCommandCenterData })
           <OperationsPageHero
             eyebrow="KXD OS · Client Operations"
             title={hero.clientName}
-            lead="Executive command center — everything important for this relationship in one view."
+            lead="Client workspace — projects, revenue, timeline, and operational context in one place."
             presence
           />
           <Link href="/admin/operations/clients" className="kxd-os-link-quiet">

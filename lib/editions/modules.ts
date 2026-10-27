@@ -121,7 +121,7 @@ export const KXD_MODULE_REGISTRY: Record<KxdModuleId, KxdModuleDefinition> = {
     category: "platform",
     required: true,
     editionSupport: "all",
-    description: "Universal command search",
+    description: "Search across clients, work, and records",
   },
   integrations: {
     id: "integrations",
@@ -193,7 +193,7 @@ export const KXD_MODULE_REGISTRY: Record<KxdModuleId, KxdModuleDefinition> = {
     category: "platform",
     required: true,
     editionSupport: "all",
-    description: "Today, command, and daily operations surfaces",
+    description: "Today, workspace, and daily operations surfaces",
   },
   connect: {
     id: "connect",

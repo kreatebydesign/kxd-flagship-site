@@ -541,7 +541,7 @@ Never invent availability.`,
       content: {
         body: `You may verify line items against agreements and note discrepancies. You may not charge, refund, transfer, or pay.
 
-Financial command stays founder/admin authority.`,
+Financial overview and billing authority stay founder/admin only.`,
         walkthrough: [],
         steps: [],
         operations: ops({

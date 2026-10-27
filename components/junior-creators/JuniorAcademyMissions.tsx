@@ -27,7 +27,7 @@ export function JuniorAcademyMissions() {
           Junior Academy · Training
         </Label>
         <p style={{ fontFamily: C.sans, fontSize: "0.8125rem", color: C.creamMuted, maxWidth: "40rem", lineHeight: 1.65 }}>
-          Practice missions that build your eye for websites, brands, and opportunities — separate from Assigned Tasks.
+          Practice exercises that build your eye for websites, brands, and opportunities — separate from Assigned Tasks.
         </p>
       </div>
 
@@ -73,7 +73,7 @@ export function JuniorAcademyMissions() {
                 marginBottom: "0.75rem",
               }}
             >
-              Mission: {mission.title}
+              Exercise: {mission.title}
             </h3>
             <Label style={{ marginBottom: "0.5rem" }}>What you&apos;ll learn</Label>
             <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>

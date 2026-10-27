@@ -83,7 +83,7 @@ export function PlaybookRunScreen({ run }: { run: PlaybookRunDetail }) {
             href={`/admin/operations/client-command/${run.clientId}`}
             className="kxd-os-link-quiet"
           >
-            Client Command Center
+            Client workspace
           </Link>
         </p>
 

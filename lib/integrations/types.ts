@@ -43,7 +43,7 @@ export type IntegrationValidationState = "valid" | "invalid" | "pending" | "unkn
 /** KXD modules that consume integration data */
 export type KxdConsumerModule =
   | "Infrastructure"
-  | "Command Center"
+  | "Operations"
   | "Brain"
   | "Projects"
   | "Timeline"

@@ -216,7 +216,7 @@ export async function completeGenesisSession(
       blueprintStatus: "applied",
       completedAt: new Date().toISOString(),
       launchReadiness: 100,
-      recommendedNextStep: "Open Client Command Center — engagement is live.",
+      recommendedNextStep: "Open the client workspace — engagement is live.",
     },
     overrideAccess: true,
   });

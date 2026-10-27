@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 const CLIENT_OPS_LINKS = [
-  { id: "command", label: "Command Center", path: "client-command" },
+  { id: "command", label: "Overview", path: "client-command" },
   { id: "work", label: "Work", path: "work" },
   { id: "workspace", label: "Workspace", path: "client-command" },
   { id: "timeline", label: "Timeline", path: "timeline" },

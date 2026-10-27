@@ -117,7 +117,7 @@ function OverviewSection({ data }: { data: PlatformDashboardData }) {
       <OperationsPageHero
         eyebrow="KXD Platform · Engineering"
         title="Platform Progress"
-        lead={`${overview.meta.currentPhaseTitle} — internal engineering cockpit for platform maturity, roadmap, and architecture health.`}
+        lead="Track platform development, completed features, upcoming improvements, and overall system health."
       />
 
       <div className="kxd-os-ops-kpi-grid kxd-os-platform-kpi-grid">

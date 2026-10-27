@@ -234,7 +234,7 @@ export function ExecutiveScreen({ data, reporting, today }: ExecutiveScreenProps
           </div>
         </KxdSection>
 
-        <KxdSection label="Financial Command">
+        <KxdSection label="Financial overview">
           <div className="kxd-os-operations-financial-head">
             <KxdMetric
               label="MRR"
