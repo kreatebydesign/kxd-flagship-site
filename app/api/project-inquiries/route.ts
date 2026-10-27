@@ -3,11 +3,16 @@ import { getPayload } from "payload";
 import config from "@payload-config";
 import { Resend } from "resend";
 import { parseAcquisitionEnvelope } from "@/lib/analytics/acquisition";
+import {
+  isFirstPartyStartProjectAutoPromote,
+  isProjectInquiryEligibleForPromotion,
+} from "@/lib/sales/promote-helpers";
+import { promoteProjectInquiryToSales } from "@/lib/sales/promote-inbound";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-const DEPLOY_VERSION = "v1-project-inquiries-2026-06-09";
+const DEPLOY_VERSION = "v2-start-project-sales-ingest-2026-10-26";
 
 export async function POST(request: Request) {
   console.log(`📋 POST /api/project-inquiries — handler invoked [${DEPLOY_VERSION}]`);
@@ -115,6 +120,38 @@ export async function POST(request: Request) {
   } catch (err) {
     console.error("❌ Payload create failed:", err);
     return NextResponse.json({ error: "Failed to save inquiry" }, { status: 500 });
+  }
+
+  const shouldAutoPromote =
+    isFirstPartyStartProjectAutoPromote({
+      inquirySource,
+      referralSource: selfReportedReferral,
+      notes: notesWithAttribution,
+    }) && isProjectInquiryEligibleForPromotion("new");
+
+  if (shouldAutoPromote && inquiry?.id != null) {
+    try {
+      const ingest = await promoteProjectInquiryToSales(Number(inquiry.id));
+      if (ingest.ok) {
+        console.log("🧭 Start Project inquiry ingested into Sales.", {
+          projectInquiryId: inquiry.id,
+          salesLeadId: ingest.salesLeadId,
+          created: ingest.created,
+          linkedExisting: ingest.linkedExisting ?? false,
+        });
+      } else {
+        console.warn("⚠️ Start Project Sales ingest skipped:", ingest.message, {
+          projectInquiryId: inquiry.id,
+          code: ingest.code,
+          candidates: ingest.candidateSalesLeadIds,
+        });
+      }
+    } catch (ingestError) {
+      console.error(
+        "❌ Sales ingest failed (project inquiry still saved):",
+        ingestError,
+      );
+    }
   }
 
   // ── Send email notification ───────────────────────────────────────────────

@@ -166,3 +166,7 @@ export function classifyIdentityCollision(input: {
 export function existingSourceInquiryId(lead: AnyDoc): number | null {
   return relId(lead.sourceInquiry);
 }
+
+export function existingSourceProjectInquiryId(lead: AnyDoc): number | null {
+  return relId(lead.sourceProjectInquiry);
+}
