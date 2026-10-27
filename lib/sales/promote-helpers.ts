@@ -2,6 +2,7 @@
  * Shared helpers for promoting KXD intake records into canonical sales-leads.
  */
 import type { SalesDoc } from "./types";
+import { isIntelligenceProjectInquiry } from "./project-inquiry-intake";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AnyDoc = Record<string, any>;
@@ -58,14 +59,7 @@ export function isFirstPartyStartProjectAutoPromote(input: {
   referralSource?: unknown;
   notes?: unknown;
 }): boolean {
-  const inquirySource = String(input.inquirySource ?? "").trim();
-  if (inquirySource === "kxd-intelligence" || inquirySource === "website-audit") {
-    return false;
-  }
-  const referralSource = String(input.referralSource ?? "").trim();
-  if (referralSource === "kxd-intelligence") return false;
-  if (String(input.notes ?? "").includes("[KXD Intelligence context]")) return false;
-  return true;
+  return !isIntelligenceProjectInquiry(input);
 }
 
 export function buildNotes(parts: Array<string | null | undefined>): string | undefined {

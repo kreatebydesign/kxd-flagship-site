@@ -128,6 +128,7 @@ import * as migration_20261023_staff_time_b1_foundation from './20261023_staff_t
 import * as migration_20261024_staff_document_template_operator_workflow from './20261024_staff_document_template_operator_workflow';
 import * as migration_20261025_staff_pay_period_reviews from './20261025_staff_pay_period_reviews';
 import * as migration_20261027_platform_economics_snapshots from './20261027_platform_economics_snapshots';
+import * as migration_20261028_phase17_project_inquiry_attribution from './20261028_phase17_project_inquiry_attribution';
 
 export const migrations = [
   {
@@ -840,5 +841,11 @@ export const migrations = [
     up: migration_20261027_platform_economics_snapshots.up,
     down: migration_20261027_platform_economics_snapshots.down,
     name: '20261027_platform_economics_snapshots',
+  },
+  {
+    // Phase 17 M2 — project inquiry intake attribution columns.
+    up: migration_20261028_phase17_project_inquiry_attribution.up,
+    down: migration_20261028_phase17_project_inquiry_attribution.down,
+    name: '20261028_phase17_project_inquiry_attribution',
   },
 ];

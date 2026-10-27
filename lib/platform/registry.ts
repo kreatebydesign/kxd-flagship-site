@@ -390,7 +390,7 @@ export const PLATFORM_PHASES: PlatformPhaseDefinition[] = [
     title: "Lead Funnel Unification",
     status: "in-progress",
     description:
-      "Partial: Research → Sales (existing) + first-party /contact and /start-project auto-promote into sales-leads with identity collision protection, commercial obligation clocks, and Needs Attention derivation. Remaining: deeper intake normalization, intelligence/audit handoff deduplication, Managed Client Lead Operations (separate sibling context).",
+      "Partial: Research → Sales + first-party /contact and /start-project auto-promote, project inquiry attribution (inquirySource, intakeChannel, audit link), audit/intelligence opportunity anchoring, and M4 fixture verification. Remaining: staff assignment defaults (M5), registry completion evidence (M6), Managed Client Lead Operations (sibling context).",
   },
 ];
 

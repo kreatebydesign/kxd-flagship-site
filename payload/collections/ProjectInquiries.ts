@@ -136,6 +136,42 @@ export const ProjectInquiries: CollectionConfig = {
                   "What the prospect selected on the form. Independent of measured acquisition evidence.",
               },
             },
+            {
+              name: "inquirySource",
+              type: "select",
+              label: "Intake Source",
+              options: [
+                { label: "Start Project", value: "start-project" },
+                { label: "KXD Intelligence", value: "kxd-intelligence" },
+                { label: "Website Audit", value: "website-audit" },
+              ],
+              defaultValue: "start-project",
+              admin: {
+                description:
+                  "How this application entered KXD OS. Independent of measured acquisition evidence.",
+              },
+            },
+            {
+              name: "intakeChannel",
+              type: "text",
+              label: "Measured Intake Channel",
+              maxLength: 80,
+              admin: {
+                description:
+                  "Channel from acquisition evidence at submission (e.g. organic-search). Not self-reported.",
+                readOnly: true,
+              },
+            },
+            {
+              name: "sourceWebsiteAudit",
+              type: "relationship",
+              relationTo: "website-audits",
+              label: "Linked Website Audit",
+              admin: {
+                description:
+                  "When this application continues from KXD Intelligence, links to the diagnostic audit record.",
+              },
+            },
             acquisitionField(),
           ],
         },

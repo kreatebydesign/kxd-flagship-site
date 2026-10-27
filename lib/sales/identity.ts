@@ -170,3 +170,7 @@ export function existingSourceInquiryId(lead: AnyDoc): number | null {
 export function existingSourceProjectInquiryId(lead: AnyDoc): number | null {
   return relId(lead.sourceProjectInquiry);
 }
+
+export function existingSourceWebsiteAuditId(lead: AnyDoc): number | null {
+  return relId(lead.sourceWebsiteAudit);
+}

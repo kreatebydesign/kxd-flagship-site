@@ -18,7 +18,12 @@ import {
   classifyIdentityCollision,
   existingSourceInquiryId,
   existingSourceProjectInquiryId,
+  existingSourceWebsiteAuditId,
 } from "./identity";
+import {
+  isIntelligenceProjectInquiry,
+  resolveProjectInquiryWebsiteAuditId,
+} from "./project-inquiry-intake";
 import { initialResponseDueAt } from "./follow-up-policy";
 import type { SalesDoc } from "./types";
 import {
@@ -110,7 +115,7 @@ function success(params: {
   created: boolean;
   origin: string;
   linkedExisting?: boolean;
-  collisionVia?: "email" | "domain" | "source";
+  collisionVia?: "email" | "domain" | "source" | "audit";
 }): PromoteToSalesResult {
   const promotedAt = new Date().toISOString();
   return {
@@ -243,19 +248,70 @@ async function linkInquiryToExistingLead(params: {
   return { salesLead: refreshed, salesLeadId };
 }
 
+async function resolveSalesLeadViaWebsiteAudit(params: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  payload: any;
+  websiteAuditId: number;
+}): Promise<{ salesLead: SalesDoc; salesLeadId: number } | null> {
+  let audit: AnyDoc;
+  try {
+    audit = (await params.payload.findByID({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      collection: "website-audits" as any,
+      id: params.websiteAuditId,
+      depth: 0,
+      overrideAccess: true,
+    })) as AnyDoc;
+  } catch {
+    return null;
+  }
+
+  const fromSource = await resolveExistingBySource({
+    payload: params.payload,
+    sourceField: "sourceWebsiteAudit",
+    sourceId: params.websiteAuditId,
+    sourceCollection: "website-audits",
+    sourceDoc: audit,
+  });
+  if (fromSource) return fromSource;
+
+  const promotedId = relId(audit.promotedSalesLead);
+  if (!promotedId) return null;
+
+  try {
+    const salesLead = (await params.payload.findByID({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      collection: "sales-leads" as any,
+      id: promotedId,
+      depth: 0,
+      overrideAccess: true,
+    })) as SalesDoc;
+    return { salesLead, salesLeadId: promotedId };
+  } catch {
+    return null;
+  }
+}
+
 async function linkProjectInquiryToExistingLead(params: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   payload: any;
   projectInquiry: AnyDoc;
   projectInquiryId: number;
   salesLead: SalesDoc;
-  via: "email" | "domain";
+  via: "email" | "domain" | "audit";
   operatorLabel?: string;
+  websiteAuditId?: number | null;
 }): Promise<{ salesLead: SalesDoc; salesLeadId: number }> {
   const salesLeadId = Number(params.salesLead.id);
   const existingSource = existingSourceProjectInquiryId(params.salesLead);
   const leadUpdate: Record<string, unknown> = {};
   if (!existingSource) leadUpdate.sourceProjectInquiry = params.projectInquiryId;
+  if (
+    params.websiteAuditId &&
+    !existingSourceWebsiteAuditId(params.salesLead)
+  ) {
+    leadUpdate.sourceWebsiteAudit = params.websiteAuditId;
+  }
 
   const existingNotes = trimText(params.salesLead.notes, 4000) ?? "";
   const inboundNote = [
@@ -615,6 +671,51 @@ export async function promoteProjectInquiryToSales(
     };
   }
 
+  const websiteAuditId = resolveProjectInquiryWebsiteAuditId({
+    sourceWebsiteAudit: projectInquiry.sourceWebsiteAudit,
+    notes: projectInquiry.notes,
+  });
+  if (websiteAuditId) {
+    const anchored = await resolveSalesLeadViaWebsiteAudit({
+      payload,
+      websiteAuditId,
+    });
+    if (anchored) {
+      const linked = await linkProjectInquiryToExistingLead({
+        payload,
+        projectInquiry,
+        projectInquiryId,
+        salesLead: anchored.salesLead,
+        via: "audit",
+        operatorLabel: options?.operatorLabel,
+        websiteAuditId,
+      });
+      return success({
+        ...linked,
+        sourceRecordType: "project_inquiry",
+        sourceRecordId: projectInquiryId,
+        created: false,
+        linkedExisting: true,
+        collisionVia: "audit",
+        origin: String(projectInquiry.inquirySource ?? "start-project"),
+      });
+    }
+  }
+
+  const intelligence = isIntelligenceProjectInquiry({
+    inquirySource: projectInquiry.inquirySource,
+    referralSource: projectInquiry.referralSource,
+    notes: projectInquiry.notes,
+  });
+  if (intelligence && !options?.allowIntelligenceCreate) {
+    return {
+      ok: false,
+      message:
+        "Intelligence-linked applications wait for the website audit opportunity or operator review before creating a separate sales record.",
+      code: "not_eligible",
+    };
+  }
+
   const identityPool = await loadSalesLeadsForIdentity(payload);
   const collision = classifyIdentityCollision({
     email: projectInquiry.email,
@@ -832,6 +933,110 @@ export async function promoteWebsiteAuditToSales(
       message: `Website audit status "${status}" is not eligible for Sales promotion.`,
       code: "not_eligible",
     };
+  }
+
+  const projectInquiriesForAudit = await payload.find({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    collection: "project-inquiries" as any,
+    limit: 1,
+    depth: 0,
+    where: { sourceWebsiteAudit: { equals: websiteAuditId } },
+    overrideAccess: true,
+  });
+  const linkedProject = projectInquiriesForAudit.docs[0] as AnyDoc | undefined;
+  const projectPromotedId = linkedProject ? relId(linkedProject.promotedSalesLead) : null;
+  if (linkedProject && projectPromotedId) {
+    try {
+      const salesLead = (await payload.findByID({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        collection: "sales-leads" as any,
+        id: projectPromotedId,
+        depth: 0,
+        overrideAccess: true,
+      })) as SalesDoc;
+      const leadUpdate: Record<string, unknown> = {};
+      if (!existingSourceWebsiteAuditId(salesLead)) {
+        leadUpdate.sourceWebsiteAudit = websiteAuditId;
+      }
+      if (!existingSourceProjectInquiryId(salesLead) && linkedProject.id) {
+        leadUpdate.sourceProjectInquiry = Number(linkedProject.id);
+      }
+      if (Object.keys(leadUpdate).length > 0) {
+        await payload.update({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          collection: "sales-leads" as any,
+          id: projectPromotedId,
+          data: leadUpdate,
+          overrideAccess: true,
+        });
+      }
+      await payload.update({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        collection: "website-audits" as any,
+        id: websiteAuditId,
+        data: {
+          promotedSalesLead: projectPromotedId,
+          promotedAt: new Date().toISOString(),
+        },
+        overrideAccess: true,
+      });
+      return success({
+        salesLead,
+        salesLeadId: projectPromotedId,
+        sourceRecordType: "website_audit",
+        sourceRecordId: websiteAuditId,
+        created: false,
+        linkedExisting: true,
+        collisionVia: "audit",
+        origin: "website-audit",
+      });
+    } catch (err) {
+      console.error("[KXD Sales] Audit link to project opportunity failed:", err);
+    }
+  }
+
+  const identityPool = await loadSalesLeadsForIdentity(payload);
+  const collision = classifyIdentityCollision({
+    email: audit.email,
+    website: audit.website,
+    company: audit.company,
+    openLeads: identityPool.open,
+    closedLeads: identityPool.closed,
+  });
+  if (collision.kind === "exact") {
+    const salesLeadId = Number(collision.salesLead.id);
+    const leadUpdate: Record<string, unknown> = {
+      sourceWebsiteAudit: websiteAuditId,
+    };
+    if (!existingSourceWebsiteAuditId(collision.salesLead as SalesDoc)) {
+      await payload.update({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        collection: "sales-leads" as any,
+        id: salesLeadId,
+        data: leadUpdate,
+        overrideAccess: true,
+      });
+    }
+    await payload.update({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      collection: "website-audits" as any,
+      id: websiteAuditId,
+      data: {
+        promotedSalesLead: salesLeadId,
+        promotedAt: new Date().toISOString(),
+      },
+      overrideAccess: true,
+    });
+    return success({
+      salesLead: collision.salesLead as SalesDoc,
+      salesLeadId,
+      sourceRecordType: "website_audit",
+      sourceRecordId: websiteAuditId,
+      created: false,
+      linkedExisting: true,
+      collisionVia: collision.via,
+      origin: "website-audit",
+    });
   }
 
   const companyName =
