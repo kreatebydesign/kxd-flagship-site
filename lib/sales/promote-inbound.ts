@@ -17,6 +17,7 @@ import { logSalesActivity } from "./activities";
 import {
   classifyIdentityCollision,
   existingSourceInquiryId,
+  existingSourceProjectInquiryId,
 } from "./identity";
 import { initialResponseDueAt } from "./follow-up-policy";
 import type { SalesDoc } from "./types";
@@ -229,6 +230,96 @@ async function linkInquiryToExistingLead(params: {
     });
   } catch (err) {
     console.error("[KXD Sales] Linked inquiry activity log failed:", err);
+  }
+
+  const refreshed = (await params.payload.findByID({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    collection: "sales-leads" as any,
+    id: salesLeadId,
+    depth: 0,
+    overrideAccess: true,
+  })) as SalesDoc;
+
+  return { salesLead: refreshed, salesLeadId };
+}
+
+async function linkProjectInquiryToExistingLead(params: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  payload: any;
+  projectInquiry: AnyDoc;
+  projectInquiryId: number;
+  salesLead: SalesDoc;
+  via: "email" | "domain";
+  operatorLabel?: string;
+}): Promise<{ salesLead: SalesDoc; salesLeadId: number }> {
+  const salesLeadId = Number(params.salesLead.id);
+  const existingSource = existingSourceProjectInquiryId(params.salesLead);
+  const leadUpdate: Record<string, unknown> = {};
+  if (!existingSource) leadUpdate.sourceProjectInquiry = params.projectInquiryId;
+
+  const existingNotes = trimText(params.salesLead.notes, 4000) ?? "";
+  const inboundNote = [
+    `Linked Start Project inquiry #${params.projectInquiryId} (${params.via}).`,
+    trimText(params.projectInquiry.businessGoals, 800),
+    trimText(params.projectInquiry.notes, 800),
+  ]
+    .filter(Boolean)
+    .join("\n");
+  leadUpdate.notes = existingNotes
+    ? `${existingNotes}\n\n${inboundNote}`
+    : inboundNote;
+
+  if (
+    String(params.salesLead.nextAction ?? "none") === "none" &&
+    !["won", "lost"].includes(String(params.salesLead.status))
+  ) {
+    leadUpdate.nextAction = "respond-today";
+    leadUpdate.nextFollowUp = initialResponseDueAt(
+      params.projectInquiry.createdAt
+        ? new Date(String(params.projectInquiry.createdAt))
+        : new Date(),
+    ).toISOString();
+  }
+
+  if (Object.keys(leadUpdate).length > 0) {
+    await params.payload.update({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      collection: "sales-leads" as any,
+      id: salesLeadId,
+      data: leadUpdate,
+      overrideAccess: true,
+    });
+  }
+
+  await params.payload.update({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    collection: "project-inquiries" as any,
+    id: params.projectInquiryId,
+    data: {
+      promotedSalesLead: salesLeadId,
+      promotedAt: new Date().toISOString(),
+      status:
+        String(params.projectInquiry.status ?? "new") === "new"
+          ? "reviewing"
+          : params.projectInquiry.status,
+    },
+    overrideAccess: true,
+  });
+
+  try {
+    await logSalesActivity({
+      activityType: "note",
+      title: "Start Project application linked",
+      summary: [
+        `Project inquiry #${params.projectInquiryId} linked to existing opportunity via ${params.via}.`,
+        params.operatorLabel ? `Operator: ${params.operatorLabel}.` : null,
+      ]
+        .filter(Boolean)
+        .join(" "),
+      leadId: salesLeadId,
+    });
+  } catch (err) {
+    console.error("[KXD Sales] Linked project inquiry activity log failed:", err);
   }
 
   const refreshed = (await params.payload.findByID({
@@ -521,6 +612,64 @@ export async function promoteProjectInquiryToSales(
       ok: false,
       message: `Project inquiry status "${status}" is not eligible for Sales promotion.`,
       code: "not_eligible",
+    };
+  }
+
+  const identityPool = await loadSalesLeadsForIdentity(payload);
+  const collision = classifyIdentityCollision({
+    email: projectInquiry.email,
+    website: projectInquiry.websiteUrl,
+    company: projectInquiry.companyName,
+    openLeads: identityPool.open,
+    closedLeads: identityPool.closed,
+  });
+
+  if (collision.kind === "exact") {
+    const linked = await linkProjectInquiryToExistingLead({
+      payload,
+      projectInquiry,
+      projectInquiryId,
+      salesLead: collision.salesLead as SalesDoc,
+      via: collision.via,
+      operatorLabel: options?.operatorLabel,
+    });
+    return success({
+      ...linked,
+      sourceRecordType: "project_inquiry",
+      sourceRecordId: projectInquiryId,
+      created: false,
+      linkedExisting: true,
+      collisionVia: collision.via,
+      origin: "start-project",
+    });
+  }
+
+  if (collision.kind === "ambiguous") {
+    const ids = collision.candidates.map((c) => c.id);
+    const reviewNote = [
+      "Identity collision — review before promoting.",
+      ...collision.candidates.map((c) => `Sales lead #${c.id} (${c.via}): ${c.reason}`),
+    ].join("\n");
+    try {
+      const priorNotes = trimText(projectInquiry.notes, 4000) ?? "";
+      await payload.update({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        collection: "project-inquiries" as any,
+        id: projectInquiryId,
+        data: {
+          notes: priorNotes ? `${priorNotes}\n\n${reviewNote}` : reviewNote,
+        },
+        overrideAccess: true,
+      });
+    } catch (err) {
+      console.error("[KXD Sales] Failed to mark project inquiry for identity review:", err);
+    }
+    return {
+      ok: false,
+      message:
+        "An existing commercial opportunity may match this application. Review before creating a duplicate.",
+      code: "needs_review",
+      candidateSalesLeadIds: ids,
     };
   }
 

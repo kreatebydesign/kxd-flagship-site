@@ -52,6 +52,22 @@ export function isWebsiteAuditEligibleForPromotion(status: string): boolean {
   return status !== "closed-lost";
 }
 
+/** First-party /start-project submissions auto-enter Sales. Intelligence/audit paths stay operator-promoted. */
+export function isFirstPartyStartProjectAutoPromote(input: {
+  inquirySource?: unknown;
+  referralSource?: unknown;
+  notes?: unknown;
+}): boolean {
+  const inquirySource = String(input.inquirySource ?? "").trim();
+  if (inquirySource === "kxd-intelligence" || inquirySource === "website-audit") {
+    return false;
+  }
+  const referralSource = String(input.referralSource ?? "").trim();
+  if (referralSource === "kxd-intelligence") return false;
+  if (String(input.notes ?? "").includes("[KXD Intelligence context]")) return false;
+  return true;
+}
+
 export function buildNotes(parts: Array<string | null | undefined>): string | undefined {
   const lines = parts.map((p) => String(p ?? "").trim()).filter(Boolean);
   if (lines.length === 0) return undefined;

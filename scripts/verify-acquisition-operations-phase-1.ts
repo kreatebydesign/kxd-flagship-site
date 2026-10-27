@@ -22,6 +22,7 @@ import {
 } from "../lib/acquisition-operations";
 import {
   isInquiryEligibleForPromotion,
+  isFirstPartyStartProjectAutoPromote,
   isProjectInquiryEligibleForPromotion,
   isWebsiteAuditEligibleForPromotion,
   INQUIRY_BUDGET_MIDPOINTS,
@@ -128,6 +129,32 @@ async function main() {
     assert.ok(!researchPromote.includes("auto-promote"));
   });
 
+  await check("first-party /start-project auto-promotes; intelligence stays operator path", () => {
+    assertFileContains(
+      "app/api/project-inquiries/route.ts",
+      "promoteProjectInquiryToSales",
+    );
+    assertFileContains(
+      "app/api/project-inquiries/route.ts",
+      "isFirstPartyStartProjectAutoPromote",
+    );
+    assert.equal(isFirstPartyStartProjectAutoPromote({ inquirySource: "start-project" }), true);
+    assert.equal(
+      isFirstPartyStartProjectAutoPromote({ inquirySource: "kxd-intelligence" }),
+      false,
+    );
+    assert.equal(
+      isFirstPartyStartProjectAutoPromote({
+        notes: "[KXD Intelligence context]",
+      }),
+      false,
+    );
+    assertFileContains(
+      "lib/sales/promote-inbound.ts",
+      "linkProjectInquiryToExistingLead",
+    );
+  });
+
   await check("sales provenance schema + unique indexes", () => {
     assertFileContains("payload/collections/SalesLeads.ts", "sourceInquiry");
     assertFileContains("payload/collections/SalesLeads.ts", "sourceProjectInquiry");
@@ -204,7 +231,11 @@ async function main() {
     assertFileContains("lib/platform/registry.ts", 'status: "in-progress"');
     assertFileContains("lib/platform/registry.ts", "Partial:");
     const registry = readFileSync(path.join(ROOT, "lib/platform/registry.ts"), "utf8");
-    assert.ok(!registry.includes('id: "phase-17"') || !/phase-17[\s\S]*?status: "completed"/.test(registry));
+    const leadFunnel = registry.match(
+      /id: "phase-17",[\s\S]*?title: "Lead Funnel Unification"[\s\S]*?status: "(in-progress|completed)"/,
+    );
+    assert.ok(leadFunnel, "Lead Funnel Unification registry entry missing");
+    assert.equal(leadFunnel[1], "in-progress");
   });
 
   await check("CSI doctrine / no universal leads collection", () => {
