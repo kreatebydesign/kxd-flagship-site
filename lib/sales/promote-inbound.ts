@@ -15,6 +15,13 @@ import type {
 } from "@/lib/acquisition-operations/promote-types";
 import { logSalesActivity } from "./activities";
 import {
+  inboundAssignmentActivitySuffix,
+  inboundStaffFieldsForNewOrUnassignedLead,
+  resolveInboundSalesStaffAssignment,
+  toAssignedStaffUserData,
+  type InboundStaffAssignment,
+} from "./inbound-staff-assignment";
+import {
   classifyIdentityCollision,
   existingSourceInquiryId,
   existingSourceProjectInquiryId,
@@ -89,6 +96,20 @@ async function resolveExistingBySource(params: {
   });
 
   return { salesLead, salesLeadId };
+}
+
+async function mergeInboundStaffAssignmentIntoUpdate(params: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  payload: any;
+  salesLead: SalesDoc;
+  leadUpdate: Record<string, unknown>;
+}): Promise<InboundStaffAssignment> {
+  const assignment = await inboundStaffFieldsForNewOrUnassignedLead(
+    params.salesLead,
+    params.payload,
+  );
+  Object.assign(params.leadUpdate, toAssignedStaffUserData(assignment));
+  return assignment;
 }
 
 async function recoverAfterUniqueRace(params: {
@@ -193,6 +214,12 @@ async function linkInquiryToExistingLead(params: {
     ).toISOString();
   }
 
+  const assignment = await mergeInboundStaffAssignmentIntoUpdate({
+    payload: params.payload,
+    salesLead: params.salesLead,
+    leadUpdate,
+  });
+
   if (Object.keys(leadUpdate).length > 0) {
     await params.payload.update({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -228,6 +255,7 @@ async function linkInquiryToExistingLead(params: {
       summary: [
         `Inquiry #${params.inquiryId} linked to existing opportunity via ${params.via}.`,
         params.operatorLabel ? `Operator: ${params.operatorLabel}.` : null,
+        inboundAssignmentActivitySuffix(assignment),
       ]
         .filter(Boolean)
         .join(" "),
@@ -337,6 +365,12 @@ async function linkProjectInquiryToExistingLead(params: {
     ).toISOString();
   }
 
+  const assignment = await mergeInboundStaffAssignmentIntoUpdate({
+    payload: params.payload,
+    salesLead: params.salesLead,
+    leadUpdate,
+  });
+
   if (Object.keys(leadUpdate).length > 0) {
     await params.payload.update({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -369,6 +403,7 @@ async function linkProjectInquiryToExistingLead(params: {
       summary: [
         `Project inquiry #${params.projectInquiryId} linked to existing opportunity via ${params.via}.`,
         params.operatorLabel ? `Operator: ${params.operatorLabel}.` : null,
+        inboundAssignmentActivitySuffix(assignment),
       ]
         .filter(Boolean)
         .join(" "),
@@ -517,6 +552,7 @@ export async function promoteInquiryToSales(
   ]);
 
   try {
+    const inboundAssignment = await resolveInboundSalesStaffAssignment(payload);
     const created = (await payload.create({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       collection: "sales-leads" as any,
@@ -538,6 +574,7 @@ export async function promoteInquiryToSales(
         estimatedValue,
         probability: 25,
         assignedTo: trimText(inquiry.assignedOwner, 120) || undefined,
+        ...toAssignedStaffUserData(inboundAssignment),
       },
       overrideAccess: true,
     })) as SalesDoc;
@@ -555,6 +592,7 @@ export async function promoteInquiryToSales(
           inquiry.timeline ? `Timeline: ${inquiry.timeline}.` : null,
           trimText(inquiry.message, 400),
           options?.operatorLabel ? `Operator: ${options.operatorLabel}.` : null,
+          inboundAssignmentActivitySuffix(inboundAssignment),
         ]
           .filter(Boolean)
           .join(" "),
@@ -799,6 +837,7 @@ export async function promoteProjectInquiryToSales(
   ]);
 
   try {
+    const inboundAssignment = await resolveInboundSalesStaffAssignment(payload);
     const created = (await payload.create({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       collection: "sales-leads" as any,
@@ -821,6 +860,7 @@ export async function promoteProjectInquiryToSales(
         sourceProjectInquiry: projectInquiryId,
         estimatedValue,
         probability: 30,
+        ...toAssignedStaffUserData(inboundAssignment),
       },
       overrideAccess: true,
     })) as SalesDoc;
@@ -845,6 +885,7 @@ export async function promoteProjectInquiryToSales(
         summary: [
           `Project inquiry #${projectInquiryId} promoted to Sales.`,
           options?.operatorLabel ? `Operator: ${options.operatorLabel}.` : null,
+          inboundAssignmentActivitySuffix(inboundAssignment),
         ]
           .filter(Boolean)
           .join(" "),
@@ -1054,6 +1095,7 @@ export async function promoteWebsiteAuditToSales(
   ]);
 
   try {
+    const inboundAssignment = await resolveInboundSalesStaffAssignment(payload);
     const created = (await payload.create({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       collection: "sales-leads" as any,
@@ -1072,6 +1114,7 @@ export async function promoteWebsiteAuditToSales(
         ).toISOString(),
         sourceWebsiteAudit: websiteAuditId,
         probability: 25,
+        ...toAssignedStaffUserData(inboundAssignment),
       },
       overrideAccess: true,
     })) as SalesDoc;
@@ -1096,6 +1139,7 @@ export async function promoteWebsiteAuditToSales(
         summary: [
           `Website audit #${websiteAuditId} promoted to Sales.`,
           options?.operatorLabel ? `Operator: ${options.operatorLabel}.` : null,
+          inboundAssignmentActivitySuffix(inboundAssignment),
         ]
           .filter(Boolean)
           .join(" "),

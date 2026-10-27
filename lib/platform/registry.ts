@@ -390,7 +390,7 @@ export const PLATFORM_PHASES: PlatformPhaseDefinition[] = [
     title: "Lead Funnel Unification",
     status: "in-progress",
     description:
-      "Partial: Research → Sales + first-party /contact and /start-project auto-promote, project inquiry attribution (inquirySource, intakeChannel, audit link), audit/intelligence opportunity anchoring, and M4 fixture verification. Remaining: staff assignment defaults (M5), registry completion evidence (M6), Managed Client Lead Operations (sibling context).",
+      "Partial: Research → Sales + first-party /contact and /start-project auto-promote, project inquiry attribution (inquirySource, intakeChannel, audit link), audit/intelligence opportunity anchoring, M4 fixture verification, inbound BDS assignment on promote, operator-only acquisition promote API, and M5–M6 verification suite. Remaining: operator sign-off and Managed Client Lead Operations (sibling context).",
   },
 ];
 

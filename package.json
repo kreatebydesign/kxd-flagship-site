@@ -98,6 +98,7 @@
     "verify:revenue-pipeline-foundation": "node --import tsx scripts/verify-revenue-pipeline-foundation.ts",
     "verify:acquisition-operations-phase-1": "node --import tsx scripts/verify-acquisition-operations-phase-1.ts",
     "verify:phase-17-lead-funnel": "node --import tsx scripts/verify-phase-17-lead-funnel.ts",
+    "verify:phase-17-m5-m6-lead-funnel": "node --import tsx scripts/verify-phase-17-m5-m6-lead-funnel.ts",
     "verify:inbound-sales-closed-loop-v1": "node --import tsx scripts/verify-inbound-sales-closed-loop-v1.ts",
     "dry-run:first-party-inquiry-backfill": "KXD_SERVER_ONLY_SHIM=1 tsx --env-file=.env.local --import ./scripts/shims/register-server-only.mjs scripts/dry-run-first-party-inquiry-backfill.ts",
     "verify:managed-client-lead-operations-phase-2": "node --import tsx scripts/verify-managed-client-lead-operations-phase-2.ts",
