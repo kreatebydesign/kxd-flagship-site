@@ -44,7 +44,7 @@ export function StaffMyClientsScreen({ data }: { data: StaffMyClientsData }) {
             <OpsEmpty message="No clients assigned yet" />
             <p style={{ marginTop: "0.75rem" }}>
               When Matt assigns a client to you in staff client assignments, it will appear here
-              with contacts, project context, and your work — without opening Client Command.
+              with contacts, project context, and your work — without opening the full client workspace.
             </p>
             <p className="kxd-os-meta" style={{ marginTop: "0.75rem" }}>
               You can still complete assigned work from{" "}

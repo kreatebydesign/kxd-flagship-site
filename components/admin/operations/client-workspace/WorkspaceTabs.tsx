@@ -519,7 +519,7 @@ export function NotesTab({ data }: { data: ClientWorkspaceData }) {
             href={`/admin/operations/client-command/${clientId}?tab=notes`}
             className="kxd-os-link-quiet"
           >
-            Client Command → Notes
+            Client workspace → Notes
           </Link>
           .
         </p>

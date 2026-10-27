@@ -129,7 +129,7 @@ export const ExecutiveTimelineEvents: CollectionConfig = {
       options: [
         { label: "Launch", value: "Launch" },
         { label: "Client HQ", value: "Client HQ" },
-        { label: "Client Command", value: "Client Command" },
+        { label: "Client workspace", value: "Client Command" },
         { label: "Client Intelligence", value: "Client Intelligence" },
         { label: "Infrastructure", value: "Infrastructure" },
         { label: "Founder Intelligence", value: "Founder Intelligence" },

@@ -56,9 +56,10 @@ Avoid repeating the same generic label on every screen.
 
 ## Technical names vs visible copy
 
-- **Do not** rename routes, APIs, database tables, permissions, or module slugs only to change wording.
+- **Do not** rename routes, APIs, database tables, permissions, or module slugs only to change wording (e.g. keep `/admin/operations/client-command`, `lib/client-command/`, timeline `sourceModule: "Client Command"`).
 - **Do** change labels, headings, leads, empty states, notifications, and Payload `admin.description` text that founders and staff read.
-- **Flag for a product decision** (do not rename architecture in a copy pass): legacy product names such as **Client Command** / **Client Command Center** hub title, **Financial Command** subsystem key, **Network Command** internal module name. Use neutral user copy around them (e.g. “client workspace”) until a formal rename is approved.
+- **Per-client HQ (staff):** **Clients** (hub), **Client workspace** (per-client depth), **Overview** (primary tab). Do not use “Client Command” or “Command Center” in UI.
+- **Internal module codenames** (e.g. Network Command, Lead Command) may remain in code; user-facing surfaces use **Network**, **Leads**, or **client workspace** as appropriate.
 
 ---
 

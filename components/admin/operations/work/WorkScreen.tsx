@@ -68,7 +68,7 @@ const QUICK_ACTIONS = [
     href: "/admin/collections/client-tasks/create",
   },
   {
-    label: "Open Client Command",
+    label: "Open client workspace",
     sub: "Client workspace hub",
     href: "/admin/operations/client-command",
   },

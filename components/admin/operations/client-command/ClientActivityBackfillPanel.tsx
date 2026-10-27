@@ -30,7 +30,7 @@ export function ClientActivityBackfillPanel() {
   return (
     <div className="kxd-os-command-backfill">
       <header className="kxd-os-command-backfill__hero">
-        <p className="kxd-os-eyebrow">KXD OS · Client Command</p>
+        <p className="kxd-os-eyebrow">KXD OS · Client workspace</p>
         <h1 className="kxd-os-headline kxd-os-headline--presence">Activity backfill</h1>
         <p className="kxd-os-command-hub__lead">
           Scans existing client records — projects, requests, proposals, retainers, notes,

@@ -17,7 +17,7 @@ export function ClientCommandHub({
       <div className="kxd-os-command-hub">
         <header className="kxd-os-command-hub__hero">
           <p className="kxd-os-eyebrow">KXD OS · Client Operations</p>
-          <h1 className="kxd-os-headline kxd-os-headline--presence">Client Command Center</h1>
+          <h1 className="kxd-os-headline kxd-os-headline--presence">Clients</h1>
           <p className="kxd-os-command-hub__lead">
             One living workspace for every client relationship — projects, revenue, timeline,
             files, and operational context without leaving KXD OS.
