@@ -450,7 +450,7 @@ export const ClientInquiries: CollectionConfig = {
       admin: {
         position: "sidebar",
         description:
-          "Client Command portal-member owner (distinct from Assigned Owner, which is a Payload/staff user).",
+          "Client workspace portal-member owner (distinct from Assigned Owner, which is a Payload/staff user).",
       },
     },
   ],

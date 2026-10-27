@@ -106,7 +106,7 @@ export function StaffClientWorkspaceScreen({ data }: { data: StaffClientWorkspac
         <OperationsPageHero
           eyebrow="Client workspace"
           title={summary.name}
-          lead="Assignment-scoped context for delivery — contacts, projects, and your work. Financial and agreement details stay in Client Command."
+          lead="Assignment-scoped context for delivery — contacts, projects, and your work. Financial and agreement details stay in the client workspace."
         />
 
         <div className="kxd-os-staff-plan-grid" style={{ marginTop: "1.5rem" }}>

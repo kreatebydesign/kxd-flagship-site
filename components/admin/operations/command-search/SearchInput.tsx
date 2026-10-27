@@ -34,7 +34,7 @@ export function SearchInput({
         autoComplete="off"
         autoCorrect="off"
         spellCheck={false}
-        aria-label="Universal command search"
+        aria-label="Search KXD OS"
       />
       <kbd className="kxd-cmd-input__hint">esc</kbd>
     </div>

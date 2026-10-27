@@ -231,7 +231,7 @@ export function CommandPalette() {
         className="kxd-cmd-panel"
         role="dialog"
         aria-modal="true"
-        aria-label="Universal command search"
+        aria-label="Search KXD OS"
         onClick={(e) => e.stopPropagation()}
         onKeyDown={onKeyDown}
       >

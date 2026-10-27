@@ -243,8 +243,8 @@ function main() {
     "components/admin/operations/client-command/ClientCommandHub.tsx",
   );
   check(
-    "Client Command Center name preserved (per-client HQ)",
-    clientHub.includes("Client Command Center"),
+    "Client hub uses premium workspace language (not Command Center)",
+    clientHub.includes("Clients") && !clientHub.includes("Client Command Center"),
   );
 
   console.log("\nPhase 7 Batch C home policy verification passed.\n");

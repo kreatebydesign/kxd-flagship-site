@@ -201,7 +201,7 @@ export function ClientPortfolioScreen({
                       </Link>
                     </div>
                     <div className="kxd-os-portfolio-cell__stack">
-                      <span className="kxd-os-caption">Command</span>
+                      <span className="kxd-os-caption">Workspace</span>
                       <Link
                         href={`/admin/operations/client-command/${row.clientId}`}
                         className="kxd-os-link-quiet"

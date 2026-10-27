@@ -167,7 +167,7 @@ export function AdminJuniorAssignedTasks({ creators, tasks }: Props) {
         }}
       >
         Assign real client or Internal KXD work. Separate from Junior Academy
-        training missions.
+        training exercises.
       </p>
 
       <div

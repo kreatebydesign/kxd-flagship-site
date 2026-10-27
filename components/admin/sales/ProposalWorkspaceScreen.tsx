@@ -2131,7 +2131,7 @@ export function ProposalWorkspaceScreen({
                         )}
                       </div>
                       <p className="kxd-os-meta" style={{ marginTop: "1rem" }}>
-                        Dual e-sign runs in Client Command → Commercial Agreements. This tab only
+                        Dual e-sign runs in the client workspace → Commercial Agreements. This tab only
                         edits the draft and lifecycle status — it does not send a signing link or
                         email the client.
                       </p>

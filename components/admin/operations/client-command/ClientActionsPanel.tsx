@@ -213,7 +213,7 @@ export function ClientActionsPanel({ data }: { data: ClientWorkspaceBundle }) {
           <p className="kxd-os-eyebrow">Executive workflow</p>
           <h2 className="kxd-os-actions__title">Client actions</h2>
           <p className="kxd-os-actions__lead">
-            Intelligence recommendations and manual follow-ups — execute without leaving Client Command.
+            Intelligence recommendations and manual follow-ups — execute without leaving the client workspace.
           </p>
         </div>
         <Link

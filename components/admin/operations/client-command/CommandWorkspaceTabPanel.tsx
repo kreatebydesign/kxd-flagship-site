@@ -222,7 +222,7 @@ function OverviewPanel({ data }: { data: ClientWorkspaceBundle }) {
           href={commercialWorkspaceHref(data.clientId, "overview")}
           className="kxd-os-link-quiet kxd-os-workspace-inline-link"
         >
-          Full financial command →
+          Full financial overview →
         </Link>
       </WorkspaceChapter>
 

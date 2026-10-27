@@ -46,7 +46,7 @@ export function buildBrainSignals(input: {
         urgency: risk.urgency,
         confidence: "high",
         estimatedValue: null,
-        suggestedAction: "Review client command center and schedule follow-up.",
+        suggestedAction: "Review the client workspace and schedule follow-up.",
         relatedModule: "Timeline",
         clientId: risk.clientId,
         clientName: risk.clientName,

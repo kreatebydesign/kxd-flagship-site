@@ -40,7 +40,7 @@ const QUICK_ACTIONS = [
     href: "/admin/operations/timeline",
   },
   {
-    label: "Client Command",
+    label: "Client workspace",
     sub: "Operator workspace",
     href: "/admin/operations/client-command",
   },

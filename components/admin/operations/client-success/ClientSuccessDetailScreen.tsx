@@ -46,7 +46,7 @@ export function ClientSuccessDetailScreen({ data }: { data: ClientSuccessDetailD
           </Link>
           {" · "}
           <Link href={`/admin/operations/client-command/${data.clientId}`} className="kxd-os-link-quiet">
-            Command Center
+            Client workspace
           </Link>
         </div>
 

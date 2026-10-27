@@ -533,7 +533,7 @@ const INTERNAL_AND_FUTURE_DEFS: CanonicalCapabilityDefinition[] = [
   },
   {
     key: "client-command",
-    label: "Client Command",
+    label: "Client workspace",
     kind: "internal",
     internalOnly: true,
   },

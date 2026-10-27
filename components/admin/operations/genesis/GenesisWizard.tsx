@@ -287,7 +287,7 @@ export function GenesisWizard({ initialSession }: { initialSession: GenesisSessi
               </div>
               <p className="kxd-os-body" style={{ marginTop: "1.25rem", lineHeight: 1.7 }}>
                 Finalizing Genesis will launch the client into KXD OS — Client, Executive Profile,
-                Command Center, Work Board, Playbooks, Success Plan, Timeline, and production drafts.
+                client workspace, Work Board, Playbooks, Success Plan, Timeline, and production drafts.
               </p>
               <div className="kxd-os-ops-workflow-actions" style={{ marginTop: "1rem" }}>
                 <KxdButton variant="secondary" onClick={generateBlueprints} disabled={busy} loading={busy}>

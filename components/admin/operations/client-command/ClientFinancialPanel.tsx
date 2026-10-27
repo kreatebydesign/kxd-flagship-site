@@ -24,7 +24,7 @@ export function ClientFinancialPanel({ data }: { data: ClientWorkspaceBundle }) 
       <header className="kxd-os-financial__hero">
         <div>
           <p className="kxd-os-eyebrow">Executive finance</p>
-          <h2 className="kxd-os-financial__title">Financial command</h2>
+          <h2 className="kxd-os-financial__title">Financial overview</h2>
           <p className="kxd-os-financial__lead">
             Revenue profile, billing setup, contracted value, pipeline, and risk flags for this client.
           </p>

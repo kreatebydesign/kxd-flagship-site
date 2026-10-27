@@ -84,7 +84,7 @@ export const ExecutiveNotes: CollectionConfig = {
       name: "summary",
       type: "textarea",
       label: "Summary",
-      admin: { description: "Plain-text preview used in vault search and command center." },
+      admin: { description: "Plain-text preview used in vault search and strategy surfaces." },
     },
     {
       name: "content",

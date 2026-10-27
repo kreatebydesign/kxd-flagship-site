@@ -263,7 +263,7 @@ export const Clients: CollectionConfig = {
       admin: {
         position: "sidebar",
         description:
-          "Commercial plan assignment. Empty = legacy (keep existing CES enabledModules). Managed in Client Command → Plans & Access.",
+          "Commercial plan assignment. Empty = legacy (keep existing CES enabledModules). Managed in client workspace → Plans & Access.",
       },
     },
     {

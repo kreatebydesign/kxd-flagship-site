@@ -35,7 +35,7 @@ export default async function GenesisSessionPage({
           {session.clientId ? (
             <p className="kxd-os-body">
               <a href={`/admin/operations/client-command/${session.clientId}`} className="kxd-os-link">
-                Open Client Command Center →
+                Open client workspace →
               </a>
             </p>
           ) : null}

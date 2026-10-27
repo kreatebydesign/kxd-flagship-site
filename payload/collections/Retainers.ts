@@ -17,7 +17,7 @@ export const Retainers: CollectionConfig = {
     useAsTitle: "retainerName",
     defaultColumns: ["client", "retainerName", "monthlyAmount", "billingDay", "billingStatus", "nextInvoiceDate"],
     group: PAYLOAD_GROUPS.kxdOs,
-    description: "Active and historical retainer agreements. Drives MRR tracking and billing intelligence in the Operations Command Center.",
+    description: "Active and historical retainer agreements. Drives MRR tracking and billing intelligence in financial reporting and Today.",
   },
   access: {
     read: isAuthenticated,
@@ -136,7 +136,7 @@ export const Retainers: CollectionConfig = {
               label: "Next Invoice Date",
               admin: {
                 date: { pickerAppearance: "dayOnly" },
-                description: "Used by the Operations Command Center for upcoming invoice alerts.",
+                description: "Used by financial reporting and Today for upcoming invoice alerts.",
               },
             },
           ],

@@ -58,10 +58,10 @@ export function getGlobalQuickActions(): QuickAction[] {
     },
     {
       id: "open-client-command-center",
-      label: "Open Client Command Center",
+      label: "Open client workspaces",
       sub: "Clients",
       href: clientCommandCenterHref(),
-      keywords: ["command center", "client command"],
+      keywords: ["client workspace", "client command", "clients"],
     },
     {
       id: "open-notifications",
@@ -119,7 +119,7 @@ export function getClientQuickActions(clientId: number): QuickAction[] {
   return filterEditionQuickActions([
     {
       id: "open-command-center",
-      label: "Open Command Center",
+      label: "Open client workspace",
       sub: "Client ops",
       href: clientCommandCenterHref(clientId),
     },
@@ -251,7 +251,7 @@ const COMMAND_VERBS: Array<{
   {
     verbs: ["command"],
     actionId: "open-command-center",
-    title: "Open Command Center",
+    title: "Open client workspace",
     actionLabel: "Open",
   },
   {

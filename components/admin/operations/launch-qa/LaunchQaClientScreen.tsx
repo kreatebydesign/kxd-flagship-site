@@ -247,7 +247,7 @@ export function LaunchQaClientScreen({
 
                 <div className="kxd-os-ops-workflow-nav" style={{ marginTop: "1.5rem" }}>
                   <Link href={`/admin/operations/client-command/${clientId}`} className="kxd-os-link-quiet">
-                    Command Center
+                    Client workspace
                   </Link>
                   <div className="kxd-os-ops-workflow-nav__group">
                     <KxdButton

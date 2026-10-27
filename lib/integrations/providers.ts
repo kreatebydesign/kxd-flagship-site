@@ -11,7 +11,7 @@ const PROVIDER_DEFINITIONS: IntegrationProviderDefinition[] = [
     description: "Repository activity, deployments, and project signals for delivery intelligence.",
     supportedFeatures: ["Repository linking", "Commit activity", "Pull request signals", "Deployment hooks"],
     futureCapabilities: ["PR automation", "Release tracking", "Issue sync", "Branch protection status"],
-    consumers: ["Projects", "Command Center", "Timeline", "Brain"],
+    consumers: ["Projects", "Operations", "Timeline", "Brain"],
     connectPriority: 3,
     settingsSchema: buildSettingsSchema({
       documentationUrl: "https://docs.github.com/en/rest",
@@ -33,7 +33,7 @@ const PROVIDER_DEFINITIONS: IntegrationProviderDefinition[] = [
     description: "Deployment platform status, build health, and infrastructure signals.",
     supportedFeatures: ["Deployment status", "Build logs reference", "Domain routing", "Preview URLs"],
     futureCapabilities: ["Auto rollback alerts", "Edge config sync", "Analytics bridge"],
-    consumers: ["Infrastructure", "Command Center", "Brain"],
+    consumers: ["Infrastructure", "Operations", "Brain"],
     connectPriority: 4,
     settingsSchema: buildSettingsSchema({
       documentationUrl: "https://vercel.com/docs/rest-api",
@@ -181,7 +181,7 @@ const PROVIDER_DEFINITIONS: IntegrationProviderDefinition[] = [
     description: "Calendar, email, and directory signals for executive workflow.",
     supportedFeatures: ["Calendar events", "Directory lookup", "Meeting references"],
     futureCapabilities: ["Meeting prep sync", "Shared drive links", "Contact enrichment"],
-    consumers: ["Timeline", "Command Center", "Brain"],
+    consumers: ["Timeline", "Operations", "Brain"],
     connectPriority: 9,
     settingsSchema: buildSettingsSchema({
       documentationUrl: "https://developers.google.com/workspace",
@@ -218,7 +218,7 @@ const PROVIDER_DEFINITIONS: IntegrationProviderDefinition[] = [
     description: "Outlook, Teams, and directory integration for enterprise clients.",
     supportedFeatures: ["Calendar sync", "Contact directory", "Teams meeting refs"],
     futureCapabilities: ["Teams notification bridge", "SharePoint asset links"],
-    consumers: ["Timeline", "Command Center", "Brain"],
+    consumers: ["Timeline", "Operations", "Brain"],
     connectPriority: 10,
     settingsSchema: buildSettingsSchema({
       documentationUrl: "https://learn.microsoft.com/en-us/graph/",
@@ -262,7 +262,7 @@ const PROVIDER_DEFINITIONS: IntegrationProviderDefinition[] = [
     description: "KXD Core data layer — CMS, collections, and operational records.",
     supportedFeatures: ["Collections API", "Admin auth", "Hooks", "Access control"],
     futureCapabilities: ["Cross-collection sync jobs", "Webhook fan-out", "Audit log stream"],
-    consumers: ["Command Center", "Brain", "Automation", "Reporting", "Sales", "Infrastructure"],
+    consumers: ["Operations", "Brain", "Automation", "Reporting", "Sales", "Infrastructure"],
     connectPriority: 0,
     coreStack: true,
     settingsSchema: buildSettingsSchema({
@@ -282,7 +282,7 @@ const PROVIDER_DEFINITIONS: IntegrationProviderDefinition[] = [
     description: "Primary Postgres database for Payload and KXD operational data.",
     supportedFeatures: ["Connection pooling", "Branching reference", "Backup status placeholder"],
     futureCapabilities: ["Query performance insights", "Branch previews", "Failover monitoring"],
-    consumers: ["Infrastructure", "Command Center", "Automation"],
+    consumers: ["Infrastructure", "Operations", "Automation"],
     connectPriority: 1,
     coreStack: true,
     settingsSchema: buildSettingsSchema({
