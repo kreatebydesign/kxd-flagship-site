@@ -4,6 +4,8 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { requirePayloadAdminApi } from "@/lib/admin/auth";
+import { acquisitionPromoteOperatorDenied } from "@/lib/acquisition-operations/acquisition-promote-access";
+import { staffActorFromUser } from "@/lib/staff/actor";
 import {
   promoteInquiryToSales,
   promoteProjectInquiryToSales,
@@ -15,8 +17,11 @@ export const dynamic = "force-dynamic";
 const SOURCE_TYPES = new Set(["inquiry", "project_inquiry", "website_audit"]);
 
 export async function POST(req: NextRequest) {
-  const auth = await requirePayloadAdminApi();
+  const auth = await requirePayloadAdminApi(req);
   if (auth instanceof NextResponse) return auth;
+
+  const operatorDenied = acquisitionPromoteOperatorDenied(staffActorFromUser(auth));
+  if (operatorDenied) return operatorDenied;
 
   try {
     const body = await req.json();
