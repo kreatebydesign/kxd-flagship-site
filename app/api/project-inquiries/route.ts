@@ -8,11 +8,16 @@ import {
   isProjectInquiryEligibleForPromotion,
 } from "@/lib/sales/promote-helpers";
 import { promoteProjectInquiryToSales } from "@/lib/sales/promote-inbound";
+import {
+  deriveIntakeChannelFromAcquisition,
+  isIntelligenceProjectInquiry,
+  normalizeProjectInquirySource,
+} from "@/lib/sales/project-inquiry-intake";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-const DEPLOY_VERSION = "v2-start-project-sales-ingest-2026-10-26";
+const DEPLOY_VERSION = "v3-phase17-m2-m3-attribution-2026-10-27";
 
 export async function POST(request: Request) {
   console.log(`📋 POST /api/project-inquiries — handler invoked [${DEPLOY_VERSION}]`);
@@ -86,6 +91,17 @@ export async function POST(request: Request) {
   // ── Save to Payload ───────────────────────────────────────────────────────
   let inquiry: { id: number | string } | null = null;
   try {
+    const normalizedInquirySource = normalizeProjectInquirySource(
+      inquirySource ||
+        (String(notes || "").includes("[KXD Intelligence context]")
+          ? "kxd-intelligence"
+          : "start-project"),
+    );
+    const parsedAuditId = auditId ? Number(auditId) : NaN;
+    const sourceWebsiteAuditId =
+      Number.isFinite(parsedAuditId) && parsedAuditId > 0 ? parsedAuditId : undefined;
+    const intakeChannel = deriveIntakeChannelFromAcquisition(parsedAcquisition.value);
+
     console.log("💾 Creating project inquiry in Payload...");
     const payload = await getPayload({ config });
     inquiry = await (payload as unknown as { create: (args: { collection: string; data: unknown }) => Promise<{ id: number | string }> }).create({
@@ -111,6 +127,9 @@ export async function POST(request: Request) {
             : undefined,
         notes: notesWithAttribution,
         referralSource: selfReportedReferral,
+        inquirySource: normalizedInquirySource,
+        intakeChannel,
+        sourceWebsiteAudit: sourceWebsiteAuditId,
         acquisition: parsedAcquisition.value,
         status: "new",
         submittedAt: new Date().toISOString(),
@@ -129,26 +148,36 @@ export async function POST(request: Request) {
       notes: notesWithAttribution,
     }) && isProjectInquiryEligibleForPromotion("new");
 
-  if (shouldAutoPromote && inquiry?.id != null) {
+  const shouldLinkIntelligence =
+    isIntelligenceProjectInquiry({
+      inquirySource,
+      referralSource: selfReportedReferral,
+      notes: notesWithAttribution,
+    }) && isProjectInquiryEligibleForPromotion("new");
+
+  if ((shouldAutoPromote || shouldLinkIntelligence) && inquiry?.id != null) {
     try {
       const ingest = await promoteProjectInquiryToSales(Number(inquiry.id));
       if (ingest.ok) {
-        console.log("🧭 Start Project inquiry ingested into Sales.", {
+        console.log("🧭 Project inquiry Sales handoff.", {
           projectInquiryId: inquiry.id,
           salesLeadId: ingest.salesLeadId,
           created: ingest.created,
           linkedExisting: ingest.linkedExisting ?? false,
+          collisionVia: ingest.collisionVia ?? null,
+          mode: shouldAutoPromote ? "first-party" : "intelligence-link",
         });
       } else {
-        console.warn("⚠️ Start Project Sales ingest skipped:", ingest.message, {
+        console.warn("⚠️ Project inquiry Sales handoff skipped:", ingest.message, {
           projectInquiryId: inquiry.id,
           code: ingest.code,
           candidates: ingest.candidateSalesLeadIds,
+          mode: shouldAutoPromote ? "first-party" : "intelligence-link",
         });
       }
     } catch (ingestError) {
       console.error(
-        "❌ Sales ingest failed (project inquiry still saved):",
+        "❌ Sales handoff failed (project inquiry still saved):",
         ingestError,
       );
     }

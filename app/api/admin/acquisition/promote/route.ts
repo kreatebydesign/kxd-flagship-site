@@ -43,7 +43,10 @@ export async function POST(req: NextRequest) {
       sourceType === "inquiry"
         ? await promoteInquiryToSales(sourceId, { operatorLabel })
         : sourceType === "project_inquiry"
-          ? await promoteProjectInquiryToSales(sourceId, { operatorLabel })
+          ? await promoteProjectInquiryToSales(sourceId, {
+              operatorLabel,
+              allowIntelligenceCreate: true,
+            })
           : await promoteWebsiteAuditToSales(sourceId, { operatorLabel });
 
     if (!result.ok) {

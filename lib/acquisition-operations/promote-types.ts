@@ -15,7 +15,7 @@ export type PromoteToSalesSuccess = {
   salesLead: SalesDoc;
   provenance: PromotionProvenance;
   linkedExisting?: boolean;
-  collisionVia?: "email" | "domain" | "source";
+  collisionVia?: "email" | "domain" | "source" | "audit";
 };
 
 export type PromoteToSalesFailure = {
@@ -29,4 +29,6 @@ export type PromoteToSalesResult = PromoteToSalesSuccess | PromoteToSalesFailure
 
 export type PromoteToSalesOptions = {
   operatorLabel?: string;
+  /** When true, intelligence-linked project inquiries may create a new opportunity if no audit anchor exists. */
+  allowIntelligenceCreate?: boolean;
 };

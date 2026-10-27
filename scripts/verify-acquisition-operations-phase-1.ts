@@ -129,6 +129,12 @@ async function main() {
     assert.ok(!researchPromote.includes("auto-promote"));
   });
 
+  await check("project inquiry attribution fields persisted on intake", () => {
+    assertFileContains("payload/collections/ProjectInquiries.ts", 'name: "inquirySource"');
+    assertFileContains("app/api/project-inquiries/route.ts", "intakeChannel");
+    assertFileContains("migrations/20261028_phase17_project_inquiry_attribution.ts", "inquiry_source");
+  });
+
   await check("first-party /start-project auto-promotes; intelligence stays operator path", () => {
     assertFileContains(
       "app/api/project-inquiries/route.ts",
