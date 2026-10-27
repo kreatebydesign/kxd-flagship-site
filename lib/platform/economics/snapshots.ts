@@ -67,6 +67,19 @@ export function snapshotsToHistory(
     }));
 }
 
+export async function economicsSnapshotExistsForFingerprint(
+  sourceFingerprint: string,
+): Promise<boolean> {
+  const payload = await getPayload({ config });
+  const result = await payload.find({
+    collection: "platform-economics-snapshots",
+    where: { sourceFingerprint: { equals: sourceFingerprint } },
+    limit: 1,
+    depth: 0,
+  });
+  return result.docs.length > 0;
+}
+
 export async function createPlatformEconomicsSnapshot(args: {
   label: string;
   calculationVersion: string;

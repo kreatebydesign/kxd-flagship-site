@@ -7590,6 +7590,201 @@ a.kxd-os-platform-subsystem-card__title:hover {
   margin: 0;
 }
 
+.kxd-os-platform-econ-valuation-hero {
+  margin-bottom: 2.25rem;
+  padding: 1.75rem 1.85rem 1.65rem;
+  border: 1px solid rgba(201, 169, 98, 0.22);
+  border-radius: var(--kxd-os-radius-md, 8px);
+  background: linear-gradient(
+    165deg,
+    rgba(201, 169, 98, 0.07) 0%,
+    rgba(255, 255, 255, 0.02) 48%
+  );
+}
+
+.kxd-os-platform-econ-valuation-hero__title {
+  font-size: 1.05rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  margin: 0 0 0.85rem;
+  max-width: 36rem;
+}
+
+.kxd-os-platform-econ-valuation-hero__value {
+  font-family: var(--kxd-os-font-mono, ui-monospace, monospace);
+  font-size: clamp(2rem, 4.5vw, 2.85rem);
+  font-weight: 400;
+  margin: 0 0 0.35rem;
+  color: var(--kxd-os-gold, #c9a962);
+  line-height: 1.1;
+}
+
+.kxd-os-platform-econ-valuation-hero__range {
+  font-size: 0.92rem;
+  color: var(--kxd-os-text-muted, rgba(255, 255, 255, 0.62));
+  margin: 0 0 1rem;
+}
+
+.kxd-os-platform-econ-valuation-hero__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  font-size: 0.8rem;
+  color: var(--kxd-os-text-muted, rgba(255, 255, 255, 0.58));
+  margin-bottom: 0.85rem;
+}
+
+.kxd-os-platform-econ-valuation-hero__confidence {
+  text-transform: capitalize;
+}
+
+.kxd-os-platform-econ-valuation-hero__calc {
+  font-size: 0.84rem;
+  line-height: 1.55;
+  margin: 0 0 0.75rem;
+  color: var(--kxd-os-text, rgba(255, 255, 255, 0.88));
+}
+
+.kxd-os-platform-econ-valuation-hero__prior {
+  font-style: italic;
+}
+
+.kxd-os-platform-econ-valuation-hero__explain {
+  font-size: 0.88rem;
+  line-height: 1.6;
+  max-width: 52rem;
+  margin: 0.75rem 0 0;
+  color: var(--kxd-os-text-muted, rgba(255, 255, 255, 0.62));
+}
+
+.kxd-os-platform-econ-auto-note {
+  margin: -0.5rem 0 1.5rem;
+}
+
+.kxd-os-platform-econ-breakdown-wrap {
+  overflow-x: auto;
+  margin: 1rem 0 0.5rem;
+  border: 1px solid var(--kxd-os-border, rgba(255, 255, 255, 0.08));
+  border-radius: var(--kxd-os-radius-md, 8px);
+}
+
+.kxd-os-platform-econ-breakdown {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.kxd-os-platform-econ-breakdown th,
+.kxd-os-platform-econ-breakdown td {
+  padding: 0.55rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--kxd-os-border, rgba(255, 255, 255, 0.06));
+  vertical-align: top;
+}
+
+.kxd-os-platform-econ-breakdown th {
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-muted, rgba(255, 255, 255, 0.5));
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.kxd-os-platform-econ-breakdown__name {
+  display: block;
+  font-weight: 500;
+  color: var(--kxd-os-text, #f5f5f5);
+}
+
+.kxd-os-platform-econ-breakdown__meta {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--kxd-os-text-muted, rgba(255, 255, 255, 0.45));
+  margin-top: 0.15rem;
+}
+
+.kxd-os-platform-econ-details {
+  margin-top: 1.25rem;
+  font-size: 0.88rem;
+}
+
+.kxd-os-platform-econ-details summary {
+  cursor: pointer;
+  color: var(--kxd-os-gold, #c9a962);
+  margin-bottom: 0.75rem;
+}
+
+.kxd-os-platform-econ-history__delta {
+  font-size: 0.88rem;
+  margin: 0 0 1rem;
+}
+
+.kxd-os-platform-econ-commercial {
+  border-top: 1px solid var(--kxd-os-border, rgba(255, 255, 255, 0.06));
+  padding-top: 0.5rem;
+}
+
+.kxd-os-platform-econ-commercial__headline {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin: 0 0 0.75rem;
+  color: var(--kxd-os-text, #f5f5f5);
+}
+
+.kxd-os-platform-econ-commercial__headline--pending {
+  color: var(--kxd-os-gold, #c9a962);
+}
+
+.kxd-os-platform-econ-exit-list {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.kxd-os-platform-econ-exit-list__item {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--kxd-os-border, rgba(255, 255, 255, 0.06));
+}
+
+.kxd-os-platform-econ-exit-list__value {
+  font-family: var(--kxd-os-font-mono, ui-monospace, monospace);
+  color: var(--kxd-os-gold, #c9a962);
+  white-space: nowrap;
+}
+
+.kxd-os-platform-econ-top10 {
+  margin: 0 0 1rem;
+  padding-left: 1.1rem;
+  font-size: 0.84rem;
+  line-height: 1.6;
+  max-width: 36rem;
+}
+
+.kxd-os-platform-econ-top10 li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.kxd-os-platform-econ-chart__fill--saas {
+  background: linear-gradient(180deg, rgba(201, 169, 98, 0.75), rgba(120, 120, 120, 0.35));
+}
+
+.kxd-os-platform-econ-saas-proj {
+  margin-top: 1.25rem;
+}
+
+.kxd-os-platform-econ-snapshot__btn--secondary {
+  background: transparent;
+  border: 1px solid rgba(201, 169, 98, 0.35);
+}
+
 .kxd-os-platform-econ-disclaimer {
   font-size: 0.84rem;
   line-height: 1.55;
