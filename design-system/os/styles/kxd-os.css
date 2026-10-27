@@ -7535,6 +7535,233 @@ a.kxd-os-platform-subsystem-card__title:hover {
   background: var(--kxd-os-gold, #c9a962);
 }
 
+/* ── Platform Economics (founder) ───────────────────────────────────── */
+
+.kxd-os-platform-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0 0 1.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--kxd-os-border, rgba(255, 255, 255, 0.08));
+}
+
+.kxd-os-platform-tabs__btn {
+  font: inherit;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--kxd-os-text-muted, rgba(255, 255, 255, 0.55));
+  cursor: pointer;
+}
+
+.kxd-os-platform-tabs__btn.is-active {
+  color: var(--kxd-os-text, #f5f5f5);
+  border-color: rgba(201, 169, 98, 0.45);
+  background: rgba(201, 169, 98, 0.08);
+}
+
+.kxd-os-platform-econ-hero {
+  margin-bottom: 2rem;
+}
+
+.kxd-os-platform-econ-hero__eyebrow {
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--kxd-os-gold, #c9a962);
+  margin: 0 0 0.5rem;
+}
+
+.kxd-os-platform-econ-hero__title {
+  font-size: 1.65rem;
+  font-weight: 400;
+  margin: 0 0 0.65rem;
+}
+
+.kxd-os-platform-econ-hero__lead {
+  max-width: 44rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--kxd-os-text-muted, rgba(255, 255, 255, 0.62));
+  margin: 0;
+}
+
+.kxd-os-platform-econ-disclaimer {
+  font-size: 0.84rem;
+  line-height: 1.55;
+  color: var(--kxd-os-text-muted, rgba(255, 255, 255, 0.55));
+  margin: 0 0 1rem;
+  max-width: 52rem;
+}
+
+.kxd-os-platform-econ-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem 1.25rem;
+  margin: 1.25rem 0;
+}
+
+.kxd-os-platform-econ-control {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.kxd-os-platform-econ-control__label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--kxd-os-text-muted, rgba(255, 255, 255, 0.6));
+}
+
+.kxd-os-platform-econ-control__value {
+  font-family: var(--kxd-os-font-mono, ui-monospace, monospace);
+  color: var(--kxd-os-text, #f5f5f5);
+}
+
+.kxd-os-platform-econ-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  color: var(--kxd-os-text-muted, rgba(255, 255, 255, 0.6));
+}
+
+.kxd-os-platform-econ-field input {
+  font: inherit;
+  padding: 0.5rem 0.65rem;
+  border-radius: var(--kxd-os-radius-sm, 6px);
+  border: 1px solid var(--kxd-os-border, rgba(255, 255, 255, 0.12));
+  background: var(--kxd-os-surface-raised, rgba(255, 255, 255, 0.04));
+  color: var(--kxd-os-text, #f5f5f5);
+}
+
+.kxd-os-platform-econ-assumptions {
+  margin: 0.75rem 0 0;
+  padding-left: 1.1rem;
+  font-size: 0.84rem;
+  line-height: 1.55;
+  color: var(--kxd-os-text-muted, rgba(255, 255, 255, 0.58));
+}
+
+.kxd-os-platform-econ-subhead {
+  font-size: 0.92rem;
+  font-weight: 500;
+  margin: 1.5rem 0 0.65rem;
+}
+
+.kxd-os-platform-econ-credits {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+  max-width: 28rem;
+}
+
+.kxd-os-platform-econ-credits li {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.84rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--kxd-os-border, rgba(255, 255, 255, 0.06));
+}
+
+.kxd-os-platform-econ-tier-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.kxd-os-platform-econ-tier {
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--kxd-os-border, rgba(255, 255, 255, 0.08));
+  border-radius: var(--kxd-os-radius-md, 8px);
+  background: var(--kxd-os-surface-raised, rgba(255, 255, 255, 0.02));
+}
+
+.kxd-os-platform-econ-tier__title {
+  font-size: 0.88rem;
+  margin: 0 0 0.75rem;
+  font-weight: 500;
+}
+
+.kxd-os-platform-econ-ip {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--kxd-os-border, rgba(255, 255, 255, 0.08));
+}
+
+.kxd-os-platform-econ-ip__value {
+  font-family: var(--kxd-os-font-mono, ui-monospace, monospace);
+  font-size: 1.35rem;
+  margin: 0.5rem 0 0;
+  color: var(--kxd-os-gold, #c9a962);
+}
+
+.kxd-os-platform-econ-chart__bars {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: flex-end;
+  gap: 0.65rem;
+  min-height: 140px;
+}
+
+.kxd-os-platform-econ-chart__bar {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.kxd-os-platform-econ-chart__fill {
+  width: 100%;
+  max-width: 48px;
+  min-height: 4px;
+  border-radius: 4px 4px 0 0;
+  background: linear-gradient(180deg, rgba(201, 169, 98, 0.9), rgba(201, 169, 98, 0.35));
+}
+
+.kxd-os-platform-econ-chart__caption {
+  font-size: 0.62rem;
+  color: var(--kxd-os-text-muted, rgba(255, 255, 255, 0.45));
+  writing-mode: horizontal-tb;
+  text-align: center;
+}
+
+.kxd-os-platform-econ-snapshot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem 1rem;
+  margin-top: 1.25rem;
+}
+
+.kxd-os-platform-econ-snapshot__btn {
+  font: inherit;
+  font-size: 0.82rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: var(--kxd-os-radius-sm, 6px);
+  border: 1px solid rgba(201, 169, 98, 0.45);
+  background: rgba(201, 169, 98, 0.12);
+  color: var(--kxd-os-text, #f5f5f5);
+  cursor: pointer;
+}
+
+.kxd-os-platform-econ-snapshot__btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 /* ── Review Inbox (Phase 12D) ───────────────────────────────────────── */
 
 .kxd-os-sidebar__link {

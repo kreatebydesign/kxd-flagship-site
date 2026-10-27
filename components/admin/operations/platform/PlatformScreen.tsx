@@ -8,6 +8,8 @@ import {
 } from "@/components/os";
 import { OperationsPageHero } from "@/components/admin/operations/shared/OperationsPageHero";
 import { OperationsShell } from "@/components/admin/operations/shared/OperationsShell";
+import { PlatformDashboardTabs } from "@/components/admin/operations/platform/PlatformDashboardTabs";
+import { PlatformEconomicsPanel } from "@/components/admin/operations/platform/PlatformEconomicsPanel";
 import type {
   PlatformDashboardData,
   PlatformMaturity,
@@ -17,6 +19,10 @@ import type {
   PlatformSubsystemDefinition,
   PlatformSubsystemStatus,
 } from "@/lib/platform";
+import type {
+  PlatformEconomicsDashboardContext,
+  PlatformEconomicsData,
+} from "@/lib/platform/economics";
 
 function ownerLabel(owner: PlatformOwner): string {
   switch (owner) {
@@ -345,12 +351,11 @@ function NorthStarPanel({ principles }: { principles: PlatformDashboardData["pri
   );
 }
 
-export function PlatformScreen({ data }: { data: PlatformDashboardData }) {
+function PlatformProgressBody({ data }: { data: PlatformDashboardData }) {
   const { overview, subsystems, architecture, phases } = data;
 
   return (
-    <OperationsShell activeId="platform">
-      <KxdPage className="kxd-os-page--ops kxd-os-page--platform">
+    <>
         <OverviewSection data={data} />
 
         <KxdSection label="Roadmap snapshot" className="kxd-os-platform-section">
@@ -406,6 +411,33 @@ export function PlatformScreen({ data }: { data: PlatformDashboardData }) {
         </KxdSection>
 
         <NorthStarPanel principles={data.principles} />
+    </>
+  );
+}
+
+export function PlatformScreen({
+  data,
+  economics,
+  economicsContext,
+}: {
+  data: PlatformDashboardData;
+  economics?: PlatformEconomicsData | null;
+  economicsContext?: PlatformEconomicsDashboardContext | null;
+}) {
+  const showEconomics = Boolean(economics && economicsContext);
+
+  return (
+    <OperationsShell activeId="platform">
+      <KxdPage className="kxd-os-page--ops kxd-os-page--platform">
+        <PlatformDashboardTabs
+          showEconomics={showEconomics}
+          progress={<PlatformProgressBody data={data} />}
+          economics={
+            showEconomics && economics && economicsContext ? (
+              <PlatformEconomicsPanel initial={economics} dashboardContext={economicsContext} />
+            ) : null
+          }
+        />
       </KxdPage>
     </OperationsShell>
   );

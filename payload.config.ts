@@ -56,6 +56,7 @@ import { ContractActivity } from "./payload/collections/ContractActivity.ts";
 import { BillingProfiles } from "./payload/collections/BillingProfiles.ts";
 import { RevenueEvents } from "./payload/collections/RevenueEvents.ts";
 import { FinancialSnapshots } from "./payload/collections/FinancialSnapshots.ts";
+import { PlatformEconomicsSnapshots } from "./payload/collections/PlatformEconomicsSnapshots.ts";
 import { ClientFinancialHealth } from "./payload/collections/ClientFinancialHealth.ts";
 import { ProposalApprovals } from "./payload/collections/ProposalApprovals.ts";
 import { EstimateItems } from "./payload/collections/EstimateItems.ts";
@@ -350,6 +351,7 @@ export default buildConfig({
     BillingProfiles,
     RevenueEvents,
     FinancialSnapshots,
+    PlatformEconomicsSnapshots,
     ClientFinancialHealth,
     ProposalAgreements,
     ProposalViewEvents,
