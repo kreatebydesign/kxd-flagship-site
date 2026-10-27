@@ -1,9 +1,14 @@
 export type {
+  CommercialValuationView,
+  CommercialValueSummary,
+  HypotheticalExitScenario,
+  SaasProjectionPoint,
   EconomicsConfidence,
   EconomicsHourlyRates,
   EconomicsValuationInputs,
   EnterpriseLicensingInputs,
   EnterpriseLicensingOutput,
+  IntegrationReadiness,
   PlatformEconomicsComputed,
   PlatformEconomicsData,
   PlatformEconomicsHistoryPoint,
@@ -13,6 +18,9 @@ export type {
   SaasSimulatorInputs,
   SaasSimulatorOutput,
   SaasTierInput,
+  SubsystemValuationBreakdownRow,
+  ValuationHeroMetrics,
+  PlatformCommercialEvidence,
   PlatformEconomicsDashboardContext,
 } from "./types";
 

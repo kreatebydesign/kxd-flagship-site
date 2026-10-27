@@ -1,11 +1,12 @@
 import "server-only";
 
-import { staffActorFromUser } from "@/lib/staff/actor";
-import { isFounderOrAdmin } from "@/lib/staff/permissions";
 import type { PayloadRequest } from "payload";
 import type { PlatformDashboardData } from "../types";
+import { loadPlatformCommercialEvidence } from "./commercial-evidence";
 import { DEFAULT_PLATFORM_ECONOMICS_INPUTS } from "./constants";
 import { computePlatformEconomics } from "./compute";
+import { canAccessPlatformEconomics } from "./founder-access";
+import { buildValuationHeroMetrics } from "./hero";
 import { listPlatformEconomicsSnapshots, snapshotsToHistory } from "./snapshots";
 import type { PlatformEconomicsData } from "./types";
 import { PLATFORM_ECONOMICS_CALC_VERSION } from "./types";
@@ -22,8 +23,7 @@ export async function loadPlatformEconomicsForFounder(
   dashboard: PlatformDashboardData,
   user: PayloadRequest["user"],
 ): Promise<PlatformEconomicsData | null> {
-  const actor = staffActorFromUser(user);
-  if (!actor || !isFounderOrAdmin(actor)) return null;
+  if (!canAccessPlatformEconomics(user)) return null;
 
   const ctx = {
     overview: dashboard.overview,
@@ -33,15 +33,22 @@ export async function loadPlatformEconomicsForFounder(
   };
 
   const defaults = DEFAULT_PLATFORM_ECONOMICS_INPUTS;
-  const computed = computePlatformEconomics(ctx, defaults);
-  const recentSnapshots = await listPlatformEconomicsSnapshots(24);
+  const milestoneContext = recentCompletedPhaseNotes(dashboard.phases);
+  const commercialEvidence = await loadPlatformCommercialEvidence();
+  const computed = computePlatformEconomics(ctx, defaults, commercialEvidence);
+  const calculatedAt = new Date().toISOString();
+
+  const recentSnapshots = await listPlatformEconomicsSnapshots(48);
+  const valuationHero = buildValuationHeroMetrics(computed, recentSnapshots, calculatedAt);
 
   return {
     calculationVersion: PLATFORM_ECONOMICS_CALC_VERSION,
     defaults,
     computed,
+    valuationHero,
     history: snapshotsToHistory(recentSnapshots),
     recentSnapshots,
-    milestoneContext: recentCompletedPhaseNotes(dashboard.phases),
+    milestoneContext,
+    commercialEvidence,
   };
 }
