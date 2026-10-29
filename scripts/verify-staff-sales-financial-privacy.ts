@@ -198,6 +198,9 @@ assert.equal(
 );
 assert.equal(rejectForbiddenStaffLeadPatchKeys({ notes: "ok" }), null);
 
+const patchGuardSrc = read("lib/staff/sales/data.ts");
+assert.match(patchGuardSrc, /Qualification notes may only be edited on prospects you created/);
+
 // --- Owner data plane preserved ---
 const operatorWorkspace = read("lib/sales/workspace.ts");
 assert.match(operatorWorkspace, /estimatedValue/);

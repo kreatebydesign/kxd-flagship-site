@@ -20,6 +20,7 @@ import type { StaffActor } from "../types";
 import {
   assertStaffMayAccessSalesLead,
   relUserId,
+  staffLeadSourcedByUserId,
   staffMayAccessSalesLead,
   type SalesLeadDoc,
 } from "./access";
@@ -425,6 +426,17 @@ export async function patchStaffProspect(
       status: 403,
       error:
         "This opportunity is under operator commercial control and cannot be edited here.",
+    };
+  }
+
+  if (
+    body.notes !== undefined &&
+    staffLeadSourcedByUserId(existing) !== actor.userId
+  ) {
+    return {
+      ok: false,
+      status: 403,
+      error: "Qualification notes may only be edited on prospects you created.",
     };
   }
 
