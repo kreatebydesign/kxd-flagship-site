@@ -40,8 +40,6 @@ export async function POST(request: Request) {
       body.opportunityUrl != null ? String(body.opportunityUrl) : undefined,
     industry: body.industry != null ? String(body.industry) : undefined,
     notes: body.notes != null ? String(body.notes) : undefined,
-    estimatedValue:
-      body.estimatedValue != null ? Number(body.estimatedValue) : undefined,
     allowDuplicateCompany: body.allowDuplicateCompany === true,
   });
 

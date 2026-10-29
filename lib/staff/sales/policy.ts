@@ -85,8 +85,6 @@ export const STAFF_SALES_CREATABLE_PATCH_KEYS = new Set([
   "opportunityUrl",
   "notes",
   "tags",
-  "estimatedValue",
-  "estimatedMRR",
   "probability",
   "status",
   "nextAction",

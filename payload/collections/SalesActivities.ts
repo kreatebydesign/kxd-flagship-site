@@ -67,6 +67,18 @@ export const SalesActivities: CollectionConfig = {
       label: "Client",
       admin: { position: "sidebar" },
     },
+    {
+      name: "recordedByStaffUser",
+      type: "relationship",
+      relationTo: "users",
+      label: "Recorded By (Staff)",
+      admin: {
+        position: "sidebar",
+        readOnly: true,
+        description:
+          "Set when logged via Staff Sales Development. NULL = operator/system activity (not shown to staff).",
+      },
+    },
     { name: "title", type: "text", required: true, label: "Title" },
     { name: "summary", type: "textarea", label: "Summary" },
     {

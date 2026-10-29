@@ -27,6 +27,8 @@ export interface LogActivityInput {
   proposalId?: number;
   clientId?: number;
   occurredAt?: string;
+  /** Staff Sales Development — marks activity visible to that staff user only. */
+  recordedByStaffUserId?: number;
 }
 
 export async function getLeadActivities(
@@ -60,6 +62,7 @@ export async function logSalesActivity(input: LogActivityInput): Promise<SalesDo
       proposal: input.proposalId,
       client: input.clientId,
       occurredAt: input.occurredAt ?? new Date().toISOString(),
+      recordedByStaffUser: input.recordedByStaffUserId ?? undefined,
     },
     overrideAccess: true,
   });

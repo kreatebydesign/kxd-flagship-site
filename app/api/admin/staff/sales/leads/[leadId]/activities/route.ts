@@ -4,6 +4,7 @@ import { getLeadActivities } from "@/lib/sales/activities";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import { assertStaffMayAccessSalesLead, type SalesLeadDoc } from "@/lib/staff/sales/access";
+import { filterStaffVisibleSalesActivities } from "@/lib/staff/sales/projection";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -53,15 +54,12 @@ export async function GET(
     );
   }
 
-  const activities = await getLeadActivities(leadId, 50);
+  const activities = filterStaffVisibleSalesActivities(
+    (await getLeadActivities(leadId, 50)) as SalesLeadDoc[],
+    gated.actor,
+  );
   return NextResponse.json({
     success: true,
-    activities: activities.map((a) => ({
-      id: Number(a.id),
-      activityType: String(a.activityType ?? "note"),
-      title: String(a.title ?? "Activity"),
-      summary: a.summary ? String(a.summary) : null,
-      occurredAt: String(a.occurredAt ?? a.createdAt ?? ""),
-    })),
+    activities,
   });
 }

@@ -40,9 +40,6 @@ export function StaffSalesDetailScreen({ data }: { data: StaffSalesDetailData })
   const [nextAction, setNextAction] = useState(p.nextAction);
   const [nextFollowUp, setNextFollowUp] = useState(toLocalInput(p.nextFollowUp));
   const [nextActionNote, setNextActionNote] = useState(p.nextActionNote ?? "");
-  const [estimatedValue, setEstimatedValue] = useState(
-    p.estimatedValue != null ? String(p.estimatedValue) : "",
-  );
 
   async function patch(body: Record<string, unknown>) {
     setBusy(true);
@@ -69,7 +66,6 @@ export function StaffSalesDetailScreen({ data }: { data: StaffSalesDetailData })
     await patch({
       notes,
       status,
-      estimatedValue: estimatedValue ? Number(estimatedValue) : null,
       nextAction,
       nextActionNote,
       nextFollowUp: nextFollowUp ? new Date(nextFollowUp).toISOString() : null,
@@ -216,17 +212,6 @@ export function StaffSalesDetailScreen({ data }: { data: StaffSalesDetailData })
                     className="kxd-os-input"
                     value={nextActionNote}
                     onChange={(e) => setNextActionNote(e.target.value)}
-                  />
-                </label>
-                <label className="kxd-os-field">
-                  <span className="kxd-os-field__label">
-                    Preliminary estimate ($) — not a quote or contract price
-                  </span>
-                  <input
-                    className="kxd-os-input"
-                    inputMode="numeric"
-                    value={estimatedValue}
-                    onChange={(e) => setEstimatedValue(e.target.value)}
                   />
                 </label>
                 <label className="kxd-os-field">
