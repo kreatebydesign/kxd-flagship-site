@@ -24,6 +24,12 @@ import {
   type SalesLeadDoc,
 } from "./access";
 import {
+  filterStaffVisibleSalesActivities,
+  staffVisibleLeadQualificationNotes,
+  STAFF_OUTBOUND_LEAD_SOURCE,
+  isStaffVisibleSalesActivity,
+} from "./projection";
+import {
   assertStaffLeadStatusTransition,
   isStaffAllowedLeadStatus,
   isStaffAllowedNextAction,
@@ -40,7 +46,7 @@ import type {
 } from "./types";
 
 const COLLECTION = "sales-leads" as const;
-const STAFF_SOURCE = "staff-outbound";
+const STAFF_SOURCE = STAFF_OUTBOUND_LEAD_SOURCE;
 
 const STATUS_LABEL: Record<string, string> = {
   new: "New",
@@ -83,10 +89,6 @@ function toRow(
     nextAction,
     nextActionLabel: NEXT_ACTION_LABEL[nextAction],
     nextFollowUp,
-    estimatedValue:
-      lead.estimatedValue != null && lead.estimatedValue !== ""
-        ? Number(lead.estimatedValue)
-        : null,
     attentionKind,
     attentionLabel: attentionKind ? ATTENTION_KIND_LABEL[attentionKind] : null,
     updatedAt: String(lead.updatedAt ?? ""),
@@ -123,6 +125,7 @@ async function loadLastMeaningfulByLead(
   for (const activity of result.docs as SalesLeadDoc[]) {
     const leadId = relUserId(activity.lead);
     if (!leadId || map.has(leadId)) continue;
+    if (!isStaffVisibleSalesActivity(activity)) continue;
     if (activity.occurredAt) map.set(leadId, String(activity.occurredAt));
   }
   return map;
@@ -213,7 +216,9 @@ export async function loadStaffSalesDetail(
 
   const lastMap = await loadLastMeaningfulByLead([leadId]);
   const row = toRow(lead, lastMap.get(leadId) ?? null);
-  const activities = await getLeadActivities(leadId, 50);
+  const activities = filterStaffVisibleSalesActivities(
+    (await getLeadActivities(leadId, 50)) as SalesLeadDoc[],
+  );
   const status = String(lead.status ?? "new");
 
   return {
@@ -223,7 +228,7 @@ export async function loadStaffSalesDetail(
       website: lead.website ? String(lead.website) : null,
       opportunityUrl: lead.opportunityUrl ? String(lead.opportunityUrl) : null,
       industry: lead.industry ? String(lead.industry) : null,
-      notes: lead.notes ? String(lead.notes) : null,
+      notes: staffVisibleLeadQualificationNotes(lead, actor),
       nextActionNote: lead.nextActionNote ? String(lead.nextActionNote) : null,
       probability:
         lead.probability != null && lead.probability !== ""
@@ -234,13 +239,7 @@ export async function loadStaffSalesDetail(
         status as LeadStatus,
       ),
     },
-    activities: activities.map((a) => ({
-      id: Number(a.id),
-      activityType: String(a.activityType ?? "note"),
-      title: String(a.title ?? "Activity"),
-      summary: a.summary ? String(a.summary) : null,
-      occurredAt: String(a.occurredAt ?? a.createdAt ?? ""),
-    })),
+    activities,
     allowedNextActions: [...STAFF_SALES_ALLOWED_NEXT_ACTIONS].map((value) => ({
       value,
       label: NEXT_ACTION_LABEL[value],
@@ -261,7 +260,6 @@ export type CreateStaffProspectInput = {
   opportunityUrl?: string;
   industry?: string;
   notes?: string;
-  estimatedValue?: number;
   allowDuplicateCompany?: boolean;
 };
 
@@ -360,10 +358,6 @@ export async function createStaffProspect(
       opportunityUrl: input.opportunityUrl?.trim() || undefined,
       industry: input.industry?.trim() || undefined,
       notes: input.notes?.trim() || undefined,
-      estimatedValue:
-        input.estimatedValue != null && Number.isFinite(input.estimatedValue)
-          ? input.estimatedValue
-          : undefined,
       source: STAFF_SOURCE,
       sourcedByStaffUser: actor.userId,
       sourcedByName: displayName,
@@ -458,18 +452,6 @@ export async function patchStaffProspect(
   if (body.industry !== undefined) data.industry = String(body.industry ?? "").trim() || null;
   if (body.notes !== undefined) data.notes = String(body.notes ?? "").trim() || null;
   if (body.tags !== undefined) data.tags = String(body.tags ?? "").trim() || null;
-  if (body.estimatedValue !== undefined) {
-    const n = body.estimatedValue === null || body.estimatedValue === ""
-      ? null
-      : Number(body.estimatedValue);
-    data.estimatedValue = n != null && Number.isFinite(n) ? n : null;
-  }
-  if (body.estimatedMRR !== undefined) {
-    const n = body.estimatedMRR === null || body.estimatedMRR === ""
-      ? null
-      : Number(body.estimatedMRR);
-    data.estimatedMRR = n != null && Number.isFinite(n) ? n : null;
-  }
   if (body.probability !== undefined) {
     const n = Number(body.probability);
     if (!Number.isFinite(n) || n < 0 || n > 100) {

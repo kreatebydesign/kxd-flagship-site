@@ -39,15 +39,6 @@ function fmtFollowUp(iso: string | null): string {
   }
 }
 
-function fmtMoney(value: number | null): string {
-  if (value == null || Number.isNaN(value)) return "—";
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(value);
-}
-
 function ProspectRow({ row }: { row: StaffSalesProspectRow }) {
   return (
     <OpsListRow href={row.href}>
@@ -66,7 +57,6 @@ function ProspectRow({ row }: { row: StaffSalesProspectRow }) {
         </p>
         <p className="kxd-os-meta" style={{ marginTop: "0.35rem" }}>
           {row.nextActionLabel} · Follow-up {fmtFollowUp(row.nextFollowUp)}
-          {row.estimatedValue != null ? ` · ${fmtMoney(row.estimatedValue)} est.` : ""}
         </p>
       </div>
     </OpsListRow>
@@ -83,7 +73,6 @@ export function StaffSalesScreen({ data }: { data: StaffSalesListData }) {
     contactName: "",
     email: "",
     website: "",
-    estimatedValue: "",
     notes: "",
   });
 
@@ -101,7 +90,6 @@ export function StaffSalesScreen({ data }: { data: StaffSalesListData }) {
           email: form.email || undefined,
           website: form.website || undefined,
           notes: form.notes || undefined,
-          estimatedValue: form.estimatedValue ? Number(form.estimatedValue) : undefined,
         }),
       });
       const payload = (await res.json()) as {
@@ -207,17 +195,6 @@ export function StaffSalesScreen({ data }: { data: StaffSalesListData }) {
                   className="kxd-os-input"
                   value={form.website}
                   onChange={(e) => setForm((f) => ({ ...f, website: e.target.value }))}
-                />
-              </label>
-              <label className="kxd-os-field">
-                <span className="kxd-os-field__label">
-                  Preliminary estimate ($) — Matt approves pricing
-                </span>
-                <input
-                  className="kxd-os-input"
-                  inputMode="numeric"
-                  value={form.estimatedValue}
-                  onChange={(e) => setForm((f) => ({ ...f, estimatedValue: e.target.value }))}
                 />
               </label>
               <label className="kxd-os-field">

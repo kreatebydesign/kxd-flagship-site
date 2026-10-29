@@ -11,7 +11,6 @@ export type StaffSalesProspectRow = {
   nextAction: NextAction;
   nextActionLabel: string;
   nextFollowUp: string | null;
-  estimatedValue: number | null;
   attentionKind: AttentionKind | null;
   attentionLabel: string | null;
   updatedAt: string;
