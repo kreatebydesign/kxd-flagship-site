@@ -129,6 +129,7 @@ import * as migration_20261024_staff_document_template_operator_workflow from '.
 import * as migration_20261025_staff_pay_period_reviews from './20261025_staff_pay_period_reviews';
 import * as migration_20261027_platform_economics_snapshots from './20261027_platform_economics_snapshots';
 import * as migration_20261028_phase17_project_inquiry_attribution from './20261028_phase17_project_inquiry_attribution';
+import * as migration_20261029_staff_sales_activity_staff_recording from './20261029_staff_sales_activity_staff_recording';
 
 export const migrations = [
   {
@@ -847,5 +848,11 @@ export const migrations = [
     up: migration_20261028_phase17_project_inquiry_attribution.up,
     down: migration_20261028_phase17_project_inquiry_attribution.down,
     name: '20261028_phase17_project_inquiry_attribution',
+  },
+  {
+    // Staff Sales — staff recording attribution on sales-activities.
+    up: migration_20261029_staff_sales_activity_staff_recording.up,
+    down: migration_20261029_staff_sales_activity_staff_recording.down,
+    name: '20261029_staff_sales_activity_staff_recording',
   },
 ];

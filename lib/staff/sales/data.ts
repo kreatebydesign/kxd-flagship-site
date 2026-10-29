@@ -25,9 +25,9 @@ import {
 } from "./access";
 import {
   filterStaffVisibleSalesActivities,
+  isStaffVisibleSalesActivity,
   staffVisibleLeadQualificationNotes,
   STAFF_OUTBOUND_LEAD_SOURCE,
-  isStaffVisibleSalesActivity,
 } from "./projection";
 import {
   assertStaffLeadStatusTransition,
@@ -107,6 +107,7 @@ function staffLeadWhere(actor: StaffActor) {
 
 async function loadLastMeaningfulByLead(
   leadIds: number[],
+  actor: StaffActor,
 ): Promise<Map<number, string>> {
   const map = new Map<number, string>();
   if (leadIds.length === 0) return map;
@@ -125,7 +126,7 @@ async function loadLastMeaningfulByLead(
   for (const activity of result.docs as SalesLeadDoc[]) {
     const leadId = relUserId(activity.lead);
     if (!leadId || map.has(leadId)) continue;
-    if (!isStaffVisibleSalesActivity(activity)) continue;
+    if (!isStaffVisibleSalesActivity(activity, actor)) continue;
     if (activity.occurredAt) map.set(leadId, String(activity.occurredAt));
   }
   return map;
@@ -148,7 +149,7 @@ export async function loadStaffSalesList(
 
   const docs = result.docs as SalesLeadDoc[];
   const ids = docs.map((d) => Number(d.id));
-  const lastByLead = await loadLastMeaningfulByLead(ids);
+  const lastByLead = await loadLastMeaningfulByLead(ids, actor);
   const prospects = docs.map((d) =>
     toRow(d, lastByLead.get(Number(d.id)) ?? null),
   );
@@ -214,10 +215,11 @@ export async function loadStaffSalesDetail(
 
   if (!staffMayAccessSalesLead(actor, lead)) return null;
 
-  const lastMap = await loadLastMeaningfulByLead([leadId]);
+  const lastMap = await loadLastMeaningfulByLead([leadId], actor);
   const row = toRow(lead, lastMap.get(leadId) ?? null);
   const activities = filterStaffVisibleSalesActivities(
     (await getLeadActivities(leadId, 50)) as SalesLeadDoc[],
+    actor,
   );
   const status = String(lead.status ?? "new");
 
@@ -374,6 +376,7 @@ export async function createStaffProspect(
     title: "Prospect created",
     summary: `Created by ${displayName} via Staff Sales Development.`,
     leadId: Number(record.id),
+    recordedByStaffUserId: actor.userId,
   });
 
   return { ok: true, id: Number(record.id), reusedExisting: false };
@@ -602,6 +605,7 @@ export async function logStaffProspectOutreach(
     title: meta.title,
     summary: input.summary?.trim() || undefined,
     leadId,
+    recordedByStaffUserId: actor.userId,
   });
 
   if (status !== "won" && status !== "lost") {

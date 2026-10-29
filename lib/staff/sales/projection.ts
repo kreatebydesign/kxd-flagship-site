@@ -6,7 +6,6 @@
 import type { StaffActor } from "../types";
 import {
   relUserId,
-  staffLeadAssignedUserId,
   staffLeadSourcedByUserId,
   type SalesLeadDoc,
 } from "./access";
@@ -34,42 +33,33 @@ export const STAFF_OPERATOR_ONLY_SALES_ACTIVITY_TYPES: ReadonlySet<string> = new
 
 export const STAFF_OUTBOUND_LEAD_SOURCE = "staff-outbound";
 
-function leadHasOperatorIntakeProvenance(lead: SalesLeadDoc): boolean {
-  return (
-    relUserId(lead.sourceInquiry) != null ||
-    relUserId(lead.sourceProjectInquiry) != null ||
-    relUserId(lead.sourceWebsiteAudit) != null ||
-    relUserId(lead.sourceResearchLead) != null ||
-    relUserId(lead.sourcePartnerReferral) != null
-  );
-}
-
 /**
- * Qualification notes on the lead record may contain operator commercial context.
- * Staff may read notes only on prospects they originated via Staff Sales Development.
+ * Lead qualification notes may contain operator commercial context.
+ * Visible only when this staff member explicitly sourced the prospect.
  */
 export function staffVisibleLeadQualificationNotes(
   lead: SalesLeadDoc,
   actor: StaffActor,
 ): string | null {
-  if (staffLeadSourcedByUserId(lead) === actor.userId) {
-    const notes = lead.notes;
-    return typeof notes === "string" && notes.trim() ? notes.trim() : null;
-  }
-  if (leadHasOperatorIntakeProvenance(lead)) {
+  if (staffLeadSourcedByUserId(lead) !== actor.userId) {
     return null;
   }
-  if (
-    staffLeadAssignedUserId(lead) === actor.userId &&
-    String(lead.source ?? "") === STAFF_OUTBOUND_LEAD_SOURCE
-  ) {
-    const notes = lead.notes;
-    return typeof notes === "string" && notes.trim() ? notes.trim() : null;
-  }
-  return null;
+  const notes = lead.notes;
+  return typeof notes === "string" && notes.trim() ? notes.trim() : null;
 }
 
-export function isStaffVisibleSalesActivity(doc: SalesLeadDoc): boolean {
+export function staffRecordedActivityUserId(doc: SalesLeadDoc): number | null {
+  return relUserId(doc.recordedByStaffUser);
+}
+
+/**
+ * Staff may only see activities they recorded via Staff Sales Development
+ * (recordedByStaffUser). Operator/system rows stay NULL and are hidden.
+ */
+export function isStaffVisibleSalesActivity(
+  doc: SalesLeadDoc,
+  actor: StaffActor,
+): boolean {
   const activityType = String(doc.activityType ?? "");
   if (STAFF_OPERATOR_ONLY_SALES_ACTIVITY_TYPES.has(activityType)) {
     return false;
@@ -80,13 +70,18 @@ export function isStaffVisibleSalesActivity(doc: SalesLeadDoc): boolean {
   if (relUserId(doc.proposal) != null) {
     return false;
   }
+  const recorderId = staffRecordedActivityUserId(doc);
+  if (recorderId == null || recorderId !== actor.userId) {
+    return false;
+  }
   return true;
 }
 
 export function mapStaffVisibleSalesActivity(
   doc: SalesLeadDoc,
+  actor: StaffActor,
 ): StaffSalesActivityRow | null {
-  if (!isStaffVisibleSalesActivity(doc)) return null;
+  if (!isStaffVisibleSalesActivity(doc, actor)) return null;
   return {
     id: Number(doc.id),
     activityType: String(doc.activityType ?? "note"),
@@ -101,10 +96,11 @@ export function mapStaffVisibleSalesActivity(
 
 export function filterStaffVisibleSalesActivities(
   docs: SalesLeadDoc[],
+  actor: StaffActor,
 ): StaffSalesActivityRow[] {
   const rows: StaffSalesActivityRow[] = [];
   for (const doc of docs) {
-    const row = mapStaffVisibleSalesActivity(doc);
+    const row = mapStaffVisibleSalesActivity(doc, actor);
     if (row) rows.push(row);
   }
   return rows;

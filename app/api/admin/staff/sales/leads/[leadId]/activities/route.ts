@@ -56,6 +56,7 @@ export async function GET(
 
   const activities = filterStaffVisibleSalesActivities(
     (await getLeadActivities(leadId, 50)) as SalesLeadDoc[],
+    gated.actor,
   );
   return NextResponse.json({
     success: true,
