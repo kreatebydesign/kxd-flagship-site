@@ -10,9 +10,13 @@ import { readShiftAuditEvents } from "@/lib/staff-time/audit";
 import { minutesBetween } from "@/lib/staff-time/dates";
 import { listStaffTimePayRequestsForStaff } from "@/lib/staff-time/pay-requests";
 import { loadDocumentedOutsideClockEvents } from "@/lib/staff-pay/documented-outside-clock";
+import {
+  computeDocumentedGrossSubtotalCents,
+  sumHistoricalEntryMinutes,
+  sumHistoricalEntryPreliminaryGrossCents,
+} from "@/lib/staff-pay/compute-documented-totals";
 import { listStaffPayHistoricalEntriesForStaff } from "@/lib/staff-pay/historical-entries";
 import { loadProvisionalHistoricalSummary } from "@/lib/staff-pay/provisional-historical";
-import { tylerOctober15Through29DocumentedGrossCents } from "@/lib/staff-pay/tyler-october-historical-reference";
 import { TYLER_OCT_21_2026_RECONCILIATION } from "@/lib/staff-pay/tyler-payroll-reconciliation";
 import { preliminaryGrossCentsForMinutes } from "@/lib/staff-pay/money";
 import type {
@@ -280,13 +284,24 @@ export async function loadStaffMyTimePayPage(actor: StaffActor): Promise<StaffMy
   );
   const provisionalHistorical = loadProvisionalHistoricalSummary(staffUserId);
   const ownerApprovedHistoricalEntries = await listStaffPayHistoricalEntriesForStaff(staffUserId);
+  const historicalGrossFromDb = sumHistoricalEntryPreliminaryGrossCents(
+    ownerApprovedHistoricalEntries,
+  );
+  const historicalMinutesFromDb = sumHistoricalEntryMinutes(ownerApprovedHistoricalEntries);
   const ownerApprovedHistoricalGrossCents =
-    provisionalHistorical?.ownerApprovedPreliminaryGrossCents ?? null;
+    ownerApprovedHistoricalEntries.length > 0
+      ? historicalGrossFromDb
+      : (provisionalHistorical?.ownerApprovedPreliminaryGrossCents ?? null);
   const ownerApprovedHistoricalMinutes =
-    provisionalHistorical?.ownerApprovedTotalMinutes ?? null;
+    ownerApprovedHistoricalEntries.length > 0
+      ? historicalMinutesFromDb
+      : (provisionalHistorical?.ownerApprovedTotalMinutes ?? null);
   const pendingProposedHistoricalGrossCents =
     provisionalHistorical?.pendingProposedGrossCents ?? null;
-  const documentedGrossSubtotalCents = tylerOctober15Through29DocumentedGrossCents();
+  const documentedGrossSubtotalCents = computeDocumentedGrossSubtotalCents({
+    verifiedPreliminaryGrossCents,
+    historicalEntries: ownerApprovedHistoricalEntries,
+  });
 
   const defaultRate = await resolveHourlyRateCents(
     db,
