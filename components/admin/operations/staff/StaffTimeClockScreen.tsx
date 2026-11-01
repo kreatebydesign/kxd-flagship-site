@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { OperationsPageHero } from "@/components/admin/operations/shared/OperationsPageHero";
 import { OperationsShell } from "@/components/admin/operations/shared/OperationsShell";
@@ -195,6 +196,12 @@ export function StaffTimeClockScreen({ initial }: { initial: StaffTimeClockPageD
           title="Time clock"
           lead="Server-recorded shift time. Your punches stay on the record — approvals never erase worked hours."
         />
+
+        <p className="kxd-os-meta" style={{ marginBottom: "1rem" }}>
+          <Link href="/admin/operations/staff/my-time-pay" className="kxd-os-link-quiet">
+            My Time & Pay review
+          </Link>
+        </p>
 
         {error ? (
           <div className="kxd-os-staff-time__error" role="alert">

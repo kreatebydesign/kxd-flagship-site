@@ -44,6 +44,11 @@ function buildStaffNavGroups(showSalesDevelopmentNav: boolean): OperationsNavGro
       href: "/admin/operations/staff/time",
     },
     {
+      id: "staff-my-time-pay",
+      label: "My Time & Pay",
+      href: "/admin/operations/staff/my-time-pay",
+    },
+    {
       id: "staff-documents",
       label: "My documents",
       href: "/admin/operations/staff/documents",

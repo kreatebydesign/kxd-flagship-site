@@ -42,7 +42,8 @@ assert.equal(STAFF_PAYROLL_DEFAULTS.tylerHourlyRateCents, 2000);
 assert.equal(STAFF_PAYROLL_DEFAULTS.firstShortPeriod.payday, "2026-10-30");
 assert.equal(STAFF_PAYROLL_DEFAULTS.firstRegularPeriod.payday, "2026-11-13");
 
-assert.equal(TYLER_OCTOBER_2026_STAGING_REFERENCE.provisionalGrossEstimateCents, 44300);
+assert.equal(TYLER_OCTOBER_2026_STAGING_REFERENCE.provisionalGrossEstimateCents, 43967);
+assert.equal(TYLER_OCTOBER_2026_STAGING_REFERENCE.provisionalTotalMinutes, 21 * 60 + 59);
 assert.equal(TYLER_OCTOBER_2026_STAGING_REFERENCE.days.length, 5);
 
 console.log("verify-staff-time-foundation: OK");

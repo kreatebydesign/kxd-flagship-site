@@ -207,9 +207,12 @@ function StaffHomeBody({
           <Link href="/admin/operations/staff/my-clients" className="kxd-os-link-quiet">
             My clients
           </Link>
-          {" · "}
           <Link href="/admin/operations/staff/documents" className="kxd-os-link-quiet">
             My documents
+          </Link>
+          {" · "}
+          <Link href="/admin/operations/staff/my-time-pay" className="kxd-os-link-quiet">
+            My Time & Pay
           </Link>
         </p>
 

@@ -15,6 +15,9 @@ import { migrations } from "../../migrations/index";
 
 export async function applyOrderedMigrations(): Promise<void> {
   process.env.PAYLOAD_MIGRATING = "true";
+  if (!process.env.NODE_ENV?.trim()) {
+    Object.assign(process.env, { NODE_ENV: "production" });
+  }
 
   console.log(
     `[KXD] Applying ${migrations.length} migrations in migrations/index.ts order`,
