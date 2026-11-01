@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { getPayload } from "payload";
 import config from "@payload-config";
+import {
+  STAFF_OVERSIGHT_NAV_ITEM,
+} from "@/components/admin/operations/shared/operations-nav";
 import { OperationsPageHero } from "@/components/admin/operations/shared/OperationsPageHero";
 import { OperationsShell } from "@/components/admin/operations/shared/OperationsShell";
 import {
@@ -503,6 +506,11 @@ export async function TodayScreen() {
   ];
 
   const quickActions = [
+    {
+      label: STAFF_OVERSIGHT_NAV_ITEM.label,
+      sub: "Team, time records, payroll review",
+      href: STAFF_OVERSIGHT_NAV_ITEM.href,
+    },
     { label: "Reports", sub: "Client performance", href: "/admin/operations/reports" },
     { label: "Log Request", sub: "New client request", href: "/admin/operations/requests/new" },
     { label: "Work", sub: "Execution desk", href: "/admin/work" },
@@ -980,6 +988,7 @@ export async function TodayScreen() {
           </p>
           <div className="flex flex-wrap items-center gap-4">
             {([
+              [STAFF_OVERSIGHT_NAV_ITEM.href, STAFF_OVERSIGHT_NAV_ITEM.label],
               ["/admin/work", "Work"],
               ["/admin/operations/creative", "Creative"],
               ["/admin/operations/growth", "Growth"],

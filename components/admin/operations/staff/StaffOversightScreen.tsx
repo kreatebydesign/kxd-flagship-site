@@ -418,7 +418,7 @@ export function StaffOversightScreen({
   }
 
   return (
-    <OperationsShell activeId="staff">
+    <OperationsShell activeId="staff-oversight">
       <KxdPage className="kxd-os-page--ops kxd-os-page--staff">
         <OperationsPageHero
           eyebrow="Staff oversight"
@@ -832,11 +832,11 @@ export function StaffOversightScreen({
         ) : null}
 
         {canReviewPayroll ? (
-          <>
+          <div id="payroll-review">
             <StaffTylerHistoricalReviewCard onError={setError} />
             <StaffTimePayRequestsCard onMessage={setMessage} onError={setError} />
             <StaffPayPeriodReviewCard onMessage={setMessage} onError={setError} />
-          </>
+          </div>
         ) : null}
 
         <section style={{ marginTop: "1.5rem" }} aria-label="End-of-day notes">

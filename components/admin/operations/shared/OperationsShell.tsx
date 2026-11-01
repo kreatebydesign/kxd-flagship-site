@@ -23,6 +23,16 @@ import { useStaffNavContext } from "@/components/admin/operations/staff/StaffNav
 function buildStaffNavGroups(showSalesDevelopmentNav: boolean): OperationsNavGroup[] {
   const items: OperationsNavGroup["items"] = [
     { id: "staff", label: "Staff home", href: "/admin/operations/staff" },
+    {
+      id: "staff-my-time-pay",
+      label: "My Time & Pay",
+      href: "/admin/operations/staff/my-time-pay",
+    },
+    {
+      id: "staff-time",
+      label: "Time clock",
+      href: "/admin/operations/staff/time",
+    },
     { id: "staff-my-work", label: "My work", href: "/admin/operations/staff/my-work" },
     {
       id: "staff-my-clients",
@@ -38,16 +48,6 @@ function buildStaffNavGroups(showSalesDevelopmentNav: boolean): OperationsNavGro
     });
   }
   items.push(
-    {
-      id: "staff-time",
-      label: "Time clock",
-      href: "/admin/operations/staff/time",
-    },
-    {
-      id: "staff-my-time-pay",
-      label: "My Time & Pay",
-      href: "/admin/operations/staff/my-time-pay",
-    },
     {
       id: "staff-documents",
       label: "My documents",
