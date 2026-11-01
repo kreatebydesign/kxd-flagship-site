@@ -2,7 +2,6 @@
  * Apply ordered Payload migrations to preview-kxd-os only.
  * Requires NEON_PREVIEW_URI (full connection string) in environment — never logged.
  */
-import { execSync } from "node:child_process";
 import { writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import {
@@ -14,7 +13,7 @@ import { isPreviewKxdOsTarget } from "./lib/preview-kxd-os-db.ts";
 
 const PREVIEW_HOST = "ep-frosty-bonus-afx8tf8q";
 
-function main() {
+async function main() {
   const uri = process.env.NEON_PREVIEW_URI?.trim();
   if (!uri) {
     console.error("NEON_PREVIEW_URI is required (preview-kxd-os connection string).");
@@ -47,22 +46,23 @@ function main() {
     process.exit(2);
   }
 
-  console.log("\npreview migrate:status");
+  console.log("\npreview migrate:target");
   console.log(`target: ${formatDbTarget(target)}\n`);
-
-  execSync("npm run migrate:status", {
-    stdio: "inherit",
-    env: { ...process.env, KXD_CONFIRM_PRODUCTION_MIGRATE: "" },
-  });
 
   if (process.env.KXD_CONFIRM_PRODUCTION_MIGRATE?.trim() !== "1") {
     console.error("\nSet KXD_CONFIRM_PRODUCTION_MIGRATE=1 to apply pending migrations to preview.\n");
     process.exit(2);
   }
 
-  console.log("\npreview migrate:apply (ordered index.ts)\n");
-  execSync("npm run migrate:production", { stdio: "inherit", env: process.env });
+  process.env.KXD_SERVER_ONLY_SHIM = "1";
+
+  console.log("\npreview migrate:apply (ordered migrations/index.ts)\n");
+  const { applyOrderedMigrations } = await import("./lib/payload-migrate-ordered.ts");
+  await applyOrderedMigrations();
   console.log("\npreview migrate:apply — done\n");
 }
 
-main();
+main().catch((err) => {
+  console.error(err instanceof Error ? err.message : err);
+  process.exit(1);
+});
