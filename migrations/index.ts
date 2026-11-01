@@ -127,6 +127,8 @@ import * as migration_20261022_staff_sales_development_phase1 from './20261022_s
 import * as migration_20261023_staff_time_b1_foundation from './20261023_staff_time_b1_foundation';
 import * as migration_20261024_staff_document_template_operator_workflow from './20261024_staff_document_template_operator_workflow';
 import * as migration_20261025_staff_pay_period_reviews from './20261025_staff_pay_period_reviews';
+import * as migration_20261101_staff_time_pay_requests from './20261101_staff_time_pay_requests';
+import * as migration_20261102_staff_pay_historical_entries from './20261102_staff_pay_historical_entries';
 import * as migration_20261027_platform_economics_snapshots from './20261027_platform_economics_snapshots';
 import * as migration_20261028_phase17_project_inquiry_attribution from './20261028_phase17_project_inquiry_attribution';
 import * as migration_20261029_staff_sales_activity_staff_recording from './20261029_staff_sales_activity_staff_recording';
@@ -836,6 +838,18 @@ export const migrations = [
     up: migration_20261025_staff_pay_period_reviews.up,
     down: migration_20261025_staff_pay_period_reviews.down,
     name: '20261025_staff_pay_period_reviews',
+  },
+  {
+    // Employee time/pay acknowledgments and correction requests (not payroll execution).
+    up: migration_20261101_staff_time_pay_requests.up,
+    down: migration_20261101_staff_time_pay_requests.down,
+    name: '20261101_staff_time_pay_requests',
+  },
+  {
+    // Owner-approved historical duration records (no fabricated Time Clock punches).
+    up: migration_20261102_staff_pay_historical_entries.up,
+    down: migration_20261102_staff_pay_historical_entries.down,
+    name: '20261102_staff_pay_historical_entries',
   },
   {
     // Platform Economics V1 — founder-only valuation snapshots.
