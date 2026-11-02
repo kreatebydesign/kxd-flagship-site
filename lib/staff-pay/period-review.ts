@@ -46,6 +46,17 @@ const CORRECTION_ACTIONS = new Set([
   "operator_historical_shift_created",
 ]);
 
+/** Drizzle expands JS arrays incorrectly for `ANY($n::int[])` — use `IN` instead. */
+function staffUserIdsInClause(staffUserIds: number[]) {
+  if (staffUserIds.length === 0) {
+    return sql`FALSE`;
+  }
+  return sql`staff_user_id IN (${sql.join(
+    staffUserIds.map((id) => sql`${id}`),
+    sql`, `,
+  )})`;
+}
+
 type PeriodRow = {
   id: number;
   period_start: string;
@@ -291,7 +302,7 @@ async function loadFingerprintRates(
     sql`
       SELECT staff_user_id, rate_cents, effective_from, effective_to
       FROM staff_hourly_rates
-      WHERE staff_user_id = ANY(${staffUserIds}::int[])
+      WHERE ${staffUserIdsInClause(staffUserIds)}
       ORDER BY staff_user_id ASC, effective_from ASC
     `,
   );
@@ -395,19 +406,25 @@ export async function loadStaffPayPeriodReview(
   const otWindowStart = workweekStarts[0] ?? periodStart;
   const otWindowEnd = periodEnd;
 
-  const otShiftsResult = await db.execute(
-    sql`
+  const otShiftRows =
+    staffUserIds.length === 0
+      ? []
+      : uniqueShifts(
+          (
+            (await db.execute(
+              sql`
       SELECT id, staff_user_id, status, started_at, ended_at, local_date_key, pay_period_id, audit_events
       FROM staff_time_shifts
       WHERE status = 'completed'
         AND ended_at IS NOT NULL
-        AND staff_user_id = ANY(${staffUserIds}::int[])
+        AND ${staffUserIdsInClause(staffUserIds)}
         AND started_at < (${otWindowEnd}::date + interval '8 days')
         AND ended_at > (${otWindowStart}::date - interval '1 day')
       ORDER BY staff_user_id ASC, started_at ASC
     `,
-  );
-  const otShiftRows = uniqueShifts((otShiftsResult as { rows?: ShiftRow[] }).rows ?? []);
+            )) as { rows?: ShiftRow[] }
+          ).rows ?? [],
+        );
 
   const fingerprint = computePayPeriodDataFingerprint({
     payPeriodId,

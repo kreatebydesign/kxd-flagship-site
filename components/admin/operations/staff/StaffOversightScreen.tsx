@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { OperationsPageHero } from "@/components/admin/operations/shared/OperationsPageHero";
 import { OperationsShell } from "@/components/admin/operations/shared/OperationsShell";
 import {
@@ -297,6 +297,35 @@ export function StaffOversightScreen({
   const [assigning, setAssigning] = useState(false);
   const [lastAssignedWorkId, setLastAssignedWorkId] = useState<number | null>(null);
   const [savingResponsibility, setSavingResponsibility] = useState(false);
+
+  useEffect(() => {
+    if (!canReviewPayroll) return;
+    if (typeof window === "undefined" || window.location.hash !== "#payroll-review") return;
+
+    let cancelled = false;
+    let frame = 0;
+    let attempts = 0;
+    const maxAttempts = 60;
+
+    const scrollToPayrollReview = () => {
+      if (cancelled) return;
+      const target = document.getElementById("payroll-review");
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+      attempts += 1;
+      if (attempts < maxAttempts) {
+        frame = window.requestAnimationFrame(scrollToPayrollReview);
+      }
+    };
+
+    scrollToPayrollReview();
+    return () => {
+      cancelled = true;
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, [canReviewPayroll]);
 
   const firstMemberId = data.members[0]?.userId ?? "";
   const [staffUserId, setStaffUserId] = useState<string>(String(firstMemberId));
@@ -832,7 +861,7 @@ export function StaffOversightScreen({
         ) : null}
 
         {canReviewPayroll ? (
-          <div id="payroll-review">
+          <div id="payroll-review" style={{ scrollMarginTop: "5.5rem" }}>
             <StaffTylerHistoricalReviewCard onError={setError} />
             <StaffTimePayRequestsCard onMessage={setMessage} onError={setError} />
             <StaffPayPeriodReviewCard onMessage={setMessage} onError={setError} />

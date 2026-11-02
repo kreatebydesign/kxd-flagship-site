@@ -553,6 +553,18 @@ export async function TodayScreen() {
           <OpsFocusPill label={focus.label} description={focus.description} tone={focus.tone} />
         </div>
 
+        <section className="kxd-os-ops-section" aria-label="Staff operations">
+          <OpsQuickGrid
+            items={[
+              {
+                label: STAFF_OVERSIGHT_NAV_ITEM.label,
+                sub: "Team, time records, payroll review",
+                href: STAFF_OVERSIGHT_NAV_ITEM.href,
+              },
+            ]}
+          />
+        </section>
+
         <section className="kxd-os-ops-section">
           <OpsSectionHead label="Daily Focus" />
           <OpsKpiStrip items={kpiItems} />
