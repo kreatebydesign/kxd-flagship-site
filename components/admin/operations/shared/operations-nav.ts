@@ -55,6 +55,8 @@ export type OperationsNavId =
   | "settings"
   | "training"
   | "staff"
+  | "staff-oversight"
+  | "staff-payroll-review"
   | "staff-documents"
   | "staff-my-work"
   | "staff-my-clients"
@@ -196,6 +198,16 @@ export const NAV_GROUPS: OperationsNavGroup[] = [
     label: "Tools",
     items: [
       {
+        id: "staff-oversight",
+        label: "Staff Oversight",
+        href: "/admin/operations/staff/oversight",
+      },
+      {
+        id: "staff-payroll-review",
+        label: "Payroll review",
+        href: "/admin/operations/staff/oversight#payroll-review",
+      },
+      {
         id: "qr-generator",
         label: "QR Generator",
         href: "/admin/operations/tools/qr-generator",
@@ -243,9 +255,16 @@ export const NAV_GROUPS: OperationsNavGroup[] = [
 /** Flat list — backwards compatible */
 export const NAV_ITEMS = NAV_GROUPS.flatMap((group) => group.items);
 
-/** Administrator oversight entry — linked from staff oversight page and Tools. */
+/** Administrator oversight — canonical route for owner staff operations. */
 export const STAFF_OVERSIGHT_NAV_ITEM = {
-  id: "staff" as const,
+  id: "staff-oversight" as const,
   label: "Staff Oversight",
   href: "/admin/operations/staff/oversight",
+};
+
+/** Employee self-service time and pay (PR #125). */
+export const MY_TIME_PAY_NAV_ITEM = {
+  id: "staff-my-time-pay" as const,
+  label: "My Time & Pay",
+  href: "/admin/operations/staff/my-time-pay",
 };

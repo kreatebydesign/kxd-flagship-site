@@ -162,6 +162,7 @@
     "verify:staff-time-shift-guards": "KXD_SERVER_ONLY_SHIM=1 node --import ./scripts/shims/register-server-only.mjs --import tsx scripts/verify-staff-time-shift-guards.ts",
     "verify:staff-pay-period-review": "KXD_SERVER_ONLY_SHIM=1 node --import ./scripts/shims/register-server-only.mjs --import tsx scripts/verify-staff-pay-period-review.ts",
     "verify:staff-my-time-pay": "tsx scripts/verify-staff-my-time-pay.ts",
+    "verify:navigation-staff-discoverability": "tsx scripts/verify-navigation-staff-discoverability.ts",
     "verify:preview-staff-my-time-pay-qa": "node --import ./scripts/shims/register-server-only.mjs --import tsx scripts/verify-preview-staff-my-time-pay-qa.ts",
     "seed:preview-tyler-payroll-qa-shifts": "node --import tsx scripts/seed-preview-tyler-payroll-qa-shifts.ts",
     "remove:preview-tyler-payroll-qa-shifts": "node --import tsx scripts/remove-preview-tyler-payroll-qa-shifts.ts",

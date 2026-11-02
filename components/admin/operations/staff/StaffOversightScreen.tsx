@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { OperationsPageHero } from "@/components/admin/operations/shared/OperationsPageHero";
 import { OperationsShell } from "@/components/admin/operations/shared/OperationsShell";
 import {
@@ -298,6 +298,35 @@ export function StaffOversightScreen({
   const [lastAssignedWorkId, setLastAssignedWorkId] = useState<number | null>(null);
   const [savingResponsibility, setSavingResponsibility] = useState(false);
 
+  useEffect(() => {
+    if (!canReviewPayroll) return;
+    if (typeof window === "undefined" || window.location.hash !== "#payroll-review") return;
+
+    let cancelled = false;
+    let frame = 0;
+    let attempts = 0;
+    const maxAttempts = 60;
+
+    const scrollToPayrollReview = () => {
+      if (cancelled) return;
+      const target = document.getElementById("payroll-review");
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+      attempts += 1;
+      if (attempts < maxAttempts) {
+        frame = window.requestAnimationFrame(scrollToPayrollReview);
+      }
+    };
+
+    scrollToPayrollReview();
+    return () => {
+      cancelled = true;
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, [canReviewPayroll]);
+
   const firstMemberId = data.members[0]?.userId ?? "";
   const [staffUserId, setStaffUserId] = useState<string>(String(firstMemberId));
   const [title, setTitle] = useState("");
@@ -418,7 +447,7 @@ export function StaffOversightScreen({
   }
 
   return (
-    <OperationsShell activeId="staff">
+    <OperationsShell activeId="staff-oversight">
       <KxdPage className="kxd-os-page--ops kxd-os-page--staff">
         <OperationsPageHero
           eyebrow="Staff oversight"
@@ -832,11 +861,11 @@ export function StaffOversightScreen({
         ) : null}
 
         {canReviewPayroll ? (
-          <>
+          <div id="payroll-review" style={{ scrollMarginTop: "5.5rem" }}>
             <StaffTylerHistoricalReviewCard onError={setError} />
             <StaffTimePayRequestsCard onMessage={setMessage} onError={setError} />
             <StaffPayPeriodReviewCard onMessage={setMessage} onError={setError} />
-          </>
+          </div>
         ) : null}
 
         <section style={{ marginTop: "1.5rem" }} aria-label="End-of-day notes">
