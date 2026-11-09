@@ -113,7 +113,7 @@ export function CesPortalHome({
           />
         ) : null}
         {clientHome && workPerformance ? (
-          <>
+          <div className="kxd-client-home kxd-client-home--command-overview">
             {!showPresentationHero ? (
               <header className="kxd-client-home__welcome kxd-client-home__welcome--compact">
                 <p className="kxd-client-home__eyebrow">{clientHome.welcome.eyebrow}</p>
@@ -138,7 +138,7 @@ export function CesPortalHome({
               suppressOverviewDuplicates
               leadAttention={null}
             />
-          </>
+          </div>
         ) : clientHome ? (
           <CesClientCommandHome
             home={clientHome}

@@ -401,7 +401,7 @@ export function composeWorkPerformanceModel(
     emptyStates: {
       completed: {
         title: "Nothing finished this month",
-        lead: `${MONTHLY_SUMMARY_SCOPE_NOTE} Finished work for other months still appears in KXD Work under that month.`,
+        lead: "Work finished in other months stays in KXD Work under that month.",
       },
       active: {
         title: "No ongoing work",
@@ -412,8 +412,8 @@ export function composeWorkPerformanceModel(
         lead: "Use Website Review when you have notes or screenshots to share.",
       },
       analytics: {
-        title: "Website performance",
-        lead: "Numbers appear here when reporting is turned on and the latest period is ready.",
+        title: "Reporting not ready yet",
+        lead: "Search and site figures appear here when the latest reporting period is verified.",
       },
       leads: {
         title: "Conversions not available",

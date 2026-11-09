@@ -330,7 +330,7 @@ function main() {
   );
   check(
     "empty state scopes monthly completed work",
-    onlyUpdatedAtCompose.emptyStates.completed.lead.includes("this month") ||
+    onlyUpdatedAtCompose.emptyStates.completed.lead.includes("KXD Work") ||
       onlyUpdatedAtCompose.emptyStates.completed.lead.includes(MONTHLY_SUMMARY_SCOPE_NOTE),
   );
   check(
