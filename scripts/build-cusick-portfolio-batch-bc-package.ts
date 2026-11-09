@@ -10,6 +10,7 @@ import {
   MONTHS_WITHOUT_VERIFIED_COMPLETIONS,
   PROPOSED_MILESTONES,
   RECONCILIATION_LEDGER,
+  SUPPLEMENTARY_EVIDENCE,
 } from "./lib/cusick-portfolio-reconciliation-2026";
 
 const root = process.cwd();
@@ -34,6 +35,8 @@ const payload = {
     ],
     gaps: EVIDENCE_GAPS,
     monthsWithoutVerifiedCompletions: MONTHS_WITHOUT_VERIFIED_COMPLETIONS,
+    evidenceGapReviewAt: "2026-11-09",
+    supplementaryEvidence: SUPPLEMENTARY_EVIDENCE,
   },
   ledger: RECONCILIATION_LEDGER,
   records: DELIVERABLE_CLIENT_NOTES.map((row) => ({

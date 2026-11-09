@@ -235,9 +235,9 @@ export const RECONCILIATION_LEDGER: ReconciliationItem[] = [
     status: "completed",
     evidenceSource: "work #50 staffDeliverableProgress",
     clientFacingDescription:
-      "Prepared and completed first feed post, story, and reel assignments using approved New Content assets.",
+      "Completed assigned feed post, story, and reel work in KXD Work (draft-for-approval flow). No published social_post_requests rows on file.",
     whyItMatters:
-      "This is documented content work in October, distinct from August website launch deliverables.",
+      "Documents creative work in October without claiming posts went live without separate publishing evidence.",
     mapsToExistingDeliverableId: null,
   },
   {
@@ -719,8 +719,52 @@ export const EVIDENCE_GAPS = [
   "client_projects: no project rows for portfolio clients in production Postgres.",
   "work table: assignments exist only for client 14; clients 5, 9, 10 have no work rows.",
   "monthly_reports: no published October or November 2026 reports for portfolio clients.",
-  "monthly_deliverables: no rows tagged October or November 2026 for any portfolio client.",
+  "monthly_deliverables: no rows tagged October or November 2026; no deliverable updated_at >= 2026-10-01.",
+  "staff_client_notes: no operator notes for portfolio clients since 2026-09-01.",
+  "client_infrastructure: github_repo and last_deployment_date unset; cannot verify Oct/Nov client site deploys from KXD OS.",
   "Cusick account audits: no website_audits collection rows; operator runbooks/scripts are out-of-band evidence only.",
+  "Local git: only kxd-flagship-site worktrees accessible; october-seo-rc is Kreate marketing SEO, not portfolio client sites.",
+  "November 2026 reporting_facts: no facts rows for period_start in November yet (as of 2026-11-09).",
+];
+
+/** Pipeline activity excluded from client completed-work counts (see supplementaryEvidence). */
+export const SUPPLEMENTARY_EVIDENCE = [
+  {
+    id: "reporting-facts-2026-10",
+    observedAt: "2026-11-01",
+    scope: "Clients 5, 9, 10, 14",
+    source: "reporting_facts",
+    summary:
+      "October 2026 period metrics ingested for all four businesses (GA4, Search Console, etc.).",
+    countsToClientCompletedWork: false,
+    reason:
+      "Automated reporting sync; not a monthly_deliverable, work assignment, or published client report.",
+    mapsToExistingDeliverableId: null,
+    relatedSeptemberMonitoring: [17, 18, 23, 24, 32],
+  },
+  {
+    id: "reporting-sync-ongoing",
+    observedAt: "2026-11-09",
+    scope: "Clients 5, 9, 10, 14",
+    source: "reporting_sync_states",
+    summary:
+      "Scheduled GA4 and Search Console syncs succeeding through 2026-11-09.",
+    countsToClientCompletedWork: false,
+    reason: "Routine retainer monitoring; September in-progress deliverables already cover this.",
+    mapsToExistingDeliverableId: null,
+    relatedSeptemberMonitoring: [17, 18, 23, 24, 32],
+  },
+  {
+    id: "infrastructure-metadata-touch",
+    observedAt: "2026-09-28",
+    scope: "Clients 5, 9, 10",
+    source: "client_infrastructure.updated_at",
+    summary: "Infrastructure records refreshed (GA4 property IDs, URLs); not a verified deployment event.",
+    countsToClientCompletedWork: false,
+    reason: "Metadata update only; no last_deployment_date recorded.",
+    mapsToExistingDeliverableId: null,
+    relatedSeptemberMonitoring: null,
+  },
 ];
 
 export const MONTHS_WITHOUT_VERIFIED_COMPLETIONS: Record<string, number[]> = {
