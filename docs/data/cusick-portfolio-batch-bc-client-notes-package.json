@@ -1,0 +1,1112 @@
+{
+  "meta": {
+    "packageId": "cusick-portfolio-batch-bc-client-notes",
+    "generatedAt": "2026-11-09",
+    "scope": "Clients 5, 9, 10, 14 only",
+    "purpose": "Reviewable clientNotes, work ledger, October performance drafts, and November plan. Does not authorize production writes or report publishing.",
+    "reconciliationSources": [
+      "monthly_deliverables (production Postgres)",
+      "work (KXD Work Engine)",
+      "monthly_reports",
+      "client_infrastructure (read-only context)",
+      "social_post_requests (empty Sep–Nov)",
+      "website_audits (empty for portfolio)",
+      "client_timeline_events (empty Sep–Nov)",
+      "client_projects (empty for portfolio)"
+    ],
+    "gaps": [
+      "website_audits: no rows for clients 5, 9, 10, 14 in production Postgres.",
+      "social_post_requests: no published post rows Sep–Nov 2026 (OTP Carts social evidence is work #49–50 only).",
+      "client_projects: no project rows for portfolio clients in production Postgres.",
+      "work table: assignments exist only for client 14; clients 5, 9, 10 have no work rows.",
+      "monthly_reports: no published October or November 2026 reports for portfolio clients.",
+      "monthly_deliverables: no rows tagged October or November 2026; no deliverable updated_at >= 2026-10-01.",
+      "staff_client_notes: no operator notes for portfolio clients since 2026-09-01.",
+      "client_infrastructure: github_repo and last_deployment_date unset; cannot verify Oct/Nov client site deploys from KXD OS.",
+      "Cusick account audits: no website_audits collection rows; operator runbooks/scripts are out-of-band evidence only.",
+      "Local git: only kxd-flagship-site worktrees accessible; october-seo-rc is Kreate marketing SEO, not portfolio client sites.",
+      "November 2026 reporting_facts: no facts rows for period_start in November yet (as of 2026-11-09)."
+    ],
+    "monthsWithoutVerifiedCompletions": {
+      "2026-09": [
+        5,
+        9,
+        14
+      ],
+      "2026-10": [
+        5,
+        9,
+        10
+      ],
+      "2026-11": [
+        5,
+        9,
+        10,
+        14
+      ]
+    },
+    "evidenceGapReviewAt": "2026-11-09",
+    "supplementaryEvidence": [
+      {
+        "id": "reporting-facts-2026-10",
+        "observedAt": "2026-11-01",
+        "scope": "Clients 5, 9, 10, 14",
+        "source": "reporting_facts",
+        "summary": "October 2026 period metrics ingested for all four businesses (GA4, Search Console, etc.).",
+        "countsToClientCompletedWork": false,
+        "reason": "Automated reporting sync; not a monthly_deliverable, work assignment, or published client report.",
+        "mapsToExistingDeliverableId": null,
+        "relatedSeptemberMonitoring": [
+          17,
+          18,
+          23,
+          24,
+          32
+        ]
+      },
+      {
+        "id": "reporting-sync-ongoing",
+        "observedAt": "2026-11-09",
+        "scope": "Clients 5, 9, 10, 14",
+        "source": "reporting_sync_states",
+        "summary": "Scheduled GA4 and Search Console syncs succeeding through 2026-11-09.",
+        "countsToClientCompletedWork": false,
+        "reason": "Routine retainer monitoring; September in-progress deliverables already cover this.",
+        "mapsToExistingDeliverableId": null,
+        "relatedSeptemberMonitoring": [
+          17,
+          18,
+          23,
+          24,
+          32
+        ]
+      },
+      {
+        "id": "infrastructure-metadata-touch",
+        "observedAt": "2026-09-28",
+        "scope": "Clients 5, 9, 10",
+        "source": "client_infrastructure.updated_at",
+        "summary": "Infrastructure records refreshed (GA4 property IDs, URLs); not a verified deployment event.",
+        "countsToClientCompletedWork": false,
+        "reason": "Metadata update only; no last_deployment_date recorded.",
+        "mapsToExistingDeliverableId": null,
+        "relatedSeptemberMonitoring": null
+      }
+    ]
+  },
+  "ledger": [
+    {
+      "reportingMonth": "2026-09",
+      "clientId": 5,
+      "clientName": "Cusick Morgan Motorsports",
+      "kind": "in-progress",
+      "title": "Search performance monitoring and ongoing SEO optimization",
+      "verifiedDate": null,
+      "status": "in-progress",
+      "evidenceSource": "monthly_deliverables #17",
+      "clientFacingDescription": "Ongoing review of how your site appears in Google Search, based on Search Console data.",
+      "whyItMatters": "Helps customers find the live motorsports site when they search, without claiming specific lead counts.",
+      "mapsToExistingDeliverableId": 17
+    },
+    {
+      "reportingMonth": "2026-09",
+      "clientId": 5,
+      "clientName": "Cusick Morgan Motorsports",
+      "kind": "in-progress",
+      "title": "Ongoing website/search health monitoring",
+      "verifiedDate": null,
+      "status": "in-progress",
+      "evidenceSource": "monthly_deliverables #18",
+      "clientFacingDescription": "Regular checks so the website stays reachable, accurate, and visible to search engines.",
+      "whyItMatters": "A live site needs steady attention so pages and forms keep working for visitors.",
+      "mapsToExistingDeliverableId": 18
+    },
+    {
+      "reportingMonth": "2026-09",
+      "clientId": 5,
+      "clientName": "Cusick Morgan Motorsports",
+      "kind": "completed",
+      "title": "September 2026 performance report published",
+      "verifiedDate": "2026-09-29",
+      "status": "published",
+      "evidenceSource": "monthly_reports #5",
+      "clientFacingDescription": "KXD published your closed-month website and search summary for September 2026 in the portal.",
+      "whyItMatters": "Gives you a verified picture of traffic and search activity for the month.",
+      "mapsToExistingDeliverableId": null
+    },
+    {
+      "reportingMonth": "2026-09",
+      "clientId": 9,
+      "clientName": "On Track Performance",
+      "kind": "in-progress",
+      "title": "Website/search performance monitoring",
+      "verifiedDate": null,
+      "status": "in-progress",
+      "evidenceSource": "monthly_deliverables #23",
+      "clientFacingDescription": "Monitoring search visibility for the current On Track Performance website.",
+      "whyItMatters": "Keeps the live site discoverable while the staged replacement site remains a separate project.",
+      "mapsToExistingDeliverableId": 23
+    },
+    {
+      "reportingMonth": "2026-09",
+      "clientId": 9,
+      "clientName": "On Track Performance",
+      "kind": "in-progress",
+      "title": "Search Console/indexing follow-through",
+      "verifiedDate": null,
+      "status": "in-progress",
+      "evidenceSource": "monthly_deliverables #24",
+      "clientFacingDescription": "Follow-up on how Google indexes OTP pages and whether important URLs are listed.",
+      "whyItMatters": "Indexing problems can hide service pages from people searching locally.",
+      "mapsToExistingDeliverableId": 24
+    },
+    {
+      "reportingMonth": "2026-09",
+      "clientId": 9,
+      "clientName": "On Track Performance",
+      "kind": "completed",
+      "title": "September 2026 performance report published",
+      "verifiedDate": "2026-09-29",
+      "status": "published",
+      "evidenceSource": "monthly_reports #6",
+      "clientFacingDescription": "KXD published your September 2026 website and search summary. The staged rebuild is not counted as launched here.",
+      "whyItMatters": "Separates monthly reporting from the replacement website still awaiting launch approval.",
+      "mapsToExistingDeliverableId": null
+    },
+    {
+      "reportingMonth": "2026-09",
+      "clientId": 10,
+      "clientName": "2475 Townsgate",
+      "kind": "completed",
+      "title": "Google Analytics 4 tracking installation and production verification",
+      "verifiedDate": "2026-09-28",
+      "status": "complete",
+      "evidenceSource": "monthly_deliverables #31",
+      "clientFacingDescription": "Installed and verified Google Analytics on the live Townsgate site so traffic can be measured.",
+      "whyItMatters": "Reliable analytics supports honest monthly reporting going forward.",
+      "mapsToExistingDeliverableId": 31
+    },
+    {
+      "reportingMonth": "2026-09",
+      "clientId": 10,
+      "clientName": "2475 Townsgate",
+      "kind": "in-progress",
+      "title": "Search/analytics monitoring following production measurement setup",
+      "verifiedDate": null,
+      "status": "in-progress",
+      "evidenceSource": "monthly_deliverables #32",
+      "clientFacingDescription": "Monitoring search and analytics now that measurement is live on the production site.",
+      "whyItMatters": "Ongoing monitoring is not the same as a one-time install; this tracks continuing oversight.",
+      "mapsToExistingDeliverableId": 32
+    },
+    {
+      "reportingMonth": "2026-09",
+      "clientId": 10,
+      "clientName": "2475 Townsgate",
+      "kind": "completed",
+      "title": "September 2026 performance report published",
+      "verifiedDate": "2026-09-29",
+      "status": "published",
+      "evidenceSource": "monthly_reports #8",
+      "clientFacingDescription": "KXD published your September 2026 website and search summary for the live property site.",
+      "whyItMatters": "Shows verified activity for the month without inventing business outcomes.",
+      "mapsToExistingDeliverableId": null
+    },
+    {
+      "reportingMonth": "2026-09",
+      "clientId": 14,
+      "clientName": "OTP Carts",
+      "kind": "waiting-on-client",
+      "title": "Google Business Profile setup (Westlake)",
+      "verifiedDate": null,
+      "status": "waiting-on-client",
+      "evidenceSource": "monthly_deliverables #7",
+      "clientFacingDescription": "Westlake Google Business Profile is prepared. Google still needs verification from your team before it can go fully live.",
+      "whyItMatters": "Local customers often check Google first; verification unlocks the Westlake listing.",
+      "mapsToExistingDeliverableId": 7
+    },
+    {
+      "reportingMonth": "2026-09",
+      "clientId": 14,
+      "clientName": "OTP Carts",
+      "kind": "in-progress",
+      "title": "Local search / showroom setup",
+      "verifiedDate": null,
+      "status": "in-progress",
+      "evidenceSource": "monthly_deliverables #8",
+      "clientFacingDescription": "Local search setup for Westlake continues after the profile is verified. Thermal listing was not launched.",
+      "whyItMatters": "Accurate local listings help nearby shoppers find the right showroom.",
+      "mapsToExistingDeliverableId": 8
+    },
+    {
+      "reportingMonth": "2026-09",
+      "clientId": 14,
+      "clientName": "OTP Carts",
+      "kind": "in-progress",
+      "title": "Google profile ownership / access recovery",
+      "verifiedDate": null,
+      "status": "in-progress",
+      "evidenceSource": "monthly_deliverables #9",
+      "clientFacingDescription": "Ownership and access steps for the Westlake profile remain open until verification finishes.",
+      "whyItMatters": "KXD cannot complete local optimization without verified profile access.",
+      "mapsToExistingDeliverableId": 9
+    },
+    {
+      "reportingMonth": "2026-09",
+      "clientId": 14,
+      "clientName": "OTP Carts",
+      "kind": "completed",
+      "title": "September 2026 performance report published",
+      "verifiedDate": "2026-09-29",
+      "status": "published",
+      "evidenceSource": "monthly_reports #7",
+      "clientFacingDescription": "KXD published your September 2026 website and search summary for OTP Carts.",
+      "whyItMatters": "Documents verified site activity for the month separate from social setup work.",
+      "mapsToExistingDeliverableId": null
+    },
+    {
+      "reportingMonth": "2026-10",
+      "clientId": 14,
+      "clientName": "OTP Carts",
+      "kind": "completed",
+      "title": "OTP Carts — Facebook & Instagram Business Launch",
+      "verifiedDate": "2026-10-30",
+      "status": "completed",
+      "evidenceSource": "work #49 (completed_at)",
+      "clientFacingDescription": "Set up Facebook and Instagram business presence for OTP Carts as a foundation for social posting.",
+      "whyItMatters": "Business accounts are required before consistent social content can run for Westlake and Thermal.",
+      "mapsToExistingDeliverableId": null
+    },
+    {
+      "reportingMonth": "2026-10",
+      "clientId": 14,
+      "clientName": "OTP Carts",
+      "kind": "completed",
+      "title": "OTP Carts Social Media (feed, story, reel)",
+      "verifiedDate": "2026-10-29",
+      "status": "completed",
+      "evidenceSource": "work #50 staffDeliverableProgress",
+      "clientFacingDescription": "Completed assigned feed post, story, and reel work in KXD Work (draft-for-approval flow). No published social_post_requests rows on file.",
+      "whyItMatters": "Documents creative work in October without claiming posts went live without separate publishing evidence.",
+      "mapsToExistingDeliverableId": null
+    },
+    {
+      "reportingMonth": "2026-11",
+      "clientId": 14,
+      "clientName": "OTP Carts",
+      "kind": "planned",
+      "title": "OTP Carts | Social Media Sales Push",
+      "verifiedDate": null,
+      "status": "planned",
+      "evidenceSource": "work #56",
+      "clientFacingDescription": "Planned sales-focused social push. Includes reviewing accounts and selecting strong cart photos before posting.",
+      "whyItMatters": "Supports visibility for in-stock carts without claiming sales results in advance.",
+      "mapsToExistingDeliverableId": null
+    }
+  ],
+  "records": [
+    {
+      "clientId": 14,
+      "clientName": "OTP Carts",
+      "deliverableId": 1,
+      "reportingMonth": "2026-08",
+      "status": "complete",
+      "completedDate": "2026-08-09",
+      "title": "Website launch & post-launch QA",
+      "proposedClientNotes": "Launched www.otpcarts.com and checked key pages after go-live so customers can browse models, financing, and contact options.",
+      "evidence": "monthly_deliverables #1",
+      "internalNotesPreserved": true
+    },
+    {
+      "clientId": 14,
+      "clientName": "OTP Carts",
+      "deliverableId": 2,
+      "reportingMonth": "2026-08",
+      "status": "complete",
+      "completedDate": "2026-08-09",
+      "title": "Brand / logo refinement",
+      "proposedClientNotes": "Refined logo lockups and sharing images so the site, Google profile, and social previews match the approved OTP Carts brand.",
+      "evidence": "monthly_deliverables #2",
+      "internalNotesPreserved": true
+    },
+    {
+      "clientId": 14,
+      "clientName": "OTP Carts",
+      "deliverableId": 3,
+      "reportingMonth": "2026-08",
+      "status": "complete",
+      "completedDate": "2026-08-09",
+      "title": "Public phone update across website and Google",
+      "proposedClientNotes": "Applied the confirmed public phone number across the website and Google Business details so callers reach the right line.",
+      "evidence": "monthly_deliverables #3",
+      "internalNotesPreserved": true
+    },
+    {
+      "clientId": 14,
+      "clientName": "OTP Carts",
+      "deliverableId": 4,
+      "reportingMonth": "2026-08",
+      "status": "complete",
+      "completedDate": "2026-08-09",
+      "title": "Technical SEO hardening",
+      "proposedClientNotes": "Hardened technical SEO basics: canonical host, sitemap, HTTPS, and indexable public routes.",
+      "evidence": "monthly_deliverables #4",
+      "internalNotesPreserved": true
+    },
+    {
+      "clientId": 14,
+      "clientName": "OTP Carts",
+      "deliverableId": 5,
+      "reportingMonth": "2026-08",
+      "status": "complete",
+      "completedDate": "2026-08-09",
+      "title": "Structured data cleanup",
+      "proposedClientNotes": "Corrected structured data on model pages so Google is not misled by unsupported rich-result markup.",
+      "evidence": "monthly_deliverables #5",
+      "internalNotesPreserved": true
+    },
+    {
+      "clientId": 14,
+      "clientName": "OTP Carts",
+      "deliverableId": 6,
+      "reportingMonth": "2026-08",
+      "status": "complete",
+      "completedDate": "2026-08-09",
+      "title": "Google indexing & Search Console setup",
+      "proposedClientNotes": "Reviewed Search Console after launch and confirmed core routes and sitemap are in good standing.",
+      "evidence": "monthly_deliverables #6",
+      "internalNotesPreserved": true
+    },
+    {
+      "clientId": 14,
+      "clientName": "OTP Carts",
+      "deliverableId": 7,
+      "reportingMonth": "2026-09",
+      "status": "waiting-on-client",
+      "completedDate": null,
+      "title": "Google Business Profile setup (Westlake)",
+      "proposedClientNotes": "Westlake Google Business Profile is prepared. Google verification from your team is still required.",
+      "evidence": "monthly_deliverables #7",
+      "internalNotesPreserved": true
+    },
+    {
+      "clientId": 14,
+      "clientName": "OTP Carts",
+      "deliverableId": 8,
+      "reportingMonth": "2026-09",
+      "status": "in-progress",
+      "completedDate": null,
+      "title": "Local search / showroom setup",
+      "proposedClientNotes": "Local search work for Westlake continues once the Google profile is verified.",
+      "evidence": "monthly_deliverables #8",
+      "internalNotesPreserved": true
+    },
+    {
+      "clientId": 14,
+      "clientName": "OTP Carts",
+      "deliverableId": 9,
+      "reportingMonth": "2026-09",
+      "status": "in-progress",
+      "completedDate": null,
+      "title": "Google profile ownership / access recovery",
+      "proposedClientNotes": "Profile access and ownership follow-through for Westlake remains open until verification completes.",
+      "evidence": "monthly_deliverables #9",
+      "internalNotesPreserved": true
+    },
+    {
+      "clientId": 5,
+      "clientName": "Cusick Morgan Motorsports",
+      "deliverableId": 10,
+      "reportingMonth": "2026-08",
+      "status": "complete",
+      "completedDate": null,
+      "title": "Website reliability and content persistence improvements",
+      "proposedClientNotes": "Improved site reliability and how content persists for visitors (historical work; exact day not recorded).",
+      "evidence": "monthly_deliverables #10",
+      "internalNotesPreserved": true
+    },
+    {
+      "clientId": 5,
+      "clientName": "Cusick Morgan Motorsports",
+      "deliverableId": 11,
+      "reportingMonth": "2026-08",
+      "status": "complete",
+      "completedDate": null,
+      "title": "News/content persistence work",
+      "proposedClientNotes": "Strengthened how news and content stay available on the site (historical work; exact day not recorded).",
+      "evidence": "monthly_deliverables #11",
+      "internalNotesPreserved": true
+    },
+    {
+      "clientId": 5,
+      "clientName": "Cusick Morgan Motorsports",
+      "deliverableId": 12,
+      "reportingMonth": "2026-08",
+      "status": "complete",
+      "completedDate": null,
+      "title": "URL reliability improvements",
+      "proposedClientNotes": "Improved URL reliability so important links keep working (historical work; exact day not recorded).",
+      "evidence": "monthly_deliverables #12",
+      "internalNotesPreserved": true
+    },
+    {
+      "clientId": 5,
+      "clientName": "Cusick Morgan Motorsports",
+      "deliverableId": 13,
+      "reportingMonth": "2026-08",
+      "status": "complete",
+      "completedDate": null,
+      "title": "Sitemap/search-indexing cleanup",
+      "proposedClientNotes": "Cleaned up sitemap and indexing issues so search engines can list the right pages.",
+      "evidence": "monthly_deliverables #13",
+      "internalNotesPreserved": true
+    },
+    {
+      "clientId": 5,
+      "clientName": "Cusick Morgan Motorsports",
+      "deliverableId": 14,
+      "reportingMonth": "2026-08",
+      "status": "complete",
+      "completedDate": null,
+      "title": "Driver search-title/SEO improvements",
+      "proposedClientNotes": "Improved search titles and SEO for driver-related pages (historical work; exact day not recorded).",
+      "evidence": "monthly_deliverables #14",
+      "internalNotesPreserved": true
+    },
+    {
+      "clientId": 5,
+      "clientName": "Cusick Morgan Motorsports",
+      "deliverableId": 15,
+      "reportingMonth": "2026-08",
+      "status": "complete",
+      "completedDate": null,
+      "title": "Social metadata improvements",
+      "proposedClientNotes": "Improved social sharing metadata so links preview correctly when shared.",
+      "evidence": "monthly_deliverables #15",
+      "internalNotesPreserved": true
+    },
+    {
+      "clientId": 5,
+      "clientName": "Cusick Morgan Motorsports",
+      "deliverableId": 16,
+      "reportingMonth": "2026-08",
+      "status": "complete",
+      "completedDate": null,
+      "title": "Search Console / measurement setup and monitoring",
+      "proposedClientNotes": "Set up Search Console and measurement foundations (historical). Ongoing monitoring continues as separate September items.",
+      "evidence": "monthly_deliverables #16",
+      "internalNotesPreserved": true
+    },
+    {
+      "clientId": 5,
+      "clientName": "Cusick Morgan Motorsports",
+      "deliverableId": 17,
+      "reportingMonth": "2026-09",
+      "status": "in-progress",
+      "completedDate": null,
+      "title": "Search performance monitoring and ongoing SEO optimization",
+      "proposedClientNotes": "Ongoing Search Console review and SEO adjustments based on real search data. Not marked complete without a verified close-out.",
+      "evidence": "monthly_deliverables #17",
+      "internalNotesPreserved": true
+    },
+    {
+      "clientId": 5,
+      "clientName": "Cusick Morgan Motorsports",
+      "deliverableId": 18,
+      "reportingMonth": "2026-09",
+      "status": "in-progress",
+      "completedDate": null,
+      "title": "Ongoing website/search health monitoring",
+      "proposedClientNotes": "Ongoing checks on site and search health. Routine monitoring is not counted as a one-time completion.",
+      "evidence": "monthly_deliverables #18",
+      "internalNotesPreserved": true
+    },
+    {
+      "clientId": 9,
+      "clientName": "On Track Performance",
+      "deliverableId": 19,
+      "reportingMonth": "2026-08",
+      "status": "complete",
+      "completedDate": null,
+      "title": "Major OTP website rebuild developed and staged",
+      "proposedClientNotes": "Built the replacement On Track Performance website and staged it for review. It is not the live production site yet.",
+      "evidence": "monthly_deliverables #19",
+      "internalNotesPreserved": true
+    },
+    {
+      "clientId": 9,
+      "clientName": "On Track Performance",
+      "deliverableId": 20,
+      "reportingMonth": "2026-08",
+      "status": "complete",
+      "completedDate": null,
+      "title": "Lead-generation / conversion-oriented website work",
+      "proposedClientNotes": "Conversion-oriented website work on the staged build (historical; exact day not recorded).",
+      "evidence": "monthly_deliverables #20",
+      "internalNotesPreserved": true
+    },
+    {
+      "clientId": 9,
+      "clientName": "On Track Performance",
+      "deliverableId": 21,
+      "reportingMonth": "2026-08",
+      "status": "complete",
+      "completedDate": null,
+      "title": "Search/SEO foundation work",
+      "proposedClientNotes": "SEO foundation on the staged site (historical; exact day not recorded).",
+      "evidence": "monthly_deliverables #21",
+      "internalNotesPreserved": true
+    },
+    {
+      "clientId": 9,
+      "clientName": "On Track Performance",
+      "deliverableId": 22,
+      "reportingMonth": "2026-08",
+      "status": "complete",
+      "completedDate": null,
+      "title": "Search Console/measurement setup and monitoring",
+      "proposedClientNotes": "Search Console setup on the staged path (historical). September follow-through is tracked separately.",
+      "evidence": "monthly_deliverables #22",
+      "internalNotesPreserved": true
+    },
+    {
+      "clientId": 9,
+      "clientName": "On Track Performance",
+      "deliverableId": 23,
+      "reportingMonth": "2026-09",
+      "status": "in-progress",
+      "completedDate": null,
+      "title": "Website/search performance monitoring",
+      "proposedClientNotes": "Monitoring the live OTP site while the staged replacement remains separate.",
+      "evidence": "monthly_deliverables #23",
+      "internalNotesPreserved": true
+    },
+    {
+      "clientId": 9,
+      "clientName": "On Track Performance",
+      "deliverableId": 24,
+      "reportingMonth": "2026-09",
+      "status": "in-progress",
+      "completedDate": null,
+      "title": "Search Console/indexing follow-through",
+      "proposedClientNotes": "Continued indexing follow-through from prior setup work.",
+      "evidence": "monthly_deliverables #24",
+      "internalNotesPreserved": true
+    },
+    {
+      "clientId": 10,
+      "clientName": "2475 Townsgate",
+      "deliverableId": 25,
+      "reportingMonth": "2026-08",
+      "status": "complete",
+      "completedDate": null,
+      "title": "2475 Townsgate website rebuild",
+      "proposedClientNotes": "Rebuilt the Townsgate property website (historical; exact day not recorded). Live where deployed and verified.",
+      "evidence": "monthly_deliverables #25",
+      "internalNotesPreserved": true
+    },
+    {
+      "clientId": 10,
+      "clientName": "2475 Townsgate",
+      "deliverableId": 26,
+      "reportingMonth": "2026-08",
+      "status": "complete",
+      "completedDate": null,
+      "title": "Eight tenant/business profiles implemented",
+      "proposedClientNotes": "Implemented tenant and business profiles on the property site (historical; exact day not recorded).",
+      "evidence": "monthly_deliverables #26",
+      "internalNotesPreserved": true
+    },
+    {
+      "clientId": 10,
+      "clientName": "2475 Townsgate",
+      "deliverableId": 27,
+      "reportingMonth": "2026-08",
+      "status": "complete",
+      "completedDate": null,
+      "title": "Accessibility and mobile QA",
+      "proposedClientNotes": "Accessibility and mobile QA on the rebuild (historical; exact day not recorded).",
+      "evidence": "monthly_deliverables #27",
+      "internalNotesPreserved": true
+    },
+    {
+      "clientId": 10,
+      "clientName": "2475 Townsgate",
+      "deliverableId": 28,
+      "reportingMonth": "2026-08",
+      "status": "complete",
+      "completedDate": null,
+      "title": "Contact/mailto routing",
+      "proposedClientNotes": "Contact and mailto routing for tenant inquiries (historical; exact day not recorded).",
+      "evidence": "monthly_deliverables #28",
+      "internalNotesPreserved": true
+    },
+    {
+      "clientId": 10,
+      "clientName": "2475 Townsgate",
+      "deliverableId": 29,
+      "reportingMonth": "2026-08",
+      "status": "complete",
+      "completedDate": null,
+      "title": "On Track Performance tenant alignment",
+      "proposedClientNotes": "Aligned On Track Performance tenant content on Townsgate (historical; exact day not recorded).",
+      "evidence": "monthly_deliverables #29",
+      "internalNotesPreserved": true
+    },
+    {
+      "clientId": 10,
+      "clientName": "2475 Townsgate",
+      "deliverableId": 30,
+      "reportingMonth": "2026-08",
+      "status": "complete",
+      "completedDate": null,
+      "title": "Legacy redirect/cutover documentation",
+      "proposedClientNotes": "Documented redirects and cutover steps for the property launch (historical; exact day not recorded).",
+      "evidence": "monthly_deliverables #30",
+      "internalNotesPreserved": true
+    },
+    {
+      "clientId": 10,
+      "clientName": "2475 Townsgate",
+      "deliverableId": 31,
+      "reportingMonth": "2026-09",
+      "status": "complete",
+      "completedDate": "2026-09-28",
+      "title": "Google Analytics 4 tracking installation and production verification",
+      "proposedClientNotes": "Installed and verified Google Analytics on the live Townsgate site on 2026-09-28.",
+      "evidence": "monthly_deliverables #31",
+      "internalNotesPreserved": true
+    },
+    {
+      "clientId": 10,
+      "clientName": "2475 Townsgate",
+      "deliverableId": 32,
+      "reportingMonth": "2026-09",
+      "status": "in-progress",
+      "completedDate": null,
+      "title": "Search/analytics monitoring following production measurement setup",
+      "proposedClientNotes": "Monitoring analytics and search after GA4 went live. Ongoing work, not a duplicate of the install.",
+      "evidence": "monthly_deliverables #32",
+      "internalNotesPreserved": true
+    }
+  ],
+  "proposedMilestones": [
+    {
+      "id": "milestone-report-sep-2026-portfolio",
+      "reportingMonth": "2026-09",
+      "clientIds": [
+        5,
+        9,
+        10,
+        14
+      ],
+      "title": "September 2026 client reports published",
+      "status": "published",
+      "verifiedDate": "2026-09-29",
+      "evidenceSource": "monthly_reports #5-8",
+      "mapsToNewDeliverable": false,
+      "note": "Report publication is ledger activity; do not duplicate as monthly_deliverables rows."
+    },
+    {
+      "id": "milestone-work-49-50-oct-2026",
+      "reportingMonth": "2026-10",
+      "clientIds": [
+        14
+      ],
+      "title": "OTP Carts social business launch and first content batch",
+      "status": "completed",
+      "verifiedDate": "2026-10-30",
+      "evidenceSource": "work #49, #50",
+      "mapsToNewDeliverable": true,
+      "note": "Propose October monthly_deliverable rows after operator review to avoid duplicating August launch items."
+    }
+  ],
+  "accountValueByClient": [
+    {
+      "clientId": 5,
+      "clientName": "Cusick Morgan Motorsports",
+      "productionUrl": "https://www.cusickmotorsports.com",
+      "retainerLabel": "Cusick Morgan Motorsports — Monthly Retainer",
+      "deliveredHighlights": [
+        "August historical website and SEO improvements recorded (deliverables #10–16).",
+        "September 2026 performance report published (monthly_reports #5)."
+      ],
+      "ongoingServices": [
+        {
+          "label": "Search Console and SEO monitoring",
+          "evidence": "monthly_deliverables #17; GA4/GSC sync reporting_sync_states",
+          "clientFacing": "KXD watches how Google finds your motorsports site and flags issues that could hide you from search."
+        },
+        {
+          "label": "Website and search health checks",
+          "evidence": "monthly_deliverables #18",
+          "clientFacing": "KXD keeps an eye on whether the site stays online, accurate, and usable for visitors."
+        },
+        {
+          "label": "Hosting and analytics wiring",
+          "evidence": "client_infrastructure GA4 542430303; batch-0b mapping",
+          "clientFacing": "KXD maintains the technical tie between your site, analytics, and search tools."
+        }
+      ],
+      "inProgress": [
+        "Search performance monitoring and ongoing SEO optimization (#17).",
+        "Ongoing website/search health monitoring (#18)."
+      ],
+      "waitingOnClient": [],
+      "nextPriorities": [
+        "Founder review of October performance draft before any portal publish.",
+        "Continue monitoring; log any verified site fixes before marking new completions."
+      ]
+    },
+    {
+      "clientId": 9,
+      "clientName": "On Track Performance",
+      "productionUrl": "https://www.on-track-performance.com",
+      "retainerLabel": "On Track Performance — Monthly Retainer",
+      "deliveredHighlights": [
+        "Staged replacement website recorded complete historically (#19). Live site unchanged.",
+        "September 2026 performance report published (monthly_reports #6)."
+      ],
+      "ongoingServices": [
+        {
+          "label": "Live site search monitoring",
+          "evidence": "monthly_deliverables #23–#24",
+          "clientFacing": "KXD tracks how the current OTP website appears in Google while the new site waits for launch approval."
+        },
+        {
+          "label": "Search Console follow-through",
+          "evidence": "monthly_deliverables #24",
+          "clientFacing": "KXD follows up on indexing so important service pages can be found."
+        }
+      ],
+      "inProgress": [
+        "Website/search performance monitoring (#23).",
+        "Search Console/indexing follow-through (#24)."
+      ],
+      "waitingOnClient": [
+        "Staged replacement site: review and launch decision when Don is ready (historical note on #19)."
+      ],
+      "nextPriorities": [
+        "Clarify launch timing for staged OTP site without treating staging as go-live.",
+        "October report draft review (Search-only metrics limitation for OTP)."
+      ]
+    },
+    {
+      "clientId": 10,
+      "clientName": "2475 Townsgate",
+      "productionUrl": "https://www.2475townsgate.com",
+      "retainerLabel": "2475 Townsgate - Monthly Web Retainer",
+      "deliveredHighlights": [
+        "Property website rebuild and tenant profiles (August historical #25–#30).",
+        "Google Analytics 4 installed and verified 2026-09-28 (#31).",
+        "September 2026 performance report published (monthly_reports #8)."
+      ],
+      "ongoingServices": [
+        {
+          "label": "Analytics and search monitoring after GA4",
+          "evidence": "monthly_deliverables #32; reporting_sync_states",
+          "clientFacing": "KXD monitors traffic and search now that measurement is live on the property site."
+        },
+        {
+          "label": "Live property website care",
+          "evidence": "client_infrastructure production_url; HTTP 200 verified 2026-11-09",
+          "clientFacing": "KXD supports the live Townsgate site so tenants and visitors can reach correct information."
+        }
+      ],
+      "inProgress": [
+        "Search/analytics monitoring following production measurement setup (#32)."
+      ],
+      "waitingOnClient": [],
+      "nextPriorities": [
+        "Use October as first full GA4 baseline in client report draft.",
+        "Any property content updates only after verified change records."
+      ]
+    },
+    {
+      "clientId": 14,
+      "clientName": "OTP Carts",
+      "productionUrl": "https://www.otpcarts.com",
+      "retainerLabel": "OTP Carts — Monthly Retainer",
+      "deliveredHighlights": [
+        "Website launch and post-launch QA August 2026 (#1).",
+        "Technical SEO and Search Console setup August (#4–#6).",
+        "October: Facebook/Instagram business setup (#49) and social creative batch (#50).",
+        "September 2026 performance report published (monthly_reports #7)."
+      ],
+      "ongoingServices": [
+        {
+          "label": "Live website and Search Console monitoring",
+          "evidence": "client_infrastructure; deliverable #6 context",
+          "clientFacing": "KXD keeps the OTP Carts website maintained and watches Google indexing after launch."
+        },
+        {
+          "label": "Local search and Google Business Profile",
+          "evidence": "monthly_deliverables #7–#9",
+          "clientFacing": "KXD is setting up Westlake local presence. Google verification from your team is still required."
+        }
+      ],
+      "inProgress": [
+        "Local search / showroom setup (#8).",
+        "Google profile ownership / access recovery (#9)."
+      ],
+      "waitingOnClient": [
+        "Google Business Profile setup (Westlake) (#7) waiting on verification."
+      ],
+      "nextPriorities": [
+        "Execute planned Social Media Sales Push (#56) after founder sign-off.",
+        "Finish Westlake GBP after Nicole completes verification.",
+        "October performance draft review (one analytics lead event, not a sale claim)."
+      ]
+    }
+  ],
+  "october2026PerformanceDrafts": [
+    {
+      "clientId": 5,
+      "clientName": "Cusick Morgan Motorsports",
+      "reportingWindow": {
+        "start": "2026-10-01",
+        "end": "2026-10-31"
+      },
+      "status": "draft-for-founder-review",
+      "evidenceSource": "reporting_facts ingested 2026-11-01",
+      "metricsAvailable": [
+        "sessions",
+        "visitors",
+        "pageviews",
+        "search clicks",
+        "search impressions",
+        "search CTR",
+        "average search position"
+      ],
+      "metricsMissing": [],
+      "plainEnglish": "In October, about 262 visits to the website and 62 clicks from Google Search. Search visibility stayed active with about 1,850 impressions. Tracked conversions in analytics were zero for the month.",
+      "versusSeptember": "Website visits down about 14% versus September. Search clicks down about 36% versus September. Search impressions were about flat. Average search position moved slightly (about 8.4 in October vs 8.4 in September).",
+      "limitations": [
+        "Figures are from synced Google analytics and Search Console, not a live Google dashboard.",
+        "Small sites can swing month to month; one month is not a trend.",
+        "Analytics conversions are not the same as confirmed customer inquiries or sales."
+      ],
+      "recommendations": [
+        "Continue Search Console monitoring already recorded as in-progress work.",
+        "Review which pages earn the most search clicks before making content changes.",
+        "Founder review before publishing an October client report in the portal."
+      ]
+    },
+    {
+      "clientId": 9,
+      "clientName": "On Track Performance",
+      "reportingWindow": {
+        "start": "2026-10-01",
+        "end": "2026-10-31"
+      },
+      "status": "draft-for-founder-review",
+      "evidenceSource": "reporting_facts ingested 2026-11-01",
+      "metricsAvailable": [
+        "search clicks",
+        "search impressions",
+        "search CTR",
+        "average search position"
+      ],
+      "metricsMissing": [
+        "GA4 sessions",
+        "pageviews",
+        "visitors (no October facts in reporting_facts)"
+      ],
+      "plainEnglish": "October search data shows about 41 clicks from Google and about 2,755 search impressions for the live On Track Performance site. Website visit counts were not available in the synced October facts.",
+      "versusSeptember": "Search clicks down about 21% versus September. Impressions down about 15% versus September.",
+      "limitations": [
+        "October reporting_facts include Search Console only for this client; GA4 website visit metrics were not present for comparison.",
+        "The replacement website remains staged, not launched; this data reflects the current live site."
+      ],
+      "recommendations": [
+        "Keep indexing follow-through on the live site (in-progress deliverable).",
+        "Schedule a separate review of the staged replacement site when Don is ready.",
+        "Founder review before publishing an October client report."
+      ]
+    },
+    {
+      "clientId": 10,
+      "clientName": "2475 Townsgate",
+      "reportingWindow": {
+        "start": "2026-10-01",
+        "end": "2026-10-31"
+      },
+      "status": "draft-for-founder-review",
+      "evidenceSource": "reporting_facts ingested 2026-11-01",
+      "metricsAvailable": [
+        "sessions",
+        "visitors",
+        "pageviews",
+        "search clicks",
+        "search impressions",
+        "search CTR",
+        "average search position"
+      ],
+      "metricsMissing": [],
+      "plainEnglish": "October was the first full month with Google Analytics verified on the live Townsgate site (installed 2026-09-28). About 40 visits, 70 page views, and 17 search clicks. Tracked conversions were zero.",
+      "versusSeptember": "Website visits up about 700% versus September after GA4 went live (September had only a handful of tracked visits). Search clicks up about 55% versus September.",
+      "limitations": [
+        "September website visit numbers were pre-GA4 and are not comparable to October.",
+        "Search and visit volumes are still modest for a multi-tenant property site."
+      ],
+      "recommendations": [
+        "Continue post-install monitoring (in-progress deliverable #32).",
+        "Use October as a baseline month going forward; avoid overstating growth from the install transition.",
+        "Founder review before publishing an October client report."
+      ]
+    },
+    {
+      "clientId": 14,
+      "clientName": "OTP Carts",
+      "reportingWindow": {
+        "start": "2026-10-01",
+        "end": "2026-10-31"
+      },
+      "status": "draft-for-founder-review",
+      "evidenceSource": "reporting_facts ingested 2026-11-01",
+      "metricsAvailable": [
+        "sessions",
+        "visitors",
+        "pageviews",
+        "search clicks",
+        "search impressions",
+        "generate_lead event count"
+      ],
+      "metricsMissing": [],
+      "plainEnglish": "In October the live OTP Carts site had about 87 visits and 257 page views. Google Search sent about 9 clicks. Analytics recorded one website lead event for the month. That is an analytics signal, not a confirmed sale.",
+      "versusSeptember": "Website visits up about 24% versus September. Search clicks up about 80% versus September. Average search position improved from about 14.8 to about 10.0 in Search Console aggregates.",
+      "limitations": [
+        "The lead event is from analytics tagging, not a validated CRM or sale record.",
+        "Social account setup in October (work #49–50) is separate from these website metrics.",
+        "Westlake Google Business Profile verification is still waiting on the client."
+      ],
+      "recommendations": [
+        "Complete Westlake profile verification so local search work can finish.",
+        "Continue the planned November social sales push (work #56) after founder approval.",
+        "Founder review before publishing an October client report."
+      ]
+    }
+  ],
+  "november2026ExecutionPlan": [
+    {
+      "id": "nov-cmm-availability",
+      "clientId": 5,
+      "title": "Confirm live site responds and key paths load",
+      "category": "inspection",
+      "effort": "low",
+      "dependsOn": null,
+      "status": "proposed",
+      "evidence": "Read-only HEAD check 2026-11-09: root redirects to www; follow-up on full page QA not run."
+    },
+    {
+      "id": "nov-cmm-search",
+      "clientId": 5,
+      "title": "Continue Search Console review against October facts",
+      "category": "monitoring",
+      "effort": "low",
+      "dependsOn": null,
+      "status": "proposed",
+      "evidence": "Deliverable #17; reporting_facts October window present."
+    },
+    {
+      "id": "nov-otp-staging",
+      "clientId": 9,
+      "title": "Document launch blockers for staged OTP site (no DNS change)",
+      "category": "launch",
+      "effort": "medium",
+      "dependsOn": "Client review of staged site",
+      "status": "proposed",
+      "evidence": "Deliverable #19 historical staging status."
+    },
+    {
+      "id": "nov-otp-gsc",
+      "clientId": 9,
+      "title": "Indexing review on live OTP domain",
+      "category": "monitoring",
+      "effort": "low",
+      "dependsOn": null,
+      "status": "proposed",
+      "evidence": "Deliverable #24."
+    },
+    {
+      "id": "nov-townsgate-ga4",
+      "clientId": 10,
+      "title": "Review first full-month GA4 baseline (October draft)",
+      "category": "monitoring",
+      "effort": "low",
+      "dependsOn": null,
+      "status": "proposed",
+      "evidence": "Deliverable #31–#32; October performance draft."
+    },
+    {
+      "id": "nov-townsgate-live",
+      "clientId": 10,
+      "title": "Confirm property site availability",
+      "category": "inspection",
+      "effort": "low",
+      "dependsOn": null,
+      "status": "proposed",
+      "evidence": "HTTP 200 www.2475townsgate.com 2026-11-09."
+    },
+    {
+      "id": "nov-carts-gbp",
+      "clientId": 14,
+      "title": "Follow up on Westlake GBP verification status",
+      "category": "local",
+      "effort": "low",
+      "dependsOn": "Client verification with Google",
+      "status": "blocked",
+      "evidence": "Deliverable #7 waiting-on-client."
+    },
+    {
+      "id": "nov-carts-social",
+      "clientId": 14,
+      "title": "Social Media Sales Push",
+      "category": "social",
+      "effort": "medium",
+      "dependsOn": "Founder approval of creative direction",
+      "status": "planned-in-work-engine",
+      "evidence": "work #56 planned 2026-11-09."
+    },
+    {
+      "id": "nov-carts-live",
+      "clientId": 14,
+      "title": "Confirm otpcarts.com availability",
+      "category": "inspection",
+      "effort": "low",
+      "dependsOn": null,
+      "status": "proposed",
+      "evidence": "HTTP 200 www.otpcarts.com 2026-11-09."
+    }
+  ],
+  "readonlyInspection": {
+    "inspectedAt": "2026-11-09T20:59:05Z",
+    "method": "HTTP HEAD (read-only)",
+    "findings": [
+      {
+        "url": "https://cusickmotorsports.com",
+        "result": "308 redirect to www",
+        "countsAsFix": false,
+        "note": "Site responds; full page and form checks not performed this pass."
+      },
+      {
+        "url": "https://on-track-performance.com",
+        "result": "301 redirect to www",
+        "countsAsFix": false,
+        "note": "Live site responds."
+      },
+      {
+        "url": "https://www.2475townsgate.com",
+        "result": "HTTP 200",
+        "countsAsFix": false,
+        "note": "Property site reachable."
+      },
+      {
+        "url": "https://www.otpcarts.com",
+        "result": "HTTP 200",
+        "countsAsFix": false,
+        "note": "Production site reachable."
+      }
+    ]
+  }
+}

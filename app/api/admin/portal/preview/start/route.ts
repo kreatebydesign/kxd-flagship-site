@@ -9,11 +9,8 @@ import config from "@payload-config";
 import { requirePayloadAdminApi } from "@/lib/admin/auth";
 import { isStudioPayloadOperator } from "../../../../../../payload/access/index";
 import { publishActivity } from "@/lib/activity-engine/publish";
-import { destroyPortalSession } from "@/lib/portal/session";
-import {
-  buildOperatorPortalPreviewSession,
-  setOperatorPortalPreviewCookie,
-} from "@/lib/portal/operator-preview";
+import { getOperatorPortalPreviewCookieSession } from "@/lib/portal/operator-preview";
+import { remintOperatorPortalPreview } from "@/lib/portal/operator-preview/remint";
 import { sanitizeSelectedPortalModules } from "@/lib/client-command/experience/compose";
 import type { OperatorPreviewDraftComposition } from "@/lib/portal/operator-preview/types";
 
@@ -108,7 +105,9 @@ export async function POST(request: Request) {
         }
       : undefined;
 
-  const session = buildOperatorPortalPreviewSession({
+  const previous = await getOperatorPortalPreviewCookieSession();
+
+  await remintOperatorPortalPreview({
     adminUserId,
     adminEmail,
     clientId,
@@ -117,13 +116,11 @@ export async function POST(request: Request) {
     draftComposition,
   });
 
-  // Never carry a real portal-user cookie into preview (avoids Don attribution).
-  await destroyPortalSession();
-  await setOperatorPortalPreviewCookie(session);
-
   try {
     await publishActivity({
-      eventType: "portal.operator-preview-started",
+      eventType: previous
+        ? "portal.operator-preview-switched"
+        : "portal.operator-preview-started",
       title: `Operator portal preview · ${clientName}`,
       summary:
         "Studio operator opened read-only client portal preview. Not a client login.",
@@ -136,6 +133,8 @@ export async function POST(request: Request) {
         adminEmail,
         clientId,
         clientSlug,
+        fromClientId: previous?.clientId ?? null,
+        toClientId: clientId,
         readOnly: true,
         attributedToPortalUser: false,
       },

@@ -25,17 +25,18 @@ export const NEUTRAL_WORKSPACE_TERMINOLOGY: Partial<
 };
 
 export const NEUTRAL_WELCOME: WorkspaceWelcomeModel = {
-  eyebrow: "Your workspace",
+  eyebrow: "Your space",
   titleTemplate: "welcome-first-name",
-  lead: "A calm view of what's in progress and what needs you next.",
+  lead:
+    "Here's what's happening with your website and what we're working on.",
 };
 
 export const NEUTRAL_EMPTY_STATES: Partial<
   Record<WorkspaceModuleKey, WorkspaceEmptyState>
 > = {
   overview: {
-    title: "Your workspace is ready",
-    lead: "As partnership work begins, updates and next steps will appear here.",
+    title: "Your space is ready",
+    lead: "As work is recorded, completed items and next steps will appear here.",
   },
   requests: {
     title: "No requests yet",
@@ -51,7 +52,7 @@ export const NEUTRAL_EMPTY_STATES: Partial<
     lead: "New deliverables will appear here when they are ready to share.",
     action: {
       id: "empty-deliverables",
-      label: "View deliverables",
+      label: "Open KXD Work",
       href: "/portal/deliverables",
     },
   },

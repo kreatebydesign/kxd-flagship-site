@@ -43,8 +43,7 @@ export function CesPartnershipBriefing({
           <h1 className="kxd-ces-partnership__brand">{briefing.clientName}</h1>
           <p className="kxd-ces-partnership__greeting">{greeting}</p>
           <p className="kxd-ces-partnership__lead">
-            Everything Kreate by Design is actively delivering, planning, and recommending for{" "}
-            {briefing.clientName}.
+            Website work, reporting, and anything that needs your input for {briefing.clientName}.
           </p>
         </header>
       ) : null}

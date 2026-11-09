@@ -10,7 +10,7 @@ export const PORTAL_CLIENT_LANGUAGE = {
   primalWorkspaceLabel: "Your workspace",
   homeWelcome: (name: string) => `Welcome back, ${name}`,
   homeLead:
-    "Everything Kreate by Design is actively delivering, planning, and recommending for your partnership.",
+    "Here's what's happening with your website and what we're working on.",
 
   launchEyebrow: "Getting started",
   launchTitle: "What to do first",
@@ -206,7 +206,8 @@ export const PORTAL_CLIENT_LANGUAGE = {
 
   authLoginEyebrow: "Your workspace",
   authLoginTitle: "Sign in",
-  authLoginLead: "Review your site, share feedback, and follow every revision — all in one place.",
+  authLoginLead:
+    "Sign in to see your website work, share feedback, and follow what KXD is handling for your business.",
   authLoginEmail: "Email",
   authLoginPassword: "Password",
   authLoginSubmit: "Sign in",
@@ -267,7 +268,7 @@ export const PORTAL_CLIENT_LANGUAGE = {
   connectedWebsiteUnavailable: "Unavailable",
   connectedWebsiteUrlMissing: "Website URL not configured",
   connectedWebsiteLatestStatus: "Latest status",
-  connectedViewDeliverables: "View deliverables",
+  connectedViewDeliverables: "Open KXD Work",
   connectedOpenRevision: "Open revision",
   connectedWorkAwaiting: "Waiting on you",
   connectedWorkInProgress: "In progress",

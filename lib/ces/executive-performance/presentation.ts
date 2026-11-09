@@ -107,10 +107,16 @@ const BY_SLUG: Record<string, ExperiencePresentation> = {
   "robin-cole": ROBIN_COLE_PRESENTATION,
   "robin-for-tracy": ROBIN_COLE_PRESENTATION,
   "robin-cole-for-tracy": ROBIN_COLE_PRESENTATION,
-  "cusick-morgan-motorsports": stubPresentation({
-    logoAlt: "Cusick Morgan Motorsports",
-    heroImageAlt: "Cusick Morgan Motorsports",
-  }),
+  "cusick-morgan-motorsports": {
+    ...stubPresentation({
+      logoAlt: "Cusick Morgan Motorsports",
+      heroImageAlt: "Cusick Morgan Motorsports",
+    }),
+    logoSrc: "/migrated-assets/logos/cusick-morgan.svg",
+    workspaceEyebrow: "Your space",
+    introduction:
+      "Website work, performance, and anything that needs your input, in one place.",
+  },
   otp: stubPresentation({
     logoAlt: "On Track Performance",
     heroImageAlt: "On Track Performance",

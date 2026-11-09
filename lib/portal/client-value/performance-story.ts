@@ -174,7 +174,7 @@ function composeReadyStory(
     tone = "caution";
     whatMovedForward =
       "Activity was recorded for this period, with one signal softer than the prior period.";
-    whatItMeans = `${signalLabel(down)} eased compared with the prior period. That is useful information — not a reason to panic. KXD will focus on the pages and searches that still have room to improve.`;
+    whatItMeans = `${signalLabel(down)} eased compared with the prior period. That is useful information, not a reason to panic. KXD will focus on the pages and searches that still have room to improve.`;
     strongestSignal = null;
   } else if (up && down) {
     tone = "steady";
@@ -186,7 +186,7 @@ function composeReadyStory(
     tone = "steady";
     whatMovedForward = "Website and search activity held steady this period.";
     whatItMeans =
-      "No dramatic swing either way. Steady periods are normal — KXD watches for clear opportunities rather than forcing a story.";
+      "No dramatic swing either way. Steady periods are normal. KXD watches for clear opportunities rather than forcing a story.";
     strongestSignal =
       impressions && trendOf(impressions) === "flat"
         ? "Search visibility held about even with the prior period."
@@ -215,10 +215,10 @@ function composeReadyStory(
   const smartestNextMove =
     nextMoveHint?.trim() ||
     (tone === "positive"
-      ? "Keep improving the pages that already attract interest — that is usually the highest-return next step."
+      ? "Keep improving the pages that already get traffic. Small updates there often help the most."
       : tone === "caution"
-        ? "Review the pages and searches already near page one — small clarity improvements often help most."
-        : "Stay the course on clear website updates and search visibility; KXD will flag a sharper move when the data supports it.");
+        ? "Review pages that show up near the top of Google. Clarity edits there often help."
+        : "No action needed right now. We will flag a clear next step when the data supports one.");
 
   return {
     availability: "ready",
@@ -254,8 +254,7 @@ export function composePerformanceStory(
       whatItMeans:
         "This workspace is set up for your website project. Milestones, updates, and revision paths will appear here as work progresses.",
       strongestSignal: null,
-      whatKxdIsWatching:
-        "KXD is advancing the website work included in your agreement.",
+      whatKxdIsWatching: "KXD is working through the website tasks in your agreement.",
       smartestNextMove:
         nextHint ??
         "When you have notes or screenshots to share, open Website Review.",
@@ -269,9 +268,9 @@ export function composePerformanceStory(
       tone: "unknown",
       whatMovedForward: "Performance reporting is not enabled for this workspace yet.",
       whatItMeans:
-        "When reporting is included in the partnership, a clear monthly story will appear here — not a wall of charts.",
+        "When reporting is turned on, a plain summary will appear here, not a wall of charts.",
       strongestSignal: null,
-      whatKxdIsWatching: "KXD continues to manage the website services included in your partnership.",
+      whatKxdIsWatching: "KXD continues to manage the website services on your account.",
       smartestNextMove:
         nextHint ??
         "Use Website Review when you have notes or updates for the site.",
@@ -285,13 +284,12 @@ export function composePerformanceStory(
       tone: "unknown",
       whatMovedForward: "Website tracking is not connected for this business yet.",
       whatItMeans:
-        "Without connected analytics, KXD cannot truthfully show how visits or search visibility changed. That setup is handled by KXD — not something you need to fix.",
+        "Without connected analytics, KXD cannot truthfully show how visits or search visibility changed. That setup is handled by KXD, not something you need to fix.",
       strongestSignal: null,
-      whatKxdIsWatching:
-        "Partnership work and website care continue while tracking is being connected.",
+      whatKxdIsWatching: "Website care continues while tracking is being connected.",
       smartestNextMove:
         nextHint ??
-        "Share website notes through Website Review anytime — tracking setup is handled by KXD.",
+        "Share website notes through Website Review anytime. Tracking setup is handled by KXD.",
       periodLabel: label,
     };
   }
@@ -300,9 +298,9 @@ export function composePerformanceStory(
     return {
       availability: mapped ? "new-tracking" : "insufficient",
       tone: "unknown",
-      whatMovedForward: "Tracking is connected. The first clear performance period is still filling in.",
+      whatMovedForward: "Google tracking is connected. Visitor numbers need a little more time before we summarize a month.",
       whatItMeans:
-        "This is a normal early state. We do not show zeros — the story appears once a verified reporting period is ready.",
+        "That is normal when reporting has just started. Open Performance for what is available now.",
       strongestSignal: null,
       whatKxdIsWatching:
         "KXD is confirming that visit and search data arrive cleanly for this business.",
@@ -327,7 +325,7 @@ export function composePerformanceStory(
       whatKxdIsWatching: "KXD is reviewing which website and search signals are ready to share.",
       smartestNextMove:
         nextHint ??
-        "Keep partnership work moving; clearer performance language will appear when metrics are ready.",
+        "No action needed right now. A clearer performance summary will appear when metrics are ready.",
       periodLabel: label,
     };
   }

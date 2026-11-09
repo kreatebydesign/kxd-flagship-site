@@ -20,6 +20,7 @@ import { CesPartnershipBriefing } from "@/components/ces/partnership";
 import { CesExecutivePerformanceWorkspace } from "@/components/ces/executive-performance";
 import { CesPresentationHomeHero } from "@/components/ces/presentation/CesPresentationHomeHero";
 import { WorkspaceFocusStrip } from "@/components/portal/WorkspaceFocusStrip";
+import { WorkPerformanceWorkspace } from "@/components/portal/WorkPerformanceWorkspace";
 import { CesClientCommandHome } from "./CesClientCommandHome";
 import { WebsiteEditorPortalAction } from "@/components/portal/WebsiteEditorPortalAction";
 import { AccountBalanceCard } from "@/components/client-hq/AccountBalanceCard";
@@ -111,7 +112,34 @@ export function CesPortalHome({
             logoAlt={profile.identity.logoAlt}
           />
         ) : null}
-        {clientHome ? (
+        {clientHome && workPerformance ? (
+          <div className="kxd-client-home kxd-client-home--command-overview">
+            {!showPresentationHero ? (
+              <header className="kxd-client-home__welcome kxd-client-home__welcome--compact">
+                <p className="kxd-client-home__eyebrow">{clientHome.welcome.eyebrow}</p>
+                <h1 className="kxd-client-home__section-title">{clientHome.welcome.greeting}</h1>
+                <p className="kxd-client-home__lead">{clientHome.welcome.lead}</p>
+              </header>
+            ) : null}
+            {isHomeZoneVisible(homeComposition, "work-performance") ? (
+              <div className="kxd-ws-perf-wrap">
+                <WorkPerformanceWorkspace model={workPerformance} />
+              </div>
+            ) : null}
+            <CesClientCommandHome
+              home={clientHome}
+              showWork={false}
+              showPartnership={false}
+              engagement={engagement}
+              engagementEyebrow={engagementEyebrow}
+              engagementTitle={engagementTitle}
+              suppressWelcome
+              suppressValueStory
+              suppressOverviewDuplicates
+              leadAttention={null}
+            />
+          </div>
+        ) : clientHome ? (
           <CesClientCommandHome
             home={clientHome}
             showWork={isHomeZoneVisible(homeComposition, "work-performance")}

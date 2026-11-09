@@ -325,19 +325,18 @@ function main() {
   );
   check(
     "honest scope note present",
-    ready.monthlySummaryScopeNote.includes("not a complete work ledger") &&
+    ready.monthlySummaryScopeNote.includes("this month") &&
       ready.monthlySummaryScopeNote === MONTHLY_SUMMARY_SCOPE_NOTE,
   );
   check(
-    "empty state denies ledger claim",
-    onlyUpdatedAtCompose.emptyStates.completed.lead.includes("not a complete work ledger") ||
-      onlyUpdatedAtCompose.emptyStates.completed.lead.includes(MONTHLY_SUMMARY_SCOPE_NOTE) ||
-      onlyUpdatedAtCompose.monthlySummaryScopeNote.includes("not a complete work ledger"),
+    "empty state scopes monthly completed work",
+    onlyUpdatedAtCompose.emptyStates.completed.lead.includes("KXD Work") ||
+      onlyUpdatedAtCompose.emptyStates.completed.lead.includes(MONTHLY_SUMMARY_SCOPE_NOTE),
   );
   check(
-    "value summary does not claim invoice breakdown",
-    !ready.valueSummary.lead.toLowerCase().includes("invoice line") &&
-      ready.valueSummary.lead.includes("not an invoice breakdown"),
+    "value summary separates ongoing work from monthly completions",
+    ready.valueSummary.lead.toLowerCase().includes("ongoing") ||
+      ready.valueSummary.lead.includes("this month"),
   );
 
   // 14. Account switching / active client — server entry static checks

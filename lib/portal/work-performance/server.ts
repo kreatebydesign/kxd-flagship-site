@@ -27,6 +27,7 @@ import { loadActiveEngagementForClient } from "@/lib/portal/active-engagement";
 import { loadResolvedServiceScope } from "@/lib/service-capabilities/assignments";
 import { getPayload } from "payload";
 import config from "@payload-config";
+import { clientFacingWorkLabel } from "@/lib/portal/deliverables/client-facing-labels";
 import { composeWorkPerformanceModel } from "./compose";
 import {
   dedupeMonthlySummaryItems,
@@ -81,9 +82,15 @@ function mapActiveDeliverables(
     .filter((doc) => String(doc.status) !== "complete")
     .map((doc) => {
       const status = String(doc.status ?? "not-started");
+      const internalTitle = String(doc.title ?? "Deliverable");
+      const clientNotes =
+        typeof doc.clientNotes === "string" && doc.clientNotes.trim()
+          ? doc.clientNotes.trim()
+          : null;
+      const { title } = clientFacingWorkLabel(internalTitle, clientNotes);
       return {
         id: `deliverable-${doc.id}`,
-        title: String(doc.title ?? "Deliverable"),
+        title,
         statusLabel: deliverableStatusLabel(status),
         owner:
           status === "waiting-on-client" ? ("client" as const) : ("kxd" as const),

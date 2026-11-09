@@ -255,7 +255,7 @@ function composeWelcomeLead(
   }
 
   if (services.length === 0) {
-    return "This is your private Kreate by Design partnership space. Ongoing work stays organized here.";
+    return "Your website work, updates, and performance in one calm place.";
   }
 
   const parts: string[] = [];
@@ -271,10 +271,10 @@ function composeWelcomeLead(
     const head = parts.slice(0, -1);
     const joined =
       head.length === 1 ? `${head[0]} and ${last}` : `${head.join(", ")}, and ${last}`;
-    return `KXD is managing the digital services included in your partnership and keeping ${joined} organized here.`;
+    return `Here is what KXD is handling for your business: ${joined}.`;
   }
   if (parts.length === 1) {
-    return `KXD is managing the digital services included in your partnership, including ${parts[0]}.`;
+    return `Here is what KXD is handling for your business, including ${parts[0]}.`;
   }
   if (services.length === 1 && services[0]) {
     return `KXD is managing ${services[0].title.toLowerCase()} for this partnership.`;
@@ -444,11 +444,13 @@ export function composeClientHomePresentation(input: {
     welcome: {
       eyebrow:
         profile.terminology["portal.home.eyebrow"]?.trim() ||
+        profile.presentation?.workspaceEyebrow?.trim() ||
         profile.hospitality.welcomeEyebrow?.trim() ||
-        "Your partnership",
+        "Your space",
       greeting,
       lead:
         profile.terminology["portal.home.lead"]?.trim() ||
+        profile.presentation?.introduction?.trim() ||
         composeWelcomeLead(services, profile),
     },
     attention: {

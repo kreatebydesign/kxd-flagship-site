@@ -72,6 +72,8 @@ export function CesClientCommandHome({
   engagementEyebrow,
   engagementTitle,
   suppressWelcome = false,
+  suppressValueStory = false,
+  suppressOverviewDuplicates = false,
   leadAttention = null,
 }: {
   home: ClientHomePresentation;
@@ -82,6 +84,10 @@ export function CesClientCommandHome({
   engagementTitle?: string;
   /** When a Shared Core presentation hero already introduces the workspace. */
   suppressWelcome?: boolean;
+  /** Work summary is shown in WorkPerformanceWorkspace instead. */
+  suppressValueStory?: boolean;
+  /** Hide attention, quick nav, performance, and next-move blocks when overview is work-first. */
+  suppressOverviewDuplicates?: boolean;
   /** Primal Phase 1 Lead Command (Build 1) — real counts only, omitted when leads is disabled. */
   leadAttention?: LeadAttentionCounts | null;
 }) {
@@ -93,6 +99,7 @@ export function CesClientCommandHome({
     story?.availability === "not-entitled" || isLaunchStage;
   const showWatchingFallback = Boolean(story) && !showCare && !isReportingAbsent;
   const showWorkSections = showWork && !isLaunchStage;
+  const showChrome = !suppressOverviewDuplicates;
 
   return (
     <div className="kxd-client-home">
@@ -103,24 +110,27 @@ export function CesClientCommandHome({
           <p className="kxd-client-home__lead">{home.welcome.lead}</p>
           {showPartnership ? (
             <Link href="/portal/partnership" className="kxd-ces-btn kxd-ces-btn--ghost">
-              View your partnership
+              Service details
             </Link>
           ) : null}
         </header>
       ) : showPartnership ? (
         <div className="kxd-client-home__welcome kxd-client-home__welcome--compact">
           <Link href="/portal/partnership" className="kxd-ces-btn kxd-ces-btn--ghost">
-            View your partnership
+            Service details
           </Link>
         </div>
       ) : null}
 
-      <ActiveEngagementCard
-        engagement={engagement}
-        eyebrow={engagementEyebrow}
-        title={engagementTitle}
-      />
+      {showChrome ? (
+        <ActiveEngagementCard
+          engagement={engagement}
+          eyebrow={engagementEyebrow}
+          title={engagementTitle}
+        />
+      ) : null}
 
+      {showChrome ? (
       <nav className="kxd-client-home__quick-nav" aria-label="Primary destinations">
         <Link href="/portal/analytics" className="kxd-ces-btn kxd-ces-btn--ghost">
           Performance
@@ -137,8 +147,10 @@ export function CesClientCommandHome({
           </Link>
         ) : null}
       </nav>
+      ) : null}
 
-      {leadAttention &&
+      {showChrome &&
+      leadAttention &&
       (leadAttention.newUntouched > 0 ||
         leadAttention.unassigned > 0 ||
         leadAttention.followUpDue > 0 ||
@@ -159,6 +171,7 @@ export function CesClientCommandHome({
         </section>
       ) : null}
 
+      {showChrome ? (
       <section className="kxd-client-home__attention" aria-labelledby="client-attention-title">
         <p className="kxd-client-home__eyebrow">Waiting on you</p>
         <h2 id="client-attention-title" className="kxd-client-home__section-title">
@@ -186,8 +199,9 @@ export function CesClientCommandHome({
           <p className="kxd-client-home__empty-note">{home.attention.allClearLead}</p>
         )}
       </section>
+      ) : null}
 
-      {story && isLaunchStage ? (
+      {story && !suppressValueStory && isLaunchStage ? (
         <section
           className="kxd-client-home__section kxd-client-home__value-story"
           aria-labelledby="client-launch-stage-title"
@@ -201,14 +215,14 @@ export function CesClientCommandHome({
         </section>
       ) : null}
 
-      {story && !isReportingAbsent ? (
+      {story && !suppressValueStory && !isReportingAbsent ? (
         <section
           className="kxd-client-home__section kxd-client-home__value-story"
           aria-labelledby="client-value-story-title"
         >
-          <p className="kxd-client-home__eyebrow">What moved forward</p>
+          <p className="kxd-client-home__eyebrow">Overview</p>
           <h2 id="client-value-story-title" className="kxd-client-home__section-title">
-            Your website story
+            Website and performance
           </h2>
           <p className="kxd-client-home__lead">{story.whatMovedForward}</p>
           <p className="kxd-client-home__eyebrow kxd-client-home__eyebrow--nested">What it means</p>
@@ -268,9 +282,9 @@ export function CesClientCommandHome({
         </section>
       ) : null}
 
-      {showWatchingFallback && story ? (
+      {showChrome && showWatchingFallback && story ? (
         <section className="kxd-client-home__section" aria-labelledby="client-watching-title">
-          <p className="kxd-client-home__eyebrow">Partnership care</p>
+          <p className="kxd-client-home__eyebrow">Ongoing care</p>
           <h2 id="client-watching-title" className="kxd-client-home__section-title">
             What KXD continues to handle
           </h2>
@@ -278,7 +292,7 @@ export function CesClientCommandHome({
         </section>
       ) : null}
 
-      {home.performance.visible ? (
+      {showChrome && home.performance.visible ? (
         <section className="kxd-client-home__performance" aria-labelledby="client-performance-title">
           <p className="kxd-client-home__eyebrow">Supporting detail</p>
           <h2 id="client-performance-title" className="kxd-client-home__section-title">
@@ -307,7 +321,7 @@ export function CesClientCommandHome({
         </section>
       ) : null}
 
-      {home.businessImpact ? (
+      {showChrome && home.businessImpact ? (
         <section className="kxd-client-home__impact" aria-labelledby="client-impact-title">
           <p className="kxd-client-home__eyebrow">Leads &amp; business impact</p>
           <h2 id="client-impact-title" className="kxd-client-home__section-title">
@@ -324,11 +338,11 @@ export function CesClientCommandHome({
         </section>
       ) : null}
 
-      {(story || home.nextMoves.length > 0) && (
+      {showChrome && (story || home.nextMoves.length > 0) && (
         <section className="kxd-client-home__section" aria-labelledby="client-next-title">
-          <p className="kxd-client-home__eyebrow">What should happen next</p>
+          <p className="kxd-client-home__eyebrow">Next steps</p>
           <h2 id="client-next-title" className="kxd-client-home__section-title">
-            Smartest next move
+            Good things to do when you have time
           </h2>
           {story ? (
             <p className="kxd-client-home__empty-note">{story.smartestNextMove}</p>
@@ -344,10 +358,15 @@ export function CesClientCommandHome({
       )}
 
       {home.services.length > 0 ? (
-        <section className="kxd-client-home__services" aria-labelledby="client-services-title">
-          <p className="kxd-client-home__eyebrow">Included in this partnership</p>
+        <section
+          className={`kxd-client-home__services${
+            suppressOverviewDuplicates ? " kxd-client-home__services--grid" : ""
+          }`}
+          aria-labelledby="client-services-title"
+        >
+          <p className="kxd-client-home__eyebrow">Your account</p>
           <h2 id="client-services-title" className="kxd-client-home__section-title">
-            What KXD manages for you
+            Services KXD handles for you
           </h2>
           <ul className="kxd-client-home__service-list">
             {home.services.map((service) => (

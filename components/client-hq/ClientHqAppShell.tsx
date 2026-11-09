@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import type { EditionBranding } from "@/lib/editions";
 import type { ResolvedExperienceProfile } from "@/lib/ces";
 import type { PortalAccountSwitcherModel } from "@/lib/portal/account-context-types";
+import type { OperatorPreviewPortfolioOption } from "@/lib/portal/operator-preview/portfolio-options";
 import { ClientHqShell } from "./ClientHqShell";
 import { resolvePortalNavId } from "@/lib/portal/nav";
 
@@ -32,6 +33,7 @@ export function ClientHqAppShell({
     clientId: number;
     clientName: string;
     mode?: "preview" | "staff-test";
+    portfolioOptions?: OperatorPreviewPortfolioOption[];
   } | null;
 }) {
   const pathname = usePathname();

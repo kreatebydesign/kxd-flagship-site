@@ -22254,13 +22254,39 @@ html[data-theme="dark"] .kxd-os-theme-pref__option.is-active {
 /* ── Batch D: Work & Performance workspace ─────────────────────────────── */
 
 .kxd-ws-perf-wrap {
-  margin-top: 1.75rem;
+  margin-top: 1rem;
+}
+
+.kxd-ws-perf-footer-link {
+  margin-top: 0.65rem;
+}
+
+.kxd-os-page--overview-tight .kxd-os-ops-hero {
+  margin-bottom: 0.25rem;
+}
+
+.kxd-ws-identity--overview {
+  padding-bottom: 0.15rem;
+}
+
+.kxd-os-operations-split--tight {
+  margin-top: 1rem !important;
 }
 
 .kxd-ws-perf {
   display: grid;
-  gap: 1.5rem;
+  gap: 1rem;
   min-width: 0;
+}
+
+.kxd-ws-perf__hero--compact .kxd-ws-perf__title {
+  overflow-wrap: anywhere;
+  margin: 0 0 0.35rem;
+  font-size: clamp(1.15rem, 2.5vw, 1.45rem);
+}
+
+.kxd-ws-perf__period-meta {
+  margin: 0.35rem 0 0;
 }
 
 .kxd-ws-perf__hero .kxd-ws-perf__title {
@@ -22270,6 +22296,10 @@ html[data-theme="dark"] .kxd-os-theme-pref__option.is-active {
 
 .kxd-ws-perf__section {
   min-width: 0;
+}
+
+.kxd-ws-perf__section--compact .kxd-os-section__label {
+  margin-bottom: 0.35rem;
 }
 
 .kxd-ws-perf__list {
@@ -22307,6 +22337,58 @@ html[data-theme="dark"] .kxd-os-theme-pref__option.is-active {
   min-width: 0;
 }
 
+.kxd-ws-perf--portal-overview {
+  gap: clamp(1.15rem, 2.4vw, 1.65rem);
+}
+
+.kxd-ws-perf__scope-note,
+.kxd-ws-perf__source-line {
+  margin: 0 0 0.5rem;
+  max-width: 42rem;
+}
+
+.kxd-ws-perf__empty-title {
+  color: var(--kxd-os-text-primary);
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+.kxd-ws-perf__list--cards {
+  gap: 0.65rem;
+}
+
+.kxd-ws-perf__list-card {
+  padding: 0.85rem 0.95rem;
+  border-radius: var(--kxd-os-radius-md, 0.5rem);
+  border: 1px solid var(--kxd-os-border-divider);
+  background: var(--kxd-os-bg-surface);
+}
+
+.kxd-ws-perf__list-card .kxd-os-body {
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--kxd-os-text-primary);
+}
+
+.kxd-ws-perf__inline-metric {
+  padding: 0.85rem 0.95rem;
+  border-radius: var(--kxd-os-radius-md, 0.5rem);
+  border: 1px solid var(--kxd-os-border-divider);
+  background: var(--kxd-os-bg-muted);
+}
+
+@media (min-width: 900px) {
+  .kxd-ws-perf--portal-overview {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 1.35rem;
+  }
+
+  .kxd-ws-perf--portal-overview .kxd-ws-perf__section--span-full,
+  .kxd-ws-perf--portal-overview > .kxd-ws-perf__hero {
+    grid-column: 1 / -1;
+  }
+}
+
 @media (max-width: 640px) {
   .kxd-ws-perf__metrics {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -22316,6 +22398,101 @@ html[data-theme="dark"] .kxd-os-theme-pref__option.is-active {
 @media (prefers-reduced-motion: reduce) {
   .kxd-ws-perf * {
     transition: none !important;
+  }
+}
+
+/* ── KXD Work (client deliverables) ─────────────────────────────────────── */
+
+.kxd-kxd-work-page .kxd-kxd-work {
+  display: grid;
+  gap: 1.75rem;
+  margin-top: 1.5rem;
+  min-width: 0;
+}
+
+.kxd-kxd-work__section {
+  min-width: 0;
+}
+
+.kxd-kxd-work__section--emphasize {
+  padding: 1rem 1.1rem;
+  border-radius: var(--kxd-os-radius-md, 0.5rem);
+  border: 1px solid color-mix(in srgb, var(--kxd-os-accent, #c9a962) 35%, transparent);
+  background: color-mix(in srgb, var(--kxd-os-surface, #141414) 92%, #fff 8%);
+}
+
+.kxd-kxd-work__section-lead {
+  margin: 0.35rem 0 0.75rem;
+  max-width: 42rem;
+  line-height: 1.55;
+}
+
+.kxd-kxd-work__list {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.kxd-kxd-work__item {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--kxd-os-radius-md, 0.5rem);
+  border: 1px solid var(--kxd-os-border, rgba(255, 255, 255, 0.08));
+  background: var(--kxd-os-surface-raised, rgba(255, 255, 255, 0.03));
+  min-width: 0;
+}
+
+.kxd-kxd-work__item-main {
+  min-width: 0;
+}
+
+.kxd-kxd-work__item-detail {
+  margin: 0.45rem 0 0;
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.kxd-kxd-work__item-meta {
+  margin: 0;
+}
+
+.kxd-kxd-work__history {
+  display: grid;
+  gap: 1.25rem;
+  padding-top: 0.5rem;
+}
+
+.kxd-kxd-work__month {
+  padding: 1rem 0 0;
+  border-top: 1px solid var(--kxd-os-border, rgba(255, 255, 255, 0.08));
+}
+
+.kxd-kxd-work__month-title {
+  margin: 0 0 0.75rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.kxd-kxd-work__month-groups {
+  display: grid;
+  gap: 1rem;
+}
+
+.kxd-kxd-work__month-group {
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .kxd-kxd-work__item {
+    padding: 0.75rem 0.85rem;
+  }
+
+  .kxd-kxd-work__item-detail {
+    font-size: 1.0625rem;
   }
 }
 

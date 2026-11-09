@@ -5,8 +5,8 @@
 
 export const CES_CLIENT_NAV_LABELS: Record<string, string> = {
   overview: "Overview",
-  partnership: "Your partnership",
-  "executive-performance": "Your partnership",
+  partnership: "Brief",
+  "executive-performance": "Brief",
   "executive-review": "Monthly review",
   "website-review": "Website feedback",
   "website-workspace": "Website updates",
