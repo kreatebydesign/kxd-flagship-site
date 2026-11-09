@@ -130,6 +130,7 @@ import * as migration_20261025_staff_pay_period_reviews from './20261025_staff_p
 import * as migration_20261101_staff_time_pay_requests from './20261101_staff_time_pay_requests';
 import * as migration_20261102_staff_pay_historical_entries from './20261102_staff_pay_historical_entries';
 import * as migration_20261109_staff_wage_external_payments from './20261109_staff_wage_external_payments';
+import * as migration_20261110_monthly_deliverables_client_notes from './20261110_monthly_deliverables_client_notes';
 import * as migration_20261027_platform_economics_snapshots from './20261027_platform_economics_snapshots';
 import * as migration_20261028_phase17_project_inquiry_attribution from './20261028_phase17_project_inquiry_attribution';
 import * as migration_20261029_staff_sales_activity_staff_recording from './20261029_staff_sales_activity_staff_recording';
@@ -875,5 +876,11 @@ export const migrations = [
     up: migration_20261029_staff_sales_activity_staff_recording.up,
     down: migration_20261029_staff_sales_activity_staff_recording.down,
     name: '20261029_staff_sales_activity_staff_recording',
+  },
+  {
+    // Monthly deliverables — client-facing notes separate from internal operator notes.
+    up: migration_20261110_monthly_deliverables_client_notes.up,
+    down: migration_20261110_monthly_deliverables_client_notes.down,
+    name: '20261110_monthly_deliverables_client_notes',
   },
 ];

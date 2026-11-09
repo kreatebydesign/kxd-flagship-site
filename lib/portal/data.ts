@@ -24,6 +24,10 @@ import {
   getBrandKitPortalResourceCategories,
   getPortalResourceCategories,
 } from "./resource-categories";
+import {
+  projectPortalDeliverables,
+  type PortalDeliverableSummary,
+} from "./deliverables";
 
 export { getPortalResourceCategories } from "./resource-categories";
 
@@ -81,7 +85,9 @@ export async function getPortalDashboard(session: PortalSession) {
   const projects = projectsR.status === "fulfilled" ? (projectsR.value.docs as AnyDoc[]) : [];
   const requests = requestsR.status === "fulfilled" ? (requestsR.value.docs as AnyDoc[]) : [];
   const deliverables =
-    deliverablesR.status === "fulfilled" ? (deliverablesR.value.docs as AnyDoc[]) : [];
+    deliverablesR.status === "fulfilled"
+      ? projectPortalDeliverables(deliverablesR.value.docs as AnyDoc[])
+      : [];
   const client = clientR.status === "fulfilled" ? (clientR.value as AnyDoc) : null;
   const onboardingDoc =
     onboardingR.status === "fulfilled" && onboardingR.value.docs.length > 0
@@ -140,9 +146,11 @@ export async function getPortalRequests(session: PortalSession) {
   return result.docs as AnyDoc[];
 }
 
-export async function getPortalDeliverables(session: PortalSession) {
+export async function getPortalDeliverables(
+  session: PortalSession,
+): Promise<PortalDeliverableSummary[]> {
   const result = await scopedFind("monthly-deliverables", session.clientId);
-  return result.docs as AnyDoc[];
+  return projectPortalDeliverables(result.docs as AnyDoc[]);
 }
 
 function mediaFromDoc(doc: AnyDoc, category: string): PortalMediaAsset | null {

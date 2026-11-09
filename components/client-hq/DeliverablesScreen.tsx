@@ -35,8 +35,10 @@ function classifyDeliverable(doc: PortalDoc, now = new Date()): WorkRow | null {
   if (!title) return null;
 
   const status = String(doc.status ?? "not-started");
-  const notes =
-    typeof doc.notes === "string" && doc.notes.trim() ? doc.notes.trim() : null;
+  const clientNotes =
+    typeof doc.clientNotes === "string" && doc.clientNotes.trim()
+      ? doc.clientNotes.trim()
+      : null;
   const completedRaw =
     doc.completedDate != null ? String(doc.completedDate).slice(0, 10) : null;
   const month = typeof doc.month === "number" ? doc.month : null;
@@ -48,7 +50,7 @@ function classifyDeliverable(doc: PortalDoc, now = new Date()): WorkRow | null {
     return {
       id: doc.id as number,
       title,
-      detail: notes,
+      detail: clientNotes,
       meta: "Action needed from you",
       bucket: "waiting",
     };
@@ -58,7 +60,7 @@ function classifyDeliverable(doc: PortalDoc, now = new Date()): WorkRow | null {
     return {
       id: doc.id as number,
       title,
-      detail: notes,
+      detail: clientNotes,
       meta: clientStatusLabel(status),
       bucket: "in-progress",
     };
@@ -68,7 +70,7 @@ function classifyDeliverable(doc: PortalDoc, now = new Date()): WorkRow | null {
     return {
       id: doc.id as number,
       title,
-      detail: notes,
+      detail: clientNotes,
       meta: "What’s next",
       bucket: "next",
     };
@@ -83,7 +85,7 @@ function classifyDeliverable(doc: PortalDoc, now = new Date()): WorkRow | null {
       return {
         id: doc.id as number,
         title,
-        detail: notes,
+        detail: clientNotes,
         meta: isCurrentMonth
           ? `Completed ${fmtPortalDate(completedRaw)}`
           : `Completed ${fmtPortalDate(completedRaw)} · historical`,
@@ -101,7 +103,7 @@ function classifyDeliverable(doc: PortalDoc, now = new Date()): WorkRow | null {
     return {
       id: doc.id as number,
       title,
-      detail: notes,
+      detail: clientNotes,
       meta: periodLabel,
       bucket: "historical",
     };
@@ -110,7 +112,7 @@ function classifyDeliverable(doc: PortalDoc, now = new Date()): WorkRow | null {
   return {
     id: doc.id as number,
     title,
-    detail: notes,
+    detail: clientNotes,
     meta: clientStatusLabel(status),
     bucket: "in-progress",
   };

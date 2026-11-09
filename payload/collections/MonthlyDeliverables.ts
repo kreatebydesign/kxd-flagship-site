@@ -118,9 +118,22 @@ export const MonthlyDeliverables: CollectionConfig = {
               },
             },
             {
+              name: "clientNotes",
+              type: "textarea",
+              label: "Client-facing description",
+              admin: {
+                description:
+                  "Optional. Shown in Client HQ when present. Never falls back to internal notes.",
+              },
+            },
+            {
               name: "notes",
               type: "textarea",
-              label: "Notes",
+              label: "Internal notes (audit / operator)",
+              admin: {
+                description:
+                  "Operator and audit history. Not shown in the client portal.",
+              },
             },
           ],
         },
