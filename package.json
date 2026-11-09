@@ -120,6 +120,7 @@
     "verify:phase4-multi-client-portal-completion": "tsx scripts/verify-phase4-multi-client-portal-completion.ts",
     "verify:phase4-portal-identity-security": "tsx scripts/verify-phase4-portal-identity-security.ts",
     "verify:phase4-deliverable-client-notes": "tsx scripts/verify-phase4-deliverable-client-notes.ts",
+    "dry-run:cusick-batch-bc-client-notes": "tsx scripts/dry-run-cusick-batch-bc-client-notes.ts",
     "verify:portal-invitation-preprovisioned-claim": "tsx scripts/verify-portal-invitation-preprovisioned-claim.ts",
     "verify:experience-feedback": "tsx scripts/verify-experience-feedback.ts",
     "verify:website-review-upload": "tsx scripts/verify-website-review-upload.ts",

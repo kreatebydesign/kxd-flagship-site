@@ -112,7 +112,7 @@ export function ClientHqShell({
   }, [navOpen]);
 
   const displayName =
-    experienceProfile?.identity.clientName ?? companyName ?? "Your partnership";
+    experienceProfile?.identity.clientName ?? companyName ?? "Your business";
   const sidebarLabel =
     experienceProfile?.hospitality.portalSidebarLabel ??
     branding?.portal.sidebarLabel ??
@@ -232,7 +232,7 @@ export function ClientHqShell({
               <p className="kxd-ces-identity__workspace">{quietWorkspaceLabel}</p>
             ) : null}
             {cesShell === "ces" ? (
-              <p className="kxd-ces-identity__partner">Private KXD partnership</p>
+              <p className="kxd-ces-identity__partner">Managed by Kreate by Design</p>
             ) : null}
             {accountSwitcher ? (
               <AccountSwitcher

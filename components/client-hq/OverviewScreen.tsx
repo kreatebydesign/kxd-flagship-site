@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import Link from "next/link";
 import { KxdPage, KxdSection } from "@/components/os";
 import { WorkspaceFocusStrip } from "@/components/portal/WorkspaceFocusStrip";
 import { WorkPerformanceWorkspace } from "@/components/portal/WorkPerformanceWorkspace";
@@ -23,7 +24,7 @@ export interface OverviewScreenProps {
   billingOverview?: PortalBillingOverviewCardModel | null;
 }
 
-/** Legacy Client HQ overview — personalized welcome and monthly work/performance. */
+/** Client overview — welcome, work summary, and recent activity. */
 export function OverviewScreen({
   displayName,
   data,
@@ -85,7 +86,14 @@ export function OverviewScreen({
         </header>
 
         {workPerformance ? (
-          <WorkPerformanceWorkspace model={workPerformance} />
+          <div className="kxd-ws-perf-wrap">
+            <WorkPerformanceWorkspace model={workPerformance} />
+            <p className="kxd-os-meta" style={{ marginTop: "1rem" }}>
+              <Link href="/portal/deliverables" className="kxd-os-link-quiet">
+                Open KXD Work for work by month
+              </Link>
+            </p>
+          </div>
         ) : (
           <WorkspaceFocusStrip personalization={personalization} />
         )}
@@ -96,26 +104,36 @@ export function OverviewScreen({
           </div>
         ) : null}
 
-        <KxdSection label="What to do next">
-          <ClientHqQuickActions actions={quickActions} />
-        </KxdSection>
-
-        <div className="kxd-os-operations-split" style={{ marginTop: "1.5rem" }}>
+        {workPerformance ? (
           <ClientHqActivityList
-            title={personalization.terminology.requests ?? "Recent updates"}
+            title={personalization.terminology.requests ?? "Recent requests"}
             items={data.recentRequests}
             field="requestTitle"
             href="/portal/requests"
             emptyMessage={emptyRequests}
           />
-          <ClientHqActivityList
-            title={personalization.terminology.deliverables ?? "In progress"}
-            items={data.recentDeliverables.filter((d) => d.status !== "complete")}
-            field="title"
-            href="/portal/deliverables"
-            emptyMessage={emptyDeliverables}
-          />
-        </div>
+        ) : (
+          <div className="kxd-os-operations-split" style={{ marginTop: "1.5rem" }}>
+            <ClientHqActivityList
+              title={personalization.terminology.requests ?? "Recent requests"}
+              items={data.recentRequests}
+              field="requestTitle"
+              href="/portal/requests"
+              emptyMessage={emptyRequests}
+            />
+            <ClientHqActivityList
+              title={personalization.terminology.deliverables ?? "In progress"}
+              items={data.recentDeliverables.filter((d) => d.status !== "complete")}
+              field="title"
+              href="/portal/deliverables"
+              emptyMessage={emptyDeliverables}
+            />
+          </div>
+        )}
+
+        <KxdSection label="Shortcuts">
+          <ClientHqQuickActions actions={quickActions} />
+        </KxdSection>
 
         {data.nextMeeting ? (
           <section className="kxd-os-card" style={{ marginTop: "1.5rem" }}>

@@ -242,7 +242,7 @@ function buildValueSummary(input: {
       activeCount,
       awaitingClientCount,
       headline: "Your workspace is ready",
-      lead: "As partnership work is recorded as complete, a focused monthly summary will appear here — not a full ledger of every service.",
+      lead: "When work is recorded for the month, a short summary will appear here. Open KXD Work for the full history.",
     };
   }
   if (awaitingClientCount > 0) {

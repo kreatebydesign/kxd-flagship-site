@@ -11,7 +11,23 @@ type WorkRow = {
   detail: string | null;
   meta: string | null;
   bucket: WorkBucket;
+  scheduleYear: number | null;
+  scheduleMonth: number | null;
 };
+
+const HISTORY_MONTHS: Array<{ year: number; month: number }> = [
+  { year: 2026, month: 9 },
+  { year: 2026, month: 10 },
+  { year: 2026, month: 11 },
+];
+
+function formatMonthHeading(year: number, month: number): string {
+  return new Date(Date.UTC(year, month - 1, 1)).toLocaleString("en-US", {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
 
 function clientStatusLabel(status: string): string {
   switch (status) {
@@ -22,7 +38,7 @@ function clientStatusLabel(status: string): string {
     case "blocked":
       return "Paused";
     case "not-started":
-      return "Up next";
+      return "Planned";
     case "complete":
       return "Completed";
     default:
@@ -46,6 +62,9 @@ function classifyDeliverable(doc: PortalDoc, now = new Date()): WorkRow | null {
   const currentMonth = now.getUTCMonth() + 1;
   const currentYear = now.getUTCFullYear();
 
+  const scheduleYear = year;
+  const scheduleMonth = month;
+
   if (status === "waiting-on-client") {
     return {
       id: doc.id as number,
@@ -53,6 +72,8 @@ function classifyDeliverable(doc: PortalDoc, now = new Date()): WorkRow | null {
       detail: clientNotes,
       meta: "Action needed from you",
       bucket: "waiting",
+      scheduleYear,
+      scheduleMonth,
     };
   }
 
@@ -63,6 +84,8 @@ function classifyDeliverable(doc: PortalDoc, now = new Date()): WorkRow | null {
       detail: clientNotes,
       meta: clientStatusLabel(status),
       bucket: "in-progress",
+      scheduleYear,
+      scheduleMonth,
     };
   }
 
@@ -71,8 +94,10 @@ function classifyDeliverable(doc: PortalDoc, now = new Date()): WorkRow | null {
       id: doc.id as number,
       title,
       detail: clientNotes,
-      meta: "What’s next",
+      meta: "Planned",
       bucket: "next",
+      scheduleYear,
+      scheduleMonth,
     };
   }
 
@@ -88,24 +113,25 @@ function classifyDeliverable(doc: PortalDoc, now = new Date()): WorkRow | null {
         detail: clientNotes,
         meta: isCurrentMonth
           ? `Completed ${fmtPortalDate(completedRaw)}`
-          : `Completed ${fmtPortalDate(completedRaw)} · historical`,
+          : `Completed ${fmtPortalDate(completedRaw)}`,
         bucket: isCurrentMonth ? "completed-dated" : "historical",
+        scheduleYear,
+        scheduleMonth,
       };
     }
 
-    // Complete without an exact day — historical/period work, never "Completed September".
     const periodLabel =
       month != null && year != null
-        ? month === currentMonth && year === currentYear
-          ? "Recent completed work"
-          : `Completed work · ${month}/${year}`
-        : "Historical completed work";
+        ? `Recorded for ${formatMonthHeading(year, month)}`
+        : "Earlier completed work";
     return {
       id: doc.id as number,
       title,
       detail: clientNotes,
       meta: periodLabel,
       bucket: "historical",
+      scheduleYear,
+      scheduleMonth,
     };
   }
 
@@ -115,7 +141,27 @@ function classifyDeliverable(doc: PortalDoc, now = new Date()): WorkRow | null {
     detail: clientNotes,
     meta: clientStatusLabel(status),
     bucket: "in-progress",
+    scheduleYear,
+    scheduleMonth,
   };
+}
+
+function WorkList({ items }: { items: WorkRow[] }) {
+  return (
+    <ul className="kxd-kxd-work__list">
+      {items.map((item) => (
+        <li key={String(item.id)} className="kxd-kxd-work__item">
+          <div className="kxd-kxd-work__item-main">
+            <p className="kxd-os-card__title">{item.title}</p>
+            {item.detail ? (
+              <p className="kxd-os-body kxd-kxd-work__item-detail">{item.detail}</p>
+            ) : null}
+          </div>
+          {item.meta ? <p className="kxd-os-meta kxd-kxd-work__item-meta">{item.meta}</p> : null}
+        </li>
+      ))}
+    </ul>
+  );
 }
 
 function WorkSection({
@@ -145,21 +191,80 @@ function WorkSection({
       {items.length === 0 ? (
         <p className="kxd-os-meta">{empty}</p>
       ) : (
-        <ul className="kxd-kxd-work__list">
-          {items.map((item) => (
-            <li key={String(item.id)} className="kxd-kxd-work__item">
-              <div className="kxd-kxd-work__item-main">
-                <p className="kxd-os-card__title">{item.title}</p>
-                {item.detail ? (
-                  <p className="kxd-os-body kxd-kxd-work__item-detail">{item.detail}</p>
-                ) : null}
+        <WorkList items={items} />
+      )}
+    </section>
+  );
+}
+
+function monthMatches(
+  row: WorkRow,
+  year: number,
+  month: number,
+): boolean {
+  return row.scheduleYear === year && row.scheduleMonth === month;
+}
+
+function isFocusHistoryMonth(year: number, month: number): boolean {
+  return HISTORY_MONTHS.some((m) => m.year === year && m.month === month);
+}
+
+function rowsForMonth(rows: WorkRow[], year: number, month: number): WorkRow[] {
+  return rows.filter((row) => monthMatches(row, year, month));
+}
+
+function statusGroupLabel(bucket: WorkBucket): string {
+  switch (bucket) {
+    case "waiting":
+      return "Waiting on you";
+    case "in-progress":
+      return "In progress";
+    case "next":
+      return "Planned";
+    case "completed-dated":
+    case "historical":
+      return "Completed";
+    default:
+      return "Work";
+  }
+}
+
+function MonthHistoryBlock({
+  year,
+  month,
+  rows,
+}: {
+  year: number;
+  month: number;
+  rows: WorkRow[];
+}) {
+  const monthRows = rowsForMonth(rows, year, month);
+  const headingId = `kxd-work-month-${year}-${month}`;
+  const groups: WorkBucket[] = ["waiting", "in-progress", "next", "completed-dated", "historical"];
+
+  return (
+    <section className="kxd-kxd-work__month" aria-labelledby={headingId}>
+      <h2 id={headingId} className="kxd-kxd-work__month-title">
+        {formatMonthHeading(year, month)}
+      </h2>
+      {monthRows.length === 0 ? (
+        <p className="kxd-os-meta">
+          No work items are recorded for this month yet. When KXD logs work for{" "}
+          {formatMonthHeading(year, month)}, it will appear here.
+        </p>
+      ) : (
+        <div className="kxd-kxd-work__month-groups">
+          {groups.map((bucket) => {
+            const items = monthRows.filter((row) => row.bucket === bucket);
+            if (items.length === 0) return null;
+            return (
+              <div key={bucket} className="kxd-kxd-work__month-group">
+                <h3 className="kxd-os-metric__label">{statusGroupLabel(bucket)}</h3>
+                <WorkList items={items} />
               </div>
-              {item.meta ? (
-                <p className="kxd-os-meta kxd-kxd-work__item-meta">{item.meta}</p>
-              ) : null}
-            </li>
-          ))}
-        </ul>
+            );
+          })}
+        </div>
       )}
     </section>
   );
@@ -179,17 +284,22 @@ export function DeliverablesScreen({
   const waiting = rows.filter((r) => r.bucket === "waiting");
   const inProgress = rows.filter((r) => r.bucket === "in-progress");
   const nextUp = rows.filter((r) => r.bucket === "next");
-  const completedDated = rows.filter((r) => r.bucket === "completed-dated");
-  const historical = rows.filter((r) => r.bucket === "historical");
+  const earlierComplete = rows.filter(
+    (r) =>
+      (r.bucket === "historical" || r.bucket === "completed-dated") &&
+      (r.scheduleYear == null ||
+        r.scheduleMonth == null ||
+        !isFocusHistoryMonth(r.scheduleYear, r.scheduleMonth)),
+  );
 
   const business = clientName?.trim() || "this business";
 
   return (
-    <KxdPage className="kxd-os-page--ops">
+    <KxdPage className="kxd-os-page--ops kxd-kxd-work-page">
       <ClientHqPageHero
         eyebrow="KXD Work"
-        title="What KXD is working on"
-        lead={`Clear, current work for ${business} — what is finished, what is underway, and anything waiting on you.`}
+        title="Work history"
+        lead={`Verified work for ${business}. Each item shows what KXD did or is doing, and plain-language notes when we have added them.`}
       />
 
       {rows.length === 0 ? (
@@ -202,7 +312,7 @@ export function DeliverablesScreen({
           <WorkSection
             id="kxd-work-waiting"
             title="Waiting on you"
-            lead="These items need a simple action from your side before KXD can continue."
+            lead="A simple action from your side lets KXD continue."
             items={waiting}
             empty="Nothing is waiting on you right now."
             emphasize={waiting.length > 0}
@@ -217,25 +327,30 @@ export function DeliverablesScreen({
           {nextUp.length > 0 ? (
             <WorkSection
               id="kxd-work-next"
-              title="What’s next"
-              lead="Planned next steps already recorded for this business."
+              title="Planned"
+              lead="Next steps already recorded for this business."
               items={nextUp}
               empty=""
             />
           ) : null}
-          <WorkSection
-            id="kxd-work-completed"
-            title="Completed this month"
-            lead="Work finished in the current month with a confirmed completion date."
-            items={completedDated}
-            empty="No dated completions recorded for this month yet."
-          />
-          {historical.length > 0 ? (
+
+          <div className="kxd-kxd-work__history">
+            <h2 className="kxd-os-section__label">Work by month</h2>
+            <p className="kxd-os-meta kxd-kxd-work__section-lead">
+              September through November 2026, grouped by status. Months with no
+              records stay visible so nothing looks missing by mistake.
+            </p>
+            {HISTORY_MONTHS.map(({ year, month }) => (
+              <MonthHistoryBlock key={`${year}-${month}`} year={year} month={month} rows={rows} />
+            ))}
+          </div>
+
+          {earlierComplete.length > 0 ? (
             <WorkSection
-              id="kxd-work-historical"
+              id="kxd-work-earlier"
               title="Earlier completed work"
-              lead="Documented completed work from prior months. Items without an exact day stay historical — they are never shown as this month’s completions."
-              items={historical}
+              lead="Completed items from months before September 2026, or without a reporting month on file."
+              items={earlierComplete}
               empty=""
             />
           ) : null}

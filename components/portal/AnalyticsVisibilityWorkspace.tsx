@@ -243,7 +243,7 @@ export function AnalyticsVisibilityWorkspace({ model }: { model: AnalyticsVisibi
 
       <CesDisclosure
         summary="About these results"
-        lead="KXD keeps Google reporting synced for your partnership. Numbers reflect the closed reporting month above — not a live Google dashboard refresh."
+        lead="KXD keeps Google reporting synced for your business. Numbers reflect the closed reporting month above, not a live Google dashboard refresh."
       >
         <ul className="kxd-ws-perf__list" aria-label="Measurement status for this business">
           {model.sources.map((source) => (

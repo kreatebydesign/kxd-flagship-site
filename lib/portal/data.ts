@@ -840,7 +840,7 @@ export async function getPortalOverview(session: PortalSession): Promise<PortalO
     {
       label: "View deliverables",
       href: "/portal/deliverables",
-      description: "See what's in progress and what's due.",
+      description: "See completed work, active items, and work by month.",
     },
     {
       label: "Website health",
