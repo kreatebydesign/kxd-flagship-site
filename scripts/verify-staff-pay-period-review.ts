@@ -119,12 +119,21 @@ const sampleReview: PayPeriodReviewPayload = {
       preliminaryStraightTimeGrossCents: 5133,
       preliminaryGrossCents: 5133,
       shiftCount: 1,
+      historicalMinutes: 0,
+      historicalPreliminaryGrossCents: 0,
+      historicalEntryCount: 0,
+      documentedGrossCents: 5133,
+      documentedMinutes: 154,
+      settledGrossCents: 0,
+      outstandingGrossCents: 5133,
       workweekOvertimeWarnings: [],
+      historicalDays: [],
       daily: [
         {
           localDateKey: "2026-10-21",
           minutes: 154,
           preliminaryGrossCents: 5133,
+          historical: null,
           shifts: [
             {
               shiftId: 1,

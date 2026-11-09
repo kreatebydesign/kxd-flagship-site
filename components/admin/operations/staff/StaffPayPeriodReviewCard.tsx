@@ -137,8 +137,9 @@ export function StaffPayPeriodReviewCard({
       <OpsSectionHead label="Pay period review & export" />
       <OpsCard className="kxd-os-ops-card-padding">
         <p className="kxd-os-meta" style={{ marginBottom: "0.75rem" }}>
-          Founder-only preliminary totals from recorded shifts. Review acknowledgment is not payroll
-          payment.
+          Founder-only documented totals from Time Clock and owner-approved historical durations.
+          Settled and outstanding reflect recorded external wage payments. Review acknowledgment is
+          not payroll payment.
         </p>
         <label className="kxd-os-meta" style={{ display: "block", marginBottom: "0.75rem" }}>
           Pay period
@@ -231,9 +232,17 @@ export function StaffPayPeriodReviewCard({
               >
                 <p className="kxd-os-ops-list-row__title">{employee.displayName}</p>
                 <p className="kxd-os-meta">
-                  {formatMinutes(employee.totalMinutes)} · Preliminary straight-time{" "}
+                  Clock {formatMinutes(employee.totalMinutes)} ·{" "}
                   {formatUsdFromCents(employee.preliminaryStraightTimeGrossCents)} ·{" "}
-                  {employee.shiftCount} completed shift(s)
+                  {employee.shiftCount} shift(s)
+                  {employee.historicalEntryCount > 0
+                    ? ` · Historical ${formatMinutes(employee.historicalMinutes)} · ${formatUsdFromCents(employee.historicalPreliminaryGrossCents)}`
+                    : ""}
+                </p>
+                <p className="kxd-os-meta">
+                  Documented {formatUsdFromCents(employee.documentedGrossCents)} · Settled{" "}
+                  {formatUsdFromCents(employee.settledGrossCents)} · Outstanding{" "}
+                  {formatUsdFromCents(employee.outstandingGrossCents)}
                 </p>
                 {employee.workweekOvertimeWarnings.length > 0 ? (
                   <ul className="kxd-os-meta" style={{ paddingLeft: "1.25rem" }}>
@@ -264,6 +273,9 @@ export function StaffPayPeriodReviewCard({
                     <p className="kxd-os-meta">
                       <strong>{day.localDateKey}</strong> · {formatMinutes(day.minutes)} ·{" "}
                       {formatUsdFromCents(day.preliminaryGrossCents)}
+                      {day.historical
+                        ? ` · includes historical duration (${formatUsdFromCents(day.historical.preliminaryGrossCents)})`
+                        : ""}
                     </p>
                     <ul className="kxd-os-meta" style={{ paddingLeft: "1.25rem" }}>
                       {day.shifts.map((shift) => (

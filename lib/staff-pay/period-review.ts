@@ -33,6 +33,14 @@ import {
   type FingerprintShiftSlice,
 } from "./review-fingerprint";
 import { hasBlockingPayPeriodExceptions } from "./exceptions";
+import {
+  historicalEntriesInPayPeriod,
+  sumHistoricalEntryMinutes,
+  sumHistoricalEntryPreliminaryGrossCents,
+} from "./compute-documented-totals";
+import { listStaffPayHistoricalEntriesForStaff } from "./historical-entries";
+import { loadStaffWagePeriodSettlement } from "./wage-payments/load-settlement";
+import { listActiveAllocationsForStaff } from "./wage-payments/queries";
 
 const PRELIMINARY_DISCLAIMER =
   "Preliminary straight-time totals from recorded shifts and effective hourly rates. Not legal payroll advice, tax withholding, or a payment authorization. Overtime and jurisdiction rules may require separate calculation.";
@@ -467,6 +475,35 @@ export async function loadStaffPayPeriodReview(
     const exceptions: PayPeriodEmployeeSummary["exceptions"] = [];
     const datesWithMinutes = new Set<string>();
 
+    const allHistoricalForStaff = await listStaffPayHistoricalEntriesForStaff(staffUserId);
+    const periodHistoricalEntries = historicalEntriesInPayPeriod(
+      allHistoricalForStaff,
+      payPeriodId,
+      periodStart,
+      periodEnd,
+    );
+    const activeAllocations = await listActiveAllocationsForStaff(staffUserId);
+    const settledByShift = new Map<number, number>();
+    const settledByHistorical = new Map<number, number>();
+    for (const alloc of activeAllocations) {
+      if (alloc.status !== "active") continue;
+      if (alloc.shiftId != null) {
+        settledByShift.set(alloc.shiftId, (settledByShift.get(alloc.shiftId) ?? 0) + alloc.grossCents);
+      }
+      if (alloc.historicalEntryId != null) {
+        settledByHistorical.set(
+          alloc.historicalEntryId,
+          (settledByHistorical.get(alloc.historicalEntryId) ?? 0) + alloc.grossCents,
+        );
+      }
+    }
+
+    for (const hist of periodHistoricalEntries) {
+      if (hist.payableMinutes > 0) {
+        datesWithMinutes.add(hist.localDateKey);
+      }
+    }
+
     for (const shift of memberShifts) {
       const status = String(shift.status);
       const startedAt = String(shift.started_at);
@@ -598,14 +635,59 @@ export async function loadStaffPayPeriodReview(
       dailyMap.set(line.localDateKey, bucket);
     }
 
+    const historicalDays = periodHistoricalEntries.map((hist) => {
+      const settledGrossCents = settledByHistorical.get(hist.id) ?? 0;
+      return {
+        historicalEntryId: hist.id,
+        localDateKey: hist.localDateKey,
+        payableMinutes: hist.payableMinutes,
+        hourlyRateCents: hist.hourlyRateCents,
+        preliminaryGrossCents: hist.preliminaryGrossCents,
+        settledGrossCents,
+        outstandingGrossCents: Math.max(0, hist.preliminaryGrossCents - settledGrossCents),
+      };
+    });
+
+    const historicalMinutes = sumHistoricalEntryMinutes(periodHistoricalEntries);
+    const historicalPreliminaryGrossCents =
+      sumHistoricalEntryPreliminaryGrossCents(periodHistoricalEntries);
+
     const daily = [...dailyMap.entries()]
       .sort(([a], [b]) => a.localeCompare(b))
-      .map(([localDateKey, shifts]) => ({
-        localDateKey,
-        minutes: shifts.reduce((s, l) => s + l.minutes, 0),
-        preliminaryGrossCents: shifts.reduce((s, l) => s + l.preliminaryGrossCents, 0),
-        shifts,
-      }));
+      .map(([localDateKey, shifts]) => {
+        const hist = historicalDays.find((h) => h.localDateKey === localDateKey) ?? null;
+        const shiftMinutes = shifts.reduce((s, l) => s + l.minutes, 0);
+        const shiftGross = shifts.reduce((s, l) => s + l.preliminaryGrossCents, 0);
+        const histMinutes = hist?.payableMinutes ?? 0;
+        const histGross = hist?.preliminaryGrossCents ?? 0;
+        return {
+          localDateKey,
+          minutes: shiftMinutes + histMinutes,
+          preliminaryGrossCents: shiftGross + histGross,
+          shifts,
+          historical: hist,
+        };
+      });
+
+    for (const hist of historicalDays) {
+      if (!dailyMap.has(hist.localDateKey)) {
+        daily.push({
+          localDateKey: hist.localDateKey,
+          minutes: hist.payableMinutes,
+          preliminaryGrossCents: hist.preliminaryGrossCents,
+          shifts: [],
+          historical: hist,
+        });
+      }
+    }
+    daily.sort((a, b) => a.localDateKey.localeCompare(b.localDateKey));
+
+    const periodSettlement = await loadStaffWagePeriodSettlement({
+      staffUserId,
+      payPeriodId,
+      periodStart,
+      periodEnd,
+    });
 
     employees.push({
       staffUserId,
@@ -616,8 +698,16 @@ export async function loadStaffPayPeriodReview(
       preliminaryStraightTimeGrossCents,
       preliminaryGrossCents: preliminaryStraightTimeGrossCents,
       shiftCount: lines.filter((l) => l.minutes > 0).length,
+      historicalMinutes,
+      historicalPreliminaryGrossCents,
+      historicalEntryCount: periodHistoricalEntries.length,
+      documentedGrossCents: periodSettlement.documentedGrossCents,
+      documentedMinutes: periodSettlement.documentedMinutes,
+      settledGrossCents: periodSettlement.settledGrossCents,
+      outstandingGrossCents: periodSettlement.outstandingGrossCents,
       workweekOvertimeWarnings,
       daily,
+      historicalDays,
       exceptions,
       missingOrUnverifiedDateKeys,
     });
