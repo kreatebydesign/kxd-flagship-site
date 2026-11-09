@@ -38,7 +38,8 @@ type ProdShiftRow = {
 
 function bootstrapPreviewUri(): string {
   const uri = process.env.NEON_PREVIEW_URI?.trim();
-  assert.ok(uri?.includes(PREVIEW_KXD_OS_ENDPOINT_ID), "NEON_PREVIEW_URI must be preview-kxd-os");
+  assert.ok(uri, "NEON_PREVIEW_URI is required");
+  assert.ok(uri.includes(PREVIEW_KXD_OS_ENDPOINT_ID), "NEON_PREVIEW_URI must be preview-kxd-os");
   assert.ok(!uri.includes("ep-twilight-math"), "production endpoint refused for preview write");
   assert.equal(process.env.KXD_CONFIRM_PREVIEW_DB_WRITE?.trim(), "1");
   return uri;
@@ -46,7 +47,8 @@ function bootstrapPreviewUri(): string {
 
 function bootstrapProductionReadUri(): string {
   const uri = process.env.NEON_PRODUCTION_READ_URI?.trim();
-  assert.ok(uri?.includes("ep-twilight-math"), "NEON_PRODUCTION_READ_URI must be production main");
+  assert.ok(uri, "NEON_PRODUCTION_READ_URI is required");
+  assert.ok(uri.includes("ep-twilight-math"), "NEON_PRODUCTION_READ_URI must be production main");
   assert.ok(!uri.includes("ep-frosty-bonus"), "preview endpoint refused for production read");
   assert.equal(process.env.KXD_CONFIRM_PRODUCTION_READ?.trim(), "1");
   return uri;

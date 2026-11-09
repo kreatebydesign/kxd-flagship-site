@@ -9,6 +9,7 @@ import type {
   StaffWagePaymentMethod,
   StaffWagePaymentView,
 } from "@/lib/staff-pay/wage-payments/types";
+import { WAGE_PAYMENT_V1_SOURCE_RULE } from "@/lib/staff-pay/wage-payments/types";
 
 const TYLER_USER_ID = 3;
 
@@ -133,6 +134,9 @@ export function StaffWagePaymentCard({
       <p className="kxd-os-meta">
         Records off-platform wage payments with allocations to shifts and historical durations. Not
         tax withholding or net pay.
+      </p>
+      <p className="kxd-os-meta" style={{ marginTop: "0.5rem" }}>
+        {WAGE_PAYMENT_V1_SOURCE_RULE}
       </p>
       {loading ? <p className="kxd-os-meta">Loading settlement…</p> : null}
       {settlement ? (

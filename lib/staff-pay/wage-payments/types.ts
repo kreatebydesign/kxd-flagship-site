@@ -87,5 +87,9 @@ export const STAFF_WAGE_PAYMENT_METHODS: readonly StaffWagePaymentMethod[] = [
 export const WAGE_PAYMENT_DISCLAIMER =
   "External wage payments record off-platform settlements only. Not tax withholding, net pay, or payment authorization.";
 
+/** Edition 1: one active allocation per shift or historical row (full documented gross for that source). */
+export const WAGE_PAYMENT_V1_SOURCE_RULE =
+  "Each shift or historical duration must be settled in full by a single external payment allocation. Use separate payments for different sources; a source cannot be split across payments.";
+
 export const STAFF_WAGE_SELF_VIEW_DISCLAIMER =
   "Settled wages are amounts KXD OS has recorded as paid externally. This is not net pay and does not include taxes or deductions.";
