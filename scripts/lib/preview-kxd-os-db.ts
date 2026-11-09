@@ -15,10 +15,18 @@ export const PREVIEW_QA_EMAIL_DOMAIN = "kxd-preview-qa.local";
 
 const PRODUCTION_ENDPOINT_MARKER = "ep-twilight-math";
 
+/** Optional ephemeral QA branch (never production main). */
+export function resolvedWageLedgerQaEndpointId(): string {
+  return (
+    process.env.KXD_WAGE_LEDGER_QA_ENDPOINT_ID?.trim() || PREVIEW_KXD_OS_ENDPOINT_ID
+  );
+}
+
 export function isPreviewKxdOsTarget(target: ResolvedDbTarget): boolean {
   if (target.kind !== "remote-postgres" || !target.isRemote) return false;
   if (target.host.includes(PRODUCTION_ENDPOINT_MARKER)) return false;
-  return target.host.includes(PREVIEW_KXD_OS_ENDPOINT_ID);
+  const allowed = new Set([PREVIEW_KXD_OS_ENDPOINT_ID, resolvedWageLedgerQaEndpointId()]);
+  return [...allowed].some((id) => target.host.includes(id));
 }
 
 export function assertPreviewKxdOsDatabase(): ResolvedDbTarget {
@@ -27,7 +35,7 @@ export function assertPreviewKxdOsDatabase(): ResolvedDbTarget {
     throw new Error(
       [
         "Refusing: DATABASE target is not the isolated preview-kxd-os Neon branch.",
-        `Expected host containing ${PREVIEW_KXD_OS_ENDPOINT_ID}.`,
+        `Expected host containing ${resolvedWageLedgerQaEndpointId()}.`,
         `Resolved: ${formatDbTarget(target)}`,
         "Set DATABASE_URI to the preview-kxd-os direct URL (see docs/KXD-OS-PREVIEW-DATABASE.md).",
       ].join("\n"),

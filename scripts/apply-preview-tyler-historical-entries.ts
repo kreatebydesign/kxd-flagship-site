@@ -6,9 +6,9 @@
  *     scripts/apply-preview-tyler-historical-entries.ts
  */
 import assert from "node:assert/strict";
-import { PREVIEW_KXD_OS_ENDPOINT_ID } from "./lib/preview-kxd-os-db.ts";
+import { resolvedWageLedgerQaEndpointId } from "./lib/preview-kxd-os-db.ts";
 
-const PREVIEW_HOST = PREVIEW_KXD_OS_ENDPOINT_ID;
+const PREVIEW_HOST = resolvedWageLedgerQaEndpointId();
 
 function bootstrapPreviewDatabaseUri(): void {
   const uri = process.env.NEON_PREVIEW_URI?.trim() || process.env.DATABASE_URI?.trim();
