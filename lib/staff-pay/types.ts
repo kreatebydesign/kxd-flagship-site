@@ -49,6 +49,16 @@ export interface WorkweekOvertimeWarningView {
   exceedsLimit: boolean;
 }
 
+export interface PayPeriodHistoricalLine {
+  historicalEntryId: number;
+  localDateKey: string;
+  payableMinutes: number;
+  hourlyRateCents: number;
+  preliminaryGrossCents: number;
+  settledGrossCents: number;
+  outstandingGrossCents: number;
+}
+
 export interface PayPeriodEmployeeSummary {
   staffUserId: number;
   displayName: string;
@@ -59,13 +69,22 @@ export interface PayPeriodEmployeeSummary {
   /** @deprecated alias — use preliminaryStraightTimeGrossCents */
   preliminaryGrossCents: number;
   shiftCount: number;
+  historicalMinutes: number;
+  historicalPreliminaryGrossCents: number;
+  historicalEntryCount: number;
+  documentedGrossCents: number;
+  documentedMinutes: number;
+  settledGrossCents: number;
+  outstandingGrossCents: number;
   workweekOvertimeWarnings: WorkweekOvertimeWarningView[];
   daily: Array<{
     localDateKey: string;
     minutes: number;
     preliminaryGrossCents: number;
     shifts: PayPeriodShiftLine[];
+    historical?: PayPeriodHistoricalLine | null;
   }>;
+  historicalDays: PayPeriodHistoricalLine[];
   exceptions: Array<{
     kind: PayPeriodExceptionKind;
     message: string;
