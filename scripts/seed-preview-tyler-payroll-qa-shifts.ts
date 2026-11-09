@@ -140,7 +140,7 @@ async function main(): Promise<void> {
        ORDER BY started_at ASC`,
       [TYLER_USER_ID],
     );
-    assert.equal(prodResult.rowCount, 11, "expected 11 verified production shifts");
+    assert.equal(prodResult.rowCount, 12, "expected 12 verified production shifts (11 covered + 1 outstanding)");
 
     let inserted = 0;
     let skipped = 0;
