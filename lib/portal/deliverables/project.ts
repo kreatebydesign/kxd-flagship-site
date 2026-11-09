@@ -1,5 +1,6 @@
 import type { PortalDoc } from "@/lib/portal/types";
 import { resolvePortalDeliverableClientNotes } from "./client-notes";
+import { filterSyntheticQaDeliverablesForPortal } from "./synthetic-qa-exclusion";
 
 /** Fields safe to pass into Client HQ and portal server components. */
 export type PortalDeliverableSummary = PortalDoc & {
@@ -39,5 +40,5 @@ export function projectPortalDeliverable(doc: AnyDoc): PortalDeliverableSummary 
 }
 
 export function projectPortalDeliverables(docs: AnyDoc[]): PortalDeliverableSummary[] {
-  return docs.map(projectPortalDeliverable);
+  return filterSyntheticQaDeliverablesForPortal(docs).map(projectPortalDeliverable);
 }

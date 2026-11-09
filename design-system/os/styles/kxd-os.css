@@ -22254,13 +22254,39 @@ html[data-theme="dark"] .kxd-os-theme-pref__option.is-active {
 /* ── Batch D: Work & Performance workspace ─────────────────────────────── */
 
 .kxd-ws-perf-wrap {
-  margin-top: 1.75rem;
+  margin-top: 1rem;
+}
+
+.kxd-ws-perf-footer-link {
+  margin-top: 0.65rem;
+}
+
+.kxd-os-page--overview-tight .kxd-os-ops-hero {
+  margin-bottom: 0.25rem;
+}
+
+.kxd-ws-identity--overview {
+  padding-bottom: 0.15rem;
+}
+
+.kxd-os-operations-split--tight {
+  margin-top: 1rem !important;
 }
 
 .kxd-ws-perf {
   display: grid;
-  gap: 1.5rem;
+  gap: 1rem;
   min-width: 0;
+}
+
+.kxd-ws-perf__hero--compact .kxd-ws-perf__title {
+  overflow-wrap: anywhere;
+  margin: 0 0 0.35rem;
+  font-size: clamp(1.15rem, 2.5vw, 1.45rem);
+}
+
+.kxd-ws-perf__period-meta {
+  margin: 0.35rem 0 0;
 }
 
 .kxd-ws-perf__hero .kxd-ws-perf__title {
@@ -22270,6 +22296,10 @@ html[data-theme="dark"] .kxd-os-theme-pref__option.is-active {
 
 .kxd-ws-perf__section {
   min-width: 0;
+}
+
+.kxd-ws-perf__section--compact .kxd-os-section__label {
+  margin-bottom: 0.35rem;
 }
 
 .kxd-ws-perf__list {

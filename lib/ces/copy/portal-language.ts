@@ -10,7 +10,7 @@ export const PORTAL_CLIENT_LANGUAGE = {
   primalWorkspaceLabel: "Your workspace",
   homeWelcome: (name: string) => `Welcome back, ${name}`,
   homeLead:
-    "What KXD has finished, what is in progress, and anything we need from you.",
+    "Here's what's happening with your website and what we're working on.",
 
   launchEyebrow: "Getting started",
   launchTitle: "What to do first",
@@ -268,7 +268,7 @@ export const PORTAL_CLIENT_LANGUAGE = {
   connectedWebsiteUnavailable: "Unavailable",
   connectedWebsiteUrlMissing: "Website URL not configured",
   connectedWebsiteLatestStatus: "Latest status",
-  connectedViewDeliverables: "View deliverables",
+  connectedViewDeliverables: "Open KXD Work",
   connectedOpenRevision: "Open revision",
   connectedWorkAwaiting: "Waiting on you",
   connectedWorkInProgress: "In progress",

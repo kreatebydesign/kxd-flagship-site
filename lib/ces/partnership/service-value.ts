@@ -10,16 +10,20 @@ const CLIENT_CAPABILITY_COPY: Partial<
   Record<ServiceCapabilityId, { label: string; summary: string }>
 > = {
   managed_website: {
-    label: "Website Management",
-    summary: "Website care, updates, and day-to-day partnership support.",
+    label: "Website management",
+    summary: "Day-to-day website care, updates, and fixes.",
   },
   seo_visibility: {
-    label: "Search Visibility",
-    summary: "Search presence and visibility monitoring.",
+    label: "Search visibility",
+    summary: "Helping Google find your pages and monitoring search presence.",
   },
   analytics_reporting: {
-    label: "Analytics & Performance Reporting",
-    summary: "Website and search performance reporting for this partnership.",
+    label: "Website performance",
+    summary: "Visitor and search reporting when tracking is connected.",
+  },
+  growth_strategy: {
+    label: "Account planning",
+    summary: "Planning and review of website and search priorities.",
   },
   hosting_infrastructure: {
     label: "Website hosting & care",

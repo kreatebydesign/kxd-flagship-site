@@ -6,6 +6,7 @@ import { getEditionBranding } from "@/lib/editions";
 import type { PortalSession } from "@/lib/portal/session";
 import type { ReportingCapabilityId } from "@/lib/reporting/domain/capabilities";
 import { getExecutivePresentation } from "../executive-performance/presentation";
+import { ensureCusickMorganBrand } from "./cusick-brand";
 import type { CesModuleId, ResolvedExperienceProfile } from "../types";
 import { buildDefaultCesProfileData } from "@/lib/client-launch/defaults";
 import { inferPortalModulesForClient } from "./infer-portal-modules";
@@ -71,6 +72,15 @@ function normalizeReportingCapabilities(value: unknown): ReportingCapabilityId[]
 
 function normalizeEnabledPortalModules(value: unknown): PortalModuleId[] {
   return normalizePortalModuleList(Array.isArray(value) ? value : []);
+}
+
+/** Payload upload URLs that expire or fail in local dev should not block registry marks. */
+function dropEphemeralIdentityLogo(profile: ResolvedExperienceProfile): void {
+  const url = profile.identity.logoUrl?.trim();
+  if (!url) return;
+  if (url.includes("/api/media/file/")) {
+    profile.identity.logoUrl = null;
+  }
 }
 
 async function loadOnboardingLogo(clientId: number): Promise<string | null> {
@@ -198,15 +208,17 @@ function finalizeProfile(profile: ResolvedExperienceProfile): ResolvedExperience
   ensureRobinColeBrand(profile);
   syncEnabledPortalModules(profile);
   ensurePrimalResultsSurfaces(profile);
+  dropEphemeralIdentityLogo(profile);
   const presentation = getExecutivePresentation(profile.identity.clientSlug);
   profile.presentation = presentation;
   /* Presentation Registry supplies brand mark when no CMS/onboarding logo exists. */
-  if (presentation?.logoSrc && !profile.identity.logoUrl) {
+  if (presentation?.logoSrc && !profile.identity.logoUrl?.trim()) {
     profile.identity.logoUrl = presentation.logoSrc;
     if (presentation.logoAlt) {
       profile.identity.logoAlt = presentation.logoAlt;
     }
   }
+  ensureCusickMorganBrand(profile);
   /* Re-apply after presentation merge so Robin still wins when registry is empty. */
   ensureRobinColeBrand(profile);
   profile.identity.logoOnDarkTreatment = resolveLogoOnDarkTreatment({

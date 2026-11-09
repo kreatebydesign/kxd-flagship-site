@@ -115,7 +115,7 @@ const BY_SLUG: Record<string, ExperiencePresentation> = {
     logoSrc: "/migrated-assets/logos/cusick-morgan.svg",
     workspaceEyebrow: "Your space",
     introduction:
-      "A clear view of website work, search health, and what needs your attention.",
+      "Website work, performance, and anything that needs your input, in one place.",
   },
   otp: stubPresentation({
     logoAlt: "On Track Performance",

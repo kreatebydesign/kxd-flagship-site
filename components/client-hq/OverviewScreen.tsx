@@ -1,13 +1,9 @@
 import type { CSSProperties } from "react";
 import Link from "next/link";
-import { KxdPage, KxdSection } from "@/components/os";
+import { KxdPage } from "@/components/os";
 import { WorkspaceFocusStrip } from "@/components/portal/WorkspaceFocusStrip";
 import { WorkPerformanceWorkspace } from "@/components/portal/WorkPerformanceWorkspace";
-import {
-  ClientHqActivityList,
-  ClientHqQuickActions,
-  ClientHqTimelineFeed,
-} from "./shared";
+import { ClientHqActivityList, ClientHqQuickActions } from "./shared";
 import { AccountBalanceCard } from "./AccountBalanceCard";
 import type { PortalOverviewData } from "@/lib/portal/types";
 import type { WorkspacePersonalizationModel } from "@/lib/portal/workspace-personalization";
@@ -38,9 +34,6 @@ export function OverviewScreen({
   const emptyDeliverables =
     personalization.emptyStates.deliverables?.lead ??
     "Nothing in progress right now.";
-  const emptyActivity =
-    personalization.emptyStates.overview?.lead ??
-    "Relationship history will appear here as milestones are logged.";
 
   const quickActions =
     personalization.primaryActions.length > 0
@@ -58,10 +51,12 @@ export function OverviewScreen({
         } as CSSProperties)
       : undefined;
 
+  const hasRecentRequests = data.recentRequests.length > 0;
+
   return (
-    <KxdPage className="kxd-os-page--ops">
+    <KxdPage className="kxd-os-page--ops kxd-os-page--overview-tight">
       <div className="kxd-ws-personalization" style={identityStyle}>
-        <header className="kxd-os-ops-hero kxd-ws-identity">
+        <header className="kxd-os-ops-hero kxd-ws-identity kxd-ws-identity--overview">
           <div className="kxd-ws-identity__row">
             {personalization.identity.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -88,7 +83,7 @@ export function OverviewScreen({
         {workPerformance ? (
           <div className="kxd-ws-perf-wrap">
             <WorkPerformanceWorkspace model={workPerformance} />
-            <p className="kxd-os-meta" style={{ marginTop: "1rem" }}>
+            <p className="kxd-os-meta kxd-ws-perf-footer-link">
               <Link href="/portal/deliverables" className="kxd-os-link-quiet">
                 Open KXD Work for work by month
               </Link>
@@ -105,24 +100,26 @@ export function OverviewScreen({
         ) : null}
 
         {workPerformance ? (
-          <ClientHqActivityList
-            title={personalization.terminology.requests ?? "Recent requests"}
-            items={data.recentRequests}
-            field="requestTitle"
-            href="/portal/requests"
-            emptyMessage={emptyRequests}
-          />
-        ) : (
-          <div className="kxd-os-operations-split" style={{ marginTop: "1.5rem" }}>
+          hasRecentRequests ? (
             <ClientHqActivityList
-              title={personalization.terminology.requests ?? "Recent requests"}
+              title={personalization.terminology.requests ?? "Recent updates"}
+              items={data.recentRequests}
+              field="requestTitle"
+              href="/portal/requests"
+              emptyMessage={emptyRequests}
+            />
+          ) : null
+        ) : (
+          <div className="kxd-os-operations-split kxd-os-operations-split--tight">
+            <ClientHqActivityList
+              title={personalization.terminology.requests ?? "Recent updates"}
               items={data.recentRequests}
               field="requestTitle"
               href="/portal/requests"
               emptyMessage={emptyRequests}
             />
             <ClientHqActivityList
-              title={personalization.terminology.deliverables ?? "In progress"}
+              title={personalization.terminology.deliverables ?? "Work in progress"}
               items={data.recentDeliverables.filter((d) => d.status !== "complete")}
               field="title"
               href="/portal/deliverables"
@@ -131,27 +128,21 @@ export function OverviewScreen({
           </div>
         )}
 
-        <KxdSection label="Shortcuts">
-          <ClientHqQuickActions actions={quickActions} />
-        </KxdSection>
+        {!workPerformance && quickActions.length > 0 ? (
+          <section className="kxd-ws-shortcuts" aria-label="Shortcuts">
+            <p className="kxd-os-section__label">Shortcuts</p>
+            <ClientHqQuickActions actions={quickActions} />
+          </section>
+        ) : null}
 
-        {data.nextMeeting ? (
-          <section className="kxd-os-card" style={{ marginTop: "1.5rem" }}>
+        {!workPerformance && data.nextMeeting ? (
+          <section className="kxd-os-card kxd-ws-next-meeting">
             <p className="kxd-os-metric__label">Up next</p>
             <p className="kxd-os-body">
               {data.nextMeeting.title} · {fmtPortalDate(data.nextMeeting.date)}
             </p>
           </section>
         ) : null}
-
-        <KxdSection label={personalization.terminology.activity ?? "Recent activity"}>
-          <div className="kxd-os-card">
-            <ClientHqTimelineFeed
-              events={data.timelineActivity.slice(0, 5)}
-              emptyMessage={emptyActivity}
-            />
-          </div>
-        </KxdSection>
       </div>
     </KxdPage>
   );

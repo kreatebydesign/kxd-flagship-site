@@ -8,12 +8,17 @@ import type {
 function Section({
   label,
   children,
+  compact = false,
 }: {
   label: string;
   children: ReactNode;
+  compact?: boolean;
 }) {
   return (
-    <section className="kxd-ws-perf__section" aria-label={label}>
+    <section
+      className={`kxd-ws-perf__section${compact ? " kxd-ws-perf__section--compact" : ""}`}
+      aria-label={label}
+    >
       <p className="kxd-os-section__label">{label}</p>
       {children}
     </section>
@@ -36,8 +41,17 @@ export function WorkPerformanceWorkspace({
   model: WorkPerformanceModel;
   multiSite?: AuthorizedMultiSiteOverview | null;
 }) {
-  const { valueSummary, analytics, updateRequests } = model;
+  const { analytics, updateRequests } = model;
   const waitingOnYou = model.currentlyInProgress.filter((item) => item.owner === "client");
+  const kxdOngoing = model.currentlyInProgress.filter((item) => item.owner !== "client");
+  const showWebsiteFeedback =
+    updateRequests.availability !== "not-entitled" &&
+    updateRequests.availability !== "empty";
+  const showLeads =
+    model.leads.availability === "ready" && model.leads.conversionCount != null;
+  const showWins = model.wins.length > 0;
+  const showCare =
+    model.clientValue && model.clientValue.careContinuity.status !== "not-configured";
 
   return (
     <div
@@ -45,12 +59,11 @@ export function WorkPerformanceWorkspace({
       data-workspace-client={model.clientId}
       data-reporting-month={model.reportingMonthLabel}
     >
-      <header className="kxd-ws-perf__hero">
-        <p className="kxd-os-eyebrow">{model.clientName}</p>
-        <h2 className="kxd-os-headline kxd-ws-perf__title">{valueSummary.headline}</h2>
-        <p className="kxd-os-ops-hero__lead">{valueSummary.lead}</p>
-        <p className="kxd-os-meta">
-          Reporting month: {model.reportingMonthLabel}
+      <header className="kxd-ws-perf__hero kxd-ws-perf__hero--compact">
+        <h2 className="kxd-os-headline kxd-ws-perf__title">{model.valueSummary.headline}</h2>
+        <p className="kxd-os-ops-hero__lead">{model.valueSummary.lead}</p>
+        <p className="kxd-os-meta kxd-ws-perf__period-meta">
+          {model.reportingMonthLabel}
           {model.comparisonPeriodLabel
             ? ` · compared with ${model.comparisonPeriodLabel}`
             : ""}
@@ -58,21 +71,16 @@ export function WorkPerformanceWorkspace({
       </header>
 
       {multiSite?.available && multiSite.totals ? (
-        <Section label="All businesses">
-          <p className="kxd-os-meta" style={{ marginBottom: "0.75rem" }}>
-            Summary across {multiSite.totals.siteCount} businesses you can open here.
-            Each stays separate when you switch.
-          </p>
+        <Section label="All businesses" compact>
           <ul className="kxd-ws-perf__list">
             {multiSite.sites.map((site) => (
               <li key={site.clientId}>
                 <p className="kxd-os-card__title">{site.clientName}</p>
                 <p className="kxd-os-meta">
-                  {site.completedThisMonth} completed · {site.activeWork} active
+                  {site.completedThisMonth} completed · {site.activeWork} ongoing
                   {site.awaitingClient > 0
                     ? ` · ${site.awaitingClient} waiting on you`
                     : ""}
-                  {site.primaryWinTitle ? ` · ${site.primaryWinTitle}` : ""}
                 </p>
               </li>
             ))}
@@ -80,22 +88,8 @@ export function WorkPerformanceWorkspace({
         </Section>
       ) : null}
 
-      {model.clientValue ? (
-        <Section label="Recent work">
-          <p className="kxd-os-body">{model.clientValue.performanceStory.whatMovedForward}</p>
-          <p className="kxd-os-meta kxd-ws-perf__stack-sm">
-            {model.clientValue.performanceStory.whatItMeans}
-          </p>
-          {model.clientValue.performanceStory.strongestSignal ? (
-            <p className="kxd-os-meta kxd-ws-perf__stack-xs">
-              {model.clientValue.performanceStory.strongestSignal}
-            </p>
-          ) : null}
-        </Section>
-      ) : null}
-
-      <Section label="Completed this month">
-        <p className="kxd-os-meta" style={{ marginBottom: "0.75rem" }}>
+      <Section label="Recent verified work" compact>
+        <p className="kxd-os-meta" style={{ marginBottom: "0.35rem" }}>
           {model.monthlySummaryScopeNote}
         </p>
         {model.completedThisMonth.length === 0 ? (
@@ -117,25 +111,82 @@ export function WorkPerformanceWorkspace({
         )}
       </Section>
 
-      <Section label="In progress">
-        {model.currentlyInProgress.filter((item) => item.owner !== "client").length === 0 ? (
+      <Section label="Ongoing work" compact>
+        <p className="kxd-os-meta" style={{ marginBottom: "0.35rem" }}>
+          Open items KXD is working on. These are not limited to the month above.
+        </p>
+        {kxdOngoing.length === 0 ? (
           <Empty {...model.emptyStates.active} />
         ) : (
           <ul className="kxd-ws-perf__list">
-            {model.currentlyInProgress
-              .filter((item) => item.owner !== "client")
-              .map((item) => (
-                <li key={item.id}>
-                  <p className="kxd-os-body">{item.title}</p>
-                  <p className="kxd-os-meta">{item.statusLabel}</p>
-                </li>
-              ))}
+            {kxdOngoing.map((item) => (
+              <li key={item.id}>
+                <p className="kxd-os-body">{item.title}</p>
+                <p className="kxd-os-meta">{item.statusLabel}</p>
+              </li>
+            ))}
           </ul>
         )}
       </Section>
 
+      <Section label="Website performance" compact>
+        {analytics.availability === "ready" && analytics.metrics.length > 0 ? (
+          <>
+            <p className="kxd-os-meta" style={{ marginBottom: "0.35rem" }}>
+              {analytics.periodLabel}
+              {analytics.freshnessNote ? ` · ${analytics.freshnessNote}` : ""}
+            </p>
+            <div className="kxd-ws-perf__metrics">
+              {analytics.metrics.map((metric) => (
+                <div key={metric.key} className="kxd-ws-perf__metric">
+                  <p className="kxd-os-metric__label">{metric.label}</p>
+                  <p className="kxd-os-metric__value">{metric.valueLabel}</p>
+                  {metric.deltaLabel ? (
+                    <p className="kxd-os-metric__sub">
+                      {metric.deltaLabel}
+                      {metric.previousLabel ? ` · was ${metric.previousLabel}` : ""}
+                    </p>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+            {model.clientValue?.performanceStory.whatItMeans ? (
+              <p className="kxd-os-meta kxd-ws-perf__stack-sm">
+                {model.clientValue.performanceStory.whatItMeans}
+              </p>
+            ) : null}
+          </>
+        ) : (
+          <Empty
+            title={model.emptyStates.analytics.title}
+            lead={analytics.statusNote ?? model.emptyStates.analytics.lead}
+          />
+        )}
+      </Section>
+
+      {showCare ? (
+        <Section label="What KXD takes care of" compact>
+          <p className="kxd-os-card__title">{model.clientValue!.careContinuity.headline}</p>
+          <p className="kxd-os-meta kxd-ws-perf__stack-xs">
+            {model.clientValue!.careContinuity.lead}
+          </p>
+          {model.clientValue!.careContinuity.lines.length > 0 ? (
+            <ul className="kxd-ws-perf__list kxd-ws-perf__stack-sm">
+              {model.clientValue!.careContinuity.lines.map((line) => (
+                <li key={line.id}>
+                  <p className="kxd-os-body">
+                    {line.label}: {line.value}
+                  </p>
+                  {line.detail ? <p className="kxd-os-meta">{line.detail}</p> : null}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </Section>
+      ) : null}
+
       {waitingOnYou.length > 0 || updateRequests.awaitingClientCount > 0 ? (
-        <Section label="Needs your attention">
+        <Section label="Needs your attention" compact>
           {waitingOnYou.length > 0 ? (
             <ul className="kxd-ws-perf__list">
               {waitingOnYou.map((item) => (
@@ -154,139 +205,54 @@ export function WorkPerformanceWorkspace({
         </Section>
       ) : null}
 
-      <Section label="Website feedback">
-        {updateRequests.availability === "not-entitled" ||
-        updateRequests.availability === "empty" ? (
-          <Empty {...model.emptyStates.requests} />
-        ) : (
-          <>
-            <p className="kxd-os-meta" style={{ marginBottom: "0.75rem" }}>
-              {updateRequests.openCount} open · {updateRequests.inProgressCount} in
-              progress · {updateRequests.awaitingClientCount} waiting on you ·{" "}
-              {updateRequests.completedThisMonthCount} completed this month
-            </p>
-            {updateRequests.priority.length > 0 ? (
-              <ul className="kxd-ws-perf__list">
-                {updateRequests.priority.map((item) => (
-                  <li key={item.id}>
-                    <p className="kxd-os-body">{item.title}</p>
-                    <p className="kxd-os-meta">{item.statusLabel}</p>
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-          </>
-        )}
-        {updateRequests.primaryAction ? (
-          <p style={{ marginTop: "0.75rem" }}>
-            <Link href={updateRequests.primaryAction.href} className="kxd-os-link-quiet">
-              {updateRequests.primaryAction.label}
-            </Link>
-          </p>
-        ) : null}
-      </Section>
-
-      <Section label="Website performance">
-        {analytics.availability === "ready" && analytics.metrics.length > 0 ? (
-          <>
-            <p className="kxd-os-meta" style={{ marginBottom: "0.75rem" }}>
-              {analytics.periodLabel}
-              {analytics.freshnessNote ? ` · ${analytics.freshnessNote}` : ""}
-            </p>
-            <div className="kxd-ws-perf__metrics">
-              {analytics.metrics.map((metric) => (
-                <div key={metric.key} className="kxd-ws-perf__metric">
-                  <p className="kxd-os-metric__label">{metric.label}</p>
-                  <p className="kxd-os-metric__value">{metric.valueLabel}</p>
-                  {metric.deltaLabel ? (
-                    <p className="kxd-os-metric__sub">
-                      {metric.deltaLabel}
-                      {metric.previousLabel ? ` · was ${metric.previousLabel}` : ""}
-                    </p>
-                  ) : null}
-                </div>
+      {showWebsiteFeedback ? (
+        <Section label="Website feedback" compact>
+          {updateRequests.priority.length > 0 ? (
+            <ul className="kxd-ws-perf__list">
+              {updateRequests.priority.map((item) => (
+                <li key={item.id}>
+                  <p className="kxd-os-body">{item.title}</p>
+                  <p className="kxd-os-meta">{item.statusLabel}</p>
+                </li>
               ))}
-            </div>
-          </>
-        ) : (
-          <Empty
-            title={model.emptyStates.analytics.title}
-            lead={analytics.statusNote ?? model.emptyStates.analytics.lead}
-          />
-        )}
-      </Section>
+            </ul>
+          ) : (
+            <p className="kxd-os-meta">
+              {updateRequests.openCount} open · {updateRequests.inProgressCount} in progress
+            </p>
+          )}
+          {updateRequests.primaryAction ? (
+            <p className="kxd-ws-perf__stack-before">
+              <Link href={updateRequests.primaryAction.href} className="kxd-os-link-quiet">
+                {updateRequests.primaryAction.label}
+              </Link>
+            </p>
+          ) : null}
+        </Section>
+      ) : null}
 
-      <Section label="Leads and conversions">
-        {model.leads.availability === "ready" && model.leads.conversionCount != null ? (
-          <>
-            <p className="kxd-os-metric__value">{model.leads.conversionCount}</p>
-            <p className="kxd-os-meta">{model.leads.conversionLabel}</p>
-            {model.leads.statusNote ? (
-              <p className="kxd-os-meta" style={{ marginTop: "0.5rem" }}>
-                {model.leads.statusNote}
-              </p>
-            ) : null}
-          </>
-        ) : (
-          <Empty
-            title={model.emptyStates.leads.title}
-            lead={model.leads.statusNote ?? model.emptyStates.leads.lead}
-          />
-        )}
-      </Section>
+      {showLeads ? (
+        <Section label="Tracked actions" compact>
+          <p className="kxd-os-metric__value">{model.leads.conversionCount}</p>
+          <p className="kxd-os-meta">{model.leads.conversionLabel}</p>
+        </Section>
+      ) : null}
 
-      <Section label="Positive wins">
-        {model.wins.length === 0 ? (
-          <Empty {...model.emptyStates.wins} />
-        ) : (
+      {showWins ? (
+        <Section label="Recent updates" compact>
           <ul className="kxd-ws-perf__list">
             {model.wins.map((win) => (
               <li key={win.id}>
                 <p className="kxd-os-card__title">{win.title}</p>
                 <p className="kxd-os-meta">{win.lead}</p>
-                <p className="kxd-os-meta">{win.evidenceLabel}</p>
               </li>
             ))}
           </ul>
-        )}
-      </Section>
-
-      {model.clientValue &&
-      model.clientValue.careContinuity.status !== "not-configured" ? (
-        <Section label="Ongoing services">
-          <p className="kxd-os-card__title">{model.clientValue.careContinuity.headline}</p>
-          <p className="kxd-os-meta kxd-ws-perf__stack-xs">
-            {model.clientValue.careContinuity.lead}
-          </p>
-          {model.clientValue.careContinuity.responsiblePartyLabel ? (
-            <p className="kxd-os-meta kxd-ws-perf__stack-xs">
-              {model.clientValue.careContinuity.responsiblePartyLabel}
-            </p>
-          ) : null}
-          {model.clientValue.careContinuity.lines.length > 0 ? (
-            <ul className="kxd-ws-perf__list kxd-ws-perf__stack-sm">
-              {model.clientValue.careContinuity.lines.map((line) => (
-                <li key={line.id}>
-                  <p className="kxd-os-body">
-                    {line.label}: {line.value}
-                  </p>
-                  {line.detail ? <p className="kxd-os-meta">{line.detail}</p> : null}
-                </li>
-              ))}
-            </ul>
-          ) : null}
         </Section>
       ) : null}
 
-      <Section label="Next steps">
-        {model.clientValue ? (
-          <p className="kxd-os-body kxd-ws-perf__stack-before">
-            {model.clientValue.performanceStory.smartestNextMove}
-          </p>
-        ) : null}
-        {model.nextMoves.length === 0 ? (
-          <Empty {...model.emptyStates.nextMoves} />
-        ) : (
+      {model.nextMoves.length > 0 ? (
+        <Section label="Suggested next steps" compact>
           <div className="kxd-os-ops-quick-grid">
             {model.nextMoves.map((move) =>
               move.href ? (
@@ -302,8 +268,8 @@ export function WorkPerformanceWorkspace({
               ),
             )}
           </div>
-        )}
-      </Section>
+        </Section>
+      ) : null}
     </div>
   );
 }

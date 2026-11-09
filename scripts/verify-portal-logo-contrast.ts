@@ -53,6 +53,16 @@ check("configured default wins over dark-wordmark heuristic", () => {
   );
 });
 
+check("Cusick white mark uses dark-panel on light sidebar", () => {
+  assert.equal(
+    resolveLogoOnDarkTreatment({
+      clientSlug: "cusick-morgan-motorsports",
+      clientName: "Cusick Morgan Motorsports",
+    }),
+    "dark-panel",
+  );
+});
+
 check("light logos stay on default (Robin Cole / Platinum-shaped)", () => {
   assert.equal(
     resolveLogoOnDarkTreatment({
@@ -84,6 +94,8 @@ check("shell + CSS wire light-panel without global invert", () => {
     "utf8",
   );
   assert.match(shell, /logo-light-panel/);
+  assert.match(shell, /logo-dark-panel/);
+  assert.match(css, /kxd-ces-identity--logo-dark-panel/);
   assert.match(shell, /logoOnDarkTreatment/);
   assert.match(css, /kxd-ces-identity--logo-light-panel/);
   assert.equal(/filter:\s*invert/i.test(css), false);

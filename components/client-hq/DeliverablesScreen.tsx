@@ -1,7 +1,9 @@
+import Link from "next/link";
 import { KxdEmptyState, KxdPage } from "@/components/os";
 import { ClientHqPageHero } from "./ClientHqPageHero";
 import type { PortalDoc } from "@/lib/portal/types";
 import { fmtPortalDate } from "@/lib/portal/format";
+import { clientFacingWorkLabel } from "@/lib/portal/deliverables/client-facing-labels";
 
 type WorkBucket = "waiting" | "in-progress" | "next" | "completed-dated" | "historical";
 
@@ -47,14 +49,15 @@ function clientStatusLabel(status: string): string {
 }
 
 function classifyDeliverable(doc: PortalDoc, now = new Date()): WorkRow | null {
-  const title = String(doc.title ?? "").trim();
-  if (!title) return null;
+  const internalTitle = String(doc.title ?? "").trim();
+  if (!internalTitle) return null;
 
   const status = String(doc.status ?? "not-started");
   const clientNotes =
     typeof doc.clientNotes === "string" && doc.clientNotes.trim()
       ? doc.clientNotes.trim()
       : null;
+  const { title, detail } = clientFacingWorkLabel(internalTitle, clientNotes);
   const completedRaw =
     doc.completedDate != null ? String(doc.completedDate).slice(0, 10) : null;
   const month = typeof doc.month === "number" ? doc.month : null;
@@ -69,7 +72,7 @@ function classifyDeliverable(doc: PortalDoc, now = new Date()): WorkRow | null {
     return {
       id: doc.id as number,
       title,
-      detail: clientNotes,
+      detail,
       meta: "Action needed from you",
       bucket: "waiting",
       scheduleYear,
@@ -81,7 +84,7 @@ function classifyDeliverable(doc: PortalDoc, now = new Date()): WorkRow | null {
     return {
       id: doc.id as number,
       title,
-      detail: clientNotes,
+      detail,
       meta: clientStatusLabel(status),
       bucket: "in-progress",
       scheduleYear,
@@ -93,7 +96,7 @@ function classifyDeliverable(doc: PortalDoc, now = new Date()): WorkRow | null {
     return {
       id: doc.id as number,
       title,
-      detail: clientNotes,
+      detail,
       meta: "Planned",
       bucket: "next",
       scheduleYear,
@@ -110,7 +113,7 @@ function classifyDeliverable(doc: PortalDoc, now = new Date()): WorkRow | null {
       return {
         id: doc.id as number,
         title,
-        detail: clientNotes,
+        detail,
         meta: isCurrentMonth
           ? `Completed ${fmtPortalDate(completedRaw)}`
           : `Completed ${fmtPortalDate(completedRaw)}`,
@@ -127,7 +130,7 @@ function classifyDeliverable(doc: PortalDoc, now = new Date()): WorkRow | null {
     return {
       id: doc.id as number,
       title,
-      detail: clientNotes,
+      detail,
       meta: periodLabel,
       bucket: "historical",
       scheduleYear,
@@ -138,7 +141,7 @@ function classifyDeliverable(doc: PortalDoc, now = new Date()): WorkRow | null {
   return {
     id: doc.id as number,
     title,
-    detail: clientNotes,
+    detail,
     meta: clientStatusLabel(status),
     bucket: "in-progress",
     scheduleYear,
@@ -247,13 +250,7 @@ function MonthHistoryBlock({
       <h2 id={headingId} className="kxd-kxd-work__month-title">
         {formatMonthHeading(year, month)}
       </h2>
-      {monthRows.length === 0 ? (
-        <p className="kxd-os-meta">
-            No work items are tagged for this month in KXD OS. That does not mean nothing
-              happened. Check Performance for reporting data or ask KXD if you expected a
-              logged item for {formatMonthHeading(year, month)}.
-        </p>
-      ) : (
+      {monthRows.length > 0 ? (
         <div className="kxd-kxd-work__month-groups">
           {groups.map((bucket) => {
             const items = monthRows.filter((row) => row.bucket === bucket);
@@ -266,7 +263,7 @@ function MonthHistoryBlock({
             );
           })}
         </div>
-      )}
+      ) : null}
     </section>
   );
 }
@@ -294,13 +291,16 @@ export function DeliverablesScreen({
   );
 
   const business = clientName?.trim() || "this business";
+  const monthsWithWork = HISTORY_MONTHS.filter(({ year, month }) =>
+    rowsForMonth(rows, year, month).length > 0,
+  );
 
   return (
     <KxdPage className="kxd-os-page--ops kxd-kxd-work-page">
       <ClientHqPageHero
         eyebrow="KXD Work"
         title="Work history"
-        lead={`Verified work for ${business}. Each item shows what KXD did or is doing, and plain-language notes when we have added them.`}
+        lead={`What KXD has finished, what is active now, and earlier work for ${business}, in plain language.`}
       />
 
       {rows.length === 0 ? (
@@ -335,16 +335,28 @@ export function DeliverablesScreen({
             />
           ) : null}
 
-          <div className="kxd-kxd-work__history">
-            <h2 className="kxd-os-section__label">Work by month</h2>
+          <section className="kxd-kxd-work__priorities" aria-labelledby="kxd-work-oct-nov">
+            <h2 id="kxd-work-oct-nov" className="kxd-os-section__label">
+              Recent months
+            </h2>
             <p className="kxd-os-meta kxd-kxd-work__section-lead">
-              September through November 2026, grouped by status. Months with no
-              records stay visible so nothing looks missing by mistake.
+              Ongoing monitoring and search work stays in In progress above. For website
+              visitors and Google data, open{" "}
+              <Link href="/portal/analytics" className="kxd-os-link-quiet">
+                Performance
+              </Link>
+              . Completed items appear below when they are verified for that month.
             </p>
-            {HISTORY_MONTHS.map(({ year, month }) => (
-              <MonthHistoryBlock key={`${year}-${month}`} year={year} month={month} rows={rows} />
-            ))}
-          </div>
+          </section>
+
+          {monthsWithWork.length > 0 ? (
+            <div className="kxd-kxd-work__history">
+              <h2 className="kxd-os-section__label">Verified work by month</h2>
+              {monthsWithWork.map(({ year, month }) => (
+                <MonthHistoryBlock key={`${year}-${month}`} year={year} month={month} rows={rows} />
+              ))}
+            </div>
+          ) : null}
 
           {earlierComplete.length > 0 ? (
             <WorkSection

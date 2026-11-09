@@ -13,6 +13,8 @@ import type { PortalAccountSwitcherModel } from "@/lib/portal/account-context-ty
 import { ClientHqLogoutButton } from "./ClientHqLogoutButton";
 import { PortalFeedbackControl } from "./PortalFeedbackControl";
 import { OperatorPortalPreviewBanner } from "@/components/portal/OperatorPortalPreviewBanner";
+import { OperatorPreviewBusinessSwitcher } from "@/components/portal/OperatorPreviewBusinessSwitcher";
+import type { OperatorPreviewPortfolioOption } from "@/lib/portal/operator-preview/portfolio-options";
 import {
   clientHqNavIsActive,
   getEnabledPortalNavGroups,
@@ -46,18 +48,13 @@ export interface ClientHqShellProps {
     clientId: number;
     clientName: string;
     mode?: "preview" | "staff-test";
+    portfolioOptions?: OperatorPreviewPortfolioOption[];
   } | null;
   children: ReactNode;
 }
 
 function labelsMatch(a: string, b: string): boolean {
   return a.trim().toLowerCase() === b.trim().toLowerCase();
-}
-
-function isPortalOverviewPath(pathname: string | undefined): boolean {
-  if (!pathname) return false;
-  const normalized = pathname.replace(/\/+$/, "") || "/";
-  return normalized === "/portal";
 }
 
 export function ClientHqShell({
@@ -124,23 +121,20 @@ export function ClientHqShell({
       ? sidebarLabel
       : null;
   const cesShell = resolvePortalHomeShell(experienceProfile);
-  const reassuranceLine = experienceProfile?.hospitality.reassuranceLine;
-  const partnerLine = experienceProfile?.hospitality.partnerFooterLine;
-  /**
-   * Suppress sidebar partner credit only when the Executive Performance
-   * maker’s signature is actually rendered (overview + EP presentation).
-   * Other portal routes retain hospitality partner mark so attribution is never blank.
-   */
-  const workspaceSignaturePresent =
-    isPortalOverviewPath(pathname) &&
-    Boolean(experienceProfile?.presentation?.enabled);
-  const showPartnerMark =
-    (experienceProfile?.hospitality.showPartnerMark ?? true) &&
-    !workspaceSignaturePresent;
-  const clientLogo =
-    experienceProfile?.identity.logoUrl ??
-    experienceProfile?.presentation?.logoSrc ??
-    null;
+  const partnerLineRaw = experienceProfile?.hospitality.partnerFooterLine;
+  const partnerLine =
+    partnerLineRaw && !/kxd\s*os/i.test(partnerLineRaw)
+      ? partnerLineRaw.replace(/^Powered by\s+/i, "").trim()
+      : null;
+  const showSubtleKxdAttribution = experienceProfile?.hospitality.showPartnerMark ?? true;
+  const showFootAttribution = cesShell === "ces" && showSubtleKxdAttribution;
+  const registryLogo = experienceProfile?.presentation?.logoSrc ?? null;
+  const identityLogo = experienceProfile?.identity.logoUrl?.trim() || null;
+  const identityLogoUsable =
+    identityLogo && !identityLogo.includes("/api/media/file/")
+      ? identityLogo
+      : null;
+  const clientLogo = identityLogoUsable ?? registryLogo ?? null;
   const clientLogoAlt =
     experienceProfile?.identity.logoAlt ??
     experienceProfile?.presentation?.logoAlt ??
@@ -152,6 +146,8 @@ export function ClientHqShell({
     experienceProfile?.identity.logoOnDarkTreatment ?? "default";
   const logoNeedsLightPanel =
     Boolean(clientLogo) && logoOnDarkTreatment === "light-panel";
+  const logoNeedsDarkPanel =
+    Boolean(clientLogo) && logoOnDarkTreatment === "dark-panel";
 
   return (
     <>
@@ -160,6 +156,7 @@ export function ClientHqShell({
           clientId={operatorPreview.clientId}
           clientName={operatorPreview.clientName}
           mode={operatorPreview.mode}
+          portfolioOptions={operatorPreview.portfolioOptions}
         />
       ) : null}
       <KxdShell className="kxd-os-shell--app">
@@ -188,6 +185,15 @@ export function ClientHqShell({
             {quietWorkspaceLabel ? (
               <p className="kxd-ces-mobile-bar__workspace">{quietWorkspaceLabel}</p>
             ) : null}
+            {operatorPreview &&
+            operatorPreview.portfolioOptions &&
+            operatorPreview.portfolioOptions.length >= 2 ? (
+              <OperatorPreviewBusinessSwitcher
+                activeClientId={operatorPreview.clientId}
+                options={operatorPreview.portfolioOptions}
+                mode={operatorPreview.mode}
+              />
+            ) : null}
             {accountSwitcher ? (
               <AccountSwitcher
                 model={accountSwitcher}
@@ -215,7 +221,9 @@ export function ClientHqShell({
           <div
             className={`kxd-ces-identity${clientLogo ? " kxd-ces-identity--has-logo" : ""}${
               logoCarriesName ? " kxd-ces-identity--logo-wordmark" : ""
-            }${logoNeedsLightPanel ? " kxd-ces-identity--logo-light-panel" : ""}`}
+            }${logoNeedsLightPanel ? " kxd-ces-identity--logo-light-panel" : ""}${
+              logoNeedsDarkPanel ? " kxd-ces-identity--logo-dark-panel" : ""
+            }`}
           >
             {clientLogo ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -233,6 +241,15 @@ export function ClientHqShell({
             ) : null}
             {cesShell === "ces" ? (
               <p className="kxd-ces-identity__partner">Managed by Kreate by Design</p>
+            ) : null}
+            {operatorPreview &&
+            operatorPreview.portfolioOptions &&
+            operatorPreview.portfolioOptions.length >= 2 ? (
+              <OperatorPreviewBusinessSwitcher
+                activeClientId={operatorPreview.clientId}
+                options={operatorPreview.portfolioOptions}
+                mode={operatorPreview.mode}
+              />
             ) : null}
             {accountSwitcher ? (
               <AccountSwitcher
@@ -291,24 +308,23 @@ export function ClientHqShell({
           <div className="kxd-os-sidebar__foot">
             {operatorPreview ? null : <ClientNotificationsCenter />}
             {operatorPreview ? null : <PortalFeedbackControl />}
-            {reassuranceLine ? (
-              <p className="kxd-ces-trust-line">
-                <span className="kxd-ces-trust-line__dot" aria-hidden="true" />
-                <span className="kxd-ces-trust-line__text">{reassuranceLine}</span>
+            {showFootAttribution ? (
+              <p className="kxd-ces-partner-mark kxd-ces-partner-mark--subtle">
+                <KxdLogo height={9} aria-hidden />
+                <span className="kxd-ces-partner-mark__text">
+                  {partnerLine ?? "Kreate by Design"}
+                </span>
               </p>
             ) : null}
-            {showPartnerMark ? (
-              <p className="kxd-ces-partner-mark">
-                {experienceProfile ? (
-                  partnerLine
-                ) : (
-                  <>
-                    <KxdLogo height={12} /> · {partnerLine ?? sidebarLabel}
-                  </>
-                )}
-              </p>
-            ) : null}
-            <ClientHqLogoutButton isOperatorPreview={Boolean(operatorPreview)} />
+            <div
+              className={
+                operatorPreview
+                  ? "kxd-ces-sidebar-preview-exit"
+                  : undefined
+              }
+            >
+              <ClientHqLogoutButton isOperatorPreview={Boolean(operatorPreview)} />
+            </div>
           </div>
         </aside>
 

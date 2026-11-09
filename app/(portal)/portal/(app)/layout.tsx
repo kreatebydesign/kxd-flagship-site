@@ -18,6 +18,7 @@ import {
   ROBIN_COLE_FAVICON_SRC,
   ROBIN_COLE_LOGO_SRC,
 } from "@/lib/ces/profile/robin-cole";
+import { loadOperatorPreviewPortfolioOptions } from "@/lib/portal/operator-preview/portfolio-options";
 import "../../../../design-system/os/styles/kxd-os.css";
 import "../../../../design-system/ces/styles/kxd-ces.css";
 
@@ -76,17 +77,27 @@ export default async function PortalAppLayout({ children }: { children: React.Re
     }
   }
 
-  const [experienceProfile, editionBranding, accountContext, billingNavAvailable, commercialNavAvailable, websiteEditorUrl] =
-    await Promise.all([
-      resolveExperienceProfile(session),
-      Promise.resolve(getPortalEditionBranding()),
-      session.isOperatorPreview
-        ? Promise.resolve(null)
-        : resolvePortalAccountContext(session),
-      resolvePortalBillingNavAvailable(session),
-      resolvePortalCommercialNavAvailable(session.clientId),
-      resolvePortalWebsiteEditorUrl(session.clientId),
-    ]);
+  const [
+    experienceProfile,
+    editionBranding,
+    accountContext,
+    billingNavAvailable,
+    commercialNavAvailable,
+    websiteEditorUrl,
+    operatorPreviewPortfolioOptions,
+  ] = await Promise.all([
+    resolveExperienceProfile(session),
+    Promise.resolve(getPortalEditionBranding()),
+    session.isOperatorPreview
+      ? Promise.resolve(null)
+      : resolvePortalAccountContext(session),
+    resolvePortalBillingNavAvailable(session),
+    resolvePortalCommercialNavAvailable(session.clientId),
+    resolvePortalWebsiteEditorUrl(session.clientId),
+    session.isOperatorPreview
+      ? loadOperatorPreviewPortfolioOptions()
+      : Promise.resolve(null),
+  ]);
 
   return (
     <CesProfileProvider
@@ -116,6 +127,7 @@ export default async function PortalAppLayout({ children }: { children: React.Re
                   session.operatorPreview?.mode === "staff-test"
                     ? "staff-test"
                     : "preview",
+                portfolioOptions: operatorPreviewPortfolioOptions ?? undefined,
               }
             : null
         }

@@ -62,5 +62,6 @@ report-output/
 # Local Build 1 QA credentials (never commit)
 .qa-build1-creds.tmp
 .qa-primal-phase1-build1/
+.qa-your-space-visual/
 scripts/_tmp-seed-*
 scripts/_tmp-payload-*

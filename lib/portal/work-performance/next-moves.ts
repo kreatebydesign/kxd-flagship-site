@@ -70,8 +70,8 @@ export function buildWorkPerformanceNextMoves(input: {
     if (href) {
       moves.push({
         id: "view-deliverables",
-        title: "View deliverables",
-        lead: "See shared deliverables as partnership work progresses.",
+        title: "Open KXD Work",
+        lead: "See verified work by month and what is still open.",
         href,
       });
     }
@@ -82,8 +82,8 @@ export function buildWorkPerformanceNextMoves(input: {
     if (href) {
       moves.push({
         id: "open-requests",
-        title: "Open partnership requests",
-        lead: "Share a change or question with the KXD team.",
+        title: "Open requests",
+        lead: "Send a change or question to the KXD team.",
         href,
       });
     }

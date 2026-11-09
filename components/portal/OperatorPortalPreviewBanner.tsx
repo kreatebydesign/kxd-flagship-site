@@ -1,15 +1,19 @@
 "use client";
 
 import { useState } from "react";
+import { OperatorPreviewBusinessSwitcher } from "@/components/portal/OperatorPreviewBusinessSwitcher";
+import type { OperatorPreviewPortfolioOption } from "@/lib/portal/operator-preview/portfolio-options";
 
 export function OperatorPortalPreviewBanner({
   clientId,
   clientName,
   mode = "preview",
+  portfolioOptions = [],
 }: {
   clientId: number;
   clientName: string;
   mode?: "preview" | "staff-test";
+  portfolioOptions?: OperatorPreviewPortfolioOption[];
 }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -71,6 +75,13 @@ export function OperatorPortalPreviewBanner({
           <p className="kxd-operator-portal-preview__switch-error">{error}</p>
         ) : null}
       </div>
+      {portfolioOptions.length >= 2 ? (
+        <OperatorPreviewBusinessSwitcher
+          activeClientId={clientId}
+          options={portfolioOptions}
+          mode={mode}
+        />
+      ) : null}
       <div className="kxd-operator-portal-preview__actions">
         {isStaffTest ? (
           <button

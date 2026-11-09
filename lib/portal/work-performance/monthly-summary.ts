@@ -123,13 +123,20 @@ export type DeliverableSummarySource = {
  * Map a monthly-deliverable doc into a summary item, or null when excluded.
  * Uses schema `completedDate` only — never `updatedAt` / `createdAt` for completion.
  */
+import { clientFacingWorkLabel } from "../deliverables/client-facing-labels";
+
 export function mapDeliverableToMonthlySummaryItem(
   doc: DeliverableSummarySource,
 ): WorkPerformanceWorkItem | null {
   if (!isMonthlySummaryDeliverableStatus(String(doc.status ?? ""))) return null;
 
-  const title = String(doc.title ?? "").trim() || "Deliverable";
-  if (isPlaceholderDeliverableTitle(title)) return null;
+  const internalTitle = String(doc.title ?? "").trim() || "Deliverable";
+  if (isPlaceholderDeliverableTitle(internalTitle)) return null;
+  const clientNotes =
+    typeof (doc as { clientNotes?: unknown }).clientNotes === "string"
+      ? String((doc as { clientNotes?: string }).clientNotes).trim() || null
+      : null;
+  const { title } = clientFacingWorkLabel(internalTitle, clientNotes);
 
   const category =
     doc.category != null && String(doc.category).trim()
@@ -235,4 +242,4 @@ export function projectMonthlySummaryForPeriod(
 }
 
 export const MONTHLY_SUMMARY_SCOPE_NOTE =
-  "This summary highlights completed deliverables and Website Review work recorded for the reporting month. It is not a complete work ledger, invoice breakdown, or billable-hours report.";
+  "Completed items listed here were finished during this month only.";

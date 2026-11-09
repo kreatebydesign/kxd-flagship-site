@@ -235,14 +235,14 @@ function buildValueSummary(input: {
   awaitingClientCount: number;
 }): WorkPerformanceModel["valueSummary"] {
   const { periodLabel: label, completedCount, activeCount, awaitingClientCount } = input;
-  if (completedCount === 0 && activeCount === 0) {
+  if (completedCount === 0 && activeCount === 0 && awaitingClientCount === 0) {
     return {
       periodLabel: label,
       completedCount,
       activeCount,
       awaitingClientCount,
-      headline: "Your workspace is ready",
-      lead: "When work is recorded for the month, a short summary will appear here. Open KXD Work for the full history.",
+      headline: "No action needed right now",
+      lead: "When something is finished or underway for this month, it will show below. Open KXD Work for the full history by month.",
     };
   }
   if (awaitingClientCount > 0) {
@@ -251,8 +251,11 @@ function buildValueSummary(input: {
       completedCount,
       activeCount,
       awaitingClientCount,
-      headline: `${completedCount} recorded complete · ${awaitingClientCount} waiting on you`,
-      lead: "Below is a focused summary of completed deliverables and Website Review work for this month, plus items that need your attention.",
+      headline:
+        completedCount > 0
+          ? `${completedCount} finished this month · ${awaitingClientCount} need your input`
+          : `${awaitingClientCount} need your input`,
+      lead: "Finished items use the month they were completed. Open KXD Work for full history.",
     };
   }
   return {
@@ -260,8 +263,14 @@ function buildValueSummary(input: {
     completedCount,
     activeCount,
     awaitingClientCount,
-    headline: `${completedCount} recorded complete this month · ${activeCount} underway`,
-    lead: "A focused view of completed deliverables and Website Review work recorded for this month — not an invoice breakdown or complete work ledger.",
+    headline:
+      completedCount > 0
+        ? `${completedCount} finished this month · ${activeCount} ongoing`
+        : activeCount > 0
+          ? `${activeCount} ongoing`
+          : "Current work",
+    lead:
+      "Finished items below are for this month only. Ongoing work is open across months, not tied to this month.",
   };
 }
 
@@ -391,32 +400,32 @@ export function composeWorkPerformanceModel(
     clientValue,
     emptyStates: {
       completed: {
-        title: "No completed work recorded for this month",
-        lead: `${MONTHLY_SUMMARY_SCOPE_NOTE} When a deliverable or Website Review is marked complete with a completion date in this month, it will appear here.`,
+        title: "Nothing finished this month",
+        lead: `${MONTHLY_SUMMARY_SCOPE_NOTE} Finished work for other months still appears in KXD Work under that month.`,
       },
       active: {
-        title: "Nothing in progress right now",
-        lead: "Active partnership work will show here when KXD has items underway for this business.",
+        title: "No ongoing work",
+        lead: "When KXD is actively working on something for this business, it will show here.",
       },
       requests: {
-        title: "No website update requests yet",
-        lead: "Submit a request when you have notes, screenshots, or revision needs.",
+        title: "No open website feedback",
+        lead: "Use Website Review when you have notes or screenshots to share.",
       },
       analytics: {
-        title: "Analytics unavailable",
-        lead: "Website results appear here when the active partnership includes reporting and verified information is available for the period.",
+        title: "Website performance",
+        lead: "Numbers appear here when reporting is turned on and the latest period is ready.",
       },
       leads: {
-        title: "Lead tracking unavailable",
-        lead: "Tracked website conversions appear when analytics facts include them. Sales pipeline stays operator-only.",
+        title: "Conversions not available",
+        lead: "Tracked form or goal actions show when your analytics include them.",
       },
       wins: {
-        title: "No verified wins this period",
-        lead: "Positive movement is highlighted only when metrics improve enough to be meaningful — never invented.",
+        title: "No clear win this period",
+        lead: "We only call out movement when the data supports it.",
       },
       nextMoves: {
-        title: "No recommended next move right now",
-        lead: "Helpful next steps appear when there is a clear, authorized action available in your workspace.",
+        title: "Nothing queued",
+        lead: "No action needed right now.",
       },
     },
     monthlySummaryScopeNote: MONTHLY_SUMMARY_SCOPE_NOTE,

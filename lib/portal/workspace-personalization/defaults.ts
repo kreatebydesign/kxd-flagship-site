@@ -28,7 +28,7 @@ export const NEUTRAL_WELCOME: WorkspaceWelcomeModel = {
   eyebrow: "Your space",
   titleTemplate: "welcome-first-name",
   lead:
-    "What KXD has finished, what is in progress, and anything we need from you.",
+    "Here's what's happening with your website and what we're working on.",
 };
 
 export const NEUTRAL_EMPTY_STATES: Partial<
@@ -52,7 +52,7 @@ export const NEUTRAL_EMPTY_STATES: Partial<
     lead: "New deliverables will appear here when they are ready to share.",
     action: {
       id: "empty-deliverables",
-      label: "View deliverables",
+      label: "Open KXD Work",
       href: "/portal/deliverables",
     },
   },

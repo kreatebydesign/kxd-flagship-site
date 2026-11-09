@@ -53,7 +53,7 @@ const ACTION_CATALOG: ActionDefinition[] = [
   },
   {
     id: "view-deliverables",
-    label: "View deliverables",
+    label: "Open KXD Work",
     href: "/portal/deliverables",
     description: "See shared deliverables",
     requires: { kind: "client-hq", moduleId: "deliverables" },
