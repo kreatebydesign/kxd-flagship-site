@@ -64,6 +64,18 @@ function main() {
     errors.push("ledger too small for Sep–Nov reconciliation");
   }
 
+  const octDrafts = (data as { october2026PerformanceDrafts?: unknown[] })
+    .october2026PerformanceDrafts;
+  if (!octDrafts || octDrafts.length !== 4) {
+    errors.push("expected 4 October 2026 performance drafts");
+  }
+
+  const novPlan = (data as { november2026ExecutionPlan?: unknown[] })
+    .november2026ExecutionPlan;
+  if (!novPlan || novPlan.length < 5) {
+    errors.push("November execution plan missing or too small");
+  }
+
   const seenIds = new Set<number>();
   for (const row of records) {
     if (!PORTFOLIO_CLIENT_IDS.has(row.clientId)) {

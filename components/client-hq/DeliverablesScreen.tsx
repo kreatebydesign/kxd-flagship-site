@@ -249,8 +249,9 @@ function MonthHistoryBlock({
       </h2>
       {monthRows.length === 0 ? (
         <p className="kxd-os-meta">
-          No work items are recorded for this month yet. When KXD logs work for{" "}
-          {formatMonthHeading(year, month)}, it will appear here.
+            No work items are tagged for this month in KXD OS. That does not mean nothing
+              happened. Check Performance for reporting data or ask KXD if you expected a
+              logged item for {formatMonthHeading(year, month)}.
         </p>
       ) : (
         <div className="kxd-kxd-work__month-groups">

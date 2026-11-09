@@ -12,6 +12,12 @@ import {
   RECONCILIATION_LEDGER,
   SUPPLEMENTARY_EVIDENCE,
 } from "./lib/cusick-portfolio-reconciliation-2026";
+import { OCTOBER_2026_PERFORMANCE_DRAFTS } from "./lib/cusick-portfolio-october-2026-drafts";
+import {
+  CLIENT_VALUE_PROFILES,
+  NOVEMBER_2026_EXECUTION_PLAN,
+  READONLY_INSPECTION_2026_11_09,
+} from "./lib/cusick-portfolio-ongoing-value";
 
 const root = process.cwd();
 const outPath = join(root, "docs/data/cusick-portfolio-batch-bc-client-notes-package.json");
@@ -22,7 +28,7 @@ const payload = {
     generatedAt: "2026-11-09",
     scope: "Clients 5, 9, 10, 14 only",
     purpose:
-      "Reviewable clientNotes proposals and Sep–Nov 2026 work ledger. Does not authorize production writes.",
+      "Reviewable clientNotes, work ledger, October performance drafts, and November plan. Does not authorize production writes or report publishing.",
     reconciliationSources: [
       "monthly_deliverables (production Postgres)",
       "work (KXD Work Engine)",
@@ -52,9 +58,15 @@ const payload = {
     internalNotesPreserved: true,
   })),
   proposedMilestones: PROPOSED_MILESTONES,
+  accountValueByClient: CLIENT_VALUE_PROFILES,
+  october2026PerformanceDrafts: OCTOBER_2026_PERFORMANCE_DRAFTS,
+  november2026ExecutionPlan: NOVEMBER_2026_EXECUTION_PLAN,
+  readonlyInspection: READONLY_INSPECTION_2026_11_09,
 };
 
 writeFileSync(outPath, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
 console.log(`Wrote ${outPath}`);
 console.log(`  ledger items: ${RECONCILIATION_LEDGER.length}`);
 console.log(`  deliverable records: ${DELIVERABLE_CLIENT_NOTES.length}`);
+console.log(`  October performance drafts: ${OCTOBER_2026_PERFORMANCE_DRAFTS.length}`);
+console.log(`  November plan tasks: ${NOVEMBER_2026_EXECUTION_PLAN.length}`);
