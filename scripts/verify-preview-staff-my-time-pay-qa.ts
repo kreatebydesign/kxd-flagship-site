@@ -5,7 +5,8 @@ import assert from "node:assert/strict";
 
 function bootstrapPreviewDatabaseUri(): void {
   const uri = process.env.NEON_PREVIEW_URI?.trim() || process.env.DATABASE_URI?.trim();
-  assert.ok(uri?.includes("ep-frosty-bonus-afx8tf8q"), "preview-kxd-os DATABASE_URI required");
+  assert.ok(uri, "NEON_PREVIEW_URI or DATABASE_URI is required");
+  assert.ok(uri.includes("ep-frosty-bonus-afx8tf8q"), "preview-kxd-os DATABASE_URI required");
   assert.ok(!uri.includes("ep-twilight-math"), "production endpoint refused");
   process.env.DATABASE_URI = uri;
   process.env.DATABASE_URL = uri;

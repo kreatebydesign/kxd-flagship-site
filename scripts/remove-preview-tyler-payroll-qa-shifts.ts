@@ -15,7 +15,8 @@ import { TYLER_RETHWILL_STAFF_USER_ID } from "../lib/staff-pay/tyler-october-his
 
 async function main(): Promise<void> {
   const uri = process.env.NEON_PREVIEW_URI?.trim();
-  assert.ok(uri?.includes(PREVIEW_KXD_OS_ENDPOINT_ID));
+  assert.ok(uri, "NEON_PREVIEW_URI is required");
+  assert.ok(uri.includes(PREVIEW_KXD_OS_ENDPOINT_ID));
   assert.equal(process.env.KXD_CONFIRM_PREVIEW_DB_WRITE?.trim(), "1");
 
   const client = new pg.Client({ connectionString: uri });
