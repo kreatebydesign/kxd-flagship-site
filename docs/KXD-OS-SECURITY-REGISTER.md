@@ -26,13 +26,16 @@ Do not treat checklist items as complete without evidence in this file or linked
 | Field | Value |
 |-------|--------|
 | **Source** | [Node.js Oct 21, 2026 security releases](https://nodejs.org/en/blog/vulnerability/october-2026-security-releases) |
-| **Highest** | HIGH (incl. **CVE-2026-111497** Brotli decoder OOB → potential RCE via `node:zlib`) |
+| **CVE** | **CVE-2026-111497** (HIGH — Brotli decoder OOB via `node:zlib`) |
 | **Affected lines** | **Node.js 22.x, 24.x, 26.x** (patched: **v22.23.4**, **v24.22.1**, **v26.12.1**) |
-| **KXD repo** | No `engines` in `package.json`; no `.nvmrc`; `vercel.json` has no Node pin; local dev observed **v20.20.2** |
-| **Assessment** | **Oct 2026 CVE set does not list Node 20.x** in official release notes. If Vercel production runtime is **20.x**, these specific patches may not apply; **confirm runtime in Vercel project settings** (not verified in this session — MCP scope 403). |
-| **Status** | **Monitor / verify runtime** — separate runtime PR if production uses 22+ or when upgrading to 22 LTS |
+| **Vercel project** | `kxd-flagship-site` — **Node 24.x** (project setting) |
+| **Diagnostic** | PR **#115** merged `c7a38193` — `GET /api/admin/system/database-target` returns `nodeRuntimeVersion` + `nodeRuntimeMeetsCve2026111497Minimum` (studio Payload **admin** only) |
+| **Production deploy (2026-10-26)** | Vercel `dpl_EtXj1RSyf7L35rZ1rAoTDy4YSbnk` — **READY** @ merge `c7a381930956d39f9bacffe049d00758de11f717` |
+| **Post-deploy probes (unauthenticated)** | `GET /api/admin/system/database-target` → **401** `Unauthorized`; `GET /api/db-health` → **401**; `GET /admin/operations/staff/documents` → **307**; `GET /` → **200** |
+| **Live runtime patch proof** | **PENDING** — authenticated founder probe not yet recorded (requires Matt session on production) |
+| **Status** | **UNVERIFIED** for CVE closure until live `nodeRuntimeVersion` shows **≥ v24.22.1** and `nodeRuntimeMeetsCve2026111497Minimum === true` |
 | **Owner** | Matt + Engineering |
-| **Dependency** | Vercel project Node version; optional `.nvmrc` + `engines` after runtime confirmation |
+| **Verify** | `npm run verify:database-target-node-runtime`; production: `fetch('/api/admin/system/database-target', { credentials: 'include' })` while logged in as Payload **admin** |
 
 ---
 
