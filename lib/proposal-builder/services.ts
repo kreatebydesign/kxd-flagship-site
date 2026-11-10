@@ -1297,13 +1297,17 @@ export async function acceptProposal(
   }
 
   try {
-    const { notifyLifecycleEvent } = await import("../proposal-lifecycle/notifications.ts");
+    const { emitLifecycleOperatorHandoff } = await import(
+      "../proposal-lifecycle/operator-handoff.ts"
+    );
     const clientRel =
       typeof proposal.client === "object" ? proposal.client?.id : proposal.client;
-    await notifyLifecycleEvent({
+    await emitLifecycleOperatorHandoff({
+      flowKind: "proposal.accepted",
+      entityId: proposal.id,
+      clientId: clientRel ? Number(clientRel) : null,
       title: `Proposal ${String(proposal.proposalNumber)} was accepted`,
       summary: `${acceptance.name} accepted for ${acceptance.organization}. Contract draft ready for internal review.`,
-      clientId: clientRel ? Number(clientRel) : undefined,
       severity: "success",
       href: `/admin/sales/contracts/${contractId}`,
       metadata: {
@@ -1314,7 +1318,7 @@ export async function acceptProposal(
       },
     });
   } catch {
-    /* notifications are best-effort */
+    /* operator handoff is best-effort */
   }
 
   return { proposal, contractId: contractId!, acceptance, alreadyAccepted: false };

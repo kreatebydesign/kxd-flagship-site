@@ -134,6 +134,39 @@ export async function processLiveCommercialStripeWebhookEvent(input: {
   });
   await savePkg(payload, contractId, applied.pkg);
 
+  if (!applied.duplicate && applied.appliedToObligation) {
+    try {
+      const { contract } = await loadContract(contractId);
+      const clientId =
+        typeof contract.client === "number"
+          ? contract.client
+          : contract.client && typeof contract.client === "object" && "id" in contract.client
+            ? Number((contract.client as { id: number }).id)
+            : null;
+      const { emitLifecycleOperatorHandoff } = await import("./operator-handoff.ts");
+      await emitLifecycleOperatorHandoff({
+        flowKind: "invoice.paid",
+        entityId: contractId,
+        clientId,
+        title: `Payment received — ${String(contract.title ?? "Agreement")}`,
+        summary:
+          "Live Stripe invoice payment applied to the commercial lifecycle package. Review obligations and onboarding eligibility.",
+        severity: "success",
+        href: `/admin/sales/contracts/${contractId}`,
+        metadata: {
+          kind: "invoice.paid.live",
+          contractId,
+          stripeEventId: event.id,
+          stripeInvoiceId: invoiceId,
+          livemode: true,
+          onboardingEligible: Boolean(applied.pkg.onboardingEligible),
+        },
+      });
+    } catch {
+      /* best-effort */
+    }
+  }
+
   return {
     ok: true,
     duplicate: applied.duplicate,
