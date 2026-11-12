@@ -82,3 +82,40 @@ export function attentionLabel(attention: CalendarAttention): string | null {
 export function eventHeadline(event: CalendarEventRecord): string {
   return displayTitle(event);
 }
+
+export type EventDateRailParts = {
+  monthLabel: string;
+  dayLabel: string;
+  yearLabel: string;
+  endDayLabel: string | null;
+  multiDay: boolean;
+};
+
+/** Month/day stack for calendar list cards (portal presentation only). */
+export function eventDateRailParts(startsOn: string, endsOn: string | null): EventDateRailParts {
+  const start = new Date(`${startsOn}T12:00:00`);
+  if (Number.isNaN(start.getTime())) {
+    return {
+      monthLabel: "—",
+      dayLabel: startsOn.slice(8, 10) || "—",
+      yearLabel: startsOn.slice(0, 4) || "",
+      endDayLabel: null,
+      multiDay: false,
+    };
+  }
+  const multiDay = Boolean(endsOn && endsOn !== startsOn);
+  let endDayLabel: string | null = null;
+  if (multiDay && endsOn) {
+    const end = new Date(`${endsOn}T12:00:00`);
+    if (!Number.isNaN(end.getTime())) {
+      endDayLabel = String(end.getDate());
+    }
+  }
+  return {
+    monthLabel: start.toLocaleDateString("en-US", { month: "short" }).toUpperCase(),
+    dayLabel: String(start.getDate()),
+    yearLabel: String(start.getFullYear()),
+    endDayLabel,
+    multiDay,
+  };
+}

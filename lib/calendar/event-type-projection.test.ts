@@ -5,7 +5,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { defaultFieldAuthority } from "./authority.ts";
-import { EVENT_TYPE_LABELS } from "./presentation.ts";
+import { EVENT_TYPE_LABELS, eventDateRailParts } from "./presentation.ts";
 import { toPublicCalendarEvent } from "./parse.ts";
 import { CALENDAR_EVENT_TYPES } from "./types.ts";
 import type { CalendarEventRecord } from "./types.ts";
@@ -76,6 +76,13 @@ describe("track_day event type", () => {
     assert.ok(pub);
     assert.equal(pub.eventType, "track_day");
     assert.equal(pub.eventTypeLabel, "Track day");
+  });
+
+  it("eventDateRailParts supports multi-day ranges", () => {
+    const rail = eventDateRailParts("2026-11-12", "2026-11-14");
+    assert.equal(rail.multiDay, true);
+    assert.equal(rail.endDayLabel, "14");
+    assert.ok(rail.monthLabel.length >= 3);
   });
 
   it("public projection keeps MotorsportReg sourceEventType label", () => {

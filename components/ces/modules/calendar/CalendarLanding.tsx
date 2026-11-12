@@ -10,6 +10,7 @@ import {
   STATUS_LABELS,
   attentionLabel,
   eventAttention,
+  eventDateRailParts,
   eventHeadline,
   formatEventDate,
   formatVenue,
@@ -21,6 +22,58 @@ type Props = {
   profile: ResolvedExperienceProfile;
   events: CalendarEventRecord[];
 };
+
+function statusTone(event: CalendarEventRecord): "won" | "new" | "lost" {
+  if (event.status === "cancelled") return "lost";
+  if (event.listedOnWebsite) return "won";
+  return "new";
+}
+
+function CalendarEventCard({ event }: { event: CalendarEventRecord }) {
+  const attention = eventAttention(event);
+  const rail = eventDateRailParts(event.startsOn, event.endsOn);
+  const venue = formatVenue(event);
+  const attentionText = attentionLabel(attention);
+
+  return (
+    <li className="kxd-cal-event-card">
+      <div className="kxd-cal-event-card__rail" aria-hidden>
+        <span className="kxd-cal-event-card__month">{rail.monthLabel}</span>
+        <span className="kxd-cal-event-card__day">{rail.dayLabel}</span>
+        {rail.multiDay && rail.endDayLabel ? (
+          <span className="kxd-cal-event-card__day-range">– {rail.endDayLabel}</span>
+        ) : null}
+        <span className="kxd-cal-event-card__year">{rail.yearLabel}</span>
+      </div>
+      <div className="kxd-cal-event-card__body">
+        <h3 className="kxd-cal-event-card__title">
+          <Link href={`/portal/calendar/${event.eventKey}`}>{eventHeadline(event)}</Link>
+        </h3>
+        {venue ? (
+          <p className="kxd-cal-event-card__venue">{venue}</p>
+        ) : (
+          <p className="kxd-cal-event-card__venue kxd-cal-event-card__venue--missing">Venue not set</p>
+        )}
+        <div className="kxd-cal-event-card__chips">
+          <span className="kxd-cal-chip kxd-cal-chip--type">{EVENT_TYPE_LABELS[event.eventType]}</span>
+          <span className="kxd-cal-chip">{SOURCE_LABELS[event.sourceSystem]}</span>
+          {attentionText ? <span className="kxd-cal-chip kxd-cal-chip--attention">{attentionText}</span> : null}
+        </div>
+      </div>
+      <div className="kxd-cal-event-card__aside">
+        <span className={`kxd-ces-status kxd-ces-status--${statusTone(event)}`}>
+          {event.listedOnWebsite ? "On website" : STATUS_LABELS[event.status]}
+        </span>
+        <Link
+          href={`/portal/calendar/${event.eventKey}`}
+          className="kxd-ces-btn kxd-ces-btn--ghost kxd-cal-event-card__manage"
+        >
+          Manage
+        </Link>
+      </div>
+    </li>
+  );
+}
 
 export function CalendarLanding({ events: initial }: Props) {
   const [events, setEvents] = useState(initial);
@@ -66,6 +119,11 @@ export function CalendarLanding({ events: initial }: Props) {
   const attentionCount = events.filter((event) => eventAttention(event) !== "none").length;
   const publishedCount = events.filter((event) => event.listedOnWebsite).length;
 
+  const latestChange = useMemo(() => {
+    const sorted = [...events].sort((a, b) => (b.updatedAt ?? "").localeCompare(a.updatedAt ?? ""));
+    return sorted[0]?.updatedAt ? fmtPortalDate(sorted[0].updatedAt) : "—";
+  }, [events]);
+
   function refresh() {
     startTransition(async () => {
       setError(null);
@@ -100,11 +158,11 @@ export function CalendarLanding({ events: initial }: Props) {
   }
 
   return (
-    <CesPage>
+    <CesPage className="kxd-cal-landing">
       <CesHero
         eyebrow="Schedule"
         title="Calendar"
-        lead="See what’s next, keep Primal notes accurate, and publish the events that should appear on the website."
+        lead="Season schedule, official MotorsportReg dates, and what Primal publishes to the website."
         actions={
           <div className="kxd-ces-hero__action-row">
             <Link href="/portal/calendar/new" className="kxd-ces-btn kxd-ces-btn--primary">
@@ -125,41 +183,41 @@ export function CalendarLanding({ events: initial }: Props) {
         }
       />
 
-      <section className="kxd-inv-command" aria-labelledby="calendar-next-title">
-        <header>
-          <p className="kxd-client-home__eyebrow">What’s next</p>
-          <h2 id="calendar-next-title">
+      <section className="kxd-cal-command" aria-labelledby="calendar-next-title">
+        <div>
+          <p className="kxd-cal-command__eyebrow">Next on the calendar</p>
+          <h2 id="calendar-next-title" className="kxd-cal-command__title">
             {nextEvent ? eventHeadline(nextEvent) : "No upcoming events yet"}
           </h2>
-          <p>
+          <p className="kxd-cal-command__lead">
             {nextEvent
-              ? `${formatEventDate(nextEvent.startsOn, nextEvent.endsOn)}${formatVenue(nextEvent) ? ` · ${formatVenue(nextEvent)}` : ""}`
+              ? `${formatEventDate(nextEvent.startsOn, nextEvent.endsOn)}${formatVenue(nextEvent) ? ` · ${formatVenue(nextEvent)}` : ""}${nextEvent ? ` · ${EVENT_TYPE_LABELS[nextEvent.eventType]}` : ""}`
               : "Refresh the official schedule or add a Primal event."}
           </p>
-        </header>
-        <dl>
-          <div>
-            <dt>Upcoming</dt>
-            <dd>{upcoming.length}</dd>
-          </div>
-          <div>
-            <dt>On website</dt>
-            <dd>{publishedCount}</dd>
-          </div>
-          <div>
-            <dt>Needs attention</dt>
-            <dd>{attentionCount}</dd>
-          </div>
-          <div>
-            <dt>Latest change</dt>
-            <dd>
-              {events[0]?.updatedAt ? fmtPortalDate([...events].sort((a, b) => (b.updatedAt ?? "").localeCompare(a.updatedAt ?? ""))[0]?.updatedAt ?? "") : "—"}
-            </dd>
-          </div>
-        </dl>
+        </div>
+        <ul className="kxd-cal-command__metrics">
+          <li>
+            <span className="kxd-cal-command__metric-label">Upcoming</span>
+            <span className="kxd-cal-command__metric-value">{upcoming.length}</span>
+          </li>
+          <li>
+            <span className="kxd-cal-command__metric-label">On website</span>
+            <span className="kxd-cal-command__metric-value">{publishedCount}</span>
+          </li>
+          <li>
+            <span className="kxd-cal-command__metric-label">Needs attention</span>
+            <span className="kxd-cal-command__metric-value">{attentionCount}</span>
+          </li>
+          <li>
+            <span className="kxd-cal-command__metric-label">Latest change</span>
+            <span className="kxd-cal-command__metric-value kxd-cal-command__metric-value--small">
+              {latestChange}
+            </span>
+          </li>
+        </ul>
       </section>
 
-      <section className="kxd-ces-section kxd-inv-toolbar" aria-label="Calendar filters">
+      <section className="kxd-ces-section kxd-cal-toolbar" aria-label="Calendar filters">
         <label className="kxd-inv-field">
           <span className="kxd-inv-field__label">Search</span>
           <input
@@ -180,7 +238,7 @@ export function CalendarLanding({ events: initial }: Props) {
             <option value="cancelled">Cancelled</option>
           </select>
         </label>
-        <p className="kxd-inv-toolbar__count">
+        <p className="kxd-cal-toolbar__count">
           {filtered.length} event{filtered.length === 1 ? "" : "s"}
         </p>
       </section>
@@ -220,41 +278,11 @@ export function CalendarLanding({ events: initial }: Props) {
       ) : null}
 
       {filtered.length > 0 ? (
-        <section className="kxd-ces-section kxd-inv-list-wrap" aria-label="Events">
-          <ul className="kxd-inv-list">
-            {filtered.map((event) => {
-              const attention = eventAttention(event);
-              return (
-                <li key={event.id} className="kxd-inv-card">
-                  <div className="kxd-inv-card__body">
-                    <div className="kxd-inv-card__top">
-                      <div>
-                        <h3>
-                          <Link href={`/portal/calendar/${event.eventKey}`}>{eventHeadline(event)}</Link>
-                        </h3>
-                        <p className="kxd-inv-card__meta">
-                          {formatEventDate(event.startsOn, event.endsOn)}
-                          {formatVenue(event) ? ` · ${formatVenue(event)}` : ""}
-                          {` · ${EVENT_TYPE_LABELS[event.eventType]}`}
-                          {` · ${SOURCE_LABELS[event.sourceSystem]}`}
-                        </p>
-                      </div>
-                      <span className={`kxd-ces-status kxd-ces-status--${event.status === "cancelled" ? "lost" : event.listedOnWebsite ? "won" : "new"}`}>
-                        {event.listedOnWebsite ? "On website" : STATUS_LABELS[event.status]}
-                      </span>
-                    </div>
-                    {attentionLabel(attention) ? (
-                      <p className="kxd-inv-card__price">{attentionLabel(attention)}</p>
-                    ) : null}
-                    <div className="kxd-inv-card__actions">
-                      <Link href={`/portal/calendar/${event.eventKey}`} className="kxd-ces-btn kxd-ces-btn--ghost">
-                        Open
-                      </Link>
-                    </div>
-                  </div>
-                </li>
-              );
-            })}
+        <section className="kxd-ces-section" aria-label="Events">
+          <ul className="kxd-cal-list">
+            {filtered.map((event) => (
+              <CalendarEventCard key={event.id} event={event} />
+            ))}
           </ul>
         </section>
       ) : null}
