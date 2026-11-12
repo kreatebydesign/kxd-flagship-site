@@ -18,6 +18,7 @@ export function ClientHqAppShell({
   commercialNavAvailable = false,
   websiteEditorUrl = null,
   operatorPreview = null,
+  portalMemberEmail = null,
 }: {
   children: React.ReactNode;
   companyName?: string;
@@ -33,6 +34,7 @@ export function ClientHqAppShell({
     clientName: string;
     mode?: "preview" | "staff-test";
   } | null;
+  portalMemberEmail?: string | null;
 }) {
   const pathname = usePathname();
   const activeId = resolvePortalNavId(pathname);
@@ -50,6 +52,7 @@ export function ClientHqAppShell({
       commercialNavAvailable={commercialNavAvailable}
       websiteEditorUrl={websiteEditorUrl}
       operatorPreview={operatorPreview}
+      portalMemberEmail={portalMemberEmail}
     >
       {children}
     </ClientHqShell>

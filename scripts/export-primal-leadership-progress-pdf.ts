@@ -5,6 +5,9 @@
  * Prerequisites: production build (`npm run build`) and a running server
  * (`npm run start`) OR pass --base=http://localhost:3000
  *
+ * Authorization: the print route requires a portal JB session, operator preview,
+ * or an authenticated KXD OS studio admin cookie in the Playwright browser context.
+ *
  * Run:
  *   npx tsx scripts/export-primal-leadership-progress-pdf.ts
  *   npx tsx scripts/export-primal-leadership-progress-pdf.ts --base=http://127.0.0.1:3000

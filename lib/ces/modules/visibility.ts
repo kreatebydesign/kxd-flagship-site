@@ -11,6 +11,7 @@ import { getEditionById } from "@/lib/editions/registry";
 import { isExecutiveClientBriefingAvailable } from "@/lib/executive-client-summary/availability";
 import { isCesModuleEnabled, type ResolvedExperienceProfile } from "../types";
 import { isExecutivePerformanceAvailable } from "../executive-performance/presentation";
+import { applyPortalMemberReportsVisibility } from "@/lib/portal/member-reports-access";
 import {
   getCanonicalCapability,
   impliedPortalModulesFromReporting,
@@ -24,6 +25,9 @@ export type PortalModuleVisibilityContext = {
   profile: ResolvedExperienceProfile;
   billingNavAvailable?: boolean;
   portfolioNavAvailable?: boolean;
+  /** Active portal login email — used for member-scoped module gates (e.g. Primal Reports). */
+  portalMemberEmail?: string | null;
+  isOperatorPreview?: boolean;
 };
 
 function editionAllowsPortalModule(moduleId: PortalModuleId): boolean {
@@ -83,21 +87,26 @@ export function isPortalModuleVisible(
   const { profile } = ctx;
   if (!editionAllowsPortalModule(moduleId)) return false;
 
+  let baseVisible = false;
   switch (def.portal.activation) {
     case "always":
-      return true;
+      baseVisible = true;
+      break;
     case "billing":
-      return ctx.billingNavAvailable === true;
+      baseVisible = ctx.billingNavAvailable === true;
+      break;
     case "portfolio":
-      return ctx.portfolioNavAvailable === true;
+      baseVisible = ctx.portfolioNavAvailable === true;
+      break;
     case "opt-in":
-      return enabledPortalIds(profile).includes(moduleId);
+      baseVisible = enabledPortalIds(profile).includes(moduleId);
+      break;
     case "ces-opt-in":
-      return (
+      baseVisible =
         isCesExperienceModuleId(moduleId) &&
         (isCesModuleEnabled(profile, moduleId) ||
-          enabledPortalIds(profile).includes(moduleId))
-      );
+          enabledPortalIds(profile).includes(moduleId));
+      break;
     case "presentation": {
       const entitled = isCesModuleEnabled(profile, "executive-performance");
       const presentationOn = isExecutivePerformanceAvailable(
@@ -106,13 +115,23 @@ export function isPortalModuleVisible(
       const briefingOn = isExecutiveClientBriefingAvailable(
         profile.identity.clientSlug,
       );
-      return entitled || presentationOn || briefingOn;
+      baseVisible = entitled || presentationOn || briefingOn;
+      break;
     }
     case "hq-default":
-      return hqDefaultVisible(profile, moduleId);
+      baseVisible = hqDefaultVisible(profile, moduleId);
+      break;
     default:
-      return false;
+      baseVisible = false;
   }
+
+  if (!baseVisible) return false;
+
+  return applyPortalMemberReportsVisibility(moduleId, {
+    clientSlug: profile.identity.clientSlug,
+    portalUserEmail: ctx.portalMemberEmail,
+    isOperatorPreview: ctx.isOperatorPreview,
+  });
 }
 
 export function listVisiblePortalModuleIds(

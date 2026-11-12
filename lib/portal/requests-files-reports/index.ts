@@ -39,7 +39,10 @@ export {
 
 export { buildPortalAuditDeliverableViewModel } from "./audit-deliverable";
 
-export { isBatchGClientHqSurfaceAvailable } from "./surface-access";
+export {
+  isBatchGClientHqSurfaceAvailable,
+  isPortalReportsSurfaceAvailable,
+} from "./surface-access";
 
 export {
   decidePortalRelatedProjectAccess,

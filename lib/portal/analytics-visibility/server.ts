@@ -23,6 +23,7 @@ import {
 } from "@/lib/reporting/persistence";
 import { loadClientReportingConnection } from "@/lib/reporting/providers/connection";
 import { countWebsiteFormInquiries } from "@/lib/reporting/leads/website-form-inquiries";
+import { canPortalMemberAccessReports } from "@/lib/portal/member-reports-access";
 import { composeAnalyticsVisibilityModel } from "./compose";
 import type { AnalyticsVisibilityModel, AnalyticsVisibilityReportItem } from "./types";
 
@@ -118,15 +119,23 @@ export async function resolvePortalAnalyticsVisibility(input: {
       reports as unknown as Array<Record<string, unknown>>,
       session.clientId,
     );
-    const leadershipReports: AnalyticsVisibilityReportItem[] = isPrimal
-      ? listCuratedPrimalLeadershipReportItems().map((item, index) => ({
-          id: -(index + 1),
-          title: item.title,
-          periodLabel: `${item.typeLabel} · ${item.periodLabel}`,
-          href: item.href,
-        }))
+    const reportsMemberOk = canPortalMemberAccessReports({
+      clientSlug: experienceProfile.identity.clientSlug,
+      portalUserEmail: session.email,
+      isOperatorPreview: session.isOperatorPreview,
+    });
+    const leadershipReports: AnalyticsVisibilityReportItem[] =
+      isPrimal && reportsMemberOk
+        ? listCuratedPrimalLeadershipReportItems().map((item, index) => ({
+            id: -(index + 1),
+            title: item.title,
+            periodLabel: `${item.typeLabel} · ${item.periodLabel}`,
+            href: item.href,
+          }))
+        : [];
+    publishedReports = reportsMemberOk
+      ? [...leadershipReports, ...cmsReports]
       : [];
-    publishedReports = [...leadershipReports, ...cmsReports];
 
     if (facts.length > 0) {
       const provenance = summarizeReportingFactProvenance(facts);

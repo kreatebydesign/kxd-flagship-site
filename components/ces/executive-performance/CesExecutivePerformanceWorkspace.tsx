@@ -10,10 +10,7 @@ import {
   type ExecutivePerformanceBriefing,
   type ExecutiveWorkspaceZoneId,
 } from "@/lib/ces/executive-performance";
-import {
-  getLatestPrimalLeadershipReportHref,
-  isPrimalLeadershipReportClient,
-} from "@/lib/ces/leadership-report";
+import { getLatestPrimalLeadershipReportHref } from "@/lib/ces/leadership-report";
 import type { LeadAttentionCounts } from "@/lib/client-command/leads/types";
 import { summarizeLeadAttentionHeadline } from "@/lib/client-command/leads/overview";
 import { CesWorkspaceSignature } from "./CesWorkspaceSignature";
@@ -23,6 +20,8 @@ export interface CesExecutivePerformanceWorkspaceProps {
   websiteReview: WebsiteReviewLandingData;
   /** Real lead attention counts when Leads is enabled — never invented. */
   leadAttention?: LeadAttentionCounts | null;
+  /** Session-bound Primal Reports allowlist (server-resolved). */
+  showLeadershipReportLink?: boolean;
 }
 
 function connectionLabel(state: string, summary?: string | null): string {
@@ -99,6 +98,7 @@ export function CesExecutivePerformanceWorkspace({
   performance,
   websiteReview,
   leadAttention = null,
+  showLeadershipReportLink = false,
 }: CesExecutivePerformanceWorkspaceProps) {
   const { presentation } = performance;
   const zones = getExecutiveZoneOrder(presentation);
@@ -324,7 +324,7 @@ export function CesExecutivePerformanceWorkspace({
             <p className="kxd-ces-exec__progress-phase">{performance.summary.currentPhase}</p>
             <p className="kxd-ces-exec__progress-focus">{performance.summary.currentFocus}</p>
             <div className="kxd-ces-exec__destinations" aria-label="Partnership destinations">
-              {isPrimalLeadershipReportClient(performance.clientSlug) ? (
+              {showLeadershipReportLink ? (
                 <Link
                   href={getLatestPrimalLeadershipReportHref()}
                   className="kxd-ces-exec__section-link"

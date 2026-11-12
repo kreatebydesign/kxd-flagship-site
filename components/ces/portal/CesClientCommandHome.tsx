@@ -68,6 +68,7 @@ export function CesClientCommandHome({
   home,
   showWork,
   showPartnership,
+  showReportsNav = true,
   engagement = null,
   engagementEyebrow,
   engagementTitle,
@@ -77,6 +78,7 @@ export function CesClientCommandHome({
   home: ClientHomePresentation;
   showWork: boolean;
   showPartnership: boolean;
+  showReportsNav?: boolean;
   engagement?: ActiveEngagementSnapshot | null;
   engagementEyebrow?: string;
   engagementTitle?: string;
@@ -128,9 +130,11 @@ export function CesClientCommandHome({
         <Link href="/portal/deliverables" className="kxd-ces-btn kxd-ces-btn--ghost">
           KXD Work
         </Link>
-        <Link href="/portal/reports" className="kxd-ces-btn kxd-ces-btn--ghost">
-          Reports
-        </Link>
+        {showReportsNav ? (
+          <Link href="/portal/reports" className="kxd-ces-btn kxd-ces-btn--ghost">
+            Reports
+          </Link>
+        ) : null}
         {leadAttention ? (
           <Link href="/portal/leads" className="kxd-ces-btn kxd-ces-btn--ghost">
             Leads

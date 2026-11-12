@@ -20,6 +20,7 @@ import {
 } from "@/lib/portal/billing/load";
 import { isLeadCommandEnabled } from "@/lib/client-command/leads/access";
 import { loadLeadAttentionOverview } from "@/lib/client-command/leads/overview";
+import { canPortalMemberAccessReports } from "@/lib/portal/member-reports-access";
 
 export const dynamic = "force-dynamic";
 
@@ -101,6 +102,12 @@ export default async function PortalOverviewPage() {
       greeting,
       websiteFormInquiries: websiteFormInquiriesFromPerformance,
     });
+    const showReportsNav = canPortalMemberAccessReports({
+      clientSlug: profile.identity.clientSlug,
+      portalUserEmail: session.email,
+      isOperatorPreview: session.isOperatorPreview,
+    });
+
     return (
       <CesPortalHome
         greeting={greeting}
@@ -116,6 +123,7 @@ export default async function PortalOverviewPage() {
         websiteEditorUrl={websiteEditorUrl}
         billingOverview={showBillingCard ? billingOverview : null}
         leadAttention={leadAttention}
+        showReportsNav={showReportsNav}
       />
     );
   }

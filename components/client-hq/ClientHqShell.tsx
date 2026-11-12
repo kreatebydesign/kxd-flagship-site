@@ -47,6 +47,8 @@ export interface ClientHqShellProps {
     clientName: string;
     mode?: "preview" | "staff-test";
   } | null;
+  /** Active portal member email — member-scoped nav (e.g. Primal Reports). */
+  portalMemberEmail?: string | null;
   children: ReactNode;
 }
 
@@ -72,6 +74,7 @@ export function ClientHqShell({
   commercialNavAvailable = false,
   websiteEditorUrl = null,
   operatorPreview = null,
+  portalMemberEmail = null,
   children,
 }: ClientHqShellProps) {
   const navGroups = getEnabledPortalNavGroups(experienceProfile, {
@@ -79,6 +82,8 @@ export function ClientHqShell({
     billingNavAvailable,
     commercialNavAvailable,
     websiteEditorUrl,
+    portalMemberEmail,
+    isOperatorPreview: Boolean(operatorPreview),
   });
   const branding = editionBranding;
   const cssVars = experienceProfile

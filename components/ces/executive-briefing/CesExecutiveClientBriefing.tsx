@@ -5,13 +5,12 @@ import type {
   ExecutiveClientBriefingUnavailable,
 } from "@/lib/executive-client-summary";
 import { getExecutivePresentation } from "@/lib/ces/executive-performance/presentation";
-import {
-  getLatestPrimalLeadershipReportHref,
-  isPrimalLeadershipReportClient,
-} from "@/lib/ces/leadership-report";
+import { getLatestPrimalLeadershipReportHref } from "@/lib/ces/leadership-report";
 
 export type CesExecutiveClientBriefingProps = {
   briefing: ExecutiveClientBriefing | ExecutiveClientBriefingUnavailable;
+  /** Server-resolved; session-bound Primal Reports allowlist. */
+  showLeadershipReport?: boolean;
 };
 
 function Chapter({ title, children }: { title: string; children: ReactNode }) {
@@ -44,7 +43,10 @@ function CesExecutiveClientBriefingUnavailableView({
   );
 }
 
-export function CesExecutiveClientBriefing({ briefing }: CesExecutiveClientBriefingProps) {
+export function CesExecutiveClientBriefing({
+  briefing,
+  showLeadershipReport = false,
+}: CesExecutiveClientBriefingProps) {
   if (!briefing.available) {
     return <CesExecutiveClientBriefingUnavailableView briefing={briefing} />;
   }
@@ -60,8 +62,6 @@ export function CesExecutiveClientBriefing({ briefing }: CesExecutiveClientBrief
   const showExecutiveReview = Boolean(
     getExecutivePresentation(briefing.clientSlug)?.executiveReviewEnabled,
   );
-  const showLeadershipReport = isPrimalLeadershipReportClient(briefing.clientSlug);
-
   return (
     <article className="kxd-ces-briefing">
       <header className="kxd-ces-briefing__hero">

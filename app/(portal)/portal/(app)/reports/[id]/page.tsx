@@ -4,7 +4,7 @@ import { resolveExperienceProfile } from "@/lib/ces/server";
 import { decidePortalReportAccess } from "@/lib/portal/analytics-visibility";
 import {
   buildPortalAuditDeliverableViewModel,
-  isBatchGClientHqSurfaceAvailable,
+  isPortalReportsSurfaceAvailable,
   toPortalReportViewModel,
 } from "@/lib/portal/requests-files-reports";
 import { getReportById } from "@/lib/reporting/engine";
@@ -21,7 +21,7 @@ export default async function PortalReportViewPage({
   if (!session) redirect("/portal/login");
 
   const profile = await resolveExperienceProfile(session);
-  if (!isBatchGClientHqSurfaceAvailable("reports", profile)) {
+  if (!isPortalReportsSurfaceAvailable(profile, session)) {
     redirect("/portal");
   }
 

@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { decidePortalReportAccess } from "@/lib/portal/analytics-visibility";
+import { isPortalReportsSurfaceAvailable } from "@/lib/portal/requests-files-reports";
+import { resolveExperienceProfile } from "@/lib/ces/server";
 import { getPortalSession } from "@/lib/portal/session";
 import { getReportById, recordPortalReportView } from "@/lib/reporting/engine";
 
@@ -12,6 +14,11 @@ export async function POST(
   const session = await getPortalSession();
   if (!session) {
     return NextResponse.json({ success: false, error: "Unauthorized." }, { status: 401 });
+  }
+
+  const profile = await resolveExperienceProfile(session);
+  if (!isPortalReportsSurfaceAvailable(profile, session)) {
+    return NextResponse.json({ success: false, error: "Not found." }, { status: 404 });
   }
 
   const { id } = await params;

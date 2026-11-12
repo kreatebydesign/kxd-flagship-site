@@ -279,6 +279,8 @@ export async function resolvePortalWorkPerformance(input: {
     hasAnalytics: reportingEntitled && facts.length > 0,
     completedThisMonth: projectMonthlySummaryForPeriod(completed, reportingPeriod)
       .length,
+    portalMemberEmail: session.email,
+    isOperatorPreview: session.isOperatorPreview,
   });
 
   const monthlyRetainerRaw = (clientDoc as { monthlyRetainerAmount?: unknown })

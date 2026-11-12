@@ -40,6 +40,8 @@ export default async function PortalLeadershipReportPage({
     !canAccessPrimalLeadershipReport({
       clientSlug: profile.identity.clientSlug,
       executivePerformanceEnabled: entitled,
+      portalUserEmail: session.email,
+      isOperatorPreview: session.isOperatorPreview,
     })
   ) {
     // Uniform denial — do not reveal that a Primal-specific report exists.

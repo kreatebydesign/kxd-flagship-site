@@ -9,6 +9,7 @@ import { isExecutiveClientBriefingAvailable } from "@/lib/executive-client-summa
 import { loadExecutiveClientBriefing } from "@/lib/executive-client-summary/load";
 import { getConnectedWorkspaceData } from "@/lib/portal/connected-workspace";
 import { composePortalGreeting } from "@/lib/portal/compose-greeting";
+import { canAccessPrimalLeadershipReport } from "@/lib/ces/leadership-report";
 import { getPortalSession } from "@/lib/portal/session";
 
 export const dynamic = "force-dynamic";
@@ -31,7 +32,19 @@ export default async function PortalPartnershipBriefingPage() {
       websiteReview,
     });
 
-    return <CesExecutiveClientBriefing briefing={briefing} />;
+    const showLeadershipReport = canAccessPrimalLeadershipReport({
+      clientSlug: slug,
+      executivePerformanceEnabled: true,
+      portalUserEmail: session.email,
+      isOperatorPreview: session.isOperatorPreview,
+    });
+
+    return (
+      <CesExecutiveClientBriefing
+        briefing={briefing}
+        showLeadershipReport={showLeadershipReport}
+      />
+    );
   }
 
   const connected = await getConnectedWorkspaceData(session, profile, websiteReview);
