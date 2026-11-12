@@ -133,6 +133,7 @@ import * as migration_20261109_staff_wage_external_payments from './20261109_sta
 import * as migration_20261027_platform_economics_snapshots from './20261027_platform_economics_snapshots';
 import * as migration_20261028_phase17_project_inquiry_attribution from './20261028_phase17_project_inquiry_attribution';
 import * as migration_20261029_staff_sales_activity_staff_recording from './20261029_staff_sales_activity_staff_recording';
+import * as migration_20261112_client_calendar_event_type_track_day from './20261112_client_calendar_event_type_track_day';
 
 export const migrations = [
   {
@@ -875,5 +876,11 @@ export const migrations = [
     up: migration_20261029_staff_sales_activity_staff_recording.up,
     down: migration_20261029_staff_sales_activity_staff_recording.down,
     name: '20261029_staff_sales_activity_staff_recording',
+  },
+  {
+    // Primal client calendar — Track day event type for portal editing.
+    up: migration_20261112_client_calendar_event_type_track_day.up,
+    down: migration_20261112_client_calendar_event_type_track_day.down,
+    name: '20261112_client_calendar_event_type_track_day',
   },
 ];

@@ -4,6 +4,7 @@ export const CALENDAR_EVENT_TYPES = [
   "main_event",
   "practice",
   "test_day",
+  "track_day",
   "prep",
   "school",
   "race",

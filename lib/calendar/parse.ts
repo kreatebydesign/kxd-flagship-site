@@ -1,5 +1,6 @@
 import { displayTitle } from "./authority";
 import { resolvePublicRegistrationHref } from "./motorsportreg";
+import { EVENT_TYPE_LABELS } from "./presentation";
 import type {
   CalendarActivityEntry,
   CalendarEventRecord,
@@ -131,7 +132,9 @@ export function toPublicCalendarEvent(event: CalendarEventRecord): PublicCalenda
     summary: event.summary,
     description: event.description,
     eventType: event.eventType,
-    eventTypeLabel: event.sourceEventType || event.eventType,
+    eventTypeLabel: event.sourceEventType?.trim()
+      ? event.sourceEventType.trim()
+      : (EVENT_TYPE_LABELS[event.eventType] ?? event.eventType),
     startsOn: event.startsOn,
     endsOn: event.endsOn,
     timezone: event.timezone,
