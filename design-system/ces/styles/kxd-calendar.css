@@ -1,0 +1,390 @@
+/**
+ * Primal portal calendar — scoped presentation (kxd-cal-*).
+ * Does not modify inventory (kxd-inv-card) globals.
+ */
+
+.kxd-ces-page.kxd-cal-landing {
+  --kxd-ces-content-max: min(76rem, calc(100vw - 2.5rem));
+}
+
+.kxd-ces-page.kxd-cal-editor {
+  --kxd-ces-content-max: min(84rem, calc(100vw - 2.5rem));
+}
+
+/* —— Command / next event —— */
+
+.kxd-cal-command {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(12rem, 0.85fr);
+  gap: clamp(1.25rem, 3vw, 2.25rem);
+  padding: clamp(1.35rem, 3vw, 2rem);
+  border-radius: calc(var(--kxd-ces-radius, 8px) + 4px);
+  border: 1px solid color-mix(in srgb, var(--kxd-os-text-faint) 14%, transparent);
+  background: color-mix(in srgb, var(--kxd-os-bg-elevated) 94%, #000);
+  position: relative;
+  overflow: hidden;
+}
+
+.kxd-cal-command::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: color-mix(in srgb, var(--kxd-ces-accent, #a83424) 85%, #fff);
+}
+
+.kxd-cal-command__eyebrow {
+  margin: 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-faint);
+}
+
+.kxd-cal-command__title {
+  margin: 0.45rem 0 0.6rem;
+  font-family: var(--kxd-os-font-serif, "Cormorant Garamond", Georgia, serif);
+  font-size: clamp(1.65rem, 2.8vw, 2.35rem);
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  line-height: 1.12;
+  word-break: break-word;
+}
+
+.kxd-cal-command__lead {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--kxd-os-text-muted);
+}
+
+.kxd-cal-command__metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-radius: var(--kxd-ces-radius, 8px);
+  overflow: hidden;
+  background: color-mix(in srgb, var(--kxd-os-text-faint) 10%, transparent);
+  align-self: center;
+}
+
+.kxd-cal-command__metrics li {
+  padding: 0.85rem 1rem;
+  background: var(--kxd-os-bg-elevated);
+  min-width: 0;
+}
+
+.kxd-cal-command__metric-label {
+  display: block;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-faint);
+}
+
+.kxd-cal-command__metric-value {
+  display: block;
+  margin-top: 0.35rem;
+  font-family: var(--kxd-os-font-serif);
+  font-size: clamp(1.2rem, 2vw, 1.55rem);
+  line-height: 1.1;
+}
+
+.kxd-cal-command__metric-value--small {
+  font-family: var(--kxd-os-font-sans);
+  font-size: 0.92rem;
+  letter-spacing: 0;
+}
+
+/* —— Toolbar —— */
+
+.kxd-cal-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(9.5rem, 11.5rem) auto;
+  gap: 0.85rem 1rem;
+  align-items: end;
+}
+
+.kxd-cal-toolbar__count {
+  margin: 0 0 0.55rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-faint);
+  white-space: nowrap;
+}
+
+/* —— Event list —— */
+
+.kxd-cal-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.kxd-cal-event-card {
+  display: grid;
+  grid-template-columns: 4.75rem minmax(0, 1fr) auto;
+  gap: clamp(0.85rem, 2vw, 1.35rem);
+  align-items: center;
+  padding: 1rem 1.15rem;
+  border-radius: 0.7rem;
+  border: 1px solid color-mix(in srgb, var(--kxd-os-text-faint) 11%, transparent);
+  background: color-mix(in srgb, var(--kxd-os-bg-elevated) 96%, #000);
+  transition:
+    border-color var(--kxd-ces-motion, 180ms) var(--kxd-ces-ease, ease),
+    background var(--kxd-ces-motion, 180ms) var(--kxd-ces-ease, ease);
+}
+
+.kxd-cal-event-card:hover {
+  border-color: color-mix(in srgb, var(--kxd-ces-accent) 28%, transparent);
+  background: color-mix(in srgb, var(--kxd-os-bg-elevated) 98%, var(--kxd-ces-accent));
+}
+
+.kxd-cal-event-card__rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.12rem;
+  text-align: center;
+  padding: 0.55rem 0.35rem;
+  border-radius: 0.45rem;
+  border: 1px solid color-mix(in srgb, var(--kxd-os-text-faint) 12%, transparent);
+  background: color-mix(in srgb, var(--kxd-os-bg-surface) 88%, transparent);
+  min-height: 4.25rem;
+  line-height: 1.1;
+}
+
+.kxd-cal-event-card__month {
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: color-mix(in srgb, var(--kxd-ces-accent) 75%, var(--kxd-os-text-muted));
+}
+
+.kxd-cal-event-card__day {
+  margin: 0.1rem 0;
+  font-family: var(--kxd-os-font-serif);
+  font-size: clamp(1.35rem, 2.2vw, 1.65rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.kxd-cal-event-card__day-range {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--kxd-os-text-muted);
+  letter-spacing: 0.02em;
+  margin-top: 0.05rem;
+}
+
+.kxd-cal-event-card__year {
+  margin-top: 0.15rem;
+  font-size: 0.65rem;
+  color: var(--kxd-os-text-faint);
+}
+
+.kxd-cal-event-card__body {
+  min-width: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.kxd-cal-event-card__title {
+  margin: 0;
+  font-family: var(--kxd-os-font-serif);
+  font-size: clamp(1.15rem, 1.8vw, 1.4rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.kxd-cal-event-card__title a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.kxd-cal-event-card__title a:hover {
+  color: color-mix(in srgb, var(--kxd-ces-accent) 55%, var(--kxd-os-text-primary));
+}
+
+.kxd-cal-event-card__venue {
+  margin: 0;
+  font-size: 0.86rem;
+  color: var(--kxd-os-text-muted);
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.kxd-cal-event-card__venue--missing {
+  color: var(--kxd-os-text-faint);
+  font-style: italic;
+}
+
+.kxd-cal-event-card__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.kxd-cal-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid color-mix(in srgb, var(--kxd-os-text-faint) 18%, transparent);
+  color: var(--kxd-os-text-muted);
+  background: color-mix(in srgb, var(--kxd-os-bg-surface) 70%, transparent);
+}
+
+.kxd-cal-chip--type {
+  border-color: color-mix(in srgb, var(--kxd-ces-accent) 35%, transparent);
+  color: color-mix(in srgb, var(--kxd-ces-accent) 88%, #fff);
+}
+
+.kxd-cal-chip--attention {
+  border-color: color-mix(in srgb, #e8b060 45%, transparent);
+  color: color-mix(in srgb, #e8b060 90%, #fff);
+}
+
+.kxd-cal-event-card__aside {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.65rem;
+  flex-shrink: 0;
+}
+
+.kxd-cal-event-card__manage {
+  min-height: 2.75rem;
+  min-width: 5.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem 1rem;
+}
+
+/* —— Editor (reuses inv-editor layout tokens) —— */
+
+.kxd-cal-editor .kxd-cal-source-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid color-mix(in srgb, var(--kxd-os-text-faint) 16%, transparent);
+}
+
+.kxd-cal-editor .kxd-cal-source-badge--official {
+  border-color: color-mix(in srgb, var(--kxd-ces-accent) 40%, transparent);
+  color: color-mix(in srgb, var(--kxd-ces-accent) 92%, #fff);
+}
+
+.kxd-cal-editor .kxd-cal-sidebar-block {
+  display: grid;
+  gap: 0.55rem;
+  font-size: 0.84rem;
+  color: var(--kxd-os-text-muted);
+  line-height: 1.5;
+}
+
+.kxd-cal-editor .kxd-cal-sidebar-block a {
+  color: color-mix(in srgb, var(--kxd-ces-accent) 80%, #fff);
+  word-break: break-all;
+}
+
+.kxd-cal-editor .kxd-cal-activity {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.kxd-cal-editor .kxd-cal-activity li {
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--kxd-os-text-muted);
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--kxd-os-text-faint) 8%, transparent);
+}
+
+.kxd-cal-editor .kxd-cal-activity li:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.kxd-cal-editor .kxd-cal-official-name {
+  margin: -0.25rem 0 0;
+}
+
+@media (max-width: 980px) {
+  .kxd-cal-command {
+    grid-template-columns: 1fr;
+  }
+
+  .kxd-cal-command__metrics {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 820px) {
+  .kxd-cal-toolbar {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .kxd-cal-toolbar__count {
+    grid-column: 1 / -1;
+    margin: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .kxd-cal-event-card {
+    grid-template-columns: 4.25rem minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-items: start;
+  }
+
+  .kxd-cal-event-card__aside {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding-top: 0.35rem;
+    border-top: 1px solid color-mix(in srgb, var(--kxd-os-text-faint) 9%, transparent);
+  }
+
+  .kxd-cal-event-card__manage {
+    flex: 1;
+    max-width: 12rem;
+  }
+
+  .kxd-cal-command__metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .kxd-cal-toolbar {
+    grid-template-columns: 1fr;
+  }
+}

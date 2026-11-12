@@ -4,6 +4,8 @@
  * Phase 1: light-first Apple-inspired product UI (system blue interactive accent).
  */
 
+@import "./kxd-calendar.css";
+
 .kxd-ces-app {
   min-height: 100%;
   --kxd-ces-content-max: 44rem;

@@ -199,6 +199,17 @@ function main() {
   check("owning location is separate from venue", read("payload/collections/ClientCalendarEvents.ts").includes("Owning Primal location"));
   check("website ScheduleSystem still exists independently", true);
 
+  check(
+    "calendar landing uses calendar event cards",
+    read("components/ces/modules/calendar/CalendarLanding.tsx").includes("kxd-cal-event-card") &&
+      !read("components/ces/modules/calendar/CalendarLanding.tsx").includes('className="kxd-inv-card"'),
+  );
+  check("calendar styles scoped", read("design-system/ces/styles/kxd-calendar.css").includes(".kxd-cal-event-card"));
+  check(
+    "event date rail helper exported",
+    read("lib/calendar/presentation.ts").includes("eventDateRailParts"),
+  );
+
   console.log("\nBuild 2 calendar verification passed.\n");
 }
 
