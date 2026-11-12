@@ -60,10 +60,19 @@ check(
   }),
 );
 check(
-  "access allows entitled primal",
+  "access allows entitled primal for JB",
   canAccessPrimalLeadershipReport({
     clientSlug: "primal-motorsports",
     executivePerformanceEnabled: true,
+    portalUserEmail: "jb.layman@primalmotorsports.com",
+  }),
+);
+check(
+  "access denies entitled primal for Tyler (reports allowlist)",
+  !canAccessPrimalLeadershipReport({
+    clientSlug: "primal-motorsports",
+    executivePerformanceEnabled: true,
+    portalUserEmail: "tyler.edwards@primalmotorsports.com",
   }),
 );
 check(

@@ -50,6 +50,8 @@ export interface CesPortalHomeProps {
   billingOverview?: PortalBillingOverviewCardModel | null;
   /** Primal Phase 1 Lead Command (Build 1) — real counts only, omitted when leads is disabled. */
   leadAttention?: LeadAttentionCounts | null;
+  /** Member-scoped Reports quick nav (Primal allowlist). */
+  showReportsNav?: boolean;
 }
 
 export function CesPortalHome({
@@ -66,6 +68,7 @@ export function CesPortalHome({
   websiteEditorUrl = null,
   billingOverview = null,
   leadAttention = null,
+  showReportsNav = true,
 }: CesPortalHomeProps) {
   const flagship = isCesFlagshipPortal(profile);
   const homeSurface = resolveCesHomeSurface({
@@ -116,6 +119,7 @@ export function CesPortalHome({
             home={clientHome}
             showWork={isHomeZoneVisible(homeComposition, "work-performance")}
             showPartnership={isHomeZoneVisible(homeComposition, "partnership-briefing")}
+            showReportsNav={showReportsNav}
             engagement={engagement}
             engagementEyebrow={engagementEyebrow}
             engagementTitle={engagementTitle}

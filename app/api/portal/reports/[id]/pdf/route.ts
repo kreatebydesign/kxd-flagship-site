@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { resolveExperienceProfile } from "@/lib/ces/server";
 import { decidePortalReportAccess } from "@/lib/portal/analytics-visibility";
-import { isBatchGClientHqSurfaceAvailable } from "@/lib/portal/requests-files-reports";
+import { isPortalReportsSurfaceAvailable } from "@/lib/portal/requests-files-reports";
 import { getPortalSession } from "@/lib/portal/session";
 import {
   BrandedReportError,
@@ -23,7 +23,7 @@ export async function GET(
   }
 
   const profile = await resolveExperienceProfile(session);
-  if (!isBatchGClientHqSurfaceAvailable("reports", profile)) {
+  if (!isPortalReportsSurfaceAvailable(profile, session)) {
     return NextResponse.json({ success: false, error: "Not found." }, { status: 404 });
   }
 

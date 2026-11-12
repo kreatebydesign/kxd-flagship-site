@@ -37,6 +37,9 @@ export type WorkspacePersonalizationInput = {
   authorizedClientId: number;
   /** Optional display name for welcome templates (portal user). */
   portalDisplayName?: string | null;
+  /** Portal login email — member-scoped module visibility. */
+  portalMemberEmail?: string | null;
+  isOperatorPreview?: boolean;
   /** Already resolved for the authorized client. */
   experienceProfile: ResolvedExperienceProfile;
 };
@@ -44,12 +47,20 @@ export type WorkspacePersonalizationInput = {
 function moduleAvailable(
   key: WorkspaceModuleKey,
   profile: ResolvedExperienceProfile,
+  member?: {
+    portalMemberEmail?: string | null;
+    isOperatorPreview?: boolean;
+  },
 ): boolean {
   const def = getWorkspaceModuleDefinition(key);
   if (!def) return false;
   if (def.capability.kind === "always") return true;
   if (def.capability.kind === "ces" || def.capability.kind === "client-hq") {
-    return isPortalModuleVisible(def.capability.moduleId, { profile });
+    return isPortalModuleVisible(def.capability.moduleId, {
+      profile,
+      portalMemberEmail: member?.portalMemberEmail,
+      isOperatorPreview: member?.isOperatorPreview,
+    });
   }
   return false;
 }
@@ -81,13 +92,17 @@ function buildPriorityModules(
   definition: WorkspaceProfileDefinition,
   profile: ResolvedExperienceProfile,
   terminology: WorkspacePersonalizationModel["terminology"],
+  member?: {
+    portalMemberEmail?: string | null;
+    isOperatorPreview?: boolean;
+  },
 ): WorkspaceModulePlacement[] {
   const orderedKeys: WorkspaceModuleKey[] = [];
   const seen = new Set<WorkspaceModuleKey>();
 
   for (const key of definition.priorityModuleKeys) {
     if (seen.has(key)) continue;
-    if (!moduleAvailable(key, profile)) continue;
+    if (!moduleAvailable(key, profile, member)) continue;
     seen.add(key);
     orderedKeys.push(key);
   }
@@ -95,7 +110,7 @@ function buildPriorityModules(
   // Fill remaining enabled modules after priorities (deterministic registry order).
   for (const mod of WORKSPACE_MODULE_REGISTRY) {
     if (seen.has(mod.key)) continue;
-    if (!moduleAvailable(mod.key, profile)) continue;
+    if (!moduleAvailable(mod.key, profile, member)) continue;
     seen.add(mod.key);
     orderedKeys.push(mod.key);
   }
@@ -116,13 +131,17 @@ function buildPriorityModules(
 function buildEmptyStates(
   terminology: WorkspacePersonalizationModel["terminology"],
   profile: ResolvedExperienceProfile,
+  member?: {
+    portalMemberEmail?: string | null;
+    isOperatorPreview?: boolean;
+  },
 ): Partial<Record<WorkspaceModuleKey, WorkspaceEmptyState>> {
   const states: Partial<Record<WorkspaceModuleKey, WorkspaceEmptyState>> = {
     ...NEUTRAL_EMPTY_STATES,
   };
 
   for (const mod of WORKSPACE_MODULE_REGISTRY) {
-    if (!moduleAvailable(mod.key, profile)) {
+    if (!moduleAvailable(mod.key, profile, member)) {
       // Do not advertise unavailable modules via empty states.
       delete states[mod.key];
       continue;
@@ -225,10 +244,16 @@ export function resolveWorkspacePersonalization(
     accentColor,
   };
 
+  const member = {
+    portalMemberEmail: input.portalMemberEmail,
+    isOperatorPreview: input.isOperatorPreview,
+  };
+
   const priorityModules = buildPriorityModules(
     definition,
     experienceProfile,
     terminology,
+    member,
   );
   const primaryActions = resolveWorkspaceActions(
     experienceProfile,
@@ -240,7 +265,7 @@ export function resolveWorkspacePersonalization(
   ).filter((action) => !primaryActions.some((p) => p.id === action.id));
 
   const recommendations = buildWorkspaceRecommendations(primaryActions);
-  const emptyStates = buildEmptyStates(terminology, experienceProfile);
+  const emptyStates = buildEmptyStates(terminology, experienceProfile, member);
   const welcome = resolveWelcome(definition);
 
   return {

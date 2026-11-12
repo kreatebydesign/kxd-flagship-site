@@ -3,6 +3,7 @@
  */
 
 import { PRIMAL_CLIENT_SLUG } from "@/lib/ces/profile/primal";
+import { canPortalMemberAccessReports } from "@/lib/portal/member-reports-access";
 import type { LeadershipReportDocument } from "./types";
 import type { LeadershipProgressReportDocument } from "./progress-types";
 import {
@@ -30,10 +31,17 @@ export function isPrimalLeadershipReportClient(
 export function canAccessPrimalLeadershipReport(input: {
   clientSlug: string | null | undefined;
   executivePerformanceEnabled: boolean;
+  portalUserEmail?: string | null;
+  isOperatorPreview?: boolean;
 }): boolean {
   return (
     input.executivePerformanceEnabled &&
-    isPrimalLeadershipReportClient(input.clientSlug)
+    isPrimalLeadershipReportClient(input.clientSlug) &&
+    canPortalMemberAccessReports({
+      clientSlug: input.clientSlug,
+      portalUserEmail: input.portalUserEmail,
+      isOperatorPreview: input.isOperatorPreview,
+    })
   );
 }
 

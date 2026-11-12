@@ -23,6 +23,8 @@ export function resolvePortalWorkspacePersonalization(input: {
   return resolveWorkspacePersonalization({
     authorizedClientId: input.session.clientId,
     portalDisplayName: input.session.displayName,
+    portalMemberEmail: input.session.email,
+    isOperatorPreview: input.session.isOperatorPreview,
     experienceProfile: input.experienceProfile,
   });
 }

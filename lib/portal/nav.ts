@@ -235,6 +235,8 @@ export function getEnabledPortalNavGroups(
     billingNavAvailable?: boolean;
     commercialNavAvailable?: boolean;
     websiteEditorUrl?: string | null;
+    portalMemberEmail?: string | null;
+    isOperatorPreview?: boolean;
   },
 ): PortalNavGroup[] {
   const portfolioNavAvailable = Boolean(options?.portfolioNavAvailable);
@@ -292,6 +294,8 @@ export function getEnabledPortalNavGroups(
     billingNavAvailable,
     portfolioNavAvailable,
     commercialNavAvailable,
+    portalMemberEmail: options?.portalMemberEmail,
+    isOperatorPreview: options?.isOperatorPreview,
   };
   const useClientLabels = resolvePortalHomeShell(navProfile) === "ces";
   const relabel = (id: string, label: string) =>

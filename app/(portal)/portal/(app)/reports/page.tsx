@@ -5,7 +5,7 @@ import {
   listCuratedPrimalLeadershipReportItems,
 } from "@/lib/ces/leadership-report";
 import { resolveExperienceProfile } from "@/lib/ces/server";
-import { isBatchGClientHqSurfaceAvailable } from "@/lib/portal/requests-files-reports";
+import { isPortalReportsSurfaceAvailable } from "@/lib/portal/requests-files-reports";
 import { getPortalReports } from "@/lib/reporting/engine";
 import { getPortalSession } from "@/lib/portal/session";
 
@@ -20,7 +20,7 @@ export default async function PortalReportsPage({
   if (!session) redirect("/portal/login");
 
   const profile = await resolveExperienceProfile(session);
-  if (!isBatchGClientHqSurfaceAvailable("reports", profile)) {
+  if (!isPortalReportsSurfaceAvailable(profile, session)) {
     redirect("/portal");
   }
 

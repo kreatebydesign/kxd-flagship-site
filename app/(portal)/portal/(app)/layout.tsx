@@ -107,6 +107,7 @@ export default async function PortalAppLayout({ children }: { children: React.Re
         billingNavAvailable={billingNavAvailable}
         commercialNavAvailable={commercialNavAvailable}
         websiteEditorUrl={websiteEditorUrl}
+        portalMemberEmail={session.email}
         operatorPreview={
           session.isOperatorPreview
             ? {

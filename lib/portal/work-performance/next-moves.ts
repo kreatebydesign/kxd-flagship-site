@@ -15,7 +15,14 @@ export function buildWorkPerformanceNextMoves(input: {
   activeReviewCount: number;
   hasAnalytics: boolean;
   completedThisMonth: number;
+  portalMemberEmail?: string | null;
+  isOperatorPreview?: boolean;
 }): WorkPerformanceNextMove[] {
+  const visibilityCtx = {
+    profile: input.profile,
+    portalMemberEmail: input.portalMemberEmail,
+    isOperatorPreview: input.isOperatorPreview,
+  };
   const moves: WorkPerformanceNextMove[] = [];
 
   if (input.awaitingClientCount > 0 && isCesModuleEnabled(input.profile, "website-review")) {
@@ -50,7 +57,7 @@ export function buildWorkPerformanceNextMoves(input: {
     }
   }
 
-  if (input.hasAnalytics && isPortalModuleVisible("reports", { profile: input.profile })) {
+  if (input.hasAnalytics && isPortalModuleVisible("reports", visibilityCtx)) {
     const href = sanitizePortalHref("/portal/reports");
     if (href) {
       moves.push({
@@ -64,7 +71,7 @@ export function buildWorkPerformanceNextMoves(input: {
 
   if (
     input.completedThisMonth === 0 &&
-    isPortalModuleVisible("deliverables", { profile: input.profile })
+    isPortalModuleVisible("deliverables", visibilityCtx)
   ) {
     const href = sanitizePortalHref("/portal/deliverables");
     if (href) {

@@ -5,6 +5,14 @@
 
 export const PRIMAL_CLIENT_SLUG = "primal-motorsports";
 
+/**
+ * Primal monthly Reports and leadership report archive — portal members only.
+ * Add authorized Primal emails here; other active members keep the rest of the workspace.
+ */
+export const PRIMAL_REPORTS_MEMBER_EMAILS = [
+  "jb.layman@primalmotorsports.com",
+] as const;
+
 export const PRIMAL_EXPERIENCE_PROFILE = {
   profileName: "Primal Motorsports Experience",
   status: "active" as const,
