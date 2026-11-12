@@ -217,32 +217,6 @@ export function CalendarLanding({ events: initial }: Props) {
         </ul>
       </section>
 
-      <section className="kxd-ces-section kxd-cal-toolbar" aria-label="Calendar filters">
-        <label className="kxd-inv-field">
-          <span className="kxd-inv-field__label">Search</span>
-          <input
-            className="kxd-inv-input"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Event or venue…"
-            autoComplete="off"
-          />
-        </label>
-        <label className="kxd-inv-field">
-          <span className="kxd-inv-field__label">View</span>
-          <select className="kxd-inv-input" value={status} onChange={(e) => setStatus(e.target.value)}>
-            <option value="upcoming">Upcoming</option>
-            <option value="website">On website</option>
-            <option value="all">All events</option>
-            <option value="draft">Drafts</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
-        </label>
-        <p className="kxd-cal-toolbar__count">
-          {filtered.length} event{filtered.length === 1 ? "" : "s"}
-        </p>
-      </section>
-
       {error ? (
         <p className="kxd-inv-error" role="alert">
           {error}
@@ -270,21 +244,47 @@ export function CalendarLanding({ events: initial }: Props) {
         </section>
       ) : null}
 
-      {events.length > 0 && filtered.length === 0 ? (
-        <section className="kxd-ces-section kxd-ces-empty">
-          <h2 className="kxd-ces-empty__title">No matches</h2>
-          <p className="kxd-ces-empty__lead">Nothing matches this view. Clear search or switch to All events.</p>
-        </section>
-      ) : null}
+      {events.length > 0 ? (
+        <div className="kxd-cal-schedule" aria-label="Events">
+          <div className="kxd-cal-schedule__toolbar kxd-cal-toolbar" aria-label="Calendar filters">
+            <label className="kxd-inv-field kxd-cal-toolbar__search">
+              <span className="kxd-inv-field__label">Search</span>
+              <input
+                className="kxd-inv-input"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Event or venue…"
+                autoComplete="off"
+              />
+            </label>
+            <label className="kxd-inv-field kxd-cal-toolbar__view">
+              <span className="kxd-inv-field__label">View</span>
+              <select className="kxd-inv-input" value={status} onChange={(e) => setStatus(e.target.value)}>
+                <option value="upcoming">Upcoming</option>
+                <option value="website">On website</option>
+                <option value="all">All events</option>
+                <option value="draft">Drafts</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </label>
+            <p className="kxd-cal-toolbar__count">
+              {filtered.length} event{filtered.length === 1 ? "" : "s"}
+            </p>
+          </div>
 
-      {filtered.length > 0 ? (
-        <section className="kxd-ces-section" aria-label="Events">
-          <ul className="kxd-cal-list">
-            {filtered.map((event) => (
-              <CalendarEventCard key={event.id} event={event} />
-            ))}
-          </ul>
-        </section>
+          {filtered.length === 0 ? (
+            <div className="kxd-cal-schedule__empty">
+              <h2 className="kxd-ces-empty__title">No matches</h2>
+              <p className="kxd-ces-empty__lead">Nothing matches this view. Clear search or switch to All events.</p>
+            </div>
+          ) : (
+            <ul className="kxd-cal-list">
+              {filtered.map((event) => (
+                <CalendarEventCard key={event.id} event={event} />
+              ))}
+            </ul>
+          )}
+        </div>
       ) : null}
     </CesPage>
   );

@@ -204,6 +204,16 @@ function main() {
     read("components/ces/modules/calendar/CalendarLanding.tsx").includes("kxd-cal-event-card") &&
       !read("components/ces/modules/calendar/CalendarLanding.tsx").includes('className="kxd-inv-card"'),
   );
+  check(
+    "calendar schedule groups toolbar and list",
+    read("components/ces/modules/calendar/CalendarLanding.tsx").includes("kxd-cal-schedule"),
+  );
+  check(
+    "editor edit lead copy",
+    read("components/ces/modules/calendar/CalendarEditor.tsx").includes(
+      "Manage event details, scheduling, and website visibility.",
+    ),
+  );
   check("calendar styles scoped", read("design-system/ces/styles/kxd-calendar.css").includes(".kxd-cal-event-card"));
   check(
     "event date rail helper exported",
