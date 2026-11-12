@@ -60,7 +60,7 @@ function fromRecord(record?: CalendarEventRecord | null): FormState {
 
 function SectionNum({ n }: { n: string }) {
   return (
-    <span className="kxd-inv-num" aria-hidden>
+    <span className="kxd-cal-section-num" aria-hidden>
       {n}
     </span>
   );
@@ -147,6 +147,13 @@ export function CalendarEditor({ mode, initial }: Props) {
 
   const pageTitle = mode === "create" ? "Add event" : "Edit event";
 
+  const pageLead =
+    mode === "create"
+      ? "Add a Primal event. It stays independent of the official MotorsportReg feed."
+      : sourceLocked
+        ? `Official date and venue come from ${SOURCE_LABELS[initial!.sourceSystem]}. Primal notes and website publishing stay with you.`
+        : "Manage event details, scheduling, and website visibility.";
+
   return (
     <CesPage className="kxd-cal-editor kxd-inv-editor">
       <header className="kxd-inv-pagehead">
@@ -155,17 +162,13 @@ export function CalendarEditor({ mode, initial }: Props) {
             Calendar <span>/</span> {mode === "create" ? "New" : "Manage"}
           </p>
           <h1 className="kxd-inv-pagehead__title">{pageTitle}</h1>
-          <p className="kxd-inv-pagehead__lead">
-            {sourceLocked
-              ? `Official date and venue come from ${SOURCE_LABELS[initial!.sourceSystem]}. Primal notes and website publishing stay with you.`
-              : "Create a Primal-owned event. It stays independent of the official MotorsportReg feed."}
-          </p>
+          <p className="kxd-inv-pagehead__lead">{pageLead}</p>
           {sourceLocked ? (
             <span className="kxd-cal-source-badge kxd-cal-source-badge--official">
               Official · {SOURCE_LABELS[initial!.sourceSystem]}
             </span>
           ) : (
-            <span className="kxd-cal-source-badge">Primal-owned event</span>
+            <span className="kxd-cal-source-badge">Primal event</span>
           )}
         </div>
         <Link href="/portal/calendar" className="kxd-ces-btn kxd-ces-btn--ghost kxd-inv-pagehead__back">
