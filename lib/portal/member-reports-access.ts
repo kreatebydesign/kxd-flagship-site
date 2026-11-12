@@ -27,6 +27,38 @@ export function canPortalMemberAccessReports(input: {
   );
 }
 
+export type PrimalLeadershipPrintAuthInput = {
+  portalSession: {
+    email: string;
+    isOperatorPreview: boolean;
+    clientSlug: string | null;
+    accessMode: "client" | "partner";
+  } | null;
+  /** Authenticated Payload `users` studio operator (KXD OS admin). */
+  studioOperatorAuthenticated: boolean;
+};
+
+/**
+ * Authorization for /primal-leadership-progress-print and equivalent HTML print surfaces.
+ * No report markup should render before this returns true.
+ */
+export function canAccessPrimalLeadershipProgressPrint(
+  input: PrimalLeadershipPrintAuthInput,
+): boolean {
+  if (input.studioOperatorAuthenticated) return true;
+
+  const session = input.portalSession;
+  if (!session) return false;
+  if (session.isOperatorPreview) return true;
+  if (session.accessMode === "partner") return false;
+
+  return canPortalMemberAccessReports({
+    clientSlug: session.clientSlug,
+    portalUserEmail: session.email,
+    isOperatorPreview: false,
+  });
+}
+
 export function applyPortalMemberReportsVisibility(
   moduleId: string,
   input: {

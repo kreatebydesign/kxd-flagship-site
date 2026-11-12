@@ -9,7 +9,10 @@ import { isPortalModuleVisible } from "../lib/ces/modules/visibility";
 import type { ResolvedExperienceProfile } from "../lib/ces";
 import { getEnabledPortalNavGroups } from "../lib/portal/nav";
 import { isPortalReportsSurfaceAvailable } from "../lib/portal/requests-files-reports";
-import { canPortalMemberAccessReports } from "../lib/portal/member-reports-access";
+import {
+  canAccessPrimalLeadershipProgressPrint,
+  canPortalMemberAccessReports,
+} from "../lib/portal/member-reports-access";
 
 function check(label: string, condition: boolean) {
   assert.equal(condition, true, label);
@@ -111,6 +114,69 @@ check(
 check(
   "Tyler reports surface denied",
   !isPortalReportsSurfaceAvailable(primalProfile, { email: tyler, isOperatorPreview: false }),
+);
+
+check(
+  "Tyler retains Leads module",
+  isPortalModuleVisible("leads", {
+    profile: primalProfile,
+    portalMemberEmail: tyler,
+  }),
+);
+check(
+  "Tyler retains Inventory module",
+  isPortalModuleVisible("inventory", {
+    profile: primalProfile,
+    portalMemberEmail: tyler,
+  }),
+);
+check(
+  "Tyler retains Calendar module",
+  isPortalModuleVisible("calendar", {
+    profile: primalProfile,
+    portalMemberEmail: tyler,
+  }),
+);
+
+const sessionBase = {
+  clientSlug: "primal-motorsports" as const,
+  accessMode: "client" as const,
+};
+
+check(
+  "JB print route allowed",
+  canAccessPrimalLeadershipProgressPrint({
+    portalSession: { ...sessionBase, email: jb, isOperatorPreview: false },
+    studioOperatorAuthenticated: false,
+  }),
+);
+check(
+  "Tyler print route denied",
+  !canAccessPrimalLeadershipProgressPrint({
+    portalSession: { ...sessionBase, email: tyler, isOperatorPreview: false },
+    studioOperatorAuthenticated: false,
+  }),
+);
+check(
+  "unauthenticated print denied",
+  !canAccessPrimalLeadershipProgressPrint({
+    portalSession: null,
+    studioOperatorAuthenticated: false,
+  }),
+);
+check(
+  "studio operator print allowed without portal session",
+  canAccessPrimalLeadershipProgressPrint({
+    portalSession: null,
+    studioOperatorAuthenticated: true,
+  }),
+);
+check(
+  "operator preview print allowed",
+  canAccessPrimalLeadershipProgressPrint({
+    portalSession: { ...sessionBase, email: tyler, isOperatorPreview: true },
+    studioOperatorAuthenticated: false,
+  }),
 );
 
 console.log("\nAll checks passed.\n");

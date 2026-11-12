@@ -26,7 +26,13 @@ function sourceStateLabel(state: string): string {
 const GA4_KEYS = new Set(["sessions", "visitors", "pageviews", "conversions"]);
 const GSC_KEYS = new Set(["clicks", "impressions", "ctr", "position", "average_position"]);
 
-export function AnalyticsVisibilityWorkspace({ model }: { model: AnalyticsVisibilityModel }) {
+export function AnalyticsVisibilityWorkspace({
+  model,
+  showReportsNavLink = true,
+}: {
+  model: AnalyticsVisibilityModel;
+  showReportsNavLink?: boolean;
+}) {
   const { analytics, leads, reports } = model;
   const metrics = analytics.metrics ?? [];
   const siteMetrics = metrics.filter((m) => GA4_KEYS.has(m.key));
@@ -234,11 +240,13 @@ export function AnalyticsVisibilityWorkspace({ model }: { model: AnalyticsVisibi
             lead="As KXD finalizes each monthly report for this business, it will be published to this secure Reports area."
           />
         )}
-        <p style={{ marginTop: "0.85rem" }}>
-          <Link href="/portal/reports" className="kxd-os-link-quiet">
-            Open Reports
-          </Link>
-        </p>
+        {showReportsNavLink ? (
+          <p style={{ marginTop: "0.85rem" }}>
+            <Link href="/portal/reports" className="kxd-os-link-quiet">
+              Open Reports
+            </Link>
+          </p>
+        ) : null}
       </Section>
 
       <CesDisclosure
