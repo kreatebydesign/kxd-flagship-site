@@ -46,6 +46,7 @@ export const ClientCalendarEvents: CollectionConfig = {
         { label: "Main event", value: "main_event" },
         { label: "Practice", value: "practice" },
         { label: "Test day", value: "test_day" },
+        { label: "Track day", value: "track_day" },
         { label: "Prep", value: "prep" },
         { label: "School", value: "school" },
         { label: "Race", value: "race" },

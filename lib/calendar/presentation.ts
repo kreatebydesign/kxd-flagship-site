@@ -5,6 +5,7 @@ export const EVENT_TYPE_LABELS: Record<CalendarEventType, string> = {
   main_event: "Main event",
   practice: "Practice",
   test_day: "Test day",
+  track_day: "Track day",
   prep: "Prep",
   school: "School",
   race: "Race",

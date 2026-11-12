@@ -10,8 +10,9 @@ import {
   isMotorsportRegRegistrationUrl,
   resolvePublicRegistrationHref,
 } from "../lib/calendar/motorsportreg.ts";
+import { EVENT_TYPE_LABELS } from "../lib/calendar/presentation.ts";
 import { validateCalendarInput } from "../lib/calendar/validate.ts";
-import type { CalendarEventRecord } from "../lib/calendar/types.ts";
+import { CALENDAR_EVENT_TYPES, type CalendarEventRecord } from "../lib/calendar/types.ts";
 import { PRIMAL_EXPERIENCE_PROFILE } from "../lib/ces/profile/primal.ts";
 import { CES_EXPERIENCE_MODULE_IDS, getCanonicalCapability } from "../lib/ces/modules/canonical.ts";
 
@@ -73,6 +74,16 @@ function main() {
 
   check("collection exists", read("payload/collections/ClientCalendarEvents.ts").includes("client-calendar-events"));
   check("migration registered", read("migrations/index.ts").includes("20261003_client_calendar_events"));
+  check(
+    "track_day migration registered",
+    read("migrations/index.ts").includes("20261112_client_calendar_event_type_track_day"),
+  );
+  check("track_day canonical type", (CALENDAR_EVENT_TYPES as readonly string[]).includes("track_day"));
+  check("track_day display label", EVENT_TYPE_LABELS.track_day === "Track day");
+  check(
+    "payload includes track_day option",
+    read("payload/collections/ClientCalendarEvents.ts").includes('value: "track_day"'),
+  );
   check("payload registers collection", read("payload.config.ts").includes("ClientCalendarEvents"));
   check("CES module id includes calendar", (CES_EXPERIENCE_MODULE_IDS as readonly string[]).includes("calendar"));
   check(
@@ -159,6 +170,26 @@ function main() {
 
   const issues = validateCalendarInput({ sourceTitle: "", startsOn: "bad" });
   check("validation requires name and date", issues.length >= 2);
+  check(
+    "validation accepts track_day",
+    validateCalendarInput({
+      sourceTitle: "Track outing",
+      startsOn: "2026-11-20",
+      eventType: "track_day",
+    }).length === 0,
+  );
+
+  const trackPublic = toPublicCalendarEvent(
+    fixture({
+      eventType: "track_day",
+      sourceEventType: null,
+      sourceSystem: "manual",
+      sourceExternalId: null,
+      fieldAuthority: defaultFieldAuthority("manual"),
+    }),
+  );
+  check("manual track_day public label is Track day", trackPublic?.eventTypeLabel === "Track day");
+  check("MSR sourceEventType label preserved", publicEvent?.eventTypeLabel === existing.sourceEventType);
 
   const manual = fixture({ sourceSystem: "manual", sourceExternalId: null, fieldAuthority: defaultFieldAuthority("manual") });
   const manualPatch = applySourceOwnedFields(manual, { sourceTitle: "feed cannot steal" } as Partial<CalendarEventRecord>);
