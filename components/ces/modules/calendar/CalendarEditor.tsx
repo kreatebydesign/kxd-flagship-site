@@ -312,43 +312,63 @@ export function CalendarEditor({ mode, initial }: Props) {
               </div>
             </section>
 
-            <section className="kxd-inv-panel kxd-inv-panel--editorial" aria-labelledby="cal-notes">
+            <section className="kxd-inv-panel kxd-inv-panel--editorial" aria-labelledby="cal-public-copy">
               <header className="kxd-inv-panel__head">
                 <SectionNum n="03" />
                 <div>
-                  <h2 id="cal-notes">Team notes</h2>
-                  <p>Internal context for Primal operators and partners.</p>
+                  <h2 id="cal-public-copy">Public website copy</h2>
+                  <p>Guest-facing description for the marketing calendar.</p>
                 </div>
               </header>
-              <div className="kxd-inv-form__stack">
-                <Field label="Notes for the team" wide>
-                  <textarea
-                    className="kxd-inv-input kxd-inv-input--textarea"
-                    rows={4}
-                    value={form.description}
-                    onChange={(e) => patch("description", e.target.value)}
-                  />
-                </Field>
-                <Field label="Practice / prep notes" wide>
-                  <textarea
-                    className="kxd-inv-input kxd-inv-input--textarea"
-                    rows={3}
-                    value={form.practiceNotes}
-                    onChange={(e) => patch("practiceNotes", e.target.value)}
-                  />
-                </Field>
-              </div>
+              <Field
+                label="Event description"
+                wide
+                hint="Shown on the public calendar when this event is published to the website."
+              >
+                <textarea
+                  className="kxd-inv-input kxd-inv-input--textarea"
+                  rows={4}
+                  value={form.description}
+                  onChange={(e) => patch("description", e.target.value)}
+                />
+              </Field>
+            </section>
+
+            <section className="kxd-inv-panel kxd-inv-panel--editorial" aria-labelledby="cal-notes">
+              <header className="kxd-inv-panel__head">
+                <SectionNum n="04" />
+                <div>
+                  <h2 id="cal-notes">Team notes</h2>
+                  <p>Internal context for Primal operators. Not shown on the public website.</p>
+                </div>
+              </header>
+              <Field
+                label="Team prep notes"
+                wide
+                hint="Private to the portal. Never published to the website."
+              >
+                <textarea
+                  className="kxd-inv-input kxd-inv-input--textarea"
+                  rows={3}
+                  value={form.practiceNotes}
+                  onChange={(e) => patch("practiceNotes", e.target.value)}
+                />
+              </Field>
             </section>
 
             <section className="kxd-inv-panel kxd-inv-panel--secondary" aria-labelledby="cal-registration">
               <header className="kxd-inv-panel__head">
-                <SectionNum n="04" />
+                <SectionNum n="05" />
                 <div>
                   <h2 id="cal-registration">Registration guidance</h2>
-                  <p>What guests should know before signing up. Informational only.</p>
+                  <p>Portal reference for operators. Not published to the website today.</p>
                 </div>
               </header>
-              <Field label="Registration guidance" wide>
+              <Field
+                label="Registration guidance"
+                wide
+                hint="Portal only. This field is not sent to the public calendar API."
+              >
                 <textarea
                   className="kxd-inv-input kxd-inv-input--textarea"
                   rows={3}
@@ -379,6 +399,9 @@ export function CalendarEditor({ mode, initial }: Props) {
                 onChange={(e) => patch("listedOnWebsite", e.currentTarget.checked)}
                 label="Publish to website"
               />
+              <p className="kxd-inv-field__hint kxd-cal-publish-warning" role="note">
+                When published, the event description becomes public on the website calendar.
+              </p>
             </div>
 
             {initial ? (
