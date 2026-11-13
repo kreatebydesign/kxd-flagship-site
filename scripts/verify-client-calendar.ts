@@ -220,6 +220,11 @@ function main() {
     read("lib/calendar/presentation.ts").includes("eventDateRailParts"),
   );
 
+  const editor = read("components/ces/modules/calendar/CalendarEditor.tsx");
+  check("Save & Next create-only", editor.includes('Save & Next') && editor.includes('mode === "create" ?'));
+  check("Save & Next uses shared form reset", read("lib/calendar/editor-form.ts").includes("formStateForNextEvent"));
+  check("duplicate save guard", editor.includes("saveInFlightRef") && editor.includes("disabled={saving || pending}"));
+
   console.log("\nBuild 2 calendar verification passed.\n");
 }
 

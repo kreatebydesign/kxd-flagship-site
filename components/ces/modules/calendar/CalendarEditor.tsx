@@ -3,9 +3,14 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { KxdToggle } from "@/components/os";
 import { CesPage } from "@/components/ces/primitives";
+import {
+  formStateForNextEvent,
+  formStateFromRecord,
+  type CalendarEditorFormState,
+} from "@/lib/calendar/editor-form";
 import type { CalendarEventInput, CalendarEventRecord, CalendarEventType } from "@/lib/calendar/types";
 import { CALENDAR_EVENT_TYPES } from "@/lib/calendar/types";
 import { EVENT_TYPE_LABELS, SOURCE_LABELS, STATUS_LABELS, formatEventDate } from "@/lib/calendar/presentation";
@@ -16,47 +21,9 @@ type Props = {
   initial?: CalendarEventRecord | null;
 };
 
-type FormState = {
-  titleOverride: string;
-  sourceTitle: string;
-  startsOn: string;
-  endsOn: string;
-  eventType: CalendarEventType;
-  status: CalendarEventRecord["status"];
-  listedOnWebsite: boolean;
-  featured: boolean;
-  venueName: string;
-  venueCity: string;
-  venueState: string;
-  venueAddress: string;
-  summary: string;
-  description: string;
-  practiceNotes: string;
-  registrationGuidance: string;
-  timezone: string;
-};
+type FormState = CalendarEditorFormState;
 
-function fromRecord(record?: CalendarEventRecord | null): FormState {
-  return {
-    titleOverride: record?.titleOverride ?? "",
-    sourceTitle: record?.sourceTitle ?? "",
-    startsOn: record?.startsOn ?? "",
-    endsOn: record?.endsOn ?? "",
-    eventType: record?.eventType ?? "school",
-    status: record?.status ?? "draft",
-    listedOnWebsite: record?.listedOnWebsite ?? false,
-    featured: record?.featured ?? false,
-    venueName: record?.venueName ?? "",
-    venueCity: record?.venueCity ?? "",
-    venueState: record?.venueState ?? "",
-    venueAddress: record?.venueAddress ?? "",
-    summary: record?.summary ?? "",
-    description: record?.description ?? "",
-    practiceNotes: record?.practiceNotes ?? "",
-    registrationGuidance: record?.registrationGuidance ?? "",
-    timezone: record?.timezone ?? "America/New_York",
-  };
-}
+type SaveIntent = "save" | "saveNext";
 
 function SectionNum({ n }: { n: string }) {
   return (
@@ -94,9 +61,14 @@ function Field({
 export function CalendarEditor({ mode, initial }: Props) {
   const router = useRouter();
   const sourceLocked = Boolean(initial && initial.sourceSystem !== "manual");
-  const [form, setForm] = useState<FormState>(fromRecord(initial));
+  const [form, setForm] = useState<FormState>(formStateFromRecord(initial));
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
   const [pending, startTransition] = useTransition();
+  const formRef = useRef<HTMLFormElement>(null);
+  const eventNameRef = useRef<HTMLInputElement>(null);
+  const saveInFlightRef = useRef(false);
 
   function patch<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -125,23 +97,48 @@ export function CalendarEditor({ mode, initial }: Props) {
     };
   }
 
-  function save() {
+  function persist(intent: SaveIntent) {
+    if (saveInFlightRef.current || saving) return;
+    if (formRef.current && !formRef.current.reportValidity()) return;
+
+    saveInFlightRef.current = true;
+    setSaving(true);
+    setError(null);
+    if (intent === "save") setSuccess(null);
+
     startTransition(async () => {
-      setError(null);
-      const url =
-        mode === "create" ? "/api/portal/calendar" : `/api/portal/calendar/${initial!.eventKey}`;
-      const response = await fetch(url, {
-        method: mode === "create" ? "POST" : "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(toPayload()),
-      });
-      const data = await response.json();
-      if (!response.ok || !data.ok) {
-        setError(data.message || "Could not save this event.");
-        return;
+      try {
+        const url =
+          mode === "create" ? "/api/portal/calendar" : `/api/portal/calendar/${initial!.eventKey}`;
+        const response = await fetch(url, {
+          method: mode === "create" ? "POST" : "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(toPayload()),
+        });
+        const data = await response.json();
+        if (!response.ok || !data.ok) {
+          setError(data.message || "Could not save this event.");
+          return;
+        }
+
+        router.refresh();
+
+        if (intent === "saveNext" && mode === "create") {
+          const savedName =
+            (data.event?.sourceTitle as string | undefined)?.trim() ||
+            form.sourceTitle.trim() ||
+            "Event";
+          setSuccess(`"${savedName}" saved. Add the next event below.`);
+          setForm((prev) => formStateForNextEvent(prev));
+          queueMicrotask(() => eventNameRef.current?.focus());
+          return;
+        }
+
+        router.push(`/portal/calendar/${data.event.eventKey}`);
+      } finally {
+        saveInFlightRef.current = false;
+        setSaving(false);
       }
-      router.push(`/portal/calendar/${data.event.eventKey}`);
-      router.refresh();
     });
   }
 
@@ -188,10 +185,17 @@ export function CalendarEditor({ mode, initial }: Props) {
         </p>
       ) : null}
 
+      {success ? (
+        <p className="kxd-inv-notice" role="status" aria-live="polite">
+          {success}
+        </p>
+      ) : null}
+
       <form
+        ref={formRef}
         onSubmit={(e) => {
           e.preventDefault();
-          save();
+          persist("save");
         }}
       >
         <div className="kxd-inv-editor__layout">
@@ -207,6 +211,7 @@ export function CalendarEditor({ mode, initial }: Props) {
               <div className="kxd-inv-form__stack">
                 <Field label="Event name" required={!sourceLocked} wide>
                   <input
+                    ref={sourceLocked ? undefined : eventNameRef}
                     className="kxd-inv-input"
                     value={sourceLocked ? form.titleOverride : form.sourceTitle}
                     onChange={(e) =>
@@ -380,9 +385,23 @@ export function CalendarEditor({ mode, initial }: Props) {
             </section>
 
             <div className="kxd-ces-empty-guide__actions">
-              <button type="submit" className="kxd-ces-btn kxd-ces-btn--primary" disabled={pending}>
-                {pending ? "Saving…" : "Save event"}
+              <button
+                type="submit"
+                className="kxd-ces-btn kxd-ces-btn--primary"
+                disabled={saving || pending}
+              >
+                {saving ? "Saving…" : "Save event"}
               </button>
+              {mode === "create" ? (
+                <button
+                  type="button"
+                  className="kxd-ces-btn kxd-ces-btn--ghost"
+                  disabled={saving || pending}
+                  onClick={() => persist("saveNext")}
+                >
+                  {saving ? "Saving…" : "Save & Next"}
+                </button>
+              ) : null}
               <Link href="/portal/calendar" className="kxd-ces-btn kxd-ces-btn--ghost">
                 Cancel
               </Link>
