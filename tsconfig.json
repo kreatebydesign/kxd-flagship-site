@@ -41,6 +41,7 @@
   ],
   "exclude": [
     "node_modules",
+    "report-output",
     "_archive",
     "scripts/staging-inbound-sales-closed-loop-qa.ts",
     "scripts/preview-direct-agreement-pdf-investment.ts",
@@ -48,6 +49,7 @@
     "scripts/verify-agreement-value-presentation.ts",
     "scripts/export-primal-leadership-progress-pdf.ts",
     "scripts/batch-cusick-sept-2026-report-polish.ts",
+    "scripts/verify-staff-sales-preview-release.ts",
     "storage/staff-documents-preview/**"
   ]
 }
