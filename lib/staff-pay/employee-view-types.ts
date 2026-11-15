@@ -29,8 +29,19 @@ export type StaffMyTimePayPeriodView = {
   periodOpenNote: string | null;
 };
 
+export type StaffMyTimePayDiscretionaryBonusView = {
+  id: number;
+  amountCents: number;
+  reason: string;
+  bonusDate: string;
+  status: "active" | "voided";
+  paymentStatus: "pending" | "paid" | "voided";
+  createdAt: string;
+};
+
 export type StaffMyTimePaySummaryTotals = {
   verifiedPreliminaryGrossCents: number;
+  activeDiscretionaryBonusCents: number;
   ownerApprovedHistoricalGrossCents: number | null;
   ownerApprovedHistoricalMinutes: number | null;
   pendingProposedHistoricalGrossCents: number | null;
@@ -60,7 +71,11 @@ export type StaffMyTimePayPageData = {
   periods: StaffMyTimePayPeriodView[];
   provisionalHistorical: import("./provisional-historical").ProvisionalHistoricalSummary | null;
   ownerApprovedHistoricalEntries: import("./historical-entries").StaffPayHistoricalEntryView[];
-  oct21Reconciliation: typeof import("./tyler-payroll-reconciliation").TYLER_OCT_21_2026_RECONCILIATION;
+  oct21Reconciliation:
+    | typeof import("./tyler-payroll-reconciliation").TYLER_OCT_21_2026_RECONCILIATION
+    | null;
+  discretionaryBonuses: StaffMyTimePayDiscretionaryBonusView[];
+  discretionaryBonusDisclaimer: string;
   summaryTotals: StaffMyTimePaySummaryTotals;
   wageSettlement: StaffMyTimePaySettlementView | null;
   myRequests: StaffTimePayRequestView[];

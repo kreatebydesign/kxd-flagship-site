@@ -120,6 +120,7 @@ async function main(): Promise<void> {
   assert.ok(oct21Daily, "Oct 21 daily bucket required");
   assert.equal(oct21Daily.minutes, 311);
   assert.equal(oct21Daily.shifts.length, 2);
+  assert.ok(view.oct21Reconciliation, "Tyler viewer must receive Oct 21 reconciliation");
   assert.equal(view.oct21Reconciliation.productionTotalMinutes, 311);
   assert.equal(TYLER_OCT_21_2026_RECONCILIATION.payableSource, "production_time_clock");
 

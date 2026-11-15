@@ -66,7 +66,8 @@ export const JuniorCreatorUsers: CollectionConfig = {
       defaultValue: 800,
       admin: {
         position: "sidebar",
-        description: "Default $8.00/hr — used in future shift tracking (Phase 2B).",
+        description:
+          "Junior Creators historical rate field (may differ from staff Time Clock rates). Staff hourly rates use staff_hourly_rates after owner confirmation.",
       },
     },
     {
@@ -77,6 +78,17 @@ export const JuniorCreatorUsers: CollectionConfig = {
       admin: {
         position: "sidebar",
         description: "Inactive users cannot log into /junior-creators.",
+      },
+    },
+    {
+      name: "linkedStaffUser",
+      type: "relationship",
+      relationTo: "users",
+      label: "Linked staff login",
+      admin: {
+        position: "sidebar",
+        description:
+          "Optional KXD OS staff user for /admin login. Do not create duplicate accounts; link an existing users record.",
       },
     },
   ],

@@ -134,6 +134,8 @@ import * as migration_20261027_platform_economics_snapshots from './20261027_pla
 import * as migration_20261028_phase17_project_inquiry_attribution from './20261028_phase17_project_inquiry_attribution';
 import * as migration_20261029_staff_sales_activity_staff_recording from './20261029_staff_sales_activity_staff_recording';
 import * as migration_20261112_client_calendar_event_type_track_day from './20261112_client_calendar_event_type_track_day';
+import * as migration_20261115_harlow_staff_foundation from './20261115_harlow_staff_foundation';
+import * as migration_20261116_staff_minor_employment_compliance from './20261116_staff_minor_employment_compliance';
 
 export const migrations = [
   {
@@ -882,5 +884,19 @@ export const migrations = [
     up: migration_20261112_client_calendar_event_type_track_day.up,
     down: migration_20261112_client_calendar_event_type_track_day.down,
     name: '20261112_client_calendar_event_type_track_day',
+  },
+  {
+    // Junior studio staff role, junior↔staff link, discretionary bonus ledger.
+    // Additive only. Local apply until production migration is authorized.
+    up: migration_20261115_harlow_staff_foundation.up,
+    down: migration_20261115_harlow_staff_foundation.down,
+    name: '20261115_harlow_staff_foundation',
+  },
+  {
+    // Minor employment compliance + bonus payment status columns.
+    // Additive only. Local apply until production migration is authorized.
+    up: migration_20261116_staff_minor_employment_compliance.up,
+    down: migration_20261116_staff_minor_employment_compliance.down,
+    name: '20261116_staff_minor_employment_compliance',
   },
 ];

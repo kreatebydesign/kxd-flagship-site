@@ -22,6 +22,7 @@ import {
   withStaffTimeTransaction,
   type StaffTimeTxReq,
 } from "./transaction";
+import { assertStaffPaidShiftPermitted } from "@/lib/staff-employment/compliance-data";
 
 function isActiveShiftConflict(error: unknown): boolean {
   if (!(error instanceof Error)) return false;
@@ -164,6 +165,7 @@ export async function startStaffShift(input: {
 }): Promise<StaffTimeShiftView> {
   const payload = await getPayload({ config });
   await ensureStaffPayrollFoundation(payload);
+  await assertStaffPaidShiftPermitted(input.actor);
   await assertWorkIntentAllowed(input.actor, input.workIntent, input.user);
   const workIntent = await resolveStaffWorkIntentForShift(input.actor, input.workIntent);
 

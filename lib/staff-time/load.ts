@@ -16,6 +16,8 @@ import {
   type StaffTimeEligibleClientOption,
   type StaffTimeEligibleWorkOption,
 } from "./eligible-assignments";
+import { loadStaffPaidShiftSelfStatus } from "@/lib/staff-employment/compliance-data";
+import type { StaffPaidShiftSelfStatus } from "@/lib/staff-employment/compliance-types";
 
 export type StaffTimeClockPageData = {
   workTimezone: string;
@@ -29,6 +31,7 @@ export type StaffTimeClockPageData = {
     weeklyHoursLimit: number;
   };
   viewer: Pick<StaffActor, "userId" | "displayName" | "staffRole">;
+  paidShiftStatus: StaffPaidShiftSelfStatus;
 };
 
 export async function loadStaffTimeClockPage(
@@ -36,12 +39,14 @@ export async function loadStaffTimeClockPage(
 ): Promise<StaffTimeClockPageData> {
   const payload = await getPayload({ config });
   const workTimezone = await resolveRequestTimezone();
-  const [activeShift, history, payroll, eligibleWork, eligibleClients] = await Promise.all([
+  const [activeShift, history, payroll, eligibleWork, eligibleClients, paidShiftStatus] =
+    await Promise.all([
     findActiveStaffShift(actor.userId),
     listStaffShiftHistory(actor.userId, 20),
     loadUpcomingPaydaySummary(payload),
     listStaffTimeEligibleWork(actor),
     listStaffTimeEligibleClients(actor),
+    loadStaffPaidShiftSelfStatus(actor),
   ]);
 
   return {
@@ -56,5 +61,6 @@ export async function loadStaffTimeClockPage(
       displayName: actor.displayName,
       staffRole: actor.staffRole,
     },
+    paidShiftStatus,
   };
 }

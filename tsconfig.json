@@ -50,6 +50,9 @@
     "scripts/export-primal-leadership-progress-pdf.ts",
     "scripts/batch-cusick-sept-2026-report-polish.ts",
     "scripts/verify-staff-sales-preview-release.ts",
+    "scripts/apply-employee-policy-template-insert-sql.ts",
+    "scripts/generate-employee-policy-template-insert-sql.ts",
+    "scripts/generate-employee-policy-template-insert-sql-compact.ts",
     "storage/staff-documents-preview/**"
   ]
 }

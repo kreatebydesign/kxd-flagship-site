@@ -141,10 +141,14 @@ assert.match(read("migrations/20261022_staff_sales_development_phase1.ts"), /sou
 assert.match(read("payload/collections/SalesLeads.ts"), /sourcedByStaffUser/);
 assert.match(read("payload/collections/SalesLeads.ts"), /assignedStaffUser/);
 assert.match(read("components/admin/operations/shared/OperationsShell.tsx"), /Sales development/);
-assert.doesNotMatch(
-  read("lib/staff/permissions.ts"),
-  /OPERATIONS_COORDINATOR_CAPABILITIES[\s\S]*staff\.sales\.read/,
-);
+{
+  const perms = read("lib/staff/permissions.ts");
+  const coordBlock = perms.match(
+    /const OPERATIONS_COORDINATOR_CAPABILITIES[\s\S]*?\] as const;/,
+  )?.[0];
+  assert.ok(coordBlock, "OPERATIONS_COORDINATOR_CAPABILITIES block missing");
+  assert.doesNotMatch(coordBlock, /staff\.sales\.read/);
+}
 
 assert.match(read("app/admin/sales/layout.tsx"), /requireStaffAwarePage/);
 assert.match(read("app/admin/sales/layout.tsx"), /x-kxd-pathname/);

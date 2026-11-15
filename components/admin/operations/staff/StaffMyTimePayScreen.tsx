@@ -252,6 +252,12 @@ export function StaffMyTimePayScreen({
                 </li>
               </>
             ) : null}
+            {view.summaryTotals.activeDiscretionaryBonusCents > 0 ? (
+              <li>
+                <strong>Discretionary bonuses (separate from hourly):</strong>{" "}
+                {formatUsdFromCents(view.summaryTotals.activeDiscretionaryBonusCents)}
+              </li>
+            ) : null}
             <li>{view.grossBeforeTaxDisclaimer}</li>
             <li>{view.paymentRecordedDisclaimer}</li>
           </ul>
@@ -339,20 +345,40 @@ export function StaffMyTimePayScreen({
           </section>
         ) : null}
 
-        <section style={{ marginTop: "1.5rem" }}>
-          <OpsSectionHead label="Oct 21 reconciliation (manual note vs Time Clock)" />
-          <OpsCard>
-            <p className="kxd-os-meta">{view.oct21Reconciliation.verdict}</p>
-            <p className="kxd-os-meta" style={{ marginTop: "0.5rem" }}>
-              Manual note: {view.oct21Reconciliation.ownerManualSpanLabel} (
-              {formatStaffPayMinutesLabel(view.oct21Reconciliation.ownerManualGrossSpanMinutes)} gross span, not
-              auto-paid). Production clock:{" "}
-              {formatStaffPayMinutesLabel(view.oct21Reconciliation.productionTotalMinutes)} payable ·{" "}
-              {formatUsdFromCents(view.oct21Reconciliation.productionPreliminaryGrossCents)} · gap between shifts
-              ~{view.oct21Reconciliation.gapBetweenShiftsMinutes} minutes.
-            </p>
-          </OpsCard>
-        </section>
+        {view.oct21Reconciliation ? (
+          <section style={{ marginTop: "1.5rem" }}>
+            <OpsSectionHead label="Oct 21 reconciliation (manual note vs Time Clock)" />
+            <OpsCard>
+              <p className="kxd-os-meta">{view.oct21Reconciliation.verdict}</p>
+              <p className="kxd-os-meta" style={{ marginTop: "0.5rem" }}>
+                Manual note: {view.oct21Reconciliation.ownerManualSpanLabel} (
+                {formatStaffPayMinutesLabel(view.oct21Reconciliation.ownerManualGrossSpanMinutes)} gross span, not
+                auto-paid). Production clock:{" "}
+                {formatStaffPayMinutesLabel(view.oct21Reconciliation.productionTotalMinutes)} payable ·{" "}
+                {formatUsdFromCents(view.oct21Reconciliation.productionPreliminaryGrossCents)} · gap between shifts
+                ~{view.oct21Reconciliation.gapBetweenShiftsMinutes} minutes.
+              </p>
+            </OpsCard>
+          </section>
+        ) : null}
+
+        {view.discretionaryBonuses.length > 0 ? (
+          <section style={{ marginTop: "1.5rem" }}>
+            <OpsSectionHead label="Discretionary bonuses" />
+            <OpsCard>
+              <p className="kxd-os-meta">{view.discretionaryBonusDisclaimer}</p>
+              <ul className="kxd-os-meta" style={{ marginTop: "0.75rem" }}>
+                {view.discretionaryBonuses.map((bonus) => (
+                  <li key={bonus.id} style={{ marginBottom: "0.5rem" }}>
+                    <strong>{bonus.bonusDate}</strong> · {formatUsdFromCents(bonus.amountCents)} · {bonus.reason}
+                    {bonus.paymentStatus === "paid" ? " · Paid" : " · Payment pending"}
+                    {bonus.status === "voided" ? " · Voided" : ""}
+                  </li>
+                ))}
+              </ul>
+            </OpsCard>
+          </section>
+        ) : null}
 
         <section style={{ marginTop: "1.5rem" }}>
           <OpsSectionHead label="Documented activity outside clock (not hours)" />

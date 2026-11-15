@@ -18,6 +18,12 @@ import {
 import { listStaffPayHistoricalEntriesForStaff } from "@/lib/staff-pay/historical-entries";
 import { loadProvisionalHistoricalSummary } from "@/lib/staff-pay/provisional-historical";
 import { TYLER_OCT_21_2026_RECONCILIATION } from "@/lib/staff-pay/tyler-payroll-reconciliation";
+import { TYLER_RETHWILL_STAFF_USER_ID } from "@/lib/staff-pay/tyler-october-historical-reference";
+import {
+  listStaffDiscretionaryBonusesForStaff,
+  sumActiveStaffDiscretionaryBonusCents,
+} from "@/lib/staff-pay/bonuses/queries";
+import { STAFF_DISCRETIONARY_BONUS_DISCLAIMER } from "@/lib/staff-pay/bonuses/types";
 import { loadStaffWageSettlementSummary } from "@/lib/staff-pay/wage-payments/load-settlement";
 import { STAFF_WAGE_SELF_VIEW_DISCLAIMER } from "@/lib/staff-pay/wage-payments/types";
 import { preliminaryGrossCentsForMinutes } from "@/lib/staff-pay/money";
@@ -305,6 +311,18 @@ export async function loadStaffMyTimePayPage(actor: StaffActor): Promise<StaffMy
     historicalEntries: ownerApprovedHistoricalEntries,
   });
 
+  const discretionaryBonusesRaw = await listStaffDiscretionaryBonusesForStaff(staffUserId);
+  const discretionaryBonuses = discretionaryBonusesRaw.map((b) => ({
+    id: b.id,
+    amountCents: b.amountCents,
+    reason: b.reason,
+    bonusDate: b.bonusDate,
+    status: b.status,
+    paymentStatus: b.paymentStatus,
+    createdAt: b.createdAt,
+  }));
+  const activeDiscretionaryBonusCents = await sumActiveStaffDiscretionaryBonusCents(staffUserId);
+
   const wageSettlementSummary = await loadStaffWageSettlementSummary(staffUserId);
   const paymentRecordedDisclaimer = wageSettlementSummary.ledgerReady
     ? `${PAYMENT_RECORDED_LEGACY} ${STAFF_WAGE_SELF_VIEW_DISCLAIMER}`
@@ -325,9 +343,13 @@ export async function loadStaffMyTimePayPage(actor: StaffActor): Promise<StaffMy
     periods,
     provisionalHistorical,
     ownerApprovedHistoricalEntries,
-    oct21Reconciliation: TYLER_OCT_21_2026_RECONCILIATION,
+    oct21Reconciliation:
+      staffUserId === TYLER_RETHWILL_STAFF_USER_ID ? TYLER_OCT_21_2026_RECONCILIATION : null,
+    discretionaryBonuses,
+    discretionaryBonusDisclaimer: STAFF_DISCRETIONARY_BONUS_DISCLAIMER,
     summaryTotals: {
       verifiedPreliminaryGrossCents,
+      activeDiscretionaryBonusCents,
       ownerApprovedHistoricalGrossCents,
       ownerApprovedHistoricalMinutes,
       pendingProposedHistoricalGrossCents,

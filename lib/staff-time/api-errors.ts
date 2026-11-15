@@ -52,6 +52,17 @@ export function staffTimeErrorResponse(error: unknown): { status: number; messag
       return { status: 400, message: "Selected user is not staff." };
     case "PAY_PERIOD_NOT_FOUND":
       return { status: 400, message: "No pay period covers this shift date." };
+    case "PAID_SHIFT_BLOCKED":
+      return {
+        status: 403,
+        message:
+          "Paid shift clock-in is blocked until employment authorization and payroll setup are confirmed.",
+      };
+    case "PAID_SHIFT_COMPLIANCE_MIGRATION_REQUIRED":
+      return {
+        status: 503,
+        message: "Employment compliance migration is required before paid shifts can start.",
+      };
     default:
       if (error.message.includes("staff_time_shifts_one_active_per_user")) {
         return {

@@ -12,6 +12,7 @@ export type StaffRoleId =
   | "executive_operations_coordinator"
   | "operations_manager"
   | "business_development_specialist"
+  | "junior_studio_teammate"
   | "none";
 
 /** Deny-by-default capability grants for restricted staff. */

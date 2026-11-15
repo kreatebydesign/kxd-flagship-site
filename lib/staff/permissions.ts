@@ -40,6 +40,27 @@ const FULL_ADMIN_CAPABILITIES: readonly StaffCapability[] = [
   "admin.payroll.review",
 ] as const;
 
+/**
+ * Junior studio teammate — core staff shell (work, time, pay self-view).
+ * No sales, billing, onboarding assist, or operator payroll tools.
+ */
+const JUNIOR_STUDIO_TEAMMATE_CAPABILITIES: readonly StaffCapability[] = [
+  "staff.home",
+  "staff.assigned-work.read",
+  "staff.assigned-work.update",
+  "staff.draft.prepare",
+  "staff.draft.submit-for-approval",
+  "staff.notes.internal",
+  "staff.training",
+  "staff.help.request",
+  "staff.guidance",
+  "staff.documents.read",
+  "staff.documents.acknowledge",
+  "staff.documents.sign",
+  "staff.time.clock",
+  "staff.time.read.self",
+] as const;
+
 /** Business Development & Digital — client-scoped; no billing or company financials. */
 const BUSINESS_DEVELOPMENT_SPECIALIST_CAPABILITIES: readonly StaffCapability[] = [
   "staff.home",
@@ -141,6 +162,9 @@ export function normalizeStaffRole(value: unknown): StaffRoleId {
   if (value === "business_development_specialist") {
     return "business_development_specialist";
   }
+  if (value === "junior_studio_teammate") {
+    return "junior_studio_teammate";
+  }
   return "none";
 }
 
@@ -154,6 +178,8 @@ export function staffRoleTitle(role: StaffRoleId): string {
       return "KXD Operations Manager";
     case "business_development_specialist":
       return "Business Development & Digital Specialist";
+    case "junior_studio_teammate":
+      return "Junior Studio Teammate";
     default:
       return "Studio teammate";
   }
@@ -190,6 +216,9 @@ export function resolveStaffCapabilities(
   }
   if (actor.staffRole === "business_development_specialist") {
     return new Set(BUSINESS_DEVELOPMENT_SPECIALIST_CAPABILITIES);
+  }
+  if (actor.staffRole === "junior_studio_teammate") {
+    return new Set(JUNIOR_STUDIO_TEAMMATE_CAPABILITIES);
   }
   if (
     actor.staffRole === "operations_coordinator" ||
@@ -257,6 +286,13 @@ export function isStaffAllowedPagePath(
     return actorHasStaffCapability(actor, "admin.staff-documents.manage");
   }
 
+  if (
+    pathname === "/admin/operations/staff/sales" ||
+    pathname.startsWith("/admin/operations/staff/sales/")
+  ) {
+    return actorHasStaffCapability(actor, "staff.sales.read");
+  }
+
   return STAFF_ALLOWED_PAGE_PREFIXES.some(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`) || pathname.startsWith(prefix),
   );
@@ -279,6 +315,21 @@ export function isStaffAllowedApiPath(
   if (!isRestrictedStaff(actor)) return true;
   if (pathname.startsWith("/api/admin/work")) {
     return isStaffAllowedWorkApiPath(pathname);
+  }
+  if (pathname.startsWith("/api/admin/staff/payroll/")) {
+    if (
+      pathname === "/api/admin/staff/payroll/bonuses" ||
+      pathname.startsWith("/api/admin/staff/payroll/bonuses/")
+    ) {
+      return actorHasStaffCapability(actor, "staff.time.read.self");
+    }
+    return actorHasStaffCapability(actor, "admin.payroll.review");
+  }
+  if (
+    pathname === "/api/admin/staff/employment/paid-shift-status" ||
+    pathname.startsWith("/api/admin/staff/employment/")
+  ) {
+    return actorHasStaffCapability(actor, "staff.time.read.self");
   }
   return STAFF_ALLOWED_API_PREFIXES.some(
     (prefix) => pathname === prefix || pathname.startsWith(prefix),

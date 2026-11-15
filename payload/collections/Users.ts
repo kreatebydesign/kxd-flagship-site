@@ -79,6 +79,10 @@ export const Users: CollectionConfig = {
           label: "Business Development & Digital Specialist",
           value: "business_development_specialist",
         },
+        {
+          label: "Junior Studio Teammate",
+          value: "junior_studio_teammate",
+        },
       ],
       admin: {
         position: "sidebar",

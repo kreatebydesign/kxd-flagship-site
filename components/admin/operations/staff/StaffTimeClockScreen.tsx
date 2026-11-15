@@ -196,6 +196,15 @@ export function StaffTimeClockScreen({ initial }: { initial: StaffTimeClockPageD
           lead="Server-recorded shift time. Your punches stay on the record — approvals never erase worked hours."
         />
 
+        {!data.paidShiftStatus.paidShiftsAllowed && !active ? (
+          <OpsCard className="kxd-os-staff-time__section">
+            <OpsStatusBadge label="Clock-in paused" variant="warning" />
+            <p className="kxd-os-meta" style={{ marginTop: "0.5rem" }}>
+              {data.paidShiftStatus.statusLabel}
+            </p>
+          </OpsCard>
+        ) : null}
+
         {error ? (
           <div className="kxd-os-staff-time__error" role="alert">
             <p className="kxd-os-staff-time__error-title">Could not save your punch</p>
@@ -324,7 +333,9 @@ export function StaffTimeClockScreen({ initial }: { initial: StaffTimeClockPageD
                   <KxdButton
                     type="button"
                     variant="primary"
-                    disabled={busy !== null || !canStart}
+                    disabled={
+                      busy !== null || !canStart || !data.paidShiftStatus.paidShiftsAllowed
+                    }
                     onClick={() => void startShift()}
                   >
                     {busy === "start" ? "Starting…" : "Start shift"}

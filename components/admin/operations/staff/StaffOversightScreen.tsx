@@ -19,6 +19,9 @@ import { StaffPayPeriodReviewCard } from "./StaffPayPeriodReviewCard";
 import { StaffTimePayRequestsCard } from "./StaffTimePayRequestsCard";
 import { StaffTylerHistoricalReviewCard } from "./StaffTylerHistoricalReviewCard";
 import { StaffWagePaymentCard } from "./StaffWagePaymentCard";
+import { StaffDiscretionaryBonusCard } from "./StaffDiscretionaryBonusCard";
+import { StaffMinorEmploymentComplianceCard } from "./StaffMinorEmploymentComplianceCard";
+import { StaffAnnualCompensationSummaryCard } from "./StaffAnnualCompensationSummaryCard";
 import { WORK_PRIORITY_LABELS, WORK_STATUS_LABELS } from "@/lib/work/constants";
 import { workViewHref } from "@/lib/work/planning/client";
 
@@ -836,6 +839,33 @@ export function StaffOversightScreen({
           <div id="payroll-review" style={{ scrollMarginTop: "5.5rem" }}>
             <StaffTylerHistoricalReviewCard onError={setError} />
             <StaffWagePaymentCard onMessage={setMessage} onError={setError} />
+            {data.members
+              .filter(
+                (m) =>
+                  m.staffRole === "junior_studio_teammate" ||
+                  m.displayName.trim() === "Harlow",
+              )
+              .map((m) => (
+                <div key={m.userId}>
+                  <StaffMinorEmploymentComplianceCard
+                    staffUserId={m.userId}
+                    staffLabel={m.displayName}
+                    onMessage={setMessage}
+                    onError={setError}
+                  />
+                  <StaffDiscretionaryBonusCard
+                    staffUserId={m.userId}
+                    staffLabel={m.displayName}
+                    onMessage={setMessage}
+                    onError={setError}
+                  />
+                  <StaffAnnualCompensationSummaryCard
+                    staffUserId={m.userId}
+                    staffLabel={m.displayName}
+                    onError={setError}
+                  />
+                </div>
+              ))}
             <StaffTimePayRequestsCard onMessage={setMessage} onError={setError} />
             <StaffPayPeriodReviewCard onMessage={setMessage} onError={setError} />
           </div>
