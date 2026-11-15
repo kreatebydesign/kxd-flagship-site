@@ -133,7 +133,7 @@ async function main(): Promise<void> {
     assert.equal(entry.status, "owner_approved");
   }
 
-  assert.match(view.paymentRecordedDisclaimer, /does not record wage payments/i);
+  assert.match(view.paymentRecordedDisclaimer, /Settled wages are amounts KXD OS has recorded as paid externally/i);
   for (const p of view.periods) {
     assert.equal(p.paymentStatusLabel, "Not recorded as paid in KXD OS");
   }
