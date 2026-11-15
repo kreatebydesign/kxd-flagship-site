@@ -35,7 +35,7 @@ export function DonYourSpaceBusinessScreen({
         <p id={`${business.slug}-overview`} className="kxd-don-space__section-label">
           Overview
         </p>
-        <p style={{ color: "rgba(255,255,255,0.78)", lineHeight: 1.55, margin: "0 0 0.75rem" }}>
+        <p className="kxd-don-space__prose" style={{ margin: "0 0 0.75rem" }}>
           {business.hosting}
         </p>
         <p className="kxd-don-space__card-amount">
@@ -75,9 +75,7 @@ export function DonYourSpaceBusinessScreen({
         <p id={`${business.slug}-payments`} className="kxd-don-space__section-label">
           Payments
         </p>
-        <p style={{ color: "rgba(255,255,255,0.78)", lineHeight: 1.55, margin: 0 }}>
-          {business.paymentsNote}
-        </p>
+        <p className="kxd-don-space__prose">{business.paymentsNote}</p>
         <p className="kxd-don-space__detail-note">
           Portfolio totals and invoice evidence appear in the final accountability report.
         </p>
@@ -98,8 +96,10 @@ export function DonYourSpaceBusinessScreen({
         <p id={`${business.slug}-docs`} className="kxd-don-space__section-label">
           Documents
         </p>
-        <p style={{ color: "rgba(255,255,255,0.72)", fontSize: "0.95rem", margin: "0 0 0.75rem" }}>
-          Full report and supporting records are available from Your Space when the package is complete.
+        <p className="kxd-don-space__prose" style={{ margin: "0 0 0.75rem" }}>
+          {downloadsEnabled
+            ? "Open the full report and supporting records from the buttons below."
+            : "When publishing is complete, the full report and supporting folder will be on your main Your Space page."}
         </p>
         <div className="kxd-don-space__actions">
           {downloadsEnabled ? (

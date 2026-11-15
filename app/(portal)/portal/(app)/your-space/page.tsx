@@ -5,7 +5,6 @@ import { resolvePortalAccountContext } from "@/lib/portal/account-context";
 import {
   canAccessDonYourSpace,
   isDonDeliverableReadyForClient,
-  resolveDonDeliverableManifest,
 } from "@/lib/portal/don-your-space";
 import { getPortalSession } from "@/lib/portal/session";
 
@@ -23,15 +22,14 @@ export default async function DonYourSpacePage() {
     redirect("/portal");
   }
 
-  const deliverable = await resolveDonDeliverableManifest();
   const readiness = await isDonDeliverableReadyForClient();
 
   return (
-    <KxdPage className="kxd-os-page--ops">
+    <KxdPage className="kxd-os-page--ops kxd-os-page--don-your-space">
       <DonYourSpaceScreen
-        deliverable={deliverable}
         downloadsEnabled={readiness.ok}
         missingDeliverables={readiness.missing}
+        showStudioChecklist={session.isOperatorPreview === true}
       />
     </KxdPage>
   );

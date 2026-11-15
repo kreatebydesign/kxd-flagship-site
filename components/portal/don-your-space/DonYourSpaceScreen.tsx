@@ -1,7 +1,4 @@
 import Link from "next/link";
-import type {
-  DonDeliverableManifest,
-} from "@/lib/portal/don-your-space/artifacts";
 import {
   DON_OWNERSHIP_GLOBAL_NOTES,
   DON_PORTFOLIO_FINANCIALS,
@@ -19,13 +16,13 @@ function money(n: number): string {
 }
 
 export function DonYourSpaceScreen({
-  deliverable,
   downloadsEnabled,
   missingDeliverables,
+  showStudioChecklist = false,
 }: {
-  deliverable: DonDeliverableManifest | null;
   downloadsEnabled: boolean;
   missingDeliverables: string[];
+  showStudioChecklist?: boolean;
 }) {
   return (
     <div className="kxd-don-space">
@@ -110,21 +107,24 @@ export function DonYourSpaceScreen({
         </p>
         {!downloadsEnabled ? (
           <div className="kxd-don-space__notice" role="status">
-            <strong>Supporting records are being finalized.</strong>{" "}
-            {missingDeliverables.length > 0
-              ? `Still needed: ${missingDeliverables.join("; ")}.`
-              : "Downloads will appear here when the package is complete."}
+            <strong>Your report and supporting folder are not posted yet.</strong>
+            <p className="kxd-don-space__prose" style={{ marginTop: "0.5rem" }}>
+              They will appear here when publishing is complete. Sign in again after that to
+              download.
+            </p>
+            {showStudioChecklist && missingDeliverables.length > 0 ? (
+              <p
+                className="kxd-don-space__prose"
+                style={{ marginTop: "0.5rem", fontSize: "0.875rem" }}
+              >
+                Studio checklist: {missingDeliverables.join("; ")}.
+              </p>
+            ) : null}
           </div>
         ) : (
-          <p style={{ color: "rgba(255,255,255,0.72)", fontSize: "0.95rem" }}>
-            Final accountability report and supporting records are ready for download.
-            {deliverable && !deliverable.wixScreenshotsComplete ? (
-              <>
-                {" "}
-                Wix Roles evidence in the ZIP may still be incomplete until all three
-                screenshots are staged.
-              </>
-            ) : null}
+          <p className="kxd-don-space__prose">
+            Your final accountability report and supporting records are ready. Use the buttons below
+            to view or download. You must stay signed in to your portal session.
           </p>
         )}
         <div className="kxd-don-space__actions">

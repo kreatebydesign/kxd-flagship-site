@@ -34,7 +34,7 @@ export default async function DonYourSpaceBusinessPage({
   const readiness = await isDonDeliverableReadyForClient();
 
   return (
-    <KxdPage className="kxd-os-page--ops">
+    <KxdPage className="kxd-os-page--ops kxd-os-page--don-your-space">
       <DonYourSpaceBusinessScreen
         business={business}
         downloadsEnabled={readiness.ok}
