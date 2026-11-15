@@ -9,6 +9,7 @@ import { resolvePortalBillingNavAvailable } from "@/lib/portal/billing/load";
 import { resolvePortalCommercialNavAvailable } from "@/lib/portal/commercial";
 import { resolvePortalWebsiteEditorUrl } from "@/lib/portal/website-editor";
 import { getPortalEditionBranding } from "@/lib/portal/nav";
+import { canAccessDonYourSpace } from "@/lib/portal/don-your-space";
 import { getPortalSession } from "@/lib/portal/session";
 import { needsPortalWelcome } from "@/lib/portal/welcome";
 import { userRequiresSecurityEnrollment } from "@/lib/portal/identity/mfa-store";
@@ -88,6 +89,11 @@ export default async function PortalAppLayout({ children }: { children: React.Re
       resolvePortalWebsiteEditorUrl(session.clientId),
     ]);
 
+  const yourSpaceNavAvailable = canAccessDonYourSpace({
+    session,
+    accountContext,
+  });
+
   return (
     <CesProfileProvider
       profile={experienceProfile}
@@ -104,6 +110,7 @@ export default async function PortalAppLayout({ children }: { children: React.Re
               accountContext?.switchingAvailable,
           )
         }
+        yourSpaceNavAvailable={yourSpaceNavAvailable}
         billingNavAvailable={billingNavAvailable}
         commercialNavAvailable={commercialNavAvailable}
         websiteEditorUrl={websiteEditorUrl}

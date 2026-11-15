@@ -29,6 +29,8 @@ export type ClientHqNavId = ClientHqModuleId;
 export type PortalBriefingNavId = "partnership";
 /** Phase 4 Batch F — multi-account authorized portfolio (not a CES entitlement). */
 export type PortalPortfolioNavId = "portfolio";
+/** Don Cusick four-business accountability workspace. */
+export type PortalYourSpaceNavId = "your-space";
 /** Authoritative commercial agreement surface — billingPlan-backed (not a CES entitlement). */
 export type PortalAgreementNavId = "agreement";
 /** External website editor doorway — configured per client infrastructure. */
@@ -38,6 +40,7 @@ export type PortalNavId =
   | CesModuleId
   | PortalBriefingNavId
   | PortalPortfolioNavId
+  | PortalYourSpaceNavId
   | PortalAgreementNavId
   | PortalWebsiteEditorNavId;
 
@@ -232,6 +235,7 @@ export function getEnabledPortalNavGroups(
   profile?: ResolvedExperienceProfile | null,
   options?: {
     portfolioNavAvailable?: boolean;
+    yourSpaceNavAvailable?: boolean;
     billingNavAvailable?: boolean;
     commercialNavAvailable?: boolean;
     websiteEditorUrl?: string | null;
@@ -240,6 +244,7 @@ export function getEnabledPortalNavGroups(
   },
 ): PortalNavGroup[] {
   const portfolioNavAvailable = Boolean(options?.portfolioNavAvailable);
+  const yourSpaceNavAvailable = Boolean(options?.yourSpaceNavAvailable);
   const billingNavAvailable = Boolean(options?.billingNavAvailable);
   const commercialNavAvailable = Boolean(options?.commercialNavAvailable);
   const websiteEditorUrl = options?.websiteEditorUrl ?? null;
@@ -255,6 +260,16 @@ export function getEnabledPortalNavGroups(
                 id: "portfolio",
                 label: "All Businesses",
                 href: "/portal/portfolio",
+              },
+            ]
+          : [];
+      const yourSpaceItem: PortalNavItem[] =
+        yourSpaceNavAvailable && group.label === "Headquarters"
+          ? [
+              {
+                id: "your-space",
+                label: "Your Space",
+                href: "/portal/your-space",
               },
             ]
           : [];
@@ -275,6 +290,7 @@ export function getEnabledPortalNavGroups(
                 href,
               })),
             ...portfolioItem,
+            ...yourSpaceItem,
             ...agreementItem,
           ],
         };
@@ -348,6 +364,28 @@ export function getEnabledPortalNavGroups(
             ]
           : [];
 
+      const yourSpaceItem: PortalNavItem[] =
+        yourSpaceNavAvailable && group.label === "Headquarters"
+          ? [
+              {
+                id: "your-space",
+                label: "Your Space",
+                href: "/portal/your-space",
+              },
+            ]
+          : [];
+
+      const portfolioItem: PortalNavItem[] =
+        portfolioNavAvailable && group.label === "Headquarters"
+          ? [
+              {
+                id: "portfolio",
+                label: "All Businesses",
+                href: "/portal/portfolio",
+              },
+            ]
+          : [];
+
       return {
         label: group.label,
         items: [
@@ -357,6 +395,8 @@ export function getEnabledPortalNavGroups(
             href,
           })),
           ...partnershipItem,
+          ...portfolioItem,
+          ...yourSpaceItem,
           ...agreementItem,
           ...cesForGroup,
         ],
@@ -366,6 +406,8 @@ export function getEnabledPortalNavGroups(
       ...group,
       items: group.items.filter((item) => {
         if (item.id === "agreement") return commercialNavAvailable;
+        if (item.id === "portfolio") return portfolioNavAvailable;
+        if (item.id === "your-space") return yourSpaceNavAvailable;
         const moduleKey =
           item.id === "partnership" ? "executive-performance" : item.id;
         return isPortalModuleVisible(moduleKey, visibilityCtx);
@@ -465,6 +507,9 @@ function simplifyPrimaryPortalNav(
 export function resolvePortalNavId(pathname: string): PortalNavId {
   if (pathname === "/portal/portfolio" || pathname.startsWith("/portal/portfolio/")) {
     return "portfolio";
+  }
+  if (pathname === "/portal/your-space" || pathname.startsWith("/portal/your-space/")) {
+    return "your-space";
   }
   if (pathname === "/portal/agreement" || pathname.startsWith("/portal/agreement/")) {
     return "agreement";

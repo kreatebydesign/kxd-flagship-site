@@ -1,0 +1,235 @@
+.kxd-don-space {
+  --don-gold: #c9a227;
+  --don-card: rgba(255, 255, 255, 0.04);
+  --don-border: rgba(201, 162, 39, 0.22);
+  max-width: 56rem;
+  margin: 0 auto;
+  padding: 0 0 3rem;
+}
+
+.kxd-don-space__hero {
+  border-bottom: 1px solid var(--don-border);
+  padding-bottom: 1.75rem;
+  margin-bottom: 2rem;
+}
+
+.kxd-don-space__hero h1 {
+  font-size: clamp(1.65rem, 3vw, 2.1rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.5rem;
+}
+
+.kxd-don-space__hero p {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 1.05rem;
+  line-height: 1.55;
+  max-width: 40rem;
+  margin: 0;
+}
+
+.kxd-don-space__metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 0.85rem;
+  margin-bottom: 2rem;
+}
+
+.kxd-don-space__metric {
+  background: var(--don-card);
+  border: 1px solid var(--don-border);
+  border-radius: 8px;
+  padding: 1rem 1.1rem;
+}
+
+.kxd-don-space__metric-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0 0 0.35rem;
+}
+
+.kxd-don-space__metric-value {
+  font-size: 1.35rem;
+  font-weight: 500;
+  color: #f7f4ee;
+  margin: 0;
+}
+
+.kxd-don-space__metric-note {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 0.4rem 0 0;
+  line-height: 1.4;
+}
+
+.kxd-don-space__section-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--don-gold);
+  margin: 0 0 0.75rem;
+}
+
+.kxd-don-space__cards {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 2.25rem;
+}
+
+.kxd-don-space__card {
+  background: var(--don-card);
+  border: 1px solid var(--don-border);
+  border-radius: 10px;
+  padding: 1.15rem 1.25rem;
+}
+
+.kxd-don-space__card h3 {
+  margin: 0 0 0.25rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.kxd-don-space__card-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.kxd-don-space__card-link:hover {
+  color: var(--don-gold);
+}
+
+.kxd-don-space__card-cta {
+  margin: 0.85rem 0 0;
+  font-size: 0.88rem;
+}
+
+.kxd-don-space__card-cta a {
+  color: var(--don-gold);
+  text-decoration: none;
+}
+
+.kxd-don-space__card-cta a:hover {
+  text-decoration: underline;
+}
+
+.kxd-don-space__back {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+}
+
+.kxd-don-space__back a {
+  color: rgba(255, 255, 255, 0.65);
+  text-decoration: none;
+}
+
+.kxd-don-space__back a:hover {
+  color: var(--don-gold);
+}
+
+.kxd-don-space__detail {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.kxd-don-space__detail:last-of-type {
+  border-bottom: none;
+}
+
+.kxd-don-space__detail-intro {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.45);
+  margin: 1rem 0 0.4rem;
+}
+
+.kxd-don-space__detail-note {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 0.65rem 0 0;
+  line-height: 1.45;
+}
+
+.kxd-don-space__list--muted {
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.kxd-don-space__card-meta {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 0 0 0.65rem;
+}
+
+.kxd-don-space__card-amount {
+  font-size: 0.95rem;
+  color: #f0eadc;
+  margin: 0 0 0.75rem;
+}
+
+.kxd-don-space__list {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.kxd-don-space__list li + li {
+  margin-top: 0.35rem;
+}
+
+.kxd-don-space__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.kxd-don-space__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.65rem 1.15rem;
+  border-radius: 6px;
+  font-size: 0.92rem;
+  text-decoration: none;
+  border: 1px solid var(--don-border);
+  color: #f7f4ee;
+  background: rgba(201, 162, 39, 0.12);
+  transition: background 0.15s ease;
+}
+
+.kxd-don-space__btn:hover {
+  background: rgba(201, 162, 39, 0.22);
+}
+
+.kxd-don-space__btn--ghost {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.kxd-don-space__notice {
+  border-left: 3px solid var(--don-gold);
+  padding: 0.85rem 1rem;
+  background: rgba(0, 0, 0, 0.2);
+  margin: 1.5rem 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.kxd-don-space__notice strong {
+  color: #f0eadc;
+}
+
+@media (max-width: 640px) {
+  .kxd-don-space__actions {
+    flex-direction: column;
+  }
+  .kxd-don-space__btn {
+    width: 100%;
+  }
+}
