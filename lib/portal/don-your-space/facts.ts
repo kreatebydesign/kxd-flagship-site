@@ -25,7 +25,7 @@ export type DonYourSpaceBusinessFacts = {
 
 export const DON_YOUR_SPACE_WELCOME = {
   greeting: "Welcome, Don.",
-  lead: "Your businesses, your records, and a clear view of the work we've completed together.",
+  lead: "Your businesses, your records, and a clear picture of the work we have completed together.",
 } as const;
 
 export const DON_PORTFOLIO_FINANCIALS = {
@@ -60,7 +60,7 @@ export const DON_YOUR_SPACE_BUSINESSES: DonYourSpaceBusinessFacts[] = [
     accessSummary: [
       "Billy Morgan has the active Owner role for this brand in Wix.",
       "Kreate by Design has Admin (Co-Owner) on that Wix site.",
-      "Website hosting and updates are managed by KXD; independent administrator login for Don on KXD hosting has not been confirmed in this package.",
+      "KXD currently manages website hosting and related technical services for your businesses. We will coordinate any additional access or account handoff arrangements directly with you.",
     ],
     limitations: [
       "Who legally owns the domain name has not been independently verified beyond account screens.",
@@ -73,7 +73,7 @@ export const DON_YOUR_SPACE_BUSINESSES: DonYourSpaceBusinessFacts[] = [
     clientId: 9,
     paymentsUsd: 3_600,
     hosting:
-      "The public site today is on Wix. A rebuilt KXD version is ready but is not on the public address until you approve switching it live.",
+      "The public site today is on Wix. A rebuilt version hosted by Kreate by Design is ready and will go live when you approve the switch.",
     workSummary: [
       "Care and search support for the live Wix site under retainer since August 2025.",
       "A full motorsport rebuild prepared for your launch decision.",
@@ -89,7 +89,7 @@ export const DON_YOUR_SPACE_BUSINESSES: DonYourSpaceBusinessFacts[] = [
       "Wix hosting renewal is reported for November 25, 2026.",
     ],
     limitations: [
-      "The rebuilt KXD site does not receive public traffic until you approve going live.",
+      "The rebuilt site does not receive public traffic until you approve going live.",
     ],
   },
   {
@@ -139,10 +139,10 @@ export const DON_YOUR_SPACE_BUSINESSES: DonYourSpaceBusinessFacts[] = [
       "A Wix ownership invitation sent to Billy Morgan was not accepted.",
       "Kreate by Design currently holds the Wix owner and admin role for this account.",
       "Wix domain renewal is reported for September 22, 2028.",
-      "KXD can send a new ownership invitation when you authorize it.",
+      "We can send a new Wix ownership invitation when you authorize it.",
     ],
     limitations: [
-      "Wix ownership transfer is not complete. No Townsgate Wix Roles screenshot is included unless one is added to the package.",
+      "Wix ownership transfer for this property is still in progress.",
     ],
   },
 ];
@@ -155,7 +155,7 @@ export function getDonYourSpaceBusinessBySlug(
 
 export const DON_OWNERSHIP_GLOBAL_NOTES = [
   "Expired Wix invitations are not active access.",
-  "Wix website roles are separate from where the live KXD-hosted websites run.",
+  "Wix website roles are separate from where your Kreate by Design hosted websites run.",
   "The accountability report describes what was delivered, what remains with each party, and what still needs attention. It does not replace legal advice.",
-  "Studio records note Nicole Mastro for Westlake OTP Carts Google Business Profile steps. Other social admin access is not listed here without verified exports.",
+  "Our records note Nicole Mastro for Westlake OTP Carts Google Business Profile steps. Other social admin access is not listed here without verified exports.",
 ] as const;
