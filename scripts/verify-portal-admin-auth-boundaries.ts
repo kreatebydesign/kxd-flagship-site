@@ -124,10 +124,11 @@ function main() {
     portalUsers.includes("maxLoginAttempts: 8") && portalUsers.includes("lockTime: 600"),
   );
 
-  check(
-    "Users collection remains Payload admin auth",
-    users.includes('slug: "users"') && users.includes("auth: true"),
-  );
+  const usersPayloadAuthEnabled =
+    users.includes('slug: "users"') &&
+    (users.includes("auth: true") ||
+      /auth:\s*\{[\s\S]*tokenExpiration/.test(users));
+  check("Users collection remains Payload admin auth", usersPayloadAuthEnabled);
 
   check(
     "Users.access.admin allows authenticated users panel entry (login redirect, not operator denial)",
@@ -229,6 +230,7 @@ function main() {
       if (
         !src.includes("requirePayloadAdminApi") &&
         !src.includes("requireStaffCapabilityApi") &&
+        !src.includes("requireStaffCapabilityReadApi") &&
         !src.includes("requireAdminOversightApi") &&
         !src.includes("authorizeReportingIngest")
       ) {

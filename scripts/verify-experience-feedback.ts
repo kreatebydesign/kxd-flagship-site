@@ -56,8 +56,11 @@ function main() {
   );
 
   check(
-    "website audit no longer matches by email/company alone",
-    audit.includes("Require a client website match") &&
+    "website audit scoped to authorized client only (no email/company pivot)",
+    audit.includes("Only audits explicitly linked to the authorized client") &&
+      audit.includes("Domain/host matching alone is never authorization") &&
+      audit.includes("client: { equals: authorizedClientId }") &&
+      audit.includes("resolveAuditClientId(audit.client) !== authorizedClientId") &&
       !audit.includes("orFilters.push({ email:") &&
       !audit.includes("orFilters.push({ company:"),
   );

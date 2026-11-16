@@ -122,12 +122,13 @@ function main() {
     ),
     "utf8",
   );
-  const landing = readFileSync(
-    path.join(root, "app/admin/operations/clients/launch/page.tsx"),
-    "utf8",
+  const launchRoot = path.join(
+    root,
+    "app/admin/operations/(studio)/clients/launch",
   );
+  const landing = readFileSync(path.join(launchRoot, "page.tsx"), "utf8");
   const legacy = readFileSync(
-    path.join(root, "app/admin/operations/client-launch/page.tsx"),
+    path.join(root, "app/admin/operations/(studio)/client-launch/page.tsx"),
     "utf8",
   );
   const nav = readFileSync(
@@ -159,10 +160,9 @@ function main() {
 
   check(
     "new draft route exists for explicit create",
-    readFileSync(
-      path.join(root, "app/admin/operations/clients/launch/new/page.tsx"),
-      "utf8",
-    ).includes("createLaunchDraft"),
+    readFileSync(path.join(launchRoot, "new/page.tsx"), "utf8").includes(
+      "createLaunchDraft",
+    ),
   );
 
   check(
