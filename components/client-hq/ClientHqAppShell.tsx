@@ -14,6 +14,7 @@ export function ClientHqAppShell({
   experienceProfile,
   accountSwitcher = null,
   portfolioNavAvailable = false,
+  yourSpaceNavAvailable = false,
   billingNavAvailable = false,
   commercialNavAvailable = false,
   websiteEditorUrl = null,
@@ -26,6 +27,7 @@ export function ClientHqAppShell({
   experienceProfile?: ResolvedExperienceProfile;
   accountSwitcher?: PortalAccountSwitcherModel | null;
   portfolioNavAvailable?: boolean;
+  yourSpaceNavAvailable?: boolean;
   billingNavAvailable?: boolean;
   commercialNavAvailable?: boolean;
   websiteEditorUrl?: string | null;
@@ -48,6 +50,7 @@ export function ClientHqAppShell({
       experienceProfile={experienceProfile}
       accountSwitcher={operatorPreview ? null : accountSwitcher}
       portfolioNavAvailable={operatorPreview ? false : portfolioNavAvailable}
+      yourSpaceNavAvailable={yourSpaceNavAvailable}
       billingNavAvailable={billingNavAvailable}
       commercialNavAvailable={commercialNavAvailable}
       websiteEditorUrl={websiteEditorUrl}

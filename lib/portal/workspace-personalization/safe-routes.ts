@@ -23,6 +23,7 @@ export const WORKSPACE_SAFE_PORTAL_HREFS = [
   "/portal/team",
   "/portal/meetings",
   "/portal/invoices",
+  "/portal/your-space",
 ] as const;
 
 export type WorkspaceSafePortalHref = (typeof WORKSPACE_SAFE_PORTAL_HREFS)[number];
