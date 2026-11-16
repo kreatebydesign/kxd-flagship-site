@@ -76,6 +76,12 @@ export const PRIMAL_OWNED_FIELDS = [
   "featured",
   "practiceNotes",
   "registrationGuidance",
+  "registrationPriceCents",
+  "supportPriceCents",
+  "transportationPriceCents",
+  "newTiresPriceCents",
+  "otherServiceName",
+  "otherServicePriceCents",
   "locationId",
   "parentEventId",
   "relationshipKind",
@@ -127,6 +133,12 @@ export type CalendarEventRecord = {
   relationshipKind: CalendarRelationshipKind;
   practiceNotes: string | null;
   registrationGuidance: string | null;
+  registrationPriceCents: number | null;
+  supportPriceCents: number | null;
+  transportationPriceCents: number | null;
+  newTiresPriceCents: number | null;
+  otherServiceName: string | null;
+  otherServicePriceCents: number | null;
   activityLog: CalendarActivityEntry[];
   createdBy: string | null;
   updatedBy: string | null;
@@ -156,6 +168,21 @@ export type CalendarEventInput = {
   relationshipKind?: CalendarRelationshipKind;
   practiceNotes?: string | null;
   registrationGuidance?: string | null;
+  registrationPriceCents?: number | null;
+  supportPriceCents?: number | null;
+  transportationPriceCents?: number | null;
+  newTiresPriceCents?: number | null;
+  otherServiceName?: string | null;
+  otherServicePriceCents?: number | null;
+};
+
+export type PublicCalendarEventPricing = {
+  registrationPriceCents: number | null;
+  supportPriceCents: number | null;
+  transportationPriceCents: number | null;
+  newTiresPriceCents: number | null;
+  otherServiceName: string | null;
+  otherServicePriceCents: number | null;
 };
 
 export type PublicCalendarEvent = {
@@ -179,6 +206,12 @@ export type PublicCalendarEvent = {
   sourceExternalId: string | null;
   sourceUrl: string | null;
   registrationHref: string | null;
+  /** USD integer cents from portal; null when unset. */
+  pricing: PublicCalendarEventPricing;
+  /**
+   * When false, website must not treat registrationPriceCents as MotorsportReg checkout price.
+   */
+  registrationPriceIsAuthoritative: boolean;
 };
 
 export type CalendarAttention =

@@ -1,11 +1,12 @@
 import type { CalendarAttention, CalendarEventRecord, CalendarEventType } from "./types";
 import { displayTitle } from "./authority";
+import { calendarEventTypeColorKey } from "./event-type-colors";
 
 export const EVENT_TYPE_LABELS: Record<CalendarEventType, string> = {
   main_event: "Main event",
   practice: "Practice",
   test_day: "Test day",
-  track_day: "Track day",
+  track_day: "Trackday",
   prep: "Prep",
   school: "School",
   race: "Race",
@@ -81,6 +82,11 @@ export function attentionLabel(attention: CalendarAttention): string | null {
 
 export function eventHeadline(event: CalendarEventRecord): string {
   return displayTitle(event);
+}
+
+export function eventTypeChipClassName(eventType: CalendarEventType): string {
+  const key = calendarEventTypeColorKey(eventType);
+  return `kxd-cal-chip--type kxd-cal-chip--type-${key.replace(/_/g, "-")}`;
 }
 
 export type EventDateRailParts = {

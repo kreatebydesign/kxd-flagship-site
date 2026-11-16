@@ -26,6 +26,12 @@ function filledForm(overrides: Partial<CalendarEditorFormState> = {}): CalendarE
     description: "Public copy",
     practiceNotes: "Private prep",
     registrationGuidance: "Call the office",
+    registrationPrice: "1500.00",
+    supportPrice: "",
+    transportationPrice: "200",
+    newTiresPrice: "",
+    otherServiceName: "",
+    otherServicePrice: "",
     timezone: "America/Chicago",
     ...overrides,
   };
@@ -46,6 +52,9 @@ describe("formStateForNextEvent", () => {
     assert.equal(next.description, "");
     assert.equal(next.practiceNotes, "");
     assert.equal(next.registrationGuidance, "");
+    assert.equal(next.registrationPrice, "");
+    assert.equal(next.supportPrice, "");
+    assert.equal(next.transportationPrice, "");
     assert.equal(next.summary, "");
   });
 

@@ -311,8 +311,47 @@
 }
 
 .kxd-cal-chip--type {
-  border-color: color-mix(in srgb, var(--kxd-ces-accent) 35%, transparent);
-  color: color-mix(in srgb, var(--kxd-ces-accent) 88%, #fff);
+  border-color: var(--kxd-cal-type-border, color-mix(in srgb, var(--kxd-ces-accent) 35%, transparent));
+  color: var(--kxd-cal-type-text, color-mix(in srgb, var(--kxd-ces-accent) 88%, #fff));
+  background: var(--kxd-cal-type-fill, color-mix(in srgb, var(--kxd-os-bg-surface) 70%, transparent));
+}
+
+.kxd-cal-chip--type-school {
+  --kxd-cal-type-fill: #2563eb;
+  --kxd-cal-type-text: #ffffff;
+  --kxd-cal-type-border: #1d4ed8;
+}
+
+.kxd-cal-chip--type-race {
+  --kxd-cal-type-fill: #dc2626;
+  --kxd-cal-type-text: #ffffff;
+  --kxd-cal-type-border: #b91c1c;
+}
+
+.kxd-cal-chip--type-track-day {
+  --kxd-cal-type-fill: #ffffff;
+  --kxd-cal-type-text: #0b0b0b;
+  --kxd-cal-type-border: #d4d4d8;
+}
+
+.kxd-cal-chip--type-other {
+  --kxd-cal-type-fill: #eab308;
+  --kxd-cal-type-text: #0b0b0b;
+  --kxd-cal-type-border: #ca8a04;
+}
+
+.kxd-cal-type-picker {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.kxd-cal-type-swatch {
+  flex-shrink: 0;
+  width: 1.65rem;
+  height: 1.65rem;
+  border-radius: 0.35rem;
+  border: 1px solid var(--kxd-os-border-default, #d4d4d8);
 }
 
 .kxd-cal-chip--attention {

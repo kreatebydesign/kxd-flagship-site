@@ -7,12 +7,17 @@ import { useRef, useState, useTransition } from "react";
 import { KxdToggle } from "@/components/os";
 import { CesPage } from "@/components/ces/primitives";
 import {
+  calendarPricingFromFormState,
   formStateForNextEvent,
   formStateFromRecord,
   type CalendarEditorFormState,
 } from "@/lib/calendar/editor-form";
+import {
+  CALENDAR_CREATABLE_EVENT_TYPES,
+  EVENT_TYPE_COLORS,
+  isCreatableCalendarEventType,
+} from "@/lib/calendar/event-type-colors";
 import type { CalendarEventInput, CalendarEventRecord, CalendarEventType } from "@/lib/calendar/types";
-import { CALENDAR_EVENT_TYPES } from "@/lib/calendar/types";
 import { EVENT_TYPE_LABELS, SOURCE_LABELS, STATUS_LABELS, formatEventDate } from "@/lib/calendar/presentation";
 import { sourceOwnedLockedMessage } from "@/lib/calendar/authority";
 
@@ -94,7 +99,25 @@ export function CalendarEditor({ mode, initial }: Props) {
       registrationGuidance: form.registrationGuidance,
       timezone: form.timezone,
       allDay: true,
+      ...calendarPricingFromFormState(form),
     };
+  }
+
+  const typeOptions: { value: CalendarEventType; label: string; legacy?: boolean }[] =
+    CALENDAR_CREATABLE_EVENT_TYPES.map((value) => ({
+      value,
+      label: EVENT_TYPE_LABELS[value],
+    }));
+  if (
+    initial?.eventType &&
+    !isCreatableCalendarEventType(initial.eventType) &&
+    !typeOptions.some((o) => o.value === initial.eventType)
+  ) {
+    typeOptions.push({
+      value: initial.eventType,
+      label: `${EVENT_TYPE_LABELS[initial.eventType]} (legacy)`,
+      legacy: true,
+    });
   }
 
   function persist(intent: SaveIntent) {
@@ -227,18 +250,35 @@ export function CalendarEditor({ mode, initial }: Props) {
                   </p>
                 ) : null}
                 <div className="kxd-inv-form__grid">
-                  <Field label="Type">
-                    <select
-                      className="kxd-inv-input"
-                      value={form.eventType}
-                      onChange={(e) => patch("eventType", e.target.value as CalendarEventType)}
-                    >
-                      {CALENDAR_EVENT_TYPES.map((type) => (
-                        <option key={type} value={type}>
-                          {EVENT_TYPE_LABELS[type]}
-                        </option>
-                      ))}
-                    </select>
+                  <Field label="Type" hint="School, Race, Trackday, and Other appear on the public website.">
+                    <div className="kxd-cal-type-picker">
+                      <span
+                        className="kxd-cal-type-swatch"
+                        style={{
+                          background: isCreatableCalendarEventType(form.eventType)
+                            ? EVENT_TYPE_COLORS[form.eventType].fill
+                            : "#71717A",
+                          color: isCreatableCalendarEventType(form.eventType)
+                            ? EVENT_TYPE_COLORS[form.eventType].text
+                            : "#fff",
+                          borderColor: isCreatableCalendarEventType(form.eventType)
+                            ? EVENT_TYPE_COLORS[form.eventType].border
+                            : "#52525B",
+                        }}
+                        aria-hidden
+                      />
+                      <select
+                        className="kxd-inv-input"
+                        value={form.eventType}
+                        onChange={(e) => patch("eventType", e.target.value as CalendarEventType)}
+                      >
+                        {typeOptions.map((type) => (
+                          <option key={type.value} value={type.value}>
+                            {type.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </Field>
                   <Field label="Status">
                     <select
@@ -361,12 +401,86 @@ export function CalendarEditor({ mode, initial }: Props) {
               </Field>
             </section>
 
-            <section className="kxd-inv-panel kxd-inv-panel--secondary" aria-labelledby="cal-registration">
+            <section className="kxd-inv-panel kxd-inv-panel--secondary" aria-labelledby="cal-pricing">
               <header className="kxd-inv-panel__head">
                 <SectionNum n="05" />
                 <div>
+                  <h2 id="cal-pricing">Registration and services</h2>
+                  <p>Optional USD prices. Published events expose these on the public calendar API.</p>
+                </div>
+              </header>
+              {initial?.sourceSystem === "motorsportreg" ? (
+                <p className="kxd-inv-field__hint" role="note">
+                  MotorsportReg checkout uses the official listing. Prices here are for the website display only.
+                </p>
+              ) : null}
+              <div className="kxd-inv-form__stack">
+                <Field label="Registration price (USD)" hint="Leave blank if not applicable.">
+                  <input
+                    className="kxd-inv-input"
+                    inputMode="decimal"
+                    value={form.registrationPrice}
+                    onChange={(e) => patch("registrationPrice", e.target.value)}
+                    placeholder="e.g. 6295.00"
+                  />
+                </Field>
+                <div className="kxd-inv-form__grid">
+                  <Field label="Support">
+                    <input
+                      className="kxd-inv-input"
+                      inputMode="decimal"
+                      value={form.supportPrice}
+                      onChange={(e) => patch("supportPrice", e.target.value)}
+                      placeholder="USD"
+                    />
+                  </Field>
+                  <Field label="Transportation">
+                    <input
+                      className="kxd-inv-input"
+                      inputMode="decimal"
+                      value={form.transportationPrice}
+                      onChange={(e) => patch("transportationPrice", e.target.value)}
+                      placeholder="USD"
+                    />
+                  </Field>
+                </div>
+                <div className="kxd-inv-form__grid">
+                  <Field label="New tires">
+                    <input
+                      className="kxd-inv-input"
+                      inputMode="decimal"
+                      value={form.newTiresPrice}
+                      onChange={(e) => patch("newTiresPrice", e.target.value)}
+                      placeholder="USD"
+                    />
+                  </Field>
+                  <Field label="Other service price">
+                    <input
+                      className="kxd-inv-input"
+                      inputMode="decimal"
+                      value={form.otherServicePrice}
+                      onChange={(e) => patch("otherServicePrice", e.target.value)}
+                      placeholder="USD"
+                    />
+                  </Field>
+                </div>
+                <Field label="Other service name" wide>
+                  <input
+                    className="kxd-inv-input"
+                    value={form.otherServiceName}
+                    onChange={(e) => patch("otherServiceName", e.target.value)}
+                    placeholder="Name customers see for the other service"
+                  />
+                </Field>
+              </div>
+            </section>
+
+            <section className="kxd-inv-panel kxd-inv-panel--secondary" aria-labelledby="cal-registration">
+              <header className="kxd-inv-panel__head">
+                <SectionNum n="06" />
+                <div>
                   <h2 id="cal-registration">Registration guidance</h2>
-                  <p>Portal reference for operators. Not published to the website today.</p>
+                  <p>Portal reference for operators. Not published to the website.</p>
                 </div>
               </header>
               <Field

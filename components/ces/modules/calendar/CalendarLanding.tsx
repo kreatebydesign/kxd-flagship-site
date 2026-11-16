@@ -12,6 +12,7 @@ import {
   eventAttention,
   eventDateRailParts,
   eventHeadline,
+  eventTypeChipClassName,
   formatEventDate,
   formatVenue,
 } from "@/lib/calendar/presentation";
@@ -55,7 +56,9 @@ function CalendarEventCard({ event }: { event: CalendarEventRecord }) {
           <p className="kxd-cal-event-card__venue kxd-cal-event-card__venue--missing">Venue not set</p>
         )}
         <div className="kxd-cal-event-card__chips">
-          <span className="kxd-cal-chip kxd-cal-chip--type">{EVENT_TYPE_LABELS[event.eventType]}</span>
+          <span className={`kxd-cal-chip ${eventTypeChipClassName(event.eventType)}`}>
+            {EVENT_TYPE_LABELS[event.eventType]}
+          </span>
           <span className="kxd-cal-chip">{SOURCE_LABELS[event.sourceSystem]}</span>
           {attentionText ? <span className="kxd-cal-chip kxd-cal-chip--attention">{attentionText}</span> : null}
         </div>

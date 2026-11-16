@@ -60,6 +60,12 @@ function fixture(partial: Partial<CalendarEventRecord> = {}): CalendarEventRecor
     relationshipKind: "none",
     practiceNotes: "Prep Friday",
     registrationGuidance: null,
+    registrationPriceCents: null,
+    supportPriceCents: null,
+    transportationPriceCents: null,
+    newTiresPriceCents: null,
+    otherServiceName: null,
+    otherServicePriceCents: null,
     activityLog: [],
     createdBy: "sync",
     updatedBy: "sync",
@@ -79,7 +85,15 @@ function main() {
     read("migrations/index.ts").includes("20261112_client_calendar_event_type_track_day"),
   );
   check("track_day canonical type", (CALENDAR_EVENT_TYPES as readonly string[]).includes("track_day"));
-  check("track_day display label", EVENT_TYPE_LABELS.track_day === "Track day");
+  check("track_day display label", EVENT_TYPE_LABELS.track_day === "Trackday");
+  check(
+    "public API exposes pricing",
+    read("lib/calendar/parse.ts").includes("pricing: publicPricingFromRecord"),
+  );
+  check(
+    "pricing migration registered",
+    read("migrations/index.ts").includes("20261116_client_calendar_event_pricing"),
+  );
   check(
     "payload includes track_day option",
     read("payload/collections/ClientCalendarEvents.ts").includes('value: "track_day"'),
@@ -188,7 +202,7 @@ function main() {
       fieldAuthority: defaultFieldAuthority("manual"),
     }),
   );
-  check("manual track_day public label is Track day", trackPublic?.eventTypeLabel === "Track day");
+  check("manual track_day public label is Trackday", trackPublic?.eventTypeLabel === "Trackday");
   check("MSR sourceEventType label preserved", publicEvent?.eventTypeLabel === existing.sourceEventType);
 
   const manual = fixture({ sourceSystem: "manual", sourceExternalId: null, fieldAuthority: defaultFieldAuthority("manual") });

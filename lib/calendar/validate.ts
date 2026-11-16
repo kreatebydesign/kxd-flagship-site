@@ -7,6 +7,7 @@ import {
   type CalendarRelationshipKind,
   type CalendarEventStatus,
 } from "./types";
+import { normalizeCalendarPricing, validateCalendarPricing } from "./pricing";
 
 export type CalendarIssue = { field: string; message: string };
 
@@ -50,6 +51,7 @@ export function normalizeCalendarInput(input: CalendarEventInput): CalendarEvent
     relationshipKind: input.relationshipKind ?? "none",
     practiceNotes: emptyToNull(input.practiceNotes),
     registrationGuidance: emptyToNull(input.registrationGuidance),
+    ...normalizeCalendarPricing(input),
   };
 }
 
@@ -86,6 +88,7 @@ export function validateCalendarInput(
   if ((input.description ?? "").length > 8000) {
     issues.push({ field: "description", message: "Description is too long." });
   }
+  issues.push(...validateCalendarPricing(normalizeCalendarPricing(input)));
   return issues;
 }
 

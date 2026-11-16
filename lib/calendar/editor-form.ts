@@ -1,3 +1,7 @@
+import {
+  formatPriceDollarsForInput,
+  parseOptionalPriceDollars,
+} from "./pricing";
 import type { CalendarEventRecord, CalendarEventType } from "./types";
 
 export type CalendarEditorFormState = {
@@ -17,6 +21,12 @@ export type CalendarEditorFormState = {
   description: string;
   practiceNotes: string;
   registrationGuidance: string;
+  registrationPrice: string;
+  supportPrice: string;
+  transportationPrice: string;
+  newTiresPrice: string;
+  otherServiceName: string;
+  otherServicePrice: string;
   timezone: string;
 };
 
@@ -38,6 +48,12 @@ export function formStateFromRecord(record?: CalendarEventRecord | null): Calend
     description: record?.description ?? "",
     practiceNotes: record?.practiceNotes ?? "",
     registrationGuidance: record?.registrationGuidance ?? "",
+    registrationPrice: formatPriceDollarsForInput(record?.registrationPriceCents),
+    supportPrice: formatPriceDollarsForInput(record?.supportPriceCents),
+    transportationPrice: formatPriceDollarsForInput(record?.transportationPriceCents),
+    newTiresPrice: formatPriceDollarsForInput(record?.newTiresPriceCents),
+    otherServiceName: record?.otherServiceName ?? "",
+    otherServicePrice: formatPriceDollarsForInput(record?.otherServicePriceCents),
     timezone: record?.timezone ?? "America/New_York",
   };
 }
@@ -63,6 +79,23 @@ export function formStateForNextEvent(
     description: "",
     practiceNotes: "",
     registrationGuidance: "",
+    registrationPrice: "",
+    supportPrice: "",
+    transportationPrice: "",
+    newTiresPrice: "",
+    otherServiceName: "",
+    otherServicePrice: "",
     timezone: previous.timezone,
+  };
+}
+
+export function calendarPricingFromFormState(form: CalendarEditorFormState) {
+  return {
+    registrationPriceCents: parseOptionalPriceDollars(form.registrationPrice),
+    supportPriceCents: parseOptionalPriceDollars(form.supportPrice),
+    transportationPriceCents: parseOptionalPriceDollars(form.transportationPrice),
+    newTiresPriceCents: parseOptionalPriceDollars(form.newTiresPrice),
+    otherServiceName: form.otherServiceName.trim() || null,
+    otherServicePriceCents: parseOptionalPriceDollars(form.otherServicePrice),
   };
 }

@@ -7,6 +7,7 @@ import { describe, it } from "node:test";
 import { defaultFieldAuthority } from "./authority.ts";
 import { EVENT_TYPE_LABELS, eventDateRailParts } from "./presentation.ts";
 import { toPublicCalendarEvent } from "./parse.ts";
+import { CALENDAR_CREATABLE_EVENT_TYPES } from "./event-type-colors.ts";
 import { CALENDAR_EVENT_TYPES } from "./types.ts";
 import type { CalendarEventRecord } from "./types.ts";
 import { validateCalendarInput } from "./validate.ts";
@@ -44,6 +45,12 @@ function publishedFixture(partial: Partial<CalendarEventRecord> = {}): CalendarE
     relationshipKind: "none",
     practiceNotes: null,
     registrationGuidance: null,
+    registrationPriceCents: null,
+    supportPriceCents: null,
+    transportationPriceCents: null,
+    newTiresPriceCents: null,
+    otherServiceName: null,
+    otherServicePriceCents: null,
     activityLog: [],
     createdBy: "portal",
     updatedBy: "portal",
@@ -58,8 +65,12 @@ describe("track_day event type", () => {
     assert.ok((CALENDAR_EVENT_TYPES as readonly string[]).includes("track_day"));
   });
 
-  it("has display label Track day", () => {
-    assert.equal(EVENT_TYPE_LABELS.track_day, "Track day");
+  it("has display label Trackday", () => {
+    assert.equal(EVENT_TYPE_LABELS.track_day, "Trackday");
+  });
+
+  it("exposes four creatable portal types", () => {
+    assert.deepEqual([...CALENDAR_CREATABLE_EVENT_TYPES], ["school", "race", "track_day", "other"]);
   });
 
   it("passes portal validation", () => {
@@ -75,7 +86,7 @@ describe("track_day event type", () => {
     const pub = toPublicCalendarEvent(publishedFixture());
     assert.ok(pub);
     assert.equal(pub.eventType, "track_day");
-    assert.equal(pub.eventTypeLabel, "Track day");
+    assert.equal(pub.eventTypeLabel, "Trackday");
   });
 
   it("eventDateRailParts supports multi-day ranges", () => {

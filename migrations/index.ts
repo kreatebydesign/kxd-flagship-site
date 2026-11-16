@@ -134,6 +134,7 @@ import * as migration_20261027_platform_economics_snapshots from './20261027_pla
 import * as migration_20261028_phase17_project_inquiry_attribution from './20261028_phase17_project_inquiry_attribution';
 import * as migration_20261029_staff_sales_activity_staff_recording from './20261029_staff_sales_activity_staff_recording';
 import * as migration_20261112_client_calendar_event_type_track_day from './20261112_client_calendar_event_type_track_day';
+import * as migration_20261116_client_calendar_event_pricing from './20261116_client_calendar_event_pricing';
 
 export const migrations = [
   {
@@ -882,5 +883,11 @@ export const migrations = [
     up: migration_20261112_client_calendar_event_type_track_day.up,
     down: migration_20261112_client_calendar_event_type_track_day.down,
     name: '20261112_client_calendar_event_type_track_day',
+  },
+  {
+    // Primal client calendar — optional registration and service prices (USD cents).
+    up: migration_20261116_client_calendar_event_pricing.up,
+    down: migration_20261116_client_calendar_event_pricing.down,
+    name: '20261116_client_calendar_event_pricing',
   },
 ];

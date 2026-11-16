@@ -1,6 +1,7 @@
 import { displayTitle } from "./authority";
 import { resolvePublicRegistrationHref } from "./motorsportreg";
 import { EVENT_TYPE_LABELS } from "./presentation";
+import { publicPricingFromRecord, registrationPriceIsAuthoritative } from "./pricing";
 import type {
   CalendarActivityEntry,
   CalendarEventRecord,
@@ -58,6 +59,13 @@ function asSource(value: unknown): CalendarSourceSystem {
     : "manual";
 }
 
+function asOptionalCents(value: unknown): number | null {
+  if (value == null || value === "") return null;
+  const n = Number(value);
+  if (!Number.isFinite(n) || n < 0) return null;
+  return Math.round(n);
+}
+
 export function parseCalendarEventDoc(doc: unknown): CalendarEventRecord | null {
   if (!doc || typeof doc !== "object") return null;
   const row = doc as Record<string, unknown>;
@@ -106,6 +114,12 @@ export function parseCalendarEventDoc(doc: unknown): CalendarEventRecord | null 
     relationshipKind: (row.relationshipKind as CalendarRelationshipKind) || "none",
     practiceNotes: asString(row.practiceNotes),
     registrationGuidance: asString(row.registrationGuidance),
+    registrationPriceCents: asOptionalCents(row.registrationPriceCents),
+    supportPriceCents: asOptionalCents(row.supportPriceCents),
+    transportationPriceCents: asOptionalCents(row.transportationPriceCents),
+    newTiresPriceCents: asOptionalCents(row.newTiresPriceCents),
+    otherServiceName: asString(row.otherServiceName),
+    otherServicePriceCents: asOptionalCents(row.otherServicePriceCents),
     activityLog,
     createdBy: asString(row.createdBy),
     updatedBy: asString(row.updatedBy),
@@ -148,5 +162,7 @@ export function toPublicCalendarEvent(event: CalendarEventRecord): PublicCalenda
     sourceExternalId: event.sourceExternalId,
     sourceUrl: event.sourceUrl,
     registrationHref,
+    pricing: publicPricingFromRecord(event),
+    registrationPriceIsAuthoritative: registrationPriceIsAuthoritative(event),
   };
 }

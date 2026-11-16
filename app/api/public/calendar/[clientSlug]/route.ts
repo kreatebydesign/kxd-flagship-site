@@ -1,6 +1,6 @@
 /**
  * GET /api/public/calendar/[clientSlug]
- * Published upcoming events only. No registration checkout.
+ * Published upcoming events only. Includes optional pricing (USD cents). No checkout.
  */
 import { NextResponse } from "next/server";
 import { getPayload } from "payload";
