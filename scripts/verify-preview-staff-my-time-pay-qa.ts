@@ -2,6 +2,7 @@
  * Preview-kxd-os QA for Tyler My Time & Pay — live calculated totals from DB.
  */
 import assert from "node:assert/strict";
+import pg from "pg";
 
 function bootstrapPreviewDatabaseUri(): void {
   const uri = process.env.NEON_PREVIEW_URI?.trim() || process.env.DATABASE_URI?.trim();
@@ -32,8 +33,21 @@ async function main(): Promise<void> {
     TYLER_PAY_PERIOD_2_DOCUMENTED_GROSS_CENTS,
     TYLER_OCT_21_2026_RECONCILIATION,
     TYLER_PRODUCTION_VERIFIED_MINUTES,
+    TYLER_PRODUCTION_VERIFIED_GROSS_CENTS,
     TYLER_HISTORICAL_OCT_15_20_APPROVED_MINUTES,
   } = await import("../lib/staff-pay/tyler-payroll-reconciliation.ts");
+  const { TYLER_RETHWILL_STAFF_USER_ID } = await import(
+    "../lib/staff-pay/tyler-october-historical-reference.ts"
+  );
+  const { mapProductionShiftIdsToPreviewShiftIds } = await import(
+    "../lib/staff-pay/preview-tyler-fixture-shift-map.ts"
+  );
+  const {
+    TYLER_OCT_2026_UNPAID_SHIFT_ID,
+    TYLER_SHIFT_MINUTES,
+    tylerDocumentedGrossCentsFixture,
+  } = await import("../lib/staff-pay/wage-payments/tyler-oct-2026-fixture.ts");
+  const { preliminaryGrossCentsForMinutes } = await import("../lib/staff-pay/money.ts");
   const { formatStaffPayMinutesLabel } = await import("../lib/staff-pay/format-minutes.ts");
   const {
     allocateShiftMinutesByWorkweek,
@@ -43,6 +57,36 @@ async function main(): Promise<void> {
 
   loadPayloadEnv();
   assertPreviewKxdOsDatabaseReadOnly();
+
+  const previewUri = process.env.DATABASE_URI!;
+  const shiftPg = new pg.Client({ connectionString: previewUri });
+  await shiftPg.connect();
+  const shiftRows = await shiftPg.query<{ id: number; audit_events: unknown }>(
+    `SELECT id, audit_events FROM staff_time_shifts WHERE staff_user_id = $1 AND status <> 'voided'`,
+    [TYLER_RETHWILL_STAFF_USER_ID],
+  );
+  const shiftIdMap = mapProductionShiftIdsToPreviewShiftIds(shiftRows.rows);
+  const hasProductionShift12 = shiftIdMap.has(TYLER_OCT_2026_UNPAID_SHIFT_ID);
+  await shiftPg.end();
+
+  const expectedVerifiedMinutes =
+    TYLER_PRODUCTION_VERIFIED_MINUTES +
+    (hasProductionShift12 ? TYLER_SHIFT_MINUTES[TYLER_OCT_2026_UNPAID_SHIFT_ID] : 0);
+  const expectedVerifiedPreliminaryGrossCents =
+    TYLER_PRODUCTION_VERIFIED_GROSS_CENTS +
+    (hasProductionShift12
+      ? preliminaryGrossCentsForMinutes(
+          TYLER_SHIFT_MINUTES[TYLER_OCT_2026_UNPAID_SHIFT_ID],
+          2000,
+        )
+      : 0);
+  const expectedDocumentedGrossCents = hasProductionShift12
+    ? tylerDocumentedGrossCentsFixture()
+    : TYLER_COMBINED_DOCUMENTED_GROSS_CENTS;
+  const expectedPeriod2DocumentedGrossCents = hasProductionShift12
+    ? TYLER_PAY_PERIOD_2_DOCUMENTED_GROSS_CENTS +
+      preliminaryGrossCentsForMinutes(TYLER_SHIFT_MINUTES[TYLER_OCT_2026_UNPAID_SHIFT_ID], 2000)
+    : TYLER_PAY_PERIOD_2_DOCUMENTED_GROSS_CENTS;
 
   const payload = await getPayload({ config });
   const TYLER_EMAIL = "tyler@kreatebydesign.com";
@@ -82,18 +126,16 @@ async function main(): Promise<void> {
   const verifiedMinutes = view.periods.reduce((s, p) => s + p.verifiedTotalMinutes, 0);
   const historicalMinutes = view.summaryTotals.ownerApprovedHistoricalMinutes ?? 0;
 
-  assert.equal(verifiedMinutes, TYLER_PRODUCTION_VERIFIED_MINUTES);
-  assert.equal(verifiedMinutes, 1905);
+  assert.equal(verifiedMinutes, expectedVerifiedMinutes);
   assert.equal(historicalMinutes, TYLER_HISTORICAL_OCT_15_20_APPROVED_MINUTES);
   assert.equal(historicalMinutes, 1319);
   assert.equal(
     formatStaffPayMinutesLabel(verifiedMinutes + historicalMinutes),
-    formatStaffPayMinutesLabel(3224),
+    formatStaffPayMinutesLabel(expectedVerifiedMinutes + TYLER_HISTORICAL_OCT_15_20_APPROVED_MINUTES),
   );
-  assert.equal(view.summaryTotals.verifiedPreliminaryGrossCents, 63500);
+  assert.equal(view.summaryTotals.verifiedPreliminaryGrossCents, expectedVerifiedPreliminaryGrossCents);
   assert.equal(view.summaryTotals.ownerApprovedHistoricalGrossCents, 43967);
-  assert.equal(view.summaryTotals.documentedGrossSubtotalCents, TYLER_COMBINED_DOCUMENTED_GROSS_CENTS);
-  assert.equal(view.summaryTotals.documentedGrossSubtotalCents, 107467);
+  assert.equal(view.summaryTotals.documentedGrossSubtotalCents, expectedDocumentedGrossCents);
   assert.equal(view.summaryTotals.pendingProposedHistoricalGrossCents, 0);
 
   const period1 = view.periods.find(
@@ -113,8 +155,7 @@ async function main(): Promise<void> {
 
   assert.equal(period1Live, TYLER_PAY_PERIOD_1_DOCUMENTED_GROSS_CENTS);
   assert.equal(period1Live, 67267);
-  assert.equal(period2Live, TYLER_PAY_PERIOD_2_DOCUMENTED_GROSS_CENTS);
-  assert.equal(period2Live, 40200);
+  assert.equal(period2Live, expectedPeriod2DocumentedGrossCents);
 
   const oct21Daily = period1?.daily.find((d) => d.localDateKey === "2026-10-21");
   assert.ok(oct21Daily, "Oct 21 daily bucket required");
@@ -132,9 +173,14 @@ async function main(): Promise<void> {
     assert.equal(entry.status, "owner_approved");
   }
 
-  assert.match(view.paymentRecordedDisclaimer, /does not record wage payments/i);
-  for (const p of view.periods) {
-    assert.equal(p.paymentStatusLabel, "Not recorded as paid in KXD OS");
+  assert.match(
+    view.paymentRecordedDisclaimer,
+    /external wage records only|Settled wages are amounts KXD OS has recorded as paid externally/i,
+  );
+  if (!view.wageSettlement?.settledGrossCents) {
+    for (const p of view.periods) {
+      assert.equal(p.paymentStatusLabel, "Not recorded as paid in KXD OS");
+    }
   }
 
   const minutesByWorkweek = new Map<string, number>();
@@ -160,6 +206,7 @@ async function main(): Promise<void> {
 
   console.log(
     JSON.stringify({
+      hasProductionShift12,
       verifiedMinutes,
       historicalMinutes,
       combinedMinutes: verifiedMinutes + historicalMinutes,

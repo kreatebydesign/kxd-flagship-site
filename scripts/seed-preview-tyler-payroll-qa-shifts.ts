@@ -121,9 +121,21 @@ async function fixtureExists(
   return (result.rowCount ?? 0) > 0;
 }
 
+function parseOptionalProductionShiftIds(): number[] | null {
+  const raw = process.env.KXD_PREVIEW_TYLER_SEED_ONLY_PRODUCTION_SHIFT_IDS?.trim();
+  if (!raw) return null;
+  const ids = raw
+    .split(/[, ]+/)
+    .map((part) => Number.parseInt(part, 10))
+    .filter((id) => Number.isFinite(id) && id > 0);
+  assert.ok(ids.length > 0, "KXD_PREVIEW_TYLER_SEED_ONLY_PRODUCTION_SHIFT_IDS must list at least one id");
+  return ids;
+}
+
 async function main(): Promise<void> {
   const previewUri = bootstrapPreviewUri();
   const productionUri = bootstrapProductionReadUri();
+  const onlyProductionShiftIds = parseOptionalProductionShiftIds();
 
   const prod = new pg.Client({ connectionString: productionUri });
   const preview = new pg.Client({ connectionString: previewUri });
@@ -131,16 +143,37 @@ async function main(): Promise<void> {
   await preview.connect();
 
   try {
-    const prodResult = await prod.query<ProdShiftRow>(
-      `SELECT id, staff_user_id, status, started_at, ended_at, work_timezone, local_date_key,
+    const prodSql = onlyProductionShiftIds
+      ? `SELECT id, staff_user_id, status, started_at, ended_at, work_timezone, local_date_key,
               work_intent_category, work_intent_work_id, work_intent_client_id, work_intent_note,
               pay_period_id, audit_events
        FROM staff_time_shifts
        WHERE staff_user_id = $1 AND status = 'completed' AND ended_at IS NOT NULL
-       ORDER BY started_at ASC`,
-      [TYLER_USER_ID],
-    );
-    assert.equal(prodResult.rowCount, 12, "expected 12 verified production shifts (11 covered + 1 outstanding)");
+         AND id = ANY($2::int[])
+       ORDER BY started_at ASC`
+      : `SELECT id, staff_user_id, status, started_at, ended_at, work_timezone, local_date_key,
+              work_intent_category, work_intent_work_id, work_intent_client_id, work_intent_note,
+              pay_period_id, audit_events
+       FROM staff_time_shifts
+       WHERE staff_user_id = $1 AND status = 'completed' AND ended_at IS NOT NULL
+       ORDER BY started_at ASC`;
+    const prodParams = onlyProductionShiftIds
+      ? [TYLER_USER_ID, onlyProductionShiftIds]
+      : [TYLER_USER_ID];
+    const prodResult = await prod.query<ProdShiftRow>(prodSql, prodParams);
+    if (onlyProductionShiftIds) {
+      assert.equal(
+        prodResult.rowCount,
+        onlyProductionShiftIds.length,
+        "production shift id filter did not match expected rows",
+      );
+    } else {
+      assert.equal(
+        prodResult.rowCount,
+        12,
+        "expected 12 verified production shifts (11 covered + 1 outstanding); set KXD_PREVIEW_TYLER_SEED_ONLY_PRODUCTION_SHIFT_IDS to seed a subset",
+      );
+    }
 
     let inserted = 0;
     let skipped = 0;
