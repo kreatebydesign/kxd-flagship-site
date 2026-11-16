@@ -263,7 +263,6 @@ function main() {
   for (const [surface, rel] of [
     ["assets", "app/(portal)/portal/(app)/assets/page.tsx"],
     ["deliverables", "app/(portal)/portal/(app)/deliverables/page.tsx"],
-    ["reports", "app/(portal)/portal/(app)/reports/page.tsx"],
   ] as const) {
     const src = read(rel);
     check(
@@ -272,6 +271,13 @@ function main() {
         src.includes('redirect("/portal")'),
     );
   }
+  const reportsListPage = read("app/(portal)/portal/(app)/reports/page.tsx");
+  check(
+    "reports list page gates with isPortalReportsSurfaceAvailable + session",
+    reportsListPage.includes("isPortalReportsSurfaceAvailable") &&
+      reportsListPage.includes("getPortalSession") &&
+      reportsListPage.includes('redirect("/portal")'),
+  );
 
   // ── Reports — Batch E access model retained + view-model hardening ───
   check(
@@ -337,6 +343,12 @@ function main() {
   );
 
   const reportDetailPage = read("app/(portal)/portal/(app)/reports/[id]/page.tsx");
+  check(
+    "reports detail page gates with isPortalReportsSurfaceAvailable + session",
+    reportDetailPage.includes("isPortalReportsSurfaceAvailable") &&
+      reportDetailPage.includes("getPortalSession") &&
+      reportDetailPage.includes('redirect("/portal")'),
+  );
   check(
     "report detail uses decidePortalReportAccess + view model",
     reportDetailPage.includes("decidePortalReportAccess") &&

@@ -323,8 +323,10 @@ async function main() {
 
   console.log("\nAuth + isolation contracts (static)");
   check(
-    "DELETE checks session.clientId ownership",
-    uploadRoute.includes("rowClientId !== session.clientId"),
+    "DELETE enforces attachment ownership via decidePortalAttachmentAccess",
+    uploadRoute.includes("decidePortalAttachmentAccess") &&
+      uploadRoute.includes("authorizedClientId: session.clientId") &&
+      uploadRoute.includes("PORTAL_ATTACHMENT_NOT_FOUND_MESSAGE"),
   );
   check(
     "unauthenticated POST returns 401 Unauthorized",
