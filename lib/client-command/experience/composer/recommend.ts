@@ -127,7 +127,7 @@ export function recommendBranding(
     motionPreset: existing.motionPreset || "calm",
     showKxdPartnerMark: existing.showKxdPartnerMark !== false,
     partnerFooterLine:
-      existing.partnerFooterLine.trim() || "Powered by Kreate by Design",
+      existing.partnerFooterLine.trim() || "Designed & Developed by Kreate by Design",
     logoHasFile: signals.logoHasFile || Boolean(signals.presentationLogoUrl),
     logoSource:
       signals.logoHasFile

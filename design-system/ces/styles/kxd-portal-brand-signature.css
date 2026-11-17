@@ -1,0 +1,134 @@
+/**
+ * Client portal KXD brand signature — login intro overlay + sidebar attribution.
+ * Scoped under .kxd-ces-app only (not founder/admin shells).
+ */
+
+/* ── Cinematic login intro (once per session) ── */
+
+.kxd-ces-app .kxd-portal-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #030304;
+  pointer-events: none;
+  animation: kxd-portal-intro-vanish 0.32s cubic-bezier(0.22, 1, 0.36, 1) 0.98s forwards;
+}
+
+.kxd-ces-app .kxd-portal-intro__stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: kxd-portal-intro-stage 1.02s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.kxd-ces-app .kxd-portal-intro__mark {
+  position: relative;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.kxd-ces-app .kxd-portal-intro__logo {
+  display: block;
+  width: clamp(4.25rem, 18vw, 6.5rem);
+  height: auto;
+  object-fit: contain;
+}
+
+.kxd-ces-app .kxd-portal-intro__sweep {
+  position: absolute;
+  inset: -30% -80%;
+  background: linear-gradient(
+    102deg,
+    transparent 38%,
+    rgba(255, 232, 190, 0.14) 46%,
+    rgba(255, 248, 220, 0.42) 50%,
+    rgba(255, 232, 190, 0.14) 54%,
+    transparent 62%
+  );
+  transform: translateX(-120%) skewX(-12deg);
+  animation: kxd-portal-intro-sweep 0.72s cubic-bezier(0.33, 1, 0.46, 1) 0.14s forwards;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+@keyframes kxd-portal-intro-stage {
+  0% {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  18% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  72% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.015);
+  }
+}
+
+@keyframes kxd-portal-intro-sweep {
+  to {
+    transform: translateX(130%) skewX(-12deg);
+  }
+}
+
+@keyframes kxd-portal-intro-vanish {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kxd-ces-app .kxd-portal-intro,
+  .kxd-ces-app .kxd-portal-intro__stage,
+  .kxd-ces-app .kxd-portal-intro__sweep {
+    animation: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+}
+
+/* ── Sidebar attribution ── */
+
+.kxd-ces-app .kxd-portal-brand-signature {
+  margin: 0.4rem 0 0;
+  padding: 0 var(--kxd-os-space-3);
+  font-size: 0.625rem;
+  line-height: 1.55;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--kxd-os-text-faint);
+}
+
+.kxd-ces-app .kxd-portal-brand-signature a {
+  color: var(--kxd-os-text-muted);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--kxd-os-text-muted) 24%, transparent);
+  transition: color var(--kxd-ces-motion, 180ms) var(--kxd-ces-ease, ease);
+}
+
+.kxd-ces-app .kxd-portal-brand-signature a:hover {
+  color: var(--kxd-os-text-secondary);
+  border-bottom-color: color-mix(in srgb, var(--kxd-os-text-secondary) 30%, transparent);
+}
+
+.kxd-ces-app .kxd-portal-brand-signature a:focus-visible {
+  outline: 2px solid var(--kxd-os-accent, var(--kxd-ces-accent));
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+@media (max-width: 960px) {
+  .kxd-ces-app .kxd-portal-brand-signature {
+    max-width: 100%;
+    padding-inline: var(--kxd-os-space-4);
+  }
+}

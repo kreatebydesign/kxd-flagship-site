@@ -44,7 +44,7 @@ export const PRIMAL_EXPERIENCE_PROFILE = {
   /** Results → Performance / Reports (portal HQ modules, not CES experience modules). */
   enabledPortalModules: ["analytics", "reports"] as const,
   showKxdPartnerMark: true,
-  partnerFooterLine: "Powered by KXD OS",
+  partnerFooterLine: "Designed & Developed by Kreate by Design",
   terminology: {
     "nav.executive-review": "Executive Review",
     "nav.website-review": "Website Review",

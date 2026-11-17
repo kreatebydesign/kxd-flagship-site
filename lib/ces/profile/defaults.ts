@@ -1,5 +1,6 @@
 import type { EditionBranding } from "@/lib/editions";
 import { KXD_CORE_BRANDING } from "@/lib/editions";
+import { KXD_PORTAL_ATTRIBUTION_COPY } from "../portal/brand-signature";
 import type {
   ExperienceBorderRadiusPreset,
   ExperienceHospitality,
@@ -9,7 +10,7 @@ import type {
   ResolvedExperienceProfile,
 } from "../types";
 
-export const CES_DEFAULT_PARTNER_FOOTER = "Powered by Kreate by Design";
+export const CES_DEFAULT_PARTNER_FOOTER = KXD_PORTAL_ATTRIBUTION_COPY;
 
 export const CES_DEFAULT_REASSURANCE = "Everything stays organized. Nothing gets lost.";
 

@@ -485,7 +485,7 @@ export async function loadOperatorExperienceSnapshot(
       supportTone: normalizeSupportTone(profile?.supportTone),
       portalSidebarLabel: String(profile?.portalSidebarLabel ?? clientName),
       partnerFooterLine: String(
-        profile?.partnerFooterLine ?? "Powered by Kreate by Design",
+        profile?.partnerFooterLine ?? "Designed & Developed by Kreate by Design",
       ),
       showPartnerMark: profile ? profile.showKxdPartnerMark !== false : true,
     },
@@ -538,7 +538,7 @@ export async function loadOperatorExperienceSnapshot(
       motionPreset: composeInput.visual?.motionPreset ?? "calm",
       showKxdPartnerMark: composeInput.hospitality?.showPartnerMark !== false,
       partnerFooterLine:
-        composeInput.hospitality?.partnerFooterLine ?? "Powered by Kreate by Design",
+        composeInput.hospitality?.partnerFooterLine ?? "Designed & Developed by Kreate by Design",
       terminology: composeInput.terminology ?? {},
     },
     logo: {

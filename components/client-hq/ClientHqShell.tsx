@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useId, useState, type CSSProperties, type ReactNode } from "react";
-import { KxdLogo } from "@/components/ui/KxdLogo";
+import { KxdPortalBrandSignature } from "@/components/ces/portal/KxdPortalBrandSignature";
+import { KxdPortalLoginIntro } from "@/components/ces/portal/KxdPortalLoginIntro";
 import { KxdShell } from "@/components/os";
 import type { ResolvedExperienceProfile } from "@/lib/ces";
 import type { EditionBranding } from "@/lib/editions";
@@ -134,7 +135,6 @@ export function ClientHqShell({
       : null;
   const cesShell = resolvePortalHomeShell(experienceProfile);
   const reassuranceLine = experienceProfile?.hospitality.reassuranceLine;
-  const partnerLine = experienceProfile?.hospitality.partnerFooterLine;
   /**
    * Suppress sidebar partner credit only when the Executive Performance
    * maker’s signature is actually rendered (overview + EP presentation).
@@ -161,9 +161,11 @@ export function ClientHqShell({
     experienceProfile?.identity.logoOnDarkTreatment ?? "default";
   const logoNeedsLightPanel =
     Boolean(clientLogo) && logoOnDarkTreatment === "light-panel";
+  const showPortalBrandIntro = Boolean(experienceProfile) && !operatorPreview;
 
   return (
     <>
+      <KxdPortalLoginIntro enabled={showPortalBrandIntro} />
       {operatorPreview ? (
         <OperatorPortalPreviewBanner
           clientId={operatorPreview.clientId}
@@ -306,17 +308,7 @@ export function ClientHqShell({
                 <span className="kxd-ces-trust-line__text">{reassuranceLine}</span>
               </p>
             ) : null}
-            {showPartnerMark ? (
-              <p className="kxd-ces-partner-mark">
-                {experienceProfile ? (
-                  partnerLine
-                ) : (
-                  <>
-                    <KxdLogo height={12} /> · {partnerLine ?? sidebarLabel}
-                  </>
-                )}
-              </p>
-            ) : null}
+            {showPartnerMark && experienceProfile ? <KxdPortalBrandSignature /> : null}
             <ClientHqLogoutButton isOperatorPreview={Boolean(operatorPreview)} />
           </div>
         </aside>

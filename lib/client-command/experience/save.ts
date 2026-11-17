@@ -134,7 +134,7 @@ export async function saveOperatorExperience(
     supportTone: normalizeSupportTone(input.supportTone),
     portalSidebarLabel: input.portalSidebarLabel.trim() || clientName,
     showKxdPartnerMark: input.showKxdPartnerMark !== false,
-    partnerFooterLine: input.partnerFooterLine.trim() || "Powered by Kreate by Design",
+    partnerFooterLine: input.partnerFooterLine.trim() || "Designed & Developed by Kreate by Design",
     enabledModules,
     terminology: mergeTerminology(existing?.terminology, input.terminology ?? {}),
   };

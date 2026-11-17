@@ -122,7 +122,7 @@ export function composeOperatorExperienceProfile(
       portalSidebarLabel:
         input.hospitality?.portalSidebarLabel ?? input.clientName,
       partnerFooterLine:
-        input.hospitality?.partnerFooterLine ?? "Powered by Kreate by Design",
+        input.hospitality?.partnerFooterLine ?? "Designed & Developed by Kreate by Design",
       showPartnerMark: input.hospitality?.showPartnerMark !== false,
     },
     enabledModules: normalizeCesExperienceModuleList(gated.ces),

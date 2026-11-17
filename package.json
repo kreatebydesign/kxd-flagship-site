@@ -144,6 +144,7 @@
     "verify:account-statement-compose": "tsx scripts/verify-account-statement-compose.ts",
     "verify:portal-billing-center": "tsx scripts/verify-portal-billing-center.ts",
     "verify:portal-date-hydration": "tsx scripts/verify-portal-date-hydration.ts",
+    "verify:portal-brand-signature": "tsx scripts/verify-portal-brand-signature.ts",
     "verify:staff-experience": "tsx scripts/verify-staff-experience.ts",
     "verify:staff-client-access": "tsx scripts/verify-staff-client-access.ts",
     "verify:staff-operator-client-access": "tsx scripts/verify-staff-operator-client-access.ts",
