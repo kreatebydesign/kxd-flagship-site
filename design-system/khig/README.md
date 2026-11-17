@@ -38,6 +38,7 @@ Think **Apple Human Interface Guidelines** for a luxury creative operating syste
 | `design-system/khig/` | **Constitution** — principles, tokens, language, scorecard |
 | `design-system/os/tokens/` | Implementation tokens (current codebase) |
 | `design-system/os/styles/kxd-os.css` | Runtime CSS (future phases align to KHIG) |
+| `design-system/ces/KXD-SIGNATURE-EXPERIENCE.md` | **Client portal** opening signature (all CES dashboards) |
 | `components/os/` | Component primitives |
 
 Future Industrial Design phases rebuild screens **against KHIG**, not against subjective preference.

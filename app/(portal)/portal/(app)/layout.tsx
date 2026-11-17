@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { CesProfileProvider } from "@/components/ces/providers/CesProfileProvider";
+import { KxdSignatureArmingInline } from "@/components/ces/portal/KxdSignatureArmingInline";
 import { ClientHqAppShell } from "@/components/client-hq/ClientHqAppShell";
 import { resolveExperienceProfile } from "@/lib/ces/server";
 import { resolvePortalHomeShell } from "@/lib/ces/modules/home";
@@ -94,11 +95,14 @@ export default async function PortalAppLayout({ children }: { children: React.Re
     accountContext,
   });
 
+  const signatureArmingEnabled = !session.isOperatorPreview && session.clientId > 0;
+
   return (
     <CesProfileProvider
       profile={experienceProfile}
       shell={resolvePortalHomeShell(experienceProfile)}
     >
+      <KxdSignatureArmingInline clientId={session.clientId} enabled={signatureArmingEnabled} />
       <ClientHqAppShell
         companyName={session.clientName}
         editionBranding={editionBranding}

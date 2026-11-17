@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useId, useState, type CSSProperties, type ReactNode } from "react";
 import { KxdPortalBrandSignature } from "@/components/ces/portal/KxdPortalBrandSignature";
-import { KxdPortalLoginIntro } from "@/components/ces/portal/KxdPortalLoginIntro";
+import { KxdSignatureExperience } from "@/components/ces/portal/KxdSignatureExperience";
 import { KxdShell } from "@/components/os";
 import type { ResolvedExperienceProfile } from "@/lib/ces";
 import type { EditionBranding } from "@/lib/editions";
@@ -161,11 +161,12 @@ export function ClientHqShell({
     experienceProfile?.identity.logoOnDarkTreatment ?? "default";
   const logoNeedsLightPanel =
     Boolean(clientLogo) && logoOnDarkTreatment === "light-panel";
-  const showPortalBrandIntro = Boolean(experienceProfile) && !operatorPreview;
+  const signatureClientId = experienceProfile?.identity.clientId ?? 0;
+  const showSignatureExperience = Boolean(experienceProfile) && !operatorPreview && signatureClientId > 0;
 
   return (
     <>
-      <KxdPortalLoginIntro enabled={showPortalBrandIntro} />
+      <KxdSignatureExperience enabled={showSignatureExperience} clientId={signatureClientId} />
       {operatorPreview ? (
         <OperatorPortalPreviewBanner
           clientId={operatorPreview.clientId}
