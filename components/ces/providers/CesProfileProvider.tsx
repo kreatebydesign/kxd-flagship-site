@@ -19,6 +19,7 @@ export function CesProfileProvider({
     <CesProfileContext.Provider value={profile}>
       <div
         className="kxd-ces-app"
+        data-client-slug={profile.identity.clientSlug ?? undefined}
         data-ces-source={profile.source}
         data-ces-shell={shell}
         data-ces-tone={profile.hospitality.supportTone}

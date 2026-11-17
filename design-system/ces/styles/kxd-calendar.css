@@ -3,14 +3,6 @@
  * Does not modify inventory (kxd-inv-card) globals.
  */
 
-/* Primal calendar accent — scoped to calendar pages only */
-.kxd-ces-page.kxd-cal-landing,
-.kxd-ces-page.kxd-cal-editor {
-  --kxd-cal-primal-red: #a83424;
-  --kxd-os-accent: var(--kxd-cal-primal-red);
-  --kxd-ces-accent: var(--kxd-cal-primal-red);
-}
-
 .kxd-ces-page.kxd-cal-landing {
   --kxd-ces-content-max: min(76rem, calc(100vw - 2.5rem));
 }
@@ -80,7 +72,7 @@
   top: 0;
   bottom: 0;
   width: 3px;
-  background: color-mix(in srgb, var(--kxd-ces-accent, #a83424) 85%, #fff);
+  background: color-mix(in srgb, var(--kxd-ces-accent, #24aee8) 85%, #fff);
 }
 
 .kxd-cal-command__eyebrow {
@@ -355,8 +347,8 @@
 }
 
 .kxd-cal-chip--attention {
-  border-color: color-mix(in srgb, #e8b060 45%, transparent);
-  color: color-mix(in srgb, #e8b060 90%, #fff);
+  border-color: color-mix(in srgb, var(--kxd-ces-accent, #24aee8) 45%, transparent);
+  color: color-mix(in srgb, var(--kxd-ces-accent, #24aee8) 90%, #fff);
 }
 
 .kxd-cal-event-card__aside {
@@ -423,8 +415,8 @@
   width: 1.85rem;
   height: 1.85rem;
   border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--kxd-cal-primal-red, #a83424) 55%, transparent);
-  color: color-mix(in srgb, var(--kxd-cal-primal-red, #a83424) 95%, #fff);
+  border: 1px solid color-mix(in srgb, var(--kxd-ces-accent, #24aee8) 55%, transparent);
+  color: color-mix(in srgb, var(--kxd-ces-accent, #24aee8) 95%, #fff);
   font-size: 0.68rem;
   letter-spacing: 0.06em;
   font-weight: 500;

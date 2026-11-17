@@ -5,6 +5,7 @@
  */
 
 @import "./kxd-calendar.css";
+@import "./kxd-primal-portal.css";
 
 .kxd-ces-app {
   min-height: 100%;

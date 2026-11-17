@@ -230,6 +230,40 @@ function main() {
   );
   check("calendar styles scoped", read("design-system/ces/styles/kxd-calendar.css").includes(".kxd-cal-event-card"));
   check(
+    "primal portal brand sheet scoped",
+    read("design-system/ces/styles/kxd-primal-portal.css").includes(
+      '[data-client-slug="primal-motorsports"]',
+    ),
+  );
+  check(
+    "CesProfileProvider exposes client slug hook",
+    read("components/ces/providers/CesProfileProvider.tsx").includes("data-client-slug"),
+  );
+  check(
+    "primal profile accent matches public site blue",
+    PRIMAL_EXPERIENCE_PROFILE.accentColor.toLowerCase() === "#24aee8",
+  );
+
+  const primalPortalCss = read("design-system/ces/styles/kxd-primal-portal.css");
+  const primalNoScope = primalPortalCss
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .split("}")
+    .map((chunk) => chunk.trim())
+    .filter((chunk) => chunk.includes("{") && !chunk.includes("@media"))
+  .some((chunk) => !chunk.includes('data-client-slug="primal-motorsports"'));
+  check("primal portal CSS fully scoped to client slug", !primalNoScope);
+
+  const calendarCss = read("design-system/ces/styles/kxd-calendar.css");
+  check("JB school chip #2563EB", calendarCss.includes("--kxd-cal-type-fill: #2563eb"));
+  check("JB race chip #DC2626", calendarCss.includes("--kxd-cal-type-fill: #dc2626"));
+  check("JB trackday chip #FFFFFF", calendarCss.includes("--kxd-cal-type-fill: #ffffff"));
+  check("JB other chip #EAB308", calendarCss.includes("--kxd-cal-type-fill: #eab308"));
+  check(
+    "attention chip uses accent token not orange",
+    !calendarCss.includes("#e8b060") &&
+      calendarCss.includes("var(--kxd-ces-accent"),
+  );
+  check(
     "event date rail helper exported",
     read("lib/calendar/presentation.ts").includes("eventDateRailParts"),
   );
