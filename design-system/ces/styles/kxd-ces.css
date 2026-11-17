@@ -13279,3 +13279,28 @@ a.kxd-brand-kit__asset:hover .kxd-brand-kit__asset-action {
     align-items: flex-start;
   }
 }
+
+/**
+ * Primal portal shell — cascade tail overrides.
+ * Generic `[data-ces-shell="ces"]` sidebar rules and profile vars can still
+ * resolve to presentation red; these beat both via selector depth + source order.
+ */
+.kxd-ces-app[data-client-slug="primal-motorsports"][data-ces-shell="ces"] .kxd-os-sidebar__link--active {
+  background: var(--kxd-os-bg-selected, rgba(36, 174, 232, 0.12));
+  color: #9ee4f6;
+  font-weight: 600;
+  box-shadow: inset 2px 0 0 #24aee8;
+}
+
+.kxd-ces-app[data-client-slug="primal-motorsports"][data-ces-shell="ces"] .kxd-os-sidebar__link--active:hover {
+  background: rgba(36, 174, 232, 0.14);
+  color: #b8ecfa;
+}
+
+.kxd-ces-app[data-client-slug="primal-motorsports"][data-ces-shell="ces"] .kxd-ces-identity__partner {
+  color: color-mix(in srgb, #24aee8 72%, var(--kxd-os-text-faint));
+}
+
+.kxd-ces-app[data-client-slug="primal-motorsports"][data-ces-shell="ces"] .kxd-ces-identity__rule {
+  background: #24aee8;
+}

@@ -224,10 +224,15 @@ function finalizeProfile(profile: ResolvedExperienceProfile): ResolvedExperience
               }
             : {}),
           ...(presentation.actionAccent
-            ? {
-                "--kxd-ces-brand": resolveCesBrandColor(presentation.actionAccent),
-                "--kxd-ces-accent": resolveCesInteractiveAccent(presentation.actionAccent),
-              }
+            ? profile.identity.clientSlug === PRIMAL_CLIENT_SLUG
+              ? {
+                  /* Primal portal shell uses electric blue (visual profile). EP keeps brand red on exec surfaces. */
+                  "--kxd-ces-exec-action": presentation.actionAccent,
+                }
+              : {
+                  "--kxd-ces-brand": resolveCesBrandColor(presentation.actionAccent),
+                  "--kxd-ces-accent": resolveCesInteractiveAccent(presentation.actionAccent),
+                }
             : {}),
           ...(presentation.intelligenceAccent
             ? {
