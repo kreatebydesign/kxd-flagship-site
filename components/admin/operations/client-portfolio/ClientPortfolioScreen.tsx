@@ -1,11 +1,5 @@
 import Link from "next/link";
-import {
-  KxdBadge,
-  KxdEmptyState,
-  KxdPage,
-  KxdSection,
-  KxdSurface,
-} from "@/components/os";
+import { KxdBadge } from "@/components/os";
 import { OperationsShell } from "@/components/admin/operations/shared/OperationsShell";
 import {
   EXECUTIVE_PRIORITY_LABEL,
@@ -63,20 +57,20 @@ export function ClientPortfolioScreen({
     : `${rows.length} relationships — revenue, health, and what matters next.`;
 
   return (
-    <OperationsShell activeId="clients" dateDisplay={dateDisplay}>
-      <KxdPage className="kxd-os-page--portfolio">
-        <header className="kxd-os-portfolio-hero">
-          <p className="kxd-os-eyebrow">Client intelligence</p>
-          <h1 className="kxd-os-headline kxd-os-headline--presence kxd-os-portfolio-hero__title">
-            Client Portfolio
-          </h1>
-          <p className="kxd-os-portfolio-hero__lead">
-            Executive visibility across active relationships, revenue, health, and next
-            actions.
+    <OperationsShell activeId="clients" dateDisplay={dateDisplay} showQuickActions={false}>
+      <div className="kxd-founder-page kxd-founder-clients">
+        <header className="kxd-founder-clients__header">
+          <p className="kxd-founder-today__eyebrow">Clients</p>
+          <h1 className="kxd-founder-clients__title">Portfolio</h1>
+          <p className="kxd-founder-clients__lede">
+            Active relationships, revenue, health, and what matters next.
           </p>
         </header>
 
-        <div className="kxd-os-portfolio-kpi-grid">
+        <div
+          className="kxd-founder-today__metrics kxd-founder-clients__metrics"
+          aria-label="Portfolio summary"
+        >
           {[
             {
               label: "Portfolio coverage",
@@ -99,29 +93,32 @@ export function ClientPortfolioScreen({
               sub: "Estimated pipeline value",
             },
           ].map((kpi) => (
-            <KxdSurface key={kpi.label} variant="glass" className="kxd-os-portfolio-kpi">
-              <p className="kxd-os-metric__label">{kpi.label}</p>
-              <p className="kxd-os-portfolio-kpi__value">{kpi.value}</p>
-              <p className="kxd-os-metric__sub">{kpi.sub}</p>
-            </KxdSurface>
+            <div key={kpi.label} className="kxd-founder-metric">
+              <p className="kxd-founder-metric__label">{kpi.label}</p>
+              <p className="kxd-founder-metric__value">{kpi.value}</p>
+              {kpi.sub ? <p className="kxd-founder-metric__detail">{kpi.sub}</p> : null}
+            </div>
           ))}
         </div>
 
-        <div className="kxd-os-portfolio-overview-head">
-          <KxdSection label="Relationships" description={overviewDescription} />
-          <div className="kxd-os-portfolio-actions">
-            <Link href="/admin/operations/events" className="kxd-os-btn kxd-os-btn--ghost">
-              Relationship Events
+        <div className="kxd-founder-clients__toolbar">
+          <div className="kxd-founder-clients__toolbar-copy">
+            <h2 className="kxd-founder-panel__title">Relationships</h2>
+            <p className="kxd-founder-clients__toolbar-lede">{overviewDescription}</p>
+          </div>
+          <div className="kxd-founder-clients__actions">
+            <Link href="/admin/operations/client-launch" className="kxd-founder-btn kxd-founder-btn--primary">
+              Launch client
             </Link>
-            <Link href="/admin/operations/client-import" className="kxd-os-btn kxd-os-btn--ghost">
+            <Link href="/admin/operations/client-import" className="kxd-founder-btn">
               Import client
             </Link>
-            <Link href="/admin/operations/client-launch" className="kxd-os-btn kxd-os-btn--primary">
-              Launch client
+            <Link href="/admin/operations/events" className="kxd-founder-btn">
+              Events
             </Link>
             <Link
               href="/admin/collections/executive-client-profiles"
-              className="kxd-os-link-quiet"
+              className="kxd-founder-clients__quiet-link"
             >
               Edit profiles
             </Link>
@@ -129,12 +126,14 @@ export function ClientPortfolioScreen({
         </div>
 
         {rows.length === 0 ? (
-          <KxdEmptyState
-            title="No clients in portfolio"
-            description="Seed clients or add records in Payload to begin building your executive roster."
-          />
+          <div className="kxd-founder-panel">
+            <p className="kxd-founder-empty">
+              No clients in the portfolio yet. Import a client or launch one from your playbook to
+              begin.
+            </p>
+          </div>
         ) : (
-          <div className="kxd-os-portfolio-roster">
+          <div className="kxd-founder-clients__roster">
             {rows.map((row) => {
               const duplicateHint = duplicateWarnings.get(row.clientId);
               const priority = row.internalPriority
@@ -143,79 +142,69 @@ export function ClientPortfolioScreen({
               const isCritical = row.internalPriority === "critical";
 
               return (
-                <div key={row.clientId} className="kxd-os-portfolio-row--card">
-                  <div className="kxd-os-portfolio-row__grid">
-                    <Link href={`/admin/operations/clients/${row.clientId}`} className="kxd-os-portfolio-row__link">
-                      <p className="kxd-os-portfolio-name">{row.name}</p>
-                      <div className="kxd-os-portfolio-cell__meta">
-                        <span className="kxd-os-meta">
-                          {tierLabel(row)} · {statusLabel(row)}
-                        </span>
-                        {!row.hasExecutiveProfile && (
-                          <KxdBadge variant="pending">Profile pending</KxdBadge>
-                        )}
-                        {isCritical && (
-                          <KxdBadge variant="critical">{priority}</KxdBadge>
-                        )}
-                      </div>
-                      {duplicateHint && (
-                        <p className="kxd-os-portfolio-note">{duplicateHint}</p>
+                <article key={row.clientId} className="kxd-founder-clients__row">
+                  <Link
+                    href={`/admin/operations/clients/${row.clientId}`}
+                    className="kxd-founder-clients__row-primary"
+                  >
+                    <p className="kxd-founder-clients__name">{row.name}</p>
+                    <p className="kxd-founder-clients__meta">
+                      {tierLabel(row)} · {statusLabel(row)}
+                    </p>
+                    <div className="kxd-founder-clients__badges">
+                      {!row.hasExecutiveProfile && (
+                        <KxdBadge variant="pending">Profile pending</KxdBadge>
                       )}
-                    </Link>
-
-                    <div className="kxd-os-portfolio-cell__stack">
-                      <span className="kxd-os-caption">Monthly</span>
-                      <span className="kxd-os-portfolio-revenue">
-                        {fmtExecutiveMoney(row.monthlyRevenue)}
-                      </span>
-                      <span className="kxd-os-meta">
-                        {fmtExecutiveMoney(row.potentialMonthlyRevenue)} potential
-                      </span>
-                    </div>
-
-                    <div className="kxd-os-portfolio-cell__stack">
-                      <span className="kxd-os-caption">Health</span>
-                      <span className="kxd-os-portfolio-health">{row.healthScore ?? "—"}</span>
-                    </div>
-
-                    <div className="kxd-os-portfolio-cell__stack">
-                      <span className="kxd-os-caption">Next action</span>
-                      <span className="kxd-os-meta">{row.nextAction ?? "—"}</span>
-                    </div>
-
-                    <div className="kxd-os-portfolio-cell__stack">
-                      <span className="kxd-os-caption">Priority</span>
-                      {priority && !isCritical ? (
-                        <span className="kxd-os-meta">{priority}</span>
-                      ) : !priority ? (
-                        <span className="kxd-os-meta">—</span>
+                      {isCritical && priority ? (
+                        <KxdBadge variant="critical">{priority}</KxdBadge>
                       ) : null}
                     </div>
-                    <div className="kxd-os-portfolio-cell__stack">
-                      <span className="kxd-os-caption">Relationship</span>
-                      <Link
-                        href={`/admin/operations/clients/${row.clientId}?tab=relationship`}
-                        className="kxd-os-link-quiet"
-                      >
-                        Contacts & events →
-                      </Link>
+                    {duplicateHint ? (
+                      <p className="kxd-founder-clients__note">{duplicateHint}</p>
+                    ) : null}
+                  </Link>
+
+                  <dl className="kxd-founder-clients__facts">
+                    <div>
+                      <dt>Monthly</dt>
+                      <dd>{fmtExecutiveMoney(row.monthlyRevenue)}</dd>
                     </div>
-                    <div className="kxd-os-portfolio-cell__stack">
-                      <span className="kxd-os-caption">Workspace</span>
-                      <Link
-                        href={`/admin/operations/client-command/${row.clientId}`}
-                        className="kxd-os-link-quiet"
-                      >
-                        Open →
-                      </Link>
+                    <div>
+                      <dt>Health</dt>
+                      <dd>{row.healthScore ?? "—"}</dd>
                     </div>
-                  </div>
-                </div>
+                    <div>
+                      <dt>Next action</dt>
+                      <dd>{row.nextAction ?? "—"}</dd>
+                    </div>
+                    {priority && !isCritical ? (
+                      <div>
+                        <dt>Priority</dt>
+                        <dd>{priority}</dd>
+                      </div>
+                    ) : null}
+                  </dl>
+
+                  <nav className="kxd-founder-clients__row-actions" aria-label="Client shortcuts">
+                    <Link
+                      href={`/admin/operations/client-command/${row.clientId}`}
+                      className="kxd-founder-clients__workspace-link"
+                    >
+                      Open workspace
+                    </Link>
+                    <Link
+                      href={`/admin/operations/clients/${row.clientId}?tab=relationship`}
+                      className="kxd-founder-clients__quiet-link"
+                    >
+                      Contacts and events
+                    </Link>
+                  </nav>
+                </article>
               );
             })}
           </div>
         )}
-      </KxdPage>
+      </div>
     </OperationsShell>
   );
 }

@@ -6,6 +6,7 @@ import {
   isStudioPersistentChromeRoute,
   resolveClientIdFromPathname,
   resolveOperationsNavIdFromPathname,
+  resolveStudioShowQuickActions,
 } from "@/lib/admin/operations-nav-active";
 import {
   OperationsChromeContext,
@@ -18,7 +19,7 @@ function defaultChromeState(pathname: string): OperationsChromeState {
     activeId: resolveOperationsNavIdFromPathname(pathname),
     clientId: resolveClientIdFromPathname(pathname),
     variant: "full",
-    showQuickActions: true,
+    showQuickActions: resolveStudioShowQuickActions(pathname),
   };
 }
 
@@ -30,12 +31,8 @@ export function StudioOperationsChrome({ children }: { children: ReactNode }) {
   const [state, setState] = useState<OperationsChromeState>(routeDefaults);
 
   useEffect(() => {
-    setState((current) => ({
-      ...current,
-      activeId: routeDefaults.activeId,
-      clientId: routeDefaults.clientId,
-    }));
-  }, [routeDefaults.activeId, routeDefaults.clientId]);
+    setState(routeDefaults);
+  }, [routeDefaults]);
 
   const patch = useCallback((partial: Partial<OperationsChromeState>) => {
     setState((current) => ({ ...current, ...partial }));

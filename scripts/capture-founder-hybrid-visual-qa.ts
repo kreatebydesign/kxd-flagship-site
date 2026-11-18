@@ -114,11 +114,25 @@ async function main() {
         vp.width >= 900
           ? await page.locator(".kxd-founder-sidebar__primary .kxd-founder-sidebar__link").count()
           : await page.locator(".kxd-founder-mobile-nav-toggle").count();
+      const execHeaders = await page.locator(".kxd-exec-header").count();
+      const quickActionBars = await page.locator(".kxd-os-quick-action-bar").count();
+
+      let batch3aPass = true;
+      let batch3aDetail = "";
+      if (route.slug === "clients") {
+        batch3aPass = quickActionBars === 0;
+        batch3aDetail = `, quickActions=${quickActionBars}`;
+      }
+      if (route.slug === "work") {
+        batch3aPass = execHeaders <= 1;
+        batch3aDetail = `, execHeaders=${execHeaders}`;
+      }
 
       (report.checks as { name: string; pass: boolean; detail?: string }[]).push({
         name: `${route.slug}@${vp.label}`,
-        pass: sidebars === 1 && shells === 1 && primary >= 1,
-        detail: `sidebars=${sidebars}, shells=${shells}, nav=${primary}`,
+        pass:
+          sidebars === 1 && shells === 1 && primary >= 1 && batch3aPass,
+        detail: `sidebars=${sidebars}, shells=${shells}, nav=${primary}${batch3aDetail}`,
       });
     }
   }

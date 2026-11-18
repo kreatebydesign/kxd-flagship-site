@@ -28,6 +28,19 @@ export function isStudioRitualRoute(pathname: string): boolean {
   );
 }
 
+/**
+ * Persistent studio chrome defaults. Dedicated founder workspaces (portfolio, work, sales)
+ * hide the global quick-action matrix unless a page explicitly opts in.
+ */
+export function resolveStudioShowQuickActions(pathname: string): boolean {
+  if (pathname === "/admin/operations/clients") return false;
+  if (pathname.startsWith("/admin/operations/client-command/")) return false;
+  if (pathname === "/admin/operations/today") return false;
+  if (pathname === "/admin/work" || pathname.startsWith("/admin/work/")) return false;
+  if (pathname === "/admin/sales" || pathname.startsWith("/admin/sales/")) return false;
+  return true;
+}
+
 /** Operations `(studio)` routes with persistent shell (Batch 1). */
 export function isStudioPersistentChromeRoute(pathname: string): boolean {
   if (FOUNDER_HYBRID_SHELL_ENABLED) {

@@ -188,13 +188,13 @@ export function WorkPlanningClient({
   const embeddedInFounderChrome =
     FOUNDER_HYBRID_SHELL_ENABLED && chrome?.mode === "layout";
 
-  const workBody = (
-    <ExecutiveWorkspaceShell workspaceId="work" includeWorkComposer={false}>
+  const planningSurface = (
+    <>
       <div
         className={[
           "kxd-os-work-engine",
           "kxd-os-work-engine--planning",
-          embeddedInFounderChrome ? "kxd-os-work-engine--founder-hybrid" : "",
+          embeddedInFounderChrome ? "kxd-os-work-engine--founder-hybrid kxd-founder-page" : "",
         ]
           .filter(Boolean)
           .join(" ")}
@@ -215,9 +215,9 @@ export function WorkPlanningClient({
 
         <main className="kxd-os-work-engine__main kxd-os-work-engine__main--planning">
             <header className="kxd-os-work-engine__hero">
-              <p className="kxd-os-work-engine__eyebrow">Work Engine</p>
-              <h1 className="kxd-os-work-engine__headline">{greeting}</h1>
-              <p className="kxd-os-work-engine__lede">
+              <p className="kxd-founder-today__eyebrow">Work</p>
+              <h1 className="kxd-os-work-engine__headline kxd-founder-work__title">{greeting}</h1>
+              <p className="kxd-os-work-engine__lede kxd-founder-work__lede">
                 {dateDisplay}. Plan the day. Move what matters. Leave the rest.
               </p>
               <p className="kxd-os-work-engine__stats">{statsLine}</p>
@@ -318,17 +318,23 @@ export function WorkPlanningClient({
           </main>
         </div>
 
-        <WorkComposerHost
-          currentUser={currentUser}
-          onCreated={onCreated}
-          onUpdated={onWorkChange}
-        />
-      </ExecutiveWorkspaceShell>
+      <WorkComposerHost
+        currentUser={currentUser}
+        onCreated={onCreated}
+        onUpdated={onWorkChange}
+      />
+    </>
   );
 
   if (embeddedInFounderChrome) {
-    return workBody;
+    return planningSurface;
   }
 
-  return <KxdShell className="kxd-os-shell--ritual">{workBody}</KxdShell>;
+  return (
+    <KxdShell className="kxd-os-shell--ritual">
+      <ExecutiveWorkspaceShell workspaceId="work" includeWorkComposer={false}>
+        {planningSurface}
+      </ExecutiveWorkspaceShell>
+    </KxdShell>
+  );
 }

@@ -267,6 +267,7 @@
     "verify:batch1-nav-performance": "tsx scripts/verify-batch1-nav-performance.ts",
     "verify:client-scoped-intelligence": "tsx scripts/verify-client-scoped-intelligence-context.ts",
     "verify:founder-hybrid-integration": "tsx scripts/verify-founder-hybrid-integration.ts",
+    "verify:batch3a-visual-coherence": "tsx scripts/verify-batch3a-visual-coherence.ts",
     "capture:founder-hybrid-visual-qa": "tsx scripts/capture-founder-hybrid-visual-qa.ts",
     "verify:founder-hybrid-staff-browser": "tsx scripts/verify-founder-hybrid-staff-browser.ts",
     "measure:operator-navigation": "tsx scripts/measure-operator-navigation.ts",
