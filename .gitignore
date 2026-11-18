@@ -55,6 +55,9 @@ private/client-review-media/*
 storage/commercial-documents/
 storage/branded-monthly-reports/
 storage/don-your-space-deliverables/
+storage/qa/*.sqlite
+storage/qa/batch1-qa-meta.json
+storage/perf/batch1-nav-performance/
 
 # KXD Connect local dogfood activation (operator-owned; never commit)
 .connect/

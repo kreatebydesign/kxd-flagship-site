@@ -15714,6 +15714,34 @@ a.kxd-os-ritual-focus__title:hover {
   color: var(--kxd-os-text-secondary);
 }
 
+.kxd-os-page-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 0.35rem;
+  padding: 2.5rem 2rem;
+  min-height: 12rem;
+}
+
+.kxd-os-page-loading__brand {
+  margin: 0;
+  font-family: var(--kxd-os-font-sans);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--kxd-os-text-muted);
+}
+
+.kxd-os-page-loading__line {
+  margin: 0;
+  font-family: var(--kxd-os-font-display, var(--kxd-os-font-sans));
+  font-size: 1.0625rem;
+  font-weight: 500;
+  color: var(--kxd-os-text-secondary);
+}
+
 .kxd-exec-today__day-shape {
   margin: 0 0 1rem;
   font-family: var(--kxd-os-font-sans);

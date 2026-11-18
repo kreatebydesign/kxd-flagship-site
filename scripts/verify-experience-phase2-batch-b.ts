@@ -36,7 +36,7 @@ function main() {
     "components/admin/KxdAdminLoginForm.tsx",
     "components/admin/PayloadLogo.tsx",
     "components/admin/executive-today/ExecutiveTodayScreen.tsx",
-    "app/admin/operations/today/loading.tsx",
+    "app/admin/operations/(studio)/today/loading.tsx",
     "lib/executive-today/recomposition.ts",
     "lib/admin/home-policy.ts",
   ];
@@ -50,11 +50,11 @@ function main() {
   const loginForm = read("components/admin/KxdAdminLoginForm.tsx");
   const logo = read("components/admin/PayloadLogo.tsx");
   const screen = read("components/admin/executive-today/ExecutiveTodayScreen.tsx");
-  const loading = read("app/admin/operations/today/loading.tsx");
+  const loading = read("app/admin/operations/(studio)/today/loading.tsx");
   const recomposition = read("lib/executive-today/recomposition.ts");
   const header = read("components/admin/executive-workspace/ExecutiveHeader.tsx");
   const homePolicy = read("lib/admin/home-policy.ts");
-  const page = read("app/admin/operations/today/page.tsx");
+  const page = read("app/admin/operations/(studio)/today/page.tsx");
   const legacyToday = existsSync(
     path.join(root, "components/admin/operations/today/TodayScreen.tsx"),
   )

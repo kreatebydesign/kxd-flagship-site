@@ -3,8 +3,7 @@
  * KXD OS — Client Portfolio (Design System 1.0 Phase 2)
  */
 
-import { getPayload } from "payload";
-import config from "@payload-config";
+import { getSharedPayload } from "@/lib/payload/get-payload";
 import { ClientPortfolioScreen } from "@/components/admin/operations/client-portfolio/ClientPortfolioScreen";
 import {
   mergeClientWithExecutiveProfile,
@@ -16,7 +15,7 @@ import { buildClientDuplicateWarnings } from "@/lib/executive-client-profile-das
 export const dynamic = "force-dynamic";
 
 export default async function ExecutiveClientsPage() {
-  const payload = await getPayload({ config });
+  const payload = await getSharedPayload();
   const now = new Date();
   const dateDisplay = now.toLocaleDateString("en-US", {
     weekday: "long",

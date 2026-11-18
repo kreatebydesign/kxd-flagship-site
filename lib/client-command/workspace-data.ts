@@ -1,7 +1,7 @@
 import "server-only";
 
-import { getPayload } from "payload";
-import config from "@payload-config";
+import { getSharedPayload } from "@/lib/payload/get-payload";
+import { timePhase } from "@/lib/perf/request-phases";
 import { loadClientActivityTimeline } from "./activity/load";
 import { loadClientCommunications } from "./communications/data";
 import {
@@ -119,7 +119,7 @@ async function fetchDocs(
   sort = "-updatedAt",
   limit = 50,
 ): Promise<CommandDoc[]> {
-  const payload = await getPayload({ config });
+  const payload = await getSharedPayload();
   try {
     const result = await payload.find({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -136,14 +136,22 @@ async function fetchDocs(
   }
 }
 
+export type LoadClientWorkspaceBundleOptions = {
+  /** Set when requireOperatorClientPageAccess already verified this request. */
+  skipSessionAccessCheck?: boolean;
+};
+
 export async function loadClientWorkspaceBundle(
   clientId: number,
+  options?: LoadClientWorkspaceBundleOptions,
 ): Promise<ClientWorkspaceBundle | null> {
-  const { isCurrentSessionDeniedClientData } = await import(
-    "@/lib/staff/operator-client-access"
-  );
-  if (await isCurrentSessionDeniedClientData(clientId)) {
-    return null;
+  if (!options?.skipSessionAccessCheck) {
+    const { isCurrentSessionDeniedClientData } = await import(
+      "@/lib/staff/operator-client-access"
+    );
+    if (await isCurrentSessionDeniedClientData(clientId)) {
+      return null;
+    }
   }
 
   const commandCenterPromise = loadClientCommandCenter(clientId);
@@ -173,7 +181,8 @@ export async function loadClientWorkspaceBundle(
     financial,
     workBoard,
     staffClientNotes,
-  ] = await Promise.all([
+  ] = await timePhase("clientCommand.bundleParallel", () =>
+    Promise.all([
     commandCenterPromise,
     workspacePromise,
     loadClientActivityTimeline(clientId),
@@ -197,7 +206,8 @@ export async function loadClientWorkspaceBundle(
     loadClientFinancialSnapshot(clientId),
     getClientWorkBoard(clientId),
     listStaffClientNotesForClient(clientId, { limit: 50 }),
-  ]);
+  ]),
+  );
 
   if (!commandCenter) return null;
   if (!workspace) return null;
@@ -317,10 +327,13 @@ export async function loadClientWorkspaceBundle(
     fastCompletions48h,
   });
 
-  await syncIntelligenceActions(clientId, memory);
+  await timePhase("clientCommand.syncIntelActions", () =>
+    syncIntelligenceActions(clientId, memory),
+  );
 
   const [actions, proposalIntelligence, conversionIntelligence, financialIntelligence, commercial] =
-    await Promise.all([
+    await timePhase("clientCommand.bundleTail", () =>
+      Promise.all([
       loadClientActions(clientId),
       Promise.resolve(buildProposalIntelligence(clientId, proposalsSnapshot)),
       Promise.resolve(
@@ -337,7 +350,8 @@ export async function loadClientWorkspaceBundle(
         clientSlug: client.slug ? String(client.slug) : null,
         contactName: partialBundle.header.primaryContact,
       }),
-    ]);
+    ]),
+    );
 
   return {
     ...partialBundle,

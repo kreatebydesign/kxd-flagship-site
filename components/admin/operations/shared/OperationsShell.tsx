@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { useLayoutEffect } from "react";
 import { KxdShell } from "@/components/os";
 import { ExecutiveWorkspaceShell } from "@/components/admin/executive-workspace";
 import { NotificationCenter } from "@/components/admin/operations/notifications";
@@ -15,6 +16,7 @@ import {
 import { getEditionOperationsNavGroups } from "@/lib/editions/navigation";
 import { StaffSignOutButton } from "@/components/admin/operations/staff/StaffSignOutButton";
 import { useStaffNavContext } from "@/components/admin/operations/staff/StaffNavContext";
+import { useOperationsChromeContext } from "./OperationsChromeContext";
 
 /**
  * Restricted-staff chrome — Portfolio, Relationship Events, and Timeline stay out.
@@ -68,13 +70,7 @@ export interface OperationsShellProps {
   showQuickActions?: boolean;
 }
 
-
-/**
- * Operations chrome. Brand mark lives once in ExecutiveHeader (top-left).
- * Do not render a second KxdOsLogo in the sidebar — that caused visible
- * duplication at desktop and mobile widths (Phase 34A.3).
- */
-export function OperationsShell({
+export function OperationsShellFrame({
   activeId,
   dateDisplay,
   clientId,
@@ -145,4 +141,36 @@ export function OperationsShell({
       </ExecutiveWorkspaceShell>
     </KxdShell>
   );
+}
+
+/**
+ * Operations chrome. When the studio layout owns the shell, this synchronizes
+ * page props and renders children only so navigation does not remount the sidebar.
+ */
+export function OperationsShell(props: OperationsShellProps) {
+  const chrome = useOperationsChromeContext();
+
+  useLayoutEffect(() => {
+    if (chrome?.mode !== "layout") return;
+    chrome.patch({
+      activeId: props.activeId,
+      dateDisplay: props.dateDisplay,
+      clientId: props.clientId,
+      variant: props.variant ?? "full",
+      showQuickActions: props.showQuickActions ?? true,
+    });
+  }, [
+    chrome,
+    props.activeId,
+    props.clientId,
+    props.dateDisplay,
+    props.showQuickActions,
+    props.variant,
+  ]);
+
+  if (chrome?.mode === "layout") {
+    return <>{props.children}</>;
+  }
+
+  return <OperationsShellFrame {...props} />;
 }

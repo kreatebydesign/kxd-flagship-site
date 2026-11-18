@@ -5,10 +5,10 @@ import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
 import type { PayloadRequest } from "payload";
-import { getPayload } from "payload";
-import config from "@payload-config";
 
 import { isPayloadAdmin } from "../../payload/access/index.ts";
+import { getSharedPayload } from "@/lib/payload/get-payload";
+import { timePhase } from "@/lib/perf/request-phases";
 import {
   OPERATIONS_HOME_PATH,
   PAYLOAD_ADMIN_LOGIN_PATH,
@@ -60,8 +60,10 @@ async function resolvePayloadAdminUserFromHeaders(
   inbound?: HeadersInit,
 ): Promise<ReturnType<typeof normalizePayloadAdminUser>> {
   const headersList = await payloadAuthHeaders(inbound);
-  const payload = await getPayload({ config });
-  const { user } = await payload.auth({ headers: headersList });
+  const payload = await getSharedPayload();
+  const { user } = await timePhase("payload.auth", () =>
+    payload.auth({ headers: headersList }),
+  );
   return normalizePayloadAdminUser(user);
 }
 

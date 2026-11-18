@@ -376,7 +376,8 @@ export async function syncIntelligenceActions(
   let created = 0;
   let skipped = 0;
 
-  const payload = await getPayload({ config });
+  const { getSharedPayload } = await import("@/lib/payload/get-payload");
+  const payload = await getSharedPayload();
   const lookups = await Promise.all(
     memory.nextBestActions.map((action) =>
       findActionByMemoryReference(clientId, `intel:${action.id}`, payload),
