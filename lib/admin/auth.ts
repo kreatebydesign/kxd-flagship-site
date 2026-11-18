@@ -67,10 +67,8 @@ async function payloadAuthHeaders(inbound?: HeadersInit): Promise<Headers> {
     .map((entry) => `${entry.name}=${entry.value}`)
     .join("; ");
   const fromHeaders = headersList.get("cookie");
-  const forwarded =
-    headersList.get("x-kxd-forwarded-cookie") ??
-    inboundHeaders?.get("x-kxd-forwarded-cookie") ??
-    undefined;
+  // Only middleware may set this (see middleware.ts nextWithPath). Never read from inbound Request.
+  const forwarded = headersList.get("x-kxd-forwarded-cookie") ?? undefined;
   const fromRequest = inboundHeaders?.get("cookie") ?? undefined;
   const cookieParts =
     forwarded || fromStore
@@ -82,9 +80,9 @@ async function payloadAuthHeaders(inbound?: HeadersInit): Promise<Headers> {
   if (cookieHeader) {
     merged.set("cookie", cookieHeader);
   }
-  const authorization = inboundHeaders?.get("authorization");
-  if (authorization && !merged.has("authorization")) {
-    merged.set("authorization", authorization);
+  const inboundAuthorization = inboundHeaders?.get("authorization");
+  if (inboundAuthorization && !merged.has("authorization")) {
+    merged.set("authorization", inboundAuthorization);
   }
   if (!merged.has("authorization")) {
     const tokenName = `${PAYLOAD_AUTH_COOKIE_PREFIX}-token`;

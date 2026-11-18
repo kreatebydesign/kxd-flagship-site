@@ -275,6 +275,7 @@
     "verify:batch3d-work-usability": "tsx scripts/verify-batch3d-work-usability.ts",
     "verify:batch3d-work-browser": "tsx scripts/verify-batch3d-work-browser.ts",
     "verify:integration-work-ui-mutations": "tsx scripts/verify-integration-work-ui-mutations.ts",
+    "verify:admin-auth-trust-boundary": "tsx scripts/verify-admin-auth-trust-boundary.ts",
     "verify:batch3d-work-functional-browser": "PAYLOAD_SQLITE_PATH=file:./storage/qa/batch1-nav.sqlite KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/mutate-batch3d-work-functional-qa.ts && QA_BASE_URL=http://localhost:3018 tsx scripts/verify-batch3d-work-functional-browser.ts",
     "capture:batch3d-work-visual-qa": "tsx scripts/capture-batch3d-work-visual-qa.ts",
     "seed:batch3d-work-qa": "KXD_SERVER_ONLY_SHIM=1 tsx --import ./scripts/shims/register-server-only.mjs scripts/seed-batch3d-work-qa.ts",
