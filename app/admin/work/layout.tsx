@@ -7,6 +7,8 @@ import { requireStaffAwarePage } from "@/lib/staff/guard";
 import { ThemeBootScript } from "@/components/os/ThemeBootScript";
 import "../../globals.css";
 import "../../../design-system/os/styles/kxd-os.css";
+import "../../../design-system/os/styles/founder-hybrid.css";
+import { StudioOperationsChrome } from "@/components/admin/operations/shared/StudioOperationsChrome";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -30,7 +32,7 @@ export default async function WorkEngineLayout({
         <ThemeBootScript />
       </head>
       <body className="antialiased">
-        {children}
+        <StudioOperationsChrome>{children}</StudioOperationsChrome>
       </body>
     </html>
   );

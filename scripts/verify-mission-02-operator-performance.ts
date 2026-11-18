@@ -61,6 +61,12 @@ check("operator links prefetch full dynamic routes", nav.includes("prefetch"));
 const loadingToday = read("app/admin/operations/(studio)/today/loading.tsx");
 check("today arrival loading remains for login handoff", loadingToday.includes("Entering your business"));
 
+const todayPage = read("app/admin/operations/(studio)/today/page.tsx");
+check(
+  "founder hybrid today uses persistent shell when enabled",
+  todayPage.includes("FounderHybridTodayScreen") && todayPage.includes("OperationsShell"),
+);
+
 const studioLayout = read("app/admin/operations/(studio)/layout.tsx");
 check(
   "studio layout mounts persistent operations chrome",

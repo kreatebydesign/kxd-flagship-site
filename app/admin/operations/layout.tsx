@@ -13,6 +13,7 @@ import { trustedLayoutReturnPath } from "@/lib/admin/trusted-layout-return-path"
 import { ThemeBootScript } from "@/components/os/ThemeBootScript";
 import "../../globals.css";
 import "../../../design-system/os/styles/kxd-os.css";
+import "../../../design-system/os/styles/founder-hybrid.css";
 import "../../../design-system/agreement/kxd-agreement-document.css";
 
 export const dynamic = "force-dynamic";

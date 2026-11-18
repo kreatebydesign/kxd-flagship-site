@@ -58,6 +58,7 @@ storage/don-your-space-deliverables/
 storage/qa/*.sqlite
 storage/qa/batch1-qa-meta.json
 storage/perf/batch1-nav-performance/
+storage/perf/founder-hybrid-visual/
 
 # KXD Connect local dogfood activation (operator-owned; never commit)
 .connect/

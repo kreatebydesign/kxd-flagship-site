@@ -5,6 +5,7 @@
 
 import { redirect } from "next/navigation";
 import { WorkEngineWorkspace } from "@/components/admin/work/WorkEngineWorkspace";
+import { OperationsShell } from "@/components/admin/operations/shared/OperationsShell";
 import { requirePayloadAdminPage } from "@/lib/admin/auth";
 import {
   formatDisplayDate,
@@ -76,16 +77,20 @@ export default async function WorkEnginePage({
         ? `Good afternoon, ${firstName}.`
         : `Good evening, ${firstName}.`;
 
+  const dateDisplay = formatDisplayDate(new Date(), timeZone);
+
   return (
-    <WorkEngineWorkspace
-      planning={planning}
-      greeting={greeting}
-      dateDisplay={formatDisplayDate(new Date(), timeZone)}
-      currentUser={{
-        id: Number(user.id),
-        email: typeof user.email === "string" ? user.email : "",
-        displayName: typeof user.displayName === "string" ? user.displayName : null,
-      }}
-    />
+    <OperationsShell activeId="work" dateDisplay={dateDisplay} showQuickActions={false}>
+      <WorkEngineWorkspace
+        planning={planning}
+        greeting={greeting}
+        dateDisplay={dateDisplay}
+        currentUser={{
+          id: Number(user.id),
+          email: typeof user.email === "string" ? user.email : "",
+          displayName: typeof user.displayName === "string" ? user.displayName : null,
+        }}
+      />
+    </OperationsShell>
   );
 }

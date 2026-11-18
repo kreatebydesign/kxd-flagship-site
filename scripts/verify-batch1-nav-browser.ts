@@ -126,7 +126,13 @@ async function main() {
   const todayMs = await navigateTimed(page, "/admin/operations/today");
   (results.timingsMs as Record<string, number>).today = todayMs;
   addCheck("Today loads authenticated", page.url().includes("/admin/operations/today"));
-  addCheck("Today ritual shell (no sidebar)", (await page.locator(".kxd-os-sidebar").count()) === 0);
+  const todaySidebars = await page.locator(".kxd-os-sidebar").count();
+  const founderPrimaryLinks = await page.locator(".kxd-founder-sidebar__primary .kxd-founder-sidebar__link").count();
+  addCheck(
+    "Today uses persistent founder navigation",
+    todaySidebars === 1 && founderPrimaryLinks === 7,
+    `sidebars=${todaySidebars}, primary=${founderPrimaryLinks}`,
+  );
 
   const clientsMs = await navigateTimed(page, "/admin/operations/clients");
   (results.timingsMs as Record<string, number>).clients = clientsMs;
@@ -174,6 +180,13 @@ async function main() {
 
   const sidebars = await page.locator(".kxd-os-sidebar").count();
   addCheck("Sidebar persisted on Client Command (single)", sidebars === 1);
+  const clientsNavActive = await page
+    .locator('a[href="/admin/operations/clients"].kxd-founder-sidebar__link--active')
+    .count();
+  addCheck("Client Command highlights Clients in founder nav", clientsNavActive === 1);
+
+  const shellStack = await page.locator(".kxd-os-shell--app").count();
+  addCheck("No duplicate operation shells", shellStack === 1);
 
   await page.goto(`${BASE_URL}/admin/operations/clients`, { waitUntil: "domcontentloaded" });
   const remountClientId = resolveQaClientId() ?? "1";
@@ -194,10 +207,40 @@ async function main() {
   const workMs = await navigateTimed(page, "/admin/work");
   (results.timingsMs as Record<string, number>).work = workMs;
   addCheck("Work loads", page.url().includes("/admin/work"));
+  addCheck(
+    "Work uses founder navigation",
+    (await page.locator(".kxd-os-sidebar").count()) === 1 &&
+      (await page.locator('a[href="/admin/work"].kxd-founder-sidebar__link--active').count()) === 1,
+  );
+
+  const salesMs = await navigateTimed(page, "/admin/sales");
+  (results.timingsMs as Record<string, number>).sales = salesMs;
+  addCheck("Sales loads", page.url().includes("/admin/sales"));
+  addCheck(
+    "Sales uses founder navigation",
+    (await page.locator(".kxd-os-sidebar").count()) === 1 &&
+      (await page.locator('a[href="/admin/sales"].kxd-founder-sidebar__link--active').count()) === 1,
+  );
+
+  const financeMs = await navigateTimed(page, "/admin/operations/accounts");
+  (results.timingsMs as Record<string, number>).finance = financeMs;
+  addCheck("Finance loads", page.url().includes("/admin/operations/accounts"));
+
+  const insightsMs = await navigateTimed(page, "/admin/operations/intelligence");
+  (results.timingsMs as Record<string, number>).insights = insightsMs;
+  addCheck("Insights loads", page.url().includes("/admin/operations/intelligence"));
 
   const backTodayMs = await navigateTimed(page, "/admin/operations/today");
   (results.timingsMs as Record<string, number>).todayReturn = backTodayMs;
   addCheck("Today return loads", page.url().includes("/admin/operations/today"));
+  addCheck(
+    "Today workflow: primary move marker",
+    (await page.locator('[data-today-primary-move="true"]').count()) >= 1,
+  );
+  addCheck(
+    "Today workflow: quiet exits",
+    (await page.locator(".kxd-founder-today__quiet-exits a").count()) >= 5,
+  );
 
   const ritualLink = page.locator('a[href="/admin/operations/today"].kxd-exec-today__cta-link, a.kxd-exec-today__cta-link').first();
   if ((await ritualLink.count()) > 0) {

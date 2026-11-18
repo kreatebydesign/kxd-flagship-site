@@ -31,6 +31,8 @@ import {
   type WorkViewResult,
 } from "@/lib/work/planning/client";
 import type { WorkListItem } from "@/lib/work/types";
+import { useOperationsChromeContext } from "@/components/admin/operations/shared/OperationsChromeContext";
+import { FOUNDER_HYBRID_SHELL_ENABLED } from "@/lib/admin/founder-hybrid/flags";
 
 function parseFiltersFromMemory(raw: Record<string, unknown>): WorkViewFilters {
   return {
@@ -182,10 +184,22 @@ export function WorkPlanningClient({
     return `${c.today} today · ${c.overdue} overdue · ${c["waiting-on-client"]} waiting on client · ${c["waiting-on-kxd"]} waiting on KXD · ${c.blocked} blocked`;
   }, [view.counts]);
 
-  return (
-    <KxdShell className="kxd-os-shell--ritual">
-      <ExecutiveWorkspaceShell workspaceId="work" includeWorkComposer={false}>
-        <div className="kxd-os-work-engine kxd-os-work-engine--planning">
+  const chrome = useOperationsChromeContext();
+  const embeddedInFounderChrome =
+    FOUNDER_HYBRID_SHELL_ENABLED && chrome?.mode === "layout";
+
+  const workBody = (
+    <ExecutiveWorkspaceShell workspaceId="work" includeWorkComposer={false}>
+      <div
+        className={[
+          "kxd-os-work-engine",
+          "kxd-os-work-engine--planning",
+          embeddedInFounderChrome ? "kxd-os-work-engine--founder-hybrid" : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+      >
+        {!embeddedInFounderChrome ? (
           <header className="kxd-os-work-engine__header kxd-os-work-engine__header--secondary">
             <nav className="kxd-os-work-engine__nav" aria-label="Work Engine">
               <span className="kxd-os-work-engine__nav-active">Work</span>
@@ -197,8 +211,9 @@ export function WorkPlanningClient({
               Full workspace
             </Link>
           </header>
+        ) : null}
 
-          <main className="kxd-os-work-engine__main kxd-os-work-engine__main--planning">
+        <main className="kxd-os-work-engine__main kxd-os-work-engine__main--planning">
             <header className="kxd-os-work-engine__hero">
               <p className="kxd-os-work-engine__eyebrow">Work Engine</p>
               <h1 className="kxd-os-work-engine__headline">{greeting}</h1>
@@ -309,6 +324,11 @@ export function WorkPlanningClient({
           onUpdated={onWorkChange}
         />
       </ExecutiveWorkspaceShell>
-    </KxdShell>
   );
+
+  if (embeddedInFounderChrome) {
+    return workBody;
+  }
+
+  return <KxdShell className="kxd-os-shell--ritual">{workBody}</KxdShell>;
 }

@@ -22,8 +22,10 @@ console.log("\nBatch 1 — navigation performance foundation\n");
 
 const navActive = read("lib/admin/operations-nav-active.ts");
 check(
-  "ritual routes excluded from persistent chrome",
-  navActive.includes("isStudioRitualRoute") && navActive.includes("/admin/operations/today"),
+  "ritual routes excluded from persistent chrome (Today persistent when hybrid)",
+  navActive.includes("isStudioRitualRoute") &&
+    (navActive.includes("FOUNDER_HYBRID_SHELL_ENABLED") ||
+      navActive.includes("/admin/operations/today")),
 );
 check(
   "client command resolves clients active id",

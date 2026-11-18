@@ -95,8 +95,9 @@ function main() {
   );
 
   check(
-    "Today page still ExecutiveTodayScreen",
-    page.includes("ExecutiveTodayScreen") && page.includes("loadExecutiveToday"),
+    "Today page uses approved founder home screen",
+    page.includes("loadExecutiveToday") &&
+      (page.includes("FounderHybridTodayScreen") || page.includes("ExecutiveTodayScreen")),
   );
   check(
     "arrival loading exists",
