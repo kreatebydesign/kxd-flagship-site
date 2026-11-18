@@ -315,6 +315,28 @@
   gap: 0.875rem;
 }
 
+.kxd-founder-today__stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.kxd-founder-today__duo {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.875rem;
+}
+
+.kxd-founder-panel--span {
+  min-height: auto;
+}
+
+.kxd-founder-today__portfolio-link {
+  margin: 0.75rem 0 0;
+  padding-top: 0.5rem;
+  border-top: 1px dashed var(--kxd-founder-border);
+}
+
 .kxd-founder-panel {
   background: var(--kxd-founder-surface);
   border: 1px solid var(--kxd-founder-border);
@@ -472,6 +494,10 @@
   }
 
   .kxd-founder-today__header {
+    grid-template-columns: 1fr;
+  }
+
+  .kxd-founder-today__duo {
     grid-template-columns: 1fr;
   }
 }
