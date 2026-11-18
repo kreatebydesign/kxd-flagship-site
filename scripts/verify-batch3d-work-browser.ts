@@ -96,7 +96,7 @@ async function main() {
   const firstRow = page.locator(".kxd-os-work-engine__row--3d").first();
   if ((await firstRow.count()) > 0) {
     await firstRow.click();
-    await page.waitForURL(/\/admin\/work\/\d+/, { timeout: 60_000 });
+    await page.waitForURL(/\/admin\/work\/\d+/, { timeout: 60_000, waitUntil: "commit" });
     record("Work detail navigation", /\/admin\/work\/\d+/.test(page.url()), page.url());
   } else {
     record("Work detail navigation", false, "no rows");
