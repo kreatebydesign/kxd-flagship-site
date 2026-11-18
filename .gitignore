@@ -62,6 +62,7 @@ storage/perf/founder-hybrid-visual/
 storage/perf/batch3a-visual/
 storage/perf/batch3b-portfolio/
 storage/perf/batch3c-today-visual/
+storage/perf/batch3d-work-visual/
 
 # KXD Connect local dogfood activation (operator-owned; never commit)
 .connect/

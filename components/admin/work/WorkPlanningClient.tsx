@@ -20,7 +20,6 @@ import {
 import type { WorkComposerUserOption } from "@/lib/work/composer";
 import {
   composeWorkView,
-  WORK_VIEW_IDS,
   WORK_VIEW_LABELS,
   workViewHref,
   type WorkFilterOptions,
@@ -30,6 +29,8 @@ import {
   type WorkViewId,
   type WorkViewResult,
 } from "@/lib/work/planning/client";
+import type { WorkClientLinkMode } from "@/lib/work/client-workspace-link";
+import { WorkPlanningViews } from "@/components/admin/work/WorkPlanningViews";
 import type { WorkListItem } from "@/lib/work/types";
 import { useOperationsChromeContext } from "@/components/admin/operations/shared/OperationsChromeContext";
 import { FOUNDER_HYBRID_SHELL_ENABLED } from "@/lib/admin/founder-hybrid/flags";
@@ -64,6 +65,7 @@ export function WorkPlanningClient({
   greeting,
   dateDisplay,
   currentUser,
+  clientLinkMode = "client-success",
 }: {
   initialView: WorkViewResult;
   initialPool: WorkListItem[];
@@ -72,6 +74,7 @@ export function WorkPlanningClient({
   greeting: string;
   dateDisplay: string;
   currentUser?: WorkComposerUserOption | null;
+  clientLinkMode?: WorkClientLinkMode;
 }) {
   const router = useRouter();
   const [pool, setPool] = useState(initialPool);
@@ -223,28 +226,11 @@ export function WorkPlanningClient({
               <p className="kxd-os-work-engine__stats">{statsLine}</p>
             </header>
 
-            <nav className="kxd-os-work-engine__views" aria-label="Work views">
-              {WORK_VIEW_IDS.map((id) => {
-                const count = view.counts[id];
-                const active = viewId === id;
-                return (
-                  <button
-                    key={id}
-                    type="button"
-                    className={
-                      active
-                        ? "kxd-os-work-engine__view kxd-os-work-engine__view--active"
-                        : "kxd-os-work-engine__view"
-                    }
-                    aria-current={active ? "page" : undefined}
-                    onClick={() => selectView(id)}
-                  >
-                    <span>{WORK_VIEW_LABELS[id]}</span>
-                    <span className="kxd-os-work-engine__view-count">{count}</span>
-                  </button>
-                );
-              })}
-            </nav>
+            <WorkPlanningViews
+              viewId={viewId}
+              counts={view.counts}
+              onSelect={selectView}
+            />
 
             <WorkPlanningFilters
               options={options}
@@ -285,6 +271,7 @@ export function WorkPlanningClient({
                           key={item.id}
                           item={item}
                           onWorkChange={onWorkChange}
+                          clientLinkMode={clientLinkMode}
                         />
                       ))}
                     </ul>
@@ -304,6 +291,7 @@ export function WorkPlanningClient({
                       key={item.id}
                       item={item}
                       onWorkChange={onWorkChange}
+                      clientLinkMode={clientLinkMode}
                     />
                   ))}
                 </ul>

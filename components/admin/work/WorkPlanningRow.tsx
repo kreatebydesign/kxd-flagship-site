@@ -2,9 +2,10 @@
 
 /**
  * Phase 24A — Work row with understated quick actions.
- * Full row opens detail; actions stop propagation. No nested anchors.
+ * Full row opens detail; actions stop propagation. Client link is a sibling anchor.
  */
 
+import Link from "next/link";
 import {
   useCallback,
   useState,
@@ -12,6 +13,10 @@ import {
   type MouseEvent,
 } from "react";
 import { useRouter } from "next/navigation";
+import {
+  resolveWorkClientHref,
+  type WorkClientLinkMode,
+} from "@/lib/work/client-workspace-link";
 import { formatTimeBudgetHours } from "@/lib/work/composer/time-budget";
 import {
   WORK_PRIORITY_LABELS,
@@ -32,9 +37,11 @@ type PlanAction = "today" | "tomorrow" | "remove" | "date";
 export function WorkPlanningRow({
   item,
   onWorkChange,
+  clientLinkMode = "client-success",
 }: {
   item: WorkListItem;
   onWorkChange: (work: WorkListItem) => void;
+  clientLinkMode?: WorkClientLinkMode;
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState<string | null>(null);
@@ -125,6 +132,8 @@ export function WorkPlanningRow({
   );
 
   const statusActions = getWorkStatusActions(item.status);
+  const nextAction = statusActions[0] ?? null;
+  const clientHref = resolveWorkClientHref(item, clientLinkMode);
   const canStart = statusActions.some((a) => a.id === "start");
   const canWaitClient = statusActions.some((a) => a.id === "waiting-on-client");
   const canWaitKxd = statusActions.some((a) => a.id === "waiting-on-kxd");
@@ -132,50 +141,60 @@ export function WorkPlanningRow({
 
   const metaParts = [
     WORK_STATUS_LABELS[item.status],
-    WORK_PRIORITY_LABELS[item.priority],
-    due ? `Due ${due}` : null,
+    assignee ? `Assignee · ${assignee}` : "Unassigned",
+    due ? (overdue ? `Due ${due} · Overdue` : `Due ${due}`) : null,
     planned ? `Planned ${planned}` : null,
-    assignee,
+    WORK_PRIORITY_LABELS[item.priority],
     budget,
     age,
+    nextAction ? `Next · ${nextAction.label}` : null,
   ].filter(Boolean);
 
   return (
     <li id={`work-${item.id}`} className="kxd-os-work-engine__item">
       <div
-        className="kxd-os-work-engine__row kxd-os-work-engine__row--planning"
+        className="kxd-os-work-engine__row kxd-os-work-engine__row--planning kxd-os-work-engine__row--3d"
         role="link"
         tabIndex={0}
         onClick={openDetail}
         onKeyDown={onKeyDown}
         aria-label={`Open ${item.title}`}
       >
-        <div className="kxd-os-work-engine__link">
-          <span className="kxd-os-work-engine__item-title-row">
-            <span className="kxd-os-work-engine__item-title">{item.title}</span>
-            {item.hasStaffAssignment ? (
-              <span className="kxd-os-work-engine__staff-chip">Staff</span>
-            ) : null}
-            {item.status === "review" ? (
-              <span className="kxd-os-work-engine__review-chip">In review</span>
-            ) : null}
-            {item.requiresOperatorApproval && item.status !== "review" ? (
-              <span className="kxd-os-work-engine__approval-chip">Approval</span>
-            ) : null}
-            {overdue ? (
-              <span className="kxd-os-work-engine__overdue-chip">Overdue</span>
-            ) : null}
-          </span>
+        <div className="kxd-os-work-engine__link kxd-os-work-engine__link--3d">
+          <div className="kxd-os-work-engine__row-head">
+            <span className="kxd-os-work-engine__item-title-row">
+              <span className="kxd-os-work-engine__item-title">{item.title}</span>
+              {item.hasStaffAssignment ? (
+                <span className="kxd-os-work-engine__staff-chip">Staff</span>
+              ) : null}
+              {item.status === "review" ? (
+                <span className="kxd-os-work-engine__review-chip">In review</span>
+              ) : null}
+              {item.requiresOperatorApproval && item.status !== "review" ? (
+                <span className="kxd-os-work-engine__approval-chip">Approval</span>
+              ) : null}
+              {overdue ? (
+                <span className="kxd-os-work-engine__overdue-chip">Overdue</span>
+              ) : null}
+            </span>
+            {clientHref ? (
+              <Link
+                href={clientHref}
+                className="kxd-os-work-engine__client kxd-os-work-engine__client--linked"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {item.clientName}
+              </Link>
+            ) : (
+              <span className="kxd-os-work-engine__client kxd-os-work-engine__client--muted">
+                {item.clientName}
+              </span>
+            )}
+          </div>
           {deliverableLine ? (
             <span className="kxd-os-work-engine__item-deliverables">{deliverableLine}</span>
           ) : null}
-          <span className="kxd-os-work-engine__item-meta">
-            <span className="kxd-os-work-engine__client-inline">
-              {item.clientName}
-            </span>
-            {" · "}
-            {metaParts.join(" · ")}
-          </span>
+          <span className="kxd-os-work-engine__item-meta">{metaParts.join(" · ")}</span>
         </div>
 
         <div
