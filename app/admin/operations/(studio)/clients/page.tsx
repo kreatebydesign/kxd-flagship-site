@@ -68,6 +68,8 @@ export default async function ExecutiveClientsPage() {
   );
   const duplicateCount = duplicateWarnings.size;
 
+  const duplicateRecord = Object.fromEntries(duplicateWarnings.entries());
+
   return (
     <ClientPortfolioScreen
       dateDisplay={dateDisplay}
@@ -78,7 +80,7 @@ export default async function ExecutiveClientsPage() {
       totalPotential={totalPotential}
       criticalCount={criticalCount}
       duplicateCount={duplicateCount}
-      duplicateWarnings={duplicateWarnings}
+      duplicateWarnings={duplicateRecord}
     />
   );
 }

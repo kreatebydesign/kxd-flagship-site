@@ -24,7 +24,14 @@ check(
   portfolio.includes("showQuickActions={false}"),
 );
 check("portfolio uses founder clients surface", portfolio.includes("kxd-founder-clients"));
-check("portfolio contextual launch control", portfolio.includes('href="/admin/operations/client-launch"'));
+const workspace = read(
+  "components/admin/operations/client-portfolio/ClientPortfolioWorkspace.tsx",
+);
+check(
+  "portfolio contextual launch control",
+  portfolio.includes('href="/admin/operations/client-launch"') ||
+    workspace.includes('href="/admin/operations/client-launch"'),
+);
 
 const work = read("components/admin/work/WorkPlanningClient.tsx");
 check(

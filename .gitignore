@@ -60,6 +60,7 @@ storage/qa/batch1-qa-meta.json
 storage/perf/batch1-nav-performance/
 storage/perf/founder-hybrid-visual/
 storage/perf/batch3a-visual/
+storage/perf/batch3b-portfolio/
 
 # KXD Connect local dogfood activation (operator-owned; never commit)
 .connect/
