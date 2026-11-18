@@ -104,8 +104,20 @@ function baseInquiry(overrides: Partial<ClientInquiryRecord> = {}): ClientInquir
     bookedProgram: null,
     locationId: null,
     assignedPortalOwnerId: null,
+    registrationId: null,
+    programLabel: null,
+    courseId: null,
+    paymentStatus: null,
+    paymentAmountCents: null,
+    paymentCurrency: null,
+    stripeCheckoutSessionId: null,
+    stripePaymentIntentId: null,
+    paidAt: null,
+    refundedAt: null,
+    eventStartsOn: null,
+    eventEndsOn: null,
     ...overrides,
-  };
+  } as ClientInquiryRecord;
 }
 
 console.log("\nPrimal Phase 1 Lead Command — Build 1\n");

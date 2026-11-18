@@ -555,3 +555,56 @@
     padding-right: 1rem;
   }
 }
+
+/* Registration payment receipt (Primal paid checkout → Lead Command) */
+
+.kxd-lead-pay {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  padding: 0.2rem 0.55rem;
+  border: 1px solid color-mix(in srgb, var(--kxd-ces-accent) 40%, transparent);
+}
+
+.kxd-lead-pay--compact {
+  font-size: 0.625rem;
+  padding: 0.15rem 0.45rem;
+}
+
+.kxd-lead-pay--paid {
+  color: color-mix(in srgb, #3d9a6a 90%, var(--kxd-os-text));
+  border-color: color-mix(in srgb, #3d9a6a 35%, transparent);
+  background: color-mix(in srgb, #3d9a6a 10%, transparent);
+}
+
+.kxd-lead-pay--pending {
+  color: color-mix(in srgb, var(--kxd-ces-accent) 88%, var(--kxd-os-text));
+  background: color-mix(in srgb, var(--kxd-ces-accent) 12%, transparent);
+}
+
+.kxd-lead-pay--failed,
+.kxd-lead-pay--exception {
+  color: color-mix(in srgb, #c45c4a 92%, var(--kxd-os-text));
+  border-color: color-mix(in srgb, #c45c4a 35%, transparent);
+  background: color-mix(in srgb, #c45c4a 8%, transparent);
+}
+
+.kxd-lead-pay--refunded {
+  color: var(--kxd-os-text-muted);
+  border-color: var(--kxd-os-border-subtle);
+  background: color-mix(in srgb, var(--kxd-os-text-faint) 8%, transparent);
+}
+
+.kxd-lead-panel--registration {
+  border-color: color-mix(in srgb, var(--kxd-ces-accent) 22%, var(--kxd-os-border-subtle));
+  background: color-mix(in srgb, var(--kxd-ces-accent) 4%, transparent);
+}
+
+.kxd-lead-summary__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}

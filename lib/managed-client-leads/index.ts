@@ -49,6 +49,8 @@ export {
   MCI_FORM_TIMESTAMP_HEADER,
   PRIMAL_MOTORSPORTS_FORM_INGEST_SECRET_ENV,
   PRIMAL_WEB_SUBMISSION_ID_PATTERN,
+  PRIMAL_REGISTRATION_ID_PATTERN,
+  isAllowedPrimalSourceExternalId,
   computeMciFormSignatureBase64,
   normalizeMciFormIngestPayload,
   verifyMciFormIngestSignature,

@@ -265,7 +265,12 @@ async function loadInquiryActivity(
       where: {
         and: [
           { client: { equals: tenant.clientId } },
-          { eventType: { like: "managed-client.inquiry.%" } },
+          {
+            or: [
+              { eventType: { like: "managed-client.inquiry.%" } },
+              { eventType: { like: "managed-client.registration.payment.%" } },
+            ],
+          },
         ],
       },
       overrideAccess: true,

@@ -214,6 +214,24 @@ export const CLIENT_NOTIFICATION_KIND_REGISTRY: ClientNotificationKindDefinition
     viewLabel: "Communication",
     fallbackHref: "/portal",
   },
+  {
+    kind: "managed-client.inquiry.received",
+    category: "leads",
+    icon: "◎",
+    match: (t) => t === "managed-client.inquiry.received",
+    defaultTitle: "New Lead Received",
+    viewLabel: "Open lead",
+    fallbackHref: "/portal/leads",
+  },
+  {
+    kind: "managed-client.registration.payment.paid",
+    category: "leads",
+    icon: "◎",
+    match: (t) => t === "managed-client.registration.payment.paid",
+    defaultTitle: "Registration Payment Confirmed",
+    viewLabel: "View registration",
+    fallbackHref: "/portal/leads",
+  },
 ];
 
 const GENERAL_KIND: ClientNotificationKindDefinition = {

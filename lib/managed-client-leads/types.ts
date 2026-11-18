@@ -9,6 +9,7 @@ import type {
   VerificationState,
 } from "@/lib/acquisition-operations";
 import type { ManagedClientLeadChannel } from "@/lib/acquisition-operations/policy";
+import type { RegistrationPaymentPatch, RegistrationPaymentStatus } from "./registration-payment";
 
 export type ReconciliationState =
   | "unlinked"
@@ -94,6 +95,19 @@ export type ClientInquiryRecord = {
   locationId: number | null;
   /** Client Command portal-member owner — distinct from assignedOwnerId (Payload users). */
   assignedPortalOwnerId: number | null;
+  // ── Primal registration payment receipt (signed ingest, optional) ────────
+  registrationId: string | null;
+  programLabel: string | null;
+  courseId: string | null;
+  paymentStatus: RegistrationPaymentStatus | null;
+  paymentAmountCents: number | null;
+  paymentCurrency: string | null;
+  stripeCheckoutSessionId: string | null;
+  stripePaymentIntentId: string | null;
+  paidAt: string | null;
+  refundedAt: string | null;
+  eventStartsOn: string | null;
+  eventEndsOn: string | null;
 };
 
 export type ReceiveClientInquiryInput = {
@@ -125,6 +139,19 @@ export type ReceiveClientInquiryInput = {
   utmTerm?: string | null;
   gclid?: string | null;
   keyword?: string | null;
+  registrationId?: string | null;
+  programLabel?: string | null;
+  courseId?: string | null;
+  paymentStatus?: RegistrationPaymentStatus | null;
+  paymentAmountCents?: number | null;
+  paymentCurrency?: string | null;
+  stripeCheckoutSessionId?: string | null;
+  stripePaymentIntentId?: string | null;
+  paidAt?: string | null;
+  refundedAt?: string | null;
+  eventStartsOn?: string | null;
+  eventEndsOn?: string | null;
+  registrationPayment?: RegistrationPaymentPatch;
 };
 
 export type ClientLeadLedgerSnapshot = {

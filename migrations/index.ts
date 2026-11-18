@@ -135,6 +135,7 @@ import * as migration_20261028_phase17_project_inquiry_attribution from './20261
 import * as migration_20261029_staff_sales_activity_staff_recording from './20261029_staff_sales_activity_staff_recording';
 import * as migration_20261112_client_calendar_event_type_track_day from './20261112_client_calendar_event_type_track_day';
 import * as migration_20261116_client_calendar_event_pricing from './20261116_client_calendar_event_pricing';
+import * as migration_20261117_client_inquiries_registration_payment from './20261117_client_inquiries_registration_payment';
 
 export const migrations = [
   {
@@ -889,5 +890,12 @@ export const migrations = [
     up: migration_20261116_client_calendar_event_pricing.up,
     down: migration_20261116_client_calendar_event_pricing.down,
     name: '20261116_client_calendar_event_pricing',
+  },
+  {
+    // Primal evtreg / Stripe receipt columns on client_inquiries.
+    // Local apply until production migration is authorized.
+    up: migration_20261117_client_inquiries_registration_payment.up,
+    down: migration_20261117_client_inquiries_registration_payment.down,
+    name: '20261117_client_inquiries_registration_payment',
   },
 ];

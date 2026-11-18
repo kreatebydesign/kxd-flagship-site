@@ -19,12 +19,32 @@ export const PRIMAL_MOTORSPORTS_FORM_INGEST_SECRET_ENV =
 export const PRIMAL_WEB_SUBMISSION_ID_PATTERN =
   /^PRIMAL-WEB-\d{8}-[A-Za-z0-9]{6,24}$/;
 
+/** Primal native event registration ids (Stripe checkout on primalmotorsports.com). */
+export const PRIMAL_REGISTRATION_ID_PATTERN =
+  /^evtreg_[a-z0-9]+_[a-z0-9]+$/i;
+
+/** Black Friday campaign school checkout order ids (Stripe on primalmotorsports.com). */
+export const PRIMAL_CAMPAIGN_SCHOOL_ORDER_ID_PATTERN =
+  /^cschool-\d{8}-[A-Za-z0-9]{6,24}$/;
+
+export function isAllowedPrimalSourceExternalId(id: string): boolean {
+  const trimmed = String(id ?? "").trim();
+  if (!trimmed) return false;
+  return (
+    PRIMAL_WEB_SUBMISSION_ID_PATTERN.test(trimmed) ||
+    PRIMAL_REGISTRATION_ID_PATTERN.test(trimmed) ||
+    PRIMAL_CAMPAIGN_SCHOOL_ORDER_ID_PATTERN.test(trimmed)
+  );
+}
+
 export type ManagedClientFormIngestCredential = {
   clientKey: string;
   sourceSystem: string;
   envVar: string;
-  /** When set, sourceExternalId must match before receipt. */
-  sourceExternalIdPattern: RegExp;
+  /** When set, sourceExternalId must match before receipt (single-pattern clients). */
+  sourceExternalIdPattern?: RegExp;
+  /** Primal: web submissions and evtreg registration ids. */
+  validateSourceExternalId?: (id: string) => boolean;
 };
 
 /**
@@ -39,6 +59,6 @@ export const MCI_FORM_INGEST_CREDENTIAL_REGISTRY: Record<
     clientKey: PRIMAL_MOTORSPORTS_CLIENT_KEY,
     sourceSystem: PRIMAL_MOTORSPORTS_SOURCE_SYSTEM,
     envVar: PRIMAL_MOTORSPORTS_FORM_INGEST_SECRET_ENV,
-    sourceExternalIdPattern: PRIMAL_WEB_SUBMISSION_ID_PATTERN,
+    validateSourceExternalId: isAllowedPrimalSourceExternalId,
   },
 };

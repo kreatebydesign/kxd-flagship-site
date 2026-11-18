@@ -18,6 +18,7 @@ import {
 } from "@/lib/calendar/presentation";
 import { fmtPortalDate } from "@/lib/portal/format";
 import { CesHero, CesPage } from "@/components/ces/primitives";
+import { CalendarMonthView, defaultCalendarMonthFromEvents } from "./CalendarMonthView";
 
 type Props = {
   profile: ResolvedExperienceProfile;
@@ -78,10 +79,18 @@ function CalendarEventCard({ event }: { event: CalendarEventRecord }) {
   );
 }
 
-export function CalendarLanding({ events: initial }: Props) {
+type CalendarPresentationMode = "list" | "month";
+
+export function CalendarLanding({ profile, events: initial }: Props) {
   const [events, setEvents] = useState(initial);
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("upcoming");
+  const defaultMode: CalendarPresentationMode =
+    profile.identity.clientSlug === "primal-motorsports" ? "month" : "list";
+  const [presentation, setPresentation] = useState<CalendarPresentationMode>(defaultMode);
+  const initialMonth = defaultCalendarMonthFromEvents(initial);
+  const [monthYear, setMonthYear] = useState(initialMonth.year);
+  const [monthIndex, setMonthIndex] = useState(initialMonth.monthIndex);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -260,8 +269,29 @@ export function CalendarLanding({ events: initial }: Props) {
                 autoComplete="off"
               />
             </label>
+            <div className="kxd-cal-toolbar__segmented" role="group" aria-label="Calendar presentation">
+              <span className="kxd-inv-field__label">Presentation</span>
+              <div className="kxd-cal-segment">
+                <button
+                  type="button"
+                  className={`kxd-cal-segment__btn${presentation === "month" ? " kxd-cal-segment__btn--active" : ""}`}
+                  aria-pressed={presentation === "month"}
+                  onClick={() => setPresentation("month")}
+                >
+                  Month
+                </button>
+                <button
+                  type="button"
+                  className={`kxd-cal-segment__btn${presentation === "list" ? " kxd-cal-segment__btn--active" : ""}`}
+                  aria-pressed={presentation === "list"}
+                  onClick={() => setPresentation("list")}
+                >
+                  List
+                </button>
+              </div>
+            </div>
             <label className="kxd-inv-field kxd-cal-toolbar__view">
-              <span className="kxd-inv-field__label">View</span>
+              <span className="kxd-inv-field__label">Filter</span>
               <select className="kxd-inv-input" value={status} onChange={(e) => setStatus(e.target.value)}>
                 <option value="upcoming">Upcoming</option>
                 <option value="website">On website</option>
@@ -280,6 +310,28 @@ export function CalendarLanding({ events: initial }: Props) {
               <h2 className="kxd-ces-empty__title">No matches</h2>
               <p className="kxd-ces-empty__lead">Nothing matches this view. Clear search or switch to All events.</p>
             </div>
+          ) : presentation === "month" ? (
+            <CalendarMonthView
+              events={filtered}
+              year={monthYear}
+              monthIndex={monthIndex}
+              onPrevMonth={() => {
+                if (monthIndex === 0) {
+                  setMonthIndex(11);
+                  setMonthYear((y) => y - 1);
+                } else {
+                  setMonthIndex((m) => m - 1);
+                }
+              }}
+              onNextMonth={() => {
+                if (monthIndex === 11) {
+                  setMonthIndex(0);
+                  setMonthYear((y) => y + 1);
+                } else {
+                  setMonthIndex((m) => m + 1);
+                }
+              }}
+            />
           ) : (
             <ul className="kxd-cal-list">
               {filtered.map((event) => (

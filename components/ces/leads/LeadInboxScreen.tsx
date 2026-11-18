@@ -9,6 +9,11 @@ import {
 } from "@/lib/client-command/leads/presentation";
 import { leadAttentionLabel } from "@/lib/client-command/leads/attention";
 import { SELECTABLE_LEAD_STAGES } from "@/lib/client-command/leads/apply-stage";
+import {
+  formatLeadRegistrationPaymentLabel,
+  leadHasRegistrationPayment,
+  registrationPaymentStatusClass,
+} from "@/lib/client-command/leads/registration-presentation";
 
 export function LeadInboxScreen({
   clientName,
@@ -134,6 +139,13 @@ export function LeadInboxScreen({
                       <span className={`kxd-ces-status ${leadStageStatusClass(item.stage)}`}>
                         {leadPresentationStageLabel(item.stage)}
                       </span>
+                      {leadHasRegistrationPayment(item.inquiry) && item.inquiry.paymentStatus ? (
+                        <span
+                          className={`kxd-lead-pay kxd-lead-pay--compact kxd-ces-status ${registrationPaymentStatusClass(item.inquiry.paymentStatus)}`}
+                        >
+                          {formatLeadRegistrationPaymentLabel(item.inquiry)}
+                        </span>
+                      ) : null}
                       <span className="kxd-lead-row__when">
                         {formatLeadRelative(item.inquiry.receivedAt)}
                       </span>

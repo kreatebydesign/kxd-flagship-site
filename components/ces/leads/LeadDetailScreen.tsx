@@ -13,6 +13,14 @@ import {
   resolveLeadPresentationStage,
 } from "@/lib/client-command/leads/presentation";
 import { LeadLifecycleActions } from "./LeadLifecycleActions";
+import {
+  formatLeadEventDates,
+  formatLeadRegistrationPaymentAmount,
+  formatLeadRegistrationPaymentLabel,
+  formatLeadRegistrationProgram,
+  leadHasRegistrationPayment,
+  registrationPaymentStatusClass,
+} from "@/lib/client-command/leads/registration-presentation";
 
 function Fact({
   label,
@@ -103,10 +111,14 @@ export function LeadDetailScreen({
 }) {
   const title = inquiry.contactName?.trim() || "Lead";
   const stage = resolveLeadPresentationStage(inquiry);
-  const interest =
-    inquiry.programInterest?.trim() ||
-    inquiry.messageSummary?.trim() ||
-    "No interest or request summary stored for this inquiry.";
+  const showRegistration = leadHasRegistrationPayment(inquiry);
+  const interest = showRegistration
+    ? formatLeadRegistrationProgram(inquiry) ||
+      inquiry.messageSummary?.trim() ||
+      "Registration record"
+    : inquiry.programInterest?.trim() ||
+      inquiry.messageSummary?.trim() ||
+      "No interest or request summary stored for this inquiry.";
   const originatingPath = pagePathFromUrl(inquiry.landingPage);
   const keyword = inquiry.keyword?.trim() || inquiry.utmTerm?.trim() || null;
 
@@ -125,6 +137,13 @@ export function LeadDetailScreen({
           <span className={`kxd-ces-status ${leadStageStatusClass(stage)}`}>
             {leadPresentationStageLabel(stage)}
           </span>
+          {showRegistration && inquiry.paymentStatus ? (
+            <span
+              className={`kxd-lead-pay kxd-ces-status ${registrationPaymentStatusClass(inquiry.paymentStatus)}`}
+            >
+              {formatLeadRegistrationPaymentLabel(inquiry)}
+            </span>
+          ) : null}
           <span className="kxd-lead-summary__when">
             Received {formatLeadRelative(inquiry.receivedAt)}
             <span className="kxd-lead-summary__when-abs">
@@ -169,6 +188,35 @@ export function LeadDetailScreen({
           ) : null}
         </dl>
       </header>
+
+      {showRegistration ? (
+        <section className="kxd-lead-panel kxd-lead-panel--registration" aria-labelledby="lead-reg-title">
+          <div className="kxd-lead-panel__head">
+            <h2 id="lead-reg-title" className="kxd-lead-panel__title">
+              Registration payment
+            </h2>
+            <p className="kxd-lead-panel__note">
+              Verified receipt from Primal Motorsports checkout. Stripe remains authoritative on the
+              website.
+            </p>
+          </div>
+          <dl className="kxd-lead-fact-grid">
+            <Fact label="Customer" value={inquiry.contactName} emphasize />
+            <Fact label="Program" value={formatLeadRegistrationProgram(inquiry)} emphasize />
+            <Fact label="Registration reference" value={inquiry.registrationId} emphasize />
+            <Fact label="Amount paid" value={formatLeadRegistrationPaymentAmount(inquiry)} />
+            <Fact label="Payment status" value={formatLeadRegistrationPaymentLabel(inquiry)} />
+            <Fact
+              label="Payment date"
+              value={inquiry.paidAt ? formatLeadWhen(inquiry.paidAt) : null}
+            />
+            <Fact label="Event dates" value={formatLeadEventDates(inquiry)} />
+            {inquiry.refundedAt ? (
+              <Fact label="Refunded" value={formatLeadWhen(inquiry.refundedAt)} />
+            ) : null}
+          </dl>
+        </section>
+      ) : null}
 
       <section className="kxd-lead-panel kxd-lead-panel--actions" aria-labelledby="lead-action-title">
         <div className="kxd-lead-panel__head">
@@ -265,6 +313,9 @@ export function LeadDetailScreen({
           <dl className="kxd-lead-fact-grid">
             <Fact label="Inquiry ID" value={inquiry.inquiryKey} />
             <Fact label="Disposition" value={labelizeLeadField(inquiry.disposition)} />
+            {inquiry.stripeCheckoutSessionId ? (
+              <Fact label="Checkout session" value={inquiry.stripeCheckoutSessionId} />
+            ) : null}
           </dl>
         </details>
       </section>

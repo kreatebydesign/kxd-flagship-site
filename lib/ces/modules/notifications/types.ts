@@ -11,6 +11,7 @@ export type ClientNotificationCategory =
   | "reporting"
   | "inventory"
   | "communications"
+  | "leads"
   | "general";
 
 export type ClientNotificationKind =
@@ -37,6 +38,8 @@ export type ClientNotificationKind =
   | "communication.message"
   | "communication.campaign"
   | "communication.form"
+  | "managed-client.inquiry.received"
+  | "managed-client.registration.payment.paid"
   | "general";
 
 export interface ClientNotificationItem {

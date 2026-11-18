@@ -20,6 +20,7 @@ import {
   OTP_COMMISSION_BOUNDARY,
   PRIMAL_MOTORSPORTS_FORM_INGEST_SECRET_ENV,
   PRIMAL_WEB_SUBMISSION_ID_PATTERN,
+  isAllowedPrimalSourceExternalId,
   computeMciFormSignatureBase64,
   normalizeMciFormIngestPayload,
   verifyMciFormIngestSignature,
@@ -78,7 +79,7 @@ async function main() {
     const otp = getManagedClientLeadPolicy("otp-carts");
     assert.equal(primal?.autoIngestFromWebsiteForm, true);
     assert.equal(otp?.autoIngestFromWebsiteForm, false);
-    assert.equal(primal?.portalModuleEnabled, false);
+    assert.equal(primal?.portalModuleEnabled, true);
     assert.equal(otp?.portalModuleEnabled, false);
   });
 
@@ -114,7 +115,7 @@ async function main() {
       body: JSON.parse(body),
       expectedClientKey: "primal-motorsports",
       expectedSourceSystem: "primal-motorsports-website",
-      sourceExternalIdPattern: PRIMAL_WEB_SUBMISSION_ID_PATTERN,
+      validateSourceExternalId: isAllowedPrimalSourceExternalId,
     });
     assert.equal(normalized.ok, true);
     if (normalized.ok) {
@@ -164,12 +165,91 @@ async function main() {
       },
       expectedClientKey: "primal-motorsports",
       expectedSourceSystem: "primal-motorsports-website",
-      sourceExternalIdPattern: PRIMAL_WEB_SUBMISSION_ID_PATTERN,
+      validateSourceExternalId: isAllowedPrimalSourceExternalId,
     });
     assert.equal(normalized.ok, false);
     if (!normalized.ok) {
       assert.equal(normalized.code, "missing_source_external_id");
     }
+  });
+
+  await check("Primal evtreg sourceExternalId accepted with payment patch", () => {
+    const normalized = normalizeMciFormIngestPayload({
+      body: {
+        clientKey: "primal-motorsports",
+        sourceSystem: "primal-motorsports-website",
+        sourceExternalId: "evtreg_mwgumtez_k1l3nb",
+        channel: "form",
+        contactName: "Paid Driver",
+        contactEmail: "paid@example.com",
+        payment: {
+          paymentStatus: "paid",
+          paymentAmountCents: 599500,
+          paymentCurrency: "usd",
+          programLabel: "2-Day Performance School",
+        },
+      },
+      expectedClientKey: "primal-motorsports",
+      expectedSourceSystem: "primal-motorsports-website",
+      validateSourceExternalId: isAllowedPrimalSourceExternalId,
+    });
+    assert.equal(normalized.ok, true);
+    if (normalized.ok) {
+      assert.equal(normalized.data.sourceExternalId, "evtreg_mwgumtez_k1l3nb");
+      assert.equal(normalized.data.registrationPayment.registrationId, "evtreg_mwgumtez_k1l3nb");
+      assert.equal(normalized.data.registrationPayment.paymentStatus, "paid");
+    }
+  });
+
+  await check("Primal cschool campaign order accepted with payment patch", () => {
+    const orderId = "cschool-20261118-E7404D79";
+    const normalized = normalizeMciFormIngestPayload({
+      body: {
+        sourceExternalId: orderId,
+        sourceSystem: "primal-motorsports-website",
+        registrationId: orderId,
+        channel: "form",
+        contactName: "Gift Buyer",
+        contactEmail: "buyer@example.com",
+        campaign: "black-friday-2026",
+        messageSummary:
+          "Black Friday campaign school payment · 2-Day Performance School · Gift · Order cschool-20261118-E7404D79 · Scheduling unscheduled",
+        payment: {
+          paymentStatus: "paid",
+          paymentAmountCents: 599500,
+          paymentCurrency: "usd",
+          stripeCheckoutSessionId: "cs_test_bf",
+          programLabel: "2-Day Performance School",
+          courseId: "performance-school-2day",
+          eventStartsOn: null,
+          eventEndsOn: null,
+        },
+      },
+      expectedClientKey: "primal-motorsports",
+      expectedSourceSystem: "primal-motorsports-website",
+      validateSourceExternalId: isAllowedPrimalSourceExternalId,
+    });
+    assert.equal(normalized.ok, true);
+    if (normalized.ok) {
+      assert.equal(normalized.data.registrationPayment.registrationId, orderId);
+      assert.equal(normalized.data.registrationPayment.paymentAmountCents, 599500);
+      assert.equal(normalized.data.registrationPayment.eventStartsOn, null);
+    }
+  });
+
+  await check("invalid sourceExternalId rejected for Primal", () => {
+    const normalized = normalizeMciFormIngestPayload({
+      body: {
+        sourceExternalId: "not-a-valid-primal-id",
+        sourceSystem: "primal-motorsports-website",
+        channel: "form",
+      },
+      expectedClientKey: "primal-motorsports",
+      expectedSourceSystem: "primal-motorsports-website",
+      validateSourceExternalId: isAllowedPrimalSourceExternalId,
+    });
+    assert.equal(normalized.ok, false);
+    if (!normalized.ok) assert.equal(normalized.code, "invalid_source_external_id");
   });
 
   await check("duplicate sourceExternalId identity is stable (same key)", () => {
@@ -180,7 +260,7 @@ async function main() {
       },
       expectedClientKey: "primal-motorsports",
       expectedSourceSystem: "primal-motorsports-website",
-      sourceExternalIdPattern: PRIMAL_WEB_SUBMISSION_ID_PATTERN,
+      validateSourceExternalId: isAllowedPrimalSourceExternalId,
     });
     const b = normalizeMciFormIngestPayload({
       body: {
@@ -189,7 +269,7 @@ async function main() {
       },
       expectedClientKey: "primal-motorsports",
       expectedSourceSystem: "primal-motorsports-website",
-      sourceExternalIdPattern: PRIMAL_WEB_SUBMISSION_ID_PATTERN,
+      validateSourceExternalId: isAllowedPrimalSourceExternalId,
     });
     assert.equal(a.ok && b.ok, true);
     if (a.ok && b.ok) {
@@ -214,7 +294,7 @@ async function main() {
       },
       expectedClientKey: "primal-motorsports",
       expectedSourceSystem: "primal-motorsports-website",
-      sourceExternalIdPattern: PRIMAL_WEB_SUBMISSION_ID_PATTERN,
+      validateSourceExternalId: isAllowedPrimalSourceExternalId,
     });
     assert.equal(normalized.ok, false);
     if (!normalized.ok) assert.equal(normalized.code, "client_key_mismatch");
@@ -282,6 +362,36 @@ async function main() {
     assertFileDoesNotContain(
       "app/api/admin/portal/preview/start/route.ts",
       "managed-client-inquiries",
+    );
+  });
+
+  await check("ingest passes registration payment into receive", () => {
+    assertFileContains(
+      "lib/managed-client-leads/form-ingest/ingest.ts",
+      "registrationPayment: normalized.data.registrationPayment",
+    );
+    assertFileContains(
+      "lib/managed-client-leads/receive.ts",
+      "buildRegistrationPaymentDataPatch",
+    );
+    assertFileContains(
+      "payload/collections/ClientInquiries.ts",
+      "paymentStatus",
+    );
+  });
+
+  await check("Primal client-visible lead notifications publish", () => {
+    assertFileContains(
+      "lib/managed-client-leads/publish-activity.ts",
+      'eventType: "managed-client.inquiry.received"',
+    );
+    assertFileContains(
+      "lib/managed-client-leads/publish-activity.ts",
+      "internalOnly: !clientVisible",
+    );
+    assertFileContains(
+      "lib/ces/modules/notifications/registry.ts",
+      "managed-client.registration.payment.paid",
     );
   });
 
