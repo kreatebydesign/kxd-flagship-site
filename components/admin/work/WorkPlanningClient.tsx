@@ -20,7 +20,6 @@ import {
 import type { WorkComposerUserOption } from "@/lib/work/composer";
 import {
   composeWorkView,
-  WORK_VIEW_IDS,
   WORK_VIEW_LABELS,
   workViewHref,
   type WorkFilterOptions,
@@ -30,7 +29,11 @@ import {
   type WorkViewId,
   type WorkViewResult,
 } from "@/lib/work/planning/client";
+import type { WorkClientLinkMode } from "@/lib/work/client-workspace-link";
+import { WorkPlanningViews } from "@/components/admin/work/WorkPlanningViews";
 import type { WorkListItem } from "@/lib/work/types";
+import { useOperationsChromeContext } from "@/components/admin/operations/shared/OperationsChromeContext";
+import { FOUNDER_HYBRID_SHELL_ENABLED } from "@/lib/admin/founder-hybrid/flags";
 
 function parseFiltersFromMemory(raw: Record<string, unknown>): WorkViewFilters {
   return {
@@ -62,6 +65,7 @@ export function WorkPlanningClient({
   greeting,
   dateDisplay,
   currentUser,
+  clientLinkMode = "client-success",
 }: {
   initialView: WorkViewResult;
   initialPool: WorkListItem[];
@@ -70,6 +74,7 @@ export function WorkPlanningClient({
   greeting: string;
   dateDisplay: string;
   currentUser?: WorkComposerUserOption | null;
+  clientLinkMode?: WorkClientLinkMode;
 }) {
   const router = useRouter();
   const [pool, setPool] = useState(initialPool);
@@ -182,10 +187,22 @@ export function WorkPlanningClient({
     return `${c.today} today · ${c.overdue} overdue · ${c["waiting-on-client"]} waiting on client · ${c["waiting-on-kxd"]} waiting on KXD · ${c.blocked} blocked`;
   }, [view.counts]);
 
-  return (
-    <KxdShell className="kxd-os-shell--ritual">
-      <ExecutiveWorkspaceShell workspaceId="work" includeWorkComposer={false}>
-        <div className="kxd-os-work-engine kxd-os-work-engine--planning">
+  const chrome = useOperationsChromeContext();
+  const embeddedInFounderChrome =
+    FOUNDER_HYBRID_SHELL_ENABLED && chrome?.mode === "layout";
+
+  const planningSurface = (
+    <>
+      <div
+        className={[
+          "kxd-os-work-engine",
+          "kxd-os-work-engine--planning",
+          embeddedInFounderChrome ? "kxd-os-work-engine--founder-hybrid kxd-founder-page" : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+      >
+        {!embeddedInFounderChrome ? (
           <header className="kxd-os-work-engine__header kxd-os-work-engine__header--secondary">
             <nav className="kxd-os-work-engine__nav" aria-label="Work Engine">
               <span className="kxd-os-work-engine__nav-active">Work</span>
@@ -197,39 +214,23 @@ export function WorkPlanningClient({
               Full workspace
             </Link>
           </header>
+        ) : null}
 
-          <main className="kxd-os-work-engine__main kxd-os-work-engine__main--planning">
+        <main className="kxd-os-work-engine__main kxd-os-work-engine__main--planning">
             <header className="kxd-os-work-engine__hero">
-              <p className="kxd-os-work-engine__eyebrow">Work Engine</p>
-              <h1 className="kxd-os-work-engine__headline">{greeting}</h1>
-              <p className="kxd-os-work-engine__lede">
+              <p className="kxd-founder-today__eyebrow">Work</p>
+              <h1 className="kxd-os-work-engine__headline kxd-founder-work__title">{greeting}</h1>
+              <p className="kxd-os-work-engine__lede kxd-founder-work__lede">
                 {dateDisplay}. Plan the day. Move what matters. Leave the rest.
               </p>
               <p className="kxd-os-work-engine__stats">{statsLine}</p>
             </header>
 
-            <nav className="kxd-os-work-engine__views" aria-label="Work views">
-              {WORK_VIEW_IDS.map((id) => {
-                const count = view.counts[id];
-                const active = viewId === id;
-                return (
-                  <button
-                    key={id}
-                    type="button"
-                    className={
-                      active
-                        ? "kxd-os-work-engine__view kxd-os-work-engine__view--active"
-                        : "kxd-os-work-engine__view"
-                    }
-                    aria-current={active ? "page" : undefined}
-                    onClick={() => selectView(id)}
-                  >
-                    <span>{WORK_VIEW_LABELS[id]}</span>
-                    <span className="kxd-os-work-engine__view-count">{count}</span>
-                  </button>
-                );
-              })}
-            </nav>
+            <WorkPlanningViews
+              viewId={viewId}
+              counts={view.counts}
+              onSelect={selectView}
+            />
 
             <WorkPlanningFilters
               options={options}
@@ -270,6 +271,7 @@ export function WorkPlanningClient({
                           key={item.id}
                           item={item}
                           onWorkChange={onWorkChange}
+                          clientLinkMode={clientLinkMode}
                         />
                       ))}
                     </ul>
@@ -289,6 +291,7 @@ export function WorkPlanningClient({
                       key={item.id}
                       item={item}
                       onWorkChange={onWorkChange}
+                      clientLinkMode={clientLinkMode}
                     />
                   ))}
                 </ul>
@@ -303,11 +306,22 @@ export function WorkPlanningClient({
           </main>
         </div>
 
-        <WorkComposerHost
-          currentUser={currentUser}
-          onCreated={onCreated}
-          onUpdated={onWorkChange}
-        />
+      <WorkComposerHost
+        currentUser={currentUser}
+        onCreated={onCreated}
+        onUpdated={onWorkChange}
+      />
+    </>
+  );
+
+  if (embeddedInFounderChrome) {
+    return planningSurface;
+  }
+
+  return (
+    <KxdShell className="kxd-os-shell--ritual">
+      <ExecutiveWorkspaceShell workspaceId="work" includeWorkComposer={false}>
+        {planningSurface}
       </ExecutiveWorkspaceShell>
     </KxdShell>
   );

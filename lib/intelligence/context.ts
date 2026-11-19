@@ -1,8 +1,7 @@
 import "server-only";
 
 import { cache } from "react";
-import { getPayload } from "payload";
-import config from "@payload-config";
+import { getSharedPayload } from "@/lib/payload/get-payload";
 import { loadHealthContext } from "@/lib/client-health/health-engine";
 import type { IntelligenceContext, IntelligenceDoc } from "./types";
 
@@ -91,7 +90,7 @@ async function findAll(
   where?: IntelligenceDoc,
   limit = 500,
 ): Promise<IntelligenceDoc[]> {
-  const payload = await getPayload({ config });
+  const payload = await getSharedPayload();
   try {
     const result = await payload.find({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -191,6 +190,117 @@ async function loadIntelligenceContextUncached(): Promise<IntelligenceContext> {
 
 /** Request-memoized. Full studio scan stays live; do not reuse across requests. */
 export const loadIntelligenceContext = cache(loadIntelligenceContextUncached);
+
+async function findForClient(
+  collection: string,
+  cid: number,
+  limit = 500,
+): Promise<IntelligenceDoc[]> {
+  return findAll(collection, { client: { equals: cid } }, limit);
+}
+
+/**
+ * Client Command intelligence slice — same types as portfolio context, scoped queries only.
+ * Request-memoized per client id (see Mission 002 hub vs command center separation).
+ */
+async function loadClientScopedIntelligenceContextUncached(
+  clientId: number,
+): Promise<IntelligenceContext | null> {
+  const payload = await getSharedPayload();
+  const clientPromise = payload
+    .findByID({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      collection: "clients" as any,
+      id: clientId,
+      depth: 0,
+      overrideAccess: true,
+    })
+    .catch(() => null);
+
+  const [
+    client,
+    retainers,
+    projects,
+    deliverables,
+    requests,
+    onboardings,
+    audits,
+    infrastructure,
+    infraEvents,
+    timeline,
+    executiveTimeline,
+    portalUsers,
+    executiveProfiles,
+    salesLeads,
+    proposals,
+    monthlyReports,
+    executiveNotes,
+    campaigns,
+    flyers,
+    videos,
+    socialPosts,
+    healthCtx,
+  ] = await Promise.all([
+    clientPromise,
+    findForClient("retainers", clientId),
+    findForClient("client-projects", clientId),
+    findForClient("monthly-deliverables", clientId),
+    findForClient("client-requests", clientId),
+    findForClient("client-onboarding", clientId),
+    findForClient("website-audits", clientId),
+    findForClient("client-infrastructure", clientId),
+    findForClient("infrastructure-events", clientId),
+    findForClient("client-timeline-events", clientId),
+    findForClient("executive-timeline-events", clientId),
+    findForClient("portal-users", clientId),
+    findForClient("executive-client-profiles", clientId),
+    findForClient("sales-leads", clientId),
+    findForClient("proposals", clientId),
+    findForClient("monthly-reports", clientId),
+    findForClient("executive-notes", clientId),
+    findForClient("creative-campaigns", clientId),
+    findForClient("flyer-requests", clientId),
+    findForClient("promo-video-requests", clientId),
+    findForClient("social-post-requests", clientId),
+    loadHealthContext(),
+  ]);
+
+  if (!client || typeof client !== "object") return null;
+  const clientDoc = client as IntelligenceDoc;
+  const clients = [clientDoc];
+  const clientsById = new Map<number, IntelligenceDoc>([[clientId, clientDoc]]);
+
+  return {
+    clients,
+    retainers,
+    projects,
+    deliverables,
+    requests,
+    onboardings,
+    audits,
+    infrastructure,
+    infraEvents,
+    infraCosts: [],
+    timeline,
+    executiveTimeline,
+    portalUsers,
+    executiveProfiles,
+    salesLeads,
+    proposals,
+    monthlyReports,
+    executiveNotes,
+    campaigns,
+    flyers,
+    videos,
+    socialPosts,
+    clientsById,
+    healthCtx,
+  };
+}
+
+export const loadClientScopedIntelligenceContext = cache(
+  loadClientScopedIntelligenceContextUncached,
+);
 
 export function activeRetainers(ctx: IntelligenceContext): IntelligenceDoc[] {
   return ctx.retainers.filter((r) =>

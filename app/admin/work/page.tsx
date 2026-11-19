@@ -5,7 +5,12 @@
 
 import { redirect } from "next/navigation";
 import { WorkEngineWorkspace } from "@/components/admin/work/WorkEngineWorkspace";
+import { OperationsShell } from "@/components/admin/operations/shared/OperationsShell";
 import { requirePayloadAdminPage } from "@/lib/admin/auth";
+import { staffActorFromUser } from "@/lib/staff/actor";
+import { isRestrictedStaff } from "@/lib/staff/permissions";
+import type { WorkClientLinkMode } from "@/lib/work/client-workspace-link";
+import { FOUNDER_HYBRID_SHELL_ENABLED } from "@/lib/admin/founder-hybrid/flags";
 import {
   formatDisplayDate,
   getZonedHour,
@@ -76,16 +81,29 @@ export default async function WorkEnginePage({
         ? `Good afternoon, ${firstName}.`
         : `Good evening, ${firstName}.`;
 
+  const dateDisplay = formatDisplayDate(new Date(), timeZone);
+
+  const actor = staffActorFromUser(user);
+  let clientLinkMode: WorkClientLinkMode = "client-success";
+  if (FOUNDER_HYBRID_SHELL_ENABLED && (!actor || !isRestrictedStaff(actor))) {
+    clientLinkMode = "client-command";
+  } else if (actor && isRestrictedStaff(actor)) {
+    clientLinkMode = "none";
+  }
+
   return (
-    <WorkEngineWorkspace
-      planning={planning}
-      greeting={greeting}
-      dateDisplay={formatDisplayDate(new Date(), timeZone)}
-      currentUser={{
-        id: Number(user.id),
-        email: typeof user.email === "string" ? user.email : "",
-        displayName: typeof user.displayName === "string" ? user.displayName : null,
-      }}
-    />
+    <OperationsShell activeId="work" dateDisplay={dateDisplay} showQuickActions={false}>
+      <WorkEngineWorkspace
+        planning={planning}
+        greeting={greeting}
+        dateDisplay={dateDisplay}
+        clientLinkMode={clientLinkMode}
+        currentUser={{
+          id: Number(user.id),
+          email: typeof user.email === "string" ? user.email : "",
+          displayName: typeof user.displayName === "string" ? user.displayName : null,
+        }}
+      />
+    </OperationsShell>
   );
 }

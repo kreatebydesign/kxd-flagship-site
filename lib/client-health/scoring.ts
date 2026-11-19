@@ -1,6 +1,5 @@
 
-import { getPayload } from "payload";
-import config from "@payload-config";
+import { getSharedPayload } from "@/lib/payload/get-payload";
 import { calculateInfrastructureScore } from "@/lib/infrastructure/scoring";
 import type { InfraDoc } from "@/lib/infrastructure/types";
 
@@ -67,7 +66,7 @@ function executiveForClient(ctx: HealthContext, cid: number): HealthDoc | null {
 }
 
 export async function loadHealthContext(): Promise<HealthContext> {
-  const payload = await getPayload({ config });
+  const payload = await getSharedPayload();
 
   async function findAll(collection: string, limit = 500): Promise<HealthDoc[]> {
     try {

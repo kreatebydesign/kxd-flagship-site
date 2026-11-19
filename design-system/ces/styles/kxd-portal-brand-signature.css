@@ -1,85 +1,157 @@
 /**
- * Client portal KXD brand signature — login intro overlay + sidebar attribution.
- * Scoped under .kxd-ces-app only (not founder/admin shells).
+ * KXD Signature Experience — shared client-portal intro + sidebar attribution.
+ * Scoped under .kxd-ces-app and html[data-kxd-signature]. Never inherits client accent tokens.
  */
 
-/* ── Cinematic login intro (once per session) ── */
+/* —— First-paint veil (inline arming script) —— */
 
-.kxd-ces-app .kxd-portal-intro {
+html[data-kxd-signature="arming"] .kxd-ces-app .kxd-os-shell--app {
+  visibility: hidden;
+}
+
+html[data-kxd-signature="arming"] {
+  background-color: #030304;
+}
+
+/* —— Cinematic experience (2.5s) —— */
+
+.kxd-signature-experience {
+  --kxd-sig-canvas: #030304;
+  --kxd-sig-gold: #c2aa72;
+  --kxd-sig-white: #f4f0e8;
   position: fixed;
   inset: 0;
   z-index: 10050;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #030304;
+  background: var(--kxd-sig-canvas);
   pointer-events: none;
-  animation: kxd-portal-intro-vanish 0.32s cubic-bezier(0.22, 1, 0.36, 1) 0.98s forwards;
-}
-
-.kxd-ces-app .kxd-portal-intro__stage {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: kxd-portal-intro-stage 1.02s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-.kxd-ces-app .kxd-portal-intro__mark {
-  position: relative;
   overflow: hidden;
-  line-height: 0;
+  animation: kxd-signature-dissolve 0.62s cubic-bezier(0.22, 1, 0.36, 1) 1.9s forwards;
 }
 
-.kxd-ces-app .kxd-portal-intro__logo {
+.kxd-signature-experience__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: clamp(1rem, 3vw, 1.35rem);
+  padding: clamp(1rem, 4vw, 2rem);
+  max-width: min(22rem, 92vw);
+}
+
+/* Stage 1 — gold line (0–400ms) */
+.kxd-signature-experience__line {
   display: block;
-  width: clamp(4.25rem, 18vw, 6.5rem);
+  width: clamp(3.5rem, 28vw, 5.5rem);
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--kxd-sig-gold) 40%, transparent),
+    var(--kxd-sig-gold),
+    color-mix(in srgb, var(--kxd-sig-gold) 40%, transparent),
+    transparent
+  );
+  opacity: 0;
+  transform: scaleX(0.35);
+  animation: kxd-signature-line 0.42s cubic-bezier(0.22, 1, 0.36, 1) 0.04s forwards;
+}
+
+/* Stage 2 — logo (400–1,100ms) */
+.kxd-signature-experience__logo-wrap {
+  position: relative;
+  line-height: 0;
+  opacity: 0;
+  transform: scale(0.94);
+  animation: kxd-signature-logo 0.72s cubic-bezier(0.22, 1, 0.36, 1) 0.38s forwards;
+}
+
+.kxd-signature-experience__logo {
+  display: block;
+  width: clamp(4.5rem, 20vw, 6.5rem);
   height: auto;
   object-fit: contain;
 }
 
-.kxd-ces-app .kxd-portal-intro__sweep {
+.kxd-signature-experience__logo-sheen {
   position: absolute;
-  inset: -30% -80%;
+  inset: -35% -85%;
   background: linear-gradient(
     102deg,
     transparent 38%,
-    rgba(255, 232, 190, 0.14) 46%,
-    rgba(255, 248, 220, 0.42) 50%,
-    rgba(255, 232, 190, 0.14) 54%,
+    rgba(255, 232, 190, 0.1) 46%,
+    rgba(255, 248, 220, 0.38) 50%,
+    rgba(255, 232, 190, 0.1) 54%,
     transparent 62%
   );
-  transform: translateX(-120%) skewX(-12deg);
-  animation: kxd-portal-intro-sweep 0.72s cubic-bezier(0.33, 1, 0.46, 1) 0.14s forwards;
+  transform: translateX(-125%) skewX(-12deg);
   mix-blend-mode: screen;
+  animation: kxd-signature-sheen 0.68s cubic-bezier(0.33, 1, 0.46, 1) 0.52s forwards;
   pointer-events: none;
 }
 
-@keyframes kxd-portal-intro-stage {
+/* Stage 3 — copy (1,000–1,900ms) */
+.kxd-signature-experience__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  opacity: 0;
+  transform: translateY(6px);
+  animation: kxd-signature-copy 0.62s cubic-bezier(0.22, 1, 0.36, 1) 0.98s forwards;
+}
+
+.kxd-signature-experience__headline {
+  margin: 0;
+  font-family: var(--kxd-os-font-sans, "Inter Tight", "Inter", system-ui, sans-serif);
+  font-size: clamp(1.05rem, 3.4vw, 1.35rem);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--kxd-sig-white);
+}
+
+.kxd-signature-experience__attribution {
+  margin: 0;
+  font-size: clamp(0.625rem, 2.6vw, 0.72rem);
+  line-height: 1.55;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--kxd-sig-white) 58%, transparent);
+}
+
+@keyframes kxd-signature-line {
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes kxd-signature-logo {
   0% {
     opacity: 0;
-    transform: scale(0.97);
-  }
-  18% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  72% {
-    opacity: 1;
-    transform: scale(1);
+    transform: scale(0.94);
   }
   100% {
-    opacity: 0;
-    transform: scale(1.015);
+    opacity: 1;
+    transform: scale(1);
   }
 }
 
-@keyframes kxd-portal-intro-sweep {
+@keyframes kxd-signature-sheen {
   to {
-    transform: translateX(130%) skewX(-12deg);
+    transform: translateX(128%) skewX(-12deg);
   }
 }
 
-@keyframes kxd-portal-intro-vanish {
+@keyframes kxd-signature-copy {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes kxd-signature-dissolve {
   to {
     opacity: 0;
     visibility: hidden;
@@ -87,16 +159,27 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .kxd-ces-app .kxd-portal-intro,
-  .kxd-ces-app .kxd-portal-intro__stage,
-  .kxd-ces-app .kxd-portal-intro__sweep {
+  html[data-kxd-signature="arming"] .kxd-ces-app .kxd-os-shell--app {
+    visibility: visible;
+  }
+
+  .kxd-signature-experience,
+  .kxd-signature-experience__line,
+  .kxd-signature-experience__logo-wrap,
+  .kxd-signature-experience__logo-sheen,
+  .kxd-signature-experience__copy {
     animation: none !important;
     opacity: 0 !important;
     visibility: hidden !important;
   }
 }
 
-/* ── Sidebar attribution ── */
+/* Legacy class aliases (V1) — do not use in new code */
+.kxd-portal-intro {
+  display: none !important;
+}
+
+/* —— Sidebar attribution —— */
 
 .kxd-ces-app .kxd-portal-brand-signature {
   margin: 0.4rem 0 0;

@@ -44,7 +44,7 @@ function main() {
   const css = read("design-system/os/styles/kxd-os.css");
   const homePolicy = read("lib/admin/home-policy.ts");
   const phaseDoc = read("docs/PHASE-7-TODAY.md");
-  const page = read("app/admin/operations/today/page.tsx");
+  const page = read("app/admin/operations/(studio)/today/page.tsx");
 
   check(
     "Today page still renders ExecutiveTodayScreen",

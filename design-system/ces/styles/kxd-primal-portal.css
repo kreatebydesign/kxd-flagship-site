@@ -86,6 +86,14 @@
   font-size: 0.625rem;
 }
 
+.kxd-ces-app[data-client-slug="primal-motorsports"] .kxd-ces-identity__partner {
+  color: color-mix(in srgb, #24aee8 72%, var(--kxd-os-text-faint));
+}
+
+.kxd-ces-app[data-client-slug="primal-motorsports"] .kxd-ces-identity__rule {
+  background: #24aee8;
+}
+
 .kxd-ces-app[data-client-slug="primal-motorsports"] .kxd-os-sidebar__link {
   color: var(--kxd-os-text-muted);
   border-radius: var(--kxd-os-radius-sm);
@@ -100,6 +108,12 @@
   background: var(--kxd-os-bg-selected);
   color: #9ee4f6;
   font-weight: 600;
+  box-shadow: inset 2px 0 0 #24aee8;
+}
+
+.kxd-ces-app[data-client-slug="primal-motorsports"] .kxd-os-sidebar__link--active:hover {
+  background: rgba(36, 174, 232, 0.14);
+  color: #b8ecfa;
 }
 
 .kxd-ces-app[data-client-slug="primal-motorsports"] .kxd-os-sidebar__foot {

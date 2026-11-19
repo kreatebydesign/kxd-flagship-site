@@ -34,7 +34,7 @@ function main() {
     "components/admin/KxdAdminLoginView.tsx",
     "app/admin/operations/page.tsx",
     "app/admin/operations/brief/page.tsx",
-    "app/admin/operations/today/page.tsx",
+    "app/admin/operations/(studio)/today/page.tsx",
     "docs/PHASE-7-TODAY.md",
     "lib/search/shortcuts.ts",
   ];

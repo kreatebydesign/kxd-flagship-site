@@ -31,7 +31,7 @@ function parseTags(value: unknown): string[] | undefined {
  * clientId is optional (internal studio work).
  */
 export async function POST(req: Request) {
-  const auth = await requirePayloadAdminApi();
+  const auth = await requirePayloadAdminApi(req);
   if (auth instanceof NextResponse) return auth;
 
   const body = await req.json();

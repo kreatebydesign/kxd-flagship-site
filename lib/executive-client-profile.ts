@@ -103,10 +103,20 @@ export function resolveClientName(raw: unknown): string {
   return "Unknown";
 }
 
+export type ClientRelationshipHealth =
+  | "healthy"
+  | "needs-attention"
+  | "at-risk"
+  | "paused";
+
 export interface MergedExecutiveClientRow {
   clientId: number;
   name: string;
   slug: string | null;
+  companyWebsite: string | null;
+  primaryContactName: string | null;
+  primaryContactEmail: string | null;
+  clientRelationshipHealth: ClientRelationshipHealth | null;
   clientStatus: string | null;
   brandTier: string | null;
   tier: ExecutiveClientTier | null;
@@ -139,10 +149,16 @@ export function mergeClientWithExecutiveProfile(
     profile?.estimatedAnnualValue as number | null | undefined,
   );
 
+  const clientRel = client.relationshipStatus as ClientRelationshipHealth | undefined;
+
   return {
     clientId,
     name: (client.name as string) || "Unknown",
     slug: (client.slug as string) || null,
+    companyWebsite: (client.companyWebsite as string) || null,
+    primaryContactName: (client.primaryContactName as string) || null,
+    primaryContactEmail: (client.primaryContactEmail as string) || null,
+    clientRelationshipHealth: clientRel ?? null,
     clientStatus: (client.status as string) || null,
     brandTier: (client.brandTier as string) || null,
     tier: (profile?.clientTier as ExecutiveClientTier) || null,

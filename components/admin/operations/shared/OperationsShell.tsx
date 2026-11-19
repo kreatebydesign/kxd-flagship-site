@@ -1,10 +1,14 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import { KxdShell } from "@/components/os";
 import { ExecutiveWorkspaceShell } from "@/components/admin/executive-workspace";
 import { NotificationCenter } from "@/components/admin/operations/notifications";
 import { QuickActionBar } from "@/components/admin/operations/quick-actions";
+import { FounderHybridSidebarNav } from "@/components/admin/founder-hybrid/FounderHybridSidebarNav";
+import { FOUNDER_HYBRID_SHELL_ENABLED } from "@/lib/admin/founder-hybrid/flags";
 import { OperationsSidebarNav } from "./OperationsSidebarNav";
 import { OperationsRouteProgress } from "./OperationsRouteProgress";
 import { OperatorNavLink } from "./OperatorNavLink";
@@ -15,6 +19,7 @@ import {
 import { getEditionOperationsNavGroups } from "@/lib/editions/navigation";
 import { StaffSignOutButton } from "@/components/admin/operations/staff/StaffSignOutButton";
 import { useStaffNavContext } from "@/components/admin/operations/staff/StaffNavContext";
+import { useOperationsChromeContext } from "./OperationsChromeContext";
 
 /**
  * Restricted-staff chrome — Portfolio, Relationship Events, and Timeline stay out.
@@ -68,13 +73,7 @@ export interface OperationsShellProps {
   showQuickActions?: boolean;
 }
 
-
-/**
- * Operations chrome. Brand mark lives once in ExecutiveHeader (top-left).
- * Do not render a second KxdOsLogo in the sidebar — that caused visible
- * duplication at desktop and mobile widths (Phase 34A.3).
- */
-export function OperationsShell({
+export function OperationsShellFrame({
   activeId,
   dateDisplay,
   clientId,
@@ -88,15 +87,81 @@ export function OperationsShell({
       ? buildStaffNavGroups(showSalesDevelopmentNav)
       : getEditionOperationsNavGroups();
   const isStaff = variant === "staff";
+  const founderHybrid = FOUNDER_HYBRID_SHELL_ENABLED && !isStaff;
+  const shellClass = founderHybrid
+    ? "kxd-os-shell--app kxd-founder-hybrid"
+    : "kxd-os-shell--app";
+  const pathname = usePathname() ?? "";
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const mobileToggleRef = useRef<HTMLButtonElement | null>(null);
+  const mobileNavId = "kxd-founder-mobile-nav";
+
+  useEffect(() => {
+    setMobileNavOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!mobileNavOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setMobileNavOpen(false);
+        mobileToggleRef.current?.focus();
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [mobileNavOpen]);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("kxd-founder-mobile-nav-open", mobileNavOpen);
+    return () => document.documentElement.classList.remove("kxd-founder-mobile-nav-open");
+  }, [mobileNavOpen]);
+
+  const appClass = [
+    "kxd-os-app",
+    founderHybrid && mobileNavOpen ? "kxd-os-app--mobile-nav-open" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
-    <KxdShell className="kxd-os-shell--app">
+    <KxdShell className={shellClass}>
       <OperationsRouteProgress />
       <ExecutiveWorkspaceShell clientId={clientId}>
-        <div className="kxd-os-app">
-          <aside className="kxd-os-sidebar" aria-label="KXD OS">
+        <div className={appClass}>
+          {founderHybrid ? (
+            <>
+              <button
+                ref={mobileToggleRef}
+                type="button"
+                className="kxd-founder-mobile-nav-toggle"
+                aria-expanded={mobileNavOpen}
+                aria-controls={mobileNavId}
+                onClick={() => setMobileNavOpen((open) => !open)}
+              >
+                {mobileNavOpen ? "Close menu" : "Menu"}
+              </button>
+              <button
+                type="button"
+                className={`kxd-founder-mobile-nav-backdrop${mobileNavOpen ? " is-open" : ""}`}
+                aria-label="Close menu"
+                tabIndex={-1}
+                onClick={() => setMobileNavOpen(false)}
+              />
+            </>
+          ) : null}
+          <aside
+            id={founderHybrid ? mobileNavId : undefined}
+            className={`kxd-os-sidebar${founderHybrid && mobileNavOpen ? " kxd-os-sidebar--mobile-open" : ""}`}
+            aria-label="KXD OS"
+          >
             <div className="kxd-os-sidebar__nav">
-              <OperationsSidebarNav navGroups={navGroups} activeId={activeId} />
+              {founderHybrid ? (
+                <FounderHybridSidebarNav activeId={activeId} />
+              ) : (
+                <OperationsSidebarNav navGroups={navGroups} activeId={activeId} />
+              )}
             </div>
 
             <div className="kxd-os-sidebar__foot">
@@ -145,4 +210,36 @@ export function OperationsShell({
       </ExecutiveWorkspaceShell>
     </KxdShell>
   );
+}
+
+/**
+ * Operations chrome. When the studio layout owns the shell, this synchronizes
+ * page props and renders children only so navigation does not remount the sidebar.
+ */
+export function OperationsShell(props: OperationsShellProps) {
+  const chrome = useOperationsChromeContext();
+
+  useLayoutEffect(() => {
+    if (chrome?.mode !== "layout") return;
+    chrome.patch({
+      activeId: props.activeId,
+      dateDisplay: props.dateDisplay,
+      clientId: props.clientId,
+      variant: props.variant ?? "full",
+      showQuickActions: props.showQuickActions ?? true,
+    });
+  }, [
+    chrome,
+    props.activeId,
+    props.clientId,
+    props.dateDisplay,
+    props.showQuickActions,
+    props.variant,
+  ]);
+
+  if (chrome?.mode === "layout") {
+    return <>{props.children}</>;
+  }
+
+  return <OperationsShellFrame {...props} />;
 }
