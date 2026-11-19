@@ -507,8 +507,8 @@ export function StartProjectForm() {
           }}
         >
           {fromIntelligence
-            ? "Your KXD Intelligence context is attached. Every application is reviewed personally. If it is the right fit, you will hear from us within 2 business days."
-            : "Every application is reviewed personally. If it is the right fit, you will hear from us within 2 business days."}
+            ? "Your KXD Intelligence context is attached. Every application is reviewed personally. If it is the right fit, we will reach out directly."
+            : "Every application is reviewed personally. If it is the right fit, we will reach out directly."}
         </p>
         <button
           type="button"

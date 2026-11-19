@@ -191,7 +191,7 @@ export function OutcomesSection() {
             {
               title: "Demand",
               description:
-                "Clearer journeys from interest to inquiry, built for conversion quality; not vanity traffic.",
+                "Clearer journeys from interest to inquiry, built for conversion quality, not vanity traffic.",
             },
             {
               title: "Operations",

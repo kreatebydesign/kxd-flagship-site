@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import { ProjectCard } from "@/components/ui/ProjectCard";

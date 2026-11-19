@@ -137,9 +137,9 @@ export default function StartProjectPage() {
                 <ul className="mt-3 space-y-2.5">
                   {[
                     "Your application is reviewed for strategic fit",
-                    "If aligned, Matt responds directly",
+                    "If aligned, you hear from us directly",
                     "We schedule a focused discovery conversation",
-                    "A custom proposal is delivered within 5 business days",
+                    "A custom proposal follows discovery, once scope is clear",
                   ].map((step) => (
                     <li key={step} className="flex items-start gap-2.5">
                       <span

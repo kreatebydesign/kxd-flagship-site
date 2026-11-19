@@ -297,7 +297,7 @@ export default function WorkingTogetherPage() {
               },
               {
                 label: "Response",
-                value: "Inquiries reviewed within two business days.",
+                value: "Inquiries reviewed personally. We follow up when there is a fit.",
               },
               {
                 label: "Payments",
