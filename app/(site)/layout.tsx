@@ -14,7 +14,7 @@ export const viewport = {
 
 export const metadata: Metadata = {
   ...buildMetadata({
-    title: "Premium Websites, Growth Infrastructure & Operational Systems",
+    title: "Premium Website Design & Development Studio",
     description: SITE.description,
     path: "/",
     keywords: [...SEO_KEYWORDS],

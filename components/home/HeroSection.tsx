@@ -135,16 +135,16 @@ export function HeroSection() {
                 href="/services/luxury-website-experiences"
                 className="text-[var(--kxd-cream-soft)] underline decoration-[var(--kxd-border-gold)] underline-offset-[0.2em] transition hover:text-[var(--kxd-cream)]"
               >
-                Luxury website experiences
+                Explore luxury website experiences
               </Link>{" "}
-              and{" "}
+              or read{" "}
               <Link
                 href="/investment"
                 className="text-[var(--kxd-cream-soft)] underline decoration-[var(--kxd-border-gold)] underline-offset-[0.2em] transition hover:text-[var(--kxd-cream)]"
               >
-                project investment
+                how we work together
               </Link>{" "}
-              are published for teams evaluating fit.
+              before you apply.
             </p>
 
             <div

@@ -217,10 +217,8 @@ export default async function ServiceDetailPage({ params }: Props) {
   const service = await fetchService(slug);
   if (!service) notFound();
 
-  const hasInvestmentInfo =
-    Boolean(service.investmentRange) ||
-    Boolean(service.timelineLabel) ||
-    Boolean(service.engagementType);
+  const hasEngagementMeta =
+    Boolean(service.timelineLabel) || Boolean(service.engagementType);
   const hasBestFor = service.bestFor.length > 0;
   const hasDeliverables = service.deliverables.length > 0;
   const hasOutcomes = service.outcomes.length > 0;
@@ -344,8 +342,8 @@ export default async function ServiceDetailPage({ params }: Props) {
         </div>
       </section>
 
-      {/* ── Investment strip ── */}
-      {hasInvestmentInfo && (
+      {/* ── Engagement meta ── */}
+      {hasEngagementMeta && (
         <div
           style={{
             background: "var(--kxd-black-deep)",
@@ -354,30 +352,28 @@ export default async function ServiceDetailPage({ params }: Props) {
         >
           <div className="kxd-container py-8 lg:py-10">
             <div className="grid gap-8 sm:grid-cols-3">
-              {service.investmentRange && (
-                <div>
-                  <p
-                    className="font-sans uppercase"
-                    style={{
-                      fontSize: "0.5rem",
-                      letterSpacing: "var(--tracking-label)",
-                      color: "var(--kxd-cream-muted)",
-                      opacity: 0.6,
-                    }}
-                  >
-                    {service.investmentLabel || "Investment"}
-                  </p>
-                  <p
-                    className="mt-2 font-serif font-light"
-                    style={{
-                      fontSize: "clamp(1rem, 1.4vw, 1.125rem)",
-                      color: "var(--kxd-cream-soft)",
-                    }}
-                  >
-                    {service.investmentRange}
-                  </p>
-                </div>
-              )}
+              <div>
+                <p
+                  className="font-sans uppercase"
+                  style={{
+                    fontSize: "0.5rem",
+                    letterSpacing: "var(--tracking-label)",
+                    color: "var(--kxd-cream-muted)",
+                    opacity: 0.6,
+                  }}
+                >
+                  Scope
+                </p>
+                <p
+                  className="mt-2 font-serif font-light"
+                  style={{
+                    fontSize: "clamp(1rem, 1.4vw, 1.125rem)",
+                    color: "var(--kxd-cream-soft)",
+                  }}
+                >
+                  Tailored to your objectives in a custom proposal.
+                </p>
+              </div>
               {service.timelineLabel && (
                 <div>
                   <p

@@ -181,13 +181,14 @@ export default function ContactPage() {
               >
                 <p className="kxd-label">Partnerships</p>
                 <p className="kxd-body-sm mt-2">
-                  Ongoing partnerships start at $1,250/month.
+                  Ongoing website care and operating support through a structured
+                  monthly relationship.
                 </p>
                 <a
                   href="/pricing"
                   className="mt-3 block font-sans text-[0.6875rem] font-medium uppercase tracking-[0.12em] text-[var(--kxd-gold)] transition hover:text-[var(--kxd-gold-light)]"
                 >
-                  View partnership packages →
+                  Partnership overview →
                 </a>
               </div>
 
@@ -197,17 +198,16 @@ export default function ContactPage() {
                   paddingLeft: "1.25rem",
                 }}
               >
-                <p className="kxd-label">Project Investment</p>
+                <p className="kxd-label">Working Together</p>
                 <p className="kxd-body-sm mt-2">
-                  Luxury websites from $8,500.
-                  <br />
-                  Growth infrastructure from $12,500.
+                  How KXD scopes projects, proposes work, and moves from discovery
+                  through launch.
                 </p>
                 <a
                   href="/investment"
                   className="mt-3 block font-sans text-[0.6875rem] font-medium uppercase tracking-[0.12em] text-[var(--kxd-gold)] transition hover:text-[var(--kxd-gold-light)]"
                 >
-                  View investment levels →
+                  Working Together →
                 </a>
               </div>
             </aside>

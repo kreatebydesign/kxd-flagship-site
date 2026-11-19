@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { HIDDEN_PROJECT_SLUGS } from "@/lib/projects";
+import { lastModifiedForPublicPath } from "@/lib/seo/sitemap-lastmod";
 import { PUBLIC_SITEMAP_PATHS, absolutePublicUrl } from "@/lib/seo/public-routes";
 import { SITE } from "@/lib/site";
 
@@ -47,7 +48,6 @@ function sitemapPriority(path: string): number {
  * No CMS/runtime data dependency (avoids production-only fetch failures).
  */
 export default function sitemap(): MetadataRoute.Sitemap {
-  const lastModified = new Date();
   const seen = new Set<string>();
   const entries: MetadataRoute.Sitemap = [];
 
@@ -61,7 +61,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
     entries.push({
       url,
-      lastModified,
+      lastModified: lastModifiedForPublicPath(path),
       changeFrequency: path === "/" ? "weekly" : "monthly",
       priority: sitemapPriority(path),
     });

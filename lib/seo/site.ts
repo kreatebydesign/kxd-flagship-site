@@ -27,7 +27,7 @@ export const SEO_KEYWORDS = [
   "Client Portal Development",
   /* Intent/qualifier */
   "Hire Premium Web Designer",
-  "Premium Website Design Cost",
+  "Premium Website Design Studio",
   "Boutique Digital Studio",
 ] as const;
 

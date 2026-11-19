@@ -13,7 +13,7 @@ const NAV_LINKS = [
   { label: "Work",         href: "/work" },
   { label: "Services",     href: "/services" },
   { label: "Platforms",    href: "/platforms" },
-  { label: "Investment",   href: "/investment" },
+  { label: "Working Together", href: "/investment" },
   { label: "Partnerships", href: "/pricing" },
   { label: "About",        href: "/about" },
 ];
@@ -119,12 +119,12 @@ export function SiteHeader() {
           {/* Desktop CTA — right-anchored */}
           <div className="hidden items-center justify-end lg:flex">
             <TrackedLink
-              href="/contact"
+              href="/start-project"
               className="kxd-nav-cta"
               ctaLocation="header_desktop"
-              linkText="Book a Call"
+              linkText="Start a Project"
             >
-              Book a Call
+              Start a Project
             </TrackedLink>
           </div>
 
@@ -289,14 +289,22 @@ export function SiteHeader() {
           <div className="mt-10 h-px w-12 bg-[var(--kxd-border-gold)]" />
 
           <TrackedLink
-            href="/contact"
+            href="/start-project"
             className="kxd-btn-primary kxd-ui-label mt-8 w-fit"
             ctaLocation="header_mobile"
-            linkText="Book a Call"
+            linkText="Start a Project"
             onClick={() => setMobileOpen(false)}
           >
-            Book a Call
+            Start a Project
           </TrackedLink>
+          <Link
+            href="/contact"
+            className="kxd-ui-label mt-5 inline-flex items-center gap-1.5 text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)]"
+            onClick={() => setMobileOpen(false)}
+          >
+            Contact
+            <span aria-hidden>→</span>
+          </Link>
           <Link
             href="/work"
             className="kxd-ui-label mt-5 inline-flex items-center gap-1.5 text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)]"

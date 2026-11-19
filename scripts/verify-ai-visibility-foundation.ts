@@ -119,6 +119,14 @@ check(
 // Events
 check("generate_lead event defined", ANALYTICS_EVENTS.generateLead === "generate_lead");
 check("inquiry_submit preserved", ANALYTICS_EVENTS.inquirySubmit === "inquiry_submit");
+check(
+  "working_together_view event defined",
+  ANALYTICS_EVENTS.workingTogetherView === "working_together_view",
+);
+check(
+  "pricing_view preserved for historical reporting",
+  ANALYTICS_EVENTS.pricingView === "pricing_view",
+);
 
 // Forms include AI referral option
 const contactSrc = readFileSync(

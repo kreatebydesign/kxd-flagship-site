@@ -575,7 +575,7 @@ export default function MotorsportsIndustryPage() {
 
       <FinalCtaBand
         headline="Ready to talk about the work?"
-        subCopy="Start a project conversation, review investment levels, or run a website audit if you want a clearer diagnosis first."
+        subCopy="Start a project conversation, learn how we work together, or run a website audit if you want a clearer diagnosis first."
         primaryLabel="Start a Project"
         primaryHref="/start-project"
         secondaryLabel="Website Audit"

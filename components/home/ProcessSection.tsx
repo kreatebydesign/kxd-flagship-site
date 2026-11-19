@@ -65,7 +65,7 @@ export function ProcessSection() {
             href="/investment"
             className="kxd-ui-label inline-flex items-center gap-2 self-end text-[var(--kxd-cream-muted)] transition hover:text-[var(--kxd-cream)]"
           >
-            View Investment Levels
+            Working Together
             <span
               aria-hidden
               className="transition-transform duration-300 group-hover:translate-x-1"

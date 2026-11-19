@@ -3,125 +3,88 @@ import Link from "next/link";
 import { PublicPageEvent } from "@/components/analytics/PublicPageEvent";
 import { FinalCtaBand } from "@/components/ui/FinalCtaBand";
 import { ANALYTICS_EVENTS } from "@/lib/analytics/config";
+import { HOMEPAGE_SERVICES } from "@/lib/homepage";
 import { buildMetadata } from "@/lib/seo/metadata";
+import { StructuredData } from "@/components/seo/StructuredData";
+import { breadcrumbSchema, webPageSchema } from "@/lib/seo/schema";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Project Investment",
+  title: "Working Together",
   description:
-    "Project investment levels for website builds, brand systems, growth infrastructure, and enterprise platforms. For ongoing monthly partnerships, see KXD Partnerships.",
+    "How Kreate by Design scopes premium website, branding, growth, and platform engagements. Founder-led discovery, custom proposals, and disciplined delivery from first conversation through launch.",
   path: "/investment",
   keywords: [
-    "Premium Website Design Cost",
-    "Brand Systems Investment",
-    "Enterprise Platform Development Cost",
-    "Growth Infrastructure Investment",
-    "Website Redesign Pricing",
+    "Premium Website Design Studio",
+    "Custom Web Design Proposal",
+    "Website Development Partnership",
+    "Brand and Digital Engagement",
+    "KXD Creative Partnership",
   ],
 });
 
-const LEVELS = [
+const PROCESS = [
   {
-    label: "01",
-    title: "Luxury Website Experiences",
-    starting: "Starting at $7,500",
-    description:
-      "Cinematic brand websites for premium businesses, hospitality, motorsports, and high-end service organizations. Every engagement is built around the brand's positioning, audience, and long-term goals.",
-    includes: [
-      "Custom design direction and art direction",
-      "Full-stack Next.js or platform build",
-      "CMS integration and editorial architecture",
-      "Mobile-first, performance-optimized delivery",
-      "Inquiry and conversion flow design",
-      "30-day post-launch support",
-    ],
-    accent: true,
+    step: "01",
+    title: "Start a Project",
+    body: "Share your business, goals, timing, and the type of work you are considering. Every application is reviewed personally.",
   },
   {
-    label: "02",
-    title: "Brand Systems & Identity",
-    starting: "Starting at $4,500",
-    description:
-      "Visual identity, brand architecture, and design systems built for brands that need a consistent, considered foundation across every touchpoint.",
-    includes: [
-      "Logo mark and wordmark system",
-      "Color, typography, and spacing system",
-      "Brand guidelines and usage documentation",
-      "Digital and print-ready asset delivery",
-      "Tone of voice and positioning alignment",
-    ],
-    accent: false,
+    step: "02",
+    title: "Fit and discovery",
+    body: "If the engagement looks aligned, we clarify scope, stakeholders, constraints, and what success should look like before any proposal.",
   },
   {
-    label: "03",
-    title: "Growth Infrastructure",
-    starting: "Starting at $12,500",
-    description:
-      "Full digital infrastructure for growing brands — combining website, inquiry systems, CRM connections, automation, and operational tooling into a unified growth engine.",
-    includes: [
-      "Strategy and infrastructure audit",
-      "Website experience and conversion architecture",
-      "Lead capture and inquiry routing systems",
-      "CRM and automation integration",
-      "Analytics and performance foundation",
-      "Scalable architecture for continued growth",
-    ],
-    accent: false,
+    step: "03",
+    title: "Custom proposal",
+    body: "You receive a written scope: deliverables, timeline, collaboration rhythm, and investment structured to the work.",
   },
   {
-    label: "04",
-    title: "Enterprise Platforms",
-    starting: "Custom Engagements",
-    description:
-      "Member portals, operational platforms, dashboards, and multi-audience systems for complex organizations. Scoped individually after a dedicated discovery engagement.",
-    includes: [
-      "Discovery and architecture session",
-      "Custom platform design and development",
-      "Multi-audience experience architecture",
-      "Operational workflow integration",
-      "Admin interface and content management",
-      "Ongoing support retainer available",
-    ],
-    accent: false,
-  },
-  {
-    label: "05",
-    title: "Ongoing Partnerships",
-    starting: "Starting at $1,250/month",
-    description:
-      "Monthly creative and operating partnerships for brands that need consistent website care, structured requests, and a private client experience — supported by KXD OS.",
-    includes: [
-      "KXD Partnership, Operating, or Executive packages",
-      "Defined monthly service credits",
-      "Premium client portal and revision workflow",
-      "Website Workspace on Operating and above",
-      "Optional Inventory, reporting, and priority support",
-    ],
-    accent: false,
+    step: "04",
+    title: "Build and launch",
+    body: "Design and development move through defined phases with founder oversight, clear approvals, and measurement ready at launch.",
   },
 ] as const;
 
-const PARTNERSHIP_FIT = {
-  ideal: [
-    "Established businesses preparing for their next stage of growth",
-    "Organizations seeking long-term strategic partnerships",
-    "Founders who value quality, execution, and collaboration",
-    "Brands ready to invest in exceptional digital experiences",
-  ],
-  notFit: [
-    "Businesses seeking the lowest-cost option",
-    "Projects requiring unrealistic timelines",
-    "Organizations looking for one-size-fits-all solutions",
-    "Engagements without strategic alignment",
-  ],
-} as const;
+const PROJECT_VS_PARTNERSHIP = [
+  {
+    title: "One-time projects",
+    body: "Website design and development, brand systems, growth infrastructure, and platform builds scoped as defined engagements with clear milestones.",
+    href: "/services/luxury-website-experiences",
+    linkLabel: "Premium websites",
+  },
+  {
+    title: "Ongoing partnerships",
+    body: "Monthly creative and operating relationships for teams that need structured website care, production capacity, and a private client experience.",
+    href: "/pricing",
+    linkLabel: "Partnership overview",
+  },
+] as const;
 
-export default function InvestmentPage() {
+export default function WorkingTogetherPage() {
+  const schema = [
+    breadcrumbSchema([
+      { name: "Working Together", path: "/investment" },
+    ]),
+    webPageSchema({
+      title: "Working Together",
+      description:
+        "How Kreate by Design scopes premium creative and technology engagements through discovery and custom proposal.",
+      path: "/investment",
+    }),
+  ];
+
   return (
     <>
+      <StructuredData data={schema} />
       <PublicPageEvent
         eventName={ANALYTICS_EVENTS.pricingView}
         params={{ page_path: "/investment" }}
       />
+      <PublicPageEvent
+        eventName={ANALYTICS_EVENTS.workingTogetherView}
+        params={{ page_path: "/investment" }}
+      />
+
       <section
         style={{
           paddingTop: "calc(var(--nav-height) + var(--section-py))",
@@ -131,192 +94,133 @@ export default function InvestmentPage() {
         }}
       >
         <div className="kxd-container" style={{ maxWidth: "54rem" }}>
-          <p className="kxd-eyebrow">Project Investment</p>
+          <p className="kxd-eyebrow">Working Together</p>
           <h1
             className="kxd-serif-title mt-5"
             style={{
               fontSize: "clamp(2.5rem, 5.5vw, 3.75rem)",
-              maxWidth: "38rem",
+              maxWidth: "36rem",
               lineHeight: 1.06,
             }}
           >
-            Built for Brands Ready to Grow.
+            Every engagement is scoped with intention.
           </h1>
-          <p className="kxd-body mt-6" style={{ maxWidth: "38rem" }}>
-            This page covers project engagements — website builds, redesigns, brand
-            systems, growth infrastructure, and platform work scoped to each business.
-            Website projects are detailed in{" "}
-            <Link
-              href="/services/luxury-website-experiences"
-              className="text-[var(--kxd-cream-soft)] underline decoration-[var(--kxd-border-gold)] underline-offset-[0.2em] transition hover:text-[var(--kxd-cream)]"
-            >
-              Luxury Website Experiences
-            </Link>
-            . Exceptional brands require more than attractive websites — intentional
-            systems, thoughtful strategy, and execution capable of supporting
-            long-term growth.
+          <p className="kxd-body mt-6" style={{ maxWidth: "38rem", lineHeight: 1.85 }}>
+            KXD is a premium creative and technology studio. We design and build
+            exceptional websites, brand systems, growth infrastructure, and custom
+            platforms for established brands. Work begins with a conversation: you
+            share context, we evaluate fit, and we propose what the business needs.
           </p>
+        </div>
+      </section>
 
-          <div
-            className="mt-8 border-l pl-5"
-            style={{ borderColor: "var(--kxd-border-gold)" }}
-          >
-            <p
-              className="font-serif font-light italic"
-              style={{
-                fontSize: "clamp(0.9375rem, 1.4vw, 1.0625rem)",
-                lineHeight: 1.7,
-                letterSpacing: "0.01em",
-                color: "var(--kxd-cream-soft)",
-                maxWidth: "34rem",
-              }}
+      <section
+        className="kxd-section border-t"
+        style={{
+          background: "var(--kxd-black-base)",
+          borderColor: "var(--kxd-border-white)",
+        }}
+      >
+        <div className="kxd-container">
+          <div className="max-w-3xl">
+            <p className="kxd-eyebrow">The model</p>
+            <h2
+              className="kxd-serif-title mt-4"
+              style={{ fontSize: "clamp(1.75rem, 3vw, 2.5rem)" }}
             >
-              Looking for ongoing monthly creative and operating support instead?
-              See{" "}
-              <Link
-                href="/pricing"
-                style={{ color: "var(--kxd-gold)", textDecoration: "underline" }}
-              >
-                KXD Partnerships
-              </Link>
-              .
+              Consultation-led. Proposal-defined. Built to perform.
+            </h2>
+            <p className="kxd-body-sm mt-5" style={{ lineHeight: 1.85, maxWidth: "36rem" }}>
+              KXD does not sell packages off a shelf. We learn the business, define the
+              work, and deliver a custom proposal with clear deliverables, timeline, and
+              collaboration expectations.
             </p>
+          </div>
+          <div className="mt-14 grid gap-px md:grid-cols-2">
+            {PROJECT_VS_PARTNERSHIP.map((item) => (
+              <div
+                key={item.title}
+                className="border p-8 md:p-10"
+                style={{
+                  borderColor: "var(--kxd-border-white)",
+                  background: "var(--kxd-black-deep)",
+                }}
+              >
+                <h2
+                  className="font-serif font-light"
+                  style={{
+                    fontSize: "clamp(1.25rem, 2vw, 1.5rem)",
+                    color: "var(--kxd-cream)",
+                  }}
+                >
+                  {item.title}
+                </h2>
+                <p className="kxd-body-sm mt-4" style={{ lineHeight: 1.85, maxWidth: "28rem" }}>
+                  {item.body}
+                </p>
+                <Link
+                  href={item.href}
+                  className="kxd-ui-label mt-6 inline-flex items-center gap-2 text-[var(--kxd-gold)] transition hover:text-[var(--kxd-cream)]"
+                >
+                  {item.linkLabel}
+                  <span aria-hidden>→</span>
+                </Link>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      <section className="kxd-section" style={{ background: "var(--kxd-black-base)" }}>
-        <div className="kxd-container">
-          <div className="space-y-0">
-            {LEVELS.map((level, i) => (
+      <section
+        className="kxd-section border-t"
+        style={{
+          background: "var(--kxd-black-deep)",
+          borderColor: "var(--kxd-border-white)",
+        }}
+      >
+        <div className="kxd-container" style={{ maxWidth: "52rem" }}>
+          <p className="kxd-eyebrow">How it begins</p>
+          <h2
+            className="kxd-serif-title mt-4"
+            style={{ fontSize: "clamp(1.75rem, 3vw, 2.25rem)" }}
+          >
+            From application to launch
+          </h2>
+          <div className="mt-12 space-y-0">
+            {PROCESS.map((step, i) => (
               <article
-                key={level.label}
-                className="grid gap-8 py-12 lg:grid-cols-[8rem_1fr_22rem] lg:gap-12"
+                key={step.step}
+                className="grid gap-6 py-8 sm:grid-cols-[4rem_1fr]"
                 style={{
-                  borderTop:
-                    i === 0
-                      ? "1px solid var(--kxd-border-gold)"
-                      : "1px solid var(--kxd-border-white)",
+                  borderTop: "1px solid var(--kxd-border-white)",
+                  ...(i === PROCESS.length - 1
+                    ? { borderBottom: "1px solid var(--kxd-border-white)" }
+                    : {}),
                 }}
               >
-                <div className="pt-0.5">
-                  <p
-                    className="font-serif font-light"
-                    style={{
-                      fontSize: "2.5rem",
-                      lineHeight: 1,
-                      color: level.accent
-                        ? "var(--kxd-gold)"
-                        : "var(--kxd-border-gold-strong)",
-                      letterSpacing: "0.04em",
-                    }}
-                  >
-                    {level.label}
-                  </p>
-                </div>
-
-                <div>
-                  <h2
-                    className="font-serif font-light"
-                    style={{
-                      fontSize: "clamp(1.25rem, 2.2vw, 1.625rem)",
-                      lineHeight: 1.15,
-                      letterSpacing: "0.01em",
-                      color: "var(--kxd-cream)",
-                    }}
-                  >
-                    {level.title}
-                  </h2>
-                  <p
-                    className="mt-1 font-sans font-medium uppercase"
-                    style={{
-                      fontSize: "0.5625rem",
-                      letterSpacing: "0.16em",
-                      color: "var(--kxd-gold)",
-                    }}
-                  >
-                    {level.starting}
-                  </p>
-                  <p className="kxd-body-sm mt-5" style={{ maxWidth: "34rem" }}>
-                    {level.description}
-                  </p>
-                </div>
-
-                <div
-                  className="border-l pl-8"
-                  style={{ borderColor: "var(--kxd-border-white)" }}
+                <p
+                  className="font-serif font-light"
+                  style={{
+                    fontSize: "1.75rem",
+                    color: "var(--kxd-gold)",
+                    lineHeight: 1,
+                  }}
                 >
-                  <p className="kxd-label mb-4">What&rsquo;s included</p>
-                  <ul className="space-y-2.5">
-                    {level.includes.map((item) => (
-                      <li key={item} className="flex items-start gap-3">
-                        <span
-                          aria-hidden
-                          style={{
-                            width: "4px",
-                            height: "4px",
-                            borderRadius: "50%",
-                            background: "var(--kxd-gold)",
-                            opacity: 0.55,
-                            flexShrink: 0,
-                            marginTop: "0.45rem",
-                          }}
-                        />
-                        <p className="kxd-body-sm leading-snug">{item}</p>
-                      </li>
-                    ))}
-                  </ul>
+                  {step.step}
+                </p>
+                <div>
+                  <h3
+                    className="font-serif font-light"
+                    style={{ fontSize: "1.25rem", color: "var(--kxd-cream)" }}
+                  >
+                    {step.title}
+                  </h3>
+                  <p className="kxd-body-sm mt-3" style={{ lineHeight: 1.8, maxWidth: "34rem" }}>
+                    {step.body}
+                  </p>
                 </div>
               </article>
             ))}
-
-            <div
-              style={{
-                borderTop: "1px solid var(--kxd-border-white)",
-                paddingTop: "3rem",
-              }}
-            >
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                {[
-                  {
-                    label: "All engagements include",
-                    value: "Direct access to the founder throughout",
-                  },
-                  {
-                    label: "Response time",
-                    value: "Within 2 business days after application",
-                  },
-                  {
-                    label: "Engagement model",
-                    value: "Scoped to your goals and growth stage",
-                  },
-                  {
-                    label: "Current partnerships",
-                    value:
-                      "Motorsports, hospitality, automotive, civic, and growth-focused brands.",
-                  },
-                ].map((note) => (
-                  <div
-                    key={note.label}
-                    className="border-l pl-5"
-                    style={{ borderColor: "var(--kxd-border-gold)" }}
-                  >
-                    <p className="kxd-label">{note.label}</p>
-                    <p className="kxd-body-sm mt-2">{note.value}</p>
-                  </div>
-                ))}
-              </div>
-              <p className="kxd-body-sm mt-10">
-                Looking for ongoing website care?{" "}
-                <a
-                  href="/pricing"
-                  className="text-[var(--kxd-gold)] transition hover:text-[var(--kxd-gold-light)]"
-                >
-                  Review partnership packages
-                </a>
-                .
-              </p>
-            </div>
           </div>
         </div>
       </section>
@@ -329,77 +233,50 @@ export default function InvestmentPage() {
         }}
       >
         <div className="kxd-container">
-          <div className="grid gap-16 lg:grid-cols-2">
-            <div>
-              <p className="kxd-eyebrow">Partnership Fit</p>
-
-              <h2
-                className="kxd-serif-title mt-4"
-                style={{
-                  fontSize: "clamp(2rem, 3vw, 2.75rem)",
-                  maxWidth: "24rem",
-                }}
-              >
-                We work best with brands ready to invest in growth.
-              </h2>
-
-              <p className="kxd-body-sm mt-6" style={{ maxWidth: "30rem" }}>
-                The strongest partnerships happen when ambition, trust, and execution
-                are aligned from day one. KXD is built for brands that want the work
-                done right — not rushed, diluted, or treated like a template.
-              </p>
-            </div>
-
-            <div className="space-y-10">
-              <div>
-                <p className="kxd-label mb-4">Ideal Partners</p>
-
-                <ul className="space-y-3">
-                  {PARTNERSHIP_FIT.ideal.map((item) => (
-                    <li key={item} className="flex items-start gap-3">
-                      <span
-                        aria-hidden
-                        style={{
-                          width: "4px",
-                          height: "4px",
-                          borderRadius: "50%",
-                          background: "var(--kxd-gold)",
-                          opacity: 0.65,
-                          flexShrink: 0,
-                          marginTop: "0.5rem",
-                        }}
-                      />
-                      <p className="kxd-body-sm">{item}</p>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div>
-                <p className="kxd-label mb-4">Not the Right Fit</p>
-
-                <ul className="space-y-3">
-                  {PARTNERSHIP_FIT.notFit.map((item) => (
-                    <li key={item} className="flex items-start gap-3">
-                      <span
-                        aria-hidden
-                        style={{
-                          width: "4px",
-                          height: "4px",
-                          borderRadius: "50%",
-                          background: "var(--kxd-cream-muted)",
-                          opacity: 0.38,
-                          flexShrink: 0,
-                          marginTop: "0.5rem",
-                        }}
-                      />
-                      <p className="kxd-body-sm">{item}</p>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
+          <p className="kxd-eyebrow">What we build</p>
+          <h2
+            className="kxd-serif-title mt-4"
+            style={{ fontSize: "clamp(1.75rem, 3vw, 2.25rem)", maxWidth: "22ch" }}
+          >
+            Services shaped to your objectives
+          </h2>
+          <p className="kxd-body-sm mt-5" style={{ maxWidth: "36rem", lineHeight: 1.85 }}>
+            Most relationships start with a premium website. Branding, SEO, custom
+            software, and ongoing partnerships follow when the strategy requires them.
+          </p>
+          <ul className="mt-10 space-y-0">
+            {HOMEPAGE_SERVICES.map((service) => (
+              <li key={service.slug}>
+                <Link
+                  href={`/services/${service.slug}`}
+                  className="kxd-service-index-row group"
+                >
+                  <span className="kxd-label text-[var(--kxd-gold)]">{service.number}</span>
+                  <div className="min-w-0">
+                    <h3
+                      className="font-serif font-light transition-colors group-hover:text-[var(--kxd-gold-light)]"
+                      style={{
+                        fontSize: "clamp(1.0625rem, 1.6vw, 1.25rem)",
+                        color: "var(--kxd-cream)",
+                      }}
+                    >
+                      {service.title}
+                    </h3>
+                    <p className="kxd-body-sm mt-2" style={{ lineHeight: 1.75 }}>
+                      {service.summary}
+                    </p>
+                  </div>
+                  <span
+                    aria-hidden
+                    className="kxd-ui-label opacity-0 transition group-hover:opacity-100"
+                    style={{ color: "var(--kxd-gold)" }}
+                  >
+                    →
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
@@ -410,79 +287,46 @@ export default function InvestmentPage() {
           borderColor: "var(--kxd-border-white)",
         }}
       >
-        <div className="kxd-container">
-          <div className="grid gap-12 lg:grid-cols-[16rem_1fr] lg:gap-20">
-            <div>
-              <p className="kxd-eyebrow">Common Questions</p>
-              <h2
-                className="kxd-serif-title mt-4"
-                style={{
-                  fontSize: "clamp(1.5rem, 2.5vw, 2rem)",
-                  maxWidth: "14rem",
-                }}
+        <div className="kxd-container" style={{ maxWidth: "48rem" }}>
+          <p className="kxd-eyebrow">Expectations</p>
+          <div className="mt-8 grid gap-6 sm:grid-cols-2">
+            {[
+              {
+                label: "Founder access",
+                value: "Direct oversight through scoping, design, and delivery.",
+              },
+              {
+                label: "Response",
+                value: "Inquiries reviewed within two business days.",
+              },
+              {
+                label: "Payments",
+                value: "Milestone structure defined in your proposal, aligned to delivery phases.",
+              },
+              {
+                label: "Fit first",
+                value: "We take on a limited number of engagements so each receives full attention.",
+              },
+            ].map((note) => (
+              <div
+                key={note.label}
+                className="border-l pl-5"
+                style={{ borderColor: "var(--kxd-border-gold)" }}
               >
-                Before you apply.
-              </h2>
-            </div>
-            <div className="space-y-0">
-              {[
-                {
-                  q: "Do you work with startups?",
-                  a: "Selectively. If the vision is clear and the investment is aligned, early-stage brands can be exceptional partners. We evaluate fit first.",
-                },
-                {
-                  q: "Can I start with a smaller scope and grow?",
-                  a: "Yes. Many long-term partnerships begin with a focused website or brand engagement. KXD is built for brands that plan to grow.",
-                },
-                {
-                  q: "Do you offer payment plans?",
-                  a: "Yes. Most projects are structured around milestone payments aligned with major delivery phases.",
-                },
-                {
-                  q: "What if I'm unsure of my budget?",
-                  a: "Submit an application and describe your goals. We'll recommend the scope that makes sense — not the most expensive option.",
-                },
-                {
-                  q: "How long do projects take?",
-                  a: "Luxury websites: typically 3–6 weeks. Growth infrastructure: 6–12 weeks. Enterprise platforms: scoped per project. Timelines are defined in the proposal.",
-                },
-              ].map((item, i, arr) => (
-                <div
-                  key={item.q}
-                  className="py-7"
-                  style={{
-                    borderTop: "1px solid var(--kxd-border-white)",
-                    ...(i === arr.length - 1
-                      ? { borderBottom: "1px solid var(--kxd-border-white)" }
-                      : {}),
-                  }}
-                >
-                  <p
-                    className="font-serif font-light"
-                    style={{
-                      fontSize: "clamp(1rem, 1.5vw, 1.1875rem)",
-                      letterSpacing: "0.005em",
-                      color: "var(--kxd-cream)",
-                    }}
-                  >
-                    {item.q}
-                  </p>
-                  <p className="kxd-body-sm mt-3" style={{ maxWidth: "38rem" }}>
-                    {item.a}
-                  </p>
-                </div>
-              ))}
-            </div>
+                <p className="kxd-label">{note.label}</p>
+                <p className="kxd-body-sm mt-2">{note.value}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       <FinalCtaBand
-        headline="Let's Build What's Next."
-        subCopy="KXD partners with a limited number of businesses each year to create exceptional digital experiences, operational systems, and growth infrastructure built with intention."
+        headline="Tell us what you are building."
+        subCopy="Start a project application when you are ready for a serious conversation. We will confirm fit, scope, and the right path forward."
         secondaryHref="/work"
         secondaryLabel="Explore Our Work"
-        analyticsCtaLocation="investment_page"
+        analyticsCtaLocation="working_together_page"
       />
     </>
   );
