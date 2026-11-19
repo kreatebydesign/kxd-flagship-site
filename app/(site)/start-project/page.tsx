@@ -7,9 +7,9 @@ import { StructuredData } from "@/components/seo/StructuredData";
 import { breadcrumbSchema, webPageSchema } from "@/lib/seo/schema";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Start a Partnership",
+  title: "Start a Project",
   description:
-    "Apply to begin a KXD project partnership. Share your brand, goals, investment range, and vision so we can personally review whether the engagement is the right fit.",
+    "Apply to start a website, brand, or software project with Kreate by Design. Share your goals and context so we can review fit personally.",
   path: "/start-project",
   keywords: [
     "Start a Web Design Project",
@@ -28,9 +28,9 @@ export default function StartProjectPage() {
       { name: "Start a Project", path: "/start-project" },
     ]),
     webPageSchema({
-      title: "Start a Partnership",
+      title: "Start a Project",
       description:
-        "Apply to begin a KXD project partnership. Share your brand, goals, investment range, and vision.",
+        "Apply to start a website, brand, or software project with Kreate by Design. Share your goals and context so we can review fit personally.",
       path: "/start-project",
     }),
   ];
@@ -58,16 +58,16 @@ export default function StartProjectPage() {
               lineHeight: 1.05,
             }}
           >
-            Apply to Build With KXD.
+            Start a project with KXD.
           </h1>
 
           <p
             className="kxd-body mt-6"
             style={{ maxWidth: "38rem", lineHeight: 1.8 }}
           >
-            This is the first step toward a focused creative partnership. Tell us
-            where your brand is now, where it needs to go, and what kind of digital
-            experience or operating system you are ready to build.
+            A short application helps us understand your business, your goals, and
+            the kind of work you need. It takes about three minutes. We review every
+            submission personally.
           </p>
 
           <div
@@ -85,16 +85,16 @@ export default function StartProjectPage() {
               }}
             >
               KXD takes on a limited number of engagements at a time so each
-              partnership gets the strategy, attention, and execution it deserves.
+              project receives strategy, attention, and care through delivery.
             </p>
           </div>
 
           <div className="mt-10 flex flex-wrap gap-x-8 gap-y-3">
             {[
-              "Reviewed personally by Matt",
-              "Response within 2 business days",
+              "Reviewed personally",
+              "Personal follow-up when it is a fit",
               "Focused application, ~3 minutes",
-              "Built for serious growth conversations",
+              "Built for serious project conversations",
             ].map((point) => (
               <div key={point} className="flex items-center gap-2.5">
                 <div
@@ -137,9 +137,9 @@ export default function StartProjectPage() {
                 <ul className="mt-3 space-y-2.5">
                   {[
                     "Your application is reviewed for strategic fit",
-                    "If aligned, Matt responds directly",
+                    "If aligned, you hear from us directly",
                     "We schedule a focused discovery conversation",
-                    "A custom proposal is delivered within 5 business days",
+                    "A custom proposal follows discovery, once scope is clear",
                   ].map((step) => (
                     <li key={step} className="flex items-start gap-2.5">
                       <span

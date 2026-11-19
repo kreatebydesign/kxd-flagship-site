@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import { ProjectCard } from "@/components/ui/ProjectCard";
@@ -18,7 +17,7 @@ import { breadcrumbSchema, itemListSchema } from "@/lib/seo/schema";
 export const metadata: Metadata = buildMetadata({
   title: "Work",
   description:
-    "Selected work from Kreate by Design, website redesigns, brand systems, growth infrastructure, and operational platforms for ambitious businesses.",
+    "Selected website, brand, and software projects from Kreate by Design, including motorsports, hospitality, construction, and service businesses.",
   path: "/work",
   keywords: [
     "Website Redesign Portfolio",
@@ -188,9 +187,9 @@ export default async function WorkPage() {
               maxWidth: "34rem",
             }}
           >
-            Selected work across motorsports, automotive, service businesses,
-            and hospitality, websites, growth infrastructure, and operational
-            systems built with the same standard of clarity and intent.
+            A sample of website, brand, and custom software work across
+            motorsports, hospitality, construction, and service businesses. Each
+            project reflects what that client needed, not a one-size-fits-all package.
           </p>
 
           {totalCount > 0 && (

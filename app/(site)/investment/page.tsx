@@ -50,7 +50,7 @@ const PROJECT_VS_PARTNERSHIP = [
     title: "One-time projects",
     body: "Website design and development, brand systems, growth infrastructure, and platform builds scoped as defined engagements with clear milestones.",
     href: "/services/luxury-website-experiences",
-    linkLabel: "Premium websites",
+    linkLabel: "Website design and development",
   },
   {
     title: "Ongoing partnerships",
@@ -297,7 +297,7 @@ export default function WorkingTogetherPage() {
               },
               {
                 label: "Response",
-                value: "Inquiries reviewed within two business days.",
+                value: "Inquiries reviewed personally. We follow up when there is a fit.",
               },
               {
                 label: "Payments",

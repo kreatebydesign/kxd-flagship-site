@@ -6,7 +6,7 @@ import { FinalCtaBand } from "@/components/ui/FinalCtaBand";
 export const metadata: Metadata = buildMetadata({
   title: "Business Platforms & Operational Systems",
   description:
-    "KXD designs and develops custom operational systems, client portals, membership platforms, hospitality infrastructure, and motorsports platforms that align operations with experience.",
+    "Custom client portals, dashboards, and business applications for companies that have outgrown disconnected tools. Built around your workflows and your brand.",
   path: "/platforms",
   keywords: [
     "Custom Business Platforms",
@@ -168,10 +168,9 @@ export default function PlatformsPage() {
             className="kxd-body mt-7"
             style={{ maxWidth: "38rem", lineHeight: 1.8 }}
           >
-            KXD develops operational platforms for organizations that have
-            outgrown disconnected tools, creating systems that improve
-            visibility, efficiency, and experience without sacrificing brand
-            integrity.
+            KXD builds custom software and portals when marketing sites and
+            off-the-shelf tools are no longer enough. The goal is visibility and
+            smoother operations without making the brand feel corporate or generic.
           </p>
 
           {/* Context markers */}

@@ -44,7 +44,7 @@ export function OutcomesSection() {
       <div className="kxd-container">
         <div className="mb-14 grid gap-10 lg:grid-cols-[1fr_1.05fr] lg:items-end lg:gap-14">
           <div>
-            <p className="kxd-eyebrow">Capabilities</p>
+            <p className="kxd-eyebrow">Outcomes</p>
 
             <h2
               className="kxd-serif-title mt-4"
@@ -53,7 +53,7 @@ export function OutcomesSection() {
                 maxWidth: "26rem",
               }}
             >
-              Premium presence. Qualified demand. Operational clarity.
+              Clarity online. Better conversations. Work that lasts.
             </h2>
 
             <p
@@ -63,9 +63,9 @@ export function OutcomesSection() {
                 lineHeight: 1.85,
               }}
             >
-              KXD builds the website, the growth layer, and the systems behind
-              them, so established businesses look sharp, convert better, and
-              operate with less friction.
+              Most clients start with the website. Some need sharper discovery and
+              inquiry paths. Others need portals, dashboards, or custom software
+              behind the brand. We take on what matches where the business is now.
             </p>
 
             <Link
@@ -191,7 +191,7 @@ export function OutcomesSection() {
             {
               title: "Demand",
               description:
-                "Clearer journeys from interest to inquiry, built for conversion quality; not vanity traffic.",
+                "Clearer journeys from interest to inquiry, built for conversion quality, not vanity traffic.",
             },
             {
               title: "Operations",

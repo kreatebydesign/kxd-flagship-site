@@ -7,8 +7,8 @@ export function FinalCtaSection() {
       primaryHref="/start-project"
       secondaryHref="/website-audit"
       secondaryLabel="Run KXD Intelligence"
-      headline="Ready to build, or ready to diagnose?"
-      subCopy="If you already know the work needs to happen, start a project conversation. If something feels off but you need clarity first, run KXD Intelligence. Then talk with intent."
+      headline="Ready to move forward, or looking for clarity first?"
+      subCopy="When the project is defined, Start a Project is the right path. When something on the site feels unclear, run KXD Intelligence first. Either way, you will hear from us personally when it is a fit."
     />
   );
 }

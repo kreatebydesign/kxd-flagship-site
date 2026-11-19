@@ -9,7 +9,7 @@ const CONTACT_CANONICAL_PATH = "/contact";
 const contactMetadata = buildMetadata({
   title: "Contact",
   description:
-    "Reach Kreate by Design for website, growth infrastructure, and platform conversations. Every inquiry is reviewed personally for fit.",
+    "Reach Kreate by Design for website, brand, and platform conversations. Every inquiry is reviewed personally for fit.",
   path: CONTACT_CANONICAL_PATH,
   keywords: [
     "Contact Kreate by Design",
@@ -44,23 +44,30 @@ export default function ContactPage() {
         }}
       >
         <div className="kxd-container" style={{ maxWidth: "54rem" }}>
-          <p className="kxd-eyebrow">Project Application</p>
+          <p className="kxd-eyebrow">Contact</p>
           <h1
             className="kxd-serif-title mt-5"
             style={{ fontSize: "clamp(2.25rem, 4.5vw, 3.25rem)", maxWidth: "34rem" }}
           >
-            Apply to Work With KXD.
+            Start a conversation.
           </h1>
           <p className="kxd-body mt-6" style={{ maxWidth: "32rem" }}>
-            KXD takes on a limited number of engagements each year.
-            Every application is reviewed personally. If it&rsquo;s the right fit,
-            we&rsquo;ll reach out directly.
+            Questions, referrals, or a quick note about your business are welcome
+            here. For a scoped website, brand, or software project, use{" "}
+            <a
+              href="/start-project"
+              className="text-[var(--kxd-cream-soft)] underline decoration-[var(--kxd-border-gold)] underline-offset-[0.2em] transition hover:text-[var(--kxd-cream)]"
+            >
+              Start a Project
+            </a>
+            . Every inquiry is reviewed personally. If it&rsquo;s the right fit, we
+            will reach out directly.
           </p>
 
           <div className="mt-10 flex flex-wrap gap-x-8 gap-y-3">
             {[
               "Reviewed personally",
-              "Response within 2 business days",
+              "Personal follow-up when it is a fit",
               "No obligation",
             ].map((point) => (
               <div key={point} className="flex items-center gap-2.5">
@@ -125,10 +132,10 @@ export default function ContactPage() {
                 <p className="kxd-label">What to Expect</p>
                 <ul className="mt-3 space-y-2.5">
                   {[
-                    "Application reviewed within 2 business days",
-                    "Direct response from Matt",
-                    "Brief discovery call if fit is confirmed",
-                    "Proposal within 5 business days",
+                    "Personal review when your note arrives",
+                    "Direct response from the founder when there is a fit",
+                    "Brief discovery call to align on scope",
+                    "Clear proposal or next step after discovery",
                   ].map((step) => (
                     <li key={step} className="flex items-start gap-2.5">
                       <span

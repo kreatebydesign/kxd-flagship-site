@@ -183,15 +183,15 @@ export function ContactForm() {
             color: "var(--foreground-muted)",
           }}
         >
-          Every application is reviewed personally. If it&rsquo;s the right fit,
-          we&rsquo;ll reach out within 2 business days to map the next step.
+          Every inquiry is reviewed personally. If it&rsquo;s the right fit, we
+          will reach out directly with a sensible next step.
         </p>
         <button
           type="button"
           onClick={() => setState("idle")}
           className="mt-10 font-sans text-[0.6875rem] font-medium uppercase tracking-[0.14em] text-[var(--kxd-gold)] transition hover:text-[var(--kxd-gold-light)]"
         >
-          Submit another application
+          Send another message
         </button>
       </div>
     );
@@ -199,7 +199,7 @@ export function ContactForm() {
 
   return (
     <form onSubmit={handleSubmit} className="kxd-luxury-form p-8 lg:p-10" noValidate>
-      <p className="kxd-label mb-8">Project Application</p>
+      <p className="kxd-label mb-8">Your inquiry</p>
 
       <div className="grid gap-5 sm:grid-cols-2">
         <Field label="Full Name" name="name" required placeholder="Your name" />
@@ -356,7 +356,7 @@ export function ContactForm() {
           disabled={state === "submitting"}
           className="kxd-btn-primary disabled:opacity-60 sm:w-auto"
         >
-          {state === "submitting" ? "Submitting…" : "Submit Application"}
+          {state === "submitting" ? "Sending…" : "Send Message"}
         </button>
         <p
           className="font-sans font-light"
@@ -366,7 +366,7 @@ export function ContactForm() {
             color: "var(--foreground-subtle)",
           }}
         >
-          Reviewed personally within 2 business days.
+          Reviewed personally. We follow up when it is a fit.
         </p>
       </div>
 

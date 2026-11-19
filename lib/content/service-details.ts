@@ -44,14 +44,14 @@ export const STATIC_SERVICE_DETAILS: Record<string, StaticServiceDetail> = {
     categoryLabel: "Presence",
     eyebrow: "Website Experiences",
     headline:
-      "Premium websites, designed and developed to hold weight.",
+      "Websites designed and built to earn trust on the first visit.",
     summary:
-      "Premium website design, development, and serious rebuilds for established businesses, backed by responsive performance, search foundations, and measurement.",
+      "Custom website design and development for established businesses. Redesigns and rebuilds with strong performance, search fundamentals, and analytics ready at launch.",
     bestFor: [
       "Businesses whose website feels outdated or interchangeable",
       "Teams whose online presence weakens trust before the first conversation",
       "Organizations that need clearer service pathways and stronger inquiry conversion",
-      "Brands preparing for a serious redesign or rebuild; not another template refresh",
+      "Brands preparing for a serious redesign or rebuild, not another template refresh",
     ],
     deliverables: [
       "Strategic redesign / rebuild scoped to business goals",
@@ -111,7 +111,7 @@ export const STATIC_SERVICE_DETAILS: Record<string, StaticServiceDetail> = {
       {
         question: "Can this connect into growth or systems work later?",
         answer:
-          "Yes. Some clients stop at the website. Others expand into growth infrastructure or operational platforms when the business needs it; not because every engagement requires it.",
+          "Yes. Some clients stop at the website. Others expand into growth infrastructure or operational platforms when the business needs it, not because every engagement requires it.",
       },
     ],
     keywords: [
@@ -151,7 +151,7 @@ export const STATIC_SERVICE_DETAILS: Record<string, StaticServiceDetail> = {
     headline:
       "Turn attention into structured demand, with measurement you can actually use.",
     summary:
-      "SEO foundations, GA4 analytics, conversion pathways, and CRM-connected lead systems for businesses that need structured demand; not just a beautiful website.",
+      "SEO foundations, GA4 analytics, conversion pathways, and CRM-connected lead systems for businesses that need structured demand, not just a beautiful website.",
     bestFor: [
       "Businesses with traffic or visibility that fails to become qualified inquiry",
       "Teams that cannot clearly see what is working across channels",
@@ -171,7 +171,7 @@ export const STATIC_SERVICE_DETAILS: Record<string, StaticServiceDetail> = {
       "Clearer visibility into how demand moves",
       "Stronger connection between presence and inquiry",
       "Lead pathways that do not die in the inbox",
-      "A growth layer that can compound with the website; not compete with it",
+      "A growth layer that can compound with the website, not compete with it",
     ],
     process: [
       {
@@ -213,7 +213,7 @@ export const STATIC_SERVICE_DETAILS: Record<string, StaticServiceDetail> = {
       {
         question: "Is this an SEO agency package?",
         answer:
-          "No. Search is one component when it matters. Growth Infrastructure is about structured demand: measurement, conversion paths, and lead systems; not generic ranking promises.",
+          "No. Search is one component when it matters. Growth Infrastructure is about structured demand: measurement, conversion paths, and lead systems, not generic ranking promises.",
       },
       {
         question: "Do you connect to CRM tools?",
@@ -270,7 +270,7 @@ export const STATIC_SERVICE_DETAILS: Record<string, StaticServiceDetail> = {
       "Organizations stuck between disconnected tools and repetitive manual work",
       "Teams that need client or member portals with real operational value",
       "Businesses whose customer experience breaks after the first inquiry",
-      "Leaders ready for a high-touch build; not an off-the-shelf software install",
+      "Leaders ready for a high-touch build, not an off-the-shelf software install",
     ],
     deliverables: [
       "Operational discovery and workflow mapping",
@@ -295,7 +295,7 @@ export const STATIC_SERVICE_DETAILS: Record<string, StaticServiceDetail> = {
       {
         stepTitle: "Architecture",
         stepDescription:
-          "Design the system around the business; not a template product roadmap.",
+          "Design the system around the business, not a template product roadmap.",
       },
       {
         stepTitle: "Build",
@@ -325,7 +325,7 @@ export const STATIC_SERVICE_DETAILS: Record<string, StaticServiceDetail> = {
       {
         question: "Are you a software development shop?",
         answer:
-          "No. KXD builds selective operational systems for partners we can serve with full attention, brand-native platforms; not mass-market software products.",
+          "No. KXD builds selective operational systems for partners we can serve with full attention, brand-native platforms, not mass-market software products.",
       },
       {
         question: "Do all clients eventually need this?",

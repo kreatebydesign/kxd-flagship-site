@@ -26,7 +26,7 @@ export function FounderStandard() {
               Founder-led.
               <br />
               <span style={{ color: "var(--kxd-gold)" }}>
-                System-minded.
+                Built to last.
               </span>
             </h2>
 
@@ -73,10 +73,10 @@ export function FounderStandard() {
                 color: "var(--kxd-cream-soft)",
               }}
             >
-              KXD designs and operates creative systems for brands that require
-              more than execution, they require infrastructure. Every engagement
-              receives direct founder oversight, production-grade creative systems,
-              and operational thinking built to compound in value long after launch.
+              KXD is a founder-led studio. Strategy, design, and development stay
+              in one room, with direct oversight from first conversation through
+              launch. We work selectively so every engagement gets attention and
+              decisions stay quick.
             </p>
 
             <div
@@ -84,9 +84,9 @@ export function FounderStandard() {
               style={{ borderColor: "var(--kxd-border-white)" }}
             >
               {[
-                { number: "100%", label: "Founder-led execution" },
-                { number: "Systems", label: "Engineered for scale" },
-                { number: "Long-term", label: "Operational partnership" },
+                { number: "Founder-led", label: "On every engagement" },
+                { number: "Selective", label: "A limited client load" },
+                { number: "Full stack", label: "Design through delivery" },
               ].map((stat) => (
                 <div key={stat.label}>
                   <p
@@ -116,8 +116,8 @@ export function FounderStandard() {
                   color: "var(--kxd-cream-muted)",
                 }}
               >
-                The standard is simple: build systems that hold value long after
-                the work is delivered.
+                The standard is simple: do work that still makes sense a year from
+                now.
               </p>
             </div>
           </div>

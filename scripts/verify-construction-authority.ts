@@ -38,9 +38,9 @@ check(
   CONSTRUCTION_PAGE.title === "Construction & Contractor Website Design",
 );
 check(
-  "meta description preserved",
+  "meta description set",
   CONSTRUCTION_PAGE.description ===
-    "Premium construction and contractor website design for established trades businesses built by Kreate by Design.",
+    "Construction and contractor website design for established trades businesses. Clear services, credible presentation, and inquiry paths built by Kreate by Design.",
 );
 
 const pageSrc = read(pagePath);
