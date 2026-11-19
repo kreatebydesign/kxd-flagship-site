@@ -53,7 +53,7 @@ export default function ContactPage() {
           </h1>
           <p className="kxd-body mt-6" style={{ maxWidth: "32rem" }}>
             KXD takes on a limited number of engagements each year.
-            Every application is reviewed personally — if it&rsquo;s the right fit,
+            Every application is reviewed personally. If it&rsquo;s the right fit,
             we&rsquo;ll reach out directly.
           </p>
 
@@ -140,7 +140,7 @@ export default function ContactPage() {
                           lineHeight: "1.6rem",
                         }}
                       >
-                        —
+                        ·
                       </span>
                       <p className="kxd-body-sm leading-snug">{step}</p>
                     </li>

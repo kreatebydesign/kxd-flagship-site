@@ -13,7 +13,7 @@ import {
 
 export const metadata: Metadata = buildMetadata({
   title: "About",
-  description: `${SITE.name} is a founder-led digital studio — websites, growth systems, and operational platforms built with discipline.`,
+  description: `${SITE.name} is a founder-led digital studio for websites, growth systems, and operational platforms, built with discipline.`,
   path: "/about",
   keywords: [
     "Founder-Led Digital Studio",
@@ -48,7 +48,7 @@ const PROCESS = [
   {
     number: "04",
     title: "Precision execution",
-    body: "From first concept through launch and beyond — every detail is considered.",
+    body: "From first concept through launch and beyond, every detail is considered.",
   },
 ] as const;
 
@@ -58,7 +58,7 @@ export default function AboutPage() {
     founderPersonSchema(),
     webPageSchema({
       title: "About",
-      description: `${SITE.name} is a founder-led digital studio — websites, growth systems, and operational platforms built with discipline.`,
+      description: `${SITE.name} is a founder-led digital studio for websites, growth systems, and operational platforms, built with discipline.`,
       path: "/about",
     }),
   ];
@@ -90,7 +90,7 @@ export default function AboutPage() {
           </h1>
           <p className="kxd-body mt-8" style={{ maxWidth: "34rem" }}>
             KXD was built on one belief: energy is the foundation of design. Every brand
-            holds a frequency — a presence that can be felt before it&rsquo;s seen. We
+            holds a frequency, a presence that can be felt before it&rsquo;s seen. We
             refine that frequency into clarity, precision, and timeless identity. This is
             where creativity meets intention, and brands evolve into experiences.
           </p>
@@ -125,7 +125,7 @@ export default function AboutPage() {
               serve the work. Every decision carries intention. Every execution carries weight.
             </p>
             <p className="kxd-body mt-5">
-              KXD was built for brands that understand this — companies and creators who are
+              KXD was built for brands that understand this, companies and creators who are
               done settling for good enough and ready to build something that lasts.
             </p>
           </div>
@@ -168,7 +168,7 @@ export default function AboutPage() {
                 >
                   <Image
                     src="/migrated-assets/founder/matt-lunger.jpg"
-                    alt="Matt Lunger — Founder, Kreate by Design"
+                    alt="Matt Lunger, Founder, Kreate by Design"
                     fill
                     className="object-cover object-top"
                     style={{
@@ -242,12 +242,12 @@ export default function AboutPage() {
                   human, yet designed with precision.
                 </p>
                 <p style={{ marginBottom: "1.75rem" }}>
-                  KXD was never about decoration. It&rsquo;s about direction — helping creators
+                  KXD was never about decoration. It&rsquo;s about direction, helping creators
                   and companies find the version of themselves that belongs to the future.
                 </p>
                 <p>
                   That&rsquo;s what drives us: to build brands, systems, and experiences designed
-                  to endure — creating clarity, momentum, and long-term value for the businesses
+                  to endure, creating clarity, momentum, and long-term value for the businesses
                   we partner with.
                 </p>
               </div>

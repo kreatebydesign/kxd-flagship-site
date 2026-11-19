@@ -274,7 +274,7 @@ export default function ConstructionIndustryPage() {
             >
               <Image
                 src={martinsen.image}
-                alt="Martinsen Construction — structural framing"
+                alt="Martinsen Construction, structural framing"
                 fill
                 sizes="(max-width: 1024px) 100vw, 66vw"
                 className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.02]"
@@ -383,7 +383,7 @@ export default function ConstructionIndustryPage() {
           >
             <Image
               src={eDavis.image}
-              alt="E. Davis Enterprises — field installation work"
+              alt="E. Davis Enterprises, field installation work"
               fill
               sizes="(max-width: 1024px) 100vw, 58vw"
               className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.02]"

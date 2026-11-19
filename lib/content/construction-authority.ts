@@ -41,7 +41,7 @@ export const CONSTRUCTION_PAGE = {
 export const CONSTRUCTION_PHILOSOPHY = {
   eyebrow: "Approach",
   title: "The site should hold the same standard as the build.",
-  body: "When the fieldwork is precise, the digital presence has to be equally considered — clear services, restrained presentation, and a next step that feels intentional.",
+  body: "When the fieldwork is precise, the digital presence has to be equally considered, clear services, restrained presentation, and a next step that feels intentional.",
 } as const;
 
 export const CONSTRUCTION_CAPABILITIES = [
@@ -57,7 +57,7 @@ export const CONSTRUCTION_CAPABILITIES = [
     index: "02",
     eyebrow: "Growth Infrastructure",
     title: "Measurement and systems when the engagement needs them.",
-    body: "Analytics foundations, conversion pathways, and operational support behind the lead — scoped to how the business actually runs. Demonstrated with E. Davis Enterprises.",
+    body: "Analytics foundations, conversion pathways, and operational support behind the lead, scoped to how the business actually runs. Demonstrated with E. Davis Enterprises.",
     href: "/services/growth-infrastructure",
     linkLabel: "Growth Infrastructure",
   },
@@ -72,7 +72,7 @@ export const CONSTRUCTION_SELECTED_WORK = [
     year: "2026",
     scope: "Website Experiences",
     summary:
-      "Residential and commercial contractor presence — service pathways, professional structure, conversion-ready architecture.",
+      "Residential and commercial contractor presence, service pathways, professional structure, conversion-ready architecture.",
     /** Crop toward structural framing within the existing project hero. */
     image: "/images/work/screenshots/martinsen-construction/desktop-home.webp",
     imagePosition: "68% 55%",
@@ -86,7 +86,7 @@ export const CONSTRUCTION_SELECTED_WORK = [
     year: "2026",
     scope: "Website Experiences · Growth Infrastructure",
     summary:
-      "Propane, gas, and generator services — website presence with analytics, payments, and operational support behind the work.",
+      "Propane, gas, and generator services, website presence with analytics, payments, and operational support behind the work.",
     image: "/images/work/screenshots/e-davis-enterprises/desktop-home.webp",
     imagePosition: "50% 62%",
     featured: false,
@@ -102,7 +102,7 @@ export const CONSTRUCTION_FAQS = [
   {
     question: "What kinds of construction and trades businesses has KXD worked with?",
     answer:
-      "Public work includes a residential and commercial contractor website, and a propane, natural gas, and generator services company with website and growth infrastructure support. Scope always follows the specific business — not a one-size contractor template.",
+      "Public work includes a residential and commercial contractor website, and a propane, natural gas, and generator services company with website and growth infrastructure support. Scope always follows the specific business; not a one-size contractor template.",
   },
   {
     question: "Is this only construction website design?",
@@ -112,7 +112,7 @@ export const CONSTRUCTION_FAQS = [
   {
     question: "Can KXD handle SEO and analytics for a contractor website too?",
     answer:
-      "Yes when the engagement calls for it. Growth Infrastructure covers analytics foundations and conversion pathways where relevant — without inventing ranking or lead guarantees. E. Davis Enterprises is a public example where website presence and growth support work together.",
+      "Yes when the engagement calls for it. Growth Infrastructure covers analytics foundations and conversion pathways where relevant, without inventing ranking or lead guarantees. E. Davis Enterprises is a public example where website presence and growth support work together.",
   },
   {
     question: "Can brand work come before a contractor website redesign?",

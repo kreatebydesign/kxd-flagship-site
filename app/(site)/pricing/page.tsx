@@ -7,7 +7,7 @@ import { breadcrumbSchema, webPageSchema } from "@/lib/seo/schema";
 export const metadata: Metadata = buildMetadata({
   title: "Partnerships",
   description:
-    "Ongoing monthly creative and operating partnerships with Kreate by Design — clear capacity, structured execution, and a private client experience. For one-time project builds, see Working Together.",
+    "Ongoing monthly creative and operating partnerships with Kreate by Design, clear capacity, structured execution, and a private client experience. For one-time project builds, see Working Together.",
   path: "/pricing",
   keywords: [
     "Website Partnership",

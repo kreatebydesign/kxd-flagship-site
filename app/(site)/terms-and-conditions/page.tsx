@@ -38,7 +38,7 @@ const SECTIONS = [
   {
     title: "Intellectual Property",
     paragraphs: [
-      "Unless otherwise noted, the content on this website — including text, visuals, layout, code snippets displayed for demonstration, and brand assets — is owned by KXD or used with permission.",
+      "Unless otherwise noted, the content on this website, including text, visuals, layout, code snippets displayed for demonstration, and brand assets, is owned by KXD or used with permission.",
       "You may view and share links to our pages for personal or informational purposes. You may not copy, reproduce, distribute, or create derivative works from site content without our prior written consent.",
     ],
   },
@@ -52,7 +52,7 @@ const SECTIONS = [
   {
     title: "Services and Engagements",
     paragraphs: [
-      "Descriptions of services on this website — including website design and development, branding and identity, SEO and analytics infrastructure, client portals, audits, retainers, and consulting — are informational.",
+      "Descriptions of services on this website, including website design and development, branding and identity, SEO and analytics infrastructure, client portals, audits, retainers, and consulting, are informational.",
       "No binding obligation exists until a written proposal, statement of work, invoice, or contract is accepted by both parties. Scope, deliverables, timelines, and fees are defined in those documents, not solely by website copy or verbal discussions.",
     ],
   },
@@ -76,7 +76,7 @@ const SECTIONS = [
   {
     title: "Third-Party Tools and Platforms",
     paragraphs: [
-      "Our work often integrates with third-party platforms — hosting providers, CMS tools, analytics services, payment processors, CRMs, email systems, and client portals.",
+      "Our work often integrates with third-party platforms, hosting providers, CMS tools, analytics services, payment processors, CRMs, email systems, and client portals.",
       "Those services are subject to their own terms, fees, and availability. KXD is not responsible for outages, policy changes, or limitations imposed by third-party vendors outside our reasonable control.",
     ],
   },

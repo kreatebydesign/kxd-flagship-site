@@ -6,22 +6,22 @@ const STEPS = [
   {
     number: "01",
     title: "System Diagnosis",
-    body: "We map the full operational picture — positioning gaps, conversion failures, infrastructure debt, and system fragmentation — before a single decision is made.",
+    body: "We map the full operational picture, positioning gaps, conversion failures, infrastructure debt, and system fragmentation, before a single decision is made.",
   },
   {
     number: "02",
     title: "System Architecture",
-    body: "We define the production blueprint: strategy, information architecture, content systems, and operational structure — engineered before design or development begins.",
+    body: "We define the production blueprint: strategy, information architecture, content systems, and operational structure, engineered before design or development begins.",
   },
   {
     number: "03",
     title: "Execution",
-    body: "We build with precision across design, development, CMS, automation, and infrastructure — every layer delivered under direct founder oversight from intake to launch.",
+    body: "We build with precision across design, development, CMS, automation, and infrastructure, every layer delivered under direct founder oversight from intake to launch.",
   },
   {
     number: "04",
     title: "Optimization",
-    body: "We refine, expand, and compound the system over time — so the infrastructure continues generating output and value long after the initial build is complete.",
+    body: "We refine, expand, and compound the system over time, so the infrastructure continues generating output and value long after the initial build is complete.",
   },
 ] as const;
 
@@ -45,7 +45,7 @@ export function ProcessSection() {
                 maxWidth: "30rem",
               }}
             >
-              A controlled system pipeline — from diagnosis to compounding output.
+              A controlled system pipeline, from diagnosis to compounding output.
             </h2>
 
             <p
@@ -55,7 +55,7 @@ export function ProcessSection() {
                 lineHeight: 1.85,
               }}
             >
-              Every KXD project flows through a structured production system —
+              Every KXD project flows through a structured production system ,
               from system diagnosis and architecture through precision execution
               and long-term operational optimization.
             </p>

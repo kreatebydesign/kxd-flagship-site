@@ -11,7 +11,7 @@ import { getJournalFeatureBySlug } from "@/lib/insights/features";
 export const metadata: Metadata = buildMetadata({
   title: "KXD Journal",
   description:
-    "Insights, builds, systems, and ideas from inside Kreate by Design — technical deep dives, client collaborations, and founder notes on how digital work actually gets made.",
+    "Insights, builds, systems, and ideas from inside Kreate by Design, technical deep dives, client collaborations, and founder notes on how digital work actually gets made.",
   path: "/insights",
   noIndex: false,
 });
@@ -137,7 +137,7 @@ export default async function InsightsPage() {
                 className="kxd-body mt-6"
                 style={{ maxWidth: "42rem", lineHeight: 1.8 }}
               >
-                Insights, builds, systems, and ideas from inside Kreate by Design —
+                Insights, builds, systems, and ideas from inside Kreate by Design ,
                 technical deep dives, client collaborations, and notes on how the
                 work actually gets made.
               </p>
@@ -293,7 +293,7 @@ export default async function InsightsPage() {
                   lineHeight: 1.6,
                 }}
               >
-                New perspectives published regularly. No newsletter — just the
+                New perspectives published regularly. No newsletter. Just the
                 work, here when you need it.
               </p>
             </div>

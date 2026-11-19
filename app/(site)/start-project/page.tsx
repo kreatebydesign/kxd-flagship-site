@@ -93,7 +93,7 @@ export default function StartProjectPage() {
             {[
               "Reviewed personally by Matt",
               "Response within 2 business days",
-              "Focused application — ~3 minutes",
+              "Focused application, ~3 minutes",
               "Built for serious growth conversations",
             ].map((point) => (
               <div key={point} className="flex items-center gap-2.5">
@@ -151,7 +151,7 @@ export default function StartProjectPage() {
                           lineHeight: "1.6rem",
                         }}
                       >
-                        —
+                        ·
                       </span>
                       <p className="kxd-body-sm leading-snug">{step}</p>
                     </li>
@@ -184,7 +184,7 @@ export default function StartProjectPage() {
                           lineHeight: "1.6rem",
                         }}
                       >
-                        —
+                        ·
                       </span>
                       <p className="kxd-body-sm leading-snug">{item}</p>
                     </li>

@@ -206,7 +206,7 @@ export function PartnershipPackagesExperience() {
             </h2>
             <p className="kxd-body mt-5" style={{ lineHeight: 1.8 }}>
               Specialized capabilities stay optional. Inventory + Public Showroom
-              is available by proposal — never bundled into a base package.
+              is available by proposal, never bundled into a base package.
             </p>
           </div>
 

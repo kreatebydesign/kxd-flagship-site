@@ -18,7 +18,7 @@ import { breadcrumbSchema, itemListSchema } from "@/lib/seo/schema";
 export const metadata: Metadata = buildMetadata({
   title: "Work",
   description:
-    "Selected work from Kreate by Design — website redesigns, brand systems, growth infrastructure, and operational platforms for ambitious businesses.",
+    "Selected work from Kreate by Design, website redesigns, brand systems, growth infrastructure, and operational platforms for ambitious businesses.",
   path: "/work",
   keywords: [
     "Website Redesign Portfolio",
@@ -189,7 +189,7 @@ export default async function WorkPage() {
             }}
           >
             Selected work across motorsports, automotive, service businesses,
-            and hospitality — websites, growth infrastructure, and operational
+            and hospitality, websites, growth infrastructure, and operational
             systems built with the same standard of clarity and intent.
           </p>
 

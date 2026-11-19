@@ -772,8 +772,8 @@ export default async function ServiceDetailPage({ params }: Props) {
               }}
             >
               Enterprise Platforms is the commercial path. Platforms is where we
-              explain the systems we build — portals, dashboards, and operational
-              infrastructure — with proof from live engagements.
+              explain the systems we build, portals, dashboards, and operational
+              infrastructure, with proof from live engagements.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-4">
               <Link

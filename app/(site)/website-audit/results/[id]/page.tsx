@@ -89,7 +89,7 @@ export default async function WebsiteAuditResultsPage({ params }: Props) {
     notFound();
   }
 
-  const grade = String(audit.grade ?? "—");
+  const grade = String(audit.grade ?? "N/A");
   const gradeColor = GRADE_COLOR[grade as keyof typeof GRADE_COLOR] ?? "var(--kxd-gold)";
   const strengths = parseLines(audit.strengths as string);
   const opportunities = parseLines(audit.opportunities as string);
@@ -194,7 +194,7 @@ export default async function WebsiteAuditResultsPage({ params }: Props) {
             }}
           >
             Here&apos;s what the diagnostic found, why it matters, and where pressure is
-            concentrating — so you can decide what to fix next.
+            concentrating, so you can decide what to fix next.
           </p>
         </div>
       </section>

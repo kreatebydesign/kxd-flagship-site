@@ -6,7 +6,7 @@ export const HOMEPAGE_SERVICES = [
     forWho: "Established businesses whose website no longer matches the standard of the work.",
     creates:
       "High-performance presence, conversion paths, content hierarchy, and launch-ready rebuilds.",
-    whyMatters: "Your website is the first proof of standard — and the first filter for demand.",
+    whyMatters: "Your website is the first proof of standard, and the first filter for demand.",
     summary:
       "Website experiences and redesigns built to strengthen market presence and convert qualified interest.",
     primary: true,
@@ -46,7 +46,7 @@ export const HOMEPAGE_SERVICES = [
     forWho: "Teams aligning voice, visuals, and positioning before a major build.",
     creates: "Identity systems and visual direction that stay coherent.",
     whyMatters: "Without a system, every page fights the last one.",
-    summary: "Voice, visuals, and positioning — aligned with discipline.",
+    summary: "Voice, visuals, and positioning, aligned with discipline.",
     primary: false,
     icon: "shapes" as const,
     cta: "View Fit" as const,

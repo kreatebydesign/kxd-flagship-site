@@ -14,7 +14,7 @@ export type WorkVisual = {
 /** Capabilities intro — business capability & execution */
 export const OUTCOMES_HEADER_VISUAL: WorkVisual = {
   src: "/migrated-assets/case-studies/autodv8ions/homepage-full.webp",
-  alt: "AutoDV8ions — premium digital platform and brand execution",
+  alt: "AutoDV8ions, premium digital platform and brand execution",
   href: "/work/autodv8ions",
   label: "AutoDV8ions",
   role: "Digital Platform",
@@ -24,21 +24,21 @@ export const OUTCOMES_HEADER_VISUAL: WorkVisual = {
 export const OUTCOME_CAPABILITY_VISUALS: Record<string, WorkVisual> = {
   Websites: {
     src: "/migrated-assets/case-studies/primal-motorsports/hero.webp",
-    alt: "Primal Motorsports — luxury website experience",
+    alt: "Primal Motorsports, luxury website experience",
     href: "/work/primal-motorsports",
     label: "Primal Motorsports",
     objectPosition: "top center",
   },
   Growth: {
     src: "/images/work/screenshots/martinsen-construction/desktop-home.webp",
-    alt: "Martinsen Construction — contractor website rebuild",
+    alt: "Martinsen Construction, contractor website rebuild",
     href: "/work/martinsen-construction",
     label: "Martinsen Construction",
     objectPosition: "top",
   },
   Systems: {
     src: "/migrated-assets/case-studies/primal-motorsports/ops-hero.webp",
-    alt: "Primal OS — operations and business systems",
+    alt: "Primal OS, operations and business systems",
     href: "/work/primal-motorsports",
     label: "KXD OS · Primal Operations",
     objectPosition: "top",
@@ -49,7 +49,7 @@ export const OUTCOME_CAPABILITY_VISUALS: Record<string, WorkVisual> = {
 export const SYSTEMS_MOMENTUM_VISUALS: WorkVisual[] = [
   {
     src: "/images/work/screenshots/martinsen-construction/desktop-home.webp",
-    alt: "Martinsen Construction — contractor website rebuild",
+    alt: "Martinsen Construction, contractor website rebuild",
     href: "/work/martinsen-construction",
     label: "Martinsen Construction",
     role: "Contractor Website",
@@ -57,7 +57,7 @@ export const SYSTEMS_MOMENTUM_VISUALS: WorkVisual[] = [
   },
   {
     src: "/images/work/screenshots/e-davis-enterprises/desktop-home.webp",
-    alt: "E. Davis Enterprises — service business website rebuild",
+    alt: "E. Davis Enterprises, service business website rebuild",
     href: "/work/e-davis-enterprises",
     label: "E. Davis Enterprises",
     role: "Service Business",
@@ -65,7 +65,7 @@ export const SYSTEMS_MOMENTUM_VISUALS: WorkVisual[] = [
   },
   {
     src: "/migrated-assets/case-studies/primal-motorsports/hero.webp",
-    alt: "Primal Motorsports — luxury website rebuild",
+    alt: "Primal Motorsports, luxury website rebuild",
     href: "/work/primal-motorsports",
     label: "Primal Motorsports",
     role: "Motorsports Website",
@@ -81,7 +81,7 @@ export const HOMEPAGE_CASE_STUDY_SLUGS = {
 
 export const PROCESS_EXECUTION_VISUAL: WorkVisual = {
   src: "/migrated-assets/case-studies/primal-motorsports/dashboard-full.webp",
-  alt: "Primal Motorsports — driver portal and operational dashboard",
+  alt: "Primal Motorsports, driver portal and operational dashboard",
   href: "/work/primal-motorsports",
   label: "Primal Motorsports · Systems",
   objectPosition: "top",
@@ -89,7 +89,7 @@ export const PROCESS_EXECUTION_VISUAL: WorkVisual = {
 
 export const FOUNDER_STANDARD_VISUAL: WorkVisual = {
   src: "/media/cusickmotorsports-com-hero-2026-06-15T06-05-15.png",
-  alt: "Cusick Morgan Motorsports — live client website",
+  alt: "Cusick Morgan Motorsports, live client website",
   href: "/work/cusick-morgan-motorsports",
   label: "Cusick Morgan Motorsports",
   objectPosition: "top",

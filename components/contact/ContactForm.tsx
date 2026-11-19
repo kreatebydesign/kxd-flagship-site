@@ -23,7 +23,7 @@ const PROJECT_TYPES = [
   { value: "growth-infrastructure", label: "Growth Infrastructure" },
   { value: "enterprise-platforms", label: "Enterprise Platforms" },
   { value: "ongoing-partnership", label: "Ongoing Partnership" },
-  { value: "general", label: "Unsure — Let's discuss" },
+  { value: "general", label: "Unsure? Let's discuss" },
 ] as const;
 
 const PARTNERSHIP_OPTIONS = [

@@ -5,9 +5,9 @@ import { buildMetadata } from "@/lib/seo/metadata";
 import { breadcrumbSchema, webPageSchema } from "@/lib/seo/schema";
 
 export const metadata: Metadata = buildMetadata({
-  title: "KXD Intelligence — Website Audit",
+  title: "KXD Intelligence Website Audit",
   description:
-    "Something about your website isn't working the way it should. KXD Intelligence reviews homepage performance, SEO foundations, mobile readiness, conversion paths, and brand presentation — then shows where the pressure is.",
+    "Something about your website isn't working the way it should. KXD Intelligence reviews homepage performance, SEO foundations, mobile readiness, conversion paths, and brand presentation. Then shows where the pressure is.",
   path: "/website-audit",
   keywords: [
     "KXD Intelligence",
@@ -43,7 +43,7 @@ export default function WebsiteAuditPage() {
       { name: "KXD Intelligence", path: "/website-audit" },
     ]),
     webPageSchema({
-      title: "KXD Intelligence — Website Audit",
+      title: "KXD Intelligence Website Audit",
       description:
         "Diagnostic website audit across performance, SEO, mobile, conversion, and brand presentation.",
       path: "/website-audit",
@@ -72,7 +72,7 @@ export default function WebsiteAuditPage() {
           </h1>
           <p className="kxd-body mt-6" style={{ maxWidth: "40rem", lineHeight: 1.8 }}>
             KXD Intelligence evaluates your homepage to surface meaningful issues and
-            opportunities — performance, discoverability, mobile experience, inquiry paths,
+            opportunities, performance, discoverability, mobile experience, inquiry paths,
             and brand presentation. Clear scores. Honest gaps. A useful next step.
           </p>
           <div className="mt-10 flex flex-wrap gap-x-8 gap-y-3">
@@ -101,7 +101,7 @@ export default function WebsiteAuditPage() {
                 <h2 className="kxd-audit-panel__title">Run the diagnostic</h2>
                 <p className="kxd-audit-panel__lede">
                   Enter your details and URL. KXD analyzes publicly visible homepage signals
-                  and returns a scorecard with prioritized observations — not an enterprise
+                  and returns a scorecard with prioritized observations; not an enterprise
                   crawl dump.
                 </p>
               </div>
@@ -145,7 +145,7 @@ export default function WebsiteAuditPage() {
                 }}
               >
                 &ldquo;Diagnosis first. Then a clear path toward the KXD capability that
-                actually fits — website, growth, or deeper systems when the business needs
+                actually fits, website, growth, or deeper systems when the business needs
                 them.&rdquo;
               </p>
             </aside>

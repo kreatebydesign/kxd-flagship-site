@@ -46,12 +46,12 @@ export const STATIC_SERVICE_DETAILS: Record<string, StaticServiceDetail> = {
     headline:
       "Premium websites, designed and developed to hold weight.",
     summary:
-      "Premium website design, development, and serious rebuilds for established businesses — backed by responsive performance, search foundations, and measurement.",
+      "Premium website design, development, and serious rebuilds for established businesses, backed by responsive performance, search foundations, and measurement.",
     bestFor: [
       "Businesses whose website feels outdated or interchangeable",
       "Teams whose online presence weakens trust before the first conversation",
       "Organizations that need clearer service pathways and stronger inquiry conversion",
-      "Brands preparing for a serious redesign or rebuild — not another template refresh",
+      "Brands preparing for a serious redesign or rebuild; not another template refresh",
     ],
     deliverables: [
       "Strategic redesign / rebuild scoped to business goals",
@@ -81,7 +81,7 @@ export const STATIC_SERVICE_DETAILS: Record<string, StaticServiceDetail> = {
       {
         stepTitle: "Design & Build",
         stepDescription:
-          "Craft and develop the experience to the KXD standard — presence first, performance throughout.",
+          "Craft and develop the experience to the KXD standard, presence first, performance throughout.",
       },
       {
         stepTitle: "Launch",
@@ -106,12 +106,12 @@ export const STATIC_SERVICE_DETAILS: Record<string, StaticServiceDetail> = {
       {
         question: "Do you guarantee more leads?",
         answer:
-          "No. KXD builds clearer presence and stronger inquiry paths. Results depend on the business, offer, and follow-through — we do not invent performance promises.",
+          "No. KXD builds clearer presence and stronger inquiry paths. Results depend on the business, offer, and follow-through, we do not invent performance promises.",
       },
       {
         question: "Can this connect into growth or systems work later?",
         answer:
-          "Yes. Some clients stop at the website. Others expand into growth infrastructure or operational platforms when the business needs it — not because every engagement requires it.",
+          "Yes. Some clients stop at the website. Others expand into growth infrastructure or operational platforms when the business needs it; not because every engagement requires it.",
       },
     ],
     keywords: [
@@ -139,7 +139,7 @@ export const STATIC_SERVICE_DETAILS: Record<string, StaticServiceDetail> = {
       },
     ],
     relationshipNote:
-      "A website engagement can stand alone. When the business needs measurement, lead structure, or operational systems later, KXD can stay involved — without forcing a funnel.",
+      "A website engagement can stand alone. When the business needs measurement, lead structure, or operational systems later, KXD can stay involved, without forcing a funnel.",
   },
 
   "growth-infrastructure": {
@@ -149,9 +149,9 @@ export const STATIC_SERVICE_DETAILS: Record<string, StaticServiceDetail> = {
     categoryLabel: "Growth",
     eyebrow: "Growth Infrastructure",
     headline:
-      "Turn attention into structured demand — with measurement you can actually use.",
+      "Turn attention into structured demand, with measurement you can actually use.",
     summary:
-      "SEO foundations, GA4 analytics, conversion pathways, and CRM-connected lead systems for businesses that need structured demand — not just a beautiful website.",
+      "SEO foundations, GA4 analytics, conversion pathways, and CRM-connected lead systems for businesses that need structured demand; not just a beautiful website.",
     bestFor: [
       "Businesses with traffic or visibility that fails to become qualified inquiry",
       "Teams that cannot clearly see what is working across channels",
@@ -171,7 +171,7 @@ export const STATIC_SERVICE_DETAILS: Record<string, StaticServiceDetail> = {
       "Clearer visibility into how demand moves",
       "Stronger connection between presence and inquiry",
       "Lead pathways that do not die in the inbox",
-      "A growth layer that can compound with the website — not compete with it",
+      "A growth layer that can compound with the website; not compete with it",
     ],
     process: [
       {
@@ -192,7 +192,7 @@ export const STATIC_SERVICE_DETAILS: Record<string, StaticServiceDetail> = {
       {
         stepTitle: "Optimization",
         stepDescription:
-          "Create a cadence for refinement — project closeout or ongoing partnership.",
+          "Create a cadence for refinement, project closeout or ongoing partnership.",
       },
     ],
     investmentLabel: "Growth Buildout",
@@ -208,12 +208,12 @@ export const STATIC_SERVICE_DETAILS: Record<string, StaticServiceDetail> = {
         question:
           "Can KXD handle the website, SEO, analytics and conversion infrastructure together?",
         answer:
-          "Yes, when the engagement calls for it. Growth Infrastructure connects the layers that usually fragment across vendors: website conversion paths, SEO and local discoverability where they matter, GA4 and Search Console measurement, lead capture and routing, CRM connection patterns, and Google Ads conversion infrastructure when advertising is part of the system. The advantage is coherence — one connected growth path instead of disconnected tools that never share a clear picture of demand.",
+          "Yes, when the engagement calls for it. Growth Infrastructure connects the layers that usually fragment across vendors: website conversion paths, SEO and local discoverability where they matter, GA4 and Search Console measurement, lead capture and routing, CRM connection patterns, and Google Ads conversion infrastructure when advertising is part of the system. The advantage is coherence, one connected growth path instead of disconnected tools that never share a clear picture of demand.",
       },
       {
         question: "Is this an SEO agency package?",
         answer:
-          "No. Search is one component when it matters. Growth Infrastructure is about structured demand: measurement, conversion paths, and lead systems — not generic ranking promises.",
+          "No. Search is one component when it matters. Growth Infrastructure is about structured demand: measurement, conversion paths, and lead systems; not generic ranking promises.",
       },
       {
         question: "Do you connect to CRM tools?",
@@ -253,7 +253,7 @@ export const STATIC_SERVICE_DETAILS: Record<string, StaticServiceDetail> = {
       },
     ],
     relationshipNote:
-      "Growth work often follows a strong website — but it can also rescue a site that already has traffic. Deeper systems come later only when operations require them.",
+      "Growth work often follows a strong website, but it can also rescue a site that already has traffic. Deeper systems come later only when operations require them.",
   },
 
   "enterprise-platforms": {
@@ -270,7 +270,7 @@ export const STATIC_SERVICE_DETAILS: Record<string, StaticServiceDetail> = {
       "Organizations stuck between disconnected tools and repetitive manual work",
       "Teams that need client or member portals with real operational value",
       "Businesses whose customer experience breaks after the first inquiry",
-      "Leaders ready for a high-touch build — not an off-the-shelf software install",
+      "Leaders ready for a high-touch build; not an off-the-shelf software install",
     ],
     deliverables: [
       "Operational discovery and workflow mapping",
@@ -284,7 +284,7 @@ export const STATIC_SERVICE_DETAILS: Record<string, StaticServiceDetail> = {
       "Less fragmentation across the tools people actually use",
       "Clearer client and internal experiences",
       "Workflows that match the business instead of fighting it",
-      "A platform that can evolve with the organization — without becoming generic software",
+      "A platform that can evolve with the organization, without becoming generic software",
     ],
     process: [
       {
@@ -295,7 +295,7 @@ export const STATIC_SERVICE_DETAILS: Record<string, StaticServiceDetail> = {
       {
         stepTitle: "Architecture",
         stepDescription:
-          "Design the system around the business — not a template product roadmap.",
+          "Design the system around the business; not a template product roadmap.",
       },
       {
         stepTitle: "Build",
@@ -325,7 +325,7 @@ export const STATIC_SERVICE_DETAILS: Record<string, StaticServiceDetail> = {
       {
         question: "Are you a software development shop?",
         answer:
-          "No. KXD builds selective operational systems for partners we can serve with full attention — brand-native platforms, not mass-market software products.",
+          "No. KXD builds selective operational systems for partners we can serve with full attention, brand-native platforms; not mass-market software products.",
       },
       {
         question: "Do all clients eventually need this?",
@@ -348,7 +348,7 @@ export const STATIC_SERVICE_DETAILS: Record<string, StaticServiceDetail> = {
       {
         slug: "plate-the-umpqua",
         title: "Plate the Umpqua",
-        note: "Hospitality website and Plate OS — inquiries, menus, Partner Concierge, and operator workflows.",
+        note: "Hospitality website and Plate OS, inquiries, menus, Partner Concierge, and operator workflows.",
       },
       {
         slug: "e-davis-enterprises",
@@ -357,7 +357,7 @@ export const STATIC_SERVICE_DETAILS: Record<string, StaticServiceDetail> = {
       },
     ],
     relationshipNote:
-      "This is the deeper layer — entered when fragmentation, portals, or workflows demand it. Review Platforms for capability evidence before you scope the engagement.",
+      "This is the deeper layer, entered when fragmentation, portals, or workflows demand it. Review Platforms for capability evidence before you scope the engagement.",
   },
 
   "brand-systems-identity": {
@@ -426,7 +426,7 @@ export const STATIC_SERVICE_DETAILS: Record<string, StaticServiceDetail> = {
       {
         question: "Do you only design logos?",
         answer:
-          "No. KXD focuses on the full brand standard — positioning, identity, and guidance that stays coherent as the business grows.",
+          "No. KXD focuses on the full brand standard, positioning, identity, and guidance that stays coherent as the business grows.",
       },
     ],
     keywords: [

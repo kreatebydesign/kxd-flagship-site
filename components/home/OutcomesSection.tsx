@@ -64,7 +64,7 @@ export function OutcomesSection() {
               }}
             >
               KXD builds the website, the growth layer, and the systems behind
-              them — so established businesses look sharp, convert better, and
+              them, so established businesses look sharp, convert better, and
               operate with less friction.
             </p>
 
@@ -191,7 +191,7 @@ export function OutcomesSection() {
             {
               title: "Demand",
               description:
-                "Clearer journeys from interest to inquiry — built for conversion quality, not vanity traffic.",
+                "Clearer journeys from interest to inquiry, built for conversion quality; not vanity traffic.",
             },
             {
               title: "Operations",
