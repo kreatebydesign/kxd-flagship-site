@@ -23,7 +23,7 @@ check(
   "workspace bundle parallelizes command center with commercial snapshots",
   workspace.includes("loadClientCommandCenter(clientId)") &&
     workspace.includes("loadClientFinancialSnapshot(clientId)") &&
-    workspace.includes("await Promise.all([") &&
+    workspace.includes("Promise.all([") &&
     workspace.includes("commandCenterPromise"),
 );
 check(
@@ -35,6 +35,13 @@ const hub = read("lib/client-command/hub.ts");
 check(
   "client list does not load full intelligence universe",
   hub.includes("loadHealthContext") && !hub.includes("loadIntelligenceContext"),
+);
+
+const engine = read("lib/client-command/engine.ts");
+check(
+  "client command center uses scoped intelligence context",
+  engine.includes("loadClientScopedIntelligenceContext") &&
+    !engine.includes("loadIntelligenceContext"),
 );
 
 const intel = read("lib/intelligence/context.ts");
@@ -51,8 +58,32 @@ check("operator nav uses useLinkStatus acknowledgment", nav.includes("useLinkSta
 check("workspace tabs can soft-navigate without RSC refetch", nav.includes("onSoftNavigate"));
 check("operator links prefetch full dynamic routes", nav.includes("prefetch"));
 
-const loadingToday = read("app/admin/operations/today/loading.tsx");
+const loadingToday = read("app/admin/operations/(studio)/today/loading.tsx");
 check("today arrival loading remains for login handoff", loadingToday.includes("Entering your business"));
+
+const todayPage = read("app/admin/operations/(studio)/today/page.tsx");
+check(
+  "founder hybrid today uses persistent shell when enabled",
+  todayPage.includes("FounderHybridTodayScreen") && todayPage.includes("OperationsShell"),
+);
+
+const studioLayout = read("app/admin/operations/(studio)/layout.tsx");
+check(
+  "studio layout mounts persistent operations chrome",
+  studioLayout.includes("StudioOperationsChrome"),
+);
+
+const shell = read("components/admin/operations/shared/OperationsShell.tsx");
+check(
+  "operations shell avoids duplicate chrome when layout owns shell",
+  shell.includes("OperationsShellFrame") && shell.includes('chrome?.mode === "layout"'),
+);
+
+const clientsLoading = read("app/admin/operations/(studio)/clients/loading.tsx");
+check("clients route exposes loading boundary", clientsLoading.includes("Loading client portfolio"));
+
+const authShared = read("lib/admin/auth.ts");
+check("admin auth reuses shared payload per request", authShared.includes("getSharedPayload"));
 
 const css = read("design-system/os/styles/kxd-os.css");
 check("pending links disable pointer events (double-click guard)", css.includes("pointer-events: none"));

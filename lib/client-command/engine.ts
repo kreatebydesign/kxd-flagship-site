@@ -1,14 +1,14 @@
 import "server-only";
 
-import { getPayload } from "payload";
-import config from "@payload-config";
+import { getSharedPayload } from "@/lib/payload/get-payload";
 import { calculateClientHealth } from "@/lib/client-health/health-engine";
 import { fetchClientWorkspace } from "@/lib/executive-client-workspace/fetch-client-workspace";
 import { getExecutiveTimelineClient } from "@/lib/executive-timeline/data";
 import { getClientInfrastructure } from "@/lib/infrastructure/data";
 import { buildClientInsightSections } from "@/lib/intelligence/summaries";
 import { buildClientRecommendations } from "@/lib/intelligence/recommendations";
-import { loadIntelligenceContext } from "@/lib/intelligence/context";
+import { loadClientScopedIntelligenceContext } from "@/lib/intelligence/context";
+import { timePhase } from "@/lib/perf/request-phases";
 import { buildQuickActions } from "./actions";
 import { getClientPlaybookSummary } from "@/lib/playbooks";
 import { getClientWorkSummary } from "@/lib/client-tasks";
@@ -26,7 +26,7 @@ import {
 import type { ClientCommandCenterData, CommandDoc } from "./types";
 
 async function fetchClientBrandKits(cid: number): Promise<CommandDoc[]> {
-  const payload = await getPayload({ config });
+  const payload = await getSharedPayload();
   try {
     const result = await payload.find({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -44,7 +44,7 @@ async function fetchClientBrandKits(cid: number): Promise<CommandDoc[]> {
 }
 
 async function fetchClientCreativeAssets(cid: number): Promise<CommandDoc[]> {
-  const payload = await getPayload({ config });
+  const payload = await getSharedPayload();
   try {
     const result = await payload.find({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -67,7 +67,7 @@ async function fetchClientAutomation(cid: number): Promise<{
   failures: CommandDoc[];
   healthRecalculations: number;
 }> {
-  const payload = await getPayload({ config });
+  const payload = await getSharedPayload();
 
   const [eventsR, notificationsR, failuresR, healthR] = await Promise.allSettled([
     payload.find({
@@ -127,8 +127,10 @@ async function fetchClientAutomation(cid: number): Promise<{
 export async function loadClientCommandCenter(
   clientId: number,
 ): Promise<ClientCommandCenterData | null> {
-  const ctx = await loadIntelligenceContext();
-  if (!ctx.clientsById.has(clientId)) return null;
+  const ctx = await timePhase("clientCommand.intelligence", () =>
+    loadClientScopedIntelligenceContext(clientId),
+  );
+  if (!ctx) return null;
 
   const [
     workspace,
@@ -143,20 +145,22 @@ export async function loadClientCommandCenter(
     clientSuccessSummary,
     genesisSummary,
     launchQaSummary,
-  ] = await Promise.all([
-    fetchClientWorkspace(clientId),
-    getClientInfrastructure(clientId),
-    getExecutiveTimelineClient(clientId),
-    fetchClientBrandKits(clientId),
-    fetchClientCreativeAssets(clientId),
-    fetchClientAutomation(clientId),
-    getClientStrategySummary(clientId),
-    getClientPlaybookSummary(clientId),
-    getClientWorkSummary(clientId),
-    getClientSuccessSummary(clientId),
-    getGenesisSummaryForClient(clientId),
-    getLaunchQaSummaryForClient(clientId),
-  ]);
+  ] = await timePhase("clientCommand.centerFetches", () =>
+    Promise.all([
+      fetchClientWorkspace(clientId),
+      getClientInfrastructure(clientId),
+      getExecutiveTimelineClient(clientId),
+      fetchClientBrandKits(clientId),
+      fetchClientCreativeAssets(clientId),
+      fetchClientAutomation(clientId),
+      getClientStrategySummary(clientId),
+      getClientPlaybookSummary(clientId),
+      getClientWorkSummary(clientId),
+      getClientSuccessSummary(clientId),
+      getGenesisSummaryForClient(clientId),
+      getLaunchQaSummaryForClient(clientId),
+    ]),
+  );
 
   const insights = await buildClientInsightSections(clientId, ctx);
   const recommendations = buildClientRecommendations(clientId, ctx);

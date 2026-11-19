@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { OperatorNavLink } from "@/components/admin/operations/shared/OperatorNavLink";
 import { KxdShell } from "@/components/os";
 import { ExecutiveWorkspaceShell } from "@/components/admin/executive-workspace";
 import { WhyThisDisclosure } from "@/components/admin/executive-intelligence/WhyThisDisclosure";
@@ -70,23 +71,23 @@ export function ExecutiveTodayScreen({ data }: { data: ExecutiveTodayData }) {
             ) : null}
             {primaryHref ? (
               <p className="kxd-exec-today__cta">
-                <Link
+                <OperatorNavLink
                   href={primaryHref}
                   className="kxd-exec-today__cta-link"
                   data-today-primary-move="true"
                 >
                   {primaryLabel}
-                </Link>
+                </OperatorNavLink>
               </p>
             ) : isCalm ? (
               <p className="kxd-exec-today__cta">
-                <Link
+                <OperatorNavLink
                   href="/admin/operations/focus"
                   className="kxd-exec-today__cta-link"
                   data-today-primary-move="true"
                 >
                   Begin the day
-                </Link>
+                </OperatorNavLink>
               </p>
             ) : null}
             <WhyThisDisclosure explainability={data.explainability} />
@@ -301,9 +302,9 @@ export function ExecutiveTodayScreen({ data }: { data: ExecutiveTodayData }) {
                 <h2 id="today-priorities" className="kxd-exec-today__label">
                   Also on your desk
                 </h2>
-                <Link href="/admin/work" className="kxd-exec-today__section-link">
+                <OperatorNavLink href="/admin/work" className="kxd-exec-today__section-link">
                   Work
-                </Link>
+                </OperatorNavLink>
               </div>
               <ul className="kxd-exec-today__list">
                 {xp.priorities.map((item) => (

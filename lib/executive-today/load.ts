@@ -6,8 +6,7 @@ import "server-only";
  * Does not publish Activity. Does not mutate calendar.
  */
 
-import { getPayload } from "payload";
-import config from "@payload-config";
+import { getSharedPayload } from "@/lib/payload/get-payload";
 import { getExecutiveContext } from "@/lib/executive-context";
 import {
   composeExecutiveIntelligence,
@@ -90,7 +89,7 @@ export async function loadExecutiveToday(input?: {
 
   const opportunityCountsPromise = (async () => {
     try {
-      const payload = await getPayload({ config });
+      const payload = await getSharedPayload();
       return await loadOpportunitySummaryCounts(payload);
     } catch {
       return emptyOpportunitySummaryCounts();

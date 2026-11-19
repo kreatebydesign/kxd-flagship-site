@@ -10,6 +10,7 @@ import {
   commercialWorkspaceHref,
   resolveCommercialSection,
 } from "@/lib/client-command/commercial/sections";
+import { timePhase, getRequestPhaseRecorder } from "@/lib/perf/request-phases";
 
 export const dynamic = "force-dynamic";
 
@@ -27,7 +28,7 @@ export default async function ClientCommandWorkspacePage({ params, searchParams 
   const { requireOperatorClientPageAccess } = await import(
     "@/lib/staff/operator-client-access"
   );
-  await requireOperatorClientPageAccess(clientId);
+  await timePhase("clientCommand.auth", () => requireOperatorClientPageAccess(clientId));
 
   if (isLegacyCommercialTabId(tabParam)) {
     redirect(commercialWorkspaceHref(clientId, resolveWorkspaceTab(tabParam).commercialSection));
@@ -40,8 +41,14 @@ export default async function ClientCommandWorkspacePage({ params, searchParams 
       ? resolveCommercialSection(sectionParam ?? resolved.commercialSection)
       : undefined;
 
-  const data = await loadClientWorkspaceBundle(clientId);
+  const data = await timePhase("clientCommand.bundle", () =>
+    loadClientWorkspaceBundle(clientId, { skipSessionAccessCheck: true }),
+  );
   if (!data) notFound();
+
+  if (process.env.KXD_LOG_REQUEST_PHASES === "1") {
+    console.info("[perf:client-command]", JSON.stringify(getRequestPhaseRecorder().snapshot()));
+  }
 
   return (
     <OperationsShell activeId="clients" clientId={clientId}>

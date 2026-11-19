@@ -54,6 +54,8 @@ export function middleware(request: NextRequest) {
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set("x-kxd-pathname", pathname);
     // App Router POST handlers can lose Cookie on next/headers(); forward from middleware.
+    // Never trust a client-supplied forwarding header; strip then set from verified cookies only.
+    requestHeaders.delete("x-kxd-forwarded-cookie");
     const forwardedCookies = request.cookies
       .getAll()
       .map((cookie) => `${cookie.name}=${cookie.value}`)
