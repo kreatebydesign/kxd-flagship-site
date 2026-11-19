@@ -1,3 +1,5 @@
+import { KXD_BUSINESS_TIMEZONE } from "@/lib/platform/timezone";
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type SalesUiDoc = Record<string, any>;
 
@@ -14,6 +16,7 @@ export function fmtDate(iso: string | null | undefined): string {
   if (!iso) return "—";
   try {
     return new Date(iso).toLocaleDateString("en-US", {
+      timeZone: KXD_BUSINESS_TIMEZONE,
       month: "short",
       day: "numeric",
       year: "numeric",
@@ -27,6 +30,7 @@ export function fmtWhen(iso: string | null | undefined): string {
   if (!iso) return "—";
   try {
     return new Date(iso).toLocaleString("en-US", {
+      timeZone: KXD_BUSINESS_TIMEZONE,
       month: "short",
       day: "numeric",
       hour: "numeric",

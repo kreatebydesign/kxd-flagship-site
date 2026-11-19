@@ -7,6 +7,7 @@ import { NEXT_ACTIONS } from "@/lib/sales/next-action";
 import { LOST_REASONS, type OutreachKind } from "@/lib/sales/follow-up-policy";
 import { WORKSPACE_MOVES } from "@/lib/sales/workspace-stages";
 import type { SalesOpportunityCard } from "@/lib/sales/workspace";
+import { KXD_BUSINESS_TIMEZONE } from "@/lib/platform/timezone";
 import { fmtMoney } from "./shared";
 
 type StoryItem = {
@@ -51,6 +52,7 @@ function fmtDue(iso: string | null): string | null {
   if (!iso) return null;
   try {
     return new Date(iso).toLocaleString("en-US", {
+      timeZone: KXD_BUSINESS_TIMEZONE,
       weekday: "short",
       month: "short",
       day: "numeric",
