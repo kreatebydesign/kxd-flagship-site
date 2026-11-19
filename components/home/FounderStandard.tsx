@@ -74,7 +74,7 @@ export function FounderStandard() {
               }}
             >
               KXD designs and operates creative systems for brands that require
-              more than execution — they require infrastructure. Every engagement
+              more than execution, they require infrastructure. Every engagement
               receives direct founder oversight, production-grade creative systems,
               and operational thinking built to compound in value long after launch.
             </p>

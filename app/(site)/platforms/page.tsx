@@ -38,7 +38,7 @@ const PHILOSOPHY_PILLARS = [
   },
   {
     title: "Long-Term Scalability",
-    body: "Systems built to grow with the business — not to be replaced by it. Architecture decisions that compound over time.",
+    body: "Systems built to grow with the business; not to be replaced by it. Architecture decisions that compound over time.",
   },
 ] as const;
 
@@ -93,7 +93,7 @@ const PROCESS_STEPS = [
   {
     number: "01",
     title: "Discovery",
-    body: "We audit how the organization actually operates — not how it's supposed to. Conversations, walkthroughs, and a clear view of the gaps.",
+    body: "We audit how the organization actually operates; not how it's supposed to. Conversations, walkthroughs, and a clear view of the gaps.",
   },
   {
     number: "02",
@@ -123,7 +123,7 @@ const FEATURED_WORK = [
     title: "Primal Motorsports",
     category: "Motorsports OS",
     description:
-      "Website, membership architecture, and growth infrastructure for one of motorsports' most ambitious brands — built as a complete operational layer, not a collection of tools.",
+      "Website, membership architecture, and growth infrastructure for one of motorsports' most ambitious brands, built as a complete operational layer; not a collection of tools.",
     outcome: "Flagship presence for a performance brand that competes at the top.",
   },
   {
@@ -131,7 +131,7 @@ const FEATURED_WORK = [
     title: "Plate the Umpqua",
     category: "Hospitality OS",
     description:
-      "Public hospitality experience plus Plate OS — inquiry workflows, menus, Partner Concierge, and operational infrastructure behind the brand.",
+      "Public hospitality experience plus Plate OS, inquiry workflows, menus, Partner Concierge, and operational infrastructure behind the brand.",
     outcome: "Website and operating system shaped around how private dining actually runs.",
   },
 ] as const;
@@ -169,7 +169,7 @@ export default function PlatformsPage() {
             style={{ maxWidth: "38rem", lineHeight: 1.8 }}
           >
             KXD develops operational platforms for organizations that have
-            outgrown disconnected tools — creating systems that improve
+            outgrown disconnected tools, creating systems that improve
             visibility, efficiency, and experience without sacrificing brand
             integrity.
           </p>
@@ -278,7 +278,7 @@ export default function PlatformsPage() {
             <p className="kxd-body mt-6" style={{ maxWidth: "40rem", lineHeight: 1.8 }}>
               That distinction matters. It means every system we design starts
               with a specific organization&rsquo;s actual workflows, constraints,
-              and brand — not a template. The result is infrastructure that feels
+              and brand; not a template. The result is infrastructure that feels
               native to the business, not bolted on.
             </p>
           </div>
@@ -353,7 +353,7 @@ export default function PlatformsPage() {
             Four domains. One standard.
           </h2>
           <p className="kxd-body mt-4" style={{ maxWidth: "36rem" }}>
-            Each engagement is bespoke — but our work clusters around four
+            Each engagement is bespoke, but our work clusters around four
             operational categories where we&rsquo;ve developed deep expertise.
           </p>
 
@@ -435,7 +435,7 @@ export default function PlatformsPage() {
                               flexShrink: 0,
                             }}
                           >
-                            —
+                            ·
                           </span>
                           <p
                             className="font-sans font-light"
@@ -449,7 +449,7 @@ export default function PlatformsPage() {
                               {label}
                             </span>
                             {detail && (
-                              <span style={{ opacity: 0.65 }}> — {detail}</span>
+                              <span style={{ opacity: 0.65 }}>, {detail}</span>
                             )}
                           </p>
                         </li>

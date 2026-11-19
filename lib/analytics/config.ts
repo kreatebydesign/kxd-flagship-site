@@ -71,7 +71,10 @@ export const ANALYTICS_EVENTS = {
   projectView: "project_view",
   caseStudyView: "case_study_view",
   serviceView: "service_view",
+  /** Historical GA4 funnels — still emitted on /investment alongside workingTogetherView. */
   pricingView: "pricing_view",
+  /** Preferred page-view name for /investment after public pricing removal. */
+  workingTogetherView: "working_together_view",
   contactClick: "contact_click",
   /** KXD Intelligence — /website-audit */
   websiteAuditStarted: "website_audit_started",

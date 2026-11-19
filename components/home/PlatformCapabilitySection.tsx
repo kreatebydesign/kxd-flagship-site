@@ -53,7 +53,7 @@ export function PlatformCapabilitySection() {
                 lineHeight: 1.85,
               }}
             >
-              KXD builds the operational layer behind ambitious brands —
+              KXD builds the operational layer behind ambitious brands ,
               portals, dashboards, and workflow infrastructure designed around
               how the business actually runs. Always in service of the brand.
               Never as a standalone software product.

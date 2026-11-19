@@ -33,7 +33,7 @@ export function WebsiteAuditorSection() {
                 lineHeight: 1.85,
               }}
             >
-              KXD Intelligence is our proprietary diagnostic — the same
+              KXD Intelligence is our proprietary diagnostic, the same
               strategic lens we apply before a rebuild or systems engagement.
               It reviews performance, discoverability, experience, conversion,
               and brand presentation, then delivers a prioritized scorecard

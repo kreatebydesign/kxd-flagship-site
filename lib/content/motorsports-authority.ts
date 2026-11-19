@@ -202,7 +202,7 @@ export const MOTORSPORTS_ENGAGEMENT = {
   ],
   investmentNote: "Project investment and ongoing partnerships are scoped separately.",
   investmentHref: "/investment",
-  investmentLabel: "View Investment",
+  investmentLabel: "Working Together",
   partnershipsHref: "/pricing",
   partnershipsLabel: "Ongoing Partnerships",
 } as const;

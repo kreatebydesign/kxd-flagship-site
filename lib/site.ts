@@ -23,7 +23,7 @@ export const SITE = {
   tagline:
     "Premium websites, growth infrastructure, and operational systems.",
   description:
-    "Kreate by Design builds premium websites, growth infrastructure, and operational platforms for ambitious businesses across the United States. Studio based in Los Angeles, California.",
+    "Kreate by Design builds premium website design and development, branding, SEO, and custom business platforms for ambitious brands. Founder-led creative and technology studio.",
   url: resolvePublicSiteUrl(),
   locale: "en_US",
   email: "matt@kreatebydesign.com",

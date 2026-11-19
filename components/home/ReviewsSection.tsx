@@ -147,7 +147,7 @@ export async function ReviewsSection() {
                 lineHeight: 1.85,
               }}
             >
-              KXD operates with brands that require system-level execution quality —
+              KXD operates with brands that require system-level execution quality ,
               consistent delivery, production-grade output, and infrastructure built
               to perform long after the initial build is complete.
             </p>
@@ -207,15 +207,15 @@ export async function ReviewsSection() {
           {[
             {
               label: "System Transparency",
-              copy: "Every production decision surfaces within a documented framework — clients understand the system logic, not just the output.",
+              copy: "Every production decision surfaces within a documented framework, clients understand the system logic; not just the output.",
             },
             {
               label: "Founder-Led Execution",
-              copy: "Direct founder oversight at every production stage — no handoffs, no gaps, no diluted decisions.",
+              copy: "Direct founder oversight at every production stage, no handoffs, no gaps, no diluted decisions.",
             },
             {
               label: "Compounding Infrastructure",
-              copy: "Systems are built to generate increasing output over time — every layer engineered to compound on the last.",
+              copy: "Systems are built to generate increasing output over time, every layer engineered to compound on the last.",
             },
           ].map((item) => (
             <div key={item.label}>

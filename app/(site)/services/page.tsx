@@ -14,7 +14,7 @@ import { StructuredData } from "@/components/seo/StructuredData";
 export const metadata: Metadata = buildMetadata({
   title: "Services",
   description:
-    "Brand systems, website experiences, growth infrastructure, and operational platforms — built with discipline by Kreate by Design.",
+    "Brand systems, website experiences, growth infrastructure, and operational platforms, built with discipline by Kreate by Design.",
   path: "/services",
   keywords: [
     "Website Redesign",
@@ -115,8 +115,8 @@ export default function ServicesPage() {
               maxWidth: "40rem",
             }}
           >
-            KXD starts where the business needs clarity most — brand, website,
-            growth infrastructure, or operational platforms — and goes deeper
+            KXD starts where the business needs clarity most, brand, website,
+            growth infrastructure, or operational platforms, and goes deeper
             only when the work requires it.
           </p>
         </div>
@@ -163,7 +163,7 @@ export default function ServicesPage() {
             Some clients need a stronger presence. Others need measurement and
             demand structure. A smaller set needs portals, workflows, and
             operational infrastructure. KXD stays involved deeper than a
-            traditional agency when the business requires it — without forcing
+            traditional agency when the business requires it, without forcing
             every engagement into a funnel.
           </p>
         </div>
@@ -311,7 +311,7 @@ export default function ServicesPage() {
 
       <FinalCtaBand
         headline="Ready to Build With Intention?"
-        subCopy="KXD partners with a limited number of businesses at a time — whether the next step is presence, growth, or deeper systems."
+        subCopy="KXD partners with a limited number of businesses at a time, whether the next step is presence, growth, or deeper systems."
         secondaryHref="/investment"
         secondaryLabel="View Investment"
       />

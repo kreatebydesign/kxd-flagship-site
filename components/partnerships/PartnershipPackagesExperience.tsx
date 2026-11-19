@@ -37,11 +37,11 @@ function PackageCard({ pkg }: { pkg: PartnershipPackage }) {
       </div>
 
       <div className="kxd-partnership-card__pricing">
-        <p className="kxd-partnership-card__price">{pkg.monthlyLabel}</p>
+        <p className="kxd-partnership-card__price">Tailored partnership</p>
         <p className="kxd-partnership-card__meta">
-          {pkg.setupLabel}
-          <span aria-hidden> · </span>
           {pkg.credits} service credits / month
+          <span aria-hidden> · </span>
+          Scoped in your agreement
         </p>
       </div>
 
@@ -112,7 +112,7 @@ export function PartnershipPackagesExperience() {
                 href="/investment"
                 style={{ color: "var(--kxd-gold)", textDecoration: "underline" }}
               >
-                See Project Investment
+                Working Together
               </Link>
               . {PARTNERSHIP_PAGE_COPY.systemNote}
             </p>
@@ -142,7 +142,7 @@ export function PartnershipPackagesExperience() {
               marginInline: "auto",
             }}
           >
-            {PARTNERSHIP_SCOPE_COPY.pricingNote}
+            Partnership capacity and deliverables are confirmed in your custom agreement.
           </p>
         </div>
       </section>
@@ -206,7 +206,7 @@ export function PartnershipPackagesExperience() {
             </h2>
             <p className="kxd-body mt-5" style={{ lineHeight: 1.8 }}>
               Specialized capabilities stay optional. Inventory + Public Showroom
-              is available by proposal — never bundled into a base package.
+              is available by proposal, never bundled into a base package.
             </p>
           </div>
 

@@ -38,7 +38,7 @@ function galleryImages(doc: Record<string, unknown>): ShowcaseImage[] {
       if (typeof url !== "string" || !url) return null;
       return {
         src: url,
-        alt: String(doc.title ?? "") + " — showcase",
+        alt: String(doc.title ?? "") + ", showcase",
         caption: typeof entry.caption === "string" ? entry.caption : undefined,
       } as ShowcaseImage;
     })
@@ -800,7 +800,7 @@ export default async function CaseStudyPage({ params }: Props) {
             </div>
           ) : cs.image ? (
             <ShowcaseFrame
-              image={{ src: cs.image, alt: `${cs.title} — digital experience` }}
+              image={{ src: cs.image, alt: `${cs.title}, digital experience` }}
               aspectRatio="16 / 9"
               priority
             />
@@ -927,7 +927,7 @@ export default async function CaseStudyPage({ params }: Props) {
                       opacity: 0.55,
                     }}
                   >
-                    —
+                    ·
                   </span>
                   <p
                     style={{
@@ -1164,7 +1164,7 @@ export default async function CaseStudyPage({ params }: Props) {
       >
         <div className="kxd-container">
           <div className="mx-auto max-w-[44rem] text-center">
-            <p className="kxd-eyebrow mb-8">11 — Start a Partnership</p>
+            <p className="kxd-eyebrow mb-8">11. Start a Partnership</p>
 
             <div className="kxd-gold-rule mb-10" />
 

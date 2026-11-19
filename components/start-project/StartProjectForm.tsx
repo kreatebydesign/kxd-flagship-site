@@ -79,10 +79,10 @@ function buildIntelligenceNotes(input: {
   const block = [
     "[KXD Intelligence context]",
     "Source: KXD Intelligence website audit",
-    `Audit ID: ${input.auditId || "—"}`,
-    `Audited website: ${input.website || "—"}`,
-    `Grade: ${input.grade || "—"}`,
-    `Overall score: ${input.score || "—"}`,
+    `Audit ID: ${input.auditId || "N/A"}`,
+    `Audited website: ${input.website || "N/A"}`,
+    `Grade: ${input.grade || "N/A"}`,
+    `Overall score: ${input.score || "N/A"}`,
   ].join("\n");
 
   const existing = input.existingNotes.trim();
@@ -507,7 +507,7 @@ export function StartProjectForm() {
           }}
         >
           {fromIntelligence
-            ? "Your KXD Intelligence context is attached. Every application is reviewed personally — if it is the right fit, you will hear from us within 2 business days."
+            ? "Your KXD Intelligence context is attached. Every application is reviewed personally. If it is the right fit, you will hear from us within 2 business days."
             : "Every application is reviewed personally. If it is the right fit, you will hear from us within 2 business days."}
         </p>
         <button

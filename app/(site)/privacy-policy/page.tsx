@@ -23,7 +23,7 @@ const SECTIONS = [
   {
     title: "Overview",
     paragraphs: [
-      `${SITE.name} ("KXD," "we," "us") respects your privacy. This policy explains what information we may collect when you visit our website, submit a form, request an audit, communicate with us by email, or use tools connected to our services — and how we use that information.`,
+      `${SITE.name} ("KXD," "we," "us") respects your privacy. This policy explains what information we may collect when you visit our website, submit a form, request an audit, communicate with us by email, or use tools connected to our services, and how we use that information.`,
       "This page is intended to be clear and practical. It is not legal advice, and we are not a law firm. If you need advice about your specific situation, please consult a qualified professional.",
     ],
   },
@@ -33,12 +33,12 @@ const SECTIONS = [
       "The information we collect depends on how you interact with us. We may receive:",
     ],
     list: [
-      "Contact details you provide — such as name, email address, phone number, company name, and role.",
-      "Project and inquiry details — goals, scope notes, budget range, timelines, and messages submitted through contact forms, start-project flows, or audit requests.",
-      "Website audit inputs — URLs, business context, and technical details you choose to share for review.",
-      "Communications — content of emails, messages, and meeting notes related to inquiries or active engagements.",
-      "Usage and technical data — pages viewed, referring URLs, device and browser type, approximate location derived from IP address, and interaction patterns on our site.",
-      "Client portal and operational data — when you are an active client, we may process account credentials, project files, approvals, and workflow information within systems we operate or integrate with on your behalf.",
+      "Contact details you provide, such as name, email address, phone number, company name, and role.",
+      "Project and inquiry details, goals, scope notes, budget range, timelines, and messages submitted through contact forms, start-project flows, or audit requests.",
+      "Website audit inputs, URLs, business context, and technical details you choose to share for review.",
+      "Communications, content of emails, messages, and meeting notes related to inquiries or active engagements.",
+      "Usage and technical data, pages viewed, referring URLs, device and browser type, approximate location derived from IP address, and interaction patterns on our site.",
+      "Client portal and operational data, when you are an active client, we may process account credentials, project files, approvals, and workflow information within systems we operate or integrate with on your behalf.",
     ],
   },
   {
@@ -59,7 +59,7 @@ const SECTIONS = [
   {
     title: "Analytics and Tracking",
     paragraphs: [
-      "We use analytics and search tools — such as Google Analytics and Google Search Console — to understand how visitors find and use our website. These tools may collect usage data through cookies or similar technologies and process it according to their own policies.",
+      "We use analytics and search tools, such as Google Analytics and Google Search Console, to understand how visitors find and use our website. These tools may collect usage data through cookies or similar technologies and process it according to their own policies.",
       "We review this information in aggregate to improve content, navigation, performance, and conversion paths. We do not use analytics to make automated decisions that produce legal or similarly significant effects.",
     ],
   },

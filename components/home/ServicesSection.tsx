@@ -36,7 +36,7 @@ export function ServicesSection() {
             >
               Websites are the entry point. Growth infrastructure structures
               demand. Operational systems run what the brand needs next. KXD
-              builds the ladder — not disconnected services.
+              builds the ladder; not disconnected services.
             </p>
           </div>
 

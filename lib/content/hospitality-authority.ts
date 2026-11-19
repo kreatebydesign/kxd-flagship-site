@@ -23,7 +23,7 @@ export const HOSPITALITY_PAGE = {
   path: HOSPITALITY_HUB_PATH,
   title: "Hospitality Website Design & Operational Systems",
   description:
-    "Premium hospitality websites and operational systems for restaurants, venues, and dining brands — from public experience to business infrastructure.",
+    "Premium hospitality websites and operational systems for restaurants, venues, and dining brands, from public experience to business infrastructure.",
   keywords: [
     "Hospitality Website Design",
     "Restaurant Website Design",
@@ -34,7 +34,7 @@ export const HOSPITALITY_PAGE = {
   eyebrow: "Hospitality",
   headline: "The experience starts before they arrive.",
   lead:
-    "KXD designs and develops premium websites for restaurants, venues, and hospitality brands — with custom operational systems when the business requires more than a public-facing experience.",
+    "KXD designs and develops premium websites for restaurants, venues, and hospitality brands, with custom operational systems when the business requires more than a public-facing experience.",
   primaryCta: { label: "Start a Project", href: "/start-project" },
   secondaryCta: { label: "View the Work", href: "/work" },
 } as const;
@@ -44,7 +44,7 @@ export const HOSPITALITY_PHILOSOPHY = {
   eyebrow: "Approach",
   title: "The introduction is part of the hospitality.",
   body: [
-    "Independent restaurants and venues compete on character. Guests decide whether a place feels right long before they walk through the door — often from a hospitality website alone.",
+    "Independent restaurants and venues compete on character. Guests decide whether a place feels right long before they walk through the door, often from a hospitality website alone.",
     "KXD designs that introduction with the same care as the room: atmosphere, specificity, and clear paths to reserve, inquire, or arrive. When the business also needs operator workflows behind the brand, the public experience and the system can grow together.",
   ],
 } as const;
@@ -53,7 +53,7 @@ export const HOSPITALITY_CAPABILITIES = [
   {
     eyebrow: "Website Experiences",
     title: "Hospitality websites that feel like the room.",
-    body: "Premium website design and redesign for restaurants, venues, and dining brands — stronger storytelling, clearer presence, and reservation or inquiry paths that hold the brand.",
+    body: "Premium website design and redesign for restaurants, venues, and dining brands, stronger storytelling, clearer presence, and reservation or inquiry paths that hold the brand.",
     href: "/services/luxury-website-experiences",
     linkLabel: "Website Experiences",
   },
@@ -81,7 +81,7 @@ export const HOSPITALITY_SELECTED_WORK = [
     title: "Plate the Umpqua",
     industry: "Dining · Hospitality Systems",
     summary:
-      "Hospitality website and Plate OS — public experience plus inquiry, menu, and Partner Concierge infrastructure.",
+      "Hospitality website and Plate OS, public experience plus inquiry, menu, and Partner Concierge infrastructure.",
     featured: true,
   },
   {
@@ -116,7 +116,7 @@ export const HOSPITALITY_FAQS = [
   {
     question: "What kinds of hospitality businesses has KXD worked with?",
     answer:
-      "Public work includes restaurants, a regional private-dining hospitality brand with Plate OS, and nightlife venue presence. Scope always follows the specific brand — not a one-size hospitality template.",
+      "Public work includes restaurants, a regional private-dining hospitality brand with Plate OS, and nightlife venue presence. Scope always follows the specific brand; not a one-size hospitality template.",
   },
   {
     question: "Is this only restaurant website design?",
@@ -124,9 +124,9 @@ export const HOSPITALITY_FAQS = [
       "Restaurant websites are a core part of the hospitality work, but the same standards apply to venues and dining experience brands: atmosphere, clarity, and paths that move interest into a visit or inquiry. Some engagements also require operational systems behind the public site.",
   },
   {
-    question: "Can KXD build operational systems for hospitality — not just the website?",
+    question: "Can KXD build operational systems for hospitality; not just the website?",
     answer:
-      "Yes when the engagement calls for it. Plate the Umpqua is a public example where the hospitality website and Plate OS — inquiry workflows, menus, Partner Concierge, and operator tooling — were built as one foundation. Platform depth is selective, not a default for every hospitality project.",
+      "Yes when the engagement calls for it. Plate the Umpqua is a public example where the hospitality website and Plate OS, inquiry workflows, menus, Partner Concierge, and operator tooling, were built as one foundation. Platform depth is selective; not a default for every hospitality project.",
   },
   {
     question: "Can brand work come before a hospitality website redesign?",
@@ -136,7 +136,7 @@ export const HOSPITALITY_FAQS = [
   {
     question: "Can KXD handle SEO and analytics for a hospitality website too?",
     answer:
-      "Yes when the engagement calls for it. Growth Infrastructure covers SEO foundations where relevant, GA4 and Search Console, and conversion pathways — without inventing ranking or booking guarantees.",
+      "Yes when the engagement calls for it. Growth Infrastructure covers SEO foundations where relevant, GA4 and Search Console, and conversion pathways, without inventing ranking or booking guarantees.",
   },
 ] as const;
 

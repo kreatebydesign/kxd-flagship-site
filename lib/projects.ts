@@ -80,7 +80,7 @@ export const PROJECTS: ProjectItem[] = [
     outcome:
       "Flagship website, member portal, and operations layer for a modern motorsports organization.",
     description:
-      "Website, driver portal, and operational infrastructure — built as one system for partners, members, and leadership.",
+      "Website, driver portal, and operational infrastructure, built as one system for partners, members, and leadership.",
     image: "/migrated-assets/case-studies/primal-motorsports/homepage-02.webp",
     year: "2025",
     featured: true,
@@ -127,7 +127,7 @@ export const PROJECTS: ProjectItem[] = [
     outcome:
       "A contractor website built for credibility, clear services, and inquiry readiness.",
     description:
-      "Website rebuild for an established contractor — service pathways, trust signals, and conversion-ready structure.",
+      "Website rebuild for an established contractor, service pathways, trust signals, and conversion-ready structure.",
     image: "/images/work/screenshots/martinsen-construction/desktop-home.png",
     logo: "/migrated-assets/logos/martinsen-construction-logo.svg",
     year: "2026",
@@ -141,7 +141,7 @@ export const PROJECTS: ProjectItem[] = [
     industry: "Hospitality",
     service: "Enterprise Platforms & Operational Systems",
     outcome:
-      "Hospitality website and Plate OS — public experience plus the operational system behind it.",
+      "Hospitality website and Plate OS, public experience plus the operational system behind it.",
     description:
       "Premium private-dining presence with Plate OS: inquiry workflows, menus, Partner Concierge, and business systems under the brand.",
     image: "/migrated-assets/case-studies/plate-the-umpqua/hero.webp",
@@ -177,7 +177,7 @@ export const PROJECTS: ProjectItem[] = [
     outcome:
       "Performance-shop presence built to attract serious motorsports clients.",
     description:
-      "Website for an automotive performance shop — clear capability, precise positioning, right-client filter.",
+      "Website for an automotive performance shop, clear capability, precise positioning, right-client filter.",
     image: "/migrated-assets/projects/otp.jpg",
     year: "2024",
     tier: "secondary",
@@ -205,7 +205,7 @@ export const PROJECTS: ProjectItem[] = [
     service: "Luxury Website Experiences",
     outcome: "A nightlife experience that translates from the velvet rope to the browser.",
     description:
-      "Digital presence for Hyde Lounge at Crypto.com Arena — SBE's flagship LA nightlife venue.",
+      "Digital presence for Hyde Lounge at Crypto.com Arena, SBE's flagship LA nightlife venue.",
     image: "/images/work/screenshots/sbe-hyde-lounge/clean-hero.png",
     year: "2024",
     tier: "secondary",
@@ -396,7 +396,7 @@ export const CASE_STUDY_CAPABILITY_LINKS: Record<string, readonly CapabilityLink
   "spur-restaurant": [
     { label: "Hospitality", href: "/industries/hospitality" },
     { label: "Website Experiences", href: "/services/luxury-website-experiences" },
-    { label: "Project Investment", href: "/investment" },
+    { label: "Working Together", href: "/investment" },
   ],
   "plate-the-umpqua": [
     { label: "Hospitality", href: "/industries/hospitality" },
@@ -469,11 +469,11 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     year: "2025",
     image: "/migrated-assets/case-studies/primal-motorsports/hero.webp",
     context:
-      "Primal Motorsports isn't a weekend racing club. It's a competitive organization with professional drivers, live events, and a growing ecosystem of partners, members, and fans. The brand had real momentum and real credibility — but the digital infrastructure didn't reflect either. What existed online was a starting point. What the organization needed was a foundation that could carry presence, membership, and operations together.",
+      "Primal Motorsports isn't a weekend racing club. It's a competitive organization with professional drivers, live events, and a growing ecosystem of partners, members, and fans. The brand had real momentum and real credibility, but the digital infrastructure didn't reflect either. What existed online was a starting point. What the organization needed was a foundation that could carry presence, membership, and operations together.",
     challenge:
-      "Three distinct audiences, three distinct needs — and no existing infrastructure to serve any of them well. Prospective partners needed to see a brand worthy of serious investment. Team members needed portal access and workflows that matched how they actually worked. Leadership needed visibility across the organization without adding overhead. A single marketing website wasn't going to solve that. The scope required architecture, not decoration.",
+      "Three distinct audiences, three distinct needs, and no existing infrastructure to serve any of them well. Prospective partners needed to see a brand worthy of serious investment. Team members needed portal access and workflows that matched how they actually worked. Leadership needed visibility across the organization without adding overhead. A single marketing website wasn't going to solve that. The scope required architecture; not decoration.",
     strategy:
-      "Strategy first. KXD mapped each audience independently — what they needed to see, what they needed to do, and what a failed digital experience would cost the organization. From there, the architecture emerged: a premium public-facing presence designed around partner credibility, a member/driver portal built for accountability and access, and an operations interface that gave leadership visibility to run the organization with confidence. Every decision was evaluated against the same standard: does this serve the organization's actual goals, or does it just look like a motorsports website?",
+      "Strategy first. KXD mapped each audience independently, what they needed to see, what they needed to do, and what a failed digital experience would cost the organization. From there, the architecture emerged: a premium public-facing presence designed around partner credibility, a member/driver portal built for accountability and access, and an operations interface that gave leadership visibility to run the organization with confidence. Every decision was evaluated against the same standard: does this serve the organization's actual goals, or does it just look like a motorsports website?",
     execution: [
       "Flagship website rebuild — premium brand presence for partner and sponsor conversations, with clear positioning and structured inquiry pathways.",
       "Driver / member portal — authenticated experience supporting team workflows, access, and organizational accountability.",
@@ -487,26 +487,26 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
       "Unified digital identity across public, member, and leadership experiences",
     ],
     whyItWorked:
-      "The result works because it was designed around the organization's actual needs — not what a motorsports website is supposed to look like. The website earns trust. The portal supports the team. The operations layer gives leadership visibility. Every experience serves a defined audience. That is the difference between a redesign and a digital system.",
+      "The result works because it was designed around the organization's actual needs; not what a motorsports website is supposed to look like. The website earns trust. The portal supports the team. The operations layer gives leadership visibility. Every experience serves a defined audience. That is the difference between a redesign and a digital system.",
     showcaseImages: [
       {
         src: "/migrated-assets/case-studies/primal-motorsports/homepage-full.webp",
-        alt: "Primal Motorsports — flagship website rebuild",
+        alt: "Primal Motorsports, flagship website rebuild",
         caption: "Public-facing brand presence",
       },
       {
         src: "/migrated-assets/case-studies/primal-motorsports/homepage-02.webp",
-        alt: "Primal Motorsports — driving school and race programs",
+        alt: "Primal Motorsports, driving school and race programs",
         caption: "Program architecture",
       },
       {
         src: "/migrated-assets/case-studies/primal-motorsports/dashboard-hero.webp",
-        alt: "Primal Motorsports — driver portal dashboard",
+        alt: "Primal Motorsports, driver portal dashboard",
         caption: "Driver portal",
       },
       {
         src: "/migrated-assets/case-studies/primal-motorsports/ops-hero.webp",
-        alt: "Primal OS — executive operations interface",
+        alt: "Primal OS, executive operations interface",
         caption: "Operations layer",
       },
     ],
@@ -524,11 +524,11 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     year: "2025",
     image: "/migrated-assets/case-studies/cusick-morgan-motorsports/hero.webp",
     context:
-      "Cusick Morgan Motorsports has the results. The credentials, the team, the competitive record — everything required to earn a serious partnership conversation. The gap wasn't performance. It was presentation. In motorsports, credibility is earned on track. Partnerships are won off it.",
+      "Cusick Morgan Motorsports has the results. The credentials, the team, the competitive record, everything required to earn a serious partnership conversation. The gap wasn't performance. It was presentation. In motorsports, credibility is earned on track. Partnerships are won off it.",
     challenge:
-      "Without a digital presence that matched the team's on-track standard, every sponsor conversation started at a disadvantage. The brand was being judged on an introduction it hadn't made yet. Good teams with weak digital presence lose deals they should win — not on capability, but on credibility before the meeting starts.",
+      "Without a digital presence that matched the team's on-track standard, every sponsor conversation started at a disadvantage. The brand was being judged on an introduction it hadn't made yet. Good teams with weak digital presence lose deals they should win, not on capability but on credibility before the meeting starts.",
     strategy:
-      "Partnership visibility was the north star. Every design decision — layout, content hierarchy, imagery treatment — was evaluated through one lens: does this make a potential partner more confident in this team? Secondary to that, team identity. The brand had to feel like a serious competitive operation — not a hobby club with a well-designed website. Copy was written to position results, not just announce them. The information architecture was built to guide a sponsor from interest to inquiry without friction.",
+      "Partnership visibility was the north star. Every design decision, layout, content hierarchy, imagery treatment, was evaluated through one lens: does this make a potential partner more confident in this team? Secondary to that, team identity. The brand had to feel like a serious competitive operation; not a hobby club with a well-designed website. Copy was written to position results; not just announce them. The information architecture was built to guide a sponsor from interest to inquiry without friction.",
     execution: [
       "Team website — cinematic design built around competitive identity, race history, and driver profiles.",
       "Partner and sponsor pathways — structured content and inquiry architecture designed to move interest into conversation.",
@@ -541,21 +541,21 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
       "Digital foundation that holds up in presentations, pitch decks, and introductions",
     ],
     whyItWorked:
-      "It worked because the goals were defined before the design started. Not 'we need a website' — but 'we need partners, and we need this to get us in the room.' That clarity drove every decision. When the purpose is specific, the outcome is specific.",
+      "It worked because the goals were defined before the design started. Not 'we need a website' but 'we need partners, and we need this to get us in the room.' That clarity drove every decision. When the purpose is specific, the outcome is specific.",
     showcaseImages: [
       {
         src: "/migrated-assets/case-studies/cusick-morgan-motorsports/hero.webp",
-        alt: "Cusick Morgan Motorsports — homepage hero",
+        alt: "Cusick Morgan Motorsports, homepage hero",
         caption: "Team brand presence",
       },
       {
         src: "/migrated-assets/case-studies/cusick-morgan-motorsports/homepage-02.webp",
-        alt: "Cusick Morgan Motorsports — partnership and program sections",
+        alt: "Cusick Morgan Motorsports, partnership and program sections",
         caption: "Partnership pathways",
       },
       {
         src: "/migrated-assets/case-studies/cusick-morgan-motorsports/homepage-03.webp",
-        alt: "Cusick Morgan Motorsports — featured partners section",
+        alt: "Cusick Morgan Motorsports, featured partners section",
         caption: "Featured partners",
       },
     ],
@@ -571,18 +571,18 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
       "Brand Systems & Identity",
     ],
     tagline:
-      "Hospitality website and Plate OS — the public experience and the operating system behind private dining.",
+      "Hospitality website and Plate OS, the public experience and the operating system behind private dining.",
     url: "https://platetheumpqua.com",
     status: "Live",
     year: "2025",
     image: "/migrated-assets/case-studies/plate-the-umpqua/hero.webp",
     logo: "/migrated-assets/logos/plate-the-umpqua.svg",
     context:
-      "Plate the Umpqua is a private-dining hospitality brand built on craft, care, and evenings that live or die in the room. The brand needed more than a brochure site. Guests needed a refined digital introduction. The business needed operational infrastructure for inquiries, menus, events, partner gifting, and payment — without turning hospitality into software theater.",
+      "Plate the Umpqua is a private-dining hospitality brand built on craft, care, and evenings that live or die in the room. The brand needed more than a brochure site. Guests needed a refined digital introduction. The business needed operational infrastructure for inquiries, menus, events, partner gifting, and payment, without turning hospitality into software theater.",
     challenge:
-      "First impressions happen before arrival, and the public presence was underselling the standard guests experience in the room. At the same time, day-to-day operations — inquiries, follow-up, menus, invoices, partner programs — could not stay duct-taped across inbox threads and disconnected tools as the business grew.",
+      "First impressions happen before arrival, and the public presence was underselling the standard guests experience in the room. At the same time, day-to-day operations, inquiries, follow-up, menus, invoices, partner programs, could not stay duct-taped across inbox threads and disconnected tools as the business grew.",
     strategy:
-      "Build the public hospitality experience and the operator system together. The website becomes the opening chapter of the evening. Plate OS becomes the authenticated layer for clients, inquiries, culinary workflows, Partner Concierge, and invoices — so the guest experience stays calm while the business runs on a coherent foundation.",
+      "Build the public hospitality experience and the operator system together. The website becomes the opening chapter of the evening. Plate OS becomes the authenticated layer for clients, inquiries, culinary workflows, Partner Concierge, and invoices, so the guest experience stays calm while the business runs on a coherent foundation.",
     execution: [
       "Premium hospitality website — editorial public presence for experiences, packages, concierge, and inquiry without template restaurant language.",
       "Plate OS — authenticated operator environment for today-board visibility, clients, inquiries, events, and culinary work.",
@@ -595,24 +595,24 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
       "Public hospitality presence that matches the standard of the room",
       "Plate OS as the operator side for inquiries, menus, events, and invoices",
       "Partner Concierge pathways that keep purchase software and dinner hospitality in the right places",
-      "A digital foundation shaped around how the business actually runs — not a theme with a contact form",
+      "A digital foundation shaped around how the business actually runs; not a theme with a contact form",
     ],
     whyItWorked:
       "The website and the operating system grew up together. Guests get a calm hospitality introduction. Operators get records, workflows, and tools that match private dining. That is the difference between a redesign and a system.",
     showcaseImages: [
       {
         src: "/migrated-assets/case-studies/plate-the-umpqua/hero.webp",
-        alt: "Plate the Umpqua — homepage hero",
+        alt: "Plate the Umpqua, homepage hero",
         caption: "The opening invitation",
       },
       {
         src: "/migrated-assets/case-studies/plate-the-umpqua/homepage-02.webp",
-        alt: "Plate the Umpqua — storytelling section",
+        alt: "Plate the Umpqua, storytelling section",
         caption: "Brand positioning",
       },
       {
         src: "/migrated-assets/case-studies/plate-the-umpqua/homepage-03.webp",
-        alt: "Plate the Umpqua — experience sections",
+        alt: "Plate the Umpqua, experience sections",
         caption: "Experience design",
       },
     ],
@@ -631,11 +631,11 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     image: "/migrated-assets/case-studies/autodv8ions/homepage-full.webp",
     logo: "/migrated-assets/logos/dv8.svg",
     context:
-      "AutoDV8ions is a boutique automotive studio that earns its reputation through precision and a point of view. Referral-driven, quality-focused, and deeply committed to doing the work right — the kind of studio where every client is a qualified one. The work was exceptional. The digital introduction wasn't anywhere close.",
+      "AutoDV8ions is a boutique automotive studio that earns its reputation through precision and a point of view. Referral-driven, quality-focused, and deeply committed to doing the work right, the kind of studio where every client is a qualified one. The work was exceptional. The digital introduction wasn't anywhere close.",
     challenge:
-      "Reputation is powerful. It's also invisible online. The studio's craftsmanship was well-known to those who already knew — but without a digital presence that matched the studio's standard, growth was limited to existing word-of-mouth. Qualified prospects were finding nothing, or finding something that didn't reflect the quality of the actual work.",
+      "Reputation is powerful. It's also invisible online. The studio's craftsmanship was well-known to those who already knew, but without a digital presence that matched the studio's standard, growth was limited to existing word-of-mouth. Qualified prospects were finding nothing, or finding something that didn't reflect the quality of the actual work.",
     strategy:
-      "Lead with identity, not a generic service list. The website had to function as a portfolio, a filter, and a statement — in that order. Design itself as demonstration: if the site looks like it was built with care and precision, it sets the expectation that the studio operates the same way. Copy was written to speak to a client who already has taste, not to explain why taste matters.",
+      "Lead with identity; not a generic service list. The website had to function as a portfolio, a filter, and a statement, in that order. Design itself as demonstration: if the site looks like it was built with care and precision, it sets the expectation that the studio operates the same way. Copy was written to speak to a client who already has taste; not to explain why taste matters.",
     execution: [
       "Brand-forward website — identity-led design that communicates the studio's point of view before its service list.",
       "Inquiry and lead architecture — structured pathways that convert qualified interest into direct conversations.",
@@ -648,21 +648,21 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
       "First impression that matches the standard of the actual work",
     ],
     whyItWorked:
-      "It works because it's specific. It's not trying to appeal to everyone — it's built for the client who already recognizes quality and wants to work with people who hold the same standard. Broad positioning produces unqualified inquiries. Sharp positioning produces the right ones.",
+      "It works because it's specific. It's not trying to appeal to everyone, it's built for the client who already recognizes quality and wants to work with people who hold the same standard. Broad positioning produces unqualified inquiries. Sharp positioning produces the right ones.",
     showcaseImages: [
       {
         src: "/migrated-assets/case-studies/autodv8ions/hero.webp",
-        alt: "AutoDV8ions — homepage hero",
+        alt: "AutoDV8ions, homepage hero",
         caption: "Brand-forward digital presence",
       },
       {
         src: "/migrated-assets/case-studies/autodv8ions/homepage-02.webp",
-        alt: "AutoDV8ions — about section",
+        alt: "AutoDV8ions, about section",
         caption: "Identity and positioning",
       },
       {
         src: "/migrated-assets/case-studies/autodv8ions/homepage-03.webp",
-        alt: "AutoDV8ions — services section",
+        alt: "AutoDV8ions, services section",
         caption: "Service architecture",
       },
     ],
@@ -681,11 +681,11 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     image: "/migrated-assets/textures/hero-bg.jpg",
     logo: "/migrated-assets/logos/dialed-in-electric.svg",
     context:
-      "Dialed In Electric is a trades business that holds itself to a higher standard — in the quality of the work and the professionalism of every touchpoint. The digital presence had to match.",
+      "Dialed In Electric is a trades business that holds itself to a higher standard, in the quality of the work and the professionalism of every touchpoint. The digital presence had to match.",
     challenge:
       "Most trades websites look like they were built in 2009. Dialed In needed something that communicated the same precision and care that the business puts into every job.",
     strategy:
-      "Brand forward, jargon free. The design had to communicate trust and competence — not through feature lists, but through the quality of the presentation itself.",
+      "Brand forward, jargon free. The design had to communicate trust and competence, not through feature lists but through the quality of the presentation itself.",
     execution: [
       "Premium digital presence for a trades business building a reputation on quality.",
       "Brand-aligned design that elevates the client's positioning in a crowded market.",
@@ -711,11 +711,11 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     year: "2024",
     image: "/migrated-assets/projects/otp.jpg",
     context:
-      "On Track Performance serves a customer who knows the difference. Whether it's track preparation, alignment, or suspension work — the clients who walk through the door have standards. The website had to meet them.",
+      "On Track Performance serves a customer who knows the difference. Whether it's track preparation, alignment, or suspension work, the clients who walk through the door have standards. The website had to meet them.",
     challenge:
-      "Automotive performance shops often look interchangeable online — loud, cluttered, aimed at everyone. On Track needed a presence that communicated precision and filtered for the right client profile.",
+      "Automotive performance shops often look interchangeable online, loud, cluttered, aimed at everyone. On Track needed a presence that communicated precision and filtered for the right client profile.",
     strategy:
-      "Precision over volume. The design language, service clarity, and content hierarchy had to reflect the shop's actual standards — sharp, clean, and built for the client who already knows what they need.",
+      "Precision over volume. The design language, service clarity, and content hierarchy had to reflect the shop's actual standards, sharp, clean, and built for the client who already knows what they need.",
     execution: [
       "Performance-aligned website built for a motorsports audience that values precision.",
       "Content architecture that communicates capability clearly and supports inquiry without overselling.",
@@ -726,11 +726,11 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
       "Clearer path from interest to contact for serious motorsports work",
     ],
     whyItWorked:
-      "Specificity is a filter. A site built for serious motorsports clients attracts serious motorsports clients. That was the goal — and the outcome.",
+      "Specificity is a filter. A site built for serious motorsports clients attracts serious motorsports clients. That was the goal, and the outcome.",
     showcaseImages: [
       {
         src: "/migrated-assets/projects/otp.jpg",
-        alt: "On Track Performance — homepage",
+        alt: "On Track Performance, homepage",
         caption: "Performance-aligned digital presence",
       },
     ],
@@ -751,7 +751,7 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     context:
       "The Golden State Warriors in-house creative team operates at a pace and scale most studios never encounter. Tight timelines, high-profile deliverables, and a brand standard that leaves no room for anything less than exceptional.",
     challenge:
-      "Supporting an in-house team means adapting to existing workflows, brand systems, and approval chains — without disrupting the machine. The goal isn't to reinvent anything. It's to deliver work that belongs.",
+      "Supporting an in-house team means adapting to existing workflows, brand systems, and approval chains, without disrupting the machine. The goal isn't to reinvent anything. It's to deliver work that belongs.",
     strategy:
       "Embed, align, and execute. Understand the brand architecture before touching the brief. Every output needed to feel like it was made by the team, not dropped in from outside.",
     execution: [
@@ -763,11 +763,11 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
       "Seamless integration with the in-house team's workflow",
     ],
     whyItWorked:
-      "Knowing when to lead and when to support is a skill. This engagement required the latter — and delivering it well is what made the work worth doing.",
+      "Knowing when to lead and when to support is a skill. This engagement required the latter, and delivering it well is what made the work worth doing.",
     showcaseImages: [
       {
         src: "/images/work/screenshots/golden-state-warriors/desktop-home.png",
-        alt: "Golden State Warriors — creative support engagement",
+        alt: "Golden State Warriors, creative support engagement",
         caption: "In-house creative support",
       },
     ],
@@ -784,11 +784,11 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     year: "2024",
     image: "/images/work/screenshots/sbe-hyde-lounge/clean-hero.png",
     context:
-      "Hyde Lounge at Crypto.com Arena is one of LA's most recognizable nightlife venues — operating at the intersection of sports, entertainment, and hospitality. SBE demanded a digital presence that carried that weight.",
+      "Hyde Lounge at Crypto.com Arena is one of LA's most recognizable nightlife venues, operating at the intersection of sports, entertainment, and hospitality. SBE demanded a digital presence that carried that weight.",
     challenge:
       "Translating the sensory experience of a premium nightlife venue into a digital format is genuinely hard. Too much and it becomes overwhelming. Too little and it loses the room entirely.",
     strategy:
-      "The web experience had to feel like the approach to the venue — anticipation before arrival. Every visual and copy decision was made to build that feeling, not just describe the space.",
+      "The web experience had to feel like the approach to the venue, anticipation before arrival. Every visual and copy decision was made to build that feeling; not just describe the space.",
     execution: [
       "Digital presence aligned to SBE's luxury hospitality brand standards.",
       "Content and visual direction built around the atmosphere and clientele of Hyde Lounge.",
@@ -798,11 +798,11 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
       "Experience that communicates the venue's character before a guest arrives",
     ],
     whyItWorked:
-      "Nightlife brands sell a feeling. The digital experience worked because it was built to create that feeling first — not to list features or show floorplans.",
+      "Nightlife brands sell a feeling. The digital experience worked because it was built to create that feeling first; not to list features or show floorplans.",
     showcaseImages: [
       {
         src: "/images/work/screenshots/sbe-hyde-lounge/clean-hero.png",
-        alt: "SBE / Hyde Lounge — digital presence",
+        alt: "SBE / Hyde Lounge, digital presence",
         caption: "Premium venue experience",
       },
     ],
@@ -819,11 +819,11 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     year: "2026",
     image: "/migrated-assets/case-studies/hair-mafia/hero.webp",
     context:
-      "Hair Mafia is a premium salon built on artistry, reputation, and a clear point of view. The clientele is loyal because the standard is consistent. What the brand needed was a digital presence that carried the same energy as the salon itself — sharp, confident, and unmistakably theirs.",
+      "Hair Mafia is a premium salon built on artistry, reputation, and a clear point of view. The clientele is loyal because the standard is consistent. What the brand needed was a digital presence that carried the same energy as the salon itself, sharp, confident, and unmistakably theirs.",
     challenge:
-      "A salon with a strong identity and a committed following was being introduced online by a presence that didn't match either. The website didn't communicate the brand's character or quality — and in an industry where first impressions decide bookings, that gap was costing the salon clients it should have earned.",
+      "A salon with a strong identity and a committed following was being introduced online by a presence that didn't match either. The website didn't communicate the brand's character or quality, and in an industry where first impressions decide bookings, that gap was costing the salon clients it should have earned.",
     strategy:
-      "Personality first, services second. The digital experience had to feel like the salon — confident, precise, and built for someone who already knows what they want. Content hierarchy was built around the brand's character, not its service menu. The goal: attract clients who are the right fit before they've walked in the door.",
+      "Personality first, services second. The digital experience had to feel like the salon, confident, precise, and built for someone who already knows what they want. Content hierarchy was built around the brand's character; not its service menu. The goal: attract clients who are the right fit before they've walked in the door.",
     execution: [
       "Brand-forward web presence — a digital introduction that communicates the salon's identity and standard before a single service is listed.",
       "Booking and inquiry pathways — low-friction architecture built to convert qualified interest into direct appointments.",
@@ -836,16 +836,16 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
       "Foundation that grows with the salon's reputation",
     ],
     whyItWorked:
-      "The best salons earn loyalty through consistency. The website works because it's specific — built for the client who already has taste, and wants to trust the person holding the scissors. That kind of specificity is the strategy.",
+      "The best salons earn loyalty through consistency. The website works because it's specific, built for the client who already has taste, and wants to trust the person holding the scissors. That kind of specificity is the strategy.",
     showcaseImages: [
       {
         src: "/migrated-assets/case-studies/hair-mafia/hero.webp",
-        alt: "Hair Mafia Salon — homepage hero",
+        alt: "Hair Mafia Salon, homepage hero",
         caption: "Brand-forward presence",
       },
       {
         src: "/migrated-assets/case-studies/hair-mafia/homepage-02.webp",
-        alt: "Hair Mafia Salon — salon experience",
+        alt: "Hair Mafia Salon, salon experience",
         caption: "Booking pathways",
       },
     ],
@@ -863,11 +863,11 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     image: "/migrated-assets/case-studies/democratic-club-greater-tracy/homepage-02.webp",
     logo: "/migrated-assets/logos/the-democratic.svg",
     context:
-      "The Democratic Club of Greater Tracy has active membership, regular events, and genuine community reach. What it lacked was a digital infrastructure to match its activity — a place where members could connect, events could be found, and prospective participants could understand the organization's purpose and impact.",
+      "The Democratic Club of Greater Tracy has active membership, regular events, and genuine community reach. What it lacked was a digital infrastructure to match its activity, a place where members could connect, events could be found, and prospective participants could understand the organization's purpose and impact.",
     challenge:
       "Without a digital presence, the organization's reach was limited to those who already knew it existed. Member engagement depended on personal outreach. Events lived in emails. The organization was doing real work without the infrastructure to grow it.",
     strategy:
-      "Accessibility and clarity first. The design language had to feel welcoming — not institutional — and the information architecture had to serve both existing members and people discovering the organization for the first time. Content structure built around participation: events, membership, mission, contact.",
+      "Accessibility and clarity first. The design language had to feel welcoming; not institutional, and the information architecture had to serve both existing members and people discovering the organization for the first time. Content structure built around participation: events, membership, mission, contact.",
     execution: [
       "Civic web presence — clear, accessible design that reflects the organization's community focus and reach.",
       "Member and event architecture — structured pathways for participation, membership inquiry, and event visibility.",
@@ -878,16 +878,16 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
       "Clear participation pathways for both existing members and new prospects",
     ],
     whyItWorked:
-      "Civic organizations don't need impressiveness — they need clarity. The site works because it prioritizes the people it's built for, not the organization's need to appear important. The result is a digital presence that feels like the club itself: open, purposeful, and built for participation.",
+      "Civic organizations don't need impressiveness, they need clarity. The site works because it prioritizes the people it's built for; not the organization's need to appear important. The result is a digital presence that feels like the club itself: open, purposeful, and built for participation.",
     showcaseImages: [
       {
         src: "/migrated-assets/case-studies/democratic-club-greater-tracy/hero.webp",
-        alt: "Democratic Club of Greater Tracy — homepage",
+        alt: "Democratic Club of Greater Tracy, homepage",
         caption: "Public digital presence",
       },
       {
         src: "/migrated-assets/case-studies/democratic-club-greater-tracy/homepage-02.webp",
-        alt: "Democratic Club of Greater Tracy — content section",
+        alt: "Democratic Club of Greater Tracy, content section",
         caption: "Member & event architecture",
       },
     ],
@@ -904,11 +904,11 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     year: "2026",
     image: "/migrated-assets/case-studies/spur-restaurant/hero.webp",
     context:
-      "Spur Restaurant & Bar was built on local reputation and genuine atmosphere — the kind of place that earns loyalty through the quality of the experience, not the size of the marketing budget. The room was right. The website wasn't doing it justice.",
+      "Spur Restaurant & Bar was built on local reputation and genuine atmosphere, the kind of place that earns loyalty through the quality of the experience; not the size of the marketing budget. The room was right. The website wasn't doing it justice.",
     challenge:
-      "A restaurant with real character and local credibility was being introduced online by a presence that didn't reflect either. The digital first impression was creating the wrong expectation — or no expectation at all — before guests arrived.",
+      "A restaurant with real character and local credibility was being introduced online by a presence that didn't reflect either. The digital first impression was creating the wrong expectation, or no expectation at all, before guests arrived.",
     strategy:
-      "The website had to feel like the room. Not describe it — feel like it. The design language, tone, and content hierarchy were all built around the same atmosphere the restaurant creates inside: warm, specific, worth the drive.",
+      "The website had to feel like the room. Not describe it, feel like it. The design language, tone, and content hierarchy were all built around the same atmosphere the restaurant creates inside: warm, specific, worth the drive.",
     execution: [
       "Character-driven web presence — design that communicates the restaurant's atmosphere before a guest reads a word.",
       "Reservation and inquiry flow — low-friction pathways built to move interest into bookings.",
@@ -919,16 +919,16 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
       "Reservation-oriented architecture that reduces friction from interest to booking",
     ],
     whyItWorked:
-      "Restaurants succeed on atmosphere. The website had to deliver a version of that before the door opens. It works because the design was built around that single goal — not built around what a restaurant website is supposed to look like.",
+      "Restaurants succeed on atmosphere. The website had to deliver a version of that before the door opens. It works because the design was built around that single goal; not built around what a restaurant website is supposed to look like.",
     showcaseImages: [
       {
         src: "/migrated-assets/case-studies/spur-restaurant/hero.webp",
-        alt: "Spur Restaurant & Bar — homepage hero",
+        alt: "Spur Restaurant & Bar, homepage hero",
         caption: "Character-driven entrance",
       },
       {
         src: "/migrated-assets/case-studies/spur-restaurant/homepage-02.webp",
-        alt: "Spur Restaurant & Bar — interior sections",
+        alt: "Spur Restaurant & Bar, interior sections",
         caption: "Reservation pathways",
       },
     ],
@@ -947,11 +947,11 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     image: "/images/work/screenshots/martinsen-construction/desktop-home.png",
     logo: "/migrated-assets/logos/martinsen-construction-logo.svg",
     context:
-      "Martinsen Construction is an established contractor serving Central Oregon with residential construction, remodeling, ADUs, and site development. The fieldwork is precise and professional. The website needed to communicate that trust before the first call — not merely decorate the brand.",
+      "Martinsen Construction is an established contractor serving Central Oregon with residential construction, remodeling, ADUs, and site development. The fieldwork is precise and professional. The website needed to communicate that trust before the first call; not merely decorate the brand.",
     challenge:
       "Most contractor websites look interchangeable: generic galleries, unclear services, weak paths to contact. Martinsen needed a digital presence that communicated licensed expertise, service clarity, and conversion readiness for homeowners and commercial prospects evaluating who to call.",
     strategy:
-      "Lead with credibility and clarity. Structure services so prospects can find the right work quickly. Make professionalism and next-step inquiry obvious. The website had to earn the call — not just look better than a template.",
+      "Lead with credibility and clarity. Structure services so prospects can find the right work quickly. Make professionalism and next-step inquiry obvious. The website had to earn the call; not just look better than a template.",
     execution: [
       "Contractor website rebuild with clear residential and commercial service pathways.",
       "Trust-first presentation — professional structure that matches the standard of work on site.",
@@ -967,7 +967,7 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     showcaseImages: [
       {
         src: "/images/work/screenshots/martinsen-construction/desktop-home.png",
-        alt: "Martinsen Construction — website rebuild",
+        alt: "Martinsen Construction, website rebuild",
         caption: "Contractor website rebuild",
       },
     ],
@@ -987,9 +987,9 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     context:
       "E. Davis Enterprises is a family-owned propane, natural gas, and generator services company serving Southern Oregon. The business is built on reliability. KXD's role expanded beyond a website rebuild into an ongoing technology partnership supporting how the company presents itself and how work moves behind the scenes.",
     challenge:
-      "Service businesses in trades and energy often default to cluttered, outdated websites — and disconnected tools for the work after the lead arrives. E. Davis needed a professional digital presence and operational infrastructure that matched the seriousness of the field team.",
+      "Service businesses in trades and energy often default to cluttered, outdated websites, and disconnected tools for the work after the lead arrives. E. Davis needed a professional digital presence and operational infrastructure that matched the seriousness of the field team.",
     strategy:
-      "Start with clarity on the public side: service pathways, trust, and inquiry readiness. Then support the business with operational systems — custom CRM workflows, payment/invoicing infrastructure, and analytics — so the website and internal operations reinforce each other as an ongoing partnership.",
+      "Start with clarity on the public side: service pathways, trust, and inquiry readiness. Then support the business with operational systems, custom CRM workflows, payment/invoicing infrastructure, and analytics, so the website and internal operations reinforce each other as an ongoing partnership.",
     execution: [
       "Service-business website rebuild with clear inquiry pathways across propane, gas, and generator work.",
       "Custom CRM and workflow support so leads and service operations have a structured home beyond the inbox.",
@@ -1003,11 +1003,11 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
       "Ongoing technology partnership instead of a one-time launch handoff",
     ],
     whyItWorked:
-      "When the website matches the professionalism of the field team, every lead starts with confidence. When CRM, payments, and analytics sit behind that presence, the engagement becomes infrastructure — not just a redesign. Client location is factual context; the capability applies to established service businesses that have outgrown disconnected tools.",
+      "When the website matches the professionalism of the field team, every lead starts with confidence. When CRM, payments, and analytics sit behind that presence, the engagement becomes infrastructure; not just a redesign. Client location is factual context; the capability applies to established service businesses that have outgrown disconnected tools.",
     showcaseImages: [
       {
         src: "/images/work/screenshots/e-davis-enterprises/desktop-home.png",
-        alt: "E. Davis Enterprises — website rebuild",
+        alt: "E. Davis Enterprises, website rebuild",
         caption: "Service business website",
       },
     ],
@@ -1024,7 +1024,7 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     year: "2026",
     image: "/images/work/screenshots/la-cocina/desktop-home.png",
     context:
-      "La Cocina is a family-run Mexican restaurant in Roseburg built on real recipes, daily preparation, and local loyalty. The room was right — the website needed to carry that same warmth online.",
+      "La Cocina is a family-run Mexican restaurant in Roseburg built on real recipes, daily preparation, and local loyalty. The room was right, the website needed to carry that same warmth online.",
     challenge:
       "Restaurant websites often feel like menus pasted onto templates. La Cocina needed a digital introduction that felt personal, appetizing, and easy to act on.",
     strategy:
@@ -1042,7 +1042,7 @@ export const CASE_STUDIES: Record<string, CaseStudy> = {
     showcaseImages: [
       {
         src: "/images/work/screenshots/la-cocina/desktop-home.png",
-        alt: "La Cocina — website rebuild",
+        alt: "La Cocina, website rebuild",
         caption: "Restaurant website rebuild",
       },
     ],

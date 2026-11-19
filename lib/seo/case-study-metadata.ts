@@ -10,9 +10,9 @@ export type CaseStudySeoOverride = {
 
 const CASE_STUDY_SEO: Record<string, CaseStudySeoOverride> = {
   "spur-restaurant": {
-    title: "Spur Restaurant & Bar — Hospitality Website Design",
+    title: "Spur Restaurant & Bar Hospitality Website Design",
     description:
-      "Premium restaurant and bar website design for Spur — character-driven hospitality web presence, editorial layout, and reservation-oriented inquiry paths. KXD case study.",
+      "Premium restaurant and bar website design for Spur. Character-driven hospitality web presence, editorial layout, and reservation-oriented inquiry paths. KXD case study.",
   },
 };
 

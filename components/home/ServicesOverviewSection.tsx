@@ -18,7 +18,7 @@ export function ServicesOverviewSection() {
           </h2>
           <p className="mt-6 max-w-xl text-[1rem] leading-[1.78] text-white/58">
             Most clients begin with a website. As the relationship deepens, we build
-            ecommerce, growth infrastructure, and operational platforms — without losing
+            ecommerce, growth infrastructure, and operational platforms, without losing
             the clarity of the original brand.
           </p>
         </div>
