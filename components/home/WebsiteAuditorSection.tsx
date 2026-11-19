@@ -33,11 +33,10 @@ export function WebsiteAuditorSection() {
                 lineHeight: 1.85,
               }}
             >
-              KXD Intelligence is our proprietary diagnostic, the same
-              strategic lens we apply before a rebuild or systems engagement.
-              It reviews performance, discoverability, experience, conversion,
-              and brand presentation, then delivers a prioritized scorecard
-              that starts the right conversation.
+              KXD Intelligence is our site review tool, the same checklist we use
+              before a rebuild conversation. It looks at performance, discoverability,
+              mobile experience, conversion paths, and how the brand comes across,
+              then returns a prioritized scorecard you can act on.
             </p>
 
             <p
@@ -49,8 +48,8 @@ export function WebsiteAuditorSection() {
                 maxWidth: "32rem",
               }}
             >
-              Diagnosis first. Then a clear path toward the KXD solution that
-              fits.
+              Start with diagnosis. Then decide whether a project, a partnership,
+              or a focused fix makes sense.
             </p>
 
             <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">

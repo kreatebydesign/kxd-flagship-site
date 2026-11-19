@@ -4,9 +4,9 @@ import { HeroWorkReel } from "./HeroWorkReel";
 import { HeroCursorGlowLazy } from "./HeroCursorGlowLazy";
 
 const PROOF_POINTS = [
-  "Premium websites that convert attention into demand.",
-  "Growth infrastructure that structures opportunity.",
-  "Operational systems that remove friction behind the brand.",
+  "Websites that earn trust on the first visit.",
+  "Search, analytics, and lead paths you can actually use.",
+  "Custom portals and tools when the business needs more than marketing.",
 ];
 
 /*
@@ -129,13 +129,13 @@ export function HeroSection() {
                 marginTop: "clamp(3.5rem, 5.5vw, 5rem)",
               }}
             >
-              Premium websites, growth infrastructure, and operational systems
-              for established businesses ready to grow with intention.{" "}
+              We design and build websites, brand work, and custom software for
+              established businesses ready to grow with intention.{" "}
               <Link
                 href="/services/luxury-website-experiences"
                 className="text-[var(--kxd-cream-soft)] underline decoration-[var(--kxd-border-gold)] underline-offset-[0.2em] transition hover:text-[var(--kxd-cream)]"
               >
-                Explore luxury website experiences
+                Website design and development
               </Link>{" "}
               or read{" "}
               <Link

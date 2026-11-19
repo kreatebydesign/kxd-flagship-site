@@ -14,7 +14,7 @@ import { StructuredData } from "@/components/seo/StructuredData";
 export const metadata: Metadata = buildMetadata({
   title: "Services",
   description:
-    "Brand systems, website experiences, growth infrastructure, and operational platforms, built with discipline by Kreate by Design.",
+    "Website design and development, brand identity, marketing foundations, and custom business software. Four ways to work with Kreate by Design, each scoped to the business.",
   path: "/services",
   keywords: [
     "Website Redesign",
@@ -115,9 +115,9 @@ export default function ServicesPage() {
               maxWidth: "40rem",
             }}
           >
-            KXD starts where the business needs clarity most, brand, website,
-            growth infrastructure, or operational platforms, and goes deeper
-            only when the work requires it.
+            Choose the lane that matches your need. We can scope a single project or
+            connect website, brand, growth, and software work when the business is
+            ready for it.
           </p>
         </div>
       </section>

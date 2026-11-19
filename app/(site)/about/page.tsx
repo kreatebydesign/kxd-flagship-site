@@ -13,7 +13,7 @@ import {
 
 export const metadata: Metadata = buildMetadata({
   title: "About",
-  description: `${SITE.name} is a founder-led digital studio for websites, growth systems, and operational platforms, built with discipline.`,
+  description: `${SITE.name} is a founder-led studio for premium website design, brand identity, and custom software, built with discipline.`,
   path: "/about",
   keywords: [
     "Founder-Led Digital Studio",
@@ -58,7 +58,7 @@ export default function AboutPage() {
     founderPersonSchema(),
     webPageSchema({
       title: "About",
-      description: `${SITE.name} is a founder-led digital studio for websites, growth systems, and operational platforms, built with discipline.`,
+      description: `${SITE.name} is a founder-led studio for premium website design, brand identity, and custom software, built with discipline.`,
       path: "/about",
     }),
   ];
@@ -246,9 +246,9 @@ export default function AboutPage() {
                   and companies find the version of themselves that belongs to the future.
                 </p>
                 <p>
-                  That&rsquo;s what drives us: to build brands, systems, and experiences designed
-                  to endure, creating clarity, momentum, and long-term value for the businesses
-                  we partner with.
+                  That&rsquo;s what drives us: to build brands and experiences designed to endure,
+                  creating clarity, momentum, and long-term value for the businesses we partner
+                  with.
                 </p>
               </div>
 

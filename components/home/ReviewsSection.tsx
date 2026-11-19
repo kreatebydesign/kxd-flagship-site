@@ -147,9 +147,8 @@ export async function ReviewsSection() {
                 lineHeight: 1.85,
               }}
             >
-              KXD operates with brands that require system-level execution quality ,
-              consistent delivery, production-grade output, and infrastructure built
-              to perform long after the initial build is complete.
+              Words from clients we have worked with. When Google reviews are part
+              of the record, they appear here exactly as published.
             </p>
           </div>
 
@@ -206,16 +205,16 @@ export async function ReviewsSection() {
         >
           {[
             {
-              label: "System Transparency",
-              copy: "Every production decision surfaces within a documented framework, clients understand the system logic; not just the output.",
+              label: "Clear process",
+              copy: "You know where the project stands, what we decided, and why.",
             },
             {
-              label: "Founder-Led Execution",
-              copy: "Direct founder oversight at every production stage, no handoffs, no gaps, no diluted decisions.",
+              label: "Founder-led",
+              copy: "The founder stays involved through launch, with direct communication along the way.",
             },
             {
-              label: "Compounding Infrastructure",
-              copy: "Systems are built to generate increasing output over time, every layer engineered to compound on the last.",
+              label: "Built to last",
+              copy: "Work meant to hold up after launch, with room to grow when the business is ready.",
             },
           ].map((item) => (
             <div key={item.label}>

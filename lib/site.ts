@@ -21,9 +21,9 @@ export const SITE = {
   name: "Kreate by Design",
   shortName: "KXD",
   tagline:
-    "Premium websites, growth infrastructure, and operational systems.",
+    "Websites, brand identity, and custom software for businesses that care how they show up online.",
   description:
-    "Kreate by Design builds premium website design and development, branding, SEO, and custom business platforms for ambitious brands. Founder-led creative and technology studio.",
+    "Kreate by Design is a founder-led studio for premium website design and development, brand identity, search foundations, and custom business software. Based in Los Angeles, working with clients nationwide.",
   url: resolvePublicSiteUrl(),
   locale: "en_US",
   email: "matt@kreatebydesign.com",

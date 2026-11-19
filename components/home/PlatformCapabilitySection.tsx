@@ -53,10 +53,9 @@ export function PlatformCapabilitySection() {
                 lineHeight: 1.85,
               }}
             >
-              KXD builds the operational layer behind ambitious brands ,
-              portals, dashboards, and workflow infrastructure designed around
-              how the business actually runs. Always in service of the brand.
-              Never as a standalone software product.
+              When a marketing site is not enough, we build client portals,
+              dashboards, and workflow tools around how the company actually runs.
+              Custom work in service of the brand, not an off-the-shelf product.
             </p>
 
             <ul className="mt-10 grid gap-0 sm:grid-cols-2 sm:gap-x-10">

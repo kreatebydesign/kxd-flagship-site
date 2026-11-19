@@ -22,7 +22,7 @@ export const CONSTRUCTION_PAGE = {
   path: CONSTRUCTION_HUB_PATH,
   title: "Construction & Contractor Website Design",
   description:
-    "Premium construction and contractor website design for established trades businesses built by Kreate by Design.",
+    "Construction and contractor website design for established trades businesses. Clear services, credible presentation, and inquiry paths built by Kreate by Design.",
   keywords: [
     "Construction Website Design",
     "Contractor Website Design",
@@ -32,7 +32,7 @@ export const CONSTRUCTION_PAGE = {
   eyebrow: "Construction & Trades",
   headline: "Trust starts before the first call.",
   lead:
-    "Premium websites and digital presence for construction companies, contractors, and trades businesses.",
+    "Websites and digital presence for construction companies, contractors, and trades businesses that need to look as professional online as they do in the field.",
   primaryCta: { label: "Start a Project", href: "/start-project" },
   secondaryCta: { label: "View the Work", href: "/work" },
 } as const;

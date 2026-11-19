@@ -38,8 +38,8 @@ export function CaseStudiesSection() {
             className="kxd-body-sm lg:text-right"
             style={{ maxWidth: "24rem" }}
           >
-            Premium presence, growth infrastructure, and operational systems ,
-            shown through motorsports, hospitality systems, and service-business work.
+            Website, brand, and software work across motorsports, hospitality,
+            construction, and service businesses, each scoped to what that client needed.
           </p>
         </div>
 

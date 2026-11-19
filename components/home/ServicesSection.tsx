@@ -24,7 +24,7 @@ export function ServicesSection() {
                 maxWidth: "24ch",
               }}
             >
-              Presence. Growth. Systems.
+              Where the work starts, and where it goes next.
             </h2>
 
             <p
@@ -34,9 +34,9 @@ export function ServicesSection() {
                 lineHeight: 1.85,
               }}
             >
-              Websites are the entry point. Growth infrastructure structures
-              demand. Operational systems run what the brand needs next. KXD
-              builds the ladder; not disconnected services.
+              Website design and development is usually the front door. Brand
+              identity, marketing foundations, and custom applications follow when
+              the business is ready. Connected work, scoped one chapter at a time.
             </p>
           </div>
 
