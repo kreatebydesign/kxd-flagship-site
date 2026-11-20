@@ -79,14 +79,15 @@ export default function AboutPage() {
           <h1
             className="kxd-serif-title mt-5"
             style={{
-              fontSize: "clamp(2.5rem, 5.5vw, 3.75rem)",
-              maxWidth: "38rem",
-              lineHeight: 1.06,
+              fontSize: "clamp(2.25rem, 5vw, 3.5rem)",
+              maxWidth: "min(40rem, 100%)",
+              lineHeight: 1.08,
             }}
           >
-            Built With Intention.
-            <br />
-            Led With Discipline.
+            A Different Way
+            <br className="hidden min-[480px]:inline" />
+            {" "}
+            to See Things.
           </h1>
           <p className="kxd-body mt-8" style={{ maxWidth: "34rem" }}>
             KXD was built on one belief: energy is the foundation of design. Every brand
@@ -253,12 +254,11 @@ export default function AboutPage() {
               </div>
 
               <div
-                className="mt-10 border-t pt-8"
+                aria-hidden
+                className="mt-10 border-t pt-10"
                 style={{ borderColor: "var(--kxd-border-white)" }}
               >
                 <div
-                  aria-hidden
-                  className="mb-6"
                   style={{
                     width: "2.5rem",
                     height: "1px",
@@ -267,39 +267,6 @@ export default function AboutPage() {
                     opacity: 0.45,
                   }}
                 />
-                <p
-                  className="font-serif font-light"
-                  style={{
-                    fontSize: "clamp(2rem, 3vw, 2.6rem)",
-                    lineHeight: 1.0,
-                    letterSpacing: "0.01em",
-                    color: "var(--kxd-cream)",
-                  }}
-                >
-                  Matt Lunger
-                </p>
-                <p
-                  className="mt-3 font-sans font-medium uppercase"
-                  style={{
-                    fontSize: "0.72rem",
-                    letterSpacing: "0.28em",
-                    color: "var(--foreground-subtle)",
-                    opacity: 0.72,
-                  }}
-                >
-                  Founder &amp; Creative Director
-                </p>
-                <p
-                  className="mt-1 font-sans font-medium uppercase"
-                  style={{
-                    fontSize: "0.60rem",
-                    letterSpacing: "0.18em",
-                    color: "var(--foreground-subtle)",
-                    opacity: 0.55,
-                  }}
-                >
-                  Kreate by Design
-                </p>
               </div>
             </div>
           </div>
