@@ -6,17 +6,17 @@ import { FinalCtaBand } from "@/components/ui/FinalCtaBand";
 export const metadata: Metadata = buildMetadata({
   title: "Business Platforms & Operational Systems",
   description:
-    "Custom client portals, dashboards, and business applications for companies that have outgrown disconnected tools. Built around your workflows and your brand.",
+    "Custom business software, client portals, industry-specific platforms, and integrations for companies that need technology built around how they actually operate.",
   path: "/platforms",
   keywords: [
+    "Custom Business Software",
+    "Client Portal Development",
     "Custom Business Platforms",
     "Operational Systems Development",
-    "Client Portal Development",
-    "Membership Platform Development",
-    "Hospitality Platform Development",
-    "Motorsports Platform Development",
+    "Industry-Specific Platform Development",
+    "Business Automation",
+    "Systems Integration",
     "Enterprise Dashboard Development",
-    "Custom CRM Systems",
     "Digital Operations Platforms",
   ],
 });
@@ -42,49 +42,53 @@ const PHILOSOPHY_PILLARS = [
   },
 ] as const;
 
-const PLATFORM_CATEGORIES = [
+const PLATFORM_CAPABILITIES = [
   {
     letter: "A",
-    name: "Motorsports OS",
-    descriptor: "Purpose-built for racing organizations and high-performance brands.",
+    name: "Custom Business Software",
+    descriptor:
+      "Purpose-built applications, business workflows, internal tools, and operational platforms.",
     capabilities: [
-      "Driver portals — licensing, communications, performance data",
-      "Operations dashboards — team coordination and live logistics",
-      "CRM infrastructure — sponsor and driver relationship management",
-      "Enrollment systems — registration, onboarding, and credentialing",
+      "Operational workflows — process coordination built around your team",
+      "Internal tooling — administrative systems that match how you work",
+      "Client dashboards — real-time visibility for projects and accounts",
+      "Reporting systems — custom data views and business intelligence",
     ],
   },
   {
     letter: "B",
-    name: "Hospitality OS",
-    descriptor: "Elevating the guest experience through seamless operational systems.",
+    name: "Client & Customer Portals",
+    descriptor:
+      "Connected experiences for customers, clients, employees, and business partners.",
     capabilities: [
-      "Reservation workflows — integrated booking experiences",
-      "Membership experiences — member portals and exclusive access",
-      "Internal operations — staff tooling and coordination systems",
-      "Concierge systems — white-glove request management",
+      "Client portals — branded environments for customers and partners",
+      "Member experiences — gated access, content, and exclusive communities",
+      "Team portals — communications, licensing, and coordination in one place",
+      "Concierge systems — request management with a brand-native experience",
     ],
   },
   {
     letter: "C",
-    name: "Membership Platforms",
-    descriptor: "Community and content infrastructure for exclusive organizations.",
+    name: "Industry-Specific Platforms",
+    descriptor:
+      "Custom technology developed around the specialized needs of different industries.",
     capabilities: [
-      "Community portals — gated member environments",
-      "Content systems — structured delivery of exclusive content",
-      "Event management — registration, RSVP, and logistics",
-      "Internal communications — seamless member-to-brand interaction",
+      "Motorsports example — operations layered on a performance brand presence",
+      "Hospitality example — guest experience aligned with back-of-house workflows",
+      "Membership example — community, events, and content in one platform",
+      "Enterprise teams — systems shaped around specialized operational needs",
     ],
   },
   {
     letter: "D",
-    name: "Enterprise Systems",
-    descriptor: "Operational infrastructure for organizations that have outgrown generic tools.",
+    name: "Integrations & Automation",
+    descriptor:
+      "Connected tools, automated workflows, reporting, and streamlined business processes.",
     capabilities: [
-      "Client dashboards — real-time project and account visibility",
-      "Operational workflows — process automation and task coordination",
-      "Administrative tooling — internal efficiency systems",
-      "Reporting systems — custom data views and business intelligence",
+      "Connected tools — CRM, enrollment, and third-party systems in sync",
+      "Automated workflows — handoffs and approvals without losing visibility",
+      "Registration paths — onboarding and credentialing that match your process",
+      "Reservation and logistics — booking, RSVP, and live coordination systems",
     ],
   },
 ] as const;
@@ -121,7 +125,7 @@ const FEATURED_WORK = [
   {
     slug: "primal-motorsports",
     title: "Primal Motorsports",
-    category: "Motorsports OS",
+    category: "Industry-specific platform",
     description:
       "Website, membership architecture, and growth infrastructure for one of motorsports' most ambitious brands, built as a complete operational layer; not a collection of tools.",
     outcome: "Flagship presence for a performance brand that competes at the top.",
@@ -129,7 +133,7 @@ const FEATURED_WORK = [
   {
     slug: "plate-the-umpqua",
     title: "Plate the Umpqua",
-    category: "Hospitality OS",
+    category: "Client portal & operations",
     description:
       "Public hospitality experience plus Plate OS, inquiry workflows, menus, Partner Concierge, and operational infrastructure behind the brand.",
     outcome: "Website and operating system shaped around how private dining actually runs.",
@@ -339,21 +343,23 @@ export default function PlatformsPage() {
         style={{ background: "var(--kxd-black-pure)", borderBottom: "1px solid var(--kxd-border-white)" }}
       >
         <div className="kxd-container">
-          <p className="kxd-eyebrow">Platform Categories</p>
+          <p className="kxd-eyebrow">Capabilities</p>
           <h2
             className="mt-5 font-serif font-light"
             style={{
-              fontSize: "clamp(1.5rem, 2.75vw, 2rem)",
+              fontSize: "clamp(1.5rem, 2.75vw, 2.125rem)",
               color: "var(--kxd-cream)",
-              maxWidth: "32rem",
-              lineHeight: 1.2,
+              maxWidth: "36rem",
+              lineHeight: 1.18,
             }}
           >
-            Four domains. One standard.
+            Built Around Your Business. Not a Category.
           </h2>
-          <p className="kxd-body mt-4" style={{ maxWidth: "36rem" }}>
-            Each engagement is bespoke, but our work clusters around four
-            operational categories where we&rsquo;ve developed deep expertise.
+          <p className="kxd-body mt-5" style={{ maxWidth: "40rem", lineHeight: 1.8 }}>
+            Every business works differently. We design and develop custom digital
+            platforms around the people, processes, and opportunities that make yours
+            unique. From focused client portals to sophisticated business software, the
+            possibilities aren&rsquo;t limited to a predefined set of industries.
           </p>
 
           <div className="mt-14 grid gap-px sm:grid-cols-2"
@@ -362,7 +368,7 @@ export default function PlatformsPage() {
               background: "var(--kxd-border-white)",
             }}
           >
-            {PLATFORM_CATEGORIES.map((cat) => (
+            {PLATFORM_CAPABILITIES.map((cat) => (
               <div
                 key={cat.letter}
                 className="group relative p-8 lg:p-10"
