@@ -28,7 +28,7 @@ ok("official gold logo asset on disk", fs.existsSync(logoPath));
 const brand = read("lib/ces/portal/brand-signature.ts");
 ok("headline copy locked", brand.includes('KXD_SIGNATURE_HEADLINE = "Exceptional by Design."'));
 ok("attribution copy locked", brand.includes("Designed & Developed by"));
-ok("signature duration 2.5s", brand.includes("KXD_SIGNATURE_EXPERIENCE_DURATION_MS = 2500"));
+ok("signature duration ~3.2s", brand.includes("KXD_SIGNATURE_EXPERIENCE_DURATION_MS = 3188"));
 
 const session = read("lib/ces/portal/signature-session.ts");
 ok("per-client session keys", session.includes("signatureStorageKey"));

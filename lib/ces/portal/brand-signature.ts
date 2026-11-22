@@ -25,17 +25,17 @@ export const KXD_PORTAL_ATTRIBUTION_COPY = `Designed & Developed by ${KXD_PORTAL
 /** @deprecated alias */
 export const CES_DEFAULT_PARTNER_FOOTER_COPY = KXD_PORTAL_ATTRIBUTION_COPY;
 
-/** Total experience length (ms) — Stage 4 completes by 2.5s. */
-export const KXD_SIGNATURE_EXPERIENCE_DURATION_MS = 2500;
+/** Total experience length (ms) — Stage 4 completes by ~3.2s (premium pacing). */
+export const KXD_SIGNATURE_EXPERIENCE_DURATION_MS = 3188;
 
 /** Animation stage markers (ms) — for documentation and tests. */
 export const KXD_SIGNATURE_STAGE = {
   lineStart: 0,
-  lineEnd: 400,
-  logoStart: 400,
-  logoEnd: 1100,
-  copyStart: 1000,
-  copyEnd: 1900,
-  dissolveStart: 1900,
-  dissolveEnd: 2500,
+  lineEnd: 510,
+  logoStart: 510,
+  logoEnd: 1403,
+  copyStart: 1275,
+  copyEnd: 2423,
+  dissolveStart: 2423,
+  dissolveEnd: 3188,
 } as const;
