@@ -104,8 +104,20 @@ function baseInquiry(overrides: Partial<ClientInquiryRecord> = {}): ClientInquir
     bookedProgram: null,
     locationId: null,
     assignedPortalOwnerId: null,
+    registrationId: null,
+    programLabel: null,
+    courseId: null,
+    paymentStatus: null,
+    paymentAmountCents: null,
+    paymentCurrency: null,
+    stripeCheckoutSessionId: null,
+    stripePaymentIntentId: null,
+    paidAt: null,
+    refundedAt: null,
+    eventStartsOn: null,
+    eventEndsOn: null,
     ...overrides,
-  };
+  } as ClientInquiryRecord;
 }
 
 console.log("\nPrimal Phase 1 Lead Command — Build 1\n");
@@ -643,6 +655,17 @@ const migrationsIndexSrc = read("migrations/index.ts");
 check(
   "Migration is registered in migrations/index.ts",
   migrationsIndexSrc.includes("20261002_primal_phase1_lead_command_foundation"),
+);
+
+const inboxViewSrc = read("lib/client-command/leads/inbox-view-filter.ts");
+const leadInboxSrc = read("components/ces/leads/LeadInboxScreen.tsx");
+const leadLoadSrc = read("lib/client-command/leads/load.ts");
+check(
+  "Lead Command exposes registrations view without a second database",
+  inboxViewSrc.includes("inquiryHasRegistrationPayment") &&
+    leadInboxSrc.includes("kxd-lead-view-tabs") &&
+    leadInboxSrc.includes("Registrations") &&
+    leadLoadSrc.includes("matchesLeadListView"),
 );
 
 if (failed > 0) {

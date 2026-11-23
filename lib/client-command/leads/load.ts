@@ -12,6 +12,7 @@ import { CLIENT_INQUIRIES_COLLECTION } from "@/lib/managed-client-leads/collecti
 import { ledgerScopeWhere, isCrossClientLeak } from "@/lib/managed-client-leads/isolation";
 import { mapDocToRecord } from "@/lib/managed-client-leads/map";
 import type { ClientInquiryRecord } from "@/lib/managed-client-leads/types";
+import { matchesLeadListView } from "./inbox-view-filter";
 import { deriveLeadPrimaryAttention } from "./attention";
 import { resolveLeadPresentationStage, leadDetailHref, resolveLeadOwnerLabel } from "./presentation";
 import { listAssignableLeadOwners, findOwnerLabel } from "./owners";
@@ -127,6 +128,7 @@ function filterLeadRows(
     }
     if (filters.q && !matchesQuery(inquiry, filters.q)) return false;
     if (!inDateRange(inquiry.receivedAt, filters.receivedFrom, filters.receivedTo)) return false;
+    if (!matchesLeadListView(inquiry, filters.leadView ?? "all")) return false;
     return true;
   });
 }
@@ -265,7 +267,12 @@ async function loadInquiryActivity(
       where: {
         and: [
           { client: { equals: tenant.clientId } },
-          { eventType: { like: "managed-client.inquiry.%" } },
+          {
+            or: [
+              { eventType: { like: "managed-client.inquiry.%" } },
+              { eventType: { like: "managed-client.registration.payment.%" } },
+            ],
+          },
         ],
       },
       overrideAccess: true,

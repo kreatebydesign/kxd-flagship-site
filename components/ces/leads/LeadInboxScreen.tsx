@@ -1,6 +1,11 @@
 import Link from "next/link";
 import { CesPage, CesHero, CesEmptyState } from "@/components/ces/primitives";
-import type { LeadListFilters, LeadListItem, LeadOwnerOption } from "@/lib/client-command/leads/types";
+import type {
+  LeadListFilters,
+  LeadListItem,
+  LeadListView,
+  LeadOwnerOption,
+} from "@/lib/client-command/leads/types";
 import {
   formatLeadRelative,
   formatLeadSource,
@@ -9,6 +14,50 @@ import {
 } from "@/lib/client-command/leads/presentation";
 import { leadAttentionLabel } from "@/lib/client-command/leads/attention";
 import { SELECTABLE_LEAD_STAGES } from "@/lib/client-command/leads/apply-stage";
+import {
+  formatLeadRegistrationPaymentLabel,
+  leadHasRegistrationPayment,
+  registrationPaymentStatusClass,
+} from "@/lib/client-command/leads/registration-presentation";
+
+const INBOX_VIEW_TABS: { id: LeadListView; label: string }[] = [
+  { id: "all", label: "All" },
+  { id: "leads", label: "Inquiries" },
+  { id: "registrations", label: "Registrations" },
+];
+
+function inboxHero(filters: LeadListFilters): { title: string; lead: string } {
+  const view = filters.leadView ?? "all";
+  if (view === "registrations") {
+    return {
+      title: "Registrations",
+      lead: "Paid registrations with verified checkout metadata — same detail view, scoped to program enrollment.",
+    };
+  }
+  if (view === "leads") {
+    return {
+      title: "Inquiries",
+      lead: "Form and contact interest without a paid registration on file.",
+    };
+  }
+  return {
+    title: "Leads",
+    lead: "Every inquiry in one calm inbox — scan who arrived, what they need, and what's waiting on you.",
+  };
+}
+
+function buildViewHref(view: LeadListView, filters: LeadListFilters): string {
+  const params = new URLSearchParams();
+  if (view !== "all") params.set("view", view);
+  if (filters.q) params.set("q", filters.q);
+  if (filters.stage && filters.stage !== "all") params.set("stage", filters.stage);
+  if (filters.ownerPortalUserId != null && filters.ownerPortalUserId !== "all") {
+    params.set("owner", String(filters.ownerPortalUserId));
+  }
+  if (filters.needsAttention) params.set("attention", "1");
+  const qs = params.toString();
+  return qs ? `/portal/leads?${qs}` : "/portal/leads";
+}
 
 export function LeadInboxScreen({
   clientName,
@@ -25,13 +74,25 @@ export function LeadInboxScreen({
   owners: LeadOwnerOption[];
   errorMessage?: string | null;
 }) {
+  const hero = inboxHero(filters);
+  const activeView = filters.leadView ?? "all";
+
   return (
     <CesPage className="kxd-lead-command">
-      <CesHero
-        eyebrow={clientName}
-        title="Leads"
-        lead="Every inquiry in one calm inbox — scan who arrived, what they need, and what's waiting on you."
-      />
+      <CesHero eyebrow={clientName} title={hero.title} lead={hero.lead} />
+
+      <nav className="kxd-lead-view-tabs" aria-label="Inbox view">
+        {INBOX_VIEW_TABS.map((tab) => (
+          <Link
+            key={tab.id}
+            href={buildViewHref(tab.id, filters)}
+            className={`kxd-lead-view-tabs__tab${activeView === tab.id ? " is-active" : ""}`}
+            aria-current={activeView === tab.id ? "page" : undefined}
+          >
+            {tab.label}
+          </Link>
+        ))}
+      </nav>
 
       <div className="kxd-lead-summary-row">
         <span className="kxd-lead-summary-row__count">
@@ -42,6 +103,7 @@ export function LeadInboxScreen({
       </div>
 
       <form className="kxd-lead-filters" method="get">
+        <input type="hidden" name="view" value={activeView} />
         <div className="kxd-lead-filters__field kxd-lead-filters__field--grow">
           <label className="kxd-lead-filters__label" htmlFor="lead-q">
             Search
@@ -134,6 +196,13 @@ export function LeadInboxScreen({
                       <span className={`kxd-ces-status ${leadStageStatusClass(item.stage)}`}>
                         {leadPresentationStageLabel(item.stage)}
                       </span>
+                      {leadHasRegistrationPayment(item.inquiry) && item.inquiry.paymentStatus ? (
+                        <span
+                          className={`kxd-lead-pay kxd-lead-pay--compact kxd-ces-status ${registrationPaymentStatusClass(item.inquiry.paymentStatus)}`}
+                        >
+                          {formatLeadRegistrationPaymentLabel(item.inquiry)}
+                        </span>
+                      ) : null}
                       <span className="kxd-lead-row__when">
                         {formatLeadRelative(item.inquiry.receivedAt)}
                       </span>

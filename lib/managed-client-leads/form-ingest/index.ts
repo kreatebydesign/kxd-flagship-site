@@ -13,6 +13,8 @@ export {
   PRIMAL_MOTORSPORTS_FORM_INGEST_SECRET_ENV,
   PRIMAL_MOTORSPORTS_SOURCE_SYSTEM,
   PRIMAL_WEB_SUBMISSION_ID_PATTERN,
+  PRIMAL_REGISTRATION_ID_PATTERN,
+  isAllowedPrimalSourceExternalId,
 } from "./constants";
 export {
   resolveMciFormIngestCredential,

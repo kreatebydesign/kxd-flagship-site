@@ -9,6 +9,7 @@ import type {
   VerificationState,
 } from "@/lib/acquisition-operations";
 import type { ManagedClientLeadChannel } from "@/lib/acquisition-operations/policy";
+import type { RegistrationPaymentStatus } from "./registration-payment";
 import type {
   ClientInquiryRecord,
   Disposition,
@@ -89,5 +90,26 @@ export function mapDocToRecord(doc: Record<string, unknown>): ClientInquiryRecor
     bookedProgram: doc.bookedProgram ? String(doc.bookedProgram) : null,
     locationId: relId(doc.location),
     assignedPortalOwnerId: relId(doc.assignedPortalOwner),
+    registrationId: doc.registrationId ? String(doc.registrationId) : null,
+    programLabel: doc.programLabel ? String(doc.programLabel) : null,
+    courseId: doc.courseId ? String(doc.courseId) : null,
+    paymentStatus: doc.paymentStatus
+      ? (String(doc.paymentStatus) as RegistrationPaymentStatus)
+      : null,
+    paymentAmountCents:
+      doc.paymentAmountCents != null && doc.paymentAmountCents !== ""
+        ? Number(doc.paymentAmountCents)
+        : null,
+    paymentCurrency: doc.paymentCurrency ? String(doc.paymentCurrency) : null,
+    stripeCheckoutSessionId: doc.stripeCheckoutSessionId
+      ? String(doc.stripeCheckoutSessionId)
+      : null,
+    stripePaymentIntentId: doc.stripePaymentIntentId
+      ? String(doc.stripePaymentIntentId)
+      : null,
+    paidAt: doc.paidAt ? String(doc.paidAt) : null,
+    refundedAt: doc.refundedAt ? String(doc.refundedAt) : null,
+    eventStartsOn: doc.eventStartsOn ? String(doc.eventStartsOn) : null,
+    eventEndsOn: doc.eventEndsOn ? String(doc.eventEndsOn) : null,
   };
 }

@@ -59,6 +59,11 @@ export default async function PortalLeadsPage({
           ? Number(rawOwner)
           : "all",
     needsAttention: first(params.attention) === "1",
+    leadView: (() => {
+      const view = first(params.view);
+      if (view === "registrations" || view === "leads") return view;
+      return "all";
+    })(),
   };
 
   const result = await loadLeadList({

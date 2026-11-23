@@ -36,6 +36,8 @@ export type LeadOwnerOption = {
   canManageMembers: boolean;
 };
 
+export type LeadListView = "all" | "leads" | "registrations";
+
 export type LeadListFilters = {
   q?: string;
   stage?: LeadPresentationStage | "all";
@@ -44,6 +46,8 @@ export type LeadListFilters = {
   sourceMedium?: string;
   receivedFrom?: string;
   receivedTo?: string;
+  /** Separate paid registrations from general inquiries in the Lead Command inbox. */
+  leadView?: LeadListView;
 };
 
 export type LeadListItem = {

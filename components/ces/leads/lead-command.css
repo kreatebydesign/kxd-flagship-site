@@ -67,6 +67,44 @@
   padding-bottom: 0.5rem;
 }
 
+.kxd-lead-view-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin: 0 0 1.25rem;
+  padding: 0.25rem;
+  border-radius: var(--kxd-ces-radius, 8px);
+  border: 1px solid var(--kxd-os-border-subtle);
+  background: color-mix(in srgb, var(--kxd-ces-accent) 2%, transparent);
+  width: fit-content;
+  max-width: 100%;
+}
+
+.kxd-lead-view-tabs__tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem 0.875rem;
+  border-radius: calc(var(--kxd-ces-radius, 8px) - 3px);
+  font-size: 0.8125rem;
+  font-weight: 550;
+  letter-spacing: 0.01em;
+  color: var(--kxd-os-text-muted);
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.kxd-lead-view-tabs__tab:hover {
+  color: var(--kxd-os-text-primary);
+  background: color-mix(in srgb, var(--kxd-ces-brand) 6%, transparent);
+}
+
+.kxd-lead-view-tabs__tab.is-active {
+  color: var(--kxd-os-text-primary);
+  background: var(--kxd-os-surface, #fff);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--kxd-ces-brand) 12%, transparent);
+}
+
 .kxd-lead-summary-row {
   display: flex;
   align-items: baseline;
@@ -554,4 +592,57 @@
     padding-left: 1rem;
     padding-right: 1rem;
   }
+}
+
+/* Registration payment receipt (Primal paid checkout → Lead Command) */
+
+.kxd-lead-pay {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  padding: 0.2rem 0.55rem;
+  border: 1px solid color-mix(in srgb, var(--kxd-ces-accent) 40%, transparent);
+}
+
+.kxd-lead-pay--compact {
+  font-size: 0.625rem;
+  padding: 0.15rem 0.45rem;
+}
+
+.kxd-lead-pay--paid {
+  color: color-mix(in srgb, #3d9a6a 90%, var(--kxd-os-text));
+  border-color: color-mix(in srgb, #3d9a6a 35%, transparent);
+  background: color-mix(in srgb, #3d9a6a 10%, transparent);
+}
+
+.kxd-lead-pay--pending {
+  color: color-mix(in srgb, var(--kxd-ces-accent) 88%, var(--kxd-os-text));
+  background: color-mix(in srgb, var(--kxd-ces-accent) 12%, transparent);
+}
+
+.kxd-lead-pay--failed,
+.kxd-lead-pay--exception {
+  color: color-mix(in srgb, #c45c4a 92%, var(--kxd-os-text));
+  border-color: color-mix(in srgb, #c45c4a 35%, transparent);
+  background: color-mix(in srgb, #c45c4a 8%, transparent);
+}
+
+.kxd-lead-pay--refunded {
+  color: var(--kxd-os-text-muted);
+  border-color: var(--kxd-os-border-subtle);
+  background: color-mix(in srgb, var(--kxd-os-text-faint) 8%, transparent);
+}
+
+.kxd-lead-panel--registration {
+  border-color: color-mix(in srgb, var(--kxd-ces-accent) 22%, var(--kxd-os-border-subtle));
+  background: color-mix(in srgb, var(--kxd-ces-accent) 4%, transparent);
+}
+
+.kxd-lead-summary__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
 }

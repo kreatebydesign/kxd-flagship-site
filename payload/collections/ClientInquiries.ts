@@ -453,5 +453,95 @@ export const ClientInquiries: CollectionConfig = {
           "Client workspace portal-member owner (distinct from Assigned Owner, which is a Payload/staff user).",
       },
     },
+  // ── Primal registration payment receipt (signed website ingest, optional) ─
+    {
+      name: "registrationId",
+      type: "text",
+      index: true,
+      label: "Registration ID",
+      admin: {
+        position: "sidebar",
+        description: "Primal evtreg id when paid registration is ingested.",
+      },
+    },
+    {
+      name: "programLabel",
+      type: "text",
+      label: "Program label",
+    },
+    {
+      name: "courseId",
+      type: "text",
+      label: "Course ID",
+      admin: { position: "sidebar" },
+    },
+    {
+      name: "paymentStatus",
+      type: "select",
+      label: "Registration payment status",
+      options: [
+        { label: "Pending", value: "pending" },
+        { label: "Paid", value: "paid" },
+        { label: "Failed", value: "failed" },
+        { label: "Refunded", value: "refunded" },
+        { label: "Payment exception", value: "payment_exception" },
+      ],
+      admin: { position: "sidebar" },
+    },
+    {
+      name: "paymentAmountCents",
+      type: "number",
+      label: "Payment amount (cents)",
+      admin: { position: "sidebar" },
+    },
+    {
+      name: "paymentCurrency",
+      type: "text",
+      label: "Payment currency",
+      defaultValue: "usd",
+      admin: { position: "sidebar" },
+    },
+    {
+      name: "stripeCheckoutSessionId",
+      type: "text",
+      label: "Stripe checkout session",
+      admin: {
+        position: "sidebar",
+        description: "Support reference only — not shown in client portal UI.",
+      },
+    },
+    {
+      name: "stripePaymentIntentId",
+      type: "text",
+      label: "Stripe payment intent",
+      admin: {
+        position: "sidebar",
+        description: "Support reference only — not shown in client portal UI.",
+      },
+    },
+    {
+      name: "paidAt",
+      type: "date",
+      label: "Paid at",
+      admin: { date: { pickerAppearance: "dayAndTime" }, position: "sidebar" },
+    },
+    {
+      name: "refundedAt",
+      type: "date",
+      label: "Refunded at",
+      admin: { date: { pickerAppearance: "dayAndTime" }, position: "sidebar" },
+    },
+    {
+      name: "eventStartsOn",
+      type: "date",
+      label: "Event start",
+      admin: { date: { pickerAppearance: "dayOnly" } },
+    },
+    {
+      name: "eventEndsOn",
+      type: "date",
+      label: "Event end",
+      admin: { date: { pickerAppearance: "dayOnly" } },
+    },
   ],
 };

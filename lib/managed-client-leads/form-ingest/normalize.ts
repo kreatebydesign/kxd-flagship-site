@@ -4,6 +4,10 @@
  */
 
 import type { ManagedClientLeadChannel } from "@/lib/acquisition-operations/policy";
+import {
+  type RegistrationPaymentPatch,
+  parseRegistrationPaymentPatch,
+} from "../registration-payment";
 
 export type NormalizedMciFormIngest = {
   sourceExternalId: string;
@@ -27,6 +31,7 @@ export type NormalizedMciFormIngest = {
   utmTerm: string | null;
   gclid: string | null;
   keyword: string | null;
+  registrationPayment: RegistrationPaymentPatch;
 };
 
 export type NormalizeMciFormIngestResult =
@@ -66,11 +71,28 @@ function parseReceivedAt(value: unknown): string {
  * Pure normalize. Caller supplies expected clientKey + sourceSystem from credential.
  * Ignores clientId / googleConversionObserved / CSI linkage from the body.
  */
+function validateSourceExternalId(
+  sourceExternalId: string,
+  input: {
+    sourceExternalIdPattern?: RegExp;
+    validateSourceExternalId?: (id: string) => boolean;
+  },
+): boolean {
+  if (input.validateSourceExternalId) {
+    return input.validateSourceExternalId(sourceExternalId);
+  }
+  if (input.sourceExternalIdPattern) {
+    return input.sourceExternalIdPattern.test(sourceExternalId);
+  }
+  return true;
+}
+
 export function normalizeMciFormIngestPayload(input: {
   body: unknown;
   expectedClientKey: string;
   expectedSourceSystem: string;
   sourceExternalIdPattern?: RegExp;
+  validateSourceExternalId?: (id: string) => boolean;
 }): NormalizeMciFormIngestResult {
   const root = asRecord(input.body);
   if (!root) {
@@ -97,10 +119,7 @@ export function normalizeMciFormIngestPayload(input: {
       message: "sourceExternalId is required.",
     };
   }
-  if (
-    input.sourceExternalIdPattern &&
-    !input.sourceExternalIdPattern.test(sourceExternalId)
-  ) {
+  if (!validateSourceExternalId(sourceExternalId, input)) {
     return {
       ok: false,
       code: "invalid_source_external_id",
@@ -154,6 +173,7 @@ export function normalizeMciFormIngestPayload(input: {
       utmTerm: boundText(root.utmTerm, 200),
       gclid: boundText(root.gclid, 200),
       keyword: boundText(root.keyword, 200),
+      registrationPayment: parseRegistrationPaymentPatch(root, sourceExternalId),
     },
   };
 }
