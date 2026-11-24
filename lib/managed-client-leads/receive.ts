@@ -14,7 +14,13 @@ import {
 import "@/lib/acquisition-operations/policies/register";
 import { resolveInquiryKeyFromSource } from "./identity";
 import { resolveReconciliationState } from "./reconciliation";
-import { publishClientInquiryReceivedActivity } from "./publish-activity";
+import { buildRegistrationPaymentDataPatch } from "./apply-registration-payment";
+import {
+  publishClientInquiryReceivedActivity,
+  publishClientInquiryRegistrationPaymentActivity,
+} from "./publish-activity";
+import type { RegistrationPaymentPatch } from "./registration-payment";
+import { hasRegistrationPaymentPatch } from "./registration-payment";
 import {
   type ClientInquiryRecord,
   type ReceiveClientInquiryInput,
@@ -24,12 +30,73 @@ import { clientIdMatchesClientKey, ledgerScopeWhere } from "./isolation";
 import { mapDocToRecord } from "./map";
 
 export type ReceiveClientInquiryResult =
-  | { ok: true; created: boolean; inquiry: ClientInquiryRecord }
+  | { ok: true; created: boolean; updated?: boolean; inquiry: ClientInquiryRecord }
   | {
       ok: false;
-      code: "policy" | "channel" | "binding" | "conflict" | "error";
+      code: "policy" | "channel" | "binding" | "conflict" | "transition" | "error";
       message: string;
     };
+
+async function patchExistingInquiry(
+  payload: Awaited<ReturnType<typeof getPayload>>,
+  existing: ClientInquiryRecord,
+  data: Record<string, unknown>,
+): Promise<ClientInquiryRecord> {
+  const doc = await payload.update({
+    collection: CLIENT_INQUIRIES_COLLECTION,
+    id: existing.id,
+    data,
+    overrideAccess: true,
+  });
+  return mapDocToRecord(doc as unknown as Record<string, unknown>);
+}
+
+async function tryApplyRegistrationPaymentToExisting(input: {
+  payload: Awaited<ReturnType<typeof getPayload>>;
+  inquiry: ClientInquiryRecord;
+  payment: RegistrationPaymentPatch;
+  sourceExternalId?: string | null;
+  actorUserId?: number | null;
+}): Promise<ReceiveClientInquiryResult> {
+  if (!hasRegistrationPaymentPatch(input.payment) && !input.inquiry.registrationId) {
+    return { ok: true, created: false, inquiry: input.inquiry };
+  }
+
+  const merged = buildRegistrationPaymentDataPatch({
+    existing: input.inquiry,
+    payment: input.payment,
+    sourceExternalId: input.sourceExternalId,
+  });
+
+  if (!merged.ok) {
+    return {
+      ok: false,
+      code: "transition",
+      message: merged.message,
+    };
+  }
+
+  if (Object.keys(merged.patch).length === 0) {
+    return { ok: true, created: false, inquiry: input.inquiry };
+  }
+
+  const touch: Record<string, unknown> = { ...merged.patch };
+  if (input.payment.programLabel && !input.inquiry.programInterest) {
+    touch.programInterest = input.payment.programLabel;
+  }
+
+  const updated = await patchExistingInquiry(input.payload, input.inquiry, touch);
+
+  if (merged.statusChanged && updated.paymentStatus) {
+    await publishClientInquiryRegistrationPaymentActivity({
+      inquiry: updated,
+      paymentStatus: updated.paymentStatus,
+      actorUserId: input.actorUserId ?? null,
+    }).catch(() => undefined);
+  }
+
+  return { ok: true, created: false, updated: true, inquiry: updated };
+}
 
 export async function receiveManagedClientInquiry(
   input: ReceiveClientInquiryInput,
@@ -110,6 +177,16 @@ export async function receiveManagedClientInquiry(
         message: "Inquiry key already belongs to another client.",
       };
     }
+    const payment = input.registrationPayment;
+    if (payment) {
+      return tryApplyRegistrationPaymentToExisting({
+        payload,
+        inquiry,
+        payment,
+        sourceExternalId: input.sourceExternalId,
+        actorUserId: input.actorUserId,
+      });
+    }
     return {
       ok: true,
       created: false,
@@ -137,6 +214,16 @@ export async function receiveManagedClientInquiry(
           code: "conflict",
           message: "CSI event already linked to another client's inquiry.",
         };
+      }
+      const payment = input.registrationPayment;
+      if (payment) {
+        return tryApplyRegistrationPaymentToExisting({
+          payload,
+          inquiry,
+          payment,
+          sourceExternalId: input.sourceExternalId,
+          actorUserId: input.actorUserId,
+        });
       }
       return {
         ok: true,
@@ -170,6 +257,16 @@ export async function receiveManagedClientInquiry(
           message: "Source external id already bound to a different client id.",
         };
       }
+      const payment = input.registrationPayment;
+      if (payment) {
+        return tryApplyRegistrationPaymentToExisting({
+          payload,
+          inquiry,
+          payment,
+          sourceExternalId: input.sourceExternalId,
+          actorUserId: input.actorUserId,
+        });
+      }
       return {
         ok: true,
         created: false,
@@ -186,6 +283,22 @@ export async function receiveManagedClientInquiry(
     hasAttributionEvidence: hasAttribution,
     reconciliationEnabled: policy.attributionReconciliationEnabled,
   });
+
+  const paymentPatch = input.registrationPayment
+    ? buildRegistrationPaymentDataPatch({
+        existing: null,
+        payment: input.registrationPayment,
+        sourceExternalId: input.sourceExternalId,
+      })
+    : null;
+
+  if (paymentPatch && !paymentPatch.ok) {
+    return {
+      ok: false,
+      code: "transition",
+      message: paymentPatch.message,
+    };
+  }
 
   try {
     const doc = await payload.create({
@@ -224,6 +337,7 @@ export async function receiveManagedClientInquiry(
         utmTerm: input.utmTerm ?? undefined,
         gclid: input.gclid ?? undefined,
         keyword: input.keyword ?? undefined,
+        ...(paymentPatch?.ok ? paymentPatch.patch : {}),
       },
       overrideAccess: true,
     });
@@ -236,6 +350,14 @@ export async function receiveManagedClientInquiry(
     }).catch(() => {
       // Activity is best-effort — never fail receipt.
     });
+
+    if (inquiry.paymentStatus) {
+      await publishClientInquiryRegistrationPaymentActivity({
+        inquiry,
+        paymentStatus: inquiry.paymentStatus,
+        actorUserId: input.actorUserId ?? null,
+      }).catch(() => undefined);
+    }
 
     return { ok: true, created: true, inquiry };
   } catch (err) {

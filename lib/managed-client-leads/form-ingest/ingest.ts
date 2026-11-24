@@ -148,6 +148,7 @@ export async function ingestManagedClientFormWebhook(input: {
     expectedClientKey: credential.clientKey,
     expectedSourceSystem: credential.sourceSystem,
     sourceExternalIdPattern: credential.sourceExternalIdPattern,
+    validateSourceExternalId: credential.validateSourceExternalId,
   });
   if (!normalized.ok) {
     return {
@@ -199,12 +200,15 @@ export async function ingestManagedClientFormWebhook(input: {
     utmTerm: normalized.data.utmTerm,
     gclid: normalized.data.gclid,
     keyword: normalized.data.keyword,
+    registrationPayment: normalized.data.registrationPayment,
   });
 
   if (!result.ok) {
     const status =
       result.code === "conflict"
         ? 409
+        : result.code === "transition"
+          ? 409
         : result.code === "binding" || result.code === "policy" || result.code === "channel"
           ? 403
           : 500;
@@ -223,6 +227,7 @@ export async function ingestManagedClientFormWebhook(input: {
     body: {
       ok: true,
       created: result.created,
+      updated: result.updated ?? false,
       inquiry: summarizeInquiry(result.inquiry),
     },
   };
@@ -236,6 +241,8 @@ function summarizeInquiry(inquiry: ClientInquiryRecord) {
     sourceExternalId: inquiry.sourceExternalId,
     reconciliationState: inquiry.reconciliationState,
     operationalStatus: inquiry.operationalStatus,
+    paymentStatus: inquiry.paymentStatus,
+    registrationId: inquiry.registrationId,
   };
 }
 
