@@ -18,6 +18,13 @@ import type {
   PublicCalendarEvent,
 } from "./types";
 import { normalizeCalendarInput, suggestEventKey, validateCalendarInput } from "./validate";
+import {
+  type CalendarMonthRef,
+  calendarMonthWindow,
+  type PublicCalendarListMode,
+  isWithinPublicCalendarWindow,
+  resolvePublicCalendarWindow,
+} from "./public-window";
 
 export { toPublicCalendarEvent };
 
@@ -99,9 +106,17 @@ export async function getCalendarEventForClient(
   return parsed;
 }
 
+export type ListPublicCalendarOptions = {
+  /** `schedule` = month-navigable archive; `upcoming` = compact feed. */
+  mode?: PublicCalendarListMode;
+  /** When set, return only rows overlapping this calendar month. */
+  month?: CalendarMonthRef | null;
+};
+
 export async function listPublicCalendar(
   payload: Payload,
   clientSlug: string,
+  options: ListPublicCalendarOptions = {},
 ): Promise<PublicCalendarEvent[]> {
   const clients = await payload.find({
     collection: "clients" as never,
@@ -113,17 +128,17 @@ export async function listPublicCalendar(
   const client = clients.docs[0] as { id?: number } | undefined;
   if (!client?.id) return [];
   const events = await listCalendarEventsForClient(payload, Number(client.id));
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const mode = options.mode ?? "schedule";
+  const window =
+    options.month != null
+      ? calendarMonthWindow(options.month)
+      : resolvePublicCalendarWindow(mode);
   return events
     .map(toPublicCalendarEvent)
     .filter((row): row is PublicCalendarEvent => Boolean(row))
-    .filter((row) => {
-      const end = row.endsOn || row.startsOn;
-      return end >= today.toISOString().slice(0, 10);
-    })
+    .filter((row) => isWithinPublicCalendarWindow(row.startsOn, row.endsOn, window))
     .sort((a, b) => a.startsOn.localeCompare(b.startsOn))
-    .slice(0, 24);
+    .slice(0, window.maxEvents);
 }
 
 export async function createCalendarEvent(
@@ -183,12 +198,6 @@ export async function createCalendarEvent(
       relationshipKind: data.relationshipKind ?? "none",
       practiceNotes: data.practiceNotes,
       registrationGuidance: data.registrationGuidance,
-      registrationPriceCents: data.registrationPriceCents,
-      supportPriceCents: data.supportPriceCents,
-      transportationPriceCents: data.transportationPriceCents,
-      newTiresPriceCents: data.newTiresPriceCents,
-      otherServiceName: data.otherServiceName,
-      otherServicePriceCents: data.otherServicePriceCents,
       activityLog: activity,
       createdBy: input.actor,
       updatedBy: input.actor,
@@ -238,12 +247,6 @@ export async function updateCalendarEvent(
     relationshipKind: data.relationshipKind ?? existing.relationshipKind,
     practiceNotes: data.practiceNotes,
     registrationGuidance: data.registrationGuidance,
-    registrationPriceCents: data.registrationPriceCents,
-    supportPriceCents: data.supportPriceCents,
-    transportationPriceCents: data.transportationPriceCents,
-    newTiresPriceCents: data.newTiresPriceCents,
-    otherServiceName: data.otherServiceName,
-    otherServicePriceCents: data.otherServicePriceCents,
     updatedBy: input.actor,
     activityLog: appendActivity(existing.activityLog, {
       actor: input.actor,
