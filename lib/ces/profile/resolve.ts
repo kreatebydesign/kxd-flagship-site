@@ -129,7 +129,6 @@ function ensurePrimalExecutiveReview(profile: ResolvedExperienceProfile): void {
  */
 function ensurePrimalLeadCommand(profile: ResolvedExperienceProfile): void {
   if (profile.identity.clientSlug !== PRIMAL_CLIENT_SLUG) return;
-  if (!profile.enabledModules.includes("website-review")) return;
   if (!profile.enabledModules.includes("leads")) {
     profile.enabledModules = [...profile.enabledModules, "leads"];
   }
