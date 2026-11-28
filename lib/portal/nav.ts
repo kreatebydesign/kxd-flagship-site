@@ -23,6 +23,7 @@ import {
   clientPortalNavLabel,
 } from "@/lib/ces/copy/client-nav-labels";
 import { resolvePortalHomeShell } from "@/lib/ces/modules/home";
+import { injectPrimalOperationalNav } from "@/lib/primal/portal-operational-nav";
 
 export type ClientHqNavId = ClientHqModuleId;
 /** Shared Core partnership briefing — nav id aliases executive-performance. */
@@ -35,6 +36,9 @@ export type PortalYourSpaceNavId = "your-space";
 export type PortalAgreementNavId = "agreement";
 /** External website editor doorway — configured per client infrastructure. */
 export type PortalWebsiteEditorNavId = "website-editor";
+export type PortalPrimalOperationalNavId =
+  | "primal-school-operations"
+  | "primal-os-discovery";
 export type PortalNavId =
   | ClientHqNavId
   | CesModuleId
@@ -42,7 +46,8 @@ export type PortalNavId =
   | PortalPortfolioNavId
   | PortalYourSpaceNavId
   | PortalAgreementNavId
-  | PortalWebsiteEditorNavId;
+  | PortalWebsiteEditorNavId
+  | PortalPrimalOperationalNavId;
 
 export interface ClientHqNavItem {
   id: ClientHqNavId;
@@ -420,17 +425,23 @@ export function getEnabledPortalNavGroups(
     websiteEditorUrl,
   );
 
+  const withPrimalOperational = injectPrimalOperationalNav(
+    withCommercial,
+    navProfile.identity.clientSlug,
+    visibilityCtx,
+  );
+
   // CES Client Command shell: calm four-destination primary nav.
   // All Businesses lives in the account switcher (not a synthetic client).
   if (useClientLabels) {
     return simplifyPrimaryPortalNav(
-      withCommercial,
+      withPrimalOperational,
       relabel,
       navProfile.identity.clientSlug,
     );
   }
 
-  return withCommercial;
+  return withPrimalOperational;
 }
 
 /**
@@ -469,7 +480,13 @@ function simplifyPrimaryPortalNav(
     return out;
   };
 
-  const operate = pick(operateIds);
+  let operate = pick(operateIds);
+  if (clientSlug === "primal-motorsports") {
+    for (const id of ["primal-school-operations", "primal-os-discovery"] as const) {
+      const item = byId.get(id);
+      if (item) operate.push({ ...item, label: relabel(id, item.label) });
+    }
+  }
   const results = pick(resultsIds);
 
   const website: PortalNavItem[] = [];
