@@ -21,6 +21,7 @@ import {
   leadHasRegistrationPayment,
   registrationPaymentStatusClass,
 } from "@/lib/client-command/leads/registration-presentation";
+import { primalAdvancedSchoolApplicationUrl } from "@/lib/primal/operational-urls";
 
 function Fact({
   label,
@@ -204,6 +205,21 @@ export function LeadDetailScreen({
             <Fact label="Customer" value={inquiry.contactName} emphasize />
             <Fact label="Program" value={formatLeadRegistrationProgram(inquiry)} emphasize />
             <Fact label="Registration reference" value={inquiry.registrationId} emphasize />
+            {inquiry.clientKey === "primal-motorsports" &&
+            inquiry.registrationId?.trim().startsWith("advapp_") ? (
+              <div className="kxd-lead-fact kxd-lead-fact--full">
+                <dt>Advanced School Operations</dt>
+                <dd>
+                  <a
+                    href={primalAdvancedSchoolApplicationUrl(inquiry.registrationId)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Open application on Primal ↗
+                  </a>
+                </dd>
+              </div>
+            ) : null}
             <Fact label="Amount paid" value={formatLeadRegistrationPaymentAmount(inquiry)} />
             <Fact label="Payment status" value={formatLeadRegistrationPaymentLabel(inquiry)} />
             <Fact
